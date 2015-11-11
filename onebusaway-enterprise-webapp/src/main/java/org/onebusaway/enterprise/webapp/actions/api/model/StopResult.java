@@ -21,6 +21,12 @@ public class StopResult implements SearchResult {
 		this.stop = stop;
 		this.routesAvailable = routesAvailable;
 	}
+	
+	public String toString() {
+	  return "{stop=" + stop 
+	      + ", routesAvailable=" + routesAvailable
+	      + "}";
+	}
 
 	public String getId() {
 		return stop.getId();

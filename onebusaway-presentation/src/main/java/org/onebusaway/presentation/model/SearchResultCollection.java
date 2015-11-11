@@ -109,4 +109,12 @@ public class SearchResultCollection implements Serializable {
   public void setQueryLon(Double queryLon) {
     this._queryLon = queryLon;
   }
+  
+  public String toString() {
+    return "{matches=" + _matches 
+        + ", suggestions=" + _suggestions
+        + ", routeFilter=" + _routeFilter
+        + "}";
+  }
+
 }

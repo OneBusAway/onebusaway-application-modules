@@ -90,4 +90,12 @@ public class ConfigAction extends OneBusAwayEnterpriseActionSupport {
   public String getSiriBaseURL() {
     return _configurationService.getConfigurationValueAsString("display.siriBaseUrl", "/onebusaway-api-webapp/siri");
   }
+  
+  public String getUseAgencyId() {
+    return _configurationService.getConfigurationValueAsString("display.useAgencyId", "false");
+  }
+  
+  public String getShowAgencyNames() {
+    return _configurationService.getConfigurationValueAsString("display.showAgencyNames", "false");
+  }
 }
