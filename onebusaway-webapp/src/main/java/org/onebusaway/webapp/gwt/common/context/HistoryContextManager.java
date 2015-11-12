@@ -59,19 +59,19 @@ public class HistoryContextManager extends AbstractContextManager
     return decodeURI(encodedFragment.replace("%23", "#"));
   }-*/;
 
-  // In new versions of Firefox, this event fires twice when the token has
-  // spaces. The second time, the spaces are not automatically decoded.
-  // Probably related to this GWT bug:
-  // https://code.google.com/p/google-web-toolkit/source/detail?spec=svn10832&r=10832
-  // Fixed by adding a decodeFragment call
   public void onValueChange(ValueChangeEvent<String> event) {
     String token = event.getValue();
-    token = decodeFragment(token);
     ContextImpl context = parseContext(token);
     fireContextChanged(context);
   }
 
+ // Spaces are not URL-decoded in newer browsers, specifically when
+ // HistoryContextManager is initialized or when an extra event fires.
+ // Probably related to this GWT bug:
+ // https://code.google.com/p/google-web-toolkit/source/detail?spec=svn10832&r=10832
+ // Fixed by adding a decodeFragment call
   private ContextImpl parseContext(String token) {
+    token = decodeFragment(token);
     Map<String, String> m = _codingStrategy.getParamStringAsMap(token);
     return new ContextImpl(m);
   }
