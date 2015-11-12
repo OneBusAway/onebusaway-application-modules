@@ -193,7 +193,7 @@
 		<dependency>
 			<groupId>org.onebusaway</groupId>
 			<artifactId>onebusaway-king-county-metro-gtfs</artifactId>
-			<version>0.0.3-st-SNAPSHOT</version>
+			<version>0.0.7-st</version>
 		</dependency>
 		<dependency>
 			<artifactId>onebusaway-csv-entities</artifactId>
