@@ -49,6 +49,8 @@ import org.onebusaway.transit_data.model.service_alerts.ESeverity;
 @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
 public class ServiceAlertRecord {
 
+  public static final String INTERNAL_SOURCE = "oba";
+  
   @OneToMany(cascade = {CascadeType.REMOVE, CascadeType.PERSIST}, fetch = FetchType.EAGER)
   @org.hibernate.annotations.Cascade({org.hibernate.annotations.CascadeType.DELETE_ORPHAN,
             org.hibernate.annotations.CascadeType.PERSIST,
@@ -102,7 +104,8 @@ public class ServiceAlertRecord {
   @Enumerated(EnumType.STRING)
   private ECause cause;
 
-  private String source;
+  
+  private String source = INTERNAL_SOURCE;
 
   @Id
   @GeneratedValue

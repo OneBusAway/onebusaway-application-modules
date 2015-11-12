@@ -125,8 +125,8 @@ public class RssServiceAlertsSerivceImpl implements RssServiceAlertsService {
         _executor = Executors.newSingleThreadScheduledExecutor();
         // re-build internal route cache
         _executor.scheduleAtFixedRate(new RefreshDataTask(), 0, 1, TimeUnit.HOURS);
-        // poll feed
-        _executor.scheduleAtFixedRate(new PollRssTask(), 0, 5, TimeUnit.MINUTES);
+        // poll feed after cache is built above
+        _executor.scheduleAtFixedRate(new PollRssTask(), 1, 5, TimeUnit.MINUTES);
     }
 
     @PreDestroy
@@ -253,14 +253,18 @@ public class RssServiceAlertsSerivceImpl implements RssServiceAlertsService {
                     return;
                 }
               
-                if(_routeShortNameToRouteIdMap == null)
+                if(_routeShortNameToRouteIdMap == null) {
+                    _log.info("empty route map, exiting");
                     return;
-
+                }
+                
                 ListBean<ServiceAlertBean> currentObaAlerts = _transitDataService.getAllServiceAlertsForAgencyId(getAgencyId());
                 for(ServiceAlertBean serviceAlertBean : currentObaAlerts.getList()){
+                    _log.info("found existing sa=" + serviceAlertBean.getDescriptions() + " with source=" + serviceAlertBean.getSource());
                     if(!_alertCache.keySet().contains(serviceAlertBean.getId())
                             && serviceAlertBean.getSource() != null
                             && serviceAlertBean.getSource().equals(_alertSource)){
+                        _log.info("new service alert=" + serviceAlertBean.getDescriptions());
                         _alertCache.put(serviceAlertBean.getId(), serviceAlertBean);
                     }
                 }
@@ -410,7 +414,13 @@ public class RssServiceAlertsSerivceImpl implements RssServiceAlertsService {
 
         @Override
         public void run() {
-            if (!isEnabled()) return;
+
+            if (!isEnabled()) 
+            {
+              _log.info("exiting refresh cache, not enabled");
+              return;
+            }
+
             try {
                 ListBean<RouteBean> routes =  _transitDataService.getRoutesForAgencyId(getAgencyId());
                 Map<String, String> mutableRouteMap = new HashMap<String, String>();
