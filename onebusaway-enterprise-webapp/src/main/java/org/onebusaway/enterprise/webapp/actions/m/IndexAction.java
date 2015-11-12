@@ -293,5 +293,13 @@ public class IndexAction extends OneBusAwayEnterpriseActionSupport {
       return null;
     }
   }
+  
+  public String getUseAgencyId() {
+    return _configurationService.getConfigurationValueAsString("display.useAgencyId", "false");
+  }
+  
+  public String getShowAgencyNames() {
+    return _configurationService.getConfigurationValueAsString("display.showAgencyNames", "false");
+  }
 
 }

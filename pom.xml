@@ -7,7 +7,7 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>onebusaway-application-modules</artifactId>
-  <version>1.1.15-cs-SNAPSHOT</version>
+  <version>1.1.15.1-cs-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>onebusaway-application-modules</name>
@@ -20,8 +20,8 @@
     <gwt-version>2.4.0</gwt-version>
     <spring-version>3.0.5.RELEASE</spring-version>
     <csv-entities-version>1.1.5-st</csv-entities-version>
-    <gtfs-version>1.3.8-st-SNAPSHOT</gtfs-version>
-    <gtfs-api-version>1.2.1-SNAPSHOT</gtfs-api-version>
+    <gtfs-version>1.3.8-st</gtfs-version>
+    <gtfs-api-version>1.2.2</gtfs-api-version>
     <onebusaway-siri-version>1.0.6</onebusaway-siri-version>
     <opentripplanner-version>0.4.1</opentripplanner-version>
     <wiki_integration_version>1.0.0</wiki_integration_version>

@@ -3,7 +3,7 @@
 	<parent>
 		<groupId>org.onebusaway</groupId>
 		<artifactId>onebusaway-application-modules</artifactId>
-		<version>1.1.15-cs-SNAPSHOT</version>
+		<version>1.1.15.1-cs-SNAPSHOT</version>
 	</parent>
 	<artifactId>onebusaway-admin-webapp</artifactId>
 	<packaging>war</packaging>
@@ -48,6 +48,10 @@
 		<repository>
 			<id>xwiki</id>
 			<url>http://maven.xwiki.org/releases</url>
+		</repository>
+		<repository>
+		  <id>maven.conveyal.com</id>
+		  <url>http://maven.conveyal.com/</url>
 		</repository>
 	</repositories>
 	<dependencies>
@@ -189,7 +193,7 @@
 		<dependency>
 			<groupId>org.onebusaway</groupId>
 			<artifactId>onebusaway-king-county-metro-gtfs</artifactId>
-			<version>0.0.3-st-SNAPSHOT</version>
+			<version>0.0.7-st</version>
 		</dependency>
 		<dependency>
 			<artifactId>onebusaway-csv-entities</artifactId>
@@ -237,8 +241,8 @@
 	</dependency>
 	<dependency>
 		<groupId>org.opentripplanner</groupId>
-		<artifactId>otp-core</artifactId>
-		<version>1.0.0-SNAPSHOT</version>
+		<artifactId>otp</artifactId>
+		<version>0.13.0</version>
 		<exclusions>
 			<exclusion>
 				<artifactId>logback-classic</artifactId>

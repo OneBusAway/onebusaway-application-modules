@@ -410,6 +410,7 @@ public class RssServiceAlertsSerivceImpl implements RssServiceAlertsService {
 
         @Override
         public void run() {
+            if (!isEnabled()) return;
             try {
                 ListBean<RouteBean> routes =  _transitDataService.getRoutesForAgencyId(getAgencyId());
                 Map<String, String> mutableRouteMap = new HashMap<String, String>();

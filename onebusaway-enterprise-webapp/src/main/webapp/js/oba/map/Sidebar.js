@@ -377,7 +377,7 @@ OBA.Sidebar = function() {
 			if (filter && routeResult.shortName !== filter && filterExistsInResults) {
 				
 				var filteredMatch = jQuery("<li></li>").addClass("filtered-match");
-				var link = jQuery('<a href="#' + stopId.match(/\d*$/) + '%20' + routeResult.shortName + '">' + routeResult.shortName + '</a>');
+				var link = jQuery('<a href="#' + OBA.Util.displayStopId(stopId) + '%20' + routeResult.shortName + '">' + routeResult.shortName + '</a>');
 				
 				var allPolylines = [];
 				jQuery.each(routeResult.directions, function(_, direction) {
@@ -399,7 +399,7 @@ OBA.Sidebar = function() {
 		matches.show();
 		
 		if (filteredMatches.find("li").length > 1) {
-			var showAll = jQuery("<li></li>").addClass("filtered-match").html('<a href="#' + stopId.match(/\d*$/) + '">See&nbsp;All</a>');
+			var showAll = jQuery("<li></li>").addClass("filtered-match").html('<a href="#' + OBA.Util.displayStopId(stopId) + '">See&nbsp;All</a>');
 			filteredMatches.find("ul").append(showAll);
 			filteredMatches.show();
 			
@@ -655,7 +655,7 @@ OBA.Sidebar = function() {
 				jQuery.history.init(function(hash) {
 					if(hash !== null && hash !== "") {
 						var searchInput = jQuery("#searchbar form input[type=text]");
-						searchInput.val(hash);
+						searchInput.val(decodeURIComponent(hash));
 						doSearch(hash);
 					} else {
 						// Launch wizard

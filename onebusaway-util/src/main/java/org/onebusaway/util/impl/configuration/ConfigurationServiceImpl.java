@@ -41,7 +41,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
 	@Autowired
 	private ThreadPoolTaskScheduler _taskScheduler;
-
+	
 	private RefreshService _refreshService = null;
 
 	private ConfigurationServiceClient _configurationServiceClient = null;
@@ -185,6 +185,20 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			return defaultValue;
 		}
 	}
+	
+	@Override
+	public Double getConfigurationValueAsDouble(String configurationItemKey,
+			Double defaultValue) {
+		try {
+			String defaultValueAsString = ((defaultValue != null) ? defaultValue
+					.toString() : null);
+
+			return Double.parseDouble(getConfigurationValueAsString(
+					configurationItemKey, defaultValueAsString));
+		} catch (NumberFormatException ex) {
+			return defaultValue;
+		}
+	}
 
 	@Override
 	public void setConfigurationValue(String component,
@@ -233,4 +247,5 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			throws Exception {
 		return _configurationServiceClient.getItem(null, configurationItemKey);
 	}
+
 }

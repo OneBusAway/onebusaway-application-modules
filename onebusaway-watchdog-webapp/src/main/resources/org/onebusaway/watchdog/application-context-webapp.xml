@@ -19,14 +19,18 @@
 <beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns:context="http://www.springframework.org/schema/context" xmlns:aop="http://www.springframework.org/schema/aop"
     xmlns:tx="http://www.springframework.org/schema/tx" xmlns:sec="http://www.springframework.org/schema/security"
+    xmlns:task="http://www.springframework.org/schema/task"
     xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
            http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd
            http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.0.xsd
            http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd
-           http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-2.0.xsd">
+           http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-2.0.xsd
+           http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-3.0.xsd">
 
+	
 	<!--  jersey scan of public APIs  -->
     <context:component-scan base-package="org.onebusaway.watchdog.api" />
+    
 	<!--  TDS support -->
 	<import resource="classpath:org/onebusaway/transit_data_federation/application-context.xml" />
 	
@@ -74,6 +78,16 @@
 	
 	<bean id="scheduledTripResource" class="org.onebusaway.watchdog.api.schedule.TripResource">
 		<property name="metricConfiguration" ref="metricConfiguration" />
+	</bean>
+	
+	 <bean id="configService" class="org.onebusaway.util.impl.configuration.ConfigurationServiceImpl">
+    	<property name="refreshService" ref="refreshServiceImpl"/>
+    	<property name="taskScheduler" ref="taskScheduler"/>
+    	<property name="configurationServiceClient" ref="configurationServiceClient" />
+    </bean>
+	
+	<bean id="configurationServiceClient" class="org.onebusaway.util.impl.configuration.ConfigurationServiceClientFileImpl">
+		<constructor-arg type="java.lang.String" value="/var/lib/oba/config.json"/>
 	</bean>
 	
 	
