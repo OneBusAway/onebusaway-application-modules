@@ -567,13 +567,16 @@ class ServiceAlertsServiceImpl implements ServiceAlertsService {
 	// this is admittedly slow performing, but it is only called on an update
 	// of a single service alert
 	private synchronized void saveDBServiceAlerts(ServiceAlertRecord alert, Long lastModified) {
-        if (lastModified == null) lastModified = System.currentTimeMillis();
-        alert.setModifiedTime(lastModified); // we need to assume its changed, as we don't track the affects clause
-        ServiceAlertRecord persistedServiceAlertRecord = _persister.getServiceAlertRecordByAlertId(alert.getAgencyId(), alert.getServiceAlertId());
-        if(persistedServiceAlertRecord != null)
-            alert.setId(persistedServiceAlertRecord.getId());
-        _log.info("Saving Service Alert to DataBase:" + alert.getServiceAlertId());
-        _persister.saveOrUpdate(alert);
+	      if (ServiceAlertRecord.INTERNAL_SOURCE.equals(alert.getSource())) {
+	        // we only save internal service alerts -- external alerts are refreshed on demand
+          if (lastModified == null) lastModified = System.currentTimeMillis();
+          alert.setModifiedTime(lastModified); // we need to assume its changed, as we don't track the affects clause
+          ServiceAlertRecord persistedServiceAlertRecord = _persister.getServiceAlertRecordByAlertId(alert.getAgencyId(), alert.getServiceAlertId());
+          if(persistedServiceAlertRecord != null)
+              alert.setId(persistedServiceAlertRecord.getId());
+          _log.info("Saving Service Alert to DataBase:" + alert.getServiceAlertId());
+          _persister.saveOrUpdate(alert);
+	      } 
 	}
 
 	/**
