@@ -404,7 +404,14 @@ private void removeDuplicateStopTimes(List<StopTime> stopTimes) {
               scheduleTimesByDistanceTraveled, distanceTraveled[i-1]);
           int t1 = (int) InterpolationLibrary.interpolate(
               scheduleTimesByDistanceTraveled, distanceTraveled[i]);
-
+          
+          if (t1 < t0) {
+        	  // sometimes even the interpolation gets it wrong
+        	  int m = t0;
+        	  t0 = t1;
+        	  t1 = m;
+        	  _log.warn("interpolation error");
+          }
           _log.warn("correcting arrival time of sequence " + (stopTime.getStopSequence()-1) + ", " + stopTime.getStopSequence() +
               " of trip " + stopTime.getTrip().getId() + " as it was less than last departure time.  Arrival[" + (i-1) + "] " +
               arrivalTimes[i-1] + " now "+ t0 + ", Arrival[" + i + "] " + arrivalTimes[i] + " now " + t1);
