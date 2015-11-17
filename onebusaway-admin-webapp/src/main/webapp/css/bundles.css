@@ -67,8 +67,11 @@
   padding-top: 10px;
   padding-bottom: 10px;
   padding-left: 10px;
-  font-size: 18px;
-  font: Times New Roman, Times, serif;
+  /*font-size: 18px;
+  font: Times New Roman, Times, serif; */
+  font-size: 2em;
+  font-family: Arial Bold, Arial;
+  font-weight: 700;
 }
 
 .submitForm {
@@ -299,10 +302,6 @@
   margin-top: 20px;
 }
 
-#uploadFiles {
-  padding-top: 20px;
-}
-
 #uploadFiles #instruction {
   background-color: #C3FDB8;
   z-index: 1;
@@ -339,24 +338,32 @@
   font-size : 12px;
 }
 
-#uploadFiles #agency_data {
+/* #uploadFiles #agency_data {
   	border-collapse: collapse;
-}
-
-#uploadFiles #agency_data th, td {
+} */
+/*
+#uploadFiles #agency_data th, #uploadFiles #agency_data td {
   border: 1px solid black;
 }
 
-#uploadFiles #agency_data th,td {
+#uploadFiles #agency_data th, #uploadFiles #agency_data td {
   padding: 5px 10px;
 }
+*/
 
-#uploadFiles #agency_data .agencyId {
+#uploadFiles #agency_data .agencyIdSelect {
+/*
   width: 50px;
+  */
+  width: 100%;
+}
+
+#uploadFiles #agency_data .agencyDataSourceData {
+  width: 35%;
 }
 
 #uploadFiles #agency_data .agencyDataSource {
-  width: 450px;
+  width: 100%;
 }
 
 #uploadFiles #agency_data .agencyCheckboxUploadSuccess {
@@ -517,9 +524,14 @@
   margin-right: 10px;
 }
 
-#bundleResultsHolder #buildBundle_resultList {
+#testBuildBundle_resultList {
   display: none;
-  padding-top : 10px;
+  margin-top : .5em;
+  /*
+  font-size: 12px;
+  white-space: nowrap;
+  */
+  overflow-x: auto;
 }
 
 #bundleResultsHolder #buildBundle_fileList {
@@ -706,7 +718,7 @@
   	border-collapse: collapse;
 }
 
-#bundleValidationResults th, td {
+#bundleValidationResults th,  #bundleValidationResults td {
   border: 1px solid black;
 }
 .testPass {
@@ -716,3 +728,426 @@
   color: red
 }
 
+/* Styles added for new UI design */
+.ui-dialog-buttonpane .cancelCopyPopup {
+	border: none;
+	background: none;
+}
+
+.ui-dialog-buttonpane .cancelCopyPopup:hover {
+	border: none;
+	text-decoration: underline !important;
+}
+
+#Create p, #Upload p, #Build p {
+    font-family: "Arial Bold","Arial";
+    font-weight: 700;
+    font-style: normal;
+    font-size: 32px;
+    color: #333;
+    text-align: left;
+    line-height: normal;
+}
+
+#Create div {
+    padding-right: 1.5em;
+    padding-bottom: 1.5em;
+    padding-left: 1.5em;
+    width: 90%;
+}
+
+#Create #newDatasetTableDiv {
+    padding-right: 1.5em;
+    padding-bottom: 1.5em;
+    padding-left: 1.5em;
+    max-width: 100%;	
+}
+
+#Create #existingDatasetTableDiv {
+    padding: 0px;
+    border: 1px solid gray;
+    max-width: 100%;	
+}
+
+#Create table {
+    padding-top: 2em;
+    padding-right: 2em;
+    padding-bottom: 2em;
+    padding-left: 2em;
+    border-spacing: .4em;
+    width: 100%;
+}
+
+#Create #createDataset {
+    border: 1px solid gray;
+}
+
+#Create table thead {
+	 border-bottom: 1px solid gray;
+}
+
+#Create table #createDataset tr td:first-child {
+	color: red;
+    max-width: 25em;
+}
+
+//#Create table #createDataset #newDirectoryButton {
+//	width: 100em;
+//}
+
+#Create .datasetDivHeader, #Upload .existingFilesHeader, #Build .buildDivHeader {
+    font-family: "Arial Bold","Arial";
+    font-weight: 700;
+    font-style: normal;
+    font-size: 24px;
+    color: #333;
+    text-align: left;
+    line-height: normal;
+    padding-bottom: .2em;
+    display: block;
+}
+
+ #Build .buildDivHeader {
+ 	padding: 1em;
+ 	padding-bottom: 0em;
+ }
+
+#Create #datasetNameLabel {
+    font-family: "Arial Bold","Arial";
+    font-weight: 700;
+    font-style: normal;
+    font-size: 14px;
+}
+
+#Create #datasetNameNotes, #Build #datasetNotes {
+    font-family: "Arial Regular","Arial";
+    font-weight: 400;
+    font-style: normal;
+    font-size: 13px;
+    color: #333;
+    text-align: left;
+    line-height: normal;
+}
+
+#Build #datasetNotes {
+	margin-top: 1em;
+	margin-left: 8em;
+}
+
+#Create #directoryName {
+    width: 95%;
+}
+
+
+#Create div #existingDirBtnDiv {
+    border: 1px solid gray;
+    padding-top: 1em;
+    width: 90%;
+}
+
+#Create #existingDatasetDiv {
+    border-collapse:collapse
+}
+
+#Create #existingDataset {
+	padding-top: 1em;
+    padding-right: 0em;
+    padding-bottom: .5em;
+    padding-left: 0em;
+    border-bottom: 1px solid gray;
+    border-spacing: 0em;
+}
+
+#Create #existingDataset .copyDirectory, #Upload .removeAgency, #Upload #addAnotherAgency,
+	#Upload #anyNotes, #Upload #cancelUpload, .bundleLink {
+	color: blue;
+}
+
+#Upload #cancelUpload {
+	float: left;
+	text-decoration: none;
+	margin: .4em;
+}
+
+#Create #existingDataset .copyDirectory:hover, #Upload .removeAgency:hover, 
+	#Upload #addAnotherAgency:hover, #Upload #anyNotes:hover,
+	#Upload #cancelUpload:hover, .bundleLink:hover {
+	font-weight: bold;
+	text-decoration: underline;
+	cursor: pointer;
+}
+
+#Create .datasetCheckbox {
+	width: 1.5em;
+}
+
+#Create .copyDirectory {
+	width: 4em;
+}
+
+#Create #existingDataset #existingDirectoryButtonDiv {
+	padding-top: 1.5em;
+}
+
+#Create #existingDatasetTableDiv {
+	width: 100%;
+}
+
+#Create #existingDirectoryButtonDiv {
+	width: 100%;
+}
+
+#Create #existingDirectoryButton {
+	margin-top: 1.5em;
+}
+
+#Create #datasetNameLabel {
+	float: left;
+	margin-right: 15px;
+}
+
+#Create th {
+    font-family: "Arial Bold","Arial";
+    font-weight: 700;
+    font-style: normal;
+    font-size: 13px;
+    color: #333;
+    text-align: left;
+    line-height: normal;
+}
+
+#Create #existingDataset th {
+	padding-bottom: .5em;
+}
+
+#Create input[type="button"],
+#Upload input[type="button"],
+#Build input[type="button"] {
+    font-family: "Arial Regular","Arial";
+    font-weight: 400;
+    font-style: normal;
+    font-size: 13px;
+    width: auto;
+    //color: #333;
+    text-align: center;
+    line-height: normal;
+    padding: .5em;
+}
+#Create input[type="button"]:hover,
+#Upload input[type="button"]:hover,
+#Build input[type="button"]:hover {
+	cursor: pointer;
+}
+
+#Create table tr:first-child th {
+    border-spacing: 0;
+    border-bottom: 1px solid gray;
+}
+
+#Create #existingDataset tbody tr:nth-child(odd) {
+	background: #ccc;
+}
+
+/* Modal dialog box for Copy on Choose tab */
+#copyPopupContents #addCommentsPopupContents {
+	margin-top: 2em;
+	margin-left: 2.3em;
+}
+
+.ui-dialog > .ui-widget-header {
+	/*background: transparent;*/
+}
+
+.ui-dialog-content {
+	background-color: white;
+}
+
+#copyPopup p, #addCommentsPopup p {
+    font-family: "Arial Bold","Arial";
+    font-weight: 700;
+    font-style: normal;
+    font-size: 24px;
+    color: #333;
+    text-align: left;
+    line-height: normal;
+    padding-bottom:0;
+    padding-right: 5em;
+    display: block;
+}
+
+#copyPopup #destinationDirDiv, #addCommentsPopup #addCommentsDiv {
+	margin-top: 2em;
+}
+
+#copyPopup #datasetNameLabel {
+	font-weight: bold;
+	padding-right: 1em;
+}
+
+#copyPopup #destinationDirectory {
+	width: 60%;
+}
+
+/* For new Upload tab */
+#uploadFiles {
+	padding: 20px;
+	border: 1px solid #808080;	
+}
+
+#Upload th {
+	text-align: left;
+}
+
+#Upload #selectedDataset {
+    font-family: "Arial Bold","Arial";
+    font-weight: 700;
+    font-style: normal;
+    font-size: 20px;
+    color: #333;
+    text-align: left;
+    line-height: normal;
+    padding-bottom: 1.5em;
+}
+
+#Upload #Agency {
+	padding: 20px;
+}
+
+#Upload #agency_data {
+	width: 100%;
+	padding-bottom: .4em;
+}
+
+#Upload #AgencyAndActionDiv {
+	padding: 20px;
+}
+
+#Upload #AgencyTableDiv {
+	padding-bottom: 3em;
+}
+
+#Upload .agencyIdData {
+	width: 30%;
+}
+/*
+#Upload .agencyDataSourceType {
+	width: 10%;
+}
+
+#Upload .agencyProtocol {
+	width: 10%;
+}
+
+#Upload .agencyDataSource {
+	width: 40%;
+}
+
+#Upload .removeAgency {
+	width: 10%;
+}
+*/
+
+#Upload .removeAgency {
+	padding-left: 1em;
+}
+#Upload #Notes {
+	float: left;
+}
+
+#Upload #UploadButtons {
+	float: right;
+}
+
+#Upload #notesDiv {
+	clear: both;
+}
+
+#Upload #existingFilesTable {
+	width: 100%;
+}
+
+#Upload .agencyColumn {
+	width: 30%;
+}
+
+#Upload .typeColumn {
+	width: 10%;
+}
+
+#Upload .fileOrUrl {
+	width: 40%;
+}
+
+#Upload .whenColumn {
+	width: 10%;
+}
+
+#Upload .whoColumn {
+	width: 10%;
+}
+
+#Upload #existingFileListDiv {
+	padding-top: 2em;
+	padding-bottom: 2em;
+}
+
+#Build input[type="button"] {
+	width: 10em;
+}
+
+#Build #buildTestBundleDiv {
+	margin-top: 3em;
+}
+
+#Build #bundleBuildInfoTable {
+	margin-left: 5em;
+	border-collapse:separate;
+	border-spacing: 1em;
+}
+
+#Build #bundleBuildInfoTable tr td:first-child {
+	font-weight: bold;
+	text-align: right;
+}
+
+#Build #buildStep2Div {
+	margin-top: 3em;
+}
+
+#Build #buildButtonSectionDiv, #Build #testButtonSectionDiv {
+	margin-top: 3em;
+	margin-left: 10em;
+}
+
+#Build #buildButtonDiv, #Build #testButtonDiv {
+	float: left;
+}
+
+#Build #buildTimeEstimate, #Build #testTimeEstimate {
+	margin-left: 1.5em;
+	float: left;
+}
+
+#testProgressBarDiv {
+	display: none;
+}
+
+#testProgressBar {
+	margin-top: 1.5em; 
+	margin-right: 15em;
+	margin-bottom: 1em
+}
+
+#testBuildProgress {
+	margin-top: 1em;
+	margin-right: 1.5em;
+	margin-bottom: 1.5em;
+	font-family: "Arial Bold","Arial";
+	font-weight: 700;
+	font-style: normal;
+	font-size: 16px;
+}
+
+.clear {
+	clear: both;
+}
