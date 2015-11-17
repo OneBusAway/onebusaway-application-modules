@@ -19,6 +19,8 @@ var agencyMetadataAvailable = false;
 var agencyMetadata;		//For agency metadata
 var selectedDirectory = "";  //Selected on Choose tab, used by Upload tab
 var destinationDirectory = ""; //For "copy" on Choose tab, used by Upload tab
+var userComments = "";		// User comments about the selected dataset
+var buildBundleId = "";		// Build request id, stored in info.json.
  
 jQuery(function() {
 	//Initialize tabs
@@ -55,6 +57,7 @@ jQuery(function() {
 		//alert("called from email!");
 		jQuery("#prevalidate_id").text(qs["id"]);
 		jQuery("#buildBundle_id").text(qs["id"]);
+		buildBundleId = qs["id"];
 		jQuery("#buildBundle_bundleName").val(qs["name"]);
 		jQuery("#buildBox #bundleStartDateHolder #startDatePicker").val(qs["startDate"]);
 		jQuery("#buildBox #bundleEndDateHolder #endDatePicker").val(qs["endDate"]);
@@ -196,10 +199,11 @@ jQuery(function() {
 	jQuery("#continueCopy").click(onContinueCopyClick);
 	
 	// upload bundle source data for selected agency
-	jQuery("#uploadSelectedAgenciesButton").click(onUploadSelectedAgenciesClick);
+	//jQuery("#uploadSelectedAgenciesButton").click(onUploadSelectedAgenciesClick);
+	jQuery("#uploadButton").click(onUploadSelectedAgenciesClick);
 
 	// add another row to the list of agencies and their source data
-	jQuery("#addAnotherAgencyButton").click(onAddAnotherAgencyClick);
+	jQuery("#addAnotherAgency").click(onAddAnotherAgencyClick);
 
 	// toggle agency row as selected when checkbox is clicked
 	jQuery("#agency_data").on("change", "tr :checkbox", onSelectAgencyChange);
@@ -208,8 +212,12 @@ jQuery(function() {
 	jQuery("#agency_data").on("change", "tr .agencyProtocol", onAgencyProtocolChange);
 
 	// remove selected agencies
-	jQuery("#removeSelectedAgenciesButton").click(onRemoveSelectedAgenciesClick);
+	// jQuery(".removeAgency").click(onRemoveSelectedAgenciesClick);
+	jQuery("#uploadFiles #agency_data").on('click', '.removeAgency', onRemoveSelectedAgenciesClick);
 
+	// popup the Comments box
+	jQuery("#anyNotes").click(onAnyCommentsClick);
+	
 	//toggle advanced option contents
 	jQuery("#createDirectory #advancedOptions #expand").bind({
 		'click' : toggleAdvancedOptions	});
@@ -237,7 +245,14 @@ jQuery(function() {
 	jQuery("#prevalidateInputs #validateBox #validateButton").click(onValidateClick);
 
 	//Handle build button click event
-	jQuery("#buildBundle_buildButton").click(onBuildClick);
+	//jQuery("#buildBundle_buildButton").click(onBuildClick);
+	//jQuery("#Build #testBundleButton").click(onBuildClick);
+	jQuery("#Build #testBundleButton").click({buildType: "test"}, onBuildClick);
+	jQuery("#Build #buildBundleButton").click({buildType: "build"}, onBuildClick);
+
+	// Toggle the test build details textarea
+	jQuery("#viewTestBuildDetails").click({buildType: "test"}, toggleBuildBundleResultList);
+
 
 	//Handle reset button click event
 	jQuery("#buildBundle_resetButton").click(onResetClick);
@@ -294,7 +309,35 @@ jQuery(function() {
 				$(this).dialog("close");
 				onCopyDestinationSpecified();
 			}
+		},
+        open: function() {
+            $('.ui-dialog-buttonpane').find('button:contains("Cancel")').addClass('cancelCopyPopup');
+        }		
+	});
+	
+	// For "Add Comments" popup to add user commments about a dataset
+	$("#addCommentsPopup").dialog({
+		autoOpen: false,
+		modal: true,
+		width: 'auto',
+		buttons: {
+			"Cancel": function() {
+				$(this).dialog("close");
+			},
+			"Continue": function() {
+				//destinationDirectory = $("#destinationDirectory").val();
+				$(this).dialog("close");
+				//onCopyDestinationSpecified();
+			}
 		}
+	});
+
+	$("#Build input[type=button]").removeAttr('disabled');
+
+	$("#testBuildBundle_resultList").prop('readonly', true);
+	
+	$("#testProgressBar").progressbar({
+		value: 0
 	});
 });
 
@@ -457,23 +500,24 @@ function showBundleInfo(bundleInfo){
 	jQuery("#commentBox #bundleComment").val(bundleObj.buildResponse.comment);
 	jQuery("#selected_bundleDirectory").text(bundleObj.directoryName);
 	jQuery("#buildBundle_id").text(bundleObj.buildResponse.requestId);
-	setDivHtml(document.getElementById('buildBundle_resultList'), bundleObj.buildResponse.statusMessages);
+	buildBundleId = bundleObj.buildResponse.requestId;
+	setDivHtml(document.getElementById('testBuildBundle_resultList'), bundleObj.buildResponse.statusMessages);
 	showBuildFileList(bundleObj.buildResponse.buildOutputFiles, bundleObj.buildResponse.requestId);
 }
 
 function onCreateDatasetClick() {
 	selectedDirectory = jQuery("#createDataset #directoryName").val();
 	onSelectDataset("create");
-	var $tabs = jQuery("#tabs");
-	$tabs.tabs('select', 1);
+	//var $tabs = jQuery("#tabs");
+	//$tabs.tabs('select', 1);
 }
 
 function onExistingDatasetClick() {
 	var selectedCheckbox = jQuery("#Create #existingDataset").find("input:checked");
 	selectedDirectory = selectedCheckbox.closest("tr").find(".directoryName").text();	
 	onSelectDataset("existing");
-	var $tabs = jQuery("#tabs");
-	$tabs.tabs('select', 1);
+	//var $tabs = jQuery("#tabs");
+	//$tabs.tabs('select', 1);
 }
 
 function onCopyExistingDatasetClick() {
@@ -483,14 +527,20 @@ function onCopyExistingDatasetClick() {
 
 function onCopyDestinationSpecified() {
 	onSelectDataset("copy");
-	var $tabs = jQuery("#tabs");
-	$tabs.tabs('select', 1);
+	//var $tabs = jQuery("#tabs");
+	//$tabs.tabs('select', 1);
 }
 
 function onContinueCopyClick() {
 	destinationDirectory = $("#destinationDirectory").text();
 	alert('destination directory: ' + destinationDirectory);
 }
+
+function onAnyCommentsClick() {
+	$("#addCommentsPopup").dialog("open");
+}
+
+
 
 function onSelectDataset(sourceDirectoryType) {
 	//var bundleDir = jQuery("#createDataset #directoryName").val();
@@ -578,6 +628,41 @@ function onSelectDataset(sourceDirectoryType) {
 						if (sourceDirectoryType=="copy") {
 							selectedDirectory = copyDir;
 						}
+						
+						var agencies = status.bundleInfo.agencyList;
+						for (var i = 0; i < agencies.length; ++i) {
+							var agency = agencies[i];
+							// Check if this is a duplicate
+							var dupe = false;
+							for (var j = 0; j < i; ++j) {
+								var agency2 = agencies[j];
+								if (agency2.agencyId == agency.agencyId 
+									&& agency2.agencyDataSource == agency.agencyDataSource
+									&& agency2.agencyDataSourceType == agency.agencyDataSourceType
+									&& agency2.agencyProtocol == agency.agencyProtocol) {
+									dupe = true;
+									break;
+								}
+							}
+							if (dupe) continue;
+							// Get agency name
+							var agencyName = "";
+							for (var j=0; j<agencyMetadata.length; ++j) {
+								if (agencyMetadata[j].legacyId == agency.agencyId) {
+									agencyName = agencyMetadata[j].name;
+									agencyName += " (" + agencyMetadata[j].shortName + ")";
+								}
+							}
+							// Add row for this file to existingFilesTable
+							var new_row = '<tr> \
+								<td>' + agencyName + '</td> \
+								<td>' + agency.agencyDataSourceType + '</td> \
+								<td>' + agency.agencyDataSource + '</td> \
+								<td></td> \
+								<td></td>  \
+								</tr>';
+							$('#existingFilesTable').append(new_row);
+						}
 						enableBuildButton();
 						enableResetButton();
 					}					
@@ -596,16 +681,22 @@ function onSelectDataset(sourceDirectoryType) {
 						showBundleInfo(JSON.stringify(bundleInfo));
 					}					
 					console.log("bundleDir=" + bundleDir);
+					jQuery("#selectedDataset").text("You are adding files to " + bundleDir);
 					jQuery("#prevalidate_bundleDirectory").text(bundleDir);
 					jQuery("#selected_bundleDirectory").text(bundleDir);
 					jQuery("#s3_location").text(status.bucketName);
 					jQuery("#gtfs_location").text(bundleDir + "/" + status.gtfsPath + " directory");
 					jQuery("#stif_location").text(bundleDir + "/" + status.stifPath + " directory");
 					enableContinueButton(jQuery("#upload_continue"));
+					
+					// Add dataset name to Build tab
+					jQuery("#Build #datasetName").text(bundleDir);
 				} else {
 					alert("null status");
 					disableBuildButton();
 				}
+				var $tabs = jQuery("#tabs");
+				$tabs.tabs('select', 1);				
 			},
 			error: function(request) {
 				alert("There was an error processing your request. Please try again.");
@@ -688,10 +779,9 @@ function onUploadSelectedAgenciesClick() {
 					alert("There was an error processing your request. Please try again.");
 				}
 			});
-
 		}
-
 	});
+	onUploadContinueClick();
 }
 
 function onAddAnotherAgencyClick() {
@@ -701,7 +791,8 @@ function onAddAnotherAgencyClick() {
 	  metadata = '<select class="agencyIdSelect">';
 	  for (var i=0; i<agencyMetadata.length; ++i) {
 		  metadata += '<option value="' + agencyMetadata[i].legacyId + '">'
-		  + agencyMetadata[i].shortName + '</option>';
+		  + agencyMetadata[i].name + ' (' 
+		  + agencyMetadata[i].shortName + ')</option>';
 	  }
 	  metadata += '</select>';
 	  url = agencyMetadata[0].gtfsFeedUrl;
@@ -709,8 +800,7 @@ function onAddAnotherAgencyClick() {
 	  	var urlValue = ' value="' + url + '"';
 	  }
 	}
-	var new_row = '<tr> \
-		<td><div><input type="checkbox" /></div></td> \
+	var new_row = '<tr class="agencySelected"> \
 		<td>' + metadata + '<input type="text" class="agencyId"/></td> \
 		<td><select class="agencyDataSourceType"> \
 		<option value="gtfs">gtfs</option> \
@@ -721,7 +811,9 @@ function onAddAnotherAgencyClick() {
 		<option value="ftp">ftp</option> \
 		<option value="file">file</option> \
 		</select></td> \
-		<td><input type="text" class="agencyDataSource" ' + urlValue + '/></td> \
+		<td class="agencyDataSourceData"> \
+		<input type="text" class="agencyDataSource" ' + urlValue + '/></td> \
+		<td class="removeAgency">remove</td> \
 		</tr>';
 	$('#agency_data').append(new_row);
 	if (agencyMetadataAvailable) {
@@ -768,8 +860,7 @@ function onAgencyProtocolChange() {
 }
 
 function onRemoveSelectedAgenciesClick() {
-	console.log("in onRemoveSelectedAgenciesClick, v2");
-	$('#agency_data .agencySelected').remove();
+	$(this).closest('tr').remove();
 }
 
 function enableContinueButton(continueButton) {
@@ -848,11 +939,14 @@ function toggleValidationResultList() {
 	jQuery("#prevalidateInputs #prevalidate_resultList").toggle();
 }
 
-function toggleBuildBundleResultList() {
-	var $image = jQuery("#buildBundle #buildBundle_progress #expand");
-	changeImageSrc($image);
+function toggleBuildBundleResultList(event) {
+	if (event.data.buildType == "test") {
+		jQuery("#testBuildBundle_resultList").toggle();
+	}
+	//var $image = jQuery("#buildBundle #buildBundle_progress #expand");
+	//changeImageSrc($image);
 	//Toggle progress result list
-	jQuery("#buildBundle #buildBundle_resultList").toggle();
+	//jQuery("#buildBundle #buildBundle_resultList").toggle();
 }
 
 function toggleDeployBundleResultList() {
@@ -1080,29 +1174,42 @@ function updateValidateList(id) {
 	});	
 }
 
-function onBuildClick() {
-	var bundleDir = jQuery("#createDirectory #directoryName").val();
-	var bundleName = jQuery("#buildBundle_bundleName").val();
+function onBuildClick(event) {
+	//var bundleDir = jQuery("#createDirectory #directoryName").val();
+	var bundleDir = selectedDirectory;
+	//var bundleName = jQuery("#buildBundle_bundleName").val();
+	var bundleName = jQuery("#Build #bundleBuildName").val();
 	var startDate = jQuery("#startDate").val();
 	var endDate = jQuery("#endDate").val();
-	var bundleComment = jQuery("#bundleComment").val();
-	var archive = jQuery("#buildBundle_archive").is(":checked");
-	var consolidate = jQuery("#buildBundle_consolidate").is(":checked");
-	var predate = jQuery("#buildBundle_predate").is(":checked");
+	//var bundleComment = jQuery("#bundleComment").val();
+	var bundleComment = jQuery("#Upload #bundleNotesText").val();
+	//var archive = jQuery("#buildBundle_archive").is(":checked");
+	var archive = false;
+	var consolidate = false;
+	
+	if (event.data.buildType == "test") {
+		jQuery("#testProgressBarDiv").show();
+	} else {
+		archive = true;
+		consolidate = true;
+	}
+	//var consolidate = jQuery("#buildBundle_consolidate").is(":checked");
+	//var predate = jQuery("#buildBundle_predate").is(":checked");
 
 	var valid = validateBundleBuildFields(bundleDir, bundleName, startDate, endDate);
 	if(valid == false) {
 		return;
 	}
 	jQuery("#buildBundle #buildBox #building #buildingProgress").attr("src","../../css/img/ajax-loader.gif");
-	jQuery("#buildBundle_buildProgress").text("Bundle Build in Progress...");
-	jQuery("#buildBundle_fileList").html("");
-	jQuery("#buildBundle #downloadLogs").hide();
-	jQuery("#buildBundle #buildBox #building").show().css("width","300px").css("margin-top", "20px");
+	//jQuery("#buildBundle_buildProgress").text("Bundle Build in Progress...");
+	//jQuery("#buildBundle_fileList").html("");
+	//jQuery("#buildBundle #downloadLogs").hide();
+	//jQuery("#buildBundle #buildBox #building").show().css("width","300px").css("margin-top", "20px");
 
-	disableBuildButton();
-	disableResetButton();
-	buildBundle(bundleName, startDate, endDate, bundleComment, archive, consolidate, predate);
+	//disableBuildButton();
+	//disableResetButton();
+	//buildBundle(bundleName, startDate, endDate, bundleComment, archive, consolidate, predate);
+	buildBundle(bundleName, startDate, endDate, bundleComment, archive, consolidate, false);
 }
 
 function onResetClick() {
@@ -1110,7 +1217,8 @@ function onResetClick() {
 	jQuery("#endDatePicker").val("");
 	jQuery("#buildBundle_bundleName").val("");
 
-	jQuery("#buildBundle_resultList").html("");
+	//jQuery("#buildBundle_resultList").html("");
+	jQuery("#testBuildBundle_resultList").val("");
 	jQuery("#buildBundle_exception").html("");
 	jQuery("#buildBundle_fileList").html("");
 	jQuery("#buildBundle_fileList").html("");
@@ -1149,7 +1257,8 @@ function validateBundleBuildFields(bundleDir, bundleName, startDate, endDate) {
 }
 
 function bundleUrl() {
-	var id = jQuery("#buildBundle_id").text();
+	//var id = jQuery("#buildBundle_id").text();
+	var id = buildBundleId;
 	jQuery("#buildBundle_exception").hide();
 	jQuery.ajax({
 		url: "../../api/build/" + id + "/url?ts=" +new Date().getTime(),
@@ -1184,8 +1293,10 @@ function bundleUrl() {
 	}
 }
 function buildBundle(bundleName, startDate, endDate, bundleComment, archive, consolidate, predate){
-	var bundleDirectory = jQuery("#selected_bundleDirectory").text();
-	var email = jQuery("#buildBundle_email").val();
+	//var bundleDirectory = jQuery("#selected_bundleDirectory").text();
+	bundleDirectory = selectedDirectory;
+	//var email = jQuery("Build #").val();
+	var email = jQuery("#buildNotificationEmail").val();
 	if (email == "") { email = "null"; }
 	jQuery.ajax({
 		url: "../../api/build/create?ts=" +new Date().getTime(),
@@ -1209,14 +1320,18 @@ function buildBundle(bundleName, startDate, endDate, bundleComment, archive, con
 				if(bundleResponse.exception !=null) {
 					alert(bundleResponse.exception.message);
 				} else {
-					jQuery("#buildBundle_resultList").html("calling...");
+					//jQuery("#buildBundle_resultList").html("calling...");
+					jQuery("#testBuildBundle_resultList").val("calling...");
 					jQuery("#buildBundle_id").text(bundleResponse.id);
+					buildBundleId = bundleResponse.id;
 					window.setTimeout(updateBuildStatus, 5000);
 					bundleUrl();
 				}
 			} else {
 				jQuery("#buildBundle_id").text(error);
-				jQuery("#buildBundle_resultList").html("error");
+				buildBundleId = error;
+				//jQuery("#buildBundle_resultList").html("error");
+				jQuery("#testBuildBundle_resultList").val("error");
 			}
 		},
 		error: function(request) {
@@ -1227,23 +1342,42 @@ function buildBundle(bundleName, startDate, endDate, bundleComment, archive, con
 
 function updateBuildStatus() {
 	disableStageButton();
-	id = jQuery("#buildBundle_id").text();
+	//id = jQuery("#buildBundle_id").text();
+	id = buildBundleId;
 	jQuery.ajax({
 		url: "../../api/build/" + id + "/list?ts=" +new Date().getTime(),
 		type: "GET",
 		async: false,
 		success: function(response) {
-			var txt = "<ul>";
+			//var txt = "<ul>";
+			var txt = "";
+			var currentTask = 0;
+			var totalTasks = 0;
 			var bundleResponse = response;
 			if (bundleResponse == null) {
 				jQuery("#buildBundle_buildProgress").text("Bundle Status Unkown!");
 				jQuery("#buildBundle #buildBox #building #buildingProgress").attr("src","../../css/img/dialog-warning-4.png");
-				jQuery("#buildBundle_resultList").html("unknown id=" + id);
+				//jQuery("#buildBundle_resultList").html("unknown id=" + id);
+				jQuery("#testBuildBundle_resultList").val("unknown id=" + id);
 			}
 			var size = bundleResponse.statusList.length;
 			if (size > 0) {
 				for (var i=0; i<size; i++) {
-					txt = txt + "<li>" + bundleResponse.statusList[i] + "</li>";
+					var nextLine = bundleResponse.statusList[i];
+					if (nextLine.indexOf("running task") >= 0) {
+						var idxCurrent = nextLine.search("\\d+/\\d+");
+						var idxTotal = nextLine.indexOf("/", idxCurrent) + 1;
+						var idxTotalEnd = nextLine.indexOf(")", idxTotal);
+						if (idxCurrent > 0 && idxTotal > 0) {
+							currentTask = parseInt(nextLine.substring(idxCurrent, idxTotal - 1));
+							totalTasks = parseInt(nextLine.substring(idxTotal, idxTotalEnd));
+							$("#testProgressBar").progressbar('value', currentTask/totalTasks * 100);
+							jQuery("#testBuildProgress").text("Completed " + currentTask 
+								+ " of " + totalTasks + " build tasks.");
+						}
+					}
+					//txt = txt + "<li>" + bundleResponse.statusList[i] + "</li>";
+					txt = txt + nextLine + "\n";
 				}
 			}
 			if (bundleResponse.complete == false) {
@@ -1256,8 +1390,12 @@ function updateBuildStatus() {
 				enableBuildButton();
 				enableResetButton();
 			}
-			txt = txt + "</ul>";
-			jQuery("#buildBundle_resultList").html(txt).css("font-size", "12px");	
+			//txt = txt + "</ul>";
+			//jQuery("#buildBundle_resultList").html(txt).css("font-size", "12px");	
+			jQuery("#testBuildBundle_resultList").val(txt).css("font-size", "12px");
+			// Make sure that the textarea remains scrolled to the bottom.
+			jQuery("#testBuildBundle_resultList").scrollTop(1500);  // Just use some arbitrarily large number
+			jQuery("#testProgressBar").progressbar("37");
 			// check for exception
 			if (bundleResponse.exception != null) {
 				jQuery("#buildBundle_buildProgress").text("Bundle Failed!");
@@ -1657,7 +1795,12 @@ function addUploadFileAgencyDropdown() {
 	console.log("starting addUploadFileAgencyDropdown");
 	agencyDropDown = $('<select class="agencyIdSelect">');
 	jQuery(agencyMetadata).each(function() {
-		agencyDropDown.append(jQuery("<option>").attr('value',this.legacyId).text(this.shortName));
+		//agencyDropDown.append(jQuery("<option>").attr('value',this.legacyId).text(this.shortName));
+		var name = this.name;
+		name += " (";
+		name += this.shortName;
+		name += ")";
+		agencyDropDown.append(jQuery("<option>").attr('value',this.legacyId).text(name));
 	});
 	agencyDropDown.insertBefore("#agencyId");
 }

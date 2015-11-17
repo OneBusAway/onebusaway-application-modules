@@ -31,8 +31,7 @@
 			</tr>
 			<tr>
 				<td><input type="text" id="directoryName"/></td>
-				<td><input type="button" id="newDirectoryButton" value="Save and Continue"
-			class="inlineFormButton" disabled="disabled"/></td>
+				<td><input type="button" id="newDirectoryButton" value="Save and Continue" disabled="disabled"/></td>
 			</tr>
 			<tr>
 				<td id="datasetNameNotes">
@@ -58,7 +57,7 @@
 				<tbody>
 					<s:iterator value="%{existingDirectories}" status="directoryStatus">
 						 <tr>
-						 	<td><input type="checkbox"/></td>
+						 	<td class="datasetCheckbox"><input type="checkbox"/></td>
 							<td class="directoryName">
 								<!--
 								<strong><s:property value="name" /></strong>
@@ -76,7 +75,7 @@
 			
 			<div id="existingDirectoryButtonDiv">
 	    		<input type="button" id="existingDirectoryButton" value="Add files to this dataset"
-					class="inlineFormButton" disabled="disabled"/>
+					disabled="disabled"/>
 			</div>
 		</div>      
 	</div>
