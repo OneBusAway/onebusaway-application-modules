@@ -521,6 +521,11 @@ OBA.Popups = (function() {
 							distance += '<span class="scheduleAlert"><span class="not_bold"> (using schedule time)</span></span>';
 							arrival = 'arrival_schedule';
 						}
+						// If realtime data is available and config is set, add vehicleID
+						else if (OBA.Config.showVehicleIdInStopPopup == "true"){
+							var vehicleId = monitoredVehicleJourney.VehicleRef.split("_")[1];
+							distance += '<span class="vehicleId"> (#' + vehicleId + ')</span>';
+						}
 						
 						
 						// time mode

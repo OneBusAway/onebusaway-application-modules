@@ -233,6 +233,10 @@
 	color: rgb(225,0,0);
 }
 
+#bustime .popup .vehicleId {
+	color: rgb(0,0,255);
+}
+
 #bustime .popup a.alert-link{
 	color: rgb(225,0,0);
 	background: url("img/alert_icon.png");

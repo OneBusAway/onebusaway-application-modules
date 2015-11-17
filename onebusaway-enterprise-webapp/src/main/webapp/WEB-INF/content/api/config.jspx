@@ -32,6 +32,7 @@ if(typeof OBA !== 'undefined' &amp;&amp; typeof OBA.Config !== 'undefined') {
 	OBA.Config.txtPrefix='<s:text name="sms.prefix" />';
 	OBA.Config.signDefaultAgencyId='<s:text name="sign.default.agency.id" />';
 	OBA.Config.useAgencyId='<s:property value="useAgencyId" />';
+	OBA.Config.showVehicleIdInStopPopup='<s:property value="showVehicleIdInStopPopup" />';
 
 	OBA.Config.siriSMUrl = "<s:property value="siriBaseURL" />" + "/stop-monitoring.json?key=" + OBA.Config.obaApiKey;
 	OBA.Config.siriVMUrl = "<s:property value="siriBaseURL" />" + "/vehicle-monitoring.json?key=" + OBA.Config.obaApiKey;
