@@ -15,16 +15,11 @@
  */
 package org.onebusaway.aws.monitoring.tasks.metrics;
 
-import org.onebusaway.aws.cloudwatch.service.CloudwatchService;
-import org.onebusaway.aws.monitoring.impl.metrics.WebappMetricsImpl;
-import org.onebusaway.aws.monitoring.model.metrics.MetricName;
-import org.onebusaway.aws.monitoring.model.metrics.MetricResponse;
 import org.onebusaway.aws.monitoring.service.metrics.AdminServerMetrics;
 import org.onebusaway.aws.monitoring.service.metrics.RealtimeMetrics;
 import org.onebusaway.aws.monitoring.service.metrics.ScheduleMetrics;
 import org.onebusaway.aws.monitoring.service.metrics.TransitimeMetrics;
 import org.onebusaway.aws.monitoring.service.metrics.WebappMetrics;
-import org.onebusaway.container.refresh.Refreshable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +27,6 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.scheduling.annotation.Scheduled;
 
-import com.amazonaws.services.cloudwatch.model.MetricDatum;
 
 public class PublishMetricsTask implements ApplicationListener<ContextRefreshedEvent>{
 
@@ -57,7 +51,7 @@ public class PublishMetricsTask implements ApplicationListener<ContextRefreshedE
 	
 	private boolean initialized = false;
 
-	@Scheduled(fixedDelay = 60000)
+	@Scheduled(fixedRate=60000)
 	public void publishEveryMinute() {
 		
 		if(initialized){		

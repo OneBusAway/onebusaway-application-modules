@@ -15,15 +15,22 @@
  */
 package org.onebusaway.aws.monitoring.api;
 
-import javax.annotation.Resource;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
 
+import org.apache.commons.lang.StringUtils;
 import org.onebusaway.aws.monitoring.service.alarms.AdminServerAlarms;
+import org.onebusaway.aws.monitoring.service.alarms.DatabaseAlarms;
+import org.onebusaway.aws.monitoring.service.alarms.GtfsRtAlarms;
 import org.onebusaway.aws.monitoring.service.alarms.RealtimeAlarms;
 import org.onebusaway.aws.monitoring.service.alarms.WebappAlarms;
+import org.onebusaway.util.services.configuration.ConfigurationService;
 import org.onebusaway.watchdog.api.MetricResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,6 +52,15 @@ public class AlarmResource extends MetricResource {
 
 	@Autowired
 	RealtimeAlarms realtimeAlarms;
+	
+	@Autowired
+	DatabaseAlarms databaseAlarms;
+	
+	@Autowired
+	GtfsRtAlarms gtfsRtAlarms;
+	
+	@Autowired
+	ConfigurationService _configurationService;
 
 	@Path("create")
 	@GET
@@ -80,6 +96,22 @@ public class AlarmResource extends MetricResource {
 			realtimeAlarms.createScheduleRealtimeDeltaAlarm();
 			realtimeAlarms.createRealtimeBusesInServiceAlarm();
 			
+			// SQS Alarms
+			gtfsRtAlarms.createMessagesDelayedAlarm();
+			gtfsRtAlarms.createMessagesDeletedAlarm();
+			gtfsRtAlarms.createMessagesReceivedAlarm();
+			gtfsRtAlarms.createMessagesSentAlarm();
+			gtfsRtAlarms.createMessagesSizeAlarm();		
+			
+			// RDS Alarms
+			for(String dbInstance : getDbInstances()){
+				databaseAlarms.createRdsHighConnectionsAlarm(dbInstance);
+				databaseAlarms.createRdsHighCPUAlarm(dbInstance);
+				databaseAlarms.createRdsLowStorageAlarm(dbInstance);
+				databaseAlarms.createRdsReadLatencyAlarm(dbInstance);
+				databaseAlarms.createRdsWriteLatencyAlarm(dbInstance);
+			}
+
 			_log.error("Alarms created successfully");
 			return Response.ok("Alarms Created Successfully").build();
 			
@@ -87,5 +119,14 @@ public class AlarmResource extends MetricResource {
 			_log.error("Error creating alarms");
 			return Response.ok("Error Creating Alarms").build();
 		}
+	}
+	
+	private List<String> getDbInstances(){
+		String dbInstances = _configurationService.getConfigurationValueAsString("alarm.dbInstances", "");
+		if(StringUtils.isNotBlank(dbInstances)){
+			return Arrays.asList(dbInstances.split("\\s*,\\s*"));
+		}
+		return new ArrayList<String>(0);
+		
 	}
 }

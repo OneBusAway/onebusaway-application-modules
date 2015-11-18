@@ -58,16 +58,8 @@ public class TransitimeMetricsImpl extends MetricsTemplate implements Transitime
 				}
 			}
 			publishMetric(MetricName.TransitimeApiErrorResponse, StandardUnit.Count, metric);
-		} catch (MalformedURLException mue) {
-			_log.error(mue.getMessage());
-			return;
-		} catch (IOException ioe) {
-			_log.warn("Error communicating with specified url : "
-					+ transitime_url + "agencies?format=json");
-			publishMetric(MetricName.TransitimeApiErrorResponse, StandardUnit.Count, metric);
-		}
-		catch(NullPointerException npe){
-			_log.warn("Error reading the agenciesList");
+		} catch (Exception e) {
+			_log.error(e.getMessage(), e);
 		}
 	}
 

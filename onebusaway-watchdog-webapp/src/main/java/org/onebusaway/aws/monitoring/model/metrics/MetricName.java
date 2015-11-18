@@ -18,45 +18,48 @@ package org.onebusaway.aws.monitoring.model.metrics;
 
 public enum MetricName {
 	
-	CurrentBundleCount("CurrentBundleCount"),	
+    CPUUtilization("CPUUtilization"),
+	CurrentBundleCount("CurrentBundleCount"),
+	DatabaseConnections("DatabaseConnections"),
     DesktopUiValid("DesktopUiValid"),
     FirstValidBundleFilesCount("FirstValidBundleFilesCount"),
-    NextBusApiErrorResponse("NextBusApiErrorResponse"), 
-    RealtimeInvalidLatLonPct("RealtimeInvalidLatLonPercentage"),
-    
+    FreeStorageSpace("FreeStorageSpace"),
+    NegativeReplicaLag("NegativeReplicaLag"),
+    NextBusApiErrorResponse("NextBusApiErrorResponse"),
+    NumberOfMessagesDelayed("ApproximateNumberOfMessagesDelayed"),
+    NumberOfMessagesDeleted("NumberOfMessagesDeleted"),
+    NumberOfMessagesReceived("NumberOfMessagesReceived"),
+    NumberOfMessagesSent("NumberOfMessagesSent"),
+    ReadLatency("ReadLatency"),
+    RealtimeInvalidLatLonPct("RealtimeInvalidLatLonDeltaPercentage"),
     RealtimeLocationsInvalid("RealtimeLocationsInvalid"),
     RealtimeLocationsTotal("RealtimeLocationsTotal"),
     RealtimeLocationsTotalPct("RealtimeLocationsTotalPercentage"),
-    
     RealtimeStopsMatched("RealtimeStopsMatched"),
     RealtimeStopsMatchedPct("RealtimeStopsMatchedPercentage"),
     RealtimeStopsUnmatched("RealtimeStopsUnmatched"),
     RealtimeStopsUnmatchedPct("RealtimeStopsUnmatchedPercentage"),
-    
     RealtimeTripsMatched("RealtimeTripsMatched"),
     RealtimeTripsMatchedAvg("RealtimeTripsMatchedAvg"),
     RealtimeTripsTotal("RealtimeTripsTotal"),
     RealtimeTripTotalPct("RealtimeTripTotalPercentage"),
     RealtimeTripsUnmatched("RealtimeTripsUnmatched"),
     RealtimeBusesInServicePct("RealtimeBusesInServicePercentage"),
-    
-    SMSWebappErrorResponse("SMSWebappErrorResponse"),
-    SMSWebappResponseTime("SMSWebappResponseTime"),
-    
+    ReplicaLag("ReplicaLag"),
     ScheduleAgencyTotal("ScheduleAgencyTotal"),
     ScheduleExpiryDateDelta("ScheduleExpiryDateDelta"),
     ScheduleRealtimeDelta("ScheduleRealtimeDelta"),
     ScheduleTotalTrips("ScheduleTotalTrips"),
-    
+    SentMessageSize("SentMessageSize"),
+    SMSWebappErrorResponse("SMSWebappErrorResponse"),
+    SMSWebappResponseTime("SMSWebappResponseTime"),
     StopMonitoringErrorResponse("StopMonitoringErrorResponse"),
-    StopMonitoringResponseTime("StopMonitoringResponseTime"),
-    
+    StopMonitoringResponseTime("StopMonitoringResponseTime"), 
     TransitimeApiErrorResponse("TransitimeApiErrorResponse"),
-    
     VehicleMonitoringErrorResponse("VehicleMonitoringErrorResponse"),
-    VehicleMonitoringResponseTime("VehicleMonitoringResponseTime");
-
-
+    VehicleMonitoringResponseTime("VehicleMonitoringResponseTime"),
+    WriteLatency("WriteLatency");
+    
     private String value;
 
     private MetricName(String value) {
@@ -73,7 +76,7 @@ public enum MetricName {
      *
      * @param value
      *        real value
-     * @return StandardUnit corresponding to the value
+     * @return MetricName corresponding to the value
      */
     public static MetricName fromValue(String value) {
         if (value == null || "".equals(value)) {
@@ -86,7 +89,7 @@ public enum MetricName {
             return FirstValidBundleFilesCount;
         } else if ("NextBusApiErrorResponse".equals(value)) {
             return NextBusApiErrorResponse;
-        } else if ("RealtimeInvalidLatLonPercentage".equals(value)) {
+        } else if ("RealtimeInvalidLatLonDeltaPercentage".equals(value)) {
             return RealtimeInvalidLatLonPct;
         } else if ("RealtimeLocationsInvalid".equals(value)) {
             return RealtimeLocationsInvalid;
