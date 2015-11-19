@@ -15,6 +15,8 @@
  */
 package org.onebusaway.transit_data_federation.util;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -79,7 +81,7 @@ public class HttpServiceClientImpl implements HttpServiceClient {
 
 	@Override
 	public List<JsonObject> getItemsForRequest(String baseObject,
-			String... params) throws Exception {
+			String... params) throws IOException{ 
 		if (_restApiLibrary == null)
 			return Collections.emptyList();
 		URL requestUrl = _restApiLibrary.buildUrl(baseObject, params);
@@ -93,7 +95,7 @@ public class HttpServiceClientImpl implements HttpServiceClient {
 
 	@Override
 	public List<Map<String, String>> getItems(String baseObject,
-			String... params) throws Exception {
+			String... params) throws IOException {
 		if (_restApiLibrary == null)
 			return Collections.emptyList();
 		List<Map<String, String>> result = new ArrayList<Map<String, String>>();
@@ -109,7 +111,7 @@ public class HttpServiceClientImpl implements HttpServiceClient {
 	}
 
 	@Override
-	public String getItem(String baseObject, String key) throws Exception {
+	public String getItem(String baseObject, String key) throws IOException {
 		List<Map<String, String>> items = getItems("config", "list");
 		if (items == null) return null;
 		for (Map<String, String> component : items) {
