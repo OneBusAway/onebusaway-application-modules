@@ -32,6 +32,8 @@ import org.onebusaway.transit_data_federation.impl.transit_graph.TripEntryImpl;
 import org.onebusaway.transit_data_federation.services.blocks.BlockCalendarService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
+import org.onebusaway.realtime.api.TimepointPredictionRecord;
+
 
 import com.google.transit.realtime.GtfsRealtime.FeedEntity;
 import com.google.transit.realtime.GtfsRealtime.FeedHeader;
@@ -41,6 +43,7 @@ import com.google.transit.realtime.GtfsRealtime.TripUpdate;
 import com.google.transit.realtime.GtfsRealtime.TripUpdate.StopTimeEvent;
 import com.google.transit.realtime.GtfsRealtime.TripUpdate.StopTimeUpdate;
 import com.google.transit.realtime.GtfsRealtimeConstants;
+
 
 import org.junit.Before;
 import org.junit.Test;
@@ -186,6 +189,46 @@ public class GtfsRealtimeTripLibraryTest {
     VehicleLocationRecord record = _library.createVehicleLocationRecordForUpdate(update);
     assertEquals(123456789000L, record.getTimeOfRecord());
     assertEquals(120, record.getScheduleDeviation(), 0.0);
+  }
+  
+  @Test
+  public void testCreateVehicleLocationRecordForUpdate_WithStopTimeUpdates() {
+    
+    StopTimeUpdate.Builder stopTimeUpdate = StopTimeUpdate.newBuilder();
+    stopTimeUpdate.setStopId("stopA");
+    StopTimeEvent.Builder stopTimeEvent = StopTimeEvent.newBuilder();
+    stopTimeEvent.setDelay(180);
+    stopTimeUpdate.setDeparture(stopTimeEvent);
+    
+    
+    TripUpdate tripUpdate = TripUpdate.newBuilder()
+        .setTrip(TripDescriptor.newBuilder().setTripId("tripA"))
+        .setDelay(120)
+        .setTimestamp(123456789)
+        .addStopTimeUpdate(stopTimeUpdate)
+        .build();
+
+    TripEntryImpl tripA = trip("tripA");
+    stopTime(0, stop("stopA", 0, 0), tripA, time(7, 30), 0.0);
+    BlockEntryImpl blockA = block("blockA");
+    BlockConfigurationEntry blockConfigA = blockConfiguration(blockA,
+        serviceIds("s1"), tripA);
+    BlockInstance blockInstanceA = new BlockInstance(blockConfigA, 0L);
+    Mockito.when(
+        _blockCalendarService.getActiveBlocks(Mockito.eq(blockA.getId()),
+            Mockito.anyLong(), Mockito.anyLong())).thenReturn(
+        Arrays.asList(blockInstanceA));
+
+    CombinedTripUpdatesAndVehiclePosition update = new CombinedTripUpdatesAndVehiclePosition();
+    update.block = new BlockDescriptor();
+    update.block.setBlockInstance(blockInstanceA);
+    update.tripUpdates = Arrays.asList(tripUpdate);
+
+    VehicleLocationRecord record = _library.createVehicleLocationRecordForUpdate(update);
+    
+    TimepointPredictionRecord tpr = record.getTimepointPredictions().get(0);
+    long departure = tpr.getTimepointPredictedDepartureTime();
+    assertEquals(departure, time(7, 33)); // 7:30 plus 3 min delay
   }
 
   private FeedMessage.Builder createFeed() {
