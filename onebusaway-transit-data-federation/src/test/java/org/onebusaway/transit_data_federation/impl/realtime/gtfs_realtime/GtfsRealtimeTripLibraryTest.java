@@ -228,7 +228,7 @@ public class GtfsRealtimeTripLibraryTest {
     
     TimepointPredictionRecord tpr = record.getTimepointPredictions().get(0);
     long departure = tpr.getTimepointPredictedDepartureTime();
-    assertEquals(departure, time(7, 33)); // 7:30 plus 3 min delay
+    assertEquals(departure, time(7, 33) * 1000); // 7:30 plus 3 min delay, + now we are in ms.
   }
 
   private FeedMessage.Builder createFeed() {

@@ -580,7 +580,7 @@ class GtfsRealtimeTripLibrary {
               updateBestScheduleDeviation(currentTime,
                   stopTime.getArrivalTime(), currentArrivalTime, best);
 
-              long timepointPredictedTime = (instance.getServiceDate()/1000L) + currentArrivalTime;
+              long timepointPredictedTime = instance.getServiceDate() + (currentArrivalTime * 1000L);
               tpr.setTimepointPredictedArrivalTime(timepointPredictedTime);
             } 
 
@@ -588,7 +588,7 @@ class GtfsRealtimeTripLibrary {
               updateBestScheduleDeviation(currentTime,
                   stopTime.getDepartureTime(), currentDepartureTime, best);
 
-              long timepointPredictedTime = (instance.getServiceDate()/1000L) + currentDepartureTime;
+              long timepointPredictedTime = instance.getServiceDate() + (currentDepartureTime * 1000L);
               tpr.setTimepointPredictedDepartureTime(timepointPredictedTime);
             }
 

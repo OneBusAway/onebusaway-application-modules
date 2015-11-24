@@ -66,12 +66,12 @@ public class TripUpdatesForAgencyAction extends GtfsRealtimeActionSupport {
           stopTimeUpdate.setStopId(normalizeId(timepointPrediction.getTimepointId()));
           TripUpdate.StopTimeEvent.Builder arrival = stopTimeUpdate.getArrivalBuilder();
           if (timepointPrediction.getTimepointPredictedArrivalTime() != -1) {
-            arrival.setTime(timepointPrediction.getTimepointPredictedArrivalTime());
+            arrival.setTime(timepointPrediction.getTimepointPredictedArrivalTime()/1000L);
           }
   
           TripUpdate.StopTimeEvent.Builder departure = stopTimeUpdate.getDepartureBuilder();
           if (timepointPrediction.getTimepointPredictedDepartureTime() != -1) {
-            departure.setTime(timepointPrediction.getTimepointPredictedDepartureTime());
+            departure.setTime(timepointPrediction.getTimepointPredictedDepartureTime()/1000L);
           }
 
 	      

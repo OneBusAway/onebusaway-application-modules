@@ -33,7 +33,7 @@ public class TimepointPredictionRecord implements Serializable {
   
   private int stopSequence = -1;
 
-  // times in seconds
+  // times in ms
   
   private long timepointScheduledTime;
 
