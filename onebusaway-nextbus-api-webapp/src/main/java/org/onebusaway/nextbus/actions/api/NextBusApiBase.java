@@ -188,10 +188,12 @@ public class NextBusApiBase {
           }
         }
       }
+      
       if (handleErrors && routeIds.size() == 0) {
+        String agencyId = agencyIds.get(0);
         body.getErrors().add(
-            new BodyError("Could not get route \"" + routeVal
-                + "\". One of the tags could be bad."));
+            new BodyError("For agency=" + agencyId + " route r=" + routeVal
+              + " is not currently available. It might be initializing still."));
         return false;
       }
     } else {

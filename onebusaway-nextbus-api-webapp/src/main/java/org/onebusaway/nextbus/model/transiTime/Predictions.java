@@ -43,9 +43,6 @@ public class Predictions {
   @JsonProperty("routeTag")
   private String routeShortName;
   
-  @XStreamAsAttribute
-  @XStreamAlias("routeCode")
-  @JsonProperty("routeCode")
   private String routeId;
   
   @XStreamAsAttribute
