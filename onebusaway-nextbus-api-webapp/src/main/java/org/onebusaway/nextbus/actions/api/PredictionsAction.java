@@ -62,6 +62,15 @@ public class PredictionsAction extends NextBusApiBase implements
   public void setStopId(String stopId) {
     this.stopId = _tdsMappingService.getStopIdFromStopCode(stopId);
   }
+  
+  // short form of stopId param
+  public String getS() {
+	  return stopId;
+  }
+  
+  public void setS(String stopId) {
+	  this.stopId = stopId;
+  }
 
   public String getRouteTag() {
     return routeTag;
