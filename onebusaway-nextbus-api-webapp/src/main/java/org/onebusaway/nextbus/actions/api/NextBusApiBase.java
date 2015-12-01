@@ -102,7 +102,7 @@ public class NextBusApiBase {
     }
     if (_transitDataService.getAgency(agencyId) == null) {
       body.getErrors().add(
-          new BodyError("Agency parameter \"a=" + agencyId + " is not valid."));
+          new BodyError("Agency parameter \"a=" + agencyId + "\" is not valid."));
       return false;
     }
     return true;

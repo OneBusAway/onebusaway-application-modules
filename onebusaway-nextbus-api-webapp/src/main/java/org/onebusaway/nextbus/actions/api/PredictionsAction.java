@@ -36,8 +36,8 @@ import com.google.gson.JsonArray;
 import com.google.gson.reflect.TypeToken;
 import com.opensymphony.xwork2.ModelDriven;
 
-public class PredictionsAction extends NextBusApiBase implements
-    ModelDriven<Body<Predictions>> {
+public class PredictionsAction extends NextBusApiBase
+    implements ModelDriven<Body<Predictions>> {
 
   private static Logger _log = LoggerFactory.getLogger(PredictionsAction.class);
 
@@ -62,14 +62,14 @@ public class PredictionsAction extends NextBusApiBase implements
   public void setStopId(String stopId) {
     this.stopId = _tdsMappingService.getStopIdFromStopCode(stopId);
   }
-  
+
   // short form of stopId param
   public String getS() {
-	  return stopId;
+    return stopId;
   }
-  
+
   public void setS(String stopId) {
-	  this.stopId = stopId;
+    this.stopId = stopId;
   }
 
   public String getRouteTag() {
@@ -77,6 +77,16 @@ public class PredictionsAction extends NextBusApiBase implements
   }
 
   public void setRouteTag(String routeTag) {
+    this.routeTag = _tdsMappingService.getRouteIdFromShortName(routeTag);
+  }
+  
+  
+  // short form of routeTag param
+  public String getR() {
+    return routeTag;
+  }
+
+  public void setR(String routeTag) {
     this.routeTag = _tdsMappingService.getRouteIdFromShortName(routeTag);
   }
 
@@ -102,7 +112,7 @@ public class PredictionsAction extends NextBusApiBase implements
             + getIdNoAgency(stopId) + "&";
       }
       String uri = serviceUrl + routeStop + "format=" + REQUEST_TYPE;
-
+      _log.info(uri);
       try {
 
         JsonArray predictionsJson = getJsonObject(uri).getAsJsonArray(
@@ -112,11 +122,11 @@ public class PredictionsAction extends NextBusApiBase implements
 
         List<Predictions> predictions = new Gson().fromJson(predictionsJson,
             listType);
-        
+
         modifyJSONObject(predictions);
 
         body.getResponse().addAll(predictions);
-        
+
       } catch (Exception e) {
         body.getErrors().add(new BodyError("No valid results found."));
         _log.error(e.getMessage());
@@ -128,12 +138,17 @@ public class PredictionsAction extends NextBusApiBase implements
   }
 
   private void modifyJSONObject(List<Predictions> predictions) {
+
+    String agencyTitle = _transitDataService.getAgency(agencyId).getName();
+
     for (Predictions prediction : predictions) {
       for (PredictionsDirection direction : prediction.getDest()) {
         for (Prediction dirPrediction : direction.getPred()) {
           dirPrediction.setDirTag(direction.getDir());
         }
       }
+
+      prediction.setAgencyTitle(agencyTitle);
     }
   }
 
@@ -164,13 +179,9 @@ public class PredictionsAction extends NextBusApiBase implements
           stopServesRoute = true;
       }
       if (!stopServesRoute) {
-        body.getErrors().add(
-            new BodyError(
-                "For agency="
-                    + agencyId
-                    + " route r="
-                    + routeTag
-                    + " is not currently available. It might be initializing still."));
+        body.getErrors().add(new BodyError("For agency=" + agencyId
+            + " route r=" + routeTag
+            + " is not currently available. It might be initializing still."));
         return false;
       }
 
