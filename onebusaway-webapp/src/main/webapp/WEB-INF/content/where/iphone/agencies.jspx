@@ -21,12 +21,11 @@
 	xmlns:oba="/oba-tags">
 <jsp:directive.page contentType="text/html" />
 <head>
-<title>Supported Transit Agencies</title>
+<title><s:text name="agencies.ScheduleAndRealtimeProvidedWithPermission"/></title>
 </head>
 <body>
 
-<p>Schedule and real-time arrival data provided with the
-permission of the following transit agencies:</p>
+<p><s:text name="agencies.ScheduleAndRealtimeProvidedWithPermission"/></p>
 
 <ul class="buttons">
 	<s:iterator value="model">

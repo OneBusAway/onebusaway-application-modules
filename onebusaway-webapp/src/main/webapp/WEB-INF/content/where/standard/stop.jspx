@@ -25,6 +25,7 @@
 <head>
 <link rel="stylesheet" type="text/css" media="all" href="${oba:resource('/WEB-INF/css/where-stop.css')}"/>
 <link rel="stylesheet" type="text/css" media="all" href="${oba:resource('/WEB-INF/css/where-standard-stop.css')}"/>
+<script type="text/javascript" src="${oba:resource('messages:ArrivalAndDepartureMessages=org.onebusaway.webapp.actions.bundles.ArrivalAndDepartureMessages')}"><jsp:text></jsp:text></script>
 <meta http-equiv="Refresh" content="60" />
 <title>
   <s:if test="title != null">
@@ -56,7 +57,7 @@
 <s:if test="filtered">
     <div class="arrivalsFilterPanel"><s:url var="removeFilterUrl" includeParams="get">
         <s:param name="route" value="%{'all'}" />
-    </s:url><s:a href="%{removeFilterUrl}">Show all arrivals</s:a></div>
+    </s:url><s:a href="%{removeFilterUrl}"><oba:message key="stop.Show_all_arrivals"/></s:a></div>
 </s:if>
 
 <!-- The Arrivals and Departures Table -->
@@ -70,57 +71,58 @@
 </s:component>
 
 <div id="nearbyStops" class="stop_links">
-<h4>Nearby stops:</h4>
+<h4><oba:message key="stop.Nearby_stops"/></h4>
 <ul>
 <s:iterator value="result.nearbyStops">
     <s:url var="nearbyStopUrl" action="stop" includeParams="none">
         <s:param name="id" value="id" />
     </s:url>
     <li><s:a href="%{nearbyStopUrl}">
-        <s:property value="name" /><s:if test="direction != null"> - <s:property value="direction" /> bound</s:if>
+        <s:property value="name" /><s:if test="direction != null"> - <s:property value="direction" /> 
+        <jsp:text> </jsp:text><oba:message key="stop.bound"/></s:if>
     </s:a></li>
 </s:iterator></ul>
 </div>
 
 <div id="otherOptions" class="stop_links">
-<h4>Stop details:</h4>
+<h4><oba:message key="stop.Stop_details"/></h4>
 <ul>
   <s:iterator value="result.stops" status="stopsIter">
     <s:url var="scheduleUrl" action="schedule" includeParams="none">
         <s:param name="id" value="id" />
     </s:url>
-    <li><s:a href="%{scheduleUrl}">See the full schedule for this stop (# <s:property value="code" />)</s:a></li>
+    <li><s:a href="%{scheduleUrl}"><oba:message key="stop.See_the_full_schedule_for_this_stop"/> (# <s:property value="code" />)</s:a></li>
   </s:iterator>
   <s:url var="switchUrl" action="stop" includeParams="get">
     <s:param name="showArrivals" value="! showArrivals"/>
   </s:url>
   <li>
     <s:a href="%{switchUrl}">
-      <s:if test="showArrivals">Show departure times</s:if>
-      <s:else>Show arrival times</s:else>
+      <s:if test="showArrivals"><oba:message key="stop.Show_departure_times"/></s:if>
+      <s:else><oba:message key="stop.Show_arrival_times"/></s:else>
     </s:a>
   </li>
   <s:url var="bookmarksUrl" action="bookmark-create" includeParams="none">
     <s:param name="stopId" value="id"/>
     <s:param name="routeId" value="routes"/>
   </s:url>
-  <li><s:a href="refineview.html?%{stopAndRouteIdsAsUrlParams}">See multiple stops or filter routes</s:a></li>
+  <li><s:a href="refineview.html?%{stopAndRouteIdsAsUrlParams}&amp;request_locale=%{locale}&amp;locale=%{locale}"><oba:message key="stop.See_multiple_stops_or_filter_routes"/></s:a></li>
   <s:if test="! anonymousUser">
-    <li><s:a href="%{bookmarksUrl}">Add a bookmark</s:a></li>
+    <li><s:a href="%{bookmarksUrl}"><oba:message key="stop.Add_a_bookmark"/></s:a></li>
   </s:if>
   <s:if test="result.stops.size == 1">
     <s:push value="result.stops[0]">
       <s:if test="wheelchairBoarding != @org.onebusaway.transit_data.model.EAccessibility@UNKNOWN">
         <s:if test="wheelchairBoarding == @org.onebusaway.transit_data.model.EAccessibility@ACCESSIBLE">
-          <li>This stop is wheelchair accessible.</li>
+          <li><oba:message key="stop.This_stop_is_wheelchair_accessible"/></li>
         </s:if>
         <s:elseif test="wheelchairBoarding == @org.onebusaway.transit_data.model.EAccessibility@NOT_ACCESSIBLE">
-          <li>This stop is <em>not</em> wheelchair accessible.</li>
+          <li><oba:message key="stop.This_stop_is_not_wheelchair_accessible"/></li>
         </s:elseif>
       </s:if>
     </s:push>
   </s:if>
-  <li><s:a href="index.html">Search for another stop</s:a></li>
+  <li><s:a href="index.html"><oba:message key="stop.Search_for_another_stop"/></s:a></li>
 </ul>
 </div>
 

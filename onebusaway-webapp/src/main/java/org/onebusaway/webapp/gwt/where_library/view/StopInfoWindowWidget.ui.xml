@@ -18,6 +18,7 @@
 -->
     <!-- RefineViewWidget.ui.xml -->
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder' xmlns:g='urn:import:com.google.gwt.user.client.ui'
+	ui:baseMessagesInterface="org.onebusaway.webapp.gwt.where_library.WhereMessages"
     xmlns:my='urn:import:org.onebusaway.webapp.gwt.where_library.view'>
 
     <ui:with field="_css" type="org.onebusaway.webapp.gwt.where_library.view.StopFinderCssResource"/>
@@ -27,7 +28,7 @@
         <div ui:field="_stopDescription" />
         <g:FlowPanel ui:field="_stopLinks" />
         <div class="{_css.stopInfoWindowRoutesPanel}">
-            <div>Routes:</div>
+            <div><ui:msg key="standardIndexPageRoutes">Routes</ui:msg>:</div>
             <g:FlowPanel ui:field="_routesPanel" />
         </div>
     </g:HTMLPanel>

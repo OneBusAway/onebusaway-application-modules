@@ -26,12 +26,14 @@ import org.onebusaway.transit_data.model.StopsForRouteBean;
 import org.onebusaway.webapp.gwt.common.control.Place;
 import org.onebusaway.webapp.gwt.common.widgets.DivPanel;
 import org.onebusaway.webapp.gwt.common.widgets.DivWidget;
+import org.onebusaway.webapp.gwt.where_library.WhereMessages;
 import org.onebusaway.webapp.gwt.where_library.rpc.WebappServiceAsync;
 import org.onebusaway.webapp.gwt.where_library.services.CombinedSearchResult;
 import org.onebusaway.webapp.gwt.where_library.view.constraints.OperationContext;
 import org.onebusaway.webapp.gwt.where_library.view.stops.PlaceClickHandler;
 import org.onebusaway.webapp.gwt.where_library.view.stops.TransitMapManager;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.maps.client.InfoWindow;
@@ -56,6 +58,8 @@ public class ResultsPanelManager {
   private Panel _panel;
 
   private TransitMapManager _transitMapManager;
+  
+  private WhereMessages _messages;
 
   public ResultsPanelManager(OperationContext context) {
     _context = context;
@@ -63,11 +67,16 @@ public class ResultsPanelManager {
     _stopFinder = context.getStopFinder();
     _transitMapManager = context.getTransitMapManager();
     _panel = context.getPanel();
+    _messages = GWT.create(WhereMessages.class);
+  }
+  
+  public void setMessages(WhereMessages messages) {
+	_messages = messages;
   }
 
   public void addNoResultsMessage() {
     _panel.clear();
-    _panel.add(new DivWidget("No results were found for your search",
+    _panel.add(new DivWidget(_messages.standardIndexPageNoResultFound(),
         _css.resultListWarning()));
   }
 
@@ -83,17 +92,17 @@ public class ResultsPanelManager {
       DivPanel panel = new DivPanel(_css.resultListAdditional());
       _panel.add(panel);
 
-      panel.add(new DivWidget("Did you mean:", _css.resultListWarning()));
+      panel.add(new DivWidget(_messages.standardIndexPageDidYouMean(), _css.resultListWarning()));
 
       List<RouteBean> routes = result.getRoutes();
-      addElementsToPanel(panel, routes, "Routes");
+      addElementsToPanel(panel, routes, _messages.standardIndexPageRoutes());
 
       List<StopBean> stops = result.getStops();
-      addElementsToPanel(panel, stops, "Stops");
+      addElementsToPanel(panel, stops, _messages.standardIndexPageStops());
 
       List<Place> addresses = result.getAddresses();
       DivPanel addressesPanel = addElementsToPanel(panel, addresses,
-          "Addresses");
+    	_messages.standardIndexPageAddress());
       if (!addresses.isEmpty()) {
         ShowPlacesOnMapToggleHandler handler = addShowOnMapLink(addressesPanel,
             addresses, primary);
@@ -102,7 +111,7 @@ public class ResultsPanelManager {
       }
 
       List<Place> places = result.getPlaces();
-      DivPanel placesPanel = addElementsToPanel(panel, places, "Places");
+      DivPanel placesPanel = addElementsToPanel(panel, places, _messages.standardIndexPagePlaces());
       if (!places.isEmpty()) {
         ShowPlacesOnMapToggleHandler handler = addShowOnMapLink(placesPanel,
             places, primary);
@@ -134,7 +143,7 @@ public class ResultsPanelManager {
 
   protected void addClearSearchLinkToResultsPanel() {
 
-    Anchor anchor = new Anchor("Clear this search");
+    Anchor anchor = new Anchor(_messages.standardIndexPageClearSearch());
     anchor.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent arg0) {
@@ -231,7 +240,7 @@ public class ResultsPanelManager {
     if (agency.getUrl() != null)
       agencyLink = "<a href=\"" + agency.getUrl() + "\">" + agency.getName()
           + "</a>";
-    resultPanel.add(new DivWidget("Operated by " + agencyLink,
+    resultPanel.add(new DivWidget(_messages.standardIndexPageOperatedBy() + " " + agencyLink,
         _css.resultListEntryDescription()));
   }
 
@@ -247,9 +256,9 @@ public class ResultsPanelManager {
         _stopFinder.getStopQueryLink(stop.getId()));
     nameRow.add(anchor);
 
-    String desc = "Stop # " + StopPresenter.getCodeForStop(stop);
+    String desc = _messages.stopByNumberPageStopNumberShebang() + " " + StopPresenter.getCodeForStop(stop);
     if (stop.getDirection() != null)
-      desc += " - " + stop.getDirection() + " bound";
+      desc += " - " + stop.getDirection() + " " + _messages.standardIndexPageBound();
     resultPanel.add(new DivWidget(desc, _css.resultListEntryDescription()));
   }
 
@@ -289,7 +298,7 @@ public class ResultsPanelManager {
     DivPanel row = new DivPanel(_css.resultListMoreInfoLink());
     parentPanel.add(row);
 
-    final Anchor anchor = new Anchor("Show all on map");
+    final Anchor anchor = new Anchor(_messages.standardIndexPageShowAllMap());
     row.add(anchor);
 
     ShowPlacesOnMapToggleHandler handler = new ShowPlacesOnMapToggleHandler(
@@ -347,7 +356,7 @@ public class ResultsPanelManager {
 
     public void setShowingOnMap(boolean showing) {
       _showing = showing;
-      _anchor.setText(_showing ? "Hide all on map" : "Show all on map");
+      _anchor.setText(_showing ? _messages.standardIndexPageHideAllMap() : _messages.standardIndexPageShowAllMap());
 
       if (_showing) {
         _transitMapManager.showPlaces(_places, true, this);
@@ -375,7 +384,7 @@ public class ResultsPanelManager {
       DivPanel row = new DivPanel();
       panel.add(row);
 
-      Anchor anchor = new Anchor("Show nearby transit stops");
+      Anchor anchor = new Anchor(_messages.standardIndexPageShowNearbyTransitStops());
       row.add(anchor);
 
       anchor.addClickHandler(new ClickHandler() {

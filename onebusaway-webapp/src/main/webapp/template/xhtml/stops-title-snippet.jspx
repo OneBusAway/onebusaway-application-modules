@@ -38,10 +38,10 @@ index.action#p(index)m(location)lat(<s:property value="lat" />)lon(<s:property v
 </s:set>
 	<div>
 		<div class="arrivalsStopAddress"><s:a href="%{mapUrl}"><s:property value="name" /></s:a></div>
-		<div class="arrivalsStopNumber"><s:a href="%{mapUrl}">Stop # <s:property value="code" /><s:if test="direction != null"> - <s:property value="direction" /> bound</s:if></s:a></div>
+		<div class="arrivalsStopNumber"><s:a href="%{mapUrl}"><oba:message key="stop.Stop"/> <jsp:text> </jsp:text> <s:property value="code" /><s:if test="direction != null"> - <s:property value="direction" /> <jsp:text> </jsp:text> <oba:message key="stop.bound"/></s:if></s:a></div>
 	</div>
     <s:if test="!#stopsIter.last">
-        <small>and</small>
+        <small><oba:message key="stop.and"/></small>
     </s:if>
   </s:iterator>
   </s:else>

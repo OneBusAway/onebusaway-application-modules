@@ -27,7 +27,7 @@
 
 <s:if test="! directionNames.isEmpty()">
 <div id="directions_of_travel">
-<div>Stops for direction of travel:</div>
+<div><s:text name="stopForRoute.DirectionTravel"/>:</div>
 <ul>
 <s:iterator value="directionNames" status="status">
   <s:url var="url" includeParams="get">
@@ -40,12 +40,13 @@
 </s:if>
 
 <div id="stops_for_route">
-<div>Stops:</div>
+<div><s:text name="stopForRoute.Stops"/>:</div>
 <s:iterator value="stops">	
 	<s:url var="url" action="stop">
 		<s:param name="id" value="id" />
 	</s:url>
-	<div><s:a href="%{url}"><s:property value="name" /><s:if test="direction != null"> - <s:property value="direction"/> bound</s:if></s:a></div>
+	<div><s:a href="%{url}"><s:property value="name" /><s:if test="direction != null"> - <s:property value="direction"/> 
+	<jsp:text> </jsp:text><s:text name="stopForRoute.Bound"/></s:if></s:a></div>
 </s:iterator>
 </div>
 

@@ -22,29 +22,31 @@
 <head>
 <link rel="stylesheet" type="text/css" media="all" href="${resources.WhereLibraryResources.css.url}" />
 <title><s:iterator value="result.stops" 
-status="stopsIter"><s:property value="name" /> - <s:property value="direction" /> bound - Stop # <s:property
+status="stopsIter"><s:property value="name" /> - <s:property value="direction" /> 
+	<jsp:text> </jsp:text><oba:message key="stop.bound"/> - <oba:message key="stop.Stop"/> <s:property
     value="code" /><s:if test="!#stopsIter.last">, </s:if></s:iterator></title>
+<script type="text/javascript" src="${oba:resource('messages:ArrivalAndDepartureMessages=org.onebusaway.webapp.actions.bundles.ArrivalAndDepartureMessages')}"><jsp:text></jsp:text></script>
 </head>
 <body>
 
 <div class="arrivalsStopInfo">
 <s:iterator value="result.stops" status="stopsIter">
 <div class="arrivalsStopAddress"><s:property value="name" /></div>
-<div class="arrivalsStopNumber">Stop # <s:property value="code" /><s:if test="direction != null"> - <s:property value="direction" />
-bound</s:if></div><s:if test="!#stopsIter.last"><small>and</small></s:if>
+<div class="arrivalsStopNumber"><oba:message key="stop.Stop"/> <s:property value="code" /><s:if test="direction != null"> - <s:property value="direction" />
+<jsp:text> </jsp:text><oba:message key="stop.bound"/></s:if></div><s:if test="!#stopsIter.last"><small><oba:message key="stop.and"/></small></s:if>
 </s:iterator>
 </div>
 
 <s:if test="filtered">
     <div class="arrivalsFilterPanel"><s:url var="removeFilterUrl" includeParams="get">
         <s:param name="route" value="%{'all'}" />
-    </s:url><s:a href="%{removeFilterUrl}">Show all arrivals</s:a></div>
+    </s:url><s:a href="%{removeFilterUrl}"><oba:message key="stop.Show_all_arrivals"/></s:a></div>
 </s:if>
 
 <s:if test="result.arrivalsAndDepartures.empty">
     <tr>
         <td colspan="3">
-        <div id="arrivalsNoScheduledArrivals">No scheduled arrivals in the next 30 minutes.</div>
+        <div id="arrivalsNoScheduledArrivals"><oba:message key="arrivalAndDeparture.NoScheduleDataOn30Min"/></div>
         </td>
     </tr>
 </s:if>
@@ -54,13 +56,13 @@ bound</s:if></div><s:if test="!#stopsIter.last"><small>and</small></s:if>
         <tr class="arrivalsHeader">
             <td class="arrivalsRouteColumn"><s:url var="url" includeParams="get">
                 <s:param name="order">route</s:param>
-            </s:url><s:a href="%{url}">route</s:a></td>
+            </s:url><s:a href="%{url}"><s:text name="route" /></s:a></td>
             <td class="arrivalsStatusColumn"><s:url var="url" includeParams="get">
                 <s:param name="order">time</s:param>
-            </s:url><s:a href="%{url}">minutes</s:a></td>
+            </s:url><s:a href="%{url}"><s:text name="minutes" /></s:a></td>
             <td class="arrivalsDestinationColumn"><s:url var="url" includeParams="get">
                 <s:param name="order">dest</s:param>
-            </s:url><s:a href="%{url}">destination</s:a></td>
+            </s:url><s:a href="%{url}"><s:text name="destination" /></s:a></td>
 
         </tr>
         <s:iterator value="result.arrivalsAndDepartures">
@@ -99,15 +101,15 @@ bound</s:if></div><s:if test="!#stopsIter.last"><small>and</small></s:if>
                     </jsp:element>
                   </s:if>
                   <s:else>
-                    <jsp:text>Every </jsp:text>
+                    <oba:message key="stop.Every"/><jsp:text> </jsp:text>
                     <s:property value="frequency.headway/60"/>
-                    <jsp:text> mins</jsp:text>
+                    <jsp:text> </jsp:text><oba:message key="stop.mins"/><jsp:text> </jsp:text>
                     <s:if test="arrivalsAndDeparturesPresentation.isShowFrequencyFrom(frequency)">
-                      <jsp:text> from </jsp:text>
+                      <jsp:text>  </jsp:text><oba:message key="stop.From"/> <jsp:text>  </jsp:text>
                       <oba:date format="hh:mmaa" value="frequency.startTime"/>
                     </s:if>
                     <s:else>
-                      <jsp:text> until </jsp:text>
+                      <jsp:text>  </jsp:text><oba:message key="stop.until"/> <jsp:text>  </jsp:text>
                       <oba:date format="hh:mmaa" value="frequency.endTime"/>
                     </s:else>
                   </s:else>
@@ -121,33 +123,33 @@ bound</s:if></div><s:if test="!#stopsIter.last"><small>and</small></s:if>
 
 </s:else>
 
-<div class="arrivalsStatusUpdates">Last Update: <oba:date value="'now'" format="hh:mm aa" /></div>
+<div class="arrivalsStatusUpdates"><oba:message key="arrivalAndDeparture.Last_Update"/> <oba:date value="'now'" format="hh:mm aa" /></div>
 
 <p>
   <s:url var="url" action="stop" includeParams="get">
     <s:param name="showArrivals" value="! showArrivals"/>
   </s:url>
   <s:a href="%{url}">
-    <s:if test="showArrivals">Show departure times</s:if>
-    <s:else>Show arrival times</s:else>
+    <s:if test="showArrivals"><oba:message key="stop.Show_departure_times"/></s:if>
+    <s:else><oba:message key="stop.Show_arrival_times"/></s:else>
   </s:a>
 </p>
 
 <div class="arrivalsNearbyStops">
-<div>Nearby stops:</div>
+<div><oba:message key="stop.Nearby_stops"/></div>
 <ul>
     <s:iterator value="result.nearbyStops">
         <s:url var="nearbyStopUrl" action="stop" includeParams="none">
             <s:param name="id" value="id" />
         </s:url>
         <li><s:a href="%{nearbyStopUrl}">
-            <s:property value="name" /><s:if test="direction != null"> - <s:property value="direction" /> bound</s:if>
+            <s:property value="name" /><s:if test="direction != null"> - <s:property value="direction" /> <jsp:text> </jsp:text><oba:message key="stop.bound"/></s:if>
     </s:a></li>
     </s:iterator>
 </ul>
 </div>
 
-<div class="arrivalsSearchForStops"><s:url var="url" action="index" includeParams="none" /><s:a href="%{url}">Search for another stop</s:a></div>
+<div class="arrivalsSearchForStops"><s:url var="url" action="index" includeParams="none" /><s:a href="%{url}"><oba:message key="stop.Search_for_another_stop"/></s:a></div>
 
 <jsp:include page="/WEB-INF/content/snippets/agencies-attribution.jspx">
 	<jsp:param name="containerClass" value="p" />

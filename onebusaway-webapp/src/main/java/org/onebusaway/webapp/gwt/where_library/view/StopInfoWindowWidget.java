@@ -24,6 +24,7 @@ import org.onebusaway.transit_data.model.RouteBean;
 import org.onebusaway.transit_data.model.StopBean;
 import org.onebusaway.webapp.gwt.common.widgets.DivWidget;
 import org.onebusaway.webapp.gwt.common.widgets.SpanWidget;
+import org.onebusaway.webapp.gwt.where_library.WhereMessages;
 import org.onebusaway.webapp.gwt.where_library.view.stops.TransitMapManager;
 
 import com.google.gwt.core.client.GWT;
@@ -59,12 +60,15 @@ public class StopInfoWindowWidget extends Composite {
   private StopFinderInterface _stopFinder;
 
   private TransitMapManager _transitMapManager;
+  
+  private WhereMessages _messages;
 
   public StopInfoWindowWidget(StopFinderInterface stopFinder,
       TransitMapManager transitMapManager, StopBean stop, StopFinderCssResource css) {
     _css = css;
     _stopFinder = stopFinder;
     _transitMapManager = transitMapManager;
+    _messages = GWT.create(WhereMessages.class);
     
     initWidget(_uiBinder.createAndBindUi(this));
 
@@ -72,16 +76,20 @@ public class StopInfoWindowWidget extends Composite {
     handleLinksForStopInfoWindow(stop);
     handleRoutesForStopInfoWindow(stop);
   }
+  
+  public void setMessages(WhereMessages messages) {
+	  _messages = messages;
+  }
 
   protected void handleTitleForStop(StopBean stop) {
 
     String name = stop.getName();
     _stopName.setInnerText(name);
 
-    String description = "Stop # " + StopPresenter.getCodeForStop(stop);
+    String description = _messages.stopByNumberPageStopNumberShebang() + " " + StopPresenter.getCodeForStop(stop);
 
     if (stop.getDirection() != null)
-      description += " - " + stop.getDirection() + " bound";
+      description += " - " + stop.getDirection() + " " + _messages.standardIndexPageBound();
 
     _stopDescription.setInnerText(description);
   }
@@ -95,10 +103,10 @@ public class StopInfoWindowWidget extends Composite {
       href = href + "&route=" + r.getId();
 
     String html = "<div><a href=\"" + href
-        + "\">Real-time arrival info</a></div>";
+        + "\">" + _messages.standardIndexPageStopInfoRealtime()+"</a></div>";
 
     String html2 = "<div><a href=\"schedule.action?id=" + bean.getId()
-        + "\">Complete timetable</a></div>";
+        + "\">" + _messages.standardIndexPageStopInfoCompleteTimetable() + "</a></div>";
 
     _stopLinks.add(new HTML(html + html2));
   }

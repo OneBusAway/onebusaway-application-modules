@@ -26,7 +26,7 @@ public class TitleWidget extends Widget {
   
   private static MyUiBinder _uiBinder = GWT.create(MyUiBinder.class);
 
-  public TitleWidget() {
+  public TitleWidget() { 
     setElement(_uiBinder.createAndBindUi(this));
   }
 }

@@ -51,7 +51,8 @@ var oba_where_standard_arrival_and_departure_for_stop = function(data) {
 	
 	var handleAlert = function(entry) {
 		setTimeout(function() {
-			alert('Go catch that bus!');
+			var m = OBA.Resources.ArrivalAndDepartureMessages;
+			alert(OBA.L10n.format(m.alertCatchBus));
 		}, 1*1000);		
 	};
 	
@@ -150,7 +151,7 @@ var oba_where_standard_arrival_and_departure_for_stop = function(data) {
 
 		var minutes = Math.round((departureTime - now) / (1000.0 * 60.0));
 	    if( Math.abs(minutes) <= 1 )
-	    	return OBA.L10n.format(OBA.Resources.ArrivalAndDepartureMessages['NOW'],minutes);
+	    	return OBA.L10n.format(OBA.Resources.ArrivalAndDepartureMessages.NOW,minutes);
 	    return minutes;
 	};
 	

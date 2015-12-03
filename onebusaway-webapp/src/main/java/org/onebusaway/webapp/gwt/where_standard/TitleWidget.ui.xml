@@ -17,7 +17,8 @@
 
 -->
     <!-- RefineViewWidget.ui.xml -->
-<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder' xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder' xmlns:g='urn:import:com.google.gwt.user.client.ui'
+	ui:baseMessagesInterface="org.onebusaway.webapp.gwt.where_library.WhereMessages">
     
     <ui:style>
         .panel {
@@ -38,6 +39,6 @@
     
     <div class="{style.panel}">
         <div class="{style.image}"><img src="{res.appIcon.getURL}" /></div>
-        <div class="{style.label}">Where Is<br />Your Bus?</div>
+        <div class="{style.label}"><ui:msg key="standardIndexPageWhereIsYourBus">Where Is<br />Your Bus?</ui:msg></div>
     </div> 
 </ui:UiBinder>
