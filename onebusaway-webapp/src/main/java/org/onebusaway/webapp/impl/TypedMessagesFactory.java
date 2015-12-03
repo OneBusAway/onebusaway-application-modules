@@ -15,17 +15,19 @@
  */
 package org.onebusaway.webapp.impl;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.config.AbstractFactoryBean;
-
 import java.io.IOException;
-import java.io.InputStream;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.text.MessageFormat;
-import java.util.Properties;
+import java.util.Locale;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.config.AbstractFactoryBean;
+import org.springframework.context.MessageSource;
+import org.springframework.context.support.ReloadableResourceBundleMessageSource;
+
+import com.opensymphony.xwork2.ActionContext;
 
 public class TypedMessagesFactory extends AbstractFactoryBean {
 
@@ -44,43 +46,35 @@ public class TypedMessagesFactory extends AbstractFactoryBean {
 
   protected Object createInstance() throws IOException {
     String name = _messagesClass.getName();
-    name = "/" + name.replace('.', '/') + ".properties";
-    InputStream is = _messagesClass.getResourceAsStream(name);
-    if (is == null)
-      throw new IllegalStateException("Unable to find resources: " + name);
-    Properties p = new Properties();
-    p.load(is);
-
-    for (Method method : _messagesClass.getDeclaredMethods()) {
-      if (!p.containsKey(method.getName()))
-        _log.warn("missing message name: messagesType="
-            + _messagesClass.getName() + " property=" + method.getName());
-    }
-
-    Handler handler = new Handler(p);
+    name = "/" + name.replace('.', '/');  
+    ReloadableResourceBundleMessageSource messageSource = new ReloadableResourceBundleMessageSource();
+    messageSource.setBasename(name);
+    Handler handler = new Handler(messageSource);
     return Proxy.newProxyInstance(_messagesClass.getClassLoader(),
         new Class[] {_messagesClass}, handler);
   }
 
   private static class Handler implements InvocationHandler {
 
-    private Properties _properties;
+	private MessageSource _messageSource;
 
-    public Handler(Properties properties) {
-      _properties = properties;
+    public Handler(MessageSource messageSource) {
+      _messageSource = messageSource;
     }
 
     public Object invoke(Object proxy, Method method, Object[] args)
         throws Throwable {
 
-      String key = method.getName();
-      if (!_properties.containsKey(key))
-        throw new IllegalArgumentException("no such message: " + key);
-      String value = _properties.getProperty(key);
-      MessageFormat format = new MessageFormat(value);
-      StringBuffer b = new StringBuffer();
-      format.format(args, b, null);
-      return b.toString();
+    	Locale local = null;
+    	try {
+    		ActionContext ctx = ActionContext.getContext();
+    		if (ctx != null)
+    			local  = ctx.getLocale();
+    		} catch(Throwable e) {
+    		}
+    	
+    	return _messageSource.getMessage(method.getName(), args,local);
     }
+	  
   }
 }
