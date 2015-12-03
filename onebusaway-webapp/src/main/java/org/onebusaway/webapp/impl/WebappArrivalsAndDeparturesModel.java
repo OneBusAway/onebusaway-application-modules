@@ -26,7 +26,7 @@ import org.onebusaway.presentation.impl.service_alerts.SituationsPresentation;
 import org.onebusaway.presentation.services.configuration.ConfigurationService;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
 import org.onebusaway.webapp.actions.bundles.ArrivalAndDepartureMessages;
-import org.onebusaway.webapp.gwt.where_library.view.ArrivalsAndDeparturesPresentaion;
+import org.onebusaway.webapp.gwt.where_library.view.ArrivalsAndDeparturesPresentation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -38,7 +38,7 @@ public class WebappArrivalsAndDeparturesModel extends
 
   private ConfigurationService _configurationService;
 
-  private ArrivalsAndDeparturesPresentaion _arrivalsAndDeparturesPresentation = new ArrivalsAndDeparturesPresentaion();
+  private ArrivalsAndDeparturesPresentation _arrivalsAndDeparturesPresentation = new ArrivalsAndDeparturesPresentation();
 
   private SituationsPresentation _situations;
 
@@ -52,7 +52,7 @@ public class WebappArrivalsAndDeparturesModel extends
     _arrivalsAndDeparturesPresentation.setMessages(messages);
   }
 
-  public ArrivalsAndDeparturesPresentaion getArrivalsAndDeparturesPresentation() {
+  public ArrivalsAndDeparturesPresentation getArrivalsAndDeparturesPresentation() {
     return _arrivalsAndDeparturesPresentation;
   }
 

@@ -28,7 +28,7 @@ import org.onebusaway.webapp.gwt.common.widgets.DivPanel;
 import org.onebusaway.webapp.gwt.common.widgets.DivWidget;
 import org.onebusaway.webapp.gwt.common.widgets.SpanWidget;
 import org.onebusaway.webapp.gwt.where_library.pages.WhereCommonPage;
-import org.onebusaway.webapp.gwt.where_library.view.ArrivalsAndDeparturesPresentaion;
+import org.onebusaway.webapp.gwt.where_library.view.ArrivalsAndDeparturesPresentation;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.ui.Anchor;
@@ -43,12 +43,12 @@ public class ArrivalsAndDeparturesWidget extends WhereCommonPage {
 
   private FlexTable _arrivalsAndDeparturesTable = new FlexTable();
 
-  private ArrivalsAndDeparturesPresentaion _methods;
+  private ArrivalsAndDeparturesPresentation _methods;
 
   private DivPanel _widget = new DivPanel();
 
   public ArrivalsAndDeparturesWidget(ContextManager contextManager) {
-    _methods = new ArrivalsAndDeparturesPresentaion(true);
+    _methods = new ArrivalsAndDeparturesPresentation(true);
     setup();
   }
 
@@ -107,8 +107,8 @@ public class ArrivalsAndDeparturesWidget extends WhereCommonPage {
   private void updateStopPanel(StopBean stop) {
     _stopPanel.clear();
     _stopPanel.add(new DivWidget(stop.getName(), "arrivalsStopAddress"));
-    _stopPanel.add(new DivWidget("Stop # " + stop.getId() + " - "
-        + stop.getDirection() + " bound"));
+    _stopPanel.add(new DivWidget(_msgs.stopByNumberPageStopNumberShebang() + " " + stop.getId() + " - "
+        + stop.getDirection() + " " +_msgs.stopByNumberPageBound()));
   }
 
   private void clearArrivalAndDepartureTable() {

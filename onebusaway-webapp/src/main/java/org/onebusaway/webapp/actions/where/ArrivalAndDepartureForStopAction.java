@@ -24,7 +24,7 @@ import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureForStopQueryBean;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.webapp.actions.bundles.ArrivalAndDepartureMessages;
-import org.onebusaway.webapp.gwt.where_library.view.ArrivalsAndDeparturesPresentaion;
+import org.onebusaway.webapp.gwt.where_library.view.ArrivalsAndDeparturesPresentation;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.opensymphony.xwork2.ActionSupport;
@@ -38,7 +38,7 @@ public class ArrivalAndDepartureForStopAction extends AbstractWhereAction
 
   private TransitDataService _service;
 
-  private ArrivalsAndDeparturesPresentaion _presentation = new ArrivalsAndDeparturesPresentaion();
+  private ArrivalsAndDeparturesPresentation _presentation = new ArrivalsAndDeparturesPresentation();
 
   private ArrivalAndDepartureForStopQueryBean _model = new ArrivalAndDepartureForStopQueryBean();
 
@@ -65,7 +65,7 @@ public class ArrivalAndDepartureForStopAction extends AbstractWhereAction
     return _result;
   }
 
-  public ArrivalsAndDeparturesPresentaion getPresentation() {
+  public ArrivalsAndDeparturesPresentation getPresentation() {
     return _presentation;
   }
 

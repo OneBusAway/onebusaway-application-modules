@@ -15,6 +15,8 @@
  */
 package org.onebusaway.webapp.gwt.where_library.view;
 
+import java.util.Locale;
+
 import org.onebusaway.presentation.client.RoutePresenter;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
 import org.onebusaway.transit_data.model.RouteBean;
@@ -23,8 +25,9 @@ import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.webapp.actions.bundles.ArrivalAndDepartureMessages;
 
 import com.google.gwt.core.client.GWT;
+import com.opensymphony.xwork2.ActionContext;
 
-public class ArrivalsAndDeparturesPresentaion {
+public class ArrivalsAndDeparturesPresentation {
 
   private static final String CANCELLED = "cancelled";
 
@@ -34,11 +37,11 @@ public class ArrivalsAndDeparturesPresentaion {
 
   private boolean _showArrivals = false;
 
-  public ArrivalsAndDeparturesPresentaion() {
+  public ArrivalsAndDeparturesPresentation() {
 
   }
 
-  public ArrivalsAndDeparturesPresentaion(boolean useDefaultResources) {
+  public ArrivalsAndDeparturesPresentation(boolean useDefaultResources) {
     if (useDefaultResources) {
       _messages = GWT.create(ArrivalAndDepartureMessages.class);
     }
@@ -77,9 +80,22 @@ public class ArrivalsAndDeparturesPresentaion {
    * @return
    */
   public String getStatusLabel(ArrivalAndDepartureBean pab) {
+	Locale def = Locale.getDefault();  
+	try{
+		ActionContext context = ActionContext.getContext();
+		if(context != null) {
+			Locale.setDefault(context.getLocale());
+		}		
+	}catch (Throwable e){
+		
+	}
+	String msj = "";
 
-    if (CANCELLED.equals(pab.getStatus()))
-      return "suspended";
+    if (CANCELLED.equals(pab.getStatus())){
+      msj = _messages.suspended();
+      Locale.setDefault(def);
+      return msj;
+    }
 
     long predicted = getPredictedTime(pab);
     long scheduled = getScheduledTime(pab);
@@ -93,30 +109,32 @@ public class ArrivalsAndDeparturesPresentaion {
 
       if (diff < -1.5) {
         if (pastTense)
-          return _showArrivals ? _messages.arrivedEarly(minutes)
+          msj = _showArrivals ? _messages.arrivedEarly(minutes)
               : _messages.departedEarly(minutes);
         else
-          return _messages.early(minutes);
+          msj = _messages.early(minutes);
       } else if (diff < 1.5) {
         if (pastTense)
-          return _showArrivals ? _messages.arrivedOnTime()
+          msj = _showArrivals ? _messages.arrivedOnTime()
               : _messages.departedOnTime();
         else
-          return _messages.onTime();
+          msj = _messages.onTime();
       } else {
         if (pastTense)
-          return _showArrivals ? _messages.arrivedLate(minutes)
+          msj = _showArrivals ? _messages.arrivedLate(minutes)
               : _messages.departedLate(minutes);
         else
-          return _messages.delayed(minutes);
+          msj = _messages.delayed(minutes);
       }
 
     } else {
       if (_showArrivals)
-        return _messages.scheduledArrival();
+        msj = _messages.scheduledArrival();
       else
-        return _messages.scheduledDeparture();
+        msj = _messages.scheduledDeparture();
     }
+    Locale.setDefault(def);
+    return msj;
   }
 
   public String getStatusLabelStyle(ArrivalAndDepartureBean pab) {
@@ -183,11 +201,23 @@ public class ArrivalsAndDeparturesPresentaion {
 
     if (CANCELLED.equals(pab.getStatus()))
       return "-";
-
+    
+    Locale def = Locale.getDefault();  
+	try{
+		ActionContext context = ActionContext.getContext();
+		if(context != null) {
+			Locale.setDefault(context.getLocale());
+		}		
+	}catch (Throwable e){
+		
+	}
+	
     boolean isNow = isNow(pab);
     long t = getBestTime(pab);
     int minutes = (int) Math.round((t - _time) / (1000.0 * 60.0));
-    return isNow ? "NOW" : Integer.toString(minutes);
+    String msj =  _messages.NOW();
+    Locale.setDefault(def);
+    return isNow ? msj : Integer.toString(minutes);
   }
 
   public boolean isNow(ArrivalAndDepartureBean pab) {
