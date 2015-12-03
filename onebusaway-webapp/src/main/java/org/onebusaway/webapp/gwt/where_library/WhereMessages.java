@@ -15,6 +15,8 @@
  */
 package org.onebusaway.webapp.gwt.where_library;
 
+import org.onebusaway.webapp.gwt.position_map.IndexPage;
+
 import com.google.gwt.i18n.client.Messages;
 
 public interface WhereMessages extends Messages {
@@ -70,6 +72,36 @@ public interface WhereMessages extends Messages {
   public String standardIndexPageInvalidAreaSpecified();
 
   public String standardIndexPageInvalidRouteSpecified();
+  
+  public String standardIndexPageLinkCurrentView();
+  
+  public String standardIndexPageSearchExample();
+  
+  public String standardIndexPageMessage();
+  
+  public String standardIndexPageNoResultFound();
+  
+  public String standardIndexPageStops();
+  
+  public String standardIndexPageAddress();
+  
+  public String standardIndexPagePlaces();
+  
+  public String standardIndexPageClearSearch();
+  
+  public String standardIndexPageOperatedBy();
+  
+  public String standardIndexPageBound();
+  
+  public String standardIndexPageShowAllMap();
+  
+  public String standardIndexPageHideAllMap();
+  
+  public String standardIndexPageShowNearbyTransitStops();
+  
+  public String standardIndexPageStopInfoRealtime();
+  
+  public String standardIndexPageStopInfoCompleteTimetable();
 
   /*****************************************************************************
    * {@link}
@@ -229,4 +261,26 @@ public interface WhereMessages extends Messages {
   public String scheduledArrival();
   
   public String scheduledDeparture();
+  
+  public String NOW();
+  
+  /****
+   * User
+   ****/
+  
+  public String userChangeYourDefaulSearchLocation();
+  
+  public String userSetLocation();
+  
+  public String userCancel();
+  
+  /****
+   * Refineview
+   ****/
+  
+  public String refineViewAddStopToList();
+  
+  public String refineViewSearchStopMessage();
+  
+  
 }
