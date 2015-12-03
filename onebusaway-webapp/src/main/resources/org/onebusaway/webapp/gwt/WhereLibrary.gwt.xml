@@ -45,6 +45,9 @@
     
     <!-- Specify the app entry point class. -->
     <entry-point class='org.onebusaway.webapp.gwt.where_library.WhereLibrary' />
-    
+	
+	<!-- Availabe Locales -->
+	<extend-property name="locale" values="en"/>
+	<extend-property name="locale" values="es"/>
 
 </module>
