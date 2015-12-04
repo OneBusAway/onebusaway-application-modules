@@ -43,7 +43,7 @@ jQuery(function() {
 				async: false,
 				success: function(response) {
 					jQuery("#userDetails #userId").val(response.id);
-					jQuery("#userDetails #userName").text(response.userName);
+					jQuery("#userDetails #username").text(response.username);
 					var userRole = response.role;
 					switch(userRole) {
 						case "ROLE_USER":
@@ -60,7 +60,7 @@ jQuery(function() {
 					}
 					jQuery("#userDetails").show();
 					
-					jQuery("#editUser #editUserName").text(response.userName);
+					jQuery("#editUser #editUserName").text(response.username);
 					jQuery("#editUser #newPassword").val("");
 					jQuery("#editUser #newRole").val(userRole).attr("selected", true);
 					
@@ -92,7 +92,8 @@ function editUser() {
 	
 	var userData = new Object();
 	userData.id = jQuery("#userDetails #userId").val();
-	userData.userName = jQuery("#editUser #editUserName").text();
+	console.log(jQuery("#userDetails #userId"));
+	userData.username = jQuery("#editUser #editUserName").text();
 	userData.password = jQuery("#editUser #newPassword").val();
 	userData.role = jQuery("#editUser #newRole option:selected").val();
 	
@@ -119,7 +120,7 @@ function showDeleteDialog() {
 	turnOffEditClick();
 	hideResult();
 	
-	var userName = jQuery("#userDetails #userName").text();
+	var userName = jQuery("#userDetails #username").text();
 	var deleteDialog = jQuery("<div id='deleteConfirm'>" +
 			"<div><label>Are you sure you want to deactivate user: </label>" +
 			"<label id='deleteMessage'>" +userName + "</label></div>" +
@@ -150,7 +151,7 @@ function deactivateUser(event) {
 	
 	var userData = new Object();
 	userData.id = jQuery("#userDetails #userId").val();
-	userData.userName = jQuery("#userDetails #userName").text();
+	userData.userName = jQuery("#userDetails #username").text();
 	
 	jQuery.ajax({
 		url:"manage-users!deactivateUser.action",

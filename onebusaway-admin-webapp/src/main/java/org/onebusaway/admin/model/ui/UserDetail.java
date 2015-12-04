@@ -23,22 +23,22 @@ package org.onebusaway.admin.model.ui;
 public class UserDetail {
 	
 	private Integer id;
-	private String userName;
+	private String username;
 	private String role;
 	private String password;
 
 	/**
 	 * @return the userName
 	 */
-	public String getUserName() {
-		return userName;
+	public String getUsername() {
+		return username;
 	}
 
 	/**
 	 * @param userName the userName to set
 	 */
-	public void setUserName(String userName) {
-		this.userName = userName;
+	public void setUsername(String username) {
+		this.username = username;
 	}
 
 	/**

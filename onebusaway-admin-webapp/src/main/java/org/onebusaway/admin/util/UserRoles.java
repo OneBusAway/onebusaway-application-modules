@@ -15,6 +15,7 @@
  */
 package org.onebusaway.admin.util;
 
+
 /**
  * Holds constants for user roles in the system
  * @author abelsare
@@ -29,7 +30,11 @@ public enum UserRoles {
 	ROLE_USER("ROLE_USER"),
 	
 	/** Admin user role **/
-	ROLE_ADMINISTRATOR("ROLE_ADMINISTRATOR");
+	ROLE_ADMINISTRATOR("ROLE_ADMINISTRATOR"),
+	
+	/** Reporting user role **/
+	ROLE_REPORTING("ROLE_REPORTING");
+	
 	
 	private String role;
 	
@@ -39,5 +44,22 @@ public enum UserRoles {
 	
 	public String getRole() {
 		return role;
+	}
+	
+	public static UserRoles fromValue(String value) {
+        if (value == null || "".equals(value)) {
+            throw new IllegalArgumentException("Value cannot be null or empty!");
+        } else if ("ROLE_ANONYMOUS".equals(value)) {
+            return ROLE_ANONYMOUS;
+        } else if ("ROLE_USER".equals(value)) {
+        	return ROLE_USER;
+        } else if ("ROLE_ADMINISTRATOR".equals(value)) {
+        	return ROLE_ADMINISTRATOR;
+		} else if ("ROLE_REPORTING".equals(value)) {
+        	return ROLE_REPORTING;
+		} else {
+            throw new IllegalArgumentException("Cannot create enum from "
+                    + value + " value!");
+        }
 	}
 }

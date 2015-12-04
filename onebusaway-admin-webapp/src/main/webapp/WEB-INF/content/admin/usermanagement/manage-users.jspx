@@ -70,7 +70,7 @@
 						 	<td>
 							 	<div>
 								 	<label class="userLabel">User name: </label>
-								 	<label id="userName"></label>
+								 	<label id="username"></label>
 							 	</div>
 							 	<div>
 								 	<label class="userLabel">User role: </label>
@@ -105,6 +105,7 @@
 				 			<option value="ROLE_ADMINISTRATOR">ADMINISTRATOR</option>
 				 			<option value="ROLE_USER">OPERATOR</option>
 				 			<option value="ROLE_ANONYMOUS">ANONYMOUS</option>
+				 			<option value="ROLE_REPORTING">REPORTING</option>
 				 		</select>
 				 	</div>
 				 	<button id="editSubmit">Submit</button>
