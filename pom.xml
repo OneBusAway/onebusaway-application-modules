@@ -35,12 +35,12 @@
 
   <repositories>
     <repository>
-      <id>releases-camsys-repo</id>
-      <url>http://developer.onebusaway.org/archiva/repository/releases/</url> 
+      <id>releases-obaweb-repo</id>
+      <url>http://repo.obaweb.org:8080/archiva/repository/releases/</url> 
     </repository>
     <repository>
-      <id>snapshots-camsys-repo</id>
-      <url>http://developer.onebusaway.org/archiva/repository/snapshots/</url> 
+      <id>snapshots-obaweb-repo</id>
+      <url>http://repo.obaweb.org:8080/archiva/repository/snapshots/</url> 
     </repository>
     <repository>
       <id>public.onebusaway.org</id>
