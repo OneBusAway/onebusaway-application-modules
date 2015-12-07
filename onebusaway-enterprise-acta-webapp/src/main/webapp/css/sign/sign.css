@@ -595,7 +595,7 @@ div.stop-id {
 }
 
 /* landscape configurations */
-/*body.landscape.sizeTIS, 
+body.landscape.sizeTIS, 
 body.landscape.sizeTIS input, 
 body.landscape.sizeTIS textarea { font-size: 2.0em; }
 
@@ -609,10 +609,10 @@ body.landscape.size1000 textarea { font-size: 1.60em; }
 
 body.landscape.size1200, 
 body.landscape.size1200 input, 
-body.landscape.size1200 textarea { font-size: 2.2em; }*/
+body.landscape.size1200 textarea { font-size: 2.2em; }
 
 /* portrait configurations */
-/*body.portrait.size1000, 
+body.portrait.size1000, 
 body.portrait.size1000 input, 
 body.portrait.size1000 textarea { font-size: 0.9em; }
 
@@ -626,4 +626,4 @@ body.portrait.size1600 textarea { font-size: 1.5em; }
 
 body.portrait.size1900, 
 body.portrait.size1900 input, 
-body.portrait.size1900 textarea { font-size: 1.7em; }*/
+body.portrait.size1900 textarea { font-size: 1.7em; }
