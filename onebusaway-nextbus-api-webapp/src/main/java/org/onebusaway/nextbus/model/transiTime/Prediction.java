@@ -87,6 +87,11 @@ public class Prediction {
   @JsonProperty("epochTime")
   private long time;
   
+  @XStreamAsAttribute
+  @XStreamAlias("block")
+  @JsonProperty("block")
+  private String blockId;
+  
   public Prediction(){}
 
   public int getSec() {
@@ -161,6 +166,14 @@ public class Prediction {
   public void setAffectedByLayover(boolean affectedByLayover) {
     if(affectedByLayover)
       this.affectedByLayover = affectedByLayover;
+  }
+
+  public String getBlockId() {
+	return blockId;
+  }
+
+  public void setBlockId(String blockId) {
+	this.blockId = blockId;
   }
  
 }

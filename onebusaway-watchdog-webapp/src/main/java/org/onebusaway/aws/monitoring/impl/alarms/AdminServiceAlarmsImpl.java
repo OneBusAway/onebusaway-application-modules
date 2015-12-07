@@ -29,21 +29,22 @@ public class AdminServiceAlarmsImpl extends AlarmsTemplate implements AdminServe
 	@Override
 	public void createCurrentBundleCountAlarm() {
 		PutMetricAlarmRequest putMetricAlarmRequest = getMetricAlarmRequest(MetricName.CurrentBundleCount);
-		putMetricAlarmRequest.setThreshold(1d);
 		putMetricAlarmRequest.setAlarmActions(getCriticalAction());
 		putMetricAlarmRequest.setUnit(StandardUnit.Count);
 		putMetricAlarmRequest.setComparisonOperator(ComparisonOperator.LessThanThreshold);
+		putMetricAlarmRequest.setThreshold(_configService
+				.getConfigurationValueAsDouble("alarm.bundleCount", 1d));
 		_cloudWatchService.publishAlarm(putMetricAlarmRequest);	
-		
 	}
 
 	@Override
 	public void createFirstValidBundleFilesCountAlarm() {
 		PutMetricAlarmRequest putMetricAlarmRequest = getMetricAlarmRequest(MetricName.FirstValidBundleFilesCount);
-		putMetricAlarmRequest.setThreshold(1d);
 		putMetricAlarmRequest.setAlarmActions(getCriticalAction());
 		putMetricAlarmRequest.setUnit(StandardUnit.Count);
 		putMetricAlarmRequest.setComparisonOperator(ComparisonOperator.LessThanThreshold);
+		putMetricAlarmRequest.setThreshold(_configService
+				.getConfigurationValueAsDouble("alarm.bundleFilesCount", 1d));
 		_cloudWatchService.publishAlarm(putMetricAlarmRequest);	
 	}
 }

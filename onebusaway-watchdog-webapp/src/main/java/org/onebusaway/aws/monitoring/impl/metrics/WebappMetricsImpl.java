@@ -103,17 +103,11 @@ public class WebappMetricsImpl extends MetricsTemplate implements
 			publishMetric(
 					MetricName.NextBusApiErrorResponse, StandardUnit.Count,
 					metric);
-		} catch (MalformedURLException mue) {
-			_log.error(mue.getMessage());
-			return;
-		} catch (IOException ioe) {
-			_log.warn("Error communicating with specified url : "
-					+ nextbus_api_url);
-			publishMetric(
-					MetricName.NextBusApiErrorResponse, StandardUnit.Count,
-					metric);
+		} catch (Exception e) {
+			_log.error(e.getMessage(), e);
 		}
 	}
+
 
 	@Override
 	public void publishSmsApiMetrics() {
@@ -132,8 +126,8 @@ public class WebappMetricsImpl extends MetricsTemplate implements
 					.select("form[action='search.action'] > input[name='q']");
 			publishMetric(MetricName.DesktopUiValid,
 					StandardUnit.Count, (double) searchBar.size());
-		} catch (IOException e) {
-			_log.warn("Error communicating with specified url : " + webapp_url);
+		} catch (Exception e) {
+			_log.error(e.getMessage(), e);
 		}
 	}
 

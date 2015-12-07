@@ -24,6 +24,7 @@ import java.util.Set;
 import org.apache.commons.lang3.text.WordUtils;
 import org.apache.struts2.rest.DefaultHttpHeaders;
 import org.onebusaway.exceptions.ServiceException;
+import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.nextbus.model.nextbus.Body;
 import org.onebusaway.nextbus.model.nextbus.BodyError;
 import org.onebusaway.nextbus.model.transiTime.Prediction;
@@ -143,7 +144,7 @@ public class PredictionsForMultiStopsAction extends NextBusApiBase implements
     return sb.toString();
   }
 
-  private boolean isValid(Body body) {
+  private boolean isValid(Body<Predictions> body) {
 
     if (!isValidAgency(body, agencyId)) {
       return false;
@@ -166,7 +167,19 @@ public class PredictionsForMultiStopsAction extends NextBusApiBase implements
       }
 
       try {
-        StopBean stopBean = _transitDataService.getStop(_tdsMappingService.getStopIdFromStopCode(stopArray[1]));
+    	String stopId = _tdsMappingService.getStopIdFromStopCode(stopArray[1]);
+    	
+    	StopBean stopBean;
+    	
+    	try {
+    		stopBean = _transitDataService.getStop(stopId);
+    	}
+    	catch(ServiceException se) {
+    		// The user didn't provide an agency id in stopId, so use provided agency
+    		String stopIdVal = new AgencyAndId(agencyId, stopId).toString();
+    		stopBean = _transitDataService.getStop(stopIdVal);
+    	}
+        
         boolean routeExists = false;
         for (RouteBean routeBean : stopBean.getRoutes()) {
           if (routeBean.getId().equals(

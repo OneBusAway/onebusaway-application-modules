@@ -34,8 +34,10 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.net.URL;
 import java.security.MessageDigest;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -64,51 +66,79 @@ public class HttpBundleStoreImpl implements BundleStoreService {
 		_apiLibrary = apiLibrary;
 	}
 
-	private List<BundleItem> getBundleListFromHttp() throws Exception {
+	private List<BundleItem> getBundleListFromHttp() {
 		ArrayList<BundleItem> output = new ArrayList<BundleItem>();
 
 		_log.info("Getting current bundle list from Server...");	     
-		List<JsonObject> bundles = _apiLibrary.getItemsForRequest("bundle",/*"staged",*/"list");
-
-		for(JsonObject itemToAdd : bundles) {
-			BundleItem item = new BundleItem();
-
-			item.setId(itemToAdd.get("id").getAsString());
-			item.setName(itemToAdd.get("name").getAsString());
-
-			/*ArrayList<String> applicableAgencyIds = new ArrayList<String>();
-			for(JsonElement _subitemToAdd : itemToAdd.get("applicable-agency-ids").getAsJsonArray()) {
-				String agencyIdToAdd = _subitemToAdd.getAsString();  
-				applicableAgencyIds.add(agencyIdToAdd);
-			}*/
-
-			item.setServiceDateFrom(ServiceDate.parseString(
-					itemToAdd.get("service-date-from").getAsString().replace("-", "")));
-			item.setServiceDateTo(ServiceDate.parseString(
-					itemToAdd.get("service-date-to").getAsString().replace("-", "")));
-			
-			if(itemToAdd.get("created") != null)
-			  item.setCreated(_updatedDateFormatter.parseDateTime(itemToAdd.get("created").getAsString()));
-      
-			if(itemToAdd.get("updated") != null)
-			  item.setUpdated(_updatedDateFormatter.parseDateTime(itemToAdd.get("updated").getAsString()));
-
-
-			ArrayList<BundleFileItem> files = new ArrayList<BundleFileItem>();
-			for(JsonElement _subitemToAdd : itemToAdd.get("files").getAsJsonArray()) {
-				JsonObject subitemToAdd = _subitemToAdd.getAsJsonObject();
-
-				BundleFileItem fileItemToAdd = new BundleFileItem();
-				fileItemToAdd.setFilename(subitemToAdd.get("filename").getAsString());
-				fileItemToAdd.setMd5(subitemToAdd.get("md5").getAsString());
-				files.add(fileItemToAdd);
-			}
-			item.setFiles(files);
-
-			output.add(item);
+		List<JsonObject> bundles = null;
+		try {
+			bundles = _apiLibrary.getItemsForRequest("bundle","list");
 		}
-
-		_log.info("Found " + output.size() + " bundle(s) available from the Server.");
+		catch (Exception e) {
+			_log.info("Error executing apiLibrary.getItemsForRequest", e);
+		}
+		
+		if(bundles != null){
+			for(JsonObject itemToAdd : bundles) {
+				try {
+					BundleItem item = new BundleItem();
+					
+					if(itemToAdd.get("id") == null)
+						item.setId(getJsonObjAsString(itemToAdd, "name"));
+					else
+						item.setId(getJsonObjAsString(itemToAdd, "id"));
+					
+					item.setName(getJsonObjAsString(itemToAdd, "name"));
+					
+					item.setServiceDateFrom(ServiceDate.parseString(
+							getJsonObjAsString(itemToAdd, "service-date-from").replace("-", "")));
+					
+					item.setServiceDateTo(ServiceDate.parseString(
+							getJsonObjAsString(itemToAdd, "service-date-to").replace("-", "")));
+					
+					if(itemToAdd.get("created") != null)
+					  item.setCreated(_updatedDateFormatter.parseDateTime(getJsonObjAsString(itemToAdd, "created")));
+		      
+					if(itemToAdd.get("updated") != null)
+					  item.setUpdated(_updatedDateFormatter.parseDateTime(getJsonObjAsString(itemToAdd, "updated")));
+		
+		
+					ArrayList<BundleFileItem> files = new ArrayList<BundleFileItem>();
+					JsonElement filesElement = itemToAdd.get("files");
+					if(filesElement != null && filesElement.isJsonArray()){
+						for(JsonElement _subitemToAdd : filesElement.getAsJsonArray()) {
+							if(_subitemToAdd.isJsonObject()){
+								JsonObject subitemToAdd = _subitemToAdd.getAsJsonObject();
+								BundleFileItem fileItemToAdd = new BundleFileItem();
+								fileItemToAdd.setFilename(getJsonObjAsString(subitemToAdd, "filename"));
+								fileItemToAdd.setMd5(getJsonObjAsString(subitemToAdd, "md5"));
+								files.add(fileItemToAdd);
+							}
+							else{
+								_log.warn("Unable to retreive file name/md5 as Json Object");
+							}
+						}
+						item.setFiles(files);
+			
+						output.add(item);
+					}
+					else{
+						_log.warn("Unable to get list of files for Bundle " + item.getName());
+					}
+				}
+				catch (NullPointerException npe){
+					_log.warn("Error retrieving bundle information");
+					continue;
+				}
+				catch (ParseException e) {
+					_log.warn("Error parsing dates for Bundle Item");
+					continue;
+				}
+			}
+			
+			
+			_log.info("Found " + output.size() + " bundle(s) available from the Server.");
+		}
 
 		return output;
 	}
@@ -251,6 +281,15 @@ public class HttpBundleStoreImpl implements BundleStoreService {
   @Override
   public boolean isLegacyBundle() {
     return false;
+  }
+  
+  private String getJsonObjAsString(JsonObject json, String key) throws NullPointerException{
+	  if(json.get(key) != null)
+		 return json.get(key).getAsString();
+	  else{
+		  _log.warn("Json member name : " + key + " not found");
+		  throw new NullPointerException();
+	  } 
   }
 
 }

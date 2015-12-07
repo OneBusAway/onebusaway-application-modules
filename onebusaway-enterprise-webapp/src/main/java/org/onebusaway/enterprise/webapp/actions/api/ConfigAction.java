@@ -98,4 +98,8 @@ public class ConfigAction extends OneBusAwayEnterpriseActionSupport {
   public String getShowAgencyNames() {
     return _configurationService.getConfigurationValueAsString("display.showAgencyNames", "false");
   }
+  
+  public String getShowVehicleIdInStopPopup() {
+    return _configurationService.getConfigurationValueAsString("display.showVehicleIdInStopPopup", "false");
+  }
 }

@@ -100,8 +100,9 @@ public class RouteConfigAction extends NextBusApiBase implements
 			}
 			
 			Collections.sort(routeBeans, new Comparator<RouteBean>() {
+			  AlphanumComparator alphaComparator = new AlphanumComparator();
 				public int compare(RouteBean arg0, RouteBean arg1) {
-					return new AlphanumComparator().compare(arg0.getId(),arg1.getId());
+					return alphaComparator.compare(arg0.getId(),arg1.getId());
 				}
 			});
 
