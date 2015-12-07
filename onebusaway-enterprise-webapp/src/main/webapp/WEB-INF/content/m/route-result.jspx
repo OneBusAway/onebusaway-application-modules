@@ -114,7 +114,7 @@
 								<c:otherwise>
 									<s:url var="url" namespace="/m" action="index">
 										<s:param name="q">
-											<s:if test="%{useAgencyId == "true"}">
+											<s:if test="%{useAgencyId == 'true'}">
 												<s:property value="id" />
 											</s:if>
 											<s:else>
@@ -127,7 +127,7 @@
 									</a> 
 								</c:otherwise>
 							</c:choose>
-							<s:if test="%{useAgencyId == "true"}">
+							<s:if test="%{useAgencyId == 'true'}">
 								<span id="${directionId}-${id}" class="anchor">&amp;nbsp</span>
 							</s:if>
 							<s:else>
