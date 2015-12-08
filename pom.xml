@@ -67,6 +67,18 @@
   </issueManagement>
 
   <distributionManagement>
+<!--
+    <repository>
+      <id>releases-camsys-repo</id>
+      <name>OneBusAway Camsys Release Repo</name>
+      <url>http://developer.onebusaway.org/archiva/repository/releases/</url> 
+    </repository>
+    <snapshotRepository>
+      <id>snapshots-camsys-repo</id>
+      <name>OneBusAway Camsys Snapshot Repo</name>
+      <url>http://developer.onebusaway.org/archiva/repository/snapshots/</url> 
+    </snapshotRepository>
+-->
     <repository>
       <id>releases-obaweb-repo</id>
       <name>OneBusAway OBAWEB Release Repo</name>
