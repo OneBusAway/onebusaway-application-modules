@@ -90,6 +90,11 @@ OBA.Sign = function() {
 
 		vehiclesPerStop = getParameterByName("vehiclesPerStop", vehiclesPerStop);
 
+		var fontSize = getParameterByName("fontSize", null);
+		if (fontSize) {
+			$("body, body input, body textarea").attr("style", "font-size: " + fontSize + "em;")
+		}
+		
 		timeout = refreshInterval;
 			
 		configurableMessageHtml = getParameterByName("message", configurableMessageHtml);
