@@ -96,7 +96,7 @@ public class PredictionAlarmsImpl extends AlarmsTemplate implements PredictionAl
     putMetricAlarmRequest
         .setComparisonOperator(ComparisonOperator.LessThanOrEqualToThreshold);
     putMetricAlarmRequest.setThreshold(_configService
-        .getConfigurationValueAsDouble("alarm.predictionProcessingTime", 30d));
+        .getConfigurationValueAsDouble("alarm.predictionProcessingTime", 0.30d));
     _cloudWatchService.publishAlarm(putMetricAlarmRequest);
     
   }
