@@ -76,6 +76,17 @@
 		</div>
 	</s:if>
 	<s:else>
+		
+		<div id="refresh">
+			<s:url var="url" namespace="/m" action="index" anchor="top">				
+				<s:param name="q"><s:property value="q" /></s:param>
+				<s:param name="l"><s:property value="l" /></s:param>
+				<s:param name="t"><s:property value="t" /></s:param>
+				<s:param name="cacheBreaker"><s:property value="cacheBreaker" /></s:param>
+			</s:url>
+	    	<a href="${url}">Refresh (<strong>Updated <s:property value="lastUpdateTime" /></strong>)</a>
+		</div>
+		
 		<div id="content">
 			<s:if test="%{results.matches.size&gt;0}">
 				<s:if test="results.resultType.equals('RouteResult')">
@@ -112,15 +123,7 @@
 			</s:if>
 		</div>
 
-		<div id="refresh">
-			<s:url var="url" namespace="/m" action="index" anchor="top">				
-				<s:param name="q"><s:property value="q" /></s:param>
-				<s:param name="l"><s:property value="l" /></s:param>
-				<s:param name="t"><s:property value="t" /></s:param>
-				<s:param name="cacheBreaker"><s:property value="cacheBreaker" /></s:param>
-			</s:url>
-	    	<a href="${url}">Refresh (<strong>Updated <s:property value="lastUpdateTime" /></strong>)</a>
-		</div>
+		
 	</s:else>
 </body>
 </html>

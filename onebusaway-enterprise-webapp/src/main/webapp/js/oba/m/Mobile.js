@@ -83,11 +83,18 @@ OBA.Mobile = (function() {
 		
 		var splitButton = jQuery("<div></div>").attr("id", "nearby-button-bar");
 		
-		var nearbyStopsBtn = jQuery("<div></div>").attr("id", "nearby-stops-button").attr("aria-label", "Find nearby stops using GPS").addClass("nearby-button").appendTo(splitButton);
-		var nearbyRoutesBtn = jQuery("<div></div>").attr("id", "nearby-routes-button").attr("aria-label", "Find nearby routes using GPS").addClass("nearby-button").appendTo(splitButton);
+		var nearbyStopsBtn = jQuery("<div></div>").attr("id", "nearby-stops-button")
+			.attr("aria-label", "Find nearby stops using GPS").attr("tabindex", 0)
+			.addClass("nearby-button").appendTo(splitButton);
 		
-		nearbyStopsBtn.append(jQuery("<div></div>").attr("id", "nearby-stops-button-icon").append(jQuery("<span></span>").addClass("nearby-text").text("Nearby Stops")));
-		nearbyRoutesBtn.append(jQuery("<div></div>").attr("id", "nearby-routes-button-icon").append(jQuery("<span></span>").addClass("nearby-text").text("Nearby Routes")));
+		var nearbyRoutesBtn = jQuery("<div></div>").attr("id", "nearby-routes-button")
+			.attr("aria-label", "Find nearby routes using GPS").attr("tabindex", 0)
+			.addClass("nearby-button").appendTo(splitButton);
+		
+		nearbyStopsBtn.append(jQuery("<div></div>").attr("id", "nearby-stops-button-icon")
+				.append(jQuery("<span></span>").addClass("nearby-text").text("Nearby Stops")));
+		nearbyRoutesBtn.append(jQuery("<div></div>").attr("id", "nearby-routes-button-icon")
+				.append(jQuery("<span></span>").addClass("nearby-text").text("Nearby Routes")));
 		
 		searchPanelForm.before(splitButton);
 				
