@@ -19,8 +19,8 @@ package org.onebusaway.aws.monitoring.model.metrics;
 public enum MetricName {
 	
     CPUUtilization("CPUUtilization"),
-	CurrentBundleCount("CurrentBundleCount"),
-	DatabaseConnections("DatabaseConnections"),
+	  CurrentBundleCount("CurrentBundleCount"),
+	  DatabaseConnections("DatabaseConnections"),
     DesktopUiValid("DesktopUiValid"),
     FirstValidBundleFilesCount("FirstValidBundleFilesCount"),
     FreeStorageSpace("FreeStorageSpace"),
@@ -58,7 +58,12 @@ public enum MetricName {
     TransitimeApiErrorResponse("TransitimeApiErrorResponse"),
     VehicleMonitoringErrorResponse("VehicleMonitoringErrorResponse"),
     VehicleMonitoringResponseTime("VehicleMonitoringResponseTime"),
-    WriteLatency("WriteLatency");
+    WriteLatency("WriteLatency"), 
+    PredictionDeserializeQueueSize("PredictionDeserializeQueueSize"), 
+    PredictionProcessingTime("PredictionProcessingTime"), 
+    PredictionTotalLatency("PredictionTotalLatency"), 
+    PredictionPredictablePercentage("PredictionPredictablePercentage"), 
+    PredictionTotalQueueLatency("PredictionTotalQueueLatency");
     
     private String value;
 
@@ -137,6 +142,16 @@ public enum MetricName {
             return VehicleMonitoringErrorResponse;
         } else if ("VehicleMonitoringResponseTime".equals(value)) {
             return VehicleMonitoringResponseTime;
+        } else if ("PredictionDeserializeQueueSize".equals(value)) {
+          return PredictionDeserializeQueueSize;
+        }  else if ("PredictionProcessingTime".equals(value)) {
+            return PredictionProcessingTime;
+        }  else if ("PredictionTotalLatency".equals(value)) {
+          return PredictionTotalLatency;
+        }  else if ("PredictionTotalQueueLatency".equals(value)) {
+          return PredictionTotalQueueLatency;
+        }  else if ("PredictionPredictablePercentage".equals(value)) {
+          return PredictionPredictablePercentage;
         } else {
             throw new IllegalArgumentException("Cannot create enum from "
                     + value + " value!");
