@@ -65,7 +65,7 @@ public class PredictionAlarmsImpl extends AlarmsTemplate implements PredictionAl
     putMetricAlarmRequest
         .setComparisonOperator(ComparisonOperator.LessThanOrEqualToThreshold);
     putMetricAlarmRequest.setThreshold(_configService
-        .getConfigurationValueAsDouble("alarm.predictionTotalLatency", 30d));
+        .getConfigurationValueAsDouble("alarm.predictionTotalLatency", 30000d));
     _cloudWatchService.publishAlarm(putMetricAlarmRequest);
     
   }
@@ -80,7 +80,7 @@ public class PredictionAlarmsImpl extends AlarmsTemplate implements PredictionAl
     putMetricAlarmRequest
         .setComparisonOperator(ComparisonOperator.LessThanOrEqualToThreshold);
     putMetricAlarmRequest.setThreshold(_configService
-        .getConfigurationValueAsDouble("alarm.predictionTotalQueueLatency", 30d));
+        .getConfigurationValueAsDouble("alarm.predictionTotalQueueLatency", 30000d));
     _cloudWatchService.publishAlarm(putMetricAlarmRequest);
     
   }
