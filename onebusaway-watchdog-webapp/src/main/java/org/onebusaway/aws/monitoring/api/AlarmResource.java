@@ -66,35 +66,40 @@ public class AlarmResource extends MetricResource {
 	@GET
 	@Produces("application/json")
 	public Response createAlarms() {
+	  StringBuffer logMsg = new StringBuffer();
+	  logMsg.append("starting\n");
 		try {
 			webappAlarms.createDesktopUiValidAlarm();
 			webappAlarms.createNextBusApiAlarm();
 			webappAlarms.createSmsApiAlarm();
 			webappAlarms.createStopMonitoringAlarm();
+			logMsg.append("webappAlarms created\n");
 
 			adminServerAlarms.createCurrentBundleCountAlarm();
 			adminServerAlarms.createFirstValidBundleFilesCountAlarm();
+			logMsg.append("adminServerAlarms created\n");
+			
 
 			// Realtime Location
-			realtimeAlarms.createRealtimeInvalidLatLonPctAlarm();
-			realtimeAlarms.createRealtimeLocationsInvalidAlarm();
-			realtimeAlarms.createRealtimeLocationsTotalAlarm();
-			realtimeAlarms.createRealtimeLocationsTotalPctAlarm();
+//			realtimeAlarms.createRealtimeInvalidLatLonPctAlarm();
+//			realtimeAlarms.createRealtimeLocationsInvalidAlarm();
+//			realtimeAlarms.createRealtimeLocationsTotalAlarm();
+//			realtimeAlarms.createRealtimeLocationsTotalPctAlarm();
 
 			// Realtime Stops
-			realtimeAlarms.createRealtimeStopsMatchedAlarm();
-			realtimeAlarms.createRealtimeStopsMatchedPctAlarm();
-			realtimeAlarms.createRealtimeStopsUnmatchedAlarm();
-			realtimeAlarms.createRealtimeStopsUnmatchedPctAlarm();
+//			realtimeAlarms.createRealtimeStopsMatchedAlarm();
+//			realtimeAlarms.createRealtimeStopsMatchedPctAlarm();
+//			realtimeAlarms.createRealtimeStopsUnmatchedAlarm();
+//			realtimeAlarms.createRealtimeStopsUnmatchedPctAlarm();
 
 			// Realtime Trips
-			realtimeAlarms.createRealtimeTripsMatchedAlarm();
-			realtimeAlarms.createRealtimeTripsMatchedAvgAlarm();
-			realtimeAlarms.createRealtimeTripsTotalAlarm();
-			realtimeAlarms.createRealtimeTripsUnmatchedAlarm();
-			realtimeAlarms.createRealtimeTripTotalPctAlarm();
-			realtimeAlarms.createScheduleRealtimeDeltaAlarm();
-			realtimeAlarms.createRealtimeBusesInServiceAlarm();
+//			realtimeAlarms.createRealtimeTripsMatchedAlarm();
+//			realtimeAlarms.createRealtimeTripsMatchedAvgAlarm();
+//			realtimeAlarms.createRealtimeTripsTotalAlarm();
+//			realtimeAlarms.createRealtimeTripsUnmatchedAlarm();
+//			realtimeAlarms.createRealtimeTripTotalPctAlarm();
+//			realtimeAlarms.createScheduleRealtimeDeltaAlarm();
+//			realtimeAlarms.createRealtimeBusesInServiceAlarm();
 			
 			// SQS Alarms
 			gtfsRtAlarms.createMessagesDelayedAlarm();
@@ -102,6 +107,8 @@ public class AlarmResource extends MetricResource {
 			gtfsRtAlarms.createMessagesReceivedAlarm();
 			gtfsRtAlarms.createMessagesSentAlarm();
 			gtfsRtAlarms.createMessagesSizeAlarm();		
+			logMsg.append("gtfsRtAlarms created");
+			
 			
 			// RDS Alarms
 			for(String dbInstance : getDbInstances()){
@@ -110,10 +117,12 @@ public class AlarmResource extends MetricResource {
 				databaseAlarms.createRdsLowStorageAlarm(dbInstance);
 				databaseAlarms.createRdsReadLatencyAlarm(dbInstance);
 				databaseAlarms.createRdsWriteLatencyAlarm(dbInstance);
+				logMsg.append("Db " + dbInstance + " alarms created");
 			}
 
-			_log.error("Alarms created successfully");
-			return Response.ok("Alarms Created Successfully").build();
+			logMsg.append("Alarms created successfully");
+			_log.info(logMsg.toString());
+			return Response.ok(logMsg.toString()).build();
 			
 		} catch (Exception e) {
 			_log.error("Error creating alarms");
