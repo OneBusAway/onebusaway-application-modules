@@ -58,7 +58,7 @@
 		</div>
 		
 		<s:iterator value="directions">
-			<a name="${directionId}" class="directionAnchor">&amp;nbsp;</a>
+			<a name="${directionId}" class="directionAnchor" tabindex="0">&amp;nbsp;</a>
 			<div class="directionForRoute">
 				<p class="directionTitle">
 					<strong>
