@@ -1,0 +1,13 @@
+html, body, #mainbox, #contentbox {
+	height: 100%;
+}
+
+#contentbox {
+	margin: auto;
+}
+
+iframe {
+	height: 100%;
+	width: 100%;
+	border: none;
+}

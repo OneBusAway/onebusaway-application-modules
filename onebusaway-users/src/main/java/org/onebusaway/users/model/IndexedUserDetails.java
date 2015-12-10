@@ -21,4 +21,5 @@ public interface IndexedUserDetails extends UserDetails {
   public UserIndexKey getUserIndexKey();
   public boolean isAnonymous();
   public boolean isAdmin();
+  public boolean isReporting();
 }

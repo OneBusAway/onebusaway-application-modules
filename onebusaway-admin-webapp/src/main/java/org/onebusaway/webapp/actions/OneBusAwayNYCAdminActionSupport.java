@@ -71,7 +71,23 @@ public class OneBusAwayNYCAdminActionSupport extends NextActionSupport {
 	 public boolean isAdminUser() {
 		 return currentUserService.isCurrentUserAdmin();
 	 }
-	  
+	 
+	 /**
+	  * Checks if the current user is a reporting user
+	  * @return true if user is a reporting user
+	  */
+	 public boolean isReportingUser() {
+		 return currentUserService.isCurrentUserReporting();
+	 }
+	 
+	/**
+	 * Check if user has access to reports
+	 * @return true if user is an admin user or a reporting user
+	 */
+	 public boolean isAccessToReports() {
+		 return isAdminUser() || isReportingUser();
+	 }
+	 
 	/**
 	 * Injects current user service
 	 * @param currentUserService the currentUserService to set

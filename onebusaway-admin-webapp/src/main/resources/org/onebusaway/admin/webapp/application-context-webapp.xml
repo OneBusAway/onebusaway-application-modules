@@ -57,7 +57,7 @@
     </bean>
     
     <sec:http auto-config="false" entry-point-ref="authenticationProcessingFilterEntryPoint">
-        <sec:intercept-url pattern="/admin/**" access="ROLE_USER,ROLE_ADMINISTRATOR" />
+        <sec:intercept-url pattern="/admin/**" access="ROLE_ADMINISTRATOR,ROLE_USER,ROLE_REPORTING" />
         <!--  we cannot use form-login as we override the default behaviour -->
         <!-- 
         <sec:form-login login-page="/login.action" authentication-failure-url="/login.action?error=1"

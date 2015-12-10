@@ -54,6 +54,10 @@ public class IndexedUserDetailsImpl extends
   public boolean isAdmin() {
     return hasAuthority(StandardAuthoritiesService.ADMINISTRATOR);
   }
+  
+  public boolean isReporting() {
+	return hasAuthority(StandardAuthoritiesService.REPORTING);
+  }
 
   @Override
   public int hashCode() {
