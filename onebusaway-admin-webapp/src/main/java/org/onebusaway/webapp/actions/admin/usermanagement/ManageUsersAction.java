@@ -51,9 +51,9 @@ public class ManageUsersAction extends OneBusAwayNYCAdminActionSupport {
 		UserDetail userDetail = gsonTool.readJson(new StringReader(userData), UserDetail.class);
 		boolean success = userManagementService.updateUser(userDetail);
 		if(success) {
-			updateUserMessage =  "User '" +userDetail.getUserName() + "' edited successfully";
+			updateUserMessage =  "User '" +userDetail.getUsername() + "' edited successfully";
 		} else {
-			updateUserMessage = "Error editing user : '" +userDetail.getUserName() +"'";
+			updateUserMessage = "Error editing user : '" +userDetail.getUsername() +"'";
 		}
 		
 		return "updateUser";
@@ -64,9 +64,9 @@ public class ManageUsersAction extends OneBusAwayNYCAdminActionSupport {
 		UserDetail userDetail = gsonTool.readJson(new StringReader(userData), UserDetail.class);
 		boolean success = userManagementService.deactivateUser(userDetail);
 		if(success) {
-			updateUserMessage =  "User '" +userDetail.getUserName() + "' deactivated successfully";
+			updateUserMessage =  "User '" +userDetail.getUsername() + "' deactivated successfully";
 		} else {
-			updateUserMessage = "Error deactivating user : '" +userDetail.getUserName() +"'";
+			updateUserMessage = "Error deactivating user : '" +userDetail.getUsername() +"'";
 		}
 		return "updateUser";
 	}
