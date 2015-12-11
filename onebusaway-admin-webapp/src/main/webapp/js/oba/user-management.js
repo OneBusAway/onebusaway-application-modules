@@ -45,24 +45,7 @@ jQuery(function() {
 					jQuery("#userDetails #userId").val(response.id);
 					jQuery("#userDetails #username").text(response.username);
 					var userRole = response.role;
-					switch(userRole) {
-										
-						case "ROLE_USER":
-							jQuery("#userDetails #userRole").text("OPERATOR");
-						break;
-						
-						case "ROLE_ADMINISTRATOR":
-							jQuery("#userDetails #userRole").text("ADMINISTRATOR");
-						break;
-						
-						case "ROLE_REPORTING":
-							jQuery("#userDetails #userRole").text("REPORTING");
-						break;
-						
-						default:
-							jQuery("#userDetails #userRole").text("ANONYMOUS");
-						break;
-					}
+					jQuery("#userDetails #userRole").text(userRole.split('_')[1]);
 					jQuery("#userDetails").show();
 					
 					jQuery("#editUser #editUserName").text(response.username);

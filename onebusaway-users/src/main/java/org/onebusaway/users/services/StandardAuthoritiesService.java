@@ -26,19 +26,24 @@ import java.util.List;
 public interface StandardAuthoritiesService {
 
   public final static String ANONYMOUS = "ROLE_ANONYMOUS";
-
+  
   public final static String USER = "ROLE_USER";
 
   public final static String ADMINISTRATOR = "ROLE_ADMINISTRATOR";
   
+  public final static String OPERATOR = "ROLE_OPERATOR";
+  
+  public final static String SUPPORT = "ROLE_SUPPORT";
+  
   public final static String REPORTING = "ROLE_REPORTING";
+  
 
   /**
    * This should be the only place where the standard authorities for the app
    * are defined
    */
   public final static List<String> STANDARD_AUTHORITIES = Collections.unmodifiableList(Arrays.asList(
-      ADMINISTRATOR, USER, ANONYMOUS, REPORTING));
+      ADMINISTRATOR, OPERATOR, SUPPORT, REPORTING, ANONYMOUS, USER));
 
   /**
    * Get the GrantedAuthority used by Spring Security for the role by name

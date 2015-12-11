@@ -16,6 +16,7 @@
 package org.onebusaway.webapp.actions.admin.usermanagement;
 
 import java.io.StringReader;
+import java.util.List;
 
 import org.apache.struts2.convention.annotation.Result;
 import org.apache.struts2.convention.annotation.Results;
@@ -36,13 +37,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class ManageUsersAction extends OneBusAwayNYCAdminActionSupport {
 
 	private static final long serialVersionUID = 1L;
-	
+
 	private UserManagementService userManagementService;
 	private JsonTool gsonTool;
 	
 	private String userData;
 	private String updateUserMessage;
-	
+
 	/**
 	 * Edits a user in the system
 	 * @return
@@ -114,5 +115,9 @@ public class ManageUsersAction extends OneBusAwayNYCAdminActionSupport {
 	public void setGsonTool(JsonTool gsonTool) {
 		this.gsonTool = gsonTool;
 	}
-
+	
+	public List<String> getPossibleRoles() {
+		return userManagementService.getAllRoleNames();
+	}
+		
 }

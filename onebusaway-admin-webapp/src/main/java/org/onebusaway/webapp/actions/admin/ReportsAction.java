@@ -24,12 +24,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class ReportsAction extends OneBusAwayNYCAdminActionSupport {
 
 	private static final long serialVersionUID = 1L;
-	
+
 	@Autowired
 	private ConfigurationServiceClient _configurationServiceClient;
-	
+
 	private static Logger _log = LoggerFactory.getLogger(ReportsAction.class);
-	
+
 	public String getTransitimeUrl() {
 		try {
 			String url = _configurationServiceClient.getItem("admin", "transitimeUrl");
@@ -39,5 +39,5 @@ public class ReportsAction extends OneBusAwayNYCAdminActionSupport {
 			return null;
 		}
 	}
-	
+
 }

@@ -116,7 +116,7 @@ public class UserManagementServiceImplTest {
 		UserDetail userDetail = mock(UserDetail.class);
 		
 		when(userDetail.getId()).thenReturn(1);
-		when(userDetail.getUserName()).thenReturn("admin2");
+		when(userDetail.getUsername()).thenReturn("admin2");
 		
 		when(userDao.getUserForId(1)).thenReturn(null);
 		
@@ -169,7 +169,7 @@ public class UserManagementServiceImplTest {
 
 	private void buildUserDetail(Integer userId, UserDetail userDetail, String password) {
 		when(userDetail.getId()).thenReturn(userId);
-		when(userDetail.getUserName()).thenReturn("admin");
+		when(userDetail.getUsername()).thenReturn("admin");
 		when(userDetail.getPassword()).thenReturn(password);
 		when(userDetail.getRole()).thenReturn("ROLE_ADMINISTRATOR");
 	}
@@ -248,7 +248,7 @@ public class UserManagementServiceImplTest {
 		UserDetail userDetail = mock(UserDetail.class);
 		
 		when(userDetail.getId()).thenReturn(1);
-		when(userDetail.getUserName()).thenReturn("admin2");
+		when(userDetail.getUsername()).thenReturn("admin2");
 		
 		when(userDao.getUserForId(1)).thenReturn(null);
 		

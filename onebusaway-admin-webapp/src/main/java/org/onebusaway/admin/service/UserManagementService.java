@@ -82,5 +82,6 @@ public interface UserManagementService {
 	 * @return true if soft delete operation succeeds, false otherwise
 	 */
 	boolean deactivateUser(UserDetail userDetail);
-
+	
+	List<String> getAllRoleNames();
 }

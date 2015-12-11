@@ -29,7 +29,6 @@ import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
 import org.onebusaway.admin.model.ui.UserDetail;
 import org.onebusaway.admin.service.UserManagementService;
-import org.onebusaway.admin.util.UserRoles;
 import org.onebusaway.users.model.User;
 import org.onebusaway.users.model.UserIndex;
 import org.onebusaway.users.model.UserRole;
@@ -161,7 +160,7 @@ public class UserManagementServiceImpl implements UserManagementService {
 	}
 	
 	public boolean createUser(String userName, String password, String role) {
-		boolean admin = (role == UserRoles.ROLE_ADMINISTRATOR.getRole());
+		boolean admin = (role == StandardAuthoritiesService.ADMINISTRATOR);
 		return createUser(userName, password, admin);
 	}
 	
@@ -234,26 +233,9 @@ public class UserManagementServiceImpl implements UserManagementService {
 		if(updateRole) {
 			//Remove current role and add the new role
 			userRoles.remove(currentRole);
-			
-			UserRoles newRole = UserRoles.valueOf(role);
-			
-			switch(newRole) {
-				case ROLE_ANONYMOUS :
-					userRoles.add(authoritiesService.getAnonymousRole());
-					break;
-				
-				case ROLE_USER :
-					userRoles.add(authoritiesService.getUserRole());
-					break;
-				
-				case ROLE_ADMINISTRATOR :
-					userRoles.add(authoritiesService.getAdministratorRole());
-					break;	
-					
-				case ROLE_REPORTING:
-					userRoles.add(authoritiesService.getReportingRole());
-					break;	
-			}
+			UserRole newRole = authoritiesService.getUserRoleForName(role);
+			userRoles.add(newRole);
+	
 		}
 	}
 
@@ -294,6 +276,11 @@ public class UserManagementServiceImpl implements UserManagementService {
 	@Autowired
 	public void setPasswordEncoder(PasswordEncoder passwordEncoder) {
 		this.passwordEncoder = passwordEncoder;
+	}
+	
+	@Override
+	public List<String> getAllRoleNames() {
+		return StandardAuthoritiesService.STANDARD_AUTHORITIES;
 	}
 
 }

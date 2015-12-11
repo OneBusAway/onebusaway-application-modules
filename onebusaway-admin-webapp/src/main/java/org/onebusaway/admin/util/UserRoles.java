@@ -32,9 +32,14 @@ public enum UserRoles {
 	/** Admin user role **/
 	ROLE_ADMINISTRATOR("ROLE_ADMINISTRATOR"),
 	
+	/** Operator user role **/
+	ROLE_OPERATOR("ROLE_OPERATOR"),
+	
+	/** Support user role **/
+	ROLE_SUPPORT("ROLE_SUPPORT"),
+	
 	/** Reporting user role **/
 	ROLE_REPORTING("ROLE_REPORTING");
-	
 	
 	private String role;
 	
@@ -55,6 +60,10 @@ public enum UserRoles {
         	return ROLE_USER;
         } else if ("ROLE_ADMINISTRATOR".equals(value)) {
         	return ROLE_ADMINISTRATOR;
+		} else if ("ROLE_OPERATOR".equals(value)) {
+        	return ROLE_OPERATOR;
+		} else if ("ROLE_SUPPORT".equals(value)) {
+        	return ROLE_SUPPORT;
 		} else if ("ROLE_REPORTING".equals(value)) {
         	return ROLE_REPORTING;
 		} else {

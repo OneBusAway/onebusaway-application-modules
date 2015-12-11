@@ -28,72 +28,64 @@
 	<div id="content">
 		<div id="text">
 			<div id="indexContainer">
-				<s:if test="adminUser">
-					<h2>Welcome Admin</h2>
-				</s:if>
-				<s:elseif test="reportingUser">
-					<h2>Welcome Reporting User</h2>
-				</s:elseif>
-				<s:else>
-					<h2>Welcome Operator</h2>
-				</s:else>
+
+				<h2>Welcome ${name}</h2>
+
+
 				<ul id="indexList">
-					<s:if test="getConfig('showApiKey')">
-						<li>
-							<s:url var="url" action="api-key"/>
-							<s:a href="%{url}">Create API key</s:a>
-						</li>
-					</s:if>
 					<!-- Commented out until its fixed 
 					<li>
 						<s:url var="url" action="api-keys"/>
 						<s:a href="%{url}">Create API key (Legacy)</s:a>
 					</li>
 					-->
-					<s:if test="adminUser">
-						<s:if test="getConfig('showManageUsers')">
-							<li><s:url var="url" action="manage-users"
-									namespace="/admin/usermanagement" /> <s:a href="%{url}">Manage Users</s:a>
-							</li>
-						</s:if>
-						<s:if test="getConfig('showBundleUtil')">
-							<li><s:url var="url" action="manage-bundles"
-									namespace="/admin/bundles" /> <s:a href="%{url}">Transit Data Bundle Utility</s:a>
-							</li>
-						</s:if>
-						<s:if test="getConfig('showVehicleStatus')">
-							<li><s:url var="url" action="vehicle-status"
-									namespace="/admin/vehiclestatus" /> <s:a href="%{url}">Vehicle Status Display Utility</s:a>
-							</li>
-						</s:if>
-						<s:if test="getConfig('showUpdateConfig')">
-							<li><s:url var="url" action="parameters" namespace="/admin" />
-								<s:a href="%{url}">Configuration Parameters Utility</s:a></li>
-							<li><s:url var="url" action="deploy-config"
-									namespace="/admin" /> <s:a href="%{url}">Update Configuration Files</s:a>
-							</li>
-						</s:if>
+
+					<s:if test="isPageAvailable('showManageUsers', 'ManageUsersAction')">
+						<li><s:url var="url" action="manage-users"
+								namespace="/admin/usermanagement" /> <s:a href="%{url}">Manage Users</s:a>
+						</li>
 					</s:if>
-					<s:if test="accessToReports">
-						<s:if test="getConfig('showReports')">
-							<li><s:url var="url" action="reports" namespace="/admin" />
-								<s:a href="%{url}">Transitime reports</s:a></li>
-						</s:if>
+					
+					<s:if test="isPageAvailable('showApiKey', 'ApiKeyAction')">
+						<li><s:url var="url" action="api-key" /> <s:a href="%{url}">Create API key</s:a>
+						</li>
 					</s:if>
-					<s:if test="getConfig('showQrCode')">
+					<s:if test="isPageAvailable('showQrCode', 'BarcodeAction')">
 						<li><s:url var="url" action="barcode"></s:url> <s:a
 								href="%{url}">QR Code Generation</s:a></li>
 					</s:if>
-					<s:if test="getConfig('manageServiceAlerts')">
+					<s:if test="isPageAvailable('manageServiceAlerts', 'ServiceAlertsAction')">
 						<li><s:url var="url" action="service-alerts"
 								namespace="/admin/servicealerts"></s:url> <s:a href="%{url}">Manage Service Alerts</s:a>
 						</li>
 					</s:if>
-					<s:if test="getConfig('validateTransitDataBundle')">
+					<s:if test="isPageAvailable('validateTransitDataBundle', 'ValidateBundleAction')">
 						<li><s:url var="url" action="validate-bundle"
 								namespace="/admin/bundles" /> <s:a href="%{url}">Validate Transit Data Bundle</s:a>
 						</li>
 					</s:if>
+					<s:if test="isPageAvailable('showBundleUtil', 'ManageBundlesAction')">
+						<li><s:url var="url" action="manage-bundles"
+								namespace="/admin/bundles" /> <s:a href="%{url}">Transit Data Bundle Utility</s:a>
+						</li>
+					</s:if>
+					<s:if test="isPageAvailable('showVehicleStatus', 'VehicleStatusAction')">
+						<li><s:url var="url" action="vehicle-status"
+								namespace="/admin/vehiclestatus" /> <s:a href="%{url}">Vehicle Status Display Utility</s:a>
+						</li>
+					</s:if>
+					<s:if test="isPageAvailable('showUpdateConfig', 'DeployConfigAction')">
+						<li><s:url var="url" action="parameters" namespace="/admin" />
+							<s:a href="%{url}">Configuration Parameters Utility</s:a></li>
+						<li><s:url var="url" action="deploy-config"
+								namespace="/admin" /> <s:a href="%{url}">Update Configuration Files</s:a>
+						</li>
+					</s:if>
+					<s:if test="isPageAvailable('showReports', 'ReportsAction')">
+						<li><s:url var="url" action="reports" namespace="/admin" />
+							<s:a href="%{url}">Transitime reports</s:a></li>
+					</s:if>
+
 				</ul>
 			</div>
 		</div>
