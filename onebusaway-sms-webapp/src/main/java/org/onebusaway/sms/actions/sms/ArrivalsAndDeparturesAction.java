@@ -78,6 +78,7 @@ public class ArrivalsAndDeparturesAction extends AbstractTextmarksAction
     logUserInteraction("stopIds", _model.getStopIds(), "routeIds",
         _model.getRouteFilter(), "args", _args);
 
+    _model.applyDedupe();
     // Since we have route numbers, not ids, we have to do ad-hoc filtering
     if (_args != null && _args.length > 0)
       filterArrivalsAndDeparturesByRoute(_args);
