@@ -27,6 +27,8 @@ import org.onebusaway.users.model.User;
 import org.onebusaway.users.model.UserRole;
 import org.onebusaway.users.services.CurrentUserService;
 import org.onebusaway.util.services.configuration.ConfigurationServiceClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -36,7 +38,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  */
 public class OneBusAwayNYCAdminActionSupport extends NextActionSupport {
 	
-	private static final long serialVersionUID = 1L;
+	  private static final long serialVersionUID = 1L;
 
 	  private Date time = null;
 	  
@@ -104,9 +106,9 @@ public class OneBusAwayNYCAdminActionSupport extends NextActionSupport {
 	}
 	
 	@Override
-	public String execute() throws Exception {
+	public String execute() throws RuntimeException  {
 		if (!hasPermissionsForPage())
-			throw new Exception("Insufficient access");
+			throw new RuntimeException("Insufficient access");
 		return SUCCESS;
 	}
 	
@@ -116,15 +118,17 @@ public class OneBusAwayNYCAdminActionSupport extends NextActionSupport {
 	public boolean hasPermissionsForPage(String name) {
 		try {
 			String item = _configurationServiceClient.getItem("permission", name);
+			if (item.equals("*"))
+				return true;
 			List<String> roleList = Arrays.asList(item.split(","));
 			return hasRoleInList(roleList);
 		}
 		catch(Exception e) {
-			// If no permission is specified in config, assume its OK.
-			return true;
+			// If no permission is specified in config, assume it's not OK.
+			return false;
 		}
 	}
-	
+		
 	public boolean hasPermissionsForPage() {
 		String name = this.getClass().getSimpleName();
 		return hasPermissionsForPage(name);
