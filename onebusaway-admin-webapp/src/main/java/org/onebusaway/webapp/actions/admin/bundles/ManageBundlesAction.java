@@ -143,12 +143,6 @@ public class ManageBundlesAction extends OneBusAwayNYCAdminActionSupport impleme
 		return SUCCESS;
 	}
 
-	@Override
-	public String execute() {
-		_log.info("in execute");
-		return SUCCESS;
-	}
-
 	/**
 	 * Creates directory from existing directory
 	 */
