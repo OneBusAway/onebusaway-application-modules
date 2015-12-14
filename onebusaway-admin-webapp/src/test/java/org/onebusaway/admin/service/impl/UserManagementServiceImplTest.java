@@ -77,7 +77,7 @@ public class UserManagementServiceImplTest {
 	}
 	
 	@Test
-	public void testCreateOperator() {
+	public void testCreateUser() {
 		UserIndex userIndex = mock(UserIndex.class);
 		when(userService.getOrCreateUserForUsernameAndPassword("operator", "password")).thenReturn(userIndex);
 		
@@ -155,14 +155,14 @@ public class UserManagementServiceImplTest {
 		when(user.getUserIndices()).thenReturn(userIndices);
 		when(user.getRoles()).thenReturn(userRoles);
 		
-		when(authoritiesService.getAdministratorRole()).thenReturn(adminRole);
+		when(authoritiesService.getUserRoleForName("ROLE_ADMINISTRATOR")).thenReturn(adminRole);
 		
 		boolean success = service.updateUser(userDetail);
 		
 		assertTrue("User updated successfully", success);
 		
 		verify(passwordEncoder).encodePassword("password", "admin");
-		verify(authoritiesService).getAdministratorRole();
+		verify(authoritiesService).getUserRoleForName("ROLE_ADMINISTRATOR");
 		verify(userDao).saveOrUpdateUser(user);
 		
 	}
@@ -238,7 +238,7 @@ public class UserManagementServiceImplTest {
 		assertTrue("User's password updated successfully", success);
 		
 		verify(passwordEncoder, times(0)).encodePassword("", "admin");
-		verify(authoritiesService).getAdministratorRole();
+		verify(authoritiesService).getUserRoleForName("ROLE_ADMINISTRATOR");
 		verify(userDao).saveOrUpdateUser(user);
 		
 	}
