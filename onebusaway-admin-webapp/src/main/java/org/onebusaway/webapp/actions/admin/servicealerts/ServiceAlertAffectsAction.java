@@ -180,20 +180,20 @@ public class ServiceAlertAffectsAction extends ActionSupport implements
 
     id = _model.getRouteId();
     if (id != null && id.length() > 0) {
-      if (!id.matches(AGENCY_AND_ID_REGEX)) {
-        addFieldError("routeId_0", "Error on route id format, must be <agency id>_<route id>");
-      } else if (!isValidAgency(id.substring(0,id.indexOf('_'))) ) {
-        addFieldError("routeId_0", "Error on agency portion of route id: \"" + id.substring(0,id.indexOf('_')) + "\" is not a valid agency id");
-      } else {
-          try {
-            RouteBean routeBean = _transitDataService.getRouteForId(id);
-            if (routeBean == null) {
-              addFieldError("routeId_0", "Error on route id: route \"" + id + "\" was not found");
-            }
-          } catch(Exception ex) {
-            addFieldError("routeId_0", "Error on route id: route \"" + id + "\" was not found");
-          }
-      }
+//      if (!id.matches(AGENCY_AND_ID_REGEX)) {
+//        addFieldError("routeId_0", "Error on route id format, must be <agency id>_<route id>");
+//      } else if (!isValidAgency(id.substring(0,id.indexOf('_'))) ) {
+//        addFieldError("routeId_0", "Error on agency portion of route id: \"" + id.substring(0,id.indexOf('_')) + "\" is not a valid agency id");
+//      } else {
+//          try {
+//            RouteBean routeBean = _transitDataService.getRouteForId(id);
+//            if (routeBean == null) {
+//              addFieldError("routeId_0", "Error on route id: route \"" + id + "\" was not found");
+//            }
+//          } catch(Exception ex) {
+//            addFieldError("routeId_0", "Error on route id: route \"" + id + "\" was not found");
+//          }
+//      }
     }
 
     id = _model.getDirectionId();

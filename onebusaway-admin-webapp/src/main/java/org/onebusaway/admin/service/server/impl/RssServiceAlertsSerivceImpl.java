@@ -396,7 +396,8 @@ public class RssServiceAlertsSerivceImpl implements RssServiceAlertsService {
                     ListBean<RouteBean> routes =  _transitDataService.getRoutesForAgencyId(getAgencyId());
                     Map<String, String> mutableRouteMap = new HashMap<String, String>();
                     for(RouteBean route : routes.getList()){
-                        mutableRouteMap.put(route.getShortName().toUpperCase(), route.getId());
+                      AgencyAndId routeId = AgencyAndId.convertFromString(route.getId());
+                        mutableRouteMap.put(route.getShortName().toUpperCase(), routeId.getId());
                     }
                     _routeShortNameToRouteIdMap = Collections.unmodifiableMap(mutableRouteMap);
                     _alertCache = new HashMap<String, ServiceAlertBean>();
