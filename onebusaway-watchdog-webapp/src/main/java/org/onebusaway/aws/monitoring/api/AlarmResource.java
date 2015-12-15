@@ -107,20 +107,23 @@ public class AlarmResource extends MetricResource {
 			gtfsRtAlarms.createMessagesReceivedAlarm();
 			gtfsRtAlarms.createMessagesSentAlarm();
 			gtfsRtAlarms.createMessagesSizeAlarm();		
-			logMsg.append("gtfsRtAlarms created");
+			logMsg.append("gtfsRtAlarms created\n");
 			
 			
 			// RDS Alarms
-			for(String dbInstance : getDbInstances()){
-				databaseAlarms.createRdsHighConnectionsAlarm(dbInstance);
-				databaseAlarms.createRdsHighCPUAlarm(dbInstance);
-				databaseAlarms.createRdsLowStorageAlarm(dbInstance);
-				databaseAlarms.createRdsReadLatencyAlarm(dbInstance);
-				databaseAlarms.createRdsWriteLatencyAlarm(dbInstance);
-				logMsg.append("Db " + dbInstance + " alarms created");
+			if (getDbInstances() != null) {
+  			for(String dbInstance : getDbInstances()){
+  				databaseAlarms.createRdsHighConnectionsAlarm(dbInstance);
+  				databaseAlarms.createRdsHighCPUAlarm(dbInstance);
+  				databaseAlarms.createRdsLowStorageAlarm(dbInstance);
+  				databaseAlarms.createRdsReadLatencyAlarm(dbInstance);
+  				databaseAlarms.createRdsWriteLatencyAlarm(dbInstance);
+  				logMsg.append("Db " + dbInstance + " alarms created\n");
+  			}
+			} else {
+			  logMsg.append("no db isntances defined!\n");
 			}
-
-			logMsg.append("Alarms created successfully");
+			logMsg.append("Alarms created successfully\n");
 			_log.info(logMsg.toString());
 			return Response.ok(logMsg.toString()).build();
 			
