@@ -108,7 +108,7 @@ public class OneBusAwayNYCAdminActionSupport extends NextActionSupport {
 	@Override
 	public String execute() throws RuntimeException  {
 		if (!hasPermissionsForPage())
-			throw new RuntimeException("Insufficient access");
+			throw new RuntimeException("Insufficient access to action " + this.getClass().getName());
 		return SUCCESS;
 	}
 	
