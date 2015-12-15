@@ -305,9 +305,11 @@ public class ServiceAlertsHelper {
     PtSituationElementStructure ptSit = new PtSituationElementStructure();
 
     EntryQualifierStructure value = new EntryQualifierStructure();
-    value.setValue(serviceAlert.getId());
-    ptSit.setSituationNumber(value);
-
+    if (serviceAlert != null) {
+      value.setValue(serviceAlert.getId());
+      ptSit.setSituationNumber(value);
+    }
+    
     if (serviceAlert.getCreationTime() != 0)
       ptSit.setCreationTime(new Date(serviceAlert.getCreationTime()));
     
