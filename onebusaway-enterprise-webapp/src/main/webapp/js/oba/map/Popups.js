@@ -604,7 +604,7 @@ OBA.Popups = (function() {
 			html += filteredMatches.html();
 		}
 
-		html += OBA.Config.infoBubbleFooterFunction("stop", uniqueStopId);	        
+		html += OBA.Config.infoBubbleFooterFunction("stop", stopCode);	        
 
 		html += "<ul class='links'>";
 		html += "<a href='#' id='zoomHere'>Center & Zoom Here</a>";
