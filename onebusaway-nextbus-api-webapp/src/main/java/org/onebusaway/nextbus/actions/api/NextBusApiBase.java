@@ -35,6 +35,7 @@ import org.onebusaway.nextbus.model.nextbus.Body;
 import org.onebusaway.nextbus.model.nextbus.BodyError;
 import org.onebusaway.nextbus.service.CacheService;
 import org.onebusaway.nextbus.service.TdsMappingService;
+import org.onebusaway.transit_data.model.AgencyBean;
 import org.onebusaway.transit_data.model.StopBean;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
@@ -63,8 +64,6 @@ public class NextBusApiBase {
   public static final String SCHEDULE_COMMAND = "/command/scheduleHorizStops";
 
   public static final String REQUEST_TYPE = "json";
-
- 
   
   // AGENCIES
 
@@ -132,21 +131,25 @@ public class NextBusApiBase {
 
   
   private boolean isValidAgency(String agencyId) {
-    Boolean result = _cache.getAgency(agencyId.toString());
-    if (result != null) {
-      return result;
-    }
     try {
-      if (_transitDataService.getAgency(agencyId) != null) {
-        _cache.putAgency(agencyId.toString(), Boolean.TRUE);
-        return true;
-      }
-    } catch (Exception e) {
-      // look failed
+      return (getCachedAgencyBean(agencyId) != null);
     }
-    _cache.putAgency(agencyId.toString(), Boolean.FALSE);
+    catch (Exception e) {
+      // This means the agency id is not valid.
+    }
     return false;
   }
+  
+  public AgencyBean getCachedAgencyBean(String id) {
+    AgencyBean bean = _cache.getAgency(id);
+    if (bean == null) {
+      bean = _transitDataService.getAgency(id);
+      if (bean != null)
+        _cache.putAgency(id, bean);
+    }
+    return bean;
+  }
+  
 
   
   // ROUTES
@@ -288,21 +291,25 @@ public class NextBusApiBase {
   }
 
   protected boolean isValidStop(AgencyAndId stopId) {
-    Boolean result = _cache.getStop(stopId.toString());
-    if (result != null) return result;
     try {
-      StopBean stopBean = _transitDataService.getStop(stopId.toString());
-      if (stopBean != null) {
-        _cache.putStop(stopId.toString(), Boolean.TRUE);
-        return true;
-      }
+      return (getCachedStopBean(stopId.toString()) != null);
+    
     } catch (Exception e) {
       // This means the stop id is not valid.
     }
-    _cache.putStop(stopId.toString(), Boolean.FALSE);
     return false;
   }
 
+  public StopBean getCachedStopBean(String id) {
+    StopBean stop = _cache.getStop(id);
+    if (stop == null) {
+      stop = _transitDataService.getStop(id);
+      if (stop != null)
+        _cache.putStop(id, stop);
+    }
+    return stop;
+  }
+  
   // VEHICLES
 
   protected List<AgencyAndId> processVehicleIds(String vehicleRef,

@@ -15,18 +15,20 @@
  */
 package org.onebusaway.nextbus.service;
 
+import org.onebusaway.transit_data.model.AgencyBean;
+import org.onebusaway.transit_data.model.StopBean;
+
 public interface CacheService {
 
-  Boolean getAgency(String string);
+  AgencyBean getAgency(String string);
 
-  void putAgency(String string, Boolean true1);
+  void putAgency(String string, AgencyBean value);
 
   Boolean getRoute(String string);
 
   void putRoute(String string, Boolean true1);
 
-  Boolean getStop(String string);
+  StopBean getStop(String key);
 
-  void putStop(String string, Boolean true1);
-
+  void putStop(String key, StopBean value);
 }

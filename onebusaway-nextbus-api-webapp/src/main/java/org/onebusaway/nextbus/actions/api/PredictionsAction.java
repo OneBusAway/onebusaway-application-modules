@@ -139,7 +139,7 @@ public class PredictionsAction extends NextBusApiBase
 
   private void modifyJSONObject(List<Predictions> predictions) {
 
-    String agencyTitle = _transitDataService.getAgency(agencyId).getName();
+    String agencyTitle = getCachedAgencyBean(agencyId).getName();
 
     for (Predictions prediction : predictions) {
       for (PredictionsDirection direction : prediction.getDest()) {
@@ -163,7 +163,7 @@ public class PredictionsAction extends NextBusApiBase
     if (!processStopIds(stopId, stopIds, agencies, body))
       return false;
 
-    StopBean stopBean = _transitDataService.getStop(stopIds.get(0).toString());
+    StopBean stopBean = getCachedStopBean(stopIds.get(0).toString());
 
     if (routeTag == null) {
       for (RouteBean routeBean : stopBean.getRoutes()) {
@@ -189,4 +189,5 @@ public class PredictionsAction extends NextBusApiBase
 
     return true;
   }
+  
 }

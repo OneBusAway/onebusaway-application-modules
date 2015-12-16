@@ -24,6 +24,8 @@ import java.util.concurrent.TimeUnit;
 import javax.annotation.PostConstruct;
 
 import org.onebusaway.nextbus.service.CacheService;
+import org.onebusaway.transit_data.model.AgencyBean;
+import org.onebusaway.transit_data.model.StopBean;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -32,10 +34,10 @@ public class CacheServiceImpl implements CacheService {
   private ScheduledExecutorService _executor;
   
 
-  private Map<String, Boolean> _validAgencyCache = new ConcurrentHashMap<String, Boolean>();
-  private Map<String, Boolean> _validStopCache = new ConcurrentHashMap<String, Boolean>();
+  private Map<String, AgencyBean> _validAgencyCache = new ConcurrentHashMap<String, AgencyBean>();
+  private Map<String, StopBean> _validStopCache = new ConcurrentHashMap<String, StopBean>();
   private Map<String, Boolean> _validRouteCache = new ConcurrentHashMap<String, Boolean>();
-
+  
   @PostConstruct
   public void start() throws Exception {
       _executor = Executors.newSingleThreadScheduledExecutor();
@@ -60,12 +62,12 @@ public class CacheServiceImpl implements CacheService {
 
 
   @Override
-  public Boolean getAgency(String key) {
+  public AgencyBean getAgency(String key) {
     return _validAgencyCache.get(key);
   }
 
   @Override
-  public void putAgency(String key, Boolean value) {
+  public void putAgency(String key, AgencyBean value) {
     _validAgencyCache.put(key, value);
   }
 
@@ -80,12 +82,13 @@ public class CacheServiceImpl implements CacheService {
   }
 
   @Override
-  public Boolean getStop(String key) {
+  public StopBean getStop(String key) {
     return _validStopCache.get(key);
   }
 
   @Override
-  public void putStop(String key, Boolean value) {
+  public void putStop(String key, StopBean value) {
     _validStopCache.put(key, value);
   }
+  
 }
