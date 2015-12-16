@@ -32,7 +32,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class ServiceAlertsPersistenceDB implements ServiceAlertsPersistence {
   
-  private static final long REFRESH_INTERVAL = 60 * 1000; // 60 seconds
+  private static final long DEFAULT_REFRESH_INTERVAL = 60 * 1000; // 60 seconds
   private static Logger _log = LoggerFactory.getLogger(ServiceAlertsPersistenceDB.class);
   
   private HibernateTemplate _template;
@@ -43,6 +43,7 @@ public class ServiceAlertsPersistenceDB implements ServiceAlertsPersistence {
   
   private long rowCount = 0;
 
+  protected long _refreshInterval = DEFAULT_REFRESH_INTERVAL;
   
   @Autowired
   public void setSessionFactory(SessionFactory sessionFactory) {
@@ -66,7 +67,8 @@ public class ServiceAlertsPersistenceDB implements ServiceAlertsPersistence {
    */
   public synchronized boolean cachedNeedsSync() {
     long now = System.currentTimeMillis();
-    if (now > lastRefresh + REFRESH_INTERVAL) {
+    
+    if (now > lastRefresh + _refreshInterval) {
       lastRefresh = now;
       return needsSync();
     }
