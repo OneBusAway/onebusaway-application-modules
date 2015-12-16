@@ -32,7 +32,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class ServiceAlertsPersistenceDB implements ServiceAlertsPersistence {
   
-  private static final long REFRESH_INTERVAL = 1 * 1000; // 1 second
+  private static final long REFRESH_INTERVAL = 60 * 1000; // 60 seconds
   private static Logger _log = LoggerFactory.getLogger(ServiceAlertsPersistenceDB.class);
   
   private HibernateTemplate _template;
