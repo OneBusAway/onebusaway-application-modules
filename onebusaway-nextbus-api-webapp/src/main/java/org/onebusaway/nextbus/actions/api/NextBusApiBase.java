@@ -27,9 +27,13 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.lang3.StringUtils;
-import org.onebusaway.exceptions.NoSuchStopServiceException;
+import javax.annotation.PostConstruct;
+
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.nextbus.impl.util.ConfigurationUtil;
@@ -55,12 +59,31 @@ public class NextBusApiBase {
   @Autowired
   protected ConfigurationUtil _configUtil;
 
+  private ScheduledExecutorService _executor;
+  
+  Map<String, Boolean> _validAgencyCache = new ConcurrentHashMap<String, Boolean>();
+  Map<String, Boolean> _validStopCache = new ConcurrentHashMap<String, Boolean>();
+  Map<String, Boolean> _validRouteCache = new ConcurrentHashMap<String, Boolean>();
+
   public static final String PREDICTIONS_COMMAND = "/command/predictions";
 
   public static final String SCHEDULE_COMMAND = "/command/scheduleHorizStops";
 
   public static final String REQUEST_TYPE = "json";
 
+  @PostConstruct
+  public void start() throws Exception {
+      _executor = Executors.newSingleThreadScheduledExecutor();
+      // re-build internal route cache
+      _executor.scheduleAtFixedRate(new RefreshDataTask(), 0, 1, TimeUnit.HOURS);
+  }
+  
+  public void clearCache() {
+    _validAgencyCache.clear();
+    _validStopCache.clear();
+    _validRouteCache.clear();
+  }
+  
   // AGENCIES
 
   protected String getMappedAgency(String agencyId) {
@@ -100,7 +123,7 @@ public class NextBusApiBase {
               "agency parameter \"a\" must be specified in query string"));
       return false;
     }
-    if (_transitDataService.getAgency(agencyId) == null) {
+    if (!isValidAgency(agencyId)) {
       body.getErrors().add(
           new BodyError("Agency parameter \"a=" + agencyId + "\" is not valid."));
       return false;
@@ -125,13 +148,38 @@ public class NextBusApiBase {
     return agencyIds;
   }
 
+  
+  private boolean isValidAgency(String agencyId) {
+    Boolean result = _validAgencyCache.get(agencyId.toString());
+    if (result != null) {
+      return result;
+    }
+    try {
+      if (_transitDataService.getAgency(agencyId) != null) {
+        _validAgencyCache.put(agencyId.toString(), Boolean.TRUE);
+        return true;
+      }
+    } catch (Exception e) {
+      // look failed
+    }
+    _validAgencyCache.put(agencyId.toString(), Boolean.FALSE);
+    return false;
+  }
+
+  
   // ROUTES
 
   protected boolean isValidRoute(AgencyAndId routeId) {
+    Boolean result = _validRouteCache.get(routeId.toString());
+    if (result != null) {
+      return result;
+    }
     if (routeId != null && routeId.hasValues()
         && this._transitDataService.getRouteForId(routeId.toString()) != null) {
+      _validRouteCache.put(routeId.toString(), Boolean.TRUE);
       return true;
     }
+    _validRouteCache.put(routeId.toString(), Boolean.FALSE);
     return false;
 
   }
@@ -258,13 +306,18 @@ public class NextBusApiBase {
   }
 
   protected boolean isValidStop(AgencyAndId stopId) {
+    Boolean result = _validStopCache.get(stopId.toString());
+    if (result != null) return result;
     try {
       StopBean stopBean = _transitDataService.getStop(stopId.toString());
-      if (stopBean != null)
+      if (stopBean != null) {
+        _validStopCache.put(stopId.toString(), Boolean.TRUE);
         return true;
+      }
     } catch (Exception e) {
       // This means the stop id is not valid.
     }
+    _validStopCache.put(stopId.toString(), Boolean.FALSE);
     return false;
   }
 
@@ -351,4 +404,11 @@ public class NextBusApiBase {
     return sb.toString();
   }
 
+  private class RefreshDataTask implements Runnable {
+
+    @Override
+    public void run() {
+      clearCache();
+    }
+  }
 }
