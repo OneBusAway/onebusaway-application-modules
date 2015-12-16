@@ -27,18 +27,13 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-
-import javax.annotation.PostConstruct;
 
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.nextbus.impl.util.ConfigurationUtil;
 import org.onebusaway.nextbus.model.nextbus.Body;
 import org.onebusaway.nextbus.model.nextbus.BodyError;
+import org.onebusaway.nextbus.service.CacheService;
 import org.onebusaway.nextbus.service.TdsMappingService;
 import org.onebusaway.transit_data.model.StopBean;
 import org.onebusaway.transit_data.services.TransitDataService;
@@ -59,11 +54,9 @@ public class NextBusApiBase {
   @Autowired
   protected ConfigurationUtil _configUtil;
 
-  private ScheduledExecutorService _executor;
+  @Autowired
+  private CacheService _cache;
   
-  Map<String, Boolean> _validAgencyCache = new ConcurrentHashMap<String, Boolean>();
-  Map<String, Boolean> _validStopCache = new ConcurrentHashMap<String, Boolean>();
-  Map<String, Boolean> _validRouteCache = new ConcurrentHashMap<String, Boolean>();
 
   public static final String PREDICTIONS_COMMAND = "/command/predictions";
 
@@ -71,18 +64,7 @@ public class NextBusApiBase {
 
   public static final String REQUEST_TYPE = "json";
 
-  @PostConstruct
-  public void start() throws Exception {
-      _executor = Executors.newSingleThreadScheduledExecutor();
-      // re-build internal route cache
-      _executor.scheduleAtFixedRate(new RefreshDataTask(), 0, 1, TimeUnit.HOURS);
-  }
-  
-  public void clearCache() {
-    _validAgencyCache.clear();
-    _validStopCache.clear();
-    _validRouteCache.clear();
-  }
+ 
   
   // AGENCIES
 
@@ -150,19 +132,19 @@ public class NextBusApiBase {
 
   
   private boolean isValidAgency(String agencyId) {
-    Boolean result = _validAgencyCache.get(agencyId.toString());
+    Boolean result = _cache.getAgency(agencyId.toString());
     if (result != null) {
       return result;
     }
     try {
       if (_transitDataService.getAgency(agencyId) != null) {
-        _validAgencyCache.put(agencyId.toString(), Boolean.TRUE);
+        _cache.putAgency(agencyId.toString(), Boolean.TRUE);
         return true;
       }
     } catch (Exception e) {
       // look failed
     }
-    _validAgencyCache.put(agencyId.toString(), Boolean.FALSE);
+    _cache.putAgency(agencyId.toString(), Boolean.FALSE);
     return false;
   }
 
@@ -170,16 +152,16 @@ public class NextBusApiBase {
   // ROUTES
 
   protected boolean isValidRoute(AgencyAndId routeId) {
-    Boolean result = _validRouteCache.get(routeId.toString());
+    Boolean result = _cache.getRoute(routeId.toString());
     if (result != null) {
       return result;
     }
     if (routeId != null && routeId.hasValues()
         && this._transitDataService.getRouteForId(routeId.toString()) != null) {
-      _validRouteCache.put(routeId.toString(), Boolean.TRUE);
+      _cache.putRoute(routeId.toString(), Boolean.TRUE);
       return true;
     }
-    _validRouteCache.put(routeId.toString(), Boolean.FALSE);
+    _cache.putRoute(routeId.toString(), Boolean.FALSE);
     return false;
 
   }
@@ -306,18 +288,18 @@ public class NextBusApiBase {
   }
 
   protected boolean isValidStop(AgencyAndId stopId) {
-    Boolean result = _validStopCache.get(stopId.toString());
+    Boolean result = _cache.getStop(stopId.toString());
     if (result != null) return result;
     try {
       StopBean stopBean = _transitDataService.getStop(stopId.toString());
       if (stopBean != null) {
-        _validStopCache.put(stopId.toString(), Boolean.TRUE);
+        _cache.putStop(stopId.toString(), Boolean.TRUE);
         return true;
       }
     } catch (Exception e) {
       // This means the stop id is not valid.
     }
-    _validStopCache.put(stopId.toString(), Boolean.FALSE);
+    _cache.putStop(stopId.toString(), Boolean.FALSE);
     return false;
   }
 
@@ -404,11 +386,5 @@ public class NextBusApiBase {
     return sb.toString();
   }
 
-  private class RefreshDataTask implements Runnable {
-
-    @Override
-    public void run() {
-      clearCache();
-    }
-  }
+ 
 }
