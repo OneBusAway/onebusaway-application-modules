@@ -22,13 +22,12 @@ public interface ScheduleHelperService {
 	/**
 	 * Check for scheduled service for the given route over the specified time period.  
 	 * That is, are any buses scheduled to visit this route in the next time period?
-	 * @param agencyId agency of the route
 	 * @param time period to check within
 	 * @param routeId of route to check
 	 * @param directionId of the route to check
 	 * @return True if scheduled service is found
 	 */
-	Boolean routeHasUpcomingScheduledService(String agencyId, long time, String routeId,
+	Boolean routeHasUpcomingScheduledService(long time, String routeId,
 			String directionId);
 
 	/**
@@ -42,17 +41,17 @@ public interface ScheduleHelperService {
 	 * @param directionId of the route to check
 	 * @return True if scheduled service is found
 	 */
-	Boolean stopHasUpcomingScheduledService(String agencyId, long time, String stopId,
+	Boolean stopHasUpcomingScheduledService(long time, String stopId,
 			String routeId, String directionId);
 
 	/**
-	 * Given the following partial input, lookup route names that "match".  The
+	 * Given the following partial input, lookup
+	 * route names/stop IDs/stop codes that "match".  The
 	 * definition of "match" is left to the implementor.  This method can be the
 	 * basis for autocompleting text in a user interface.
-	 * @param agencyId to constrain the search against; may be null.
 	 * @param input partial text representing a GTFS route short name.
 	 * @return a list of GTFS short names that may qualify.
 	 */
-	List<String> getSearchSuggestions(String agencyId, String input);
+	List<String> getSearchSuggestions(String input);
 
 }
