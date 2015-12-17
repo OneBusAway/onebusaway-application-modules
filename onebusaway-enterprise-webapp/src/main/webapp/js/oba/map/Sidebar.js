@@ -676,8 +676,14 @@ OBA.Sidebar = function() {
 					serviceAlertsList.empty();
 					
 					var showAlerts = false;
-
+					var moreInfoLinkPrefix = "";
+					var moreInfoLinkSuffix = "";
+			        
 					jQuery.each(serviceAlerts, function(_, serviceAlert) {
+				        if (serviceAlert.InfoLinks && serviceAlert.InfoLinks.InfoLink.length > 0) {
+				        	moreInfoLinkPrefix = ' <a href="' + serviceAlert.InfoLinks.InfoLink[0].Uri + '" target="alert">';
+				        	moreInfoLinkSuffix = "</a>";
+				        }
 						
 						// If this is not a global alert, display it
 						if (!serviceAlert.Affects.Operators || (serviceAlert.Affects.Operators && !serviceAlert.Affects.Operators.hasOwnProperty("AllOperators"))) {
@@ -688,7 +694,7 @@ OBA.Sidebar = function() {
 							} else if(typeof serviceAlert.Summary !== 'undefined') {
 								text = serviceAlert.Summary;
 							}
-							
+							text = moreInfoLinkPrefix + text + moreInfoLinkSuffix;
 							if(text !== null) {
 								serviceAlertsList.append(jQuery("<li></li>").html(text.replace(/\n/g, "<br/>")));
 								showAlerts = true;
