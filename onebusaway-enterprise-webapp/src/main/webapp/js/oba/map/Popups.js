@@ -354,7 +354,7 @@ OBA.Popups = (function() {
 		
 		html += '<div class="header stop">';
 		html += '<p class="title">' + stopResult.name + '</p><p>';
-		html += '<span class="type">Stopcode ' + stopCode + '</span>';
+		html += '<span class="type">' + OBA.Config.stopTerm + ' ' + stopCode + '</span>';
 		
 		// update time across all arrivals
 		var updateTimestampReference = OBA.Util.ISO8601StringToDate(siri.Siri.ServiceDelivery.ResponseTimestamp).getTime();

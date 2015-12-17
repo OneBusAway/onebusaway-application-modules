@@ -29,6 +29,7 @@ if(typeof OBA !== 'undefined' &amp;&amp; typeof OBA.Config !== 'undefined') {
 	OBA.Config.mapCenterLon=<s:property value="mapCenterLon" default="null" />;
 	OBA.Config.mapZoom=<s:property value="mapZoom" default="null" />;
 	OBA.Config.shortCode='<s:text name="sms.shortcode" />';
+	OBA.Config.stopTerm='<s:text name="stopTerm" />';
 	OBA.Config.txtPrefix='<s:text name="sms.prefix" />';
 	OBA.Config.signDefaultAgencyId='<s:text name="sign.default.agency.id" />';
 	OBA.Config.useAgencyId='<s:property value="useAgencyId" />';
