@@ -94,6 +94,7 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
         routeBean.getId(), null, 0, System.currentTimeMillis());
 
     Map<String, List<String>> stopIdToDistanceAwayStringMap = new HashMap<String, List<String>>();
+    Map<String, List<String>> stopIdToVehicleIdMap = new HashMap<String, List<String>>();
     Map<String, Boolean> stopIdToRealtimeDataMap = new HashMap<String, Boolean>();
     
     // build map of stop IDs to list of distance strings
@@ -107,6 +108,7 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
       String stopId = monitoredCall.getStopPointRef().getValue();
       
       fillDistanceAwayStringsList(journey.getMonitoredVehicleJourney(),journey.getRecordedAtTime(), stopId, stopIdToDistanceAwayStringMap);
+      fillVehicleIdsStringList(journey.getMonitoredVehicleJourney(), journey.getRecordedAtTime(), stopId, stopIdToVehicleIdMap);
       fillRealtimeData(journey.getMonitoredVehicleJourney(), stopId, stopIdToRealtimeDataMap);
     }
 
@@ -140,7 +142,7 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
 
           for (String stopId : stopGroupBean.getStopIds()) {
             stopsOnRoute.add(new StopOnRoute(stopIdToStopBeanMap.get(stopId),
-                stopIdToDistanceAwayStringMap.get(stopId), stopIdToRealtimeDataMap.get(stopId)));
+                stopIdToDistanceAwayStringMap.get(stopId), stopIdToRealtimeDataMap.get(stopId), stopIdToVehicleIdMap.get(stopId)));
           }
         }
         
@@ -289,8 +291,17 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
       String timePrediction = getPresentableTime(visit.getMonitoredVehicleJourney(),
     	 	visit.getRecordedAtTime().getTime(), true);
       
-      List<String> distanceAways = new ArrayList<String>();
+      String vehicleId = null;
+      if (visit.getMonitoredVehicleJourney() != null && visit.getMonitoredVehicleJourney().getVehicleRef() != null) {
+        vehicleId = visit.getMonitoredVehicleJourney().getVehicleRef().getValue();
+      } else {
+        vehicleId = "N/A"; // insert an empty element so it aligns with distanceAways
+      }
       
+      List<String> distanceAways = new ArrayList<String>();
+      List<String> vehicleIds = new ArrayList<String>();
+      if (vehicleId.contains("_")) vehicleId = vehicleId.split("_")[1];
+      vehicleIds.add(vehicleId);
       if(timePrediction != null) {
     	  distanceAways.add(timePrediction);
       } else {
@@ -298,7 +309,7 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
       }
       
       results.get(visit.getMonitoredVehicleJourney().getDestinationName().getValue()).add(
-    		  		new StopOnRoute(stopBean,distanceAways, visit.getMonitoredVehicleJourney().isMonitored()));
+    		  		new StopOnRoute(stopBean,distanceAways, visit.getMonitoredVehicleJourney().isMonitored(), vehicleIds));
     }
 
     return results;
@@ -323,6 +334,24 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
       map.put(stopId, distanceStrings);
 
   }
+  
+  private void fillVehicleIdsStringList(
+      MonitoredVehicleJourney mvj, Date recordedAtTime,
+      String stopId, Map<String, List<String>> map) {
+
+    List<String> vehicleIdStrings = map.get(stopId);
+    if (vehicleIdStrings ==null) {
+      vehicleIdStrings = new ArrayList<String>();
+    }
+    if (mvj != null && mvj.getVehicleRef() != null) {
+      String id = mvj.getVehicleRef().getValue();
+      if (id.contains("_")) id = id.split("_")[1];
+      vehicleIdStrings.add(id);
+    } else {
+      vehicleIdStrings.add("N/A");
+    }
+  }
+
   
   private void fillRealtimeData(
 		  MonitoredVehicleJourney mvj,

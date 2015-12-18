@@ -65,8 +65,8 @@
 									</c:when>
 									<c:otherwise>
 										<ol class="arrivalsAtStop">
-											<c:forEach var="distanceAway" items="${distanceAways}">
-												<li>${distanceAway}</li>
+											<c:forEach var="distanceAway" items="${distanceAways}" varStatus="status">
+												<li>${distanceAway}  <small>Vehicle ${vehicleIds[status.index]}</small></li>
 											</c:forEach>
 										</ol>
 									</c:otherwise>		
