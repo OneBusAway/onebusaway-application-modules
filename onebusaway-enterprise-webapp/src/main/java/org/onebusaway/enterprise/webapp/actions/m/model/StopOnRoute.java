@@ -16,13 +16,16 @@ public class StopOnRoute {
   
   private List<String> distanceAways;
   
+  private List<String> vehicleIds; // in approximate order with distanceAways;
+  
   private Boolean hasRealtime = true;
   
-  public StopOnRoute(StopBean stop, List<String> distanceAways, Boolean hasRealtime) {
+  public StopOnRoute(StopBean stop, List<String> distanceAways, Boolean hasRealtime, List<String> vehicleIds) {
     this.stop = stop;
     this.distanceAways = distanceAways;
     if(hasRealtime != null)
     	this.hasRealtime = hasRealtime;
+    this.vehicleIds = vehicleIds;
   }
   
   public String getId() {
@@ -39,6 +42,10 @@ public class StopOnRoute {
   
   public List<String> getDistanceAways() {
     return distanceAways;
+  }
+  
+  public List<String> getVehicleIds() {
+    return vehicleIds;
   }
 
 public Boolean getHasRealtime() {
