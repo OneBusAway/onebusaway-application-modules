@@ -28,13 +28,17 @@
 
 	<s:if test="anonymousUser">
 		<s:if test="failure">
-			<p class="error">Your username and or password are incorrect.</p>
+			<p class="error">Your username and or password are incorrect. To reset your password: </p>
+			<s:form action="/forgot-password.action">
+				Enter your username <s:textfield name="username" /> and 
+				<s:submit value="Click here" />
+			</s:form>
 		</s:if>
 
 	    <s:form action="/userIndex_login" namespace="/admin" method="POST">
 			<fieldset>
 	        	<label class="top">Username:</label>
-    	    	<s:textfield name="j_username"/>
+    	    	<s:textfield key="username" name="j_username"/>
 			</fieldset>
 
 			<fieldset>
