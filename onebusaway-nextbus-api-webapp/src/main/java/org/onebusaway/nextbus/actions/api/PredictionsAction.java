@@ -26,6 +26,8 @@ import org.onebusaway.nextbus.model.nextbus.BodyError;
 import org.onebusaway.nextbus.model.transiTime.Prediction;
 import org.onebusaway.nextbus.model.transiTime.Predictions;
 import org.onebusaway.nextbus.model.transiTime.PredictionsDirection;
+import org.onebusaway.nextbus.util.HttpUtil;
+import org.onebusaway.nextbus.validation.ErrorMsg;
 import org.onebusaway.transit_data.model.RouteBean;
 import org.onebusaway.transit_data.model.StopBean;
 import org.slf4j.Logger;
@@ -36,10 +38,12 @@ import com.google.gson.JsonArray;
 import com.google.gson.reflect.TypeToken;
 import com.opensymphony.xwork2.ModelDriven;
 
-public class PredictionsAction extends NextBusApiBase
-    implements ModelDriven<Body<Predictions>> {
+public class PredictionsAction extends NextBusApiBase implements
+    ModelDriven<Body<Predictions>> {
 
   private static Logger _log = LoggerFactory.getLogger(PredictionsAction.class);
+
+  private HttpUtil _httpUtil = new HttpUtil();
 
   private String agencyId;
 
@@ -79,8 +83,7 @@ public class PredictionsAction extends NextBusApiBase
   public void setRouteTag(String routeTag) {
     this.routeTag = _tdsMappingService.getRouteIdFromShortName(routeTag);
   }
-  
-  
+
   // short form of routeTag param
   public String getR() {
     return routeTag;
@@ -115,7 +118,7 @@ public class PredictionsAction extends NextBusApiBase
       _log.info(uri);
       try {
 
-        JsonArray predictionsJson = getJsonObject(uri).getAsJsonArray(
+        JsonArray predictionsJson = _httpUtil.getJsonObject(uri).getAsJsonArray(
             "predictions");
         Type listType = new TypeToken<List<Predictions>>() {
         }.getType();
@@ -179,15 +182,13 @@ public class PredictionsAction extends NextBusApiBase
           stopServesRoute = true;
       }
       if (!stopServesRoute) {
-        body.getErrors().add(new BodyError("For agency=" + agencyId
-            + " route r=" + routeTag
-            + " is not currently available. It might be initializing still."));
+        body.getErrors().add(
+            new BodyError(ErrorMsg.ROUTE_UNAVAILABLE.getDescription(),
+                agencyId, routeTag));
         return false;
       }
-
     }
-
     return true;
   }
-  
+
 }

@@ -35,6 +35,7 @@ import org.onebusaway.nextbus.model.nextbus.Body;
 import org.onebusaway.nextbus.model.nextbus.BodyError;
 import org.onebusaway.nextbus.service.CacheService;
 import org.onebusaway.nextbus.service.TdsMappingService;
+import org.onebusaway.nextbus.validation.ErrorMsg;
 import org.onebusaway.transit_data.model.AgencyBean;
 import org.onebusaway.transit_data.model.StopBean;
 import org.onebusaway.transit_data.services.TransitDataService;
@@ -57,61 +58,86 @@ public class NextBusApiBase {
 
   @Autowired
   private CacheService _cache;
-  
 
   public static final String PREDICTIONS_COMMAND = "/command/predictions";
 
   public static final String SCHEDULE_COMMAND = "/command/scheduleHorizStops";
 
   public static final String REQUEST_TYPE = "json";
+
+  // CACHE
   
-  // AGENCIES
-
-  protected String getMappedAgency(String agencyId) {
-    if (_configUtil.getAgencyMapper().containsKey(agencyId.toUpperCase()))
-      return _configUtil.getAgencyMapper().get(agencyId.toUpperCase());
-    return agencyId;
-  }
-
-  protected String getIdNoAgency(String id) {
-    String[] agencyAndId = id.split("_");
-    if (agencyAndId != null && agencyAndId.length == 2) {
-      return agencyAndId[1];
+  public AgencyBean getCachedAgencyBean(String id) {
+    AgencyBean bean = _cache.getAgency(id);
+    if (bean == null) {
+      bean = _transitDataService.getAgency(id);
+      if (bean != null)
+        _cache.putAgency(id, bean);
     }
-    return id;
-
+    return bean;
   }
 
-  protected List<String> getAgencies(String agencyIdVal) {
-    String agencyId = agencyIdVal;
-    List<String> agencyIds = new ArrayList<String>();
-    if (agencyId != null) {
-      // The user provided an agancy id so, use it
-      agencyIds.add(agencyId);
-    } else {
-      // They did not provide an agency id, so interpret that an any/all
-      // agencies.
-      Map<String, List<CoordinateBounds>> agencies = _transitDataService.getAgencyIdsWithCoverageArea();
-      agencyIds.addAll(agencies.keySet());
+  public StopBean getCachedStopBean(String id) {
+    StopBean stop = _cache.getStop(id);
+    if (stop == null) {
+      stop = _transitDataService.getStop(id);
+      if (stop != null)
+        _cache.putStop(id, stop);
     }
-    return agencyIds;
+    return stop;
   }
 
+  // VALIDATION
+  
   protected boolean isValidAgency(Body body, String agencyId) {
     if (agencyId == null) {
-      body.getErrors().add(
-          new BodyError(
-              "agency parameter \"a\" must be specified in query string"));
+      body.getErrors().add(new BodyError(ErrorMsg.AGENCY_NULL.getDescription()));
       return false;
     }
     if (!isValidAgency(agencyId)) {
       body.getErrors().add(
-          new BodyError("Agency parameter \"a=" + agencyId + "\" is not valid."));
+          new BodyError(ErrorMsg.AGENCY_INVALID.getDescription(), agencyId));
       return false;
     }
     return true;
   }
 
+  private boolean isValidAgency(String agencyId) {
+    try {
+      return (getCachedAgencyBean(agencyId) != null);
+    } catch (Exception e) {
+      // This means the agency id is not valid.
+    }
+    return false;
+  }
+
+  protected boolean isValidRoute(AgencyAndId routeId) {
+    if (routeId != null && routeId.hasValues()) {
+      Boolean result = _cache.getRoute(routeId.toString());
+      if (result != null) {
+        return result;
+      }
+      if (this._transitDataService.getRouteForId(routeId.toString()) != null) {
+        _cache.putRoute(routeId.toString(), Boolean.TRUE);
+        return true;
+      }
+      _cache.putRoute(routeId.toString(), Boolean.FALSE);
+    }
+    return false;
+  }
+
+  protected boolean isValidStop(AgencyAndId stopId) {
+    try {
+      return (getCachedStopBean(stopId.toString()) != null);
+
+    } catch (Exception e) {
+      // This means the stop id is not valid.
+    }
+    return false;
+  }
+
+  // PROCESSSING METHODS
+  
   protected List<String> processAgencyIds(String agencyId) {
     List<String> agencyIds = new ArrayList<String>();
 
@@ -127,82 +153,6 @@ public class NextBusApiBase {
     }
 
     return agencyIds;
-  }
-
-  
-  private boolean isValidAgency(String agencyId) {
-    try {
-      return (getCachedAgencyBean(agencyId) != null);
-    }
-    catch (Exception e) {
-      // This means the agency id is not valid.
-    }
-    return false;
-  }
-  
-  public AgencyBean getCachedAgencyBean(String id) {
-    AgencyBean bean = _cache.getAgency(id);
-    if (bean == null) {
-      bean = _transitDataService.getAgency(id);
-      if (bean != null)
-        _cache.putAgency(id, bean);
-    }
-    return bean;
-  }
-  
-
-  
-  // ROUTES
-
-  protected boolean isValidRoute(AgencyAndId routeId) {
-    Boolean result = _cache.getRoute(routeId.toString());
-    if (result != null) {
-      return result;
-    }
-    if (routeId != null && routeId.hasValues()
-        && this._transitDataService.getRouteForId(routeId.toString()) != null) {
-      _cache.putRoute(routeId.toString(), Boolean.TRUE);
-      return true;
-    }
-    _cache.putRoute(routeId.toString(), Boolean.FALSE);
-    return false;
-
-  }
-
-  protected boolean isValidRoute(Body body, AgencyAndId routeId) {
-    if (!isValidRoute(routeId)) {
-      String routeIdStr = null;
-      if (routeId != null)
-        routeIdStr = routeId.toString();
-      body.getErrors().add(
-          new BodyError("Could not get route \"" + routeId
-              + "\". One of the tags could be bad."));
-      return false;
-    }
-    return true;
-  }
-
-  protected boolean isValidRoute(Body body, String agencyId, String routeVal) {
-
-    if (routeVal == null) {
-      body.getErrors().add(
-          new BodyError("For agency a=" + agencyId
-              + " route r=null is invalid or temporarily unavailable."));
-      return false;
-    }
-
-    try {
-      AgencyAndId routeId = AgencyAndIdLibrary.convertFromString(routeVal);
-      if (isValidRoute(routeId)) {
-        return true;
-      }
-    } catch (IllegalStateException e) {
-      AgencyAndId routeId = new AgencyAndId(agencyId, routeVal);
-      if (this.isValidRoute(body, routeId)) {
-        return true;
-      }
-    }
-    return false;
   }
 
   protected <E> boolean processRouteIds(String routeVal,
@@ -221,19 +171,19 @@ public class NextBusApiBase {
           }
         }
       }
-      
+
       if (handleErrors && routeIds.size() == 0) {
         String agencyId = agencyIds.get(0);
         body.getErrors().add(
-            new BodyError("For agency=" + agencyId + " route r=" + routeVal
-              + " is not currently available. It might be initializing still."));
+            new BodyError(ErrorMsg.ROUTE_UNAVAILABLE.getDescription(),
+                agencyId, routeVal));
         return false;
       }
     } else {
       if (handleErrors) {
         body.getErrors().add(
-            new BodyError("For agency a=" + agencyIds.get(0)
-                + " route r=null is invalid or temporarily unavailable."));
+            new BodyError(ErrorMsg.ROUTE_NULL.getDescription(),
+                agencyIds.get(0)));
       }
       return false;
     }
@@ -244,8 +194,6 @@ public class NextBusApiBase {
       List<AgencyAndId> routeIds, List<String> agencyIds, Body<E> body) {
     return processRouteIds(routeVal, routeIds, agencyIds, body, true);
   }
-
-  // STOPS
 
   protected <E> boolean processStopIds(String stopIdVal,
       List<AgencyAndId> stopIds, List<String> agencyIds, Body<E> body) {
@@ -260,8 +208,8 @@ public class NextBusApiBase {
           stopIds.add(stopId);
         } else {
           body.getErrors().add(
-              new BodyError("stopId \"" + stopId.toString()
-                  + "\" is not a valid stop id integer"));
+              new BodyError(ErrorMsg.STOP_INVALID.getDescription(),
+                  stopId.toString()));
           return false;
         }
       } catch (Exception e) {
@@ -275,42 +223,17 @@ public class NextBusApiBase {
         }
         if (stopIds.size() == 0) {
           body.getErrors().add(
-              new BodyError("stopId \"" + stopIdVal
-                  + "\" is not a valid stop id integer"));
+              new BodyError(ErrorMsg.STOP_INVALID.getDescription(), stopIdVal));
           return false;
         }
       }
       return true;
 
     } else {
-      body.getErrors().add(
-          new BodyError(
-              "stop parameter \"s\" must be specified in query string"));
+      body.getErrors().add(new BodyError(ErrorMsg.STOP_S_NULL.getDescription()));
       return false;
     }
   }
-
-  protected boolean isValidStop(AgencyAndId stopId) {
-    try {
-      return (getCachedStopBean(stopId.toString()) != null);
-    
-    } catch (Exception e) {
-      // This means the stop id is not valid.
-    }
-    return false;
-  }
-
-  public StopBean getCachedStopBean(String id) {
-    StopBean stop = _cache.getStop(id);
-    if (stop == null) {
-      stop = _transitDataService.getStop(id);
-      if (stop != null)
-        _cache.putStop(id, stop);
-    }
-    return stop;
-  }
-  
-  // VEHICLES
 
   protected List<AgencyAndId> processVehicleIds(String vehicleRef,
       List<String> agencyIds) {
@@ -335,9 +258,38 @@ public class NextBusApiBase {
     return vehicleIds;
   }
 
-  // HTTP
+  // HELPER METHODS
+  
+  protected String getMappedAgency(String agencyId) {
+    if (_configUtil.getAgencyMapper().containsKey(agencyId.toUpperCase()))
+      return _configUtil.getAgencyMapper().get(agencyId.toUpperCase());
+    return agencyId;
+  }
+  
+  protected List<String> getAgencies(String agencyIdVal) {
+    String agencyId = agencyIdVal;
+    List<String> agencyIds = new ArrayList<String>();
+    if (agencyId != null) {
+      // The user provided an agancy id so, use it
+      agencyIds.add(agencyId);
+    } else {
+      // They did not provide an agency id, so interpret that an any/all
+      // agencies.
+      Map<String, List<CoordinateBounds>> agencies = _transitDataService.getAgencyIdsWithCoverageArea();
+      agencyIds.addAll(agencies.keySet());
+    }
+    return agencyIds;
+  }
 
-  protected String getServiceUrl() {
+  protected String getIdNoAgency(String id) {
+    String[] agencyAndId = id.split("_");
+    if (agencyAndId != null && agencyAndId.length == 2) {
+      return agencyAndId[1];
+    }
+    return id;
+  }
+
+  public String getServiceUrl() {
     String host = _configUtil.getTransiTimeHost();
     String port = _configUtil.getTransiTimePort();
     String apiKey = _configUtil.getTransiTimeKey();
@@ -346,52 +298,4 @@ public class NextBusApiBase {
     return serviceUrl;
   }
 
-  protected JsonObject getJsonObject(String uri) throws MalformedURLException,
-      IOException {
-    URL url = new URL(uri);
-    HttpURLConnection request = (HttpURLConnection) url.openConnection();
-    request.connect();
-
-    // Convert to a JSON object to print data
-    JsonParser jp = new JsonParser(); // from gson
-    JsonElement root = jp.parse(new InputStreamReader(
-        (InputStream) request.getContent())); // Convert the input stream to a
-    // json element
-    JsonObject rootobj = root.getAsJsonObject(); // May be an array, may be
-    // an
-    // object.
-    return rootobj;
-  }
-
-  protected String callURL(String myURL) {
-    System.out.println("Requeted URL:" + myURL);
-    StringBuilder sb = new StringBuilder();
-    URLConnection urlConn = null;
-    InputStreamReader in = null;
-    try {
-      URL url = new URL(myURL);
-      urlConn = url.openConnection();
-      if (urlConn != null)
-        urlConn.setReadTimeout(60 * 1000);
-      if (urlConn != null && urlConn.getInputStream() != null) {
-        in = new InputStreamReader(urlConn.getInputStream(),
-            Charset.defaultCharset());
-        BufferedReader bufferedReader = new BufferedReader(in);
-        if (bufferedReader != null) {
-          int cp;
-          while ((cp = bufferedReader.read()) != -1) {
-            sb.append((char) cp);
-          }
-          bufferedReader.close();
-        }
-      }
-      in.close();
-    } catch (Exception e) {
-      throw new RuntimeException("Exception while calling URL:" + myURL, e);
-    }
-
-    return sb.toString();
-  }
-
- 
 }

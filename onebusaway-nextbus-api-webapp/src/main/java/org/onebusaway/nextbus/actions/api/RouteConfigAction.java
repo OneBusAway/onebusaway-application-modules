@@ -27,6 +27,7 @@ import org.onebusaway.geospatial.model.EncodedPolylineBean;
 import org.onebusaway.geospatial.services.PolylineEncoder;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.nextbus.model.nextbus.Body;
+import org.onebusaway.nextbus.model.nextbus.BodyError;
 import org.onebusaway.nextbus.model.nextbus.Direction;
 import org.onebusaway.nextbus.model.nextbus.DisplayRoute;
 import org.onebusaway.nextbus.model.nextbus.DisplayStop;
@@ -34,6 +35,7 @@ import org.onebusaway.nextbus.model.nextbus.Path;
 import org.onebusaway.nextbus.model.nextbus.Point;
 import org.onebusaway.nextbus.model.nextbus.Route;
 import org.onebusaway.nextbus.model.nextbus.Stop;
+import org.onebusaway.nextbus.validation.ErrorMsg;
 import org.onebusaway.transit_data.model.RouteBean;
 import org.onebusaway.transit_data.model.StopBean;
 import org.onebusaway.transit_data.model.StopGroupBean;
@@ -47,133 +49,154 @@ import com.opensymphony.xwork2.ModelDriven;
 import com.opensymphony.xwork2.validator.annotations.RequiredFieldValidator;
 
 public class RouteConfigAction extends NextBusApiBase implements
-		ModelDriven<Body<Route>> {
+    ModelDriven<Body<Route>> {
 
-	private String agencyId;
+  private String agencyId;
 
-	private String routeId;
+  private String routeId;
 
-	private static int MAX_ROUTES = 100;
+  private static int MAX_ROUTES = 100;
 
-	public String getA() {
-		return agencyId;
-	}
+  public String getA() {
+    return agencyId;
+  }
 
-	public void setA(String agencyId) {
-		this.agencyId = getMappedAgency(agencyId);
-	}
+  public void setA(String agencyId) {
+    this.agencyId = getMappedAgency(agencyId);
+  }
 
-	public String getR() {
-		return routeId;
-	}
+  public String getR() {
+    return routeId;
+  }
 
-	public void setR(String routeId) {
-		this.routeId = _tdsMappingService.getRouteIdFromShortName(routeId);
-	}
+  public void setR(String routeId) {
+    this.routeId = _tdsMappingService.getRouteIdFromShortName(routeId);
+  }
 
-	public HttpHeaders index() {
-		return new DefaultHttpHeaders("success");
-	}
+  public HttpHeaders index() {
+    return new DefaultHttpHeaders("success");
+  }
 
-	@Override
-	public Body<Route> getModel() {
+  @Override
+  public Body<Route> getModel() {
 
-		Body<Route> body = new Body<Route>();
-		
-		if (isValid(body)) {
+    Body<Route> body = new Body<Route>();
 
-			List<String> agencyIds = processAgencyIds(agencyId);
+    if (isValid(body)) {
 
-			List<AgencyAndId> routeIds = new ArrayList<AgencyAndId>();
+      List<String> agencyIds = processAgencyIds(agencyId);
 
-			List<RouteBean> routeBeans = new ArrayList<RouteBean>();
+      List<AgencyAndId> routeIds = new ArrayList<AgencyAndId>();
 
-			int routes_count = 1;
+      List<RouteBean> routeBeans = new ArrayList<RouteBean>();
 
-			if (processRouteIds(routeId, routeIds, agencyIds, body)) {
-				for (AgencyAndId routeId : routeIds) {
-					routeBeans.add(_transitDataService.getRouteForId(routeId.toString()));
-				}
-			} else if(routeId == null) {
-				routeBeans = _transitDataService.getRoutesForAgencyId(agencyId)
-						.getList();
-			}
-			
-			Collections.sort(routeBeans, new Comparator<RouteBean>() {
-			  AlphanumComparator alphaComparator = new AlphanumComparator();
-				public int compare(RouteBean arg0, RouteBean arg1) {
-					return alphaComparator.compare(arg0.getId(),arg1.getId());
-				}
-			});
+      int routes_count = 1;
 
-			for (RouteBean routeBean : routeBeans) {
+      if (processRouteIds(routeId, routeIds, agencyIds, body)) {
+        for (AgencyAndId routeId : routeIds) {
+          routeBeans.add(_transitDataService.getRouteForId(routeId.toString()));
+        }
+      } else if (routeId == null) {
+        routeBeans = _transitDataService.getRoutesForAgencyId(agencyId).getList();
+      }
 
-				// Limit Number of Routes Returned
-				if (routes_count > MAX_ROUTES)
-					break;
+      Collections.sort(routeBeans, new Comparator<RouteBean>() {
+        AlphanumComparator alphaComparator = new AlphanumComparator();
 
-				Route route = new Route();
-				route.setTag(getIdNoAgency(routeBean.getId()));
-				route.setTitle(routeBean.getLongName());
-				route.setShortTitle(routeBean.getShortName());
-				route.setColor(routeBean.getColor());
-				route.setOppositeColor(routeBean.getTextColor());
+        public int compare(RouteBean arg0, RouteBean arg1) {
+          return alphaComparator.compare(arg0.getId(), arg1.getId());
+        }
+      });
 
-				StopsForRouteBean stopsForRoute = _transitDataService
-						.getStopsForRoute(routeBean.getId());
+      for (RouteBean routeBean : routeBeans) {
 
-				// Stops
-				for (StopBean stopBean : stopsForRoute.getStops()) {
-					Stop stop = new Stop();
-					stop.setTag(getIdNoAgency(stopBean.getId()));
-					stop.setTitle(stopBean.getName());
-					stop.setLat(stopBean.getLat());
-					stop.setLon(stopBean.getLon());
-					stop.setStopId(stopBean.getCode());
-					route.getStops().add(stop);
-				}
+        // Limit Number of Routes Returned
+        if (routes_count > MAX_ROUTES)
+          break;
 
-				// Directions
-				for (StopGroupingBean stopGroupingBean : stopsForRoute
-						.getStopGroupings()) {
-					for (StopGroupBean stopGroupBean : stopGroupingBean
-							.getStopGroups()) {
-						Direction direction = new Direction();
-						direction.setTag(stopGroupBean.getId());
-						direction.setTitle(stopGroupBean.getName().getName());
-						for (String stopId : stopGroupBean.getStopIds()) {
-							direction.getStops().add(new DisplayStop(getIdNoAgency(stopId)));
-						}
-						route.getDirections().add(direction);
-					}
-				}
+        Route route = new Route();
+        route.setTag(getIdNoAgency(routeBean.getId()));
+        route.setTitle(route.getTag() + " " + routeBean.getLongName());
+        route.setShortTitle(routeBean.getShortName());
+        route.setColor(routeBean.getColor());
+        route.setOppositeColor(routeBean.getTextColor());
 
-				// PolyLines
-				for (EncodedPolylineBean polyline : stopsForRoute
-						.getPolylines()) {
-					Path path = new Path();
-					List<CoordinatePoint> coordinatePoints = PolylineEncoder
-							.decode(polyline);
-					for (CoordinatePoint coordinatePoint : coordinatePoints) {
-						path.getPoints().add(
-								new Point(coordinatePoint.getLat(),
-										coordinatePoint.getLon()));
-					}
-					route.getPaths().add(path);
-				}
+        StopsForRouteBean stopsForRoute = _transitDataService.getStopsForRoute(routeBean.getId());
 
-				body.getResponse().add(route);
-				routes_count++;
-			}
-		}
-		return body;
+        // Stops
+        for (StopBean stopBean : stopsForRoute.getStops()) {
+          Stop stop = new Stop();
+          stop.setTag(getIdNoAgency(stopBean.getId()));
+          stop.setTitle(stopBean.getName());
+          stop.setLat(stopBean.getLat());
+          stop.setLon(stopBean.getLon());
+          stop.setStopId(stopBean.getCode());
+          route.getStops().add(stop);
+        }
 
-	}
+        // Directions
+        for (StopGroupingBean stopGroupingBean : stopsForRoute.getStopGroupings()) {
+          for (StopGroupBean stopGroupBean : stopGroupingBean.getStopGroups()) {
+            Direction direction = new Direction();
+            direction.setTag(stopGroupBean.getId());
+            direction.setTitle(stopGroupBean.getName().getName());
+            for (String stopId : stopGroupBean.getStopIds()) {
+              direction.getStops().add(new DisplayStop(getIdNoAgency(stopId)));
+            }
+            route.getDirections().add(direction);
+          }
+        }
 
-	private boolean isValid(Body body) {
-		if (!isValidAgency(body, agencyId))
-			return false;
-		
-		return true;
-	}
+        // PolyLines
+        for (EncodedPolylineBean polyline : stopsForRoute.getPolylines()) {
+          Path path = new Path();
+          List<CoordinatePoint> coordinatePoints = PolylineEncoder.decode(polyline);
+          for (CoordinatePoint coordinatePoint : coordinatePoints) {
+            path.getPoints().add(
+                new Point(coordinatePoint.getLat(), coordinatePoint.getLon()));
+          }
+          route.getPaths().add(path);
+        }
+
+        body.getResponse().add(route);
+        routes_count++;
+      }
+    }
+    return body;
+
+  }
+
+  private boolean isValid(Body body) {
+    // Validate Agency
+    if (!isValidAgency(body, agencyId))
+      return false;
+
+    // Validate Undefined Route
+    if (getR() == null) {
+      body.getErrors().add(
+          new BodyError(ErrorMsg.ROUTE_LIMIT.getDescription(), MAX_ROUTES));
+      return false;
+    }
+
+    // Validate Defined Route
+    try {
+      AgencyAndId agencyAndRouteId = AgencyAndId.convertFromString(routeId);
+      if (!isValidRoute(agencyAndRouteId)) {
+        body.getErrors().add(
+            new BodyError(ErrorMsg.ROUTE_INVALID.getDescription(), routeId,
+                getCachedAgencyBean(agencyId).getName()));
+        return false;
+      }
+    } catch (IllegalArgumentException e) {
+      AgencyAndId agencyAndRouteId = new AgencyAndId(agencyId, routeId);
+      if (!this.isValidRoute(agencyAndRouteId)) {
+        body.getErrors().add(
+            new BodyError(ErrorMsg.ROUTE_INVALID.getDescription(), routeId,
+                getCachedAgencyBean(agencyId).getName()));
+        return false;
+      }
+    }
+
+    return true;
+  }
 }

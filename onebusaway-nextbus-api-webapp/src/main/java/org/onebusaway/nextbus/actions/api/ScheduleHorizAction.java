@@ -15,105 +15,121 @@
  */
 package org.onebusaway.nextbus.actions.api;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.lang.reflect.Type;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLConnection;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.struts2.rest.DefaultHttpHeaders;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.nextbus.model.nextbus.Body;
+import org.onebusaway.nextbus.model.transiTime.Prediction;
 import org.onebusaway.nextbus.model.transiTime.Predictions;
+import org.onebusaway.nextbus.model.transiTime.PredictionsDirection;
+import org.onebusaway.nextbus.model.transiTime.ScheduleHeader;
 import org.onebusaway.nextbus.model.transiTime.ScheduleRoute;
+import org.onebusaway.nextbus.model.transiTime.ScheduleStop;
+import org.onebusaway.nextbus.model.transiTime.ScheduleTableRow;
+import org.onebusaway.nextbus.util.HttpUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
 import com.opensymphony.xwork2.ModelDriven;
 
 public class ScheduleHorizAction extends NextBusApiBase implements
-		ModelDriven<Body<List<ScheduleRoute>>> {
+    ModelDriven<Body<List<ScheduleRoute>>> {
 
-	private static Logger _log = LoggerFactory
-			.getLogger(ScheduleHorizAction.class);
+  private static Logger _log = LoggerFactory.getLogger(ScheduleHorizAction.class);
 
-	private String agencyId;
+  private HttpUtil _httpUtil = new HttpUtil();
 
-	private String stopId;
+  private String agencyId;
 
-	private String routeId;
+  private String stopId;
 
-	public String getA() {
-		return agencyId;
-	}
+  private String routeId;
 
-	public void setA(String agencyId) {
-		this.agencyId = getMappedAgency(agencyId);
-	}
+  public String getA() {
+    return agencyId;
+  }
 
-	public String getR() {
-		return routeId;
-	}
+  public void setA(String agencyId) {
+    this.agencyId = getMappedAgency(agencyId);
+  }
 
-	public void setR(String routeId) {
-		this.routeId = _tdsMappingService.getRouteIdFromShortName(routeId);
-	}
+  public String getR() {
+    return routeId;
+  }
 
-	public DefaultHttpHeaders index() {
-		return new DefaultHttpHeaders("success");
-	}
+  public void setR(String routeId) {
+    this.routeId = _tdsMappingService.getRouteIdFromShortName(routeId);
+  }
 
-	public Body<List<ScheduleRoute>> getModel() {
+  public DefaultHttpHeaders index() {
+    return new DefaultHttpHeaders("success");
+  }
 
-		Body<List<ScheduleRoute>> body = new Body<List<ScheduleRoute>>();
-		List<AgencyAndId> routeIds = new ArrayList<AgencyAndId>();
+  public Body<List<ScheduleRoute>> getModel() {
 
-		if (isValid(body, routeIds)) {
+    Body<List<ScheduleRoute>> body = new Body<List<ScheduleRoute>>();
+    List<AgencyAndId> routeIds = new ArrayList<AgencyAndId>();
 
-			String serviceUrl = getServiceUrl() + agencyId + SCHEDULE_COMMAND
-					+ "?";
-			String route = "r=" + getIdNoAgency(routeId);
-			String uri = serviceUrl + route + "&format=" + REQUEST_TYPE;
+    if (isValid(body, routeIds)) {
 
-			try {
-				JsonArray scheduleJson = getJsonObject(uri).getAsJsonArray(
-						"schedule");
-				Type listType = new TypeToken<List<ScheduleRoute>>() {
-				}.getType();
-				List<List<ScheduleRoute>> schedules = new Gson().fromJson(
-						scheduleJson, listType);
+      String serviceUrl = getServiceUrl() + agencyId + SCHEDULE_COMMAND + "?";
+      String route = "r=" + getIdNoAgency(routeId);
+      String uri = serviceUrl + route + "&format=" + REQUEST_TYPE;
 
-				body.getResponse().addAll(schedules);
-			} catch (Exception e) {
-				_log.error(e.getMessage());
-			}
-		}
+      try {
+        JsonArray scheduleJson = _httpUtil.getJsonObject(uri).getAsJsonArray(
+            "schedule");
+        Type listType = new TypeToken<List<ScheduleRoute>>() {
+        }.getType();
+        List<ScheduleRoute> schedules = new Gson().fromJson(scheduleJson,
+            listType);
+        
+        modifyJSONObject(schedules);
 
-		return body;
+        body.getResponse().add(schedules);
+      } catch (Exception e) {
+        _log.error(e.getMessage());
+      }
+    }
 
-	}
+    return body;
 
-	private boolean isValid(Body body, List<AgencyAndId> routeIds) {
-		if (!isValidAgency(body, agencyId))
-			return false;
+  }
 
-		List<String> agencies = new ArrayList<String>();
-		agencies.add(agencyId);
+  private void modifyJSONObject(List<ScheduleRoute> schedules) {
 
-		if (!processRouteIds(routeId, routeIds, agencies, body))
-			return false;
+	    String agencyTitle = getCachedAgencyBean(agencyId).getName();
+	    
+	    for (ScheduleRoute scheduleRoute : schedules) {
+	      scheduleRoute.setRouteName(scheduleRoute.getRouteId() + " " + scheduleRoute.getRouteName());
+        
+        //Stop Times
+        for(ScheduleTableRow tableRow : scheduleRoute.getTimesForTrip()){
+          
+          for(int i = 0; i < tableRow.getTime().size(); i++){
+            tableRow.getTime().get(i).setTag(scheduleRoute.getStop().get(i).getStopId());
+          }
+        }
+	    }
+	  }
+  
 
-		return true;
-	}
+  private boolean isValid(Body body, List<AgencyAndId> routeIds) {
+    if (!isValidAgency(body, agencyId))
+      return false;
+
+    List<String> agencies = new ArrayList<String>();
+    agencies.add(agencyId);
+
+    if (!processRouteIds(routeId, routeIds, agencies, body))
+      return false;
+
+    return true;
+  }
 }

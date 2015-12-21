@@ -15,9 +15,8 @@
  */
 package org.onebusaway.nextbus.impl.rest.xstream;
 
-import org.onebusaway.nextbus.model.nextbus.BodyError;
-import org.onebusaway.nextbus.model.nextbus.DisplayStop;
-import org.onebusaway.nextbus.model.nextbus.ScheduleDisplayStop;
+import org.onebusaway.nextbus.model.transiTime.ScheduleHeader;
+import org.onebusaway.nextbus.model.transiTime.ScheduleStop;
 
 import com.thoughtworks.xstream.converters.Converter;
 import com.thoughtworks.xstream.converters.MarshallingContext;
@@ -25,27 +24,26 @@ import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 
-public class DisplayStopConverter implements Converter {
+public class ScheduleHeaderConverter implements Converter {
 
 	public boolean canConvert(Class type) {
-		return type.equals(ScheduleDisplayStop.class);
+		return type.equals(ScheduleHeader.class);
 	}
 
-	@Override
-	public void marshal(Object source, HierarchicalStreamWriter writer,
-			MarshallingContext context) {
-	  ScheduleDisplayStop stop = (ScheduleDisplayStop) source;
-		writer.addAttribute("tag", stop.getTag());
-		writer.setValue(stop.getValue());
+	 @Override
+	  public void marshal(Object source, HierarchicalStreamWriter writer,
+	      MarshallingContext context) {
+	   ScheduleHeader header = (ScheduleHeader) source;
+	    writer.addAttribute("tag", header.getStopId());
+	    writer.setValue(header.getStopName());
+	  }
 
-	}
-
-	@Override
-	public Object unmarshal(HierarchicalStreamReader reader,
-			UnmarshallingContext context) {
-	  ScheduleDisplayStop stop = new ScheduleDisplayStop();
-		stop.setValue(reader.getValue());
-		stop.setTag(reader.getAttribute("tag"));
-		return stop;
-	}
+	  @Override
+	  public Object unmarshal(HierarchicalStreamReader reader,
+	      UnmarshallingContext context) {
+	    ScheduleHeader header = new ScheduleHeader();
+	    header.setStopName(reader.getValue());
+	    header.setStopId((reader.getAttribute("tag")));
+	    return header;
+	  }
 }

@@ -18,8 +18,13 @@ package org.onebusaway.nextbus.model.nextbus;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.onebusaway.nextbus.impl.rest.jackson.CapitalizeSerializer;
+import org.onebusaway.nextbus.impl.rest.xstream.CapitalizeConverter;
+
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
+import com.thoughtworks.xstream.annotations.XStreamConverter;
 import com.thoughtworks.xstream.annotations.XStreamImplicit;
 
 @XStreamAlias("direction")
@@ -31,6 +36,8 @@ public class Direction {
 	private String tag;
 	
 	@XStreamAsAttribute 
+	@XStreamConverter(CapitalizeConverter.class)
+  @JsonSerialize(using = CapitalizeSerializer.class)
 	private String title;
 	
 	@XStreamAsAttribute 

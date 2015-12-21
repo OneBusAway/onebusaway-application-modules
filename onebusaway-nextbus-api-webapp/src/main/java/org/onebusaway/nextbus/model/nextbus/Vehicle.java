@@ -28,103 +28,125 @@ import com.thoughtworks.xstream.annotations.XStreamOmitField;
 @XStreamAlias("vehicle")
 @JsonRootName("vehicle")
 public class Vehicle {
-	
-	@XStreamAsAttribute 
-	private String id;
-	
-	@XStreamAsAttribute 
-	private String routeTag;
-	
-	@XStreamAsAttribute 
-	private String dirTag;
-	
-	@XStreamAsAttribute
-	private BigDecimal lat;
-	
-	@XStreamAsAttribute
-	private BigDecimal lon;
-	
-	@XStreamAsAttribute
-	private int secsSinceReport;
-	
-	@XStreamAsAttribute
-	private boolean predictable;
-	
-	@XStreamAsAttribute
-	private int heading;
-	
-	@XStreamAsAttribute
-	private double speedKmHr;
+  
+  @XStreamAsAttribute 
+  private String id;
+  
+  @XStreamAsAttribute 
+  private String routeTag;
+  
+  @XStreamAsAttribute 
+  private String dirTag;
+  
+  @XStreamAsAttribute
+  private BigDecimal lat;
+  
+  @XStreamAsAttribute
+  private BigDecimal lon;
+  
+  @XStreamAsAttribute
+  private int secsSinceReport;
+  
+  @XStreamAsAttribute
+  private boolean predictable;
+  
+  @XStreamAsAttribute
+  private int heading;
+  
+  @XStreamAsAttribute
+  private Integer speedKmHr;
+  
+  @XStreamAsAttribute 
+  private String tripTag;
+  
+  @XStreamAsAttribute 
+  private String block;
 
-	public String getId() {
-		return id;
-	}
+  public String getId() {
+    return id;
+  }
 
-	public void setId(String id) {
-		this.id = id;
-	}
+  public void setId(String id) {
+    this.id = id;
+  }
 
-	public String getRouteTag() {
-		return routeTag;
-	}
+  public String getRouteTag() {
+    return routeTag;
+  }
 
-	public void setRouteTag(String routeTag) {
-		this.routeTag = routeTag;
-	}
+  public void setRouteTag(String routeTag) {
+    this.routeTag = routeTag;
+  }
 
-	public String getDirTag() {
-		return dirTag;
-	}
+  public String getDirTag() {
+    return dirTag;
+  }
 
-	public void setDirTag(String dirTag) {
-		this.dirTag = dirTag;
-	}
+  public void setDirTag(String dirTag) {
+    this.dirTag = dirTag;
+  }
 
-	public BigDecimal getLat() {
-		return lat;
-	}
+  public BigDecimal getLat() {
+    return lat;
+  }
 
-	public void setLat(BigDecimal lat) {
-		this.lat = lat;
-	}
+  public void setLat(BigDecimal lat) {
+    this.lat = lat;
+  }
 
-	public BigDecimal getLon() {
-		return lon;
-	}
+  public BigDecimal getLon() {
+    return lon;
+  }
 
-	public void setLon(BigDecimal lon) {
-		this.lon = lon;
-	}
+  public void setLon(BigDecimal lon) {
+    this.lon = lon;
+  }
 
-	public int getSecsSinceReport() {
-		return secsSinceReport;
-	}
+  public int getSecsSinceReport() {
+    return secsSinceReport;
+  }
 
-	public void setSecsSinceReport(int secsSinceReport) {
-		this.secsSinceReport = secsSinceReport;
-	}
+  public void setSecsSinceReport(int secsSinceReport) {
+    this.secsSinceReport = secsSinceReport;
+  }
 
-	public boolean getPredictable() {
-		return predictable;
-	}
+  public boolean getPredictable() {
+    return predictable;
+  }
 
-	public void setPredictable(boolean predictable) {
-		this.predictable = predictable;
-	}
+  public void setPredictable(boolean predictable) {
+    this.predictable = predictable;
+  }
 
-	public int getHeading() {
-		return heading;
-	}
+  public int getHeading() {
+    return heading;
+  }
 
-	public void setHeading(int d) {
-		this.heading = d;
-	}
+  public void setHeading(int d) {
+    this.heading = d;
+  }
 
-	public double getSpeedKmHr() {
-		return speedKmHr;
-	}
+  public Integer getSpeedKmHr() {
+    return speedKmHr;
+  }
 
-	public void setSpeedKmHr(double speedKmHr) {
-		this.speedKmHr = speedKmHr;
-	}
+  public String getTripTag() {
+    return tripTag;
+  }
+
+  public void setTripTag(String tripTag) {
+    this.tripTag = tripTag;
+  }
+
+  public String getBlock() {
+    return block;
+  }
+
+  public void setBlock(String block) {
+    this.block = block;
+  }
+
+  public void setSpeedKmHr(Integer speedKmHr) {
+    this.speedKmHr = speedKmHr;
+  }
 }

@@ -15,8 +15,13 @@
  */
 package org.onebusaway.nextbus.model.nextbus;
 
+import org.onebusaway.nextbus.impl.rest.jackson.CapitalizeSerializer;
+import org.onebusaway.nextbus.impl.rest.xstream.CapitalizeConverter;
+
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
+import com.thoughtworks.xstream.annotations.XStreamConverter;
 
 @XStreamAlias("stop")
 public class Stop {
@@ -24,7 +29,9 @@ public class Stop {
 	@XStreamAsAttribute 
 	private String tag;
 	
-	@XStreamAsAttribute 
+	@XStreamAsAttribute
+	@XStreamConverter(CapitalizeConverter.class)
+	@JsonSerialize(using = CapitalizeSerializer.class)
 	private String title;
 	
 	@XStreamAsAttribute 

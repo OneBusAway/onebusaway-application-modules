@@ -69,8 +69,7 @@ public class RouteListAction extends NextBusApiBase implements
 			for (RouteBean routeBean : routeBeans) {
 				DisplayRoute route = new DisplayRoute();
 				route.setTag(getIdNoAgency(routeBean.getId()));
-				route.setTitle(routeBean.getLongName());
-				route.setShortTitle(routeBean.getShortName());
+				route.setTitle(routeBean.getShortName() + " " + routeBean.getLongName());
 				body.getResponse().add(route);
 			}
 

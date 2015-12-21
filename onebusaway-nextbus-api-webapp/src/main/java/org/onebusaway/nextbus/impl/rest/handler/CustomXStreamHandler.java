@@ -32,8 +32,9 @@ package org.onebusaway.nextbus.impl.rest.handler;
 
 import org.apache.struts2.rest.handler.XStreamHandler;
 import org.onebusaway.nextbus.impl.rest.xstream.BodyErrorConverter;
-import org.onebusaway.nextbus.impl.rest.xstream.DisplayStopConverter;
+import org.onebusaway.nextbus.impl.rest.xstream.ScheduleHeaderConverter;
 import org.onebusaway.nextbus.impl.rest.xstream.ScheduleStopConverter;
+import org.onebusaway.nextbus.impl.rest.xstream.ScheduleTransitStopConverter;
 import org.onebusaway.nextbus.model.nextbus.Agency;
 import org.onebusaway.nextbus.model.nextbus.Body;
 import org.onebusaway.nextbus.model.nextbus.DisplayRoute;
@@ -68,8 +69,9 @@ public class CustomXStreamHandler extends XStreamHandler {
     xstream.processAnnotations(ScheduleRoute.class);
     
     xstream.registerConverter(new BodyErrorConverter());
-    xstream.registerConverter(new DisplayStopConverter());
-    xstream.registerConverter(new ScheduleStopConverter());
+    //xstream.registerConverter(new ScheduleStopConverter());
+    xstream.registerConverter(new ScheduleTransitStopConverter());
+    xstream.registerConverter(new ScheduleHeaderConverter());
     
     return xstream;
   }

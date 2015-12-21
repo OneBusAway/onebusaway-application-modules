@@ -37,6 +37,7 @@ import org.onebusaway.transit_data.model.realtime.VehicleLocationRecordQueryBean
 import org.onebusaway.transit_data.model.trips.TripDetailsBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsInclusionBean;
 import org.onebusaway.transit_data.model.trips.TripStatusBean;
+import org.onebusaway.transit_data.model.trips.TripsForAgencyQueryBean;
 import org.onebusaway.transit_data.model.trips.TripsForRouteQueryBean;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
@@ -46,143 +47,164 @@ import com.opensymphony.xwork2.ModelDriven;
 import com.opensymphony.xwork2.validator.annotations.RequiredFieldValidator;
 
 public class VehicleLocationsAction extends NextBusApiBase implements
-		ModelDriven<Body<Vehicle>> {
+    ModelDriven<Body<Vehicle>> {
 
-	private String agencyId;
+  private final int MAX_RESULTS = 100;
 
-	private String routeId;
+  private String agencyId;
 
-	private long time;
+  private String routeId;
 
-	public String getA() {
-		return agencyId;
-	}
+  private long time;
 
-	public void setA(String agencyId) {
-		this.agencyId = getMappedAgency(agencyId);
-	}
+  public String getA() {
+    return agencyId;
+  }
 
-	public String getR() {
-		return routeId;
-	}
+  public void setA(String agencyId) {
+    this.agencyId = getMappedAgency(agencyId);
+  }
 
-	public void setR(String routeId) {
-		this.routeId = _tdsMappingService.getRouteIdFromShortName(routeId);
-	}
+  public String getR() {
+    return routeId;
+  }
 
-	public long getT() {
-		if (time == 0)
-			return System.currentTimeMillis();
-		return time;
-	}
+  public void setR(String routeId) {
+    this.routeId = _tdsMappingService.getRouteIdFromShortName(routeId);
+  }
 
-	public void setT(long time) {
-		this.time = time;
-	}
+  public long getT() {
+    if (time == 0)
+      return System.currentTimeMillis();
+    return time;
+  }
 
-	public HttpHeaders index() {
-		return new DefaultHttpHeaders("success");
-	}
+  public void setT(long time) {
+    this.time = time;
+  }
 
-	@Override
-	public Body<Vehicle> getModel() {
+  public HttpHeaders index() {
+    return new DefaultHttpHeaders("success");
+  }
 
-		Body<Vehicle> body = new Body<Vehicle>();
-		List<AgencyAndId> routeIds = new ArrayList<AgencyAndId>();
-		List<String> agencies = new ArrayList<String>();
+  @Override
+  public Body<Vehicle> getModel() {
 
-		if (isValid(body)) {
+    Body<Vehicle> body = new Body<Vehicle>();
+    List<AgencyAndId> routeIds = new ArrayList<AgencyAndId>();
+    List<String> agencies = new ArrayList<String>();
 
-			agencies.add(agencyId);
-			processRouteIds(routeId, routeIds, agencies, body, false);
+    if (isValid(body)) {
+      agencies.add(agencyId);
+      processRouteIds(routeId, routeIds, agencies, body, false);
+      // Valid Route Specified
+      if (routeIds.size() > 0) {
+        for (AgencyAndId routeId : routeIds) {
+          body.getResponse().addAll(
+              getVehiclesForRoute(routeId.toString(),
+                  getAllTripsForRoute(routeId.toString(), getT())));
+        }
+      } 
+      // Invalid Route Specified, return results for first 100 results for agency
+      else {
+        body.getResponse().addAll(
+            getVehiclesForRoute(null,
+                getAllTripsForAgency(agencyId, getT())));
+      }
+      body.setLastTime(new LastTime(System.currentTimeMillis()));
+    }
 
-			if (routeIds.size() > 0) {
-				for (AgencyAndId routeId : routeIds) {
-					body.getResponse().addAll(
-							getVehiclesForRoute(routeId.toString(), getT()));
-				}
+    return body;
 
-			} else {
+  }
 
-				List<RouteBean> routeBeans = _transitDataService
-						.getRoutesForAgencyId(agencyId).getList();
+  private List<Vehicle> getVehiclesForRoute(String routeId,
+      ListBean<TripDetailsBean> trips) {
 
-				for (RouteBean routeBean : routeBeans) {
-					body.getResponse().addAll(
-							getVehiclesForRoute(routeBean.getId(), time));
-				}
-			}
-		}
+    DecimalFormat df = new DecimalFormat();
+    df.setMaximumFractionDigits(6);
 
-		body.setLastTime(new LastTime(System.currentTimeMillis()));
+    List<Vehicle> vehiclesList = new ArrayList<Vehicle>();
+    for (TripDetailsBean tripDetails : trips.getList()) {
 
-		return body;
+      TripStatusBean tripStatus = tripDetails.getStatus();
 
-	}
+      // filter out interlined routes
+      if (routeId != null
+          && !tripDetails.getTrip().getRoute().getId().equals(routeId))
+        continue;
 
-	private List<Vehicle> getVehiclesForRoute(String routeId, long time) {
+      Vehicle vehicle = new Vehicle();
+      
+      String vehicleId = null;
+      
+      if(tripStatus.getVehicleId() != null){
+        vehicleId = getIdNoAgency(tripStatus.getVehicleId());
+      }
+      else
+        continue;
 
-		DecimalFormat df = new DecimalFormat();
-		df.setMaximumFractionDigits(6);
+      
+      vehicle.setId(vehicleId);
+      vehicle.setLat(new BigDecimal(
+          df.format(tripStatus.getLocation().getLat())));
+      vehicle.setLon(new BigDecimal(
+          df.format(tripStatus.getLocation().getLon())));
+      vehicle.setHeading((int) tripStatus.getOrientation());
+      vehicle.setDirTag(tripStatus.getActiveTrip().getDirectionId());
+      vehicle.setPredictable(tripStatus.isPredicted());
+      vehicle.setRouteTag(getIdNoAgency(tripStatus.getActiveTrip().getRoute().getId()));
+      vehicle.setTripTag(getIdNoAgency(tripStatus.getActiveTrip().getId()));
+      vehicle.setBlock(getIdNoAgency(tripStatus.getActiveTrip().getBlockId()));
 
-		List<Vehicle> vehiclesList = new ArrayList<Vehicle>();
-		ListBean<TripDetailsBean> trips = getAllTripsForRoute(routeId, time);
-		for (TripDetailsBean tripDetails : trips.getList()) {
+      int secondsSinceUpdate = 0;
+      if (tripStatus.getLastUpdateTime() > 0)
+        secondsSinceUpdate = (int) TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis()
+            - tripStatus.getLastUpdateTime());
 
-			TripStatusBean tripStatus = tripDetails.getStatus();
+      vehicle.setSecsSinceReport(secondsSinceUpdate);
+      
 
-			// filter out interlined routes
-			if (routeId != null
-					&& !tripDetails.getTrip().getRoute().getId()
-							.equals(routeId))
-				continue;
+      vehiclesList.add(vehicle);
+    }
 
-			Vehicle vehicle = new Vehicle();
-			vehicle.setId(tripStatus.getVehicleId());
-			vehicle.setLat(new BigDecimal(df.format(tripStatus.getLocation()
-					.getLat())));
-			vehicle.setLon(new BigDecimal(df.format(tripStatus.getLocation()
-					.getLon())));
-			vehicle.setHeading((int) tripStatus.getOrientation());
-			vehicle.setDirTag(tripStatus.getActiveTrip().getDirectionId());
-			vehicle.setPredictable(tripStatus.isPredicted());
-			vehicle.setRouteTag(getIdNoAgency(tripStatus.getActiveTrip()
-					.getRoute().getId()));
+    return vehiclesList;
 
-			int secondsSinceUpdate = 0;
-			if (tripStatus.getLastUpdateTime() > 0)
-				secondsSinceUpdate = (int) TimeUnit.MILLISECONDS
-						.toSeconds(System.currentTimeMillis()
-								- tripStatus.getLastUpdateTime());
+  }
 
-			vehicle.setSecsSinceReport(secondsSinceUpdate);
+  private ListBean<TripDetailsBean> getAllTripsForRoute(String routeId,
+      long currentTime) {
+    TripsForRouteQueryBean query = new TripsForRouteQueryBean();
+    query.setRouteId(routeId);
+    query.setTime(currentTime);
 
-			vehiclesList.add(vehicle);
-		}
+    TripDetailsInclusionBean inclusionBean = new TripDetailsInclusionBean();
+    inclusionBean.setIncludeTripBean(true);
+    inclusionBean.setIncludeTripStatus(true);
+    query.setInclusion(inclusionBean);
 
-		return vehiclesList;
+    return _transitDataService.getTripsForRoute(query);
+  }
 
-	}
+  private ListBean<TripDetailsBean> getAllTripsForAgency(String agencyId,
+      long currentTime) {
+    TripsForAgencyQueryBean query = new TripsForAgencyQueryBean();
+    query.setAgencyId(agencyId);
+    query.setTime(currentTime);
 
-	private ListBean<TripDetailsBean> getAllTripsForRoute(String routeId,
-			long currentTime) {
-		TripsForRouteQueryBean tripRouteQueryBean = new TripsForRouteQueryBean();
-		tripRouteQueryBean.setRouteId(routeId);
-		tripRouteQueryBean.setTime(currentTime);
+    TripDetailsInclusionBean inclusionBean = new TripDetailsInclusionBean();
+    inclusionBean.setIncludeTripBean(true);
+    inclusionBean.setIncludeTripStatus(true);
+    query.setInclusion(inclusionBean);
 
-		TripDetailsInclusionBean inclusionBean = new TripDetailsInclusionBean();
-		inclusionBean.setIncludeTripBean(true);
-		inclusionBean.setIncludeTripStatus(true);
-		tripRouteQueryBean.setInclusion(inclusionBean);
+    return _transitDataService.getTripsForAgency(query);
+  }
 
-		return _transitDataService.getTripsForRoute(tripRouteQueryBean);
-	}
+  private boolean isValid(Body body) {
 
-	private boolean isValid(Body body) {
+    if (!isValidAgency(body, agencyId))
+      return false;
 
-		if (!isValidAgency(body, agencyId))
-			return false;
-
-		return true;
-	}
+    return true;
+  }
 }
