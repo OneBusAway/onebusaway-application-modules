@@ -302,6 +302,7 @@
 		<dependency>
 			<groupId>javax.mail</groupId>
 			<artifactId>mail</artifactId>
+			<scope>provided</scope>
 			<version>1.4</version>
 		</dependency>
 		<dependency>

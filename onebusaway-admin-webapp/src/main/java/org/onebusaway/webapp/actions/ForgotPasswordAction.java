@@ -15,16 +15,10 @@
  */
 package org.onebusaway.webapp.actions;
 
-import javax.mail.Session;
-import javax.mail.Transport;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
-import javax.mail.Message;
-
-import java.util.Properties;
-
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.onebusaway.admin.service.TemporaryPasswordService;
 import org.slf4j.Logger;
 
@@ -33,10 +27,7 @@ public class ForgotPasswordAction extends OneBusAwayNYCAdminActionSupport {
 
 	private static Logger _log = LoggerFactory.getLogger(ForgotPasswordAction.class);
 	
-	private static final String EMAIL_FROM = "admin@onebusaway.com";
-	private static final String EMAIL_SUBJECT = "OneBusAway password reset";
-	private static final String EMAIL_BODY = "Your temporary password is: ";
-
+	
 	private String username;
 
 	public String getUsername() {
@@ -46,35 +37,39 @@ public class ForgotPasswordAction extends OneBusAwayNYCAdminActionSupport {
 	public void setUsername(String username) {
 		this.username = username;
 	}
-
-	private String temporaryPassword;
 	
 	@Autowired
 	private TemporaryPasswordService _passwordService;
+		
+	private static final String EMAIL_SUBJECT = "OneBusAway password reset";
+	private static final String EMAIL_BODY = "Your temporary password is: ";
 	
-	// Send email with password reset link. Assume email address = username.
+	@Autowired
+	JavaMailSender _mailSender;
+	
+	private SimpleMailMessage getMessage() {
+		SimpleMailMessage msg = new SimpleMailMessage();
+		msg.setTo(username);
+		msg.setSubject(EMAIL_SUBJECT);
+
+		String tempPass = _passwordService.getTemporaryPasswordForUser(username);
+		msg.setText(EMAIL_BODY + tempPass);
+		return msg;
+	}
+	
 	@Override
 	public String execute() {
 		super.execute();
-
-		temporaryPassword = _passwordService.getTemporaryPasswordForUser(username);
+		SimpleMailMessage msg = getMessage();
 		try {
-			// User default session
-			Session session = Session.getDefaultInstance(new Properties());
-
-			Message message = new MimeMessage(session);
-			message.setFrom(new InternetAddress(EMAIL_FROM));
-			message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(username));
-			message.setSubject(EMAIL_SUBJECT);
-			message.setText(EMAIL_BODY + temporaryPassword);
-			Transport.send(message);
-			
-			return SUCCESS;
-			
-		} catch (Exception e) {
-			_log.warn("Could not send email: " + e.getMessage());
+			_mailSender.send(msg);
+			_log.info("Sent email.");
+		} catch(Exception e) {
+			_log.error("Could not send email: " + e.getMessage());
 			throw new RuntimeException("Unable to send email.");
 		}
+		return SUCCESS;
 	}
+	
 	
 }
