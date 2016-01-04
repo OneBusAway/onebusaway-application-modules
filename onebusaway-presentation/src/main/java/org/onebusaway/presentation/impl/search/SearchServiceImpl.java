@@ -427,14 +427,17 @@ public class SearchServiceImpl implements SearchService {
 				}
 			} else {
 				// if the token is not a route and the next or last token is a
-				// valid stop id,
+				// valid stop id (but not also a route ID),
 				// consider the token a bad filter and remove it from the query.
-				if ((lastItem != null && stopsForId(lastItem).size() > 0)
-						|| (nextItem != null && stopsForId(nextItem).size() > 0)) {
-				  if (!token.contains("_")) {
-				    // if we have an agency Id, its probably a stop, don't discard
-				    continue;
-				  }
+				if ((lastItem != null && stopsForId(lastItem).size() > 0
+						&& !_routeShortNameToRouteBeanMap.containsKey(lastItem))
+						|| (nextItem != null && stopsForId(nextItem).size() > 0
+								&& !_routeShortNameToRouteBeanMap.containsKey(nextItem))) {
+					if (!token.contains("_")) {
+						// if we have an agency Id, its probably a stop, don't
+						// discard
+						continue;
+					}
 				}
 			}
 
