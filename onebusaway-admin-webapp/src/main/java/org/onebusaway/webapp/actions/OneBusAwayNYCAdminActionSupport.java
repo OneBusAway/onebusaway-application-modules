@@ -21,9 +21,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.onebusaway.admin.service.AccessControlService;
 import org.onebusaway.presentation.impl.NextActionSupport;
 import org.onebusaway.users.client.model.UserBean;
 import org.onebusaway.users.model.User;
+import org.onebusaway.users.model.UserIndex;
 import org.onebusaway.users.model.UserRole;
 import org.onebusaway.users.services.CurrentUserService;
 import org.onebusaway.util.services.configuration.ConfigurationServiceClient;
@@ -92,8 +94,11 @@ public class OneBusAwayNYCAdminActionSupport extends NextActionSupport {
 	    _session = session;
 	}
 	
+	
+	
 	protected User getCurrentUserValue() {
-		return currentUserService.getCurrentUserAsUserIndex().getUser();
+		UserIndex idx = currentUserService.getCurrentUserAsUserIndex();
+		return (idx == null) ? null : idx.getUser();
 	}
 	
 	public boolean hasRoleInList(List<String> roleList) {
@@ -105,10 +110,13 @@ public class OneBusAwayNYCAdminActionSupport extends NextActionSupport {
 		return false;
 	}
 	
+	Logger _log = LoggerFactory.getLogger(OneBusAwayNYCAdminActionSupport.class);
 	@Override
-	public String execute() throws RuntimeException  {
-		if (!hasPermissionsForPage())
+	public String execute() {
+		if (!hasPrivilegeForPage()) {
 			throw new RuntimeException("Insufficient access to action " + this.getClass().getName());
+		}
+		_log.warn("Has privilege for page " + this.getClass().getName());
 		return SUCCESS;
 	}
 	
@@ -132,6 +140,22 @@ public class OneBusAwayNYCAdminActionSupport extends NextActionSupport {
 	public boolean hasPermissionsForPage() {
 		String name = this.getClass().getSimpleName();
 		return hasPermissionsForPage(name);
+	}
+	
+	@Autowired
+	private AccessControlService _accessControlService;
+	
+	private boolean hasPrivilegeForPage() {
+		try {
+			String privilege = this.getClass().getName();
+			User user = getCurrentUserValue();
+			
+			return _accessControlService.userHasPrivilege(user, privilege);
+		}
+		catch(Exception e) {
+			_log.warn(e.getMessage());
+			return false;
+		}
 	}
 
 }
