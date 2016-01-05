@@ -15,8 +15,8 @@
  */
 package org.onebusaway.admin.service.bundle.api;
 
+import org.onebusaway.admin.service.AccessControlService;
 import org.onebusaway.users.services.CurrentUserService;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,15 +28,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class AuthenticatedResource {
 
   private static Logger _log = LoggerFactory.getLogger(AuthenticatedResource.class);
+  
+  @Autowired
   protected CurrentUserService _currentUserService;
   
   @Autowired
-  public void setCurrentUserService(CurrentUserService userDataService) {
-    _currentUserService = userDataService;
-  }
+  private AccessControlService _accessControlService;
 
   protected boolean isAuthorized() {
-    boolean isAuthorized = _currentUserService.isCurrentUserAdmin();
+	String privilege = this.getClass().getName(); // perhaps too coarse-grained for API calls
+    boolean isAuthorized = _accessControlService.currentUserHasPrivilege(privilege);
     if (!isAuthorized) {
       _log.info("request not authorized");
     }

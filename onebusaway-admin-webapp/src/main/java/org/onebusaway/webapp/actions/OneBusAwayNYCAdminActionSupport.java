@@ -104,8 +104,7 @@ public class OneBusAwayNYCAdminActionSupport extends NextActionSupport {
 	private AccessControlService _accessControlService;
 	
 	public boolean hasPrivilegeForPage(String privilege) {
-		User user = getCurrentUserValue();
-		return _accessControlService.userHasPrivilege(user, privilege);
+		return _accessControlService.currentUserHasPrivilege(privilege);
 	}
 	
 	public boolean hasPrivilegeForPage() {

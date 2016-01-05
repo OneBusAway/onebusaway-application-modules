@@ -35,7 +35,7 @@ import org.springframework.web.context.ServletContextAware;
 
 @Path("/bundle")
 @Component
-public class BundleResource implements ServletContextAware{
+public class BundleResource extends AuthenticatedResource implements ServletContextAware{
   
   private static Logger _log = LoggerFactory.getLogger(BundleResource.class);
   @Autowired
@@ -70,8 +70,11 @@ public class BundleResource implements ServletContextAware{
     String bundleName) {
       // TODO this should follow the deployer pattern with an async response
       // object
-      
-    return _localBundleStager.stage(environment, bundleDir, bundleName);
+      if (!isAuthorized()) {
+    	return Response.noContent().build();
+	  }
+	  
+	  return _localBundleStager.stage(environment, bundleDir, bundleName);
     
     /*String json = "{ERROR}";
       try {
@@ -183,6 +186,10 @@ public class BundleResource implements ServletContextAware{
   @GET
   public Response deploy(@PathParam("environment")
   String environment) {
+	 if (!isAuthorized()) {
+		 return Response.noContent().build();
+	 }
+	  
     if(isTdm()){
       return _tdmBundleDeployer.deploy(environment);
     }

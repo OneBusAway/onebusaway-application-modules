@@ -32,6 +32,7 @@ import org.codehaus.jackson.map.MappingJsonFactory;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.onebusaway.admin.model.ui.UserDetail;
 import org.onebusaway.admin.service.UserManagementService;
+import org.onebusaway.admin.service.bundle.api.AuthenticatedResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,7 +45,7 @@ import org.springframework.stereotype.Component;
  */
 @Path("/users")
 @Component
-public class UserResource {
+public class UserResource extends AuthenticatedResource {
 
 	private UserManagementService userManagementService;
 	private final ObjectMapper mapper = new ObjectMapper();
@@ -53,6 +54,10 @@ public class UserResource {
 	@GET
 	@Produces("application/json")
 	public Response getUserNames(@QueryParam("search") String searchString) {
+		
+		if (!isAuthorized()) {
+			return Response.noContent().build();
+		}
 		
 		log.info("Getting matching user names");
 		
@@ -69,6 +74,11 @@ public class UserResource {
 	@GET
 	@Produces("application/json")
 	public Response getDetail(@QueryParam("user") String userName) {
+		
+		if (!isAuthorized()) {
+			return Response.noContent().build();
+		}
+
 		log.info("Getting user detail for user : {}", userName);
 		
 		UserDetail userDetail = userManagementService.getUserDetail(userName);

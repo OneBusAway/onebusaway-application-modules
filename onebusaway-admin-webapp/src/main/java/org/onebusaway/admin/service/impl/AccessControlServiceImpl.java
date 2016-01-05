@@ -27,7 +27,9 @@ import org.onebusaway.admin.model.role.Privilege;
 import org.onebusaway.admin.model.role.Role;
 import org.onebusaway.admin.service.AccessControlService;
 import org.onebusaway.users.model.User;
+import org.onebusaway.users.model.UserIndex;
 import org.onebusaway.users.model.UserRole;
+import org.onebusaway.users.services.CurrentUserService;
 import org.onebusaway.users.services.StandardAuthoritiesService;
 import org.onebusaway.util.services.configuration.ConfigurationServiceClient;
 import org.slf4j.LoggerFactory;
@@ -44,6 +46,9 @@ public class AccessControlServiceImpl implements AccessControlService {
 	
 	@Autowired
 	private ConfigurationServiceClient _configurationServiceClient;
+	
+	@Autowired
+	private CurrentUserService currentUserService;
 	
 	private static final String privilegeComponent = "privilege";
 
@@ -74,6 +79,18 @@ public class AccessControlServiceImpl implements AccessControlService {
 		}
 		
 		return false;
+	}
+	
+	@Override
+	public boolean currentUserHasPrivilege(String privilege) {
+		return currentUserHasPrivilege(new Privilege(privilege));
+	}
+
+	@Override
+	public boolean currentUserHasPrivilege(Privilege privilege) {
+		UserIndex idx = currentUserService.getCurrentUserAsUserIndex();
+		User user = (idx == null) ? null : idx.getUser();
+		return userHasPrivilege(user, privilege);
 	}
 	
 	private boolean roleHasPrivilege(Role role, Privilege privilege) {
@@ -117,6 +134,5 @@ public class AccessControlServiceImpl implements AccessControlService {
   			}
 		}
 	}
-	
 	
 }

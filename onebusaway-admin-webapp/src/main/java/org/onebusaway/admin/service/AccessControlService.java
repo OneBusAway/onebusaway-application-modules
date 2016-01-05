@@ -25,4 +25,7 @@ public interface AccessControlService {
 	
 	public boolean userHasPrivilege(User user, Privilege privilege);
 
+	public boolean currentUserHasPrivilege(String privilege);
+	
+	public boolean currentUserHasPrivilege(Privilege privilege);
 }
