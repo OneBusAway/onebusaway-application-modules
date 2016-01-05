@@ -83,7 +83,7 @@ public class IndexAction extends OneBusAwayNYCAdminActionSupport {
 	private CurrentUserService _currentUserService;
 	
 	public String execute() {
-		super.execute();
+		// Don't check permissions
 		String username = _currentUserService.getCurrentUserAsUserIndex().getId().getValue();
 		if (_temporaryPasswordService.isTemporaryPassword(username)) {
 			HttpServletResponse response = ServletActionContext.getResponse();

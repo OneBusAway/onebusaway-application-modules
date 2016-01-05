@@ -28,5 +28,11 @@ public class LoginAction extends OneBusAwayNYCAdminActionSupport {
   public boolean isFailure() {
     return _failure;
   }
+  
+  // Don't check permissions
+  @Override
+  public String execute() {
+	  return SUCCESS;
+  }
 
 }

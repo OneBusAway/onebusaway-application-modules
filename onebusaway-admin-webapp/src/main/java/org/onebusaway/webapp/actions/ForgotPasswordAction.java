@@ -59,7 +59,7 @@ public class ForgotPasswordAction extends OneBusAwayNYCAdminActionSupport {
 	
 	@Override
 	public String execute() {
-		super.execute();
+		// Don't check permissions.
 		SimpleMailMessage msg = getMessage();
 		try {
 			_mailSender.send(msg);
