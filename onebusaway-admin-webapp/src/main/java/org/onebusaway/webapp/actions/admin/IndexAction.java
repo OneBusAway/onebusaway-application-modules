@@ -67,7 +67,7 @@ public class IndexAction extends OneBusAwayNYCAdminActionSupport {
 	}
 	
 	public boolean isPageAvailable(String key, String actionName) {
-		return getConfig(key) && hasPermissionsForPage(actionName);
+		return getConfig(key) && hasPrivilegeForPage(actionName);
 	}
 	
 	public String getName() {

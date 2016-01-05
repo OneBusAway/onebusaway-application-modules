@@ -15,22 +15,15 @@
  */
 package org.onebusaway.webapp.actions;
 
-import java.util.Arrays;
 import java.util.Date;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.onebusaway.admin.service.AccessControlService;
 import org.onebusaway.presentation.impl.NextActionSupport;
 import org.onebusaway.users.client.model.UserBean;
 import org.onebusaway.users.model.User;
 import org.onebusaway.users.model.UserIndex;
-import org.onebusaway.users.model.UserRole;
 import org.onebusaway.users.services.CurrentUserService;
-import org.onebusaway.util.services.configuration.ConfigurationServiceClient;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -94,68 +87,29 @@ public class OneBusAwayNYCAdminActionSupport extends NextActionSupport {
 	    _session = session;
 	}
 	
-	
-	
 	protected User getCurrentUserValue() {
 		UserIndex idx = currentUserService.getCurrentUserAsUserIndex();
 		return (idx == null) ? null : idx.getUser();
-	}
+	} 
 	
-	public boolean hasRoleInList(List<String> roleList) {
-		User user = getCurrentUserValue();
-		Set<UserRole> roles = user.getRoles();
-		for (UserRole role : roles)
-			if (roleList.contains(role.getName()))
-				return true;
-		return false;
-	}
-	
-	Logger _log = LoggerFactory.getLogger(OneBusAwayNYCAdminActionSupport.class);
 	@Override
 	public String execute() {
 		if (!hasPrivilegeForPage()) {
 			throw new RuntimeException("Insufficient access to action " + this.getClass().getName());
 		}
-		_log.warn("Has privilege for page " + this.getClass().getName());
 		return SUCCESS;
-	}
-	
-	@Autowired
-	private ConfigurationServiceClient _configurationServiceClient;
-	
-	public boolean hasPermissionsForPage(String name) {
-		try {
-			String item = _configurationServiceClient.getItem("permission", name);
-			if (item.equals("*"))
-				return true;
-			List<String> roleList = Arrays.asList(item.split(","));
-			return hasRoleInList(roleList);
-		}
-		catch(Exception e) {
-			// If no permission is specified in config, assume it's not OK.
-			return false;
-		}
-	}
-		
-	public boolean hasPermissionsForPage() {
-		String name = this.getClass().getSimpleName();
-		return hasPermissionsForPage(name);
 	}
 	
 	@Autowired
 	private AccessControlService _accessControlService;
 	
-	private boolean hasPrivilegeForPage() {
-		try {
-			String privilege = this.getClass().getName();
-			User user = getCurrentUserValue();
-			
-			return _accessControlService.userHasPrivilege(user, privilege);
-		}
-		catch(Exception e) {
-			_log.warn(e.getMessage());
-			return false;
-		}
+	public boolean hasPrivilegeForPage(String privilege) {
+		User user = getCurrentUserValue();
+		return _accessControlService.userHasPrivilege(user, privilege);
+	}
+	
+	public boolean hasPrivilegeForPage() {
+		return hasPrivilegeForPage(this.getClass().getName());
 	}
 
 }

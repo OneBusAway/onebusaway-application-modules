@@ -38,11 +38,14 @@ import org.springframework.stereotype.Component;
 @Component
 public class AccessControlServiceImpl implements AccessControlService {
 
-	
 	private static Logger _log = LoggerFactory.getLogger(AccessControlServiceImpl.class);
 		
 	private Map<String, Role> roleByName;
 	
+	@Autowired
+	private ConfigurationServiceClient _configurationServiceClient;
+	
+	private static final String privilegeComponent = "privilege";
 
 	@Override
 	public boolean userHasPrivilege(User user, String privilege) {		
@@ -77,11 +80,6 @@ public class AccessControlServiceImpl implements AccessControlService {
 		Set<Privilege> allowed = role.getAllowedPrivileges();
 		return allowed != null && allowed.contains(privilege);
 	}
-	
-	@Autowired
-	private ConfigurationServiceClient _configurationServiceClient;
-	
-	private static final String privilegeComponent = "privilege";
 	
 	@PostConstruct
 	private void init() throws Exception {
