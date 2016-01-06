@@ -42,6 +42,13 @@
     <res-auth>Container</res-auth>
   </resource-ref>
 
+  <resource-ref>
+    <description>SES Connection</description>
+    <res-ref-name>mail/Session</res-ref-name>
+    <res-type>javax.mail.Session</res-type>
+    <res-auth>Container</res-auth>
+  </resource-ref>
+
   <context-param>
     <param-name>contextConfigLocation</param-name>
     <param-value>
