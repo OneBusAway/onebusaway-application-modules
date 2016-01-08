@@ -34,7 +34,7 @@ class AffectsStopKeyFactory implements AffectsKeyFactory<AgencyAndId> {
       if (affects.getStopId() != null
           && !(affects.getDirectionId() != null
               || affects.getRouteId() != null || affects.getTripId() != null)) {
-        AgencyAndId stopId = ServiceAlertLibrary.agencyAndId(affects.getAgencyId(), affects.getStopId());
+        AgencyAndId stopId = ServiceAlertLibrary.agencyAndIdAndId(affects.getAgencyId(), affects.getStopId());
         stopIds.add(stopId);
       }
     }

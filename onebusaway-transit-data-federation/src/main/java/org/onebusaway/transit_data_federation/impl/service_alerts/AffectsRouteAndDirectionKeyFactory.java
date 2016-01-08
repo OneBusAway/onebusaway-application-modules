@@ -17,6 +17,7 @@
 package org.onebusaway.transit_data_federation.impl.service_alerts;
 
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -35,10 +36,10 @@ class AffectsRouteAndDirectionKeyFactory implements
       if (affects.getRouteId() != null
           && affects.getDirectionId() != null
           && !(affects.getStopId() != null || affects.getTripId() != null)) {
-        AgencyAndId routeId = ServiceAlertLibrary.agencyAndId(serviceAlert.getAgencyId(), affects.getRouteId());
-        RouteAndDirectionRef ref = new RouteAndDirectionRef(routeId,
-            affects.getDirectionId());
-        routeAndDirectionRefs.add(ref);
+          AgencyAndId routeId = ServiceAlertLibrary.agencyAndIdAndId(serviceAlert.getAgencyId(), affects.getRouteId());
+          RouteAndDirectionRef ref = new RouteAndDirectionRef(routeId,
+              affects.getDirectionId());
+          routeAndDirectionRefs.add(ref);
       }
     }
 

@@ -34,7 +34,7 @@ class AffectsTripKeyFactory implements AffectsKeyFactory<AgencyAndId> {
       if (affects.getTripId() != null
           && !(affects.getDirectionId() != null
               || affects.getRouteId() != null || affects.getStopId() != null)) {
-        AgencyAndId tripId = ServiceAlertLibrary.agencyAndId(serviceAlert.getAgencyId(), affects.getTripId());
+        AgencyAndId tripId = ServiceAlertLibrary.agencyAndIdAndId(serviceAlert.getAgencyId(), affects.getTripId());
         tripIds.add(tripId);
       }
     }
