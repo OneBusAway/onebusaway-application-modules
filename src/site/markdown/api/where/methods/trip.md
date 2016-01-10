@@ -31,7 +31,7 @@ http://api.pugetsound.onebusaway.org/api/where/trip/1_12540399.xml?key=TEST
 
 ## Request Parameters
 
-* id - the id of the trip, encoded directly in the url:
+* id - the id of the trip, encoded directly in the URL:
     * `http://api.pugetsound.onebusaway.org/api/where/trip/[ID GOES HERE].xml`
 
 ## Response

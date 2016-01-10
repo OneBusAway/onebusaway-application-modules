@@ -34,7 +34,7 @@ http://api.pugetsound.onebusaway.org/api/where/arrivals-and-departures-for-stop/
 
 ## Request Parameters
 
-* id - the stop id, encoded directly in the url:
+* id - the stop id, encoded directly in the URL:
     * `http://api.pugetsound.onebusaway.org/api/where/arrivals-and-departures-for-stop/[ID GOES HERE].xml`
 * minutesBefore=n - include vehicles having arrived or departed in the previous n minutes (default=5)
 * minutesAfter=n - include vehicles arriving or departing in the next n minutes (default=35)

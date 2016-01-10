@@ -31,7 +31,7 @@ http://api.pugetsound.onebusaway.org/api/where/agency/1.xml?key=TEST
 
 ## Request Parameters
 
-* id - the id of the agency, encoded directly in the url:
+* id - the id of the agency, encoded directly in the URL:
     * `http://api.pugetsound.onebusaway.org/api/where/agency/[ID GOES HERE].xml`
 
 ### Response

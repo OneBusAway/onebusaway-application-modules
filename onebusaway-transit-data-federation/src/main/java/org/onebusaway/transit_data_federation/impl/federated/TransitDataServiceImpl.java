@@ -1,6 +1,7 @@
 /**
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
  * Copyright (C) 2012 Google, Inc.
+ * Copyright (C) 2014 Kurt Raschke <kurt@kurtraschke.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +28,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.onebusaway.exceptions.NoSuchTripServiceException;
+import org.onebusaway.exceptions.OutOfServiceAreaServiceException;
 import org.onebusaway.exceptions.ServiceException;
 import org.onebusaway.federations.annotations.FederatedByAgencyIdMethod;
 import org.onebusaway.federations.annotations.FederatedByEntityIdMethod;
@@ -253,6 +255,7 @@ class TransitDataServiceImpl implements TransitDataService {
 
   @Override
   public StopsBean getStops(SearchQueryBean query) throws ServiceException {
+    checkBounds(query.getBounds());
     return _stopsBeanService.getStops(query);
   }
 
@@ -352,6 +355,7 @@ class TransitDataServiceImpl implements TransitDataService {
   @Override
   public ListBean<TripDetailsBean> getTripsForBounds(
       TripsForBoundsQueryBean query) {
+    checkBounds(query.getBounds());
     return _tripDetailsBeanService.getTripsForBounds(query);
   }
 
@@ -416,6 +420,7 @@ class TransitDataServiceImpl implements TransitDataService {
 
   @Override
   public RoutesBean getRoutes(SearchQueryBean query) throws ServiceException {
+    checkBounds(query.getBounds());
     return _routesBeanService.getRoutesForQuery(query);
   }
 
@@ -653,6 +658,22 @@ class TransitDataServiceImpl implements TransitDataService {
     adQuery.setTime(query.getTime());
 
     return adQuery;
+  }
+  
+  private void checkBounds(CoordinateBounds cb) {
+    if (cb == null) {
+      return;
+    }
+
+    Collection<CoordinateBounds> allAgencyBounds = _agencyService.getAgencyIdsAndCoverageAreas().values();
+
+    for (CoordinateBounds agencyBounds : allAgencyBounds) {
+      if (agencyBounds.intersects(cb)) {
+        return;
+      }
+    }
+
+    throw new OutOfServiceAreaServiceException();
   }
 
 }

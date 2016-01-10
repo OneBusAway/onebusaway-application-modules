@@ -52,7 +52,7 @@ import org.springframework.stereotype.Component;
  * @param record record to add
  */
 @Component
-class VehicleLocationRecordCacheImpl implements VehicleLocationRecordCache {
+public class VehicleLocationRecordCacheImpl implements VehicleLocationRecordCache {
 
   private static Logger _log = LoggerFactory.getLogger(VehicleLocationRecordCacheImpl.class);
 
