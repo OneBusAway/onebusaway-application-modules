@@ -24,6 +24,7 @@ import org.onebusaway.users.model.UserPropertiesV1;
 import org.onebusaway.users.model.properties.Bookmark;
 import org.onebusaway.users.model.properties.RouteFilter;
 import org.onebusaway.users.model.properties.UserPropertiesV2;
+import org.onebusaway.users.model.properties.UserPropertiesV3;
 import org.onebusaway.users.services.UserDao;
 import org.onebusaway.users.services.UserPropertiesMigration;
 import org.onebusaway.users.services.UserPropertiesMigrationStatus;
@@ -64,14 +65,32 @@ public class UserPropertiesMigrationImpl implements UserPropertiesMigration {
     if (target.isAssignableFrom(properties.getClass()))
       return (T) properties;
 
-    if (UserPropertiesV1.class.isAssignableFrom(properties.getClass())
-        && target == UserPropertiesV2.class)
-      return (T) getV2Properties((UserPropertiesV1) properties);
+    if (UserPropertiesV1.class.isAssignableFrom(properties.getClass())) {
+      if (target == UserPropertiesV2.class) {
+        return (T) getV2Properties((UserPropertiesV1) properties);
+      } else if (target == UserPropertiesV3.class) {
+        properties = getV2Properties((UserPropertiesV1) properties);
+        return (T) getV3Properties((UserPropertiesV2) properties);
+      }
+    }
 
-    if (UserPropertiesV2.class.isAssignableFrom(properties.getClass())
-        && target == UserPropertiesV1.class)
-      return (T) getV1Properties((UserPropertiesV2) properties);
-
+    if (UserPropertiesV2.class.isAssignableFrom(properties.getClass())) {
+      if (target == UserPropertiesV1.class) {
+        return (T) getV1Properties((UserPropertiesV2) properties);
+      } else if (target == UserPropertiesV3.class) {
+        return (T) getV3Properties((UserPropertiesV2) properties);
+      }
+    }
+    
+    if (UserPropertiesV3.class.isAssignableFrom(properties.getClass())) {
+      if (target == UserPropertiesV1.class) {
+        properties = getV2PropertiesFromV3((UserPropertiesV3) properties);
+        return (T) getV1Properties((UserPropertiesV2) properties);
+      } else if (target == UserPropertiesV2.class) {
+        return (T) getV2PropertiesFromV3((UserPropertiesV3) properties);
+      }
+    }
+      
     throw new IllegalStateException("can't convert properties: from="
         + properties.getClass() + " to=" + target);
   }
@@ -102,6 +121,38 @@ public class UserPropertiesMigrationImpl implements UserPropertiesMigration {
    * @param v1
    * @return
    */
+
+  private UserPropertiesV3 getV3Properties(UserPropertiesV2 v2) {
+
+    UserPropertiesV3 v3 = new UserPropertiesV3();
+
+    v3.setRememberPreferencesEnabled(v2.isRememberPreferencesEnabled());
+
+    v3.setDefaultLocationLat(v2.getDefaultLocationLat());
+    v3.setDefaultLocationLon(v2.getDefaultLocationLon());
+    v3.setDefaultLocationName(v2.getDefaultLocationName());
+    v3.setBookmarks(v2.getBookmarks());
+    v3.setMinApiRequestInterval(v2.getMinApiRequestInterval());
+    v3.setReadSituationIdsWithReadTime(v2.getReadSituationIdsWithReadTime());
+
+    return v3;
+  }
+
+  private UserPropertiesV2 getV2PropertiesFromV3(UserPropertiesV3 v3) {
+
+    UserPropertiesV2 v2 = new UserPropertiesV2();
+
+    v2.setRememberPreferencesEnabled(v3.isRememberPreferencesEnabled());
+
+    v2.setDefaultLocationLat(v3.getDefaultLocationLat());
+    v2.setDefaultLocationLon(v3.getDefaultLocationLon());
+    v2.setDefaultLocationName(v3.getDefaultLocationName());
+    v2.setBookmarks(v3.getBookmarks());
+    v2.setMinApiRequestInterval(v3.getMinApiRequestInterval());
+    v2.setReadSituationIdsWithReadTime(v3.getReadSituationIdsWithReadTime());
+
+    return v2;
+  }
 
   private UserPropertiesV2 getV2Properties(UserPropertiesV1 v1) {
 

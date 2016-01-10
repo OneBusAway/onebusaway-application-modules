@@ -38,6 +38,9 @@ import javax.annotation.PreDestroy;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.realtime.api.VehicleLocationListener;
 import org.onebusaway.realtime.api.VehicleLocationRecord;
+import org.onebusaway.transit_data.model.service_alerts.ECause;
+import org.onebusaway.transit_data.model.service_alerts.ESeverity;
+import org.onebusaway.transit_data_federation.impl.service_alerts.*;
 import org.onebusaway.transit_data_federation.services.AgencyService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockCalendarService;
 import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts;
@@ -89,9 +92,9 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   private URL _alertsUrl;
 
   private int _refreshInterval = 30;
-  
+
   private Map<String,String> _headersMap;
-  
+
   private Map _alertAgencyIdMap;
 
   private List<String> _agencyIds = new ArrayList<String>();
@@ -120,6 +123,7 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   
   private MonitoredResult _monitoredResult = new MonitoredResult();
   
+  private StopModificationStrategy _stopModificationStrategy = null;
 
   @Autowired
   public void setAgencyService(AgencyService agencyService) {
@@ -153,6 +157,11 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     _scheduledExecutorService = scheduledExecutorService;
   }
 
+  public void setStopModificationStrategy(StopModificationStrategy strategy) {
+    _stopModificationStrategy = strategy;
+  }
+
+
   public void setTripUpdatesUrl(URL tripUpdatesUrl) {
     _tripUpdatesUrl = tripUpdatesUrl;
   }
@@ -168,11 +177,11 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   public void setRefreshInterval(int refreshInterval) {
     _refreshInterval = refreshInterval;
   }
-  
+
   public void setHeadersMap(Map<String,String> headersMap) {
 	_headersMap = headersMap;
   }
-  
+
   public void setAlertAgencyIdMap(Map alertAgencyIdMap) {
 	_alertAgencyIdMap = alertAgencyIdMap;
   }
@@ -217,6 +226,9 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     _tripsLibrary = new GtfsRealtimeTripLibrary();
     _tripsLibrary.setBlockCalendarService(_blockCalendarService);
     _tripsLibrary.setEntitySource(_entitySource);
+    if (_stopModificationStrategy != null) {
+      _tripsLibrary.setStopModificationStrategy(_stopModificationStrategy);
+    }
 
     _alertLibrary = new GtfsRealtimeAlertLibrary();
     _alertLibrary.setEntitySource(_entitySource);
@@ -291,17 +303,23 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     Calendar c = Calendar.getInstance();
     c.add(Calendar.MINUTE, -15);
     Date staleRecordThreshold = c.getTime();
-
+    long newestUpdate = 0; 
     Iterator<Map.Entry<AgencyAndId, Date>> it = _lastVehicleUpdate.entrySet().iterator();
     while (it.hasNext()) {
       Map.Entry<AgencyAndId, Date> entry = it.next();
       AgencyAndId vehicleId = entry.getKey();
       Date lastUpdateTime = entry.getValue();
+      if (lastUpdateTime != null && lastUpdateTime.getTime() > newestUpdate) {
+        newestUpdate = lastUpdateTime.getTime();
+      }
       if (!seenVehicles.contains(vehicleId)
           && lastUpdateTime.before(staleRecordThreshold)) {
         it.remove();
       }
     }
+    // NOTE: this implies receiving stale updates is equivalent to not being updated at all
+    result.setLastUpdate(newestUpdate);
+    _log.info("active vehicles=" + seenVehicles.size() + " for updates=" + updates.size());
   }
 
   private void handleAlerts(FeedMessage alerts) {
@@ -324,11 +342,149 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
         ServiceAlert existingAlert = _alertsById.get(id);
         if (existingAlert == null || !existingAlert.equals(serviceAlert)) {
           _alertsById.put(id, serviceAlert);
-          _serviceAlertService.createOrUpdateServiceAlert(serviceAlertBuilder,
-              _agencyIds.get(0));
+
+          ServiceAlertRecord serviceAlertRecord = new ServiceAlertRecord();
+          serviceAlertRecord.setAgencyId(_agencyIds.get(0));
+          serviceAlertRecord.setActiveWindows(new HashSet<ServiceAlertTimeRange>());
+          if(serviceAlert.getActiveWindowList() != null){
+            for(ServiceAlerts.TimeRange timeRange : serviceAlert.getActiveWindowList()){
+              ServiceAlertTimeRange serviceAlertTimeRange = new ServiceAlertTimeRange();
+              serviceAlertTimeRange.setFromValue(timeRange.getStart());
+              serviceAlertTimeRange.setToValue(timeRange.getEnd());
+                serviceAlertRecord.getActiveWindows().add(serviceAlertTimeRange);
+            }
+          }
+
+          serviceAlertRecord.setAllAffects(new HashSet<ServiceAlertsSituationAffectsClause>());
+          if(serviceAlert.getAffectsList() != null){
+            for(ServiceAlerts.Affects affects : serviceAlertBuilder.getAffectsList()){
+              ServiceAlertsSituationAffectsClause serviceAlertsSituationAffectsClause = new ServiceAlertsSituationAffectsClause();
+              serviceAlertsSituationAffectsClause.setAgencyId(affects.getAgencyId());
+              serviceAlertsSituationAffectsClause.setApplicationId(affects.getApplicationId());
+              serviceAlertsSituationAffectsClause.setDirectionId(affects.getDirectionId());
+              serviceAlertsSituationAffectsClause.setRouteId(affects.getRouteId().getId());
+              serviceAlertsSituationAffectsClause.setStopId(affects.getTripId().getId());
+              serviceAlertsSituationAffectsClause.setTripId(affects.getTripId().getId());
+              serviceAlertRecord.getAllAffects().add(serviceAlertsSituationAffectsClause);
+            }
+          }
+
+          serviceAlertRecord.setCause(getECause(serviceAlert.getCause()));
+          serviceAlertRecord.setConsequences(new HashSet<ServiceAlertSituationConsequenceClause>());
+          if(serviceAlert.getConsequenceList() != null){
+            for(ServiceAlerts.Consequence consequence : serviceAlert.getConsequenceList()){
+              ServiceAlertSituationConsequenceClause serviceAlertSituationConsequenceClause = new ServiceAlertSituationConsequenceClause();
+              serviceAlertSituationConsequenceClause.setDetourPath(consequence.getDetourPath());
+              serviceAlertSituationConsequenceClause.setDetourStopIds(new HashSet<String>());
+              if(consequence.getDetourStopIdsList() != null){
+                for(ServiceAlerts.Id stopId : consequence.getDetourStopIdsList()){
+                  serviceAlertSituationConsequenceClause.getDetourStopIds().add(stopId.getId());
+                }
+              }
+              serviceAlertRecord.getConsequences().add(serviceAlertSituationConsequenceClause);
+            }
+          }
+
+          serviceAlertRecord.setCreationTime(serviceAlert.getCreationTime());
+          serviceAlertRecord.setDescriptions(
+              new HashSet<ServiceAlertLocalizedString>());
+          if(serviceAlert.getDescription() != null){
+            for(ServiceAlerts.TranslatedString.Translation translation : serviceAlert.getDescription().getTranslationList()){
+              ServiceAlertLocalizedString string = new ServiceAlertLocalizedString();
+              string.setValue(translation.getText());
+              string.setLanguage(translation.getLanguage());
+              serviceAlertRecord.getDescriptions().add(string);
+            }
+          }
+
+          serviceAlertRecord.setModifiedTime(serviceAlert.getModifiedTime());
+          serviceAlertRecord.setPublicationWindows(new HashSet<ServiceAlertTimeRange>());
+
+          serviceAlertRecord.setServiceAlertId(serviceAlert.getId().getId());
+          serviceAlertRecord.setSeverity(getESeverity(serviceAlert.getSeverity()));
+
+          serviceAlertRecord.setSummaries(new HashSet<ServiceAlertLocalizedString>());
+          if(serviceAlert.getSummary() != null){
+            for(ServiceAlerts.TranslatedString.Translation translation : serviceAlert.getSummary().getTranslationList()){
+              ServiceAlertLocalizedString string = new ServiceAlertLocalizedString();
+              string.setValue(translation.getText());
+              string.setLanguage(translation.getLanguage());
+              serviceAlertRecord.getSummaries().add(string);
+            }
+          }
+
+          serviceAlertRecord.setUrls(new HashSet<ServiceAlertLocalizedString>());
+          if(serviceAlert.getUrl() != null){
+            for(ServiceAlerts.TranslatedString.Translation translation : serviceAlert.getUrl().getTranslationList()){
+              ServiceAlertLocalizedString string = new ServiceAlertLocalizedString();
+              string.setValue(translation.getText());
+              string.setLanguage(translation.getLanguage());
+              serviceAlertRecord.getUrls().add(string);
+            }
+          }
+
+          _serviceAlertService.createOrUpdateServiceAlert(serviceAlertRecord);
         }
       }
     }
+  }
+
+  private ESeverity getESeverity(ServiceAlert.Severity severity){
+    if(severity == ServiceAlert.Severity.NO_IMPACT)
+      return ESeverity.NO_IMPACT;
+    if(severity == ServiceAlert.Severity.NORMAL)
+      return ESeverity.NORMAL;
+    if(severity == ServiceAlert.Severity.SEVERE)
+      return ESeverity.SEVERE;
+    if(severity == ServiceAlert.Severity.SLIGHT)
+      return ESeverity.SLIGHT;
+    if(severity == ServiceAlert.Severity.UNKNOWN)
+      return ESeverity.UNKNOWN;
+    if(severity == ServiceAlert.Severity.VERY_SEVERE)
+      return ESeverity.VERY_SEVERE;
+    if(severity == ServiceAlert.Severity.VERY_SLIGHT)
+      return ESeverity.VERY_SLIGHT;
+    return ESeverity.UNKNOWN;
+  }
+
+  private ECause getECause(ServiceAlert.Cause cause){
+    if(cause == ServiceAlert.Cause.UNKNOWN_CAUSE){
+      return ECause.UNKNOWN_CAUSE;
+    }
+    if(cause == ServiceAlert.Cause.OTHER_CAUSE){
+      return ECause.OTHER_CAUSE;
+    }
+    if(cause == ServiceAlert.Cause.TECHNICAL_PROBLEM){
+      return ECause.TECHNICAL_PROBLEM;
+    }
+    if(cause == ServiceAlert.Cause.STRIKE){
+      return ECause.STRIKE;
+    }
+    if(cause == ServiceAlert.Cause.DEMONSTRATION){
+      return ECause.DEMONSTRATION;
+    }
+    if(cause == ServiceAlert.Cause.ACCIDENT){
+      return ECause.ACCIDENT;
+    }
+    if(cause == ServiceAlert.Cause.HOLIDAY){
+      return ECause.HOLIDAY;
+    }
+    if(cause == ServiceAlert.Cause.WEATHER){
+      return ECause.WEATHER;
+    }
+    if(cause == ServiceAlert.Cause.MAINTENANCE){
+      return ECause.MAINTENANCE;
+    }
+    if(cause == ServiceAlert.Cause.CONSTRUCTION){
+      return ECause.CONSTRUCTION;
+    }
+    if(cause == ServiceAlert.Cause.POLICE_ACTIVITY){
+      return ECause.POLICE_ACTIVITY;
+    }
+    if(cause == ServiceAlert.Cause.MEDICAL_EMERGENCY){
+      return ECause.MEDICAL_EMERGENCY;
+    }
+    return ECause.UNKNOWN_CAUSE;
   }
 
   private AgencyAndId createId(String id) {
@@ -338,22 +494,26 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   /**
    * 
    * @param url
-   * @return a {@link FeedMessage} constructed from the protocol buffer conent
+   * @return a {@link FeedMessage} constructed from the protocol buffer content
    *         of the specified url, or a default empty {@link FeedMessage} if the
    *         url is null
    * @throws IOException
    */
   private FeedMessage readOrReturnDefault(URL url) throws IOException {
     if (url == null) {
-      FeedMessage.Builder builder = FeedMessage.newBuilder();
-      FeedHeader.Builder header = FeedHeader.newBuilder();
-      header.setGtfsRealtimeVersion(GtfsRealtimeConstants.VERSION);
-      builder.setHeader(header);
-      return builder.build();
+      return getDefaultFeedMessage();
     }
     return readFeedFromUrl(url);
   }
 
+  private FeedMessage getDefaultFeedMessage() {
+    FeedMessage.Builder builder = FeedMessage.newBuilder();
+    FeedHeader.Builder header = FeedHeader.newBuilder();
+    header.setGtfsRealtimeVersion(GtfsRealtimeConstants.VERSION);
+    builder.setHeader(header);
+    return builder.build();
+  }
+  
   /**
    * 
    * @param url the {@link URL} to read from
@@ -364,12 +524,16 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   private FeedMessage readFeedFromUrl(URL url) throws IOException {
    URLConnection urlConnection = url.openConnection();
    setHeadersToUrlConnection(urlConnection);
-   InputStream in = urlConnection.getInputStream();
-    try {
-      return FeedMessage.parseFrom(in, _registry);
-    } finally {
+   InputStream in = null;
+   try {
+     in = urlConnection.getInputStream();
+     return FeedMessage.parseFrom(in, _registry);
+   } catch (IOException ex) {
+     _log.error("connection issue with url " + url);
+     return getDefaultFeedMessage();
+   } finally {
       try {
-        in.close();
+        if (in != null) in.close();
       } catch (IOException ex) {
         _log.error("error closing url stream " + url);
       }

@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2011 Metropolitan Transportation Authority
+
+    Licensed under the Apache License, Version 2.0 (the "License"); you may not
+    use this file except in compliance with the License. You may obtain a copy of
+    the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+    License for the specific language governing permissions and limitations under
+    the License.
+
+-->
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:context="http://www.springframework.org/schema/context" xmlns:tx="http://www.springframework.org/schema/tx"
+  xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
+        http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.0.xsd">
+
+    <!-- Database Connection Configuration -->
+    <bean id="dataSource"
+          class="org.springframework.jndi.JndiObjectFactoryBean">
+      <property name="jndiName"
+                value="java:comp/env/jdbc/archiveDB"/>   
+      <property name="lookupOnStartup"
+                value="true"/>   
+      <property name="cache"
+                value="true"/>   
+      <property name="proxyInterface"
+                value="javax.sql.DataSource"/>   
+      <property name="resourceRef"
+                value="true" />
+    </bean>
+
+  <bean id="kcm_gtfsRealtimeTask" class="org.onebusaway.gtfs_realtime.archiver.listener.GtfsRealtimeArchiverTask">
+    <property name="scheduledExecutorService" ref="scheduledExecutorService" />
+    <property name="feedService" ref="feedService" />
+  	<property name="tripUpdatesUrl" value="http://data.onebusaway.org/cgi/trip-updates.sh" />
+  	<property name="vehiclePositionsUrl" value="http://data.onebusaway.org/cgi/vehicle-positions.sh" />
+  	<property name="refreshInterval" value="30" />
+  </bean>
+  <bean id="wsf_gtfsRealtimeTask" class="org.onebusaway.gtfs_realtime.archiver.listener.GtfsRealtimeArchiverTask">
+    <property name="scheduledExecutorService" ref="scheduledExecutorService" />
+    <property name="feedService" ref="feedService" />
+  	<property name="tripUpdatesUrl" value="http://admin.staging.obast.org:9999/wsf/tripUpdates" />
+  	<property name="vehiclePositionsUrl" value="http://admin.staging.obast.org:9999/wsf/vehiclePositions" />
+  	<property name="refreshInterval" value="30" />
+  </bean>
+  
+  <!--         <bean id="wsf_avl" class="org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.GtfsRealtimeSource"> -->
+<!--                 <property name="tripUpdatesUrl" value="http://localhost:9000/wsf/tripUpdates" /> -->
+<!--                 <property name="vehiclePositionsUrl" value="http://localhost:9000/wsf/vehiclePositions" /> -->
+<!--                 <property name="refreshInterval" value="30"/> -->
+<!--                 <property name="agencyIds"> -->
+<!--                         <list> -->
+<!--                                 <value>95</value> -->
+<!--                         </list> -->
+<!--                 </property> -->
+
+<!--         </bean> -->
+  
+  
+  
+  
+	<bean id="sessionFactory" class="org.springframework.orm.hibernate3.annotation.AnnotationSessionFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<property name="annotatedClasses">
+			<list>
+				<value>org.onebusaway.gtfs_realtime.archiver.model.TripUpdateModel</value>
+				<value>org.onebusaway.gtfs_realtime.archiver.model.StopTimeUpdateModel</value>
+				<value>org.onebusaway.gtfs_realtime.archiver.model.VehiclePositionModel</value>
+			</list>
+		</property>
+		<property name="hibernateProperties">
+			<props>
+				<prop key="hibernate.connection.pool_size">1</prop>
+				<prop key="hibernate.current_session_context_class">thread</prop>
+				<prop key="hibernate.cache.provider_class">org.hibernate.cache.NoCacheProvider</prop>
+				<prop key="hibernate.show_sql">false</prop>
+				<prop key="hibernate.hbm2ddl.auto">update</prop>
+	            <prop key="hibernate.jdbc.batch_size">1000</prop>
+    		    <prop key="hibernate.order_inserts">false</prop>
+            	<prop key="hibernate.order_updates">false</prop>
+			</props>
+		</property>
+	</bean>
+</beans>

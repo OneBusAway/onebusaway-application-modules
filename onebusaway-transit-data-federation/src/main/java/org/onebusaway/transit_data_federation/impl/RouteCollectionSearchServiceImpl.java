@@ -53,7 +53,14 @@ import org.springframework.stereotype.Component;
 public class RouteCollectionSearchServiceImpl implements
     RouteCollectionSearchService {
 
-  private static Analyzer _analyzer = new StandardAnalyzer();
+  public static final String[] ENGLISH_STOP_WORDS = {
+    "an", "and", "are", "as", "at", "be", "but", "by",
+    "for", "if", "in", "into", "is", "it",
+    "no", "not", "of", "on", "or", "such",
+    "that", "the", "their", "then", "there", "these",
+    "they", "this", "to", "was", "will", "with"
+  };
+  private static Analyzer _analyzer = new StandardAnalyzer(ENGLISH_STOP_WORDS);
 
   private static String[] NAME_FIELDS = {
       RouteCollectionSearchIndexConstants.FIELD_ROUTE_SHORT_NAME,

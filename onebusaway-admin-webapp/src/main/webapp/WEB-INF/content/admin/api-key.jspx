@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2011 Metropolitan Transportation Authority
+
+    Licensed under the Apache License, Version 2.0 (the "License"); you may not
+    use this file except in compliance with the License. You may obtain a copy of
+    the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+    License for the specific language governing permissions and limitations under
+    the License.
+
+-->
+
+<html xmlns:jsp="http://java.sun.com/JSP/Page"
+	xmlns:c="http://java.sun.com/jsp/jstl/core" xmlns:s="/struts-tags">
+<jsp:directive.page contentType="text/html" />
+<head>
+<s:url var="url" value="/css/admin.css" />
+<link rel="stylesheet" href="${url}" type="text/css" />
+
+<s:url var="url" value="/js/lib/jquery.js" />
+<script type="text/javascript" src="${url}">
+	<!-- prevent jspx minimization -->
+	</script>
+<s:url var="url" value="/js/oba/api-key.js" />
+<script type="text/javascript" src="${url}">
+	<!-- prevent jspx minimization -->
+	</script>
+</head>
+<body>
+	<div id="content">
+		<div id="text">
+			<h2>Create an API key</h2>
+			<s:form action="api-key!createAPIKey" namespace="/admin">
+				<fieldset style="background-color: transparent; border: 0;">
+					<label class="top">Key :</label>
+					<div style="border: 1px solid #000; display: inline-block;">
+						<s:textfield id="key" name="key" required="true"
+							style="margin: 1px; width: 300px;" />
+						<button type="button" onclick="handleGenerateApiKeyClick()"
+							style="background-color: transparent; border: 0;">Generate</button>
+					</div>
+				</fieldset>
+				<s:submit align="left" value="Create" />
+				<div id="apiKeyResult">
+					<s:actionmessage />
+					<s:fielderror />
+				</div>
+			</s:form>
+		</div>
+	</div>
+</body>
+</html>

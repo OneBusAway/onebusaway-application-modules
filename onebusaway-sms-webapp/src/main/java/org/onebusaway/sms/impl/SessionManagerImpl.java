@@ -27,11 +27,15 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 import org.onebusaway.sms.services.SessionManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 @Component
 public class SessionManagerImpl implements SessionManager {
 
+  private static Logger _log = LoggerFactory.getLogger(SessionManagerImpl.class);
+  
   private ConcurrentHashMap<String, ContextEntry> _contextEntriesByKey = new ConcurrentHashMap<String, ContextEntry>();
 
   private ScheduledExecutorService _executor;
@@ -124,7 +128,6 @@ public class SessionManagerImpl implements SessionManager {
   private class SessionCleanup implements Runnable {
 
     public void run() {
-
       long minTime = System.currentTimeMillis() - _sessionTimeout * 1000;
 
       Iterator<ContextEntry> it = _contextEntriesByKey.values().iterator();

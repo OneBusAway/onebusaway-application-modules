@@ -102,6 +102,8 @@ public abstract class AbstractOrbcadRecordSource implements MonitoredDataSource 
 
   private transient int _recordsValid = 0;
   
+  private transient long _latestUpdate = 0;
+  
   private MonitoredResult _monitoredResult, _currentResult = new MonitoredResult();
 
   public void setRefreshInterval(int refreshIntervalInSeconds) {
@@ -304,6 +306,7 @@ public abstract class AbstractOrbcadRecordSource implements MonitoredDataSource 
 
         preHandleRefresh();
         handleRefresh();
+        _currentResult.setLastUpdate(_latestUpdate);
         postHandleRefresh();
 
         try {
@@ -328,7 +331,7 @@ public abstract class AbstractOrbcadRecordSource implements MonitoredDataSource 
 
     
     private void postHandleRefresh() {
-      _log.debug("" + _agencyIds + ": runningCount=" + _recordsTotal  + ", currentCount=" + _currentResult.getRecordsTotal());
+      _log.debug("" + _agencyIds + ": runningCount=" + _recordsTotal  + ", currentCount=" + _currentResult.getRecordsTotal() + " for agency " + _currentResult.getAgencyIds());
       if (_currentResult.getRecordsTotal() > 0) {
         // only consider it a successful update if we got some records
         // ftp impl may not have a new file to download
@@ -376,6 +379,9 @@ public abstract class AbstractOrbcadRecordSource implements MonitoredDataSource 
 
       message.setServiceDate(blockInstance.getServiceDate());
       message.setTimeOfRecord(record.getTime() * 1000);
+      if (message.getTimeOfRecord() > _latestUpdate) {
+        _latestUpdate = message.getTimeOfRecord();
+      }
       message.setTimeOfLocationUpdate(message.getTimeOfRecord());
       
       // In Orbcad, +scheduleDeviation means the bus is early and -schedule
@@ -389,6 +395,7 @@ public abstract class AbstractOrbcadRecordSource implements MonitoredDataSource 
       if (record.hasLat() && record.hasLon()) {
         message.setCurrentLocationLat(record.getLat());
         message.setCurrentLocationLon(record.getLon());
+        _currentResult.addLatLon(record.getLat(), record.getLon());
       }
 
       int effectiveScheduleTime = (int) (record.getTime() - blockInstance.getServiceDate() / 1000);

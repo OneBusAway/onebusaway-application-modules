@@ -33,7 +33,7 @@
   <import resource="classpath:org/onebusaway/container/application-context.xml" />
 
   <bean id="bundle" class="org.onebusaway.transit_data_federation.services.FederatedTransitDataBundle">
-    <property name="path" value="${bundlePath}" />
+   <!--  <property name="path" value="${bundlePath}" /> -->
   </bean>
   
   <!-- Database Connection Configuration -->
@@ -48,7 +48,7 @@
   <bean class="org.onebusaway.container.spring.PropertyOverrideConfigurer">
     <property name="properties">
       <props>
-        <prop key="ehCacheConfiguration.diskStorePath">${bundlePath}/cache</prop>
+        <prop key="ehCacheConfiguration.diskStorePath">/tmp/cache</prop>
       </props>
     </property>
     <property name="order" value="0" />

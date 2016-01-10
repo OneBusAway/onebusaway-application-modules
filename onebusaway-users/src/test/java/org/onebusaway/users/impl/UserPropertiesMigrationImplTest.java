@@ -29,6 +29,7 @@ import org.onebusaway.users.model.UserPropertiesV1;
 import org.onebusaway.users.model.properties.Bookmark;
 import org.onebusaway.users.model.properties.RouteFilter;
 import org.onebusaway.users.model.properties.UserPropertiesV2;
+import org.onebusaway.users.model.properties.UserPropertiesV3;
 
 public class UserPropertiesMigrationImplTest {
 
@@ -117,5 +118,84 @@ public class UserPropertiesMigrationImplTest {
 
     assertEquals(Arrays.asList("1_29214", "1_75403", "1_75414"),
         v1.getBookmarkedStopIds());
+  }
+  @Test
+  public void testV2ToV3Migration() {
+
+    UserPropertiesV2 v2 = new UserPropertiesV2();
+    v2.setDefaultLocationLat(47.0);
+    v2.setDefaultLocationLon(-122.0);
+    v2.setDefaultLocationName("Seattle");
+    v2.setRememberPreferencesEnabled(true);
+
+    Bookmark b1 = new Bookmark(0,null,Arrays.asList("1_29214"),new RouteFilter());
+    Bookmark b2 = new Bookmark(1,null,Arrays.asList("1_75403", "1_75414"), new RouteFilter());
+    v2.setBookmarks(Arrays.asList(b1, b2));
+
+    UserPropertiesV2 result = _service.migrate(v2, UserPropertiesV2.class);
+    assertTrue(v2 == result);
+
+    UserPropertiesV3 v3 = _service.migrate(v2, UserPropertiesV3.class);
+
+    assertTrue(v3.isRememberPreferencesEnabled());
+
+    assertEquals(47.0, v3.getDefaultLocationLat(), 0.0);
+    assertEquals(-122.0, v3.getDefaultLocationLon(), 0.0);
+    assertEquals("Seattle", v3.getDefaultLocationName());
+
+    List<Bookmark> bookmarks = v3.getBookmarks();
+    assertEquals(2, bookmarks.size());
+
+    Bookmark bookmark = bookmarks.get(0);
+    assertEquals(0,bookmark.getId());
+    assertNull(bookmark.getName());
+    assertEquals(Arrays.asList("1_29214"), bookmark.getStopIds());
+    assertTrue(bookmark.getRouteFilter().getRouteIds().isEmpty());
+
+    bookmark = bookmarks.get(1);
+    assertEquals(1,bookmark.getId());
+    assertNull(bookmark.getName());
+    assertEquals(Arrays.asList("1_75403", "1_75414"), bookmark.getStopIds());
+    assertTrue(bookmark.getRouteFilter().getRouteIds().isEmpty());
+  }
+
+  @Test
+  public void testV3ToV2Migration() {
+
+    UserPropertiesV3 v3 = new UserPropertiesV3();
+    v3.setDefaultLocationLat(47.0);
+    v3.setDefaultLocationLon(-122.0);
+    v3.setDefaultLocationName("Seattle");
+    v3.setRememberPreferencesEnabled(true);
+
+    Bookmark b1 = new Bookmark(0,null,Arrays.asList("1_29214"),new RouteFilter());
+    Bookmark b2 = new Bookmark(1,null,Arrays.asList("1_75403", "1_75414"), new RouteFilter());
+    v3.setBookmarks(Arrays.asList(b1, b2));
+
+    UserPropertiesV3 result = _service.migrate(v3, UserPropertiesV3.class);
+    assertTrue(v3 == result);
+
+    UserPropertiesV2 v2 = _service.migrate(v3, UserPropertiesV2.class);
+
+    assertTrue(v2.isRememberPreferencesEnabled());
+
+    assertEquals(47.0, v2.getDefaultLocationLat(), 0.0);
+    assertEquals(-122.0, v2.getDefaultLocationLon(), 0.0);
+    assertEquals("Seattle", v2.getDefaultLocationName());
+
+    List<Bookmark> bookmarks = v2.getBookmarks();
+    assertEquals(2, bookmarks.size());
+
+    Bookmark bookmark = bookmarks.get(0);
+    assertEquals(0,bookmark.getId());
+    assertNull(bookmark.getName());
+    assertEquals(Arrays.asList("1_29214"), bookmark.getStopIds());
+    assertTrue(bookmark.getRouteFilter().getRouteIds().isEmpty());
+
+    bookmark = bookmarks.get(1);
+    assertEquals(1,bookmark.getId());
+    assertNull(bookmark.getName());
+    assertEquals(Arrays.asList("1_75403", "1_75414"), bookmark.getStopIds());
+    assertTrue(bookmark.getRouteFilter().getRouteIds().isEmpty());
   }
 }

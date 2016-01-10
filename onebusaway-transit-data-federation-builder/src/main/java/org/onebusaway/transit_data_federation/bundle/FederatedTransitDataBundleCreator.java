@@ -31,6 +31,7 @@ import org.onebusaway.collections.CollectionsLibrary;
 import org.onebusaway.container.ContainerLibrary;
 import org.onebusaway.container.spring.PropertyOverrideConfigurer;
 import org.onebusaway.transit_data_federation.bundle.model.GtfsBundle;
+import org.onebusaway.transit_data_federation.bundle.model.StatusMessages;
 import org.onebusaway.transit_data_federation.bundle.model.TaskDefinition;
 import org.onebusaway.transit_data_federation.impl.DirectedGraph;
 import org.onebusaway.transit_data_federation.services.FederatedTransitDataBundle;
@@ -89,6 +90,8 @@ public class FederatedTransitDataBundleCreator {
   private boolean _randomizeCacheDir = false;
 
   private String _bundleKey;
+  
+  private StatusMessages _status = new StatusMessages();
 
   /**
    * 
@@ -149,6 +152,10 @@ public class FederatedTransitDataBundleCreator {
   public void setAdditionalBeanPropertyOverrides(Properties props) {
     _additionalBeanPropertyOverrides = props;
   }
+  
+  public StatusMessages getStatusMessages() {
+    return this._status;
+  }
 
   /**
    * Build the bundle!
@@ -180,11 +187,14 @@ public class FederatedTransitDataBundleCreator {
     // Clear cache files
     FederatedTransitDataBundle bundle = context.getBean(FederatedTransitDataBundle.class);
     clearExistingCacheFiles(bundle);
-
+    int taskSize = taskNames.size();
+    int i = 0;
     for (TaskDefinition def : taskDefinitions) {
       String taskName = def.getTaskName();
       if (taskNames.contains(taskName)) {
+        i++;
         System.out.println("== " + taskName + " =====>");
+        _status.addMessage("running task " + taskName + " (" + i + "/" + taskSize + ")");
         Runnable task = getTask(context, def.getTask(), def.getTaskBeanName());
         if (task == null)
           throw new IllegalStateException("unknown task bean with name: "
@@ -195,6 +205,7 @@ public class FederatedTransitDataBundleCreator {
             def.getTaskWhenSkippedBeanName());
         if (task != null) {
           System.out.println("== skipping " + taskName + " =====>");
+          _status.addMessage("skipping task " + taskName);
           task.run();
         }
       }

@@ -3,7 +3,7 @@
   <parent>
     <groupId>org.onebusaway</groupId>
     <artifactId>onebusaway-application-modules</artifactId>
-    <version>1.1.15-SNAPSHOT</version>
+    <version>1.1.15.4-cs-SNAPSHOT</version>
   </parent>
   <artifactId>onebusaway-webapp</artifactId>
   <packaging>war</packaging>
@@ -29,6 +29,12 @@
     <dependency>
       <groupId>org.onebusaway</groupId>
       <artifactId>onebusaway-presentation</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    
+    <dependency>
+      <groupId>org.onebusaway</groupId>
+      <artifactId>onebusaway-util</artifactId>
       <version>${project.version}</version>
     </dependency>
 
@@ -91,6 +97,12 @@
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-log4j12</artifactId>
     </dependency>
+    <dependency>
+      <groupId>mysql</groupId>
+       <artifactId>mysql-connector-java</artifactId>
+       <version>5.1.17</version>
+    </dependency>    
+    
 
         <!-- Wiki Integration Support -->
         <!-- XWiki depends on an old verion of beanutils that causes conflicts for some reason -->
@@ -128,6 +140,12 @@
       <groupId>com.thoughtworks.xstream</groupId>
       <artifactId>xstream</artifactId>
     </dependency>
+    <!--  support mysql out of the box -->
+	<dependency>
+		<groupId>mysql</groupId>
+		<artifactId>mysql-connector-java</artifactId>
+		<version>5.1.17</version>
+	</dependency>
 
     <dependency>
       <groupId>junit</groupId>
@@ -251,6 +269,33 @@
           </webResources>
         </configuration>
       </plugin>
+      <plugin>
+		<groupId>pl.project13.maven</groupId>
+		<artifactId>git-commit-id-plugin</artifactId>
+		<version>2.1.15</version>
+		<executions>
+		  <execution>
+		    <goals>
+			  <goal>revision</goal>
+			</goals>
+		  </execution>
+		</executions>
+		<configuration>
+		  <prefix>git</prefix>
+		  <dateFormat>dd.MM.yyyy '@' HH:mm:ss z</dateFormat>
+		  <verbose>true</verbose>
+		  <skipPoms>false</skipPoms>
+		  <generateGitPropertiesFile>true</generateGitPropertiesFile>
+		  <generateGitPropertiesFilename>src/main/resources/git.properties</generateGitPropertiesFilename>
+		  <gitDescribe>
+			<skip>false</skip>
+			<always>true</always>
+			<abbrev>7</abbrev>
+			<dirty>-dirty</dirty>
+			<forceLongFormat>false</forceLongFormat>
+		  </gitDescribe>
+		</configuration>
+	  </plugin>
     </plugins>
   </build>
 

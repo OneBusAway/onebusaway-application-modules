@@ -43,9 +43,13 @@ import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.onebusaway.utility.IOLibrary;
 import org.onebusaway.utility.collections.TreeUnionFind;
 import org.onebusaway.utility.collections.TreeUnionFind.Sentry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class GtfsStopsForMergingMain {
 
+  protected static Logger _log = LoggerFactory.getLogger(GtfsStopsForMergingMain.class);
+  
   private static final String ARG_CONSOLIDATED = "consolidated";
 
   private static final String ARG_DISTANCE = "distance";
@@ -81,6 +85,7 @@ public class GtfsStopsForMergingMain {
     for (int i = 0; i < args.length - 1; i += 2) {
       String path = args[i];
       String agencyId = args[i + 1];
+      _log.error("found path="  + path + ", agencyId=" + agencyId);
       Collection<Stop> stops = readStopsFromGtfsPath(path, agencyId);
 
       for (Collection<Stop> previousStops : allStops) {

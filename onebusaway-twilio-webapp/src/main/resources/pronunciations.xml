@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+            http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<text-modifications>
+    <!-- Fix Typos First -->
+    <replacement from="ands atlantic" to="and s atlantic" />
+    <replacement from="&amp;se" to="&amp; se" />
+    <replacement from="ne&amp;" to="ne &amp;" />
+    <replacement from="ne/ne" to="ne &amp; ne" />
+    <replacement from="ne\ne" to="ne &amp; ne" />
+    <replacement from="nw/nw" to="nw &amp; nw" />
+    <replacement from="nw\nw" to="nw &amp; nw" />
+    <replacement from="sw/w" to="sw &amp; w" />
+    <replacement from="n\denny" to="n &amp; denny" />
+    <replacement from="s\.everett" to="s everett" />
+    <replacement from="ns/b" to="" />
+    <replacement from="e/b-far/mid" to="" />
+
+    <!-- Place Name Abbreviations -->
+    <replacement from="bthl" to="bothell" />
+    <replacement from="iss" to="issaquah" />
+    <replacement from="hlnds" to="highlands" />
+    <replacement from="lkview" to="lakeview" />
+    <replacement from="g washington" to="george washington" />
+    <replacement from="wash" to="washington" />
+
+    <replacement from="ml" to="martin luther" />
+    <replacement from="m\. l\. king" to="martin luther king" />
+    <replacement from="jr" to="junior" />
+    <replacement from="u wy ne &amp; ne pac st" to="university way ne and ne pacific street" />
+
+    <!-- Punctuation -->
+    <replacement from="\." to="" atWordBoundary="false" />
+    <replacement from="\(" to="" atWordBoundary="false" />
+    <replacement from="\)" to="" atWordBoundary="false" />
+
+    <!-- Highway Name Abberviations -->
+    <replacement from="i-5/ne" to="i-5 north east" />
+    <replacement from="i 5" to="i-5" />
+    <replacement from="i-405s" to="i-405 south" />
+    <replacement from="i 90" to="i-90" />
+    <replacement from="sr 520" to="sr-520" />
+    <replacement from="sr 203" to="sr-203" />
+    <replacement from="exp lanes" to="express lanes" />
+    <replacement from="reg lanes" to="regular lanes" />
+
+    <!-- Normalize Transit Bay Names -->
+    <replacement from="bay\s*#{0,1}\s*(\d+)" to="bay \1" />
+
+    <!-- Cardinal Directions -->
+    <replacement from="n/s" to="north-south" />
+    <replacement from="e/w" to="east-west" />
+    <replacement from="e/n" to="east-north" />
+    <replacement from="w/s" to="west-south" />
+
+    <replacement from="n\\b" to="north bound" />
+    <replacement from="n/b" to="north bound" />
+    <replacement from="nb" to="north bound" />
+
+    <replacement from="s\\b" to="south bound" />
+    <replacement from="s/b" to="south bound" />
+    <replacement from="sb" to="south bound" />
+
+    <replacement from="eastbnd" to="east bound" />
+    <replacement from="e\\b" to="east bound" />
+    <replacement from="e/b" to="east bound" />
+    <replacement from="eb" to="east bound" />
+
+    <replacement from="w\\b" to="west bound" />
+    <replacement from="w/b" to="west bound" />
+    <replacement from="wb" to="west bound" />
+
+    <replacement from="n" to="north" />
+    <replacement from="ne" to="north east" />
+    <replacement from="e" to="east" />
+    <replacement from="se" to="south east" />
+    <replacement from="s" to="south" />
+    <replacement from="sw" to="south west" />
+    <replacement from="w" to="west" />
+    <replacement from="nw" to="north" />
+
+    <replacement from="so" to="south" />
+
+    <!-- General Abberviations -->
+    <replacement from="av" to="avenue" />
+    <replacement from="ave" to="avenue" />
+    <replacement from="bch" to="beach" />
+    <replacement from="bl" to="boulevard" />
+    <replacement from="bldg" to="building" />
+    <replacement from="blk" to="block" />
+    <replacement from="blvd" to="boulevard" />
+    <replacement from="cc" to="community college" />
+    <replacement from="cntr" to="center" />
+    <replacement from="co" to="county" />
+    <replacement from="conv" to="convention" />
+    <replacement from="ctr" to="center" />
+    <replacement from="dr" to="drive" />
+    <replacement from="ext" to="extension" />
+    <replacement from="exp" to="express" />
+    <replacement from="fed" to="federal" />
+    <replacement from="frwy" to="freeway" />
+    <replacement from="fwy" to="freeway" />
+    <replacement from="fwystn" to="freeway station" />
+    <replacement from="hs" to="high school" />
+    <replacement from="hwy" to="highway" />
+    <replacement from="intrntnl" to="international" />
+    <replacement from="isl" to="island" />
+    <replacement from="lay" to="layover" />
+    <replacement from="lk" to="lake" />
+    <replacement from="ln" to="lane" />
+    <replacement from="lns" to="lanes" />
+    <replacement from="mem" to="memorial" />
+    <replacement from="mt" to="mount" />
+    <replacement from="p &amp; r" to="park and ride" />
+    <replacement from="pr" to="park and ride" />
+    <replacement from="pkwy" to="parkway" />
+    <replacement from="pl" to="place" />
+    <replacement from="pt" to="point" />
+    <replacement from="rdwy" to="roadway" />
+    <replacement from="rdwy" to="roadway" />
+    <replacement from="reg" to="regular" />
+    <replacement from="st" to="street" />
+    <replacement from="sta" to="station" />
+    <replacement from="stn" to="station" />
+    <replacement from="t\.c\." to="transit center" />
+    <replacement from="tc" to="transit center" />
+    <replacement from="temp" to="temporary" />
+    <replacement from="univ" to="university" />
+    <replacement from="vly" to="valley" />
+    <replacement from="wy" to="way" />
+    
+    <replacement from="wa" to="washington" />
+    <replacement from="ny" to="new york" />
+
+    <!-- General -->
+    <replacement from="&amp;" to="and" />
+
+    <replacement from="i-5" to="eye five" />
+    <replacement from="i-405" to="eye four oh five" />
+    <replacement from="i-90" to="eye ninety" />
+    <replacement from="sr-520" to="ess are five twenty" />
+    <replacement from="sr-203" to="ess are two oh three" />
+    <replacement from="noaa" to="noah" />
+    <replacement from="uw/ccc" to="you dub, cascadia community college" />
+    <replacement from="uw" to="you dub" />
+    <replacement from="lwhs" to="lake washington high school" />
+
+    <replacement from="alki" to='&lt;phoneme ph="ae1 l k ay"&gt;alki&lt;/phoneme&gt;' />
+    <replacement from="burien" to='&lt;phoneme ph="b j er i eh n"&gt;burien&lt;/phoneme&gt;' />
+    <replacement from="des moines" to='&lt;phoneme ph="d eh m oy n"&gt;desmoines&lt;/phoneme&gt;' />
+    <replacement from="enumclaw" to='&lt;phoneme ph="j uw n eh m k l aa"&gt;enumclaw&lt;/phoneme&gt;' />
+    <replacement from="fauntleroy" to='&lt;phoneme ph="f ao n t t l eh r oy"&gt;fauntleroy&lt;/phoneme&gt;' />
+    <replacement from="fremont" to='&lt;phoneme ph="f r i1 m aa1 n t"&gt;fremont&lt;/phoneme&gt;' />
+    <replacement from="laurelhurst" to='&lt;phoneme ph="l ao1 r ah l h er1 s t"&gt;laurelhurst&lt;/phoneme&gt;' />
+    <replacement from="madrona" to='&lt;phoneme ph="m uh1 d r ow n ah"&gt;madrona&lt;/phoneme&gt;' />
+    <replacement from="puyallup" to='&lt;phoneme ph="p j1 uw aa l ah p"&gt;puyallup&lt;/phoneme&gt;' />
+    <replacement from="sammamish" to='&lt;phoneme ph="s ah m ae1 m ih sh"&gt;sammamish&lt;/phoneme&gt;' />
+    <replacement from="tacoma" to='&lt;phoneme ph="t aa k ow1 m ah"&gt;tacoma&lt;/phoneme&gt;' />
+    <replacement from="tukwila" to='&lt;phoneme ph="t ah k w ih1 l ah"&gt;tukwila&lt;/phoneme&gt;' />
+    <replacement from="wedgwood" to='&lt;phoneme ph="w eh d jh w uh d"&gt;wedgwood&lt;/phoneme&gt;' />
+
+</text-modifications>

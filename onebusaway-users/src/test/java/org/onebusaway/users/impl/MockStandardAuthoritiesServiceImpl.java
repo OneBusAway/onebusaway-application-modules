@@ -17,7 +17,7 @@ package org.onebusaway.users.impl;
 
 import org.onebusaway.users.model.UserRole;
 import org.onebusaway.users.services.StandardAuthoritiesService;
-import org.springframework.security.GrantedAuthority;
+import org.springframework.security.core.GrantedAuthority;
 
 public class MockStandardAuthoritiesServiceImpl implements
     StandardAuthoritiesService {
@@ -27,6 +27,8 @@ public class MockStandardAuthoritiesServiceImpl implements
   private UserRole _anonymous = new UserRole(ANONYMOUS);
 
   private UserRole _user = new UserRole(USER);
+  
+  private UserRole _reporting = new UserRole(REPORTING);
 
   @Override
   public UserRole getAdministratorRole() {
@@ -41,6 +43,11 @@ public class MockStandardAuthoritiesServiceImpl implements
   @Override
   public UserRole getUserRole() {
     return _user;
+  }
+  
+  @Override
+  public UserRole getReportingRole() {
+    return _reporting;
   }
 
   @Override

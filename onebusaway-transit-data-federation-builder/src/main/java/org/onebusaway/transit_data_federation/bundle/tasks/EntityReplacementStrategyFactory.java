@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.bundle.services.EntityReplacementStrategy;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
@@ -85,10 +86,17 @@ public class EntityReplacementStrategyFactory {
         if (line.length() == 0 || line.startsWith("#")
             || line.startsWith("{{{") || line.startsWith("}}}"))
           continue;
-        String[] tokens = line.split("\\s+");
+        String[] tokens;
+        if (line.contains("\"")) {
+          tokens = line.split("\"");	
+        } else {
+          tokens = line.split("\\s+");
+        }
         List<AgencyAndId> ids = new ArrayList<AgencyAndId>();
-        for (String token : tokens)
-          ids.add(AgencyAndIdLibrary.convertFromString(token));
+        for (String token : tokens) {
+          if (StringUtils.isNotBlank(token))
+            ids.add(AgencyAndIdLibrary.convertFromString(token));
+        }
         for (int i = 1; i < ids.size(); i++)
           impl.addEntityReplacement(entityClass, ids.get(i), ids.get(0));
       }

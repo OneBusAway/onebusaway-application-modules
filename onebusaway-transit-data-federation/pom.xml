@@ -3,7 +3,7 @@
   <parent>
     <groupId>org.onebusaway</groupId>
     <artifactId>onebusaway-application-modules</artifactId>
-    <version>1.1.15-SNAPSHOT</version>
+    <version>1.1.15.4-cs-SNAPSHOT</version>
   </parent>
   <artifactId>onebusaway-transit-data-federation</artifactId>
   <packaging>jar</packaging>
@@ -36,6 +36,18 @@
     </dependency>
 
     <dependency>
+        <groupId>org.codehaus.jackson</groupId>
+        <artifactId>jackson-mapper-asl</artifactId>
+        <version>1.9.2</version>
+    </dependency>
+    <dependency>
+        <groupId>org.codehaus.jackson</groupId>
+        <artifactId>jackson-jaxrs</artifactId>
+        <version>1.9.2</version>
+    </dependency>
+
+
+    <dependency>
       <groupId>colt</groupId>
       <artifactId>colt</artifactId>
       <version>1.0.3</version>
@@ -56,13 +68,18 @@
     <dependency>
       <groupId>org.onebusaway</groupId>
       <artifactId>onebusaway-gtfs-realtime-api</artifactId>
-      <version>1.2.0</version>
-    </dependency>
+      <version>${gtfs-api-version}</version>
+    </dependency> 
 
     <dependency>
       <groupId>org.apache.lucene</groupId>
       <artifactId>lucene-core</artifactId>
       <version>2.4.1</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
     </dependency>
 
     <dependency>
@@ -79,6 +96,24 @@
       <groupId>org.mockito</groupId>
       <artifactId>mockito-core</artifactId>
       <scope>test</scope>
+    </dependency>
+    
+   <dependency>
+   		<groupId>com.google.code.gson</groupId>
+   		<artifactId>gson</artifactId>
+   		<version>1.7.1</version>
+   		<type>jar</type>
+   		<scope>compile</scope>
+   </dependency>
+	 <dependency>
+			<groupId>joda-time</groupId>
+			<artifactId>joda-time</artifactId>
+			<version>2.0</version>
+		</dependency>        
+    <dependency>
+        <groupId>org.codehaus.jackson</groupId>
+        <artifactId>jackson-xc</artifactId>
+        <version>1.9.2</version>
     </dependency>
 
   </dependencies>

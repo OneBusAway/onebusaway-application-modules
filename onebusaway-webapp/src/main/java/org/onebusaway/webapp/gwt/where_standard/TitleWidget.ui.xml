@@ -37,7 +37,7 @@
     <ui:with field='res' type='org.onebusaway.webapp.gwt.where_standard.WhereStopFinderStandardResources'/>
     
     <div class="{style.panel}">
-        <div class="{style.image}"><img src="{res.appIcon.getURL}" /></div>
+        <div class="{style.image}"><!-- <img src="{res.appIcon.getURL}" />--></div>
         <div class="{style.label}">Where Is<br />Your Bus?</div>
     </div> 
 </ui:UiBinder>

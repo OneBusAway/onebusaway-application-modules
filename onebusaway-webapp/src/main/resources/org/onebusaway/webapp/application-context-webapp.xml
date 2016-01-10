@@ -24,11 +24,11 @@
 <beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xmlns:context="http://www.springframework.org/schema/context" xmlns:aop="http://www.springframework.org/schema/aop"
   xmlns:tx="http://www.springframework.org/schema/tx" xmlns:sec="http://www.springframework.org/schema/security"
-  xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
-           http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd
+  xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+           http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
            http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.0.xsd
            http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd
-           http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-2.0.4.xsd">
+           http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.0.xsd">
 
   <!-- This turns on automatic annotation configuration -->
   <context:annotation-config />
@@ -37,6 +37,7 @@
   <import resource="classpath:org/onebusaway/users/application-context-security.xml" />
   <import resource="classpath:org/onebusaway/geocoder/application-context.xml" />
   <import resource="classpath:org/onebusaway/presentation/application-context.xml" />
+  <import resource="classpath:org/onebusaway/util/application-context.xml" />
 
   <context:component-scan base-package="org.onebusaway.webapp.impl" />
 
@@ -44,11 +45,16 @@
     and set a Remember Me cookie to remember that user for the future -->
   <bean id="currentUserStrategyImpl" class="org.onebusaway.users.impl.AutoUserCurrentUserStrategyImpl" primary="true" />
 
-  <sec:http>
+  <sec:http auto-config="false" entry-point-ref="authenticationProcessingFilterEntryPoint">
     <sec:intercept-url pattern="/admin/**" access="ROLE_ADMINISTRATOR" />
+    <!--  we cannot use form-login as we override the default behaviour -->
+    <!-- 
     <sec:form-login login-page="/login.action" authentication-failure-url="/login.action?error=1" />
+    -->
     <sec:remember-me services-ref="rememberMeServices" />
     <sec:logout invalidate-session="false" logout-url="/logout.action" />
+    <sec:custom-filter position="BASIC_AUTH_FILTER" ref="everyLastLoginAuthenticationFilter"/>
+    <sec:custom-filter position="FORM_LOGIN_FILTER" ref="userIndexAuthenticationFilter"/>
   </sec:http>
 
   <bean id="rememberMeServices" class="org.onebusaway.users.impl.authentication.TokenBasedRememberMeExtendedServices">
@@ -60,10 +66,6 @@
   <bean class="org.onebusaway.container.spring.PropertyOverrideConfigurer">
     <property name="properties">
       <props>
-        <prop key="userIndexAuthenticationFilter.defaultTargetUrl">/user/index.action</prop>
-        <prop key="userIndexAuthenticationFilter.authenticationFailureUrl">/login.action?failure=true</prop>
-        <prop key="everyLastLoginAuthenticationFilter.defaultTargetUrl">/user/index.action</prop>
-        <prop key="everyLastLoginAuthenticationFilter.authenticationFailureUrl">/login.action?failure=true</prop>
         <prop key="resourceServiceImpl.prefix">/resource.action?id=</prop>
       </props>
     </property>

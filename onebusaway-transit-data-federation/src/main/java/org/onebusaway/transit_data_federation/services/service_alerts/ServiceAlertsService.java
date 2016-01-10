@@ -16,16 +16,15 @@
  */
 package org.onebusaway.transit_data_federation.services.service_alerts;
 
-import java.util.List;
-
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data.model.service_alerts.SituationQueryBean;
 import org.onebusaway.transit_data.services.TransitDataService;
+import org.onebusaway.transit_data_federation.impl.service_alerts.ServiceAlertRecord;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.blocks.BlockTripInstance;
-import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects;
-import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
+
+import java.util.List;
 
 public interface ServiceAlertsService {
 
@@ -45,8 +44,7 @@ public interface ServiceAlertsService {
    * @return the built service alert
    */
 
-  public ServiceAlert createOrUpdateServiceAlert(ServiceAlert.Builder builder,
-      String defaultAgencyId);
+  public ServiceAlertRecord createOrUpdateServiceAlert(ServiceAlertRecord serviceAlertRecord);
 
   public void removeServiceAlert(AgencyAndId serviceAlertId);
 
@@ -61,9 +59,9 @@ public interface ServiceAlertsService {
    */
   public void removeAllServiceAlertsForFederatedAgencyId(String agencyId);
 
-  public ServiceAlert getServiceAlertForId(AgencyAndId serviceAlertId);
+  public ServiceAlertRecord getServiceAlertForId(AgencyAndId serviceAlertId);
 
-  public List<ServiceAlert> getAllServiceAlerts();
+  public List<ServiceAlertRecord> getAllServiceAlerts();
 
   /**
    * This returns all the service alerts with the specified federated agency id,
@@ -75,7 +73,7 @@ public interface ServiceAlertsService {
    * @param agencyId
    * @return
    */
-  public List<ServiceAlert> getServiceAlertsForFederatedAgencyId(String agencyId);
+  public List<ServiceAlertRecord> getServiceAlertsForFederatedAgencyId(String agencyId);
 
   /**
    * This returns the set of service alerts affecting a particular agency, as
@@ -85,20 +83,20 @@ public interface ServiceAlertsService {
    * @param agencyId
    * @return the set of service alerts affecting the specified agency
    */
-  public List<ServiceAlert> getServiceAlertsForAgencyId(long time,
+  public List<ServiceAlertRecord> getServiceAlertsForAgencyId(long time,
       String agencyId);
 
-  public List<ServiceAlert> getServiceAlertsForStopId(long time,
+  public List<ServiceAlertRecord> getServiceAlertsForStopId(long time,
       AgencyAndId stopId);
   
-  public List<ServiceAlert> getServiceAlertsForStopCall(long time,
+  public List<ServiceAlertRecord> getServiceAlertsForStopCall(long time,
       BlockInstance blockInstance, BlockStopTimeEntry blockStopTime,
       AgencyAndId vehicleId);
 
-  public List<ServiceAlert> getServiceAlertsForVehicleJourney(long time,
+  public List<ServiceAlertRecord> getServiceAlertsForVehicleJourney(long time,
       BlockTripInstance blockTripInstance,
       AgencyAndId vehicleId);
 
-  public List<ServiceAlert> getServiceAlerts(SituationQueryBean query);
+  public List<ServiceAlertRecord> getServiceAlerts(SituationQueryBean query);
 
 }

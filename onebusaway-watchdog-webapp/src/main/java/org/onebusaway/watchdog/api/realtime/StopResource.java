@@ -21,17 +21,20 @@ import java.util.List;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
 
 import org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.MonitoredDataSource;
 import org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.MonitoredResult;
+import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.onebusaway.watchdog.api.MetricResource;
 
 @Path("/metric/realtime/stop")
 public class StopResource extends MetricResource {
 
-  @Path("/{agencyId}/matched")
+  @Path("{agencyId}/matched")
   @GET
+  @Produces("application/json")
   public Response getMatchedStopCount(@PathParam("agencyId") String agencyId) {
     List<String> matchedStopIds = new ArrayList<String>();
     try {
@@ -39,17 +42,19 @@ public class StopResource extends MetricResource {
         _log.error("no configured data sources");
         return Response.ok(error("matched-stops", "con configured data sources")).build();
       }
-
+      
       for (MonitoredDataSource mds : getDataSources()) {
         MonitoredResult result = mds.getMonitoredResult();
         if (result == null) continue;
         for (String mAgencyId : result.getAgencyIds()) {
           if (agencyId.equals(mAgencyId)) {
-            matchedStopIds.addAll(result.getMatchedStopIds());
+            for (String stopId : result.getMatchedStopIds()) {
+              matchedStopIds.add(stopId);
+            }
           }
-        }
+        }                
       }
-
+      
       return Response.ok(ok("matched-stops", matchedStopIds.size())).build();
     } catch (Exception e) {
       _log.error("getMatchedStopCount broke", e);
@@ -57,8 +62,9 @@ public class StopResource extends MetricResource {
     }
   }
 
-  @Path("/{agencyId}/unmatched")
+  @Path("{agencyId}/unmatched")
   @GET
+  @Produces("application/json")
   public Response getUnmatchedStops(@PathParam("agencyId") String agencyId) {
     try {
       int unmatchedStops = 0;
@@ -84,8 +90,9 @@ public class StopResource extends MetricResource {
     }
   }
 
-  @Path("/{agencyId}/unmatched-ids")
+  @Path("{agencyId}/unmatched-ids")
   @GET
+  @Produces("application/json")
   public Response getUnmatchedStopIds(@PathParam("agencyId") String agencyId) {
     try {
       List<String> unmatchedStopIds = new ArrayList<String>();

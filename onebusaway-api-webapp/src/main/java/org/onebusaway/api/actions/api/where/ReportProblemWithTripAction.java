@@ -36,6 +36,8 @@ public class ReportProblemWithTripAction extends ApiActionSupport {
 
   private static final long serialVersionUID = 1L;
 
+  private static final int V2 = 2;
+
   @Autowired
   private TransitDataService _service;
 
@@ -48,15 +50,19 @@ public class ReportProblemWithTripAction extends ApiActionSupport {
   }
 
   @RequiredStringValidator(message = "requiredField.tripId")
-  public void setTripId(String tripId) {
+  public void setId(String tripId) {
     _model.setTripId(tripId);
   }
+  
+  public void setTripId(String tripId) {
+    setId(tripId);
+  }
 
-  public String getTripId() {
+  public String getId() {
     return _model.getTripId();
   }
 
-  public void setServiceDate(long serviceDate) {
+  public void setServiceDate(long serviceDate) {	   
     _model.setServiceDate(serviceDate);
   }
 
@@ -64,7 +70,7 @@ public class ReportProblemWithTripAction extends ApiActionSupport {
     _model.setVehicleId(vehicleId);
   }
 
-  public void setStopId(String stopId) {
+  public void setStopId(String stopId) {	
     _model.setStopId(stopId);
   }
 
@@ -83,7 +89,7 @@ public class ReportProblemWithTripAction extends ApiActionSupport {
     _model.setCode(code);
   }
 
-  public void setUserComment(String comment) {
+  public void setUserComment(String comment) {	  
     _model.setUserComment(comment);
   }
 
@@ -95,11 +101,11 @@ public class ReportProblemWithTripAction extends ApiActionSupport {
     _model.setUserVehicleNumber(vehicleNumber);
   }
 
-  public void setUserLat(double lat) {
+  public void setUserLat(double lat) {	 
     _model.setUserLat(lat);
   }
 
-  public void setUserLon(double lon) {
+  public void setUserLon(double lon) {	
     _model.setUserLon(lon);
   }
 
@@ -107,7 +113,11 @@ public class ReportProblemWithTripAction extends ApiActionSupport {
     _model.setUserLocationAccuracy(userLocationAccuracy);
   }
 
-  public DefaultHttpHeaders create() throws IOException, ServiceException {
+  public DefaultHttpHeaders show() throws IOException, ServiceException {   
+    return index();
+  }
+
+  public DefaultHttpHeaders create() throws IOException, ServiceException {	  
     return index();
   }
 
@@ -120,6 +130,9 @@ public class ReportProblemWithTripAction extends ApiActionSupport {
 
     if (hasErrors())
       return setValidationErrorsResponse();
+
+    if( ! isVersion(V2))
+      return setUnknownVersionResponse();
 
     _model.setTime(_time);
     _model.setStatus(EProblemReportStatus.NEW);

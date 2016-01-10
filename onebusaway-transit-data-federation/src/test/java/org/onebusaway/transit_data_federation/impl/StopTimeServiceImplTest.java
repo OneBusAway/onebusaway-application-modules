@@ -420,7 +420,7 @@ public class StopTimeServiceImplTest {
     assertEquals(date("2009-09-04 01:00").getTime(), sti.getArrivalTime());
     assertEquals(date("2009-09-04 01:30").getTime(), sti.getDepartureTime());
   }
-    
+
   /****
    * Private Methods
    ****/

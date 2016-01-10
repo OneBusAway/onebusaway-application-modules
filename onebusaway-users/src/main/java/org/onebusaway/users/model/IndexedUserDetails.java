@@ -15,10 +15,11 @@
  */
 package org.onebusaway.users.model;
 
-import org.springframework.security.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetails;
 
 public interface IndexedUserDetails extends UserDetails {
   public UserIndexKey getUserIndexKey();
   public boolean isAnonymous();
   public boolean isAdmin();
+  public boolean isReporting();
 }

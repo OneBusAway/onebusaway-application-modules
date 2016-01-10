@@ -38,6 +38,7 @@ import org.onebusaway.users.model.UserIndex;
 import org.onebusaway.users.model.UserIndexKey;
 import org.onebusaway.users.model.UserPropertiesV1;
 import org.onebusaway.users.model.UserRole;
+import org.onebusaway.users.model.properties.UserPropertiesV3;
 import org.onebusaway.users.services.StandardAuthoritiesService;
 import org.onebusaway.users.services.UserDao;
 import org.onebusaway.users.services.UserIndexTypes;
@@ -48,7 +49,7 @@ import org.onebusaway.users.services.UserService;
 import org.onebusaway.users.services.internal.UserIndexRegistrationService;
 import org.onebusaway.users.services.internal.UserRegistration;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.providers.encoding.PasswordEncoder;
+import org.springframework.security.authentication.encoding.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -255,7 +256,7 @@ public class UserServiceImpl implements UserService {
       User user = new User();
       user.setCreationTime(new Date());
       user.setTemporary(true);
-      user.setProperties(new UserPropertiesV1());
+      user.setProperties(new UserPropertiesV3());
       Set<UserRole> roles = new HashSet<UserRole>();
       if (isAnonymous)
         roles.add(_authoritiesService.getAnonymousRole());

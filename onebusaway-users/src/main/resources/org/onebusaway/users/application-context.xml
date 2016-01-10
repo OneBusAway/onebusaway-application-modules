@@ -123,12 +123,15 @@
         <property name="proxyInterface" value="org.onebusaway.users.services.UserPropertiesService" />
         <property name="invocationHandler">
             <bean class="org.onebusaway.users.impl.UserPropertiesServiceVersionedInvocationHandler">
-                <property name="preferredVersion" value="2" />
+                <property name="preferredVersion" value="3" />
                 <property name="userPropertiesServiceV1">
                     <bean class="org.onebusaway.users.impl.UserPropertiesServiceV1Impl" />
                 </property>
                 <property name="userPropertiesServiceV2">
                     <bean class="org.onebusaway.users.impl.UserPropertiesServiceV2Impl" />
+                </property>
+                <property name="userPropertiesServiceV3">
+                    <bean class="org.onebusaway.users.impl.UserPropertiesServiceV3Impl" />
                 </property>
             </bean>
         </property>
@@ -137,7 +140,7 @@
     <bean id="passwordEncoderV1" class="org.onebusaway.users.impl.authentication.VersionedPasswordEncoder">
         <property name="versionId" value="v1" />
         <property name="passwordEncoder">
-            <bean class="org.springframework.security.providers.encoding.ShaPasswordEncoder">
+            <bean class="org.springframework.security.authentication.encoding.ShaPasswordEncoder">
                 <constructor-arg value="256" />
                 <property name="encodeHashAsBase64" value="true" />
             </bean>

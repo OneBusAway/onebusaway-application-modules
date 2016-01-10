@@ -1,0 +1,82 @@
+<!--
+
+    Copyright (c) 2013 Kurt Raschke
+    Copyright (c) 2011 Metropolitan Transportation Authority
+
+    Licensed under the Apache License, Version 2.0 (the "License"); you may not
+    use this file except in compliance with the License. You may obtain a copy of
+    the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+    License for the specific language governing permissions and limitations under
+    the License.
+
+-->
+<html xmlns:jsp="http://java.sun.com/JSP/Page"
+      xmlns:c="http://java.sun.com/jsp/jstl/core" xmlns:s="/struts-tags"
+      xmlns:wiki="/oba-wiki-tags">
+    <jsp:directive.page contentType="text/html" />
+    <s:set name="useAgencyId" value="useAgencyId" />
+    <s:set name="showAgencyNames" value="showAgencyNames" />
+    <head>
+        <s:url var="url" value="/css/routes/routes.css">
+            <s:param name="v"><s:property value="frontEndVersion" /></s:param>
+        </s:url>
+        <link rel="stylesheet" href="${url}" type="text/css" media="screen,print"/>
+        
+        <s:url var="url" value="/js/oba/Routes.js">
+            <s:param name="v"><s:property value="frontEndVersion" /></s:param>
+        </s:url>
+        <script type="text/javascript" src="${url}"><!-- //prevent jspx minimization --></script>
+
+        <title><s:property value="getText('routes.title')"/></title>
+    </head>
+    <body>
+        <div id="content" >
+            <h1 id="HRoutes"><span><strong>Routes</strong></span></h1>
+            <div id="routes">
+                <ul class="routeList">
+                    <s:iterator value="routes">
+                        <li>
+                            <s:set var="routeColor">#<s:property value="color" default="000" /></s:set>
+                            <p class="name" style="border-bottom-color: ${routeColor};">
+                                <s:set var="linkDestination">
+                                    <s:if test="#useAgencyId">
+                                        <s:property value="id" />
+                                    </s:if>
+                                    <s:else>
+                                        <s:property value="shortName" />
+                                    </s:else>
+                                </s:set>
+
+                                <s:url var="url" value="/" anchor="%{linkDestination}" />
+
+                                <a href="${url}">
+                                    <s:if test="#showAgencyNames">
+                                        <s:property value="agency.name" />&amp;nbsp;
+                                    </s:if>
+                                    <s:if test="shortName != null and longName != null">
+                                        <s:property value="shortName" />&amp;nbsp;<s:property value="longName" />
+                                    </s:if>
+                                    <s:elseif test="shortName != null">
+                                        <s:property value="shortName" />
+                                    </s:elseif>
+                                    <s:elseif test="longName != null">
+                                        <s:property value="longName" />
+                                    </s:elseif>
+                                </a>
+                            </p>
+                            <s:if test="description != null">
+                                <p class="description"><s:property value="description" /></p>
+                            </s:if>
+                        </li>
+                    </s:iterator>
+                </ul>
+            </div>
+        </div>
+    </body>
+</html>
