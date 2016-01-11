@@ -15,6 +15,28 @@
  */
 package org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime;
 
+import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.realtime.api.VehicleLocationListener;
+import org.onebusaway.realtime.api.VehicleLocationRecord;
+import org.onebusaway.transit_data_federation.services.AgencyService;
+import org.onebusaway.transit_data_federation.services.blocks.BlockCalendarService;
+import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts;
+import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert;
+import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlertsService;
+import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
+
+import com.google.protobuf.ExtensionRegistry;
+import com.google.transit.realtime.GtfsRealtime.Alert;
+import com.google.transit.realtime.GtfsRealtime.FeedEntity;
+import com.google.transit.realtime.GtfsRealtime.FeedHeader;
+import com.google.transit.realtime.GtfsRealtime.FeedMessage;
+import com.google.transit.realtime.GtfsRealtimeConstants;
+import com.google.transit.realtime.GtfsRealtimeOneBusAway;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -33,27 +55,6 @@ import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-
-import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.realtime.api.VehicleLocationListener;
-import org.onebusaway.realtime.api.VehicleLocationRecord;
-import org.onebusaway.transit_data_federation.services.AgencyService;
-import org.onebusaway.transit_data_federation.services.blocks.BlockCalendarService;
-import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts;
-import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert;
-import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlertsService;
-import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import com.google.protobuf.ExtensionRegistry;
-import com.google.transit.realtime.GtfsRealtime.Alert;
-import com.google.transit.realtime.GtfsRealtime.FeedEntity;
-import com.google.transit.realtime.GtfsRealtime.FeedHeader;
-import com.google.transit.realtime.GtfsRealtime.FeedMessage;
-import com.google.transit.realtime.GtfsRealtimeConstants;
-import com.google.transit.realtime.GtfsRealtimeOneBusAway;
 
 public class GtfsRealtimeSource {
 
@@ -87,6 +88,8 @@ public class GtfsRealtimeSource {
   private URL _alertsUrl;
 
   private int _refreshInterval = 30;
+  
+  private boolean _showNegativeScheduledArrivals = true;
 
   private List<String> _agencyIds = new ArrayList<String>();
 
@@ -111,7 +114,7 @@ public class GtfsRealtimeSource {
   private GtfsRealtimeTripLibrary _tripsLibrary;
 
   private GtfsRealtimeAlertLibrary _alertLibrary;
-
+  
   @Autowired
   public void setAgencyService(AgencyService agencyService) {
     _agencyService = agencyService;
@@ -166,6 +169,18 @@ public class GtfsRealtimeSource {
 
   public void setAgencyIds(List<String> agencyIds) {
     _agencyIds.addAll(agencyIds);
+  }
+  
+  public void setShowNegativeScheduledArrivals(boolean _showNegativeScheduledArrivals) {
+    this._showNegativeScheduledArrivals = _showNegativeScheduledArrivals;
+  }
+  
+  public boolean getShowNegativeScheduledArrivals() {
+    return _showNegativeScheduledArrivals;
+  }
+  
+  public List<String> getAgencyIds() {
+    return _agencyIds;
   }
 
   @PostConstruct
