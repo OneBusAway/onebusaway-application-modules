@@ -115,7 +115,7 @@ public class TransitGraphImpl implements Serializable, TransitGraph {
   
   public void initialize() {
     if (_stopLocationTree == null) {
-      System.out.println("initializing trip planner graph...");
+      System.out.println("initializing transit graph...");
 
       if (_stops.size() == 0) {
 
