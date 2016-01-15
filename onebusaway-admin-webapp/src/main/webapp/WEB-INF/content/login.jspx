@@ -34,6 +34,11 @@
 				<s:submit value="Click here" />
 			</s:form>
 		</s:if>
+		<s:else>
+			<s:if test="forbidden">
+				<p class="error">Please login to view this resource.</p>
+			</s:if>
+		</s:else>
 
 	    <s:form action="/userIndex_login" namespace="/admin" method="POST">
 			<fieldset>

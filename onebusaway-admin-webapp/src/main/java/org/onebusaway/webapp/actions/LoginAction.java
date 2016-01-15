@@ -29,6 +29,16 @@ public class LoginAction extends OneBusAwayNYCAdminActionSupport {
     return _failure;
   }
   
+  private boolean _forbidden;
+  
+  public void setForbidden(boolean forbidden) {
+	  _forbidden = forbidden;
+  }
+  
+  public boolean isForbidden() {
+	  return _forbidden;
+  }
+
   // Don't check permissions
   @Override
   public String execute() {

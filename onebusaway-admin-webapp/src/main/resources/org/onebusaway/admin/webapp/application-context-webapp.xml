@@ -74,6 +74,7 @@
             <props>
             <prop key="loginAuthenticationSuccessHandler.targetUrl">/admin/index.action</prop>
             <prop key="resourceServiceImpl.prefix">/resource.action?id=</prop>
+            <prop key="authenticationProcessingFilterEntryPoint.loginFormUrl">/login.action?forbidden=true</prop>
           </props>
         </property>
     </bean>
