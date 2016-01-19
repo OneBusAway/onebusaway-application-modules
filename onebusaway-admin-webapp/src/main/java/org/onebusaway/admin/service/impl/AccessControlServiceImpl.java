@@ -78,6 +78,7 @@ public class AccessControlServiceImpl implements AccessControlService {
 			}
 		}
 		
+		_log.warn("Auth failed for " + user + ", " + privilege);
 		return false;
 	}
 	
@@ -95,7 +96,11 @@ public class AccessControlServiceImpl implements AccessControlService {
 	
 	private boolean roleHasPrivilege(Role role, Privilege privilege) {
 		Set<Privilege> allowed = role.getAllowedPrivileges();
-		return allowed != null && allowed.contains(privilege);
+		boolean authorized = allowed != null && allowed.contains(privilege);
+		if (!authorized) {
+		  _log.warn("Auth failed for " + role + ", " + privilege);
+		}
+		return authorized;
 	}
 	
 	@PostConstruct
