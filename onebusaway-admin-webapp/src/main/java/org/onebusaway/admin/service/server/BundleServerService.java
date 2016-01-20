@@ -37,7 +37,9 @@ public interface BundleServerService {
   
   <T> T makeRequest(String instanceId, String apiCall, Object payload, Class<T> returnType, int waitTimeInSeconds, Map params);
 
-  void setup();
+  <T> T makeRequest(String instanceId, String apiCall, Object payload, Class<T> returnType, int waitTimeInSeconds, Map params,
+		String sessionId);
   
+  void setup();
 
 }

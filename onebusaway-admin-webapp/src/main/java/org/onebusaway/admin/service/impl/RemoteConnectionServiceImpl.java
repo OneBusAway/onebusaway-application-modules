@@ -20,6 +20,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.CookieHandler;
+import java.net.CookieManager;
+import java.net.CookieStore;
+import java.net.HttpCookie;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -39,16 +43,22 @@ import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
 
+
 @Component
 public class RemoteConnectionServiceImpl implements RemoteConnectionService {
 
 	private static Logger log = LoggerFactory.getLogger(RemoteConnectionServiceImpl.class);
 	
-
+	
 	@Override
-	public String postContent(String url, Map<String, String> params) {
+	public String postContent(String url, Map<String, String> params, String sessionId) {
 		HttpURLConnection connection = null;
 		String content = null;
+		
+		// We may temporarily replace the sessionId. This is for forwarding build API calls.
+		CookieHandler handler = CookieHandler.getDefault();
+		HttpCookie oldCookie = null;
+		String oldSessionId = null;
 		
 		try {
 			StringBuilder postData = new StringBuilder();
@@ -60,13 +70,31 @@ public class RemoteConnectionServiceImpl implements RemoteConnectionService {
 	        }
 	        byte[] postDataBytes = postData.toString().getBytes("UTF-8");
 
+	        
 			connection = (HttpURLConnection) new URL(url).openConnection();
 	        connection.setRequestMethod("POST");
 	        connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
 	        connection.setRequestProperty("Content-Length", String.valueOf(postDataBytes.length));
+	      	        
+	        if (sessionId != null) {
+	        	if (handler instanceof CookieManager) {
+	        		CookieStore store = ((CookieManager) handler).getCookieStore();
+	        		String host = connection.getURL().getHost();
+	        		for (HttpCookie cookie : store.getCookies()) {
+	        			if(HttpCookie.domainMatches(cookie.getDomain(), host)) {
+	        				oldCookie = cookie;
+	        				oldSessionId = cookie.getValue();
+	        				cookie.setValue(sessionId);
+	        				break;
+	        			}
+	        		}
+	        	}
+	        }
+	        
 	        connection.setDoOutput(true);
 	        connection.getOutputStream().write(postDataBytes);
 			content = fromJson(connection);
+		
 			
 		} catch (MalformedURLException e) {
 			log.error("Exception connecting to " +url + ". The url might be malformed");
@@ -78,8 +106,17 @@ public class RemoteConnectionServiceImpl implements RemoteConnectionService {
 			if (connection != null) {
 				connection.disconnect();
 			}
+			
+			// Replace the old session cookie.
+			if (oldCookie != null)
+				oldCookie.setValue(oldSessionId);
 		}
 		return content;
+	}
+	
+	@Override
+	public String postContent(String url, Map<String, String> params) {
+		return postContent(url, params, null);
 	}
 	
 	@Override
