@@ -26,6 +26,7 @@ import java.net.CookieStore;
 import java.net.HttpCookie;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.Map;
@@ -55,11 +56,6 @@ public class RemoteConnectionServiceImpl implements RemoteConnectionService {
 		HttpURLConnection connection = null;
 		String content = null;
 		
-		// We may temporarily replace the sessionId. This is for forwarding build API calls.
-		CookieHandler handler = CookieHandler.getDefault();
-		HttpCookie oldCookie = null;
-		String oldSessionId = null;
-		
 		try {
 			StringBuilder postData = new StringBuilder();
 	        for (Entry<String, String> param : params.entrySet()) {
@@ -75,21 +71,9 @@ public class RemoteConnectionServiceImpl implements RemoteConnectionService {
 	        connection.setRequestMethod("POST");
 	        connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
 	        connection.setRequestProperty("Content-Length", String.valueOf(postDataBytes.length));
-	      	        
-	        if (sessionId != null) {
-	        	if (handler instanceof CookieManager) {
-	        		CookieStore store = ((CookieManager) handler).getCookieStore();
-	        		String host = connection.getURL().getHost();
-	        		for (HttpCookie cookie : store.getCookies()) {
-	        			if(HttpCookie.domainMatches(cookie.getDomain(), host)) {
-	        				oldCookie = cookie;
-	        				oldSessionId = cookie.getValue();
-	        				cookie.setValue(sessionId);
-	        				break;
-	        			}
-	        		}
-	        	}
-	        }
+	        
+	        if (sessionId != null)
+	        	connection.setRequestProperty("Cookie", "JSESSIONID=" + sessionId + ";");
 	        
 	        connection.setDoOutput(true);
 	        connection.getOutputStream().write(postDataBytes);
@@ -106,10 +90,6 @@ public class RemoteConnectionServiceImpl implements RemoteConnectionService {
 			if (connection != null) {
 				connection.disconnect();
 			}
-			
-			// Replace the old session cookie.
-			if (oldCookie != null)
-				oldCookie.setValue(oldSessionId);
 		}
 		return content;
 	}
