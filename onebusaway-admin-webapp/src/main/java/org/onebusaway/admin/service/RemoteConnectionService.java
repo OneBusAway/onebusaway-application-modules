@@ -33,6 +33,7 @@ public interface RemoteConnectionService {
 	 * @return the required content as string
 	 */
 	String getContent(String url);
+	String getContent(String url, String sessionId);
 	String postContent(String url, Map<String,String> params);
 	String postContent(String url, Map<String,String> params, String sessionId);
 	

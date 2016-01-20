@@ -95,12 +95,14 @@ public class RemoteConnectionServiceImpl implements RemoteConnectionService {
 	}
 	
 	@Override
-	public String getContent(String url) {
+	public String getContent(String url, String sessionId) {
 		HttpURLConnection connection = null;
 		String content = null;
 		try {
 			connection = (HttpURLConnection) new URL(url).openConnection();
 			connection.setRequestMethod("GET");
+			if (sessionId != null)
+	        	connection.setRequestProperty("Cookie", "JSESSIONID=" + sessionId + ";");
 			connection.setDoOutput(true);
 			connection.setReadTimeout(10000);
 			content = fromJson(connection);
@@ -116,6 +118,11 @@ public class RemoteConnectionServiceImpl implements RemoteConnectionService {
 			}
 		}
 		return content;
+	}
+	
+	@Override
+	public String getContent(String url) {
+		return getContent(url, null);
 	}
 	
 	@Override

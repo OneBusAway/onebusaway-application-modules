@@ -260,7 +260,7 @@ public class BundleServerServiceImpl implements BundleServerService, ServletCont
 	   return makeRequestInternal(instanceId, apiCall, jsonPayload, returnType, null, null);
    }
    
-   protected <T> T makeRequestInternal(String instanceId, String apiCall, String jsonPayload, Class<T> returnType, Map<String, String> params, String sessionId) {
+   protected <T> T makeRequestInternal(String instanceId, String apiCall, String jsonPayload, Class<T> returnType, Map<String, String> params, String sessionId) {	   
 	   _log.debug("makeRequestInternal(" + instanceId + ", " + apiCall + ")");
 	   String host = this.findPublicDns(instanceId);
 	   if (host == null || host.length() == 0) {
@@ -274,9 +274,7 @@ public class BundleServerServiceImpl implements BundleServerService, ServletCont
 	   // copy stream into String
 	   String content;
 	   if (params == null)
-		   content = remoteConnectionService.getContent(url);
-	   else if (sessionId == null)
-		   content = remoteConnectionService.postContent(url, params);
+		   content = remoteConnectionService.getContent(url, sessionId);
 	   else
 		   content = remoteConnectionService.postContent(url, params, sessionId);
 	   

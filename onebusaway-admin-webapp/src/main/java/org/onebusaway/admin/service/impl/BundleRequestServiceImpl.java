@@ -228,8 +228,8 @@ public class BundleRequestServiceImpl implements BundleRequestService, ServletCo
     return bundleResponse;
   }
 
-  protected <T> T makeRequest(String instanceId, String apiCall, Object payload, Class<T> returnType) {
-    return _bundleServer.makeRequest(instanceId, apiCall, payload, returnType, WAIT_SECONDS);
+  protected <T> T makeRequest(String instanceId, String apiCall, Object payload, Class<T> returnType, String sessionId) {
+    return _bundleServer.makeRequest(instanceId, apiCall, payload, returnType, WAIT_SECONDS, null, sessionId);
   }
   
   protected <T> T makeRequest(String instanceId, String apiCall, Object payload, Class<T> returnType, Map params, String sessionId) {
@@ -272,7 +272,10 @@ public class BundleRequestServiceImpl implements BundleRequestService, ServletCo
         String url = "/validate/remote/" + _request.getBundleDirectory() + "/"
             + _request.getBundleBuildName() + "/"
             + _request.getId() + "/create";
-        _response = makeRequest(serverId, url, null, BundleResponse.class);
+        
+        String sessionId = _request.getSessionId();
+        
+        _response = makeRequest(serverId, url, null, BundleResponse.class, sessionId);
         
         if (_response != null && _response.getId() != null) {
           String id = _response.getId();
@@ -283,7 +286,7 @@ public class BundleRequestServiceImpl implements BundleRequestService, ServletCo
           while (!isComplete(_response)) {
             url = "/validate/remote/" + id + "/list";
 
-            _response = makeRequest(serverId, url, null, BundleResponse.class);
+            _response = makeRequest(serverId, url, null, BundleResponse.class, sessionId);
             _validationMap.put(id, _response);
             pollCount++;
             Thread.sleep(5 * 1000);
@@ -399,7 +402,7 @@ public class BundleRequestServiceImpl implements BundleRequestService, ServletCo
           // should this response look ok, query until it completes
           while (!isComplete(_response)) {
             url = "/build/remote/" + id + "/list";
-            _response = makeRequest(serverId, url, null, BundleBuildResponse.class);
+            _response = makeRequest(serverId, url, null, BundleBuildResponse.class, sessionId);
             if (_response != null) {
             	_response.setBundleResultLink(getResultLink(_request.getBundleName(), _request.getId(),
             			_request.getBundleStartDateString(), _request.getBundleEndDateString()));
