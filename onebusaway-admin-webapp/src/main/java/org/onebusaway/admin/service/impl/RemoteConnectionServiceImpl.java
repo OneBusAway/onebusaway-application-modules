@@ -20,8 +20,13 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.CookieHandler;
+import java.net.CookieManager;
+import java.net.CookieStore;
+import java.net.HttpCookie;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.Map;
@@ -39,14 +44,15 @@ import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
 
+
 @Component
 public class RemoteConnectionServiceImpl implements RemoteConnectionService {
 
 	private static Logger log = LoggerFactory.getLogger(RemoteConnectionServiceImpl.class);
 	
-
+	
 	@Override
-	public String postContent(String url, Map<String, String> params) {
+	public String postContent(String url, Map<String, String> params, String sessionId) {
 		HttpURLConnection connection = null;
 		String content = null;
 		
@@ -60,13 +66,19 @@ public class RemoteConnectionServiceImpl implements RemoteConnectionService {
 	        }
 	        byte[] postDataBytes = postData.toString().getBytes("UTF-8");
 
+	        
 			connection = (HttpURLConnection) new URL(url).openConnection();
 	        connection.setRequestMethod("POST");
 	        connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
 	        connection.setRequestProperty("Content-Length", String.valueOf(postDataBytes.length));
+	        
+	        if (sessionId != null)
+	        	connection.setRequestProperty("Cookie", "JSESSIONID=" + sessionId + ";");
+	        
 	        connection.setDoOutput(true);
 	        connection.getOutputStream().write(postDataBytes);
 			content = fromJson(connection);
+		
 			
 		} catch (MalformedURLException e) {
 			log.error("Exception connecting to " +url + ". The url might be malformed");
@@ -80,6 +92,11 @@ public class RemoteConnectionServiceImpl implements RemoteConnectionService {
 			}
 		}
 		return content;
+	}
+	
+	@Override
+	public String postContent(String url, Map<String, String> params) {
+		return postContent(url, params, null);
 	}
 	
 	@Override

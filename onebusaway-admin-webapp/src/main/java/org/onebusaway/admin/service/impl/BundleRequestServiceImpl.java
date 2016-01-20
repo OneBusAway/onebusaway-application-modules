@@ -232,8 +232,8 @@ public class BundleRequestServiceImpl implements BundleRequestService, ServletCo
     return _bundleServer.makeRequest(instanceId, apiCall, payload, returnType, WAIT_SECONDS);
   }
   
-  protected <T> T makeRequest(String instanceId, String apiCall, Object payload, Class<T> returnType, Map params) {
-    return _bundleServer.makeRequest(instanceId, apiCall, payload, returnType, WAIT_SECONDS, params);
+  protected <T> T makeRequest(String instanceId, String apiCall, Object payload, Class<T> returnType, Map params, String sessionId) {
+    return _bundleServer.makeRequest(instanceId, apiCall, payload, returnType, WAIT_SECONDS, params, sessionId);
   }
   
   private class ValidateThread implements Runnable {
@@ -387,7 +387,8 @@ public class BundleRequestServiceImpl implements BundleRequestService, ServletCo
         params.put("archive", ""+_request.getArchiveFlag());
         params.put("consolidate", ""+_request.getConsolidateFlag());
         params.put("predate", ""+_request.getPredate());
-        _response = makeRequest(serverId, url, null, BundleBuildResponse.class, params);
+        String sessionId = _request.getSessionId();
+        _response = makeRequest(serverId, url, null, BundleBuildResponse.class, params, sessionId);
         if (_response != null && _response.getId() != null) {
           String id = _response.getId();
           // put response in map

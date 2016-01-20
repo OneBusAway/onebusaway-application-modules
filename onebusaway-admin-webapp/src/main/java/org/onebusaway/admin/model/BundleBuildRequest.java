@@ -33,8 +33,9 @@ public class BundleBuildRequest {
 	private String _bundleComment;
 	private boolean _archiveFlag;
 	private boolean _consolidateFlag;
-  private boolean _predateFlag;
-
+	private boolean _predateFlag;
+	private String _sessionId;
+	
 	public String getBundleDirectory() {
 		return _bundleDirectory;
 	}
@@ -142,6 +143,14 @@ public class BundleBuildRequest {
   }
   public void setPredate(boolean predate) {
     _predateFlag = predate;
+  }
+  
+  public String getSessionId() {
+	  return _sessionId;
+  }
+  
+  public void setSessionId(String sessionId) {
+	  _sessionId = sessionId;
   }
 
 }

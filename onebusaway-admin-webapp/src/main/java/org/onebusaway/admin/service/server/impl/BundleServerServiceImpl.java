@@ -257,10 +257,10 @@ public class BundleServerServiceImpl implements BundleServerService, ServletCont
    }
    
    protected <T> T makeRequestInternal(String instanceId, String apiCall, String jsonPayload, Class<T> returnType) {
-	   return makeRequestInternal(instanceId, apiCall, jsonPayload, returnType, null);
+	   return makeRequestInternal(instanceId, apiCall, jsonPayload, returnType, null, null);
    }
    
-   protected <T> T makeRequestInternal(String instanceId, String apiCall, String jsonPayload, Class<T> returnType, Map<String, String> params) {
+   protected <T> T makeRequestInternal(String instanceId, String apiCall, String jsonPayload, Class<T> returnType, Map<String, String> params, String sessionId) {
 	   _log.debug("makeRequestInternal(" + instanceId + ", " + apiCall + ")");
 	   String host = this.findPublicDns(instanceId);
 	   if (host == null || host.length() == 0) {
@@ -272,7 +272,14 @@ public class BundleServerServiceImpl implements BundleServerService, ServletCont
 	   _log.debug("making request for " + url);
 
 	   // copy stream into String
-	   String content = (params==null?remoteConnectionService.getContent(url):remoteConnectionService.postContent(url, params));
+	   String content;
+	   if (params == null)
+		   content = remoteConnectionService.getContent(url);
+	   else if (sessionId == null)
+		   content = remoteConnectionService.postContent(url, params);
+	   else
+		   content = remoteConnectionService.postContent(url, params, sessionId);
+	   
 	   if (content == null) return null;
 	   
 	   // parse content to appropriate return type
@@ -299,7 +306,7 @@ public class BundleServerServiceImpl implements BundleServerService, ServletCont
    }
    
    @Override
-   public <T> T makeRequest(String instanceId, String apiCall, Object payload, Class<T> returnType, int waitTimeInSeconds, Map params) {
+   public <T> T makeRequest(String instanceId, String apiCall, Object payload, Class<T> returnType, int waitTimeInSeconds, Map params, String sessionId) {
 	   try {
 	       // serialize payload
 	       String jsonPayload = toJson(payload);
@@ -318,12 +325,17 @@ public class BundleServerServiceImpl implements BundleServerService, ServletCont
 	         return null;
 	       }
 	       // make our request
-	       return (T) makeRequestInternal(instanceId, apiCall, jsonPayload, returnType, params);
+	       return (T) makeRequestInternal(instanceId, apiCall, jsonPayload, returnType, params, sessionId);
 	     } catch (InterruptedException ie) {
 	       return null;
 	     } finally {
 	       _log.debug("exiting makeRequest");
 	     }
+   }
+   
+   @Override
+   public <T> T makeRequest(String instanceId, String apiCall, Object payload, Class<T> returnType, int waitTimeInSeconds, Map params) {
+	   return makeRequest(instanceId, apiCall, payload, returnType, waitTimeInSeconds, params, null);
    }
    
    @Override
