@@ -32,6 +32,7 @@
       <props>
 
         <prop key="cacheManager.cacheManagerName">org.onebusaway.admin.bundle.cacheManager</prop>
+        <prop key="distanceAlongShapeLibrary.lenientStopShapeAssignment">true</prop>
 <!--
         <prop key="ehCacheConfiguration.diskStorePath">${bundleCacheDir}</prop>
 -->
