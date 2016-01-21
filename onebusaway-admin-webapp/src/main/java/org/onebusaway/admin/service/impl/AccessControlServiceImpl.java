@@ -73,7 +73,7 @@ public class AccessControlServiceImpl implements AccessControlService {
 			
 			else if (role.hasAllPrivileges() || 
 					(privilege != null && roleHasPrivilege(role, privilege))) {
-				_log.info(userRole.getName() + " has privileges for " + privilege.getName());
+				_log.debug(userRole.getName() + " has privileges for " + privilege.getName());
 				return true;
 			}
 		}
