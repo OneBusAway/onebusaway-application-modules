@@ -63,7 +63,7 @@ public class ScheduleAction extends ActionSupport {
 
   private TimeZone _timeZone;
 
-  private boolean _showArrivals = false;
+  private Boolean _showArrivals = null;
 
   public void setId(String id) {
     _id = id;
@@ -89,7 +89,7 @@ public class ScheduleAction extends ActionSupport {
   public TimeZone getTimeZone() {
     return _timeZone;
   }
-
+  
   @Override
   @Actions({@Action(value = "/where/standard/schedule")})
   public String execute() throws Exception {
@@ -101,10 +101,10 @@ public class ScheduleAction extends ActionSupport {
       return INPUT;
 
     _result = _service.getScheduleForStop(_id, _date);
-
+    
     if (_result == null)
       throw new NoSuchStopServiceException(_id);
-
+    
     StopCalendarDaysBean days = _result.getCalendarDays();
     String tzName = days.getTimeZone();
     _timeZone = TimeZone.getTimeZone(tzName);
@@ -112,7 +112,7 @@ public class ScheduleAction extends ActionSupport {
       _timeZone = TimeZone.getDefault();
 
     filterResults();
-
+    
     return SUCCESS;
   }
 
@@ -208,10 +208,10 @@ public class ScheduleAction extends ActionSupport {
           directions.size());
 
       for (StopRouteDirectionScheduleBean direction : directions) {
-
+    	  
         List<StopTimeInstanceBean> filteredStopTimes = getFilteredStopTimes(direction);
         List<FrequencyInstanceBean> filteredFrequencies = getFilteredFrequencies(direction);
-
+        
         if (!(filteredStopTimes.isEmpty() && filteredFrequencies.isEmpty())) {
           direction.setStopTimes(filteredStopTimes);
           direction.setFrequencies(filteredFrequencies);
@@ -234,9 +234,11 @@ public class ScheduleAction extends ActionSupport {
     List<StopTimeInstanceBean> filteredStopTimes = new ArrayList<StopTimeInstanceBean>(
         stopTimes.size());
 
+    boolean showArrivals = (_showArrivals == null) ? !(directionHasDepartures(direction)) : _showArrivals;
+    
     for (StopTimeInstanceBean stopTime : stopTimes) {
-      if ((_showArrivals && stopTime.isArrivalEnabled())
-          || (!_showArrivals && stopTime.isDepartureEnabled()))
+      if ((showArrivals && stopTime.isArrivalEnabled())
+          || (!showArrivals && stopTime.isDepartureEnabled()))
         filteredStopTimes.add(stopTime);
     }
     return filteredStopTimes;
@@ -248,12 +250,27 @@ public class ScheduleAction extends ActionSupport {
     List<FrequencyInstanceBean> filteredFrequencies = new ArrayList<FrequencyInstanceBean>(
         frequencies.size());
 
+    boolean showArrivals = (_showArrivals == null) ? !(directionHasDepartures(direction)) : _showArrivals;
+    
     for (FrequencyInstanceBean frequency : frequencies) {
-      if ((_showArrivals && frequency.isArrivalEnabled())
-          || (!_showArrivals && frequency.isDepartureEnabled()))
+      if ((showArrivals && frequency.isArrivalEnabled())
+          || (! showArrivals && frequency.isDepartureEnabled()))
         filteredFrequencies.add(frequency);
     }
     return filteredFrequencies;
+  }
+  
+  private boolean directionHasDepartures(StopRouteDirectionScheduleBean direction) {
+	  
+	  for (StopTimeInstanceBean stopTime : direction.getStopTimes())
+		  if (stopTime.isDepartureEnabled())
+			  return true;
+	 
+	  for (FrequencyInstanceBean frequency : direction.getFrequencies())
+		  if (frequency.isDepartureEnabled())
+			  return true;
+
+	  return false;
   }
 
   public Date getShiftedDate(Date date) {
@@ -338,4 +355,5 @@ public class ScheduleAction extends ActionSupport {
       return getShiftedDateStatic(date);
     }
   }
+  
 }
