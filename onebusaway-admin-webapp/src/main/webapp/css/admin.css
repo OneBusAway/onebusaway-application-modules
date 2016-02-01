@@ -204,9 +204,8 @@ ul li {
 	color: rgb(255,0,0);
 }
 
-/* from MTA CSS: */
 html, body {
-    background-image: url("http://web.mta.info/css/images/grey_bg.jpg");
+    background-image: url("img/grey_bg.jpg");
     background-repeat: repeat-x;
     color: #333333;
     font: 13px/1.231 helvetica,arial,clean,sans-serif;
