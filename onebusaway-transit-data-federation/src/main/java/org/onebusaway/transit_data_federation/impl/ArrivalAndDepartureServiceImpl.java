@@ -561,11 +561,11 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
         results.add(instance);
     }
 
-    if (locations.isEmpty() || (noLocations && frequencyNoScheduleOffset >= 0 && frequencyNoScheduleOffset != Long.MAX_VALUE)) {
+    if (locations.isEmpty() || (noLocations && frequencyNoScheduleOffset >= 0)) {
       
       ArrivalAndDepartureInstance instance;
       
-      if (noSchedule) {
+      if (noSchedule && frequencyNoScheduleOffset != Long.MAX_VALUE) {
     	 int headway = sti.getFrequency().getHeadwaySecs();
     	 long offset = sti.getFrequencyOffset() + headway - (frequencyNoScheduleOffset % headway);
     	 instance = createArrivalAndDepartureForStopTimeInstance(sti, frequencyOffsetTime, (int) offset);
