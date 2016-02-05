@@ -53,6 +53,7 @@ import org.onebusaway.utility.EInRangeStrategy;
 import org.onebusaway.utility.EOutOfRangeStrategy;
 import org.onebusaway.utility.InterpolationLibrary;
 import org.onebusaway.utility.TransitInterpolationLibrary;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -95,7 +96,7 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
   public void setStopTransferService(StopTransferService stopTransferService) {
     _stopTransferService = stopTransferService;
   }
-  
+
   @Override
   public List<ArrivalAndDepartureInstance> getArrivalsAndDeparturesForStopInTimeRange(
       StopEntry stop, TargetTime targetTime, long fromTime, long toTime) {
@@ -105,7 +106,7 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
     Date toTimeBuffered = new Date(toTime + _blockStatusService.getRunningEarlyWindow() * 1000);
 
     List<StopTimeInstance> stis = _stopTimeService.getStopTimeInstancesInTimeRange(
-        stop, fromTimeBuffered, toTimeBuffered, EFrequencyStopTimeBehavior.INCLUDE_INTERPOLATED);
+        stop, fromTimeBuffered, toTimeBuffered, EFrequencyStopTimeBehavior.INCLUDE_UNSPECIFIED);
 
     long frequencyOffsetTime = Math.max(targetTime.getTargetTime(), fromTime);
 
@@ -532,26 +533,13 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
       long frequencyOffsetTime, BlockInstance blockInstance,
       List<BlockLocation> locations, List<ArrivalAndDepartureInstance> results) {
 
-	boolean noLocations = true;
-	boolean noSchedule = (sti.getFrequency() != null) && (sti.getFrequency().getExactTimes() == 0);
-	long frequencyNoScheduleOffset = Long.MAX_VALUE;
-	
     for (BlockLocation location : locations) {
-    
-     if (sti.isFrequencyOffsetSpecified()) {
-    	 long scheduledTime = blockInstance.getBlock().getDepartureTimeForIndex(0) + sti.getFrequencyOffset();
-    	 long buffer = sti.getFrequency().getHeadwaySecs() / 2;
-    	 long delta = scheduledTime - location.getBlockStartTime();
-    	 
-    	 if (!noSchedule && scheduledTime != location.getBlockStartTime())
-    		 continue;
-    	 else if (noSchedule && (Math.abs(delta) > buffer)) {
-    		 frequencyNoScheduleOffset = Math.min(delta, frequencyNoScheduleOffset);
-    		 continue;
-    	 }
+
+      if (sti.isFrequencyOffsetSpecified()
+          && ((blockInstance.getBlock().getDepartureTimeForIndex(0) + sti.getFrequencyOffset()) != location.getBlockStartTime())) {
+        continue;
       }
-     
-      noLocations = false;
+
       ArrivalAndDepartureInstance instance = createArrivalAndDepartureForStopTimeInstance(
           sti, frequencyOffsetTime);
       applyBlockLocationToInstance(instance, location,
@@ -561,18 +549,10 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
         results.add(instance);
     }
 
-    if (locations.isEmpty() || (noLocations && frequencyNoScheduleOffset >= 0)) {
-      
-      ArrivalAndDepartureInstance instance;
-      
-      if (noSchedule && frequencyNoScheduleOffset != Long.MAX_VALUE) {
-    	 int headway = sti.getFrequency().getHeadwaySecs();
-    	 long offset = sti.getFrequencyOffset() + headway - (frequencyNoScheduleOffset % headway);
-    	 instance = createArrivalAndDepartureForStopTimeInstance(sti, frequencyOffsetTime, (int) offset);
-      }
-      else 
-    	 instance = createArrivalAndDepartureForStopTimeInstance(
-    			  sti, frequencyOffsetTime);
+    if (locations.isEmpty()) {
+
+      ArrivalAndDepartureInstance instance = createArrivalAndDepartureForStopTimeInstance(
+          sti, frequencyOffsetTime);
 
       if (sti.getFrequency() == null) {
 
@@ -1017,17 +997,6 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
     return true;
   }
 
-  private ArrivalAndDepartureInstance createArrivalAndDepartureForStopTimeInstance(
-	      StopTimeInstance sti, long prevFrequencyTime, int freqOffset) {
-
-	    ArrivalAndDepartureInstance instance = createArrivalAndDeparture(sti,
-	        prevFrequencyTime, freqOffset);
-
-	    instance.setBlockSequence(sti.getBlockSequence());
-
-	    return instance;
-	  }
-  
   private ArrivalAndDepartureInstance createArrivalAndDepartureForStopTimeInstance(
       StopTimeInstance sti, long prevFrequencyTime) {
 
