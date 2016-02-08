@@ -25,6 +25,7 @@ OBA.Sign = function() {
 	var stopInfo = {};
 	var routeInfo = {};
 	var vehiclesPerStop = 3;
+	var sortByRoute = false; // otherwise sort by arrival distance/departure time
 	
 	var url = window.location.href;
 	var signPosition = url.indexOf("/sign/sign");
@@ -89,7 +90,9 @@ OBA.Sign = function() {
 		refreshInterval = getParameterByName("refresh", refreshInterval);
 
 		vehiclesPerStop = getParameterByName("vehiclesPerStop", vehiclesPerStop);
-
+		
+		sortByRoute = getParameterByName("sortByRoute", sortByRoute);
+		
 		var fontSize = getParameterByName("fontSize", null);
 		if (fontSize) {
 			$("body, body input, body textarea").attr("style", "font-size: " + fontSize + "em;")
@@ -213,7 +216,7 @@ OBA.Sign = function() {
 		return newElement;
 	}
 	
-	function updateElementForStop(stopId, stopElement, headsignToDistanceAways, applicableSituations) {
+	function updateElementForStop(stopId, stopElement, sortedHeadsigns, headsignToDistanceAways, applicableSituations) {
 		if(stopElement === null) {
 			return;
 		}
@@ -274,8 +277,24 @@ OBA.Sign = function() {
 		// arrivals
 		var r = 0;
 		var table = [];
+		// by default the routeIdAndHeadsign is sorted by arrival distance/departure time
 		
-		jQuery.each(headsignToDistanceAways, function(routeIdAndHeadsign, distanceAways) {
+		if (sortByRoute) {
+		  sortedHeadsigns.sort(function(a, b) {
+			  var headsignA=a.toLowerCase();
+				 var headsignB=b.toLowerCase();
+				 console.log("" + headsignA + " ? " + headsignB);
+				 if (headsignA < headsignB) //sort string ascending
+				  return -1;
+				 if (headsignA > headsignB)
+				  return 1;
+				 return 0; //default return value (no sorting)
+				
+		  });
+		} 
+		
+		jQuery.each(sortedHeadsigns, function(index, routeIdAndHeadsign) {
+			var distanceAways = headsignToDistanceAways[routeIdAndHeadsign];
 			var headsign = routeIdAndHeadsign.split("_")[2];
 			var row = {
 					etaCount : 0,
@@ -444,6 +463,8 @@ OBA.Sign = function() {
 			}
 			
 			var headsignToDistanceAways = {};
+			var sortedHeadsigns = [];
+
 			var applicableSituations = {};
 			var r = 0;
 			jQuery.each(json.Siri.ServiceDelivery.StopMonitoringDelivery[0].MonitoredStopVisit, function(_, monitoredStopVisit) {
@@ -484,10 +505,13 @@ OBA.Sign = function() {
 				}
 				
 				headsignToDistanceAways[routeIdAndHeadsign].push(vehicleInfo);
+				if (jQuery.inArray(routeIdAndHeadsign, sortedHeadsigns) == -1) {
+					sortedHeadsigns.push(routeIdAndHeadsign);
+				}
 			});
 
 			// update table for this stop ID
-			updateElementForStop(stopId, stopElement, headsignToDistanceAways, applicableSituations);
+			updateElementForStop(stopId, stopElement, sortedHeadsigns, headsignToDistanceAways, applicableSituations);
 			
 			var oldContent = jQuery("#content");
 			
