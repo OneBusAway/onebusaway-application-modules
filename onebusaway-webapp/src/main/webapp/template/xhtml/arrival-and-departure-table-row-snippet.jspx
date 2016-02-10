@@ -64,6 +64,7 @@
                 <s:param name="serviceDate" value="serviceDate" />
                 <s:param name="vehicleId" value="tripStatus.vehicleId" />
                 <s:param name="stopId" value="stop.id" />
+                <s:param name="showVehicleId" value="%{tripStatus != null}" />
               </s:url>
               <s:if test="#excludeTripLinks">
                 <s:property value="#presentation.getTripHeadsign(top)" />
