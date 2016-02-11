@@ -658,7 +658,7 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
 
       } else {
         if (isFrequencyBasedArrivalInRange(blockInstance, sti.getFrequency(),
-            fromTime, toTime)) {
+            fromTime, toTime) && sti.getFrequency().getExactTimes() != 0) {
           results.add(instance);
         }
       }
