@@ -58,6 +58,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -534,7 +535,6 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
     return r;
   }
   
-  
   private void applyPostInterpolateForFrequencyNoSchedule(StopTimeInstance sti, long fromTime, long toTime,
 		  long frequencyOffsetTime, BlockInstance blockInstance, List<ArrivalAndDepartureInstance> results) {
 	  
@@ -555,11 +555,8 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
 	  
 	  int headwayMs = sti.getFrequency().getHeadwaySecs() * 1000;
 	  
-	  // Find latest instance
-	  ArrivalAndDepartureInstance instance = null;
-	  for (ArrivalAndDepartureInstance ad : results)
-		  if (instance == null || ad.getBestDepartureTime() >= instance.getBestDepartureTime())
-			  instance = ad;
+	  // Find latest instance. Prefer realtime.
+	  ArrivalAndDepartureInstance instance = findBestArrivalAndDepartureInstance(results);
 	  
 	  long time;
 	  
@@ -582,6 +579,37 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
 		ArrivalAndDepartureInstance newInstance = createArrivalAndDepartureForStopTimeInstanceWithTime(sti, time);
 		results.add(newInstance);
 	  }
+  }
+
+  private static ArrivalAndDepartureInstance findBestArrivalAndDepartureInstance(
+		  List<ArrivalAndDepartureInstance> instances) {
+	  
+	  Comparator<ArrivalAndDepartureInstance> cmp = new Comparator<ArrivalAndDepartureInstance>() {
+
+		@Override
+		public int compare(ArrivalAndDepartureInstance a, ArrivalAndDepartureInstance b) {
+			long l1, l2;
+			if (!isRealtime(a) && isRealtime(b))
+				return -1;
+			else if (isRealtime(a) && !isRealtime(b))
+				return 1;
+			else if (a.getBestDepartureTime() == 0 || b.getBestDepartureTime() == 0) {
+				l1 = a.getBestArrivalTime();
+				l2 = b.getBestArrivalTime();
+			}
+			else {
+				l1 = a.getBestDepartureTime();
+				l2 = b.getBestDepartureTime();
+			}
+			return Long.valueOf(l1).compareTo(Long.valueOf(l2));
+		}
+		 
+		private boolean isRealtime(ArrivalAndDepartureInstance ad) {
+			return ad.getBlockLocation() != null && ad.getBlockLocation().isPredicted();
+		}
+	  };
+	  
+	  return Collections.max(instances, cmp);
   }
 
   private void applyRealTimeToStopTimeInstance(StopTimeInstance sti,
