@@ -231,7 +231,7 @@ public class FeedServiceImpl implements FeedService {
       try {
         combinedDateTime = Calendar.getInstance();
         int year = Integer.parseInt(startDate.substring(0, 4));
-        int month = Integer.parseInt(startDate.substring(4, 6));
+        int month = Integer.parseInt(startDate.substring(4, 6)) - 1;
         int day = Integer.parseInt(startDate.substring(6));
         int hourOfDay = Integer.parseInt(startTime.substring(0, 2));
         int minute = Integer.parseInt(startTime.substring(3, 5));
