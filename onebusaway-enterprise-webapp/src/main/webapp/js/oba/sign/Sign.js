@@ -91,7 +91,8 @@ OBA.Sign = function() {
 
 		vehiclesPerStop = getParameterByName("vehiclesPerStop", vehiclesPerStop);
 		
-		sortByRoute = getParameterByName("sortByRoute", sortByRoute);
+		var sortByRouteStr = getParameterByName("sortByRoute", "false");
+		sortByRoute = (sortByRouteStr.toLowerCase() == "true");
 		
 		var fontSize = getParameterByName("fontSize", null);
 		if (fontSize) {
@@ -216,7 +217,7 @@ OBA.Sign = function() {
 		return newElement;
 	}
 	
-	function updateElementForStop(stopId, stopElement, sortedHeadsigns, headsignToDistanceAways, applicableSituations) {
+	function updateElementForStop(stopId, stopElement, sortOrderAndRouteIdAndHeadsign, headsignToDistanceAways, applicableSituations) {
 		if(stopElement === null) {
 			return;
 		}
@@ -277,23 +278,9 @@ OBA.Sign = function() {
 		// arrivals
 		var r = 0;
 		var table = [];
-		// by default the routeIdAndHeadsign is sorted by arrival distance/departure time
 		
-		if (sortByRoute) {
-		  sortedHeadsigns.sort(function(a, b) {
-			  var headsignA=a.toLowerCase();
-				 var headsignB=b.toLowerCase();
-				 console.log("" + headsignA + " ? " + headsignB);
-				 if (headsignA < headsignB) //sort string ascending
-				  return -1;
-				 if (headsignA > headsignB)
-				  return 1;
-				 return 0; //default return value (no sorting)
-				
-		  });
-		} 
-		
-		jQuery.each(sortedHeadsigns, function(index, routeIdAndHeadsign) {
+		jQuery.each(sortOrderAndRouteIdAndHeadsign, function(index, routeIdAndHeadsignArray) {
+			var routeIdAndHeadsign = routeIdAndHeadsignArray.routeIdAndHeadsign;
 			var distanceAways = headsignToDistanceAways[routeIdAndHeadsign];
 			var headsign = routeIdAndHeadsign.split("_")[2];
 			var row = {
@@ -394,6 +381,12 @@ OBA.Sign = function() {
 		
 	}
 	
+	// from jQuery 1.7
+	function isNumeric(n) {
+		var number = !jQuery.isArray( n ) && (n - parseFloat( n ) + 1) >= 0;
+		return number;
+	}
+	
 	function toEtaSpan1(etas, monitored) {
 		var list = '<div class="prediction">';
 		for (index = 1; index < etas.length; index++) {
@@ -440,6 +433,17 @@ OBA.Sign = function() {
 		jQuery("#pager").show();
 	}
 	
+	function containsSortKeys(value, array) {
+		var found = false;
+		jQuery.each(array, function(index, sortKey) {
+			if (sortKey.routeIdAndHeadsign == value) {
+				found = true;
+				return true;
+			}
+		});
+		return found;
+	}
+	
 	function update(stopId) {
 
 		var carousel = jQuery('.jcarousel ul');	
@@ -463,7 +467,8 @@ OBA.Sign = function() {
 			}
 			
 			var headsignToDistanceAways = {};
-			var sortedHeadsigns = [];
+			var sortedArrivalTimes = [];
+			var sortedRouteIds = [];
 
 			var applicableSituations = {};
 			var r = 0;
@@ -505,13 +510,49 @@ OBA.Sign = function() {
 				}
 				
 				headsignToDistanceAways[routeIdAndHeadsign].push(vehicleInfo);
-				if (jQuery.inArray(routeIdAndHeadsign, sortedHeadsigns) == -1) {
-					sortedHeadsigns.push(routeIdAndHeadsign);
+				var routeShortName = routeInfo[routeId].shortName;
+				var sortKeys = {
+						routeIdAndHeadsign: routeIdAndHeadsign,
+						routeShortName: routeShortName,
+						
+				};
+				
+				if (!containsSortKeys(routeIdAndHeadsign, sortedArrivalTimes)) {
+					sortedArrivalTimes.push(sortKeys);
+				}
+				if (!containsSortKeys(routeIdAndHeadsign, sortedRouteIds)) {
+					sortedRouteIds.push(sortKeys);
 				}
 			});
 
+			var sortOrderAndRouteIdAndHeadsign = sortedArrivalTimes;
+			// default is to sort by arrival times / arrival distances			
+			if (sortByRoute) {
+				  sortedRouteIds.sort(function(a, b) {
+					     var routeShortNameA=a.routeShortName;
+						 var routeShortNameB=b.routeShortName;
+
+						 // perform a true numeric sort if possible
+						 if (isNumeric(routeShortNameA) && isNumeric(routeShortNameB)) {
+							 return routeShortNameA - routeShortNameB;
+						 }
+						 
+						 routeShortNameA = routeShortNameA.toLowerCase();
+						 routeShortNameB = routeShortNameB.toLowerCase();
+						 // otherwise to string-based sort
+						 if (routeShortNameA < routeShortNameB) //sort string ascending
+						  return -1;
+						 if (routeShortNameA > routeShortNameB)
+						  return 1;
+						 return 0; //default return value (no sorting)
+						
+				  });
+				  sortOrderAndRouteIdAndHeadsign = sortedRouteIds;
+				} 
+
+			
 			// update table for this stop ID
-			updateElementForStop(stopId, stopElement, sortedHeadsigns, headsignToDistanceAways, applicableSituations);
+			updateElementForStop(stopId, stopElement, sortOrderAndRouteIdAndHeadsign, headsignToDistanceAways, applicableSituations);
 			
 			var oldContent = jQuery("#content");
 			
