@@ -420,10 +420,10 @@ td.additional_stops {
 	padding: 0 0 0.1em 0;
 }
 div.prediction {
-	height: 35px;
+	height: 100px;
 	line-height: 100%;
 	vertical-align: middle;
-	padding-top: 15px;
+	padding-top: 0px;
 	padding-right: 5px; 
 	padding-left: 0;
 	padding-bottom: 0;
