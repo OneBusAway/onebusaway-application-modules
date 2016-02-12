@@ -420,7 +420,7 @@ td.additional_stops {
 	padding: 0 0 0.1em 0;
 }
 div.prediction {
-	padding: 0 0.2em 0 0;
+	padding: 1.2em 0.2em 0 0;
 	text-align: center;
 }
 p.alert {
