@@ -348,8 +348,32 @@ th {
 	padding: .5em;
     font-size: 1.4em;
     line-height: 1.1em;
-    width: 60%;
+    /* width: 60%; */
     border-bottom: 2px solid #999;
+}
+th.routeHeader {
+    text-align: center;
+    padding: .25em;
+    /*width: 10%;*/
+    /*border-right: 1px solid #999 */
+}
+th.headsignHeader {
+    text-align: center;
+    padding: .25em;
+    /* border-right: 1px solid #999 */
+}
+th.nextArrivalHeader {
+    text-align: right;
+    padding: .25em;
+    /* border-right: 1px solid #999 */
+}
+th.futureArrivalHeader {
+    text-align: center;
+    width: 10%;
+    font-size: 1.0em;
+    line-height: 0.9em;
+    padding: .1em;
+    /* border-right: 1px solid #999 */
 }
 td {
     vertical-align: middle;

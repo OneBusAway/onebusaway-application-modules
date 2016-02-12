@@ -26,6 +26,7 @@ OBA.Sign = function() {
 	var routeInfo = {};
 	var vehiclesPerStop = 3;
 	var sortByRoute = false; // otherwise sort by arrival distance/departure time
+	var showHeader = false;
 	
 	var url = window.location.href;
 	var signPosition = url.indexOf("/sign/sign");
@@ -93,6 +94,8 @@ OBA.Sign = function() {
 		
 		var sortByRouteStr = getParameterByName("sortByRoute", "false");
 		sortByRoute = (sortByRouteStr.toLowerCase() == "true");
+		var showHeaderStr = getParameterByName("showHeader", "false");
+		showHeader = (showHeaderStr.toLowerCase() == "true");
 		
 		var fontSize = getParameterByName("fontSize", null);
 		if (fontSize) {
@@ -224,6 +227,10 @@ OBA.Sign = function() {
 		
 		var tableBody = stopElement.find("table");
 		tableBody.html("").empty();
+		if (showHeader) {
+			var thead = "<thead><tr><th class='routeHeader'>Route</th><th class='headsignHeader'>Headsign</th><th class='nextArrivalHeader'>Next Arrival</th><th class='futureArrivalHeader'>Future Arrivals</th></tr></thead>"
+			tableBody.append(thead);
+		}
 
 		// situations
 		stopElement.find(".alerts .scroller").html("").empty();
@@ -368,6 +375,7 @@ OBA.Sign = function() {
 		
 		// no arrivals
 		if(r === 0) {
+			stopElement.find("thead").html("").empty(); // clear out the header when there is no data to show
 			jQuery('<tr class="last">' + 
 					'<td colspan="4">' + 
 						'No buses en-route to this stop. Please check back shortly for an update.</li>' +
