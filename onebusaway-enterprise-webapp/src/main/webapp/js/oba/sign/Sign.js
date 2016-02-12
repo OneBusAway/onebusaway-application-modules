@@ -401,7 +401,7 @@ OBA.Sign = function() {
 			if (index == 1) {
 				list = list + etas[index];
 			} else {
-				list = list + " / " + etas[index];
+				list = list + "<br/>" + etas[index];
 			}
 		}
 		list += "</div>"

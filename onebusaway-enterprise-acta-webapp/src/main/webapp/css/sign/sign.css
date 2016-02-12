@@ -419,6 +419,10 @@ td.additional_stops {
 	width: 75px;
 	padding: 0 0 0.1em 0;
 }
+div.prediction {
+	padding: 0 0.2em 0 0;
+	text-align: center;
+}
 p.alert {
 	display: block;
     color: white;
