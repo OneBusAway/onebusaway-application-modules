@@ -330,13 +330,6 @@ var obaApiFactory = function() {
 		jQuery.getJSON(url, params, handler);
 	};
 	
-	that.planTrip = function(params, callback, errorCallback) {
-		var url = createUrl('/where/plan-trip.json');
-		params = createParams(params);
-		var handler = createEntryHandler(callback, errorCallback, processItineraries);
-		jQuery.getJSON(url, params, handler);
-	};
-	
 	that.route = function(routeId, callback, errorCallback) {
 		var url = createUrl('/where/route/' + routeId + '.json');
 		var params = createParams();

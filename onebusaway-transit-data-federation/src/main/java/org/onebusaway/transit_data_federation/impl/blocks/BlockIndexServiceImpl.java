@@ -29,8 +29,6 @@ import java.util.Set;
 import javax.annotation.PostConstruct;
 
 import org.onebusaway.collections.FactoryMap;
-import org.onebusaway.collections.tuple.Pair;
-import org.onebusaway.collections.tuple.Tuples;
 import org.onebusaway.container.refresh.Refreshable;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.impl.RefreshableResources;
@@ -57,6 +55,7 @@ import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 import org.onebusaway.utility.ObjectSerializationLibrary;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -166,40 +165,6 @@ public class BlockIndexServiceImpl implements BlockIndexService {
       StopEntry stopEntry) {
     return ((StopEntryImpl) stopEntry).getStopTripIndices();
   }
-
-  @Override
-  public List<Pair<BlockStopSequenceIndex>> getBlockSequenceIndicesBetweenStops(
-      StopEntry fromStop, StopEntry toStop) {
-
-    List<BlockStopSequenceIndex> fromIndices = ((StopEntryImpl) fromStop).getStopTripIndices();
-    List<BlockStopSequenceIndex> toIndices = ((StopEntryImpl) toStop).getStopTripIndices();
-
-    Map<BlockSequenceIndex, BlockStopSequenceIndex> fromIndicesBySequence = getBlockStopSequenceIndicesBySequence(fromIndices);
-    Map<BlockSequenceIndex, BlockStopSequenceIndex> toIndicesBySequence = getBlockStopSequenceIndicesBySequence(toIndices);
-
-    fromIndicesBySequence.keySet().retainAll(toIndicesBySequence.keySet());
-
-    List<Pair<BlockStopSequenceIndex>> results = new ArrayList<Pair<BlockStopSequenceIndex>>();
-
-    for (Map.Entry<BlockSequenceIndex, BlockStopSequenceIndex> entry : fromIndicesBySequence.entrySet()) {
-      BlockSequenceIndex index = entry.getKey();
-      BlockStopSequenceIndex fromStopIndex = entry.getValue();
-      BlockStopSequenceIndex toStopIndex = toIndicesBySequence.get(index);
-
-      /**
-       * If the stops aren't in the requested order, then we don't include the
-       * sequence indices in the results
-       */
-      if (fromStopIndex.getOffset() > toStopIndex.getOffset())
-        continue;
-
-      Pair<BlockStopSequenceIndex> pair = Tuples.pair(fromStopIndex,
-          toStopIndex);
-      results.add(pair);
-    }
-
-    return results;
-  }
   
   @Override
   public List<BlockLayoverIndex> getBlockLayoverIndices() {
@@ -257,40 +222,6 @@ public class BlockIndexServiceImpl implements BlockIndexService {
   public List<FrequencyStopTripIndex> getFrequencyStopTripIndicesForStop(
       StopEntry stop) {
     return ((StopEntryImpl) stop).getFrequencyStopTripIndices();
-  }
-
-  @Override
-  public List<Pair<FrequencyStopTripIndex>> getFrequencyIndicesBetweenStops(
-      StopEntry fromStop, StopEntry toStop) {
-
-    List<FrequencyStopTripIndex> fromIndices = getFrequencyStopTripIndicesForStop(fromStop);
-    List<FrequencyStopTripIndex> toIndices = getFrequencyStopTripIndicesForStop(toStop);
-
-    Map<FrequencyBlockTripIndex, FrequencyStopTripIndex> fromIndicesBySequence = getFrequencyStopTripIndicesBySequence(fromIndices);
-    Map<FrequencyBlockTripIndex, FrequencyStopTripIndex> toIndicesBySequence = getFrequencyStopTripIndicesBySequence(toIndices);
-
-    fromIndicesBySequence.keySet().retainAll(toIndicesBySequence.keySet());
-
-    List<Pair<FrequencyStopTripIndex>> results = new ArrayList<Pair<FrequencyStopTripIndex>>();
-
-    for (Map.Entry<FrequencyBlockTripIndex, FrequencyStopTripIndex> entry : fromIndicesBySequence.entrySet()) {
-      FrequencyBlockTripIndex index = entry.getKey();
-      FrequencyStopTripIndex fromStopIndex = entry.getValue();
-      FrequencyStopTripIndex toStopIndex = toIndicesBySequence.get(index);
-
-      /**
-       * If the stops aren't in the requested order, then we don't include the
-       * sequence indices in the results
-       */
-      if (fromStopIndex.getOffset() > toStopIndex.getOffset())
-        continue;
-
-      Pair<FrequencyStopTripIndex> pair = Tuples.pair(fromStopIndex,
-          toStopIndex);
-      results.add(pair);
-    }
-
-    return results;
   }
 
   /****
@@ -542,27 +473,4 @@ public class BlockIndexServiceImpl implements BlockIndexService {
       }
     }
   }
-
-  private Map<BlockSequenceIndex, BlockStopSequenceIndex> getBlockStopSequenceIndicesBySequence(
-      List<BlockStopSequenceIndex> indices) {
-
-    Map<BlockSequenceIndex, BlockStopSequenceIndex> m = new HashMap<BlockSequenceIndex, BlockStopSequenceIndex>();
-
-    for (BlockStopSequenceIndex index : indices)
-      m.put(index.getIndex(), index);
-
-    return m;
-  }
-
-  private Map<FrequencyBlockTripIndex, FrequencyStopTripIndex> getFrequencyStopTripIndicesBySequence(
-      List<FrequencyStopTripIndex> indices) {
-
-    Map<FrequencyBlockTripIndex, FrequencyStopTripIndex> m = new HashMap<FrequencyBlockTripIndex, FrequencyStopTripIndex>();
-
-    for (FrequencyStopTripIndex index : indices)
-      m.put(index.getIndex(), index);
-
-    return m;
-  }
-
 }

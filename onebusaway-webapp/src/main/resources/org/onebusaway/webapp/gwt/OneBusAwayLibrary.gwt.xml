@@ -32,7 +32,6 @@
     <inherits name='com.google.gwt.user.User' />
     <inherits name="com.google.gwt.i18n.I18N" />
     <inherits name="org.onebusaway.webapp.gwt.CommonLibrary"/>
-    <inherits name="org.onebusaway.webapp.gwt.TripPlannerLibrary"/>
     
     <source path="oba_library"/>
 </module>

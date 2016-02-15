@@ -28,13 +28,6 @@
       <version>${project.version}</version>
     </dependency>
 
-    <!-- This is the original SIRI API implementation that we hope to eventually move away from -->
-    <dependency>
-      <groupId>org.onebusaway</groupId>
-      <artifactId>onebusaway-siri-api</artifactId>
-      <version>1.0.0</version>
-    </dependency>
-
     <!-- For GTFS-realtime support -->
     <dependency>
       <groupId>org.onebusaway</groupId>

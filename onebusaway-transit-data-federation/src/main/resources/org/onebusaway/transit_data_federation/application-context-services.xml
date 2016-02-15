@@ -26,7 +26,6 @@
            http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-2.0.xsd">
 
   <import resource="classpath:org/onebusaway/transit_data_federation/application-context-common.xml" />
-  <import resource="classpath:org/onebusaway/transit_data_federation/application-context-otp.xml" />
 
   <context:component-scan base-package="org.onebusaway.transit_data_federation.impl" />
     
@@ -62,8 +61,6 @@
   </bean>
 
   <bean id="refreshServiceImpl" class="org.onebusaway.container.refresh.RefreshServiceImpl" />
-
-  <bean id="tripPlannerConstants" class="org.onebusaway.transit_data_federation.model.tripplanner.TripPlannerConstants" />
 
   <bean id="extendedCalendarServiceServiceDateRangeCache" class="org.onebusaway.container.spring.ehcache.EhCacheFactoryBean">
     <property name="cacheManager" ref="cacheManager" />

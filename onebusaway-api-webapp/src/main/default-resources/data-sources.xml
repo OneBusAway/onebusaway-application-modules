@@ -11,5 +11,4 @@
         <property name="serviceInterface" value="org.onebusaway.transit_data.services.TransitDataService" />
     </bean>
 
-    <bean id="apiKeyValidationService" class="org.onebusaway.users.impl.validation.KeyValidationServiceImpl"/>
 </beans>
