@@ -559,6 +559,7 @@ public class BlockLocationServiceImpl implements BlockLocationService,
 
         BlockConfigurationEntry blockConfig = blockInstance.getBlock();
 
+        int tprIndexCounter = 0;
         for (TimepointPredictionRecord tpr : timepointPredictions) {
           AgencyAndId stopId = tpr.getTimepointId();
           long predictedTime;
@@ -576,6 +577,28 @@ public class BlockLocationServiceImpl implements BlockLocationService,
             // StopSequence equals to -1 when there is no stop sequence in the GTFS-rt
             if (stopId.equals(stop.getId()) && stopTime.getTrip().getId().equals(tpr.getTripId()) &&
                (tpr.getStopSequence() == -1 || stopTime.getSequence() == tpr.getStopSequence())) {
+              
+              if (tpr.getStopSequence() == -1 && isFirstOrLastStopInTrip(stopTime) && isLoopRoute(stopTime)) {
+                // GTFS-rt feed didn't provide stop_sequence, and we have a loop, and we're attempting to apply the update to the first/last stop
+                
+                if (isSinglePredictionForTrip(timepointPredictions, tpr, tprIndexCounter)) {
+                  continue;
+                }
+                
+                // If this isn't the last prediction, and we're on the first stop, then apply it
+                if (isLastPrediction(stopTime, timepointPredictions, tpr, tprIndexCounter) 
+                    && isFirstStopInRoute(stopTime)) {
+                  // Do not calculate schedule deviation
+                  continue;
+                }
+                
+                // If this is the last prediction, and we're on the last stop, then apply it
+                if (isFirstPrediction(stopTime, timepointPredictions, tpr, tprIndexCounter) 
+                    && isLastStopInRoute(stopTime)) {
+                  // Do not calculate schedule deviation
+                  continue;
+                }
+              }
               int arrivalOrDepartureTime;
               // We currently use the scheduled arrival time of the stop as the search index
               // This MUST be consistent with the index search in ArrivalAndSepartureServiceImpl.getBestScheduleDeviation()
@@ -590,6 +613,7 @@ public class BlockLocationServiceImpl implements BlockLocationService,
               scheduleDeviations.put(index, (double) deviation);
             }
           }
+          tprIndexCounter++;
         }
 
         double[] scheduleTimes = new double[scheduleDeviations.size()];
@@ -639,6 +663,125 @@ public class BlockLocationServiceImpl implements BlockLocationService,
     return location;
   }
 
+  /**
+   * @param timepointPredictions is contains all tprs for the block 
+   * @param tpr is the current time-point prediction for given stop
+   * @param tprIndexCounter
+   * @return true if there is only one time-point prediction
+   * for given trip
+   */
+  private boolean isSinglePredictionForTrip(
+      List<TimepointPredictionRecord> timepointPredictions,
+      TimepointPredictionRecord tpr, int tprIndexCounter) {
+    
+    if (timepointPredictions.size() == 1) {
+      return true;
+    } 
+    
+    boolean isNextPredictionHasSameTripId = true;
+    if(tprIndexCounter + 1 < timepointPredictions.size()){
+      isNextPredictionHasSameTripId = timepointPredictions.get(tprIndexCounter + 1).
+          getTripId().equals(tpr.getTripId());
+      if (isNextPredictionHasSameTripId) {
+        return false;
+      }
+    }
+    
+    if (tprIndexCounter - 1 >= 0) {
+      return !timepointPredictions.get(tprIndexCounter - 1).getTripId().equals(tpr.getTripId());
+    }
+    
+    return !isNextPredictionHasSameTripId;
+  }
+  
+  /**
+   * Checks if the first and the last stop of the trip are the same
+   * @param stopTime
+   * @return true if its loop route
+   */
+  private boolean isLoopRoute(StopTimeEntry stopTime) {
+    List<StopTimeEntry> stopTimes = stopTime.getTrip().getStopTimes();
+    AgencyAndId firstStopId = stopTimes.get(0).getStop().getId();
+    AgencyAndId lastStopId = stopTimes.get(stopTimes.size() -1).getStop().getId();
+    return firstStopId.equals(lastStopId);
+  }
+
+  /**
+   * @param stopTime
+   * @return true if the given stop is the first or the last stop in given trip
+   */
+  private boolean isFirstOrLastStopInTrip(StopTimeEntry stopTime) {
+    List<StopTimeEntry> stopTimes = stopTime.getTrip().getStopTimes();
+    AgencyAndId firstStopId = stopTimes.get(0).getStop().getId();
+    AgencyAndId lastStopId = stopTimes.get(stopTimes.size() -1).getStop().getId();
+    AgencyAndId currentStopId = stopTime.getStop().getId();
+    return firstStopId.equals(currentStopId) || lastStopId.equals(currentStopId);
+  }
+  
+  /**
+   * 
+   * @param stopTime
+   * @return true if the given stop is the first stop of the route
+   */
+  private boolean isFirstStopInRoute(StopTimeEntry stopTime) {
+    List<StopTimeEntry> stopTimes = stopTime.getTrip().getStopTimes();
+    return stopTimes.get(0).getSequence() == stopTime.getSequence(); 
+  }
+  
+  /**
+   * 
+   * @param stopTime
+   * @return true if the given stop is the last stop of the route
+   */
+  private boolean isLastStopInRoute(StopTimeEntry stopTime) {
+    List<StopTimeEntry> stopTimes = stopTime.getTrip().getStopTimes();
+    return stopTimes.get(stopTimes.size() -1).getSequence() == stopTime.getSequence(); 
+  }
+  
+  /**
+   * 
+   * @param stopTime is the current stop
+   * @param timepointPredictions is the all time-point predictions in the block
+   * @param timepointPredictionRecord is the current tpr for the stop
+   * @param index is the index of the current tpr in timepointPredictions
+   * @return true if the given tpr is the first prediction for the trip
+   */
+  private boolean isFirstPrediction (StopTimeEntry stopTime, List<TimepointPredictionRecord> timepointPredictions,
+      TimepointPredictionRecord timepointPredictionRecord, int index) {
+    
+    List<StopTimeEntry> stopTimes = stopTime.getTrip().getStopTimes();
+    AgencyAndId firstStopId = stopTimes.get(0).getStop().getId();
+    
+    if (firstStopId.equals(timepointPredictionRecord.getTimepointId())
+        && stopTime.getTrip().getId().equals(timepointPredictionRecord.getTripId())) {
+      return index == 0 || ( index > 0 &&
+          !timepointPredictions.get(index - 1).getTripId().equals(timepointPredictionRecord.getTripId()));
+    }
+    return false;
+  }
+  
+  /**
+   * 
+   * @param stopTime is the current stop
+   * @param timepointPredictions is the all time-point predictions in the block
+   * @param timepointPredictionRecord is the current tpr for the stop
+   * @param index is the index of the current tpr in timepointPredictions
+   * @return return true if the given tpr is the last prediction for the trip
+   */
+  private boolean isLastPrediction (StopTimeEntry stopTime, List<TimepointPredictionRecord> timepointPredictions,
+      TimepointPredictionRecord timepointPredictionRecord, int index) {
+    
+    List<StopTimeEntry> stopTimes = stopTime.getTrip().getStopTimes();
+    AgencyAndId lastStopId = stopTimes.get(stopTimes.size() - 1).getStop().getId();
+    
+    if (lastStopId.equals(timepointPredictionRecord.getTimepointId())
+        && stopTime.getTrip().getId().equals(timepointPredictionRecord.getTripId())) {
+      return index + 1 == timepointPredictions.size() || ( index < timepointPredictions.size() &&
+          !timepointPredictions.get(index + 1).getTripId().equals(timepointPredictionRecord.getTripId()));
+    }
+    return false;
+  }
+  
   /****
    * {@link ScheduledBlockLocation} Methods
    ****/
