@@ -7,7 +7,7 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>onebusaway-application-modules</artifactId>
-  <version>1.1.15.11-cs</version>
+  <version>1.1.15.12-cs-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>onebusaway-application-modules</name>
