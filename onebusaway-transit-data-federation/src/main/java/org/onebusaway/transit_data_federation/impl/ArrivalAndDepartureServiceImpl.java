@@ -53,10 +53,15 @@ import org.onebusaway.utility.EInRangeStrategy;
 import org.onebusaway.utility.EOutOfRangeStrategy;
 import org.onebusaway.utility.InterpolationLibrary;
 import org.onebusaway.utility.TransitInterpolationLibrary;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import net.sf.ehcache.util.TimeUtil;
+
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -76,6 +81,8 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
   private BlockStatusService _blockStatusService;
 
   private StopTransferService _stopTransferService;
+  
+  private boolean removeFuturePredictionsWithoutRealtime = false;
 
   @Autowired
   public void setStopTimeService(StopTimeService stopTimeService) {
@@ -97,6 +104,9 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
     _stopTransferService = stopTransferService;
   }
 
+  public void setRemoveFuturePredictionsWithoutRealtime(boolean remove) {
+	this.removeFuturePredictionsWithoutRealtime = remove;
+  }
   
   @Override
   public List<ArrivalAndDepartureInstance> getArrivalsAndDeparturesForStopInTimeRange(
@@ -134,6 +144,27 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
         	  frequencyOffsetTime,  blockInstance, instances);
         }
       }
+    }
+    
+    if (removeFuturePredictionsWithoutRealtime) {
+    	
+    	List<ArrivalAndDepartureInstance> filteredInstances = new ArrayList<ArrivalAndDepartureInstance>();
+    	
+    	for (ArrivalAndDepartureInstance instance : instances) {
+    		FrequencyEntry entry = instance.getFrequency();
+    	
+			boolean toAdd = (entry == null) // not a frequency-based instance
+												// instance
+					// frequency interval has started
+					|| (instance.getServiceDate() + (entry.getStartTime() * 1000) < targetTime.getTargetTime())
+					// instance has realtime data
+					|| (instance.getBlockLocation() != null && instance.getBlockLocation().isPredicted());
+    		
+    		if (toAdd)
+    			filteredInstances.add(instance);
+    	}
+    	
+    	return filteredInstances;
     }
 
     return instances;
@@ -537,8 +568,15 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
   
   private void applyPostInterpolateForFrequencyNoSchedule(StopTimeInstance sti, long fromTime, long toTime,
 		  long frequencyOffsetTime, BlockInstance blockInstance, List<ArrivalAndDepartureInstance> results) {
-	  
+
 	  if (results == null || results.size() == 0)
+		  return;
+
+	  // Find latest instance. Prefer realtime.
+	  ArrivalAndDepartureInstance instance = findBestArrivalAndDepartureInstance(results);
+	  
+	  // If no realtime data, don't make extrapolations.
+	  if (instance.getBlockLocation() == null || !instance.getBlockLocation().isPredicted())
 		  return;
 	  
 	  BlockStopTimeEntry bst =  sti.getStopTime();
@@ -555,30 +593,18 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
 	  
 	  int headwayMs = sti.getFrequency().getHeadwaySecs() * 1000;
 	  
-	  // Find latest instance. Prefer realtime.
-	  ArrivalAndDepartureInstance instance = findBestArrivalAndDepartureInstance(results);
-	  
-	  long time;
-	  
-	  // If not realtime, set predicted time to a multiple of scheduled time.
-	  if (instance.getBlockLocation() == null || !instance.getBlockLocation().isPredicted()) {
-		  for (time = stopStartTimeExact; time < fromTime; time += headwayMs);
-		  instance.setScheduledArrivalTime(time);
-		  instance.setScheduledDepartureTime(time);
-	  }
-	  else {
-		  time = instance.getBestDepartureTime();
-		  if (time == 0)
-			  time = instance.getBestArrivalTime();
-		  // Do not extrapolate trips starting at the headway change: 
-		  stopEndTimeExact -= headwayMs;
-	  }
-	  
+	  long time = instance.getBestDepartureTime();
+	  if (time == 0)
+		time = instance.getBestArrivalTime();
+	  // Do not extrapolate trips starting at the headway change: 
+	  stopEndTimeExact -= headwayMs;
+	  	  
 	  // Extrapolate future stop times.
 	  while ((time += headwayMs) < Math.min(toTime, stopEndTimeExact)) {
 		ArrivalAndDepartureInstance newInstance = createArrivalAndDepartureForStopTimeInstanceWithTime(sti, time);
 		results.add(newInstance);
 	  }
+	  
   }
 
   private static ArrivalAndDepartureInstance findBestArrivalAndDepartureInstance(
@@ -658,7 +684,7 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
 
       } else {
         if (isFrequencyBasedArrivalInRange(blockInstance, sti.getFrequency(),
-            fromTime, toTime) && sti.getFrequency().getExactTimes() != 0) {
+            fromTime, toTime)) {
           results.add(instance);
         }
       }
@@ -1259,4 +1285,5 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
       return new ArrivalAndDepartureTime(arrivalTime, departureTime);
     }
   }
+
 }
