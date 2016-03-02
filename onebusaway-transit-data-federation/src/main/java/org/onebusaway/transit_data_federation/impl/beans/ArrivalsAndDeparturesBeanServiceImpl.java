@@ -313,7 +313,8 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
 
     pab.setStop(stopBean);
     pab.setStopSequence(stopTime.getSequence());
-
+    pab.setTotalStopsInTrip(stopTime.getTotalStopsInTrip());
+    
     pab.setStatus("default");
 
     pab.setScheduledArrivalTime(instance.getScheduledArrivalTime());

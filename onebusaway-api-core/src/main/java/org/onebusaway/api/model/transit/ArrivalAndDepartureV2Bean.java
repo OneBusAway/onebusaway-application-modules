@@ -20,7 +20,7 @@ import java.util.List;
 
 public class ArrivalAndDepartureV2Bean implements Serializable {
 
-  private static final long serialVersionUID = 2L;
+  private static final long serialVersionUID = 3L;
 
   private String routeId;
 
@@ -77,6 +77,8 @@ public class ArrivalAndDepartureV2Bean implements Serializable {
   private TripStatusV2Bean tripStatus;
 
   private List<String> situationIds;
+  
+  private int totalStopsInTrip;
 
   public String getRouteId() {
     return routeId;
@@ -314,7 +316,15 @@ public class ArrivalAndDepartureV2Bean implements Serializable {
     this.predictedDepartureInterval = predictedDepartureInterval;
   }
 
-  public long computeBestArrivalTime() {
+  public int getTotalStopsInTrip() {
+	return totalStopsInTrip;
+}
+
+public void setTotalStopsInTrip(int totalStopsInTrip) {
+	this.totalStopsInTrip = totalStopsInTrip;
+}
+
+public long computeBestArrivalTime() {
     return hasPredictedArrivalTime() ? getPredictedArrivalTime()
         : getScheduledArrivalTime();
   }
