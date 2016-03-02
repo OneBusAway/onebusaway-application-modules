@@ -327,9 +327,9 @@ public class FeedServiceImpl implements FeedService {
     if (entity == null)
       return null;
     VehiclePositionModel vpm = new VehiclePositionModel();
-    if (entity.hasTripUpdate()) {
-      if (entity.getTripUpdate().hasTrip()) {
-        TripDescriptor td = entity.getTripUpdate().getTrip();
+    if (entity.hasVehicle()) {
+      if (entity.getVehicle().hasTrip()) {
+        TripDescriptor td = entity.getVehicle().getTrip();
         if (td.hasTripId()) {
           vpm.setTripId(td.getTripId());
         }
@@ -337,11 +337,9 @@ public class FeedServiceImpl implements FeedService {
           vpm.setRouteId(td.getRouteId());
         }
         if (td.hasStartDate() && td.hasStartTime()) {
-          this.parseDate(td.getStartDate(), td.getStartTime());
+          vpm.setTripStart(parseDate(td.getStartDate(), td.getStartTime()));
         }
       }
-    }
-    if (entity.hasVehicle()) {
       if (entity.getVehicle().hasVehicle()) {
         VehicleDescriptor vd = entity.getVehicle().getVehicle();
         if (vd.hasId()) {
