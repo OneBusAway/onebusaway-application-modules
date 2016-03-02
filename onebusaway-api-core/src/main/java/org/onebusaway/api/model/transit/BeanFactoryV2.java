@@ -838,7 +838,8 @@ public class BeanFactoryV2 {
     addToReferences(stop);
     bean.setStopSequence(ad.getStopSequence());
     bean.setBlockTripSequence(ad.getBlockTripSequence());
-
+    bean.setTotalStopsInTrip(ad.getTotalStopsInTrip());
+    
     bean.setRouteId(route.getId());
     addToReferences(route);
 
