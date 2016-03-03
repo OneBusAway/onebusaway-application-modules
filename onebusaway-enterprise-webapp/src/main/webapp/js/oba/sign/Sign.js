@@ -228,7 +228,7 @@ OBA.Sign = function() {
 		var tableBody = stopElement.find("table");
 		tableBody.html("").empty();
 		if (showHeader) {
-			var thead = "<thead><tr><th class='routeHeader'>Route</th><th class='headsignHeader'>Headsign</th><th class='nextArrivalHeader'>Next Arrival</th><th class='futureArrivalHeader'>Future Arrivals</th></tr></thead>"
+			var thead = "<thead><tr class='headerFirstRow'><th class='routeHeader'>Route</th><th class='headsignHeader'>Destination</th><th colspan='2' class='nextArrivalHeader'>Next Arrivals</th></tr></thead>"
 			tableBody.append(thead);
 		}
 
@@ -384,8 +384,8 @@ OBA.Sign = function() {
 				   .appendTo(tableBody);
 		}
 		
-		stopElement.find('tr:even').addClass('even');
-		stopElement.find('tr:odd').addClass('odd');
+		stopElement.find('tbody tr:even').addClass('even');
+		stopElement.find('tbody tr:odd').addClass('odd');
 		
 	}
 	
@@ -514,7 +514,7 @@ OBA.Sign = function() {
 					//vehicleInfo.expectedDepartureTime = OBA.Util.ISO8601StringToDate(journey.MonitoredCall.ExpectedDepartureTime);
 					vehicleInfo.timePrediction = OBA.Util.getArrivalEstimateForISOString(
 							journey.MonitoredCall.ExpectedArrivalTime, 
-							updateTimestampReference);
+							updateTimestampReference, "min");
 				}
 				
 				headsignToDistanceAways[routeIdAndHeadsign].push(vehicleInfo);
