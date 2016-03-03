@@ -224,12 +224,7 @@ public class BundleManagementServiceImpl implements BundleManagementService {
 
   public void setBundleStoreRoot(String path) throws Exception {
     File bundleRootPath = new File(path);
-
-    if (!bundleRootPath.exists() || !bundleRootPath.canWrite()) {
-      throw new Exception("Bundle store path " + bundleRootPath
-          + " does not exist or is not writable.");
-    }
-
+    // don't validate the path here -- do it during setup
     this._bundleRootPath = path;
   }
 
