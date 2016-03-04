@@ -392,7 +392,12 @@ public class SearchServiceImpl implements SearchService {
 		List<String> tokens = new ArrayList<String>();
 		StringTokenizer tokenizer = new StringTokenizer(q, " +", true);
 		while (tokenizer.hasMoreTokens()) {
-			String token = tokenizer.nextToken().trim().toUpperCase();
+		  /*
+		   * Don't upper case the token -- as transit data service queries are
+		   * case sensitive.  However, the maps cached in this class are all
+		   * upper case for convenience.
+		   */
+			String token = tokenizer.nextToken().trim(); 
 
 			if (!StringUtils.isEmpty(token)) {
 				tokens.add(token);
@@ -412,17 +417,17 @@ public class SearchServiceImpl implements SearchService {
 			}
 
 			// keep track of route tokens we found when parsing
-			if (_routeShortNameToRouteBeanMap.containsKey(token)) {
+			if (_routeShortNameToRouteBeanMap.containsKey(token.toUpperCase())) {
 				// if a route is included as part of another type of query, then
 				// it's a filter--
 				// so remove it from the normalized query sent to the geocoder
 				// or stop service
 				if ((lastItem != null && !_routeShortNameToRouteBeanMap
-						.containsKey(lastItem))
+						.containsKey(lastItem.toUpperCase()))
 						|| (nextItem != null && !_routeShortNameToRouteBeanMap
-								.containsKey(nextItem))) {
+								.containsKey(nextItem.toUpperCase()))) {
 					results.addRouteFilter(_routeShortNameToRouteBeanMap
-							.get(token));
+							.get(token.toUpperCase()));
 					continue;
 				}
 			} else {
@@ -430,9 +435,9 @@ public class SearchServiceImpl implements SearchService {
 				// valid stop id (but not also a route ID),
 				// consider the token a bad filter and remove it from the query.
 				if ((lastItem != null && stopsForId(lastItem).size() > 0
-						&& !_routeShortNameToRouteBeanMap.containsKey(lastItem))
+						&& !_routeShortNameToRouteBeanMap.containsKey(lastItem.toUpperCase()))
 						|| (nextItem != null && stopsForId(nextItem).size() > 0
-								&& !_routeShortNameToRouteBeanMap.containsKey(nextItem))) {
+								&& !_routeShortNameToRouteBeanMap.containsKey(nextItem.toUpperCase()))) {
 					if (!token.contains("_")) {
 						// if we have an agency Id, its probably a stop, don't
 						// discard
@@ -446,7 +451,7 @@ public class SearchServiceImpl implements SearchService {
 				// if a user is prepending a route filter with a plus sign, chop
 				// it off
 				// e.g. main and craig + B63
-				if (_routeShortNameToRouteBeanMap.containsKey(nextItem)) {
+				if (_routeShortNameToRouteBeanMap.containsKey(nextItem.toUpperCase())) {
 					continue;
 				}
 
@@ -467,8 +472,10 @@ public class SearchServiceImpl implements SearchService {
 		return normalizedQuery.trim();
 	}
 
-	private void tryAsRoute(SearchResultCollection results, String routeQuery,
+	private void tryAsRoute(SearchResultCollection results, String routeQueryMixedCase,
 			SearchResultFactory resultFactory) {
+	  
+	  String routeQuery = new String(routeQueryMixedCase);
 		if (routeQuery == null || StringUtils.isEmpty(routeQuery)) {
 			return;
 		}
