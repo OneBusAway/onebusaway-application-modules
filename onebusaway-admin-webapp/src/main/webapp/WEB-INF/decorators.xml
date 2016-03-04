@@ -26,6 +26,7 @@
         <pattern>/admin/bundles/manage-bundles!downloadValidateFile.action*</pattern>
         <pattern>/admin/vehiclestatus/popup*</pattern>
         <pattern>/api/*</pattern>
+        <pattern>/transitime*</pattern>
 	</excludes>
 
 	<decorator name="decorate" page="decorate.jspx">
