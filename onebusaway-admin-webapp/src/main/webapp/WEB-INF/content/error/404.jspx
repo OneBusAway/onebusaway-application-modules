@@ -24,8 +24,12 @@
 	doctype-system="http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd" />
 
 <jsp:directive.page contentType="text/html" />
-
-
+<jsp:scriptlet>
+<![CDATA[
+    // todo this isn't very pretty
+	response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+]]>
+</jsp:scriptlet>
 <head>
   <title>404 Not Found</title>
 </head>
