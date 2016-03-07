@@ -162,7 +162,7 @@
   
   <error-page>
     <error-code>404</error-code>
-    <location>/redirect?uri=/error/404.action</location>
+    <location>/error/404.action</location>
   </error-page> 
   <error-page>
     <exception-type>org.springframework.transaction.CannotCreateTransactionException</exception-type>
