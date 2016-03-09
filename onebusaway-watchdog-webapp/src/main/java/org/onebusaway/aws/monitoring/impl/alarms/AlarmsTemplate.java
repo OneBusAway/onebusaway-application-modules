@@ -31,17 +31,27 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
 import com.amazonaws.services.cloudwatch.model.ComparisonOperator;
+import com.amazonaws.services.cloudwatch.model.Dimension;
 import com.amazonaws.services.cloudwatch.model.PutMetricAlarmRequest;
+import com.amazonaws.services.cloudwatch.model.StandardUnit;
 import com.amazonaws.services.cloudwatch.model.Statistic;
 
 @Component
-public class AlarmsTemplate implements ApplicationListener<ContextRefreshedEvent> {
+public abstract class AlarmsTemplate implements ApplicationListener<ContextRefreshedEvent> {
 	private final static String  ALARM = "Alarm";
 	private final static String DEFAULT_ENV = "dev";
+	
 	private final static String CRITICAL_ACTION = "criticalAction";
 	private final static String NON_CRITICAL_ACTION = "nonCriticalAction";
 	
+	private final static String AWS_RDS_DIMENSION = "DBInstanceIdentifier";
+	private final static String AWS_RDS_NAMESPACE = "AWS/RDS";
+	private final static String AWS_SQS_DIMENSION = "QueueName";
+	private final static String AWS_SQS_NAMESPACE = "AWS/SQS";
+	private final static String SQS_PREFIX = "Sqs";
+	
 	private String env = "";
+	private String sqsQueue = "";
 	
 	private Map<String,String> actions = new HashMap<String,String>();
 	
@@ -54,6 +64,10 @@ public class AlarmsTemplate implements ApplicationListener<ContextRefreshedEvent
 	
 	public String getEnv() {
 		return env;
+	}
+	
+	public String getSqsQueue() {
+		return sqsQueue;
 	}
 
 	public Map<String,String> getActions() {
@@ -76,7 +90,7 @@ public class AlarmsTemplate implements ApplicationListener<ContextRefreshedEvent
 		return new PutMetricAlarmRequest()
 		.withActionsEnabled(true)
 		.withMetricName(metricName.toString())
-		.withAlarmName(getAlarmName(metricName))
+		.withAlarmName(getAlarmName(metricName.toString()))
 		.withPeriod(60)
 		.withEvaluationPeriods(3)
 		.withStatistic(Statistic.Average)
@@ -85,19 +99,48 @@ public class AlarmsTemplate implements ApplicationListener<ContextRefreshedEvent
 		
 	}
 	
-	protected String getAlarmName(MetricName metricName){
-		return metricName.toString() + ALARM + WordUtils.capitalize(getEnv());	
+	protected PutMetricAlarmRequest getRDSMetricAlarmRequest(MetricName metricName, String alarmName, String dbInstance){
+		return new PutMetricAlarmRequest()
+		.withActionsEnabled(true)
+		.withMetricName(metricName.toString())
+		.withAlarmName(getAlarmName(dbInstance + alarmName))
+		.withPeriod(60)
+		.withEvaluationPeriods(3)
+		.withStatistic(Statistic.Average)
+		.withComparisonOperator(ComparisonOperator.GreaterThanOrEqualToThreshold)
+		.withNamespace(AWS_RDS_NAMESPACE)
+		.withDimensions(new Dimension().withName(AWS_RDS_DIMENSION).withValue(dbInstance));
+		
+	}
+	
+	protected PutMetricAlarmRequest getSQSMetricAlarmRequest(MetricName metricName, String sqsQueue){
+		return new PutMetricAlarmRequest()
+		.withActionsEnabled(true)
+		.withMetricName(metricName.toString())
+		.withAlarmName(getAlarmName(SQS_PREFIX + metricName.toString()))
+		.withPeriod(60)
+		.withEvaluationPeriods(3)
+		.withUnit(StandardUnit.Count)
+		.withStatistic(Statistic.Average)
+		.withComparisonOperator(ComparisonOperator.LessThanOrEqualToThreshold)
+		.withNamespace(AWS_SQS_NAMESPACE)
+		.withDimensions(new Dimension().withName(AWS_SQS_DIMENSION).withValue(sqsQueue));
+		
+	}
+	
+	protected String getAlarmName(String metricName){
+		return metricName + ALARM + WordUtils.capitalize(getEnv());	
 	}
 
 	@Override
 	public void onApplicationEvent(ContextRefreshedEvent event) {
 		if(_configService == null){
-			this.env = DEFAULT_ENV;
 			actions.put(CRITICAL_ACTION, "");
 			actions.put(NON_CRITICAL_ACTION, "");
 		}
 		else {
 			this.env = _configService.getConfigurationValueAsString("oba.env", DEFAULT_ENV);
+			this.sqsQueue = _configService.getConfigurationValueAsString("alarm.sqsQueue", DEFAULT_ENV);
 			actions.put(CRITICAL_ACTION, _configService.getConfigurationValueAsString("alarm.criticalSns", ""));
 			actions.put(NON_CRITICAL_ACTION, _configService.getConfigurationValueAsString("alarm.nonCriticalSns", ""));
 		}

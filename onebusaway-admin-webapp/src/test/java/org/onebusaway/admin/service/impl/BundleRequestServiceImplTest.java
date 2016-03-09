@@ -122,7 +122,7 @@ public class BundleRequestServiceImplTest {
       }
       @SuppressWarnings("unchecked")
       @Override
-      public <T> T makeRequest(String instanceId, String apiCall, Object payload, Class<T> returnType, int waitTimeInSeconds, Map params) {
+      public <T> T makeRequest(String instanceId, String apiCall, Object payload, Class<T> returnType, int waitTimeInSeconds, Map params, String sessionId) {
         _log.debug("makeRequest called with apiCall=" + apiCall + " and payload=" + payload);
         if (apiCall.equals("/validate/remote/2012Jan/test_0/1/create")) {
           BundleResponse br = new BundleResponse("1");

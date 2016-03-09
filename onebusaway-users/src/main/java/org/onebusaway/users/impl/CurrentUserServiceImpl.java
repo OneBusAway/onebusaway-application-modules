@@ -88,6 +88,14 @@ public class CurrentUserServiceImpl implements CurrentUserService {
   }
 
   @Override
+  public boolean isCurrentUserReporting() {
+    IndexedUserDetails details = _currentUserStrategy.getCurrentUserDetails(false);
+    if (details == null)
+      return false;
+    return details.isReporting();
+  }
+  
+  @Override
   public IndexedUserDetails getCurrentUserDetails() {
     return _currentUserStrategy.getCurrentUserDetails(false);
   }

@@ -43,9 +43,6 @@ public class Predictions {
   @JsonProperty("routeTag")
   private String routeShortName;
   
-  @XStreamAsAttribute
-  @XStreamAlias("routeCode")
-  @JsonProperty("routeCode")
   private String routeId;
   
   @XStreamAsAttribute
@@ -64,7 +61,11 @@ public class Predictions {
   @JsonSerialize(using = CapitalizeSerializer.class)
   private String stopName;
   
-  
+  @XStreamAsAttribute
+  @XStreamAlias("stopTag")
+  @JsonProperty("stopTag")
+  private String stopId;
+
   public Predictions(){}
   
   public String getAgencyTitle() {
@@ -115,6 +116,13 @@ public class Predictions {
     this.dest = dest;
   }
 
+  public String getStopId() {
+	return stopId;
+  }
 
+  public void setStopId(String stopId) {
+	this.stopId = stopId;
+  }
+  
 }
 

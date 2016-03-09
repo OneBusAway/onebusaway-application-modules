@@ -259,8 +259,10 @@ public class GtfsArchiveTask implements  Runnable {
       Context initialContext = new InitialContext();
       Context environmentContext = (Context) initialContext.lookup("java:comp/env");
       DataSource ds = (DataSource) environmentContext.lookup("jdbc/archiveDB");
-      if (ds == null) return null;
-      
+      if (ds == null) { 
+        _log.error("unable to locate expected datasource jdbc/archiveDB");
+        return null;
+      }
       Configuration config = new Configuration();
       config.setProperty("hibernate.connection.datasource", "java:comp/env/jdbc/archiveDB");
       config.setProperty("hibernate.connection.pool_size", "1");
@@ -281,6 +283,7 @@ public class GtfsArchiveTask implements  Runnable {
 
       return config;
     } catch (Throwable t) {
+      _log.error("configuration exception:", t);
       return null;
     }
   }

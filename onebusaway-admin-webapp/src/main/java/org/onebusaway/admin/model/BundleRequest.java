@@ -20,6 +20,7 @@ public class BundleRequest {
   private String _bundleDirectory;
   private String _tmpDirectory;
   private String _bundleBuildName;
+  private String _sessionId;
   
   public String getBundleDirectory() {
     return _bundleDirectory;
@@ -51,5 +52,13 @@ public class BundleRequest {
   
   public void setId(String id) {
     _id = id;
+  }
+  
+  public String getSessionId() {
+	  return _sessionId;
+  }
+  
+  public void setSessionId(String sessionId) {
+	  _sessionId = sessionId;
   }
 }

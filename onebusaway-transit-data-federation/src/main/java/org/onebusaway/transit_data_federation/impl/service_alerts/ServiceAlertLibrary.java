@@ -18,6 +18,7 @@ package org.onebusaway.transit_data_federation.impl.service_alerts;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data.model.service_alerts.EEffect;
 import org.onebusaway.transit_data.model.service_alerts.ESeverity;
+import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence.Effect;
 import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id;
 import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert.Severity;
@@ -32,6 +33,18 @@ public class ServiceAlertLibrary {
     return new AgencyAndId(agencyId, id);
   }
 
+  /**
+   * Id may have agencyId duplicated -- do the right thing
+   * @return a valid, non duplicated AgencyAndId
+   */
+  public static final AgencyAndId agencyAndIdAndId(String agencyId, String id) {
+    if (id != null && id.indexOf(AgencyAndIdLibrary.ID_SEPARATOR) != -1) {
+      return AgencyAndIdLibrary.convertFromString(id);
+    }
+    return new AgencyAndId(agencyId, id);
+  }
+
+  
   public static Id id(AgencyAndId id) {
     return id(id.getAgencyId(), id.getId());
   }

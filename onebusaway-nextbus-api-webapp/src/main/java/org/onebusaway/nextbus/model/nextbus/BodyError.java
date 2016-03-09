@@ -29,6 +29,10 @@ public class BodyError {
     this.content = content;
   }
   
+  public BodyError(String content, Object...objects){
+    this.content = String.format(content, objects);
+  }
+  
   @XStreamAlias("content")
   private String content;
   

@@ -49,6 +49,21 @@
                 value="true" />
     </bean>
     
+    <!--  Email connection -->
+     <bean id="mailSession"
+          class="org.springframework.jndi.JndiObjectFactoryBean">
+      <property name="jndiName"
+                value="java:comp/env/mail/Session"/> 
+      <property name="lookupOnStartup"
+                value="true"/>   
+      <property name="cache"
+                value="true"/>   
+    </bean> 
+   
+    <bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
+    	<property name="session" ref="mailSession"/> 
+	</bean>
+    
 <!-- Other Stuff: -->
 
     <bean id="externalGeocoderImpl" class="org.onebusaway.geocoder.enterprise.impl.EnterpriseGoogleGeocoderImpl">

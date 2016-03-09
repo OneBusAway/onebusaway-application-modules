@@ -168,6 +168,12 @@ public class TripEntriesFactory {
     List<StopTimeEntryImpl> stopTimesForTrip = _stopTimeEntriesFactory.processStopTimes(
         graph, stopTimes, tripEntry, shapePoints);
 
+    // Also:  only set the trip if there are stops for it
+    if (stopTimesForTrip == null || stopTimesForTrip.size() < 2) {
+      _log.error("trip " + trip.getId() + " missing stops!");
+      return null;
+    }
+    
     double tripDistance = getTripDistance(stopTimesForTrip, shapePoints);
     tripEntry.setTotalTripDistance(tripDistance);
 
@@ -189,7 +195,14 @@ public class TripEntriesFactory {
   private double getTripDistance(List<StopTimeEntryImpl> stopTimes,
       ShapePoints shapePoints) {
 
-    StopTimeEntryImpl lastStopTime = stopTimes.get(stopTimes.size() - 1);
+    StopTimeEntryImpl lastStopTime = null;
+    try {
+    lastStopTime = stopTimes.get(stopTimes.size() - 1);
+    } catch (ArrayIndexOutOfBoundsException e) {
+      _log.error("FATAL:  missing last stop " + stopTimes);
+    }
+    
+    
 
     if (shapePoints != null) {
       double[] distances = shapePoints.getDistTraveled();

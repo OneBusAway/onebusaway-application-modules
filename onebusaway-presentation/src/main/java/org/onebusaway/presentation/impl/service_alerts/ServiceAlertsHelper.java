@@ -43,11 +43,13 @@ import uk.org.siri.siri.DirectionRefStructure;
 import uk.org.siri.siri.EntryQualifierStructure;
 import uk.org.siri.siri.ExtensionsStructure;
 import uk.org.siri.siri.HalfOpenTimestampRangeStructure;
+import uk.org.siri.siri.InfoLinkStructure;
 import uk.org.siri.siri.LineRefStructure;
 import uk.org.siri.siri.MonitoredStopVisitStructure;
 import uk.org.siri.siri.PtConsequenceStructure;
 import uk.org.siri.siri.PtConsequencesStructure;
 import uk.org.siri.siri.PtSituationElementStructure;
+import uk.org.siri.siri.RoadSituationElementStructure.InfoLinks;
 import uk.org.siri.siri.ServiceConditionEnumeration;
 import uk.org.siri.siri.ServiceDelivery;
 import uk.org.siri.siri.SeverityEnumeration;
@@ -305,9 +307,11 @@ public class ServiceAlertsHelper {
     PtSituationElementStructure ptSit = new PtSituationElementStructure();
 
     EntryQualifierStructure value = new EntryQualifierStructure();
-    value.setValue(serviceAlert.getId());
-    ptSit.setSituationNumber(value);
-
+    if (serviceAlert != null) {
+      value.setValue(serviceAlert.getId());
+      ptSit.setSituationNumber(value);
+    }
+    
     if (serviceAlert.getCreationTime() != 0)
       ptSit.setCreationTime(new Date(serviceAlert.getCreationTime()));
     
@@ -352,9 +356,29 @@ public class ServiceAlertsHelper {
 
   private void handleOtherFields(ServiceAlertBean serviceAlert,
       PtSituationElementStructure ptSituation) {
-
-    if (serviceAlert == null || serviceAlert.getPublicationWindows() == null)
+    if (serviceAlert == null) {
       return;
+    }
+     
+      if (serviceAlert.getUrls() != null && ! serviceAlert.getUrls().isEmpty()) {
+        InfoLinks infoLinks = ptSituation.getInfoLinks();
+        if (infoLinks == null) {
+            infoLinks = new InfoLinks();
+            ptSituation.setInfoLinks(infoLinks);
+        }
+        for (NaturalLanguageStringBean linkBean : serviceAlert.getUrls()) {
+            InfoLinkStructure infoLinkStructure = new InfoLinkStructure();
+            infoLinkStructure.setUri(linkBean.getValue());
+            infoLinks.getInfoLink().add(infoLinkStructure);
+            
+        }
+      }
+      
+      
+    if (serviceAlert.getPublicationWindows() == null) {
+      return;
+    }
+    
     // TODO Not handling severity yet.
     ptSituation.setSeverity(SeverityEnumeration.UNDEFINED);
 

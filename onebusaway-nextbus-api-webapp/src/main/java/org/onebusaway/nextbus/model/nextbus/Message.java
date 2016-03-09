@@ -109,19 +109,19 @@ public class Message {
 		this.sendToBuses = sendToBuses;
 	}
 
-	public long getStartBoundary() {
+	public Long getStartBoundary() {
 		return startBoundary;
 	}
 
-	public void setStartBoundary(long startBoundary) {
+	public void setStartBoundary(Long startBoundary) {
 		this.startBoundary = startBoundary;
 	}
 
-	public long getEndBoundary() {
+	public Long getEndBoundary() {
 		return endBoundary;
 	}
 
-	public void setEndBoundary(long endBoundary) {
+	public void setEndBoundary(Long endBoundary) {
 		this.endBoundary = endBoundary;
 	}
 

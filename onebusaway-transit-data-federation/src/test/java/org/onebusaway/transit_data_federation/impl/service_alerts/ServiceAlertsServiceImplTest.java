@@ -82,6 +82,7 @@ public class ServiceAlertsServiceImplTest extends AbstractTransactionalJUnit4Spr
         _service.setServiceAlertsCache(cache);
         _persister = new ServiceAlertsPersistenceDB();
         _service.setServiceAlertsPersistence(_persister);
+        _persister._refreshInterval = 1000;
         _persister.setSessionFactory(_sessionFactory);
         assertTrue("we need a template to continue", _persister.getHibernateTemplate() != null);
     }

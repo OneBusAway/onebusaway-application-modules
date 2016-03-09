@@ -20,6 +20,7 @@ import java.util.List;
 import org.apache.struts2.convention.annotation.Result;
 import org.apache.struts2.convention.annotation.Results;
 import org.apache.struts2.interceptor.validation.SkipValidation;
+import org.onebusaway.webapp.actions.OneBusAwayNYCAdminActionSupport;
 import org.onebusaway.transit_data.model.AgencyWithCoverageBean;
 import org.onebusaway.transit_data.model.ListBean;
 import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
@@ -28,14 +29,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.opensymphony.xwork2.ActionSupport;
 import com.opensymphony.xwork2.validator.annotations.RequiredStringValidator;
 import com.opensymphony.xwork2.validator.annotations.Validations;
 
 @Results({@Result(type = "redirectAction", name = "redirect", params = {
     "actionName", "service-alerts!agency", "agencyId", "${agencyId}", "parse",
     "true"})})
-public class ServiceAlertsAction extends ActionSupport {
+public class ServiceAlertsAction extends OneBusAwayNYCAdminActionSupport {
 
   private static final long serialVersionUID = 1L;
   private static Logger _log = LoggerFactory.getLogger(ServiceAlertsAction.class);
@@ -72,6 +72,9 @@ public class ServiceAlertsAction extends ActionSupport {
   @SkipValidation
   @Override
   public String execute() {
+	// Check that we have permission:
+	super.execute();
+	
     try {
       _agencies = _transitDataService.getAgenciesWithCoverage();
     } catch (Throwable t) {

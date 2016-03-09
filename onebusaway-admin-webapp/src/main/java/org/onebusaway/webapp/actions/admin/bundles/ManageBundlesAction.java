@@ -143,12 +143,6 @@ public class ManageBundlesAction extends OneBusAwayNYCAdminActionSupport impleme
 		return SUCCESS;
 	}
 
-	@Override
-	public String execute() {
-		_log.info("in execute");
-		return SUCCESS;
-	}
-
 	/**
 	 * Creates directory from existing directory
 	 */
@@ -583,7 +577,10 @@ public class ManageBundlesAction extends OneBusAwayNYCAdminActionSupport impleme
 		JSONArray buildFiles = new JSONArray();
 		JSONArray statusMessages = new JSONArray();
 		JSONObject buildObj = new JSONObject();		
-		JSONObject bundleObj = getBundleTrackingObject(bundleBuildResponse.getBundleDirectoryName());		
+		JSONObject bundleObj = getBundleTrackingObject(bundleBuildResponse.getBundleDirectoryName());
+		if (bundleObj == null) {
+		  bundleObj = new JSONObject();
+		}
 		if(bundleObj.get("buildResponse") == null){
 			buildObj = new JSONObject();
 		}else {

@@ -35,8 +35,8 @@ class AffectsRouteAndStopKeyFactory implements
       if (affects.getRouteId() != null
           && affects.getStopId() != null
           && !( affects.getDirectionId() != null || affects.getTripId() != null)) {
-        AgencyAndId routeId = ServiceAlertLibrary.agencyAndId(serviceAlert.getAgencyId(), affects.getRouteId());
-        AgencyAndId stopId = ServiceAlertLibrary.agencyAndId(serviceAlert.getAgencyId(), affects.getStopId());
+        AgencyAndId routeId = ServiceAlertLibrary.agencyAndIdAndId(serviceAlert.getAgencyId(), affects.getRouteId());
+        AgencyAndId stopId = ServiceAlertLibrary.agencyAndIdAndId(serviceAlert.getAgencyId(), affects.getStopId());
 
         RouteAndStopCallRef ref = new RouteAndStopCallRef(routeId, stopId);
         keys.add(ref);

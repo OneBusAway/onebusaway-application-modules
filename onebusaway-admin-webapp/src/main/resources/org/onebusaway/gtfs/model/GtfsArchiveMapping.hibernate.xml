@@ -287,7 +287,7 @@
 	  <property name="patternTo" />
 	</class>
 
-	<class name="org.onebusaway.nyc.admin.service.bundle.task.model.GtfsBundleInfo" table="gtfs_bundle_info">
+	<class name="org.onebusaway.admin.service.bundle.task.model.GtfsBundleInfo" table="gtfs_bundle_info">
 		<id name="id" column="gid" type="int" length="11" unsaved-value="null">
             <generator class="increment" />
   		</id>

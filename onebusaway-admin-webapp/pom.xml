@@ -3,7 +3,7 @@
 	<parent>
 		<groupId>org.onebusaway</groupId>
 		<artifactId>onebusaway-application-modules</artifactId>
-		<version>1.1.15.1-cs-SNAPSHOT</version>
+		<version>1.1.15.16-cs-SNAPSHOT</version>
 	</parent>
 	<artifactId>onebusaway-admin-webapp</artifactId>
 	<packaging>war</packaging>
@@ -193,7 +193,7 @@
 		<dependency>
 			<groupId>org.onebusaway</groupId>
 			<artifactId>onebusaway-king-county-metro-gtfs</artifactId>
-			<version>0.0.7-st</version>
+			<version>0.0.8-st</version>
 		</dependency>
 		<dependency>
 			<artifactId>onebusaway-csv-entities</artifactId>
@@ -302,6 +302,7 @@
 		<dependency>
 			<groupId>javax.mail</groupId>
 			<artifactId>mail</artifactId>
+			<scope>provided</scope>
 			<version>1.4</version>
 		</dependency>
 		<dependency>
@@ -321,6 +322,11 @@
 			<artifactId>commons-csv</artifactId>
 			<version>1.1</version>
 		</dependency>
+		<dependency>
+    		<groupId>org.mitre.dsmiley.httpproxy</groupId>
+    		<artifactId>smiley-http-proxy-servlet</artifactId>
+    		<version>1.7</version>
+		</dependency>	
 	</dependencies>
 
 	<profiles>

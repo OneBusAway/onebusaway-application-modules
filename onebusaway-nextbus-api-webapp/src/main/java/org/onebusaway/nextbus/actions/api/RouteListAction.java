@@ -60,16 +60,16 @@ public class RouteListAction extends NextBusApiBase implements
 					.getRoutesForAgencyId(agencyId).getList();
 			
 			Collections.sort(routeBeans, new Comparator<RouteBean>() {
-				public int compare(RouteBean arg0, RouteBean arg1) {
-					return new AlphanumComparator().compare(arg0.getId(),arg1.getId());
-				}
-			});
+        AlphanumComparator alphaComparator = new AlphanumComparator();
+        public int compare(RouteBean arg0, RouteBean arg1) {
+          return alphaComparator.compare(arg0.getId(),arg1.getId());
+        }
+      });
 			
 			for (RouteBean routeBean : routeBeans) {
 				DisplayRoute route = new DisplayRoute();
 				route.setTag(getIdNoAgency(routeBean.getId()));
-				route.setTitle(routeBean.getLongName());
-				route.setShortTitle(routeBean.getShortName());
+				route.setTitle(routeBean.getShortName() + " " + routeBean.getLongName());
 				body.getResponse().add(route);
 			}
 

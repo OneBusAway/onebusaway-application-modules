@@ -19,16 +19,19 @@ import java.util.List;
 
 import org.apache.struts2.rest.DefaultHttpHeaders;
 import org.apache.struts2.rest.HttpHeaders;
+import org.onebusaway.exceptions.ServiceException;
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.nextbus.model.nextbus.Agency;
 import org.onebusaway.nextbus.model.nextbus.Body;
+import org.onebusaway.nextbus.model.nextbus.BodyError;
+import org.onebusaway.nextbus.validation.ErrorMsg;
 import org.onebusaway.transit_data.model.AgencyWithCoverageBean;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.opensymphony.xwork2.ModelDriven;
 
-public class AgencyListAction implements ModelDriven<Body<Agency>> {
+public class AgencyListAction extends NextBusApiBase implements ModelDriven<Body<Agency>> {
 
   @Autowired
   private TransitDataService _service;
@@ -41,13 +44,18 @@ public class AgencyListAction implements ModelDriven<Body<Agency>> {
   public Body<Agency> getModel() {
 
     Body<Agency> body = new Body<Agency>();
-    List<AgencyWithCoverageBean> agencies = _service.getAgenciesWithCoverage();
-    for (AgencyWithCoverageBean agencyBean : agencies) {
-      Agency agency = new Agency();
-      agency.setTag(agencyBean.getAgency().getId());
-      agency.setTitle(agencyBean.getAgency().getName());
-      agency.setRegionTitle(agencyBean.getAgency().getName());
-      body.getResponse().add(agency);
+    try{
+	    List<AgencyWithCoverageBean> agencies = _service.getAgenciesWithCoverage();
+	    for (AgencyWithCoverageBean agencyBean : agencies) {
+	      Agency agency = new Agency();
+	      agency.setTag(agencyBean.getAgency().getId());
+	      agency.setTitle(agencyBean.getAgency().getName());
+	      agency.setRegionTitle(agencyBean.getAgency().getName());
+	      body.getResponse().add(agency);
+	    }
+    }
+    catch (ServiceException e){
+    	body.getErrors().add(new BodyError(ErrorMsg.SERVICE_ERROR.getDescription()));
     }
 
     return body;

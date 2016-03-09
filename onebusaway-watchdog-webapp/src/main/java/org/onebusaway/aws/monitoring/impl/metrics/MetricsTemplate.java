@@ -21,6 +21,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.util.Date;
 import java.util.List;
@@ -41,10 +42,12 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
-public class MetricsTemplate {
+public abstract class MetricsTemplate {
 	
 	protected static final Logger _log = LoggerFactory
 			.getLogger(MetricsTemplate.class);
+	
+	protected static final int CONNECTION_TIMEOUT = 3000; 
 	
 	@Autowired
 	CloudwatchService _cloudWatchService;
@@ -53,21 +56,37 @@ public class MetricsTemplate {
 	ConfigurationService _configurationService;
 	
 	public JsonObject getJsonObject(String uri) throws MalformedURLException,
-			IOException {
-		URL url = new URL(uri);
-		HttpURLConnection request = (HttpURLConnection) url.openConnection();
-		request.connect();
-
-		// Convert to a JSON object to print data
-		JsonParser jp = new JsonParser(); // from gson
-		JsonElement root = jp.parse(new InputStreamReader((InputStream) request
-				.getContent())); 
-		
-		// Convert the input stream to a
-		// json element
-		JsonObject rootobj = root.getAsJsonObject(); 
-		// May be an array, may be an object.
-		return rootobj;
+			IOException, SocketTimeoutException {
+		HttpURLConnection con = null;
+		try{
+			URL url = new URL(uri);
+			con = (HttpURLConnection) url.openConnection();
+			con.setConnectTimeout(CONNECTION_TIMEOUT);
+			con.setReadTimeout(CONNECTION_TIMEOUT);
+			con.connect();
+	
+			// Convert to a JSON object to print data
+			JsonParser jp = new JsonParser(); // from gson
+			JsonElement root = jp.parse(new InputStreamReader((InputStream) con
+					.getContent())); 
+			
+			// Convert the input stream to a
+			// json element
+			JsonObject rootobj = root.getAsJsonObject(); 
+			// May be an array, may be an object.
+			return rootobj;
+		}catch (MalformedURLException mue){
+			_log.warn(mue.getMessage());
+			throw mue;	
+		}catch (SocketTimeoutException ste){
+			_log.warn("Connection to url : " + uri + " timed out after " + (CONNECTION_TIMEOUT / 1000) + " sec");
+			throw ste;
+		}catch (IOException ioe){
+			_log.warn("Error communicating with specified url : " + uri);
+			throw ioe;
+		}finally{
+			if(con != null) con.disconnect();
+		}
 	}
 
 	public MetricDatum getMetricDatum(String metricName, Double value,
@@ -79,11 +98,14 @@ public class MetricsTemplate {
 	public MetricResponse getUrlWithResponseTime(String url) {
 		long startTime = System.currentTimeMillis();
 		double metric;
+		HttpURLConnection con = null;
 		try {
 			URL obj = new URL(url);
-			HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+			con = (HttpURLConnection) obj.openConnection();
+			con.setConnectTimeout(CONNECTION_TIMEOUT);
+			con.setReadTimeout(CONNECTION_TIMEOUT);
 			int responseCode = con.getResponseCode();
-			if (responseCode == 200) {
+			if (responseCode == HttpURLConnection.HTTP_OK) {
 				BufferedReader in = new BufferedReader(new InputStreamReader(
 						con.getInputStream()));
 				while(in.readLine() != null) {}
@@ -92,9 +114,15 @@ public class MetricsTemplate {
 			} else {
 				metric = 1d;
 			}
+		} catch (SocketTimeoutException e){
+			_log.warn("Connection to url : " + url + " timed out after " + (CONNECTION_TIMEOUT / 1000) + " sec");
+			metric = 1d;
 		} catch (IOException ioe) {
 			_log.warn("Error communicating with specified url : " + url);
 			metric = 1d;
+		} 
+		finally{
+			if(con != null) con.disconnect();
 		}
 		
 		return new MetricResponse(metric,
@@ -151,4 +179,5 @@ public class MetricsTemplate {
 	public void publishMetric(MetricName metricName, StandardUnit unit, Double metric){
 		_cloudWatchService.publishMetric(metricName.toString(), unit, metric);
 	}
+	
 }

@@ -16,11 +16,11 @@
 package org.onebusaway.gtfs_realtime.archiver.service;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
-
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs_realtime.archiver.listener.GtfsRealtimeEntitySource;
 import org.onebusaway.gtfs_realtime.archiver.model.AlertModel;
@@ -30,7 +30,6 @@ import org.onebusaway.gtfs_realtime.archiver.model.TimeRangeModel;
 import org.onebusaway.gtfs_realtime.archiver.model.TripUpdateModel;
 import org.onebusaway.gtfs_realtime.archiver.model.VehiclePositionModel;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -218,17 +217,38 @@ public class FeedServiceImpl implements FeedService {
     return t.getScheduleRelationship().getNumber();
   }
 
+  /**
+   * Combine startDate and startTime into a single combined Date.
+   * 
+   * @param startDate a String with format of "YYYYMMDD"
+   * @param startTime a String with format of "HH:MM:SS"
+   * @return a Date representing the combined date and time
+   */
   private Date parseDate(String startDate, String startTime) {
+    Calendar combinedDateTime = null;
     if (StringUtils.isNotBlank(startDate)
         || StringUtils.isNotBlank(startTime)) {
-      _log.info("todo parseDate(" + startDate + "," + startTime + ")");
+      try {
+        combinedDateTime = Calendar.getInstance();
+        int year = Integer.parseInt(startDate.substring(0, 4));
+        int month = Integer.parseInt(startDate.substring(4, 6)) - 1;
+        int day = Integer.parseInt(startDate.substring(6));
+        int hourOfDay = Integer.parseInt(startTime.substring(0, 2));
+        int minute = Integer.parseInt(startTime.substring(3, 5));
+        int second = Integer.parseInt(startTime.substring(6));
+        combinedDateTime.set(year, month, day, hourOfDay, minute, second);
+      } catch (Exception e) {
+        _log.error("Error parsing date " + startDate + " and time " 
+            + startTime);
+      }
     }
-    return null;
+    return combinedDateTime != null ? combinedDateTime.getTime() : null;
   }
 
   @Override
   public List<VehiclePositionModel> readVehiclePositions(
       FeedMessage vehiclePositions, GtfsRealtimeEntitySource entitySource) {
+    _log.debug("reading VehiclePosition");
     List<VehiclePositionModel> models = new ArrayList<VehiclePositionModel>();
     if (vehiclePositions == null)
       return models;
@@ -280,6 +300,7 @@ public class FeedServiceImpl implements FeedService {
         }
 
         // Check for stopId
+        _log.debug("Stop id: " + vehiclePosition.getStopId());
         if (StringUtils.isNotBlank(vehiclePosition.getStopId())) {
           String stopId = vehiclePosition.getStopId();
           if (agencyId.length() > 0) {
@@ -306,9 +327,9 @@ public class FeedServiceImpl implements FeedService {
     if (entity == null)
       return null;
     VehiclePositionModel vpm = new VehiclePositionModel();
-    if (entity.hasTripUpdate()) {
-      if (entity.getTripUpdate().hasTrip()) {
-        TripDescriptor td = entity.getTripUpdate().getTrip();
+    if (entity.hasVehicle()) {
+      if (entity.getVehicle().hasTrip()) {
+        TripDescriptor td = entity.getVehicle().getTrip();
         if (td.hasTripId()) {
           vpm.setTripId(td.getTripId());
         }
@@ -316,11 +337,9 @@ public class FeedServiceImpl implements FeedService {
           vpm.setRouteId(td.getRouteId());
         }
         if (td.hasStartDate() && td.hasStartTime()) {
-          this.parseDate(td.getStartDate(), td.getStartTime());
+          vpm.setTripStart(parseDate(td.getStartDate(), td.getStartTime()));
         }
       }
-    }
-    if (entity.hasVehicle()) {
       if (entity.getVehicle().hasVehicle()) {
         VehicleDescriptor vd = entity.getVehicle().getVehicle();
         if (vd.hasId()) {

@@ -59,6 +59,16 @@ public interface UserManagementService {
 	boolean createUser(String userName, String password, boolean admin);
 	
 	/**
+	 * Creates a user in the system with given user name and password. Assigns admin role to the created
+	 * user if admin flag is set
+	 * @param userName user name of the new user
+	 * @param password password of the new user
+	 * @param role role of the new user
+	 * @return true if user creation is successful, false otherwise
+	 */
+	boolean createUser(String userName, String password, String role);
+	
+	/**
 	 * Updates user in the system with new password and role. Only updates the user record if it is found in the
 	 * system.
 	 * @param userDetail userDetails such as username, password etc
@@ -72,5 +82,6 @@ public interface UserManagementService {
 	 * @return true if soft delete operation succeeds, false otherwise
 	 */
 	boolean deactivateUser(UserDetail userDetail);
-
+	
+	List<String> getAllRoleNames();
 }

@@ -91,11 +91,13 @@
     <div id="schedulePanel">
     
     <s:if test="status.vehicleId != null">
-      <s:url var="url" action="vehicle-status">
-        <s:param name="vehicleId" value="status.vehicleId"/>
-      </s:url>
-      
-      <p><span class="tripPanelLabel">Real-time status:</span> <s:a href="%{url}">More Info</s:a></p>
+      <s:if test="showVehicleId">
+        <s:url var="url" action="vehicle-status">
+          <s:param name="vehicleId" value="status.vehicleId"/>
+        </s:url>
+        
+        <p><span class="tripPanelLabel">Real-time status:</span> <s:a href="%{url}">More Info</s:a></p>
+      </s:if>
     </s:if>
     
 

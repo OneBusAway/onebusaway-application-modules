@@ -57,7 +57,8 @@
     </bean>
     
     <sec:http auto-config="false" entry-point-ref="authenticationProcessingFilterEntryPoint">
-        <sec:intercept-url pattern="/admin/**" access="ROLE_USER,ROLE_ADMINISTRATOR" />
+        <sec:intercept-url pattern="/admin/**" access="ROLE_ADMINISTRATOR,ROLE_USER,ROLE_REPORTING,ROLE_OPERATOR,ROLE_SUPPORT" />
+        <sec:intercept-url pattern="/transitime/**" access="ROLE_ADMINISTRATOR,ROLE_REPORTING,ROLE_OPERATOR" />
         <!--  we cannot use form-login as we override the default behaviour -->
         <!-- 
         <sec:form-login login-page="/login.action" authentication-failure-url="/login.action?error=1"
@@ -74,6 +75,7 @@
             <props>
             <prop key="loginAuthenticationSuccessHandler.targetUrl">/admin/index.action</prop>
             <prop key="resourceServiceImpl.prefix">/resource.action?id=</prop>
+            <prop key="authenticationProcessingFilterEntryPoint.loginFormUrl">/login.action?forbidden=true</prop>
           </props>
         </property>
     </bean>

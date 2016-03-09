@@ -18,9 +18,14 @@ package org.onebusaway.webapp.actions;
 import java.util.Date;
 import java.util.Map;
 
+import org.onebusaway.admin.service.AccessControlService;
 import org.onebusaway.presentation.impl.NextActionSupport;
 import org.onebusaway.users.client.model.UserBean;
+import org.onebusaway.users.model.User;
+import org.onebusaway.users.model.UserIndex;
 import org.onebusaway.users.services.CurrentUserService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -30,8 +35,10 @@ import org.springframework.beans.factory.annotation.Autowired;
  */
 public class OneBusAwayNYCAdminActionSupport extends NextActionSupport {
 	
-	private static final long serialVersionUID = 1L;
+	  private static final long serialVersionUID = 1L;
 
+	  private static Logger _log = LoggerFactory.getLogger(OneBusAwayNYCAdminActionSupport.class);
+	  
 	  private Date time = null;
 	  
 	  public void setTime(Date time) {
@@ -46,9 +53,8 @@ public class OneBusAwayNYCAdminActionSupport extends NextActionSupport {
 	    }
 	  }
 	  
-	  
 	 protected CurrentUserService currentUserService;
-
+	 
 	 protected UserBean getCurrentUser() {
 		 UserBean user = currentUserService.getCurrentUser();
 		 if (user == null)
@@ -71,7 +77,7 @@ public class OneBusAwayNYCAdminActionSupport extends NextActionSupport {
 	 public boolean isAdminUser() {
 		 return currentUserService.isCurrentUserAdmin();
 	 }
-	  
+	 
 	/**
 	 * Injects current user service
 	 * @param currentUserService the currentUserService to set
@@ -83,6 +89,36 @@ public class OneBusAwayNYCAdminActionSupport extends NextActionSupport {
 	
 	public void setSession(Map<String, Object> session) {
 	    _session = session;
+	}
+	
+	protected User getCurrentUserValue() {
+		UserIndex idx = currentUserService.getCurrentUserAsUserIndex();
+		return (idx == null) ? null : idx.getUser();
+	} 
+	
+	@Override
+	public String execute() {
+		if (!hasPrivilegeForPage()) {
+			throw new RuntimeException("Insufficient access to action " + this.getClass().getName());
+		}
+		return SUCCESS;
+	}
+	
+	@Autowired
+	private AccessControlService _accessControlService;
+	
+	public boolean hasPrivilegeForPage(String privilege) {
+	  boolean authorized = _accessControlService.currentUserHasPrivilege(privilege);
+	  if (!authorized)
+	    _log.warn("Auth failed for " + privilege);
+		return authorized;
+	}
+	
+	public boolean hasPrivilegeForPage() {
+	  boolean authorized = hasPrivilegeForPage(this.getClass().getName());
+	  if (!authorized)
+	    _log.warn("Auth failed for " + this.getClass().getName());
+		return authorized;
 	}
 
 }

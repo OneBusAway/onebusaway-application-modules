@@ -126,12 +126,6 @@ public class ValidateRemoteResource extends AuthenticatedResource {
     }
     return response;
   }
-
-  // TODO
-  @Override
-  protected boolean isAuthorized() {
-    return true;
-  }
   
     private class ValidateThread implements Runnable {
       

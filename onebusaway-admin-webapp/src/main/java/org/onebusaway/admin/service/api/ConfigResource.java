@@ -18,6 +18,7 @@ package org.onebusaway.admin.service.api;
 import java.util.UUID;
 
 import org.onebusaway.admin.service.RemoteConnectionService;
+import org.onebusaway.admin.service.bundle.api.AuthenticatedResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +33,7 @@ import javax.ws.rs.core.Response;
 
 @Path("/config")
 @Component
-public class ConfigResource implements ServletContextAware {
+public class ConfigResource extends AuthenticatedResource implements ServletContextAware {
 
   private static final String DEFAULT_TDM_URL = "http://tdm";
   private static Logger _log = LoggerFactory.getLogger(ConfigResource.class);
@@ -90,6 +91,10 @@ public class ConfigResource implements ServletContextAware {
    * deploy files staged on S3 to local directories.
    */
   public Response deploy(@PathParam("environment") String environment) {
+    if (!isAuthorized()) {
+      return Response.noContent().build();
+    }
+
     try {
     String url = getTDMURL() + "/api/tdm/config/deploy/from/" + environment;
     _log.debug("requesting:" + url);

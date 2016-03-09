@@ -149,14 +149,6 @@ public class BuildRemoteResource extends AuthenticatedResource {
     return response;
   }
   
-
-  // TODO
-  @Override
-  protected boolean isAuthorized() {
-    return true;
-  }
-  
-
     private class BuildThread implements Runnable {
       
       private BundleBuildRequest _request;

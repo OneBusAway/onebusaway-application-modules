@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+import org.springframework.web.context.request.RequestContextHolder;
 
 import java.io.StringWriter;
 
@@ -68,6 +69,10 @@ public class ValidateResource extends AuthenticatedResource {
 		this.bundleName = bundleName;
 		bundleRequest.setBundleBuildName(bundleName);
 		bundleRequest.setBundleDirectory(bundleDirectory);
+		
+		String session = RequestContextHolder.currentRequestAttributes().getSessionId();
+		bundleRequest.setSessionId(session);
+		
 		BundleResponse bundleResponse = null;
 		try {
 			bundleResponse = _bundleService.validate(bundleRequest);      

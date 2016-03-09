@@ -57,7 +57,7 @@ import org.onebusaway.webapp.actions.OneBusAwayNYCAdminActionSupport;
       params={"root", "bundleValidationResults"})
 })
 public class ValidateBundleAction extends OneBusAwayNYCAdminActionSupport {
-  private static Logger _log = LoggerFactory.getLogger(ManageBundlesAction.class);
+  private static Logger _log = LoggerFactory.getLogger(ValidateBundleAction.class);
   private static final long serialVersionUID = 1L;
     
   // Names of valid tests
@@ -121,11 +121,6 @@ public class ValidateBundleAction extends OneBusAwayNYCAdminActionSupport {
   @Override
   public String input() {
     _log.debug("in input");
-    return SUCCESS;
-  }
-
-  @Override
-  public String execute() {
     return SUCCESS;
   }
 

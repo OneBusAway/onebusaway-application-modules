@@ -35,7 +35,7 @@ import javax.annotation.PreDestroy;
 
 import org.apache.log4j.Layout;
 import org.apache.log4j.Level;
-import org.apache.log4j.SimpleLayout;
+import org.apache.log4j.PatternLayout;
 import org.apache.log4j.WriterAppender;
 import org.onebusaway.admin.model.BundleBuildRequest;
 import org.onebusaway.admin.model.BundleBuildResponse;
@@ -703,7 +703,7 @@ public class BundleBuildingServiceImpl implements BundleBuildingService {
    */
   private void configureLogging(OutputStream os) {
     if (_debug) return;
-    Layout layout = new SimpleLayout();
+    Layout layout = new PatternLayout(PatternLayout.TTCC_CONVERSION_PATTERN);
     WriterAppender wa = new WriterAppender(layout, os);
     wa.setName("bundlebuilder.out");
     // introducing log4j dependency here

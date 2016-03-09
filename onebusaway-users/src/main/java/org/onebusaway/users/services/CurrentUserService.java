@@ -80,6 +80,13 @@ public interface CurrentUserService {
    * @return true if the current user is an admin
    */
   public boolean isCurrentUserAdmin();
+  
+  /**
+   * See {@link StandardAuthoritiesService} for definition of reporting
+   * 
+   * @return true if the current user is a reporting
+   */
+  public boolean isCurrentUserReporting();
 
   /**
    * A generic method that dispatches based on the "mode" parameter. If mode is
@@ -285,5 +292,6 @@ public interface CurrentUserService {
    * {@link UserService#enableAdminRoleForUser(User, boolean)}.
    */
   public void enableAdminRole();
+
 
 }

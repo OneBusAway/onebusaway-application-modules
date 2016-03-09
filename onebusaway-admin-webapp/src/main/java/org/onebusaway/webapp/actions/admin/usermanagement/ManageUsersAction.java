@@ -16,6 +16,7 @@
 package org.onebusaway.webapp.actions.admin.usermanagement;
 
 import java.io.StringReader;
+import java.util.List;
 
 import org.apache.struts2.convention.annotation.Result;
 import org.apache.struts2.convention.annotation.Results;
@@ -36,13 +37,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class ManageUsersAction extends OneBusAwayNYCAdminActionSupport {
 
 	private static final long serialVersionUID = 1L;
-	
+
 	private UserManagementService userManagementService;
 	private JsonTool gsonTool;
 	
 	private String userData;
 	private String updateUserMessage;
-	
+
 	/**
 	 * Edits a user in the system
 	 * @return
@@ -51,9 +52,9 @@ public class ManageUsersAction extends OneBusAwayNYCAdminActionSupport {
 		UserDetail userDetail = gsonTool.readJson(new StringReader(userData), UserDetail.class);
 		boolean success = userManagementService.updateUser(userDetail);
 		if(success) {
-			updateUserMessage =  "User '" +userDetail.getUserName() + "' edited successfully";
+			updateUserMessage =  "User '" +userDetail.getUsername() + "' edited successfully";
 		} else {
-			updateUserMessage = "Error editing user : '" +userDetail.getUserName() +"'";
+			updateUserMessage = "Error editing user : '" +userDetail.getUsername() +"'";
 		}
 		
 		return "updateUser";
@@ -64,9 +65,9 @@ public class ManageUsersAction extends OneBusAwayNYCAdminActionSupport {
 		UserDetail userDetail = gsonTool.readJson(new StringReader(userData), UserDetail.class);
 		boolean success = userManagementService.deactivateUser(userDetail);
 		if(success) {
-			updateUserMessage =  "User '" +userDetail.getUserName() + "' deactivated successfully";
+			updateUserMessage =  "User '" +userDetail.getUsername() + "' deactivated successfully";
 		} else {
-			updateUserMessage = "Error deactivating user : '" +userDetail.getUserName() +"'";
+			updateUserMessage = "Error deactivating user : '" +userDetail.getUsername() +"'";
 		}
 		return "updateUser";
 	}
@@ -114,5 +115,9 @@ public class ManageUsersAction extends OneBusAwayNYCAdminActionSupport {
 	public void setGsonTool(JsonTool gsonTool) {
 		this.gsonTool = gsonTool;
 	}
-
+	
+	public List<String> getPossibleRoles() {
+		return userManagementService.getAllRoleNames();
+	}
+		
 }

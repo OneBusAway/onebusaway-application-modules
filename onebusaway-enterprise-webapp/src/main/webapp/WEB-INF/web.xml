@@ -28,21 +28,24 @@
       <res-type>javax.sql.DataSource</res-type>
       <res-auth>Container</res-auth>
   	</resource-ref>
+	<!-- this should come from context (context.xml -->
+	<!-- 
 	<env-entry>
 	        <env-entry-name>xwikiUrl</env-entry-name>
 	        <env-entry-type>java.lang.String</env-entry-type>
-	        <env-entry-value>http://appelb.prod.obahart.org/xwiki</env-entry-value>
+	        <env-entry-value>http://your-server.com/xwiki</env-entry-value>
     </env-entry>
 	<env-entry>
 	        <env-entry-name>wikiDocumentEditUrl</env-entry-name>
 	        <env-entry-type>java.lang.String</env-entry-type>
-	        <env-entry-value>"http://appelb.prod.obahart.org/xwiki/bin/edit/Main/%{documentName}</env-entry-value>
+	        <env-entry-value>"http://your-server.com/xwiki/bin/edit/Main/%{documentName}</env-entry-value>
     </env-entry>
 	<env-entry>
 	        <env-entry-name>wikiAttachmentUrl</env-entry-name>
 	        <env-entry-type>java.lang.String</env-entry-type>
-	        <env-entry-value>http://appelb.prod.obahart.org/xwiki/bin/download/Main/%{documentName}/%{attachmentName}</env-entry-value>
+	        <env-entry-value>http://your-server.com/xwiki/bin/download/Main/%{documentName}/%{attachmentName}</env-entry-value>
     </env-entry>
+     -->
 	<context-param>
 		<param-name>contextConfigLocation</param-name>
 		<param-value>

@@ -16,24 +16,8 @@
 package org.onebusaway.admin.service.server.impl;
 
 
-import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-
+import com.google.transit.realtime.GtfsRealtime.*;
+import com.google.transit.realtime.GtfsRealtime.TranslatedString.Translation;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.methods.GetMethod;
@@ -45,30 +29,24 @@ import org.onebusaway.admin.service.server.RssServiceAlertsService;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data.model.ListBean;
 import org.onebusaway.transit_data.model.RouteBean;
-import org.onebusaway.transit_data.model.service_alerts.EEffect;
-import org.onebusaway.transit_data.model.service_alerts.ESeverity;
-import org.onebusaway.transit_data.model.service_alerts.NaturalLanguageStringBean;
-import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
-import org.onebusaway.transit_data.model.service_alerts.SituationAffectsBean;
-import org.onebusaway.transit_data.model.service_alerts.SituationConsequenceBean;
-import org.onebusaway.transit_data.model.service_alerts.TimeRangeBean;
+import org.onebusaway.transit_data.model.service_alerts.*;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.remoting.RemoteConnectFailureException;
 import org.springframework.stereotype.Component;
 
-import com.google.transit.realtime.GtfsRealtime.Alert;
-import com.google.transit.realtime.GtfsRealtime.EntitySelector;
-import com.google.transit.realtime.GtfsRealtime.FeedEntity;
-import com.google.transit.realtime.GtfsRealtime.FeedHeader;
-import com.google.transit.realtime.GtfsRealtime.FeedMessage;
-import com.google.transit.realtime.GtfsRealtime.TimeRange;
-import com.google.transit.realtime.GtfsRealtime.TranslatedString;
-import com.google.transit.realtime.GtfsRealtime.TranslatedString.Translation;
-import com.google.transit.realtime.GtfsRealtime.TripDescriptor;
-import com.google.transit.realtime.GtfsRealtimeConstants;
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 @Component
 public class RssServiceAlertsSerivceImpl implements RssServiceAlertsService {
@@ -295,6 +273,7 @@ public class RssServiceAlertsSerivceImpl implements RssServiceAlertsService {
                     String guid = cachedAlertsGuidIter.next();
                     if(!currentRssAlertMap.keySet().contains(guid)){
                         _log.info("Removing expired alert with guid " + guid);
+                        _transitDataService.removeServiceAlert(guid);
                         cachedAlertsGuidIter.remove();
                     }else{
                         ServiceAlertBean currentAlert = _alertCache.get(guid);
@@ -302,6 +281,7 @@ public class RssServiceAlertsSerivceImpl implements RssServiceAlertsService {
                         if(rssAlert.getCreationTime() > currentAlert.getCreationTime()) {
                             _log.info("Updating alert with guid " + guid);
                             _alertCache.put(guid, rssAlert);
+                            _transitDataService.updateServiceAlert(rssAlert);
                         }
                     }
                 }
@@ -310,24 +290,13 @@ public class RssServiceAlertsSerivceImpl implements RssServiceAlertsService {
                 for(String currentRssGuid : currentRssAlertMap.keySet()){
                     if(!_alertCache.keySet().contains(currentRssGuid)){
                         _log.info("Creating alert with guid " + currentRssGuid);
+                        _transitDataService.createServiceAlert(getAgencyId(), currentRssAlertMap.get(currentRssGuid));
                         _alertCache.put(currentRssGuid, currentRssAlertMap.get(currentRssGuid));
                     }
                 }
-                
-                updateAlerts(_alertCache);
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        }
-
-        
-        
-        private void updateAlerts(Map<String, ServiceAlertBean> wmataAlertCache) {
-          FeedMessage.Builder feed = FeedMessage.newBuilder();
-          FeedHeader.Builder header = feed.getHeaderBuilder();
-          header.setGtfsRealtimeVersion(GtfsRealtimeConstants.VERSION);
-          fillFeedMessage(feed, wmataAlertCache);
-          _feed = feed.build();
         }
 
         // this code borrowed from AlertsForAgencyAction
@@ -346,8 +315,9 @@ public class RssServiceAlertsSerivceImpl implements RssServiceAlertsService {
         private void fillAlert(FeedMessage.Builder feed, ListBean<ServiceAlertBean> alerts) {
           for (ServiceAlertBean serviceAlert : alerts.getList()) {
             FeedEntity.Builder entity = feed.addEntityBuilder();
-            entity.setId(Integer.toString(feed.getEntityCount()));
+            entity.setId(serviceAlert.getId());
             Alert.Builder alert = entity.getAlertBuilder();
+
 
             fillTranslations(serviceAlert.getSummaries(),
                 alert.getHeaderTextBuilder());
@@ -409,28 +379,37 @@ public class RssServiceAlertsSerivceImpl implements RssServiceAlertsService {
       }
       return id;
     }
-    
+
     private class RefreshDataTask implements Runnable {
 
         @Override
         public void run() {
 
-            if (!isEnabled()) 
+            if (!isEnabled())
             {
-              _log.info("exiting refresh cache, not enabled");
-              return;
+                _log.info("exiting refresh cache, not enabled");
+                return;
             }
 
-            try {
-                ListBean<RouteBean> routes =  _transitDataService.getRoutesForAgencyId(getAgencyId());
-                Map<String, String> mutableRouteMap = new HashMap<String, String>();
-                for(RouteBean route : routes.getList()){
-                    mutableRouteMap.put(route.getShortName().toUpperCase(), route.getId());
+            while(true){
+                try {
+                    ListBean<RouteBean> routes =  _transitDataService.getRoutesForAgencyId(getAgencyId());
+                    Map<String, String> mutableRouteMap = new HashMap<String, String>();
+                    for(RouteBean route : routes.getList()){
+                      AgencyAndId routeId = AgencyAndId.convertFromString(route.getId());
+                        mutableRouteMap.put(route.getShortName().toUpperCase(), routeId.toString());
+                    }
+                    _routeShortNameToRouteIdMap = Collections.unmodifiableMap(mutableRouteMap);
+                    _alertCache = new HashMap<String, ServiceAlertBean>();
+                    break;
+                } catch (RemoteConnectFailureException rcfe) {
+                    _log.warn("TDS hasn't started yet, will re-attempt to load routes in 30 seconds");
+                    try {
+                        Thread.sleep((30l * 1000l));
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
                 }
-                _routeShortNameToRouteIdMap = Collections.unmodifiableMap(mutableRouteMap);
-                _alertCache = new HashMap<String, ServiceAlertBean>();
-            } catch (Exception e) {
-                e.printStackTrace();
             }
         }
     }

@@ -26,6 +26,8 @@ import org.onebusaway.nextbus.model.nextbus.BodyError;
 import org.onebusaway.nextbus.model.transiTime.Prediction;
 import org.onebusaway.nextbus.model.transiTime.Predictions;
 import org.onebusaway.nextbus.model.transiTime.PredictionsDirection;
+import org.onebusaway.nextbus.util.HttpUtil;
+import org.onebusaway.nextbus.validation.ErrorMsg;
 import org.onebusaway.transit_data.model.RouteBean;
 import org.onebusaway.transit_data.model.StopBean;
 import org.slf4j.Logger;
@@ -40,6 +42,8 @@ public class PredictionsAction extends NextBusApiBase implements
     ModelDriven<Body<Predictions>> {
 
   private static Logger _log = LoggerFactory.getLogger(PredictionsAction.class);
+
+  private HttpUtil _httpUtil = new HttpUtil();
 
   private String agencyId;
 
@@ -63,11 +67,29 @@ public class PredictionsAction extends NextBusApiBase implements
     this.stopId = _tdsMappingService.getStopIdFromStopCode(stopId);
   }
 
+  // short form of stopId param
+  public String getS() {
+    return stopId;
+  }
+
+  public void setS(String stopId) {
+    this.stopId = stopId;
+  }
+
   public String getRouteTag() {
     return routeTag;
   }
 
   public void setRouteTag(String routeTag) {
+    this.routeTag = _tdsMappingService.getRouteIdFromShortName(routeTag);
+  }
+
+  // short form of routeTag param
+  public String getR() {
+    return routeTag;
+  }
+
+  public void setR(String routeTag) {
     this.routeTag = _tdsMappingService.getRouteIdFromShortName(routeTag);
   }
 
@@ -93,21 +115,21 @@ public class PredictionsAction extends NextBusApiBase implements
             + getIdNoAgency(stopId) + "&";
       }
       String uri = serviceUrl + routeStop + "format=" + REQUEST_TYPE;
-
+      _log.info(uri);
       try {
 
-        JsonArray predictionsJson = getJsonObject(uri).getAsJsonArray(
+        JsonArray predictionsJson = _httpUtil.getJsonObject(uri).getAsJsonArray(
             "predictions");
         Type listType = new TypeToken<List<Predictions>>() {
         }.getType();
 
         List<Predictions> predictions = new Gson().fromJson(predictionsJson,
             listType);
-        
+
         modifyJSONObject(predictions);
 
         body.getResponse().addAll(predictions);
-        
+
       } catch (Exception e) {
         body.getErrors().add(new BodyError("No valid results found."));
         _log.error(e.getMessage());
@@ -119,12 +141,17 @@ public class PredictionsAction extends NextBusApiBase implements
   }
 
   private void modifyJSONObject(List<Predictions> predictions) {
+
+    String agencyTitle = getCachedAgencyBean(agencyId).getName();
+
     for (Predictions prediction : predictions) {
       for (PredictionsDirection direction : prediction.getDest()) {
         for (Prediction dirPrediction : direction.getPred()) {
           dirPrediction.setDirTag(direction.getDir());
         }
       }
+
+      prediction.setAgencyTitle(agencyTitle);
     }
   }
 
@@ -139,7 +166,7 @@ public class PredictionsAction extends NextBusApiBase implements
     if (!processStopIds(stopId, stopIds, agencies, body))
       return false;
 
-    StopBean stopBean = _transitDataService.getStop(stopIds.get(0).toString());
+    StopBean stopBean = getCachedStopBean(stopIds.get(0).toString());
 
     if (routeTag == null) {
       for (RouteBean routeBean : stopBean.getRoutes()) {
@@ -156,17 +183,12 @@ public class PredictionsAction extends NextBusApiBase implements
       }
       if (!stopServesRoute) {
         body.getErrors().add(
-            new BodyError(
-                "For agency="
-                    + agencyId
-                    + " route r="
-                    + routeTag
-                    + " is not currently available. It might be initializing still."));
+            new BodyError(ErrorMsg.ROUTE_UNAVAILABLE.getDescription(),
+                agencyId, routeTag));
         return false;
       }
-
     }
-
     return true;
   }
+
 }

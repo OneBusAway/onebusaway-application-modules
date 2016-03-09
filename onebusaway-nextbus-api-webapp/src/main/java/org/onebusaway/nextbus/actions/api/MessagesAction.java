@@ -27,8 +27,10 @@ import org.onebusaway.nextbus.model.nextbus.BodyError;
 import org.onebusaway.nextbus.model.nextbus.Message;
 import org.onebusaway.nextbus.model.nextbus.MessageText;
 import org.onebusaway.transit_data.model.ListBean;
+import org.onebusaway.transit_data.model.service_alerts.NaturalLanguageStringBean;
 import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationQueryBean;
+import org.onebusaway.transit_data.model.service_alerts.TimeRangeBean;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -58,7 +60,7 @@ public class MessagesAction extends NextBusApiBase implements ModelDriven<Body<M
 	}
 
 	public void setR(String routeId) {
-		this.routeId = routeId;
+		this.routeId = _tdsMappingService.getRouteIdFromShortName(routeId);
 	}
 
 	public HttpHeaders index() {
@@ -79,48 +81,53 @@ public class MessagesAction extends NextBusApiBase implements ModelDriven<Body<M
 				body.getResponse().addAll(getMessagesForRoute(agencyId,routeId.toString()));
 			}
 		}
-		else{
-			body.getErrors().add(new BodyError("You must provide a route id."));
-		}
-	
 		return body;
 		
 	}
 	
 	private List<Message> getMessagesForRoute(String agencyId, String routeId){
 		
-		DecimalFormat df = new DecimalFormat();
-		df.setMaximumFractionDigits(6);
-		
 		List<Message> messageList = new ArrayList<Message>(); 
 		ListBean<ServiceAlertBean> serviceAlertBeans = getAllSituations(agencyId, routeId);
-		    for(ServiceAlertBean serviceAlert : serviceAlertBeans.getList()) {
-		      //serviceAlertBean.get
-		      
-		      Message message = new Message();
-		      message.setId(serviceAlert.getId());
-		      message.setCreator(serviceAlert.getReason());
-		      
-		      message.setEndBoundaryStr(serviceAlert.getPublicationWindows().toString());
-		      
-		      message.setMessageText(new MessageText(serviceAlert.getDescriptions().toString()));
-		      
-		      messageList.add(message);
-		    }
-		    
-		    return messageList;
+    
+    serviceAlerts:
+    for(ServiceAlertBean serviceAlert : serviceAlertBeans.getList()) {
+     
+        if(serviceAlert.getActiveWindows() != null){ 
+          long currentTime = System.currentTimeMillis();
+            
+           for(TimeRangeBean timerange : serviceAlert.getActiveWindows()){
+             if(timerange.getFrom() < currentTime || timerange.getTo() < currentTime){
+               
+               continue serviceAlerts;
+             }
+           }
+        }
+         
+        Message message = new Message();
+        message.setId(serviceAlert.getId());
+        message.setCreator(serviceAlert.getSource());
+        
+        //message.setEndBoundaryStr(serviceAlert.getPublicationWindows().toString());
+
+        String messageText = "";
+        for(NaturalLanguageStringBean description : serviceAlert.getDescriptions()){
+          messageText += description.getValue();
+        }
+        message.setMessageText(new MessageText(messageText));
+        
+        messageList.add(message);
+    }
+    
+    return messageList;
 		    
 	 }
 	
 	private ListBean<ServiceAlertBean> getAllSituations(String agencyId, String routeId) {
-		 // First get service alerts for the stop
-        SituationQueryBean query = new SituationQueryBean();
-        /*List<String> stopIdStrings = new ArrayList<String>();
-        stopIdStrings.add(stopIdString);*/
-        SituationQueryBean.AffectsBean affects = new SituationQueryBean.AffectsBean();
-        query.getAffects().add(affects);
-        affects.setAgencyId(agencyId);
-        affects.setRouteId(routeId);
+      SituationQueryBean query = new SituationQueryBean();
+      SituationQueryBean.AffectsBean affects = new SituationQueryBean.AffectsBean();
+      query.getAffects().add(affects);
+      affects.setRouteId(routeId);
         
 	    return _transitDataService.getServiceAlerts(query);
   }

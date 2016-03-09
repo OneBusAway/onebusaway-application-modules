@@ -77,7 +77,7 @@ public class UserManagementServiceImplTest {
 	}
 	
 	@Test
-	public void testCreateOperator() {
+	public void testCreateUser() {
 		UserIndex userIndex = mock(UserIndex.class);
 		when(userService.getOrCreateUserForUsernameAndPassword("operator", "password")).thenReturn(userIndex);
 		
@@ -116,7 +116,7 @@ public class UserManagementServiceImplTest {
 		UserDetail userDetail = mock(UserDetail.class);
 		
 		when(userDetail.getId()).thenReturn(1);
-		when(userDetail.getUserName()).thenReturn("admin2");
+		when(userDetail.getUsername()).thenReturn("admin2");
 		
 		when(userDao.getUserForId(1)).thenReturn(null);
 		
@@ -155,21 +155,21 @@ public class UserManagementServiceImplTest {
 		when(user.getUserIndices()).thenReturn(userIndices);
 		when(user.getRoles()).thenReturn(userRoles);
 		
-		when(authoritiesService.getAdministratorRole()).thenReturn(adminRole);
+		when(authoritiesService.getUserRoleForName("ROLE_ADMINISTRATOR")).thenReturn(adminRole);
 		
 		boolean success = service.updateUser(userDetail);
 		
 		assertTrue("User updated successfully", success);
 		
 		verify(passwordEncoder).encodePassword("password", "admin");
-		verify(authoritiesService).getAdministratorRole();
+		verify(authoritiesService).getUserRoleForName("ROLE_ADMINISTRATOR");
 		verify(userDao).saveOrUpdateUser(user);
 		
 	}
 
 	private void buildUserDetail(Integer userId, UserDetail userDetail, String password) {
 		when(userDetail.getId()).thenReturn(userId);
-		when(userDetail.getUserName()).thenReturn("admin");
+		when(userDetail.getUsername()).thenReturn("admin");
 		when(userDetail.getPassword()).thenReturn(password);
 		when(userDetail.getRole()).thenReturn("ROLE_ADMINISTRATOR");
 	}
@@ -238,7 +238,7 @@ public class UserManagementServiceImplTest {
 		assertTrue("User's password updated successfully", success);
 		
 		verify(passwordEncoder, times(0)).encodePassword("", "admin");
-		verify(authoritiesService).getAdministratorRole();
+		verify(authoritiesService).getUserRoleForName("ROLE_ADMINISTRATOR");
 		verify(userDao).saveOrUpdateUser(user);
 		
 	}
@@ -248,7 +248,7 @@ public class UserManagementServiceImplTest {
 		UserDetail userDetail = mock(UserDetail.class);
 		
 		when(userDetail.getId()).thenReturn(1);
-		when(userDetail.getUserName()).thenReturn("admin2");
+		when(userDetail.getUsername()).thenReturn("admin2");
 		
 		when(userDao.getUserForId(1)).thenReturn(null);
 		

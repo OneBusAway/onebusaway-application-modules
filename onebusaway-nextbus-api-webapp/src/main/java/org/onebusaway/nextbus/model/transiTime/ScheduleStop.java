@@ -44,7 +44,7 @@ public class ScheduleStop {
 	}
 
 	public void setTimeSecs(long timeSecs) {
-		this.timeSecs = timeSecs*1000;
+		this.timeSecs = timeSecs;
 	}
 
 	public String getValue() {

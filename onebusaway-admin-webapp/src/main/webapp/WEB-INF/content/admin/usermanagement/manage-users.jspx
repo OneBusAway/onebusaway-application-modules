@@ -70,7 +70,7 @@
 						 	<td>
 							 	<div>
 								 	<label class="userLabel">User name: </label>
-								 	<label id="userName"></label>
+								 	<label id="username"></label>
 							 	</div>
 							 	<div>
 								 	<label class="userLabel">User role: </label>
@@ -102,9 +102,9 @@
 				 	<div id="editRole">
 				 		<label class="userLabel">New Role:</label>
 				 		<select name="Role" id="newRole">
-				 			<option value="ROLE_ADMINISTRATOR">ADMINISTRATOR</option>
-				 			<option value="ROLE_USER">OPERATOR</option>
-				 			<option value="ROLE_ANONYMOUS">ANONYMOUS</option>
+				 			<c:forEach items="${possibleRoles}" var="role">
+				 				<option value="${role}">${role.split("_")[1]}</option>
+				 			</c:forEach>
 				 		</select>
 				 	</div>
 				 	<button id="editSubmit">Submit</button>
