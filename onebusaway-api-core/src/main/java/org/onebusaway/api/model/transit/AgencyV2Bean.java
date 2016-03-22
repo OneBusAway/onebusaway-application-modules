@@ -1,5 +1,6 @@
 /**
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2015 University of South Florida (cagricetin@mail.usf.edu)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +20,7 @@ import java.io.Serializable;
 
 public class AgencyV2Bean implements Serializable, HasId {
 
-  private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 2L;
 
   private String id;
 
@@ -34,6 +35,10 @@ public class AgencyV2Bean implements Serializable, HasId {
   private String phone;
 
   private String disclaimer;
+  
+  private String email;
+  
+  private String fareUrl;
 
   private boolean privateService;
 
@@ -91,6 +96,22 @@ public class AgencyV2Bean implements Serializable, HasId {
 
   public void setDisclaimer(String disclaimer) {
     this.disclaimer = disclaimer;
+  }
+  
+  public String getEmail() {
+	return email;
+  }
+
+  public void setEmail(String email) {
+	this.email = email;
+  }
+
+  public String getFareUrl() {
+	return fareUrl;
+  }
+
+  public void setFareUrl(String fareUrl) {
+	this.fareUrl = fareUrl;
   }
 
   public boolean isPrivateService() {
