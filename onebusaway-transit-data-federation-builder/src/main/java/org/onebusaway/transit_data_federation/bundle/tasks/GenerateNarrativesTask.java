@@ -1,6 +1,7 @@
 /**
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
  * Copyright (C) 2011 Google, Inc.
+ * Copyright (C) 2015 University of South Florida (cagricetin@mail.usf.edu)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -174,6 +175,8 @@ public class GenerateNarrativesTask implements Runnable {
       narrative.setPhone(deduplicate(agency.getPhone()));
       narrative.setTimezone(deduplicate(agency.getTimezone()));
       narrative.setUrl(deduplicate(agency.getUrl()));
+      narrative.setEmail(agency.getEmail());
+      narrative.setFareUrl(agency.getFareUrl());
 
       String disclaimer = _modifications.getModificationForTypeAndId(
           AgencyNarrative.class, agency.getId(), "disclaimer");
