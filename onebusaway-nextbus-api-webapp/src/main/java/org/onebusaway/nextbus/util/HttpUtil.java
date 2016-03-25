@@ -59,10 +59,13 @@ public class HttpUtil {
     return sb.toString();
   }
 
-  public JsonObject getJsonObject(String uri) throws MalformedURLException,
+  public JsonObject getJsonObject(String uri, int timeoutSeconds) throws MalformedURLException,
       IOException {
     URL url = new URL(uri);
     HttpURLConnection request = (HttpURLConnection) url.openConnection();
+    
+    if (timeoutSeconds > 0)
+      request.setConnectTimeout(timeoutSeconds * 1000);
     request.connect();
 
     // Convert to a JSON object to print data

@@ -44,8 +44,8 @@
 				<entry key="2" value="1" />
 			</map>
 		</property>
-	</bean>
+		<property name="httpTimeoutSeconds" value="15" />
+    </bean>
     
-    <bean id="tdsMappingService" class="org.onebusaway.nextbus.impl.TdsMappingServiceImpl" />
-   
+    <bean id="tdsMappingService" class="org.onebusaway.nextbus.impl.TdsMappingServiceImpl" />   
 </beans>
