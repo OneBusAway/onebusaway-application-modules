@@ -369,6 +369,7 @@ public class SearchServiceImpl implements SearchService {
 		tryAsRoute(results, normalizedQuery, resultFactory);
 
 		// only guess it as a stop if its numeric or has possible agency prefix
+		// results does not support mixed types -- it can only be a route or a stop
 		if (results.isEmpty() && (StringUtils.isNumeric(normalizedQuery) || normalizedQuery.contains("_")) ) {
 			tryAsStop(results, normalizedQuery, resultFactory);
 		}
@@ -390,7 +391,28 @@ public class SearchServiceImpl implements SearchService {
 		q = q.trim();
 
 		List<String> tokens = new ArrayList<String>();
+		if (Boolean.TRUE.equals(configuredAgencyIdHasSpaces())) {
+  		String agencyMatch = matchAgencyIds(q);
+  		if (agencyMatch != null) {
+  		  // handle agencies with spaces
+  		  q = q.replace(agencyMatch, "");
+  		  tokens.add(agencyMatch);
+  		}
+		}
+		
 		StringTokenizer tokenizer = new StringTokenizer(q, " +", true);
+		if (configuredAgencyIdHasSpaces() && !tokens.isEmpty() && tokenizer.hasMoreTokens()) {
+		  String peek = tokenizer.nextToken().trim();
+		  if (peek.contains("_")) {
+		    // we have an agency id + "_" that was probably meant for the last token
+		    tokens.set(0,  tokens.get(0) + peek);
+		  } else {
+		    if (!StringUtils.isEmpty(peek)) {
+		      tokens.add(peek);
+		    }
+		  }
+		}
+		
 		while (tokenizer.hasMoreTokens()) {
 		  /*
 		   * Don't upper case the token -- as transit data service queries are
@@ -472,7 +494,50 @@ public class SearchServiceImpl implements SearchService {
 		return normalizedQuery.trim();
 	}
 
-	private void tryAsRoute(SearchResultCollection results, String routeQueryMixedCase,
+	private Boolean _agencyIdHasSpaces = null;
+	private Boolean configuredAgencyIdHasSpaces() {
+	  if (_agencyIdHasSpaces == null) {
+	    Boolean agencyIdHasSpaces = Boolean.FALSE;
+	    for (String id : getAgencyIds()) {
+	      if (id.contains(" ")) {
+	        agencyIdHasSpaces = Boolean.TRUE;
+	        break;
+	      }
+	    }
+	    // see if another thread beat us to it
+	    if (_agencyIdHasSpaces == null) {
+	      _agencyIdHasSpaces = agencyIdHasSpaces;
+	    }
+	  }
+    return _agencyIdHasSpaces;
+  }
+
+  private String matchAgencyIds(String q) {
+	  for (String id : getAgencyIds()) {
+	    if (q.contains(id)) {
+	      return id;
+	    }
+	  }
+    return null;
+  }
+
+
+	private List<String> _agencyIds = null;
+  private List<String> getAgencyIds() {
+    if (_agencyIds == null) {
+      List<String> agencyIds = new ArrayList<String>();
+      for(AgencyWithCoverageBean agenciesWithCoverage : _transitDataService.getAgenciesWithCoverage()) {
+        agencyIds.add(agenciesWithCoverage.getAgency().getId());
+      }
+      // see if another thread beat us to it
+      if (_agencyIds == null) {
+        _agencyIds = agencyIds;
+      }
+    }
+    return _agencyIds;
+  }
+
+  private void tryAsRoute(SearchResultCollection results, String routeQueryMixedCase,
 			SearchResultFactory resultFactory) {
 	  
 	  String routeQuery = new String(routeQueryMixedCase);
@@ -487,6 +552,14 @@ public class SearchServiceImpl implements SearchService {
 		}
 
 		// agency + route id matching (from direct links)
+    if (_routeIdToRouteBeanMap.get(routeQueryMixedCase) != null) {
+      RouteBean routeBean = _routeIdToRouteBeanMap.get(routeQueryMixedCase);
+      results.addMatch(resultFactory.getRouteResult(routeBean));
+      // if we've matched, assume no others
+      return;
+    }
+
+    // agency + route id matching (from direct links)
     if (_routeIdToRouteBeanMap.get(routeQuery) != null) {
       RouteBean routeBean = _routeIdToRouteBeanMap.get(routeQuery);
       results.addMatch(resultFactory.getRouteResult(routeBean));
