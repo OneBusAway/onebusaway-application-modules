@@ -144,8 +144,8 @@ jQuery(function() {
 					data: {
 						"diffBundleName" : bundleNames[0],
 						"diffBuildName" : buildNames[0],
-						"bundleDirectory" : jQuery("#createDirectory #directoryName").val(),
-						"bundleName": jQuery("#buildBundle_bundleName").val()
+						"bundleDirectory" : selectedDirectory,
+						"bundleName": jQuery("#bundleBuildName").val()
 					},
 					type: "GET",
 					async: false,
@@ -247,11 +247,12 @@ jQuery(function() {
 	//Handle build button click event
 	//jQuery("#buildBundle_buildButton").click(onBuildClick);
 	//jQuery("#Build #testBundleButton").click(onBuildClick);
-	jQuery("#Build #testBundleButton").click({buildType: "test"}, onBuildClick);
-	jQuery("#Build #buildBundleButton").click({buildType: "build"}, onBuildClick);
+	jQuery("#Build #testBuildBundleButton").click({buildType: "test"}, onBuildClick);
+	jQuery("#Build #finalBuildBundleButton").click({buildType: "final"}, onBuildClick);
 
-	// Toggle the test build details textarea
+	// Toggle the test and final build details textarea
 	jQuery("#viewTestBuildDetails").click({buildType: "test"}, toggleBuildBundleResultList);
+	jQuery("#viewFinalBuildDetails").click({buildType: "final"}, toggleBuildBundleResultList);
 
 
 	//Handle reset button click event
@@ -336,7 +337,13 @@ jQuery(function() {
 
 	$("#testBuildBundle_resultList").prop('readonly', true);
 	
+	$("#finalBuildBundle_resultList").prop('readonly', true);
+	
 	$("#testProgressBar").progressbar({
+		value: 0
+	});
+	
+	$("#finalProgressBar").progressbar({
 		value: 0
 	});
 });
@@ -502,6 +509,7 @@ function showBundleInfo(bundleInfo){
 	jQuery("#buildBundle_id").text(bundleObj.buildResponse.requestId);
 	buildBundleId = bundleObj.buildResponse.requestId;
 	setDivHtml(document.getElementById('testBuildBundle_resultList'), bundleObj.buildResponse.statusMessages);
+	setDivHtml(document.getElementById('finalBuildBundle_resultList'), bundleObj.buildResponse.statusMessages);
 	showBuildFileList(bundleObj.buildResponse.buildOutputFiles, bundleObj.buildResponse.requestId);
 }
 
@@ -629,39 +637,51 @@ function onSelectDataset(sourceDirectoryType) {
 							selectedDirectory = copyDir;
 						}
 						
-						var agencies = status.bundleInfo.agencyList;
-						for (var i = 0; i < agencies.length; ++i) {
-							var agency = agencies[i];
-							// Check if this is a duplicate
-							var dupe = false;
-							for (var j = 0; j < i; ++j) {
-								var agency2 = agencies[j];
-								if (agency2.agencyId == agency.agencyId 
-									&& agency2.agencyDataSource == agency.agencyDataSource
-									&& agency2.agencyDataSourceType == agency.agencyDataSourceType
-									&& agency2.agencyProtocol == agency.agencyProtocol) {
-									dupe = true;
-									break;
+						if (actionName != "createDirectory" && status.bundleInfo != null) {
+							var agencies = status.bundleInfo.agencyList;
+							if (agencies != null) {
+								for (var i = 0; i < agencies.length; ++i) {
+									var agency = agencies[i];
+									// Check if this is a duplicate
+									var dupe = false;
+									for (var j = 0; j < i; ++j) {
+										var agency2 = agencies[j];
+										if (agency2.agencyId == agency.agencyId && agency.agencyBundleUploadDate != null) {
+											var updateDate = Date.parse(agency.agencyBundleUploadDate);
+											var stringDate = new Date(updateDate).toString();
+										}
+										if (agency2.agencyId == agency.agencyId 
+											&& agency2.agencyDataSource == agency.agencyDataSource
+											&& agency2.agencyDataSourceType == agency.agencyDataSourceType
+											&& agency2.agencyProtocol == agency.agencyProtocol) {
+											dupe = true;
+											break;
+										}
+									}
+									if (dupe) continue;
+									// Get agency name
+									var agencyName = "";
+									for (var j=0; j<agencyMetadata.length; ++j) {
+										if (agencyMetadata[j].legacyId == agency.agencyId) {
+											agencyName = agencyMetadata[j].name;
+											agencyName += " (" + agencyMetadata[j].shortName + ")";
+										}
+									}
+									// Add row for this file to existingFilesTable
+									var uploadDate = "";
+									if (agency.agencyBundleUploadDate != null) {
+										uploadDate = agency.agencyBundleUploadDate;
+									}
+									var new_row = '<tr> \
+										<td>' + agencyName + '</td> \
+										<td>' + agency.agencyDataSourceType + '</td> \
+										<td>' + agency.agencyDataSource + '</td> \
+										<td>' + uploadDate + '</td> \
+										<td></td>  \
+										</tr>';
+									$('#existingFilesTable').append(new_row);
 								}
 							}
-							if (dupe) continue;
-							// Get agency name
-							var agencyName = "";
-							for (var j=0; j<agencyMetadata.length; ++j) {
-								if (agencyMetadata[j].legacyId == agency.agencyId) {
-									agencyName = agencyMetadata[j].name;
-									agencyName += " (" + agencyMetadata[j].shortName + ")";
-								}
-							}
-							// Add row for this file to existingFilesTable
-							var new_row = '<tr> \
-								<td>' + agencyName + '</td> \
-								<td>' + agency.agencyDataSourceType + '</td> \
-								<td>' + agency.agencyDataSource + '</td> \
-								<td></td> \
-								<td></td>  \
-								</tr>';
-							$('#existingFilesTable').append(new_row);
 						}
 						enableBuildButton();
 						enableResetButton();
@@ -942,6 +962,8 @@ function toggleValidationResultList() {
 function toggleBuildBundleResultList(event) {
 	if (event.data.buildType == "test") {
 		jQuery("#testBuildBundle_resultList").toggle();
+	} else {
+		jQuery("#finalBuildBundle_resultList").toggle();
 	}
 	//var $image = jQuery("#buildBundle #buildBundle_progress #expand");
 	//changeImageSrc($image);
@@ -1007,7 +1029,7 @@ function directoryOptionChanged() {
 				//Enable or disable create/select button when user enters/removes the destination 
 				// directory name for a Copy
 				jQuery("#createDirectoryContents #destDirectoryName").bind("input propertychange", function() {
-					var text = jQuery("#createDirectory #directoryName").val();
+					var text = selectedDirectory;
 					var copyDestText = jQuery("#createDirectory #destDirectoryName").val();
 					if (text.length > 0 && copyDestText.length > 0) {
 						enableSelectButton();
@@ -1186,12 +1208,14 @@ function onBuildClick(event) {
 	//var archive = jQuery("#buildBundle_archive").is(":checked");
 	var archive = false;
 	var consolidate = false;
+	var buildType = event.data.buildType;
 	
-	if (event.data.buildType == "test") {
+	if (buildType == "test") {
 		jQuery("#testProgressBarDiv").show();
 	} else {
 		archive = true;
 		consolidate = true;
+		jQuery("#finalProgressBarDiv").show();
 	}
 	//var consolidate = jQuery("#buildBundle_consolidate").is(":checked");
 	//var predate = jQuery("#buildBundle_predate").is(":checked");
@@ -1209,7 +1233,7 @@ function onBuildClick(event) {
 	//disableBuildButton();
 	//disableResetButton();
 	//buildBundle(bundleName, startDate, endDate, bundleComment, archive, consolidate, predate);
-	buildBundle(bundleName, startDate, endDate, bundleComment, archive, consolidate, false);
+	buildBundle(bundleName, startDate, endDate, bundleComment, archive, consolidate, false, buildType);
 }
 
 function onResetClick() {
@@ -1219,6 +1243,7 @@ function onResetClick() {
 
 	//jQuery("#buildBundle_resultList").html("");
 	jQuery("#testBuildBundle_resultList").val("");
+	jQuery("#finalBuildBundle_resultList").val("");
 	jQuery("#buildBundle_exception").html("");
 	jQuery("#buildBundle_fileList").html("");
 	jQuery("#buildBundle_fileList").html("");
@@ -1292,10 +1317,14 @@ function bundleUrl() {
 		window.setTimeout(bundleUrl, 5000);
 	}
 }
-function buildBundle(bundleName, startDate, endDate, bundleComment, archive, consolidate, predate){
+function buildBundle(bundleName, startDate, endDate, bundleComment, archive, consolidate, predate, buildType){
 	//var bundleDirectory = jQuery("#selected_bundleDirectory").text();
 	bundleDirectory = selectedDirectory;
 	//var email = jQuery("Build #").val();
+	var $buildBundle_resultList = jQuery("#testBuildBundle_resultList");
+	if (buildType == "final") {
+		$buildBundle_resultList = jQuery("#finalBuildBundle_resultList");
+	}
 	var email = jQuery("#buildNotificationEmail").val();
 	if (email == "") { email = "null"; }
 	jQuery.ajax({
@@ -1321,17 +1350,17 @@ function buildBundle(bundleName, startDate, endDate, bundleComment, archive, con
 					alert(bundleResponse.exception.message);
 				} else {
 					//jQuery("#buildBundle_resultList").html("calling...");
-					jQuery("#testBuildBundle_resultList").val("calling...");
+					$buildBundle_resultList.val("calling...");
 					jQuery("#buildBundle_id").text(bundleResponse.id);
 					buildBundleId = bundleResponse.id;
-					window.setTimeout(updateBuildStatus, 5000);
+					window.setTimeout(updateBuildStatus.bind(null, buildType), 5000);
 					bundleUrl();
 				}
 			} else {
 				jQuery("#buildBundle_id").text(error);
 				buildBundleId = error;
 				//jQuery("#buildBundle_resultList").html("error");
-				jQuery("#testBuildBundle_resultList").val("error");
+				$buildBundle_resultList.val("error");
 			}
 		},
 		error: function(request) {
@@ -1340,10 +1369,19 @@ function buildBundle(bundleName, startDate, endDate, bundleComment, archive, con
 	});
 }
 
-function updateBuildStatus() {
+function updateBuildStatus(buildType) {
+	console.log("build type: " + buildType);
 	disableStageButton();
 	//id = jQuery("#buildBundle_id").text();
 	id = buildBundleId;
+	var $progressBar = jQuery("#testProgressBar");
+	var $buildProgress = jQuery("#testBuildProgress");
+	var $buildBundle_resultList = jQuery("#testBuildBundle_resultList");
+	if (buildType == "final") {
+		$progressBar = jQuery("#finalProgressBar");
+		$buildProgress = jQuery("#finalBuildProgress");
+		$buildBundle_resultList = jQuery("#finalBuildBundle_resultList");
+	}
 	jQuery.ajax({
 		url: "../../api/build/" + id + "/list?ts=" +new Date().getTime(),
 		type: "GET",
@@ -1358,7 +1396,7 @@ function updateBuildStatus() {
 				jQuery("#buildBundle_buildProgress").text("Bundle Status Unkown!");
 				jQuery("#buildBundle #buildBox #building #buildingProgress").attr("src","../../css/img/dialog-warning-4.png");
 				//jQuery("#buildBundle_resultList").html("unknown id=" + id);
-				jQuery("#testBuildBundle_resultList").val("unknown id=" + id);
+				$buildBundle_resultList.val("unknown id=" + id);
 			}
 			var size = bundleResponse.statusList.length;
 			if (size > 0) {
@@ -1371,17 +1409,21 @@ function updateBuildStatus() {
 						if (idxCurrent > 0 && idxTotal > 0) {
 							currentTask = parseInt(nextLine.substring(idxCurrent, idxTotal - 1));
 							totalTasks = parseInt(nextLine.substring(idxTotal, idxTotalEnd));
-							$("#testProgressBar").progressbar('value', currentTask/totalTasks * 100);
-							jQuery("#testBuildProgress").text("Completed " + currentTask 
+							$progressBar.progressbar('value', (currentTask-1)/totalTasks * 100);
+							$buildProgress.text("Completed " + (currentTask-1)
 								+ " of " + totalTasks + " build tasks.");
 						}
+					} else if (currentTask > 0 && currentTask == totalTasks) { // All tasks finished
+						$progressBar.progressbar('value', 100);
+						$buildProgress.text("Completed " + currentTask
+								+ " of " + totalTasks + " build tasks.");
 					}
 					//txt = txt + "<li>" + bundleResponse.statusList[i] + "</li>";
 					txt = txt + nextLine + "\n";
 				}
 			}
 			if (bundleResponse.complete == false) {
-				window.setTimeout(updateBuildStatus, 5000); // recurse
+				window.setTimeout(updateBuildStatus.bind(null, buildType), 5000); // recurse
 			} else {
 				jQuery("#buildBundle_buildProgress").text("Bundle Complete!");
 				jQuery("#buildBundle #buildBox #building #buildingProgress").attr("src","../../css/img/dialog-accept-2.png");
@@ -1392,10 +1434,10 @@ function updateBuildStatus() {
 			}
 			//txt = txt + "</ul>";
 			//jQuery("#buildBundle_resultList").html(txt).css("font-size", "12px");	
-			jQuery("#testBuildBundle_resultList").val(txt).css("font-size", "12px");
+			$buildBundle_resultList.val(txt).css("font-size", "12px");
 			// Make sure that the textarea remains scrolled to the bottom.
-			jQuery("#testBuildBundle_resultList").scrollTop(1500);  // Just use some arbitrarily large number
-			jQuery("#testProgressBar").progressbar("37");
+			$buildBundle_resultList.scrollTop(1500);  // Just use some arbitrarily large number
+			//jQuery("#testProgressBar").progressbar("37");
 			// check for exception
 			if (bundleResponse.exception != null) {
 				jQuery("#buildBundle_buildProgress").text("Bundle Failed!");
@@ -1497,8 +1539,8 @@ function onStageClick() {
 
 function stageBundle() {
 	var environment = jQuery("#deploy_environment").text();
-	var bundleDir = jQuery("#createDirectory #directoryName").val();
-	var bundleName = jQuery("#buildBundle_bundleName").val();
+	var bundleDir = selectedDirectory;
+	var bundleName = jQuery("#Build #bundleBuildName").val();
 	jQuery.ajax({
 		url: "../../api/bundle/stagerequest/" + environment + "/" + bundleDir + "/" + bundleName + "?ts=" +new Date().getTime(), 
 		type: "GET",

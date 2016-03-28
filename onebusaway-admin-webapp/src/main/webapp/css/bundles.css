@@ -524,7 +524,7 @@
   margin-right: 10px;
 }
 
-#testBuildBundle_resultList {
+#testBuildBundle_resultList, #finalBuildBundle_resultList {
   display: none;
   margin-top : .5em;
   /*
@@ -1128,17 +1128,17 @@
 	float: left;
 }
 
-#testProgressBarDiv {
+#testProgressBarDiv, #finalProgressBarDiv {
 	display: none;
 }
 
-#testProgressBar {
+#testProgressBar, #finalProgressBar {
 	margin-top: 1.5em; 
 	margin-right: 15em;
 	margin-bottom: 1em
 }
 
-#testBuildProgress {
+#testBuildProgress, #finalBuildProgress {
 	margin-top: 1em;
 	margin-right: 1.5em;
 	margin-bottom: 1.5em;

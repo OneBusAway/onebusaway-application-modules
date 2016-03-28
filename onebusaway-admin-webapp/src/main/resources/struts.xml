@@ -48,7 +48,9 @@
 
       <interceptors>
         <interceptor-stack name="onebusaway-webapp-stack">
-          <interceptor-ref name="defaultStack">
+          
+          <!-- <interceptor-ref name="defaultStack"> -->
+          <interceptor-ref name="paramsPrepareParamsStack">
             <param name="modelDriven.refreshModelBeforeResult">true</param>
           </interceptor-ref>
         </interceptor-stack>
