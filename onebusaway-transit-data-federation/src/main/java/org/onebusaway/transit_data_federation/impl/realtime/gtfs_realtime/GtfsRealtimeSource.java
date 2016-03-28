@@ -376,7 +376,7 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
               serviceAlertsSituationAffectsClause.setApplicationId(affects.getApplicationId());
               serviceAlertsSituationAffectsClause.setDirectionId(affects.getDirectionId());
               serviceAlertsSituationAffectsClause.setRouteId(affects.getRouteId().getId());
-              serviceAlertsSituationAffectsClause.setStopId(affects.getTripId().getId());
+              serviceAlertsSituationAffectsClause.setStopId(affects.getStopId().getId());
               serviceAlertsSituationAffectsClause.setTripId(affects.getTripId().getId());
               serviceAlertRecord.getAllAffects().add(serviceAlertsSituationAffectsClause);
             }
