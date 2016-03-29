@@ -640,6 +640,11 @@ function onSelectDataset(sourceDirectoryType) {
 						if (actionName != "createDirectory" && status.bundleInfo != null) {
 							var agencies = status.bundleInfo.agencyList;
 							if (agencies != null) {
+								if (agencies.length > 0) {
+									$("#agency_data .agencySelected").remove();
+									// Clear the existingFilesTable
+									$('#existingFilesTable .previouslyUploaded').remove();
+								}
 								for (var i = 0; i < agencies.length; ++i) {
 									var agency = agencies[i];
 									// Check if this is a duplicate
@@ -667,12 +672,20 @@ function onSelectDataset(sourceDirectoryType) {
 											agencyName += " (" + agencyMetadata[j].shortName + ")";
 										}
 									}
+
+									// Add row to the list of previously uploaded files
+									onAddAnotherAgencyClick();
+									$("#agency_data tr:last .agencyIdSelect").val(agency.agencyId);
+									$("#agency_data tr:last .agencyDataSourceType").val(agency.agencyDataSourceType);
+									$("#agency_data tr:last .agencyProtocol").val(agency.agencyProtocol);
+									$("#agency_data tr:last .agencyDataSource").val(agency.agencyDataSource);
+
 									// Add row for this file to existingFilesTable
 									var uploadDate = "";
 									if (agency.agencyBundleUploadDate != null) {
 										uploadDate = agency.agencyBundleUploadDate;
 									}
-									var new_row = '<tr> \
+									var new_row = '<tr class="previouslyUploaded"> \
 										<td>' + agencyName + '</td> \
 										<td>' + agency.agencyDataSourceType + '</td> \
 										<td>' + agency.agencyDataSource + '</td> \

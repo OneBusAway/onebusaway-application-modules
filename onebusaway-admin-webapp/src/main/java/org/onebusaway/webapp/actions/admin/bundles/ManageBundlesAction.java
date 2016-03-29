@@ -459,7 +459,7 @@ public class ManageBundlesAction extends OneBusAwayNYCAdminActionSupport impleme
     for (Object existingObj : agencyList) {
       JSONObject existingAgencyObj = (JSONObject) existingObj;
       String existingAgencyId = (String)existingAgencyObj.get("agencyId");
-      if (existingAgencyId == null &&  !existingAgencyId.equals(agencyId)) {
+      if (existingAgencyId != null &&  !existingAgencyId.equals(agencyId)) {
         updatedAgencyList.add(existingObj);
       }
     }
@@ -535,7 +535,7 @@ public class ManageBundlesAction extends OneBusAwayNYCAdminActionSupport impleme
     for (Object existingObj : agencyList) {
       JSONObject existingAgencyObj = (JSONObject) existingObj;
       String existingAgencyId = (String)existingAgencyObj.get("agencyId");
-      if (existingAgencyId == null &&  !existingAgencyId.equals(agencyId)) {
+      if (existingAgencyId != null &&  !existingAgencyId.equals(agencyId)) {
         updatedAgencyList.add(existingObj);
       }
     }
