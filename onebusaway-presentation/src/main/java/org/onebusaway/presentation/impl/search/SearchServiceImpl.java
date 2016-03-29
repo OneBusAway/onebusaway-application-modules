@@ -45,6 +45,7 @@ import org.springframework.stereotype.Component;
 
 import java.net.URLDecoder;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -89,11 +90,11 @@ public class SearchServiceImpl implements SearchService {
 	@Autowired
 	private TransitDataService _transitDataService;
 
-	private Map<String, RouteBean> _routeShortNameToRouteBeanMap = new HashMap<String, RouteBean>();
+	private Map<String, List<RouteBean>> _routeShortNameToRouteBeanMap = new HashMap<String, List<RouteBean>>();
 	
-	private Map<String, RouteBean> _routeIdToRouteBeanMap = new HashMap<String, RouteBean>();
+	private Map<String, RouteBean> _routeIdToRouteBeanMap = new HashMap<String, RouteBean>(); // these are uniquely prefixed, they don't need to be a list
 
-	private Map<String, RouteBean> _routeLongNameToRouteBeanMap = new HashMap<String, RouteBean>();
+	private Map<String, List<RouteBean>> _routeLongNameToRouteBeanMap = new HashMap<String, List<RouteBean>>();
 
 	private Map<String, String> _stopCodeToStopIdMap = new HashMap<String, String>();
 
@@ -126,11 +127,19 @@ public class SearchServiceImpl implements SearchService {
 			for (RouteBean routeBean : _transitDataService
 					.getRoutesForAgencyId(agency.getAgency().getId()).getList()) {
 				if (routeBean.getShortName() != null)
+				    if (_routeShortNameToRouteBeanMap.containsKey(routeBean.getShortName().toUpperCase())) {
+				      _routeShortNameToRouteBeanMap.get(routeBean.getShortName().toUpperCase()).add(routeBean);
+				    } else {
 					_routeShortNameToRouteBeanMap.put(routeBean.getShortName()
-							.toUpperCase(), routeBean);
+							.toUpperCase(), new ArrayList<RouteBean>(Arrays.asList(routeBean)));
+				    }
 				if (routeBean.getLongName() != null)
-					_routeLongNameToRouteBeanMap.put(routeBean.getLongName(),
-							routeBean);
+				  if (_routeLongNameToRouteBeanMap.containsKey(routeBean.getLongName())) {
+				    _routeLongNameToRouteBeanMap.get(routeBean.getLongName()).add(routeBean);
+				  } else {
+				    _routeLongNameToRouteBeanMap.put(routeBean.getLongName(),
+							new ArrayList<RouteBean>(Arrays.asList(routeBean)));
+				  }
 				
 				_routeIdToRouteBeanMap.put(routeBean.getId(), routeBean);
 			}
@@ -449,7 +458,7 @@ public class SearchServiceImpl implements SearchService {
 						|| (nextItem != null && !_routeShortNameToRouteBeanMap
 								.containsKey(nextItem.toUpperCase()))) {
 					results.addRouteFilter(_routeShortNameToRouteBeanMap
-							.get(token.toUpperCase()));
+							.get(token.toUpperCase()).get(0)); //TODO Filtering on multiple route matches
 					continue;
 				}
 			} else {
@@ -459,7 +468,7 @@ public class SearchServiceImpl implements SearchService {
 				if ((lastItem != null && stopsForId(lastItem).size() > 0
 						&& !_routeShortNameToRouteBeanMap.containsKey(lastItem.toUpperCase()))
 						|| (nextItem != null && stopsForId(nextItem).size() > 0
-								&& !_routeShortNameToRouteBeanMap.containsKey(nextItem.toUpperCase()))) {
+								&& !_routeShortNameToRouteBeanMap.containsKey(nextItem.toUpperCase()))) { // TOOD Filtering on multiple route matches
 					if (!token.contains("_")) {
 						// if we have an agency Id, its probably a stop, don't
 						// discard
@@ -569,8 +578,9 @@ public class SearchServiceImpl implements SearchService {
 		
 		// short name matching
 		if (_routeShortNameToRouteBeanMap.get(routeQuery) != null) {
-			RouteBean routeBean = _routeShortNameToRouteBeanMap.get(routeQuery);
-			results.addMatch(resultFactory.getRouteResult(routeBean));
+		  for (RouteBean routeBean : _routeShortNameToRouteBeanMap.get(routeQuery)) {
+						results.addMatch(resultFactory.getRouteResult(routeBean));
+		  }
 		}
 
 		for (String routeShortName : _routeShortNameToRouteBeanMap.keySet()) {
@@ -585,9 +595,9 @@ public class SearchServiceImpl implements SearchService {
 					&& ((routeShortName.startsWith(routeQuery) && leftOversAreDiscardable) || (routeShortName
 							.endsWith(routeQuery) && leftOversAreDiscardable))) {
 			  try {
-  			  RouteBean routeBean = _routeShortNameToRouteBeanMap
-  						.get(routeShortName);
-  				results.addSuggestion(resultFactory.getRouteResult(routeBean));
+			    for (RouteBean routeBean : _routeShortNameToRouteBeanMap.get(routeShortName)) {
+			      results.addSuggestion(resultFactory.getRouteResult(routeBean));
+			    }
   				continue;
 			  } catch (OutOfServiceAreaServiceException oosase) {
 			  }
@@ -600,10 +610,9 @@ public class SearchServiceImpl implements SearchService {
 			if (routeLongName.contains(routeQuery + " ")
 					|| routeLongName.contains(" " + routeQuery)) {
 			  try {
-  				RouteBean routeBean = _routeLongNameToRouteBeanMap
-  						.get(routeLongName);
-  				results.addSuggestion(resultFactory.getRouteResult(routeBean));
-  				continue;
+			    for (RouteBean routeBean : _routeLongNameToRouteBeanMap.get(routeLongName)) {
+			      results.addSuggestion(resultFactory.getRouteResult(routeBean));
+			    }
 			  } catch (OutOfServiceAreaServiceException oosase) {
 			  }
 			}

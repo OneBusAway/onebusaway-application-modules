@@ -598,6 +598,12 @@ OBA.Sidebar = function() {
 						break;
 				}	
 				
+			} else if (matches.length > 1 && resultType == "RouteResult") {
+				// suppport multiple routes found
+				addRoutesToLegend(matches, "Routes:", null, null);
+				routeMap.panToRoute(matches[0].id);
+				(wizard && wizard.enabled()) ? results.triggerHandler('route_result') : null;
+			// TODO: support multiple stop matches here!
 			} else if(suggestions.length > 0){    // did you mean suggestions
 				
 				switch(resultType) {
