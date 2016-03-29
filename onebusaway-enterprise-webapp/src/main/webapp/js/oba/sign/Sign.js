@@ -569,6 +569,12 @@ OBA.Sign = function() {
 			
 			jQuery("body").prepend(newContent);
 			
+			var header = jQuery(".header");
+			if (header[0].offsetHeight <  header[0].scrollHeight)
+				header.simplyScroll({
+					customClass: 'title_header'
+			 	});			
+			
 			if (stopIdsToRequest.length < 2) {
 				newContent.css("bottom", "80px").css("margin-bottom", "0px");
 				jQuery("#pager").hide();
