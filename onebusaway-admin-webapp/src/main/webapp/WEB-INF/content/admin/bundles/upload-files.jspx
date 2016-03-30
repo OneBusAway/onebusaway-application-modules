@@ -84,8 +84,8 @@
 						-->
 					</div>
 					<div id="notesDiv">
-						<textarea rows="4" cols="60" id="bundleNotesText">
-						<!-- Without a commment here, display gets all screwed up -->
+						<textarea rows="4" cols="60" id="bundleComment">
+						<!-- Prevent jsp minimzation if empty div -->
 						</textarea> 
 					</div>
 				</div>

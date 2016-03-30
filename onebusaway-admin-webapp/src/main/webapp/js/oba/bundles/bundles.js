@@ -61,7 +61,7 @@ jQuery(function() {
 		jQuery("#buildBundle_bundleName").val(qs["name"]);
 		jQuery("#buildBox #bundleStartDateHolder #startDatePicker").val(qs["startDate"]);
 		jQuery("#buildBox #bundleEndDateHolder #endDatePicker").val(qs["endDate"]);
-		jQuery("#comments").val(qs["bundleComment"]);
+		jQuery("#bundleComment").val(qs["bundleComment"]);
 		//hide the result link when reentering from email
 		jQuery("#buildBundle_resultLink").hide();
 		// just in case set the tab
@@ -490,7 +490,7 @@ function showBundleInfo(bundleInfo){
 	
 	if (bundleObj.buildResponse == undefined) {
 		// Set Comments field to ""
-		jQuery("#commentBox #bundleComment").val("");
+		jQuery("#uploadFiles #bundleComment").val("");
 		return;
 	}
 	
@@ -504,7 +504,7 @@ function showBundleInfo(bundleInfo){
 	jQuery("#startDate").val(bundleObj.buildResponse.startDate);
 	jQuery("#endDatePicker").val(bundleObj.buildResponse.endDate);
 	jQuery("#endDate").val(bundleObj.buildResponse.endDate);
-	jQuery("#commentBox #bundleComment").val(bundleObj.buildResponse.comment);
+	jQuery("#uploadFiles #bundleComment").val(bundleObj.buildResponse.comment);
 	jQuery("#selected_bundleDirectory").text(bundleObj.directoryName);
 	jQuery("#buildBundle_id").text(bundleObj.buildResponse.requestId);
 	buildBundleId = bundleObj.buildResponse.requestId;
@@ -1025,7 +1025,7 @@ function directoryOptionChanged() {
 		jQuery("#selectExistingContents").hide();
 		jQuery('#copyDirectory').hide();
 		// Blank out the Comment box
-		jQuery("#commentBox #bundleComment").val("");
+		jQuery("#uploadFiles #bundleComment").val("");
 	} 
 	else if(jQuery("#copy").is(":checked")) {
 		jQuery("#createDirectoryContents #directoryButton").val("Copy");
@@ -1217,7 +1217,7 @@ function onBuildClick(event) {
 	var startDate = jQuery("#startDate").val();
 	var endDate = jQuery("#endDate").val();
 	//var bundleComment = jQuery("#bundleComment").val();
-	var bundleComment = jQuery("#Upload #bundleNotesText").val();
+	var bundleComment = jQuery("#uploadFiles #bundleComment").val();
 	//var archive = jQuery("#buildBundle_archive").is(":checked");
 	var archive = false;
 	var consolidate = false;
