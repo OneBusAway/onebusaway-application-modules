@@ -631,9 +631,11 @@ public class SearchServiceImpl implements SearchService {
 		// try to find a stop ID for all known agencies
 		List<StopBean> matches = stopsForId(stopQuery);
 
-		if (matches.size() == 1)
-			results.addMatch(resultFactory.getStopResult(matches.get(0),
-					results.getRouteFilter()));
+		if (matches.size() > 0)  // support multiple agency stop matches
+		  for (StopBean stopBean : matches) {
+		    results.addMatch(resultFactory.getStopResult(stopBean,
+		        results.getRouteFilter()));
+		  }
 		else {
 			for (StopBean match : matches) {
 				results.addSuggestion(resultFactory.getStopResult(match,
