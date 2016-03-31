@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.onebusaway.admin.service.TemporaryPasswordService;
+import org.onebusaway.util.services.configuration.ConfigurationService;
 import org.slf4j.Logger;
 
 public class ForgotPasswordAction extends OneBusAwayNYCAdminActionSupport {
@@ -42,10 +43,13 @@ public class ForgotPasswordAction extends OneBusAwayNYCAdminActionSupport {
 	private TemporaryPasswordService _passwordService;
 		
 	private static final String EMAIL_SUBJECT = "OneBusAway password reset";
-	private static final String EMAIL_BODY = "Your temporary password is: ";
+	private static final String DEFAULT_EMAIL_BODY = "Your temporary password is: @PASSWORD@";
 	
 	@Autowired
 	JavaMailSender _mailSender;
+	
+	@Autowired
+	private ConfigurationService configService;
 	
 	private SimpleMailMessage getMessage() {
 		SimpleMailMessage msg = new SimpleMailMessage();
@@ -53,11 +57,21 @@ public class ForgotPasswordAction extends OneBusAwayNYCAdminActionSupport {
 		msg.setSubject(EMAIL_SUBJECT);
 
 		String tempPass = _passwordService.getTemporaryPasswordForUser(username);
-		msg.setText(EMAIL_BODY + tempPass);
+		msg.setText(getEmailBody(tempPass));
 		return msg;
 	}
 	
-	@Override
+	private String getEmailBody(String tempPass) {
+	  String emailBody = getEmailBodyConfig();
+	  return emailBody.replace("@PASSWORD@", tempPass);
+  }
+
+  private String getEmailBodyConfig() {
+    return configService.getConfigurationValueAsString(
+        "forgot.password.email.body", DEFAULT_EMAIL_BODY);
+  }
+
+  @Override
 	public String execute() {
 		// Don't check permissions.
 		SimpleMailMessage msg = getMessage();
