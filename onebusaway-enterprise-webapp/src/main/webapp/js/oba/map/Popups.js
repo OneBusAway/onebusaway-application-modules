@@ -288,7 +288,7 @@ OBA.Popups = (function() {
 					var lastClass = ((_ === activity.MonitoredVehicleJourney.OnwardCalls.OnwardCall.length - 1) ? " last" : "");
 
 					html += '<li class="nextStop' + lastClass + '">';				
-					html += '<a href="#' + stopIdWithoutAgencyId + '">' + onwardCall.StopPointName + '</a>';
+					html += '<a href="#' + onwardCall.StopPointRef + '">' + onwardCall.StopPointName + '</a>';
 					html += '<span>';
 						
 					if(typeof onwardCall.ExpectedArrivalTime !== 'undefined' && onwardCall.ExpectedArrivalTime !== null) {

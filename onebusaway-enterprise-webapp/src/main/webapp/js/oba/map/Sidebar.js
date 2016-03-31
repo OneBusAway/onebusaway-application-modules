@@ -461,6 +461,30 @@ OBA.Sidebar = function() {
 		suggestions.show();
 	}
 	
+	// show multiple stop choices to user
+	function showStopPickerList(stopResults) {
+		suggestions.find("h2").text("Did you mean?");
+
+		var resultsList = suggestions.find("ul");
+
+		jQuery.each(stopResults, function(_, stop) {
+			console.log("stop=" + Object.getOwnPropertyNames(stop));
+			var link = jQuery('<a href="#' + stop.id+ '"></a>') /*shortName*/
+							.text(stop.name)/*shortName*/
+							.attr("title", stop.name);/*description*/
+
+			var listItem = jQuery("<li></li>")
+							.addClass("locationItem")
+							.append(link);
+			
+			resultsList.append(listItem);
+		});
+		
+		
+		suggestions.show();
+		
+	}
+	
 	function resetSearchPanelAndMap() {
 		adDiv.hide();
 		welcome.hide();
@@ -603,7 +627,10 @@ OBA.Sidebar = function() {
 				addRoutesToLegend(matches, "Routes:", null, null);
 				routeMap.panToRoute(matches[0].id);
 				(wizard && wizard.enabled()) ? results.triggerHandler('route_result') : null;
-			// TODO: support multiple stop matches here!
+			} else if (matches.length > 1 && resultType == "StopResult") {
+				// we've matched multiple stops across agenes -- disambiguate
+				showStopPickerList(matches);
+				
 			} else if(suggestions.length > 0){    // did you mean suggestions
 				
 				switch(resultType) {

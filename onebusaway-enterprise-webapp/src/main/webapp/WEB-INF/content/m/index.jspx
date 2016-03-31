@@ -90,7 +90,7 @@
 		<div id="content">
 			<s:if test="%{results.matches.size&gt;0}">
 				<s:if test="results.resultType.equals('RouteResult')">
-					<s:if test="%{results.matches.size==1}">
+					<s:if test="%{results.matches.size&gt;0}"><!--  support multiple agency route matches -->
 						<c:import url="route-result.jspx"/>
 					</s:if>
 					<s:else>
