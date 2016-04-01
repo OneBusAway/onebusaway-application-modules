@@ -55,7 +55,7 @@ public class DistanceAlongShapeLibrary {
 
   private double _maxDistanceFromStopToShapePoint = 1000;
 
-  private int _maximumNumberOfPotentialAssignments = 1000000000;
+  private int _maximumNumberOfPotentialAssignments = Integer.MAX_VALUE;
   
   private boolean _lenientStopShapeAssignment = false;
 
