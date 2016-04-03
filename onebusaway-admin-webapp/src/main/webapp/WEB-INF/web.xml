@@ -92,7 +92,7 @@
     <dispatcher>FORWARD</dispatcher>
     <dispatcher>REQUEST</dispatcher>
   </filter-mapping>
-  <filter-mapping>
+ <filter-mapping>
     <filter-name>requestAndResponseContextFilter</filter-name>
     <url-pattern>/*</url-pattern>
     <dispatcher>FORWARD</dispatcher>
@@ -115,7 +115,7 @@
     <url-pattern>*.action</url-pattern>
     <dispatcher>FORWARD</dispatcher>
     <dispatcher>REQUEST</dispatcher>
-  </filter-mapping>
+  </filter-mapping>  
 	
 	<!-- Listeners -->
   <listener>
@@ -151,10 +151,18 @@
     <url-pattern>/redirect</url-pattern>
   </servlet-mapping>
   
+  <servlet>
+	<servlet-name>transitime</servlet-name>
+	<servlet-class>org.onebusaway.admin.servlets.CustomProxyServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>transitime</servlet-name>
+	<url-pattern>/transitime/*</url-pattern>
+  </servlet-mapping>
   
   <error-page>
     <error-code>404</error-code>
-    <location>/redirect?uri=/error/404.action</location>
+    <location>/error/404.action</location>
   </error-page> 
   <error-page>
     <exception-type>org.springframework.transaction.CannotCreateTransactionException</exception-type>

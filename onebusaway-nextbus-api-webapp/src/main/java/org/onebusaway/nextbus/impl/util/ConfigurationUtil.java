@@ -24,6 +24,7 @@ public class ConfigurationUtil {
   private String transiTimePort = "8080";
   private String transiTimeKey = "8a3273b0";
   private Map<String,String> agencyMapper = new HashMap<String,String>(1);
+  private int httpTimeoutSeconds = 15;
   
   public ConfigurationUtil(){}
   
@@ -58,6 +59,13 @@ public class ConfigurationUtil {
   public void setAgencyMapper(Map<String,String> agencyMapper) {
     this.agencyMapper = agencyMapper;
   }
+  
+  public int getHttpTimeoutSeconds() {
+    return httpTimeoutSeconds;
+  }
 
+  public void setHttpTimeoutSeconds(int httpTimeoutSeconds) {
+    this.httpTimeoutSeconds = httpTimeoutSeconds;
+  }
   
 }

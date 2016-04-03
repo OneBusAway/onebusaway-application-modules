@@ -47,7 +47,7 @@
 					</s:if>
 					
 					<s:if test="isPageAvailable('showApiKey', 'org.onebusaway.webapp.actions.admin.ApiKeyAction')">
-						<li><s:url var="url" action="api-key" /> <s:a href="%{url}">Create API key</s:a>
+						<li><s:url var="url" action="api-key" /> <s:a href="%{url}">Create API Key</s:a>
 						</li>
 					</s:if>
 					<s:if test="isPageAvailable('showQrCode', 'org.onebusaway.webapp.actions.admin.BarcodeAction')">
@@ -83,7 +83,7 @@
 					</s:if>
 					<s:if test="isPageAvailable('showReports', 'org.onebusaway.webapp.actions.admin.ReportsAction')">
 						<li><s:url var="url" action="reports" namespace="/admin" />
-							<s:a href="%{url}">Transitime reports</s:a></li>
+							<s:a href="%{url}">Transitime Reports</s:a></li>
 					</s:if>
 
 				</ul>

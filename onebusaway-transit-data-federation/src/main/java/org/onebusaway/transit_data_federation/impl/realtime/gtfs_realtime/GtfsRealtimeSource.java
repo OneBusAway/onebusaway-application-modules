@@ -40,7 +40,11 @@ import org.onebusaway.realtime.api.VehicleLocationListener;
 import org.onebusaway.realtime.api.VehicleLocationRecord;
 import org.onebusaway.transit_data.model.service_alerts.ECause;
 import org.onebusaway.transit_data.model.service_alerts.ESeverity;
-import org.onebusaway.transit_data_federation.impl.service_alerts.*;
+import org.onebusaway.transit_data_federation.impl.service_alerts.ServiceAlertLocalizedString;
+import org.onebusaway.transit_data_federation.impl.service_alerts.ServiceAlertRecord;
+import org.onebusaway.transit_data_federation.impl.service_alerts.ServiceAlertSituationConsequenceClause;
+import org.onebusaway.transit_data_federation.impl.service_alerts.ServiceAlertTimeRange;
+import org.onebusaway.transit_data_federation.impl.service_alerts.ServiceAlertsSituationAffectsClause;
 import org.onebusaway.transit_data_federation.services.AgencyService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockCalendarService;
 import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts;
@@ -56,7 +60,6 @@ import com.google.transit.realtime.GtfsRealtime.Alert;
 import com.google.transit.realtime.GtfsRealtime.FeedEntity;
 import com.google.transit.realtime.GtfsRealtime.FeedHeader;
 import com.google.transit.realtime.GtfsRealtime.FeedMessage;
-import com.google.transit.realtime.GtfsRealtime.TripUpdate;
 import com.google.transit.realtime.GtfsRealtimeConstants;
 import com.google.transit.realtime.GtfsRealtimeOneBusAway;
 
@@ -92,6 +95,8 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   private URL _alertsUrl;
 
   private int _refreshInterval = 30;
+  
+  private boolean _showNegativeScheduledArrivals = true;
 
   private Map<String,String> _headersMap;
 
@@ -193,11 +198,19 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   public void setAgencyIds(List<String> agencyIds) {
     _agencyIds.addAll(agencyIds);
   }
-
+  
+  public void setShowNegativeScheduledArrivals(boolean _showNegativeScheduledArrivals) {
+    this._showNegativeScheduledArrivals = _showNegativeScheduledArrivals;
+  }
+  
+  public boolean getShowNegativeScheduledArrivals() {
+    return _showNegativeScheduledArrivals;
+  }
+  
   public List<String> getAgencyIds() {
     return _agencyIds;
   }
-  
+
   public void setMonitoredResult(MonitoredResult result) {
     _monitoredResult = result;
   }
@@ -363,7 +376,7 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
               serviceAlertsSituationAffectsClause.setApplicationId(affects.getApplicationId());
               serviceAlertsSituationAffectsClause.setDirectionId(affects.getDirectionId());
               serviceAlertsSituationAffectsClause.setRouteId(affects.getRouteId().getId());
-              serviceAlertsSituationAffectsClause.setStopId(affects.getTripId().getId());
+              serviceAlertsSituationAffectsClause.setStopId(affects.getStopId().getId());
               serviceAlertsSituationAffectsClause.setTripId(affects.getTripId().getId());
               serviceAlertRecord.getAllAffects().add(serviceAlertsSituationAffectsClause);
             }

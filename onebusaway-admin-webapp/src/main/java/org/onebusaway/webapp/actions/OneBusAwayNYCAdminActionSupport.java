@@ -24,6 +24,8 @@ import org.onebusaway.users.client.model.UserBean;
 import org.onebusaway.users.model.User;
 import org.onebusaway.users.model.UserIndex;
 import org.onebusaway.users.services.CurrentUserService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -35,6 +37,8 @@ public class OneBusAwayNYCAdminActionSupport extends NextActionSupport {
 	
 	  private static final long serialVersionUID = 1L;
 
+	  private static Logger _log = LoggerFactory.getLogger(OneBusAwayNYCAdminActionSupport.class);
+	  
 	  private Date time = null;
 	  
 	  public void setTime(Date time) {
@@ -104,11 +108,17 @@ public class OneBusAwayNYCAdminActionSupport extends NextActionSupport {
 	private AccessControlService _accessControlService;
 	
 	public boolean hasPrivilegeForPage(String privilege) {
-		return _accessControlService.currentUserHasPrivilege(privilege);
+	  boolean authorized = _accessControlService.currentUserHasPrivilege(privilege);
+	  if (!authorized)
+	    _log.warn("Auth failed for " + privilege);
+		return authorized;
 	}
 	
 	public boolean hasPrivilegeForPage() {
-		return hasPrivilegeForPage(this.getClass().getName());
+	  boolean authorized = hasPrivilegeForPage(this.getClass().getName());
+	  if (!authorized)
+	    _log.warn("Auth failed for " + this.getClass().getName());
+		return authorized;
 	}
 
 }

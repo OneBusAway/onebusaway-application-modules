@@ -149,7 +149,6 @@ public class BuildRemoteResource extends AuthenticatedResource {
     return response;
   }
   
-
     private class BuildThread implements Runnable {
       
       private BundleBuildRequest _request;

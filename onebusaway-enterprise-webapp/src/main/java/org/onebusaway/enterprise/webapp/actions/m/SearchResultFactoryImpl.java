@@ -216,7 +216,7 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
           if(arrivalsForRouteAndDirection.isEmpty()) {
             directions.add(new RouteDirection(stopGroupBean.getName().getName(), stopGroupBean, Collections.<StopOnRoute>emptyList(), 
                 hasUpcomingScheduledService, Collections.<String>emptyList()));
-          } else {          
+          } else {
             for (Map.Entry<String,List<StopOnRoute>> entry : arrivalsForRouteAndDirection.entrySet()) {
               directions.add(new RouteDirection(entry.getKey(), stopGroupBean, entry.getValue(), 
                  hasUpcomingScheduledService, Collections.<String>emptyList()));
@@ -225,27 +225,23 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
         }
       }
 
-      RouteAtStop routeAtStop = new RouteAtStop(routeBean, directions,
-          serviceAlertDescriptions);
-
-      // Keep track of service and no service per route. If at least one
-      // direction per route meets some criteria, break because that route is handled.
-      for (RouteDirection direction : routeAtStop.getDirections()) {
-        if (Boolean.FALSE.equals(direction.getHasUpcomingScheduledService()) && direction.getStops().isEmpty()) {
-          routesWithNoScheduledService.add(routeAtStop);
-          break;
-        } else {
-          if (!direction.getStops().isEmpty()) {
-            routesWithArrivals.add(routeAtStop);
-            break;
-          } else {
-            routesWithNoVehiclesEnRoute.add(routeAtStop);
-            break;
-          }
-        }
+      // For each direction, determine whether the route has no service, has no vehicles,
+      // or has service with vehicles en route. Add RouteAtStop object to appropriate collection.
+      // Now one RouteAtStop object exists for each direction for each route.
+      for (RouteDirection direction : directions) {
+    	  List<RouteDirection> directionList = Collections.<RouteDirection>singletonList(direction);
+    	  
+    	  RouteAtStop routeAtStop = new RouteAtStop(routeBean, directionList, serviceAlertDescriptions);
+    	  
+    	  if (!direction.getStops().isEmpty())
+    		  routesWithArrivals.add(routeAtStop);
+    	  else if (Boolean.FALSE.equals(direction.getHasUpcomingScheduledService()))
+    		  routesWithNoScheduledService.add(routeAtStop);
+    	  else
+    		  routesWithNoVehiclesEnRoute.add(routeAtStop);
       }
     }
-
+    
     return new StopResult(stopBean, routesWithArrivals,
         routesWithNoVehiclesEnRoute, routesWithNoScheduledService, filteredRoutes, serviceAlertDescriptions);
   }

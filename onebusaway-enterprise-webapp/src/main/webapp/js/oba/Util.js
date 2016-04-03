@@ -103,7 +103,7 @@ OBA.Util = (function() {
 			return array;
 		},
 		ISO8601StringToDate: ISO8601StringToDate,
-		getArrivalEstimateForISOString: function(predictionDateString, referenceDateObj) {
+		getArrivalEstimateForISOString: function(predictionDateString, referenceDateObj, minutesText) {
 			if(typeof predictionDateString === 'undefined' || predictionDateString === null) {
 				return null;
 			}
@@ -112,7 +112,7 @@ OBA.Util = (function() {
 
 			var minutesAway = Math.floor((predictionDateObj - referenceDateObj) / 60 / 1000);
 			
-			return minutesAway  + " minute" + ((Math.abs(minutesAway) === 1) ? "" : "s");
+			return minutesAway + " " + (minutesText || "minute") + ((Math.abs(minutesAway) === 1) ? "" : "s");
 		},
 		displayTime: function(secondsAgo) {
 			secondsAgo = Math.floor(secondsAgo);

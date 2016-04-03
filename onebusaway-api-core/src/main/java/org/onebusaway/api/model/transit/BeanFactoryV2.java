@@ -1,5 +1,6 @@
 /**
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2015 University of South Florida (cagricetin@mail.usf.edu)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -273,6 +274,8 @@ public class BeanFactoryV2 {
     bean.setPrivateService(agency.isPrivateService());
     bean.setTimezone(agency.getTimezone());
     bean.setUrl(agency.getUrl());
+    bean.setEmail(agency.getEmail());
+    bean.setFareUrl(agency.getFareUrl());
     return bean;
   }
 
@@ -822,7 +825,8 @@ public class BeanFactoryV2 {
     addToReferences(stop);
     bean.setStopSequence(ad.getStopSequence());
     bean.setBlockTripSequence(ad.getBlockTripSequence());
-
+    bean.setTotalStopsInTrip(ad.getTotalStopsInTrip());
+    
     bean.setRouteId(route.getId());
     addToReferences(route);
 

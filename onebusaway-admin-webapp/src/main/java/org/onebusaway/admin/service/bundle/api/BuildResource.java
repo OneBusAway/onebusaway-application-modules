@@ -45,6 +45,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+import org.springframework.web.context.request.RequestContextHolder;
 
 @Path("/build/")
 @Component
@@ -89,7 +90,7 @@ public class BuildResource extends AuthenticatedResource {
 		archive = archiveFlag;
 		consolidate = consolidateFlag;
 		predate = predateFlag;
-
+		
 		if (!isAuthorized()) {
 			return Response.noContent().build();
 		}
@@ -121,6 +122,9 @@ public class BuildResource extends AuthenticatedResource {
 			buildRequest.setArchiveFlag(archive);
 			buildRequest.setConsolidateFlag(consolidate);
 			buildRequest.setPredate(predate);
+			
+			String session = RequestContextHolder.currentRequestAttributes().getSessionId();
+			buildRequest.setSessionId(session);
 			
 			try {
 				String message = "Starting bundle building process for bundle '" + buildRequest.getBundleName()

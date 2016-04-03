@@ -39,14 +39,15 @@ import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
 
+
 @Component
 public class RemoteConnectionServiceImpl implements RemoteConnectionService {
 
 	private static Logger log = LoggerFactory.getLogger(RemoteConnectionServiceImpl.class);
 	
-
+	
 	@Override
-	public String postContent(String url, Map<String, String> params) {
+	public String postContent(String url, Map<String, String> params, String sessionId) {
 		HttpURLConnection connection = null;
 		String content = null;
 		
@@ -60,13 +61,19 @@ public class RemoteConnectionServiceImpl implements RemoteConnectionService {
 	        }
 	        byte[] postDataBytes = postData.toString().getBytes("UTF-8");
 
+	        
 			connection = (HttpURLConnection) new URL(url).openConnection();
 	        connection.setRequestMethod("POST");
 	        connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
 	        connection.setRequestProperty("Content-Length", String.valueOf(postDataBytes.length));
+	        
+	        if (sessionId != null)
+	        	connection.setRequestProperty("Cookie", "JSESSIONID=" + sessionId + ";");
+	        
 	        connection.setDoOutput(true);
 	        connection.getOutputStream().write(postDataBytes);
 			content = fromJson(connection);
+		
 			
 		} catch (MalformedURLException e) {
 			log.error("Exception connecting to " +url + ". The url might be malformed");
@@ -83,12 +90,19 @@ public class RemoteConnectionServiceImpl implements RemoteConnectionService {
 	}
 	
 	@Override
-	public String getContent(String url) {
+	public String postContent(String url, Map<String, String> params) {
+		return postContent(url, params, null);
+	}
+	
+	@Override
+	public String getContent(String url, String sessionId) {
 		HttpURLConnection connection = null;
 		String content = null;
 		try {
 			connection = (HttpURLConnection) new URL(url).openConnection();
 			connection.setRequestMethod("GET");
+			if (sessionId != null)
+	        	connection.setRequestProperty("Cookie", "JSESSIONID=" + sessionId + ";");
 			connection.setDoOutput(true);
 			connection.setReadTimeout(10000);
 			content = fromJson(connection);
@@ -104,6 +118,11 @@ public class RemoteConnectionServiceImpl implements RemoteConnectionService {
 			}
 		}
 		return content;
+	}
+	
+	@Override
+	public String getContent(String url) {
+		return getContent(url, null);
 	}
 	
 	@Override

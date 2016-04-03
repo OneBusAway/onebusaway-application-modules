@@ -33,7 +33,9 @@ public interface RemoteConnectionService {
 	 * @return the required content as string
 	 */
 	String getContent(String url);
+	String getContent(String url, String sessionId);
 	String postContent(String url, Map<String,String> params);
+	String postContent(String url, Map<String,String> params, String sessionId);
 	
 	/**
 	 * Posts binary data to the given url and returns response of the given type

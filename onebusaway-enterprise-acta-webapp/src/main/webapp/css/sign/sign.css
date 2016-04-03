@@ -348,8 +348,32 @@ th {
 	padding: .5em;
     font-size: 1.4em;
     line-height: 1.1em;
-    width: 60%;
+    /* width: 60%; */
     border-bottom: 2px solid #999;
+}
+th.routeHeader {
+    text-align: center;
+    padding: .25em;
+    /*width: 10%;*/
+    /*border-right: 1px solid #999 */
+}
+th.headsignHeader {
+    text-align: center;
+    padding: .25em;
+    /* border-right: 1px solid #999 */
+}
+th.nextArrivalHeader {
+    text-align: right;
+    padding: .25em;
+    /* border-right: 1px solid #999 */
+}
+th.futureArrivalHeader {
+    text-align: center;
+    width: 10%;
+    font-size: 1.0em;
+    line-height: 0.9em;
+    padding: .1em;
+    /* border-right: 1px solid #999 */
 }
 td {
     vertical-align: middle;
@@ -394,6 +418,18 @@ td.distance {
 td.additional_stops {
 	width: 75px;
 	padding: 0 0 0.1em 0;
+}
+div.prediction {
+	height: 100px;
+	line-height: 100%;
+	vertical-align: middle;
+	padding-top: 0px;
+	padding-right: 5px; 
+	padding-left: 0;
+	padding-bottom: 0;
+	margin: 0 0 0 0;
+	border: 0 0 0 0;
+	text-align: center;
 }
 p.alert {
 	display: block;

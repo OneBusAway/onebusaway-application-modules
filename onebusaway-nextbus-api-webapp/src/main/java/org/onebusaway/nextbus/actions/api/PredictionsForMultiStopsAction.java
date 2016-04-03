@@ -92,7 +92,8 @@ public class PredictionsForMultiStopsAction extends NextBusApiBase implements
       String uri = serviceUrl + routeStopIds + "format=" + REQUEST_TYPE;
 
       try {
-        JsonArray predictionsJson = _httpUtil.getJsonObject(uri).getAsJsonArray(
+        int timeout = _configUtil.getHttpTimeoutSeconds();
+        JsonArray predictionsJson = _httpUtil.getJsonObject(uri, timeout).getAsJsonArray(
             "predictions");
         Type listType = new TypeToken<List<Predictions>>() {
         }.getType();

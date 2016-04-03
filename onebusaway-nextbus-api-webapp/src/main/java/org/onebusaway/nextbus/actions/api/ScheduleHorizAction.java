@@ -83,7 +83,8 @@ public class ScheduleHorizAction extends NextBusApiBase implements
       String uri = serviceUrl + route + "&format=" + REQUEST_TYPE;
 
       try {
-        JsonArray scheduleJson = _httpUtil.getJsonObject(uri).getAsJsonArray(
+        int timeout = _configUtil.getHttpTimeoutSeconds();
+        JsonArray scheduleJson = _httpUtil.getJsonObject(uri, timeout).getAsJsonArray(
             "schedule");
         Type listType = new TypeToken<List<ScheduleRoute>>() {
         }.getType();

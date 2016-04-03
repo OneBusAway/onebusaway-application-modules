@@ -189,8 +189,10 @@ public final class SiriSupport {
 			location.setLatitude(new BigDecimal(df.format(currentVehicleTripStatus.getLastKnownLocation().getLat())));
 			location.setLongitude(new BigDecimal(df.format(currentVehicleTripStatus.getLastKnownLocation().getLon())));
 		} else {
-			location.setLatitude(new BigDecimal(df.format(currentVehicleTripStatus.getLocation().getLat())));
-			location.setLongitude(new BigDecimal(df.format(currentVehicleTripStatus.getLocation().getLon())));
+		  if (currentVehicleTripStatus.getLocation() != null) {
+		    location.setLatitude(new BigDecimal(df.format(currentVehicleTripStatus.getLocation().getLat())));
+		    location.setLongitude(new BigDecimal(df.format(currentVehicleTripStatus.getLocation().getLon())));
+		  }
 		}
 
 		monitoredVehicleJourney.setVehicleLocation(location);

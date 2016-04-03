@@ -73,11 +73,12 @@ public class AccessControlServiceImpl implements AccessControlService {
 			
 			else if (role.hasAllPrivileges() || 
 					(privilege != null && roleHasPrivilege(role, privilege))) {
-				_log.info(userRole.getName() + " has privileges for " + privilege.getName());
+				_log.debug(userRole.getName() + " has privileges for " + privilege.getName());
 				return true;
 			}
 		}
 		
+		_log.warn("Auth failed for " + user + ", " + privilege);
 		return false;
 	}
 	
@@ -95,7 +96,11 @@ public class AccessControlServiceImpl implements AccessControlService {
 	
 	private boolean roleHasPrivilege(Role role, Privilege privilege) {
 		Set<Privilege> allowed = role.getAllowedPrivileges();
-		return allowed != null && allowed.contains(privilege);
+		boolean authorized = allowed != null && allowed.contains(privilege);
+		if (!authorized) {
+		  _log.warn("Auth failed for " + role + ", " + privilege);
+		}
+		return authorized;
 	}
 	
 	@PostConstruct

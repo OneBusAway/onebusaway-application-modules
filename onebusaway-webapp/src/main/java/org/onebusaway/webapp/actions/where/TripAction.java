@@ -59,6 +59,8 @@ public class TripAction extends ActionSupport {
 
   private boolean _showArrivals = false;
 
+  private boolean _showVehicleId = true;
+
   public void setId(String id) {
     _id = id;
   }
@@ -108,7 +110,15 @@ public class TripAction extends ActionSupport {
   public boolean isShowArrivals() {
     return _showArrivals;
   }
+  
+  public void setShowVehicleId(boolean showVehicleId) {
+    _showVehicleId = showVehicleId;
+  }
 
+  public boolean isShowVehicleId() {
+    return _showVehicleId;
+  }
+  
   public TripDetailsBean getResult() {
     return _tripDetails;
   }
@@ -116,7 +126,7 @@ public class TripAction extends ActionSupport {
   public TimeZone getTimeZone() {
     return _timeZone;
   }
-
+  
   @Override
   @Actions({
       @Action(value = "/where/standard/trip"),
@@ -142,7 +152,7 @@ public class TripAction extends ActionSupport {
 
     if (_tripDetails == null)
       throw new NoSuchTripServiceException(_id);
-
+    
     TripStopTimesBean stopTimes = _tripDetails.getSchedule();
     _timeZone = TimeZone.getTimeZone(stopTimes.getTimeZone());
 
