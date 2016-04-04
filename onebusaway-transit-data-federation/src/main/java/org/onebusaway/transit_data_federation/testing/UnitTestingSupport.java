@@ -47,7 +47,6 @@ import org.onebusaway.transit_data_federation.impl.transit_graph.RouteEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopTimeEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.TripEntryImpl;
-import org.onebusaway.transit_data_federation.impl.tripplanner.StopTransfers;
 import org.onebusaway.transit_data_federation.model.ShapePoints;
 import org.onebusaway.transit_data_federation.services.blocks.BlockIndexFactoryService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockTripIndex;
@@ -59,7 +58,6 @@ import org.onebusaway.transit_data_federation.services.transit_graph.RouteEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.ServiceIdActivation;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
-import org.onebusaway.transit_data_federation.services.tripplanner.StopTransfer;
 
 public class UnitTestingSupport {
 
@@ -160,21 +158,6 @@ public class UnitTestingSupport {
 
   public static StopEntryImpl stop(String id, double lat, double lon) {
     return new StopEntryImpl(aid(id), lat, lon);
-  }
-
-  public static void addTransfer(StopEntryImpl from, StopEntryImpl to) {
-
-    double distance = SphericalGeometryLibrary.distance(from.getStopLocation(),
-        to.getStopLocation());
-    StopTransfer transfer = new StopTransfer(to, 0, distance);
-
-    List<StopTransfer> transfers = new ArrayList<StopTransfer>();
-    StopTransfers existing = from.getTransfers();
-    if (existing != null && existing.getTransfersFromStop() != null)
-      transfers.addAll(existing.getTransfersFromStop());
-    transfers.add(transfer);
-    existing = new StopTransfers(transfers, null);
-    from.setTransfers(existing);
   }
 
   public static BlockEntryImpl block(String id) {

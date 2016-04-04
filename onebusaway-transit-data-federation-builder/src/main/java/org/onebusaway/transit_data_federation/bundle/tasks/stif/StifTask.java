@@ -15,6 +15,8 @@
  */
 package org.onebusaway.transit_data_federation.bundle.tasks.stif;
 
+import org.onebusaway.collections.tuple.Pair;
+import org.onebusaway.collections.tuple.Tuples;
 import org.onebusaway.csv_entities.CSVLibrary;
 import org.onebusaway.csv_entities.CSVListener;
 import org.onebusaway.gtfs.model.AgencyAndId;
@@ -29,7 +31,7 @@ import org.onebusaway.transit_data_federation.bundle.tasks.stif.model.ServiceCod
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.FederatedTransitDataBundle;
 import org.onebusaway.utility.ObjectSerializationLibrary;
-import org.opentripplanner.common.model.P2;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -398,7 +400,7 @@ public class StifTask implements Runnable {
         blockNo ++;
         StifTrip lastTrip = pullout;
         int i = 0;
-        HashSet<P2<String>> blockIds = new HashSet<P2<String>>();
+        HashSet<Pair<String>> blockIds = new HashSet<Pair<String>>();
         while (lastTrip.type != StifTripType.PULLIN) {
 
           unmatchedTrips.remove(lastTrip);
@@ -484,7 +486,7 @@ public class StifTask implements Runnable {
             }
 
             blockId = blockId.intern();
-            blockIds.add(new P2<String>(blockId, gtfsTrip.getServiceId().getId()));
+            blockIds.add(Tuples.pair(blockId, gtfsTrip.getServiceId().getId()));
             gtfsTrip.setBlockId(blockId);
             _gtfsMutableRelationalDao.updateEntity(gtfsTrip);
 
@@ -496,7 +498,7 @@ public class StifTask implements Runnable {
             usedGtfsTrips.add(gtfsTrip);
           }
           if (lastTrip.type == StifTripType.DEADHEAD) {
-            for (P2<String> blockId : blockIds) {
+            for (Pair<String> blockId : blockIds) {
               String tripId = String.format("deadhead_%s_%s_%s_%s_%s", blockId.getSecond(), lastTrip.firstStop, lastTrip.firstStopTime, lastTrip.lastStop, lastTrip.runId);
               dumpBlockDataForTrip(lastTrip, blockId.getSecond(), tripId, blockId.getFirst(), "no gtfs trip");
             }
@@ -504,7 +506,7 @@ public class StifTask implements Runnable {
         }
         unmatchedTrips.remove(lastTrip);
 
-        for (P2<String> blockId : blockIds) {
+        for (Pair<String> blockId : blockIds) {
           String pulloutTripId = String.format("pullout_%s_%s_%s_%s", blockId.getSecond(), lastTrip.firstStop, lastTrip.firstStopTime, lastTrip.runId);
           dumpBlockDataForTrip(pullout, blockId.getSecond(), pulloutTripId , blockId.getFirst(), "no gtfs trip");
           String pullinTripId = String.format("pullin_%s_%s_%s_%s", blockId.getSecond(), lastTrip.lastStop, lastTrip.lastStopTime, lastTrip.runId);

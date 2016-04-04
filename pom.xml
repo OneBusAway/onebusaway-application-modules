@@ -23,7 +23,6 @@
     <gtfs-version>1.3.6</gtfs-version>
     <gtfs-api-version>1.2.2</gtfs-api-version>
     <onebusaway-siri-version>1.0.6</onebusaway-siri-version>
-    <opentripplanner-version>0.4.1</opentripplanner-version>
     <wiki_integration_version>1.0.0</wiki_integration_version>
     <slf4j.version>1.7.5</slf4j.version>
     <guava-version>16.0.1</guava-version>

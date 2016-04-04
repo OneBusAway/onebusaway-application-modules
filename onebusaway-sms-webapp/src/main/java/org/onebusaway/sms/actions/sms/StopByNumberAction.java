@@ -100,8 +100,6 @@ public class StopByNumberAction extends AbstractTextmarksAction {
 
     _stops = results.getStops();
 
-    logUserInteraction("stopQuery", _stopQuery);
-
     int stopIndex = 0;
 
     if (_stops.isEmpty()) {

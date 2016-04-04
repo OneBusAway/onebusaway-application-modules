@@ -405,13 +405,10 @@ public class BundleManagementServiceImpl implements BundleManagementService {
       _refreshService
           .refresh(RefreshableResources.ROUTE_COLLECTION_SEARCH_DATA);
       _refreshService.refresh(RefreshableResources.STOP_SEARCH_DATA);
-      _refreshService.refresh(RefreshableResources.WALK_PLANNER_GRAPH);
       _refreshService.refresh(RefreshableResources.BLOCK_INDEX_DATA);
       _refreshService.refresh(RefreshableResources.BLOCK_INDEX_SERVICE);
-      _refreshService.refresh(RefreshableResources.STOP_TRANSFER_DATA);
       _refreshService.refresh(RefreshableResources.SHAPE_GEOSPATIAL_INDEX);
       _refreshService.refresh(RefreshableResources.STOP_GEOSPATIAL_INDEX);
-      _refreshService.refresh(RefreshableResources.TRANSFER_PATTERNS);
       _refreshService.refresh(RefreshableResources.NARRATIVE_DATA);
 
     } catch (Exception e) {

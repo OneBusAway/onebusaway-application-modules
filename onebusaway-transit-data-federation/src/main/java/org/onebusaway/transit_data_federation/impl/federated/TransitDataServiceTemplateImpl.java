@@ -32,9 +32,6 @@ import org.onebusaway.transit_data.model.blocks.BlockBean;
 import org.onebusaway.transit_data.model.blocks.BlockInstanceBean;
 import org.onebusaway.transit_data.model.blocks.ScheduledBlockLocationBean;
 import org.onebusaway.transit_data.model.config.BundleMetadata;
-import org.onebusaway.transit_data.model.oba.LocalSearchResult;
-import org.onebusaway.transit_data.model.oba.MinTravelTimeToStopsBean;
-import org.onebusaway.transit_data.model.oba.TimedPlaceBean;
 import org.onebusaway.transit_data.model.problems.*;
 import org.onebusaway.transit_data.model.realtime.CurrentVehicleEstimateBean;
 import org.onebusaway.transit_data.model.realtime.CurrentVehicleEstimateQueryBean;
@@ -42,7 +39,6 @@ import org.onebusaway.transit_data.model.realtime.VehicleLocationRecordBean;
 import org.onebusaway.transit_data.model.realtime.VehicleLocationRecordQueryBean;
 import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationQueryBean;
-import org.onebusaway.transit_data.model.tripplanning.*;
 import org.onebusaway.transit_data.model.trips.*;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.transit_data_federation.services.*;
@@ -105,8 +101,6 @@ public class TransitDataServiceTemplateImpl implements TransitDataServiceTemplat
   @Autowired
   private BlockBeanService _blockBeanService;
 
-  @Autowired
-  private ItinerariesBeanService _itinerariesBeanService;
 
   @Autowired
   private ShapeBeanService _shapeBeanService;
@@ -418,50 +412,6 @@ public class TransitDataServiceTemplateImpl implements TransitDataServiceTemplat
       CurrentVehicleEstimateQueryBean query) {
     
     return _currentVehicleEstimateService.getCurrentVehicleEstimates(query);
-  }
-
-  //@Override
-  public ItinerariesBean getItinerariesBetween(TransitLocationBean from,
-      TransitLocationBean to, long targetTime, ConstraintsBean constraints)
-      throws ServiceException {
-    
-    return _itinerariesBeanService.getItinerariesBetween(from, to, targetTime,
-        constraints);
-  }
-
-  //@Override
-  public void reportProblemWithPlannedTrip(TransitLocationBean from,
-      TransitLocationBean to, long targetTime, ConstraintsBean constraints,
-      PlannedTripProblemReportBean report) {
-    
-    _userReportingService.reportProblemWithPlannedTrip(from, to, targetTime,
-        constraints, report);
-  }
-
-  //@Override
-  public ListBean<VertexBean> getStreetGraphForRegion(double latFrom,
-      double lonFrom, double latTo, double lonTo) throws ServiceException {
-    
-    return _itinerariesBeanService.getStreetGraphForRegion(latFrom, lonFrom,
-        latTo, lonTo);
-  }
-
-  //@Override
-  public MinTravelTimeToStopsBean getMinTravelTimeToStopsFrom(
-      CoordinatePoint location, long time,
-      TransitShedConstraintsBean constraints) throws ServiceException {
-    
-    return _itinerariesBeanService.getMinTravelTimeToStopsFrom(location, time,
-        constraints);
-  }
-
-  public List<TimedPlaceBean> getLocalPaths(String agencyId,
-      ConstraintsBean constraints,
-      MinTravelTimeToStopsBean minTravelTimeToStops,
-      List<LocalSearchResult> localResults) throws ServiceException {
-    
-    return _itinerariesBeanService.getLocalPaths(constraints,
-        minTravelTimeToStops, localResults);
   }
 
   /****

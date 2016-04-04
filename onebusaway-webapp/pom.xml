@@ -44,12 +44,6 @@
       <version>0.0.1</version>
     </dependency>
 
-        <!-- This is here mostly to support csv record parsing -->
-    <dependency>
-      <groupId>org.onebusaway</groupId>
-      <artifactId>onebusaway-csv-entities</artifactId>
-    </dependency>
-
         <!-- Struts2 Dependencies -->
     <dependency>
       <groupId>org.apache.struts</groupId>
@@ -202,7 +196,6 @@
         <configuration>
           <modules>
             <module>org.onebusaway.webapp.gwt.BookmarkEditApplication</module>
-            <module>org.onebusaway.webapp.gwt.OneBusAwayStandardApplication</module>
             <module>org.onebusaway.webapp.gwt.SearchLocationLibrary</module>
             <module>org.onebusaway.webapp.gwt.WhereStopFinderRefineViewApplication</module>
             <module>org.onebusaway.webapp.gwt.WhereStopFinderStandardApplication</module>
@@ -260,10 +253,6 @@
             <resource>
               <directory>target/gwt/LoginWidget</directory>
               <targetPath />
-            </resource>
-            <resource>
-              <directory>target/gwt/org.onebusaway.webapp.gwt.OneBusAwayStandardApplication</directory>
-              <targetPath>explore/onebusaway</targetPath>
             </resource>
             <resource>
               <directory>target/gwt/org.onebusaway.webapp.gwt.SearchLocationLibrary</directory>

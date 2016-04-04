@@ -5,7 +5,7 @@ information.
 
 ## GTFS-realtime
 
-We support [GTFS-realtime](http://code.google.com/transit/realtime/) out of the box, including support for trip updates,
+We support [GTFS-realtime](https://developers.google.com/transit/gtfs-realtime) out of the box, including support for trip updates,
 vehicle positions, and alerts.  To add support, create a
 [GtfsRealtimeSource](./apidocs/org/onebusaway/transit_data_federation/impl/realtime/gtfs_realtime/GtfsRealtimeSource.html)
 bean in your `data-sources.xml` file.  Then specify URLs for the three different types of GTFS-realtime data as
@@ -64,9 +64,9 @@ your SIRI data-source.  Here is a full example:
 </bean>
 ~~~
 
-## ASC Orbital - Orbcad
+## Orbital/ACS/Xerox OrbCAD
 
-A number of agencies have ACS Orbital - Orbcad AVL systems.  Some agencies have configured the data-export option of
+A number of agencies have Orbital/ACS/Xerox OrbCAD AVL systems.  Some agencies have configured the data-export option of
 these systems to spit out a CSV file of vehicle locations and schedule deviations for all the vehicles in their fleet,
 which is then shared through a webserver.  OneBusAway supports data of this form.  To add support, create a
 [OrbcadRecordHttpSource](./apidocs/org/onebusaway/transit_data_federation/impl/realtime/orbcad/OrbcadRecordHttpSource.html)
@@ -82,16 +82,6 @@ bean in your `data-sources.xml` file.  Then specify the URL for your real-time d
     </list>
   </property>
 </bean>
-~~~
-
-## MyBus
-
-Back in the day, OneBusAway supported just one kind of real-time data: the legacy MyBus system used by King County
-Metro.  If you want to relive the glory days (and the MyBus servers are still up), you can enable the MyBus real-time
-feed by adding the following bean to your `data-sources.xml` file:
-
-~~~
-<bean id="king_county_metro_avl" class="org.onebusaway.transit_data_federation.impl.realtime.mybus.TimepointPredictionServiceImpl" />
 ~~~
 
 ## Custom Implementation

@@ -38,7 +38,6 @@ import org.apache.commons.cli.Parser;
 import org.onebusaway.gtfs.impl.GtfsRelationalDaoImpl;
 import org.onebusaway.transit_data_federation.bundle.model.GtfsBundle;
 import org.onebusaway.transit_data_federation.bundle.model.GtfsBundles;
-import org.opentripplanner.graph_builder.impl.osm.FileBasedOpenStreetMapProviderImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -82,8 +81,6 @@ public class FederatedTransitDataBundleCreatorMain {
   private static final String ARG_RANDOMIZE_CACHE_DIR = "randomizeCacheDir";
 
   private static final String ARG_ADDITIONAL_RESOURCES_DIRECTORY = "additionalResourcesDirectory";
-
-  private static final String ARG_OSM = "osm";
 
   public static void main(String[] args) throws Exception {
     System.out.println(System.getProperties());
@@ -156,12 +153,6 @@ public class FederatedTransitDataBundleCreatorMain {
         beans.put("dataSource", bean.getBeanDefinition());
       }
 
-      if (commandLine.hasOption(ARG_OSM)) {
-        File osmPath = new File(commandLine.getOptionValue(ARG_OSM));
-        BeanDefinitionBuilder bean = BeanDefinitionBuilder.genericBeanDefinition(FileBasedOpenStreetMapProviderImpl.class);
-        bean.addPropertyValue("path", osmPath);
-        beans.put("osmProvider", bean.getBeanDefinition());
-      }
 
       File outputPath = new File(remainingArgs[remainingArgs.length - 1]);
 
@@ -242,7 +233,6 @@ public class FederatedTransitDataBundleCreatorMain {
     options.addOption(ARG_BUNDLE_KEY, true, "");
     options.addOption(ARG_RANDOMIZE_CACHE_DIR, false, "");
     options.addOption(ARG_ADDITIONAL_RESOURCES_DIRECTORY, true, "");
-    options.addOption(ARG_OSM, true, "");
 
     Option dOption = new Option("D", "use value for given property");
     dOption.setArgName("property=value");

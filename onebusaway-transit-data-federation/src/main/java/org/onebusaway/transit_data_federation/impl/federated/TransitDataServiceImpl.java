@@ -26,7 +26,6 @@ import org.onebusaway.exceptions.ServiceException;
 import org.onebusaway.federations.annotations.FederatedByAgencyIdMethod;
 import org.onebusaway.federations.annotations.FederatedByEntityIdMethod;
 import org.onebusaway.geospatial.model.CoordinateBounds;
-import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.geospatial.model.EncodedPolylineBean;
 import org.onebusaway.realtime.api.TimepointPredictionRecord;
 import org.onebusaway.transit_data.model.AgencyBean;
@@ -50,11 +49,7 @@ import org.onebusaway.transit_data.model.blocks.BlockBean;
 import org.onebusaway.transit_data.model.blocks.BlockInstanceBean;
 import org.onebusaway.transit_data.model.blocks.ScheduledBlockLocationBean;
 import org.onebusaway.transit_data.model.config.BundleMetadata;
-import org.onebusaway.transit_data.model.oba.LocalSearchResult;
-import org.onebusaway.transit_data.model.oba.MinTravelTimeToStopsBean;
-import org.onebusaway.transit_data.model.oba.TimedPlaceBean;
 import org.onebusaway.transit_data.model.problems.ETripProblemGroupBy;
-import org.onebusaway.transit_data.model.problems.PlannedTripProblemReportBean;
 import org.onebusaway.transit_data.model.problems.StopProblemReportBean;
 import org.onebusaway.transit_data.model.problems.StopProblemReportQueryBean;
 import org.onebusaway.transit_data.model.problems.StopProblemReportSummaryBean;
@@ -67,11 +62,6 @@ import org.onebusaway.transit_data.model.realtime.VehicleLocationRecordBean;
 import org.onebusaway.transit_data.model.realtime.VehicleLocationRecordQueryBean;
 import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationQueryBean;
-import org.onebusaway.transit_data.model.tripplanning.ConstraintsBean;
-import org.onebusaway.transit_data.model.tripplanning.ItinerariesBean;
-import org.onebusaway.transit_data.model.tripplanning.TransitLocationBean;
-import org.onebusaway.transit_data.model.tripplanning.TransitShedConstraintsBean;
-import org.onebusaway.transit_data.model.tripplanning.VertexBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsQueryBean;
@@ -358,49 +348,6 @@ public class TransitDataServiceImpl implements TransitDataService {
     return _transitDataService.getCurrentVehicleEstimates(query);
   }
 
-  @Override
-  public ItinerariesBean getItinerariesBetween(TransitLocationBean from,
-      TransitLocationBean to, long targetTime, ConstraintsBean constraints)
-      throws ServiceException {
-    blockUntilBundleIsReady();
-    return _transitDataService.getItinerariesBetween(from, to, targetTime,
-        constraints);
-  }
-
-  @Override
-  public void reportProblemWithPlannedTrip(TransitLocationBean from,
-      TransitLocationBean to, long targetTime, ConstraintsBean constraints,
-      PlannedTripProblemReportBean report) {
-    blockUntilBundleIsReady();
-    _transitDataService.reportProblemWithPlannedTrip(from, to, targetTime,
-        constraints, report);
-  }
-
-  @Override
-  public ListBean<VertexBean> getStreetGraphForRegion(double latFrom,
-      double lonFrom, double latTo, double lonTo) throws ServiceException {
-    blockUntilBundleIsReady();
-    return _transitDataService.getStreetGraphForRegion(latFrom, lonFrom,
-        latTo, lonTo);
-  }
-
-  @Override
-  public MinTravelTimeToStopsBean getMinTravelTimeToStopsFrom(
-      CoordinatePoint location, long time,
-      TransitShedConstraintsBean constraints) throws ServiceException {
-    blockUntilBundleIsReady();
-    return _transitDataService.getMinTravelTimeToStopsFrom(location, time,
-        constraints);
-  }
-
-  public List<TimedPlaceBean> getLocalPaths(String agencyId,
-      ConstraintsBean constraints,
-      MinTravelTimeToStopsBean minTravelTimeToStops,
-      List<LocalSearchResult> localResults) throws ServiceException {
-    blockUntilBundleIsReady();
-    return _transitDataService.getLocalPaths(agencyId,
-        constraints, minTravelTimeToStops, localResults);
-  }
 
   /****
    * 

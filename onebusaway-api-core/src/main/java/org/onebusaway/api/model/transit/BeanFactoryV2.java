@@ -39,7 +39,6 @@ import org.onebusaway.api.model.transit.service_alerts.SituationConditionDetails
 import org.onebusaway.api.model.transit.service_alerts.SituationConsequenceV2Bean;
 import org.onebusaway.api.model.transit.service_alerts.SituationV2Bean;
 import org.onebusaway.api.model.transit.service_alerts.TimeRangeV2Bean;
-import org.onebusaway.api.model.transit.tripplanning.MinTravelTimeToStopV2Bean;
 import org.onebusaway.collections.CollectionsLibrary;
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.geospatial.model.EncodedPolylineBean;
@@ -70,7 +69,6 @@ import org.onebusaway.transit_data.model.blocks.BlockInstanceBean;
 import org.onebusaway.transit_data.model.blocks.BlockStopTimeBean;
 import org.onebusaway.transit_data.model.blocks.BlockTripBean;
 import org.onebusaway.transit_data.model.config.BundleMetadata;
-import org.onebusaway.transit_data.model.oba.MinTravelTimeToStopsBean;
 import org.onebusaway.transit_data.model.realtime.CurrentVehicleEstimateBean;
 import org.onebusaway.transit_data.model.realtime.VehicleLocationRecordBean;
 import org.onebusaway.transit_data.model.schedule.FrequencyBean;
@@ -179,7 +177,7 @@ public class BeanFactoryV2 {
       BundleMetadata result) {
     return entry(getConfig(result));
   }
-  
+
   public ListWithReferencesBean<AgencyWithCoverageV2Bean> getResponse(
       List<AgencyWithCoverageBean> beans) {
     List<AgencyWithCoverageV2Bean> list = new ArrayList<AgencyWithCoverageV2Bean>();
@@ -239,22 +237,8 @@ public class BeanFactoryV2 {
     return entry(getSituation(situation));
   }
 
-  public ListWithReferencesBean<MinTravelTimeToStopV2Bean> getMinTravelTimeToStops(
-      MinTravelTimeToStopsBean travelTimes) {
-    List<MinTravelTimeToStopV2Bean> beans = new ArrayList<MinTravelTimeToStopV2Bean>();
-    for (int i = 0; i < travelTimes.getSize(); i++) {
-      MinTravelTimeToStopV2Bean bean = new MinTravelTimeToStopV2Bean();
-      bean.setStopId(travelTimes.getStopId(i));
-      bean.setLocation(new CoordinatePoint(travelTimes.getStopLat(i),
-          travelTimes.getStopLon(i)));
-      bean.setTravelTime(travelTimes.getTravelTime(i));
-      beans.add(bean);
-    }
-    return list(beans, false);
-  }
-
   /****
-   * 
+   *
    *****/
 
   public ListWithReferencesBean<String> getEntityIdsResponse(
@@ -268,7 +252,7 @@ public class BeanFactoryV2 {
   }
 
   /****
-   * 
+   *
    ***/
 
   public TimeIntervalV2 getTimeInterval(TimeIntervalBean interval) {
@@ -323,7 +307,7 @@ public class BeanFactoryV2 {
     bean.setServiceDateTo(meta.getServiceDateTo());
     return bean;
   }
-  
+
   public StopV2Bean getStop(StopBean stop) {
     StopV2Bean bean = new StopV2Bean();
     bean.setCode(stop.getCode());
@@ -687,7 +671,7 @@ public class BeanFactoryV2 {
     /*
      * StopCalendarDaysBean days = stopSchedule.getCalendarDays();
      * bean.setTimeZone(days.getTimeZone());
-     * 
+     *
      * List<StopCalendarDayV2Bean> dayBeans = new
      * ArrayList<StopCalendarDayV2Bean>(); for (StopCalendarDayBean day :
      * days.getDays()) { StopCalendarDayV2Bean dayBean =
@@ -1186,17 +1170,17 @@ public class BeanFactoryV2 {
 
     return true;
   }
-  
+
   private Properties getGitProperties(){
-	  Properties properties = new Properties();
-	  try {
-		  InputStream inputStream = getClass().getClassLoader().getResourceAsStream("git.properties");
-		  if (inputStream != null) {
-			  properties.load(inputStream);
-		  }
-		  return properties;
-	  } catch (IOException ioe) {
-		  return null;
-	  }
+          Properties properties = new Properties();
+          try {
+                  InputStream inputStream = getClass().getClassLoader().getResourceAsStream("git.properties");
+                  if (inputStream != null) {
+                          properties.load(inputStream);
+                  }
+                  return properties;
+          } catch (IOException ioe) {
+                  return null;
+          }
   }
 }

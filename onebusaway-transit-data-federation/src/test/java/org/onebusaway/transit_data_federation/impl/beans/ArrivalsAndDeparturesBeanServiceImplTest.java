@@ -63,7 +63,7 @@ import org.onebusaway.transit_data_federation.services.realtime.BlockLocation;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
-import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstance;
+import org.onebusaway.transit_data_federation.model.StopTimeInstance;
 
 public class ArrivalsAndDeparturesBeanServiceImplTest {
 

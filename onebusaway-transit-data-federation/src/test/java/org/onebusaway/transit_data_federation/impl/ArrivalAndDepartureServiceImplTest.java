@@ -16,6 +16,7 @@
 package org.onebusaway.transit_data_federation.impl;
 
 import static org.junit.Assert.assertEquals;
+
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.block;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.blockConfiguration;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.dateAsLong;
@@ -36,6 +37,7 @@ import org.onebusaway.transit_data_federation.impl.realtime.VehicleLocationRecor
 import org.onebusaway.transit_data_federation.impl.transit_graph.BlockEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.TripEntryImpl;
+import org.onebusaway.transit_data_federation.model.StopTimeInstance;
 import org.onebusaway.transit_data_federation.model.TargetTime;
 import org.onebusaway.transit_data_federation.services.StopTimeService;
 import org.onebusaway.transit_data_federation.services.StopTimeService.EFrequencyStopTimeBehavior;
@@ -47,7 +49,6 @@ import org.onebusaway.transit_data_federation.services.realtime.BlockLocation;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
-import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstance;
 
 import org.junit.Before;
 import org.junit.Test;

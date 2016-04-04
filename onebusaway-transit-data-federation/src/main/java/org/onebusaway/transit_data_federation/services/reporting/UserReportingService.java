@@ -20,15 +20,12 @@ import java.util.List;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data.model.ListBean;
 import org.onebusaway.transit_data.model.problems.ETripProblemGroupBy;
-import org.onebusaway.transit_data.model.problems.PlannedTripProblemReportBean;
 import org.onebusaway.transit_data.model.problems.StopProblemReportBean;
 import org.onebusaway.transit_data.model.problems.StopProblemReportSummaryBean;
 import org.onebusaway.transit_data.model.problems.StopProblemReportQueryBean;
 import org.onebusaway.transit_data.model.problems.TripProblemReportBean;
 import org.onebusaway.transit_data.model.problems.TripProblemReportSummaryBean;
 import org.onebusaway.transit_data.model.problems.TripProblemReportQueryBean;
-import org.onebusaway.transit_data.model.tripplanning.ConstraintsBean;
-import org.onebusaway.transit_data.model.tripplanning.TransitLocationBean;
 
 public interface UserReportingService {
 
@@ -65,8 +62,4 @@ public interface UserReportingService {
   public void deleteTripProblemReportForId(long id);
 
   public List<String> getAllTripProblemReportLabels();
-
-  public void reportProblemWithPlannedTrip(TransitLocationBean from,
-      TransitLocationBean to, long targetTime, ConstraintsBean constraints,
-      PlannedTripProblemReportBean report);
 }

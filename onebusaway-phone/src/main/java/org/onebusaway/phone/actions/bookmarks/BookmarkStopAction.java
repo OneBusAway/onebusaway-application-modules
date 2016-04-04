@@ -65,8 +65,6 @@ public class BookmarkStopAction extends AbstractAction {
     List<String> stopIds = MappingLibrary.map(_stops, "id");
     _currentUserService.addStopBookmark(name, stopIds, new RouteFilter());
     
-    logUserInteraction("stopIds",stopIds);
-    
     return SUCCESS;
   }
 }
