@@ -230,6 +230,7 @@ public class FederatedTransitDataBundleCreatorMain {
   }
 
   protected void buildOptions(Options options) {
+    options.addOption(ARG_USE_DATABASE_FOR_GTFS, false, "");
     options.addOption(ARG_SKIP_TO, true, "");
     options.addOption(ARG_ONLY, true, "");
     options.addOption(ARG_SKIP, true, "");
