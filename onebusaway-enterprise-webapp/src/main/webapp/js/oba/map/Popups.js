@@ -454,14 +454,14 @@ OBA.Popups = (function() {
 			routeAndDirectionWithArrivalsCount++;
 		});	    
 	    
-	    // service available
-		var maxObservationsToShow = 3;
-		if(totalRouteCount > 5) {
-			maxObservationsToShow = 1;
-		} else if(totalRouteCount > 3) {
+	    
+	    // Maximum Upcoming Vehicles to Display
+	    var maxObservationsToShow = 3;
+		if((totalRouteCount - routeAndDirectionWithoutArrivalsCount) > 4) {
 			maxObservationsToShow = 2;
 		}	
-
+		
+		// service available
 		if(routeAndDirectionWithArrivalsCount > 0) {
 		    html += '<p class="service">Buses en-route:</p>';
 
