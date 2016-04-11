@@ -85,6 +85,10 @@
 						<li><s:url var="url" action="reports" namespace="/admin" />
 							<s:a href="%{url}">Transitime Reports</s:a></li>
 					</s:if>
+					<s:if test="isPageAvailable('vehiclePredictions', 'org.onebusaway.webapp.actions.admin.ReportsAction')">
+						<li><s:url var="url" action="index" namespace="/admin/vehiclepredictions" />
+							<s:a href="%{url}">Vehicle Predictions</s:a></li>
+					</s:if>
 
 				</ul>
 			</div>
