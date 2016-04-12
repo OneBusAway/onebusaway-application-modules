@@ -88,6 +88,7 @@ function onSearchClick() {
 			var attrs = parseAvlData(response);
 			loadAvlMap(attrs['latLng']);
 			queryPredictionValues(attrs, vehicleId);
+			queryFinalPrediction(attrs)
 			displayAttrs("#avlData", attrs);
 			avlAttrs = attrs;
 		}
@@ -105,6 +106,7 @@ function onSearchClick() {
 			var attrs = parseSiri(response)
 			loadObaMap(attrs['latLng']);
 			queryOBAApiValues(attrs, agencyId, vehicleId);
+			queryOBAFinalStop(attrs, agencyId, vehicleId);
 			displayAttrs("#obaData", attrs);
 			obaAttrs = attrs;
 		}
@@ -135,6 +137,51 @@ function queryOBAApiValues(attrs, agencyId, vehicleId) {
 				attrs["tdsNextPrediction"] = new Date(now + s.nextStopTimeOffset * 1000);
 				attrs["obaapicall"] = "true";
 			}
+		}
+	});	
+}
+
+function queryOBAFinalStop(attrs, agencyId, vehicleId) {
+	var tripId = attrs["tripId"];
+	var scheduleUrl = "http://app." + domain 
+		+ "/onebusaway-api-webapp/api/where/trip-details/"
+		+ agencyId + "_" + tripId + ".json?key=OBAKEY";
+	
+	jQuery.ajax({
+		url: scheduleUrl,
+		type: "GET",
+		jsonp: "callback",
+		dataType: "jsonp",
+		async: false,
+		success: function(response) {
+			var s = response.data.entry.schedule.stopTimes;
+			attrs["tdsFinalStopId"] = s[s.length-1].stopId.split("_")[1];
+			queryOBAFinalPrediction(attrs, agencyId, attrs["tdsFinalStopId"], vehicleId)
+		}
+	});	
+}
+
+function queryOBAFinalPrediction(attrs, agencyId, stopId, vehicleId) {
+	
+	var tripId = attrs["tripId"];
+	// Setting service date to today so will not work for trips that span a day.
+	var serviceDate = new Date(); 
+	serviceDate.setHours(0,0,0,0);
+	var lastStopPredUrl = "http://app." + domain 
+		+ "/onebusaway-api-webapp/api/where/arrival-and-departure-for-stop/"
+		+ agencyId + "_" + stopId + ".json?key=OBAKEY&tripId="
+		+ agencyId + "_" + tripId + "&vehicleId=" + agencyId + "_" + vehicleId 
+		+ "&serviceDate=" + serviceDate.getTime();
+
+	jQuery.ajax({
+		url: lastStopPredUrl,
+		type: "GET",
+		jsonp: "callback",
+		dataType: "jsonp",
+		async: false,
+		success: function(response) {
+			var pred = response.data.entry.predictedArrivalTime;
+			attrs["tdsFinalStopPred"] = new Date(pred);
 		}
 	});
 	
@@ -187,6 +234,54 @@ function queryPredictionValues(attrs, vehicleId) {
 		console.log("vehicleDetails did not return route/stop, returning")
 	}
 
+}
+
+function queryFinalPrediction(attrs) {
+	var tripId = attrs["tripId"];
+	var scheduleUrl = "http://gtfsrt." + domain + ":" + port 
+		+ "/api/v1/key/4b248c1b/agency/1/command/trip?tripId=" 
+		+ tripId + "&format=json";
+	
+	jQuery.ajax({
+		url: scheduleUrl,
+		type: "GET",
+		async: false,
+		success: function(response) {
+			var s = response.schedule;
+			attrs["finalStopId"] = s[s.length-1].stopId;
+		}
+	});
+	
+	if (attrs["finalStopId"] == null)
+		return;
+	
+	var routeId = attrs["routeId"];
+	var stopId = attrs["finalStopId"];
+	var vehicleId = attrs["vehicleId"];
+	var lastStopPredUrl = "http://gtfsrt." + domain + ":" + port 
+		+ "/api/v1/key/4b248c1b/agency/1/command/predictions?rs="
+		+ routeId + "|" + stopId;
+	jQuery.ajax({
+		url: lastStopPredUrl,
+		type: "GET",
+		async: false,
+		success: function(response) {
+			for (var i = 0; i < response.predictions.length; i++) {
+				var dests = response.predictions[i].dest;
+				for (var j = 0; j < dests.length; j++) {
+					var preds = dests[j].pred;
+					for (var k = 0; k < preds.length; k++) {
+						var pred = preds[k];
+						if (pred.vehicleId == vehicleId) {
+							attrs["finalStopPred"] = new Date(pred.time * 1000);
+							return;
+						}
+					}
+				}
+			}
+		}
+	});
+	
 }
 
 
