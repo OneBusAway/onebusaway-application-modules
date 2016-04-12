@@ -127,14 +127,18 @@ function queryOBAApiValues(attrs, agencyId, vehicleId) {
 		async: false,
 		success: function(response) {
 			attrs["obaapicall"] = "false";
-			var now = new Date(response.currentTime);
+			
 			if (response.data != undefined && response.data.entry != undefined 
 					&& response.data.entry.status != undefined) {
+				var now = new Date(response.currentTime);	
 				var e = response.data.entry;
 				var s = e.status;
 				attrs["schedDev"] = s.scheduleDeviation;
 				attrs["tdsNextStopId"] = s.nextStop.split("_")[1];
-				attrs["tdsNextPrediction"] = new Date(now + s.nextStopTimeOffset * 1000);
+				console.log("offset=" + (s.nextStopTimeOffset * 1000) + ", now=" + now);
+				attrs["tdsLastUpdate"] = new Date(s.lastUpdateTime);
+				
+				attrs["tdsNextPrediction"] = new Date(now.getTime() + (s.nextStopTimeOffset * 1000));
 				attrs["obaapicall"] = "true";
 			}
 		}
