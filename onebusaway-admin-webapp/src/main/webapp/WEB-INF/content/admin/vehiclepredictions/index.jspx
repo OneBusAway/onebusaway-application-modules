@@ -44,15 +44,46 @@
 	<script type="text/javascript" src="${url}">
 	<!-- //prevent jspx minimization -->
 	</script>
+	
+	<!--  leaflet -->
+	<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.css" />
+    <script src="//cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.js">
+    <!-- //prevent jspx minimization -->
+    </script>
 </head>
 <body>
-<s:form action="index" >
-  <div id="vehicleId">
-  <label>Vehicle Id</label>
-  <label class="required">*</label>
-  <input type="text" id="vehicleId" />
-  <input type="button" id="display_vehicle" value="search" />
+  <div id="contentDiv2" style="width:800px; height:800px">
+	  <div id="vehicleIdDiv">
+		  <label>Vehicle Id</label>
+		  <label class="required">*</label>
+		  <input type="text" id="vehicleId" />
+		  <input type="button" id="display_vehicle" value="search" />
+	  </div>
+
+  <div id="maps" style="height:600px; display:none">
+    <div id="avlDiv" style="border=1; width:300px; height:320px; float:left">
+	    <h2>AVL Raw Position</h2>
+	  	<div id="avlMap" style="width:300px; height:300px">
+	  	<h3>No Data</h3>
+	  	</div>
+	  	<div id="avlData">
+	  	<!-- //prevent jspx minimization -->
+	  	</div>
+  	</div>
+
+    <div id="obaDiv" style="border=1; width:300px; height:320px; float:right">
+	  	<h2>OBA Position</h2>
+	  	<div id="obaMap" style="width:300px; height:300px">
+	  	<h3>No Data</h3>
+	  	</div>
+	  	<div id="obaData">
+	  	<!-- //prevent jspx minimization -->
+	  	</div>
+  	</div>
+  	<div id="reset" sytle="clear:both">
+  	<!-- //prevent jspx minimization -->
+  	</div>
   </div>
-</s:form>
+</div>
 </body>
 </html>
