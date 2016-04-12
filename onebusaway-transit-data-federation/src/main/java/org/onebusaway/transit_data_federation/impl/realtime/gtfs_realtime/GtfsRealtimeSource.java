@@ -283,7 +283,10 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
    */
   private synchronized void handeUpdates(MonitoredResult result, FeedMessage tripUpdates,
       FeedMessage vehiclePositions, FeedMessage alerts) {
-
+	  
+	long time = tripUpdates.getHeader().getTimestamp() * 1000;
+	_tripsLibrary.setCurrentTime(time);
+	
     List<CombinedTripUpdatesAndVehiclePosition> combinedUpdates = _tripsLibrary.groupTripUpdatesAndVehiclePositions(result,
         tripUpdates, vehiclePositions);
     result.setRecordsTotal(combinedUpdates.size());
