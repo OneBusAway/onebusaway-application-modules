@@ -93,7 +93,6 @@ function onSearchClick() {
 			avlAttrs = attrs;
 		}
 	});
-	//http://app.prod.wmata.obaweb.org/onebusaway-api-webapp/siri/vehicle-monitoring?key=OBAKEY&callback=jsonp1460454759616&_=1460454774864&OperatorRef=1&LineRef=5A&type=json
 	var obaUrl = "http://app." + domain + "/onebusaway-api-webapp/siri/vehicle-monitoring?key=OBAKEY&OperatorRef="
 	+ agencyId + "&VehicleRef=" + vehicleId +  "&type=json";
 	jQuery.ajax({
@@ -115,10 +114,11 @@ function onSearchClick() {
 }
 
 function queryOBAApiValues(attrs, agencyId, vehicleId) {
-	//http://app.prod.wmata.obaweb.org/onebusaway-api-webapp/api/where/trip-for-vehicle/1_7181.json?key=OBAKEY
+
 	var apiUrl = "http://app." + domain 
 	+ "/onebusaway-api-webapp/api/where/trip-for-vehicle/"
 	+ agencyId + "_" + vehicleId + ".json?key=OBAKEY";
+
 	jQuery.ajax({
 		url: apiUrl,
 		type: "GET",
@@ -133,11 +133,12 @@ function queryOBAApiValues(attrs, agencyId, vehicleId) {
 				var now = new Date(response.currentTime);	
 				var e = response.data.entry;
 				var s = e.status;
-				attrs["schedDev"] = s.scheduleDeviation;
+				attrs["schedDev"] = (s.scheduleDeviation/60) + " min"
+				  + (s.scheduleDeviation < 0? " (early)":" (late)" );
 				attrs["tdsNextStopId"] = s.nextStop.split("_")[1];
 				console.log("offset=" + (s.nextStopTimeOffset * 1000) + ", now=" + now);
 				attrs["tdsLastUpdate"] = new Date(s.lastUpdateTime);
-				
+				attrs["tdsNextStopOffset"] = s.nextStopTimeOffset;
 				attrs["tdsNextPrediction"] = new Date(now.getTime() + (s.nextStopTimeOffset * 1000));
 				attrs["obaapicall"] = "true";
 			}
