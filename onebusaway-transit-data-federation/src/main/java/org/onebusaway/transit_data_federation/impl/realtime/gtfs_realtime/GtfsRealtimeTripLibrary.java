@@ -66,6 +66,7 @@ import java.util.Set;
 class GtfsRealtimeTripLibrary {
 
   private static final Logger _log = LoggerFactory.getLogger(GtfsRealtimeTripLibrary.class);
+  private static final String DEBUG_VEHICLE = "6330";
 
   private GtfsRealtimeEntitySource _entitySource;
 
@@ -142,18 +143,21 @@ class GtfsRealtimeTripLibrary {
         // Trip update has a vehicle ID - index by vehicle ID
         String vehicleId = tu.getVehicle().getId();
 
+        if (DEBUG_VEHICLE.equals(vehicleId)) {
+          _log.error("checking trip " + tu.getTrip().getTripId());
+        }
+        
         if (!tripUpdatesByVehicleId.containsKey(vehicleId)) {
           tripUpdatesByVehicleId.put(vehicleId, tu);
         } else {
           // upcoming merge will fix this
-          _log.debug("Multiple TripUpdates for vehicle {}; taking oldest.",
+          _log.debug("Multiple TripUpdates for vehicle {}; taking best.",
               vehicleId);
 
-          TripUpdate otherUpdate = tripUpdatesByVehicleId.get(vehicleId);
-
-          long otherTimestamp = otherUpdate.getTimestamp();
-
-          if (tu.getTimestamp() < otherTimestamp) {
+          if (tripMoreAppropriate(tu, tripUpdatesByVehicleId.get(vehicleId), vehicleId)) {
+            if (DEBUG_VEHICLE.equals(vehicleId)) {
+              _log.error("trip " + tu.getTrip().getTripId() + " wins");
+            }
             tripUpdatesByVehicleId.put(vehicleId, tu);
           }
 
@@ -306,6 +310,33 @@ class GtfsRealtimeTripLibrary {
     return updates;
   }
 
+  private boolean tripMoreAppropriate(TripUpdate newTrip, TripUpdate original, String vehicleId) {
+    long closestTemporalUpdateNewTrip = closestTemporalUpdate(newTrip);
+    long closestTemporalUpdateOriginal = closestTemporalUpdate(original);
+    
+    if (DEBUG_VEHICLE.equals(vehicleId)) {
+      _log.error(closestTemporalUpdateNewTrip + " <? " + closestTemporalUpdateOriginal);
+    }
+    
+    if (closestTemporalUpdateNewTrip < closestTemporalUpdateOriginal)
+      return true;
+    
+    return false;
+  }
+
+  private long closestTemporalUpdate(TripUpdate t) {
+    long closest = Long.MAX_VALUE;
+    for (StopTimeUpdate stu : t.getStopTimeUpdateList()) {
+      if (stu.hasArrival()) {
+        long delta = Math.abs(stu.getArrival().getTime() * 1000 - getCurrentTime());
+        if (delta < closest) {
+          closest = delta;
+        }
+      }
+    }
+    return closest;
+  }
+
   /**
    * The {@link VehicleLocationRecord} is guaranteed to have a
    * {@link VehicleLocationRecord#getVehicleId()} value.
@@ -327,10 +358,10 @@ class GtfsRealtimeTripLibrary {
 
     BlockDescriptor blockDescriptor = update.block;
     if (update.block == null) return null;
-
+    String vehicleId = update.block.getVehicleId();
     record.setBlockId(blockDescriptor.getBlockInstance().getBlock().getBlock().getId());
 
-    applyTripUpdatesToRecord(result, blockDescriptor, update.tripUpdates, record);
+    applyTripUpdatesToRecord(result, blockDescriptor, update.tripUpdates, record, vehicleId);
 
     if (update.vehiclePosition != null) {
       applyVehiclePositionToRecord(result, update.vehiclePosition, record);
@@ -499,7 +530,7 @@ class GtfsRealtimeTripLibrary {
 
   
   private void applyTripUpdatesToRecord(MonitoredResult result, BlockDescriptor blockDescriptor,
-      List<TripUpdate> tripUpdates, VehicleLocationRecord record) {
+      List<TripUpdate> tripUpdates, VehicleLocationRecord record, String vehicleId) {
 
     BlockInstance instance = blockDescriptor.getBlockInstance();
 
@@ -521,7 +552,9 @@ class GtfsRealtimeTripLibrary {
       
       if (updatesForTrip != null) {
         for (TripUpdate tripUpdate : updatesForTrip) {
-
+          if (DEBUG_VEHICLE.equals(vehicleId)) {
+            _log.error("found trip " + tripId);
+          }
           /**
            * TODO: delete this code once all upstream systems have been
            * migrated the new "delay" and "timestamp" fields.
@@ -529,6 +562,7 @@ class GtfsRealtimeTripLibrary {
           if (tripUpdate.hasExtension(GtfsRealtimeOneBusAway.obaTripUpdate)) {
             OneBusAwayTripUpdate obaTripUpdate = tripUpdate.getExtension(GtfsRealtimeOneBusAway.obaTripUpdate);
             if (obaTripUpdate.hasDelay()) {
+              _log.error("found extension");
               /**
                * TODO: Improved logic around picking the "best" schedule deviation
                */
@@ -550,6 +584,8 @@ class GtfsRealtimeTripLibrary {
             best.delta = 0;
             best.isInPast = false;
             best.scheduleDeviation = tripUpdate.getDelay();
+            if (DEBUG_VEHICLE.equals(vehicleId))
+              _log.error("record has delay");
           }
           if (tripUpdate.hasTimestamp()) {
             best.timestamp = tripUpdate.getTimestamp() * 1000;
@@ -578,7 +614,7 @@ class GtfsRealtimeTripLibrary {
 
             if (currentArrivalTime >= 0) {
               updateBestScheduleDeviation(currentTime,
-                  stopTime.getArrivalTime(), currentArrivalTime, best);
+                  stopTime.getArrivalTime(), currentArrivalTime, best, tripId, vehicleId);
 
               long timepointPredictedTime = instance.getServiceDate() + (currentArrivalTime * 1000L);
               tpr.setTimepointPredictedArrivalTime(timepointPredictedTime);
@@ -586,7 +622,7 @@ class GtfsRealtimeTripLibrary {
 
             if (currentDepartureTime >= 0) {
               updateBestScheduleDeviation(currentTime,
-                  stopTime.getDepartureTime(), currentDepartureTime, best);
+                  stopTime.getDepartureTime(), currentDepartureTime, best, tripId, vehicleId);
 
               long timepointPredictedTime = instance.getServiceDate() + (currentDepartureTime * 1000L);
               tpr.setTimepointPredictedDepartureTime(timepointPredictedTime);
@@ -604,6 +640,9 @@ class GtfsRealtimeTripLibrary {
     record.setServiceDate(instance.getServiceDate());
     if (blockDescriptor.getStartTime() != null) {
       record.setBlockStartTime(blockDescriptor.getStartTime());
+    }
+    if (DEBUG_VEHICLE.equals(vehicleId)) {
+      _log.error("schedDev final = " + best.scheduleDeviation);
     }
     record.setScheduleDeviation(best.scheduleDeviation);
     if (best.timestamp != 0) {
@@ -739,15 +778,18 @@ class GtfsRealtimeTripLibrary {
   }
 
   private void updateBestScheduleDeviation(int currentTime,
-      int expectedStopTime, int actualStopTime, BestScheduleDeviation best) {
+      int expectedStopTime, int actualStopTime, BestScheduleDeviation best, AgencyAndId tripId, String vehicleId) {
 
     int delta = Math.abs(currentTime - actualStopTime);
     boolean isInPast = currentTime > actualStopTime;
     int scheduleDeviation = actualStopTime - expectedStopTime;
-
+    
     if (delta < best.delta || (!isInPast && best.isInPast)) {
       best.delta = delta;
       best.isInPast = isInPast;
+      if (DEBUG_VEHICLE.equals(vehicleId)) {
+        _log.error("schedDev=" + scheduleDeviation + " for trip " + tripId + " with delta=" + delta);
+      }
       best.scheduleDeviation = scheduleDeviation;
     }
   }

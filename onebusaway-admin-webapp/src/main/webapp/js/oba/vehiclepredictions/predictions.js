@@ -15,16 +15,21 @@
  */
 
 var maps = [];
-var domain="prod.wmata.obaweb.org";
-var port=8080;
+var transitimeWeb="gtfsrt.dev.wmata.obaweb.org:8080";
+var obaWeb="app.dev.wmata.obaweb.org"
 var avlAttrs = new Object();
 var obaAttrs = new Object();
+var autoRefresh = false;
 
 jQuery(function() {
 	startup();
 });
 
 function refresh() {
+	doSearch();
+}
+
+function refreshAttrs() {
 	displayAttrs("#avlData", avlAttrs);
 	displayAttrs("#obaData", obaAttrs);
 }
@@ -32,6 +37,8 @@ function startup() {
 	
 	// stuff to do on load
 	jQuery("#display_vehicle").click(onSearchClick);
+	
+	jQuery("#autorefresh").click(onRefreshClick);
 }
 
 function loadMap(latLng, mapName) {
@@ -65,11 +72,27 @@ function loadObaMap(latLng) {
 	}
 }
 
+function onRefreshClick() {
+	if (jQuery("#autorefresh").is(":checked")) {
+		autoRefresh = true;
+		doSearch();
+	} else {
+		autoRefresh = false;
+	}
+}
 
 function onSearchClick() {
-	setTimeout(refresh, 5000); // this is a hack for async calls below
-	setTimeout(refresh, 10000);
 	jQuery("#maps").show();
+	doSearch();
+}
+
+function doSearch() {
+	if (autoRefresh) {
+		setTimeout(refresh, 15000);
+	}
+	setTimeout(refreshAttrs, 3000); // this is a hack for async calls below
+	setTimeout(refreshAttrs, 5000);
+
 	var vehicleId = jQuery("#vehicleId").val();
 	var agencyId="1";
 	var now = new Date();
@@ -77,7 +100,7 @@ function onSearchClick() {
 	var beginDate=formatDate(oneMinuteAgo);
 	var numDays=1;
 	var beginTime=formatTime(oneMinuteAgo);
-	var avlUrl= "http://gtfsrt." + domain + ":" + port + "/web/reports/avlJsonData.jsp?a="
+	var avlUrl= "http://" + transitimeWeb + "/web/reports/avlJsonData.jsp?a="
 	+ agencyId + "&beginDate=" + beginDate + "&numDays=" + numDays + "&v=" + vehicleId + 
 	"&beginTime=" + encodeURI(beginTime);
 	jQuery.ajax({
@@ -93,7 +116,7 @@ function onSearchClick() {
 			avlAttrs = attrs;
 		}
 	});
-	var obaUrl = "http://app." + domain + "/onebusaway-api-webapp/siri/vehicle-monitoring?key=OBAKEY&OperatorRef="
+	var obaUrl = "http://" + obaWeb + "/onebusaway-api-webapp/siri/vehicle-monitoring?key=OBAKEY&OperatorRef="
 	+ agencyId + "&VehicleRef=" + vehicleId +  "&type=json";
 	jQuery.ajax({
 		url: obaUrl,
@@ -115,7 +138,7 @@ function onSearchClick() {
 
 function queryOBAApiValues(attrs, agencyId, vehicleId) {
 
-	var apiUrl = "http://app." + domain 
+	var apiUrl = "http://" + obaWeb 
 	+ "/onebusaway-api-webapp/api/where/trip-for-vehicle/"
 	+ agencyId + "_" + vehicleId + ".json?key=OBAKEY";
 
@@ -136,7 +159,6 @@ function queryOBAApiValues(attrs, agencyId, vehicleId) {
 				attrs["schedDev"] = (s.scheduleDeviation/60) + " min"
 				  + (s.scheduleDeviation < 0? " (early)":" (late)" );
 				attrs["tdsNextStopId"] = s.nextStop.split("_")[1];
-				console.log("offset=" + (s.nextStopTimeOffset * 1000) + ", now=" + now);
 				attrs["tdsLastUpdate"] = new Date(s.lastUpdateTime);
 				attrs["tdsNextStopOffset"] = s.nextStopTimeOffset;
 				attrs["tdsNextPrediction"] = new Date(now.getTime() + (s.nextStopTimeOffset * 1000));
@@ -148,7 +170,7 @@ function queryOBAApiValues(attrs, agencyId, vehicleId) {
 
 function queryOBAFinalStop(attrs, agencyId, vehicleId) {
 	var tripId = attrs["tripId"];
-	var scheduleUrl = "http://app." + domain 
+	var scheduleUrl = "http://" + obaWeb
 		+ "/onebusaway-api-webapp/api/where/trip-details/"
 		+ agencyId + "_" + tripId + ".json?key=OBAKEY";
 	
@@ -172,7 +194,7 @@ function queryOBAFinalPrediction(attrs, agencyId, stopId, vehicleId) {
 	// Setting service date to today so will not work for trips that span a day.
 	var serviceDate = new Date(); 
 	serviceDate.setHours(0,0,0,0);
-	var lastStopPredUrl = "http://app." + domain 
+	var lastStopPredUrl = "http://" + obaWeb 
 		+ "/onebusaway-api-webapp/api/where/arrival-and-departure-for-stop/"
 		+ agencyId + "_" + stopId + ".json?key=OBAKEY&tripId="
 		+ agencyId + "_" + tripId + "&vehicleId=" + agencyId + "_" + vehicleId 
@@ -193,7 +215,7 @@ function queryOBAFinalPrediction(attrs, agencyId, stopId, vehicleId) {
 }
 
 function queryPredictionValues(attrs, vehicleId) {
-	var vehicleDetailsUrl = "http://gtfsrt." + domain + ":" + port 
+	var vehicleDetailsUrl = "http://" + transitimeWeb 
 	+ "/api/v1/key/4b248c1b/agency/1/command/vehiclesDetails?v=" 
 	+ vehicleId + "&format=json";
 	jQuery.ajax({
@@ -212,7 +234,7 @@ function queryPredictionValues(attrs, vehicleId) {
 	
 	if (attrs["routeId"] != undefined && attrs["nextStopId"] != undefined) {
 	
-		var predictionUrl = "http://gtfsrt." + domain + ":" + port 
+		var predictionUrl = "http://" + transitimeWeb
 		+ "/api/v1/key/4b248c1b/agency/1/command/predictions?rs=" 
 		+ attrs["routeId"] + "|" + attrs["nextStopId"] 
 		+ "&numPreds=20&format=json";
@@ -243,7 +265,7 @@ function queryPredictionValues(attrs, vehicleId) {
 
 function queryFinalPrediction(attrs) {
 	var tripId = attrs["tripId"];
-	var scheduleUrl = "http://gtfsrt." + domain + ":" + port 
+	var scheduleUrl = "http://" + transitimeWeb 
 		+ "/api/v1/key/4b248c1b/agency/1/command/trip?tripId=" 
 		+ tripId + "&format=json";
 	
@@ -263,7 +285,7 @@ function queryFinalPrediction(attrs) {
 	var routeId = attrs["routeId"];
 	var stopId = attrs["finalStopId"];
 	var vehicleId = attrs["vehicleId"];
-	var lastStopPredUrl = "http://gtfsrt." + domain + ":" + port 
+	var lastStopPredUrl = "http://" + transitimeWeb 
 		+ "/api/v1/key/4b248c1b/agency/1/command/predictions?rs="
 		+ routeId + "|" + stopId;
 	jQuery.ajax({

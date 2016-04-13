@@ -58,6 +58,7 @@
 		  <label class="required">*</label>
 		  <input type="text" id="vehicleId" />
 		  <input type="button" id="display_vehicle" value="search" />
+		  <input type="checkbox" id="autorefresh" value="Auto Refresh" />
 	  </div>
 
   <div id="maps" style="height:600px; display:none">
