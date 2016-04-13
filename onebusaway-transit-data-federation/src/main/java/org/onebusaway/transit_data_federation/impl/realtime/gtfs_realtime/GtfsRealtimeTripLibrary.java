@@ -53,7 +53,6 @@ import org.slf4j.LoggerFactory;
 
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -124,7 +123,7 @@ class GtfsRealtimeTripLibrary {
       FeedMessage tripUpdateMessage, FeedMessage vehiclePositionsMessage) {
 
     List<CombinedTripUpdatesAndVehiclePosition> updates = new ArrayList<CombinedTripUpdatesAndVehiclePosition>();
-    Map<String, List<TripUpdate>> tripUpdatesListByVehicleId = new HashMap<String, List<TripUpdate>>();
+    Map<String, TripUpdate> tripUpdatesByVehicleId = new HashMap<String, TripUpdate>();
     Map<String, VehiclePosition> vehiclePositionsByVehicleId = new HashMap<String, VehiclePosition>();
 
     ListMultimap<BlockDescriptor, TripUpdate> anonymousTripUpdatesByBlock = ArrayListMultimap.<BlockDescriptor, TripUpdate> create();
@@ -143,18 +142,21 @@ class GtfsRealtimeTripLibrary {
         // Trip update has a vehicle ID - index by vehicle ID
         String vehicleId = tu.getVehicle().getId();
 
-        if (!tripUpdatesListByVehicleId.containsKey(vehicleId)) {
-          List<TripUpdate> tus = new ArrayList<TripUpdate>();
-          tus.add(tu);
-          tripUpdatesListByVehicleId.put(vehicleId, tus);
+        if (!tripUpdatesByVehicleId.containsKey(vehicleId)) {
+          tripUpdatesByVehicleId.put(vehicleId, tu);
         } else {
           // upcoming merge will fix this
-          _log.debug("Multiple TripUpdates for vehicle {}; adding new.",
+          _log.debug("Multiple TripUpdates for vehicle {}; taking newest.",
               vehicleId);
 
-          List<TripUpdate> tus = tripUpdatesListByVehicleId.get(vehicleId);
-          tus.add(tu);
-          
+          TripUpdate otherUpdate = tripUpdatesByVehicleId.get(vehicleId);
+
+          long otherTimestamp = otherUpdate.getTimestamp();
+
+          if (tu.getTimestamp() > otherTimestamp) {
+            tripUpdatesByVehicleId.put(vehicleId, tu);
+          }
+
         }
       } else {
         /*
@@ -248,14 +250,13 @@ class GtfsRealtimeTripLibrary {
     }
 
     // Map updates by vehicle ID
-    for (Map.Entry<String, List<TripUpdate>> e : tripUpdatesListByVehicleId.entrySet()) {
+    for (Map.Entry<String, TripUpdate> e : tripUpdatesByVehicleId.entrySet()) {
       CombinedTripUpdatesAndVehiclePosition update = new CombinedTripUpdatesAndVehiclePosition();
 
       String vehicleId = e.getKey();
-      List<TripUpdate> tus = e.getValue();
-      TripDescriptor trip = tus.get(0).getTrip();
-      update.block = getTripDescriptorAsBlockDescriptor(result, trip);
-      update.tripUpdates = tus;
+      TripUpdate tu = e.getValue();
+      update.block = getTripDescriptorAsBlockDescriptor(result, tu.getTrip());
+      update.tripUpdates = Collections.singletonList(tu);
 
       if (vehiclePositionsByVehicleId.containsKey(vehicleId)) {
         update.vehiclePosition = vehiclePositionsByVehicleId.get(vehicleId);
