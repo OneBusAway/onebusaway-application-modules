@@ -146,14 +146,14 @@ class GtfsRealtimeTripLibrary {
           tripUpdatesByVehicleId.put(vehicleId, tu);
         } else {
           // upcoming merge will fix this
-          _log.debug("Multiple TripUpdates for vehicle {}; taking newest.",
+          _log.debug("Multiple TripUpdates for vehicle {}; taking oldest.",
               vehicleId);
 
           TripUpdate otherUpdate = tripUpdatesByVehicleId.get(vehicleId);
 
           long otherTimestamp = otherUpdate.getTimestamp();
 
-          if (tu.getTimestamp() > otherTimestamp) {
+          if (tu.getTimestamp() < otherTimestamp) {
             tripUpdatesByVehicleId.put(vehicleId, tu);
           }
 
