@@ -50,6 +50,9 @@
     <script src="//cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.js">
     <!-- //prevent jspx minimization -->
     </script>
+    <script src="////api.tiles.mapbox.com/mapbox.js/plugins/leaflet-markercluster/v0.4.0/leaflet.markercluster.js">
+    <!-- //prevent jspx minimization -->
+    </script>
 </head>
 <body>
   <div id="contentDiv2" style="width:800px; height:800px">
@@ -57,8 +60,10 @@
 		  <label>Vehicle Id</label>
 		  <label class="required">*</label>
 		  <input type="text" id="vehicleId" />
-		  <input type="button" id="display_vehicle" value="search" />
-		  <input type="checkbox" id="autorefresh" value="Auto Refresh" />
+		  <input type="button" id="display_vehicle" value="search" />&amp;nbsp;
+		  <input type="button" id="clear_map" value="clear map" />&amp;nbsp;
+		  <label>Auto Refresh</label><input type="checkbox" id="autorefresh" value="Auto Refresh" />
+		  
 	  </div>
 
   <div id="maps" style="height:600px; display:none">

@@ -14,9 +14,9 @@
  * the License.
  */
 
-var maps = [];
+var maps = new Object();;
 var transitimeWeb="gtfsrt.dev.wmata.obaweb.org:8080";
-var obaWeb="app.dev.wmata.obaweb.org"
+var obaWeb="app.dev.wmata.obaweb.org";
 var avlAttrs = new Object();
 var obaAttrs = new Object();
 var autoRefresh = false;
@@ -37,8 +37,30 @@ function startup() {
 	
 	// stuff to do on load
 	jQuery("#display_vehicle").click(onSearchClick);
-	
 	jQuery("#autorefresh").click(onRefreshClick);
+	jQuery("#clear_map").click(onClearMapClick);
+}
+
+function onClearMapClick() {
+	console.log("clear!");
+	jQuery.each(maps, function(index,value) {
+		console.log("clearing layers for map " + index + ":" + value);
+		if (value != null) {
+			console.log("clearing map " + index);
+			value.eachLayer(function(layer){
+				value.removeLayer(layer);
+			})
+			// TODO refactor
+			L.control.scale({metric: false}).addTo(value);
+			L.tileLayer('http://api.tiles.mapbox.com/v4/transitime.j1g5bb0j/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoidHJhbnNpdGltZSIsImEiOiJiYnNWMnBvIn0.5qdbXMUT1-d90cv1PAIWOQ', {
+				attribution: '&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> &amp; <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
+				maxZoom: 19
+			}).addTo(value);
+
+		} else {
+			console.log("null markers for" + index);
+		}
+	});
 }
 
 function loadMap(latLng, mapName) {
@@ -48,16 +70,18 @@ function loadMap(latLng, mapName) {
 	} else {
 		map = L.map(mapName);
 		maps[mapName] = map;
+		
 		L.control.scale({metric: false}).addTo(map);
 		L.tileLayer('http://api.tiles.mapbox.com/v4/transitime.j1g5bb0j/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoidHJhbnNpdGltZSIsImEiOiJiYnNWMnBvIn0.5qdbXMUT1-d90cv1PAIWOQ', {
 			attribution: '&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> &amp; <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
 			maxZoom: 19
 		}).addTo(map);
 	}
-
+	
 	// center map around marker
 	map.setView(latLng, 17);
-	var marker = L.marker(latLng).addTo(map);
+	var marker = L.marker(latLng);
+	map.addLayer(marker);
 	
 }
 
@@ -149,8 +173,6 @@ function queryOBAApiValues(attrs, agencyId, vehicleId) {
 		dataType: "jsonp",
 		async: false,
 		success: function(response) {
-			attrs["obaapicall"] = "false";
-			
 			if (response.data != undefined && response.data.entry != undefined 
 					&& response.data.entry.status != undefined) {
 				var now = new Date(response.currentTime);	
@@ -160,9 +182,8 @@ function queryOBAApiValues(attrs, agencyId, vehicleId) {
 				  + (s.scheduleDeviation < 0? " (early)":" (late)" );
 				attrs["tdsNextStopId"] = s.nextStop.split("_")[1];
 				attrs["tdsLastUpdate"] = new Date(s.lastUpdateTime);
-				attrs["tdsNextStopOffset"] = s.nextStopTimeOffset;
+//				attrs["tdsNextStopOffset"] = s.nextStopTimeOffset;
 				attrs["tdsNextPrediction"] = new Date(now.getTime() + (s.nextStopTimeOffset * 1000));
-				attrs["obaapicall"] = "true";
 			}
 		}
 	});	
@@ -224,6 +245,10 @@ function queryPredictionValues(attrs, vehicleId) {
 		async: false,
 		success: function(response) {
 			var v = response.vehicles[0];
+			if (v == undefined) {
+				console.log("empty vehicleDetails");
+				return;
+			}
 			attrs["routeId"] = v.routeId;
 			attrs["schedDev"] = v.schAdhStr;
 			attrs["blockAlpha"] = v.block;
@@ -249,9 +274,7 @@ function queryPredictionValues(attrs, vehicleId) {
 							if (predvalue.vehicle == vehicleId) {
 								attrs["nextPrediction"] = new Date(predvalue.time * 1000);
 								return;
-							} else {
-								console.log("skipping vehicle=" + predvalue.vehicle);
-							}
+							} 
 						});
 					});
 				});
@@ -265,6 +288,10 @@ function queryPredictionValues(attrs, vehicleId) {
 
 function queryFinalPrediction(attrs) {
 	var tripId = attrs["tripId"];
+	if (tripId == undefined || tripId == null) {
+		console.log("missing tripId");
+		return;
+	}
 	var scheduleUrl = "http://" + transitimeWeb 
 		+ "/api/v1/key/4b248c1b/agency/1/command/trip?tripId=" 
 		+ tripId + "&format=json";
@@ -328,7 +355,7 @@ function parseSiri(siri) {
 				attrs["routeId"] = mvj.LineRef.split("_")[1];
 				attrs["tripId"] = mvj.FramedVehicleJourneyRef.DatedVehicleJourneyRef.split("_")[1];
 				attrs["siriNextStopId"] = mvj.MonitoredCall.StopPointRef.split("_")[1];
-				attrs["siriNextPrediction"] = mvj.MonitoredCall.ExpectedArrivalTime;
+				attrs["siriNextPrediction"] = mvj.MonitoredCall.ExpectedDepartureTime;
 				attrs["siriMonitored"] = mvj.Monitored;
 			} else {
 				console.log("MonitoringVehicleJourney missing");
@@ -367,7 +394,7 @@ function parseAvlData(jsonData) {
 		
     	// parse date string -> number
     	avl.timestamp = Date.parse(avl.time.replace(/-/g, '/').slice(0,-2))
-  	    attrs['timestamp'] = avl.timestamp;
+//  	    attrs['timestamp'] = avl.timestamp;
     	attrs['pretty_timestamp'] = new Date(avl.timestamp);
 		// we only want the most recent
 		latLng = L.latLng(avl.lat, avl.lon);
@@ -392,7 +419,7 @@ function displayAttrs(divName, attrs) {
 function lookupTitle(s) {
 	var txt;
     switch (s) {
-    	case "timetamp":
+    	case "timestamp":
     		txt = "Raw Timestamp";
     		break;
     	case "pretty_timestamp":
@@ -400,6 +427,53 @@ function lookupTitle(s) {
   		  break;
     	case "latLng":
     		txt = "Lat/Lon";
+    		break;
+    	case "routeId":
+    		txt = "Route Id";
+    		break;
+    	case "tripId":
+    		txt = "Trip Id";
+    		break;
+    	case "schedDev":
+    		txt = "Schedule Deviation";
+    		break;
+    	case "nextPrediction":
+    		txt = "Next Stop Arrival"
+    	case "blockAlpha":
+    		txt = "Block Alpha";
+    		break;
+    	case "nextStopId":
+    		txt = "Next Stop Id";
+    		break;
+    	case "finalStopId":
+    		txt = "Last Stop Id";
+    		break;
+    	case "finalStopPred":
+    		txt = "Last Stop Arrival";
+    		break;
+    	case "siriNextStopId":
+    		txt = "Next Stop Id (SIRI)";
+    		break;
+    	case "siriNextPrediction":
+    		txt = "Next Stop Departure (SIRI)";
+			break;
+    	case "siriMonitored":
+    		txt = "Realtime (Not Schedule Data)";
+    		break;
+    	case "tdsNextStopId":
+    		txt = "Next Stop Id (Mobile)";
+    		break;
+    	case "tdsLastUpdate":
+    		txt = "Last Update";
+    		break;
+    	case "tdsNextPrediction":
+    		txt = "Next Stop Departure (Mobile)";
+			break;
+    	case "tdsFinalStopId":
+    		txt = "Last Stop Id (Mobile)";
+    		break;
+    	case "tdsFinalStopPred":
+    		txt = "Last Stop Departure (Mobile)";
     		break;
 	    default:
 	      txt = s;
