@@ -16,7 +16,7 @@
 
 var maps = new Object();;
 var transitimeWeb="gtfsrt.dev.wmata.obaweb.org:8080";
-var obaWeb="app.dev.wmata.obaweb.org";
+var obaWeb="app.dev.wmata.obaweb.org:8080";
 var avlAttrs = new Object();
 var obaAttrs = new Object();
 var autoRefresh = false;
@@ -439,6 +439,7 @@ function lookupTitle(s) {
     		break;
     	case "nextPrediction":
     		txt = "Next Stop Arrival"
+    		break;
     	case "blockAlpha":
     		txt = "Block Alpha";
     		break;

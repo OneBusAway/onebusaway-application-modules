@@ -70,7 +70,9 @@ class VehicleStatusServiceImpl implements VehicleLocationListener,
 
   @Override
   public void handleVehicleLocationRecord(VehicleLocationRecord record) {
-	  record.setPhase(EVehiclePhase.IN_PROGRESS); // if we've received a report, assume it is in progress/in service
+	  if (record.getPhase() == null) {
+	    record.setPhase(EVehiclePhase.IN_PROGRESS); // if we've received a report, assume it is in progress/in service
+	  } 
     if (record.getTimeOfRecord() == 0)
       throw new IllegalArgumentException("you must specify a record time");
 
