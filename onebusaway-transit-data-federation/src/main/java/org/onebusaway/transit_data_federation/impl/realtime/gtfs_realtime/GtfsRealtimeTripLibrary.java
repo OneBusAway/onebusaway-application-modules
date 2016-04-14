@@ -315,6 +315,7 @@ class GtfsRealtimeTripLibrary {
   private long getTripStartTime(String tripId) {
     TripEntry tripEntry = _entitySource.getTrip(tripId);
     long min = Long.MAX_VALUE;
+    if (tripEntry == null) return min;
     for (StopTimeEntry stopTime : tripEntry.getStopTimes()) {
       if (stopTime.getArrivalTime() < min)
         min = stopTime.getArrivalTime();
