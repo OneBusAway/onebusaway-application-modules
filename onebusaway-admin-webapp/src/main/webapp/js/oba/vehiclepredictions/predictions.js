@@ -20,9 +20,12 @@ var obaWeb="app.dev.wmata.obaweb.org:8080";
 var avlAttrs = new Object();
 var obaAttrs = new Object();
 var autoRefresh = false;
+var obaAge = null;
+var avlAge = null;
 
 jQuery(function() {
 	startup();
+	setTimeout(refreshTimers, 1000);
 });
 
 function refresh() {
@@ -33,12 +36,29 @@ function refreshAttrs() {
 	displayAttrs("#avlData", avlAttrs);
 	displayAttrs("#obaData", obaAttrs);
 }
+
+function refreshTimers() {
+	updateAvlAge();
+	updateObaAge();
+	setTimeout(refreshTimers, 1000);
+}
+
 function startup() {
 	
 	// stuff to do on load
 	jQuery("#display_vehicle").click(onSearchClick);
 	jQuery("#autorefresh").click(onRefreshClick);
+	jQuery("#advanced").click(onAdvancedClick);
 	jQuery("#clear_map").click(onClearMapClick);
+	jQuery("#transitimeWeb").val(transitimeWeb);
+	jQuery("#obaWeb").val(obaWeb);
+	
+	jQuery('html').bind('keypress', function(e){
+		if (e.keyCode == 13) {
+			onSearchClick();
+			return false;
+		}
+	})
 }
 
 function onClearMapClick() {
@@ -105,6 +125,16 @@ function onRefreshClick() {
 	}
 }
 
+function onAdvancedClick() {
+	if (jQuery("#advanced").is(":checked")) {
+		jQuery("#transitimeWeb").show();
+		jQuery("#obaWeb").show();
+	} else {
+		jQuery("#transitimeWeb").hide();
+		jQuery("#obaWeb").hide();
+	}
+}
+
 function onSearchClick() {
 	jQuery("#maps").show();
 	doSearch();
@@ -117,6 +147,9 @@ function doSearch() {
 	setTimeout(refreshAttrs, 3000); // this is a hack for async calls below
 	setTimeout(refreshAttrs, 5000);
 
+	transitimeWeb = jQuery("#transitimeWeb").val();
+	obaWeb = jQuery("#obaWeb").val();
+	
 	var vehicleId = jQuery("#vehicleId").val();
 	var agencyId="1";
 	var now = new Date();
@@ -178,15 +211,31 @@ function queryOBAApiValues(attrs, agencyId, vehicleId) {
 				var now = new Date(response.currentTime);	
 				var e = response.data.entry;
 				var s = e.status;
-				attrs["schedDev"] = (s.scheduleDeviation/60) + " min"
-				  + (s.scheduleDeviation < 0? " (early)":" (late)" );
+				attrs["schedDev"] = formatScheduleDeviation(s.scheduleDeviation);
 				attrs["tdsNextStopId"] = s.nextStop.split("_")[1];
 				attrs["tdsLastUpdate"] = new Date(s.lastUpdateTime);
-//				attrs["tdsNextStopOffset"] = s.nextStopTimeOffset;
+				setObaAge(s.lastUpdateTime);
 				attrs["tdsNextPrediction"] = new Date(now.getTime() + (s.nextStopTimeOffset * 1000));
 			}
 		}
 	});	
+}
+
+function formatScheduleDeviation(s) {
+	var r = s;
+	if (s < 120 && s > -120) {
+		r = s + " s";
+	} else {
+		r = Math.round(s/60.0*10)/10 + " min"
+	}
+	if (s == 0) {
+		r = r + " (ontime)";
+	} else if (s > 0) {
+		r = r + " (late)";
+	} else {
+		r = r + " (early)";
+	}
+	return r;
 }
 
 function queryOBAFinalStop(attrs, agencyId, vehicleId) {
@@ -394,7 +443,7 @@ function parseAvlData(jsonData) {
 		
     	// parse date string -> number
     	avl.timestamp = Date.parse(avl.time.replace(/-/g, '/').slice(0,-2))
-//  	    attrs['timestamp'] = avl.timestamp;
+    	setAvlAge(avl.timestamp);
     	attrs['pretty_timestamp'] = new Date(avl.timestamp);
 		// we only want the most recent
 		latLng = L.latLng(avl.lat, avl.lon);
@@ -415,6 +464,25 @@ function displayAttrs(divName, attrs) {
 	
 }
 
+function setObaAge(d) {
+	obaAge = new Date(d).getTime();
+	updateObaAge();
+}
+
+function setAvlAge(d) {
+	avlAge = new Date(d).getTime();
+	updateAvlAge();
+}
+function updateObaAge() {
+	var time = Math.round((new Date().getTime() - obaAge)/1000);
+	jQuery("#obaAge").html("<b>Age</b>: " + time + " s");
+ 
+}
+
+function updateAvlAge() {
+	var time = Math.round((new Date().getTime() - avlAge)/1000);
+	jQuery("#avlAge").html("<b>Age</b>: " + time + " s");
+}
 
 function lookupTitle(s) {
 	var txt;

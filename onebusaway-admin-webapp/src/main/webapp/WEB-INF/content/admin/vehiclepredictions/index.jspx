@@ -57,12 +57,14 @@
 <body>
   <div id="contentDiv2" style="width:800px; height:800px">
 	  <div id="vehicleIdDiv">
-		  <label>Vehicle Id</label>
-		  <label class="required">*</label>
-		  <input type="text" id="vehicleId" />
+		  <label>Vehicle</label>&amp;nbsp;
+		  <input type="text" id="vehicleId" size="4"/>&amp;nbsp;
 		  <input type="button" id="display_vehicle" value="search" />&amp;nbsp;
 		  <input type="button" id="clear_map" value="clear map" />&amp;nbsp;
-		  <label>Auto Refresh</label><input type="checkbox" id="autorefresh" value="Auto Refresh" />
+		  <input type="text" id="transitimeWeb" size="32" style="display:none"/>
+		  <input type="text" id="obaWeb" size="32" style="display:none"/>
+		  <label>Auto Refresh</label><input type="checkbox" id="autorefresh" value="Auto Refresh" />&amp;nbsp;
+		  <label>Advanced</label><input type="checkbox" id="advanced" value="Advanced" />
 		  
 	  </div>
 
@@ -71,6 +73,9 @@
 	    <h2>AVL Raw Position</h2>
 	  	<div id="avlMap" style="width:300px; height:300px">
 	  	<h3>No Data</h3>
+	  	</div>
+	  	<div id="avlAge">
+	  	<!-- //prevent jspx minimization -->
 	  	</div>
 	  	<div id="avlData">
 	  	<!-- //prevent jspx minimization -->
@@ -81,6 +86,9 @@
 	  	<h2>OBA Position</h2>
 	  	<div id="obaMap" style="width:300px; height:300px">
 	  	<h3>No Data</h3>
+	  	</div>
+	  	<div id="obaAge">
+	  	<!-- //prevent jspx minimization -->
 	  	</div>
 	  	<div id="obaData">
 	  	<!-- //prevent jspx minimization -->
