@@ -20,7 +20,7 @@ import java.util.List;
 
 public class StopBean implements Serializable {
 
-  private static final long serialVersionUID = 3L;
+  private static final long serialVersionUID = 2L;
 
   private String id;
 
@@ -39,7 +39,7 @@ public class StopBean implements Serializable {
   private List<RouteBean> routes;
   
   private EAccessibility wheelchairBoarding;
-  
+
   public String getId() {
     return id;
   }

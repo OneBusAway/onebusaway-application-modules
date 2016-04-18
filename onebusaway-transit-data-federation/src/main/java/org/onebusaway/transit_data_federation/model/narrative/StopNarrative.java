@@ -43,7 +43,7 @@ public final class StopNarrative implements Serializable {
   private final int locationType;
 
   private final String direction;
-  
+
   public static Builder builder() {
     return new Builder();
   }
@@ -94,7 +94,7 @@ public final class StopNarrative implements Serializable {
     private int locationType;
 
     private String direction;
-    
+
     public StopNarrative create() {
       return new StopNarrative(this);
     }

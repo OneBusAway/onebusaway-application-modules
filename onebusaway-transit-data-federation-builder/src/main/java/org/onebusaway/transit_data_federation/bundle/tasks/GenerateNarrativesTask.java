@@ -250,7 +250,7 @@ public class GenerateNarrativesTask implements Runnable {
       String direction = computeStopDirection(provider, shapePointCache, stop,
           stopEntry);
       narrative.setDirection(deduplicate(direction));
-      
+
       provider.setNarrativeForStop(stopEntry.getId(), narrative.create());
     }
   }
@@ -556,7 +556,7 @@ public class GenerateNarrativesTask implements Runnable {
         return "?";
     }
   }
-  
+
   private String trim(String value) {
     if (value == null)
       return value;
