@@ -251,8 +251,6 @@ public class GenerateNarrativesTask implements Runnable {
           stopEntry);
       narrative.setDirection(deduplicate(direction));
       
-      narrative.setIsNonRevenue(!findRevenueService(stop));
-
       provider.setNarrativeForStop(stopEntry.getId(), narrative.create());
     }
   }
@@ -557,17 +555,6 @@ public class GenerateNarrativesTask implements Runnable {
       default:
         return "?";
     }
-  }
-
-  private boolean findRevenueService(Stop stop) {
-      List<StopTime> stopTimesForStop = _gtfsDao.getStopTimesForStop(stop);
-      for (StopTime st: stopTimesForStop) {
-          if (st.getPickupType() == 0 || st.getDropOffType() == 0) {
-              return true;
-          }
-      }
-      
-      return false;
   }
   
   private String trim(String value) {

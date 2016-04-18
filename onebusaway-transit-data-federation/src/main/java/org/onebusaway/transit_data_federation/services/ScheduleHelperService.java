@@ -54,5 +54,8 @@ public interface ScheduleHelperService {
 	 * @return a list of GTFS short names that may qualify.
 	 */
 	List<String> getSearchSuggestions(String agencyId, String input);
+        
+	Boolean stopHasRevenueServiceOnRoute(String agencyId, String stopId,
+		String routeId, String directionId);
 
 }

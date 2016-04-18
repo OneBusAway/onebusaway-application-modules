@@ -560,5 +560,10 @@ public class TransitDataServiceImpl implements TransitDataService {
 		return result;
   }
 
+  @Override
+  public Boolean stopHasRevenueServiceOnRoute(String agencyId, String stopId, String routeId, String directionId) {
+      return _transitDataService.stopHasRevenueServiceOnRoute(agencyId, stopId, routeId, directionId);
+  }
+
   
 }

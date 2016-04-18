@@ -615,6 +615,10 @@ public class TransitDataServiceTemplateImpl implements TransitDataServiceTemplat
 	  return _scheduleHelperService.getSearchSuggestions(agencyId, input);
   }
   
+  public Boolean stopHasRevenueServiceOnRoute(String agencyId, String stopId, String routeId, String directionId) {
+      return _scheduleHelperService.stopHasRevenueServiceOnRoute(agencyId, stopId, routeId, directionId);
+  }
+  
   //@Override
   public String getActiveBundleId() {
     // TODO Auto-generated method stub

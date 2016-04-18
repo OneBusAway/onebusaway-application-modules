@@ -48,6 +48,7 @@ import org.onebusaway.transit_data.model.StopGroupBean;
 import org.onebusaway.transit_data.model.StopGroupingBean;
 import org.onebusaway.transit_data.model.StopsForRouteBean;
 import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
+import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 
 import uk.org.siri.siri.MonitoredCallStructure;
 import uk.org.siri.siri.MonitoredStopVisitStructure;
@@ -141,7 +142,8 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
           stopsOnRoute = new ArrayList<StopOnRoute>();
 
           for (String stopId : stopGroupBean.getStopIds()) {
-            if (!stopIdToStopBeanMap.get(stopId).getIsNonRevenue()) {
+            if (_transitDataService.stopHasRevenueServiceOnRoute((routeBean.getAgency()!=null?routeBean.getAgency().getId():null),
+                    stopId, routeBean.getId(), stopGroupBean.getId())) {
               stopsOnRoute.add(new StopOnRoute(stopIdToStopBeanMap.get(stopId),
                   stopIdToDistanceAwayStringMap.get(stopId), stopIdToRealtimeDataMap.get(stopId), stopIdToVehicleIdMap.get(stopId)));
             }

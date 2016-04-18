@@ -524,5 +524,9 @@ public interface TransitDataService extends FederatedService {
    */
   @FederatedByAgencyIdMethod
   public List<String> getSearchSuggestions(String agencyId, String input);
+  
+  @FederatedByAgencyIdMethod
+  public Boolean stopHasRevenueServiceOnRoute(String agencyId, String stopId,
+                String routeId, String directionId);
 
 }

@@ -30,7 +30,7 @@ import org.onebusaway.transit_data_federation.services.narrative.NarrativeServic
  */
 public final class StopNarrative implements Serializable {
 
-  private static final long serialVersionUID = 3L;
+  private static final long serialVersionUID = 2L;
 
   private final String code;
 
@@ -44,8 +44,6 @@ public final class StopNarrative implements Serializable {
 
   private final String direction;
   
-  private final boolean isNonRevenue;
-
   public static Builder builder() {
     return new Builder();
   }
@@ -57,7 +55,6 @@ public final class StopNarrative implements Serializable {
     this.url = builder.url;
     this.locationType = builder.locationType;
     this.direction = builder.direction;
-    this.isNonRevenue = builder.isNonRevenue;
   }
 
   public String getCode() {
@@ -83,10 +80,6 @@ public final class StopNarrative implements Serializable {
   public String getDirection() {
     return direction;
   }
-  
-  public boolean getIsNonRevenue() {
-    return isNonRevenue; 
-  }
 
   public static class Builder {
 
@@ -102,8 +95,6 @@ public final class StopNarrative implements Serializable {
 
     private String direction;
     
-    private boolean isNonRevenue;
-
     public StopNarrative create() {
       return new StopNarrative(this);
     }
@@ -130,10 +121,6 @@ public final class StopNarrative implements Serializable {
 
     public void setDirection(String direction) {
       this.direction = direction;
-    }
-    
-    public void setIsNonRevenue(boolean isNonRevenue) {
-      this.isNonRevenue = isNonRevenue;
     }
   }
 
