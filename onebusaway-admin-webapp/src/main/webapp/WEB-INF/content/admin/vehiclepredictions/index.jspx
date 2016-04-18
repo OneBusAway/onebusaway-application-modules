@@ -20,10 +20,8 @@
 <jsp:directive.page contentType="text/html" />
 <head>
 	<title>Vehicle Predictions</title>
-	<!-- 
- 	<s:url var="url" value="/css/prediction.css"/> 
+ 	<s:url var="url" value="/css/vehicleprediction.css"/> 
  	<link rel="stylesheet" type="text/css" href="${url}" />
- 	 --> 
 	<s:url var="url" value="/js/lib/jquery.js">
 	</s:url>
 	<script type="text/javascript" src="${url}">
@@ -69,7 +67,7 @@
 	  </div>
 
   <div id="maps" style="height:600px; display:none">
-    <div id="avlDiv" style="border=1; width:300px; height:320px; float:left">
+    <div id="avlDiv" style="border=1; width:390px; height:320px; float:left">
 	    <h2>AVL Raw Position</h2>
 	  	<div id="avlMap" style="width:300px; height:300px">
 	  	<h3>No Data</h3>
@@ -80,9 +78,86 @@
 	  	<div id="avlData">
 	  	<!-- //prevent jspx minimization -->
 	  	</div>
+	  	<div id="avlTable" class="table">
+	  		<div class="rowGroup">
+	  			<div class="row">
+		  			<div class="avl_label" id="avl_timestamp_label" >Timestamp</div>
+		  			<div class="avl_value" id="avl_timestamp">loading...</div>
+	  			</div>
+	  		</div>
+	  		<div class="rowGroup">
+	  			<div class="row">
+		  			<div class="avl_label" id="avl_latlon_label" >Raw Lat/Lon</div>
+		  			<div class="avl_value" id="avl_latlon">loading...</div>
+	  			</div>
+	  		</div>
+	  		<div class="rowGroup">
+	  			<div class="row">
+		  			<div class="avl_label" id="avl_trip_label" >Trip</div>
+		  			<div class="avl_value" id="avl_trip">loading...</div>
+	  			</div>
+	  		</div>
+	  		<div class="rowGroup">
+	  			<div class="row">
+		  			<div class="avl_label" id="avl_route_label" >Route</div>
+		  			<div class="avl_value" id="avl_route">loading...</div>
+	  			</div>
+	  		</div>
+	  		<div class="rowGroup">
+	  			<div class="row">
+		  			<div class="avl_label" id="avl_block_label" >Block</div>
+		  			<div class="avl_value" id="avl_block">loading...</div>
+	  			</div>
+	  		</div>
+	  		<div class="rowGroup">
+	  			<div class="row">
+		  			<div class="avl_label" id="avl_schdev_label" >Schedule Deviation</div>
+		  			<div class="avl_value" id="avl_schdev">loading...</div>
+	  			</div>
+	  		</div>
+	  		<div class="rowGroup">
+	  			<div class="row">
+		  			<div class="avl_label" id="avl_nextstopid_label" >Next Stop Id</div>
+		  			<div class="avl_value" id="avl_nextstopid">loading...</div>
+	  			</div>
+	  		</div>
+	  		<div class="rowGroup">
+	  			<div class="row">
+		  			<div class="avl_label" id="avl_nextstoppred_label" >Next Stop Prediction</div>
+		  			<div class="avl_value" id="avl_nextstoppred">loading...</div>
+	  			</div>
+	  		</div>
+	  		<div class="rowGroup">
+	  			<div class="row">
+		  			<div class="avl_label" id="avl_finalstopid_label" >Final Stop Id</div>
+		  			<div class="avl_value" id="avl_finalstopid">loading...</div>
+	  			</div>
+	  		</div>
+	  		<div class="rowGroup">
+	  			<div class="row">
+		  			<div class="avl_label" id="avl_finalstoppred_label" >Final Stop Prediction</div>
+		  			<div class="avl_value" id="avl_finalstoppred">loading...</div>
+	  			</div>
+	  		</div>
+	  	</div>
   	</div>
-
-    <div id="obaDiv" style="border=1; width:300px; height:320px; float:right">
+<!--   	
+	<div id="deltaDiv" style="border=1; width:10px; height:320px; float:center">
+		<div id="deltaTable" class="table">
+	  		<div class="rowGroup">
+	  			<div class="row">
+		  			<div id="delta_age"></div>
+	  			</div>
+	  		</div>
+	  		<div class="rowGroup">
+	  			<div class="row">
+		  			<div id="delta_latlon"></div>
+	  			</div>
+	  		</div>
+  		</div>
+	</div>
+	 -->
+    <div id="obaDiv" style="border=1; width:390px; height:320px; float:right">
 	  	<h2>OBA Position</h2>
 	  	<div id="obaMap" style="width:300px; height:300px">
 	  	<h3>No Data</h3>
@@ -92,6 +167,80 @@
 	  	</div>
 	  	<div id="obaData">
 	  	<!-- //prevent jspx minimization -->
+	  	</div>
+	  	<div id="obaTable">
+	  		<div class="rowGroup">
+	  			<div class="row">
+		  			<div class="oba_label" id="oba_timestamp_label" >Timestamp</div>
+		  			<div class="oba_value" id="oba_timestamp">loading...</div>
+	  			</div>
+	  		</div>
+	  		<div class="rowGroup">
+	  			<div class="row">
+		  			<div class="oba_label" id="oba_latlon_label" >Raw Lat/Lon</div>
+		  			<div class="oba_value" id="oba_latlon">loading...</div>
+	  			</div>
+	  		</div>
+	  		<div class="rowGroup">
+	  			<div class="row">
+		  			<div class="oba_label" id="oba_trip_label" >Trip</div>
+		  			<div class="oba_value" id="oba_trip">loading...</div>
+	  			</div>
+	  		</div>
+	  		<div class="rowGroup">
+	  			<div class="row">
+		  			<div class="oba_label" id="oba_route_label" >Route</div>
+		  			<div class="oba_value" id="oba_route">loading...</div>
+	  			</div>
+	  		</div>
+	  		<div class="rowGroup">
+	  			<div class="row">
+		  			<div class="oba_label" id="oba_block_label" >Block</div>
+		  			<div class="oba_value" id="oba_block">loading...</div>
+	  			</div>
+	  		</div>
+	  		<div class="rowGroup">
+	  			<div class="row">
+		  			<div class="oba_label" id="oba_schdev_label" >Schedule Deviation</div>
+		  			<div class="oba_value" id="oba_schdev">loading...</div>
+	  			</div>
+	  		</div>
+	  		<div class="rowGroup">
+	  			<div class="row">
+		  			<div class="oba_label" id="oba_nextstopid_label" >Next Stop Id</div>
+		  			<div class="oba_value">
+			  			<label id="oba_tdsnextstopid">loading...</label>&amp;nbsp;(tds)&amp;nbsp;/&amp;nbsp;
+			  			<label id="oba_sirinextstopid">loading...</label>&amp;nbsp;(siri)
+		  			</div>
+	  			</div>
+	  		</div>
+	  		<div class="rowGroup">
+	  			<div class="row">
+		  			<div class="oba_label" id="oba_nextstoppred_label" >Next Stop Prediction</div>
+		  			<div class="oba_value">
+			  			<label id="oba_tdsnextstoppred">loading...</label>&amp;nbsp;(tds)&amp;nbsp;/&amp;nbsp;
+			  			<label id="oba_sirinextstoppred">loading...</label>&amp;nbsp;(siri)
+		  			</div>
+	  			</div>
+	  		</div>
+	  		<div class="rowGroup">
+	  			<div class="row">
+		  			<div class="oba_label" id="oba_finalstopid_label" >Final Stop Id</div>
+		  			<div class="oba_value" id="oba_finalstopid">loading...</div>
+	  			</div>
+	  		</div>
+	  		<div class="rowGroup">
+	  			<div class="row">
+		  			<div class="oba_label" id="oba_finalstoppred_label" >Final Stop Prediction</div>
+		  			<div class="oba_value" id="oba_finalstoppred">loading...</div>
+	  			</div>
+	  		</div>
+	  		<div class="rowGroup">
+	  			<div class="row">
+		  			<div class="oba_label" id="oba_tdsnexttripid_label" >Next Trip</div>
+		  			<div class="oba_value" id="oba_tdsnexttripid">loading...</div>
+	  			</div>
+	  		</div>
 	  	</div>
   	</div>
   	<div id="reset" sytle="clear:both">

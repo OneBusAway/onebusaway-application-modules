@@ -15,8 +15,8 @@
  */
 
 var maps = new Object();;
-var transitimeWeb="gtfsrt.dev.wmata.obaweb.org:8080";
-var obaWeb="app.dev.wmata.obaweb.org:8080";
+var transitimeWeb="gtfsrt.prod.wmata.obaweb.org:8080";
+var obaWeb="app.prod.wmata.obaweb.org:8080";
 var avlAttrs = new Object();
 var obaAttrs = new Object();
 var autoRefresh = false;
@@ -33,8 +33,6 @@ function refresh() {
 }
 
 function refreshAttrs() {
-	displayAttrs("#avlData", avlAttrs);
-	displayAttrs("#obaData", obaAttrs);
 }
 
 function refreshTimers() {
@@ -62,7 +60,6 @@ function startup() {
 }
 
 function onClearMapClick() {
-	console.log("clear!");
 	jQuery.each(maps, function(index,value) {
 		console.log("clearing layers for map " + index + ":" + value);
 		if (value != null) {
@@ -144,9 +141,6 @@ function doSearch() {
 	if (autoRefresh) {
 		setTimeout(refresh, 15000);
 	}
-	setTimeout(refreshAttrs, 3000); // this is a hack for async calls below
-	setTimeout(refreshAttrs, 5000);
-
 	transitimeWeb = jQuery("#transitimeWeb").val();
 	obaWeb = jQuery("#obaWeb").val();
 	
@@ -169,8 +163,14 @@ function doSearch() {
 			loadAvlMap(attrs['latLng']);
 			queryPredictionValues(attrs, vehicleId);
 			queryFinalPrediction(attrs)
-			displayAttrs("#avlData", attrs);
 			avlAttrs = attrs;
+		},
+		fail: function() {
+			jQuery("#avl_route").html("...");
+			jQuery("#avl.schedDev").html("...");
+			jQuery("#avl_block").html("...");
+			jQuery("#avl_trip").html("...");
+			jQuery("#avl_nextstopid").html("...");
 		}
 	});
 	var obaUrl = "http://" + obaWeb + "/onebusaway-api-webapp/siri/vehicle-monitoring?key=OBAKEY&OperatorRef="
@@ -186,8 +186,14 @@ function doSearch() {
 			loadObaMap(attrs['latLng']);
 			queryOBAApiValues(attrs, agencyId, vehicleId);
 			queryOBAFinalStop(attrs, agencyId, vehicleId);
-			displayAttrs("#obaData", attrs);
 			obaAttrs = attrs;
+		},
+		fail: function() {
+			jQuery("#oba_schdev").html("...");
+			jQuery("#oba_tdsnextstopid").html("...");
+			jQuery("#oba_tdsnextstoppred").html("...");
+			jQuery("#oba_finalstopid").html("...");
+			jQuery("#oba_tdsnexttripid").html("...");
 		}
 	});
 
@@ -212,11 +218,23 @@ function queryOBAApiValues(attrs, agencyId, vehicleId) {
 				var e = response.data.entry;
 				var s = e.status;
 				attrs["schedDev"] = formatScheduleDeviation(s.scheduleDeviation);
+				jQuery("#oba_schdev").html(formatScheduleDeviation(s.scheduleDeviation))
 				attrs["tdsNextStopId"] = s.nextStop.split("_")[1];
+				jQuery("#oba_tdsnextstopid").html(s.nextStop.split("_")[1].toString());
 				attrs["tdsLastUpdate"] = new Date(s.lastUpdateTime);
 				setObaAge(s.lastUpdateTime);
 				attrs["tdsNextPrediction"] = new Date(now.getTime() + (s.nextStopTimeOffset * 1000));
+				jQuery("#oba_tdsnextstoppred").html(formatTime(new Date(now.getTime() + (s.nextStopTimeOffset * 1000))));
+			} else {
+				jQuery("#oba_schdev").html("...");
+				jQuery("#oba_tdsnextstopid").html("...");
+				jQuery("#oba_tdsnextstoppred").html("...");
 			}
+		},
+		fail: function() {
+			jQuery("#oba_schdev").html("...");
+			jQuery("#oba_tdsnextstopid").html("...");
+			jQuery("#oba_tdsnextstoppred").html("...");
 		}
 	});	
 }
@@ -240,6 +258,13 @@ function formatScheduleDeviation(s) {
 
 function queryOBAFinalStop(attrs, agencyId, vehicleId) {
 	var tripId = attrs["tripId"];
+	if (tripId == undefined) {
+		console.log("missing trip id");
+		jQuery("#oba_finalstopid").html("...");
+		jQuery("#oba_finalstoppred").html("...");
+		jQuery("#oba_tdsnexttripid").html("...");
+		return
+	}
 	var scheduleUrl = "http://" + obaWeb
 		+ "/onebusaway-api-webapp/api/where/trip-details/"
 		+ agencyId + "_" + tripId + ".json?key=OBAKEY";
@@ -251,9 +276,23 @@ function queryOBAFinalStop(attrs, agencyId, vehicleId) {
 		dataType: "jsonp",
 		async: false,
 		success: function(response) {
+			var schedule = response.data.entry.schedule;
 			var s = response.data.entry.schedule.stopTimes;
 			attrs["tdsFinalStopId"] = s[s.length-1].stopId.split("_")[1];
+			jQuery("#oba_finalstopid").html(s[s.length-1].stopId.split("_")[1]);
+			
+			if (schedule != undefined && schedule.nextTripId != undefined) {
+				jQuery("#oba_tdsnexttripid").html(schedule.nextTripId.split("_")[1]);
+			} else {
+				jQuery("#oba_tdsnexttripid").html("end of block");
+			}
+
+			
 			queryOBAFinalPrediction(attrs, agencyId, attrs["tdsFinalStopId"], vehicleId)
+		},
+		fail: function() {
+			jQuery("#oba_finalstopid").html("...");
+			jQuery("#oba_tdsnexttripid").html("...");
 		}
 	});	
 }
@@ -279,6 +318,10 @@ function queryOBAFinalPrediction(attrs, agencyId, stopId, vehicleId) {
 		success: function(response) {
 			var pred = response.data.entry.predictedArrivalTime;
 			attrs["tdsFinalStopPred"] = new Date(pred);
+			jQuery("#oba_finalstoppred").html(formatTime(new Date(pred)));
+		},
+		fail: function() {
+			jQuery("#oba_finalstoppred").html("...");
 		}
 	});
 	
@@ -299,10 +342,23 @@ function queryPredictionValues(attrs, vehicleId) {
 				return;
 			}
 			attrs["routeId"] = v.routeId;
-			attrs["schedDev"] = v.schAdhStr;
+			jQuery("#avl_route").html(v.routeId);
+			attrs["schedev"] = v.schAdhStr;
+			jQuery("#avl_schdev").html(v.schAdhStr);
 			attrs["blockAlpha"] = v.block;
+			jQuery("#avl_block").html(v.block);
+			jQuery("#oba_block").html(v.block);
 			attrs["tripId"] = v.trip;
+			jQuery("#avl_trip").html(v.trip);
 			attrs["nextStopId"] = v.nextStopId;
+			jQuery("#avl_nextstopid").html(v.nextStopId);
+		},
+		fail: function() {
+			jQuery("#avl_route").html("...");
+			jQuery("#avl_schdev").html("...");
+			jQuery("#avl_block").html("...");
+			jQuery("#avl_trip").html("...");
+			jQuery("#avl_nextstopid").html("...");
 		}
 	});
 	
@@ -322,15 +378,27 @@ function queryPredictionValues(attrs, vehicleId) {
 						jQuery.each(dvalue.pred, function( predindex, predvalue){
 							if (predvalue.vehicle == vehicleId) {
 								attrs["nextPrediction"] = new Date(predvalue.time * 1000);
+								jQuery("#avl_nextstoppred").html(formatTime(new Date(predvalue.time * 1000)));
 								return;
 							} 
 						});
 					});
 				});
+			},
+			fail: function() {
+				jQuery("#avl_nextstoppred").html("...");
 			}
 		});
 	} else {
-		console.log("vehicleDetails did not return route/stop, returning")
+		console.log("vehicleDetails did not return route/stop, returning");
+		jQuery("#avl_route").html("...");
+		jQuery("#avl_schdev").html("...");
+		jQuery("#avl_block").html("...");
+		jQuery("#avl_trip").html("...");
+		jQuery("#avl_nextstopid").html("...");
+		jQuery("#avl_nextstoppred").html("...");
+		jQuery("#avl_finalstopid").html("...");
+		jQuery("#avl_finalstoppred").html("...");
 	}
 
 }
@@ -352,11 +420,17 @@ function queryFinalPrediction(attrs) {
 		success: function(response) {
 			var s = response.schedule;
 			attrs["finalStopId"] = s[s.length-1].stopId;
+			jQuery("#avl_finalstopid").html(s[s.length-1].stopId);
+		},
+		fail: function() {
+			jQuery("#avl_finalstopid").html("...");
 		}
 	});
 	
-	if (attrs["finalStopId"] == null)
+	if (attrs["finalStopId"] == null) {
+		jQuery("#avl_finalstoppred").html("...");
 		return;
+	}
 	
 	var routeId = attrs["routeId"];
 	var stopId = attrs["finalStopId"];
@@ -377,11 +451,15 @@ function queryFinalPrediction(attrs) {
 						var pred = preds[k];
 						if (pred.vehicleId == vehicleId) {
 							attrs["finalStopPred"] = new Date(pred.time * 1000);
+							jQuery("#avl_finalstoppred").html(formatTime(new Date(pred.time * 1000)));
 							return;
 						}
 					}
 				}
 			}
+		},
+		fail: function() {
+			jQuery("#avl_finalstoppred").html("...");
 		}
 	});
 	
@@ -400,18 +478,52 @@ function parseSiri(siri) {
 			if (mvj != undefined) {
 				latLng = L.latLng(mvj.VehicleLocation.Latitude, mvj.VehicleLocation.Longitude);
 				attrs['pretty_timestamp'] = new Date(sd.ResponseTimestamp);
+				jQuery("#oba_timestamp").html(formatTime(new Date(sd.ResponseTimestamp)));
 				attrs["latLng"] = latLng
+				jQuery("#oba_latlon").html(mvj.VehicleLocation.Latitude + ", " + mvj.VehicleLocation.Longitude)
 				attrs["routeId"] = mvj.LineRef.split("_")[1];
+				jQuery("#oba_route").html(mvj.LineRef.split("_")[1])
 				attrs["tripId"] = mvj.FramedVehicleJourneyRef.DatedVehicleJourneyRef.split("_")[1];
-				attrs["siriNextStopId"] = mvj.MonitoredCall.StopPointRef.split("_")[1];
+				jQuery("#oba_trip").html(mvj.FramedVehicleJourneyRef.DatedVehicleJourneyRef.split("_")[1])
+				// BlockRef is missing
+				//jQuery("#oba_block").html(mvj.BlockRef.split("_")[1]);
+				if (mvj.MonitoredCall.StopPointRef != undefined) {
+					attrs["siriNextStopId"] = mvj.MonitoredCall.StopPointRef.split("_")[1];
+					jQuery("#oba_sirinextstopid").html(mvj.MonitoredCall.StopPointRef.split("_")[1]);
+				} else {
+					attrs["siriNextStopId"] = undefined;
+					jQuery("#oba_sirinextstopid").html("...");
+				}
 				attrs["siriNextPrediction"] = mvj.MonitoredCall.ExpectedDepartureTime;
+				jQuery("#oba_sirinextstoppred").html(formatTime(new Date(mvj.MonitoredCall.ExpectedDepartureTime)));
 				attrs["siriMonitored"] = mvj.Monitored;
 			} else {
 				console.log("MonitoringVehicleJourney missing");
 			}
 		} else {
 			console.log("VehiceActivity missing:" + siri.Siri.ServiceDelivery.VehicleMonitoringDelivery);
+			jQuery("#oba_timestamp").html("...");
+			jQuery("#oba_latlon").html("...");
+			jQuery("#oba_route").html("...");
+			jQuery("#oba_trip").html("...");
+			jQuery("#oba_block").html("...");
+			jQuery("#oba_schdev").html("...");
+			jQuery("#oba_tdsnextstopid").html("...");
+			jQuery("#oba_tdsnextstoppred").html("...");
+			jQuery("#oba_sirinextstopid").html("...");
+			jQuery("#oba_sirinextstoppred").html("...");
 		}
+	} else {
+		jQuery("#oba_timestamp").html("...");
+		jQuery("#oba_latlon").html("...");
+		jQuery("#oba_route").html("...");
+		jQuery("#oba_trip").html("...");
+		jQuery("#oba_block").html("...");
+		jQuery("#oba_schdev").html("...");
+		jQuery("#oba_tdsnextstopid").html("...");
+		jQuery("#oba_tdsnextstoppred").html("...");
+		jQuery("#oba_sirinextstopid").html("...");
+		jQuery("#oba_sirinextstoppred").html("...");
 	}
 	return attrs;
 }
@@ -444,25 +556,15 @@ function parseAvlData(jsonData) {
     	// parse date string -> number
     	avl.timestamp = Date.parse(avl.time.replace(/-/g, '/').slice(0,-2))
     	setAvlAge(avl.timestamp);
-    	attrs['pretty_timestamp'] = new Date(avl.timestamp);
+    	jQuery("#avl_timestamp").html(formatTime(new Date(avl.timestamp)));
 		// we only want the most recent
 		latLng = L.latLng(avl.lat, avl.lon);
     	attrs['latLng'] = latLng;
+    	jQuery("#avl_latlon").html(avl.lat + ", " + avl.lon);
     }
     return attrs;
 }
 
-
-
-function displayAttrs(divName, attrs) {
-	var html = "";
-	var div = jQuery(divName);
-	jQuery.each(attrs, function( index, value ) {
-		html = html + "<p>" + lookupTitle(index) + ":&nbsp" + value + "</p>";
-	});
-	div.html(html);
-	
-}
 
 function setObaAge(d) {
 	obaAge = new Date(d).getTime();
@@ -476,6 +578,7 @@ function setAvlAge(d) {
 function updateObaAge() {
 	var time = Math.round((new Date().getTime() - obaAge)/1000);
 	jQuery("#obaAge").html("<b>Age</b>: " + time + " s");
+	jQuery("#delta_age").html(new Date(jQuery("#avl_timestamp").val()).getTime() - new Date(obaAttrs["tdsLastUpdate"]).getTime());
  
 }
 
@@ -484,68 +587,20 @@ function updateAvlAge() {
 	jQuery("#avlAge").html("<b>Age</b>: " + time + " s");
 }
 
-function lookupTitle(s) {
-	var txt;
-    switch (s) {
-    	case "timestamp":
-    		txt = "Raw Timestamp";
-    		break;
-    	case "pretty_timestamp":
-  		  txt = "Timestamp";
-  		  break;
-    	case "latLng":
-    		txt = "Lat/Lon";
-    		break;
-    	case "routeId":
-    		txt = "Route Id";
-    		break;
-    	case "tripId":
-    		txt = "Trip Id";
-    		break;
-    	case "schedDev":
-    		txt = "Schedule Deviation";
-    		break;
-    	case "nextPrediction":
-    		txt = "Next Stop Arrival"
-    		break;
-    	case "blockAlpha":
-    		txt = "Block Alpha";
-    		break;
-    	case "nextStopId":
-    		txt = "Next Stop Id";
-    		break;
-    	case "finalStopId":
-    		txt = "Last Stop Id";
-    		break;
-    	case "finalStopPred":
-    		txt = "Last Stop Arrival";
-    		break;
-    	case "siriNextStopId":
-    		txt = "Next Stop Id (SIRI)";
-    		break;
-    	case "siriNextPrediction":
-    		txt = "Next Stop Departure (SIRI)";
-			break;
-    	case "siriMonitored":
-    		txt = "Realtime (Not Schedule Data)";
-    		break;
-    	case "tdsNextStopId":
-    		txt = "Next Stop Id (Mobile)";
-    		break;
-    	case "tdsLastUpdate":
-    		txt = "Last Update";
-    		break;
-    	case "tdsNextPrediction":
-    		txt = "Next Stop Departure (Mobile)";
-			break;
-    	case "tdsFinalStopId":
-    		txt = "Last Stop Id (Mobile)";
-    		break;
-    	case "tdsFinalStopPred":
-    		txt = "Last Stop Departure (Mobile)";
-    		break;
-	    default:
-	      txt = s;
-  }
-  return "<b>" + txt + "</b> ";
-}
+function getDistanceFromLatLonInKm(lat1,lon1,lat2,lon2) {
+	  var R = 6371000; // Radius of the earth in m
+	  var dLat = deg2rad(lat2-lat1);  // deg2rad below
+	  var dLon = deg2rad(lon2-lon1); 
+	  var a = 
+	    Math.sin(dLat/2) * Math.sin(dLat/2) +
+	    Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * 
+	    Math.sin(dLon/2) * Math.sin(dLon/2)
+	    ; 
+	  var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+	  var d = R * c; // Distance in km
+	  return d;
+	}
+
+	function deg2rad(deg) {
+	  return deg * (Math.PI/180)
+	}
