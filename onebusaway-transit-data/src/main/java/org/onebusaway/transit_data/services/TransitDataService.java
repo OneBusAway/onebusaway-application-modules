@@ -528,5 +528,8 @@ public interface TransitDataService extends FederatedService {
   @FederatedByAgencyIdMethod
   public Boolean stopHasRevenueServiceOnRoute(String agencyId, String stopId,
                 String routeId, String directionId);
+  
+  @FederatedByAgencyIdMethod
+  public Boolean stopHasRevenueService(String agencyId, String stopId);
 
 }

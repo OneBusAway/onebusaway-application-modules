@@ -57,5 +57,7 @@ public interface ScheduleHelperService {
         
 	Boolean stopHasRevenueServiceOnRoute(String agencyId, String stopId,
 		String routeId, String directionId);
+        
+	Boolean stopHasRevenueService(String agencyId, String stopId);
 
 }

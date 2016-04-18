@@ -98,4 +98,26 @@ public class TrivialSchedulerHelperService implements ScheduleHelperService {
             
             return false;
         }
+
+    @Override
+    public Boolean stopHasRevenueService(String agencyId, String stopId) {
+            AgencyAndId stop = AgencyAndIdLibrary.convertFromString(stopId);
+            StopEntry stopEntry = _graph.getStopEntryForId(stop);
+            
+            List<BlockStopTimeIndex> stopTimeIndicesForStop = _blockIndexService.getStopTimeIndicesForStop(stopEntry);
+            
+            for (BlockStopTimeIndex bsti: stopTimeIndicesForStop) {
+                List<BlockStopTimeEntry> stopTimes = bsti.getStopTimes();
+                for (BlockStopTimeEntry bste: stopTimes) {
+                    StopTimeEntry stopTime = bste.getStopTime();
+                    
+                    if (stopTime.getDropOffType() == 0 ||
+                            stopTime.getPickupType() == 0) {
+                        return true;
+                    }
+                }
+            }
+            
+            return false;
+    }
 }
