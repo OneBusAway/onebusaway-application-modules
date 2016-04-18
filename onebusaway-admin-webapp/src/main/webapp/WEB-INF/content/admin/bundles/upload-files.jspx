@@ -21,10 +21,109 @@
 	xmlns:c="http://java.sun.com/jsp/jstl/core" xmlns:s="/struts-tags">
 <jsp:directive.page contentType="text/html" />
 <!-- <s:set name="theme" value="'xhtml'" scope="page" /> -->
+		<p>Upload Files to Dataset</p>
+		<!--
 		<div class="tabHeader">
 			<label class="headerLabel">Upload Files</label>
 		</div>
+		-->
 		<div id="uploadFiles">
+			<div id="selectedDataset">
+				You are adding files to
+			</div> 
+			<div id="AgencyAndActionDiv">
+		<!-- -->
+				<div id="AgencyTableDiv">
+				<!-- -->
+					<table id="agency_data">
+						<tr id="AgencyTableHeader">
+							<th>Agency</th>
+							<th>Type</th>
+							<th>Protocol</th>
+							<th>File or URL</th>
+							<th></th>
+						</tr>
+						<tr class="agencySelected">
+							<td class="agencyIdData"><input type="text"  class="agencyId" id="agencyId"/></td>
+							<td>
+								<select class="agencyDataSourceType" id="agencyDataSourceType">
+									<option value="gtfs">gtfs</option>
+									<option value="aux">aux</option>
+								</select>
+							</td>
+							<td>
+								<select class="agencyProtocol" id="agencyProtocol">
+									<option value="http">http</option>
+									<option value="ftp">ftp</option>
+									<option value="file">file</option>
+								</select>
+							</td>
+							<td class="agencyDataSourceData">
+								<input type="text" class="agencyDataSource" id="agencyDataSource"/>
+							</td>
+							<td class="removeAgency">remove</td>
+						</tr>
+					</table>
+					<span id="addAnotherAgency">Add another</span>
+					<!-- -->
+				</div>
+				<!-- -->
+				<div id="Action">
+					<div>
+						<div id="Notes">
+							Any notes you'd like to keep about this dataset?
+							<span id="anyNotes">Yes</span>
+						</div>
+						<div id="UploadButtons">
+							<s:url var="url" action="index.action" namespace="/admin" />
+							<a href="${url}" class="link" id="cancelUpload">Cancel</a> 
+							<input type="button" id="uploadButton" value="Upload" />
+						</div>
+						<!--
+						<div class="clear"></div>
+						-->
+					</div>
+					<div id="notesDiv">
+						<textarea rows="4" cols="60" id="bundleComment">
+						<!-- Prevent jsp minimzation if empty div -->
+						</textarea> 
+					</div>
+				</div>
+			</div>
+		</div>
+		<div id="existingFileListDiv">
+			<span class="existingFilesHeader">Existing files in this dataset:</span>
+			<!-- -->
+			<div>
+				<table id="existingFilesTable">
+					<tr>
+						<th class="agencyColumn">Agency</th>
+						<th class="typeColumn">Type</th>
+						<th class="fileOrUrl">File or URL</th>
+						<th class="whenColumn">When?</th>
+						<th class="whoColumn" >Who?</th>
+					</tr>
+				</table>
+			</div>
+			<!-- -->
+		</div>
+		<!-- Div for "Add Comments" popup -->
+		<!-- -->
+		<div id="addCommentsPopup">
+			<div id="addCommentsPopupContents">
+				<div id="addCommentsPopupHeader">
+					<p>Add your notes about this dataset.</p>
+				</div>
+				<div id="addCommentsDiv">
+			<!--
+					<textarea rows="4" columns="40" id="userCommentsForBundle"></textarea>
+			-->
+				</div>
+			</div>
+		</div>
+		<!-- -->
+		
+			<!--
 			<div>
 				<input type="button" id="uploadSelectedAgenciesButton" value="Upload Selected Agencies"/>
 				<input type="button" id="addAnotherAgencyButton" value="Add Another Agency"/>
@@ -67,5 +166,7 @@
 					<input type="button" id="upload_continue" value="Continue" class="submit_disabled" disabled="disabled"/>
 				</fieldset>
 			</div>
+			
 		</div>
+		-->
 </html>

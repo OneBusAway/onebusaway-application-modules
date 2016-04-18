@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+            http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<html xmlns:jsp="http://java.sun.com/JSP/Page"
+    xmlns:c="http://java.sun.com/jsp/jstl/core" xmlns:s="/struts-tags"
+    xmlns:oba="/oba-tags">
+<jsp:directive.page contentType="text/html" />
+
+<head>
+
+<title><s:text name="ServiceAlertEdit" /></title>
+<s:url var="url" value="/css/jquery-ui.css" />
+<link rel="stylesheet" type="text/css" href="${url}">
+	<!-- //prevent jspx minimization -->
+</link>
+
+<s:url var="url" value="/css/service-alerts.css" />
+<link rel="stylesheet" type="text/css" href="${url}">
+	<!-- //prevent jspx minimization -->
+</link>
+
+<s:url var="url" value="/js/lib/jquery.js" />
+<script type="text/javascript" src="${url}">
+<!-- //prevent jspx minimization -->
+	
+</script>
+
+<s:url var="url" value="/js/lib/jquery.ui.js" />
+<script type="text/javascript" src="${url}">
+<!-- //prevent jspx minimization -->
+	
+</script>
+
+<s:url var="url" value="/js/oba/service-alerts.js">
+	<!-- //prevent jspx minimization -->
+</s:url>
+<script type="text/javascript" src="${url}">
+<!-- //prevent jspx minimization -->
+	
+</script>
+
+</head>
+
+<body>
+<s:set name="theme" value="'simple'" scope="page" />
+<s:if test="newServiceAlert" >
+	<s:set name="serviceAlertsTitle" >Create Service Alert</s:set>
+</s:if><s:else>
+	<s:set name="serviceAlertsTitle" >Edit Service Alert</s:set>
+</s:else>
+<div id="ServiceAlerts">
+	<p><s:property value="serviceAlertsTitle" /></p>
+	<s:form action="service-alert">
+	
+		<div id="describeAlertDiv">
+			<span  id="describeAlertHeader">Step 1: Describe the alert</span>
+			<div id="describeAlertsTableDiv">
+				<table>
+					<s:textfield label="Summary Title" name="summary" value="%{summary}" theme="xhtml"/>
+					<s:textarea label="Detailed Description" name="description" value="%{description}" cols="80" rows="5" theme="xhtml"/>
+					<s:select label="Reason" name="reason" headerKey="null" 
+						headerValue="What caused this situation?" list="reasonValues" 
+						value="model.reason"
+						theme="xhtml"/>
+					<s:select label="Severity" name="severity" headerKey="null" headerValue="How severe is the situation?" list="severityValues" value="model.severity" theme="xhtml"/>
+					<s:select label="Owning Agency" name="agencyId" headerKey="null" 
+						headerValue="Which agency owns this alert?" list="agencies" 
+						value="agencyId" 
+						listKey="%{agency.id}" listValue="%{agency.name}" theme="xhtml"/>
+				</table>
+			</div>
+			<s:hidden name="alertId" value="%{model.id}"/>
+		</div>
+		<div id="alertAffectsDiv">
+			<span  id="describeAlertHeader">Step 2: Tie this alert to a specific agency, route and/or stop</span>
+			<div id="conditionListDiv">
+				<table id="conditionTable">
+				<s:set var="letterArray" value='{"A","B","C","D","E","F","G",
+					"H","I","J","K","L","M","N","O","P","Q","R","S","T","U",
+					"V","W","X","Y","Z"}' />
+				<s:iterator value="model.allAffects" status="rowStatus" >
+				<s:if test="%{agencyId!=null || routeId!=null || stopId!=null}" >
+					<tr class="affectsClause">
+					<td>
+						<div class="conditionClauseLabel">
+							<div class="conditionClauseLabelFirstLine">Condition</div>
+							<div class="conditionClauseLabelLetter">
+								<s:property value="%{#letterArray[#rowStatus.index]}" />
+							</div>
+						</div>
+					</td>
+					<td>
+						<table class="affectsClauseConditions">
+							<s:select label="Agency" cssClass="alertCondition"
+								name="allAffects[%{#rowStatus.index}].agencyId" headerKey="null" 
+								headerValue="Select agency affected" list="agencies" 
+								listKey="agency.id" listValue="agency.name" 
+								value="agencyId" theme="xhtml"/>
+							<s:textfield label="Route" cssClass="alertCondition"
+								name="allAffects[%{#rowStatus.index}].routeId" value="%{routeId}" theme="xhtml"/>
+							<s:textfield label="Stop" cssClass="alertCondition"
+								name="allAffects[%{#rowStatus.index}].stopId" value="%{stopId}" theme="xhtml"/>
+						</table>
+					</td>
+					<td class="deleteCondition">Delete Condition</td>
+					</tr>
+				</s:if>
+				</s:iterator>
+				<s:if test="model.allAffects==null">
+					<tr class="affectsClause">
+					<td>
+						<div class="conditionClauseLabel">
+							<div class="conditionClauseLabelFirstLine">Condition</div>
+							<div class="conditionClauseLabelLetter">A</div>
+						</div>
+					</td>
+					<td>
+						<table class="affectsClauseConditions">
+							<s:select label="Agency" cssClass="alertCondition"
+								name="allAffects[0].agencyId" headerKey="null" 
+								headerValue="Select agency affected" list="agencies" 
+								listKey="agency.id" listValue="agency.name" 
+								theme="xhtml"/>
+							<s:textfield label="Route" cssClass="alertCondition"
+								name="allAffects[0].routeId" theme="xhtml"/>
+							<s:textfield label="Stop" cssClass="alertCondition"
+								name="allAffects[0].stopId" theme="xhtml"/>
+						</table>
+					</td>
+					<td class="deleteCondition">Delete Condition</td>
+					</tr>
+				</s:if>
+				</table>
+				<span id="addAnotherCondition">Add another condition</span>
+			</div>
+		</div>
+		<div id="buttonsDiv">
+			<s:submit value="Cancel" name="cancel" method="cancel" />
+			<s:submit value="Save" name="submit" />
+		</div>
+	</s:form>
+</div>
+</body>
+</html>

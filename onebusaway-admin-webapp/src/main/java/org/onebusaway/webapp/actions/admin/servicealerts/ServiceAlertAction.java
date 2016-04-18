@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import org.apache.struts2.convention.annotation.Action;
 import org.apache.struts2.convention.annotation.InterceptorRef;
 import org.apache.struts2.convention.annotation.InterceptorRefs;
 import org.apache.struts2.convention.annotation.ParentPackage;
@@ -41,6 +42,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.opensymphony.xwork2.ActionSupport;
 import com.opensymphony.xwork2.ModelDriven;
+import com.opensymphony.xwork2.Preparable;
 import com.thoughtworks.xstream.XStream;
 
 @ParentPackage("onebusaway-admin-webapp-default")
@@ -50,12 +52,15 @@ import com.thoughtworks.xstream.XStream;
 })
 @Results({
     @Result(type = "redirectAction", name = "submitSuccess", params = {
-        "actionName", "service-alert", "id", "${id}", "parse", "true"}),
+        "actionName", "service-alerts", "id", "${id}", "parse", "true"}),
     @Result(type = "redirectAction", name = "deleteSuccess", params = {
         "actionName", "service-alerts!agency", "agencyId", "${agencyId}",
-        "parse", "true"})})
+        "parse", "true"}),
+    @Result(type = "redirectAction", name = "cancelResult", params = {
+        "actionName", "service-alerts", "id", "${id}", "parse", "true"})
+        })
 public class ServiceAlertAction extends ActionSupport implements
-    ModelDriven<ServiceAlertBean> {
+    ModelDriven<ServiceAlertBean>, Preparable {
 
   private static final long serialVersionUID = 1L;
   
@@ -63,12 +68,24 @@ public class ServiceAlertAction extends ActionSupport implements
 
   private TransitDataService _transitDataService;
 
-  private ServiceAlertBean _model = new ServiceAlertBean();
+  //private ServiceAlertBean _model = new ServiceAlertBean();
+  private ServiceAlertBean _model;
 
   private String _agencyId;
+  
+  private String _alertId;
 
   private String _raw;
 
+//  String summary = "";
+//  String description = "";
+//  String reason = "";
+//  String severity = "";
+//  String owningAgency = "";
+  private boolean submit;
+  private boolean cancel;
+
+  
   @Autowired
   public void setTransitDataService(TransitDataService transitDataService) {
     _transitDataService = transitDataService;
@@ -79,12 +96,24 @@ public class ServiceAlertAction extends ActionSupport implements
     return _model;
   }
 
+  public void setModel(ServiceAlertBean model) {
+    this._model = model;
+  }
+
   public void setAgencyId(String agencyId) {
     _agencyId = agencyId;
   }
 
   public String getAgencyId() {
     return _agencyId;
+  }
+
+  public String getAlertId() {
+    return _alertId;
+  }
+
+  public void setAlertId(String alertId) {
+    this._alertId = alertId;
   }
 
   public void setSummary(String summary) {
@@ -137,9 +166,44 @@ public class ServiceAlertAction extends ActionSupport implements
     return _raw;
   }
 
-  @Override
-  public String execute() {
+  public void setSubmit(String submit) {
+    this.submit = true;
+  }
+  
+  public void setCancel(String cancel) {
+    this.cancel = true;
+  }
 
+  @Override
+  public void prepare() throws Exception {
+    try {
+      if (_alertId != null && !_alertId.trim().isEmpty()) {
+        _model = _transitDataService.getServiceAlertForId(_alertId);
+        _model.setAllAffects(null);
+      } else {
+        _model = new ServiceAlertBean();
+      }
+    } catch (RuntimeException e) {
+      _log.error("Unable to retrieve Service Alerts for agency Id", e);
+      throw e;
+    }
+  }
+  
+@Override
+  public String execute() throws IOException, JSONException {
+
+    _log.info("ServiceAlerts.execute()");
+    if (submit) {
+        _log.info("Service Alert submitted");
+        submit();
+        return "submitSuccess";
+     }
+     if (cancel) {
+       _log.info("Service Alert cleared");
+        //doClear();
+        return "cancelResult";
+     }
+  
     try {
       if (_model.getId() != null && !_model.getId().trim().isEmpty())
         _model = _transitDataService.getServiceAlertForId(_model.getId());
@@ -169,11 +233,11 @@ public class ServiceAlertAction extends ActionSupport implements
         _model = _transitDataService.createServiceAlert(_agencyId, _model);
       }
       else {
-        ServiceAlertBean existing = _transitDataService.getServiceAlertForId(_model.getId());
-        if (existing != null) {
+        //ServiceAlertBean existing = _transitDataService.getServiceAlertForId(_model.getId());
+        //if (existing != null) {
           // The updated service alert constructed from the POST won't include affects clauses.
-          _model.setAllAffects(existing.getAllAffects());
-        }
+        //  _model.setAllAffects(existing.getAllAffects());
+        //}
         _transitDataService.updateServiceAlert(_model);
       }
     } catch (RuntimeException e) {
@@ -182,6 +246,13 @@ public class ServiceAlertAction extends ActionSupport implements
     }
 
     return "submitSuccess";
+  }
+  
+  @Action("cancel")
+  public String cancel() {
+    _log.info("Service Alert cleared");
+    //doClear();
+    return "cancelResult"; 
   }
 
   public String addAffects() {
