@@ -20,7 +20,7 @@ import java.util.List;
 
 public class StopBean implements Serializable {
 
-  private static final long serialVersionUID = 2L;
+  private static final long serialVersionUID = 3L;
 
   private String id;
 
@@ -39,6 +39,8 @@ public class StopBean implements Serializable {
   private List<RouteBean> routes;
   
   private EAccessibility wheelchairBoarding;
+  
+  private boolean isNonRevenue;
 
   public String getId() {
     return id;
@@ -114,6 +116,14 @@ public class StopBean implements Serializable {
 
   public void setWheelchairBoarding(EAccessibility wheelchairBoarding) {
     this.wheelchairBoarding = wheelchairBoarding;
+  }
+  
+  public boolean getIsNonRevenue() {
+    return isNonRevenue;
+  }
+  
+  public void setIsNonRevenue(boolean isNonRevenue) {
+    this.isNonRevenue = isNonRevenue;
   }
 
   /***************************************************************************

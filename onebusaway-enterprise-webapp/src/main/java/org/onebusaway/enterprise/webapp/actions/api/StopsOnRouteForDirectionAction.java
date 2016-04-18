@@ -67,7 +67,9 @@ public class StopsOnRouteForDirectionAction extends OneBusAwayEnterpriseActionSu
         
         if(!stopGroupBean.getStopIds().isEmpty()) {
           for(String stopId : stopGroupBean.getStopIds()) {
-            _stops.add(new StopOnRoute(stopIdToStopBeanMap.get(stopId)));
+            if (!stopIdToStopBeanMap.get(stopId).getIsNonRevenue()) {
+              _stops.add(new StopOnRoute(stopIdToStopBeanMap.get(stopId)));
+            }
           }
         }
       }

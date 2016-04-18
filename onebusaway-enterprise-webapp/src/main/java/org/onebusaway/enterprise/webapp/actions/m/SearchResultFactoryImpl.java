@@ -141,8 +141,10 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
           stopsOnRoute = new ArrayList<StopOnRoute>();
 
           for (String stopId : stopGroupBean.getStopIds()) {
-            stopsOnRoute.add(new StopOnRoute(stopIdToStopBeanMap.get(stopId),
-                stopIdToDistanceAwayStringMap.get(stopId), stopIdToRealtimeDataMap.get(stopId), stopIdToVehicleIdMap.get(stopId)));
+            if (!stopIdToStopBeanMap.get(stopId).getIsNonRevenue()) {
+              stopsOnRoute.add(new StopOnRoute(stopIdToStopBeanMap.get(stopId),
+                  stopIdToDistanceAwayStringMap.get(stopId), stopIdToRealtimeDataMap.get(stopId), stopIdToVehicleIdMap.get(stopId)));
+            }
           }
         }
         
