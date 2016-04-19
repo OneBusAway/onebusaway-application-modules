@@ -30,42 +30,16 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 public class HttpUtil {
-  public String callURL(String myURL) {
-    StringBuilder sb = new StringBuilder();
-    URLConnection urlConn = null;
-    InputStreamReader in = null;
-    try {
-      URL url = new URL(myURL);
-      urlConn = url.openConnection();
-      if (urlConn != null)
-        urlConn.setReadTimeout(60 * 1000);
-      if (urlConn != null && urlConn.getInputStream() != null) {
-        in = new InputStreamReader(urlConn.getInputStream(),
-            Charset.defaultCharset());
-        BufferedReader bufferedReader = new BufferedReader(in);
-        if (bufferedReader != null) {
-          int cp;
-          while ((cp = bufferedReader.read()) != -1) {
-            sb.append((char) cp);
-          }
-          bufferedReader.close();
-        }
-      }
-      in.close();
-    } catch (Exception e) {
-      throw new RuntimeException("Exception while calling URL:" + myURL, e);
-    }
-
-    return sb.toString();
-  }
 
   public JsonObject getJsonObject(String uri, int timeoutSeconds) throws MalformedURLException,
       IOException {
     URL url = new URL(uri);
     HttpURLConnection request = (HttpURLConnection) url.openConnection();
     
-    if (timeoutSeconds > 0)
+    if (timeoutSeconds > 0) {
       request.setConnectTimeout(timeoutSeconds * 1000);
+      request.setReadTimeout(timeoutSeconds * 1000);
+    }
     request.connect();
 
     // Convert to a JSON object to print data
