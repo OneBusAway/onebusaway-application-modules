@@ -654,6 +654,10 @@
   padding-top: 20px;
 }
 
+#staging_bundleName {
+	padding: 10px;
+}
+
 #stageBundle #stageContentsHolder {
   border: solid 1px transparent;
   width: 890px;

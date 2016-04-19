@@ -605,6 +605,10 @@ function onSelectDataset(sourceDirectoryType) {
 						jQuery("#createDirectoryMessage").text(status.message).css("color", "green");
 						// If "createDirectory", add the new directory to the current list of bundle directories.
 						if (actionName == "createDirectory") {
+							// Blank out the bundle name for the Build and Stage taba
+							$("#Build #bundleBuildName").val("");
+							$("#Stage #staging_bundleName").text("");
+							disableStageButton();
 							// Add a new div for this directory to the list of existing directories
 							var idx = 0;
 							$("#createDirectory #currentDirectories").find("#listItem").each(function() {
@@ -638,6 +642,10 @@ function onSelectDataset(sourceDirectoryType) {
 						}
 						
 						if (actionName != "createDirectory" && status.bundleInfo != null) {
+							// Display the name of the most recently built bundle on the Build and Stage tabs
+							$("#Build #bundleBuildName").val(status.bundleInfo.buildResponse.bundleBuildName);
+							$("#Stage #staging_bundleName").text(status.bundleInfo.buildResponse.bundleBuildName);
+							enableStageButton();
 							var agencies = status.bundleInfo.agencyList;
 							if (agencies != null) {
 								if (agencies.length > 0) {
@@ -1441,6 +1449,7 @@ function updateBuildStatus(buildType) {
 				jQuery("#buildBundle_buildProgress").text("Bundle Complete!");
 				jQuery("#buildBundle #buildBox #building #buildingProgress").attr("src","../../css/img/dialog-accept-2.png");
 				updateBuildList(id);
+				$("#Stage #staging_bundleName").text($("#Build #bundleBuildName").val());
 				enableStageButton();
 				enableBuildButton();
 				enableResetButton();
@@ -1450,7 +1459,6 @@ function updateBuildStatus(buildType) {
 			$buildBundle_resultList.val(txt).css("font-size", "12px");
 			// Make sure that the textarea remains scrolled to the bottom.
 			$buildBundle_resultList.scrollTop(1500);  // Just use some arbitrarily large number
-			//jQuery("#testProgressBar").progressbar("37");
 			// check for exception
 			if (bundleResponse.exception != null) {
 				jQuery("#buildBundle_buildProgress").text("Bundle Failed!");
