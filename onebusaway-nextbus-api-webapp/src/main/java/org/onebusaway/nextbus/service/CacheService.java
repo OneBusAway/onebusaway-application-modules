@@ -31,4 +31,8 @@ public interface CacheService {
   StopBean getStop(String key);
 
   void putStop(String key, StopBean value);
+
+  boolean isInvalidStop(String key);
+
+  void setInvalidStop(String key);
 }

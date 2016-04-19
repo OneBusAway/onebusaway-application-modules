@@ -42,11 +42,9 @@ import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 
 public class NextBusApiBase {
+  
   @Autowired
   protected TransitDataService _transitDataService;
 
@@ -80,9 +78,20 @@ public class NextBusApiBase {
   public StopBean getCachedStopBean(String id) {
     StopBean stop = _cache.getStop(id);
     if (stop == null) {
-      stop = _transitDataService.getStop(id);
-      if (stop != null)
+      if (_cache.isInvalidStop(id)) {
+        return null;
+      }
+      
+      try {
+        stop = _transitDataService.getStop(id);
+      } catch (Throwable t) {
+        _cache.setInvalidStop(id);
+      }
+      if (stop != null) {
         _cache.putStop(id, stop);
+      } else {
+        _cache.setInvalidStop(id);
+      }
     }
     return stop;
   }

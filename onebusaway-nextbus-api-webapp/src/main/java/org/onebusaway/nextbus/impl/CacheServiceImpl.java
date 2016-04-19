@@ -36,6 +36,7 @@ public class CacheServiceImpl implements CacheService {
 
   private Map<String, AgencyBean> _validAgencyCache = new ConcurrentHashMap<String, AgencyBean>();
   private Map<String, StopBean> _validStopCache = new ConcurrentHashMap<String, StopBean>();
+  private Map<String, Boolean> _invalidStopCache = new ConcurrentHashMap<String, Boolean>();
   private Map<String, Boolean> _validRouteCache = new ConcurrentHashMap<String, Boolean>();
   
   @PostConstruct
@@ -48,6 +49,7 @@ public class CacheServiceImpl implements CacheService {
   public void clearCache() {
     _validAgencyCache.clear();
     _validStopCache.clear();
+    _invalidStopCache.clear();
     _validRouteCache.clear();
   }
   
@@ -91,4 +93,13 @@ public class CacheServiceImpl implements CacheService {
     _validStopCache.put(key, value);
   }
   
+  @Override 
+  public boolean isInvalidStop(String key) {
+    return Boolean.TRUE.equals(_invalidStopCache.get(key));
+  }
+  
+  @Override 
+  public void setInvalidStop(String key) {
+    _invalidStopCache.put(key, Boolean.TRUE);
+  }
 }
