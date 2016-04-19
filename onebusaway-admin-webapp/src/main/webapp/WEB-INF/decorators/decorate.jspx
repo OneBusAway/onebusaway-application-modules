@@ -56,7 +56,7 @@
 						<s:url var="url" namespace="/" action="logout"></s:url>
 						<s:a href="%{url}">Logout</s:a>
 						<s:url var="url" namespace="/admin" action="index"/>
-						<a href="${url}">Back To Welcome</a>
+						<a href="${url}">Main Menu</a>
 					</div>
 				</s:if>
 			</div>

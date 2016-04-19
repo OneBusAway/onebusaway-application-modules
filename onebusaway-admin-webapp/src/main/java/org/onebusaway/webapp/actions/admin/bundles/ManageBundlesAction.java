@@ -29,7 +29,9 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -450,13 +452,25 @@ public class ManageBundlesAction extends OneBusAwayNYCAdminActionSupport impleme
 			agencyList = new JSONArray();
 		}else {
 			agencyList = (JSONArray)bundleObj.get("agencyList");
-
 		}
+
+    // Don't retain any existing agencyList entries for this agency.
+		JSONArray updatedAgencyList = new JSONArray();
+    for (Object existingObj : agencyList) {
+      JSONObject existingAgencyObj = (JSONObject) existingObj;
+      String existingAgencyId = (String)existingAgencyObj.get("agencyId");
+      if (existingAgencyId != null &&  !existingAgencyId.equals(agencyId)) {
+        updatedAgencyList.add(existingObj);
+      }
+    }
+    agencyList = updatedAgencyList;
 
 		agencyObj.put("agencyId", agencyId);
 		agencyObj.put("agencyDataSource", agencyDataSource);
 		agencyObj.put("agencyDataSourceType", agencyDataSourceType);
 		agencyObj.put("agencyProtocol", agencyProtocol);	
+    agencyObj.put("agencyBundleUploadDate", 
+        new SimpleDateFormat("MMM dd yyyy").format(new Date()));
 		agencyList.add(agencyObj);
 		bundleObj.put("agencyList", agencyList);
 		writeBundleTrackingInfo(bundleObj, directoryName);
@@ -514,13 +528,25 @@ public class ManageBundlesAction extends OneBusAwayNYCAdminActionSupport impleme
 			agencyList = new JSONArray();
 		}else {
 			agencyList = (JSONArray)bundleObj.get("agencyList");
-
 		}
+
+    // Don't retain any existing agencyList entries for this agency.
+    JSONArray updatedAgencyList = new JSONArray();
+    for (Object existingObj : agencyList) {
+      JSONObject existingAgencyObj = (JSONObject) existingObj;
+      String existingAgencyId = (String)existingAgencyObj.get("agencyId");
+      if (existingAgencyId != null &&  !existingAgencyId.equals(agencyId)) {
+        updatedAgencyList.add(existingObj);
+      }
+    }
+    agencyList = updatedAgencyList;
 
 		agencyObj.put("agencyId", agencyId);
 		agencyObj.put("agencyDataSource", agencyDataSource);
 		agencyObj.put("agencyDataSourceType", agencyDataSourceType);
 		agencyObj.put("agencyProtocol", agencyProtocol);	
+		agencyObj.put("agencyBundleUploadDate", 
+		    new SimpleDateFormat("MMM dd yyyy").format(new Date()));
 		agencyList.add(agencyObj);
 		bundleObj.put("agencyList", agencyList);
 		writeBundleTrackingInfo(bundleObj, directoryName);

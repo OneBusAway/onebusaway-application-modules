@@ -38,6 +38,9 @@
 			<div id="listButton">
 				<!-- <input type="button" id="stageBundle_listButton" value="Refresh" /> -->
 			</div>
+			<div id="staging_bundleName">
+			<!--  Prevent JSP minimization -->
+			</div>
 			<input type="button" id="stageBundle_stageButton" value="Stage Bundle" />
 			<div id="stageBundle_bundleList">
 			<!--  space -->

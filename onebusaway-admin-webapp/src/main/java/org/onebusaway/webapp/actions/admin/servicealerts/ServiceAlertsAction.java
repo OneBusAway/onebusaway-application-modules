@@ -39,14 +39,19 @@ public class ServiceAlertsAction extends OneBusAwayNYCAdminActionSupport {
 
   private static final long serialVersionUID = 1L;
   private static Logger _log = LoggerFactory.getLogger(ServiceAlertsAction.class);
-
   private TransitDataService _transitDataService;
-
   private String _agencyId;
-
+  private String _alertId;
   private List<AgencyWithCoverageBean> _agencies;
-
   private List<ServiceAlertBean> _situations;
+  private List<ServiceAlertBean>[] _situationsByAgency;
+  String summary = "";
+  String description = "";
+  String reason = "";
+  String severity = "";
+  String owningAgency = "";
+  private boolean submit;
+  private boolean clear;
 
   @Autowired
   public void setTransitDataService(TransitDataService transitDataService) {
@@ -61,6 +66,14 @@ public class ServiceAlertsAction extends OneBusAwayNYCAdminActionSupport {
     return _agencyId;
   }
 
+  public String get_alertId() {
+    return _alertId;
+  }
+
+  public void set_alertId(String _alertId) {
+    this._alertId = _alertId;
+  }
+
   public List<AgencyWithCoverageBean> getAgencies() {
     return _agencies;
   }
@@ -69,14 +82,76 @@ public class ServiceAlertsAction extends OneBusAwayNYCAdminActionSupport {
     return _situations;
   }
 
+  public List<ServiceAlertBean>[] getSituationsByAgency() {
+    return _situationsByAgency;
+  }
+
+  public void setSummary(String summary) {
+    this.summary = summary;
+  }
+
+  public void setDescription(String description) {
+    this.description = description;
+  }
+
+  public void setReason(String reason) {
+    this.reason = reason;
+  }
+
+  public void setSeverity(String severity) {
+    this.severity = severity;
+  }
+
+  public void setOwningAgency(String owningAgency) {
+    this.owningAgency = owningAgency;
+  }
+
+  public void setSubmit(String submit) {
+    this.submit = true;
+  }
+  
+  public void setClear(String clear) {
+    this.clear = true;
+  }
+
   @SkipValidation
   @Override
   public String execute() {
-	// Check that we have permission:
-	super.execute();
+    _log.info("ServiceAlerts.execute()");
+    /*
+    if (submit) {
+        _log.info("Service Alert submitted");
+        //doSubmit();
+        //return "submitResult";
+     }
+     if (clear) {
+       _log.info("Service Alert cleared");
+        //doClear();
+        //return "clearResult";
+     }
+     */
+  
+  	// Check that we have permission:
+  	super.execute();
 	
     try {
       _agencies = _transitDataService.getAgenciesWithCoverage();
+      _situationsByAgency = new List[_agencies.size()];
+      //for (AgencyWithCoverageBean agency : _agencies) {
+      for (int i=0; i<_agencies.size(); ++i) {
+        AgencyWithCoverageBean agency = _agencies.get(i);
+        String agencyId = agency.getAgency().getId();
+        ListBean<ServiceAlertBean> result = _transitDataService.getAllServiceAlertsForAgencyId(agencyId);
+        List<ServiceAlertBean> serviceAlerts = result.getList();
+        _situationsByAgency[i] = serviceAlerts;
+      }
+      for (int i=0; i<_agencies.size(); ++i) {
+        _log.info("Agency " + _agencies.get(i).getAgency().getId());
+        List<ServiceAlertBean> serviceAlerts = _situationsByAgency[i];
+        for (ServiceAlertBean serviceAlert : serviceAlerts) {
+          _log.info("   Alert: " + serviceAlert.getSummaries().get(0));
+        }
+      }
     } catch (Throwable t) {
       _log.error("unable to retrieve agencies with coverage", t);
       _log.error("issue connecting to TDS -- check your configuration in data-sources.xml");
@@ -92,6 +167,17 @@ public class ServiceAlertsAction extends OneBusAwayNYCAdminActionSupport {
     return SUCCESS;
   }
 
+  public String deleteAlert() {
+    String id = _alertId;
+    try {
+      _transitDataService.removeServiceAlert(_alertId);
+    } catch (RuntimeException e) {
+      _log.error("Error deleting service alert", e);
+      throw e;
+    }
+    return "SUCCESS";
+  }
+  
   @Validations(requiredStrings = {@RequiredStringValidator(fieldName = "agencyId", message = "missing required agencyId field")})
   public String removeAllForAgency() {
     try {

@@ -20,10 +20,86 @@
 <html xmlns:jsp="http://java.sun.com/JSP/Page"
 	xmlns:c="http://java.sun.com/jsp/jstl/core" xmlns:s="/struts-tags">
 <jsp:directive.page contentType="text/html" />
-		<div class="tabHeader">
-			<label class="headerLabel">Create Bundle Directory</label>
+	<p>Dataset for Bundle Creation</p>
+	<!--Create a blank dataset -->
+    <div id="newDatasetTableDiv">
+        <span class="datasetDivHeader">Create a blank dataset</span>
+		<table id="createDataset">
+			<tr>
+				<td id="datasetNameLabel">What do you want to name your dataset?</td>
+				<td></td>
+			</tr>
+			<tr>
+				<td><input type="text" id="directoryName"/></td>
+				<td><input type="button" id="newDirectoryButton" value="Save and Continue" disabled="disabled"/></td>
+			</tr>
+			<tr>
+				<td id="datasetNameNotes">
+					This name will become the name of your Bundle<br/>later on. Avoid spaces or symbols in your name.
+				</td>
+				<td>
+				</td>
+			</tr>
+		</table>
+	</div>
+	<div id="existingDatasetDiv">
+        <span class="datasetDivHeader">Or select an existing dataset</span>
+		<div id="existingDatasetTableDiv">
+			<table id="existingDataset">
+				<thead>
+					<tr id="existingDatasetLabel">
+						<th></th>
+						<th>Dataset Name</th>
+						<th>Last Updated Date</th>
+						<th></th>
+					</tr>
+				</thead>
+				<tbody>
+					<s:iterator value="%{existingDirectories}" status="directoryStatus">
+						 <tr>
+						 	<td class="datasetCheckbox"><input type="checkbox"/></td>
+							<td class="directoryName">
+								<!--
+								<strong><s:property value="name" /></strong>
+								-->
+								<s:property value="name" />
+							</td>
+							<td class="timestamp">
+								<s:property value="creationTimestamp" />
+							</td>
+							<td class="copyDirectory">copy</td>
+						</tr> 
+					</s:iterator>
+				</tbody>
+			</table>
+			
+			<div id="existingDirectoryButtonDiv">
+	    		<input type="button" id="existingDirectoryButton" value="Add files to this dataset"
+					disabled="disabled"/>
+			</div>
+		</div>      
+	</div>
+	<!-- Div for "Copy" popup -->
+	<div id="copyPopup">
+		<div id="copyPopupContents">
+			<div id="copyPopupHeader">
+				<p>You are duplicating a dataset.</p>
+				You will want to give it a unique name.
+			</div>
+			<div id="destinationDirDiv">
+				<label for="destinationDirectory" id="datasetNameLabel">New dataset name</label>
+				<input type="text" name="destinationDirectory" id="destinationDirectory"></input>
+			</div>
 		</div>
-		<div id="createDirectory">
+		<!--
+		<div>
+			<input type="button" id="cancelCopy" value="Cancel"/>
+			<input type="button" id="continueCopy" value="Continue"/>
+		</div>
+		-->
+	</div>
+
+<!--
 			<label class="bundleHeader">Select or Create New Bundle Directory</label>
 			<div class="directoryLabels">
 				<label class="adminLabel directoryLabel">Currently selected bundle:</label> 
@@ -49,7 +125,9 @@
 				<div id="createDirectoryResult">
 					<img id="resultImage" alt="Image not found" />
 					<div id="createDirectoryMessage">
+					-->
 						<!--  space -->
+						<!--
 					</div>
 				</div>
 			</div>
@@ -61,6 +139,7 @@
 						 <div id="listItem">
 							<div class="listData">
 								<strong><s:property value="name" /></strong>
+								<s:property value="name" />
 							</div>
 							<div class="listData">
 								<s:property value="type" />
@@ -72,13 +151,18 @@
 					</s:iterator>
 				</div>
 			</div>
+			-->
+			<!--
 			<br/>
 			<label id="commentLabel">Comments:</label>
 			<div id="commentBox">
 				<textarea id="bundleComment">
+				-->
 				<!-- blank -->
+				<!--
 				</textarea>
 			</div>
+			-->
 			<!-- 
 			<div id="advancedOptions">
 				<s:url var="url" value="/css/img/arrow-right-3.png" />
@@ -92,6 +176,7 @@
 				</div>
 			</div>
 			-->
+			<!--
 			<div class="submitForm">
 				<fieldset>
 					<s:url var="url" action="index.action" namespace="/admin" />
@@ -99,5 +184,5 @@
 					<input type="button" id="create_continue" value="Continue" class="submit_disabled" disabled="disabled"/>
 				</fieldset>
 			</div>
-		</div>
+			-->
 </html>

@@ -22,54 +22,98 @@
 <jsp:directive.page contentType="text/html" />
 <head>
 <title><s:text name="ServiceAlert" /></title>
-<!--
-<title>Service Alert</title>
--->
+
+<s:url var="url" value="/css/jquery-ui.css" />
+<link rel="stylesheet" type="text/css" href="${url}">
+	<!-- //prevent jspx minimization -->
+</link>
+
+<s:url var="url" value="/css/service-alerts.css" />
+<link rel="stylesheet" type="text/css" href="${url}">
+	<!-- //prevent jspx minimization -->
+</link>
+
+<s:url var="url" value="/js/lib/jquery.js" />
+<script type="text/javascript" src="${url}">
+<!-- //prevent jspx minimization -->
+	
+</script>
+
+<s:url var="url" value="/js/lib/jquery.ui.js">
+</s:url>
+<script type="text/javascript" src="${url}">
+<!-- //prevent jspx minimization -->
+	
+</script>
+
+<s:url var="url" value="/js/oba/service-alerts.js">
+	<!-- //prevent jspx minimization -->
+</s:url>
+<script type="text/javascript" src="${url}">
+<!-- //prevent jspx minimization -->
+	
+</script>
+
 </head>
 <body>
 
 <s:set name="theme" value="'xhtml'" scope="page" />
-
-<p><s:a namespace="/admin" action="index">Back To Welcome</s:a></p>
-
-<s:if test="agencyId == null">
-    <h2>Pick an agency:</h2>
-    <ul>
-        <s:iterator value="agencies">
-            <s:url var="url" action="service-alerts!agency">
-                <s:param name="agencyId" value="agency.id" />
-            </s:url>
-            <li><s:a href="%{url}">
-                <s:property value="agency.name" />
-            </s:a></li>
-        </s:iterator>
-    </ul>
-</s:if>
-<s:else>
-    <h3>Actions:</h3>
-    <ul>
-        <s:url var="url" action="service-alert">
-            <s:param name="agencyId" value="agencyId" />
-        </s:url>
-        <li><s:a href="%{url}">Create a Service Alert</s:a></li>
-        <s:url var="url" action="service-alerts!removeAllForAgency">
-            <s:param name="agencyId" value="agencyId" />
-        </s:url>
-        <li><s:a href="%{url}">Remove ALL Service Alerts</s:a></li>
-    </ul>
-    <h3>Service Alerts:</h3>
-    <ul>
-        <s:iterator value="situations">
-            <s:url var="url" action="service-alert">
-                <s:param name="id" value="id" />
-            </s:url>
-            <li><s:a href="%{url}">
-                <s:property value="summaries[0].value" />
-            </s:a>
-            </li>
-        </s:iterator>
-    </ul>
-</s:else>
+<div id="ServiceAlerts">
+	<p>Manage Service Alerts</p>
+	<div id="serviceAlertActions">
+		<div>
+			<fieldset>
+				<s:url var="url" action="service-alert-edit.action" namespace="/admin/servicealerts" >
+					<s:param name="newServiceAlert" value="true" />
+				</s:url>
+				<a href="${url}" id="createAlertLink" class="link">Create a new alert</a> 
+			</fieldset>
+		</div>
+		<div id="existingAlertsTableDiv">
+			<span  id="existingAlertsHeader">Existing Alerts</span>
+			<div id="alertsTableDiv">
+				<table id="alertsTable">
+					<tr>
+						<th>Agency</th>
+						<th>Summary Title</th>
+						<th>Severity</th>
+						<th>Reason</th>
+						<th></th>
+						<th></th>
+					</tr>
+					<s:iterator value="agencies" status="agencyStatus">
+						<s:set var="agencyIdx" value="%{#agencyStatus.index}" />
+						<!-- <s:set var="agencyId" value="%{#agency.agency.id}" /> -->
+						<s:iterator value="situationsByAgency[#agencyIdx]" status="id">
+							<tr>
+								<td><s:property value="agency.id" /></td>
+								<td><s:property value="summaries[0].value" /></td>
+								<td><s:property value="severity" /></td>
+								<td><s:property value="reason" /></td>
+								<td>
+									<fieldset>
+										<s:url var="url" action="service-alert-edit.action" namespace="/admin/servicealerts" >
+											<s:param name="alertId" value="id" />
+										</s:url>
+										<a href="${url}" id="editAlertLink" class="link">Edit</a>
+									</fieldset>
+								</td>
+								<td>
+									<fieldset>
+										<s:url var="url" action="service-alert-edit!deleteAlert.action" namespace="/admin/servicealerts" >
+											<s:param name="alertId" value="id" />
+										</s:url>
+										<a href="${url}" id="deleteAlertLink" class="link">Delete</a>
+									</fieldset>
+								</td>
+							</tr>
+						</s:iterator>
+        			</s:iterator>
+				</table>
+			</div>
+		</div>
+	</div>
+</div>
 
 </body>
 </html>
