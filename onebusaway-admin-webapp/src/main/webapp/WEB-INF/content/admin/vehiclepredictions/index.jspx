@@ -139,6 +139,20 @@
 		  			<div class="avl_value" id="avl_finalstoppred">loading...</div>
 	  			</div>
 	  		</div>
+	  		<div class="rowGroup">
+	  			<div class="row">
+		  			<div class="oba_label" id="avl_tdsnexttripid_label" >Next Trip</div>
+		  			<div class="oba_value" id="avl_tdsnexttripid">...</div>
+	  			</div>
+	  		</div>
+<!-- 	  		
+	  		<div class="rowGroup">
+	  			<div class="row">
+		  			<div class="oba_label" id="avl_predictiondelta_label" >Next Prediction Delta</div>
+		  			<div class="oba_value" id="avl_predictiondelta">...</div>
+	  			</div>
+	  		</div>
+	  		 -->
 	  	</div>
   	</div>
 <!--   	

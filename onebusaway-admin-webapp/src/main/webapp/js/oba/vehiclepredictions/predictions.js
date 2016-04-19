@@ -38,7 +38,39 @@ function refreshAttrs() {
 function refreshTimers() {
 	updateAvlAge();
 	updateObaAge();
+	triggers();
 	setTimeout(refreshTimers, 1000);
+}
+
+function triggers() {
+	
+	var avlNextStopPredStyle = styleForPrediction("#avl_nextstoppred");
+	jQuery("#avl_nextstoppred").css('background-color', avlNextStopPredStyle);
+	
+	var obatdsNextStopPredStyle = styleForPrediction("#oba_tdsnextstoppred");
+	jQuery("#oba_tdsnextstoppred").css('background-color', obatdsNextStopPredStyle);
+	
+	var obasiriNextStopPredStyle = styleForPrediction("#oba_sirinextstoppred");
+	jQuery("#oba_sirinextstoppred").css('background-color', obasiriNextStopPredStyle);
+
+}
+
+function styleForPrediction(field) {
+	var now = new Date();
+	var fieldVal = jQuery(field).html();
+	var fieldPred = new Date();
+	fieldPred.setHours(fieldVal.split(":")[0]);
+	fieldPred.setMinutes(fieldVal.split(":")[1]);
+	fieldPred.setSeconds(fieldVal.split(":")[2]);
+	console.log("time: " + fieldPred);
+	if (fieldPred.getTime() >= now.getTime() + 30000) {
+		return "green"
+	} else if (fieldPred.getTime() < now.getTime() + 30000
+			&& fieldPred.getTime() > now.getTime()) {
+		return "yellow";
+	} else {
+		return "red";
+	}
 }
 
 function startup() {
@@ -170,7 +202,8 @@ function doSearch() {
 			jQuery("#avl.schedDev").html("...");
 			jQuery("#avl_block").html("...");
 			jQuery("#avl_trip").html("...");
-			jQuery("#avl_nextstopid").html("...");
+			setAvlNextStopId("...");
+			
 		}
 	});
 	var obaUrl = "http://" + obaWeb + "/onebusaway-api-webapp/siri/vehicle-monitoring?key=OBAKEY&OperatorRef="
@@ -351,14 +384,14 @@ function queryPredictionValues(attrs, vehicleId) {
 			attrs["tripId"] = v.trip;
 			jQuery("#avl_trip").html(v.trip);
 			attrs["nextStopId"] = v.nextStopId;
-			jQuery("#avl_nextstopid").html(v.nextStopId);
+			setAvlNextStopId(v.nextStopId);
 		},
 		fail: function() {
 			jQuery("#avl_route").html("...");
 			jQuery("#avl_schdev").html("...");
 			jQuery("#avl_block").html("...");
 			jQuery("#avl_trip").html("...");
-			jQuery("#avl_nextstopid").html("...");
+			setAvlNextStopId("...");
 		}
 	});
 	
@@ -378,7 +411,7 @@ function queryPredictionValues(attrs, vehicleId) {
 						jQuery.each(dvalue.pred, function( predindex, predvalue){
 							if (predvalue.vehicle == vehicleId) {
 								attrs["nextPrediction"] = new Date(predvalue.time * 1000);
-								jQuery("#avl_nextstoppred").html(formatTime(new Date(predvalue.time * 1000)));
+								setAvlNextStopPred(formatTime(new Date(predvalue.time * 1000)));
 								return;
 							} 
 						});
@@ -386,7 +419,7 @@ function queryPredictionValues(attrs, vehicleId) {
 				});
 			},
 			fail: function() {
-				jQuery("#avl_nextstoppred").html("...");
+				setNextStopPred("...");
 			}
 		});
 	} else {
@@ -395,8 +428,8 @@ function queryPredictionValues(attrs, vehicleId) {
 		jQuery("#avl_schdev").html("...");
 		jQuery("#avl_block").html("...");
 		jQuery("#avl_trip").html("...");
-		jQuery("#avl_nextstopid").html("...");
-		jQuery("#avl_nextstoppred").html("...");
+		setAvlNextStopId("...");
+		setNextStopPred("...");
 		jQuery("#avl_finalstopid").html("...");
 		jQuery("#avl_finalstoppred").html("...");
 	}
@@ -586,6 +619,14 @@ function updateAvlAge() {
 	var time = Math.round((new Date().getTime() - avlAge)/1000);
 	jQuery("#avlAge").html("<b>Age</b>: " + time + " s");
 }
+
+function setAvlNextStopId(val) {
+	jQuery("#avl_nextstopid").html(val);
+}
+function setAvlNextStopPred(val) {
+	jQuery("#avl_nextstoppred").html(val);
+}
+
 
 function getDistanceFromLatLonInKm(lat1,lon1,lat2,lon2) {
 	  var R = 6371000; // Radius of the earth in m
