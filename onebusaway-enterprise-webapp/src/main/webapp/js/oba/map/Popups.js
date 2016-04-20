@@ -284,11 +284,15 @@ OBA.Popups = (function() {
 				jQuery.each(activity.MonitoredVehicleJourney.OnwardCalls.OnwardCall, function(_, onwardCall) {
 					var stopIdParts = onwardCall.StopPointRef.split("_");
 					var stopIdWithoutAgencyId = stopIdParts[1];
-						
+					var stopRef = onwardCall.StopPointRef;
+					if (onwardCall.ArrivalPlatformName != undefined) {
+						// here we override the arrivalPlatformName to contain the stopcode
+						stopRef = onwardCall.ArrivalPlatformName;
+					}
 					var lastClass = ((_ === activity.MonitoredVehicleJourney.OnwardCalls.OnwardCall.length - 1) ? " last" : "");
 
-					html += '<li class="nextStop' + lastClass + '">';				
-					html += '<a href="#' + onwardCall.StopPointRef + '">' + onwardCall.StopPointName + '</a>';
+					html += '<li class="nextStop' + lastClass + '">';	
+					html += '<a href="#' + stopRef + '">' + onwardCall.StopPointName + '</a>';
 					html += '<span>';
 						
 					if(typeof onwardCall.ExpectedArrivalTime !== 'undefined' && onwardCall.ExpectedArrivalTime !== null) {
@@ -350,7 +354,7 @@ OBA.Popups = (function() {
 		var stopCode = stopResult.code;
 		
 		if(stopCode == null)
-			stopCode = stopId;
+			stopCode = uniqueStopId;
 		
 		html += '<div class="header stop">';
 		html += '<p class="title">' + stopResult.name + '</p><p>';
@@ -471,7 +475,7 @@ OBA.Popups = (function() {
 				html += '<ul>';
 
 				html += '<li class="route">';
-				html += '<a href="#' + uniqueStopId + '%20' + mvj.PublishedLineName + '"><span class="route-name">' + mvj.PublishedLineName + "</span>&nbsp;&nbsp; " + mvj.DestinationName + '</a>';
+				html += '<a href="#' + stopCode + '%20' + mvj.PublishedLineName + '"><span class="route-name">' + mvj.PublishedLineName + "</span>&nbsp;&nbsp; " + mvj.DestinationName + '</a>';
 				if(mvj.Monitored)
 				if (mvj.LineRef in alertData) {
 					html += ' <a id="alert-link|' + uniqueStopId + '|' + mvj.LineRef + '|' + mvj.PublishedLineName + '" class="alert-link" href="#">Alert</a>';
@@ -589,7 +593,7 @@ OBA.Popups = (function() {
 			var i = 0;
 			jQuery.each(routeAndDirectionWithoutSerivce, function(_, d) {
 				html += '<li class="route">';
-				html += '<a class="muted" href="#' + uniqueStopId + "%20" + d.shortName + '"><span class="route-name">' + d.shortName + '</span></a>';
+				html += '<a class="muted" href="#' + stopCode + "%20" + d.shortName + '"><span class="route-name">' + d.shortName + '</span></a>';
 				html += '</li>';
 				
 				i++;

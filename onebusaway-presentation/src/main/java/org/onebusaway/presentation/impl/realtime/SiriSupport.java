@@ -508,6 +508,13 @@ public final class SiriSupport {
 		StopPointRefStructure stopPointRef = new StopPointRefStructure();
 		stopPointRef.setValue(stopBean.getId());
 		onwardCallStructure.setStopPointRef(stopPointRef);
+		
+		if (stopBean.getCode() != null) {
+			// Agency's prefer stop code display in UI, so override platform name for this use
+			NaturalLanguageStringStructure platform = new NaturalLanguageStringStructure();
+			platform.setValue(stopBean.getCode());
+			onwardCallStructure.setArrivalPlatformName(platform);
+		}
 
 		NaturalLanguageStringStructure stopPoint = new NaturalLanguageStringStructure();
 		stopPoint.setValue(stopBean.getName());
