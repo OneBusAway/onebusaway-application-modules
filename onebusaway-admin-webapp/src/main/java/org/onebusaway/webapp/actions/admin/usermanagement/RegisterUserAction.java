@@ -91,7 +91,7 @@ public class RegisterUserAction extends OneBusAwayNYCAdminActionSupport {
 	 * @param username the username to set
 	 */
 	public void setUsername(String username) {
-		this.username = username;
+		this.username = username.trim();
 	}
 
 	/**
