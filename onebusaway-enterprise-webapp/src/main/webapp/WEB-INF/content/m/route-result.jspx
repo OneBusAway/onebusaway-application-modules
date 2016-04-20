@@ -82,10 +82,10 @@
 									<s:url var="url" namespace="/m" action="index">
 										<s:param name="q">
 											<s:if test="%{useAgencyId == 'true'}">
-												<s:property value="id" />
+												<s:property value="codeOrId" />
 											</s:if>
 											<s:else>
-												<s:property value="idWithoutAgency" />
+												<s:property value="codeOrIdWithoutAgency" />
 											</s:else>
 										</s:param>
 									</s:url>
@@ -115,10 +115,10 @@
 									<s:url var="url" namespace="/m" action="index">
 										<s:param name="q">
 											<s:if test="%{useAgencyId == 'true'}">
-												<s:property value="id" />
+												<s:property value="codeOrId" />
 											</s:if>
 											<s:else>
-												<s:property value="idWithoutAgency" />
+												<s:property value="codeOrIdWithoutAgency" />
 											</s:else>
 										</s:param>
 									</s:url>

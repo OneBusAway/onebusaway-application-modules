@@ -32,8 +32,22 @@ public class StopOnRoute {
     return stop.getId();
   }
   
+  public String getCodeOrId() {
+	  if (stop.getCode() != null) {
+		  return stop.getCode();
+	  }
+	  return getId();
+  }
+  
   public String getIdWithoutAgency() {
     return AgencyAndIdLibrary.convertFromString(getId()).getId();
+  }
+  
+  public String getCodeOrIdWithoutAgency() {
+	  if (stop.getCode() != null) {
+		  return stop.getCode();
+	  }
+	  return getIdWithoutAgency();
   }
   
   public String getName() {
