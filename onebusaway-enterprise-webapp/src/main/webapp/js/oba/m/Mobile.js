@@ -4,6 +4,8 @@ OBA.Mobile = (function() {
 	
 	var locationField = null;
 	var typeField = null;
+	var refreshBar = null;
+	var defaultTimeout = OBA.Config.refreshInterval;
 	
 	function addAutocompleteBehavior() {
 		
@@ -29,7 +31,7 @@ OBA.Mobile = (function() {
 	
 	function addRefreshBehavior() {
 		// refresh button logic
-		var refreshBar = jQuery("#refresh")
+		refreshBar = jQuery("#refresh")
 					.css("position", "absolute")
 					.css("right", "20")
 					.css("left", "12");
@@ -74,6 +76,8 @@ OBA.Mobile = (function() {
 		
 		theWindow.scroll(repositionRefreshBar)
 					.resize(repositionRefreshBar);
+		
+		setTimeout(refreshContent, defaultTimeout);
 	}
 	
 	function initLocationUI() {
@@ -147,6 +151,11 @@ OBA.Mobile = (function() {
 			
 		});
 	};
+	
+	function refreshContent() {
+		refreshBar.find("a").click();
+		setTimeout(refreshContent, defaultTimeout);
+	}
 		
 	return {
 		initialize: function() {
