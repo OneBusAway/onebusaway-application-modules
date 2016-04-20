@@ -21,6 +21,7 @@ import java.util.List;
 import org.onebusaway.realtime.api.TimepointPredictionRecord;
 import org.onebusaway.transit_data.model.blocks.BlockInstanceBean;
 import org.onebusaway.transit_data.model.blocks.BlockTripBean;
+import org.onebusaway.transit_data.model.trips.TimepointPredictionBean;
 import org.onebusaway.transit_data.model.trips.TripStatusBean;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
@@ -30,7 +31,7 @@ import org.springframework.stereotype.Component;
 
 /**
  * Trivial implementation of the PredictionHelperService.  It returns a single prediction
- * for the tripStatus.
+ * for the tripStatus, or prediction records if available.
  *
  */
 @Component
@@ -51,8 +52,28 @@ public class TrivialPredictionHelperService implements PredictionHelperService {
 			return records;
 		if (!tripStatus.isPredicted())
 			return records;
-		
+
 		records = new ArrayList<TimepointPredictionRecord>();
+
+		List<TimepointPredictionBean> beans = tripStatus.getTimepointPredictions();
+		
+		if (beans != null && beans.size() > 0) {
+			for (TimepointPredictionBean bean : beans) {
+				TimepointPredictionRecord tpr = new TimepointPredictionRecord();
+				
+				tpr.setTimepointId(AgencyAndIdLibrary.convertFromString(bean.getTimepointId()));
+				tpr.setTimepointScheduledTime(bean.getTimepointScheduledTime());
+				tpr.setTimepointPredictedArrivalTime(bean.getTimepointPredictedArrivalTime());
+				tpr.setTimepointPredictedDepartureTime(bean.getTimepointPredictedDepartureTime());
+				tpr.setStopSequence(bean.getStopSequence());
+				tpr.setTripId(AgencyAndIdLibrary.convertFromString(bean.getTripId()));
+				
+				records.add(tpr);
+			}
+			
+			return records;
+		}
+		
 		TimepointPredictionRecord tpr = new TimepointPredictionRecord();
 		tpr.setTimepointId(AgencyAndIdLibrary.convertFromString(tripStatus.getNextStop().getId()));
 		tpr.setTimepointScheduledTime(tripStatus.getLastUpdateTime() + tripStatus.getNextStopTimeOffset() * 1000);
