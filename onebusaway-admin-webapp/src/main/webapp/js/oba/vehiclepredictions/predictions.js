@@ -63,13 +63,17 @@ function styleForPrediction(field) {
 	fieldPred.setMinutes(fieldVal.split(":")[1]);
 	fieldPred.setSeconds(fieldVal.split(":")[2]);
 	console.log("time: " + fieldPred);
-	if (fieldPred.getTime() >= now.getTime() + 30000) {
-		return "green"
-	} else if (fieldPred.getTime() < now.getTime() + 30000
-			&& fieldPred.getTime() > now.getTime()) {
-		return "yellow";
+	//if prediction is in future that's great
+	if (fieldPred.getTime() >= now.getTime()) {
+		return "#33FFCC" // green == good
+	} else if (fieldPred.getTime() < now.getTime()
+			&& fieldPred.getTime() > now.getTime() - 90000) {
+		// if prediction is within 90 seconds past that's ok
+		return "yellow"; // yellow == warning
 	} else {
-		return "red";
+	    // prediction is in past
+		return "#FFCCCC"; // red == bad
+
 	}
 }
 
