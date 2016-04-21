@@ -359,8 +359,12 @@ public final class SiriSupport {
 							blockTripStopsAfterTheVehicle++;
 							ArrivalsAndDeparturesQueryBean query = new ArrivalsAndDeparturesQueryBean();
 							StopWithArrivalsAndDeparturesBean result = transitDataService.getStopWithArrivalsAndDepartures(stop.getId(), query);
-							// TODO!  We can't assume the first result is the correct result
+							// We can't assume the first result is the correct result
 							Collections.sort(result.getArrivalsAndDepartures(), new SortByTime());
+							if (result.getArrivalsAndDepartures().isEmpty()) {
+							  // bad data?  abort!
+							  continue;
+							}
 							ArrivalAndDepartureBean arrivalAndDeparture = result.getArrivalsAndDepartures().get(0);
 							distanceOfVehicleFromCall = arrivalAndDeparture.getDistanceFromStop();
 							//responseTimestamp = arrivalAndDeparture.getScheduledArrivalTime();
