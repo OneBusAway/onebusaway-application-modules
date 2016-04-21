@@ -42,8 +42,8 @@ public class CacheServiceImpl implements CacheService {
   @PostConstruct
   public void start() throws Exception {
       _executor = Executors.newSingleThreadScheduledExecutor();
-      // re-build internal route cache
-      _executor.scheduleAtFixedRate(new RefreshDataTask(), 0, 1, TimeUnit.HOURS);
+      // re-build internal route cache once a day
+      _executor.scheduleAtFixedRate(new RefreshDataTask(), 0, 24, TimeUnit.HOURS);
   }
   
   public void clearCache() {
