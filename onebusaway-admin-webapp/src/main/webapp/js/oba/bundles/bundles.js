@@ -1121,6 +1121,7 @@ function onValidateClick() {
 					jQuery("#prevalidate_id_label").show();
 				}
 				//jQuery("#prevalidate_resultList").text("calling...");
+				jQuery("#Build #bundleBuildName").val(bundleName);
 				window.setTimeout(updateValidateStatus, 5000);
 			} else {
 				jQuery("#prevalidate_id").text(error);
