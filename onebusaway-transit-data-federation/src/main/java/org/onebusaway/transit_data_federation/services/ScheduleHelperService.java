@@ -54,10 +54,33 @@ public interface ScheduleHelperService {
 	 * @return a list of GTFS short names that may qualify.
 	 */
 	List<String> getSearchSuggestions(String agencyId, String input);
-        
+
+       /**
+        * Given a stop, route, and direction, test if that stop has revenue service
+        * on the given route in the given direction.
+        * 
+        * @param agencyId    Agency ID of stop; used only for routing requests
+        *                    to federated backends
+        * @param stopId      Agency-and-ID of stop being tested
+        * @param routeId     Agency-and-ID of route to filter for
+        * @param directionId Direction ID to filter for
+        * @return true if the stop being tested ever permits boarding or alighting
+        *         from the specified route in the specified direction in the 
+        *         currently-loaded bundle; false otherwise
+        */        
 	Boolean stopHasRevenueServiceOnRoute(String agencyId, String stopId,
 		String routeId, String directionId);
         
+        /**
+         * Given a stop, test if that stop has revenue service.
+         * 
+         * @param agencyId Agency ID of stop; used only for routing requests
+         *                 to federated backends
+         * @param stopId   Agency-and-ID of stop being tested
+         * @return true if the stop being tested ever permits boarding or alighting
+         *         from any route in any direction in the currently-loaded bundle;
+         *         false otherwise
+         */
 	Boolean stopHasRevenueService(String agencyId, String stopId);
 
 }
