@@ -72,9 +72,7 @@ public class TrivialSchedulerHelperService implements ScheduleHelperService {
         public Boolean stopHasRevenueServiceOnRoute(String agencyId, String stopId,
                 String routeId, String directionId) {
             AgencyAndId stop = AgencyAndIdLibrary.convertFromString(stopId);
-            AgencyAndId route = AgencyAndIdLibrary.convertFromString(routeId);
-            StopEntry stopEntry = _graph.getStopEntryForId(stop);
-            
+            StopEntry stopEntry = _graph.getStopEntryForId(stop);            
             List<BlockStopTimeIndex> stopTimeIndicesForStop = _blockIndexService.getStopTimeIndicesForStop(stopEntry);
             
             for (BlockStopTimeIndex bsti: stopTimeIndicesForStop) {
@@ -84,11 +82,20 @@ public class TrivialSchedulerHelperService implements ScheduleHelperService {
                     
                     TripEntry theTrip = stopTime.getTrip();
                     
-                    if (!(theTrip.getRoute().getId().equals(route) &&                    
-                    theTrip.getDirectionId().equals(directionId))) {
+                    if (routeId != null && !theTrip.getRoute().getId().equals(AgencyAndIdLibrary.convertFromString(routeId))) {
                         continue;
                     }
                     
+                    if (directionId != null && !theTrip.getDirectionId().equals(directionId)) {
+                        continue;
+                    }
+                    
+                    /*
+                     * If at least one stoptime on one trip (subject to the
+                     * route and direction filters above) permits unrestricted
+                     * pick-up or drop-off at this stop (type=0), then it is
+                     * considered a 'revenue' stop.
+                     */
                     if (stopTime.getDropOffType() == 0 ||
                             stopTime.getPickupType() == 0) {
                         return true;
@@ -99,25 +106,9 @@ public class TrivialSchedulerHelperService implements ScheduleHelperService {
             return false;
         }
 
-    @Override
-    public Boolean stopHasRevenueService(String agencyId, String stopId) {
-            AgencyAndId stop = AgencyAndIdLibrary.convertFromString(stopId);
-            StopEntry stopEntry = _graph.getStopEntryForId(stop);
-            
-            List<BlockStopTimeIndex> stopTimeIndicesForStop = _blockIndexService.getStopTimeIndicesForStop(stopEntry);
-            
-            for (BlockStopTimeIndex bsti: stopTimeIndicesForStop) {
-                List<BlockStopTimeEntry> stopTimes = bsti.getStopTimes();
-                for (BlockStopTimeEntry bste: stopTimes) {
-                    StopTimeEntry stopTime = bste.getStopTime();
-                    
-                    if (stopTime.getDropOffType() == 0 ||
-                            stopTime.getPickupType() == 0) {
-                        return true;
-                    }
-                }
-            }
-            
-            return false;
-    }
+        @Override
+        public Boolean stopHasRevenueService(String agencyId, String stopId) {
+            return this.stopHasRevenueServiceOnRoute(agencyId, stopId,
+                    null, null);
+        }
 }
