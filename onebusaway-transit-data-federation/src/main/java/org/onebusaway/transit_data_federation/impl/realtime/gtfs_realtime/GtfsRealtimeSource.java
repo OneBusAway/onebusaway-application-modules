@@ -15,6 +15,7 @@
  */
 package org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -62,6 +63,12 @@ import com.google.transit.realtime.GtfsRealtime.FeedHeader;
 import com.google.transit.realtime.GtfsRealtime.FeedMessage;
 import com.google.transit.realtime.GtfsRealtimeConstants;
 import com.google.transit.realtime.GtfsRealtimeOneBusAway;
+import com.jcraft.jsch.Channel;
+import com.jcraft.jsch.ChannelSftp;
+import com.jcraft.jsch.JSch;
+import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.Session;
+import com.jcraft.jsch.SftpException;
 
 public class GtfsRealtimeSource implements MonitoredDataSource {
 
@@ -90,9 +97,15 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
 
   private URL _tripUpdatesUrl;
 
+  private String _sftpTripUpdatesUrl;
+
   private URL _vehiclePositionsUrl;
 
+  private String _sftpVehiclePositionsUrl;
+
   private URL _alertsUrl;
+
+  private String _sftpAlertsUrl;
 
   private int _refreshInterval = 30;
   
@@ -171,12 +184,24 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     _tripUpdatesUrl = tripUpdatesUrl;
   }
 
+  public void setSftpTripUpdatesUrl(String sftpTripUpdatesUrl) {
+    _sftpTripUpdatesUrl = sftpTripUpdatesUrl;
+  }
+
   public void setVehiclePositionsUrl(URL vehiclePositionsUrl) {
     _vehiclePositionsUrl = vehiclePositionsUrl;
   }
 
+  public void setSftpVehiclePositionsUrl(String sftpVehiclePositionsUrl) {
+    _sftpVehiclePositionsUrl = sftpVehiclePositionsUrl;
+  }
+
   public void setAlertsUrl(URL alertsUrl) {
     _alertsUrl = alertsUrl;
+  }
+
+  public void setSftpAlertsUrl(String sftpAlertsUrl) {
+    _sftpAlertsUrl = sftpAlertsUrl;
   }
 
   public void setRefreshInterval(int refreshInterval) {
@@ -261,9 +286,15 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   }
 
   public void refresh() throws IOException {
-    FeedMessage tripUpdates = readOrReturnDefault(_tripUpdatesUrl);
-    FeedMessage vehiclePositions = readOrReturnDefault(_vehiclePositionsUrl);
-    FeedMessage alerts = readOrReturnDefault(_alertsUrl);
+    FeedMessage tripUpdates = _sftpTripUpdatesUrl != null ?
+        readOrReturnDefault(_sftpTripUpdatesUrl)
+        : readOrReturnDefault(_tripUpdatesUrl);
+    FeedMessage vehiclePositions = _sftpVehiclePositionsUrl != null ?
+        readOrReturnDefault(_sftpVehiclePositionsUrl)
+        : readOrReturnDefault(_vehiclePositionsUrl);
+    FeedMessage alerts = _sftpAlertsUrl != null ?
+        readOrReturnDefault(_sftpAlertsUrl)
+        : readOrReturnDefault(_alertsUrl);
     MonitoredResult result = new MonitoredResult();
     result.setAgencyIds(_agencyIds);
     handeUpdates(result, tripUpdates, vehiclePositions, alerts);
@@ -522,6 +553,10 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     return readFeedFromUrl(url);
   }
 
+  private FeedMessage readOrReturnDefault(String url) throws IOException {
+    return readFeedFromUrl(url);
+  }
+
   private FeedMessage getDefaultFeedMessage() {
     FeedMessage.Builder builder = FeedMessage.newBuilder();
     FeedHeader.Builder header = FeedHeader.newBuilder();
@@ -555,6 +590,74 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
       }
     }
   }
+
+  /**
+   * This method was added to allow accessing an SFTP feed, since the Java URL
+   * class does not yet support the SFTP protocol.
+   *
+   * @param url of the SFTP feed to read
+   * @return a {@link FeedMessage} constructed from the protocol buffer content
+   *         of the specified url
+   * @throws IOException
+   */
+  private FeedMessage readFeedFromUrl(String url) throws IOException {
+   Session session = null;
+   Channel channel = null;
+   ChannelSftp downloadChannelSftp = null;
+   InputStream in = null;
+   JSch jsch=new JSch();
+
+   // Parse SFTP URL
+   int idx = url.indexOf("//") + 2;
+   int idx2 = url.indexOf(":", idx);
+   String user = url.substring(idx, idx2);
+   idx = idx2 + 1;
+   idx2 = url.indexOf("@");
+   String pw = url.substring(idx, idx2);
+   url = url.substring(idx2 + 1);
+   idx = url.indexOf(":");
+   String host = url.substring(0, idx);
+   String rdir = "";
+   idx = url.indexOf("/") + 1;
+   idx2 = url.lastIndexOf("/");
+   if (idx2 > idx) {
+     rdir = url.substring(idx, idx2);
+   } else {
+     idx2 = idx-1;
+   }
+   String rfile = url.substring(idx2+1);
+
+   try {
+     session=jsch.getSession(user, host, 22);
+     session.setPassword(pw);
+     session.setConfig("StrictHostKeyChecking", "no");
+     session.connect(10000);  // Set timeout to 10 seconds
+     channel = session.openChannel("sftp");
+     channel.connect();
+     downloadChannelSftp = (ChannelSftp) channel;
+     downloadChannelSftp.cd(downloadChannelSftp.getHome() + "/" + rdir);
+     File downloadFile = new File(downloadChannelSftp.getHome() + "/" + rfile);
+     in = downloadChannelSftp.get(downloadFile.getName());
+
+     return FeedMessage.parseFrom(in, _registry);
+   } catch (JSchException ex) {
+     _log.error("connection issue with sftp url " + url);
+     return getDefaultFeedMessage();
+   } catch (SftpException e) {
+     _log.error("connection issue with sftp");
+     e.printStackTrace();
+    return getDefaultFeedMessage();
+  } finally {
+     try {
+       if (channel != null) channel.disconnect();
+       if (session != null) session.disconnect();
+       if (in != null) in.close();
+     } catch (IOException ex) {
+       _log.error("error closing url stream " + url);
+     }
+   }
+ }
+
 /**
  * Set the headers to the urlConnection if any
  * @param urlConnection
