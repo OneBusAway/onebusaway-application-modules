@@ -15,13 +15,14 @@
  */
 
 var maps = new Object();;
-var transitimeWeb="gtfsrt.prod.wmata.obaweb.org:8080";
-var obaWeb="app.prod.wmata.obaweb.org:8080";
+var transitimeWeb="gtfsrt.dev.wmata.obaweb.org:8080";
+var obaWeb="app.dev.wmata.obaweb.org:8080";
 var avlAttrs = new Object();
 var obaAttrs = new Object();
 var autoRefresh = false;
 var obaAge = null;
 var avlAge = null;
+var forceBounds = false;
 
 jQuery(function() {
 	startup();
@@ -62,7 +63,7 @@ function styleForPrediction(field) {
 	fieldPred.setHours(fieldVal.split(":")[0]);
 	fieldPred.setMinutes(fieldVal.split(":")[1]);
 	fieldPred.setSeconds(fieldVal.split(":")[2]);
-	console.log("time: " + fieldPred);
+
 	//if prediction is in future that's great
 	if (fieldPred.getTime() >= now.getTime()) {
 		return "#33FFCC" // green == good
@@ -116,7 +117,7 @@ function onClearMapClick() {
 	});
 }
 
-function loadMap(latLng, mapName) {
+function loadMap(latLng1, latLng2, mapName) {
 	var map;
 	if (maps[mapName] != undefined) {
 		map = maps[mapName];
@@ -131,21 +132,52 @@ function loadMap(latLng, mapName) {
 		}).addTo(map);
 	}
 	
-	// center map around marker
-	map.setView(latLng, 17);
-	var marker = L.marker(latLng);
-	map.addLayer(marker);
-	
+	// if latLng2 is present, its transitime's guess at vehicle position
+	if (latLng2 == null || latLng2 == undefined || latLng2.lat == 0 && latLng2.lng == 0) {
+		// center map around single marker
+		map.setView(latLng1, 17);
+		var marker = L.marker(latLng1);
+		map.addLayer(marker);
+	} else if (latLng1 == null || latLng1 == undefined) {
+		//console.log(mapName + " missing input");
+	} else {
+		console.log(mapName + " " + latLng1 + " vs " + latLng2);
+		// show two marks and center between intermediate position
+		var redIcon = L.Icon.extend({
+			  options: {
+			      iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png'
+			  }
+			});
+		
+		var marker1 = L.marker(latLng1);
+		map.addLayer(marker1);
+
+		var marker2 = L.marker(latLng2, {icon: new redIcon});
+		map.addLayer(marker2);
+		
+		var group = new L.featureGroup([marker1, marker2]);
+		// this doesn't work as well as it should so make it optional
+		if (forceBounds == true) {
+			var centerLat = (latLng1.lat + latLng2.lat) /2;
+			var centerLon = (latLng1.lng + latLng2.lng) /2;
+			map.setView(L.latLng(centerLat, centerLon), 17);
+			map.fitBounds(group.getBounds());
+		} else {
+			map.setView(latLng1, 17);
+		}
+	}	
 }
 
-function loadAvlMap(latLng) {
-	if (latLng != null) {
-		loadMap(latLng, 'avlMap');
+function loadAvlMap(latLng1, latLng2) {
+	if (latLng2 != null && latLng2 != null) {
+		loadMap(latLng1, latLng2, 'avlMap');
+	} else if (latLng != null) {
+		loadMap(latLng1, 'avlMap');
 	}
 }
 function loadObaMap(latLng) {
 	if (latLng != null) {
-		loadMap(latLng, 'obaMap');
+		loadMap(latLng, null, 'obaMap');
 	}
 }
 
@@ -196,7 +228,6 @@ function doSearch() {
 		async: false,
 		success: function(response) {
 			var attrs = parseAvlData(response);
-			loadAvlMap(attrs['latLng']);
 			queryPredictionValues(attrs, vehicleId);
 			queryFinalPrediction(attrs)
 			avlAttrs = attrs;
@@ -210,6 +241,25 @@ function doSearch() {
 			
 		}
 	});
+	
+	var predictionLocationUrl = "http://" + transitimeWeb 
+	+ "/api/v1/key/4b248c1b/agency/1/command/vehicleLocation?v=" + vehicleId
+	+ "&format=json"
+	jQuery.ajax({
+		url: predictionLocationUrl,
+		type: "GET",
+		async: false,
+		success: function(response) {
+			avlAttrs["predictionLocation"] = L.latLng(response[0], response[1]);
+			loadAvlMap(avlAttrs['latLng'], avlAttrs["predictionLocation"]);
+
+		},
+		fail: function() {
+			loadAvlMap(avlAttrs['latLng'], null);
+			console.log("no predictionLocation");
+		}
+	});
+	
 	var obaUrl = "http://" + obaWeb + "/onebusaway-api-webapp/siri/vehicle-monitoring?key=OBAKEY&OperatorRef="
 	+ agencyId + "&VehicleRef=" + vehicleId +  "&type=json";
 	jQuery.ajax({
@@ -423,7 +473,7 @@ function queryPredictionValues(attrs, vehicleId) {
 				});
 			},
 			fail: function() {
-				setNextStopPred("...");
+				setAvlNextStopPred("...");
 			}
 		});
 	} else {
@@ -433,7 +483,7 @@ function queryPredictionValues(attrs, vehicleId) {
 		jQuery("#avl_block").html("...");
 		jQuery("#avl_trip").html("...");
 		setAvlNextStopId("...");
-		setNextStopPred("...");
+		setAvlNextStopPred("...");
 		jQuery("#avl_finalstopid").html("...");
 		jQuery("#avl_finalstoppred").html("...");
 	}
@@ -572,8 +622,10 @@ function formatDate(date) {
 }
 
 function formatTime(date) {
+	if (date == null) return null;
 	var local = new Date(date);
     local.setMinutes(date.getMinutes() - date.getTimezoneOffset());
+    if (local.toJSON() == null) return null; // invalid date
     return local.toJSON().slice(11, 19);
 	
 }
@@ -584,7 +636,8 @@ function parseAvlData(jsonData) {
     var vehicle;
     
     if (jsonData.data.length == 0) {
-    	console.log("no data: " + jsonData);
+    	console.log("no data: " + jsonData.toString());
+    	return attrs;
     }
     
     for (var i=0; i<jsonData.data.length; ++i) {
