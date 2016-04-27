@@ -575,7 +575,6 @@ class GtfsRealtimeTripLibrary {
           if (tripUpdate.hasExtension(GtfsRealtimeOneBusAway.obaTripUpdate)) {
             OneBusAwayTripUpdate obaTripUpdate = tripUpdate.getExtension(GtfsRealtimeOneBusAway.obaTripUpdate);
             if (obaTripUpdate.hasDelay()) {
-              _log.error("found extension");
               /**
                * TODO: Improved logic around picking the "best" schedule deviation
                */
