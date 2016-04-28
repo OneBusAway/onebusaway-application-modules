@@ -31,6 +31,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 
 @ParentPackage("json-default")
 @Result(type="json", params={"callbackParameter", "callback"})
@@ -78,7 +79,10 @@ public class StopsWithinBoundsAction extends OneBusAwayEnterpriseActionSupport {
     }
     
     for(StopBean stop : stops.getStops()) {
-      _stops.add(new StopOnRoute(stop));
+      String agencyId = AgencyAndIdLibrary.convertFromString(stop.getId()).getAgencyId();
+      if (_transitDataService.stopHasRevenueService(agencyId, stop.getId())) {
+        _stops.add(new StopOnRoute(stop));
+      }
     }
     
     return SUCCESS;
