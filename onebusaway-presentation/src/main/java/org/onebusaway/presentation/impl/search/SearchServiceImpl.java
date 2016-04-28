@@ -55,6 +55,7 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 
 /**
  * A class that constructs search results given a search result factory that is
@@ -152,8 +153,11 @@ public class SearchServiceImpl implements SearchService {
 			List<StopBean> stopsList = stops.getStops();
 
 			for (StopBean stop : stopsList) {
-				_stopCodeToStopIdMap.put(agency.getAgency().getId() + "_"
+				String agencyId = AgencyAndIdLibrary.convertFromString(stop.getId()).getAgencyId();
+				if (_transitDataService.stopHasRevenueService(agencyId, stop.getId())) {
+					_stopCodeToStopIdMap.put(agency.getAgency().getId() + "_"
 						+ stop.getCode().toUpperCase(), stop.getId());
+				}
 			}
 		}
 
@@ -205,6 +209,11 @@ public class SearchServiceImpl implements SearchService {
 		// Iterate through each stop and see if it adds additional routes for a
 		// direction to our final results.
 		for (StopBean stopBean : stops.getStops()) {
+      
+      String agencyId = AgencyAndIdLibrary.convertFromString(stopBean.getId()).getAgencyId();
+      if (!_transitDataService.stopHasRevenueService(agencyId, stopBean.getId())) {
+          continue;
+      }
 
 			// Get the stop bean that is actually inside this search result. We
 			// kept track of it earlier.
@@ -633,13 +642,19 @@ public class SearchServiceImpl implements SearchService {
 
 		if (matches.size() > 0)  // support multiple agency stop matches
 		  for (StopBean stopBean : matches) {
-		    results.addMatch(resultFactory.getStopResult(stopBean,
-		        results.getRouteFilter()));
+                      String agencyId = AgencyAndIdLibrary.convertFromString(stopBean.getId()).getAgencyId();
+                      if (_transitDataService.stopHasRevenueService(agencyId, stopBean.getId())) {
+		        results.addMatch(resultFactory.getStopResult(stopBean,
+		          results.getRouteFilter()));
+                      }
 		  }
 		else {
 			for (StopBean match : matches) {
+                            String agencyId = AgencyAndIdLibrary.convertFromString(match.getId()).getAgencyId();
+                            if (_transitDataService.stopHasRevenueService(agencyId, match.getId())) {
 				results.addSuggestion(resultFactory.getStopResult(match,
 						results.getRouteFilter()));
+                            }
 			}
 		}
 	}

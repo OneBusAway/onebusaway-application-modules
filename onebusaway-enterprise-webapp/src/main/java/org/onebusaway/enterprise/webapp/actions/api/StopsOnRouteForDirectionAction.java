@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 
 @ParentPackage("json-default")
 @Result(type="json", params={"callbackParameter", "callback"})
@@ -67,7 +68,11 @@ public class StopsOnRouteForDirectionAction extends OneBusAwayEnterpriseActionSu
         
         if(!stopGroupBean.getStopIds().isEmpty()) {
           for(String stopId : stopGroupBean.getStopIds()) {
-            _stops.add(new StopOnRoute(stopIdToStopBeanMap.get(stopId)));
+            String agencyId = AgencyAndIdLibrary.convertFromString(_routeId).getAgencyId();
+            if (_transitDataService.stopHasRevenueServiceOnRoute(agencyId, stopId,
+                    stopsForRoute.getRoute().getId(), stopGroupBean.getId())) {
+              _stops.add(new StopOnRoute(stopIdToStopBeanMap.get(stopId)));
+            }
           }
         }
       }
