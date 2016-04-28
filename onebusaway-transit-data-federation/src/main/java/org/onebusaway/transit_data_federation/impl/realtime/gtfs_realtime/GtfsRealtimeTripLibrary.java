@@ -17,7 +17,18 @@
  */
 package org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime;
 
-import org.onebusaway.collections.FactoryMap;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+
 import org.onebusaway.collections.MappingLibrary;
 import org.onebusaway.collections.Min;
 import org.onebusaway.gtfs.model.AgencyAndId;
@@ -25,6 +36,7 @@ import org.onebusaway.gtfs.model.calendar.ServiceDate;
 import org.onebusaway.gtfs.serialization.mappings.InvalidStopTimeException;
 import org.onebusaway.gtfs.serialization.mappings.StopTimeFieldMappingFactory;
 import org.onebusaway.realtime.api.EVehiclePhase;
+import org.onebusaway.realtime.api.TimepointPredictionRecord;
 import org.onebusaway.realtime.api.VehicleLocationRecord;
 import org.onebusaway.transit_data_federation.services.blocks.BlockCalendarService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
@@ -34,6 +46,8 @@ import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTi
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
@@ -48,26 +62,9 @@ import com.google.transit.realtime.GtfsRealtime.VehiclePosition;
 import com.google.transit.realtime.GtfsRealtimeOneBusAway;
 import com.google.transit.realtime.GtfsRealtimeOneBusAway.OneBusAwayTripUpdate;
 
-import org.onebusaway.realtime.api.TimepointPredictionRecord;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
 class GtfsRealtimeTripLibrary {
 
   private static final Logger _log = LoggerFactory.getLogger(GtfsRealtimeTripLibrary.class);
-  private static final String DEBUG_VEHICLE = "16";
 
   private GtfsRealtimeEntitySource _entitySource;
 
@@ -144,10 +141,6 @@ class GtfsRealtimeTripLibrary {
         // Trip update has a vehicle ID - index by vehicle ID
         String vehicleId = tu.getVehicle().getId();
 
-        if (DEBUG_VEHICLE.equals(vehicleId)) {
-          _log.debug("checking trip " + tu.getTrip().getTripId());
-        }
-        
         if (!tripUpdatesByVehicleId.containsKey(vehicleId)) {
           tripUpdatesByVehicleId.put(vehicleId, tu);
         } else {
@@ -156,9 +149,6 @@ class GtfsRealtimeTripLibrary {
               vehicleId);
 
           if (tripMoreAppropriate(tu, tripUpdatesByVehicleId.get(vehicleId), vehicleId)) {
-            if (DEBUG_VEHICLE.equals(vehicleId)) {
-              _log.debug("trip " + tu.getTrip().getTripId() + " wins");
-            }
             tripUpdatesByVehicleId.put(vehicleId, tu);
           }
 
@@ -327,10 +317,6 @@ class GtfsRealtimeTripLibrary {
     long closestTemporalUpdateNewTrip = closestTemporalUpdate(newTrip);
     long closestTemporalUpdateOriginal = closestTemporalUpdate(original);
     
-    if (DEBUG_VEHICLE.equals(vehicleId)) {
-      _log.debug(closestTemporalUpdateNewTrip + " <? " + closestTemporalUpdateOriginal);
-    }
-    
     if (closestTemporalUpdateNewTrip < closestTemporalUpdateOriginal)
       return true;
     
@@ -424,41 +410,6 @@ class GtfsRealtimeTripLibrary {
 
     return adjustedBlockStartTime;
   }
-
-  private boolean hasDelayValue(TripUpdate tripUpdate) {
-
-    if (tripUpdate.hasDelay()) {
-      return true;
-    }
-
-    if (tripUpdate.hasExtension(GtfsRealtimeOneBusAway.obaTripUpdate)) {
-      OneBusAwayTripUpdate obaTripUpdate = tripUpdate.getExtension(GtfsRealtimeOneBusAway.obaTripUpdate);
-      if (obaTripUpdate.hasDelay()) {
-        return true;
-      }
-    }
-
-    if (tripUpdate.getStopTimeUpdateCount() == 0)
-      return false;
-
-    StopTimeUpdate stopTimeUpdate = tripUpdate.getStopTimeUpdate(0);
-    if (!(stopTimeUpdate.hasArrival() || stopTimeUpdate.hasDeparture()))
-      return false;
-
-    boolean hasDelay = false;
-    if (stopTimeUpdate.hasDeparture()) {
-      StopTimeEvent departure = stopTimeUpdate.getDeparture();
-      hasDelay |= departure.hasDelay();
-      hasDelay |= departure.hasTime();
-    }
-    if (stopTimeUpdate.hasArrival()) {
-      StopTimeEvent arrival = stopTimeUpdate.getArrival();
-      hasDelay |= arrival.hasDelay();
-      hasDelay |= arrival.hasTime();
-    }
-    return hasDelay;
-  }
-
 
   private BlockDescriptor getTripDescriptorAsBlockDescriptor(MonitoredResult result,
       TripDescriptor trip) {
@@ -565,9 +516,6 @@ class GtfsRealtimeTripLibrary {
       
       if (updatesForTrip != null) {
         for (TripUpdate tripUpdate : updatesForTrip) {
-          if (DEBUG_VEHICLE.equals(vehicleId)) {
-            _log.debug("found trip " + tripId);
-          }
           /**
            * TODO: delete this code once all upstream systems have been
            * migrated the new "delay" and "timestamp" fields.
@@ -598,8 +546,6 @@ class GtfsRealtimeTripLibrary {
             best.isInPast = false;
             best.scheduleDeviation = tripUpdate.getDelay();
             best.tripId = tripId.getId();
-            if (DEBUG_VEHICLE.equals(vehicleId))
-              _log.debug("record has delay");
           }
           if (tripUpdate.hasTimestamp()) {
             best.timestamp = tripUpdate.getTimestamp() * 1000;
@@ -656,15 +602,13 @@ class GtfsRealtimeTripLibrary {
       record.setBlockStartTime(blockDescriptor.getStartTime());
     }
     long tripStartTime = this.getTripStartTime(best.tripId);
-    // if trip does't start till the future mark it as deadhead
+    /*
+     *  if trip does't start till the future mark it as deadhead
+     *  TODO:  if large schedule deviation in the past this strategy may not work
+     */
     if (best.scheduleDeviation == 0 &&  (tripStartTime - currentTime) > 5 * 60 && !best.isInPast) {
-      if (DEBUG_VEHICLE.equals(vehicleId))
-        _log.debug("discarding schedule deviation for future trip for vehicleId=" + vehicleId + " with future seconds =" + (tripStartTime - currentTime));
       record.setPhase(EVehiclePhase.DEADHEAD_BEFORE);
     } else {
-      if (DEBUG_VEHICLE.equals(vehicleId)) {
-        _log.debug("schedDev final = " + best.scheduleDeviation + " for tripStartTime=" + tripStartTime);
-      }
       record.setScheduleDeviation(best.scheduleDeviation);
     }
     if (best.timestamp != 0) {
@@ -809,9 +753,6 @@ class GtfsRealtimeTripLibrary {
     if (delta < best.delta || (!isInPast && best.isInPast)) {
       best.delta = delta;
       best.isInPast = isInPast;
-      if (DEBUG_VEHICLE.equals(vehicleId)) {
-        _log.debug("schedDev=" + scheduleDeviation + " for trip " + tripId + " with delta=" + delta);
-      }
       best.scheduleDeviation = scheduleDeviation;
       best.tripId = tripId.getId();
     }
