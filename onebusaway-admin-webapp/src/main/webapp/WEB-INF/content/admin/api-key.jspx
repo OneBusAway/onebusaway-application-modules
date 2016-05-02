@@ -24,6 +24,9 @@
 <s:url var="url" value="/css/admin.css" />
 <link rel="stylesheet" href="${url}" type="text/css" />
 
+<s:url var="url" value="/css/api-key.css" />
+<link rel="stylesheet" href="${url}" type="text/css" />
+
 <s:url var="url" value="/js/lib/jquery.js" />
 <script type="text/javascript" src="${url}">
 	<!-- prevent jspx minimization -->
@@ -36,18 +39,39 @@
 <body>
 	<div id="content">
 		<div id="text">
-			<h2>Create an API key</h2>
-			<s:form action="api-key!createAPIKey" namespace="/admin">
+			<h2>Manage API keys</h2>
+			<s:form  action="api-key" namespace="/admin">
+				<fieldset id="apiKeyContactInfo">
+					<legend id="contactInfoLegend">Contact Information</legend>
+					<div id="contactInfoItems">
+						<label>Name</label>
+						<s:textfield id="contactName" name="contactName"
+								style="margin: 1px; width: 300px;" />
+						<label>Company</label>
+						<s:textfield id="contactCompany" name="contactCompany"
+								style="margin: 1px; width: 300px;" />
+						<label>Email</label>
+						<s:textfield id="contactEmail" name="contactEmail"
+								style="margin: 1px; width: 300px;" />
+						<label>Details</label>
+						<s:textarea id="contactDetails" name="contactDetails"
+								style="margin: 1px; width: 300px;"
+								cols="60" rows="4"/>
+					</div>
+				</fieldset>
 				<fieldset style="background-color: transparent; border: 0;">
 					<label class="top">Key :</label>
 					<div style="border: 1px solid #000; display: inline-block;">
 						<s:textfield id="key" name="key" required="true"
 							style="margin: 1px; width: 300px;" />
-						<button type="button" onclick="handleGenerateApiKeyClick()"
-							style="background-color: transparent; border: 0;">Generate</button>
+						<s:submit value="Generate new key"
+							onclick="handleGenerateApiKeyClick(); return false" />
+						<s:submit align="left" value="Search" name="search" method="searchAPIKey" />
 					</div>
 				</fieldset>
-				<s:submit align="left" value="Create" />
+				<s:submit align="left" value="Save" name="save" method="saveAPIKey" />
+				<s:submit align="left" value="Delete" name="delete" method="deleteAPIKey" />
+				<s:submit value="Clear" onclick="clearApiKeyFields(); return false;" />
 				<div id="apiKeyResult">
 					<s:actionmessage />
 					<s:fielderror />
