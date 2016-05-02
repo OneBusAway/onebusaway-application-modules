@@ -89,30 +89,34 @@ public class StopForIdAction extends OneBusAwayEnterpriseActionSupport {
       List<StopGroupingBean> stopGroupings = stopsForRoute.getStopGroupings();
       for (StopGroupingBean stopGroupingBean : stopGroupings) {
         for (StopGroupBean stopGroupBean : stopGroupingBean.getStopGroups()) {
-          NameBean name = stopGroupBean.getName();
-          String type = name.getType();
-
-          if (!type.equals("destination"))
-            continue;
-        
-          // filter out route directions that don't stop at this stop
-          if(!stopGroupBean.getStopIds().contains(_stopId))
-            continue;
-          
-          Boolean hasUpcomingScheduledService = 
-        		  _transitDataService.stopHasUpcomingScheduledService((routeBean.getAgency()!=null?routeBean.getAgency().getId():null), System.currentTimeMillis(), stop.getId(), 
-        				  routeBean.getId(), stopGroupBean.getId());
-
-          // if there are buses on route, always have "scheduled service"
-          Boolean routeHasVehiclesInService = true;
-        		  //_realtimeService.getVehiclesInServiceForStopAndRoute(stop.getId(), routeBean.getId(), System.currentTimeMillis());
-
-          if(routeHasVehiclesInService) {
-        	  hasUpcomingScheduledService = true;
-          }
-          
-          routeDirections.add(new RouteDirection(stopGroupBean, null, null, hasUpcomingScheduledService));
-        }
+        	if (_transitDataService.stopHasRevenueServiceOnRoute((routeBean.getAgency()!=null?routeBean.getAgency().getId():null),
+        			 _stopId, routeBean.getId(), stopGroupBean.getId())) {
+        	
+		          NameBean name = stopGroupBean.getName();
+		          String type = name.getType();
+		
+		          if (!type.equals("destination"))
+		            continue;
+		        
+		          // filter out route directions that don't stop at this stop
+		          if(!stopGroupBean.getStopIds().contains(_stopId))
+		            continue;
+		          
+		          Boolean hasUpcomingScheduledService = 
+		        		  _transitDataService.stopHasUpcomingScheduledService((routeBean.getAgency()!=null?routeBean.getAgency().getId():null), System.currentTimeMillis(), stop.getId(), 
+		        				  routeBean.getId(), stopGroupBean.getId());
+		
+		          // if there are buses on route, always have "scheduled service"
+		          Boolean routeHasVehiclesInService = true;
+		        		  //_realtimeService.getVehiclesInServiceForStopAndRoute(stop.getId(), routeBean.getId(), System.currentTimeMillis());
+		
+		          if(routeHasVehiclesInService) {
+		        	  hasUpcomingScheduledService = true;
+		          }
+		          
+		          routeDirections.add(new RouteDirection(stopGroupBean, null, null, hasUpcomingScheduledService));
+	        }
+		}
       }
       
       RouteAtStop routeAtStop = new RouteAtStop(routeBean, routeDirections);

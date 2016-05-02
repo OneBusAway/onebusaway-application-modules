@@ -29,6 +29,7 @@ import org.onebusaway.realtime.api.TimepointPredictionRecord;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
 import org.onebusaway.transit_data.model.ArrivalsAndDeparturesQueryBean;
 import org.onebusaway.transit_data.model.ListBean;
+import org.onebusaway.transit_data.model.RouteBean;
 import org.onebusaway.transit_data.model.StopWithArrivalsAndDeparturesBean;
 import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationQueryBean;
@@ -138,7 +139,6 @@ public class RealtimeServiceImpl implements RealtimeService {
       if(!_presentationService.include(tripDetails.getStatus()))
           continue;
       
-      
       VehicleActivityStructure activity = new VehicleActivityStructure();
       // Check for Realtime Data
       if(!tripDetails.getStatus().isPredicted()){
@@ -230,6 +230,7 @@ public class RealtimeServiceImpl implements RealtimeService {
       
       TripStatusBean statusBeanForCurrentTrip = adBean.getTripStatus();
       TripBean tripBeanForAd = adBean.getTrip();
+      final RouteBean routeBean = tripBeanForAd.getRoute();
       
       if(statusBeanForCurrentTrip == null)
     	  continue;
@@ -237,6 +238,9 @@ public class RealtimeServiceImpl implements RealtimeService {
       if(!_presentationService.include(statusBeanForCurrentTrip) || !_presentationService.include(adBean, statusBeanForCurrentTrip))
           continue;
       
+      if(!_transitDataService.stopHasRevenueServiceOnRoute((routeBean.getAgency()!=null?routeBean.getAgency().getId():null), 
+  	    	  stopId, routeBean.getId(), adBean.getTrip().getDirectionId()))
+    	  continue;
       
       MonitoredStopVisitStructure stopVisit = new MonitoredStopVisitStructure();
      
