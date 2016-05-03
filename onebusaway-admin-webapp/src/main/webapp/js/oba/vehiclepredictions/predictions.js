@@ -310,8 +310,8 @@ function queryOBAApiValues(attrs, agencyId, vehicleId) {
 				jQuery("#oba_tdsnextstopid").html(s.nextStop.split("_")[1].toString());
 				attrs["tdsLastUpdate"] = new Date(s.lastUpdateTime);
 				setObaAge(s.lastUpdateTime);
-				attrs["tdsNextPrediction"] = new Date(now.getTime() + (s.nextStopTimeOffset * 1000));
-				jQuery("#oba_tdsnextstoppred").html(formatTime(new Date(now.getTime() + (s.nextStopTimeOffset * 1000))));
+				
+				queryOBANextStopPrediction(attrs, agencyId, attrs["tdsNextStopId"], vehicleId)
 			} else {
 				jQuery("#oba_schdev").html("...");
 				jQuery("#oba_tdsnextstopid").html("...");
@@ -385,6 +385,14 @@ function queryOBAFinalStop(attrs, agencyId, vehicleId) {
 }
 
 function queryOBAFinalPrediction(attrs, agencyId, stopId, vehicleId) {
+	queryOBAStopPrediction(attrs, agencyId, stopId, vehicleId, true, "tdsFinalStopPred", "#oba_finalstoppred")
+}
+
+function queryOBANextStopPrediction(attrs, agencyId, stopId, vehicleId) {
+	queryOBAStopPrediction(attrs, agencyId, stopId, vehicleId, false, "tdsNextPrediction", "#oba_tdsnextstoppred")
+}
+
+function queryOBAStopPrediction(attrs, agencyId, stopId, vehicleId, isArrival, attrsKey, label) {
 	
 	var tripId = attrs["tripId"];
 	// Setting service date to today so will not work for trips that span a day.
@@ -403,12 +411,13 @@ function queryOBAFinalPrediction(attrs, agencyId, stopId, vehicleId) {
 		dataType: "jsonp",
 		async: false,
 		success: function(response) {
-			var pred = response.data.entry.predictedArrivalTime;
-			attrs["tdsFinalStopPred"] = new Date(pred);
-			jQuery("#oba_finalstoppred").html(formatTime(new Date(pred)));
+			var e = response.data.entry;
+			var pred = isArrival ? e.predictedArrivalTime : e.predictedDepartureTime;
+			attrs[attrsKey] = new Date(pred);
+			jQuery(label).html(formatTime(new Date(pred)));
 		},
 		fail: function() {
-			jQuery("#oba_finalstoppred").html("...");
+			jQuery(label).html("...");
 		}
 	});
 	
