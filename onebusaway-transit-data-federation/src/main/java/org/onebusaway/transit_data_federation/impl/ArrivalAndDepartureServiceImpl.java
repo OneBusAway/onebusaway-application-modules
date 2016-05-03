@@ -74,7 +74,7 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
   private BlockLocationService _blockLocationService;
 
   private BlockStatusService _blockStatusService;
-  
+
   private boolean removeFuturePredictionsWithoutRealtime = false;
 
   @Autowired
@@ -83,7 +83,8 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
   }
 
   @Autowired
-  public void setBlockLocationService(BlockLocationService blockLocationService) {
+  public void setBlockLocationService(
+      BlockLocationService blockLocationService) {
     _blockLocationService = blockLocationService;
   }
 
@@ -92,68 +93,74 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
     _blockStatusService = blockStatusService;
   }
 
-
   public void setRemoveFuturePredictionsWithoutRealtime(boolean remove) {
-	this.removeFuturePredictionsWithoutRealtime = remove;
+    this.removeFuturePredictionsWithoutRealtime = remove;
   }
-  
+
   @Override
   public List<ArrivalAndDepartureInstance> getArrivalsAndDeparturesForStopInTimeRange(
       StopEntry stop, TargetTime targetTime, long fromTime, long toTime) {
 
     // We add a buffer before and after to catch late and early buses
-    Date fromTimeBuffered = new Date(fromTime - _blockStatusService.getRunningLateWindow() * 1000);
-    Date toTimeBuffered = new Date(toTime + _blockStatusService.getRunningEarlyWindow() * 1000);
+    Date fromTimeBuffered = new Date(
+        fromTime - _blockStatusService.getRunningLateWindow() * 1000);
+    Date toTimeBuffered = new Date(
+        toTime + _blockStatusService.getRunningEarlyWindow() * 1000);
 
     List<StopTimeInstance> stis = _stopTimeService.getStopTimeInstancesInTimeRange(
-        stop, fromTimeBuffered, toTimeBuffered, EFrequencyStopTimeBehavior.INCLUDE_UNSPECIFIED);
-    
+        stop, fromTimeBuffered, toTimeBuffered,
+        EFrequencyStopTimeBehavior.INCLUDE_UNSPECIFIED);
+
     long frequencyOffsetTime = Math.max(targetTime.getTargetTime(), fromTime);
 
-    Map<BlockInstance, List<StopTimeInstance>> stisByBlockId = getStopTimeInstancesByBlockInstance(stis);
+    Map<BlockInstance, List<StopTimeInstance>> stisByBlockId = getStopTimeInstancesByBlockInstance(
+        stis);
 
     List<ArrivalAndDepartureInstance> instances = new ArrayList<ArrivalAndDepartureInstance>();
 
     for (Map.Entry<BlockInstance, List<StopTimeInstance>> entry : stisByBlockId.entrySet()) {
 
       BlockInstance blockInstance = entry.getKey();
-            
+
       List<BlockLocation> locations = _blockLocationService.getLocationsForBlockInstance(
           blockInstance, targetTime);
 
       List<StopTimeInstance> stisForBlock = entry.getValue();
 
       for (StopTimeInstance sti : stisForBlock) {
-    	
+
         applyRealTimeToStopTimeInstance(sti, targetTime, fromTime, toTime,
             frequencyOffsetTime, blockInstance, locations, instances);
-        
-        if (sti.getFrequency() != null && sti.getFrequency().getExactTimes() == 0) {
-        	applyPostInterpolateForFrequencyNoSchedule(sti, fromTime, toTime,
-        	  frequencyOffsetTime,  blockInstance, instances);
+
+        if (sti.getFrequency() != null
+            && sti.getFrequency().getExactTimes() == 0) {
+          applyPostInterpolateForFrequencyNoSchedule(sti, fromTime, toTime,
+              frequencyOffsetTime, blockInstance, instances);
         }
       }
     }
-    
+
     if (removeFuturePredictionsWithoutRealtime) {
-    	
-    	List<ArrivalAndDepartureInstance> filteredInstances = new ArrayList<ArrivalAndDepartureInstance>();
-    	
-    	for (ArrivalAndDepartureInstance instance : instances) {
-    		FrequencyEntry entry = instance.getFrequency();
-    	
-			boolean toAdd = (entry == null) // not a frequency-based instance
-												// instance
-					// frequency interval has started
-					|| (instance.getServiceDate() + (entry.getStartTime() * 1000) < targetTime.getTargetTime())
-					// instance has realtime data
-					|| (instance.getBlockLocation() != null && instance.getBlockLocation().isPredicted());
-    		
-    		if (toAdd)
-    			filteredInstances.add(instance);
-    	}
-    	
-    	return filteredInstances;
+
+      List<ArrivalAndDepartureInstance> filteredInstances = new ArrayList<ArrivalAndDepartureInstance>();
+
+      for (ArrivalAndDepartureInstance instance : instances) {
+        FrequencyEntry entry = instance.getFrequency();
+
+        boolean toAdd = (entry == null) // not a frequency-based instance
+            // instance
+            // frequency interval has started
+            || (instance.getServiceDate()
+                + (entry.getStartTime() * 1000) < targetTime.getTargetTime())
+                // instance has realtime data
+            || (instance.getBlockLocation() != null
+                && instance.getBlockLocation().isPredicted());
+
+        if (toAdd)
+          filteredInstances.add(instance);
+      }
+
+      return filteredInstances;
     }
 
     return instances;
@@ -164,7 +171,8 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
       StopEntry stop, long currentTime, long fromTime, long toTime) {
 
     List<StopTimeInstance> stis = _stopTimeService.getStopTimeInstancesInTimeRange(
-        stop, new Date(fromTime), new Date(toTime), EFrequencyStopTimeBehavior.INCLUDE_UNSPECIFIED);
+        stop, new Date(fromTime), new Date(toTime),
+        EFrequencyStopTimeBehavior.INCLUDE_UNSPECIFIED);
 
     List<ArrivalAndDepartureInstance> instances = new ArrayList<ArrivalAndDepartureInstance>();
 
@@ -305,7 +313,8 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
 
     if (instance.isPredictedArrivalTimeSet()) {
 
-      int scheduledDeviation = (int) ((instance.getPredictedArrivalTime() - instance.getScheduledArrivalTime()) / 1000);
+      int scheduledDeviation = (int) ((instance.getPredictedArrivalTime()
+          - instance.getScheduledArrivalTime()) / 1000);
 
       int departureDeviation = propagateScheduleDeviationBackwardBetweenStops(
           prevStopTime, stopTime, scheduledDeviation);
@@ -364,7 +373,8 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
 
     if (instance.isPredictedDepartureTimeSet()) {
 
-      int scheduledDeviation = (int) ((instance.getPredictedDepartureTime() - instance.getScheduledDepartureTime()) / 1000);
+      int scheduledDeviation = (int) ((instance.getPredictedDepartureTime()
+          - instance.getScheduledDepartureTime()) / 1000);
 
       int arrivalDeviation = propagateScheduleDeviationForwardBetweenStops(
           stopTime, nextStopTime, scheduledDeviation);
@@ -398,88 +408,97 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
 
     return r;
   }
-  
-  private void applyPostInterpolateForFrequencyNoSchedule(StopTimeInstance sti, long fromTime, long toTime,
-		  long frequencyOffsetTime, BlockInstance blockInstance, List<ArrivalAndDepartureInstance> results) {
 
-	  if (results == null || results.size() == 0)
-		  return;
+  private void applyPostInterpolateForFrequencyNoSchedule(StopTimeInstance sti,
+      long fromTime, long toTime, long frequencyOffsetTime,
+      BlockInstance blockInstance, List<ArrivalAndDepartureInstance> results) {
 
-	  // Find latest instance. Prefer realtime.
-	  ArrivalAndDepartureInstance instance = findBestArrivalAndDepartureInstance(results);
-	  
-	  // If no realtime data, don't make extrapolations.
-	  if (instance.getBlockLocation() == null || !instance.getBlockLocation().isPredicted())
-		  return;
-	  
-	  BlockStopTimeEntry bst =  sti.getStopTime();
-	  
-	  // See similar calculation in FrequencyBlockStopTimeEntry.getStopTimeOffset()
-	  int d0 = bst.getTrip().getDepartureTimeForIndex(0);
-	  int d1 = bst.getStopTime().getDepartureTime();
-	  int stopDelta = d1 - d0;
-	  
-	  int stopStartTime = sti.getFrequency().getStartTime() + stopDelta;
-	  int stopEndTime = sti.getFrequency().getEndTime() + stopDelta;
-	  long stopStartTimeExact = sti.getServiceDate() + stopStartTime * 1000;
-	  long stopEndTimeExact = sti.getServiceDate() + stopEndTime * 1000;
-	  
-	  int headwayMs = sti.getFrequency().getHeadwaySecs() * 1000;
-	  
-	  long time = instance.getBestDepartureTime();
-	  if (time == 0)
-		time = instance.getBestArrivalTime();
-	  // Do not extrapolate trips starting at the headway change: 
-	  stopEndTimeExact -= headwayMs;
-	  	  
-	  // Extrapolate future stop times.
-	  while ((time += headwayMs) < Math.min(toTime, stopEndTimeExact)) {
-		ArrivalAndDepartureInstance newInstance = createArrivalAndDepartureForStopTimeInstanceWithTime(sti, time);
-		results.add(newInstance);
-	  }
-	  
+    if (results == null || results.size() == 0)
+      return;
+
+    // Find latest instance. Prefer realtime.
+    ArrivalAndDepartureInstance instance = findBestArrivalAndDepartureInstance(
+        results);
+
+    // If no realtime data, don't make extrapolations.
+    if (instance.getBlockLocation() == null
+        || !instance.getBlockLocation().isPredicted())
+      return;
+
+    BlockStopTimeEntry bst = sti.getStopTime();
+
+    // See similar calculation in
+    // FrequencyBlockStopTimeEntry.getStopTimeOffset()
+    int d0 = bst.getTrip().getDepartureTimeForIndex(0);
+    int d1 = bst.getStopTime().getDepartureTime();
+    int stopDelta = d1 - d0;
+
+    int stopStartTime = sti.getFrequency().getStartTime() + stopDelta;
+    int stopEndTime = sti.getFrequency().getEndTime() + stopDelta;
+    long stopStartTimeExact = sti.getServiceDate() + stopStartTime * 1000;
+    long stopEndTimeExact = sti.getServiceDate() + stopEndTime * 1000;
+
+    int headwayMs = sti.getFrequency().getHeadwaySecs() * 1000;
+
+    long time = instance.getBestDepartureTime();
+    if (time == 0)
+      time = instance.getBestArrivalTime();
+    // Do not extrapolate trips starting at the headway change:
+    stopEndTimeExact -= headwayMs;
+
+    // Extrapolate future stop times.
+    while ((time += headwayMs) < Math.min(toTime, stopEndTimeExact)) {
+      ArrivalAndDepartureInstance newInstance = createArrivalAndDepartureForStopTimeInstanceWithTime(
+          sti, time);
+      results.add(newInstance);
+    }
+
   }
 
   private static ArrivalAndDepartureInstance findBestArrivalAndDepartureInstance(
-		  List<ArrivalAndDepartureInstance> instances) {
-	  
-	  Comparator<ArrivalAndDepartureInstance> cmp = new Comparator<ArrivalAndDepartureInstance>() {
+      List<ArrivalAndDepartureInstance> instances) {
 
-		@Override
-		public int compare(ArrivalAndDepartureInstance a, ArrivalAndDepartureInstance b) {
-			long l1, l2;
-			if (!isRealtime(a) && isRealtime(b))
-				return -1;
-			else if (isRealtime(a) && !isRealtime(b))
-				return 1;
-			else if (a.getBestDepartureTime() == 0 || b.getBestDepartureTime() == 0) {
-				l1 = a.getBestArrivalTime();
-				l2 = b.getBestArrivalTime();
-			}
-			else {
-				l1 = a.getBestDepartureTime();
-				l2 = b.getBestDepartureTime();
-			}
-			return Long.valueOf(l1).compareTo(Long.valueOf(l2));
-		}
-		 
-		private boolean isRealtime(ArrivalAndDepartureInstance ad) {
-			return ad.getBlockLocation() != null && ad.getBlockLocation().isPredicted();
-		}
-	  };
-	  
-	  return Collections.max(instances, cmp);
+    Comparator<ArrivalAndDepartureInstance> cmp = new Comparator<ArrivalAndDepartureInstance>() {
+
+      @Override
+      public int compare(ArrivalAndDepartureInstance a,
+          ArrivalAndDepartureInstance b) {
+        long l1, l2;
+        if (!isRealtime(a) && isRealtime(b))
+          return -1;
+        else if (isRealtime(a) && !isRealtime(b))
+          return 1;
+        else if (a.getBestDepartureTime() == 0
+            || b.getBestDepartureTime() == 0) {
+          l1 = a.getBestArrivalTime();
+          l2 = b.getBestArrivalTime();
+        } else {
+          l1 = a.getBestDepartureTime();
+          l2 = b.getBestDepartureTime();
+        }
+        return Long.valueOf(l1).compareTo(Long.valueOf(l2));
+      }
+
+      private boolean isRealtime(ArrivalAndDepartureInstance ad) {
+        return ad.getBlockLocation() != null
+            && ad.getBlockLocation().isPredicted();
+      }
+    };
+
+    return Collections.max(instances, cmp);
   }
 
   private void applyRealTimeToStopTimeInstance(StopTimeInstance sti,
       TargetTime targetTime, long fromTime, long toTime,
       long frequencyOffsetTime, BlockInstance blockInstance,
-      List<BlockLocation> locations, List<ArrivalAndDepartureInstance> results) {
+      List<BlockLocation> locations,
+      List<ArrivalAndDepartureInstance> results) {
 
     for (BlockLocation location : locations) {
 
       if (sti.isFrequencyOffsetSpecified()
-          && ((blockInstance.getBlock().getDepartureTimeForIndex(0) + sti.getFrequencyOffset()) != location.getBlockStartTime())) {
+          && ((blockInstance.getBlock().getDepartureTimeForIndex(0)
+              + sti.getFrequencyOffset()) != location.getBlockStartTime())) {
         continue;
       }
 
@@ -530,12 +549,14 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
 
     instance.setBlockLocation(blockLocation);
 
-    boolean success = setPredictedTimesFromTimepointPredictionRecords(instance, blockLocation, targetTime);
-           
+    boolean success = setPredictedTimesFromTimepointPredictionRecords(instance,
+        blockLocation, targetTime);
+
     if (blockLocation.isScheduleDeviationSet()
         || blockLocation.areScheduleDeviationsSet()) {
-    	
-      Double scheduleDeviation = getBestScheduleDeviation(instance, blockLocation);
+
+      Double scheduleDeviation = getBestScheduleDeviation(instance,
+          blockLocation);
       if (scheduleDeviation != null) {
         if (!success)
           setPredictedTimesFromScheduleDeviation(instance, blockLocation,
@@ -546,17 +567,21 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
   }
 
   /**
-   * Returns the best schedule deviation for this stop, given the scheduleDeviations
-   * stored in blockLocation.  {@link TransitInterpolationLibrary} is used to find
-   * the best deviation, which interpolates/extrapolates values consistent with the 
-   * GTFS-realtime spec (https://developers.google.com/transit/gtfs-realtime/) when
-   * using the {@link EInRangeStrategy.PREVIOUS_VALUE} and {@link EOutOfRangeStrategy.LAST_VALUE}
-   * strategies.  null is returned if no real-time deviations were found and the scheduled 
-   * arrival time should be used.
+   * Returns the best schedule deviation for this stop, given the
+   * scheduleDeviations stored in blockLocation.
+   * {@link TransitInterpolationLibrary} is used to find the best deviation,
+   * which interpolates/extrapolates values consistent with the GTFS-realtime
+   * spec (https://developers.google.com/transit/gtfs-realtime/) when using the
+   * {@link EInRangeStrategy.PREVIOUS_VALUE} and
+   * {@link EOutOfRangeStrategy.LAST_VALUE} strategies. null is returned if no
+   * real-time deviations were found and the scheduled arrival time should be
+   * used.
+   * 
    * @param instance
    * @param blockLocation
-   * @return the best deviation for this stop, or null if no real-time deviations were found
-   * and the scheduled arrival time should be used.
+   * @return the best deviation for this stop, or null if no real-time
+   *         deviations were found and the scheduled arrival time should be
+   *         used.
    */
   private Double getBestScheduleDeviation(ArrivalAndDepartureInstance instance,
       BlockLocation blockLocation) {
@@ -564,10 +589,13 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
     ScheduleDeviationSamples scheduleDeviations = blockLocation.getScheduleDeviations();
 
     if (scheduleDeviations != null && !scheduleDeviations.isEmpty()) {
-      // We currently use the scheduled arrival time of the stop as the search index
-      // This MUST be consistent with the index set in BlockLocationServiceImpl.getBlockLocation()
+      // We currently use the scheduled arrival time of the stop as the search
+      // index
+      // This MUST be consistent with the index set in
+      // BlockLocationServiceImpl.getBlockLocation()
       Integer arrivalTime = instance.getBlockStopTime().getStopTime().getArrivalTime();
-      // Determine which real-time deviation should be used for this stop, if any
+      // Determine which real-time deviation should be used for this stop, if
+      // any
       return TransitInterpolationLibrary.interpolate(
           scheduleDeviations.getScheduleTimes(),
           scheduleDeviations.getScheduleDeviationMus(), arrivalTime,
@@ -580,90 +608,97 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
   }
 
   private boolean setPredictedTimesFromTimepointPredictionRecords(
-		  ArrivalAndDepartureInstance instance, BlockLocation blockLocation,
-		  long targetTime) {
+      ArrivalAndDepartureInstance instance, BlockLocation blockLocation,
+      long targetTime) {
 
-	    List<TimepointPredictionRecord> records = blockLocation.getTimepointPredictions();
-	    if (records == null)
-	    	return false;
-	    
-		// Find the right timepoint prediction record. We need to make sure that there
-	    // are the proper number of records if the trip loops and stopSequence is not set.
-	    	    
-	    int stopSequence = instance.getBlockStopTime().getStopTime().getSequence();
-	    
-	    int totalCandidates = 0;
-	    int thisStopIndex = 0; // index (with respect to stop sequence) among stops with the same ID
-	    
-	    List<BlockStopTimeEntry> stopTimes = instance.getBlockTrip().getStopTimes();
-	    for (int i = 0; i < stopTimes.size(); i++) {
-	    	BlockStopTimeEntry stopTime = stopTimes.get(i);
-	    	StopTimeEntry stop = stopTime.getStopTime();
-	    	if (stop.getStop().getId().equals(instance.getStop().getId())) {
-	    		totalCandidates++;
-	    		if (stop.getSequence() < stopSequence)
-	    			thisStopIndex++;
-	    	}
-	    }
-	        
-	    int tprTotalCandidates = 0;
-	    int tprStopIndex = 0;
-	    	
-	    boolean success = false;
-	    
-	    for (TimepointPredictionRecord tpr : records) {
-	    	
-	    	boolean tripMatches = tpr.getTripId().equals(instance.getBlockTrip().getTrip().getId());
-	    	boolean stopMatches = tpr.getTimepointId().equals(instance.getStop().getId());
-	    	boolean sequenceMatches = tpr.getStopSequence() > 0 && tpr.getStopSequence() == stopSequence;
-	    	
-	    	if (!tripMatches || !stopMatches)
-	    		continue;
-	    	
-	    	if (sequenceMatches || tprStopIndex == thisStopIndex) {
-	    		
-	    		success = true;
-	    		
-	    		long arrivalTime = tpr.getTimepointPredictedArrivalTime();
-				setPredictedArrivalTimeForInstance(instance, arrivalTime);
-				
-				long departureTime = tpr.getTimepointPredictedDepartureTime();
-				if (departureTime <= 0) {
-					int slack = instance.getBlockStopTime().getStopTime().getSlackTime();
-				    departureTime = arrivalTime + slack * 1000;
-				}
-				setPredictedDepartureTimeForInstance(instance, departureTime);
-				
-				if (sequenceMatches)
-					return true;
-	    	}
-	    	
-	    
-	    	else if (tprStopIndex < thisStopIndex)
-	    		tprStopIndex++;
-	    	
-	    	tprTotalCandidates++;
-	    }
-	    	    
-	    if (success && totalCandidates == tprTotalCandidates && tprStopIndex == thisStopIndex)
-	    	return true;
-	    
-	    // Clear out prediction times if we didn't end up finding the proper number of records
-	    
-	    setPredictedArrivalTimeForInstance(instance, 0);
-	    setPredictedDepartureTimeForInstance(instance, 0);
-	    
-	    return false;
+    List<TimepointPredictionRecord> records = blockLocation.getTimepointPredictions();
+    if (records == null)
+      return false;
 
-	}
-  
+    // Find the right timepoint prediction record. We need to make sure that
+    // there are the proper number of records if the trip loops and stopSequence
+    // is not set.
+
+    int stopSequence = instance.getBlockStopTime().getStopTime().getSequence();
+
+    int totalCandidates = 0;
+    int thisStopIndex = 0; // index (with respect to stop sequence) among stops
+                           // with the same ID
+
+    List<BlockStopTimeEntry> stopTimes = instance.getBlockTrip().getStopTimes();
+    for (int i = 0; i < stopTimes.size(); i++) {
+      BlockStopTimeEntry stopTime = stopTimes.get(i);
+      StopTimeEntry stop = stopTime.getStopTime();
+      if (stop.getStop().getId().equals(instance.getStop().getId())) {
+        totalCandidates++;
+        if (stop.getSequence() < stopSequence)
+          thisStopIndex++;
+      }
+    }
+
+    int tprTotalCandidates = 0;
+    int tprStopIndex = 0;
+
+    boolean success = false;
+
+    for (TimepointPredictionRecord tpr : records) {
+
+      boolean tripMatches = tpr.getTripId().equals(
+          instance.getBlockTrip().getTrip().getId());
+      boolean stopMatches = tpr.getTimepointId().equals(
+          instance.getStop().getId());
+      boolean sequenceMatches = tpr.getStopSequence() > 0
+          && tpr.getStopSequence() == stopSequence;
+
+      if (!tripMatches || !stopMatches)
+        continue;
+
+      if (sequenceMatches || tprStopIndex == thisStopIndex) {
+
+        success = true;
+
+        long arrivalTime = tpr.getTimepointPredictedArrivalTime();
+        setPredictedArrivalTimeForInstance(instance, arrivalTime);
+
+        long departureTime = tpr.getTimepointPredictedDepartureTime();
+        if (departureTime <= 0) {
+          int slack = instance.getBlockStopTime().getStopTime().getSlackTime();
+          departureTime = arrivalTime + slack * 1000;
+        }
+        setPredictedDepartureTimeForInstance(instance, departureTime);
+
+        if (sequenceMatches)
+          return true;
+      }
+
+      else if (tprStopIndex < thisStopIndex)
+        tprStopIndex++;
+
+      tprTotalCandidates++;
+    }
+
+    if (success && totalCandidates == tprTotalCandidates
+        && tprStopIndex == thisStopIndex)
+      return true;
+
+    // Clear out prediction times if we didn't end up finding the proper number
+    // of records
+
+    setPredictedArrivalTimeForInstance(instance, 0);
+    setPredictedDepartureTimeForInstance(instance, 0);
+
+    return false;
+
+  }
+
   private void setPredictedTimesFromScheduleDeviation(
       ArrivalAndDepartureInstance instance, BlockLocation blockLocation,
       int scheduleDeviation, long targetTime) {
 
     BlockStopTimeEntry blockStopTime = instance.getBlockStopTime();
 
-    int effectiveScheduleTime = (int) (((targetTime - instance.getServiceDate()) / 1000) - scheduleDeviation);
+    int effectiveScheduleTime = (int) (((targetTime - instance.getServiceDate())
+        / 1000) - scheduleDeviation);
 
     int arrivalDeviation = calculateArrivalDeviation(
         blockLocation.getNextStop(), blockStopTime, effectiveScheduleTime,
@@ -685,25 +720,23 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
     long arrivalTime = schedule.getArrivalTime() + arrivalDeviation * 1000;
     setPredictedArrivalTimeForInstance(instance, arrivalTime);
 
-    long departureTime = schedule.getDepartureTime() + departureDeviation
-        * 1000;
+    long departureTime = schedule.getDepartureTime()
+        + departureDeviation * 1000;
     setPredictedDepartureTimeForInstance(instance, departureTime);
 
   }
-  
-  private void setPredictedTimeIntervals(
-		  ArrivalAndDepartureInstance instance, BlockLocation blockLocation,
-		  long targetTime) {
-	  
-	TimeIntervalBean predictedArrivalTimeInterval = computePredictedArrivalTimeInterval(
-	   instance, blockLocation, targetTime);
-	instance.setPredictedArrivalInterval(predictedArrivalTimeInterval);
 
-	
+  private void setPredictedTimeIntervals(ArrivalAndDepartureInstance instance,
+      BlockLocation blockLocation, long targetTime) {
+
+    TimeIntervalBean predictedArrivalTimeInterval = computePredictedArrivalTimeInterval(
+        instance, blockLocation, targetTime);
+    instance.setPredictedArrivalInterval(predictedArrivalTimeInterval);
+
     TimeIntervalBean predictedDepartureTimeInterval = computePredictedDepartureTimeInterval(
-	   instance, blockLocation, targetTime);
-	instance.setPredictedDepartureInterval(predictedDepartureTimeInterval);	  
-  
+        instance, blockLocation, targetTime);
+    instance.setPredictedDepartureInterval(predictedDepartureTimeInterval);
+
   }
 
   /**
@@ -879,7 +912,8 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
         samples.getScheduleDeviationSigmas(), stopTime.getArrivalTime(),
         EOutOfRangeStrategy.LAST_VALUE, EInRangeStrategy.INTERPOLATE);
 
-    long from = (long) (instance.getScheduledArrivalTime() + (mu - sigma) * 1000);
+    long from = (long) (instance.getScheduledArrivalTime()
+        + (mu - sigma) * 1000);
     long to = (long) (instance.getScheduledArrivalTime() + (mu + sigma) * 1000);
 
     return new TimeIntervalBean(from, to);
@@ -909,8 +943,10 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
         samples.getScheduleDeviationSigmas(), stopTime.getDepartureTime(),
         EOutOfRangeStrategy.LAST_VALUE, EInRangeStrategy.INTERPOLATE);
 
-    long from = (long) (instance.getScheduledDepartureTime() + (mu - sigma) * 1000);
-    long to = (long) (instance.getScheduledDepartureTime() + (mu + sigma) * 1000);
+    long from = (long) (instance.getScheduledDepartureTime()
+        + (mu - sigma) * 1000);
+    long to = (long) (instance.getScheduledDepartureTime()
+        + (mu + sigma) * 1000);
 
     return new TimeIntervalBean(from, to);
   }
@@ -936,23 +972,25 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
 
   private boolean isFrequencyBasedArrivalInRange(BlockInstance blockInstance,
       FrequencyEntry frequency, long fromReduced, long toReduced) {
-    long startTime = blockInstance.getServiceDate() + frequency.getStartTime()
-        * 1000;
-    long endTime = blockInstance.getServiceDate() + frequency.getEndTime()
-        * 1000;
+    long startTime = blockInstance.getServiceDate()
+        + frequency.getStartTime() * 1000;
+    long endTime = blockInstance.getServiceDate()
+        + frequency.getEndTime() * 1000;
     return fromReduced <= endTime && startTime <= toReduced;
   }
 
   private ArrivalAndDepartureInstance createArrivalAndDepartureForStopTimeInstanceWithTime(
-	      StopTimeInstance sti, long time) {
+      StopTimeInstance sti, long time) {
 
-	    ArrivalAndDepartureTime scheduledTime = new ArrivalAndDepartureTime(time, time);
-	    ArrivalAndDepartureInstance instance = new ArrivalAndDepartureInstance(sti, scheduledTime);
-	    instance.setBlockSequence(sti.getBlockSequence());
+    ArrivalAndDepartureTime scheduledTime = new ArrivalAndDepartureTime(time,
+        time);
+    ArrivalAndDepartureInstance instance = new ArrivalAndDepartureInstance(sti,
+        scheduledTime);
+    instance.setBlockSequence(sti.getBlockSequence());
 
-	    return instance;
+    return instance;
   }
-  
+
   private ArrivalAndDepartureInstance createArrivalAndDepartureForStopTimeInstance(
       StopTimeInstance sti, long prevFrequencyTime) {
 
@@ -985,8 +1023,8 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
   }
 
   private BlockStopTimeEntry getBlockStopTime(
-      BlockTripInstance blockTripInstance, AgencyAndId stopId,
-      int stopSequence, int timeOfServiceDate) {
+      BlockTripInstance blockTripInstance, AgencyAndId stopId, int stopSequence,
+      int timeOfServiceDate) {
 
     /**
      * We don't iterate over block stop times directly because there is
@@ -1095,8 +1133,8 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
 
     } else {
 
-      long departureTime = prevFrequencyTime + frequency.getHeadwaySecs()
-          * 1000 / 2;
+      long departureTime = prevFrequencyTime
+          + frequency.getHeadwaySecs() * 1000 / 2;
 
       long freqStartTime = stopTimeInstance.getServiceDate()
           + frequency.getStartTime() * 1000;
