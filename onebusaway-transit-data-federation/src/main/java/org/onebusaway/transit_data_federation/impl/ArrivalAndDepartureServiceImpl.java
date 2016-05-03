@@ -19,6 +19,7 @@ package org.onebusaway.transit_data_federation.impl;
 import org.onebusaway.collections.FactoryMap;
 import org.onebusaway.collections.Min;
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.realtime.api.TimepointPredictionRecord;
 import org.onebusaway.transit_data.model.TimeIntervalBean;
 import org.onebusaway.transit_data_federation.model.StopTimeInstance;
 import org.onebusaway.transit_data_federation.model.TargetTime;
@@ -526,13 +527,17 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
 
     instance.setBlockLocation(blockLocation);
 
+    boolean success = setPredictedTimesFromTimepointPredictionRecords(instance, blockLocation, targetTime);
+           
     if (blockLocation.isScheduleDeviationSet()
         || blockLocation.areScheduleDeviationsSet()) {
-
+    	
       Double scheduleDeviation = getBestScheduleDeviation(instance, blockLocation);
       if (scheduleDeviation != null) {
-        setPredictedTimesFromScheduleDeviation(instance, blockLocation,
-            scheduleDeviation.intValue(), targetTime);
+        if (!success)
+          setPredictedTimesFromScheduleDeviation(instance, blockLocation,
+              scheduleDeviation.intValue(), targetTime);
+        setPredictedTimeIntervals(instance, blockLocation, targetTime);
       }
     }
   }
@@ -571,6 +576,38 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
     }
   }
 
+  private boolean setPredictedTimesFromTimepointPredictionRecords(
+	  ArrivalAndDepartureInstance instance, BlockLocation blockLocation,
+	  long targetTime) {
+
+    List<TimepointPredictionRecord> records = blockLocation.getTimepointPredictions();
+    if (records == null)
+    	return false;
+    
+    for (TimepointPredictionRecord tpr : records) {
+    	
+    	boolean tripMatches = blockLocation.getActiveTrip().getTrip().getId().equals(tpr.getTripId());
+    	boolean stopMatches = instance.getStop().getId().equals(tpr.getTimepointId());
+		if (!tripMatches || !stopMatches)
+			continue;
+		
+		long arrivalTime = tpr.getTimepointPredictedArrivalTime();
+		setPredictedArrivalTimeForInstance(instance, arrivalTime);
+		
+		long departureTime = tpr.getTimepointPredictedDepartureTime();
+		if (departureTime <= 0) {
+		    int slack = calculateExpectedSlackTime(blockLocation, instance, targetTime);
+			departureTime = arrivalTime + slack;
+		}
+		setPredictedDepartureTimeForInstance(instance, departureTime);
+				
+		return true;
+		
+	}
+	
+    return false;
+  }
+
   private void setPredictedTimesFromScheduleDeviation(
       ArrivalAndDepartureInstance instance, BlockLocation blockLocation,
       int scheduleDeviation, long targetTime) {
@@ -599,18 +636,25 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
     long arrivalTime = schedule.getArrivalTime() + arrivalDeviation * 1000;
     setPredictedArrivalTimeForInstance(instance, arrivalTime);
 
-    TimeIntervalBean predictedArrivalTimeInterval = computePredictedArrivalTimeInterval(
-        instance, blockLocation, targetTime);
-    instance.setPredictedArrivalInterval(predictedArrivalTimeInterval);
-
     long departureTime = schedule.getDepartureTime() + departureDeviation
         * 1000;
     setPredictedDepartureTimeForInstance(instance, departureTime);
 
-    TimeIntervalBean predictedDepartureTimeInterval = computePredictedDepartureTimeInterval(
-        instance, blockLocation, targetTime);
-    instance.setPredictedDepartureInterval(predictedDepartureTimeInterval);
+  }
+  
+  private void setPredictedTimeIntervals(
+		  ArrivalAndDepartureInstance instance, BlockLocation blockLocation,
+		  long targetTime) {
+	  
+	TimeIntervalBean predictedArrivalTimeInterval = computePredictedArrivalTimeInterval(
+	   instance, blockLocation, targetTime);
+	instance.setPredictedArrivalInterval(predictedArrivalTimeInterval);
 
+	
+    TimeIntervalBean predictedDepartureTimeInterval = computePredictedDepartureTimeInterval(
+	   instance, blockLocation, targetTime);
+	instance.setPredictedDepartureInterval(predictedDepartureTimeInterval);	  
+  
   }
 
   /**
@@ -705,6 +749,42 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
 
     return scheduleDeviation;
   }
+  
+  // see calculateDepartureDeviation
+	private int calculateExpectedSlackTime(BlockLocation blockLocation, ArrivalAndDepartureInstance instance,
+			long targetTime) {
+		
+		int scheduleDeviation = 0;
+		if (blockLocation.isScheduleDeviationSet())
+			scheduleDeviation = getBestScheduleDeviation(instance, blockLocation).intValue();
+	
+	    int effectiveScheduleTime = (int) (((targetTime - instance.getServiceDate()) / 1000) - scheduleDeviation);
+		
+		BlockStopTimeEntry nextBlockStopTime = blockLocation.getNextStop();
+		BlockStopTimeEntry targetBlockStopTime = instance.getBlockStopTime();
+		
+		// TargetStopTime
+		if (nextBlockStopTime == null
+				|| nextBlockStopTime.getBlockSequence() > targetBlockStopTime.getBlockSequence()) {
+			return 0;
+		}
+
+		StopTimeEntry nextStopTime = nextBlockStopTime.getStopTime();
+		StopTimeEntry targetStopTime = targetBlockStopTime.getStopTime();
+
+		int slack = targetBlockStopTime.getAccumulatedSlackTime() - nextBlockStopTime.getAccumulatedSlackTime();
+
+		slack += targetStopTime.getSlackTime();
+
+		if (nextStopTime.getArrivalTime() <= effectiveScheduleTime
+				&& effectiveScheduleTime <= nextStopTime.getDepartureTime()) {
+			slack -= (effectiveScheduleTime - nextStopTime.getArrivalTime());
+		}
+
+		slack = Math.max(slack, 0);
+
+		return slack;
+	}
 
   private int propagateScheduleDeviationForwardBetweenStops(
       BlockStopTimeEntry prevStopTime, BlockStopTimeEntry nextStopTime,
