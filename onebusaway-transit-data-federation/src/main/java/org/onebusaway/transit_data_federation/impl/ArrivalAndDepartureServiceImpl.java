@@ -17,6 +17,7 @@
 package org.onebusaway.transit_data_federation.impl;
 
 import org.onebusaway.collections.FactoryMap;
+import org.onebusaway.collections.MappingLibrary;
 import org.onebusaway.collections.Min;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.realtime.api.TimepointPredictionRecord;
@@ -60,6 +61,8 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -577,37 +580,83 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
   }
 
   private boolean setPredictedTimesFromTimepointPredictionRecords(
-	  ArrivalAndDepartureInstance instance, BlockLocation blockLocation,
-	  long targetTime) {
+		  ArrivalAndDepartureInstance instance, BlockLocation blockLocation,
+		  long targetTime) {
 
-    List<TimepointPredictionRecord> records = blockLocation.getTimepointPredictions();
-    if (records == null)
-    	return false;
-    
-    for (TimepointPredictionRecord tpr : records) {
-    	
-    	boolean tripMatches = blockLocation.getActiveTrip().getTrip().getId().equals(tpr.getTripId());
-    	boolean stopMatches = instance.getStop().getId().equals(tpr.getTimepointId());
-		if (!tripMatches || !stopMatches)
-			continue;
-		
-		long arrivalTime = tpr.getTimepointPredictedArrivalTime();
-		setPredictedArrivalTimeForInstance(instance, arrivalTime);
-		
-		long departureTime = tpr.getTimepointPredictedDepartureTime();
-		if (departureTime <= 0) {
-		    int slack = calculateExpectedSlackTime(blockLocation, instance, targetTime);
-			departureTime = arrivalTime + slack;
-		}
-		setPredictedDepartureTimeForInstance(instance, departureTime);
+	    List<TimepointPredictionRecord> records = blockLocation.getTimepointPredictions();
+	    if (records == null)
+	    	return false;
+	    
+		// Find the right timepoint prediction record. We need to make sure that there
+	    // are the proper number of records if the trip loops and stopSequence is not set.
+	    	    
+	    int stopSequence = instance.getBlockStopTime().getStopTime().getSequence();
+	    
+	    int totalCandidates = 0;
+	    int thisStopIndex = 0; // index (with respect to stop sequence) among stops with the same ID
+	    
+	    List<BlockStopTimeEntry> stopTimes = instance.getBlockTrip().getStopTimes();
+	    for (int i = 0; i < stopTimes.size(); i++) {
+	    	BlockStopTimeEntry stopTime = stopTimes.get(i);
+	    	StopTimeEntry stop = stopTime.getStopTime();
+	    	if (stop.getStop().getId().equals(instance.getStop().getId())) {
+	    		totalCandidates++;
+	    		if (stop.getSequence() < stopSequence)
+	    			thisStopIndex++;
+	    	}
+	    }
+	        
+	    int tprTotalCandidates = 0;
+	    int tprStopIndex = 0;
+	    	
+	    boolean success = false;
+	    
+	    for (TimepointPredictionRecord tpr : records) {
+	    	
+	    	boolean tripMatches = tpr.getTripId().equals(instance.getBlockTrip().getTrip().getId());
+	    	boolean stopMatches = tpr.getTimepointId().equals(instance.getStop().getId());
+	    	boolean sequenceMatches = tpr.getStopSequence() > 0 && tpr.getStopSequence() == stopSequence;
+	    	
+	    	if (!tripMatches || !stopMatches)
+	    		continue;
+	    	
+	    	if (sequenceMatches || tprStopIndex == thisStopIndex) {
+	    		
+	    		success = true;
+	    		
+	    		long arrivalTime = tpr.getTimepointPredictedArrivalTime();
+				setPredictedArrivalTimeForInstance(instance, arrivalTime);
 				
-		return true;
-		
-	}
-	
-    return false;
-  }
+				long departureTime = tpr.getTimepointPredictedDepartureTime();
+				if (departureTime <= 0) {
+					int slack = instance.getBlockStopTime().getStopTime().getSlackTime();
+				    departureTime = arrivalTime + slack * 1000;
+				}
+				setPredictedDepartureTimeForInstance(instance, departureTime);
+				
+				if (sequenceMatches)
+					return true;
+	    	}
+	    	
+	    
+	    	else if (tprStopIndex < thisStopIndex)
+	    		tprStopIndex++;
+	    	
+	    	tprTotalCandidates++;
+	    }
+	    	    
+	    if (success && totalCandidates == tprTotalCandidates && tprStopIndex == thisStopIndex)
+	    	return true;
+	    
+	    // Clear out prediction times if we didn't end up finding the proper number of records
+	    
+	    setPredictedArrivalTimeForInstance(instance, 0);
+	    setPredictedDepartureTimeForInstance(instance, 0);
+	    
+	    return false;
 
+	}
+  
   private void setPredictedTimesFromScheduleDeviation(
       ArrivalAndDepartureInstance instance, BlockLocation blockLocation,
       int scheduleDeviation, long targetTime) {
@@ -749,42 +798,6 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
 
     return scheduleDeviation;
   }
-  
-  // see calculateDepartureDeviation
-	private int calculateExpectedSlackTime(BlockLocation blockLocation, ArrivalAndDepartureInstance instance,
-			long targetTime) {
-		
-		int scheduleDeviation = 0;
-		if (blockLocation.isScheduleDeviationSet())
-			scheduleDeviation = getBestScheduleDeviation(instance, blockLocation).intValue();
-	
-	    int effectiveScheduleTime = (int) (((targetTime - instance.getServiceDate()) / 1000) - scheduleDeviation);
-		
-		BlockStopTimeEntry nextBlockStopTime = blockLocation.getNextStop();
-		BlockStopTimeEntry targetBlockStopTime = instance.getBlockStopTime();
-		
-		// TargetStopTime
-		if (nextBlockStopTime == null
-				|| nextBlockStopTime.getBlockSequence() > targetBlockStopTime.getBlockSequence()) {
-			return 0;
-		}
-
-		StopTimeEntry nextStopTime = nextBlockStopTime.getStopTime();
-		StopTimeEntry targetStopTime = targetBlockStopTime.getStopTime();
-
-		int slack = targetBlockStopTime.getAccumulatedSlackTime() - nextBlockStopTime.getAccumulatedSlackTime();
-
-		slack += targetStopTime.getSlackTime();
-
-		if (nextStopTime.getArrivalTime() <= effectiveScheduleTime
-				&& effectiveScheduleTime <= nextStopTime.getDepartureTime()) {
-			slack -= (effectiveScheduleTime - nextStopTime.getArrivalTime());
-		}
-
-		slack = Math.max(slack, 0);
-
-		return slack;
-	}
 
   private int propagateScheduleDeviationForwardBetweenStops(
       BlockStopTimeEntry prevStopTime, BlockStopTimeEntry nextStopTime,
