@@ -69,6 +69,8 @@ jQuery(function() {
 		$tabs.tabs('select', 3);
 		updateBuildStatus();
 	}
+	// hide the Build Progress message
+	jQuery("#buildBundle #buildingTest").hide();
 	// politely set our hash as tabs are changed
 	jQuery("#tabs").bind("tabsshow", function(event, ui) {
 		window.location.hash = ui.tab.hash;
@@ -235,7 +237,7 @@ jQuery(function() {
 		'click' : toggleValidationResultList});
 
 	//toggle bundle build progress list
-	jQuery("#buildBundle #buildBundle_progress #expand").bind({
+	jQuery("#buildBundle #buildBundle_buildTestProgress #expand").bind({
 		'click' : toggleBuildBundleResultList});
 
 	//handle create, select and copy radio buttons
@@ -335,9 +337,9 @@ jQuery(function() {
 
 	$("#Build input[type=button]").removeAttr('disabled');
 
-	$("#testBuildBundle_resultList").prop('readonly', true);
+	$("#buildBundle_testResultList").prop('readonly', true);
 	
-	$("#finalBuildBundle_resultList").prop('readonly', true);
+	$("#buildBundle_finalResultList").prop('readonly', true);
 	
 	$("#testProgressBar").progressbar({
 		value: 0
@@ -982,11 +984,11 @@ function toggleValidationResultList() {
 
 function toggleBuildBundleResultList(event) {
 	if (event.data.buildType == "test") {
-		jQuery("#testBuildBundle_resultList").toggle();
+		jQuery("#buildBundle_testResultList").toggle();
 	} else {
-		jQuery("#finalBuildBundle_resultList").toggle();
+		jQuery("#buildBundle_finalResultList").toggle();
 	}
-	//var $image = jQuery("#buildBundle #buildBundle_progress #expand");
+	//var $image = jQuery("#buildBundle #buildBundle_buildProgress #expand");
 	//changeImageSrc($image);
 	//Toggle progress result list
 	//jQuery("#buildBundle #buildBundle_resultList").toggle();
@@ -1246,11 +1248,12 @@ function onBuildClick(event) {
 	if(valid == false) {
 		return;
 	}
-	jQuery("#buildBundle #buildBox #building #buildingProgress").attr("src","../../css/img/ajax-loader.gif");
-	//jQuery("#buildBundle_buildProgress").text("Bundle Build in Progress...");
-	//jQuery("#buildBundle_fileList").html("");
+	jQuery("#buildBundle #buildingTest").show();
+	jQuery("#buildBundle #buildingTest #buildingTestProgress").attr("src","../../css/img/ajax-loader.gif");
+	jQuery("#buildBundle_buildTestProgress").text("Bundle Build in Progress...");
+	jQuery("#buildBundle_testFileList").html("");
 	//jQuery("#buildBundle #downloadLogs").hide();
-	//jQuery("#buildBundle #buildBox #building").show().css("width","300px").css("margin-top", "20px");
+	jQuery("#buildBundle #buildingTest").show().css("width","300px").css("margin-top", "20px");
 
 	//disableBuildButton();
 	//disableResetButton();
@@ -1264,14 +1267,15 @@ function onResetClick() {
 	jQuery("#buildBundle_bundleName").val("");
 
 	//jQuery("#buildBundle_resultList").html("");
-	jQuery("#testBuildBundle_resultList").val("");
-	jQuery("#finalBuildBundle_resultList").val("");
-	jQuery("#buildBundle_exception").html("");
-	jQuery("#buildBundle_fileList").html("");
-	jQuery("#buildBundle_fileList").html("");
+	jQuery("#buildBundle_testResultList").val("");
+	jQuery("#buildBundle_finalResultList").val("");
+	jQuery("#buildBundle_testException").html("");
+	jQuery("#buildBundle_finalException").html("");
+	jQuery("#buildBundle_testFileList").html("");
+	jQuery("#buildBundle_finalFileList").html("");
 
-	jQuery("#buildBundle #downloadLogs").hide();
-	jQuery("#buildBundle #buildBox #building").hide();
+	jQuery("#buildBundle #downloadTestLogs").hide();
+	jQuery("#buildBundle #buildingTest").hide();
 }
 
 function validateBundleBuildFields(bundleDir, bundleName, startDate, endDate) {
@@ -1314,14 +1318,14 @@ function bundleUrl() {
 		success: function(response) {
 			var bundleResponse = response;
 			if(bundleResponse.exception !=null) {
-				jQuery("#buildBundle #buildBox #buildBundle_resultLink #resultLink")
+				jQuery("#buildBundle #buildBundle_testResultLink #testResultLink")
 				.text("(exception)")
 				.css("padding-left", "5px")
 				.css("font-size", "12px")
 				.addClass("adminLabel")
 				.css("color", "red");
 			} else {
-				jQuery("#buildBundle #buildBox #buildBundle_resultLink #resultLink")
+				jQuery("#buildBundle #buildBundle_testResultLink #testResultLink")
 				.text(bundleResponse.bundleResultLink)
 				.css("padding-left", "5px")
 				.css("font-size", "12px")
@@ -1334,7 +1338,7 @@ function bundleUrl() {
 			timeout = setTimeout(bundleUrl, 10000);
 		}
 	});
-	var url = jQuery("#buildBundle #buildBox #buildBundle_resultLink #resultLink").text();
+	var url = jQuery("#buildBundle #buildBundle_testResultLink #testResultLink").text();
 	if (url == null || url == "") {
 		window.setTimeout(bundleUrl, 5000);
 	}
@@ -1343,9 +1347,9 @@ function buildBundle(bundleName, startDate, endDate, bundleComment, archive, con
 	//var bundleDirectory = jQuery("#selected_bundleDirectory").text();
 	bundleDirectory = selectedDirectory;
 	//var email = jQuery("Build #").val();
-	var $buildBundle_resultList = jQuery("#testBuildBundle_resultList");
+	var $buildBundle_resultList = jQuery("#buildBundle_testResultList");
 	if (buildType == "final") {
-		$buildBundle_resultList = jQuery("#finalBuildBundle_resultList");
+		$buildBundle_resultList = jQuery("#buildBundle_finalResultList");
 	}
 	var email = jQuery("#buildNotificationEmail").val();
 	if (email == "") { email = "null"; }
@@ -1398,11 +1402,11 @@ function updateBuildStatus(buildType) {
 	id = buildBundleId;
 	var $progressBar = jQuery("#testProgressBar");
 	var $buildProgress = jQuery("#testBuildProgress");
-	var $buildBundle_resultList = jQuery("#testBuildBundle_resultList");
+	var $buildBundle_resultList = jQuery("#buildBundle_testResultList");
 	if (buildType == "final") {
 		$progressBar = jQuery("#finalProgressBar");
 		$buildProgress = jQuery("#finalBuildProgress");
-		$buildBundle_resultList = jQuery("#finalBuildBundle_resultList");
+		$buildBundle_resultList = jQuery("#buildBundle_finalResultList");
 	}
 	jQuery.ajax({
 		url: "../../api/build/" + id + "/list?ts=" +new Date().getTime(),
@@ -1416,7 +1420,7 @@ function updateBuildStatus(buildType) {
 			var bundleResponse = response;
 			if (bundleResponse == null) {
 				jQuery("#buildBundle_buildProgress").text("Bundle Status Unkown!");
-				jQuery("#buildBundle #buildBox #building #buildingProgress").attr("src","../../css/img/dialog-warning-4.png");
+				jQuery("#buildBundle #buildingTest #buildingTestProgress").attr("src","../../css/img/dialog-warning-4.png");
 				//jQuery("#buildBundle_resultList").html("unknown id=" + id);
 				$buildBundle_resultList.val("unknown id=" + id);
 			}
@@ -1447,8 +1451,8 @@ function updateBuildStatus(buildType) {
 			if (bundleResponse.complete == false) {
 				window.setTimeout(updateBuildStatus.bind(null, buildType), 5000); // recurse
 			} else {
-				jQuery("#buildBundle_buildProgress").text("Bundle Complete!");
-				jQuery("#buildBundle #buildBox #building #buildingProgress").attr("src","../../css/img/dialog-accept-2.png");
+				jQuery("#buildBundle_buildTestProgress").text("Bundle Complete!");
+				jQuery("#buildBundle #buildingTest #buildingTestProgress").attr("src","../../css/img/dialog-accept-2.png");
 				updateBuildList(id);
 				$("#Stage #staging_bundleName").text($("#Build #bundleBuildName").val());
 				enableStageButton();
@@ -1462,11 +1466,11 @@ function updateBuildStatus(buildType) {
 			$buildBundle_resultList.scrollTop(1500);  // Just use some arbitrarily large number
 			// check for exception
 			if (bundleResponse.exception != null) {
-				jQuery("#buildBundle_buildProgress").text("Bundle Failed!");
-				jQuery("#buildBundle #buildBox #building #buildingProgress").attr("src","../../css/img/dialog-warning-4.png");
+				jQuery("#buildBundle_buildTestProgress").text("Bundle Failed!");
+				jQuery("#buildBundle #buildingTest #buildingTestProgress").attr("src","../../css/img/dialog-warning-4.png");
 				if (bundleResponse.exception.message != undefined) {
-					jQuery("#buildBundle_exception").show().css("display","inline");
-					jQuery("#buildBundle_exception").html(bundleResponse.exception.message);
+					jQuery("#buildBundle_testException").show().css("display","inline");
+					jQuery("#buildBundle_testException").html(bundleResponse.exception.message);
 				}
 				disableStageButton();
 				enableBuildButton();
@@ -1540,9 +1544,9 @@ function updateBuildList(id) {
 			+ encodeURIComponent("bundleBuilder.out.txt") + "\">" + ".txt" +  "</a></li>";
 
 			txt = txt + "</ul>";
-			jQuery("#buildBundle_fileList").html(txt).css("display", "block");
-			jQuery("#buildBundle #downloadLogs").show().css("display", "block");
-			jQuery("#buildBundle #downloadLogs #downloadButton").attr("href", "manage-bundles!buildOutputZip.action?id=" + id);
+			jQuery("#buildBundle_testFileList").html(txt).css("display", "block");
+			jQuery("#buildBundle #downloadTestLogs").show().css("display", "block");
+			jQuery("#buildBundle #downloadTestLogs #downloadTestButton").attr("href", "manage-bundles!buildOutputZip.action?id=" + id);
 			var continueButton = jQuery("#build_continue");
 			enableContinueButton(continueButton);
 		},
