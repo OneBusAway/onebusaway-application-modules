@@ -34,7 +34,7 @@ function handleGenerateApiKeyClick() {
 	});
 }
 
-function clearApiKeyFields() {q
+function clearApiKeyFields() {
 	$("#contactName").val("");
 	$("#contactCompany").val("");
 	$("#contactEmail").val("");
