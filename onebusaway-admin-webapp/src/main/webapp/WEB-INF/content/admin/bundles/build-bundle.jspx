@@ -103,37 +103,33 @@
 						</textarea>
 					</div>
 				</div>
-			<div id="bundleTestResultsHolder">
-				<div id="bundleTestResults">
-					<!--
-					<div id="buildBundle_progress">
-						<s:url var="url" value="/css/img/arrow-right-3.png" />
-						<img src="${url}" alt="Not found" id="expand" /> <label
-							class="adminLabel">Bundle Build Progress</label>
-					</div>
-					-->
-					<div id="buildBundle_testResultList">
-					<!-- -->
-						<!--  space -->
-						<!-- -->
-					</div>
-					<div id="buildBundle_testException">
-					<!-- -->
-						<!--  space -->
-						<!-- -->
-					</div>
-					<div id="buildBundle_testFileList">
-					<!-- -->
-						<!--  space -->
-						<!-- -->
+				<div id="bundleTestResultsHolder">
+					<div id="bundleTestResults">
+						<!--
+						<div id="buildBundle_progress">
+							<s:url var="url" value="/css/img/arrow-right-3.png" />
+							<img src="${url}" alt="Not found" id="expand" /> <label
+								class="adminLabel">Bundle Build Progress</label>
+						</div>
+						-->
+						<div id="buildBundle_testResultList">
+							<!--  space -->
+						</div>
+						<div id="buildBundle_testException">
+							<!--  space -->
+						</div>
+						<div id="buildBundle_testFileList">
+							<!--  space -->
+						</div>
 					</div>
 				</div>
-			</div>
-			<div id="downloadTestLogs">
-				<s:url var="url" value="/css/img/go-down-10.png" />
-				<img src="${url}" alt="Image not found" id="downloadImg"/>
-				<a id="downloadTestButton" class="adminLabel">Download as zip</a>
-			</div>
+				<!-- This has only been implemented for MTA
+				<div id="downloadTestLogs">
+					<s:url var="url" value="/css/img/go-down-10.png" />
+					<img src="${url}" alt="Image not found" id="downloadImg"/>
+					<a id="downloadTestButton" class="adminLabel">Download as zip</a>
+				</div>
+				-->
 			</div>
 		</div>
 		<div id="buildStep2Div">
