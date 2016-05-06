@@ -353,7 +353,7 @@ class GtfsRealtimeTripLibrary {
 
 
     VehicleLocationRecord record = new VehicleLocationRecord();
-    record.setTimeOfRecord(currentTime());
+    record.setTimeOfRecord(currentTime()); // this is just the default -- if we have tripUpdates this will be re-written
 
     BlockDescriptor blockDescriptor = update.block;
     if (update.block == null) return null;
@@ -762,6 +762,9 @@ class GtfsRealtimeTripLibrary {
       VehiclePosition vehiclePosition,
       VehicleLocationRecord record) {
     Position position = vehiclePosition.getPosition();
+    if (vehiclePosition.hasTimestamp()) {
+      record.setTimeOfLocationUpdate(vehiclePosition.getTimestamp());
+    }
     record.setCurrentLocationLat(position.getLatitude());
     record.setCurrentLocationLon(position.getLongitude());
     if (result != null) {
