@@ -29,3 +29,7 @@ fieldset#apiKeyContactInfo #contactInfoLegend {
 fieldset#apiKeyContactInfo #contactInfoItems {
 	margin-left: .5em;
 }
+
+fieldset#apiKeyContactInfo #api-key_searchEmail {
+	margin-left: 1em;
+}

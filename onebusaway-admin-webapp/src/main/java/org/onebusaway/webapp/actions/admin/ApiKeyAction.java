@@ -15,6 +15,8 @@
  */
 package org.onebusaway.webapp.actions.admin;
 
+import java.util.List;
+
 import org.apache.struts2.convention.annotation.Result;
 import org.apache.struts2.convention.annotation.Results;
 import org.onebusaway.presentation.impl.NextActionSupport;
@@ -130,6 +132,38 @@ public class ApiKeyAction extends NextActionSupport{
       contactDetails = bean.getContactDetails();
       addActionMessage("Key '" + key + "' found");
     }
+    return SUCCESS;
+  }
+
+  public String searchContactEmail() {
+    String searchResult = "Email address '" + contactEmail
+        + "' could not be found";
+    List<String> apiKeys =
+        userService.getUserIndexKeyValuesForKeyType(UserIndexTypes.API_KEY);
+    // clear other fields
+    contactName = "";
+    contactCompany = "";
+    contactDetails = "";
+    key = "";
+
+    for (String apiKey : apiKeys) {
+      // for each api key, check if contact email matches
+      UserIndexKey userKey = new UserIndexKey(UserIndexTypes.API_KEY, apiKey);
+      UserIndex userIndex = userService.getUserIndexForId(userKey);
+      if (userIndex != null) {
+        User user = userIndex.getUser();
+        UserBean bean = userService.getUserAsBean(user);
+        if (contactEmail.equals(bean.getContactEmail())) {
+          contactName = bean.getContactName();
+          contactCompany = bean.getContactCompany();
+          contactDetails = bean.getContactDetails();
+          key = apiKey;
+          searchResult = "Email address '" + contactEmail + "' found";
+          break;
+        }
+      }
+    }
+    addActionMessage(searchResult);
     return SUCCESS;
   }
 

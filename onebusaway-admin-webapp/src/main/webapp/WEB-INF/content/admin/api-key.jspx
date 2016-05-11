@@ -53,6 +53,8 @@
 						<label>Email</label>
 						<s:textfield id="contactEmail" name="contactEmail"
 								style="margin: 1px; width: 300px;" />
+						<s:submit align="left" value="Search" name="searchEmail"
+							method="searchContactEmail" formnovalidate="true" />
 						<label>Details</label>
 						<s:textarea id="contactDetails" name="contactDetails"
 								style="margin: 1px; width: 300px;"
