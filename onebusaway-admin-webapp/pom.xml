@@ -55,6 +55,16 @@
 		</repository>
 	</repositories>
 	<dependencies>
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-api</artifactId>
+        <version>${slf4j.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-log4j12</artifactId>
+        <version>${slf4j.version}</version>
+      </dependency>
         <dependency>
             <groupId>org.jdom</groupId>
             <artifactId>jdom2</artifactId>
@@ -193,7 +203,7 @@
 		<dependency>
 			<groupId>org.onebusaway</groupId>
 			<artifactId>onebusaway-king-county-metro-gtfs</artifactId>
-			<version>0.0.8-st</version>
+			<version>0.0.10-st-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<artifactId>onebusaway-csv-entities</artifactId>
