@@ -553,15 +553,6 @@ function onAnyCommentsClick() {
 
 
 function onSelectDataset(sourceDirectoryType) {
-	//var bundleDir = jQuery("#createDataset #directoryName").val();
-	//if (sourceDirectoryType == "existing") {
-	//	var selectedCheckbox = jQuery("#Create #existingDataset").find("input:checked");
-	//	bundleDir = selectedCheckbox.closest("tr").find(".directoryName").text();
-	//}
-	//if (sourceDirectoryType == "copy") {
-	//	bundleDir = selectedDirectory;
-	//}
-	//selectedDirectory = bundleDir; //Used by Upload tab
 	var bundleDir = selectedDirectory;
 	var actionName = "selectDirectory";
 	if (sourceDirectoryType=="copy") {
@@ -572,7 +563,6 @@ function onSelectDataset(sourceDirectoryType) {
 	// initially hide the Request Id label when picking a new bundle
 	jQuery("#prevalidate_id_label").hide();
 	
-	//if (jQuery("#create").is(":checked")) {
 	if (sourceDirectoryType == "create") {
 		// Check for valid bundle directory name
 		var bundleNameCheck = /^[a-zA-Z0-9\.\_\-]+$/;
@@ -587,10 +577,6 @@ function onSelectDataset(sourceDirectoryType) {
 		actionName = "createDirectory";
 	}
 
-	//if(jQuery("#copy").is(":checked")) {
-	//	copyDir = jQuery("#destDirectoryName").val();
-	//	actionName = "copyDirectory";
-	//}
 	jQuery.ajax({
 		url: "manage-bundles!" + actionName + ".action?ts=" +new Date().getTime(),
 		type: "GET",
@@ -601,15 +587,14 @@ function onSelectDataset(sourceDirectoryType) {
 				disableSelectButton();
 				var status = response;
 				if (status != undefined) {
-					//jQuery("#createDirectory #createDirectoryContents #createDirectoryResult").show().css("display","block");
 					if(status.selected == true) {
 						jQuery("#createDirectoryResult #resultImage").attr("src", "../../css/img/dialog-accept-2.png");
 						jQuery("#createDirectoryMessage").text(status.message).css("color", "green");
+						// Clear the bundle name for the Build and Stage tabs
+						$("#Build #bundleBuildName").val("");
+						$("#Stage #staging_bundleName").text("");
 						// If "createDirectory", add the new directory to the current list of bundle directories.
 						if (actionName == "createDirectory") {
-							// Blank out the bundle name for the Build and Stage taba
-							$("#Build #bundleBuildName").val("");
-							$("#Stage #staging_bundleName").text("");
 							disableStageButton();
 							// Add a new div for this directory to the list of existing directories
 							var idx = 0;
@@ -645,8 +630,10 @@ function onSelectDataset(sourceDirectoryType) {
 						
 						if (actionName != "createDirectory" && status.bundleInfo != null) {
 							// Display the name of the most recently built bundle on the Build and Stage tabs
-							$("#Build #bundleBuildName").val(status.bundleInfo.buildResponse.bundleBuildName);
-							$("#Stage #staging_bundleName").text(status.bundleInfo.buildResponse.bundleBuildName);
+							if (status.bundleInfo.buildResponse != null) {
+								$("#Build #bundleBuildName").val(status.bundleInfo.buildResponse.bundleBuildName);
+								$("#Stage #staging_bundleName").text(status.bundleInfo.buildResponse.bundleBuildName);
+							}
 							enableStageButton();
 							var agencies = status.bundleInfo.agencyList;
 							if (agencies != null) {
@@ -748,7 +735,6 @@ function onSelectDataset(sourceDirectoryType) {
 }
 
 function onUploadSelectedAgenciesClick() {
-	//var bundleDir = jQuery("#createDirectory #directoryName").val();
 	var bundleDir = selectedDirectory;
 	var cleanedDirs = [];
 	$('#agency_data .agencySelected').each(function() {
@@ -794,7 +780,6 @@ function onUploadSelectedAgenciesClick() {
 		} else {
 			console.log("about to call manage-bundles!uploadSourceFile");
 			var files = agencyDataFile;
-			//var agencyFile = agencyDataFile.files[0];
 			console.log("file name is: " + agencyDataFile.name);
 			var formData = new FormData();
 			formData.append("ts", new Date().getTime());
@@ -893,7 +878,6 @@ function onSelectAgencyChange() {
 function onAgencyProtocolChange() {
 	console.log("in onAgencyProtocolChange, v1");
 	var protocol = $(this).val();
-	//var elementType = $(this).prop('tagName');
 	var dataSource = $(this).closest('tr').find(".agencyDataSource");
 	if (protocol == "file") {
 		dataSource.clone().attr('type','file').insertAfter(dataSource).prev().remove();
@@ -988,10 +972,6 @@ function toggleBuildBundleResultList(event) {
 	} else {
 		jQuery("#buildBundle_finalResultList").toggle();
 	}
-	//var $image = jQuery("#buildBundle #buildBundle_buildProgress #expand");
-	//changeImageSrc($image);
-	//Toggle progress result list
-	//jQuery("#buildBundle #buildBundle_resultList").toggle();
 }
 
 function toggleDeployBundleResultList() {
@@ -1070,7 +1050,7 @@ function directoryOptionChanged() {
 		jQuery("#createDirectoryContents #directoryButton").attr("name","method:selectDirectory");
 		jQuery("#selectExistingContents").show();
 		jQuery('#copyDirectory').hide();
-		// TODO replace the exitingDirectories form call with this below
+		// TODO replace the existingDirectories form call with this below
 //		jQuery.ajax({
 //		url: "manage-bundles!requestExistingDirectories.action",
 //		type: "GET",
@@ -1221,15 +1201,11 @@ function updateValidateList(id) {
 }
 
 function onBuildClick(event) {
-	//var bundleDir = jQuery("#createDirectory #directoryName").val();
 	var bundleDir = selectedDirectory;
-	//var bundleName = jQuery("#buildBundle_bundleName").val();
 	var bundleName = jQuery("#Build #bundleBuildName").val();
 	var startDate = jQuery("#startDate").val();
 	var endDate = jQuery("#endDate").val();
-	//var bundleComment = jQuery("#bundleComment").val();
 	var bundleComment = jQuery("#uploadFiles #bundleComment").val();
-	//var archive = jQuery("#buildBundle_archive").is(":checked");
 	var archive = false;
 	var consolidate = false;
 	var buildType = event.data.buildType;
@@ -1241,8 +1217,6 @@ function onBuildClick(event) {
 		consolidate = true;
 		jQuery("#finalProgressBarDiv").show();
 	}
-	//var consolidate = jQuery("#buildBundle_consolidate").is(":checked");
-	//var predate = jQuery("#buildBundle_predate").is(":checked");
 
 	var valid = validateBundleBuildFields(bundleDir, bundleName, startDate, endDate);
 	if(valid == false) {
@@ -1252,7 +1226,6 @@ function onBuildClick(event) {
 	jQuery("#buildBundle #buildingTest #buildingTestProgress").attr("src","../../css/img/ajax-loader.gif");
 	jQuery("#buildBundle_buildTestProgress").text("Bundle Build in Progress...");
 	jQuery("#buildBundle_testFileList").html("");
-	//jQuery("#buildBundle #downloadLogs").hide();
 	jQuery("#buildBundle #buildingTest").show().css("width","300px").css("margin-top", "20px");
 
 	//disableBuildButton();
