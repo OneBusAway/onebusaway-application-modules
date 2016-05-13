@@ -58,9 +58,9 @@ jQuery(function() {
 		jQuery("#prevalidate_id").text(qs["id"]);
 		jQuery("#buildBundle_id").text(qs["id"]);
 		buildBundleId = qs["id"];
-		jQuery("#buildBundle_bundleName").val(qs["name"]);
-		jQuery("#buildBox #bundleStartDateHolder #startDatePicker").val(qs["startDate"]);
-		jQuery("#buildBox #bundleEndDateHolder #endDatePicker").val(qs["endDate"]);
+		jQuery("#Build #bundleBuildName").val(qs["name"]);
+		jQuery("#Build #startDatePicker").val(qs["startDate"]);
+		jQuery("#Build #endDatePicker").val(qs["endDate"]);
 		jQuery("#bundleComment").val(qs["bundleComment"]);
 		//hide the result link when reentering from email
 		jQuery("#buildBundle_resultLink").hide();
@@ -1392,62 +1392,67 @@ function updateBuildStatus(buildType) {
 			var totalTasks = 0;
 			var bundleResponse = response;
 			if (bundleResponse == null) {
-				jQuery("#buildBundle_buildProgress").text("Bundle Status Unkown!");
+				jQuery("#buildBundle_buildProgress").text("Bundle Status Unknown!");
 				jQuery("#buildBundle #buildingTest #buildingTestProgress").attr("src","../../css/img/dialog-warning-4.png");
 				//jQuery("#buildBundle_resultList").html("unknown id=" + id);
 				$buildBundle_resultList.val("unknown id=" + id);
-			}
-			var size = bundleResponse.statusList.length;
-			if (size > 0) {
-				for (var i=0; i<size; i++) {
-					var nextLine = bundleResponse.statusList[i];
-					if (nextLine.indexOf("running task") >= 0) {
-						var idxCurrent = nextLine.search("\\d+/\\d+");
-						var idxTotal = nextLine.indexOf("/", idxCurrent) + 1;
-						var idxTotalEnd = nextLine.indexOf(")", idxTotal);
-						if (idxCurrent > 0 && idxTotal > 0) {
-							currentTask = parseInt(nextLine.substring(idxCurrent, idxTotal - 1));
-							totalTasks = parseInt(nextLine.substring(idxTotal, idxTotalEnd));
-							$progressBar.progressbar('value', (currentTask-1)/totalTasks * 100);
-							$buildProgress.text("Completed " + (currentTask-1)
-								+ " of " + totalTasks + " build tasks.");
-						}
-					} else if (currentTask > 0 && currentTask == totalTasks) { // All tasks finished
-						$progressBar.progressbar('value', 100);
-						$buildProgress.text("Completed " + currentTask
-								+ " of " + totalTasks + " build tasks.");
-					}
-					//txt = txt + "<li>" + bundleResponse.statusList[i] + "</li>";
-					txt = txt + nextLine + "\n";
-				}
-			}
-			if (bundleResponse.complete == false) {
-				window.setTimeout(updateBuildStatus.bind(null, buildType), 5000); // recurse
 			} else {
-				jQuery("#buildBundle_buildTestProgress").text("Bundle Complete!");
-				jQuery("#buildBundle #buildingTest #buildingTestProgress").attr("src","../../css/img/dialog-accept-2.png");
-				updateBuildList(id);
-				$("#Stage #staging_bundleName").text($("#Build #bundleBuildName").val());
-				enableStageButton();
-				enableBuildButton();
-				enableResetButton();
-			}
-			//txt = txt + "</ul>";
-			//jQuery("#buildBundle_resultList").html(txt).css("font-size", "12px");	
-			$buildBundle_resultList.val(txt).css("font-size", "12px");
-			// Make sure that the textarea remains scrolled to the bottom.
-			$buildBundle_resultList.scrollTop(1500);  // Just use some arbitrarily large number
-			// check for exception
-			if (bundleResponse.exception != null) {
-				jQuery("#buildBundle_buildTestProgress").text("Bundle Failed!");
-				jQuery("#buildBundle #buildingTest #buildingTestProgress").attr("src","../../css/img/dialog-warning-4.png");
-				if (bundleResponse.exception.message != undefined) {
-					jQuery("#buildBundle_testException").show().css("display","inline");
-					jQuery("#buildBundle_testException").html(bundleResponse.exception.message);
+				jQuery("#Build #datasetName").text(bundleResponse.bundleDirectoryName);
+				var size = 0;
+				if (bundleResponse.statusList != null) {
+					size = bundleResponse.statusList.length;
 				}
-				disableStageButton();
-				enableBuildButton();
-				enableResetButton();
+				if (size > 0) {
+					for (var i=0; i<size; i++) {
+						var nextLine = bundleResponse.statusList[i];
+						if (nextLine.indexOf("running task") >= 0) {
+							var idxCurrent = nextLine.search("\\d+/\\d+");
+							var idxTotal = nextLine.indexOf("/", idxCurrent) + 1;
+							var idxTotalEnd = nextLine.indexOf(")", idxTotal);
+							if (idxCurrent > 0 && idxTotal > 0) {
+								currentTask = parseInt(nextLine.substring(idxCurrent, idxTotal - 1));
+								totalTasks = parseInt(nextLine.substring(idxTotal, idxTotalEnd));
+								$progressBar.progressbar('value', (currentTask-1)/totalTasks * 100);
+								$buildProgress.text("Completed " + (currentTask-1)
+									+ " of " + totalTasks + " build tasks.");
+							}
+						} else if (currentTask > 0 && currentTask == totalTasks) { // All tasks finished
+							$progressBar.progressbar('value', 100);
+							$buildProgress.text("Completed " + currentTask
+									+ " of " + totalTasks + " build tasks.");
+						}
+						//txt = txt + "<li>" + bundleResponse.statusList[i] + "</li>";
+						txt = txt + nextLine + "\n";
+					}
+				}
+				if (bundleResponse.complete == false) {
+					window.setTimeout(updateBuildStatus.bind(null, buildType), 5000); // recurse
+				} else {
+					jQuery("#buildBundle_buildTestProgress").text("Bundle Complete!");
+					jQuery("#buildBundle #buildingTest #buildingTestProgress").attr("src","../../css/img/dialog-accept-2.png");
+					updateBuildList(id);
+					$("#Stage #staging_bundleName").text($("#Build #bundleBuildName").val());
+					enableStageButton();
+					enableBuildButton();
+					enableResetButton();
+				}
+				//txt = txt + "</ul>";
+				//jQuery("#buildBundle_resultList").html(txt).css("font-size", "12px");
+				$buildBundle_resultList.val(txt).css("font-size", "12px");
+				// Make sure that the textarea remains scrolled to the bottom.
+				$buildBundle_resultList.scrollTop(1500);  // Just use some arbitrarily large number
+				// check for exception
+				if (bundleResponse.exception != null) {
+					jQuery("#buildBundle_buildTestProgress").text("Bundle Failed!");
+					jQuery("#buildBundle #buildingTest #buildingTestProgress").attr("src","../../css/img/dialog-warning-4.png");
+					if (bundleResponse.exception.message != undefined) {
+						jQuery("#buildBundle_testException").show().css("display","inline");
+						jQuery("#buildBundle_testException").html(bundleResponse.exception.message);
+					}
+					disableStageButton();
+					enableBuildButton();
+					enableResetButton();
+				}
 			}
 		},
 		error: function(request) {
