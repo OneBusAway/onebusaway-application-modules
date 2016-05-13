@@ -201,7 +201,6 @@ jQuery(function() {
 	jQuery("#continueCopy").click(onContinueCopyClick);
 	
 	// upload bundle source data for selected agency
-	//jQuery("#uploadSelectedAgenciesButton").click(onUploadSelectedAgenciesClick);
 	jQuery("#uploadButton").click(onUploadSelectedAgenciesClick);
 
 	// add another row to the list of agencies and their source data
@@ -219,7 +218,9 @@ jQuery(function() {
 
 	// popup the Comments box
 	jQuery("#anyNotes").click(onAnyCommentsClick);
-	
+
+	jQuery("#Upload #bundleComment").change(onBundleCommentChanged);
+
 	//toggle advanced option contents
 	jQuery("#createDirectory #advancedOptions #expand").bind({
 		'click' : toggleAdvancedOptions	});
@@ -810,6 +811,17 @@ function onUploadSelectedAgenciesClick() {
 		}
 	});
 	onUploadContinueClick();
+}
+
+function onBundleCommentChanged() {
+	jQuery.ajax({
+		url: "manage-bundles!updateBundleComments.action?ts=" + new Date().getTime(),
+		type: "GET",
+		data: {
+			"directoryName" : selectedDirectory,
+			"comments" : $("#uploadFiles #bundleComment").val()
+		}
+	});
 }
 
 function onAddAnotherAgencyClick() {

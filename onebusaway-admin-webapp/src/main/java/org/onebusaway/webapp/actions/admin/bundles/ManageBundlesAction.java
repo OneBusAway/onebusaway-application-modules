@@ -378,6 +378,25 @@ public class ManageBundlesAction extends OneBusAwayNYCAdminActionSupport impleme
 		return "fileList";
 	}
 
+  /**
+   * Updates the bundle comments for the specified bundle
+   */
+  @SuppressWarnings("unchecked")
+  public String updateBundleComments() {
+    JSONObject buildObj = new JSONObject();
+    JSONObject bundleObj = getBundleTrackingObject(directoryName);
+    if (bundleObj == null) {
+      bundleObj = new JSONObject();
+    }
+    if(bundleObj.get("buildResponse") != null) {
+      buildObj = (JSONObject)bundleObj.get("buildResponse");
+    }
+    buildObj.put("comment", comments);
+    bundleObj.put("buildResponse", buildObj);
+    writeBundleTrackingInfo(bundleObj, directoryName);
+    return "uploadStatus";
+  }
+
 	/**
 	 * Uploads the bundle source data for the specified agency
 	 */
