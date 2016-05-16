@@ -454,6 +454,8 @@ OBA.Popups = (function() {
 				routeAndDirectionWithoutArrivalsCount--;
 			}
 
+			// append RecordedAtTime to mvj so we know the age of the record, not just the age of the update
+			monitoredJourney.MonitoredVehicleJourney["RecordedAtTime"] = OBA.Util.ISO8601StringToDate(monitoredJourney.RecordedAtTime).getTime();
 			routeAndDirectionWithArrivals[routeId + "_" + directionId + "_" + destinationNameHash].push(monitoredJourney.MonitoredVehicleJourney);
 			routeAndDirectionWithArrivalsCount++;
 		});	    
@@ -497,7 +499,7 @@ OBA.Popups = (function() {
 							&& monitoredVehicleJourney.MonitoredCall.ExpectedArrivalTime !== null) {
 							timePrediction = OBA.Util.getArrivalEstimateForISOString(
 									monitoredVehicleJourney.MonitoredCall.ExpectedArrivalTime, 
-									updateTimestampReference);
+									monitoredVehicleJourney.RecordedAtTime/*synthetic property*/);
 						}
 
 						var wrapped = false;
