@@ -16,7 +16,7 @@
 
   <!-- Common Software Dependency Versions -->
   <properties>
-    <struts-version>2.3.16.2</struts-version>
+    <struts-version>2.3.16.3</struts-version>
     <gwt-version>2.4.0</gwt-version>
     <spring-version>3.0.3.RELEASE</spring-version>
     <csv-entities-version>1.0.3</csv-entities-version>
