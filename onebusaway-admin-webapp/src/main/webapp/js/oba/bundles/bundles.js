@@ -175,6 +175,8 @@ jQuery(function() {
 
 	jQuery("#deploy_continue").click(onDeployContinueClick);
 
+	jQuery('#Create #filenameError').hide();
+
 	// hookup ajax call to select
 	jQuery("#newDirectoryButton").click(onCreateDatasetClick);
 
@@ -266,12 +268,19 @@ jQuery(function() {
 	//Using bind() with propertychange event as live() does not work in IE for unknown reasons
 	jQuery("#createDataset #directoryName").bind("input propertychange", function() {
 		var text = jQuery("#createDataset #directoryName").val();
+		var validDatasetNameExp = /^[a-zA-Z_-\d]+$/;
 		//var copyDestText = jQuery("#createDirectory #destDirectoryName").val();
-		if (text.length > 0 && (!jQuery("#copy").is(":checked") || copyDestText.length > 0)) {
-			enableSelectButton();
-		} else {
-			disableSelectButton();
-			jQuery("#createDirectory #createDirectoryContents #createDirectoryResult").hide();
+		jQuery('#Create #filenameError').hide();
+		disableSelectButton();
+		if (text.length > 0) {
+			if (text.match(validDatasetNameExp)) {
+				if (!jQuery("#copy").is(":checked") || copyDestText.length > 0) {
+					enableSelectButton();
+				}
+			} else {
+				jQuery('#Create #filenameError').show();
+				jQuery("#createDirectory #createDirectoryContents #createDirectoryResult").hide();
+			}
 		}
 	});
 	
