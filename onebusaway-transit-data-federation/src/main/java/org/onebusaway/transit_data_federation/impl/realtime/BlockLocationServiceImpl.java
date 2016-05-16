@@ -394,6 +394,9 @@ public class BlockLocationServiceImpl implements BlockLocationService,
 
     // TODO : We might take a bit more care in picking the collection if
     // multiple collections are returned
+    if (cacheRecords.size() > 1) {
+      _log.error("multiple cache entries for vehicle " + vehicleId);
+    }
     for (VehicleLocationCacheElements cacheRecord : cacheRecords) {
       BlockInstance blockInstance = cacheRecord.getBlockInstance();
       BlockLocation location = getBlockLocation(blockInstance, cacheRecord,

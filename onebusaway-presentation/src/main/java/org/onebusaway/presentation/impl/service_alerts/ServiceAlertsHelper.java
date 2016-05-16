@@ -310,6 +310,9 @@ public class ServiceAlertsHelper {
     if (serviceAlert != null) {
       value.setValue(serviceAlert.getId());
       ptSit.setSituationNumber(value);
+    } else {
+      // nothing to do 
+      return ptSit;
     }
     
     if (serviceAlert.getCreationTime() != 0)

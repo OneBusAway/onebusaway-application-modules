@@ -601,19 +601,13 @@ class GtfsRealtimeTripLibrary {
     if (blockDescriptor.getStartTime() != null) {
       record.setBlockStartTime(blockDescriptor.getStartTime());
     }
-    long tripStartTime = this.getTripStartTime(best.tripId);
-    /*
-     *  if trip does't start till the future mark it as deadhead
-     *  TODO:  if large schedule deviation in the past this strategy may not work
-     */
-    if (best.scheduleDeviation == 0 &&  (tripStartTime - currentTime) > 5 * 60 && !best.isInPast) {
-      record.setPhase(EVehiclePhase.DEADHEAD_BEFORE);
-    } else {
-      record.setScheduleDeviation(best.scheduleDeviation);
-    }
+
+
+    record.setScheduleDeviation(best.scheduleDeviation);
     if (best.timestamp != 0) {
       record.setTimeOfRecord(best.timestamp);
     }
+
     record.setTimepointPredictions(timepointPredictions);
   }
 
