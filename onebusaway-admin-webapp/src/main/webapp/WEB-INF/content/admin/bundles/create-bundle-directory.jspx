@@ -33,11 +33,12 @@
 				<td><input type="text" id="directoryName"/></td>
 				<td><input type="button" id="newDirectoryButton" value="Save and Continue" disabled="disabled"/></td>
 			</tr>
+			<tr id="filenameError">
+				<td id="filenameErrorMsg">Name is not valid; it cannot contain spaces or symbols.</td>
+			</tr>
 			<tr>
 				<td id="datasetNameNotes">
 					This name will become the name of your Bundle<br/>later on. Avoid spaces or symbols in your name.
-				</td>
-				<td>
 				</td>
 			</tr>
 		</table>

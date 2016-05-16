@@ -165,6 +165,10 @@
   padding-left: 30px;
 }
 
+#Create #filenameError {
+	color: red;
+}
+
 #createDirectory #selectExistingContents{
   display:none;
   padding-left: 30px;
