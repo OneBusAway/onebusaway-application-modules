@@ -3,7 +3,7 @@
   <parent>
     <artifactId>onebusaway-quickstart</artifactId>
     <groupId>org.onebusaway</groupId>
-    <version>1.1.15.24-cs</version>
+    <version>1.1.15.25-cs-SNAPSHOT</version>
   </parent>
   <artifactId>onebusaway-quickstart-bootstrap</artifactId>
   <name>onebusaway-quickstart-bootstrap</name>
