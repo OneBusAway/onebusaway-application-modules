@@ -530,7 +530,7 @@ class GtfsRealtimeTripLibrary {
               best.delta = 0;
               best.isInPast = false;
               best.scheduleDeviation = delay;
-              best.tripId = tripId.getId();
+              best.tripId = tripId;
             }
 
             if (obaTripUpdate.hasTimestamp()) {
@@ -545,7 +545,7 @@ class GtfsRealtimeTripLibrary {
             best.delta = 0;
             best.isInPast = false;
             best.scheduleDeviation = tripUpdate.getDelay();
-            best.tripId = tripId.getId();
+            best.tripId = tripId;
           }
           if (tripUpdate.hasTimestamp()) {
             best.timestamp = tripUpdate.getTimestamp() * 1000;
@@ -604,6 +604,8 @@ class GtfsRealtimeTripLibrary {
 
 
     record.setScheduleDeviation(best.scheduleDeviation);
+    // the schedule deviation is relative to the trip so this needs to be set!
+    record.setTripId(best.tripId); 
     if (best.timestamp != 0) {
       record.setTimeOfRecord(best.timestamp);
     }
@@ -748,7 +750,7 @@ class GtfsRealtimeTripLibrary {
       best.delta = delta;
       best.isInPast = isInPast;
       best.scheduleDeviation = scheduleDeviation;
-      best.tripId = tripId.getId();
+      best.tripId = tripId;
     }
   }
 
@@ -777,6 +779,6 @@ class GtfsRealtimeTripLibrary {
     public int scheduleDeviation = 0;
     public boolean isInPast = true;
     public long timestamp = 0;
-    public String tripId = null;
+    public AgencyAndId tripId = null;
   }
 }

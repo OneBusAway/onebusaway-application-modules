@@ -555,7 +555,13 @@ OBA.Popups = (function() {
 										distance += " <span class='not_bold'>(at terminal, scheduled to depart " + departureTime.format("h:MM TT") + ")</span>";
 									}
 								} else {
-									distance += " <span class='not_bold'>(at terminal)</span>";
+									// here we want to use the time prediction if we have it (counter to what the MTA does)
+									// we also ignore stalled as the time prediction will account for that
+									if (timePrediction != null) {
+										distance = timePrediction + ", " + distance + " <span class='not_bold'>(at terminal)</span>";	
+									} else {
+										distance += " <span class='not_bold'>(at terminal)</span>";
+									}
 								}
 							} else if(wrapped === true) {
 								distance += " <span class='not_bold'>(+ scheduled layover at terminal)</span>";

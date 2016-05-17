@@ -41,6 +41,7 @@ import org.onebusaway.collections.Range;
 import org.onebusaway.container.ConfigurationParameter;
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.realtime.api.EVehiclePhase;
 import org.onebusaway.realtime.api.TimepointPredictionRecord;
 import org.onebusaway.realtime.api.VehicleLocationRecord;
 import org.onebusaway.transit_data_federation.model.TargetTime;
@@ -294,7 +295,23 @@ public class BlockLocationServiceImpl implements BlockLocationService,
 
       ScheduledBlockLocation scheduledBlockLocation = getScheduledBlockLocationForVehicleLocationRecord(
           record, instance);
-
+      if (scheduledBlockLocation != null && scheduledBlockLocation.getActiveTrip() != null) {
+        /*
+         * schedule deviation (and hence vehicle position) is relative to the trip.  If scheduled trip
+         * and predicted trip disagree we have no idea where the bus is.  Assume vehicle in layover so it
+         * will render on map but at a stop, and not otherwise be a ghost bus
+         */
+        AgencyAndId scheduledTrip = scheduledBlockLocation.getActiveTrip().getTrip().getId();
+        AgencyAndId actualTrip = record.getTripId();
+        if (actualTrip != null && !scheduledTrip.equals(actualTrip)) {
+          record.setPhase(EVehiclePhase.LAYOVER_DURING);
+          _log.debug("trip mismatch for vehicle " + record.getVehicleId() 
+              + " with actual/schedule="
+              + actualTrip + " != " + scheduledTrip
+              + " for route " + scheduledBlockLocation.getActiveTrip().getTrip().getRoute().getId()
+              );
+        }
+      }
       if (!record.isScheduleDeviationSet()) {
         int deviation = (int) ((record.getTimeOfRecord() - record.getServiceDate()) / 1000 - scheduledBlockLocation.getScheduledTime());
         record.setScheduleDeviation(deviation);
