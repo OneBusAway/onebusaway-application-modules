@@ -145,6 +145,9 @@ public class FeedServiceImpl implements FeedService {
       TripUpdateModel tu = new TripUpdateModel();
       TripDescriptor t = entity.getTripUpdate().getTrip();
       tu.setTimestamp(new Date(timestamp));
+      if (entity.getTripUpdate().hasDelay()) {
+        tu.setDelay(entity.getTripUpdate().getDelay());
+      }
       if (t.hasTripId())
         tu.setTripId(t.getTripId());
       if (t.hasRouteId()) {

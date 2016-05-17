@@ -68,6 +68,9 @@ public class TripUpdateModel {
   private String vehicleLicensePlate;
   @Column(nullable = true, name = "timestamp")
   private Date timestamp;
+  @Column(nullable = true, name = "delay")
+  private int delay;
+
 
   @OneToMany(cascade = {
       CascadeType.ALL}, mappedBy = "tripUpdate", fetch = FetchType.EAGER)
@@ -157,5 +160,12 @@ public class TripUpdateModel {
     if (stopTimeUpdate != null) {
       stopTimeUpdates.add(stopTimeUpdate);
     }
+  }
+
+  public Integer getDelay() {
+    return delay;
+  }
+  public void setDelay(Integer delay) {
+    this.delay = delay;
   }
 }
