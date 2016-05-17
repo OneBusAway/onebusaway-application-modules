@@ -604,8 +604,6 @@ class GtfsRealtimeTripLibrary {
 
 
     record.setScheduleDeviation(best.scheduleDeviation);
-    // the schedule deviation is relative to the trip so this needs to be set!
-    record.setTripId(best.tripId); 
     if (best.timestamp != 0) {
       record.setTimeOfRecord(best.timestamp);
     }
