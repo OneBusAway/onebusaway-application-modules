@@ -84,7 +84,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			List<JsonObject> configurationItems = _configurationServiceClient
 					.getItemsForRequest("config", "list");
 			if (configurationItems == null) {
-				_log.info("no config values present!");
+				_log.debug("no config values present!");
 				return;
 			}
 			for (JsonObject configItem : configurationItems) {
@@ -127,13 +127,13 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			String defaultValue) {
 		String value = null;
 		if (_configurationServiceClient.isLocal()) {
-			_log.info("using localConfiguration=" + _localConfiguration);
+			_log.debug("using localConfiguration=" + _localConfiguration);
 			try {
 				value = getLocalConfigurationValue(configurationItemKey);
 			} catch (Exception e) {
 				_log.error("lookup up local config failed:", e);
 			}
-			_log.info("for key=" + configurationItemKey + " found " + value);
+			_log.debug("for key=" + configurationItemKey + " found " + value);
 			if (value == null) {
 				return defaultValue;
 			}

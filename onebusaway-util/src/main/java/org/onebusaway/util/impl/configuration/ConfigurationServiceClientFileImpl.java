@@ -101,7 +101,7 @@ public class ConfigurationServiceClientFileImpl implements
 		for (Map<String, String> setting : settings) {
 		  if (component == null) {
 		    if (setting.containsKey("key") && key.equals(setting.get("key"))) {
-		      _log.info("getItem(no-component)(" + component  + ", " + key + ")=" + setting.get("value"));
+		      _log.debug("getItem(no-component)(" + component  + ", " + key + ")=" + setting.get("value"));
 		      return setting.get("value");  
 		    }
 		  } else {
@@ -109,7 +109,7 @@ public class ConfigurationServiceClientFileImpl implements
   					component.equals(setting.get("component"))) &&
   				setting.containsKey("key") && 
   				key.equals(setting.get("key"))) {
-  			  _log.info("getItem(" + component  + ", " + key + ")=" + setting.get("value"));
+  			  _log.debug("getItem(" + component  + ", " + key + ")=" + setting.get("value"));
   				return setting.get("value");
   			}
 		  }
