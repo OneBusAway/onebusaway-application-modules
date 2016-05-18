@@ -69,6 +69,8 @@ import java.util.Map;
 @Component
 class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
 
+  private static Logger _log = LoggerFactory.getLogger(ArrivalAndDepartureServiceImpl.class);
+  
   private StopTimeService _stopTimeService;
 
   private BlockLocationService _blockLocationService;
@@ -1015,6 +1017,14 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
 
     BlockStopTimeEntry blockStopTime = getBlockStopTime(blockTripInstance,
         stopId, stopSequence, timeOfServiceDate);
+    
+    if (blockStopTime == null) {
+      _log.error("block stop time is null for stopid=" + stopId 
+          + " and blockTripInstance=" + blockTripInstance
+          + " and timeOfServiceDate=" + timeOfServiceDate);
+      return null;
+    }
+    
     StopTimeInstance stopTimeInstance = new StopTimeInstance(blockStopTime,
         blockTripInstance.getState());
 
