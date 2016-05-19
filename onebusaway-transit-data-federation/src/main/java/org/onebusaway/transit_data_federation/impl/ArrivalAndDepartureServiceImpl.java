@@ -661,7 +661,6 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
         success = true;
 
         long arrivalTime = tpr.getTimepointPredictedArrivalTime();
-        setPredictedArrivalTimeForInstance(instance, arrivalTime);
 
         long departureTime = tpr.getTimepointPredictedDepartureTime();
         if (departureTime <= 0) {
@@ -669,6 +668,16 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
           departureTime = arrivalTime + slack * 1000;
         }
         setPredictedDepartureTimeForInstance(instance, departureTime);
+
+	if (arrivalTime == -1 && 
+	    tpr.getTimepointPredictedDepartureTime() != -1) {
+	    _log.error("arrivalTime is -1 setting to departureTime of "
+		       + tpr.getTimepointPredictedDepartureTime());
+	    setPredictedArrivalTimeForInstance(instance, tpr.getTimepointPredictedDepartureTime());
+	} else {
+	    setPredictedArrivalTimeForInstance(instance, arrivalTime);
+	}
+
 
         if (sequenceMatches)
           return true;
