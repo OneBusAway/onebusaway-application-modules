@@ -49,8 +49,6 @@ import org.onebusaway.utility.EInRangeStrategy;
 import org.onebusaway.utility.EOutOfRangeStrategy;
 import org.onebusaway.utility.InterpolationLibrary;
 import org.onebusaway.utility.TransitInterpolationLibrary;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -69,8 +67,6 @@ import java.util.Map;
 @Component
 class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
 
-  private static Logger _log = LoggerFactory.getLogger(ArrivalAndDepartureServiceImpl.class);
-  
   private StopTimeService _stopTimeService;
 
   private BlockLocationService _blockLocationService;
@@ -669,14 +665,14 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
         }
         setPredictedDepartureTimeForInstance(instance, departureTime);
 
-	if (arrivalTime == -1 && 
-	    tpr.getTimepointPredictedDepartureTime() != -1) {
-	    _log.error("arrivalTime is -1 setting to departureTime of "
-		       + tpr.getTimepointPredictedDepartureTime());
-	    setPredictedArrivalTimeForInstance(instance, tpr.getTimepointPredictedDepartureTime());
-	} else {
-	    setPredictedArrivalTimeForInstance(instance, arrivalTime);
-	}
+        /*
+         * if arrivalTime is -1 be polite to clients and serve departureTime
+         */
+      	if (arrivalTime == -1) {
+      	    setPredictedArrivalTimeForInstance(instance, departureTime);
+      	} else {
+      	    setPredictedArrivalTimeForInstance(instance, arrivalTime);
+      	}
 
 
         if (sequenceMatches)
