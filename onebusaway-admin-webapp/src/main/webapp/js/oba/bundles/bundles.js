@@ -221,6 +221,7 @@ jQuery(function() {
 	// popup the Comments box
 	jQuery("#anyNotes").click(onAnyCommentsClick);
 
+	// if bundle comment has changed, save it to info.json
 	jQuery("#Upload #bundleComment").change(onBundleCommentChanged);
 
 	//toggle advanced option contents
@@ -231,10 +232,16 @@ jQuery(function() {
 	if (jQuery("#prevalidate_id").text().length == 0) {
 		jQuery("#prevalidate_id_label").hide();
 	}
-	
+
+	//initially disable the Validate button on the Pre-validate tab
+	disableValidateButton();
+
+	//if bundle build name is entered, enable the Validate button
+	jQuery("#Validate #prevalidate_bundleName").on("input propertychange", onBundleNameChanged);
+
 	//initially hide the Validation Progress label
 	jQuery("#prevalidate_progress").hide();
-	
+
 	//toggle validation progress list
 	jQuery("#prevalidateInputs #prevalidate_progress #expand").bind({
 		'click' : toggleValidationResultList});
@@ -493,6 +500,9 @@ function showBundleInfo(bundleInfo){
 	if (bundleObj.validationResponse != undefined) {
 		//Populating Pre-Validate Tab Fields
 		jQuery("#prevalidate_bundleName").val(bundleObj.validationResponse.bundleBuildName);
+		if ((jQuery("#prevalidate_bundleName").val()).length > 0) {
+			enableValidateButton();
+		}
 		jQuery("#prevalidate_id").text(bundleObj.validationResponse.requestId);
 		if (jQuery("#prevalidate_id").text().length > 0) {
 			jQuery("#prevalidate_id_label").show();
@@ -907,6 +917,15 @@ function onAgencyProtocolChange() {
 	}
 }
 
+function onBundleNameChanged() {
+	var text = jQuery("#Validate #prevalidate_bundleName").val();
+	if (text.length == 0 || selectedDirectory.length == 0) {
+		disableValidateButton();
+	} else {
+		enableValidateButton();
+	}
+}
+
 function onRemoveSelectedAgenciesClick() {
 	$(this).closest('tr').remove();
 }
@@ -933,6 +952,14 @@ function enableAddFilesButton() {
 
 function disableAddFilesButton() {
 	jQuery("#Create #createDataset #existingDirectoryButton").attr("disabled", "disabled").css("color", "#999");
+}
+
+function enableValidateButton() {
+	jQuery("#prevalidateInputs #validateBox #validateButton").removeAttr("disabled").css("color", "#000");
+}
+
+function disableValidateButton() {
+	jQuery("#prevalidateInputs #validateBox #validateButton").attr("disabled", "disabled").css("color", "#999");
 }
 
 function enableStageButton() {
