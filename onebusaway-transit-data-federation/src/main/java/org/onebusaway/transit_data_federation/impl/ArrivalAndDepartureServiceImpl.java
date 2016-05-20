@@ -67,6 +67,8 @@ import java.util.Map;
 @Component
 class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
 
+  private static Logger _log = LoggerFactory.getLogger(ArrivalAndDepartureServiceImpl.class);
+  
   private StopTimeService _stopTimeService;
 
   private BlockLocationService _blockLocationService;
