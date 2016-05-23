@@ -48,12 +48,16 @@
 	<div id="compareBuilds">
 		<div id="compareExistingBuilds">
 			<label class="adminLabel">Select a build from below:</label>
+
 			<div id="compareSelectedBuild">
+				<!--  space -->
 			</div>
 		</div>
 	</div>
 	<div id="compareDiff">
 		<label class="adminLabel">Diff result:</label>
-		<div id="diffResult"/>
+		<div id="diffResult">
+			<!--  space -->
+		</div>
 	</div>
 </html>
