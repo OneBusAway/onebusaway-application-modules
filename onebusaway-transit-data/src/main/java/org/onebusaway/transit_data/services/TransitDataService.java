@@ -555,4 +555,10 @@ public interface TransitDataService extends FederatedService {
   @FederatedByAgencyIdMethod
   public Boolean stopHasRevenueService(String agencyId, String stopId);
 
+  /**
+   * Get all stops that have revenue service for the listed agency.
+   */
+  @FederatedByAgencyIdMethod
+  public List<StopBean> getAllRevenueStops(AgencyWithCoverageBean agency);
+
 }

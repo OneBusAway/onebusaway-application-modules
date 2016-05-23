@@ -623,6 +623,22 @@ public class TransitDataServiceTemplateImpl implements TransitDataServiceTemplat
       return _scheduleHelperService.stopHasRevenueService(agencyId, stopId);    
   }
   
+  public List<StopBean> getAllRevenueStops(AgencyWithCoverageBean agency) {
+    SearchQueryBean query = new SearchQueryBean();
+    CoordinateBounds bounds = new CoordinateBounds();
+
+    double lat = agency.getLat();
+    double lon = agency.getLon();
+    double latSpan = agency.getLatSpan() / 2;
+    double lonSpan = agency.getLonSpan() / 2;
+    bounds.addPoint(lat - latSpan, lon - lonSpan);
+    bounds.addPoint(lat + latSpan, lon + lonSpan);
+    query.setBounds(bounds);
+    
+    return _scheduleHelperService.filterRevenueService(agency.getAgency(), getStops(query));
+  }
+
+
   //@Override
   public String getActiveBundleId() {
     // TODO Auto-generated method stub

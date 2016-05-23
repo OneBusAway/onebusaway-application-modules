@@ -145,37 +145,16 @@ public class SearchServiceImpl implements SearchService {
 				_routeIdToRouteBeanMap.put(routeBean.getId(), routeBean);
 			}
 
-			SearchQueryBean query = new SearchQueryBean();
-			query.setBounds(getAgencyBounds(agency));
-			query.setMaxCount(Integer.MAX_VALUE);
-
-			StopsBean stops = _transitDataService.getStops(query);
-			List<StopBean> stopsList = stops.getStops();
-
+			List<StopBean> stopsList = _transitDataService.getAllRevenueStops(agency);
 			for (StopBean stop : stopsList) {
-				String agencyId = AgencyAndIdLibrary.convertFromString(stop.getId()).getAgencyId();
-				if (_transitDataService.stopHasRevenueService(agencyId, stop.getId())) {
-					_stopCodeToStopIdMap.put(agency.getAgency().getId() + "_"
-						+ stop.getCode().toUpperCase(), stop.getId());
-				}
+				_stopCodeToStopIdMap.put(agency.getAgency().getId() + "_"
+					+ stop.getCode().toUpperCase(), stop.getId());
 			}
 		}
 
 		_bundleIdForCaches = currentBundleId;
 	}
 
-	private CoordinateBounds getAgencyBounds(AgencyWithCoverageBean agency) {
-		CoordinateBounds bounds = new CoordinateBounds();
-
-		double lat = agency.getLat();
-		double lon = agency.getLon();
-		double latSpan = agency.getLatSpan() / 2;
-		double lonSpan = agency.getLonSpan() / 2;
-		bounds.addPoint(lat - latSpan, lon - lonSpan);
-		bounds.addPoint(lat + latSpan, lon + lonSpan);
-
-		return bounds;
-	}
 
 	@Override
 	public SearchResultCollection findStopsNearPoint(Double latitude,

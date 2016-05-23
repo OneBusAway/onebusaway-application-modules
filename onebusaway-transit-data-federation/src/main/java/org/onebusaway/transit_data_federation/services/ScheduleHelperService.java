@@ -17,6 +17,10 @@ package org.onebusaway.transit_data_federation.services;
 
 import java.util.List;
 
+import org.onebusaway.transit_data.model.AgencyBean;
+import org.onebusaway.transit_data.model.StopBean;
+import org.onebusaway.transit_data.model.StopsBean;
+
 public interface ScheduleHelperService {
 
 	/**
@@ -82,5 +86,11 @@ public interface ScheduleHelperService {
          *         false otherwise
          */
 	Boolean stopHasRevenueService(String agencyId, String stopId);
+
+	/**
+	 * given a list of stops for an agency, filter out the non-revenue stops <i>en masse</i>
+	 * Included for performance reasons to batch calls.
+	 */
+  List<StopBean> filterRevenueService(AgencyBean agency, StopsBean stops);
 
 }

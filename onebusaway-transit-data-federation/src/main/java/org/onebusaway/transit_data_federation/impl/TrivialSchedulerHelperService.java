@@ -15,10 +15,15 @@
  */
 package org.onebusaway.transit_data_federation.impl;
 
+import java.util.ArrayList;
 import java.util.List;
-import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 
+import org.onebusaway.container.cache.Cacheable;
+import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.transit_data.model.AgencyBean;
+import org.onebusaway.transit_data.model.StopBean;
+import org.onebusaway.transit_data.model.StopsBean;
+import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.ScheduleHelperService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockIndexService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockStopTimeIndex;
@@ -69,6 +74,7 @@ public class TrivialSchedulerHelperService implements ScheduleHelperService {
 	}
 
   @Override
+  @Cacheable
   public Boolean stopHasRevenueServiceOnRoute(String agencyId, String stopId,
           String routeId, String directionId) {
       AgencyAndId stop = AgencyAndIdLibrary.convertFromString(stopId);
@@ -86,7 +92,7 @@ public class TrivialSchedulerHelperService implements ScheduleHelperService {
                   continue;
               }
               
-              if (directionId != null && !theTrip.getDirectionId().equals(directionId)) {
+              if (directionId != null && theTrip.getDirectionId() != null && !theTrip.getDirectionId().equals(directionId)) {
                   continue;
               }
               
@@ -107,8 +113,20 @@ public class TrivialSchedulerHelperService implements ScheduleHelperService {
   }
 
   @Override
+  @Cacheable
   public Boolean stopHasRevenueService(String agencyId, String stopId) {
       return this.stopHasRevenueServiceOnRoute(agencyId, stopId,
               null, null);
+  }
+
+  @Override
+  public List<StopBean> filterRevenueService(AgencyBean agency, StopsBean stops) {
+    List<StopBean> filtered = new ArrayList<StopBean>();
+    for (StopBean stop: stops.getStops()) {
+      if (stopHasRevenueService(agency.getId(), stop.getId())) {
+        filtered.add(stop);
+      }
+    }
+    return filtered;
   }
 }

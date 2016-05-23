@@ -569,5 +569,10 @@ public class TransitDataServiceImpl implements TransitDataService {
   public Boolean stopHasRevenueService(String agencyId, String stopId) {
           return _transitDataService.stopHasRevenueService(agencyId, stopId);    
   }
+
+  @Override
+  public List<StopBean> getAllRevenueStops(AgencyWithCoverageBean agency) {
+    return _transitDataService.getAllRevenueStops(agency);
+  }
   
 }
