@@ -228,8 +228,10 @@ public class PresentationServiceImpl implements PresentationService {
 	    
 	    // TEMPORARY MTA THING FOR BX-RELEASE
 	    // hide buses that are on detour from a-d queries
-	    if(isOnDetour(statusBean))
+	    if(isOnDetour(statusBean)) {
+	      _log.debug("  " + statusBean.getVehicleId() + " filtered out because of detour.");
 	      return false;
+	    }
 	    
 	    // not in-service
 	    String phase = statusBean.getPhase();

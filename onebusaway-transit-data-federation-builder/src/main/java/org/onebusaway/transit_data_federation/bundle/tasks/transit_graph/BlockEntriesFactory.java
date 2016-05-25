@@ -83,9 +83,15 @@ public class BlockEntriesFactory {
         if (tripEntry == null)
           continue;
 
+        /*
+         * here we default the blockId to the tripId
+         */
         AgencyAndId blockId = trip.getId();
 
         if (trip.getBlockId() != null) {
+          /*
+           * he have a block so set it
+           */
           blockId = new AgencyAndId(trip.getId().getAgencyId(),
               trip.getBlockId());
         }

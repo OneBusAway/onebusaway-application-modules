@@ -133,8 +133,11 @@ public class RealtimeServiceImpl implements RealtimeService {
         continue;
 
       // filtered out by user
-      if(directionId != null && !tripDetails.getTrip().getDirectionId().equals(directionId))
-        continue;
+      if (tripDetails.getTrip().getDirectionId() != null) {
+        if(directionId != null && !tripDetails.getTrip().getDirectionId().equals(directionId)) {
+          continue;
+        }
+      }
       
       if(!_presentationService.include(tripDetails.getStatus()))
           continue;

@@ -238,9 +238,11 @@ public class StopMonitoringAction extends ApiActionSupport
       if (routeIds.size() > 0 && !routeIds.contains(thisRouteId))
         continue;
 
-      if (directionId != null && !thisDirectionId.equals(directionId))
-        continue;
-
+      if (thisDirectionId != null) {
+        if (directionId != null && !thisDirectionId.equals(directionId))
+          continue;
+      }
+      
       // visit count filters
       Integer visitCountForThisLine = visitCountByLine.get(thisRouteId);
       if (visitCountForThisLine == null) {
