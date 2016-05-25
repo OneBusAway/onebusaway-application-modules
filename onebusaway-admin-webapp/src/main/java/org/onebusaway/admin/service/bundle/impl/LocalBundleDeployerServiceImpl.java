@@ -42,6 +42,7 @@ import javax.ws.rs.core.StreamingOutput;
 import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.map.MappingJsonFactory;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.joda.time.LocalDate;
 import org.json.JSONObject;
 import org.onebusaway.admin.bundle.BundleProvider;
 import org.onebusaway.admin.bundle.BundlesListMessage;
@@ -131,10 +132,14 @@ public class LocalBundleDeployerServiceImpl implements BundleDeployerService{
     private Bundle getLatestBundleAsBundle() {
       List<Bundle> bundles = bundleProvider.getBundles();
       Bundle latestBundle = null;
+
       for (Bundle bundle : bundles) {
-        if (latestBundle == null
+        // make sure bundle is active 
+        if (bundle.getServiceDateFrom().isBefore(new LocalDate())) {
+          if (latestBundle == null
             || bundle.getCreated().isAfter(latestBundle.getCreated())) {
           latestBundle = bundle;
+          }
         }
       }
     return latestBundle;
