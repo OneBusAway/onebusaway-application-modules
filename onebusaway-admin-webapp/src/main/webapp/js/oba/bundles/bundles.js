@@ -610,7 +610,7 @@ function onSelectDataset(sourceDirectoryType) {
 		data: {"directoryName" : bundleDir,
 			"destDirectoryName" : copyDir},
 			async: false,
-			success: function(response) {				
+			success: function(response) {
 				disableSelectButton();
 				var status = response;
 				if (status != undefined) {
@@ -818,6 +818,7 @@ function onUploadSelectedAgenciesClick() {
 			formData.append("directoryName", bundleDir);
 			formData.append("agencyId", agencyId);
 			formData.append("agencyDataSourceType", agencyDataSourceType);
+			formData.append("agencyProtocol", agencyProtocol);
 			formData.append("agencySourceFile", agencyDataFile);
 			formData.append("cleanDir", cleanDir);
 			var actionName = "uploadSourceFile";
