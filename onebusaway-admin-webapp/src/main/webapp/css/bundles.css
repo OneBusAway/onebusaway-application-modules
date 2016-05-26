@@ -654,12 +654,13 @@
 
 /** stage section **/
 
-#stageBundle {
+#stageBundle, #downloadBundle {
   padding-top: 20px;
 }
 
-#staging_bundleName {
+#staging_bundleName, #download_bundleName, #download_selectedDataset {
 	padding: 10px;
+	margin-bottom: 5px;
 }
 
 #stageBundle #stageContentsHolder {
@@ -690,7 +691,7 @@
   background-color: #F0F0F0;
 }
 
-#stageBundle #requestLabels {
+#stageBundle #requestLabels, #downloadBundle #requestLabels {
   padding-top : 20px;
   display:none;
 }
@@ -734,6 +735,36 @@
 }
 .testFail {
   color: red
+}
+
+/** download bundle section **/
+
+#downloadBundle {
+	padding-bottom: 2.5em;
+}
+
+#downloadDirBlock label, #downloadDirBlock input {
+	display: block;
+	float: left;
+	clear: left;
+}
+
+#downloadDirBlock label {
+	padding-bottom: 3px;
+	font-weight: bold;
+}
+
+#downloadDirBlock {
+	margin-bottom: 40px;
+	padding-bottom: 20px;
+}
+
+#downloadBundle #downloadBundle_downloadButton,
+#downloadBundle #downloadBundle_bundleList,
+#downloadBundle #downloadBox,
+#downloadBundle #bundleResults {
+	float: left;
+	clear: left;
 }
 
 /* Styles added for new UI design */

@@ -292,6 +292,7 @@ jQuery(function() {
 	});
 	
 	disableStageButton();
+	disableDownloadButton();
 	disableBuildButton();
 
 	//toggle bundle staging progress list
@@ -312,6 +313,9 @@ jQuery(function() {
 	jQuery("#deployBundle_listButton").click(onDeployListClick);
 	onDeployListClick();
 	
+	//Handle download button click event
+	jQuery("#downloadBundle_downloadButton").click(onDownloadBundleClick);
+
 	//Retrieve transit agency metadata
 	getAgencyMetadata();
 	
@@ -537,6 +541,7 @@ function showBundleInfo(bundleInfo){
 
 function onCreateDatasetClick() {
 	selectedDirectory = jQuery("#createDataset #directoryName").val();
+	$("#Download #download_selectedDataset").text(selectedDirectory);
 	onSelectDataset("create");
 	//var $tabs = jQuery("#tabs");
 	//$tabs.tabs('select', 1);
@@ -544,7 +549,8 @@ function onCreateDatasetClick() {
 
 function onExistingDatasetClick() {
 	var selectedCheckbox = jQuery("#Create #existingDataset").find("input:checked");
-	selectedDirectory = selectedCheckbox.closest("tr").find(".directoryName").text();	
+	selectedDirectory = selectedCheckbox.closest("tr").find(".directoryName").text();
+	$("#Download #download_selectedDataset").text(selectedDirectory);
 	onSelectDataset("existing");
 	//var $tabs = jQuery("#tabs");
 	//$tabs.tabs('select', 1);
@@ -552,6 +558,7 @@ function onExistingDatasetClick() {
 
 function onCopyExistingDatasetClick() {
 	selectedDirectory = $(this).closest("tr").find(".directoryName").text();
+	$("#Download #download_selectedDataset").text(selectedDirectory);
 	var continueCopy = $("#copyPopup").dialog("open");
 }
 
@@ -613,9 +620,11 @@ function onSelectDataset(sourceDirectoryType) {
 						// Clear the bundle name for the Build and Stage tabs
 						$("#Build #bundleBuildName").val("");
 						$("#Stage #staging_bundleName").text("");
+						$("#Download #download_bundleName").text("");
 						// If "createDirectory", add the new directory to the current list of bundle directories.
 						if (actionName == "createDirectory") {
 							disableStageButton();
+							disableDownloadButton();
 							// Add a new div for this directory to the list of existing directories
 							var idx = 0;
 							$("#createDirectory #currentDirectories").find("#listItem").each(function() {
@@ -646,6 +655,7 @@ function onSelectDataset(sourceDirectoryType) {
 						}			
 						if (sourceDirectoryType=="copy") {
 							selectedDirectory = copyDir;
+							$("#Download #download_selectedDataset").text(selectedDirectory);
 						}
 						
 						if (actionName != "createDirectory" && status.bundleInfo != null) {
@@ -653,8 +663,10 @@ function onSelectDataset(sourceDirectoryType) {
 							if (status.bundleInfo.buildResponse != null) {
 								$("#Build #bundleBuildName").val(status.bundleInfo.buildResponse.bundleBuildName);
 								$("#Stage #staging_bundleName").text(status.bundleInfo.buildResponse.bundleBuildName);
+								$("#Download #download_bundleName").text(status.bundleInfo.buildResponse.bundleBuildName);
 							}
 							enableStageButton();
+							enableDownloadButton();
 							var agencies = status.bundleInfo.agencyList;
 							if (agencies != null) {
 								if (agencies.length > 0) {
@@ -990,6 +1002,14 @@ function enableBuildButton() {
 function disableBuildButton() {
 	jQuery("#buildBundle_buildButton").attr("disabled", "disabled").css("color", "#999");
 	disableContinueButton($("#create_continue"));
+}
+
+function enableDownloadButton() {
+	jQuery("#downloadBundle_downloadButton").removeAttr("disabled").css("color", "#000");
+}
+
+function disableDownloadButton() {
+	jQuery("#downloadBundle_downloadButton").attr("disabled", "disabled").css("color", "#999");
 }
 
 function enableResetButton() {
@@ -1419,6 +1439,7 @@ function buildBundle(bundleName, startDate, endDate, bundleComment, archive, con
 function updateBuildStatus(buildType) {
 	console.log("build type: " + buildType);
 	disableStageButton();
+	disableDownloadButton();
 	//id = jQuery("#buildBundle_id").text();
 	id = buildBundleId;
 	var $progressBar = jQuery("#testProgressBar");
@@ -1480,9 +1501,11 @@ function updateBuildStatus(buildType) {
 					jQuery("#buildBundle #buildingTest #buildingTestProgress").attr("src","../../css/img/dialog-accept-2.png");
 					updateBuildList(id);
 					$("#Stage #staging_bundleName").text($("#Build #bundleBuildName").val());
+					$("#Download #download_bundleName").text($("#Build #bundleBuildName").val());
 					enableStageButton();
 					enableBuildButton();
 					enableResetButton();
+					enableDownloadButton();
 				}
 				//txt = txt + "</ul>";
 				//jQuery("#buildBundle_resultList").html(txt).css("font-size", "12px");
@@ -1498,6 +1521,7 @@ function updateBuildStatus(buildType) {
 						jQuery("#buildBundle_testException").html(bundleResponse.exception.message);
 					}
 					disableStageButton();
+					disableDownloadButton();
 					enableBuildButton();
 					enableResetButton();
 				}
@@ -1840,6 +1864,16 @@ function onDeployListClick(){
 			alert("There was an error processing your request. Please try again.");
 		}
 	});
+}
+
+//download the specified bundle
+function onDownloadBundleClick() {
+	var downloadDataset = selectedDirectory;
+	var downloadFileName = $("#Download #download_bundleName").text();
+	//window.location='manage-bundles!downloadBundle.action?downloadFilename=MAY16_TEST_3.tar.gz';
+	window.location='manage-bundles!downloadBundle.action'
+		+ '?downloadDataSet=' + downloadDataset
+		+ '&downloadFilename=' + downloadFileName
 }
 
 //add support for parsing query string
