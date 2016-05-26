@@ -93,11 +93,16 @@ import com.google.gson.JsonParser;
 					"inputName", "downloadInputStream",
 					"contentDisposition", "attachment;filename=\"output.zip\"",
 					"bufferSize", "1024"}),
-					@Result(name="download", type="stream", 
-					params={"contentType", "text/html", 
-							"inputName", "downloadInputStream",
-							"contentDisposition", "attachment;filename=\"${downloadFilename}\"",
-							"bufferSize", "1024"})
+			@Result(name="download", type="stream",
+			params={"contentType", "text/html",
+					"inputName", "downloadInputStream",
+					"contentDisposition", "attachment;filename=\"${downloadFilename}\"",
+					"bufferSize", "1024"}),
+      @Result(name="downloadGzip", type="stream",
+      params={"contentType", "application/x-gzip",
+          "inputName", "downloadInputStream",
+          "contentDisposition", "attachment;filename=\"${downloadFilename}\"",
+          "bufferSize", "1024"})
 })
 public class ManageBundlesAction extends OneBusAwayNYCAdminActionSupport implements ServletContextAware {
 	private static Logger _log = LoggerFactory.getLogger(ManageBundlesAction.class);
@@ -125,6 +130,7 @@ public class ManageBundlesAction extends OneBusAwayNYCAdminActionSupport impleme
 	private BundleResponse bundleResponse;
 	private BundleBuildResponse bundleBuildResponse;
 	private String id;
+  private String downloadDataSet;
 	private String downloadFilename;
 	private InputStream downloadInputStream;
 	private List<String> fileList = new ArrayList<String>();
@@ -680,6 +686,15 @@ public class ManageBundlesAction extends OneBusAwayNYCAdminActionSupport impleme
 		return "error";
 	}
 
+	public String downloadBundle() {
+    fileService.validateFileName(downloadFilename);
+    String s3Key = this.downloadDataSet + "/builds/" + this.downloadFilename
+        + "/" + this.downloadFilename + ".tar.gz";
+    this.downloadFilename += ".tar.gz";
+    this.downloadInputStream = this.fileService.get(s3Key);
+    return "downloadGzip";
+	}
+
 	public String downloadValidateFile() {
 		this.bundleResponse = this.bundleRequestService.lookupValidationRequest(getId());
 		fileService.validateFileName(downloadFilename);
@@ -936,6 +951,14 @@ public class ManageBundlesAction extends OneBusAwayNYCAdminActionSupport impleme
 	public InputStream getDownloadInputStream() {
 		return this.downloadInputStream;
 	}
+
+  public void setDownloadDataSet(String name) {
+    this.downloadDataSet = name;
+  }
+
+  public String getDownloadDataSet() {
+    return this.downloadDataSet;
+  }
 
 	public void setDownloadFilename(String name) {
 		this.downloadFilename = name;
