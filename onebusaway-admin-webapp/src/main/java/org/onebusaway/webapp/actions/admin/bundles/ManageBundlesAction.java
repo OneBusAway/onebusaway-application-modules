@@ -53,6 +53,7 @@ import org.onebusaway.admin.service.BundleRequestService;
 import org.onebusaway.admin.service.DiffService;
 import org.onebusaway.admin.service.FileService;
 import org.onebusaway.admin.util.NYCFileUtils;
+import org.onebusaway.agency_metadata.service.AgencyMetadataService;
 import org.onebusaway.util.services.configuration.ConfigurationService;
 import org.onebusaway.webapp.actions.OneBusAwayNYCAdminActionSupport;
 import org.slf4j.Logger;
@@ -302,6 +303,11 @@ public class ManageBundlesAction extends OneBusAwayNYCAdminActionSupport impleme
 		for (String[] directory: existingDirectories){
 			if (directory[0].equals(directoryName)){
 				directoryStatus = createDirectoryStatus("Loaded existing directory " + directoryName, true, null, directoryName);
+				JSONObject bundleInfo = directoryStatus.getBundleInfo();
+				// Update the agency list to reflect what's actually on the file system
+				JSONArray updatedAgencyList = updateAgencyList(directoryStatus, directoryName);
+				bundleInfo.put("agencyList", updatedAgencyList);
+				directoryStatus.setBundleInfo(bundleInfo);
 				break;
 			}
 		}
@@ -1051,4 +1057,72 @@ public class ManageBundlesAction extends OneBusAwayNYCAdminActionSupport impleme
 	public void setDestDirectoryName(String destDirectoryName) {
 		this.destDirectoryName = destDirectoryName;
 	}
+
+  private JSONArray updateAgencyList(DirectoryStatus directoryStatus,
+      String directoryName) {
+    JSONArray newAgencyList = new JSONArray();
+    JSONArray agencyList = null;
+    JSONObject bundleInfo = directoryStatus.getBundleInfo();
+    if (bundleInfo != null) {
+      agencyList = (JSONArray)bundleInfo.get("agencyList");
+    }
+    if (agencyList != null) {
+      for (int i=0; i < agencyList.size(); ++i) {
+        JSONObject agency = (JSONObject)agencyList.get(i);
+        if (!agency.get("agencyDataSourceType").equals("gtfs")) {
+          continue;
+        }
+        String agencyId = (String)agency.get("agencyId");
+        String agencyDataSourceType = (String)agency.get("agencyDataSourceType");
+        File mostRecentFile = getMostRecentFile(agencyId, directoryName,
+            agencyDataSourceType);
+        JSONObject newAgency = (JSONObject)agency.clone();
+        if (mostRecentFile != null) {
+          String currentFilename = (String)agency.get("agencyDataSource");
+          if (currentFilename != null) {
+            currentFilename = currentFilename.substring(currentFilename.lastIndexOf("/") + 1);
+          } else {
+            currentFilename = "";
+          }
+          String mostRecentFilename = mostRecentFile.getName();
+          String currentFileDate = (String)agency.get("agencyBundleUploadDate");
+          String mostRecentDate = new SimpleDateFormat("MMM dd yyyy")
+              .format(new Date(mostRecentFile.lastModified()));
+          if (!mostRecentFilename.equals(currentFilename)
+              || !mostRecentDate.equals(currentFileDate)) {
+            newAgency.put("agencyDataSource", mostRecentFile.getName());
+            newAgency.put("agencyBundleUploadDate", mostRecentDate);
+            newAgency.put("agencyProtocol", "file");
+          }
+        }
+        newAgencyList.add(newAgency);
+      }
+    }
+    return newAgencyList;
+  }
+
+  private File getMostRecentFile(String agencyId, String directoryName,
+      String dataSourceType) {
+    String basePath = fileService.getBucketName();
+    String dataSourceTypePath = "";
+    if (dataSourceType.equals("gtfs")) {
+      dataSourceTypePath =  fileService.getGtfsPath();
+    } else {
+      dataSourceTypePath =  fileService.getAuxPath();
+    }
+    String fullPath = basePath + "/" + directoryName + "/"
+      + dataSourceTypePath + "/" + agencyId;
+    File agencyDir = new File(fullPath);
+    File[] uploadedFiles =  agencyDir.listFiles();
+    File mostRecentFile = null;
+    if (uploadedFiles.length > 0) {
+      mostRecentFile = uploadedFiles[0];
+      for (File existingFile : uploadedFiles) {
+        if (existingFile.lastModified() > mostRecentFile.lastModified()) {
+          mostRecentFile = existingFile;
+        }
+      }
+    }
+    return mostRecentFile;
+  }
 }
