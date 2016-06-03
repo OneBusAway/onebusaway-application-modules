@@ -703,11 +703,13 @@ function onSelectDataset(sourceDirectoryType) {
 									}
 
 									// Add row to the list of previously uploaded files
-									onAddAnotherAgencyClick();
+									onAddAnotherAgencyClick(agency.agencyProtocol);
 									$("#agency_data tr:last .agencyIdSelect").val(agency.agencyId);
 									$("#agency_data tr:last .agencyDataSourceType").val(agency.agencyDataSourceType);
 									$("#agency_data tr:last .agencyProtocol").val(agency.agencyProtocol);
-									$("#agency_data tr:last .agencyDataSource").val(agency.agencyDataSource);
+									if(agency.agencyProtocol != "file") {
+										$("#agency_data tr:last .agencyDataSource").val(agency.agencyDataSource);
+									} 
 
 									// Add row for this file to existingFilesTable
 									var uploadDate = "";
@@ -855,8 +857,13 @@ function onBundleCommentChanged() {
 		}
 	});
 }
+function foo(a,inputType) {
 
-function onAddAnotherAgencyClick() {
+}
+function onAddAnotherAgencyClick(inputType) {
+	if (inputType === undefined) {
+		inputType = "file";
+	}
 	var metadata = "";
 	var url = "";
 	if (agencyMetadataAvailable) {
@@ -884,7 +891,7 @@ function onAddAnotherAgencyClick() {
 		<option value="file">file</option> \
 		</select></td> \
 		<td class="agencyDataSourceData"> \
-		<input type="text" class="agencyDataSource" ' + urlValue + '/></td> \
+		<input type=' + inputType + ' class="agencyDataSource" ' + urlValue + '/></td> \
 		<td class="removeAgency">remove</td> \
 		</tr>';
 	$('#agency_data').append(new_row);

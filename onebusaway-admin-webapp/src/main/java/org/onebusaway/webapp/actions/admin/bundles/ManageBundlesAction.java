@@ -1058,61 +1058,76 @@ public class ManageBundlesAction extends OneBusAwayNYCAdminActionSupport impleme
 		this.destDirectoryName = destDirectoryName;
 	}
 
+	/**
+	 * This method will create an agencyList JSON array based on the directories
+	 * and files currently in this bundle directory.  That list will then be
+	 * updated based on any additional information in the bundleInfo data from
+	 * the file info.json.
+	 *
+	 * @param directoryStatus contains info about the bundle build process
+	 * @param directoryName name of the directory for this bundle
+	 * @return the updated agency list
+	 */
   private JSONArray updateAgencyList(DirectoryStatus directoryStatus,
       String directoryName) {
-    JSONArray newAgencyList = new JSONArray();
-    JSONArray agencyList = null;
-    JSONObject bundleInfo = directoryStatus.getBundleInfo();
-    if (bundleInfo != null) {
-      agencyList = (JSONArray)bundleInfo.get("agencyList");
-    }
-    if (agencyList != null) {
-      for (int i=0; i < agencyList.size(); ++i) {
-        JSONObject agency = (JSONObject)agencyList.get(i);
-        if (!agency.get("agencyDataSourceType").equals("gtfs")) {
-          continue;
-        }
-        String agencyId = (String)agency.get("agencyId");
-        String agencyDataSourceType = (String)agency.get("agencyDataSourceType");
-        File mostRecentFile = getMostRecentFile(agencyId, directoryName,
-            agencyDataSourceType);
-        JSONObject newAgency = (JSONObject)agency.clone();
-        if (mostRecentFile != null) {
-          String currentFilename = (String)agency.get("agencyDataSource");
-          if (currentFilename != null) {
-            currentFilename = currentFilename.substring(currentFilename.lastIndexOf("/") + 1);
-          } else {
-            currentFilename = "";
-          }
-          String mostRecentFilename = mostRecentFile.getName();
-          String currentFileDate = (String)agency.get("agencyBundleUploadDate");
-          String mostRecentDate = new SimpleDateFormat("MMM dd yyyy")
-              .format(new Date(mostRecentFile.lastModified()));
-          if (!mostRecentFilename.equals(currentFilename)
-              || !mostRecentDate.equals(currentFileDate)) {
-            newAgency.put("agencyDataSource", mostRecentFile.getName());
-            newAgency.put("agencyBundleUploadDate", mostRecentDate);
-            newAgency.put("agencyProtocol", "file");
-          }
-        }
-        newAgencyList.add(newAgency);
-      }
-    }
+    JSONArray newAgencyList = agencyListFromFiles(directoryName);
+    newAgencyList = updateFromLastAgencyList(newAgencyList, directoryStatus);
     return newAgencyList;
   }
 
-  private File getMostRecentFile(String agencyId, String directoryName,
-      String dataSourceType) {
+  /**
+   * This creates an agencyList JSON array based on the directories
+   * and files currently in this bundle directory.
+   *
+   * @param directoryName name of the directory for this bundle
+   * @return a newly constructed agencyList constructed based on the directories
+   *         and files currently on the file system.
+   */
+  private JSONArray agencyListFromFiles(String directoryName) {
+    JSONArray newAgencyList = new JSONArray();
     String basePath = fileService.getBucketName();
-    String dataSourceTypePath = "";
-    if (dataSourceType.equals("gtfs")) {
-      dataSourceTypePath =  fileService.getGtfsPath();
-    } else {
-      dataSourceTypePath =  fileService.getAuxPath();
+
+    // add gtfs files
+    String fullPath = basePath + "/" + directoryName + "/" + fileService.getGtfsPath();
+    File[] agencyDirs = (new File(fullPath)).listFiles();
+    if (agencyDirs != null) {
+      for (File agencyDir : agencyDirs) {
+        String agencyId = agencyDir.getName();
+        String agencyPath = fullPath + "/" + agencyId;
+        File mostRecentFile = getMostRecentGtfsFile(agencyDir);
+        JSONObject agencyRecord = createAgencyRecord(mostRecentFile, "gtfs", agencyId);
+        newAgencyList.add(agencyRecord);
+      }
     }
-    String fullPath = basePath + "/" + directoryName + "/"
-      + dataSourceTypePath + "/" + agencyId;
-    File agencyDir = new File(fullPath);
+
+    // add aux files
+    fullPath = basePath + "/" + directoryName + "/" + fileService.getAuxPath();
+    agencyDirs = (new File(fullPath)).listFiles();
+    if (agencyDirs != null) {
+      for (File agencyDir : agencyDirs) {
+        String agencyId = agencyDir.getName();
+        String agencyPath = fullPath + "/" + agencyId;
+        File[] auxFiles = agencyDir.listFiles();
+        for (File auxFile : auxFiles) {
+          JSONObject agencyRecord = createAgencyRecord(auxFile, "aux", agencyId);
+          newAgencyList.add(agencyRecord);
+        }
+      }
+    }
+
+    return newAgencyList;
+  }
+
+  /**
+   * Gets the most recent file in a GTFS directory for an agency.  There should
+   * only be one file anyway, but this is needed in case additional versions of
+   * the file have been manually added.
+   *
+   * @param agencyDir the name of the directory for this agency, generally the
+   *                  same as the agency id.
+   * @return the most recent file in this GTFS directory.
+   */
+  private File getMostRecentGtfsFile(File agencyDir) {
     File[] uploadedFiles =  agencyDir.listFiles();
     File mostRecentFile = null;
     if (uploadedFiles.length > 0) {
@@ -1124,5 +1139,64 @@ public class ManageBundlesAction extends OneBusAwayNYCAdminActionSupport impleme
       }
     }
     return mostRecentFile;
+  }
+
+  /**
+   * Creates a new agency record to be added to the agencyList.
+   *
+   * @param bundleFile the file to be added
+   * @param dataSourceType 'aux' or 'http'
+   * @param agencyId the agency id
+   * @return the new agency record
+   */
+  private JSONObject createAgencyRecord(File bundleFile, String dataSourceType, String agencyId) {
+    JSONObject agencyRecord = new JSONObject();
+    String fileDate = new SimpleDateFormat("MMM dd yyyy").format(new Date(bundleFile.lastModified()));
+    agencyRecord.put("agencyBundleUploadDate", fileDate);
+    agencyRecord.put("agencyDataSource", bundleFile.getName());
+    agencyRecord.put("agencyDataSourceType", dataSourceType);
+    agencyRecord.put("agencyId", agencyId);
+    agencyRecord.put("agencyProtocol", "file");
+    return agencyRecord;
+  }
+
+  /**
+   * Updates the new agencyList based on any additional information in the
+   * bundleInfo data from the file info.json.  More specifically, if an entry
+   * from the bundleInfo matches for agency id, filename, and date, then the
+   * data source (URL for this file) and protocol are updated from the
+   * bundleInfo data.
+   *
+   * @param newAgencyList the newly created agencyList
+   * @param directoryStatus contains info about the bundle build process
+   * @return the updated agencyList
+   */
+  private JSONArray updateFromLastAgencyList(JSONArray newAgencyList, DirectoryStatus directoryStatus) {
+    JSONObject bundleInfo = directoryStatus.getBundleInfo();
+    JSONArray agencyList = bundleInfo == null ? null
+        : (JSONArray)bundleInfo.get("agencyList");
+    if (agencyList != null) {
+      for (int i=0; i < agencyList.size(); ++i) {
+        JSONObject agency = (JSONObject)agencyList.get(i);
+        String currentFilename = (String)agency.get("agencyDataSource");
+        if (currentFilename != null) {
+          currentFilename = currentFilename.substring(currentFilename.lastIndexOf("/") + 1);
+        } else {
+          currentFilename = "";
+        }
+        for (int j=0; j<newAgencyList.size(); ++j) {
+          JSONObject updatedAgency = (JSONObject)newAgencyList.get(j);
+          if (agency.get("agencyId").equals(updatedAgency.get("agencyId"))
+              && currentFilename.equals(updatedAgency.get("agencyDataSource"))
+              && agency.get("agencyBundleUploadDate")
+                .equals(updatedAgency.get("agencyBundleUploadDate"))) {
+            updatedAgency.put("agencyDataSource", agency.get("agencyDataSource"));
+            updatedAgency.put("agencyProtocol", agency.get("agencyProtocol"));
+            newAgencyList.set(j, updatedAgency);
+          }
+        }
+      }
+    }
+    return newAgencyList;
   }
 }
