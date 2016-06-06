@@ -399,9 +399,9 @@ function onAgencyIdSelectClick() {
 			|| (previous_protocol != "file" && protocol == "file")) {
 		var dataSource = $(this).closest('tr').find(".agencyDataSource");
 		if (protocol == "file") {
-			dataSource.clone().attr('type','file').insertAfter(dataSource).prev().remove();
+			dataSource.replaceWith('<input class="agencyDataSource" type="file" undefined=""></input>');
 		} else if (dataSource.attr('type') == 'file') {
-			dataSource.clone().attr('type','text').insertAfter(dataSource).prev().remove();
+			dataSource.replaceWith('<input class="agencyDataSource" type="text" undefined=""></input>');
 		}  
 	}
 	$(this).closest('tr').find(".agencyProtocol").val(protocol);
@@ -931,9 +931,9 @@ function onAgencyProtocolChange() {
 	var protocol = $(this).val();
 	var dataSource = $(this).closest('tr').find(".agencyDataSource");
 	if (protocol == "file") {
-		dataSource.clone().attr('type','file').insertAfter(dataSource).prev().remove();
+		dataSource.replaceWith('<input class="agencyDataSource" type="file" undefined=""></input>');
 	} else if (dataSource.attr('type') == 'file') {
-		dataSource.clone().attr('type','text').insertAfter(dataSource).prev().remove();
+		dataSource.replaceWith('<input class="agencyDataSource" type="text" undefined=""></input>');
 	}
 }
 
