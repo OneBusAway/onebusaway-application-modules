@@ -95,6 +95,7 @@ public class AccessControlServiceImpl implements AccessControlService {
 	}
 	
 	private boolean roleHasPrivilege(Role role, Privilege privilege) {
+		if (role == null) return false;
 		Set<Privilege> allowed = role.getAllowedPrivileges();
 		boolean authorized = allowed != null && allowed.contains(privilege);
 		if (!authorized) {
