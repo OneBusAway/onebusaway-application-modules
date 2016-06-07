@@ -20,7 +20,9 @@ import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.blocks.InstanceState;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
-import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstance;
+import org.onebusaway.transit_data_federation.model.StopTimeInstance;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Captures an arrival and departure time combination, as a concrete time, as
@@ -31,6 +33,8 @@ import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInsta
  */
 public class ArrivalAndDepartureTime {
 
+  private static Logger _log = LoggerFactory.getLogger(ArrivalAndDepartureTime.class);
+  
   private long arrivalTime;
 
   private long departureTime;
@@ -80,7 +84,10 @@ public class ArrivalAndDepartureTime {
 
   public static ArrivalAndDepartureTime getScheduledTime(long serviceDate,
       BlockStopTimeEntry blockStopTime, int offset) {
-
+    if ( blockStopTime == null) {
+      _log.error("blockStopTime is null");
+      return null;
+    }
     StopTimeEntry stopTime = blockStopTime.getStopTime();
 
     long arrivalTime = serviceDate + (stopTime.getArrivalTime() + offset)

@@ -29,6 +29,5 @@
   <constant name="struts.action.excludePattern" value="/services/.*,/api/.*" />
   <constant name="struts.enable.DynamicMethodInvocation" value="true" />
   <constant name="struts.allowed.action.names" value="[a-zA-Z0-9._!@/\\-]*" />
-
   <include file="struts-onebusaway-webapp.xml"/>
 </struts>

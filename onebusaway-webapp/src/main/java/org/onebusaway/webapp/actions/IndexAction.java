@@ -15,8 +15,17 @@
  */
 package org.onebusaway.webapp.actions;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.struts2.ServletActionContext;
 import org.apache.struts2.convention.annotation.Result;
 import org.apache.struts2.convention.annotation.Results;
+import org.onebusaway.util.services.configuration.ConfigurationService;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.opensymphony.xwork2.ActionContext;
 import com.opensymphony.xwork2.ActionInvocation;
@@ -28,7 +37,19 @@ import com.opensymphony.xwork2.ActionSupport;
 public class IndexAction extends ActionSupport {
 
   private static final long serialVersionUID = 1L;
+  
+  private Properties _properties;
 
+  public Properties getProperties(){
+	return _properties;
+  }
+  
+  private ConfigurationService _configService;
+  @Autowired
+  public void setConfigService(ConfigurationService configService) {
+    _configService = configService;
+  }
+  
   @Override
   public String execute() throws Exception {
 
@@ -39,10 +60,21 @@ public class IndexAction extends ActionSupport {
     String namespace = proxy.getNamespace();
     String name = proxy.getActionName();
 
+	_properties = new Properties();
+	try {
+		InputStream inputStream = getClass().getClassLoader().getResourceAsStream("git.properties");
+		if (inputStream != null) {
+			_properties.load(inputStream);
+		}
+	} catch (IOException ioe) {}
+	
+	HttpServletRequest request = ServletActionContext.getRequest();    
+	_properties.putAll(_configService.getConfiguration());
+	
     if (namespace.equals("/") && (name.equals("index") || name.equals(""))) {
       return super.execute();
     }
-
+    
     return "404";
   }
 }

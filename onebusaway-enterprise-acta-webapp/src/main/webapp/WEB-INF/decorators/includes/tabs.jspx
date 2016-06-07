@@ -1,0 +1,9 @@
+<div xmlns:jsp="http://java.sun.com/JSP/Page"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:decorator="http://www.opensymphony.com/sitemesh/decorator" 
+	xmlns:s="/struts-tags" 
+	id="horizontalcssmenu" style="clear: both;">
+	
+	<!-- No tab links for ACTA app -->
+	
+</div>

@@ -17,12 +17,20 @@ package org.onebusaway.watchdog.api;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+
+import javax.ws.rs.core.Response;
 
 import org.codehaus.jackson.map.ObjectMapper;
+
 import org.onebusaway.geospatial.model.CoordinateBounds;
+import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.transit_data.model.ListBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsInclusionBean;
@@ -33,23 +41,23 @@ import org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.Monito
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.onebusaway.watchdog.model.Metric;
 import org.onebusaway.watchdog.model.MetricConfiguration;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public abstract class MetricResource {
 
-  protected static Logger _log = LoggerFactory.getLogger(MetricResource.class);
-  
+  protected static Logger _log = LoggerFactory.getLogger(MetricResource.class); 
   protected MetricConfiguration _configuration;
   protected ObjectMapper _mapper = new ObjectMapper();
   
   @Autowired
   public void setMetricConfiguration(MetricConfiguration mc) {
+    _log.info("Setting MetricConfiguration: " + mc);
     _configuration = mc;
   }
   
-
   protected List<MonitoredDataSource> getDataSources() {
     return _configuration.getDataSources();
   }
@@ -57,8 +65,8 @@ public abstract class MetricResource {
   protected TransitDataService getTDS() {
     return _configuration.getTDS();
   }
-  
-  protected int getTotalRecordCount(String agencyId) throws Exception {
+  	  
+  protected int getTotalRecordCount(String agencyId) {
     int totalRecords = 0;
 
     for (MonitoredDataSource mds : getDataSources()) {
@@ -118,6 +126,117 @@ public abstract class MetricResource {
     return prunedTripIds;
   }
 
+  protected int getUnmatchedTripIdCt(String agencyId) {
+    int unmatchedTripCt = 0;
+
+    for (MonitoredDataSource mds : getDataSources()) {
+      MonitoredResult result = mds.getMonitoredResult();
+      if (result == null) continue;
+      for (String mAgencyId : result.getAgencyIds()) {
+        if (agencyId.equals(mAgencyId)) {
+          unmatchedTripCt += result.getUnmatchedTripIds().size();
+        }
+      }
+    } 
+    return unmatchedTripCt;
+  }
+  
+  protected int getMatchedStopCt(String agencyId) {
+    List<String> matchedStopIds = new ArrayList<String>();
+    try {
+      if (this.getDataSources() == null || this.getDataSources().isEmpty()) {
+        _log.error("no configured data sources");
+        return 0;
+      }
+
+      for (MonitoredDataSource mds : getDataSources()) {
+        MonitoredResult result = mds.getMonitoredResult();
+        if (result == null) continue;
+        for (String mAgencyId : result.getAgencyIds()) {
+          if (agencyId.equals(mAgencyId)) {
+            matchedStopIds.addAll(result.getMatchedStopIds());
+          }
+        }
+      }
+      return matchedStopIds.size();
+    } catch (Exception e) {
+      _log.error("getMatchedStopCt broke", e);
+      return 0;
+    }
+  }
+ 
+  protected int getUnmatchedStopCt(String agencyId) {
+    int unmatchedStops = 0;
+    try {
+      if (this.getDataSources() == null || this.getDataSources().isEmpty()) {
+        _log.error("no configured data sources");
+        return 0;
+      }
+
+      for (MonitoredDataSource mds : getDataSources()) {
+        MonitoredResult result = mds.getMonitoredResult();
+        if (result == null) continue;
+        for (String mAgencyId : result.getAgencyIds()) {
+          if (agencyId.equals(mAgencyId)) {
+            unmatchedStops += result.getUnmatchedStopIds().size();
+          }
+        }
+      }
+      return unmatchedStops;
+    } catch (Exception e) {
+      _log.error("getUnmatchedStopCt broke", e);
+      return 0;
+    }
+  }
+ 
+  protected int getLocationTotal(String agencyId) {
+    int locations = 0;
+    try {
+      if (this.getDataSources() == null || this.getDataSources().isEmpty()) {
+        _log.error("no configured data sources");
+        return 0;
+      }
+
+      for (MonitoredDataSource mds : getDataSources()) {
+        MonitoredResult result = mds.getMonitoredResult();
+        if (result == null) continue;
+        for (String mAgencyId : result.getAgencyIds()) {
+          if (agencyId.equals(mAgencyId)) {
+            locations += result.getAllCoordinates().size();
+          }
+        }
+      }
+      return locations;
+    } catch (Exception e) {
+      _log.error("getLocationTotal broke", e);
+      return 0;
+    }
+  }
+  
+  protected int getInvalidLocation(String agencyId) {
+    int locations = 0;
+    try {
+      if (this.getDataSources() == null || this.getDataSources().isEmpty()) {
+        _log.error("no configured data sources");
+        return 0;
+      }
+      
+      for (MonitoredDataSource mds : getDataSources()) {
+        MonitoredResult result = mds.getMonitoredResult();
+        if (result == null) continue;
+        for (String mAgencyId : result.getAgencyIds()) {
+          if (agencyId.equals(mAgencyId)) {
+            locations += findInvalidLatLon(agencyId, result.getAllCoordinates()).size();
+          }
+        }
+      }
+      return locations;
+    } catch (Exception e) {
+      _log.error("getInvalidLocation broke", e);
+      return 0;
+    }
+  }
+  
   protected String ok(String metricName, Object value) {
     Metric metric = new Metric();
     metric.setMetricName(metricName);
@@ -160,4 +279,35 @@ public abstract class MetricResource {
 
   }
   
+  private Collection<CoordinatePoint> findInvalidLatLon(String agencyId,
+      Set<CoordinatePoint> coordinatePoints) {
+    List<CoordinatePoint> invalid = new ArrayList<CoordinatePoint>();
+    List<CoordinateBounds> bounds = getTDS().getAgencyIdsWithCoverageArea().get(agencyId);
+    
+    // ensure we have a valid bounding box for requested agency
+    if (bounds == null || bounds.isEmpty()) {
+      _log.warn("no bounds configured for agency " + agencyId);
+      for (CoordinatePoint pt : coordinatePoints) {
+        invalid.add(pt);
+      }
+      return invalid;
+    }
+    
+    
+    for (CoordinateBounds bound : bounds) {
+      boolean found = false;
+      for (CoordinatePoint pt : coordinatePoints) {
+        // check if point is inside bounds
+        if (bound.contains(pt)) {
+          found = true;
+        }
+        if (!found) {
+          invalid.add(pt);
+        }
+      }
+    }
+    _log.debug("agency " + agencyId + " had " + invalid.size() + " invalid out of " + coordinatePoints.size());
+    return invalid;
+  }
+
 }

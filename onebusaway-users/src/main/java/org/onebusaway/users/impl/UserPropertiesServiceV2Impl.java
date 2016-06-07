@@ -252,7 +252,13 @@ public class UserPropertiesServiceV2Impl implements UserPropertiesService {
         _userDao.saveOrUpdateUser(user);
     }
   }
-
+  
+  @Override
+  public void updateApiKeyContactInfo(User user, String contactName, 
+      String contactCompany, String contactEmail, String contactDetails) {
+    throw new UnsupportedOperationException();
+  } 
+  
   @Override
   public void mergeProperties(User sourceUser, User targetUser) {
     mergeProperties(getProperties(sourceUser), getProperties(targetUser));

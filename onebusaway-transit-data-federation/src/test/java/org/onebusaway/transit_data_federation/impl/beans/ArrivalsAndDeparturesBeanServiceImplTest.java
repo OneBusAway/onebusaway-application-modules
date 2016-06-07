@@ -36,11 +36,14 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
+
 import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
 import org.onebusaway.transit_data.model.ArrivalsAndDeparturesQueryBean;
 import org.onebusaway.transit_data.model.StopBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.transit_data.model.trips.TripStatusBean;
+import org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.GtfsRealtimeNegativeArrivals;
+import org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.GtfsRealtimeNegativeArrivalsImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.BlockEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopTimeEntryImpl;
@@ -60,7 +63,7 @@ import org.onebusaway.transit_data_federation.services.realtime.BlockLocation;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
-import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstance;
+import org.onebusaway.transit_data_federation.model.StopTimeInstance;
 
 public class ArrivalsAndDeparturesBeanServiceImplTest {
 
@@ -72,6 +75,7 @@ public class ArrivalsAndDeparturesBeanServiceImplTest {
   private StopBeanService _stopBeanService;
   private TripDetailsBeanService _tripDetailsBeanService;
   private ServiceAlertsBeanService _serviceAlertsBeanService;
+  private GtfsRealtimeNegativeArrivals _gtfsRealtimeNegativeArrivals;
 
   @Before
   public void setup() {
@@ -98,6 +102,9 @@ public class ArrivalsAndDeparturesBeanServiceImplTest {
 
     _serviceAlertsBeanService = Mockito.mock(ServiceAlertsBeanService.class);
     _service.setServiceAlertsBeanService(_serviceAlertsBeanService);
+    
+    _gtfsRealtimeNegativeArrivals = new GtfsRealtimeNegativeArrivalsImpl();
+    _service.setGtfsRealtimeNegativeArrivals(_gtfsRealtimeNegativeArrivals);
   }
 
   @Test

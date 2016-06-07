@@ -1,0 +1,36 @@
+<!--
+
+    Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+            http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<Response xmlns:jsp="http://java.sun.com/JSP/Page"
+      xmlns:c="http://java.sun.com/jsp/jstl/core"
+     xmlns:s="/struts-tags"
+     xmlns:wiki="/oba-wiki-tags">
+  <jsp:directive.page contentType="application/xml" />
+  <Gather numDigits="1">
+    <Say>
+    	Welcome.  Our system let's you access real-time bus arrival information over the phone.  When you first call the system, you are asked to enter your stop number, followed by the pound sign.  Once you've entered your stop number, this system will list scheduled bus arrivals and departures at your stop.
+		To enter a stop number, please press one.
+		For help finding your stop number, please press two.
+		To access your bookmarked stops, please press three.
+		To manage your bookmarked stops, please press four.
+		To check your most recent stop, please press five.
+		To search for a stop by route number, please press six.
+		To repeat, please press  eight.
+		If you need help, please press zero.	
+    </Say>
+  </Gather>
+</Response>

@@ -23,7 +23,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.struts2.ServletActionContext;
 import org.onebusaway.presentation.impl.ArrivalsAndDeparturesModel;
 import org.onebusaway.presentation.impl.service_alerts.SituationsPresentation;
-import org.onebusaway.presentation.services.configuration.ConfigurationService;
+import org.onebusaway.util.services.configuration.ConfigurationService;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
 import org.onebusaway.webapp.actions.bundles.ArrivalAndDepartureMessages;
 import org.onebusaway.webapp.gwt.where_library.view.ArrivalsAndDeparturesPresentaion;
@@ -76,7 +76,7 @@ public class WebappArrivalsAndDeparturesModel extends
       _situations = new SituationsPresentation();
 
       HttpServletRequest request = ServletActionContext.getRequest();
-      Map<String, Object> config = _configurationService.getConfiguration(false, request.getContextPath());
+      Map<String, String> config = _configurationService.getConfiguration();
       String key = (String) config.get("apiKey");
       if (key != null)
         _situations.setApiKey(key);

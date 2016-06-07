@@ -31,17 +31,17 @@
       <artifactId>onebusaway-presentation</artifactId>
       <version>${project.version}</version>
     </dependency>
+    
+    <dependency>
+      <groupId>org.onebusaway</groupId>
+      <artifactId>onebusaway-util</artifactId>
+      <version>${project.version}</version>
+    </dependency>
 
     <dependency>
       <groupId>org.onebusaway</groupId>
       <artifactId>onebusaway-everylastlogin</artifactId>
       <version>0.0.1</version>
-    </dependency>
-
-        <!-- This is here mostly to support csv record parsing -->
-    <dependency>
-      <groupId>org.onebusaway</groupId>
-      <artifactId>onebusaway-csv-entities</artifactId>
     </dependency>
 
         <!-- Struts2 Dependencies -->
@@ -97,6 +97,12 @@
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-log4j12</artifactId>
     </dependency>
+    <dependency>
+      <groupId>mysql</groupId>
+       <artifactId>mysql-connector-java</artifactId>
+       <version>5.1.17</version>
+    </dependency>    
+    
 
         <!-- Wiki Integration Support -->
         <!-- XWiki depends on an old verion of beanutils that causes conflicts for some reason -->
@@ -134,6 +140,12 @@
       <groupId>com.thoughtworks.xstream</groupId>
       <artifactId>xstream</artifactId>
     </dependency>
+    <!--  support mysql out of the box -->
+	<dependency>
+		<groupId>mysql</groupId>
+		<artifactId>mysql-connector-java</artifactId>
+		<version>5.1.17</version>
+	</dependency>
 
     <dependency>
       <groupId>junit</groupId>
@@ -184,7 +196,6 @@
         <configuration>
           <modules>
             <module>org.onebusaway.webapp.gwt.BookmarkEditApplication</module>
-            <module>org.onebusaway.webapp.gwt.OneBusAwayStandardApplication</module>
             <module>org.onebusaway.webapp.gwt.SearchLocationLibrary</module>
             <module>org.onebusaway.webapp.gwt.WhereStopFinderRefineViewApplication</module>
             <module>org.onebusaway.webapp.gwt.WhereStopFinderStandardApplication</module>
@@ -244,10 +255,6 @@
               <targetPath />
             </resource>
             <resource>
-              <directory>target/gwt/org.onebusaway.webapp.gwt.OneBusAwayStandardApplication</directory>
-              <targetPath>explore/onebusaway</targetPath>
-            </resource>
-            <resource>
               <directory>target/gwt/org.onebusaway.webapp.gwt.SearchLocationLibrary</directory>
               <targetPath>user</targetPath>
             </resource>
@@ -262,6 +269,33 @@
           </webResources>
         </configuration>
       </plugin>
+      <plugin>
+		<groupId>pl.project13.maven</groupId>
+		<artifactId>git-commit-id-plugin</artifactId>
+		<version>2.1.15</version>
+		<executions>
+		  <execution>
+		    <goals>
+			  <goal>revision</goal>
+			</goals>
+		  </execution>
+		</executions>
+		<configuration>
+		  <prefix>git</prefix>
+		  <dateFormat>dd.MM.yyyy '@' HH:mm:ss z</dateFormat>
+		  <verbose>true</verbose>
+		  <skipPoms>false</skipPoms>
+		  <generateGitPropertiesFile>true</generateGitPropertiesFile>
+		  <generateGitPropertiesFilename>src/main/resources/git.properties</generateGitPropertiesFilename>
+		  <gitDescribe>
+			<skip>false</skip>
+			<always>true</always>
+			<abbrev>7</abbrev>
+			<dirty>-dirty</dirty>
+			<forceLongFormat>false</forceLongFormat>
+		  </gitDescribe>
+		</configuration>
+	  </plugin>
     </plugins>
   </build>
 

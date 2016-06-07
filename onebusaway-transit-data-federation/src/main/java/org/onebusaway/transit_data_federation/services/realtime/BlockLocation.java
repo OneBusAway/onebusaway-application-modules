@@ -44,6 +44,8 @@ public class BlockLocation {
 
   private BlockInstance blockInstance;
 
+  private int blockStartTime;
+
   private BlockTripEntry activeTrip;
 
   private boolean inService;
@@ -124,6 +126,14 @@ public class BlockLocation {
 
   public void setBlockInstance(BlockInstance instance) {
     this.blockInstance = instance;
+  }
+
+  public int getBlockStartTime() {
+    return blockStartTime;
+  }
+
+  public void setBlockStartTime(int blockStartTime) {
+    this.blockStartTime = blockStartTime;
   }
 
   /**

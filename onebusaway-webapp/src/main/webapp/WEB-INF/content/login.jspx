@@ -76,7 +76,7 @@
     </td>
     <td>
       <h4>Simple Login</h4>
-      <s:form action="/userIndex_login" method="put">
+      <s:form action="/userIndex_login" method="POST">
         <s:textfield name="j_username"/>
         <s:password name="j_password"/>
         <s:checkbox name="_spring_security_remember_me" value="true" label="Remember Me"/>

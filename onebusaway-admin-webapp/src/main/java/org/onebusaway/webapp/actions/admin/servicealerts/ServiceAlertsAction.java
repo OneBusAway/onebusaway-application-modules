@@ -1,0 +1,192 @@
+/**
+ * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.onebusaway.webapp.actions.admin.servicealerts;
+
+import java.util.List;
+
+import org.apache.struts2.convention.annotation.Result;
+import org.apache.struts2.convention.annotation.Results;
+import org.apache.struts2.interceptor.validation.SkipValidation;
+import org.onebusaway.webapp.actions.OneBusAwayNYCAdminActionSupport;
+import org.onebusaway.transit_data.model.AgencyWithCoverageBean;
+import org.onebusaway.transit_data.model.ListBean;
+import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
+import org.onebusaway.transit_data.services.TransitDataService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import com.opensymphony.xwork2.validator.annotations.RequiredStringValidator;
+import com.opensymphony.xwork2.validator.annotations.Validations;
+
+@Results({@Result(type = "redirectAction", name = "redirect", params = {
+    "actionName", "service-alerts!agency", "agencyId", "${agencyId}", "parse",
+    "true"})})
+public class ServiceAlertsAction extends OneBusAwayNYCAdminActionSupport {
+
+  private static final long serialVersionUID = 1L;
+  private static Logger _log = LoggerFactory.getLogger(ServiceAlertsAction.class);
+  private TransitDataService _transitDataService;
+  private String _agencyId;
+  private String _alertId;
+  private List<AgencyWithCoverageBean> _agencies;
+  private List<ServiceAlertBean> _situations;
+  private List<ServiceAlertBean>[] _situationsByAgency;
+  String summary = "";
+  String description = "";
+  String reason = "";
+  String severity = "";
+  String owningAgency = "";
+  private boolean submit;
+  private boolean clear;
+
+  @Autowired
+  public void setTransitDataService(TransitDataService transitDataService) {
+    _transitDataService = transitDataService;
+  }
+
+  public void setAgencyId(String agencyId) {
+    _agencyId = agencyId;
+  }
+
+  public String getAgencyId() {
+    return _agencyId;
+  }
+
+  public String get_alertId() {
+    return _alertId;
+  }
+
+  public void set_alertId(String _alertId) {
+    this._alertId = _alertId;
+  }
+
+  public List<AgencyWithCoverageBean> getAgencies() {
+    return _agencies;
+  }
+
+  public List<ServiceAlertBean> getSituations() {
+    return _situations;
+  }
+
+  public List<ServiceAlertBean>[] getSituationsByAgency() {
+    return _situationsByAgency;
+  }
+
+  public void setSummary(String summary) {
+    this.summary = summary;
+  }
+
+  public void setDescription(String description) {
+    this.description = description;
+  }
+
+  public void setReason(String reason) {
+    this.reason = reason;
+  }
+
+  public void setSeverity(String severity) {
+    this.severity = severity;
+  }
+
+  public void setOwningAgency(String owningAgency) {
+    this.owningAgency = owningAgency;
+  }
+
+  public void setSubmit(String submit) {
+    this.submit = true;
+  }
+  
+  public void setClear(String clear) {
+    this.clear = true;
+  }
+
+  @SkipValidation
+  @Override
+  public String execute() {
+    _log.info("ServiceAlerts.execute()");
+    /*
+    if (submit) {
+        _log.info("Service Alert submitted");
+        //doSubmit();
+        //return "submitResult";
+     }
+     if (clear) {
+       _log.info("Service Alert cleared");
+        //doClear();
+        //return "clearResult";
+     }
+     */
+  
+  	// Check that we have permission:
+  	super.execute();
+	
+    try {
+      _agencies = _transitDataService.getAgenciesWithCoverage();
+      _situationsByAgency = new List[_agencies.size()];
+      //for (AgencyWithCoverageBean agency : _agencies) {
+      for (int i=0; i<_agencies.size(); ++i) {
+        AgencyWithCoverageBean agency = _agencies.get(i);
+        String agencyId = agency.getAgency().getId();
+        ListBean<ServiceAlertBean> result = _transitDataService.getAllServiceAlertsForAgencyId(agencyId);
+        List<ServiceAlertBean> serviceAlerts = result.getList();
+        _situationsByAgency[i] = serviceAlerts;
+      }
+      for (int i=0; i<_agencies.size(); ++i) {
+        _log.info("Agency " + _agencies.get(i).getAgency().getId());
+        List<ServiceAlertBean> serviceAlerts = _situationsByAgency[i];
+        for (ServiceAlertBean serviceAlert : serviceAlerts) {
+          _log.info("   Alert: " + serviceAlert.getSummaries().get(0));
+        }
+      }
+    } catch (Throwable t) {
+      _log.error("unable to retrieve agencies with coverage", t);
+      _log.error("issue connecting to TDS -- check your configuration in data-sources.xml");
+      throw new RuntimeException("Check your onebusaway-nyc-transit-data-federation-webapp configuration", t);
+    }
+    return SUCCESS;
+  }
+
+  @Validations(requiredStrings = {@RequiredStringValidator(fieldName = "agencyId", message = "missing required agencyId field")})
+  public String agency() {
+    ListBean<ServiceAlertBean> result = _transitDataService.getAllServiceAlertsForAgencyId(_agencyId);
+    _situations = result.getList();
+    return SUCCESS;
+  }
+
+  public String deleteAlert() {
+    String id = _alertId;
+    try {
+      _transitDataService.removeServiceAlert(_alertId);
+    } catch (RuntimeException e) {
+      _log.error("Error deleting service alert", e);
+      throw e;
+    }
+    return "SUCCESS";
+  }
+  
+  @Validations(requiredStrings = {@RequiredStringValidator(fieldName = "agencyId", message = "missing required agencyId field")})
+  public String removeAllForAgency() {
+    try {
+      _transitDataService.removeAllServiceAlertsForAgencyId(_agencyId);
+    } catch (RuntimeException e) {
+      _log.error("Unable to remove all service alerts for agency", e);
+      throw e;
+    }
+    return "redirect";
+  }
+  
+}

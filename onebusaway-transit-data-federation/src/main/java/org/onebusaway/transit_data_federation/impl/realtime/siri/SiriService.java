@@ -16,12 +16,6 @@
  */
 package org.onebusaway.transit_data_federation.impl.realtime.siri;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
-import javax.xml.datatype.Duration;
-
 import org.onebusaway.collections.CollectionsLibrary;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.realtime.api.VehicleLocationListener;
@@ -31,20 +25,13 @@ import org.onebusaway.siri.OneBusAwayAffects;
 import org.onebusaway.siri.OneBusAwayAffectsStructure.Applications;
 import org.onebusaway.siri.OneBusAwayConsequence;
 import org.onebusaway.siri.core.ESiriModuleType;
+import org.onebusaway.transit_data.model.service_alerts.ECause;
+import org.onebusaway.transit_data.model.service_alerts.EEffect;
 import org.onebusaway.transit_data.model.service_alerts.ESeverity;
-import org.onebusaway.transit_data_federation.impl.service_alerts.ServiceAlertLibrary;
+import org.onebusaway.transit_data_federation.impl.service_alerts.*;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.blocks.BlockCalendarService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
-import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects;
-import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence;
-import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence.Effect;
-import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id;
-import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert;
-import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert.Cause;
-import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange;
-import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString;
-import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation;
 import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlertsService;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
@@ -53,40 +40,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import uk.org.siri.siri.AbstractServiceDeliveryStructure;
-import uk.org.siri.siri.AffectedCallStructure;
-import uk.org.siri.siri.AffectedOperatorStructure;
-import uk.org.siri.siri.AffectedStopPointStructure;
-import uk.org.siri.siri.AffectedVehicleJourneyStructure;
+import uk.org.siri.siri.*;
 import uk.org.siri.siri.AffectedVehicleJourneyStructure.Calls;
-import uk.org.siri.siri.AffectsScopeStructure;
 import uk.org.siri.siri.AffectsScopeStructure.Operators;
 import uk.org.siri.siri.AffectsScopeStructure.StopPoints;
 import uk.org.siri.siri.AffectsScopeStructure.VehicleJourneys;
-import uk.org.siri.siri.BlockRefStructure;
-import uk.org.siri.siri.DefaultedTextStructure;
-import uk.org.siri.siri.EntryQualifierStructure;
-import uk.org.siri.siri.ExtensionsStructure;
-import uk.org.siri.siri.FramedVehicleJourneyRefStructure;
-import uk.org.siri.siri.HalfOpenTimestampRangeStructure;
-import uk.org.siri.siri.LocationStructure;
-import uk.org.siri.siri.OperatorRefStructure;
-import uk.org.siri.siri.PtConsequenceStructure;
-import uk.org.siri.siri.PtConsequencesStructure;
-import uk.org.siri.siri.PtSituationElementStructure;
-import uk.org.siri.siri.ServiceConditionEnumeration;
-import uk.org.siri.siri.ServiceDelivery;
-import uk.org.siri.siri.SeverityEnumeration;
-import uk.org.siri.siri.SituationExchangeDeliveryStructure;
 import uk.org.siri.siri.SituationExchangeDeliveryStructure.Situations;
-import uk.org.siri.siri.StopPointRefStructure;
-import uk.org.siri.siri.VehicleActivityStructure;
 import uk.org.siri.siri.VehicleActivityStructure.MonitoredVehicleJourney;
-import uk.org.siri.siri.VehicleJourneyRefStructure;
-import uk.org.siri.siri.VehicleMonitoringDeliveryStructure;
-import uk.org.siri.siri.VehicleRefStructure;
-import uk.org.siri.siri.WorkflowStatusEnumeration;
+
+import javax.xml.datatype.Duration;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
 
 @Component
 public class SiriService {
@@ -286,19 +252,19 @@ public class SiriService {
     if (situations == null)
       return;
 
-    List<ServiceAlert.Builder> serviceAlertsToUpdate = new ArrayList<ServiceAlert.Builder>();
+    List<ServiceAlertRecord> serviceAlertsToUpdate = new ArrayList<ServiceAlertRecord>();
     List<AgencyAndId> serviceAlertIdsToRemove = new ArrayList<AgencyAndId>();
 
     for (PtSituationElementStructure ptSituation : situations.getPtSituationElement()) {
 
-      ServiceAlert.Builder serviceAlert = getPtSituationAsServiceAlert(
+      ServiceAlertRecord serviceAlert = getPtSituationAsServiceAlert(
           ptSituation, endpointDetails);
 
       WorkflowStatusEnumeration progress = ptSituation.getProgress();
       boolean remove = (progress != null && (progress == WorkflowStatusEnumeration.CLOSING || progress == WorkflowStatusEnumeration.CLOSED));
 
       if (remove) {
-        AgencyAndId situationId = ServiceAlertLibrary.agencyAndId(serviceAlert.getId());
+        AgencyAndId situationId = ServiceAlertLibrary.agencyAndId(serviceAlert.getAgencyId(), serviceAlert.getServiceAlertId());
         serviceAlertIdsToRemove.add(situationId);
       } else {
         serviceAlertsToUpdate.add(serviceAlert);
@@ -309,26 +275,30 @@ public class SiriService {
     if (!CollectionsLibrary.isEmpty(endpointDetails.getDefaultAgencyIds()))
       defaultAgencyId = endpointDetails.getDefaultAgencyIds().get(0);
 
-    for (ServiceAlert.Builder serviceAlert : serviceAlertsToUpdate)
-      _serviceAlertsService.createOrUpdateServiceAlert(serviceAlert,
-          defaultAgencyId);
+    for (ServiceAlertRecord serviceAlert : serviceAlertsToUpdate){
+      serviceAlert.setAgencyId(defaultAgencyId);
+      _serviceAlertsService.createOrUpdateServiceAlert(serviceAlert);
+    }
+
     _serviceAlertsService.removeServiceAlerts(serviceAlertIdsToRemove);
   }
 
-  private ServiceAlert.Builder getPtSituationAsServiceAlert(
+  private ServiceAlertRecord getPtSituationAsServiceAlert(
       PtSituationElementStructure ptSituation,
       SiriEndpointDetails endpointDetails) {
 
-    ServiceAlert.Builder serviceAlert = ServiceAlert.newBuilder();
+    ServiceAlertRecord serviceAlert = new ServiceAlertRecord();
     EntryQualifierStructure serviceAlertNumber = ptSituation.getSituationNumber();
     String situationId = serviceAlertNumber.getValue();
 
     if (!endpointDetails.getDefaultAgencyIds().isEmpty()) {
       String agencyId = endpointDetails.getDefaultAgencyIds().get(0);
-      serviceAlert.setId(ServiceAlertLibrary.id(agencyId, situationId));
+      serviceAlert.setServiceAlertId(situationId);
+      serviceAlert.setAgencyId(agencyId);
     } else {
       AgencyAndId id = AgencyAndIdLibrary.convertFromString(situationId);
-      serviceAlert.setId(ServiceAlertLibrary.id(id));
+      serviceAlert.setAgencyId(ServiceAlertLibrary.id(id).getAgencyId());
+      serviceAlert.setServiceAlertId(situationId);
     }
 
     handleDescriptions(ptSituation, serviceAlert);
@@ -341,70 +311,76 @@ public class SiriService {
   }
 
   private void handleDescriptions(PtSituationElementStructure ptSituation,
-      ServiceAlert.Builder serviceAlert) {
+      ServiceAlertRecord serviceAlert) {
 
-    TranslatedString summary = translation(ptSituation.getSummary());
+    ServiceAlertLocalizedString summary = translation(ptSituation.getSummary());
+    if(serviceAlert.getSummaries() == null)
+      serviceAlert.setSummaries(new HashSet<ServiceAlertLocalizedString>());
     if (summary != null)
-      serviceAlert.setSummary(summary);
+      serviceAlert.getSummaries().add(summary);
 
-    TranslatedString description = translation(ptSituation.getDescription());
+    ServiceAlertLocalizedString description = translation(ptSituation.getDescription());
+    if(serviceAlert.getDescriptions() == null)
+      serviceAlert.setDescriptions(new HashSet<ServiceAlertLocalizedString>());
     if (description != null)
-      serviceAlert.setDescription(description);
+      serviceAlert.getDescriptions().add(description);
   }
 
   private void handleOtherFields(PtSituationElementStructure ptSituation,
-      ServiceAlert.Builder serviceAlert) {
+      ServiceAlertRecord serviceAlert) {
 
     SeverityEnumeration severity = ptSituation.getSeverity();
     if (severity != null) {
       ESeverity severityEnum = ESeverity.valueOfTpegCode(severity.value());
-      serviceAlert.setSeverity(ServiceAlertLibrary.convertSeverity(severityEnum));
+      serviceAlert.setSeverity(severityEnum);
     }
 
     if (ptSituation.getPublicationWindow() != null) {
       HalfOpenTimestampRangeStructure window = ptSituation.getPublicationWindow();
-      TimeRange.Builder range = TimeRange.newBuilder();
+      ServiceAlertTimeRange range = new ServiceAlertTimeRange();
       if (window.getStartTime() != null)
-        range.setStart(window.getStartTime().getTime());
+        range.setFromValue(window.getStartTime().getTime());
       if (window.getEndTime() != null)
-        range.setEnd(window.getEndTime().getTime());
-      if (range.hasStart() || range.hasEnd())
-        serviceAlert.addPublicationWindow(range);
+        range.setToValue(window.getEndTime().getTime());
+      if(serviceAlert.getActiveWindows() == null)
+        serviceAlert.setActiveWindows(new HashSet<ServiceAlertTimeRange>());
+      if (range.getFromValue() != null || range.getToValue() != null)
+        serviceAlert.getActiveWindows().add(range);
     }
   }
 
   private void handlReasons(PtSituationElementStructure ptSituation,
-      ServiceAlert.Builder serviceAlert) {
+      ServiceAlertRecord serviceAlert) {
 
-    Cause cause = getReasonAsCause(ptSituation);
+    ECause cause = getReasonAsCause(ptSituation);
     if (cause != null)
       serviceAlert.setCause(cause);
   }
 
-  private Cause getReasonAsCause(PtSituationElementStructure ptSituation) {
+  private ECause getReasonAsCause(PtSituationElementStructure ptSituation) {
     if (ptSituation.getEnvironmentReason() != null)
-      return Cause.WEATHER;
+      return ECause.WEATHER;
     if (ptSituation.getEquipmentReason() != null) {
       switch (ptSituation.getEquipmentReason()) {
         case CONSTRUCTION_WORK:
-          return Cause.CONSTRUCTION;
+          return ECause.CONSTRUCTION;
         case CLOSED_FOR_MAINTENANCE:
         case MAINTENANCE_WORK:
         case EMERGENCY_ENGINEERING_WORK:
         case LATE_FINISH_TO_ENGINEERING_WORK:
         case REPAIR_WORK:
-          return Cause.MAINTENANCE;
+          return ECause.MAINTENANCE;
         default:
-          return Cause.TECHNICAL_PROBLEM;
+          return ECause.TECHNICAL_PROBLEM;
       }
     }
     if (ptSituation.getPersonnelReason() != null) {
       switch (ptSituation.getPersonnelReason()) {
         case INDUSTRIAL_ACTION:
         case UNOFFICIAL_INDUSTRIAL_ACTION:
-          return Cause.STRIKE;
+          return ECause.STRIKE;
       }
-      return Cause.OTHER_CAUSE;
+      return ECause.OTHER_CAUSE;
     }
     /**
      * There are really so many possibilities here that it's tricky to translate
@@ -414,19 +390,19 @@ public class SiriService {
       switch (ptSituation.getMiscellaneousReason()) {
         case ACCIDENT:
         case COLLISION:
-          return Cause.ACCIDENT;
+          return ECause.ACCIDENT;
         case DEMONSTRATION:
         case MARCH:
-          return Cause.DEMONSTRATION;
+          return ECause.DEMONSTRATION;
         case PERSON_ILL_ON_VEHICLE:
         case FATALITY:
-          return Cause.MEDICAL_EMERGENCY;
+          return ECause.MEDICAL_EMERGENCY;
         case POLICE_REQUEST:
         case BOMB_ALERT:
         case CIVIL_EMERGENCY:
         case EMERGENCY_SERVICES:
         case EMERGENCY_SERVICES_CALL:
-          return Cause.POLICE_ACTIVITY;
+          return ECause.POLICE_ACTIVITY;
       }
     }
 
@@ -438,7 +414,7 @@ public class SiriService {
    ****/
 
   protected void handleAffects(PtSituationElementStructure ptSituation,
-      ServiceAlert.Builder serviceAlert) {
+      ServiceAlertRecord serviceAlert) {
 
     AffectsScopeStructure affectsStructure = ptSituation.getAffects();
 
@@ -455,9 +431,11 @@ public class SiriService {
         if (operatorRef == null || operatorRef.getValue() == null)
           continue;
         String agencyId = operatorRef.getValue();
-        Affects.Builder affects = Affects.newBuilder();
+        ServiceAlertsSituationAffectsClause affects = new ServiceAlertsSituationAffectsClause();
         affects.setAgencyId(agencyId);
-        serviceAlert.addAffects(affects);
+        if(serviceAlert.getAllAffects() == null)
+          serviceAlert.setAllAffects(new HashSet<ServiceAlertsSituationAffectsClause>());
+        serviceAlert.getAllAffects().add(affects);
       }
     }
 
@@ -471,10 +449,12 @@ public class SiriService {
         if (stopRef == null || stopRef.getValue() == null)
           continue;
         AgencyAndId stopId = AgencyAndIdLibrary.convertFromString(stopRef.getValue());
-        Id id = ServiceAlertLibrary.id(stopId);
-        Affects.Builder affects = Affects.newBuilder();
-        affects.setStopId(id);
-        serviceAlert.addAffects(affects);
+        ServiceAlertsSituationAffectsClause affects = new ServiceAlertsSituationAffectsClause();
+        affects.setStopId(stopId.getId());
+        affects.setAgencyId(stopId.getAgencyId());
+        if(serviceAlert.getAllAffects() == null)
+          serviceAlert.setAllAffects(new HashSet<ServiceAlertsSituationAffectsClause>());
+        serviceAlert.getAllAffects().add(affects);
       }
     }
 
@@ -484,11 +464,12 @@ public class SiriService {
 
       for (AffectedVehicleJourneyStructure vj : vjs.getAffectedVehicleJourney()) {
 
-        Affects.Builder affects = Affects.newBuilder();
+        ServiceAlertsSituationAffectsClause affects = new ServiceAlertsSituationAffectsClause();
         if (vj.getLineRef() != null) {
-          AgencyAndId routeId = AgencyAndIdLibrary.convertFromString(vj.getLineRef().getValue());
-          Id id = ServiceAlertLibrary.id(routeId);
-          affects.setRouteId(id);
+          AgencyAndId routeId = AgencyAndIdLibrary.convertFromString(
+              vj.getLineRef().getValue());
+          affects.setRouteId(routeId.getId());
+          affects.setAgencyId(routeId.getAgencyId());
         }
 
         if (vj.getDirectionRef() != null)
@@ -501,30 +482,36 @@ public class SiriService {
         boolean hasStopRefs = stopRefs != null
             && !CollectionsLibrary.isEmpty(stopRefs.getCall());
 
+        if(serviceAlert.getAllAffects() == null)
+          serviceAlert.setAllAffects(new HashSet<ServiceAlertsSituationAffectsClause>());
         if (!(hasTripRefs || hasStopRefs)) {
-          if (affects.hasRouteId())
-            serviceAlert.addAffects(affects);
+          if (affects.getRouteId() != null)
+            serviceAlert.getAllAffects().add(affects);
         } else if (hasTripRefs && hasStopRefs) {
           for (VehicleJourneyRefStructure vjRef : vj.getVehicleJourneyRef()) {
             AgencyAndId tripId = AgencyAndIdLibrary.convertFromString(vjRef.getValue());
-            affects.setTripId(ServiceAlertLibrary.id(tripId));
+            affects.setTripId(tripId.getId());
+            affects.setAgencyId(tripId.getAgencyId());
             for (AffectedCallStructure call : stopRefs.getCall()) {
               AgencyAndId stopId = AgencyAndIdLibrary.convertFromString(call.getStopPointRef().getValue());
-              affects.setStopId(ServiceAlertLibrary.id(stopId));
-              serviceAlert.addAffects(affects);
+              affects.setStopId(stopId.getId());
+              affects.setAgencyId(stopId.getAgencyId());
+              serviceAlert.getAllAffects().add(affects);
             }
           }
         } else if (hasTripRefs) {
           for (VehicleJourneyRefStructure vjRef : vj.getVehicleJourneyRef()) {
             AgencyAndId tripId = AgencyAndIdLibrary.convertFromString(vjRef.getValue());
-            affects.setTripId(ServiceAlertLibrary.id(tripId));
-            serviceAlert.addAffects(affects);
+            affects.setTripId(tripId.getId());
+            affects.setAgencyId(tripId.getAgencyId());
+            serviceAlert.getAllAffects().add(affects);
           }
         } else {
           for (AffectedCallStructure call : stopRefs.getCall()) {
             AgencyAndId stopId = AgencyAndIdLibrary.convertFromString(call.getStopPointRef().getValue());
-            affects.setStopId(ServiceAlertLibrary.id(stopId));
-            serviceAlert.addAffects(affects);
+            affects.setStopId(stopId.getId());
+            affects.setAgencyId(stopId.getAgencyId());
+            serviceAlert.getAllAffects().add(affects);
           }
         }
       }
@@ -541,11 +528,12 @@ public class SiriService {
             && !CollectionsLibrary.isEmpty(applications.getAffectedApplication())) {
 
           List<AffectedApplicationStructure> apps = applications.getAffectedApplication();
-
+          if(serviceAlert.getAllAffects() == null)
+            serviceAlert.setAllAffects(new HashSet<ServiceAlertsSituationAffectsClause>());
           for (AffectedApplicationStructure sApp : apps) {
-            Affects.Builder affects = Affects.newBuilder();
+            ServiceAlertsSituationAffectsClause affects = new ServiceAlertsSituationAffectsClause();
             affects.setApplicationId(sApp.getApiKey());
-            serviceAlert.addAffects(affects);
+            serviceAlert.getAllAffects().add(affects);
           }
         }
       }
@@ -553,7 +541,7 @@ public class SiriService {
   }
 
   private void handleConsequences(PtSituationElementStructure ptSituation,
-      ServiceAlert.Builder serviceAlert) {
+      ServiceAlertRecord serviceAlert) {
 
     PtConsequencesStructure consequences = ptSituation.getConsequences();
 
@@ -561,7 +549,7 @@ public class SiriService {
       return;
 
     for (PtConsequenceStructure consequence : consequences.getConsequence()) {
-      Consequence.Builder builder = Consequence.newBuilder();
+      ServiceAlertSituationConsequenceClause builder = new ServiceAlertSituationConsequenceClause();
       if (consequence.getCondition() != null)
         builder.setEffect(getConditionAsEffect(consequence.getCondition()));
       ExtensionsStructure extensions = consequence.getExtensions();
@@ -573,71 +561,71 @@ public class SiriService {
             builder.setDetourPath(obaConsequence.getDiversionPath());
         }
       }
-      if (builder.hasDetourPath() || builder.hasEffect())
-        serviceAlert.addConsequence(builder);
+      if(serviceAlert.getConsequences() == null)
+        serviceAlert.setConsequences(new HashSet<ServiceAlertSituationConsequenceClause>());
+      if (builder.getDetourPath() != null || builder.getEffect() != null)
+        serviceAlert.getConsequences().add(builder);
     }
   }
 
-  private Effect getConditionAsEffect(ServiceConditionEnumeration condition) {
+  private EEffect getConditionAsEffect(ServiceConditionEnumeration condition) {
     switch (condition) {
 
       case CANCELLED:
       case NO_SERVICE:
-        return Effect.NO_SERVICE;
+        return EEffect.NO_SERVICE;
 
       case DELAYED:
-        return Effect.SIGNIFICANT_DELAYS;
+        return EEffect.SIGNIFICANT_DELAYS;
 
       case DIVERTED:
-        return Effect.DETOUR;
+        return EEffect.DETOUR;
 
       case ADDITIONAL_SERVICE:
       case EXTENDED_SERVICE:
       case SHUTTLE_SERVICE:
       case SPECIAL_SERVICE:
       case REPLACEMENT_SERVICE:
-        return Effect.ADDITIONAL_SERVICE;
+        return EEffect.ADDITIONAL_SERVICE;
 
       case DISRUPTED:
       case INTERMITTENT_SERVICE:
       case SHORT_FORMED_SERVICE:
-        return Effect.REDUCED_SERVICE;
+        return EEffect.REDUCED_SERVICE;
 
       case ALTERED:
       case ARRIVES_EARLY:
       case REPLACEMENT_TRANSPORT:
       case SPLITTING_TRAIN:
-        return Effect.MODIFIED_SERVICE;
+        return EEffect.MODIFIED_SERVICE;
 
       case ON_TIME:
       case FULL_LENGTH_SERVICE:
       case NORMAL_SERVICE:
-        return Effect.OTHER_EFFECT;
+        return EEffect.OTHER_EFFECT;
 
       case UNDEFINED_SERVICE_INFORMATION:
       case UNKNOWN:
-        return Effect.UNKNOWN_EFFECT;
+        return EEffect.UNKNOWN_EFFECT;
 
       default:
         _log.warn("unknown condition: " + condition);
-        return Effect.UNKNOWN_EFFECT;
+        return EEffect.UNKNOWN_EFFECT;
     }
   }
 
-  private TranslatedString translation(DefaultedTextStructure text) {
+  private ServiceAlertLocalizedString translation(DefaultedTextStructure text) {
     if (text == null)
       return null;
     String value = text.getValue();
     if (value == null)
       return null;
 
-    Translation.Builder translation = Translation.newBuilder();
-    translation.setText(value);
+    ServiceAlertLocalizedString translation = new ServiceAlertLocalizedString();
+    translation.setValue(value);
     if (text.getLang() != null)
       translation.setLanguage(text.getLang());
 
-    TranslatedString.Builder tsBuilder = TranslatedString.newBuilder();
-    tsBuilder.addTranslation(translation);
-    return tsBuilder.build();
+    return translation;
   }
 }

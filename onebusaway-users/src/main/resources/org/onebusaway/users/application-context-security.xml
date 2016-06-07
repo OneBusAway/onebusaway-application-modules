@@ -19,38 +19,63 @@
 <beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns:context="http://www.springframework.org/schema/context" xmlns:aop="http://www.springframework.org/schema/aop"
     xmlns:tx="http://www.springframework.org/schema/tx" xmlns:sec="http://www.springframework.org/schema/security"
-    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
-           http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+           http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
            http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.0.xsd
            http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd
-           http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-2.0.xsd">
+           http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.0.xsd">
 
+   	<bean id="indexedUserDetailsSaltSourceImpl" class="org.onebusaway.users.impl.authentication.IndexedUserDetailsSaltSourceImpl" />
+
+    <bean id="loginAuthenticationFailureHandler" class="org.onebusaway.users.impl.authentication.LoginAuthenticationFailureHandler"/>
+    <bean id="loginAuthenticationSuccessHandler" class="org.onebusaway.users.impl.authentication.LoginAuthenticationSuccessHandler"/>
+    
     <bean id="userIndexAuthenticationFilter" class="org.onebusaway.users.impl.authentication.IndexedUserAuthenticationProcessorFilter">
-        <property name="defaultTargetUrl" value="/index.action" />
-        <property name="authenticationManager" ref="_authenticationManager" />
+        <property name="authenticationManager" ref="authenticationManager" />
         <property name="filterProcessesUrl" value="/userIndex_login" />
-        <sec:custom-filter after="AUTHENTICATION_PROCESSING_FILTER" />
+        <property name="authenticationFailureHandler" ref="loginAuthenticationFailureHandler" />
+        <property name="authenticationSuccessHandler" ref="loginAuthenticationSuccessHandler" />
     </bean>
-
+ 
     <bean id="everyLastLoginAuthenticationFilter" class="org.onebusaway.users.impl.authentication.EveryLastLoginAuthenticationProcessorFilter">
-        <property name="defaultTargetUrl" value="/index.action" />
-        <property name="authenticationManager" ref="_authenticationManager" />
+		<constructor-arg><value>/everylastlogin_login</value></constructor-arg>
+        <property name="authenticationManager" ref="authenticationManager" />
         <property name="filterProcessesUrl" value="/everylastlogin_login" />
-        <sec:custom-filter before="BASIC_PROCESSING_FILTER" />
+        <property name="authenticationFailureHandler" ref="loginAuthenticationFailureHandler" />
+        <property name="authenticationSuccessHandler" ref="loginAuthenticationSuccessHandler" />
     </bean>
 
-    <bean id="indexedUserDetailsSaltSourceImpl" class="org.onebusaway.users.impl.authentication.IndexedUserDetailsSaltSourceImpl" />
 
-    <bean id="daoAuthenticationProvider" class="org.springframework.security.providers.dao.DaoAuthenticationProvider">
+    <bean id="daoAuthenticationProvider" class="org.springframework.security.authentication.dao.DaoAuthenticationProvider">
         <property name="userDetailsService" ref="userDetailsServiceImpl" />
-        <property name="passwordEncoder" ref="passwordEncoderV1" />
         <property name="saltSource" ref="indexedUserDetailsSaltSourceImpl" />
-        <sec:custom-authentication-provider />
+        <property name="passwordEncoder" ref="passwordEncoderV1" />
     </bean>
 
     <bean id="defaultUserAuthenticationProvider" class="org.onebusaway.users.impl.authentication.DefaultUserAuthenticationProvider">
-        <sec:custom-authentication-provider />
     </bean>
+    
+    <bean id="securityContextPersistenceFilter" class="org.springframework.security.web.context.SecurityContextPersistenceFilter">
+      <property name="forceEagerSessionCreation" value="false" />
+      <property name="securityContextRepository">
+      	<bean class="org.springframework.security.web.context.HttpSessionSecurityContextRepository">
+      		<property name="allowSessionCreation" value="false" />
+      	</bean>
+      </property>
+    </bean>
+    
+    <bean id="authenticationProcessingFilterEntryPoint" class="org.springframework.security.web.authentication.AuthenticationProcessingFilterEntryPoint">
+      <property name="loginFormUrl" value="/userIndex_login" />
+      <property name="forceHttps" value="false" />
+      <property name="useForward" value="true" />
+    </bean>
+ 
+
+	<sec:authentication-manager alias="authenticationManager">
+	  <sec:authentication-provider ref="daoAuthenticationProvider">
+	  </sec:authentication-provider>
+	</sec:authentication-manager>
+
 
     <bean id="openid_plugin" class="org.onebusaway.everylastlogin.server.OpenIdAuthenticationPlugin" />
     <bean id="twitter_plugin" class="org.onebusaway.everylastlogin.server.TwitterAuthenticationPlugin" />

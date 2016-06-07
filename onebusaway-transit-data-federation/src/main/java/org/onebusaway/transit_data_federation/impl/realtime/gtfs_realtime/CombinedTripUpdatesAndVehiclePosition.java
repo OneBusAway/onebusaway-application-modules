@@ -29,7 +29,12 @@ class CombinedTripUpdatesAndVehiclePosition implements
 
   @Override
   public int compareTo(CombinedTripUpdatesAndVehiclePosition o) {
-    return block.getBlockEntry().getId().compareTo(
-        o.block.getBlockEntry().getId());
+    return block.getBlockInstance().getBlock().getBlock().getId().compareTo(
+        o.block.getBlockInstance().getBlock().getBlock().getId());
+  }
+
+  @Override
+  public String toString() {
+    return "block=" + block.toString() + " tripUpdates=" + tripUpdates.toString() + ((vehiclePosition != null) ? " vehiclePosition=" + vehiclePosition.toString() : "");
   }
 }

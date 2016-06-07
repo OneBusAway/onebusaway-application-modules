@@ -18,6 +18,7 @@ package org.onebusaway.watchdog.api.schedule;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
 
 import org.onebusaway.watchdog.api.MetricResource;
@@ -25,8 +26,9 @@ import org.onebusaway.watchdog.api.MetricResource;
 @Path("/metric/schedule/trip")
 public class TripResource extends MetricResource {
 
-  @Path("/{agencyId}/total")
+  @Path("{agencyId}/total")
   @GET
+  @Produces("application/json")
   public Response getScheduleTripCount(@PathParam("agencyId") String agencyId) {
     try {
       if (this.getDataSources() == null || this.getDataSources().isEmpty()) {

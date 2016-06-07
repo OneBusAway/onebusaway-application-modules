@@ -114,7 +114,6 @@ The current list of supported API methods.  Methods that are subject to changed 
 * [block](methods/block.html) - get block configuration for a specific block
 * [cancel-alarm](methods/cancel-alarm.html) - cancel a registered alarm
 * [current-time](methods/current-time.html) - retrieve the current system time
-* ~~[plan-trip](methods/plan-trip.html) - plan a trip <font color="red">BETA</font>~~ (Check out the [OpenTripPlanner](http://www.opentripplanner.org/) project instead)
 * [register-alarm-for-arrival-and-departure-at-stop](methods/register-alarm-for-arrival-and-departure-at-stop.html) - register an alarm for an arrival-departure event
 * [report-problem-with-stop](methods/report-problem-with-stop.html) - submit a user-generated problem for a stop
 * [report-problem-with-trip](methods/report-problem-with-trip.html) - submit a user-generated problem for a trip

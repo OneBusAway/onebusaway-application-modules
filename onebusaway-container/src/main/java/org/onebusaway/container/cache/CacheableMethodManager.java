@@ -22,9 +22,12 @@ import java.util.concurrent.ConcurrentHashMap;
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Element;
+import net.sf.ehcache.ObjectExistsException;
 
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.Signature;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Support class providing functionality for caching the output of arbitrary
@@ -40,6 +43,8 @@ import org.aspectj.lang.Signature;
  */
 public class CacheableMethodManager {
 
+  private static Logger _log = LoggerFactory.getLogger(CacheableMethodManager.class);
+  
   private ConcurrentHashMap<String, CacheEntry> _entries = new ConcurrentHashMap<String, CacheEntry>();
 
   private CacheManager _cacheManager;
@@ -127,16 +132,31 @@ public class CacheableMethodManager {
         cache = createCache(pjp, name);
         if (cache == null) {
           if(!_cacheManager.cacheExists(name))
-        	  _cacheManager.addCache(name);
+            try {
+              _cacheManager.addCache(name);
+            } catch (ObjectExistsException oee) {
+              _log.error("Cache already exists: " + name);
+            }
           cache = _cacheManager.getCache(name);
         } else {
-          _cacheManager.addCache(cache);
+          try {
+            _cacheManager.addCache(cache);
+          } catch (ObjectExistsException oee) {
+            _log.error("Cache already exists: " + name);
+          }
         }
       }
-      entry = new CacheEntry(keyFactory, valueSerializable, cache);
-      _entries.put(name, entry);
+      synchronized (_entries) {
+    	  entry = new CacheEntry(keyFactory, valueSerializable, cache);
+    	  if (_entries.containsKey(name)) {
+    		  // another thread beat us here, discard
+    		  _log.warn("concurrent attempt to create cache = " + name);
+    	  } else {
+    		  _entries.put(name, entry);
+    	  }
+      }
     }
-    return entry;
+    return _entries.get(name);
   }
 
   private boolean isValueSerializable(ProceedingJoinPoint pjp, Method method) {

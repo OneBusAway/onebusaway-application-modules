@@ -29,7 +29,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 
 import org.onebusaway.exceptions.ServiceException;
-import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.transit_data.model.AgencyWithCoverageBean;
 import org.onebusaway.transit_data.model.ListBean;
 import org.onebusaway.transit_data.model.RouteBean;
@@ -41,13 +40,6 @@ import org.onebusaway.transit_data.model.StopScheduleBean;
 import org.onebusaway.transit_data.model.StopWithArrivalsAndDeparturesBean;
 import org.onebusaway.transit_data.model.StopsBean;
 import org.onebusaway.transit_data.model.StopsForRouteBean;
-import org.onebusaway.transit_data.model.oba.LocalSearchResult;
-import org.onebusaway.transit_data.model.oba.MinTransitTimeResult;
-import org.onebusaway.transit_data.model.oba.MinTravelTimeToStopsBean;
-import org.onebusaway.transit_data.model.oba.TimedPlaceBean;
-import org.onebusaway.transit_data.model.tripplanning.ConstraintsBean;
-import org.onebusaway.transit_data.model.tripplanning.ItinerariesBean;
-import org.onebusaway.transit_data.model.tripplanning.TransitShedConstraintsBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsBean;
 import org.onebusaway.transit_data.model.trips.TripsForBoundsQueryBean;
 import org.onebusaway.users.client.model.UserBean;
@@ -115,15 +107,6 @@ public class WebappServiceServletImpl extends RemoteServiceServlet implements
   }
 
   @Override
-  public MinTransitTimeResult getMinTravelTimeToStopsFrom(
-      CoordinatePoint location, long time,
-      TransitShedConstraintsBean constraints, int timeSegmentSize)
-      throws ServiceException {
-    return _service.getMinTravelTimeToStopsFrom(location, time, constraints,
-        timeSegmentSize);
-  }
-
-  @Override
   public RouteBean getRouteForId(String routeId) throws ServiceException {
     return _service.getRouteForId(routeId);
   }
@@ -167,23 +150,8 @@ public class WebappServiceServletImpl extends RemoteServiceServlet implements
     return _service.getTripsForBounds(query);
   }
 
-
-  @Override
-  public ItinerariesBean getTripsBetween(CoordinatePoint from,
-      CoordinatePoint to, long time, ConstraintsBean constraints)
-      throws ServiceException {
-    return _service.getTripsBetween(from, to, time, constraints);
-  }
-
-  @Override
-  public List<TimedPlaceBean> getLocalPathsToStops(ConstraintsBean constraints,
-      MinTravelTimeToStopsBean travelTimes, List<LocalSearchResult> localResults)
-      throws ServiceException {
-    return _service.getLocalPathsToStops(constraints, travelTimes, localResults);
-  }
-
   /****
-   * 
+   *
    ****/
 
   /**
@@ -223,10 +191,6 @@ public class WebappServiceServletImpl extends RemoteServiceServlet implements
       servlet.log(message, null);
     } else {
 
-      // TODO : Hack for Nokia demo
-      // /Users/bdferris/Documents/Aptana%20Studio%20Workspace/nokia-hello-world/
-      if (modulePath.endsWith("nokia-hello-world/"))
-        modulePath = "/where/mobile/";
 
       if (!modulePath.startsWith(contextPath))
         modulePath = contextPath + modulePath;

@@ -21,6 +21,7 @@ import java.util.List;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
 
 import org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.MonitoredDataSource;
@@ -30,8 +31,9 @@ import org.onebusaway.watchdog.api.MetricResource;
 @Path("/metric/realtime/trip")
 public class TripResource extends MetricResource {
 
-  @Path("/{agencyId}/total")
+  @Path("{agencyId}/total")
   @GET
+  @Produces("application/json")
   public Response getTotalRecords(@PathParam("agencyId") String agencyId) {
     try {
       int totalRecords = 0;
@@ -47,8 +49,9 @@ public class TripResource extends MetricResource {
     }
   }
   
-  @Path("/{agencyId}/matched")
+  @Path("{agencyId}/matched")
   @GET
+  @Produces("application/json")
   public Response getMatchedTripCount(@PathParam("agencyId") String agencyId) {
     try {
       if (this.getDataSources() == null || this.getDataSources().isEmpty()) {
@@ -65,8 +68,9 @@ public class TripResource extends MetricResource {
   }
   
   
-  @Path("/{agencyId}/unmatched")
+  @Path("{agencyId}/unmatched")
   @GET
+  @Produces("application/json")
   public Response getUnmatchedTrips(@PathParam("agencyId") String agencyId) {
     try {
       int unmatchedTrips = 0;
@@ -94,8 +98,9 @@ public class TripResource extends MetricResource {
 
 
   
-  @Path("/{agencyId}/unmatched-ids")
+  @Path("{agencyId}/unmatched-ids")
   @GET
+  @Produces("application/json")
   public Response getUnmatchedTripIds(@PathParam("agencyId") String agencyId) {
     try {
       List<String> unmatchedTripIds = new ArrayList<String>();
@@ -120,8 +125,9 @@ public class TripResource extends MetricResource {
     }
   }
 
-  @Path("/{agencyId}/schedule-realtime-delta")
+  @Path("{agencyId}/schedule-realtime-delta")
   @GET
+  @Produces("application/json")
   public Response getScheduleRealtimeTripsDelta(@PathParam("agencyId") String agencyId) {
     try {
       if (this.getDataSources() == null || this.getDataSources().isEmpty()) {
@@ -142,8 +148,9 @@ public class TripResource extends MetricResource {
   }
 
 
-  @Path("/{agencyId}/buses-in-service-percent")
+  @Path("{agencyId}/buses-in-service-percent")
   @GET
+  @Produces("application/json")
   public Response getBusesInServicePercent(@PathParam("agencyId") String agencyId) {
     try {
       if (this.getDataSources() == null || this.getDataSources().isEmpty()) {
@@ -166,6 +173,40 @@ public class TripResource extends MetricResource {
       return Response.ok(error("buses-in-service-percent", e)).build();
     }
   }
+  
+  /*
+  @Path("{agencyId}/long-term-delta/matched-trips")
+  @GET
+  @Produces("application/json")
+  public Response getLongTermDeltaMatched() {
+    int totalMatchedTripIds = 0;
+    for (MonitoredDataSource mds : getDataSources()) {
+      MonitoredResult result = mds.getMonitoredResult();
+      totalMatchedTripIds += result.getMatchedTripIds().size();
+    }
+    _log.info("long term matched delta, current = " + totalMatchedTripIds + ", average = " + _longTermAverages.getMatchedTripsAvg());;
+    int longTermDelta =  totalMatchedTripIds - _longTermAverages.getAvgByAgency(matched-trips-average, agencyId);
 
+    return Response.ok(ok("long-term-delta-matched-trips", longTermDelta)).build();    
+  }
+  */
+
+  /*
+  @Path("long-term-delta/matched-trips")
+  @GET
+  @Produces("application/json")
+  public Response getLongTermDeltaMatched() {
+    int longTermDelta = getLongTermDeltaMatchedTrips();
+    return Response.ok(ok("long-term-delta-matched-trips", longTermDelta)).build();    
+  }
+
+  @Path("long-term-delta/unmatched-trips")
+  @GET
+  @Produces("application/json")
+  public Response getLongTermDeltaUnmatched() {
+    int longTermDelta = getLongTermDeltaUnmatchedTrips();
+    return Response.ok(ok("long-term-delta-unmatched-trips", longTermDelta)).build();    
+  }
+  */
 
 }

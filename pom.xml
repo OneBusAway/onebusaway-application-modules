@@ -3,7 +3,7 @@
   <parent>
     <artifactId>onebusaway</artifactId>
     <groupId>org.onebusaway</groupId>
-    <version>1.1.7</version>
+    <version>1.1.10</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>onebusaway-application-modules</artifactId>
@@ -12,30 +12,26 @@
 
   <name>onebusaway-application-modules</name>
   <description>The core OneBusAway application suite.</description>
-  <url>https://github.com/OneBusAway/onebusaway-application-modules/wiki/</url>
+  <url>https://github.com/camsys/onebusaway-application-modules/wiki/</url>
 
   <!-- Common Software Dependency Versions -->
   <properties>
     <struts-version>2.3.16.2</struts-version>
     <gwt-version>2.4.0</gwt-version>
-    <spring-version>3.0.3.RELEASE</spring-version>
-    <csv-entities-version>1.1.5</csv-entities-version>
-    <gtfs-version>1.3.5</gtfs-version>
-    <onebusaway-siri-version>1.0.4</onebusaway-siri-version>
-    <opentripplanner-version>0.4.1</opentripplanner-version>
+    <spring-version>3.0.5.RELEASE</spring-version>
+    <csv-entities-version>1.1.6</csv-entities-version>
+    <gtfs-version>1.3.7</gtfs-version>
+    <gtfs-api-version>1.2.2</gtfs-api-version>
+    <onebusaway-siri-version>1.0.6</onebusaway-siri-version>
     <wiki_integration_version>1.0.0</wiki_integration_version>
+    <slf4j.version>1.7.5</slf4j.version>
+    <guava-version>16.0.1</guava-version>
     <!--  These properties are primarily used in configuring joint integration tests -->
     <org_onebusaway_test_port>9900</org_onebusaway_test_port>
     <org_onebusaway_test_ajp_port>9901</org_onebusaway_test_ajp_port>
     <org_onebusaway_test_rmi_port>9902</org_onebusaway_test_rmi_port>
   </properties>
 
-  <repositories>
-    <repository>
-      <id>public.onebusaway.org</id>
-      <url>http://nexus.onebusaway.org/content/groups/public/</url>
-    </repository>
-  </repositories>
 
   <pluginRepositories>
     <pluginRepository>
@@ -44,38 +40,34 @@
     </pluginRepository>
   </pluginRepositories>
 
-  <scm>
-    <connection>scm:git:http://github.com/OneBusAway/onebusaway-application-modules.git</connection>
-    <developerConnection>scm:git:ssh://git@github.com/OneBusAway/onebusaway-application-modules.git</developerConnection>
-    <url>http://github.com/OneBusAway/onebusaway-application-modules</url>
-  </scm>
 
   <issueManagement>
     <system>GitHub</system>
     <url>https://github.com/OneBusAway/onebusaway-application-modules/issues</url>
   </issueManagement>
 
-  <distributionManagement>
-    <site>
-      <id>${site_id}</id>
-      <url>${site_deployment_base}/onebusaway-application-modules/${project.version}</url>
-    </site>
-  </distributionManagement>
 
   <modules>
+    <module>onebusaway-admin-webapp</module>
+    <module>onebusaway-agency-metadata</module>
     <module>onebusaway-api-core</module>
     <module>onebusaway-api-webapp</module>
     <module>onebusaway-combined-webapp</module>
     <module>onebusaway-container</module>
     <module>onebusaway-core</module>
+    <module>onebusaway-enterprise-acta-webapp</module>
+    <module>onebusaway-enterprise-webapp</module>
     <module>onebusaway-federations</module>
     <module>onebusaway-federations-webapp</module>
     <module>onebusaway-geocoder</module>
     <module>onebusaway-geospatial</module>
     <module>onebusaway-gtfs-hibernate-spring</module>
+    <module>onebusaway-gtfs-realtime-archiver</module>
     <module>onebusaway-gwt-common</module>
+    <module>onebusaway-nextbus-api-webapp</module>
     <module>onebusaway-phone</module>
     <module>onebusaway-phone-webapp</module>
+    <module>onebusaway-twilio-webapp</module>
     <module>onebusaway-presentation</module>
     <module>onebusaway-quickstart</module>
     <module>onebusaway-sms-webapp</module>
@@ -85,6 +77,7 @@
     <module>onebusaway-transit-data-federation-builder</module>
     <module>onebusaway-transit-data-federation-webapp</module>
     <module>onebusaway-users</module>
+    <module>onebusaway-util</module>
     <module>onebusaway-watchdog-webapp</module>
     <module>onebusaway-webapp</module>
   </modules>
@@ -220,7 +213,7 @@
       <dependency>
         <groupId>com.vividsolutions</groupId>
         <artifactId>jts</artifactId>
-        <version>1.10</version>
+        <version>1.13</version>
       </dependency>
 
       <dependency>
@@ -304,12 +297,18 @@
       <dependency>
         <groupId>org.slf4j</groupId>
         <artifactId>slf4j-api</artifactId>
-        <version>1.5.6</version>
+        <version>${slf4j.version}</version>
       </dependency>
       <dependency>
         <groupId>org.slf4j</groupId>
         <artifactId>slf4j-log4j12</artifactId>
-        <version>1.5.6</version>
+        <version>${slf4j.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.google.guava</groupId>
+        <artifactId>guava</artifactId>
+        <version>${guava-version}</version>
       </dependency>
 
       <dependency>
@@ -324,7 +323,17 @@
         <version>1.8.0</version>
         <scope>test</scope>
       </dependency>
-    </dependencies>
+      <dependency>
+    	<groupId>com.brsanthu</groupId>
+    	<artifactId>google-analytics-java</artifactId>
+    	<version>1.1.2</version>
+	</dependency>
+	<dependency>
+		<groupId>org.apache.httpcomponents</groupId>
+		<artifactId>httpclient</artifactId>
+		<version>4.3.5</version>
+	</dependency>
+ 	</dependencies>
   </dependencyManagement>
 
   <build>
@@ -383,7 +392,7 @@
                 <goal>test</goal>
               </goals>
               <configuration>
-                <skip>false</skip>
+                <skip>true</skip>
                 <excludes>
                   <exclude>none</exclude>
                 </excludes>
@@ -419,7 +428,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-site-plugin</artifactId>
-	<version>3.3</version>
+   	    <version>3.3</version>
         <configuration>
           <reportPlugins>
             <plugin>
@@ -513,6 +522,7 @@
             <exclude>**/*.wav</exclude>
             <exclude>bin/**</exclude>
             <exclude>src/test/resources/**</exclude>
+            <exclude>**/git.properties</exclude>
           </excludes>
         </configuration>
       </plugin>

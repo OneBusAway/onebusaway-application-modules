@@ -20,8 +20,8 @@ import org.onebusaway.users.services.StandardAuthoritiesService;
 import org.onebusaway.users.services.UserDao;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.GrantedAuthority;
-import org.springframework.security.GrantedAuthorityImpl;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.GrantedAuthorityImpl;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -94,5 +94,10 @@ class StandardAuthoritiesServiceImpl implements StandardAuthoritiesService {
   @Override
   public UserRole getUserRole() {
     return getUserRoleForName(USER);
+  }
+  
+  @Override
+  public UserRole getReportingRole() {
+    return getUserRoleForName(REPORTING);
   }
 }

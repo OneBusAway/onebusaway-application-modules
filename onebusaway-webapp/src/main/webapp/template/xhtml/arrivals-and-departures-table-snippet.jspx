@@ -76,8 +76,16 @@
         <s:if test="#arrivalsAndDepartures.empty">
             <tr>
                 <td colspan="3">
-                <div id="arrivalsNoScheduledArrivals">No scheduled
-                arrivals in the next 30 minutes.</div>
+                <div id="arrivalsNoScheduledArrivals">
+                	No scheduled
+                	<s:if test="showArrivals">
+                		arrivals
+                	</s:if>
+                	<s:else>
+                		departures
+                	</s:else>
+            		in the next 30 minutes.
+            	</div>
                 </td>
             </tr>
         </s:if>

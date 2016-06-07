@@ -42,11 +42,11 @@ public final class AgencyNarrative implements Serializable {
 
   private final String phone;
   
-  private final String email;
-  
   private final String fareUrl;
 
   private final String disclaimer;
+  
+  private final String email;
 
   /**
    * If true, indicates the agency provides private service that is not
@@ -65,9 +65,9 @@ public final class AgencyNarrative implements Serializable {
     this.lang = builder.lang;
     this.phone = builder.phone;
     this.disclaimer = builder.disclaimer;
-    this.email = builder.email;
     this.fareUrl = builder.fareUrl;
     this.privateService = builder.privateService;
+    this.email = builder.email;
   }
 
   public String getName() {
@@ -93,7 +93,7 @@ public final class AgencyNarrative implements Serializable {
   public String getEmail() {
     return email;
   }
-
+  
   public String getDisclaimer() {
     return disclaimer;
   }
@@ -124,11 +124,11 @@ public final class AgencyNarrative implements Serializable {
 
     private String disclaimer;
     
-    private String email;
-    
     private String fareUrl;
 
     private boolean privateService;
+    
+    private String email;
 
     public AgencyNarrative create() {
       return new AgencyNarrative(this);
@@ -145,7 +145,7 @@ public final class AgencyNarrative implements Serializable {
     public void setTimezone(String timezone) {
       this.timezone = timezone;
     }
-
+    
     public void setLang(String lang) {
       this.lang = lang;
     }

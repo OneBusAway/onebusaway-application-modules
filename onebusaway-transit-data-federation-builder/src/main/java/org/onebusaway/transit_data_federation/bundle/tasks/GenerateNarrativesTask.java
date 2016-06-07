@@ -173,6 +173,7 @@ public class GenerateNarrativesTask implements Runnable {
       narrative.setLang(deduplicate(agency.getLang()));
       narrative.setName(deduplicate(agency.getName()));
       narrative.setPhone(deduplicate(agency.getPhone()));
+      narrative.setEmail(deduplicate(agency.getEmail()));
       narrative.setTimezone(deduplicate(agency.getTimezone()));
       narrative.setUrl(deduplicate(agency.getUrl()));
       narrative.setEmail(agency.getEmail());

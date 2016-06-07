@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
 <!--
 
     Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
@@ -27,7 +28,7 @@
 <head>
   <title><decorator:title default="OneBusAway" /></title>
   <link rel="stylesheet" type="text/css" media="all" href="${oba:resource('/WEB-INF/css/where-standard.css')}"/>
-  <link rel="stylesheet" type="text/css" media="all" href="${pageContext.request.contextPath}/p/Stylesheet!raw.action"/> 
+  <link rel="stylesheet" type="text/css" media="all" href="${oba:resource('/WEB-INF/css/Stylesheet.css')}"/> 
   <link rel="icon" type="image/png" href="${oba:resource('/images/Bus.png')}"/>
   <decorator:head />
 </head>
@@ -44,50 +45,62 @@
 <s:set var="uri">${pageContext.request.requestURI}</s:set>
 <s:set var="contextPath">${pageContext.request.contextPath}</s:set>
 
-<jsp:element name="li">
-  <jsp:attribute name="class">
-    <s:if test="#uri.startsWith(#contextPath + '/index') or #uri == #contextPath + '/'">current</s:if>
-  </jsp:attribute>
-  <a href="${pageContext.request.contextPath}/">Home</a>
-</jsp:element>
+<s:if test="!properties.getProperty('hide_home_tab')">
+  <jsp:element name="li">
+    <jsp:attribute name="class">
+      <s:if test="#uri.startsWith(#contextPath + '/index') or #uri == #contextPath + '/'">current</s:if>
+    </jsp:attribute>
+    <a href="${pageContext.request.contextPath}/">Home</a>
+  </jsp:element>
+</s:if>
 
-<jsp:element name="li">
-  <jsp:attribute name="class">
-    <s:if test="#uri.startsWith(#contextPath + '/p/Tools')">current</s:if>
-  </jsp:attribute>
-  <a href="${pageContext.request.contextPath}/p/Tools.action">Tools</a>
-</jsp:element>
+<s:if test="!properties.getProperty('hide_tools_tab')">
+  <jsp:element name="li">
+    <jsp:attribute name="class">
+      <s:if test="#uri.startsWith(#contextPath + '/p/Tools')">current</s:if>
+    </jsp:attribute>
+    <a href="${pageContext.request.contextPath}/p/Tools.action">Tools</a>
+  </jsp:element>
+</s:if>
 
-<jsp:element name="li">
-  <jsp:attribute name="class">
-    <s:if test="#uri.startsWith(#contextPath + '/p/Research')">current</s:if>
-  </jsp:attribute>
-  <a href="${pageContext.request.contextPath}/p/Research.action">Research</a>
-</jsp:element>
+<s:if test="!properties.getProperty('hide_research_tab')">
+    <jsp:element name="li">
+      <jsp:attribute name="class">
+      <s:if test="#uri.startsWith(#contextPath + '/p/Research')">current</s:if>
+    </jsp:attribute>
+    <a href="${pageContext.request.contextPath}/p/Research.action">Research</a>
+  </jsp:element>
+</s:if>
 
+<s:if test="!properties.getProperty('hide_contact_us_tab')">
 <jsp:element name="li">
-  <jsp:attribute name="class">
-    <s:if test="#uri.startsWith(#contextPath + '/p/ContactUs')">current</s:if>
-  </jsp:attribute>
-  <a href="${pageContext.request.contextPath}/p/ContactUs.action">Contact Us</a>
-</jsp:element>
+    <jsp:attribute name="class">
+      <s:if test="#uri.startsWith(#contextPath + '/p/ContactUs')">current</s:if>
+    </jsp:attribute>
+    <a href="${pageContext.request.contextPath}/p/ContactUs.action">Contact Us</a>
+  </jsp:element>
+</s:if>
 
-<jsp:element name="li">
-  <jsp:attribute name="class">
-    <s:if test="#uri.startsWith(#contextPath + '/user')">current</s:if>
-  </jsp:attribute>
-  <a href="${pageContext.request.contextPath}/user/index.action">Settings</a>
-</jsp:element>
+<s:if test="!properties.getProperty('hide_settings_tab')">
+  <jsp:element name="li">
+    <jsp:attribute name="class">
+      <s:if test="#uri.startsWith(#contextPath + '/user')">current</s:if>
+    </jsp:attribute>
+    <a href="${pageContext.request.contextPath}/user/index.action">Settings</a>
+  </jsp:element>
+</s:if>
 
 </ul>
 
 <a id="headerTitle" href="${pageContext.request.contextPath}/">OneBusAway</a>
-
 </div>
 
 <decorator:body />
-  
+<div id="version" style="font-size:14px;color:darkgray;position:absolute;right:2em">
+	<s:property value="properties.getProperty('git.commit.id.describe')" />
 </div>
+</div>
+
 </div>
 
 <div id="feedback">
@@ -98,15 +111,14 @@
 
 <!-- Google Analytics -->
 <script type="text/javascript">
-var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
-document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+	var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+	document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
 </script>
 <script type="text/javascript">
-var pageTracker = _gat._getTracker("UA-2423527-7");
+	var pageTracker = _gat._getTracker("${oba:configValue('tracker')}");
 pageTracker._initData();
 pageTracker._trackPageview();
 </script>
-
 </body>
-	
+
 </jsp:root>

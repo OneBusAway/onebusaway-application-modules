@@ -33,6 +33,8 @@ public class ReportProblemWithStopAction extends ApiActionSupport {
 
   private static final long serialVersionUID = 1L;
 
+  private static final int V2 = 2;
+
   @Autowired
   private TransitDataService _service;
 
@@ -43,12 +45,16 @@ public class ReportProblemWithStopAction extends ApiActionSupport {
   }
 
   @RequiredStringValidator(message = "requiredField.stopId")
-  public void setStopId(String stopId) {
+  public void setId(String stopId) {
     _model.setStopId(stopId);
   }
 
-  public String getStopId() {
+  public String getId() {
     return _model.getStopId();
+  }
+  
+  public void setStopId(String stopId) {
+    setId(stopId);
   }
 
   @Deprecated
@@ -79,6 +85,10 @@ public class ReportProblemWithStopAction extends ApiActionSupport {
     _model.setUserLocationAccuracy(userLocationAccuracy);
   }
 
+  public DefaultHttpHeaders show() throws IOException, ServiceException {   
+    return index();
+  }
+
   public DefaultHttpHeaders create() throws IOException, ServiceException {
     return index();
   }
@@ -87,6 +97,9 @@ public class ReportProblemWithStopAction extends ApiActionSupport {
 
     if (hasErrors())
       return setValidationErrorsResponse();
+
+    if( ! isVersion(V2))
+      return setUnknownVersionResponse();
 
     _model.setTime(System.currentTimeMillis());
     _model.setStatus(EProblemReportStatus.NEW);

@@ -1,0 +1,330 @@
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>org.onebusaway</groupId>
+		<artifactId>onebusaway-application-modules</artifactId>
+		<version>1.1.16-SNAPSHOT</version>
+	</parent>
+	<artifactId>onebusaway-enterprise-webapp</artifactId>
+	<packaging>war</packaging>
+
+	<name>onebusaway-enterprise-webapp</name>
+
+	<properties>
+		<jetty.version>6.1.26</jetty.version>
+		<xwiki.integration.version>0.0.2</xwiki.integration.version>
+	</properties>
+
+
+	<repositories>
+		<!-- Required for the xwiki-rendering-macros -->
+		<repository>
+			<id>xwiki</id>
+			<url>http://maven.xwiki.org/releases</url>
+		</repository>
+	</repositories>
+
+
+	<dependencies>
+
+		<!-- OneBusAway Dependencies -->
+		<dependency>
+			<groupId>org.onebusaway</groupId>
+			<artifactId>onebusaway-presentation</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.onebusaway</groupId>
+			<artifactId>onebusaway-transit-data</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.onebusaway</groupId>
+			<artifactId>onebusaway-realtime-api</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.onebusaway</groupId>
+			<artifactId>onebusaway-util</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.onebusaway</groupId>
+			<artifactId>onebusaway-geocoder</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>commons-beanutils</groupId>
+			<artifactId>commons-beanutils</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.onebusaway</groupId>
+			<artifactId>onebusaway-wiki-integration-tags</artifactId>
+			<version>${xwiki.integration.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.onebusaway</groupId>
+			<artifactId>onebusaway-wiki-integration-xwiki-impl</artifactId>
+			<version>${xwiki.integration.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.onebusaway</groupId>
+			<artifactId>onebusaway-wiki-integration-xwiki-struts-macros</artifactId>
+			<version>${xwiki.integration.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.onebusaway</groupId>
+			<artifactId>onebusaway-wiki-integration-xwiki-macros</artifactId>
+			<version>${xwiki.integration.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.thoughtworks.xstream</groupId>
+			<artifactId>xstream</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>com.google.code.gson</groupId>
+			<artifactId>gson</artifactId>
+			<version>1.7.1</version>
+		</dependency>
+
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>jsp-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>jstl</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>taglibs</groupId>
+			<artifactId>standard</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.dmurph</groupId>
+			<artifactId>JGoogleAnalyticsTracker</artifactId>
+			<version>1.2.2</version>
+		</dependency>
+
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-all</artifactId>
+			<version>1.9.0-rc1</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.tuckey</groupId>
+			<artifactId>urlrewritefilter</artifactId>
+			<version>3.2.0</version>
+			<type>jar</type>
+			<scope>compile</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-log4j12</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>log4j</groupId>
+			<artifactId>apache-log4j-extras</artifactId>
+			<version>1.1</version>
+		</dependency>
+
+		<!-- for amazon deployment -->
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<version>5.1.17</version>
+		</dependency>
+
+	</dependencies>
+
+	<profiles>
+		<profile>
+			<id>cloud</id> <!-- aka services-dev --> <!-- aka staging, production -->
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<properties>
+				<tds.path>http://localhost:8080/onebusaway-transit-data-federation-webapp</tds.path>
+				<vtms.path>http://localhost:8080/onebusaway-transit-data-federation-webapp</vtms.path>
+				<config.path>http://localhost:8080/onebusaway-transit-data-federation-webapp</config.path>
+				<webapp.api.url />
+				<tdm.host>tdm.dev.obanyc.com</tdm.host>
+				<log4j.appender>ROLL</log4j.appender>
+				<create-apikey>false</create-apikey>
+				<siri.cache.disabled>false</siri.cache.disabled>
+			</properties>
+		</profile>
+		<profile>
+			<id>local-front-end</id>
+			<properties>
+				<tds.path>http://localhost:8080/onebusaway-transit-data-federation-webapp</tds.path>
+				<vtms.path>http://localhost:8080/onebusaway-transit-data-federation-webapp</vtms.path>
+				<config.path>http://localhost:8080/onebusaway-transit-data-federation-webapp</config.path>
+				<archive.path>http://localhost:8080/onebusaway-report-archive</archive.path>
+				<tdm.host>tdm.dev.obanyc.com</tdm.host>
+				<webapp.api.url />
+				<log4j.appender>stdout</log4j.appender>
+				<create-apikey>true</create-apikey>
+				<siri.cache.disabled>false</siri.cache.disabled>
+			</properties>
+		</profile>
+		<profile>
+			<id>local-single-port</id><!-- aka services-tdf-as-tds --> <!-- aka staging, production -->
+			<properties>
+				<tds.path>http://localhost:8080/onebusaway-transit-data-federation-webapp</tds.path>
+				<vtms.path>http://localhost:8080/onebusaway-transit-data-federation-webapp</vtms.path>
+				<config.path>http://localhost:8080/onebusaway-transit-data-federation-webapp</config.path>
+				<archive.path>http://localhost:8080/onebusaway-nyc-report-archive</archive.path>
+				<tdm.host>tdm.dev.obanyc.com</tdm.host>
+				<webapp.api.url />
+				<log4j.appender>stdout</log4j.appender>
+				<create-apikey>true</create-apikey>
+				<siri.cache.disabled>false</siri.cache.disabled>
+			</properties>
+		</profile>
+		<profile>
+			<!-- Vehicle tracking webapp offers the TDS -->
+			<id>local-ie</id> <!-- aka services-vtw-as-tds --> <!-- single port, aka development -->
+			<properties>
+				<tds.path>http://localhost:9905/onebusaway-nyc-vehicle-tracking-webapp</tds.path>
+				<vtms.path>http://localhost:9905/onebusaway-nyc-vehicle-tracking-webapp</vtms.path>
+				<config.path>http://localhost:9905/onebusaway-nyc-vehicle-tracking-webapp</config.path>
+				<archive.path>http://localhost:9090/onebusaway-nyc-report-archive</archive.path>
+				<tdm.host>tdm.dev.obanyc.com</tdm.host>
+				<webapp.api.url>http://localhost:8080</webapp.api.url>
+				<log4j.appender>stdout</log4j.appender>
+				<create-apikey>true</create-apikey>
+				<siri.cache.disabled>true</siri.cache.disabled>
+			</properties>
+		</profile>
+		<profile>
+			<id>local-multi-port</id> <!-- services-vtw-as-tds-multiport --><!-- multi port, also for development -->
+			<!-- assumes we're running on 8080, and vtw and api are on different ports -->
+			<properties>
+				<tds.path>http://localhost:8081/onebusaway-nyc-vehicle-tracking-webapp</tds.path>
+				<vtms.path>http://localhost:8081/onebusaway-nyc-vehicle-tracking-webapp</vtms.path>
+				<config.path>http://localhost:8081/onebusaway-nyc-vehicle-tracking-webapp</config.path>
+				<archive.path>http://localhost:8081/onebusaway-nyc-report-archive</archive.path>
+				<tdm.host>tdm.dev.obanyc.com</tdm.host>
+				<webapp.api.url>http://localhost:8082</webapp.api.url>
+				<log4j.appender>stdout</log4j.appender>
+				<create-apikey>true</create-apikey>
+				<siri.cache.disabled>false</siri.cache.disabled>
+			</properties>
+		</profile>
+	</profiles>
+
+	<build>
+		<finalName>onebusaway-enterprise-webapp</finalName>
+		<plugins>
+			<plugin>
+				<groupId>pl.project13.maven</groupId>
+				<artifactId>git-commit-id-plugin</artifactId>
+				<version>2.1.2</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>revision</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<prefix>git</prefix>
+					<dateFormat>dd.MM.yyyy '@' HH:mm:ss z</dateFormat>
+					<verbose>true</verbose>
+					<skipPoms>false</skipPoms>
+					<generateGitPropertiesFile>false</generateGitPropertiesFile>
+					<generateGitPropertiesFilename>src/main/resources/git.properties</generateGitPropertiesFilename>
+					<gitDescribe>
+						<skip>false</skip>
+						<always>true</always>
+						<abbrev>7</abbrev>
+						<dirty>-dirty</dirty>
+						<forceLongFormat>false</forceLongFormat>
+					</gitDescribe>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.mortbay.jetty</groupId>
+				<artifactId>maven-jetty-plugin</artifactId>
+				<version>${jetty.version}</version>
+				<configuration>
+					<contextPath>/</contextPath>
+				</configuration>
+			</plugin>
+		</plugins>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
+				<includes>
+					<include>**/*.properties</include>
+					<include>**/*.xml</include>
+				</includes>
+			</resource>
+		</resources>
+		<pluginManagement>
+			<plugins>
+				<!-- This tells eclipse to when to execute the git-commit plugin -->
+				<plugin>
+					<groupId>org.eclipse.m2e</groupId>
+					<artifactId>lifecycle-mapping</artifactId>
+					<version>1.0.0</version>
+					<configuration>
+						<lifecycleMappingMetadata>
+							<pluginExecutions>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>
+											pl.project13.maven
+										</groupId>
+										<artifactId>
+											git-commit-id-plugin
+										</artifactId>
+										<versionRange>
+											[2.1.2,)
+										</versionRange>
+										<goals>
+											<goal>revision</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<execute>
+											<runOnIncremental>true</runOnIncremental>
+											<runOnConfiguration>true</runOnConfiguration>
+										</execute>
+									</action>
+								</pluginExecution>
+							</pluginExecutions>
+						</lifecycleMappingMetadata>
+					</configuration>
+				</plugin>
+				<plugin>
+				<groupId>com.mycila.maven-license-plugin</groupId>
+				<artifactId>maven-license-plugin</artifactId>
+				<configuration>
+					<excludes combine.children="append">
+						<exclude>**/onebusaway/enterprise/webapp/**</exclude>
+						<exclude>src/main/webapp/**</exclude>
+						<exclude>src/main/resources/**</exclude>
+						<exclude>resources/**</exclude>
+					</excludes>
+				</configuration>
+			</plugin>
+			</plugins>
+		</pluginManagement>
+	</build>
+
+</project>

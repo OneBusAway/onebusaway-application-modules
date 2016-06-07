@@ -85,9 +85,8 @@ public class RealTimeHistoryServiceImpl implements RealTimeHistoryService {
       BlockInstance instance, VehicleLocationRecord record,
       ScheduledBlockLocation scheduledBlockLocation) {
     
-    if( true )
-      return null;
-
+	if (scheduledBlockLocation == null) 
+	  return null;
     BlockTripEntry blockTrip = scheduledBlockLocation.getActiveTrip();
     TripEntry trip = blockTrip.getTrip();
 
