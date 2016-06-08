@@ -22,6 +22,7 @@ import org.onebusaway.collections.Min;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.realtime.api.TimepointPredictionRecord;
 import org.onebusaway.transit_data.model.TimeIntervalBean;
+import org.onebusaway.transit_data.model.TransitDataConstants;
 import org.onebusaway.transit_data_federation.model.StopTimeInstance;
 import org.onebusaway.transit_data_federation.model.TargetTime;
 import org.onebusaway.transit_data_federation.services.ArrivalAndDepartureQuery;
@@ -490,6 +491,10 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
     return Collections.max(instances, cmp);
   }
 
+  /*
+   * here we map realtime on top of schedule and also filter
+   * out canceled trips.
+   */
   private void applyRealTimeToStopTimeInstance(StopTimeInstance sti,
       TargetTime targetTime, long fromTime, long toTime,
       long frequencyOffsetTime, BlockInstance blockInstance,
@@ -501,6 +506,9 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
       if (sti.isFrequencyOffsetSpecified()
           && ((blockInstance.getBlock().getDepartureTimeForIndex(0)
               + sti.getFrequencyOffset()) != location.getBlockStartTime())) {
+        continue;
+      }
+      if (TransitDataConstants.STATUS_CANCELED.equals(location.getStatus())) {
         continue;
       }
 
@@ -551,6 +559,9 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
 
     if (instance == null) return;
     instance.setBlockLocation(blockLocation);
+    
+    //xxxxx
+    
 
     boolean success = setPredictedTimesFromTimepointPredictionRecords(instance,
         blockLocation, targetTime);

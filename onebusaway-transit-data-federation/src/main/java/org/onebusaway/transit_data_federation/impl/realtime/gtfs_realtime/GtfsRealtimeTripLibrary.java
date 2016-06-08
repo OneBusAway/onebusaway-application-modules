@@ -359,6 +359,7 @@ class GtfsRealtimeTripLibrary {
     if (update.block == null) return null;
     String vehicleId = update.block.getVehicleId();
     record.setBlockId(blockDescriptor.getBlockInstance().getBlock().getBlock().getId());
+    record.setStatus(blockDescriptor.getScheduleRelationship().toString());
 
     applyTripUpdatesToRecord(result, blockDescriptor, update.tripUpdates, record, vehicleId);
 
@@ -476,6 +477,9 @@ class GtfsRealtimeTripLibrary {
     BlockDescriptor blockDescriptor = new BlockDescriptor();
     blockDescriptor.setBlockInstance(instance);
     blockDescriptor.setStartDate(serviceDate);
+    if (trip.hasScheduleRelationship()) {
+      blockDescriptor.setScheduleRelationshipValue(trip.getScheduleRelationship().toString());
+    }
     int tripStartTime = 0;
     int blockStartTime = 0;
     if (trip.hasStartTime() && !"0".equals(trip.getStartTime())) {

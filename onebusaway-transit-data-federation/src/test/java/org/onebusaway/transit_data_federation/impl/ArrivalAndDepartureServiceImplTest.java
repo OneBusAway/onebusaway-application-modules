@@ -16,7 +16,7 @@
 package org.onebusaway.transit_data_federation.impl;
 
 import static org.junit.Assert.assertEquals;
-
+import static org.junit.Assert.assertNotNull;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.block;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.blockConfiguration;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.dateAsLong;
@@ -30,6 +30,7 @@ import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.realtime.api.TimepointPredictionRecord;
 import org.onebusaway.realtime.api.VehicleLocationRecord;
+import org.onebusaway.transit_data.model.TransitDataConstants;
 import org.onebusaway.transit_data_federation.impl.blocks.BlockStatusServiceImpl;
 import org.onebusaway.transit_data_federation.impl.blocks.ScheduledBlockLocationServiceImpl;
 import org.onebusaway.transit_data_federation.impl.realtime.BlockLocationServiceImpl;
@@ -49,7 +50,6 @@ import org.onebusaway.transit_data_federation.services.realtime.BlockLocation;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -312,6 +312,9 @@ public class ArrivalAndDepartureServiceImplTest {
      * deviation per stop. When this is correctly implemented, the below
      * assertion should be uncommented and it should pass.
      */
+    /*
+     * TODO: for backward compatiability we did not implement this.  Discuss!
+     */
     // assertEquals(0, predictedArrivalTimeStopA);
 
     /**
@@ -406,30 +409,15 @@ public class ArrivalAndDepartureServiceImplTest {
         predictedDepartureTimeStopA);
 
     /**
-     * FIXME - Fully support both real-time arrival and departure times for each
-     * stop in OBA
-     * 
-     * We're currently limited by OBA's internal data model which contains only
-     * one deviation per stop. By GTFS-rt spec, if real-time arrival information
-     * is given for a stop, then it should be used. In our case we expect to get
-     * 13:20 as predictedArrivalTime, as this is the predicted arrival time
-     * supplied in the real-time feed. However, we are getting 13:25 as
-     * predictedArrivalTime, which is actually the predictedDepartureTime for
-     * this stop. This is because OBA must prefer predicted departure times to
-     * arrival times when only one deviation per stop is supported, as the
-     * departure times are what should be propagated downstream.
-     * 
-     * So, the below assertion is currently commented out, as it fails. Future
-     * work should overhaul OBA's data model to support more than one real-time
-     * deviation per stop. When this is correctly implemented, the below
-     * assertion should be uncommented and it should pass.
+     * OBA's data model now supports more than one real-time
+     * deviation per stop. 
      */
 
-    // long predictedArrivalTimeStopA = getPredictedArrivalTimeByStopId(
-    // arrivalsAndDepartures, stopA.getId());
-    //
-    // assertEquals(TimeUnit.MILLISECONDS.toSeconds(tprA.getTimepointPredictedArrivalTime()),
-    // TimeUnit.MILLISECONDS.toSeconds(predictedArrivalTimeStopA));
+     long predictedArrivalTimeStopA = getPredictedArrivalTimeByStopId(
+     arrivalsAndDepartures, mStopA.getId());
+    
+     assertEquals(TimeUnit.MILLISECONDS.toSeconds(tprA.getTimepointPredictedArrivalTime()),
+     TimeUnit.MILLISECONDS.toSeconds(predictedArrivalTimeStopA));
 
     /**
      * Test for Stop B
@@ -1640,6 +1628,26 @@ public class ArrivalAndDepartureServiceImplTest {
     
   }
   
+  
+  /**
+   * This method tests trip update CANCELED support
+   * 
+   * Test configuration: Trip for stopA and stopB is cancelled. There should be no arrivals and departures returned 
+   * from the API!
+   */
+  @Test
+  public void testGetArrivalsAndDeparturesForStopInTimeRange18() {
+
+    // Call ArrivalsAndDeparturesForStopInTimeRange method in
+    // ArrivalAndDepartureServiceImpl
+    List<ArrivalAndDepartureInstance> arrivalsAndDepartures = getArrivalsAndDeparturesForStopInTimeRangeForCancelledTrip();
+
+    assertNotNull(arrivalsAndDepartures);
+    assertEquals(0, arrivalsAndDepartures.size());
+    
+  }
+
+  
   /**
    * Set up the BlockLocationServiceImpl for the test, using the given
    * timepointPredictions
@@ -1736,6 +1744,103 @@ public class ArrivalAndDepartureServiceImplTest {
     return _service.getArrivalsAndDeparturesForStopInTimeRange(mStopB, target,
         stopTimeFrom, stopTimeTo);
   }
+  /**
+   * Set up the BlockLocationServiceImpl for the test, using the given
+   * timepointPredictions
+   * 
+   * This method creates a normal route with a single trip and two stops in a block
+   * 
+   * stop_id     trip_id    stop_sequence
+   *    A           1             0
+   *    B           1             1
+   * 
+   * @param timepointPredictions real-time predictions to apply to the
+   *          BlockLocationServiceImpl
+   * @return a list of ArrivalAndDepartureInstances which is used to access
+   *         predicted arrival/departure times for a stop, for comparison
+   *         against the expected values
+   */
+  private List<ArrivalAndDepartureInstance> getArrivalsAndDeparturesForStopInTimeRangeForCancelledTrip() {
+    TargetTime target = new TargetTime(mCurrentTime, mCurrentTime);
+
+    // Setup block
+    BlockEntryImpl block = block("blockA");
+
+    stopTime(0, mStopA, mTrip1, time(13, 30), time(13, 35), 1000);
+    stopTime(1, mStopB, mTrip1, time(13, 45), time(13, 50), 2000);
+
+    BlockConfigurationEntry blockConfig = blockConfiguration(block,
+        serviceIds(lsids("sA"), lsids()), mTrip1);
+    BlockStopTimeEntry bstAA = blockConfig.getStopTimes().get(0);
+    BlockStopTimeEntry bstAB = blockConfig.getStopTimes().get(1);
+    BlockStopTimeEntry bstBA = blockConfig.getStopTimes().get(0);
+
+    // Setup block location instance for trip B
+    BlockInstance blockInstance = new BlockInstance(blockConfig, mServiceDate);
+    BlockLocation blockLocationB = new BlockLocation();
+    blockLocationB.setActiveTrip(bstBA.getTrip());
+    blockLocationB.setBlockInstance(blockInstance);
+    blockLocationB.setClosestStop(bstBA);
+    blockLocationB.setDistanceAlongBlock(400);
+    blockLocationB.setInService(true);
+    blockLocationB.setNextStop(bstAA);
+    blockLocationB.setPredicted(false);
+    blockLocationB.setScheduledDistanceAlongBlock(400);
+
+
+    // Mock StopTimeInstance with time frame
+    long stopTimeFrom = dateAsLong("2015-07-23 00:00");
+    long stopTimeTo = dateAsLong("2015-07-24 00:00");
+
+    StopTimeInstance sti1 = new StopTimeInstance(bstAB,
+        blockInstance.getState());
+    ArrivalAndDepartureInstance in1 = new ArrivalAndDepartureInstance(sti1);
+    in1.setBlockLocation(blockLocationB);
+    in1.setPredictedArrivalTime((long) (in1.getScheduledArrivalTime()));
+    in1.setPredictedDepartureTime((long) (in1.getScheduledDepartureTime()));
+
+    StopTimeInstance sti2 = new StopTimeInstance(bstBA,
+        blockInstance.getState());
+    ArrivalAndDepartureInstance in2 = new ArrivalAndDepartureInstance(sti2);
+    in2.setBlockLocation(blockLocationB);
+
+    Date fromTimeBuffered = new Date(stopTimeFrom
+        - _blockStatusService.getRunningLateWindow() * 1000);
+    Date toTimeBuffered = new Date(stopTimeTo
+        + _blockStatusService.getRunningEarlyWindow() * 1000);
+
+    Mockito.when(
+        _stopTimeService.getStopTimeInstancesInTimeRange(mStopB,
+            fromTimeBuffered, toTimeBuffered,
+            EFrequencyStopTimeBehavior.INCLUDE_UNSPECIFIED)).thenReturn(
+        Arrays.asList(sti1, sti2));
+
+    // Create and add vehicle location record cache
+    VehicleLocationRecordCacheImpl _cache = new VehicleLocationRecordCacheImpl();
+    VehicleLocationRecord vlr = new VehicleLocationRecord();
+    vlr.setBlockId(blockLocationB.getBlockInstance().getBlock().getBlock().getId());
+    vlr.setTripId(mTrip1.getId());
+    vlr.setTimepointPredictions(blockLocationB.getTimepointPredictions());
+    vlr.setTimeOfRecord(mCurrentTime);
+    vlr.setVehicleId(new AgencyAndId("1", "123"));
+    vlr.setStatus(TransitDataConstants.STATUS_CANCELED);
+
+    // Create ScheduledBlockLocation for cache
+    ScheduledBlockLocation sbl = new ScheduledBlockLocation();
+    sbl.setActiveTrip(blockLocationB.getActiveTrip());
+
+    // Add data to cache
+    _cache.addRecord(blockInstance, vlr, sbl, null);
+    _blockLocationService.setVehicleLocationRecordCache(_cache);
+    ScheduledBlockLocationServiceImpl scheduledBlockLocationServiceImpl = new ScheduledBlockLocationServiceImpl();
+    _blockLocationService.setScheduledBlockLocationService(scheduledBlockLocationServiceImpl);
+
+    // Call ArrivalAndDepartureService
+    return _service.getArrivalsAndDeparturesForStopInTimeRange(mStopB, target,
+        stopTimeFrom, stopTimeTo);
+  }
+
+  
   
   /**
    * Set up the BlockLocationServiceImpl for the test, using the given

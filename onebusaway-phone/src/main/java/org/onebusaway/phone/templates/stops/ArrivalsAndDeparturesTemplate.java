@@ -121,7 +121,7 @@ public class ArrivalsAndDeparturesTemplate extends AbstractAgiTemplate {
         addText(destination);
       }
 
-      if (TransitDataConstants.STATUS_CANCELLED.equals(adb.getStatus())) {
+      if (TransitDataConstants.STATUS_LEGACY_CANCELLED.equalsIgnoreCase(adb.getStatus())) {
         addText("is currently not in service");
         continue;
       }
