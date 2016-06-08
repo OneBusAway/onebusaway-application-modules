@@ -336,6 +336,20 @@
 				<bundle.deployPath>/var/lib/oba/bundles/active</bundle.deployPath>
 				<tdm.host>tdm</tdm.host><!-- assumes domain is set -->
 				<log4j.appender>ROLL</log4j.appender>
+				<log4j.priority>info</log4j.priority>
+			</properties>
+		</profile>
+		<profile>
+			<id>travis</id>
+			<properties>
+				<tds.path>http://localhost:8080/onebusaway-transit-data-federation-webapp</tds.path>
+				<vtms.path>http://localhost:8080/onebusaway-transit-data-federation-webapp</vtms.path>
+				<bundle.builtPath>/var/lib/oba/bundles/builder</bundle.builtPath>
+				<bundle.stagedPath>/var/lib/oba/bundles/staged</bundle.stagedPath>
+				<bundle.deployPath>/var/lib/oba/bundles/active</bundle.deployPath>
+				<tdm.host>tdm</tdm.host><!-- assumes domain is set -->
+				<log4j.appender>ROLL</log4j.appender>
+				<log4j.priority>error</log4j.priority>
 			</properties>
 		</profile>
 	</profiles>

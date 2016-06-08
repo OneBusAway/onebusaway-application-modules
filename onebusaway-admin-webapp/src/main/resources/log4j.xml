@@ -31,7 +31,7 @@
 	<!-- 0 or 1 root elements -->
 
 	<root>
-		<priority value="info" />
+		<priority value="${log4j.priority}" />
 		<appender-ref ref="${log4j.appender}" />
 	</root>
 
