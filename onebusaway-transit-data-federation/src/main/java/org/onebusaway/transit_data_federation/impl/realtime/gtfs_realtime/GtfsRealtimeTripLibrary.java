@@ -757,7 +757,7 @@ class GtfsRealtimeTripLibrary {
       VehicleLocationRecord record) {
     Position position = vehiclePosition.getPosition();
     if (vehiclePosition.hasTimestamp()) {
-      record.setTimeOfLocationUpdate(vehiclePosition.getTimestamp());
+      record.setTimeOfLocationUpdate(vehiclePosition.getTimestamp() * 1000); //vehicle timestamp is in seconds
     }
     record.setCurrentLocationLat(position.getLatitude());
     record.setCurrentLocationLon(position.getLongitude());
