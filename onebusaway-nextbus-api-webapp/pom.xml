@@ -151,12 +151,10 @@
 		<dependency>
 			<groupId>com.brsanthu</groupId>
 			<artifactId>google-analytics-java</artifactId>
-			<version>1.1.2</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpclient</artifactId>
-			<version>4.3.5</version>
 		</dependency>
 		<dependency>
 			<groupId>com.google.code.gson</groupId>
@@ -176,7 +174,7 @@
 			<plugin>
 				<groupId>pl.project13.maven</groupId>
 				<artifactId>git-commit-id-plugin</artifactId>
-				<version>2.1.15</version>
+				<version>2.2.1</version>
 				<executions>
 					<execution>
 						<goals>
@@ -191,6 +189,9 @@
 					<skipPoms>false</skipPoms>
 					<generateGitPropertiesFile>true</generateGitPropertiesFile>
 					<generateGitPropertiesFilename>src/main/resources/git.properties</generateGitPropertiesFilename>
+					<!--  travis takes some shortcuts with git so we need to tell the plugin to ignore git errors -->
+					<failOnUnableToExtractRepoInfo>false</failOnUnableToExtractRepoInfo>
+					<failOnNoGitDirectory>false</failOnNoGitDirectory>					
 					<gitDescribe>
 						<skip>false</skip>
 						<always>true</always>

@@ -82,27 +82,6 @@
 		</property>
 	</bean>
 
-	<!-- look up these values from web.xml/context.xml as they change per environment -->
-	<jee:jndi-lookup id="xwikiUrlBean" jndi-name="java:comp/env/xwikiUrl"
-		resource-ref="true"></jee:jndi-lookup>
-	<jee:jndi-lookup id="xwikiDocumentEditUrlBean"
-		jndi-name="java:comp/env/wikiDocumentEditUrl" resource-ref="true"></jee:jndi-lookup>
-	<jee:jndi-lookup id="xwikiAttachmentUrlBean" jndi-name="java:comp/env/wikiAttachmentUrl"
-		resource-ref="true"></jee:jndi-lookup>
-
-	<bean id="wikiDocumentService" class="org.onebusaway.wiki.xwiki.impl.XWikiDocumentServiceImpl"
-		lazy-init="true">
-		<property name="xwikiUrl" ref="xwikiUrlBean" />
-	</bean>
-
-	<bean id="wikiRenderingService"
-		class="org.onebusaway.wiki.xwiki.impl.XWikiRenderingServiceImpl"
-		lazy-init="true">
-		<property name="wikiDocumentViewUrl" value="/wiki/%{documentName}" />
-		<property name="wikiDocumentEditUrl" ref="xwikiDocumentEditUrlBean" />
-		<property name="wikiAttachmentUrl" ref="xwikiAttachmentUrlBean" />
-	</bean>
-
 	<bean id="siriCacheService"
 		class="org.onebusaway.presentation.services.cachecontrol.SiriCacheServiceImpl">
 		<property name="disabled" value="${siri.cache.disabled}" />

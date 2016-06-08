@@ -105,7 +105,7 @@ size.
 
 ## Methods
 
-The current list of supported API methods.  Methods that are subject to changed are marked <font color="red">BETA</font>.
+The current list of supported API methods.  Methods that are subject to changed are marked <font color="red">BETA</font>.  Methods that have a ~~strikethrough~~ are deprecated and no longer supported.
 
 * [agencies-with-coverage](methods/agencies-with-coverage.html) - list all supported agencies along with the center of their coverage area
 * [agency](methods/agency.html) - get details for a specific agency

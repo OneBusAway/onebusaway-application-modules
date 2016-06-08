@@ -274,13 +274,17 @@
 					<groupId>org.codehaus.jackson</groupId>
 					<artifactId>jackson-mapper-asl</artifactId>
 				</exclusion>
+				<exclusion>
+					<groupId>commons-logging</groupId>
+					<artifactId>commons-logging</artifactId>
+				</exclusion>
 			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>commons-logging</groupId>
 			<artifactId>commons-logging</artifactId>
-			<version>1.1.1</version>
-		</dependency>
+			<version>1.1.2</version>
+		</dependency>	
 		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>servlet-api</artifactId>
@@ -297,8 +301,6 @@
 		    <artifactId>diffutils</artifactId>
 		    <version>1.2.1</version>
 		</dependency>
-		<!-- dependency> <groupId>org.codehaus.jackson</groupId> <artifactId>jackson-core-asl</artifactId> 
-			<version>1.9.0</version> </dependency -->
 		<dependency>
 			<groupId>org.scala-lang</groupId>
 			<artifactId>scala-library</artifactId>
@@ -324,7 +326,7 @@
 
 	<profiles>
 		<profile>
-			<id>cloud</id> <!-- aka services-dev --> <!-- aka staging, production -->
+			<id>cloud</id> 
 			<activation>
 				<activeByDefault>true</activeByDefault>
 			</activation>
@@ -338,64 +340,6 @@
 				<log4j.appender>ROLL</log4j.appender>
 			</properties>
 		</profile>
-		<profile>
-			<id>local-front-end</id>
-			<properties>
-				<tds.path>http://sms.dev.obanyc.com:8080/onebusaway-nyc-transit-data-federation-webapp</tds.path>
-				<vtms.path>http://sms.dev.obanyc.com:8080/onebusaway-nyc-transit-data-federation-webapp</vtms.path>
-				<tdm.host>tdm.dev.obanyc.com</tdm.host>
-				<log4j.appender>stdout</log4j.appender>
-			</properties>
-		</profile>
-		<profile>
-			<id>local-single-port</id><!-- aka services-tdf-as-tds --> <!-- aka staging, production -->
-			<properties>
-				<tds.path>http://localhost:8080/onebusaway-nyc-transit-data-federation-webapp</tds.path>
-				<vtms.path>http://localhost:8080/onebusaway-nyc-transit-data-federation-webapp</vtms.path>
-				<bundle.builtPath>/var/lib/oba/bundles/builder</bundle.builtPath>
-        <bundle.stagedPath>/var/lib/oba/bundles/staged</bundle.stagedPath>
-        <bundle.deployPath>/var/lib/oba/bundles/active</bundle.deployPath>
-				<tdm.host>tdm.dev.obanyc.com</tdm.host>
-				<log4j.appender>stdout</log4j.appender>
-			</properties>
-		</profile>
-		<profile>
-			<id>local-tdm</id><!-- aka services-tdf-as-tds --> <!-- aka staging, production -->
-			<properties>
-				<tds.path>http://localhost:8080/onebusaway-nyc-transit-data-federation-webapp</tds.path>
-				<vtms.path>http://localhost:8080/onebusaway-nyc-transit-data-federation-webapp</vtms.path>
-				<bundle.builtPath>/var/lib/oba/bundles/builder</bundle.builtPath>
-        <bundle.stagedPath>/var/lib/oba/bundles/staged</bundle.stagedPath>
-        <bundle.deployPath>/var/lib/oba/bundles/active</bundle.deployPath>
-				<tdm.host>localhost:8080/onebusaway-nyc-tdm-webapp</tdm.host>
-				<log4j.appender>stdout</log4j.appender>
-			</properties>
-		</profile>
-		<profile>
-			<!-- Vehicle tracking webapp offers the TDS -->
-			<id>local-ie</id> <!-- aka services-vtw-as-tds --> <!-- single port, aka development -->
-			<properties>
-				<tds.path>http://localhost:8080/onebusaway-nyc-vehicle-tracking-webapp</tds.path>
-				<vtms.path>http://localhost:8080/onebusaway-nyc-vehicle-tracking-webapp</vtms.path>
-				<bundle.builtPath>/var/lib/oba/bundles/builder</bundle.builtPath>
-        <bundle.stagedPath>/var/lib/oba/bundles/staged</bundle.stagedPath>
-        <bundle.deployPath>/var/lib/oba/bundles/active</bundle.deployPath>
-				<tdm.host>tdm.dev.obanyc.com</tdm.host>
-				<log4j.appender>stdout</log4j.appender>
-			</properties>
-		</profile>
-		<profile>
-			<id>local-multi-port</id>
-			<properties>
-				<tds.path>http://localhost:8081/onebusaway-nyc-vehicle-tracking-webapp</tds.path>
-				<vtms.path>http://localhost:8081/onebusaway-nyc-vehicle-tracking-webapp</vtms.path>
-				<bundle.builtPath>/var/lib/oba/bundles/builder</bundle.builtPath>
-        <bundle.stagedPath>/var/lib/oba/bundles/staged</bundle.stagedPath>
-        <bundle.deployPath>/var/lib/oba/bundles/active</bundle.deployPath>
-				<tdm.host>tdm.dev.obanyc.com</tdm.host>
-				<log4j.appender>stdout</log4j.appender>
-			</properties>
-		</profile>
 	</profiles>
 
 	<build>
@@ -404,7 +348,7 @@
 			<plugin>
 				<groupId>pl.project13.maven</groupId>
 				<artifactId>git-commit-id-plugin</artifactId>
-				<version>2.1.2</version>
+				<version>2.2.1</version>
 				<executions>
 					<execution>
 						<goals>
@@ -419,6 +363,9 @@
 					<skipPoms>false</skipPoms>
 					<generateGitPropertiesFile>false</generateGitPropertiesFile>
 					<generateGitPropertiesFilename>src/main/resources/git.properties</generateGitPropertiesFilename>
+					<!--  travis takes some shortcuts with git so we need to tell the plugin to ignore git errors -->
+					<failOnUnableToExtractRepoInfo>false</failOnUnableToExtractRepoInfo>
+					<failOnNoGitDirectory>false</failOnNoGitDirectory>
 					<gitDescribe>
 						<skip>false</skip>
 						<always>true</always>

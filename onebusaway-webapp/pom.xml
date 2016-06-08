@@ -272,7 +272,7 @@
       <plugin>
 		<groupId>pl.project13.maven</groupId>
 		<artifactId>git-commit-id-plugin</artifactId>
-		<version>2.1.15</version>
+		<version>2.2.1</version>
 		<executions>
 		  <execution>
 		    <goals>
@@ -287,6 +287,9 @@
 		  <skipPoms>false</skipPoms>
 		  <generateGitPropertiesFile>true</generateGitPropertiesFile>
 		  <generateGitPropertiesFilename>src/main/resources/git.properties</generateGitPropertiesFilename>
+		  <!--  travis takes some shortcuts with git so we need to tell the plugin to ignore git errors -->
+		  <failOnUnableToExtractRepoInfo>false</failOnUnableToExtractRepoInfo>
+		  <failOnNoGitDirectory>false</failOnNoGitDirectory>		  
 		  <gitDescribe>
 			<skip>false</skip>
 			<always>true</always>
