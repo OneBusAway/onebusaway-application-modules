@@ -319,7 +319,13 @@
                   <groupId>org.mitre.dsmiley.httpproxy</groupId>
                   <artifactId>smiley-http-proxy-servlet</artifactId>
                   <version>1.7</version>
-                </dependency>	
+                </dependency>
+        <!-- http://mvnrepository.com/artifact/joda-time/joda-time -->
+        <dependency>
+            <groupId>joda-time</groupId>
+            <artifactId>joda-time</artifactId>
+            <version>2.9.4</version>
+        </dependency>
 	</dependencies>
 
 	<profiles>

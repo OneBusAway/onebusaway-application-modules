@@ -246,13 +246,19 @@
   </bean>
   <bean id="checkShapes" class="org.onebusaway.transit_data_federation.bundle.tasks.CheckShapeIdTask" />
 
-
   <bean id="task_stats" class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
     <property name="taskName" value="gtfs_statistics" />
     <property name="afterTaskName" value="load_gtfs_post_modifications"/>
     <property name="task" ref="gtfsStatisticsTask" />
   </bean>
   <bean id="gtfsStatisticsTask" class="org.onebusaway.admin.service.bundle.task.GtfsStatisticsTask" />
+
+  <bean id="task_fixed_route_data_validation" class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
+    <property name="taskName" value="fixed_route_data_validation" />
+    <property name="afterTaskName" value="gtfs_statistics"/>
+    <property name="task" ref="fixedRouteDataValidationTask" />
+  </bean>
+  <bean id="fixedRouteDataValidationTask" class="org.onebusaway.admin.service.bundle.task.FixedRouteDataValidationTask" />
 
 
   <!-- End of validation routines -->
