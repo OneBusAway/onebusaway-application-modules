@@ -634,7 +634,7 @@ public class TransitDataServiceTemplateImpl implements TransitDataServiceTemplat
     bounds.addPoint(lat - latSpan, lon - lonSpan);
     bounds.addPoint(lat + latSpan, lon + lonSpan);
     query.setBounds(bounds);
-    
+    query.setMaxCount(Integer.MAX_VALUE);
     return _scheduleHelperService.filterRevenueService(agency.getAgency(), getStops(query));
   }
 
