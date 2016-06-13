@@ -559,9 +559,6 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
 
     if (instance == null) return;
     instance.setBlockLocation(blockLocation);
-    
-    //xxxxx
-    
 
     boolean success = setPredictedTimesFromTimepointPredictionRecords(instance,
         blockLocation, targetTime);
