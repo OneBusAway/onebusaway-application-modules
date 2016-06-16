@@ -389,15 +389,7 @@
 					<contextPath>/</contextPath>
 				</configuration>
 			</plugin>
-		</plugins>
-		<resources>
-			<resource>
-				<directory>src/main/resources</directory>
-				<filtering>true</filtering>
-			</resource>
-		</resources>
-		<pluginManagement>
-			<plugins>
+<!--
 			  <plugin>
 			    <groupId>org.apache.maven.plugins</groupId>
 			    <artifactId>maven-compiler-plugin</artifactId>
@@ -407,22 +399,25 @@
 			      <target>1.7</target>
 			    </configuration>
 			  </plugin>
+-->
+		</plugins>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
+			</resource>
+		</resources>
+		<pluginManagement>
+			<plugins>
       <plugin>
-        <groupId>com.mycila.maven-license-plugin</groupId>
-        <artifactId>maven-license-plugin</artifactId>
+        <groupId>com.mycila</groupId>
+        <artifactId>license-maven-plugin</artifactId>
+        <version>2.11</version>
         <configuration>
           <excludes combine.children="append">
             <!-- JQuery Excludes -->
-            <exclude>**/jquery*.js</exclude>
-            <exclude>**/jquery*.css</exclude>
-            <!-- GWT Excludes -->
-            <exclude>**/*.xml</exclude>
-            <exclude>**/*.jsp</exclude>
-            <exclude>**/*.jspx</exclude>
-            <exclude>**/*.js</exclude>
-            <exclude>**/*.properties</exclude>
-            <exclude>**/*.css</exclude>
-            <exclude>**/BaseLocations.txt</exclude>
+            <exclude>**/jqGrid.js</exclude>
+            <exclude>**/grid.*.js</exclude>
           </excludes>
         </configuration>
       </plugin>
