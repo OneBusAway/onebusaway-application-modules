@@ -149,6 +149,7 @@
 #createDirectory,
 #compareBundles,
 #compareBuilds,
+#compareFixedRouteModes,
 #compareDiff {
   padding-top: 20px;
 }
@@ -566,6 +567,19 @@
 
 #downloadLogs #downloadButton {
   float: left;
+}
+
+#Compare #fixedRouteDiffTable .stopCt {
+	text-align: right;
+	padding-right: 30px;
+}
+
+#Compare #fixedRouteDiffTable .currentRpt {
+	background-color: #9F9;
+}
+
+#Compare #fixedRouteDiffTable .selectedRpt {
+	background-color: #F99;
 }
 
 #downloadLogs #downloadImg {
