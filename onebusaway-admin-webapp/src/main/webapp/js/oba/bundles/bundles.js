@@ -178,11 +178,16 @@ jQuery(function() {
 								}
 								$.each(value2.stopCounts, function(index3, value3) {
 									var stopCt = value3.stopCt;
-									var stopClass = routeClass;
+									var stopClass = "";
+									if (routeClass == "currentRpt") {
+										stopClass = "currentStopCt";
+									} else if (routeClass == "selectedRpt") {
+										stopClass = "selectedStopCt";
+									}
 									if (value3.srcCode == 1) {
-										stopClass = "currentRpt"
+										stopClass = "currentStopCt";
 									} else if (value3.srcCode == 2) {
-										stopClass = "selectedRpt"
+										stopClass = "selectedStopCt";
 									}
 									var weekdayTrips = value3.tripCts[0];
 									var satTrips = value3.tripCts[1];
@@ -191,6 +196,7 @@ jQuery(function() {
 										modeName = "";
 										routeName = "";
 									}
+									//stopClass = "stopCt " + stopClass;
 									var new_row = '<tr class="fixedRouteDiff"> \
 										<td class=' + modeClass + '>' + modeName + '</td> \
 										<td class=' + routeClass + '>' + routeName + '</td> \

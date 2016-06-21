@@ -50,18 +50,35 @@
 			<div class="validateBundle">
 				<p>Validate Transit Data Bundle will read the selected csv file and, based on that, 
 				generate API calls to either the staging or production environment to verify the 
-				validity of the current Transit Data Bundle for that environment.
+				validity of the currently deployed Transit Data Bundle for that environment.
 				</p>
+				<!--
 				<label for="csvFile">Select CSV file: </label>
 				<input type="file" id="csvFile"/>
+				-->
+				 <fieldset>
+					<h3>Select CSV file</h3>
+					<div id="csvOptions">
+						<div>
+							<input name="inputFile" type="radio" value="wiki" checked="checked" class="type" />
+							Wiki
+							<s:textfield id="csvWikiUrl" value="%{wikiUrl}" />
+						</div>
+						<div>
+							<input name="inputFile" type="radio" value="file" class="type" />
+							File
+							<input type="file" id="csvFile"/>
+						</div>
+					</div>
+				</fieldset>
 				<div id="environmentOptions">
 					<input type="radio" name="environmentOptions" value="staging" id="stagingEnv" checked="checked" /> 
 					<label for="stagingEnv" class="horizontalRadio">Staging</label> 
 					<input type="radio" name="environmentOptions" value="prod" id="productionEnv" /> 
 					<label for="productionEnv" class="horizontalRadio">Production</label>
 				</div>
-				<input type="button" disabled="true" id="validateBundleButton" value="Validate Bundle" />
-				<div id="processing" class="testPass" style="display: none;">
+				<input type="button" id="validateBundleButton" value="Validate Bundle" />
+				<div id="processing" class="testPass"  style="display: none;">
 					Processing your request...
 				</div>
 				<div id="resultsDiv">

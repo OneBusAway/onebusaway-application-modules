@@ -15,18 +15,13 @@
  */
 package org.onebusaway.admin.service.impl;
 
-import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.csv.CSVFormat;
@@ -86,23 +81,8 @@ public class BundleCheckParserServiceImpl implements BundleCheckParserService {
   public static final Set<String> validTests = new HashSet<String>(Arrays.asList(TEST_VALUES));
   
   @Override
-  public BundleValidationParseResults parseBundleChecksFile(File uploadedCsvFile) {
+  public BundleValidationParseResults parseBundleChecksFile(Reader csvDataFile) {
     // Create set of valid tests
-/*
-    Set<String> validTests = new HashSet<String>();
-    validTests.add(TEST_ROUTE);
-    validTests.add(TEST_ROUTE_SEARCH);
-    validTests.add(TEST_SCHEDULE);
-    validTests.add(TEST_RT);
-    validTests.add(TEST_SCHEDULE_DATE);
-    validTests.add(TEST_DELETED_ROUTE_SEARCH);
-    validTests.add(TEST_ROUTE_REVISION);
-    validTests.add(TEST_SATURDAY_SCHEDULE);
-    validTests.add(TEST_SUNDAY_SCHEDULE);
-    validTests.add(TEST_EXPRESS_INDICATOR);
-    validTests.add(TEST_STOP_FOR_ROUTE);
-    validTests.add(TEST_NOT_STOP_FOR_ROUTE);
-  */
     List<ParsedBundleValidationCheck> parsedChecks = new ArrayList<ParsedBundleValidationCheck>();
     List<BundleValidationParseError> parseErrors = new ArrayList<BundleValidationParseError> ();
     BundleValidationParseResults parseResults = new BundleValidationParseResults();
@@ -110,17 +90,16 @@ public class BundleCheckParserServiceImpl implements BundleCheckParserService {
     parseResults.setParseErrors(parseErrors);
     
     try {
-      Reader in = new FileReader(uploadedCsvFile);
       int linenum = 0;
-      for (CSVRecord record : CSVFormat.DEFAULT.parse(in)) {
+      for (CSVRecord record : CSVFormat.DEFAULT.parse(csvDataFile)) {
         ++linenum;
         parseResults = parseRecord(record, parseResults);
       }
     }  catch (FileNotFoundException e) {
-      _log.info("Exception parsing csv file " + uploadedCsvFile, e);
+      _log.info("Exception parsing csv file ", e);
       e.printStackTrace();
     } catch (IOException e) {
-      _log.info("Exception parsing csv file " + uploadedCsvFile, e);
+      _log.info("Exception parsing csv file ", e);
       e.printStackTrace();
     }
     return parseResults;

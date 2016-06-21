@@ -61,9 +61,9 @@
 		</div>
 	</div>
 	<div id="compareFixedRouteModes">
-		<label class="adminLabel">Comparison of Fixed Route Modes</label>
 			<div>
 				<table id="fixedRouteDiffTable">
+					<caption>Comparison of Fixed Route Modes</caption>
 					<tr>
 						<th class="modeColumn">Mode</th>
 						<th class="routeColumn">Route</th>
