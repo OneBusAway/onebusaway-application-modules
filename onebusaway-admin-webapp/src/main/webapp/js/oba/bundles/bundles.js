@@ -153,9 +153,61 @@ jQuery(function() {
 					async: false,
 					success: function(data) {
 						$('#diffResult').text('');
-						$.each(data, function(index, value) {
+						$.each(data.diffResults, function(index, value) {
 							$('#diffResult').append(
 									"<div id=\"diffResultItem\">"+value+"</div>");
+						});
+						$.each(data.fixedRouteDiffs, function(index, value) {
+							var modeName = value.modeName;
+							var modeClass = "";
+							if (value.srcCode == 1) {
+								modeClass = "currentRpt"
+							} else if (value.srcCode == 2) {
+								modeClass = "selectedRpt"
+							}
+							$.each(value.routes, function(index2, value2) {
+								var routeName = value2.routeName;
+								if (index2 > 0) {
+									modeName = "";
+								}
+								var routeClass = modeClass;
+								if (value2.srcCode == 1) {
+									routeClass = "currentRpt"
+								} else if (value2.srcCode == 2) {
+									routeClass = "selectedRpt"
+								}
+								$.each(value2.stopCounts, function(index3, value3) {
+									var stopCt = value3.stopCt;
+									var stopClass = "";
+									if (routeClass == "currentRpt") {
+										stopClass = "currentStopCt";
+									} else if (routeClass == "selectedRpt") {
+										stopClass = "selectedStopCt";
+									}
+									if (value3.srcCode == 1) {
+										stopClass = "currentStopCt";
+									} else if (value3.srcCode == 2) {
+										stopClass = "selectedStopCt";
+									}
+									var weekdayTrips = value3.tripCts[0];
+									var satTrips = value3.tripCts[1];
+									var sunTrips = value3.tripCts[2];
+									if (index3 > 0) {
+										modeName = "";
+										routeName = "";
+									}
+									//stopClass = "stopCt " + stopClass;
+									var new_row = '<tr class="fixedRouteDiff"> \
+										<td class=' + modeClass + '>' + modeName + '</td> \
+										<td class=' + routeClass + '>' + routeName + '</td> \
+										<td class=' + stopClass + '>' + stopCt + '</td> \
+										<td class=' + stopClass + '>' + weekdayTrips + '</td> \
+										<td class=' + stopClass + '>' + satTrips + '</td> \
+										<td class=' + stopClass + '>' + sunTrips + '</td> \
+										</tr>';
+									$('#fixedRouteDiffTable').append(new_row);
+								});
+							});
 						});
 					}
 				})

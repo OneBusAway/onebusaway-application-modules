@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2015 Cambridge Systematics, Inc.
+ * Copyright (C) 2016 Cambridge Systematics, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,16 +15,18 @@
  */
 package org.onebusaway.admin.service;
 
-import java.io.Reader;
-import org.onebusaway.admin.model.BundleValidationParseResults;
+import java.io.File;
+import java.util.List;
+
+import org.onebusaway.admin.model.ui.DataValidationMode;
 
 /**
- * Provides a service to parse a file containing bundle validation checks used
- * to establish the validity of a transit data bundle.  Specific implementations
- * could parse data from different file formats, such as .csv or .xlsx.
+ * Provides a service to parse a file containing a FixedRouteDataValidation
+ * report in a .csv format and return the parsed results.
+ *
  * @author jpearson
  *
  */
-public interface BundleCheckParserService {
-  public BundleValidationParseResults parseBundleChecksFile(Reader csvDataFile);
+public interface FixedRouteParserService {
+  public List<DataValidationMode> parseFixedRouteReportFile(File checkFile);
 }

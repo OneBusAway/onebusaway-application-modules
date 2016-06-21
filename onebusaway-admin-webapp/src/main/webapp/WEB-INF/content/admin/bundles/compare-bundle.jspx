@@ -60,4 +60,20 @@
 			<!--  space -->
 		</div>
 	</div>
+	<div id="compareFixedRouteModes">
+			<div>
+				<table id="fixedRouteDiffTable">
+					<caption>Comparison of Fixed Route Modes</caption>
+					<tr>
+						<th class="modeColumn">Mode</th>
+						<th class="routeColumn">Route</th>
+						<th class="stopCtColumn"># of Stops</th>
+						<th class="weekdayTripColumn"># of Weekday trips</th>
+						<th class="satTripsColumn" ># of Sat trips</th>
+						<th class="sunTripsColumn" ># of Sun trips</th>
+					</tr>
+				</table>
+			</div>
+	</div>
 </html>
+
