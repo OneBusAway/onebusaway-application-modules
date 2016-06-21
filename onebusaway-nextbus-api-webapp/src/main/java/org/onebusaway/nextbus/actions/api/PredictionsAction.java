@@ -96,6 +96,10 @@ public class PredictionsAction extends NextBusApiBase implements
   public DefaultHttpHeaders index() {
     return new DefaultHttpHeaders("success");
   }
+  
+  public String execute() {
+	  return SUCCESS;
+  }
 
   public Body<Predictions> getModel() {
 
