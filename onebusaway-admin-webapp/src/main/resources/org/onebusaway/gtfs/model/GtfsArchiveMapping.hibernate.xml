@@ -213,6 +213,15 @@
         <property name="shapeDistTraveled" />
 
     </class>
+    <class name="org.onebusaway.gtfs.model.Block" table="tmp_gtfs_bocks">
+        <id name="id" column="gid" type="int" length="11" unsaved-value="null">
+            <generator class="increment" />
+        </id>
+        <property name="blockSequence" />
+        <property name="blockVariable" />
+        <property name="blockRoute" />
+        <property name="blockRun" />
+	</class>
 
     <class name="org.onebusaway.gtfs.model.Transfer" table="tmp_gtfs_transfers">
         <id name="id" column="gid" type="int" length="11" unsaved-value="null">

@@ -129,4 +129,8 @@ public class FederatedTransitDataBundle {
     return new File(_path, "TripRunData.obj");
   }
   
+  public File getBlockRunDataPath() {
+    return new File(_path, "BlockRunData.obj");
+  }
+  
 }
