@@ -927,6 +927,9 @@ function onAddAnotherAgencyClick(inputType) {
 	  }
 	  metadata += '</select>';
 	  url = agencyMetadata[0].gtfsFeedUrl;
+	  if (url == null) {
+		  url = "";
+	  }
 	  if (url.toLowerCase().startsWith("http") || url.toLowerCase().startsWith("ftp")) {
 	  	var urlValue = ' value="' + url + '"';
 	  }
@@ -1982,13 +1985,12 @@ function getAgencyMetadata(){
 function addUploadFileAgencyDropdown() {
 	console.log("starting addUploadFileAgencyDropdown");
 	agencyDropDown = $('<select class="agencyIdSelect">');
-	jQuery(agencyMetadata).each(function() {
-		//agencyDropDown.append(jQuery("<option>").attr('value',this.legacyId).text(this.shortName));
-		var name = this.name;
+	for (var i = 0; i < agencyMetadata.length; i++) {
+		var name = agencyMetadata[i].name;
 		name += " (";
-		name += this.shortName;
+		name += agencyMetadata[i].shortName;
 		name += ")";
-		agencyDropDown.append(jQuery("<option>").attr('value',this.legacyId).text(name));
-	});
+		agencyDropDown.append(jQuery("<option>").attr('value',agencyMetadata[i].legacyId).text(name));
+	};
 	agencyDropDown.insertBefore("#agencyId");
 }

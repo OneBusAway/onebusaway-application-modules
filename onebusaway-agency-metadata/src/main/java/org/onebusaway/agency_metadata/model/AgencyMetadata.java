@@ -34,14 +34,14 @@ import javax.persistence.Table;
 public class AgencyMetadata {
   
   /* Sound Transit constants */
-  private static final int GTFS_ID_LENGTH = 20;
+  private static final int GTFS_ID_LENGTH = 35;
   private static final int NAME_LENGTH = 40;
   private static final int SHORT_NAME_LENGTH = 10;
-  private static final int LEGACY_ID_LENGTH = 15;
+  private static final int LEGACY_ID_LENGTH = 35;
   private static final int GTFS_FEED_URL_LENGTH = 300;
   private static final int GTFS_RT_FEED_URL_LENGTH = 300;
   private static final int BOUNDING_BOX_LENGTH = 300;
-  private static final int NTD_ID_LENGTH = 4;
+  private static final int NTD_ID_LENGTH = 5;
   
   
   
