@@ -63,6 +63,7 @@ public class GtfsRealtimeTripLibraryTest {
   public void before() {
     _library = new GtfsRealtimeTripLibrary();
     _library.setCurrentTime(8 * 60 * 60 * 1000);
+    _library.setValidateCurrentTime(false);  // tell library its a test
     _entitySource = Mockito.mock(GtfsRealtimeEntitySource.class);
     _library.setEntitySource(_entitySource);
 

@@ -77,6 +77,14 @@ class GtfsRealtimeTripLibrary {
    */
   private long _currentTime = 0;
 
+  private boolean _validateCurrentTime = true;
+  public void setValidateCurrentTime(boolean validate) {
+    _validateCurrentTime = validate;
+  }
+  private boolean validateCurrentTime() {
+    return _validateCurrentTime;
+  }
+
   private StopModificationStrategy _stopModificationStrategy = null;
 
   public void setEntitySource(GtfsRealtimeEntitySource entitySource) {
@@ -788,7 +796,7 @@ class GtfsRealtimeTripLibrary {
   private long currentTime() {
     if (_currentTime != 0) {
       // if the feed clock is off by more than an hour we most likely have a timezone issue
-      if (Math.abs(_currentTime - System.currentTimeMillis()) > 60 * 60 * 1000) {
+      if (validateCurrentTime() && Math.abs(_currentTime - System.currentTimeMillis()) > 60 * 60 * 1000) {
         _log.error("timestamp invalid at " + new Date(_currentTime) + ", overriding with system time");
         _currentTime = System.currentTimeMillis();
       }
