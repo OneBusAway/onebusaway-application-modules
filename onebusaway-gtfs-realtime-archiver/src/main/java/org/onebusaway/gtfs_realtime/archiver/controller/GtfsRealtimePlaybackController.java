@@ -1,3 +1,18 @@
+/**
+ * Copyright (C) 2016 Cambridge Systematics, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.onebusaway.gtfs_realtime.archiver.controller;
 
 import java.io.IOException;
@@ -23,7 +38,7 @@ public class GtfsRealtimePlaybackController {
   GtfsRealtimeRetriever _gtfsRealtimeRetriever;
 
   @Autowired
-  TimeService timeService;
+  TimeService _timeService;
   
   @RequestMapping(value = "/gtfs-realtime/trip-updates")
   public void tripUpdates(ServletRequest request, HttpServletResponse response,
@@ -34,7 +49,7 @@ public class GtfsRealtimePlaybackController {
     
     checkTimeService(session, new Date(end * 1000));
     
-    Date endDate = timeService.getCurrentTime(session);
+    Date endDate = _timeService.getCurrentTime(session);
     Date startDate = new Date((endDate.getTime() - (interval * 1000))); 
         
     FeedMessage tripUpdates = _gtfsRealtimeRetriever.getTripUpdates(startDate, endDate);
@@ -50,7 +65,7 @@ public class GtfsRealtimePlaybackController {
     
     checkTimeService(session, new Date(end * 1000));
     
-    Date endDate = timeService.getCurrentTime(session);
+    Date endDate = _timeService.getCurrentTime(session);
     Date startDate = new Date((endDate.getTime() - (interval * 1000))); 
         
     FeedMessage tripUpdates = _gtfsRealtimeRetriever.getVehiclePositions(startDate, endDate);
@@ -62,7 +77,7 @@ public class GtfsRealtimePlaybackController {
   @RequestMapping(value = "/gtfs-realtime/clear")
   public @ResponseBody String clear(
       @RequestParam(value = "session", required = true) String session) {
-    timeService.clear(session);
+    _timeService.clear(session);
     return "SUCCESS\n";
   }
 
@@ -78,8 +93,8 @@ public class GtfsRealtimePlaybackController {
   }
   
   private void checkTimeService(String session, Date time) {
-    if (!timeService.isTimeSet(session)) {
-      timeService.setCurrentTime(session, time);
+    if (!_timeService.isTimeSet(session)) {
+      _timeService.setCurrentTime(session, time);
     }
   }
 }
