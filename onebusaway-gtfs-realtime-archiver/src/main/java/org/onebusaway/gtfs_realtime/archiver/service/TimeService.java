@@ -23,10 +23,6 @@ public interface TimeService {
   
   void setCurrentTime(String session, Date time);
   
-  boolean isTimeSet(String session);
-  
-  boolean isTimeSet(String session, Date time);
-  
   void clear(String session);
   
 }

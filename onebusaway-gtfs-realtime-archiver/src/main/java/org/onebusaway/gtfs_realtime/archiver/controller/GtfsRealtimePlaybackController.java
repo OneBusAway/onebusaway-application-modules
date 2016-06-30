@@ -61,7 +61,8 @@ public class GtfsRealtimePlaybackController {
     
     EntityType type  = path.equals("trip-updates") ? EntityType.TRIP : EntityType.VEHICLE;
 
-    checkTimeService(key, new Date(end * 1000));
+    // will not create new session if time is the same
+    _timeService.setCurrentTime(key, new Date(end * 1000));
     
     Date endDate = _timeService.getCurrentTime(key);
     Date startDate = new Date((endDate.getTime() - (interval * 1000))); 
@@ -95,11 +96,6 @@ public class GtfsRealtimePlaybackController {
     }
   }
   
-  private void checkTimeService(String session, Date time) {
-    if (!_timeService.isTimeSet(session, time)) {
-      _timeService.setCurrentTime(session, time);
-    }
-  }
   
   private boolean isAllowed(String key) {
     return _keyService.getPermission(key, "api");

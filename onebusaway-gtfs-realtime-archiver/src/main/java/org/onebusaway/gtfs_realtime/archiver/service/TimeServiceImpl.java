@@ -28,7 +28,6 @@ import com.google.common.cache.CacheBuilder;
 @Component
 public class TimeServiceImpl implements TimeService {
   
-  // Session is not cleared automatically right now.
   Map<String, Session> sessions;
   
   @PostConstruct
@@ -52,21 +51,15 @@ public class TimeServiceImpl implements TimeService {
 
   @Override
   public void setCurrentTime(String session, Date time) {
-    Session s = new Session();
+    Session s = sessions.get(session);
+    if (s != null && time.equals(s.originalTime)) {
+      return;
+    }
+    
+    s = new Session();
     s.originalTime = time;
     s.timeSet = new Date();
     sessions.put(session, s);
-  }
-
-  @Override
-  public boolean isTimeSet(String session) {
-    return isTimeSet(session, null);
-  }
-  
-  @Override
-  public boolean isTimeSet(String session, Date time) {
-    Session s = sessions.get(session);
-    return s != null && s.originalTime != null && (time == null || time.equals(s.originalTime));
   }
 
   @Override
