@@ -16,24 +16,27 @@
 package org.onebusaway.gtfs_realtime.archiver.service;
 
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
 
 import org.springframework.stereotype.Component;
 
+import com.google.common.cache.CacheBuilder;
+
 @Component
 public class TimeServiceImpl implements TimeService {
-  
-  private static final int SESSIONS_THRESHOLD = 1000;
   
   // Session is not cleared automatically right now.
   Map<String, Session> sessions;
   
   @PostConstruct
   public void init() {
-    sessions = new HashMap<String, Session>(); 
+    sessions = CacheBuilder.newBuilder()
+      .expireAfterAccess(1, TimeUnit.DAYS)
+      .<String, Session>build()
+      .asMap();
   }
   
   @Override
@@ -49,11 +52,6 @@ public class TimeServiceImpl implements TimeService {
 
   @Override
   public void setCurrentTime(String session, Date time) {
-    
-    if (sessions.size() > SESSIONS_THRESHOLD) {
-      sessions.clear();
-    }
-    
     Session s = new Session();
     s.originalTime = time;
     s.timeSet = new Date();
@@ -62,8 +60,13 @@ public class TimeServiceImpl implements TimeService {
 
   @Override
   public boolean isTimeSet(String session) {
+    return isTimeSet(session, null);
+  }
+  
+  @Override
+  public boolean isTimeSet(String session, Date time) {
     Session s = sessions.get(session);
-    return s != null && s.originalTime != null;
+    return s != null && s.originalTime != null && (time == null || time.equals(s.originalTime));
   }
 
   @Override

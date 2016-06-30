@@ -20,6 +20,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+import org.onebusaway.gtfs_realtime.archiver.model.FeedEntityModel;
 import org.onebusaway.gtfs_realtime.archiver.model.StopTimeUpdateModel;
 import org.onebusaway.gtfs_realtime.archiver.model.TripUpdateModel;
 import org.onebusaway.gtfs_realtime.archiver.model.VehiclePositionModel;
@@ -33,10 +34,10 @@ import com.google.transit.realtime.GtfsRealtime.FeedMessage;
 import com.google.transit.realtime.GtfsRealtime.Position;
 import com.google.transit.realtime.GtfsRealtime.TripDescriptor;
 import com.google.transit.realtime.GtfsRealtime.TripUpdate;
-import com.google.transit.realtime.GtfsRealtime.VehicleDescriptor;
-import com.google.transit.realtime.GtfsRealtime.VehiclePosition;
 import com.google.transit.realtime.GtfsRealtime.TripUpdate.StopTimeEvent;
 import com.google.transit.realtime.GtfsRealtime.TripUpdate.StopTimeUpdate;
+import com.google.transit.realtime.GtfsRealtime.VehicleDescriptor;
+import com.google.transit.realtime.GtfsRealtime.VehiclePosition;
 
 @Component
 public class GtfsRealtimeRetrieverImpl implements GtfsRealtimeRetriever {
@@ -51,19 +52,20 @@ public class GtfsRealtimeRetrieverImpl implements GtfsRealtimeRetriever {
   @Autowired
   VehiclePositionDao _vehiclePositionDao;
   
-  @Override
-  public FeedMessage getTripUpdates(Date startDate, Date endDate) {
+  @Override  
+  public FeedMessage getFeedMessage(EntityType type, Date startDate, Date endDate) {
   
     FeedMessage.Builder builder = FeedMessage.newBuilder();
     
-    List<TripUpdateModel> updates = _tripUpdateDao.findByDate(startDate, endDate);
+    List<? extends FeedEntityModel> updates = (type == EntityType.VEHICLE) ?
+        _vehiclePositionDao.findByDate(startDate, endDate)
+        :  _tripUpdateDao.findByDate(startDate, endDate);
  
     long timestamp = 0;
 
-    for (TripUpdateModel update : updates) {
-      TripUpdate tu = writeTripUpdate(update);
-      FeedEntity.Builder fe = FeedEntity.newBuilder();
-      fe.setTripUpdate(tu);
+    for (FeedEntityModel update : updates) {
+      FeedEntity.Builder fe = fillFeedEntity(update);
+      // This is not guaranteed to match entityID in source feed.
       fe.setId(Long.toString(update.getId()));
       builder.addEntity(fe);
       timestamp = Math.max(timestamp, update.getTimestamp().getTime());
@@ -78,31 +80,29 @@ public class GtfsRealtimeRetrieverImpl implements GtfsRealtimeRetriever {
     return builder.build();
   }
   
-  @Override
-  public FeedMessage getVehiclePositions(Date startDate, Date endDate) {
-  
-    FeedMessage.Builder builder = FeedMessage.newBuilder();
-    
-    List<VehiclePositionModel> updates = _vehiclePositionDao.findByDate(startDate, endDate);
- 
-    long timestamp = 0;
-
-    for (VehiclePositionModel update : updates) {
-      VehiclePosition vp = writeVehiclePosition(update);
-      FeedEntity.Builder fe = FeedEntity.newBuilder();
-      fe.setVehicle(vp);
-      fe.setId(Long.toString(update.getId()));
-      builder.addEntity(fe);
-      timestamp = Math.max(timestamp, update.getTimestamp().getTime());
+  private FeedEntity.Builder fillFeedEntity(FeedEntityModel model) {
+    if (model instanceof VehiclePositionModel) {
+      return fillFeedEntity((VehiclePositionModel) model);
     }
-    
-    FeedHeader.Builder header = FeedHeader.newBuilder();
-    header.setTimestamp(timestamp/1000);
-    header.setGtfsRealtimeVersion(GTFS_RT_VERSION);
-    
-    builder.setHeader(header);
-    
-    return builder.build();
+    else if (model instanceof TripUpdateModel) {
+      return fillFeedEntity((TripUpdateModel) model);
+    }
+    else {
+      return null;
+    }
+  }
+  
+  
+  private FeedEntity.Builder fillFeedEntity(VehiclePositionModel model) {
+    VehiclePosition vp = writeVehiclePosition(model);
+    return FeedEntity.newBuilder()
+        .setVehicle(vp);
+  }
+  
+  private FeedEntity.Builder fillFeedEntity(TripUpdateModel model) {
+    TripUpdate tu = writeTripUpdate(model);
+    return FeedEntity.newBuilder()
+        .setTripUpdate(tu);
   }
   
   private TripUpdate writeTripUpdate(TripUpdateModel model) {

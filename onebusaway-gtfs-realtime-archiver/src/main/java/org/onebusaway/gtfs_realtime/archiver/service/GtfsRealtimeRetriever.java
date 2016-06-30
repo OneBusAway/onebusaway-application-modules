@@ -20,6 +20,6 @@ import java.util.Date;
 import com.google.transit.realtime.GtfsRealtime.FeedMessage;
 
 public interface GtfsRealtimeRetriever {
-  public FeedMessage getTripUpdates(Date startDate, Date endDate);
-  public FeedMessage getVehiclePositions(Date startDate, Date endDate);
+  enum EntityType { TRIP, VEHICLE };
+  public FeedMessage getFeedMessage(EntityType type, Date startDate, Date endDate);
 }

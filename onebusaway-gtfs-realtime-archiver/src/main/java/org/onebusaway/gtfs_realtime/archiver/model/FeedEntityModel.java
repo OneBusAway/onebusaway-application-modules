@@ -13,20 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.onebusaway.gtfs_realtime.archiver.service;
+package org.onebusaway.gtfs_realtime.archiver.model;
 
 import java.util.Date;
 
-public interface TimeService {
+public interface FeedEntityModel {
 
-  Date getCurrentTime(String session);
+  long getId();
   
-  void setCurrentTime(String session, Date time);
-  
-  boolean isTimeSet(String session);
-  
-  boolean isTimeSet(String session, Date time);
-  
-  void clear(String session);
-  
+  Date getTimestamp();
 }

@@ -22,9 +22,12 @@ import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.onebusaway.gtfs_realtime.archiver.service.GtfsRealtimeRetriever;
+import org.onebusaway.gtfs_realtime.archiver.service.GtfsRealtimeRetriever.EntityType;
 import org.onebusaway.gtfs_realtime.archiver.service.TimeService;
+import org.onebusaway.users.services.ApiKeyPermissionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -40,44 +43,44 @@ public class GtfsRealtimePlaybackController {
   @Autowired
   TimeService _timeService;
   
-  @RequestMapping(value = "/gtfs-realtime/trip-updates")
+  @Autowired
+  ApiKeyPermissionService _keyService;
+  
+  @RequestMapping(value = "/gtfs-realtime/{path:trip-updates|vehicle-positions}")
   public void tripUpdates(ServletRequest request, HttpServletResponse response,
+      @RequestParam(value = "key", required = true) String key,
       @RequestParam(value = "time", required = true) long end,
-      @RequestParam(value = "session", required = true) String session,
-      @RequestParam(value = "interval", required = false, defaultValue = "30") long interval)
+      @RequestParam(value = "interval", required = false, defaultValue = "30") long interval,
+      @PathVariable String path)
           throws IOException {
     
-    checkTimeService(session, new Date(end * 1000));
+    if(!isAllowed(key)) {
+      response.sendError(HttpServletResponse.SC_FORBIDDEN);
+      return;
+    }
     
-    Date endDate = _timeService.getCurrentTime(session);
+    EntityType type  = path.equals("trip-updates") ? EntityType.TRIP : EntityType.VEHICLE;
+
+    checkTimeService(key, new Date(end * 1000));
+    
+    Date endDate = _timeService.getCurrentTime(key);
     Date startDate = new Date((endDate.getTime() - (interval * 1000))); 
         
-    FeedMessage tripUpdates = _gtfsRealtimeRetriever.getTripUpdates(startDate, endDate);
+    FeedMessage tripUpdates = _gtfsRealtimeRetriever.getFeedMessage(type, startDate, endDate);
     render(request, response, tripUpdates);
   }
-  
-  @RequestMapping(value = "/gtfs-realtime/vehicle-positions")
-  public void vehiclePositions(ServletRequest request, HttpServletResponse response,
-      @RequestParam(value = "time", required = true) long end,
-      @RequestParam(value = "session", required = true) String session,
-      @RequestParam(value = "interval", required = false, defaultValue = "30") long interval)
-          throws IOException {
-    
-    checkTimeService(session, new Date(end * 1000));
-    
-    Date endDate = _timeService.getCurrentTime(session);
-    Date startDate = new Date((endDate.getTime() - (interval * 1000))); 
-        
-    FeedMessage tripUpdates = _gtfsRealtimeRetriever.getVehiclePositions(startDate, endDate);
-    render(request, response, tripUpdates);
-  }
-  
-  
   
   @RequestMapping(value = "/gtfs-realtime/clear")
-  public @ResponseBody String clear(
-      @RequestParam(value = "session", required = true) String session) {
-    _timeService.clear(session);
+  public @ResponseBody String clear(HttpServletResponse response,
+      @RequestParam(value = "key", required = true) String key)
+          throws IOException {
+    
+    if(!isAllowed(key)) {
+      response.sendError(HttpServletResponse.SC_FORBIDDEN);
+      return "";
+    }
+    
+    _timeService.clear(key);
     return "SUCCESS\n";
   }
 
@@ -93,8 +96,12 @@ public class GtfsRealtimePlaybackController {
   }
   
   private void checkTimeService(String session, Date time) {
-    if (!_timeService.isTimeSet(session)) {
+    if (!_timeService.isTimeSet(session, time)) {
       _timeService.setCurrentTime(session, time);
     }
+  }
+  
+  private boolean isAllowed(String key) {
+    return _keyService.getPermission(key, "api");
   }
 }
