@@ -594,6 +594,7 @@ function showBundleInfo(bundleInfo){
 function onCreateDatasetClick() {
 	selectedDirectory = jQuery("#createDataset #directoryName").val();
 	$("#Download #download_selectedDataset").text(selectedDirectory);
+	$("#uploadFiles #bundleComment").val("");
 	onSelectDataset("create");
 	//var $tabs = jQuery("#tabs");
 	//$tabs.tabs('select', 1);

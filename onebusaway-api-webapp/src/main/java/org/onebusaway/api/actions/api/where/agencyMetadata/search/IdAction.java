@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.onebusaway.api.actions.api.where.agency;
+package org.onebusaway.api.actions.api.where.agencyMetadata.search;
 
 import java.io.IOException;
 import java.util.List;
@@ -23,24 +23,26 @@ import org.apache.struts2.rest.DefaultHttpHeaders;
 import org.onebusaway.agency_metadata.model.AgencyMetadata;
 import org.onebusaway.agency_metadata.service.AgencyMetadataService;
 import org.onebusaway.api.actions.api.ApiActionSupport;
-import org.onebusaway.api.model.transit.BeanFactoryV2;
+import org.onebusaway.api.actions.api.where.Messages;
 import org.onebusaway.exceptions.ServiceException;
-import org.onebusaway.transit_data.model.config.BundleMetadata;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class ListAction extends ApiActionSupport {
+import com.opensymphony.xwork2.validator.annotations.RequiredFieldValidator;
 
-	  private static Logger _log = LoggerFactory.getLogger(ListAction.class);
+public class IdAction extends ApiActionSupport {
+
+	  private static Logger _log = LoggerFactory.getLogger(IdAction.class);
 	  private static final int V2 = 2;
+	  private String id;
 	  
-	  public ListAction() {
+	  public IdAction() {
 	    super(V2);
 	  }
 	  
-	  public ListAction(int defaultVersion) {
+	  public IdAction(int defaultVersion) {
 	    super(defaultVersion);
 	  }
 
@@ -51,19 +53,23 @@ public class ListAction extends ApiActionSupport {
 	  
 	  @Autowired
 	  private AgencyMetadataService _agencyMetadataService;
+	  
+	  @RequiredFieldValidator(message = Messages.MISSING_REQUIRED_FIELD)
+	  public void setId(String id) {
+	    this.id = id;
+	  }
 
 	  public String getId() {
-	    _log.error("in id!");
-	    return _service.getActiveBundleId();
+	    return id;
 	  }
+
 	  
-	  public DefaultHttpHeaders index() throws IOException, ServiceException {
+	  public DefaultHttpHeaders show() throws IOException, ServiceException {
 	    if (hasErrors())
 	      return setValidationErrorsResponse();
 
-	    List<AgencyMetadata> agencyMetadata =  _agencyMetadataService.getAllAgencyMetadata();
+	    List<AgencyMetadata> agencyMetadata =  _agencyMetadataService.getAgencyMetadataForId(id);
 	    
 	    return setOkResponse(agencyMetadata);
 	  }
-
 }
