@@ -28,4 +28,6 @@ public interface VehiclePositionDao {
 
   List<VehiclePositionModel> getVehiclePositions(String vehicleId,
       Date startDate, Date endDate);
+  
+  List<VehiclePositionModel> findByDate(Date startDate, Date endDate);
 }
