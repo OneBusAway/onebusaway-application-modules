@@ -342,7 +342,25 @@ jQuery(function() {
 			}
 		}
 	});
-	
+
+	//Enable "Continue" button when user enters a destination name for copying
+	//a dataset. If the name is removed or invalid, disable the "Continue" button.
+	//Using bind() with propertychange event as live() does not work in IE for unknown reasons
+	jQuery("#destinationDirectory").bind("input propertychange", function() {
+		var text = jQuery("#destinationDirectory").val();
+		var validDatasetNameExp = /^[a-zA-Z_-\d]+$/;
+		jQuery('#copyFilenameError').hide();
+		$("#copyContinue").button("disable");
+		if (text.length > 0) {
+			if (text.match(validDatasetNameExp)) {
+				$("#copyContinue").button("enable");
+			} else {
+				jQuery('#copyFilenameError').show();
+				//jQuery("#createDirectory #createDirectoryContents #createDirectoryResult").hide();
+			}
+		}
+	});
+
 	disableStageButton();
 	disableDownloadButton();
 	disableBuildButton();
@@ -376,16 +394,22 @@ jQuery(function() {
 		autoOpen: false,
 		modal: true,
 		width: 'auto',
-		buttons: {
-			"Cancel": function() {
+		buttons: [{
+			id: "copyCancel",
+			text: "Cancel",
+			click: function() {
 				$(this).dialog("close");
-			},
-			"Continue": function() {
+			}
+		},
+		{
+			id: "copyContinue",
+			text: "Continue",
+			click: function() {
 				destinationDirectory = $("#destinationDirectory").val();
 				$(this).dialog("close");
 				onCopyDestinationSpecified();
 			}
-		},
+		}],
         open: function() {
             $('.ui-dialog-buttonpane').find('button:contains("Cancel")').addClass('cancelCopyPopup');
         }		
@@ -596,8 +620,6 @@ function onCreateDatasetClick() {
 	$("#Download #download_selectedDataset").text(selectedDirectory);
 	$("#uploadFiles #bundleComment").val("");
 	onSelectDataset("create");
-	//var $tabs = jQuery("#tabs");
-	//$tabs.tabs('select', 1);
 }
 
 function onExistingDatasetClick() {
@@ -605,20 +627,19 @@ function onExistingDatasetClick() {
 	selectedDirectory = selectedCheckbox.closest("tr").find(".directoryName").text();
 	$("#Download #download_selectedDataset").text(selectedDirectory);
 	onSelectDataset("existing");
-	//var $tabs = jQuery("#tabs");
-	//$tabs.tabs('select', 1);
 }
 
 function onCopyExistingDatasetClick() {
 	selectedDirectory = $(this).closest("tr").find(".directoryName").text();
 	$("#Download #download_selectedDataset").text(selectedDirectory);
+	$("#destinationDirectory").val("");
+	jQuery('#copyFilenameError').hide();
+	$("#copyContinue").button("disable");
 	var continueCopy = $("#copyPopup").dialog("open");
 }
 
 function onCopyDestinationSpecified() {
 	onSelectDataset("copy");
-	//var $tabs = jQuery("#tabs");
-	//$tabs.tabs('select', 1);
 }
 
 function onContinueCopyClick() {

@@ -91,6 +91,9 @@
 				<label for="destinationDirectory" id="datasetNameLabel">New dataset name</label>
 				<input type="text" name="destinationDirectory" id="destinationDirectory"></input>
 			</div>
+			<div id="copyFilenameError">
+				Name is not valid; it cannot contain spaces or symbols.
+			</div>
 		</div>
 		<!--
 		<div>
