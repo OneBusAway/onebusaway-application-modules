@@ -166,7 +166,7 @@
   padding-left: 30px;
 }
 
-#Create #filenameError {
+#Create #filenameError, #copyFilenameError {
 	color: red;
 }
 
