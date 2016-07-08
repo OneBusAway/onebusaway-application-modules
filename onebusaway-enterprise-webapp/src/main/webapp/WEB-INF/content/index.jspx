@@ -48,7 +48,7 @@
 &lt;![endif]--&gt;
 </jsp:text>
 
-<s:url var="url" value="http://maps.googleapis.com/maps/api/js">				
+<s:url var="url" value="https://maps.googleapis.com/maps/api/js">				
 	<s:param name="v">3</s:param>
 	<s:param name="client"><s:property value="googleMapsClientId" /></s:param>
 	<s:param name="sensor">false</s:param>
@@ -120,7 +120,7 @@
 </s:url>
 <script type="text/javascript" src="${url}"><!-- //prevent jspx minimization --></script>
 
-<script type="text/javascript" src="http://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"><!-- jspx --></script>
+<script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"><!-- jspx --></script>
 
 </head>
 <body>
