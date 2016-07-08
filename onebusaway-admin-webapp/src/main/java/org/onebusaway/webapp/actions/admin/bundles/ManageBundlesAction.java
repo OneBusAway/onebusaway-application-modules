@@ -32,8 +32,10 @@ import java.nio.file.StandardCopyOption;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -47,11 +49,15 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.JSONArray;
 import org.onebusaway.admin.model.BundleBuildResponse;
 import org.onebusaway.admin.model.BundleResponse;
+import org.onebusaway.admin.model.ui.DataValidationMode;
+import org.onebusaway.admin.model.ui.DataValidationRouteCounts;
+import org.onebusaway.admin.model.ui.DataValidationStopCt;
 import org.onebusaway.admin.model.ui.DirectoryStatus;
 import org.onebusaway.admin.model.ui.ExistingDirectory;
 import org.onebusaway.admin.service.BundleRequestService;
 import org.onebusaway.admin.service.DiffService;
 import org.onebusaway.admin.service.FileService;
+import org.onebusaway.admin.service.FixedRouteParserService;
 import org.onebusaway.admin.util.NYCFileUtils;
 import org.onebusaway.agency_metadata.service.AgencyMetadataService;
 import org.onebusaway.util.services.configuration.ConfigurationService;
@@ -88,7 +94,7 @@ import com.google.gson.JsonParser;
 			@Result(name="existingBuildList", type="json", 
 			params={"root", "existingBuildList"}),
 			@Result(name="diffResult", type="json", 
-			params={"root", "diffResult"}),
+			params={"root", "combinedDiffs"}),
 			@Result(name="downloadZip", type="stream", 
 			params={"contentType", "application/zip", 
 					"inputName", "downloadInputStream",
@@ -139,11 +145,15 @@ public class ManageBundlesAction extends OneBusAwayNYCAdminActionSupport impleme
 	private String diffBuildName;
 	private List<String> existingBuildList = new ArrayList<String>();
 	private List<String> diffResult = new ArrayList<String>();
+	private Map<String, List> combinedDiffs;
 	private DirectoryStatus directoryStatus;
 	// where the bundle is deployed to
 	private String s3Path = "s3://bundle-data/activebundle/<env>/";
 	private String environment = "dev";
 	private DiffService diffService;
+  @Autowired
+  private FixedRouteParserService _fixedRouteParserService;
+
 	private static final String TRACKING_INFO = "info.json";
 
 	@Override
@@ -607,6 +617,13 @@ public class ManageBundlesAction extends OneBusAwayNYCAdminActionSupport impleme
 				+ diffBuildName + "/outputs/gtfs_stats.csv";
 		diffResult.clear();
 		diffResult = diffService.diff(selectedBundlePath, currentBundlePath);
+
+		// Added code to compare Fixed Route Date Validation reports from the
+		// two specified bundles and builds
+		List<DataValidationMode> fixedRouteDiffs = compareFixedRouteValidations();
+		combinedDiffs = new HashMap<String, List>();
+		combinedDiffs.put("diffResults", diffResult);
+		combinedDiffs.put("fixedRouteDiffs", fixedRouteDiffs);
 		return "diffResult";
 	}
 
@@ -986,6 +1003,10 @@ public class ManageBundlesAction extends OneBusAwayNYCAdminActionSupport impleme
 		return this.diffResult;
 	}
 
+  public Map<String, List> getCombinedDiffs() {
+    return this.combinedDiffs;
+  }
+
 	public void setEmailTo(String to) {
 	}
 
@@ -1198,5 +1219,149 @@ public class ManageBundlesAction extends OneBusAwayNYCAdminActionSupport impleme
       }
     }
     return newAgencyList;
+  }
+
+  private List<DataValidationMode> compareFixedRouteValidations() {
+    String currentValidationReportPath = fileService.getBucketName()
+        + File.separator  + bundleDirectory + "/builds/" + bundleName
+        + "/outputs/fixed_route_validation.csv";
+    File currentValidationReportFile = new File(currentValidationReportPath);
+    String selectedValidationReportPath = fileService.getBucketName()
+        + File.separator
+        + diffBundleName + "/builds/"
+        + diffBuildName + "/outputs/fixed_route_validation.csv";
+    File selectedValidationReportFile = new File(selectedValidationReportPath);
+
+    // parse input files
+    List<DataValidationMode> currentModes
+      = _fixedRouteParserService.parseFixedRouteReportFile(currentValidationReportFile);
+    List<DataValidationMode> selectedModes
+      = _fixedRouteParserService.parseFixedRouteReportFile(selectedValidationReportFile);
+
+    // compare and get diffs
+    List<DataValidationMode> fixedRouteDiffs
+      = findFixedRouteDiffs(currentModes, selectedModes);
+
+    return  fixedRouteDiffs;
+  }
+
+  private List<DataValidationMode> findFixedRouteDiffs(
+      List<DataValidationMode> currentModes,
+      List<DataValidationMode> selectedModes) {
+
+    List<DataValidationMode> fixedRouteDiffs = new ArrayList<>();
+    if (currentModes != null && selectedModes == null) {
+      return currentModes;
+    }
+    if (currentModes == null && selectedModes != null) {
+      return selectedModes;
+    }
+    if (currentModes == null && selectedModes == null) {
+      return fixedRouteDiffs;
+    }
+
+    for (DataValidationMode currentMode : currentModes) {
+      // Check if this mode exists in selectedModes
+      DataValidationMode diffMode = null;
+      String modeName = currentMode.getModeName();
+      for (DataValidationMode selectedMode : selectedModes) {
+        if (modeName.equals(selectedMode.getModeName())) {
+          selectedModes.remove(selectedMode);
+          diffMode = compareModes(currentMode, selectedMode);
+          break;
+        }
+      }
+      if (diffMode == null) {
+        currentMode.setSrcCode("1");
+        diffMode = currentMode;
+      }
+      if (diffMode.getRoutes().size() > 0) {
+        fixedRouteDiffs.add(diffMode);
+      }
+    }
+    if (selectedModes.size() > 0) {
+      for (DataValidationMode selectedMode : selectedModes) {
+        selectedMode.setSrcCode("2");
+        fixedRouteDiffs.add(selectedMode);
+      }
+    }
+    return fixedRouteDiffs;
+  }
+
+  private DataValidationMode compareModes(
+      DataValidationMode currentMode, DataValidationMode selectedMode) {
+
+    DataValidationMode diffMode = new DataValidationMode();
+    diffMode.setModeName(currentMode.getModeName());
+    diffMode.setRoutes(new ArrayList<DataValidationRouteCounts>());
+
+    for (DataValidationRouteCounts currentRoute : currentMode.getRoutes()) {
+      // Check if this route exists in selectedMode
+      DataValidationRouteCounts diffRoute = null;
+      String routeName = currentRoute.getRouteName();
+      for (DataValidationRouteCounts selectedRoute : selectedMode.getRoutes()) {
+        if (routeName.equals(selectedRoute.getRouteName())) {
+          selectedMode.getRoutes().remove(selectedRoute);
+          diffRoute = compareStops(currentRoute, selectedRoute);
+          break;
+        }
+      }
+      if (diffRoute == null) {
+        currentRoute.setSrcCode("1");
+        diffRoute = currentRoute;
+      }
+      if (diffRoute.getStopCounts().size() > 0) {
+        diffMode.getRoutes().add(diffRoute);
+      }
+    }
+    if (selectedMode.getRoutes().size() > 0) {
+      for (DataValidationRouteCounts selectedRoute : selectedMode.getRoutes()) {
+        selectedRoute.setSrcCode("2");
+        diffMode.getRoutes().add(selectedRoute);
+      }
+    }
+    return diffMode;
+  }
+  private DataValidationRouteCounts compareStops(
+      DataValidationRouteCounts currentRoute,
+      DataValidationRouteCounts selectedRoute) {
+
+    DataValidationRouteCounts diffRoute = new DataValidationRouteCounts();
+    diffRoute.setRouteName(currentRoute.getRouteName());
+    diffRoute.setStopCounts(new ArrayList<DataValidationStopCt>());
+
+    for (DataValidationStopCt currentStopCt : currentRoute.getStopCounts()) {
+      boolean stopCtMatched = false;
+      // Check if this stop exists in selectedRoute
+      for (DataValidationStopCt selectedStopCt : selectedRoute.getStopCounts()) {
+        if (currentStopCt.getStopCt() == selectedStopCt.getStopCt()) {
+          stopCtMatched = true;
+          selectedRoute.getStopCounts().remove(selectedStopCt);
+          if ((currentStopCt.getTripCts()[0] != selectedStopCt.getTripCts()[0])
+              || (currentStopCt.getTripCts()[1] != selectedStopCt.getTripCts()[1])
+              || (currentStopCt.getTripCts()[2] != selectedStopCt.getTripCts()[2])){
+            currentStopCt.setSrcCode("1");
+            diffRoute.getStopCounts().add(currentStopCt);
+            selectedStopCt.setSrcCode("2");
+            diffRoute.getStopCounts().add(selectedStopCt);
+          }
+          break;
+        }
+      }
+      if (stopCtMatched) {
+        continue;
+      } else {
+        currentStopCt.setSrcCode("1");
+        diffRoute.getStopCounts().add(currentStopCt);
+      }
+    }
+    if (selectedRoute.getStopCounts().size() > 0) {
+      for (DataValidationStopCt selectedStopCt : selectedRoute.getStopCounts()) {
+        selectedStopCt.setSrcCode("2");
+        diffRoute.getStopCounts().add(selectedStopCt);
+      }
+    }
+
+    return diffRoute;
   }
 }

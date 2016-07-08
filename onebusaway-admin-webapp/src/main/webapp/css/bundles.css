@@ -1,17 +1,17 @@
 /**
  * Copyright (c) 2011 Metropolitan Transportation Authority
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *         http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
  
  
@@ -149,6 +149,7 @@
 #createDirectory,
 #compareBundles,
 #compareBuilds,
+#compareFixedRouteModes,
 #compareDiff {
   padding-top: 20px;
 }
@@ -165,7 +166,7 @@
   padding-left: 30px;
 }
 
-#Create #filenameError {
+#Create #filenameError, #copyFilenameError {
 	color: red;
 }
 
@@ -568,6 +569,41 @@
   float: left;
 }
 
+#Compare #fixedRouteDiffTable caption {
+	font-weight: bold;
+	font-size: 1.3em;
+	margin-bottom: .3em;
+}
+
+#Compare #fixedRouteDiffTable th {
+	margin-bottom: .1em;
+	padding: .3em;
+}
+
+#Compare #fixedRouteDiffTable tr:first-child td {
+	border-bottom: 1px solid gray;
+}
+
+#Compare #fixedRouteDiffTable .currentStopCt {
+	text-align: right;
+	padding-right: 30px;
+	background-color: #9F9;
+}
+
+#Compare #fixedRouteDiffTable .selectedStopCt {
+	text-align: right;
+	padding-right: 30px;
+	background-color: #F99;
+}
+
+#Compare #fixedRouteDiffTable .currentRpt {
+	background-color: #9F9;
+}
+
+#Compare #fixedRouteDiffTable .selectedRpt {
+	background-color: #F99;
+}
+
 #downloadLogs #downloadImg {
   float: left;
   margin-right: 5px;
@@ -723,6 +759,11 @@
 .validateBundle {
   font-size: 14px;
 }
+
+#csvWikiUrl {
+	width: 30em;
+}
+
 #bundleValidationResults {
   	border-collapse: collapse;
 }

@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.onebusaway.api.actions.api.where.agency.search;
+package org.onebusaway.api.actions.api.where.agencyMetadata.search;
 
 import java.io.IOException;
 import java.util.List;
@@ -32,17 +32,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.opensymphony.xwork2.validator.annotations.RequiredFieldValidator;
 
-public class IdAction extends ApiActionSupport {
-
-	  private static Logger _log = LoggerFactory.getLogger(IdAction.class);
+public class GtfsIdAction extends ApiActionSupport {
+	  private static Logger _log = LoggerFactory.getLogger(GtfsIdAction.class);
 	  private static final int V2 = 2;
 	  private String id;
 	  
-	  public IdAction() {
+	  public GtfsIdAction() {
 	    super(V2);
 	  }
 	  
-	  public IdAction(int defaultVersion) {
+	  public GtfsIdAction(int defaultVersion) {
 	    super(defaultVersion);
 	  }
 
@@ -63,13 +62,13 @@ public class IdAction extends ApiActionSupport {
 	    return id;
 	  }
 
-	  
 	  public DefaultHttpHeaders show() throws IOException, ServiceException {
 	    if (hasErrors())
 	      return setValidationErrorsResponse();
 
-	    List<AgencyMetadata> agencyMetadata =  _agencyMetadataService.getAgencyMetadataForId(id);
+	    List<AgencyMetadata> agencyMetadata =  _agencyMetadataService.getAgencyMetadataForGtfsId(id);
 	    
 	    return setOkResponse(agencyMetadata);
 	  }
+
 }

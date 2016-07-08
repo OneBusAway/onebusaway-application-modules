@@ -1,17 +1,17 @@
-/**
+/*
  * Copyright (c) 2011 Metropolitan Transportation Authority
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *         http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 var timeout = null;
@@ -153,9 +153,61 @@ jQuery(function() {
 					async: false,
 					success: function(data) {
 						$('#diffResult').text('');
-						$.each(data, function(index, value) {
+						$.each(data.diffResults, function(index, value) {
 							$('#diffResult').append(
 									"<div id=\"diffResultItem\">"+value+"</div>");
+						});
+						$.each(data.fixedRouteDiffs, function(index, value) {
+							var modeName = value.modeName;
+							var modeClass = "";
+							if (value.srcCode == 1) {
+								modeClass = "currentRpt"
+							} else if (value.srcCode == 2) {
+								modeClass = "selectedRpt"
+							}
+							$.each(value.routes, function(index2, value2) {
+								var routeName = value2.routeName;
+								if (index2 > 0) {
+									modeName = "";
+								}
+								var routeClass = modeClass;
+								if (value2.srcCode == 1) {
+									routeClass = "currentRpt"
+								} else if (value2.srcCode == 2) {
+									routeClass = "selectedRpt"
+								}
+								$.each(value2.stopCounts, function(index3, value3) {
+									var stopCt = value3.stopCt;
+									var stopClass = "";
+									if (routeClass == "currentRpt") {
+										stopClass = "currentStopCt";
+									} else if (routeClass == "selectedRpt") {
+										stopClass = "selectedStopCt";
+									}
+									if (value3.srcCode == 1) {
+										stopClass = "currentStopCt";
+									} else if (value3.srcCode == 2) {
+										stopClass = "selectedStopCt";
+									}
+									var weekdayTrips = value3.tripCts[0];
+									var satTrips = value3.tripCts[1];
+									var sunTrips = value3.tripCts[2];
+									if (index3 > 0) {
+										modeName = "";
+										routeName = "";
+									}
+									//stopClass = "stopCt " + stopClass;
+									var new_row = '<tr class="fixedRouteDiff"> \
+										<td class=' + modeClass + '>' + modeName + '</td> \
+										<td class=' + routeClass + '>' + routeName + '</td> \
+										<td class=' + stopClass + '>' + stopCt + '</td> \
+										<td class=' + stopClass + '>' + weekdayTrips + '</td> \
+										<td class=' + stopClass + '>' + satTrips + '</td> \
+										<td class=' + stopClass + '>' + sunTrips + '</td> \
+										</tr>';
+									$('#fixedRouteDiffTable').append(new_row);
+								});
+							});
 						});
 					}
 				})
@@ -290,7 +342,25 @@ jQuery(function() {
 			}
 		}
 	});
-	
+
+	//Enable "Continue" button when user enters a destination name for copying
+	//a dataset. If the name is removed or invalid, disable the "Continue" button.
+	//Using bind() with propertychange event as live() does not work in IE for unknown reasons
+	jQuery("#destinationDirectory").bind("input propertychange", function() {
+		var text = jQuery("#destinationDirectory").val();
+		var validDatasetNameExp = /^[a-zA-Z_-\d]+$/;
+		jQuery('#copyFilenameError').hide();
+		$("#copyContinue").button("disable");
+		if (text.length > 0) {
+			if (text.match(validDatasetNameExp)) {
+				$("#copyContinue").button("enable");
+			} else {
+				jQuery('#copyFilenameError').show();
+				//jQuery("#createDirectory #createDirectoryContents #createDirectoryResult").hide();
+			}
+		}
+	});
+
 	disableStageButton();
 	disableDownloadButton();
 	disableBuildButton();
@@ -324,16 +394,22 @@ jQuery(function() {
 		autoOpen: false,
 		modal: true,
 		width: 'auto',
-		buttons: {
-			"Cancel": function() {
+		buttons: [{
+			id: "copyCancel",
+			text: "Cancel",
+			click: function() {
 				$(this).dialog("close");
-			},
-			"Continue": function() {
+			}
+		},
+		{
+			id: "copyContinue",
+			text: "Continue",
+			click: function() {
 				destinationDirectory = $("#destinationDirectory").val();
 				$(this).dialog("close");
 				onCopyDestinationSpecified();
 			}
-		},
+		}],
         open: function() {
             $('.ui-dialog-buttonpane').find('button:contains("Cancel")').addClass('cancelCopyPopup');
         }		
@@ -542,9 +618,8 @@ function showBundleInfo(bundleInfo){
 function onCreateDatasetClick() {
 	selectedDirectory = jQuery("#createDataset #directoryName").val();
 	$("#Download #download_selectedDataset").text(selectedDirectory);
+	$("#uploadFiles #bundleComment").val("");
 	onSelectDataset("create");
-	//var $tabs = jQuery("#tabs");
-	//$tabs.tabs('select', 1);
 }
 
 function onExistingDatasetClick() {
@@ -552,20 +627,19 @@ function onExistingDatasetClick() {
 	selectedDirectory = selectedCheckbox.closest("tr").find(".directoryName").text();
 	$("#Download #download_selectedDataset").text(selectedDirectory);
 	onSelectDataset("existing");
-	//var $tabs = jQuery("#tabs");
-	//$tabs.tabs('select', 1);
 }
 
 function onCopyExistingDatasetClick() {
 	selectedDirectory = $(this).closest("tr").find(".directoryName").text();
 	$("#Download #download_selectedDataset").text(selectedDirectory);
+	$("#destinationDirectory").val("");
+	jQuery('#copyFilenameError').hide();
+	$("#copyContinue").button("disable");
 	var continueCopy = $("#copyPopup").dialog("open");
 }
 
 function onCopyDestinationSpecified() {
 	onSelectDataset("copy");
-	//var $tabs = jQuery("#tabs");
-	//$tabs.tabs('select', 1);
 }
 
 function onContinueCopyClick() {
@@ -875,6 +949,9 @@ function onAddAnotherAgencyClick(inputType) {
 	  }
 	  metadata += '</select>';
 	  url = agencyMetadata[0].gtfsFeedUrl;
+	  if (url == null) {
+		  url = "";
+	  }
 	  if (url.toLowerCase().startsWith("http") || url.toLowerCase().startsWith("ftp")) {
 	  	var urlValue = ' value="' + url + '"';
 	  }
@@ -1930,13 +2007,12 @@ function getAgencyMetadata(){
 function addUploadFileAgencyDropdown() {
 	console.log("starting addUploadFileAgencyDropdown");
 	agencyDropDown = $('<select class="agencyIdSelect">');
-	jQuery(agencyMetadata).each(function() {
-		//agencyDropDown.append(jQuery("<option>").attr('value',this.legacyId).text(this.shortName));
-		var name = this.name;
+	for (var i = 0; i < agencyMetadata.length; i++) {
+		var name = agencyMetadata[i].name;
 		name += " (";
-		name += this.shortName;
+		name += agencyMetadata[i].shortName;
 		name += ")";
-		agencyDropDown.append(jQuery("<option>").attr('value',this.legacyId).text(name));
-	});
+		agencyDropDown.append(jQuery("<option>").attr('value',agencyMetadata[i].legacyId).text(name));
+	};
 	agencyDropDown.insertBefore("#agencyId");
 }

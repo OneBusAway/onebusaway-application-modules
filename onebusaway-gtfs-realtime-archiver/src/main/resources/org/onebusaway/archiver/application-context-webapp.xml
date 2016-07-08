@@ -28,6 +28,8 @@
   <import resource="classpath:data-sources.xml" />
   <import resource="classpath:org/onebusaway/container/application-context.xml" />
   
+  <!-- API keys    --> 
+  <import resource="classpath:org/onebusaway/users/application-context.xml" />  
   
   <!--  TDS support -->
   <import resource="classpath:org/onebusaway/transit_data_federation/application-context.xml" />
@@ -41,6 +43,9 @@
         <value>org.onebusaway.transit_data_federation.impl.reporting.StopProblemReportRecord</value>
         <value>org.onebusaway.transit_data_federation.impl.reporting.TripProblemReportRecord</value>
         <value>org.onebusaway.transit_data_federation.impl.service_alerts.ServiceAlertRecord</value>
+      	<value>org.onebusaway.users.model.UserRole</value>
+      	<value>org.onebusaway.users.model.UserIndex</value>
+      	<value>org.onebusaway.users.model.User</value>
       </list>
     </property>
   </bean>
@@ -87,6 +92,10 @@
   <bean id="feedService" class="org.onebusaway.gtfs_realtime.archiver.service.FeedServiceImpl">
 	<property name="gtfsPersistor" ref="gtfsPersistorImpl" />   
   </bean>
+  
+  <bean class="org.onebusaway.gtfs_realtime.archiver.service.GtfsRealtimeRetrieverImpl" />
+  
+  <bean class="org.onebusaway.gtfs_realtime.archiver.service.TimeServiceImpl" />
 
   <bean id="scheduledExecutorService" class="org.springframework.scheduling.concurrent.ScheduledExecutorFactoryBean" />
   <bean id="taskScheduler" class="org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler" />

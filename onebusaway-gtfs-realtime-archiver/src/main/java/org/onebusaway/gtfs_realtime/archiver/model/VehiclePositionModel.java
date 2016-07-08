@@ -39,7 +39,7 @@ import org.hibernate.annotations.Index;
     @Index(name = "vp_timestamp_idx", columnNames = {"timestamp"})})
 @org.hibernate.annotations.Entity(mutable = false)
 
-public class VehiclePositionModel {
+public class VehiclePositionModel implements FeedEntityModel {
 
   @Id
   @GeneratedValue(generator = "increment")

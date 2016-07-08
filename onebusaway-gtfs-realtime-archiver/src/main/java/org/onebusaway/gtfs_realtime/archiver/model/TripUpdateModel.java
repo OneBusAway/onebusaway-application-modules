@@ -45,7 +45,7 @@ import org.hibernate.annotations.Index;
  * trip update.
  *
  */
-public class TripUpdateModel {
+public class TripUpdateModel implements FeedEntityModel {
 
   @Id
   @GeneratedValue(generator = "increment")

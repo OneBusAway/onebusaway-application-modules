@@ -16,8 +16,12 @@
 package org.onebusaway.gtfs_realtime.archiver.service;
 
 import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
 
 import org.hibernate.SessionFactory;
+import org.hibernate.criterion.DetachedCriteria;
+import org.hibernate.criterion.Restrictions;
 import org.onebusaway.gtfs_realtime.archiver.model.TripUpdateModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,6 +54,13 @@ public class TripUpdateDaoImpl implements TripUpdateDao {
     _template.saveOrUpdateAll(Arrays.asList(array));
     _template.flush();
     _template.clear();
+  }
+  
+  @Override
+  public List<TripUpdateModel> findByDate(Date startDate, Date endDate) {
+    DetachedCriteria criteria = DetachedCriteria.forClass(TripUpdateModel.class);
+    criteria.add(Restrictions.between("timestamp", startDate, endDate));
+    return (List<TripUpdateModel>)  _template.findByCriteria(criteria);
   }
 
 }
