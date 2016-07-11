@@ -183,7 +183,7 @@
 			<!-- Include the welcome div with example searches -->
 			<c:import url="includes/welcome.jspx" />
 		   
-			<s:url var="url" namespace="/route" action="index"/>
+			<s:url var="url" namespace="/routes" action="index"/>
 			<div id="available-routes"><a href="${url}">Click here</a> for a list of available routes.</div>
 		   
 			<div id="cant-find">
