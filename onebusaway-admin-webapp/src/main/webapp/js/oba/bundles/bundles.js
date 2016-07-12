@@ -1600,6 +1600,7 @@ function updateBuildStatus(buildType) {
 				// check for exception
 				if (bundleResponse.exception != null) {
 					jQuery("#buildBundle_buildTestProgress").text("Bundle Failed!");
+					$buildProgress.text("Bundle build failed");
 					jQuery("#buildBundle #buildingTest #buildingTestProgress").attr("src","../../css/img/dialog-warning-4.png");
 					if (bundleResponse.exception.message != undefined) {
 						jQuery("#buildBundle_testException").show().css("display","inline");
