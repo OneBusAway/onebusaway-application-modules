@@ -41,6 +41,7 @@ import org.onebusaway.admin.model.BundleBuildRequest;
 import org.onebusaway.admin.model.BundleBuildResponse;
 import org.onebusaway.admin.model.BundleRequestResponse;
 import org.onebusaway.admin.service.FileService;
+import org.onebusaway.admin.service.bundle.BundleBuildResponseDao;
 import org.onebusaway.admin.service.bundle.BundleBuildingService;
 import org.onebusaway.admin.util.NYCFileUtils;
 import org.onebusaway.admin.util.ProcessUtil;
@@ -91,10 +92,13 @@ public class BundleBuildingServiceImpl implements BundleBuildingService {
   public void setDebug(boolean flag) {
     _debug = flag;
   }
-  
+
   @Autowired
   private ConfigurationServiceClient configurationServiceClient;
-  
+
+  @Autowired
+  private BundleBuildResponseDao _buildBundleResponseDao;
+
   @Autowired
   public void setFileService(FileService service) {
     _fileService = service;
@@ -269,7 +273,6 @@ public class BundleBuildingServiceImpl implements BundleBuildingService {
     File dataDir = new File(dataPath);
     response.setBundleDataDirectory(dataPath);
     dataDir.mkdirs();
-    
     for (String gtfs : response.getGtfsList()) {
       String outputFilename = null;
       if (!gtfs.endsWith(".zip")) {
@@ -991,5 +994,25 @@ public class BundleBuildingServiceImpl implements BundleBuildingService {
         }
       }
     }
+  }
+
+  @Override
+  public void createBundleBuildResponse(BundleBuildResponse bundleBuildResponse) {
+    _buildBundleResponseDao.saveOrUpdate(bundleBuildResponse);
+  }
+
+  @Override
+  public void updateBundleBuildResponse(BundleBuildResponse bundleBuildResponse) {
+    _buildBundleResponseDao.saveOrUpdate(bundleBuildResponse);
+  }
+
+  @Override
+  public BundleBuildResponse getBundleBuildResponseForId(String id) {
+    return _buildBundleResponseDao.getBundleBuildResponseForId(id);
+  }
+
+  @Override
+  public int getBundleBuildResponseMaxId() {
+    return _buildBundleResponseDao.getBundleBuildResponseMaxId();
   }
 }
