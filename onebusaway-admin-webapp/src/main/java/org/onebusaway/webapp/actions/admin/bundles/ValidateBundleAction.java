@@ -17,8 +17,11 @@ package org.onebusaway.webapp.actions.admin.bundles;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.Reader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
@@ -85,11 +88,20 @@ public class ValidateBundleAction extends OneBusAwayNYCAdminActionSupport {
   @Autowired
   private BuildBundleQueriesService _buildBundleQueriesService;
   
+  private String wikiUrl;
   private String csvFile;
   private String checkEnvironment;
   private File csvDataFile;
   private List<BundleValidationCheckResult> bundleValidationResults = new ArrayList<BundleValidationCheckResult>();
   
+  public String getWikiUrl() {
+    return wikiUrl;
+  }
+
+  public void setWikiUrl(String wikiUrl) {
+    this.wikiUrl = wikiUrl;
+  }
+
   public String getCsvFile() {
     return csvFile;
   }
@@ -119,6 +131,13 @@ public class ValidateBundleAction extends OneBusAwayNYCAdminActionSupport {
   }
 
   @Override
+  public String execute() {
+    _log.debug("in execute");
+    wikiUrl = getSourceUrl();
+    return SUCCESS;
+  }
+
+  @Override
   public String input() {
     _log.debug("in input");
     return SUCCESS;
@@ -128,25 +147,51 @@ public class ValidateBundleAction extends OneBusAwayNYCAdminActionSupport {
    * Uploads the bundle validate checks and uses them to test the validity of the bundle
    */
   public String runValidateBundle() {
-    Path csvTarget = uploadCsvFile(csvFile);
-    BundleValidationParseResults parseResults = _bundleCheckParserService.parseBundleChecksFile(csvTarget.toFile());
+    File inputFile;
+    Path csvTarget = null;
+    Reader csvInputFile = null;
+    if (wikiUrl.length() > 0) {
+      URL wikiInputUrl;
+      try {
+        wikiInputUrl = new URL(wikiUrl);
+        csvInputFile = new BufferedReader(
+            new InputStreamReader(wikiInputUrl.openStream()));
+      } catch (MalformedURLException e) {
+        return "bundleValidationResults";
+      } catch (IOException e) {
+        e.printStackTrace();
+        return "bundleValidationResults";
+      }
+    } else if (csvFile.length() > 0) {
+      csvTarget = uploadCsvFile(csvFile);
+      inputFile = csvTarget.toFile();
+      try {
+        csvInputFile = new FileReader(inputFile);
+      } catch (FileNotFoundException e) {
+        e.printStackTrace();
+        return "bundleValidationResults";
+      }
+    } else {
+      return "bundleValidationResults";
+    }
+    BundleValidationParseResults parseResults = _bundleCheckParserService.parseBundleChecksFile(csvInputFile);
     List<BundleValidateQuery> queryResults = _buildBundleQueriesService.buildQueries(parseResults.getParsedBundleChecks(), checkEnvironment);
     for (BundleValidateQuery query : queryResults) {
-      String queryString = query.getQuery();
       String queryResult = getQueryResult(query);
       query.setQueryResult(queryResult);
     }
     List<BundleValidationCheckResult> checkResults = checkResults(queryResults);
-    try {
-      Files.delete(csvTarget);
-    } catch (IOException e) {
-      _log.error("Exception while trying to delete temp .csv file");
-      e.printStackTrace();
-    }  
+    if (csvTarget != null) {
+      try {
+        Files.delete(csvTarget);
+      } catch (IOException e) {
+        _log.error("Exception while trying to delete temp .csv file");
+        e.printStackTrace();
+      }
+    }
     bundleValidationResults = checkResults;         
     return "bundleValidationResults";
   }
-    
   
   public Path uploadCsvFile(String csvFileName) {    
     Path csvTarget = null;
@@ -167,7 +212,7 @@ public class ValidateBundleAction extends OneBusAwayNYCAdminActionSupport {
     }
     return csvTarget;
   }
- 
+
   public String getQueryResult(BundleValidateQuery query) {
     String queryString = query.getQuery();
     String result = "";
@@ -256,5 +301,34 @@ public class ValidateBundleAction extends OneBusAwayNYCAdminActionSupport {
     } else {
       return null;
     }
+  }
+
+  /*
+   * This method will use the config service to retrieve the URL for report
+   * input parameters.  The value is stored in config.json.
+   *
+   * @return the URL to use to retrieve the query data to be reported on
+   */
+  private String getSourceUrl() {
+    String sourceUrl = "";
+
+    try {
+      List<Map<String, String>> components = _configurationServiceClient.getItems("config");
+      if (components == null) {
+        _log.info("_configurationServiceClient.getItems call failed");
+      }
+      for (Map<String, String> component: components) {
+        if (component.containsKey("component") && "admin".equals(component.get("component"))) {
+          if ("bundleDataTest".equals(component.get("key"))) {
+             sourceUrl = component.get("value");
+             break;
+          }
+        }
+      }
+    } catch (Exception e) {
+      _log.error("could not retrieve Data Validation URL from config:", e);
+    }
+
+    return sourceUrl;
   }
 }

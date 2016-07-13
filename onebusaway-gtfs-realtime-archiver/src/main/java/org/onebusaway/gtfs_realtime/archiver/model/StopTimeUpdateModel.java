@@ -44,7 +44,7 @@ public class StopTimeUpdateModel {
   @GenericGenerator(name = "increment", strategy = "increment")
   private long id;
   @Column(nullable = true, name = "stop_sequence")
-  private long stopSequence;
+  private Long stopSequence;
   @Column(nullable = true, name = "stop_id", length = 20)
   private String stopId;
   @Column(nullable = true, name = "arrival_delay")
@@ -73,7 +73,7 @@ public class StopTimeUpdateModel {
     this.id = id;
   }
 
-  public long getStopSequence() {
+  public Long getStopSequence() {
     return stopSequence;
   }
 

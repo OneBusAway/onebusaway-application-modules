@@ -36,7 +36,7 @@
   <link rel="shortcut icon" href="http://mta.info/siteimages/favicon.ico" type="image/x-icon"/>
 
   <script type="text/javascript" src="http://mta.info/js/csshorizontalmenu.js"><!-- //prevent jspx minimization --></script>
-  <script type="text/javascript" src="http://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"><!-- jspx --></script>
+  <script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"><!-- jspx --></script>
 
   <s:url var="url" value="/css/reset.css">
 	<s:param name="v"><s:property value="frontEndVersion" /></s:param>

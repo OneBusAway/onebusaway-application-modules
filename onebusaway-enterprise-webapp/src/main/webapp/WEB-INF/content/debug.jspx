@@ -31,7 +31,7 @@ html, body {
         height: 100%;
       }
 </style>
-<s:url var="url" value="http://maps.googleapis.com/maps/api/js">				
+<s:url var="url" value="https://maps.googleapis.com/maps/api/js">				
 	<s:param name="v">3</s:param>
 	<s:param name="client"><s:property value="googleMapsClientId" /></s:param>
 	<s:param name="sensor">false</s:param>

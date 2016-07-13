@@ -149,6 +149,7 @@
 #createDirectory,
 #compareBundles,
 #compareBuilds,
+#compareFixedRouteModes,
 #compareDiff {
   padding-top: 20px;
 }
@@ -165,7 +166,7 @@
   padding-left: 30px;
 }
 
-#Create #filenameError {
+#Create #filenameError, #copyFilenameError {
 	color: red;
 }
 
@@ -568,6 +569,41 @@
   float: left;
 }
 
+#Compare #fixedRouteDiffTable caption {
+	font-weight: bold;
+	font-size: 1.3em;
+	margin-bottom: .3em;
+}
+
+#Compare #fixedRouteDiffTable th {
+	margin-bottom: .1em;
+	padding: .3em;
+}
+
+#Compare #fixedRouteDiffTable tr:first-child td {
+	border-bottom: 1px solid gray;
+}
+
+#Compare #fixedRouteDiffTable .currentStopCt {
+	text-align: right;
+	padding-right: 30px;
+	background-color: #9F9;
+}
+
+#Compare #fixedRouteDiffTable .selectedStopCt {
+	text-align: right;
+	padding-right: 30px;
+	background-color: #F99;
+}
+
+#Compare #fixedRouteDiffTable .currentRpt {
+	background-color: #9F9;
+}
+
+#Compare #fixedRouteDiffTable .selectedRpt {
+	background-color: #F99;
+}
+
 #downloadLogs #downloadImg {
   float: left;
   margin-right: 5px;
@@ -723,6 +759,11 @@
 .validateBundle {
   font-size: 14px;
 }
+
+#csvWikiUrl {
+	width: 30em;
+}
+
 #bundleValidationResults {
   	border-collapse: collapse;
 }

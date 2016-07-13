@@ -3,11 +3,11 @@
   <parent>
     <artifactId>onebusaway</artifactId>
     <groupId>org.onebusaway</groupId>
-    <version>1.2.2-SNAPSHOT</version>
+    <version>1.2.2</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>onebusaway-application-modules</artifactId>
-  <version>1.1.15.29-cs-SNAPSHOT</version>
+  <version>1.1.15.30-cs-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>onebusaway-application-modules</name>

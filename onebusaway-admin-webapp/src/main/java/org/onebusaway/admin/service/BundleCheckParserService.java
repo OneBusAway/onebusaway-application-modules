@@ -15,18 +15,16 @@
  */
 package org.onebusaway.admin.service;
 
-import java.io.File;
-import java.util.List;
-
+import java.io.Reader;
 import org.onebusaway.admin.model.BundleValidationParseResults;
 
 /**
  * Provides a service to parse a file containing bundle validation checks used
- * to establish the validity of a transit data bundle. Specific implementations
+ * to establish the validity of a transit data bundle.  Specific implementations
  * could parse data from different file formats, such as .csv or .xlsx.
  * @author jpearson
  *
  */
 public interface BundleCheckParserService {
-  public BundleValidationParseResults parseBundleChecksFile(File checkFile);
+  public BundleValidationParseResults parseBundleChecksFile(Reader csvDataFile);
 }
