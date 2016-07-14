@@ -74,18 +74,18 @@
 					<img id="buildingTestProgress" src="${url}" alt="Ajax loader" class="progress" /> 
 					<label id="buildBundle_buildTestProgress" class="adminLabel">Bundle Build in Progress...</label>
 				</div>
-
-				<div id="buildBundle_testResultLink">
+				<!--
+				<div id="buildBundle_resultLink">
 					<label class="adminLabel">Result Link :</label>
-					<label id="testResultLink">
-
+					<label id="resultLink">
+					-->
 					<!-- -->
 					<!-- For IE -->
 					<!-- -->
-
+				<!--
 					<s:property value="" /></label>
 				</div>
-
+				-->
 				<div id="testProgressBarDiv">
 					<div id="testProgressBar">
 						<!--  space -->

@@ -22,7 +22,6 @@ import org.onebusaway.admin.model.BundleRequest;
 import org.onebusaway.admin.model.BundleResponse;
 import org.onebusaway.admin.service.BundleRequestService;
 import org.onebusaway.admin.service.EmailService;
-import org.onebusaway.admin.service.bundle.BundleBuildingService;
 import org.onebusaway.admin.service.server.BundleServerService;
 import org.onebusaway.util.services.configuration.ConfigurationService;
 import org.slf4j.Logger;
@@ -52,9 +51,6 @@ public class BundleRequestServiceImpl implements BundleRequestService, ServletCo
 	private String _instanceId;
   private Map<String, BundleResponse> _validationMap = new HashMap<String, BundleResponse>();
   private Map<String, BundleBuildResponse> _buildMap = new HashMap<String, BundleBuildResponse>();
-
-  @Autowired
-  private BundleBuildingService _bundleService;
 
   @Autowired
   public void setEmailService(EmailService service) {
@@ -115,11 +111,7 @@ public class BundleRequestServiceImpl implements BundleRequestService, ServletCo
    * Retrieve a BundleBuildResponse object for the given id.
    */
   public BundleBuildResponse lookupBuildRequest(String id) {
-    BundleBuildResponse bbr = _buildMap.get(id);
-    if (bbr == null) {
-      bbr = _bundleService.getBundleBuildResponseForId(id);
-    }
-    return bbr;
+	  return _buildMap.get(id);
   }
   
   /**
@@ -188,9 +180,6 @@ public class BundleRequestServiceImpl implements BundleRequestService, ServletCo
 
   private Integer inc() {
     synchronized (jobCounter) {
-      if (jobCounter == 0) {
-        jobCounter = _bundleService.getBundleBuildResponseMaxId();
-      }
       jobCounter++;
     }
     return jobCounter;
@@ -235,7 +224,6 @@ public class BundleRequestServiceImpl implements BundleRequestService, ServletCo
     bundleResponse.setBundleComment(bundleRequest.getBundleComment());
     _buildMap.put(bundleResponse.getId(), bundleResponse);
     bundleResponse.addStatusMessage("queueing...");
-    _bundleService.createBundleBuildResponse(bundleResponse);
     _executorService.execute(new BuildThread(bundleRequest, bundleResponse));
     return bundleResponse;
   }
@@ -280,6 +268,7 @@ public class BundleRequestServiceImpl implements BundleRequestService, ServletCo
           return;
         }
 
+        _log.info("calling validate(remote)");
         String url = "/validate/remote/" + _request.getBundleDirectory() + "/"
             + _request.getBundleBuildName() + "/"
             + _request.getId() + "/create";
@@ -409,7 +398,7 @@ public class BundleRequestServiceImpl implements BundleRequestService, ServletCo
           _response.setBundleResultLink(getResultLink(_request.getBundleName(), _request.getId(),
     			_request.getBundleStartDateString(), _request.getBundleEndDateString()));
           _buildMap.put(id, _response);
-          _bundleService.updateBundleBuildResponse(_response);
+
           // should this response look ok, query until it completes
           while (!isComplete(_response)) {
             url = "/build/remote/" + id + "/list";
@@ -418,7 +407,6 @@ public class BundleRequestServiceImpl implements BundleRequestService, ServletCo
             	_response.setBundleResultLink(getResultLink(_request.getBundleName(), _request.getId(),
             			_request.getBundleStartDateString(), _request.getBundleEndDateString()));
               _buildMap.put(id, _response);
-              _bundleService.updateBundleBuildResponse(_response);
             }
             pollCount++;
             Thread.sleep(5 * 1000);
@@ -446,7 +434,6 @@ public class BundleRequestServiceImpl implements BundleRequestService, ServletCo
           _response.addStatusMessage("shutting down server");
           _log.info("buildThread exiting, shutting down server");
           _bundleServer.stop(serverId);
-          _bundleService.updateBundleBuildResponse(_response);
           sendEmail(_request, _response);
           try {
             // allow machine to power down

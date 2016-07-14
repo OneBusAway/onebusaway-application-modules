@@ -35,12 +35,5 @@ public interface BundleBuildingService {
 
   String getDefaultAgencyId();
 
-  void createBundleBuildResponse(BundleBuildResponse bundleBuildResponse);
-
-  void updateBundleBuildResponse(BundleBuildResponse bundleBuildResponse);
-
-  BundleBuildResponse getBundleBuildResponseForId(String id);
-
-  int getBundleBuildResponseMaxId();
 
 }

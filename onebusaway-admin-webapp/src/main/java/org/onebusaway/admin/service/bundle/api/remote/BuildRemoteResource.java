@@ -57,10 +57,10 @@ public class BuildRemoteResource extends AuthenticatedResource {
   private static Logger _log = LoggerFactory.getLogger(BuildRemoteResource.class);
   private Map<String, BundleBuildResponse> _buildMap = new HashMap<String, BundleBuildResponse>();
   private ExecutorService _executorService = null;
-
+	
   @Autowired
   private BundleBuildingService _bundleService;
-
+  
   @PostConstruct
   public void setup() {
         _executorService = Executors.newFixedThreadPool(1);
@@ -112,6 +112,7 @@ public class BuildRemoteResource extends AuthenticatedResource {
       final MappingJsonFactory jsonFactory = new MappingJsonFactory();
       final JsonGenerator jsonGenerator = jsonFactory.createJsonGenerator(sw);
       // write back response
+      _log.error("returning id=" + bundleResponse.getId() + " for bundleResponse=" + bundleResponse);
       _mapper.writeValue(jsonGenerator, bundleResponse);
       response = Response.ok(sw.toString()).build();
     } catch (Exception any) {
@@ -136,13 +137,11 @@ public class BuildRemoteResource extends AuthenticatedResource {
       final MappingJsonFactory jsonFactory = new MappingJsonFactory();
       final JsonGenerator jsonGenerator = jsonFactory.createJsonGenerator(sw);
       BundleBuildResponse bbr = _buildMap.get(id);
-      if (bbr == null) {
-        bbr = _bundleService.getBundleBuildResponseForId(id);
-      }
       if (bbr != null && bbr.getException() != null) {
         _log.error("id=" + id + " has exception=" + bbr.getException());
       }
-      _mapper.writeValue(jsonGenerator, bbr);
+      _mapper.writeValue(jsonGenerator, _buildMap.get(id));
+
       response = Response.ok(sw.toString()).build();
     } catch (Exception any) {
       response = Response.serverError().build();
