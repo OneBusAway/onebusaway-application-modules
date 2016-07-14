@@ -63,6 +63,9 @@ public class BundleBuildResponse {
   private static final int BUNDLE_ID_LEN = 255;
   private static final int ID_LEN = 10;
   private static final int NAME_LEN = 255;
+  private static final int STATUS_LEN = 4096;
+  private static final int EX_MSG_LEN = 4096;
+  private static final int EX_ROOT_CAUSE_LEN = 4096;
 
   @Id
   @Column(nullable = true, name="id", length = ID_LEN)
@@ -85,7 +88,7 @@ public class BundleBuildResponse {
 
   @CollectionOfElements
   @LazyCollection (LazyCollectionOption.FALSE)
-  @Column(nullable = true, name="status_list", length = NAME_LEN)
+  @Column(nullable = true, name="status_list", length = STATUS_LEN)
 	private List<String> _statusList = Collections.synchronizedList(new ArrayList<String>());
 
   @CollectionOfElements
@@ -100,8 +103,8 @@ public class BundleBuildResponse {
 
   @Embedded
   @AttributeOverrides({
-    @AttributeOverride(name = "_msg", column = @Column(name = "exception_msg", length = 50)),
-    @AttributeOverride(name = "_rootCause", column = @Column(name = "exception_root_cause"))})
+    @AttributeOverride(name = "_msg", column = @Column(name = "exception_msg", length = EX_MSG_LEN)),
+    @AttributeOverride(name = "_rootCause", column = @Column(name = "exception_root_cause", length = EX_ROOT_CAUSE_LEN))})
 	private SerializableException _exception = null;
 
   @Column(nullable = true, name="is_complete", length = NAME_LEN)
@@ -206,6 +209,9 @@ public class BundleBuildResponse {
   }
   
 	public void addStatusMessage(String msg) {
+	  if (msg.length() > STATUS_LEN) {
+	    msg = msg.substring(0, STATUS_LEN - 1);
+	  }
 		_statusList.add(msg);
 	}
 
@@ -408,24 +414,38 @@ public class BundleBuildResponse {
 	 public void setBundleComment(String bundleComment) {
 		 this.bundleComment = bundleComment;
 	 }
-	 
+
 	 private static class SerializableException extends Exception implements Serializable {
 		 private String _msg = "";
 		 private String _rootCause = "";
 
+		 public SerializableException() {
+		   _msg = "";
+		   _rootCause = "";
+		 }
+
 		 public SerializableException(String msg, Exception rootCause) {
 			 _msg = rootCause.getClass().getName() + ":" + msg;
+			 if (msg.length() > EX_MSG_LEN) {
+			   msg = msg.substring(0, EX_MSG_LEN - 1);
+			 }
 			 int count = 0;
 			 for (StackTraceElement ste:rootCause.getStackTrace()) {
 				 _rootCause += ste.toString() + "\n";
 				 count++;
 				 if (count > 1) break;
 			 }
+       if (_rootCause.length() > EX_ROOT_CAUSE_LEN) {
+         _rootCause = _rootCause.substring(0, EX_ROOT_CAUSE_LEN - 1);
+       }
 		 }
 
 		 public SerializableException(Exception newException, Exception rootCause) {
 			 _msg = newException.getClass().getName() + ":"  + newException.getMessage() 
 					 + ";  " + rootCause.getClass().getName() + ":" + rootCause.getMessage();
+       if (_msg.length() > EX_MSG_LEN) {
+         _msg = _msg.substring(0, EX_MSG_LEN - 1);
+       }
 
 			 int count = 0;
 			 for (StackTraceElement ste:newException.getStackTrace()) {
@@ -439,6 +459,9 @@ public class BundleBuildResponse {
 				 _rootCause += ste.toString() + "\n";
 				 if (count > 1) break;
 			 }
+       if (_rootCause.length() > EX_MSG_LEN) {
+         _rootCause = _rootCause.substring(0, EX_MSG_LEN - 1);
+       }
 		 }
 
 		 public String getMessage() {
