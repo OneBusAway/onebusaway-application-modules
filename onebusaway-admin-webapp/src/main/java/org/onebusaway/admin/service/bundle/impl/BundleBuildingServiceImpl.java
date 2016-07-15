@@ -171,10 +171,7 @@ public class BundleBuildingServiceImpl implements BundleBuildingService {
       response.addStatusMessage("downloading gtfs " + file);
       // write some meta_data into the file name for later use
       String agencyDir = parseAgencyDir(parentDir, file);
-      
       String gtfsFileName = _fileService.get(file, tmpDirectory);
-      
-      
       // if we have metadata, rename file to encode metadata
       if (agencyDir != null) {
         File toRename = new File(gtfsFileName);
@@ -198,7 +195,7 @@ public class BundleBuildingServiceImpl implements BundleBuildingService {
     // download aux files, which could be stif or hastus, etc
     List<String> aux = _fileService.list(
         bundleDir + "/" + _fileService.getAuxPath(), -1);
-    parentDir = _fileService.getGtfsPath(); // Parent of agency dir
+    parentDir = _fileService.getAuxPath(); // Parent of agency dir
     for (String file : aux) {
       _log.info("downloading aux:" + aux);
       response.addStatusMessage("downloading aux files " + file);
