@@ -188,7 +188,7 @@ public class BundleRequestServiceImpl implements BundleRequestService, ServletCo
 
   private Integer inc() {
     synchronized (jobCounter) {
-      if (jobCounter == 0) {
+      if (jobCounter == 0 && _bundleService != null) {
         jobCounter = _bundleService.getBundleBuildResponseMaxId();
       }
       jobCounter++;
