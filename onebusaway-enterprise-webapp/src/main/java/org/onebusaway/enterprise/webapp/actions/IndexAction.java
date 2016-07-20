@@ -18,6 +18,7 @@ package org.onebusaway.enterprise.webapp.actions;
 
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.onebusaway.presentation.services.realtime.RealtimeService;
 import org.onebusaway.util.services.configuration.ConfigurationService;
 import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
@@ -44,6 +45,10 @@ public class IndexAction extends OneBusAwayEnterpriseActionSupport {
   public String getGoogleMapsClientId() {
     return _configurationService.getConfigurationValueAsString("display.googleMapsClientId", "");    
   }
+  
+  public String getGoogleMapsChannelId() {
+	  return _configurationService.getConfigurationValueAsString("display.googleMapsChannelId", "");    
+  }
 
   public String getGoogleAdClientId() {
 	return _configurationService.getConfigurationValueAsString("display.googleAdsClientId", "");    
@@ -67,7 +72,10 @@ public class IndexAction extends OneBusAwayEnterpriseActionSupport {
     // actions, we have to have this action check to see if it's being called as a "default" action and
     // return the 404 message if so. There has to be a better way than this? 
     if((name.equals("") || name.equals("index")) && (namespace.equals("") || namespace.equals("/"))) {
-      return SUCCESS;
+    	
+      if (!StringUtils.isEmpty(getGoogleMapsClientId())) {
+    	  return SUCCESS;
+      }
     }
 
     return "NotFound";
