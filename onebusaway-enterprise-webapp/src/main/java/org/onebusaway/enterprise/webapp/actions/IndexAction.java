@@ -72,10 +72,7 @@ public class IndexAction extends OneBusAwayEnterpriseActionSupport {
     // actions, we have to have this action check to see if it's being called as a "default" action and
     // return the 404 message if so. There has to be a better way than this? 
     if((name.equals("") || name.equals("index")) && (namespace.equals("") || namespace.equals("/"))) {
-    	
-      if (!StringUtils.isEmpty(getGoogleMapsClientId())) {
-    	  return SUCCESS;
-      }
+    	return SUCCESS;
     }
 
     return "NotFound";
