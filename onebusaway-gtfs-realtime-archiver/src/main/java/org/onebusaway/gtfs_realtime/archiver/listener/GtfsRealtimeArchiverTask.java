@@ -250,7 +250,7 @@ public class GtfsRealtimeArchiverTask implements ApplicationListener {
       try {
         update();
       } catch (Throwable ex) {
-        _log.warn("Error updating from GTFS-realtime data sources", ex);
+        _log.warn("Error updating from GTFS-realtime data sources for url= " + _tripUpdatesUrl, ex);
       }
     }
   }

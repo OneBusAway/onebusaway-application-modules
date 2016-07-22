@@ -30,13 +30,17 @@ function createLinkAvlModule(title, urlinput, timestamp, latlon, tripVal, route,
 	
 	var module = {};
 
-	module.refresh = function(agencyId, beginDate, numDays, vehicleId, beginTime) {
+	module.refresh = function(agencyId, beginDate, numDays, rawVehicleId, beginTime) {
 	
 		linkWeb = urlinput.val();
+		vehicleId = hashVehicleId(rawVehicleId);
 		
-		var linkUrl = "http://" + linkWeb + 
-			"/services/tss_lab/GetOnScheduleTrains?TimeInterval=5";
-	
+//		var linkUrl = "http://" + linkWeb + 
+//			"/services/tss_lab/GetOnScheduleTrains?TimeInterval=5";
+//		var linkUrl = "http://localhost:9999/onebusaway-admin-webapp" +
+//			"/admin/vehiclepredictions/link-proxy.action"
+		var linkUrl = "./link-proxy.action"
+			
 		jQuery.ajax({
 			url: linkUrl,
 			type: "GET",
@@ -44,7 +48,7 @@ function createLinkAvlModule(title, urlinput, timestamp, latlon, tripVal, route,
 			success: function(response) {
 				var d = xml2js(response);
 				for (var i = 0; i < d.Trip.length; i++) {
-					if (d.Trip[i].VehicleId == vehicleId) {
+					if (hashVehicleId(d.Trip[i].VehicleId) == vehicleId) {
 						processLinkTrip(d.Trip[i]);
 						return;
 					}
@@ -59,7 +63,8 @@ function createLinkAvlModule(title, urlinput, timestamp, latlon, tripVal, route,
 			route.html("...");
 			schdev.html("...");
 			block.html("...");
-			trip.html("...");
+			if (trip != undefined && trip != null  & trip.html != undefined)
+				trip.html("...");
 			nextstopid.html("...");	
 		}
 	}
@@ -115,6 +120,8 @@ function createLinkAvlModule(title, urlinput, timestamp, latlon, tripVal, route,
 				return stopUpdates[i];
 			}
 		}
+		// we fell through, return last stop
+		return stopUpdates[stopUpdates.length-1];
 	}
 	
 	function xml2js(xml) {
@@ -155,6 +162,19 @@ function createLinkAvlModule(title, urlinput, timestamp, latlon, tripVal, route,
 	function setAge(d) {
 		avlAge = new Date(d).getTime();
 		module.updateAge();
+	}
+	
+	function hashVehicleId(aVehicleId) {
+		if (aVehicleId == null) return null;
+		var array = aVehicleId.split(":");
+		var output = "";
+		array.sort();
+		for (i=0; i<array.length; i++) {
+			output += array[i];
+			output += ":";
+		}
+		return output.substring(0, output.length);
+
 	}
 	
 	module.updateAge = function() {

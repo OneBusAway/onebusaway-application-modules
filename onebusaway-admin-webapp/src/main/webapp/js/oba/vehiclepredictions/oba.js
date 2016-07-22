@@ -176,7 +176,7 @@ function createObaModule(title, urlinput, timestamp, latlon, trip, route, block,
 		var lastStopPredUrl = "http://" + obaWeb + obaApiPrefix
 			+ "/api/where/arrival-and-departure-for-stop/"
 			+ agencyId + "_" + stopId + ".json?key=OBAKEY&tripId="
-			+ agencyId + "_" + tripId + "&vehicleId=" + agencyId + "_" + vehicleId 
+			+ agencyId + "_" + tripId + "&vehicleId=" + agencyId + "_" + encodeURI(vehicleId) 
 			+ "&serviceDate=" + serviceDate.getTime();
 
 		jQuery.ajax({
@@ -186,10 +186,14 @@ function createObaModule(title, urlinput, timestamp, latlon, trip, route, block,
 			dataType: "jsonp",
 			async: false,
 			success: function(response) {
-				var e = response.data.entry;
-				var pred = isArrival ? e.predictedArrivalTime : e.predictedDepartureTime;
-				attrs[attrsKey] = new Date(pred);
-				label.html(formatTime(new Date(pred)));
+				if (response.data != null && response.data.entry != undefined) {
+					var e = response.data.entry;
+					var pred = isArrival ? e.predictedArrivalTime : e.predictedDepartureTime;
+					attrs[attrsKey] = new Date(pred);
+					label.html(formatTime(new Date(pred)));
+				} else {
+					label.html("...");
+				}
 			},
 			fail: function() {
 				label.html("...");
