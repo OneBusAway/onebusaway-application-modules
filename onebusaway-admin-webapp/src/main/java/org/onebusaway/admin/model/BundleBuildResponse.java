@@ -426,7 +426,7 @@ public class BundleBuildResponse {
 
 		 public SerializableException(String msg, Exception rootCause) {
 			 _msg = rootCause.getClass().getName() + ":" + msg;
-			 if (msg.length() > EX_MSG_LEN) {
+			 if (msg != null && msg.length() > EX_MSG_LEN) {
 			   msg = msg.substring(0, EX_MSG_LEN - 1);
 			 }
 			 int count = 0;

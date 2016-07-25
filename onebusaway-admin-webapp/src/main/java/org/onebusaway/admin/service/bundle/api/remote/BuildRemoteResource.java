@@ -166,7 +166,7 @@ public class BuildRemoteResource extends AuthenticatedResource {
         _response.addStatusMessage("in run queue");
         _bundleService.doBuild(_request, _response);
         } catch (Exception any) {
-          _log.error("exception caught (already logged?)=" + any);
+          _log.error("exception caught (already logged?)=" + any, any);
         } finally {
           _response.setComplete(true);
         }
