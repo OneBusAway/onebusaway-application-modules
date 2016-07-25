@@ -18,16 +18,6 @@
 	</properties>
 
 	<repositories>
-    <repository>
-      <id>releases-obaweb-repo</id>
-      <name>OneBusAway OBAWEB Release Repo</name>
-      <url>http://repo.obaweb.org:8080/archiva/repository/releases/</url> 
-    </repository>
-    <snapshotRepository>
-      <id>snapshots-obaweb-repo</id>
-      <name>OneBusAway OBAWEB Snapshot Repo</name>
-      <url>http://repo.obaweb.org:8080/archiva/repository/snapshots/</url> 
-    </snapshotRepository>
 		<!-- Required for the xwiki-rendering-macros -->
 <!--
     <repository>
