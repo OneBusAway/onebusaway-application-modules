@@ -86,6 +86,8 @@ public class BaseModTask {
     mod.getWriter().getEntityClasses().add(PatternPair.class);
     
     TransformFactory factory = mod.getTransformFactory();
+    // the transformer may be called twice causing erroneous duplicate messages
+    mod.getReader().setOverwriteDuplicates(true);
     
     addAgencyMappings(mod.getReader(), gtfsBundle);
     
