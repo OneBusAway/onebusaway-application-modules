@@ -9,7 +9,7 @@ problem reporting admin interface.
 
 ## Sample Request
 
-http://api.pugetsound.onebusaway.org/api/where/report-problem-with-trip/1_79430293.xml?key=TEST&serviceDate=1291536000000&vehicleId=1_3521&stopId=1_75403&code=vehicle_never_came
+http://api.pugetsound.onebusaway.org/api/where/report-problem-with-trip/1_79430293.xml?key=TEST&amp;serviceDate=1291536000000&amp;vehicleId=1_3521&amp;stopId=1_75403&amp;code=vehicle_never_came
 
 ## Sample Response
 
