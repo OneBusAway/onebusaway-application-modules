@@ -6,7 +6,7 @@ Register an alarm for a single arrival and departure at a stop, with a callback 
 
 ## Sample Request
 
-http://api.pugetsound.onebusaway.org/api/where/register-alarm-for-arrival-and-departure-at-stop/1_75403.xml?key=TEST&tripId=1_15551341&serviceDate=1291536000000&vehicleId=1_3521&stopSequence=42&alarmTimeOffset=120&url=http://host/callback_url
+http://api.pugetsound.onebusaway.org/api/where/register-alarm-for-arrival-and-departure-at-stop/1_75403.xml?key=TEST&amp;tripId=1_15551341&amp;serviceDate=1291536000000&amp;vehicleId=1_3521&amp;stopSequence=42&amp;alarmTimeOffset=120&amp;url=http://host/callback_url
 
 ## Sample Response
 
