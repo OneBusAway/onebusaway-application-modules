@@ -19,6 +19,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import javax.annotation.PostConstruct;
+
 import org.onebusaway.container.ConfigurationParameter;
 import org.onebusaway.presentation.services.realtime.PresentationService;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
@@ -39,6 +41,13 @@ public class PresentationServiceImpl implements PresentationService {
 
   private static Logger _log = LoggerFactory.getLogger(PresentationServiceImpl.class);
   
+  private static final String APPROACHING_TEXT = "approaching";
+  private static final String ONE_STOP_WORD = "stop";
+  private static final String MULTIPLE_STOPS_WORD = "stops";
+  private static final String ONE_MILE_WORD = "mile";
+  private static final String MULTIPLE_MILES_WORD = "miles";
+  private static final String AWAY_WORD = "away";
+
   private boolean _showArrivals = false;
 
   private Long _now = null;
@@ -51,6 +60,12 @@ public class PresentationServiceImpl implements PresentationService {
   private int _expiredTimeout = 300;
   private float _previousTripFilterDistanceMiles = 5.0f;
   private boolean _includeRequiresPhase = false;
+  int atStopThresholdInFeet = 100;
+  int approachingThresholdInFeet = 500;
+  int distanceAsStopsThresholdInFeet = 2640;
+  int distanceAsStopsThresholdInStops = 3;
+  int distanceAsStopsMaximumThresholdInFeet = 2640;
+  boolean firstLoad;
 
   @ConfigurationParameter
   public void setAtStopThresholdInFeet(int atStopThresholdInFeet) {
@@ -109,6 +124,11 @@ public class PresentationServiceImpl implements PresentationService {
       return System.currentTimeMillis();
   }
 
+  @PostConstruct
+  public void start(){
+    firstLoad = true;
+  }
+
   @Override
   public Boolean isInLayover(TripStatusBean statusBean) {
     if(statusBean != null) {
@@ -151,12 +171,19 @@ public class PresentationServiceImpl implements PresentationService {
 
     return null;
   }
-  
+
   @Override
   public String getPresentableDistance(SiriDistanceExtension distances) {
-    return getPresentableDistance(distances, "approaching", "stop", "stops", "mile", "miles", "away");
+    return getPresentableDistance(distances, APPROACHING_TEXT, ONE_STOP_WORD, MULTIPLE_STOPS_WORD, 
+        ONE_MILE_WORD, MULTIPLE_MILES_WORD, AWAY_WORD);
   }
-  
+
+  @Override
+  public String getPresentableDistance(Double distanceFromStop, Integer numberOfStopsAway) {
+    return getPresentableDistance(distanceFromStop, numberOfStopsAway, APPROACHING_TEXT, ONE_STOP_WORD, 
+          MULTIPLE_STOPS_WORD, ONE_MILE_WORD, MULTIPLE_MILES_WORD, AWAY_WORD);
+  }
+/*  Used by nyc
   @Override
   public String getPresentableDistance(SiriDistanceExtension distances, String approachingText, 
       String oneStopWord, String multipleStopsWord, String oneMileWord, String multipleMilesWord, String awayWord) {
@@ -192,7 +219,54 @@ public class PresentationServiceImpl implements PresentationService {
     
     return r;
   }
-  
+*/  
+
+  @Override
+  public String getPresentableDistance(SiriDistanceExtension distances, String approachingText, 
+      String oneStopWord, String multipleStopsWord, String oneMileWord, String multipleMilesWord, String awayWord) {
+
+    Double distanceFromStop = distances.getDistanceFromCall();
+    Integer numberOfStopsAway = distances.getStopsFromCall();
+
+    return getPresentableDistance(distanceFromStop, numberOfStopsAway, approachingText, oneStopWord, 
+        multipleStopsWord, oneMileWord, multipleMilesWord, awayWord);
+  }
+
+  @Override
+  public String getPresentableDistance(Double distanceFromStop, Integer numberOfStopsAway, String approachingText, 
+        String oneStopWord, String multipleStopsWord, String oneMileWord, String multipleMilesWord, String awayWord){
+    String r = "";
+    
+    // meters->feet
+    double feetAway = distanceFromStop * 3.2808399;
+
+    if(feetAway < atStopThresholdInFeet) {
+      r = "at " + oneStopWord;
+
+    } else if(feetAway < approachingThresholdInFeet) {
+      r = approachingText;
+
+    } else {
+      if(feetAway <= distanceAsStopsMaximumThresholdInFeet && 
+          (numberOfStopsAway <= distanceAsStopsThresholdInStops 
+          || feetAway <= distanceAsStopsThresholdInFeet)) {
+        
+        if(numberOfStopsAway == 0)
+          r = "< 1 " + oneStopWord + " " + awayWord;
+        else
+          r = numberOfStopsAway == 1
+          ? "1 " + oneStopWord + " " + awayWord
+              : numberOfStopsAway + " " + multipleStopsWord + " " + awayWord;
+
+      } else {
+        double milesAway = (float)feetAway / 5280;
+        r = String.format("%1.1f " + multipleMilesWord + " " + awayWord, milesAway);
+      }
+    }
+
+    return r;
+  }
+
   /**
    * Filter logic: these methods determine which buses are shown in different request contexts. By 
    * default, OBA reports all vehicles both scheduled and tracked, which one may or may not want.
@@ -218,21 +292,20 @@ public class PresentationServiceImpl implements PresentationService {
 	      _log.debug("  " + statusBean.getVehicleId() + " filtered out because D.A.T. is NaN.");
 	      return false;
 	    }
-    
-    
+
 	    // onebusaway-application-modules does not use phase!
 	    if (_includeRequiresPhase  && statusBean.getPhase() == null) {
 	      _log.debug("  " + statusBean.getVehicleId() + " filtered out because phase is null.");
 	      return false;
 	    }
-	    
+
 	    // TEMPORARY MTA THING FOR BX-RELEASE
 	    // hide buses that are on detour from a-d queries
 	    if(isOnDetour(statusBean)) {
 	      _log.debug("  " + statusBean.getVehicleId() + " filtered out because of detour.");
 	      return false;
 	    }
-	    
+
 	    // not in-service
 	    String phase = statusBean.getPhase();
 	    if(phase != null 
@@ -242,14 +315,14 @@ public class PresentationServiceImpl implements PresentationService {
 	      _log.debug("  " + statusBean.getVehicleId() + " filtered out because phase is not in progress.");      
 	      return false;
 	    }
-	
+
 	    // disabled
 	    String status = statusBean.getStatus();
 	    if(status != null && status.toUpperCase().equals("DISABLED")) {
 	      _log.debug("  " + statusBean.getVehicleId() + " filtered out because it is disabled.");
 	      return false;
 	    }
-	
+
 	    if (getTime() - statusBean.getLastUpdateTime() >= 1000 * _expiredTimeout) {
 	      _log.debug("  " + statusBean.getVehicleId() + " filtered out because data is expired.");
 	      return false;
@@ -257,7 +330,7 @@ public class PresentationServiceImpl implements PresentationService {
     }
     return true;
   }
-  
+
   /***
    * These rules are just for SIRI SM calls. 
    */
@@ -277,7 +350,7 @@ public class PresentationServiceImpl implements PresentationService {
 		if(adBean.getScheduledArrivalTime() > 0 && adBean.getScheduledArrivalTime() < System.currentTimeMillis())
 			return false;
 	}
-   
+
     // wrap-around logic
     String phase = status.getPhase();
     TripBean activeTrip = status.getActiveTrip();
@@ -289,11 +362,11 @@ public class PresentationServiceImpl implements PresentationService {
 	  _log.debug("  " + status.getVehicleId() + " filtered out due to trip block sequence");
 	  return false;
 	}
-	
+
 	// only buses that are on the same or previous trip as the a-d make it to this point:
 	if(activeTrip != null
       && !adTripBean.getId().equals(activeTrip.getId())) {
-		
+
       double distanceAlongTrip = status.getDistanceAlongTrip();
       double totalDistanceAlongTrip = status.getTotalDistanceAlongTrip();
 
@@ -304,7 +377,7 @@ public class PresentationServiceImpl implements PresentationService {
 	      return false;
       }
 	}
-	
+
 	// filter out buses that are in layover at the beginning of the previous trip
 	if(phase != null && 
         (phase.toUpperCase().equals("LAYOVER_BEFORE") || phase.toUpperCase().equals("LAYOVER_DURING"))) {
@@ -312,7 +385,7 @@ public class PresentationServiceImpl implements PresentationService {
       double distanceAlongTrip = status.getDistanceAlongTrip();
       double totalDistanceAlongTrip = status.getTotalDistanceAlongTrip();
       double ratio = distanceAlongTrip / totalDistanceAlongTrip;
-      
+
       if(activeTrip != null
             && !adTripBean.getId().equals(activeTrip.getId()) 
             && ratio < 0.50) {
@@ -345,7 +418,7 @@ public class PresentationServiceImpl implements PresentationService {
       double distanceAlongTrip = status.getDistanceAlongTrip();
       double totalDistanceAlongTrip = status.getTotalDistanceAlongTrip();
       double ratio = distanceAlongTrip / totalDistanceAlongTrip;
-      
+
       // if the bus isn't serving the trip this arrival and departure is for AND 
       // the bus is NOT on the previous trip in the block, but at the end of that trip (ready to serve
       // the trip this arrival and departure is for), filter that out.
@@ -356,7 +429,7 @@ public class PresentationServiceImpl implements PresentationService {
         return false;
       }
     } 
-    
+
     /*else {
       // if the bus isn't serving the trip this arrival and departure is for, filter out--
       // since the bus is not in layover now.
@@ -366,7 +439,7 @@ public class PresentationServiceImpl implements PresentationService {
         //return false;
       }
     }*/
-    
+
     return true;
   }
 
