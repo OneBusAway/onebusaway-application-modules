@@ -75,7 +75,6 @@ public class VehicleMonitoringAction extends ApiActionSupport
   @Autowired
   private RealtimeService _realtimeService;
   
-  @Autowired
   private GoogleAnalyticsServiceImpl _gaService;
   
   private Siri _response;
@@ -101,6 +100,11 @@ public class VehicleMonitoringAction extends ApiActionSupport
 
   public void setType(String type) {
     _type = type;
+  }
+
+  @Autowired
+  public void set_gaService(GoogleAnalyticsServiceImpl _gaService) {
+    this._gaService = _gaService;
   }
 
   //@Override
@@ -370,9 +374,6 @@ public class VehicleMonitoringAction extends ApiActionSupport
   }
   
   private void processGoogleAnalytics(){
-    if (_gaService ==  null) {
-      return;
-    }
 	  processGoogleAnalyticsPageView();
 	  processGoogleAnalyticsApiKeys();  
   }
