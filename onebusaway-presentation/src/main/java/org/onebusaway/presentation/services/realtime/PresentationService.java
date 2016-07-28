@@ -43,4 +43,11 @@ public interface PresentationService {
   // for stops and vehicles
   boolean include(ArrivalAndDepartureBean adBean, TripStatusBean status);
 
+  public String getPresentableDistance(Double distanceFromStop, Integer numberOfStopsAway);
+
+  public String getPresentableDistance(Double distanceFromStop,
+      Integer numberOfStopsAway, String approachingText, String oneStopWord,
+      String multipleStopsWord, String oneMileWord, String multipleMilesWord,
+      String awayWord);
+
 }

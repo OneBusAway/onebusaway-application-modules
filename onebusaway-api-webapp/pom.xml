@@ -34,10 +34,22 @@
     </dependency>
 
     <!-- This is the original SIRI API implementation that we hope to eventually move away from -->
+    <!--
     <dependency>
       <groupId>org.onebusaway</groupId>
       <artifactId>onebusaway-siri-api</artifactId>
       <version>1.0.0</version>
+    </dependency>
+    -->
+    <dependency>
+        <groupId>org.onebusaway</groupId>
+        <artifactId>onebusaway-siri-api-v13</artifactId>
+        <version>${onebusaway-siri-1-api-version}</version>
+    </dependency>
+    <dependency>
+        <groupId>org.onebusaway</groupId>
+        <artifactId>onebusaway-siri-api-v20</artifactId>
+        <version>${onebusaway-siri-2-api-version}</version>
     </dependency>
 
     <dependency>
