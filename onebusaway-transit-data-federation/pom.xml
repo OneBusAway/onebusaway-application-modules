@@ -3,7 +3,7 @@
   <parent>
     <groupId>org.onebusaway</groupId>
     <artifactId>onebusaway-application-modules</artifactId>
-    <version>1.1.15.30-st-SNAPSHOT</version>
+    <version>1.1.15.31-st-SNAPSHOT</version>
   </parent>
   <artifactId>onebusaway-transit-data-federation</artifactId>
   <packaging>jar</packaging>
@@ -35,6 +35,17 @@
       <version>${onebusaway-siri-version}</version>
     </dependency>
 
+    <dependency>
+        <groupId>org.onebusaway</groupId>
+        <artifactId>onebusaway-siri-api-v13</artifactId>
+        <version>${onebusaway-siri-1-api-version}</version>
+    </dependency>
+    <!-- -->
+    <dependency>
+        <groupId>org.onebusaway</groupId>
+        <artifactId>onebusaway-siri-api-v20</artifactId>
+        <version>${onebusaway-siri-2-api-version}</version>
+    </dependency>
     <dependency>
         <groupId>org.codehaus.jackson</groupId>
         <artifactId>jackson-mapper-asl</artifactId>

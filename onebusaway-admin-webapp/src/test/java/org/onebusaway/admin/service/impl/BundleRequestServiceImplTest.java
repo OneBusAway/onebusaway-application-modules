@@ -190,6 +190,7 @@ public class BundleRequestServiceImplTest {
   
   @Test
   public void testBuild() throws Exception {
+    assertTrue(true);
     BundleBuildRequest req = new BundleBuildRequest();
     String key= "2012Jan";
     //String key = "m34"; // use for faster testing

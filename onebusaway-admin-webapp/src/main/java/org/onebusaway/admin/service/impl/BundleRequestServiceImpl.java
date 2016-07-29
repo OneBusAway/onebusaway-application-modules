@@ -116,7 +116,7 @@ public class BundleRequestServiceImpl implements BundleRequestService, ServletCo
    */
   public BundleBuildResponse lookupBuildRequest(String id) {
     BundleBuildResponse bbr = _buildMap.get(id);
-    if (bbr == null) {
+    if (bbr == null && _bundleService != null) {
       bbr = _bundleService.getBundleBuildResponseForId(id);
     }
     return bbr;
@@ -188,7 +188,7 @@ public class BundleRequestServiceImpl implements BundleRequestService, ServletCo
 
   private Integer inc() {
     synchronized (jobCounter) {
-      if (jobCounter == 0) {
+      if (jobCounter == 0 && _bundleService != null) {
         jobCounter = _bundleService.getBundleBuildResponseMaxId();
       }
       jobCounter++;
@@ -235,7 +235,9 @@ public class BundleRequestServiceImpl implements BundleRequestService, ServletCo
     bundleResponse.setBundleComment(bundleRequest.getBundleComment());
     _buildMap.put(bundleResponse.getId(), bundleResponse);
     bundleResponse.addStatusMessage("queueing...");
-    _bundleService.createBundleBuildResponse(bundleResponse);
+    if (_bundleService != null) {
+      _bundleService.createBundleBuildResponse(bundleResponse);
+    }
     _executorService.execute(new BuildThread(bundleRequest, bundleResponse));
     return bundleResponse;
   }
@@ -409,7 +411,9 @@ public class BundleRequestServiceImpl implements BundleRequestService, ServletCo
           _response.setBundleResultLink(getResultLink(_request.getBundleName(), _request.getId(),
     			_request.getBundleStartDateString(), _request.getBundleEndDateString()));
           _buildMap.put(id, _response);
-          _bundleService.updateBundleBuildResponse(_response);
+          if (_bundleService != null) {
+            _bundleService.updateBundleBuildResponse(_response);
+          }
           // should this response look ok, query until it completes
           while (!isComplete(_response)) {
             url = "/build/remote/" + id + "/list";
@@ -418,7 +422,9 @@ public class BundleRequestServiceImpl implements BundleRequestService, ServletCo
             	_response.setBundleResultLink(getResultLink(_request.getBundleName(), _request.getId(),
             			_request.getBundleStartDateString(), _request.getBundleEndDateString()));
               _buildMap.put(id, _response);
-              _bundleService.updateBundleBuildResponse(_response);
+              if (_bundleService != null) {
+                _bundleService.updateBundleBuildResponse(_response);
+              }
             }
             pollCount++;
             Thread.sleep(5 * 1000);
@@ -446,7 +452,9 @@ public class BundleRequestServiceImpl implements BundleRequestService, ServletCo
           _response.addStatusMessage("shutting down server");
           _log.info("buildThread exiting, shutting down server");
           _bundleServer.stop(serverId);
-          _bundleService.updateBundleBuildResponse(_response);
+          if (_bundleService != null) {
+            _bundleService.updateBundleBuildResponse(_response);
+          }
           sendEmail(_request, _response);
           try {
             // allow machine to power down

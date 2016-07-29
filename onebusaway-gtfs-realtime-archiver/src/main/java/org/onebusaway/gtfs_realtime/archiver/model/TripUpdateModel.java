@@ -69,7 +69,7 @@ public class TripUpdateModel implements FeedEntityModel {
   @Column(nullable = true, name = "timestamp")
   private Date timestamp;
   @Column(nullable = true, name = "delay")
-  private int delay;
+  private Integer delay;
 
 
   @OneToMany(cascade = {

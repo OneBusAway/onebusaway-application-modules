@@ -3,7 +3,7 @@
 	<parent>
 		<groupId>org.onebusaway</groupId>
 		<artifactId>onebusaway-application-modules</artifactId>
-		<version>1.1.15.30-st-SNAPSHOT</version>
+		<version>1.1.15.31-st-SNAPSHOT</version>
 	</parent>
 	<artifactId>onebusaway-admin-webapp</artifactId>
 	<packaging>war</packaging>
@@ -21,11 +21,11 @@
 		<!-- Required for the xwiki-rendering-macros -->
     <repository>
       <id>releases-camsys-repo</id>
-      <url>http://developer.onebusaway.org/archiva/repository/releases/</url> 
+      <url>http://repo.obaweb.org:8080/archiva/repository/releases/</url> 
     </repository>
     <repository>
       <id>snapshots-camsys-repo</id>
-      <url>http://developer.onebusaway.org/archiva/repository/snapshots/</url> 
+      <url>http://repo.obaweb.org:8080/archiva/repository/snapshots/</url> 
     </repository>
     <repository>
       <id>public.onebusaway.org</id>
@@ -203,7 +203,7 @@
 		<dependency>
 			<groupId>org.onebusaway</groupId>
 			<artifactId>onebusaway-king-county-metro-gtfs</artifactId>
-			<version>0.0.10-st</version>
+			<version>0.0.11-st-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<artifactId>onebusaway-csv-entities</artifactId>

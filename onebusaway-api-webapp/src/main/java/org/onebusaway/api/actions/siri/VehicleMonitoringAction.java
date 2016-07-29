@@ -60,6 +60,7 @@ public class VehicleMonitoringAction extends ApiActionSupport
     implements ServletRequestAware, ServletResponseAware {
 
   private static final long serialVersionUID = 1L;
+
   protected static Logger _log = LoggerFactory.getLogger(VehicleMonitoringAction.class);
   
   private static final int V3 = 3;
@@ -74,7 +75,6 @@ public class VehicleMonitoringAction extends ApiActionSupport
   @Autowired
   private RealtimeService _realtimeService;
   
-  @Autowired
   private GoogleAnalyticsServiceImpl _gaService;
   
   private Siri _response;
@@ -100,6 +100,11 @@ public class VehicleMonitoringAction extends ApiActionSupport
 
   public void setType(String type) {
     _type = type;
+  }
+
+  @Autowired
+  public void set_gaService(GoogleAnalyticsServiceImpl _gaService) {
+    this._gaService = _gaService;
   }
 
   //@Override

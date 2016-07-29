@@ -7,7 +7,7 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>onebusaway-application-modules</artifactId>
-  <version>1.1.15.30-st-SNAPSHOT</version>
+  <version>1.1.15.31-st-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>onebusaway-application-modules</name>
@@ -23,6 +23,8 @@
     <gtfs-version>1.3.8-SNAPSHOT</gtfs-version>
     <gtfs-api-version>1.2.2</gtfs-api-version>
     <onebusaway-siri-version>1.0.6</onebusaway-siri-version>
+    <onebusaway-siri-1-api-version>1.0.1</onebusaway-siri-1-api-version>
+    <onebusaway-siri-2-api-version>1.0.3</onebusaway-siri-2-api-version>
     <wiki_integration_version>1.0.0</wiki_integration_version>
     <slf4j.version>1.7.5</slf4j.version>
     <guava-version>16.0.1</guava-version>
@@ -47,6 +49,13 @@
       <id>public.onebusaway.org</id>
       <url>http://nexus.onebusaway.org/content/groups/public/</url>
     </repository>
+
+    <!-- Added for Siri V2.0 -->
+    <repository>
+      <id>wmata-repo</id>
+      <url>http://repo.prod.wmata.obaweb.org:8080/archiva/repository/releases/</url>
+    </repository>
+    
   </repositories>
 
   <pluginRepositories>
@@ -369,7 +378,7 @@
       <dependency>
         <groupId>org.mockito</groupId>
         <artifactId>mockito-core</artifactId>
-        <version>1.8.0</version>
+        <version>1.9.0-rc1</version>
         <scope>test</scope>
       </dependency>
       <dependency>

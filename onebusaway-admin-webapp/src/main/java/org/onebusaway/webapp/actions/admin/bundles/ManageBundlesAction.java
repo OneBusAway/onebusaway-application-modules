@@ -16,6 +16,7 @@
 package org.onebusaway.webapp.actions.admin.bundles;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -316,8 +317,10 @@ public class ManageBundlesAction extends OneBusAwayNYCAdminActionSupport impleme
 				JSONObject bundleInfo = directoryStatus.getBundleInfo();
 				// Update the agency list to reflect what's actually on the file system
 				JSONArray updatedAgencyList = updateAgencyList(directoryStatus, directoryName);
-				bundleInfo.put("agencyList", updatedAgencyList);
-				directoryStatus.setBundleInfo(bundleInfo);
+				if (bundleInfo != null && !bundleInfo.isEmpty()) {
+				  bundleInfo.put("agencyList", updatedAgencyList);
+				  directoryStatus.setBundleInfo(bundleInfo);
+				}
 				break;
 			}
 		}
@@ -700,15 +703,34 @@ public class ManageBundlesAction extends OneBusAwayNYCAdminActionSupport impleme
 		fileService.validateFileName(downloadFilename);
 		this.bundleBuildResponse = this.bundleRequestService.lookupBuildRequest(getId());
 		if (this.bundleBuildResponse != null) {
-			String s3Key = bundleBuildResponse.getRemoteOutputDirectory() + File.separator + this.downloadFilename;
+		  String dir = bundleBuildResponse.getRemoteOutputDirectory();
+		  if (dir == null) {
+		    // something went very wrong but we don't have enough information to know what
+		    // return link to bundlebuilder log and hope that contains the relevant info to debug
+		    _log.error("bundle build response did not have a valid remote output dir!");
+		    this.downloadInputStream = createDefaultSummaryStream();
+		    return "download";
+		  }
+			String s3Key = dir + File.separator + this.downloadFilename;
 			_log.info("get request for s3Key=" + s3Key);
-			this.downloadInputStream = this.fileService.get(s3Key);
+			try {
+			  this.downloadInputStream = this.fileService.get(s3Key);
+			} catch (Exception e) {
+			  // bundle build failed and summary was not written to disk
+			  // return a standard version so the log can be examined
+			  this.downloadInputStream = createDefaultSummaryStream();
+			}
 			return "download";
 		}
 		// TODO
 		return "error";
 	}
 
+	private InputStream createDefaultSummaryStream() {
+	  String summary = "filename,description,lines\n";
+	  return new ByteArrayInputStream(summary.getBytes());
+	}
+	
 	public String downloadBundle() {
     fileService.validateFileName(downloadFilename);
     String s3Key = this.downloadDataSet + "/builds/" + this.downloadFilename
