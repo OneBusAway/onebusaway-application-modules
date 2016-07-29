@@ -57,7 +57,12 @@ public class LinkProxyAction extends OneBusAwayNYCAdminActionSupport {
       stream = response.getEntity().getContent();
       return SUCCESS;
     } catch (Exception e) {
-      _log.error("proxy error:", e);
+      _log.error("proxy error to (" 
+          + getLinkServiceProtocol() + "://" +
+          getLinkServiceHost() + ":" +
+          getLinkServicePath() 
+          + "):"
+          , e);
     }
     return ERROR;
   }
