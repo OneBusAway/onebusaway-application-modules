@@ -43,6 +43,11 @@ function createLinkAvlModule(title, urlinput, timestamp, latlon, tripVal, route,
 			dataType: 'xml',
 			success: function(response) {
 				var d = xml2js(response);
+				if (d.Trip == null || d.Trip.length == undefined) {
+					console.log("webservice attempt failed for " + linkUrl);
+					fail();
+					return;
+				}
 				for (var i = 0; i < d.Trip.length; i++) {
 					if (d.Trip[i].VehicleId == vehicleId) {
 						processLinkTrip(d.Trip[i]);
