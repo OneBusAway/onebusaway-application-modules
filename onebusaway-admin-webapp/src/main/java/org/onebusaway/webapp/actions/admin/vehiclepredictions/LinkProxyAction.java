@@ -24,12 +24,11 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.struts2.convention.annotation.Namespace;
 import org.apache.struts2.convention.annotation.Result;
+import org.onebusaway.util.services.configuration.ConfigurationService;
 import org.onebusaway.webapp.actions.OneBusAwayNYCAdminActionSupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.amazonaws.http.HttpResponse;
-import com.opensymphony.xwork2.Action;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @Namespace(value="/admin/vehiclepredictions")
 @Result(name = "success",
@@ -43,15 +42,17 @@ public class LinkProxyAction extends OneBusAwayNYCAdminActionSupport {
   
   private Logger _log = LoggerFactory.getLogger(LinkProxyAction.class);
   
+  @Autowired
+  private ConfigurationService _configurationService;
+
   private String type = "application/xml";
   private InputStream stream;
 
   public String execute() {
     CloseableHttpClient httpclient = HttpClients.createDefault();
     try {
-      // TODO this should come from configuration
-      HttpHost target = new HttpHost("localhost", 9765, "http");
-      HttpGet request = new HttpGet("/services/tss_lab/GetOnScheduleTrains?TimeInterval=5");
+      HttpHost target = new HttpHost(getLinkServiceHost(), getLinkServicePort(), getLinkServiceProtocol());
+      HttpGet request = new HttpGet(getLinkServicePath());
       CloseableHttpResponse response = httpclient.execute(target, request);
       stream = response.getEntity().getContent();
       return SUCCESS;
@@ -60,7 +61,24 @@ public class LinkProxyAction extends OneBusAwayNYCAdminActionSupport {
     }
     return ERROR;
   }
+
+  private String getLinkServiceProtocol() {
+    return _configurationService.getConfigurationValueAsString("admin.link.service.protocol", "http");
+  }
+
   
+  private String getLinkServiceHost() {
+    return _configurationService.getConfigurationValueAsString("admin.link.service.host", "localhost");
+  }
+  
+  private int getLinkServicePort() {
+    return _configurationService.getConfigurationValueAsInteger("admin.link.service.port", 9764);
+  }
+  
+  private String getLinkServicePath() {
+    return _configurationService.getConfigurationValueAsString("admin.link.service.path", "/services/tss_lab/GetOnScheduleTrains?TimeInterval=5");
+  }
+
   public String getType() {
     return this.type;
   }
