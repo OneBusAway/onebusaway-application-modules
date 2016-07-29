@@ -36,6 +36,17 @@
     </dependency>
 
     <dependency>
+        <groupId>org.onebusaway</groupId>
+        <artifactId>onebusaway-siri-api-v13</artifactId>
+        <version>${onebusaway-siri-1-api-version}</version>
+    </dependency>
+    <!-- -->
+    <dependency>
+        <groupId>org.onebusaway</groupId>
+        <artifactId>onebusaway-siri-api-v20</artifactId>
+        <version>${onebusaway-siri-2-api-version}</version>
+    </dependency>
+    <dependency>
         <groupId>org.codehaus.jackson</groupId>
         <artifactId>jackson-mapper-asl</artifactId>
         <version>1.9.2</version>
