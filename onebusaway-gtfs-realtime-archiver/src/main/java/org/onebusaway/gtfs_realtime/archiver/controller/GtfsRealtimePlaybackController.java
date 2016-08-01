@@ -16,6 +16,8 @@
 package org.onebusaway.gtfs_realtime.archiver.controller;
 
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import javax.servlet.ServletRequest;
@@ -38,18 +40,22 @@ import com.google.transit.realtime.GtfsRealtime.FeedMessage;
 public class GtfsRealtimePlaybackController {
 
   @Autowired
-  GtfsRealtimeRetriever _gtfsRealtimeRetriever;
+  private GtfsRealtimeRetriever _gtfsRealtimeRetriever;
 
   @Autowired
-  TimeService _timeService;
+  private TimeService _timeService;
   
   @Autowired
-  ApiKeyPermissionService _keyService;
+  private ApiKeyPermissionService _keyService;
+  
+  private static SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+  
   
   @RequestMapping(value = "/gtfs-realtime/{path:trip-updates|vehicle-positions}")
   public void tripUpdates(ServletRequest request, HttpServletResponse response,
       @RequestParam(value = "key", required = true) String key,
-      @RequestParam(value = "time", required = true) long end,
+      @RequestParam(value = "timestamp", required = false) Long timestampInSeconds,
+      @RequestParam(value = "time", required = false) String simpleDate,
       @RequestParam(value = "interval", required = false, defaultValue = "30") long interval,
       @PathVariable String path)
           throws IOException {
@@ -59,10 +65,26 @@ public class GtfsRealtimePlaybackController {
       return;
     }
     
+    if (simpleDate != null) {
+      Date parsed;
+      try {
+        parsed = DATE_FORMAT.parse(simpleDate);
+        timestampInSeconds = parsed.getTime() / 1000;
+      } catch (ParseException e) {
+        // bury
+      }
+    }
+    
+    if (timestampInSeconds == null) {
+      response.sendError(HttpServletResponse.SC_PRECONDITION_FAILED, "time or timestamp parameters required");
+      return;
+    }
+    
     EntityType type  = path.equals("trip-updates") ? EntityType.TRIP : EntityType.VEHICLE;
 
     // will not create new session if time is the same
-    _timeService.setCurrentTime(key, new Date(end * 1000));
+    Date requestedDate = new Date(timestampInSeconds * 1000);
+    _timeService.setCurrentTime(key, requestedDate);
     
     Date endDate = _timeService.getCurrentTime(key);
     Date startDate = new Date((endDate.getTime() - (interval * 1000))); 
