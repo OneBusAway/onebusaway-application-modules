@@ -212,6 +212,14 @@ public class S3FileServiceImpl implements FileService, ServletContextAware {
 		}
 	}
 
+  @Override
+  /**
+   * Delete the specified bundle directory
+   */
+  public boolean deleteBundleDirectory(String filename) {
+    throw new UnsupportedOperationException("deleteBundleDirectory() is not supported for s3FileService");
+  }
+
 	@Override
 	/**
 	 * Return tabular data (filename, flag, modified date) about bundle directories.

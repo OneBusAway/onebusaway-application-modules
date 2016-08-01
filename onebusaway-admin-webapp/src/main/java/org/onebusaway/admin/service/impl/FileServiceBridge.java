@@ -142,6 +142,14 @@ public class FileServiceBridge implements FileService, ServletContextAware {
 		return _disk.createBundleDirectory(filename);
 	}
 
+  @Override
+  public boolean deleteBundleDirectory(String filename) {
+    if (_isS3) {
+      return _s3.deleteBundleDirectory(filename);
+    }
+    return _disk.deleteBundleDirectory(filename);
+  }
+
 	@Override
 	public List<String[]> listBundleDirectories(int maxResults) {
 		if (_isS3) {

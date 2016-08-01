@@ -235,6 +235,18 @@ public class ManageBundlesAction extends OneBusAwayNYCAdminActionSupport impleme
 		return "selectDirectory";
 	}
 	
+  /**
+   * Deletes an existing directory
+   */
+  @SuppressWarnings("unchecked")
+  public String deleteDirectory() {
+    boolean directoryDeleted = false;
+
+    directoryDeleted = fileService.deleteBundleDirectory(directoryName);
+    directoryStatus = createDirectoryStatus("Directory deleted", directoryDeleted, "", "");
+    return "selectDirectory";
+  }
+
 	/**
 	 * Creates directory for uploading bundles on AWS
 	 */

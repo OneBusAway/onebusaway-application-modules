@@ -38,6 +38,8 @@ public interface FileService {
 
   boolean createBundleDirectory(String filename);
 
+  boolean deleteBundleDirectory(String filename);
+
   List<String[]> listBundleDirectories(int maxResults);
 
   String get(String s3path, String tmpDir);
