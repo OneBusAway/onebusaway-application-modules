@@ -245,14 +245,17 @@ jQuery(function() {
 			jQuery("#existingDirectoryButton").attr("disabled", "disabled").css("color", "#999");
 		}
 	});
-	
+
 	// use an existing dataset
 	jQuery("#existingDirectoryButton").click(onExistingDatasetClick);
-	
+
 	// copy existing dataset to a new directory
 	jQuery(".copyDirectory").click(onCopyExistingDatasetClick);
-	
-	jQuery("#continueCopy").click(onContinueCopyClick);
+
+	//jQuery("#continueCopy").click(onContinueCopyClick);
+
+	// copy existing dataset to a new directory
+	jQuery(".deleteDirectory").click(onDeleteExistingDatasetClick);
 	
 	// upload bundle source data for selected agency
 	jQuery("#uploadButton").click(onUploadSelectedAgenciesClick);
@@ -415,6 +418,49 @@ jQuery(function() {
         }		
 	});
 	
+	// For "Delete" popup to confirm deleting the directory
+	$("#deletePopup").dialog({
+		autoOpen: false,
+		modal: true,
+		width: 'auto',
+		buttons: [{
+			id: "deleteCancel",
+			text: "Cancel",
+			click: function() {
+				$(this).dialog("close");
+			}
+		},
+		{
+			id: "deleteContinue",
+			text: "Delete dataset",
+			click: function() {
+				//destinationDirectory = $("#destinationDirectory").val();
+				$(this).dialog("close");
+				onDeleteDatasetConfirmed();
+			}
+		}],
+        open: function() {
+            $('.ui-dialog-buttonpane').find('button:contains("Cancel")').addClass('cancelDeletePopup');
+        }
+	});
+
+	// For "Delete Success" popup to confirm the directory was deleted
+	$("#deleteSuccessPopup").dialog({
+		autoOpen: false,
+		modal: true,
+		width: 'auto',
+		buttons: [{
+			id: "deleteSuccessCancel",
+			text: "Continue",
+			click: function() {
+				$(this).dialog("close");
+			}
+		}],
+        open: function() {
+            $('.ui-dialog-buttonpane').find('button:contains("Continue")').addClass('cancelDeletePopup');
+        }
+	});
+
 	// For "Add Comments" popup to add user commments about a dataset
 	$("#addCommentsPopup").dialog({
 		autoOpen: false,
@@ -610,9 +656,13 @@ function showBundleInfo(bundleInfo){
 	jQuery("#selected_bundleDirectory").text(bundleObj.directoryName);
 	jQuery("#buildBundle_id").text(bundleObj.buildResponse.requestId);
 	buildBundleId = bundleObj.buildResponse.requestId;
-	setDivHtml(document.getElementById('testBuildBundle_resultList'), bundleObj.buildResponse.statusMessages);
-	setDivHtml(document.getElementById('finalBuildBundle_resultList'), bundleObj.buildResponse.statusMessages);
-	showBuildFileList(bundleObj.buildResponse.buildOutputFiles, bundleObj.buildResponse.requestId);
+	if (bundleObj.buildResponse.statusMessages != null) {
+		setDivHtml(document.getElementById('testBuildBundle_resultList'), bundleObj.buildResponse.statusMessages);
+		setDivHtml(document.getElementById('finalBuildBundle_resultList'), bundleObj.buildResponse.statusMessages);
+	}
+	if (bundleObj.buildResponse.requestId != null) {
+		showBuildFileList(bundleObj.buildResponse.buildOutputFiles, bundleObj.buildResponse.requestId);
+	}
 }
 
 function onCreateDatasetClick() {
@@ -642,9 +692,18 @@ function onCopyDestinationSpecified() {
 	onSelectDataset("copy");
 }
 
-function onContinueCopyClick() {
-	destinationDirectory = $("#destinationDirectory").text();
-	alert('destination directory: ' + destinationDirectory);
+function onDeleteDatasetConfirmed() {
+	onDeleteDataset();
+}
+
+//function onContinueCopyClick() {
+//	destinationDirectory = $("#destinationDirectory").text();
+//	alert('destination directory: ' + destinationDirectory);
+//}
+
+function onDeleteExistingDatasetClick() {
+	selectedDirectory = $(this).closest("tr").find(".directoryName").text();
+	var continueDelete = $("#deletePopup").dialog("open");
 }
 
 function onAnyCommentsClick() {
@@ -658,6 +717,8 @@ function onSelectDataset(sourceDirectoryType) {
 	var actionName = "selectDirectory";
 	if (sourceDirectoryType=="copy") {
 		actionName = "copyDirectory"
+	} else if (sourceDirectoryType=="delete") {
+		actionName = "deleteDirectory"
 	}
 	var copyDir = destinationDirectory;
 
@@ -839,6 +900,30 @@ function onSelectDataset(sourceDirectoryType) {
 			error: function(request) {
 				alert("There was an error processing your request. Please try again.");
 			}
+	});
+}
+
+function onDeleteDataset() {
+	var bundleDir = selectedDirectory;
+	var actionName = "deleteDirectory";
+	jQuery.ajax({
+		url: "manage-bundles!" + actionName + ".action?ts=" +new Date().getTime(),
+		type: "GET",
+		data: {"directoryName" : bundleDir},
+		async: false,
+		success: function(response) {
+			disableSelectButton();
+			$("#deleteSuccessPopup").dialog("open");
+			//alert("Dataset was successfully deleted");
+			// Remove dataset from list of datasets
+			var datasetTd = $('td').filter(function(){
+			    return $(this).text() === bundleDir;
+			})
+			datasetTd.parent().remove();
+		},
+		error: function(request) {
+			alert("There was an error processing your request. Please try again.");
+		}
 	});
 }
 
