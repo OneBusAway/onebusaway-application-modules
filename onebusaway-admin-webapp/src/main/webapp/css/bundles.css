@@ -809,12 +809,15 @@
 }
 
 /* Styles added for new UI design */
-.ui-dialog-buttonpane .cancelCopyPopup {
+.ui-dialog-buttonpane .cancelCopyPopup,
+.ui-dialog-buttonpane .cancelDeletePopup,
+.ui-dialog-buttonpane .cancelDeleteSuccessPopup {
 	border: none;
 	background: none;
 }
 
-.ui-dialog-buttonpane .cancelCopyPopup:hover {
+.ui-dialog-buttonpane .cancelCopyPopup:hover,
+.ui-dialog-buttonpane .cancelDeletePopup:hover {
 	border: none;
 	text-decoration: underline !important;
 }
@@ -938,8 +941,10 @@
     border-spacing: 0em;
 }
 
-#Create #existingDataset .copyDirectory, #Upload .removeAgency, #Upload #addAnotherAgency,
-	#Upload #anyNotes, #Upload #cancelUpload, .bundleLink {
+#Create #existingDataset .copyDirectory,
+#Create #existingDataset .deleteDirectory,
+#Upload .removeAgency, #Upload #addAnotherAgency,
+#Upload #anyNotes, #Upload #cancelUpload, .bundleLink {
 	color: blue;
 }
 
@@ -949,7 +954,9 @@
 	margin: .4em;
 }
 
-#Create #existingDataset .copyDirectory:hover, #Upload .removeAgency:hover, 
+#Create #existingDataset .copyDirectory:hover,
+#Create #existingDataset .deleteDirectory:hover,
+#Upload .removeAgency:hover, 
 	#Upload #addAnotherAgency:hover, #Upload #anyNotes:hover,
 	#Upload #cancelUpload:hover, .bundleLink:hover {
 	font-weight: bold;
@@ -961,7 +968,7 @@
 	width: 1.5em;
 }
 
-#Create .copyDirectory {
+#Create .copyDirectory, #Create .deleteDirectory {
 	width: 4em;
 }
 
@@ -1028,8 +1035,9 @@
 	background: #ccc;
 }
 
-/* Modal dialog box for Copy on Choose tab */
-#copyPopupContents #addCommentsPopupContents {
+/* Modal dialog box for Copy and Delete on Choose tab */
+#copyPopupContents, #deletePopupContents, #deleteSuccessPopupContents,
+#addCommentsPopupContents {
 	margin-top: 2em;
 	margin-left: 2.3em;
 }
@@ -1042,7 +1050,7 @@
 	background-color: white;
 }
 
-#copyPopup p, #addCommentsPopup p {
+#copyPopup p, #deletePopup p, #deleteSuccessPopup p, #addCommentsPopup p {
     font-family: "Arial Bold","Arial";
     font-weight: 700;
     font-style: normal;
@@ -1059,7 +1067,7 @@
 	margin-top: 2em;
 }
 
-#copyPopup #datasetNameLabel {
+#copyPopup #datasetNameLabel, #deletePopup #datasetNameLabel {
 	font-weight: bold;
 	padding-right: 1em;
 }
