@@ -174,6 +174,10 @@ public class ManageBundlesAction extends OneBusAwayNYCAdminActionSupport impleme
 		JSONObject destObject = new JSONObject();		
 		destObject = sourceObject;
 		destObject.put("directoryName", destDirectoryName);
+		// Note that the bundle comments are part of the buildResponse object and
+		// will not be retained on the copy.
+		destObject.remove("buildResponse");
+		destObject.remove("validationResponse");
 		
 		String createDirectoryMessage = null;
 		boolean directoryCreated = false;
@@ -198,16 +202,16 @@ public class ManageBundlesAction extends OneBusAwayNYCAdminActionSupport impleme
           Path gtfsTempDir = Files.createTempDirectory("gtfs_latest");
           Path auxTempDir = Files.createTempDirectory("aux_latest");
           
-          String s3GtfsKey = directoryName +  File.separator + fileService.getGtfsPath();
-          String s3AuxKey = directoryName +  File.separator + fileService.getAuxPath();
+          String srcGtfsDir = directoryName +  File.separator + fileService.getGtfsPath();
+          String srcAuxDir = directoryName +  File.separator + fileService.getAuxPath();
           
-          String gtfsCopy = fileService.get(s3GtfsKey, gtfsTempDir.toString());
-          String auxCopy = fileService.get(s3AuxKey, auxTempDir.toString());
+          String gtfsCopy = fileService.get(srcGtfsDir, gtfsTempDir.toString());
+          String auxCopy = fileService.get(srcAuxDir, auxTempDir.toString());
 
-          String newS3GtfsKey = destDirectoryName + File.separator + fileService.getGtfsPath();
-          String newS3AuxKey = destDirectoryName + File.separator + fileService.getAuxPath();
-          fileService.put(newS3GtfsKey, gtfsCopy);
-          fileService.put(newS3AuxKey, auxCopy);
+          String destGtfsDir = destDirectoryName + File.separator + fileService.getGtfsPath();
+          String destAuxDir = destDirectoryName + File.separator + fileService.getAuxPath();
+          fileService.put(destGtfsDir, gtfsTempDir.toString());
+          fileService.put(destAuxDir, auxTempDir.toString());
           _log.info("copy complete");
           
         } catch (IOException e) {
@@ -219,7 +223,6 @@ public class ManageBundlesAction extends OneBusAwayNYCAdminActionSupport impleme
 					_log.info("Copied from: "+directoryName+ " to: "+destDirectoryName);
 					directoryName = destDirectoryName;
 					createDirectoryMessage = "Successfully copied into new directory: " + destDirectoryName;
-					createDirectoryMessage += ". Validate and Build now!";
 					timestamp = fileService.getBundleDirTimestamp(destDirectoryName);
 				} else {
 					createDirectoryMessage = "Unable to create direcory: " + destDirectoryName;
@@ -232,6 +235,18 @@ public class ManageBundlesAction extends OneBusAwayNYCAdminActionSupport impleme
 		return "selectDirectory";
 	}
 	
+  /**
+   * Deletes an existing directory
+   */
+  @SuppressWarnings("unchecked")
+  public String deleteDirectory() {
+    boolean directoryDeleted = false;
+
+    directoryDeleted = fileService.deleteBundleDirectory(directoryName);
+    directoryStatus = createDirectoryStatus("Directory deleted", directoryDeleted, "", "");
+    return "selectDirectory";
+  }
+
 	/**
 	 * Creates directory for uploading bundles on AWS
 	 */

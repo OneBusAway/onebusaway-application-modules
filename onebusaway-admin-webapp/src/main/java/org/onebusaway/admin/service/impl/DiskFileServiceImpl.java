@@ -116,6 +116,12 @@ public class DiskFileServiceImpl implements FileService {
 		return f.mkdirs();
 	}
 
+  @Override
+  public boolean deleteBundleDirectory(String filename) {
+    File dir = new File(_basePath, filename);
+    return deleteFile(dir);
+  }
+
 	@Override
 	public List<String[]> listBundleDirectories(int maxResults) {
 		ArrayList<String[]> bundleDirs = new ArrayList<String[]>();
@@ -232,6 +238,25 @@ public class DiskFileServiceImpl implements FileService {
 			throw new RuntimeException("File name contains characters that could lead to directory " +
 					"traversal attack");
 		}
+	}
+
+	private boolean deleteFile(File file) {
+
+	  if (file.isDirectory()) {
+	    if (file.list().length == 0){
+	      return file.delete();
+	    } else {
+	      String files[] = file.list();
+	      for (String temp : files) {
+	        File fileDelete = new File(file, temp);
+	        //recursive delete
+	        deleteFile(fileDelete);
+	      }
+	      return file.delete();
+	    }
+	  } else {
+	    return file.delete();
+	  }
 	}
 
 }
