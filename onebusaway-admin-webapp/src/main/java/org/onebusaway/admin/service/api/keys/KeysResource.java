@@ -107,6 +107,7 @@ public class KeysResource {
         result.put("contactCompany", bean.getContactCompany());
         result.put("contactEmail", bean.getContactEmail());
         result.put("contactDetails", bean.getContactDetails());
+        result.put("minApiRequestInterval", bean.getMinApiRequestInterval().toString());
         Response response = constructResponse(result);
         log.info("Returning response from listKeyDetails");
         return response;
@@ -123,12 +124,13 @@ public class KeysResource {
 	    @DefaultValue("") @QueryParam("name") String name, 
 	    @DefaultValue("") @QueryParam("company") String company, 
 	    @DefaultValue("") @QueryParam("email") String email, 
-	    @DefaultValue("") @QueryParam("details") String details
+	    @DefaultValue("") @QueryParam("details") String details,
+	    @DefaultValue("100") @QueryParam("minApiReqInt") String minApiReqInt
 	    ) throws JsonGenerationException,
 	      JsonMappingException, IOException {
 	    log.info("Starting createKey with no parameter");
 	    return createKey(UUID.randomUUID().toString(), name, company, 
-	      email, details);
+	      email, details, minApiReqInt);
 	  }
 
 	  @Path("/create/{keyValue}")
@@ -139,16 +141,24 @@ public class KeysResource {
 	    @DefaultValue("") @QueryParam("name") String name, 
 	    @DefaultValue("") @QueryParam("company") String company, 
 	    @DefaultValue("") @QueryParam("email") String email, 
-	    @DefaultValue("") @QueryParam("details") String details
+	    @DefaultValue("") @QueryParam("details") String details,
+      @DefaultValue("100") @QueryParam("minApiReqInt") String minApiReqInt
 	    )  throws JsonGenerationException, JsonMappingException, IOException {
 	        
 	    log.info("Starting createKey with keyValue: " + keyValue + ", name: " 
 	      + name + ", company: " + company +", email: " + email + ", details: " 
-	      + details);
+	      + details + ", minApiReqInt: " + minApiReqInt);
+
+	    Long minApiReqIntervalLong = 0L;
+	    try {
+	      minApiReqIntervalLong = Long.parseLong(minApiReqInt);
+	    } catch (NumberFormatException e) {
+	      log.error("Could not parse minApiReqInt: " + minApiReqInt);
+	    }
 
 	    String message = "API Key created: " + keyValue;
 	    try {
-	      saveOrUpdateKey(keyValue, 0L, name, company, email, details);
+	      saveOrUpdateKey(keyValue, minApiReqIntervalLong, name, company, email, details);
 	    } catch (Exception e) {
 	      log.error(e.getMessage());
 	      message = e.getMessage();
@@ -166,16 +176,27 @@ public class KeysResource {
 	    @QueryParam("name") String name, 
 	    @QueryParam("company") String company, 
 	    @QueryParam("email") String email, 
-	    @QueryParam("details") String details
+	    @QueryParam("details") String details,
+	    @QueryParam("minApiReqInt") String minApiReqInt
 	    )  throws JsonGenerationException, JsonMappingException, IOException {
 	        
 	    log.info("Starting updateKey with keyValue: " + keyValue + ", name: " 
 	      + name + ", company: " + company +", email: " + email + ", details: " 
-	      + details);
+	      + details + ", minApiReqInt: " + minApiReqInt);
+
+      Long minApiReqIntervalLong = 0L;
+      if (!minApiReqInt.isEmpty()) {
+        try {
+          minApiReqIntervalLong = Long.parseLong(minApiReqInt);
+        } catch (NumberFormatException e) {
+          log.error("Could not parse minApiReqInt: " + minApiReqInt);
+        }
+      }
 
 	    String message = "API Key updated: " + keyValue;
 	    try {
-	      updateKeyContactInfo(keyValue, name, company, email, details);
+	      updateKeyContactInfo(keyValue, name, company, email, details,
+	          minApiReqIntervalLong);
 	    } catch (Exception e) {
 	      log.error(e.getMessage());
 	      message = e.getMessage();
@@ -220,7 +241,7 @@ public class KeysResource {
 
 	    _userPropertiesService.authorizeApi(userIndex.getUser(),
 	        minApiRequestInterval);
-	    
+
 	    // Set the API Key contact info
 	    User user = userIndex.getUser();
 	    _userPropertiesService.updateApiKeyContactInfo(user, contactName, 
@@ -232,7 +253,7 @@ public class KeysResource {
 
 	  private void updateKeyContactInfo(String apiKey, String contactName, 
 	      String contactCompany, String contactEmail, 
-	      String contactDetails) throws Exception {
+	      String contactDetails, Long minApiReqIntervalLong) throws Exception {
 	    UserIndexKey key = new UserIndexKey(UserIndexTypes.API_KEY, apiKey);
 	    UserIndex userIndex = _userService.getUserIndexForId(key);
 
@@ -258,11 +279,14 @@ public class KeysResource {
       if (contactDetails != null) {
         keyContactDetails = contactDetails;
       }
-	    
+
+      _userPropertiesService.authorizeApi(userIndex.getUser(),
+          minApiReqIntervalLong);
+
 	    _userPropertiesService.updateApiKeyContactInfo(user, keyContactName, 
         keyContactCompany, keyContactEmail, keyContactDetails);
 	  }
-	  
+
 	  private void delete(String apiKey) throws Exception {
 	    UserIndexKey key = new UserIndexKey(UserIndexTypes.API_KEY, apiKey);
 	    UserIndex userIndex = _userService.getUserIndexForId(key);

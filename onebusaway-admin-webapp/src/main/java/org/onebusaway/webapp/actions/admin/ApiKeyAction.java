@@ -39,6 +39,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class ApiKeyAction extends NextActionSupport{
 
 	private static final long serialVersionUID = 1L;
+	private Long minApiReqInt = 100L;
 	private String contactName;
 	private String contactCompany;
 	private String contactEmail;
@@ -48,155 +49,17 @@ public class ApiKeyAction extends NextActionSupport{
 	private UserPropertiesService userPropertiesService;
 
   /**
-   * Handle the "Save" action for either creating a new key or updating
-   * an existing one.
-   * @return success message
+   * @return the minApiReqInt
    */
-  public String saveAPIKey() {
-    // Check if key already exists
-    UserIndexKey userKey = new UserIndexKey(UserIndexTypes.API_KEY, key);
-    UserIndex userIndexForId = userService.getUserIndexForId(userKey);
-    if (userIndexForId == null) {
-      createAPIKey(key);
-      addActionMessage("Key '" + key + "' created successfully");
-    } else {
-      updateAPIKey(userIndexForId);
-      addActionMessage("Key '" + key + "' updated successfully");
-    }
-
-    clearContactInfoAndKey();
-    return SUCCESS;
+  public Long getMinApiReqInt() {
+    return minApiReqInt;
   }
 
-	/**
-	 * Creates API key in the database
-	 * @return success message
-	 */
-	public void createAPIKey(String apiKey) {
-		UserIndexKey userIndexKey = new UserIndexKey(UserIndexTypes.API_KEY, apiKey);
-    UserIndex userIndex = userService.getOrCreateUserForIndexKey(userIndexKey,
-        apiKey, false);
-    userPropertiesService.authorizeApi(userIndex.getUser(), 0);
-    // Set the API Key contact info
-    User user = userIndex.getUser();
-    userPropertiesService.updateApiKeyContactInfo(user, contactName,
-      contactCompany, contactEmail, contactDetails);
-
-    // Clear the cached value here
-    userService.getMinApiRequestIntervalForKey(apiKey, true);
-		return;
-	}
-
-  public void updateAPIKey(UserIndex userIndexForId) {
-    User user = userIndexForId.getUser();
-
-    UserBean bean = userService.getUserAsBean(user);
-    String keyContactName = bean.getContactName();
-    String keyContactCompany = bean.getContactCompany();
-    String keyContactEmail = bean.getContactEmail();
-    String keyContactDetails = bean.getContactDetails();
-
-    if (contactName != null) {
-      keyContactName = contactName;
-    }
-    if (contactCompany != null) {
-      keyContactCompany = contactCompany;
-    }
-    if (contactEmail != null) {
-      keyContactEmail = contactEmail;
-    }
-    if (contactDetails != null) {
-      keyContactDetails = contactDetails;
-    }
-
-    userPropertiesService.updateApiKeyContactInfo(user, keyContactName,
-      keyContactCompany, keyContactEmail, keyContactDetails);
-
-    // Clear the cached value here
-    userService.getMinApiRequestIntervalForKey(key, true);
-    return;
-  }
-
-  public String searchAPIKey() {
-    // Check if key already exists
-    UserIndexKey userKey = new UserIndexKey(UserIndexTypes.API_KEY, key);
-    UserIndex userIndexForId = userService.getUserIndexForId(userKey);
-    if (userIndexForId == null) {
-      addActionMessage("Key '" + key + "' does not exist");
-    } else {
-      User user = userIndexForId.getUser();
-      UserBean bean = userService.getUserAsBean(user);
-      contactName = bean.getContactName();
-      contactCompany = bean.getContactCompany();
-      contactEmail = bean.getContactEmail();
-      contactDetails = bean.getContactDetails();
-      addActionMessage("Key '" + key + "' found");
-    }
-    return SUCCESS;
-  }
-
-  public String searchContactEmail() {
-    String searchResult = "Email address '" + contactEmail
-        + "' could not be found";
-    List<String> apiKeys =
-        userService.getUserIndexKeyValuesForKeyType(UserIndexTypes.API_KEY);
-    // clear other fields
-    contactName = "";
-    contactCompany = "";
-    contactDetails = "";
-    key = "";
-
-    for (String apiKey : apiKeys) {
-      // for each api key, check if contact email matches
-      UserIndexKey userKey = new UserIndexKey(UserIndexTypes.API_KEY, apiKey);
-      UserIndex userIndex = userService.getUserIndexForId(userKey);
-      if (userIndex != null) {
-        User user = userIndex.getUser();
-        UserBean bean = userService.getUserAsBean(user);
-        if (contactEmail.equals(bean.getContactEmail())) {
-          contactName = bean.getContactName();
-          contactCompany = bean.getContactCompany();
-          contactDetails = bean.getContactDetails();
-          key = apiKey;
-          searchResult = "Email address '" + contactEmail + "' found";
-          break;
-        }
-      }
-    }
-    addActionMessage(searchResult);
-    return SUCCESS;
-  }
-
-  public String deleteAPIKey() {
-    // Check if key already exists
-    UserIndexKey userKey = new UserIndexKey(UserIndexTypes.API_KEY, key);
-    UserIndex userIndexForId = userService.getUserIndexForId(userKey);
-    if (userIndexForId == null) {
-      addActionMessage("Key '" + key + "' does not exist");
-    } else {
-      User user = userIndexForId.getUser();
-      boolean found = false;
-      for (UserIndex index : user.getUserIndices()) {
-        if (index.getId().getValue().equalsIgnoreCase(userKey.getValue())) {
-          userIndexForId = index;
-          found = true;
-          break;
-        }
-      }
-      if (!found) {
-        addActionMessage("API key " + key + " not found (no exact match).");
-      }
-      userService.removeUserIndexForUser(user, userIndexForId.getId());
-      if (user.getUserIndices().isEmpty()) {
-        userService.deleteUser(user);
-      }
-      // Clear the cached value here
-      userService.getMinApiRequestIntervalForKey(key, true);
-
-      addActionMessage("Key '" + key + "' deleted");
-      clearContactInfoAndKey();
-    }
-    return SUCCESS;
+  /**
+   * @param minApiReqInt the minApiReqInt to set
+   */
+  public void setMinApiReqInt(Long minApiReqInt) {
+    this.minApiReqInt = minApiReqInt;
   }
 
   /**
@@ -256,41 +119,196 @@ public class ApiKeyAction extends NextActionSupport{
   }
 
   /**
-	 * Returns the key of the user being created
-	 * @return the key
-	 */
-	//@RequiredStringValidator(message="API key is required")
-	public String getKey() {
-		return key;
-	}
-	
-	/**
-	 * Injects the key of the user being created
-	 * @param key the key to set
-	 */
-	public void setKey(String key) {
-		this.key = key;
-	}
+   * Returns the key of the user being created
+   * @return the key
+   */
+  //@RequiredStringValidator(message="API key is required")
+  public String getKey() {
+    return key;
+  }
+
+  /**
+   * Injects the key of the user being created
+   * @param key the key to set
+   */
+  public void setKey(String key) {
+    this.key = key;
+  }
+
+  /**
+   * Injects {@link UserService}
+   * @param userService the userService to set
+   */
+  @Autowired
+  public void setUserService(UserService userService) {
+    this.userService = userService;
+  }
+
+  /**
+   * Injects {@link UserPropertiesService}
+   * @param userPropertiesService the userPropertiesService to set
+   */
+  @Autowired
+  public void setUserPropertiesService(UserPropertiesService userPropertiesService) {
+    this.userPropertiesService = userPropertiesService;
+  }
+
+  /**
+   * Handle the "Save" action for either creating a new key or updating
+   * an existing one.
+   * @return success message
+   */
+  public String saveAPIKey() {
+    // Check if key already exists
+    UserIndexKey userKey = new UserIndexKey(UserIndexTypes.API_KEY, key);
+    UserIndex userIndexForId = userService.getUserIndexForId(userKey);
+    if (userIndexForId == null) {
+      createAPIKey(key);
+      addActionMessage("Key '" + key + "' created successfully");
+    } else {
+      updateAPIKey(userIndexForId);
+      addActionMessage("Key '" + key + "' updated successfully");
+    }
+
+    clearContactInfoAndKey();
+    return SUCCESS;
+  }
 
 	/**
-	 * Injects {@link UserService}
-	 * @param userService the userService to set
+	 * Creates API key in the database
+	 * @return success message
 	 */
-	@Autowired
-	public void setUserService(UserService userService) {
-		this.userService = userService;
+	public void createAPIKey(String apiKey) {
+		UserIndexKey userIndexKey = new UserIndexKey(UserIndexTypes.API_KEY, apiKey);
+    UserIndex userIndex = userService.getOrCreateUserForIndexKey(userIndexKey,
+        apiKey, false);
+    userPropertiesService.authorizeApi(userIndex.getUser(), minApiReqInt);
+    // Set the API Key contact info
+    User user = userIndex.getUser();
+    userPropertiesService.updateApiKeyContactInfo(user, contactName,
+      contactCompany, contactEmail, contactDetails);
+
+    // Clear the cached value here
+    userService.getMinApiRequestIntervalForKey(apiKey, true);
+		return;
 	}
 
-	/**
-	 * Injects {@link UserPropertiesService}
-	 * @param userPropertiesService the userPropertiesService to set
-	 */
-	@Autowired
-	public void setUserPropertiesService(UserPropertiesService userPropertiesService) {
-		this.userPropertiesService = userPropertiesService;
-	}
+  public void updateAPIKey(UserIndex userIndexForId) {
+    User user = userIndexForId.getUser();
+
+    UserBean bean = userService.getUserAsBean(user);
+    String keyContactName = bean.getContactName();
+    String keyContactCompany = bean.getContactCompany();
+    String keyContactEmail = bean.getContactEmail();
+    String keyContactDetails = bean.getContactDetails();
+
+    if (contactName != null) {
+      keyContactName = contactName;
+    }
+    if (contactCompany != null) {
+      keyContactCompany = contactCompany;
+    }
+    if (contactEmail != null) {
+      keyContactEmail = contactEmail;
+    }
+    if (contactDetails != null) {
+      keyContactDetails = contactDetails;
+    }
+    userPropertiesService.authorizeApi(user, minApiReqInt);
+    userPropertiesService.updateApiKeyContactInfo(user, keyContactName,
+      keyContactCompany, keyContactEmail, keyContactDetails);
+
+    // Clear the cached value here
+    userService.getMinApiRequestIntervalForKey(key, true);
+    return;
+  }
+
+  public String searchAPIKey() {
+    // Check if key already exists
+    UserIndexKey userKey = new UserIndexKey(UserIndexTypes.API_KEY, key);
+    UserIndex userIndexForId = userService.getUserIndexForId(userKey);
+    if (userIndexForId == null) {
+      addActionMessage("Key '" + key + "' does not exist");
+    } else {
+      User user = userIndexForId.getUser();
+      UserBean bean = userService.getUserAsBean(user);
+      minApiReqInt = bean.getMinApiRequestInterval();
+      contactName = bean.getContactName();
+      contactCompany = bean.getContactCompany();
+      contactEmail = bean.getContactEmail();
+      contactDetails = bean.getContactDetails();
+      addActionMessage("Key '" + key + "' found");
+    }
+    return SUCCESS;
+  }
+
+  public String searchContactEmail() {
+    String searchResult = "Email address '" + contactEmail
+        + "' could not be found";
+    List<String> apiKeys =
+        userService.getUserIndexKeyValuesForKeyType(UserIndexTypes.API_KEY);
+    // clear other fields
+    contactName = "";
+    contactCompany = "";
+    contactDetails = "";
+    key = "";
+
+    for (String apiKey : apiKeys) {
+      // for each api key, check if contact email matches
+      UserIndexKey userKey = new UserIndexKey(UserIndexTypes.API_KEY, apiKey);
+      UserIndex userIndex = userService.getUserIndexForId(userKey);
+      if (userIndex != null) {
+        User user = userIndex.getUser();
+        UserBean bean = userService.getUserAsBean(user);
+        if (contactEmail.equals(bean.getContactEmail())) {
+          minApiReqInt = bean.getMinApiRequestInterval();
+          contactName = bean.getContactName();
+          contactCompany = bean.getContactCompany();
+          contactDetails = bean.getContactDetails();
+          key = apiKey;
+          searchResult = "Email address '" + contactEmail + "' found";
+          break;
+        }
+      }
+    }
+    addActionMessage(searchResult);
+    return SUCCESS;
+  }
+
+  public String deleteAPIKey() {
+    // Check if key already exists
+    UserIndexKey userKey = new UserIndexKey(UserIndexTypes.API_KEY, key);
+    UserIndex userIndexForId = userService.getUserIndexForId(userKey);
+    if (userIndexForId == null) {
+      addActionMessage("Key '" + key + "' does not exist");
+    } else {
+      User user = userIndexForId.getUser();
+      boolean found = false;
+      for (UserIndex index : user.getUserIndices()) {
+        if (index.getId().getValue().equalsIgnoreCase(userKey.getValue())) {
+          userIndexForId = index;
+          found = true;
+          break;
+        }
+      }
+      if (!found) {
+        addActionMessage("API key " + key + " not found (no exact match).");
+      }
+      userService.removeUserIndexForUser(user, userIndexForId.getId());
+      if (user.getUserIndices().isEmpty()) {
+        userService.deleteUser(user);
+      }
+      // Clear the cached value here
+      userService.getMinApiRequestIntervalForKey(key, true);
+
+      addActionMessage("Key '" + key + "' deleted");
+      clearContactInfoAndKey();
+    }
+    return SUCCESS;
+  }
 
 	private void clearContactInfoAndKey() {
+	  minApiReqInt = 100L;
     contactName = "";
     contactCompany = "";
     contactEmail = "";
