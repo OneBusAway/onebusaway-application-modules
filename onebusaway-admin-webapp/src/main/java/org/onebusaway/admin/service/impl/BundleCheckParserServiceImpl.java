@@ -54,6 +54,7 @@ public class BundleCheckParserServiceImpl implements BundleCheckParserService {
   private static final String TEST_ROUTE_REVISION = "route revision";
   private static final String TEST_SATURDAY_SCHEDULE = "saturday schedule";
   private static final String TEST_SUNDAY_SCHEDULE = "sunday schedule";
+  private static final String TEST_WEEKDAY_SCHEDULE = "weekday schedule";
   private static final String TEST_EXPRESS_INDICATOR = "express indicator";
   private static final String TEST_STOP_FOR_ROUTE = "stop for route";
   private static final String TEST_NOT_STOP_FOR_ROUTE = "not stop for route";
@@ -72,6 +73,7 @@ public class BundleCheckParserServiceImpl implements BundleCheckParserService {
     TEST_ROUTE_REVISION, 
     TEST_SATURDAY_SCHEDULE, 
     TEST_SUNDAY_SCHEDULE, 
+    TEST_WEEKDAY_SCHEDULE,
     TEST_EXPRESS_INDICATOR, 
     TEST_STOP_FOR_ROUTE, 
     TEST_NOT_STOP_FOR_ROUTE,

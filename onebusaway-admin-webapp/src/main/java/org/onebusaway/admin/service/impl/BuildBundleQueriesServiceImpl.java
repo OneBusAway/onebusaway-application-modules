@@ -57,6 +57,7 @@ public class BuildBundleQueriesServiceImpl implements BuildBundleQueriesService 
   private static final String TEST_ROUTE_REVISION = "route revision";
   private static final String TEST_SATURDAY_SCHEDULE = "saturday schedule";
   private static final String TEST_SUNDAY_SCHEDULE = "sunday schedule";
+  private static final String TEST_WEEKDAY_SCHEDULE = "weekday schedule";
   private static final String TEST_EXPRESS_INDICATOR = "express indicator";
   private static final String TEST_STOP_FOR_ROUTE = "stop for route";
   private static final String TEST_NOT_STOP_FOR_ROUTE = "not stop for route";
@@ -139,6 +140,7 @@ public class BuildBundleQueriesServiceImpl implements BuildBundleQueriesService 
     queryBuilders.put(TEST_SCHEDULE_DATE, new ScheduleDateCheckServiceImpl());
     queryBuilders.put(TEST_SATURDAY_SCHEDULE, new SaturdayScheduleCheckServiceImpl());
     queryBuilders.put(TEST_SUNDAY_SCHEDULE, new SundayScheduleCheckServiceImpl());
+    queryBuilders.put(TEST_WEEKDAY_SCHEDULE, new WeekdayScheduleCheckServiceImpl());
     queryBuilders.put(TEST_STOP_DATE_AT_TIME, new StopDateAtTimeCheckServiceImpl());
     queryBuilders.put(TEST_NOT_STOP_DATE_AT_TIME, new NotStopdateAtTimeCheckServiceImpl());
     queryBuilders.put(TEST_RT, new RtCheckServiceImpl());
