@@ -42,6 +42,7 @@ import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
 import org.onebusaway.realtime.api.VehicleLocationListener;
 import org.onebusaway.realtime.api.VehicleLocationRecord;
+import org.onebusaway.transit_data_federation.impl.realtime.SiriLikeRealtimeSource.NodesAndTimestamp;
 import org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.MonitoredResult;
 import org.onebusaway.transit_data_federation.impl.transit_graph.TransitGraphDaoImpl;
 import org.onebusaway.transit_data_federation.services.blocks.BlockGeospatialService;
@@ -68,7 +69,7 @@ public class SiriLikeRealtimeSource {
   private static SimpleDateFormat ISO_DATE_SHORT_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX");
   private static SimpleDateFormat ISO_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSSSXXX");
   public List<String> _routeList = new ArrayList<String>();
-  private XPathExpression vehicleActivityExpression;
+  private XPathExpression mvjExpression;
   private XPathExpression tripIdExpression;
   private XPathExpression serviceDateExpression;
   private XPathExpression recordedAtExpression;
@@ -140,19 +141,21 @@ public class SiriLikeRealtimeSource {
 
   @PostConstruct
   public void setup() throws Exception {
+    ISO_DATE_FORMAT.setLenient(false);
+    ISO_DATE_SHORT_FORMAT.setLenient(false);
     factory = DocumentBuilderFactory.newInstance();
     builder = factory.newDocumentBuilder();
     
     XPathFactory xPathfactory = XPathFactory.newInstance();
     XPath xpath = xPathfactory.newXPath();
 
-    vehicleActivityExpression = xpath.compile("/Siri/VehicleMonitoringDelivery/VehicleActivity");
-    tripIdExpression = xpath.compile("MonitoredVehicleJourney/FramedVehicleJourneyRef/DatedVehicleJourneyRef/text()");
-    serviceDateExpression = xpath.compile("MonitoredVehicleJourney/FramedVehicleJourneyRef/DataFrameRef/text()");
-    recordedAtExpression = xpath.compile("RecordedAtTime/text()");
-    vehicleIdExpression = xpath.compile("MonitoredVehicleJourney/VehicleRef/text()");
-    latExpression = xpath.compile("MonitoredVehicleJourney/VehicleLocation/Latitude/text()");
-    lonExpression = xpath.compile("MonitoredVehicleJourney/VehicleLocation/Longitude/text()");
+    mvjExpression = xpath.compile("/Siri/VehicleMonitoringDelivery/VehicleActivity/MonitoredVehicleJourney");
+    tripIdExpression = xpath.compile("FramedVehicleJourneyRef/DatedVehicleJourneyRef/text()");
+    serviceDateExpression = xpath.compile("FramedVehicleJourneyRef/DataFrameRef/text()");
+    recordedAtExpression = xpath.compile("/Siri/VehicleMonitoringDelivery/VehicleActivity/RecordedAtTime/text()");
+    vehicleIdExpression = xpath.compile("VehicleRef/text()");
+    latExpression = xpath.compile("VehicleLocation/Latitude/text()");
+    lonExpression = xpath.compile("VehicleLocation/Longitude/text()");
     if (_refreshInterval > 0) {
       _refreshTask = _scheduledExecutorService.scheduleAtFixedRate(
           new RefreshTask(), 0, _refreshInterval, TimeUnit.SECONDS);
@@ -182,15 +185,26 @@ public class SiriLikeRealtimeSource {
   }
   
   private synchronized void handleUpdates(MonitoredResult result) throws Exception {
+    int vehicles = 0;
+    int trips = 0;
     for (String route : getRoutes()) {
-      for (Node n : parseVehicles(new URL(constructUrl(route, getApiKey(), getUrl())))) {
-        VehicleLocationRecord vlr = parse(n);
+      NodesAndTimestamp nodesAndTimestamp = parseVehicles(new URL(constructUrl(route, getApiKey(), getUrl())));
+      _log.debug("found " + nodesAndTimestamp.getNodes().size() + " nodes");
+      for (Node n : nodesAndTimestamp.getNodes()) {
+        vehicles ++;
+        VehicleLocationRecord vlr = parse(n, nodesAndTimestamp.getTimestamp());
         if (vlr != null) {
+          trips++;
           result.addMatchedTripId(vlr.getTripId().getId());
-          _vehicleLocationListener.handleVehicleLocationRecord(vlr);
+          try {
+            _vehicleLocationListener.handleVehicleLocationRecord(vlr);
+          } catch (Exception any) {
+            // bury
+          }
         }
       }
     }
+    _log.info("updated " + trips + " of " + vehicles + " for agency " + getAgency());
   }
   
   private String constructUrl(String route, String apiKey, String url) {
@@ -198,22 +212,32 @@ public class SiriLikeRealtimeSource {
   }
 
   // process URL into a series of fragments representing vehicle activity
-  public List<Node> parseVehicles(URL url) throws Exception {
-    ArrayList<Node> vehicles = new ArrayList<Node>();
+  public NodesAndTimestamp parseVehicles(URL url) throws Exception {
+    List<Node> vehicles = new ArrayList<Node>();
     Document doc = builder.parse(url.toString());
-    NodeList nl = (NodeList) this.vehicleActivityExpression.evaluate(doc, XPathConstants.NODESET);
-    if (nl ==null) return vehicles;
+    String recordedAtStr = (String)recordedAtExpression.evaluate(doc, XPathConstants.STRING);
+    long timestamp = parseDate(recordedAtStr).getTime();
+    _log.debug("timestamp=" + new Date(timestamp) + " for date " + recordedAtStr);
+    NodeList nl = (NodeList) this.mvjExpression.evaluate(doc, XPathConstants.NODESET);
+    if (nl ==null || nl.getLength() == 0) {
+      _log.debug("no nodes found");
+      return new NodesAndTimestamp(vehicles, timestamp);
+    }
     for (int i = 0; i < nl.getLength(); i++) {
       vehicles.add(nl.item(i));
     }
-    return vehicles;
+    return new NodesAndTimestamp(vehicles, timestamp);
   }
   
-  public VehicleLocationRecord parse(Node node) throws Exception {
+  
+  public VehicleLocationRecord parse(Node node, long timestamp) throws Exception {
     String tripId = (String) tripIdExpression.evaluate(node, XPathConstants.STRING);
     if (tripId == null) {
       _log.error("no trip for node=" + node);
       return null;
+    }
+    if (timestamp == 0) {
+      timestamp = System.currentTimeMillis();
     }
     
     String serviceDateStr = (String) serviceDateExpression.evaluate(node, XPathConstants.STRING);
@@ -221,8 +245,8 @@ public class SiriLikeRealtimeSource {
     
     VehicleLocationRecord vlr = new VehicleLocationRecord();
     try {
-      vlr.setTimeOfLocationUpdate(parseDate((String)recordedAtExpression.evaluate(node, XPathConstants.STRING)).getTime());
-      vlr.setTimeOfRecord(vlr.getTimeOfLocationUpdate());
+      vlr.setTimeOfLocationUpdate(timestamp);
+      vlr.setTimeOfRecord(timestamp);
       vlr.setTripId(new AgencyAndId(getAgency(), tripId));
       vlr.setServiceDate(serviceDate.getTime());
       vlr.setVehicleId(new AgencyAndId(getAgency(), (String)vehicleIdExpression.evaluate(node, XPathConstants.STRING)));
@@ -233,8 +257,10 @@ public class SiriLikeRealtimeSource {
         vlr.setScheduleDeviation(scheduleDeviation);
       }
     } catch (NumberFormatException nfe) {
+      _log.info("caught nfe", nfe);
       return null;
     }
+    _log.debug("return vlr=" + vlr);
     return vlr;
   }
 
@@ -244,13 +270,18 @@ public class SiriLikeRealtimeSource {
     TripEntry tripEntry = this._transitGraphDao.getTripEntryForId(vlr.getTripId());
  // unit tests don't have a populated transit graph so fall back on scheduled time from feed
     if (tripEntry != null) {
-      long time = vlr.getTimeOfLocationUpdate();
+      // todo this is a side effect
+      vlr.setBlockId(tripEntry.getBlock().getId());
+      long time = vlr.getTimeOfLocationUpdate()/1000;
       double lat = vlr.getCurrentLocationLat();
       double lon = vlr.getCurrentLocationLon();
       long serviceDateTime = vlr.getServiceDate();
       long effectiveScheduleTimeSeconds = getEffectiveScheduleTime(tripEntry, lat, lon, time, serviceDateTime);
       long effectiveScheduleTime = effectiveScheduleTimeSeconds + (serviceDateTime/1000);
-      return (int)(time - effectiveScheduleTime);
+      int deviation =  (int)(time - effectiveScheduleTime);
+      _log.debug("deviation(" + vlr.getVehicleId() + " is " + deviation + " time=" + new Date(time*1000) 
+          + ", effectiveScheduleTime=" + new Date(effectiveScheduleTime*1000));
+      return deviation;
     }
     
     return null;
@@ -275,23 +306,23 @@ private long getEffectiveScheduleTime(TripEntry trip, double lat, double lon, lo
     return Double.parseDouble(s);
   }
 
-  private Date parseDate(String s) throws Exception {
-    if (StringUtils.isBlank(s)) {
-      return beginningOfDay();
-    }
+  public Date parseShortDate(String s) throws Exception {
+    return ISO_DATE_SHORT_FORMAT.parse(s);
+  }
+
+  public Date parseDate(String s) throws Exception {
+    int endPos = "yyyy-MM-ddTHH:mm:ss.SSS".length();
+    // we can't convince Java's Simple Date to parse millisecond to 7 digit precision
+    s = s.substring(0, endPos-1) + s.substring((s.length() - 7), s.length());
+    
     return ISO_DATE_FORMAT.parse(s);
   }
 
   public Date parseServiceDate(String serviceDateStr) throws Exception {
-    if (StringUtils.isBlank(serviceDateStr)) {
-      return beginningOfDay();
-    }
-    return ISO_DATE_SHORT_FORMAT.parse(serviceDateStr);
+    Date d = ISO_DATE_SHORT_FORMAT.parse(serviceDateStr);
+    return new ServiceDate(d).getAsDate();
   }
 
-  private Date beginningOfDay() {
-    return new ServiceDate().getAsDate();
-  }
   
   private class RefreshTask implements Runnable {
 
@@ -304,4 +335,20 @@ private long getEffectiveScheduleTime(TripEntry trip, double lat, double lon, lo
       }
     }
   }
+  
+  public static class NodesAndTimestamp {
+    private List<Node> _nodes;
+    private long _timestamp;
+    public NodesAndTimestamp(List<Node> nodes, long timestamp) {
+      this._nodes = nodes;
+      this._timestamp = timestamp;
+    }
+    public List<Node> getNodes() {
+      return _nodes;
+    }
+    public long getTimestamp() {
+      return _timestamp;
+    }
+  }
+
 }
