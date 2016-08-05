@@ -752,7 +752,8 @@ function onSelectDataset(sourceDirectoryType) {
 					if(status.selected == true) {
 						jQuery("#createDirectoryResult #resultImage").attr("src", "../../css/img/dialog-accept-2.png");
 						jQuery("#createDirectoryMessage").text(status.message).css("color", "green");
-						// Clear the bundle name for the Build and Stage tabs
+						// Clear the bundle name for the Pre-validate, Build and Stage tabs
+						$("#Validate #prevalidate_bundleName").val("");
 						$("#Build #bundleBuildName").val("");
 						$("#Stage #staging_bundleName").text("");
 						$("#Download #download_bundleName").text("");
@@ -796,6 +797,7 @@ function onSelectDataset(sourceDirectoryType) {
 						if (actionName != "createDirectory" && status.bundleInfo != null) {
 							// Display the name of the most recently built bundle on the Build and Stage tabs
 							if (status.bundleInfo.buildResponse != null) {
+								$("#Validate #prevalidate_bundleName").val(status.bundleInfo.buildResponse.bundleBuildName);
 								$("#Build #bundleBuildName").val(status.bundleInfo.buildResponse.bundleBuildName);
 								$("#Stage #staging_bundleName").text(status.bundleInfo.buildResponse.bundleBuildName);
 								$("#Download #download_bundleName").text(status.bundleInfo.buildResponse.bundleBuildName);
@@ -1105,6 +1107,11 @@ function onBundleNameChanged() {
 		disableValidateButton();
 	} else {
 		enableValidateButton();
+		jQuery("#prevalidateInputs #validateBox #validating").hide();
+		jQuery("#prevalidate_progress").hide();
+		jQuery("#prevalidate_exception").hide();
+		jQuery("#prevalidate_resultList").empty();
+		jQuery("#prevalidate_fileList").empty();
 	}
 }
 
@@ -1320,14 +1327,16 @@ function onValidateClick() {
 		alert("bundle build name cannot contain spaces");
 		return;
 	}
-
 	else {
 		jQuery("#buildBundle_bundleName").val(bundleName);
 	}
-
+	disableValidateButton();
 	jQuery("#prevalidate_progress").show();
 	jQuery("#prevalidate_exception").hide();
-	jQuery("#prevalidateInputs #validateBox #validateButton").attr("disabled", "disabled");
+	jQuery("#prevalidate_resultList").empty();
+	jQuery("#prevalidate_fileList").empty();
+	jQuery("#prevalidate_validationProgress").text("Validating ... ");
+	jQuery("#prevalidateInputs #validateBox #validating #validationProgress").attr("src","../../css/img/ajax-loader.gif");
 	jQuery("#prevalidateInputs #validateBox #validating").show().css("display","inline");
 	jQuery.ajax({
 		url: "../../api/validate/" + bundleDirectory + "/" + bundleName + "/create?ts=" +new Date().getTime(),
@@ -1349,10 +1358,12 @@ function onValidateClick() {
 				if (jQuery("#prevalidate_id").text().length > 0) {
 					jQuery("#prevalidate_id_label").show();
 				}
+				enableValidateButton();
 			}
 		},
 		error: function(request) {
 			alert("There was an error processing your request. Please try again.");
+			enableValidateButton();
 		}
 	});
 }
@@ -1383,6 +1394,7 @@ function updateValidateStatus() {
 				jQuery("#prevalidate_validationProgress").text("Complete.");
 				jQuery("#prevalidateInputs #validateBox #validating #validationProgress").attr("src","../../css/img/dialog-accept-2.png");
 				updateValidateList(id);
+				enableValidateButton();
 			}
 			txt = txt + "</ul>";
 			jQuery("#prevalidate_resultList").html(txt).css("font-size", "12px");
