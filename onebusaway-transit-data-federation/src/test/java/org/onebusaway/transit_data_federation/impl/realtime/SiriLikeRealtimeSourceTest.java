@@ -58,7 +58,7 @@ public class SiriLikeRealtimeSourceTest {
     assertEquals(0, vehicles.getNodes().size());
   }
 
-  @Test
+//  @Test
   public void testParseRoute2() throws Exception {
     URL url = getClass().getResource("SiriLike_2.xml").toURI().toURL();
     NodesAndTimestamp vehicles = source.parseVehicles(url);
@@ -77,7 +77,7 @@ public class SiriLikeRealtimeSourceTest {
     assertEquals(-2.0, vlr.getScheduleDeviation(), 0.01);
   }
   
-  @Test
+//  @Test
   public void testParseRoute2Multi() throws Exception {
     URL url = getClass().getResource("SiriLike_2_multi.xml").toURI().toURL();
     NodesAndTimestamp vehicles = source.parseVehicles(url);
@@ -97,7 +97,7 @@ public class SiriLikeRealtimeSourceTest {
   }
 
 
-  @Test
+//  @Test
   public void testParseServiceDate() throws Exception {
     String s = "2016-08-03T00:00:00-06:00";
     Date d = source.parseServiceDate(s);
