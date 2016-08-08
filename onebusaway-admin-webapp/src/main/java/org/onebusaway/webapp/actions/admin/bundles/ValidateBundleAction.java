@@ -62,7 +62,7 @@ import org.onebusaway.webapp.actions.OneBusAwayNYCAdminActionSupport;
 public class ValidateBundleAction extends OneBusAwayNYCAdminActionSupport {
   private static Logger _log = LoggerFactory.getLogger(ValidateBundleAction.class);
   private static final long serialVersionUID = 1L;
-    
+
   // Names of valid tests
   private static final String TEST_ROUTE = "route";
   private static final String TEST_ROUTE_SEARCH = "route search";
@@ -73,6 +73,7 @@ public class ValidateBundleAction extends OneBusAwayNYCAdminActionSupport {
   private static final String TEST_ROUTE_REVISION = "route revision";
   private static final String TEST_SATURDAY_SCHEDULE = "saturday schedule";
   private static final String TEST_SUNDAY_SCHEDULE = "sunday schedule";
+  private static final String TEST_WEEKDAY_SCHEDULE = "weekday schedule";
   private static final String TEST_EXPRESS_INDICATOR = "express indicator";
   private static final String TEST_STOP_FOR_ROUTE = "stop for route";
   private static final String TEST_NOT_STOP_FOR_ROUTE = "not stop for route";
@@ -285,7 +286,9 @@ public class ValidateBundleAction extends OneBusAwayNYCAdminActionSupport {
   private QueryResultChecker getResultChecker(String test) {
     if (test.equals(TEST_SCHEDULE) || test.equals(TEST_SCHEDULE_DATE)) {
       return new ScheduleQueryResultChecker();
-    } else if (test.equals(TEST_SATURDAY_SCHEDULE) || test.equals(TEST_SUNDAY_SCHEDULE)) {
+    } else if (test.equals(TEST_SATURDAY_SCHEDULE)
+        || test.equals(TEST_SUNDAY_SCHEDULE)
+        || test.equals(TEST_WEEKDAY_SCHEDULE)) {
       return new WeekendScheduleQueryResultChecker();
     } else if (test.equals(TEST_RT)) {
       return new RealtimeQueryResultChecker();
