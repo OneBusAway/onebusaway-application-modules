@@ -244,7 +244,7 @@ OBA.Sign = function() {
 				if (typeof situation.Affects.VehicleJourneys != "undefined"
 					&& typeof situation.Affects.VehicleJourneys.AffectedVehicleJourney != "undefined") {
 					jQuery.each(situation.Affects.VehicleJourneys.AffectedVehicleJourney, function(_, journey) {
-						if (journey.LineRef in routeInfo && jQuery.inArray(journey.LineRef, existingSigns) < 0) {
+						if (journey.LineRef in routeInfo) {
 							found = true;
 						}
 					});
