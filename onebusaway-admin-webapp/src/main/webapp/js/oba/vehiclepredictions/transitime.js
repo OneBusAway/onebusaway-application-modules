@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 function createTransitimeModule(title, urlinput, timestamp, latlon, trip, route, block, schdev, nextstopid, 
-		nextstoppred, finalstopid, finalstoppred, nexttripid, age, mapName) {
+		nextstoppred, finalstopid, finalstoppred, nexttripid, status, age, mapName) {
 
 	var transitimeWeb = OBA.config.transitimeUrl || "gtfsrt.dev.wmata.obaweb.org:8080";
 	urlinput.val(transitimeWeb);
@@ -28,8 +28,8 @@ function createTransitimeModule(title, urlinput, timestamp, latlon, trip, route,
 	
 	var module = {};
 
-	module.refresh = function(agencyId, beginDate, numDays, vehicleId, beginTime) {
-		
+	module.refresh = function(vehicleAgencyId, tripAgencyId, stopAgencyId, beginDate, numDays, vehicleId, beginTime) {
+		var agencyId = stopAgencyId;
 		transitimeWeb = urlinput.val();
 		
 		var avlAttrs = {}

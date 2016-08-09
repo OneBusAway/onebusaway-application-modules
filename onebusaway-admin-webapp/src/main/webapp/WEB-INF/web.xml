@@ -159,7 +159,7 @@
     <servlet-name>transitime</servlet-name>
 	<url-pattern>/transitime/*</url-pattern>
   </servlet-mapping>
-  
+  <!-- 
   <error-page>
     <error-code>404</error-code>
     <location>/error/404.action</location>
@@ -172,5 +172,5 @@
     <exception-type>java.lang.RuntimeException</exception-type>
     <location>/redirect?uri=/error.action</location>
   </error-page>
-  
+   -->
 </web-app>

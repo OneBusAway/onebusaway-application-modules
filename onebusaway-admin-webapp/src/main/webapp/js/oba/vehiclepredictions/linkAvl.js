@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 function createLinkAvlModule(title, urlinput, timestamp, latlon, tripVal, route, block, schdev, nextstopid, 
-		nextstoppred, finalstopid, finalstoppred, nexttripid, age, mapName) {
+		nextstoppred, finalstopid, finalstoppred, nexttripid, status, age, mapName) {
 
 	var linkWeb = OBA.config.linkUrl || "localhost:9764";
 	urlinput.val(linkWeb);
@@ -30,13 +30,13 @@ function createLinkAvlModule(title, urlinput, timestamp, latlon, tripVal, route,
 	
 	var module = {};
 
-	module.refresh = function(agencyId, beginDate, numDays, vehicleId, beginTime) {
+	module.refresh = function(vehicleAgencyId, tripAgencyId, stopAgencyId, beginDate, numDays, rawVehicleId, beginTime) {
 	
 		linkWeb = urlinput.val();
-		
-		var linkUrl = "http://" + linkWeb + 
-			"/services/tss_lab/GetOnScheduleTrains?TimeInterval=5";
-	
+		vehicleId = hashVehicleId(rawVehicleId);
+		var linkUrl = "./link-proxy.action"
+		status.html("loading...");
+		setTimeout(checkRefresh, 4000);
 		jQuery.ajax({
 			url: linkUrl,
 			type: "GET",
@@ -49,7 +49,7 @@ function createLinkAvlModule(title, urlinput, timestamp, latlon, tripVal, route,
 					return;
 				}
 				for (var i = 0; i < d.Trip.length; i++) {
-					if (d.Trip[i].VehicleId == vehicleId) {
+					if (hashVehicleId(d.Trip[i].VehicleId) == vehicleId) {
 						processLinkTrip(d.Trip[i]);
 						return;
 					}
@@ -64,8 +64,18 @@ function createLinkAvlModule(title, urlinput, timestamp, latlon, tripVal, route,
 			route.html("...");
 			schdev.html("...");
 			block.html("...");
-			trip.html("...");
+			console.log("trip=" + trip);
+			if (trip == undefined || trip == null || trip.html == undefined) {
+				status.html("could not determin trip for vehicle " + vehicleId);
+			} else 	if (trip != undefined && trip != null && trip.html != undefined)
+				trip.html("...");
 			nextstopid.html("...");	
+		}
+	}
+	
+	function checkRefresh() {
+		if (status.html() == "loading...") {
+			status.html("connection issue with AVL");
 		}
 	}
 	
@@ -97,11 +107,16 @@ function createLinkAvlModule(title, urlinput, timestamp, latlon, tripVal, route,
 		finalstoppred.html(formatTime(finalStopUpdate.ArrivalTime.Estimated));
 		
 		var latLng = L.latLng(trip.Lat, trip.Lon);
+		status.html("Update Complete");
 		setTimeout(loadLinkMap, 1000, latLng);
 		
 	}
 	
 	function formatStopUpdates(trip) {
+		if (trip.StopUpdates.Update == undefined) {
+			console.log("stop update missing update");
+			return;
+		} 
 		trip.StopUpdates.Update.forEach(function(d) {
 			d.ArrivalTime.Scheduled = new Date(d.ArrivalTime.Scheduled);
 			d.ArrivalTime.Estimated = new Date(d.ArrivalTime.Estimated);
@@ -120,6 +135,8 @@ function createLinkAvlModule(title, urlinput, timestamp, latlon, tripVal, route,
 				return stopUpdates[i];
 			}
 		}
+		// we fell through, return last stop
+		return stopUpdates[stopUpdates.length-1];
 	}
 	
 	function xml2js(xml) {
@@ -160,6 +177,19 @@ function createLinkAvlModule(title, urlinput, timestamp, latlon, tripVal, route,
 	function setAge(d) {
 		avlAge = new Date(d).getTime();
 		module.updateAge();
+	}
+	
+	function hashVehicleId(aVehicleId) {
+		if (aVehicleId == null) return null;
+		var array = aVehicleId.split(":");
+		var output = "";
+		array.sort();
+		for (i=0; i<array.length; i++) {
+			output += array[i];
+			output += ":";
+		}
+		return output.substring(0, output.length);
+
 	}
 	
 	module.updateAge = function() {

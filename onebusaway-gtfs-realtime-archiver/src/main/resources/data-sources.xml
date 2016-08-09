@@ -27,6 +27,21 @@
     <bean id="dataSource"
           class="org.springframework.jndi.JndiObjectFactoryBean">
       <property name="jndiName"
+                value="java:comp/env/jdbc/appDB"/>   
+      <property name="lookupOnStartup"
+                value="true"/>   
+      <property name="cache"
+                value="true"/>   
+      <property name="proxyInterface"
+                value="javax.sql.DataSource"/>   
+      <property name="resourceRef"
+                value="true" />
+    </bean>
+    
+    
+    <bean id="gtfsRealtimeArchiveDataSource"
+          class="org.springframework.jndi.JndiObjectFactoryBean">
+      <property name="jndiName"
                 value="java:comp/env/jdbc/archiveDB"/>   
       <property name="lookupOnStartup"
                 value="true"/>   
@@ -65,9 +80,61 @@
 
 <!--         </bean> -->
   
+    <bean id="gtfsRealtimeArchiveSessionFactory" class="org.springframework.orm.hibernate3.annotation.AnnotationSessionFactoryBean">
+    <property name="dataSource" ref="gtfsRealtimeArchiveDataSource" />
+    <property name="annotatedClasses">
+      <list>
+        <value>org.onebusaway.gtfs_realtime.archiver.model.TripUpdateModel</value>
+        <value>org.onebusaway.gtfs_realtime.archiver.model.StopTimeUpdateModel</value>
+        <value>org.onebusaway.gtfs_realtime.archiver.model.VehiclePositionModel</value>
+        <value>org.onebusaway.gtfs_realtime.archiver.model.AlertModel</value>
+        <value>org.onebusaway.gtfs_realtime.archiver.model.EntitySelectorModel</value>
+        <value>org.onebusaway.gtfs_realtime.archiver.model.TimeRangeModel</value>
+      </list>
+    </property>
+    <property name="hibernateProperties">
+      <props>
+        <prop key="hibernate.connection.pool_size">1</prop>
+        <prop key="hibernate.current_session_context_class">thread</prop>
+        <prop key="hibernate.cache.provider_class">org.hibernate.cache.NoCacheProvider</prop>
+        <prop key="hibernate.show_sql">false</prop>
+        <prop key="hibernate.hbm2ddl.auto">update</prop>
+        <prop key="hibernate.jdbc.batch_size">1000</prop>
+        <prop key="hibernate.order_inserts">false</prop>
+        <prop key="hibernate.order_updates">false</prop>
+      </props>
+    </property>
+  </bean>
   
+  <!-- 
+      <bean id="httpServiceClient" class="org.onebusaway.transit_data_federation.util.HttpServiceClientImpl" >
+      <constructor-arg type="java.lang.String" value="admin.staging.obast.org"/>
+      <constructor-arg type="java.lang.Integer" value="9999" />
+      <constructor-arg type="java.lang.String" value="/api/" />
+    </bean>
+-->
+     <bean id="httpServiceClient" class="org.onebusaway.transit_data_federation.util.HttpServiceClientImpl" >
+      <constructor-arg type="java.lang.String" value="localhost"/>
+      <constructor-arg type="java.lang.Integer" value="9999" />
+      <constructor-arg type="java.lang.String" value="/onebusaway-admin-webapp/api/" />
+    </bean>
+
   
+  <bean id="bundleManagementService" class="org.onebusaway.transit_data_federation.impl.bundle.BundleManagementServiceImpl">
+    <property name="bundleStoreRoot" value="/var/lib/oba/oba-st-bundle-gtfs" />
+    <property name="standaloneMode" value="false" />
+  </bean>
+
+  <bean class="org.onebusaway.container.spring.SystemPropertyOverrideConfigurer">
+    <property name="order" value="-2" />
+    <property name="properties">
+      <props>
+        <prop key="bundlePath">/var/lib/obanyc/no-such-dir</prop>
+      </props>
+    </property>
+  </bean>
   
+  <!-- 
 	<bean id="sessionFactory" class="org.springframework.orm.hibernate3.annotation.AnnotationSessionFactoryBean">
 		<property name="dataSource" ref="dataSource" />
 		<property name="annotatedClasses">
@@ -90,4 +157,5 @@
 			</props>
 		</property>
 	</bean>
+	 -->
 </beans>

@@ -28,7 +28,7 @@ var slots = [
 		"container": ["#avl_title", "#avl_web", "#avl_timestamp", "#avl_latlon", "#avl_trip",
 		              "#avl_route", "#avl_block", "#avl_schdev", "#avl_nextstopid",
 		              "#avl_nextstoppred", "#avl_finalstopid", "#avl_finalstoppred",
-		              "#avl_nexttripid", "#avlAge"],
+		              "#avl_nexttripid", "#avl_error", "#avlAge"],
 		"map": "avlMap",
 		"options": "#avl_options"
 	},
@@ -37,7 +37,7 @@ var slots = [
 		"container": ["#oba_title", "#oba_web", "#oba_timestamp", "#oba_latlon", "#oba_trip",
 		              "#oba_route", "#oba_block", "#oba_schdev", "#oba_nextstopid",
 		              "#oba_nextstoppred", "#oba_finalstopid", "#oba_finalstoppred",
-		              "#oba_nexttripid", "#obaAge"],
+		              "#oba_nexttripid", "#oba_error", "#obaAge"],
 		"map": "obaMap",
 		"options": "#oba_options"
 	}
@@ -138,7 +138,9 @@ function startup() {
 		}
 	})
 	
-	jQuery("#agencyId").val(OBA.config.defaultAgencyId || "1");
+	jQuery("#vehicleAgencyId").val(OBA.config.defaultVehicleAgencyId || "1");
+	jQuery("#tripAgencyId").val(OBA.config.defaultTripAgencyId || "1");
+	jQuery("#stopAgencyId").val(OBA.config.defaultStopAgencyId || "1");
 	
 	initSlots();
 }
@@ -243,7 +245,9 @@ function doSearch() {
 	}
 	
 	var vehicleId = jQuery("#vehicleId").val();
-	var agencyId= jQuery("#agencyId").val();
+	var stopAgencyId= jQuery("#stopAgencyId").val();
+	var tripAgencyId= jQuery("#tripAgencyId").val();
+	var vehicleAgencyId= jQuery("#vehicleAgencyId").val();
 	var now = new Date();
 	var oneMinuteAgo = new Date(now.getTime() - (1 * 60 * 1000));
 	var beginDate=formatDate(oneMinuteAgo);
@@ -252,7 +256,7 @@ function doSearch() {
 	
 	slots.forEach(function(slot) {
 		if (slot.module)
-			slot.module.refresh(agencyId, beginDate, numDays, vehicleId, beginTime);
+			slot.module.refresh(vehicleAgencyId, tripAgencyId, stopAgencyId, beginDate, numDays, vehicleId, beginTime);
 	})
 }
 

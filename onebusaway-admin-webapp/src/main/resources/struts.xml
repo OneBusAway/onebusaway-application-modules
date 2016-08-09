@@ -62,8 +62,10 @@
 		        <param name="namespace">/</param>
 		    </result>
         </global-results>
+        <!-- 
         <global-exception-mappings>
     		<exception-mapping exception="java.lang.Exception" result="errorHandler"/>
 		</global-exception-mappings>
+		 -->
     </package>
 </struts>
