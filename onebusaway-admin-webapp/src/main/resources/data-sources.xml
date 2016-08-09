@@ -60,6 +60,21 @@
       <property name="resourceRef"
                 value="true" />
     </bean>
+     <!-- Database Connection Configuration for Bundle Build Response -->
+    <bean id="bundleBuildResponseDataSource"
+          class="org.springframework.jndi.JndiObjectFactoryBean">
+      <property name="jndiName"
+                value="java:comp/env/jdbc/appDB"/>
+      <property name="lookupOnStartup"
+                value="true"/>
+      <property name="cache"
+                value="true"/>
+      <property name="proxyInterface"
+                value="javax.sql.DataSource"/>
+      <property name="resourceRef"
+                value="true" />
+    </bean>
+    
     
     <!--  Email connection -->
      <bean id="mailSession"
@@ -140,13 +155,34 @@
 				<prop key="hibernate.connection.pool_size">1</prop>
 				<prop key="hibernate.current_session_context_class">thread</prop>
 				<prop key="hibernate.cache.provider_class">org.hibernate.cache.NoCacheProvider</prop>
-				<prop key="hibernate.show_sql">true</prop>
+				<prop key="hibernate.show_sql">false</prop>
 				<prop key="hibernate.hbm2ddl.auto">update</prop>
 				<prop key="hibernate.jdbc.batch_size">1000</prop>
 			</props>
 		</property>
 	</bean>
-
+     <bean id="bundleBuildResponseSessionFactory"
+    class="org.springframework.orm.hibernate3.annotation.AnnotationSessionFactoryBean">
+    <property name="dataSource" ref="bundleBuildResponseDataSource" />
+    <property name="annotatedClasses">
+      <list>
+        <value>org.onebusaway.admin.model.BundleBuildResponse</value>
+        <value>org.onebusaway.admin.service.bundle.impl.BundleBuildResponseDaoImpl</value>
+      </list>
+    </property>
+    <property name="hibernateProperties">
+      <props>
+        <prop key="hibernate.dialect">org.hibernate.dialect.MySQLDialect</prop>
+        <prop key="hibernate.connection.pool_size">1</prop>
+        <prop key="hibernate.current_session_context_class">thread</prop>
+        <prop key="hibernate.cache.provider_class">org.hibernate.cache.NoCacheProvider</prop>
+        <prop key="hibernate.show_sql">false</prop>
+        <prop key="hibernate.hbm2ddl.auto">update</prop>
+        <prop key="hibernate.jdbc.batch_size">1000</prop>
+      </props>
+    </property>
+  </bean>
+ 
 	<!-- quartz scheduling for PingJob -->
 	<bean name="pingJob" class="org.springframework.scheduling.quartz.JobDetailBean">
 		<property name="jobClass" value="org.onebusaway.admin.job.PingJob" />

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 function createObaModule(title, urlinput, timestamp, latlon, trip, route, block, schdev, nextstopid, 
-		nextstoppred, finalstopid, finalstoppred, nexttripid, age, mapName) {
+		nextstoppred, finalstopid, finalstoppred, nexttripid, status, age, mapName) {
 	
 	var obaWeb = OBA.config.obaUrl || "app.dev.wmata.obaweb.org:8080";
 	urlinput.val(obaWeb);
@@ -41,35 +41,50 @@ function createObaModule(title, urlinput, timestamp, latlon, trip, route, block,
 	
 	var module = {};
 	
-	module.refresh = function(agencyId, beginDate, numDays, vehicleId, beginTime) {
+	module.refresh = function(vehicleAgencyId, tripAgencyId, stopAgencyId, beginDate, numDays, vehicleId, beginTime) {
 		
 		obaWeb = urlinput.val();
-	
+		status.html("loading...");
 		var obaUrl = "http://" + obaWeb + "/onebusaway-api-webapp/siri/vehicle-monitoring?key=OBAKEY&OperatorRef="
-			+ agencyId + "&VehicleRef=" + vehicleId +  "&type=json";
-		
+			+ vehicleAgencyId + "&VehicleRef=" + vehicleId +  "&type=json";
+		setTimeout(checkRefresh, 4000);
 		jQuery.ajax({
 			url: obaUrl,
 			jsonp: "callback",
+			timeout: 2000,
 			dataType: "jsonp",
 			type: "GET",
 			async: false,
 			success: function(response) {
 				var attrs = parseSiri(response)
 				loadObaMap(attrs['latLng']);
-				queryOBAApiValues(attrs, agencyId, vehicleId);
-				queryOBAFinalStop(attrs, agencyId, vehicleId);
+				queryOBAApiValues(attrs, vehicleAgencyId, tripAgencyId, stopAgencyId, vehicleId);
+				queryOBAFinalStop(attrs, vehicleAgencyId, tripAgencyId, stopAgencyId, vehicleId);
 				obaAttrs = attrs;
+				status.html("Update Complete");
 			},
 			fail: function() {
+				status.html("unexpected VM response.  Invalid API key?")
 				schdev.html("...");
 				tdsnextstopid.html("...");
 				tdsnextstoppred.html("...");
 				finalstopid.html("...");
 				nexttripid.html("...");
+			},
+			complete : function( xhr, data) {
+				if (xhr.status != 0) {
+				} else {
+					status.html("invalid VM response from OBA:  perhaps vehicle " + vehicleId + " not found")
+				}
 			}
 		});
 		
+	}
+	
+	function checkRefresh() {
+		if (status.html() == "loading...") {
+			status.html("connection issue with OBA");
+		}
 	}
 	
 	function loadObaMap(latLng) {
@@ -78,19 +93,21 @@ function createObaModule(title, urlinput, timestamp, latlon, trip, route, block,
 		}
 	}
 	
-	function queryOBAApiValues(attrs, agencyId, vehicleId) {
+	function queryOBAApiValues(attrs, vehicleAgencyId, tripAgencyId, stopAgencyId, vehicleId) {
 
 		var apiUrl = "http://" + obaWeb + obaApiPrefix
 			+ "/api/where/trip-for-vehicle/"
-			+ agencyId + "_" + vehicleId + ".json?key=OBAKEY";
+			+ vehicleAgencyId + "_" + vehicleId + ".json?key=OBAKEY";
 
 		jQuery.ajax({
 			url: apiUrl,
 			type: "GET",
 			jsonp: "callback",
 			dataType: "jsonp",
-			async: false,
+			async: true,
+			timeout: 2000,
 			success: function(response) {
+
 				if (response.data != undefined && response.data.entry != undefined 
 						&& response.data.entry.status != undefined) {
 					var now = new Date(response.currentTime);	
@@ -103,25 +120,34 @@ function createObaModule(title, urlinput, timestamp, latlon, trip, route, block,
 					attrs["tdsLastUpdate"] = new Date(s.lastUpdateTime);
 					setAge(s.lastUpdateTime);
 					
-					queryOBANextStopPrediction(attrs, agencyId, attrs["tdsNextStopId"], vehicleId)
+					queryOBANextStopPrediction(attrs, vehicleAgencyId, tripAgencyId, stopAgencyId, attrs["tdsNextStopId"], vehicleId)
 				} else {
+					status.html("unexpected response querying for trip:" + response);
 					schdev.html("...");
 					tdsnextstopid.html("...");
 					tdsnextstoppred.html("...");
 				}
 			},
-			fail: function() {
+			fail : function() {
 				schdev.html("...");
 				tdsnextstopid.html("...");
 				tdsnextstoppred.html("...");
+				status.html("vehicle " + vehicleId + " not found (or connecton issue) via OBA");
+			},
+			complete : function( xhr, data) {
+				console.log("complete");
+				if (xhr.status == 0) {
+					status.html("invalid response from OBA:  perhaps vehicle " + vehicleId + " not found")
+				}
 			}
 		});	
 	}
 
-	function queryOBAFinalStop(attrs, agencyId, vehicleId) {
+	function queryOBAFinalStop(attrs, vehicleAgencyId, tripAgencyId, stopAgencyId, vehicleId) {
 		var tripId = attrs["tripId"];
 		if (tripId == undefined) {
 			console.log("missing trip id");
+			status.html("missing tripid for vehicle " + vehicleId);
 			finalstopid.html("...");
 			finalstoppred.html("...");
 			nexttripid.html("...");
@@ -129,7 +155,7 @@ function createObaModule(title, urlinput, timestamp, latlon, trip, route, block,
 		}
 		var scheduleUrl = "http://" + obaWeb + obaApiPrefix
 			+ "/api/where/trip-details/"
-			+ agencyId + "_" + tripId + ".json?key=OBAKEY";
+			+ tripAgencyId + "_" + tripId + ".json?key=OBAKEY";
 		
 		jQuery.ajax({
 			url: scheduleUrl,
@@ -150,7 +176,7 @@ function createObaModule(title, urlinput, timestamp, latlon, trip, route, block,
 				}
 
 				
-				queryOBAFinalPrediction(attrs, agencyId, attrs["tdsFinalStopId"], vehicleId)
+				queryOBAFinalPrediction(attrs, vehicleAgencyId, tripAgencyId, stopAgencyId, attrs["tdsFinalStopId"], vehicleId)
 			},
 			fail: function() {
 				finalstopid.html("...");
@@ -159,15 +185,15 @@ function createObaModule(title, urlinput, timestamp, latlon, trip, route, block,
 		});	
 	}
 
-	function queryOBAFinalPrediction(attrs, agencyId, stopId, vehicleId) {
-		queryOBAStopPrediction(attrs, agencyId, stopId, vehicleId, true, "tdsFinalStopPred", finalstoppred)
+	function queryOBAFinalPrediction(attrs, vehicleAgencyId, tripAgencyId, stopAgencyId, stopId, vehicleId) {
+		queryOBAStopPrediction(attrs, vehicleAgencyId, tripAgencyId, stopAgencyId, stopId, vehicleId, true, "tdsFinalStopPred", finalstoppred)
 	}
 
-	function queryOBANextStopPrediction(attrs, agencyId, stopId, vehicleId) {
-		queryOBAStopPrediction(attrs, agencyId, stopId, vehicleId, false, "tdsNextPrediction", tdsnextstoppred)
+	function queryOBANextStopPrediction(attrs, vehicleAgencyId, tripAgencyId, stopAgencyId, stopId, vehicleId) {
+		queryOBAStopPrediction(attrs, vehicleAgencyId, tripAgencyId, stopAgencyId, stopId, vehicleId, false, "tdsNextPrediction", tdsnextstoppred)
 	}
 
-	function queryOBAStopPrediction(attrs, agencyId, stopId, vehicleId, isArrival, attrsKey, label) {
+	function queryOBAStopPrediction(attrs, vehicleAgencyId, tripAgencyId, stopAgencyId, stopId, vehicleId, isArrival, attrsKey, label) {
 		
 		var tripId = attrs["tripId"];
 		// Setting service date to today so will not work for trips that span a day.
@@ -175,8 +201,8 @@ function createObaModule(title, urlinput, timestamp, latlon, trip, route, block,
 		serviceDate.setHours(0,0,0,0);
 		var lastStopPredUrl = "http://" + obaWeb + obaApiPrefix
 			+ "/api/where/arrival-and-departure-for-stop/"
-			+ agencyId + "_" + stopId + ".json?key=OBAKEY&tripId="
-			+ agencyId + "_" + tripId + "&vehicleId=" + agencyId + "_" + encodeURI(vehicleId) 
+			+ stopAgencyId + "_" + stopId + ".json?key=OBAKEY&tripId="
+			+ tripAgencyId + "_" + tripId + "&vehicleId=" + vehicleAgencyId + "_" + encodeURI(vehicleId) 
 			+ "&serviceDate=" + serviceDate.getTime();
 
 		jQuery.ajax({
@@ -193,6 +219,7 @@ function createObaModule(title, urlinput, timestamp, latlon, trip, route, block,
 					label.html(formatTime(new Date(pred)));
 				} else {
 					label.html("...");
+					status.html("TDS call failed: " + lastStopPredUrl);
 				}
 			},
 			fail: function() {

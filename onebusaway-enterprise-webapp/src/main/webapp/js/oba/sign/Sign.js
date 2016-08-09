@@ -241,10 +241,13 @@ OBA.Sign = function() {
 			// make sure we have a valid alert before showing
 			var found = false;
 			jQuery.each(applicableSituations, function(situationId, situation) {
-				if (typeof situation.Affects.VehicleJourneys != "undefined") {
-					if (journey.LineRef in routeInfo && jQuery.inArray(journey.LineRef, existingSigns) < 0) {
-						found = true;
-					}
+				if (typeof situation.Affects.VehicleJourneys != "undefined"
+					&& typeof situation.Affects.VehicleJourneys.AffectedVehicleJourney != "undefined") {
+					jQuery.each(situation.Affects.VehicleJourneys.AffectedVehicleJourney, function(_, journey) {
+						if (journey.LineRef in routeInfo) {
+							found = true;
+						}
+					});
 				}
 			});
 			if (!found) return;

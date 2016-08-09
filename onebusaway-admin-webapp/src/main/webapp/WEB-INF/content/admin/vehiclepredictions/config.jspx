@@ -32,13 +32,17 @@ if (!OBA.config) {
 <s:set var="linkUrl" value="%{getConfig('linkUrl')}"/>
 <s:set var="obaApiPrefix" value="%{getConfig('obaApiPrefix')}"/>
 <s:set var="defaultModules" value="%{getConfig('defaultModules')}"/>
-<s:set var="defaultAgencyId" value="%{getConfig('defaultAgencyId')}"/>
+<s:set var="defaultVehicleAgencyId" value="%{getConfig('defaultVehicleAgencyId')}"/>
+<s:set var="defaultTripAgencyId" value="%{getConfig('defaultTripAgencyId')}"/>
+<s:set var="defaultStopAgencyId" value="%{getConfig('defaultStopAgencyId')}"/>
 
 OBA.config.obaUrl = "${obaUrl}";
 OBA.config.transitimeUrl = "${transitimeUrl}";
 OBA.config.linkUrl = "${linkUrl}";
 OBA.config.obaApiPrefix = "${obaApiPrefix}";
 OBA.config.defaultModules = "${defaultModules}";
-OBA.config.defaultAgencyId = "${defaultAgencyId}"
+OBA.config.defaultVehicleAgencyId = "${defaultVehicleAgencyId}"
+OBA.config.defaultTripAgencyId = "${defaultTripAgencyId}"
+OBA.config.defaultStopAgencyId = "${defaultStopAgencyId}"
 
 </jsp:root>
