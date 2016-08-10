@@ -418,6 +418,7 @@
             <!-- JQuery Excludes -->
             <exclude>**/jqGrid.js</exclude>
             <exclude>**/grid.*.js</exclude>
+            <exclude>**/CTBusStops*</exclude>
           </excludes>
         </configuration>
       </plugin>
