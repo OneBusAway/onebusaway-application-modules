@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *         http://www.apache.org/licenses/LICENSE-2.0
+ *         http://www.apache.org/licenses/LICENSE-2.0f
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -71,6 +71,7 @@ jQuery(function() {
 	}
 	// hide the Build Progress message
 	jQuery("#buildBundle #buildingTest").hide();
+	jQuery("#buildBundle #buildingFinal").hide();
 	// politely set our hash as tabs are changed
 	jQuery("#tabs").bind("tabsshow", function(event, ui) {
 		window.location.hash = ui.tab.hash;
@@ -152,10 +153,15 @@ jQuery(function() {
 					type: "GET",
 					async: false,
 					success: function(data) {
-						$('#diffResult').text('');
+						//$('#diffResult').text('');
 						$.each(data.diffResults, function(index, value) {
-							$('#diffResult').append(
-									"<div id=\"diffResultItem\">"+value+"</div>");
+							//$('#diffResult').append(
+							//		"<div id=\"diffResultItem\">"+value+"</div>");
+							// Skip first three rows of results
+							if (index >= 3) {
+								var diffRow = formatDiffRow(value);
+								$("#diffResultsTable").append(diffRow);
+							}
 						});
 						$.each(data.fixedRouteDiffs, function(index, value) {
 							var modeName = value.modeName;
@@ -293,6 +299,7 @@ jQuery(function() {
 
 	//if bundle build name is entered, enable the Validate button
 	jQuery("#Validate #prevalidate_bundleName").on("input propertychange", onBundleNameChanged);
+	jQuery("#Build #bundleBuildName").on("input propertychange", onBundleNameChanged);
 
 	//initially hide the Validation Progress label
 	jQuery("#prevalidate_progress").hide();
@@ -321,9 +328,6 @@ jQuery(function() {
 	jQuery("#viewTestBuildDetails").click({buildType: "test"}, toggleBuildBundleResultList);
 	jQuery("#viewFinalBuildDetails").click({buildType: "final"}, toggleBuildBundleResultList);
 
-
-	//Handle reset button click event
-	jQuery("#buildBundle_resetButton").click(onResetClick);
 
 	//Enable or disable create/select button when user enters/removes directory name
 	//For a copy, a value must also be provided for the destination directory
@@ -366,7 +370,7 @@ jQuery(function() {
 
 	disableStageButton();
 	disableDownloadButton();
-	disableBuildButton();
+	disableBuildButtons();
 
 	//toggle bundle staging progress list
 	jQuery("#stageBundle #stageBundle_progress #expand").bind({
@@ -647,7 +651,7 @@ function showBundleInfo(bundleInfo){
 			&& bundleObj.buildResponse.email != "null") {
 		jQuery("#buildBundle_email").val(bundleObj.buildResponse.email);
 	}
-	jQuery("#buildBundle_bundleName").val(bundleObj.buildResponse.bundleBuildName);
+	//jQuery("#buildBundle_bundleName").val(bundleObj.buildResponse.bundleBuildName);
 	jQuery("#startDatePicker").val(bundleObj.buildResponse.startDate);
 	jQuery("#startDate").val(bundleObj.buildResponse.startDate);
 	jQuery("#endDatePicker").val(bundleObj.buildResponse.endDate);
@@ -746,6 +750,7 @@ function onSelectDataset(sourceDirectoryType) {
 			"destDirectoryName" : copyDir},
 			async: false,
 			success: function(response) {
+				clearPreviousBuildResults();
 				disableSelectButton();
 				var status = response;
 				if (status != undefined) {
@@ -801,6 +806,11 @@ function onSelectDataset(sourceDirectoryType) {
 								$("#Build #bundleBuildName").val(status.bundleInfo.buildResponse.bundleBuildName);
 								$("#Stage #staging_bundleName").text(status.bundleInfo.buildResponse.bundleBuildName);
 								$("#Download #download_bundleName").text(status.bundleInfo.buildResponse.bundleBuildName);
+								// Get results of previous build
+								if (status.bundleInfo.buildResponse.statusMessages != null
+										&& status.bundleInfo.buildResponse.statusMessages.length > 0) {
+									getPreviousBuildResults(status.bundleInfo.buildResponse);
+								}
 							}
 							enableStageButton();
 							enableDownloadButton();
@@ -864,14 +874,12 @@ function onSelectDataset(sourceDirectoryType) {
 								}
 							}
 						}
-						enableBuildButton();
-						enableResetButton();
+						enableBuildButtons();
 					}					
 					else {
 						jQuery("#createDirectoryResult #resultImage").attr("src", "../../css/img/warning_16.png");
 						jQuery("#createDirectoryMessage").text(status.message).css("color", "red");
-						disableBuildButton();
-						disableResetButton();
+						disableBuildButtons();
 					}
 					var continueButton = jQuery("#create_continue");
 					enableContinueButton(continueButton);
@@ -894,7 +902,7 @@ function onSelectDataset(sourceDirectoryType) {
 					jQuery("#Build #datasetName").text(bundleDir);
 				} else {
 					alert("null status");
-					disableBuildButton();
+					disableBuildButtons();
 				}
 				var $tabs = jQuery("#tabs");
 				$tabs.tabs('select', 1);				
@@ -1018,9 +1026,35 @@ function onBundleCommentChanged() {
 		}
 	});
 }
-function foo(a,inputType) {
 
+function getPreviousBuildResults(buildResponse) {
+	$("#Build #buildBundle_testResultList").val(buildResponse.statusMessages.join("\n"));
+	// Create list of output files.
+	var txt = "<ul>";
+	var list = buildResponse.buildOutputFiles;
+	if (list != null) {
+		var size = list.length;
+		if (size > 0) {
+			for (var i=0; i<size; i++) {
+				var encoded = encodeURIComponent(list[i]);
+				txt = txt + "<li>"
+				+ "<img src=\"../../css/img/go-down-5.png\" />"
+				+ "<a href=\"manage-bundles!downloadOutputFile.action?id="
+				+ buildResponse.requestId + "&downloadFilename=" 
+				+ encoded + "\">" + list[i] +  "</a></li>";
+			}
+		}
+	}
+	txt = txt + "</ul>";
+	$("#buildBundle_testFileList").html(txt).css("display", "block");
+
+	// Hide the div for the result link
+	$("#buildBundle_testResultLink").hide();
+	$("#testProgressBarDiv #testBuildProgress").text("Previous Build Messages");
+	$("#testProgressBarDiv").show();
+	$("#bundleTestResultsHolder").show();
 }
+
 function onAddAnotherAgencyClick(inputType) {
 	if (inputType === undefined) {
 		inputType = "file";
@@ -1102,6 +1136,7 @@ function onAgencyProtocolChange() {
 }
 
 function onBundleNameChanged() {
+	// Changes for Pre-validate tab
 	var text = jQuery("#Validate #prevalidate_bundleName").val();
 	if (text.length == 0 || selectedDirectory.length == 0) {
 		disableValidateButton();
@@ -1113,6 +1148,9 @@ function onBundleNameChanged() {
 		jQuery("#prevalidate_resultList").empty();
 		jQuery("#prevalidate_fileList").empty();
 	}
+
+	// Changes for Build tab
+	clearPreviousBuildResults();
 }
 
 function onRemoveSelectedAgenciesClick() {
@@ -1171,30 +1209,12 @@ function disableDeployButton() {
 	disableContinueButton($("#deploy_continue"));
 }
 
-function enableBuildButton() {
-	jQuery("#buildBundle_buildButton").removeAttr("disabled").css("color", "#000");
-	enableContinueButton($("#create_continue"));
-}
-
-function disableBuildButton() {
-	jQuery("#buildBundle_buildButton").attr("disabled", "disabled").css("color", "#999");
-	disableContinueButton($("#create_continue"));
-}
-
 function enableDownloadButton() {
 	jQuery("#downloadBundle_downloadButton").removeAttr("disabled").css("color", "#000");
 }
 
 function disableDownloadButton() {
 	jQuery("#downloadBundle_downloadButton").attr("disabled", "disabled").css("color", "#999");
-}
-
-function enableResetButton() {
-	jQuery("#buildBundle_resetButton").removeAttr("disabled").css("color", "#000");
-}
-
-function disableResetButton() {
-	jQuery("#buildBundle_resetButton").attr("disabled", "disabled").css("color", "#999");
 }
 
 function toggleAdvancedOptions() {
@@ -1462,32 +1482,47 @@ function onBuildClick(event) {
 	
 	if (buildType == "test") {
 		jQuery("#testProgressBarDiv").show();
+		jQuery("#buildBundle #buildingTest").show();
+		jQuery("#buildBundle #buildingTest #buildingTestProgress").attr("src","../../css/img/ajax-loader.gif");
+		jQuery("#buildBundle_buildTestProgress").text("Bundle Build in Progress...");
+		jQuery("#buildBundle_testFileList").html("");
+		jQuery("#buildBundle #buildingTest").show().css("width","300px").css("margin-top", "20px");
+		// Show result link
+		$("#buildBundle_testResultLink").show();
 	} else {
 		archive = true;
 		consolidate = true;
 		jQuery("#finalProgressBarDiv").show();
+		jQuery("#buildBundle #buildingFinal").show();
+		jQuery("#buildBundle #buildingFinal #buildingFinalProgress").attr("src","../../css/img/ajax-loader.gif");
+		jQuery("#buildBundle_buildFinalProgress").text("Bundle Build in Progress...");
+		jQuery("#buildBundle_finalFileList").html("");
+		jQuery("#buildBundle #buildingFinal").show().css("width","300px").css("margin-top", "20px");
+		// Show result link
+		$("#buildBundle_finalResultLink").show();
 	}
 
 	var valid = validateBundleBuildFields(bundleDir, bundleName, startDate, endDate);
 	if(valid == false) {
 		return;
 	}
-	jQuery("#buildBundle #buildingTest").show();
-	jQuery("#buildBundle #buildingTest #buildingTestProgress").attr("src","../../css/img/ajax-loader.gif");
-	jQuery("#buildBundle_buildTestProgress").text("Bundle Build in Progress...");
-	jQuery("#buildBundle_testFileList").html("");
-	jQuery("#buildBundle #buildingTest").show().css("width","300px").css("margin-top", "20px");
 
-	//disableBuildButton();
-	//disableResetButton();
-	//buildBundle(bundleName, startDate, endDate, bundleComment, archive, consolidate, predate);
+	clearPreviousBuildResults();
+	disableBuildButtons();
+
+	//jQuery("#buildBundle_testFileList").html("");
+	//jQuery("#buildBundle #buildingTest").show().css("width","300px").css("margin-top", "20px");
+
+	// Show result link
+	//$("#buildBundle_testResultLink").show();
+
 	buildBundle(bundleName, startDate, endDate, bundleComment, archive, consolidate, false, buildType);
 }
 
-function onResetClick() {
-	jQuery("#startDatePicker").val("");
-	jQuery("#endDatePicker").val("");
-	jQuery("#buildBundle_bundleName").val("");
+function clearPreviousBuildResults() {
+	//jQuery("#startDatePicker").val("");
+	//jQuery("#endDatePicker").val("");
+	//jQuery("#buildBundle_bundleName").val("");
 
 	//jQuery("#buildBundle_resultList").html("");
 	jQuery("#buildBundle_testResultList").val("");
@@ -1497,8 +1532,24 @@ function onResetClick() {
 	jQuery("#buildBundle_testFileList").html("");
 	jQuery("#buildBundle_finalFileList").html("");
 
-	jQuery("#buildBundle #downloadTestLogs").hide();
-	jQuery("#buildBundle #buildingTest").hide();
+	// Hide result divs
+	jQuery("#buildBundle_testResultLink").hide();
+	jQuery("#bundleTestResultsHolder").hide();
+	jQuery("#buildBundle_finalResultLink").hide();
+	jQuery("#bundleFinalResultsHolder").hide();
+
+	//jQuery("#buildBundle #downloadTestLogs").hide();
+	//jQuery("#buildBundle #buildingTest").hide();
+}
+
+function disableBuildButtons() {
+	jQuery("#buildBundle #testBuildBundleButton").prop("disabled", true).css("color", "#999");
+	jQuery("#buildBundle #finalBuildBundleButton").prop("disabled", true).css("color", "#999");
+}
+
+function enableBuildButtons() {
+	jQuery("#buildBundle #testBuildBundleButton").prop("disabled", false).css("color", "#000");
+	jQuery("#buildBundle #finalBuildBundleButton").prop("disabled", false).css("color", "#000");
 }
 
 function validateBundleBuildFields(bundleDir, bundleName, startDate, endDate) {
@@ -1530,9 +1581,13 @@ function validateBundleBuildFields(bundleDir, bundleName, startDate, endDate) {
 	return valid;
 }
 
-function bundleUrl() {
+function bundleUrl(buildType) {
 	//var id = jQuery("#buildBundle_id").text();
 	var id = buildBundleId;
+	var $resultLink = jQuery("#buildBundle #buildBundle_testResultLink #testResultLink");
+	if (buildType == "final") {
+		$resultLink = jQuery("#buildBundle #buildBundle_finalResultLink #finalResultLink");
+	}
 	jQuery("#buildBundle_exception").hide();
 	jQuery.ajax({
 		url: "../../api/build/" + id + "/url?ts=" +new Date().getTime(),
@@ -1541,14 +1596,16 @@ function bundleUrl() {
 		success: function(response) {
 			var bundleResponse = response;
 			if(bundleResponse.exception !=null) {
-				jQuery("#buildBundle #buildBundle_testResultLink #testResultLink")
+				//jQuery("#buildBundle #buildBundle_testResultLink #testResultLink")
+				$resultLink
 				.text("(exception)")
 				.css("padding-left", "5px")
 				.css("font-size", "12px")
 				.addClass("adminLabel")
 				.css("color", "red");
 			} else {
-				jQuery("#buildBundle #buildBundle_testResultLink #testResultLink")
+				//jQuery("#buildBundle #buildBundle_testResultLink #testResultLink")
+				$resultLink
 				.text(bundleResponse.bundleResultLink)
 				.css("padding-left", "5px")
 				.css("font-size", "12px")
@@ -1558,20 +1615,40 @@ function bundleUrl() {
 		},
 		error: function(request) {
 			clearTimeout(timeout);
-			timeout = setTimeout(bundleUrl, 10000);
+			timeout = setTimeout(bundleUrl.bind(null, buildType), 10000);
 		}
 	});
-	var url = jQuery("#buildBundle #buildBundle_testResultLink #testResultLink").text();
+	var url = $esultLink.text();
 	if (url == null || url == "") {
-		window.setTimeout(bundleUrl, 5000);
+		window.setTimeout(bundleUrl.bind(null, buildType), 5000);
 	}
 }
 function buildBundle(bundleName, startDate, endDate, bundleComment, archive, consolidate, predate, buildType){
 	//var bundleDirectory = jQuery("#selected_bundleDirectory").text();
 	bundleDirectory = selectedDirectory;
 	//var email = jQuery("Build #").val();
+	$("#testProgressBarDiv #testBuildProgress").text("Initializing build process");
 	var $buildBundle_resultList = jQuery("#buildBundle_testResultList");
-	if (buildType == "final") {
+	if (buildType == "test") {
+		$("#buildingTest").show();
+		$("#buildBundle_testResultLink").show();
+		$("#testProgressBarDiv").show();
+		$("#bundleTestResultsHolder").show();
+		$("#bundleTestResults").show();
+		$("#buildingFinal").hide();
+		$("#buildBundle_finalResultLink").hide();
+		$("#finalProgressBarDiv").hide();
+		$("#bundleFinalResults").hide();
+	} else {
+		$("#buildingTest").hide();
+		$("#buildBundle_testResultLink").hide();
+		$("#testProgressBarDiv").hide();
+		$("#bundleFinalResultsHolder").show();
+		$("#bundleTestResults").hide();
+		$("#buildingFinal").show();
+		$("#buildBundle_finalResultLink").show();
+		$("#finalProgressBarDiv").show();
+		$("#bundleFinalResults").show();
 		$buildBundle_resultList = jQuery("#buildBundle_finalResultList");
 	}
 	var email = jQuery("#buildNotificationEmail").val();
@@ -1596,6 +1673,7 @@ function buildBundle(bundleName, startDate, endDate, bundleComment, archive, con
 			if (bundleResponse != undefined) {
 				//display exception message if there is any
 				if(bundleResponse.exception !=null) {
+					enableBuildButtons();
 					alert(bundleResponse.exception.message);
 				} else {
 					//jQuery("#buildBundle_resultList").html("calling...");
@@ -1603,16 +1681,18 @@ function buildBundle(bundleName, startDate, endDate, bundleComment, archive, con
 					jQuery("#buildBundle_id").text(bundleResponse.id);
 					buildBundleId = bundleResponse.id;
 					window.setTimeout(updateBuildStatus.bind(null, buildType), 5000);
-					bundleUrl();
+					bundleUrl(buildType);
 				}
 			} else {
 				jQuery("#buildBundle_id").text(error);
 				buildBundleId = error;
 				//jQuery("#buildBundle_resultList").html("error");
 				$buildBundle_resultList.val("error");
+				enableBuildButtons();
 			}
 		},
 		error: function(request) {
+			enableBuildButtons();
 			alert("There was an error processing your request. Please try again.");
 		}
 	});
@@ -1624,13 +1704,20 @@ function updateBuildStatus(buildType) {
 	disableDownloadButton();
 	//id = jQuery("#buildBundle_id").text();
 	id = buildBundleId;
+	// Initialize vars for Test section
+	var $buildBundle_buildProgress = jQuery("#buildBundle_buildTestProgress");
 	var $progressBar = jQuery("#testProgressBar");
+	var $buildingProgress = jQuery("#buildBundle #buildingTest #buildingTestProgress");
 	var $buildProgress = jQuery("#testBuildProgress");
 	var $buildBundle_resultList = jQuery("#buildBundle_testResultList");
+	var $buildBundle_exception = jQuery("#buildBundle_testException");
 	if (buildType == "final") {
+		$buildBundle_buildProgress = jQuery("#buildBundle_buildFinalProgress");
 		$progressBar = jQuery("#finalProgressBar");
+		$buildingProgress = jQuery("#buildBundle #buildingFinal #buildingFinalProgress");
 		$buildProgress = jQuery("#finalBuildProgress");
 		$buildBundle_resultList = jQuery("#buildBundle_finalResultList");
+		$buildBundle_exception = jQuery("#buildBundle_finalException");
 	}
 	jQuery.ajax({
 		url: "../../api/build/" + id + "/list?ts=" +new Date().getTime(),
@@ -1643,10 +1730,11 @@ function updateBuildStatus(buildType) {
 			var totalTasks = 0;
 			var bundleResponse = response;
 			if (bundleResponse == null) {
-				jQuery("#buildBundle_buildProgress").text("Bundle Status Unknown!");
-				jQuery("#buildBundle #buildingTest #buildingTestProgress").attr("src","../../css/img/dialog-warning-4.png");
+				$buildBundle_buildProgress.text("Bundle Status Unknown!");
+				$buildingProgress.attr("src","../../css/img/dialog-warning-4.png");
 				//jQuery("#buildBundle_resultList").html("unknown id=" + id);
 				$buildBundle_resultList.val("unknown id=" + id);
+				enableBuildButtons();
 			} else {
 				jQuery("#Build #datasetName").text(bundleResponse.bundleDirectoryName);
 				var size = 0;
@@ -1679,15 +1767,16 @@ function updateBuildStatus(buildType) {
 				if (bundleResponse.complete == false) {
 					window.setTimeout(updateBuildStatus.bind(null, buildType), 5000); // recurse
 				} else {
-					jQuery("#buildBundle_buildTestProgress").text("Bundle Complete!");
-					jQuery("#buildBundle #buildingTest #buildingTestProgress").attr("src","../../css/img/dialog-accept-2.png");
-					updateBuildList(id);
+					//jQuery("#buildBundle_buildTestProgress").text("Bundle Complete!");
+					//jQuery("#buildBundle #buildingTest #buildingTestProgress").attr("src","../../css/img/dialog-accept-2.png");
+					$buildBundle_buildProgress.text("Bundle Complete!");
+					$buildingProgress.attr("src","../../css/img/dialog-accept-2.png");
+					updateBuildList(id, buildType);
 					$("#Stage #staging_bundleName").text($("#Build #bundleBuildName").val());
 					$("#Download #download_bundleName").text($("#Build #bundleBuildName").val());
 					enableStageButton();
-					enableBuildButton();
-					enableResetButton();
 					enableDownloadButton();
+					enableBuildButtons();
 				}
 				//txt = txt + "</ul>";
 				//jQuery("#buildBundle_resultList").html(txt).css("font-size", "12px");
@@ -1696,29 +1785,32 @@ function updateBuildStatus(buildType) {
 				$buildBundle_resultList.scrollTop(1500);  // Just use some arbitrarily large number
 				// check for exception
 				if (bundleResponse.exception != null) {
-					jQuery("#buildBundle_buildTestProgress").text("Bundle Failed!");
+					//jQuery("#buildBundle_buildTestProgress").text("Bundle Failed!");
+					$buildBundle_buildProgress.text("Bundle Failed!");
 					$buildProgress.text("Bundle build failed");
-					jQuery("#buildBundle #buildingTest #buildingTestProgress").attr("src","../../css/img/dialog-warning-4.png");
+					//jQuery("#buildBundle #buildingTest #buildingTestProgress").attr("src","../../css/img/dialog-warning-4.png");
+					$buildingProgress.attr("src","../../css/img/dialog-warning-4.png");
 					if (bundleResponse.exception.message != undefined) {
-						jQuery("#buildBundle_testException").show().css("display","inline");
-						jQuery("#buildBundle_testException").html(bundleResponse.exception.message);
+						//jQuery("#buildBundle_testException").show().css("display","inline");
+						//jQuery("#buildBundle_testException").html(bundleResponse.exception.message);
+						$buildBundle_exception.show().css("display","inline");
+						$buildBundle_exception.html(bundleResponse.exception.message);
 					}
 					disableStageButton();
 					disableDownloadButton();
 					enableBuildButton();
-					enableResetButton();
 				}
 			}
 		},
 		error: function(request) {
 			clearTimeout(timeout);
-			timeout = setTimeout(updateBuildStatus, 10000);
+			timeout = setTimeout(updateBuildStatus.bind(null, buildType), 10000);
 		}
 	});
 }
 
 //populate list of files that were result of building
-function updateBuildList(id) {
+function updateBuildList(id,buildType) {
 	var summaryList = null;
 	jQuery.ajax({
 		url: "manage-bundles!downloadOutputFile.action?ts=" +new Date().getTime(),
@@ -1731,6 +1823,10 @@ function updateBuildList(id) {
 			}
 	});
 
+	var $buildBundle_fileList = jQuery("#buildBundle_testFileList");
+	if (buildType == "final") {
+		$buildBundle_fileList = jQuery("#buildBundle_finalFileList");
+	}
 	var lines = summaryList.split(/\n/);
 	lines.pop(lines.length-1); // discard header
 	var fileDescriptionMap = new Array();
@@ -1777,20 +1873,55 @@ function updateBuildList(id) {
 			+ encodeURIComponent("bundleBuilder.out.txt") + "\">" + ".txt" +  "</a></li>";
 
 			txt = txt + "</ul>";
-			jQuery("#buildBundle_testFileList").html(txt).css("display", "block");
+			//jQuery("#buildBundle_testFileList").html(txt).css("display", "block");
+			$buildBundle_fileList.html(txt).css("display", "block");
+			/* This has only been implemented for MTA
 			jQuery("#buildBundle #downloadTestLogs").show().css("display", "block");
 			jQuery("#buildBundle #downloadTestLogs #downloadTestButton").attr("href", "manage-bundles!buildOutputZip.action?id=" + id);
+			*/
 			var continueButton = jQuery("#build_continue");
 			enableContinueButton(continueButton);
 		},
 		error: function(request) {
 			clearTimeout(timeout);
 			timeout = setTimeout(function() {
-				updateBuildList(id);
+				updateBuildList(id, buildType);
 			}, 10000);
 		}
 	});	
 }
+
+/*
+ * This is used in the Compare tab to format each row for the
+ * Diff Results table.
+ */
+function formatDiffRow(value) {
+	var tokens = value.split(",");
+	var newRow = "";
+	var dataClass = "redListData";
+	var testChar = tokens[0].charAt(0);
+	if (tokens[0].charAt(0) == '+') {
+		dataClass = "greenListData";
+	}
+	var teststr = tokens[0].substr(1);
+	tokens[0] = tokens[0].substr(1);
+	var dataItems = "";
+	tokens.forEach(function(entry, idx) {
+		if (entry == "null") {
+			entry = "";
+		}
+		var tdClass = "";
+		if (!isNaN(entry) && idx > 0) {
+			tdClass = " class=numericTd ";
+		}
+		dataItems += "<td" + tdClass + ">" + entry + "</td>";
+	});
+	var newRow = "<tr class=" + dataClass + " >"
+		+ dataItems
+		+ "</tr>";
+	return newRow;
+}
+
 
 function onStageClick() {
 	stageBundle();
