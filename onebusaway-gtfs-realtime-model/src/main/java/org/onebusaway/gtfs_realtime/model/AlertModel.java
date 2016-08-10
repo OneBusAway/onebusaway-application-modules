@@ -13,10 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.onebusaway.gtfs_realtime.archiver.model;
+package org.onebusaway.gtfs_realtime.model;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Index;
+import org.onebusaway.gtfs_realtime.interfaces.FeedEntityModel;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -38,7 +39,7 @@ import javax.persistence.Table;
     @Index(name = "alrt_timestamp_idx", columnNames = {"timestamp"})})
 @org.hibernate.annotations.Entity(mutable = false)
 
-public class AlertModel {
+public class AlertModel implements FeedEntityModel {
 
   /* Sound Transit constants */
 

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2015 Cambridge Systematics, Inc.
+ * Copyright (C) 2016 Cambridge Systematics, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,19 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.onebusaway.gtfs_realtime.archiver.service;
+package org.onebusaway.gtfs_realtime.interfaces;
 
-import java.util.List;
+import java.util.Date;
 
-import org.onebusaway.gtfs_realtime.model.AlertModel;
-import org.onebusaway.gtfs_realtime.model.TripUpdateModel;
-import org.onebusaway.gtfs_realtime.model.VehiclePositionModel;
+public interface FeedEntityModel {
 
-public interface GtfsPersistor {
-
-  void persist(TripUpdateModel tripUpdate);
-
-  void persist(VehiclePositionModel vehiclePosition);
-
-  void persist(AlertModel alert);
+  long getId();
+  
+  Date getTimestamp();
 }
+

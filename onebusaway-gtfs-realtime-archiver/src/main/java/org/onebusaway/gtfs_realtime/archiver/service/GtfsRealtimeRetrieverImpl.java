@@ -20,10 +20,10 @@ import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
-import org.onebusaway.gtfs_realtime.archiver.model.FeedEntityModel;
-import org.onebusaway.gtfs_realtime.archiver.model.StopTimeUpdateModel;
-import org.onebusaway.gtfs_realtime.archiver.model.TripUpdateModel;
-import org.onebusaway.gtfs_realtime.archiver.model.VehiclePositionModel;
+import org.onebusaway.gtfs_realtime.interfaces.FeedEntityModel;
+import org.onebusaway.gtfs_realtime.model.StopTimeUpdateModel;
+import org.onebusaway.gtfs_realtime.model.TripUpdateModel;
+import org.onebusaway.gtfs_realtime.model.VehiclePositionModel;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

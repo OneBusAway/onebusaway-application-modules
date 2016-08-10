@@ -18,7 +18,7 @@ package org.onebusaway.gtfs_realtime.archiver.service;
 import java.util.Date;
 import java.util.List;
 
-import org.onebusaway.gtfs_realtime.archiver.model.TripUpdateModel;
+import org.onebusaway.gtfs_realtime.model.TripUpdateModel;
 
 public interface TripUpdateDao {
 

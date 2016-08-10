@@ -121,6 +121,7 @@
     <module>onebusaway-geospatial</module>
     <module>onebusaway-gtfs-hibernate-spring</module>
     <module>onebusaway-gtfs-realtime-archiver</module>
+    <module>onebusaway-gtfs-realtime-model</module>
     <module>onebusaway-gwt-common</module>
     <module>onebusaway-nextbus-api-webapp</module>
     <module>onebusaway-phone</module>

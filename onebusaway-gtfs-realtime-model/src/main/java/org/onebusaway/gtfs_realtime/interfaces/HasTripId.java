@@ -13,13 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.onebusaway.gtfs_realtime.archiver.model;
+package org.onebusaway.gtfs_realtime.interfaces;
 
-import java.util.Date;
-
-public interface FeedEntityModel {
-
-  long getId();
+public interface HasTripId {
+  String getTripId();
   
-  Date getTimestamp();
+  void setTripId(String id);
 }

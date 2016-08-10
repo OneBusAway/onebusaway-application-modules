@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.onebusaway.gtfs_realtime.archiver.model;
+package org.onebusaway.gtfs_realtime.model;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -30,6 +30,9 @@ import javax.persistence.Table;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Index;
+import org.onebusaway.gtfs_realtime.interfaces.FeedEntityModel;
+import org.onebusaway.gtfs_realtime.interfaces.HasRouteId;
+import org.onebusaway.gtfs_realtime.interfaces.HasTripId;
 
 @Entity
 @Table(name = "trip_update")
@@ -45,7 +48,7 @@ import org.hibernate.annotations.Index;
  * trip update.
  *
  */
-public class TripUpdateModel implements FeedEntityModel {
+public class TripUpdateModel implements FeedEntityModel, HasTripId, HasRouteId {
 
   @Id
   @GeneratedValue(generator = "increment")

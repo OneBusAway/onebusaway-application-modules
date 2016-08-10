@@ -18,9 +18,9 @@ package org.onebusaway.gtfs_realtime.archiver.service;
 import static org.junit.Assert.assertEquals;
 
 import org.onebusaway.gtfs_realtime.archiver.listener.GtfsRealtimeEntitySource;
-import org.onebusaway.gtfs_realtime.archiver.model.AlertModel;
-import org.onebusaway.gtfs_realtime.archiver.model.EntitySelectorModel;
-import org.onebusaway.gtfs_realtime.archiver.model.TimeRangeModel;
+import org.onebusaway.gtfs_realtime.model.AlertModel;
+import org.onebusaway.gtfs_realtime.model.EntitySelectorModel;
+import org.onebusaway.gtfs_realtime.model.TimeRangeModel;
 
 import com.google.transit.realtime.GtfsRealtime.Alert;
 import com.google.transit.realtime.GtfsRealtime.EntitySelector;

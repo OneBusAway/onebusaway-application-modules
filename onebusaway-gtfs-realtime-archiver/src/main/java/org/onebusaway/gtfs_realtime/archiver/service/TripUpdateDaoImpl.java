@@ -22,7 +22,7 @@ import java.util.List;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Restrictions;
-import org.onebusaway.gtfs_realtime.archiver.model.TripUpdateModel;
+import org.onebusaway.gtfs_realtime.model.TripUpdateModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.onebusaway.gtfs_realtime.archiver.model;
+package org.onebusaway.gtfs_realtime.model;
 
 import java.util.Date;
 
@@ -27,6 +27,7 @@ import javax.persistence.Table;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Index;
+import org.onebusaway.gtfs_realtime.interfaces.HasStopId;
 
 @Entity
 @Table(name = "stop_time_update")
@@ -37,7 +38,7 @@ import org.hibernate.annotations.Index;
     @Index(name = "stu_trip_update_id_idx", columnNames = {"trip_update_id"})})
 @org.hibernate.annotations.Entity(mutable = false)
 
-public class StopTimeUpdateModel {
+public class StopTimeUpdateModel implements HasStopId {
 
   @Id
   @GeneratedValue(generator = "increment")

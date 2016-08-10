@@ -18,7 +18,7 @@ package org.onebusaway.gtfs_realtime.archiver.service;
 import java.util.Arrays;
 
 import org.hibernate.SessionFactory;
-import org.onebusaway.gtfs_realtime.archiver.model.AlertModel;
+import org.onebusaway.gtfs_realtime.model.AlertModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

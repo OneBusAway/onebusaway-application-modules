@@ -160,6 +160,11 @@
 			<artifactId>onebusaway-transit-data</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+        <dependency>
+          <groupId>org.onebusaway</groupId>
+          <artifactId>onebusaway-gtfs-realtime-model</artifactId>
+          <version>${project.version}</version>
+        </dependency>
 		<dependency>
 			<groupId>org.onebusaway</groupId>
 			<artifactId>onebusaway-agency-metadata</artifactId>
@@ -328,6 +333,7 @@
             <artifactId>joda-time</artifactId>
             <version>2.9.4</version>
         </dependency>
+        
 	</dependencies>
 
 	<profiles>
