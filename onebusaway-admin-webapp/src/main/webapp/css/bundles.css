@@ -235,12 +235,12 @@
 
 .greenListData{
   background-color: #99FF99;
-  table-layout: fixed;
+  //table-layout: fixed;
 }
 
 .blueListData{
   background-color: #CEF6F5;
-  table-layout: fixed;
+  //table-layout: fixed;
 }
 
 #createDirectory #createDirectoryContents #directoryName{
@@ -489,7 +489,7 @@
   margin-right: 20px;
 }
 
-#buildBundle_buildButton, #buildBundle_resetButton {
+#buildBundle_buildButton {
   margin-top: 5px;
   margin-right: 20px;
 }
@@ -569,15 +569,28 @@
   float: left;
 }
 
+#Compare #diffResultsTable caption,
 #Compare #fixedRouteDiffTable caption {
 	font-weight: bold;
 	font-size: 1.3em;
 	margin-bottom: .3em;
 }
 
+#Compare #diffResultsTable th,
 #Compare #fixedRouteDiffTable th {
 	margin-bottom: .1em;
 	padding: .3em;
+}
+
+#Compare #diffResultsTable td {
+	padding-top: 3px;
+	padding-right: 10px;
+	padding-bottom: 3px;
+	padding-left: 10px;
+}
+
+#Compare #diffResultsTable .numericTd {
+	text-align: right;
 }
 
 #Compare #fixedRouteDiffTable tr:first-child td {
@@ -952,6 +965,7 @@
 	float: left;
 	text-decoration: none;
 	margin: .4em;
+	padding: .5em;
 }
 
 #Create #existingDataset .copyDirectory:hover,
@@ -1086,7 +1100,8 @@
 	text-align: left;
 }
 
-#Upload #selectedDataset {
+#Upload #selectedDataset,
+#Upload #commentsLabel {
     font-family: "Arial Bold","Arial";
     font-weight: 700;
     font-style: normal;
@@ -1095,6 +1110,14 @@
     text-align: left;
     line-height: normal;
     padding-bottom: 1.5em;
+}
+
+#Upload #commentsLabel, #Upload #bundleComment {
+	display: block;
+}
+
+#Upload #commentsLabel {
+	padding-bottom: .1em;
 }
 
 #Upload #Agency {
