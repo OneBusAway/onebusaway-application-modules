@@ -66,15 +66,17 @@ public abstract class MetricResource {
     return _configuration.getTDS();
   }
   	  
-  protected int getTotalRecordCount(String agencyId) {
+  protected int getTotalRecordCount(String agencyId, String feedId) {
     int totalRecords = 0;
 
     for (MonitoredDataSource mds : getDataSources()) {
       MonitoredResult result = mds.getMonitoredResult();
       if (result == null) continue;
-      for (String mAgencyId : result.getAgencyIds()) {
-        if (agencyId.equals(mAgencyId)) {
-          totalRecords += result.getRecordsTotal();
+      if (feedId == null || feedId.equals(mds.getFeedId())) {
+        for (String mAgencyId : result.getAgencyIds()) {
+          if (agencyId.equals(mAgencyId)) {
+            totalRecords += result.getRecordsTotal();
+          }
         }
       }
     }
@@ -109,15 +111,17 @@ public abstract class MetricResource {
     return agencyTrips.size();
   }
   
-  protected List<String> getValidRealtimeTripIds(String agencyId) {
+  protected List<String> getValidRealtimeTripIds(String agencyId, String feedId) {
     Set<String> tripIds = new HashSet<String>();
 
     for (MonitoredDataSource mds : getDataSources()) {
       MonitoredResult result = mds.getMonitoredResult();
       if (result == null) continue;
-      for (String tripId : result.getMatchedTripIds()) {
-        if (agencyId.equals(AgencyAndIdLibrary.convertFromString(tripId).getAgencyId())) {
-          tripIds.add(tripId);
+      if (feedId == null || feedId.equals(mds.getFeedId())) {
+        for (String tripId : result.getMatchedTripIds()) {
+          if (agencyId.equals(AgencyAndIdLibrary.convertFromString(tripId).getAgencyId())) {
+            tripIds.add(tripId);
+          }
         }
       }
     }
@@ -126,22 +130,24 @@ public abstract class MetricResource {
     return prunedTripIds;
   }
 
-  protected int getUnmatchedTripIdCt(String agencyId) {
+  protected int getUnmatchedTripIdCt(String agencyId, String feedId) {
     int unmatchedTripCt = 0;
 
     for (MonitoredDataSource mds : getDataSources()) {
       MonitoredResult result = mds.getMonitoredResult();
       if (result == null) continue;
-      for (String mAgencyId : result.getAgencyIds()) {
-        if (agencyId.equals(mAgencyId)) {
-          unmatchedTripCt += result.getUnmatchedTripIds().size();
+      if (feedId == null || feedId.equals(mds.getFeedId())) {
+        for (String mAgencyId : result.getAgencyIds()) {
+          if (agencyId.equals(mAgencyId)) {
+            unmatchedTripCt += result.getUnmatchedTripIds().size();
+          }
         }
       }
     } 
     return unmatchedTripCt;
   }
   
-  protected int getMatchedStopCt(String agencyId) {
+  protected int getMatchedStopCt(String agencyId, String feedId) {
     List<String> matchedStopIds = new ArrayList<String>();
     try {
       if (this.getDataSources() == null || this.getDataSources().isEmpty()) {
@@ -152,9 +158,11 @@ public abstract class MetricResource {
       for (MonitoredDataSource mds : getDataSources()) {
         MonitoredResult result = mds.getMonitoredResult();
         if (result == null) continue;
-        for (String mAgencyId : result.getAgencyIds()) {
-          if (agencyId.equals(mAgencyId)) {
-            matchedStopIds.addAll(result.getMatchedStopIds());
+        if (feedId == null || feedId.equals(mds.getFeedId())) {
+          for (String mAgencyId : result.getAgencyIds()) {
+            if (agencyId.equals(mAgencyId)) {
+              matchedStopIds.addAll(result.getMatchedStopIds());
+            }
           }
         }
       }
@@ -165,7 +173,7 @@ public abstract class MetricResource {
     }
   }
  
-  protected int getUnmatchedStopCt(String agencyId) {
+  protected int getUnmatchedStopCt(String agencyId, String feedId) {
     int unmatchedStops = 0;
     try {
       if (this.getDataSources() == null || this.getDataSources().isEmpty()) {
@@ -176,9 +184,11 @@ public abstract class MetricResource {
       for (MonitoredDataSource mds : getDataSources()) {
         MonitoredResult result = mds.getMonitoredResult();
         if (result == null) continue;
-        for (String mAgencyId : result.getAgencyIds()) {
-          if (agencyId.equals(mAgencyId)) {
-            unmatchedStops += result.getUnmatchedStopIds().size();
+        if (feedId == null || feedId.equals(mds.getFeedId())) {
+          for (String mAgencyId : result.getAgencyIds()) {
+            if (agencyId.equals(mAgencyId)) {
+              unmatchedStops += result.getUnmatchedStopIds().size();
+            }
           }
         }
       }
@@ -189,7 +199,7 @@ public abstract class MetricResource {
     }
   }
  
-  protected int getLocationTotal(String agencyId) {
+  protected int getLocationTotal(String agencyId, String feedId) {
     int locations = 0;
     try {
       if (this.getDataSources() == null || this.getDataSources().isEmpty()) {
@@ -200,9 +210,11 @@ public abstract class MetricResource {
       for (MonitoredDataSource mds : getDataSources()) {
         MonitoredResult result = mds.getMonitoredResult();
         if (result == null) continue;
-        for (String mAgencyId : result.getAgencyIds()) {
-          if (agencyId.equals(mAgencyId)) {
-            locations += result.getAllCoordinates().size();
+        if (feedId == null || feedId.equals(mds.getFeedId())) {
+          for (String mAgencyId : result.getAgencyIds()) {
+            if (agencyId.equals(mAgencyId)) {
+              locations += result.getAllCoordinates().size();
+            }
           }
         }
       }
@@ -213,7 +225,7 @@ public abstract class MetricResource {
     }
   }
   
-  protected int getInvalidLocation(String agencyId) {
+  protected int getInvalidLocation(String agencyId, String feedId) {
     int locations = 0;
     try {
       if (this.getDataSources() == null || this.getDataSources().isEmpty()) {
@@ -224,9 +236,11 @@ public abstract class MetricResource {
       for (MonitoredDataSource mds : getDataSources()) {
         MonitoredResult result = mds.getMonitoredResult();
         if (result == null) continue;
-        for (String mAgencyId : result.getAgencyIds()) {
-          if (agencyId.equals(mAgencyId)) {
-            locations += findInvalidLatLon(agencyId, result.getAllCoordinates()).size();
+        if (feedId == null || feedId.equals(mds.getFeedId())) {
+          for (String mAgencyId : result.getAgencyIds()) {
+            if (agencyId.equals(mAgencyId)) {
+              locations += findInvalidLatLon(agencyId, result.getAllCoordinates()).size();
+            }
           }
         }
       }

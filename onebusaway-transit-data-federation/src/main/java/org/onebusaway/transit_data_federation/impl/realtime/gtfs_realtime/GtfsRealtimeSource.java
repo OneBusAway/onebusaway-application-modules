@@ -141,6 +141,8 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   
   private MonitoredResult _monitoredResult = new MonitoredResult();
   
+  private String _feedId = null;
+  
   private StopModificationStrategy _stopModificationStrategy = null;
 
   @Autowired
@@ -242,6 +244,14 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   
   public MonitoredResult getMonitoredResult() {
     return _monitoredResult;
+  }
+  
+  public String getFeedId() {
+    return _feedId;
+  }
+  
+  public void setFeedId(String id) {
+    _feedId = id;
   }
   
   @PostConstruct
