@@ -234,7 +234,7 @@ OBA.Sign = function() {
 
 		// situations
 		stopElement.find(".alerts .scroller").html("").empty();
-		if (jQuery.isEmptyObject(applicableSituations) && !isValidAlert(applicableSituations)) {
+		if (jQuery.isEmptyObject(applicableSituations) || !isValidAlert(applicableSituations)) {
 			stopElement.find(".alerts").hide();
 			stopElement.find(".arrivals").width("100%");
 		} else {
