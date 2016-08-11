@@ -1188,7 +1188,7 @@ public class ManageBundlesAction extends OneBusAwayNYCAdminActionSupport impleme
   private File getMostRecentGtfsFile(File agencyDir) {
     File[] uploadedFiles =  agencyDir.listFiles();
     File mostRecentFile = null;
-    if (uploadedFiles.length > 0) {
+    if (uploadedFiles != null && uploadedFiles.length > 0) {
       mostRecentFile = uploadedFiles[0];
       for (File existingFile : uploadedFiles) {
         if (existingFile.lastModified() > mostRecentFile.lastModified()) {
@@ -1209,6 +1209,7 @@ public class ManageBundlesAction extends OneBusAwayNYCAdminActionSupport impleme
    */
   private JSONObject createAgencyRecord(File bundleFile, String dataSourceType, String agencyId) {
     JSONObject agencyRecord = new JSONObject();
+    if (bundleFile == null) return agencyRecord;
     String fileDate = new SimpleDateFormat("MMM dd yyyy").format(new Date(bundleFile.lastModified()));
     agencyRecord.put("agencyBundleUploadDate", fileDate);
     agencyRecord.put("agencyDataSource", bundleFile.getName());
