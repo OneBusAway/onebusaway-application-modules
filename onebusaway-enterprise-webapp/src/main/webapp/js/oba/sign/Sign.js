@@ -234,10 +234,10 @@ OBA.Sign = function() {
 
 		// situations
 		stopElement.find(".alerts .scroller").html("").empty();
-		if (jQuery.isEmptyObject(applicableSituations) || !isValidAlert(applicableSituations)) {
+		if (jQuery.isEmptyObject(applicableSituations)) {
 			stopElement.find(".alerts").hide();
 			stopElement.find(".arrivals").width("100%");
-		} else {
+		} else if (isValidAlert(applicableSituations)) {
 			
 			stopElement.find(".alerts").show();
 			stopElement.find(".arrivals").width("70%");
@@ -379,18 +379,26 @@ OBA.Sign = function() {
 		
 	}
 	
-	function isValidAlert(applicableSitations) {
+	function isValidAlert(applicableSituations) {
+		var found = false;
 		jQuery.each(applicableSituations, function(situationId, situation) {
 			if (typeof situation.Affects.VehicleJourneys != "undefined"
 				&& typeof situation.Affects.VehicleJourneys.AffectedVehicleJourney != "undefined") {
 				jQuery.each(situation.Affects.VehicleJourneys.AffectedVehicleJourney, function(_, journey) {
-					if (journey.LineRef in routeInfo) {
-						return true;
+					// journey.LineRef does not have an agency ID
+					for (routeId in routeInfo) {
+						if (trimAgencyId(routeId) == journey.LineRef) {
+							found = true;
+						}
 					}
 				});
 			}
 		});
-		return false;
+		return found;
+	}
+	
+	function trimAgencyId(id) {
+		return id.split("_")[1];
 	}
 	
 	// from jQuery 1.7
