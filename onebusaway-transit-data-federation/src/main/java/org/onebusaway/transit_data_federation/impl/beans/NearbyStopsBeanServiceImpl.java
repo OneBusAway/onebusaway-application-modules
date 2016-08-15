@@ -18,14 +18,16 @@ package org.onebusaway.transit_data_federation.impl.beans;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.onebusaway.container.cache.Cacheable;
-import org.onebusaway.container.cache.CacheableArgument;
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data.model.StopBean;
 import org.onebusaway.transit_data_federation.services.beans.GeospatialBeanService;
 import org.onebusaway.transit_data_federation.services.beans.NearbyStopsBeanService;
+
+import net.sf.ehcache.Cache;
+import net.sf.ehcache.Element;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -33,17 +35,40 @@ import org.springframework.stereotype.Component;
 class NearbyStopsBeanServiceImpl implements NearbyStopsBeanService {
 
   private GeospatialBeanService _geospatialBeanService;
+  
+  private Cache _nearbyStopsCache;
 
   @Autowired
   public void setGeospatialBeanService(
       GeospatialBeanService geospatialBeanService) {
     _geospatialBeanService = geospatialBeanService;
   }
+  
+  public void setNearbyStopsCache(Cache nearbyStopsCache){
+    _nearbyStopsCache = nearbyStopsCache;
+  }
 
-  @Cacheable
-  public List<AgencyAndId> getNearbyStops(
-      @CacheableArgument(keyProperty = "id") StopBean stopBean, double radius) {
+  public List<AgencyAndId> getNearbyStops(StopBean stopBean, double radius) {
 
+    if (_nearbyStopsCache == null)
+      return getNearbyStopsUncached(stopBean, radius);
+
+    String key = getCacheKey(stopBean, radius);
+    Element element = _nearbyStopsCache.get(key);
+
+    if (element == null) {
+
+      List<AgencyAndId> values = getNearbyStopsUncached(stopBean,
+          radius);
+
+      element = new Element(key, values);
+      _nearbyStopsCache.put(element);
+    }
+
+    return (List<AgencyAndId>) element.getValue();
+  }
+  
+  public List<AgencyAndId> getNearbyStopsUncached(StopBean stopBean, double radius) {
     CoordinateBounds bounds = SphericalGeometryLibrary.bounds(
         stopBean.getLat(), stopBean.getLon(), radius);
     List<AgencyAndId> ids = _geospatialBeanService.getStopsByBounds(bounds);
@@ -56,4 +81,9 @@ class NearbyStopsBeanServiceImpl implements NearbyStopsBeanService {
     }
     return excludingSource;
   }
+  
+  private String getCacheKey(StopBean stopBean, double radius) {
+     return stopBean.getId();
+  }
+  
 }
