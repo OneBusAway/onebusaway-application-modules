@@ -38,10 +38,15 @@
 	<inherits name='com.google.gwt.user.User' />
 	<inherits name="com.google.gwt.i18n.I18N" />
 	<inherits name="com.google.gwt.maps.GoogleMaps" />
+	<inherits name="org.onebusaway.webapp.gwt.WhereLibrary" />
 
     <source path="search_location" />
 
 	<!-- Specify the app entry point class -->
 	<entry-point class='org.onebusaway.webapp.gwt.search_location.SearchLocationLibrary' />
+	
+	<!-- Availabe Locales -->
+	<extend-property name="locale" values="en"/>
+	<extend-property name="locale" values="es"/>
 
 </module>

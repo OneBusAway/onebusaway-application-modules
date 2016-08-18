@@ -28,7 +28,9 @@ import org.onebusaway.webapp.gwt.oba_application.control.state.AddressLookupErro
 import org.onebusaway.webapp.gwt.oba_application.control.state.State;
 import org.onebusaway.webapp.gwt.oba_application.resources.OneBusAwayCssResource;
 import org.onebusaway.webapp.gwt.oba_application.resources.OneBusAwayStandardResources;
+import org.onebusaway.webapp.gwt.where_library.WhereMessages;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -41,6 +43,8 @@ public class AddressLookupPresenter {
   private FlowPanel _widget;
 
   private CommonControl _control;
+  
+  private WhereMessages _messages;
 
   public void setControl(CommonControl control) {
     _control = control;
@@ -55,6 +59,14 @@ public class AddressLookupPresenter {
 
   public StateEventListener getStateEventListener() {
     return new StateEventHandler();
+  }
+  
+  public AddressLookupPresenter() {
+    _messages = GWT.create(WhereMessages.class);
+  }
+
+  public void setMessages(WhereMessages messages) {
+    _messages = messages;
   }
 
   /*****************************************************************************
@@ -85,7 +97,7 @@ public class AddressLookupPresenter {
               "We couldn't find that adress.  Check to make sure it's correct, or perhaps add the city or zip code?",
               _css.AddressLookupNoAddressFound()));
         } else {
-          _widget.add(new DivWidget("Did you mean:",
+          _widget.add(new DivWidget(_messages.standardIndexPageDidYouMean(),
               _css.AddressLookupMultipleAddressesFound()));
           for (final Place placemark : places) {
 

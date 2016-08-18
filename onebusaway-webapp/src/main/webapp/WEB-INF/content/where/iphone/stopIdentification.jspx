@@ -16,16 +16,16 @@
     limitations under the License.
 
 -->
-<html xmlns:jsp="http://java.sun.com/JSP/Page" xmlns:c="http://java.sun.com/jsp/jstl/core">
+<html xmlns:jsp="http://java.sun.com/JSP/Page" xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:s="/struts-tags">
 <jsp:directive.page contentType="text/html" />
 <head>
-<title>OneBusAway - Search For Stops</title>
+<title>OneBusAway - <s:text name="stopIdentification.Title" /></title>
 </head>
 
 <body>
 
-<p>You can find your stop number in the upper left corner of the posted
-timetable at a bus stop:</p>
+<p><s:text name="stopIdentification.FindStopMessage" />:</p>
 
 <jsp:element name="img">
 <jsp:attribute name="src">
@@ -34,8 +34,7 @@ timetable at a bus stop:</p>
 <jsp:attribute name="class">stopIdentificationImage</jsp:attribute>
 </jsp:element>
 
-<p>If your stop has a shelter, the stop number is also painted in the
-upper-left corner:</p>
+<p><s:text name="stopIdentification.StopShelterMessage" />:</p>
 
 <jsp:element name="img">
 <jsp:attribute name="src">
@@ -43,8 +42,8 @@ upper-left corner:</p>
 </jsp:attribute>
 <jsp:attribute name="class">stopIdentificationImage</jsp:attribute>
 </jsp:element>
-
-<p>If you can't find your stop number, you can <a href="index.action">search for stops by route</a>.</p>
+<s:url var="urlFindRoute"  action="index.action"/>
+<p><s:text name="stopIdentification.StopByRouteMessage" ><s:param name="value" value="urlFindRoute"/></s:text></p>
 
 </body>
 </html>

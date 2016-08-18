@@ -20,7 +20,8 @@
     xmlns:oba="/oba-tags">
 <jsp:directive.page contentType="text/html" />
 <head>
-<title>Route <s:property value="result.trip.route.shortName" /> - <s:property value="result.trip.tripHeadsign" /> - Trip # <s:property
+<title><s:text name="trip.Route"/> <jsp:text> </jsp:text> <s:property value="result.trip.route.shortName" /> 
+- <s:property value="result.trip.tripHeadsign" /> - <s:text name="trip.Trip"/> <jsp:text> </jsp:text><s:property
     value="result.trip.Id" /></title>
 </head>
 <body>
@@ -28,12 +29,14 @@
 <div id="tripPanel"><s:push value="result">
 
     <div class="tripPanelHeader">
-    <div class="tripPanelHeaderRoute">Route <s:property value="result.trip.route.shortName" /> - <s:property value="result.trip.tripHeadsign" /></div>
-    <div class="tripPanelHeaderTripId">Trip # <s:property value="result.trip.id" /></div>
+    <div class="tripPanelHeaderRoute"><s:text name="trip.Route"/> <jsp:text> </jsp:text> 
+    <s:property value="result.trip.route.shortName" /> - <s:property value="result.trip.tripHeadsign" /></div>
+    <div class="tripPanelHeaderTripId"> <s:text name="trip.Trip"/> <jsp:text> </jsp:text> 
+    <s:property value="result.trip.id" /></div>
     </div>
 
     <s:if test="schedule.previousTrip != null">
-        <p>Incoming Route:<br/><a href="trip.action?id=${schedule.previousTrip.id}"><oba:routeName
+        <p><s:text name="trip.Incoming_Route"/>:<br/><a href="trip.action?id=${schedule.previousTrip.id}"><oba:routeName
             value="schedule.previousTrip.route" /> - <s:property
             value="schedule.previousTrip.tripHeadsign" /></a></p>
     </s:if>
@@ -52,7 +55,7 @@
     </s:iterator></div>
 
     <s:if test="schedule.nextTrip != null">
-        <p>Continues as Route:<br/><a href="trip.action?id=${schedule.nextTrip.id}"><oba:routeName
+        <p><s:text name="trip.Continues_as_Route"/>:<br/><a href="trip.action?id=${schedule.nextTrip.id}"><oba:routeName
             value="schedule.nextTrip.route" /> - <s:property
             value="schedule.nextTrip.tripHeadsign" /></a></p>
     </s:if>

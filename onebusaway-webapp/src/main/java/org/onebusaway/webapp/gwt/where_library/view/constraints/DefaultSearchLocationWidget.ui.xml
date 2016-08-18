@@ -17,9 +17,11 @@
 
 -->
     <!-- RefineViewWidget.ui.xml -->
-<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder' xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder' xmlns:g='urn:import:com.google.gwt.user.client.ui'
+  ui:baseMessagesInterface="org.onebusaway.webapp.gwt.where_library.WhereMessages">
+
     <p>
         <span ui:field="_defaultSearchLocationName"/><br/>
-        <a href="../../user/index.action">Change your default search location</a>
+        <a href="../../user/index.action"><ui:msg key="standardIndexPageChangeDefaultSearchLocation">Change your default search location</ui:msg></a>
     </p>
 </ui:UiBinder>

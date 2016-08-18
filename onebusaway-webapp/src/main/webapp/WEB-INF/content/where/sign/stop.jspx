@@ -46,6 +46,7 @@
     </s:component>
   </s:else>
 </title>
+<script type="text/javascript" src="${oba:resource('messages:ArrivalAndDepartureMessages=org.onebusaway.webapp.actions.bundles.ArrivalAndDepartureMessages')}"><jsp:text></jsp:text></script>
 </head>
 <body>
 

@@ -21,42 +21,43 @@
     xmlns:oba="/oba-tags">
 <jsp:directive.page contentType="text/html" />
 <head>
-<title>Vehicle Status</title>
+<title><s:text name="vehicleStatus.Title" /></title>
 <c:set var="url"><s:url value="/js/jquery.js"/></c:set>
 <script type="text/javascript" src="${url}"><jsp:text></jsp:text></script>
 <c:set var="url"><s:url value="/js/oba-maps.js"/></c:set>
 <script type="text/javascript" src="${url}"><jsp:text></jsp:text></script>
-<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"><jsp:text></jsp:text></script>
+<script type="text/javascript" src="https://maps.google.com/maps/api/js?sensor=false"><jsp:text></jsp:text></script>
 </head>
 <body>
 
 <div class="container">
-<h2>Vehicle Status</h2>
+<h2><s:text name="vehicleStatus.Title" /></h2>
 <s:if test="result != null">
     <s:push value="result">
         <ul>
-            <li>Vehicle ID: <s:property value="vehicleId" /></li>
-            <li>Last update: <oba:date format="EEE, MMM d yyyy h:mm:ss aa"
+            <li><s:text name="vehicleStatus.VehicleID" />: <s:property value="vehicleId" /></li>
+            <li><s:text name="vehicleStatus.LastUpdate" />: <oba:date format="EEE, MMM d yyyy h:mm:ss aa"
                 value="lastUpdateTime" /></li>
             <s:if test="tripStatus != null">
                 <s:push value="tripStatus">
-                    <li>Trip: <s:a action="trip">
+                    <li><s:text name="vehicleStatus.Trip" />: <s:a action="trip">
                       <s:param name="id" value="trip.id"/>
                       <s:param name="serviceDate" value="serviceDate"/>
                       <oba:routeName value="trip"/> - <s:property value="trip.tripHeadsign"/>
                       </s:a>
                     </li>
                     <s:if test="scheduleDeviationSet">
-                        <li>Schedule Deviation: <s:property value="scheduleDeviation/60"/> mins</li>
+                        <li><s:text name="vehicleStatus.ScheduleDeviation" />: <s:property value="scheduleDeviation/60"/> mins</li>
                     </s:if>
                     <s:if test="phase != null">
-                        <li>Phase: <s:property value="phase" /></li>
+                        <li><s:text name="vehicleStatus.Phase" />: <s:property value="phase" /></li>
                     </s:if>
                     <s:if test="status != null">
-                        <li>Status: <s:property value="status" /></li>
+                        <li><s:text name="vehicleStatus.Status" />: <s:property value="status" /></li>
                     </s:if>
                     <s:if test="nextStop != null">
-                        <li>Next Stop: <s:a action="stop"><s:param name="id" value="nextStop.id"/><s:property value="nextStop.name" /></s:a></li>
+                        <li><s:text name="vehicleStatus.NextStop" />: 
+                        <s:a action="stop"><s:param name="id" value="nextStop.id"/><s:property value="nextStop.name" /></s:a></li>
                     </s:if>
                     <s:if test="lastKnownLocation != null">
                         <script type="text/javascript">
@@ -87,15 +88,18 @@
     jQuery(document).ready(showLastKnownLocation);
 </script>
     
-                        <li>Last Known Location: <div class="lastKnownLocation" style="width:200px; height:200px"><jsp:text></jsp:text></div></li>
+                        <li><s:text name="vehicleStatus.LastKnownLocation" />: 
+                        	<div class="lastKnownLocation" style="width:200px; height:200px"><jsp:text></jsp:text></div></li>
                     </s:if>
                 </s:push>
             </s:if>
             <s:if test="allRecords != null">
-                <li><h4>All Records:</h4></li>
+                <li><h4><s:text name="vehicleStatus.AllRecords" />:</h4></li>
                 <ul>
                     <s:iterator value="allRecords">
-                        <li><oba:date format="EEE, MMM d yyyy h:mm:ss aa" value="timeOfRecord" /> - scheduleDeviation=<s:property value="scheduleDeviation"/> secs</li>
+                        <li><oba:date format="EEE, MMM d yyyy h:mm:ss aa" value="timeOfRecord" /> - 
+                        <s:text name="vehicleStatus.scheduleDeviationVar" />=<s:property value="scheduleDeviation"/> 
+                        <jsp:text> </jsp:text><s:text name="vehicleStatus.secs" /></li>
                     </s:iterator>
                 </ul>                
 	        </s:if>                    
@@ -103,7 +107,7 @@
     </s:push>
 </s:if>
 <s:else>
-    <p>Vehicle not found.</p>
+    <p><s:text name="vehicleStatus.VehicleNotFound" />.</p>
 </s:else></div>
 
 </body>

@@ -41,9 +41,9 @@
               <s:property value="trip.tripHeadsign" />
             </s:a>
             <jsp:text> - </jsp:text>
-            <oba:date timeStyle="short" value="blockInstance.serviceDate + blockStopTimes[0].stopTime.departureTime * 1000"/>
+            <oba:date timeStyle="short" format="hh:mm a" value="blockInstance.serviceDate + blockStopTimes[0].stopTime.departureTime * 1000"/>
             <jsp:text> - </jsp:text>
-            <oba:date timeStyle="short" value="blockInstance.serviceDate + blockStopTimes[blockStopTimes.size-1].stopTime.arrivalTime * 1000"/>
+            <oba:date timeStyle="short" format="hh:mm a" value="blockInstance.serviceDate + blockStopTimes[blockStopTimes.size-1].stopTime.arrivalTime * 1000"/>
             </li>
         </s:iterator>
     </ul>

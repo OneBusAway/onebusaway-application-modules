@@ -21,15 +21,15 @@
 	xmlns:oba="/oba-tags">
 <jsp:directive.page contentType="text/html" />
 <head>
-<title>Set Your Default Search Location</title>
+<title><s:text name="user.SetYourDefaultSearchLocation" /></title>
 </head>
 <body>
 
-<div>Please enter your zip code so we can provide results appropriate to your location:</div>
+<div><s:text name="user.EnterZipCodeToLocation" /></div>
 
 <form action="set-default-search-location.action">
-<div><input type="text" class="inputTextbox" name="location" /></div>
-<div><input id="submit" type="submit" class="inputButton" value="Submit" /></div>
+<div><input type="text" class="inputTextbox" name="getText('user.locationField')" /></div>
+<div><input id="submit" type="submit" class="inputButton" value="getText('submitButton')" /></div>
 </form>
 
 </body>

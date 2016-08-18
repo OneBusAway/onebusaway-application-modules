@@ -15,7 +15,10 @@
  */
 package org.onebusaway.webapp.gwt.search_location;
 
+import org.onebusaway.webapp.gwt.where_library.WhereMessages;
+
 import com.google.gwt.core.client.EntryPoint;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JsArray;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -36,6 +39,8 @@ import com.google.gwt.user.client.ui.FormPanel.SubmitEvent;
 import com.google.gwt.user.client.ui.FormPanel.SubmitHandler;
 
 public class SearchLocationLibrary implements EntryPoint {
+
+  private static WhereMessages _messages = GWT.create(WhereMessages.class);
 
   @Override
   public void onModuleLoad() {
@@ -62,6 +67,9 @@ public class SearchLocationLibrary implements EntryPoint {
     private Geocoder _geocoder = new Geocoder();
 
     private String _query;
+    
+    private static WhereMessages _messages = SearchLocationLibrary._messages;
+    
 
     public static void wire(RootPanel panel) {
       SearchLocationHandler handler = new SearchLocationHandler(panel);
@@ -74,7 +82,7 @@ public class SearchLocationLibrary implements EntryPoint {
 
     private void setChangeDefaultSearchLocationMode() {
 
-      Anchor anchor = new Anchor("Change your default search location");
+      Anchor anchor = new Anchor(_messages.userChangeYourDefaulSearchLocation());
 
       _panel.clear();
       _panel.add(anchor);
@@ -101,10 +109,10 @@ public class SearchLocationLibrary implements EntryPoint {
       final TextBox textBox = new TextBox();
       row.add(textBox);
 
-      SubmitButton submitButton = new SubmitButton("Set location");
+      SubmitButton submitButton = new SubmitButton(_messages.userSetLocation());
       row.add(submitButton);
 
-      Button cancelButton = new Button("Cancel");
+      Button cancelButton = new Button(_messages.userCancel());
       row.add(cancelButton);
 
       System.out.println("here: 7");

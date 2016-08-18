@@ -76,6 +76,8 @@ public class NotificationWidgetPage extends WhereCommonPage {
   private String _tripId;
 
   private String _stopId;
+  
+  private String _serviceDate;
 
   private DivPanel _stopPanel = new DivPanel(_stopCss.arrivalsStopInfo());
 
@@ -270,8 +272,8 @@ public class NotificationWidgetPage extends WhereCommonPage {
 
     DivPanel numberPanel = new DivPanel(_stopCss.arrivalsStopNumber());
     _stopPanel.add(numberPanel);
-    Anchor numberLink = new Anchor("Stop # " + stop.getCode() + " - "
-        + stop.getDirection() + " bound", url);
+    Anchor numberLink = new Anchor(_msgs.stopByNumberPageStopNumberShebang() + " " + stop.getCode() + " - "
+        + stop.getDirection() + " " +_msgs.stopByNumberPageBound() , url);
     numberPanel.add(numberLink);
   }
 

@@ -99,9 +99,9 @@
 </div>
 
 <div class="stop_links">
-<h4>Historical Real-Time Stats:</h4>
+<h4><oba:message key="arrivalAndDeparture.Historical_Real_Time_Stats"/></h4>
 <s:if test="result.scheduleDeviationHistogram == null">
-<p>No historical real-time data is available for this trip + stop.</p>
+<p><oba:message key="arrivalAndDeparture.NoHistorialRealtimeAvailable"/></p>
 </s:if>
 <s:else>
 <s:push value="result.scheduleDeviationHistogram">
@@ -112,11 +112,11 @@
   <s:param name="chbh">a</s:param>
   <s:param name="chxr">1,0,<s:property value="maxCount"/>,5</s:param>
   <s:param name="chds">0,<s:property value="maxCount"/></s:param>
-  <s:param name="chtt">Schedule Adherence History</s:param>
+  <s:param name="chtt"><oba:message key="arrivalAndDeparture.chart.Schedule_Adherence_History"/></s:param>
   <!-- Specify an extra X axis title -->
   <s:param name="chxt">x,y,x,y</s:param>
   <!-- Specify the extra X axis title value -->
-  <s:param name="chxl">0:<s:iterator value="labels">|<s:property /></s:iterator>|2:|Schedule Deviation (mins)||3:|Count|</s:param>
+  <s:param name="chxl">0:<s:iterator value="labels">|<s:property /></s:iterator>|2:|<oba:message key="arrivalAndDeparture.chart.Schedule_Deviation"/>||3:|<oba:message key="arrivalAndDeparture.chart.Count"/>|</s:param>
   <!-- Position the X axis label at the middle (50%) -->
   <s:param name="chxp">2,50|3,50</s:param>
   <!--  Style the X-Axis Labe -->

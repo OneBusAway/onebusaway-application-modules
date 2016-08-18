@@ -19,40 +19,39 @@
 <html xmlns:jsp="http://java.sun.com/JSP/Page" xmlns:c="http://java.sun.com/jsp/jstl/core" xmlns:s="/struts-tags">
 <jsp:directive.page contentType="text/html" />
 <head>
-<title>OneBusAway - Real-Time Arrival Info</title>
+<title>OneBusAway - <s:text name="RealTimeArrivalInfo" /></title>
 </head>
 
 <body>
+<s:url var="urlStopIdentification"  action="stopIdentification.action"/>
+<p><s:text name="iphone.SearchStopAndLearnMessage" ><s:param name="value" value="urlStopIdentification"/></s:text></p>
 
-<p>You can search for stops by number.  Learn about how to find <a
-    href="stopIdentification.action">your stop number</a>.</p>
-
-<h2>Search by stop number:</h2>
+<h2><s:text name="iphone.SearchStopMessage" /></h2>
 
 <form action="stops.action">
 <div><s:textfield cssClass="inputTextbox" name="code" /></div>
-<div><input id="stops_submit" type="submit" class="inputButton" value="Search By Stop Number" /></div>
+<s:text name="iphone.SearchStop.SubmitButton" var="sButton" />
+<div><s:submit id="stops_submit" cssClass="inputButton" type="submit" value="%{sButton}" align="center" /></div>
 </form>
 
-<p>If your stop is missing its number or you are not at the stop, you can also search by
-bus route.</p>
+<p><s:text name="iphone.SearchRouteAndLearnMessage" /></p>
 
-<h2>Search by route number:</h2>
+<h2><s:text name="iphone.SearchRouteMessage" /></h2>
 
 <form action="routes.action">
 <div><input type="text" class="inputTextbox" name="query" /></div>
-<div><input id="routes_submit" type="submit" class="inputButton" value="Search By Route" /></div>
+<s:text name="iphone.SearchRoute.SubmitButton" var="rButton" />
+<div><s:submit id="routes_submit" cssClass="inputButton" type="submit" value="%{rButton}" align="center" /></div>
 </form>
 
-<h2>Other Links:</h2>
+<h2><s:text name="iphone.OtherLinks" /></h2>
 
 <ul class="buttons">
-	<li><a href="user/index.action">Settings</a></li>
-	<li><a href="agencies.action">Supported Agencies</a></li>
+	<li><a href="user/index.action"><s:text name="user.Settings" /></a></li>
+	<li><a href="agencies.action"><s:text name="agencies.SupportedAgencies" /></a></li>
 </ul>
 
-<p class="credits">Thanks to <a href="http://www.sofianehassaine.com/">Sofiane Hassaine</a> for use of his
-design.</p>
+<p class="credits"><s:text name="iphone.PageCredits" /></p>
 
 </body>
 </html>

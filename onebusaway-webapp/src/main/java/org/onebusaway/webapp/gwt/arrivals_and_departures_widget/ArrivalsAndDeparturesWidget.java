@@ -107,8 +107,9 @@ public class ArrivalsAndDeparturesWidget extends WhereCommonPage {
   private void updateStopPanel(StopBean stop) {
     _stopPanel.clear();
     _stopPanel.add(new DivWidget(stop.getName(), "arrivalsStopAddress"));
-    _stopPanel.add(new DivWidget("Stop # " + stop.getId() + " - "
-        + stop.getDirection() + " bound"));
+    _stopPanel.add(new DivWidget(_msgs.stopByNumberPageStopNumberShebang()
+        + " " + stop.getId() + " - " + stop.getDirection() + " "
+        + _msgs.stopByNumberPageBound()));
   }
 
   private void clearArrivalAndDepartureTable() {

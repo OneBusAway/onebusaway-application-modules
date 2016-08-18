@@ -38,7 +38,11 @@
 	<inherits name='com.google.gwt.user.User' />
 
     <entry-point class="org.onebusaway.webapp.gwt.viewkit.ViewKitEntryPoint"/>
-    
+	
+	<!-- Availabe Locales -->
+	<extend-property name="locale" values="en"/>
+	<extend-property name="locale" values="es"/>
+
     <source path="viewkit" />
 
 </module>

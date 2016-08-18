@@ -30,6 +30,7 @@ import org.onebusaway.transit_data.model.RouteBean;
 import org.onebusaway.transit_data.model.StopBean;
 import org.onebusaway.webapp.gwt.common.context.Context;
 import org.onebusaway.webapp.gwt.common.context.ContextImpl;
+import org.onebusaway.webapp.gwt.where_library.WhereMessages;
 import org.onebusaway.webapp.gwt.where_library.rpc.WebappServiceAsync;
 import org.onebusaway.webapp.gwt.where_library.view.StopFinderCssResource;
 import org.onebusaway.webapp.gwt.where_library.view.StopFinderInterface;
@@ -40,6 +41,7 @@ import org.onebusaway.webapp.gwt.where_library.view.constraints.OperationContext
 import org.onebusaway.webapp.gwt.where_library.view.constraints.OperationHandler;
 import org.onebusaway.webapp.gwt.where_library.view.stops.TransitMapManager;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -223,15 +225,18 @@ public class AbstractStopAndRouteSelectionWidget extends Composite {
 
   private class StopInfoWindowWidgetExtension extends StopInfoWindowWidget {
 
+    private WhereMessages _messages;
+
     public StopInfoWindowWidgetExtension(StopFinderInterface stopFinder,
         TransitMapManager transitMapManager, StopBean stop,
         StopFinderCssResource css) {
       super(stopFinder, transitMapManager, stop, css);
+      _messages = GWT.create(WhereMessages.class);
     }
 
     @Override
     protected void handleLinksForStopInfoWindow(final StopBean bean) {
-      Anchor anchor = new Anchor("Add this stop to the list");
+      Anchor anchor = new Anchor(_messages.refineViewAddStopToList());
       anchor.addClickHandler(new ClickHandler() {
 
         public void onClick(ClickEvent event) {
@@ -245,11 +250,13 @@ public class AbstractStopAndRouteSelectionWidget extends Composite {
   }
 
   private class DefaultOperationHandler implements OperationHandler {
+
+    private WhereMessages _messages = GWT.create(WhereMessages.class);
+
     @Override
     public void handleOperation(OperationContext context) {
       Panel panel = context.getPanel();
-      HTMLPanel html = new HTMLPanel(
-          "<p>Search for stops like you normally would.</p><p>Click and select a stop to add it to your custom stop view.</p>");
+      HTMLPanel html = new HTMLPanel(_messages.refineViewSearchStopMessage());
       panel.add(html);
       context.getTransitMapManager().showStopsInCurrentView();
     }

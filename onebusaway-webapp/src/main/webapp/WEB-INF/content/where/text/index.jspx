@@ -16,32 +16,33 @@
     limitations under the License.
 
 -->
-<html xmlns:jsp="http://java.sun.com/JSP/Page" xmlns:c="http://java.sun.com/jsp/jstl/core">
+<html xmlns:jsp="http://java.sun.com/JSP/Page" xmlns:c="http://java.sun.com/jsp/jstl/core" xmlns:s="/struts-tags">
 <jsp:directive.page contentType="text/html" />
 <head>
-<title>OneBusAway - Real-Time Arrival Info</title>
+<title>OneBusAway - <s:text name="RealTimeArrivalInfo" /></title>
 </head>
 
 <body>
 
-<div class="label">You can search for stops by number.  Enter a stop number to search:</div>
+<div class="label"><s:text name="text.SearchStopMessage" /></div>
 
 <form id="stops_form" action="stops.action">
 <div><input type="text" class="inputTextbox" name="code" /></div>
-<div><input id="stops_submit" type="submit" class="inputButton" value="Submit" /></div>
+<s:text name="submitButton" var="sButton" />
+<div><s:submit id="stops_submit" cssClass="inputButton" type="submit" value="%{sButton}" align="left" /></div>
 </form>
 
-<div class="label">If your stop is missing a posted schedule or you are not at the stop, you can also search by
-bus route number:</div>
+<div class="label"><s:text name="text.SearchRouteMessage" /></div>
 
 <form id="routes_form" action="routes.action">
 <div><input type="text" class="inputTextbox" name="query" /></div>
-<div><input id="routes_submit" type="submit" class="inputButton" value="Submit" /></div>
+<div><s:submit id="routes_submit" cssClass="inputButton" type="submit" value="%{sButton}" align="left" /></div>
 </form>
+<s:url var="urlUserAction" namespace="/user" action="index"/>
+<s:url var="urlAgenciesAction"  action="agencies"/>
+<p><s:text name="text.ChangePersonalSettings" ><s:param  name="value" value="urlUserAction"/></s:text></p>
 
-<p>Change your <a href="user/index.action">personal settings.</a></p>
-
-<p>See the list of <a href="agencies.action">supported transit agencies</a>.</p>
+<p><s:text name="text.ListSupportedAgencies" ><s:param name="value" value="urlAgenciesAction"/></s:text></p>
 
 </body>
 </html>
