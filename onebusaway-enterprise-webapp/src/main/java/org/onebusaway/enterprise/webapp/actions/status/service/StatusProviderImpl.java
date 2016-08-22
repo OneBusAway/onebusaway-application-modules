@@ -25,7 +25,9 @@ import java.util.List;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.methods.GetMethod;
+import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.onebusaway.agency_metadata.model.AgencyMetadata;
 import org.onebusaway.enterprise.webapp.actions.status.model.IcingaItem;
 import org.onebusaway.enterprise.webapp.actions.status.model.IcingaResponse;
 import org.onebusaway.enterprise.webapp.actions.status.model.StatusGroup;
@@ -51,7 +53,7 @@ public class StatusProviderImpl implements StatusProvider {
 
   @Autowired
   private ConfigurationService _config;
-  
+    
   @Override
   public StatusGroup getServiceAlertStatus() {
 
@@ -136,6 +138,46 @@ public class StatusProviderImpl implements StatusProvider {
       
       group.addItem(item);
       
+    }
+    
+    return group;
+  }
+  
+  @Override
+  public StatusGroup getAgencyMetadataStatus() {
+    
+    StatusGroup group = new StatusGroup();
+    group.setTitle("Agency Messages");
+    
+    AgencyMetadata[] response = new AgencyMetadata[0];
+    
+    String api =  _config.getConfigurationValueAsString("status.obaApi", 
+        "http://localhost:8080/onebusaway-api-webapp/");
+    String endpoint = _config.getConfigurationValueAsString("status.obaApiAgencyMetadata", 
+        "api/where/agency-metadata/list.json");
+    String apikey = _config.getConfigurationValueAsString("display.obaApiKey", "OBAKEY");    
+    
+    String url = api + endpoint + "?key=" + apikey;
+    
+    try {
+      HttpClient client = new HttpClient();
+      HttpMethod method = new GetMethod(url);
+      client.executeMethod(method);
+      InputStream result = method.getResponseBodyAsStream();
+      ObjectMapper mapper = new ObjectMapper();
+      JsonNode tree = mapper.readTree(result);
+      JsonNode value = tree.findValue("data");
+      response = mapper.readValue(value, AgencyMetadata[].class);
+    } catch (IOException e) {
+      _log.error("Exception getting AgencyMetadata" + e);
+      e.printStackTrace();
+    }
+    
+    for (AgencyMetadata bean : response) {
+      StatusItem item = new StatusItem();
+      item.setTitle(bean.getName() + ": " + bean.getAgencyMessage());
+      item.setStatus(StatusItem.Status.INFO);
+      group.addItem(item);
     }
     
     return group;
