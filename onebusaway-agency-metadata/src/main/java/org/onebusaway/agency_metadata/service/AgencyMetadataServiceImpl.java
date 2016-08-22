@@ -39,7 +39,8 @@ public class AgencyMetadataServiceImpl implements AgencyMetadataService {
 
   @Override
   public void createAgencyMetadata(String gtfsId, String name, String shortName, String legacyId, 
-      String gtfsFeedUrl, String gtfsRtFeedUrl, String boundingBox, String ntdId) {
+      String gtfsFeedUrl, String gtfsRtFeedUrl, String boundingBox, String ntdId,
+      String agencyMessage) {
 
     // Verify that boundingBox is a valid Well Known Text Polygon format for an agency bounding box.
     if (!isValidBoundingBox(boundingBox)) {
@@ -56,13 +57,15 @@ public class AgencyMetadataServiceImpl implements AgencyMetadataService {
     model.setGtfsRtFeedUrl(gtfsRtFeedUrl);
     model.setBoundingBox(boundingBox);
     model.setNtdId(ntdId);
+    model.setAgencyMessage(agencyMessage);
     
     _agencyMetadataDao.saveOrUpdate(model);
   }
 
   @Override
   public void updateAgencyMetadata(long id, String gtfsId, String name, String shortName, String legacyId, 
-      String gtfsFeedUrl, String gtfsRtFeedUrl, String boundingBox, String ntdId) {
+      String gtfsFeedUrl, String gtfsRtFeedUrl, String boundingBox, String ntdId,
+      String agencyMessage) {
 	AgencyMetadata model = getAgencyMetadataForId(String.valueOf(id)).get(0);
 	if (gtfsId != null) {
 		model.setGtfsId(gtfsId);
@@ -91,6 +94,9 @@ public class AgencyMetadataServiceImpl implements AgencyMetadataService {
 	}
 	if (ntdId != null) {
 	    model.setNtdId(ntdId);
+	}
+	if (agencyMessage != null) {
+	    model.setAgencyMessage(agencyMessage);
 	}
     
     _agencyMetadataDao.saveOrUpdate(model);
@@ -136,6 +142,16 @@ public class AgencyMetadataServiceImpl implements AgencyMetadataService {
     return _agencyMetadataDao.getAgencyMetadataForNtdId(ntdId);
   }
 
+  @Override
+  public String getAgencyMetadataMessage(String id) {
+    String message = "";
+    List<AgencyMetadata> agencyMetadataList =  _agencyMetadataDao.getAgencyMetadataForId(id);
+    if (agencyMetadataList != null && agencyMetadataList.size() > 0) {
+      message = agencyMetadataList.get(0).getAgencyMessage();
+    }
+    return message;
+  }
+
   /* Private functions */
   private boolean isValidBoundingBox(String wkt) { 
     _log.info("Validating: " + wkt);
@@ -149,5 +165,5 @@ public class AgencyMetadataServiceImpl implements AgencyMetadataService {
     _log.info("Validation of POLYGON succeeded");
     return true;
   }
-  
+
 }

@@ -70,10 +70,12 @@
 				<!-- -->
 				<div id="Action">
 					<div>
+						<!--
 						<div id="Notes">
 							Any notes you'd like to keep about this dataset?
 							<span id="anyNotes">Yes</span>
 						</div>
+						-->
 						<div id="UploadButtons">
 							<s:url var="url" action="index.action" namespace="/admin" />
 							<a href="${url}" class="link" id="cancelUpload">Cancel</a> 
@@ -84,6 +86,7 @@
 						-->
 					</div>
 					<div id="notesDiv">
+						<label id="commentsLabel" for="bundleComment">Comments</label>
 						<textarea rows="4" cols="60" id="bundleComment">
 						<!-- Prevent jsp minimzation if empty div -->
 						</textarea> 

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.onebusaway.gtfs_realtime.archiver.model;
+package org.onebusaway.gtfs_realtime.model;
 
 import java.util.Date;
 
@@ -29,6 +29,9 @@ import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Index;
+import org.onebusaway.gtfs_realtime.interfaces.HasRouteId;
+import org.onebusaway.gtfs_realtime.interfaces.HasStopId;
+import org.onebusaway.gtfs_realtime.interfaces.HasTripId;
 
 @Entity
 @Table(name = "entity_selector")
@@ -41,7 +44,7 @@ import org.hibernate.annotations.Index;
     @Index(name = "es_trip_route_id_idx", columnNames = {"trip_route_id"}),
     @Index(name = "es_alert_id_idx", columnNames = {"alert_id"})})
 @org.hibernate.annotations.Entity(mutable = false)
-public class EntitySelectorModel {
+public class EntitySelectorModel implements HasTripId, HasRouteId, HasStopId {
 
   /* Sound Transit constants */
 

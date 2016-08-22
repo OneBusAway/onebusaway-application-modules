@@ -55,25 +55,42 @@
 		</div>
 	</div>
 	<div id="compareDiff">
+		<!--
 		<label class="adminLabel">Diff result:</label>
 		<div id="diffResult">
-			<!--  space -->
+		-->
+		<div>
+			<table id="diffResultsTable">
+				<caption>Diff Results</caption>
+				<tr>
+					<th>Id</th>
+					<th>Name</th>
+					<th>Routes</th>
+					<th>Trips</th>
+					<th>Stops</th>
+					<th>Stop Times</th>
+					<th>Service Start</th>
+					<th>Service End</th>
+					<th>Calendar Start</th>
+					<th>Calendar End</th>
+				</tr>
+			</table>
 		</div>
 	</div>
 	<div id="compareFixedRouteModes">
-			<div>
-				<table id="fixedRouteDiffTable">
-					<caption>Comparison of Fixed Route Modes</caption>
-					<tr>
-						<th class="modeColumn">Mode</th>
-						<th class="routeColumn">Route</th>
-						<th class="stopCtColumn"># of Stops</th>
-						<th class="weekdayTripColumn"># of Weekday trips</th>
-						<th class="satTripsColumn" ># of Sat trips</th>
-						<th class="sunTripsColumn" ># of Sun trips</th>
-					</tr>
-				</table>
-			</div>
+		<div>
+			<table id="fixedRouteDiffTable">
+				<caption>Comparison of Fixed Route Modes</caption>
+				<tr>
+					<th class="modeColumn">Mode</th>
+					<th class="routeColumn">Route</th>
+					<th class="stopCtColumn"># of Stops</th>
+					<th class="weekdayTripColumn"># of Weekday trips</th>
+					<th class="satTripsColumn" ># of Sat trips</th>
+					<th class="sunTripsColumn" ># of Sun trips</th>
+				</tr>
+			</table>
+		</div>
 	</div>
 </html>
 

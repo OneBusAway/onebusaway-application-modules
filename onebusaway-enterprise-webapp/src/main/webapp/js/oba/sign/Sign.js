@@ -237,20 +237,7 @@ OBA.Sign = function() {
 		if (jQuery.isEmptyObject(applicableSituations)) {
 			stopElement.find(".alerts").hide();
 			stopElement.find(".arrivals").width("100%");
-		} else {
-			// make sure we have a valid alert before showing
-			var found = false;
-			jQuery.each(applicableSituations, function(situationId, situation) {
-				if (typeof situation.Affects.VehicleJourneys != "undefined"
-					&& typeof situation.Affects.VehicleJourneys.AffectedVehicleJourney != "undefined") {
-					jQuery.each(situation.Affects.VehicleJourneys.AffectedVehicleJourney, function(_, journey) {
-						if (journey.LineRef in routeInfo) {
-							found = true;
-						}
-					});
-				}
-			});
-			if (!found) return;
+		} else if (isValidAlert(applicableSituations)) {
 			
 			stopElement.find(".alerts").show();
 			stopElement.find(".arrivals").width("70%");
@@ -390,6 +377,28 @@ OBA.Sign = function() {
 		stopElement.find('tbody tr:even').addClass('even');
 		stopElement.find('tbody tr:odd').addClass('odd');
 		
+	}
+	
+	function isValidAlert(applicableSituations) {
+		var found = false;
+		jQuery.each(applicableSituations, function(situationId, situation) {
+			if (typeof situation.Affects.VehicleJourneys != "undefined"
+				&& typeof situation.Affects.VehicleJourneys.AffectedVehicleJourney != "undefined") {
+				jQuery.each(situation.Affects.VehicleJourneys.AffectedVehicleJourney, function(_, journey) {
+					// journey.LineRef does not have an agency ID
+					for (routeId in routeInfo) {
+						if (trimAgencyId(routeId) == journey.LineRef) {
+							found = true;
+						}
+					}
+				});
+			}
+		});
+		return found;
+	}
+	
+	function trimAgencyId(id) {
+		return id.split("_")[1];
 	}
 	
 	// from jQuery 1.7

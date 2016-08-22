@@ -63,4 +63,6 @@
     	<property name="key" value="TEST" />
     </bean>
     
+    <bean class="org.onebusaway.enterprise.webapp.actions.status.service.StatusProviderImpl" />
+    
 </beans>

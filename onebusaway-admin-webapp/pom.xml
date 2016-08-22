@@ -160,6 +160,11 @@
 			<artifactId>onebusaway-transit-data</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+        <dependency>
+          <groupId>org.onebusaway</groupId>
+          <artifactId>onebusaway-gtfs-realtime-model</artifactId>
+          <version>${project.version}</version>
+        </dependency>
 		<dependency>
 			<groupId>org.onebusaway</groupId>
 			<artifactId>onebusaway-agency-metadata</artifactId>
@@ -203,7 +208,7 @@
 		<dependency>
 			<groupId>org.onebusaway</groupId>
 			<artifactId>onebusaway-king-county-metro-gtfs</artifactId>
-			<version>0.0.11-st-SNAPSHOT</version>
+			<version>0.0.10-st</version>
 		</dependency>
 		<dependency>
 			<artifactId>onebusaway-csv-entities</artifactId>
@@ -328,6 +333,7 @@
             <artifactId>joda-time</artifactId>
             <version>2.9.4</version>
         </dependency>
+        
 	</dependencies>
 
 	<profiles>
@@ -418,6 +424,7 @@
             <!-- JQuery Excludes -->
             <exclude>**/jqGrid.js</exclude>
             <exclude>**/grid.*.js</exclude>
+            <exclude>**/CTBusStops*</exclude>
           </excludes>
         </configuration>
       </plugin>

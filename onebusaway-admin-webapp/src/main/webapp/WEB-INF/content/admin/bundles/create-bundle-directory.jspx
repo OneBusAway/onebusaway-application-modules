@@ -23,7 +23,7 @@
 	<p>Dataset for Bundle Creation</p>
 	<!--Create a blank dataset -->
     <div id="newDatasetTableDiv">
-        <span class="datasetDivHeader">Create a blank dataset</span>
+        <span class="datasetDivHeader">Create a new dataset</span>
 		<table id="createDataset">
 			<tr>
 				<td id="datasetNameLabel">What do you want to name your dataset?</td>

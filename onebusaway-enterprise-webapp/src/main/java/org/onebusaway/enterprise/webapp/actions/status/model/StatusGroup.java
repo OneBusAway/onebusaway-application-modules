@@ -13,13 +13,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.onebusaway.gtfs_realtime.archiver.model;
+package org.onebusaway.enterprise.webapp.actions.status.model;
 
-import java.util.Date;
+import java.util.ArrayList;
+import java.util.List;
 
-public interface FeedEntityModel {
+public class StatusGroup {
 
-  long getId();
-  
-  Date getTimestamp();
+	String title;
+	
+	List<StatusItem> items = new ArrayList<StatusItem>();
+	
+	public String getTitle() {
+		return title;
+	}
+	public void setTitle(String title) {
+		this.title = title;
+	}
+	public List<StatusItem> getItems() {
+		return items;
+	}
+	public void setItems(List<StatusItem> items) {
+		this.items = items;
+	}
+	
+	public void addItem(StatusItem item) {
+		items.add(item);
+	}
+	
+	
 }

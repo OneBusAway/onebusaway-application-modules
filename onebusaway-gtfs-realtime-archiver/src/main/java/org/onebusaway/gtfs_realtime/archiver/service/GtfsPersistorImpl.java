@@ -23,9 +23,9 @@ import java.util.concurrent.TimeUnit;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
-import org.onebusaway.gtfs_realtime.archiver.model.AlertModel;
-import org.onebusaway.gtfs_realtime.archiver.model.TripUpdateModel;
-import org.onebusaway.gtfs_realtime.archiver.model.VehiclePositionModel;
+import org.onebusaway.gtfs_realtime.model.AlertModel;
+import org.onebusaway.gtfs_realtime.model.TripUpdateModel;
+import org.onebusaway.gtfs_realtime.model.VehiclePositionModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

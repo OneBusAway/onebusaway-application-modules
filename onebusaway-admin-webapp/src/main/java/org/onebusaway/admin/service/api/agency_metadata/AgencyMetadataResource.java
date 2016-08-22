@@ -77,20 +77,21 @@ public class AgencyMetadataResource {
     @QueryParam("gtfs_feed_url") String gtfs_feed_url, 
     @QueryParam("gtfs_rt_feed_url") String gtfs_rt_feed_url, 
     @QueryParam("bounding_box") String bounding_box, 
-    @QueryParam("ntd_id") String ntd_id
+    @QueryParam("ntd_id") String ntd_id,
+    @QueryParam("agency_message") String agency_message
     ) throws JsonGenerationException, JsonMappingException, IOException {
     
     log.info("Starting createAgencyMetadata with gtfs_id: " + gtfs_id + ", name: " 
         + name + ", short_name: " + short_name +", legacy_id: " + legacy_id + ", gtfs_feed_url: " 
         + gtfs_feed_url + ", gtfs_rt_feed_url: " + gtfs_rt_feed_url + ", bounding_box: "
-        + bounding_box + ", ntd_id: " + ntd_id);
+        + bounding_box + ", ntd_id: " + ntd_id + ", agency_message: " + agency_message);
     
     String message = "Agency Metadata record created for: " + name;
     
     try {
       _agencyMetadataService.createAgencyMetadata(gtfs_id, name, 
           short_name, legacy_id, gtfs_feed_url, gtfs_rt_feed_url, 
-          bounding_box, ntd_id);
+          bounding_box, ntd_id, agency_message);
     } catch (Exception e) {
       log.error(e.getMessage());
       throw new WebApplicationException(e, Response.serverError().build());
@@ -111,20 +112,22 @@ public class AgencyMetadataResource {
     @QueryParam("gtfs_feed_url") String gtfs_feed_url, 
     @QueryParam("gtfs_rt_feed_url") String gtfs_rt_feed_url, 
     @QueryParam("bounding_box") String bounding_box, 
-    @QueryParam("ntd_id") String ntd_id
+    @QueryParam("ntd_id") String ntd_id,
+    @QueryParam("agency_message") String agency_message
     )  throws JsonGenerationException, JsonMappingException, IOException {
         
     log.info("Starting updateAgencyMetadata with agencyIndex: " + agencyIndex + ", gtfs_id: "
       + gtfs_id + ", name: " + name + ", short_name: " + short_name +", legacy_id: "
       + legacy_id + ", gtfs_feed_url: " + gtfs_feed_url + ", gtfs_rt_feed_url: " 
-      + gtfs_rt_feed_url + ", bounding_box: " + bounding_box + ", ntd_id: " + ntd_id);
+      + gtfs_rt_feed_url + ", bounding_box: " + bounding_box + ", ntd_id: " + ntd_id
+      + ", agency_message: " + agency_message);
 
     String message = "Agency Metadata updated: " + agencyIndex;
     try {
       long id = Long.parseLong(agencyIndex);
       _agencyMetadataService.updateAgencyMetadata(id, gtfs_id, name, 
           short_name, legacy_id, gtfs_feed_url, gtfs_rt_feed_url, 
-          bounding_box, ntd_id);
+          bounding_box, ntd_id, agency_message);
     } catch (Exception e) {
       log.error(e.getMessage());
       message = e.getMessage();

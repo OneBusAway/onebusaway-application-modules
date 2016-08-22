@@ -1,0 +1,56 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.onebusaway</groupId>
+    <artifactId>onebusaway-application-modules</artifactId>
+    <version>1.1.15.32-cs-SNAPSHOT</version>
+  </parent>
+  <artifactId>onebusaway-gtfs-realtime-model</artifactId>
+  <name>onebusaway-gtfs-realtime-model</name>
+  <packaging>jar</packaging>
+
+  <dependencies>
+   <!-- 
+    <dependency>
+      <groupId>org.onebusaway</groupId>
+      <artifactId>onebusaway-gtfs-realtime-api</artifactId>
+      <version>${gtfs-api-version}</version> 
+    </dependency> -->
+   
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-log4j12</artifactId>
+    </dependency>
+	    <dependency>
+	      <groupId>org.onebusaway</groupId>
+	      <artifactId>onebusaway-container</artifactId>
+	      <version>1.1.15.32-cs-SNAPSHOT</version>
+	    </dependency>
+	
+	<dependency>
+      <groupId>org.onebusaway</groupId>
+      <artifactId>onebusaway-gtfs-realtime-api</artifactId>
+      <version>${gtfs-api-version}</version>
+    </dependency>
+    
+     <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+      <version>3.1</version>
+    </dependency>
+   
+    
+	</dependencies>
+
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>com.mycila</groupId>
+        <artifactId>license-maven-plugin</artifactId>
+        <version>2.11</version>
+      </plugin>
+    </plugins>
+  </build>
+
+</project>

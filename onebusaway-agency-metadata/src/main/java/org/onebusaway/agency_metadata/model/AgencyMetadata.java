@@ -42,6 +42,7 @@ public class AgencyMetadata {
   private static final int GTFS_RT_FEED_URL_LENGTH = 300;
   private static final int BOUNDING_BOX_LENGTH = 300;
   private static final int NTD_ID_LENGTH = 5;
+  private static final int AGENCY_MESSAGE = 300;
   
   
   
@@ -65,6 +66,8 @@ public class AgencyMetadata {
   private String boundingBox;
   @Column(nullable = true, name="ntd_id", length = NTD_ID_LENGTH)
   private String ntdId;
+  @Column(nullable = true, name="agency_message", length = AGENCY_MESSAGE)
+  private String agencyMessage;
   
   public long getId() {
     return id;
@@ -138,7 +141,15 @@ public class AgencyMetadata {
     this.ntdId = ntdId;
   }
   
-  public String toString() {
+  public String getAgencyMessage() {
+    return agencyMessage;
+  }
+
+  public void setAgencyMessage(String agencyMessage) {
+		this.agencyMessage = agencyMessage;
+	}
+
+	public String toString() {
     return "{AgencyMetadata={id:" + id + ",gtfsId:" + getGtfsId() + ",name:" + getName() + ",shortName:" 
         + getShortName() + ",legacyId:" + getLegacyId() + ",gtfsFeedUrl:" + getGtfsFeedUrl()
         + ",gtfsRtFeedUrl:" + getGtfsRtFeedUrl()+ ",ntdId:" + getNtdId() + "}}";
