@@ -46,4 +46,10 @@ public class StatusItem {
 		this.description = description;
 	}
 	
+	// This should be unique among current StatusItems
+	// Used to match different HTML elements for client-side events.
+	public String getId() {
+	  return Integer.toString(title.hashCode());
+	}
+	
 }
