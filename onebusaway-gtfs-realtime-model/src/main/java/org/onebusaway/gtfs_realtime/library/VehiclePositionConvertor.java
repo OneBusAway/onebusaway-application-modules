@@ -34,6 +34,9 @@ public class VehiclePositionConvertor extends FeedEntityConvertor<VehiclePositio
       return null;
     VehiclePositionModel vpm = new VehiclePositionModel();
     if (entity.hasVehicle()) {
+      if (entity.getVehicle().hasTimestamp()) {
+        timestamp = entity.getVehicle().getTimestamp() * 1000;
+      }
       if (entity.getVehicle().hasTrip()) {
         TripDescriptor td = entity.getVehicle().getTrip();
         if (td.hasTripId()) {
