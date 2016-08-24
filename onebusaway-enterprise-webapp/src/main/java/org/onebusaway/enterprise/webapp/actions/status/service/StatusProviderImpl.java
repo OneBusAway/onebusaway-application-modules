@@ -109,10 +109,12 @@ public class StatusProviderImpl implements StatusProvider {
       response = mapper.readValue(result, IcingaResponse.class);
     } catch (IOException e) {
       _log.error("Exception getting Icinga data " + e);
-      e.printStackTrace();
+      group.addItem(exceptionStatus(e));
+      return group;
     }
     
     if (response == null) {
+      group.addItem(exceptionStatus());
       return group;
     }
     
@@ -170,7 +172,13 @@ public class StatusProviderImpl implements StatusProvider {
       response = mapper.readValue(value, AgencyMetadata[].class);
     } catch (IOException e) {
       _log.error("Exception getting AgencyMetadata" + e);
-      e.printStackTrace();
+      group.addItem(exceptionStatus(e));
+      return group;
+    }
+    
+    if (response == null) {
+      group.addItem(exceptionStatus());
+      return group;
     }
     
     for (AgencyMetadata bean : response) {
@@ -194,5 +202,17 @@ public class StatusProviderImpl implements StatusProvider {
     return encoded.toString();
   }
   
-
+  private static StatusItem exceptionStatus(Exception e) {
+    StatusItem item = new StatusItem();
+    item.setStatus(StatusItem.Status.WARNING);
+    item.setTitle("Unable to load status group.");
+    if (e != null) {
+      item.setDescription(e.toString());
+    }
+    return item;
+  }
+  
+  private static StatusItem exceptionStatus() {
+    return exceptionStatus(null);
+  }
 }
