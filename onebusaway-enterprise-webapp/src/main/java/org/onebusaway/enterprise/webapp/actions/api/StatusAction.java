@@ -35,14 +35,12 @@ public class StatusAction extends OneBusAwayEnterpriseActionSupport {
   
   private List<StatusGroup> groups;
   
-  private StatusItem.Status overallStatus;
   
   private boolean showOK;
 
   @Override
   public String execute() {
     groups = createGroups();
-    overallStatus = getOverallStatus();
     return SUCCESS;
   }
   
@@ -58,26 +56,6 @@ public class StatusAction extends OneBusAwayEnterpriseActionSupport {
     return groups;
   }
   
-  public String getOverallStyle() {
-    if (overallStatus == StatusItem.Status.OK) {
-      return "panel-success";
-    }
-    else if (overallStatus == StatusItem.Status.WARNING) {
-      return "panel-warning";
-    }
-    return "panel-danger";
-  }
-  
-  public String getOverallMessage() {
-    if (overallStatus == StatusItem.Status.OK) {
-      return "All systems operational.";
-    }
-    else if (overallStatus == StatusItem.Status.WARNING) {
-      return "Some warnings.";
-    }
-    return "Warning: system errors!";
-  }
-  
   public boolean showItem(StatusItem.Status status) {
     return (status != StatusItem.Status.OK) || showOK;
   }
@@ -85,22 +63,21 @@ public class StatusAction extends OneBusAwayEnterpriseActionSupport {
   private List<StatusGroup> createGroups() {
     groups = new ArrayList<StatusGroup>();
     groups.add(_statusProvider.getIcingaStatus());
-    groups.add(_statusProvider.getAgencyMetadataStatus());
     groups.add(_statusProvider.getServiceAlertStatus());
-    return groups;
-  }
-  
-  // OK, WARNING, or ERROR
-  private StatusItem.Status getOverallStatus() {
-    StatusItem.Status status = StatusItem.Status.OK;
+    groups.add(_statusProvider.getAgencyMetadataStatus());
+    
+    // trim OKs
     for (StatusGroup group : groups) {
+      List<StatusItem> items = new ArrayList<StatusItem>();
       for (StatusItem item : group.getItems()) {
-        if (item.getStatus().compareTo(status) > 0) {
-          status = item.getStatus();
+        if (showItem(item.getStatus())) {
+          items.add(item);
         }
       }
+      group.setItems(items);
     }
-    return status;
+    
+    return groups;
   }
   
 }

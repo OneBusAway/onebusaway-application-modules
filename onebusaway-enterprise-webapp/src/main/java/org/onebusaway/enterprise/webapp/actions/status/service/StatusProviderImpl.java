@@ -25,6 +25,7 @@ import java.util.List;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.methods.GetMethod;
+import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.onebusaway.agency_metadata.model.AgencyMetadata;
@@ -79,7 +80,7 @@ public class StatusProviderImpl implements StatusProvider {
         StatusItem item = new StatusItem();
         item.setDescription(bean.getDescriptions().get(0).getValue());
         item.setTitle(agencyName + ": " + bean.getSummaries().get(0).getValue());
-        item.setStatus(StatusItem.Status.INFO);
+        item.setStatus(StatusItem.Status.ALERT);
         group.addItem(item);
       }
     }
@@ -182,10 +183,12 @@ public class StatusProviderImpl implements StatusProvider {
     }
     
     for (AgencyMetadata bean : response) {
-      StatusItem item = new StatusItem();
-      item.setTitle(bean.getName() + ": " + bean.getAgencyMessage());
-      item.setStatus(StatusItem.Status.INFO);
-      group.addItem(item);
+      if (!StringUtils.isEmpty(bean.getAgencyMessage())) {
+        StatusItem item = new StatusItem();
+        item.setTitle(bean.getName() + ": " + bean.getAgencyMessage());
+        item.setStatus(StatusItem.Status.INFO);
+        group.addItem(item);
+      }
     }
     
     return group;

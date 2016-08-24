@@ -47,18 +47,17 @@ span.link { text-decoration: underline; text-decoration-style: dotted; }
       </div>
     </div>
     
-    <div class="panel ${overallStyle}">
-     <div class="panel-heading">
-      <h3 class="panel-title">${overallMessage}</h3>
-     </div>
-    </div>
-    
     <s:iterator value="groups">
       <div class="panel panel-default">
         <div class="panel-heading"><s:property value="title" /></div>
       <div class="panel-body">
        	<s:if test="%{items.size == 0}">
-       	  <i>No status to show.</i>
+       	   <div class="panel panel-success" style="margin-bottom:0;">
+		     <div class="panel-heading">
+		     <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"><!-- jspx min --></span>
+		      <span>All systems operational</span>
+		     </div>
+		   </div>
        	</s:if>
        	<s:iterator value="items">
        	  <s:if test="%{showItem(status)}">
@@ -66,16 +65,19 @@ span.link { text-decoration: underline; text-decoration-style: dotted; }
        	      <span>
        	      
        	      <s:if test="%{status == @org.onebusaway.enterprise.webapp.actions.status.model.StatusItem$Status@OK}">
-       	        <span class="glyphicon glyphicon-ok-sign text-success" aria-hidden="true"><!--  disable min --></span>
+       	        <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"><!--  disable min --></span>
        	      </s:if>
        	      <s:elseif test="%{status == @org.onebusaway.enterprise.webapp.actions.status.model.StatusItem$Status@WARNING}">
        	        <span class="glyphicon glyphicon-warning-sign text-warning" aria-hidden="true"><!--  disable min --></span>
        	      </s:elseif>
  			  <s:elseif test="%{status == @org.onebusaway.enterprise.webapp.actions.status.model.StatusItem$Status@ERROR}">
-       	        <span class="glyphicon glyphicon-bell text-danger" aria-hidden="true"><!--  disable min --></span>
+       	        <span class="glyphicon glyphicon-remove text-danger" aria-hidden="true"><!--  disable min --></span>
        	      </s:elseif>
        	   	  <s:elseif test="%{status == @org.onebusaway.enterprise.webapp.actions.status.model.StatusItem$Status@INFO}">
        	        <span class="glyphicon glyphicon-info-sign text-info" aria-hidden="true"><!--  disable min --></span>
+       	      </s:elseif>
+       	      <s:elseif test="%{status == @org.onebusaway.enterprise.webapp.actions.status.model.StatusItem$Status@ALERT}">
+       	        <span class="glyphicon glyphicon-bell text-danger" aria-hidden="true"><!--  disable min --></span>
        	      </s:elseif>
        	    
        	      <s:if test="%{description.length() > 0 and !description.equals(title)}">
