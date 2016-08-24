@@ -67,6 +67,14 @@
   	<property name="vehiclePositionsUrl" value="http://admin.staging.obast.org:9999/wsf/vehiclePositions" />
   	<property name="refreshInterval" value="30" />
   </bean>
+  <bean id="linkAvlRealtimeTask" class="org.onebusaway.gtfs_realtime.archiver.listener.LinkAvlRealtimeArchiverTask">
+    <property name="scheduledExecutorService" ref="scheduledExecutorService" />
+    <property name="feedService" ref="feedService" />
+    <property name="linkAvlUrl" value="https://std-itd-sba1201.dev01.agency.soundtransit.org:8244/services/link/1/arrivals/3" />
+    <property name="avlFeedId" value="Link" />
+    <property name="refreshInterval" value="30" />
+    <property name="disabledCertificateVerification" value="true" />
+  </bean>
   
   <!--         <bean id="wsf_avl" class="org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.GtfsRealtimeSource"> -->
 <!--                 <property name="tripUpdatesUrl" value="http://localhost:9000/wsf/tripUpdates" /> -->
@@ -91,6 +99,9 @@
         <value>org.onebusaway.gtfs_realtime.model.AlertModel</value>
         <value>org.onebusaway.gtfs_realtime.model.EntitySelectorModel</value>
         <value>org.onebusaway.gtfs_realtime.model.TimeRangeModel</value>
+        <value>org.onebusaway.gtfs_realtime.archiver.model.LinkAVLData</value>
+        <value>org.onebusaway.gtfs_realtime.archiver.model.TripInfo</value>
+        <value>org.onebusaway.gtfs_realtime.archiver.model.StopUpdate</value>
       </list>
     </property>
     <property name="hibernateProperties">

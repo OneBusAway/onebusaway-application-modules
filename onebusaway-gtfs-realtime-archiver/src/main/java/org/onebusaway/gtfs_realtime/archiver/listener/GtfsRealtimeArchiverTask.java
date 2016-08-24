@@ -20,23 +20,11 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-
-import org.onebusaway.gtfs_realtime.archiver.service.FeedService;
 import org.onebusaway.transit_data_federation.services.transit_graph.AgencyEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
-import org.springframework.context.event.ContextRefreshedEvent;
-
 import com.google.protobuf.ExtensionRegistry;
 import com.google.transit.realtime.GtfsRealtimeConstants;
 import com.google.transit.realtime.GtfsRealtimeOneBusAway;
@@ -48,10 +36,7 @@ import com.google.transit.realtime.GtfsRealtime.FeedMessage;
  * Entry point for archiving GTFS-realtime. Configure one of these (via spring
  * configuration) for each of your GTFS realtime sources.
  */
-public class GtfsRealtimeArchiverTask implements ApplicationListener {
-
-  private static final Logger _log = LoggerFactory.getLogger(
-      GtfsRealtimeArchiverTask.class);
+public class GtfsRealtimeArchiverTask extends RealtimeArchiverTask {
 
   private static final ExtensionRegistry _registry = ExtensionRegistry.newInstance();
 
@@ -62,41 +47,19 @@ public class GtfsRealtimeArchiverTask implements ApplicationListener {
 
   private TransitGraphDao _transitGraphDao;
 
-  private ScheduledExecutorService _scheduledExecutorService;
-
-  private ScheduledFuture<?> _refreshTask;
-
-  private FeedService _feedService;
-
   private URL _tripUpdatesUrl;
 
   private URL _vehiclePositionsUrl;
 
   private URL _alertsUrl;
 
-  private int _refreshInterval = 30;
-
   private List<String> _agencyIds = new ArrayList<String>();
 
   private GtfsRealtimeEntitySource _entitySource;
 
-  private boolean initialized = false;
-
   @Autowired
   public void setTransitGraphDao(TransitGraphDao transitGraphDao) {
     _transitGraphDao = transitGraphDao;
-  }
-
-  @Autowired
-  public void setScheduledExecutorService(
-      ScheduledExecutorService scheduledExecutorService) {
-    _log.info("executor=" + scheduledExecutorService);
-    _scheduledExecutorService = scheduledExecutorService;
-  }
-
-  @Autowired
-  public void setFeedService(FeedService feedService) {
-    _feedService = feedService;
   }
 
   public void setTripUpdatesUrl(URL tripUpdatesUrl) {
@@ -111,11 +74,6 @@ public class GtfsRealtimeArchiverTask implements ApplicationListener {
     _alertsUrl = alertsUrl;
   }
 
-  @Autowired
-  public void setRefreshInterval(int refreshInterval) {
-    _refreshInterval = refreshInterval;
-  }
-
   public void setAgencyId(String agencyId) {
     _agencyIds.add(agencyId);
   }
@@ -128,15 +86,7 @@ public class GtfsRealtimeArchiverTask implements ApplicationListener {
     return _agencyIds;
   }
 
-  public void setInitialized(boolean isInitialized) {
-    this.initialized = isInitialized;
-  }
-
-  public boolean getInitialized() {
-    return this.initialized;
-  }
-
-  private void init() {
+  protected void init() {
     while (!initialized) {
       _log.info("Still waiting for context initialization");
       try {
@@ -186,22 +136,6 @@ public class GtfsRealtimeArchiverTask implements ApplicationListener {
 
   }
 
-  @PostConstruct
-  public void start() {
-    BackgroundInitTask bit = new BackgroundInitTask();
-    new Thread(bit).start();
-    _log.error("PostConstruct Complete");
-  }
-
-  @PreDestroy
-  public void stop() {
-    _log.info("stopping");
-    if (_refreshTask != null) {
-      _refreshTask.cancel(true);
-      _refreshTask = null;
-    }
-  }
-
   public void update() throws IOException {
     FeedMessage tripUpdates = readOrReturnDefault(_tripUpdatesUrl);
     FeedMessage vehiclePositions = readOrReturnDefault(_vehiclePositionsUrl);
@@ -243,7 +177,7 @@ public class GtfsRealtimeArchiverTask implements ApplicationListener {
     }
   }
 
-  private class UpdateTask implements Runnable {
+  protected class UpdateTask implements Runnable {
 
     @Override
     public void run() {
@@ -255,21 +189,4 @@ public class GtfsRealtimeArchiverTask implements ApplicationListener {
     }
   }
 
-  private class BackgroundInitTask implements Runnable {
-    @Override
-    public void run() {
-      try {
-        init();
-      } catch (Throwable ex) {
-        _log.warn("Error initializing", ex);
-      }
-    }
-  }
-
-  @Override
-  public void onApplicationEvent(ApplicationEvent event) {
-    if (event instanceof ContextRefreshedEvent) {
-      setInitialized(true);
-    }
-  }
 }
