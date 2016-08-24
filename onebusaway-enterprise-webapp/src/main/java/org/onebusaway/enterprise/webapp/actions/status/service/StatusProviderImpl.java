@@ -25,6 +25,7 @@ import java.util.List;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.methods.GetMethod;
+import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.onebusaway.agency_metadata.model.AgencyMetadata;
@@ -79,7 +80,7 @@ public class StatusProviderImpl implements StatusProvider {
         StatusItem item = new StatusItem();
         item.setDescription(bean.getDescriptions().get(0).getValue());
         item.setTitle(agencyName + ": " + bean.getSummaries().get(0).getValue());
-        item.setStatus(StatusItem.Status.INFO);
+        item.setStatus(StatusItem.Status.ALERT);
         group.addItem(item);
       }
     }
@@ -109,10 +110,12 @@ public class StatusProviderImpl implements StatusProvider {
       response = mapper.readValue(result, IcingaResponse.class);
     } catch (IOException e) {
       _log.error("Exception getting Icinga data " + e);
-      e.printStackTrace();
+      group.addItem(exceptionStatus(e));
+      return group;
     }
     
     if (response == null) {
+      group.addItem(exceptionStatus());
       return group;
     }
     
@@ -170,14 +173,22 @@ public class StatusProviderImpl implements StatusProvider {
       response = mapper.readValue(value, AgencyMetadata[].class);
     } catch (IOException e) {
       _log.error("Exception getting AgencyMetadata" + e);
-      e.printStackTrace();
+      group.addItem(exceptionStatus(e));
+      return group;
+    }
+    
+    if (response == null) {
+      group.addItem(exceptionStatus());
+      return group;
     }
     
     for (AgencyMetadata bean : response) {
-      StatusItem item = new StatusItem();
-      item.setTitle(bean.getName() + ": " + bean.getAgencyMessage());
-      item.setStatus(StatusItem.Status.INFO);
-      group.addItem(item);
+      if (!StringUtils.isEmpty(bean.getAgencyMessage())) {
+        StatusItem item = new StatusItem();
+        item.setTitle(bean.getName() + ": " + bean.getAgencyMessage());
+        item.setStatus(StatusItem.Status.INFO);
+        group.addItem(item);
+      }
     }
     
     return group;
@@ -194,5 +205,17 @@ public class StatusProviderImpl implements StatusProvider {
     return encoded.toString();
   }
   
-
+  private static StatusItem exceptionStatus(Exception e) {
+    StatusItem item = new StatusItem();
+    item.setStatus(StatusItem.Status.WARNING);
+    item.setTitle("Unable to load status group.");
+    if (e != null) {
+      item.setDescription(e.toString());
+    }
+    return item;
+  }
+  
+  private static StatusItem exceptionStatus() {
+    return exceptionStatus(null);
+  }
 }

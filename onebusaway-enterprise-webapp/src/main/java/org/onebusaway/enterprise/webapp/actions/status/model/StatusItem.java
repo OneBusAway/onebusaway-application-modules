@@ -16,7 +16,7 @@
 package org.onebusaway.enterprise.webapp.actions.status.model;
 
 public class StatusItem {
-	public enum Status { INFO, OK, WARNING, ERROR };
+	public enum Status { ALERT, INFO, OK, WARNING, ERROR };
 		
 	Status status;
 	String title;

@@ -23,6 +23,7 @@ import java.util.concurrent.TimeUnit;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
+import org.onebusaway.gtfs_realtime.archiver.model.LinkAVLData;
 import org.onebusaway.gtfs_realtime.model.AlertModel;
 import org.onebusaway.gtfs_realtime.model.TripUpdateModel;
 import org.onebusaway.gtfs_realtime.model.VehiclePositionModel;
@@ -48,12 +49,15 @@ public class GtfsPersistorImpl implements GtfsPersistor, ApplicationListener {
       100000);
   private ArrayBlockingQueue<AlertModel> _alerts = new ArrayBlockingQueue<AlertModel>(
       100000);
+  private ArrayBlockingQueue<LinkAVLData> _linkAvlData = new ArrayBlockingQueue<LinkAVLData>(
+      100000);
 
   private ThreadPoolTaskScheduler _taskScheduler;
 
   private TripUpdateDao _tripUpdateDao;
   private VehiclePositionDao _vehiclePositionDao;
   private AlertDao _alertDao;
+  private LinkAvlDao _linkAvlDao;
   private boolean initialized = false;
 
   @Autowired
@@ -74,6 +78,11 @@ public class GtfsPersistorImpl implements GtfsPersistor, ApplicationListener {
   @Autowired
   public void setAlertDao(AlertDao dao) {
     _alertDao = dao;
+  }
+
+  @Autowired
+  public void setLinkAvlDao(LinkAvlDao dao) {
+    _linkAvlDao = dao;
   }
 
   /**
@@ -108,6 +117,9 @@ public class GtfsPersistorImpl implements GtfsPersistor, ApplicationListener {
                                                                              // seconds;
     final AlertThread alertThread = new AlertThread();
     _taskScheduler.scheduleWithFixedDelay(alertThread, 10 * 1000); // every 10
+                                                                   // seconds;
+    final LinkAvlThread linkAvlThread = new LinkAvlThread();
+    _taskScheduler.scheduleWithFixedDelay(linkAvlThread, 10 * 1000); // every 10
                                                                    // seconds;
 
   }
@@ -151,6 +163,15 @@ public class GtfsPersistorImpl implements GtfsPersistor, ApplicationListener {
     if (!accepted) {
       _log.error("Local alert buffer full!  Clearing!  Dropping "
           + alert.getId() + " record");
+    }
+  }
+
+  @Override
+  public void persist(LinkAVLData avlData) {
+    boolean accepted = _linkAvlData.offer(avlData);
+    if (!accepted) {
+      _log.error("Local link AVL data buffer full!  Clearing!  Dropping "
+          + avlData.getId() + " record");
     }
   }
 
@@ -200,6 +221,21 @@ public class GtfsPersistorImpl implements GtfsPersistor, ApplicationListener {
     }
   }
 
+  private class LinkAvlThread implements Runnable {
+
+    @Override
+    public void run() {
+      List<LinkAVLData> records = new ArrayList<LinkAVLData>();
+      _linkAvlData.drainTo(records, _batchSize);
+      _log.info("drained " + records.size() + " link AVL records");
+      try {
+        _linkAvlDao.saveOrUpdate(records.toArray(new LinkAVLData[0]));
+      } catch (Exception e) {
+        _log.error("error persisting link AVL data=", e);
+      }
+    }
+  }
+
   private class BackgroundInitTask implements Runnable {
     @Override
     public void run() {
@@ -216,7 +252,6 @@ public class GtfsPersistorImpl implements GtfsPersistor, ApplicationListener {
     if (event instanceof ContextRefreshedEvent) {
       setInitialized(true);
     }
-
   }
 
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2015 Cambridge Systematics, Inc.
+ * Copyright (C) 2016 Cambridge Systematics, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,17 +16,9 @@
 package org.onebusaway.gtfs_realtime.archiver.service;
 
 import org.onebusaway.gtfs_realtime.archiver.model.LinkAVLData;
-import org.onebusaway.gtfs_realtime.model.AlertModel;
-import org.onebusaway.gtfs_realtime.model.TripUpdateModel;
-import org.onebusaway.gtfs_realtime.model.VehiclePositionModel;
 
-public interface GtfsPersistor {
+public interface LinkAvlDao {
 
-  void persist(TripUpdateModel tripUpdate);
+  void saveOrUpdate(LinkAVLData... array);
 
-  void persist(VehiclePositionModel vehiclePosition);
-
-  void persist(AlertModel alert);
-
-  void persist(LinkAVLData linkAvlData);
 }

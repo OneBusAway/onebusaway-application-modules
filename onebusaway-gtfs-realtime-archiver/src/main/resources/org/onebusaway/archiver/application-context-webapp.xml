@@ -74,6 +74,7 @@
     <property name="tripUpdateDao" ref="tripUpdateDaoImpl" />
     <property name="vehiclePositionDao" ref="vehiclePositionDaoImpl" />
     <property name="alertDao" ref="alertDaoImpl" />
+    <property name="linkAvlDao" ref="linkAvlDaoImpl" />
     <property name="batchSize" value="1000" />
   </bean>
 
@@ -86,6 +87,10 @@
   </bean>
   
   <bean id="alertDaoImpl" class="org.onebusaway.gtfs_realtime.archiver.service.AlertDaoImpl">
+    <property name="sessionFactory" ref="gtfsRealtimeArchiveSessionFactory" />
+  </bean>
+
+  <bean id="linkAvlDaoImpl" class="org.onebusaway.gtfs_realtime.archiver.service.LinkAvlDaoImpl">
     <property name="sessionFactory" ref="gtfsRealtimeArchiveSessionFactory" />
   </bean>
   
