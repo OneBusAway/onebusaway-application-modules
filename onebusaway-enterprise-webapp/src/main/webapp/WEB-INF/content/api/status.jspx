@@ -79,8 +79,8 @@ span.link { text-decoration: underline; text-decoration-style: dotted; }
        	      </s:elseif>
        	    
        	      <s:if test="%{description.length() > 0 and !description.equals(title)}">
-       	        <span class="link" data-toggle="collapse" data-target="#collapse${title.hashCode()}"><s:property value="title" /></span>
-       	        <div class="collapse" id="collapse${title.hashCode()}">
+       	        <span class="link" data-toggle="collapse" data-target="#collapse${id}"><s:property value="title" /></span>
+       	        <div class="collapse" id="collapse${id}">
   			      <div class="well">${description}</div>
   			    </div>
   			  </s:if>

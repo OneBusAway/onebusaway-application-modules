@@ -36,6 +36,9 @@ public class TripUpdateConvertor extends FeedEntityConvertor<TripUpdateModel> {
     if (entity.hasTripUpdate()) {
       TripUpdateModel tu = new TripUpdateModel();
       TripDescriptor t = entity.getTripUpdate().getTrip();
+      if (entity.getTripUpdate().hasTimestamp()) {
+        timestamp = entity.getTripUpdate().getTimestamp() * 1000;
+      }
       tu.setTimestamp(new Date(timestamp));
       if (entity.getTripUpdate().hasDelay()) {
         tu.setDelay(entity.getTripUpdate().getDelay());
