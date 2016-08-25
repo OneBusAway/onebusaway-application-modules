@@ -60,19 +60,26 @@ public class GtfsValidationTask implements Runnable {
   }
   @Override
   public void run() {
-    File basePath = _bundle.getPath();
-    _log.info("Starting GTFS valdiation to basePath=" + basePath);
-    logger.header(filename, InvalidValueHelper.getCsvHeader());
-    GtfsValidationService service = new GtfsValidationService(_dao);
-    ValidationResult vr = service.validateRoutes();
-    log(vr, filename);
-    vr = service.validateTrips();
-    log(vr, filename);
-    vr = service.duplicateStops();
-    log(vr, filename);
-    vr = service.listReversedTripShapes();
-    log(vr, filename);
-    _log.info("Exiting");
+    try {
+      File basePath = _bundle.getPath();
+      _log.info("Starting GTFS valdiation to basePath=" + basePath);
+      logger.header(filename, InvalidValueHelper.getCsvHeader());
+      GtfsValidationService service = new GtfsValidationService(_dao);
+      ValidationResult vr = service.validateRoutes();
+      log(vr, filename);
+      vr = service.validateTrips();
+      log(vr, filename);
+      vr = service.duplicateStops();
+      log(vr, filename);
+      vr = service.listReversedTripShapes();
+      log(vr, filename);
+      
+    } catch (Exception any) {
+      // don't let validation issues break the build
+      _log.error("validation issue:", any);
+    } finally {
+      _log.info("Exiting");
+    }
   }
 
 
