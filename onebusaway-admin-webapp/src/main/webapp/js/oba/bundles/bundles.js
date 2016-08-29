@@ -1027,29 +1027,18 @@ function onBundleCommentChanged() {
 	});
 }
 
+/*
+ * When a dataset is selected from the "Choose" tab, this function is called
+ * for displaying the results from the most recent build for the selected
+ * dataset.
+ */
 function getPreviousBuildResults(buildResponse) {
+	// Display the progress messages produced by the build 
 	$("#Build #buildBundle_testResultList").val(buildResponse.statusMessages.join("\n"));
-	// Create list of output files.
-	var txt = "<ul>";
-	var list = buildResponse.buildOutputFiles;
-	if (list != null) {
-		var size = list.length;
-		if (size > 0) {
-			for (var i=0; i<size; i++) {
-				var encoded = encodeURIComponent(list[i]);
-				txt = txt + "<li>"
-				+ "<img src=\"../../css/img/go-down-5.png\" />"
-				+ "<a href=\"manage-bundles!downloadOutputFile.action?id="
-				+ buildResponse.requestId + "&downloadFilename=" 
-				+ encoded + "\">" + list[i] +  "</a></li>";
-			}
-		}
-	}
-	txt = txt + "</ul>";
-	$("#buildBundle_testFileList").html(txt).css("display", "block");
+	// Create the formatted list of bundle build output files.
+	updateBuildList(buildResponse.requestId,"test");
 
-	// Hide the div for the result link
-	$("#buildBundle_testResultLink").hide();
+	$("#buildBundle_testResultLink").hide();// Hide the div for the result link
 	$("#testProgressBarDiv #testBuildProgress").text("Previous Build Messages");
 	$("#testProgressBarDiv").show();
 	$("#bundleTestResultsHolder").show();
@@ -1065,7 +1054,7 @@ function onAddAnotherAgencyClick(inputType) {
 	  metadata = '<select class="agencyIdSelect">';
 	  for (var i=0; i<agencyMetadata.length; ++i) {
 		  metadata += '<option value="' + agencyMetadata[i].legacyId + '">'
-		  + agencyMetadata[i].name + ' (' 
+		  + agencyMetadata[i].name + ' ('
 		  + agencyMetadata[i].shortName + ')</option>';
 	  }
 	  metadata += '</select>';

@@ -47,11 +47,13 @@ import com.google.transit.realtime.GtfsRealtimeConstants;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentMatcher;
 import org.mockito.Mockito;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class GtfsRealtimeTripLibraryTest {
 
@@ -232,6 +234,75 @@ public class GtfsRealtimeTripLibraryTest {
     assertEquals(departure, time(7, 33) * 1000); // 7:30 plus 3 min delay, + now we are in ms.
   }
 
+  // Ensure that if we get an update for a future day we propagate a prediction for that day.
+  // (This is equivalent to timestamp on feed being early incorrectly, since currentTime in
+  // GtfsRealtimeTripLibrary is set via the timestamp.)
+  @Test
+  public void testCreateVehicleLocationRecordForUpdate_FutureDay() {
+    
+    final long day = TimeUnit.DAYS.toMillis(1);
+    
+    StopTimeUpdate.Builder stopTimeUpdate = StopTimeUpdate.newBuilder();
+    stopTimeUpdate.setStopId("stopA");
+    StopTimeEvent.Builder stopTimeEvent = StopTimeEvent.newBuilder();
+    stopTimeEvent.setDelay(180);
+    stopTimeUpdate.setDeparture(stopTimeEvent);
+   
+    TripUpdate tripUpdate = TripUpdate.newBuilder()
+        .setTrip(TripDescriptor.newBuilder().setTripId("tripA"))
+        .setDelay(120)
+        .setTimestamp((_library.getCurrentTime() + day)/1000)
+        .addStopTimeUpdate(stopTimeUpdate)
+        .build();
+
+
+    TripEntryImpl tripA = trip("tripA");
+    stopTime(0, stop("stopA", 0, 0), tripA, time(7, 30), 0.0);
+    BlockEntryImpl blockA = block("blockA");
+    BlockConfigurationEntry blockConfigA = blockConfiguration(blockA,
+        serviceIds("s1"), tripA);
+    BlockInstance blockInstanceA = new BlockInstance(blockConfigA, 0L);
+    BlockInstance blockInstanceB = new BlockInstance(blockConfigA, day);
+    
+    Mockito.when(_entitySource.getTrip("tripA")).thenReturn(tripA);
+    
+    Mockito.when(
+        _blockCalendarService.getActiveBlocks(Mockito.eq(blockA.getId()),
+            Mockito.anyLong(), Mockito.longThat(new ArgumentMatcher<Long>() {
+              @Override
+              public boolean matches(Object argument) {
+                return ((Long) argument) < day;
+              }
+            }))).thenReturn(Arrays.asList(blockInstanceA));
+    
+    Mockito.when(
+        _blockCalendarService.getActiveBlocks(Mockito.eq(blockA.getId()),
+            Mockito.anyLong(), Mockito.longThat(new ArgumentMatcher<Long>() {
+              @Override
+              public boolean matches(Object argument) {
+                return ((Long) argument) >= day;
+              }
+            }))).thenReturn(Arrays.asList(blockInstanceB));
+    
+    
+    FeedMessage.Builder TU = createFeed();
+    TU.addEntity(createTripUpdate(tripUpdate));
+    
+    FeedMessage.Builder VP = createFeed();
+    
+    List<CombinedTripUpdatesAndVehiclePosition> updates = 
+        _library.groupTripUpdatesAndVehiclePositions(TU.build(), VP.build());
+
+    CombinedTripUpdatesAndVehiclePosition update = updates.get(0);
+        
+    VehicleLocationRecord record = _library.createVehicleLocationRecordForUpdate(update);
+    
+    TimepointPredictionRecord tpr = record.getTimepointPredictions().get(0);
+    long departure = tpr.getTimepointPredictedDepartureTime();
+    assertEquals(departure, time(7, 33) * 1000 + day); // 7:30 + 3 min delay + on next day
+  }
+
+  
   private FeedMessage.Builder createFeed() {
     FeedMessage.Builder builder = FeedMessage.newBuilder();
     FeedHeader.Builder header = FeedHeader.newBuilder();
@@ -264,6 +335,13 @@ public class GtfsRealtimeTripLibraryTest {
 
     FeedEntity.Builder tripUpdateEntity = FeedEntity.newBuilder();
     tripUpdateEntity.setId(tripId);
+    tripUpdateEntity.setTripUpdate(tripUpdate);
+    return tripUpdateEntity.build();
+  }
+  
+  private FeedEntity createTripUpdate(TripUpdate tripUpdate) {
+    FeedEntity.Builder tripUpdateEntity = FeedEntity.newBuilder();
+    tripUpdateEntity.setId(tripUpdate.getTrip().getTripId());
     tripUpdateEntity.setTripUpdate(tripUpdate);
     return tripUpdateEntity.build();
   }

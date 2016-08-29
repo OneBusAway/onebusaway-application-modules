@@ -182,7 +182,8 @@ class GtfsRealtimeTripLibrary {
          * (includes start date and time).
          */
         TripDescriptor td = tu.getTrip();
-        BlockDescriptor bd = getTripDescriptorAsBlockDescriptor(result, td);
+        long time = tu.hasTimestamp() ? tu.getTimestamp() * 1000 : currentTime();
+        BlockDescriptor bd = getTripDescriptorAsBlockDescriptor(result, td, time);
 
         if (bd == null) {
           continue;
@@ -233,7 +234,8 @@ class GtfsRealtimeTripLibrary {
          */
 
         TripDescriptor td = vp.getTrip();
-        BlockDescriptor bd = getTripDescriptorAsBlockDescriptor(result, td);
+        long time = vp.hasTimestamp() ? vp.getTimestamp() * 1000 : currentTime();
+        BlockDescriptor bd = getTripDescriptorAsBlockDescriptor(result, td, time);
 
         if (bd == null) {
           continue;
@@ -273,7 +275,8 @@ class GtfsRealtimeTripLibrary {
 
       String vehicleId = e.getKey();
       TripUpdate tu = e.getValue();
-      update.block = getTripDescriptorAsBlockDescriptor(result, tu.getTrip());
+      long time = tu.hasTimestamp() ? tu.getTimestamp() * 1000 : currentTime();
+      update.block = getTripDescriptorAsBlockDescriptor(result, tu.getTrip(), time);
       update.tripUpdates = Collections.singletonList(tu);
 
       if (vehiclePositionsByVehicleId.containsKey(vehicleId)) {
@@ -436,7 +439,7 @@ class GtfsRealtimeTripLibrary {
   }
 
   private BlockDescriptor getTripDescriptorAsBlockDescriptor(MonitoredResult result,
-      TripDescriptor trip) {
+      TripDescriptor trip, long currentTime) {
     if (!trip.hasTripId()) {
       return null;
     }
@@ -473,16 +476,15 @@ class GtfsRealtimeTripLibrary {
     		return null;
     	}
     } else {
-    	long t = currentTime();
-    	long timeFrom = t - 30 * 60 * 1000;
-    	long timeTo = t + 30 * 60 * 1000;
+    	long timeFrom = currentTime - 30 * 60 * 1000;
+    	long timeTo = currentTime + 30 * 60 * 1000;
     	
     	List<BlockInstance> instances = _blockCalendarService.getActiveBlocks(
     			block.getId(), timeFrom, timeTo);
     	
     	if (instances.isEmpty()) {
     		instances = _blockCalendarService.getClosestActiveBlocks(block.getId(), 
-    				t);
+    				currentTime);
     	}
     	
     	if (instances.isEmpty()) {
