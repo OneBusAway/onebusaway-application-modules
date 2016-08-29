@@ -172,6 +172,7 @@ public class LinkAvlRealtimeArchiverTask extends RealtimeArchiverTask {
     }
 
     avlData.setAvlSource(_avlFeedId);
+    if (avlData.getTrips() == null) return avlData;
     for (TripInfo tripInfo : avlData.getTrips()) {
       tripInfo.setLinkAVLData(avlData);
       for (StopUpdate stopUpdate : tripInfo.getStopUpdates()) {
