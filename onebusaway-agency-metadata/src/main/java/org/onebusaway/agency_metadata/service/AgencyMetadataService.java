@@ -29,6 +29,8 @@ public interface AgencyMetadataService {
       String gtfs_feed_url, String gtfs_rt_feed_url, String bounding_box, String ntd_id,
       String agency_message);
   
+  void updateAgencyMetadata(AgencyMetadata model);
+
   void delete(long id);
   
   List<AgencyMetadata> getAllAgencyMetadata();

@@ -15,7 +15,8 @@
  */
  
  
-#ServiceAlerts p {
+#ServiceAlerts p,
+#AgencyMetadata p {
 	padding-top: 2em;
 	padding-bottom: 1em;
     font-family: "Arial Bold","Arial";
@@ -37,12 +38,14 @@
 	padding-left: 1em;
 }
 
-#ServiceAlerts .link {
+#ServiceAlerts .link,
+#AgencyMetadata .link {
   /* color: #463E3F; */
   color: #06F;
 }
 
-#ServiceAlerts #createAlertLink, #existingAlertsHeader, #describeAlertHeader {
+#ServiceAlerts #createAlertLink, #existingAlertsHeader, #describeAlertHeader,
+#AgencyMetadata #createMetadataLink, #existingMetadataHeader {
     font-family: "Arial Bold","Arial";
     font-weight: 700;
     font-style: normal;
@@ -54,16 +57,19 @@
 	text-decoration: none;
 }
 
-#ServiceAlerts #existingAlertsTableDiv {
+#ServiceAlerts #existingAlertsTableDiv,
+#AgencyMetadata #existingMetadataTableDiv {
 	margin-top: 2em;
 }
 
-#ServiceAlerts #alertsTableDiv {
+#ServiceAlerts #alertsTableDiv,
+#AgencyMetadata #metadataTableDiv {
 	margin-right: 2em;
 	margin-left: 2em;
 }
 
 #ServiceAlerts #alertsTableDiv th,
+#AgencyMetadata #metadataTableDiv th,
 #ServiceAlerts .conditionClauseLabelLetter,
 #ServiceAlerts .conditionClauseLabelFirstLine {
     font-family: "Arial Bold","Arial";
@@ -83,11 +89,13 @@
 }
 
 #ServiceAlerts #describeAlertDiv,
-#ServiceAlerts #alertAffectsDiv {
+#ServiceAlerts #alertAffectsDiv,
+#AgencyMetadata #describeMetadataDiv {
 	padding-bottom: 3em;
 }
 
-#ServiceAlerts #service-alert .tdLabel {
+#ServiceAlerts #service-alert .tdLabel,
+#AgencyMetadata #agency-metadata-edit .tdLabel {
     font-family: "Arial Bold","Arial";
     font-weight: 700;
     font-style: normal;
@@ -163,11 +171,13 @@
 	cursor: pointer;
  }
  
- #ServiceAlerts #buttonsDiv {
+ #ServiceAlerts #buttonsDiv,
+ #AgencyMetadata #buttonsDiv {
  	margin-left: 11em;
  }
  
- #ServiceAlerts input[type=submit] {
+ #ServiceAlerts input[type=submit],
+ #AgencyMetadata input[type=submit] {
  	color: black;
  	width: 8em;
  	height: 2.5em;
