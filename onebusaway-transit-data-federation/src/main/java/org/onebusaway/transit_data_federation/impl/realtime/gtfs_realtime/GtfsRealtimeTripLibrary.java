@@ -520,6 +520,8 @@ class GtfsRealtimeTripLibrary {
       AgencyAndId tripId = trip.getId();
       List<TripUpdate> updatesForTrip = tripUpdatesByTripId.get(tripId.getId());
       
+      boolean tripUpdateHasDelay = false;
+      
       if (updatesForTrip != null) {
         for (TripUpdate tripUpdate : updatesForTrip) {
           /**
@@ -537,6 +539,7 @@ class GtfsRealtimeTripLibrary {
               best.isInPast = false;
               best.scheduleDeviation = delay;
               best.tripId = tripId;
+              tripUpdateHasDelay = true;
             }
 
             if (obaTripUpdate.hasTimestamp()) {
@@ -552,6 +555,7 @@ class GtfsRealtimeTripLibrary {
             best.isInPast = false;
             best.scheduleDeviation = tripUpdate.getDelay();
             best.tripId = tripId;
+            tripUpdateHasDelay = true;
           }
           if (tripUpdate.hasTimestamp()) {
             best.timestamp = tripUpdate.getTimestamp() * 1000;
@@ -598,6 +602,36 @@ class GtfsRealtimeTripLibrary {
                 tpr.getTimepointPredictedDepartureTime() != -1) {
               timepointPredictions.add(tpr);
             }
+          }
+        }
+      }
+      
+      // If we have a TripUpdate delay and timepoint predictions, interpolate
+      // timepoint predictions for close, unserved stops. See GtfsRealtimeTripLibraryTest
+      // for full explanation
+      // tripUpdateHasDelay = true => best.scheduleDeviation is TripUpdate delay
+      if (timepointPredictions.size() > 0 && tripUpdateHasDelay) {
+        Set<AgencyAndId> records = new HashSet<AgencyAndId>();
+        for (TimepointPredictionRecord tpr : timepointPredictions) {
+          records.add(tpr.getTimepointId());
+        }
+        long tprStartTime = getEarliestTimeInRecords(timepointPredictions);
+        for (StopTimeEntry stopTime : trip.getStopTimes()) {
+          if (records.contains(stopTime.getStop().getId())) {
+            continue;
+          }
+          long predictionOffset = instance.getServiceDate() + (best.scheduleDeviation * 1000L);
+          long predictedDepartureTime = (stopTime.getDepartureTime() * 1000L) + predictionOffset;
+          long predictedArrivalTime = (stopTime.getArrivalTime() * 1000L) + predictionOffset;
+          long time = best.timestamp != 0 ? best.timestamp : currentTime();
+          if (predictedDepartureTime > time && predictedDepartureTime < tprStartTime) {
+            TimepointPredictionRecord tpr = new TimepointPredictionRecord();
+            tpr.setTimepointId(stopTime.getStop().getId());
+            tpr.setTripId(stopTime.getTrip().getId());
+            tpr.setStopSequence(stopTime.getGtfsSequence());
+            tpr.setTimepointPredictedArrivalTime(predictedArrivalTime);
+            tpr.setTimepointPredictedDepartureTime(predictedDepartureTime);
+            timepointPredictions.add(tpr);
           }
         }
       }
@@ -770,6 +804,19 @@ class GtfsRealtimeTripLibrary {
     if (result != null) {
       result.addLatLon(position.getLatitude(), position.getLongitude());
     }
+  }
+  
+  private static long getEarliestTimeInRecords(Collection<TimepointPredictionRecord> records) {
+    long min = Long.MAX_VALUE;
+    for (TimepointPredictionRecord tpr : records) {
+      if (tpr.getTimepointPredictedArrivalTime() != -1) {
+        min = Math.min(min, tpr.getTimepointPredictedArrivalTime());
+      }
+      else if (tpr.getTimepointPredictedDepartureTime() != -1) {
+        min = Math.min(min, tpr.getTimepointPredictedDepartureTime());
+      }
+    }
+    return min;
   }
 
   private long currentTime() {
