@@ -45,7 +45,13 @@
 								namespace="/admin/usermanagement" /> <s:a href="%{url}">Manage Users</s:a>
 						</li>
 					</s:if>
-					
+
+					<s:if test="isPageAvailable('showAgencyMetadata', 'org.onebusaway.webapp.actions.admin.agencymetadata.AgencyMetadataAction')">
+						<li><s:url var="url" action="agency-metadata" namespace="/admin/agencymetadata"/>
+							<s:a href="%{url}">Manage Agency Metadata</s:a>
+						</li>
+					</s:if>
+
 					<s:if test="isPageAvailable('showApiKey', 'org.onebusaway.webapp.actions.admin.ApiKeyAction')">
 						<li><s:url var="url" action="api-key" /> <s:a href="%{url}">Manage API Keys</s:a>
 						</li>
