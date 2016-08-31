@@ -101,7 +101,12 @@ public class AgencyMetadataServiceImpl implements AgencyMetadataService {
     
     _agencyMetadataDao.saveOrUpdate(model);
   }
-  
+
+  @Override
+  public void updateAgencyMetadata(AgencyMetadata model) {
+    _agencyMetadataDao.saveOrUpdate(model);
+  }
+
   @Override
   public void delete(long id) {
     _agencyMetadataDao.delete(id);
