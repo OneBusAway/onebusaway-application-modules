@@ -331,7 +331,8 @@ public class PresentationServiceImpl implements PresentationService {
 		return false;
 	
 	if(status.isPredicted()) {
-		if(adBean.getPredictedArrivalTime() > 0 && adBean.getPredictedArrivalTime() < getTime())
+		if(adBean.getPredictedArrivalTime() > 0 && adBean.getPredictedArrivalTime() < getTime()
+		    && adBean.getDistanceFromStop() != 0.0)
 			return false;
 	    // hide buses that are on detour from a-d queries
 	    if(isOnDetour(status))
