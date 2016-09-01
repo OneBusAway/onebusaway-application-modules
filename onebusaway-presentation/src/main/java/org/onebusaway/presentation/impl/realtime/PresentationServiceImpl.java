@@ -15,10 +15,6 @@
  */
 package org.onebusaway.presentation.impl.realtime;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-
 import javax.annotation.PostConstruct;
 
 import org.onebusaway.container.ConfigurationParameter;
@@ -60,11 +56,6 @@ public class PresentationServiceImpl implements PresentationService {
   private int _expiredTimeout = 300;
   private float _previousTripFilterDistanceMiles = 5.0f;
   private boolean _includeRequiresPhase = false;
-  int atStopThresholdInFeet = 100;
-  int approachingThresholdInFeet = 500;
-  int distanceAsStopsThresholdInFeet = 2640;
-  int distanceAsStopsThresholdInStops = 3;
-  int distanceAsStopsMaximumThresholdInFeet = 2640;
   boolean firstLoad;
 
   @ConfigurationParameter
@@ -239,17 +230,17 @@ public class PresentationServiceImpl implements PresentationService {
     
     // meters->feet
     double feetAway = distanceFromStop * 3.2808399;
-
-    if(feetAway < atStopThresholdInFeet) {
+    
+    if(feetAway < _atStopThresholdInFeet) {
       r = "at " + oneStopWord;
 
-    } else if(feetAway < approachingThresholdInFeet) {
+    } else if(feetAway < _approachingThresholdInFeet) {
       r = approachingText;
 
     } else {
-      if(feetAway <= distanceAsStopsMaximumThresholdInFeet && 
-          (numberOfStopsAway <= distanceAsStopsThresholdInStops 
-          || feetAway <= distanceAsStopsThresholdInFeet)) {
+      if(feetAway <= _distanceAsStopsMaximumThresholdInFeet && 
+          (numberOfStopsAway <= _distanceAsStopsThresholdInStops 
+          || feetAway <= _distanceAsStopsThresholdInFeet)) {
         
         if(numberOfStopsAway == 0)
           r = "< 1 " + oneStopWord + " " + awayWord;
@@ -340,14 +331,14 @@ public class PresentationServiceImpl implements PresentationService {
 		return false;
 	
 	if(status.isPredicted()) {
-		if(adBean.getPredictedArrivalTime() > 0 && adBean.getPredictedArrivalTime() < System.currentTimeMillis())
+		if(adBean.getPredictedArrivalTime() > 0 && adBean.getPredictedArrivalTime() < getTime())
 			return false;
 	    // hide buses that are on detour from a-d queries
 	    if(isOnDetour(status))
 	      return false;
 	}
 	else{
-		if(adBean.getScheduledArrivalTime() > 0 && adBean.getScheduledArrivalTime() < System.currentTimeMillis())
+		if(adBean.getScheduledArrivalTime() > 0 && adBean.getScheduledArrivalTime() < getTime())
 			return false;
 	}
 
