@@ -31,6 +31,7 @@ import java.util.Set;
 
 import org.onebusaway.collections.MappingLibrary;
 import org.onebusaway.collections.Min;
+import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
 import org.onebusaway.gtfs.serialization.mappings.InvalidStopTimeException;
@@ -39,7 +40,9 @@ import org.onebusaway.realtime.api.EVehiclePhase;
 import org.onebusaway.realtime.api.TimepointPredictionRecord;
 import org.onebusaway.realtime.api.VehicleLocationRecord;
 import org.onebusaway.transit_data_federation.services.blocks.BlockCalendarService;
+import org.onebusaway.transit_data_federation.services.blocks.BlockGeospatialService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
+import org.onebusaway.transit_data_federation.services.blocks.ScheduledBlockLocation;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
@@ -69,7 +72,9 @@ class GtfsRealtimeTripLibrary {
   private GtfsRealtimeEntitySource _entitySource;
 
   private BlockCalendarService _blockCalendarService;
-
+   
+  private BlockGeospatialService _blockGeospatialService;
+  
   /**
    * This is primarily here to assist with unit testing.
    */
@@ -77,6 +82,8 @@ class GtfsRealtimeTripLibrary {
 
   private StopModificationStrategy _stopModificationStrategy = null;
 
+  private boolean _scheduleAdherenceFromLocation = false;
+  
   public void setEntitySource(GtfsRealtimeEntitySource entitySource) {
     _entitySource = entitySource;
   }
@@ -96,6 +103,15 @@ class GtfsRealtimeTripLibrary {
   public void setStopModificationStrategy(StopModificationStrategy strategy) {
     _stopModificationStrategy = strategy;
   }
+  
+  public void setScheduleAdherenceFromLocation(boolean scheduleAdherenceFromLocation) {
+    _scheduleAdherenceFromLocation = scheduleAdherenceFromLocation;
+  }
+  
+  public void setBlockGeospatialService(BlockGeospatialService blockGeospatialService) {
+    _blockGeospatialService = blockGeospatialService;
+  }
+ 
 
   /**
    * Trip updates describe a trip which is undertaken by a vehicle (which is
@@ -372,7 +388,7 @@ class GtfsRealtimeTripLibrary {
     applyTripUpdatesToRecord(result, blockDescriptor, update.tripUpdates, record, vehicleId);
 
     if (update.vehiclePosition != null) {
-      applyVehiclePositionToRecord(result, update.vehiclePosition, record);
+      applyVehiclePositionToRecord(result, blockDescriptor, update.vehiclePosition, record);
     }
 
     /**
@@ -798,6 +814,7 @@ class GtfsRealtimeTripLibrary {
   }
 
   private void applyVehiclePositionToRecord(MonitoredResult result,
+      BlockDescriptor blockDescriptor,
       VehiclePosition vehiclePosition,
       VehicleLocationRecord record) {
     Position position = vehiclePosition.getPosition();
@@ -808,6 +825,18 @@ class GtfsRealtimeTripLibrary {
     record.setCurrentLocationLon(position.getLongitude());
     if (result != null) {
       result.addLatLon(position.getLatitude(), position.getLongitude());
+    }
+    if (_scheduleAdherenceFromLocation) {
+      CoordinatePoint location = new CoordinatePoint(position.getLatitude(), position.getLongitude());
+      double totalDistance = blockDescriptor.getBlockInstance().getBlock().getTotalBlockDistance();
+      long timestamp = vehiclePosition.hasTimestamp() ? record.getTimeOfLocationUpdate() : record.getTimeOfRecord();
+      ScheduledBlockLocation loc = _blockGeospatialService.getBestScheduledBlockLocationForLocation(
+          blockDescriptor.getBlockInstance(), location, timestamp, 0, totalDistance);
+      
+      long serviceDateTime = record.getServiceDate();
+      long effectiveScheduleTime = loc.getScheduledTime() + (serviceDateTime/1000);
+      double deviation =  timestamp/1000 - effectiveScheduleTime;
+      record.setScheduleDeviation(deviation);
     }
   }
   
