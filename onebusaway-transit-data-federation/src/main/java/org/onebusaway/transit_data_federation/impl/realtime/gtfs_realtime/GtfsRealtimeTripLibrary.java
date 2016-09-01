@@ -334,6 +334,11 @@ class GtfsRealtimeTripLibrary {
         if (delta < closest) {
           closest = delta;
         }
+      } else if (stu.hasDeparture()) {
+        long delta = Math.abs(stu.getDeparture().getTime() * 1000 - getCurrentTime());
+        if (delta < closest) {
+          closest = delta;
+        }
       }
     }
     return closest;
