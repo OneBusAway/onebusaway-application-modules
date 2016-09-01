@@ -86,15 +86,15 @@
 								<td>
 									<fieldset>
 										<s:url var="url" action="agency-metadata-edit.action" namespace="/admin/agencymetadata" >
-											<s:param name="agencyId" value="id" />
+											<s:param name="agencyMetadataId" value="id" />
 										</s:url>
 										<a href="${url}" id="editMetadataLink" class="link">Edit</a>
 									</fieldset>
 								</td>
 								<td>
 									<fieldset>
-										<s:url var="url" action="agency-metadata-edit!deleteAlert.action" namespace="/admin/agencymetadata" >
-											<s:param name="agencyId" value="id" />
+										<s:url var="url" action="agency-metadata-edit!deleteAgencyMetadata.action" namespace="/admin/agencymetadata" >
+											<s:param name="agencyMetadataId" value="id" />
 										</s:url>
 										<a href="${url}" id="deleteMetadataLink" class="link">Delete</a>
 									</fieldset>

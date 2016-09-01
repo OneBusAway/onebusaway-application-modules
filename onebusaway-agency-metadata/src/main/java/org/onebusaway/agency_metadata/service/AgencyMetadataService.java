@@ -24,6 +24,8 @@ public interface AgencyMetadataService {
   void createAgencyMetadata(String gtfs_id, String name, String short_name, String legacy_id, 
       String gtfs_feed_url, String gtfs_rt_feed_url, String bounding_box, String ntd_id,
       String agency_message);
+
+  void createAgencyMetadata(AgencyMetadata model);
   
   void updateAgencyMetadata(long id, String gtfs_id, String name, String short_name, String legacy_id, 
       String gtfs_feed_url, String gtfs_rt_feed_url, String bounding_box, String ntd_id,
@@ -32,7 +34,9 @@ public interface AgencyMetadataService {
   void updateAgencyMetadata(AgencyMetadata model);
 
   void delete(long id);
-  
+
+  void removeAgencyMetadata(String agencyMetadataId);
+
   List<AgencyMetadata> getAllAgencyMetadata();
 
   List<AgencyMetadata> getAgencyMetadataForId(String id);

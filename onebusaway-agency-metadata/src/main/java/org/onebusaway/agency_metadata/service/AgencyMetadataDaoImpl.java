@@ -66,6 +66,12 @@ public class AgencyMetadataDaoImpl implements AgencyMetadataDao {
   }
   
   @Override
+  public void removeAgencyMetadata(String agencyMetadataId) {
+    List<AgencyMetadata> models = _template.findByNamedParam("from AgencyMetadata where id=:id", "id", Long.valueOf(agencyMetadataId));
+    _template.delete(models.get(0));
+  }
+
+  @Override
   public List<AgencyMetadata> getAllAgencyMetadata() {
     return _template.find("from AgencyMetadata");
   }
