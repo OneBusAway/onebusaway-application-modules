@@ -61,6 +61,8 @@ public class GtfsRtProxyAction extends OneBusAwayNYCAdminActionSupport {
   
   private List<VehiclePositionModel> vehiclePositions;
   
+  private String source;
+  
   public String execute() {
     FeedMessage tu = getFeedMessage(getTripUpdatesPath());
     if (tu != null) {
@@ -83,6 +85,10 @@ public class GtfsRtProxyAction extends OneBusAwayNYCAdminActionSupport {
     return vehiclePositions;
   }
   
+  public void setSource(String source) {
+    this.source = source;
+  }
+  
   private FeedMessage getFeedMessage(String url) {
     try {
       CloseableHttpClient httpclient = HttpClients.createDefault();
@@ -100,11 +106,11 @@ public class GtfsRtProxyAction extends OneBusAwayNYCAdminActionSupport {
   }
   
   private String getTripUpdatesPath() {
-    return _configurationService.getConfigurationValueAsString("admin.gtfsrt.trip_updates.url", "http://admin.staging.obast.org:9999/sc/trip-updates");
+    return _configurationService.getConfigurationValueAsString("admin.gtfsrt." + source + ".trip_updates.url", "http://admin.staging.obast.org:9999/sc/trip-updates");
   }
   
   private String getVehiclePositionsPath() {
-    return _configurationService.getConfigurationValueAsString("admin.gtfsrt.vehicle_positions.url", "http://admin.staging.obast.org:9999/sc/vehicle-positions");
+    return _configurationService.getConfigurationValueAsString("admin.gtfsrt." + source + ".vehicle_positions.url", "http://admin.staging.obast.org:9999/sc/vehicle-positions");
   }
  
 }

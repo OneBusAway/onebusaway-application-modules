@@ -30,9 +30,9 @@ if (!OBA.config) {
 <s:set var="obaUrl" value="%{getConfig('obaUrl')}"/>
 <s:set var="transitimeUrl" value="%{getConfig('transitimeUrl')}"/>
 <s:set var="linkUrl" value="%{getConfig('linkUrl')}"/>
-<s:set var="gtfsRtWeb" value="%{getConfig('gtfsRtWeb')}"/>
-<s:set var="gtfsRtContext" value="%{getConfig('gtfsRtContext')}"/>
 <s:set var="obaApiPrefix" value="%{getConfig('obaApiPrefix')}"/>
+<s:set var="gtfsRtSources" value="%{getConfig('gtfsRtSources')}" />
+<s:url var="gtfsRtUrl" action="gtfs-rt-proxy.action" />
 <s:set var="defaultModules" value="%{getConfig('defaultModules')}"/>
 <s:set var="defaultVehicleAgencyId" value="%{getConfig('defaultVehicleAgencyId')}"/>
 <s:set var="defaultTripAgencyId" value="%{getConfig('defaultTripAgencyId')}"/>
@@ -41,8 +41,8 @@ if (!OBA.config) {
 OBA.config.obaUrl = "${obaUrl}";
 OBA.config.transitimeUrl = "${transitimeUrl}";
 OBA.config.linkUrl = "${linkUrl}";
-OBA.config.gtfsRtWeb = "${gtfsRtWeb}";
-OBA.config.gtfsRtContext = "${gtfsRtContext}";
+OBA.config.gtfsRtSources = "${gtfsRtSources}";
+OBA.config.gtfsRtUrl = "${gtfsRtUrl}";
 OBA.config.obaApiPrefix = "${obaApiPrefix}";
 OBA.config.defaultModules = "${defaultModules}";
 OBA.config.defaultVehicleAgencyId = "${defaultVehicleAgencyId}"

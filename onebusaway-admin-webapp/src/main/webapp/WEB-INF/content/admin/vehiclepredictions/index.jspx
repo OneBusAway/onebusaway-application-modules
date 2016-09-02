@@ -116,7 +116,6 @@
 	  		<option value="transitime">Transitime</option>
 	  		<option value="oba">OBA</option>
 	  		<option value="link">Link</option>
-	  		<option value="gtfsRt">GTFS-RT</option>
 	  	</select>
 	  	<div id="avlMap" style="width:300px; height:300px">
 	  	<h3>No Data</h3>
@@ -208,7 +207,6 @@
 	  		<option value="transitime">Transitime</option>
 	  		<option value="oba">OBA</option>
 	  		<option value="link">Link</option>
-	  		<option value="gtfsRt">GTFS-RT</option>
 	  	</select>
 	  	<div id="obaMap" style="width:300px; height:300px">
 	  	<h3>No Data</h3>
