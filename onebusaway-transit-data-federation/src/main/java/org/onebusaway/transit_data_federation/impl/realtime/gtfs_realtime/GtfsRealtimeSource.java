@@ -262,7 +262,8 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   
   public void setFeedId(String id) {
     _feedId = id;
-
+  }
+  
   public void setScheduleAdherenceFromLocation(boolean scheduleAdherenceFromLocation) {
     _scheduleAdherenceFromLocation = scheduleAdherenceFromLocation;
   }

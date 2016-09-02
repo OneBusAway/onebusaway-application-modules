@@ -65,7 +65,7 @@ public class BlockRunServiceImpl implements BlockRunService {
   public List<Integer> getBlockIds(Integer routeKey, Integer runId) {
     List<BlockRunIndex> index = _map.get(hash(routeKey, runId));
     if (index == null) {
-      _log.error("miss for hash=" + hash(routeKey, runId));
+      _log.debug("miss for hash=" + hash(routeKey, runId));
       return null;
     }
     List<Integer> blockIds = new ArrayList<Integer>();
