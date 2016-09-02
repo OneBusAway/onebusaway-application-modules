@@ -48,11 +48,10 @@ public class AgencyMetadataEditAction  extends ActionSupport implements
 
   @Autowired
   private AgencyMetadataService _agencyMetadataService;
-
   private AgencyMetadata _model;
-  
-  private String _agencyId;
-  
+  private String _agencyMetadataId;
+  private boolean _newAgencyMetadata = false;
+
   @Override
   public AgencyMetadata getModel() {
     if (_model == null) {
@@ -65,28 +64,36 @@ public class AgencyMetadataEditAction  extends ActionSupport implements
     this._model = model;
   }
 
-  public String getAgencyId() {
-    return _agencyId;
+  public String getAgencyMetadataId() {
+    return _agencyMetadataId;
   }
 
-  public void setAgencyId(String agencyId) {
-    _agencyId = agencyId;
+  public void setAgencyMetadataId(String agencyMetadataId) {
+    _agencyMetadataId = agencyMetadataId;
+  }
+
+  public boolean isNewAgencyMetadata() {
+    return _newAgencyMetadata;
+  }
+
+  public void setNewAgencyMetadata(boolean newAgencyMetadata) {
+    _newAgencyMetadata = newAgencyMetadata;
   }
 
   @Override
   public String execute() {
     try {
-      if (_agencyId != null && !_agencyId.trim().isEmpty())
-        _model = _agencyMetadataService.getAgencyMetadataForId(String.valueOf(_agencyId)).get(0);
+      if (_agencyMetadataId != null && !_agencyMetadataId.trim().isEmpty())
+        _model = _agencyMetadataService.getAgencyMetadataForId(String.valueOf(_agencyMetadataId)).get(0);
     } catch (RuntimeException e) {
       _log.error("Unable to retrieve Service Alert", e);
       throw e;
     }
     /*
-    if (_agencyId == null && _alertId != null) {
+    if (_agencyMetadataId == null && _alertId != null) {
       int index = _alertId.indexOf('_');
       if (index != -1)
-        _agencyId = _alertId.substring(0, index);
+        _agencyMetadataId = _alertId.substring(0, index);
     }
     */
 
@@ -110,7 +117,7 @@ public class AgencyMetadataEditAction  extends ActionSupport implements
 
     try {
       if (_model.getId() == 0L ) {
-        //_model = _agencyMetadataService.createAgencyMetadata(_agencyId, _model);
+        _agencyMetadataService.createAgencyMetadata(_model);
       }
       else {
         //ServiceAlertBean existing = _transitDataService.getServiceAlertForId(_model.getId());
@@ -135,5 +142,15 @@ public class AgencyMetadataEditAction  extends ActionSupport implements
     return "cancelResult"; 
   }
 
+  public String deleteAgencyMetadata() {
+    String id = _agencyMetadataId;
+    try {
+      _agencyMetadataService.removeAgencyMetadata(_agencyMetadataId);
+    } catch (RuntimeException e) {
+      _log.error("Error deleting agency metadata", e);
+      throw e;
+    }
+    return "deleteResult";
+  }
 
 }

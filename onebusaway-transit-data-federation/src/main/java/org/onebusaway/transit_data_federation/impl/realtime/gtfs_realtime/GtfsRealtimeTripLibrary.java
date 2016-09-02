@@ -33,6 +33,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.onebusaway.collections.MappingLibrary;
 import org.onebusaway.collections.Min;
+import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
 import org.onebusaway.gtfs.serialization.mappings.InvalidStopTimeException;
@@ -41,7 +42,9 @@ import org.onebusaway.realtime.api.EVehiclePhase;
 import org.onebusaway.realtime.api.TimepointPredictionRecord;
 import org.onebusaway.realtime.api.VehicleLocationRecord;
 import org.onebusaway.transit_data_federation.services.blocks.BlockCalendarService;
+import org.onebusaway.transit_data_federation.services.blocks.BlockGeospatialService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
+import org.onebusaway.transit_data_federation.services.blocks.ScheduledBlockLocation;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
@@ -71,7 +74,9 @@ class GtfsRealtimeTripLibrary {
   private GtfsRealtimeEntitySource _entitySource;
 
   private BlockCalendarService _blockCalendarService;
-
+   
+  private BlockGeospatialService _blockGeospatialService;
+  
   /**
    * This is primarily here to assist with unit testing.
    */
@@ -87,6 +92,8 @@ class GtfsRealtimeTripLibrary {
 
   private StopModificationStrategy _stopModificationStrategy = null;
 
+  private boolean _scheduleAdherenceFromLocation = false;
+  
   public void setEntitySource(GtfsRealtimeEntitySource entitySource) {
     _entitySource = entitySource;
   }
@@ -119,6 +126,15 @@ class GtfsRealtimeTripLibrary {
   public void setStopModificationStrategy(StopModificationStrategy strategy) {
     _stopModificationStrategy = strategy;
   }
+  
+  public void setScheduleAdherenceFromLocation(boolean scheduleAdherenceFromLocation) {
+    _scheduleAdherenceFromLocation = scheduleAdherenceFromLocation;
+  }
+  
+  public void setBlockGeospatialService(BlockGeospatialService blockGeospatialService) {
+    _blockGeospatialService = blockGeospatialService;
+  }
+ 
 
   /**
    * Trip updates describe a trip which is undertaken by a vehicle (which is
@@ -357,6 +373,11 @@ class GtfsRealtimeTripLibrary {
         if (delta < closest) {
           closest = delta;
         }
+      } else if (stu.hasDeparture()) {
+        long delta = Math.abs(stu.getDeparture().getTime() * 1000 - getCurrentTime());
+        if (delta < closest) {
+          closest = delta;
+        }
       }
     }
     return closest;
@@ -390,7 +411,7 @@ class GtfsRealtimeTripLibrary {
     applyTripUpdatesToRecord(result, blockDescriptor, update.tripUpdates, record, vehicleId);
 
     if (update.vehiclePosition != null) {
-      applyVehiclePositionToRecord(result, update.vehiclePosition, record);
+      applyVehiclePositionToRecord(result, blockDescriptor, update.vehiclePosition, record);
     }
 
     /**
@@ -543,6 +564,8 @@ class GtfsRealtimeTripLibrary {
       AgencyAndId tripId = trip.getId();
       List<TripUpdate> updatesForTrip = tripUpdatesByTripId.get(tripId.getId());
       
+      boolean tripUpdateHasDelay = false;
+      
       if (updatesForTrip != null) {
         for (TripUpdate tripUpdate : updatesForTrip) {
           /**
@@ -560,6 +583,7 @@ class GtfsRealtimeTripLibrary {
               best.isInPast = false;
               best.scheduleDeviation = delay;
               best.tripId = tripId;
+              tripUpdateHasDelay = true;
             }
 
             if (obaTripUpdate.hasTimestamp()) {
@@ -575,6 +599,7 @@ class GtfsRealtimeTripLibrary {
             best.isInPast = false;
             best.scheduleDeviation = tripUpdate.getDelay();
             best.tripId = tripId;
+            tripUpdateHasDelay = true;
           }
           if (tripUpdate.hasTimestamp()) {
             best.timestamp = tripUpdate.getTimestamp() * 1000;
@@ -621,6 +646,36 @@ class GtfsRealtimeTripLibrary {
                 tpr.getTimepointPredictedDepartureTime() != -1) {
               timepointPredictions.add(tpr);
             }
+          }
+        }
+      }
+      
+      // If we have a TripUpdate delay and timepoint predictions, interpolate
+      // timepoint predictions for close, unserved stops. See GtfsRealtimeTripLibraryTest
+      // for full explanation
+      // tripUpdateHasDelay = true => best.scheduleDeviation is TripUpdate delay
+      if (timepointPredictions.size() > 0 && tripUpdateHasDelay) {
+        Set<AgencyAndId> records = new HashSet<AgencyAndId>();
+        for (TimepointPredictionRecord tpr : timepointPredictions) {
+          records.add(tpr.getTimepointId());
+        }
+        long tprStartTime = getEarliestTimeInRecords(timepointPredictions);
+        for (StopTimeEntry stopTime : trip.getStopTimes()) {
+          if (records.contains(stopTime.getStop().getId())) {
+            continue;
+          }
+          long predictionOffset = instance.getServiceDate() + (best.scheduleDeviation * 1000L);
+          long predictedDepartureTime = (stopTime.getDepartureTime() * 1000L) + predictionOffset;
+          long predictedArrivalTime = (stopTime.getArrivalTime() * 1000L) + predictionOffset;
+          long time = best.timestamp != 0 ? best.timestamp : currentTime();
+          if (predictedDepartureTime > time && predictedDepartureTime < tprStartTime) {
+            TimepointPredictionRecord tpr = new TimepointPredictionRecord();
+            tpr.setTimepointId(stopTime.getStop().getId());
+            tpr.setTripId(stopTime.getTrip().getId());
+            tpr.setStopSequence(stopTime.getGtfsSequence());
+            tpr.setTimepointPredictedArrivalTime(predictedArrivalTime);
+            tpr.setTimepointPredictedDepartureTime(predictedDepartureTime);
+            timepointPredictions.add(tpr);
           }
         }
       }
@@ -782,6 +837,7 @@ class GtfsRealtimeTripLibrary {
   }
 
   private void applyVehiclePositionToRecord(MonitoredResult result,
+      BlockDescriptor blockDescriptor,
       VehiclePosition vehiclePosition,
       VehicleLocationRecord record) {
     Position position = vehiclePosition.getPosition();
@@ -793,6 +849,31 @@ class GtfsRealtimeTripLibrary {
     if (result != null) {
       result.addLatLon(position.getLatitude(), position.getLongitude());
     }
+    if (_scheduleAdherenceFromLocation) {
+      CoordinatePoint location = new CoordinatePoint(position.getLatitude(), position.getLongitude());
+      double totalDistance = blockDescriptor.getBlockInstance().getBlock().getTotalBlockDistance();
+      long timestamp = vehiclePosition.hasTimestamp() ? record.getTimeOfLocationUpdate() : record.getTimeOfRecord();
+      ScheduledBlockLocation loc = _blockGeospatialService.getBestScheduledBlockLocationForLocation(
+          blockDescriptor.getBlockInstance(), location, timestamp, 0, totalDistance);
+      
+      long serviceDateTime = record.getServiceDate();
+      long effectiveScheduleTime = loc.getScheduledTime() + (serviceDateTime/1000);
+      double deviation =  timestamp/1000 - effectiveScheduleTime;
+      record.setScheduleDeviation(deviation);
+    }
+  }
+  
+  private static long getEarliestTimeInRecords(Collection<TimepointPredictionRecord> records) {
+    long min = Long.MAX_VALUE;
+    for (TimepointPredictionRecord tpr : records) {
+      if (tpr.getTimepointPredictedArrivalTime() != -1) {
+        min = Math.min(min, tpr.getTimepointPredictedArrivalTime());
+      }
+      else if (tpr.getTimepointPredictedDepartureTime() != -1) {
+        min = Math.min(min, tpr.getTimepointPredictedDepartureTime());
+      }
+    }
+    return min;
   }
 
   private long currentTime() {

@@ -58,9 +58,7 @@ public class AgencyMetadataAction extends ActionSupport {
     } catch (Exception ex) {
       _log.error("Exception getting agency metadata: " + ex.getMessage());
     }
-    
 
     return SUCCESS;
   }
-
 }

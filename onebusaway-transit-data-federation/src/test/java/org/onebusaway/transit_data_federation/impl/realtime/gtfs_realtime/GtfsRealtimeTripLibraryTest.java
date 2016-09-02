@@ -203,7 +203,6 @@ public class GtfsRealtimeTripLibraryTest {
     stopTimeEvent.setDelay(180);
     stopTimeUpdate.setDeparture(stopTimeEvent);
     
-    
     TripUpdate tripUpdate = TripUpdate.newBuilder()
         .setTrip(TripDescriptor.newBuilder().setTripId("tripA"))
         .setDelay(120)
@@ -242,19 +241,10 @@ public class GtfsRealtimeTripLibraryTest {
     
     final long day = TimeUnit.DAYS.toMillis(1);
     
-    StopTimeUpdate.Builder stopTimeUpdate = StopTimeUpdate.newBuilder();
-    stopTimeUpdate.setStopId("stopA");
-    StopTimeEvent.Builder stopTimeEvent = StopTimeEvent.newBuilder();
-    stopTimeEvent.setDelay(180);
-    stopTimeUpdate.setDeparture(stopTimeEvent);
+    StopTimeUpdate.Builder stopTimeUpdate = stopTimeUpdateWithDepartureDelay("stopA", 180);
    
-    TripUpdate tripUpdate = TripUpdate.newBuilder()
-        .setTrip(TripDescriptor.newBuilder().setTripId("tripA"))
-        .setDelay(120)
-        .setTimestamp((_library.getCurrentTime() + day)/1000)
-        .addStopTimeUpdate(stopTimeUpdate)
-        .build();
-
+    TripUpdate.Builder tripUpdate = tripUpdate("tripA", (_library.getCurrentTime() + day)/1000, 
+        120, stopTimeUpdate);
 
     TripEntryImpl tripA = trip("tripA");
     stopTime(0, stop("stopA", 0, 0), tripA, time(7, 30), 0.0);
@@ -286,7 +276,7 @@ public class GtfsRealtimeTripLibraryTest {
     
     
     FeedMessage.Builder TU = createFeed();
-    TU.addEntity(createTripUpdate(tripUpdate));
+    TU.addEntity(feed(tripUpdate));
     
     FeedMessage.Builder VP = createFeed();
     
@@ -301,9 +291,130 @@ public class GtfsRealtimeTripLibraryTest {
     long departure = tpr.getTimepointPredictedDepartureTime();
     assertEquals(departure, time(7, 33) * 1000 + day); // 7:30 + 3 min delay + on next day
   }
-
   
-  private FeedMessage.Builder createFeed() {
+  /**
+   * This method tests that we create timepoint prediction records for stops
+   * that have not been served yet if there are TPRs downstream. If TPRs exist
+   * downstream of a stop, the bus is assumed to be ahead of that stop. This
+   * assumption is not necessarily true for stop time updates. We require that
+   * the trip update delay indicates realtime schedule adherence for this 
+   * behavior to make sense.
+   * 
+   * Current time = 7:31. Trip update delay = 2 minutes
+   *          Schedule time    Real-time from feed  Timepoint predicted departure time
+   * Stop A   7:30             -----                7:32
+   * Stop B   7:40             7:43                 7:43
+   */
+  @Test
+  public void testTprInterpolation_0() {
+    
+    _library.setCurrentTime(time(7, 31) * 1000);
+    
+    TripEntryImpl tripA = trip("tripA");
+    stopTime(0, stop("stopA", 0, 0), tripA, time(7, 30), 0.0);
+    stopTime(1, stop("stopB", 0, 0), tripA, time(7, 40), 10.0);
+    BlockEntryImpl blockA = block("blockA");
+    BlockConfigurationEntry blockConfigA = blockConfiguration(blockA,
+        serviceIds("s1"), tripA);
+    BlockInstance blockInstanceA = new BlockInstance(blockConfigA, 0L);
+    
+    StopTimeUpdate.Builder stopTimeUpdate = stopTimeUpdateWithDepartureDelay("stopB", 180);
+    TripUpdate.Builder tripUpdate = tripUpdate("tripA", _library.getCurrentTime()/1000,  120, stopTimeUpdate);
+   
+    Mockito.when(_entitySource.getTrip("tripA")).thenReturn(tripA);
+    
+    Mockito.when(
+        _blockCalendarService.getActiveBlocks(Mockito.eq(blockA.getId()),
+            Mockito.anyLong(), Mockito.anyLong())).thenReturn(Arrays.asList(blockInstanceA));
+    
+    VehicleLocationRecord record = vehicleLocationRecord(tripUpdate);
+    
+    long stopADept = getPredictedDepartureTimeByStopId(record, "stopA");
+    assertEquals(stopADept, time(7, 32) * 1000);
+    
+    long stopBDept = getPredictedDepartureTimeByStopId(record, "stopB");
+    assertEquals(stopBDept, time(7, 43) * 1000);
+  }
+  
+  /**
+   * Same as above, but we should NOT create new timepoint prediction records
+   * because the stop has already been served. Only thing different is current
+   * time.
+   * 
+   * Current time = 7:33. Trip update delay = 2 minutes
+   *          Schedule time    Real-time from feed  Timepoint predicted departure time
+   * Stop A   7:30             -----                ----
+   * Stop B   7:40             7:43                 7:43
+   */
+  @Test
+  public void testTprInterpolation_1() {
+    
+    _library.setCurrentTime(time(7, 33) * 1000);
+    
+    TripEntryImpl tripA = trip("tripA");
+    stopTime(0, stop("stopA", 0, 0), tripA, time(7, 30), 0.0);
+    stopTime(1, stop("stopB", 0, 0), tripA, time(7, 40), 10.0);
+    BlockEntryImpl blockA = block("blockA");
+    BlockConfigurationEntry blockConfigA = blockConfiguration(blockA,
+        serviceIds("s1"), tripA);
+    BlockInstance blockInstanceA = new BlockInstance(blockConfigA, 0L);
+    
+    StopTimeUpdate.Builder stopTimeUpdate = stopTimeUpdateWithDepartureDelay("stopB", 180);
+    TripUpdate.Builder tripUpdate = tripUpdate("tripA", _library.getCurrentTime()/1000,  120, stopTimeUpdate);
+   
+    Mockito.when(_entitySource.getTrip("tripA")).thenReturn(tripA);
+    
+    Mockito.when(
+        _blockCalendarService.getActiveBlocks(Mockito.eq(blockA.getId()),
+            Mockito.anyLong(), Mockito.anyLong())).thenReturn(Arrays.asList(blockInstanceA));
+    
+    VehicleLocationRecord record = vehicleLocationRecord(tripUpdate);
+    
+    long stopADept = getPredictedDepartureTimeByStopId(record, "stopA");
+    assertEquals(stopADept, -1); // no tpr for this stop
+    
+    long stopBDept = getPredictedDepartureTimeByStopId(record, "stopB");
+    assertEquals(stopBDept, time(7, 43) * 1000);
+  }
+  
+  /**
+   * Test that we do NOT create new timepoint prediction record when it 
+   * already exists.
+   * 
+   * Current time = 7:25. Trip update delay = 2 minutes
+   *          Schedule time    Real-time from feed  Timepoint predicted departure time
+   * Stop A   7:30             7:33                 7:33 (and only one)
+   */
+  @Test
+  public void testTprInterpolation_2() {
+    
+    _library.setCurrentTime(time(7, 25) * 1000);
+    
+    TripEntryImpl tripA = trip("tripA");
+    stopTime(0, stop("stopA", 0, 0), tripA, time(7, 30), 0.0);
+    BlockEntryImpl blockA = block("blockA");
+    BlockConfigurationEntry blockConfigA = blockConfiguration(blockA,
+        serviceIds("s1"), tripA);
+    BlockInstance blockInstanceA = new BlockInstance(blockConfigA, 0L);
+    
+    StopTimeUpdate.Builder stopTimeUpdate = stopTimeUpdateWithDepartureDelay("stopA", 180);
+    TripUpdate.Builder tripUpdate = tripUpdate("tripA", _library.getCurrentTime()/1000,  120, stopTimeUpdate);
+   
+    Mockito.when(_entitySource.getTrip("tripA")).thenReturn(tripA);
+    
+    Mockito.when(
+        _blockCalendarService.getActiveBlocks(Mockito.eq(blockA.getId()),
+            Mockito.anyLong(), Mockito.anyLong())).thenReturn(Arrays.asList(blockInstanceA));
+    
+    VehicleLocationRecord record = vehicleLocationRecord(tripUpdate);
+    
+    long stopADept = getPredictedDepartureTimeByStopId(record, "stopA");
+    assertEquals(stopADept, time(7, 33) * 1000);
+    
+    assertEquals(record.getTimepointPredictions().size(), 1);
+  }
+ 
+  private static FeedMessage.Builder createFeed() {
     FeedMessage.Builder builder = FeedMessage.newBuilder();
     FeedHeader.Builder header = FeedHeader.newBuilder();
     header.setGtfsRealtimeVersion(GtfsRealtimeConstants.VERSION);
@@ -339,10 +450,55 @@ public class GtfsRealtimeTripLibraryTest {
     return tripUpdateEntity.build();
   }
   
-  private FeedEntity createTripUpdate(TripUpdate tripUpdate) {
+  private static FeedEntity feed(TripUpdate.Builder tripUpdate) {
     FeedEntity.Builder tripUpdateEntity = FeedEntity.newBuilder();
     tripUpdateEntity.setId(tripUpdate.getTrip().getTripId());
     tripUpdateEntity.setTripUpdate(tripUpdate);
     return tripUpdateEntity.build();
+  }
+  
+  private static StopTimeUpdate.Builder stopTimeUpdateWithDepartureDelay(String stopId, int delay) {
+    StopTimeUpdate.Builder stopTimeUpdate = StopTimeUpdate.newBuilder();
+    stopTimeUpdate.setStopId(stopId);
+    StopTimeEvent.Builder stopTimeEvent = StopTimeEvent.newBuilder();
+    stopTimeEvent.setDelay(delay);
+    stopTimeUpdate.setDeparture(stopTimeEvent);
+    return stopTimeUpdate;
+  }
+  
+  private static TripUpdate.Builder tripUpdate(String tripId, long timestamp, int delay,
+      StopTimeUpdate.Builder... stopTimeUpdates) {
+    TripUpdate.Builder tu = TripUpdate.newBuilder()
+        .setTrip(TripDescriptor.newBuilder().setTripId(tripId))
+        .setDelay(delay)
+        .setTimestamp(timestamp);
+    
+    for (StopTimeUpdate.Builder stu : stopTimeUpdates) {
+        tu.addStopTimeUpdate(stu);
+    }
+    
+    return tu;
+  }
+  
+  private VehicleLocationRecord vehicleLocationRecord(TripUpdate.Builder tu) {
+    FeedMessage.Builder TU = createFeed().addEntity(feed(tu));
+    FeedMessage.Builder VP = createFeed();
+    
+    List<CombinedTripUpdatesAndVehiclePosition> updates = 
+        _library.groupTripUpdatesAndVehiclePositions(TU.build(), VP.build());
+
+    CombinedTripUpdatesAndVehiclePosition update = updates.get(0);
+    VehicleLocationRecord record = _library.createVehicleLocationRecordForUpdate(update);
+    
+    return record;
+  }
+  
+  private static long getPredictedDepartureTimeByStopId(VehicleLocationRecord record, String stopId) {
+    for (TimepointPredictionRecord tpr : record.getTimepointPredictions()) {
+      if (tpr.getTimepointId().getId().equals(stopId)) {
+        return tpr.getTimepointPredictedDepartureTime();
+      }
+    }
+    return -1;
   }
 }

@@ -48,6 +48,7 @@ import org.onebusaway.transit_data_federation.impl.service_alerts.ServiceAlertTi
 import org.onebusaway.transit_data_federation.impl.service_alerts.ServiceAlertsSituationAffectsClause;
 import org.onebusaway.transit_data_federation.services.AgencyService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockCalendarService;
+import org.onebusaway.transit_data_federation.services.blocks.BlockGeospatialService;
 import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts;
 import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert;
 import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlertsService;
@@ -144,7 +145,11 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   private String _feedId = null;
   
   private StopModificationStrategy _stopModificationStrategy = null;
+  
+  private boolean _scheduleAdherenceFromLocation = false;
 
+  private BlockGeospatialService _blockGeospatialService;
+ 
   @Autowired
   public void setAgencyService(AgencyService agencyService) {
     _agencyService = agencyService;
@@ -175,6 +180,11 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   public void setScheduledExecutorService(
       ScheduledExecutorService scheduledExecutorService) {
     _scheduledExecutorService = scheduledExecutorService;
+  }
+  
+  @Autowired
+  public void setBlockGeospatialService(BlockGeospatialService blockGeospatialService) {
+    _blockGeospatialService = blockGeospatialService;
   }
 
   public void setStopModificationStrategy(StopModificationStrategy strategy) {
@@ -252,6 +262,9 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   
   public void setFeedId(String id) {
     _feedId = id;
+
+  public void setScheduleAdherenceFromLocation(boolean scheduleAdherenceFromLocation) {
+    _scheduleAdherenceFromLocation = scheduleAdherenceFromLocation;
   }
   
   @PostConstruct
@@ -277,7 +290,9 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     if (_stopModificationStrategy != null) {
       _tripsLibrary.setStopModificationStrategy(_stopModificationStrategy);
     }
-
+    _tripsLibrary.setScheduleAdherenceFromLocation(_scheduleAdherenceFromLocation);
+    _tripsLibrary.setBlockGeospatialService(_blockGeospatialService);
+    
     _alertLibrary = new GtfsRealtimeAlertLibrary();
     _alertLibrary.setEntitySource(_entitySource);
 

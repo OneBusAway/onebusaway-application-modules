@@ -27,6 +27,8 @@ public interface AgencyMetadataDao {
   
   void delete(long id);
 
+  void removeAgencyMetadata(String agencyMetadataId);
+
   List<AgencyMetadata> getAllAgencyMetadata();
 
   List<AgencyMetadata> getAgencyMetadataForId(String id);
