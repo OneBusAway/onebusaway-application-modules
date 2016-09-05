@@ -89,61 +89,33 @@ public class AgencyMetadataEditAction  extends ActionSupport implements
       _log.error("Unable to retrieve Service Alert", e);
       throw e;
     }
-    /*
-    if (_agencyMetadataId == null && _alertId != null) {
-      int index = _alertId.indexOf('_');
-      if (index != -1)
-        _agencyMetadataId = _alertId.substring(0, index);
-    }
-    */
-
-    //_model.setReason("Set in execute method");
-    /*
-    try {
-      _agencies = _transitDataService.getAgenciesWithCoverage();
-    } catch (Throwable t) {
-      _log.error("unable to retrieve agencies with coverage", t);
-      _log.error("issue connecting to TDS -- check your configuration in data-sources.xml");
-      throw new RuntimeException("Check your onebusaway-nyc-transit-data-federation-webapp configuration", t);
-    }
-    */
     return "SUCCESS";
   }
-  
+
   @Action("submit")
   public String submit() throws IOException, JSONException {
-
-    //_model.setReason(string(_model.getReason()));
 
     try {
       if (_model.getId() == 0L ) {
         _agencyMetadataService.createAgencyMetadata(_model);
       }
       else {
-        //ServiceAlertBean existing = _transitDataService.getServiceAlertForId(_model.getId());
-        //if (existing != null) {
-          // The updated service alert constructed from the POST won't include affects clauses.
-        //  _model.setAllAffects(existing.getAllAffects());
-        //}
         _agencyMetadataService.updateAgencyMetadata(_model);
       }
     } catch (RuntimeException e) {
       _log.error("Error creating or updating Service Alert", e);
       throw e;
     }
-
     return "submitSuccess";
   }
-  
+
   @Action("cancel")
   public String cancel() {
     _log.info("Agency Metadata cleared");
-    //doClear();
     return "cancelResult"; 
   }
 
   public String deleteAgencyMetadata() {
-    String id = _agencyMetadataId;
     try {
       _agencyMetadataService.removeAgencyMetadata(_agencyMetadataId);
     } catch (RuntimeException e) {
@@ -152,5 +124,4 @@ public class AgencyMetadataEditAction  extends ActionSupport implements
     }
     return "deleteResult";
   }
-
 }

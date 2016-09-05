@@ -36,14 +36,14 @@
 <s:url var="url" value="/js/lib/jquery.js" />
 <script type="text/javascript" src="${url}">
 <!-- //prevent jspx minimization -->
-	
+
 </script>
 
 <s:url var="url" value="/js/lib/jquery.ui.js">
 </s:url>
 <script type="text/javascript" src="${url}">
 <!-- //prevent jspx minimization -->
-	
+
 </script>
 
 </head>
@@ -75,38 +75,34 @@
 					</tr>
 					<s:iterator value="agencyMetadata" status="metadataStatus">
 						<s:set var="agencyMetadataIdx" value="%{#metadataStatus.index}" />
-						<!-- <s:set var="agencyId" value="%{#agency.agency.id}" /> -->
-						<!-- <s:iterator value="situationsByAgency[#agencyIdx]" status="id"> -->
-							<tr>
-								<td><s:property value="id" /></td>
-								<td><s:property value="name" /></td>
-								<td><s:property value="shortName" /></td>
-								<td><s:property value="gtfsId" /></td>
-								<td><s:property value="agencyMessage" /></td>
-								<td>
-									<fieldset>
-										<s:url var="url" action="agency-metadata-edit.action" namespace="/admin/agencymetadata" >
-											<s:param name="agencyMetadataId" value="id" />
-										</s:url>
-										<a href="${url}" id="editMetadataLink" class="link">Edit</a>
-									</fieldset>
-								</td>
-								<td>
-									<fieldset>
-										<s:url var="url" action="agency-metadata-edit!deleteAgencyMetadata.action" namespace="/admin/agencymetadata" >
-											<s:param name="agencyMetadataId" value="id" />
-										</s:url>
-										<a href="${url}" id="deleteMetadataLink" class="link">Delete</a>
-									</fieldset>
-								</td>
-							</tr>
-						<!-- </s:iterator> -->
+						<tr>
+							<td><s:property value="id" /></td>
+							<td><s:property value="name" /></td>
+							<td><s:property value="shortName" /></td>
+							<td><s:property value="gtfsId" /></td>
+							<td><s:property value="agencyMessage" /></td>
+							<td>
+								<fieldset>
+									<s:url var="url" action="agency-metadata-edit.action" namespace="/admin/agencymetadata" >
+										<s:param name="agencyMetadataId" value="id" />
+									</s:url>
+									<a href="${url}" id="editMetadataLink" class="link">Edit</a>
+								</fieldset>
+							</td>
+							<td>
+								<fieldset>
+									<s:url var="url" action="agency-metadata-edit!deleteAgencyMetadata.action" namespace="/admin/agencymetadata" >
+										<s:param name="agencyMetadataId" value="id" />
+									</s:url>
+									<a href="${url}" id="deleteMetadataLink" class="link">Delete</a>
+								</fieldset>
+							</td>
+						</tr>
         			</s:iterator>
 				</table>
 			</div>
 		</div>
 	</div>
-	
 </div>
 </body>
 </html>
