@@ -17,9 +17,24 @@
 jQuery(function() {
 	// add another condition for the service alert
 	jQuery("#addAnotherCondition").click(onAddAnotherCondition);
-	
+
 	// delete the condition for this service alert
 	jQuery(".deleteCondition").click(onDeleteCondition);
+
+	// Check  if this is the "Edit Service Alert" page
+	if ($("#service-alert_submit").length > 0) {
+		// Only enable the Save button if an "owning agency" is selected.
+		if ($("#service-alert_agencyId option:selected").val() == "null") {
+			$("#service-alert_submit").attr("disabled", "disabled");
+		}
+		$("#service-alert_agencyId").change(function() {
+			if ($("#service-alert_agencyId option:selected").val() == "null") {
+				$("#service-alert_submit").attr("disabled", "disabled");
+			} else {
+				$("#service-alert_submit").removeAttr("disabled");
+			}
+		});
+	}
 });
 
 function getAgencySelectOptions() {
