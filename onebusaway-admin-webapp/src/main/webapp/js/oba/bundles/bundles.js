@@ -142,6 +142,10 @@ jQuery(function() {
 				return $(element).text();  
 			});
 			if (buildNames.length > 0) {
+				// Clear any previous results from the tables
+				$('#diffResultsTable tr').slice(1).remove();
+				$('#fixedRouteDiffTable tr').slice(1).remove();
+
 				jQuery.ajax({
 					url: "manage-bundles!diffResult.action",
 					data: {
@@ -153,7 +157,6 @@ jQuery(function() {
 					type: "GET",
 					async: false,
 					success: function(data) {
-						//$('#diffResult').text('');
 						$.each(data.diffResults, function(index, value) {
 							//$('#diffResult').append(
 							//		"<div id=\"diffResultItem\">"+value+"</div>");
