@@ -182,12 +182,15 @@ public class BuildResource extends AuthenticatedResource {
 			return Response.noContent().build();
 		}
 		BundleBuildResponse buildResponse = _bundleService.lookupBuildRequest(id);
-		buildResponse.setBundleBuildName(bundleName);
-		buildResponse.setBundleDirectoryName(directoryName);
-		buildResponse.setBundleEmailTo(emailTo);
-		buildResponse.setBundleStartDate(startDate);
-		buildResponse.setBundleEndDate(endDate);
-		buildResponse.setBundleComment(comment);
+		String dirName = buildResponse.getBundleDirectoryName();
+		if (dirName == null || dirName.isEmpty()) {
+  		buildResponse.setBundleBuildName(bundleName);
+  		buildResponse.setBundleDirectoryName(directoryName);
+  		buildResponse.setBundleEmailTo(emailTo);
+  		buildResponse.setBundleStartDate(startDate);
+  		buildResponse.setBundleEndDate(endDate);
+  		buildResponse.setBundleComment(comment);
+		}
 		try {
 			final StringWriter sw = new StringWriter();
 			final MappingJsonFactory jsonFactory = new MappingJsonFactory();

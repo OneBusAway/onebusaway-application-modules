@@ -18,9 +18,7 @@ function createGtfsRtModule(title, urlinput, timestamp, latlon, tripVal, route, 
 
 	// This actually looks at GTFS-RT model classes proxied through from admin-webapp
 	
-	var gtfsRtWeb = OBA.config.gtfsRtWeb || "localhost:8080";
-	var gtfsRtApi = OBA.config.gtfsRtContext || "/onebusaway-admin-webapp";
-	urlinput.val(gtfsRtWeb);
+	urlinput.val("unused");
 	
 	title.html("GTFS-RT")
 	
@@ -36,8 +34,8 @@ function createGtfsRtModule(title, urlinput, timestamp, latlon, tripVal, route, 
 		status.html("loading...");
 		setTimeout(checkRefresh, 4000);
 		
-		var gtfsrtUrl = "http://" + gtfsRtWeb + gtfsRtContext + "/admin/vehiclepredictions/gtfs-rt-proxy.action"
-				
+		var gtfsrtUrl = OBA.config.gtfsRtUrl + "?source=" + createGtfsRtModule.source;
+		
 		jQuery.ajax({
 			url: gtfsrtUrl,
 			type: "GET",

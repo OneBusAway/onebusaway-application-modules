@@ -46,11 +46,23 @@ var slots = [
 var modules = {
 		"transitime": createTransitimeModule,
 		"oba": createObaModule,
-		"link": createLinkAvlModule,
-		"gtfsRt": createGtfsRtModule
+		"link": createLinkAvlModule
 }
 
 function initSlots() {
+	
+	// Add GFTS RT slots
+	OBA.config.gtfsRtSources.split(",").forEach(function(source) {
+		modules[source] = function() {
+			createGtfsRtModule.source = source;
+			return createGtfsRtModule.apply(null, arguments);
+		}
+		slots.forEach(function(slot) {
+			var opt = jQuery(document.createElement("option"));
+			opt.attr("value", source).text("GTFS-RT " + source);
+			jQuery(slot.options).append(opt);
+		})
+	})
 	
 	function setSlotModule(slot, name) {
 		var createModule = modules[name];

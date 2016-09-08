@@ -24,7 +24,7 @@ public interface AgencyMetadataDao {
   void saveOrUpdate(AgencyMetadata metadata);
 
   void saveOrUpdate(AgencyMetadata... array);
-  
+
   void delete(long id);
 
   void removeAgencyMetadata(String agencyMetadataId);
@@ -32,7 +32,7 @@ public interface AgencyMetadataDao {
   List<AgencyMetadata> getAllAgencyMetadata();
 
   List<AgencyMetadata> getAgencyMetadataForId(String id);
-  
+
   List<AgencyMetadata> getAgencyMetadataForGtfsId(String gtfsId);
 
   List<AgencyMetadata> getAgencyMetadataForName(String name);

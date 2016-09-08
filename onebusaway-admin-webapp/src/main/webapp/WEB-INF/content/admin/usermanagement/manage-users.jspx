@@ -18,7 +18,9 @@
 -->
 
 <html xmlns:jsp="http://java.sun.com/JSP/Page"
-	xmlns:c="http://java.sun.com/jsp/jstl/core" xmlns:s="/struts-tags">
+	xmlns:c="http://java.sun.com/jsp/jstl/core" 
+	xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+	xmlns:s="/struts-tags">
 <jsp:directive.page contentType="text/html" />
 <head>
 <title>Create, Update or Delete users/roles</title>
@@ -103,7 +105,7 @@
 				 		<label class="userLabel">New Role:</label>
 				 		<select name="Role" id="newRole">
 				 			<c:forEach items="${possibleRoles}" var="role">
-				 				<option value="${role}">${role.split("_")[1]}</option>
+				 				<option value="${role}">${fn:split(role, "_")[1]}</option>
 				 			</c:forEach>
 				 		</select>
 				 	</div>

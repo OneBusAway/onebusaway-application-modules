@@ -113,6 +113,7 @@
 	padding-top: .2em;
 }
 */
+#AgencyMetadata #metadataTable,
 #ServiceAlerts #alertsTable {
     border-collapse: separate;
     border-spacing: 2em .2em;
@@ -178,7 +179,6 @@
  
  #ServiceAlerts input[type=submit],
  #AgencyMetadata input[type=submit] {
- 	color: black;
  	width: 8em;
  	height: 2.5em;
  	margin-bottom: 3em;

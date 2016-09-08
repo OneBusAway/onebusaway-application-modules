@@ -16,19 +16,20 @@
 package org.onebusaway.webapp.actions.admin.vehiclepredictions;
 
 import java.io.InputStream;
+import java.net.URL;
+import java.net.URLConnection;
 
-import org.apache.http.HttpHost;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
+import javax.net.ssl.HttpsURLConnection;
+
 import org.apache.struts2.convention.annotation.Namespace;
 import org.apache.struts2.convention.annotation.Result;
+import org.onebusaway.util.DisableSSLLibrary;
 import org.onebusaway.util.services.configuration.ConfigurationService;
 import org.onebusaway.webapp.actions.OneBusAwayNYCAdminActionSupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.web.util.UrlUtils;
 
 @Namespace(value="/admin/vehiclepredictions")
 @Result(name = "success",
@@ -49,18 +50,18 @@ public class LinkProxyAction extends OneBusAwayNYCAdminActionSupport {
   private InputStream stream;
 
   public String execute() {
-    CloseableHttpClient httpclient = HttpClients.createDefault();
+ 
+    String path = UrlUtils.buildFullRequestUrl(getLinkServiceProtocol(), getLinkServiceHost(), getLinkServicePort(), getLinkServicePath(), null);
     try {
-      HttpHost target = new HttpHost(getLinkServiceHost(), getLinkServicePort(), getLinkServiceProtocol());
-      HttpGet request = new HttpGet(getLinkServicePath());
-      CloseableHttpResponse response = httpclient.execute(target, request);
-      stream = response.getEntity().getContent();
-      _log.info("connect to (" 
-          + getLinkServiceProtocol() + "://" +
-          getLinkServiceHost() + ":" +
-          getLinkServicePath() 
-          + ")");
-
+      URL url = new URL(path);
+      URLConnection conn = url.openConnection();
+      if (getLinkServiceProtocol().equals("https") && getDisableSSL() 
+          && conn instanceof HttpsURLConnection) {
+        DisableSSLLibrary.disableSSL((HttpsURLConnection) conn);
+      }
+      stream = conn.getInputStream();
+      _log.info("connect to ({})", path);
+    
       return SUCCESS;
     } catch (Exception e) {
       _log.error("proxy error to (" 
@@ -77,7 +78,6 @@ public class LinkProxyAction extends OneBusAwayNYCAdminActionSupport {
     return _configurationService.getConfigurationValueAsString("admin.link.service.protocol", "http");
   }
 
-  
   private String getLinkServiceHost() {
     return _configurationService.getConfigurationValueAsString("admin.link.service.host", "localhost");
   }
@@ -89,7 +89,11 @@ public class LinkProxyAction extends OneBusAwayNYCAdminActionSupport {
   private String getLinkServicePath() {
     return _configurationService.getConfigurationValueAsString("admin.link.service.path", "/services/tss_lab/GetOnScheduleTrains?TimeInterval=5");
   }
-
+  
+  private boolean getDisableSSL() {
+    return Boolean.parseBoolean(_configurationService.getConfigurationValueAsString("admin.link.disableSSL", "false"));
+  }
+  
   public String getType() {
     return this.type;
   }
