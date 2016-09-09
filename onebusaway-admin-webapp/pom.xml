@@ -31,16 +31,6 @@
       <id>public.onebusaway.org</id>
       <url>http://nexus.onebusaway.org/content/groups/public/</url>
     </repository>
-        <repository>
-            <id>camsys-cache</id>
-            <url>http://svn2.camsys.com/archiva/repository/internal/</url>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
 		<repository>
 			<id>opengeo</id>
 			<url>http://repo.opengeo.org</url>

@@ -179,16 +179,8 @@ function createLinkAvlModule(title, urlinput, timestamp, latlon, tripVal, route,
 	}
 	
 	function hashVehicleId(aVehicleId) {
-		if (aVehicleId == null) return null;
-		var array = aVehicleId.split(":");
-		var output = "";
-		array.sort();
-		for (i=0; i<array.length; i++) {
-			output += array[i];
-			output += ":";
-		}
-		return output.substring(0, output.length);
-
+		// using tripId now, no need to hash
+		return aVehicleId;
 	}
 	
 	module.updateAge = function() {
