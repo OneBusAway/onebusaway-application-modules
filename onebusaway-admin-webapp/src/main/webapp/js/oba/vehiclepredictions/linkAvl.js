@@ -49,7 +49,8 @@ function createLinkAvlModule(title, urlinput, timestamp, latlon, tripVal, route,
 					return;
 				}
 				for (var i = 0; i < d.Trip.length; i++) {
-					if (hashVehicleId(d.Trip[i].VehicleId) == vehicleId) {
+					// Yes, we are using TripId as vehicleId now
+					if (hashVehicleId(d.Trip[i].TripId) == vehicleId) {
 						processLinkTrip(d.Trip[i]);
 						return;
 					}
