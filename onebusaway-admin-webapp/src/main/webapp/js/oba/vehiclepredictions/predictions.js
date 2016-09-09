@@ -46,7 +46,7 @@ var slots = [
 var modules = {
 		"transitime": createTransitimeModule,
 		"oba": createObaModule,
-		"link": createLinkAvlModule
+		"linkavl": createLinkAvlModule
 }
 
 function initSlots() {
