@@ -27,6 +27,7 @@ OBA.Sign = function() {
 	var vehiclesPerStop = 3;
 	var sortByRoute = false; // otherwise sort by arrival distance/departure time
 	var showHeader = false;
+	var lineRef = "";
 	
 	var url = window.location.href;
 	var signPosition = url.indexOf("/sign/sign");
@@ -101,6 +102,7 @@ OBA.Sign = function() {
 		if (fontSize) {
 			$("body, body input, body textarea").attr("style", "font-size: " + fontSize + "em;")
 		}
+		lineRef = getParameterByName("routeId", "");
 		
 		timeout = refreshInterval;
 			
@@ -473,7 +475,7 @@ OBA.Sign = function() {
 
 		var stopElement = getNewElementForStop(stopId);
 		
-		var params = { OperatorRef: stopId.agency, MonitoringRef: stopId.id, StopMonitoringDetailLevel: "normal", MinimumStopVisitsPerLine: 3 };
+		var params = { OperatorRef: stopId.agency, MonitoringRef: stopId.id, LineRef: lineRef, StopMonitoringDetailLevel: "normal", MinimumStopVisitsPerLine: 3 };
 		jQuery.getJSON(obaApiBaseUrl + OBA.Config.siriSMUrl, params, function(json) {	
 			//updateTimestamp(OBA.Util.ISO8601StringToDate(json.Siri.ServiceDelivery.ResponseTimestamp));
 			//hideError();
