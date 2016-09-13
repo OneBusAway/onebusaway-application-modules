@@ -474,8 +474,12 @@ OBA.Sign = function() {
 		}
 
 		var stopElement = getNewElementForStop(stopId);
-		
-		var params = { OperatorRef: stopId.agency, MonitoringRef: stopId.id, LineRef: lineRef, StopMonitoringDetailLevel: "normal", MinimumStopVisitsPerLine: 3 };
+
+		var params = { OperatorRef: stopId.agency, MonitoringRef: stopId.id, StopMonitoringDetailLevel: "normal", MinimumStopVisitsPerLine: 3 };
+		if (lineRef) {
+			params.LineRef = lineRef;
+		}
+
 		jQuery.getJSON(obaApiBaseUrl + OBA.Config.siriSMUrl, params, function(json) {	
 			//updateTimestamp(OBA.Util.ISO8601StringToDate(json.Siri.ServiceDelivery.ResponseTimestamp));
 			//hideError();
