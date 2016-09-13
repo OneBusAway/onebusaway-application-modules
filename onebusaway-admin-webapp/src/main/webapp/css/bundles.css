@@ -1140,23 +1140,6 @@
 #Upload .agencyIdData {
 	width: 30%;
 }
-/*
-#Upload .agencyDataSourceType {
-	width: 10%;
-}
-
-#Upload .agencyProtocol {
-	width: 10%;
-}
-
-#Upload .agencyDataSource {
-	width: 40%;
-}
-
-#Upload .removeAgency {
-	width: 10%;
-}
-*/
 
 #Upload .removeAgency {
 	padding-left: 1em;
@@ -1171,6 +1154,52 @@
 
 #Upload #notesDiv {
 	clear: both;
+}
+
+#Upload #addNewAgencyDiv {
+	margin-top: 1em;
+}
+
+#Upload #addNewAgencyTable {
+	width: 100%;
+}
+
+#Upload #addNewAgencyTable th,
+#Upload #addNewAgencyTable td {
+	padding-right: 1em;
+	margin: 1em;
+}
+
+#Upload .newAgencyNameCell {
+	width: 30%;
+}
+
+#Upload .newAgencyName {
+	width: 100%;
+}
+
+#Upload .newAgencyShortNameCell {
+	width: 15%;
+}
+
+#Upload .newAgencyShortName {
+	width: 100%;
+}
+
+#Upload .newAgencyLegacyIdCell {
+	width: 5%;
+}
+
+#Upload .newAgencyLegacyId {
+	width: 100%;
+}
+
+#Upload .newAgencyAddButtonCell {
+	width: 15%;
+}
+
+#Upload .newAgencyAddButton {
+	width: 100%;
 }
 
 #Upload #existingFilesTable {

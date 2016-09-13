@@ -67,7 +67,7 @@ jQuery(function() {
 		// just in case set the tab
 		var $tabs = jQuery("#tabs");
 		$tabs.tabs('select', 3);
-		updateBuildStatus();
+		updateBuildStatus("test");
 	}
 	// hide the Build Progress message
 	jQuery("#buildBundle #buildingTest").hide();
@@ -277,6 +277,8 @@ jQuery(function() {
 
 	// change input type to 'file' if protocol changes to 'file'
 	jQuery("#agency_data").on("change", "tr .agencyProtocol", onAgencyProtocolChange);
+
+	jQuery("#addNewAgency").click(onAddNewAgencyClick);
 
 	// remove selected agencies
 	// jQuery(".removeAgency").click(onRemoveSelectedAgenciesClick);
@@ -1026,6 +1028,38 @@ function onBundleCommentChanged() {
 		data: {
 			"directoryName" : selectedDirectory,
 			"comments" : $("#uploadFiles #bundleComment").val()
+		}
+	});
+}
+
+function onAddNewAgencyClick() {
+	// Make ajax call
+	jQuery.ajax({
+		url: "../../api/agency/create",
+		type: "GET",
+		async: false,
+		data: {
+			"gtfs_id" : "",
+			"name" : $("#newAgencyName").val(),
+			"short_name" : $("#newAgencyShortName").val(),
+			"legacy_id" : $("#newAgencyLegacyId").val(),
+			"gtfs_feed_url" : "",
+			"gtfs_rt_feed_url" : "",
+			"bounding_box" : "",
+			"ntd_id" : "",
+			"agency_message" : ""
+		},
+		success: function(response) {
+			getAgencyMetadata();
+
+			//clear fields for new agency
+			$("#newAgencyName").val("");
+			$("#newAgencyShortName").val("");
+			$("#newAgencyLegacyId").val("");
+		},
+		error: function(request) {
+			console.log("Error adding new agency");
+			alert("There was an error processing your request. Please try again.");
 		}
 	});
 }
