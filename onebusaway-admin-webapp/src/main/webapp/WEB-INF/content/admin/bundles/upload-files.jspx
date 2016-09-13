@@ -64,7 +64,7 @@
 							<td class="removeAgency">remove</td>
 						</tr>
 					</table>
-					<span id="addAnotherAgency">Add another</span>
+					<span id="addAnotherAgency">Add another agency row</span>
 					<!-- -->
 				</div>
 				<!-- -->
@@ -91,6 +91,36 @@
 						<!-- Prevent jsp minimzation if empty div -->
 						</textarea> 
 					</div>
+				</div>
+				<div id="addNewAgencyDiv">
+					Add another agency to the agency database.
+					<table id="addNewAgencyTable">
+						<tr>
+							<th>Agency Name</th>
+							<th>Short Name</th>
+							<th>Legacy Id</th>
+							<th></th>
+						</tr>
+						<tr>
+							<td class="newAgencyNameCell">
+								<input type="text" class="newAgencyName" id="newAgencyName"/>
+							</td>
+							<td class="newAgencyShortNameCell">
+								<input type="text" class="newAgencyShortName" id="newAgencyShortName"/>
+							</td>
+							<td class="newAgencyLegacyIdCell">
+								<input type="text" class="newAgencyLegacyId" id="newAgencyLegacyId"/>
+							</td>
+							<!-- -->
+							<td class="newAgencyAddButtonCell">
+								<input type="button" class="newAgencyAddButton" id="addNewAgency" value="Add new agency" />
+							</td>
+							<!-- -->
+						</tr>
+					</table>
+					<!--
+					<input type="button" class="newAgencyAddButton" id="addNewAgency" value="Add new agency" />
+					-->
 				</div>
 			</div>
 		</div>
