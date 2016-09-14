@@ -133,14 +133,16 @@ public class TripResource extends MetricResource {
   @Path("{agencyId}/schedule-realtime-delta")
   @GET
   @Produces("application/json")
-  public Response getScheduleRealtimeTripsDelta(@PathParam("agencyId") String agencyId, @QueryParam("feedId") String feedId) {
+  public Response getScheduleRealtimeTripsDelta(@PathParam("agencyId") String agencyId, 
+      @QueryParam("feedId") String feedId,
+      @QueryParam("routeId") String routeId) {
     try {
       if (this.getDataSources() == null || this.getDataSources().isEmpty()) {
         _log.error("no configured data sources");
         return Response.ok(error("schedule-realtime-trips-delta", "con configured data sources")).build();
       }
 
-      int scheduleTrips = getScheduledTrips(agencyId);
+      int scheduleTrips = getScheduledTrips(agencyId, routeId);
       int totalRecords = getTotalRecordCount(agencyId, feedId);
       int validRealtimeTrips = getValidRealtimeTripIds(agencyId, feedId).size();
       _log.debug("agencytrips size=" + scheduleTrips + ", validRealtimeTrips=" + validRealtimeTrips + ", totalRecords=" + totalRecords);
@@ -156,14 +158,16 @@ public class TripResource extends MetricResource {
   @Path("{agencyId}/buses-in-service-percent")
   @GET
   @Produces("application/json")
-  public Response getBusesInServicePercent(@PathParam("agencyId") String agencyId, @QueryParam("feedId") String feedId) {
+  public Response getBusesInServicePercent(@PathParam("agencyId") String agencyId, 
+       @QueryParam("feedId") String feedId,
+       @QueryParam("routeId") String routeId) {
     try {
       if (this.getDataSources() == null || this.getDataSources().isEmpty()) {
         _log.error("no configured data sources");
         return Response.ok(error("buses-in-service-percent", "con configured data sources")).build();
       }
 
-      double scheduleTrips = getScheduledTrips(agencyId);
+      double scheduleTrips = getScheduledTrips(agencyId, routeId);
       if (scheduleTrips < 1) {
         // prevent NaN -- late night service may not have scheduled trips
         return Response.ok(ok("buses-in-service-percent", 100.)).build();

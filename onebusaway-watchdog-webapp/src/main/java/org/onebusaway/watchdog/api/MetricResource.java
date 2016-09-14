@@ -84,6 +84,10 @@ public abstract class MetricResource {
   }
   
   protected int getScheduledTrips(String agencyId) {
+    return getScheduledTrips(agencyId, null);
+  }
+  
+  protected int getScheduledTrips(String agencyId, String routeId) {
     Set<TripDetailsBean> agencyTrips = new HashSet<TripDetailsBean>();
     TripsForBoundsQueryBean query = new TripsForBoundsQueryBean();
     List<CoordinateBounds> allBounds = getTDS().getAgencyIdsWithCoverageArea().get(agencyId);
@@ -104,7 +108,9 @@ public abstract class MetricResource {
   
       for (TripDetailsBean trip : allTrips.getList()) {
         if (trip.getTripId().startsWith(agencyId + "_")) {
-          agencyTrips.add(trip);
+          if (routeId == null || routeId.equals(trip.getTrip().getRoute().getId())) {
+            agencyTrips.add(trip);
+          }
         }
       }
     }

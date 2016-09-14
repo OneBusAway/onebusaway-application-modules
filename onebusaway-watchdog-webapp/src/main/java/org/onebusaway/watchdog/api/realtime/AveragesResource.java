@@ -105,13 +105,15 @@ public class AveragesResource extends LongTermAveragesResource {
   @Path("{agencyId}/buses-in-service-pct")
   @GET
   @Produces("application/json")
-  public Response getBusesInServicePct(@PathParam("agencyId") String agencyId, @QueryParam("feedId") String feedId) {
+  public Response getBusesInServicePct(@PathParam("agencyId") String agencyId, 
+      @QueryParam("feedId") String feedId,
+      @QueryParam("routeId") String routeId) {
     try {
       if (this.getDataSources() == null || this.getDataSources().isEmpty()) {
         _log.error("no configured data sources");
         return Response.ok(error("buses-in-service-pct", "no configured data sources")).build();
       }
-      int scheduledTrips = getScheduledTrips(agencyId);
+      int scheduledTrips = getScheduledTrips(agencyId, routeId);
       int validRealtimeTrips = getValidRealtimeTripIds(agencyId, feedId).size();
       int percent = (int)Math.round((validRealtimeTrips * 100.0 / scheduledTrips));
       int average = getAvgByAgency("buses-in-service-pct", agencyId);
@@ -184,13 +186,15 @@ public class AveragesResource extends LongTermAveragesResource {
   @Path("{agencyId}/trip-schedule-realtime-diff-pct")
   @GET
   @Produces("application/json")
-  public Response getTripScheduleRealtimeDiff(@PathParam("agencyId") String agencyId, @QueryParam("feedId") String feedId) {
+  public Response getTripScheduleRealtimeDiff(@PathParam("agencyId") String agencyId, 
+      @QueryParam("feedId") String feedId,
+      @QueryParam("routeId") String routeId) {
     try {
       if (this.getDataSources() == null || this.getDataSources().isEmpty()) {
         _log.error("no configured data sources");
         return Response.ok(error("trip-schedule-realtime-diff-pct", "no configured data sources")).build();
       } 
-      int scheduledTrips = getScheduledTrips(agencyId);
+      int scheduledTrips = getScheduledTrips(agencyId, routeId);
       int validRealtimeTrips = getValidRealtimeTripIds(agencyId, feedId).size();
       int diff = scheduledTrips - validRealtimeTrips;      
       int average = getAvgByAgency("trip-schedule-realtime-diff", agencyId);
