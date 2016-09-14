@@ -31,6 +31,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.geospatial.model.CoordinatePoint;
+import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data.model.ListBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsInclusionBean;
@@ -105,10 +106,10 @@ public abstract class MetricResource {
       }
   
       _log.debug("allTrips size=" + allTrips.getList().size());
-  
+      AgencyAndId routeAndId = new AgencyAndId(agencyId, routeId);
       for (TripDetailsBean trip : allTrips.getList()) {
-        if (trip.getTripId().startsWith(agencyId + "_")) {
-          if (routeId == null || routeId.equals(trip.getTrip().getRoute().getId())) {
+        if (trip.getTripId().startsWith(agencyId)) {
+          if (routeId == null || routeAndId.toString().equals(trip.getTrip().getRoute().getId())) {
             agencyTrips.add(trip);
           }
         }
