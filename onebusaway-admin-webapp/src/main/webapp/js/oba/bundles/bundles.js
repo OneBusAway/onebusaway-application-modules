@@ -52,6 +52,7 @@ jQuery(function() {
 		// alert("hash=" + hash);
 		$(hash).click();
 	}
+	clearPreviousBuildResults();
 	var qs = parseQuerystring();
 	if (qs["fromEmail"] == "true") {
 		//alert("called from email!");
@@ -68,10 +69,10 @@ jQuery(function() {
 		var $tabs = jQuery("#tabs");
 		$tabs.tabs('select', 3);
 		updateBuildStatus("test");
+		$("#bundleTestResultsHolder").show();
+		$("#testProgressBarDiv").show();
+		$("#testProgressBarDiv #testBuildProgress").text("Previous Build Messages").show();
 	}
-	// hide the Build Progress message
-	jQuery("#buildBundle #buildingTest").hide();
-	jQuery("#buildBundle #buildingFinal").hide();
 	// politely set our hash as tabs are changed
 	jQuery("#tabs").bind("tabsshow", function(event, ui) {
 		window.location.hash = ui.tab.hash;
@@ -1565,7 +1566,15 @@ function clearPreviousBuildResults() {
 	jQuery("#bundleFinalResultsHolder").hide();
 
 	//jQuery("#buildBundle #downloadTestLogs").hide();
-	//jQuery("#buildBundle #buildingTest").hide();
+	jQuery("#buildBundle #buildingTest").hide();
+	jQuery("#buildBundle #buildingFinal").hide();
+
+	//Reset the Progress bar
+	$("#testProgressBar").progressbar('value', 0)
+	$("#finalProgressBar").progressbar('value', 0)
+
+	//Make sure any "Bundle Build Failed" message is cleared
+	$("#testProgressBarDiv #testBuildProgress").text("Previous Build Messages");
 }
 
 function disableBuildButtons() {
