@@ -324,7 +324,6 @@ public class NYCFileUtils {
       for (String path : paths) {
         cmd.append(path + " ");
       }
-      cmd.append("-f " + filename);
       _log.info("exec:" + cmd.toString());
       process = Runtime.getRuntime().exec(cmd.toString());
       return process.waitFor();
