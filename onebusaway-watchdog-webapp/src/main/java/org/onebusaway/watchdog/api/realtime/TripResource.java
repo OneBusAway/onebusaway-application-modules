@@ -170,7 +170,8 @@ public class TripResource extends MetricResource {
       double scheduleTrips = getScheduledTrips(agencyId, routeId);
       if (scheduleTrips < 1) {
         // prevent NaN -- late night service may not have scheduled trips
-        return Response.ok(ok("buses-in-service-percent", 100.)).build();
+        // changed this to return 0 if no service -- makes more sense
+        return Response.ok(ok("buses-in-service-percent", 0.)).build();
       }
       double validRealtimeTrips = getValidRealtimeTripIds(agencyId, feedId).size();
 
