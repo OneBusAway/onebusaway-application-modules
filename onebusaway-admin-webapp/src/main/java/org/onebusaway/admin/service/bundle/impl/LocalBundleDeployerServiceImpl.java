@@ -135,7 +135,8 @@ public class LocalBundleDeployerServiceImpl implements BundleDeployerService{
 
       for (Bundle bundle : bundles) {
         // make sure bundle is active 
-        if (bundle.getServiceDateFrom().isBefore(new LocalDate())) {
+        if (bundle.getServiceDateFrom().isBefore(new LocalDate())
+            || bundle.getServiceDateFrom().isEqual(new LocalDate())) {
           if (latestBundle == null
             || bundle.getCreated().isAfter(latestBundle.getCreated())) {
           latestBundle = bundle;
