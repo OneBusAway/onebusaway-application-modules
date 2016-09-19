@@ -334,7 +334,7 @@ OBA.Sign = function() {
 				sign.appendTo(row);
 				
 				// name cell
-				var spanTxt = " Bus #" + rowInfo.vehicleId
+				var spanTxt = " Vehicle #" + rowInfo.vehicleId
 				if (!rowInfo.monitored) {
 					spanTxt = "";
 				}
@@ -370,7 +370,7 @@ OBA.Sign = function() {
 			stopElement.find("thead").html("").empty(); // clear out the header when there is no data to show
 			jQuery('<tr class="last">' + 
 					'<td colspan="4">' + 
-						'No buses en-route to this stop. Please check back shortly for an update.</li>' +
+						'No vehicles en-route to this stop. Please check back shortly for an update.</li>' +
 					'</td>' +
 				   '</tr>')
 				   .appendTo(tableBody);
