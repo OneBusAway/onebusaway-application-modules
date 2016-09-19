@@ -245,6 +245,10 @@ public class RealtimeServiceImpl implements RealtimeService {
   	    	  stopId, routeBean.getId(), adBean.getTrip().getDirectionId()))
     	  continue;
       
+      // Filter out if the vehicle has realtime information and is ahead of current stop
+      if (statusBeanForCurrentTrip.isPredicted() && !(adBean.hasPredictedArrivalTime() || adBean.hasPredictedDepartureTime()))
+        continue;
+      
       MonitoredStopVisitStructure stopVisit = new MonitoredStopVisitStructure();
      
       // Check for Realtime Data
