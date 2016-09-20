@@ -164,7 +164,13 @@ public class GtfsRealtimeRetrieverImpl implements GtfsRealtimeRetriever {
       stu.setStopSequence(stum.getStopSequence().intValue());
     }
     if (stum.getStopId() != null) {
-      stu.setStopId(parseId(stum.getStopId()));
+      String parsedStopId = parseId(stum.getStopId());
+      if (parsedStopId != null) {
+        stu.setStopId(parseId(stum.getStopId()));
+      } else {
+        // parsing failed (invalid agency-and-id) but pass along as is
+        stu.setStopId(stum.getStopId());
+      }
     }
     
     if (stum.getArrivalDelay() != null || stum.getArrivalTime() != null) {
@@ -261,6 +267,11 @@ public class GtfsRealtimeRetrieverImpl implements GtfsRealtimeRetriever {
   
   // parse an ID of the form agencyID_ID to ID
   private String parseId(String id) {
+    try {
       return AgencyAndIdLibrary.convertFromString(id).getId();
+    } catch (IllegalStateException ise) {
+      // KCM has technically invalid stop ids (100074234)
+      return null;
+    }
   }
 }
