@@ -261,6 +261,11 @@ public class GtfsRealtimeRetrieverImpl implements GtfsRealtimeRetriever {
   
   // parse an ID of the form agencyID_ID to ID
   private String parseId(String id) {
+    try {
       return AgencyAndIdLibrary.convertFromString(id).getId();
+    } catch (IllegalStateException ise) {
+      // KCM has technically invalid stop ids (100074234)
+      return null;
+    }
   }
 }
