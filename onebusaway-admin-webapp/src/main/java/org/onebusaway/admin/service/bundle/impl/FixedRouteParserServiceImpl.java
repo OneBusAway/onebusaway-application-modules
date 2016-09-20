@@ -59,27 +59,28 @@ public class FixedRouteParserServiceImpl implements FixedRouteParserService {
   public List<DataValidationMode> parseFixedRouteReportFile(File fixedRouteReportFile) {
 
     List<DataValidationMode> parsedModes = new ArrayList<>();
-    DataValidationMode currentMode = null;
-    try {
-      Reader in = new FileReader(fixedRouteReportFile);
-      int i = 0;
-      for (CSVRecord record : CSVFormat.DEFAULT.parse(in)) {
-        if (i==0) {
+    if (fixedRouteReportFile != null && fixedRouteReportFile.exists()) {
+      DataValidationMode currentMode = null;
+      try {
+        Reader in = new FileReader(fixedRouteReportFile);
+        int i = 0;
+        for (CSVRecord record : CSVFormat.DEFAULT.parse(in)) {
+          if (i==0) {
+            i++;
+            continue;   // Skip the first record, which is just the column headers
+          }
+          currentMode = parseRecord(record, currentMode, parsedModes);
           i++;
-          continue;   // Skip the first record, which is just the column headers
         }
-        currentMode = parseRecord(record, currentMode, parsedModes);
-        i++;
+      }  catch (FileNotFoundException e) {
+        _log.info("Exception parsing csv file " + fixedRouteReportFile, e);
+        e.printStackTrace();
+      } catch (IOException e) {
+        _log.info("Exception parsing csv file " + fixedRouteReportFile, e);
+        e.printStackTrace();
       }
-    }  catch (FileNotFoundException e) {
-      _log.info("Exception parsing csv file " + fixedRouteReportFile, e);
-      e.printStackTrace();
-    } catch (IOException e) {
-      _log.info("Exception parsing csv file " + fixedRouteReportFile, e);
-      e.printStackTrace();
+      parsedModes.add(currentMode); // Add in the last mode processed.
     }
-    parsedModes.add(currentMode); // Add in the last mode processed.
-   
     return parsedModes;
   }
   

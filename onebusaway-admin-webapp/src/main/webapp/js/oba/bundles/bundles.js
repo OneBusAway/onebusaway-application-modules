@@ -52,6 +52,7 @@ jQuery(function() {
 		// alert("hash=" + hash);
 		$(hash).click();
 	}
+	clearPreviousBuildResults();
 	var qs = parseQuerystring();
 	if (qs["fromEmail"] == "true") {
 		//alert("called from email!");
@@ -67,11 +68,11 @@ jQuery(function() {
 		// just in case set the tab
 		var $tabs = jQuery("#tabs");
 		$tabs.tabs('select', 3);
-		updateBuildStatus();
+		updateBuildStatus("test");
+		$("#bundleTestResultsHolder").show();
+		$("#testProgressBarDiv").show();
+		$("#testProgressBarDiv #testBuildProgress").text("Previous Build Messages").show();
 	}
-	// hide the Build Progress message
-	jQuery("#buildBundle #buildingTest").hide();
-	jQuery("#buildBundle #buildingFinal").hide();
 	// politely set our hash as tabs are changed
 	jQuery("#tabs").bind("tabsshow", function(event, ui) {
 		window.location.hash = ui.tab.hash;
@@ -277,6 +278,8 @@ jQuery(function() {
 
 	// change input type to 'file' if protocol changes to 'file'
 	jQuery("#agency_data").on("change", "tr .agencyProtocol", onAgencyProtocolChange);
+
+	jQuery("#addNewAgency").click(onAddNewAgencyClick);
 
 	// remove selected agencies
 	// jQuery(".removeAgency").click(onRemoveSelectedAgenciesClick);
@@ -1030,6 +1033,38 @@ function onBundleCommentChanged() {
 	});
 }
 
+function onAddNewAgencyClick() {
+	// Make ajax call
+	jQuery.ajax({
+		url: "../../api/agency/create",
+		type: "GET",
+		async: false,
+		data: {
+			"gtfs_id" : "",
+			"name" : $("#newAgencyName").val(),
+			"short_name" : $("#newAgencyShortName").val(),
+			"legacy_id" : $("#newAgencyLegacyId").val(),
+			"gtfs_feed_url" : "",
+			"gtfs_rt_feed_url" : "",
+			"bounding_box" : "",
+			"ntd_id" : "",
+			"agency_message" : ""
+		},
+		success: function(response) {
+			getAgencyMetadata();
+
+			//clear fields for new agency
+			$("#newAgencyName").val("");
+			$("#newAgencyShortName").val("");
+			$("#newAgencyLegacyId").val("");
+		},
+		error: function(request) {
+			console.log("Error adding new agency");
+			alert("There was an error processing your request. Please try again.");
+		}
+	});
+}
+
 /*
  * When a dataset is selected from the "Choose" tab, this function is called
  * for displaying the results from the most recent build for the selected
@@ -1531,7 +1566,15 @@ function clearPreviousBuildResults() {
 	jQuery("#bundleFinalResultsHolder").hide();
 
 	//jQuery("#buildBundle #downloadTestLogs").hide();
-	//jQuery("#buildBundle #buildingTest").hide();
+	jQuery("#buildBundle #buildingTest").hide();
+	jQuery("#buildBundle #buildingFinal").hide();
+
+	//Reset the Progress bar
+	$("#testProgressBar").progressbar('value', 0)
+	$("#finalProgressBar").progressbar('value', 0)
+
+	//Make sure any "Bundle Build Failed" message is cleared
+	$("#testProgressBarDiv #testBuildProgress").text("Previous Build Messages");
 }
 
 function disableBuildButtons() {
