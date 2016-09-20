@@ -164,7 +164,13 @@ public class GtfsRealtimeRetrieverImpl implements GtfsRealtimeRetriever {
       stu.setStopSequence(stum.getStopSequence().intValue());
     }
     if (stum.getStopId() != null) {
-      stu.setStopId(parseId(stum.getStopId()));
+      String parsedStopId = parseId(stum.getStopId());
+      if (parsedStopId != null) {
+        stu.setStopId(parseId(stum.getStopId()));
+      } else {
+        // parsing failed (invalid agency-and-id) but pass along as is
+        stu.setStopId(stum.getStopId());
+      }
     }
     
     if (stum.getArrivalDelay() != null || stum.getArrivalTime() != null) {
