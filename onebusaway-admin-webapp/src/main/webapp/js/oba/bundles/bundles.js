@@ -678,7 +678,11 @@ function showBundleInfo(bundleInfo){
 function onCreateDatasetClick() {
 	selectedDirectory = jQuery("#createDataset #directoryName").val();
 	$("#Download #download_selectedDataset").text(selectedDirectory);
+	// Clear fields on the Upload tab
+	$('#agency_data tr').slice(1).remove();
+	onAddAnotherAgencyClick("file");
 	$("#uploadFiles #bundleComment").val("");
+	$('#existingFilesTable tr').slice(1).remove();
 	onSelectDataset("create");
 }
 
@@ -1086,6 +1090,10 @@ function onAddAnotherAgencyClick(inputType) {
 	if (inputType === undefined) {
 		inputType = "file";
 	}
+	var file_selected = ""; // For Protocol select group
+	if (inputType === "file") {
+		file_selected = "selected";
+	}
 	var metadata = "";
 	var url = "";
 	if (agencyMetadataAvailable) {
@@ -1113,7 +1121,7 @@ function onAddAnotherAgencyClick(inputType) {
 		<td><select class="agencyProtocol"> \
 		<option value="http">http</option> \
 		<option value="ftp">ftp</option> \
-		<option value="file">file</option> \
+		<option value="file" ' + file_selected + '>file</option> \
 		</select></td> \
 		<td class="agencyDataSourceData"> \
 		<input type=' + inputType + ' class="agencyDataSource" ' + urlValue + '/></td> \
