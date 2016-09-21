@@ -629,7 +629,7 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
      in = urlConnection.getInputStream();
      return FeedMessage.parseFrom(in, _registry);
    } catch (IOException ex) {
-     _log.error("connection issue with url " + url);
+     _log.error("connection issue with url " + url + ", ex=" + ex);
      return getDefaultFeedMessage();
    } finally {
       try {
