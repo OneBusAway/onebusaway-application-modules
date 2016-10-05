@@ -39,6 +39,7 @@
 
         <result-types>
             <result-type name="xml" class="org.onebusaway.api.impl.XmlResult" />
+            <result-type name="rss" class="com.googlecode.s2rome.struts2.plugin.rome.RomeResult"/>
         </result-types>
 
         <interceptors>
