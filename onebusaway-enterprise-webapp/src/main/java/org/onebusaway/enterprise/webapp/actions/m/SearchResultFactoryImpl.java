@@ -271,7 +271,7 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
         continue;
 
       String directionId = visit.getMonitoredVehicleJourney().getDirectionRef().getValue();
-      if (!stopGroupBean.getId().equals(directionId))
+      if (directionId != null && !stopGroupBean.getId().equals(directionId)) 
         continue;
 
       // on detour?

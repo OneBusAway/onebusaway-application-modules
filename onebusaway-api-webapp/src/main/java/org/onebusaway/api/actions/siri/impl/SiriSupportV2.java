@@ -137,7 +137,11 @@ public final class SiriSupportV2 {
     
     //Route Short Name
     NaturalLanguageStringStructure routeShortName = new NaturalLanguageStringStructure();
-    routeShortName.setValue(framedJourneyTripBean.getRoute().getShortName());
+    String shortName = framedJourneyTripBean.getRoute().getShortName();
+    if (shortName == null) {
+      shortName = framedJourneyTripBean.getRoute().getId().split("_")[1];
+    }
+    routeShortName.setValue(shortName);
     
     //Agency Id
     OperatorRefStructure operatorRef = new OperatorRefStructure();

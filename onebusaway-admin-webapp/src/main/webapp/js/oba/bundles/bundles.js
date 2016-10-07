@@ -63,15 +63,16 @@ jQuery(function() {
 		jQuery("#Build #startDatePicker").val(qs["startDate"]);
 		jQuery("#Build #endDatePicker").val(qs["endDate"]);
 		jQuery("#bundleComment").val(qs["bundleComment"]);
-		//hide the result link when reentering from email
-		jQuery("#buildBundle_resultLink").hide();
 		// just in case set the tab
 		var $tabs = jQuery("#tabs");
 		$tabs.tabs('select', 3);
-		updateBuildStatus("test");
+		// Reshow hidden result elements
+		$("#buildBundle #buildingTest").show();
+		$("#buildBundle_testResultLink").show();
 		$("#bundleTestResultsHolder").show();
 		$("#testProgressBarDiv").show();
 		$("#testProgressBarDiv #testBuildProgress").text("Previous Build Messages").show();
+		updateBuildStatus("test");
 	}
 	// politely set our hash as tabs are changed
 	jQuery("#tabs").bind("tabsshow", function(event, ui) {
@@ -1521,7 +1522,8 @@ function onBuildClick(event) {
 		jQuery("#buildBundle #buildingTest #buildingTestProgress").attr("src","../../css/img/ajax-loader.gif");
 		jQuery("#buildBundle_buildTestProgress").text("Bundle Build in Progress...");
 		jQuery("#buildBundle_testFileList").html("");
-		jQuery("#buildBundle #buildingTest").show().css("width","300px").css("margin-top", "20px");
+		//jQuery("#buildBundle #buildingTest").show().css("width","300px").css("margin-top", "20px");
+		jQuery("#buildBundle #buildingTest").show();
 		// Show result link
 		$("#buildBundle_testResultLink").show();
 	} else {
@@ -1532,7 +1534,8 @@ function onBuildClick(event) {
 		jQuery("#buildBundle #buildingFinal #buildingFinalProgress").attr("src","../../css/img/ajax-loader.gif");
 		jQuery("#buildBundle_buildFinalProgress").text("Bundle Build in Progress...");
 		jQuery("#buildBundle_finalFileList").html("");
-		jQuery("#buildBundle #buildingFinal").show().css("width","300px").css("margin-top", "20px");
+		//jQuery("#buildBundle #buildingFinal").show().css("width","300px").css("margin-top", "20px");
+		jQuery("#buildBundle #buildingFinal").show();
 		// Show result link
 		$("#buildBundle_finalResultLink").show();
 	}
@@ -1544,12 +1547,6 @@ function onBuildClick(event) {
 
 	clearPreviousBuildResults();
 	disableBuildButtons();
-
-	//jQuery("#buildBundle_testFileList").html("");
-	//jQuery("#buildBundle #buildingTest").show().css("width","300px").css("margin-top", "20px");
-
-	// Show result link
-	//$("#buildBundle_testResultLink").show();
 
 	buildBundle(bundleName, startDate, endDate, bundleComment, archive, consolidate, false, buildType);
 }
@@ -1745,10 +1742,10 @@ function updateBuildStatus(buildType) {
 	console.log("build type: " + buildType);
 	disableStageButton();
 	disableDownloadButton();
-	//id = jQuery("#buildBundle_id").text();
 	id = buildBundleId;
 	// Initialize vars for Test section
 	var $buildBundle_buildProgress = jQuery("#buildBundle_buildTestProgress");
+	var $resultLink = jQuery("#testResultLink");
 	var $progressBar = jQuery("#testProgressBar");
 	var $buildingProgress = jQuery("#buildBundle #buildingTest #buildingTestProgress");
 	var $buildProgress = jQuery("#testBuildProgress");
@@ -1756,6 +1753,7 @@ function updateBuildStatus(buildType) {
 	var $buildBundle_exception = jQuery("#buildBundle_testException");
 	if (buildType == "final") {
 		$buildBundle_buildProgress = jQuery("#buildBundle_buildFinalProgress");
+		$resultLink = jQuery("#finalResultLink");
 		$progressBar = jQuery("#finalProgressBar");
 		$buildingProgress = jQuery("#buildBundle #buildingFinal #buildingFinalProgress");
 		$buildProgress = jQuery("#finalBuildProgress");
@@ -1767,7 +1765,6 @@ function updateBuildStatus(buildType) {
 		type: "GET",
 		async: false,
 		success: function(response) {
-			//var txt = "<ul>";
 			var txt = "";
 			var currentTask = 0;
 			var totalTasks = 0;
@@ -1775,10 +1772,17 @@ function updateBuildStatus(buildType) {
 			if (bundleResponse == null) {
 				$buildBundle_buildProgress.text("Bundle Status Unknown!");
 				$buildingProgress.attr("src","../../css/img/dialog-warning-4.png");
-				//jQuery("#buildBundle_resultList").html("unknown id=" + id);
 				$buildBundle_resultList.val("unknown id=" + id);
 				enableBuildButtons();
 			} else {
+				if (!$resultLink.text()) {
+					$resultLink
+						.text(bundleResponse.bundleResultLink)
+						.css("padding-left", "5px")
+						.css("font-size", "12px")
+						.addClass("adminLabel")
+						.css("color", "green");
+				}
 				jQuery("#Build #datasetName").text(bundleResponse.bundleDirectoryName);
 				var size = 0;
 				if (bundleResponse.statusList != null) {
@@ -1803,15 +1807,12 @@ function updateBuildStatus(buildType) {
 							$buildProgress.text("Completed " + currentTask
 									+ " of " + totalTasks + " build tasks.");
 						}
-						//txt = txt + "<li>" + bundleResponse.statusList[i] + "</li>";
 						txt = txt + nextLine + "\n";
 					}
 				}
 				if (bundleResponse.complete == false) {
 					window.setTimeout(updateBuildStatus.bind(null, buildType), 5000); // recurse
 				} else {
-					//jQuery("#buildBundle_buildTestProgress").text("Bundle Complete!");
-					//jQuery("#buildBundle #buildingTest #buildingTestProgress").attr("src","../../css/img/dialog-accept-2.png");
 					$buildBundle_buildProgress.text("Bundle Complete!");
 					$buildingProgress.attr("src","../../css/img/dialog-accept-2.png");
 					updateBuildList(id, buildType);
@@ -1821,21 +1822,15 @@ function updateBuildStatus(buildType) {
 					enableDownloadButton();
 					enableBuildButtons();
 				}
-				//txt = txt + "</ul>";
-				//jQuery("#buildBundle_resultList").html(txt).css("font-size", "12px");
 				$buildBundle_resultList.val(txt).css("font-size", "12px");
 				// Make sure that the textarea remains scrolled to the bottom.
 				$buildBundle_resultList.scrollTop(1500);  // Just use some arbitrarily large number
 				// check for exception
 				if (bundleResponse.exception != null) {
-					//jQuery("#buildBundle_buildTestProgress").text("Bundle Failed!");
 					$buildBundle_buildProgress.text("Bundle Failed!");
 					$buildProgress.text("Bundle build failed");
-					//jQuery("#buildBundle #buildingTest #buildingTestProgress").attr("src","../../css/img/dialog-warning-4.png");
 					$buildingProgress.attr("src","../../css/img/dialog-warning-4.png");
 					if (bundleResponse.exception.message != undefined) {
-						//jQuery("#buildBundle_testException").show().css("display","inline");
-						//jQuery("#buildBundle_testException").html(bundleResponse.exception.message);
 						$buildBundle_exception.show().css("display","inline");
 						$buildBundle_exception.html(bundleResponse.exception.message);
 					}

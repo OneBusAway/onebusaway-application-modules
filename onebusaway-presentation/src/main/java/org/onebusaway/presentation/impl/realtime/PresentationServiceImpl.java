@@ -319,6 +319,7 @@ public class PresentationServiceImpl implements PresentationService {
 	      return false;
 	    }
     }
+    _log.debug("include passed for " + statusBean.getVehicleId());
     return true;
   }
 
@@ -327,20 +328,28 @@ public class PresentationServiceImpl implements PresentationService {
    */
   @Override
   public boolean include(ArrivalAndDepartureBean adBean, TripStatusBean status) {
-	if(adBean == null || status == null)
+	if(adBean == null || status == null) {
+	  _log.debug("null info");
 		return false;
+	}
 	
 	if(status.isPredicted()) {
 		if(adBean.getPredictedArrivalTime() > 0 && adBean.getPredictedArrivalTime() < getTime()
-		    && adBean.getDistanceFromStop() != 0.0)
+		    && adBean.getDistanceFromStop() != 0.0) {
+		  _log.debug(" prediction in past drop");
 			return false;
+		}
 	    // hide buses that are on detour from a-d queries
-	    if(isOnDetour(status))
+	    if(isOnDetour(status)) {
+	      _log.debug(" detour drop");
 	      return false;
+	    }
 	}
 	else{
-		if(adBean.getScheduledArrivalTime() > 0 && adBean.getScheduledArrivalTime() < getTime())
+		if(adBean.getScheduledArrivalTime() > 0 && adBean.getScheduledArrivalTime() < getTime()) {
+		  _log.debug("shcheduled arrival in past drop");
 			return false;
+		}
 	}
 
     // wrap-around logic
@@ -365,7 +374,8 @@ public class PresentationServiceImpl implements PresentationService {
       double distanceFromTerminalMeters = totalDistanceAlongTrip - distanceAlongTrip;
 
       if(distanceFromTerminalMeters > (_previousTripFilterDistanceMiles * 1609)) {
-    	  _log.debug("  " + status.getVehicleId() + " filtered out due to distance from terminal on prev. trip");
+    	  _log.debug("  " + status.getVehicleId() + " filtered out due to distance from terminal on prev. trip "
+    	      + distanceFromTerminalMeters + " > " + (_previousTripFilterDistanceMiles * 1609));
 	      return false;
       }
 	}
@@ -432,6 +442,7 @@ public class PresentationServiceImpl implements PresentationService {
       }
     }*/
 
+    _log.debug("include ad passed for " + status.getVehicleId());
     return true;
   }
 

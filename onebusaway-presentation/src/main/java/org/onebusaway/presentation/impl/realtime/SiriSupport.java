@@ -114,7 +114,11 @@ public final class SiriSupport {
 		monitoredVehicleJourney.setDirectionRef(directionRef);
 
 		NaturalLanguageStringStructure routeShortName = new NaturalLanguageStringStructure();
-		routeShortName.setValue(framedJourneyTripBean.getRoute().getShortName());
+		String shortName = framedJourneyTripBean.getRoute().getShortName();
+		if (shortName == null) {
+		  shortName = framedJourneyTripBean.getRoute().getId().split("_")[1];
+		}
+		routeShortName.setValue(shortName);
 		monitoredVehicleJourney.setPublishedLineName(routeShortName);
 
 		JourneyPatternRefStructure journeyPattern = new JourneyPatternRefStructure();

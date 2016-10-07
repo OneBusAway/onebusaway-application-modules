@@ -44,6 +44,8 @@ public class RouteAtStop {
   }
   
   public String getShortName() {
+    if (route.getShortName() == null)
+      return route.getId().split("_")[1];
     return route.getShortName();
   }
   

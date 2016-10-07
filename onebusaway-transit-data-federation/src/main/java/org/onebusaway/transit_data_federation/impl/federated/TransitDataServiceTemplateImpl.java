@@ -597,17 +597,17 @@ public class TransitDataServiceTemplateImpl implements TransitDataServiceTemplat
   }
 
   //@Override
-  public Boolean routeHasUpcomingScheduledService(String agencyId, long time, String routeId,
+  public Boolean routeHasUpcomingScheduledService(String routeAgencyId, long time, String routeId,
 		String directionId) {
     
-	  return _scheduleHelperService.routeHasUpcomingScheduledService(agencyId, time, routeId, directionId);
+	  return _scheduleHelperService.routeHasUpcomingScheduledService(routeAgencyId, time, routeId, directionId);
   }
 
   //@Override
-  public Boolean stopHasUpcomingScheduledService(String agencyId, long time, String stopId,
+  public Boolean stopHasUpcomingScheduledService(String stopAgencyId, long time, String stopId,
 		String routeId, String directionId) {
     
-	  return _scheduleHelperService.stopHasUpcomingScheduledService(agencyId, time, stopId, routeId, directionId);
+	  return _scheduleHelperService.stopHasUpcomingScheduledService(stopAgencyId, time, stopId, routeId, directionId);
   }
 
   //@Override
@@ -615,8 +615,8 @@ public class TransitDataServiceTemplateImpl implements TransitDataServiceTemplat
 	  return _scheduleHelperService.getSearchSuggestions(agencyId, input);
   }
   
-  public Boolean stopHasRevenueServiceOnRoute(String agencyId, String stopId, String routeId, String directionId) {
-      return _scheduleHelperService.stopHasRevenueServiceOnRoute(agencyId, stopId, routeId, directionId);
+  public Boolean stopHasRevenueServiceOnRoute(String stopAgencyId, String stopId, String routeId, String directionId) {
+      return _scheduleHelperService.stopHasRevenueServiceOnRoute(stopAgencyId, stopId, routeId, directionId);
   }
   
   public Boolean stopHasRevenueService(String agencyId, String stopId) {
