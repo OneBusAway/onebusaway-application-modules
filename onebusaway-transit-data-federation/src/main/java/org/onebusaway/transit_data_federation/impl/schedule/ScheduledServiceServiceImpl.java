@@ -42,8 +42,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class ScheduledServiceServiceImpl implements ScheduleHelperService {
   
-  Logger _log = Logger.getLogger(ScheduledServiceServiceImpl.class);
-  
   private static final long SCHEDULE_WINDOW_BEFORE = 15 * 60 * 1000;
 
   private static final long SCHEDULE_WINDOW_AFTER = 60 * 60 * 1000;
