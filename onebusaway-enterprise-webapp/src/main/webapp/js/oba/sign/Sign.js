@@ -194,7 +194,10 @@ OBA.Sign = function() {
 		var sign = element.addClass("sign");
 		sign.css("border-left-color", routeInfo[routeId].color);
 		sign.css("border-left-style", "solid");
-		sign.text(routeInfo[routeId].shortName);
+		var shortName = routeInfo[routeId].shortName
+		if (shortName == null || shortName == "")
+			shortName = routeId.split("_")[1];
+		sign.text(shortName);
 		return sign;
 	}
 	
