@@ -21,6 +21,8 @@ import java.util.List;
 public class StatusGroup {
 
 	String title;
+	String source;
+	String scope;
 	
 	List<StatusItem> items = new ArrayList<StatusItem>();
 	
@@ -29,6 +31,18 @@ public class StatusGroup {
 	}
 	public void setTitle(String title) {
 		this.title = title;
+	}
+	public String getSource() {
+	  return source;
+	}
+	public void setSource(String source) {
+	  this.source = source;
+	}
+	public String getScope() {
+	  return scope;
+	}
+	public void setScope(String scope) {
+	  this.scope = scope;
 	}
 	public List<StatusItem> getItems() {
 		return items;

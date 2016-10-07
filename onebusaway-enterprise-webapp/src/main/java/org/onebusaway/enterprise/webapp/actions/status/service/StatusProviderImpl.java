@@ -59,7 +59,9 @@ public class StatusProviderImpl implements StatusProvider {
   public StatusGroup getServiceAlertStatus() {
 
     StatusGroup group = new StatusGroup();
-    group.setTitle("Service Alerts");
+    group.setTitle("Agency Advisories");
+    group.setScope("Schedule and real-time availability at the agency level");
+    group.setSource("Sound Transit administrators -- manual entry");
 
     List<AgencyWithCoverageBean> agencies = _transitDataService.getAgenciesWithCoverage();
 
@@ -92,8 +94,10 @@ public class StatusProviderImpl implements StatusProvider {
   public StatusGroup getIcingaStatus() {
     
     StatusGroup group = new StatusGroup();
-    group.setTitle("Icinga Alerts");
-    
+    group.setTitle("System Monitoring");
+    group.setScope("Monitoring and Infrastructure notices");
+    group.setSource("Monitoring subsystem -- automated notifications");
+
     IcingaResponse response = null;
     
     // fail if not configured!
@@ -150,8 +154,10 @@ public class StatusProviderImpl implements StatusProvider {
   public StatusGroup getAgencyMetadataStatus() {
     
     StatusGroup group = new StatusGroup();
-    group.setTitle("Agency Messages");
-    
+    group.setTitle("General Notices");
+    group.setScope("Informational updates about holiday and schedule changes");
+    group.setSource("Agency Providers -- manual entry");
+
     AgencyMetadata[] response = new AgencyMetadata[0];
     
     String api =  _config.getConfigurationValueAsString("status.obaApi", 
@@ -196,6 +202,7 @@ public class StatusProviderImpl implements StatusProvider {
   
   private static String encode(String command) throws UnsupportedEncodingException {
     StringBuffer encoded = new StringBuffer();
+    if (command == null) return encoded.toString();
     String[] tokens = command.split("/");
     for (String token : tokens) {
       String enc = URLEncoder.encode(token, "utf-8");
