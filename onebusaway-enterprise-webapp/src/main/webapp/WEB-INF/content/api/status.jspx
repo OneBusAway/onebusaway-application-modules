@@ -43,13 +43,21 @@ span.link { text-decoration: underline; text-decoration-style: dotted; }
     <div class="row">
       <div class="page-header">
         <span class="badge pull-right">Last Refreshed: <span id="time">25</span> seconds ago</span>  
-        <h1>Onebusaway System Status</h1> 
+        <h1>OneBusAway System Status</h1> 
       </div>
     </div>
     
     <s:iterator value="groups">
       <div class="panel panel-default">
-        <div class="panel-heading"><s:property value="title" /></div>
+        <div class="panel-heading">
+        	<b><s:property value="title" /></b>
+        	<br/>
+        	<br/>
+        	<span><small><b>Scope:  </b><s:property value="scope" /></small></span>
+        	<br/>
+        	<span><small><b>Source:  </b><s:property value="source" /></small></span>
+       	</div>
+        
       <div class="panel-body">
        	<s:if test="%{items.size == 0}">
        	   <div class="panel panel-success" style="margin-bottom:0;">
