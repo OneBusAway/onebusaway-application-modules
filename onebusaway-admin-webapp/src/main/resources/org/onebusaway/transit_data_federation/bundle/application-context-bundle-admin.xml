@@ -238,6 +238,26 @@
   	<property name="filename" value="gtfs_validation_post.csv"/>
   </bean> 
 
+  <bean id="task_gtfs_full_validation" class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
+    <property name="taskName" value="gtfs_full_validation" />
+    <property name="afterTaskName" value="gtfs_validation_post_transform"/>
+    <property name="beforeTaskName" value="transit_graph"/>
+    <property name="task" ref="gtfsFullValidationTask" />
+  </bean>
+
+  <bean id="gtfsFullValidationTask" class="org.onebusaway.admin.service.bundle.task.GtfsFullValidationTask">
+    <property name="validateService" ref="bundleValidationService" />
+  </bean>
+
+  <bean id="bundleValidationService" class="org.onebusaway.admin.service.bundle.impl.BundleValidationServiceImpl" />
+
+  <bean id="fileService" class="org.onebusaway.admin.service.impl.FileServiceBridge">
+    <property name="bucketName" value="obanyc-bundle-data-test"/>
+    <property name="gtfsPath" value="gtfs_latest" />
+    <property name="auxPath" value="aux_latest" />
+    <property name="configPath" value="config" />
+    <property name="buildPath" value="builds" />
+  </bean>
 
   <bean id="task_check_shapes" class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
     <property name="taskName" value="check_shapes" />

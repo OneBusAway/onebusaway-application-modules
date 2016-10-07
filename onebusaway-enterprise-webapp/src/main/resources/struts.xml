@@ -33,6 +33,10 @@
 
     <package name="onebusaway-webapp-default" extends="struts-default">
 
+        <result-types>
+            <result-type name="rss" class="com.googlecode.s2rome.struts2.plugin.rome.RomeResult"/>
+        </result-types>
+
         <global-results>
          	<result name="NotFound">
                 <param name="location">/WEB-INF/content/error/404.jspx</param>
@@ -45,12 +49,12 @@
                 <param name="namespace">/</param>
                 <param name="actionName">index</param>
             </result>
-            <result name="errorHandler" type="chain">
+			<result name="errorHandler" type="chain">
 		        <param name="actionName">error</param>
 		        <param name="namespace">/</param>
 		    </result>
         </global-results>
-         <global-exception-mappings>
+        <global-exception-mappings>
     		<exception-mapping exception="java.lang.Exception" result="errorHandler"/>
 		</global-exception-mappings>
 
