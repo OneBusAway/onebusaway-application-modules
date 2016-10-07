@@ -17,7 +17,6 @@ package org.onebusaway.transit_data_federation.impl.schedule;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.log4j.Logger;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data.model.AgencyBean;
 import org.onebusaway.transit_data.model.StopBean;
@@ -42,8 +41,6 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class ScheduledServiceServiceImpl implements ScheduleHelperService {
-  
-  Logger _log = Logger.getLogger(ScheduledServiceServiceImpl.class);
   
   private static final long SCHEDULE_WINDOW_BEFORE = 15 * 60 * 1000;
 
@@ -190,7 +187,6 @@ public class ScheduledServiceServiceImpl implements ScheduleHelperService {
   @Override
   public List<String> getSearchSuggestions(String agencyId, String input) {
     // TODO Auto-generated method stub
-    _log.error("unimplemented getSearchSuggestions");
     return null;
   }
 
@@ -198,7 +194,6 @@ public class ScheduledServiceServiceImpl implements ScheduleHelperService {
   public List<StopBean> filterRevenueService(AgencyBean agency,
       StopsBean stops) {
     // TODO Auto-generated method stub
-    _log.error("unimplemented filterRevenueService");
     return stops.getStops();
   }
   
