@@ -1871,7 +1871,6 @@ function updateBuildList(id,buildType) {
 	var fileCountMap = new Array();
 	for (var i = 0; i < lines.length; i++) {
 		var dataField = lines[i].split(',');
-
 		fileDescriptionMap[dataField[0]] = dataField[1];
 		fileCountMap[dataField[0]] = dataField[2];
 	}
@@ -1890,6 +1889,11 @@ function updateBuildList(id,buildType) {
 					for (var i=0; i<size; i++) {
 						var description = fileDescriptionMap[list[i]];
 						var lineCount = fileCountMap[list[i]];
+						var fileExtension = list[i].substring(list[i].lastIndexOf("."));
+						// for html files, leave lineCount blank
+						if (fileExtension === ".html") {
+							lineCount = "";
+						}
 						if (description != undefined) {
 							var encoded = encodeURIComponent(list[i]);
 							txt = txt + "<li>" + description + ":" + "&nbsp;"
@@ -1897,7 +1901,9 @@ function updateBuildList(id,buildType) {
 							+ "<img src=\"../../css/img/go-down-5.png\" />"
 							+ "<a href=\"manage-bundles!downloadOutputFile.action?id="
 							+ id+ "&downloadFilename=" 
-							+ encoded + "\">" + ".csv" +  "</a></li>";
+							+ encoded + "\">"
+							+ fileExtension
+							+  "</a></li>";
 						}
 					}
 				}
