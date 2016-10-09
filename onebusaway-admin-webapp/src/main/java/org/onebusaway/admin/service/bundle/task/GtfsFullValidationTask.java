@@ -16,16 +16,12 @@
 package org.onebusaway.admin.service.bundle.task;
 
 import java.io.File;
-import java.io.IOException;
 
-import org.onebusaway.admin.model.BundleRequest;
 import org.onebusaway.admin.model.BundleRequestResponse;
 import org.onebusaway.admin.service.bundle.BundleValidationService;
-import org.onebusaway.gtfs.serialization.GtfsReader;
-import org.onebusaway.gtfs.services.GtfsMutableRelationalDao;
-import org.onebusaway.king_county_metro_gtfs.model.PatternPair;
 import org.onebusaway.transit_data_federation.bundle.model.GtfsBundle;
 import org.onebusaway.transit_data_federation.bundle.model.GtfsBundles;
+import org.onebusaway.transit_data_federation.bundle.tasks.MultiCSVLogger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,8 +45,15 @@ public class GtfsFullValidationTask implements  Runnable {
   @Autowired
   private BundleValidationService _validateService;
 
+  @Autowired
+  protected MultiCSVLogger _logger;
+
   public void setValidateService(BundleValidationService validateService) {
     _validateService = validateService;
+  }
+
+  public void setLogger(MultiCSVLogger logger) {
+    _logger = logger;
   }
 
   @Override
@@ -68,10 +71,11 @@ public class GtfsFullValidationTask implements  Runnable {
       String gtfsFileName = gtfsFile.getName();
       String gtfsFilePath = gtfsBundle.getPath().toString();
       String outputFile = requestResponse.getResponse().getBundleOutputDirectory() 
-          + "/final/" + gtfsFileName + ".html"; 
+          + "/" + gtfsFileName + ".html";
       _log.info(gtfsBundle.getPath().toString());
       try {
         _validateService.installAndValidateGtfs(gtfsFilePath, outputFile);
+        _logger.header(gtfsFileName + ".html", "", "");  // To go into summary.csv
       } catch (Exception any) {
         _log.error("GtfsFullValidationTask failed:", any);
       } finally {
