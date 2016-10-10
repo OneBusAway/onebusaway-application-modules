@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2011 Google, Inc.
+ * Copyright (C) 2016 Cambridge Systematics, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,11 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime;
+package org.onebusaway.transit_data_federation.services.blocks;
 
+import java.util.List;
 
-public interface MonitoredDataSource {
-
-  MonitoredResult getMonitoredResult();
-  String getFeedId();
+public interface BlockRunService {
+  public List<Integer> getBlockIds(Integer routeKey, Integer runId);
 }

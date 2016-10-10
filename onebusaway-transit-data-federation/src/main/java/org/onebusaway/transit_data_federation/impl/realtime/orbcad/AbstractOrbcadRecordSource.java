@@ -105,6 +105,8 @@ public abstract class AbstractOrbcadRecordSource implements MonitoredDataSource 
   private transient long _latestUpdate = 0;
   
   private MonitoredResult _monitoredResult, _currentResult = new MonitoredResult();
+  
+  private String _feedId = null;
 
   public void setRefreshInterval(int refreshIntervalInSeconds) {
     _refreshInterval = refreshIntervalInSeconds;
@@ -147,6 +149,13 @@ public abstract class AbstractOrbcadRecordSource implements MonitoredDataSource 
     return _monitoredResult;
   }
   
+  public String getFeedId() {
+    return _feedId;
+  }
+  
+  public void setFeedId(String id) {
+    _feedId = id;
+  }
   
   /****
    * JMX Attributes

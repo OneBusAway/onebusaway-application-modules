@@ -19,6 +19,7 @@ package org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime;
 
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -28,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import org.onebusaway.collections.MappingLibrary;
 import org.onebusaway.collections.Min;
@@ -80,6 +82,14 @@ class GtfsRealtimeTripLibrary {
    */
   private long _currentTime = 0;
 
+  private boolean _validateCurrentTime = true;
+  public void setValidateCurrentTime(boolean validate) {
+    _validateCurrentTime = validate;
+  }
+  private boolean validateCurrentTime() {
+    return _validateCurrentTime;
+  }
+
   private StopModificationStrategy _stopModificationStrategy = null;
 
   private boolean _scheduleAdherenceFromLocation = false;
@@ -97,7 +107,20 @@ class GtfsRealtimeTripLibrary {
   }
 
   public void setCurrentTime(long currentTime) {
+    setCurrentTime(currentTime, 0);
+  }
+  
+  public void setCurrentTime(long currentTime, int originOffsetHours) {
+    if (originOffsetHours != 0) {
+      Calendar c = Calendar.getInstance();
+      c.setTime(new Date(currentTime));
+      c.roll(Calendar.HOUR, originOffsetHours);
+      _currentTime = c.getTimeInMillis();
+      _log.info("currentTime set to " + new Date(_currentTime) + " from offset " + originOffsetHours);
+    } else {
     _currentTime = currentTime;
+    }
+    
   }
   
   public void setStopModificationStrategy(StopModificationStrategy strategy) {
@@ -819,7 +842,7 @@ class GtfsRealtimeTripLibrary {
       VehicleLocationRecord record) {
     Position position = vehiclePosition.getPosition();
     if (vehiclePosition.hasTimestamp()) {
-      record.setTimeOfLocationUpdate(vehiclePosition.getTimestamp() * 1000); //vehicle timestamp is in seconds
+      record.setTimeOfLocationUpdate(TimeUnit.SECONDS.toMillis(vehiclePosition.getTimestamp())); //vehicle timestamp is in seconds
     }
     record.setCurrentLocationLat(position.getLatitude());
     record.setCurrentLocationLon(position.getLongitude());
@@ -854,8 +877,14 @@ class GtfsRealtimeTripLibrary {
   }
 
   private long currentTime() {
-    if (_currentTime != 0)
+    if (_currentTime != 0) {
+      // if the feed clock is off by more than an hour we most likely have a timezone issue
+      if (validateCurrentTime() && Math.abs(_currentTime - System.currentTimeMillis()) > 60 * 60 * 1000) {
+        _log.error("timestamp invalid at " + new Date(_currentTime) + ", overriding with system time");
+        _currentTime = System.currentTimeMillis();
+      }
       return _currentTime;
+    }
     return System.currentTimeMillis();
   }
 

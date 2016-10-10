@@ -26,7 +26,7 @@ import net.sf.ehcache.Cache;
 
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.Signature;
-import org.onebusaway.collections.PropertyPathExpression;
+import org.onebusaway.collections.beans.PropertyPathExpression;
 import org.springframework.stereotype.Component;
 
 /**

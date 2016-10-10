@@ -19,6 +19,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 
 import org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.MonitoredDataSource;
@@ -31,7 +32,7 @@ public class AgencyResource extends MetricResource {
   @Path("{agencyId}/last-update-delta")
   @GET
   @Produces("application/json")
-  public Response getLastUpdateDelta(@PathParam("agencyId") String agencyId) {
+  public Response getLastUpdateDelta(@PathParam("agencyId") String agencyId, @QueryParam("feedId") String feedId) {
     try {
       long lastUpdate = 0;
       if (this.getDataSources() == null || this.getDataSources().isEmpty()) {
@@ -42,9 +43,11 @@ public class AgencyResource extends MetricResource {
       for (MonitoredDataSource mds : getDataSources()) {
         MonitoredResult result = mds.getMonitoredResult();
         if (result == null) continue;
-        for (String mAgencyId : result.getAgencyIds()) {
-          if (agencyId.equals(mAgencyId)) {
-            lastUpdate += result.getLastUpdate();
+        if (feedId == null || feedId.equals(mds.getFeedId())) {
+          for (String mAgencyId : result.getAgencyIds()) {
+            if (agencyId.equals(mAgencyId)) {
+              lastUpdate += result.getLastUpdate();
+            }
           }
         }
       }

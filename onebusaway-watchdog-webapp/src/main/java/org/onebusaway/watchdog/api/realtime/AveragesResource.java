@@ -15,28 +15,27 @@
  */
 package org.onebusaway.watchdog.api.realtime;
 
-import org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.MonitoredDataSource;
-import org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.MonitoredResult;
-import org.onebusaway.watchdog.api.LongTermAveragesResource;
-
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
+
+import org.onebusaway.watchdog.api.LongTermAveragesResource;
 
 @Path("/metric/realtime/delta")
 public class AveragesResource extends LongTermAveragesResource {
   @Path("{agencyId}/average-matched-trips")
   @GET
   @Produces("application/json")
-  public Response getLongTermDeltaMatched(@PathParam("agencyId") String agencyId) {
+  public Response getLongTermDeltaMatched(@PathParam("agencyId") String agencyId, @QueryParam("feedId") String feedId) {
     try {
       if (this.getDataSources() == null || this.getDataSources().isEmpty()) {
         _log.error("no configured data sources");
         return Response.ok(error("long-term-delta-matched-trips", "no configured data sources")).build();
       }
-      int validRealtimeTrips = getValidRealtimeTripIds(agencyId).size();
+      int validRealtimeTrips = getValidRealtimeTripIds(agencyId, feedId).size();
       int average = getAvgByAgency("matched-trips-average", agencyId);
       int longTermDelta =  validRealtimeTrips - average;
       _log.debug("current: " + validRealtimeTrips + ", average: " + average);
@@ -50,13 +49,13 @@ public class AveragesResource extends LongTermAveragesResource {
   @Path("{agencyId}/average-matched-trips-pct")
   @GET
   @Produces("application/json")
-  public Response getLongTermDeltaMatchedPct(@PathParam("agencyId") String agencyId) {
+  public Response getLongTermDeltaMatchedPct(@PathParam("agencyId") String agencyId, @QueryParam("feedId") String feedId) {
     try {
       if (this.getDataSources() == null || this.getDataSources().isEmpty()) {
         _log.error("no configured data sources");
         return Response.ok(error("long-term-delta-matched-trips-pct", "no configured data sources")).build();
       }
-      int validRealtimeTrips = getValidRealtimeTripIds(agencyId).size();
+      int validRealtimeTrips = getValidRealtimeTripIds(agencyId, feedId).size();
       int average = getAvgByAgency("matched-trips-average", agencyId);
       int longTermDeltaPct =  average !=0 ? (int)(Math.round(((validRealtimeTrips - average)*100.0)/average)) : Integer.MAX_VALUE;
       _log.debug("current matched: " + validRealtimeTrips + ", average: " + average);
@@ -70,14 +69,14 @@ public class AveragesResource extends LongTermAveragesResource {
   @Path("{agencyId}/average-unmatched-trips")
   @GET
   @Produces("application/json")
-  public Response getLongTermDeltaUnmatched(@PathParam("agencyId") String agencyId) {
+  public Response getLongTermDeltaUnmatched(@PathParam("agencyId") String agencyId, @QueryParam("feedId") String feedId) {
     try {
       //int unmatchedTrips = 0;
       if (this.getDataSources() == null || this.getDataSources().isEmpty()) {
         _log.error("no configured data sources");
         return Response.ok(error("unmatched-trips", "no configured data sources")).build();
       }     
-      int unmatchedTrips = getUnmatchedTripIdCt(agencyId);
+      int unmatchedTrips = getUnmatchedTripIdCt(agencyId, feedId);
       int average = getAvgByAgency("unmatched-trips-average", agencyId);
       int longTermDelta = unmatchedTrips - average;
       _log.debug("current: " + unmatchedTrips + ", average: " + average);
@@ -91,9 +90,9 @@ public class AveragesResource extends LongTermAveragesResource {
   @Path("{agencyId}/average-unmatched-trips-pct")
   @GET
   @Produces("application/json")
-  public Response getLongTermDeltaUnmatchedPct(@PathParam("agencyId") String agencyId) {
+  public Response getLongTermDeltaUnmatchedPct(@PathParam("agencyId") String agencyId, @QueryParam("feedId") String feedId) {
     try {
-      int unmatchedTrips = getUnmatchedTripIdCt(agencyId);
+      int unmatchedTrips = getUnmatchedTripIdCt(agencyId, feedId);
       int average = getAvgByAgency("unmatched-trips-average", agencyId);
       int longTermDeltaPct = average != 0 ? (int)(Math.round(((unmatchedTrips - average) * 100.0)/average)) : Integer.MAX_VALUE;
       _log.debug("current unmatched: " + unmatchedTrips + ", average: " + average);
@@ -106,14 +105,16 @@ public class AveragesResource extends LongTermAveragesResource {
   @Path("{agencyId}/buses-in-service-pct")
   @GET
   @Produces("application/json")
-  public Response getBusesInServicePct(@PathParam("agencyId") String agencyId) {
+  public Response getBusesInServicePct(@PathParam("agencyId") String agencyId, 
+      @QueryParam("feedId") String feedId,
+      @QueryParam("routeId") String routeId) {
     try {
       if (this.getDataSources() == null || this.getDataSources().isEmpty()) {
         _log.error("no configured data sources");
         return Response.ok(error("buses-in-service-pct", "no configured data sources")).build();
       }
-      int scheduledTrips = getScheduledTrips(agencyId);
-      int validRealtimeTrips = getValidRealtimeTripIds(agencyId).size();
+      int scheduledTrips = getScheduledTrips(agencyId, routeId);
+      int validRealtimeTrips = getValidRealtimeTripIds(agencyId, feedId).size();
       int percent = (int)Math.round((validRealtimeTrips * 100.0 / scheduledTrips));
       int average = getAvgByAgency("buses-in-service-pct", agencyId);
       int longTermDeltaPct =  average !=0 ? (int)Math.round(((percent - average)*100.0)/average) : Integer.MAX_VALUE;
@@ -127,13 +128,13 @@ public class AveragesResource extends LongTermAveragesResource {
   @Path("{agencyId}/matched-stops-pct")
   @GET
   @Produces("application/json")
-  public Response getMatchedStops(@PathParam("agencyId") String agencyId) {
+  public Response getMatchedStops(@PathParam("agencyId") String agencyId, @QueryParam("feedId") String feedId) {
     try {
       if (this.getDataSources() == null || this.getDataSources().isEmpty()) {
         _log.error("no configured data sources");
         return Response.ok(error("matched-stops", "no configured data sources")).build();
       } 
-      int matched = getMatchedStopCt(agencyId);
+      int matched = getMatchedStopCt(agencyId, feedId);
       int average = getAvgByAgency("matched-stops", agencyId);
       int percent = average !=0 ? (int)Math.round(((matched - average)*100.0)/average) : Integer.MAX_VALUE;
       _log.debug("current matched stops: " + matched + ", average: " + average);
@@ -146,13 +147,13 @@ public class AveragesResource extends LongTermAveragesResource {
   @Path("{agencyId}/unmatched-stops-pct")
   @GET
   @Produces("application/json")
-  public Response getUnmatchedStops(@PathParam("agencyId") String agencyId) {
+  public Response getUnmatchedStops(@PathParam("agencyId") String agencyId, @QueryParam("feedId") String feedId) {
     try {
       if (this.getDataSources() == null || this.getDataSources().isEmpty()) {
         _log.error("no configured data sources");
         return Response.ok(error("unmatched-stops", "no configured data sources")).build();
       } 
-      int unmatched = getUnmatchedStopCt(agencyId);
+      int unmatched = getUnmatchedStopCt(agencyId, feedId);
       int average = getAvgByAgency("unmatched-stops", agencyId);
       int percent = average !=0 ? (int)Math.round(((unmatched - average)*100.0)/average) : Integer.MAX_VALUE;
       _log.debug("current unmatched stops: " + unmatched + ", average: " + average);
@@ -166,13 +167,13 @@ public class AveragesResource extends LongTermAveragesResource {
   @Path("{agencyId}/trip-total-pct")
   @GET
   @Produces("application/json")
-  public Response getTripTotalPct(@PathParam("agencyId") String agencyId) {
+  public Response getTripTotalPct(@PathParam("agencyId") String agencyId, @QueryParam("feedId") String feedId) {
     try {
       if (this.getDataSources() == null || this.getDataSources().isEmpty()) {
         _log.error("no configured data sources");
         return Response.ok(error("trip-total-pct", "no configured data sources")).build();
       } 
-      int total = getTotalRecordCount(agencyId);
+      int total = getTotalRecordCount(agencyId, feedId);
       int average = getAvgByAgency("trip-total", agencyId);
       int percent = average !=0 ? (int)Math.round(((total - average)*100.0)/average) : Integer.MAX_VALUE;
       _log.debug("trip-total: " + total + ", average: " + average);
@@ -185,14 +186,16 @@ public class AveragesResource extends LongTermAveragesResource {
   @Path("{agencyId}/trip-schedule-realtime-diff-pct")
   @GET
   @Produces("application/json")
-  public Response getTripScheduleRealtimeDiff(@PathParam("agencyId") String agencyId) {
+  public Response getTripScheduleRealtimeDiff(@PathParam("agencyId") String agencyId, 
+      @QueryParam("feedId") String feedId,
+      @QueryParam("routeId") String routeId) {
     try {
       if (this.getDataSources() == null || this.getDataSources().isEmpty()) {
         _log.error("no configured data sources");
         return Response.ok(error("trip-schedule-realtime-diff-pct", "no configured data sources")).build();
       } 
-      int scheduledTrips = getScheduledTrips(agencyId);
-      int validRealtimeTrips = getValidRealtimeTripIds(agencyId).size();
+      int scheduledTrips = getScheduledTrips(agencyId, routeId);
+      int validRealtimeTrips = getValidRealtimeTripIds(agencyId, feedId).size();
       int diff = scheduledTrips - validRealtimeTrips;      
       int average = getAvgByAgency("trip-schedule-realtime-diff", agencyId);
       int percent = average !=0 ? (int)Math.round(((diff - average)*100.0)/average) : Integer.MAX_VALUE;
@@ -206,13 +209,13 @@ public class AveragesResource extends LongTermAveragesResource {
   @Path("{agencyId}/location-total-pct")
   @GET
   @Produces("application/json")
-  public Response getLocationTotalPct(@PathParam("agencyId") String agencyId) {
+  public Response getLocationTotalPct(@PathParam("agencyId") String agencyId, @QueryParam("feedId") String feedId) {
     try {
       if (this.getDataSources() == null || this.getDataSources().isEmpty()) {
         _log.error("no configured data sources");
         return Response.ok(error("location-total-pct", "no configured data sources")).build();
       } 
-      int total = getLocationTotal(agencyId);
+      int total = getLocationTotal(agencyId, feedId);
       int average = getAvgByAgency("location-total", agencyId);
       int percent = average !=0 ? (int)Math.round(((total - average)*100.0)/average) : Integer.MAX_VALUE;
       _log.debug("location-total: " + total + ", average: " + average);
@@ -225,13 +228,13 @@ public class AveragesResource extends LongTermAveragesResource {
   @Path("{agencyId}/location-invalid-lat-lon-pct")
   @GET
   @Produces("application/json")
-  public Response getLocationInvalidPct(@PathParam("agencyId") String agencyId) {
+  public Response getLocationInvalidPct(@PathParam("agencyId") String agencyId, @QueryParam("feedId") String feedId) {
     try {
       if (this.getDataSources() == null || this.getDataSources().isEmpty()) {
         _log.error("no configured data sources");
         return Response.ok(error("location-invalid-lat-lon-pct", "no configured data sources")).build();
       } 
-      int total = getInvalidLocation(agencyId);
+      int total = getInvalidLocation(agencyId, feedId);
       int average = getAvgByAgency("location-invalid-lat-lon", agencyId);
       int percent = average !=0 ? (int)Math.round(((total - average)*100.0)/average) : Integer.MAX_VALUE;
       _log.debug("location-invalid-lat-lon: " + total + ", average: " + average);

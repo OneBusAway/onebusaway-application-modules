@@ -378,11 +378,21 @@
 
   <bean id="blockLocationHistoryTask" class="org.onebusaway.transit_data_federation.bundle.tasks.history.BlockLocationHistoryTask" />
 
+	<!--  Block Run Index -->
+
+  <bean class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
+    <property name="taskName" value="block_run_index" />
+    <property name="afterTaskName" value="stop_search_index" />
+    <property name="task" ref="blockRunIndexTask" />
+  </bean>
+
+  <bean id="blockRunIndexTask" class="org.onebusaway.transit_data_federation.bundle.tasks.BlockRunTask" />
+
   <!-- Pre Cache -->
 
   <bean class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
     <property name="taskName" value="pre_cache" />
-    <property name="afterTaskName" value="block_location_history" />
+    <property name="afterTaskName" value="block_run_index" />
     <property name="task" ref="preCacheTask" />
   </bean>
 

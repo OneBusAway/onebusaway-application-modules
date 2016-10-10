@@ -22,6 +22,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 
 import org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.MonitoredDataSource;
@@ -35,7 +36,7 @@ public class StopResource extends MetricResource {
   @Path("{agencyId}/matched")
   @GET
   @Produces("application/json")
-  public Response getMatchedStopCount(@PathParam("agencyId") String agencyId) {
+  public Response getMatchedStopCount(@PathParam("agencyId") String agencyId, @QueryParam("feedId") String feedId) {
     List<String> matchedStopIds = new ArrayList<String>();
     try {
       if (this.getDataSources() == null || this.getDataSources().isEmpty()) {
@@ -46,10 +47,12 @@ public class StopResource extends MetricResource {
       for (MonitoredDataSource mds : getDataSources()) {
         MonitoredResult result = mds.getMonitoredResult();
         if (result == null) continue;
-        for (String mAgencyId : result.getAgencyIds()) {
-          if (agencyId.equals(mAgencyId)) {
-            for (String stopId : result.getMatchedStopIds()) {
-              matchedStopIds.add(stopId);
+        if (feedId == null || feedId.equals(mds.getFeedId())) {
+          for (String mAgencyId : result.getAgencyIds()) {
+            if (agencyId.equals(mAgencyId)) {
+              for (String stopId : result.getMatchedStopIds()) {
+                matchedStopIds.add(stopId);
+              }
             }
           }
         }                
@@ -65,7 +68,7 @@ public class StopResource extends MetricResource {
   @Path("{agencyId}/unmatched")
   @GET
   @Produces("application/json")
-  public Response getUnmatchedStops(@PathParam("agencyId") String agencyId) {
+  public Response getUnmatchedStops(@PathParam("agencyId") String agencyId, @QueryParam("feedId") String feedId) {
     try {
       int unmatchedStops = 0;
       if (this.getDataSources() == null || this.getDataSources().isEmpty()) {
@@ -76,10 +79,12 @@ public class StopResource extends MetricResource {
       for (MonitoredDataSource mds : getDataSources()) {
         MonitoredResult result = mds.getMonitoredResult();
         if (result == null) continue;
-        for (String mAgencyId : result.getAgencyIds()) {
-          _log.debug("examining agency=" + mAgencyId + " with unmatched stops=" + result.getUnmatchedStopIds().size());
-          if (agencyId.equals(mAgencyId)) {
-            unmatchedStops += result.getUnmatchedStopIds().size();
+        if (feedId == null || feedId.equals(mds.getFeedId())) {
+          for (String mAgencyId : result.getAgencyIds()) {
+            _log.debug("examining agency=" + mAgencyId + " with unmatched stops=" + result.getUnmatchedStopIds().size());
+            if (agencyId.equals(mAgencyId)) {
+              unmatchedStops += result.getUnmatchedStopIds().size();
+            }
           }
         }
       }
@@ -93,7 +98,7 @@ public class StopResource extends MetricResource {
   @Path("{agencyId}/unmatched-ids")
   @GET
   @Produces("application/json")
-  public Response getUnmatchedStopIds(@PathParam("agencyId") String agencyId) {
+  public Response getUnmatchedStopIds(@PathParam("agencyId") String agencyId, @QueryParam("feedId") String feedId) {
     try {
       List<String> unmatchedStopIds = new ArrayList<String>();
       if (this.getDataSources() == null || this.getDataSources().isEmpty()) {
@@ -104,9 +109,11 @@ public class StopResource extends MetricResource {
       for (MonitoredDataSource mds : getDataSources()) {
         MonitoredResult result = mds.getMonitoredResult();
         if (result == null) continue;
-        for (String mAgencyId : result.getAgencyIds()) {
-          if (agencyId.equals(mAgencyId)) {
-            unmatchedStopIds.addAll(result.getUnmatchedStopIds());
+        if (feedId == null || feedId.equals(mds.getFeedId())) {
+          for (String mAgencyId : result.getAgencyIds()) {
+            if (agencyId.equals(mAgencyId)) {
+              unmatchedStopIds.addAll(result.getUnmatchedStopIds());
+            }
           }
         }
       }

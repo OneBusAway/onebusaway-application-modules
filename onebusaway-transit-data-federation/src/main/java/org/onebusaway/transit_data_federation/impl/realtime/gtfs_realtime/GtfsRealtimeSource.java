@@ -142,6 +142,8 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   
   private MonitoredResult _monitoredResult = new MonitoredResult();
   
+  private String _feedId = null;
+  
   private StopModificationStrategy _stopModificationStrategy = null;
   
   private boolean _scheduleAdherenceFromLocation = false;
@@ -254,6 +256,14 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     return _monitoredResult;
   }
   
+  public String getFeedId() {
+    return _feedId;
+  }
+  
+  public void setFeedId(String id) {
+    _feedId = id;
+  }
+  
   public void setScheduleAdherenceFromLocation(boolean scheduleAdherenceFromLocation) {
     _scheduleAdherenceFromLocation = scheduleAdherenceFromLocation;
   }
@@ -350,13 +360,22 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
       VehicleLocationRecord record = _tripsLibrary.createVehicleLocationRecordForUpdate(result, update);
       if (record != null) {
         if (record.getTripId() != null) {
+          // tripId will be null if block was matched
           result.addUnmatchedTripId(record.getTripId().toString());
         }
         AgencyAndId vehicleId = record.getVehicleId();
+        // here we try to get a more accurate count of updates
+        // some providers re-send old data or future data cluttering the feed
+        // the TDS will discard these
+        if (blockNotActive(record)) {
+          _log.debug("discarding v: " + vehicleId + " as block not active");
+          continue;
+        }
         seenVehicles.add(vehicleId);
         Date timestamp = new Date(record.getTimeOfRecord());
         Date prev = _lastVehicleUpdate.get(vehicleId);
         if (prev == null || prev.before(timestamp)) {
+          _log.debug("matched vehicle " + vehicleId + " on block=" + record.getBlockId() + " with scheduleDeviation=" + record.getScheduleDeviation());
           _vehicleLocationListener.handleVehicleLocationRecord(record);
           _lastVehicleUpdate.put(vehicleId, timestamp);
         }
@@ -377,12 +396,26 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
       }
       if (!seenVehicles.contains(vehicleId)
           && lastUpdateTime.before(staleRecordThreshold)) {
+        _log.debug("removing stale vehicleId=" + vehicleId);
         it.remove();
       }
     }
     // NOTE: this implies receiving stale updates is equivalent to not being updated at all
     result.setLastUpdate(newestUpdate);
-    _log.info("active vehicles=" + seenVehicles.size() + " for updates=" + updates.size());
+    _log.info("Agency " + this.getAgencyIds().get(0) + " has active vehicles=" + seenVehicles.size() 
+        + " for updates=" + updates.size() + " with most recent timestamp " + new Date(newestUpdate));
+  }
+
+  private boolean blockNotActive(VehicleLocationRecord record) {
+    if (record.isScheduleDeviationSet()) {
+      if (Math.abs(record.getScheduleDeviation()) > 60 * 60) {
+        // if schedule deviation is way off then ignore
+        _log.debug("discarding v: " + record.getVehicleId() + " for schDev=" + record.getScheduleDeviation());
+        return true;
+      }
+      
+    }
+    return false;
   }
 
   private void handleAlerts(FeedMessage alerts) {
@@ -596,7 +629,7 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
      in = urlConnection.getInputStream();
      return FeedMessage.parseFrom(in, _registry);
    } catch (IOException ex) {
-     _log.error("connection issue with url " + url);
+     _log.error("connection issue with url " + url + ", ex=" + ex);
      return getDefaultFeedMessage();
    } finally {
       try {

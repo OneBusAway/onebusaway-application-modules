@@ -19,6 +19,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 
 import org.onebusaway.watchdog.api.MetricResource;
@@ -29,14 +30,14 @@ public class TripResource extends MetricResource {
   @Path("{agencyId}/total")
   @GET
   @Produces("application/json")
-  public Response getScheduleTripCount(@PathParam("agencyId") String agencyId) {
+  public Response getScheduleTripCount(@PathParam("agencyId") String agencyId, @QueryParam("routeId") String routeId) {
     try {
       if (this.getDataSources() == null || this.getDataSources().isEmpty()) {
         _log.error("no configured data sources");
         return Response.ok(error("scheduled-trips", "con configured data sources")).build();
       }
 
-      int scheduleTrips = getScheduledTrips(agencyId);
+      int scheduleTrips = getScheduledTrips(agencyId, routeId);
       
       return Response.ok(ok("scheduled-trips", scheduleTrips)).build();
     } catch (Exception e) {

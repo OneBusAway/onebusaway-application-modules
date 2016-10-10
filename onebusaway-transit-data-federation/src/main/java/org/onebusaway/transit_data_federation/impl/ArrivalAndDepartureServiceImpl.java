@@ -137,6 +137,9 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
 
         if (sti.getFrequency() != null
             && sti.getFrequency().getExactTimes() == 0) {
+          /*
+           * adjust following schedule times relative to current realtime data
+           */
           applyPostInterpolateForFrequencyNoSchedule(sti, fromTime, toTime,
               frequencyOffsetTime, blockInstance, instances);
         }
@@ -436,19 +439,24 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
     int d1 = bst.getStopTime().getDepartureTime();
     int stopDelta = d1 - d0;
 
-    int stopStartTime = sti.getFrequency().getStartTime() + stopDelta;
     int stopEndTime = sti.getFrequency().getEndTime() + stopDelta;
-    long stopStartTimeExact = sti.getServiceDate() + stopStartTime * 1000;
     long stopEndTimeExact = sti.getServiceDate() + stopEndTime * 1000;
 
     int headwayMs = sti.getFrequency().getHeadwaySecs() * 1000;
 
+    /*
+     * TODO: if start_time is available from feed we should use it over this calculation
+     */
     long time = instance.getBestDepartureTime();
     if (time == 0)
       time = instance.getBestArrivalTime();
     // Do not extrapolate trips starting at the headway change:
     stopEndTimeExact -= headwayMs;
 
+    /*
+     * here we correct the scheduled departures to offset from the current
+     * realtime.
+     */
     // Extrapolate future stop times.
     while ((time += headwayMs) < Math.min(toTime, stopEndTimeExact)) {
       ArrivalAndDepartureInstance newInstance = createArrivalAndDepartureForStopTimeInstanceWithTime(

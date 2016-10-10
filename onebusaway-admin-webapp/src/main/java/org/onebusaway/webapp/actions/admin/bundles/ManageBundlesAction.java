@@ -1301,6 +1301,7 @@ public class ManageBundlesAction extends OneBusAwayNYCAdminActionSupport impleme
     for (DataValidationMode currentMode : currentModes) {
       // Check if this mode exists in selectedModes
       DataValidationMode diffMode = null;
+      if (currentMode == null) continue;
       String modeName = currentMode.getModeName();
       for (DataValidationMode selectedMode : selectedModes) {
         if (modeName.equals(selectedMode.getModeName())) {
@@ -1309,7 +1310,7 @@ public class ManageBundlesAction extends OneBusAwayNYCAdminActionSupport impleme
           break;
         }
       }
-      if (diffMode == null) {
+      if (diffMode == null && currentMode != null) {
         currentMode.setSrcCode("1");
         diffMode = currentMode;
       }

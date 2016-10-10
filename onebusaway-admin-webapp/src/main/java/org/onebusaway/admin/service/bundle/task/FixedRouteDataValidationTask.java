@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTimeConstants;
 import org.joda.time.LocalDate;
 import org.onebusaway.gtfs.model.Agency;
@@ -72,7 +73,12 @@ public class FixedRouteDataValidationTask implements Runnable {
   
   @Override
   public void run() {
-    _log.info("Creating fixed route data validation report");
+    if (StringUtils.isBlank(getSourceUrl())) {
+      _log.info("missing sourceUrl, exiting");
+      return;
+    }
+
+    _log.info("Creating fixed route data validation report with sourceUrl=" + getSourceUrl());
     logger.header(FILENAME, "Mode,Route,# of stops,# of weekday trips,# of Sat trips,# of Sunday trips");   
     
     // Use next Wednesday date (including today) to serve as weekday check date.

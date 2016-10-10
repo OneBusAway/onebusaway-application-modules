@@ -30,7 +30,7 @@ function createLinkAvlModule(title, urlinput, timestamp, latlon, tripVal, route,
 	
 	var module = {};
 
-	module.refresh = function(vehicleAgencyId, tripAgencyId, stopAgencyId, beginDate, numDays, rawVehicleId, beginTime) {
+		module.refresh = function(vehicleAgencyId, tripAgencyId, stopAgencyId, beginDate, numDays, rawVehicleId, beginTime) {
 	
 		linkWeb = urlinput.val();
 		vehicleId = hashVehicleId(rawVehicleId);
@@ -65,7 +65,6 @@ function createLinkAvlModule(title, urlinput, timestamp, latlon, tripVal, route,
 			route.html("...");
 			schdev.html("...");
 			block.html("...");
-			console.log("trip=" + trip);
 			if (trip == undefined || trip == null || trip.html == undefined) {
 				status.html("could not determin trip for vehicle " + vehicleId);
 			} else 	if (trip != undefined && trip != null && trip.html != undefined)
