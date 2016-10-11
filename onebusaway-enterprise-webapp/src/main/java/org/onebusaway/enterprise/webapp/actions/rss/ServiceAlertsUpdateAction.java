@@ -56,7 +56,7 @@ public class ServiceAlertsUpdateAction extends OneBusAwayEnterpriseActionSupport
 	  public String execute() {
 	    _feed = new SyndFeedImpl();
 	    StringBuilder title = new StringBuilder();
-	    title.append("OneBusAway Service Alerts");
+	    title.append("OneBusAway Agency Advisories");
 
 	    HttpServletRequest request = ServletActionContext.getRequest();
 
@@ -83,16 +83,11 @@ public class ServiceAlertsUpdateAction extends OneBusAwayEnterpriseActionSupport
 	    if (saGroup.getItems().size() == 0) {
 	      serviceAlertEntry = new SyndEntryImpl();
 	      serviceAlertEntry.setTitle("All systems operational");
-	      serviceAlertEntry.setLink(baseUrl + "/rss/service-alerts-update");
-	      saContent = new SyndContentImpl();
-	      saContent.setValue("All systems operational");
-	      serviceAlertEntry.setDescription(saContent);
 	      entries.add(serviceAlertEntry);
 	    } else {
 	      for (StatusItem saItem : saGroup.getItems()) {
 	        serviceAlertEntry = new SyndEntryImpl();
 	        serviceAlertEntry.setTitle(saItem.getTitle());
-	        serviceAlertEntry.setLink(baseUrl + "/rss/service-alerts-update");
 	        saContent = new SyndContentImpl();
 	        saContent.setValue(saItem.getDescription());
 	        serviceAlertEntry.setDescription(saContent);

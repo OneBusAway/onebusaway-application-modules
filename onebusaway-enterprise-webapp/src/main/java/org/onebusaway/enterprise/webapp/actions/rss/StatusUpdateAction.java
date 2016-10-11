@@ -79,7 +79,7 @@ public class StatusUpdateAction extends OneBusAwayEnterpriseActionSupport {
     // Add Icinga Alerts
     SyndEntry icingaEntry = new SyndEntryImpl();
     SyndContent icingaContent = new SyndContentImpl();
-    icingaEntry.setTitle("Monitoring Alerts");
+    icingaEntry.setTitle("System Monitoring");
     icingaEntry.setLink(baseUrl + "/rss/monitoring-alerts-update");
     entries.add(icingaEntry);
     StatusGroup icingaGroup = _statusProvider.getIcingaStatus();
@@ -95,16 +95,11 @@ public class StatusUpdateAction extends OneBusAwayEnterpriseActionSupport {
     if (icingaProblems.getItems().size() == 0) {
       icingaEntry = new SyndEntryImpl();
       icingaEntry.setTitle("All systems operational");
-      icingaEntry.setLink(baseUrl + "/rss/monitoring-alerts-update");
-      icingaContent = new SyndContentImpl();
-      icingaContent.setValue("All systems operational");
-      icingaEntry.setDescription(icingaContent);
       entries.add(icingaEntry);
     } else {
       for (StatusItem icingaItem : icingaProblems.getItems()) {
         icingaEntry = new SyndEntryImpl();
         icingaEntry.setTitle(icingaItem.getTitle());
-        icingaEntry.setLink(baseUrl + "/rss/monitoring-alerts-update");
         icingaContent = new SyndContentImpl();
         icingaContent.setValue(icingaItem.getStatus() + ": " + icingaItem.getDescription());
         icingaEntry.setDescription(icingaContent);
@@ -115,23 +110,18 @@ public class StatusUpdateAction extends OneBusAwayEnterpriseActionSupport {
     // Add Service Alerts
     SyndEntry serviceAlertEntry = new SyndEntryImpl();
     SyndContent saContent = new SyndContentImpl();
-    serviceAlertEntry.setTitle("Service Alerts");
+    serviceAlertEntry.setTitle("Agency Advisories");
     serviceAlertEntry.setLink(baseUrl + "/rss/service-alerts-update");
     entries.add(serviceAlertEntry);
     StatusGroup saGroup = _statusProvider.getServiceAlertStatus();
     if (saGroup.getItems().size() == 0) {
       serviceAlertEntry = new SyndEntryImpl();
       serviceAlertEntry.setTitle("All systems operational");
-      serviceAlertEntry.setLink(baseUrl + "/rss/service-alerts-update");
-      saContent = new SyndContentImpl();
-      saContent.setValue("All systems operational");
-      serviceAlertEntry.setDescription(saContent);
       entries.add(serviceAlertEntry);
     } else {
       for (StatusItem saItem : saGroup.getItems()) {
         serviceAlertEntry = new SyndEntryImpl();
         serviceAlertEntry.setTitle(saItem.getTitle());
-        serviceAlertEntry.setLink(baseUrl + "/rss/service-alerts-update");
         saContent = new SyndContentImpl();
         saContent.setValue(saItem.getDescription());
         serviceAlertEntry.setDescription(saContent);
@@ -141,27 +131,18 @@ public class StatusUpdateAction extends OneBusAwayEnterpriseActionSupport {
 
     // Add Agency Messages
     SyndEntry agencyMsgEntry = new SyndEntryImpl();
-    SyndContent agencyMsgContent = new SyndContentImpl();
-    agencyMsgEntry.setTitle("Agency Messages");
+    agencyMsgEntry.setTitle("General Notices");
     agencyMsgEntry.setLink(baseUrl + "/rss/agency-messages-update");
     entries.add(agencyMsgEntry);
     StatusGroup agencyMsgGroup = _statusProvider.getAgencyMetadataStatus();
     if (agencyMsgGroup.getItems().size() == 0) {
       agencyMsgEntry = new SyndEntryImpl();
       agencyMsgEntry.setTitle("No Agency Messages");
-      agencyMsgEntry.setLink(baseUrl + "/rss/agency-messages-update");
-      agencyMsgContent = new SyndContentImpl();
-      agencyMsgContent.setValue("No Agency Messages");
-      agencyMsgEntry.setDescription(agencyMsgContent);
       entries.add(agencyMsgEntry);
     } else {
       for (StatusItem agencyMsgItem : agencyMsgGroup.getItems()) {
         agencyMsgEntry = new SyndEntryImpl();
         agencyMsgEntry.setTitle(agencyMsgItem.getTitle());
-        agencyMsgEntry.setLink(baseUrl + "/rss/agency-messages-update");
-        agencyMsgContent = new SyndContentImpl();
-        agencyMsgContent.setValue(agencyMsgItem.getDescription());
-        agencyMsgEntry.setDescription(agencyMsgContent);
         entries.add(agencyMsgEntry);
       }
     }
