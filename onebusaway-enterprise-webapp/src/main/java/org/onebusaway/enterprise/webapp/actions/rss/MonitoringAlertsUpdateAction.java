@@ -56,7 +56,7 @@ public class MonitoringAlertsUpdateAction extends OneBusAwayEnterpriseActionSupp
 	  public String execute() {
 	    _feed = new SyndFeedImpl();
 	    StringBuilder title = new StringBuilder();
-	    title.append("OneBusAway Monitoring Alerts");
+	    title.append("OneBusAway System Monitoring");
 
 	    HttpServletRequest request = ServletActionContext.getRequest();
 
@@ -71,7 +71,7 @@ public class MonitoringAlertsUpdateAction extends OneBusAwayEnterpriseActionSupp
 
 	    _feed.setTitle(title.toString());
 	    _feed.setLink(baseUrl);
-	    _feed.setDescription("Monitoring Alerts");
+	    _feed.setDescription("System Monitoring");
 
 	    List<SyndEntry> entries = new ArrayList<SyndEntry>();
 
@@ -87,20 +87,14 @@ public class MonitoringAlertsUpdateAction extends OneBusAwayEnterpriseActionSupp
 	        icingaProblems.addItem(icingaItem);
 	      }
 	    }
-
 	    if (icingaProblems.getItems().size() == 0) {
 	      icingaEntry = new SyndEntryImpl();
 	      icingaEntry.setTitle("All systems operational");
-	      icingaEntry.setLink(baseUrl + "/rss/monitoring-alerts-update");
-	      icingaContent = new SyndContentImpl();
-	      icingaContent.setValue("All systems operational");
-	      icingaEntry.setDescription(icingaContent);
 	      entries.add(icingaEntry);
 	    } else {
 	      for (StatusItem icingaItem : icingaProblems.getItems()) {
 	        icingaEntry = new SyndEntryImpl();
 	        icingaEntry.setTitle(icingaItem.getTitle());
-	        icingaEntry.setLink(baseUrl + "/rss/monitoring-alerts-update");
 	        icingaContent = new SyndContentImpl();
 	        icingaContent.setValue(icingaItem.getStatus() + ": " + icingaItem.getDescription());
 	        icingaEntry.setDescription(icingaContent);

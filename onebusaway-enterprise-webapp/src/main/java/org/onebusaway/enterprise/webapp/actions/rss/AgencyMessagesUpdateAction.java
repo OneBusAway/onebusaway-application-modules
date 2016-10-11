@@ -31,8 +31,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.sun.syndication.feed.synd.SyndContent;
-import com.sun.syndication.feed.synd.SyndContentImpl;
 import com.sun.syndication.feed.synd.SyndEntry;
 import com.sun.syndication.feed.synd.SyndEntryImpl;
 import com.sun.syndication.feed.synd.SyndFeed;
@@ -56,7 +54,7 @@ public class AgencyMessagesUpdateAction extends OneBusAwayEnterpriseActionSuppor
 	  public String execute() {
 	    _feed = new SyndFeedImpl();
 	    StringBuilder title = new StringBuilder();
-	    title.append("OneBusAway Agency Messages");
+	    title.append("OneBusAway General Notices");
 
 	    HttpServletRequest request = ServletActionContext.getRequest();
 
@@ -71,30 +69,21 @@ public class AgencyMessagesUpdateAction extends OneBusAwayEnterpriseActionSuppor
 
 	    _feed.setTitle(title.toString());
 	    _feed.setLink(baseUrl);
-	    _feed.setDescription("Agency Messages");
+	    _feed.setDescription("General Notices");
 
 	    List<SyndEntry> entries = new ArrayList<SyndEntry>();
 
 	    // Add Agency Messages
 	    SyndEntry agencyMsgEntry = new SyndEntryImpl();
-	    SyndContent agencyMsgContent = new SyndContentImpl();
 	    StatusGroup agencyMsgGroup = _statusProvider.getAgencyMetadataStatus();
 	    if (agencyMsgGroup.getItems().size() == 0) {
 	      agencyMsgEntry = new SyndEntryImpl();
-	      agencyMsgEntry.setTitle("No Agency Messages");
-	      agencyMsgEntry.setLink(baseUrl + "/rss/agency-messages-update");
-	      agencyMsgContent = new SyndContentImpl();
-	      agencyMsgContent.setValue("No Agency Messages");
-	      agencyMsgEntry.setDescription(agencyMsgContent);
+	      agencyMsgEntry.setTitle("No General Notices");
 	      entries.add(agencyMsgEntry);
 	    } else {
 	      for (StatusItem agencyMsgItem : agencyMsgGroup.getItems()) {
 	        agencyMsgEntry = new SyndEntryImpl();
 	        agencyMsgEntry.setTitle(agencyMsgItem.getTitle());
-		    agencyMsgEntry.setLink(baseUrl + "/rss/agency-messages-update");
-	        agencyMsgContent = new SyndContentImpl();
-	        agencyMsgContent.setValue(agencyMsgItem.getDescription());
-	        agencyMsgEntry.setDescription(agencyMsgContent);
 	        entries.add(agencyMsgEntry);
 	      }
 	    }
