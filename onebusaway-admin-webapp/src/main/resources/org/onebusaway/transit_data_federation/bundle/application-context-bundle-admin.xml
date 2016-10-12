@@ -81,7 +81,7 @@
   <bean id="task_hastus_translate" class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
     <property name="taskName" value="hastus_translate_task" />
     <property name="afterTaskName" value="change_log" />
-    <property name="beforeTaskName" value="multi_agency" />
+    <property name="beforeTaskName" value="missing_trips_for_block" />
     <property name="task" ref="hastusTranslateTask" />
   </bean>
   <bean id="hastusTranslateTask" class="org.onebusaway.admin.service.bundle.task.HastusTranslateTask" >
@@ -89,6 +89,16 @@
     <property name="bundleRequestResponse" ref="bundleRequestResponse" />
   </bean>
   
+  <bean id="task_missing_trips_for_block" class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
+    <property name="taskName" value="missing_trips_for_block" />
+    <property name="afterTaskName" value="hastus_translate_task" />
+    <property name="beforeTaskName" value="multi_agency" />
+    <property name="task" ref="missingTripsForBlock" />
+  </bean>
+  <bean id="missingTripsForBlock" class="org.onebusaway.admin.service.bundle.task.MissingTripsForBlock" >
+    <property name="logger" ref="multiCSVLogger" />
+  </bean>
+
   <bean id="task_multi_agency" class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
     <property name="taskName" value="multi_agency" />
     <property name="afterTaskName" value="hastus_translate_task"/>
