@@ -43,7 +43,12 @@ span.link { text-decoration: underline; text-decoration-style: dotted; }
     <div class="row">
       <div class="page-header">
         <span class="badge pull-right">Last Refreshed: <span id="time">25</span> seconds ago</span>  
-        <h1>OneBusAway System Status</h1> 
+       	<s:if test="%{customHeader.length() > 0}">
+       		 <h1><s:text name="%{customHeader}"/> OneBusAway System Status</h1>
+       	</s:if>
+        <s:else>
+        	<h1>OneBusAway System Status</h1>
+        </s:else>
       </div>
     </div>
     
@@ -106,6 +111,13 @@ span.link { text-decoration: underline; text-decoration-style: dotted; }
      </div>
     </s:iterator>
     
+   	<s:if test="%{contactEmail.length() > 0}">
+   		 <h5>For questions or problems with this page contact 
+   		 	<s:set var="contactEmail" value="%{contactEmail}" />
+   		 	<a href="mailto:${contactEmail}">${contactEmail}</a>
+   		 </h5>
+   	</s:if>
+
  </div>
 </body>
 

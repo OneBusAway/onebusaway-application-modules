@@ -22,6 +22,7 @@ import org.onebusaway.enterprise.webapp.actions.OneBusAwayEnterpriseActionSuppor
 import org.onebusaway.enterprise.webapp.actions.status.model.StatusGroup;
 import org.onebusaway.enterprise.webapp.actions.status.model.StatusItem;
 import org.onebusaway.enterprise.webapp.actions.status.service.StatusProvider;
+import org.onebusaway.util.services.configuration.ConfigurationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,15 +32,23 @@ public class StatusAction extends OneBusAwayEnterpriseActionSupport {
   private static final Logger _log = LoggerFactory.getLogger(StatusAction.class);
   
   @Autowired
+  private ConfigurationService _config;
+
+  @Autowired
   private StatusProvider _statusProvider;
   
   private List<StatusGroup> groups;
   
-  
   private boolean showOK;
+  private boolean showCustomHeader;
+  private boolean showContactEmail;
+  private String customHeader = "";
+  private String contactEmail = "";
 
   @Override
   public String execute() {
+    checkCustomHeader();
+    checkContactEmail();
     groups = createGroups();
     return SUCCESS;
   }
@@ -52,6 +61,38 @@ public class StatusAction extends OneBusAwayEnterpriseActionSupport {
     this.showOK = showOK;
   }
   
+  public boolean isShowCustomHeader() {
+    return showCustomHeader;
+  }
+
+  public void setShowCustomHeader(boolean showCustomHeader) {
+    this.showCustomHeader = showCustomHeader;
+  }
+
+  public boolean isShowContactEmail() {
+    return showContactEmail;
+  }
+
+  public void setShowContactEmail(boolean showContactEmail) {
+    this.showContactEmail = showContactEmail;
+  }
+
+  public String getCustomHeader() {
+    return customHeader;
+  }
+
+  public void setCustomHeader(String customHeader) {
+    this.customHeader = customHeader;
+  }
+
+  public String getContactEmail() {
+    return contactEmail;
+  }
+
+  public void setContactEmail(String contactEmail) {
+    this.contactEmail = contactEmail;
+  }
+
   public List<StatusGroup> getGroups() {
     return groups;
   }
@@ -79,5 +120,27 @@ public class StatusAction extends OneBusAwayEnterpriseActionSupport {
     
     return groups;
   }
-  
+
+  private void checkCustomHeader() {
+    String header = _config.getConfigurationValueAsString("status.customHeader", null);
+    if (header != null && header != "") {
+      setCustomHeader(header);
+      setShowCustomHeader(true);
+    } else {
+      setCustomHeader("");
+      setShowCustomHeader(false);
+    }
+  }
+
+  private void checkContactEmail() {
+    String email = _config.getConfigurationValueAsString("status.contactEmail", null);
+    if (email != null && email != "") {
+      setContactEmail(email);
+      setShowContactEmail(true);
+    } else {
+      setContactEmail("");
+      setShowContactEmail(false);
+    }
+  }
+
 }
