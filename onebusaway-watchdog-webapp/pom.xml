@@ -3,7 +3,7 @@
 	<parent>
 		<groupId>org.onebusaway</groupId>
 		<artifactId>onebusaway-application-modules</artifactId>
-		<version>1.1.15.32-cs</version>
+		<version>1.1.15.33-cs-SNAPSHOT</version>
 	</parent>
 	<artifactId>onebusaway-watchdog-webapp</artifactId>
 	<packaging>war</packaging>
