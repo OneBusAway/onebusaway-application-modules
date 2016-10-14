@@ -111,12 +111,22 @@ span.link { text-decoration: underline; text-decoration-style: dotted; }
      </div>
     </s:iterator>
     
-   	<s:if test="%{contactEmail.length() > 0}">
+    <div>
+      <a href="../rss/status-update" >
+        <img src="../img/feed-icon-28x28.png"
+          alt="Subscribe to OneBusAway System Status" />
+          Subscribe to OneBusAway System Status
+      </a>
+    </div>
+
+    <div>
+   	  <s:if test="%{contactEmail.length() > 0}">
    		 <h5>For questions or problems with this page contact 
    		 	<s:set var="contactEmail" value="%{contactEmail}" />
    		 	<a href="mailto:${contactEmail}">${contactEmail}</a>
    		 </h5>
-   	</s:if>
+   	  </s:if>
+   	</div>
 
  </div>
 </body>
