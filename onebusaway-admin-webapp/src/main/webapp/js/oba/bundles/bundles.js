@@ -21,6 +21,7 @@ var selectedDirectory = "";  //Selected on Choose tab, used by Upload tab
 var destinationDirectory = ""; //For "copy" on Choose tab, used by Upload tab
 var userComments = "";		// User comments about the selected dataset
 var buildBundleId = "";		// Build request id, stored in info.json.
+var fromResultLink = false; // If this was called with a Result Link
  
 jQuery(function() {
 	//Initialize tabs
@@ -51,28 +52,6 @@ jQuery(function() {
 		// TODO this doesn't work when fromEmail query string is present 
 		// alert("hash=" + hash);
 		$(hash).click();
-	}
-	clearPreviousBuildResults();
-	var qs = parseQuerystring();
-	if (qs["fromEmail"] == "true") {
-		//alert("called from email!");
-		jQuery("#prevalidate_id").text(qs["id"]);
-		jQuery("#buildBundle_id").text(qs["id"]);
-		buildBundleId = qs["id"];
-		jQuery("#Build #bundleBuildName").val(qs["name"]);
-		jQuery("#Build #startDatePicker").val(qs["startDate"]);
-		jQuery("#Build #endDatePicker").val(qs["endDate"]);
-		jQuery("#bundleComment").val(qs["bundleComment"]);
-		// just in case set the tab
-		var $tabs = jQuery("#tabs");
-		$tabs.tabs('select', 3);
-		// Reshow hidden result elements
-		$("#buildBundle #buildingTest").show();
-		$("#buildBundle_testResultLink").show();
-		$("#bundleTestResultsHolder").show();
-		$("#testProgressBarDiv").show();
-		$("#testProgressBarDiv #testBuildProgress").text("Previous Build Messages").show();
-		updateBuildStatus("test");
 	}
 	// politely set our hash as tabs are changed
 	jQuery("#tabs").bind("tabsshow", function(event, ui) {
@@ -160,8 +139,6 @@ jQuery(function() {
 					async: false,
 					success: function(data) {
 						$.each(data.diffResults, function(index, value) {
-							//$('#diffResult').append(
-							//		"<div id=\"diffResultItem\">"+value+"</div>");
 							// Skip first three rows of results
 							if (index >= 3) {
 								var diffRow = formatDiffRow(value);
@@ -207,7 +184,6 @@ jQuery(function() {
 										modeName = "";
 										routeName = "";
 									}
-									//stopClass = "stopCt " + stopClass;
 									var new_row = '<tr class="fixedRouteDiff"> \
 										<td class=' + modeClass + '>' + modeName + '</td> \
 										<td class=' + routeClass + '>' + routeName + '</td> \
@@ -250,7 +226,6 @@ jQuery(function() {
 		$(this).prop("checked", state);
 		// If this item is selected, enable the "Add files..." button
 		if (state == true) {
-			//jQuery("#existingDirectoryButton").prop("enabled",true);
 			jQuery("#existingDirectoryButton").removeAttr("disabled").css("color", "#000");
 		} else {
 			jQuery("#existingDirectoryButton").attr("disabled", "disabled").css("color", "#999");
@@ -262,8 +237,6 @@ jQuery(function() {
 
 	// copy existing dataset to a new directory
 	jQuery(".copyDirectory").click(onCopyExistingDatasetClick);
-
-	//jQuery("#continueCopy").click(onContinueCopyClick);
 
 	// copy existing dataset to a new directory
 	jQuery(".deleteDirectory").click(onDeleteExistingDatasetClick);
@@ -283,7 +256,6 @@ jQuery(function() {
 	jQuery("#addNewAgency").click(onAddNewAgencyClick);
 
 	// remove selected agencies
-	// jQuery(".removeAgency").click(onRemoveSelectedAgenciesClick);
 	jQuery("#uploadFiles #agency_data").on('click', '.removeAgency', onRemoveSelectedAgenciesClick);
 
 	// popup the Comments box
@@ -326,8 +298,6 @@ jQuery(function() {
 	jQuery("#prevalidateInputs #validateBox #validateButton").click(onValidateClick);
 
 	//Handle build button click event
-	//jQuery("#buildBundle_buildButton").click(onBuildClick);
-	//jQuery("#Build #testBundleButton").click(onBuildClick);
 	jQuery("#Build #testBuildBundleButton").click({buildType: "test"}, onBuildClick);
 	jQuery("#Build #finalBuildBundleButton").click({buildType: "final"}, onBuildClick);
 
@@ -342,7 +312,6 @@ jQuery(function() {
 	jQuery("#createDataset #directoryName").bind("input propertychange", function() {
 		var text = jQuery("#createDataset #directoryName").val();
 		var validDatasetNameExp = /^[a-zA-Z_-\d]+$/;
-		//var copyDestText = jQuery("#createDirectory #destDirectoryName").val();
 		jQuery('#Create #filenameError').hide();
 		disableSelectButton();
 		if (text.length > 0) {
@@ -370,7 +339,6 @@ jQuery(function() {
 				$("#copyContinue").button("enable");
 			} else {
 				jQuery('#copyFilenameError').show();
-				//jQuery("#createDirectory #createDirectoryContents #createDirectoryResult").hide();
 			}
 		}
 	});
@@ -445,7 +413,6 @@ jQuery(function() {
 			id: "deleteContinue",
 			text: "Delete dataset",
 			click: function() {
-				//destinationDirectory = $("#destinationDirectory").val();
 				$(this).dialog("close");
 				onDeleteDatasetConfirmed();
 			}
@@ -482,9 +449,7 @@ jQuery(function() {
 				$(this).dialog("close");
 			},
 			"Continue": function() {
-				//destinationDirectory = $("#destinationDirectory").val();
 				$(this).dialog("close");
-				//onCopyDestinationSpecified();
 			}
 		}
 	});
@@ -502,6 +467,30 @@ jQuery(function() {
 	$("#finalProgressBar").progressbar({
 		value: 0
 	});
+
+	clearPreviousBuildResults();
+	var qs = parseQuerystring();
+	if (qs["fromEmail"] == "true") {
+		//alert("called from email!");
+		fromResultLink = true;
+		buildBundleId = qs["id"];
+		updateBuildStatus("test");
+		jQuery("#prevalidate_id").text(qs["id"]);
+		jQuery("#buildBundle_id").text(qs["id"]);
+		jQuery("#prevalidate_bundleName").val(qs["name"]);
+		jQuery("#Build #bundleBuildName").val(qs["name"]);
+		jQuery("#Build #startDatePicker").val(qs["startDate"]);
+		jQuery("#Build #endDatePicker").val(qs["endDate"]);
+		// Reshow hidden result elements
+		$("#buildBundle #buildingTest").show();
+		$("#buildBundle_testResultLink").show();
+		$("#bundleTestResultsHolder").show();
+		$("#testProgressBarDiv").show();
+		// just in case set the tab
+		var $tabs = jQuery("#tabs");
+		$tabs.tabs('select', 3);
+	}
+
 });
 
 function onCreateContinueClick() {
@@ -626,7 +615,6 @@ function showBundleInfo(bundleInfo){
 	if (bundleObj.agencyList != undefined) {
 		//Populating Upload Tab Fields
 		$.each(bundleObj.agencyList, function(i, agency) {
-			//showThisAgency(agency);
 			jQuery("#agencyId").val(agency.agencyId);
 		    jQuery("#agencyDataSource").val(agency.agencyDataSource);
 		    jQuery("#agencyDataSourceType").val(agency.agencyDataSourceType);
@@ -658,7 +646,6 @@ function showBundleInfo(bundleInfo){
 			&& bundleObj.buildResponse.email != "null") {
 		jQuery("#buildBundle_email").val(bundleObj.buildResponse.email);
 	}
-	//jQuery("#buildBundle_bundleName").val(bundleObj.buildResponse.bundleBuildName);
 	jQuery("#startDatePicker").val(bundleObj.buildResponse.startDate);
 	jQuery("#startDate").val(bundleObj.buildResponse.startDate);
 	jQuery("#endDatePicker").val(bundleObj.buildResponse.endDate);
@@ -666,12 +653,14 @@ function showBundleInfo(bundleInfo){
 	jQuery("#uploadFiles #bundleComment").val(bundleObj.buildResponse.comment);
 	jQuery("#selected_bundleDirectory").text(bundleObj.directoryName);
 	jQuery("#buildBundle_id").text(bundleObj.buildResponse.requestId);
-	buildBundleId = bundleObj.buildResponse.requestId;
+	if (!fromResultLink) {
+		buildBundleId = bundleObj.buildResponse.requestId;
+	}
 	if (bundleObj.buildResponse.statusMessages != null) {
 		setDivHtml(document.getElementById('testBuildBundle_resultList'), bundleObj.buildResponse.statusMessages);
 		setDivHtml(document.getElementById('finalBuildBundle_resultList'), bundleObj.buildResponse.statusMessages);
 	}
-	if (bundleObj.buildResponse.requestId != null) {
+	if (buildBundleId != null) {
 		showBuildFileList(bundleObj.buildResponse.buildOutputFiles, bundleObj.buildResponse.requestId);
 	}
 }
@@ -711,11 +700,6 @@ function onDeleteDatasetConfirmed() {
 	onDeleteDataset();
 }
 
-//function onContinueCopyClick() {
-//	destinationDirectory = $("#destinationDirectory").text();
-//	alert('destination directory: ' + destinationDirectory);
-//}
-
 function onDeleteExistingDatasetClick() {
 	selectedDirectory = $(this).closest("tr").find(".directoryName").text();
 	var continueDelete = $("#deletePopup").dialog("open");
@@ -724,8 +708,6 @@ function onDeleteExistingDatasetClick() {
 function onAnyCommentsClick() {
 	$("#addCommentsPopup").dialog("open");
 }
-
-
 
 function onSelectDataset(sourceDirectoryType) {
 	var bundleDir = selectedDirectory;
@@ -812,7 +794,7 @@ function onSelectDataset(sourceDirectoryType) {
 						
 						if (actionName != "createDirectory" && status.bundleInfo != null) {
 							// Display the name of the most recently built bundle on the Build and Stage tabs
-							if (status.bundleInfo.buildResponse != null) {
+							if (status.bundleInfo.buildResponse != null && !fromResultLink) {
 								$("#Validate #prevalidate_bundleName").val(status.bundleInfo.buildResponse.bundleBuildName);
 								$("#Build #bundleBuildName").val(status.bundleInfo.buildResponse.bundleBuildName);
 								$("#Stage #staging_bundleName").text(status.bundleInfo.buildResponse.bundleBuildName);
@@ -857,6 +839,7 @@ function onSelectDataset(sourceDirectoryType) {
 										if (agencyMetadata[j].legacyId == agency.agencyId) {
 											agencyName = agencyMetadata[j].name;
 											agencyName += " (" + agencyMetadata[j].shortName + ")";
+											break;
 										}
 									}
 
@@ -915,8 +898,10 @@ function onSelectDataset(sourceDirectoryType) {
 					alert("null status");
 					disableBuildButtons();
 				}
-				var $tabs = jQuery("#tabs");
-				$tabs.tabs('select', 1);				
+				if (!fromResultLink) {
+					var $tabs = jQuery("#tabs");
+					$tabs.tabs('select', 1);
+				}
 			},
 			error: function(request) {
 				alert("There was an error processing your request. Please try again.");
@@ -935,7 +920,6 @@ function onDeleteDataset() {
 		success: function(response) {
 			disableSelectButton();
 			$("#deleteSuccessPopup").dialog("open");
-			//alert("Dataset was successfully deleted");
 			// Remove dataset from list of datasets
 			var datasetTd = $('td').filter(function(){
 			    return $(this).text() === bundleDir;
@@ -1405,7 +1389,6 @@ function onValidateClick() {
 				if (jQuery("#prevalidate_id").text().length > 0) {
 					jQuery("#prevalidate_id_label").show();
 				}
-				//jQuery("#prevalidate_resultList").text("calling...");
 				jQuery("#Build #bundleBuildName").val(bundleName);
 				window.setTimeout(updateValidateStatus, 5000);
 			} else {
@@ -1522,7 +1505,6 @@ function onBuildClick(event) {
 		jQuery("#buildBundle #buildingTest #buildingTestProgress").attr("src","../../css/img/ajax-loader.gif");
 		jQuery("#buildBundle_buildTestProgress").text("Bundle Build in Progress...");
 		jQuery("#buildBundle_testFileList").html("");
-		//jQuery("#buildBundle #buildingTest").show().css("width","300px").css("margin-top", "20px");
 		jQuery("#buildBundle #buildingTest").show();
 		// Show result link
 		$("#buildBundle_testResultLink").show();
@@ -1534,7 +1516,6 @@ function onBuildClick(event) {
 		jQuery("#buildBundle #buildingFinal #buildingFinalProgress").attr("src","../../css/img/ajax-loader.gif");
 		jQuery("#buildBundle_buildFinalProgress").text("Bundle Build in Progress...");
 		jQuery("#buildBundle_finalFileList").html("");
-		//jQuery("#buildBundle #buildingFinal").show().css("width","300px").css("margin-top", "20px");
 		jQuery("#buildBundle #buildingFinal").show();
 		// Show result link
 		$("#buildBundle_finalResultLink").show();
@@ -1552,11 +1533,6 @@ function onBuildClick(event) {
 }
 
 function clearPreviousBuildResults() {
-	//jQuery("#startDatePicker").val("");
-	//jQuery("#endDatePicker").val("");
-	//jQuery("#buildBundle_bundleName").val("");
-
-	//jQuery("#buildBundle_resultList").html("");
 	jQuery("#buildBundle_testResultList").val("");
 	jQuery("#buildBundle_finalResultList").val("");
 	jQuery("#buildBundle_testException").html("");
@@ -1570,7 +1546,6 @@ function clearPreviousBuildResults() {
 	jQuery("#buildBundle_finalResultLink").hide();
 	jQuery("#bundleFinalResultsHolder").hide();
 
-	//jQuery("#buildBundle #downloadTestLogs").hide();
 	jQuery("#buildBundle #buildingTest").hide();
 	jQuery("#buildBundle #buildingFinal").hide();
 
@@ -1622,7 +1597,6 @@ function validateBundleBuildFields(bundleDir, bundleName, startDate, endDate) {
 }
 
 function bundleUrl(buildType) {
-	//var id = jQuery("#buildBundle_id").text();
 	var id = buildBundleId;
 	var $resultLink = jQuery("#buildBundle #buildBundle_testResultLink #testResultLink");
 	if (buildType == "final") {
@@ -1636,7 +1610,6 @@ function bundleUrl(buildType) {
 		success: function(response) {
 			var bundleResponse = response;
 			if(bundleResponse.exception !=null) {
-				//jQuery("#buildBundle #buildBundle_testResultLink #testResultLink")
 				$resultLink
 				.text("(exception)")
 				.css("padding-left", "5px")
@@ -1644,7 +1617,6 @@ function bundleUrl(buildType) {
 				.addClass("adminLabel")
 				.css("color", "red");
 			} else {
-				//jQuery("#buildBundle #buildBundle_testResultLink #testResultLink")
 				$resultLink
 				.text(bundleResponse.bundleResultLink)
 				.css("padding-left", "5px")
@@ -1664,9 +1636,7 @@ function bundleUrl(buildType) {
 	}
 }
 function buildBundle(bundleName, startDate, endDate, bundleComment, archive, consolidate, predate, buildType){
-	//var bundleDirectory = jQuery("#selected_bundleDirectory").text();
 	bundleDirectory = selectedDirectory;
-	//var email = jQuery("Build #").val();
 	$("#testProgressBarDiv #testBuildProgress").text("Initializing build process");
 	var $buildBundle_resultList = jQuery("#buildBundle_testResultList");
 	if (buildType == "test") {
@@ -1716,7 +1686,6 @@ function buildBundle(bundleName, startDate, endDate, bundleComment, archive, con
 					enableBuildButtons();
 					alert(bundleResponse.exception.message);
 				} else {
-					//jQuery("#buildBundle_resultList").html("calling...");
 					$buildBundle_resultList.val("calling...");
 					jQuery("#buildBundle_id").text(bundleResponse.id);
 					buildBundleId = bundleResponse.id;
@@ -1726,7 +1695,6 @@ function buildBundle(bundleName, startDate, endDate, bundleComment, archive, con
 			} else {
 				jQuery("#buildBundle_id").text(error);
 				buildBundleId = error;
-				//jQuery("#buildBundle_resultList").html("error");
 				$buildBundle_resultList.val("error");
 				enableBuildButtons();
 			}
@@ -1784,6 +1752,12 @@ function updateBuildStatus(buildType) {
 						.css("color", "green");
 				}
 				jQuery("#Build #datasetName").text(bundleResponse.bundleDirectoryName);
+				// Check if this was called via a Result Link
+				if ((selectedDirectory == "") && fromResultLink) {
+					selectedDirectory = bundleResponse.bundleDirectoryName;
+					// Initialize all tabs as of selected on Choose tab
+					onSelectDataset("existing");
+				}
 				var size = 0;
 				if (bundleResponse.statusList != null) {
 					size = bundleResponse.statusList.length;
@@ -1810,7 +1784,7 @@ function updateBuildStatus(buildType) {
 						txt = txt + nextLine + "\n";
 					}
 				}
-				if (bundleResponse.complete == false) {
+				if (bundleResponse.complete == false ) {
 					window.setTimeout(updateBuildStatus.bind(null, buildType), 5000); // recurse
 				} else {
 					$buildBundle_buildProgress.text("Bundle Complete!");
@@ -1822,6 +1796,7 @@ function updateBuildStatus(buildType) {
 					enableDownloadButton();
 					enableBuildButtons();
 				}
+				fromResultLink = false;
 				$buildBundle_resultList.val(txt).css("font-size", "12px");
 				// Make sure that the textarea remains scrolled to the bottom.
 				$buildBundle_resultList.scrollTop(1500);  // Just use some arbitrarily large number
@@ -1917,7 +1892,6 @@ function updateBuildList(id,buildType) {
 			+ encodeURIComponent("bundleBuilder.out.txt") + "\">" + ".txt" +  "</a></li>";
 
 			txt = txt + "</ul>";
-			//jQuery("#buildBundle_testFileList").html(txt).css("display", "block");
 			$buildBundle_fileList.html(txt).css("display", "block");
 			/* This has only been implemented for MTA
 			jQuery("#buildBundle #downloadTestLogs").show().css("display", "block");
@@ -2228,7 +2202,6 @@ function onDeployListClick(){
 function onDownloadBundleClick() {
 	var downloadDataset = selectedDirectory;
 	var downloadFileName = $("#Download #download_bundleName").text();
-	//window.location='manage-bundles!downloadBundle.action?downloadFilename=MAY16_TEST_3.tar.gz';
 	window.location='manage-bundles!downloadBundle.action'
 		+ '?downloadDataSet=' + downloadDataset
 		+ '&downloadFilename=' + downloadFileName
@@ -2264,10 +2237,8 @@ function getAgencyMetadata(){
 				if (url == null) {
 				  url = "";
 				}
-				//console.log("url: " + url);
 				if (url.toLowerCase().startsWith("http")
 						|| url.toLowerCase().startsWith("ftp")) {
-					//console.log("set url");
 					$("#agency_data tr:last .agencyDataSource").val(url);
 				}	
 			}
