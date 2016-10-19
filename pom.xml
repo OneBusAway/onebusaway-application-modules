@@ -7,7 +7,7 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>onebusaway-application-modules</artifactId>
-  <version>1.1.13.4-SNAPSHOT</version>
+  <version>1.1.13.4</version>
   <packaging>pom</packaging>
 
   <name>onebusaway-application-modules</name>
@@ -56,6 +56,14 @@
   </issueManagement>
 
   <distributionManagement>
+    <repository>
+      <id>releases-mvn-repo</id>
+      <url>http://build.staging.obanyc.com/archiva/repository/releases/</url>
+    </repository>
+    <snapshotRepository>
+      <id>snapshots-mvn-repo</id>
+      <url>http://build.staging.obanyc.com/archiva/repository/snapshots/</url>
+    </snapshotRepository>
     <site>
       <id>${site_id}</id>
       <url>${site_deployment_base}/onebusaway-application-modules/${project.version}</url>
