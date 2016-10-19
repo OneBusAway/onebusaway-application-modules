@@ -707,4 +707,15 @@ class TransitDataServiceImpl implements TransitDataService {
     return adQuery;
   }
 
+  @Override
+  public Boolean stopHasRevenueServiceOnRoute(String agencyId, String stopId,
+		String routeId, String directionId) {
+    return _scheduleHelperService.stopHasRevenueServiceOnRoute(agencyId, stopId, routeId, directionId);
+  }
+
+  @Override
+  public Boolean stopHasRevenueService(String agencyId, String stopId) {
+    return _scheduleHelperService.stopHasRevenueService(agencyId, stopId);    
+  }
+
 }
