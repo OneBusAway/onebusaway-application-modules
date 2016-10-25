@@ -515,6 +515,11 @@ OBA.Sign = function() {
 				var headsign = journey.DestinationName;
 				var routeIdAndHeadsign = routeId + "_" + headsign;
 				var updateTimestampReference = OBA.Util.ISO8601StringToDate(json.Siri.ServiceDelivery.ResponseTimestamp).getTime();
+				var journeyTimestamp = updateTimestampReference;
+				if (monitoredStopVisit.RecordedAtTime != 'undefined') {
+					// if we have a stop visit time use it, its more accurate
+					journeyTimestamp = OBA.Util.ISO8601StringToDate(monitoredStopVisit.RecordedAtTime).getTime();
+				}
 				if(typeof headsignToDistanceAways[routeIdAndHeadsign] === 'undefined') {
 					headsignToDistanceAways[routeIdAndHeadsign] = [];
 					r++;
@@ -535,7 +540,8 @@ OBA.Sign = function() {
 					//vehicleInfo.expectedDepartureTime = OBA.Util.ISO8601StringToDate(journey.MonitoredCall.ExpectedDepartureTime);
 					vehicleInfo.timePrediction = OBA.Util.getArrivalEstimateForISOString(
 							journey.MonitoredCall.ExpectedArrivalTime, 
-							updateTimestampReference, "min");
+							journeyTimestamp, "min");
+					
 				}
 				
 				headsignToDistanceAways[routeIdAndHeadsign].push(vehicleInfo);
