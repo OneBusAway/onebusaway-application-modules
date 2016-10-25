@@ -17,11 +17,13 @@ package org.onebusaway.webapp.actions.admin;
 
 import static org.junit.Assert.*;
 
+import org.json.simple.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.onebusaway.admin.service.FileService;
+import org.onebusaway.admin.util.BundleInfo;
 import org.onebusaway.webapp.actions.admin.bundles.ManageBundlesAction;
 
 import static org.mockito.Mockito.when;
@@ -37,6 +39,8 @@ public class ManageBundlesActionTest {
 
 	@Mock
 	private FileService fileService;
+	@Mock
+	private BundleInfo bundleInfo;
 	private ManageBundlesAction action;
 	private static final String directoryName = "TEST"; 
 	
@@ -46,6 +50,7 @@ public class ManageBundlesActionTest {
 		
 		action = new ManageBundlesAction();
 		action.setFileService(fileService);
+		action.setBundleInfo(bundleInfo);
 		action.setDirectoryName(directoryName);
 	}
 	
@@ -65,6 +70,7 @@ public class ManageBundlesActionTest {
 	private void setCommonExpectations(boolean exists, boolean created) {
 		when(fileService.bundleDirectoryExists(directoryName)).thenReturn(exists);
 		when(fileService.createBundleDirectory(directoryName)).thenReturn(created);
+		when(bundleInfo.getBundleTrackingObject(directoryName)).thenReturn(new JSONObject());
 	}
 	
 	@Test
