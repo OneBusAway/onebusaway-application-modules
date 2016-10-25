@@ -128,12 +128,12 @@ jQuery(function() {
 				$('#fixedRouteDiffTable tr').slice(1).remove();
 
 				jQuery.ajax({
-					url: "manage-bundles!diffResult.action",
+					url: "compare-bundles!diffResult.action",
 					data: {
-						"diffBundleName" : bundleNames[0],
-						"diffBuildName" : buildNames[0],
-						"bundleDirectory" : selectedDirectory,
-						"bundleName": jQuery("#bundleBuildName").val()
+						"datasetName" : selectedDirectory,
+						"buildName" : jQuery("#bundleBuildName").val(),
+						"datasetName2" : bundleNames[0],
+						"buildName2": buildNames[0]
 					},
 					type: "GET",
 					async: false,
@@ -954,7 +954,7 @@ function onUploadSelectedAgenciesClick() {
 		if (agencyProtocol != "file") {
 			var actionName = "uploadSourceData";	
 			jQuery.ajax({
-				url: "manage-bundles!" + actionName + ".action?ts=" + new Date().getTime(),
+				url: "upload-gtfs!" + actionName + ".action?ts=" + new Date().getTime(),
 				type: "GET",
 				data: {
 					"directoryName" : bundleDir,
@@ -989,7 +989,7 @@ function onUploadSelectedAgenciesClick() {
 			formData.append("cleanDir", cleanDir);
 			var actionName = "uploadSourceFile";
 			jQuery.ajax({
-				url: "manage-bundles!" + actionName + ".action",
+				url: "upload-gtfs!" + actionName + ".action",
 				type: "POST",
 				data: formData,
 				cache: false,
