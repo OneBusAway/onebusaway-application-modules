@@ -111,6 +111,8 @@
    
    <bean id="bundleServerService" class="org.onebusaway.admin.service.server.impl.BundleServerServiceImpl" />
 
+   <bean id="bundleInfo" class="org.onebusaway.admin.util.BundleInfo" />
+
    <bean id="keyTranslator" class="org.onebusaway.admin.util.ConfigurationKeyTranslator" />
    
    <bean id="loginEventListener" class="org.onebusaway.admin.event.handler.LoginEventListener" />
