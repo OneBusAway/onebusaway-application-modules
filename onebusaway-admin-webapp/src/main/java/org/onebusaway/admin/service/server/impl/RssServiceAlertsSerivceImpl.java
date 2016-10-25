@@ -66,6 +66,7 @@ public class RssServiceAlertsSerivceImpl implements RssServiceAlertsService {
     private Map<String, ServiceAlertBean> _alertCache;
     private boolean _removeAgencyIds = true;
     private FeedMessage _feed = null;
+    private Locale _locale = null;
 
     @Autowired
     public void setTransitDataService(TransitDataService tds) {
@@ -88,6 +89,10 @@ public class RssServiceAlertsSerivceImpl implements RssServiceAlertsService {
       _alertSource = source;
     }
     
+    public void setLocale(Locale locale) {
+      _locale = locale;
+    }
+    
     public boolean isEnabled() {
       return _serviceStatusUrlString != null && _serviceAdvisoryUrlString != null;
     }
@@ -100,6 +105,9 @@ public class RssServiceAlertsSerivceImpl implements RssServiceAlertsService {
     
     @PostConstruct
     public void start() throws Exception {
+        if (_locale == null)
+          _locale = Locale.getDefault();
+        
         _executor = Executors.newSingleThreadScheduledExecutor();
         // re-build internal route cache
         _executor.scheduleAtFixedRate(new RefreshDataTask(), 0, 1, TimeUnit.HOURS);
@@ -134,7 +142,11 @@ public class RssServiceAlertsSerivceImpl implements RssServiceAlertsService {
         List<Element> elements = doc.getRootElement().getChild("channel").getChildren("item");
         String language = doc.getRootElement().getChild("channel").getChildText("language");
         if(language == null)
-            language = "en-us";  //they don't send language for this feed currently, perhaps they'll start?
+            language = _locale.getLanguage();  //they don't send language for this feed currently, perhaps they'll start?
+        if(language.equals("en-us")) {
+          // java prefers en
+          language = _locale.getLanguage();
+        }
         for(Element itemElement : elements){
             String title = itemElement.getChild("title").getValue();
             String link = itemElement.getChild("link").getValue();
@@ -176,6 +188,12 @@ public class RssServiceAlertsSerivceImpl implements RssServiceAlertsService {
 
         List<Element> elements = doc.getRootElement().getChild("channel").getChildren("item");
         String language = doc.getRootElement().getChild("channel").getChildText("language");
+        if (language == null) {
+          language = _locale.getLanguage();
+        }
+        if (language.equals("en-us")) {
+          language = _locale.getLanguage();
+        }
         for(Element itemElement : elements){
             String title = itemElement.getChild("title").getValue();
             String link = itemElement.getChild("link").getValue();
