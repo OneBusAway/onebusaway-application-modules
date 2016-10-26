@@ -219,7 +219,7 @@ OBA.Popups = (function() {
 		var alertData = processAlertData(r.Siri.ServiceDelivery.SituationExchangeDelivery);
 		
 		var activity = r.Siri.ServiceDelivery.VehicleMonitoringDelivery[0].VehicleActivity[0];
-		if(activity === null || activity.MonitoredVehicleJourney === null) {
+		if(activity === null || typeof activity == 'undefined' || activity.MonitoredVehicleJourney === null) {
 			return null;
 		}
 
