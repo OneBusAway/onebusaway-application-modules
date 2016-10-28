@@ -39,6 +39,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class ApiKeyAction extends NextActionSupport{
 
 	private static final long serialVersionUID = 1L;
+  private static final long MIN_API_REQ_INT_DEFAULT = 100L;
 	private Long minApiReqInt = 100L;
 	private String contactName;
 	private String contactCompany;
@@ -182,6 +183,9 @@ public class ApiKeyAction extends NextActionSupport{
 		UserIndexKey userIndexKey = new UserIndexKey(UserIndexTypes.API_KEY, apiKey);
     UserIndex userIndex = userService.getOrCreateUserForIndexKey(userIndexKey,
         apiKey, false);
+    if (minApiReqInt == null) {
+      minApiReqInt = MIN_API_REQ_INT_DEFAULT;
+    }
     userPropertiesService.authorizeApi(userIndex.getUser(), minApiReqInt);
     // Set the API Key contact info
     User user = userIndex.getUser();

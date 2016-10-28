@@ -45,7 +45,7 @@
 					<label>Min Api Request Interval (ms)</label>
 					<s:textfield id="minApiReqInt" name="minApiReqInt"
 								style="margin: 1px; width: 100px;" />
-					<span id="requestIntervalError">*Request Interval is not valid; it can only be a number.</span>
+					<span id="requestIntervalError">*Request Interval is not valid; it must be a number, zero or greater.</span>
 				</fieldset>
 				<fieldset id="apiKeyContactInfo">
 					<legend id="contactInfoLegend">Contact Information</legend>

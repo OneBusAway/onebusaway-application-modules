@@ -28,7 +28,8 @@ jQuery(function() {
 	jQuery("#minApiReqInt").bind("input propertychange", function() {
 		var text = jQuery("#minApiReqInt").val();
 		var validDatasetNameExp = /^\d*$/;
-		if ((text.length > 0) && (!text.match(validDatasetNameExp))) {
+		if ((text.length == 0)
+				|| ((text.length > 0) && (!text.match(validDatasetNameExp)))) {
 			jQuery('#requestIntervalError').show();
 			$("#api-key_save").prop('disabled', true);
 		} else {
