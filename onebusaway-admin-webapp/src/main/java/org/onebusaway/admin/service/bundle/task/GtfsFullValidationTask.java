@@ -16,7 +16,13 @@
 package org.onebusaway.admin.service.bundle.task;
 
 import java.io.File;
+import java.io.IOException;
 
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.nodes.Node;
+import org.jsoup.select.Elements;
 import org.onebusaway.admin.model.BundleRequestResponse;
 import org.onebusaway.admin.service.bundle.BundleValidationService;
 import org.onebusaway.transit_data_federation.bundle.model.GtfsBundle;
@@ -75,7 +81,8 @@ public class GtfsFullValidationTask implements  Runnable {
       _log.info(gtfsBundle.getPath().toString());
       try {
         _validateService.installAndValidateGtfs(gtfsFilePath, outputFile);
-        _logger.header(gtfsFileName + ".html", "", "");  // To go into summary.csv
+        _logger.header(gtfsFileName + ".html", "", "");  // To add into summary.csv
+        checkOutputForErrors(gtfsBundle, outputFile);
       } catch (Exception any) {
         _log.error("GtfsFullValidationTask failed:", any);
       } finally {
@@ -100,5 +107,32 @@ public class GtfsFullValidationTask implements  Runnable {
 
     throw new IllegalStateException(
         "must define either \"gtfs-bundles\" or \"gtfs-bundle\" in config");
+  }
+/** This method will parse the validation output HTML file checking to see
+ * if any errors were found during the validation.  If any were, a summary csv
+ * file is created listing the errors.
+ *
+ * @param gtfsBundle - the bundle being checked
+ * @param outputFile - the name of the HTML file to be checked.
+ * @throws IOException
+ */
+  private void checkOutputForErrors(GtfsBundle gtfsBundle, String outputFile)
+      throws IOException {
+    File validationHtmlFile = new File(outputFile);
+    Document doc = Jsoup.parse(validationHtmlFile, "UTF-8");
+    Element validationErrors = doc.select(".issueHeader:containsOwn(Errors:) ~ ul").first();
+    if (validationErrors != null && validationErrors.hasText()) {
+      String csvFileName = gtfsBundle.getDefaultAgencyId()
+          + "_gtfs_validation_errors.csv";
+      _logger.header(csvFileName, "Error Message, Error Detail");
+      for (Element element: validationErrors.children()) {
+        Element lineDiv = element.select("div").first();
+        int nodeCt = lineDiv.childNodeSize();
+        String errorMsgText = lineDiv.text();
+        String errorDetailText = lineDiv.childNode(nodeCt-1).toString();
+        errorMsgText = errorMsgText.substring(0, errorMsgText.length()-errorDetailText.length());
+        _logger.logCSV(csvFileName, errorMsgText + "," + errorDetailText);
+      }
+    }
   }
 }
