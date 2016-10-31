@@ -17,11 +17,15 @@ package org.onebusaway.admin.service.bundle.task;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.nodes.Node;
+import org.jsoup.nodes.TextNode;
 import org.jsoup.select.Elements;
 import org.onebusaway.admin.model.BundleRequestResponse;
 import org.onebusaway.admin.service.bundle.BundleValidationService;
@@ -82,7 +86,7 @@ public class GtfsFullValidationTask implements  Runnable {
       try {
         _validateService.installAndValidateGtfs(gtfsFilePath, outputFile);
         _logger.header(gtfsFileName + ".html", "", "");  // To add into summary.csv
-        checkOutputForErrors(gtfsBundle, outputFile);
+        checkOutputForErrors(gtfsBundle.getDefaultAgencyId(), outputFile);
       } catch (Exception any) {
         _log.error("GtfsFullValidationTask failed:", any);
       } finally {
@@ -112,27 +116,78 @@ public class GtfsFullValidationTask implements  Runnable {
  * if any errors were found during the validation.  If any were, a summary csv
  * file is created listing the errors.
  *
- * @param gtfsBundle - the bundle being checked
+ * @param agencyId - the agency id of the HTML file being checked
  * @param outputFile - the name of the HTML file to be checked.
  * @throws IOException
  */
-  private void checkOutputForErrors(GtfsBundle gtfsBundle, String outputFile)
+  private void checkOutputForErrors(String agencyId, String outputFile)
       throws IOException {
     File validationHtmlFile = new File(outputFile);
     Document doc = Jsoup.parse(validationHtmlFile, "UTF-8");
-    Element validationErrors = doc.select(".issueHeader:containsOwn(Errors:) ~ ul").first();
+    Elements validationErrors = doc.select(".issueHeader:containsOwn(Errors:) ~ ul").first().select("li");
     if (validationErrors != null && validationErrors.hasText()) {
-      String csvFileName = gtfsBundle.getDefaultAgencyId()
-          + "_gtfs_validation_errors.csv";
+      String csvFileName = agencyId + "_gtfs_validation_errors.csv";
       _logger.header(csvFileName, "Error Message, Error Detail");
-      for (Element element: validationErrors.children()) {
-        Element lineDiv = element.select("div").first();
-        int nodeCt = lineDiv.childNodeSize();
-        String errorMsgText = lineDiv.text();
-        String errorDetailText = lineDiv.childNode(nodeCt-1).toString();
-        errorMsgText = errorMsgText.substring(0, errorMsgText.length()-errorDetailText.length());
+      for (Node parentNode : validationErrors) { // for each <li>
+        String errorMsgText = "";
+        String errorDetailText = "";
+        for (Node node : parentNode.childNodes()) {
+          if (node instanceof TextNode) {
+            errorMsgText += ((TextNode) node).text();
+          } else if (node instanceof Element) {
+            String tagName = ((Element)node).tagName();
+            if (tagName.equals("br")) {
+              errorMsgText += " ";
+            } else if (tagName.equals("div")) {
+              errorMsgText += parseDivData(node);
+            } else if (tagName.equals("table")) {
+              errorDetailText = parseTableData(node);
+            } else {
+              errorMsgText += ((Element)node).text();
+            }
+          }
+        }
         _logger.logCSV(csvFileName, errorMsgText + "," + errorDetailText);
       }
     }
+  }
+
+  private String parseDivData (Node divNode) {
+    String parsedText = "";
+    for (Node node : divNode.childNodes()) {
+      if (node instanceof TextNode) {
+        parsedText += ((TextNode) node).text();
+      } else if (node instanceof Element) {
+        String tagName = ((Element)node).tagName();
+        if (tagName.equals("br")) {
+          parsedText += " ";
+        } else if (tagName.equals("div")) {
+          parsedText += parseDivData(node);
+        } else if (tagName.equals("table")) {
+          parsedText += parseTableData(node);
+        } else {
+          parsedText += " " + ((Element)node).text();
+        }
+      }
+    }
+    return parsedText;
+  }
+
+  private String parseTableData (Node node) {
+    String parsedData = "";
+    // Get the headers and data from the table
+    Element detailsTable = ((Element)node).getElementsByClass("dump").first();
+    List<String> headers = new ArrayList<>();
+    List<String> details = new ArrayList<>();
+    Iterator<Element> headerIterator = detailsTable.select("th").iterator();
+    Iterator<Element> detailsIterator = detailsTable.select("td").iterator();
+    while (headerIterator.hasNext() && detailsIterator.hasNext()) {
+      headers.add(headerIterator.next().text());
+      details.add(detailsIterator.next().text());
+    }
+    for (int i=0; i<headers.size(); i++) {
+      parsedData += headers.get(i) + ":" + details.get(i) + "  ";
+    }
+    return parsedData;
   }
 }
