@@ -21,6 +21,7 @@ import java.util.Map;
 
 import org.onebusaway.collections.FactoryMap;
 import org.onebusaway.gtfs.model.calendar.ServiceInterval;
+import org.onebusaway.transit_data_federation.util.LoggingIntervalUtil;
 import org.onebusaway.transit_data_federation.impl.transit_graph.FrequencyBlockStopTimeEntryImpl;
 import org.onebusaway.transit_data_federation.services.blocks.BlockIndexService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockStopTimeIndex;
@@ -57,6 +58,8 @@ public class BlockStopTimeIndicesFactory {
   private static final FrequencyBlockStopTimeComparator _frequencyBlockStopTimeLooseComparator = new FrequencyBlockStopTimeComparator();
 
   private static final FrequencyBlockStopTimeStrictComparator _frequencyBlockStopTimeStrictComparator = new FrequencyBlockStopTimeStrictComparator();
+  
+  private LoggingIntervalUtil _logIntervals = new LoggingIntervalUtil();
 
   private boolean _verbose = false;
 
@@ -105,7 +108,7 @@ public class BlockStopTimeIndicesFactory {
       List<BlockConfigurationEntry> configurations = block.getConfigurations();
 
       if (configurations.isEmpty()) {
-        _log.warn("block has no active configurations: " + block.getId());
+        _log.warn("block is not referred to in calendars (no active configurations): " + block.getId());
         continue;
       }
 
@@ -152,12 +155,13 @@ public class BlockStopTimeIndicesFactory {
       Map<BlockStopTimeKey, List<BlockStopTimeEntry>> stopTimesByKey) {
 
     List<BlockStopTimeIndex> allIndices = new ArrayList<BlockStopTimeIndex>();
+    int logInterval = _logIntervals.getAppropriateLoggingInterval(allIndices.size()) * 10;
 
     int count = 0;
 
     for (List<BlockStopTimeEntry> stopTimes : stopTimesByKey.values()) {
 
-      if (_verbose && count % 1000 == 0)
+      if (_verbose && count % logInterval == 0)
         _log.info("groups processed: " + count + "/" + stopTimesByKey.size());
 
       count++;

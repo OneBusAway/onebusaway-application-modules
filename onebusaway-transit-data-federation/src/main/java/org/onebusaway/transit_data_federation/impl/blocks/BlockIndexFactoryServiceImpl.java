@@ -55,6 +55,7 @@ import org.onebusaway.transit_data_federation.services.transit_graph.HasBlockSto
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
+import org.onebusaway.transit_data_federation.util.LoggingIntervalUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -76,6 +77,8 @@ public class BlockIndexFactoryServiceImpl implements BlockIndexFactoryService {
   private static final Comparator<BlockSequence> _blockSequenceLooseComparator = new BlockStopTimeLooseComparator<BlockSequence>();
 
   private static final Comparator<BlockSequence> _blockSequenceStrictComparator = new BlockTripStrictComparator<BlockSequence>();
+  
+  private LoggingIntervalUtil _logIntervals = new LoggingIntervalUtil();
 
   private AgencyService _agencyService;
 
@@ -222,6 +225,7 @@ public class BlockIndexFactoryServiceImpl implements BlockIndexFactoryService {
   public List<BlockTripIndex> createTripIndices(Iterable<BlockEntry> blocks) {
 
     List<BlockTripIndex> allIndices = new ArrayList<BlockTripIndex>();
+    int logInterval = _logIntervals.getAppropriateLoggingInterval(allIndices.size());
 
     Map<BlockSequenceKey, List<BlockTripEntry>> blockTripsByKey = new FactoryMap<BlockSequenceKey, List<BlockTripEntry>>(
         new ArrayList<BlockTripEntry>());
@@ -259,7 +263,7 @@ public class BlockIndexFactoryServiceImpl implements BlockIndexFactoryService {
 
     for (List<BlockTripEntry> tripsWithSameSequence : blockTripsByKey.values()) {
 
-      if (_verbose && count % 100 == 0)
+      if (_verbose && count % logInterval == 0)
         _log.info("groups processed: " + count + "/" + blockTripsByKey.size());
 
       count++;
@@ -281,6 +285,7 @@ public class BlockIndexFactoryServiceImpl implements BlockIndexFactoryService {
       Iterable<BlockEntry> blocks) {
 
     List<BlockLayoverIndex> allIndices = new ArrayList<BlockLayoverIndex>();
+    int logInterval = _logIntervals.getAppropriateLoggingInterval(allIndices.size());
 
     Map<BlockLayoverSequenceKey, List<BlockTripEntry>> blockTripsByServiceIds = new FactoryMap<BlockLayoverSequenceKey, List<BlockTripEntry>>(
         new ArrayList<BlockTripEntry>());
@@ -324,7 +329,7 @@ public class BlockIndexFactoryServiceImpl implements BlockIndexFactoryService {
 
     for (List<BlockTripEntry> tripsWithSameSequence : blockTripsByServiceIds.values()) {
 
-      if (_verbose && count % 100 == 0)
+      if (_verbose && count % logInterval == 0)
         _log.info("groups processed: " + count + "/"
             + blockTripsByServiceIds.size());
 
@@ -345,6 +350,7 @@ public class BlockIndexFactoryServiceImpl implements BlockIndexFactoryService {
       Iterable<BlockEntry> blocks) {
 
     List<FrequencyBlockTripIndex> allIndices = new ArrayList<FrequencyBlockTripIndex>();
+    int logInterval = _logIntervals.getAppropriateLoggingInterval(allIndices.size());
 
     Map<BlockSequenceKey, List<BlockTripEntry>> blockTripsByKey = new FactoryMap<BlockSequenceKey, List<BlockTripEntry>>(
         new ArrayList<BlockTripEntry>());
@@ -381,7 +387,7 @@ public class BlockIndexFactoryServiceImpl implements BlockIndexFactoryService {
 
     for (List<BlockTripEntry> tripsWithSameSequence : blockTripsByKey.values()) {
 
-      if (_verbose && count % 100 == 0)
+      if (_verbose && count % logInterval == 0)
         _log.info("frequency groups processed: " + count + "/"
             + blockTripsByKey.size());
 

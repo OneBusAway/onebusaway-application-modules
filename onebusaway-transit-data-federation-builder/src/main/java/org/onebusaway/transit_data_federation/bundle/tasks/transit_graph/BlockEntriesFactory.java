@@ -29,6 +29,7 @@ import org.onebusaway.gtfs.services.GtfsRelationalDao;
 import org.onebusaway.transit_data_federation.impl.transit_graph.BlockEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.TransitGraphImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.TripEntryImpl;
+import org.onebusaway.transit_data_federation.util.LoggingIntervalUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -115,10 +116,12 @@ public class BlockEntriesFactory {
       Map<AgencyAndId, List<TripEntryImpl>> tripsByBlockId) {
 
     int blockIndex = 0;
+    LoggingIntervalUtil _logIntervals = new LoggingIntervalUtil();
+	int logInterval = _logIntervals.getAppropriateLoggingInterval(tripsByBlockId.keySet().size());
 
     for (Map.Entry<AgencyAndId, List<TripEntryImpl>> entry : tripsByBlockId.entrySet()) {
 
-      if (blockIndex % 10 == 0)
+      if (blockIndex % logInterval == 0)
         _log.info("block: " + blockIndex + "/" + tripsByBlockId.size());
       blockIndex++;
 

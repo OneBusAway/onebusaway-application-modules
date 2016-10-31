@@ -28,6 +28,7 @@ import org.onebusaway.transit_data_federation.impl.transit_graph.AgencyEntryImpl
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.TransitGraphImpl;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
+import org.onebusaway.transit_data_federation.util.LoggingIntervalUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,12 +56,15 @@ public class StopEntriesFactory {
     int stopIndex = 0;
 
     Collection<Stop> stops = _gtfsDao.getAllStops();
+    LoggingIntervalUtil _logIntervals = new LoggingIntervalUtil();
+    int logInterval = _logIntervals.getAppropriateLoggingInterval(stops.size());
+    
     Map<String, ArrayList<StopEntry>> stopEntriesByAgencyId = new FactoryMap<String, ArrayList<StopEntry>>(
         new ArrayList<StopEntry>());
 
     for (Stop stop : stops) {
 
-      if (stopIndex % 500 == 0)
+      if (stopIndex % logInterval == 0)
         _log.info("stops: " + stopIndex + "/" + stops.size());
       stopIndex++;
 

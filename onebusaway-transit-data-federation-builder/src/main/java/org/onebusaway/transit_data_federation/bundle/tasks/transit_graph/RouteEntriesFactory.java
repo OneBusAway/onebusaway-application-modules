@@ -22,6 +22,7 @@ import org.onebusaway.gtfs.services.GtfsRelationalDao;
 import org.onebusaway.transit_data_federation.bundle.services.UniqueService;
 import org.onebusaway.transit_data_federation.impl.transit_graph.RouteEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.TransitGraphImpl;
+import org.onebusaway.transit_data_federation.util.LoggingIntervalUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,10 +50,14 @@ public class RouteEntriesFactory {
   public void processRoutes(TransitGraphImpl graph) {
 
     Collection<Route> routes = _gtfsDao.getAllRoutes();
+    LoggingIntervalUtil _logIntervals = new LoggingIntervalUtil();
+    int logInterval = _logIntervals.getAppropriateLoggingInterval(routes.size());
     int routeIndex = 0;
 
     for (Route route : routes) {
-      _log.info("route processed: " + routeIndex + "/" + routes.size());
+    	if (routeIndex % logInterval == 0 ){
+    		_log.info("route processed: " + routeIndex + "/" + routes.size());
+    	}
       routeIndex++;
       processRoute(graph, route);
     }
