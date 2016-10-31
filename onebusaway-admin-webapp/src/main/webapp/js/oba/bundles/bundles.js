@@ -669,8 +669,10 @@ function onCreateDatasetClick() {
 	selectedDirectory = jQuery("#createDataset #directoryName").val();
 	$("#Download #download_selectedDataset").text(selectedDirectory);
 	// Clear fields on the Upload tab
-	$('#agency_data tr').slice(1).remove();
-	onAddAnotherAgencyClick("file");
+	if (agencyMetadataAvailable) {
+		$('#agency_data tr').slice(1).remove();
+		onAddAnotherAgencyClick("file");
+	}
 	$("#uploadFiles #bundleComment").val("");
 	$('#existingFilesTable tr').slice(1).remove();
 	onSelectDataset("create");
@@ -1041,7 +1043,6 @@ function onAddNewAgencyClick() {
 		},
 		success: function(response) {
 			getAgencyMetadata();
-
 			//clear fields for new agency
 			$("#newAgencyName").val("");
 			$("#newAgencyShortName").val("");
@@ -1072,6 +1073,10 @@ function getPreviousBuildResults(buildResponse) {
 }
 
 function onAddAnotherAgencyClick(inputType) {
+	// If no agency metadata defined, just return.
+	if (!agencyMetadataAvailable) {
+		return;
+	}
 	if (inputType === undefined) {
 		inputType = "file";
 	}

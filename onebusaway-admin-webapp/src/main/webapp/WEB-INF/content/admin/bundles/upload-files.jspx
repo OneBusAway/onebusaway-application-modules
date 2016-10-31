@@ -44,7 +44,9 @@
 							<th></th>
 						</tr>
 						<tr class="agencySelected">
-							<td class="agencyIdData"><input type="text"  class="agencyId" id="agencyId"/></td>
+							<td class="agencyIdData"><input type="text"  class="agencyId" id="agencyId" readonly="readonly"
+							  value="You must define an agency before you can upload to it." />
+							</td>
 							<td>
 								<select class="agencyDataSourceType" id="agencyDataSourceType">
 									<option value="gtfs">gtfs</option>
