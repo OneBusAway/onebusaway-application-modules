@@ -4,13 +4,18 @@ public class LoggingIntervalUtil {
 	
 	public int getAppropriateLoggingInterval(int s){
 				
-		int interval = s/20;
+		int interval = s/10;
+		// rounded to lowest power of 10. 
+		double exponent = Math.floor(Math.log10((double) interval));
+		double roundedInterval = Math.pow(10, exponent); 
 		
-		if (interval > 0){
-			return interval;
-		} else {
+		if (roundedInterval > 0) {
+			return (int) roundedInterval;
+		}
+		else {
 			return 1;
 		}
+		
 	}
 
 }

@@ -178,6 +178,8 @@ public class GtfsMultiReaderImpl implements Runnable {
     private Counter<String> _counter = new Counter<String>();
 
     private Map<String, Long> _startTime = new HashMap<String, Long>();
+    
+    private int logInterval = 1000;
 
     public void handleEntity(Object bean) {
       String name = bean.getClass().getName();
@@ -190,7 +192,12 @@ public class GtfsMultiReaderImpl implements Runnable {
     private void increment(String key) {
       _counter.increment(key);
       int c = _counter.getCount(key);
-      if (c % 1000 == 0) {
+      if (c % logInterval == 0) {
+		  // backoff logging by power of ten
+    	  if (c == logInterval){
+    		  logInterval = logInterval * 10;
+    		  System.out.println("now logging every " + logInterval);
+    	  }
         double ellapsedTime = (System.currentTimeMillis() - getStartTimeForKey(key)) / 1000.0;
         System.out.println(key + " = " + c + " rate="
             + ((long) (c / ellapsedTime)));
