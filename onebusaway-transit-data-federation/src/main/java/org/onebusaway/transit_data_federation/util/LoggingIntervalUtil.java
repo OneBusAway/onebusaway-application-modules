@@ -9,7 +9,7 @@ public class LoggingIntervalUtil {
 		double exponent = Math.floor(Math.log10((double) interval));
 		double roundedInterval = Math.pow(10, exponent); 
 		
-		if (roundedInterval > 0) {
+		if (roundedInterval >= 1) {
 			return (int) roundedInterval;
 		}
 		else {
