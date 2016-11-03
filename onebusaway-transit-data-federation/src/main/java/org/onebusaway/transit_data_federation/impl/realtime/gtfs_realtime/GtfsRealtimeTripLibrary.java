@@ -546,6 +546,9 @@ class GtfsRealtimeTripLibrary {
     if (arrival.hasTime())
       return (int) (arrival.getTime() - serviceDate / 1000);
 	
+	// The arrival has no delay or time, this is a bad GTFS-RT so we just skip it and log a warning mentioning the issue
+	_log.info("expected arrival delay or time for stopTimeUpdate " + stopTimeUpdate);
+	
 	return -1;
   }
 
@@ -558,8 +561,11 @@ class GtfsRealtimeTripLibrary {
       return stopTime.getDepartureTime() + departure.getDelay();
     if (departure.hasTime())
       return (int) (departure.getTime() - serviceDate / 1000);
-    throw new IllegalStateException(
-        "expected departure delay or time for stopTimeUpdate " + stopTimeUpdate);
+	
+	// The departure has no delay or time, this is a bad GTFS-RT so we just skip it and log a warning mentioning the issue
+	_log.info("expected departure delay or time for stopTimeUpdate " + stopTimeUpdate);
+	
+	return -1;
   }
 
   private void updateBestScheduleDeviation(int currentTime,
