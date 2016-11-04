@@ -27,6 +27,7 @@ import org.onebusaway.gtfs_realtime.archiver.service.GtfsRealtimeRetriever;
 import org.onebusaway.gtfs_realtime.archiver.service.GtfsRealtimeRetriever.EntityType;
 import org.onebusaway.gtfs_realtime.archiver.service.TimeService;
 import org.onebusaway.users.services.ApiKeyPermissionService;
+import org.onebusaway.users.services.ApiKeyPermissionService.Status;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -38,6 +39,8 @@ import com.google.transit.realtime.GtfsRealtime.FeedMessage;
 
 @Controller
 public class GtfsRealtimePlaybackController {
+
+  private static final int TOO_MANY_REQUESTS = 429;
 
   @Autowired
   private GtfsRealtimeRetriever _gtfsRealtimeRetriever;
@@ -60,7 +63,14 @@ public class GtfsRealtimePlaybackController {
       @PathVariable String path)
           throws IOException {
     
-    if(!isAllowed(key)) {
+    Status status = isAllowed(key);
+    
+    if(Status.RATE_EXCEEDED == status) {
+      response.sendError(TOO_MANY_REQUESTS);
+      return;
+    }
+    
+    if(Status.AUTHORIZED != status) {
       response.sendError(HttpServletResponse.SC_FORBIDDEN);
       return;
     }
@@ -98,13 +108,20 @@ public class GtfsRealtimePlaybackController {
       @RequestParam(value = "key", required = true) String key)
           throws IOException {
     
-    if(!isAllowed(key)) {
-      response.sendError(HttpServletResponse.SC_FORBIDDEN);
-      return "";
+    Status status = isAllowed(key);
+    if(Status.AUTHORIZED == status) {
+      _timeService.clear(key);
+      return "SUCCESS\n";
     }
     
-    _timeService.clear(key);
-    return "SUCCESS\n";
+    if (Status.RATE_EXCEEDED == status) {
+      response.sendError(TOO_MANY_REQUESTS);
+      return "rate limit exceeded";
+    }
+    
+    response.sendError(HttpServletResponse.SC_FORBIDDEN);
+    return "permission denied";
+    
   }
 
   private void render(ServletRequest request, HttpServletResponse response,
@@ -119,7 +136,7 @@ public class GtfsRealtimePlaybackController {
   }
   
   
-  private boolean isAllowed(String key) {
+  private Status isAllowed(String key) {
     return _keyService.getPermission(key, "api");
   }
 }

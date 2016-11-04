@@ -24,6 +24,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.struts2.ServletActionContext;
 import org.onebusaway.presentation.services.realtime.RealtimeService;
 import org.onebusaway.users.services.ApiKeyPermissionService;
+import org.onebusaway.users.services.ApiKeyPermissionService.Status;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +43,9 @@ import com.opensymphony.xwork2.interceptor.AbstractInterceptor;
 public class ApiKeyInterceptor extends AbstractInterceptor {
 
   private static final long serialVersionUID = 1L;
+
+  //at this time ServletResponse does not support 429 so define it locally
+  private static final int RESPONSE_TOO_MANY_REQUESTS = 429;
 
   private static Logger _log = LoggerFactory.getLogger(ApiKeyInterceptor.class);
 
@@ -89,18 +93,28 @@ public class ApiKeyInterceptor extends AbstractInterceptor {
     // String acceptHeader = request.getHeader("Accept");
   }
 
-  private int isAllowed(ActionInvocation invocation) {
+  // package private for unit tests
+  int isAllowed(ActionInvocation invocation) {
     ActionContext context = invocation.getInvocationContext();
     Map<String, Object> parameters = context.getParameters();
     String[] keys = (String[]) parameters.get("key");
 
-    if (keys == null || keys.length == 0)
+    if (keys == null || keys.length == 0) {
+      // 401:  we couldn't find the api key
       return HttpServletResponse.SC_UNAUTHORIZED;
+    }
 
-    if (_keyService.getPermission(keys[0], "api"))
+    Status status = _keyService.getPermission(keys[0], "api"); 
+    if (status == Status.AUTHORIZED) {
       return HttpServletResponse.SC_OK;
-    else
-      return HttpServletResponse.SC_FORBIDDEN;
+    } 
+    
+    if (status == Status.RATE_EXCEEDED) {
+      return RESPONSE_TOO_MANY_REQUESTS;  
+    }
+    
+     // fall through is 403 Forbidden (we understood the key, but auth failed)
+    return HttpServletResponse.SC_FORBIDDEN;
 
   }
 

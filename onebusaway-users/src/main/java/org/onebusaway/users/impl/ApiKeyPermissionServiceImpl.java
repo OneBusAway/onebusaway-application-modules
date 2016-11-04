@@ -40,20 +40,20 @@ public class ApiKeyPermissionServiceImpl implements ApiKeyPermissionService {
   }
 
   @Override
-  public boolean getPermission(String key, String service) {
+  public Status getPermission(String key, String service) {
 
     Long minRequestInterval = _userService.getMinApiRequestIntervalForKey(key,false);
     if (minRequestInterval == null) {
-      return false;
+      return Status.UNAUTHORIZED;
     }
     
     long now = System.currentTimeMillis();
     Long lastVisit = _lastVisitForUser.get(key);
     
-    boolean ok = false;
+    Status ok = Status.RATE_EXCEEDED;
     
     if (lastVisit == null || lastVisit + minRequestInterval <= now) {
-      ok = true;
+      ok = Status.AUTHORIZED;
     }
     
     _lastVisitForUser.put(key, now);
