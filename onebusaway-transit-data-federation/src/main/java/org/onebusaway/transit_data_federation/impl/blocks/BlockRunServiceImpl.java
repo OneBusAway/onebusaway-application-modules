@@ -50,14 +50,15 @@ public class BlockRunServiceImpl implements BlockRunService {
   @PostConstruct
   @Refreshable(dependsOn = RefreshableResources.TRANSIT_GRAPH)
   public void setup() throws IOException, ClassNotFoundException {
-    _log.error("bundle path=" + _bundle.getPath());
+    _log.info("bundle path=" + _bundle.getPath());
     File path = _bundle.getBlockRunDataPath();
     if (path.exists()) {
-      _log.error("loading BlockRunIndex...");
+      _log.info("loading BlockRunIndex...");
       _map = ObjectSerializationLibrary.readObject(path);
-      _log.error("loading BlockRunIndex...done");
+      _log.info("loading BlockRunIndex...done");
     } else {
-      _log.error("failed BlockRunIndex load, path not found of " + path);
+      // this index is optional, do not fail if not found
+      _log.info("failed BlockRunIndex load, path not found of " + path);
       _map = new HashMap<String, List<BlockRunIndex>>();
     }
   }
