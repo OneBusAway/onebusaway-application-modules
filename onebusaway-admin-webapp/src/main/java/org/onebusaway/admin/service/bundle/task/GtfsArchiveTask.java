@@ -61,6 +61,7 @@ public class GtfsArchiveTask implements  Runnable {
     "tmp_pattern_pairs",
     "tmp_gtfs_calendar_dates",
     "tmp_gtfs_calendars",
+    "tmp_gtfs_block",
     "tmp_gtfs_fare_rules",
     "tmp_gtfs_fare_attributes",
     "tmp_gtfs_feed_info",
@@ -78,6 +79,7 @@ public class GtfsArchiveTask implements  Runnable {
   private static Map<String, String> PRIMARY_KEY_MAP = new HashMap<String, String>();
   static {
     PRIMARY_KEY_MAP.put("gtfs_agencies", "id");
+    PRIMARY_KEY_MAP.put("gtfs_block", "gid");
     PRIMARY_KEY_MAP.put("gtfs_calendar_dates", "gid");
     PRIMARY_KEY_MAP.put("gtfs_calendars", "gid");
     PRIMARY_KEY_MAP.put("gtfs_fare_attributes", "agencyId,id");
