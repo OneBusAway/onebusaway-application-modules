@@ -59,8 +59,6 @@ public class BlockStopTimeIndicesFactory {
 
   private static final FrequencyBlockStopTimeStrictComparator _frequencyBlockStopTimeStrictComparator = new FrequencyBlockStopTimeStrictComparator();
   
-  private LoggingIntervalUtil _logIntervals = new LoggingIntervalUtil();
-
   private boolean _verbose = false;
 
   public void setVerbose(boolean verbose) {
@@ -155,7 +153,7 @@ public class BlockStopTimeIndicesFactory {
       Map<BlockStopTimeKey, List<BlockStopTimeEntry>> stopTimesByKey) {
 
     List<BlockStopTimeIndex> allIndices = new ArrayList<BlockStopTimeIndex>();
-    int logInterval = _logIntervals.getAppropriateLoggingInterval(allIndices.size()) * 10;
+    int logInterval = LoggingIntervalUtil.getAppropriateLoggingInterval(allIndices.size()) * 10;
 
     int count = 0;
 

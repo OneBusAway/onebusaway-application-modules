@@ -78,8 +78,6 @@ public class BlockIndexFactoryServiceImpl implements BlockIndexFactoryService {
 
   private static final Comparator<BlockSequence> _blockSequenceStrictComparator = new BlockTripStrictComparator<BlockSequence>();
   
-  private LoggingIntervalUtil _logIntervals = new LoggingIntervalUtil();
-
   private AgencyService _agencyService;
 
   private AgencyBeanService _agencyBeanService;
@@ -225,7 +223,7 @@ public class BlockIndexFactoryServiceImpl implements BlockIndexFactoryService {
   public List<BlockTripIndex> createTripIndices(Iterable<BlockEntry> blocks) {
 
     List<BlockTripIndex> allIndices = new ArrayList<BlockTripIndex>();
-    int logInterval = _logIntervals.getAppropriateLoggingInterval(allIndices.size());
+    int logInterval = LoggingIntervalUtil.getAppropriateLoggingInterval(allIndices.size());
 
     Map<BlockSequenceKey, List<BlockTripEntry>> blockTripsByKey = new FactoryMap<BlockSequenceKey, List<BlockTripEntry>>(
         new ArrayList<BlockTripEntry>());
@@ -285,7 +283,7 @@ public class BlockIndexFactoryServiceImpl implements BlockIndexFactoryService {
       Iterable<BlockEntry> blocks) {
 
     List<BlockLayoverIndex> allIndices = new ArrayList<BlockLayoverIndex>();
-    int logInterval = _logIntervals.getAppropriateLoggingInterval(allIndices.size());
+    int logInterval = LoggingIntervalUtil.getAppropriateLoggingInterval(allIndices.size());
 
     Map<BlockLayoverSequenceKey, List<BlockTripEntry>> blockTripsByServiceIds = new FactoryMap<BlockLayoverSequenceKey, List<BlockTripEntry>>(
         new ArrayList<BlockTripEntry>());
@@ -350,7 +348,7 @@ public class BlockIndexFactoryServiceImpl implements BlockIndexFactoryService {
       Iterable<BlockEntry> blocks) {
 
     List<FrequencyBlockTripIndex> allIndices = new ArrayList<FrequencyBlockTripIndex>();
-    int logInterval = _logIntervals.getAppropriateLoggingInterval(allIndices.size());
+    int logInterval = LoggingIntervalUtil.getAppropriateLoggingInterval(allIndices.size());
 
     Map<BlockSequenceKey, List<BlockTripEntry>> blockTripsByKey = new FactoryMap<BlockSequenceKey, List<BlockTripEntry>>(
         new ArrayList<BlockTripEntry>());

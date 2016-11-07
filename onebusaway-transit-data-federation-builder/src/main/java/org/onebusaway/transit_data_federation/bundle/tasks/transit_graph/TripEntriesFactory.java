@@ -105,9 +105,8 @@ public class TripEntriesFactory {
 
       List<Trip> tripsForRoute = _gtfsDao.getTripsForRoute(route);
       
-      LoggingIntervalUtil _logIntervals = new LoggingIntervalUtil();
       int tripCount = tripsForRoute.size();
-      int logInterval = _logIntervals.getAppropriateLoggingInterval(tripCount);
+      int logInterval = LoggingIntervalUtil.getAppropriateLoggingInterval(tripCount);
 
       _log.info("trips to process: " + tripCount);
       int tripIndex = 0;

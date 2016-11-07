@@ -56,8 +56,7 @@ public class StopEntriesFactory {
     int stopIndex = 0;
 
     Collection<Stop> stops = _gtfsDao.getAllStops();
-    LoggingIntervalUtil _logIntervals = new LoggingIntervalUtil();
-    int logInterval = _logIntervals.getAppropriateLoggingInterval(stops.size());
+    int logInterval = LoggingIntervalUtil.getAppropriateLoggingInterval(stops.size());
     
     Map<String, ArrayList<StopEntry>> stopEntriesByAgencyId = new FactoryMap<String, ArrayList<StopEntry>>(
         new ArrayList<StopEntry>());

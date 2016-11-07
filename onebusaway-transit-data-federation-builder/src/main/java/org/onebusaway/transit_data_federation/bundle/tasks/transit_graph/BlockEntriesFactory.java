@@ -115,9 +115,8 @@ public class BlockEntriesFactory {
   private void processBlockTrips(TransitGraphImpl graph,
       Map<AgencyAndId, List<TripEntryImpl>> tripsByBlockId) {
 
-    int blockIndex = 0;
-    LoggingIntervalUtil _logIntervals = new LoggingIntervalUtil();
-	int logInterval = _logIntervals.getAppropriateLoggingInterval(tripsByBlockId.keySet().size());
+    int blockIndex = 0; 
+	int logInterval = LoggingIntervalUtil.getAppropriateLoggingInterval(tripsByBlockId.keySet().size());
 
     for (Map.Entry<AgencyAndId, List<TripEntryImpl>> entry : tripsByBlockId.entrySet()) {
 

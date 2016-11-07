@@ -12,6 +12,7 @@ public class LoggingIntervalUtilTest {
 		
 		assertEquals(Integer.valueOf(l.getAppropriateLoggingInterval(16777216)), Integer.valueOf(1000000));
 		assertEquals(Integer.valueOf(l.getAppropriateLoggingInterval(10)), Integer.valueOf(1));
+		assertEquals(Integer.valueOf(l.getAppropriateLoggingInterval(-10)), Integer.valueOf(1));
 	}
 
 }

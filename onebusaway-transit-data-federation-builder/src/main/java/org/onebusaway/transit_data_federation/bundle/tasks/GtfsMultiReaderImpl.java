@@ -194,7 +194,7 @@ public class GtfsMultiReaderImpl implements Runnable {
       int c = _counter.getCount(key);
       if (c % logInterval == 0) {
 		  // backoff logging by power of ten
-    	  if (c == logInterval){
+    	  if (c == logInterval * 10){
     		  logInterval = logInterval * 10;
     		  System.out.println("now logging every " + logInterval);
     	  }
