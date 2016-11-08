@@ -7,10 +7,10 @@ public class LoggingIntervalUtil {
 		int interval = s/10;
 		// rounded to lowest power of 10. 
 		double exponent = Math.floor(Math.log10((double) interval));
-		double roundedInterval = Math.pow(10, exponent); 
+		int roundedInterval = (int) Math.pow(10, exponent); 
 		
 		if (roundedInterval >= 1) {
-			return (int) roundedInterval;
+			return roundedInterval;
 		}
 		else {
 			return 1;
