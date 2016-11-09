@@ -148,54 +148,135 @@ jQuery(function() {
 						$.each(data.fixedRouteDiffs, function(index, value) {
 							var modeName = value.modeName;
 							var modeClass = "";
+							var modeFirstLineClass=" modeFirstLine";
+							var addSpacer = true;
 							if (value.srcCode == 1) {
-								modeClass = "currentRpt"
+								modeClass = "currentRpt";
 							} else if (value.srcCode == 2) {
-								modeClass = "selectedRpt"
+								modeClass = "selectedRpt";
 							}
 							$.each(value.routes, function(index2, value2) {
 								var routeName = value2.routeName;
+								var routeFirstLineClass=" routeFirstLine";
+								addSpacer = false;
 								if (index2 > 0) {
 									modeName = "";
+									modeFirstLineClass = "";
 								}
 								var routeClass = modeClass;
 								if (value2.srcCode == 1) {
-									routeClass = "currentRpt"
+									routeClass = "currentRpt";
 								} else if (value2.srcCode == 2) {
-									routeClass = "selectedRpt"
+									routeClass = "selectedRpt";
 								}
-								$.each(value2.stopCounts, function(index3, value3) {
-									var stopCt = value3.stopCt;
-									var stopClass = "";
-									if (routeClass == "currentRpt") {
-										stopClass = "currentStopCt";
-									} else if (routeClass == "selectedRpt") {
-										stopClass = "selectedStopCt";
-									}
-									if (value3.srcCode == 1) {
-										stopClass = "currentStopCt";
-									} else if (value3.srcCode == 2) {
-										stopClass = "selectedStopCt";
-									}
-									var weekdayTrips = value3.tripCts[0];
-									var satTrips = value3.tripCts[1];
-									var sunTrips = value3.tripCts[2];
-									if (index3 > 0) {
+								$.each(value2.headsignCounts, function(headsignIdx, headsign) {
+									var headsignName = headsign.headsign;
+									var headsignBorderClass = "";
+									if (headsignIdx > 0) {
 										modeName = "";
 										routeName = "";
+										modeFirstLineClass = "";
+										routeFirstLineClass = "";
+										headsignBorderClass = " headsignBorder";
+										addSpacer = false;
 									}
-									var new_row = '<tr class="fixedRouteDiff"> \
-										<td class=' + modeClass + '>' + modeName + '</td> \
-										<td class=' + routeClass + '>' + routeName + '</td> \
-										<td class=' + stopClass + '>' + stopCt + '</td> \
-										<td class=' + stopClass + '>' + weekdayTrips + '</td> \
-										<td class=' + stopClass + '>' + satTrips + '</td> \
-										<td class=' + stopClass + '>' + sunTrips + '</td> \
-										</tr>';
-									$('#fixedRouteDiffTable').append(new_row);
+									var headsignClass = routeClass;
+									if (headsign.srcCode == 1) {
+										headsignClass = "currentRpt";
+									} else if (headsign.srcCode == 2) {
+										headsignClass = "selectedRpt";
+									}
+									$.each(headsign.dirCounts, function(dirIdx, direction) {
+										var dirName = direction.direction;
+										var dirBorderClass = "";
+										if (dirIdx > 0) {
+											modeName = "";
+											routeName = "";
+											headsignName = "";
+											modeFirstLineClass = "";
+											routeFirstLineClass = "";
+											headsignBorderClass = "";
+											dirBorderClass = " dirBorder";
+											addSpacer = false;
+										}
+										var dirClass = headsignClass;
+										if (direction.srcCode == 1) {
+											dirClass = "currentRpt";
+										} else if (direction.srcCode == 2) {
+											dirClass = "selectedRpt";
+										}
+										$.each(direction.stopCounts, function(index3, value3) {
+											var stopCt = value3.stopCt;
+											var stopClass = "";
+											if (dirClass == "currentRpt") {
+												stopClass = "currentStopCt";
+											} else if (dirClass == "selectedRpt") {
+												stopClass = "selectedStopCt";
+											}
+											if (value3.srcCode == 1) {
+												stopClass = "currentStopCt";
+											} else if (value3.srcCode == 2) {
+												stopClass = "selectedStopCt";
+											}
+											var weekdayTrips = value3.tripCts[0];
+											var satTrips = value3.tripCts[1];
+											var sunTrips = value3.tripCts[2];
+											if (index3 > 0) {
+												modeName = "";
+												modeFirstLineClass = "";
+												routeName = "";
+												headsignName = "";
+												dirName = "";
+												routeFirstLineClass = "";
+												headsignBorderClass = "";
+												dirBorderClass = "";
+												addSpacer = false;
+											}
+											if (index > 0 && headsignIdx == 0
+													&& dirIdx == 0 && index3 == 0) {
+												addSpacer = true;
+											}
+											if (addSpacer) {
+												var new_spacer_row = '<tr class="spacer"> \
+													<td></td> \
+													<td></td> \
+													<td></td> \
+													<td></td> \
+													<td></td> \
+													<td></td> \
+													<td></td> \
+													<td></td> \
+													</tr>';
+												$('#fixedRouteDiffTable').append(new_spacer_row);
+											}
+											var new_row = '<tr class="fixedRouteDiff' + modeFirstLineClass + routeFirstLineClass + '"> \
+												<td class=' + modeClass + ' modeName >' + modeName + '</td> \
+												<td class=' + routeClass + routeFirstLineClass + '>' + routeName + '</td> \
+												<td class="' + headsignClass + routeFirstLineClass + headsignBorderClass + '">' + headsignName + '</td> \
+												<td class="' + dirClass + routeFirstLineClass + headsignBorderClass + dirBorderClass + '">' + dirName + '</td> \
+												<td class="' + stopClass + routeFirstLineClass + headsignBorderClass + dirBorderClass + '">' + stopCt + '</td> \
+												<td class="' + stopClass + routeFirstLineClass + headsignBorderClass + dirBorderClass + '">' + weekdayTrips + '</td> \
+												<td class="' + stopClass + routeFirstLineClass + headsignBorderClass + dirBorderClass + '">' + satTrips + '</td> \
+												<td class="' + stopClass + routeFirstLineClass + headsignBorderClass + dirBorderClass + '">' + sunTrips + '</td> \
+												</tr>';
+											$('#fixedRouteDiffTable').append(new_row);
+										});
+									});
 								});
 							});
 						});
+						// Add bottom border to reprot
+						var new_spacer_row = '<tr class="spacer"> \
+							<td></td> \
+							<td></td> \
+							<td></td> \
+							<td></td> \
+							<td></td> \
+							<td></td> \
+							<td></td> \
+							<td></td> \
+							</tr>';
+						$('#fixedRouteDiffTable').append(new_spacer_row);
 					}
 				})
 			}
@@ -367,6 +448,9 @@ jQuery(function() {
 	
 	//Handle download button click event
 	jQuery("#downloadBundle_downloadButton").click(onDownloadBundleClick);
+
+	//Handle sync button click event
+	jQuery("#syncBundle_syncButton").click(onSyncDeployedBundleClick);
 
 	//Retrieve transit agency metadata
 	getAgencyMetadata();
@@ -2210,6 +2294,41 @@ function onDownloadBundleClick() {
 	window.location='manage-bundles!downloadBundle.action'
 		+ '?downloadDataSet=' + downloadDataset
 		+ '&downloadFilename=' + downloadFileName
+}
+
+// Sync active bundle with staging
+function onSyncDeployedBundleClick() {
+	var environment = jQuery("#deploy_environment").text();
+
+	jQuery.ajax({
+		url: "sync-bundle!syncBundle.action?ts=" + new Date().getTime(),
+		type: "GET",
+		async: false,
+		success: function(response) {
+			var bundleResponse = response;
+			/*
+			if (bundleResponse != undefined) {
+				// the header is set wrong for the proxied object, run eval to correct
+				if (typeof response=="string") {
+					bundleResponse = eval('(' + response + ')');
+				}
+				jQuery("#deployBundle_resultList").html("calling...");
+				jQuery("#deployBundle_id").text(bundleResponse.id);
+				jQuery("#deployBundle #requestLabels").show().css("display","block");
+				jQuery("#deployContentsHolder #deployBox #deploying").show().css("display","block");
+				jQuery("#deployBundle_deployProgress").text("Deploying ...");
+				jQuery("#deployContentsHolder #deployBox #deploying #deployingProgress").attr("src","../../css/img/ajax-loader.gif");
+				window.setTimeout(updateDeployStatus, 5000);
+			} else {
+				jQuery("#deployBundle_id").text(error);
+				jQuery("#deployBundle_resultList").html("error");
+			}
+			*/
+		},
+		error: function(request) {
+			alert("There was an error processing your request. Please try again.");
+		}
+	});
 }
 
 //add support for parsing query string

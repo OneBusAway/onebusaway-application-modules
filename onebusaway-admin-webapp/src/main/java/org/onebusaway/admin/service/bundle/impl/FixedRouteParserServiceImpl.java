@@ -25,6 +25,8 @@ import java.util.List;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
+import org.onebusaway.admin.model.ui.DataValidationDirectionCts;
+import org.onebusaway.admin.model.ui.DataValidationHeadsignCts;
 import org.onebusaway.admin.model.ui.DataValidationMode;
 import org.onebusaway.admin.model.ui.DataValidationRouteCounts;
 import org.onebusaway.admin.model.ui.DataValidationStopCt;
@@ -46,6 +48,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class FixedRouteParserServiceImpl implements FixedRouteParserService {
   private static Logger _log = LoggerFactory.getLogger(FixedRouteParserServiceImpl.class);
+  private DataValidationRouteCounts currentRoute;
+  private DataValidationHeadsignCts currentHeadsign;
+  private DataValidationDirectionCts currentDirection;
 
   /**
    * Parses a FixedRouteDataValidation report file into a List of 
@@ -98,64 +103,65 @@ public class FixedRouteParserServiceImpl implements FixedRouteParserService {
    */
   private DataValidationMode parseRecord(CSVRecord record, 
       DataValidationMode currentMode, List<DataValidationMode> parsedModes) {
-    if (record.size() < 6 || record.get(2).isEmpty()
-        || !record.get(2).matches("^\\d+$")) {  //Stop count should be numeric
+    if (record.size() < 8 || record.get(4).isEmpty()
+        || !record.get(4).matches("^\\d+$")) {  //Stop count should be numeric
       return currentMode;  
     }
     // Create the StopCt for this line (every line should have a stop count)
     DataValidationStopCt currentStopCt = new  DataValidationStopCt();
-    currentStopCt.setStopCt(Integer.parseInt(record.get(2)));
+    currentStopCt.setStopCt(Integer.parseInt(record.get(4)));
     int[] stopCtTrips = {0,0,0};
     for (int i=0; i<3; i++) {
       try {
-        int tripCt = Integer.parseInt(record.get(3+i));
+        int tripCt = Integer.parseInt(record.get(5+i));
         stopCtTrips[i] = tripCt;
       } catch (NumberFormatException ex) {
         // Do nothing, leave array value at 0.
       }
     }
     currentStopCt.setTripCts(stopCtTrips);
-    
-    if (!record.get(0).isEmpty()) {  // new mode
-      if (record.get(1).isEmpty()) {
+    String modeName = record.get(0);
+    String routeName = record.get(1);
+    String headsign = record.get(2);
+    String dirName = record.get(3);
+
+    if (modeName.length()>0) {  // new mode
+      if (routeName.isEmpty()) {
         return currentMode;  // this shouldn't happen.  Any line with a mode
                              // name should also have a route name.
       }
       if (currentMode != null) {
         parsedModes.add(currentMode);
       }
-      currentMode = new DataValidationMode();
-      currentMode.setModeName(record.get(0));
-      DataValidationRouteCounts currentRoute = new DataValidationRouteCounts();
-      currentRoute.setRouteName(record.get(1));
-      List<DataValidationStopCt> stopCountsList = new ArrayList<>();
+      currentMode = new DataValidationMode(modeName, routeName, headsign, dirName);
+      currentRoute = currentMode.getRoutes().get(0);
+      currentHeadsign = currentRoute.getHeadsignCounts().get(0);
+      currentDirection = currentHeadsign.getDirCounts().get(0);
+      List<DataValidationStopCt> stopCountsList = currentDirection.getStopCounts();
       stopCountsList.add(currentStopCt);
-      currentRoute.setStopCounts(stopCountsList);
-      List<DataValidationRouteCounts> routesForMode = new ArrayList<>();
-      routesForMode.add(currentRoute);
-      currentMode.setRoutes(routesForMode);
-    } else if (record.get(0).isEmpty() && !record.get(1).isEmpty()) {
+    } else if (routeName.length()>0) {
       // New route for current mode
-      DataValidationRouteCounts currentRoute = new DataValidationRouteCounts();
-      currentRoute.setRouteName(record.get(1));
-      List<DataValidationStopCt> stopCountsList = new ArrayList<>();
+      currentRoute = new DataValidationRouteCounts(routeName, headsign, dirName);
+      currentMode.getRoutes().add(currentRoute);
+      currentHeadsign = currentRoute.getHeadsignCounts().get(0);
+      currentDirection = currentHeadsign.getDirCounts().get(0);
+      List<DataValidationStopCt> stopCountsList = currentDirection.getStopCounts();
       stopCountsList.add(currentStopCt);
-      currentRoute.setStopCounts(stopCountsList);
-      List<DataValidationRouteCounts> routesForMode = currentMode.getRoutes();
-      routesForMode.add(currentRoute);
-      currentMode.setRoutes(routesForMode);
-    } else if (record.get(0).isEmpty() && record.get(1).isEmpty()) {
-      // Additional stop count for existing route
-      List<DataValidationRouteCounts> routesForMode = currentMode.getRoutes();
-      DataValidationRouteCounts currentRoute
-        = routesForMode.get(routesForMode.size()-1);
-      List<DataValidationStopCt> stopCountsList = currentRoute.getStopCounts();
+    } else if (headsign.length()>0) {
+      currentHeadsign = new DataValidationHeadsignCts(headsign, dirName);
+      currentRoute.getHeadsignCounts().add(currentHeadsign);
+      currentDirection = currentHeadsign.getDirCounts().get(0);
+      List<DataValidationStopCt> stopCountsList = currentDirection.getStopCounts();
       stopCountsList.add(currentStopCt);
-      currentRoute.setStopCounts(stopCountsList);
-      routesForMode.set(routesForMode.size()-1, currentRoute);
-      currentMode.setRoutes(routesForMode);
+    } else if (dirName.length()>0) {
+      currentDirection = new DataValidationDirectionCts(dirName);
+      currentHeadsign.getDirCounts().add(currentDirection);
+      List<DataValidationStopCt> stopCountsList = currentDirection.getStopCounts();
+      stopCountsList.add(currentStopCt);
+    } else if (dirName.isEmpty()) {
+      List<DataValidationStopCt> stopCountsList = currentDirection.getStopCounts();
+      stopCountsList.add(currentStopCt);
     } 
     return currentMode;  
   }
-
 }

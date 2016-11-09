@@ -84,6 +84,8 @@
 				<tr>
 					<th class="modeColumn">Mode</th>
 					<th class="routeColumn">Route</th>
+					<th class="headsignColumn">Headsign</th>
+					<th class="dirColumn">Dir</th>
 					<th class="stopCtColumn"># of Stops</th>
 					<th class="weekdayTripColumn"># of Weekday trips</th>
 					<th class="satTripsColumn" ># of Sat trips</th>
