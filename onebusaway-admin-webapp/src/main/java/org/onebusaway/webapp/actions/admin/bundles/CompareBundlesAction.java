@@ -24,6 +24,8 @@ import java.util.Map;
 import org.apache.struts2.convention.annotation.Namespace;
 import org.apache.struts2.convention.annotation.Result;
 import org.apache.struts2.convention.annotation.Results;
+import org.onebusaway.admin.model.ui.DataValidationDirectionCts;
+import org.onebusaway.admin.model.ui.DataValidationHeadsignCts;
 import org.onebusaway.admin.model.ui.DataValidationMode;
 import org.onebusaway.admin.model.ui.DataValidationRouteCounts;
 import org.onebusaway.admin.model.ui.DataValidationStopCt;
@@ -59,7 +61,6 @@ public class CompareBundlesAction extends OneBusAwayNYCAdminActionSupport {
   private DiffService diffService;
   @Autowired
   private FixedRouteParserService _fixedRouteParserService;
-
 
   public void setDatasetName(String datasetName) {
     this.datasetName = datasetName;
@@ -195,7 +196,7 @@ public class CompareBundlesAction extends OneBusAwayNYCAdminActionSupport {
       for (DataValidationRouteCounts selectedRoute : selectedMode.getRoutes()) {
         if (routeName.equals(selectedRoute.getRouteName())) {
           selectedMode.getRoutes().remove(selectedRoute);
-          diffRoute = compareStops(currentRoute, selectedRoute);
+          diffRoute = compareRoutes(currentRoute, selectedRoute);
           break;
         }
       }
@@ -203,7 +204,7 @@ public class CompareBundlesAction extends OneBusAwayNYCAdminActionSupport {
         currentRoute.setSrcCode("1");
         diffRoute = currentRoute;
       }
-      if (diffRoute.getStopCounts().size() > 0) {
+      if (diffRoute.getHeadsignCounts().size() > 0) {
         diffMode.getRoutes().add(diffRoute);
       }
     }
@@ -216,28 +217,97 @@ public class CompareBundlesAction extends OneBusAwayNYCAdminActionSupport {
     return diffMode;
   }
 
-  private DataValidationRouteCounts compareStops(
-      DataValidationRouteCounts currentRoute,
-      DataValidationRouteCounts selectedRoute) {
-
+  private DataValidationRouteCounts compareRoutes(
+      DataValidationRouteCounts currentRoute, DataValidationRouteCounts selectedRoute) {
     DataValidationRouteCounts diffRoute = new DataValidationRouteCounts();
-    diffRoute.setRouteName(currentRoute.getRouteName());
-    diffRoute.setStopCounts(new ArrayList<DataValidationStopCt>());
 
-    for (DataValidationStopCt currentStopCt : currentRoute.getStopCounts()) {
+    diffRoute.setRouteName(currentRoute.getRouteName());
+    diffRoute.setHeadsignCounts(new ArrayList<DataValidationHeadsignCts>());
+
+    for (DataValidationHeadsignCts currentHeadsign : currentRoute.getHeadsignCounts()) {
+      // Check if this headsign exists in selectedMode
+      DataValidationHeadsignCts diffHeadsign = null;
+      String headsignName = currentHeadsign.getHeadsign();
+      for (DataValidationHeadsignCts selectedHeadsign : selectedRoute.getHeadsignCounts()) {
+        if (headsignName.equals(selectedHeadsign.getHeadsign())) {
+          selectedRoute.getHeadsignCounts().remove(selectedHeadsign);
+          diffHeadsign = compareHeadsigns(currentHeadsign, selectedHeadsign);
+          break;
+        }
+      }
+      if (diffHeadsign == null) {
+        currentHeadsign.setSrcCode("1");
+        diffHeadsign = currentHeadsign;
+      }
+      if (diffHeadsign.getDirCounts().size() > 0) {
+        diffRoute.getHeadsignCounts().add(diffHeadsign);
+      }
+    }
+    if (selectedRoute.getHeadsignCounts().size() > 0) {
+      for (DataValidationHeadsignCts selectedHeadsign : selectedRoute.getHeadsignCounts()) {
+        selectedHeadsign.setSrcCode("2");
+        diffRoute.getHeadsignCounts().add(selectedHeadsign);
+      }
+    }
+    return diffRoute;
+  }
+
+  private DataValidationHeadsignCts compareHeadsigns (
+      DataValidationHeadsignCts currentHeadsign, DataValidationHeadsignCts selectedHeadsign) {
+    DataValidationHeadsignCts diffHeadsign = new DataValidationHeadsignCts();
+
+    diffHeadsign.setHeadsign(currentHeadsign.getHeadsign());
+    diffHeadsign.setDirCounts(new ArrayList<DataValidationDirectionCts>());
+
+    for (DataValidationDirectionCts currentDirection : currentHeadsign.getDirCounts()) {
+      // Check if this headsign exists in selectedMode
+      DataValidationDirectionCts diffDirection = null;
+      String directionName = currentDirection.getDirection();
+      for (DataValidationDirectionCts selectedDirection : selectedHeadsign.getDirCounts()) {
+        if (directionName.equals(selectedDirection.getDirection())) {
+          selectedHeadsign.getDirCounts().remove(selectedDirection);
+          diffDirection = compareDirections(currentDirection, selectedDirection);
+          break;
+        }
+      }
+      if (diffDirection == null) {
+        currentDirection.setSrcCode("1");
+        diffDirection = currentDirection;
+      }
+      if (diffDirection.getStopCounts().size() > 0) {
+        diffHeadsign.getDirCounts().add(diffDirection);
+      }
+    }
+    if (selectedHeadsign.getDirCounts().size() > 0) {
+      for (DataValidationDirectionCts selectedDirection : selectedHeadsign.getDirCounts()) {
+        selectedDirection.setSrcCode("2");
+        diffHeadsign.getDirCounts().add(selectedDirection);
+      }
+    }
+    return diffHeadsign;
+  }
+
+  private DataValidationDirectionCts compareDirections (
+      DataValidationDirectionCts currentDirection, DataValidationDirectionCts selectedDirection) {
+
+    DataValidationDirectionCts diffDirection = new DataValidationDirectionCts();
+    diffDirection.setDirection(currentDirection.getDirection());
+    diffDirection.setStopCounts(new ArrayList<DataValidationStopCt>());
+
+    for (DataValidationStopCt currentStopCt : currentDirection.getStopCounts()) {
       boolean stopCtMatched = false;
-      // Check if this stop exists in selectedRoute
-      for (DataValidationStopCt selectedStopCt : selectedRoute.getStopCounts()) {
+      // Check if this stop count  exists in selectedMode
+      for (DataValidationStopCt selectedStopCt : selectedDirection.getStopCounts()) {
         if (currentStopCt.getStopCt() == selectedStopCt.getStopCt()) {
           stopCtMatched = true;
-          selectedRoute.getStopCounts().remove(selectedStopCt);
+          selectedDirection.getStopCounts().remove(selectedStopCt);
           if ((currentStopCt.getTripCts()[0] != selectedStopCt.getTripCts()[0])
               || (currentStopCt.getTripCts()[1] != selectedStopCt.getTripCts()[1])
               || (currentStopCt.getTripCts()[2] != selectedStopCt.getTripCts()[2])){
             currentStopCt.setSrcCode("1");
-            diffRoute.getStopCounts().add(currentStopCt);
+            diffDirection.getStopCounts().add(currentStopCt);
             selectedStopCt.setSrcCode("2");
-            diffRoute.getStopCounts().add(selectedStopCt);
+            diffDirection.getStopCounts().add(selectedStopCt);
           }
           break;
         }
@@ -246,15 +316,15 @@ public class CompareBundlesAction extends OneBusAwayNYCAdminActionSupport {
         continue;
       } else {
         currentStopCt.setSrcCode("1");
-        diffRoute.getStopCounts().add(currentStopCt);
+        diffDirection.getStopCounts().add(currentStopCt);
       }
     }
-    if (selectedRoute.getStopCounts().size() > 0) {
-      for (DataValidationStopCt selectedStopCt : selectedRoute.getStopCounts()) {
+    if (selectedDirection.getStopCounts().size() > 0) {
+      for (DataValidationStopCt selectedStopCt : selectedDirection.getStopCounts()) {
         selectedStopCt.setSrcCode("2");
-        diffRoute.getStopCounts().add(selectedStopCt);
+        diffDirection.getStopCounts().add(selectedStopCt);
       }
     }
-    return diffRoute;
+    return diffDirection;
   }
 }

@@ -52,12 +52,14 @@ public class FixedRouteDataValidationTask implements Runnable {
   private MultiCSVLogger logger;
   private GtfsMutableRelationalDao _dao;
   private FederatedTransitDataBundle _bundle;
+  private static final int MAX_STOP_CT = 150;
+  int maxStops = 0;
 
   @Autowired
   public void setLogger(MultiCSVLogger logger) {
     this.logger = logger;
   }
-  
+
   @Autowired
   public void setGtfsDao(GtfsMutableRelationalDao dao) {
     _dao = dao;
@@ -67,10 +69,10 @@ public class FixedRouteDataValidationTask implements Runnable {
   public void setBundle(FederatedTransitDataBundle bundle) {
     _bundle = bundle;
   }
-  
+
   @Autowired
   private ConfigurationServiceClient _configurationServiceClient;
-  
+
   @Override
   public void run() {
     if (StringUtils.isBlank(getSourceUrl())) {
@@ -79,18 +81,22 @@ public class FixedRouteDataValidationTask implements Runnable {
     }
 
     _log.info("Creating fixed route data validation report with sourceUrl=" + getSourceUrl());
-    logger.header(FILENAME, "Mode,Route,# of stops,# of weekday trips,# of Sat trips,# of Sunday trips");   
-    
+    logger.header(FILENAME, "Mode,Route,Headsign,Direction,# of stops,# of weekday trips,# of Sat trips,# of Sunday trips");
+
     // Use next Wednesday date (including today) to serve as weekday check date.
+    LocalDate firstMon = getFirstDay(DateTimeConstants.MONDAY);
+    LocalDate firstTues = getFirstDay(DateTimeConstants.TUESDAY);
     LocalDate firstWed = getFirstDay(DateTimeConstants.WEDNESDAY);
+    LocalDate firstThur = getFirstDay(DateTimeConstants.THURSDAY);
+    LocalDate firstFri = getFirstDay(DateTimeConstants.FRIDAY);
     LocalDate firstSat = getFirstDay(DateTimeConstants.SATURDAY);
     LocalDate firstSun = getFirstDay(DateTimeConstants.SUNDAY);
-    
+
     // Get the service ids for weekdays, Saturdays, and Sundays
     Set<AgencyAndId> weekdaySvcIds = new HashSet<>();
     Set<AgencyAndId> saturdaySvcIds = new HashSet<>();
     Set<AgencyAndId> sundaySvcIds = new HashSet<>();
-    
+
     // Check service ids
     Collection<ServiceCalendar> calendars = _dao.getAllCalendars();
     for (ServiceCalendar calendar : calendars) {
@@ -98,8 +104,24 @@ public class FixedRouteDataValidationTask implements Runnable {
       LocalDate jodaStartDate = new LocalDate(svcStartDate);
       Date svcEndDate = calendar.getEndDate().getAsDate();
       LocalDate jodaEndDate = new LocalDate(svcEndDate);
+      if (calendar.getMonday() == 1 && !firstMon.isBefore(jodaStartDate)
+          && !firstMon.isAfter(jodaEndDate)) {
+        weekdaySvcIds.add(calendar.getServiceId());
+      }
+      if (calendar.getTuesday() == 1 && !firstTues.isBefore(jodaStartDate)
+          && !firstTues.isAfter(jodaEndDate)) {
+        weekdaySvcIds.add(calendar.getServiceId());
+      }
       if (calendar.getWednesday() == 1 && !firstWed.isBefore(jodaStartDate)
           && !firstWed.isAfter(jodaEndDate)) {
+        weekdaySvcIds.add(calendar.getServiceId());
+      }
+      if (calendar.getThursday() == 1 && !firstThur.isBefore(jodaStartDate)
+          && !firstThur.isAfter(jodaEndDate)) {
+        weekdaySvcIds.add(calendar.getServiceId());
+      }
+      if (calendar.getFriday() == 1 && !firstFri.isBefore(jodaStartDate)
+          && !firstFri.isAfter(jodaEndDate)) {
         weekdaySvcIds.add(calendar.getServiceId());
       }
       if (calendar.getSaturday() == 1 && !firstSat.isBefore(jodaStartDate)
@@ -111,7 +133,7 @@ public class FixedRouteDataValidationTask implements Runnable {
         sundaySvcIds.add(calendar.getServiceId());
       }
     }
-    
+
     Map<String, List<String>> reportModes = getReportModes();
     Collection<Agency> agencies = _dao.getAllAgencies();
     for (String currentMode : reportModes.keySet()) {
@@ -124,9 +146,10 @@ public class FixedRouteDataValidationTask implements Runnable {
         }
         List<Route> routes = _dao.getRoutesForAgency(agency);
         for (Route route : routes) {
-          int[] wkdayTrips = new int[100];
-          int[] satTrips = new int[100];
-          int[] sunTrips = new int[100];
+          int[] wkdayTrips = null;
+          int[] satTrips = null;
+          int[] sunTrips = null;
+          Map<String, TripTotals> tripMap = new HashMap<>();
           AgencyAndId routeId = route.getId();
           if (currentRoutes.contains(routeId.toString())
               || getAllRoutes) {
@@ -134,9 +157,28 @@ public class FixedRouteDataValidationTask implements Runnable {
             for (Trip trip : trips) {
               List<StopTime> stopTimes =  _dao.getStopTimesForTrip(trip);
               int stopCt = stopTimes.size();
+              if (stopCt > MAX_STOP_CT) {
+                stopCt = MAX_STOP_CT;
+              }
+              TripTotals tripTotals = null;
+              if (tripMap.containsKey(trip.getTripHeadsign())) {
+                tripTotals = tripMap.get(trip.getTripHeadsign());
+              } else {
+                tripTotals = new TripTotals();
+                tripMap.put(trip.getTripHeadsign(), tripTotals);
+              }
               /*
                * TODO: if stopCt exceeds array sizes, resize arrays
                */
+              if (trip.getDirectionId().equals("0")) {
+                wkdayTrips = tripTotals.wkdayTrips_0;
+                satTrips = tripTotals.satTrips_0;
+                sunTrips = tripTotals.sunTrips_0;
+              } else {
+                wkdayTrips = tripTotals.wkdayTrips_1;
+                satTrips = tripTotals.satTrips_1;
+                sunTrips = tripTotals.sunTrips_1;
+              }
               AgencyAndId tripSvcId = trip.getServiceId();
               if (weekdaySvcIds.contains(tripSvcId)) {
                 ++wkdayTrips[stopCt];
@@ -145,40 +187,52 @@ public class FixedRouteDataValidationTask implements Runnable {
               } else if (sundaySvcIds.contains(tripSvcId)) {
                 ++sunTrips[stopCt];
               }
+              tripMap.put(trip.getTripHeadsign(), tripTotals);
             }
-            String routeName = route.getDesc();
-            if (routeName == null || routeName.length() > 40) {
-              routeName = route.getLongName();
-            }
-            if (routeName == null || routeName.isEmpty() || routeName.length() > 40) {
-              routeName = route.getShortName();
-            }
-            if (routeName == null || routeName.isEmpty() || routeName.length() > 40) {
-              routeName = route.getDesc();
-              if (routeName != null) {
-                routeName = routeName.substring(0, 40);
+            String routeName = route.getShortName() + "-" + route.getDesc();
+            for (String headSign : tripMap.keySet() ) {
+              TripTotals tripTotals = tripMap.get(headSign);
+              String dir_0 = "0";
+              String dir_1 = "1";
+              for (int i=0; i<MAX_STOP_CT; ++i) {
+                if (tripTotals.wkdayTrips_0[i]>0
+                    || tripTotals.satTrips_0[i]>0
+                    || tripTotals.sunTrips_0[i]>0) {
+                  logger.logCSV(FILENAME, currentMode + "," + routeName + ","
+                      + headSign + "," + dir_0 + ","
+                      + i + "," + tripTotals.wkdayTrips_0[i] + ","
+                      + tripTotals.satTrips_0[i] + ","
+                      + tripTotals.sunTrips_0[i]);
+                  dir_0 = "";       // Only display direction on its first line
+                  headSign = "";    // Only display headsign on its first line
+                  routeName = "";   // Only display route on its first line
+                  currentMode = "";  // Only display mode on its first line
+                }
               }
-            }
-            if (routeName == null) {
-              routeName = "";
-            }
-            for (int i=0; i<wkdayTrips.length; ++i) {
-              if (wkdayTrips[i]>0 || satTrips[i] > 0 || sunTrips[i]>0) {
-                logger.logCSV(FILENAME, currentMode + "," + routeName + ","
-                    + i + "," + wkdayTrips[i] + ","
-                    + satTrips[i] + "," + sunTrips[i]);
-                routeName = "";
-                currentMode = "";  // Only display mode on its first line
+              for (int i=0; i<MAX_STOP_CT; ++i) {
+                if (tripTotals.wkdayTrips_1[i]>0
+                    || tripTotals.satTrips_1[i]>0
+                    || tripTotals.sunTrips_1[i]>0) {
+                  logger.logCSV(FILENAME, currentMode + "," + routeName + ","
+                      + headSign + "," + dir_1 + ","
+                      + i + "," + tripTotals.wkdayTrips_1[i] + ","
+                      + tripTotals.satTrips_1[i] + ","
+                      + tripTotals.sunTrips_1[i]);
+                  dir_1 = "";       // Only display direction on its first line
+                  headSign = "";    // Only display headsign on its first line
+                  routeName = "";   // Only display route on its first line
+                  currentMode = "";  // Only display mode on its first line
+                }
               }
             }
           }
         }
       }
-      logger.logCSV(FILENAME,",,,,,,");
+      logger.logCSV(FILENAME,",,,,,,,,");
     }
     _log.info("done");
   }
-  
+
   private LocalDate getFirstDay(int dayOfWeek) {
     LocalDate today = LocalDate.now();
     int old = today.getDayOfWeek();
@@ -187,19 +241,8 @@ public class FixedRouteDataValidationTask implements Runnable {
     }
     return today.plusDays(dayOfWeek - old);
   }
-  private LocalDate getFirstSat() {
-    LocalDate today = LocalDate.now();
-    int old = today.getDayOfWeek();
-    int saturday = 6;
-    if (saturday < old) {
-      saturday += 7;
-    }
-    return today.plusDays(saturday - old);
-  }
-  
   private Map<String, List<String>> getReportModes() {
     Map<String, List<String>> reportModes = new HashMap<>();
-    //String sourceURL = "https://raw.github.com/wiki/camsys/onebusaway-application-modules/FixedRouteDataValidation.md";
     String sourceUrl = getSourceUrl();
     try (BufferedReader br = 
         new BufferedReader(new InputStreamReader(new URL(sourceUrl).openStream()))) {
@@ -217,10 +260,9 @@ public class FixedRouteDataValidationTask implements Runnable {
       // TODO Auto-generated catch block
       e.printStackTrace();
     }
-    
     return reportModes;
   }
-  
+
   /*
    * This method will use the config service to retrieve the URL for report
    * input parameters.  The value is stored in config.json.
@@ -229,7 +271,7 @@ public class FixedRouteDataValidationTask implements Runnable {
    */
   private String getSourceUrl() {
     String sourceUrl = "";
-    
+
     try {
       List<Map<String, String>> components = _configurationServiceClient.getItems("config");
       if (components == null) {
@@ -246,7 +288,25 @@ public class FixedRouteDataValidationTask implements Runnable {
     } catch (Exception e) {
       _log.error("could not retrieve Data Validation URL from config:", e);
     }
-    
+
     return sourceUrl;
+  }
+
+  class TripTotals {
+    int[] wkdayTrips_0;
+    int[] wkdayTrips_1;
+    int[] satTrips_0;
+    int[] satTrips_1;
+    int[] sunTrips_0;
+    int[] sunTrips_1;
+
+    public TripTotals () {
+      wkdayTrips_0 = new int[MAX_STOP_CT+1];
+      wkdayTrips_1 = new int[MAX_STOP_CT+1];
+      satTrips_0 = new int[MAX_STOP_CT+1];
+      satTrips_1 = new int[MAX_STOP_CT+1];
+      sunTrips_0 = new int[MAX_STOP_CT+1];
+      sunTrips_1 = new int[MAX_STOP_CT+1];
+    }
   }
 }

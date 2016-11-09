@@ -593,8 +593,58 @@
 	text-align: right;
 }
 
+#Compare #fixedRouteDiffTable tr .routeFirstLine {
+	//margin-top: 15px;
+	//padding-top: 15px;
+}
+
+#Compare #fixedRouteDiffTable .modeName {
+	font-weight: bold;
+	padding-right: 15px;
+}
+
+#Compare #fixedRouteDiffTable tr.spacer td {
+	padding-top: 7px;
+	border-top: thin black solid;
+}
+
+//#Compare #fixedRouteDiffTable tr.spacer td {
+//	border-top: thin black solid;
+//}
+
+#Compare #fixedRouteDiffTable tr.spacer td:first-child {
+	border-top: none;
+}
+
+#Compare #fixedRouteDiffTable tr.spacer td:nth-child(2),
+#Compare #fixedRouteDiffTable tr.spacer td:last-child {
+	border-left: none;
+	border-right: none;
+}
+
+#Compare #fixedRouteDiffTable tr.routeFirstLine td {
+	border-top: thin black solid;
+}
+
+#Compare #fixedRouteDiffTable tr.routeFirstLine td:first-child {
+	border-top: none;
+}
+
+#Compare #fixedRouteDiffTable tr td:nth-child(2) {
+	border-left: thin black solid;
+}
+
+#Compare #fixedRouteDiffTable tr td:last-child {
+	border-right: thin black solid;
+}
+
 #Compare #fixedRouteDiffTable tr:first-child td {
 	border-bottom: 1px solid gray;
+}
+
+#Compare #fixedRouteDiffTable td.headsignBorder,
+#Compare #fixedRouteDiffTable td.dirBorder {
+	border-top: 1px solid gray;
 }
 
 #Compare #fixedRouteDiffTable .currentStopCt {
@@ -707,7 +757,8 @@
   padding-top: 20px;
 }
 
-#staging_bundleName, #download_bundleName, #download_selectedDataset {
+#staging_bundleName, #download_bundleName, #download_selectedDataset,
+#sync_bundleName, #sync_selectedDataset {
 	padding: 10px;
 	margin-bottom: 5px;
 }

@@ -15,6 +15,7 @@
  */
 package org.onebusaway.admin.model.ui;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -29,6 +30,17 @@ public class DataValidationMode {
   private String modeName;
   List<DataValidationRouteCounts> routes;
   private String srcCode;  // Used in diff files to indicate the source.
+
+  public DataValidationMode() {
+    super();
+  }
+  public DataValidationMode(String modeName,
+      String routeName, String headsign, String direction) {
+    super();
+    this.modeName = modeName;
+    this.routes = new ArrayList<DataValidationRouteCounts>();
+    routes.add(new DataValidationRouteCounts(routeName, headsign, direction));
+  }
 
   public String getModeName() {
     return modeName;

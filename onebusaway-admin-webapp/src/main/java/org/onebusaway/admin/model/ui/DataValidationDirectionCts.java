@@ -19,39 +19,40 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Holds the stop count summary for a particular mode and route.
- * The summary data is contained in the DataValidaionHeadsignCts
- * elements.
+ * Holds the stop count details for a particular mode, route, headsign, and
+ * direction. All the trips meeting the above criteria are checked for the
+ * number of stops they make. This data is summarized by totaling the number
+ * of trips with a particular number of stops.
  *
  * @author jpearson
  *
  */
-public class DataValidationRouteCounts {
-  private String routeName;
-  List<DataValidationHeadsignCts> headsignCounts;
+public class DataValidationDirectionCts {
+  private String direction;
+  List<DataValidationStopCt> stopCounts;
   private String srcCode;  // Used in diff files to indicate the source.
 
-  public DataValidationRouteCounts() {
+  public DataValidationDirectionCts() {
     super();
+    this.stopCounts = new ArrayList<DataValidationStopCt>();
   }
-  public DataValidationRouteCounts(String routeName, String headsign, String direction) {
+  public DataValidationDirectionCts(String direction) {
     super();
-    this.routeName = routeName;
-    this.headsignCounts = new ArrayList<DataValidationHeadsignCts>();
-    this.headsignCounts.add(new DataValidationHeadsignCts(headsign, direction));
+    this.direction = direction;
+    this.stopCounts = new ArrayList<DataValidationStopCt>();
   }
-
-  public String getRouteName() {
-    return routeName;
+  
+  public String getDirection() {
+    return direction;
   }
-  public void setRouteName(String routeName) {
-    this.routeName = routeName;
+  public void setDirection(String direction) {
+    this.direction = direction;
   }
-  public List<DataValidationHeadsignCts> getHeadsignCounts() {
-    return headsignCounts;
+  public List<DataValidationStopCt> getStopCounts() {
+    return stopCounts;
   }
-  public void setHeadsignCounts(List<DataValidationHeadsignCts> headsignCounts) {
-    this.headsignCounts = headsignCounts;
+  public void setStopCounts(List<DataValidationStopCt> stopCounts) {
+    this.stopCounts = stopCounts;
   }
   public String getSrcCode() {
     return srcCode;

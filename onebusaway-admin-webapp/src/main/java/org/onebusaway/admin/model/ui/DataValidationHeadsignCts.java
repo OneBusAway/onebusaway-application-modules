@@ -19,39 +19,40 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Holds the stop count summary for a particular mode and route.
- * The summary data is contained in the DataValidaionHeadsignCts
- * elements.
+ * Holds the stop count details for a particular mode, route, and headsign.
+ * Summary trip count details are collected in the DataValidationDirectionCts
+ * entries.
  *
  * @author jpearson
  *
  */
-public class DataValidationRouteCounts {
-  private String routeName;
-  List<DataValidationHeadsignCts> headsignCounts;
+public class DataValidationHeadsignCts {
+  private String headsign;
+  List<DataValidationDirectionCts> dirCounts;
   private String srcCode;  // Used in diff files to indicate the source.
 
-  public DataValidationRouteCounts() {
+  public DataValidationHeadsignCts() {
     super();
+    this.dirCounts = new ArrayList<DataValidationDirectionCts>();
   }
-  public DataValidationRouteCounts(String routeName, String headsign, String direction) {
+  public DataValidationHeadsignCts(String headsign, String direction) {
     super();
-    this.routeName = routeName;
-    this.headsignCounts = new ArrayList<DataValidationHeadsignCts>();
-    this.headsignCounts.add(new DataValidationHeadsignCts(headsign, direction));
+    this.headsign = headsign;
+    this.dirCounts = new ArrayList<DataValidationDirectionCts>();
+    this.dirCounts.add(new DataValidationDirectionCts(direction));
   }
 
-  public String getRouteName() {
-    return routeName;
+  public String getHeadsign() {
+    return headsign;
   }
-  public void setRouteName(String routeName) {
-    this.routeName = routeName;
+  public void setHeadsign(String headsign) {
+    this.headsign = headsign;
   }
-  public List<DataValidationHeadsignCts> getHeadsignCounts() {
-    return headsignCounts;
+  public List<DataValidationDirectionCts> getDirCounts() {
+    return dirCounts;
   }
-  public void setHeadsignCounts(List<DataValidationHeadsignCts> headsignCounts) {
-    this.headsignCounts = headsignCounts;
+  public void setDirCounts(List<DataValidationDirectionCts> dirCounts) {
+    this.dirCounts = dirCounts;
   }
   public String getSrcCode() {
     return srcCode;
