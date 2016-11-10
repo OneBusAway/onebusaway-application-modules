@@ -124,7 +124,11 @@ public class GtfsFullValidationTask implements  Runnable {
       throws IOException {
     File validationHtmlFile = new File(outputFile);
     Document doc = Jsoup.parse(validationHtmlFile, "UTF-8");
-    Elements validationErrors = doc.select(".issueHeader:containsOwn(Errors:) ~ ul").first().select("li");
+    Elements select = doc.select(".issueHeader:containsOwn(Errors:) ~ ul");
+    if (select == null) return;
+    Element first = select.first();
+    if (first == null) return;
+    Elements validationErrors = first.select("li");
     if (validationErrors != null && validationErrors.hasText()) {
       String csvFileName = agencyId + "_gtfs_validation_errors.csv";
       _logger.header(csvFileName, "Error Message, Error Detail");
