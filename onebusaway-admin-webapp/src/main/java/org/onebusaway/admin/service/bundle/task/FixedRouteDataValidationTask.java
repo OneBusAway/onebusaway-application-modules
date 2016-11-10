@@ -79,6 +79,16 @@ public class FixedRouteDataValidationTask implements Runnable {
       _log.info("missing sourceUrl, exiting");
       return;
     }
+    try {
+      process();
+      _log.info("done");
+    } catch (Exception e) {
+      _log.error("exception with FixedRouteDataValidationTask:", e);    
+    }
+    
+  }
+
+  private void process() throws Exception {
 
     _log.info("Creating fixed route data validation report with sourceUrl=" + getSourceUrl());
     logger.header(FILENAME, "Mode,Route,Headsign,Direction,# of stops,# of weekday trips,# of Sat trips,# of Sunday trips");
@@ -230,9 +240,8 @@ public class FixedRouteDataValidationTask implements Runnable {
       }
       logger.logCSV(FILENAME,",,,,,,,,");
     }
-    _log.info("done");
   }
-
+  
   private LocalDate getFirstDay(int dayOfWeek) {
     LocalDate today = LocalDate.now();
     int old = today.getDayOfWeek();
