@@ -170,7 +170,7 @@ public class FixedRouteDataValidationTask implements Runnable {
               /*
                * TODO: if stopCt exceeds array sizes, resize arrays
                */
-              if (trip.getDirectionId().equals("0")) {
+              if (trip.getDirectionId() == null || trip.getDirectionId().equals("0")) {
                 wkdayTrips = tripTotals.wkdayTrips_0;
                 satTrips = tripTotals.satTrips_0;
                 sunTrips = tripTotals.sunTrips_0;
