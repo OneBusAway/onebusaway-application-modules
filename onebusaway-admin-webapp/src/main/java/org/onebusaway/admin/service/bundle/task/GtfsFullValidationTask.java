@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2015 Cambridge Systematics, Inc.
+ * Copyright (C) 2016 Cambridge Systematics, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,18 +15,11 @@
  */
 package org.onebusaway.admin.service.bundle.task;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.nodes.Node;
-import org.jsoup.nodes.TextNode;
-import org.jsoup.select.Elements;
 import org.onebusaway.admin.model.BundleRequestResponse;
 import org.onebusaway.admin.service.bundle.BundleValidationService;
 import org.onebusaway.transit_data_federation.bundle.model.GtfsBundle;
@@ -37,10 +30,20 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
+/**
+ * Run the python transitfeed validator against the output GTFS to verify we are not
+ * generating invalid GTFS.  Parse errors results into CSV, and provide full HTML
+ * results as well.
+ * @author jpearson
+ *
+ */
 public class GtfsFullValidationTask implements  Runnable {
   private static Logger _log = LoggerFactory.getLogger(GtfsFullValidationTask.class);
   protected ApplicationContext _applicationContext;
 
+  // lazy instantiated below
+  private ExecutorService _executor = null;
+  
   private BundleRequestResponse requestResponse;
   @Autowired
   public void setApplicationContext(ApplicationContext applicationContext) {
@@ -71,31 +74,87 @@ public class GtfsFullValidationTask implements  Runnable {
     _log.info("GtfsFullValidationTask Starting");
     // Only run  this on a Final build
     if (!requestResponse.getRequest().getArchiveFlag()) {
-      _log.info("archive flag not set, GtfsFullValidationTask exiting");
+      _log.info("archive flag not set, GtfsFullValidationTask Exiting");
       return;
     }
 
-    GtfsBundles gtfsBundles = getGtfsBundles(_applicationContext);
-    for (GtfsBundle gtfsBundle : gtfsBundles.getBundles()) {
-      File gtfsFile = gtfsBundle.getPath();
-      String gtfsFileName = gtfsFile.getName();
-      String gtfsFilePath = gtfsBundle.getPath().toString();
-      String outputFile = requestResponse.getResponse().getBundleOutputDirectory() 
-          + "/" + gtfsFileName + ".html";
-      _log.info(gtfsBundle.getPath().toString());
-      try {
-        _validateService.installAndValidateGtfs(gtfsFilePath, outputFile);
-        _logger.header(gtfsFileName + ".html", "", "");  // To add into summary.csv
-        checkOutputForErrors(gtfsBundle.getDefaultAgencyId(), outputFile);
-      } catch (Exception any) {
-        _log.error("GtfsFullValidationTask failed:", any);
-      } finally {
-        _log.info("GtfsFullValidationTask Exiting");
-      }
-    }
-    return;
+    processGtfsBundles(getGtfsBundles(_applicationContext));
+    
+    _log.info("GtfsFullValidationTask Exiting");
   }
 
+  private void processGtfsBundles(GtfsBundles gtfsBundles) {
+    List<GtfsFullValidationTaskJobResult> results = new ArrayList<GtfsFullValidationTaskJobResult>();
+    
+    for (GtfsBundle gtfsBundle : gtfsBundles.getBundles()) {
+      
+      try {
+        results.add(submitJob(_validateService, gtfsBundle));
+      } catch (Exception any) {
+        _log.error("GtfsFullValidationTask failed for gtfsBundle:" 
+            + gtfsBundle.getPath().getName(), any);
+      }
+    }
+
+    try {
+      // give the executor a chance to run
+      Thread.sleep(1 * 1000);
+    } catch (InterruptedException e1) {
+      return;
+    }
+    
+    // here we wait on the tasks to finish up
+    
+    int i = 0;
+    for (GtfsFullValidationTaskJobResult result : results) {
+      while (!result.isDone()) {
+        try {
+          _log.info("waiting on thread[" + i + "/"+ results.size() + "] " + result.getCsvFileName());
+          Thread.sleep(10 * 1000);
+        } catch (InterruptedException e) {
+          return;
+        }
+      }
+      i++;
+      _log.info("result " + result.getCsvFileName() + " completed in " + result.getRunTime()/1000 + "s");
+      // process the results in the order they were submitted
+      processResult(result);
+
+    }
+  }
+
+  private void processResult(GtfsFullValidationTaskJobResult result) {
+    _logger.header(result.getCsvFileName(), result.getColumnName());
+    for (String msg : result.getErrors()) {
+      _logger.logCSV(result.getCsvFileName(), msg);
+    }
+  }
+
+  private GtfsFullValidationTaskJobResult submitJob(BundleValidationService validateService, GtfsBundle gtfsBundle) {
+    String agencyId = gtfsBundle.getDefaultAgencyId();
+    String csvFileName = agencyId + "_gtfs_validation_errors.csv";
+    GtfsFullValidationTaskJobResult result = new GtfsFullValidationTaskJobResult(csvFileName, "Error Message, Error Detail");
+    String outputFile = requestResponse.getResponse().getBundleOutputDirectory() 
+        + "/" + gtfsBundle.getPath().getName() + ".html";
+    GtfsFullValidationTaskJob wt = new GtfsFullValidationTaskJob(validateService, gtfsBundle, outputFile, result);
+    // submit job for processing
+    _log.info("submitting job " + gtfsBundle.getPath().getName());
+    getExecutorService().submit(wt);
+    // this adds it to summary.csv so the html result file can be viewed
+    _logger.header(gtfsBundle.getPath().getName() + ".html", "", ""); 
+    return result;
+  }
+
+
+  private ExecutorService getExecutorService() {
+    if (_executor == null) {
+      int cpus = Runtime.getRuntime().availableProcessors();
+      _executor = Executors.newFixedThreadPool(cpus);
+      _log.info("created threadpool of " + cpus);
+    }
+    return _executor;
+  }
+  
   protected GtfsBundles getGtfsBundles(ApplicationContext context) {
 
     GtfsBundles bundles = (GtfsBundles) context.getBean("gtfs-bundles");
@@ -112,86 +171,8 @@ public class GtfsFullValidationTask implements  Runnable {
     throw new IllegalStateException(
         "must define either \"gtfs-bundles\" or \"gtfs-bundle\" in config");
   }
-/** This method will parse the validation output HTML file checking to see
- * if any errors were found during the validation.  If any were, a summary csv
- * file is created listing the errors.
- *
- * @param agencyId - the agency id of the HTML file being checked
- * @param outputFile - the name of the HTML file to be checked.
- * @throws IOException
- */
-  private void checkOutputForErrors(String agencyId, String outputFile)
-      throws IOException {
-    File validationHtmlFile = new File(outputFile);
-    Document doc = Jsoup.parse(validationHtmlFile, "UTF-8");
-    Elements select = doc.select(".issueHeader:containsOwn(Errors:) ~ ul");
-    if (select == null) return;
-    Element first = select.first();
-    if (first == null) return;
-    Elements validationErrors = first.select("li");
-    if (validationErrors != null && validationErrors.hasText()) {
-      String csvFileName = agencyId + "_gtfs_validation_errors.csv";
-      _logger.header(csvFileName, "Error Message, Error Detail");
-      for (Node parentNode : validationErrors) { // for each <li>
-        String errorMsgText = "";
-        String errorDetailText = "";
-        for (Node node : parentNode.childNodes()) {
-          if (node instanceof TextNode) {
-            errorMsgText += ((TextNode) node).text();
-          } else if (node instanceof Element) {
-            String tagName = ((Element)node).tagName();
-            if (tagName.equals("br")) {
-              errorMsgText += " ";
-            } else if (tagName.equals("div")) {
-              errorMsgText += parseDivData(node);
-            } else if (tagName.equals("table")) {
-              errorDetailText = parseTableData(node);
-            } else {
-              errorMsgText += ((Element)node).text();
-            }
-          }
-        }
-        _logger.logCSV(csvFileName, errorMsgText + "," + errorDetailText);
-      }
-    }
-  }
 
-  private String parseDivData (Node divNode) {
-    String parsedText = "";
-    for (Node node : divNode.childNodes()) {
-      if (node instanceof TextNode) {
-        parsedText += ((TextNode) node).text();
-      } else if (node instanceof Element) {
-        String tagName = ((Element)node).tagName();
-        if (tagName.equals("br")) {
-          parsedText += " ";
-        } else if (tagName.equals("div")) {
-          parsedText += parseDivData(node);
-        } else if (tagName.equals("table")) {
-          parsedText += parseTableData(node);
-        } else {
-          parsedText += " " + ((Element)node).text();
-        }
-      }
-    }
-    return parsedText;
-  }
 
-  private String parseTableData (Node node) {
-    String parsedData = "";
-    // Get the headers and data from the table
-    Element detailsTable = ((Element)node).getElementsByClass("dump").first();
-    List<String> headers = new ArrayList<>();
-    List<String> details = new ArrayList<>();
-    Iterator<Element> headerIterator = detailsTable.select("th").iterator();
-    Iterator<Element> detailsIterator = detailsTable.select("td").iterator();
-    while (headerIterator.hasNext() && detailsIterator.hasNext()) {
-      headers.add(headerIterator.next().text());
-      details.add(detailsIterator.next().text());
-    }
-    for (int i=0; i<headers.size(); i++) {
-      parsedData += headers.get(i) + ":" + details.get(i) + "  ";
-    }
-    return parsedData;
-  }
+  
+  
 }
