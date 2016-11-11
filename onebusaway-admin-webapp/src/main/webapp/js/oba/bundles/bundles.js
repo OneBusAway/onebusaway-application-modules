@@ -455,6 +455,9 @@ jQuery(function() {
 	//Retrieve transit agency metadata
 	getAgencyMetadata();
 	
+	// Retrieve dataset name and build name for bundle currently deployed on staging.
+	getDeployedOnStagingBundleInfo();
+	
 	// For "Copy" popup to specify a destination directory
 	$("#copyPopup").dialog({
 		autoOpen: false,
@@ -553,6 +556,7 @@ jQuery(function() {
 	});
 
 	clearPreviousBuildResults();
+	$("#Sync #syncProgressDiv").hide();
 	var qs = parseQuerystring();
 	if (qs["fromEmail"] == "true") {
 		//alert("called from email!");
@@ -2299,31 +2303,17 @@ function onDownloadBundleClick() {
 // Sync active bundle with staging
 function onSyncDeployedBundleClick() {
 	var environment = jQuery("#deploy_environment").text();
-
+	$("#Sync #syncProgressIcon").attr("src", "../../css/img/ajax-loader.gif");
+	$("#syncProgressText").text("Syncing bundles in Progress...");
+	$("#Sync #syncProgressDiv").show();
 	jQuery.ajax({
 		url: "sync-bundle!syncBundle.action?ts=" + new Date().getTime(),
 		type: "GET",
 		async: false,
 		success: function(response) {
 			var bundleResponse = response;
-			/*
-			if (bundleResponse != undefined) {
-				// the header is set wrong for the proxied object, run eval to correct
-				if (typeof response=="string") {
-					bundleResponse = eval('(' + response + ')');
-				}
-				jQuery("#deployBundle_resultList").html("calling...");
-				jQuery("#deployBundle_id").text(bundleResponse.id);
-				jQuery("#deployBundle #requestLabels").show().css("display","block");
-				jQuery("#deployContentsHolder #deployBox #deploying").show().css("display","block");
-				jQuery("#deployBundle_deployProgress").text("Deploying ...");
-				jQuery("#deployContentsHolder #deployBox #deploying #deployingProgress").attr("src","../../css/img/ajax-loader.gif");
-				window.setTimeout(updateDeployStatus, 5000);
-			} else {
-				jQuery("#deployBundle_id").text(error);
-				jQuery("#deployBundle_resultList").html("error");
-			}
-			*/
+			$("#Sync #syncProgressIcon").attr("src", "../../css/img/dialog-accept-2.png");
+			$("#syncProgressText").text("Syncing bundles complete!");
 		},
 		error: function(request) {
 			alert("There was an error processing your request. Please try again.");
@@ -2383,4 +2373,24 @@ function addUploadFileAgencyDropdown() {
 		agencyDropDown.append(jQuery("<option>").attr('value',agencyMetadata[i].legacyId).text(name));
 	};
 	agencyDropDown.insertBefore("#agencyId");
+}
+
+//retrieve transit agency metadata from server
+function getDeployedOnStagingBundleInfo(){
+	jQuery.ajax({
+		url: "../../api/bundle/latest",
+		type: "GET",
+		async: false,
+		success: function(response) {
+			//var bundleInfo = response;
+			var bundleInfo = JSON.parse(response);
+			var datasetName = bundleInfo.dataset;
+			var buildName = bundleInfo.name;
+			$("#sync_deployedDataset").text(datasetName);
+			$("#sync_deployedBundleName").text(buildName);
+		},
+		error: function(request) {
+			console.log("There was an error trying to retrieve agency metadata");
+		}
+	});
 }

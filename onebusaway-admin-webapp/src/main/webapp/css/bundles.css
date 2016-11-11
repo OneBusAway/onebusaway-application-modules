@@ -758,7 +758,7 @@
 }
 
 #staging_bundleName, #download_bundleName, #download_selectedDataset,
-#sync_bundleName, #sync_selectedDataset {
+#sync_deployedBundleName, #sync_deployedDataset {
 	padding: 10px;
 	margin-bottom: 5px;
 }
@@ -870,6 +870,10 @@
 #downloadBundle #bundleResults {
 	float: left;
 	clear: left;
+}
+
+#Sync #syncProgressDiv {
+	margin-top: 20px;
 }
 
 /* Styles added for new UI design */
