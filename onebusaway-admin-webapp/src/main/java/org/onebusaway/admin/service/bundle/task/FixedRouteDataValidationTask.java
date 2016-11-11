@@ -240,6 +240,7 @@ public class FixedRouteDataValidationTask implements Runnable {
       }
       logger.logCSV(FILENAME,",,,,,,,,");
     }
+    _log.info("finished fixed route data validation report");
   }
   
   private LocalDate getFirstDay(int dayOfWeek) {
@@ -262,8 +263,8 @@ public class FixedRouteDataValidationTask implements Runnable {
         if (reportRoutes == null) {
           reportRoutes = new ArrayList<>();
         }
-        reportRoutes.add(reportData[1]);
-        reportModes.put(reportData[0], reportRoutes);
+        reportRoutes.add(reportData[1].trim());
+        reportModes.put(reportData[0].trim(), reportRoutes);
       }
     } catch (IOException e) {
       // TODO Auto-generated catch block
