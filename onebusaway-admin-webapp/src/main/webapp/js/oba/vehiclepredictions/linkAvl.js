@@ -65,8 +65,8 @@ function createLinkAvlModule(title, urlinput, timestamp, latlon, tripVal, route,
 			route.html("...");
 			schdev.html("...");
 			block.html("...");
-			if (trip == undefined || trip == null || trip.html == undefined) {
-				status.html("could not determin trip for vehicle " + vehicleId);
+			if (typeof trip == 'undefined' || trip == undefined || trip == null || trip.html == undefined) {
+				status.html("could not determine trip for vehicle " + vehicleId);
 			} else 	if (trip != undefined && trip != null && trip.html != undefined)
 				trip.html("...");
 			nextstopid.html("...");	
