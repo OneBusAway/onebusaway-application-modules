@@ -622,6 +622,12 @@
 	border-right: none;
 }
 
+#Compare #fixedRouteDiffTable td.rtNum {
+	text-align: right;
+	padding-left: .3em;
+	padding-right: .5em;
+}
+
 #Compare #fixedRouteDiffTable tr.routeFirstLine td {
 	border-top: thin black solid;
 }

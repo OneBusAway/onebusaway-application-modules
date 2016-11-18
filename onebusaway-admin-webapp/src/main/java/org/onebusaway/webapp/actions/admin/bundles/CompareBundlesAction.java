@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeSet;
 
 import org.apache.struts2.convention.annotation.Namespace;
 import org.apache.struts2.convention.annotation.Result;
@@ -187,16 +188,24 @@ public class CompareBundlesAction extends OneBusAwayNYCAdminActionSupport {
 
     DataValidationMode diffMode = new DataValidationMode();
     diffMode.setModeName(currentMode.getModeName());
-    diffMode.setRoutes(new ArrayList<DataValidationRouteCounts>());
+    diffMode.setRoutes(new TreeSet<DataValidationRouteCounts>());
 
     for (DataValidationRouteCounts currentRoute : currentMode.getRoutes()) {
       // Check if this route exists in selectedMode
       DataValidationRouteCounts diffRoute = null;
+      String routeNum = currentRoute.getRouteNum();
       String routeName = currentRoute.getRouteName();
       for (DataValidationRouteCounts selectedRoute : selectedMode.getRoutes()) {
-        if (routeName.equals(selectedRoute.getRouteName())) {
+        if (routeNum.equals(selectedRoute.getRouteNum())) {
           selectedMode.getRoutes().remove(selectedRoute);
-          diffRoute = compareRoutes(currentRoute, selectedRoute);
+          if (routeName.equals(selectedRoute.getRouteName())) {
+            diffRoute = compareRoutes(currentRoute, selectedRoute);
+          } else {    // Route name changed, but not route number.
+            currentRoute.setSrcCode("1");
+            selectedRoute.setSrcCode("2");
+            diffMode.getRoutes().add(currentRoute);
+            diffRoute = selectedRoute;
+          }
           break;
         }
       }
@@ -222,7 +231,8 @@ public class CompareBundlesAction extends OneBusAwayNYCAdminActionSupport {
     DataValidationRouteCounts diffRoute = new DataValidationRouteCounts();
 
     diffRoute.setRouteName(currentRoute.getRouteName());
-    diffRoute.setHeadsignCounts(new ArrayList<DataValidationHeadsignCts>());
+    diffRoute.setRouteNum(currentRoute.getRouteNum());
+    diffRoute.setHeadsignCounts(new TreeSet<DataValidationHeadsignCts>());
 
     for (DataValidationHeadsignCts currentHeadsign : currentRoute.getHeadsignCounts()) {
       // Check if this headsign exists in selectedMode
@@ -257,7 +267,7 @@ public class CompareBundlesAction extends OneBusAwayNYCAdminActionSupport {
     DataValidationHeadsignCts diffHeadsign = new DataValidationHeadsignCts();
 
     diffHeadsign.setHeadsign(currentHeadsign.getHeadsign());
-    diffHeadsign.setDirCounts(new ArrayList<DataValidationDirectionCts>());
+    diffHeadsign.setDirCounts(new TreeSet<DataValidationDirectionCts>());
 
     for (DataValidationDirectionCts currentDirection : currentHeadsign.getDirCounts()) {
       // Check if this headsign exists in selectedMode
@@ -292,7 +302,7 @@ public class CompareBundlesAction extends OneBusAwayNYCAdminActionSupport {
 
     DataValidationDirectionCts diffDirection = new DataValidationDirectionCts();
     diffDirection.setDirection(currentDirection.getDirection());
-    diffDirection.setStopCounts(new ArrayList<DataValidationStopCt>());
+    diffDirection.setStopCounts(new TreeSet<DataValidationStopCt>());
 
     for (DataValidationStopCt currentStopCt : currentDirection.getStopCounts()) {
       boolean stopCtMatched = false;

@@ -83,7 +83,8 @@
 				<caption>Comparison of Fixed Route Modes</caption>
 				<tr>
 					<th class="modeColumn">Mode</th>
-					<th class="routeColumn">Route</th>
+					<th class="rtNumColumn">Rt</th>
+					<th class="rtNameColumn">Route Name</th>
 					<th class="headsignColumn">Headsign</th>
 					<th class="dirColumn">Dir</th>
 					<th class="stopCtColumn"># of Stops</th>

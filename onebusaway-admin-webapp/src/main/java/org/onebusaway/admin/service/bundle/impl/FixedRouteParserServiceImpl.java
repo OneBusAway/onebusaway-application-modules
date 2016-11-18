@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.SortedSet;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
@@ -74,6 +75,8 @@ public class FixedRouteParserServiceImpl implements FixedRouteParserService {
             i++;
             continue;   // Skip the first record, which is just the column headers
           }
+          // When the record being parsed is for a new mode, the parseRecord
+          // method will add the previous mode to the parsedModes List.
           currentMode = parseRecord(record, currentMode, parsedModes);
           i++;
         }
@@ -88,7 +91,7 @@ public class FixedRouteParserServiceImpl implements FixedRouteParserService {
     }
     return parsedModes;
   }
-  
+
   /**
    * Parses a csv record representing one line of a FixedRouteDataValidation
    * report.  If the line is part of the mode currently being processed, it
@@ -125,6 +128,16 @@ public class FixedRouteParserServiceImpl implements FixedRouteParserService {
     String headsign = record.get(2);
     String dirName = record.get(3);
 
+    // If routeName is prefixed with the route number, extract the route number
+    String routeNum = "";
+    if (routeName.length() > 0) {
+    int idx = routeName.substring(0,Math.min(5, routeName.length())).indexOf("-");
+      if (idx > 0) {
+        routeNum = routeName.substring(0,idx).trim();
+        routeName = routeName.substring(idx+1);
+      }
+    }
+
     if (modeName.length()>0) {  // new mode
       if (routeName.isEmpty()) {
         return currentMode;  // this shouldn't happen.  Any line with a mode
@@ -133,33 +146,33 @@ public class FixedRouteParserServiceImpl implements FixedRouteParserService {
       if (currentMode != null) {
         parsedModes.add(currentMode);
       }
-      currentMode = new DataValidationMode(modeName, routeName, headsign, dirName);
-      currentRoute = currentMode.getRoutes().get(0);
-      currentHeadsign = currentRoute.getHeadsignCounts().get(0);
-      currentDirection = currentHeadsign.getDirCounts().get(0);
-      List<DataValidationStopCt> stopCountsList = currentDirection.getStopCounts();
+      currentMode = new DataValidationMode(modeName, routeNum, routeName, headsign, dirName);
+      currentRoute = currentMode.getRoutes().first();
+      currentHeadsign = currentRoute.getHeadsignCounts().first();
+      currentDirection = currentHeadsign.getDirCounts().first();
+      SortedSet<DataValidationStopCt> stopCountsList = currentDirection.getStopCounts();
       stopCountsList.add(currentStopCt);
     } else if (routeName.length()>0) {
       // New route for current mode
-      currentRoute = new DataValidationRouteCounts(routeName, headsign, dirName);
+      currentRoute = new DataValidationRouteCounts(routeNum, routeName, headsign, dirName);
       currentMode.getRoutes().add(currentRoute);
-      currentHeadsign = currentRoute.getHeadsignCounts().get(0);
-      currentDirection = currentHeadsign.getDirCounts().get(0);
-      List<DataValidationStopCt> stopCountsList = currentDirection.getStopCounts();
+      currentHeadsign = currentRoute.getHeadsignCounts().first();
+      currentDirection = currentHeadsign.getDirCounts().first();
+      SortedSet<DataValidationStopCt> stopCountsList = currentDirection.getStopCounts();
       stopCountsList.add(currentStopCt);
     } else if (headsign.length()>0) {
       currentHeadsign = new DataValidationHeadsignCts(headsign, dirName);
       currentRoute.getHeadsignCounts().add(currentHeadsign);
-      currentDirection = currentHeadsign.getDirCounts().get(0);
-      List<DataValidationStopCt> stopCountsList = currentDirection.getStopCounts();
+      currentDirection = currentHeadsign.getDirCounts().first();
+      SortedSet<DataValidationStopCt> stopCountsList = currentDirection.getStopCounts();
       stopCountsList.add(currentStopCt);
     } else if (dirName.length()>0) {
       currentDirection = new DataValidationDirectionCts(dirName);
       currentHeadsign.getDirCounts().add(currentDirection);
-      List<DataValidationStopCt> stopCountsList = currentDirection.getStopCounts();
+      SortedSet<DataValidationStopCt> stopCountsList = currentDirection.getStopCounts();
       stopCountsList.add(currentStopCt);
     } else if (dirName.isEmpty()) {
-      List<DataValidationStopCt> stopCountsList = currentDirection.getStopCounts();
+      SortedSet<DataValidationStopCt> stopCountsList = currentDirection.getStopCounts();
       stopCountsList.add(currentStopCt);
     } 
     return currentMode;  
