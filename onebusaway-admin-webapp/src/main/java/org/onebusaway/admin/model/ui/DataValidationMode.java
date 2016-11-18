@@ -15,8 +15,9 @@
  */
 package org.onebusaway.admin.model.ui;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Iterator;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 /**
  * Holds the details for a transit mode in the Fixed Route Data Validation
@@ -26,9 +27,9 @@ import java.util.List;
  * @author jpearson
  *
  */
-public class DataValidationMode {
+public class DataValidationMode implements Comparable<DataValidationMode> {
   private String modeName;
-  List<DataValidationRouteCounts> routes;
+  SortedSet<DataValidationRouteCounts> routes;
   private String srcCode;  // Used in diff files to indicate the source.
 
   public DataValidationMode() {
@@ -38,8 +39,21 @@ public class DataValidationMode {
       String routeName, String headsign, String direction) {
     super();
     this.modeName = modeName;
-    this.routes = new ArrayList<DataValidationRouteCounts>();
-    routes.add(new DataValidationRouteCounts(routeName, headsign, direction));
+    this.routes = new TreeSet<DataValidationRouteCounts>();
+    String routeNum = "";
+    int idx = routeName.substring(0,5).indexOf("-");
+    if (idx > 0) {
+      routeNum = routeName.substring(0,idx).trim();
+      routeName = routeName.substring(idx+1);
+    }
+    routes.add(new DataValidationRouteCounts(routeNum, routeName, headsign, direction));
+  }
+  public DataValidationMode(String modeName, String routeNum,
+      String routeName, String headsign, String direction) {
+    super();
+    this.modeName = modeName;
+    this.routes = new TreeSet<DataValidationRouteCounts>();
+    routes.add(new DataValidationRouteCounts(routeNum, routeName, headsign, direction));
   }
 
   public String getModeName() {
@@ -48,10 +62,10 @@ public class DataValidationMode {
   public void setModeName(String modeName) {
     this.modeName = modeName;
   }
-  public List<DataValidationRouteCounts> getRoutes() {
+  public SortedSet<DataValidationRouteCounts> getRoutes() {
     return routes;
   }
-  public void setRoutes(List<DataValidationRouteCounts> routes) {
+  public void setRoutes(SortedSet<DataValidationRouteCounts> routes) {
     this.routes = routes;
   }
   public String getSrcCode() {
@@ -59,5 +73,95 @@ public class DataValidationMode {
   }
   public void setSrcCode(String srcCode) {
     this.srcCode = srcCode;
+  }
+
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result
+        + ((routes == null) ? 0 : routes.hashCode());
+    result = prime * result + ((modeName == null) ? 0 : modeName.hashCode());
+    result = prime * result + ((srcCode == null) ? 0 : srcCode.hashCode());
+    return result;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null) {
+      return false;
+    }
+    if (!(obj instanceof DataValidationMode)) {
+      return false;
+    }
+    DataValidationMode other = (DataValidationMode) obj;
+    if (routes == null) {
+      if (other.routes != null) {
+        return false;
+      }
+    } else if (!routes.equals(other.routes)) {
+      return false;
+    }
+
+    if (modeName == null) {
+      if (other.modeName != null) {
+        return false;
+      }
+    } else if (!modeName.equals(other.modeName)) {
+      return false;
+    }
+
+    if (srcCode == null) {
+      if (other.srcCode != null) {
+        return false;
+      }
+    } else if (!srcCode.equals(other.srcCode)) {
+      return false;
+    }
+    return true;
+  }
+
+  @Override
+  public int compareTo(DataValidationMode obj) {
+    DataValidationMode other = (DataValidationMode) obj;
+    if (modeName == null) {
+      if (other.modeName != null) {
+        return -1;
+      }
+    } else if (other.modeName == null) {
+      return 1;
+    } else if (!modeName.equals(other.modeName)) {
+      return modeName.compareTo(other.modeName);
+    }
+
+    //Compare routes sets
+    if (!routes.equals(other.routes)) {
+      if (routes.size() != other.routes.size()) {
+        return routes.size() - other.routes.size();
+      }
+      Iterator<DataValidationRouteCounts> it_1 = routes.iterator();
+      Iterator<DataValidationRouteCounts> it_2 = other.routes.iterator();
+      while (it_1.hasNext()) {
+        if (!it_1.next().equals(it_2.next())) {
+          return it_1.next().compareTo(it_2.next());
+        }
+      }
+    }
+
+    if (srcCode == null) {
+      if (other.srcCode != null) {
+        return -1;
+      } else {
+        return 0;
+      }
+    } else if (other.srcCode == null) {
+      return 1;
+    } else if (!srcCode.equals(other.srcCode)) {
+      return srcCode == "1" ? -1 : 1;
+    }
+    return 0;
   }
 }

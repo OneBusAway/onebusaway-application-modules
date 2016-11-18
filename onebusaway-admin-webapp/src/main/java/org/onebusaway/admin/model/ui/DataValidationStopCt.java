@@ -15,6 +15,8 @@
  */
 package org.onebusaway.admin.model.ui;
 
+import java.util.Arrays;
+
 /**
  * Holds the number of trips for a specific stop count for a given route and 
  * mode in the Fixed Route Data Validation report.  The trip numbers will be
@@ -24,7 +26,7 @@ package org.onebusaway.admin.model.ui;
  * @author jpearson
  *
  */
-public class DataValidationStopCt {
+public class DataValidationStopCt implements Comparable {
 
   private int stopCt;
   private int[] tripCts;
@@ -47,5 +49,66 @@ public class DataValidationStopCt {
   }
   public void setSrcCode(String srcCode) {
     this.srcCode = srcCode;
+  }
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + ((srcCode == null) ? 0 : srcCode.hashCode());
+    result = prime * result + stopCt;
+    result = prime * result + Arrays.hashCode(tripCts);
+    return result;
+  }
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null) {
+      return false;
+    }
+    if (!(obj instanceof DataValidationStopCt)) {
+      return false;
+    }
+    DataValidationStopCt other = (DataValidationStopCt) obj;
+    if (srcCode == null) {
+      if (other.srcCode != null) {
+        return false;
+      }
+    } else if (!srcCode.equals(other.srcCode)) {
+      return false;
+    }
+    if (stopCt != other.stopCt) {
+      return false;
+    }
+    if (!Arrays.equals(tripCts, other.tripCts)) {
+      return false;
+    }
+    return true;
+  }
+
+  @Override
+  public int compareTo(Object obj) {
+    DataValidationStopCt other = (DataValidationStopCt)obj;
+    if (stopCt != other.stopCt) {
+      return stopCt - other.stopCt;
+    }
+    if (srcCode == null) {
+      if (other.srcCode != null) {
+        return -1;
+      } else {
+        return 0;
+      }
+    } else if (other.srcCode == null) {
+      return 1;
+    } else if (!srcCode.equals(other.srcCode)) {
+      return srcCode == "1" ? -1 : 1;
+    }
+    for (int i=0; i<3; i++) {
+      if (tripCts[i] != other.tripCts[i]) {
+        return tripCts[i] - other.tripCts[i];
+      }
+    }
+    return 0;
   }
 }

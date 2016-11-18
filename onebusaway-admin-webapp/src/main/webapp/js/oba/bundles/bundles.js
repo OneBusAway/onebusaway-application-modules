@@ -156,6 +156,7 @@ jQuery(function() {
 								modeClass = "selectedRpt";
 							}
 							$.each(value.routes, function(index2, value2) {
+								var routeNum = value2.routeNum;
 								var routeName = value2.routeName;
 								var routeFirstLineClass=" routeFirstLine";
 								addSpacer = false;
@@ -174,6 +175,7 @@ jQuery(function() {
 									var headsignBorderClass = "";
 									if (headsignIdx > 0) {
 										modeName = "";
+										routeNum = "";
 										routeName = "";
 										modeFirstLineClass = "";
 										routeFirstLineClass = "";
@@ -191,6 +193,7 @@ jQuery(function() {
 										var dirBorderClass = "";
 										if (dirIdx > 0) {
 											modeName = "";
+											routeNum = "";
 											routeName = "";
 											headsignName = "";
 											modeFirstLineClass = "";
@@ -224,6 +227,7 @@ jQuery(function() {
 											if (index3 > 0) {
 												modeName = "";
 												modeFirstLineClass = "";
+												routeNum = "";
 												routeName = "";
 												headsignName = "";
 												dirName = "";
@@ -250,8 +254,9 @@ jQuery(function() {
 												$('#fixedRouteDiffTable').append(new_spacer_row);
 											}
 											var new_row = '<tr class="fixedRouteDiff' + modeFirstLineClass + routeFirstLineClass + '"> \
-												<td class=' + modeClass + ' modeName >' + modeName + '</td> \
-												<td class=' + routeClass + routeFirstLineClass + '>' + routeName + '</td> \
+												<td class="' + modeClass + ' modeName" >' + modeName + '</td> \
+												<td class="' + routeClass + routeFirstLineClass + ' rtNum" >' + routeNum + '</td> \
+												<td class="' + routeClass + routeFirstLineClass + '">' + routeName + '</td> \
 												<td class="' + headsignClass + routeFirstLineClass + headsignBorderClass + '">' + headsignName + '</td> \
 												<td class="' + dirClass + routeFirstLineClass + headsignBorderClass + dirBorderClass + '">' + dirName + '</td> \
 												<td class="' + stopClass + routeFirstLineClass + headsignBorderClass + dirBorderClass + '">' + stopCt + '</td> \
