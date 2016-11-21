@@ -17,37 +17,38 @@ package org.onebusaway.geocoder.impl;
 
 import static org.junit.Assert.assertEquals;
 
+import java.io.IOException;
 import java.util.List;
 
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.AnnotationConfiguration;
 import org.hibernate.cfg.Configuration;
+import org.hibernate.service.ServiceRegistry;
+import org.hibernate.service.ServiceRegistryBuilder;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.onebusaway.geocoder.model.GeocoderResult;
 import org.onebusaway.geocoder.model.GeocoderResults;
 import org.onebusaway.geocoder.services.GeocoderService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.transaction.TransactionConfiguration;
+import org.springframework.transaction.annotation.Transactional;
 
+@ContextConfiguration(locations = "classpath:org/onebusaway/geocoder/impl/application-context-test.xml")
+@TransactionConfiguration(transactionManager="transactionManager", defaultRollback=true)
+@RunWith(SpringJUnit4ClassRunner.class)
 public class DatabaseCachingGeocoderImplTest {
-
+  
+  @Autowired
   private SessionFactory _sessionFactory;
-
-  @Before
-  public void setup() {
-    Configuration config = new AnnotationConfiguration();
-    config = config.configure("org/onebusaway/geocoder/impl/hibernate-configuration.xml");
-    _sessionFactory = config.buildSessionFactory();
-  }
-
-  @After
-  public void tearDown() {
-    if (_sessionFactory != null)
-      _sessionFactory.close();
-  }
-
+  
   @Test
+  @Transactional
   public void test() {
 
     GeocoderResults results = new GeocoderResults();
