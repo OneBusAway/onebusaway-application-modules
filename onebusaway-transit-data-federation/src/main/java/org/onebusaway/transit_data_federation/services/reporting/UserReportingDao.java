@@ -15,6 +15,7 @@
  */
 package org.onebusaway.transit_data_federation.services.reporting;
 
+import java.sql.SQLException;
 import java.util.List;
 
 import org.onebusaway.collections.tuple.T2;

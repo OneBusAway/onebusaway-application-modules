@@ -16,12 +16,10 @@
  */
 package org.onebusaway.transit_data_federation.impl.reporting;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.hibernate.Criteria;
-import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Order;
@@ -37,47 +35,58 @@ import org.onebusaway.transit_data.model.problems.TripProblemReportQueryBean;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.reporting.UserReportingDao;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.orm.hibernate3.HibernateCallback;
-import org.springframework.orm.hibernate3.HibernateTemplate;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
 class UserReportingDaoImpl implements UserReportingDao {
 
-  private HibernateTemplate _template;
+  SessionFactory _sessionFactory;
 
   @Autowired
   public void setSessionFactory(SessionFactory sessionFactory) {
-    _template = new HibernateTemplate(sessionFactory);
+    _sessionFactory = sessionFactory;
   }
 
   @Override
+  @Transactional
   public void saveOrUpdate(Object record) {
-    _template.saveOrUpdate(record);
+	  try{
+		  getSession().saveOrUpdate(record);
+	  }catch(Exception e){
+		  e.printStackTrace();
+	  }
   }
 
   @Override
+  @Transactional
   public void delete(Object entity) {
-    _template.delete(entity);
+	  getSession().delete(entity);
   }
 
   @SuppressWarnings("unchecked")
   @Override
+  @Transactional
   public List<T2<AgencyAndId, Integer>> getStopProblemReportSummaries(
       String agencyId, long timeFrom, long timeTo, EProblemReportStatus status) {
 
     List<Object[]> records = null;
 
-    if (status == null) {
-      String[] names = {"agencyId", "timeFrom", "timeTo"};
-      Object[] values = {agencyId, timeFrom, timeTo};
-      records = _template.findByNamedQueryAndNamedParam(
-          "stopProblemReportSummaries", names, values);
-    } else {
-      String[] names = {"agencyId", "timeFrom", "timeTo", "status"};
-      Object[] values = {agencyId, timeFrom, timeTo, status};
-      records = _template.findByNamedQueryAndNamedParam(
-          "stopProblemReportSummariesWithStatus", names, values);
+    if (status == null) {      
+      records = getSession()
+	    		  .getNamedQuery("stopProblemReportSummaries")
+	    		  .setParameter("agencyId", agencyId)
+	    		  .setParameter("timeFrom", timeFrom)
+	    		  .setParameter("timeTo", timeTo)
+	    		  .list();
+    } else {      
+      records = getSession()
+    		  .getNamedQuery("stopProblemReportSummariesWithStatus")
+    		  .setParameter("agencyId", agencyId)
+    		  .setParameter("timeFrom", timeFrom)
+    		  .setParameter("timeTo", timeTo)
+    		  .setParameter("status", status)
+    		  .list();
     }
 
     List<T2<AgencyAndId, Integer>> results = new ArrayList<T2<AgencyAndId, Integer>>(
@@ -94,44 +103,38 @@ class UserReportingDaoImpl implements UserReportingDao {
 
   @SuppressWarnings("unchecked")
   @Override
+  @Transactional
   public List<T2<Object, Integer>> getTripProblemReportSummaries(
       final TripProblemReportQueryBean query, final ETripProblemGroupBy groupBy) {
+	  
+    Criteria c = getSession().createCriteria(TripProblemReportRecord.class);
 
-    List<Object[]> rows = _template.executeFind(new HibernateCallback<List<Object[]>>() {
+    ProjectionList projections = Projections.projectionList();
+    projections.add(Projections.rowCount());
+    switch (groupBy) {
+      case TRIP:
+        projections.add(Projections.groupProperty("tripId.agencyId"));
+        projections.add(Projections.groupProperty("tripId.id"));
+        break;
+      case STATUS:
+        projections.add(Projections.groupProperty("status"));
+        break;
+      case LABEL:
+        projections.add(Projections.groupProperty("label"));
+        break;
+    }
+    c.setProjection(projections);
 
-      @Override
-      public List<Object[]> doInHibernate(Session session)
-          throws HibernateException, SQLException {
+    addQueryToCriteria(query, c);
 
-        Criteria c = session.createCriteria(TripProblemReportRecord.class);
-
-        ProjectionList projections = Projections.projectionList();
-        projections.add(Projections.rowCount());
-        switch (groupBy) {
-          case TRIP:
-            projections.add(Projections.groupProperty("tripId.agencyId"));
-            projections.add(Projections.groupProperty("tripId.id"));
-            break;
-          case STATUS:
-            projections.add(Projections.groupProperty("status"));
-            break;
-          case LABEL:
-            projections.add(Projections.groupProperty("label"));
-            break;
-        }
-        c.setProjection(projections);
-
-        addQueryToCriteria(query, c);
-
-        return c.list();
-      }
-    });
+    List<Object[]> rows = c.list();
+  
 
     List<T2<Object, Integer>> results = new ArrayList<T2<Object, Integer>>(
         rows.size());
 
     for (Object[] row : rows) {
-      Integer count = (Integer) row[0];
+      Integer count = ((Long) row[0]).intValue();
       Object key = getKeyForTripProblemReportSummariesRow(row, groupBy);
       results.add(Tuples.tuple(key, count.intValue()));
     }
@@ -140,71 +143,80 @@ class UserReportingDaoImpl implements UserReportingDao {
   }
 
   @SuppressWarnings("unchecked")
+  @Transactional
   public List<StopProblemReportRecord> getStopProblemReports(String agencyId,
       long timeFrom, long timeTo, EProblemReportStatus status) {
-
     if (status == null) {
-      String[] names = {"agencyId", "timeFrom", "timeTo"};
-      Object[] values = {agencyId, timeFrom, timeTo};
-      return _template.findByNamedQueryAndNamedParam("stopProblemReports",
-          names, values);
+      return getSession()
+    		  .getNamedQuery("stopProblemReports")
+    		  .setParameter("agencyId", agencyId)
+    		  .setParameter("timeFrom", timeFrom)
+    		  .setParameter("timeTo", timeTo)
+    		  .list();
     } else {
-      String[] names = {"agencyId", "timeFrom", "timeTo", "status"};
-      Object[] values = {agencyId, timeFrom, timeTo, status};
-      return _template.findByNamedQueryAndNamedParam(
-          "stopProblemReportsWithStatus", names, values);
+      return getSession()
+    		  .getNamedQuery("stopProblemReportsWithStatus")
+    		  .setParameter("agencyId", agencyId)
+    		  .setParameter("timeFrom", timeFrom)
+    		  .setParameter("timeTo", timeTo)
+    		  .setParameter("status", status)
+    		  .list();
     }
   }
 
   @SuppressWarnings("unchecked")
+  @Transactional
   public List<TripProblemReportRecord> getTripProblemReports(
       final TripProblemReportQueryBean query) {
 
-    return _template.executeFind(new HibernateCallback<List<TripProblemReportRecord>>() {
+    Criteria c = getSession().createCriteria(TripProblemReportRecord.class);
+    addQueryToCriteria(query, c);
+    c.addOrder(Order.asc("time"));
+    return c.list();
+  
 
-      @Override
-      public List<TripProblemReportRecord> doInHibernate(Session session)
-          throws HibernateException, SQLException {
-
-        Criteria c = session.createCriteria(TripProblemReportRecord.class);
-        addQueryToCriteria(query, c);
-        c.addOrder(Order.asc("time"));
-        return c.list();
-      }
-
-    });
   }
 
   @SuppressWarnings("unchecked")
   @Override
+  @Transactional
   public List<StopProblemReportRecord> getAllStopProblemReportsForStopId(
       AgencyAndId stopId) {
-    return _template.findByNamedQueryAndNamedParam(
-        "allStopProblemReportsForStopId", "stopId", stopId);
+    return getSession()
+    		.getNamedQuery("allStopProblemReportsForStopId")
+    		.setParameter("stopId", stopId)
+    		.list();
   }
 
   @SuppressWarnings("unchecked")
   @Override
+  @Transactional
   public List<TripProblemReportRecord> getAllTripProblemReportsForTripId(
       AgencyAndId tripId) {
-    return _template.findByNamedQueryAndNamedParam(
-        "allTripProblemReportsForTripId", "tripId", tripId);
+	  
+	  return getSession()
+	    		.getNamedQuery("allTripProblemReportsForTripId")
+	    		.setParameter("tripId", tripId)
+	    		.list();
   }
 
   @Override
+  @Transactional
   public StopProblemReportRecord getStopProblemRecordForId(long id) {
-    return _template.get(StopProblemReportRecord.class, id);
+    return (StopProblemReportRecord) getSession().get(StopProblemReportRecord.class, id);
   }
 
   @Override
+  @Transactional
   public TripProblemReportRecord getTripProblemRecordForId(long id) {
-    return _template.get(TripProblemReportRecord.class, id);
+    return (TripProblemReportRecord) getSession().get(TripProblemReportRecord.class, id);
   }
 
   @SuppressWarnings("unchecked")
   @Override
+  @Transactional
   public List<String> getAllTripProblemReportLabels() {
-    return _template.findByNamedQuery("allTripProblemReportLabels");
+    return getSession().getNamedQuery("allTripProblemReportLabels").list();
   }
 
   private Object getKeyForTripProblemReportSummariesRow(Object[] row,
@@ -241,4 +253,9 @@ class UserReportingDaoImpl implements UserReportingDao {
       c.add(Property.forName("label").eq(query.getLabel()));
     }
   }
+  
+  private Session getSession(){
+	  return _sessionFactory.getCurrentSession();
+  }
+
 }

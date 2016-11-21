@@ -21,21 +21,25 @@ import org.hibernate.SessionFactory;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.impl.realtime.history.BlockLocationArchiveRecord;
 import org.springframework.orm.hibernate3.HibernateTemplate;
+import org.springframework.transaction.annotation.Transactional;
 
 public class DatabaseBlockLocationArchiveSource implements
     BlockLocationArchiveSource {
 
-  private HibernateTemplate _template;
+  private SessionFactory _sessionFactory;
 
   public void setSessionFactory(SessionFactory sessionFactory) {
-    _template = new HibernateTemplate(sessionFactory);
+	  _sessionFactory = sessionFactory;
   }
 
   @SuppressWarnings("unchecked")
   @Override
+  @Transactional
   public List<BlockLocationArchiveRecord> getRecordsForTrip(AgencyAndId tripId) {
-    return _template.findByNamedParam(
-        "from BlockLocationArchiveRecord where tripId=:tripId", "tripId",
-        tripId);
+	final String stringQuery = "from BlockLocationArchiveRecord where tripId=:tripId";
+    return _sessionFactory.getCurrentSession()
+    		.createQuery(stringQuery)
+    		.setParameter("tripId",tripId)
+    		.list();
   }
 }

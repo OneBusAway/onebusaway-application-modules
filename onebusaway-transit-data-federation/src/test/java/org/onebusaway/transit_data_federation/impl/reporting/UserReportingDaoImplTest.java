@@ -18,45 +18,49 @@ package org.onebusaway.transit_data_federation.impl.reporting;
 import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.List;
 
 import org.hibernate.SessionFactory;
-import org.hibernate.cfg.AnnotationConfiguration;
-import org.hibernate.cfg.Configuration;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.onebusaway.collections.tuple.T2;
 import org.onebusaway.collections.tuple.Tuples;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data.model.problems.EProblemReportStatus;
 import org.onebusaway.transit_data.model.problems.ETripProblemGroupBy;
 import org.onebusaway.transit_data.model.problems.TripProblemReportQueryBean;
+import org.onebusaway.transit_data_federation.services.reporting.UserReportingDao;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.transaction.TransactionConfiguration;
+import org.springframework.transaction.annotation.Transactional;
 
+@ContextConfiguration(locations = "classpath:org/onebusaway/transit_data_federation/application-context-test.xml")
+@TransactionConfiguration(transactionManager="transactionManager", defaultRollback=true)
+@RunWith(SpringJUnit4ClassRunner.class)
 public class UserReportingDaoImplTest {
-
-  private UserReportingDaoImpl _dao;
-
+	
+  @Autowired
+  private UserReportingDao _dao;
+  
+  @Autowired
   private SessionFactory _sessionFactory;
 
   @Before
   public void setup() throws IOException {
-
-    _dao = new UserReportingDaoImpl();
-
-    Configuration config = new AnnotationConfiguration();
-    config = config.configure("org/onebusaway/transit_data_federation/hibernate-configuration.xml");
-    _sessionFactory = config.buildSessionFactory();
-
-    _dao.setSessionFactory(_sessionFactory);
   }
 
   @Test
+  @Transactional
   public void test() {
     TripProblemReportRecord r1 = new TripProblemReportRecord();
+    r1.setTime(1000);
     r1.setLabel("label-1");
     r1.setStatus(EProblemReportStatus.NEW);
-    r1.setTime(1000);
-    r1.setTripId(new AgencyAndId("1", "trip-1"));
+    r1.setTripId(new AgencyAndId("1", "trip-1")); 
     _dao.saveOrUpdate(r1);
 
     TripProblemReportRecord r2 = new TripProblemReportRecord();
@@ -66,21 +70,25 @@ public class UserReportingDaoImplTest {
     r2.setTripId(new AgencyAndId("1", "trip-1"));
     _dao.saveOrUpdate(r2);
 
-    TripProblemReportRecord r3 = new TripProblemReportRecord();
+   TripProblemReportRecord r3 = new TripProblemReportRecord();
     r3.setLabel("label-2");
     r3.setStatus(EProblemReportStatus.VERIFIED);
     r3.setTime(3000);
     r3.setTripId(new AgencyAndId("2", "trip-1"));
     _dao.saveOrUpdate(r3);
-
+    
+    
+   
+    TripProblemReportQueryBean queryBean = query(null, null, 0, 0, null, null);
+    
     List<T2<Object, Integer>> summaries = _dao.getTripProblemReportSummaries(
-        query(null, null, 0, 0, null, null), ETripProblemGroupBy.TRIP);
+    		queryBean, ETripProblemGroupBy.TRIP);
     assertEquals(2, summaries.size());
     assertEquals(Tuples.tuple(new AgencyAndId("1", "trip-1"), 2),
         summaries.get(0));
     assertEquals(Tuples.tuple(new AgencyAndId("2", "trip-1"), 1),
         summaries.get(1));
-
+    
     summaries = _dao.getTripProblemReportSummaries(
         query(null, "1_trip-1", 0, 0, null, null), ETripProblemGroupBy.LABEL);
     assertEquals(2, summaries.size());
