@@ -87,6 +87,11 @@
       <artifactId>onebusaway-gtfs-realtime-api</artifactId>
       <version>1.1.0</version>
     </dependency>    
+    
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-test</artifactId>
+    </dependency>
 
     <!-- Library for accessing MyBus Data Stream -->
     <dependency>

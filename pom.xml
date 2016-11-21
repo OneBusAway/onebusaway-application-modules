@@ -18,7 +18,7 @@
   <properties>
     <struts-version>2.3.16.3</struts-version>
     <gwt-version>2.4.0</gwt-version>
-    <spring-version>3.2.17.RELEASE</spring-version>
+    <spring-version>4.0.9.RELEASE</spring-version>
     <csv-entities-version>1.0.3</csv-entities-version>
     <gtfs-version>1.2.6</gtfs-version>
     <onebusaway-siri-version>1.0.4</onebusaway-siri-version>
@@ -155,7 +155,7 @@
       <dependency>
         <groupId>org.hibernate</groupId>
         <artifactId>hibernate-core</artifactId>
-        <version>3.3.1.GA</version>
+        <version>4.0.1.Final</version>
       </dependency>
       <dependency>
         <groupId>org.hibernate</groupId>
@@ -323,7 +323,7 @@
       <dependency>
         <groupId>junit</groupId>
         <artifactId>junit</artifactId>
-        <version>4.8.1</version>
+        <version>4.12</version>
         <scope>test</scope>
       </dependency>
       <dependency>
