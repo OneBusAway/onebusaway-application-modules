@@ -31,6 +31,14 @@
 	<!-- //prevent jspx minimization -->
 </link>
 
+<s:url var="url" value="/css/print-bundle-report.css" />
+<link rel="stylesheet" type="text/css" media="print" href="${url}">
+	<!-- //prevent jspx minimization -->
+</link>
+
+<!--
+<s:url var="url" value="/js/lib/jquery-3.1.1.min.js" />
+-->
 <s:url var="url" value="/js/lib/jquery.js">
 </s:url>
 <script type="text/javascript" src="${url}">
@@ -38,7 +46,19 @@
 	
 </script>
 
+<!--
+<s:url var="url" value="http://code.jquery.com/jquery-migrate-1.4.1.js">
+</s:url>
+
+<script type="text/javascript" src="${url}">
+-->
+<!-- //prevent jspx minimization -->
+<!--
+</script>
+-->
+
 <s:url var="url" value="/js/lib/jquery.ui.js">
+	<!-- //prevent jspx minimization -->
 </s:url>
 <script type="text/javascript" src="${url}">
 <!-- //prevent jspx minimization -->
@@ -50,7 +70,7 @@
 </s:url>
 <script type="text/javascript" src="${url}">
 <!-- //prevent jspx minimization -->
-	
+
 </script>
 </head>
 <body>

@@ -77,10 +77,22 @@
 			</table>
 		</div>
 	</div>
+	<hr />
 	<div id="compareFixedRouteModes">
 		<div>
+			<input id="printFixedRouteRptButton" value="Print Fixed Route Comparison Report" type="button" />
 			<table id="fixedRouteDiffTable">
-				<caption>Comparison of Fixed Route Modes</caption>
+				<caption>
+					Comparison of Fixed Route Modes
+					<br />
+					<span id="baseBundle" >
+					<!--  prevent jsxp minimiztion -->
+					</span>
+					<br />
+					<span id="compareToBundle" >
+					<!--  prevent jsxp minimiztion -->
+					</span>
+				</caption>
 				<tr>
 					<th class="modeColumn">Mode</th>
 					<th class="rtNumColumn">Rt</th>

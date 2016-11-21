@@ -145,6 +145,10 @@ jQuery(function() {
 								$("#diffResultsTable").append(diffRow);
 							}
 						});
+						var baseBundle = selectedDirectory + " / " + jQuery("#bundleBuildName").val();
+						var compareToBundle = bundleNames[0] + " / " + buildNames[0];
+						$("#baseBundle").text(baseBundle + " (green)");
+						$("#compareToBundle").text(compareToBundle + " (red)");
 						$.each(data.fixedRouteDiffs, function(index, value) {
 							var modeName = value.modeName;
 							var modeClass = "";
@@ -242,6 +246,7 @@ jQuery(function() {
 											}
 											if (addSpacer) {
 												var new_spacer_row = '<tr class="spacer"> \
+													<td></td> \
 													<td></td> \
 													<td></td> \
 													<td></td> \
@@ -428,6 +433,8 @@ jQuery(function() {
 			}
 		}
 	});
+
+	jQuery("#printFixedRouteRptButton").click(onPrintFixedRouteRptClick);
 
 	disableStageButton();
 	disableDownloadButton();
@@ -1273,6 +1280,10 @@ function onBundleNameChanged() {
 
 function onRemoveSelectedAgenciesClick() {
 	$(this).closest('tr').remove();
+}
+
+function onPrintFixedRouteRptClick() {
+	window.print();
 }
 
 function enableContinueButton(continueButton) {
