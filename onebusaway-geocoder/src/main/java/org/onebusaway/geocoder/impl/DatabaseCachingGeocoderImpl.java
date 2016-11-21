@@ -21,7 +21,6 @@ import org.onebusaway.geocoder.services.GeocoderService;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.orm.hibernate3.HibernateTemplate;
 import org.springframework.transaction.annotation.Transactional;
 
 public class DatabaseCachingGeocoderImpl implements GeocoderService {

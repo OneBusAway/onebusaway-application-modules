@@ -25,8 +25,6 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.onebusaway.gtfs.services.HibernateOperation;
 import org.onebusaway.gtfs.services.HibernateOperations;
-import org.springframework.orm.hibernate3.HibernateCallback;
-import org.springframework.orm.hibernate3.HibernateTemplate;
 import org.springframework.transaction.annotation.Transactional;
 
 public class SpringHibernateOperationsImpl implements HibernateOperations {

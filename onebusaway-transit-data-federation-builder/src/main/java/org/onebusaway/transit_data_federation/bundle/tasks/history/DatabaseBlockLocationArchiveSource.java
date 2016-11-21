@@ -20,7 +20,6 @@ import java.util.List;
 import org.hibernate.SessionFactory;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.impl.realtime.history.BlockLocationArchiveRecord;
-import org.springframework.orm.hibernate3.HibernateTemplate;
 import org.springframework.transaction.annotation.Transactional;
 
 public class DatabaseBlockLocationArchiveSource implements
