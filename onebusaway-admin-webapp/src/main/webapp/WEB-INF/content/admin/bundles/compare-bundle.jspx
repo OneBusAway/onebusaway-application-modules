@@ -23,75 +23,124 @@
 	<div class="tabHeader">
 		<label class="headerLabel">Compare Bundles</label>
 	</div>
-	<div id="compareBundles">
-		<div id="compareExistingContents">
-			<label class="adminLabel">Select an existing bundle directory from below:</label>
-			<div id="compareCurrentDirectories">
-				<s:iterator value="%{existingDirectories}" status="directoryStatus">
-					<div id="compareListItem">
-						<div class="listData">
-							<strong>
-								<s:property value="name" />
-							</strong>
-						</div>
-						<div class="listData">
-							<s:property value="type" />
-						</div>
-						<div class="listData">
-							<s:property value="creationTimestamp" />
-						</div>
-					</div> 
-				</s:iterator>
-			</div>
-		</div>
-	</div>
-	<div id="compareBuilds">
-		<div id="compareExistingBuilds">
-			<label class="adminLabel">Select a build from below:</label>
 
-			<div id="compareSelectedBuild">
-				<!--  space -->
-			</div>
-		</div>
+	<div id="currentBundleDiv">
+		<fieldset>
+			<legend>Current Bundle</legend>
+			<table id="currentBundleTable">
+				<tr>
+					<td>Dataset Name</td>
+					<td>
+						<select name="currentDatasetList" id="currentDatasetList">
+							<option value="0">Select a dataset</option>
+							<s:iterator value="%{existingDirectories}" status="status">
+								<s:set var="index" value="%{#status.count}" />
+								<option value="">
+									<s:property value="name" />
+								</option>
+							</s:iterator>
+						</select>
+					</td>
+				</tr>
+				<tr>
+					<td>Build Name</td>
+					<td>
+						<select name="currentBuildNameList" id="currentBuildNameList">
+							<option value="0">Select a build name</option>
+						</select>
+					</td>
+				</tr>
+			</table>
+		</fieldset>
 	</div>
+
+	<div id="compareToBundleDiv">
+		<fieldset>
+			<legend>Compare to Bundle</legend>
+			<table id="compareToBundleTable">
+				<tr>
+					<td>Dataset Name</td>
+					<td>
+						<select name="compareToDatasetList" id="compareToDatasetList">
+							<option value="0">Select a dataset</option>
+							<s:iterator value="%{existingDirectories}" status="status">
+								<s:set var="index" value="%{#status.count}" />
+								<option value="">
+									<s:property value="name" />
+								</option>
+							</s:iterator>
+						</select>
+					</td>
+				</tr>
+				<tr>
+					<td>Build Name</td>
+					<td>
+						<select name="compareToBuildNameList" id="compareToBuildNameList">
+							<option value="0">Select a build name</option>
+						</select>
+					</td>
+				</tr>
+			</table>
+		</fieldset>
+	</div>
+
 	<div id="compareDiff">
-		<!--
-		<label class="adminLabel">Diff result:</label>
-		<div id="diffResult">
-		-->
 		<div>
 			<table id="diffResultsTable">
 				<caption>Diff Results</caption>
-				<tr>
-					<th>Id</th>
-					<th>Name</th>
-					<th>Routes</th>
-					<th>Trips</th>
-					<th>Stops</th>
-					<th>Stop Times</th>
-					<th>Service Start</th>
-					<th>Service End</th>
-					<th>Calendar Start</th>
-					<th>Calendar End</th>
-				</tr>
+				<thead>
+					<tr>
+						<th>Id</th>
+						<th>Name</th>
+						<th>Routes</th>
+						<th>Trips</th>
+						<th>Stops</th>
+						<th>Stop Times</th>
+						<th>Service Start</th>
+						<th>Service End</th>
+						<th>Calendar Start</th>
+						<th>Calendar End</th>
+					</tr>
+				</thead>
+				<tbody>
+					<!--  prevent jsxp minimiztion -->
+				</tbody>
 			</table>
 		</div>
 	</div>
+	<hr />
+
 	<div id="compareFixedRouteModes">
 		<div>
+			<input id="printFixedRouteRptButton" value="Print Fixed Route Comparison Report" type="button" />
 			<table id="fixedRouteDiffTable">
-				<caption>Comparison of Fixed Route Modes</caption>
-				<tr>
-					<th class="modeColumn">Mode</th>
-					<th class="rtNumColumn">Rt</th>
-					<th class="rtNameColumn">Route Name</th>
-					<th class="headsignColumn">Headsign</th>
-					<th class="dirColumn">Dir</th>
-					<th class="stopCtColumn"># of Stops</th>
-					<th class="weekdayTripColumn"># of Weekday trips</th>
-					<th class="satTripsColumn" ># of Sat trips</th>
-					<th class="sunTripsColumn" ># of Sun trips</th>
-				</tr>
+				<caption>
+					Comparison of Fixed Route Modes
+					<br />
+					<span id="baseBundle" >
+					<!--  prevent jsxp minimiztion -->
+					</span>
+					<br />
+					<span id="compareToBundle" >
+					<!--  prevent jsxp minimiztion -->
+					</span>
+				</caption>
+				  <thead>
+					<tr>
+						<th class="modeColumn">Mode</th>
+						<th class="rtNumColumn">Rt</th>
+						<th class="rtNameColumn">Route Name</th>
+						<th class="headsignColumn">Headsign</th>
+						<th class="dirColumn">Dir</th>
+						<th class="stopCtColumn"># of Stops</th>
+						<th class="weekdayTripColumn"># of Weekday trips</th>
+						<th class="satTripsColumn" ># of Sat trips</th>
+						<th class="sunTripsColumn" ># of Sun trips</th>
+					</tr>
+				</thead>
+				<tbody>
+					<!--  prevent jsxp minimiztion -->
+				</tbody>
 			</table>
 		</div>
 	</div>

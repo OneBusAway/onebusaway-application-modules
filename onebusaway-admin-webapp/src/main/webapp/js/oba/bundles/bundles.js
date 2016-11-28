@@ -22,7 +22,12 @@ var destinationDirectory = ""; //For "copy" on Choose tab, used by Upload tab
 var userComments = "";		// User comments about the selected dataset
 var buildBundleId = "";		// Build request id, stored in info.json.
 var fromResultLink = false; // If this was called with a Result Link
- 
+// For Fixed Route Comparison Report on Compare tab
+var currentReportDataset = "";
+var currentReportBuildName = "";
+var compareToDataset =  "";
+var compareToBuildName =  "";
+
 jQuery(function() {
 	//Initialize tabs
 	jQuery("#tabs").tabs();
@@ -56,6 +61,14 @@ jQuery(function() {
 	// politely set our hash as tabs are changed
 	jQuery("#tabs").bind("tabsshow", function(event, ui) {
 		window.location.hash = ui.tab.hash;
+	});
+
+	// Set values for dataset select lists on Compare tab
+	$("#currentDatasetList > option").each(function(index, value) {
+		$(this).val(index);
+	});
+	$("#compareToDatasetList > option").each(function(index, value) {
+		$(this).val(index);
 	});
 
 	jQuery("#currentDirectories").selectable({ 
@@ -97,7 +110,7 @@ jQuery(function() {
 				jQuery.ajax({
 					url: "manage-bundles!existingBuildList.action",
 					data: {
-						"diffBundleName" : names[0]
+						"selectedBundleName" : names[0]
 					},
 					type: "GET",
 					async: false,
@@ -145,6 +158,10 @@ jQuery(function() {
 								$("#diffResultsTable").append(diffRow);
 							}
 						});
+						var baseBundle = selectedDirectory + " / " + jQuery("#bundleBuildName").val();
+						var compareToBundle = bundleNames[0] + " / " + buildNames[0];
+						$("#baseBundle").text(baseBundle + " (green)");
+						$("#compareToBundle").text(compareToBundle + " (red)");
 						$.each(data.fixedRouteDiffs, function(index, value) {
 							var modeName = value.modeName;
 							var modeClass = "";
@@ -242,6 +259,7 @@ jQuery(function() {
 											}
 											if (addSpacer) {
 												var new_spacer_row = '<tr class="spacer"> \
+													<td></td> \
 													<td></td> \
 													<td></td> \
 													<td></td> \
@@ -428,6 +446,17 @@ jQuery(function() {
 			}
 		}
 	});
+
+	// On Compare tab
+	jQuery("#currentDatasetList").on("change", onCurrentDatasetChange);
+
+	jQuery("#currentBuildNameList").on("change", onCurrentBuildNameChange);
+
+	jQuery("#compareToDatasetList").on("change", onCompareToDatasetChange);
+
+	jQuery("#compareToBuildNameList").on("change", onCompareToBuildNameChange);
+
+	jQuery("#printFixedRouteRptButton").click(onPrintFixedRouteRptClick);
 
 	disableStageButton();
 	disableDownloadButton();
@@ -636,6 +665,17 @@ function onBuildContinueClick() {
 	$tabs.tabs('select', 4);
 }
 
+function onCurrentDatasetNameSelectClick() {
+	var idx = $(this).find(":selected").index();
+	if (idx == 0) {
+		//clean data
+	} else {
+		currentReportDataset = $(this).find(":selected").text();
+		currentReportBuildName = getLatestBuildName(currentReportDataset);
+	}
+}
+
+
 function onStageContinueClick() {
 	var $tabs = jQuery("#tabs");
 	$tabs.tabs('select', 5);
@@ -776,6 +816,7 @@ function onExistingDatasetClick() {
 	selectedDirectory = selectedCheckbox.closest("tr").find(".directoryName").text();
 	$("#Download #download_selectedDataset").text(selectedDirectory);
 	onSelectDataset("existing");
+	updateFixedRouteParams(selectedDirectory);
 }
 
 function onCopyExistingDatasetClick() {
@@ -830,6 +871,12 @@ function onSelectDataset(sourceDirectoryType) {
 		}
 		actionName = "createDirectory";
 	}
+	// Reset fields on Compare tab
+	resetCurrentReportDataset();
+	resetCompareToDataset();
+	// Clear any previous reports
+	$("#diffResultsTable tbody").empty();
+	$('#fixedRouteDiffTable tbody').empty();
 
 	jQuery.ajax({
 		url: "manage-bundles!" + actionName + ".action?ts=" +new Date().getTime(),
@@ -1273,6 +1320,10 @@ function onBundleNameChanged() {
 
 function onRemoveSelectedAgenciesClick() {
 	$(this).closest('tr').remove();
+}
+
+function onPrintFixedRouteRptClick() {
+	window.print();
 }
 
 function enableContinueButton(continueButton) {
@@ -1893,6 +1944,10 @@ function updateBuildStatus(buildType) {
 					enableStageButton();
 					enableDownloadButton();
 					enableBuildButtons();
+					// Update fields for Compare tab
+					// Add dataset to lists if it isn't there already
+					addToDatasetLists(selectedDirectory);
+					updateFixedRouteParams(selectedDirectory);
 				}
 				fromResultLink = false;
 				$buildBundle_resultList.val(txt).css("font-size", "12px");
@@ -2005,6 +2060,341 @@ function updateBuildList(id,buildType) {
 			}, 10000);
 		}
 	});	
+}
+/**
+ * Functions used with the Compare tab for generating reports on differences
+ * between two bundle builds.
+ */
+function onCurrentDatasetChange() {
+	// Clear any previous reports
+	$("#diffResultsTable tbody").empty();
+	$('#fixedRouteDiffTable tbody').empty();
+
+	if ($("#currentDatasetList option:selected").val() == 0) {
+		resetCurrentReportDataset();
+	} else {
+		currentReportDataset = $("#currentDatasetList option:selected").text();
+		currentReportBuildName = "";
+		var buildNameList = getExistingBuildList(currentReportDataset);
+		initBuildNameList($("#currentBuildNameList"), buildNameList);
+	}
+}
+
+function onCurrentBuildNameChange() {
+	// Clear any previous reports
+	$("#diffResultsTable tbody").empty();
+	$('#fixedRouteDiffTable tbody').empty();
+
+	if ($("#currentBuildNameList option:selected").val() == 0) {
+		currentReportBuildName = "";
+	} else {
+		currentReportBuildName = $("#currentBuildNameList option:selected").text();
+		if (currentReportDataset && currentReportBuildName
+				&& compareToDataset && compareToBuildName) {
+			buildDiffReport();
+		}
+	}
+}
+
+function onCompareToDatasetChange() {
+	// Clear any previous reports
+	$("#diffResultsTable tbody").empty();
+	$('#fixedRouteDiffTable tbody').empty();
+
+	if ($("#compareToDatasetList option:selected").val() == 0) {
+		resetCompareToDataset();
+	} else {
+		compareToDataset = $("#compareToDatasetList option:selected").text();
+		compareToBuildName = "";
+		var buildNameList = getExistingBuildList(compareToDataset);
+		initBuildNameList($("#compareToBuildNameList"), buildNameList);
+	}
+}
+
+function onCompareToBuildNameChange() {
+	// Clear any previous reports
+	$("#diffResultsTable tbody").empty();
+	$('#fixedRouteDiffTable tbody').empty();
+
+	if ($("#compareToBuildNameList option:selected").val() == 0) {
+		compareToBuildName = "";
+	} else {
+		compareToBuildName = $("#compareToBuildNameList option:selected").text();
+		if (currentReportDataset && currentReportBuildName
+				&& compareToDataset && compareToBuildName) {
+			buildDiffReport();
+		}
+	}
+}
+
+// Called when a dataset is selected on the Choose tab.
+function updateFixedRouteParams(datasetName) {
+	// Clear any previous reports
+	$("#diffResultsTable tbody").empty();
+	$('#fixedRouteDiffTable tbody').empty();
+
+	currentReportDataset = datasetName;
+	currentReportBuildName = $("#bundleBuildName").val();
+	// Select the current dataset name
+	$("#currentDatasetList option").filter(function() {
+	    return $(this).text() == datasetName;
+	}).prop('selected', true);
+	// Populate list of build names for this dataset and select the current one
+	var buildNameList = getExistingBuildList(datasetName);
+	initBuildNameList($("#currentBuildNameList"), buildNameList);
+	$("#currentBuildNameList option").filter(function() {
+	    return $(this).text() == $("#bundleBuildName").val();
+	}).prop('selected', true);
+
+	resetCompareToDataset();
+	return;
+}
+
+function getExistingBuildList(datasetName) {
+	var buildNameList;
+	if (datasetName) {
+		jQuery.ajax({
+			url: "manage-bundles!existingBuildList.action",
+			data: {
+				"selectedBundleName" : datasetName
+			},
+			type: "GET",
+			async: false,
+			success: function(data) {
+				buildNameList=data;
+			}
+		})
+	}
+	return buildNameList;
+}
+
+function initBuildNameList($buildNameList, buildNameList) {
+	var row_0 = '<option value="0">Select a build name</option>';
+	$buildNameList.find('option').remove().end().append(row_0);
+	var i;
+	for (i=0; i<buildNameList.length; ++i) {
+		var nextRow = '<option value="' + (i+1) + '">' + buildNameList[i] + '</option>';
+		$buildNameList.append(nextRow);
+	}
+	$buildNameList.val("0");
+	return;
+}
+
+function resetCurrentReportDataset() {
+	var currentReportDataset = "";
+	var currentReportBuildName = "";
+	$("#currentDatasetList").val("0");
+	var row_0 = '<option value="0">Select a build name</option>';
+	$("#currentBuildNameList").find('option').remove().end().append(row_0);
+}
+function resetCompareToDataset() {
+	var compareToDataset = "";
+	var compareToBuildName = "";
+	$("#compareToDatasetList").val("0");
+	var row_0 = '<option value="0">Select a build name</option>';
+	$("#compareToBuildNameList").find('option').remove().end().append(row_0);
+}
+
+function addToDatasetLists(directoryName) {
+	var exists = false;
+	$('#currentDatasetList option').each(function() {
+	    if (this.text == directoryName) {
+	        exists = true;
+	    }
+	});
+
+	if (!exists) {
+		var datasetAdded = false;
+		$("#currentDatasetList option").each(function() {
+			if (this.value > 0 && (directoryName < this.text)) {
+				var newRow = '<option value=' + this.value + '>' + directoryName + '</option>';
+				$(this).before(newRow);
+				datasetAdded = true;
+				return false;
+			}
+		});
+		$("#compareToDatasetList option").each(function() {
+			if (this.value > 0 && (directoryName < this.text)) {
+				var newRow = '<option value=' + this.value + '>' + directoryName + '</option>';
+				$(this).first().before(newRow);
+				return false;
+			}
+		});
+		if (!datasetAdded) {
+			var datasetVal = $("#currentDatasetList > option").length;
+			var newRow = '<option value=' + datasetVal + '>Select a build name</option>';
+			$("#currentDatasetList").find('option').end().append(newRow);
+			$("#compareToDatasetList").find('option').end().append(newRow);
+		}
+	}
+}
+
+function buildDiffReport() {
+	// Clear any previous reports
+	$("#diffResultsTable tbody").empty();
+	$('#fixedRouteDiffTable tbody').empty();
+	jQuery.ajax({
+		url: "compare-bundles!diffResult.action",
+		data: {
+			"datasetName" : currentReportDataset,
+			"buildName" : currentReportBuildName,
+			"datasetName2" : compareToDataset,
+			"buildName2": compareToBuildName
+		},
+		type: "GET",
+		async: false,
+		success: function(data) {
+			$.each(data.diffResults, function(index, value) {
+				// Skip first three rows of results
+				if (index >= 3) {
+					var diffRow = formatDiffRow(value);
+					$("#diffResultsTable").append(diffRow);
+				}
+			});
+			var baseBundle = currentReportDataset + " / " + currentReportBuildName;
+			var compareToBundle = compareToDataset + " / " + compareToBuildName;
+			$("#baseBundle").text(baseBundle + " (green)");
+			$("#compareToBundle").text(compareToBundle + " (red)");
+			$.each(data.fixedRouteDiffs, function(index, value) {
+				var modeName = value.modeName;
+				var modeClass = "";
+				var modeFirstLineClass=" modeFirstLine";
+				var addSpacer = true;
+				if (value.srcCode == 1) {
+					modeClass = "currentRpt";
+				} else if (value.srcCode == 2) {
+					modeClass = "selectedRpt";
+				}
+				$.each(value.routes, function(index2, value2) {
+					var routeNum = value2.routeNum;
+					var routeName = value2.routeName;
+					var routeFirstLineClass=" routeFirstLine";
+					addSpacer = false;
+					if (index2 > 0) {
+						modeName = "";
+						modeFirstLineClass = "";
+					}
+					var routeClass = modeClass;
+					if (value2.srcCode == 1) {
+						routeClass = "currentRpt";
+					} else if (value2.srcCode == 2) {
+						routeClass = "selectedRpt";
+					}
+					$.each(value2.headsignCounts, function(headsignIdx, headsign) {
+						var headsignName = headsign.headsign;
+						var headsignBorderClass = "";
+						if (headsignIdx > 0) {
+							modeName = "";
+							routeNum = "";
+							routeName = "";
+							modeFirstLineClass = "";
+							routeFirstLineClass = "";
+							headsignBorderClass = " headsignBorder";
+							addSpacer = false;
+						}
+						var headsignClass = routeClass;
+						if (headsign.srcCode == 1) {
+							headsignClass = "currentRpt";
+						} else if (headsign.srcCode == 2) {
+							headsignClass = "selectedRpt";
+						}
+						$.each(headsign.dirCounts, function(dirIdx, direction) {
+							var dirName = direction.direction;
+							var dirBorderClass = "";
+							if (dirIdx > 0) {
+								modeName = "";
+								routeNum = "";
+								routeName = "";
+								headsignName = "";
+								modeFirstLineClass = "";
+								routeFirstLineClass = "";
+								headsignBorderClass = "";
+								dirBorderClass = " dirBorder";
+								addSpacer = false;
+							}
+							var dirClass = headsignClass;
+							if (direction.srcCode == 1) {
+								dirClass = "currentRpt";
+							} else if (direction.srcCode == 2) {
+								dirClass = "selectedRpt";
+							}
+							$.each(direction.stopCounts, function(index3, value3) {
+								var stopCt = value3.stopCt;
+								var stopClass = "";
+								if (dirClass == "currentRpt") {
+									stopClass = "currentStopCt";
+								} else if (dirClass == "selectedRpt") {
+									stopClass = "selectedStopCt";
+								}
+								if (value3.srcCode == 1) {
+									stopClass = "currentStopCt";
+								} else if (value3.srcCode == 2) {
+									stopClass = "selectedStopCt";
+								}
+								var weekdayTrips = value3.tripCts[0];
+								var satTrips = value3.tripCts[1];
+								var sunTrips = value3.tripCts[2];
+								if (index3 > 0) {
+									modeName = "";
+									modeFirstLineClass = "";
+									routeNum = "";
+									routeName = "";
+									headsignName = "";
+									dirName = "";
+									routeFirstLineClass = "";
+									headsignBorderClass = "";
+									dirBorderClass = "";
+									addSpacer = false;
+								}
+								if (index > 0 && headsignIdx == 0
+										&& dirIdx == 0 && index3 == 0) {
+									addSpacer = true;
+								}
+								if (addSpacer) {
+									var new_spacer_row = '<tr class="spacer"> \
+										<td></td> \
+										<td></td> \
+										<td></td> \
+										<td></td> \
+										<td></td> \
+										<td></td> \
+										<td></td> \
+										<td></td> \
+										<td></td> \
+										</tr>';
+									$('#fixedRouteDiffTable').append(new_spacer_row);
+								}
+								var new_row = '<tr class="fixedRouteDiff' + modeFirstLineClass + routeFirstLineClass + '"> \
+									<td class="' + modeClass + ' modeName" >' + modeName + '</td> \
+									<td class="' + routeClass + routeFirstLineClass + ' rtNum" >' + routeNum + '</td> \
+									<td class="' + routeClass + routeFirstLineClass + '">' + routeName + '</td> \
+									<td class="' + headsignClass + routeFirstLineClass + headsignBorderClass + '">' + headsignName + '</td> \
+									<td class="' + dirClass + routeFirstLineClass + headsignBorderClass + dirBorderClass + '">' + dirName + '</td> \
+									<td class="' + stopClass + routeFirstLineClass + headsignBorderClass + dirBorderClass + '">' + stopCt + '</td> \
+									<td class="' + stopClass + routeFirstLineClass + headsignBorderClass + dirBorderClass + '">' + weekdayTrips + '</td> \
+									<td class="' + stopClass + routeFirstLineClass + headsignBorderClass + dirBorderClass + '">' + satTrips + '</td> \
+									<td class="' + stopClass + routeFirstLineClass + headsignBorderClass + dirBorderClass + '">' + sunTrips + '</td> \
+									</tr>';
+								$('#fixedRouteDiffTable').append(new_row);
+							});
+						});
+					});
+				});
+			});
+			// Add bottom border to reprot
+			var new_spacer_row = '<tr class="spacer"> \
+				<td></td> \
+				<td></td> \
+				<td></td> \
+				<td></td> \
+				<td></td> \
+				<td></td> \
+				<td></td> \
+				<td></td> \
+				</tr>';
+			$('#fixedRouteDiffTable').append(new_spacer_row);
+		}
+	})
 }
 
 /*

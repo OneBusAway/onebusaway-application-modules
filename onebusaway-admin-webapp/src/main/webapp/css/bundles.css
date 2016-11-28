@@ -569,11 +569,29 @@
   float: left;
 }
 
+#Compare #currentBundleDiv fieldset,
+#Compare #compareToBundleDiv fieldset {
+	border: 1px solid gray;
+	width: 45%;
+}
+
+
+#Compare #currentBundleDiv legend,
+#Compare #compareToBundleDiv legend {
+	font-weight: bold;
+	font-size: 1.3em;
+	margin-top: .5em;
+	margin-bottom: .3em;
+	line-height: 1em;
+	text-align: left;
+}
+
 #Compare #diffResultsTable caption,
 #Compare #fixedRouteDiffTable caption {
 	font-weight: bold;
 	font-size: 1.3em;
 	margin-bottom: .3em;
+	line-height: 1em;
 }
 
 #Compare #diffResultsTable th,
@@ -589,8 +607,24 @@
 	padding-left: 10px;
 }
 
+#Compare #fixedRouteDiffTable th.modeColumn {
+	text-align: left;
+}
+
 #Compare #diffResultsTable .numericTd {
 	text-align: right;
+}
+
+#Compare #compareDiff {
+	margin-bottom: 2em;
+}
+
+#Compare #printFixedRouteRptButton {
+	margin-bottom: 1em;
+}
+
+#Compare #baseBundle, #Compare #compareToBundle {
+	font-size: .7em;
 }
 
 #Compare #fixedRouteDiffTable tr .routeFirstLine {
@@ -600,7 +634,8 @@
 
 #Compare #fixedRouteDiffTable .modeName {
 	font-weight: bold;
-	padding-right: 15px;
+	padding-right: 1em;
+	padding-left: .3em;
 }
 
 #Compare #fixedRouteDiffTable tr.spacer td {
@@ -643,10 +678,11 @@
 #Compare #fixedRouteDiffTable tr td:last-child {
 	border-right: thin black solid;
 }
-
+/*
 #Compare #fixedRouteDiffTable tr:first-child td {
 	border-bottom: 1px solid gray;
 }
+*/
 
 #Compare #fixedRouteDiffTable td.headsignBorder,
 #Compare #fixedRouteDiffTable td.dirBorder {
