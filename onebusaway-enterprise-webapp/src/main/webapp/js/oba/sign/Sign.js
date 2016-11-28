@@ -87,7 +87,7 @@ OBA.Sign = function() {
 	function setupUI() {
 		
 		jQuery.fx.interval = 50;
-		
+
 		// configure interface with URL params
 		refreshInterval = getParameterByName("refresh", refreshInterval);
 
@@ -194,7 +194,7 @@ OBA.Sign = function() {
 		var sign = element.addClass("sign");
 		sign.css("border-left-color", routeInfo[routeId].color);
 		sign.css("border-left-style", "solid");
-		var shortName = routeInfo[routeId].shortName
+		var shortName = routeInfo[routeId].shortName;
 		if (shortName == null || shortName == "")
 			shortName = routeId.split("_")[1];
 		sign.text(shortName);
@@ -221,7 +221,7 @@ OBA.Sign = function() {
 			'</div>').addClass("slide");
 		
 		_gaq.push(['_trackEvent', "DIY Sign", "Add Stop", stopId.id]);
-		
+
 		return newElement;
 	}
 	
@@ -243,7 +243,7 @@ OBA.Sign = function() {
 			stopElement.find(".alerts").hide();
 			stopElement.find(".arrivals").width("100%");
 		} else if (isValidAlert(applicableSituations)) {
-			
+
 			stopElement.find(".alerts").show();
 			stopElement.find(".arrivals").width("70%");
 
@@ -258,15 +258,19 @@ OBA.Sign = function() {
 
 				var existingSigns = [];
 
-				jQuery.each(situation.Affects.VehicleJourneys.AffectedVehicleJourney, function(_, journey) {
-					if (journey.LineRef in routeInfo && jQuery.inArray(journey.LineRef, existingSigns) < 0) {
-						var sign = signForRoute(journey.LineRef, jQuery("<div></div>"));
-						sign.addClass("alert_sign");
-						signWrapper.append(sign);
-						existingSigns.push(journey.LineRef);
-					}
-				});
+				// this loop grabs the route name if present
+				if (typeof situation.Affects.VehicleJourneys != "undefined") {
+					jQuery.each(situation.Affects.VehicleJourneys.AffectedVehicleJourney, function(_, journey) {
+						if (journey.LineRef in routeInfo && jQuery.inArray(journey.LineRef, existingSigns) < 0) {
+							var sign = signForRoute(journey.LineRef, jQuery("<div></div>"));
+							sign.addClass("alert_sign");
+							signWrapper.append(sign);
+							existingSigns.push(journey.LineRef);
+						}
+					});
+				}
 
+				// even if route name/ affected journeys not present we still display the alert
 				var alert = jQuery("<div></div>")
 								.addClass("alert")
 								.html('<p class="alert_summary">' + situation.Summary.replace(/\n\n/g, "<br/><br/>").replace(/\n/g, " ") + '</p><p>' + situation.Description.replace(/$/g, "<br/><br/>").replace(/\n\n/g, "<br/><br/>").replace(/\n/g, " ") + '</p>');
@@ -276,7 +280,7 @@ OBA.Sign = function() {
 				stopElement.find("div.scroller").append(alert);
 			});
 		}
-		
+
 		// arrivals
 		var r = 0;
 		var table = [];
@@ -337,7 +341,7 @@ OBA.Sign = function() {
 				sign.appendTo(row);
 				
 				// name cell
-				var spanTxt = " Vehicle #" + rowInfo.vehicleId
+				var spanTxt = " Vehicle #" + rowInfo.vehicleId;
 				if (!rowInfo.monitored) {
 					spanTxt = "";
 				}
@@ -349,10 +353,6 @@ OBA.Sign = function() {
 					.text(rowInfo.headsign)
 					.append(vehicleIdSpan)
 					.appendTo(row);
-
-				var scheduledSpan = jQuery("<span></span>")
-				.addClass("bus-id")
-				.text(rowInfo.monitoried==true?"":"(scheduled) ");
 
 				jQuery('<td></td>')
 				.addClass("distance")
@@ -399,6 +399,17 @@ OBA.Sign = function() {
 				});
 			}
 		});
+
+		if (!found) {
+			// check for a global service alert
+            jQuery.each(applicableSituations, function(situationId, situation) {
+                if (typeof situation.Affects.Operators != "undefined") {
+                    jQuery.each(situation.Affects.Operators, function (_, operator) {
+                        found = true;
+                    });
+                }
+            });
+        }
 		return found;
 	}
 	
@@ -421,7 +432,7 @@ OBA.Sign = function() {
 				list = list + "<br/>" + etas[index];
 			}
 		}
-		list += "</div>"
+		list += "</div>";
 		return list;
 	}
 
@@ -548,7 +559,7 @@ OBA.Sign = function() {
 				var routeShortName = routeInfo[routeId].shortName;
 				var sortKeys = {
 						routeIdAndHeadsign: routeIdAndHeadsign,
-						routeShortName: routeShortName,
+						routeShortName: routeShortName
 						
 				};
 				
@@ -647,7 +658,7 @@ OBA.Sign = function() {
 				}
 				
 				var arrivalsHeight = 0;
-				var alerts = stopElement.find(".arrivals");
+				alerts = stopElement.find(".arrivals");
 				jQuery.each(alerts, function(_, arrival) {
 					arrivalsHeight += jQuery(arrival).height();
 				});
