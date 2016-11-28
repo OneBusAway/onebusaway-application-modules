@@ -28,6 +28,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -117,7 +118,7 @@ public class ManageBundlesAction extends OneBusAwayNYCAdminActionSupport impleme
 	private String downloadFilename;
 	private InputStream downloadInputStream;
 	private List<String> fileList = new ArrayList<String>();
-	private String diffBundleName;
+	private String selectedBundleName;
 	private List<String> existingBuildList = new ArrayList<String>();
 	private DirectoryStatus directoryStatus;
 	private BundleInfo bundleInfo;
@@ -370,8 +371,8 @@ public class ManageBundlesAction extends OneBusAwayNYCAdminActionSupport impleme
   }
 
 	public String existingBuildList() {
-		_log.info("existingBuildList called for path=" + fileService.getBucketName()+"/"+ diffBundleName +"/"+fileService.getBuildPath()); 
-		File builds = new File(fileService.getBucketName()+"/"+ diffBundleName +"/"+fileService.getBuildPath());
+		_log.info("existingBuildList called for path=" + fileService.getBucketName()+"/"+ selectedBundleName +"/"+fileService.getBuildPath());
+		File builds = new File(fileService.getBucketName()+"/"+ selectedBundleName +"/"+fileService.getBuildPath());
 		File[] existingDirectories = builds.listFiles();
 		existingBuildList.clear();
 		if(existingDirectories == null){
@@ -380,6 +381,7 @@ public class ManageBundlesAction extends OneBusAwayNYCAdminActionSupport impleme
 		for(File file: existingDirectories) {
 			existingBuildList.add(file.getName());
 		}
+		Collections.sort(existingBuildList);
 		return "existingBuildList";
 	}
 
@@ -632,12 +634,12 @@ public class ManageBundlesAction extends OneBusAwayNYCAdminActionSupport impleme
 		return new JsonParser().parse(in.readLine());
 	}
 
-	public void setDiffBundleName(String diffBundleName) {
-		this.diffBundleName = diffBundleName;
+	public void setSelectedBundleName(String selectedBundleName) {
+		this.selectedBundleName = selectedBundleName;
 	}
 
-	public String getDiffBundleName() {
-		return diffBundleName;
+	public String getSelectedBundleName() {
+		return selectedBundleName;
 	}
 
 	public DirectoryStatus getDirectoryStatus() {
