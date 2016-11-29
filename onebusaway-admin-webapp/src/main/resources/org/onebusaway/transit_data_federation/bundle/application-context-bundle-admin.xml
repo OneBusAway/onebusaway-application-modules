@@ -99,6 +99,20 @@
     <property name="logger" ref="multiCSVLogger" />
   </bean>
 
+  <!-- start block -->
+  <bean id="task_missing_block_for_trips" class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
+    <property name="taskName" value="missing_block_for_trips" />
+    <property name="afterTaskName" value="missing_trips_for_block" />
+    <property name="beforeTaskName" value="multi_agency" />
+    <property name="task" ref="missingBlockForTrips" />
+  </bean>
+  <bean id="missingBlockForTrips" class="org.onebusaway.admin.service.bundle.task.MissingBlockForTrips" >
+    <property name="logger" ref="multiCSVLogger" />
+  </bean>
+
+  <!-- end block -->
+
+
   <bean id="task_multi_agency" class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
     <property name="taskName" value="multi_agency" />
     <property name="afterTaskName" value="hastus_translate_task"/>

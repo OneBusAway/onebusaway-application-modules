@@ -84,7 +84,9 @@ public class BundleInfo {
       }
       finally{
         try{
-          handle.close();
+          if (handle != null) {
+            handle.close();
+          }
         }catch(IOException ie){
           _log.error("Bundle Tracker Writing :: File Handle Failed to Close");
         }

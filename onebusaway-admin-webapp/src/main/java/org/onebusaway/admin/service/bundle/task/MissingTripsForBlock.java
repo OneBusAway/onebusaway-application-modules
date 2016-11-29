@@ -21,9 +21,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.zip.ZipEntry;
@@ -45,7 +45,7 @@ import org.springframework.context.ApplicationContext;
  * is generated with the list of any such blocks.
  *
  */
-public class MissingTripsForBlock implements  Runnable {
+public class MissingTripsForBlock extends GtfsFileHandler implements Runnable {
   private static final String FILENAME = "blocks_not_in_trips.csv";
   private static final String GTFS_BLOCK = "block.txt";
   private static final String GTFS_TRIPS = "trips.txt";
@@ -75,41 +75,37 @@ public class MissingTripsForBlock implements  Runnable {
     for (GtfsBundle gtfsBundle : gtfsBundles.getBundles()) {
       String gtfsFilePath = gtfsBundle.getPath().toString();
       if (gtfsBundle.getAgencyIdMappings().containsKey(LINK_AGENCY)) {
-        try (ZipFile zipFile = new ZipFile(gtfsFilePath)) {
-          // Get Link block ids and block entries
-          ZipEntry entry = zipFile.getEntry(GTFS_BLOCK);
-          if (entry != null) {
-            InputStream stream = zipFile.getInputStream(entry);
-            BufferedReader br = new BufferedReader(new InputStreamReader(stream));
-            String line;
-            while ((line = br.readLine()) != null) {
-              String[] cols = line.split(",");
-              if (cols[2].equals(LINK_ROUTE)) {
-                linkBlocks.add(cols[0]);
-                linkBlockEntries.put(cols[0], line);
-              }
-            }
-            br.close();
+
+        CSVData blockCsvData = getCSVData(gtfsFilePath, GTFS_BLOCK);
+        String blockHeaders = blockCsvData.getHeader();
+        List<String> blockRows = blockCsvData.getRows();
+        int blockSeqIndex = getIndexForValue(blockHeaders, "block_seq_num");
+        int routeIndex = getIndexForValue(blockHeaders, "block_route_num");
+        for (String row : blockRows) {
+          String[] cols = row.split(",");
+          if (LINK_ROUTE.equals(cols[routeIndex])) {
+            linkBlocks.add(cols[blockSeqIndex]);
+            linkBlockEntries.put(cols[blockSeqIndex], row);
           }
-          // Now check for Link blocks referenced in trips.txt
-          entry = zipFile.getEntry(GTFS_TRIPS);
-          if (entry != null) {
-            InputStream stream = zipFile.getInputStream(entry);
-            BufferedReader br = new BufferedReader(new InputStreamReader(stream));
-            String line;
-            while ((line = br.readLine()) != null) {
-              String[] cols = line.split(",");
-              String tripBlock = cols[6];
-              if (linkBlocks.contains(tripBlock)) {
-                linkBlocks.remove(tripBlock);
-              }
-            }
-            br.close();
-          }
-        } catch (IOException e) {
-          _log.error("Error reading GTFS files: " + e.getMessage());
         }
-        break;
+
+        _log.info(linkBlocks.size() + " blocks found in blocks.txt");
+
+        CSVData tripCsvData = getCSVData(gtfsFilePath, GTFS_TRIPS);
+        String tripHeaders = tripCsvData.getHeader();
+        List<String> tripRows = tripCsvData.getRows();
+        int blockIndex = getIndexForValue(tripHeaders, "block_id");
+        int routeIdIndex = getIndexForValue(tripHeaders, "route_id");
+
+        int tripCount = 0;
+        for (String row : tripRows) {
+          String[] cols = row.split(",");
+          String tripBlock = cols[blockIndex];
+          if (linkBlocks.contains(tripBlock)) {
+            linkBlocks.remove(tripBlock);
+          }
+        }
+        _log.info(linkBlocks.size() + " unmatched blocks!");
       }
     }
     // Write out results to .csv file
@@ -120,20 +116,4 @@ public class MissingTripsForBlock implements  Runnable {
     _log.info("MissingTripsForBlock Task Exiting");
   }
 
-  protected GtfsBundles getGtfsBundles(ApplicationContext context) {
-
-    GtfsBundles bundles = (GtfsBundles) context.getBean("gtfs-bundles");
-    if (bundles != null)
-      return bundles;
-
-    GtfsBundle bundle = (GtfsBundle) context.getBean("gtfs-bundle");
-    if (bundle != null) {
-      bundles = new GtfsBundles();
-      bundles.getBundles().add(bundle);
-      return bundles;
-    }
-
-    throw new IllegalStateException(
-        "must define either \"gtfs-bundles\" or \"gtfs-bundle\" in config");
-  }
 }

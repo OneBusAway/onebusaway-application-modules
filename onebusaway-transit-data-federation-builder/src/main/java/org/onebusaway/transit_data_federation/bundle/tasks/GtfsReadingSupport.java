@@ -139,7 +139,7 @@ public class GtfsReadingSupport {
    * @param context
    * @return
    */
-  private static GtfsBundles getGtfsBundles(ApplicationContext context) {
+  public static GtfsBundles getGtfsBundles(ApplicationContext context) {
 
     GtfsBundles bundles = (GtfsBundles) context.getBean("gtfs-bundles");
     if (bundles != null)
