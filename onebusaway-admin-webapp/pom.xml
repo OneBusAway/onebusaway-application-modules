@@ -421,7 +421,9 @@
             <exclude>**/jqGrid.js</exclude>
             <exclude>**/grid.*.js</exclude>
             <exclude>**/CTBusStops*</exclude>
-          </excludes>
+		    <exclude>**/leaflet.*</exclude>
+
+		  </excludes>
         </configuration>
       </plugin>
 
