@@ -25,8 +25,12 @@ var fromResultLink = false; // If this was called with a Result Link
 // For Fixed Route Comparison Report on Compare tab
 var currentReportDataset = "";
 var currentReportBuildName = "";
+var currentArchivedReportDataset = "";
+var currentArchivedReportBuildName = "";
 var compareToDataset =  "";
 var compareToBuildName =  "";
+var compareToArchivedDataset =  "";
+var compareToArchivedBuildName =  "";
 
 jQuery(function() {
 	//Initialize tabs
@@ -70,6 +74,48 @@ jQuery(function() {
 	$("#compareToDatasetList > option").each(function(index, value) {
 		$(this).val(index);
 	});
+	$("#currentArchivedDatasetList > option").each(function(index, value) {
+		$(this).val(index);
+	});
+	$("#compareToArchivedDatasetList > option").each(function(index, value) {
+		$(this).val(index);
+	});
+	$("#currentArchivedDatasetList").hide();
+	$("#currentArchivedBuildNameList").hide();
+	$("#compareToArchivedDatasetList").hide();
+	$("#compareToArchivedBuildNameList").hide();
+	
+    $('#Compare #useArchiveCheckbox').change(function() {
+    	$("#diffResultsTable tbody").empty();
+    	$('#fixedRouteDiffTable tbody').empty();
+        if($(this).is(":checked")) {
+        	$("#currentDatasetList").hide();
+        	$("#currentBuildNameList").hide();
+        	$("#compareToDatasetList").hide();
+        	$("#compareToBuildNameList").hide();
+        	$("#currentArchivedDatasetList").show();
+        	$("#currentArchivedBuildNameList").show();
+        	$("#compareToArchivedDatasetList").show();
+        	$("#compareToArchivedBuildNameList").show();
+    		if (currentArchivedReportDataset && currentArchivedReportBuildName
+    				&& compareToArchivedDataset && compareToArchivedBuildName) {
+    			buildDiffReport();
+    		}
+        } else {
+        	$("#currentArchivedDatasetList").hide();
+        	$("#currentArchivedBuildNameList").hide();
+        	$("#compareToArchivedDatasetList").hide();
+        	$("#compareToArchivedBuildNameList").hide();
+        	$("#currentDatasetList").show();
+        	$("#currentBuildNameList").show();
+        	$("#compareToDatasetList").show();
+        	$("#compareToBuildNameList").show();
+    		if (currentReportDataset && currentReportBuildName
+    				&& compareToDataset && compareToBuildName) {
+    			buildDiffReport();
+    		}
+        }
+    });	
 
 	jQuery("#currentDirectories").selectable({ 
 		stop: function() {
@@ -449,12 +495,16 @@ jQuery(function() {
 
 	// On Compare tab
 	jQuery("#currentDatasetList").on("change", onCurrentDatasetChange);
-
 	jQuery("#currentBuildNameList").on("change", onCurrentBuildNameChange);
 
-	jQuery("#compareToDatasetList").on("change", onCompareToDatasetChange);
+	jQuery("#currentArchivedDatasetList").on("change", onCurrentArchivedDatasetChange);
+	jQuery("#currentArchivedBuildNameList").on("change", onCurrentArchivedBuildNameChange);
 
+	jQuery("#compareToDatasetList").on("change", onCompareToDatasetChange);
 	jQuery("#compareToBuildNameList").on("change", onCompareToBuildNameChange);
+
+	jQuery("#compareToArchivedDatasetList").on("change", onCompareToArchivedDatasetChange);
+	jQuery("#compareToArchivedBuildNameList").on("change", onCompareToArchivedBuildNameChange);
 
 	jQuery("#printFixedRouteRptButton").click(onPrintFixedRouteRptClick);
 
@@ -664,7 +714,7 @@ function onBuildContinueClick() {
 	var $tabs = jQuery("#tabs");
 	$tabs.tabs('select', 4);
 }
-
+/*
 function onCurrentDatasetNameSelectClick() {
 	var idx = $(this).find(":selected").index();
 	if (idx == 0) {
@@ -674,7 +724,7 @@ function onCurrentDatasetNameSelectClick() {
 		currentReportBuildName = getLatestBuildName(currentReportDataset);
 	}
 }
-
+*/
 
 function onStageContinueClick() {
 	var $tabs = jQuery("#tabs");
@@ -2096,6 +2146,37 @@ function onCurrentBuildNameChange() {
 	}
 }
 
+function onCurrentArchivedDatasetChange() {
+	// Clear any previous reports
+	$("#diffResultsTable tbody").empty();
+	$('#fixedRouteDiffTable tbody').empty();
+
+	if ($("#currentArchivedDatasetList option:selected").val() == 0) {
+		resetCurrentReportDataset();
+	} else {
+		currentArchivedReportDataset = $("#currentArchivedDatasetList option:selected").text();
+		currentArchivedReportBuildName = "";
+		var buildNameList = getExistingBuildList(currentArchivedReportDataset);
+		initBuildNameList($("#currentArchivedBuildNameList"), buildNameList);
+	}
+}
+
+function onCurrentArchivedBuildNameChange() {
+	// Clear any previous reports
+	$("#diffResultsTable tbody").empty();
+	$('#fixedRouteDiffTable tbody').empty();
+
+	if ($("#currentArchivedBuildNameList option:selected").val() == 0) {
+		currentArchivedReportBuildName = "";
+	} else {
+		currentArchivedReportBuildName = $("#currentArchivedBuildNameList option:selected").text();
+		if (currentArchivedReportDataset && currentArchivedReportBuildName
+				&& compareToArchivedDataset && compareToArchivedBuildName) {
+			buildDiffReport();
+		}
+	}
+}
+
 function onCompareToDatasetChange() {
 	// Clear any previous reports
 	$("#diffResultsTable tbody").empty();
@@ -2127,6 +2208,37 @@ function onCompareToBuildNameChange() {
 	}
 }
 
+function onCompareToArchivedDatasetChange() {
+	// Clear any previous reports
+	$("#diffResultsTable tbody").empty();
+	$('#fixedRouteDiffTable tbody').empty();
+
+	if ($("#compareToArchivedDatasetList option:selected").val() == 0) {
+		resetCompareToReportDataset();
+	} else {
+		compareToArchivedDataset = $("#compareToArchivedDatasetList option:selected").text();
+		compareToArchivedBuildName = "";
+		var buildNameList = getExistingBuildList(compareToArchivedDataset);
+		initBuildNameList($("#compareToArchivedBuildNameList"), buildNameList);
+	}
+}
+
+function onCompareToArchivedBuildNameChange() {
+	// Clear any previous reports
+	$("#diffResultsTable tbody").empty();
+	$('#fixedRouteDiffTable tbody').empty();
+
+	if ($("#compareToArchivedBuildNameList option:selected").val() == 0) {
+		compareToArchivedBuildName = "";
+	} else {
+		compareToArchivedBuildName = $("#compareToArchivedBuildNameList option:selected").text();
+		if (currentArchivedReportDataset && currentArchivedReportBuildName
+				&& compareToArchivedDataset && compareToArchivedBuildName) {
+			buildDiffReport();
+		}
+	}
+}
+
 // Called when a dataset is selected on the Choose tab.
 function updateFixedRouteParams(datasetName) {
 	// Clear any previous reports
@@ -2152,11 +2264,13 @@ function updateFixedRouteParams(datasetName) {
 
 function getExistingBuildList(datasetName) {
 	var buildNameList;
+	var useArchivedGtfs = jQuery("#useArchiveCheckbox").is(":checked");
 	if (datasetName) {
 		jQuery.ajax({
 			url: "manage-bundles!existingBuildList.action",
 			data: {
-				"selectedBundleName" : datasetName
+				"selectedBundleName" : datasetName,
+				"useArchivedGtfs" : useArchivedGtfs
 			},
 			type: "GET",
 			async: false,
@@ -2168,12 +2282,22 @@ function getExistingBuildList(datasetName) {
 	return buildNameList;
 }
 
-function initBuildNameList($buildNameList, buildNameList) {
+function initBuildNameList($buildNameList, buildNameMap) {
 	var row_0 = '<option value="0">Select a build name</option>';
 	$buildNameList.find('option').remove().end().append(row_0);
 	var i;
-	for (i=0; i<buildNameList.length; ++i) {
-		var nextRow = '<option value="' + (i+1) + '">' + buildNameList[i] + '</option>';
+	var getKeys = function(buildNameMap) {
+		   var keys = [];
+		   for(var key in buildNameMap){
+		      keys.push(key);
+		   }
+		   return keys;
+		}
+	for (var key in buildNameMap) {
+		var name = key;
+		var gid = buildNameMap[key];
+		//var nextRow = '<option value="' + (i+1) + '">' + buildNameList[i] + '</option>';
+		var nextRow = '<option value="' + buildNameMap[key] + '">' + key + '</option>';
 		$buildNameList.append(nextRow);
 	}
 	$buildNameList.val("0");
@@ -2181,18 +2305,34 @@ function initBuildNameList($buildNameList, buildNameList) {
 }
 
 function resetCurrentReportDataset() {
-	var currentReportDataset = "";
-	var currentReportBuildName = "";
-	$("#currentDatasetList").val("0");
-	var row_0 = '<option value="0">Select a build name</option>';
-	$("#currentBuildNameList").find('option').remove().end().append(row_0);
+	if (!jQuery("#useArchiveCheckbox").is(":checked")) {
+		currentReportDataset = "";
+		currentReportBuildName = "";
+		$("#currentDatasetList").val("0");
+		var row_0 = '<option value="0">Select a build name</option>';
+		$("#currentBuildNameList").find('option').remove().end().append(row_0);
+	} else {
+		currentArchivedReportDataset = "";
+		currentArchivedReportBuildName = "";
+		$("#currentArchivedDatasetList").val("0");
+		var row_0 = '<option value="0">Select an archived build name</option>';
+		$("#currentArchivedBuildNameList").find('option').remove().end().append(row_0);
+	}
 }
 function resetCompareToDataset() {
-	var compareToDataset = "";
-	var compareToBuildName = "";
-	$("#compareToDatasetList").val("0");
-	var row_0 = '<option value="0">Select a build name</option>';
-	$("#compareToBuildNameList").find('option').remove().end().append(row_0);
+	if (!jQuery("#useArchiveCheckbox").is(":checked")) {
+		compareToDataset = "";
+		compareToBuildName = "";
+		$("#compareToDatasetList").val("0");
+		var row_0 = '<option value="0">Select a build name</option>';
+		$("#compareToBuildNameList").find('option').remove().end().append(row_0);
+	} else {
+		compareToArchivedDataset = "";
+		compareToArchivedBuildName = "";
+		$("#compareToArchivedDatasetList").val("0");
+		var row_0 = '<option value="0">Select an archived build name</option>';
+		$("#compareToBuildNameList").find('option').remove().end().append(row_0);		
+	}
 }
 
 function addToDatasetLists(directoryName) {
@@ -2233,13 +2373,32 @@ function buildDiffReport() {
 	// Clear any previous reports
 	$("#diffResultsTable tbody").empty();
 	$('#fixedRouteDiffTable tbody').empty();
+	var useArchived = jQuery("#useArchiveCheckbox").is(":checked");
+	if (!useArchived) {
+		var dataset_1 = currentReportDataset;
+		var dataset_1_build_id = 0;
+		var dataset_2 = compareToDataset;
+		var dataset_2_build_id = 0;
+		var buildName_1 = currentReportBuildName;
+		var buildName_2 = compareToBuildName;
+	} else {
+		var dataset_1 = currentArchivedReportDataset;
+		var dataset_1_build_id = $('#currentArchivedBuildNameList option:selected').val();
+		var dataset_2 = compareToArchivedDataset;
+		var dataset_2_build_id = $('#compareToArchivedBuildNameList option:selected').val();
+		var buildName_1 = currentArchivedReportBuildName;
+		var buildName_2 = compareToArchivedBuildName;		
+	}
 	jQuery.ajax({
 		url: "compare-bundles!diffResult.action",
 		data: {
-			"datasetName" : currentReportDataset,
-			"buildName" : currentReportBuildName,
-			"datasetName2" : compareToDataset,
-			"buildName2": compareToBuildName
+			"useArchived" : useArchived,
+			"datasetName" : dataset_1,
+			"dataset_1_build_id" : dataset_1_build_id,
+			"buildName" : buildName_1,
+			"datasetName2" : dataset_2,
+			"dataset_2_build_id" : dataset_2_build_id,
+			"buildName2": buildName_2
 		},
 		type: "GET",
 		async: false,
@@ -2251,8 +2410,8 @@ function buildDiffReport() {
 					$("#diffResultsTable").append(diffRow);
 				}
 			});
-			var baseBundle = currentReportDataset + " / " + currentReportBuildName;
-			var compareToBundle = compareToDataset + " / " + compareToBuildName;
+			var baseBundle = dataset_1 + " / " + buildName_1;
+			var compareToBundle = dataset_2 + " / " + buildName_2;
 			$("#baseBundle").text(baseBundle + " (green)");
 			$("#compareToBundle").text(compareToBundle + " (red)");
 			$.each(data.fixedRouteDiffs, function(index, value) {
@@ -2383,6 +2542,7 @@ function buildDiffReport() {
 			});
 			// Add bottom border to reprot
 			var new_spacer_row = '<tr class="spacer"> \
+				<td></td> \
 				<td></td> \
 				<td></td> \
 				<td></td> \

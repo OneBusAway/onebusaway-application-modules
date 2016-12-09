@@ -15,8 +15,6 @@
  */
 package org.onebusaway.admin.service.bundle;
 
-import java.util.List;
-
 import org.onebusaway.admin.model.BundleBuildResponse;
 
 /**

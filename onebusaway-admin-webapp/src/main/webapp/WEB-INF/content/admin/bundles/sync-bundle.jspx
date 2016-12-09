@@ -35,7 +35,7 @@
 			<div id="sync_deployedDataset">
 			<!--  Prevent JSP minimization -->
 			</div>
-			<label class="bundleHeader">Currently Deployed Bundle on Staging</label>  
+			<label class="bundleHeader">Build Name Deployed on Staging</label>  
 			<div id="sync_deployedBundleName">
 			<!--  Prevent JSP minimization -->
 			</div>
