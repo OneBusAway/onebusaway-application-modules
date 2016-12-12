@@ -142,21 +142,24 @@ public class DataValidationRouteCounts implements Comparable<DataValidationRoute
       if (other.routeNum != null) {
         return -1;
       }
-    } else if (other.routeNum == null) {
-      return 1;
-    }
-    if (!routeNum.equals(other.routeNum)) {
-      if (isNumeric(routeNum)) {
-        if (isNumeric(other.routeNum)) {
-          return Integer.parseInt(routeNum) - Integer.parseInt(other.routeNum);
-        } else {
-          return -1;    // Numeric vs. alpha.
-        }
+    } else {
+      if (other.routeNum == null) {
+        return 1;
       } else {
-        if (isNumeric(other.routeNum)) {
-          return 1;
-        } else {
-          return routeNum.compareTo(other.routeNum);
+        if (!routeNum.equals(other.routeNum)) {
+          if (isNumeric(routeNum)) {
+            if (isNumeric(other.routeNum)) {
+              return Integer.parseInt(routeNum) - Integer.parseInt(other.routeNum);
+            } else {
+              return -1;    // Numeric vs. alpha.
+            }
+          } else {
+            if (isNumeric(other.routeNum)) {
+              return 1;
+            } else {
+              return routeNum.compareTo(other.routeNum);
+            }
+          }
         }
       }
     }

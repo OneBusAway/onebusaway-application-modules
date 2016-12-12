@@ -29,8 +29,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.SortedMap;
+import java.util.SortedSet;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
 import javax.servlet.ServletContext;
@@ -47,6 +51,7 @@ import org.onebusaway.admin.model.ui.DirectoryStatus;
 import org.onebusaway.admin.model.ui.ExistingDirectory;
 import org.onebusaway.admin.service.BundleRequestService;
 import org.onebusaway.admin.service.FileService;
+import org.onebusaway.admin.service.bundle.GtfsArchiveService;
 import org.onebusaway.admin.util.BundleInfo;
 import org.onebusaway.admin.util.NYCFileUtils;
 import org.onebusaway.util.services.configuration.ConfigurationService;
@@ -110,6 +115,7 @@ public class ManageBundlesAction extends OneBusAwayNYCAdminActionSupport impleme
 	private FileService fileService;
 	private BundleRequestService bundleRequestService;
 	private ConfigurationService configService;
+	private GtfsArchiveService gtfsArchiveService;
 	private static final int MAX_RESULTS = -1;
 	private BundleResponse bundleResponse;
 	private BundleBuildResponse bundleBuildResponse;
@@ -119,9 +125,10 @@ public class ManageBundlesAction extends OneBusAwayNYCAdminActionSupport impleme
 	private InputStream downloadInputStream;
 	private List<String> fileList = new ArrayList<String>();
 	private String selectedBundleName;
-	private List<String> existingBuildList = new ArrayList<String>();
+	private SortedMap<String, String> existingBuildList = new TreeMap<String, String>();
 	private DirectoryStatus directoryStatus;
 	private BundleInfo bundleInfo;
+	private boolean useArchivedGtfs;
 	// where the bundle is deployed to
 	private String s3Path = "s3://bundle-data/activebundle/<env>/";
 	private String environment = "dev";
@@ -314,6 +321,11 @@ public class ManageBundlesAction extends OneBusAwayNYCAdminActionSupport impleme
 		return directories;
 	}
 
+  public SortedSet<String> getExistingArchivedDirectories() {
+    SortedSet<String> existingArchivedDirectories = gtfsArchiveService.getAllDatasets();
+    return existingArchivedDirectories;
+  }
+
 	@SuppressWarnings("unchecked")
 	public String fileList() {
 		_log.info("fileList called for id=" + id); 
@@ -371,17 +383,22 @@ public class ManageBundlesAction extends OneBusAwayNYCAdminActionSupport impleme
   }
 
 	public String existingBuildList() {
-		_log.info("existingBuildList called for path=" + fileService.getBucketName()+"/"+ selectedBundleName +"/"+fileService.getBuildPath());
-		File builds = new File(fileService.getBucketName()+"/"+ selectedBundleName +"/"+fileService.getBuildPath());
-		File[] existingDirectories = builds.listFiles();
-		existingBuildList.clear();
-		if(existingDirectories == null){
-			return null;
-		}
-		for(File file: existingDirectories) {
-			existingBuildList.add(file.getName());
-		}
-		Collections.sort(existingBuildList);
+    existingBuildList.clear();
+    if (!useArchivedGtfs) {
+      _log.info("existingBuildList called for path=" + fileService.getBucketName()+"/"+ selectedBundleName +"/"+fileService.getBuildPath());
+      File builds = new File(fileService.getBucketName()+"/"+ selectedBundleName +"/"+fileService.getBuildPath());
+      File[] existingDirectories = builds.listFiles();
+      if(existingDirectories == null){
+        return null;
+      }
+      int i = 1;
+      for(File file: existingDirectories) {
+        existingBuildList.put(file.getName(), ""+i++);
+      }
+	  } else {
+	    existingBuildList = gtfsArchiveService.getBuildNameMapForDataset(selectedBundleName);
+	  }
+
 		return "existingBuildList";
 	}
 
@@ -585,6 +602,11 @@ public class ManageBundlesAction extends OneBusAwayNYCAdminActionSupport impleme
 		this.configService = configService;
 	}
 
+  @Autowired
+  public void setGtfsArchiveService(GtfsArchiveService gtfsArchiveService) {
+    this.gtfsArchiveService = gtfsArchiveService;
+  }
+
 	public BundleResponse getBundleResponse() {
 		return bundleResponse;
 	}
@@ -670,7 +692,7 @@ public class ManageBundlesAction extends OneBusAwayNYCAdminActionSupport impleme
 		return this.fileList;
 	}
 
-	public List<String> getExistingBuildList() {
+	public SortedMap<String, String> getExistingBuildList() {
 		return this.existingBuildList;
 	}
 
@@ -683,6 +705,10 @@ public class ManageBundlesAction extends OneBusAwayNYCAdminActionSupport impleme
 
 	public String getEnvironment() {
 		return environment;
+	}
+
+	public void setUseArchivedGtfs(boolean useArchivedGtfs) {
+	  this.useArchivedGtfs = useArchivedGtfs;
 	}
 
 	@Override

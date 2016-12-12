@@ -15,16 +15,27 @@
  */
 package org.onebusaway.webapp.actions.admin.bundles;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.SortedSet;
 import java.util.TreeSet;
 
 import org.apache.struts2.convention.annotation.Namespace;
 import org.apache.struts2.convention.annotation.Result;
 import org.apache.struts2.convention.annotation.Results;
+import org.joda.time.DateTimeConstants;
+import org.joda.time.LocalDate;
 import org.onebusaway.admin.model.ui.DataValidationDirectionCts;
 import org.onebusaway.admin.model.ui.DataValidationHeadsignCts;
 import org.onebusaway.admin.model.ui.DataValidationMode;
@@ -33,11 +44,18 @@ import org.onebusaway.admin.model.ui.DataValidationStopCt;
 import org.onebusaway.admin.service.DiffService;
 import org.onebusaway.admin.service.FileService;
 import org.onebusaway.admin.service.FixedRouteParserService;
+import org.onebusaway.admin.service.bundle.GtfsArchiveService;
+import org.onebusaway.admin.service.bundle.task.model.ArchivedAgency;
+import org.onebusaway.admin.service.bundle.task.model.ArchivedCalendar;
+import org.onebusaway.admin.service.bundle.task.model.ArchivedRoute;
+import org.onebusaway.admin.service.bundle.task.model.ArchivedStopTime;
+import org.onebusaway.admin.service.bundle.task.model.ArchivedTrip;
+import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.util.services.configuration.ConfigurationServiceClient;
 import org.onebusaway.webapp.actions.OneBusAwayNYCAdminActionSupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.context.ServletContextAware;
 
 /**
  * Action class used by Transit Data Bundle Utility to compare two bundles.
@@ -51,20 +69,38 @@ import org.springframework.web.context.ServletContextAware;
 public class CompareBundlesAction extends OneBusAwayNYCAdminActionSupport {
   private static Logger _log = LoggerFactory.getLogger(CompareBundlesAction.class);
   private static final long serialVersionUID = 1L;
+  private static final char ID_SEPARATOR = '_';
+  private static final int MAX_STOP_CT = 200;
 
+  private boolean useArchived;
   private String datasetName;
+  private int dataset_1_build_id;
   private String buildName;
   private String datasetName2;
+  private int dataset_2_build_id;
   private String buildName2;
   private FileService fileService;
+  private GtfsArchiveService _gtfsArchiveService;
   private List<String> diffResult = new ArrayList<String>();
   private Map<String, List> combinedDiffs;
   private DiffService diffService;
   @Autowired
   private FixedRouteParserService _fixedRouteParserService;
 
+  public boolean isUseArchived() {
+    return useArchived;
+  }
+
+  public void setUseArchived(boolean useArchived) {
+    this.useArchived = useArchived;
+  }
+
   public void setDatasetName(String datasetName) {
     this.datasetName = datasetName;
+  }
+
+  public void setDataset_1_build_id(int dataset_1_build_id) {
+    this.dataset_1_build_id = dataset_1_build_id;
   }
 
   public void setBuildName(String buildName) {
@@ -73,6 +109,10 @@ public class CompareBundlesAction extends OneBusAwayNYCAdminActionSupport {
 
   public void setDatasetName2(String datasetName2) {
     this.datasetName2 = datasetName2;
+  }
+
+  public void setDataset_2_build_id(int dataset_2_build_id) {
+    this.dataset_2_build_id = dataset_2_build_id;
   }
 
   public void setBuildName2(String buildName2) {
@@ -84,9 +124,17 @@ public class CompareBundlesAction extends OneBusAwayNYCAdminActionSupport {
     this.fileService = fileService;
   }
 
+  @Autowired
+  public void setGtfsArchiveService(GtfsArchiveService gtfsArchiveService) {
+    this._gtfsArchiveService = gtfsArchiveService;
+  }
+
   public Map<String, List> getCombinedDiffs() {
     return combinedDiffs;
   }
+
+  @Autowired
+  private ConfigurationServiceClient _configurationServiceClient;
 
   @Autowired
   public void setDiffService(DiffService diffService) {
@@ -116,21 +164,28 @@ public class CompareBundlesAction extends OneBusAwayNYCAdminActionSupport {
   private List<DataValidationMode> compareFixedRouteValidations(
       String datasetName, String buildName,
       String datasetName2, String buildName2) {
-    String currentValidationReportPath = fileService.getBucketName()
-        + File.separator  + datasetName + "/builds/" + buildName
-        + "/outputs/fixed_route_validation.csv";
-    File currentValidationReportFile = new File(currentValidationReportPath);
-    String selectedValidationReportPath = fileService.getBucketName()
-        + File.separator
-        + datasetName2 + "/builds/"
-        + buildName2 + "/outputs/fixed_route_validation.csv";
-    File selectedValidationReportFile = new File(selectedValidationReportPath);
+    List<DataValidationMode> currentModes;
+    List<DataValidationMode> selectedModes;
+    if (!useArchived) {
+      String currentValidationReportPath = fileService.getBucketName()
+          + File.separator  + datasetName + "/builds/" + buildName
+          + "/outputs/fixed_route_validation.csv";
+      File currentValidationReportFile = new File(currentValidationReportPath);
+      String selectedValidationReportPath = fileService.getBucketName()
+          + File.separator
+          + datasetName2 + "/builds/"
+          + buildName2 + "/outputs/fixed_route_validation.csv";
+      File selectedValidationReportFile = new File(selectedValidationReportPath);
 
-    // parse input files
-    List<DataValidationMode> currentModes
-      = _fixedRouteParserService.parseFixedRouteReportFile(currentValidationReportFile);
-    List<DataValidationMode> selectedModes
-      = _fixedRouteParserService.parseFixedRouteReportFile(selectedValidationReportFile);
+      // parse input files
+      currentModes
+        = _fixedRouteParserService.parseFixedRouteReportFile(currentValidationReportFile);
+      selectedModes
+        = _fixedRouteParserService.parseFixedRouteReportFile(selectedValidationReportFile);
+    } else {
+      currentModes = buildModes(dataset_1_build_id);
+      selectedModes = buildModes(dataset_2_build_id);
+    }
 
     // compare and get diffs
     List<DataValidationMode> fixedRouteDiffs
@@ -139,6 +194,226 @@ public class CompareBundlesAction extends OneBusAwayNYCAdminActionSupport {
     return  fixedRouteDiffs;
   }
 
+  private List<DataValidationMode> buildModes(int buildId) {
+    List<DataValidationMode> modes = new ArrayList<>();
+
+    // Get bundle start date
+    Date bundleStartDate = _gtfsArchiveService.getBundleStartDate(buildId);
+    LocalDate start = new LocalDate(bundleStartDate.getTime());
+
+    // Get dates for checking trips for days of the week
+    LocalDate firstMon = getFirstDay(DateTimeConstants.MONDAY, start);
+    LocalDate firstTues = getFirstDay(DateTimeConstants.TUESDAY, start);
+    LocalDate firstWed = getFirstDay(DateTimeConstants.WEDNESDAY, start);
+    LocalDate firstThur = getFirstDay(DateTimeConstants.THURSDAY, start);
+    LocalDate firstFri = getFirstDay(DateTimeConstants.FRIDAY, start);
+    LocalDate firstSat = getFirstDay(DateTimeConstants.SATURDAY, start);
+    LocalDate firstSun = getFirstDay(DateTimeConstants.SUNDAY, start);
+
+    // Get the service ids for weekdays, Saturdays, and Sundays
+    Set<AgencyAndId> weekdaySvcIds = new HashSet<>();
+    Set<AgencyAndId> saturdaySvcIds = new HashSet<>();
+    Set<AgencyAndId> sundaySvcIds = new HashSet<>();
+
+    // Check service ids
+    List<ArchivedCalendar> calendars =
+        _gtfsArchiveService.getAllCalendarsByBundleId(buildId);
+    for (ArchivedCalendar calendar : calendars) {
+      Date svcStartDate = calendar.getStartDate().getAsDate();
+      LocalDate jodaStartDate = new LocalDate(svcStartDate);
+      Date svcEndDate = calendar.getEndDate().getAsDate();
+      LocalDate jodaEndDate = new LocalDate(svcEndDate);
+      if (calendar.getMonday() == 1 && !firstMon.isBefore(jodaStartDate)
+          && !firstMon.isAfter(jodaEndDate)) {
+        weekdaySvcIds.add(calendar.getServiceId());
+      }
+      if (calendar.getTuesday() == 1 && !firstTues.isBefore(jodaStartDate)
+          && !firstTues.isAfter(jodaEndDate)) {
+        weekdaySvcIds.add(calendar.getServiceId());
+      }
+      if (calendar.getWednesday() == 1 && !firstWed.isBefore(jodaStartDate)
+          && !firstWed.isAfter(jodaEndDate)) {
+        weekdaySvcIds.add(calendar.getServiceId());
+      }
+      if (calendar.getThursday() == 1 && !firstThur.isBefore(jodaStartDate)
+          && !firstThur.isAfter(jodaEndDate)) {
+        weekdaySvcIds.add(calendar.getServiceId());
+      }
+      if (calendar.getFriday() == 1 && !firstFri.isBefore(jodaStartDate)
+          && !firstFri.isAfter(jodaEndDate)) {
+        weekdaySvcIds.add(calendar.getServiceId());
+      }
+      if (calendar.getSaturday() == 1 && !firstSat.isBefore(jodaStartDate)
+          && !firstSat.isAfter(jodaEndDate)) {
+        saturdaySvcIds.add(calendar.getServiceId());
+      }
+      if (calendar.getSunday() == 1 && !firstSun.isBefore(jodaStartDate)
+          && !firstSun.isAfter(jodaEndDate)) {
+        sundaySvcIds.add(calendar.getServiceId());
+      }
+    }
+
+    Map<String, List<String>> reportModes = getReportModes();
+    Collection<ArchivedAgency> agencies = _gtfsArchiveService.getAllAgenciesByBundleId(buildId);
+    for (String currentMode : reportModes.keySet()) {
+      DataValidationMode newMode = new DataValidationMode();
+      newMode.setModeName(currentMode);
+      SortedSet<DataValidationRouteCounts> newModeRouteCts = new TreeSet<DataValidationRouteCounts>();
+      List<String> currentRoutes = reportModes.get(currentMode);
+      for (ArchivedAgency agency : agencies) {
+        boolean getAllRoutes = false;
+        // If currentRoutes[0] is an agency id, get all the routes for that agency
+        if (currentRoutes.get(0).equals(agency.getId())) {
+          getAllRoutes = true;
+        }
+        List<ArchivedRoute> routes = _gtfsArchiveService.getRoutesForAgencyAndBundleId(agency, buildId);
+        int routeCt = routes.size();
+        int currentRouteCt=0;
+        for (ArchivedRoute route : routes) {
+          currentRouteCt++;
+          int[] wkdayTrips = null;
+          int[] satTrips = null;
+          int[] sunTrips = null;
+          Map<String, TripTotals> tripMap = new HashMap<>();
+          String routeId = route.getAgencyId() + ID_SEPARATOR + route.getId();
+          //AgencyAndId routeId = route.getId();
+          if (currentRoutes.contains(routeId)
+              || getAllRoutes) {
+            DataValidationRouteCounts newRouteCts = new DataValidationRouteCounts();
+            //String routeName = route.getShortName() + "-" + route.getDesc();
+            String routeName = route.getDesc();
+            if (routeName == null || routeName.equals("null") || routeName.isEmpty()) {
+              routeName = route.getLongName();
+            }
+            if (routeName == null || routeName.equals("null")) {
+              routeName =  "";
+            }
+            newRouteCts.setRouteName(routeName);
+            String routeNum = route.getShortName();
+            if (routeNum == null || routeNum.equals("null") || routeNum.isEmpty()) {
+              routeNum = route.getId();
+            }
+            if (routeNum == null || routeNum.equals("null")) {
+              routeNum =  "";
+            }
+            newRouteCts.setRouteNum(routeNum);
+            SortedSet<DataValidationHeadsignCts> headsignCounts = new TreeSet<>();
+            List<ArchivedTrip> trips = _gtfsArchiveService.getTripsForRouteAndBundleId(routeId, buildId);
+            for (ArchivedTrip trip : trips) {
+              List<ArchivedStopTime> stopTimes =  _gtfsArchiveService.getStopTimesForTripAndBundleId(trip, buildId);
+              int stopCt = stopTimes.size();
+              if (stopCt > MAX_STOP_CT) {
+                stopCt = MAX_STOP_CT;
+              }
+              TripTotals tripTotals = null;
+              String tripHeadsign = trip.getTripHeadsign();
+              tripHeadsign = tripHeadsign == null ? "" : tripHeadsign;
+              if (tripMap.containsKey(tripHeadsign)) {
+                tripTotals = tripMap.get(tripHeadsign);
+              } else {
+                tripTotals = new TripTotals();
+                tripMap.put(tripHeadsign, tripTotals);
+              }
+              /*
+               * TODO: if stopCt exceeds array sizes, resize arrays
+               */
+              if (trip.getDirectionId() == null || trip.getDirectionId().equals("0")) {
+                wkdayTrips = tripTotals.wkdayTrips_0;
+                satTrips = tripTotals.satTrips_0;
+                sunTrips = tripTotals.sunTrips_0;
+              } else {
+                wkdayTrips = tripTotals.wkdayTrips_1;
+                satTrips = tripTotals.satTrips_1;
+                sunTrips = tripTotals.sunTrips_1;
+              }
+              //AgencyAndId tripSvcId = trip.getServiceId();
+              AgencyAndId tripSvcId = new AgencyAndId(trip.getServiceId_agencyId(), trip.getServiceId_id());
+              if (weekdaySvcIds.contains(tripSvcId)) {
+                ++wkdayTrips[stopCt];
+              } else if (saturdaySvcIds.contains(tripSvcId)) {
+                ++satTrips[stopCt];
+              } else if (sundaySvcIds.contains(tripSvcId)) {
+                ++sunTrips[stopCt];
+              }
+              tripMap.put(tripHeadsign, tripTotals);
+            }  // End of trips loop.  Stop counts by direction for this route have been set.
+            for (String headSign : tripMap.keySet() ) {
+              TripTotals tripTotals = tripMap.get(headSign);
+              DataValidationHeadsignCts newHeadsignCt = new DataValidationHeadsignCts();
+              newHeadsignCt.setHeadsign(headSign);
+              SortedSet<DataValidationDirectionCts> newDirCountSet = new TreeSet<DataValidationDirectionCts>();
+
+              DataValidationDirectionCts newDirCt_0 = new DataValidationDirectionCts();
+              newDirCt_0.setDirection("0");
+              SortedSet<DataValidationStopCt> stopCounts_0 = new TreeSet<>();
+              for (int i=0; i<MAX_STOP_CT; ++i) {
+                if (tripTotals.wkdayTrips_0[i]>0
+                    || tripTotals.satTrips_0[i]>0
+                    || tripTotals.sunTrips_0[i]>0) {
+                  DataValidationStopCt stopCt_0 = new DataValidationStopCt();
+                  stopCt_0.setStopCt(i);
+                  stopCt_0.setTripCts(new int[]
+                      {tripTotals.wkdayTrips_0[i], tripTotals.satTrips_0[i], tripTotals.sunTrips_0[i]});
+                  stopCounts_0.add(stopCt_0);
+                }
+              }
+              if (stopCounts_0.size() > 0) {
+                newDirCt_0.setStopCounts(stopCounts_0);
+                newDirCountSet.add(newDirCt_0);
+              }
+              DataValidationDirectionCts newDirCt_1 = new DataValidationDirectionCts();
+              newDirCt_1.setDirection("1");
+              SortedSet<DataValidationStopCt> stopCounts_1 = new TreeSet<>();
+              for (int i=0; i<MAX_STOP_CT; ++i) {
+                if (tripTotals.wkdayTrips_1[i]>0
+                    || tripTotals.satTrips_1[i]>0
+                    || tripTotals.sunTrips_1[i]>0) {
+                  DataValidationStopCt stopCt_1 = new DataValidationStopCt();
+                  stopCt_1.setStopCt(i);
+                  stopCt_1.setTripCts(new int[]
+                      {tripTotals.wkdayTrips_1[i], tripTotals.satTrips_1[i], tripTotals.sunTrips_1[i]});
+                  stopCounts_1.add(stopCt_1);
+                }
+                if (stopCounts_1.size() > 0) {
+                  newDirCt_1.setStopCounts(stopCounts_1);
+                  newDirCountSet.add(newDirCt_1);
+                }
+              }
+              if (newDirCountSet.size() > 0) {
+                newHeadsignCt.setDirCounts(newDirCountSet);
+                headsignCounts.add(newHeadsignCt);
+              }
+            }
+            if (headsignCounts.size() > 0) {
+              newRouteCts.setHeadsignCounts(headsignCounts);
+              newModeRouteCts.add(newRouteCts);
+            }
+          }
+        }
+      }
+      if (newModeRouteCts.size() > 0) {
+        newMode.setRoutes(newModeRouteCts);
+        modes.add(newMode);
+      }
+    }
+    return modes;
+  }
+
+  private LocalDate getFirstDay(int dayOfWeek, LocalDate startDate) {
+    int old = startDate.getDayOfWeek();
+    if (dayOfWeek < old) {
+      dayOfWeek += 7;
+    }
+    return startDate.plusDays(dayOfWeek - old);
+  }
+
+  /**
+   * Find the differences between two Lists of modes
+   *
+   * @param currentModes
+   * @param selectedModes
+   * @return
+   */
   private List<DataValidationMode> findFixedRouteDiffs(
       List<DataValidationMode> currentModes,
       List<DataValidationMode> selectedModes) {
@@ -337,4 +612,74 @@ public class CompareBundlesAction extends OneBusAwayNYCAdminActionSupport {
     }
     return diffDirection;
   }
+
+  private Map<String, List<String>> getReportModes() {
+    Map<String, List<String>> reportModes = new HashMap<>();
+    String sourceUrl = getSourceUrl();
+    try (BufferedReader br =
+        new BufferedReader(new InputStreamReader(new URL(sourceUrl).openStream()))) {
+      String line;
+      while ((line = br.readLine()) != null) {
+        String[] reportData = line.split(",");
+        List<String> reportRoutes = reportModes.get(reportData[0]);
+        if (reportRoutes == null) {
+          reportRoutes = new ArrayList<>();
+        }
+        reportRoutes.add(reportData[1].trim());
+        reportModes.put(reportData[0].trim(), reportRoutes);
+      }
+    } catch (IOException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+    return reportModes;
+  }
+
+  /*
+   * This method will use the config service to retrieve the URL for report
+   * input parameters.  The value is stored in config.json.
+   *
+   * @return the URL to use to retrieve the modes and routes to be reported on
+   */
+  private String getSourceUrl() {
+    String sourceUrl = "";
+
+    try {
+      List<Map<String, String>> components = _configurationServiceClient.getItems("config");
+      if (components == null) {
+        _log.info("getItems call failed");
+      }
+      for (Map<String, String> component: components) {
+        if (component.containsKey("component") && "admin".equals(component.get("component"))) {
+          if ("fixedRouteDataValidation".equals(component.get("key"))) {
+             sourceUrl = component.get("value");
+             break;
+          }
+        }
+      }
+    } catch (Exception e) {
+      _log.error("could not retrieve Data Validation URL from config:", e);
+    }
+
+    return sourceUrl;
+  }
+
+  class TripTotals {
+    int[] wkdayTrips_0;
+    int[] wkdayTrips_1;
+    int[] satTrips_0;
+    int[] satTrips_1;
+    int[] sunTrips_0;
+    int[] sunTrips_1;
+
+    public TripTotals () {
+      wkdayTrips_0 = new int[MAX_STOP_CT+1];
+      wkdayTrips_1 = new int[MAX_STOP_CT+1];
+      satTrips_0 = new int[MAX_STOP_CT+1];
+      satTrips_1 = new int[MAX_STOP_CT+1];
+      sunTrips_0 = new int[MAX_STOP_CT+1];
+      sunTrips_1 = new int[MAX_STOP_CT+1];
+    }
+  }
+
 }
