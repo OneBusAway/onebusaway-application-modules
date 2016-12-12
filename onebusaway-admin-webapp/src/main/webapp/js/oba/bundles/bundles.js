@@ -80,6 +80,7 @@ jQuery(function() {
 	$("#compareToArchivedDatasetList > option").each(function(index, value) {
 		$(this).val(index);
 	});
+	$('#Compare #buildingReportDiv').hide();
 	$("#currentArchivedDatasetList").hide();
 	$("#currentArchivedBuildNameList").hide();
 	$("#compareToArchivedDatasetList").hide();
@@ -2382,6 +2383,7 @@ function buildDiffReport() {
 		var buildName_1 = currentReportBuildName;
 		var buildName_2 = compareToBuildName;
 	} else {
+		$('#Compare #buildingReportDiv').show();
 		var dataset_1 = currentArchivedReportDataset;
 		var dataset_1_build_id = $('#currentArchivedBuildNameList option:selected').val();
 		var dataset_2 = compareToArchivedDataset;
@@ -2403,6 +2405,7 @@ function buildDiffReport() {
 		type: "GET",
 		async: false,
 		success: function(data) {
+			$('#Compare #buildingReportDiv').hide();
 			$.each(data.diffResults, function(index, value) {
 				// Skip first three rows of results
 				if (index >= 3) {

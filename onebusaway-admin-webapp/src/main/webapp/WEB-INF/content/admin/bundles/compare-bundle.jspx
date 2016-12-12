@@ -25,15 +25,14 @@
 	</div>
 
 	<div id="selectArchiveDiv">
-		<input type="checkbox" id="useArchiveCheckbox" value="useArchivedData">Use archived data</input>
-		<!--
-		<fieldset>
-			<legend>Select Source for Fixed Route Comparison</legend>
-				<input type="radio" name="fixedRouteSource" value="filesystem">Filesystem (default)</input>
-				<input type="radio" name="fixedRouteSource" value="archive">Archived Data</input>
-		</fieldset>
-		-->
+		<input type="checkbox" id="useArchiveCheckbox" value="useArchivedData">Use archived data for Fixed Route Comparison</input>
 	</div>
+	<div id="buildingReportDiv">
+		<s:url var="url" value="/css/img/ajax-loader.gif" />
+		<img id="buildingReportIcon" src="${url}" alt="Ajax loader" class="progress" />
+		<label id="buildingReportMsg" class="adminLabel">Fixed Route Comparison Report in Progress...</label>
+	</div>
+
 
 	<div id="bundleSelectionDiv">
 		<div id="currentBundleDiv">

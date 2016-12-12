@@ -195,6 +195,10 @@
   font-size: 12px;
 }
 
+#buildingReportDiv {
+	color: green;
+}
+
 #currentDirectories #listItem,
 #compareCurrentDirectories #compareListItem,
 #compareSelectedBuild #compareBuildListItem {
