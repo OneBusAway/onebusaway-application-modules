@@ -16,6 +16,7 @@
  */
 package org.onebusaway.transit_data_federation.impl;
 
+import org.onebusaway.container.refresh.RefreshService;
 import org.onebusaway.container.refresh.Refreshable;
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.gtfs.model.AgencyAndId;
@@ -46,6 +47,8 @@ class WhereGeospatialServiceImpl implements GeospatialBeanService {
 
   private TransitGraphDao _transitGraphDao;
 
+  private RefreshService _refreshService;
+
   private STRtree _tree;
 
   @Autowired
@@ -53,15 +56,20 @@ class WhereGeospatialServiceImpl implements GeospatialBeanService {
     _transitGraphDao = transitGraphDao;
   }
 
+  @Autowired
+  public void setRefreshService(RefreshService refreshService) {
+    _refreshService = refreshService;
+  }
 
   @PostConstruct
-  @Refreshable(dependsOn = RefreshableResources.STOP_GEOSPATIAL_INDEX)
+  @Refreshable(dependsOn = RefreshableResources.TRANSIT_GRAPH)
   public void initialize() {
 
     List<StopEntry> stops = _transitGraphDao.getAllStops();
     
     if (stops.size() == 0) {
       _tree = null;
+      _refreshService.refresh(RefreshableResources.STOP_GEOSPATIAL_INDEX);
       return;
     }
     
@@ -75,6 +83,8 @@ class WhereGeospatialServiceImpl implements GeospatialBeanService {
     }
 
     _tree.build();
+
+    _refreshService.refresh(RefreshableResources.STOP_GEOSPATIAL_INDEX);
   }
 
   /****
