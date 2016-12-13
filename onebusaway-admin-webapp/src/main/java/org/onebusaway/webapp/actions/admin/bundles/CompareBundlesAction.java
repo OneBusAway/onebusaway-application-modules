@@ -259,14 +259,18 @@ public class CompareBundlesAction extends OneBusAwayNYCAdminActionSupport {
       DataValidationMode newMode = new DataValidationMode();
       newMode.setModeName(currentMode);
       SortedSet<DataValidationRouteCounts> newModeRouteCts = new TreeSet<DataValidationRouteCounts>();
-      List<String> currentRoutes = reportModes.get(currentMode);
-      for (ArchivedAgency agency : agencies) {
-        boolean getAllRoutes = false;
-        // If currentRoutes[0] is an agency id, get all the routes for that agency
-        if (currentRoutes.get(0).equals(agency.getId())) {
-          getAllRoutes = true;
+      List<String> agenciesOrRoutes = reportModes.get(currentMode);  // Note: currentRoutes entries might be just an agency id
+      for (String agencyOrRoute : agenciesOrRoutes) {                // or a route, i.e. <agencyId>_<routeId>
+        List<ArchivedRoute> routes = null;
+        int idx = agencyOrRoute.indexOf("_"); // check if agency or route id
+        if (idx < 0) {    // it's an agency
+          routes = _gtfsArchiveService.getRoutesForAgencyAndBundleId(agencyOrRoute, buildId);
+        } else {
+          ;
         }
-        List<ArchivedRoute> routes = _gtfsArchiveService.getRoutesForAgencyAndBundleId(agency, buildId);
+        if (routes == null || routes.size() ==  0) {
+          continue;
+        }
         int routeCt = routes.size();
         int currentRouteCt=0;
         for (ArchivedRoute route : routes) {
@@ -276,118 +280,114 @@ public class CompareBundlesAction extends OneBusAwayNYCAdminActionSupport {
           int[] sunTrips = null;
           Map<String, TripTotals> tripMap = new HashMap<>();
           String routeId = route.getAgencyId() + ID_SEPARATOR + route.getId();
-          //AgencyAndId routeId = route.getId();
-          if (currentRoutes.contains(routeId)
-              || getAllRoutes) {
-            DataValidationRouteCounts newRouteCts = new DataValidationRouteCounts();
-            //String routeName = route.getShortName() + "-" + route.getDesc();
-            String routeName = route.getDesc();
-            if (routeName == null || routeName.equals("null") || routeName.isEmpty()) {
-              routeName = route.getLongName();
+          DataValidationRouteCounts newRouteCts = new DataValidationRouteCounts();
+          //String routeName = route.getShortName() + "-" + route.getDesc();
+          String routeName = route.getDesc();
+          if (routeName == null || routeName.equals("null") || routeName.isEmpty()) {
+            routeName = route.getLongName();
+          }
+          if (routeName == null || routeName.equals("null")) {
+            routeName =  "";
+          }
+          newRouteCts.setRouteName(routeName);
+          String routeNum = route.getShortName();
+          if (routeNum == null || routeNum.equals("null") || routeNum.isEmpty()) {
+            routeNum = route.getId();
+          }
+          if (routeNum == null || routeNum.equals("null")) {
+            routeNum =  "";
+          }
+          newRouteCts.setRouteNum(routeNum);
+          SortedSet<DataValidationHeadsignCts> headsignCounts = new TreeSet<>();
+          List<ArchivedTrip> trips = _gtfsArchiveService.getTripsForRouteAndBundleId(routeId, buildId);
+          for (ArchivedTrip trip : trips) {
+            List<ArchivedStopTime> stopTimes =  _gtfsArchiveService.getStopTimesForTripAndBundleId(trip, buildId);
+            int stopCt = stopTimes.size();
+            if (stopCt > MAX_STOP_CT) {
+              stopCt = MAX_STOP_CT;
             }
-            if (routeName == null || routeName.equals("null")) {
-              routeName =  "";
-            }
-            newRouteCts.setRouteName(routeName);
-            String routeNum = route.getShortName();
-            if (routeNum == null || routeNum.equals("null") || routeNum.isEmpty()) {
-              routeNum = route.getId();
-            }
-            if (routeNum == null || routeNum.equals("null")) {
-              routeNum =  "";
-            }
-            newRouteCts.setRouteNum(routeNum);
-            SortedSet<DataValidationHeadsignCts> headsignCounts = new TreeSet<>();
-            List<ArchivedTrip> trips = _gtfsArchiveService.getTripsForRouteAndBundleId(routeId, buildId);
-            for (ArchivedTrip trip : trips) {
-              List<ArchivedStopTime> stopTimes =  _gtfsArchiveService.getStopTimesForTripAndBundleId(trip, buildId);
-              int stopCt = stopTimes.size();
-              if (stopCt > MAX_STOP_CT) {
-                stopCt = MAX_STOP_CT;
-              }
-              TripTotals tripTotals = null;
-              String tripHeadsign = trip.getTripHeadsign();
-              tripHeadsign = tripHeadsign == null ? "" : tripHeadsign;
-              if (tripMap.containsKey(tripHeadsign)) {
-                tripTotals = tripMap.get(tripHeadsign);
-              } else {
-                tripTotals = new TripTotals();
-                tripMap.put(tripHeadsign, tripTotals);
-              }
-              /*
-               * TODO: if stopCt exceeds array sizes, resize arrays
-               */
-              if (trip.getDirectionId() == null || trip.getDirectionId().equals("0")) {
-                wkdayTrips = tripTotals.wkdayTrips_0;
-                satTrips = tripTotals.satTrips_0;
-                sunTrips = tripTotals.sunTrips_0;
-              } else {
-                wkdayTrips = tripTotals.wkdayTrips_1;
-                satTrips = tripTotals.satTrips_1;
-                sunTrips = tripTotals.sunTrips_1;
-              }
-              //AgencyAndId tripSvcId = trip.getServiceId();
-              AgencyAndId tripSvcId = new AgencyAndId(trip.getServiceId_agencyId(), trip.getServiceId_id());
-              if (weekdaySvcIds.contains(tripSvcId)) {
-                ++wkdayTrips[stopCt];
-              } else if (saturdaySvcIds.contains(tripSvcId)) {
-                ++satTrips[stopCt];
-              } else if (sundaySvcIds.contains(tripSvcId)) {
-                ++sunTrips[stopCt];
-              }
+            TripTotals tripTotals = null;
+            String tripHeadsign = trip.getTripHeadsign();
+            tripHeadsign = tripHeadsign == null ? "" : tripHeadsign;
+            if (tripMap.containsKey(tripHeadsign)) {
+              tripTotals = tripMap.get(tripHeadsign);
+            } else {
+              tripTotals = new TripTotals();
               tripMap.put(tripHeadsign, tripTotals);
-            }  // End of trips loop.  Stop counts by direction for this route have been set.
-            for (String headSign : tripMap.keySet() ) {
-              TripTotals tripTotals = tripMap.get(headSign);
-              DataValidationHeadsignCts newHeadsignCt = new DataValidationHeadsignCts();
-              newHeadsignCt.setHeadsign(headSign);
-              SortedSet<DataValidationDirectionCts> newDirCountSet = new TreeSet<DataValidationDirectionCts>();
+            }
+            /*
+             * TODO: if stopCt exceeds array sizes, resize arrays
+             */
+            if (trip.getDirectionId() == null || trip.getDirectionId().equals("0")) {
+              wkdayTrips = tripTotals.wkdayTrips_0;
+              satTrips = tripTotals.satTrips_0;
+              sunTrips = tripTotals.sunTrips_0;
+            } else {
+              wkdayTrips = tripTotals.wkdayTrips_1;
+              satTrips = tripTotals.satTrips_1;
+              sunTrips = tripTotals.sunTrips_1;
+            }
+            //AgencyAndId tripSvcId = trip.getServiceId();
+            AgencyAndId tripSvcId = new AgencyAndId(trip.getServiceId_agencyId(), trip.getServiceId_id());
+            if (weekdaySvcIds.contains(tripSvcId)) {
+              ++wkdayTrips[stopCt];
+            } else if (saturdaySvcIds.contains(tripSvcId)) {
+              ++satTrips[stopCt];
+            } else if (sundaySvcIds.contains(tripSvcId)) {
+              ++sunTrips[stopCt];
+            }
+            tripMap.put(tripHeadsign, tripTotals);
+          }  // End of trips loop.  Stop counts by direction for this route have been set.
+          for (String headSign : tripMap.keySet() ) {
+            TripTotals tripTotals = tripMap.get(headSign);
+            DataValidationHeadsignCts newHeadsignCt = new DataValidationHeadsignCts();
+            newHeadsignCt.setHeadsign(headSign);
+            SortedSet<DataValidationDirectionCts> newDirCountSet = new TreeSet<DataValidationDirectionCts>();
 
-              DataValidationDirectionCts newDirCt_0 = new DataValidationDirectionCts();
-              newDirCt_0.setDirection("0");
-              SortedSet<DataValidationStopCt> stopCounts_0 = new TreeSet<>();
-              for (int i=0; i<MAX_STOP_CT; ++i) {
-                if (tripTotals.wkdayTrips_0[i]>0
-                    || tripTotals.satTrips_0[i]>0
-                    || tripTotals.sunTrips_0[i]>0) {
-                  DataValidationStopCt stopCt_0 = new DataValidationStopCt();
-                  stopCt_0.setStopCt(i);
-                  stopCt_0.setTripCts(new int[]
-                      {tripTotals.wkdayTrips_0[i], tripTotals.satTrips_0[i], tripTotals.sunTrips_0[i]});
-                  stopCounts_0.add(stopCt_0);
-                }
-              }
-              if (stopCounts_0.size() > 0) {
-                newDirCt_0.setStopCounts(stopCounts_0);
-                newDirCountSet.add(newDirCt_0);
-              }
-              DataValidationDirectionCts newDirCt_1 = new DataValidationDirectionCts();
-              newDirCt_1.setDirection("1");
-              SortedSet<DataValidationStopCt> stopCounts_1 = new TreeSet<>();
-              for (int i=0; i<MAX_STOP_CT; ++i) {
-                if (tripTotals.wkdayTrips_1[i]>0
-                    || tripTotals.satTrips_1[i]>0
-                    || tripTotals.sunTrips_1[i]>0) {
-                  DataValidationStopCt stopCt_1 = new DataValidationStopCt();
-                  stopCt_1.setStopCt(i);
-                  stopCt_1.setTripCts(new int[]
-                      {tripTotals.wkdayTrips_1[i], tripTotals.satTrips_1[i], tripTotals.sunTrips_1[i]});
-                  stopCounts_1.add(stopCt_1);
-                }
-                if (stopCounts_1.size() > 0) {
-                  newDirCt_1.setStopCounts(stopCounts_1);
-                  newDirCountSet.add(newDirCt_1);
-                }
-              }
-              if (newDirCountSet.size() > 0) {
-                newHeadsignCt.setDirCounts(newDirCountSet);
-                headsignCounts.add(newHeadsignCt);
+            DataValidationDirectionCts newDirCt_0 = new DataValidationDirectionCts();
+            newDirCt_0.setDirection("0");
+            SortedSet<DataValidationStopCt> stopCounts_0 = new TreeSet<>();
+            for (int i=0; i<MAX_STOP_CT; ++i) {
+              if (tripTotals.wkdayTrips_0[i]>0
+                  || tripTotals.satTrips_0[i]>0
+                  || tripTotals.sunTrips_0[i]>0) {
+                DataValidationStopCt stopCt_0 = new DataValidationStopCt();
+                stopCt_0.setStopCt(i);
+                stopCt_0.setTripCts(new int[]
+                    {tripTotals.wkdayTrips_0[i], tripTotals.satTrips_0[i], tripTotals.sunTrips_0[i]});
+                stopCounts_0.add(stopCt_0);
               }
             }
-            if (headsignCounts.size() > 0) {
-              newRouteCts.setHeadsignCounts(headsignCounts);
-              newModeRouteCts.add(newRouteCts);
+            if (stopCounts_0.size() > 0) {
+              newDirCt_0.setStopCounts(stopCounts_0);
+              newDirCountSet.add(newDirCt_0);
             }
+            DataValidationDirectionCts newDirCt_1 = new DataValidationDirectionCts();
+            newDirCt_1.setDirection("1");
+            SortedSet<DataValidationStopCt> stopCounts_1 = new TreeSet<>();
+            for (int i=0; i<MAX_STOP_CT; ++i) {
+              if (tripTotals.wkdayTrips_1[i]>0
+                  || tripTotals.satTrips_1[i]>0
+                  || tripTotals.sunTrips_1[i]>0) {
+                DataValidationStopCt stopCt_1 = new DataValidationStopCt();
+                stopCt_1.setStopCt(i);
+                stopCt_1.setTripCts(new int[]
+                    {tripTotals.wkdayTrips_1[i], tripTotals.satTrips_1[i], tripTotals.sunTrips_1[i]});
+                stopCounts_1.add(stopCt_1);
+              }
+              if (stopCounts_1.size() > 0) {
+                newDirCt_1.setStopCounts(stopCounts_1);
+                newDirCountSet.add(newDirCt_1);
+              }
+            }
+            if (newDirCountSet.size() > 0) {
+              newHeadsignCt.setDirCounts(newDirCountSet);
+              headsignCounts.add(newHeadsignCt);
+            }
+          }
+          if (headsignCounts.size() > 0) {
+            newRouteCts.setHeadsignCounts(headsignCounts);
+            newModeRouteCts.add(newRouteCts);
           }
         }
       }

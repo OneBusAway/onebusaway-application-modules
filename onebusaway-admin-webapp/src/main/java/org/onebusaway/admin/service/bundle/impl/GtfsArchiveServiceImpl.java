@@ -90,9 +90,9 @@ public class GtfsArchiveServiceImpl implements GtfsArchiveService {
 
   @Override
   public List<ArchivedRoute> getRoutesForAgencyAndBundleId(
-      ArchivedAgency agency, int buildId) {
+      String agencyId, int buildId) {
     List<ArchivedRoute> routes = new ArrayList<>();
-    routes = _gtfsArchiveDao.getRoutesForAgencyAndBundleId(agency, buildId);
+    routes = _gtfsArchiveDao.getRoutesForAgencyAndBundleId(agencyId, buildId);
 
     return routes;
   }

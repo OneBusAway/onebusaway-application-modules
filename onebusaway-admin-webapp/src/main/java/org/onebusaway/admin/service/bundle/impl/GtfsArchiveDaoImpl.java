@@ -49,7 +49,7 @@ public class GtfsArchiveDaoImpl implements GtfsArchiveDao {
   private HibernateTemplate _template;
 
   @Autowired
-  @Qualifier("bundleBuildResponseSessionFactory")
+  @Qualifier("gtfsRealtimeArchiveSessionFactory")
   public void setSessionFactory(SessionFactory sessionFactory) {
     _template = new HibernateTemplate(sessionFactory);
   }
@@ -157,17 +157,9 @@ public class GtfsArchiveDaoImpl implements GtfsArchiveDao {
 
   @Override
   public List<ArchivedRoute> getRoutesForAgencyAndBundleId(
-      ArchivedAgency agency, int buildId) {
-    String agencyId = agency.getId();
+      String agencyId, int buildId) {
     Session session = _template.getSessionFactory().getCurrentSession();
     Transaction tx = session.beginTransaction();
-    //List<ArchivedRoute> archivedRoutes = _template
-    //    .findByNamedParam("from ArchivedRoute where gtfsBundleInfoId=:build_id and agency=:agency",
-    //        new String[]{"build_id", "agency"}, new String[]{""+buildId, agencyId});
-    //List<ArchivedRoute> archivedRoutes = _template.find("from ArchivedRoute where gtfsBundleInfoId=? and agency=?", (Integer)buildId, (String)agencyId);
-    
-    //List<ArchivedRoute> archivedRoutes = _template
-    //    .findByNamedParam("from ArchivedRoute where gtfs_bundle_info_id=:build_id", "build_id", buildId);
     Query query = session.createQuery("from ArchivedRoute where gtfs_bundle_info_id=:build_id and agencyId=:agencyId")
         .setParameter("build_id", buildId)
         .setParameter("agencyId", agencyId);

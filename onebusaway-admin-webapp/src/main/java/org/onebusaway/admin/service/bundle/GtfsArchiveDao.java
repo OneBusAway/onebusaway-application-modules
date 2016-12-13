@@ -46,7 +46,7 @@ public interface GtfsArchiveDao {
   GtfsBundleInfo getBundleInfoForId(int buildId);
 
   List<ArchivedRoute> getRoutesForAgencyAndBundleId(
-      ArchivedAgency agency, int buildId);
+      String agencyId, int buildId);
 
   List<ArchivedStopTime> getStopTimesForTripAndBundleId(
       ArchivedTrip trip, int buildId);
