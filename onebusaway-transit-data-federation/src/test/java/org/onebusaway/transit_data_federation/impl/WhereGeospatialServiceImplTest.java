@@ -27,6 +27,7 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.container.refresh.RefreshService;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 
@@ -38,6 +39,9 @@ public class WhereGeospatialServiceImplTest {
 
     TransitGraphDao dao = Mockito.mock(TransitGraphDao.class);
     service.setTransitGraphDao(dao);
+
+    RefreshService refreshService = Mockito.mock(RefreshService.class);
+    service.setRefreshService(refreshService);
 
     StopEntry stopA = stop("a", -0.5, -0.5);
     StopEntry stopB = stop("b", -0.5, 0.5);
