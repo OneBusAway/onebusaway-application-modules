@@ -35,6 +35,10 @@ public interface GtfsArchiveService {
   
   SortedSet<String> getAllDatasets();
 
+  List<ArchivedRoute> getAllRoutesByBundleId(int buildId);
+
+  List<ArchivedTrip> getAllTripsByBundleId(int buildId);
+
   SortedSet<String> getBuildNamesForDataset(String dataset);
 
   SortedMap<String, String> getBuildNameMapForDataset(String dataset);
@@ -46,4 +50,6 @@ public interface GtfsArchiveService {
   List<ArchivedStopTime> getStopTimesForTripAndBundleId(ArchivedTrip trip, int buildId);
 
   List<ArchivedTrip> getTripsForRouteAndBundleId(String routeId, int buildId);
+
+  List getTripStopCounts(int buildId);
 }

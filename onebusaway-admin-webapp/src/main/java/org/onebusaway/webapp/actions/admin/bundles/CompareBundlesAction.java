@@ -20,6 +20,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -166,6 +168,11 @@ public class CompareBundlesAction extends OneBusAwayNYCAdminActionSupport {
       String datasetName2, String buildName2) {
     List<DataValidationMode> currentModes;
     List<DataValidationMode> selectedModes;
+
+    long startTime = (new Date()).getTime();
+    long buildModeTime1 = 0L;
+    long buildModeTime2 = 0L;
+
     if (!useArchived) {
       String currentValidationReportPath = fileService.getBucketName()
           + File.separator  + datasetName + "/builds/" + buildName
@@ -183,14 +190,32 @@ public class CompareBundlesAction extends OneBusAwayNYCAdminActionSupport {
       selectedModes
         = _fixedRouteParserService.parseFixedRouteReportFile(selectedValidationReportFile);
     } else {
+      long buildModeStartTime = (new Date()).getTime();
       currentModes = buildModes(dataset_1_build_id);
+      buildModeTime1 = (new Date()).getTime() - buildModeStartTime;
+      buildModeStartTime = (new Date()).getTime();
       selectedModes = buildModes(dataset_2_build_id);
+      buildModeTime2 = (new Date()).getTime() - buildModeStartTime;
     }
 
     // compare and get diffs
     List<DataValidationMode> fixedRouteDiffs
       = findFixedRouteDiffs(currentModes, selectedModes);
 
+    long totalTime = (new Date()).getTime() -startTime ;
+
+    String buildTimeMsg1 = ("Elapsed time for building mode for first dataset was "
+        + buildModeTime1/(60*1000) + " min ")
+        + (buildModeTime1/1000)%60 + " sec";
+    String buildTimeMsg2 = ("Elapsed time for building mode for second dataset was "
+        + buildModeTime2/(60*1000) + " min ")
+        + (buildModeTime2/1000)%60 + " sec";
+    String totalTimeMsg = ("Total elapsed time for Fixed Route Comparison report was "
+        + totalTime/(60*1000) + " min ")
+        + (totalTime/1000)%60 + " sec";
+    _log.info(buildTimeMsg1);
+    _log.info(buildTimeMsg2);
+    _log.info(totalTimeMsg);
     return  fixedRouteDiffs;
   }
 
@@ -253,27 +278,70 @@ public class CompareBundlesAction extends OneBusAwayNYCAdminActionSupport {
       }
     }
 
+    // Get all the routes for this build id
+    List<ArchivedRoute> allRoutes = _gtfsArchiveService.getAllRoutesByBundleId(buildId);
+
+    // Get all the trips for this build id
+    List<ArchivedTrip> allTrips = _gtfsArchiveService.getAllTripsByBundleId(buildId);
+
+    // Get trip stop countt for all the trips in this build
+    // This call returns a list of arrays of Objects of the form
+    // [String trip_agencyId, String trip_id, int stop_count]
+    List allStopCts =  _gtfsArchiveService.getTripStopCounts(buildId);
+    Map <AgencyAndId, Integer> tripStopCounts = new HashMap<>();
+    for (int i=0; i < allStopCts.size(); ++i) {
+      Object[] tripStopCt = (Object[])allStopCts.get(i);
+      String tripAgencyId = (String)tripStopCt[0];
+      String tripId = (String)tripStopCt[1];
+      int stopCt = (int)tripStopCt[2];
+      AgencyAndId agencyAndId = new AgencyAndId(tripAgencyId, tripId);
+      tripStopCounts.put(agencyAndId, stopCt);
+    }
+
+    /*
+    for (int i=0; i<allStopCts.size(); i++) {
+      Object[] foo = (Object[])allStopCts.get(i);
+      String tripId = (String)foo[1];
+      int tripCt = (int)foo[2];
+      String debug = "";
+    }
+    */
+
     Map<String, List<String>> reportModes = getReportModes();
     Collection<ArchivedAgency> agencies = _gtfsArchiveService.getAllAgenciesByBundleId(buildId);
+    /*
+    try {
+      getTripsWithStopCts();
+    } catch (SQLException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+    */
     for (String currentMode : reportModes.keySet()) {
       DataValidationMode newMode = new DataValidationMode();
       newMode.setModeName(currentMode);
       SortedSet<DataValidationRouteCounts> newModeRouteCts = new TreeSet<DataValidationRouteCounts>();
       List<String> agenciesOrRoutes = reportModes.get(currentMode);  // Note: currentRoutes entries might be just an agency id
       for (String agencyOrRoute : agenciesOrRoutes) {                // or a route, i.e. <agencyId>_<routeId>
-        List<ArchivedRoute> routes = null;
+        //List<ArchivedRoute> routes = null;
         int idx = agencyOrRoute.indexOf("_"); // check if agency or route id
+        /*
         if (idx < 0) {    // it's an agency
           routes = _gtfsArchiveService.getRoutesForAgencyAndBundleId(agencyOrRoute, buildId);
         } else {
           ;
         }
+        */
+        /*
         if (routes == null || routes.size() ==  0) {
           continue;
-        }
-        int routeCt = routes.size();
+        }*/
+        int routeCt = allRoutes.size();
         int currentRouteCt=0;
-        for (ArchivedRoute route : routes) {
+        for (ArchivedRoute route : allRoutes) {
+          if (!route.getAgencyId().equals(agencyOrRoute)) {
+            continue;
+          }
           currentRouteCt++;
           int[] wkdayTrips = null;
           int[] satTrips = null;
@@ -298,11 +366,42 @@ public class CompareBundlesAction extends OneBusAwayNYCAdminActionSupport {
             routeNum =  "";
           }
           newRouteCts.setRouteNum(routeNum);
+
+          // Build DataValidationHeadsignCts
           SortedSet<DataValidationHeadsignCts> headsignCounts = new TreeSet<>();
-          List<ArchivedTrip> trips = _gtfsArchiveService.getTripsForRouteAndBundleId(routeId, buildId);
-          for (ArchivedTrip trip : trips) {
-            List<ArchivedStopTime> stopTimes =  _gtfsArchiveService.getStopTimesForTripAndBundleId(trip, buildId);
-            int stopCt = stopTimes.size();
+          //List<ArchivedTrip> trips = _gtfsArchiveService.getTripsForRouteAndBundleId(routeId, buildId);
+          int stopCtIdx=0;
+          for (ArchivedTrip trip : allTrips) {
+            if (trip.getRoute_agencyId().compareTo(route.getAgencyId()) > 0
+                || (trip.getRoute_agencyId().equals(route.getAgencyId())
+                    && trip.getRoute_id().compareTo(route.getId()) > 0)) {
+              break;
+            }
+            if (!trip.getRoute_agencyId().equals(route.getAgencyId()) || !trip.getRoute_id().equals(route.getId())) {
+              continue;
+            }
+
+            // Get stop times for this trip
+            //List<ArchivedStopTime> stopTimes =  _gtfsArchiveService.getStopTimesForTripAndBundleId(trip, buildId);
+            /*
+            int i=0;
+            int stopCt = 0;
+            for (i=stopCtIdx; i< allStopCts.size(); ++i) {
+              Object[] tripStopCt = (Object[])allStopCts.get(i);
+              String tripAgencyId = (String)tripStopCt[0];
+              String tripId = (String)tripStopCt[1];
+              if (tripAgencyId.equals(trip.getAgencyId()) && tripId.equals(trip.getId())) {
+                stopCt = (int)tripStopCt[2];
+                stopCtIdx = i+1;
+                break;
+              }
+            }
+            */
+
+            AgencyAndId tripAgencyAndId = new AgencyAndId(trip.getAgencyId(), trip.getId());
+
+            int stopCt = tripStopCounts.get(tripAgencyAndId) != null ? tripStopCounts.get(tripAgencyAndId) : 0;
+            //int stopCt = stopTimes.size();
             if (stopCt > MAX_STOP_CT) {
               stopCt = MAX_STOP_CT;
             }
@@ -663,7 +762,32 @@ public class CompareBundlesAction extends OneBusAwayNYCAdminActionSupport {
 
     return sourceUrl;
   }
+/*
+  private void getTripsWithStopCts() throws SQLException {
+    Statement stmt = null;
+    String query = "select trip_agencyId, trip_id, count(*) from (select * from gtfs_stop_times where gtfs_bundle_info_id=25) x group by trip_agencyId, trip_id";
 
+      try {
+        stmt = con.createStatement();
+        ResultSet rs = stmt.executeQuery(query);
+        while (rs.next()) {
+            String coffeeName = rs.getString("COF_NAME");
+            int supplierID = rs.getInt("SUP_ID");
+            float price = rs.getFloat("PRICE");
+            int sales = rs.getInt("SALES");
+            int total = rs.getInt("TOTAL");
+            System.out.println(coffeeName + "\t" + supplierID +
+                               "\t" + price + "\t" + sales +
+                               "\t" + total);
+        }
+    } catch (SQLException e ) {
+        JDBCTutorialUtilities.printSQLException(e);
+    } finally {
+        if (stmt != null) { stmt.close(); }
+    }
+      return;
+  }
+*/
   class TripTotals {
     int[] wkdayTrips_0;
     int[] wkdayTrips_1;

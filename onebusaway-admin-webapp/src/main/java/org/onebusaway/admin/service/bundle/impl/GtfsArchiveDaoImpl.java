@@ -88,6 +88,26 @@ public class GtfsArchiveDaoImpl implements GtfsArchiveDao {
     return archivedCalendars;
   }
   
+  @Override
+  public List<ArchivedRoute> getAllRoutesByBundleId(int buildId) {
+    Session session = _template.getSessionFactory().getCurrentSession();
+    Transaction tx = session.beginTransaction();
+    List<ArchivedRoute> archivedRoutes = _template
+        .findByNamedParam("from ArchivedRoute where gtfsBundleInfoId=:id", "id", buildId);
+    tx.commit();
+    return archivedRoutes;
+  }
+
+  @Override
+  public List<ArchivedTrip> getAllTripsByBundleId(int buildId) {
+    Session session = _template.getSessionFactory().getCurrentSession();
+    Transaction tx = session.beginTransaction();
+    List<ArchivedTrip> archivedTrips = _template
+        .findByNamedParam("from ArchivedTrip where gtfsBundleInfoId=:id order by route_agencyId, route_id", "id", buildId);
+    tx.commit();
+    return archivedTrips;
+  }
+
   /** 
    * Accesses the database to get the names of all the archived datasets.
    * 
@@ -203,6 +223,18 @@ public class GtfsArchiveDaoImpl implements GtfsArchiveDao {
     
     tx.commit();
     return archivedTrips;
+  }
+
+  @Override
+  public List getTripStopCounts(int buildId) {
+    Session session = _template.getSessionFactory().getCurrentSession();
+    Transaction tx = session.beginTransaction();
+    Query query = session.getNamedQuery("tripStopCts")
+        .setParameter("bundleId", buildId);
+    List results = query.list();
+
+    tx.commit();
+    return results;
   }
 
 }

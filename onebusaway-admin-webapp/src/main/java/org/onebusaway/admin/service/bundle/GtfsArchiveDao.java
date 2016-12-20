@@ -39,6 +39,10 @@ public interface GtfsArchiveDao {
 
   SortedSet<String> getAllDatasets();
 
+  List<ArchivedRoute> getAllRoutesByBundleId(int buildId);
+
+  List<ArchivedTrip> getAllTripsByBundleId(int buildId);
+
   SortedSet<String> getBuildNamesForDataset(String dataset);
 
   SortedMap<String, String> getBuildNameMapForDataset(String dataset);
@@ -53,4 +57,6 @@ public interface GtfsArchiveDao {
 
   List<ArchivedTrip> getTripsForRouteAndBundleId(String routeId,
       int buildId);
+
+  List getTripStopCounts(int buildId);
 }

@@ -66,6 +66,22 @@ public class GtfsArchiveServiceImpl implements GtfsArchiveService {
   }
 
   @Override
+  public List<ArchivedRoute> getAllRoutesByBundleId(int buildId) {
+    List<ArchivedRoute> routes = new ArrayList<>();
+    routes = _gtfsArchiveDao.getAllRoutesByBundleId(buildId);
+
+    return routes;
+  }
+
+  @Override
+  public List<ArchivedTrip> getAllTripsByBundleId(int buildId) {
+    List<ArchivedTrip> trips = new ArrayList<>();
+    trips = _gtfsArchiveDao.getAllTripsByBundleId(buildId);
+
+    return trips;
+  }
+
+  @Override
   public SortedSet<String> getBuildNamesForDataset(String dataset) {
     SortedSet<String> buildNames = new TreeSet<>();
     buildNames = _gtfsArchiveDao.getBuildNamesForDataset(dataset);
@@ -107,12 +123,20 @@ public class GtfsArchiveServiceImpl implements GtfsArchiveService {
   }
 
   @Override
-  public List<ArchivedTrip> getTripsForRouteAndBundleId(String routeId,
+  public List getTripsForRouteAndBundleId(String routeId,
       int buildId) {
     List<ArchivedTrip> trips = new ArrayList<>();
     trips = _gtfsArchiveDao.getTripsForRouteAndBundleId(routeId, buildId);
 
     return trips;
+  }
+
+  @Override
+  public List<Object[]> getTripStopCounts(int buildId) {
+    List<Object[]>results = null;
+    results = _gtfsArchiveDao.getTripStopCounts(buildId);
+
+    return results;
   }
 
 }

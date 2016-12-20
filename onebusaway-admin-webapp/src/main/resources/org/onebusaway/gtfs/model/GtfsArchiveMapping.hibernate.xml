@@ -380,7 +380,6 @@
         <property name="pickupType" />
         <property name="dropOffType" />
         <property name="shapeDistTraveled" />
-        <property name="farePeriodId" />
     </class>
 
     <class name="org.onebusaway.admin.service.bundle.task.model.ArchivedTrip" table="gtfs_trips">
@@ -402,5 +401,35 @@
         <property name="blockId" index="blockId" />
         <property name="wheelchairAccessible"/>
     </class>
+<!--
+    <sql-query name="tripsStopCts">
+        <return-scalar column="trip_agencyId" type="string" />
+        <return-scalar column="trip_id" type="string" />
+        <return-scalar column="stop_count" type="int" />
+        SELECT  st.trip_agencyId as trip_agencyId
+                st.trip_id as trip_id,
+                count(*) as stop_count
+        FROM gtfs_stop_times st
+        WHERE st.gtfs_bundle_info_id=:bundleId
+        GROUP BY st.trip_agencyId,
+                st.trip_id
+    </sql-query>
+-->
+
+    <sql-query name="tripStopCts">
+        <return-scalar column="trip_agencyId" type="string" />
+        <return-scalar column="trip_id" type="string" />
+        <return-scalar column="stop_count" type="int" />
+        SELECT  trip_agencyId as trip_agencyId,
+                trip_id as trip_id,
+                count(*) as stop_count
+        FROM gtfs_stop_times st
+        WHERE st.gtfs_bundle_info_id=:bundleId
+        GROUP BY st.trip_agencyId,
+                st.trip_id
+        ORDER BY st.trip_agencyId,
+                st.trip_id
+    </sql-query>
+
 
 </hibernate-mapping>
