@@ -149,6 +149,8 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   private boolean _scheduleAdherenceFromLocation = false;
 
   private BlockGeospatialService _blockGeospatialService;
+  
+  private boolean _enabled = true;
  
   @Autowired
   public void setAgencyService(AgencyService agencyService) {
@@ -195,6 +197,10 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   public void setTripUpdatesUrl(URL tripUpdatesUrl) {
     _tripUpdatesUrl = tripUpdatesUrl;
   }
+  
+  public URL getTripUpdatesUrl() {
+    return _tripUpdatesUrl;
+  }
 
   public void setSftpTripUpdatesUrl(String sftpTripUpdatesUrl) {
     _sftpTripUpdatesUrl = sftpTripUpdatesUrl;
@@ -204,6 +210,10 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     _vehiclePositionsUrl = vehiclePositionsUrl;
   }
 
+  public URL getVehiclePositionsUrl() {
+    return _vehiclePositionsUrl;
+  }
+  
   public void setSftpVehiclePositionsUrl(String sftpVehiclePositionsUrl) {
     _sftpVehiclePositionsUrl = sftpVehiclePositionsUrl;
   }
@@ -212,12 +222,20 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     _alertsUrl = alertsUrl;
   }
 
+  public URL getAlertsUrl() {
+    return _alertsUrl;
+  }
+  
   public void setSftpAlertsUrl(String sftpAlertsUrl) {
     _sftpAlertsUrl = sftpAlertsUrl;
   }
 
   public void setRefreshInterval(int refreshInterval) {
     _refreshInterval = refreshInterval;
+  }
+  
+  public int getRefreshInterval() {
+    return _refreshInterval;
   }
 
   public void setHeadersMap(Map<String,String> headersMap) {
@@ -268,6 +286,18 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     _scheduleAdherenceFromLocation = scheduleAdherenceFromLocation;
   }
   
+  public void setEnabled(boolean enabled) {
+    this._enabled = enabled;
+  }
+  
+  public boolean getEnabled() {
+    return _enabled;
+  }
+  
+  public GtfsRealtimeTripLibrary getGtfsRealtimeTripLibrary() {
+    return _tripsLibrary;
+  }
+  
   @PostConstruct
   public void start() {
     if (_agencyIds.isEmpty()) {
@@ -301,6 +331,10 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
       _refreshTask = _scheduledExecutorService.scheduleAtFixedRate(
           new RefreshTask(), 0, _refreshInterval, TimeUnit.SECONDS);
     }
+  }
+  
+  public void reset() {
+    _lastVehicleUpdate.clear();
   }
 
   @PreDestroy
@@ -728,7 +762,9 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     @Override
     public void run() {
       try {
-        refresh();
+        if (_enabled) {
+          refresh();
+        }
       } catch (Throwable ex) {
         _log.warn("Error updating from GTFS-realtime data sources", ex);
       }

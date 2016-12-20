@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2016 Cambridge Systematics, Inc.
+
+    Licensed under the Apache License, Version 2.0 (the "License"); you may not
+    use this file except in compliance with the License. You may obtain a copy of
+    the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+    License for the specific language governing permissions and limitations under
+    the License.
+
+-->
+<html xmlns:jsp="http://java.sun.com/JSP/Page"
+    xmlns:c="http://java.sun.com/jsp/jstl/core"
+    xmlns:fmt="http://java.sun.com/jsp/jstl/fmt">
+<jsp:directive.page contentType="text/html" />
+<head>
+<title>Playback</title>
+</head>
+<body>
+
+<a href="${pageContext.request.contextPath}" style="float: right;">Home</a>
+<h2>Playback</h2>
+<table class="data">
+<!-- iterate over current data sources -->
+	<thead>
+		<tr>
+			<td>Agency</td>
+			<td>Trip Url</td>
+			<td>Refresh</td>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<td>${detail.source.agencyIds}</td>
+			<td>${detail.source.tripUpdatesUrl}</td>
+			<td>${detail.source.refreshInterval}</td>
+		</tr>
+	</tbody>
+</table>
+<hr />
+<h3>Playback Settings</h3>
+<table>
+	<thead>
+		<tr>
+			<td>Time</td>
+			<td>Trip URL</td>
+			<td>Refresh</td>
+			<td>Key</td>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+		    <form name="command" action="playback!playback.do" method="POST">
+		        <input type="hidden" name="index" value="${detail.index}" />
+		        <input type="hidden" name="command" value="update" id="command"/>
+				<td><input type="text" name="time" value="2016-12-05 04:40:00" /></td>
+				<td><input type="text" name="baseUrl" value="http://localhost:9999/onebusaway-gtfs-realtime-archiver/gtfs-realtime/trip-updates"/></td>
+				<td><input type="text" name="refresh" value="30" /></td>
+				<td><input type="text" name="apiKey" value="TEST" /></td>
+				<input type="button" name="update" value="update"  onClick="javascript: document.command.submit();"/>
+				<input type="button" name="clear" value="restart clock" onClick="javascript: document.getElementById('command').value='clear';document.command.submit();" />
+			</form>
+		</tr>
+	</tbody>
+  
+</table>
+</body>
+</html>

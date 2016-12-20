@@ -23,6 +23,7 @@ import org.onebusaway.transit_data_federation.services.blocks.BlockTripInstance;
 import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects;
 import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlertsService;
 import org.onebusaway.transit_data_federation.services.transit_graph.*;
+import org.onebusaway.util.SystemTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -99,7 +100,7 @@ class ServiceAlertsServiceImpl implements ServiceAlertsService {
 			serviceAlertRecord.setServiceAlertId(uuid.toString());
 		}
 
-		long lastModified = System.currentTimeMillis();
+		long lastModified = SystemTime.currentTimeMillis();
 		if (serviceAlertRecord.getCreationTime() < 1l)
         serviceAlertRecord.setCreationTime(lastModified);
 
@@ -567,7 +568,7 @@ class ServiceAlertsServiceImpl implements ServiceAlertsService {
 	// this is admittedly slow performing, but it is only called on an update
 	// of a single service alert
 	private synchronized void saveDBServiceAlerts(ServiceAlertRecord alert, Long lastModified) {
-          if (lastModified == null) lastModified = System.currentTimeMillis();
+          if (lastModified == null) lastModified = SystemTime.currentTimeMillis();
           alert.setModifiedTime(lastModified); // we need to assume its changed, as we don't track the affects clause
           ServiceAlertRecord persistedServiceAlertRecord = _persister.getServiceAlertRecordByAlertId(alert.getAgencyId(), alert.getServiceAlertId());
           if(persistedServiceAlertRecord != null)

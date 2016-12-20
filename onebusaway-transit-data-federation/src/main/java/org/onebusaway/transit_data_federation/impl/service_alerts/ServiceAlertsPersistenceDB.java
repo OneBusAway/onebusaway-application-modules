@@ -22,6 +22,7 @@ import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.onebusaway.util.SystemTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,7 +67,7 @@ public class ServiceAlertsPersistenceDB implements ServiceAlertsPersistence {
    * with persister
    */
   public synchronized boolean cachedNeedsSync() {
-    long now = System.currentTimeMillis();
+    long now = SystemTime.currentTimeMillis();
     
     if (now > lastRefresh + _refreshInterval) {
       lastRefresh = now;
@@ -154,7 +155,7 @@ public class ServiceAlertsPersistenceDB implements ServiceAlertsPersistence {
   }
 
   private Long getLastModified() {
-    long start = System.currentTimeMillis();
+    long start = SystemTime.currentTimeMillis();
     try {
       return _template.execute(new HibernateCallback<Long>() {
         @Override
@@ -168,7 +169,7 @@ public class ServiceAlertsPersistenceDB implements ServiceAlertsPersistence {
       _log.error("hibernate blew:", t);
       return null;
     } finally {
-      long stop = System.currentTimeMillis();
+      long stop = SystemTime.currentTimeMillis();
       _log.debug("getLastModified took " + (stop - start) + "ms");
     }
   }

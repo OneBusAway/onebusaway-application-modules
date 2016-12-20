@@ -41,6 +41,7 @@ import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.twilio.actions.Messages;
 import org.onebusaway.twilio.actions.TwilioSupport;
 import org.onebusaway.twilio.impl.PhoneArrivalsAndDeparturesModel;
+import org.onebusaway.util.SystemTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -136,7 +137,7 @@ public class ArrivalsAndDeparturesAction extends TwilioSupport {
     }
     Collections.sort(arrivals, new ArrivalAndDepartureComparator());
 
-    long now = System.currentTimeMillis();
+    long now = SystemTime.currentTimeMillis();
 
     for (ArrivalAndDepartureBean adb : arrivals) {
 

@@ -51,6 +51,7 @@ import org.onebusaway.transit_data_federation.services.blocks.ScheduledBlockLoca
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.ServiceIdActivation;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
+import org.onebusaway.util.SystemTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -237,7 +238,7 @@ public class SiriLikeRealtimeSource {
       return null;
     }
     if (timestamp == 0) {
-      timestamp = System.currentTimeMillis();
+      timestamp = SystemTime.currentTimeMillis();
     }
     
     String serviceDateStr = (String) serviceDateExpression.evaluate(node, XPathConstants.STRING);

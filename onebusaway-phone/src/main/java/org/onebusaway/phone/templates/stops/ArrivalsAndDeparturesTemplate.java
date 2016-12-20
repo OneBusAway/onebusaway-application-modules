@@ -34,6 +34,7 @@ import org.onebusaway.transit_data.model.RouteBean;
 import org.onebusaway.transit_data.model.StopsWithArrivalsAndDeparturesBean;
 import org.onebusaway.transit_data.model.TransitDataConstants;
 import org.onebusaway.transit_data.model.trips.TripBean;
+import org.onebusaway.util.SystemTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
@@ -101,7 +102,7 @@ public class ArrivalsAndDeparturesTemplate extends AbstractAgiTemplate {
 
     Collections.sort(arrivals, new ArrivalAndDepartureComparator());
 
-    long now = System.currentTimeMillis();
+    long now = SystemTime.currentTimeMillis();
 
     for (ArrivalAndDepartureBean adb : arrivals) {
 

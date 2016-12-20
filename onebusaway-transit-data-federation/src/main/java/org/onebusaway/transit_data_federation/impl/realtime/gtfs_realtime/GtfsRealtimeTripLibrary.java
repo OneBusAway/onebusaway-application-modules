@@ -31,6 +31,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.lang.StringUtils;
 import org.onebusaway.collections.MappingLibrary;
 import org.onebusaway.collections.Min;
 import org.onebusaway.geospatial.model.CoordinatePoint;
@@ -51,6 +52,7 @@ import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTi
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
+import org.onebusaway.util.SystemTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,7 +69,7 @@ import com.google.transit.realtime.GtfsRealtime.VehiclePosition;
 import com.google.transit.realtime.GtfsRealtimeOneBusAway;
 import com.google.transit.realtime.GtfsRealtimeOneBusAway.OneBusAwayTripUpdate;
 
-class GtfsRealtimeTripLibrary {
+public class GtfsRealtimeTripLibrary {
 
   private static final Logger _log = LoggerFactory.getLogger(GtfsRealtimeTripLibrary.class);
 
@@ -176,7 +178,7 @@ class GtfsRealtimeTripLibrary {
 
       TripUpdate tu = fe.getTripUpdate();
 
-      if (tu.hasVehicle() && tu.getVehicle().hasId()) {
+      if (tu.hasVehicle() && tu.getVehicle().hasId() && StringUtils.isNotBlank(tu.getVehicle().getId())) {
         // Trip update has a vehicle ID - index by vehicle ID
         String vehicleId = tu.getVehicle().getId();
 
@@ -879,13 +881,13 @@ class GtfsRealtimeTripLibrary {
   private long currentTime() {
     if (_currentTime != 0) {
       // if the feed clock is off by more than an hour we most likely have a timezone issue
-      if (validateCurrentTime() && Math.abs(_currentTime - System.currentTimeMillis()) > 60 * 60 * 1000) {
+      if (validateCurrentTime() && Math.abs(_currentTime - SystemTime.currentTimeMillis()) > 60 * 60 * 1000) {
         _log.error("timestamp invalid at " + new Date(_currentTime) + ", overriding with system time");
-        _currentTime = System.currentTimeMillis();
+        _currentTime = SystemTime.currentTimeMillis();
       }
       return _currentTime;
     }
-    return System.currentTimeMillis();
+    return SystemTime.currentTimeMillis();
   }
 
   private static class BestScheduleDeviation {

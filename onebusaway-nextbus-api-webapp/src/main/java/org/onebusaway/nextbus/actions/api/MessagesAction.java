@@ -32,6 +32,7 @@ import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationQueryBean;
 import org.onebusaway.transit_data.model.service_alerts.TimeRangeBean;
 import org.onebusaway.transit_data.services.TransitDataService;
+import org.onebusaway.util.SystemTime;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.opensymphony.xwork2.ModelDriven;
@@ -94,7 +95,7 @@ public class MessagesAction extends NextBusApiBase implements ModelDriven<Body<M
     for(ServiceAlertBean serviceAlert : serviceAlertBeans.getList()) {
      
         if(serviceAlert.getActiveWindows() != null){ 
-          long currentTime = System.currentTimeMillis();
+          long currentTime = SystemTime.currentTimeMillis();
             
            for(TimeRangeBean timerange : serviceAlert.getActiveWindows()){
              if(timerange.getFrom() < currentTime || timerange.getTo() < currentTime){

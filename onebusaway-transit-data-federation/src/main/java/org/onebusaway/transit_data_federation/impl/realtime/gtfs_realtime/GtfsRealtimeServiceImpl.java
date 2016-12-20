@@ -37,6 +37,7 @@ import org.onebusaway.transit_data_federation.services.realtime.VehicleStatus;
 import org.onebusaway.transit_data_federation.services.realtime.VehicleStatusService;
 import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlertsService;
 import org.onebusaway.transit_data_federation.services.transit_graph.*;
+import org.onebusaway.util.SystemTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -72,7 +73,7 @@ class GtfsRealtimeServiceImpl implements GtfsRealtimeService {
 
     FeedMessage.Builder feedMessage = createFeedWithDefaultHeader();
 
-    List<BlockLocation> activeBlocks = _blockStatusService.getAllActiveBlocks(System.currentTimeMillis());
+    List<BlockLocation> activeBlocks = _blockStatusService.getAllActiveBlocks(SystemTime.currentTimeMillis());
     for (BlockLocation activeBlock : activeBlocks) {
 
       // Only interested in blocks with real-time data

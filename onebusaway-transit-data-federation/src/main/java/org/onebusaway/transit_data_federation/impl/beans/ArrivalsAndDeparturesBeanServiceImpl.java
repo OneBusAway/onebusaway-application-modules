@@ -244,7 +244,7 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
     if (!this.useScheduleDeviationHistory) {
       return bean;
     }
-    
+
     int step = 120;
 
     ScheduleDeviationHistogram histo = _realTimeHistoryService.getScheduleDeviationHistogramForArrivalAndDepartureInstance(

@@ -29,6 +29,7 @@ import java.net.URL;
 
 import org.apache.commons.io.IOUtils;
 import org.onebusaway.util.FileUtility;
+import org.onebusaway.util.SystemTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -255,7 +256,7 @@ public class NYCFileUtils {
 
   public String createTmpDirectory() {
     String tmpDir = System.getProperty("java.io.tmpdir") + File.separator
-        + "tmp" + System.currentTimeMillis();
+        + "tmp" + SystemTime.currentTimeMillis();
     boolean created = new File(tmpDir).mkdir();
     // if directory already exists, try again
     if (!created) {

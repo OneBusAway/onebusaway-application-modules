@@ -22,6 +22,7 @@ import java.util.Map;
 import org.onebusaway.presentation.impl.NextActionSupport;
 import org.onebusaway.users.client.model.UserBean;
 import org.onebusaway.users.services.CurrentUserService;
+import org.onebusaway.util.SystemTime;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -41,7 +42,7 @@ public abstract class OneBusAwayEnterpriseActionSupport extends NextActionSuppor
     if(time != null) {
       return time;
     } else {
-      return System.currentTimeMillis();
+      return SystemTime.currentTimeMillis();
     }
   }
   
@@ -97,7 +98,7 @@ public abstract class OneBusAwayEnterpriseActionSupport extends NextActionSuppor
   }
 
   public String getCacheBreaker() {
-	  return String.valueOf(System.currentTimeMillis());
+	  return String.valueOf(SystemTime.currentTimeMillis());
   }
 
   protected UserBean getCurrentUser() {

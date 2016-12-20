@@ -54,6 +54,7 @@ import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEn
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
+import org.onebusaway.util.SystemTime;
 import org.onebusaway.utility.ObjectSerializationLibrary;
 
 import org.slf4j.Logger;
@@ -366,7 +367,7 @@ public class BlockIndexServiceImpl implements BlockIndexService {
   private void loadBlockTripIndicesByBlockId() {
 
     _log.info("calculating block trip indices by blockId...");
-    long t1 = System.currentTimeMillis();
+    long t1 = SystemTime.currentTimeMillis();
 
     _blockTripIndicesByBlockId = new HashMap<AgencyAndId, List<BlockTripIndex>>();
     _blockLayoverIndicesByBlockId = new HashMap<AgencyAndId, List<BlockLayoverIndex>>();
@@ -386,7 +387,7 @@ public class BlockIndexServiceImpl implements BlockIndexService {
         _frequencyBlockTripIndicesByBlockId.put(block.getId(), frequencyIndices);
     }
 
-    long t2 = System.currentTimeMillis();
+    long t2 = SystemTime.currentTimeMillis();
     _log.info("completed calculating block trip indices by blockId: t="
         + (t2 - t1));
   }

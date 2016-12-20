@@ -30,6 +30,7 @@ import org.onebusaway.presentation.services.realtime.RealtimeService;
 import org.onebusaway.presentation.services.search.SearchResultFactory;
 import org.onebusaway.presentation.services.search.SearchService;
 import org.onebusaway.transit_data.services.TransitDataService;
+import org.onebusaway.util.SystemTime;
 import org.onebusaway.util.services.configuration.ConfigurationService;
 import org.onebusaway.enterprise.webapp.actions.OneBusAwayEnterpriseActionSupport;
 import org.onebusaway.enterprise.webapp.actions.m.model.GeocodeResult;
@@ -222,7 +223,7 @@ public class IndexAction extends OneBusAwayEnterpriseActionSupport {
   }
 
   public String getCacheBreaker() {
-    return String.valueOf(System.currentTimeMillis());
+    return String.valueOf(SystemTime.currentTimeMillis());
   }
 
   public boolean getQueryIsEmpty() {

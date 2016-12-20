@@ -17,7 +17,7 @@ package org.onebusaway.users.impl;
 
 import org.onebusaway.users.services.ApiKeyPermissionService;
 import org.onebusaway.users.services.UserService;
-
+import org.onebusaway.util.SystemTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -47,7 +47,7 @@ public class ApiKeyPermissionServiceImpl implements ApiKeyPermissionService {
       return Status.UNAUTHORIZED;
     }
     
-    long now = System.currentTimeMillis();
+    long now = SystemTime.currentTimeMillis();
     Long lastVisit = _lastVisitForUser.get(key);
     
     Status ok = Status.RATE_EXCEEDED;

@@ -18,6 +18,8 @@ package org.onebusaway.admin.service.bundle.task;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.onebusaway.util.SystemTime;
+
 /**
  * Status object for job GtfsFullValidationTaskJob
  */
@@ -30,14 +32,14 @@ public class GtfsFullValidationTaskJobResult {
   private long finish;
  
   public GtfsFullValidationTaskJobResult(String csvFileName, String columnNames) {
-    this.start = System.currentTimeMillis();
+    this.start = SystemTime.currentTimeMillis();
     this.csvFileName = csvFileName;
     this.columnName = columnNames;
   }
   
   public void setDone() {
     done = true;
-    this.finish = System.currentTimeMillis();
+    this.finish = SystemTime.currentTimeMillis();
   }
   
   public long getRunTime() {

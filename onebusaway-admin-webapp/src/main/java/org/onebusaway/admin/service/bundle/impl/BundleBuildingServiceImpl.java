@@ -57,6 +57,7 @@ import org.onebusaway.transit_data_federation.bundle.tasks.EntityReplacementStra
 import org.onebusaway.transit_data_federation.bundle.tasks.MultiCSVLogger;
 import org.onebusaway.transit_data_federation.bundle.tasks.stif.StifTask;
 import org.onebusaway.transit_data_federation.services.FederatedTransitDataBundle;
+import org.onebusaway.util.SystemTime;
 import org.onebusaway.util.logging.LoggingService;
 import org.onebusaway.util.services.configuration.ConfigurationService;
 import org.onebusaway.util.services.configuration.ConfigurationServiceClient;
@@ -943,7 +944,7 @@ public class BundleBuildingServiceImpl implements BundleBuildingService {
     String bundleName = request.getBundleName();
     _log.info("createVersionString found bundleName=" + bundleName);
     if (bundleName == null || bundleName.length() == 0) {
-      bundleName = "b" + System.currentTimeMillis();
+      bundleName = "b" + SystemTime.currentTimeMillis();
     }
     return request.getBundleDirectory() + File.separator + 
         _fileService.getBuildPath() +  File.separator +

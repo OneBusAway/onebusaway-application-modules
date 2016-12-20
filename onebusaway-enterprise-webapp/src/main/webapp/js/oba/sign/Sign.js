@@ -35,9 +35,9 @@ OBA.Sign = function() {
 
 	var hostname = window.location.hostname;
 	var hostnamePosition = url.indexOf(hostname);
-	var obaApiBaseUrlPosition = url.indexOf("/", hostnamePosition);
-	var obaApiBaseUrl = url.substring(0, obaApiBaseUrlPosition);
-	
+    var obaApiBaseUrlPosition = url.indexOf("/", hostnamePosition);
+    var obaApiBaseUrl = url.substring(0, obaApiBaseUrlPosition);
+
 	var setupUITimeout = null;
 	
 	function getParameterByName(name, defaultValue) {
@@ -162,7 +162,7 @@ OBA.Sign = function() {
 		});
 
 		updateClock();
-		setInterval(updateClock, 1000);
+		setInterval(updateClock, 10 * 1000);
 	}
 	
 	function advance() {
@@ -172,9 +172,22 @@ OBA.Sign = function() {
 	}
 	
 	function updateClock() {
-		var now = new Date();
-		jQuery("#clock #time").text(now.format("h:MM TT"));
-		jQuery("#clock #day").text(now.format("dddd, mmmm d"));
+		// try and get date from server
+		jQuery.getJSON(obaApiBaseUrl + OBA.Config.timeApiUrl, function(json) {
+			var now;
+			if (json.data == null) {
+				console.log("call to time server failed: url=" + obaApiBaseUrl + OBA.Config.timeApiUrl);
+				now = new Date();
+			} else {
+				now = new Date(json.data.entry.time);
+			}
+			jQuery("#clock #time").text(now.format("h:MM TT"));
+			jQuery("#clock #day").text(now.format("dddd, mmmm d"));
+		}  
+		
+		
+		);
+		
 	}
 	
 	function initStop(stopId, initMonitor) {

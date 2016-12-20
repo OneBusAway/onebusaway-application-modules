@@ -27,6 +27,7 @@ import org.onebusaway.exceptions.ServiceException;
 import org.onebusaway.transit_data.model.problems.EProblemReportStatus;
 import org.onebusaway.transit_data.model.problems.TripProblemReportBean;
 import org.onebusaway.transit_data.services.TransitDataService;
+import org.onebusaway.util.SystemTime;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.opensymphony.xwork2.conversion.annotations.TypeConversion;
@@ -43,7 +44,7 @@ public class ReportProblemWithTripAction extends ApiActionSupport {
 
   private TripProblemReportBean _model = new TripProblemReportBean();
 
-  private long _time = System.currentTimeMillis();
+  private long _time = SystemTime.currentTimeMillis();
 
   public ReportProblemWithTripAction() {
     super(2);

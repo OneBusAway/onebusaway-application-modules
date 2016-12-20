@@ -28,6 +28,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.onebusaway.twilio.services.SessionManager;
+import org.onebusaway.util.SystemTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -86,7 +87,7 @@ public class TwilioDispatchFilter implements Filter {
 
   private String format(HttpServletRequest request, String nextAction) {
     
-    String path = nextAction + "?_foo=" + System.currentTimeMillis();
+    String path = nextAction + "?_foo=" + SystemTime.currentTimeMillis();
 
     // copy the path to the forwarded request
     for (Object key : request.getParameterMap().keySet()) {

@@ -50,6 +50,11 @@
 
     <servlet-mapping>
         <servlet-name>remoting</servlet-name>
+        <url-pattern>*.do</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>remoting</servlet-name>
         <url-pattern>/remoting/*</url-pattern>
     </servlet-mapping>
 

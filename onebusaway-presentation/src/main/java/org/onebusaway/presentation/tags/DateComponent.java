@@ -23,6 +23,7 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 import org.apache.struts2.components.ContextBean;
+import org.onebusaway.util.SystemTime;
 
 import com.opensymphony.xwork2.ActionContext;
 import com.opensymphony.xwork2.util.ValueStack;
@@ -94,7 +95,7 @@ public class DateComponent extends ContextBean {
     else if (obj instanceof String) {
       String v = (String) obj;
       if (v.equals("now"))
-        obj = new Date();
+        obj = new Date(SystemTime.currentTimeMillis());
     }
 
     if (obj instanceof Date) {

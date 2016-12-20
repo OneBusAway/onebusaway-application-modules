@@ -48,6 +48,7 @@ import org.onebusaway.transit_data_federation.services.blocks.ScheduledBlockLoca
 import org.onebusaway.transit_data_federation.services.realtime.BlockLocation;
 import org.onebusaway.transit_data_federation.services.realtime.BlockLocationService;
 import org.onebusaway.transit_data_federation.services.realtime.CurrentVehicleEstimationService;
+import org.onebusaway.util.SystemTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -134,7 +135,7 @@ class CurrentVehicleEstimationServiceImpl implements
   public ListBean<CurrentVehicleEstimateBean> getCurrentVehicleEstimates(
       CurrentVehicleEstimateQueryBean query) {
 
-    long minT = System.currentTimeMillis() - _maxWindow * 60 * 1000;
+    long minT = SystemTime.currentTimeMillis() - _maxWindow * 60 * 1000;
     minT = 0;
 
     List<Record> records = getRecords(query.getRecords(), minT);
