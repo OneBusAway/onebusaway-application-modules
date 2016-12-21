@@ -195,6 +195,10 @@
   font-size: 12px;
 }
 
+#buildingReportDiv {
+	color: green;
+}
+
 #currentDirectories #listItem,
 #compareCurrentDirectories #compareListItem,
 #compareSelectedBuild #compareBuildListItem {
@@ -569,13 +573,28 @@
   float: left;
 }
 
+#Compare #compareDiff {
+	margin-bottom: 2em;
+}
+
+#Compare #currentBundleDiv {
+	float: left;
+	width: 48%;
+	margin-bottom: 2px;
+}
+
+#Compare #compareToBundleDiv {
+	float: right;
+	width: 48%;
+}
+
 #Compare #currentBundleDiv fieldset,
 #Compare #compareToBundleDiv fieldset {
 	border: 1px solid gray;
-	width: 45%;
+	//width: 45%;
 }
 
-
+#Compare #selectArchiveDiv,
 #Compare #currentBundleDiv legend,
 #Compare #compareToBundleDiv legend {
 	font-weight: bold;
@@ -607,16 +626,16 @@
 	padding-left: 10px;
 }
 
+#Compare #compareDiff {
+	margin-top: 10em;
+}
+
 #Compare #fixedRouteDiffTable th.modeColumn {
 	text-align: left;
 }
 
 #Compare #diffResultsTable .numericTd {
 	text-align: right;
-}
-
-#Compare #compareDiff {
-	margin-bottom: 2em;
 }
 
 #Compare #printFixedRouteRptButton {

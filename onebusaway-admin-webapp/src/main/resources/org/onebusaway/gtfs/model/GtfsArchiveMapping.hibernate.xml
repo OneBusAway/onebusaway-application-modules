@@ -31,6 +31,7 @@
         <property name="phone" />
         <property name="timezone" />
         <property name="url" />
+        <property name="email" />
     </class>
 
     <class name="org.onebusaway.gtfs.model.Block" table="tmp_gtfs_block">
@@ -307,4 +308,128 @@
 		<property name="directory" />
 		<property name="timestamp" />
 	</class>
+
+    <!-- Mappings for archived GTFS classes, same as the regular classes but
+         with a column added for the bundle id.
+    -->
+    <class name="org.onebusaway.admin.service.bundle.task.model.ArchivedAgency" table="gtfs_agencies">
+        <composite-id>
+          <key-property name="gtfsBundleInfoId" column="gtfs_bundle_info_id" type="java.lang.Integer"/>
+          <key-property name="id" type="string" length="50" />
+        </composite-id>
+        <property name="fareUrl" />
+        <property name="lang" />
+        <property name="name" />
+        <property name="phone" />
+        <property name="timezone" />
+        <property name="url" />
+        <property name="email" />
+    </class>
+
+    <class name="org.onebusaway.admin.service.bundle.task.model.ArchivedCalendar" table="gtfs_calendars">
+        <composite-id>
+          <key-property name="gtfsBundleInfoId" column="gtfs_bundle_info_id" type="java.lang.Integer"/>
+          <key-property name="id" column="gid" type="int" length="11" />
+        </composite-id>
+        <property name="monday" />
+        <property name="tuesday" />
+        <property name="wednesday" />
+        <property name="thursday" />
+        <property name="friday" />
+        <property name="saturday" />
+        <property name="sunday" />
+        <property name="startDate" type="org.onebusaway.gtfs.impl.ServiceDateUserType" length="8"/>
+        <property name="endDate" type="org.onebusaway.gtfs.impl.ServiceDateUserType" length="8"/>
+        <component name="serviceId" class="org.onebusaway.gtfs.model.AgencyAndId">
+            <property name="agencyId" column="serviceId_agencyId" index="serviceId" length="50" />
+            <property name="id" column="serviceId_id" index="serviceId" />
+        </component>
+    </class>
+
+    <class name="org.onebusaway.admin.service.bundle.task.model.ArchivedRoute" table="gtfs_routes">
+        <composite-id>
+            <key-property name="gtfsBundleInfoId" column="gtfs_bundle_info_id" type="java.lang.Integer"/>
+            <key-property name="agencyId" type="string" length="50" />
+            <key-property name="id" type="string" />
+        </composite-id>
+        <property name="desc" column="description" type="text"/>
+        <property name="shortName" />
+        <property name="longName" />
+        <property name="type" />
+        <property name="url" />
+        <property name="color" />
+        <property name="textColor" />
+        <property name="agency" length="50" />
+    </class>
+
+    <class name="org.onebusaway.admin.service.bundle.task.model.ArchivedStopTime" table="gtfs_stop_times">
+        <composite-id>
+            <key-property name="gtfsBundleInfoId" column="gtfs_bundle_info_id" type="java.lang.Integer"/>
+            <key-property name="id" column="gid" type="int" length="11" />
+        </composite-id>
+        <property name="stop_agencyId" length="50" />
+        <property name="stop_id" />
+        <property name="trip_agencyId" length="50" index="stop_time_trip_agency_id_idx" />
+        <property name="trip_id" index="stop_time_trip_id_idx" />
+        <property name="stopSequence" />
+        <property name="arrivalTime" />
+        <property name="departureTime" />
+        <property name="timepoint"/>
+        <property name="stopHeadsign" />
+        <property name="routeShortName" />
+        <property name="pickupType" />
+        <property name="dropOffType" />
+        <property name="shapeDistTraveled" />
+    </class>
+
+    <class name="org.onebusaway.admin.service.bundle.task.model.ArchivedTrip" table="gtfs_trips">
+        <composite-id>
+            <key-property name="gtfsBundleInfoId" column="gtfs_bundle_info_id" type="java.lang.Integer"/>
+            <key-property name="agencyId" type="string" length="50" />
+            <key-property name="id" type="string" />
+        </composite-id>
+        <property name="route_agencyId" length="50" />
+        <property name="route_id" />
+        <property name="serviceId_agencyId" column="serviceId_agencyId" length="50" />
+        <property name="serviceId_id" column="serviceId_id" />
+        <property name="shapeId_agencyId" column="shapeId_agencyId" length="50" />
+        <property name="shapeId_id" column="shapeId_id" />
+        <property name="tripShortName" />
+        <property name="tripHeadsign" />
+        <property name="routeShortName" />
+        <property name="directionId" />
+        <property name="blockId" index="blockId" />
+        <property name="wheelchairAccessible"/>
+    </class>
+<!--
+    <sql-query name="tripsStopCts">
+        <return-scalar column="trip_agencyId" type="string" />
+        <return-scalar column="trip_id" type="string" />
+        <return-scalar column="stop_count" type="int" />
+        SELECT  st.trip_agencyId as trip_agencyId
+                st.trip_id as trip_id,
+                count(*) as stop_count
+        FROM gtfs_stop_times st
+        WHERE st.gtfs_bundle_info_id=:bundleId
+        GROUP BY st.trip_agencyId,
+                st.trip_id
+    </sql-query>
+-->
+
+    <sql-query name="tripStopCts">
+        <return-scalar column="trip_agencyId" type="string" />
+        <return-scalar column="trip_id" type="string" />
+        <return-scalar column="stop_count" type="int" />
+        SELECT  trip_agencyId as trip_agencyId,
+                trip_id as trip_id,
+                count(*) as stop_count
+        FROM gtfs_stop_times st
+        WHERE st.gtfs_bundle_info_id=:bundleId
+        GROUP BY st.trip_agencyId,
+                st.trip_id
+        ORDER BY st.trip_agencyId,
+                st.trip_id
+    </sql-query>
+
+
 </hibernate-mapping>

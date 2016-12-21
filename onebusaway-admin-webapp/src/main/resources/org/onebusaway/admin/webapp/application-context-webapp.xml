@@ -109,6 +109,8 @@
       
    <bean id="bundleBuildingService" class="org.onebusaway.admin.service.bundle.impl.BundleBuildingServiceImpl" />
    
+   <bean id="gtfsArchiveService" class="org.onebusaway.admin.service.bundle.impl.GtfsArchiveServiceImpl" />
+
    <bean id="bundleServerService" class="org.onebusaway.admin.service.server.impl.BundleServerServiceImpl" />
 
    <bean id="bundleInfo" class="org.onebusaway.admin.util.BundleInfo" />

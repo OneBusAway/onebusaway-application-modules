@@ -24,64 +24,100 @@
 		<label class="headerLabel">Compare Bundles</label>
 	</div>
 
-	<div id="currentBundleDiv">
-		<fieldset>
-			<legend>Current Bundle</legend>
-			<table id="currentBundleTable">
-				<tr>
-					<td>Dataset Name</td>
-					<td>
-						<select name="currentDatasetList" id="currentDatasetList">
-							<option value="0">Select a dataset</option>
-							<s:iterator value="%{existingDirectories}" status="status">
-								<s:set var="index" value="%{#status.count}" />
-								<option value="">
-									<s:property value="name" />
-								</option>
-							</s:iterator>
-						</select>
-					</td>
-				</tr>
-				<tr>
-					<td>Build Name</td>
-					<td>
-						<select name="currentBuildNameList" id="currentBuildNameList">
-							<option value="0">Select a build name</option>
-						</select>
-					</td>
-				</tr>
-			</table>
-		</fieldset>
+	<div id="selectArchiveDiv">
+		<input type="checkbox" id="useArchiveCheckbox" value="useArchivedData">Use archived data for Fixed Route Comparison</input>
+	</div>
+	<div id="buildingReportDiv">
+		<s:url var="url" value="/css/img/ajax-loader.gif" />
+		<img id="buildingReportIcon" src="${url}" alt="Ajax loader" class="progress" />
+		<label id="buildingReportMsg" class="adminLabel">Fixed Route Comparison Report in Progress...</label>
 	</div>
 
-	<div id="compareToBundleDiv">
-		<fieldset>
-			<legend>Compare to Bundle</legend>
-			<table id="compareToBundleTable">
-				<tr>
-					<td>Dataset Name</td>
-					<td>
-						<select name="compareToDatasetList" id="compareToDatasetList">
-							<option value="0">Select a dataset</option>
-							<s:iterator value="%{existingDirectories}" status="status">
-								<s:set var="index" value="%{#status.count}" />
-								<option value="">
-									<s:property value="name" />
-								</option>
-							</s:iterator>
-						</select>
-					</td>
-				</tr>
-				<tr>
-					<td>Build Name</td>
-					<td>
-						<select name="compareToBuildNameList" id="compareToBuildNameList">
-							<option value="0">Select a build name</option>
-						</select>
-					</td>
-				</tr>
-			</table>
-		</fieldset>
+
+	<div id="bundleSelectionDiv">
+		<div id="currentBundleDiv">
+			<fieldset>
+				<legend>Current Bundle</legend>
+				<table id="currentBundleTable">
+					<tr>
+						<td>Dataset Name</td>
+						<td>
+							<select name="currentDatasetList" id="currentDatasetList">
+								<option value="0">Select a dataset</option>
+								<s:iterator value="%{existingDirectories}" status="status">
+									<s:set var="index" value="%{#status.count}" />
+									<option value="">
+										<s:property value="name" />
+									</option>
+								</s:iterator>
+							</select>
+							<select name="currentArchivedDatasetList" id="currentArchivedDatasetList">
+								<option value="0">Select an archived dataset</option>
+								<s:iterator value="%{existingArchivedDirectories}" status="status">
+									<s:set var="index" value="%{#status.count}" />
+									<option value="">
+										<s:property />
+									</option>
+								</s:iterator>
+							</select>
+						</td>
+					</tr>
+					<tr>
+						<td>Build Name</td>
+						<td>
+							<select name="currentBuildNameList" id="currentBuildNameList">
+								<option value="0">Select a build name</option>
+							</select>
+							<select name="currentArchivedBuildNameList" id="currentArchivedBuildNameList">
+								<option value="0">Select an archived build name</option>
+							</select>
+						</td>
+					</tr>
+				</table>
+			</fieldset>
+		</div>
+
+		<div id="compareToBundleDiv">
+			<fieldset>
+				<legend>Compare to Bundle</legend>
+				<table id="compareToBundleTable">
+					<tr>
+						<td>Dataset Name</td>
+						<td>
+							<select name="compareToDatasetList" id="compareToDatasetList">
+								<option value="0">Select a dataset</option>
+								<s:iterator value="%{existingDirectories}" status="status">
+									<s:set var="index" value="%{#status.count}" />
+									<option value="">
+										<s:property value="name" />
+									</option>
+								</s:iterator>
+							</select>
+							<select name="compareToArchivedDatasetList" id="compareToArchivedDatasetList">
+								<option value="0">Select an archived dataset</option>
+								<s:iterator value="%{existingArchivedDirectories}" status="status">
+									<s:set var="index" value="%{#status.count}" />
+									<option value="">
+										<s:property />
+									</option>
+								</s:iterator>
+							</select>
+						</td>
+					</tr>
+					<tr>
+						<td>Build Name</td>
+						<td>
+							<select name="compareToBuildNameList" id="compareToBuildNameList">
+								<option value="0">Select a build name</option>
+							</select>
+							<select name="compareToArchivedBuildNameList" id="compareToArchivedBuildNameList">
+								<option value="0">Select an archived build name</option>
+							</select>
+						</td>
+					</tr>
+				</table>
+			</fieldset>
+		</div>
 	</div>
 
 	<div id="compareDiff">
@@ -138,7 +174,7 @@
 						<th class="sunTripsColumn" ># of Sun trips</th>
 					</tr>
 				</thead>
-				<tbody>
+				<tbody class="fixedRouteScrollable">
 					<!--  prevent jsxp minimiztion -->
 				</tbody>
 			</table>

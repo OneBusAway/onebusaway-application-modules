@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-#topbar, #branding, #text h2, #breadcrumb, .tabHeader, #compareBundles, #compareDiff,
+#topbar, #branding, #text h2, #breadcrumb, .tabHeader, #bundleSelectionDiv,
+#selectArchiveDiv, #compareDiff,
 hr, #printFixedRouteRptButton, #compareBuilds {
 	display: none;
 }
