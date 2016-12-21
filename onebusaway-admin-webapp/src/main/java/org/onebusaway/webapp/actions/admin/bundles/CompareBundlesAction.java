@@ -222,27 +222,25 @@ public class CompareBundlesAction extends OneBusAwayNYCAdminActionSupport {
   private List<DataValidationMode> buildModes(int buildId) {
     List<DataValidationMode> modes = new ArrayList<>();
 
-    // Get bundle start date
-    Date bundleStartDate = _gtfsArchiveService.getBundleStartDate(buildId);
-    LocalDate start = new LocalDate(bundleStartDate.getTime());
+    // Check service ids
+    List<ArchivedCalendar> calendars =
+        _gtfsArchiveService.getAllCalendarsByBundleId(buildId);
 
     // Get dates for checking trips for days of the week
-    LocalDate firstMon = getFirstDay(DateTimeConstants.MONDAY, start);
-    LocalDate firstTues = getFirstDay(DateTimeConstants.TUESDAY, start);
-    LocalDate firstWed = getFirstDay(DateTimeConstants.WEDNESDAY, start);
-    LocalDate firstThur = getFirstDay(DateTimeConstants.THURSDAY, start);
-    LocalDate firstFri = getFirstDay(DateTimeConstants.FRIDAY, start);
-    LocalDate firstSat = getFirstDay(DateTimeConstants.SATURDAY, start);
-    LocalDate firstSun = getFirstDay(DateTimeConstants.SUNDAY, start);
+    LocalDate startDate = getStartDate(calendars);
+    LocalDate firstMon = getFirstDay(DateTimeConstants.MONDAY, startDate);
+    LocalDate firstTues = getFirstDay(DateTimeConstants.TUESDAY, startDate);
+    LocalDate firstWed = getFirstDay(DateTimeConstants.WEDNESDAY, startDate);
+    LocalDate firstThur = getFirstDay(DateTimeConstants.THURSDAY, startDate);
+    LocalDate firstFri = getFirstDay(DateTimeConstants.FRIDAY, startDate);
+    LocalDate firstSat = getFirstDay(DateTimeConstants.SATURDAY, startDate);
+    LocalDate firstSun = getFirstDay(DateTimeConstants.SUNDAY, startDate);
 
     // Get the service ids for weekdays, Saturdays, and Sundays
     Set<AgencyAndId> weekdaySvcIds = new HashSet<>();
     Set<AgencyAndId> saturdaySvcIds = new HashSet<>();
     Set<AgencyAndId> sundaySvcIds = new HashSet<>();
 
-    // Check service ids
-    List<ArchivedCalendar> calendars =
-        _gtfsArchiveService.getAllCalendarsByBundleId(buildId);
     for (ArchivedCalendar calendar : calendars) {
       Date svcStartDate = calendar.getStartDate().getAsDate();
       LocalDate jodaStartDate = new LocalDate(svcStartDate);
@@ -298,25 +296,8 @@ public class CompareBundlesAction extends OneBusAwayNYCAdminActionSupport {
       tripStopCounts.put(agencyAndId, stopCt);
     }
 
-    /*
-    for (int i=0; i<allStopCts.size(); i++) {
-      Object[] foo = (Object[])allStopCts.get(i);
-      String tripId = (String)foo[1];
-      int tripCt = (int)foo[2];
-      String debug = "";
-    }
-    */
-
     Map<String, List<String>> reportModes = getReportModes();
     Collection<ArchivedAgency> agencies = _gtfsArchiveService.getAllAgenciesByBundleId(buildId);
-    /*
-    try {
-      getTripsWithStopCts();
-    } catch (SQLException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }
-    */
     for (String currentMode : reportModes.keySet()) {
       DataValidationMode newMode = new DataValidationMode();
       newMode.setModeName(currentMode);
@@ -325,17 +306,6 @@ public class CompareBundlesAction extends OneBusAwayNYCAdminActionSupport {
       for (String agencyOrRoute : agenciesOrRoutes) {                // or a route, i.e. <agencyId>_<routeId>
         //List<ArchivedRoute> routes = null;
         int idx = agencyOrRoute.indexOf("_"); // check if agency or route id
-        /*
-        if (idx < 0) {    // it's an agency
-          routes = _gtfsArchiveService.getRoutesForAgencyAndBundleId(agencyOrRoute, buildId);
-        } else {
-          ;
-        }
-        */
-        /*
-        if (routes == null || routes.size() ==  0) {
-          continue;
-        }*/
         int routeCt = allRoutes.size();
         int currentRouteCt=0;
         for (ArchivedRoute route : allRoutes) {
@@ -349,7 +319,6 @@ public class CompareBundlesAction extends OneBusAwayNYCAdminActionSupport {
           Map<String, TripTotals> tripMap = new HashMap<>();
           String routeId = route.getAgencyId() + ID_SEPARATOR + route.getId();
           DataValidationRouteCounts newRouteCts = new DataValidationRouteCounts();
-          //String routeName = route.getShortName() + "-" + route.getDesc();
           String routeName = route.getDesc();
           if (routeName == null || routeName.equals("null") || routeName.isEmpty()) {
             routeName = route.getLongName();
@@ -369,7 +338,6 @@ public class CompareBundlesAction extends OneBusAwayNYCAdminActionSupport {
 
           // Build DataValidationHeadsignCts
           SortedSet<DataValidationHeadsignCts> headsignCounts = new TreeSet<>();
-          //List<ArchivedTrip> trips = _gtfsArchiveService.getTripsForRouteAndBundleId(routeId, buildId);
           int stopCtIdx=0;
           for (ArchivedTrip trip : allTrips) {
             if (trip.getRoute_agencyId().compareTo(route.getAgencyId()) > 0
@@ -381,27 +349,9 @@ public class CompareBundlesAction extends OneBusAwayNYCAdminActionSupport {
               continue;
             }
 
-            // Get stop times for this trip
-            //List<ArchivedStopTime> stopTimes =  _gtfsArchiveService.getStopTimesForTripAndBundleId(trip, buildId);
-            /*
-            int i=0;
-            int stopCt = 0;
-            for (i=stopCtIdx; i< allStopCts.size(); ++i) {
-              Object[] tripStopCt = (Object[])allStopCts.get(i);
-              String tripAgencyId = (String)tripStopCt[0];
-              String tripId = (String)tripStopCt[1];
-              if (tripAgencyId.equals(trip.getAgencyId()) && tripId.equals(trip.getId())) {
-                stopCt = (int)tripStopCt[2];
-                stopCtIdx = i+1;
-                break;
-              }
-            }
-            */
-
             AgencyAndId tripAgencyAndId = new AgencyAndId(trip.getAgencyId(), trip.getId());
 
             int stopCt = tripStopCounts.get(tripAgencyAndId) != null ? tripStopCounts.get(tripAgencyAndId) : 0;
-            //int stopCt = stopTimes.size();
             if (stopCt > MAX_STOP_CT) {
               stopCt = MAX_STOP_CT;
             }
@@ -426,7 +376,6 @@ public class CompareBundlesAction extends OneBusAwayNYCAdminActionSupport {
               satTrips = tripTotals.satTrips_1;
               sunTrips = tripTotals.sunTrips_1;
             }
-            //AgencyAndId tripSvcId = trip.getServiceId();
             AgencyAndId tripSvcId = new AgencyAndId(trip.getServiceId_agencyId(), trip.getServiceId_id());
             if (weekdaySvcIds.contains(tripSvcId)) {
               ++wkdayTrips[stopCt];
@@ -496,6 +445,46 @@ public class CompareBundlesAction extends OneBusAwayNYCAdminActionSupport {
       }
     }
     return modes;
+  }
+
+  /**
+   * Examines all the service calendars for this bundle to determine an appropriate
+   * starting date for the bundle. The problem is that if an agency has two
+   * consecutive service calendars for the same trips, if we simply included all
+   * service calendars, those trips would be counted twice. So the goal is to
+   * determine an appropriate starting date and then only count those service
+   * calendars that are active on that date or within the first week following that
+   * date.
+   * <p>
+   * The strategy used here is to find the earliest service calendar start date
+   * for each agency, and then take the latest of those start dates to be the
+   * start date for the bundle as a whole.
+   *
+   * @param   calendars List of all the ArchivedCalendars for this bundle
+   * @return            the date to be used as the bundle starting date
+   */
+  private LocalDate getStartDate(List<ArchivedCalendar> calendars) {
+    Map<String, LocalDate> agencyStartDates = new HashMap<>();
+    for (ArchivedCalendar calendar : calendars) {
+      String agencyId = calendar.getServiceId().getAgencyId();
+      LocalDate start = new LocalDate(calendar.getStartDate().getAsDate().getTime());
+      LocalDate current = agencyStartDates.get(agencyId);
+      if (current == null || start.isBefore(current)) {
+        agencyStartDates.put(agencyId, start);
+      }
+    }
+    LocalDate agencyStartDate = null;
+    for (LocalDate start : agencyStartDates.values()) {
+      if (agencyStartDate == null) {
+        agencyStartDate = start;
+      } else if (start.isAfter(agencyStartDate)) {
+        agencyStartDate = start;
+      }
+    }
+    if (agencyStartDate == null) {
+      agencyStartDate = new LocalDate();
+    }
+    return agencyStartDate;
   }
 
   private LocalDate getFirstDay(int dayOfWeek, LocalDate startDate) {
@@ -762,32 +751,7 @@ public class CompareBundlesAction extends OneBusAwayNYCAdminActionSupport {
 
     return sourceUrl;
   }
-/*
-  private void getTripsWithStopCts() throws SQLException {
-    Statement stmt = null;
-    String query = "select trip_agencyId, trip_id, count(*) from (select * from gtfs_stop_times where gtfs_bundle_info_id=25) x group by trip_agencyId, trip_id";
 
-      try {
-        stmt = con.createStatement();
-        ResultSet rs = stmt.executeQuery(query);
-        while (rs.next()) {
-            String coffeeName = rs.getString("COF_NAME");
-            int supplierID = rs.getInt("SUP_ID");
-            float price = rs.getFloat("PRICE");
-            int sales = rs.getInt("SALES");
-            int total = rs.getInt("TOTAL");
-            System.out.println(coffeeName + "\t" + supplierID +
-                               "\t" + price + "\t" + sales +
-                               "\t" + total);
-        }
-    } catch (SQLException e ) {
-        JDBCTutorialUtilities.printSQLException(e);
-    } finally {
-        if (stmt != null) { stmt.close(); }
-    }
-      return;
-  }
-*/
   class TripTotals {
     int[] wkdayTrips_0;
     int[] wkdayTrips_1;
