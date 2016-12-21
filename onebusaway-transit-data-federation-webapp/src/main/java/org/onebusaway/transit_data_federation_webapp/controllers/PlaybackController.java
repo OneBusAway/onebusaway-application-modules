@@ -23,10 +23,12 @@ import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 
+import org.apache.commons.lang.StringUtils;
 import org.onebusaway.transit_data_federation.impl.bundle.RealtimeSourceServiceImpl;
 import org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.GtfsRealtimeSource;
 import org.onebusaway.transit_data_federation_webapp.model.RealtimeSourceDetail;
 import org.onebusaway.util.SystemTime;
+import org.onebusaway.util.services.configuration.ConfigurationServiceClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +42,7 @@ import org.springframework.web.servlet.ModelAndView;
 @Controller
 public class PlaybackController {
 
+  private static final String DEFAULT_ARCHIVE_URL = "http://localhost:9999/onebusaway-gtfs-realtime-archiver/gtfs-realtime/trip-updates";
   private static final int CONNECTION_TIMEOUT = 5 * 1000; // 5 seconds
   private static final int READ_TIMEOUT = 5 * 1000; // 5 seconds
   private static Logger _log = LoggerFactory.getLogger(PlaybackController.class);
@@ -47,6 +50,9 @@ public class PlaybackController {
   
   @Autowired
   private RealtimeSourceServiceImpl _sourceService;
+
+  @Autowired
+  private ConfigurationServiceClient _configurationServiceClient;
 
   @RequestMapping("/playback.do")
   public ModelAndView index() throws Exception {
@@ -74,6 +80,7 @@ public class PlaybackController {
     RealtimeSourceDetail detail = new RealtimeSourceDetail();
     detail.setSource(_sourceService.getSources().get(index));
     detail.setIndex(index);
+    detail.setBaseUrl(getDefaultArchiveUrlConfig());
     return new ModelAndView("playback-detail.jspx", "detail", detail);
   }
   
@@ -94,13 +101,16 @@ public class PlaybackController {
 
   
   @RequestMapping("/playback!playback.do")
-  public ModelAndView playback(int index, 
+  public ModelAndView playback(int index,
+     String date,
       String time, 
       String baseUrl, 
       String apiKey, 
       String refresh,
       String command) throws Exception {
-    long millisSinceEpoch = parseTime(time);
+    String dateAndTimeStr = date + " " + time;
+    _log.debug("playback with dateAndTime=|" + dateAndTimeStr + "|");
+    long millisSinceEpoch = parseTime(dateAndTimeStr);
     long localAdjustment = System.currentTimeMillis() - millisSinceEpoch;
     // set the values that came off the page
     if ("clear".equals(command)) {
@@ -108,9 +118,9 @@ public class PlaybackController {
       _log.info("calling reset...");
       callReset(resetUrl);
     } else {
-      _log.info("update command to time=" + time);
+      _log.info("update command to time=" + dateAndTimeStr);
     }
-    String tripUrl = constructTripUrl(baseUrl, time, refresh, apiKey);
+    String tripUrl = constructTripUrl(baseUrl, dateAndTimeStr, refresh, apiKey);
     GtfsRealtimeSource source = _sourceService.getSources().get(index); 
     source.setTripUpdatesUrl(new URL(tripUrl));
     // turn off date validation
@@ -162,6 +172,21 @@ public class PlaybackController {
         + "time=" + URLEncoder.encode(time)
         + "&interval=" + refresh
         + "&key=" + apiKey;
+  }
+
+
+  private String getDefaultArchiveUrlConfig() {
+
+    String value;
+    try {
+      value = _configurationServiceClient.getItem("tds", "archiveUrl");
+    } catch (Exception any) {
+      value = DEFAULT_ARCHIVE_URL;
+    }
+    if (StringUtils.isBlank(value)) {
+      return DEFAULT_ARCHIVE_URL;
+    }
+    return value;
   }
 
 }

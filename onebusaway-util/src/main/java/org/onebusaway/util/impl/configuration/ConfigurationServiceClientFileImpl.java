@@ -129,8 +129,8 @@ public class ConfigurationServiceClientFileImpl implements
 		            });
 		        _config = o;
 		      } catch (Exception e) {
-		        _log.info("Failed to get an environment out of /var/lib/oba/config.json, continuing without it.");
-		        
+		        _log.info("Failed to get configuration out of /var/lib/oba/config.json, continuing without it.", e);
+
 		      }
 		      return _config;
 
