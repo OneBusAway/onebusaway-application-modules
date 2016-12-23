@@ -112,7 +112,7 @@
 					</jsp:include>
 				</div>
 				<div id="Compare">
-					<jsp:include page="compare-bundle.jspx">
+					<jsp:include page="compare-bundles.jspx">
 						<!--  space -->
 					</jsp:include>
 				</div>
