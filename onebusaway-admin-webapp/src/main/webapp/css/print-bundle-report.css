@@ -15,22 +15,22 @@
  */
 
 #topbar, #branding, #text h2, #breadcrumb, .tabHeader, #bundleSelectionDiv,
-#selectArchiveDiv, #compareDiff,
+#fixedRouteComparisonDiv, #selectArchiveDiv, #compareDiff,
 hr, #printFixedRouteRptButton, #compareBuilds {
 	display: none;
 }
 
-#Compare #compareFixedRouteModes #fixedRouteDiffTable caption {
+#compareFixedRouteModes #fixedRouteDiffTable caption {
 	font-size: 2em;
 	line-height: 1em;
 }
 
-#Compare #compareFixedRouteModes #fixedRouteDiffTable caption #baseBundle {
+#compareFixedRouteModes #fixedRouteDiffTable caption #baseBundle {
 	margin-top: .5em;
 	padding-top: .5em;
 }
 
-#Compare #compareFixedRouteModes #fixedRouteDiffTable caption #baseBundle,
-#Compare #compareFixedRouteModes #fixedRouteDiffTable caption #compareToBundle {
+#compareFixedRouteModes #fixedRouteDiffTable caption #baseBundle,
+#compareFixedRouteModes #fixedRouteDiffTable caption #compareToBundle {
 	font-size: .6em;
 }

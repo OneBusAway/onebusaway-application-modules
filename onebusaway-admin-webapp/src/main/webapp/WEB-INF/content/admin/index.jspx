@@ -75,6 +75,11 @@
 								namespace="/admin/bundles" /> <s:a href="%{url}">Transit Data Bundle Utility</s:a>
 						</li>
 					</s:if>
+					<s:if test="isPageAvailable('showBundleUtil', 'org.onebusaway.webapp.actions.admin.bundlereports.BundleReportsAction')">
+						<li><s:url var="url" action="bundle-reports" namespace="/admin/bundlereports" />
+							<s:a href="%{url}">Data Bundle Reports</s:a>
+						</li>
+					</s:if>
 					<s:if test="isPageAvailable('showVehicleStatus', 'org.onebusaway.webapp.actions.admin.vehiclestatus.VehicleStatusAction')">
 						<li><s:url var="url" action="vehicle-status"
 								namespace="/admin/vehiclestatus" /> <s:a href="%{url}">Vehicle Status Display Utility</s:a>
