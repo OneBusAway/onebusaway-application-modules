@@ -41,7 +41,7 @@
         <property name="current_session_context_class">thread</property>
 
         <!-- Disable the second-level cache  -->
-        <property name="cache.provider_class">org.hibernate.cache.HashtableCacheProvider</property>
+        <property name="cache.provider_class">org.hibernate.cache.internal.NoCachingRegionFactory</property>
 
         <!-- Echo all executed SQL to stdout -->
         <property name="show_sql">false</property>
