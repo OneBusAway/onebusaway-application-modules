@@ -45,9 +45,7 @@ class UserDaoImpl implements UserDao {
   }
 
   @Override
-  @Transactional
   public int getNumberOfUsers() {
-	  _sessionFactory.openSession();
 	Query query = getSession().getNamedQuery("numberOfUsers");
     List<?> values = query.list();
     if (values == null || values.size() == 0)
@@ -58,17 +56,13 @@ class UserDaoImpl implements UserDao {
 
   @SuppressWarnings("unchecked")
   @Override
-  @Transactional
   public List<Integer> getAllUserIds() {
-	  _sessionFactory.openSession();
     return getSession().createQuery("SELECT user.id FROM User user").list();
   }
 
   @Override
-  @Transactional
   public List<Integer> getAllUserIdsInRange(final int firstResult,
       final int maxResults) {
-	  _sessionFactory.openSession();
         Query query = getSession().createQuery("SELECT user.id FROM User user");
         query.setFirstResult(firstResult);
         query.setMaxResults(maxResults);
@@ -76,7 +70,6 @@ class UserDaoImpl implements UserDao {
   }
   
   @Override
-  @Transactional
   public long getNumberOfStaleUsers(Date lastAccessTime) {
     List<?> values = getSession().getNamedQuery("numberOfStaleUsers").setTimestamp("lastAccessTime", lastAccessTime).list();
     if (values == null || values.size() == 0)
@@ -87,7 +80,6 @@ class UserDaoImpl implements UserDao {
   }
   
   @Override
-  @Transactional
   public List<Integer> getStaleUserIdsInRange(final Date lastAccessTime, final int firstResult, final int maxResults) {
         Query query = getSession().createQuery("SELECT user.id FROM User user WHERE lastAccessTime < :lastAccessTime");
         query.setFirstResult(firstResult);
@@ -98,19 +90,16 @@ class UserDaoImpl implements UserDao {
   }
 
   @Override
-  @Transactional
   public User getUserForId(int id) {
     return (User) getSession().get(User.class, id);
   }
   
   @Override
-  @Transactional
   public void saveOrUpdateUser(User user) {
 	getSession().saveOrUpdate(user);
   }
 
   @Override
-  @Transactional
   public void saveOrUpdateUsers(User... users) {
 	Session session = getSession();
     List<User> list = new ArrayList<User>(users.length);
@@ -121,13 +110,11 @@ class UserDaoImpl implements UserDao {
   }
 
   @Override
-  @Transactional
   public void deleteUser(User user) {
     getSession().delete(user);
   }
 
   @Override
-  @Transactional
   public int getNumberOfUserRoles() {
     List<?> values = getSession().getNamedQuery("numberOfUserRoles").list();
     if (values == null || values.size() == 0)
@@ -137,7 +124,6 @@ class UserDaoImpl implements UserDao {
   }
 
   @Override
-  @Transactional
   public int getNumberOfUsersWithRole(UserRole role) {
 	Query query = getSession().getNamedQuery("numberOfUsersWithRole");
 	query.setParameter("role", role);
@@ -149,7 +135,6 @@ class UserDaoImpl implements UserDao {
   }
 
   @Override
-  @Transactional
   public UserRole getUserRoleForName(String name) {
     return (UserRole) getSession().get(UserRole.class, name);
   }
@@ -161,7 +146,6 @@ class UserDaoImpl implements UserDao {
 
   @SuppressWarnings("unchecked")
   @Override
-  @Transactional
   public List<String> getUserIndexKeyValuesForKeyType(String keyType) {
 	  
 	  return getSession()
@@ -170,20 +154,17 @@ class UserDaoImpl implements UserDao {
 			  .list();
   }
 
-  @Transactional
   @Override
   public UserIndex getUserIndexForId(UserIndexKey key) {
     return (UserIndex) getSession().get(UserIndex.class, key);
   }
 
   @Override
-  @Transactional
   public void saveOrUpdateUserIndex(UserIndex userIndex) {
 	  getSession().saveOrUpdate(userIndex);
   }
 
   @Override
-  @Transactional
   public void deleteUserIndex(UserIndex index) {
     getSession().delete(index);
   }

@@ -40,6 +40,7 @@ import org.onebusaway.transit_data_federation.services.realtime.VehicleStatusSer
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -127,6 +128,7 @@ class VehicleStatusBeanServiceImpl implements VehicleStatusBeanService {
   }
 
   @Override
+  @Transactional(readOnly = true)
   public ListBean<VehicleLocationRecordBean> getVehicleLocations(
       VehicleLocationRecordQueryBean query) {
 

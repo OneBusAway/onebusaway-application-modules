@@ -44,7 +44,6 @@ import org.springframework.transaction.annotation.Transactional;
  * @see BlockLocationRecord
  */
 @Component
-@Transactional
 @ManagedResource("org.onebusaway.transit_data_federation.impl.realtime:name=BlockLocationRecordDaoImpl")
 public class BlockLocationRecordDaoImpl implements BlockLocationRecordDao {
 

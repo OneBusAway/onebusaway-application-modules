@@ -66,7 +66,7 @@ class UserReportingDaoImpl implements UserReportingDao {
 
   @SuppressWarnings("unchecked")
   @Override
-  @Transactional
+  @Transactional(readOnly=true)
   public List<T2<AgencyAndId, Integer>> getStopProblemReportSummaries(
       String agencyId, long timeFrom, long timeTo, EProblemReportStatus status) {
 
@@ -103,7 +103,7 @@ class UserReportingDaoImpl implements UserReportingDao {
 
   @SuppressWarnings("unchecked")
   @Override
-  @Transactional
+  @Transactional(readOnly=true)
   public List<T2<Object, Integer>> getTripProblemReportSummaries(
       final TripProblemReportQueryBean query, final ETripProblemGroupBy groupBy) {
 	  
@@ -143,7 +143,7 @@ class UserReportingDaoImpl implements UserReportingDao {
   }
 
   @SuppressWarnings("unchecked")
-  @Transactional
+  @Transactional(readOnly=true)
   public List<StopProblemReportRecord> getStopProblemReports(String agencyId,
       long timeFrom, long timeTo, EProblemReportStatus status) {
     if (status == null) {
@@ -165,7 +165,7 @@ class UserReportingDaoImpl implements UserReportingDao {
   }
 
   @SuppressWarnings("unchecked")
-  @Transactional
+  @Transactional(readOnly=true)
   public List<TripProblemReportRecord> getTripProblemReports(
       final TripProblemReportQueryBean query) {
 
@@ -179,7 +179,7 @@ class UserReportingDaoImpl implements UserReportingDao {
 
   @SuppressWarnings("unchecked")
   @Override
-  @Transactional
+  @Transactional(readOnly=true)
   public List<StopProblemReportRecord> getAllStopProblemReportsForStopId(
       AgencyAndId stopId) {
     return getSession()
@@ -190,7 +190,7 @@ class UserReportingDaoImpl implements UserReportingDao {
 
   @SuppressWarnings("unchecked")
   @Override
-  @Transactional
+  @Transactional(readOnly=true)
   public List<TripProblemReportRecord> getAllTripProblemReportsForTripId(
       AgencyAndId tripId) {
 	  
@@ -201,20 +201,20 @@ class UserReportingDaoImpl implements UserReportingDao {
   }
 
   @Override
-  @Transactional
+  @Transactional(readOnly=true)
   public StopProblemReportRecord getStopProblemRecordForId(long id) {
     return (StopProblemReportRecord) getSession().get(StopProblemReportRecord.class, id);
   }
 
   @Override
-  @Transactional
+  @Transactional(readOnly=true)
   public TripProblemReportRecord getTripProblemRecordForId(long id) {
     return (TripProblemReportRecord) getSession().get(TripProblemReportRecord.class, id);
   }
 
   @SuppressWarnings("unchecked")
   @Override
-  @Transactional
+  @Transactional(readOnly=true)
   public List<String> getAllTripProblemReportLabels() {
     return getSession().getNamedQuery("allTripProblemReportLabels").list();
   }

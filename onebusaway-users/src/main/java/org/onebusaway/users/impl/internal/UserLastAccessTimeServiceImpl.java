@@ -27,6 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
 public class UserLastAccessTimeServiceImpl implements UserLastAccessTimeService {
@@ -50,6 +51,7 @@ public class UserLastAccessTimeServiceImpl implements UserLastAccessTimeService 
     return _cache.getSize();
   }
 
+  @Transactional
   public void handleAccessForUser(int userId, long accessTime) {
     Element element = _cache.get(userId);
     if (element == null) {

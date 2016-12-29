@@ -37,6 +37,7 @@ import org.onebusaway.users.services.internal.LastSelectedStopService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 
 public class UserPropertiesServiceV2Impl implements UserPropertiesService {
 
@@ -113,6 +114,7 @@ public class UserPropertiesServiceV2Impl implements UserPropertiesService {
   }
 
   @Override
+  @Transactional
   public void setRememberUserPreferencesEnabled(User user,
       boolean rememberPreferencesEnabled) {
     UserPropertiesV2 properties = getProperties(user);
@@ -123,6 +125,7 @@ public class UserPropertiesServiceV2Impl implements UserPropertiesService {
   }
 
   @Override
+  @Transactional
   public void setDefaultLocation(User user, String locationName, double lat,
       double lon) {
 
@@ -144,6 +147,7 @@ public class UserPropertiesServiceV2Impl implements UserPropertiesService {
   }
 
   @Override
+  @Transactional
   public int addStopBookmark(User user, String name, List<String> stopIds,
       RouteFilter filter) {
 
@@ -165,6 +169,7 @@ public class UserPropertiesServiceV2Impl implements UserPropertiesService {
   }
 
   @Override
+  @Transactional
   public void updateStopBookmark(User user, int id, String name,
       List<String> stopIds, RouteFilter routeFilter) {
 
@@ -187,6 +192,7 @@ public class UserPropertiesServiceV2Impl implements UserPropertiesService {
   }
 
   @Override
+  @Transactional
   public void resetUser(User user) {
     user.setProperties(new UserPropertiesV2());
     _userDao.saveOrUpdateUser(user);
@@ -194,6 +200,7 @@ public class UserPropertiesServiceV2Impl implements UserPropertiesService {
   }
 
   @Override
+  @Transactional
   public void deleteStopBookmarks(User user, int id) {
     UserPropertiesV2 properties = getProperties(user);
 
@@ -231,6 +238,7 @@ public class UserPropertiesServiceV2Impl implements UserPropertiesService {
   }
 
   @Override
+  @Transactional
   public void markServiceAlertAsRead(User user, String situationId, long time,
       boolean isRead) {
 

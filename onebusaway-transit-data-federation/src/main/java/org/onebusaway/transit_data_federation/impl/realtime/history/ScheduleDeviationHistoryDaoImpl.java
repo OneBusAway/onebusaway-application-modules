@@ -60,7 +60,7 @@ public class ScheduleDeviationHistoryDaoImpl implements
   }
 
   @Override
-  @Transactional
+  @Transactional(readOnly=true)
   public ScheduleDeviationHistory getScheduleDeviationHistoryForTripId(
       AgencyAndId tripId) {
     return (ScheduleDeviationHistory) getSession().get(ScheduleDeviationHistory.class, tripId);

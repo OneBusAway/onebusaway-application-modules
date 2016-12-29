@@ -27,6 +27,7 @@ import org.onebusaway.users.services.UserPropertiesMigration;
 import org.onebusaway.users.services.UserPropertiesMigrationStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.transaction.annotation.Transactional;
 
 public class UserPropertiesMigrationBulkOperation<T extends UserProperties> {
 
@@ -64,7 +65,7 @@ public class UserPropertiesMigrationBulkOperation<T extends UserProperties> {
     _propertiesMigration = propertiesMigration;
     _target = target;
   }
-
+  @Transactional(readOnly = true)
   public void run() {
     _numberOfUsers = _dao.getNumberOfUsers();
     for (int i = 0; i < _numberOfUsers; i += FETCH_LIMIT)
@@ -124,6 +125,7 @@ public class UserPropertiesMigrationBulkOperation<T extends UserProperties> {
     }
 
     @Override
+    @Transactional
     public void run() {
 
       _log.info("offset=" + _offset);
