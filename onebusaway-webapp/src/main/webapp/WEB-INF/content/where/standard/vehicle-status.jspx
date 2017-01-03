@@ -26,7 +26,7 @@
 <script type="text/javascript" src="${url}"><jsp:text></jsp:text></script>
 <c:set var="url"><s:url value="/js/oba-maps.js"/></c:set>
 <script type="text/javascript" src="${url}"><jsp:text></jsp:text></script>
-<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"><jsp:text></jsp:text></script>
+<script type="text/javascript" src="//maps.google.com/maps/api/js?sensor=false"><jsp:text></jsp:text></script>
 </head>
 <body>
 
