@@ -33,11 +33,11 @@
 			</div>
 			<label class="bundleHeader">Dataset Deployed on Staging</label>  
 			<div id="sync_deployedDataset">
-			<!--  Prevent JSP minimization -->
+				${stagingDeployedDataset}
 			</div>
 			<label class="bundleHeader">Build Name Deployed on Staging</label>  
 			<div id="sync_deployedBundleName">
-			<!--  Prevent JSP minimization -->
+				${stagingDeployedBundleName}
 			</div>
 			<div>
 				<input type="button" id="syncBundle_syncButton" value="Sync Deployed Bundle" />

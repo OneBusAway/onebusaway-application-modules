@@ -541,7 +541,7 @@ jQuery(function() {
 	getAgencyMetadata();
 	
 	// Retrieve dataset name and build name for bundle currently deployed on staging.
-	getDeployedOnStagingBundleInfo();
+	//getDeployedOnStagingBundleInfo();
 	
 	// For "Copy" popup to specify a destination directory
 	$("#copyPopup").dialog({
@@ -2931,24 +2931,4 @@ function addUploadFileAgencyDropdown() {
 		agencyDropDown.append(jQuery("<option>").attr('value',agencyMetadata[i].legacyId).text(name));
 	};
 	agencyDropDown.insertBefore("#agencyId");
-}
-
-//retrieve transit agency metadata from server
-function getDeployedOnStagingBundleInfo(){
-	jQuery.ajax({
-		url: "../../api/bundle/latest",
-		type: "GET",
-		async: false,
-		success: function(response) {
-			//var bundleInfo = response;
-			var bundleInfo = JSON.parse(response);
-			var datasetName = bundleInfo.dataset;
-			var buildName = bundleInfo.name;
-			$("#sync_deployedDataset").text(datasetName);
-			$("#sync_deployedBundleName").text(buildName);
-		},
-		error: function(request) {
-			console.log("There was an error trying to retrieve agency metadata");
-		}
-	});
 }

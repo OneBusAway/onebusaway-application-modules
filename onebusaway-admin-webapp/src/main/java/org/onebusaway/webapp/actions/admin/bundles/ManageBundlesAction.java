@@ -62,6 +62,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.context.ServletContextAware;
 
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 
@@ -106,6 +107,7 @@ import com.google.gson.JsonParser;
 public class ManageBundlesAction extends OneBusAwayNYCAdminActionSupport implements ServletContextAware {
 	private static Logger _log = LoggerFactory.getLogger(ManageBundlesAction.class);
 	private static final long serialVersionUID = 1L;
+	private static final String API_LATEST_BUNDLE = "/api/bundle/latest";
 
 	private String bundleDirectory; // holds the final directory name 
 	private String directoryName; // holds the value entered in the text box
@@ -129,6 +131,8 @@ public class ManageBundlesAction extends OneBusAwayNYCAdminActionSupport impleme
 	private DirectoryStatus directoryStatus;
 	private BundleInfo bundleInfo;
 	private boolean useArchivedGtfs;
+	private String stagingDeployedDataset;
+	private String stagingDeployedBundleName;
 	// where the bundle is deployed to
 	private String s3Path = "s3://bundle-data/activebundle/<env>/";
 	private String environment = "dev";
@@ -699,7 +703,46 @@ public class ManageBundlesAction extends OneBusAwayNYCAdminActionSupport impleme
 	public void setEmailTo(String to) {
 	}
 
-	public String getS3Path() {
+	public String getStagingDeployedDataset() {
+	  if (stagingDeployedDataset == null || stagingDeployedDataset.isEmpty()) {
+	    getStagingDeployedBundleData();
+	  }
+	  return stagingDeployedDataset;
+  }
+
+  public void setStagingDeployedDataset(String stagingDeployedDataset) {
+    this.stagingDeployedDataset = stagingDeployedDataset;
+  }
+
+  public String getStagingDeployedBundleName() {
+    if (stagingDeployedBundleName == null || stagingDeployedBundleName.isEmpty()) {
+      getStagingDeployedBundleData();
+    }
+    return stagingDeployedBundleName;
+  }
+
+  public void setStagingDeployedBundleName(String stagingDeployedBundleName) {
+    this.stagingDeployedBundleName = stagingDeployedBundleName;
+  }
+
+  private void getStagingDeployedBundleData() {
+    String adminStagingHost = configService.getConfigurationValueAsString(
+        "adminStaging", null);
+    String adminStagingPort = configService.getConfigurationValueAsString(
+        "adminStagingPort", null);
+    String adminStagingUrl = adminStagingHost + ":" + adminStagingPort
+        + API_LATEST_BUNDLE;
+    JsonObject latestBundle = null;
+    try {
+      latestBundle = getJsonData(adminStagingUrl).getAsJsonObject();
+    }  catch (Exception e) {
+      _log.error("Failed to retrieve name of the latest deployed bundle");
+    }
+    stagingDeployedDataset = latestBundle.get("dataset").getAsString();
+    stagingDeployedBundleName = latestBundle.get("name").getAsString();
+  }
+
+  public String getS3Path() {
 		return s3Path;
 	}
 
