@@ -51,11 +51,6 @@
 				  </exclusion>
 			  </exclusions>
 				</dependency>
-        <dependency>
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-annotations</artifactId>
-        </dependency>
-
         <!-- Database Connection Pooling -->
         <dependency>
             <groupId>commons-dbcp</groupId>
