@@ -462,7 +462,7 @@ jQuery(function() {
 	//Using bind() with propertychange event as live() does not work in IE for unknown reasons
 	jQuery("#createDataset #directoryName").bind("input propertychange", function() {
 		var text = jQuery("#createDataset #directoryName").val();
-		var validDatasetNameExp = /^[a-zA-Z_-\d]+$/;
+		var validDatasetNameExp = /^[a-zA-Z0-9]+$/;
 		jQuery('#Create #filenameError').hide();
 		disableSelectButton();
 		if (text.length > 0) {
@@ -685,9 +685,9 @@ function onAgencyIdSelectClick() {
 	}
 	var previous_protocol = $(this).closest('tr').find(".agencyProtocol").val();
 	var protocol = "file";
-	if (url.toLowerCase().startsWith("http")) {
+	if (url.toLowerCase().substring(0,4) === 'http') {
 	  protocol = "http";
-	} else if (url.toLowerCase().startsWith("ftp")) {
+	} else if (url.toLowerCase().substring(0,3) === 'ftp') {
 		protocol = "ftp";
 	}
 	if ((previous_protocol == "file" && protocol != "file")
@@ -1289,7 +1289,8 @@ function onAddAnotherAgencyClick(inputType) {
 	  if (url == null) {
 		  url = "";
 	  }
-	  if (url.toLowerCase().startsWith("http") || url.toLowerCase().startsWith("ftp")) {
+	  if (url.toLowerCase().substring(0,4) === 'http'
+		  || (url.toLowerCase().substring(0,3) === 'ftp')) {
 	  	var urlValue = ' value="' + url + '"';
 	  }
 	}
@@ -2909,8 +2910,8 @@ function getAgencyMetadata(){
 				if (url == null) {
 				  url = "";
 				}
-				if (url.toLowerCase().startsWith("http")
-						|| url.toLowerCase().startsWith("ftp")) {
+				if (url.toLowerCase().substring(0,4) === 'http'
+					|| url.toLowerCase().substring(0,3) === 'ftp') {
 					$("#agency_data tr:last .agencyDataSource").val(url);
 				}	
 			}

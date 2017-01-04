@@ -83,7 +83,7 @@
 		</div>      
 	</div>
 	<!-- Div for "Copy" popup -->
-	<div id="copyPopup">
+	<div id="copyPopup" class="ui-helper-hidden">
 		<div id="copyPopupContents">
 			<div id="copyPopupHeader">
 				<p>You are duplicating a dataset.</p>
