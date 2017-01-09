@@ -231,6 +231,7 @@ public class UserPropertiesServiceV2Impl implements UserPropertiesService {
   }
 
   @Override
+  @Transactional
   public void authorizeApi(User user, long minApiRequestInterval) {
     UserPropertiesV2 properties = getProperties(user);
     properties.setMinApiRequestInterval(minApiRequestInterval);

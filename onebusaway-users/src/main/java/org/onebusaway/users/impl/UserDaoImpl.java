@@ -135,11 +135,13 @@ class UserDaoImpl implements UserDao {
   }
 
   @Override
+  @Transactional
   public UserRole getUserRoleForName(String name) {
     return (UserRole) getSession().get(UserRole.class, name);
   }
 
   @Override
+  @Transactional
   public void saveOrUpdateUserRole(UserRole userRole) {
 	  getSession().saveOrUpdate(userRole);
   }
