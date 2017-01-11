@@ -27,8 +27,12 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -324,6 +328,20 @@ public class ManageBundlesAction extends OneBusAwayNYCAdminActionSupport impleme
 		}
 		return directories;
 	}
+
+  /**
+   * Returns the existing directories in the current bucket on AWS, but sorted
+   * by date.
+   * @return list of existing directories
+   */
+  public Set<ExistingDirectory> getSortedByDateDirectories() {
+    Set<ExistingDirectory> directories = getExistingDirectories();
+    // Resort by date
+    Set<ExistingDirectory> sortedDirectories
+      = new TreeSet<ExistingDirectory>(new DirectoryByDateComp());
+    sortedDirectories.addAll(directories);
+    return sortedDirectories;
+  }
 
   public SortedSet<String> getExistingArchivedDirectories() {
     SortedSet<String> existingArchivedDirectories = gtfsArchiveService.getAllDatasets();
@@ -780,5 +798,27 @@ public class ManageBundlesAction extends OneBusAwayNYCAdminActionSupport impleme
 
 	public void setDestDirectoryName(String destDirectoryName) {
 		this.destDirectoryName = destDirectoryName;
+	}
+
+	private class DirectoryByDateComp implements Comparator<ExistingDirectory> {
+	  @Override
+	  public int compare(ExistingDirectory ed1, ExistingDirectory ed2) {
+	    // ExistingDirectory.creationTimestamp is a String 'dow mon dd hh:mm:ss zzz yyyy'
+	    String[] ed1Split = ed1.getCreationTimestamp().split(" ");
+      String[] ed2Split = ed2.getCreationTimestamp().split(" ");
+      SimpleDateFormat formatter = new SimpleDateFormat("dd-MMM-yyyy");
+      Date ed1Date = new Date();
+      Date ed2Date = new Date();
+      try {
+        ed1Date = formatter.parse(ed1Split[2] + "-" + ed1Split[1]
+            + "-" + ed1Split[5]);
+        ed2Date = formatter.parse(ed2Split[2] + "-" + ed2Split[1]
+            + "-" + ed2Split[5]);
+      } catch (ParseException e) {
+        e.printStackTrace();
+        return 0;
+      }
+	    return ed1Date.compareTo(ed2Date) * -1;
+	  }
 	}
 }
