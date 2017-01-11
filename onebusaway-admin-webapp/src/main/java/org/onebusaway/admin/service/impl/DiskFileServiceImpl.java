@@ -132,7 +132,14 @@ public class DiskFileServiceImpl implements FileService {
 		// need filename/flag/modified date
 		for (String dir: list) {
 			File fDir = new File(baseDir, dir);
-			String[] a = {dir, " ", new Date(fDir.lastModified()).toString()};
+			String lastModified = new Date(fDir.lastModified()).toString();
+			// Since the bundle directory date does not get updated when a build
+			// is done, get the date on the builds sub-directory.
+			File buildDir = new File(fDir, _buildPath);
+			if (buildDir.exists()) {
+			  lastModified = new Date(buildDir.lastModified()).toString();
+			}
+			String[] a = {dir, " ", lastModified};
 			bundleDirs.add(a);
 		}
 		return bundleDirs;
