@@ -57,7 +57,7 @@
 					</tr>
 				</thead>
 				<tbody>
-					<s:iterator value="%{existingDirectories}" status="directoryStatus">
+					<s:iterator value="%{sortedByDateDirectories}" status="directoryStatus">
 						 <tr>
 						 	<td class="datasetCheckbox"><input type="checkbox"/></td>
 							<td class="directoryName">
