@@ -34,6 +34,7 @@ import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTi
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
+import org.onebusaway.utility.time.SystemTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -534,7 +535,7 @@ class GtfsRealtimeTripLibrary {
   private long currentTime() {
     if (_currentTime != 0)
       return _currentTime;
-    return System.currentTimeMillis();
+    return SystemTime.currentTimeMillis();
   }
 
   private static class BestScheduleDeviation {

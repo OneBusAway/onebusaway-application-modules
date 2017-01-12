@@ -26,6 +26,7 @@ import org.onebusaway.transit_data_federation.model.TargetTime;
 import org.onebusaway.transit_data_federation.services.ArrivalAndDepartureService;
 import org.onebusaway.transit_data_federation.services.realtime.ArrivalAndDepartureInstance;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
+import org.onebusaway.utility.time.SystemTime;
 import org.opentripplanner.routing.core.EdgeNarrative;
 import org.opentripplanner.routing.core.State;
 import org.opentripplanner.routing.core.TraverseOptions;
@@ -140,7 +141,7 @@ public class DepartureEdge extends AbstractEdge {
        * TODO : If we want to simulate real-time trip planning with the system
        * in some past state, we'll need a way to adjust NOW here
        */
-      TargetTime time = new TargetTime(s0.getTime(), System.currentTimeMillis());
+      TargetTime time = new TargetTime(s0.getTime(), SystemTime.currentTimeMillis());
       return service.getArrivalsAndDeparturesForStopInTimeRange(_stop, time,
           fromTime, toTime);
     } else {

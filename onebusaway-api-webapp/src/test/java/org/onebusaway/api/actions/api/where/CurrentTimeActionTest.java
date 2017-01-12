@@ -28,6 +28,7 @@ import org.onebusaway.api.model.ResponseBean;
 import org.onebusaway.api.model.TimeBean;
 import org.onebusaway.api.model.transit.EntryWithReferencesBean;
 import org.onebusaway.utility.DateLibrary;
+import org.onebusaway.utility.time.SystemTime;
 
 public class CurrentTimeActionTest {
 
@@ -36,7 +37,7 @@ public class CurrentTimeActionTest {
 
     CurrentTimeAction action = new CurrentTimeAction();
 
-    long t = System.currentTimeMillis();
+    long t = SystemTime.currentTimeMillis();
 
     DefaultHttpHeaders headers = action.index();
     assertEquals(200, headers.getStatus());

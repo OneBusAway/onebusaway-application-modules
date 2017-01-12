@@ -45,6 +45,7 @@ import org.onebusaway.transit_data_federation.services.blocks.ScheduledBlockLoca
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
+import org.onebusaway.utility.time.SystemTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -294,7 +295,7 @@ public abstract class AbstractOrbcadRecordSource implements MonitoredDataSource 
         _log.debug("checking if we need to refresh");
 
         synchronized (this) {
-          long t = System.currentTimeMillis();
+          long t = SystemTime.currentTimeMillis();
           if (_lastRefresh + _refreshInterval * 1000 > t)
             return;
           _lastRefresh = t;

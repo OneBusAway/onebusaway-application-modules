@@ -40,6 +40,7 @@ import org.onebusaway.transit_data_federation.services.blocks.ScheduledBlockLoca
 import org.onebusaway.transit_data_federation.services.realtime.BlockLocation;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
+import org.onebusaway.utility.time.SystemTime;
 
 public class BlockLocationServiceImplTest {
 
@@ -100,7 +101,7 @@ public class BlockLocationServiceImplTest {
     double epsilon = 0.001;
 
     TargetTime target = new TargetTime(t(
-        serviceDate, 0, 0), System.currentTimeMillis());
+        serviceDate, 0, 0), SystemTime.currentTimeMillis());
 
     BlockInstance blockInstance = new BlockInstance(blockConfig, serviceDate);
     BlockLocation location = _service.getLocationForBlockInstance(
@@ -120,7 +121,7 @@ public class BlockLocationServiceImplTest {
         _blockLocationService.getScheduledBlockLocationFromScheduledTime(
             blockConfig, 1800)).thenReturn(p);
 
-    target = new TargetTime(t(serviceDate, 0, 30), System.currentTimeMillis());
+    target = new TargetTime(t(serviceDate, 0, 30), SystemTime.currentTimeMillis());
 
     location = _service.getLocationForBlockInstance(blockInstance, target);
 

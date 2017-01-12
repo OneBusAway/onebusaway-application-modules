@@ -25,6 +25,7 @@ import org.onebusaway.transit_data.model.problems.EProblemReportStatus;
 import org.onebusaway.transit_data.model.problems.StopProblemReportQueryBean;
 import org.onebusaway.transit_data.model.problems.StopProblemReportSummaryBean;
 import org.onebusaway.transit_data.services.TransitDataService;
+import org.onebusaway.utility.time.SystemTime;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.opensymphony.xwork2.ActionSupport;
@@ -87,7 +88,7 @@ public class StopProblemReportSummariesAction extends ActionSupport {
     StopProblemReportQueryBean query = new StopProblemReportQueryBean();
     query.setAgencyId(_agencyId);
     query.setTimeFrom(0);
-    query.setTimeTo(System.currentTimeMillis());
+    query.setTimeTo(SystemTime.currentTimeMillis());
     if (_status != null)
       query.setStatus(EProblemReportStatus.valueOf(_status.toUpperCase()));
 

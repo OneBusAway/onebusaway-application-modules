@@ -54,6 +54,7 @@ import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAle
 import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange;
 import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange.Builder;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
+import org.onebusaway.utility.time.SystemTime;
 
 public class ServiceAlertsServiceImplTest {
 
@@ -133,19 +134,19 @@ public class ServiceAlertsServiceImplTest {
     // here for future reference.
     // Open-ended publication window ends in the past, should get filtered out
     ServiceAlert serviceAlert2 = addServiceAlertWithTimeRange(agencyId,
-        createTimeRange(0, System.currentTimeMillis()));
+        createTimeRange(0, SystemTime.currentTimeMillis()));
 
     // Closed publication window starts in future, should get filtered out
     ServiceAlert serviceAlert3 = addServiceAlertWithTimeRange(
         agencyId,
-        createTimeRange(System.currentTimeMillis() + (60 * 60 * 1000),
-            System.currentTimeMillis() + (60 * 60 * 1000 * 2)));
+        createTimeRange(SystemTime.currentTimeMillis() + (60 * 60 * 1000),
+            SystemTime.currentTimeMillis() + (60 * 60 * 1000 * 2)));
 
     // Closed publication window contains time, should get included
     ServiceAlert serviceAlert4 = addServiceAlertWithTimeRange(
         agencyId,
-        createTimeRange(System.currentTimeMillis() - (60 * 60 * 1000),
-            System.currentTimeMillis() + (60 * 60 * 1000)));
+        createTimeRange(SystemTime.currentTimeMillis() - (60 * 60 * 1000),
+            SystemTime.currentTimeMillis() + (60 * 60 * 1000)));
 
     SituationQueryBean query = new SituationQueryBean();
     // query.setAgencyId(agencyId);
@@ -156,7 +157,7 @@ public class ServiceAlertsServiceImplTest {
     affects.add(e);
     query.setAffects(affects);
     // Time is not supported by SituationQueryBean anymore
-    // query.setTime(System.currentTimeMillis());
+    // query.setTime(SystemTime.currentTimeMillis());
 
     List<ServiceAlert> alerts = _service.getServiceAlerts(query);
     assertEquals(2, alerts.size());
@@ -235,10 +236,10 @@ public class ServiceAlertsServiceImplTest {
         "1");
 
     List<ServiceAlert> alerts = _service.getServiceAlertsForAgencyId(
-        System.currentTimeMillis(), "1");
+        SystemTime.currentTimeMillis(), "1");
     assertEquals(0, alerts.size());
 
-    alerts = _service.getServiceAlertsForAgencyId(System.currentTimeMillis(),
+    alerts = _service.getServiceAlertsForAgencyId(SystemTime.currentTimeMillis(),
         "2");
     assertEquals(1, alerts.size());
     assertTrue(alerts.contains(serviceAlert));
@@ -328,9 +329,9 @@ public class ServiceAlertsServiceImplTest {
         serviceIds(lsids("a"), lsids()), trip);
 
     BlockInstance blockInstance = new BlockInstance(blockConfig,
-        System.currentTimeMillis());
+        SystemTime.currentTimeMillis());
     List<ServiceAlert> alerts = _service.getServiceAlertsForStopCall(
-        System.currentTimeMillis(), blockInstance,
+        SystemTime.currentTimeMillis(), blockInstance,
         blockConfig.getStopTimes().get(0), new AgencyAndId("1", "1111"));
     assertEquals(4, alerts.size());
     assertTrue(alerts.contains(serviceAlert1));
@@ -349,11 +350,11 @@ public class ServiceAlertsServiceImplTest {
         "1");
 
     List<ServiceAlert> alerts = _service.getServiceAlertsForStopId(
-        System.currentTimeMillis(), new AgencyAndId("1", "10020"));
+        SystemTime.currentTimeMillis(), new AgencyAndId("1", "10020"));
     assertEquals(1, alerts.size());
     assertTrue(alerts.contains(serviceAlert));
 
-    alerts = _service.getServiceAlertsForStopId(System.currentTimeMillis(),
+    alerts = _service.getServiceAlertsForStopId(SystemTime.currentTimeMillis(),
         new AgencyAndId("1", "10021"));
     assertEquals(0, alerts.size());
   }
@@ -428,10 +429,10 @@ public class ServiceAlertsServiceImplTest {
 
     BlockTripInstance blockTripInstance = new BlockTripInstance(
         blockConfig.getTrips().get(0), new InstanceState(
-            System.currentTimeMillis()));
+            SystemTime.currentTimeMillis()));
 
     List<ServiceAlert> alerts = _service.getServiceAlertsForVehicleJourney(
-        System.currentTimeMillis(), blockTripInstance, new AgencyAndId("1",
+        SystemTime.currentTimeMillis(), blockTripInstance, new AgencyAndId("1",
             "1111"));
     assertEquals(3, alerts.size());
     assertTrue(alerts.contains(serviceAlert2));
@@ -492,10 +493,10 @@ public class ServiceAlertsServiceImplTest {
         null);
 
     List<ServiceAlert> alerts = _service.getServiceAlertsForAgencyId(
-        System.currentTimeMillis(), "2");
+        SystemTime.currentTimeMillis(), "2");
     assertEquals(0, alerts.size());
 
-    alerts = _service.getServiceAlertsForStopId(System.currentTimeMillis(),
+    alerts = _service.getServiceAlertsForStopId(SystemTime.currentTimeMillis(),
         new AgencyAndId("1", "10020"));
     assertEquals(1, alerts.size());
     assertTrue(alerts.contains(serviceAlert2));

@@ -17,13 +17,15 @@ package org.onebusaway.transit_data.model.problems;
 
 import java.io.Serializable;
 
+import org.onebusaway.utility.time.SystemTime;
+
 public class PlannedTripProblemReportBean implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
   private long id;
 
-  private long reportTime = System.currentTimeMillis();
+  private long reportTime = SystemTime.currentTimeMillis();
 
   private String data;
 

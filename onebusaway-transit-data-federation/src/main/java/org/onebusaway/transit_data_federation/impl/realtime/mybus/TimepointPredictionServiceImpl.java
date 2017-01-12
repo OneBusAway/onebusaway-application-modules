@@ -42,6 +42,7 @@ import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
+import org.onebusaway.utility.time.SystemTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -266,7 +267,7 @@ public class TimepointPredictionServiceImpl {
     if (predictionsByBlockId.isEmpty())
       return;
 
-    long t = System.currentTimeMillis();
+    long t = SystemTime.currentTimeMillis();
     long timeFrom = t - 30 * 60 * 1000;
     long timeTo = t + 30 * 60 * 1000;
 
@@ -296,7 +297,7 @@ public class TimepointPredictionServiceImpl {
 
     VehicleLocationRecord r = new VehicleLocationRecord();
     r.setBlockId(best.getBlockId());
-    r.setTimeOfRecord(System.currentTimeMillis());
+    r.setTimeOfRecord(SystemTime.currentTimeMillis());
     r.setTimeOfLocationUpdate(r.getTimeOfRecord());
     r.setScheduleDeviation(best.getScheduleDeviation());
 

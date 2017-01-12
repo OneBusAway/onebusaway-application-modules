@@ -18,6 +18,8 @@ package org.onebusaway.presentation.impl.resources;
 import java.io.File;
 import java.net.URL;
 
+import org.onebusaway.utility.time.SystemTime;
+
 import com.google.gwt.resources.client.ResourcePrototype;
 
 public class ResourcePrototypeImpl implements ResourcePrototype {
@@ -31,7 +33,7 @@ public class ResourcePrototypeImpl implements ResourcePrototype {
   protected boolean _initialized = false;
   protected URL _localUrl;
   protected File _localFile = null;
-  private long _lastModified = System.currentTimeMillis();
+  private long _lastModified = SystemTime.currentTimeMillis();
   protected long _localFileLength = -1;
 
   public ResourcePrototypeImpl(ClientBundleContext context,

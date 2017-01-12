@@ -32,6 +32,7 @@ import org.onebusaway.transit_data.model.problems.PlannedTripProblemReportBean;
 import org.onebusaway.transit_data.model.tripplanning.ConstraintsBean;
 import org.onebusaway.transit_data.model.tripplanning.TransitLocationBean;
 import org.onebusaway.transit_data.services.TransitDataService;
+import org.onebusaway.utility.time.SystemTime;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.opensymphony.xwork2.conversion.annotations.TypeConversion;
@@ -140,9 +141,9 @@ public class ReportProblemWithPlannedTripAction extends ApiActionSupport {
   public DefaultHttpHeaders index() throws IOException, ServiceException {
 
     if (_time == 0)
-      _time = System.currentTimeMillis();
+      _time = SystemTime.currentTimeMillis();
     if (_constraints.getCurrentTime() == -1)
-      _constraints.setCurrentTime(System.currentTimeMillis());
+      _constraints.setCurrentTime(SystemTime.currentTimeMillis());
 
     BeanFactoryV2 factory = getBeanFactoryV2();
     ItineraryV2BeanFactory itineraryFactory = new ItineraryV2BeanFactory(

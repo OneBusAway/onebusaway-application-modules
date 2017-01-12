@@ -32,6 +32,7 @@ import org.onebusaway.transit_data.model.VehicleStatusBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.transit_data.model.trips.TripStatusBean;
 import org.onebusaway.transit_data.services.TransitDataService;
+import org.onebusaway.utility.time.SystemTime;
 
 import com.google.transit.realtime.GtfsRealtime.FeedEntity;
 import com.google.transit.realtime.GtfsRealtime.FeedMessage;
@@ -53,7 +54,7 @@ public class VehiclePositionsForAgencyActionTest {
 
   @Test
   public void test() {
-    long now = System.currentTimeMillis();
+    long now = SystemTime.currentTimeMillis();
 
     List<VehicleStatusBean> vehicles = new ArrayList<VehicleStatusBean>();
     RouteBean.Builder routeBuilder = RouteBean.builder();

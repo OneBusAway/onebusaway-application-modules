@@ -23,6 +23,7 @@ import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsBean;
 import org.onebusaway.transit_data.model.trips.TripStatusBean;
 import org.onebusaway.transit_data.model.trips.TripsForBoundsQueryBean;
+import org.onebusaway.utility.time.SystemTime;
 import org.onebusaway.webapp.gwt.common.MapOverlayManager;
 import org.onebusaway.webapp.gwt.common.PageException;
 import org.onebusaway.webapp.gwt.common.context.Context;
@@ -95,7 +96,7 @@ public class IndexPage extends WhereCommonPage {
 
     TripsForBoundsQueryBean query = new TripsForBoundsQueryBean();
     query.setBounds(bounds);
-    query.setTime(System.currentTimeMillis());
+    query.setTime(SystemTime.currentTimeMillis());
     query.getInclusion().setIncludeTripBean(true);
 
     WebappServiceAsync service = WebappServiceAsync.SERVICE;

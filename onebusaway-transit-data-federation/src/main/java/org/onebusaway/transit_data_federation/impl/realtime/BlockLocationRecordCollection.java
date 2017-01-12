@@ -28,6 +28,7 @@ import org.onebusaway.realtime.api.EVehiclePhase;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.utility.EOutOfRangeStrategy;
 import org.onebusaway.utility.InterpolationLibrary;
+import org.onebusaway.utility.time.SystemTime;
 
 /**
  * A collection of block location records from the same block/trip/vehicle over
@@ -70,7 +71,7 @@ public final class BlockLocationRecordCollection implements Serializable {
     this.fromTime = fromTime;
     this.toTime = toTime;
     this.records = records;
-    this.measuredLastUpdateTime = System.currentTimeMillis();
+    this.measuredLastUpdateTime = SystemTime.currentTimeMillis();
   }
 
   public BlockLocationRecordCollection(long fromTime, long toTime) {

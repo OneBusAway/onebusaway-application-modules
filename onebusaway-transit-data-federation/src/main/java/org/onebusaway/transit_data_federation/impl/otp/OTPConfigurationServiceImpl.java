@@ -27,6 +27,7 @@ import org.onebusaway.transit_data_federation.services.tripplanner.ItinerariesSe
 import org.onebusaway.transit_data_federation.services.tripplanner.StopHopService;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTransferService;
 import org.onebusaway.transit_data_federation.services.tripplanner.TransferPatternService;
+import org.onebusaway.utility.time.SystemTime;
 import org.opentripplanner.routing.core.TraverseModeSet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -129,7 +130,7 @@ class OTPConfigurationServiceImpl implements OTPConfigurationService {
 
     options.useServiceDays = false;
 
-    options.currentTime = System.currentTimeMillis();
+    options.currentTime = SystemTime.currentTimeMillis();
 
     return options;
   }

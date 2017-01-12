@@ -93,6 +93,7 @@ import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEnt
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.ItinerariesService;
+import org.onebusaway.utility.time.SystemTime;
 import org.opentripplanner.routing.core.Edge;
 import org.opentripplanner.routing.core.EdgeNarrative;
 import org.opentripplanner.routing.core.Graph;
@@ -453,7 +454,7 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
         stopLocation.setLon(travelTimes.getStopLon(index));
 
         ItinerariesBean itineraries = getItinerariesBetween(stopLocation,
-            place, System.currentTimeMillis(), walkConstraints);
+            place, SystemTime.currentTimeMillis(), walkConstraints);
 
         for (ItineraryBean plan : itineraries.getItineraries()) {
           double t = currentTripDuration

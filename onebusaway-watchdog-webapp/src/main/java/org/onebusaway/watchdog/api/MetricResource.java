@@ -31,6 +31,7 @@ import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.MonitoredDataSource;
 import org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.MonitoredResult;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
+import org.onebusaway.utility.time.SystemTime;
 import org.onebusaway.watchdog.model.Metric;
 import org.onebusaway.watchdog.model.MetricConfiguration;
 import org.slf4j.Logger;
@@ -80,7 +81,7 @@ public abstract class MetricResource {
     
     for (CoordinateBounds bounds : allBounds) {
       query.setBounds(bounds);
-      query.setTime(System.currentTimeMillis());
+      query.setTime(SystemTime.currentTimeMillis());
       query.setMaxCount(Integer.MAX_VALUE);
       
       TripDetailsInclusionBean inclusion = query.getInclusion();
@@ -121,7 +122,7 @@ public abstract class MetricResource {
   protected String ok(String metricName, Object value) {
     Metric metric = new Metric();
     metric.setMetricName(metricName);
-    metric.setCurrentTimestamp(System.currentTimeMillis());
+    metric.setCurrentTimestamp(SystemTime.currentTimeMillis());
     metric.setMetricValue(value);
     metric.setResponse("SUCCESS");
     

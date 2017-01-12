@@ -30,6 +30,7 @@ import org.onebusaway.transit_data.model.service_alerts.SituationAffectsBean;
 import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
 import org.onebusaway.transit_data.model.service_alerts.TimeRangeBean;
 import org.onebusaway.users.client.model.UserBean;
+import org.onebusaway.utility.time.SystemTime;
 
 public class SituationsPresentation {
 
@@ -39,7 +40,7 @@ public class SituationsPresentation {
 
   private UserBean _user;
 
-  private long _time = System.currentTimeMillis();
+  private long _time = SystemTime.currentTimeMillis();
 
   private long _redisplayIfNowActiveThhreshold = 24 * 60 * 60 * 1000;
 

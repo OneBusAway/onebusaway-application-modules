@@ -65,6 +65,7 @@ import org.onebusaway.transit_data_federation.services.transit_graph.TransitGrap
 import org.onebusaway.transit_data_federation.services.tripplanner.ItinerariesService;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstance;
 import org.onebusaway.utility.IOLibrary;
+import org.onebusaway.utility.time.SystemTime;
 import org.opentripplanner.routing.algorithm.GenericDijkstra;
 import org.opentripplanner.routing.algorithm.strategies.SkipTraverseResultStrategy;
 import org.opentripplanner.routing.core.Edge;
@@ -185,7 +186,7 @@ public class TransferPatternsTask implements Runnable {
   @Override
   public void run() {
 
-    long tIn = System.currentTimeMillis();
+    long tIn = SystemTime.currentTimeMillis();
 
     List<StopEntry> hubStops = loadHubStops();
     List<StopEntry> stops = loadSourceStops(hubStops);
@@ -277,7 +278,7 @@ public class TransferPatternsTask implements Runnable {
 
     writeData(patternsByStopId);
 
-    long tOut = System.currentTimeMillis();
+    long tOut = SystemTime.currentTimeMillis();
     int duration = (int) ((tOut - tIn) / 1000);
     System.out.println("duration=" + duration);
   }

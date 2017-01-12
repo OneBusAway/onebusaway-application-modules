@@ -18,10 +18,11 @@ package org.onebusaway.transit_data_federation.services.realtime;
 
 import org.onebusaway.realtime.api.VehicleLocationRecord;
 import org.onebusaway.transit_data_federation.services.blocks.ScheduledBlockLocation;
+import org.onebusaway.utility.time.SystemTime;
 
 public class VehicleLocationCacheElement {
 
-  private final long measuredLastUpdateTime = System.currentTimeMillis();
+  private final long measuredLastUpdateTime = SystemTime.currentTimeMillis();
 
   private final VehicleLocationRecord _record;
 

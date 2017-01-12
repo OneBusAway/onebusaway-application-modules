@@ -32,6 +32,7 @@ import org.apache.commons.net.ftp.FTPListParseEngine;
 import org.apache.commons.net.ftp.FTPReply;
 import org.onebusaway.csv_entities.CsvEntityReader;
 import org.onebusaway.csv_entities.schema.AnnotationDrivenEntitySchemaFactory;
+import org.onebusaway.utility.time.SystemTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jmx.export.annotation.ManagedAttribute;
@@ -153,7 +154,7 @@ public class OrbcadRecordFtpSource extends AbstractOrbcadRecordSource {
   }
 
   private List<String> getUpdatedFilesToDownload() throws IOException {
-    long t1 = System.currentTimeMillis();
+    long t1 = SystemTime.currentTimeMillis();
 
     FTPListParseEngine engine = _ftpClient.initiateListParsing(_dataDirectory);
 
@@ -173,7 +174,7 @@ public class OrbcadRecordFtpSource extends AbstractOrbcadRecordSource {
     _totalFtpFiles = paths.size();
     _newFtpFiles = toDownload.size();
 
-    long t2 = System.currentTimeMillis();
+    long t2 = SystemTime.currentTimeMillis();
 
     if (_log.isDebugEnabled())
       _log.debug("file listing time: " + (t2 - t1) + " totalFiles: "
@@ -196,7 +197,7 @@ public class OrbcadRecordFtpSource extends AbstractOrbcadRecordSource {
 
       _log.debug("downloading path: {}", path);
 
-      long t3 = System.currentTimeMillis();
+      long t3 = SystemTime.currentTimeMillis();
       InputStream in = _ftpClient.retrieveFileStream(path);
 
       if (!FTPReply.isPositivePreliminary(_ftpClient.getReplyCode())) {
@@ -214,7 +215,7 @@ public class OrbcadRecordFtpSource extends AbstractOrbcadRecordSource {
         continue;
       }
 
-      long t4 = System.currentTimeMillis();
+      long t4 = SystemTime.currentTimeMillis();
       if (_log.isDebugEnabled())
         _log.info("file download time: " + (t4 - t3));
     }

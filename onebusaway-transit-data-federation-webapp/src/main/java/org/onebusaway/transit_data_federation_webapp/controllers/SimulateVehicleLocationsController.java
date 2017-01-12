@@ -28,6 +28,7 @@ import org.onebusaway.transit_data_federation.model.TargetTime;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.realtime.BlockLocation;
 import org.onebusaway.transit_data_federation.services.realtime.BlockLocationService;
+import org.onebusaway.utility.time.SystemTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -49,7 +50,7 @@ public class SimulateVehicleLocationsController {
 
     CurrentVehicleEstimateQueryBean bean = new CurrentVehicleEstimateQueryBean();
 
-    long time = System.currentTimeMillis();
+    long time = SystemTime.currentTimeMillis();
     
     List<Record> records = new ArrayList<Record>();
 

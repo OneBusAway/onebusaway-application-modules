@@ -21,6 +21,7 @@ import org.apache.struts2.rest.DefaultHttpHeaders;
 import org.onebusaway.api.actions.api.ApiActionSupport;
 import org.onebusaway.exceptions.ServiceException;
 import org.onebusaway.transit_data.services.TransitDataService;
+import org.onebusaway.utility.time.SystemTime;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.google.transit.realtime.GtfsRealtime.FeedHeader;
@@ -77,7 +78,7 @@ public abstract class GtfsRealtimeActionSupport extends ApiActionSupport {
     if (hasErrors())
       return setValidationErrorsResponse();
 
-    long time = System.currentTimeMillis();
+    long time = SystemTime.currentTimeMillis();
     if (_time != 0)
       time = _time;
 

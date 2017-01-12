@@ -30,6 +30,7 @@ import org.onebusaway.transit_data.model.tripplanning.ConstraintsBean;
 import org.onebusaway.transit_data.model.tripplanning.ItinerariesBean;
 import org.onebusaway.transit_data.model.tripplanning.TransitLocationBean;
 import org.onebusaway.transit_data.services.TransitDataService;
+import org.onebusaway.utility.time.SystemTime;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class TripPlannerTestTask implements Runnable {
@@ -94,10 +95,10 @@ public class TripPlannerTestTask implements Runnable {
       for (Pair<CoordinatePoint> pair : points) {
         TransitLocationBean from = new TransitLocationBean(pair.getFirst());
         TransitLocationBean to = new TransitLocationBean(pair.getSecond());
-        long tIn = System.currentTimeMillis();
+        long tIn = SystemTime.currentTimeMillis();
         ItinerariesBean result = _transitDataService.getItinerariesBetween(
             from, to, _time.getTime(), constraints);
-        long tOut = System.currentTimeMillis();
+        long tOut = SystemTime.currentTimeMillis();
         long tDiff = tOut - tIn;
         tTotal += tDiff;
         index++;
