@@ -462,7 +462,7 @@ jQuery(function() {
 	//Using bind() with propertychange event as live() does not work in IE for unknown reasons
 	jQuery("#createDataset #directoryName").bind("input propertychange", function() {
 		var text = jQuery("#createDataset #directoryName").val();
-		var validDatasetNameExp = /^[a-zA-Z0-9]+$/;
+		var validDatasetNameExp = /^[a-zA-Z0-9_-]+$/;
 		jQuery('#Create #filenameError').hide();
 		disableSelectButton();
 		if (text.length > 0) {
@@ -482,7 +482,7 @@ jQuery(function() {
 	//Using bind() with propertychange event as live() does not work in IE for unknown reasons
 	jQuery("#destinationDirectory").bind("input propertychange", function() {
 		var text = jQuery("#destinationDirectory").val();
-		var validDatasetNameExp = /^[a-zA-Z_-\d]+$/;
+		var validDatasetNameExp = /^[a-zA-Z0-9_-]+$/;
 		jQuery('#copyFilenameError').hide();
 		$("#copyContinue").button("disable");
 		if (text.length > 0) {
