@@ -173,20 +173,27 @@ OBA.Sign = function() {
 	
 	function updateClock() {
 		// try and get date from server
-		jQuery.getJSON(obaApiBaseUrl + OBA.Config.timeApiUrl, function(json) {
-			var now;
-			if (json.data == null) {
-				console.log("call to time server failed: url=" + obaApiBaseUrl + OBA.Config.timeApiUrl);
-				now = new Date();
-			} else {
-				now = new Date(json.data.entry.time);
-			}
-			jQuery("#clock #time").text(now.format("h:MM TT"));
-			jQuery("#clock #day").text(now.format("dddd, mmmm d"));
-		}  
-		
-		
-		);
+		jQuery.ajax({
+                dataType: "json",
+                url: obaApiBaseUrl + OBA.Config.timeApiUrl,
+                success: function (json, textStatus, jqXHR) {
+                    var now;
+                    if (json.data == null) {
+                        console.log("call to time server failed: url=" + obaApiBaseUrl + OBA.Config.timeApiUrl);
+                        now = new Date();
+                    } else {
+                        now = new Date(json.data.entry.time);
+                    }
+                    jQuery("#clock #time").text(now.format("h:MM TT"));
+                    jQuery("#clock #day").text(now.format("dddd, mmmm d"));
+                },
+                error: function (jqxhr, textStatus, error) {
+                    now = new Date();
+                    jQuery("#clock #time").text(now.format("h:MM TT"));
+                    jQuery("#clock #day").text(now.format("dddd, mmmm d"));
+                }
+            }
+			);
 		
 	}
 	
