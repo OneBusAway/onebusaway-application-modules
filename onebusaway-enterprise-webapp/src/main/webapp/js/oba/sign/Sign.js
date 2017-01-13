@@ -179,7 +179,7 @@ OBA.Sign = function() {
                 success: function (json, textStatus, jqXHR) {
                     var now;
                     if (json.data == null) {
-                        console.log("call to time server failed: url=" + obaApiBaseUrl + OBA.Config.timeApiUrl);
+                        //console.log("call to time server failed: url=" + obaApiBaseUrl + OBA.Config.timeApiUrl);
                         now = new Date();
                     } else {
                         now = new Date(json.data.entry.time);
@@ -591,7 +591,18 @@ OBA.Sign = function() {
 				}
 			});
 
-			var sortOrderAndRouteIdAndHeadsign = sortedArrivalTimes;
+			// now look for stop-based service alerts
+			if (json.Siri.ServiceDelivery.SituationExchangeDelivery != null
+			       && json.Siri.ServiceDelivery.SituationExchangeDelivery.length > 0) {
+                jQuery.each(json.Siri.ServiceDelivery.SituationExchangeDelivery[0].Situations.PtSituationElement, function (_, ptSituationElement) {
+                    if (typeof situationsById[ptSituationElement.SituationNumber] !== 'undefined') {
+                        applicableSituations[ptSituationElement.SituationNumber] = ptSituationElement;
+                    }
+                });
+            }
+
+
+            var sortOrderAndRouteIdAndHeadsign = sortedArrivalTimes;
 			// default is to sort by arrival times / arrival distances			
 			if (sortByRoute) {
 				  sortedRouteIds.sort(function(a, b) {
