@@ -123,6 +123,7 @@ OBA.Popups = (function() {
 	}
 	
 	// CONTENT GENERATION
+	// this method is no longer used....
 	function getServiceAlerts(r, situationRefs) {
 	    var html = '';
 
