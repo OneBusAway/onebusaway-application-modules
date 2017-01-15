@@ -806,8 +806,8 @@ public class GtfsRealtimeTripLibrary {
       return stopTime.getArrivalTime() + arrival.getDelay();
     if (arrival.hasTime())
       return (int) (arrival.getTime() - serviceDate / 1000);
-    throw new IllegalStateException(
-        "expected arrival delay or time for stopTimeUpdate " + stopTimeUpdate);
+    // instead of illegal state exception we return -1 to not corrupt the read
+    return -1;
   }
 
   private int computeDepartureTime(StopTimeEntry stopTime,
