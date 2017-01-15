@@ -91,6 +91,21 @@
     	<property name="session" ref="mailSession"/> 
 	</bean>
     
+    <!-- Database Connection Configuration for retrieving archived data -->
+    <bean id="gtfsRealtimeArchiveDataSource"
+          class="org.springframework.jndi.JndiObjectFactoryBean">
+      <property name="jndiName"
+                value="java:comp/env/jdbc/archiveDB"/>
+      <property name="lookupOnStartup"
+                value="true"/>
+      <property name="cache"
+                value="true"/>
+      <property name="proxyInterface"
+                value="javax.sql.DataSource"/>
+      <property name="resourceRef"
+                value="true" />
+    </bean>
+
 <!-- Other Stuff: -->
 
     <bean id="externalGeocoderImpl" class="org.onebusaway.geocoder.enterprise.impl.EnterpriseGoogleGeocoderImpl">
@@ -183,6 +198,33 @@
     </property>
   </bean>
  
+  <bean id="gtfsRealtimeArchiveSessionFactory" class="org.springframework.orm.hibernate3.annotation.AnnotationSessionFactoryBean">
+    <property name="dataSource" ref="gtfsRealtimeArchiveDataSource" />
+    <property name="annotatedClasses">
+      <list>
+        <value>org.onebusaway.admin.service.bundle.task.model.GtfsBundleInfo</value>
+        <value>org.onebusaway.admin.service.bundle.impl.GtfsArchiveDaoImpl</value>
+      </list>
+    </property>
+    <property name="hibernateProperties">
+      <props>
+        <prop key="hibernate.connection.pool_size">1</prop>
+        <prop key="hibernate.current_session_context_class">thread</prop>
+        <prop key="hibernate.cache.provider_class">org.hibernate.cache.NoCacheProvider</prop>
+        <prop key="hibernate.show_sql">false</prop>
+        <prop key="hibernate.hbm2ddl.auto">none</prop>
+        <prop key="hibernate.jdbc.batch_size">1000</prop>
+        <prop key="hibernate.order_inserts">false</prop>
+        <prop key="hibernate.order_updates">false</prop>
+      </props>
+    </property>
+    <property name="mappingResources">
+      <list>
+        <value>org/onebusaway/gtfs/model/GtfsArchiveMapping.hibernate.xml</value>
+      </list>
+    </property>
+  </bean>
+
 	<!-- quartz scheduling for PingJob -->
 	<bean name="pingJob" class="org.springframework.scheduling.quartz.JobDetailBean">
 		<property name="jobClass" value="org.onebusaway.admin.job.PingJob" />
