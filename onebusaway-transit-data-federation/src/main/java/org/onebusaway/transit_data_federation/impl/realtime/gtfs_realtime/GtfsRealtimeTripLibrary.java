@@ -819,8 +819,9 @@ public class GtfsRealtimeTripLibrary {
       return stopTime.getDepartureTime() + departure.getDelay();
     if (departure.hasTime())
       return (int) (departure.getTime() - serviceDate / 1000);
-    throw new IllegalStateException(
-        "expected departure delay or time for stopTimeUpdate " + stopTimeUpdate);
+    // instead of throwing an exception here, simply return -1
+    // so as to not stop the rest of the processing
+    return -1;
   }
 
   private void updateBestScheduleDeviation(int currentTime,
