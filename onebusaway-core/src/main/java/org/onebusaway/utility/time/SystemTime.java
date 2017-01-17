@@ -51,7 +51,7 @@ public class SystemTime {
 	}
 
 	public static long currentTimeMillis() {
-		return SystemTime.currentTimeMillis() - INSTANCE._adjustment;
+		return System.currentTimeMillis() + INSTANCE._adjustment;
 	}
 
 	public static void setEnabled(String enabledFlag) {
