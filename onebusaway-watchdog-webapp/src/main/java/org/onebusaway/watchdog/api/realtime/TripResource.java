@@ -175,7 +175,8 @@ public class TripResource extends MetricResource {
       }
       double validRealtimeTrips = getValidRealtimeTripIds(agencyId, feedId).size();
 
-      _log.debug("agencytrips size=" + scheduleTrips + ", validRealtimeTrips=" + validRealtimeTrips);
+      _log.info("agencytrips size=" + scheduleTrips + ", validRealtimeTrips=" + validRealtimeTrips
+              + " for feedId=" + feedId + ", routeId=" + routeId);
       double percent = Math.abs((validRealtimeTrips / scheduleTrips) * 100);
       return Response.ok(ok("buses-in-service-percent", percent)).build();
     } catch (Exception e) {
