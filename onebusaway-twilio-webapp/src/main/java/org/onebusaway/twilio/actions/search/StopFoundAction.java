@@ -102,8 +102,8 @@ public class StopFoundAction extends TwilioSupport implements SessionAware {
 				addMessage(Messages.DIRECTION_BOUND, direction);
 			}
 	
-			addText(Messages.IS);
-			addText(stop.getCode());
+			addMessage(Messages.IS);
+			addText(stop.getCode() + ".");
 	
 			addMessage(Messages.STOP_FOUND_ARRIVAL_INFO);
 			//AgiActionName arrivalInfoAction = addAction("1", "/stop/arrivalsAndDeparturesForStopId");
