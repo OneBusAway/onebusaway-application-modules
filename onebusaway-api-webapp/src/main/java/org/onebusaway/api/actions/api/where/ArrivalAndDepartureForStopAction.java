@@ -24,7 +24,6 @@ import org.onebusaway.exceptions.ServiceException;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureForStopQueryBean;
 import org.onebusaway.transit_data.services.TransitDataService;
-import org.onebusaway.utility.time.SystemTime;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.opensymphony.xwork2.conversion.annotations.TypeConversion;
@@ -102,7 +101,7 @@ public class ArrivalAndDepartureForStopAction extends ApiActionSupport {
       return setValidationErrorsResponse();
 
     if (_query.getTime() == 0)
-      _query.setTime(SystemTime.currentTimeMillis());
+      _query.setTime(System.currentTimeMillis());
 
     ArrivalAndDepartureBean result = _service.getArrivalAndDepartureForStop(_query);
 

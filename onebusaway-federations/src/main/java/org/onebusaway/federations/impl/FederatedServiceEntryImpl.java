@@ -20,7 +20,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.onebusaway.federations.FederatedServiceRegistryEntry;
-import org.onebusaway.utility.time.SystemTime;
 
 /**
  * Federated service registry entry helper class for
@@ -81,7 +80,7 @@ public class FederatedServiceEntryImpl {
   }
 
   public boolean isExpired() {
-    return _expiresAfter > 0 && SystemTime.currentTimeMillis() > _expiresAfter;
+    return _expiresAfter > 0 && System.currentTimeMillis() > _expiresAfter;
   }
 
   public String getServiceUrl() {

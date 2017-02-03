@@ -22,7 +22,6 @@ import javax.ws.rs.core.Response;
 
 import org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.MonitoredDataSource;
 import org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.MonitoredResult;
-import org.onebusaway.utility.time.SystemTime;
 import org.onebusaway.watchdog.api.MetricResource;
 
 @Path("/metric/realtime/agency")
@@ -47,7 +46,7 @@ public class AgencyResource extends MetricResource {
           }
         }
       }
-      return Response.ok(ok("last-update-delta", (SystemTime.currentTimeMillis() - lastUpdate)/1000)).build();
+      return Response.ok(ok("last-update-delta", (System.currentTimeMillis() - lastUpdate)/1000)).build();
     } catch (Exception e) {
       _log.error("getLastUpdateDelta broke", e);
       return Response.ok(error("last-update-delta", e)).build();

@@ -27,7 +27,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.httpclient.util.DateParseException;
 import org.apache.commons.httpclient.util.DateUtil;
 import org.apache.struts2.ServletActionContext;
-import org.onebusaway.utility.time.SystemTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -172,7 +171,7 @@ public class CacheControlInterceptor extends AbstractInterceptor {
     Date expiresTime = null;
 
     if (cacheControl.expiresOffset() > 0) {
-      expiresTime = new Date(SystemTime.currentTimeMillis()
+      expiresTime = new Date(System.currentTimeMillis()
           + cacheControl.expiresOffset());
     } else {
       expiresTime = invokeDateMethod(invocation, cacheControl.expiresMethod());

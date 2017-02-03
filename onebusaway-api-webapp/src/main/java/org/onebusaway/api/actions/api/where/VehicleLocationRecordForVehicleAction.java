@@ -24,7 +24,6 @@ import org.onebusaway.api.model.transit.BeanFactoryV2;
 import org.onebusaway.exceptions.ServiceException;
 import org.onebusaway.transit_data.model.realtime.VehicleLocationRecordBean;
 import org.onebusaway.transit_data.services.TransitDataService;
-import org.onebusaway.utility.time.SystemTime;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.opensymphony.xwork2.conversion.annotations.TypeConversion;
@@ -40,7 +39,7 @@ public class VehicleLocationRecordForVehicleAction extends ApiActionSupport {
 
   private String _id;
 
-  private long _time = SystemTime.currentTimeMillis();
+  private long _time = System.currentTimeMillis();
 
   public VehicleLocationRecordForVehicleAction() {
     super(V2);

@@ -33,7 +33,6 @@ import javax.annotation.PreDestroy;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.realtime.BlockLocationRecordCache;
-import org.onebusaway.utility.time.SystemTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -274,7 +273,7 @@ class BlockLocationRecordCacheImpl implements BlockLocationRecordCache {
 
     @Override
     public void run() {
-      clearStaleRecords(SystemTime.currentTimeMillis()
+      clearStaleRecords(System.currentTimeMillis()
           - _blockLocationRecordCacheWindowSize * 1000);
     }
   }

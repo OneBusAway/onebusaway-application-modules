@@ -32,7 +32,6 @@ import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationAffectsBean;
 import org.onebusaway.transit_data.model.service_alerts.TimeRangeBean;
 import org.onebusaway.transit_data.services.TransitDataService;
-import org.onebusaway.utility.time.SystemTime;
 
 import com.google.transit.realtime.GtfsRealtime.Alert;
 import com.google.transit.realtime.GtfsRealtime.EntitySelector;
@@ -58,7 +57,7 @@ public class AlertsForAgencyActionTest {
 
   @Test
   public void test() {
-    long now = SystemTime.currentTimeMillis();
+    long now = System.currentTimeMillis();
 
     List<ServiceAlertBean> alerts = new ArrayList<ServiceAlertBean>();
 

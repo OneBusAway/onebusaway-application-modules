@@ -17,8 +17,6 @@ package org.onebusaway.transit_data_federation.model;
 
 import java.io.Serializable;
 
-import org.onebusaway.utility.time.SystemTime;
-
 /**
  * Typically, when it comes to real-time information, you want to query the
  * system right now. However, to assist with debugging, we make it possible to
@@ -49,11 +47,11 @@ public final class TargetTime implements Serializable {
   private final long targetTime;
 
   public TargetTime() {
-    this(SystemTime.currentTimeMillis());
+    this(System.currentTimeMillis());
   }
 
   public TargetTime(long targetTime) {
-    this(targetTime, SystemTime.currentTimeMillis());
+    this(targetTime, System.currentTimeMillis());
   }
 
   public TargetTime(long targetTime, long currentTime) {

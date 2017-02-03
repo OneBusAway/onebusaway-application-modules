@@ -20,7 +20,6 @@ import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
 import org.onebusaway.transit_data.model.RouteBean;
 import org.onebusaway.transit_data.model.schedule.FrequencyBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
-import org.onebusaway.utility.time.SystemTime;
 import org.onebusaway.webapp.actions.bundles.ArrivalAndDepartureMessages;
 
 import com.google.gwt.core.client.GWT;
@@ -31,7 +30,7 @@ public class ArrivalsAndDeparturesPresentaion {
 
   private ArrivalAndDepartureMessages _messages;
   
-  private long _time = SystemTime.currentTimeMillis();
+  private long _time = System.currentTimeMillis();
 
   private boolean _showArrivals = false;
 

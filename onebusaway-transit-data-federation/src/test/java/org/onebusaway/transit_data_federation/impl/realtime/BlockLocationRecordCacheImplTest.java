@@ -33,13 +33,12 @@ import org.onebusaway.transit_data_federation.impl.transit_graph.BlockEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.TripEntryImpl;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
-import org.onebusaway.utility.time.SystemTime;
 
 public class BlockLocationRecordCacheImplTest {
 
   @Test
   public void testSimpleOperations() {
-    long serviceDate = SystemTime.currentTimeMillis();
+    long serviceDate = System.currentTimeMillis();
 
     BlockEntryImpl block = block("blockA");
     TripEntryImpl trip = trip("tripA", "serviceId");
@@ -121,7 +120,7 @@ public class BlockLocationRecordCacheImplTest {
   @Test
   public void testClearCache() throws InterruptedException {
 
-    long serviceDate = SystemTime.currentTimeMillis();
+    long serviceDate = System.currentTimeMillis();
 
     BlockEntryImpl blockA = block("blockA");
     TripEntryImpl tripA = trip("tripA", "serviceId");
@@ -157,7 +156,7 @@ public class BlockLocationRecordCacheImplTest {
         record(50, "blockB", serviceDate, "vehicleD", 20.0));
     
     
-    cache.clearStaleRecords(SystemTime.currentTimeMillis()-150);
+    cache.clearStaleRecords(System.currentTimeMillis()-150);
 
     List<BlockLocationRecordCollection> records = cache.getRecordsForVehicleId(aid("vehicleA"));
     assertEquals(0, records.size());
@@ -184,7 +183,7 @@ public class BlockLocationRecordCacheImplTest {
     BlockLocationRecordCacheImpl cache = new BlockLocationRecordCacheImpl();
     cache.setBlockLocationRecordCacheWindowSize(2);
 
-    long serviceDate = SystemTime.currentTimeMillis();
+    long serviceDate = System.currentTimeMillis();
     int vid = 0;
 
     for (int i = 0; i < 20; i++) {

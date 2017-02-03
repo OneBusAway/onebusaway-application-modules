@@ -41,7 +41,6 @@ import org.onebusaway.transit_data_federation.services.realtime.BlockLocation;
 import org.onebusaway.transit_data_federation.services.realtime.BlockLocationService;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.FrequencyEntry;
-import org.onebusaway.utility.time.SystemTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -357,7 +356,7 @@ public class BlockStatusServiceImpl implements BlockStatusService {
       Map<BlockInstance, List<List<BlockLocation>>> results) {
 
     Map<AgencyAndId, List<BlockLocation>> locations = _blockLocationService.getLocationsForBlockInstance(
-        instance, timestamps, SystemTime.currentTimeMillis());
+        instance, timestamps, System.currentTimeMillis());
 
     if (locations.isEmpty()) {
       List<List<BlockLocation>> empty = Collections.emptyList();

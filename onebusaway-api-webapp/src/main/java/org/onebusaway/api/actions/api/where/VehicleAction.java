@@ -26,7 +26,6 @@ import org.onebusaway.exceptions.OutOfServiceAreaServiceException;
 import org.onebusaway.exceptions.ServiceException;
 import org.onebusaway.transit_data.model.VehicleStatusBean;
 import org.onebusaway.transit_data.services.TransitDataService;
-import org.onebusaway.utility.time.SystemTime;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.opensymphony.xwork2.conversion.annotations.TypeConversion;
@@ -71,7 +70,7 @@ public class VehicleAction extends ApiActionSupport {
     if (hasErrors())
       return setValidationErrorsResponse();
 
-    long time = SystemTime.currentTimeMillis();
+    long time = System.currentTimeMillis();
     if (_time != 0)
       time = _time;
 

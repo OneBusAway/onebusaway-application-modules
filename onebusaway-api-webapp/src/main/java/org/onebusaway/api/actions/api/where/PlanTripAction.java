@@ -42,7 +42,6 @@ import org.onebusaway.transit_data.model.tripplanning.ItinerariesBean;
 import org.onebusaway.transit_data.model.tripplanning.ItineraryBean;
 import org.onebusaway.transit_data.model.tripplanning.TransitLocationBean;
 import org.onebusaway.transit_data.services.TransitDataService;
-import org.onebusaway.utility.time.SystemTime;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.opensymphony.xwork2.conversion.annotations.TypeConversion;
@@ -141,9 +140,9 @@ public class PlanTripAction extends ApiActionSupport {
   public DefaultHttpHeaders index() throws IOException, ServiceException {
 
     if (_time == 0)
-      _time = SystemTime.currentTimeMillis();
+      _time = System.currentTimeMillis();
     if (_constraints.getCurrentTime() == -1)
-      _constraints.setCurrentTime(SystemTime.currentTimeMillis());
+      _constraints.setCurrentTime(System.currentTimeMillis());
 
     BeanFactoryV2 factory = getBeanFactoryV2();
     ItineraryV2BeanFactory itineraryFactory = new ItineraryV2BeanFactory(

@@ -35,7 +35,6 @@ import org.onebusaway.transit_data_federation.impl.transit_graph.BlockEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.TripEntryImpl;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
-import org.onebusaway.utility.time.SystemTime;
 
 public class BlockLocationRecordCollectionTest {
 
@@ -47,7 +46,7 @@ public class BlockLocationRecordCollectionTest {
     stopTime(0, null, trip, time(9, 00), 0);
     BlockConfigurationEntry blockConfig = linkBlockTrips(block, trip);
     BlockInstance blockInstance = new BlockInstance(blockConfig,
-        SystemTime.currentTimeMillis());
+        System.currentTimeMillis());
 
     SortedMap<Long, BlockLocationRecord> records = new TreeMap<Long, BlockLocationRecord>();
 

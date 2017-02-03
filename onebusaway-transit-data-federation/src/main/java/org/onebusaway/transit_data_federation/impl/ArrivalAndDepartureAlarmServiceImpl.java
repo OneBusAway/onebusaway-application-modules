@@ -45,7 +45,6 @@ import org.onebusaway.transit_data_federation.services.realtime.ArrivalAndDepart
 import org.onebusaway.transit_data_federation.services.realtime.BlockLocation;
 import org.onebusaway.transit_data_federation.services.realtime.BlockLocationListener;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
-import org.onebusaway.utility.time.SystemTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -431,7 +430,7 @@ class ArrivalAndDepartureAlarmServiceImpl implements
     private int processQueue(PriorityQueue<AlarmForBlockInstance> queue,
         int scheduleDeviation) {
 
-      int effectiveScheduleTime = (int) ((SystemTime.currentTimeMillis() - _blockInstance.getServiceDate()) / 1000 - scheduleDeviation);
+      int effectiveScheduleTime = (int) ((System.currentTimeMillis() - _blockInstance.getServiceDate()) / 1000 - scheduleDeviation);
 
       while (!queue.isEmpty()) {
         AlarmForBlockInstance alarm = queue.peek();

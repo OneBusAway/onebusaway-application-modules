@@ -20,14 +20,13 @@ import java.util.List;
 
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.transit_data.model.QueryBean;
-import org.onebusaway.utility.time.SystemTime;
 
 @QueryBean
 public final class CurrentVehicleEstimateQueryBean implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
-  private long time = SystemTime.currentTimeMillis();
+  private long time = System.currentTimeMillis();
 
   private CoordinatePoint mostRecentLocation;
 

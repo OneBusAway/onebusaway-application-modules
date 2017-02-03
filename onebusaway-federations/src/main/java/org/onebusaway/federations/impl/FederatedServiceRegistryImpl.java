@@ -30,7 +30,6 @@ import java.util.concurrent.TimeUnit;
 import org.onebusaway.federations.FederatedServiceRegistry;
 import org.onebusaway.federations.FederatedServiceRegistryConstants;
 import org.onebusaway.federations.FederatedServiceRegistryEntry;
-import org.onebusaway.utility.time.SystemTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -107,7 +106,7 @@ public class FederatedServiceRegistryImpl implements FederatedServiceRegistry {
     String expiresAfter = properties.get(FederatedServiceRegistryConstants.KEY_REGISTRATION_EXPIRES_AFTER);
     if (expiresAfter != null) {
       int epiresAfterMS = Integer.parseInt(expiresAfter) * 1000;
-      entry.setExpiresAfter(SystemTime.currentTimeMillis() + epiresAfterMS);
+      entry.setExpiresAfter(System.currentTimeMillis() + epiresAfterMS);
     }
 
     boolean enabled = true;

@@ -23,7 +23,6 @@ import org.onebusaway.users.services.IndexedUserDetailsService;
 import org.onebusaway.users.services.StandardAuthoritiesService;
 import org.onebusaway.users.services.UserService;
 import org.onebusaway.users.services.internal.UserLastAccessTimeService;
-import org.onebusaway.utility.time.SystemTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.security.userdetails.UserDetails;
@@ -112,7 +111,7 @@ public class UserDetailsServiceImpl implements UserDetailsService,
 
   private void setLastAccessTimeForUser(UserIndex userIndex) {
     User user = userIndex.getUser();
-    _userLastAccessTimeService.handleAccessForUser(user.getId(), SystemTime.currentTimeMillis());
+    _userLastAccessTimeService.handleAccessForUser(user.getId(), System.currentTimeMillis());
   }
 
   @Override
