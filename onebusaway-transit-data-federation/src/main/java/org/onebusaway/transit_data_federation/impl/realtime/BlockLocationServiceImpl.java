@@ -64,7 +64,6 @@ import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
-import org.onebusaway.utility.time.SystemTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -970,9 +969,9 @@ public class BlockLocationServiceImpl implements BlockLocationService,
         if (queue.isEmpty())
           return;
 
-        long t1 = SystemTime.currentTimeMillis();
+        long t1 = System.currentTimeMillis();
         _blockLocationRecordDao.saveBlockLocationRecords(queue);
-        long t2 = SystemTime.currentTimeMillis();
+        long t2 = System.currentTimeMillis();
         _lastInsertDuration = t2 - t1;
         _lastInsertCount = queue.size();
       } catch (Throwable ex) {

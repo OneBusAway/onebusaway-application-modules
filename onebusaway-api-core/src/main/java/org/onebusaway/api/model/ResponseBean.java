@@ -18,7 +18,6 @@ package org.onebusaway.api.model;
 import java.io.Serializable;
 
 import org.onebusaway.csv_entities.schema.annotations.CsvField;
-import org.onebusaway.utility.time.SystemTime;
 
 public class ResponseBean implements Serializable {
 
@@ -26,7 +25,7 @@ public class ResponseBean implements Serializable {
 
   private int version;
   private int code;
-  private long currentTime = SystemTime.currentTimeMillis();
+  private long currentTime = System.currentTimeMillis();
   
   @CsvField(optional = true)
   private String text;

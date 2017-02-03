@@ -28,7 +28,6 @@ import org.onebusaway.users.services.CurrentUserService;
 import org.onebusaway.users.services.logging.UserInteractionLoggingIndicator;
 import org.onebusaway.users.services.logging.UserInteractionLoggingOutlet;
 import org.onebusaway.users.services.logging.UserInteractionLoggingService;
-import org.onebusaway.utility.time.SystemTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -88,7 +87,7 @@ public class UserInteractionLoggingServiceImpl implements
   public void logInteraction(Map<String, Object> entry) {
     try {
       JSONObject obj = getMapAsJSONObject(entry);
-      obj.put("timestamp", SystemTime.currentTimeMillis());
+      obj.put("timestamp", System.currentTimeMillis());
       String serialized = obj.toString();
       for (UserInteractionLoggingOutlet outlet : _outlets)
         outlet.logInteraction(serialized);

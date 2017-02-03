@@ -18,7 +18,6 @@ package org.onebusaway.sms.impl;
 import org.onebusaway.presentation.impl.ArrivalsAndDeparturesModel;
 import org.onebusaway.presentation.services.text.TextModification;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
-import org.onebusaway.utility.time.SystemTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Scope;
@@ -37,7 +36,7 @@ public class SmsArrivalsAndDeparturesModel extends ArrivalsAndDeparturesModel {
   }
 
   public String getMinutesLabel(ArrivalAndDepartureBean pab) {
-    long now = SystemTime.currentTimeMillis();
+    long now = System.currentTimeMillis();
     long t = pab.getScheduledDepartureTime();
     if (pab.hasPredictedDepartureTime())
       t = pab.getPredictedDepartureTime();

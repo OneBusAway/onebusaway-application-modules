@@ -27,7 +27,6 @@ import org.onebusaway.transit_data.model.RouteBean;
 import org.onebusaway.transit_data.model.StopBean;
 import org.onebusaway.transit_data.model.StopWithArrivalsAndDeparturesBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
-import org.onebusaway.utility.time.SystemTime;
 import org.onebusaway.webapp.gwt.common.PageException;
 import org.onebusaway.webapp.gwt.common.context.Context;
 import org.onebusaway.webapp.gwt.common.context.ContextManager;
@@ -278,7 +277,7 @@ public class NotificationWidgetPage extends WhereCommonPage {
 
   private void updateArrivalsAndDeparturePanel(ArrivalAndDepartureBean bean) {
 
-    long now = SystemTime.currentTimeMillis();
+    long now = System.currentTimeMillis();
 
     TripBean trip = bean.getTrip();
     RouteBean route = trip.getRoute();
@@ -350,7 +349,7 @@ public class NotificationWidgetPage extends WhereCommonPage {
     if (_departureBean != null) {
       System.out.println("we have a bean");
       if (_departureBean.computeBestDepartureTime() - _minutesBefore * 60
-          * 1000 < SystemTime.currentTimeMillis()) {
+          * 1000 < System.currentTimeMillis()) {
         System.out.println("we have an alarm!");
         _notificationTimer.cancel();
         NotificationContextImpl context = new NotificationContextImpl();

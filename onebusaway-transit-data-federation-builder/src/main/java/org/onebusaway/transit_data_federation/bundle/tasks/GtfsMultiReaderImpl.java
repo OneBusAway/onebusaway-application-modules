@@ -32,7 +32,6 @@ import org.onebusaway.gtfs.model.ShapePoint;
 import org.onebusaway.gtfs.serialization.GtfsReader;
 import org.onebusaway.gtfs.services.GenericMutableDao;
 import org.onebusaway.transit_data_federation.bundle.services.EntityReplacementStrategy;
-import org.onebusaway.utility.time.SystemTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -192,7 +191,7 @@ public class GtfsMultiReaderImpl implements Runnable {
       _counter.increment(key);
       int c = _counter.getCount(key);
       if (c % 1000 == 0) {
-        double ellapsedTime = (SystemTime.currentTimeMillis() - getStartTimeForKey(key)) / 1000.0;
+        double ellapsedTime = (System.currentTimeMillis() - getStartTimeForKey(key)) / 1000.0;
         System.out.println(key + " = " + c + " rate="
             + ((long) (c / ellapsedTime)));
       }
@@ -201,7 +200,7 @@ public class GtfsMultiReaderImpl implements Runnable {
     private long getStartTimeForKey(String key) {
       Long value = _startTime.get(key);
       if (value == null) {
-        value = SystemTime.currentTimeMillis();
+        value = System.currentTimeMillis();
         _startTime.put(key, value);
       }
       return value;

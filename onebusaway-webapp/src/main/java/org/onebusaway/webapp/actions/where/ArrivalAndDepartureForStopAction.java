@@ -23,7 +23,6 @@ import org.onebusaway.presentation.impl.service_alerts.SituationsPresentation;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureForStopQueryBean;
 import org.onebusaway.transit_data.services.TransitDataService;
-import org.onebusaway.utility.time.SystemTime;
 import org.onebusaway.webapp.actions.bundles.ArrivalAndDepartureMessages;
 import org.onebusaway.webapp.gwt.where_library.view.ArrivalsAndDeparturesPresentaion;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -85,7 +84,7 @@ public class ArrivalAndDepartureForStopAction extends AbstractWhereAction
   public String execute() {
 
     if (_model.getTime() == 0)
-      _model.setTime(SystemTime.currentTimeMillis());
+      _model.setTime(System.currentTimeMillis());
 
     _result = _service.getArrivalAndDepartureForStop(_model);
 

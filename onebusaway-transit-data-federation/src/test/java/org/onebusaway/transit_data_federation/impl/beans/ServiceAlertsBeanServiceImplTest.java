@@ -44,7 +44,6 @@ import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAle
 import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString;
 import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation;
 import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlertsService;
-import org.onebusaway.utility.time.SystemTime;
 
 public class ServiceAlertsBeanServiceImplTest {
 
@@ -123,7 +122,7 @@ public class ServiceAlertsBeanServiceImplTest {
     tsBuilder.addTranslation(tBuilder);
     builder.setDescription(tsBuilder);
     builder.setId(ServiceAlertLibrary.id("1", "updated_id"));
-    builder.setModifiedTime(SystemTime.currentTimeMillis());
+    builder.setModifiedTime(System.currentTimeMillis());
     trBuilder = TimeRange.newBuilder();
     trBuilder.setStart(20);
     trBuilder.setEnd(40);

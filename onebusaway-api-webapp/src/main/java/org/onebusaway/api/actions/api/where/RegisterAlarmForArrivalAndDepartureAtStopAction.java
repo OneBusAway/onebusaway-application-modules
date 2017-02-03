@@ -26,7 +26,6 @@ import org.onebusaway.presentation.impl.StackInterceptor.AddToStack;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureForStopQueryBean;
 import org.onebusaway.transit_data.model.RegisterAlarmQueryBean;
 import org.onebusaway.transit_data.services.TransitDataService;
-import org.onebusaway.utility.time.SystemTime;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.opensymphony.xwork2.validator.annotations.RequiredFieldValidator;
@@ -90,7 +89,7 @@ public class RegisterAlarmForArrivalAndDepartureAtStopAction extends
       return setValidationErrorsResponse();
 
     if (_query.getTime() == 0)
-      _query.setTime(SystemTime.currentTimeMillis());
+      _query.setTime(System.currentTimeMillis());
 
     AlarmDetails details = _alarmService.alterAlarmQuery(_alarm, _data);
 

@@ -22,7 +22,6 @@ import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAle
 import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence;
 import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id;
 import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert;
-import org.onebusaway.utility.time.SystemTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,8 +42,8 @@ class GtfsRealtimeAlertLibrary {
 
   public ServiceAlert.Builder getAlertAsServiceAlert(AgencyAndId id, Alert alert) {
     ServiceAlert.Builder b = ServiceAlert.newBuilder();
-    b.setCreationTime(SystemTime.currentTimeMillis());
-    b.setModifiedTime(SystemTime.currentTimeMillis());
+    b.setCreationTime(System.currentTimeMillis());
+    b.setModifiedTime(System.currentTimeMillis());
     b.setId(ServiceAlertLibrary.id(id));
     for (GtfsRealtime.TimeRange range : alert.getActivePeriodList()) {
       ServiceAlerts.TimeRange.Builder rangeBuilder = ServiceAlerts.TimeRange.newBuilder();

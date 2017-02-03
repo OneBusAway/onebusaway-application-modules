@@ -28,7 +28,6 @@ import org.onebusaway.collections.Counter;
 import org.onebusaway.csv_entities.CSVLibrary;
 import org.onebusaway.transit_data_federation.services.FederatedTransitDataBundle;
 import org.onebusaway.utility.IOLibrary;
-import org.onebusaway.utility.time.SystemTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -111,7 +110,7 @@ public class TransferPatternsHubAnalysisTask implements Runnable {
 
   private void writeCounts(Counter<String> counts) {
     try {
-      long tIn = SystemTime.currentTimeMillis();
+      long tIn = System.currentTimeMillis();
       PrintWriter writer = new PrintWriter(
           _bundle.getTransferPatternsTransferPointCountsPath());
       List<String> keys = counts.getSortedKeys();
@@ -120,7 +119,7 @@ public class TransferPatternsHubAnalysisTask implements Runnable {
         writer.println(count + "\t" + key);
       }
       writer.close();
-      long tOut = SystemTime.currentTimeMillis();
+      long tOut = System.currentTimeMillis();
       _log.info("Time to write output: " + (tOut - tIn));
     } catch (FileNotFoundException ex) {
       throw new IllegalStateException("error writing output", ex);

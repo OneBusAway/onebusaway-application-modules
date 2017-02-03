@@ -18,8 +18,6 @@ package org.onebusaway.presentation.impl.resources;
 import java.io.File;
 import java.net.URL;
 
-import org.onebusaway.utility.time.SystemTime;
-
 class ResourceEntry extends AbstractResource {
 
   private final String resourcePath;
@@ -41,7 +39,7 @@ class ResourceEntry extends AbstractResource {
     if (sourceFile != null)
       setLastModifiedTime(sourceFile.lastModified());
     else
-      setLastModifiedTime(SystemTime.currentTimeMillis());
+      setLastModifiedTime(System.currentTimeMillis());
   }
 
   public String getResourcePath() {

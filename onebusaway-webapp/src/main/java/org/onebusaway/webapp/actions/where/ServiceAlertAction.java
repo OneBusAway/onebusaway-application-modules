@@ -27,7 +27,6 @@ import org.onebusaway.transit_data.model.service_alerts.NaturalLanguageStringBea
 import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.users.services.CurrentUserService;
-import org.onebusaway.utility.time.SystemTime;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.opensymphony.xwork2.ActionSupport;
@@ -97,7 +96,7 @@ public class ServiceAlertAction extends ActionSupport {
     }
 
     _currentUserService.markServiceAlertAsRead(_situation.getId(),
-        SystemTime.currentTimeMillis(), true);
+        System.currentTimeMillis(), true);
 
     return SUCCESS;
   }

@@ -30,7 +30,6 @@ import org.onebusaway.transit_data.model.trips.TripDetailsBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsInclusionBean;
 import org.onebusaway.transit_data.model.trips.TripsForAgencyQueryBean;
 import org.onebusaway.transit_data.services.TransitDataService;
-import org.onebusaway.utility.time.SystemTime;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.opensymphony.xwork2.conversion.annotations.TypeConversion;
@@ -99,7 +98,7 @@ public class TripsForAgencyAction extends ApiActionSupport {
     if (hasErrors())
       return setValidationErrorsResponse();
 
-    long time = SystemTime.currentTimeMillis();
+    long time = System.currentTimeMillis();
     if (_time != null)
       time = _time.getTime();
 

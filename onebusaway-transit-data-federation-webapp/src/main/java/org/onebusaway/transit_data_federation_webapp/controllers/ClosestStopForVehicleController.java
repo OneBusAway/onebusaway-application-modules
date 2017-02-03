@@ -20,7 +20,6 @@ import org.onebusaway.transit_data.model.trips.TripDetailsBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsInclusionBean;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.beans.TripDetailsBeanService;
-import org.onebusaway.utility.time.SystemTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -41,9 +40,9 @@ public class ClosestStopForVehicleController {
     AgencyAndId vid = AgencyAndIdLibrary.convertFromString(vehicleId);
     
     if( time == 0)
-      time = SystemTime.currentTimeMillis();
+      time = System.currentTimeMillis();
     if( time < 0)
-      time = SystemTime.currentTimeMillis() - time * 1000;
+      time = System.currentTimeMillis() - time * 1000;
     
     TripDetailsInclusionBean inclusion = new TripDetailsInclusionBean();
     inclusion.setIncludeTripBean(false);

@@ -39,7 +39,6 @@ import org.onebusaway.transit_data_federation.services.realtime.ScheduleDeviatio
 import org.onebusaway.transit_data_federation.services.realtime.VehicleLocationCacheElements;
 import org.onebusaway.transit_data_federation.services.realtime.VehicleLocationCacheEntry;
 import org.onebusaway.transit_data_federation.services.realtime.VehicleLocationRecordCache;
-import org.onebusaway.utility.time.SystemTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -243,7 +242,7 @@ class VehicleLocationRecordCacheImpl implements VehicleLocationRecordCache {
 
     @Override
     public void run() {
-      clearStaleRecords(SystemTime.currentTimeMillis()
+      clearStaleRecords(System.currentTimeMillis()
           - _blockLocationRecordCacheWindowSize * 1000);
     }
   }

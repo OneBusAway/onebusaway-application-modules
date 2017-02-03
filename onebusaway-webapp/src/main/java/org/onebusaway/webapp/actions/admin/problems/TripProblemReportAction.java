@@ -31,7 +31,6 @@ import org.onebusaway.transit_data.model.realtime.VehicleLocationRecordBean;
 import org.onebusaway.transit_data.model.realtime.VehicleLocationRecordQueryBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.transit_data.services.TransitDataService;
-import org.onebusaway.utility.time.SystemTime;
 import org.onebusaway.webapp.actions.bundles.ProblemReportStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -96,10 +95,10 @@ public class TripProblemReportAction extends ActionSupport implements
   @Validations(requiredFields = {@RequiredFieldValidator(fieldName = "model.id", message = "missing id")}, requiredStrings = {@RequiredStringValidator(fieldName = "model.tripId", message = "missing tripId")})
   @Override
   public String execute() {
-    long t1 = SystemTime.currentTimeMillis();
+    long t1 = System.currentTimeMillis();
     _model = _transitDataService.getTripProblemReportForTripIdAndId(
         _model.getTripId(), _model.getId());
-    long t2 = SystemTime.currentTimeMillis();
+    long t2 = System.currentTimeMillis();
     System.out.println("getTripProblemReportForTripIdAndId=" + (t2-t1));
     if (_model == null)
       return ERROR;
@@ -119,16 +118,16 @@ public class TripProblemReportAction extends ActionSupport implements
       query.setVehicleId(_model.getVehicleId());
       query.setFromTime(timeFrom);
       query.setToTime(timeTo);
-      long t3 = SystemTime.currentTimeMillis();
+      long t3 = System.currentTimeMillis();
       ListBean<VehicleLocationRecordBean> records = _transitDataService.getVehicleLocationRecords(query);
-      long t4 = SystemTime.currentTimeMillis();
+      long t4 = System.currentTimeMillis();
       System.out.println("getVehicleLocationRecords=" + (t4-t3));
       _vehicleLocationRecords = records.getList();
     }
 
-    long t5 = SystemTime.currentTimeMillis();
+    long t5 = System.currentTimeMillis();
     _labels = _transitDataService.getAllTripProblemReportLabels();
-    long t6 = SystemTime.currentTimeMillis();
+    long t6 = System.currentTimeMillis();
     System.out.println("getAllTripProblemReportLabels=" + (t6-t5));
 
     // Deduplicate labels

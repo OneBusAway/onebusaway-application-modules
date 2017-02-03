@@ -23,7 +23,6 @@ import org.apache.struts2.interceptor.SessionAware;
 import org.apache.struts2.interceptor.validation.SkipValidation;
 import org.onebusaway.transit_data.model.realtime.VehicleLocationRecordBean;
 import org.onebusaway.transit_data.services.TransitDataService;
-import org.onebusaway.utility.time.SystemTime;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.opensymphony.xwork2.ActionSupport;
@@ -93,7 +92,7 @@ public class VehicleLocationRecordAction extends ActionSupport implements
   public String submit() {
 
     if (_model.getTimeOfRecord() == 0)
-      _model.setTimeOfRecord(SystemTime.currentTimeMillis());
+      _model.setTimeOfRecord(System.currentTimeMillis());
 
     _model.setBlockId(clean(_model.getBlockId()));
     _model.setTripId(clean(_model.getTripId()));

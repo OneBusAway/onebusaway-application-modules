@@ -54,7 +54,6 @@ import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEn
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
-import org.onebusaway.utility.time.SystemTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -142,8 +141,8 @@ class ServiceAlertsServiceImpl implements ServiceAlertsService {
     }
 
     if (!builder.hasCreationTime())
-      builder.setCreationTime(SystemTime.currentTimeMillis());
-    builder.setModifiedTime(SystemTime.currentTimeMillis());
+      builder.setCreationTime(System.currentTimeMillis());
+    builder.setModifiedTime(System.currentTimeMillis());
 
     ServiceAlert serviceAlert = builder.build();
     updateReferences(serviceAlert);
