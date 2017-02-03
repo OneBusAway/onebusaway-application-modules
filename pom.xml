@@ -520,6 +520,8 @@
             <exclude>**/*.wav</exclude>
             <exclude>bin/**</exclude>
             <exclude>src/test/resources/**</exclude>
+            <exclude>*.iml</exclude>
+            <exclude>.idea/**</exclude>
           </excludes>
         </configuration>
       </plugin>
