@@ -12,7 +12,7 @@
     <name>onebusaway-users</name>
 
     <properties>
-        <spring-security.version>2.0.4</spring-security.version>
+        <spring-security.version>3.2.10.RELEASE</spring-security.version>
     </properties>
 
     <dependencies>
@@ -35,12 +35,12 @@
             <groupId>org.springframework.security</groupId>
         </dependency>
         <dependency>
-            <artifactId>spring-security-core</artifactId>
+            <artifactId>spring-security-web</artifactId>
             <version>${spring-security.version}</version>
             <groupId>org.springframework.security</groupId>
         </dependency>
         <dependency>
-            <artifactId>spring-security-core-tiger</artifactId>
+            <artifactId>spring-security-core</artifactId>
             <version>${spring-security.version}</version>
             <groupId>org.springframework.security</groupId>
         </dependency>
