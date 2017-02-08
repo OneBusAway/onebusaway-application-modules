@@ -25,9 +25,11 @@ import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.time;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.trip;
 
+import com.google.transit.realtime.GtfsRealtime;
 import org.onebusaway.realtime.api.VehicleLocationRecord;
 import org.onebusaway.transit_data_federation.impl.transit_graph.BlockEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopEntryImpl;
+import org.onebusaway.transit_data_federation.impl.transit_graph.StopTimeEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.TripEntryImpl;
 import org.onebusaway.transit_data_federation.services.blocks.BlockCalendarService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
@@ -413,6 +415,55 @@ public class GtfsRealtimeTripLibraryTest {
     
     assertEquals(record.getTimepointPredictions().size(), 1);
   }
+
+  /**
+   * This method tests that we propagate a time point prediction record
+   * when it comes from a trip that hasn't started yet.
+   *
+   * Current time = 7:31. Trip update delay = 2 minutes
+   *                  Schedule time    Real-time from feed
+   * Stop A (trip A)  7:30             7:33
+   * Stop A (trip B)  7:40             7:44
+   */
+  @Test
+  public void testTprOnFutureTrip() {
+
+    _library.setCurrentTime(time(7, 31) * 1000);
+
+    TripEntryImpl tripA = trip("tripA");
+    TripEntryImpl tripB = trip("tripB");
+    StopEntryImpl stopA = stop("stopA", 0, 0);
+    stopTime(0, stopA, tripA, time(7, 30), 0.0);
+    stopTime(0, stopA, tripB, time(7, 40), 0.0);
+    BlockEntryImpl blockA = block("blockA");
+    BlockConfigurationEntry blockConfigA = blockConfiguration(blockA,
+            serviceIds("s1"), tripA, tripB);
+    BlockInstance blockInstanceA = new BlockInstance(blockConfigA, 0L);
+
+    StopTimeUpdate.Builder stuA = stopTimeUpdateWithDepartureDelay("stopA", 180);
+    TripUpdate.Builder tuA = tripUpdate("tripA", _library.getCurrentTime()/1000,  120, stuA);
+
+    StopTimeUpdate.Builder stuB = stopTimeUpdateWithDepartureDelay("stopA", 240);
+    TripUpdate.Builder tuB = tripUpdate("tripB", _library.getCurrentTime()/1000,  0, stuB);
+
+    tuA.setVehicle(vehicle("bus1"));
+    tuB.setVehicle(vehicle("bus1"));
+
+    Mockito.when(_entitySource.getTrip("tripA")).thenReturn(tripA);
+    Mockito.when(_entitySource.getTrip("tripB")).thenReturn(tripB);
+
+    Mockito.when(
+            _blockCalendarService.getActiveBlocks(Mockito.eq(blockA.getId()),
+                    Mockito.anyLong(), Mockito.anyLong())).thenReturn(Arrays.asList(blockInstanceA));
+
+    VehicleLocationRecord record = vehicleLocationRecord(tuA, tuB);
+
+    long tripADept = getPredictedDepartureTimeByStopIdAndTripId(record, "stopA", "tripA");
+    assertEquals(tripADept, time(7, 33) * 1000);
+
+    long tripBDept = getPredictedDepartureTimeByStopIdAndTripId(record, "stopA", "tripB");
+    assertEquals(tripBDept, time(7, 44) * 1000);
+  }
  
   private static FeedMessage.Builder createFeed() {
     FeedMessage.Builder builder = FeedMessage.newBuilder();
@@ -465,6 +516,10 @@ public class GtfsRealtimeTripLibraryTest {
     stopTimeUpdate.setDeparture(stopTimeEvent);
     return stopTimeUpdate;
   }
+
+  private static GtfsRealtime.VehicleDescriptor vehicle(String id) {
+    return GtfsRealtime.VehicleDescriptor.newBuilder().setId(id).build();
+  }
   
   private static TripUpdate.Builder tripUpdate(String tripId, long timestamp, int delay,
       StopTimeUpdate.Builder... stopTimeUpdates) {
@@ -480,8 +535,13 @@ public class GtfsRealtimeTripLibraryTest {
     return tu;
   }
   
-  private VehicleLocationRecord vehicleLocationRecord(TripUpdate.Builder tu) {
-    FeedMessage.Builder TU = createFeed().addEntity(feed(tu));
+  private VehicleLocationRecord vehicleLocationRecord(TripUpdate.Builder... tripUpdates) {
+    FeedMessage.Builder TU = createFeed();
+
+    for (TripUpdate.Builder tu : tripUpdates) {
+      TU.addEntity(feed(tu));
+    }
+
     FeedMessage.Builder VP = createFeed();
     
     List<CombinedTripUpdatesAndVehiclePosition> updates = 
@@ -494,9 +554,15 @@ public class GtfsRealtimeTripLibraryTest {
   }
   
   private static long getPredictedDepartureTimeByStopId(VehicleLocationRecord record, String stopId) {
+    return getPredictedDepartureTimeByStopIdAndTripId(record, stopId, null);
+  }
+
+  private static long getPredictedDepartureTimeByStopIdAndTripId(VehicleLocationRecord record, String stopId, String tripId) {
     for (TimepointPredictionRecord tpr : record.getTimepointPredictions()) {
       if (tpr.getTimepointId().getId().equals(stopId)) {
-        return tpr.getTimepointPredictedDepartureTime();
+        if (tripId == null || tpr.getTripId().getId().equals(tripId)) {
+          return tpr.getTimepointPredictedDepartureTime();
+        }
       }
     }
     return -1;

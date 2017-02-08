@@ -639,6 +639,7 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
     // is not set.
 
     int stopSequence = instance.getBlockStopTime().getStopTime().getSequence();
+    int gtfsSequence = instance.getBlockStopTime().getStopTime().getGtfsSequence();
 
     int totalCandidates = 0;
     int thisStopIndex = 0; // index (with respect to stop sequence) among stops
@@ -667,7 +668,7 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
       boolean stopMatches = tpr.getTimepointId().equals(
           instance.getStop().getId());
       boolean sequenceMatches = tpr.getStopSequence() > 0
-          && tpr.getStopSequence() == stopSequence;
+          && tpr.getStopSequence() == gtfsSequence;
 
       if (!tripMatches || !stopMatches)
         continue;
