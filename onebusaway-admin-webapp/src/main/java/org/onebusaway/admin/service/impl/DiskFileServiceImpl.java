@@ -127,8 +127,10 @@ public class DiskFileServiceImpl implements FileService {
 		ArrayList<String[]> bundleDirs = new ArrayList<String[]>();
 		File baseDir = new File(_basePath);
 		String[] list  = baseDir.list();
-		_log.info("empty list for bundleDirectories at basepath=" + _basePath);
-		if (list == null) return bundleDirs;
+		if (list == null) {
+			_log.info("empty list for bundleDirectories at basepath=" + _basePath);
+			return bundleDirs;
+		}
 		// need filename/flag/modified date
 		for (String dir: list) {
 			File fDir = new File(baseDir, dir);
@@ -181,7 +183,7 @@ public class DiskFileServiceImpl implements FileService {
   // copy file to file
   // copy file to dir
 	public String put(String key, String directory) {
-		_log.info("put(" + key + ", " + directory + ")");
+		_log.debug("put(" + key + ", " + directory + ")");
 		NYCFileUtils fs = new NYCFileUtils();
 		String baseDirectoryName = _basePath + File.separator + fs.parseDirectory(key);
 		File baseDirectory = new File(baseDirectoryName);
@@ -193,7 +195,8 @@ public class DiskFileServiceImpl implements FileService {
 		File srcLocation = new File(directory);
 		
 		try {
-      fs.copyFiles(srcLocation, destLocation);
+			_log.debug("cp " + srcLocation + " " + destLocation);
+      		fs.copyFiles(srcLocation, destLocation);
 		} catch (Exception e) {
 		  _log.error("put failed(" + key + ", " + directory + "):", e);
 		}

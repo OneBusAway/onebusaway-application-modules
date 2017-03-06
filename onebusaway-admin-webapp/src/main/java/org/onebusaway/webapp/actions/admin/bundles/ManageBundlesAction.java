@@ -302,7 +302,7 @@ public class ManageBundlesAction extends OneBusAwayNYCAdminActionSupport impleme
 		directoryStatus.setBucketName(fileService.getBucketName());	
 		if(selected){
 			JSONObject bundleObj = bundleInfo.getBundleTrackingObject(directoryName);
-			if(bundleInfo != null) { //Added for JUnit
+			if(bundleInfo != null && bundleObj != null) { //Added for JUnit
 				if(!bundleObj.isEmpty()) {
 					directoryStatus.setBundleInfo(bundleObj);
 				}
@@ -319,6 +319,7 @@ public class ManageBundlesAction extends OneBusAwayNYCAdminActionSupport impleme
 	 * @return list of existing directories
 	 */
 	public Set<ExistingDirectory> getExistingDirectories() {
+
 		List<String[]> existingDirectories = fileService.listBundleDirectories(MAX_RESULTS);
 		Set<ExistingDirectory> directories = new TreeSet<ExistingDirectory> ();
 		for(String[] existingDirectory : existingDirectories) {
@@ -362,8 +363,9 @@ public class ManageBundlesAction extends OneBusAwayNYCAdminActionSupport impleme
 		JSONArray statusMessages = new JSONArray();
 		JSONObject validationObj = new JSONObject();		
 		JSONObject bundleObj = bundleInfo.getBundleTrackingObject(bundleResponse.getDirectoryName());		
-		if(bundleObj.get("validationResponse") == null){
+		if(bundleObj == null || bundleObj.get("validationResponse") == null){
 			validationObj = new JSONObject();
+			bundleObj = new JSONObject();
 		}else {
 			validationObj = (JSONObject)bundleObj.get("validationResponse");
 
@@ -754,7 +756,8 @@ public class ManageBundlesAction extends OneBusAwayNYCAdminActionSupport impleme
     try {
       latestBundle = getJsonData(adminStagingUrl).getAsJsonObject();
     }  catch (Exception e) {
-      _log.error("Failed to retrieve name of the latest deployed bundle");
+      _log.error("Failed to retrieve name of the latest deployed bundle at: "
+			  + adminStagingUrl);
     }
     stagingDeployedDataset = latestBundle.get("dataset").getAsString();
     stagingDeployedBundleName = latestBundle.get("name").getAsString();
@@ -803,22 +806,30 @@ public class ManageBundlesAction extends OneBusAwayNYCAdminActionSupport impleme
 	private class DirectoryByDateComp implements Comparator<ExistingDirectory> {
 	  @Override
 	  public int compare(ExistingDirectory ed1, ExistingDirectory ed2) {
-	    // ExistingDirectory.creationTimestamp is a String 'dow mon dd hh:mm:ss zzz yyyy'
-	    String[] ed1Split = ed1.getCreationTimestamp().split(" ");
-      String[] ed2Split = ed2.getCreationTimestamp().split(" ");
-      SimpleDateFormat formatter = new SimpleDateFormat("dd-MMM-yyyy");
-      Date ed1Date = new Date();
-      Date ed2Date = new Date();
-      try {
-        ed1Date = formatter.parse(ed1Split[2] + "-" + ed1Split[1]
-            + "-" + ed1Split[5]);
-        ed2Date = formatter.parse(ed2Split[2] + "-" + ed2Split[1]
-            + "-" + ed2Split[5]);
-      } catch (ParseException e) {
-        e.printStackTrace();
-        return 0;
-      }
-	    return ed1Date.compareTo(ed2Date) * -1;
+	  	try {
+	  		return unsafeCompare(ed1, ed2);
+		} catch (Throwable t) {
+	  		_log.error("compare failed: " + t);
+		}
+		return 0;
+	  }
+
+	  private int unsafeCompare(ExistingDirectory ed1, ExistingDirectory ed2) throws Exception {
+		  // ExistingDirectory.creationTimestamp is a String 'dow mon dd hh:mm:ss zzz yyyy'
+		  String[] ed1Split = ed1.getCreationTimestamp().split(" ");
+		  String[] ed2Split = ed2.getCreationTimestamp().split(" ");
+		  SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss dd-MMM-yyyy");
+		  Date ed1Date = new Date();
+		  Date ed2Date = new Date();
+			  ed1Date = formatter.parse(ed1Split[3]
+					  + " " + ed1Split[2] + "-" + ed1Split[1]
+					  + "-" + ed1Split[5]);
+			  ed2Date = formatter.parse(ed2Split[3]
+			  		+ " " + ed2Split[2] + "-" + ed2Split[1]
+					  + "-" + ed2Split[5]);
+			  _log.info("" + ed1Date + " ?= " + ed2Date);
+		  return ed1Date.compareTo(ed2Date) * -1;
+
 	  }
 	}
 }
