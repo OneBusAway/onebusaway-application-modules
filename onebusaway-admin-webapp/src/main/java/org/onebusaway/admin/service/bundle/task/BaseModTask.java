@@ -99,7 +99,7 @@ public class BaseModTask {
     List<File> paths = new ArrayList<File>();
     paths.add(gtfsBundle.getPath());
     _log.info("transformer path=" + gtfsBundle.getPath() + "; output="
-        + outputDirectory);
+        + outputDirectory + " for modUrl=" + modUrl);
     mod.setGtfsInputDirectories(paths);
     mod.setOutputDirectory(new File(outputDirectory));
     GtfsTransformerLibrary.configureTransformation(mod, modUrl);
