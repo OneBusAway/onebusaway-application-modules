@@ -15,8 +15,8 @@
  */
 package org.onebusaway.users.impl.authentication;
 
-import org.springframework.security.providers.AbstractAuthenticationToken;
-import org.springframework.security.userdetails.UserDetails;
+import org.springframework.security.authentication.AbstractAuthenticationToken;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.io.Serializable;
 
