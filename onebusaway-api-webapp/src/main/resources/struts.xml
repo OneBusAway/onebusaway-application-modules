@@ -26,6 +26,7 @@
   <constant name="struts.convention.package.locators.basePackage" value="org.onebusaway.api.actions" />
   <constant name="struts.convention.action.checkImplementsAction" value="false" />
   <constant name="struts.action.extension" value="xhtml,,xml,json,csv,pb,pbtext" />
+  <constant name="struts.multipart.parser" value="pell" />
   <!--
     This exclusion pattern is here because of the difference in how Tomcat and Jetty handle matching requests for the
     url "/".  Tomcat doesn't match it (even though the Struts prepare-and-execute filter is setup to match "/*"), so
