@@ -44,12 +44,12 @@
     and set a Remember Me cookie to remember that user for the future -->
   <bean id="currentUserStrategyImpl" class="org.onebusaway.users.impl.AutoUserCurrentUserStrategyImpl" primary="true" />
 
-  <sec:http>
+  <!-- <sec:http>
     <sec:intercept-url pattern="/admin/**" access="ROLE_ADMINISTRATOR" />
     <sec:form-login login-page="/login.action" authentication-failure-url="/login.action?error=1" />
     <sec:remember-me services-ref="rememberMeServices" />
     <sec:logout invalidate-session="false" logout-url="/logout.action" />
-  </sec:http>
+  </sec:http> -->
 
   <bean id="rememberMeServices" class="org.onebusaway.users.impl.authentication.TokenBasedRememberMeExtendedServices">
     <property name="key" value="SpringSecured" />
