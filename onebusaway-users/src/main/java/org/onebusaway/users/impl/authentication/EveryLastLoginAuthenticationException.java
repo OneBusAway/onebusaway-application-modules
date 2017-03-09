@@ -15,7 +15,8 @@
  */
 package org.onebusaway.users.impl.authentication;
 
-import org.springframework.security.AuthenticationException;
+import org.springframework.security.core.AuthenticationException;
+
 
 public class EveryLastLoginAuthenticationException extends AuthenticationException {
 

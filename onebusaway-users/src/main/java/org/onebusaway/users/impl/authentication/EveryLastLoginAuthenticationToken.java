@@ -15,10 +15,11 @@
  */
 package org.onebusaway.users.impl.authentication;
 
-import org.springframework.security.GrantedAuthority;
-import org.springframework.security.providers.AbstractAuthenticationToken;
-
 import java.io.Serializable;
+import java.util.List;
+
+import org.springframework.security.authentication.AbstractAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
 
 public class EveryLastLoginAuthenticationToken extends AbstractAuthenticationToken
     implements Serializable {
@@ -31,12 +32,12 @@ public class EveryLastLoginAuthenticationToken extends AbstractAuthenticationTok
 
   private String _credentials;
 
-  public EveryLastLoginAuthenticationToken(String key, Object principal, String credentials, GrantedAuthority[] authorities) {
+  public EveryLastLoginAuthenticationToken(String key, Object principal, String credentials, List<GrantedAuthority> authorities) {
     super(authorities);
 
     if ((key == null) || ("".equals(key)) || (principal == null)
         || "".equals(principal) || (authorities == null)
-        || (authorities.length == 0)) {
+        || (authorities.size() == 0)) {
       throw new IllegalArgumentException(
           "Cannot pass null or empty values to constructor");
     }

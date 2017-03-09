@@ -17,9 +17,8 @@ package org.onebusaway.users.services;
 
 import org.onebusaway.users.model.IndexedUserDetails;
 import org.onebusaway.users.model.UserIndexKey;
-
 import org.springframework.dao.DataAccessException;
-import org.springframework.security.userdetails.UsernameNotFoundException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 public interface IndexedUserDetailsService {
 

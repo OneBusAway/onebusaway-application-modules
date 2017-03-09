@@ -18,7 +18,9 @@ package org.onebusaway.users.impl.authentication;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
+import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.onebusaway.everylastlogin.server.AuthenticationResult;
 import org.onebusaway.everylastlogin.server.LoginManager;
@@ -26,23 +28,44 @@ import org.onebusaway.everylastlogin.server.AuthenticationResult.EResultCode;
 import org.onebusaway.users.model.IndexedUserDetails;
 import org.onebusaway.users.services.CurrentUserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.Authentication;
-import org.springframework.security.AuthenticationException;
-import org.springframework.security.ui.AbstractProcessingFilter;
-import org.springframework.security.ui.FilterChainOrder;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
+import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 
 public class EveryLastLoginAuthenticationProcessorFilter extends
-    AbstractProcessingFilter {
+AbstractAuthenticationProcessingFilter {
 
-  private CurrentUserService _currentUserService;
+ 
+
+ protected EveryLastLoginAuthenticationProcessorFilter(
+			String defaultFilterProcessesUrl) {
+		super(defaultFilterProcessesUrl);
+		// TODO Auto-generated constructor stub
+	}
+ 
+ protected EveryLastLoginAuthenticationProcessorFilter(
+			RequestMatcher defaultFilterProcessesUrl) {
+		super(defaultFilterProcessesUrl);
+		// TODO Auto-generated constructor stub
+	}
+
+private CurrentUserService _currentUserService;
 
   @Autowired
   public void setCurrentUserService(CurrentUserService currentUserService) {
     _currentUserService = currentUserService;
   }
+  
+  @PostConstruct
+  public void setup(){
+	  //setFailureHandler("/error.jspx");
+  }
 
   @Override
-  public Authentication attemptAuthentication(HttpServletRequest request)
+  public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
       throws AuthenticationException {
 
     String mode = request.getParameter("mode");
@@ -66,10 +89,13 @@ public class EveryLastLoginAuthenticationProcessorFilter extends
     return new DefaultUserAuthenticationToken(details);
   }
 
-  protected String determineFailureUrl(HttpServletRequest request,
+ /* protected String determineFailureUrl(HttpServletRequest request,
       AuthenticationException failed) {
-
-    String failureUrl = super.determineFailureUrl(request, failed);
+	  
+	 
+	String failureUrl = getFailureHandler()..determineFailureUrl(request, failed);
+    
+    
 
     if (failed instanceof EveryLastLoginAuthenticationException) {
       EveryLastLoginAuthenticationException ex = (EveryLastLoginAuthenticationException) failed;
@@ -88,7 +114,12 @@ public class EveryLastLoginAuthenticationProcessorFilter extends
 
     return failureUrl;
   }
-
+  
+  public void setFailureHandler(String defaultFailureUrl){
+	  AuthenticationFailureHandler failureHandler = new SimpleUrlAuthenticationFailureHandler(defaultFailureUrl);
+	  super.setAuthenticationFailureHandler(failureHandler);
+  }
+  
   @Override
   public String getDefaultFilterProcessesUrl() {
     return "/everylastlogin_login";
@@ -97,5 +128,5 @@ public class EveryLastLoginAuthenticationProcessorFilter extends
   @Override
   public int getOrder() {
     return FilterChainOrder.AUTHENTICATION_PROCESSING_FILTER;
-  }
+  }*/
 }

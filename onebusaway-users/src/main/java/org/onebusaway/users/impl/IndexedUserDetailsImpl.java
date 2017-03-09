@@ -21,13 +21,15 @@ import org.onebusaway.users.model.UserIndex;
 import org.onebusaway.users.model.UserIndexKey;
 import org.onebusaway.users.model.UserRole;
 import org.onebusaway.users.services.StandardAuthoritiesService;
+import org.springframework.security.core.GrantedAuthority;
 
-import org.springframework.security.GrantedAuthority;
-
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 
 public class IndexedUserDetailsImpl extends
-    org.springframework.security.userdetails.User implements IndexedUserDetails {
+    org.springframework.security.core.userdetails.User implements IndexedUserDetails {
 
   private static final long serialVersionUID = 2L;
 
@@ -81,7 +83,7 @@ public class IndexedUserDetailsImpl extends
   }
 
   private boolean hasAuthority(String authorityToCheck) {
-    GrantedAuthority[] authorities = getAuthorities();
+    List<GrantedAuthority> authorities = (ArrayList<GrantedAuthority>) getAuthorities();
     for (GrantedAuthority authority : authorities) {
       if (authority.getAuthority().equals(authorityToCheck))
         return true;
@@ -89,13 +91,13 @@ public class IndexedUserDetailsImpl extends
     return false;
   }
 
-  private static GrantedAuthority[] getGrantedAuthoritiesForUser(
+  private static Collection<? extends GrantedAuthority> getGrantedAuthoritiesForUser(
       StandardAuthoritiesService authoritiesService, User user) {
     Set<UserRole> roles = user.getRoles();
-    GrantedAuthority[] authorities = new GrantedAuthority[roles.size()];
+    List<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>(roles.size());
     int index = 0;
     for (UserRole role : roles)
-      authorities[index++] = authoritiesService.getNameBasedAuthority(role.getName());
+    	authorities.add(index++, authoritiesService.getNameBasedAuthority(role.getName()));
     return authorities;
   }
 }
