@@ -30,8 +30,10 @@ import org.onebusaway.nextbus.model.transiTime.ScheduleRoute;
 import org.onebusaway.nextbus.model.transiTime.ScheduleStop;
 import org.onebusaway.nextbus.model.transiTime.ScheduleTableRow;
 import org.onebusaway.nextbus.util.HttpUtil;
+import org.onebusaway.nextbus.util.HttpUtilImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -43,7 +45,8 @@ public class ScheduleHorizAction extends NextBusApiBase implements
 
   private static Logger _log = LoggerFactory.getLogger(ScheduleHorizAction.class);
 
-  private HttpUtil _httpUtil = new HttpUtil();
+  @Autowired
+  private HttpUtil _httpUtil;
 
   private String agencyId;
 
