@@ -551,6 +551,7 @@ public class BlockLocationServiceImpl implements BlockLocationService,
       location.setVehicleId(record.getVehicleId());
 
       List<TimepointPredictionRecord> timepointPredictions = record.getTimepointPredictions();
+      location.setTimepointPredictions(timepointPredictions);
       if (timepointPredictions != null && !timepointPredictions.isEmpty()) {
 
         SortedMap<Integer, Double> scheduleDeviations = new TreeMap<Integer, Double>();

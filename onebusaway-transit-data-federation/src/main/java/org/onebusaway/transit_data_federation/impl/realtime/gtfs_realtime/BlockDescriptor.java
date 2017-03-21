@@ -15,39 +15,43 @@
  */
 package org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime;
 
-import org.onebusaway.transit_data_federation.services.transit_graph.BlockEntry;
+import com.google.transit.realtime.GtfsRealtime;
+import org.onebusaway.gtfs.model.calendar.ServiceDate;
+import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 
 class BlockDescriptor {
 
-  private BlockEntry blockEntry;
+  private BlockInstance blockInstance;
 
-  private String startDate;
+  private ServiceDate startDate;
 
-  private String startTime;
+  private Integer startTime;
 
   private String vehicleId;
 
-  public BlockEntry getBlockEntry() {
-    return blockEntry;
+  private GtfsRealtime.TripDescriptor.ScheduleRelationship scheduleRelationship = GtfsRealtime.TripDescriptor.ScheduleRelationship.SCHEDULED;
+
+  public BlockInstance getBlockInstance() {
+    return blockInstance;
   }
 
-  public void setBlockEntry(BlockEntry blockEntry) {
-    this.blockEntry = blockEntry;
+  public void setBlockInstance(BlockInstance blockInstance) {
+    this.blockInstance = blockInstance;
   }
 
-  public String getStartDate() {
+  public ServiceDate getStartDate() {
     return startDate;
   }
 
-  public void setStartDate(String startDate) {
+  public void setStartDate(ServiceDate startDate) {
     this.startDate = startDate;
   }
 
-  public String getStartTime() {
+  public Integer getStartTime() {
     return startTime;
   }
 
-  public void setStartTime(String startTime) {
+  public void setStartTime(Integer startTime) {
     this.startTime = startTime;
   }
 
@@ -59,12 +63,24 @@ class BlockDescriptor {
     this.vehicleId = vehicleId;
   }
 
+  public void setScheduleRelationshipValue(String value) {
+    this.scheduleRelationship = GtfsRealtime.TripDescriptor.ScheduleRelationship.valueOf(value);
+  }
+
+  public void setScheduleRelationship(GtfsRealtime.TripDescriptor.ScheduleRelationship schedule) {
+    this.scheduleRelationship = schedule;
+  }
+
+  public GtfsRealtime.TripDescriptor.ScheduleRelationship getScheduleRelationship() {
+    return scheduleRelationship;
+  }
+
   @Override
   public int hashCode() {
     final int prime = 31;
     int result = 1;
     result = prime * result
-        + ((blockEntry == null) ? 0 : blockEntry.hashCode());
+        + ((blockInstance == null) ? 0 : blockInstance.hashCode());
     result = prime * result + ((startDate == null) ? 0 : startDate.hashCode());
     result = prime * result + ((startTime == null) ? 0 : startTime.hashCode());
     result = prime * result + ((vehicleId == null) ? 0 : vehicleId.hashCode());
@@ -80,10 +96,10 @@ class BlockDescriptor {
     if (getClass() != obj.getClass())
       return false;
     BlockDescriptor other = (BlockDescriptor) obj;
-    if (blockEntry == null) {
-      if (other.blockEntry != null)
+    if (blockInstance == null) {
+      if (other.blockInstance != null)
         return false;
-    } else if (!blockEntry.equals(other.blockEntry))
+    } else if (!blockInstance.equals(other.blockInstance))
       return false;
     if (startDate == null) {
       if (other.startDate != null)
