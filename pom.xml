@@ -20,7 +20,7 @@
     <gwt-version>2.4.0</gwt-version>
     <spring-version>4.0.9.RELEASE</spring-version>
     <csv-entities-version>1.0.3</csv-entities-version>
-    <gtfs-version>1.2.6</gtfs-version>
+    <gtfs-version>1.2.6.1-SNAPSHOT</gtfs-version>
     <onebusaway-siri-version>1.0.4</onebusaway-siri-version>
     <opentripplanner-version>0.4.1</opentripplanner-version>
     <wiki_integration_version>1.0.0</wiki_integration_version>
@@ -95,7 +95,7 @@
     <module>onebusaway-transit-data-federation-webapp</module>
     <module>onebusaway-users</module>
     <module>onebusaway-watchdog-webapp</module>
-    <module>onebusaway-webapp</module>
+    <!--<module>onebusaway-webapp</module>-->
   </modules>
   
   <!-- This is where we control the master dependency version used by all modules -->
