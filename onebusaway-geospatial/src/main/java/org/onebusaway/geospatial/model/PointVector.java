@@ -18,6 +18,8 @@
  */
 package org.onebusaway.geospatial.model;
 
+import org.apache.commons.math.util.FastMath;
+
 import java.util.Arrays;
 
 public class PointVector {
@@ -69,7 +71,7 @@ public class PointVector {
     double sum = 0.0;
     for (int i = 0; i < _vector.length; i++)
       sum += _vector[i] * _vector[i];
-    return Math.sqrt(sum);
+    return FastMath.sqrt(sum);
   }
 
   public double dotProduct(PointVector v) {
@@ -112,11 +114,11 @@ public class PointVector {
    */
   public double getAngle(PointVector v) {
     double cosTheta = getCosAngle(v);
-    return Math.acos(cosTheta);
+    return FastMath.acos(cosTheta);
   }
 
   public double getAngle() {
-    return Math.atan2(getY(), getX());
+    return FastMath.atan2(getY(), getX());
   }
 
   /*******************************************************************************************************************
@@ -161,10 +163,10 @@ public class PointVector {
 
   public PointVector rotate(double angle, int dimensionA, int dimensionB) {
     double[] ord = getOrdinates();
-    ord[dimensionA] = _vector[dimensionA] * Math.cos(angle)
-        + _vector[dimensionB] * Math.sin(angle);
-    ord[dimensionB] = _vector[dimensionB] * Math.cos(angle)
-        - _vector[dimensionA] * Math.sin(angle);
+    ord[dimensionA] = _vector[dimensionA] * FastMath.cos(angle)
+        + _vector[dimensionB] * FastMath.sin(angle);
+    ord[dimensionB] = _vector[dimensionB] * FastMath.cos(angle)
+        - _vector[dimensionA] * FastMath.sin(angle);
     return new PointVector(ord);
   }
 
