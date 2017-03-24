@@ -15,16 +15,11 @@
  */
 package org.onebusaway.geospatial.services;
 
-import static java.lang.Math.atan2;
-import static java.lang.Math.cos;
-import static java.lang.Math.sin;
-import static java.lang.Math.sqrt;
-import static java.lang.Math.toDegrees;
-import static java.lang.Math.toRadians;
-
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.geospatial.model.XYPoint;
+
+import static org.apache.commons.math.util.FastMath.*;
 
 public class SphericalGeometryLibrary {
 
