@@ -488,7 +488,7 @@ class GtfsRealtimeTripLibrary {
                     tripUpdate, stopTimeUpdate, blockTrip.getStopTimes(),
                     instance.getServiceDate());
             if (blockStopTime == null) {
-              _log.warn("missing blockStopTime for stopTimeUpdate=" + stopTimeUpdate);
+              _log.debug("missing blockStopTime for vehicle=" + vehicleId);
               continue;
             }
 
