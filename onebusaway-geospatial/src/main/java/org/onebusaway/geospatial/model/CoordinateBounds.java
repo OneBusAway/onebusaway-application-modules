@@ -17,9 +17,6 @@ package org.onebusaway.geospatial.model;
 
 import java.io.Serializable;
 
-import static org.apache.commons.math.util.FastMath.max;
-import static org.apache.commons.math.util.FastMath.min;
-
 public final class CoordinateBounds implements Serializable {
 
   private static final long serialVersionUID = 1L;
@@ -100,10 +97,10 @@ public final class CoordinateBounds implements Serializable {
       _maxLat = lat;
       _maxLon = lon;
     } else {
-      _minLat = min(_minLat, lat);
-      _minLon = min(_minLon, lon);
-      _maxLat = max(_maxLat, lat);
-      _maxLon = max(_maxLon, lon);
+      _minLat = Math.min(_minLat, lat);
+      _minLon = Math.min(_minLon, lon);
+      _maxLat = Math.max(_maxLat, lat);
+      _maxLon = Math.max(_maxLon, lon);
     }
   }
 
