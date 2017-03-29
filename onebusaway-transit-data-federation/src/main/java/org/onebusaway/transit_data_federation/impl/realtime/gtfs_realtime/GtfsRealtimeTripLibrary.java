@@ -429,18 +429,17 @@ class GtfsRealtimeTripLibrary {
   private void applyTripUpdatesToRecord(MonitoredResult result, BlockDescriptor blockDescriptor,
       List<TripUpdate> tripUpdates, VehicleLocationRecord record, String vehicleId) {
 
-
     BlockInstance instance = blockDescriptor.getBlockInstance();
 
     BlockConfigurationEntry blockConfiguration = instance.getBlock();
     List<BlockTripEntry> blockTrips = blockConfiguration.getTrips();
-
     Map<String, List<TripUpdate>> tripUpdatesByTripId = MappingLibrary.mapToValueList(
         tripUpdates, "trip.tripId");
 
     long t = currentTime();
     int currentTime = (int) ((t - instance.getServiceDate()) / 1000);
     BestScheduleDeviation best = new BestScheduleDeviation();
+
     List<TimepointPredictionRecord> timepointPredictions = new ArrayList<TimepointPredictionRecord>();
 
     for (BlockTripEntry blockTrip : blockTrips) {
@@ -451,7 +450,10 @@ class GtfsRealtimeTripLibrary {
 
       if (updatesForTrip != null) {
         for (TripUpdate tripUpdate : updatesForTrip) {
-
+          /**
+           * TODO: delete this code once all upstream systems have been
+           * migrated the new "delay" and "timestamp" fields.
+           */
           if (tripUpdate.hasExtension(GtfsRealtimeOneBusAway.obaTripUpdate)) {
             OneBusAwayTripUpdate obaTripUpdate = tripUpdate.getExtension(GtfsRealtimeOneBusAway.obaTripUpdate);
             if (obaTripUpdate.hasDelay()) {
@@ -469,7 +471,6 @@ class GtfsRealtimeTripLibrary {
               best.timestamp = obaTripUpdate.getTimestamp() * 1000;
             }
           }
-
 
           if (tripUpdate.hasDelay()) {
             /**
@@ -497,7 +498,9 @@ class GtfsRealtimeTripLibrary {
             TimepointPredictionRecord tpr = new TimepointPredictionRecord();
             tpr.setTimepointId(new AgencyAndId(stopTime.getStop().getId().getAgencyId(), idOnly(stopTime.getStop().getId().getId())));
             tpr.setTimepointScheduledTime(instance.getServiceDate() + stopTime.getArrivalTime() * 1000);
-
+            if (stopTimeUpdate.hasStopSequence()) {
+              //tpr.setStopSequence(stopTimeUpdate.getStopSequence());
+            }
             int currentArrivalTime = computeArrivalTime(stopTime,
                     stopTimeUpdate, instance.getServiceDate());
             if (currentArrivalTime >= 0) {
@@ -559,9 +562,6 @@ class GtfsRealtimeTripLibrary {
     if (best.timestamp != 0) {
       record.setTimeOfRecord(best.timestamp);
     }
-    if (timepointPredictions.isEmpty()) {
-      _log.info("no tps for vehicle=" + vehicleId);
-    }
     record.setTimepointPredictions(timepointPredictions);
   }
 
@@ -574,8 +574,8 @@ class GtfsRealtimeTripLibrary {
           return updates;
         }
       }
-      return null;
     }
+    // fall through of default behaviour
     return tripUpdatesByTripId.get(tripId.getId());
   }
 
