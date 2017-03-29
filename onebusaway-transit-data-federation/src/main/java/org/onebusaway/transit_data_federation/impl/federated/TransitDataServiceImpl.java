@@ -185,7 +185,7 @@ class TransitDataServiceImpl implements TransitDataService {
   @Autowired
   private BundleManagementService _bundleManagementService;
 
-  @Autowired
+  @Autowired(required=false)
   private PredictionHelperService _predictionHelperService;
   
   @Autowired
@@ -649,7 +649,9 @@ class TransitDataServiceImpl implements TransitDataService {
   public List<TimepointPredictionRecord> getPredictionRecordsForTrip(
 		  String agencyId,
 		  TripStatusBean tripStatus) {
-	  return _predictionHelperService.getPredictionRecordsForTrip(agencyId, tripStatus);
+      if (_predictionHelperService != null)
+	    return _predictionHelperService.getPredictionRecordsForTrip(agencyId, tripStatus);
+      return null;
   }
 
   @Override
