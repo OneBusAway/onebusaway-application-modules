@@ -48,7 +48,7 @@ import org.onebusaway.users.services.UserService;
 import org.onebusaway.users.services.internal.UserIndexRegistrationService;
 import org.onebusaway.users.services.internal.UserRegistration;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.encoding.PasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -291,7 +291,7 @@ public class UserServiceImpl implements UserService {
   public UserIndex getOrCreateUserForUsernameAndPassword(String username,
       String password) {
 
-    String credentials = _passwordEncoder.encodePassword(password, username);
+    String credentials = _passwordEncoder.encode(password);
     UserIndexKey key = new UserIndexKey(UserIndexTypes.USERNAME, username);
     return getOrCreateUserForIndexKey(key, credentials, false);
   }
@@ -346,8 +346,7 @@ public class UserServiceImpl implements UserService {
       throw new IllegalArgumentException("expected UserIndex of type "
           + UserIndexTypes.USERNAME);
 
-    String credentials = _passwordEncoder.encodePassword(password,
-        id.getValue());
+    String credentials = _passwordEncoder.encode(password);
     setCredentialsForUserIndex(userIndex, credentials);
   }
 
