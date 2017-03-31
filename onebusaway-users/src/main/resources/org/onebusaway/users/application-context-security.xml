@@ -25,25 +25,30 @@
            http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
            http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security.xsd">
 
+    <sec:authentication-manager alias="authenticationManager">
+        <sec:authentication-provider user-service-ref="userDetailsServiceImpl" />
+    </sec:authentication-manager>
+    
     <bean id="userIndexAuthenticationFilter" class="org.onebusaway.users.impl.authentication.IndexedUserAuthenticationProcessorFilter">
-        <property name="defaultTargetUrl" value="/index.action" />
-        <property name="authenticationManager" ref="_authenticationManager" />
-        <property name="filterProcessesUrl" value="/userIndex_login" />
-        <sec:custom-filter after="FORM_LOGIN_FILTER" ref="authenticationProcessingFilter" />
+        <property name="authenticationSuccessHandler" ref="authenticationSuccessHandler" />
+        <property name="authenticationManager" ref="authenticationManager" />
+        <property name="filterProcessesUrl" value="/userIndex_login" />      
     </bean>
-
+	
     <bean id="everyLastLoginAuthenticationFilter" class="org.onebusaway.users.impl.authentication.EveryLastLoginAuthenticationProcessorFilter">
-        <property name="defaultTargetUrl" value="/index.action" />
-        <property name="authenticationManager" ref="_authenticationManager" />
+        <property name="authenticationSuccessHandler" ref="authenticationSuccessHandler" />
+        <property name="authenticationManager" ref="authenticationManager" />
         <property name="filterProcessesUrl" value="/everylastlogin_login" />
-        <sec:custom-filter before="BASIC_AUTH_FILTER" ref="basicAuthenticationFilter" />
     </bean>
-
+	
+	<bean id="authenticationSuccessHandler" class="org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler">
+		<property name="defaultTargetUrl" value="/index.action" />  
+	</bean>
+	
     <bean id="indexedUserDetailsSaltSourceImpl" class="org.onebusaway.users.impl.authentication.IndexedUserDetailsSaltSourceImpl" />
-
-    <bean id="daoAuthenticationProvider" class="org.springframework.security.providers.dao.DaoAuthenticationProvider">
+	<bean id="daoAuthenticationProvider" class="org.springframework.security.authentication.dao.DaoAuthenticationProvider">
         <property name="userDetailsService" ref="userDetailsServiceImpl" />
-        <property name="passwordEncoder" ref="passwordEncoderV1" />
+        <property name="passwordEncoder" ref="passwordEncoderV2" />
         <property name="saltSource" ref="indexedUserDetailsSaltSourceImpl" />
     </bean>
 

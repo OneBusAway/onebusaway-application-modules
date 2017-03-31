@@ -32,13 +32,18 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 
 public class EveryLastLoginAuthenticationProcessorFilter extends
 AbstractAuthenticationProcessingFilter {
 
- 
+ private static final String DEFAULT_FILTER_PROCESSES_URL = "/";
+
+ public EveryLastLoginAuthenticationProcessorFilter(){
+	 super(DEFAULT_FILTER_PROCESSES_URL);
+ }
 
  protected EveryLastLoginAuthenticationProcessorFilter(
 			String defaultFilterProcessesUrl) {
@@ -88,7 +93,24 @@ private CurrentUserService _currentUserService;
 
     return new DefaultUserAuthenticationToken(details);
   }
+  
+  public void setSuccessHandler(AuthenticationSuccessHandler successHandler) {
+      super.setAuthenticationSuccessHandler(successHandler);
+  }
 
+  public void setFailureHandler(AuthenticationFailureHandler failureHandler) {
+	  super.setAuthenticationFailureHandler(failureHandler);
+  }
+  
+  @Override
+  public AuthenticationSuccessHandler getSuccessHandler() {
+      return super.getSuccessHandler();
+  }
+  
+  @Override
+  public AuthenticationFailureHandler getFailureHandler() {
+      return super.getFailureHandler();
+  }
  /* protected String determineFailureUrl(HttpServletRequest request,
       AuthenticationException failed) {
 	  

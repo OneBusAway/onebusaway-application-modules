@@ -16,7 +16,11 @@
 package org.onebusaway.users.impl.authentication;
 
 import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.util.Assert;
 
 public class IndexedUserAuthenticationProcessorFilter extends
     UsernamePasswordAuthenticationFilter {
@@ -45,5 +49,23 @@ public class IndexedUserAuthenticationProcessorFilter extends
 
   protected String obtainUserIndexType(HttpServletRequest request) {
     return request.getParameter(_indexTypeParameter);
+  }
+  
+  public void setSuccessHandler(AuthenticationSuccessHandler successHandler) {
+      super.setAuthenticationSuccessHandler(successHandler);
+  }
+
+  public void setFailureHandler(AuthenticationFailureHandler failureHandler) {
+	  super.setAuthenticationFailureHandler(failureHandler);
+  }
+  
+  @Override
+  public AuthenticationSuccessHandler getSuccessHandler() {
+      return super.getSuccessHandler();
+  }
+  
+  @Override
+  public AuthenticationFailureHandler getFailureHandler() {
+      return super.getFailureHandler();
   }
 }
