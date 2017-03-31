@@ -134,13 +134,10 @@
         </property>
     </bean>
     
-    <bean id="passwordEncoderV1" class="org.onebusaway.users.impl.authentication.VersionedPasswordEncoder">
-        <property name="versionId" value="v1" />
+    <bean id="passwordEncoderV2" class="org.onebusaway.users.impl.authentication.VersionedPasswordEncoder">
+        <property name="versionId" value="v2" />
         <property name="passwordEncoder">
-            <bean class="org.springframework.security.providers.encoding.ShaPasswordEncoder">
-                <constructor-arg value="256" />
-                <property name="encodeHashAsBase64" value="true" />
-            </bean>
+            <bean id="encoder" class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder"/>
         </property>
     </bean>
 
