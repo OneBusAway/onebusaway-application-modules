@@ -26,7 +26,7 @@
            http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security.xsd">
 
     <sec:authentication-manager alias="authenticationManager">
-        <sec:authentication-provider user-service-ref="userDetailsServiceImpl" />
+        <sec:authentication-provider ref="daoAuthenticationProvider" />
     </sec:authentication-manager>
     
     <bean id="userIndexAuthenticationFilter" class="org.onebusaway.users.impl.authentication.IndexedUserAuthenticationProcessorFilter">
@@ -46,9 +46,10 @@
 	</bean>
 	
     <bean id="indexedUserDetailsSaltSourceImpl" class="org.onebusaway.users.impl.authentication.IndexedUserDetailsSaltSourceImpl" />
+	
 	<bean id="daoAuthenticationProvider" class="org.springframework.security.authentication.dao.DaoAuthenticationProvider">
         <property name="userDetailsService" ref="userDetailsServiceImpl" />
-        <property name="passwordEncoder" ref="passwordEncoderV2" />
+        <property name="passwordEncoder" ref="passwordEncoderV1" />
         <property name="saltSource" ref="indexedUserDetailsSaltSourceImpl" />
     </bean>
 

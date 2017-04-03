@@ -48,11 +48,11 @@ import org.onebusaway.users.services.UserService;
 import org.onebusaway.users.services.internal.UserIndexRegistrationService;
 import org.onebusaway.users.services.internal.UserRegistration;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.authentication.encoding.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Assert;
 
-@Component
 public class UserServiceImpl implements UserService {
 
   private UserDao _userDao;
@@ -66,6 +66,8 @@ public class UserServiceImpl implements UserService {
   private UserIndexRegistrationService _userIndexRegistrationService;
 
   private PasswordEncoder _passwordEncoder;
+  
+  private boolean _hasCryptoEncoder = false;
 
   private ExecutorService _executors;
 
@@ -96,9 +98,43 @@ public class UserServiceImpl implements UserService {
     _userIndexRegistrationService = userIndexRegistrationService;
   }
 
-  @Autowired
-  public void setPasswordEncoder(PasswordEncoder passwordEncoder) {
+
+  private void setPasswordEncoder(PasswordEncoder passwordEncoder) {
     _passwordEncoder = passwordEncoder;
+  }
+  
+  public void setPasswordEncoder(Object passwordEncoder) {
+      Assert.notNull(passwordEncoder, "passwordEncoder cannot be null");
+
+      if (passwordEncoder instanceof PasswordEncoder) {
+          setPasswordEncoder((PasswordEncoder) passwordEncoder);
+          return;
+      }
+
+      if (passwordEncoder instanceof org.springframework.security.crypto.password.PasswordEncoder) {
+          final org.springframework.security.crypto.password.PasswordEncoder delegate =
+                  (org.springframework.security.crypto.password.PasswordEncoder)passwordEncoder;
+          _hasCryptoEncoder = true;
+          setPasswordEncoder(new PasswordEncoder() {
+              public String encodePassword(String rawPass, Object salt) {
+                  checkSalt(salt);
+                  return delegate.encode(rawPass);
+              }
+
+              public boolean isPasswordValid(String encPass, String rawPass, Object salt) {
+                  checkSalt(salt);
+                  return delegate.matches(rawPass, encPass);
+              }
+
+              private void checkSalt(Object salt) {
+                  Assert.isNull(salt, "Salt value must be null when used with crypto module PasswordEncoder");
+              }
+          });
+
+          return;
+      }
+
+      throw new IllegalArgumentException("passwordEncoder must be a PasswordEncoder instance");
   }
 
   @PostConstruct
@@ -290,8 +326,9 @@ public class UserServiceImpl implements UserService {
   @Transactional
   public UserIndex getOrCreateUserForUsernameAndPassword(String username,
       String password) {
-
-    String credentials = _passwordEncoder.encode(password);
+	
+	String salt = _hasCryptoEncoder ? null : username; 
+    String credentials = _passwordEncoder.encodePassword(password, salt);
     UserIndexKey key = new UserIndexKey(UserIndexTypes.USERNAME, username);
     return getOrCreateUserForIndexKey(key, credentials, false);
   }
@@ -340,13 +377,15 @@ public class UserServiceImpl implements UserService {
   @Transactional
   public void setPasswordForUsernameUserIndex(UserIndex userIndex,
       String password) {
-
+	
     UserIndexKey id = userIndex.getId();
     if (!UserIndexTypes.USERNAME.equals(id.getType()))
       throw new IllegalArgumentException("expected UserIndex of type "
           + UserIndexTypes.USERNAME);
 
-    String credentials = _passwordEncoder.encode(password);
+	String salt = _hasCryptoEncoder ? null : id.getValue(); 
+	
+	String credentials = _passwordEncoder.encodePassword(password, salt);
     setCredentialsForUserIndex(userIndex, credentials);
   }
 
