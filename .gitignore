@@ -5,3 +5,8 @@ pom.xml.releaseBackup
 .project
 .classpath
 /.idea/
+*.iml
+*.iws
+.idea
+**/bin/*
+git.properties
