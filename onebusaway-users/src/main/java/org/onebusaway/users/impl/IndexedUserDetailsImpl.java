@@ -83,7 +83,7 @@ public class IndexedUserDetailsImpl extends
   }
 
   private boolean hasAuthority(String authorityToCheck) {
-    List<GrantedAuthority> authorities = (ArrayList<GrantedAuthority>) getAuthorities();
+    List<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>(getAuthorities());
     for (GrantedAuthority authority : authorities) {
       if (authority.getAuthority().equals(authorityToCheck))
         return true;
