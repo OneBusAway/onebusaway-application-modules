@@ -32,6 +32,8 @@ public class TimepointPredictionRecord implements Serializable {
 
   private long timepointPredictedTime;
 
+  private int stopSequence = -1;
+
   public TimepointPredictionRecord() {
 
   }
@@ -64,5 +66,13 @@ public class TimepointPredictionRecord implements Serializable {
 
   public void setTimepointPredictedTime(long timepointPredictedTime) {
     this.timepointPredictedTime = timepointPredictedTime;
+  }
+
+  public int getStopSequence() {
+    return stopSequence;
+  }
+
+  public void setStopSequence(int stopSequence) {
+    this.stopSequence = stopSequence;
   }
 }
