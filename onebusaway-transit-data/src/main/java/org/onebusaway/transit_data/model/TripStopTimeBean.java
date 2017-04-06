@@ -31,6 +31,8 @@ public class TripStopTimeBean implements Serializable {
   
   private double distanceAlongTrip;
 
+  private int gtfsSequence;
+
   public int getArrivalTime() {
     return arrivalTime;
   }
@@ -69,5 +71,13 @@ public class TripStopTimeBean implements Serializable {
 
   public void setDistanceAlongTrip(double distanceAlongTrip) {
     this.distanceAlongTrip = distanceAlongTrip;
+  }
+
+  public int getGtfsSequence() {
+    return gtfsSequence;
+  }
+
+  public void setGtfsSequence(int gtfsSequence) {
+    this.gtfsSequence = gtfsSequence;
   }
 }

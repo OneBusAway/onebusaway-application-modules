@@ -114,6 +114,8 @@ public class TripStopTimesBeanServiceImpl implements TripStopTimesBeanService {
       StopBean stopBean = _stopBeanService.getStopForId(stopEntry.getId());
       stBean.setStop(stopBean);
       stBean.setDistanceAlongTrip(stopTime.getShapeDistTraveled());
+      stBean.setGtfsSequence(stopTime.getGtfsSequence());
+
       bean.addStopTime(stBean);
     }
 
