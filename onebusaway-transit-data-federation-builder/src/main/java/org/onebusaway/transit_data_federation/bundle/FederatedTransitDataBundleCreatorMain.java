@@ -92,7 +92,7 @@ public class FederatedTransitDataBundleCreatorMain {
   }
 
   public void run(String[] args) throws Exception {
-
+	System.out.println("launching...");
     try {
       Parser parser = new GnuParser();
 
@@ -217,6 +217,8 @@ public class FederatedTransitDataBundleCreatorMain {
 
         creator.run();
       } catch (Exception ex) {
+        System.out.println("fatal exception follows");
+        ex.printStackTrace();
         _log.error("error building transit data bundle", ex);
         System.exit(-1);
       }
@@ -225,7 +227,7 @@ public class FederatedTransitDataBundleCreatorMain {
       printUsage();
       System.exit(-1);
     }
-
+    System.out.println("clean exit");
     System.exit(0);
   }
 
