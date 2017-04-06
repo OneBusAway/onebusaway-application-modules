@@ -242,6 +242,10 @@ public class HastusGtfsFactory {
       }
 
       RouteStopSequenceItem item = new RouteStopSequenceItem();
+      if (feature.getProperty("SEQARC_") == null) {
+        _log.error("missing mandatory property for " + id);
+        continue;
+      }
       item.setSequenceArc((Long) feature.getProperty("SEQARC_").getValue());
       item.setSequenceArcId((Long) feature.getProperty("SEQARC_ID").getValue());
       item.setSequence((Long) feature.getProperty("SEQARC_ID").getValue());
