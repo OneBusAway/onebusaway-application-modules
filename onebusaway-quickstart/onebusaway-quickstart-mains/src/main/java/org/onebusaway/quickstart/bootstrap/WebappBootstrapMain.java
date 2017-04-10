@@ -121,7 +121,7 @@ public class WebappBootstrapMain {
       System.err.println("=");
       System.err.println("= Your OneBusAway instance has started.  Browse to:");
       System.err.println("=");
-      System.err.println("= http://localhost:8080/");
+      System.err.println("= http://localhost:" + port + "/");
       System.err.println("=");
       System.err.println("= to see your instance in action.");
       if (consoleMode) {
