@@ -33,6 +33,7 @@ import org.onebusaway.container.cache.Cacheable;
 import org.onebusaway.container.cache.CacheableArgument;
 import org.onebusaway.users.client.model.UserBean;
 import org.onebusaway.users.client.model.UserIndexBean;
+import org.onebusaway.users.impl.authentication.AdaptivePasswordEncoder;
 import org.onebusaway.users.model.User;
 import org.onebusaway.users.model.UserIndex;
 import org.onebusaway.users.model.UserIndexKey;
@@ -105,36 +106,13 @@ public class UserServiceImpl implements UserService {
   
   public void setPasswordEncoder(Object passwordEncoder) {
       Assert.notNull(passwordEncoder, "passwordEncoder cannot be null");
-
-      if (passwordEncoder instanceof PasswordEncoder) {
-          setPasswordEncoder((PasswordEncoder) passwordEncoder);
-          return;
-      }
-
+      
       if (passwordEncoder instanceof org.springframework.security.crypto.password.PasswordEncoder) {
-          final org.springframework.security.crypto.password.PasswordEncoder delegate =
-                  (org.springframework.security.crypto.password.PasswordEncoder)passwordEncoder;
-          _hasCryptoEncoder = true;
-          setPasswordEncoder(new PasswordEncoder() {
-              public String encodePassword(String rawPass, Object salt) {
-                  checkSalt(salt);
-                  return delegate.encode(rawPass);
-              }
-
-              public boolean isPasswordValid(String encPass, String rawPass, Object salt) {
-                  checkSalt(salt);
-                  return delegate.matches(rawPass, encPass);
-              }
-
-              private void checkSalt(Object salt) {
-                  Assert.isNull(salt, "Salt value must be null when used with crypto module PasswordEncoder");
-              }
-          });
-
-          return;
+    	  _hasCryptoEncoder = true;
       }
-
-      throw new IllegalArgumentException("passwordEncoder must be a PasswordEncoder instance");
+      
+      AdaptivePasswordEncoder adpativePasswordEncoder = new AdaptivePasswordEncoder();
+      setPasswordEncoder(adpativePasswordEncoder.getPasswordEncoder(passwordEncoder));
   }
 
   @PostConstruct
