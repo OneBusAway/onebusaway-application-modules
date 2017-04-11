@@ -1,4 +1,4 @@
-## The OneBusAway Application Suite [![Build Status](https://travis-ci.org/OneBusAway/onebusaway-application-modules.svg?branch=master)](https://travis-ci.org/OneBusAway/onebusaway-application-modules)
+## The OneBusAway Application Suite [![Build Status](https://travis-ci.org/OneBusAway/onebusaway-application-modules.svg?branch=master)](https://travis-ci.org/OneBusAway/onebusaway-application-modules) [![Join the OneBusAway chat](https://onebusaway.herokuapp.com/badge.svg)](https://onebusaway.herokuapp.com/)
 
 The OneBusAway application suite's primary function is to share real-time public transit information with riders across a variety of interfaces:
 
