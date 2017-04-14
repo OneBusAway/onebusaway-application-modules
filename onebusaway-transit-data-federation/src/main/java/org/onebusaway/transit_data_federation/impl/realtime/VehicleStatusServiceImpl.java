@@ -93,7 +93,7 @@ class VehicleStatusServiceImpl implements VehicleLocationListener,
     if (blockId != null && record.getServiceDate() != 0)
       _blockVehicleLocationService.handleVehicleLocationRecord(record);
 
-    // if vehicle has no block or has lost it, remove it from the block VLS.
+      // if vehicle has no block or has lost it, remove it from the block VLS.
     else {
       if(record.getVehicleId() != null) {
         _blockVehicleLocationService.resetVehicleLocation(record.getVehicleId());

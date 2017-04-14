@@ -431,6 +431,7 @@ public class BlockLocationServiceImpl implements BlockLocationService,
     if (record.getTimeOfRecord() == 0)
       throw new IllegalArgumentException("you must specify a record time");
 
+
     BlockInstance blockInstance = getBestBlockForRecord(blockId,
         record.getServiceDate(), record.getTimeOfRecord());
 
