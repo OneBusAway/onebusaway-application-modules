@@ -15,6 +15,8 @@
  */
 package org.onebusaway.api.actions.api.where;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Date;
 
 import org.apache.struts2.rest.DefaultHttpHeaders;
@@ -60,8 +62,13 @@ public class TripDetailsAction extends ApiActionSupport {
   }
 
   @RequiredFieldValidator
-  public void setId(String id) {
-    _id = id;
+  public void setId(String id) { 
+    try {
+		_id = new URI(id).getPath();
+	} catch (URISyntaxException e) {
+		// TODO log a warning / error
+		_id = id;
+	}
   }
 
   public String getId() {
