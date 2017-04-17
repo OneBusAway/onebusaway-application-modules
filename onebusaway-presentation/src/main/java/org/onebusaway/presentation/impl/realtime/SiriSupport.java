@@ -70,6 +70,8 @@ import uk.org.siri.siri.SituationSimpleRefStructure;
 import uk.org.siri.siri.StopPointRefStructure;
 import uk.org.siri.siri.VehicleRefStructure;
 
+import static org.apache.commons.lang.StringUtils.isBlank;
+
 public final class SiriSupport {
 
 	private static Logger _log = LoggerFactory.getLogger(SiriSupport.class);
@@ -118,7 +120,12 @@ public final class SiriSupport {
 		if (shortName == null) {
 		  shortName = framedJourneyTripBean.getRoute().getId().split("_")[1];
 		}
-		routeShortName.setValue(shortName);
+		if (!isBlank(currentVehicleTripStatus.getActiveTrip().getRouteShortName())) {
+			// look for an override like an express desginator
+			routeShortName.setValue(currentVehicleTripStatus.getActiveTrip().getRouteShortName());
+		} else {
+			routeShortName.setValue(shortName);
+		}
 		monitoredVehicleJourney.setPublishedLineName(routeShortName);
 
 		JourneyPatternRefStructure journeyPattern = new JourneyPatternRefStructure();

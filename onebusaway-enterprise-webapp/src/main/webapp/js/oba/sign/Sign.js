@@ -97,7 +97,7 @@ OBA.Sign = function() {
 		sortByRoute = (sortByRouteStr.toLowerCase() == "true");
 		var showHeaderStr = getParameterByName("showHeader", "false");
 		showHeader = (showHeaderStr.toLowerCase() == "true");
-		
+
 		var fontSize = getParameterByName("fontSize", null);
 		if (fontSize) {
 			$("body, body input, body textarea").attr("style", "font-size: " + fontSize + "em;")
@@ -210,14 +210,19 @@ OBA.Sign = function() {
 		});
 	}
 	
-	function signForRoute(routeId, element) {
+	function signForRoute(routeId, tripShortName, element) {
 		var sign = element.addClass("sign");
 		sign.css("border-left-color", routeInfo[routeId].color);
 		sign.css("border-left-style", "solid");
 		var shortName = routeInfo[routeId].shortName;
 		if (shortName == null || shortName == "")
 			shortName = routeId.split("_")[1];
-		sign.text(shortName);
+		if (tripShortName != null && tripShortName != "") {
+			// use the trip override
+            sign.text(tripShortName);
+        } else {
+            sign.text(shortName);
+        }
 		return sign;
 	}
 	
@@ -282,7 +287,7 @@ OBA.Sign = function() {
 				if (typeof situation.Affects.VehicleJourneys != "undefined") {
 					jQuery.each(situation.Affects.VehicleJourneys.AffectedVehicleJourney, function(_, journey) {
 						if (journey.LineRef in routeInfo && jQuery.inArray(journey.LineRef, existingSigns) < 0) {
-							var sign = signForRoute(journey.LineRef, jQuery("<div></div>"));
+							var sign = signForRoute(journey.LineRef, null, jQuery("<div></div>"));
 							sign.addClass("alert_sign");
 							signWrapper.append(sign);
 							existingSigns.push(journey.LineRef);
@@ -313,6 +318,7 @@ OBA.Sign = function() {
 					etaCount : 0,
 					vehicleInfo : null,
 					lineRef : null,
+					tripShortName : null, // if the trip has an override route name (Express)
 					headsign : headsign,
 					vehicleId : null,
 					monitored : false,
@@ -331,6 +337,7 @@ OBA.Sign = function() {
 				if (row.etaCount == 0) {
 					row.vehicleInfo = vehicleInfo;
 					row.lineRef = vehicleInfo.lineRef;
+					row.tripShortName = vehicleInfo.tripShortName;
 					row.vehicleId = vehicleInfo.vehicleId;
 					row.monitored = vehicleInfo.monitored;
 				}
@@ -356,7 +363,7 @@ OBA.Sign = function() {
 				}
 				
 				// sign
-				var sign = signForRoute(rowInfo.lineRef, jQuery("<td></td>"));
+				var sign = signForRoute(rowInfo.lineRef, rowInfo.tripShortName, jQuery("<td></td>"));
 				sign.addClass("arrival_sign");
 				sign.appendTo(row);
 				
@@ -441,6 +448,18 @@ OBA.Sign = function() {
 	function isNumeric(n) {
 		var number = !jQuery.isArray( n ) && (n - parseFloat( n ) + 1) >= 0;
 		return number;
+	}
+
+	function hasLeadingNumber(n) {
+		return leadingNumber(n) != null;
+	}
+
+	function leadingNumber(n) {
+		var leadingNumberRegex = /^\d+/g;
+
+		var result = leadingNumberRegex.exec(n);
+		if (result == null) return null;
+		return result[0];
 	}
 	
 	function toEtaSpan1(etas, monitored) {
@@ -566,6 +585,7 @@ OBA.Sign = function() {
 				vehicleInfo.distanceAway = journey.MonitoredCall.Extensions.Distances.PresentableDistance;
 				vehicleInfo.vehicleId = journey.VehicleRef.split("_")[1];
 				vehicleInfo.lineRef = journey.LineRef;
+				vehicleInfo.tripShortName = null;
 				vehicleInfo.monitored = journey.Monitored;
 				if (typeof journey.MonitoredCall.ExpectedDepartureTime != 'undefined') {
 					//vehicleInfo.expectedDepartureTime = OBA.Util.ISO8601StringToDate(journey.MonitoredCall.ExpectedDepartureTime);
@@ -574,8 +594,13 @@ OBA.Sign = function() {
 							journeyTimestamp, "min");
 					
 				}
-				
-				headsignToDistanceAways[routeIdAndHeadsign].push(vehicleInfo);
+
+                // trip may have a route override like an express designator
+				if (journey.PublishedLineName != null) {
+                    vehicleInfo.tripShortName = journey.PublishedLineName;
+                }
+
+                headsignToDistanceAways[routeIdAndHeadsign].push(vehicleInfo);
 				var routeShortName = routeInfo[routeId].shortName;
 				var sortKeys = {
 						routeIdAndHeadsign: routeIdAndHeadsign,
@@ -607,13 +632,26 @@ OBA.Sign = function() {
 			if (sortByRoute) {
 				  sortedRouteIds.sort(function(a, b) {
 					     var routeShortNameA=a.routeShortName;
+					     if (hasLeadingNumber(routeShortNameA))
+					     	routeShortNameA = leadingNumber(routeShortNameA);
 						 var routeShortNameB=b.routeShortName;
+					     if (hasLeadingNumber(routeShortNameB))
+					     	routeShortNameB = leadingNumber(routeShortNameB);
 
 						 // perform a true numeric sort if possible
 						 if (isNumeric(routeShortNameA) && isNumeric(routeShortNameB)) {
 							 return routeShortNameA - routeShortNameB;
 						 }
-						 
+						 // try to handle "21" vs "21E" vs "A Line" in a reasonable/stable manner
+						 if (isNumeric(routeShortNameA)) {
+                             return  -1 * routeShortNameB.localeCompare(parseInt(routeShortNameA));
+                         }
+
+						 if (isNumeric(routeShortNameB)) {
+                             return routeShortNameA.localeCompare(parseInt(routeShortNameB));
+                         }
+
+                         // by here we are comparing txt to txt "A Line" to "B Line"
 						 routeShortNameA = routeShortNameA.toLowerCase();
 						 routeShortNameB = routeShortNameB.toLowerCase();
 						 // otherwise to string-based sort

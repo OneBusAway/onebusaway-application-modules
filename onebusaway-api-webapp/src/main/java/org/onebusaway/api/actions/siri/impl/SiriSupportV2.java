@@ -82,6 +82,8 @@ import uk.org.siri.siri_2.StopPointInPatternStructure;
 import uk.org.siri.siri_2.StopPointRefStructure;
 import uk.org.siri.siri_2.VehicleRefStructure;
 
+import static org.apache.commons.lang.StringUtils.isBlank;
+
 public final class SiriSupportV2 {
 
   private static Logger _log = LoggerFactory.getLogger(SiriSupportV2.class);
@@ -138,6 +140,10 @@ public final class SiriSupportV2 {
     //Route Short Name
     NaturalLanguageStringStructure routeShortName = new NaturalLanguageStringStructure();
     String shortName = framedJourneyTripBean.getRoute().getShortName();
+    if (!isBlank(currentVehicleTripStatus.getActiveTrip().getRouteShortName())) {
+      // look for an override like an express desginator
+      shortName = currentVehicleTripStatus.getActiveTrip().getRouteShortName();
+    }
     if (shortName == null) {
       shortName = framedJourneyTripBean.getRoute().getId().split("_")[1];
     }
@@ -309,6 +315,7 @@ public final class SiriSupportV2 {
     // detail level - minimal
     if (detailLevel.equals(DetailLevel.MINIMUM) || detailLevel.equals(DetailLevel.BASIC)
         || detailLevel.equals(DetailLevel.NORMAL)|| detailLevel.equals(DetailLevel.CALLS)){
+
     monitoredVehicleJourney.getPublishedLineName().add(routeShortName);
     monitoredVehicleJourney.getDestinationName().add(headsign);
     monitoredVehicleJourney.setMonitored(currentVehicleTripStatus
