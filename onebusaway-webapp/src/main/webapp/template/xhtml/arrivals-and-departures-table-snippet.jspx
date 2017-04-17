@@ -45,7 +45,7 @@
                 <s:text name="destination" />
             </s:if> <s:else>
                 <s:url var="url" includeParams="get">
-                    <s:param name="order">destination</s:param>
+                    <s:param name="order">dest</s:param>
                 </s:url>
                 <s:a href="%{url}">
                     <s:text name="destination" />
@@ -76,14 +76,13 @@
         <s:if test="#arrivalsAndDepartures.empty">
             <tr>
                 <td colspan="3">
-                <div id="arrivalsNoScheduledArrivals">No scheduled
-                arrivals in the next 30 minutes.</div>
+                <div id="arrivalsNoScheduledArrivals"><oba:message key="arrivalAndDeparture.NoScheduleDataOn30Min"/></div>
                 </td>
             </tr>
         </s:if>
     </table>
 
-    <div class="arrivalsStatusUpdates">Last Update: <oba:date
+    <div class="arrivalsStatusUpdates"><oba:message key="arrivalAndDeparture.Last_Update"/><oba:date
         value="'now'" format="hh:mm aa" /></div>
 
 </jsp:root>

@@ -36,7 +36,7 @@ import org.onebusaway.webapp.gwt.where_library.WhereLibrary;
 import org.onebusaway.webapp.gwt.where_library.pages.WhereCommonPage;
 import org.onebusaway.webapp.gwt.where_library.resources.WhereLibraryStandardStopCssResource;
 import org.onebusaway.webapp.gwt.where_library.rpc.WebappServiceAsync;
-import org.onebusaway.webapp.gwt.where_library.view.ArrivalsAndDeparturesPresentaion;
+import org.onebusaway.webapp.gwt.where_library.view.ArrivalsAndDeparturesPresentation;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -64,6 +64,8 @@ public class NotificationWidgetPage extends WhereCommonPage {
   private static final String PARAM_TRIP_ID = "tripId";
 
   private static final String PARAM_STOP_ID = "stopId";
+  
+  private static final String PARAM_SERVICE_DATE = "serviceDate";
 
   private NotificationStateDAO _dao = new NotificationStateDAO();
 
@@ -76,12 +78,14 @@ public class NotificationWidgetPage extends WhereCommonPage {
   private String _tripId;
 
   private String _stopId;
+  
+  private String _serviceDate;
 
   private DivPanel _stopPanel = new DivPanel(_stopCss.arrivalsStopInfo());
 
   private Grid _arrivalsAndDeparturesTable = new Grid(2, 3);
 
-  private ArrivalsAndDeparturesPresentaion _methods;
+  private ArrivalsAndDeparturesPresentation _methods;
 
   private List<NotificationMethod> _notificationMethods = new ArrayList<NotificationMethod>();
 
@@ -92,7 +96,7 @@ public class NotificationWidgetPage extends WhereCommonPage {
   private ArrivalAndDepartureBean _departureBean = null;
 
   public NotificationWidgetPage(ContextManager contextManager) {
-    _methods = new ArrivalsAndDeparturesPresentaion(true);
+    _methods = new ArrivalsAndDeparturesPresentation(true);
     _notificationMethods.add(new SoundNotificationMethod());
     _notificationMethods.add(new PopupNotificationMethod());
   }
@@ -189,10 +193,11 @@ public class NotificationWidgetPage extends WhereCommonPage {
 
     _tripId = context.getParam(PARAM_TRIP_ID);
     _stopId = context.getParam(PARAM_STOP_ID);
+    _serviceDate = context.getParam(PARAM_SERVICE_DATE);
 
-    System.out.println("tripId=" + _tripId + " stopId=" + _stopId);
+    System.out.println("tripId=" + _tripId + " stopId=" + _stopId + " serviceDate=" + _serviceDate);
 
-    if (_tripId == null || _stopId == null) {
+    if (_tripId == null || _stopId == null || _serviceDate == null) {
       _dataRequestTimer.cancel();
     } else {
 
@@ -270,8 +275,8 @@ public class NotificationWidgetPage extends WhereCommonPage {
 
     DivPanel numberPanel = new DivPanel(_stopCss.arrivalsStopNumber());
     _stopPanel.add(numberPanel);
-    Anchor numberLink = new Anchor("Stop # " + stop.getCode() + " - "
-        + stop.getDirection() + " bound", url);
+    Anchor numberLink = new Anchor(_msgs.stopByNumberPageStopNumberShebang() + " " + stop.getCode() + " - "
+        + stop.getDirection() + " " +_msgs.stopByNumberPageBound() , url);
     numberPanel.add(numberLink);
   }
 

@@ -44,8 +44,12 @@
 
 	<!-- Specify the app entry point class -->
 	<entry-point class='org.onebusaway.webapp.gwt.where_refineview.WhereStopFinderRefineViewApplication' />
-    
+	
+	<!-- Availabe Locales -->
+	<extend-property name="locale" values="en"/>
+	<extend-property name="locale" values="es"/>
+
     <!-- Temporary for development -->
     <set-configuration-property name="CssResource.style" value="pretty"/>
-    
+
 </module>

@@ -44,4 +44,10 @@ public interface ArrivalAndDepartureMessages extends Messages {
   public String scheduledArrival();
   
   public String scheduledDeparture();
+  
+  public String NOW();
+  
+  public String alertCatchBus();
+  
+  public String suspended();
 }

@@ -21,6 +21,8 @@
 	xmlns:oba="/oba-tags">
 <jsp:directive.page contentType="text/html" />
 <head>
+<meta http-equiv="content-language" content="${locale}"/>
+<meta name="gwt:property" content="locale=${locale}"/>
 <title>OneBusAway</title>
 <jsp:element name="script">
   <jsp:attribute name="type">text/javascript</jsp:attribute>

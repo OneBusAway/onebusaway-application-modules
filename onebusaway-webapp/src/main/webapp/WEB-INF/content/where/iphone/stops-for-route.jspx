@@ -27,7 +27,7 @@
 
 <s:if test="! directionNames.isEmpty()">
 <div id="directions_of_travel">
-<h3>Stops for direction of travel:</h3>
+<h3><s:text name="stopForRoute.DirectionTravel"/>:</h3>
 
 <ul class="buttons">
 <s:iterator value="directionNames" status="status">
@@ -42,7 +42,7 @@
 </s:if>
 
 <div id="stops_for_route">
-<h3>Stops:</h3>
+<h3><s:text name="stopForRoute.Stops"/>:</h3>
 <ul class="buttons">
 <s:iterator value="stops">	
 	<s:url var="url" action="stop">

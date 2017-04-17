@@ -17,7 +17,8 @@
 
 -->
     <!-- RefineViewWidget.ui.xml -->
-<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder' xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder' xmlns:g='urn:import:com.google.gwt.user.client.ui'
+	ui:baseMessagesInterface="org.onebusaway.webapp.gwt.where_library.WhereMessages">
 
     <ui:style type="org.onebusaway.webapp.gwt.stop_and_route_selection.AbstractStopAndRouteSelectionWidget.MyStyle">
 
@@ -47,8 +48,9 @@
 
     <g:HTMLPanel addStyleNames="{style.panel}">
 
-        <h2>Stop and Route Selection</h2>
+        <h2><ui:msg key="refineViewTitle">Stop and Route Selection</ui:msg></h2>
 
+        <ui:msg key="refineViewIntroMessage">
         <p>Did you know that you can:</p>
 
         <ul>
@@ -59,20 +61,21 @@
         <p>This page lets you pick and choose stops and routes to create a custom view showing just the information
             you
             want to see.</p>
+        </ui:msg>
 
-        <h3>Stops</h3>
+        <h3><ui:msg key="refineViewStops">Stops</ui:msg></h3>
 
         <g:FlowPanel ui:field="_stopsPanel" addStyleNames="{style.list}"/>
 
-        <p class="{style.linkPanel}"><g:Anchor ui:field="_addStopAnchor">Add a stop</g:Anchor></p>
+        <p class="{style.linkPanel}"><g:Anchor ui:field="_addStopAnchor"><ui:msg key="refineViewAddStop">Add a stop</ui:msg></g:Anchor></p>
 
-        <h3>Routes</h3>
+        <h3><ui:msg key="refineViewRoutes">Routes</ui:msg></h3>
 
         <g:FlowPanel ui:field="_routesPanel" addStyleNames="{style.list}" />
         
-        <h3>All set?</h3>
+        <h3><ui:msg key="refineViewAllSetQuestion">All set?</ui:msg></h3>
         
-        <p class="{style.linkPanel}"><g:Anchor ui:field="_showCustomViewAnchor">Click to view your custom stop view</g:Anchor></p>
+        <p class="{style.linkPanel}"><g:Anchor ui:field="_showCustomViewAnchor"><ui:msg key="refineViewClickToCustomView">Click to view your custom stop view</ui:msg></g:Anchor></p>
 
     </g:HTMLPanel>
 

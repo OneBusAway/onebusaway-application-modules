@@ -33,9 +33,9 @@ import org.onebusaway.webapp.gwt.mobile_application.view.BookmarkViewController;
 import org.onebusaway.webapp.gwt.viewkit.ListViewController;
 import org.onebusaway.webapp.gwt.viewkit.ListViewModel;
 import org.onebusaway.webapp.gwt.viewkit.ListViewRow;
-import org.onebusaway.webapp.gwt.viewkit.NavigationController;
 import org.onebusaway.webapp.gwt.viewkit.ListViewRow.ListViewRowStyle;
-import org.onebusaway.webapp.gwt.where_library.view.ArrivalsAndDeparturesPresentaion;
+import org.onebusaway.webapp.gwt.viewkit.NavigationController;
+import org.onebusaway.webapp.gwt.where_library.view.ArrivalsAndDeparturesPresentation;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -46,7 +46,7 @@ public class StopWithArrivalsAndDeparturesListViewModel extends ListViewModel {
 
   private static final MobileApplicationCssResource _css = MobileApplicationResources.INSTANCE.getCSS();
 
-  private static final ArrivalsAndDeparturesPresentaion _methods = new ArrivalsAndDeparturesPresentaion(
+  private static final ArrivalsAndDeparturesPresentation _methods = new ArrivalsAndDeparturesPresentation(
       true);
 
   private static final DateTimeFormat _timeFormat = DateTimeFormat.getShortTimeFormat();

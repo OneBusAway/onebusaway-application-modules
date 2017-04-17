@@ -86,17 +86,17 @@
                         value="#presentation.getStatusLabel(top)" />
               </jsp:element>
             </s:if> <s:else>
-                <jsp:text>Every </jsp:text>
+                <oba:message key="stop.Every"/><jsp:text> </jsp:text>
                 <s:property value="frequency.headway/60" />
-                <jsp:text> mins</jsp:text>
+                <jsp:text> </jsp:text><oba:message key="stop.mins"/><jsp:text> </jsp:text>
                 <s:if
                     test="#presentation.isShowFrequencyFrom(frequency)">
-                    <jsp:text> from </jsp:text>
+                    <jsp:text>  </jsp:text><oba:message key="stop.From"/> <jsp:text>  </jsp:text>
                     <oba:date format="hh:mmaa"
                         value="frequency.startTime" />
                 </s:if>
                 <s:else>
-                    <jsp:text> until </jsp:text>
+                    <jsp:text>  </jsp:text><oba:message key="stop.until"/> <jsp:text>  </jsp:text>
                     <oba:date format="hh:mmaa" value="frequency.endTime" />
                 </s:else>
             </s:else></div>

@@ -15,15 +15,17 @@
  */
 package org.onebusaway.webapp.impl;
 
-import com.google.gwt.i18n.client.Messages;
-
 import java.io.IOException;
-import java.io.InputStream;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.text.MessageFormat;
-import java.util.Properties;
+import java.util.Locale;
+
+import org.springframework.context.MessageSource;
+import org.springframework.context.support.ReloadableResourceBundleMessageSource;
+
+import com.google.gwt.i18n.client.Messages;
+import com.opensymphony.xwork2.ActionContext;
 
 public class GWTMessagesFactory extends GWTAbstractFactory {
 
@@ -33,36 +35,34 @@ public class GWTMessagesFactory extends GWTAbstractFactory {
 
   protected Object createInstance() throws IOException {
     String name = _type.getName();
-    name = "/" + name.replace('.', '/') + ".properties";
-    InputStream is = _type.getResourceAsStream(name);
-    if (is == null)
-      throw new IllegalStateException("Unable to find resources: " + name);
-    Properties p = new Properties();
-    p.load(is);
-    Handler handler = new Handler(p);
+    name = "/" + name.replace('.', '/');  
+    ReloadableResourceBundleMessageSource messageSource = new ReloadableResourceBundleMessageSource();
+    messageSource.setBasename(name);
+    Handler handler = new Handler(messageSource);
     return Proxy.newProxyInstance(_type.getClassLoader(), new Class[] {_type},
         handler);
   }
 
   private static class Handler implements InvocationHandler {
 
-    private Properties _properties;
+    private MessageSource _messageSource;
 
-    public Handler(Properties properties) {
-      _properties = properties;
+    public Handler(MessageSource messageSource) {
+      _messageSource = messageSource;
     }
 
     public Object invoke(Object proxy, Method method, Object[] args)
         throws Throwable {
 
-      String key = method.getName();
-      if (!_properties.containsKey(key))
-        throw new IllegalArgumentException("no such message: " + key);
-      String value = _properties.getProperty(key);
-      MessageFormat format = new MessageFormat(value);
-      StringBuffer b = new StringBuffer();
-      format.format(args, b, null);
-      return b.toString();
+    	Locale local = null;
+    	try {
+    		ActionContext ctx = ActionContext.getContext();
+    		if (ctx != null)
+    			local  = ctx.getLocale();
+    		} catch(Throwable e) {
+    		}
+    	
+    	return _messageSource.getMessage(method.getName(), args,local);
     }
   }
 }

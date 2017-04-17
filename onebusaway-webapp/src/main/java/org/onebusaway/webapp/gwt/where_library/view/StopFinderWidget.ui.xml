@@ -18,6 +18,7 @@
 -->
     <!-- RefineViewWidget.ui.xml -->
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder' xmlns:g='urn:import:com.google.gwt.user.client.ui'
+	ui:baseMessagesInterface="org.onebusaway.webapp.gwt.where_library.WhereMessages"
     xmlns:my='urn:import:org.onebusaway.webapp.gwt.where_library.view'>
 
     <ui:style type="org.onebusaway.webapp.gwt.where_library.view.StopFinderCssResource">
@@ -146,19 +147,18 @@
                 <g:center>
                     <g:FlowPanel>
                         <g:FlowPanel addStyleNames="{style.searchPanel}">
-                            <g:Label>Search for stops:</g:Label>
+                            <g:Label><ui:msg key="standardIndexPageSearchForStops">Search for stops:</ui:msg></g:Label>
                             <g:FormPanel ui:field="_searchFormPanel">
                                 <g:FlowPanel>
                                     <g:TextBox ui:field="_searchTextBox" visibleLength="55" name="q" />
-                                    <g:SubmitButton>Search</g:SubmitButton>
+                                    <g:SubmitButton><ui:msg key="standardIndexPageSearch">Search</ui:msg></g:SubmitButton>
                                 </g:FlowPanel>
                             </g:FormPanel>
-                            <g:Label addStyleNames="{style.searchExample}">By address (ex. "3rd and pike") or route number (ex. "44" or
-                                "71").</g:Label>
+                            <g:Label addStyleNames="{style.searchExample}"><ui:msg key="standardIndexPageSearchExample">By address (ex. "3rd and pike") or route number (ex. "44" or "71").</ui:msg></g:Label>
 
                         </g:FlowPanel>
                         <g:FlowPanel addStyleNames="{style.linksPanel}" ui:field="_linksPanel">
-                            <g:Anchor href="#" ui:field="_currentLinkAnchor">Link to the current view</g:Anchor>
+                            <g:Anchor href="#" ui:field="_currentLinkAnchor"><ui:msg key="standardIndexPageLinkCurrentView">Link to the current view</ui:msg></g:Anchor>
                         </g:FlowPanel>
                     </g:FlowPanel>
                 </g:center>

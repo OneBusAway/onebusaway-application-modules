@@ -17,7 +17,8 @@
 
 -->
     <!-- RefineViewWidget.ui.xml -->
-<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder' xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder' xmlns:g='urn:import:com.google.gwt.user.client.ui'
+	ui:baseMessagesInterface="org.onebusaway.webapp.gwt.where_library.WhereMessages">
 
     <ui:style>
     .title {
@@ -25,9 +26,9 @@
     }
     </ui:style>
     <g:HTMLPanel addStyleNames="{style.title}">
-        <h3>Add a Stop</h3>
+        <h3><ui:msg key="refineViewAddStop">Add a Stop</ui:msg></h3>
         <p>
-            <g:Anchor ui:field="cancelAnchor">Or go back to the previous screen</g:Anchor>
+            <g:Anchor ui:field="cancelAnchor"><ui:msg key="refineViewGoBackScreen">Or go back to the previous screen</ui:msg></g:Anchor>
         </p>
     </g:HTMLPanel>
 </ui:UiBinder>
