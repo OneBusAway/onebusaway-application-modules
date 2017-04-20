@@ -20,6 +20,7 @@ import java.util.List;
 
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.transit_data.model.StopBean;
+import org.onebusaway.transit_data.model.TimepointPredictionBean;
 import org.onebusaway.transit_data.model.schedule.FrequencyBean;
 import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
 
@@ -96,6 +97,8 @@ public final class TripStatusBean implements Serializable {
   private String vehicleId;
 
   private List<ServiceAlertBean> situations;
+
+  private List<TimepointPredictionBean> timepointPredictions;
 
   public TripBean getActiveTrip() {
     return activeTrip;
@@ -393,4 +396,13 @@ public void setPreviousStopDistanceFromVehicle(
   public void setSituations(List<ServiceAlertBean> situations) {
     this.situations = situations;
   }
+
+  public List<TimepointPredictionBean> getTimepointPredictions() {
+    return timepointPredictions;
+  }
+
+  public void setTimepointPredictions(List<TimepointPredictionBean> timepointPredictions) {
+    this.timepointPredictions = timepointPredictions;
+  }
+
 }

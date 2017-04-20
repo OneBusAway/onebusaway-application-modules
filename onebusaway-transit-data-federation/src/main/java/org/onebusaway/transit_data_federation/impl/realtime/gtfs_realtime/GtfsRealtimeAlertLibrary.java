@@ -30,11 +30,24 @@ import com.google.transit.realtime.GtfsRealtime.Alert;
 import com.google.transit.realtime.GtfsRealtime.EntitySelector;
 import com.google.transit.realtime.GtfsRealtime.TripDescriptor;
 
+import java.util.List;
+
 class GtfsRealtimeAlertLibrary {
 
   private static final Logger _log = LoggerFactory.getLogger(GtfsRealtimeAlertLibrary.class);
 
   private GtfsRealtimeEntitySource _entitySource;
+
+  private String[] _agencyIds = {};
+  void setAgencyIds(List<String> agencies) {
+    if (agencies != null) {
+      _agencyIds = agencies.toArray(_agencyIds);
+    }
+  }
+  private boolean _stripAgencyPrefix = true;
+  public void setStripAgencyPrefix(boolean remove) {
+    _stripAgencyPrefix = remove;
+  }
 
   public void setEntitySource(GtfsRealtimeEntitySource entitySource) {
     _entitySource = entitySource;
@@ -78,7 +91,7 @@ class GtfsRealtimeAlertLibrary {
     if (selector.hasAgencyId())
       affects.setAgencyId(selector.getAgencyId());
     if (selector.hasRouteId()) {
-      Id routeId = _entitySource.getRouteId(selector.getRouteId());
+      Id routeId = _entitySource.getRouteId(idOnly(selector.getRouteId()));
       affects.setRouteId(routeId);
     }
     if (selector.hasStopId()) {
@@ -90,9 +103,17 @@ class GtfsRealtimeAlertLibrary {
       if (trip.hasTripId())
         affects.setTripId(_entitySource.getTripId(trip.getTripId()));
       else if (trip.hasRouteId())
-        affects.setRouteId(_entitySource.getRouteId(trip.getRouteId()));
+        affects.setRouteId(_entitySource.getRouteId(idOnly(trip.getRouteId())));
     }
     return affects;
+  }
+
+  private String idOnly(String s) {
+    if (s == null || !_stripAgencyPrefix) return s;
+    for (String t : _agencyIds) {
+      s = s.replace(t+"_", "");
+    }
+    return s;
   }
 
   private ServiceAlert.Cause convertCause(Alert.Cause cause) {

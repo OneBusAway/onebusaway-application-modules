@@ -130,7 +130,7 @@ public class GtfsRealtimeTripLibraryTest {
     Collections.sort(groups);
 
     CombinedTripUpdatesAndVehiclePosition group = groups.get(0);
-    assertSame(blockA, group.block.getBlockEntry());
+    assertSame(blockA, group.block.getBlockInstance().getBlock().getBlock());
     assertEquals(2, group.tripUpdates.size());
     TripUpdate tripUpdate = group.tripUpdates.get(0);
     assertEquals("tripA", tripUpdate.getTrip().getTripId());
@@ -138,7 +138,7 @@ public class GtfsRealtimeTripLibraryTest {
     assertEquals("tripB", tripUpdate.getTrip().getTripId());
 
     group = groups.get(1);
-    assertSame(blockB, group.block.getBlockEntry());
+    assertSame(blockB, group.block.getBlockInstance().getBlock().getBlock());
     assertEquals(2, group.tripUpdates.size());
     tripUpdate = group.tripUpdates.get(0);
     assertEquals("tripC", tripUpdate.getTrip().getTripId());

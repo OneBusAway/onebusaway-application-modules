@@ -18,6 +18,7 @@
  */
 package org.onebusaway.geospatial.model;
 
+
 import java.util.Arrays;
 
 public class PointVector {

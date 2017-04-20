@@ -22,8 +22,10 @@ import java.util.Map;
 
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.realtime.api.EVehiclePhase;
+import org.onebusaway.realtime.api.TimepointPredictionRecord;
 import org.onebusaway.transit_data.model.ListBean;
 import org.onebusaway.transit_data.model.StopBean;
+import org.onebusaway.transit_data.model.TimepointPredictionBean;
 import org.onebusaway.transit_data.model.TripStopTimesBean;
 import org.onebusaway.transit_data.model.schedule.FrequencyBean;
 import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
@@ -105,10 +107,6 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
       ServiceAlertsBeanService serviceAlertBeanService) {
     _serviceAlertBeanService = serviceAlertBeanService;
   }
-
-  /****
-   * {@link TripStatusBeanService} Interface
-   ****/
 
   @Override
   public TripDetailsBean getTripForId(TripDetailsQueryBean query) {
@@ -267,6 +265,24 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
         FrequencyBean fb = FrequencyBeanLibrary.getBeanForFrequency(
             serviceDate, frequencyLabel);
         bean.setFrequency(fb);
+      }
+
+      if (blockLocation.getTimepointPredictions() != null && blockLocation.getTimepointPredictions().size() > 0) {
+        List<TimepointPredictionBean> timepointPredictions = new ArrayList<TimepointPredictionBean>();
+        for (TimepointPredictionRecord tpr: blockLocation.getTimepointPredictions()) {
+          TimepointPredictionBean tpb = new TimepointPredictionBean();
+          tpb.setTimepointId(tpr.getTimepointId().toString());
+          // TODO refactor NYC to support unified changes
+          tpb.setTimepointPredictedArrivalTime(tpr.getTimepointPredictedTime());
+          tpb.setTimepointPredictedDepartureTime(tpr.getTimepointPredictedTime());
+          tpb.setTimepointScheduledTime(tpr.getTimepointScheduledTime());
+          //tpb.setTripId(tpr.getTripId().toString());
+          //tpb.setStopSequence(tpr.getStopSequence());
+          //tpb.setTimepointPredictedArrivalTime(tpr.getTimepointPredictedArrivalTime());
+          //tpb.setTimepointPredictedDepartureTime(tpr.getTimepointPredictedDepartureTime());
+          timepointPredictions.add(tpb);
+        }
+        bean.setTimepointPredictions(timepointPredictions);
       }
 
     } else {

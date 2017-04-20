@@ -35,6 +35,7 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.realtime.api.EVehiclePhase;
 import org.onebusaway.realtime.api.VehicleLocationListener;
 import org.onebusaway.realtime.api.VehicleLocationRecord;
 import org.onebusaway.transit_data_federation.services.AgencyService;
@@ -52,7 +53,6 @@ import com.google.transit.realtime.GtfsRealtime.Alert;
 import com.google.transit.realtime.GtfsRealtime.FeedEntity;
 import com.google.transit.realtime.GtfsRealtime.FeedHeader;
 import com.google.transit.realtime.GtfsRealtime.FeedMessage;
-import com.google.transit.realtime.GtfsRealtime.TripUpdate;
 import com.google.transit.realtime.GtfsRealtimeConstants;
 import com.google.transit.realtime.GtfsRealtimeOneBusAway;
 
@@ -89,6 +89,8 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
 
   private int _refreshInterval = 30;
 
+  private boolean _stripAgencyPrefixesFromFeed = false;
+
   private List<String> _agencyIds = new ArrayList<String>();
 
   /**
@@ -114,7 +116,7 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   private GtfsRealtimeAlertLibrary _alertLibrary;
   
   private MonitoredResult _monitoredResult = new MonitoredResult();
-  
+
 
   @Autowired
   public void setAgencyService(AgencyService agencyService) {
@@ -183,7 +185,9 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   public MonitoredResult getMonitoredResult() {
     return _monitoredResult;
   }
-  
+
+  public void setStripAgencyPrefixesFromFeed(boolean strip) { _stripAgencyPrefixesFromFeed = strip; }
+
   @PostConstruct
   public void start() {
     if (_agencyIds.isEmpty()) {
@@ -202,11 +206,15 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     _entitySource.setTransitGraphDao(_transitGraphDao);
 
     _tripsLibrary = new GtfsRealtimeTripLibrary();
+    _tripsLibrary.setAgencyIds(getAgencyIds());
+    _tripsLibrary.setStripAgencyPrefix(_stripAgencyPrefixesFromFeed);
     _tripsLibrary.setBlockCalendarService(_blockCalendarService);
     _tripsLibrary.setEntitySource(_entitySource);
 
     _alertLibrary = new GtfsRealtimeAlertLibrary();
     _alertLibrary.setEntitySource(_entitySource);
+    _alertLibrary.setAgencyIds(getAgencyIds());
+    _alertLibrary.setStripAgencyPrefix(_stripAgencyPrefixesFromFeed);
 
     if (_refreshInterval > 0) {
       _refreshTask = _scheduledExecutorService.scheduleAtFixedRate(
@@ -269,6 +277,8 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
         Date timestamp = new Date(record.getTimeOfRecord());
         Date prev = _lastVehicleUpdate.get(vehicleId);
         if (prev == null || prev.before(timestamp)) {
+          // if its in the GTFS-RT its assumed IN SERVICE
+          record.setPhase(EVehiclePhase.IN_PROGRESS);
           _vehicleLocationListener.handleVehicleLocationRecord(record);
           _lastVehicleUpdate.put(vehicleId, timestamp);
         }
@@ -278,17 +288,24 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     Calendar c = Calendar.getInstance();
     c.add(Calendar.MINUTE, -15);
     Date staleRecordThreshold = c.getTime();
-
+    long newestUpdate = 0; // track age of data
     Iterator<Map.Entry<AgencyAndId, Date>> it = _lastVehicleUpdate.entrySet().iterator();
     while (it.hasNext()) {
       Map.Entry<AgencyAndId, Date> entry = it.next();
       AgencyAndId vehicleId = entry.getKey();
       Date lastUpdateTime = entry.getValue();
+      if (lastUpdateTime != null && lastUpdateTime.getTime() > newestUpdate) {
+        newestUpdate = lastUpdateTime.getTime();
+      }
       if (!seenVehicles.contains(vehicleId)
           && lastUpdateTime.before(staleRecordThreshold)) {
         it.remove();
       }
     }
+    // NOTE: this implies receiving stale updates is equivalent to not being updated at all
+    result.setLastUpdate(newestUpdate);
+    _log.info("Agency " + this.getAgencyIds().get(0) + " has active vehicles=" + seenVehicles.size()
+            + " for updates=" + updates.size() + " with most recent timestamp " + new Date(newestUpdate));
   }
 
   private void handleAlerts(FeedMessage alerts) {

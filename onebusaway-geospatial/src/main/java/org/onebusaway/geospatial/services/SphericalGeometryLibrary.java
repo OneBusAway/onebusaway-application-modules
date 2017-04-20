@@ -15,16 +15,10 @@
  */
 package org.onebusaway.geospatial.services;
 
-import static java.lang.Math.atan2;
-import static java.lang.Math.cos;
-import static java.lang.Math.sin;
-import static java.lang.Math.sqrt;
-import static java.lang.Math.toDegrees;
-import static java.lang.Math.toRadians;
-
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.geospatial.model.XYPoint;
+
 
 public class SphericalGeometryLibrary {
 
@@ -64,18 +58,18 @@ public class SphericalGeometryLibrary {
       double lon2, double radius) {
 
     // http://en.wikipedia.org/wiki/Great-circle_distance
-    lat1 = toRadians(lat1); // Theta-s
-    lon1 = toRadians(lon1); // Lambda-s
-    lat2 = toRadians(lat2); // Theta-f
-    lon2 = toRadians(lon2); // Lambda-f
+    lat1 = Math.toRadians(lat1); // Theta-s
+    lon1 = Math.toRadians(lon1); // Lambda-s
+    lat2 = Math.toRadians(lat2); // Theta-f
+    lon2 = Math.toRadians(lon2); // Lambda-f
 
     double deltaLon = lon2 - lon1;
 
-    double y = sqrt(p2(cos(lat2) * sin(deltaLon))
-        + p2(cos(lat1) * sin(lat2) - sin(lat1) * cos(lat2) * cos(deltaLon)));
-    double x = sin(lat1) * sin(lat2) + cos(lat1) * cos(lat2) * cos(deltaLon);
+    double y = Math.sqrt(p2(Math.cos(lat2) * Math.sin(deltaLon))
+        + p2(Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(deltaLon)));
+    double x = Math.sin(lat1) * Math.sin(lat2) + Math.cos(lat1) * Math.cos(lat2) * Math.cos(deltaLon);
 
-    return radius * atan2(y, x);
+    return radius * Math.atan2(y, x);
   }
 
   public static final CoordinateBounds bounds(CoordinatePoint point,
@@ -100,8 +94,8 @@ public class SphericalGeometryLibrary {
 
     double radiusOfEarth = RADIUS_OF_EARTH_IN_KM * 1000;
 
-    double latRadians = toRadians(lat);
-    double lonRadians = toRadians(lon);
+    double latRadians = Math.toRadians(lat);
+    double lonRadians = Math.toRadians(lon);
 
     double latRadius = radiusOfEarth;
     double lonRadius = Math.cos(latRadians) * radiusOfEarth;
@@ -109,11 +103,11 @@ public class SphericalGeometryLibrary {
     double latOffset = latDistance / latRadius;
     double lonOffset = lonDistance / lonRadius;
 
-    double latFrom = toDegrees(latRadians - latOffset);
-    double latTo = toDegrees(latRadians + latOffset);
+    double latFrom = Math.toDegrees(latRadians - latOffset);
+    double latTo = Math.toDegrees(latRadians + latOffset);
 
-    double lonFrom = toDegrees(lonRadians - lonOffset);
-    double lonTo = toDegrees(lonRadians + lonOffset);
+    double lonFrom = Math.toDegrees(lonRadians - lonOffset);
+    double lonTo = Math.toDegrees(lonRadians + lonOffset);
 
     return new CoordinateBounds(latFrom, lonFrom, latTo, lonTo);
   }

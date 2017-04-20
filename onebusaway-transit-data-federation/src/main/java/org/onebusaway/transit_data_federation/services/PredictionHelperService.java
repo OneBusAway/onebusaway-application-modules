@@ -31,5 +31,6 @@ public interface PredictionHelperService {
 	 */
 	List<TimepointPredictionRecord> getPredictionRecordsForTrip(String agencyId,
 			TripStatusBean tripStatus);
-
+	List<TimepointPredictionRecord> getPredictionRecordsForVehicleAndTrip(String vehicleId,
+																		  TripStatusBean tripStatus);
 }
