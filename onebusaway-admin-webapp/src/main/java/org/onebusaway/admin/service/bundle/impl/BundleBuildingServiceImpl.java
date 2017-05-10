@@ -488,6 +488,10 @@ public class BundleBuildingServiceImpl implements BundleBuildingService {
         cmdOverrides.setProperty("stopVerificationTask.path", this.getStopVerificationURL());
         cmdOverrides.setProperty("stopVerificationDistanceTask.path", this.getStopVerificationURL());
       }
+      String stopMappingUrl = configurationService.getConfigurationValueAsString("admin.stopMappingUrl", null);
+      if (stopMappingUrl != null) {
+        cmdOverrides.setProperty("stopConsolidationFileTask.stopConsolidationUrl", stopMappingUrl);
+      }
       creator.setAdditionalBeanPropertyOverrides(cmdOverrides);
 
 

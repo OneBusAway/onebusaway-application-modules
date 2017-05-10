@@ -410,6 +410,7 @@ public class BundleManagementServiceImpl implements BundleManagementService {
       _refreshService.refresh(RefreshableResources.SHAPE_GEOSPATIAL_INDEX);
       _refreshService.refresh(RefreshableResources.STOP_GEOSPATIAL_INDEX);
       _refreshService.refresh(RefreshableResources.NARRATIVE_DATA);
+      _refreshService.refresh(RefreshableResources.STOP_CONSOLIDATION_FILE);
 
     } catch (Exception e) {
       _log.error("Bundle " + bundleName + "(" + bundleId + ")"

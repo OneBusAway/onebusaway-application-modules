@@ -449,18 +449,27 @@
 <!--  check distance between consolidated stops -->
   <bean id="task_gtfs_archive" class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
     <property name="taskName" value="gtfs_archive" />
-    <property name="beforeTaskName" value="summary" />
+    <property name="beforeTaskName" value="consolidation_file" />
     <property name="afterTaskName" value="stop_verification" />
     <property name="task" ref="gtfsArchiveTask" />
   </bean>
 
+
+  <bean class="org.onebusaway.admin.service.bundle.task.StopConsolidationFileTask" id="stopConsolidationFileTask" />
+
+  <bean id="task_stop_consolidation_file" class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
+    <property name="taskName" value="consolidation_file" />
+    <property name="beforeTaskName" value="summary" />
+    <property name="afterTaskName" value="gtfs_archive" />
+    <property name="task" ref="stopConsolidationFileTask" />
+  </bean>
 
   <bean class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
     <property name="taskName" value="summary" />
     <property name="afterTaskName" value="pre_cache" />
     <property name="task" ref="summaryTask" />
   </bean>
-
+  
   <bean id="summaryTask" class="org.onebusaway.transit_data_federation.bundle.tasks.SummarizeCSVTask" >
     <property name="logger" ref="multiCSVLogger" />
   </bean>
