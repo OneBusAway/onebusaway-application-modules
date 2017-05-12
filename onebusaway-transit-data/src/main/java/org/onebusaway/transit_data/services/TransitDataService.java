@@ -38,6 +38,7 @@ import org.onebusaway.transit_data.model.AgencyWithCoverageBean;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureForStopQueryBean;
 import org.onebusaway.transit_data.model.ArrivalsAndDeparturesQueryBean;
+import org.onebusaway.transit_data.model.ConsolidatedStopMapBean;
 import org.onebusaway.transit_data.model.ListBean;
 import org.onebusaway.transit_data.model.RegisterAlarmQueryBean;
 import org.onebusaway.transit_data.model.RouteBean;
@@ -561,4 +562,9 @@ public interface TransitDataService extends FederatedService {
   @FederatedByAgencyIdMethod
   public List<StopBean> getAllRevenueStops(AgencyWithCoverageBean agency);
 
+  /**
+   * Get consolidated stops for agency
+   */
+  @FederatedByAgencyIdMethod
+  public ListBean<ConsolidatedStopMapBean> getAllConsolidatedStops();
 }

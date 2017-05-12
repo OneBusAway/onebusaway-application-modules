@@ -19,7 +19,9 @@ import java.util.Date;
 
 import org.apache.struts2.rest.DefaultHttpHeaders;
 import org.onebusaway.api.actions.api.ApiActionSupport;
+import org.onebusaway.api.services.AgencyAndIdModificationStrategy;
 import org.onebusaway.exceptions.ServiceException;
+import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.util.SystemTime;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +40,9 @@ public abstract class GtfsRealtimeActionSupport extends ApiActionSupport {
 
   @Autowired
   protected TransitDataService _service;
+
+  @Autowired(required = false)
+  protected AgencyAndIdModificationStrategy _stopIdModificationStrategy;
 
   private String _agencyId;
 
@@ -100,6 +105,16 @@ public abstract class GtfsRealtimeActionSupport extends ApiActionSupport {
         id = id.substring(index + 1);
       }
     }
+    return id;
+  }
+
+  protected AgencyAndId modifiedStopId(String agency, String stopId) {
+    AgencyAndId id = AgencyAndId.convertFromString(stopId);
+    if (_stopIdModificationStrategy == null)
+      return id;
+    AgencyAndId newId = _stopIdModificationStrategy.convertId(agency, id);
+    if (newId != null)
+      id = newId;
     return id;
   }
 }

@@ -29,6 +29,7 @@ import org.onebusaway.transit_data.model.RouteBean;
 import org.onebusaway.transit_data.model.StopBean;
 import org.onebusaway.transit_data_federation.model.narrative.StopNarrative;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
+import org.onebusaway.transit_data_federation.services.ConsolidatedStopsService;
 import org.onebusaway.transit_data_federation.services.RouteService;
 import org.onebusaway.transit_data_federation.services.beans.RouteBeanService;
 import org.onebusaway.transit_data_federation.services.beans.StopBeanService;
@@ -53,6 +54,8 @@ class StopBeanServiceImpl implements StopBeanService {
 
   private NarrativeService _narrativeService;
 
+  private ConsolidatedStopsService _consolidatedStopsService;
+
   @Autowired
   public void setTranstiGraphDao(TransitGraphDao transitGraphDao) {
     _transitGraphDao = transitGraphDao;
@@ -73,15 +76,25 @@ class StopBeanServiceImpl implements StopBeanService {
     _narrativeService = narrativeService;
   }
 
+  @Autowired
+  public void setConsolidatedStopsService(ConsolidatedStopsService consolidatedStopsService) {
+    _consolidatedStopsService = consolidatedStopsService;
+  }
+
   @Cacheable
   public StopBean getStopForId(AgencyAndId id) {
 
     StopEntry stop = _transitGraphDao.getStopEntryForId(id);
     StopNarrative narrative = _narrativeService.getStopForId(id);
 
-    if (stop == null)
+    if (stop == null) {
+      // try looking up consolidated id
+      AgencyAndId consolidatedId = _consolidatedStopsService.getConsolidatedStopIdForHiddenStopId(id);
+      if (consolidatedId != null)
+        return getStopForId(consolidatedId);
       throw new NoSuchStopServiceException(
-          AgencyAndIdLibrary.convertToString(id));
+              AgencyAndIdLibrary.convertToString(id));
+    }
 
     StopBean sb = new StopBean();
     fillStopBean(stop, narrative, sb);

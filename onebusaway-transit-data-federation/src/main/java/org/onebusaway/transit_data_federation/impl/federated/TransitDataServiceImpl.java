@@ -33,6 +33,7 @@ import org.onebusaway.transit_data.model.AgencyWithCoverageBean;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureForStopQueryBean;
 import org.onebusaway.transit_data.model.ArrivalsAndDeparturesQueryBean;
+import org.onebusaway.transit_data.model.ConsolidatedStopMapBean;
 import org.onebusaway.transit_data.model.ListBean;
 import org.onebusaway.transit_data.model.RegisterAlarmQueryBean;
 import org.onebusaway.transit_data.model.RouteBean;
@@ -573,6 +574,11 @@ public class TransitDataServiceImpl implements TransitDataService {
   @Override
   public List<StopBean> getAllRevenueStops(AgencyWithCoverageBean agency) {
     return _transitDataService.getAllRevenueStops(agency);
+  }
+
+  @Override
+  public ListBean<ConsolidatedStopMapBean> getAllConsolidatedStops() {
+    return _transitDataService.getAllConsolidatedStops();
   }
   
 }

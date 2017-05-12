@@ -122,6 +122,9 @@ public class TransitDataServiceTemplateImpl implements TransitDataServiceTemplat
   
   @Autowired
   private ScheduleHelperService _scheduleHelperService;
+
+  @Autowired
+  private ConsolidatedStopsService _consolidatedStopsService;
   
 
   /****
@@ -649,6 +652,13 @@ public class TransitDataServiceTemplateImpl implements TransitDataServiceTemplat
   public BundleMetadata getBundleMetadata() {
     // TODO Auto-generated method stub
     return null;
+  }
+
+  public ListBean<ConsolidatedStopMapBean> getAllConsolidatedStops() {
+    ListBean<ConsolidatedStopMapBean> ret = new ListBean<ConsolidatedStopMapBean>();
+    Collection<ConsolidatedStopMapBean> beans = _consolidatedStopsService.getAllConsolidatedStops();
+    ret.setList(new ArrayList<ConsolidatedStopMapBean>(beans));
+    return ret;
   }
 
   /****
