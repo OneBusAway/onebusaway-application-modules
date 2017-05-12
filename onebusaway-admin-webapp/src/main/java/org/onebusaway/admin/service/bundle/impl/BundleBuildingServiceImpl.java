@@ -488,7 +488,7 @@ public class BundleBuildingServiceImpl implements BundleBuildingService {
         cmdOverrides.setProperty("stopVerificationTask.path", this.getStopVerificationURL());
         cmdOverrides.setProperty("stopVerificationDistanceTask.path", this.getStopVerificationURL());
       }
-      String stopMappingUrl = configurationService.getConfigurationValueAsString("admin.stopMappingUrl", null);
+      String stopMappingUrl = getStopMappingUrl();
       if (stopMappingUrl != null) {
         cmdOverrides.setProperty("stopConsolidationFileTask.stopConsolidationUrl", stopMappingUrl);
       }
@@ -544,6 +544,12 @@ public class BundleBuildingServiceImpl implements BundleBuildingService {
       }
     }
 
+  }
+
+  private String getStopMappingUrl() {
+    if (configurationService == null)
+      return null;
+    return configurationService.getConfigurationValueAsString("admin.stopMappingUrl", null);
   }
   
   private void monitorStatus(BundleBuildResponse response,
