@@ -19,6 +19,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.rememberme.TokenBasedRememberMeServices;
 
 
@@ -30,6 +31,10 @@ import org.springframework.security.web.authentication.rememberme.TokenBasedReme
  */
 public class TokenBasedRememberMeExtendedServices extends
     TokenBasedRememberMeServices {
+
+  public TokenBasedRememberMeExtendedServices(String key, UserDetailsService userDetailsService) {
+    super(key, userDetailsService);
+  }
 
   @Override
   public UserDetails processAutoLoginCookie(String[] cookieTokens,

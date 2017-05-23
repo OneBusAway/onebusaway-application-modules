@@ -25,6 +25,10 @@ import org.springframework.util.Assert;
 public class IndexedUserAuthenticationProcessorFilter extends
     UsernamePasswordAuthenticationFilter {
 
+  public IndexedUserAuthenticationProcessorFilter() {
+    super();
+  }
+
   private String _indexTypeParameter = "j_indexType";
 
   public void setIndexTypeParameter(String indexTypeParameter) {

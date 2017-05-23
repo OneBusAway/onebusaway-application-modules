@@ -52,9 +52,9 @@
   </sec:http> -->
 
   <bean id="rememberMeServices" class="org.onebusaway.users.impl.authentication.TokenBasedRememberMeExtendedServices">
-    <property name="key" value="SpringSecured" />
+    <constructor-arg name="key" value="SpringSecured" />
+    <constructor-arg name="userDetailsService" ref="userDetailsServiceImpl" />
     <property name="tokenValiditySeconds" value="63072000" />
-    <property name="userDetailsService" ref="userDetailsServiceImpl" />
   </bean>
 
   <bean class="org.onebusaway.container.spring.PropertyOverrideConfigurer">

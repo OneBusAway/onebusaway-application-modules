@@ -18,7 +18,7 @@
   <properties>
     <struts-version>2.3.32</struts-version>
     <gwt-version>2.4.0</gwt-version>
-    <spring-version>4.0.9.RELEASE</spring-version>
+    <spring-version>4.3.8.RELEASE</spring-version>
     <csv-entities-version>1.0.3</csv-entities-version>
     <gtfs-version>1.2.6.1</gtfs-version>
     <onebusaway-siri-version>1.0.4</onebusaway-siri-version>
