@@ -235,6 +235,53 @@ public class GtfsRealtimeTripLibraryTest {
     assertEquals(departure, time(7, 33) * 1000); // 7:30 plus 3 min delay, + now we are in ms.
   }
 
+  @Test
+  public void testStopRewriting() {
+
+    StopTimeUpdate.Builder stopTimeUpdate = StopTimeUpdate.newBuilder();
+    stopTimeUpdate.setStopId("replaceA");
+    StopTimeEvent.Builder stopTimeEvent = StopTimeEvent.newBuilder();
+    stopTimeEvent.setDelay(180);
+    stopTimeUpdate.setDeparture(stopTimeEvent);
+    stopTimeUpdate.setStopSequence(0);
+
+    TripUpdate tripUpdate = TripUpdate.newBuilder()
+            .setTrip(TripDescriptor.newBuilder().setTripId("tripA"))
+            .setDelay(120)
+            .setTimestamp(123456789)
+            .addStopTimeUpdate(stopTimeUpdate)
+            .build();
+
+    TripEntryImpl tripA = trip("tripA");
+    stopTime(0, stop("stopA", 0, 0), tripA, time(7, 30), 0.0);
+    BlockEntryImpl blockA = block("blockA");
+    BlockConfigurationEntry blockConfigA = blockConfiguration(blockA,
+            serviceIds("s1"), tripA);
+    BlockInstance blockInstanceA = new BlockInstance(blockConfigA, 0L);
+    Mockito.when(
+            _blockCalendarService.getActiveBlocks(Mockito.eq(blockA.getId()),
+                    Mockito.anyLong(), Mockito.anyLong())).thenReturn(
+            Collections.singletonList(blockInstanceA));
+
+    CombinedTripUpdatesAndVehiclePosition update = new CombinedTripUpdatesAndVehiclePosition();
+    update.block = new BlockDescriptor();
+    update.block.setBlockInstance(blockInstanceA);
+    update.tripUpdates = Collections.singletonList(tripUpdate);
+
+    StopModificationStrategy strategy = Mockito.mock(StopModificationStrategy.class);
+    Mockito.when(strategy.convertStopId("replaceA")).thenReturn("stopA");
+
+    _library.setStopModificationStrategy(strategy);
+
+    VehicleLocationRecord record = _library.createVehicleLocationRecordForUpdate(update);
+    assertEquals(123456789000L, record.getTimeOfRecord());
+    assertEquals(120, record.getScheduleDeviation(), 0.0);
+
+    TimepointPredictionRecord tpr = record.getTimepointPredictions().get(0);
+    long departure = tpr.getTimepointPredictedDepartureTime();
+    assertEquals(departure, time(7, 33) * 1000);
+  }
+
   // Ensure that if we get an update for a future day we propagate a prediction for that day.
   // (This is equivalent to timestamp on feed being early incorrectly, since currentTime in
   // GtfsRealtimeTripLibrary is set via the timestamp.)
