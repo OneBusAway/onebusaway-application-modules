@@ -109,11 +109,16 @@ public class BaseModTask {
       factory.addModificationsFromString(transform);
     }
 
+    addExtraMods(mod);
     _log.info("running...");
     mod.run();
     _log.info("done!");
     // cleanup
     return cleanup(gtfsBundle);
+  }
+
+  public void addExtraMods(GtfsTransformer mod) {
+    // default: none
   }
 
   private boolean skipMod(String agencyId) {

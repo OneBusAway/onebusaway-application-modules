@@ -15,17 +15,25 @@
  */
 package org.onebusaway.admin.service.bundle.task;
 
+import org.onebusaway.admin.model.BundleRequestResponse;
+import org.onebusaway.gtfs_transformer.GtfsTransformer;
 import org.onebusaway.transit_data_federation.bundle.model.GtfsBundle;
 import org.onebusaway.transit_data_federation.bundle.model.GtfsBundles;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class GtfsModTask extends BaseModTask implements Runnable {
 
   private static Logger _log = LoggerFactory.getLogger(GtfsModTask.class);
-  
 
-  
+  private BundleRequestResponse _requestResponse;
+
+  @Autowired
+  public void setRequestResponse(BundleRequestResponse requestResponse) {
+    _requestResponse = requestResponse;
+  }
+
   @Override
   public void run() {
     try {
@@ -69,5 +77,12 @@ public class GtfsModTask extends BaseModTask implements Runnable {
     return null;
   }
 
+  @Override
+  public void addExtraMods(GtfsTransformer mod) {
+    SimpleFeedVersionStrategy strategy = new SimpleFeedVersionStrategy();
+    String name = requestResponse.getRequest().getBundleName();
+    strategy.setVersion(name);
+    mod.addTransform(strategy);
+  }
 
 }
