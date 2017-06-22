@@ -117,13 +117,15 @@ public class BlockEntriesFactoryTest {
     List<BlockEntryImpl> blocks = _graph.getBlocks();
     assertEquals(2, blocks.size());
 
-    BlockEntryImpl block = blocks.get(0);
+    // jre8 changes this ordering so explicity search
+    BlockEntryImpl block = find(blocks, "blockB");
     assertEquals(aid("blockB"), block.getId());
     assertSame(block, tripEntryC.getBlock());
     Mockito.verify(_blockConfigFactory).processBlockConfigurations(block,
         Arrays.asList(tripEntryC));
 
-    block = blocks.get(1);
+    // jre8 changes this ordering so explicity search
+    block = find(blocks, "blockA");
     assertEquals(aid("blockA"), block.getId());
     assertSame(block, tripEntryA.getBlock());
     assertSame(block, tripEntryB.getBlock());
@@ -131,5 +133,14 @@ public class BlockEntriesFactoryTest {
         Arrays.asList(tripEntryA, tripEntryB));
 
     Mockito.verifyNoMoreInteractions(_blockConfigFactory);
+  }
+
+  private BlockEntryImpl find(List<BlockEntryImpl> blocks, String searchBlockId) {
+    for (BlockEntryImpl i : blocks) {
+      if (searchBlockId.equals(i.getId().getId())) {
+        return i;
+      }
+    }
+    return null;
   }
 }

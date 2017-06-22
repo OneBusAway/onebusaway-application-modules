@@ -11,7 +11,7 @@
     <name>onebusaway-federations-webapp</name>
 
     <properties>
-        <tomcat-version>5.5.29</tomcat-version>
+        <tomcat-version>7.0.70</tomcat-version>
     </properties>
 
     <dependencies>
@@ -93,7 +93,7 @@
                 <artifactId>cargo-maven2-plugin</artifactId>
                 <configuration>
                     <configuration>
-                        <home>${project.build.directory}/tomcat5x/container</home>
+                        <home>${project.build.directory}/tomcat7x/container</home>
                         <properties>
                             <cargo.servlet.port>${org_onebusaway_test_port}</cargo.servlet.port>
                             <cargo.tomcat.ajp.port>${org_onebusaway_test_ajp_port}</cargo.tomcat.ajp.port>
@@ -101,14 +101,12 @@
                         </properties>
                     </configuration>
                     <container>
-                        <containerId>tomcat5x</containerId>
+                        <containerId>tomcat7x</containerId>
                         <zipUrlInstaller>
                             <url>http://developer.onebusaway.org/dist/apache-tomcat-${tomcat-version}.zip</url>
-                            <installDir>${java.io.tmpdir}/cargo-installs</installDir>
+                            <extractDir>${java.io.tmpdir}/cargo-installs</extractDir>
                         </zipUrlInstaller>
                     </container>
-                    <!-- Don't wait around once the container has been started -->
-                    <wait>false</wait>
                 </configuration>
                 <executions>
                     <execution>
@@ -127,18 +125,18 @@
                         <configuration>
                             <deployer>
                                 <type>installed</type>
-                                <deployables>
-                                    <deployable>
-                                        <groupId>org.onebusaway</groupId>
-                                        <artifactId>onebusaway-federations-webapp</artifactId>
-                                        <type>war</type>
-                                        <properties>
-                                            <context>onebusaway-federations-webapp</context>
-                                        </properties>
-                                        <pingURL>http://localhost:${org_onebusaway_test_port}/onebusaway-federations-webapp/remoting/index.action</pingURL>
-                                    </deployable>
-                                </deployables>
                             </deployer>
+                            <deployables>
+                                <deployable>
+                                    <groupId>org.onebusaway</groupId>
+                                    <artifactId>onebusaway-federations-webapp</artifactId>
+                                    <type>war</type>
+                                    <properties>
+                                        <context>onebusaway-federations-webapp</context>
+                                    </properties>
+                                    <pingURL>http://localhost:${org_onebusaway_test_port}/onebusaway-federations-webapp/remoting/index.action</pingURL>
+                                </deployable>
+                            </deployables>
                         </configuration>
                     </execution>
                     <execution>
