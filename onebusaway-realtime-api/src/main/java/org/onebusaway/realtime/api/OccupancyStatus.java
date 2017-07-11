@@ -77,6 +77,26 @@ public enum OccupancyStatus implements Serializable {
             return false;
         }
         public String toString() { return String.valueOf(_status); }
+        public static OccupancyStatus toEnum(int status) {
+            if (status == UNKNOWN.valueOf())
+                return UNKNOWN;
+            if (status == EMPTY.valueOf())
+                return EMPTY;
+            if (status == MANY_SEATS_AVAILABLE.valueOf())
+                return MANY_SEATS_AVAILABLE;
+            if (status == FEW_SEATS_AVAILABLE.valueOf())
+                return FEW_SEATS_AVAILABLE;
+            if (status == STANDING_ROOM_ONLY.valueOf())
+                return STANDING_ROOM_ONLY;
+            if (status == CRUSHED_STANDING_ROOM_ONLY.valueOf())
+                return CRUSHED_STANDING_ROOM_ONLY;
+            if (status == FULL.valueOf())
+                return FULL;
+            if (status == NOT_ACCEPTING_PASSENGERS.valueOf())
+                return NOT_ACCEPTING_PASSENGERS;
+            throw new IllegalArgumentException("unexpected value " + status);
+
+        }
 
 
 }

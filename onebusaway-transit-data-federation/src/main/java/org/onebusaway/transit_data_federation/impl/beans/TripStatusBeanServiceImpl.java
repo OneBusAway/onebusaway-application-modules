@@ -336,8 +336,8 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
       bean.setStatus(status);
 
     VehicleOccupancyRecord vehicleOccupancyRecord = _vehicleOccupancyRecordCache.getRecordForVehicleId(blockLocation.getVehicleId());
-    if (vehicleOccupancyRecord != null) {
-      bean.setOccupancyStatus(vehicleOccupancyRecord.getOccupancyStatus());
+    if (vehicleOccupancyRecord != null && vehicleOccupancyRecord.getOccupancyStatus() != null) {
+      bean.setOccupancyStatus(vehicleOccupancyRecord.getOccupancyStatus().valueOf());
     }
 
     bean.setPredicted(blockLocation.isPredicted());
