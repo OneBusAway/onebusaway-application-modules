@@ -73,6 +73,7 @@ import org.onebusaway.transit_data.model.realtime.CurrentVehicleEstimateBean;
 import org.onebusaway.transit_data.model.realtime.CurrentVehicleEstimateQueryBean;
 import org.onebusaway.transit_data.model.realtime.VehicleLocationRecordBean;
 import org.onebusaway.transit_data.model.realtime.VehicleLocationRecordQueryBean;
+import org.onebusaway.realtime.api.VehicleOccupancyRecord;
 import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationQueryBean;
 import org.onebusaway.transit_data.model.tripplanning.ConstraintsBean;
@@ -89,6 +90,7 @@ import org.onebusaway.transit_data.model.trips.TripsForAgencyQueryBean;
 import org.onebusaway.transit_data.model.trips.TripsForBoundsQueryBean;
 import org.onebusaway.transit_data.model.trips.TripsForRouteQueryBean;
 import org.onebusaway.transit_data.services.TransitDataService;
+import org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.VehicleOccupancyRecordCache;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.AgencyService;
 import org.onebusaway.transit_data_federation.services.ArrivalAndDepartureAlarmService;
@@ -181,6 +183,9 @@ class TransitDataServiceImpl implements TransitDataService {
 
   @Autowired
   private VehicleStatusBeanService _vehicleStatusBeanService;
+
+  @Autowired
+  private VehicleOccupancyRecordCache _vehicleOccupancyRecordCache;
   
   @Autowired
   private BundleManagementService _bundleManagementService;
@@ -409,7 +414,7 @@ class TransitDataServiceImpl implements TransitDataService {
   @Override
   public ListBean<VehicleStatusBean> getAllVehiclesForAgency(String agencyId,
       long time) {
-    return _vehicleStatusBeanService.getAllVehiclesForAgency(agencyId, time);
+    return  _vehicleStatusBeanService.getAllVehiclesForAgency(agencyId, time);
   }
 
   @Override
@@ -509,7 +514,18 @@ class TransitDataServiceImpl implements TransitDataService {
     _vehicleStatusBeanService.resetVehicleLocation(id);
   }
 
-  /****
+  @Override
+  public void addVehicleOccupancyRecord(VehicleOccupancyRecord vehicleOccupancyRecord) {
+    _vehicleOccupancyRecordCache.addRecord(vehicleOccupancyRecord);
+  }
+
+
+  @Override
+  public VehicleOccupancyRecord getVehicleOccupancyRecordForVehicleId(AgencyAndId vehicleId) {
+    return _vehicleOccupancyRecordCache.getRecordForVehicleId(vehicleId);
+  }
+
+    /****
    * Service Alert Methods
    ****/
 

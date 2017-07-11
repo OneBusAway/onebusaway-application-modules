@@ -29,6 +29,8 @@ public final class VehicleStatusV2Bean implements Serializable {
 
   private String status;
 
+  private Integer occupancyStatus;
+
   private long lastUpdateTime;
 
   private Long lastLocationUpdateTime;
@@ -62,6 +64,10 @@ public final class VehicleStatusV2Bean implements Serializable {
   public void setStatus(String status) {
     this.status = status;
   }
+
+  public Integer getOccupancyStatus() { return occupancyStatus; }
+
+  public void setOccupancyStatus(Integer occupancyStatus) { this.occupancyStatus = occupancyStatus; }
 
   public long getLastUpdateTime() {
     return lastUpdateTime;

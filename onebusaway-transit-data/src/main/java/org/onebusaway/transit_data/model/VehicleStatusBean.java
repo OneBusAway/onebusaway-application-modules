@@ -19,6 +19,7 @@ import java.io.Serializable;
 import java.util.List;
 
 import org.onebusaway.geospatial.model.CoordinatePoint;
+import org.onebusaway.realtime.api.OccupancyStatus;
 import org.onebusaway.transit_data.model.realtime.VehicleLocationRecordBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.transit_data.model.trips.TripStatusBean;
@@ -32,6 +33,8 @@ public final class VehicleStatusBean implements Serializable {
   private String phase;
 
   private String status;
+
+  private OccupancyStatus occupancyStatus;
 
   private long lastUpdateTime;
 
@@ -68,6 +71,10 @@ public final class VehicleStatusBean implements Serializable {
   public void setStatus(String status) {
     this.status = status;
   }
+
+  public OccupancyStatus getOccupancyStatus() { return occupancyStatus; }
+
+  public void setOccupancyStatus(OccupancyStatus occupancyStatus) { this.occupancyStatus = occupancyStatus; }
 
   public long getLastUpdateTime() {
     return lastUpdateTime;

@@ -39,6 +39,7 @@ import org.onebusaway.api.model.transit.tripplanning.MinTravelTimeToStopV2Bean;
 import org.onebusaway.collections.CollectionsLibrary;
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.geospatial.model.EncodedPolylineBean;
+import org.onebusaway.realtime.api.OccupancyStatus;
 import org.onebusaway.transit_data.model.AgencyBean;
 import org.onebusaway.transit_data.model.AgencyWithCoverageBean;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
@@ -604,6 +605,12 @@ public class BeanFactoryV2 {
     bean.setPhase(vehicleStatus.getPhase());
     bean.setStatus(vehicleStatus.getStatus());
     bean.setVehicleId(vehicleStatus.getVehicleId());
+    if (vehicleStatus.getOccupancyStatus() != null &&
+            vehicleStatus.getOccupancyStatus() != OccupancyStatus.UNKNOWN) {
+      bean.setOccupancyStatus(vehicleStatus.getOccupancyStatus().valueOf());
+    } else {
+      bean.setOccupancyStatus((null));
+    }
 
     TripBean trip = vehicleStatus.getTrip();
     if (trip != null) {

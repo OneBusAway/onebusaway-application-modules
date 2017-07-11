@@ -25,6 +25,7 @@ import org.onebusaway.transit_data.model.ListBean;
 import org.onebusaway.transit_data.model.VehicleStatusBean;
 import org.onebusaway.transit_data.model.realtime.VehicleLocationRecordBean;
 import org.onebusaway.transit_data.model.realtime.VehicleLocationRecordQueryBean;
+import org.onebusaway.realtime.api.VehicleOccupancyRecord;
 import org.onebusaway.transit_data.model.trips.TripDetailsBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsInclusionBean;
 import org.onebusaway.transit_data_federation.impl.realtime.BlockLocationRecord;
@@ -228,6 +229,11 @@ class VehicleStatusBeanServiceImpl implements VehicleStatusBeanService {
         VehicleLocationRecordBean rBean = getVehicleLocationRecordAsBean(r);
         allRecordBeans.add(rBean);
       }
+    }
+
+    VehicleOccupancyRecord vor = status.getOccupancyRecord();
+    if (vor != null) {
+      bean.setOccupancyStatus(vor.getOccupancyStatus());
     }
 
     return bean;
