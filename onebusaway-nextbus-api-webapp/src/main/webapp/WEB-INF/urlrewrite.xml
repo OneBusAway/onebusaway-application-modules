@@ -82,4 +82,24 @@
 		<to last="true">/api/vehicle-locations.json</to>
 	</rule>
 
+	<!-- Gtfsrt Rewriter -->
+	<rule>
+		<from>^(.*)/gtfsrt/agency/([0-9]+)/tripUpdates$</from>
+		<to last="true">/gtfsrt/trip-updates.pb?agencyId=$2</to>
+	</rule>
+
+	<rule>
+		<from>^(.*)/gtfsrt/agency/([0-9]+)/vehiclePositions$</from>
+		<to last="true">/gtfsrt/vehicle-positions.pb?agencyId=$2</to>
+	</rule>
+
+	<rule>
+		<from>^(.*)/gtfsrt/agency/([0-9]+)/tripUpdates.json$</from>
+		<to last="true">/gtfsrt/trip-updates.pbtext?agencyId=$2</to>
+	</rule>
+
+	<rule>
+		<from>^(.*)/gtfsrt/agency/([0-9]+)/vehiclePositions.json$</from>
+		<to last="true">/gtfsrt/vehicle-positions.pbtext?agencyId=$2</to>
+	</rule>
 </urlrewrite>

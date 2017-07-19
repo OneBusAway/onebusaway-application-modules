@@ -21,6 +21,7 @@ import java.io.InputStreamReader;
 import java.util.LinkedList;
 import java.util.List;
 
+import com.google.transit.realtime.GtfsRealtime;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpEntity;
@@ -96,6 +97,51 @@ public class HttpUtilImpl implements HttpUtil {
 		}
 	}
   }
+
+	public GtfsRealtime.FeedMessage getFeedMessage(final String urlString, int timeoutSeconds) throws ClientProtocolException, IOException {
+		CloseableHttpResponse response = null;
+		CloseableHttpClient httpClient = null;
+		try{
+			final HttpGet request = new HttpGet(getEncodedUrl(urlString));
+			request.addHeader("accept", "application/octet-stream");
+			httpClient = _httpClientPool.getClient();
+			response = httpClient.execute(request);
+			final String errorMessage;
+
+			if(response != null){
+				if(response.getStatusLine().getStatusCode() == HttpStatus.SC_OK){
+					final HttpEntity entity = response.getEntity();
+					if(entity != null){
+						final InputStream content = response.getEntity().getContent();
+						try{
+							GtfsRealtime.FeedMessage msg =  GtfsRealtime.FeedMessage.parseFrom(content);
+							return msg;
+						} finally {
+							content.close();
+						}
+					} else {
+						errorMessage ="Failed to retrieve a valid HttpEntity object from the response";
+					}
+				}
+				else{
+					errorMessage = "HTTP Response: " + response.getStatusLine().getStatusCode();
+				}
+			}
+			else{
+				errorMessage = "Received a Null response";
+			}
+
+			throw new IOException(errorMessage);
+
+		}catch(Exception e){
+			_log.error("Error handling url: " + urlString, e);
+			throw e;
+		} finally{
+			if(response !=null){
+				response.close();
+			}
+		}
+	}
   
   public String getEncodedUrl(String url) {
        List<NameValuePair> params = new LinkedList<NameValuePair>();;
