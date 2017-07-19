@@ -4,3 +4,8 @@ pom.xml.releaseBackup
 .settings
 .project
 .classpath
+.idea
+**/bin/*
+*.iml
+*.class
+git.properties
