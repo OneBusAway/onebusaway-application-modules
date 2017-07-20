@@ -21,18 +21,16 @@ import java.io.InputStreamReader;
 import java.util.LinkedList;
 import java.util.List;
 
-import com.google.transit.realtime.GtfsRealtime;
+import com.google.transit.realtime.GtfsRealtime.FeedMessage;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicNameValuePair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,125 +44,109 @@ import com.google.gson.JsonParser;
 @Component
 public class HttpUtilImpl implements HttpUtil {
 
-  private static Logger _log = LoggerFactory.getLogger(HttpUtilImpl.class);
-  
-  @Autowired
-  private HttpClientPool _httpClientPool;
-  
-  public JsonObject getJsonObject(final String urlString, int timeoutSeconds) throws ClientProtocolException, IOException {
-	CloseableHttpResponse response = null;
-	CloseableHttpClient httpClient = null;
-	try{
-		final HttpGet request = new HttpGet(getEncodedUrl(urlString));
-		request.addHeader("accept", "application/json");
-		httpClient = _httpClientPool.getClient();
-		response = httpClient.execute(request);
-		final String errorMessage;
-		
-		if(response != null){
-			if(response.getStatusLine().getStatusCode() == HttpStatus.SC_OK){
-				final HttpEntity entity = response.getEntity();
-				if(entity != null){
-					final InputStream content = response.getEntity().getContent();
-					try{
-						JsonParser jp = new JsonParser();
-					    JsonElement root = jp.parse(new InputStreamReader(content));
-					    JsonObject rootobj = root.getAsJsonObject();
-					    return rootobj;
-					} finally {
-						content.close();
-					}
-				} else {
-					errorMessage ="Failed to retrieve a valid HttpEntity object from the response";
-				}	
+	private static Logger _log = LoggerFactory.getLogger(HttpUtilImpl.class);
+
+	@Autowired
+	private HttpClientPool _httpClientPool;
+
+	public JsonObject getJsonObject(final String urlString, int timeoutSeconds)
+			throws ClientProtocolException, IOException {
+		CloseableHttpResponse response = null;
+
+		try {
+			response = getResponse(urlString);
+			HttpEntity entity = getEntity(response);
+			InputStream content = entity.getContent();
+			try{
+				JsonParser jp = new JsonParser();
+				JsonElement root = jp.parse(new InputStreamReader(content));
+				JsonObject rootobj = root.getAsJsonObject();
+				return rootobj;
+			} finally{
+				content.close();
 			}
-			else{
-				errorMessage = "HTTP Response: " + response.getStatusLine().getStatusCode();
-			}
-		}
-		else{
-			errorMessage = "Received a Null response";
-		}
-		
-		throw new IOException(errorMessage);    
-	   
-	}catch(Exception e){
-		_log.error("Error handling url: " + urlString, e);
-		throw e;
-	} finally{
-		if(response !=null){
+
+		} catch (Exception e) {
+			_log.error("Error handling url: " + urlString, e);
+			throw e;
+		} finally {
 			response.close();
 		}
 	}
-  }
 
-	public GtfsRealtime.FeedMessage getFeedMessage(final String urlString, int timeoutSeconds) throws ClientProtocolException, IOException {
+	public FeedMessage getFeedMessage(final String urlString, int timeoutSeconds) throws ClientProtocolException, IOException {
+
 		CloseableHttpResponse response = null;
-		CloseableHttpClient httpClient = null;
-		try{
-			final HttpGet request = new HttpGet(getEncodedUrl(urlString));
-			request.addHeader("accept", "application/octet-stream");
-			httpClient = _httpClientPool.getClient();
-			response = httpClient.execute(request);
-			final String errorMessage;
 
-			if(response != null){
-				if(response.getStatusLine().getStatusCode() == HttpStatus.SC_OK){
-					final HttpEntity entity = response.getEntity();
-					if(entity != null){
-						final InputStream content = response.getEntity().getContent();
-						try{
-							GtfsRealtime.FeedMessage msg =  GtfsRealtime.FeedMessage.parseFrom(content);
-							return msg;
-						} finally {
-							content.close();
-						}
-					} else {
-						errorMessage ="Failed to retrieve a valid HttpEntity object from the response";
-					}
-				}
-				else{
-					errorMessage = "HTTP Response: " + response.getStatusLine().getStatusCode();
-				}
-			}
-			else{
-				errorMessage = "Received a Null response";
+		try {
+			response = getResponse(urlString);
+			HttpEntity entity = getEntity(response);
+			InputStream content = entity.getContent();
+			try{
+				FeedMessage msg = FeedMessage.parseFrom(content);
+				return msg;
+			} finally{
+				content.close();
 			}
 
-			throw new IOException(errorMessage);
-
-		}catch(Exception e){
+		} catch (Exception e) {
 			_log.error("Error handling url: " + urlString, e);
 			throw e;
-		} finally{
-			if(response !=null){
-				response.close();
-			}
+		} finally {
+			response.close();
 		}
 	}
-  
-  public String getEncodedUrl(String url) {
-       List<NameValuePair> params = new LinkedList<NameValuePair>();;
-       String[] urlParts = url.split("\\?");
-       String encodedUrl;
-       if (urlParts.length > 1) {
-            String query = urlParts[1];
-            for (String param : query.split("&")) {
-                String[] pair = param.split("=");
-                if (pair.length > 1) {
-                	params.add(new BasicNameValuePair(pair[0], pair[1]));
-                }
-                else{
-                	params.add(new BasicNameValuePair(pair[0], StringUtils.EMPTY));
-                }
-            }
-            String paramString = URLEncodedUtils.format(params, "utf-8"); 
-            encodedUrl = urlParts[0] + "?" + paramString; 
-       }
-       else{
-    	   encodedUrl = url;
-       }
-      
-       return encodedUrl;
+
+	public CloseableHttpResponse getResponse(String urlString) throws ClientProtocolException, IOException{
+		HttpGet request = new HttpGet(getEncodedUrl(urlString));
+		CloseableHttpClient httpClient = _httpClientPool.getClient();
+		return httpClient.execute(request);
+	}
+
+	public HttpEntity getEntity(CloseableHttpResponse response) throws IOException{
+		final String errorMessage;
+		if (response != null) {
+			if(response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+				HttpEntity entity = response.getEntity();
+				if (entity != null) {
+					return entity;
+				}
+				else {
+					errorMessage = "Failed to retrieve a valid HttpEntity object from the response";
+				}
+			} else {
+				errorMessage = "HTTP Response: "
+						+ response.getStatusLine().getStatusCode();
+			}
+		} else {
+			errorMessage = "Received a Null response";
+		}
+
+		throw new IOException(errorMessage);
+	}
+
+	public String getEncodedUrl(String url) {
+		List<NameValuePair> params = new LinkedList<NameValuePair>();
+		;
+		String[] urlParts = url.split("\\?");
+		String encodedUrl;
+		if (urlParts.length > 1) {
+			String query = urlParts[1];
+			for (String param : query.split("&")) {
+				String[] pair = param.split("=");
+				if (pair.length > 1) {
+					params.add(new BasicNameValuePair(pair[0], pair[1]));
+				} else {
+					params.add(new BasicNameValuePair(pair[0],
+							StringUtils.EMPTY));
+				}
+			}
+			String paramString = URLEncodedUtils.format(params, "utf-8");
+			encodedUrl = urlParts[0] + "?" + paramString;
+		} else {
+			encodedUrl = url;
+		}
+
+		return encodedUrl;
 	}
 }
