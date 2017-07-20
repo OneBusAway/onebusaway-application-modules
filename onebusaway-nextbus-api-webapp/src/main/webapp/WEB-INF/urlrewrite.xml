@@ -82,10 +82,37 @@
 		<to last="true">/api/vehicle-locations.json</to>
 	</rule>
 
-	<!-- Gtfsrt Rewriter -->
+	<!-- Gtfsrt Trip Updates Rewriter -->
+	<rule>
+		<from>^(.*)/gtfsrt/tripUpdates$</from>
+		<to last="true">/gtfsrt/trip-updates.pb</to>
+	</rule>
+
+	<rule>
+		<from>^(.*)/gtfsrt/tripUpdates.json$</from>
+		<to last="true">/gtfsrt/trip-updates.pbtext</to>
+	</rule>
+
 	<rule>
 		<from>^(.*)/gtfsrt/agency/([0-9]+)/tripUpdates$</from>
 		<to last="true">/gtfsrt/trip-updates.pb?agencyId=$2</to>
+	</rule>
+
+	<rule>
+		<from>^(.*)/gtfsrt/agency/([0-9]+)/tripUpdates.json$</from>
+		<to last="true">/gtfsrt/trip-updates.pbtext?agencyId=$2</to>
+	</rule>
+
+
+	<!-- Gtfsrt Vehicle Positions Rewriter -->
+	<rule>
+		<from>^(.*)/gtfsrt/vehiclePositions$</from>
+		<to last="true">/gtfsrt/vehicle-positions.pb</to>
+	</rule>
+
+	<rule>
+		<from>^(.*)/gtfsrt/vehiclePositions.json$</from>
+		<to last="true">/gtfsrt/vehicle-positions.pbtext</to>
 	</rule>
 
 	<rule>
@@ -94,12 +121,29 @@
 	</rule>
 
 	<rule>
-		<from>^(.*)/gtfsrt/agency/([0-9]+)/tripUpdates.json$</from>
-		<to last="true">/gtfsrt/trip-updates.pbtext?agencyId=$2</to>
-	</rule>
-
-	<rule>
 		<from>^(.*)/gtfsrt/agency/([0-9]+)/vehiclePositions.json$</from>
 		<to last="true">/gtfsrt/vehicle-positions.pbtext?agencyId=$2</to>
 	</rule>
+
+	<!-- Gtfsrt Alerts Rewriter -->
+	<rule>
+		<from>^(.*)/gtfsrt/alerts$</from>
+		<to last="true">/gtfsrt/alerts.pb</to>
+	</rule>
+
+	<rule>
+		<from>^(.*)/gtfsrt/alerts.json$</from>
+		<to last="true">/gtfsrt/alerts.pbtext</to>
+	</rule>
+
+	<rule>
+		<from>^(.*)/gtfsrt/agency/([0-9]+)/alerts$</from>
+		<to last="true">/gtfsrt/alerts.pb?agencyId=$2</to>
+	</rule>
+
+	<rule>
+		<from>^(.*)/gtfsrt/agency/([0-9]+)/alerts.json$</from>
+		<to last="true">/gtfsrt/alerts.pbtext?agencyId=$2</to>
+	</rule>
+
 </urlrewrite>
