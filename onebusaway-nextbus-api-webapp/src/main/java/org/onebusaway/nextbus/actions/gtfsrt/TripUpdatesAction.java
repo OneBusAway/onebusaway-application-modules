@@ -20,6 +20,7 @@ import com.opensymphony.xwork2.ModelDriven;
 import org.apache.struts2.rest.DefaultHttpHeaders;
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.nextbus.actions.api.NextBusApiBase;
+import org.onebusaway.nextbus.impl.gtfsrt.GtfsrtCache;
 import org.onebusaway.nextbus.impl.gtfsrt.GtfsrtHelper;
 import org.onebusaway.nextbus.util.HttpUtil;
 import org.slf4j.Logger;
@@ -37,6 +38,9 @@ public class TripUpdatesAction extends NextBusApiBase  implements
 
     @Autowired
     private HttpUtil _httpUtil;
+
+    @Autowired
+    private GtfsrtCache _cache;
 
     private GtfsrtHelper _gtfsrtHelper = new GtfsrtHelper();
 
@@ -58,31 +62,37 @@ public class TripUpdatesAction extends NextBusApiBase  implements
 
     @Override
     public FeedMessage getModel() {
-    	FeedMessage.Builder feedMessage = createFeedWithDefaultHeader();
-    	FeedMessage remoteFeedMessage = null;
-    	
-    	List<String> agencyIds = new ArrayList<String>();
-    	
-    	if (agencyId != null) {
-            agencyIds.add(agencyId);
-    	} else {
-	        Map<String,List<CoordinateBounds>> agencies = _transitDataService.getAgencyIdsWithCoverageArea();
-	        agencyIds.addAll(agencies.keySet());
-    	}
-    	
-        
-    	for(String agencyId : agencyIds){
-	        String gtfsrtUrl = getServiceUrl() + agencyId + TRIP_UPDATES_COMMAND;
-	        try{
-	        	remoteFeedMessage = _httpUtil.getFeedMessage(gtfsrtUrl, 30);
-	            feedMessage.addAllEntity(remoteFeedMessage.getEntityList());
-	        }
-	        catch(Exception e){
-	            _log.error(e.getMessage());
-	        }
+        FeedMessage cachedTripUpdates = _cache.getTripUpdates();
+        if(cachedTripUpdates != null){
+            return cachedTripUpdates;
         }
+        else {
+            FeedMessage.Builder feedMessage = createFeedWithDefaultHeader();
+            FeedMessage remoteFeedMessage = null;
 
-        return feedMessage.build();
+            List<String> agencyIds = new ArrayList<String>();
+
+            if (agencyId != null) {
+                agencyIds.add(agencyId);
+            } else {
+                Map<String, List<CoordinateBounds>> agencies = _transitDataService.getAgencyIdsWithCoverageArea();
+                agencyIds.addAll(agencies.keySet());
+            }
+
+
+            for (String agencyId : agencyIds) {
+                String gtfsrtUrl = getServiceUrl() + agencyId + TRIP_UPDATES_COMMAND;
+                try {
+                    remoteFeedMessage = _httpUtil.getFeedMessage(gtfsrtUrl, 30);
+                    feedMessage.addAllEntity(remoteFeedMessage.getEntityList());
+                } catch (Exception e) {
+                    _log.error(e.getMessage());
+                }
+            }
+            FeedMessage builtFeedMessage = feedMessage.build();
+            _cache.putTripUpdates(builtFeedMessage);
+            return builtFeedMessage;
+        }
     }
     
     public FeedMessage.Builder createFeedWithDefaultHeader() {

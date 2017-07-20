@@ -21,6 +21,7 @@ import com.opensymphony.xwork2.ModelDriven;
 import org.apache.struts2.rest.DefaultHttpHeaders;
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.nextbus.actions.api.NextBusApiBase;
+import org.onebusaway.nextbus.impl.gtfsrt.GtfsrtCache;
 import org.onebusaway.nextbus.impl.gtfsrt.GtfsrtHelper;
 import org.onebusaway.nextbus.util.HttpUtil;
 import org.onebusaway.transit_data.model.ListBean;
@@ -48,6 +49,9 @@ public class AlertsAction extends NextBusApiBase implements
 	@Autowired
 	private TransitDataService _transitDataService;
 
+	@Autowired
+	private GtfsrtCache _cache;
+
 	private GtfsrtHelper _gtfsrtHelper = new GtfsrtHelper();
 
 	private String agencyId;
@@ -66,42 +70,50 @@ public class AlertsAction extends NextBusApiBase implements
 
 	@Override
 	public FeedMessage getModel() {
-
-		FeedMessage.Builder feedMessage = createFeedWithDefaultHeader();
-
-		List<String> agencyIds = new ArrayList<String>();
-
-		if (agencyId != null) {
-			agencyIds.add(agencyId);
-		} else {
-			Map<String,List<CoordinateBounds>> agencies = _transitDataService.getAgencyIdsWithCoverageArea();
-			agencyIds.addAll(agencies.keySet());
+		FeedMessage cachedAlerts = _cache.getAlerts();
+		if(cachedAlerts != null){
+			return cachedAlerts;
 		}
+		else {
 
-		for(String agencyId : agencyIds) {
-			ListBean<ServiceAlertBean> serviceAlertBeans = _transitDataService.getAllServiceAlertsForAgencyId(agencyId);
+			FeedMessage.Builder feedMessage = createFeedWithDefaultHeader();
 
-			for (ServiceAlertBean serviceAlert : serviceAlertBeans.getList()) {
-				try {
-					Alert.Builder alert = Alert.newBuilder();
+			List<String> agencyIds = new ArrayList<String>();
 
-					fillAlertHeader(alert, serviceAlert.getSummaries());
-					fillAlertDescriptions(alert, serviceAlert.getDescriptions());
-					fillActiveWindows(alert, serviceAlert.getActiveWindows());
-					fillSituationAffects(alert, serviceAlert.getAllAffects());
+			if (agencyId != null) {
+				agencyIds.add(agencyId);
+			} else {
+				Map<String, List<CoordinateBounds>> agencies = _transitDataService.getAgencyIdsWithCoverageArea();
+				agencyIds.addAll(agencies.keySet());
+			}
 
-					FeedEntity.Builder feedEntity = FeedEntity.newBuilder();
-					feedEntity.setAlert(alert);
-					feedEntity.setId(id(agencyId, serviceAlert.getId()));
-					feedMessage.addEntity(feedEntity);
-				}
-				catch(Exception e){
-					_log.error("Unable to process service alert", e);
+			for (String agencyId : agencyIds) {
+				ListBean<ServiceAlertBean> serviceAlertBeans = _transitDataService.getAllServiceAlertsForAgencyId(agencyId);
+
+				for (ServiceAlertBean serviceAlert : serviceAlertBeans.getList()) {
+					try {
+						Alert.Builder alert = Alert.newBuilder();
+
+						fillAlertHeader(alert, serviceAlert.getSummaries());
+						fillAlertDescriptions(alert, serviceAlert.getDescriptions());
+						fillActiveWindows(alert, serviceAlert.getActiveWindows());
+						fillSituationAffects(alert, serviceAlert.getAllAffects());
+
+						FeedEntity.Builder feedEntity = FeedEntity.newBuilder();
+						feedEntity.setAlert(alert);
+						feedEntity.setId(id(agencyId, serviceAlert.getId()));
+						feedMessage.addEntity(feedEntity);
+					} catch (Exception e) {
+						_log.error("Unable to process service alert", e);
+					}
 				}
 			}
-		}
 
-		return feedMessage.build();
+			FeedMessage builtFeedMessage = feedMessage.build();
+			_cache.putAlerts(builtFeedMessage);
+
+			return builtFeedMessage;
+		}
 
 	}
 
