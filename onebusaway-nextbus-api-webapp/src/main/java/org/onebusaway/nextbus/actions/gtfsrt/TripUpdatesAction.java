@@ -15,27 +15,17 @@
  */
 package org.onebusaway.nextbus.actions.gtfsrt;
 
-import com.google.transit.realtime.GtfsRealtimeConstants;
-import com.google.transit.realtime.GtfsRealtime.FeedHeader;
 import com.google.transit.realtime.GtfsRealtime.FeedMessage;
-import com.google.transit.realtime.GtfsRealtime.FeedHeader.Incrementality;
-import com.opensymphony.xwork2.Action;
-import com.opensymphony.xwork2.ActionSupport;
 import com.opensymphony.xwork2.ModelDriven;
-
-import org.apache.struts2.convention.annotation.Result;
 import org.apache.struts2.rest.DefaultHttpHeaders;
-import org.onebusaway.api.model.ResponseBean;
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.nextbus.actions.api.NextBusApiBase;
-import org.onebusaway.nextbus.actions.api.PredictionsAction;
 import org.onebusaway.nextbus.impl.gtfsrt.GtfsrtHelper;
 import org.onebusaway.nextbus.util.HttpUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;

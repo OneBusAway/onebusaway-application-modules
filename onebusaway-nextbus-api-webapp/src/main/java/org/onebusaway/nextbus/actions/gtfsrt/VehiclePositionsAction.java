@@ -15,9 +15,7 @@
  */
 package org.onebusaway.nextbus.actions.gtfsrt;
 
-import com.google.transit.realtime.GtfsRealtime;
 import com.google.transit.realtime.GtfsRealtime.FeedMessage;
-import com.google.transit.realtime.GtfsRealtimeConstants;
 import com.opensymphony.xwork2.ModelDriven;
 import org.apache.struts2.rest.DefaultHttpHeaders;
 import org.onebusaway.geospatial.model.CoordinateBounds;
