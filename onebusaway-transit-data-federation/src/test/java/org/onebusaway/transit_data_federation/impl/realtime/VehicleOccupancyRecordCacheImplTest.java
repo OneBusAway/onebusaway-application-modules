@@ -18,7 +18,7 @@ package org.onebusaway.transit_data_federation.impl.realtime;
 import org.junit.Test;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.realtime.api.VehicleOccupancyRecord;
-import org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.VehicleOccupancyRecordCacheImpl;
+import org.onebusaway.transit_data_federation.impl.realtime.apc.VehicleOccupancyRecordCacheImpl;
 
 import static java.lang.Thread.sleep;
 import static org.junit.Assert.assertEquals;

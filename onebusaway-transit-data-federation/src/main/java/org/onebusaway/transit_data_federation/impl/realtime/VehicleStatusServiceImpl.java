@@ -24,7 +24,7 @@ import org.onebusaway.realtime.api.VehicleLocationListener;
 import org.onebusaway.realtime.api.VehicleLocationRecord;
 import org.onebusaway.realtime.api.VehicleOccupancyListener;
 import org.onebusaway.realtime.api.VehicleOccupancyRecord;
-import org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.VehicleOccupancyRecordCache;
+import org.onebusaway.transit_data_federation.impl.realtime.apc.VehicleOccupancyRecordCache;
 import org.onebusaway.transit_data_federation.services.blocks.BlockVehicleLocationListener;
 import org.onebusaway.transit_data_federation.services.realtime.VehicleLocationCacheElement;
 import org.onebusaway.transit_data_federation.services.realtime.VehicleLocationCacheElements;
