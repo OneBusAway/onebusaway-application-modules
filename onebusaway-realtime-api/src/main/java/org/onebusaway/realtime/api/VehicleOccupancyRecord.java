@@ -28,6 +28,8 @@ public class VehicleOccupancyRecord {
     private AgencyAndId vehicleId;
     private Date timestamp;
     private OccupancyStatus occupancyStatus;
+    private String routeId;
+    private String directionId;
 
 
     public AgencyAndId getVehicleId() {
@@ -50,6 +52,16 @@ public class VehicleOccupancyRecord {
     public OccupancyStatus getOccupancyStatus() {
         return occupancyStatus;
     }
+
+    public String getRouteId() { return routeId; }
+
+    public void setRouteId(String routeId) {
+        this.routeId = routeId;
+    }
+
+    public String getDirectionId() { return directionId; }
+
+    public void setDirectionId(String directionId) { this.directionId = directionId; }
 
     public void setOccupancyStatus(OccupancyStatus occupancyStatus) {
         this.occupancyStatus = occupancyStatus;

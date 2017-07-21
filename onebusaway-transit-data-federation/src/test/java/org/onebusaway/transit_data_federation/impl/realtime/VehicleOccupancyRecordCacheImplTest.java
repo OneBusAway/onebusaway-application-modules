@@ -48,27 +48,55 @@ public class VehicleOccupancyRecordCacheImplTest {
         cache.setCacheTimeoutSeconds(CACHE_TIMEOUT);
 
         AgencyAndId vehicle = new AgencyAndId("ACTA", "1111");
-        assertNull(cache.getRecordForVehicleId(vehicle));
+        String routeId = "a1";
+        String directionId = null;
+        assertNull(cache.getRecordForVehicleIdAndRoute(vehicle, routeId, directionId));
 
         VehicleOccupancyRecord record1 = new VehicleOccupancyRecord();
         cache.addRecord(record1);
         // if we add a record without a vehicleId its rejected
-        assertNull(cache.getRecordForVehicleId(vehicle));
+        assertNull(cache.getLastRecordForVehicleId(vehicle));
+        assertNull(cache.getRecordForVehicleIdAndRoute(vehicle, routeId, directionId));
         record1.setVehicleId(vehicle);
         cache.addRecord(record1);
 
-        assertEquals(record1, cache.getRecordForVehicleId(vehicle));
+
+
+        assertEquals(record1, cache.getLastRecordForVehicleId(vehicle));
+        assertNull(cache.getRecordForVehicleIdAndRoute(vehicle, routeId, directionId));
+
+        // direction should be optional
+        record1.setRouteId(routeId);
+        cache.addRecord(record1);
+        assertEquals(record1, cache.getLastRecordForVehicleId(vehicle));
+        assertEquals(record1, cache.getRecordForVehicleIdAndRoute(vehicle, routeId, directionId));
+
+        // but used if present
+        directionId = "0";
+        record1.setDirectionId("1");
+        cache.addRecord(record1);
+        assertNull(cache.getRecordForVehicleIdAndRoute(vehicle, routeId, directionId));
+        directionId = "1";
+        assertEquals(record1, cache.getRecordForVehicleIdAndRoute(vehicle, routeId, directionId));
 
         sleep(CACHE_TIMEOUT * 1000);
         // cache has expired!
-        assertNull(cache.getRecordForVehicleId(vehicle));
+        assertNull(cache.getRecordForVehicleIdAndRoute(vehicle, routeId, directionId));
+        assertNull(cache.getLastRecordForVehicleId(vehicle));
 
         // add it back
         cache.addRecord(record1);
-        assertEquals(record1, cache.getRecordForVehicleId(vehicle));
+        assertEquals(record1, cache.getRecordForVehicleIdAndRoute(vehicle, routeId, directionId));
+        assertEquals(record1, cache.getLastRecordForVehicleId(vehicle));
         // then clear it
-        assertTrue(cache.clearRecord(vehicle));
-        assertNull(cache.getRecordForVehicleId(vehicle));
+        assertTrue(cache.clearRecordForVehicle(vehicle));
+        assertEquals(record1, cache.getRecordForVehicleIdAndRoute(vehicle, routeId, directionId));
+
+        // clear it in route cache
+        assertTrue(cache.clearRecord(record1));
+
+        assertNull(cache.getRecordForVehicleIdAndRoute(vehicle, routeId, directionId));
+        assertNull(cache.getLastRecordForVehicleId(vehicle));
     }
 
 }

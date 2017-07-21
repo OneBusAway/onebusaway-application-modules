@@ -24,7 +24,10 @@ import org.onebusaway.realtime.api.VehicleOccupancyRecord;
 public interface VehicleOccupancyRecordCache {
     void addRecord(VehicleOccupancyRecord vehicleOccupancyRecord);
 
-    VehicleOccupancyRecord getRecordForVehicleId(AgencyAndId vehicleId);
+    VehicleOccupancyRecord getLastRecordForVehicleId(AgencyAndId vehicleId);
 
-    boolean clearRecord(AgencyAndId vehicleId);
+    VehicleOccupancyRecord getRecordForVehicleIdAndRoute(AgencyAndId vehicleId, String routeId, String directionId);
+
+    boolean clearRecordForVehicle(AgencyAndId vehicleId);
+    boolean clearRecord(VehicleOccupancyRecord vehicleOccupancyRecord);
 }
