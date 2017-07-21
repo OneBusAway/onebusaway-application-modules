@@ -106,6 +106,26 @@
 										<a href="${url}" id="deleteAlertLink" class="link">Delete</a>
 									</fieldset>
 								</td>
+								<!-- twitter -->
+								<td>
+									<fieldset>
+										<s:url var="url" action="service-alert-edit!tweetAlert.action" namespace="/admin/servicealerts" >
+											<s:param name="alertId" value="id" />
+										</s:url>
+										<a href="${url}" id="tweetAlertLink" class="link">Tweet</a>
+									</fieldset>
+								</td>
+
+								<!-- everbridge -->
+								<td>
+									<fieldset>
+										<s:url var="url" action="service-alert-edit!everbridgeAlert.action" namespace="/admin/servicealerts" >
+											<s:param name="alertId" value="id" />
+										</s:url>
+										<a href="${url}" id="everbridgeAlertLink" class="link">Everbridge</a>
+									</fieldset>
+								</td>
+
 							</tr>
 						</s:iterator>
         			</s:iterator>

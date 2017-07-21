@@ -10,6 +10,10 @@
 
   <name>onebusaway-api-webapp</name>
 
+    <properties>
+        <log4j.appender>ROLL</log4j.appender>
+    </properties>
+
   <dependencies>
 
     <dependency>
@@ -114,11 +118,26 @@
       <artifactId>apns</artifactId>
       <version>0.1.6</version>
     </dependency>
-
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-log4j12</artifactId>
-    </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+      <dependency>
+          <groupId>log4j</groupId>
+          <artifactId>log4j</artifactId>
+          <version>1.2.16</version>
+      </dependency>
+      <dependency>
+          <groupId>log4j</groupId>
+          <artifactId>apache-log4j-extras</artifactId>
+          <version>1.1</version>
+      </dependency>
 
     <dependency>
       <groupId>junit</groupId>
@@ -132,7 +151,7 @@
 		<type>jar</type>
 		<scope>compile</scope>
 	</dependency>
-    
+
     <!--  support mysql out of the box -->
 	<dependency>
 		<groupId>mysql</groupId>

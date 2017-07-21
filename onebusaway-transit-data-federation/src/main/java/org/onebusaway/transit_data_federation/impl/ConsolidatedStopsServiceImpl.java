@@ -52,6 +52,7 @@ public class ConsolidatedStopsServiceImpl implements ConsolidatedStopsService {
 
     @Override
     public Collection<ConsolidatedStopMapBean> getAllConsolidatedStops() {
+        if (_index == null) return new ArrayList<ConsolidatedStopMapBean>();
         return _index.values();
     }
 

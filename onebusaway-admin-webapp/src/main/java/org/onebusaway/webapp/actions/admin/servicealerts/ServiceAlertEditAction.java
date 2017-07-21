@@ -15,6 +15,7 @@
  */
 package org.onebusaway.webapp.actions.admin.servicealerts;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -25,6 +26,8 @@ import org.apache.struts2.convention.annotation.InterceptorRefs;
 import org.apache.struts2.convention.annotation.ParentPackage;
 import org.apache.struts2.convention.annotation.Result;
 import org.apache.struts2.convention.annotation.Results;
+import org.onebusaway.admin.service.NotificationService;
+import org.onebusaway.admin.service.impl.TwitterServiceImpl;
 import org.onebusaway.presentation.bundles.ResourceBundleSupport;
 import org.onebusaway.presentation.bundles.service_alerts.Reasons;
 import org.onebusaway.presentation.bundles.service_alerts.Severity;
@@ -43,7 +46,7 @@ import com.opensymphony.xwork2.Preparable;
 
 @ParentPackage("onebusaway-admin-webapp-default")
 @Results({
-  @Result(type = "redirectAction", name = "deleteResult", params = {
+  @Result(type = "redirectAction", name = "refreshResult", params = {
       "actionName", "service-alerts", "parse", "true"})
       })
 
@@ -225,7 +228,38 @@ public class ServiceAlertEditAction extends ActionSupport implements
       _log.error("Error deleting service alert", e);
       throw e;
     }
-    return "deleteResult";
+    return "refreshResult";
+  }
+
+  private NotificationService _notificationService;
+  @Autowired
+  public void setNotificationService(NotificationService notificationService) {
+    _notificationService = notificationService;
+  }
+
+  public String tweetAlert() {
+    _log.info("Tweet! " + _alertId);
+
+    if (_notificationService != null) {
+      String response = null;
+      try {
+        _log.info("calling tweet....");
+        response = _notificationService.tweet(TwitterServiceImpl.toTweet(_transitDataService.getServiceAlertForId(_alertId)));
+        _log.info("tweet succeeded with response=" + response);
+      } catch (IOException ioe) {
+        _log.error("tweet failed!", ioe);
+        return "error";
+      }
+      _log.info("tweet response=" + response);
+    } else {
+      _log.info("no notification service provided");
+    }
+    return "refreshResult";
+  }
+
+  public String everbridgeAlert() {
+    _log.info("everbridge! " + _alertId);
+    return "refreshResult";
   }
   
 }
