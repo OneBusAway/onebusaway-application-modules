@@ -25,17 +25,17 @@
 
     <bean name="myXml" type="org.apache.struts2.rest.handler.ContentTypeHandler" class="org.onebusaway.nextbus.impl.rest.handler.CustomXStreamHandler" />
     <bean name="myJson" type="org.apache.struts2.rest.handler.ContentTypeHandler" class="org.onebusaway.nextbus.impl.rest.handler.CustomJacksonLibHandler" />
-    <!-- <bean name="myCsv" type="org.apache.struts2.rest.handler.ContentTypeHandler" class="org.onebusaway.nextbus.api.impl.CustomCsvHandler" />
-    <bean name="myProtocolBuffer" type="org.apache.struts2.rest.handler.ContentTypeHandler" class="org.onebusaway.nextbus.api.impl.CustomProtocolBufferHandler" />
-    <bean name="myProtocolBufferText" type="org.apache.struts2.rest.handler.ContentTypeHandler" class="org.onebusaway.nextbus.api.impl.CustomProtocolBufferTextHandler" /> -->
+    <bean name="myProtocolBuffer" type="org.apache.struts2.rest.handler.ContentTypeHandler" class="org.onebusaway.nextbus.impl.rest.handler.CustomProtocolBufferHandler" />
+    <bean name="myProtocolBufferText" type="org.apache.struts2.rest.handler.ContentTypeHandler" class="org.onebusaway.nextbus.impl.rest.handler.CustomProtocolBufferTextHandler" />
     
     <constant name="struts.rest.defaultExtension" value="json" />
     <constant name="struts.rest.handlerOverride.xml" value="myXml" />
     <constant name="struts.rest.handlerOverride.json" value="myJson" />
+    <constant name="struts.rest.handlerOverride.pb" value="myProtocolBuffer" />
+    <constant name="struts.rest.handlerOverride.pbtext" value="myProtocolBufferText" />
     <!-- <constant name="struts.rest.handlerOverride.json" value="myJson" />
     <constant name="struts.rest.handlerOverride.csv" value="myCsv" />
-    <constant name="struts.rest.handlerOverride.pb" value="myProtocolBuffer" />
-    <constant name="struts.rest.handlerOverride.pbtext" value="myProtocolBufferText" /> -->
+    -->
     
     <package name="rest-custom" extends="rest-default">
 
@@ -73,7 +73,6 @@
                 <interceptor-ref name="params">
                     <param name="excludeParams">dojo\..*</param>
                 </interceptor-ref>
-                <interceptor-ref name="rest" />
                 <interceptor-ref name="conversionError" />
                 <interceptor-ref name="validation">
                     <!-- <param name="excludeMethods">input,back,cancel,browse,index,show,edit,editNew</param> -->
@@ -87,4 +86,6 @@
         </interceptors>
         <default-interceptor-ref name="restCustomStack" />
     </package>
+
+
 </struts>
