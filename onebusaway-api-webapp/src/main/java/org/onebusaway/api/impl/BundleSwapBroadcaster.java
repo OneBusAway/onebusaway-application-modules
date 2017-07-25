@@ -53,7 +53,9 @@ public class BundleSwapBroadcaster {
 
     @PostConstruct
     public void init() {
+        _log.info("init, calling getActiveBundleId()");
         _bundleId = _transitDataService.getActiveBundleId();
+        _log.info("active bundleId= " + _bundleId);
         _executor = new ThreadPoolTaskScheduler();
         _executor.initialize();
         CronTrigger hourly = new CronTrigger("5 0 * * * *"); // 5 sec past hour
@@ -63,7 +65,7 @@ public class BundleSwapBroadcaster {
                 testForNewBundle();
             }
         }, hourly);
-        _log.info("initializing  with bundle ID {}", _bundleId);
+        _log.info("initializing with bundle ID {}", _bundleId);
     }
 
     @PreDestroy
