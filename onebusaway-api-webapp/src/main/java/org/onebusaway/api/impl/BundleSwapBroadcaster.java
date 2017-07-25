@@ -53,19 +53,8 @@ public class BundleSwapBroadcaster {
 
     @PostConstruct
     public void init() {
-        _log.info("init, calling getActiveBundleId()");
-        _bundleId = _transitDataService.getActiveBundleId();
-        _log.info("active bundleId= " + _bundleId);
-        _executor = new ThreadPoolTaskScheduler();
-        _executor.initialize();
-        CronTrigger hourly = new CronTrigger("5 0 * * * *"); // 5 sec past hour
-        _executor.schedule(new Runnable() {
-            @Override
-            public void run() {
-                testForNewBundle();
-            }
-        }, hourly);
-        _log.info("initializing with bundle ID {}", _bundleId);
+        BackgroundThread thread = new BackgroundThread();
+        new Thread(thread).start();
     }
 
     @PreDestroy
@@ -79,6 +68,27 @@ public class BundleSwapBroadcaster {
         if (!_bundleId.equals(bundleId)) {
             _bundleId = bundleId;
             _refreshService.refresh(RefreshableResources.BUNDLE_SWAP);
+        }
+    }
+
+
+    public class BackgroundThread implements Runnable {
+
+        @Override
+        public void run() {
+            _log.info("blocking on active bundle....");
+            _bundleId = _transitDataService.getActiveBundleId();
+            _log.info("active bundle = " + _bundleId + ", initializing cron trigger");
+            _executor = new ThreadPoolTaskScheduler();
+            _executor.initialize();
+            CronTrigger hourly = new CronTrigger("5 0 * * * *"); // 5 sec past hour
+            _executor.schedule(new Runnable() {
+                @Override
+                public void run() {
+                    testForNewBundle();
+                }
+            }, hourly);
+            _log.info("initialed with bundle ID {}", _bundleId);
         }
     }
 }
