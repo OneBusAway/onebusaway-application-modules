@@ -48,15 +48,8 @@ public class ConsolidatedStopIdModificationStrategy implements AgencyAndIdModifi
     @Refreshable(dependsOn = RefreshableResources.BUNDLE_SWAP)
     public void init() {
         _log.info("entering init..");
-        _map = new HashMap<Pair<String, AgencyAndId>, AgencyAndId>();
-        _log.info("calling getAllConsolidatedStops");
-        ListBean<ConsolidatedStopMapBean> beans = _transitDataService.getAllConsolidatedStops();
-        _log.info("getAllConsolidatedStops returned " + beans.getList().size() + " entries");
-        for (ConsolidatedStopMapBean bean : beans.getList()) {
-            for (AgencyAndId hidden : bean.getHiddenStopIds()) {
-                _map.put(Pair.of(hidden.getAgencyId(), bean.getConsolidatedStopId()), hidden);
-            }
-        }
+        BackgroundThread thread = new BackgroundThread();
+        new Thread(thread).start();
         _log.info("exiting");
     }
 
@@ -64,6 +57,25 @@ public class ConsolidatedStopIdModificationStrategy implements AgencyAndIdModifi
     public AgencyAndId convertId(String targetAgency, AgencyAndId stopId) {
         return _map.get(Pair.of(targetAgency, stopId));
     }
+
+    public class BackgroundThread implements Runnable {
+
+        @Override
+        public void run() {
+            _log.info("background thread starting up....");
+            _map = new HashMap<Pair<String, AgencyAndId>, AgencyAndId>();
+            _log.info("calling getAllConsolidatedStops");
+            ListBean<ConsolidatedStopMapBean> beans = _transitDataService.getAllConsolidatedStops();
+            _log.info("getAllConsolidatedStops returned " + beans.getList().size() + " entries");
+            for (ConsolidatedStopMapBean bean : beans.getList()) {
+                for (AgencyAndId hidden : bean.getHiddenStopIds()) {
+                    _map.put(Pair.of(hidden.getAgencyId(), bean.getConsolidatedStopId()), hidden);
+                }
+            }
+            _log.info("run complete");
+        }
+    }
+
 
 }
 
