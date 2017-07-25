@@ -59,9 +59,9 @@ class ServiceAlertsServiceImpl implements ServiceAlertsService {
 	}
 	
 	public ServiceAlertsCache getServiceAlertsCache() {
-	  return _cache;
+		return _cache;
 	}
-	
+
 	@Autowired
 	public void setServiceAlertsPersistence(ServiceAlertsPersistence persister) {
 	  _persister = persister;
@@ -435,18 +435,18 @@ class ServiceAlertsServiceImpl implements ServiceAlertsService {
 			ids.remove(id);
 			if (ids.isEmpty())
 				map.remove(existingEffect);
-		}
+			}
 
 		for (T newEffect : newEffects) {
 			if (existingEffects.contains(newEffect))
 				continue;
-      AgencyAndId id = ServiceAlertLibrary.agencyAndId(serviceAlert.getAgencyId(), serviceAlert.getServiceAlertId());
+      		AgencyAndId id = ServiceAlertLibrary.agencyAndId(serviceAlert.getAgencyId(), serviceAlert.getServiceAlertId());
 			Set<AgencyAndId> ids = map.get(newEffect);
 			if (ids == null) {
 				ids = new HashSet<AgencyAndId>();
 				map.put(newEffect, ids);
 			}
-			ids.add(id);
+				ids.add(id);
 		}
 	}
 
@@ -481,7 +481,7 @@ class ServiceAlertsServiceImpl implements ServiceAlertsService {
 		if (time == -1 || serviceAlert.getPublicationWindows().size() == 0)
 			return true;
 		for (ServiceAlertTimeRange publicationWindow : serviceAlert.getPublicationWindows()) {
-			if ((publicationWindow.getFromValue() == null || publicationWindow.getToValue() <= time)
+			if ((publicationWindow.getFromValue() == null || publicationWindow.getFromValue() <= time)
 					&& (publicationWindow.getToValue() == null || publicationWindow.getToValue() >= time)) {
 				return true;
 			}
@@ -552,7 +552,7 @@ class ServiceAlertsServiceImpl implements ServiceAlertsService {
 	 ****/
 
 	synchronized void loadServiceAlerts() {
-	  
+
 	  _cache.clear(); //we need to clear the cache in case records were deleted
 		List<ServiceAlertRecord> alerts = _persister.getAlerts();
 		_log.debug("Loaded " + alerts.size() + " service alerts from DB");
@@ -562,7 +562,7 @@ class ServiceAlertsServiceImpl implements ServiceAlertsService {
 
 		} catch (Exception ex) {
 			_log.error("error loading service alerts from DB ", ex);
-		}		
+		}
 	}
 
 	// this is admittedly slow performing, but it is only called on an update
