@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<html xmlns:jsp="http://java.sun.com/JSP/Page"
+      xmlns:c="http://java.sun.com/jsp/jstl/core"
+      xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+      xmlns:s="/struts-tags">
+<jsp:directive.page contentType="text/html" />
+<head>
+    <title>Users</title>
+
+    <s:url var="url" value="/css/jquery-ui.css"/>
+    <link rel="stylesheet" href="${url}" type="text/css"/>
+
+    <s:url var="url" value="/css/user-management.css"/>
+    <link rel="stylesheet" href="${url}" type="text/css"/>
+
+    <s:url var="url" value="/js/lib/jquery.js" />
+    <script type="text/javascript" src="${url}">
+        <!-- //prevent jspx minimization -->
+    </script>
+
+    <s:url var="url" value="/js/lib/jquery.ui.js" />
+    <script type="text/javascript" src="${url}">
+        <!-- //prevent jspx minimization -->
+    </script>
+
+    <s:url var="url" value="/js/oba/user-management.js" />
+    <script type="text/javascript" src="${url}">
+        <!-- //prevent jspx minimization -->
+    </script>
+
+</head>
+<body>
+<div id="content">
+    <div id="text">
+        <h2>User List</h2>
+
+        <div class="clear" />
+        <div id="userList">
+            <table id="userListTable" cellspacing="0">
+                <tr class="headerRow">
+                    <th>User Names</th>
+                </tr>
+                <tr>
+                    <td>
+                        <div id="userList">
+                            <c:forEach items="${allUsersList}" var="item">
+                                ${item}<br></br>
+                            </c:forEach>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+            <input type="hidden" id="userId" />
+        </div>
+
+        <div id="userList2">
+            <table id="userListTable2" cellspacing="0">
+                <tr class="headerRow">
+                    <th>User Details</th>
+                </tr>
+                <tr>
+                    <td>
+                        <div id="usersList">
+                            <c:forEach items="${allUserDetailsList}" var="user">
+                                <tr>
+                                    <td>${user.username}</td>
+                                    <td>${fn:split(user.role, "_")[1]}</td>
+                                </tr>
+                            </c:forEach>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+            <input type="hidden" id="userId" />
+        </div>
+
+    </div>
+</div>
+</body>
+</html>

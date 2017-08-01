@@ -61,6 +61,11 @@
 					<img src="${url}" alt="Not Found" />
 					<a href="register-user.action" id="addUser">Create User</a>
 				</div>
+				<div id="listUsers">
+					<s:url var="url" value="/css/img/add-contact-icon.png" />
+					<img src="${url}" alt="Not Found" />
+					<a href="list-users.action" id="listUsers">List Users</a>
+				</div>
 				<div class="clear" />
 				<div id="userDetails">
 				 	<table id="detailsTable" cellspacing="0">
