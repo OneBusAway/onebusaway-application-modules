@@ -16,6 +16,7 @@
 package org.onebusaway.admin.service.impl;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -82,7 +83,62 @@ public class UserManagementServiceImpl implements UserManagementService {
 		
 		return matchingUserNames;
 	}
-	
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public List<String> getAllUserNames() {
+
+		final String hql = "select ui.id.value from UserIndex ui where ui.id.type = 'username'";
+
+		List<String> allUserNames = hibernateTemplate.execute(new HibernateCallback<List<String>>() {
+
+			@Override
+			public List<String> doInHibernate(Session session)
+					throws HibernateException, SQLException {
+				Query query = session.createQuery(hql);
+				return query.list();
+			}
+		});
+
+		log.debug("Returning all user names");
+
+		return allUserNames;
+	}
+
+	@Override
+	public List<UserDetail> getAllUserDetails() {
+
+		List<UserDetail> userDetails = new ArrayList<UserDetail>();
+
+		List<User> users = hibernateTemplate.execute(new HibernateCallback<List<User>>() {
+
+			@SuppressWarnings("unchecked")
+			@Override
+			public List<User> doInHibernate(Session session)
+					throws HibernateException, SQLException {
+				Criteria criteria = session.createCriteria(User.class)
+						.createCriteria("userIndices");
+				List<User> users = criteria.list();
+				return users;
+			}
+		});
+
+		if(!users.isEmpty()) {
+			for (User user : users) {
+				for(UserIndex ui : user.getUserIndices()) {
+					if (ui.getId().getType().equals("username")) {
+						UserDetail userDetail = buildUserDetail(user);
+						userDetails.add(userDetail);
+					}
+				}
+			}
+		}
+
+		log.debug("Returning user details for all users");
+
+		return userDetails;
+	}
+
 	@Override
 	public UserDetail getUserDetail(final String userName) {
 		List<User> users = hibernateTemplate.execute(new HibernateCallback<List<User>>() {
@@ -98,7 +154,7 @@ public class UserManagementServiceImpl implements UserManagementService {
 				return users;
 			}
 		});
-		
+
 		UserDetail userDetail = null;
 		
 		if(!users.isEmpty()) {

@@ -33,31 +33,11 @@
 <body>
 <div id="content">
     <div id="text">
-        <h2>User List</h2>
-
-        <div class="clear" />
         <div id="userList">
-            <table id="userListTable" cellspacing="0">
+            <table id="detailsTable" cellspacing="0">
                 <tr class="headerRow">
-                    <th>User Names</th>
-                </tr>
-                <tr>
-                    <td>
-                        <div id="userList">
-                            <c:forEach items="${allUsersList}" var="item">
-                                ${item}<br></br>
-                            </c:forEach>
-                        </div>
-                    </td>
-                </tr>
-            </table>
-            <input type="hidden" id="userId" />
-        </div>
-
-        <div id="userList2">
-            <table id="userListTable2" cellspacing="0">
-                <tr class="headerRow">
-                    <th>User Details</th>
+                    <th>User name</th>
+                    <th>Role</th>
                 </tr>
                 <tr>
                     <td>
@@ -72,9 +52,11 @@
                     </td>
                 </tr>
             </table>
-            <input type="hidden" id="userId" />
+            <div class="backToMenu">
+                <s:url var="url" value="manage-users.action" />
+                <a href="${url}">Back to User Management</a>
+            </div>
         </div>
-
     </div>
 </div>
 </body>
