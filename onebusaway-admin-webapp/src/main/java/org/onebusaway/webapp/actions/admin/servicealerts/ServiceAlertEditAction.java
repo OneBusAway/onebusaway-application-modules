@@ -232,7 +232,7 @@ public class ServiceAlertEditAction extends ActionSupport implements
   }
 
   private NotificationService _notificationService;
-  @Autowired
+  @Autowired(required = false)
   public void setNotificationService(NotificationService notificationService) {
     _notificationService = notificationService;
   }
