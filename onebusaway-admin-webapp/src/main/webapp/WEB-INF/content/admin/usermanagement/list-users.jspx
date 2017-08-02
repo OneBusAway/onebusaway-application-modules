@@ -33,6 +33,7 @@
 <body>
 <div id="content">
     <div id="text">
+        <h2>User List</h2>
         <div id="userList">
             <table id="detailsTable" cellspacing="0">
                 <tr class="headerRow">
@@ -44,7 +45,7 @@
                         <div id="usersList">
                             <c:forEach items="${allUserDetailsList}" var="user">
                                 <tr>
-                                    <td>${user.username}</td>
+                                    <td><a href="edit-users.action" id="editUsers">${user.username}</a></td>
                                     <td>${fn:split(user.role, "_")[1]}</td>
                                 </tr>
                             </c:forEach>

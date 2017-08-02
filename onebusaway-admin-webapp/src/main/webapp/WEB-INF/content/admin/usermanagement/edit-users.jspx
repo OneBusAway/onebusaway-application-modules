@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<html xmlns:jsp="http://java.sun.com/JSP/Page"
+      xmlns:c="http://java.sun.com/jsp/jstl/core"
+      xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+      xmlns:s="/struts-tags">
+<jsp:directive.page contentType="text/html" />
+<head>
+    <title>Edit User</title>
+
+    <s:url var="url" value="/css/jquery-ui.css"/>
+    <link rel="stylesheet" href="${url}" type="text/css"/>
+
+    <s:url var="url" value="/css/user-management.css"/>
+    <link rel="stylesheet" href="${url}" type="text/css"/>
+
+    <s:url var="url" value="/js/lib/jquery.js" />
+    <script type="text/javascript" src="${url}">
+        <!-- //prevent jspx minimization -->
+    </script>
+
+    <s:url var="url" value="/js/lib/jquery.ui.js" />
+    <script type="text/javascript" src="${url}">
+        <!-- //prevent jspx minimization -->
+    </script>
+
+    <s:url var="url" value="/js/oba/user-management.js" />
+    <script type="text/javascript" src="${url}">
+        <!-- //prevent jspx minimization -->
+    </script>
+
+</head>
+<body>
+<div id="content">
+    <div id="text">
+        <h2>Edit User</h2>
+        <s:form action="register-user!createUser" namespace="/admin/usermanagement">
+            <div class="userField">
+                <label id="top">Username :</label>
+                <label id="editUserName"></label>
+            </div>
+            <div class="userField">
+                <label id="top">Password :</label>
+                <s:textfield name="password" id="password"/>
+                <label class="required">*</label>
+                <s:fielderror fieldName="password" cssClass="errorMessage" />
+            </div>
+            <div class="userField">
+                <label id="top">Role :</label>
+                <select name="Role" id="newRole">
+                    <c:forEach items="${possibleRoles}" var="role">
+                        <option value="${role}">${fn:split(role, "_")[1]}</option>
+                    </c:forEach>
+                </select>
+            </div>
+            <s:submit/>
+            <div id="createUserResult">
+                <s:if test="hasActionMessages()">
+                    <s:actionmessage />
+                    <script type="text/javascript">
+                        clearForm();
+                    </script>
+                </s:if>
+                <s:actionerror/>
+            </div>
+        </s:form>
+        <div class="backToMenu">
+            <s:url var="url" value="manage-users.action" />
+            <a href="${url}">Back to User Management</a>
+        </div>
+    </div>
+</div>
+</body>
+</html>
