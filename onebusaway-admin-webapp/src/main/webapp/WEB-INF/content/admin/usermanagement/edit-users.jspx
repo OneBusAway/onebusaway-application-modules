@@ -37,12 +37,11 @@
         <s:form action="register-user!createUser" namespace="/admin/usermanagement">
             <div class="userField">
                 <label id="top">Username :</label>
-                <label id="editUserName"></label>
+                <label id="username"></label>
             </div>
             <div class="userField">
                 <label id="top">Password :</label>
                 <s:textfield name="password" id="password"/>
-                <label class="required">*</label>
                 <s:fielderror fieldName="password" cssClass="errorMessage" />
             </div>
             <div class="userField">

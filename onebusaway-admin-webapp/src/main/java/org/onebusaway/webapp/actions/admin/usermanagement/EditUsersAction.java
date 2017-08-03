@@ -13,8 +13,13 @@ public class EditUsersAction extends OneBusAwayNYCAdminActionSupport {
 
     private static Logger log = LoggerFactory.getLogger(ListUsersAction.class);
     private UserManagementService userManagementService;
+    private String username;
 
     public void init() {
+
+        log.info("Getting user detail for user : {}", username);
+
+        UserDetail userDetail = userManagementService.getUserDetail(username);
 
     }
 
@@ -28,5 +33,13 @@ public class EditUsersAction extends OneBusAwayNYCAdminActionSupport {
 
     public List<String> getPossibleRoles() {
         return userManagementService.getAllRoleNames();
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 }
