@@ -46,7 +46,7 @@
                             <c:forEach items="${allUserDetailsList}" var="user">
                                 <tr>
                                     <td><s:url var="editUser" action="edit-users.action">
-                                        <s:param name="username">user.username</s:param>
+                                        <s:param name="username">${user.username}</s:param>
                                     </s:url>
                                         <a href="${editUser}">${user.username}</a></td>
                                     <td>${fn:split(user.role, "_")[1]}</td>

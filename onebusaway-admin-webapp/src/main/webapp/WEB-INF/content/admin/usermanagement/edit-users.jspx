@@ -37,7 +37,7 @@
         <s:form action="register-user!createUser" namespace="/admin/usermanagement">
             <div class="userField">
                 <label id="top">Username :</label>
-                <label id="username"></label>
+                <label id="username">${userToEdit.username}</label>
             </div>
             <div class="userField">
                 <label id="top">Password :</label>

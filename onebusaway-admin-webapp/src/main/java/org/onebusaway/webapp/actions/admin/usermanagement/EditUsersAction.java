@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.io.StringReader;
 import java.util.List;
 
 public class EditUsersAction extends OneBusAwayNYCAdminActionSupport {
@@ -14,21 +15,36 @@ public class EditUsersAction extends OneBusAwayNYCAdminActionSupport {
     private static Logger log = LoggerFactory.getLogger(ListUsersAction.class);
     private UserManagementService userManagementService;
     private String username;
+    private UserDetail userToEdit;
+    private String updateUserMessage;
 
     public void init() {
 
         log.info("Getting user detail for user : {}", username);
 
-        UserDetail userDetail = userManagementService.getUserDetail(username);
+        UserDetail userToEdit = userManagementService.getUserDetail(username);
+    }
+
+    public String updateUser() {
+
+        boolean success = userManagementService.updateUser(userToEdit);
+        if(success) {
+            updateUserMessage =  "User '" +userToEdit.getUsername() + "' edited successfully";
+        } else {
+            updateUserMessage = "Error editing user : '" +userToEdit.getUsername() +"'";
+        }
+
+        return "updateUser";
 
     }
 
-    /**
-     * @param userManagementService the userManagementService to set
-     */
     @Autowired
     public void setUserManagementService(UserManagementService userManagementService) {
         this.userManagementService = userManagementService;
+    }
+
+    public String getUpdateUserMessage() {
+        return updateUserMessage;
     }
 
     public List<String> getPossibleRoles() {
@@ -41,5 +57,13 @@ public class EditUsersAction extends OneBusAwayNYCAdminActionSupport {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    public UserDetail getUserToEdit() {
+        return userToEdit;
+    }
+
+    public void setUserToEdit(UserDetail userToEdit) {
+        this.userToEdit = userToEdit;
     }
 }
