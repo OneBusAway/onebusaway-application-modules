@@ -8,44 +8,21 @@
 <head>
     <title>Edit User</title>
 
-    <s:url var="url" value="/css/jquery-ui.css"/>
-    <link rel="stylesheet" href="${url}" type="text/css"/>
-
     <s:url var="url" value="/css/user-management.css"/>
     <link rel="stylesheet" href="${url}" type="text/css"/>
-
-    <s:url var="url" value="/js/lib/jquery.js" />
-    <script type="text/javascript" src="${url}">
-        <!-- //prevent jspx minimization -->
-    </script>
-
-    <s:url var="url" value="/js/lib/jquery.ui.js" />
-    <script type="text/javascript" src="${url}">
-        <!-- //prevent jspx minimization -->
-    </script>
-
-    <s:url var="url" value="/js/oba/user-management.js" />
-    <script type="text/javascript" src="${url}">
-        <!-- //prevent jspx minimization -->
-    </script>
 
 </head>
 <body>
 <div id="content">
     <div id="text">
         <h2>Edit User</h2>
-        <s:form action="register-user!createUser" namespace="/admin/usermanagement">
+        <s:form action="edit-users!userUpdate" namespace="/admin/usermanagement" method="POST">
             <div class="userField">
                 <label id="top">Username :</label>
-                <label id="username">${userToEdit.username}</label>
+                <label id="username">${username}</label>
             </div>
-            <div class="userField">
-                <label id="top">Password :</label>
-                <s:textfield name="password" id="password"/>
-                <s:fielderror fieldName="password" cssClass="errorMessage" />
-            </div>
-            <div class="userField">
-                <label id="top">Role :</label>
+            <div id="editRole">
+                <label class="userLabel">New Role:</label>
                 <select name="Role" id="newRole">
                     <c:forEach items="${possibleRoles}" var="role">
                         <option value="${role}">${fn:split(role, "_")[1]}</option>
@@ -53,15 +30,8 @@
                 </select>
             </div>
             <s:submit/>
-            <div id="createUserResult">
-                <s:if test="hasActionMessages()">
-                    <s:actionmessage />
-                    <script type="text/javascript">
-                        clearForm();
-                    </script>
-                </s:if>
-                <s:actionerror/>
-            </div>
+            <input type="hidden" name="username" value="${username}" />
+            <input type="hidden" name="role" value="${newRole}" />
         </s:form>
         <div class="backToMenu">
             <s:url var="url" value="manage-users.action" />

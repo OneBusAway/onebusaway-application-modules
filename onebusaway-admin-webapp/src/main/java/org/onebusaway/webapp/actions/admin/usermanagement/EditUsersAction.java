@@ -1,5 +1,7 @@
 package org.onebusaway.webapp.actions.admin.usermanagement;
 
+import org.apache.struts2.convention.annotation.Result;
+import org.apache.struts2.convention.annotation.Results;
 import org.onebusaway.admin.model.ui.UserDetail;
 import org.onebusaway.admin.service.UserManagementService;
 import org.onebusaway.webapp.actions.OneBusAwayNYCAdminActionSupport;
@@ -15,19 +17,31 @@ public class EditUsersAction extends OneBusAwayNYCAdminActionSupport {
     private static Logger log = LoggerFactory.getLogger(ListUsersAction.class);
     private UserManagementService userManagementService;
     private String username;
+    private String role;
+    private String password;
     private UserDetail userToEdit;
     private String updateUserMessage;
 
-    public void init() {
+    public String init() {
 
-        log.info("Getting user detail for user : {}", username);
+        setUserToEdit(userManagementService.getUserDetail(username));
+        boolean success = userManagementService.updateUser(userToEdit);
 
-        UserDetail userToEdit = userManagementService.getUserDetail(username);
+        return SUCCESS;
     }
 
-    public String updateUser() {
+    public String userUpdate() {
+
+        log.error("EditUsersAction .... *********** !!!!!!!!!!!!!");
+
+        setUserToEdit(userManagementService.getUserDetail(username));
+        log.error("User to Edit: username: " + getUserToEdit().getUsername());
+        log.error("User to Edit: role: " + getUserToEdit().getRole());
+        log.error("User to Edit: id: " + getUserToEdit().getId());
+        //userToEdit.setRole(getRole());
 
         boolean success = userManagementService.updateUser(userToEdit);
+
         if(success) {
             updateUserMessage =  "User '" +userToEdit.getUsername() + "' edited successfully";
         } else {
@@ -65,5 +79,21 @@ public class EditUsersAction extends OneBusAwayNYCAdminActionSupport {
 
     public void setUserToEdit(UserDetail userToEdit) {
         this.userToEdit = userToEdit;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 }
