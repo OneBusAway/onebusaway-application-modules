@@ -65,8 +65,12 @@ public class ManageUsersAction extends OneBusAwayNYCAdminActionSupport {
 	}
 
 	public String userFromList() {
+
 		log.error("This is what we get! Username: " + getUname());
-		setUsername(getUname());
+
+		//replace double quotes
+		setUsername(getUname().replaceAll("^\"|\"$", ""));
+
 		log.error("This is what we return! Username: " + username);
 		if (username == null) {
 

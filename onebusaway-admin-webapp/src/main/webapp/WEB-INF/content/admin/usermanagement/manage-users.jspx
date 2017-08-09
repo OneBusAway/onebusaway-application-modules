@@ -48,38 +48,30 @@
 
 <script type="text/javascript">
 	$(document).ready(function() {
+		var uname = $("#username").text();
+		console.log("username is " + uname)
 
-	    //call function on action - do we have a user?
-		//no, nothing
-		//yes? then do something with it!
+		if(!!uname) {
+            //$.ajax({
+            jQuery.ajax({
+                //what I'm calling
+                url: "manage-users!userFromList.action",
+                //type:
+                type: "POST",
+                //the type of data that you're expecting back from the server
+                dataType: "json",
+                //what I'm passing
+                data: {uname: JSON.stringify(uname)},
 
-	    //we have ?something that identifies the user
-		//user that to get the user and set all the values
-		//then display
-        //var selected = ui.item.value;
-        var uname = 'test';
-        jQuery.ajax({
-			//what I'm calling
-            url:"manage-users!userFromList.action",
-			//type:
-            type: "POST",
-			//the type of data that you're expecting back from the server
-            dataType: "json",
-			//what I'm passing
-            data : {uname:JSON.stringify(uname)},
-			//my return from action method - if there is a response its success and if not, its not??
-            success: function(response) {
-
-                //here call the method that will get the user
-				//and then set all the values
-                console.log(response);
-                //show the User Details box
-                jQuery("#userDetails").show();
-            },
-            error: function() {
-                alert("Error updating user");
-            }
-        });
+                success: function (response) {
+                    //show the User Details box
+                    jQuery("#userDetails").show();
+                },
+                error: function () {
+                    alert("Error updating user");
+                }
+            });
+        }
 
         /*
         select: function(event, ui) {
@@ -131,9 +123,9 @@
 					<a href="${url}">List Users</a>
 				</div>
 				<div class="userField">
-					<label id="top">Username :</label>
 					<label id="username">${username}</label>
 				</div>
+
 				<div class="clear" />
 				<div id="userDetails">
 				 	<table id="detailsTable" cellspacing="0">
@@ -163,7 +155,6 @@
 					 	</tr>
 				 	</table>
 				 	<input type="hidden" id="userId" />
-					<input type="hidden" id="username" />
 				 </div>
 				 <div id="editUser">
 				 	<label id="editTitle">Edit User</label>
