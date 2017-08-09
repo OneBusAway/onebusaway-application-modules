@@ -66,7 +66,7 @@
 			//the type of data that you're expecting back from the server
             dataType: "json",
 			//what I'm passing
-            data : {"uname":JSON.stringify(uname)},
+            data : {uname:JSON.stringify(uname)},
 			//my return from action method - if there is a response its success and if not, its not??
             success: function(response) {
 

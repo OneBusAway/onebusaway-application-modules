@@ -66,12 +66,12 @@ public class ManageUsersAction extends OneBusAwayNYCAdminActionSupport {
 
 	public String userFromList() {
 		log.error("This is what we get! Username: " + getUname());
-		username = username;
+		setUsername(getUname());
 		log.error("This is what we return! Username: " + username);
 		if (username == null) {
 
 		}
-		return "nothin";
+		return "userFromList";
 	}
 
 	/**
