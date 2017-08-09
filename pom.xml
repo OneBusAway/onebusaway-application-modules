@@ -39,11 +39,11 @@
   <repositories>
     <repository>
       <id>releases-camsys-repo</id>
-      <url>http://developer.onebusaway.org/archiva/repository/releases/</url> 
+      <url>http://archiva.obaweb.org/archiva/repository/releases/</url> 
     </repository>
     <repository>
       <id>snapshots-camsys-repo</id>
-      <url>http://developer.onebusaway.org/archiva/repository/snapshots/</url> 
+      <url>http://archiva.obaweb.org/archiva/repository/snapshots/</url> 
     </repository>
     <repository>
       <id>public.onebusaway.org</id>
