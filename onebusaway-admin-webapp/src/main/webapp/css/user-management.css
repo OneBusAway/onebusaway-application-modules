@@ -35,6 +35,22 @@
 	padding:3px 3px 0;
 }
 
+#userAdminList {
+	float: right;
+	padding-bottom: 20px;
+}
+
+#userAdminList ul {
+	border: solid 1px #999999;
+	padding: 10px 0;
+}
+
+#userAdminList li a {
+	display: inline-block;
+	padding: 10px 5px 10px;
+	color: #0000FF;
+}
+
 #createUser img {
 	vertical-align: middle;
 }

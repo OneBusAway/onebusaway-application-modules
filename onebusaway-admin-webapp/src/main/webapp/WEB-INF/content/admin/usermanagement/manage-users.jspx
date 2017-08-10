@@ -87,7 +87,7 @@
 					<label>Search by username</label>
 					<input type="text" id="searchUser" />
 				 </div>
-				<div id="createUser">
+				<div id="userAdminList">
 					<ul>
 						<li><s:url var="url" value="register-user.action" id="addUser"/>
 						<a href="${url}">Create User</a>
