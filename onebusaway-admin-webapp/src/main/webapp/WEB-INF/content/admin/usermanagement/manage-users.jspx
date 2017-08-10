@@ -96,10 +96,9 @@
 					<s:url var="url" value="list-users.action" />
 					<a href="${url}">List Users</a>
 				</div>
-				<div class="userField">
+				<div id="userName" style="display: none;">
 					<label id="username">${username}</label>
 				</div>
-
 				<div class="clear" />
 				<div id="userDetails">
 				 	<table id="detailsTable" cellspacing="0">
