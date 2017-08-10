@@ -49,30 +49,13 @@ public class ManageUsersAction extends OneBusAwayNYCAdminActionSupport {
 	private String userData;
 	private String updateUserMessage;
 	private String username;
-	private String uname;
-	private UserDetail userDetails = null;
 
 
 	public String setUser() {
 
-		//just need the id
 		log.error("setUser: " + username);
-		setUserDetails(userManagementService.getUserDetail(username));
-		log.error("Have user: " + getUserDetails().getUsername());
-		log.error("Have user role: " + getUserDetails().getRole());
-		log.error("Have user id: " + getUserDetails().getId());
+
 		return "setUser";
-	}
-
-	public String userFromList() {
-
-		log.error("This is what we get! Username: " + getUname());
-
-		log.error("This is what we return! Username: " + username);
-		if (username == null) {
-
-		}
-		return "userFromList";
 	}
 
 	/**
@@ -158,20 +141,5 @@ public class ManageUsersAction extends OneBusAwayNYCAdminActionSupport {
 
 	public void setUsername(String username) {
 		this.username = username;
-	}
-	public UserDetail getUserDetails() {
-		return userDetails;
-	}
-
-	public void setUserDetails(UserDetail userDetails) {
-		this.userDetails = userDetails;
-	}
-
-	public String getUname() {
-		return uname;
-	}
-
-	public void setUname(String uname) {
-		this.uname = uname;
 	}
 }

@@ -49,30 +49,27 @@
 <script type="text/javascript">
 	$(document).ready(function() {
 	    //if we've come to this page from list-users, we might have a username
-		//if we do, set it
-
+		//if we do, set it and get User Details for editing
 		var uname = $("#username").text();
-		console.log("username is " + uname)
-
 		if(!!uname) {
             jQuery.ajax({
-                //what I'm calling
-                url: "manage-users!userFromList.action",
-                //type:
-                type: "POST",
-                //the type of data that you're expecting back from the server
-                dataType: "json",
-                //what I'm passing
-                data: {uname: uname},
-
-                success: function (response) {
-                    //show the User Details box
-
-                    getUser(uname);
+                url: "../../api/users/getUserDetails",
+                data: {"user" : uname},
+                type: "GET",
+                async: false,
+                success: function(response) {
+                    jQuery("#userDetails #userId").val(response.id);
+                    jQuery("#userDetails #username").text(response.username);
+                    var userRole = response.role;
+                    jQuery("#userDetails #userRole").text(userRole.split('_')[1]);
                     jQuery("#userDetails").show();
+
+                    jQuery("#editUser #editUserName").text(response.username);
+                    jQuery("#editUser #newPassword").val("");
+                    jQuery("#editUser #newRole").val(userRole).attr("selected", true);
                 },
-                error: function () {
-                    alert("Error updating user");
+                error: function(request) {
+                    alert("There was an error processing your request. Please try again.");
                 }
             });
         }
