@@ -84,7 +84,7 @@
 			<h2>User Management Utility</h2>
 			<div id="container">
 				 <div id="search" class="ui-helper-clearfix">  
-					<label>Search by user name</label>
+					<label>Search by username</label>
 					<input type="text" id="searchUser" />
 				 </div>
 				<div id="createUser">
