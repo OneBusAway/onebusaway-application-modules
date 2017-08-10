@@ -55,6 +55,30 @@
 	vertical-align: middle;
 }
 
+.usersTable {
+	border: solid 1px #666;
+	margin: 10px 0;
+}
+
+.usersTable th {
+	padding-right: 10px;
+	text-align: left;
+	font-size: 12px;
+	padding-left: 15px;
+}
+
+.usersTable .headerRow th{
+	border-bottom: solid 1px #666;
+	font-size: 14px;
+}
+
+.usersTable td {
+	padding-right: 10px;
+	padding-top: 5px;
+	padding-bottom: 5px;
+	padding-left: 15px;
+}
+
 #addUser {
 	margin-left: 5px;
 	padding: 0;
