@@ -18,10 +18,6 @@ public class ListUsersAction extends OneBusAwayNYCAdminActionSupport {
     private static Logger log = LoggerFactory.getLogger(ListUsersAction.class);
     private UserManagementService userManagementService;
 
-    public void init() {
-
-    }
-
     /**
      * @param userManagementService the userManagementService to set
      */

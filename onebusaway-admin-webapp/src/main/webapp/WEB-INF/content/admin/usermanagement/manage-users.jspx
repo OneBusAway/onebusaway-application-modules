@@ -48,8 +48,9 @@
 
 <script type="text/javascript">
 	$(document).ready(function() {
-	    //if we've come to this page from list-users, we might have a username
-		//if we do, set it and get User Details for editing
+	    /* if we've come to this page from list-users, we might have a username
+	     * if we do, set it and get User Details for editing
+	     */
 		var uname = $("#username").text();
 		if(!!uname) {
             jQuery.ajax({
@@ -73,8 +74,6 @@
                 }
             });
         }
-
-
 	} );
 </script>
 

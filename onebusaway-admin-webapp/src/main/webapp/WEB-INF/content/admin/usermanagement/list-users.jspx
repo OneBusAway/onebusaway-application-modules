@@ -45,7 +45,7 @@
                         <div id="usersList">
                             <c:forEach items="${allUserDetailsList}" var="user">
                                 <tr>
-                                    <td><s:url var="editUser" action="manage-users!setUser">
+                                    <td><s:url var="editUser" action="manage-users.action">
                                         <s:param name="username">${user.username}</s:param>
                                     </s:url>
                                         <a href="${editUser}">${user.username}</a></td>

@@ -35,7 +35,6 @@ import org.springframework.beans.factory.annotation.Autowired;
  */
 @Results({
 	@Result(name="updateUser", type="json", params= {"root","updateUserMessage"}),
-	@Result(name="userFromList", type="json", params= {"root","username"}),
 })
 
 
@@ -50,13 +49,6 @@ public class ManageUsersAction extends OneBusAwayNYCAdminActionSupport {
 	private String updateUserMessage;
 	private String username;
 
-
-	public String setUser() {
-
-		log.error("setUser: " + username);
-
-		return "setUser";
-	}
 
 	/**
 	 * Edits a user in the system
@@ -73,7 +65,6 @@ public class ManageUsersAction extends OneBusAwayNYCAdminActionSupport {
 		}
 
 		return "updateUser";
-		
 	}
 	
 	public String deactivateUser() {
@@ -135,11 +126,14 @@ public class ManageUsersAction extends OneBusAwayNYCAdminActionSupport {
 		return userManagementService.getAllRoleNames();
 	}
 
-	public String getUsername() {
-		return username;
-	}
+    /**
+     * @return the username
+     */
+    public String getUsername() { return username; }
 
-	public void setUsername(String username) {
-		this.username = username;
-	}
+    /**
+     * @param username
+     * Used by list-users when selecting a user from the list
+     */
+    public void setUsername(String username) { this.username = username; }
 }
