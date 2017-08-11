@@ -16,7 +16,6 @@
  
 #container {
  	margin-top: 10px;
- 	overflow: hidden;
 }
 
 #search {  
@@ -35,19 +34,27 @@
 	padding:3px 3px 0;
 }
 
+header {
+    margin-top: 20px;
+}
+
+header h2 {
+    display:inline;
+}
+
 #userAdminList {
-	float: right;
-	padding-bottom: 20px;
+    float: right;
+    display:inline;
 }
 
 #userAdminList ul {
-	border: solid 1px #999999;
 	padding: 10px 0;
 }
 
 #userAdminList li a {
+
 	display: inline-block;
-	padding: 10px 5px 10px;
+	padding: 0px 5px 10px;
 	color: #0000FF;
 }
 
