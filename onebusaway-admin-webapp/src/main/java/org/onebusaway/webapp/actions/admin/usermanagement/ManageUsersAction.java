@@ -34,7 +34,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  *
  */
 @Results({
-	@Result(name="updateUser", type="json", params= {"root","updateUserMessage"}),
+	@Result(name="updateUser", type="json", params= {"root","updateUserMessage"})
 })
 
 
@@ -55,7 +55,6 @@ public class ManageUsersAction extends OneBusAwayNYCAdminActionSupport {
 	 * @return
 	 */
 	public String editUser() {
-		log.error("userData: " + userData);
 		UserDetail userDetail = gsonTool.readJson(new StringReader(userData), UserDetail.class);
 		boolean success = userManagementService.updateUser(userDetail);
 		if(success) {
