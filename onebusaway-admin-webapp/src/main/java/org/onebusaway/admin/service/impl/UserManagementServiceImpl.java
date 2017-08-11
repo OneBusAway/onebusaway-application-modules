@@ -35,6 +35,7 @@ import org.onebusaway.users.model.UserIndex;
 import org.onebusaway.users.model.UserRole;
 import org.onebusaway.users.services.StandardAuthoritiesService;
 import org.onebusaway.users.services.UserDao;
+import org.onebusaway.users.services.UserIndexTypes;
 import org.onebusaway.users.services.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -117,7 +118,9 @@ public class UserManagementServiceImpl implements UserManagementService {
 			public List<User> doInHibernate(Session session)
 					throws HibernateException, SQLException {
 				Criteria criteria = session.createCriteria(User.class)
-						.createCriteria("userIndices");
+						.createCriteria("userIndices")
+						.setMaxResults(20)
+						.add(Restrictions.eq("id.type", UserIndexTypes.USERNAME));
 				List<User> users = criteria.list();
 				return users;
 			}
@@ -126,16 +129,11 @@ public class UserManagementServiceImpl implements UserManagementService {
 		if(!users.isEmpty()) {
 			for (User user : users) {
 				for(UserIndex ui : user.getUserIndices()) {
-					if (ui.getId().getType().equals("username")) {
-						UserDetail userDetail = buildUserDetail(user);
-						userDetails.add(userDetail);
-					}
+					UserDetail userDetail = buildUserDetail(user);
+					userDetails.add(userDetail);
 				}
 			}
 		}
-
-		log.debug("Returning user details for all users");
-
 		return userDetails;
 	}
 
