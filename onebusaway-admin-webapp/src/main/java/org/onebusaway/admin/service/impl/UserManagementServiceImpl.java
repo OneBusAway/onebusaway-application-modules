@@ -134,6 +134,8 @@ public class UserManagementServiceImpl implements UserManagementService {
 				}
 			}
 		}
+		log.debug("Returning all user details");
+
 		return userDetails;
 	}
 
