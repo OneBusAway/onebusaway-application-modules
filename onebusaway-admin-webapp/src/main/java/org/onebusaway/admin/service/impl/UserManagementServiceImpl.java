@@ -119,7 +119,7 @@ public class UserManagementServiceImpl implements UserManagementService {
 					throws HibernateException, SQLException {
 				Criteria criteria = session.createCriteria(User.class)
 						.createCriteria("userIndices")
-						.setMaxResults(20)
+						.setMaxResults(500)
 						.add(Restrictions.eq("id.type", UserIndexTypes.USERNAME));
 				List<User> users = criteria.list();
 				return users;
