@@ -35,12 +35,6 @@ public interface UserManagementService {
 	List<String> getUserNames(String searchTerm);
 
 	/**
-	 * Returns a list of all user names in the database
-	 * @return list of user names
-	 */
-	List<String> getAllUserNames();
-
-	/**
 	 * Returns a list of user details (name, role) for every user in the database
 	 * @return list of userDetails
 	 */

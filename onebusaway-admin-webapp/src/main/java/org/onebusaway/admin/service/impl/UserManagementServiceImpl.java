@@ -86,27 +86,6 @@ public class UserManagementServiceImpl implements UserManagementService {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
-	public List<String> getAllUserNames() {
-
-		final String hql = "select ui.id.value from UserIndex ui where ui.id.type = 'username'";
-
-		List<String> allUserNames = hibernateTemplate.execute(new HibernateCallback<List<String>>() {
-
-			@Override
-			public List<String> doInHibernate(Session session)
-					throws HibernateException, SQLException {
-				Query query = session.createQuery(hql);
-				return query.list();
-			}
-		});
-
-		log.debug("Returning all user names");
-
-		return allUserNames;
-	}
-
-	@Override
 	public List<UserDetail> getAllUserDetails() {
 
 		List<UserDetail> userDetails = new ArrayList<UserDetail>();
