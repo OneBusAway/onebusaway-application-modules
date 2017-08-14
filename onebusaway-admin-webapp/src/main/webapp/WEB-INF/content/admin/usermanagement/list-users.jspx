@@ -29,12 +29,52 @@
         <!-- //prevent jspx minimization -->
     </script>
 
+
+    <script type="text/javascript">
+        $(document).ready(function() {
+            /*
+             * Initialize pages, page numbers etc
+             */
+            {
+                jQuery.ajax({
+                    url:"list-users!initializePages.action",
+                    type: "GET",
+                    async: false,
+                    success: function(response) {
+
+                    },
+                    error: function(request) {
+                        alert("There was an error processing your request. Please try again.");
+                    }
+                });
+            }
+        } );
+    </script>
+
 </head>
 <body>
 <div id="content">
     <div id="text">
         <h2>User List</h2>
         <div id="userList">
+            <div id="pageNum">
+                <label>Page </label>
+                <label id="thisPage">${thisPage}</label>
+                <label> of </label>
+                <label id="numberOfPages">${numberOfPages}</label>
+
+                <!-- //if there is a previous page... -->
+                <s:if test="numberOfPages > 0">
+                    <s:url var="url" value="list-users.action" />
+                    <a href="${url}"> previous </a>
+                </s:if>
+
+                <!-- //if there is another page... -->
+                <s:if test="%{numberOfPages > 0}">
+                    <s:url var="url" value="list-users.action" />
+                    <a href="${url}"> next </a>
+                </s:if>
+            </div>
             <table class="usersTable" cellspacing="0">
                 <tr class="headerRow">
                     <th>User name</th>

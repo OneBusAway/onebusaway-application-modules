@@ -17,6 +17,22 @@ public class ListUsersAction extends OneBusAwayNYCAdminActionSupport {
 
     private static Logger log = LoggerFactory.getLogger(ListUsersAction.class);
     private UserManagementService userManagementService;
+    private int usersPerPage = 15;
+    private int numberOfPages;
+    private int thisPage;
+
+    public void initializePages() {
+        setThisPage(1);
+        int count = userManagementService.getUserDetailsCount();
+        log.error("User details count is: " + count);
+        log.error("Users per page is: " + getUsersPerPage());
+        setNumberOfPages((int) Math.ceil((double)count/getUsersPerPage()));
+        log.error("Number of pages is: " + getNumberOfPages());
+    }
+
+    public void getPage() {
+
+    }
 
     /**
      * @param userManagementService the userManagementService to set
@@ -27,8 +43,33 @@ public class ListUsersAction extends OneBusAwayNYCAdminActionSupport {
     }
 
     public List<UserDetail> getAllUserDetailsList() {
-        long count = userManagementService.getUserDetailsCount();
-        log.error("User details count is: " + count);
-        return userManagementService.getAllUserDetails();
+        int first = (getThisPage() * getUsersPerPage()) - getUsersPerPage();
+        log.error("First: " + first);
+        //return userManagementService.getUserDetails(1, 500);
+        return userManagementService.getUserDetails(first, getUsersPerPage());
+    }
+
+    public int getUsersPerPage() {
+        return usersPerPage;
+    }
+
+    public void setUsersPerPage(int usersPerPage) {
+        this.usersPerPage = usersPerPage;
+    }
+
+    public int getNumberOfPages() {
+        return numberOfPages;
+    }
+
+    public void setNumberOfPages(int numberOfPages) {
+        this.numberOfPages = numberOfPages;
+    }
+
+    public int getThisPage() {
+        return thisPage;
+    }
+
+    public void setThisPage(int thisPage) {
+        this.thisPage = thisPage;
     }
 }
