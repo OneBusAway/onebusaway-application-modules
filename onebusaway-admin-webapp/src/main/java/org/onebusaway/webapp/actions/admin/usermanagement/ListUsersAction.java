@@ -58,7 +58,8 @@ public class ListUsersAction extends OneBusAwayNYCAdminActionSupport {
     }
 
     public int getNumberOfPages() {
-        return numberOfPages;
+        int count = userManagementService.getUserDetailsCount();
+        return ((int) Math.ceil((double)count/getUsersPerPage()));
     }
 
     public void setNumberOfPages(int numberOfPages) {
