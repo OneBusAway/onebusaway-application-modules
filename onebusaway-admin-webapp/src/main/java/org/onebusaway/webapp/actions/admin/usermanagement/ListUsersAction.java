@@ -19,7 +19,7 @@ public class ListUsersAction extends OneBusAwayNYCAdminActionSupport {
     private UserManagementService userManagementService;
     private int usersPerPage = 15;
     private int numberOfPages;
-    private int thisPage;
+    private int thisPage = 1;
 
     public void initializePages() {
         setThisPage(1);

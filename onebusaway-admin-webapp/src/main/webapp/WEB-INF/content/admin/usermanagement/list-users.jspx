@@ -64,13 +64,13 @@
                 <label id="numberOfPages">${numberOfPages}</label>
 
                 <!-- //if there is a previous page... -->
-                <s:if test="numberOfPages > 0">
+                <s:if test="%{thisPage > 1}">
                     <s:url var="url" value="list-users.action" />
                     <a href="${url}"> previous </a>
                 </s:if>
 
                 <!-- //if there is another page... -->
-                <s:if test="%{numberOfPages > 0}">
+                <s:if test="%{numberOfPages > 1}">
                     <s:url var="url" value="list-users.action" />
                     <a href="${url}"> next </a>
                 </s:if>
