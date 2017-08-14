@@ -107,7 +107,7 @@ public class UserManagementServiceImpl implements UserManagementService {
     }
 
 	@Override
-	public List<UserDetail> getAllUserDetails() {
+	public List<UserDetail> getUserDetails(final int start, final int maxResults) {
 
 		List<UserDetail> userDetails = new ArrayList<UserDetail>();
 
@@ -119,8 +119,9 @@ public class UserManagementServiceImpl implements UserManagementService {
 					throws HibernateException, SQLException {
 				Criteria criteria = session.createCriteria(User.class)
 						.createCriteria("userIndices")
-						.setMaxResults(500)
-						.add(Restrictions.eq("id.type", UserIndexTypes.USERNAME));
+						.add(Restrictions.eq("id.type", UserIndexTypes.USERNAME))
+				        .setFirstResult(start)
+                        .setMaxResults(maxResults);
 				List<User> users = criteria.list();
 				return users;
 			}
