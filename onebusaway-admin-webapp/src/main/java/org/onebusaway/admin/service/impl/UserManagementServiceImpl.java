@@ -27,6 +27,7 @@ import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.onebusaway.admin.model.ui.UserDetail;
 import org.onebusaway.admin.service.UserManagementService;
@@ -84,6 +85,26 @@ public class UserManagementServiceImpl implements UserManagementService {
 		
 		return matchingUserNames;
 	}
+
+	@Override
+    public Integer getUserDetailsCount() {
+        Integer count = hibernateTemplate.execute(new HibernateCallback<Integer>() {
+            @SuppressWarnings("unchecked")
+            @Override
+            public Integer doInHibernate(Session session)
+                    throws HibernateException, SQLException {
+                Criteria criteria = session.createCriteria(User.class)
+                        .createCriteria("userIndices")
+                        .add(Restrictions.eq("id.type", UserIndexTypes.USERNAME))
+						.setProjection(Projections.rowCount());
+                List<User> users = criteria.list();
+                Integer count = (Integer) criteria.uniqueResult();
+                return count;
+            }
+        });
+
+        return count;
+    }
 
 	@Override
 	public List<UserDetail> getAllUserDetails() {

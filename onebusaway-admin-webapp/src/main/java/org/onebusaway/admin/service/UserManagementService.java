@@ -35,6 +35,12 @@ public interface UserManagementService {
 	List<String> getUserNames(String searchTerm);
 
 	/**
+	 * Returns the number of user details (name, role) for every user in the database
+	 * @return long number (count) of user details
+	 */
+	Integer getUserDetailsCount();
+
+	/**
 	 * Returns a list of user details (name, role) for every user in the database
 	 * @return list of userDetails
 	 */

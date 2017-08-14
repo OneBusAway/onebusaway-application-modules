@@ -27,6 +27,8 @@ public class ListUsersAction extends OneBusAwayNYCAdminActionSupport {
     }
 
     public List<UserDetail> getAllUserDetailsList() {
+        long count = userManagementService.getUserDetailsCount();
+        log.error("User details count is: " + count);
         return userManagementService.getAllUserDetails();
     }
 }
