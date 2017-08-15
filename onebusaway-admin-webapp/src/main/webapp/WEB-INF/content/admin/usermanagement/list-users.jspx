@@ -29,28 +29,6 @@
         <!-- //prevent jspx minimization -->
     </script>
 
-
-    <script type="text/javascript">
-        $(document).ready(function() {
-            /*
-             * Initialize pages, page numbers etc
-             */
-            {
-                jQuery.ajax({
-                    url:"list-users!initializePages.action",
-                    type: "GET",
-                    async: false,
-                    success: function(response) {
-
-                    },
-                    error: function(request) {
-                        alert("There was an error processing your request. Please try again.");
-                    }
-                });
-            }
-        } );
-    </script>
-
 </head>
 <body>
 <div id="content">
@@ -65,13 +43,13 @@
 
                 <!-- //if there is a previous page... -->
                 <s:if test="%{thisPage > 1}">
-                    <s:url var="url" value="list-users.action" />
+                    <s:url var="url" value="list-users!previousPage" />
                     <a href="${url}"> previous </a>
                 </s:if>
 
                 <!-- //if there is another page... -->
                 <s:if test="%{numberOfPages > 1}">
-                    <s:url var="url" value="list-users.action" />
+                    <s:url var="url" action="list-users!nextPage" />
                     <a href="${url}"> next </a>
                 </s:if>
             </div>
@@ -83,7 +61,7 @@
                 <tr>
                     <td>
                         <div id="usersList">
-                            <c:forEach items="${allUserDetailsList}" var="user">
+                            <c:forEach items="${userDetailsList}" var="user">
                                 <tr>
                                     <td><s:url var="editUser" action="manage-users.action">
                                         <s:param name="username">${user.username}</s:param>
