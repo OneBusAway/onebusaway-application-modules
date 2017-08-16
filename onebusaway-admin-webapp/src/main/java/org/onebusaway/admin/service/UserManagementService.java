@@ -41,10 +41,16 @@ public interface UserManagementService {
 	Integer getUserDetailsCount();
 
 	/**
-	 * Returns a list of user details (name, role) for every user in the database
+	 * Returns a list of user details (name, role) for maxResults of users staring with 'start'
 	 * @return list of userDetails
 	 */
 	List<UserDetail> getUserDetails(final int start, final int maxResults);
+
+	/**
+	 * Returns a list of user details (name, role) for every user in the database
+	 * @return list of userDetails
+	 */
+	List<UserDetail> getAllUserDetails();
 
 	/**
 	 * Fetches the user details such as user name, user role of the given user

@@ -18,7 +18,7 @@ public class ListUsersAction extends OneBusAwayNYCAdminActionSupport {
     private static Logger log = LoggerFactory.getLogger(ListUsersAction.class);
     private UserManagementService userManagementService;
     private List<UserDetail> userDetailsList;
-    private int usersPerPage = 5;
+    private int usersPerPage = 15;
     private int numberOfPages;
     private int thisPage;
 

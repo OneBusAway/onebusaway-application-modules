@@ -27,6 +27,7 @@ import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.onebusaway.admin.model.ui.UserDetail;
@@ -135,7 +136,39 @@ public class UserManagementServiceImpl implements UserManagementService {
 				}
 			}
 		}
-		log.debug("Returning all user details");
+		log.debug("Returning user details");
+
+		return userDetails;
+	}
+
+	@Override
+	public List<UserDetail> getAllUserDetails() {
+
+		List<UserDetail> userDetails = new ArrayList<UserDetail>();
+
+		List<User> users = hibernateTemplate.execute(new HibernateCallback<List<User>>() {
+
+			@SuppressWarnings("unchecked")
+			@Override
+			public List<User> doInHibernate(Session session)
+					throws HibernateException, SQLException {
+				Criteria criteria = session.createCriteria(User.class)
+						.createCriteria("userIndices")
+						.add(Restrictions.eq("id.type", UserIndexTypes.USERNAME));
+				List<User> users = criteria.list();
+				return users;
+			}
+		});
+
+		if(!users.isEmpty()) {
+			for (User user : users) {
+				for(UserIndex ui : user.getUserIndices()) {
+					UserDetail userDetail = buildUserDetail(user);
+					userDetails.add(userDetail);
+				}
+			}
+		}
+		log.debug("Returning user details");
 
 		return userDetails;
 	}
