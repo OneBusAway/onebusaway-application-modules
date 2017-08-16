@@ -39,6 +39,7 @@ OBA.Sign = function() {
     var obaApiBaseUrl = url.substring(0, obaApiBaseUrlPosition);
 
 	var setupUITimeout = null;
+	var disableAlerts = false;
 	
 	function getParameterByName(name, defaultValue) {
 		name = name.replace(/[\[]/,"\\\[").replace(/[\]]/,"\\\]");
@@ -90,6 +91,8 @@ OBA.Sign = function() {
 
 		// configure interface with URL params
 		refreshInterval = getParameterByName("refresh", refreshInterval);
+		var disableAlertsStr = getParameterByName("disableAlerts", "false");
+		disableAlerts = (disableAlertsStr.toLowerCase() == "true");
 
 		vehiclesPerStop = getParameterByName("vehiclesPerStop", vehiclesPerStop);
 		
@@ -264,7 +267,7 @@ OBA.Sign = function() {
 
 		// situations
 		stopElement.find(".alerts .scroller").html("").empty();
-		if (jQuery.isEmptyObject(applicableSituations)) {
+		if (disableAlerts || jQuery.isEmptyObject(applicableSituations)) {
 			stopElement.find(".alerts").hide();
 			stopElement.find(".arrivals").width("100%");
 		} else if (isValidAlert(applicableSituations)) {
