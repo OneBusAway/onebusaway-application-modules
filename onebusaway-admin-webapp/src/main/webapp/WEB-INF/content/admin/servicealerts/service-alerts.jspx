@@ -78,8 +78,7 @@
 						<th>Summary Title</th>
 						<th>Severity</th>
 						<th>Reason</th>
-						<th></th>
-						<th></th>
+						<th colspan="4">Actions</th>
 					</tr>
 					<s:iterator value="agencies" status="agencyStatus">
 						<s:set var="agencyIdx" value="%{#agencyStatus.index}" />
@@ -106,23 +105,33 @@
 										<a href="${url}" id="deleteAlertLink" class="link">Delete</a>
 									</fieldset>
 								</td>
-								<!-- twitter -->
+								<!-- twitter only if configured-->
 								<td>
 									<fieldset>
-										<s:url var="url" action="service-alert-edit!tweetAlert.action" namespace="/admin/servicealerts" >
-											<s:param name="alertId" value="id" />
-										</s:url>
-										<a href="${url}" id="tweetAlertLink" class="link">Tweet</a>
+										<s:if test="isPageAvailable('showTweet', 'org.onebusaway.webapp.actions.admin.servicealerts.ServiceAlertEditAction')">
+											<s:url var="url" action="service-alert-edit!tweetAlert.action" namespace="/admin/servicealerts" >
+												<s:param name="alertId" value="id" />
+											</s:url>
+											<a href="${url}" id="tweetAlertLink" class="link">Tweet</a>
+										</s:if>
+										<s:else>
+											<!-- blank -->
+										</s:else>
 									</fieldset>
 								</td>
 
 								<!-- everbridge -->
 								<td>
 									<fieldset>
-										<s:url var="url" action="service-alert-edit!everbridgeAlert.action" namespace="/admin/servicealerts" >
-											<s:param name="alertId" value="id" />
-										</s:url>
-										<a href="${url}" id="everbridgeAlertLink" class="link">Everbridge</a>
+										<s:if test="isPageAvailable('showEverbridge', 'org.onebusaway.webapp.actions.admin.servicealerts.ServiceAlertEditAction')">
+											<s:url var="url" action="service-alert-edit!everbridgeAlert.action" namespace="/admin/servicealerts" >
+												<s:param name="alertId" value="id" />
+											</s:url>
+											<a href="${url}" id="everbridgeAlertLink" class="link">Everbridge</a>
+										</s:if>
+										<s:else>
+											<!-- blank -->
+										</s:else>
 									</fieldset>
 								</td>
 

@@ -35,41 +35,10 @@ import org.springframework.util.StringUtils;
 
 public class IndexAction extends OneBusAwayNYCAdminActionSupport {
 
-	@Autowired
-	private ConfigurationServiceClient _configurationServiceClient;
-	
 	private static final long serialVersionUID = 1L;
 	private static Logger _log = LoggerFactory.getLogger(IndexAction.class);
 	
-	public boolean getConfig(String partialKey) {
-		_log.debug("partialKey=" + partialKey);
-		boolean result = true; // default is to show feature
-		try {
-			List<Map<String, String>> components = _configurationServiceClient.getItems("api", "config", "list");
-			if (components == null) {
-				_log.debug("getItems call failed");
-				return result;
-			}
-			for (Map<String, String> component: components) {
-				_log.debug("component=" + component);
-				if (component.containsKey("component") && "admin".equals(component.get("component"))) {
-					_log.debug("found admin component");
-					if (partialKey.equals(component.get("key"))) {
-						_log.debug("found key=" + partialKey + ", and value=" + component.get("value"));
-						return "true".equalsIgnoreCase(component.get("value"));
-					}
-				}
-			}
-		} catch (Exception e) {
-			_log.error("config query broke:", e);
-		}
-		return result;
-	}
-	
-	public boolean isPageAvailable(String key, String actionName) {
-		return getConfig(key) && hasPrivilegeForPage(actionName);
-	}
-	
+
 	public String getName() {
 		UserRole user =  getCurrentUserValue().getRoles().iterator().next(); // use first
 		String name = user.getName().split("_")[1];
