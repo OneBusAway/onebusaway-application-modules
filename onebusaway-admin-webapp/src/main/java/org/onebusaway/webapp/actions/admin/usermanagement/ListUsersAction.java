@@ -20,7 +20,7 @@ public class ListUsersAction extends OneBusAwayNYCAdminActionSupport {
     private List<UserDetail> userDetailsList;
     private int usersPerPage = 5;
     private int numberOfPages;
-    private int thisPage = 1;
+    private int thisPage;
 
     public String execute() {
         super.execute();
@@ -29,51 +29,31 @@ public class ListUsersAction extends OneBusAwayNYCAdminActionSupport {
         return SUCCESS;
     }
 
-    //why are these all strings??
-
     public String firstPage(){
         setThisPage(1);
         int count = userManagementService.getUserDetailsCount();
-
-        log.error("User details count is: " + count);
-        log.error("Users per page is: " + getUsersPerPage());
-
         setNumberOfPages((int) Math.ceil((double)count/getUsersPerPage()));
-
-        log.error("Number of pages is: " + getNumberOfPages());
-
-        int first = 0;
-        log.error("First: " + first);
-        setUserDetailsList(userManagementService.getUserDetails(first, getUsersPerPage()));
+        int firstUser = 0;
+        setUserDetailsList(userManagementService.getUserDetails(firstUser, getUsersPerPage()));
 
         return SUCCESS;
     }
 
     public String nextPage() {
-        setThisPage(thisPage + 1);
-        int count = userManagementService.getUserDetailsCount();
-        setNumberOfPages((int) Math.ceil((double)count/getUsersPerPage()));
-        int first = (getThisPage() * getUsersPerPage()) - getUsersPerPage();
-        log.error("First: " + first);
-        setUserDetailsList(userManagementService.getUserDetails(first, getUsersPerPage()));
-
-        addActionMessage("here we are at the Next page");
+        setThisPage(getThisPage() + 1);
+        int firstUser = (getThisPage() * getUsersPerPage()) - getUsersPerPage();
+        setUserDetailsList(userManagementService.getUserDetails(firstUser, getUsersPerPage()));
 
         return SUCCESS;
     }
 
     public String previousPage() {
+        int firstUser = 0;
         setThisPage(thisPage - 1);
-        if (thisPage ==1) {
-            firstPage();
-            addActionMessage("here we are at the Next page");
-            return SUCCESS;
+        if (thisPage !=1) {
+            firstUser = (getThisPage() * getUsersPerPage()) - getUsersPerPage();
         }
-        int first = (getThisPage() * getUsersPerPage()) - getUsersPerPage();
-        log.error("First: " + first);
-        setUserDetailsList(userManagementService.getUserDetails(first, getUsersPerPage()));
-
-        addActionMessage("here we are at the Previous page");
+        setUserDetailsList(userManagementService.getUserDetails(firstUser, getUsersPerPage()));
 
         return SUCCESS;
     }
