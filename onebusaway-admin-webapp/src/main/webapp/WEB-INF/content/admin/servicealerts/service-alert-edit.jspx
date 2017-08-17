@@ -82,6 +82,8 @@
 						headerValue="Which agency owns this alert?" list="agencies" 
 						value="agencyId" 
 						listKey="%{agency.id}" listValue="%{agency.name}" theme="xhtml"/>
+					<s:textfield label="Start Date" id="publicationWindowStartDate" name="startDate" value="%{startDate}" theme="xhtml"/>
+					<s:textfield label="End Date" id="publicationWindowEndDate" name="endDate" value="%{endDate}" theme="xhtml"/>
 				</table>
 			</div>
 			<s:hidden name="alertId" value="%{model.id}"/>

@@ -74,6 +74,7 @@
 			<div id="alertsTableDiv">
 				<table id="alertsTable">
 					<tr>
+						<th>Active</th>
 						<th>Agency</th>
 						<th>Summary Title</th>
 						<th>Severity</th>
@@ -85,6 +86,7 @@
 						<!-- <s:set var="agencyId" value="%{#agency.agency.id}" /> -->
 						<s:iterator value="situationsByAgency[#agencyIdx]" status="id">
 							<tr>
+								<td><s:property value="isActive(publicationWindows)" /></td>
 								<td><s:property value="agency.id" /></td>
 								<td><s:property value="summaries[0].value" /></td>
 								<td><s:property value="severity" /></td>

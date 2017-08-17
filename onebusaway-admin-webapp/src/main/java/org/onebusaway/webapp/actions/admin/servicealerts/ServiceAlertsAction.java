@@ -24,6 +24,7 @@ import org.onebusaway.webapp.actions.OneBusAwayNYCAdminActionSupport;
 import org.onebusaway.transit_data.model.AgencyWithCoverageBean;
 import org.onebusaway.transit_data.model.ListBean;
 import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
+import org.onebusaway.transit_data.model.service_alerts.TimeRangeBean;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -158,6 +159,18 @@ public class ServiceAlertsAction extends OneBusAwayNYCAdminActionSupport {
       throw new RuntimeException("Check your onebusaway-nyc-transit-data-federation-webapp configuration", t);
     }
     return SUCCESS;
+  }
+  
+  public boolean isActive(List<TimeRangeBean> windows){
+	  if(windows != null && !windows.isEmpty()){
+		  long now = System.currentTimeMillis();
+		  TimeRangeBean timeRangeBean = windows.get(0);
+		  if((timeRangeBean.getTo() > 0 &&  timeRangeBean.getTo() <= now) ||
+				  (timeRangeBean.getFrom() > 0 &&  timeRangeBean.getFrom() >= now)){
+			  return false;
+		  }
+	  }
+	  return true;
   }
 
   @Validations(requiredStrings = {@RequiredStringValidator(fieldName = "agencyId", message = "missing required agencyId field")})

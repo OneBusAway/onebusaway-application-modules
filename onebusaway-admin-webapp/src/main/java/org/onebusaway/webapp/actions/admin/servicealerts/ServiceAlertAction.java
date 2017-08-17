@@ -16,7 +16,9 @@
 package org.onebusaway.webapp.actions.admin.servicealerts;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -35,6 +37,7 @@ import org.onebusaway.transit_data.model.service_alerts.NaturalLanguageStringBea
 import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationAffectsBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationConsequenceBean;
+import org.onebusaway.transit_data.model.service_alerts.TimeRangeBean;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -172,6 +175,70 @@ public class ServiceAlertAction extends ActionSupport implements
   
   public void setCancel(String cancel) {
     this.cancel = true;
+  }
+  
+  public String getStartDate() {
+	  List<TimeRangeBean> publicationWindows = _model.getPublicationWindows();
+	  if(publicationWindows == null || publicationWindows.isEmpty() || publicationWindows.get(0).getFrom() == 0){
+		  return null;
+	  }
+	  Date date = new Date(publicationWindows.get(0).getFrom());
+	  SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+	  return sdf.format(date);
+  }
+
+  public void setStartDate(Date startDate) {
+	  List<TimeRangeBean> publicationWindows = _model.getPublicationWindows();
+	  if (publicationWindows == null) {
+		  publicationWindows = new ArrayList<TimeRangeBean>();
+	      _model.setPublicationWindows(publicationWindows);
+	  }
+	  
+	  if (publicationWindows.isEmpty()) {
+		  publicationWindows.add(new TimeRangeBean());
+	  }
+	  
+	  TimeRangeBean timeRangeBean = publicationWindows.get(0);
+	  
+	  if(startDate != null){
+		  timeRangeBean.setFrom(startDate.getTime());
+	  }
+	  else{
+		  timeRangeBean.setFrom(0); 
+	  }
+	 
+  }
+  
+  public String getEndDate() {
+	  List<TimeRangeBean> publicationWindows = _model.getPublicationWindows();
+	  if(publicationWindows == null || publicationWindows.isEmpty() || publicationWindows.get(0).getTo() == 0){
+		  return null;
+	  }
+	  Date date = new Date(publicationWindows.get(0).getTo());
+	  SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+	  return sdf.format(date);
+  }
+
+  public void setEndDate(Date endDate) {
+	  List<TimeRangeBean> publicationWindows = _model.getPublicationWindows();
+	  if (publicationWindows == null) {
+		  publicationWindows = new ArrayList<TimeRangeBean>();
+	      _model.setPublicationWindows(publicationWindows);
+	  }
+	  
+	  if (publicationWindows.isEmpty()) {
+		  publicationWindows.add(new TimeRangeBean());
+	  }
+	  
+	  TimeRangeBean timeRangeBean = publicationWindows.get(0);
+	  
+	  if(endDate != null){
+		  timeRangeBean.setTo(endDate.getTime());
+	  }
+	  else{
+		  timeRangeBean.setTo(0); 
+	  }
+	 
   }
 
   @Override
