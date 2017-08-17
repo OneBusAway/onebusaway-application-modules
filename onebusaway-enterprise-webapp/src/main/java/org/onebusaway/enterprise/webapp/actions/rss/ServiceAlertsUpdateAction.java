@@ -78,7 +78,7 @@ public class ServiceAlertsUpdateAction extends OneBusAwayEnterpriseActionSupport
 	    // Add Service Alerts
 	    SyndEntry serviceAlertEntry = new SyndEntryImpl();
 	    SyndContent saContent = new SyndContentImpl();
-	    StatusGroup saGroup = _statusProvider.getServiceAlertStatus();
+	    StatusGroup saGroup = _statusProvider.getAgencyServiceAlertStatus();
 
 	    if (saGroup.getItems().size() == 0) {
 	      serviceAlertEntry = new SyndEntryImpl();

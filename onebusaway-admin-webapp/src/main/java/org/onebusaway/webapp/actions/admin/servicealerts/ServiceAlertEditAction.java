@@ -283,8 +283,9 @@ public class ServiceAlertEditAction extends ActionSupport implements
       String response = null;
       try {
         _log.info("calling tweet....");
-        response = _notificationService.tweet(TwitterServiceImpl.toTweet(_transitDataService.getServiceAlertForId(_alertId)));
-        _log.info("tweet succeeded with response=" + response);
+        response = _notificationService.tweet(
+        	    TwitterServiceImpl.toTweet(_transitDataService.getServiceAlertForId(_alertId),
+                        _notificationService.getNotificationStrategy()));
       } catch (IOException ioe) {
         _log.error("tweet failed!", ioe);
         return "error";

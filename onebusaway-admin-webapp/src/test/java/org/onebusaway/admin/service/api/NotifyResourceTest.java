@@ -15,6 +15,8 @@
  */
 package org.onebusaway.admin.service.api;
 
+import org.onebusaway.admin.service.impl.NotificationServiceImpl;
+import org.onebusaway.presentation.impl.service_alerts.NotificationStrategy;
 import org.onebusaway.transit_data.model.service_alerts.NaturalLanguageStringBean;
 import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
 
@@ -37,7 +39,14 @@ public class NotifyResourceTest {
     @Test
     public void testToTweet() {
         ServiceAlertBean bean = null;
+
+        NotificationServiceImpl nsi = new NotificationServiceImpl();
+        NotificationStrategy ns = new TestNotificationStrategy();
+        nsi.setNotificationStrategy(ns);
+
         NotifyResource resource = new NotifyResource();
+        resource.setNotificationService(nsi);
+
         assertNull(resource.toTweet(bean));
 
         bean = new ServiceAlertBean();
@@ -115,5 +124,18 @@ public class NotifyResourceTest {
         bean.setLang("en");
         bean.setValue(msg);
         return bean;
+    }
+
+    public static class TestNotificationStrategy implements NotificationStrategy {
+
+        @Override
+        public String summarizeRoute(String routeId) {
+            return routeId;
+        }
+
+        @Override
+        public String summarizeStop(String stopId) {
+            return stopId;
+        }
     }
 }

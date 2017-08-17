@@ -16,6 +16,7 @@
 package org.onebusaway.admin.service.impl;
 
 import org.onebusaway.admin.service.NotificationService;
+import org.onebusaway.presentation.impl.service_alerts.NotificationStrategy;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
@@ -25,13 +26,20 @@ import java.io.IOException;
  */
 public class NotificationServiceImpl implements NotificationService {
 
-    TwitterServiceImpl _twitter;
+    private TwitterServiceImpl _twitter;
+    private NotificationStrategy _tweetStrategy;
 
     @Autowired
     public void setTwitterServiceImpl(TwitterServiceImpl twitter) {
         _twitter = twitter;
     }
 
+    @Autowired
+    public void setNotificationStrategy(NotificationStrategy strategy) { _tweetStrategy = strategy; }
+
+    public NotificationStrategy getNotificationStrategy() {
+        return _tweetStrategy;
+    }
 
     public String tweet(String message) throws IOException {
         if (_twitter == null) {

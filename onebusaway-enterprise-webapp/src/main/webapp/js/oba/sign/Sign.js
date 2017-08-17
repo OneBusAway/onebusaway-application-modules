@@ -20,6 +20,7 @@ OBA.Sign = function() {
 	
 	var refreshInterval = 30;
 	var timeout = 30;
+	var scrollSpeed = 2; // pixels per frame.  1 or 2 are good defaults
 	var configurableMessageHtml = null;
 	var stopIdsToRequest = null;
 	var stopInfo = {};
@@ -93,6 +94,8 @@ OBA.Sign = function() {
 		refreshInterval = getParameterByName("refresh", refreshInterval);
 		var disableAlertsStr = getParameterByName("disableAlerts", "false");
 		disableAlerts = (disableAlertsStr.toLowerCase() == "true");
+
+		scrollSpeed = parseInt(getParameterByName("scrollSpeed", 2));
 
 		vehiclesPerStop = getParameterByName("vehiclesPerStop", vehiclesPerStop);
 		
@@ -725,7 +728,7 @@ OBA.Sign = function() {
 						pauseOnHover: false,
 						autoMode: 'loop',
 						frameRate: 20,
-						speed: 2
+						speed: scrollSpeed
 					});
 				}
 				
@@ -745,7 +748,7 @@ OBA.Sign = function() {
 						pauseOnHover: false,
 						autoMode: 'loop',
 						frameRate: 20,
-						speed: 2
+						speed: scrollSpeed
 					});
 				}
 				
