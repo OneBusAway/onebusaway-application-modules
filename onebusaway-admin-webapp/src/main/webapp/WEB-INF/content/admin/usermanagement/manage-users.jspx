@@ -64,8 +64,11 @@
                             <a href="${url}">Create User</a>
                         </li>
                         <li><s:url var="url" value="list-users.action" />
-                            <a href="${url}">List Users</a>
+                            <a href="${url}">List Users paginated</a>
                         </li>
+						<li><s:url var="url" value="users-by-role.action" />
+							<a href="${url}">List Users by role</a>
+						</li>
                     </ul>
                 </div>
             </header>
