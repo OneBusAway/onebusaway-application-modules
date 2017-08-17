@@ -33,6 +33,8 @@
     <import resource="classpath:org/onebusaway/util/application-context.xml" />
 
     <context:component-scan base-package="org.onebusaway.enterprise.webapp.impl" />
+    <!-- notification strategy lives in presentation -->
+    <context:component-scan base-package="org.onebusaway.presentation.impl.service_alerts" />
     
     <bean id="currentUserStrategyImpl" class="org.onebusaway.users.impl.CurrentUserStrategyImpl" primary="true" />
 

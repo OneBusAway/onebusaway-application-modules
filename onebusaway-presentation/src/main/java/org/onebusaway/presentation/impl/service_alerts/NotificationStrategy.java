@@ -13,16 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.onebusaway.enterprise.webapp.actions.status.service;
+package org.onebusaway.presentation.impl.service_alerts;
 
-import org.onebusaway.enterprise.webapp.actions.status.model.StatusGroup;
+public interface NotificationStrategy {
 
-public interface StatusProvider {
-
-  StatusGroup getIcingaStatus();
-
-  StatusGroup getAgencyServiceAlertStatus();
-  
-  StatusGroup getAgencyMetadataStatus();
-
+    String summarizeRoute(String routeId);
+    String summarizeStop(String stopId);
 }

@@ -21,8 +21,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import org.apache.struts2.convention.annotation.InterceptorRef;
-import org.apache.struts2.convention.annotation.InterceptorRefs;
 import org.apache.struts2.convention.annotation.ParentPackage;
 import org.apache.struts2.convention.annotation.Result;
 import org.apache.struts2.convention.annotation.Results;
@@ -34,7 +32,6 @@ import org.onebusaway.presentation.bundles.service_alerts.Severity;
 import org.onebusaway.transit_data.model.AgencyWithCoverageBean;
 import org.onebusaway.transit_data.model.service_alerts.NaturalLanguageStringBean;
 import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
-import org.onebusaway.transit_data.model.service_alerts.SituationAffectsBean;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,7 +39,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.opensymphony.xwork2.ActionSupport;
 import com.opensymphony.xwork2.ModelDriven;
-import com.opensymphony.xwork2.Preparable;
 
 @ParentPackage("onebusaway-admin-webapp-default")
 @Results({
@@ -65,6 +61,8 @@ public class ServiceAlertEditAction extends ActionSupport implements
   private boolean _newServiceAlert = false;
   
   private TransitDataService _transitDataService;
+
+
 
   @Override
   public ServiceAlertBean getModel() {
@@ -244,7 +242,9 @@ public class ServiceAlertEditAction extends ActionSupport implements
       String response = null;
       try {
         _log.info("calling tweet....");
-        response = _notificationService.tweet(TwitterServiceImpl.toTweet(_transitDataService.getServiceAlertForId(_alertId)));
+        response = _notificationService.tweet(
+                TwitterServiceImpl.toTweet(_transitDataService.getServiceAlertForId(_alertId),
+                        _notificationService.getNotificationStrategy()));
         _log.info("tweet succeeded with response=" + response);
       } catch (IOException ioe) {
         _log.error("tweet failed!", ioe);
