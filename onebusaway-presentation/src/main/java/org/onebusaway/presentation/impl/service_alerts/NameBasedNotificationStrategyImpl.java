@@ -15,6 +15,7 @@
  */
 package org.onebusaway.presentation.impl.service_alerts;
 
+import org.onebusaway.exceptions.NoSuchStopServiceException;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data.model.RouteBean;
 import org.onebusaway.transit_data.model.StopBean;
@@ -61,6 +62,10 @@ public class NameBasedNotificationStrategyImpl implements NotificationStrategy {
             return stop.getName();
         } catch (IllegalStateException ise) {
             // invalid id -- return it as is
+            return stopIdStr;
+        } catch (NoSuchStopServiceException nsse) {
+            // something went wrong
+            _log.error("couldn't find stop for stopId=|" + stopIdStr + "|");
             return stopIdStr;
         }
     }

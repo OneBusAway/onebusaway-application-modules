@@ -21,7 +21,19 @@ jQuery(function() {
 	// delete the condition for this service alert
 	jQuery(".deleteCondition").click(onDeleteCondition);
 
-	// Check  if this is the "Edit Service Alert" page
+    // hook up service alert links
+    for (var i = 0; i < 1000; i++) {
+    	var selector = "#tweetAlertLink" + i;
+
+    	if (jQuery(selector).length ) {
+            jQuery(selector).click(onTweetCondition);
+        } else {
+    		// first element not found signifies break
+    		break;
+		}
+    }
+
+    // Check  if this is the "Edit Service Alert" page
 	if ($("#service-alert_submit").length > 0) {
 		// Only enable the Save button if an "owning agency" is selected.
 		if ($("#service-alert_agencyId option:selected").val() == "null") {
@@ -35,6 +47,7 @@ jQuery(function() {
 			}
 		});
 	}
+
 });
 
 function getAgencySelectOptions() {
@@ -95,17 +108,48 @@ function onAddAnotherCondition() {
 	$("#conditionTable td:last.deleteCondition").click(onDeleteCondition);
 }
 function onDeleteCondition() {
-	$(this).closest('tr').remove();
-	// Reset the name attributes for the remaining conditions to match their 
-	// new positions in the list.
-	$('#conditionTable tr.affectsClause').each(function(index) {
-		$(this).find('.conditionClauseLabelLetter').text(String.fromCharCode('A'.charCodeAt(0) + index));
-		$(this).find('.alertCondition').each(function() {
-			var nameAttr = $(this).attr('name');
-			var idx1 = nameAttr.indexOf('[');
-			var idx2 = nameAttr.indexOf(']');
-			nameAttr = nameAttr.substring(0,idx1+1) + index + nameAttr.substring(idx2);
-			$(this).attr('name', nameAttr);
-		});
-	});
+    $(this).closest('tr').remove();
+    // Reset the name attributes for the remaining conditions to match their
+    // new positions in the list.
+    $('#conditionTable tr.affectsClause').each(function (index) {
+        $(this).find('.conditionClauseLabelLetter').text(String.fromCharCode('A'.charCodeAt(0) + index));
+        $(this).find('.alertCondition').each(function () {
+            var nameAttr = $(this).attr('name');
+            var idx1 = nameAttr.indexOf('[');
+            var idx2 = nameAttr.indexOf(']');
+            nameAttr = nameAttr.substring(0, idx1 + 1) + index + nameAttr.substring(idx2);
+            $(this).attr('name', nameAttr);
+        });
+    });
 }
+function onTweetCondition(handler) {
+	var aId = handler.target.id;
+	var id = aId.replace("tweetA", "");
+	var divSelector = "#tweetDiv" + id;
+	var alertDiv = jQuery(divSelector);
+	var alertId = alertDiv.html();
+    sendAndShowTweet(alertId);
+}
+function sendAndShowTweet(alertId) {
+    jQuery.ajax({
+        url: "service-alert-edit!tweetAlert.action",
+        data: {
+            "alertId": alertId
+        },
+        type: "GET",
+        async: false,
+        success: function (data) {
+			jQuery("#dialog").show();
+            jQuery("#dialog").html(data);
+            jQuery("#dialog").dialog();
+        },
+        error: function (data) {
+            jQuery("#dialog").show();
+            jQuery("#dialog").html(data);
+            jQuery("#dialog").dialog();
+        }
+    })
+}
+
+
+
