@@ -76,6 +76,7 @@
 			<div id="alertsTableDiv">
 				<table id="alertsTable">
 					<tr>
+						<th>Active</th>
 						<th>Agency</th>
 						<th>Summary Title</th>
 						<th>Severity</th>
@@ -90,6 +91,7 @@
 							<c:url var="encodedId" value=""><c:param name="output" value="${id}" /></c:url>
 							<c:set var="encodedId" value="${fn:substringAfter(encodedId, '=')}" />
 								<tr>
+									<td><s:property value="isActive(publicationWindows)" /></td>
 									<td><s:property value="agency.id" /></td>
 									<td><s:property value="summaries[0].value" /></td>
 									<td><s:property value="severity" /></td>
@@ -97,6 +99,24 @@
 									<td>
 										<fieldset>
 											<s:url var="url" action="service-alert-edit.action" namespace="/admin/servicealerts" >
+											<s:param name="alertId" value="id" />
+											</s:url>
+										<a href="${url}" id="editAlertLink" class="link">Edit</a>
+									</fieldset>
+								</td>
+								<td>
+									<fieldset>
+										<s:url var="url" action="service-alert-edit!deleteAlert.action" namespace="/admin/servicealerts" >
+											<s:param name="alertId" value="id" />
+										</s:url>
+										<a href="${url}" id="deleteAlertLink" class="link">Delete</a>
+									</fieldset>
+								</td>
+								<!-- twitter only if configured-->
+								<td>
+									<fieldset>
+										<s:if test="isPageAvailable('showTweet', 'org.onebusaway.webapp.actions.admin.servicealerts.ServiceAlertEditAction')">
+											<s:url var="url" action="service-alert-edit!tweetAlert.action" namespace="/admin/servicealerts" >
 												<s:param name="alertId" value="id" />
 											</s:url>
 											<a href="${url}" id="editAlertLink" class="link">Edit</a>

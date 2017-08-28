@@ -16,11 +16,15 @@
 package org.onebusaway.webapp.actions.admin.servicealerts;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import org.apache.struts2.convention.annotation.InterceptorRef;
+import org.apache.struts2.convention.annotation.InterceptorRefs;
 import org.apache.struts2.convention.annotation.ParentPackage;
 import org.apache.struts2.convention.annotation.Result;
 import org.apache.struts2.convention.annotation.Results;
@@ -32,6 +36,8 @@ import org.onebusaway.presentation.bundles.service_alerts.Severity;
 import org.onebusaway.transit_data.model.AgencyWithCoverageBean;
 import org.onebusaway.transit_data.model.service_alerts.NaturalLanguageStringBean;
 import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
+import org.onebusaway.transit_data.model.service_alerts.SituationAffectsBean;
+import org.onebusaway.transit_data.model.service_alerts.TimeRangeBean;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,6 +45,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.opensymphony.xwork2.ActionSupport;
 import com.opensymphony.xwork2.ModelDriven;
+import com.opensymphony.xwork2.Preparable;
 
 @ParentPackage("onebusaway-admin-webapp-default")
 @Results({
@@ -65,25 +72,12 @@ public class ServiceAlertEditAction extends ActionSupport implements
   
   private TransitDataService _transitDataService;
 
-
-
   @Override
   public ServiceAlertBean getModel() {
     if (_model == null) {
       _model = new ServiceAlertBean();
       _model.setReason("Initial setup of empty ServiceAlert");
     }
-    /*
-    List<SituationAffectsBean> allAffects = _model.getAllAffects();
-    if (allAffects == null) {
-      allAffects = new ArrayList<SituationAffectsBean>();
-    }
-    if (allAffects.isEmpty()) {
-      SituationAffectsBean affectBean = new SituationAffectsBean();
-      allAffects.add(affectBean);
-      _model.setAllAffects(allAffects);
-    }
-    */
     return _model;
   }
 
@@ -169,25 +163,74 @@ public class ServiceAlertEditAction extends ActionSupport implements
     NaturalLanguageStringBean nls = descriptions.get(0);
     return nls.getValue();
   }
-  /*
-  @Override
-  public void prepare() throws Exception {
-    try {
-      if (_alertId != null && !_alertId.trim().isEmpty())
-        _model = _transitDataService.getServiceAlertForId(_alertId);
-    } catch (RuntimeException e) {
-      _log.error("Unable to retrieve Service Alert", e);
-      throw e;
-    }
+  
+  public String getStartDate() {
+	  List<TimeRangeBean> publicationWindows = _model.getPublicationWindows();
+	  if(publicationWindows == null || publicationWindows.isEmpty() || publicationWindows.get(0).getFrom() == 0){
+		  return null;
+	  }
+	  Date date = new Date(publicationWindows.get(0).getFrom());
+	  SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+	  return sdf.format(date);
   }
-  */
+
+  public void setStartDate(Date startDate) {
+	  List<TimeRangeBean> publicationWindows = _model.getPublicationWindows();
+	  if (publicationWindows == null) {
+		  publicationWindows = new ArrayList<TimeRangeBean>();
+	      _model.setPublicationWindows(publicationWindows);
+	  }
+	  
+	  if (publicationWindows.isEmpty()) {
+		  publicationWindows.add(new TimeRangeBean());
+	  }
+	  
+	  TimeRangeBean timeRangeBean = publicationWindows.get(0);
+	  
+	  if(startDate != null){
+		  timeRangeBean.setFrom(startDate.getTime());
+	  }
+	  else{
+		  timeRangeBean.setFrom(0); 
+	  }
+	 
+  }
+  
+  public String getEndDate() {
+	  List<TimeRangeBean> publicationWindows = _model.getPublicationWindows();
+	  if(publicationWindows == null || publicationWindows.isEmpty() || publicationWindows.get(0).getTo() == 0){
+		  return null;
+	  }
+	  Date date = new Date(publicationWindows.get(0).getTo());
+	  SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+	  return sdf.format(date);
+  }
+
+  public void setEndDate(Date endDate) {
+	  List<TimeRangeBean> publicationWindows = _model.getPublicationWindows();
+	  if (publicationWindows == null) {
+		  publicationWindows = new ArrayList<TimeRangeBean>();
+	      _model.setPublicationWindows(publicationWindows);
+	  }
+	  
+	  if (publicationWindows.isEmpty()) {
+		  publicationWindows.add(new TimeRangeBean());
+	  }
+	  
+	  TimeRangeBean timeRangeBean = publicationWindows.get(0);
+	  
+	  if(endDate != null){
+		  timeRangeBean.setTo(endDate.getTime());
+	  }
+	  else{
+		  timeRangeBean.setTo(0); 
+	  }
+	 
+  }
+
+
   @Override
   public String execute() {
-    //if (_alertId != null) {
-    //  _model = _transitDataService.getServiceAlertForId(_alertId);
-    //}
-    
-    //String alertId = _model.getId();
     try {
       if (_alertId != null && !_alertId.trim().isEmpty())
         _model = _transitDataService.getServiceAlertForId(_alertId);
@@ -202,7 +245,6 @@ public class ServiceAlertEditAction extends ActionSupport implements
         _agencyId = _alertId.substring(0, index);
     }
 
-    //_model.setReason("Set in execute method");
     try {
       _agencies = _transitDataService.getAgenciesWithCoverage();
     } catch (Throwable t) {
@@ -222,7 +264,6 @@ public class ServiceAlertEditAction extends ActionSupport implements
   }
 
   public String deleteAlert() {
-    String id = _alertId;
     try {
       _transitDataService.removeServiceAlert(_alertId);
     } catch (RuntimeException e) {
@@ -246,7 +287,7 @@ public class ServiceAlertEditAction extends ActionSupport implements
       try {
         _log.info("calling tweet....");
         response = _notificationService.tweet(
-                TwitterServiceImpl.toTweet(_transitDataService.getServiceAlertForId(_alertId),
+        	    TwitterServiceImpl.toTweet(_transitDataService.getServiceAlertForId(_alertId),
                         _notificationService.getNotificationStrategy()));
         _log.info("tweet succeeded with response=" + response);
         _twitterResult = response;

@@ -48,6 +48,21 @@ jQuery(function() {
 		});
 	}
 
+	jQuery("#publicationWindowStartDate").datepicker({ 
+		dateFormat: "yy-mm-dd",
+		onSelect: function(selectedDate) {
+			jQuery("#publicationWindowEndDate").datepicker("option", "minDate", selectedDate);
+		}
+	});
+	
+	jQuery("#publicationWindowEndDate").datepicker({ 
+		dateFormat: "yy-mm-dd",
+		onSelect: function(selectedDate) {
+			jQuery("#publicationWindowStartDate").datepicker("option", "maxDate", selectedDate);
+		}
+	});
+	
+
 });
 
 function getAgencySelectOptions() {

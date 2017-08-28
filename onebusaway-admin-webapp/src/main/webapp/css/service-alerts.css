@@ -95,6 +95,7 @@
 }
 
 #ServiceAlerts #service-alert .tdLabel,
+#ServiceAlerts #describeAlertsTableDiv th,
 #AgencyMetadata #agency-metadata-edit .tdLabel {
     font-family: "Arial Bold","Arial";
     font-weight: 700;
@@ -183,3 +184,7 @@
  	height: 2.5em;
  	margin-bottom: 3em;
  }
+ 
+
+ 
+ 
