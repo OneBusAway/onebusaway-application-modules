@@ -33,37 +33,47 @@
 				Enter your username <s:textfield name="username" /> and 
 				<s:submit value="Click here" />
 			</s:form>
+			<br></br>
+			<div id="navigation">
+				<s:url var="url" namespace="/" action="logout"></s:url>
+				<s:a href="%{url}">Go Back to Login</s:a>
+			</div>
 		</s:if>
-		<s:else>
-			<s:if test="forbidden">
+		<s:elseif test="forbidden">
 				<p class="error">Please login to view this resource.</p>
-			</s:if>
+
+			<div id="navigation">
+				<s:url var="url" namespace="/" action="logout"></s:url>
+				<s:a href="%{url}">Go Back to Login</s:a>
+			</div>
+		</s:elseif>
+		<s:else>
+			<s:form action="/userIndex_login" namespace="/admin" method="POST">
+				<fieldset>
+					<label class="top">Username:</label>
+					<s:textfield key="username" name="j_username"/>
+				</fieldset>
+
+				<fieldset>
+					<label class="top">Password:</label>
+					<s:password name="j_password"/>
+				</fieldset>
+
+				<fieldset>
+					<s:checkbox name="_spring_security_remember_me" value="true" label="Remember Me"/>
+					<label class="inline">Remember Me</label>
+				</fieldset>
+
+				<s:hidden name="j_indexType" value="username"/>
+				<s:submit value="Login"/>
+			</s:form>
 		</s:else>
-
-	    <s:form action="/userIndex_login" namespace="/admin" method="POST">
-			<fieldset>
-	        	<label class="top">Username:</label>
-    	    	<s:textfield key="username" name="j_username"/>
-			</fieldset>
-
-			<fieldset>
-        		<label class="top">Password:</label>
-    	    	<s:password name="j_password"/>
-    	    </fieldset>
-    	    
-    	    <fieldset>
-	    	    <s:checkbox name="_spring_security_remember_me" value="true" label="Remember Me"/>
-				<label class="inline">Remember Me</label>
-			</fieldset>
-			
-     	    <s:hidden name="j_indexType" value="username"/>
-     	    <s:submit value="Login"/>
-        </s:form>
 	</s:if>
 	<s:else>
 		<s:url var="url" namespace="/admin" action="index"/>
 		<p>You are already logged in.<br/><a href="${url}">Go to index page</a><br/><a href="logout.action">Logout</a></p>
 	</s:else>
+<br></br>
 </div>
 </div>
 </body>

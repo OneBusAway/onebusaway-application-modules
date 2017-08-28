@@ -16,7 +16,6 @@
  
 #container {
  	margin-top: 10px;
- 	overflow: hidden;
 }
 
 #search {  
@@ -35,8 +34,56 @@
 	padding:3px 3px 0;
 }
 
+header {
+    margin-top: 20px;
+}
+
+header h2 {
+    display:inline;
+}
+
+#userAdminList {
+    float: right;
+    display:inline;
+}
+
+#userAdminList ul {
+	padding: 10px 0;
+}
+
+#userAdminList li a {
+
+	display: inline-block;
+	padding: 0px 5px 10px;
+	color: #0000FF;
+}
+
 #createUser img {
 	vertical-align: middle;
+}
+
+.usersTable {
+	border: solid 1px #666;
+	margin: 10px 0;
+}
+
+.usersTable th {
+	padding-right: 10px;
+	text-align: left;
+	font-size: 12px;
+	padding-left: 15px;
+}
+
+.usersTable .headerRow th{
+	border-bottom: solid 1px #666;
+	font-size: 14px;
+}
+
+.usersTable td {
+	padding-right: 10px;
+	padding-top: 5px;
+	padding-bottom: 5px;
+	padding-left: 15px;
 }
 
 #addUser {

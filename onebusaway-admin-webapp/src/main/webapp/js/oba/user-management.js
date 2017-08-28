@@ -186,3 +186,31 @@ function showResult() {
 	jQuery("#userResult").show();
 }
 
+function showUserToEdit(username) {
+    /* if we've come to this page from list-users, we might have a username
+     * if we do, set it and get User Details for editing
+     */
+    var uname = username;
+    if(!!username) {
+        jQuery.ajax({
+            url: "../../api/users/getUserDetails",
+            data: {"user" : uname},
+            type: "GET",
+            async: false,
+            success: function(response) {
+                jQuery("#userDetails #userId").val(response.id);
+                jQuery("#userDetails #username").text(response.username);
+                var userRole = response.role;
+                jQuery("#userDetails #userRole").text(userRole.split('_')[1]);
+                jQuery("#userDetails").show();
+
+                jQuery("#editUser #editUserName").text(response.username);
+                jQuery("#editUser #newPassword").val("");
+                jQuery("#editUser #newRole").val(userRole).attr("selected", true);
+            },
+            error: function(request) {
+                alert("There was an error processing your request. Please try again.");
+            }
+        });
+    }
+}
