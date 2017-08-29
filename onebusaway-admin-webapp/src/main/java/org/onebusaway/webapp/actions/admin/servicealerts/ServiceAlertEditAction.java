@@ -52,8 +52,11 @@ import com.opensymphony.xwork2.Preparable;
 @ParentPackage("onebusaway-admin-webapp-default")
 @Results({
   @Result(type = "redirectAction", name = "refreshResult", params = {
-      "actionName", "service-alerts", "parse", "true"})
-      })
+      "actionName", "service-alerts", "parse", "true"}),
+        @Result(name="twitterResult", type="json",
+                params={"root", "twitterResult"}),
+
+})
 
 public class ServiceAlertEditAction extends ActionSupport implements
     ModelDriven<ServiceAlertBean> {
@@ -333,16 +336,25 @@ public class ServiceAlertEditAction extends ActionSupport implements
         response = _notificationService.tweet(
         	    TwitterServiceImpl.toTweet(_transitDataService.getServiceAlertForId(_alertId),
                         _notificationService.getNotificationStrategy()));
+        _log.info("tweet succeeded with response=" + response);
+        _twitterResult = response;
       } catch (IOException ioe) {
         _log.error("tweet failed!", ioe);
-        return "error";
+        _twitterResult = "Exception: " + ioe.getClass().getName() + ":" + ioe.getMessage();
+        return "twitterResult";
+      } catch (Throwable t) {
+        _log.error("error trying to tweet=", t);
+        _twitterResult = "Exception: " + t.getClass().getName() + ":" + t.getMessage();
       }
       _log.info("tweet response=" + response);
     } else {
       _log.info("no notification service provided");
     }
-    return "refreshResult";
+    return "twitterResult";
   }
+
+  private String _twitterResult;
+  public String getTwitterResult() { return _twitterResult; }
 
   public String everbridgeAlert() {
     _log.info("everbridge! " + _alertId);

@@ -84,7 +84,6 @@
       <property name="order" value="-2" />
       <property name="properties">
         <props>
-          <prop key="tdm.host">${tdm.host}</prop>
           <prop key="admin.chefRole">ADMIN</prop>
         </props>
       </property>

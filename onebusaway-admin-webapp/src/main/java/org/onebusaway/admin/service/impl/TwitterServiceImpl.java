@@ -114,9 +114,13 @@ public class TwitterServiceImpl {
         try {
             Status status = _twitter.updateStatus(statusMessage);
             if (status != null) {
-                response = status.toString();
+                response = "Successfully tweeted \""
+                        + status.getText()
+                        + "\" at "
+                        + status.getCreatedAt();
             }
         } catch (TwitterException te) {
+            _log.error(te.getExceptionCode() + ":" + ":" + te.getStatusCode() + te.getErrorMessage());
             throw new IOException(te);
         }
         return response;
@@ -142,10 +146,18 @@ public class TwitterServiceImpl {
 
             for (SituationAffectsBean allAffects : bean.getAllAffects()) {
                 if (allAffects != null && StringUtils.isNotBlank(allAffects.getRouteId())) {
-                    routes.add(strategy.summarizeRoute(allAffects.getRouteId()));
+                    AgencyAndId routeId = new AgencyAndId(allAffects.getAgencyId(), allAffects.getRouteId());
+                    routes.add(strategy.summarizeRoute(routeId.toString()));
                     foundClause = true;
                 } else if (allAffects != null && StringUtils.isNotBlank(allAffects.getStopId())) {
-                    stops.add(strategy.summarizeStop(allAffects.getStopId()));
+                    AgencyAndId stopId = null;
+                    try {
+                        stopId = AgencyAndId.convertFromString(allAffects.getStopId());
+                    } catch (IllegalStateException ise) {
+                        stopId = new AgencyAndId(allAffects.getAgencyId(), allAffects.getStopId());
+                    }
+
+                    stops.add(strategy.summarizeStop(stopId.toString()));
                     foundClause = true;
                 } else if (allAffects != null
                         && StringUtils.isBlank(allAffects.getRouteId())
@@ -186,8 +198,7 @@ public class TwitterServiceImpl {
                 tweet += " stop(s) ";
             }
             for (String s : stops) {
-                AgencyAndId id = AgencyAndId.convertFromString(s);
-                tweet += id.getId() + ", ";
+                tweet += s + ", ";
             }
             tweet = tweet.substring(0, tweet.length() -2);
         }

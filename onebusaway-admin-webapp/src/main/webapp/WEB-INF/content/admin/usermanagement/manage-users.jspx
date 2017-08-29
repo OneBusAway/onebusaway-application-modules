@@ -46,20 +46,39 @@
 <!-- //prevent jspx minimization -->
 </script>
 
+<script type="text/javascript">
+    $(document).ready(function () {
+        showUserToEdit('${username}');
+    });
+</script>
+
 </head>
 <body>
 	<div id="content">
 		<div id="text">
-			<h2>User Management Utility</h2>
+            <header>
+                <h2>User Management Utility</h2>
+                <div id="userAdminList">
+                    <ul>
+                        <li><s:url var="url" value="register-user.action" id="addUser"/>
+                            <a href="${url}">Create User</a>
+                        </li>
+                        <li><s:url var="url" value="list-users.action" />
+                            <a href="${url}">List Users paginated</a>
+                        </li>
+						<li><s:url var="url" value="users-by-role.action" />
+							<a href="${url}">List Users by role</a>
+						</li>
+                    </ul>
+                </div>
+            </header>
 			<div id="container">
 				 <div id="search" class="ui-helper-clearfix">  
-					<label>Search by user name</label>
+					<label>Search by username</label>
 					<input type="text" id="searchUser" />
 				 </div>
-				 <div id="createUser">	
-					<s:url var="url" value="/css/img/add-contact-icon.png" />
-					<img src="${url}" alt="Not Found" />
-					<a href="register-user.action" id="addUser">Create User</a>
+				<div id="userName" style="display: none;">
+					<label id="username">${username}</label>
 				</div>
 				<div class="clear" />
 				<div id="userDetails">

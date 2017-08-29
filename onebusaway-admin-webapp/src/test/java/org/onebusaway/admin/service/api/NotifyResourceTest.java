@@ -67,7 +67,7 @@ public class NotifyResourceTest {
 
         // add a single route
         affects.setRouteId("A1");
-        assertEquals("Snow Routes in Affect affecting route(s) A1", resource.toTweet(bean));
+        assertEquals("Snow Routes in Affect affecting route(s) ACTA_A1", resource.toTweet(bean));
 
         // add a stop
         affects = new SituationAffectsBean();
@@ -83,7 +83,7 @@ public class NotifyResourceTest {
         }
 
         affects.setStopId("ACTA_6968");
-        assertEquals("Snow Routes in Affect affecting route(s) A1 and stop(s) 6968", resource.toTweet(bean));
+        assertEquals("Snow Routes in Affect affecting route(s) ACTA_A1 and stop(s) ACTA_6968", resource.toTweet(bean));
 
         // add another route
         affects = new SituationAffectsBean();
@@ -91,14 +91,14 @@ public class NotifyResourceTest {
 
         bean.getAllAffects().add(affects);
         affects.setRouteId("B2");
-        assertEquals("Snow Routes in Affect affecting route(s) A1, B2 and stop(s) 6968", resource.toTweet(bean));
+        assertEquals("Snow Routes in Affect affecting route(s) ACTA_A1, ACTA_B2 and stop(s) ACTA_6968", resource.toTweet(bean));
 
         // add another stop
         affects = new SituationAffectsBean();
         affects.setAgencyId("ACTA");
         bean.getAllAffects().add(affects);
         affects.setStopId("ACTA_4370");
-        assertEquals("Snow Routes in Affect affecting route(s) A1, B2 and stop(s) 6968, 4370", resource.toTweet(bean));
+        assertEquals("Snow Routes in Affect affecting route(s) ACTA_A1, ACTA_B2 and stop(s) ACTA_6968, ACTA_4370", resource.toTweet(bean));
 
         // clear out routes, add a single stop
         affects = new SituationAffectsBean();
@@ -106,14 +106,14 @@ public class NotifyResourceTest {
         bean.setAllAffects(new ArrayList<SituationAffectsBean>());
         bean.getAllAffects().add(affects);
         affects.setStopId("ACTA_4370");
-        assertEquals("Snow Routes in Affect affecting stop(s) 4370", resource.toTweet(bean));
+        assertEquals("Snow Routes in Affect affecting stop(s) ACTA_4370", resource.toTweet(bean));
 
         // add another stop
         affects = new SituationAffectsBean();
         affects.setAgencyId("ACTA");
         bean.getAllAffects().add(affects);
         affects.setStopId("ACTA_6968");
-        assertEquals("Snow Routes in Affect affecting stop(s) 4370, 6968", resource.toTweet(bean));
+        assertEquals("Snow Routes in Affect affecting stop(s) ACTA_4370, ACTA_6968", resource.toTweet(bean));
 
         // we don't support trip level tweets
 

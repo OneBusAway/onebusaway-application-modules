@@ -33,7 +33,25 @@ public interface UserManagementService {
 	 * @return list of matching user names that contains the given search string
 	 */
 	List<String> getUserNames(String searchTerm);
-	
+
+	/**
+	 * Returns the number of user details (name, role) for every user in the database
+	 * @return long number (count) of user details
+	 */
+	Integer getUserDetailsCount();
+
+	/**
+	 * Returns a list of user details (name, role) for maxResults of users staring with 'start'
+	 * @return list of userDetails
+	 */
+	List<UserDetail> getUserDetails(final int start, final int maxResults);
+
+	/**
+	 * Returns a list of user details (name, role) for every user in the database
+	 * @return list of userDetails
+	 */
+	List<UserDetail> getAllUserDetails();
+
 	/**
 	 * Fetches the user details such as user name, user role of the given user
 	 * @param userName user whose details are desired

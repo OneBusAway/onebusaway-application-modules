@@ -24,6 +24,8 @@ import org.onebusaway.admin.json.JsonTool;
 import org.onebusaway.admin.model.ui.UserDetail;
 import org.onebusaway.admin.service.UserManagementService;
 import org.onebusaway.webapp.actions.OneBusAwayNYCAdminActionSupport;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -34,15 +36,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 @Results({
 	@Result(name="updateUser", type="json", params= {"root","updateUserMessage"})
 })
+
+
 public class ManageUsersAction extends OneBusAwayNYCAdminActionSupport {
 
 	private static final long serialVersionUID = 1L;
-
+	private static Logger log = LoggerFactory.getLogger(ManageUsersAction.class);
 	private UserManagementService userManagementService;
 	private JsonTool gsonTool;
 	
 	private String userData;
 	private String updateUserMessage;
+	private String username;
+
 
 	/**
 	 * Edits a user in the system
@@ -56,9 +62,8 @@ public class ManageUsersAction extends OneBusAwayNYCAdminActionSupport {
 		} else {
 			updateUserMessage = "Error editing user : '" +userDetail.getUsername() +"'";
 		}
-		
+
 		return "updateUser";
-		
 	}
 	
 	public String deactivateUser() {
@@ -102,7 +107,7 @@ public class ManageUsersAction extends OneBusAwayNYCAdminActionSupport {
 	}
 
 	/**
-	 * @param editUserMessage the updateUserMessage to set
+	 * @param updateUserMessage the updateUserMessage to set
 	 */
 	public void setUpdateUserMessage(String updateUserMessage) {
 		this.updateUserMessage = updateUserMessage;
@@ -119,5 +124,15 @@ public class ManageUsersAction extends OneBusAwayNYCAdminActionSupport {
 	public List<String> getPossibleRoles() {
 		return userManagementService.getAllRoleNames();
 	}
-		
+
+    /**
+     * @return the username
+     */
+    public String getUsername() { return username; }
+
+    /**
+     * @param username
+     * Used by list-users when selecting a user from the list
+     */
+    public void setUsername(String username) { this.username = username; }
 }

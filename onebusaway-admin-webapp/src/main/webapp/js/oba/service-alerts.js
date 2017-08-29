@@ -21,6 +21,18 @@ jQuery(function() {
 	// delete the condition for this service alert
 	jQuery(".deleteCondition").click(onDeleteCondition);
 	
+	// hook up service alert links
+    for (var i = 0; i < 1000; i++) {
+    	var selector = "#tweetAlertLink" + i;
+
+    	if (jQuery(selector).length ) {
+            jQuery(selector).click(onTweetCondition);
+        } else {
+    		// first element not found signifies break
+    		break;
+		}
+    }
+    
 	// show service alerts template list
 	jQuery("#loadTemplate").click(showHideLoadTemplate);
 
