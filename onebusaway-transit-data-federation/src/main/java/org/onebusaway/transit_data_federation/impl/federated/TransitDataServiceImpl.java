@@ -62,6 +62,7 @@ import org.onebusaway.transit_data.model.realtime.CurrentVehicleEstimateQueryBea
 import org.onebusaway.transit_data.model.realtime.VehicleLocationRecordBean;
 import org.onebusaway.transit_data.model.realtime.VehicleLocationRecordQueryBean;
 import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
+import org.onebusaway.transit_data.model.service_alerts.ServiceAlertRecordBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationQueryBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsBean;
@@ -407,6 +408,13 @@ public class TransitDataServiceImpl implements TransitDataService {
     blockUntilBundleIsReady();
     return _transitDataService.getAllServiceAlertsForAgencyId(agencyId);
   }
+  
+  @Override
+  public ListBean<ServiceAlertRecordBean> getAllServiceAlertRecordsForAgencyId(
+      String agencyId) {
+    blockUntilBundleIsReady();
+    return _transitDataService.getAllServiceAlertRecordsForAgencyId(agencyId);
+  }
 
   @Override
   public void removeAllServiceAlertsForAgencyId(String agencyId) {
@@ -580,5 +588,11 @@ public class TransitDataServiceImpl implements TransitDataService {
   public ListBean<ConsolidatedStopMapBean> getAllConsolidatedStops() {
     return _transitDataService.getAllConsolidatedStops();
   }
+
+@Override
+public ServiceAlertBean copyServiceAlert(String agencyId,
+	      ServiceAlertBean situation) {
+	return _transitDataService.copyServiceAlert(agencyId, situation);
+}
   
 }

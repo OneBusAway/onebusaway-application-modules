@@ -20,6 +20,9 @@ jQuery(function() {
 
 	// delete the condition for this service alert
 	jQuery(".deleteCondition").click(onDeleteCondition);
+	
+	// show service alerts template list
+	jQuery("#loadTemplate").click(showHideLoadTemplate);
 
 	// Check  if this is the "Edit Service Alert" page
 	if ($("#service-alert_submit").length > 0) {
@@ -50,7 +53,17 @@ jQuery(function() {
 		}
 	});
 	
+	jQuery("#loadTemplateInput [name='template']").click(function(){
+		var selectedTemplateId = jQuery("#loadTemplateInput [name='template']").val();
+		loadTemplate(selectedTemplateId);
+	})
+	
+	jQuery("#loadTemplate").click(function(){
+		jQuery("#loadTemplateInput").toggle();
+	});
+	
 });
+
 
 function getAgencySelectOptions() {
 	var optionsList = "";
@@ -123,4 +136,22 @@ function onDeleteCondition() {
 			$(this).attr('name', nameAttr);
 		});
 	});
+}
+
+function showHideLoadTemplate(){
+	
+}
+
+function loadTemplate(id) {
+	if(id != "null"){
+		var urlArray = window.location.href.split('?');
+		var url = urlArray[0] + "?";
+		if(url.length > 2 && urlArray[1].includes("newServiceAlert=true")){
+			url += 'newServiceAlert=true&';
+		}	
+		url += 'alertId=' + id + '&';
+		url += 'fromFavorite=true'
+			
+		window.location.href = url;
+	}
 }

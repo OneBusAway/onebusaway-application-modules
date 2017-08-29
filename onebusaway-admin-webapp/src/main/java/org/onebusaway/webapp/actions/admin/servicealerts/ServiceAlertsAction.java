@@ -24,6 +24,7 @@ import org.onebusaway.webapp.actions.OneBusAwayNYCAdminActionSupport;
 import org.onebusaway.transit_data.model.AgencyWithCoverageBean;
 import org.onebusaway.transit_data.model.ListBean;
 import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
+import org.onebusaway.transit_data.model.service_alerts.ServiceAlertRecordBean;
 import org.onebusaway.transit_data.model.service_alerts.TimeRangeBean;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.slf4j.Logger;
@@ -45,7 +46,7 @@ public class ServiceAlertsAction extends OneBusAwayNYCAdminActionSupport {
   private String _alertId;
   private List<AgencyWithCoverageBean> _agencies;
   private List<ServiceAlertBean> _situations;
-  private List<ServiceAlertBean>[] _situationsByAgency;
+  private List<ServiceAlertRecordBean>[] _situationsByAgency;
   String summary = "";
   String description = "";
   String reason = "";
@@ -66,7 +67,7 @@ public class ServiceAlertsAction extends OneBusAwayNYCAdminActionSupport {
   public String getAgencyId() {
     return _agencyId;
   }
-
+  
   public String get_alertId() {
     return _alertId;
   }
@@ -83,7 +84,7 @@ public class ServiceAlertsAction extends OneBusAwayNYCAdminActionSupport {
     return _situations;
   }
 
-  public List<ServiceAlertBean>[] getSituationsByAgency() {
+  public List<ServiceAlertRecordBean>[] getSituationsByAgency() {
     return _situationsByAgency;
   }
 
@@ -142,15 +143,15 @@ public class ServiceAlertsAction extends OneBusAwayNYCAdminActionSupport {
       for (int i=0; i<_agencies.size(); ++i) {
         AgencyWithCoverageBean agency = _agencies.get(i);
         String agencyId = agency.getAgency().getId();
-        ListBean<ServiceAlertBean> result = _transitDataService.getAllServiceAlertsForAgencyId(agencyId);
-        List<ServiceAlertBean> serviceAlerts = result.getList();
+        ListBean<ServiceAlertRecordBean> result = _transitDataService.getAllServiceAlertRecordsForAgencyId(agencyId);
+        List<ServiceAlertRecordBean> serviceAlerts = result.getList();
         _situationsByAgency[i] = serviceAlerts;
       }
       for (int i=0; i<_agencies.size(); ++i) {
         _log.info("Agency " + _agencies.get(i).getAgency().getId());
-        List<ServiceAlertBean> serviceAlerts = _situationsByAgency[i];
-        for (ServiceAlertBean serviceAlert : serviceAlerts) {
-          _log.info("   Alert: " + serviceAlert.getSummaries().get(0));
+        List<ServiceAlertRecordBean> serviceAlerts = _situationsByAgency[i];
+        for (ServiceAlertRecordBean serviceAlert : serviceAlerts) {
+          _log.info("   Alert: " + serviceAlert.getServiceAlertBean().getSummaries().get(0));
         }
       }
     } catch (Throwable t) {
@@ -190,6 +191,7 @@ public class ServiceAlertsAction extends OneBusAwayNYCAdminActionSupport {
     }
     return "SUCCESS";
   }
+
   
   @Validations(requiredStrings = {@RequiredStringValidator(fieldName = "agencyId", message = "missing required agencyId field")})
   public String removeAllForAgency() {

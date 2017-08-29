@@ -79,22 +79,23 @@
 						<th>Summary Title</th>
 						<th>Severity</th>
 						<th>Reason</th>
-						<th colspan="4">Actions</th>
+						<th colspan="5">Actions</th>
 					</tr>
 					<s:iterator value="agencies" status="agencyStatus">
 						<s:set var="agencyIdx" value="%{#agencyStatus.index}" />
 						<!-- <s:set var="agencyId" value="%{#agency.agency.id}" /> -->
-						<s:iterator value="situationsByAgency[#agencyIdx]" status="id">
+						<s:iterator value="situationsByAgency[#agencyIdx]" status="id" var="alertRecord">
+						<s:if test="%{!#alertRecord.copy}">
 							<tr>
-								<td><s:property value="isActive(publicationWindows)" /></td>
+								<td><s:property value="isActive(serviceAlertBean.publicationWindows)" /></td>
 								<td><s:property value="agency.id" /></td>
-								<td><s:property value="summaries[0].value" /></td>
-								<td><s:property value="severity" /></td>
-								<td><s:property value="reason" /></td>
+								<td><s:property value="serviceAlertBean.summaries[0].value" /></td>
+								<td><s:property value="serviceAlertBean.severity" /></td>
+								<td><s:property value="serviceAlertBean.reason" /></td>
 								<td>
 									<fieldset>
 										<s:url var="url" action="service-alert-edit.action" namespace="/admin/servicealerts" >
-											<s:param name="alertId" value="id" />
+											<s:param name="alertId" value="serviceAlertBean.id" />
 										</s:url>
 										<a href="${url}" id="editAlertLink" class="link">Edit</a>
 									</fieldset>
@@ -102,7 +103,7 @@
 								<td>
 									<fieldset>
 										<s:url var="url" action="service-alert-edit!deleteAlert.action" namespace="/admin/servicealerts" >
-											<s:param name="alertId" value="id" />
+											<s:param name="alertId" value="serviceAlertBean.id" />
 										</s:url>
 										<a href="${url}" id="deleteAlertLink" class="link">Delete</a>
 									</fieldset>
@@ -112,7 +113,7 @@
 									<fieldset>
 										<s:if test="isPageAvailable('showTweet', 'org.onebusaway.webapp.actions.admin.servicealerts.ServiceAlertEditAction')">
 											<s:url var="url" action="service-alert-edit!tweetAlert.action" namespace="/admin/servicealerts" >
-												<s:param name="alertId" value="id" />
+												<s:param name="alertId" value="serviceAlertBean.id" />
 											</s:url>
 											<a href="${url}" id="tweetAlertLink" class="link">Tweet</a>
 										</s:if>
@@ -127,7 +128,7 @@
 									<fieldset>
 										<s:if test="isPageAvailable('showEverbridge', 'org.onebusaway.webapp.actions.admin.servicealerts.ServiceAlertEditAction')">
 											<s:url var="url" action="service-alert-edit!everbridgeAlert.action" namespace="/admin/servicealerts" >
-												<s:param name="alertId" value="id" />
+												<s:param name="alertId" value="serviceAlertBean.id" />
 											</s:url>
 											<a href="${url}" id="everbridgeAlertLink" class="link">Everbridge</a>
 										</s:if>
@@ -138,6 +139,51 @@
 								</td>
 
 							</tr>
+						</s:if>
+						</s:iterator>
+        			</s:iterator>
+				</table>
+			</div>
+		</div>
+		<div id="existingTemplatesTableDiv">
+			<span  id="existingFavoritesHeader">Favorites</span>
+			<div id="favoritesTableDiv">
+				<table id="favoritesTable">
+					<tr>
+						<th>Agency</th>
+						<th>Summary Title</th>
+						<th>Severity</th>
+						<th>Reason</th>
+						<th colspan="3">Actions</th>
+					</tr>
+					<s:iterator value="agencies" status="agencyStatus">
+						<s:set var="agencyIdx" value="%{#agencyStatus.index}" />
+						<s:iterator value="situationsByAgency[#agencyIdx]" status="id" var="alertRecord">
+						<s:if test="%{#alertRecord.copy}">
+							<tr>
+								<td><s:property value="agency.id" /></td>
+								<td><s:property value="serviceAlertBean.summaries[0].value" /></td>
+								<td><s:property value="serviceAlertBean.severity" /></td>
+								<td><s:property value="serviceAlertBean.reason" /></td>
+								<td>
+									<fieldset>
+										<s:url var="url" action="service-alert-edit.action" namespace="/admin/servicealerts" escapeAmp="false" >
+											<s:param name="alertId" value="serviceAlertBean.id" />
+											<s:param name="favorite" value="true" />
+										</s:url>
+										<a href="${url}" id="editAlertLink" class="link">Edit</a>
+									</fieldset>
+								</td>
+								<td>
+									<fieldset>
+										<s:url var="url" action="service-alert-edit!deleteAlert.action" namespace="/admin/servicealerts" >
+											<s:param name="alertId" value="serviceAlertBean.id" />
+										</s:url>
+										<a href="${url}" id="deleteAlertLink" class="link">Delete</a>
+									</fieldset>
+								</td>
+							</tr>
+						 </s:if>
 						</s:iterator>
         			</s:iterator>
 				</table>

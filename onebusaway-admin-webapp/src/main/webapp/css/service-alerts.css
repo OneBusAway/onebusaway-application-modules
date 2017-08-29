@@ -17,8 +17,8 @@
  
 #ServiceAlerts p,
 #AgencyMetadata p {
-	padding-top: 2em;
-	padding-bottom: 1em;
+	padding-top: 1.5em;
+	padding-bottom: .5em;
     font-family: "Arial Bold","Arial";
     font-weight: 700;
     font-style: normal;
@@ -44,31 +44,38 @@
   color: #06F;
 }
 
-#ServiceAlerts #createAlertLink, #existingAlertsHeader, #describeAlertHeader,
-#AgencyMetadata #createMetadataLink, #existingMetadataHeader {
+#ServiceAlerts #createAlertLink, #existingAlertsHeader, #existingFavoritesHeader, #describeAlertHeader,
+#AgencyMetadata #createMetadataLink, #existingMetadataHeader, #createTemplateLink{
     font-family: "Arial Bold","Arial";
     font-weight: 700;
     font-style: normal;
     font-size: 24px;
     text-align: left;
     line-height: normal;
-    padding-bottom: .3em;
+    padding-bottom: .7em;
     display: block;
 	text-decoration: none;
 }
 
-#ServiceAlerts #existingAlertsTableDiv,
+#ServiceAlerts #existingAlertsTableDiv, 
+#ServiceAlerts #existingTemplatesTableDiv,
 #AgencyMetadata #existingMetadataTableDiv {
 	margin-top: 2em;
 }
 
-#ServiceAlerts #alertsTableDiv,
+#ServiceAlerts #existingTemplatesTableDiv{
+	padding-bottom: 6em;
+}
+
+#ServiceAlerts #alertsTableDiv, 
+#ServiceAlerts #favoritesTableDiv,
 #AgencyMetadata #metadataTableDiv {
 	margin-right: 2em;
 	margin-left: 2em;
 }
 
 #ServiceAlerts #alertsTableDiv th,
+#ServiceAlerts #favoritesTableDiv th,
 #AgencyMetadata #metadataTableDiv th,
 #ServiceAlerts .conditionClauseLabelLetter,
 #ServiceAlerts .conditionClauseLabelFirstLine {
@@ -84,7 +91,8 @@
 	text-align: center;
 }
 
-#ServiceAlerts #service-alert {
+#ServiceAlerts #service-alert,
+#ServiceAlerts #loadTemplate {
 	padding-left: 3em;
 }
 
@@ -115,7 +123,8 @@
 }
 */
 #AgencyMetadata #metadataTable,
-#ServiceAlerts #alertsTable {
+#ServiceAlerts #alertsTable,
+#ServiceAlerts #favoritesTable  {
     border-collapse: separate;
     border-spacing: 2em .2em;
  }
@@ -180,11 +189,29 @@
  
  #ServiceAlerts input[type=submit],
  #AgencyMetadata input[type=submit] {
- 	width: 8em;
+ 	width: 9em;
  	height: 2.5em;
  	margin-bottom: 3em;
  }
  
-
+ #ServiceAlerts #loadTemplate {
+ 	color: blue;
+ 	font-family: Trebuchet MS,Tahoma,Verdana,Arial,sans-serif;
+ 	font-size: 1.1em;
+ 	line-height: 120%;
+ 	text-decoration: underline;
+ 	padding-bottom: 1em;
+ }
  
+ #ServiceAlerts #loadTemplate:hover {
+ 	font-weight: bold;
+	cursor: pointer;
+ }
+ 
+ #ServiceAlerts #loadTemplateInput {
+ 	font-weight: 700;
+ 	font-size: 14px;
+ 	padding-bottom: 2em;
+ 	padding-left: 4em;
+ }
  

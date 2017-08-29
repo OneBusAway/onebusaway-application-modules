@@ -34,8 +34,10 @@ import org.onebusaway.presentation.bundles.ResourceBundleSupport;
 import org.onebusaway.presentation.bundles.service_alerts.Reasons;
 import org.onebusaway.presentation.bundles.service_alerts.Severity;
 import org.onebusaway.transit_data.model.AgencyWithCoverageBean;
+import org.onebusaway.transit_data.model.ListBean;
 import org.onebusaway.transit_data.model.service_alerts.NaturalLanguageStringBean;
 import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
+import org.onebusaway.transit_data.model.service_alerts.ServiceAlertRecordBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationAffectsBean;
 import org.onebusaway.transit_data.model.service_alerts.TimeRangeBean;
 import org.onebusaway.transit_data.services.TransitDataService;
@@ -61,11 +63,17 @@ public class ServiceAlertEditAction extends ActionSupport implements
   
   private List<AgencyWithCoverageBean> _agencies;
   
+  private List<ServiceAlertBean> _situationTemplatesByAgency;
+  
   private String _alertId;
   
   private String _agencyId;
   
   private boolean _newServiceAlert = false;
+  
+  private boolean _favorite = false;
+  
+  private boolean _fromFavorite = false;
   
   private TransitDataService _transitDataService;
 
@@ -108,6 +116,22 @@ public class ServiceAlertEditAction extends ActionSupport implements
 
   public void setNewServiceAlert(boolean newServiceAlert) {
     this._newServiceAlert = newServiceAlert;
+  }
+  
+  public boolean isFavorite() {
+    return _favorite;
+  }
+
+  public void setFavorite(boolean favorite) {
+	  _favorite = favorite;
+  }
+  
+  public boolean isFromFavorite() {
+    return _fromFavorite;
+  }
+
+  public void setFromFavorite(boolean fromFavorite) {
+	  _fromFavorite =fromFavorite;
   }
 
   @Autowired
@@ -225,30 +249,53 @@ public class ServiceAlertEditAction extends ActionSupport implements
 	 
   }
 
+  public List<ServiceAlertBean> getTemplateSummaries(){	  
+	  if(_situationTemplatesByAgency == null || _situationTemplatesByAgency.isEmpty())
+		  return new ArrayList<ServiceAlertBean>(0);
+	  return _situationTemplatesByAgency;
+  }
 
   @Override
   public String execute() {
-    try {
-      if (_alertId != null && !_alertId.trim().isEmpty())
-        _model = _transitDataService.getServiceAlertForId(_alertId);
-    } catch (RuntimeException e) {
-      _log.error("Unable to retrieve Service Alert", e);
-      throw e;
-    }
-    
-    if (_agencyId == null && _alertId != null) {
-      int index = _alertId.indexOf('_');
-      if (index != -1)
-        _agencyId = _alertId.substring(0, index);
-    }
+	 try {
+		  if (_alertId != null && !_alertId.trim().isEmpty()){
+	    	  _model = _transitDataService.getServiceAlertForId(_alertId);
+		      if(_agencyId == null){
+		      	_agencyId = ServiceAlertsUtil.getAgencyFromAlertId(_alertId);
+		      }
+		  }
+      } catch (RuntimeException e) {
+        _log.error("Unable to retrieve Service Alert", e);
+        throw e;
+     }
 
-    try {
-      _agencies = _transitDataService.getAgenciesWithCoverage();
-    } catch (Throwable t) {
-      _log.error("unable to retrieve agencies with coverage", t);
-      _log.error("issue connecting to TDS -- check your configuration in data-sources.xml");
-      throw new RuntimeException("Check your onebusaway-nyc-transit-data-federation-webapp configuration", t);
+
+     try {
+	      _agencies = _transitDataService.getAgenciesWithCoverage();
+	      _situationTemplatesByAgency = new ArrayList<ServiceAlertBean>();
+		  for (int i=0; i<_agencies.size(); ++i) {
+	        AgencyWithCoverageBean agency = _agencies.get(i);
+	        String agencyId = agency.getAgency().getId();
+	        ListBean<ServiceAlertRecordBean> result = _transitDataService.getAllServiceAlertRecordsForAgencyId(agencyId);
+	        for(ServiceAlertRecordBean serviceAlertRecord : result.getList())
+	        {
+	        	if(Boolean.TRUE.equals(serviceAlertRecord.isCopy())){
+	        		_situationTemplatesByAgency.add(serviceAlertRecord.getServiceAlertBean());
+	        	}   		
+	        }
+	      }  
+      
+     } catch (Throwable t) {
+	      _log.error("unable to retrieve agencies with coverage", t);
+	      _log.error("issue connecting to TDS -- check your configuration in data-sources.xml");
+	      throw new RuntimeException("Check your onebusaway-nyc-transit-data-federation-webapp configuration", t);
     }
+     
+    if(isFromFavorite()){
+    	setStartDate(null);
+    	setEndDate(null);
+    }
+  
     return "SUCCESS";
   }
   
@@ -259,7 +306,7 @@ public class ServiceAlertEditAction extends ActionSupport implements
   public Map<String, String> getSeverityValues() {
     return ResourceBundleSupport.getLocaleMap(this, Severity.class);
   }
-
+  
   public String deleteAlert() {
     try {
       _transitDataService.removeServiceAlert(_alertId);

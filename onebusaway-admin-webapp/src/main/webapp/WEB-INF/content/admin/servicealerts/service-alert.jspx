@@ -60,8 +60,7 @@
 <s:set name="theme" value="'xhtml'" scope="page" />
 
 <s:if test="agencyId != null">
-<s:url var="url" action="service-alerts!agency">
-  <s:param name="agencyId" value="agencyId"/>
+<s:url var="url" action="service-alerts">
 </s:url>
 <p><s:a href="%{url}">Back to Agency Service Alerts</s:a></p>
 </s:if>
@@ -128,5 +127,8 @@
 <p><s:a href="%{url}">Delete</s:a></p>
 </s:if>
 
+<s:hidden name="favorite" value="%{favorite}"/>
+<s:hidden name="newServiceAlert" value="%{newServiceAlert}"/>
+<s:hidden name="fromFavorite" value="%{fromFavorite}"/>
 </body>
 </html>

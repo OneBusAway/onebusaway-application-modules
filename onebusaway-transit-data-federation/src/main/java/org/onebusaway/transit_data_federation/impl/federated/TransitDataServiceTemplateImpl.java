@@ -38,6 +38,7 @@ import org.onebusaway.transit_data.model.realtime.CurrentVehicleEstimateQueryBea
 import org.onebusaway.transit_data.model.realtime.VehicleLocationRecordBean;
 import org.onebusaway.transit_data.model.realtime.VehicleLocationRecordQueryBean;
 import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
+import org.onebusaway.transit_data.model.service_alerts.ServiceAlertRecordBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationQueryBean;
 import org.onebusaway.transit_data.model.trips.*;
 import org.onebusaway.transit_data.services.TransitDataService;
@@ -455,6 +456,11 @@ public class TransitDataServiceTemplateImpl implements TransitDataServiceTemplat
   public void updateServiceAlert(ServiceAlertBean situation) {
     _serviceAlertsBeanService.updateServiceAlert(situation);
   }
+  
+  public ServiceAlertBean copyServiceAlert(String agencyId,
+	      ServiceAlertBean situation) {
+    return _serviceAlertsBeanService.copyServiceAlert(agencyId, situation);
+  }
 
   //@Override
   public ServiceAlertBean getServiceAlertForId(String situationId) {
@@ -476,6 +482,14 @@ public class TransitDataServiceTemplateImpl implements TransitDataServiceTemplat
     
     List<ServiceAlertBean> situations = _serviceAlertsBeanService.getServiceAlertsForFederatedAgencyId(agencyId);
     return new ListBean<ServiceAlertBean>(situations, false);
+  }
+  
+  //@Override
+  public ListBean<ServiceAlertRecordBean> getAllServiceAlertRecordsForAgencyId(
+      String agencyId) {
+    
+    List<ServiceAlertRecordBean> situations = _serviceAlertsBeanService.getServiceAlertRecordsForFederatedAgencyId(agencyId);
+    return new ListBean<ServiceAlertRecordBean>(situations, false);
   }
 
   //@Override

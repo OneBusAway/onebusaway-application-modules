@@ -60,13 +60,24 @@
 <s:set name="theme" value="'simple'" scope="page" />
 <s:if test="newServiceAlert" >
 	<s:set name="serviceAlertsTitle" >Create Service Alert</s:set>
-</s:if><s:else>
+</s:if>
+<s:elseif test="favorite">
+    <s:set name="serviceAlertsTitle" >Edit Favorite Service Alert</s:set>
+</s:elseif>
+<s:else>
 	<s:set name="serviceAlertsTitle" >Edit Service Alert</s:set>
 </s:else>
+
 <div id="ServiceAlerts">
 	<p><s:property value="serviceAlertsTitle" /></p>
+	<s:if test="%{!favorite}" >	
+		<div id="loadTemplate">Load from favorites...</div>
+		<div id="loadTemplateInput" style="display:none">
+		<s:select name="template" label="Select Template" list="templateSummaries" headerKey="null" 
+			headerValue="" listKey="id" listValue="summaries[0].value" theme="xhtml"/>
+		</div>
+	</s:if>
 	<s:form action="service-alert">
-	
 		<div id="describeAlertDiv">
 			<span  id="describeAlertHeader">Step 1: Describe the alert</span>
 			<div id="describeAlertsTableDiv">
@@ -82,11 +93,15 @@
 						headerValue="Which agency owns this alert?" list="agencies" 
 						value="agencyId" 
 						listKey="%{agency.id}" listValue="%{agency.name}" theme="xhtml"/>
-					<s:textfield label="Start Date" id="publicationWindowStartDate" name="startDate" value="%{startDate}" theme="xhtml"/>
-					<s:textfield label="End Date" id="publicationWindowEndDate" name="endDate" value="%{endDate}" theme="xhtml"/>
+					<s:if test="%{!favorite}" >	
+						<s:textfield label="Start Date" id="publicationWindowStartDate" name="startDate" value="%{startDate}" theme="xhtml"/>
+						<s:textfield label="End Date" id="publicationWindowEndDate" name="endDate" value="%{endDate}" theme="xhtml"/>
+					</s:if>
 				</table>
 			</div>
 			<s:hidden name="alertId" value="%{model.id}"/>
+			<s:hidden name="favorite" value="%{favorite}"/>
+			<s:hidden name="fromFavorite" value="%{fromFavorite}"/>
 		</div>
 		<div id="alertAffectsDiv">
 			<span  id="describeAlertHeader">Step 2: Tie this alert to a specific agency, route and/or stop</span>
@@ -152,8 +167,12 @@
 			</div>
 		</div>
 		<div id="buttonsDiv">
+			<s:if test="%{!favorite}" >	
+				<s:submit value="Add to Favorites" name="addToFav" method="addToFavorites"/>
+			</s:if>
 			<s:submit value="Cancel" name="cancel" method="cancel" />
 			<s:submit value="Save" name="submit" />
+			
 		</div>
 	</s:form>
 </div>
