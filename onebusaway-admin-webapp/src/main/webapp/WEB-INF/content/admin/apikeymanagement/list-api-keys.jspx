@@ -16,15 +16,16 @@
     limitations under the License.
 
 -->
-
 <html xmlns:jsp="http://java.sun.com/JSP/Page"
-      xmlns:c="http://java.sun.com/jsp/jstl/core" xmlns:s="/struts-tags">
+      xmlns:c="http://java.sun.com/jsp/jstl/core"
+      xmlns:s="/struts-tags">
 <jsp:directive.page contentType="text/html" />
 <head>
-    <s:url var="url" value="/css/admin.css" />
+    <title>API Keys</title>
+    <s:url var="url" value="/css/api-key.css" />
     <link rel="stylesheet" href="${url}" type="text/css" />
 
-    <s:url var="url" value="/css/api-key.css" />
+    <s:url var="url" value="/css/admin.css" />
     <link rel="stylesheet" href="${url}" type="text/css" />
 
     <s:url var="url" value="/js/lib/jquery.js" />
@@ -36,17 +37,51 @@
         <!-- prevent jspx minimization -->
     </script>
 </head>
-
     <body>
-    <div id="content">
-        <div id="text">
-            <h2>Create User</h2>
-            <div class="backToMenu">
-                <s:url var="url" action="api-key" namespace="../"/>
-                <a href="${url}">Back to Manage API Keys</a>
+        <div id="content">
+            <div id="text">
+            <h2>API Keys</h2>
+            <div>
+                <table class="apiKeysTable" cellspacing="0">
+                    <tr class="headerRow">
+                        <th>User name</th>
+                        <th>Role</th>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div id="keysList">
+                                <c:forEach items="${apiKeysList}" var="user">
+                                    <tr>
+                                        <td><s:url var="editUser" action="manage-users.action">
+                                            <s:param name="username">${user}</s:param>
+                                        </s:url>
+                                            <a href="${editUser}">${user}</a></td>
+                                        <td>${user}</td>
+                                    </tr>
+                                </c:forEach>
+                            </div>
+
+                            <!--    <div id="usersList">
+                                    <c:forEach items="${userDetailsList}" var="user">
+                                        <tr>
+                                            <td><s:url var="editUser" action="manage-users.action">
+                                                <s:param name="username">${user.username}</s:param>
+                                            </s:url>
+                                                <a href="${editUser}">${user.username}</a></td>
+                                            <td>${fn:split(user.role, "_")[1]}</td>
+                                        </tr>
+                                    </c:forEach>
+                                </div>-->
+                            </td>
+                        </tr>
+                    </table>
+                    <div class="backToMenu">
+                        <s:url var="url" action="api-key" namespace=".."/>
+                        <a href="${url}">Back to Manage API Keys</a>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
     </body>
 </html>
 

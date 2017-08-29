@@ -46,3 +46,27 @@ fieldset#apiKeyContactInfo #contactInfoItems {
 fieldset#apiKeyContactInfo #api-key_searchEmail {
 	margin-left: 1em;
 }
+
+.apiKeysTable {
+    border: solid 1px #666;
+    margin: 10px 0;
+}
+
+.apiKeysTable th {
+    padding-right: 10px;
+    text-align: left;
+    font-size: 12px;
+    padding-left: 15px;
+}
+
+.apiKeysTable .headerRow th{
+    border-bottom: solid 1px #666;
+    font-size: 14px;
+}
+
+.apiKeysTable td {
+    padding-right: 10px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    padding-left: 15px;
+}
