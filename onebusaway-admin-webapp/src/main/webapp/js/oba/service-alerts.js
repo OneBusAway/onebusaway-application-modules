@@ -167,3 +167,31 @@ function loadTemplate(id) {
 		window.location.href = url;
 	}
 }
+function onTweetCondition(handler) {
+    var aId = handler.target.id;
+    var id = aId.replace("tweetA", "");
+    var divSelector = "#tweetDiv" + id;
+    var alertDiv = jQuery(divSelector);
+    var alertId = alertDiv.html();
+    sendAndShowTweet(alertId);
+}
+function sendAndShowTweet(alertId) {
+    jQuery.ajax({
+        url: "service-alert-edit!tweetAlert.action",
+        data: {
+            "alertId": alertId
+        },
+        type: "GET",
+        async: false,
+        success: function (data) {
+            jQuery("#dialog").show();
+            jQuery("#dialog").html(data);
+            jQuery("#dialog").dialog();
+        },
+        error: function (data) {
+            jQuery("#dialog").show();
+            jQuery("#dialog").html(data);
+            jQuery("#dialog").dialog();
+        }
+    })
+}

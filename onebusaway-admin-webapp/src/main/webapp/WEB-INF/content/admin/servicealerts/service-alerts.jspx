@@ -83,9 +83,11 @@
 						<th>Reason</th>
 						<th colspan="5">Actions</th>
 					</tr>
+					<s:set var="alertIdx" value="-1" />
 					<s:iterator value="agencies" status="agencyStatus">
 						<s:set var="agencyIdx" value="%{#agencyStatus.index}" />
 						<s:iterator value="situationsByAgency[#agencyIdx]" status="id" var="alertRecord">
+
 						<s:if test="%{!#alertRecord.copy}">
 							<s:set var="alertIdx" value="%{#alertIdx + 1}" />
 							<c:url var="encodedId" value=""><c:param name="output" value="${serviceAlertBean.id}" /></c:url>
