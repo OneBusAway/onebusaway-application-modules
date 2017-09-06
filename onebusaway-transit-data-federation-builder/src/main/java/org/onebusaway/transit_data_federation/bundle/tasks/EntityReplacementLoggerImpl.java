@@ -119,17 +119,19 @@ public class EntityReplacementLoggerImpl implements EntityReplacementLogger {
    * generate the report via the MultiCSVLogger
    */
   public void log() {
+    // only run this once, even if we are called multiple times
     if (!_csvLogger.hasHeader("gtfs_stop_replacements.csv")) {
       _csvLogger.header("gtfs_stop_replacements.csv",
-          "orgin_stop_id,replacement_stop_id,origin_lat,origin_lon,replacement_lat,replacement_lon,distance_in_feet");
+          "orginal_stop_id,replacement_stop_id,original_lat,original_lon,replacement_lat,replacement_lon,distance_in_feet");
+      for (Serializable key : _replacements.keySet()) {
+        EntityStore es = _replacements.get(key);
+        _csvLogger.log("gtfs_stop_replacements.csv", es.getId(),
+            es.getReplacementId(), es.getOriginalLat(), es.getOriginalLon(),
+            es.getReplacmentLat(), es.getReplacmentLon(), es.getDistanceInFeet());
+      }
     }
 
-    for (Serializable key : _replacements.keySet()) {
-      EntityStore es = _replacements.get(key);
-      _csvLogger.log("gtfs_stop_replacements.csv", es.getId(),
-          es.getReplacementId(), es.getOriginalLat(), es.getOriginalLon(),
-          es.getReplacmentLat(), es.getReplacmentLon(), es.getDistanceInFeet());
-    }
+    
   }
 
   /**

@@ -21,8 +21,6 @@ import java.util.Map;
 
 import org.onebusaway.transit_data_federation.bundle.services.EntityReplacementLogger;
 import org.onebusaway.transit_data_federation.bundle.services.EntityReplacementStrategy;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * {@link EntityReplacementStrategy} implementation that is used to map entity
