@@ -98,5 +98,30 @@
   <bean id="scheduledExecutorService" class="org.springframework.scheduling.concurrent.ScheduledExecutorFactoryBean">
 
   </bean>
-
+	
+  <bean id="stopHasRevenueCache" class="org.onebusaway.container.spring.ehcache.EhCacheFactoryBean">
+    <property name="cacheManager" ref="cacheManager" />
+    <property name="cacheName"
+      value="org.onebusaway.transit_data_federation.services.revenue.RevenueSearchService.stopHasRevenueService" />
+    <property name="maxElementsInMemory" value="10000" />
+    <property name="eternal" value="true" />
+    <property name="overflowToDisk" value="false" />
+    <property name="diskPersistent" value="false" />
+  </bean>
+  
+  <bean id="stopHasRevenueOnRouteCache" class="org.onebusaway.container.spring.ehcache.EhCacheFactoryBean">
+    <property name="cacheManager" ref="cacheManager" />
+    <property name="cacheName"
+      value="org.onebusaway.transit_data_federation.services.revenue.RevenueSearchService.stopHasRevenueServiceOnRouteCache" />
+    <property name="maxElementsInMemory" value="50000" />
+    <property name="eternal" value="true" />
+    <property name="overflowToDisk" value="false" />
+    <property name="diskPersistent" value="false" />
+  </bean>
+  
+  <bean id="revenueSearchServiceImpl" class="org.onebusaway.transit_data_federation.impl.revenue.RevenueSearchServiceImpl">
+    <property name="stopHasRevenueServiceCache" ref="stopHasRevenueCache" />
+    <property name="stopHasRevenueServiceOnRouteCache" ref="stopHasRevenueOnRouteCache" />
+  </bean>
+  
 </beans>

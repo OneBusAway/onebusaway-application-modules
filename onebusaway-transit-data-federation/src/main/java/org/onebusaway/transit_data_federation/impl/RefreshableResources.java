@@ -42,6 +42,8 @@ public final class RefreshableResources {
   public static final String TRANSFER_PATTERNS = "transfer_patterns";
 
   public static final String NARRATIVE_DATA = "narrativeData";
+  
+  public static final String REVENUE_STOP_ROUTE_INDEX = "revenueStopRouteIndex";
 
   private RefreshableResources() {
 
