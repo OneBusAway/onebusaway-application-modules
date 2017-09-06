@@ -28,6 +28,9 @@
     <s:url var="url" value="/css/admin.css" />
     <link rel="stylesheet" href="${url}" type="text/css" />
 
+    <s:url var="url" value="/css/user-management.css"/>
+    <link rel="stylesheet" href="${url}" type="text/css"/>
+
     <s:url var="url" value="/js/lib/jquery.js" />
     <script type="text/javascript" src="${url}">
         <!-- prevent jspx minimization -->

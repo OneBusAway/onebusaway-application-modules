@@ -106,6 +106,30 @@ header h2 {
 	width: 250px;
 }
 
+.apiKeysTable {
+	border: solid 1px #666;
+	margin: 10px 0;
+}
+
+.apiKeysTable th {
+	padding-right: 10px;
+	text-align: left;
+	font-size: 12px;
+	padding-left: 15px;
+}
+
+.apiKeysTable .headerRow th{
+	border-bottom: solid 1px #666;
+	font-size: 14px;
+}
+
+.apiKeysTable td {
+	padding-right: 10px;
+	padding-top: 5px;
+	padding-bottom: 5px;
+	padding-left: 15px;
+}
+
 #detailsTable th {
 	padding-right: 10px;
 	text-align: left;
@@ -122,6 +146,8 @@ header h2 {
 	padding-top: 10px;
 	padding-left: 3px;
 }
+
+
 
 .userLabel {
 	font-size: 12px;
@@ -232,6 +258,8 @@ header h2 {
 #newPassword {
 	width: 150px;
 }
+
+
 
 
 
