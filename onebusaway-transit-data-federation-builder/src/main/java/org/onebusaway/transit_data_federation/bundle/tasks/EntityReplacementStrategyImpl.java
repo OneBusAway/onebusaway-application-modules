@@ -19,7 +19,10 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.onebusaway.transit_data_federation.bundle.services.EntityReplacementLogger;
 import org.onebusaway.transit_data_federation.bundle.services.EntityReplacementStrategy;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * {@link EntityReplacementStrategy} implementation that is used to map entity
@@ -33,6 +36,14 @@ public class EntityReplacementStrategyImpl implements EntityReplacementStrategy 
 
   private Map<Class<?>, Map<Serializable, Serializable>> _entityReplacement = new HashMap<Class<?>, Map<Serializable, Serializable>>();
 
+  private EntityReplacementLogger _entityLogger = null;
+  
+  @Override
+  public void setEntityReplacementLogger(EntityReplacementLogger logger) {
+    _entityLogger = logger;
+    
+  }
+  
   public void addEntityReplacement(Class<?> entityType, Serializable entityId,
       Serializable replacementEntityId) {
     Map<Serializable, Serializable> idMappings = _entityReplacement.get(entityType);
@@ -64,5 +75,16 @@ public class EntityReplacementStrategyImpl implements EntityReplacementStrategy 
       return null;
     return idMappings.get(entityId);
   }
+
+  @Override
+  public <T> T logReplacement(Class<T> type, Serializable id, Serializable replacementId, T originalEntity, T replacementEntity) {
+
+    if (_entityLogger != null) {
+      _entityLogger.log(type, id, replacementId, originalEntity, replacementEntity);
+    }
+    
+    return replacementEntity;
+  }
+
 
 }
