@@ -32,7 +32,9 @@ public class ListApiKeysAction extends OneBusAwayNYCAdminActionSupport {
 
     public void generateUserBeans() {
 
-        for(String key : getApiKeysList()) {
+        setApiKeysList(userService.getUserIndexKeyValuesForKeyType(UserIndexTypes.API_KEY));
+
+        for (String key : getApiKeysList()) {
             UserIndexKey userKey = new UserIndexKey(UserIndexTypes.API_KEY, key);
             UserIndex userIndexForId = userService.getUserIndexForId(userKey);
             if (userIndexForId != null) {
@@ -40,33 +42,10 @@ public class ListApiKeysAction extends OneBusAwayNYCAdminActionSupport {
                 UserBean bean = userService.getUserAsBean(user);
                 if (bean != null) {
                     getApiKeysUserBeansList().add(bean);
-                    log.error("** ! User bean id: " + bean.getUserId());
-                    log.error("** ! User bean index: " + bean.getIndices().get(0).getValue());
                 }
             }
         }
-
-        /*
-        // Check if key already exists
-    UserIndexKey userKey = new UserIndexKey(UserIndexTypes.API_KEY, key);
-    UserIndex userIndexForId = userService.getUserIndexForId(userKey);
-    if (userIndexForId == null) {
-      addActionMessage("Key '" + key + "' does not exist");
-    } else {
-      User user = userIndexForId.getUser();
-      UserBean bean = userService.getUserAsBean(user);
-      minApiReqInt = bean.getMinApiRequestInterval();
-      contactName = bean.getContactName();
-      contactCompany = bean.getContactCompany();
-      contactEmail = bean.getContactEmail();
-      contactDetails = bean.getContactDetails();
-      addActionMessage("Key '" + key + "' found");
     }
-    return SUCCESS;
-  }
-         */
-    }
-
 
     /**
      * Injects {@link UserService}
@@ -86,14 +65,13 @@ public class ListApiKeysAction extends OneBusAwayNYCAdminActionSupport {
         this.userPropertiesService = userPropertiesService;
     }
 
+    public List<String> getApiKeysList() {
+        return apiKeysList;
+    }
+
     public void setApiKeysList(List<String> apiKeysList) {
         this.apiKeysList = apiKeysList;
     }
-
-    public List<String> getApiKeysList() {
-        return userService.getUserIndexKeyValuesForKeyType(UserIndexTypes.API_KEY);
-    }
-
 
     public List<UserBean> getApiKeysUserBeansList() {
         return apiKeysUserBeansList;
