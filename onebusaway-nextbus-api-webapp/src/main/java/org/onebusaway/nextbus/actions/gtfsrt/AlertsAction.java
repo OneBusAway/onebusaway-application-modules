@@ -154,17 +154,26 @@ public class AlertsAction extends NextBusApiBase implements
 			EntitySelector.Builder entitySelector = EntitySelector.newBuilder();
 			if (affects.getAgencyId() != null)
 				entitySelector.setAgencyId(affects.getAgencyId());
-			if (affects.getRouteId() != null)
-				entitySelector.setRouteId(id(agencyId, affects.getRouteId()));
+			if (affects.getRouteId() != null) {
+				entitySelector.setRouteId(id(agencyId, sanitize(affects.getRouteId())));
+			}
 			if (affects.getTripId() != null) {
 				TripDescriptor.Builder trip = TripDescriptor.newBuilder();
-				trip.setTripId(id(agencyId, affects.getTripId()));
+				trip.setTripId(id(agencyId, sanitize(affects.getTripId())));
 				entitySelector.setTrip(trip);
 			}
 			if (affects.getStopId() != null)
-				entitySelector.setStopId(id(agencyId, affects.getStopId()));
+				entitySelector.setStopId(id(agencyId, sanitize(affects.getStopId())));
 			alert.addInformedEntity(entitySelector);
 		}
+	}
+
+	private String sanitize(String s) {
+		if (s == null) return s;
+		int pos = s.indexOf('_');
+		if (pos > 0 && pos+1 < s.length())
+			return s.substring(pos+1, s.length());
+		return s;
 	}
 
 	private TranslatedString convertTranslatedString(
@@ -184,6 +193,7 @@ public class AlertsAction extends NextBusApiBase implements
 	}
 
 	private String id(String agencyId, String id) {
+		if (agencyId == null) return id;
 		return _gtfsrtHelper.id(agencyId, id);
 	}
 }
