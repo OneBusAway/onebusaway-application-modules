@@ -88,12 +88,6 @@
 			<version>${xwiki.integration.version}</version>
 		</dependency>
 
-      <!-- This provides support for Struts2 Rome rss result type -->
-        <dependency>
-            <groupId>com.googlecode.s2rome</groupId>
-            <artifactId>struts2-rome-plugin</artifactId>
-            <version>0.3</version>
-        </dependency>
         <!-- Rome framework for RSS support -->
         <dependency>
             <groupId>com.rometools</groupId>
@@ -333,6 +327,7 @@
 						<exclude>**/popover.js</exclude>
 						<exclude>**/markerManager.js</exclude>
 						<exclude>**/rgbcolor.js</exclude>
+						<exclude>**/*.properties</exclude>
 					</excludes>
 				</configuration>
 			</plugin>

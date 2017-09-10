@@ -15,7 +15,7 @@
  */
 package org.onebusaway.enterprise.webapp.actions.rss;
 
-import com.sun.syndication.feed.synd.SyndFeed;
+import com.rometools.rome.feed.synd.SyndFeed;
 import org.onebusaway.enterprise.webapp.actions.OneBusAwayEnterpriseActionSupport;
 import org.onebusaway.enterprise.webapp.actions.status.service.StatusProvider;
 import org.springframework.beans.factory.annotation.Autowired;

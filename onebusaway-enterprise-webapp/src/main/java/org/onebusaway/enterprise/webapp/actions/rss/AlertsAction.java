@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016 Cambridge Systematics, Inc.
+ * Copyright (C) 2017 Cambridge Systematics, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,21 +15,21 @@
  */
 package org.onebusaway.enterprise.webapp.actions.rss;
 
-import com.sun.syndication.feed.synd.SyndContent;
-import com.sun.syndication.feed.synd.SyndContentImpl;
-import com.sun.syndication.feed.synd.SyndEntry;
-import com.sun.syndication.feed.synd.SyndEntryImpl;
-import com.sun.syndication.feed.synd.SyndFeedImpl;
+import com.rometools.rome.feed.synd.SyndFeedImpl;
 import org.apache.commons.lang.StringUtils;
 import org.apache.struts2.ServletActionContext;
 import org.apache.struts2.convention.annotation.Result;
 import org.apache.struts2.convention.annotation.Results;
 import org.onebusaway.presentation.impl.service_alerts.NotificationStrategy;
+import org.onebusaway.rss.model.AffectsClauseRssBean;
+import org.onebusaway.rss.model.ServiceAlertRssBean;
+import org.onebusaway.rss.model.TimeRangeRssBean;
 import org.onebusaway.transit_data.model.AgencyWithCoverageBean;
 import org.onebusaway.transit_data.model.ListBean;
 import org.onebusaway.transit_data.model.service_alerts.NaturalLanguageStringBean;
 import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationAffectsBean;
+import org.onebusaway.transit_data.model.service_alerts.TimeRangeBean;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,15 +68,19 @@ public class AlertsAction extends RssFeedAction {
     public String execute() {
         try {
             _feed = new SyndFeedImpl();
+            List<ServiceAlertRssBean> beans = new ArrayList<>();
+
+            String baseUrl = createBaseUrl(ServletActionContext.getRequest());
+            setServiceAlerts(beans, baseUrl);
+
+            for (Object objBean : beans) {
+                ServiceAlertRssBean rssBean = (ServiceAlertRssBean)objBean;
+                _feed.getModules().add(rssBean);
+            }
 
             _feed.setTitle("OneBusAway Service Alerts");
-            String baseUrl = createBaseUrl(ServletActionContext.getRequest());
             _feed.setLink("");
-            _feed.setDescription("Service Information");
-
-            List<SyndEntry> entries = new ArrayList<SyndEntry>();
-            setServiceAlerts(entries, baseUrl);
-            _feed.setEntries(entries);
+            _feed.setDescription("Service Information - Service Alerts");
 
             return SUCCESS;
         } catch (Throwable t) {
@@ -85,12 +89,7 @@ public class AlertsAction extends RssFeedAction {
         }
     }
 
-    private void setServiceAlerts(List<SyndEntry> entries, String baseUrl) {
-        SyndEntry serviceAlertEntry = new SyndEntryImpl();
-        SyndContent saContent = new SyndContentImpl();
-        serviceAlertEntry.setTitle("Agency Advisories");
-        serviceAlertEntry.setLink(baseUrl + "/rss/alerts");
-        entries.add(serviceAlertEntry);
+    private void setServiceAlerts(List<ServiceAlertRssBean> beans, String baseUrl) {
 
         List<AgencyWithCoverageBean> agencies = _transitDataService.getAgenciesWithCoverage();
 
@@ -102,19 +101,19 @@ public class AlertsAction extends RssFeedAction {
             if (StringUtils.isNotBlank(_agencyId)) {
                 // we have a filter, only return service alerts for that agency
                 if (_agencyId.equals(agencyId)) {
-                    setServiceAlerts(agency, entries, baseUrl);
+                    setServiceAlerts(agency, beans, baseUrl);
                 } else {
                     // here we reject the agency and its alerts
                 }
             } else {
                 // we don't have a filter, render all agencies
-                setServiceAlerts(agency, entries, baseUrl);
+                setServiceAlerts(agency, beans, baseUrl);
             }
 
         }
     }
 
-    private void setServiceAlerts(AgencyWithCoverageBean agency, List<SyndEntry> entries, String baseUrl) {
+    private void setServiceAlerts(AgencyWithCoverageBean agency, List<ServiceAlertRssBean> beans, String baseUrl) {
 
         ListBean<ServiceAlertBean> allServiceAlertsForAgencyId
                 = _transitDataService.getAllServiceAlertsForAgencyId(agency.getAgency().getId());
@@ -124,99 +123,52 @@ public class AlertsAction extends RssFeedAction {
             return;
         }
 
+
         for (ServiceAlertBean sab : allServiceAlertsForAgencyId.getList()) {
-            SyndEntry serviceAlertEntry = new SyndEntryImpl();
-            SyndContent saContent = new SyndContentImpl();
-            serviceAlertEntry = new SyndEntryImpl();
-            serviceAlertEntry.setTitle(simplify(sab.getSummaries()));
-            saContent.setValue(summarize(sab.getDescriptions(), sab.getAllAffects()));
-            serviceAlertEntry.setDescription(saContent);
-            entries.add(serviceAlertEntry);
-        }
 
-    }
-
-    // given a list of language strings pick the most appropriate
-    private String simplify(List<NaturalLanguageStringBean> items) {
-        if (items == null || items.isEmpty()) return "";
-        if (items.size() == 1) return items.get(0).getValue();
-        for (NaturalLanguageStringBean bean : items) {
-            if (_locale.equalsIgnoreCase(bean.getLang())) {
-                return bean.getValue();
+            ServiceAlertRssBean bean = new ServiceAlertRssBean();
+            bean.setId(sab.getId());
+            bean.setReason(sab.getReason());
+            if (sab.getSeverity() != null) {
+                bean.setSeverity(sab.getSeverity().getTpegCodes()[0]);
             }
+            bean.setSummary(ServiceAlertRssBean.getLocalString(sab.getSummaries()));
+            bean.setDescription(ServiceAlertRssBean.getLocalString(sab.getDescriptions()));
+            bean.setPublicationWindows(toTimeRange(sab.getPublicationWindows()));
+            bean.setAffectsClauses(toAffectClause(sab.getAllAffects()));
+            beans.add(bean);
         }
-        // we had more than one item but did not match on language
-        // log it and return the first item
-        _log.warn("unmatched locale " + _locale + " for items=" + items);
-        return items.get(0).getValue();
+
     }
 
-    // summarize a service alert's description in consequences
-    private String summarize(List<NaturalLanguageStringBean> descriptions, List<SituationAffectsBean> affects) {
-        StringBuffer text = new StringBuffer();
-        text.append(simplify(descriptions));
-        text.append(" for"); // this really should come from a resource bundle
+    private List<AffectsClauseRssBean> toAffectClause(List<SituationAffectsBean> clauses) {
+        List<AffectsClauseRssBean> beans = new ArrayList<>();
+        if (clauses == null)
+            return null;
 
-        for(String s : getOnlyAgencyAffects(affects)) {
-            // if this fires the others will not
-            text.append(s);
+        for (SituationAffectsBean clause : clauses) {
+            AffectsClauseRssBean bean = new AffectsClauseRssBean();
+            bean.setAgencyId(clause.getAgencyId());
+            bean.setRouteId(clause.getRouteId());
+            bean.setTripId(clause.getTripId());
+            bean.setStopId(clause.getStopId());
+            beans.add(bean);
         }
-
-        for(String s : getRouteAffects(affects)) {
-            text.append(" route ")
-                    .append(_strategy.summarizeRoute(s))
-                    .append(",");
-        }
-        text.deleteCharAt(text.length()-1); // remove trailing comma
-        for (String s : getStopAffects(affects)) {
-            text.append(" stop ")
-                    .append(_strategy.summarizeStop(s))
-                    .append(",");
-        }
-        text.deleteCharAt(text.length()-1); // remove trailing comma
-
-
-        return text.toString();
+        return beans;
     }
 
-    private List<String> getOnlyAgencyAffects(List<SituationAffectsBean> affects) {
-        List<String> results = new ArrayList<String>();
-        if (affects == null) return results;
-        for (SituationAffectsBean affectsBean : affects) {
-            if (affectsBean != null
-                    && StringUtils.isBlank(affectsBean.getRouteId())
-                    && StringUtils.isBlank(affectsBean.getStopId())
-                    && StringUtils.isBlank(affectsBean.getTripId())
-                    && StringUtils.isNotBlank(affectsBean.getAgencyId())) {
-                results.add(affectsBean.getAgencyId());
-            }
-        }
-        return results;
-    }
+    private List<TimeRangeRssBean> toTimeRange(List<TimeRangeBean> beans) {
 
+        List<TimeRangeRssBean> trrbs = new ArrayList<>();
+        if (beans == null) return trrbs;
 
-    private List<String> getRouteAffects(List<SituationAffectsBean> affects) {
-        List<String> results = new ArrayList<String>();
-        if (affects == null) return results;
-        for (SituationAffectsBean affectsBean : affects) {
-            if (affectsBean != null
-                    && StringUtils.isNotBlank(affectsBean.getRouteId())) {
-                results.add(affectsBean.getRouteId());
-            }
+        for (TimeRangeBean trb : beans) {
+            TimeRangeRssBean trrb = new TimeRangeRssBean();
+            trrb.setFrom(trb.getFrom());
+            trrb.setTo(trb.getTo());
+            trrbs.add(trrb);
         }
-        return results;
-    }
-
-    private List<String> getStopAffects(List<SituationAffectsBean> affects) {
-        List<String> results = new ArrayList<String>();
-        if (affects == null) return results;
-        for (SituationAffectsBean affectsBean : affects) {
-            if (affectsBean != null
-                    && StringUtils.isNotBlank(affectsBean.getStopId())) {
-                results.add(affectsBean.getStopId());
-            }
-        }
-        return results;
+        return trrbs;
     }
 
 }
