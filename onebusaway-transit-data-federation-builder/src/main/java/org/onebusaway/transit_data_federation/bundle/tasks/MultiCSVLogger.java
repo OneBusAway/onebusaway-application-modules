@@ -21,6 +21,7 @@ import java.io.FileOutputStream;
 import java.io.PrintStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -43,6 +44,7 @@ public class MultiCSVLogger {
   private String diff_log_filename = "diff_log.csv";
   private Logger _log = LoggerFactory.getLogger(MultiCSVLogger.class);
   private static DateFormat SIMPLE_DATE = new SimpleDateFormat();
+  private ArrayList<MultiCSVLoggerSummarizeListener> listeners = new ArrayList<MultiCSVLoggerSummarizeListener>();
 
   private HashMap<String, Log> logs;
   
@@ -50,6 +52,10 @@ public class MultiCSVLogger {
   
   public void setBasePath(File path) {
     this.basePath = path;
+  }
+
+  public void addListener(MultiCSVLoggerSummarizeListener listener) {
+    listeners.add(listener);
   }
   
   class Log {
@@ -135,6 +141,10 @@ public class MultiCSVLogger {
     }
   }
 
+  public boolean hasHeader(String file) {
+    return logs.get(file) != null;
+  }
+  
   public void changelogHeader() {
     changelogHeader(null);
   }
@@ -168,6 +178,11 @@ public class MultiCSVLogger {
   }
 	  
   public void summarize() {
+    // tell our listeners we are about to summarize our results
+    for (MultiCSVLoggerSummarizeListener l : listeners) {
+      l.summarize();
+    }
+    
     FileOutputStream outputStream;
     try {
       outputStream = new FileOutputStream(new File(basePath, "summary.csv"), true);
