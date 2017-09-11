@@ -45,7 +45,7 @@
                        namespace="/admin/apikeymanagement"/>
                 <a href="${url}">List API keys</a>
             </div>
-			<s:form  action="api-key" namespace="/admin">
+			<s:form  action="api-key" namespace="/admin/apikeymanagement">
 				<fieldset id="requestInterval">
 					<label>Min Api Request Interval (ms)</label>
 					<s:textfield id="minApiReqInt" name="minApiReqInt"

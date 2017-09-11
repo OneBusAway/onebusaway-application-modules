@@ -17,11 +17,6 @@
 jQuery(function() {
 	jQuery('#requestIntervalError').hide();
 
-	// if key field is empty, auto-generate key
-	if ($("#key").val() == '') {
-		handleGenerateApiKeyClick();
-	}
-
 	//If the Minimum API Request Interval is not a number, disable the "Save"
 	//button. Using bind() with propertychange event as live() does not work
 	//in IE for unknown reasons
@@ -42,7 +37,7 @@ jQuery(function() {
 
 function handleGenerateApiKeyClick() {
 	jQuery.ajax({
-		url: "../api/config/generate-api-key",
+		url: "../../api/config/generate-api-key",
 		type: "GET",
 		success: function(response) {
 			jQuery("#key").val(response);

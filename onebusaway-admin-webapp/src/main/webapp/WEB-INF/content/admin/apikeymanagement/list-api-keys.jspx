@@ -71,7 +71,7 @@
                         </tr>
                     </table>
                     <div class="backToMenu">
-                        <s:url var="url" action="api-key" namespace=".."/>
+                        <s:url var="url" value="api-key.action" />
                         <a href="${url}">Back to Manage API Keys</a>
                     </div>
                 </div>
