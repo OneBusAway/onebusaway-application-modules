@@ -18,39 +18,24 @@ package org.onebusaway.enterprise.webapp.actions.rss;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.apache.struts2.ServletActionContext;
 import org.apache.struts2.convention.annotation.Result;
 import org.apache.struts2.convention.annotation.Results;
-import org.onebusaway.enterprise.webapp.actions.OneBusAwayEnterpriseActionSupport;
 import org.onebusaway.enterprise.webapp.actions.status.model.StatusGroup;
 import org.onebusaway.enterprise.webapp.actions.status.model.StatusItem;
-import org.onebusaway.enterprise.webapp.actions.status.service.StatusProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
-import com.sun.syndication.feed.synd.SyndContent;
-import com.sun.syndication.feed.synd.SyndContentImpl;
-import com.sun.syndication.feed.synd.SyndEntry;
-import com.sun.syndication.feed.synd.SyndEntryImpl;
-import com.sun.syndication.feed.synd.SyndFeed;
-import com.sun.syndication.feed.synd.SyndFeedImpl;
+import com.rometools.rome.feed.synd.SyndContent;
+import com.rometools.rome.feed.synd.SyndContentImpl;
+import com.rometools.rome.feed.synd.SyndEntry;
+import com.rometools.rome.feed.synd.SyndEntryImpl;
+import com.rometools.rome.feed.synd.SyndFeedImpl;
 
 @Results({@Result(type = "rss", params={"feedName", "feed", "feedType", "rss_2.0"})})
-public class StatusUpdateAction extends OneBusAwayEnterpriseActionSupport {
+public class StatusUpdateAction extends RssFeedAction {
   private static Logger _log = LoggerFactory.getLogger(StatusUpdateAction.class);
   private static final long serialVersionUID = 1L;
-
-  private SyndFeed _feed;
-
-  @Autowired
-  private StatusProvider _statusProvider;
-
-  public SyndFeed getFeed() {
-    return _feed;
-  }
 
   @Override
   public String execute() {
@@ -58,16 +43,7 @@ public class StatusUpdateAction extends OneBusAwayEnterpriseActionSupport {
     StringBuilder title = new StringBuilder();
     title.append("OneBusAway System Status");
 
-    HttpServletRequest request = ServletActionContext.getRequest();
-
-    StringBuilder b = new StringBuilder();
-    b.append("http://");
-    b.append(request.getServerName());
-    if (request.getServerPort() != 80)
-      b.append(":").append(request.getServerPort());
-    if (request.getContextPath() != null)
-      b.append(request.getContextPath());
-    String baseUrl = b.toString();
+    String baseUrl = createBaseUrl(ServletActionContext.getRequest());
 
     _feed.setTitle(title.toString());
     //_feed.setLink(baseUrl);
@@ -76,6 +52,16 @@ public class StatusUpdateAction extends OneBusAwayEnterpriseActionSupport {
 
     List<SyndEntry> entries = new ArrayList<SyndEntry>();
 
+    setIcingaAlerts(entries, baseUrl);
+    setAgencyServiceAlerts(entries, baseUrl);
+    setAgencyMessages(entries, baseUrl);
+
+    _feed.setEntries(entries);
+    return SUCCESS;
+  }
+
+
+  private void setIcingaAlerts(List<SyndEntry> entries, String baseUrl) {
     // Add Icinga Alerts
     SyndEntry icingaEntry = new SyndEntryImpl();
     SyndContent icingaContent = new SyndContentImpl();
@@ -107,13 +93,17 @@ public class StatusUpdateAction extends OneBusAwayEnterpriseActionSupport {
       }
     }
 
+  }
+
+  // these are top-level service alerts without a route/stop affects clause
+  protected void setAgencyServiceAlerts(List<SyndEntry> entries, String baseUrl) {
     // Add Service Alerts
     SyndEntry serviceAlertEntry = new SyndEntryImpl();
     SyndContent saContent = new SyndContentImpl();
     serviceAlertEntry.setTitle("Agency Advisories");
     serviceAlertEntry.setLink(baseUrl + "/rss/service-alerts-update");
     entries.add(serviceAlertEntry);
-    StatusGroup saGroup = _statusProvider.getServiceAlertStatus();
+    StatusGroup saGroup = _statusProvider.getAgencyServiceAlertStatus();
     if (saGroup.getItems().size() == 0) {
       serviceAlertEntry = new SyndEntryImpl();
       serviceAlertEntry.setTitle("All systems operational");
@@ -128,6 +118,10 @@ public class StatusUpdateAction extends OneBusAwayEnterpriseActionSupport {
         entries.add(serviceAlertEntry);
       }
     }
+
+  }
+
+  private void setAgencyMessages(List<SyndEntry> entries, String baseUrl) {
 
     // Add Agency Messages
     SyndEntry agencyMsgEntry = new SyndEntryImpl();
@@ -146,8 +140,5 @@ public class StatusUpdateAction extends OneBusAwayEnterpriseActionSupport {
         entries.add(agencyMsgEntry);
       }
     }
-    _feed.setEntries(entries);
-    return SUCCESS;
   }
-
 }

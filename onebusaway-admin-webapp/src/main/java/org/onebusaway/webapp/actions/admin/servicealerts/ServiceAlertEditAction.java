@@ -16,7 +16,9 @@
 package org.onebusaway.webapp.actions.admin.servicealerts;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -32,9 +34,12 @@ import org.onebusaway.presentation.bundles.ResourceBundleSupport;
 import org.onebusaway.presentation.bundles.service_alerts.Reasons;
 import org.onebusaway.presentation.bundles.service_alerts.Severity;
 import org.onebusaway.transit_data.model.AgencyWithCoverageBean;
+import org.onebusaway.transit_data.model.ListBean;
 import org.onebusaway.transit_data.model.service_alerts.NaturalLanguageStringBean;
 import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
+import org.onebusaway.transit_data.model.service_alerts.ServiceAlertRecordBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationAffectsBean;
+import org.onebusaway.transit_data.model.service_alerts.TimeRangeBean;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,8 +52,11 @@ import com.opensymphony.xwork2.Preparable;
 @ParentPackage("onebusaway-admin-webapp-default")
 @Results({
   @Result(type = "redirectAction", name = "refreshResult", params = {
-      "actionName", "service-alerts", "parse", "true"})
-      })
+      "actionName", "service-alerts", "parse", "true"}),
+        @Result(name="twitterResult", type="json",
+                params={"root", "twitterResult"}),
+
+})
 
 public class ServiceAlertEditAction extends ActionSupport implements
     ModelDriven<ServiceAlertBean> {
@@ -58,11 +66,17 @@ public class ServiceAlertEditAction extends ActionSupport implements
   
   private List<AgencyWithCoverageBean> _agencies;
   
+  private List<ServiceAlertBean> _situationTemplatesByAgency;
+  
   private String _alertId;
   
   private String _agencyId;
   
   private boolean _newServiceAlert = false;
+  
+  private boolean _favorite = false;
+  
+  private boolean _fromFavorite = false;
   
   private TransitDataService _transitDataService;
 
@@ -72,17 +86,6 @@ public class ServiceAlertEditAction extends ActionSupport implements
       _model = new ServiceAlertBean();
       _model.setReason("Initial setup of empty ServiceAlert");
     }
-    /*
-    List<SituationAffectsBean> allAffects = _model.getAllAffects();
-    if (allAffects == null) {
-      allAffects = new ArrayList<SituationAffectsBean>();
-    }
-    if (allAffects.isEmpty()) {
-      SituationAffectsBean affectBean = new SituationAffectsBean();
-      allAffects.add(affectBean);
-      _model.setAllAffects(allAffects);
-    }
-    */
     return _model;
   }
 
@@ -116,6 +119,22 @@ public class ServiceAlertEditAction extends ActionSupport implements
 
   public void setNewServiceAlert(boolean newServiceAlert) {
     this._newServiceAlert = newServiceAlert;
+  }
+  
+  public boolean isFavorite() {
+    return _favorite;
+  }
+
+  public void setFavorite(boolean favorite) {
+	  _favorite = favorite;
+  }
+  
+  public boolean isFromFavorite() {
+    return _fromFavorite;
+  }
+
+  public void setFromFavorite(boolean fromFavorite) {
+	  _fromFavorite =fromFavorite;
   }
 
   @Autowired
@@ -168,47 +187,118 @@ public class ServiceAlertEditAction extends ActionSupport implements
     NaturalLanguageStringBean nls = descriptions.get(0);
     return nls.getValue();
   }
-  /*
-  @Override
-  public void prepare() throws Exception {
-    try {
-      if (_alertId != null && !_alertId.trim().isEmpty())
-        _model = _transitDataService.getServiceAlertForId(_alertId);
-    } catch (RuntimeException e) {
-      _log.error("Unable to retrieve Service Alert", e);
-      throw e;
-    }
+  
+  public String getStartDate() {
+	  List<TimeRangeBean> publicationWindows = _model.getPublicationWindows();
+	  if(publicationWindows == null || publicationWindows.isEmpty() || publicationWindows.get(0).getFrom() == 0){
+		  return null;
+	  }
+	  Date date = new Date(publicationWindows.get(0).getFrom());
+	  SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+	  return sdf.format(date);
   }
-  */
+
+  public void setStartDate(Date startDate) {
+	  List<TimeRangeBean> publicationWindows = _model.getPublicationWindows();
+	  if (publicationWindows == null) {
+		  publicationWindows = new ArrayList<TimeRangeBean>();
+	      _model.setPublicationWindows(publicationWindows);
+	  }
+	  
+	  if (publicationWindows.isEmpty()) {
+		  publicationWindows.add(new TimeRangeBean());
+	  }
+	  
+	  TimeRangeBean timeRangeBean = publicationWindows.get(0);
+	  
+	  if(startDate != null){
+		  timeRangeBean.setFrom(startDate.getTime());
+	  }
+	  else{
+		  timeRangeBean.setFrom(0); 
+	  }
+	 
+  }
+  
+  public String getEndDate() {
+	  List<TimeRangeBean> publicationWindows = _model.getPublicationWindows();
+	  if(publicationWindows == null || publicationWindows.isEmpty() || publicationWindows.get(0).getTo() == 0){
+		  return null;
+	  }
+	  Date date = new Date(publicationWindows.get(0).getTo());
+	  SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+	  return sdf.format(date);
+  }
+
+  public void setEndDate(Date endDate) {
+	  List<TimeRangeBean> publicationWindows = _model.getPublicationWindows();
+	  if (publicationWindows == null) {
+		  publicationWindows = new ArrayList<TimeRangeBean>();
+	      _model.setPublicationWindows(publicationWindows);
+	  }
+	  
+	  if (publicationWindows.isEmpty()) {
+		  publicationWindows.add(new TimeRangeBean());
+	  }
+	  
+	  TimeRangeBean timeRangeBean = publicationWindows.get(0);
+	  
+	  if(endDate != null){
+		  timeRangeBean.setTo(endDate.getTime());
+	  }
+	  else{
+		  timeRangeBean.setTo(0); 
+	  }
+	 
+  }
+
+  public List<ServiceAlertBean> getTemplateSummaries(){	  
+	  if(_situationTemplatesByAgency == null || _situationTemplatesByAgency.isEmpty())
+		  return new ArrayList<ServiceAlertBean>(0);
+	  return _situationTemplatesByAgency;
+  }
+
   @Override
   public String execute() {
-    //if (_alertId != null) {
-    //  _model = _transitDataService.getServiceAlertForId(_alertId);
-    //}
-    
-    //String alertId = _model.getId();
-    try {
-      if (_alertId != null && !_alertId.trim().isEmpty())
-        _model = _transitDataService.getServiceAlertForId(_alertId);
-    } catch (RuntimeException e) {
-      _log.error("Unable to retrieve Service Alert", e);
-      throw e;
-    }
-    
-    if (_agencyId == null && _alertId != null) {
-      int index = _alertId.indexOf('_');
-      if (index != -1)
-        _agencyId = _alertId.substring(0, index);
-    }
+	 try {
+		  if (_alertId != null && !_alertId.trim().isEmpty()){
+	    	  _model = _transitDataService.getServiceAlertForId(_alertId);
+		      if(_agencyId == null){
+		      	_agencyId = ServiceAlertsUtil.getAgencyFromAlertId(_alertId);
+		      }
+		  }
+      } catch (RuntimeException e) {
+        _log.error("Unable to retrieve Service Alert", e);
+        throw e;
+     }
 
-    //_model.setReason("Set in execute method");
-    try {
-      _agencies = _transitDataService.getAgenciesWithCoverage();
-    } catch (Throwable t) {
-      _log.error("unable to retrieve agencies with coverage", t);
-      _log.error("issue connecting to TDS -- check your configuration in data-sources.xml");
-      throw new RuntimeException("Check your onebusaway-nyc-transit-data-federation-webapp configuration", t);
+
+     try {
+	      _agencies = _transitDataService.getAgenciesWithCoverage();
+	      _situationTemplatesByAgency = new ArrayList<ServiceAlertBean>();
+		  for (int i=0; i<_agencies.size(); ++i) {
+	        AgencyWithCoverageBean agency = _agencies.get(i);
+	        String agencyId = agency.getAgency().getId();
+	        ListBean<ServiceAlertRecordBean> result = _transitDataService.getAllServiceAlertRecordsForAgencyId(agencyId);
+	        for(ServiceAlertRecordBean serviceAlertRecord : result.getList())
+	        {
+	        	if(Boolean.TRUE.equals(serviceAlertRecord.isCopy())){
+	        		_situationTemplatesByAgency.add(serviceAlertRecord.getServiceAlertBean());
+	        	}   		
+	        }
+	      }  
+      
+     } catch (Throwable t) {
+	      _log.error("unable to retrieve agencies with coverage", t);
+	      _log.error("issue connecting to TDS -- check your configuration in data-sources.xml");
+	      throw new RuntimeException("Check your onebusaway-nyc-transit-data-federation-webapp configuration", t);
     }
+     
+    if(isFromFavorite()){
+    	setStartDate(null);
+    	setEndDate(null);
+    }
+  
     return "SUCCESS";
   }
   
@@ -219,9 +309,8 @@ public class ServiceAlertEditAction extends ActionSupport implements
   public Map<String, String> getSeverityValues() {
     return ResourceBundleSupport.getLocaleMap(this, Severity.class);
   }
-
+  
   public String deleteAlert() {
-    String id = _alertId;
     try {
       _transitDataService.removeServiceAlert(_alertId);
     } catch (RuntimeException e) {
@@ -244,18 +333,28 @@ public class ServiceAlertEditAction extends ActionSupport implements
       String response = null;
       try {
         _log.info("calling tweet....");
-        response = _notificationService.tweet(TwitterServiceImpl.toTweet(_transitDataService.getServiceAlertForId(_alertId)));
+        response = _notificationService.tweet(
+        	    TwitterServiceImpl.toTweet(_transitDataService.getServiceAlertForId(_alertId),
+                        _notificationService.getNotificationStrategy()));
         _log.info("tweet succeeded with response=" + response);
+        _twitterResult = response;
       } catch (IOException ioe) {
         _log.error("tweet failed!", ioe);
-        return "error";
+        _twitterResult = "Exception: " + ioe.getClass().getName() + ":" + ioe.getMessage();
+        return "twitterResult";
+      } catch (Throwable t) {
+        _log.error("error trying to tweet=", t);
+        _twitterResult = "Exception: " + t.getClass().getName() + ":" + t.getMessage();
       }
       _log.info("tweet response=" + response);
     } else {
       _log.info("no notification service provided");
     }
-    return "refreshResult";
+    return "twitterResult";
   }
+
+  private String _twitterResult;
+  public String getTwitterResult() { return _twitterResult; }
 
   public String everbridgeAlert() {
     _log.info("everbridge! " + _alertId);

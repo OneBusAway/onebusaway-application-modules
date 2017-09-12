@@ -31,6 +31,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+
 import java.util.*;
 
 @Component
@@ -108,6 +109,22 @@ class ServiceAlertsServiceImpl implements ServiceAlertsService {
 		saveDBServiceAlerts(serviceAlertRecord, lastModified);
 		return serviceAlertRecord;
 	}
+	
+	@Override
+	public synchronized ServiceAlertRecord copyServiceAlert(ServiceAlertRecord serviceAlertRecord) {
+		
+		if (_persister.needsSync()) this.loadServiceAlerts();
+		UUID uuid = UUID.randomUUID();
+		serviceAlertRecord.setServiceAlertId(uuid.toString());
+
+		long lastModified = SystemTime.currentTimeMillis();
+        serviceAlertRecord.setCreationTime(lastModified);
+        serviceAlertRecord.setCopy(Boolean.TRUE);
+		
+		updateReferences(serviceAlertRecord);
+		saveDBServiceAlerts(serviceAlertRecord, lastModified);
+		return serviceAlertRecord;
+	}	
 
 	@Override
 	public synchronized void removeServiceAlert(AgencyAndId serviceAlertId) {
@@ -583,6 +600,6 @@ class ServiceAlertsServiceImpl implements ServiceAlertsService {
 	 */
 	private ServiceAlertRecord getServiceAlertRecordByAlertId(String agencyId, String serviceAlertId) {
 	  return _persister.getServiceAlertRecordByAlertId(agencyId, serviceAlertId);
-	}	
+	}
 
 }

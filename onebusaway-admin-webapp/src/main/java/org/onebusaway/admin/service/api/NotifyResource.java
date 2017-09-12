@@ -15,12 +15,10 @@
  */
 package org.onebusaway.admin.service.api;
 
-import org.apache.commons.lang.StringUtils;
 import org.onebusaway.admin.service.NotificationService;
 import org.onebusaway.admin.service.bundle.api.AuthenticatedResource;
 import org.onebusaway.admin.service.impl.TwitterServiceImpl;
 import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
-import org.onebusaway.transit_data.model.service_alerts.SituationAffectsBean;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,8 +29,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Notification API for internal admin operations.
@@ -81,7 +77,7 @@ public class NotifyResource extends AuthenticatedResource {
 
     // package private for unit tests
      String toTweet(ServiceAlertBean bean) {
-        return TwitterServiceImpl.toTweet(bean);
+        return TwitterServiceImpl.toTweet(bean, _notificationService.getNotificationStrategy());
     }
 
 }

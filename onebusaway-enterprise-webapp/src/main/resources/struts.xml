@@ -34,7 +34,7 @@
     <package name="onebusaway-webapp-default" extends="struts-default">
 
         <result-types>
-            <result-type name="rss" class="com.googlecode.s2rome.struts2.plugin.rome.RomeResult"/>
+            <result-type name="rss" class="org.onebusaway.presentation.rss.RomeResult"/>
         </result-types>
 
         <global-results>

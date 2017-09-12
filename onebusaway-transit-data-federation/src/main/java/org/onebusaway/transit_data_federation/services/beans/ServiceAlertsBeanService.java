@@ -20,6 +20,7 @@ import java.util.List;
 
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
+import org.onebusaway.transit_data.model.service_alerts.ServiceAlertRecordBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationQueryBean;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.blocks.BlockTripInstance;
@@ -31,6 +32,9 @@ public interface ServiceAlertsBeanService {
       ServiceAlertBean serviceAlert);
 
   public void updateServiceAlert(ServiceAlertBean serviceAlert);
+  
+  public ServiceAlertBean copyServiceAlert(String agencyId,
+			ServiceAlertBean situationBean);
 
   public void removeServiceAlert(AgencyAndId serviceAlertId);
 
@@ -52,4 +56,7 @@ public interface ServiceAlertsBeanService {
 
   public List<ServiceAlertBean> getServiceAlertsForVehicleJourney(long time,
       BlockTripInstance blockTripInstance, AgencyAndId vehicleId);
+
+  public List<ServiceAlertRecordBean> getServiceAlertRecordsForFederatedAgencyId(
+		String agencyId);
 }

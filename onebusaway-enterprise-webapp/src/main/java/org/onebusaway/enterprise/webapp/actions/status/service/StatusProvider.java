@@ -21,7 +21,8 @@ public interface StatusProvider {
 
   StatusGroup getIcingaStatus();
 
-  StatusGroup getServiceAlertStatus();
+  StatusGroup getAgencyServiceAlertStatus();
   
   StatusGroup getAgencyMetadataStatus();
+
 }

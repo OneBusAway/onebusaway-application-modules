@@ -20,6 +20,7 @@ OBA.Sign = function() {
 	
 	var refreshInterval = 30;
 	var timeout = 30;
+	var scrollSpeed = 2; // pixels per frame.  1 or 2 are good defaults
 	var configurableMessageHtml = null;
 	var stopIdsToRequest = null;
 	var stopInfo = {};
@@ -39,6 +40,7 @@ OBA.Sign = function() {
     var obaApiBaseUrl = url.substring(0, obaApiBaseUrlPosition);
 
 	var setupUITimeout = null;
+	var disableAlerts = false;
 	
 	function getParameterByName(name, defaultValue) {
 		name = name.replace(/[\[]/,"\\\[").replace(/[\]]/,"\\\]");
@@ -90,6 +92,10 @@ OBA.Sign = function() {
 
 		// configure interface with URL params
 		refreshInterval = getParameterByName("refresh", refreshInterval);
+		var disableAlertsStr = getParameterByName("disableAlerts", "false");
+		disableAlerts = (disableAlertsStr.toLowerCase() == "true");
+
+		scrollSpeed = parseInt(getParameterByName("scrollSpeed", 2));
 
 		vehiclesPerStop = getParameterByName("vehiclesPerStop", vehiclesPerStop);
 		
@@ -264,7 +270,7 @@ OBA.Sign = function() {
 
 		// situations
 		stopElement.find(".alerts .scroller").html("").empty();
-		if (jQuery.isEmptyObject(applicableSituations)) {
+		if (disableAlerts || jQuery.isEmptyObject(applicableSituations)) {
 			stopElement.find(".alerts").hide();
 			stopElement.find(".arrivals").width("100%");
 		} else if (isValidAlert(applicableSituations)) {
@@ -722,7 +728,7 @@ OBA.Sign = function() {
 						pauseOnHover: false,
 						autoMode: 'loop',
 						frameRate: 20,
-						speed: 2
+						speed: scrollSpeed
 					});
 				}
 				
@@ -742,7 +748,7 @@ OBA.Sign = function() {
 						pauseOnHover: false,
 						autoMode: 'loop',
 						frameRate: 20,
-						speed: 2
+						speed: scrollSpeed
 					});
 				}
 				

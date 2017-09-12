@@ -53,6 +53,7 @@ import org.onebusaway.transit_data_federation.bundle.model.GtfsBundle;
 import org.onebusaway.transit_data_federation.bundle.model.GtfsBundles;
 import org.onebusaway.transit_data_federation.bundle.model.StatusMessages;
 import org.onebusaway.transit_data_federation.bundle.model.TaskDefinition;
+import org.onebusaway.transit_data_federation.bundle.tasks.EntityReplacementLoggerImpl;
 import org.onebusaway.transit_data_federation.bundle.tasks.EntityReplacementStrategyFactory;
 import org.onebusaway.transit_data_federation.bundle.tasks.MultiCSVLogger;
 import org.onebusaway.transit_data_federation.bundle.tasks.stif.StifTask;
@@ -450,6 +451,10 @@ public class BundleBuildingServiceImpl implements BundleBuildingService {
       BeanDefinitionBuilder multiCSVLogger = BeanDefinitionBuilder.genericBeanDefinition(MultiCSVLogger.class);
       multiCSVLogger.addPropertyValue("basePath", loggingPath);
       beans.put("multiCSVLogger", multiCSVLogger.getBeanDefinition());
+      
+      BeanDefinitionBuilder entityReplacementLogger = BeanDefinitionBuilder.genericBeanDefinition(EntityReplacementLoggerImpl.class);
+      beans.put("entityReplacementLogger", entityReplacementLogger.getBeanDefinition());
+      
 
       BeanDefinitionBuilder requestDef = BeanDefinitionBuilder.genericBeanDefinition(BundleRequestResponse.class);
       requestDef.addPropertyValue("request", request);

@@ -47,10 +47,15 @@ public class StatusAction extends OneBusAwayEnterpriseActionSupport {
 
   @Override
   public String execute() {
-    checkCustomHeader();
-    checkContactEmail();
-    groups = createGroups();
-    return SUCCESS;
+    try {
+      checkCustomHeader();
+      checkContactEmail();
+      groups = createGroups();
+      return SUCCESS;
+    } catch (Throwable t) {
+      _log.error("Exception in execute:", t);
+      return ERROR;
+    }
   }
   
   public boolean isShowOK() {
@@ -104,7 +109,7 @@ public class StatusAction extends OneBusAwayEnterpriseActionSupport {
   private List<StatusGroup> createGroups() {
     groups = new ArrayList<StatusGroup>();
     groups.add(_statusProvider.getIcingaStatus());
-    groups.add(_statusProvider.getServiceAlertStatus());
+    groups.add(_statusProvider.getAgencyServiceAlertStatus());
     groups.add(_statusProvider.getAgencyMetadataStatus());
     
     // trim OKs

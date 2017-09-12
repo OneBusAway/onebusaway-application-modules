@@ -15,6 +15,8 @@
  */
 package org.onebusaway.admin.service;
 
+import org.onebusaway.presentation.impl.service_alerts.NotificationStrategy;
+
 import java.io.IOException;
 
 /**
@@ -23,4 +25,5 @@ import java.io.IOException;
 public interface NotificationService {
 
     public String tweet(String message) throws IOException;
+    public NotificationStrategy getNotificationStrategy();
 }

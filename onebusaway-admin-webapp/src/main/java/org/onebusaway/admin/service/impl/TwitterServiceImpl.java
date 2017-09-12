@@ -17,6 +17,7 @@ package org.onebusaway.admin.service.impl;
 
 import org.apache.commons.lang.StringUtils;
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.presentation.impl.service_alerts.NotificationStrategy;
 import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationAffectsBean;
 import org.slf4j.Logger;
@@ -113,21 +114,24 @@ public class TwitterServiceImpl {
         try {
             Status status = _twitter.updateStatus(statusMessage);
             if (status != null) {
-                response = status.toString();
+                response = "Successfully tweeted \""
+                        + status.getText()
+                        + "\" at "
+                        + status.getCreatedAt();
             }
         } catch (TwitterException te) {
+            _log.error(te.getExceptionCode() + ":" + ":" + te.getStatusCode() + te.getErrorMessage());
             throw new IOException(te);
         }
         return response;
     }
 
     /**
-     * convert a service alert to a tweet.
+     * convert a service alert to a tweet. @See NotificationStrategy to change
+     * behaviour.
      *
-     * TODO:  add configuration to use stop_codes, stop_names, route_names
-     * in the tweet instead of the GTFS ids.
      */
-    public static String toTweet(ServiceAlertBean bean) {
+    public static String toTweet(ServiceAlertBean bean, NotificationStrategy strategy) {
         if (bean == null) return null;
         if (bean.getSummaries() == null) return null;
         if (bean.getSummaries().isEmpty()) return null;
@@ -142,10 +146,18 @@ public class TwitterServiceImpl {
 
             for (SituationAffectsBean allAffects : bean.getAllAffects()) {
                 if (allAffects != null && StringUtils.isNotBlank(allAffects.getRouteId())) {
-                    routes.add(allAffects.getRouteId());
+                    AgencyAndId routeId = new AgencyAndId(allAffects.getAgencyId(), allAffects.getRouteId());
+                    routes.add(strategy.summarizeRoute(routeId.toString()));
                     foundClause = true;
                 } else if (allAffects != null && StringUtils.isNotBlank(allAffects.getStopId())) {
-                    stops.add(allAffects.getStopId());
+                    AgencyAndId stopId = null;
+                    try {
+                        stopId = AgencyAndId.convertFromString(allAffects.getStopId());
+                    } catch (IllegalStateException ise) {
+                        stopId = new AgencyAndId(allAffects.getAgencyId(), allAffects.getStopId());
+                    }
+
+                    stops.add(strategy.summarizeStop(stopId.toString()));
                     foundClause = true;
                 } else if (allAffects != null
                         && StringUtils.isBlank(allAffects.getRouteId())
@@ -186,8 +198,7 @@ public class TwitterServiceImpl {
                 tweet += " stop(s) ";
             }
             for (String s : stops) {
-                AgencyAndId id = AgencyAndId.convertFromString(s);
-                tweet += id.getId() + ", ";
+                tweet += s + ", ";
             }
             tweet = tweet.substring(0, tweet.length() -2);
         }

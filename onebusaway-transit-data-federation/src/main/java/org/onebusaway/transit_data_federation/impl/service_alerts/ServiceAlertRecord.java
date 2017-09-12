@@ -111,12 +111,14 @@ public class ServiceAlertRecord {
   @GeneratedValue
   private int id = 0;
 
-  @Column(nullable = false, name="service_alert_agency_id", length = 10)
+  @Column(nullable = false, name="service_alert_agency_id", length = 50)
   private String agencyId;
 
-	@Column(nullable = false, name="service_alert_id", length = 255)
-	private String serviceAlertId;
-
+  @Column(nullable = false, name="service_alert_id", length = 255)
+  private String serviceAlertId;
+  
+  private Boolean copy;
+ 
   private Long creationTime = 0l;
 
   private Long modifiedTime = 0l;
@@ -243,4 +245,13 @@ public class ServiceAlertRecord {
   public void setId(int id) {
       this.id = id;
   }
+
+public Boolean isCopy() {
+	return copy;
+}
+
+public void setCopy(Boolean copy) {
+	this.copy = copy;
+}
+  
 }

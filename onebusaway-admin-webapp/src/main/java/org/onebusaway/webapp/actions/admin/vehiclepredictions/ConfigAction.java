@@ -28,22 +28,10 @@ public class ConfigAction extends OneBusAwayNYCAdminActionSupport {
 
 	private static final long serialVersionUID = 1L;
 
-	@Autowired
-	private ConfigurationServiceClient _configurationServiceClient;
-	
 	private static Logger _log = LoggerFactory.getLogger(ReportsAction.class);
 	
 	public String execute() {
 		return SUCCESS;
 	}
 	
-	public String getConfig(String key) {
-		try {
-			String value = _configurationServiceClient.getItem("vehiclepredictions", key);
-			return value;
-		} catch (Exception e) {
-			_log.error("config query broke: ", e);
-			return null;
-		}
-	}
 }

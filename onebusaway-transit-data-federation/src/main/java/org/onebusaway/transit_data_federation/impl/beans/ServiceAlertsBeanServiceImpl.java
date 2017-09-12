@@ -56,7 +56,24 @@ class ServiceAlertsBeanServiceImpl implements ServiceAlertsBeanService {
     AgencyAndId id = AgencyAndIdLibrary.convertFromString(situationBean.getId());
     ServiceAlertRecord serviceAlertRecord = getServiceAlertRecordFromServiceAlertBean(
         situationBean, id.getAgencyId());
+    
+    ServiceAlertRecord dbServiceAlertRecord = _serviceAlertsService.getServiceAlertForId(id);
+    
+    if(dbServiceAlertRecord != null){
+  	  serviceAlertRecord.setCopy(dbServiceAlertRecord.isCopy());
+    }
+    
     _serviceAlertsService.createOrUpdateServiceAlert(serviceAlertRecord);
+  }
+  
+  @Override
+  public ServiceAlertBean copyServiceAlert(String agencyId,
+	      ServiceAlertBean situationBeanToCopy) {
+	  situationBeanToCopy.setId(null);
+	  ServiceAlertRecord serviceAlertRecordCopy = getServiceAlertRecordFromServiceAlertBean(
+			  situationBeanToCopy, agencyId);
+	  serviceAlertRecordCopy = _serviceAlertsService.copyServiceAlert(serviceAlertRecordCopy);
+	  return getServiceAlertAsBean(serviceAlertRecordCopy);  
   }
 
   @Override
@@ -77,6 +94,13 @@ class ServiceAlertsBeanServiceImpl implements ServiceAlertsBeanService {
       String agencyId) {
     List<ServiceAlertRecord> serviceAlerts = _serviceAlertsService.getServiceAlertsForFederatedAgencyId(agencyId);
     return list(serviceAlerts);
+  }
+  
+  @Override
+  public List<ServiceAlertRecordBean> getServiceAlertRecordsForFederatedAgencyId(
+      String agencyId) {
+    List<ServiceAlertRecord> serviceAlerts = _serviceAlertsService.getServiceAlertsForFederatedAgencyId(agencyId);
+    return listRecordBeans(serviceAlerts);
   }
 
   @Override
@@ -131,7 +155,7 @@ class ServiceAlertsBeanServiceImpl implements ServiceAlertsBeanService {
   }
 
   private ServiceAlertBean getServiceAlertAsBean(ServiceAlertRecord serviceAlert) {
-
+	
     ServiceAlertBean bean = new ServiceAlertBean();
 
     AgencyAndId id = ServiceAlertLibrary.agencyAndId(serviceAlert.getAgencyId(), serviceAlert.getServiceAlertId());
@@ -160,13 +184,29 @@ class ServiceAlertsBeanServiceImpl implements ServiceAlertsBeanService {
     bean.setAllAffects(getAffectsAsBeans(serviceAlert));
     bean.setConsequences(getConsequencesAsBeans(serviceAlert));
     bean.setSource(serviceAlert.getSource());
-
+    
     return bean;
+  }
+  
+  private List<ServiceAlertRecordBean> listRecordBeans(List<ServiceAlertRecord> serviceAlerts) {
+    List<ServiceAlertRecordBean> beans = new ArrayList<ServiceAlertRecordBean>();
+    for (ServiceAlertRecord serviceAlert : serviceAlerts)
+      beans.add(getServiceAlertAsRecordBean(serviceAlert));
+    return beans;
+  }
+  
+  private ServiceAlertRecordBean getServiceAlertAsRecordBean(ServiceAlertRecord serviceAlert) {
+	ServiceAlertBean bean = getServiceAlertAsBean(serviceAlert);
+	ServiceAlertRecordBean serviceAlertRecordBean = new ServiceAlertRecordBean();
+    serviceAlertRecordBean.setServiceAlertBean(bean);
+    serviceAlertRecordBean.setCopy(serviceAlert.isCopy());
+    
+    return serviceAlertRecordBean;
   }
 
   private ServiceAlertRecord getServiceAlertRecordFromServiceAlertBean(
       ServiceAlertBean bean, String agencyId) {
-
+	  
     ServiceAlertRecord serviceAlertRecord = new ServiceAlertRecord();
     serviceAlertRecord.setAgencyId(agencyId);
     if (bean.getId() != null && !bean.getId().isEmpty()) {

@@ -67,6 +67,7 @@ import org.onebusaway.transit_data.model.realtime.CurrentVehicleEstimateQueryBea
 import org.onebusaway.transit_data.model.realtime.VehicleLocationRecordBean;
 import org.onebusaway.transit_data.model.realtime.VehicleLocationRecordQueryBean;
 import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
+import org.onebusaway.transit_data.model.service_alerts.ServiceAlertRecordBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationQueryBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationQueryBeanFederatedServiceMethodInvocationHandler;
 import org.onebusaway.transit_data.model.trips.TripBean;
@@ -375,6 +376,9 @@ public interface TransitDataService extends FederatedService {
 
   @FederatedByEntityIdMethod(propertyExpression = "id")
   public void updateServiceAlert(ServiceAlertBean situation);
+  
+  @FederatedByEntityIdMethod
+  public ServiceAlertBean copyServiceAlert(String agencyId, ServiceAlertBean situation);
 
   @FederatedByEntityIdMethod
   public void removeServiceAlert(String situationId);
@@ -567,4 +571,8 @@ public interface TransitDataService extends FederatedService {
    */
   @FederatedByAgencyIdMethod
   public ListBean<ConsolidatedStopMapBean> getAllConsolidatedStops();
+  
+  @FederatedByAgencyIdMethod
+  public ListBean<ServiceAlertRecordBean> getAllServiceAlertRecordsForAgencyId(
+		String agencyId);
 }

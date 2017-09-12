@@ -56,7 +56,7 @@ public class StatusProviderImpl implements StatusProvider {
   private ConfigurationService _config;
     
   @Override
-  public StatusGroup getServiceAlertStatus() {
+  public StatusGroup getAgencyServiceAlertStatus() {
 
     StatusGroup group = new StatusGroup();
     group.setTitle("Agency Advisories");
@@ -89,7 +89,7 @@ public class StatusProviderImpl implements StatusProvider {
     
     return group;
   }
-  
+
   @Override
   public StatusGroup getIcingaStatus() {
     
@@ -103,7 +103,13 @@ public class StatusProviderImpl implements StatusProvider {
     // fail if not configured!
     String baseUrl = _config.getConfigurationValueAsString("icinga.baseUrl", null);
     String command = _config.getConfigurationValueAsString("icinga.command", null);
-        
+
+    // be careful -- by default we aren't configured to do anything!
+    if (baseUrl == null || command == null) {
+      _log.info("missing required configuration for status group: baseUrl="
+              + baseUrl + ", command=" + command);
+      return group;
+    }
     try {
       HttpClient client = new HttpClient();
       String url = baseUrl + encode(command);
