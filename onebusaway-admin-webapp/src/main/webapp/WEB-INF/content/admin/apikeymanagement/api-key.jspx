@@ -21,6 +21,7 @@
 	xmlns:c="http://java.sun.com/jsp/jstl/core" xmlns:s="/struts-tags">
 <jsp:directive.page contentType="text/html" />
 <head>
+    <title>Manage API Keys</title>
 <s:url var="url" value="/css/admin.css" />
 <link rel="stylesheet" href="${url}" type="text/css" />
 
@@ -39,56 +40,65 @@
 <body>
 	<div id="content">
 		<div id="text">
-            <h2>Manage API Keys</h2>
-            <div>
-                <s:url var="url" action="list-api-keys"
-                       namespace="/admin/apikeymanagement"/>
-                <a href="${url}">List API keys</a>
-            </div>
+            <header>
+                <h2>Manage API Keys</h2>
+                <div id="userAdminList">
+                    <ul>
+                        <li>
+                            <a id="newKey" href=" ">Create API key</a>
+                        </li>
+                        <li><s:url var="url" action="list-api-keys"
+                                   namespace="/admin/apikeymanagement"/>
+                            <a href="${url}">List API keys</a>
+                        </li>
+                    </ul>
+                </div>
+            </header>
 			<s:form  action="api-key" namespace="/admin/apikeymanagement">
-				<fieldset id="requestInterval">
-					<label>Min Api Request Interval (ms)</label>
-					<s:textfield id="minApiReqInt" name="minApiReqInt"
-								style="margin: 1px; width: 100px;" />
-					<span id="requestIntervalError">*Request Interval is not valid; it must be a number, zero or greater.</span>
-				</fieldset>
-				<fieldset id="apiKeyContactInfo">
-					<legend id="contactInfoLegend">Contact Information</legend>
-					<div id="contactInfoItems">
-						<label>Name</label>
-						<s:textfield id="contactName" name="contactName"
-								style="margin: 1px; width: 300px;" />
-						<label>Company</label>
-						<s:textfield id="contactCompany" name="contactCompany"
-								style="margin: 1px; width: 300px;" />
-						<label>Email</label>
-						<s:textfield id="contactEmail" name="contactEmail"
-								style="margin: 1px; width: 300px;" />
-						<s:submit align="left" value="Search" name="searchEmail"
-							method="searchContactEmail" formnovalidate="true" />
-						<label>Details</label>
-						<s:textarea id="contactDetails" name="contactDetails"
-								style="margin: 1px; width: 300px;"
-								cols="60" rows="4"/>
-					</div>
-				</fieldset>
-				<fieldset style="background-color: transparent; border: 0;">
-					<label class="top">Key :</label>
-					<div style="border: 1px solid #000; display: inline-block;">
-						<s:textfield id="key" name="key" required="true"
-							style="margin: 1px; width: 300px;" />
-						<s:submit value="Generate new key"
-							onclick="handleGenerateApiKeyClick(); return false" />
-						<s:submit align="left" value="Search" name="search" method="searchAPIKey" />
-					</div>
-				</fieldset>
-				<s:submit align="left" value="Save" name="save" method="saveAPIKey" />
-				<s:submit align="left" value="Delete" name="delete" method="deleteAPIKey" />
-				<s:submit value="Clear" onclick="clearApiKeyFields(); return false;" />
-				<div id="apiKeyResult">
-					<s:actionmessage />
-					<s:fielderror />
-				</div>
+                <fieldset style="background-color: transparent; border: 0;">
+                    <div style="border: 1px solid #000; display: inline-block;">
+                        <label>Key</label>
+                        <s:textfield id="key" name="key" required="true"
+                                     style="margin: 1px; width: 300px;" />
+                        <s:submit id="searchKey" align="left" value="Search" name="search"
+                                  method="searchAPIKey" onclick="showEditApiKey()"/>
+                    </div>
+                </fieldset>
+                <div id="editApiKey">
+                    <fieldset id="requestInterval">
+                        <label>Min Api Request Interval (ms)</label>
+                        <s:textfield id="minApiReqInt" name="minApiReqInt"
+                                    style="margin: 1px; width: 100px;" />
+                        <span id="requestIntervalError">*Request Interval is not valid; it must be a number, zero or greater.</span>
+                    </fieldset>
+                    <fieldset id="apiKeyContactInfo">
+                        <legend id="contactInfoLegend">Contact Information</legend>
+                        <div id="contactInfoItems">
+                            <label>Name</label>
+                            <s:textfield id="contactName" name="contactName"
+                                    style="margin: 1px; width: 300px;" />
+                            <label>Company</label>
+                            <s:textfield id="contactCompany" name="contactCompany"
+                                    style="margin: 1px; width: 300px;" />
+                            <label>Email</label>
+                            <s:textfield id="contactEmail" name="contactEmail"
+                                    style="margin: 1px; width: 300px;" />
+                            <s:submit align="left" value="Search" name="searchEmail"
+                                method="searchContactEmail" formnovalidate="true" />
+                            <label>Details</label>
+                            <s:textarea id="contactDetails" name="contactDetails"
+                                    style="margin: 1px; width: 300px;"
+                                    cols="60" rows="4"/>
+                        </div>
+                    </fieldset>
+                    <s:submit id="saveKey" align="left" value="Save" name="save" method="saveAPIKey" />
+                    <s:submit id="deleteKey" align="left" value="Delete" name="delete" method="deleteAPIKey" />
+                    <s:submit id="clearData" value="Clear" onclick="clearApiKeyFields(); return false;" />
+                </div>
+                <div id="apiKeyResult">
+                    <s:actionmessage />
+                    <s:fielderror />
+                </div>
 			</s:form>
 		</div>
 	</div>

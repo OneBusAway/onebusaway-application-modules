@@ -70,3 +70,27 @@ fieldset#apiKeyContactInfo #api-key_searchEmail {
     padding-bottom: 5px;
     padding-left: 15px;
 }
+
+header {
+    margin-top: 20px;
+}
+
+header h2 {
+    display:inline;
+}
+
+#userAdminList {
+    float: right;
+    display:inline;
+}
+
+#userAdminList ul {
+    padding: 10px 0;
+}
+
+#userAdminList li a {
+
+    display: inline-block;
+    padding: 0px 5px 10px;
+    color: #0000FF;
+}
