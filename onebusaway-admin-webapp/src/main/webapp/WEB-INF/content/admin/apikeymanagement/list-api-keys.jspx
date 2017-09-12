@@ -57,10 +57,10 @@
                                 <div id="keysList">
                                     <c:forEach items="${apiKeysUserBeansList}" var="userBean">
                                         <tr>
-                                            <td><s:url var="editUser" action="manage-users.action">
-                                                <s:param name="username">${userBean.indices[0].value}</s:param>
+                                            <td><s:url var="editApiKey" action="api-key!searchAPIKey">
+                                                <s:param name="key">${userBean.indices[0].value}</s:param>
                                             </s:url>
-                                                <a href="${editUser}">${userBean.indices[0].value}</a></td>
+                                                <a href="${editApiKey}">${userBean.indices[0].value}</a></td>
                                             <td>${userBean.contactName}</td>
                                             <td>${userBean.contactCompany}</td>
                                             <td>${userBean.contactEmail}</td>
