@@ -15,12 +15,18 @@
  */
 
 jQuery(function() {
-	jQuery('#requestIntervalError').hide();
 
-	// if key field is empty, auto-generate key
-	if ($("#key").val() == '') {
-		handleGenerateApiKeyClick();
-	}
+    //if we have an API key, show the edit section
+    //otherwise, hide the edit section
+    var key = jQuery("#key").val();
+    if(!!key) {
+        showEditApiKey();
+    }
+    else {
+        $('#editApiKey').hide();
+    }
+
+	jQuery('#requestIntervalError').hide();
 
 	//If the Minimum API Request Interval is not a number, disable the "Save"
 	//button. Using bind() with propertychange event as live() does not work
@@ -38,11 +44,19 @@ jQuery(function() {
 		}
 	});
 
+    jQuery("#newKey").click(function(e) {
+        e.preventDefault();
+        handleGenerateApiKeyClick();
+        hideDelete();
+        hideSearch();
+        hideResult();
+    });
+
 });
 
 function handleGenerateApiKeyClick() {
 	jQuery.ajax({
-		url: "../api/config/generate-api-key",
+		url: "../../api/config/generate-api-key",
 		type: "GET",
 		success: function(response) {
 			jQuery("#key").val(response);
@@ -51,6 +65,30 @@ function handleGenerateApiKeyClick() {
 			alert("There was an error processing your request. Please try again.");
 		}
 	});
+    showEditApiKey();
+    hideResult();
+}
+
+function hideResult() {
+    if(jQuery("#apiKeyResult").is(":visible")) {
+        $("#apiKeyResult").hide();
+    }
+}
+
+function hideDelete() {
+    if(jQuery("#deleteKey").is(":visible")) {
+        $("#deleteKey").hide();
+    }
+}
+
+function hideSearch() {
+    if(jQuery("#searchKey").is(":visible")) {
+        $("#searchKey").hide();
+    }
+}
+
+function showEditApiKey() {
+    $('#editApiKey').show();
 }
 
 function clearApiKeyFields() {
@@ -62,4 +100,7 @@ function clearApiKeyFields() {
 	$("#key").val("");
 	$('#requestIntervalError').hide();
 	$("#api-key_save").prop('disabled', false);
+    $('#searchKey').show();
+    $('#deleteKey').show();
+    $("#apiKeyResult").hide();
 }

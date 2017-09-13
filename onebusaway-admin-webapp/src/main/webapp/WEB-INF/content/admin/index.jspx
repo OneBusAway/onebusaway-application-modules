@@ -52,8 +52,9 @@
 						</li>
 					</s:if>
 
-					<s:if test="isPageAvailable('showApiKey', 'org.onebusaway.webapp.actions.admin.ApiKeyAction')">
-						<li><s:url var="url" action="api-key" /> <s:a href="%{url}">Manage API Keys</s:a>
+					<s:if test="isPageAvailable('showApiKey', 'org.onebusaway.webapp.actions.admin.apikeymanagement.ApiKeyAction')">
+						<li><s:url var="url" action="api-key"
+								   namespace="/admin/apikeymanagement" />  <s:a href="%{url}">Manage API Keys</s:a>
 						</li>
 					</s:if>
 					<s:if test="isPageAvailable('showQrCode', 'org.onebusaway.webapp.actions.admin.BarcodeAction')">
