@@ -3,7 +3,7 @@
     <parent>
         <groupId>org.onebusaway</groupId>
         <artifactId>onebusaway-application-modules</artifactId>
-        <version>1.1.13.10-SNAPSHOT</version>
+        <version>1.1.13.10</version>
     </parent>
     <artifactId>onebusaway-container</artifactId>
     <packaging>jar</packaging>
