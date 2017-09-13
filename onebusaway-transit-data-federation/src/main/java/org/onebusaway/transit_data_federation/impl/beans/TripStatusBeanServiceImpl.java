@@ -338,6 +338,7 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
     // if we have trip info, check for apc data
     String routeId = null;
     String directionId = null;
+    AgencyAndId vehicleId = blockLocation.getVehicleId();
     if (activeTripInstance != null
             && activeTripInstance.getBlockTrip() != null
             && activeTripInstance.getBlockTrip().getTrip() != null
@@ -345,12 +346,14 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
       routeId = activeTripInstance.getBlockTrip().getTrip().getRoute().getId().getId();
       directionId = activeTripInstance.getBlockTrip().getTrip().getDirectionId();
     }
-    VehicleOccupancyRecord vehicleOccupancyRecord =
-            _vehicleOccupancyRecordCache.getRecordForVehicleIdAndRoute(blockLocation.getVehicleId(), routeId, directionId);
-    if (vehicleOccupancyRecord != null && vehicleOccupancyRecord.getOccupancyStatus() != null) {
-      bean.setOccupancyStatus(vehicleOccupancyRecord.getOccupancyStatus().valueOf());
+    if(vehicleId != null){
+	    VehicleOccupancyRecord vehicleOccupancyRecord =
+	            _vehicleOccupancyRecordCache.getRecordForVehicleIdAndRoute(vehicleId, routeId, directionId);
+	    if (vehicleOccupancyRecord != null && vehicleOccupancyRecord.getOccupancyStatus() != null) {
+	      bean.setOccupancyStatus(vehicleOccupancyRecord.getOccupancyStatus().valueOf());
+	    }
     }
-
+    
     bean.setPredicted(blockLocation.isPredicted());
 
     AgencyAndId vid = blockLocation.getVehicleId();
