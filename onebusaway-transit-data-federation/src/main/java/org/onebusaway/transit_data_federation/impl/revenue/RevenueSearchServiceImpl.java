@@ -115,8 +115,9 @@ public class RevenueSearchServiceImpl implements RevenueSearchService {
       String routeId, String directionId) {
     AgencyAndId stop = AgencyAndIdLibrary.convertFromString(stopId);
     AgencyAndId route = AgencyAndIdLibrary.convertFromString(routeId);
-    if(_nonRevenueStopRouteIndices.get(stop) != null && 
-        _nonRevenueStopRouteIndices.get(stop).contains(getHash(route, directionId))){
+    if((_nonRevenueStopRouteIndices.get(stop) != null && 
+        _nonRevenueStopRouteIndices.get(stop).contains(getHash(route, directionId)))
+        || _nonRevenueStopRouteIndices.isEmpty()){
       return true;
     }
     return false;
@@ -139,7 +140,7 @@ public class RevenueSearchServiceImpl implements RevenueSearchService {
   
   private Boolean stopHasRevenueServiceUncached(String agencyId, String stopId) {
     AgencyAndId stop = AgencyAndIdLibrary.convertFromString(stopId);
-    if(_nonRevenueStopRouteIndices.get(stop) != null){
+    if(_nonRevenueStopRouteIndices.get(stop) != null || _nonRevenueStopRouteIndices.isEmpty()){
       return true;
     }
     return false;
