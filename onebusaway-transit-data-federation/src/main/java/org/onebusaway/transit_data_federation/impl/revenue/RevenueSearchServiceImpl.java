@@ -48,7 +48,7 @@ public class RevenueSearchServiceImpl implements RevenueSearchService {
     _bundle = bundle;
   }
 
-  private Map<AgencyAndId, HashSet<String>> _nonRevenueStopRouteIndices;
+  private Map<AgencyAndId, HashSet<String>> _revenueStopRouteIndices;
   
   private Cache _stopHasRevenueServiceCache;
   
@@ -86,11 +86,11 @@ public class RevenueSearchServiceImpl implements RevenueSearchService {
 
     if (path.exists()) {
       _log.info("loading revenue stop route indices data");
-      _nonRevenueStopRouteIndices = ObjectSerializationLibrary.readObject(path);
+      _revenueStopRouteIndices = ObjectSerializationLibrary.readObject(path);
       _log.info("revenue stop route data loaded");
 
     } else {
-      _nonRevenueStopRouteIndices = Collections.emptyMap();
+      _revenueStopRouteIndices = Collections.emptyMap();
     }
   }
 
@@ -115,9 +115,9 @@ public class RevenueSearchServiceImpl implements RevenueSearchService {
       String routeId, String directionId) {
     AgencyAndId stop = AgencyAndIdLibrary.convertFromString(stopId);
     AgencyAndId route = AgencyAndIdLibrary.convertFromString(routeId);
-    if((_nonRevenueStopRouteIndices.get(stop) != null && 
-        _nonRevenueStopRouteIndices.get(stop).contains(getHash(route, directionId)))
-        || _nonRevenueStopRouteIndices.isEmpty()){
+    if((_revenueStopRouteIndices.get(stop) != null && 
+        _revenueStopRouteIndices.get(stop).contains(getHash(route, directionId)))
+        || _revenueStopRouteIndices.isEmpty()){
       return true;
     }
     return false;
@@ -140,7 +140,7 @@ public class RevenueSearchServiceImpl implements RevenueSearchService {
   
   private Boolean stopHasRevenueServiceUncached(String agencyId, String stopId) {
     AgencyAndId stop = AgencyAndIdLibrary.convertFromString(stopId);
-    if(_nonRevenueStopRouteIndices.get(stop) != null || _nonRevenueStopRouteIndices.isEmpty()){
+    if(_revenueStopRouteIndices.get(stop) != null || _revenueStopRouteIndices.isEmpty()){
       return true;
     }
     return false;
