@@ -74,6 +74,7 @@ public class ArrivalsAndDeparturesAction extends AbstractTextmarksAction
       return INPUT;
 
     _model.process();
+    _model.setAlertPresentText(getAlertPresentText());
 
 
     _model.applyDedupe();
@@ -82,6 +83,15 @@ public class ArrivalsAndDeparturesAction extends AbstractTextmarksAction
       filterArrivalsAndDeparturesByRoute(_args);
 
     return SUCCESS;
+  }
+
+  private String getAlertPresentText() {
+    final String ALERT_TEXT_KEY = "sms.alert.txt";
+    if (System.getProperties().containsKey(ALERT_TEXT_KEY)) {
+      return System.getProperty(ALERT_TEXT_KEY);
+    }
+
+    return "";
   }
 
   private void filterArrivalsAndDeparturesByRoute(String[] tokens) {
