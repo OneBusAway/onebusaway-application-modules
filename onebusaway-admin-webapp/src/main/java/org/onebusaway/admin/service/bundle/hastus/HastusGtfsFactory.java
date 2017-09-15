@@ -767,10 +767,14 @@ public class HastusGtfsFactory {
         && scheduleType.equals("Saturday"))
       routeVariation = "eb";
 
-    if (route.equals("270") && routeVariation.equals("w3")
-        && scheduleType.equals("Saturday"))
+    if (route.equals("270") && routeVariation.equals("w"))
       routeVariation = "wb";
-    
+
+    if (route.equals("270") && routeVariation.equals("w3")
+            && scheduleType.equals("Saturday"))
+      routeVariation = "wb";
+
+
     if (route.equals("535") && routeVariation.equals("n2"))
       routeVariation = "nb";
 
