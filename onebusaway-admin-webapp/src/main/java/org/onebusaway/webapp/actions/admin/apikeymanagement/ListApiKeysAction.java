@@ -37,6 +37,10 @@ public class ListApiKeysAction extends OneBusAwayNYCAdminActionSupport {
     private List<UserBean> apiKeysUserBeansList = new ArrayList<UserBean>();
     private UserService userService;
     private UserPropertiesService userPropertiesService;
+    private int keysPerPage = 6;
+    private int numberOfPages;
+    private int thisPage;
+
 
     public String execute() {
         super.execute();
@@ -47,8 +51,26 @@ public class ListApiKeysAction extends OneBusAwayNYCAdminActionSupport {
 
     public void generateUserBeans() {
 
-        setApiKeysList(userService.getUserIndexKeyValuesForKeyType(UserIndexTypes.API_KEY));
+        setThisPage(1);
+        int count = userService.getApiKeyCount();
+        setNumberOfPages((int) Math.ceil((double)count/getKeysPerPage()));
+        int firstKey = 0;
+        log.error("number of api keys: " + userService.getApiKeyCount());
 
+        List<User> users = userService.getApiKeys(firstKey, getKeysPerPage());
+        log.error("number of api keys retrieved: " + users.size());
+
+        if(!users.isEmpty()) {
+            for (User user : users) {
+                UserBean bean = userService.getUserAsBean(user);
+                if (bean != null) {
+                    getApiKeysUserBeansList().add(bean);
+                }
+            }
+        }
+
+        /*
+        setApiKeysList(userService.getUserIndexKeyValuesForKeyType(UserIndexTypes.API_KEY));
         for (String key : getApiKeysList()) {
             UserIndexKey userKey = new UserIndexKey(UserIndexTypes.API_KEY, key);
             UserIndex userIndexForId = userService.getUserIndexForId(userKey);
@@ -60,6 +82,8 @@ public class ListApiKeysAction extends OneBusAwayNYCAdminActionSupport {
                 }
             }
         }
+*/
+
     }
 
     /**
@@ -80,6 +104,27 @@ public class ListApiKeysAction extends OneBusAwayNYCAdminActionSupport {
         this.userPropertiesService = userPropertiesService;
     }
 
+    public int getKeysPerPage() {
+        return keysPerPage;
+    }
+
+    public void setKeysPerPage(int keysPerPage) {
+        this.keysPerPage = keysPerPage;
+    }
+
+    public int getNumberOfPages() { return numberOfPages; }
+
+    public void setNumberOfPages(int numberOfPages) {
+        this.numberOfPages = numberOfPages;
+    }
+
+    public int getThisPage() {
+        return thisPage;
+    }
+
+    public void setThisPage(int thisPage) {
+        this.thisPage = thisPage;
+    }
     public List<String> getApiKeysList() {
         return apiKeysList;
     }

@@ -246,6 +246,16 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
+  public Integer getApiKeyCount(){
+    return _userDao.getUserKeyCount(UserIndexTypes.API_KEY);
+  }
+
+  @Override
+  public List<User> getApiKeys(final int start, final int maxResults){
+    return _userDao.getUsersForKeyType(start, maxResults, UserIndexTypes.API_KEY);
+  }
+
+  @Override
   public UserIndex getOrCreateUserForIndexKey(UserIndexKey key,
       String credentials, boolean isAnonymous) {
 
