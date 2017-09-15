@@ -206,40 +206,6 @@ class UserDaoImpl implements UserDao {
     return users;
   }
 
-/*  @Override
-  public List<String> getAllUserIndexKeyValuesInRange(final int firstResult,
-                                            final int maxResults, String keyType) {
-    return _template.execute(new HibernateCallback<List<Integer>>() {
-      @SuppressWarnings("unchecked")
-      @Override
-      public List<Integer> doInHibernate(Session session)
-              throws HibernateException, SQLException {
-        Query query = session.createQuery("SELECT user.id FROM User user");
-        query.sett
-        query.setFirstResult(firstResult);
-        query.setMaxResults(maxResults);
-        return query.list();
-      }
-    });
-  }
-
-  @Override
-  public List<Integer> getAllUserIdsInRange(final int firstResult,
-                                            final int maxResults) {
-    return _template.execute(new HibernateCallback<List<Integer>>() {
-      @SuppressWarnings("unchecked")
-      @Override
-      public List<Integer> doInHibernate(Session session)
-              throws HibernateException, SQLException {
-        Query query = session.createQuery("SELECT user.id FROM User user");
-        query.setFirstResult(firstResult);
-        query.setMaxResults(maxResults);
-        return query.list();
-      }
-    });
-  }
-*/
-
   @Transactional
   @Override
   public UserIndex getUserIndexForId(UserIndexKey key) {
