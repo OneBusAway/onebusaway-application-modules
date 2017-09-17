@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -38,6 +39,7 @@ import org.onebusaway.transit_data.model.ListBean;
 import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationQueryBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationQueryBean.AffectsBean;
+import org.onebusaway.transit_data.model.service_alerts.TimeRangeBean;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.util.services.configuration.ConfigurationService;
 import org.slf4j.Logger;
@@ -77,8 +79,8 @@ public class StatusProviderImpl implements StatusProvider {
       query.setAffects(Collections.singletonList(ab));
       ListBean<ServiceAlertBean> alerts = _transitDataService.getServiceAlerts(
           query);
-
-      for (ServiceAlertBean bean : alerts.getList()) {
+      List<ServiceAlertBean> beans = filterByTime(alerts.getList(), System.currentTimeMillis());
+      for (ServiceAlertBean bean : beans) {
         StatusItem item = new StatusItem();
         item.setDescription(bean.getDescriptions().get(0).getValue());
         item.setTitle(agencyName + ": " + bean.getSummaries().get(0).getValue());
@@ -231,4 +233,27 @@ public class StatusProviderImpl implements StatusProvider {
   private static StatusItem exceptionStatus() {
     return exceptionStatus(null);
   }
+
+  private List<ServiceAlertBean> filterByTime(List<ServiceAlertBean> beans, long time) {
+    List<ServiceAlertBean> results = new ArrayList<ServiceAlertBean>();
+    if (beans == null) return results;
+    for (ServiceAlertBean bean : beans) {
+      if (filterByTime(bean, time))
+        results.add(bean);
+    }
+    return results;
+  }
+
+  private boolean filterByTime(ServiceAlertBean serviceAlert, long time) {
+    if (time == -1 || serviceAlert.getPublicationWindows().size() == 0)
+      return true;
+    for (TimeRangeBean publicationWindow : serviceAlert.getPublicationWindows()) {
+      if ((publicationWindow.getFrom() <= time)
+              && (publicationWindow.getTo() >= time)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
 }
