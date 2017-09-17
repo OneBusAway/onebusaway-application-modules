@@ -146,9 +146,15 @@ public class TwitterServiceImpl {
 
             for (SituationAffectsBean allAffects : bean.getAllAffects()) {
                 if (allAffects != null && StringUtils.isNotBlank(allAffects.getRouteId())) {
-                    AgencyAndId routeId = new AgencyAndId(allAffects.getAgencyId(), allAffects.getRouteId());
-                    routes.add(strategy.summarizeRoute(routeId.toString()));
-                    foundClause = true;
+                    // agency id is optional -- if route_id has it already do not prepend
+                    if (allAffects.getAgencyId() == null || "null".equals(allAffects.getAgencyId())) {
+                        routes.add(strategy.summarizeRoute(allAffects.getRouteId()));
+                        foundClause = true;
+                    } else {
+                        AgencyAndId routeId = new AgencyAndId(allAffects.getAgencyId(), allAffects.getRouteId());
+                        routes.add(strategy.summarizeRoute(routeId.toString()));
+                        foundClause = true;
+                    }
                 } else if (allAffects != null && StringUtils.isNotBlank(allAffects.getStopId())) {
                     AgencyAndId stopId = null;
                     try {
