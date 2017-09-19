@@ -78,6 +78,7 @@ public class ArrivalsAndDeparturesAction extends TwilioSupport {
   private TextModification _destinationPronunciation;
 
   private List<StopBean> _stops = new ArrayList<StopBean>();
+  
 
   @Autowired
   public void setDestinationPronunciation(
@@ -154,7 +155,7 @@ public class ArrivalsAndDeparturesAction extends TwilioSupport {
     Collections.sort(arrivals, new ArrivalAndDepartureComparator());
 
     long now = SystemTime.currentTimeMillis();
-
+    boolean hasAlerts = false;
     for (ArrivalAndDepartureBean adb : arrivals) {
 
       TripBean trip = adb.getTrip();
@@ -180,7 +181,7 @@ public class ArrivalsAndDeparturesAction extends TwilioSupport {
         addText("is currently not in service");
         continue;
       }
-
+      
       long t = adb.computeBestDepartureTime();
       boolean isPrediction = adb.hasPredictedDepartureTime();
 
@@ -213,10 +214,17 @@ public class ArrivalsAndDeparturesAction extends TwilioSupport {
         addText("but is currently on adverse weather re-route.");
       }
       addText(". ");
+      if(!hasAlerts && adb.getSituations() != null && adb.getSituations().size() > 0){
+        hasAlerts = true;
+      }
     }
     
-    processServiceAlertMessages(buildStopRouteAlertsMap());
+    //processServiceAlertMessages(buildStopRouteAlertsMap());
 
+    
+    if(hasAlerts){
+      addText(getAlertPresentText());
+    }
     addMessage(Messages.ARRIVAL_INFO_DISCLAIMER);
 
     List<AgencyBean> agencies = AgencyPresenter.getAgenciesForArrivalAndDepartures(arrivals);
@@ -375,8 +383,7 @@ public class ArrivalsAndDeparturesAction extends TwilioSupport {
     if (System.getProperties().containsKey(ALERT_TEXT_KEY)) {
       return System.getProperty(ALERT_TEXT_KEY);
     }
-
-    return "are reporting service alerts.";
+    return "";
   }
   
   private boolean containsActiveAlert(ServiceAlertBean serviceAlert, long time) {
