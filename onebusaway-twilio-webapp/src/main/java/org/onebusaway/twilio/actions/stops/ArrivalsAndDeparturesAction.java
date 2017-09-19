@@ -344,15 +344,15 @@ public class ArrivalsAndDeparturesAction extends TwilioSupport {
         addText(_routeNumberPronunciation.modify(routeId));
         addText(",");
       }
-      addMessage(Messages.REPORTING_ALERTS);
+      addText(getAlertPresentText());
     } 
     else if(routeIds.size() > 0){
       addText("Route ");
       addText(_routeNumberPronunciation.modify(routeIds.get(0)));
-      addMessage(Messages.REPORTING_ALERT);
+      addMessage(getAlertPresentText());
     } 
   }
-  
+
   private void addServiceAlertStopText(List<String> stopIds) {
     if(stopIds.size() > 1){
       addText("Stops ");
@@ -361,15 +361,24 @@ public class ArrivalsAndDeparturesAction extends TwilioSupport {
         addText(stopId);
         addText(",");
       }
-      addMessage(Messages.REPORTING_ALERTS);
+      addText(getAlertPresentText());
     } 
     else if(stopIds.size() > 0){
       addText("Stop ");
       addText(stopIds.get(0));
-      addMessage(Messages.REPORTING_ALERT);
+      addText(getAlertPresentText());
     } 
   }
 
+  private String getAlertPresentText() {
+    final String ALERT_TEXT_KEY = "ivr.alert.txt";
+    if (System.getProperties().containsKey(ALERT_TEXT_KEY)) {
+      return System.getProperty(ALERT_TEXT_KEY);
+    }
+
+    return "are reporting service alerts.";
+  }
+  
   private boolean containsActiveAlert(ServiceAlertBean serviceAlert, long time) {
 
     if (time == -1 || serviceAlert.getPublicationWindows() == null
