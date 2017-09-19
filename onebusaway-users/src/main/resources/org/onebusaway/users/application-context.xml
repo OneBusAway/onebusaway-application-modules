@@ -123,7 +123,7 @@
         <property name="proxyInterface" value="org.onebusaway.users.services.UserPropertiesService" />
         <property name="invocationHandler">
             <bean class="org.onebusaway.users.impl.UserPropertiesServiceVersionedInvocationHandler">
-                <property name="preferredVersion" value="3" />
+                <property name="preferredVersion" value="4" />
                 <property name="userPropertiesServiceV1">
                     <bean class="org.onebusaway.users.impl.UserPropertiesServiceV1Impl" />
                 </property>
@@ -132,6 +132,9 @@
                 </property>
                 <property name="userPropertiesServiceV3">
                     <bean class="org.onebusaway.users.impl.UserPropertiesServiceV3Impl" />
+                </property>
+                <property name="userPropertiesServiceV4">
+                    <bean class="org.onebusaway.users.impl.UserPropertiesServiceV4Impl" />
                 </property>
             </bean>
         </property>

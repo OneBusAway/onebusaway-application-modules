@@ -253,5 +253,11 @@ public class UserPropertiesServiceV1Impl implements UserPropertiesService {
   public void updateApiKeyContactInfo(User user, String contactName, 
       String contactCompany, String contactEmail, String contactDetails) {
     throw new UnsupportedOperationException();
-  } 
+  }
+
+  @Override
+  public void disableUser(User user) {
+    throw new UnsupportedOperationException();
+  }
+
 }

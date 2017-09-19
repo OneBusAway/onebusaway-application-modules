@@ -38,7 +38,7 @@ import org.onebusaway.users.model.UserIndex;
 import org.onebusaway.users.model.UserIndexKey;
 import org.onebusaway.users.model.UserPropertiesV1;
 import org.onebusaway.users.model.UserRole;
-import org.onebusaway.users.model.properties.UserPropertiesV3;
+import org.onebusaway.users.model.properties.UserPropertiesV4;
 import org.onebusaway.users.services.StandardAuthoritiesService;
 import org.onebusaway.users.services.UserDao;
 import org.onebusaway.users.services.UserIndexTypes;
@@ -266,7 +266,7 @@ public class UserServiceImpl implements UserService {
       User user = new User();
       user.setCreationTime(new Date());
       user.setTemporary(true);
-      user.setProperties(new UserPropertiesV3());
+      user.setProperties(new UserPropertiesV4());
       Set<UserRole> roles = new HashSet<UserRole>();
       if (isAnonymous)
         roles.add(_authoritiesService.getAnonymousRole());
