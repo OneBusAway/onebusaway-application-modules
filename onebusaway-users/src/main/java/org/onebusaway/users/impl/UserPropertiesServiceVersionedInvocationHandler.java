@@ -152,6 +152,9 @@ public class UserPropertiesServiceVersionedInvocationHandler implements Invocati
       case 3:
         _v3References.incrementAndGet();
         return _userServiceV3;
+      case 4:
+        _v4References.incrementAndGet();
+        return _userServiceV4;
     }
   }
 

@@ -29,12 +29,15 @@ import org.onebusaway.users.model.properties.UserPropertiesV4;
 import org.onebusaway.users.services.UserDao;
 import org.onebusaway.users.services.UserPropertiesMigration;
 import org.onebusaway.users.services.UserPropertiesMigrationStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class UserPropertiesMigrationImpl implements UserPropertiesMigration {
 
+    private static Logger _log = LoggerFactory.getLogger(UserPropertiesMigrationImpl.class);
   private Object _userPropertiesMigrationOperationLock = new Object();
 
   private UserPropertiesMigrationBulkOperation<?> _operation = null;
@@ -145,8 +148,8 @@ public class UserPropertiesMigrationImpl implements UserPropertiesMigration {
 
   /****
    * 
-   * @param v1
-   * @return
+   * param UserPropertiesVersion
+   * return
    */
 
   private UserPropertiesV4 getV4Properties(UserPropertiesV3 v3) {
@@ -161,6 +164,10 @@ public class UserPropertiesMigrationImpl implements UserPropertiesMigration {
       v4.setBookmarks(v3.getBookmarks());
       v4.setMinApiRequestInterval(v3.getMinApiRequestInterval());
       v4.setReadSituationIdsWithReadTime(v3.getReadSituationIdsWithReadTime());
+      v4.setContactCompany(v3.getContactCompany());
+      v4.setContactDetails(v3.getContactDetails());
+      v4.setContactName(v3.getContactName());
+      v4.setContactEmail(v3.getContactEmail());
 
       return v4;
   }
