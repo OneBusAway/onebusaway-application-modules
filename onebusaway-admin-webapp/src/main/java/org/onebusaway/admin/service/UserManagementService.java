@@ -95,11 +95,19 @@ public interface UserManagementService {
 	boolean updateUser(UserDetail userDetail);
 	
 	/**
-	 * Deactivates/soft deletes a given user.
+	 * Deactivates/soft deletes a given user.  This action is un-reversible.
+     * Called "delete" in the UI
 	 * @param userDetail userDetails such as id, username etc
 	 * @return true if soft delete operation succeeds, false otherwise
 	 */
 	boolean deactivateUser(UserDetail userDetail);
-	
+
+    /**
+     * Diabless a given user.  User can be enabled again.
+     * @param userDetail userDetails such as id, username etc
+     * @return true if soft delete operation succeeds, false otherwise
+     */
+    boolean disableUser(UserDetail userDetail);
+
 	List<String> getAllRoleNames();
 }

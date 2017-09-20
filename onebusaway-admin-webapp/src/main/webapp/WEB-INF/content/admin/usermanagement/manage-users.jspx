@@ -69,6 +69,9 @@
 						<li><s:url var="url" value="users-by-role.action" />
 							<a href="${url}">List Users by role</a>
 						</li>
+                        <li><s:url var="url" value="disabled-users.action" />
+                            <a href="${url}">List disabled users</a>
+                        </li>
                     </ul>
                 </div>
             </header>
@@ -102,9 +105,11 @@
 							 	<div id="actions">
 								 	<s:url var="url" value="/css/img/edit-4.png" />
 									<img src="${url}" alt="Not Found" id="edit" title="Edit User"/>
+                                    <s:url var="url" value="/css/img/edit-delete-7.png" />
+                                    <img src="${url}" alt="Not Found" id="disable" title="Disable User"/>
 								 	<s:url var="url" value="/css/img/edit-delete-7.png" />
-									<img src="${url}" alt="Not Found" id="deactivate" title="Deactivate User"/>
-							 	</div>
+									<img src="${url}" alt="Not Found" id="deactivate" title="Delete User"/>
+                                </div>
 						 	</td>
 					 	</tr>
 				 	</table>

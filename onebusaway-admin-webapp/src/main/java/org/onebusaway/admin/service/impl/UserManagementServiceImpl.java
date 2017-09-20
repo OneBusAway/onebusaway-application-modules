@@ -32,13 +32,11 @@ import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.onebusaway.admin.model.ui.UserDetail;
 import org.onebusaway.admin.service.UserManagementService;
+import org.onebusaway.users.client.model.UserBean;
 import org.onebusaway.users.model.User;
 import org.onebusaway.users.model.UserIndex;
 import org.onebusaway.users.model.UserRole;
-import org.onebusaway.users.services.StandardAuthoritiesService;
-import org.onebusaway.users.services.UserDao;
-import org.onebusaway.users.services.UserIndexTypes;
-import org.onebusaway.users.services.UserService;
+import org.onebusaway.users.services.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,6 +55,7 @@ public class UserManagementServiceImpl implements UserManagementService {
 
 	private HibernateTemplate hibernateTemplate;
 	private StandardAuthoritiesService authoritiesService;
+    private UserPropertiesService userPropertiesService;
 	private UserDao userDao;
 	private UserService userService;
 	private PasswordEncoder passwordEncoder;
@@ -281,7 +280,23 @@ public class UserManagementServiceImpl implements UserManagementService {
 		
 		return true;
 	}
-	
+
+	@Override
+    public boolean disableUser(UserDetail userDetail) {
+        User user = userService.getUserForId(userDetail.getId());
+
+        if(user == null) {
+            log.info("User '{}' does not exist in the system", userDetail.getUsername());
+            return false;
+        }
+
+        userPropertiesService.disableUser(user);
+
+        log.info("User '{}' disabled successfully", userDetail.getUsername());
+
+        return true;
+    }
+
 	@Override
 	public boolean deactivateUser(UserDetail userDetail) {
 		User user = userService.getUserForId(userDetail.getId());
@@ -298,10 +313,10 @@ public class UserManagementServiceImpl implements UserManagementService {
 			userDao.deleteUserIndex(userIndex);
 			it.remove();
 		}
-		
+
 		userDao.saveOrUpdateUser(user);
 		
-		log.info("User '{}' deactivated successfully", userDetail.getUsername());
+		log.info("User '{}' deleted successfully", userDetail.getUsername());
 		
 		return true;
 	}
@@ -372,5 +387,14 @@ public class UserManagementServiceImpl implements UserManagementService {
 	public List<String> getAllRoleNames() {
 		return StandardAuthoritiesService.STANDARD_AUTHORITIES;
 	}
+
+    /**
+     * Injects {@link UserPropertiesService}
+     * @param userPropertiesService the userPropertiesService to set
+     */
+    @Autowired
+    public void setUserPropertiesService(UserPropertiesService userPropertiesService) {
+        this.userPropertiesService = userPropertiesService;
+    }
 
 }

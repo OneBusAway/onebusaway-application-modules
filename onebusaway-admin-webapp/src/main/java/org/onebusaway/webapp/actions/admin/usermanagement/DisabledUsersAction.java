@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.onebusaway.webapp.actions.admin.usermanagement;
 
 import org.onebusaway.admin.model.ui.UserDetail;
@@ -26,25 +27,16 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-public class UsersByRoleAction extends OneBusAwayNYCAdminActionSupport {
+public class DisabledUsersAction extends OneBusAwayNYCAdminActionSupport {
 
-    private static Logger log = LoggerFactory.getLogger(UsersByRoleAction.class);
+    private static Logger log = LoggerFactory.getLogger(DisabledUsersAction.class);
     private UserManagementService userManagementService;
     private List<UserDetail> userDetailsList;
 
     public String execute() {
         super.execute();
 
-        List<UserDetail> udl = userManagementService.getAllUserDetails();
-
-        Collections.sort(udl, new Comparator<UserDetail>() {
-            @Override
-            public int compare(UserDetail userDetail, UserDetail userDetail2) {
-                return userDetail.getRole().compareTo(userDetail2.getRole());
-            }
-        });
-
-        setUserDetailsList(udl);
+        setUserDetailsList(userManagementService.getAllUserDetails());
 
         return SUCCESS;
     }

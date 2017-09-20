@@ -65,14 +65,25 @@ public class ManageUsersAction extends OneBusAwayNYCAdminActionSupport {
 
 		return "updateUser";
 	}
+
+    public String disableUser() {
+        UserDetail userDetail = gsonTool.readJson(new StringReader(userData), UserDetail.class);
+        boolean success = userManagementService.disableUser(userDetail);
+        if(success) {
+            updateUserMessage =  "User '" +userDetail.getUsername() + "' disabled successfully";
+        } else {
+            updateUserMessage = "Error disabling user : '" +userDetail.getUsername() +"'";
+        }
+        return "updateUser";
+    }
 	
 	public String deactivateUser() {
 		UserDetail userDetail = gsonTool.readJson(new StringReader(userData), UserDetail.class);
 		boolean success = userManagementService.deactivateUser(userDetail);
 		if(success) {
-			updateUserMessage =  "User '" +userDetail.getUsername() + "' deactivated successfully";
+			updateUserMessage =  "User '" +userDetail.getUsername() + "' deleted successfully";
 		} else {
-			updateUserMessage = "Error deactivating user : '" +userDetail.getUsername() +"'";
+			updateUserMessage = "Error deleting user : '" +userDetail.getUsername() +"'";
 		}
 		return "updateUser";
 	}

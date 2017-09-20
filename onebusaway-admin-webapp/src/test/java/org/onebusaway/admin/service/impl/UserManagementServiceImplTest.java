@@ -254,7 +254,7 @@ public class UserManagementServiceImplTest {
 		
 		boolean success = service.deactivateUser(userDetail);
 		
-		assertFalse("Unable to deactivate non existing user", success);
+		assertFalse("Unable to delete non existing user", success);
 		
 		verify(userDao, times(0)).deleteUserIndex(isA(UserIndex.class));
 		verify(userDao, times(0)).saveOrUpdateUser(user);

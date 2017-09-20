@@ -64,6 +64,9 @@ jQuery(function() {
 	
 	//Edit image click
 	jQuery("#actions #edit").on("click", showEditUser);
+
+    //Disable image click
+    jQuery("#actions #disable").on("click", disableUser);
 	
 	//Delete image click
 	jQuery("#actions #deactivate").on("click", showDeleteDialog);
@@ -110,12 +113,12 @@ function showDeleteDialog() {
 	
 	var userName = jQuery("#userDetails #username").text();
 	var deleteDialog = jQuery("<div id='deleteConfirm'>" +
-			"<div><label>Are you sure you want to deactivate user: </label>" +
+			"<div><label>Are you sure you want to delete user: </label>" +
 			"<label id='deleteMessage'>" +userName + "</label></div>" +
 			"<div id='deleteButtons'><button id='deleteSubmit'>OK</button>" +
 			"<label id='deleteCancel'>Cancel</label></div></div>")
 			.dialog({
-				title: "Deactivate User?",
+				title: "Delete User?",
 				autoOpen: false,
 				height: "auto",
 				width: "auto",
@@ -133,16 +136,41 @@ function showDeleteDialog() {
 		turnOnEditClick();
 	});
 }
-
 function deactivateUser(event) {
-	var deleteDialog = event.data.dialog;
+    var deleteDialog = event.data.dialog;
+
+    var userData = new Object();
+    userData.id = jQuery("#userDetails #userId").val();
+    userData.userName = jQuery("#userDetails #username").text();
+
+    jQuery.ajax({
+        url:"manage-users!deactivateUser.action",
+        type: "POST",
+        dataType: "json",
+        data : {"userData":JSON.stringify(userData)},
+        traditional: true,
+        success: function(response) {
+            jQuery("#userResult #result").text(response);
+            showResult();
+            deleteDialog.dialog('close');
+            jQuery("#search #searchUser").val("");
+            jQuery("#userDetails").hide();
+            turnOnEditClick();
+        },
+        error: function() {
+            alert("Error deactivating user");
+        }
+    });
+}
+
+function disableUser() {
 	
 	var userData = new Object();
 	userData.id = jQuery("#userDetails #userId").val();
 	userData.userName = jQuery("#userDetails #username").text();
 	
 	jQuery.ajax({
-		url:"manage-users!deactivateUser.action",
+		url:"manage-users!disableUser.action",
 		type: "POST",
 		dataType: "json",
 		data : {"userData":JSON.stringify(userData)},
@@ -156,7 +184,7 @@ function deactivateUser(event) {
 			turnOnEditClick();
 		},
 		error: function() {
-			alert("Error deactivating user");
+			alert("Error disabling user");
 		}
 	});
 }
