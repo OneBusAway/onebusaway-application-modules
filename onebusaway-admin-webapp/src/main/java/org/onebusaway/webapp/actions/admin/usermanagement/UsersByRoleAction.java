@@ -35,7 +35,7 @@ public class UsersByRoleAction extends OneBusAwayNYCAdminActionSupport {
     public String execute() {
         super.execute();
 
-        List<UserDetail> udl = userManagementService.getAllUserDetails();
+        List<UserDetail> udl = userManagementService.getActiveUsersDetails();
 
         Collections.sort(udl, new Comparator<UserDetail>() {
             @Override

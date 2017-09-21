@@ -276,6 +276,11 @@ public class UserPropertiesServiceV3Impl implements UserPropertiesService {
         throw new UnsupportedOperationException();
   }
 
+    @Override
+    public void activateUser(User user) {
+        throw new UnsupportedOperationException();
+  }
+
   @Override
   public void mergeProperties(User sourceUser, User targetUser) {
     mergeProperties(getProperties(sourceUser), getProperties(targetUser));

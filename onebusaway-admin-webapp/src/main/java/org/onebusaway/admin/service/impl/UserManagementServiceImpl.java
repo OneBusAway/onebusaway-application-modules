@@ -141,7 +141,7 @@ public class UserManagementServiceImpl implements UserManagementService {
 	}
 
 	@Override
-	public List<UserDetail> getAllUserDetails() {
+	public List<UserDetail> getActiveUsersDetails() {
 
 		List<UserDetail> userDetails = new ArrayList<UserDetail>();
 
@@ -161,16 +161,54 @@ public class UserManagementServiceImpl implements UserManagementService {
 
 		if(!users.isEmpty()) {
 			for (User user : users) {
-				for(UserIndex ui : user.getUserIndices()) {
-					UserDetail userDetail = buildUserDetail(user);
-					userDetails.add(userDetail);
-				}
+                UserBean bean = userService.getUserAsBean(user);
+                if (!bean.isDisabled()) {
+                    for(UserIndex ui : user.getUserIndices()) {
+                        UserDetail userDetail = buildUserDetail(user);
+                        userDetails.add(userDetail);
+                    }
+                }
 			}
 		}
 		log.debug("Returning user details");
 
 		return userDetails;
 	}
+
+    @Override
+    public List<UserDetail> getInactiveUsersDetails() {
+
+        List<UserDetail> userDetails = new ArrayList<UserDetail>();
+
+        List<User> users = hibernateTemplate.execute(new HibernateCallback<List<User>>() {
+
+            @SuppressWarnings("unchecked")
+            @Override
+            public List<User> doInHibernate(Session session)
+                    throws HibernateException, SQLException {
+                Criteria criteria = session.createCriteria(User.class)
+                        .createCriteria("userIndices")
+                        .add(Restrictions.eq("id.type", UserIndexTypes.USERNAME));
+                List<User> users = criteria.list();
+                return users;
+            }
+        });
+
+        if(!users.isEmpty()) {
+            for (User user : users) {
+                UserBean bean = userService.getUserAsBean(user);
+                if (bean.isDisabled()) {
+                    for(UserIndex ui : user.getUserIndices()) {
+                        UserDetail userDetail = buildUserDetail(user);
+                        userDetails.add(userDetail);
+                    }
+                }
+            }
+        }
+        log.debug("Returning user details");
+
+        return userDetails;
+    }
 
 	@Override
 	public UserDetail getUserDetail(final String userName) {
@@ -213,6 +251,11 @@ public class UserManagementServiceImpl implements UserManagementService {
 			//There should be only one role
 			userDetail.setRole(role.getName());
 		}
+
+        UserBean bean = userService.getUserAsBean(user);
+        userDetail.setDisabled(bean.isDisabled());
+        log.error("Bean is disabled: " + bean.isDisabled());
+        log.error("User detail is disabled: " + userDetail.isDisabled());
 		
 		return userDetail;
 	}
@@ -281,8 +324,9 @@ public class UserManagementServiceImpl implements UserManagementService {
 		return true;
 	}
 
+	//Marks the user as inactive, can activate again
 	@Override
-    public boolean disableUser(UserDetail userDetail) {
+    public boolean inactivateUser(UserDetail userDetail) {
         User user = userService.getUserForId(userDetail.getId());
 
         if(user == null) {
@@ -297,6 +341,24 @@ public class UserManagementServiceImpl implements UserManagementService {
         return true;
     }
 
+    //Marks the user as active
+    @Override
+    public boolean activateUser(UserDetail userDetail) {
+        User user = userService.getUserForId(userDetail.getId());
+
+        if(user == null) {
+            log.info("User '{}' does not exist in the system", userDetail.getUsername());
+            return false;
+        }
+
+        userPropertiesService.activateUser(user);
+
+        log.info("User '{}' activated successfully", userDetail.getUsername());
+
+        return true;
+    }
+
+    //deletes the user
 	@Override
 	public boolean deactivateUser(UserDetail userDetail) {
 		User user = userService.getUserForId(userDetail.getId());

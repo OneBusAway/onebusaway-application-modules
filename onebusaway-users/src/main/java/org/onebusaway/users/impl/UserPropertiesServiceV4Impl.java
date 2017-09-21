@@ -266,6 +266,15 @@ public class UserPropertiesServiceV4Impl implements UserPropertiesService {
         _userDao.saveOrUpdateUser(user);
     }
 
+    @Override
+    public void activateUser(User user) {
+        UserPropertiesV4 properties = getProperties(user);
+        properties.setDisabled(false);
+
+        user.setProperties(properties);
+        _userDao.saveOrUpdateUser(user);
+    }
+
 
     @Override
     public void mergeProperties(User sourceUser, User targetUser) {

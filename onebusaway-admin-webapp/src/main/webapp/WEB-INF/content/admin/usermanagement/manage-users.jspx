@@ -64,13 +64,13 @@
                             <a href="${url}">Create User</a>
                         </li>
                         <li><s:url var="url" value="list-users.action" />
-                            <a href="${url}">List Users paginated</a>
+                            <a href="${url}">List All Users paginated</a>
                         </li>
 						<li><s:url var="url" value="users-by-role.action" />
-							<a href="${url}">List Users by role</a>
+							<a href="${url}">List Active Users by role</a>
 						</li>
-                        <li><s:url var="url" value="disabled-users.action" />
-                            <a href="${url}">List disabled users</a>
+                        <li><s:url var="url" value="list-inactive-users.action" />
+                            <a href="${url}">List Inactive Users by role</a>
                         </li>
                     </ul>
                 </div>
@@ -100,15 +100,25 @@
 								 	<label class="userLabel">User role: </label>
 								 	<label id="userRole"></label>
 							 	</div>
+                                <div>
+                                    <label class="userLabel">Disabled: </label>
+                                    <label id="disabled"></label>
+                                </div>
 							 	</td>
 							 	<td>
 							 	<div id="actions">
 								 	<s:url var="url" value="/css/img/edit-4.png" />
 									<img src="${url}" alt="Not Found" id="edit" title="Edit User"/>
+                                    <s:if test="disabled">
+                                        <s:url var="url" value="/css/img/circle_green18x18.png" />
+                                        <img src="${url}" alt="Not Found" id="activate" title="Mark User Active"/>
+                                    </s:if>
+                                    <s:else>
+                                        <s:url var="url" value="/css/img/circle_orange18x18.png" />
+                                        <img src="${url}" alt="Not Found" id="inactivate" title="Mark User Inactive"/>
+                                    </s:else>
                                     <s:url var="url" value="/css/img/edit-delete-7.png" />
-                                    <img src="${url}" alt="Not Found" id="disable" title="Disable User"/>
-								 	<s:url var="url" value="/css/img/edit-delete-7.png" />
-									<img src="${url}" alt="Not Found" id="deactivate" title="Delete User"/>
+                                    <img src="${url}" alt="Not Found" id="delete" title="Delete User"/>
                                 </div>
 						 	</td>
 					 	</tr>

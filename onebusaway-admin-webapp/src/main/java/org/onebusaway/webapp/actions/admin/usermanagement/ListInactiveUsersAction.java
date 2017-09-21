@@ -23,20 +23,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
-public class DisabledUsersAction extends OneBusAwayNYCAdminActionSupport {
+public class ListInactiveUsersAction extends OneBusAwayNYCAdminActionSupport {
 
-    private static Logger log = LoggerFactory.getLogger(DisabledUsersAction.class);
+    private static Logger log = LoggerFactory.getLogger(ListInactiveUsersAction.class);
     private UserManagementService userManagementService;
     private List<UserDetail> userDetailsList;
 
     public String execute() {
         super.execute();
 
-        setUserDetailsList(userManagementService.getAllUserDetails());
+        setUserDetailsList(userManagementService.getInactiveUsersDetails());
 
         return SUCCESS;
     }

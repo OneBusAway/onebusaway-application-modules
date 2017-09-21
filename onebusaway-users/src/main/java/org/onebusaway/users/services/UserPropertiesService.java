@@ -73,6 +73,8 @@ public interface UserPropertiesService {
 
   public void disableUser(User user);
 
+  public void activateUser(User user);
+
   public void resetUser(User user);
 
   public void mergeProperties(User sourceUser, User targetUser);

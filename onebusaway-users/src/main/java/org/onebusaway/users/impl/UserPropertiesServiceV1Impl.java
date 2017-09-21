@@ -260,4 +260,9 @@ public class UserPropertiesServiceV1Impl implements UserPropertiesService {
     throw new UnsupportedOperationException();
   }
 
+  @Override
+  public void activateUser(User user) {
+      throw new UnsupportedOperationException();
+  }
+
 }

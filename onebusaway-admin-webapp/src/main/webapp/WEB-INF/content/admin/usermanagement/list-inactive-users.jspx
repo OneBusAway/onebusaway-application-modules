@@ -50,11 +50,10 @@
 <body>
 <div id="content">
     <div id="text">
-        <h2>Disabled Users</h2>
+        <h2>Inactive Users</h2>
         <div id="userList">
             <table class="usersTable" cellspacing="0">
                 <tr class="headerRow">
-                    <th>Enable User</th>
                     <th>User name</th>
                     <th>Role</th>
                 </tr>
@@ -63,7 +62,6 @@
                         <div id="usersList">
                             <c:forEach items="${userDetailsList}" var="user">
                                 <tr>
-                                    <td></td>
                                     <td><s:url var="editUser" action="manage-users.action">
                                         <s:param name="username">${user.username}</s:param>
                                     </s:url>

@@ -46,6 +46,7 @@ jQuery(function() {
 					jQuery("#userDetails #username").text(response.username);
 					var userRole = response.role;
 					jQuery("#userDetails #userRole").text(userRole.split('_')[1]);
+                    jQuery("#userDetails #disabled").text(response.disabled);
 					jQuery("#userDetails").show();
 					
 					jQuery("#editUser #editUserName").text(response.username);
@@ -65,11 +66,14 @@ jQuery(function() {
 	//Edit image click
 	jQuery("#actions #edit").on("click", showEditUser);
 
-    //Disable image click
-    jQuery("#actions #disable").on("click", disableUser);
-	
+    //Inactivate image click
+    jQuery("#actions #inactivate").on("click", inactivateUser);
+
+    //Inactivate image click
+    jQuery("#actions #activate").on("click", activateUser);
+
 	//Delete image click
-	jQuery("#actions #deactivate").on("click", showDeleteDialog);
+	jQuery("#actions #delete").on("click", showDeleteDialog);
 	
 });
 
@@ -128,7 +132,7 @@ function showDeleteDialog() {
 	deleteDialog.dialog('open');
 	
 	var confirmButton = deleteDialog.find("#deleteSubmit");
-	confirmButton.on("click", {"dialog": deleteDialog}, deactivateUser);
+	confirmButton.on("click", {"dialog": deleteDialog}, deleteUser);
 	
 	var cancelButton = deleteDialog.find("#deleteCancel");
 	cancelButton.on("click", function(){
@@ -136,7 +140,7 @@ function showDeleteDialog() {
 		turnOnEditClick();
 	});
 }
-function deactivateUser(event) {
+function deleteUser(event) {
     var deleteDialog = event.data.dialog;
 
     var userData = new Object();
@@ -144,7 +148,7 @@ function deactivateUser(event) {
     userData.userName = jQuery("#userDetails #username").text();
 
     jQuery.ajax({
-        url:"manage-users!deactivateUser.action",
+        url:"manage-users!deleteUser.action",
         type: "POST",
         dataType: "json",
         data : {"userData":JSON.stringify(userData)},
@@ -163,14 +167,14 @@ function deactivateUser(event) {
     });
 }
 
-function disableUser() {
+function inactivateUser() {
 	
 	var userData = new Object();
 	userData.id = jQuery("#userDetails #userId").val();
 	userData.userName = jQuery("#userDetails #username").text();
 	
 	jQuery.ajax({
-		url:"manage-users!disableUser.action",
+		url:"manage-users!inactivateUser.action",
 		type: "POST",
 		dataType: "json",
 		data : {"userData":JSON.stringify(userData)},
@@ -184,9 +188,35 @@ function disableUser() {
 			turnOnEditClick();
 		},
 		error: function() {
-			alert("Error disabling user");
+			alert("Error inactivating user");
 		}
 	});
+}
+
+function activateUser() {
+
+    var userData = new Object();
+    userData.id = jQuery("#userDetails #userId").val();
+    userData.userName = jQuery("#userDetails #username").text();
+
+    jQuery.ajax({
+        url:"manage-users!activateUser.action",
+        type: "POST",
+        dataType: "json",
+        data : {"userData":JSON.stringify(userData)},
+        traditional: true,
+        success: function(response) {
+            jQuery("#userResult #result").text(response);
+            showResult();
+            deleteDialog.dialog('close');
+            jQuery("#search #searchUser").val("");
+            jQuery("#userDetails").hide();
+            turnOnEditClick();
+        },
+        error: function() {
+            alert("Error activating user");
+        }
+    });
 }
 
 function turnOffEditClick() {

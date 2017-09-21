@@ -18,6 +18,7 @@ package org.onebusaway.webapp.actions.admin.usermanagement;
 import java.io.StringReader;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.struts2.convention.annotation.Result;
 import org.apache.struts2.convention.annotation.Results;
 import org.onebusaway.admin.json.JsonTool;
@@ -49,7 +50,6 @@ public class ManageUsersAction extends OneBusAwayNYCAdminActionSupport {
 	private String updateUserMessage;
 	private String username;
 
-
 	/**
 	 * Edits a user in the system
 	 * @return
@@ -66,24 +66,35 @@ public class ManageUsersAction extends OneBusAwayNYCAdminActionSupport {
 		return "updateUser";
 	}
 
-    public String disableUser() {
+    public String inactivateUser() {
         UserDetail userDetail = gsonTool.readJson(new StringReader(userData), UserDetail.class);
-        boolean success = userManagementService.disableUser(userDetail);
+        boolean success = userManagementService.inactivateUser(userDetail);
         if(success) {
-            updateUserMessage =  "User '" +userDetail.getUsername() + "' disabled successfully";
+            updateUserMessage =  "User inactivated successfully";
         } else {
-            updateUserMessage = "Error disabling user : '" +userDetail.getUsername() +"'";
+            updateUserMessage = "Error inactivating user : '" +username +"'";
         }
         return "updateUser";
     }
-	
-	public String deactivateUser() {
+
+    public String activateUser() {
+        UserDetail userDetail = gsonTool.readJson(new StringReader(userData), UserDetail.class);
+        boolean success = userManagementService.activateUser(userDetail);
+        if(success) {
+            updateUserMessage =  "User activated successfully";
+        } else {
+            updateUserMessage = "Error activating user : '" +username +"'";
+        }
+        return "updateUser";
+    }
+
+	public String deleteUser() {
 		UserDetail userDetail = gsonTool.readJson(new StringReader(userData), UserDetail.class);
 		boolean success = userManagementService.deactivateUser(userDetail);
 		if(success) {
-			updateUserMessage =  "User '" +userDetail.getUsername() + "' deleted successfully";
+			updateUserMessage =  "User deleted successfully";
 		} else {
-			updateUserMessage = "Error deleting user : '" +userDetail.getUsername() +"'";
+			updateUserMessage = "Error deleting user : '" + username + "'";
 		}
 		return "updateUser";
 	}
@@ -146,4 +157,5 @@ public class ManageUsersAction extends OneBusAwayNYCAdminActionSupport {
      * Used by list-users when selecting a user from the list
      */
     public void setUsername(String username) { this.username = username; }
+
 }

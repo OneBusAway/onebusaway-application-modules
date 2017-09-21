@@ -47,10 +47,18 @@ public interface UserManagementService {
 	List<UserDetail> getUserDetails(final int start, final int maxResults);
 
 	/**
-	 * Returns a list of user details (name, role) for every user in the database
+	 * Returns a list of user details (name, role) for every enabled user in the database
+     * An enabled user is a user where the property isDisabled=false
 	 * @return list of userDetails
 	 */
-	List<UserDetail> getAllUserDetails();
+	List<UserDetail> getActiveUsersDetails();
+
+    /**
+     * Returns a list of user details (name, role) for every disabled user in the database
+     * An disabled user is a user where the property isDisabled=true
+     * @return list of userDetails
+     */
+    List<UserDetail> getInactiveUsersDetails();
 
 	/**
 	 * Fetches the user details such as user name, user role of the given user
@@ -103,11 +111,18 @@ public interface UserManagementService {
 	boolean deactivateUser(UserDetail userDetail);
 
     /**
-     * Diabless a given user.  User can be enabled again.
+     * Inactivates a given user.  User can be activated again.
      * @param userDetail userDetails such as id, username etc
-     * @return true if soft delete operation succeeds, false otherwise
+     * @return true if setting isDisabled property succeeds, false otherwise
      */
-    boolean disableUser(UserDetail userDetail);
+    boolean inactivateUser(UserDetail userDetail);
+
+    /**
+     * Activates a given user that has been deactivated
+     * @param userDetail userDetails such as id, username etc
+     * @return true if setting isDisabled property succeeds, false otherwise
+     */
+    boolean activateUser(UserDetail userDetail);
 
 	List<String> getAllRoleNames();
 }
