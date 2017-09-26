@@ -60,14 +60,14 @@
 
 	<!-- Other Stuff: -->
 	<bean id="serviceAreaServiceImpl" class="org.onebusaway.presentation.impl.ServiceAreaServiceImpl" />
-	
+<!--
 	<bean id="defaultServiceBounds" class="org.onebusaway.geospatial.model.CoordinateBounds">
 		<property name="minLat" value="38.598692" />
 		<property name="minLon" value="-77.449457" />
 		<property name="maxLat" value="39.19148899999999" />
 		<property name="maxLon" value="-76.488045" />
 	</bean>
-
+-->
 	<bean id="externalGeocoderImpl"
 		class="org.onebusaway.geocoder.enterprise.impl.EnterpriseGoogleGeocoderImpl" depends-on="serviceAreaServiceImpl">
 		<!-- <property name="wktFilterPolygon" value="POLYGON((-82.553075 27.978988,-82.533849 
@@ -79,7 +79,7 @@
 			27.970499,-82.377293 27.943205,-82.408193 27.941992,-82.414372 27.914085,-82.461751 
 			27.909231,-82.463811 27.938959,-82.491277 27.920152,-82.47411 27.823034,-82.549641 
 			27.861892,-82.553075 27.978988))" /> -->
-		<property name="resultBiasingBounds" ref="defaultServiceBounds" />
+	<!--	<property name="resultBiasingBounds" ref="defaultServiceBounds" /> -->
 	</bean>
 
 
@@ -87,8 +87,6 @@
 		class="org.onebusaway.container.spring.SystemPropertyOverrideConfigurer">
 		<property name="properties">
 			<props>
-				<prop key="webapp.api.url">${webapp.api.url}</prop>
-				<prop key="tdm.host">${tdm.host}</prop>
 				<prop key="front-end.version">${git.commit.id}</prop>
 			</props>
 		</property>
