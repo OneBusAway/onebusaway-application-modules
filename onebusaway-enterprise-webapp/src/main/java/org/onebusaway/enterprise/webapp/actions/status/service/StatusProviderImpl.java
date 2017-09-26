@@ -245,7 +245,10 @@ public class StatusProviderImpl implements StatusProvider {
   }
 
   private boolean filterByTime(ServiceAlertBean serviceAlert, long time) {
-    if (time == -1 || serviceAlert.getPublicationWindows().size() == 0)
+    if (time == -1
+            || serviceAlert == null
+            || serviceAlert.getPublicationWindows() == null
+            || serviceAlert.getPublicationWindows().size() == 0)
       return true;
     for (TimeRangeBean publicationWindow : serviceAlert.getPublicationWindows()) {
       if ((publicationWindow.getFrom() <= time)
