@@ -260,6 +260,7 @@ function showUserToEdit(username) {
                 jQuery("#userDetails #username").text(response.username);
                 var userRole = response.role;
                 jQuery("#userDetails #userRole").text(userRole.split('_')[1]);
+                jQuery("#userDetails #disabled").text(response.disabled);
                 jQuery("#userDetails").show();
 
                 jQuery("#editUser #editUserName").text(response.username);

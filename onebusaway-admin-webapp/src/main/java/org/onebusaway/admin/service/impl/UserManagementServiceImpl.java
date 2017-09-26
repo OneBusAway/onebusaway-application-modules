@@ -129,7 +129,7 @@ public class UserManagementServiceImpl implements UserManagementService {
 
 		if(!users.isEmpty()) {
 			for (User user : users) {
-				for(UserIndex ui : user.getUserIndices()) {
+			    if (!user.getUserIndices().isEmpty()) {
 					UserDetail userDetail = buildUserDetail(user);
 					userDetails.add(userDetail);
 				}
@@ -163,7 +163,7 @@ public class UserManagementServiceImpl implements UserManagementService {
 			for (User user : users) {
                 UserBean bean = userService.getUserAsBean(user);
                 if (!bean.isDisabled()) {
-                    for(UserIndex ui : user.getUserIndices()) {
+                    if (!user.getUserIndices().isEmpty()) {
                         UserDetail userDetail = buildUserDetail(user);
                         userDetails.add(userDetail);
                     }
@@ -198,7 +198,7 @@ public class UserManagementServiceImpl implements UserManagementService {
             for (User user : users) {
                 UserBean bean = userService.getUserAsBean(user);
                 if (bean.isDisabled()) {
-                    for(UserIndex ui : user.getUserIndices()) {
+                    if (!user.getUserIndices().isEmpty()) {
                         UserDetail userDetail = buildUserDetail(user);
                         userDetails.add(userDetail);
                     }
