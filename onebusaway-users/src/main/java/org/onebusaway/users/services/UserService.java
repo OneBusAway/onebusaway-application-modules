@@ -90,6 +90,11 @@ public interface UserService {
   public UserIndex getUserIndexForId(UserIndexKey key);
 
   /**
+   * * @return the user index from the username string
+   * */
+  public UserIndex getUserIndexForUsername(String username);
+
+  /**
    * @param key see {@link UserIndex#getId()}
    * @param credentials {@link UserIndex#getCredentials()}
    * @param isAnonymous is a newly created user anonymous -

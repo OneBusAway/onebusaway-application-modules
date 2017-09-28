@@ -50,6 +50,7 @@ import org.onebusaway.users.services.internal.UserIndexRegistrationService;
 import org.onebusaway.users.services.internal.UserRegistration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.encoding.PasswordEncoder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -299,6 +300,27 @@ public class UserServiceImpl implements UserService {
   @Override
   public UserIndex getUserIndexForId(UserIndexKey key) {
     return _userDao.getUserIndexForId(key);
+  }
+
+  @Override
+  public UserIndex getUserIndexForUsername(String username)
+          throws UsernameNotFoundException {
+
+      int index = username.indexOf('_');
+      if (index == -1)
+          throw new UsernameNotFoundException(
+                  "username did not take the form type_value: " + username);
+
+      String type = username.substring(0, index);
+      String value = username.substring(index + 1);
+
+      UserIndexKey key = new UserIndexKey(type, value);
+      UserIndex userIndex = getUserIndexForId(key);
+
+      if (userIndex == null)
+          throw new UsernameNotFoundException(key.toString());
+
+      return userIndex;
   }
 
   @Override
