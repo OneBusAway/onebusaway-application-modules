@@ -32,6 +32,7 @@ public class SmsArrivalsAndDeparturesModel extends ArrivalsAndDeparturesModel {
   private static final String DEFAULT_MINUTE_LOCALIZATION = "m";
   private TextModification _abbreviations;
   private String _minuteLocalization = DEFAULT_MINUTE_LOCALIZATION;
+  private String alertPresentText = "";
   
   @Autowired(required=false)
   public void setDestinationAbbreviations(
@@ -43,7 +44,14 @@ public class SmsArrivalsAndDeparturesModel extends ArrivalsAndDeparturesModel {
   public void setMinuteLocalization(String abbrev) {
     _minuteLocalization = abbrev;
   }
-  
+
+  public void setAlertPresentText(String msg) {
+    alertPresentText = msg;
+  }
+
+  public String getAlertPresentText() { return alertPresentText; }
+
+
   public String getMinutesLabel(ArrivalAndDepartureBean pab) {
     long now = SystemTime.currentTimeMillis();
     long t = pab.getScheduledDepartureTime();

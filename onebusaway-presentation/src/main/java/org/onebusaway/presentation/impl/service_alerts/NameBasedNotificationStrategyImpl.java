@@ -45,6 +45,7 @@ public class NameBasedNotificationStrategyImpl implements NotificationStrategy {
         try {
             AgencyAndId routeId = AgencyAndIdLibrary.convertFromString(routeIdStr);
             RouteBean route = _tds.getRouteForId(routeIdStr);
+            if (route == null || route.getShortName() == null) return routeIdStr;
             return route.getShortName();
         } catch (IllegalStateException ise) {
             // invalid id -- return it as is
@@ -59,6 +60,7 @@ public class NameBasedNotificationStrategyImpl implements NotificationStrategy {
         try {
             AgencyAndId routeId = AgencyAndIdLibrary.convertFromString(stopIdStr);
             StopBean stop = _tds.getStop(routeId.toString());
+            if (stop == null || stop.getName() == null) return stopIdStr;
             return stop.getName();
         } catch (IllegalStateException ise) {
             // invalid id -- return it as is

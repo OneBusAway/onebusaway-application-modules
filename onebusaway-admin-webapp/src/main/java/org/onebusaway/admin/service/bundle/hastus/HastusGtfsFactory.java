@@ -763,14 +763,21 @@ public class HastusGtfsFactory {
         && scheduleType.equals("Saturday"))
       routeVariation = "sb";
     
-    if (route.equals("270") && routeVariation.equals("e1")
+    if (route.equals("270") && routeVariation != null && routeVariation.equals("e1")
         && scheduleType.equals("Saturday"))
       routeVariation = "eb";
 
-    if (route.equals("270") && routeVariation.equals("w3")
-        && scheduleType.equals("Saturday"))
+    if (route.equals("270") && routeVariation != null && routeVariation.equals("w"))
       routeVariation = "wb";
-    
+
+    if (route.equals("270") && routeVariation != null && routeVariation.equals("w3")
+            && scheduleType.equals("Saturday"))
+      routeVariation = "wb";
+
+    if (route.equals("271") && routeVariation != null && routeVariation.equals("w"))
+      routeVariation = "wb";
+
+
     if (route.equals("535") && routeVariation.equals("n2"))
       routeVariation = "nb";
 
