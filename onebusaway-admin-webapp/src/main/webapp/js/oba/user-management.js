@@ -42,18 +42,8 @@ jQuery(function() {
 				type: "GET",
 				async: false,
 				success: function(response) {
-					jQuery("#userDetails #userId").val(response.id);
-					jQuery("#userDetails #username").text(response.username);
-					var userRole = response.role;
-					jQuery("#userDetails #userRole").text(userRole.split('_')[1]);
-                    jQuery("#userDetails #disabled").text(response.disabled);
-					jQuery("#userDetails").show();
-					
-					jQuery("#editUser #editUserName").text(response.username);
-					jQuery("#editUser #newPassword").val("");
-					jQuery("#editUser #newRole").val(userRole).attr("selected", true);
-					
-					hideResult();
+                    showUserDetails(response);
+                    hideResult();
 				},
 				error: function(request) {
 					alert("There was an error processing your request. Please try again.");
@@ -80,6 +70,7 @@ jQuery(function() {
 function showEditUser() {
 	jQuery("#editUser").show();
 	jQuery("#editUser #editSubmit").click(editUser);
+
 	hideResult();
 }
 
@@ -140,6 +131,7 @@ function showDeleteDialog() {
 		turnOnEditClick();
 	});
 }
+
 function deleteUser(event) {
     var deleteDialog = event.data.dialog;
 
@@ -182,10 +174,10 @@ function inactivateUser() {
 		success: function(response) {
 			jQuery("#userResult #result").text(response);
 			showResult();
-			deleteDialog.dialog('close');
 			jQuery("#search #searchUser").val("");
 			jQuery("#userDetails").hide();
 			turnOnEditClick();
+            showUserToEdit(userData.userName);
 		},
 		error: function() {
 			alert("Error inactivating user");
@@ -208,10 +200,10 @@ function activateUser() {
         success: function(response) {
             jQuery("#userResult #result").text(response);
             showResult();
-            deleteDialog.dialog('close');
             jQuery("#search #searchUser").val("");
             jQuery("#userDetails").hide();
             turnOnEditClick();
+            showUserToEdit(userData.userName);
         },
         error: function() {
             alert("Error activating user");
@@ -244,6 +236,29 @@ function showResult() {
 	jQuery("#userResult").show();
 }
 
+function showUserDetails(response) {
+    jQuery("#userDetails #userId").val(response.id);
+    jQuery("#userDetails #username").text(response.username);
+    var userRole = response.role;
+    jQuery("#userDetails #userRole").text(userRole.split('_')[1]);
+    jQuery("#userDetails #disabled").text(response.disabled);
+    jQuery("#userDetails").show();
+    var isDisabled = response.disabled;
+    if(isDisabled) {
+        jQuery("#inactive").show();
+        jQuery("#activate").show();
+        jQuery("#inactivate").hide();
+    }
+    else {
+        jQuery("#inactive").hide();
+        jQuery("#activate").hide();
+        jQuery("#inactivate").show();
+    }
+    jQuery("#editUser #editUserName").text(response.username);
+    jQuery("#editUser #newPassword").val("");
+    jQuery("#editUser #newRole").val(userRole).attr("selected", true);
+}
+
 function showUserToEdit(username) {
     /* if we've come to this page from list-users, we might have a username
      * if we do, set it and get User Details for editing
@@ -256,16 +271,7 @@ function showUserToEdit(username) {
             type: "GET",
             async: false,
             success: function(response) {
-                jQuery("#userDetails #userId").val(response.id);
-                jQuery("#userDetails #username").text(response.username);
-                var userRole = response.role;
-                jQuery("#userDetails #userRole").text(userRole.split('_')[1]);
-                jQuery("#userDetails #disabled").text(response.disabled);
-                jQuery("#userDetails").show();
-
-                jQuery("#editUser #editUserName").text(response.username);
-                jQuery("#editUser #newPassword").val("");
-                jQuery("#editUser #newRole").val(userRole).attr("selected", true);
+                showUserDetails(response);
             },
             error: function(request) {
                 alert("There was an error processing your request. Please try again.");

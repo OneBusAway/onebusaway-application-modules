@@ -100,23 +100,22 @@
 								 	<label class="userLabel">User role: </label>
 								 	<label id="userRole"></label>
 							 	</div>
-                                <div>
-                                    <label class="userLabel">Disabled: </label>
-                                    <label id="disabled"></label>
+                                <div id="inactive">
+                                    <label class="userLabel">User is Inactive</label>
                                 </div>
 							 	</td>
 							 	<td>
 							 	<div id="actions">
 								 	<s:url var="url" value="/css/img/edit-4.png" />
 									<img src="${url}" alt="Not Found" id="edit" title="Edit User"/>
-                                    <s:if test="disabled">
+                                    <label id="activate">
                                         <s:url var="url" value="/css/img/circle_green18x18.png" />
                                         <img src="${url}" alt="Not Found" id="activate" title="Mark User Active"/>
-                                    </s:if>
-                                    <s:else>
+                                    </label>
+                                    <label id="inactivate">
                                         <s:url var="url" value="/css/img/circle_orange18x18.png" />
                                         <img src="${url}" alt="Not Found" id="inactivate" title="Mark User Inactive"/>
-                                    </s:else>
+                                    </label>
                                     <s:url var="url" value="/css/img/edit-delete-7.png" />
                                     <img src="${url}" alt="Not Found" id="delete" title="Delete User"/>
                                 </div>
