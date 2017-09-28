@@ -122,10 +122,15 @@ public class AlertsAction extends RssFeedAction {
             _log.info("no service alerts returned for agency " + agency.getAgency().getId());
             return;
         }
-
+        
+        long time = System.currentTimeMillis();
 
         for (ServiceAlertBean sab : allServiceAlertsForAgencyId.getList()) {
-
+        	
+        	if(!containsActiveAlert(sab, time)){
+        		continue;
+        	}
+        	
             ServiceAlertRssBean bean = new ServiceAlertRssBean();
             bean.setId(sab.getId());
             bean.setReason(sab.getReason());
@@ -139,6 +144,20 @@ public class AlertsAction extends RssFeedAction {
             beans.add(bean);
         }
 
+    }
+    
+    private boolean containsActiveAlert(ServiceAlertBean serviceAlert, long time) {
+
+        if (time == -1 || serviceAlert.getPublicationWindows() == null
+            || serviceAlert.getPublicationWindows().size() == 0)
+          return true;
+        for (TimeRangeBean publicationWindow : serviceAlert.getPublicationWindows()) {
+          if ((publicationWindow.getFrom() <= time)
+              && (publicationWindow.getTo() >= time)) {
+            return true;
+          }
+        }
+        return false;
     }
 
     private List<AffectsClauseRssBean> toAffectClause(List<SituationAffectsBean> clauses) {
