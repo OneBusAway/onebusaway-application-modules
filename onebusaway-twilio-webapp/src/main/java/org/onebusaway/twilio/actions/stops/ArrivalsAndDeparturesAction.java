@@ -120,7 +120,7 @@ public class ArrivalsAndDeparturesAction extends TwilioSupport {
     PhoneArrivalsAndDeparturesModel model = (PhoneArrivalsAndDeparturesModel) sessionMap.get("_model");
     StopsWithArrivalsAndDeparturesBean result = model.getResult();
 
-    buildPredictedArrivals(result.getArrivalsAndDepartures());
+    buildPredictedArrivals(result.getArrivalsAndDepartures(), result.getStops());
 
     setNextAction("stops/arrivals-and-departures");
     _log.debug("setting navState, have stopIds=" + model.getStopIds());
@@ -148,14 +148,15 @@ public class ArrivalsAndDeparturesAction extends TwilioSupport {
     return INPUT;
   }
 
-  protected void buildPredictedArrivals(List<ArrivalAndDepartureBean> arrivals) {
+  protected void buildPredictedArrivals(List<ArrivalAndDepartureBean> arrivals, List<StopBean> list) {
     if (arrivals.isEmpty()) {
       addMessage(Messages.ARRIVAL_INFO_NO_SCHEDULED_ARRIVALS);
     }
     Collections.sort(arrivals, new ArrivalAndDepartureComparator());
 
     long now = SystemTime.currentTimeMillis();
-    boolean hasAlerts = false;
+    boolean hasAlerts = stopsHaveAlerts(list);
+    
     for (ArrivalAndDepartureBean adb : arrivals) {
 
       TripBean trip = adb.getTrip();
@@ -300,6 +301,15 @@ public class ArrivalsAndDeparturesAction extends TwilioSupport {
     addServiceAlertRouteText(routeIds);
     addServiceAlertStopText(stopIds);
   }
+  
+  private boolean stopsHaveAlerts(List<StopBean> stops){
+	  for(StopBean stop: stops){
+		  if(getServiceAlertsForStop(stop.getId()).size() > 0){
+			return true;  
+		  }
+	  }
+	  return false;
+  }
 
   private List<ServiceAlertBean> getServiceAlertsForStop(String stopId) {
     SituationQueryBean query = new SituationQueryBean();
@@ -314,6 +324,7 @@ public class ArrivalsAndDeparturesAction extends TwilioSupport {
 
     return Collections.emptyList();
   }
+  
 
   private List<ServiceAlertBean> getServiceAlertsForRoute(String routeId) {
     SituationQueryBean query = new SituationQueryBean();
