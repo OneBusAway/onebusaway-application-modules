@@ -1,15 +1,3 @@
-package org.onebusaway.twilio.actions.stops;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-
-import org.apache.struts2.convention.annotation.Result;
-import org.apache.struts2.convention.annotation.Results;
-import org.apache.struts2.interceptor.SessionAware;
-import org.onebusaway.presentation.services.text.TextModification;
-import org.onebusaway.transit_data.model.StopBean;
-import org.onebusaway.transit_data.model.StopsWithArrivalsAndDeparturesBean;
 /**
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
  *
@@ -25,6 +13,18 @@ import org.onebusaway.transit_data.model.StopsWithArrivalsAndDeparturesBean;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.onebusaway.twilio.actions.stops;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.struts2.convention.annotation.Result;
+import org.apache.struts2.convention.annotation.Results;
+import org.apache.struts2.interceptor.SessionAware;
+import org.onebusaway.presentation.services.text.TextModification;
+import org.onebusaway.transit_data.model.StopBean;
+import org.onebusaway.transit_data.model.StopsWithArrivalsAndDeparturesBean;
 import org.onebusaway.twilio.actions.Messages;
 import org.onebusaway.twilio.actions.TwilioSupport;
 import org.onebusaway.twilio.impl.PhoneArrivalsAndDeparturesModel;
