@@ -34,7 +34,7 @@
 <s:if test="%{result.arrivalsAndDepartures.empty}">
     <div>No scheduled arrivals in the next 30 minutes.</div>
 </s:if>
-<s:if test="%{result.situations.size &gt; 0}">
+<s:if test="%{hasAlerts()}">
     <s:property value="alertPresentText" />
 </s:if>
 </body>
