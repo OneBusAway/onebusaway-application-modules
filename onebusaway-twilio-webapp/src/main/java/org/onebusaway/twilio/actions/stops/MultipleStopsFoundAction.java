@@ -1,9 +1,15 @@
 package org.onebusaway.twilio.actions.stops;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
+import org.apache.struts2.convention.annotation.Result;
+import org.apache.struts2.convention.annotation.Results;
+import org.apache.struts2.interceptor.SessionAware;
 import org.onebusaway.presentation.services.text.TextModification;
 import org.onebusaway.transit_data.model.StopBean;
+import org.onebusaway.transit_data.model.StopsWithArrivalsAndDeparturesBean;
 /**
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
  *
@@ -21,16 +27,29 @@ import org.onebusaway.transit_data.model.StopBean;
  */
 import org.onebusaway.twilio.actions.Messages;
 import org.onebusaway.twilio.actions.TwilioSupport;
+import org.onebusaway.twilio.impl.PhoneArrivalsAndDeparturesModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 import com.opensymphony.xwork2.ActionContext;
 import com.opensymphony.xwork2.util.ValueStack;
 
-public class MultipleStopsFoundAction extends TwilioSupport {
 
+@Results({
+	  @Result(name="arrivals", location="arrivals-and-departures-for-stop-id", type="chain"),
+	  @Result(name = "repeat", location = "multiple-stops-found", type = "chain")
+})
+public class MultipleStopsFoundAction extends TwilioSupport implements SessionAware {
+  
+	
   private TextModification _destinationPronunciation;
 
+  private List<String> _stopIds;
+
+  public List<String> getStopIds() {
+    return _stopIds;
+  }
+ 
   @Autowired
   public void setDestinationPronunciation(
       @Qualifier("destinationPronunciation") TextModification destinationPronunciation) {
@@ -40,10 +59,28 @@ public class MultipleStopsFoundAction extends TwilioSupport {
 
   @Override
   public String execute() throws Exception {
+	  
+	  Integer navState = (Integer) sessionMap.get("navState");
+	    if (navState == null) {
+	      navState = DISPLAY_DATA;
+	    }
 
-	ActionContext context = ActionContext.getContext();
+	    if (navState == DISPLAY_DATA) {
+	      return displayData();
+	    }
+	    // navigation options after rendering a stop
+	    return doRouting();  
+	  
+	
+  }
+
+private String displayData() {
+    
+	/*ActionContext context = ActionContext.getContext();
     ValueStack vs = context.getValueStack();
-    List<StopBean> stops = (List<StopBean>) vs.findValue("stops");
+    List<StopBean> stops = (List<StopBean>) vs.findValue("stops");*/
+    
+    List<StopBean> stops = (List<StopBean>)sessionMap.get("stops");
     
     int index = 1;
     
@@ -65,10 +102,36 @@ public class MultipleStopsFoundAction extends TwilioSupport {
       addText(". ");
    }
 
-    addMessage(Messages.HOW_TO_GO_BACK);
+    //addMessage(Messages.HOW_TO_GO_BACK);
     //addAction("\\*", "/back");
 
     addMessage(Messages.TO_REPEAT);
     
+    sessionMap.put("navState", new Integer(DO_ROUTING));
+    
     return SUCCESS;
-  }}
+  }
+
+  private String doRouting() {
+    sessionMap.put("navState", new Integer(DISPLAY_DATA));
+   
+    /*ActionContext context = ActionContext.getContext();
+    ValueStack vs = context.getValueStack();
+    List<StopBean> stops = (List<StopBean>) vs.findValue("stops");*/
+    
+    List<StopBean> stops = (List<StopBean>)sessionMap.get("stops");
+    
+    for(int i = 0; i < stops.size(); i++){
+    
+	    if (String.valueOf(i + 1).equals(getInput())) {
+	    	StopBean stop = stops.get(i);
+	    	_stopIds = Arrays.asList(stop.getId());
+	    	return "arrivals";
+	    } else if (REPEAT_MENU_ITEM.equals(getInput())) {
+	      return "repeat";
+	    } 
+    }
+   
+    return INPUT;
+  }
+}

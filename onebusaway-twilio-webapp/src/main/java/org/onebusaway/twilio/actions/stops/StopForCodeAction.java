@@ -94,6 +94,7 @@ public String execute() throws Exception {
       _stopIds = Arrays.asList(stop.getId());
       return SUCCESS;
     } else {
+      sessionMap.put("stops", _stops);
       return "multipleStopsFound";
     }
   }
