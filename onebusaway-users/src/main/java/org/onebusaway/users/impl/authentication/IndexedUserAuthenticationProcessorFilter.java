@@ -39,7 +39,7 @@ public class IndexedUserAuthenticationProcessorFilter extends
   }
 
   /* during authentication, if you are trying to retrieve the username
-  and the user property for that user is disabled, it will return null
+  and the user isDisabled in the properties, it will return null
   Without the username, the user can not log in
   */
   @Override

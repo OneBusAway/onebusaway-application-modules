@@ -254,8 +254,6 @@ public class UserManagementServiceImpl implements UserManagementService {
 
         UserBean bean = userService.getUserAsBean(user);
         userDetail.setDisabled(bean.isDisabled());
-        log.error("Bean is disabled: " + bean.isDisabled());
-        log.error("User detail is disabled: " + userDetail.isDisabled());
 		
 		return userDetail;
 	}
