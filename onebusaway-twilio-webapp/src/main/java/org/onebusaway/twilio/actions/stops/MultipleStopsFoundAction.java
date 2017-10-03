@@ -27,111 +27,73 @@ import org.onebusaway.transit_data.model.StopBean;
 import org.onebusaway.transit_data.model.StopsWithArrivalsAndDeparturesBean;
 import org.onebusaway.twilio.actions.Messages;
 import org.onebusaway.twilio.actions.TwilioSupport;
-import org.onebusaway.twilio.impl.PhoneArrivalsAndDeparturesModel;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
-import com.opensymphony.xwork2.ActionContext;
-import com.opensymphony.xwork2.util.ValueStack;
+public class MultipleStopsFoundAction extends TwilioSupport implements
+		SessionAware {
 
+	private TextModification _destinationPronunciation;
 
-@Results({
-	  @Result(name="arrivals", location="arrivals-and-departures-for-stop-id", type="chain"),
-	  @Result(name = "repeat", location = "multiple-stops-found", type = "chain")
-})
-public class MultipleStopsFoundAction extends TwilioSupport implements SessionAware {
-  
-	
-  private TextModification _destinationPronunciation;
+	private List<String> _stopIds;
 
-  private List<String> _stopIds;
+	public List<String> getStopIds() {
+		return _stopIds;
+	}
 
-  public List<String> getStopIds() {
-    return _stopIds;
-  }
- 
-  @Autowired
-  public void setDestinationPronunciation(
-      @Qualifier("destinationPronunciation") TextModification destinationPronunciation) {
-    _destinationPronunciation = destinationPronunciation;
-  }
+	@Autowired
+	public void setDestinationPronunciation(
+			@Qualifier("destinationPronunciation") TextModification destinationPronunciation) {
+		_destinationPronunciation = destinationPronunciation;
+	}
 
+	@Override
+	public String execute() throws Exception {
 
-  @Override
-  public String execute() throws Exception {
-	  
-	  Integer navState = (Integer) sessionMap.get("navState");
-	    if (navState == null) {
-	      navState = DISPLAY_DATA;
-	    }
+		Integer navState = (Integer) sessionMap.get("navState");
+		if (navState == null) {
+			navState = DISPLAY_DATA;
+		}
 
-	    if (navState == DISPLAY_DATA) {
-	      return displayData();
-	    }
-	    // navigation options after rendering a stop
-	    return doRouting();  
-	  
-	
-  }
+		if (navState == DISPLAY_DATA) {
+			return displayData();
+		}
+		// navigation options after rendering a stop
+		return INPUT;
+	}
 
-private String displayData() {
-    
-	/*ActionContext context = ActionContext.getContext();
-    ValueStack vs = context.getValueStack();
-    List<StopBean> stops = (List<StopBean>) vs.findValue("stops");*/
-    
-    List<StopBean> stops = (List<StopBean>)sessionMap.get("stops");
-    
-    int index = 1;
-    
-    addMessage(Messages.MULTIPLE_STOPS_WERE_FOUND);
-    
-    for( StopBean stop : stops) {
-      
-      addMessage(Messages.FOR);
-      
-      String destination = _destinationPronunciation.modify(stop.getName());
-      destination = destination.replaceAll("\\&", "and");      
-      addText(destination);
-      addText(", ");
-      
-      addMessage(Messages.PLEASE_PRESS);
-      
-      String key = Integer.toString(index++);
-      addText(key);
-      addText(". ");
-   }
+	private String displayData() {
 
-    //addMessage(Messages.HOW_TO_GO_BACK);
-    //addAction("\\*", "/back");
+		List<StopBean> stops = (List<StopBean>) sessionMap.get("stops");
 
-    addMessage(Messages.TO_REPEAT);
-    
-    sessionMap.put("navState", new Integer(DO_ROUTING));
-    
-    return SUCCESS;
-  }
+		int index = 1;
 
-  private String doRouting() {
-    sessionMap.put("navState", new Integer(DISPLAY_DATA));
-   
-    /*ActionContext context = ActionContext.getContext();
-    ValueStack vs = context.getValueStack();
-    List<StopBean> stops = (List<StopBean>) vs.findValue("stops");*/
-    
-    List<StopBean> stops = (List<StopBean>)sessionMap.get("stops");
-    
-    for(int i = 0; i < stops.size(); i++){
-    
-	    if (String.valueOf(i + 1).equals(getInput())) {
-	    	StopBean stop = stops.get(i);
-	    	_stopIds = Arrays.asList(stop.getId());
-	    	return "arrivals";
-	    } else if (REPEAT_MENU_ITEM.equals(getInput())) {
-	      return "repeat";
-	    } 
-    }
-   
-    return INPUT;
-  }
+		addMessage(Messages.MULTIPLE_STOPS_WERE_FOUND);
+
+		for (StopBean stop : stops) {
+
+			addMessage(Messages.FOR);
+
+			String destination = _destinationPronunciation.modify(stop
+					.getName());
+			destination = destination.replaceAll("\\&", "and");
+			addText(destination);
+			addText(", ");
+
+			addMessage(Messages.PLEASE_PRESS);
+
+			String key = Integer.toString(index++);
+			addText(key);
+			addText(". ");
+		}
+
+		addMessage(Messages.TO_REPEAT);
+
+		sessionMap.put("stops", stops);
+		sessionMap.put("navState", new Integer(DO_ROUTING));
+
+		return SUCCESS;
+	}
+
 }
