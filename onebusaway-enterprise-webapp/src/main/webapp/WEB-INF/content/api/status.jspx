@@ -22,6 +22,7 @@
 <jsp:directive.page contentType="text/html" />
 <head>
 <title>Onebusaway System Status</title>
+<meta content='width=device-width, initial-scale=1.0, shrink-to-fit=no' name='viewport' />
 <!-- Inspired by http://bootsnipp.com/snippets/featured/simple-status-page -->
 <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet"
   type="text/css"><!-- Prevent jspx minimization --></link>
