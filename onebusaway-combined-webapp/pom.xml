@@ -3,7 +3,7 @@
   <parent>
     <groupId>org.onebusaway</groupId>
     <artifactId>onebusaway-application-modules</artifactId>
-    <version>1.1.15.45-cs</version>
+    <version>1.1.15.46-cs-SNAPSHOT</version>
   </parent>
   <artifactId>onebusaway-combined-webapp</artifactId>
   <packaging>pom</packaging>
