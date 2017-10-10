@@ -33,9 +33,9 @@
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=8" />
   
-  <link rel="shortcut icon" href="http://mta.info/siteimages/favicon.ico" type="image/x-icon"/>
-
-  <script type="text/javascript" src="http://mta.info/js/csshorizontalmenu.js"><!-- //prevent jspx minimization --></script>
+  <s:set var="favicon" value="getText('favicon.url')" />
+  <link rel="shortcut icon" href="${favicon}" type="image/x-icon"/>
+  
   <script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"><!-- jspx --></script>
 
   <s:url var="url" value="/css/reset.css">
