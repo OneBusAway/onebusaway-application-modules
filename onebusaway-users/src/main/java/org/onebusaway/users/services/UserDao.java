@@ -70,6 +70,16 @@ public interface UserDao {
    */
   public List<String> getUserIndexKeyValuesForKeyType(String keyType);
 
+  /**
+   * @return the number (count) of Users of type keyType
+   */
+  public Integer getUserKeyCount(String keyType);
+
+  /**
+   * @return the list of Users of type keyType, for maxResults of users staring with 'start'
+   */
+  public List<User> getUsersForKeyType(final int start, final int maxResults, final String keyType);
+
   public UserIndex getUserIndexForId(UserIndexKey key);
 
   public void saveOrUpdateUserIndex(UserIndex userIndex);

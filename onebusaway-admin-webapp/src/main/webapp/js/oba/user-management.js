@@ -42,17 +42,8 @@ jQuery(function() {
 				type: "GET",
 				async: false,
 				success: function(response) {
-					jQuery("#userDetails #userId").val(response.id);
-					jQuery("#userDetails #username").text(response.username);
-					var userRole = response.role;
-					jQuery("#userDetails #userRole").text(userRole.split('_')[1]);
-					jQuery("#userDetails").show();
-					
-					jQuery("#editUser #editUserName").text(response.username);
-					jQuery("#editUser #newPassword").val("");
-					jQuery("#editUser #newRole").val(userRole).attr("selected", true);
-					
-					hideResult();
+                    showUserDetails(response);
+                    hideResult();
 				},
 				error: function(request) {
 					alert("There was an error processing your request. Please try again.");
@@ -64,15 +55,22 @@ jQuery(function() {
 	
 	//Edit image click
 	jQuery("#actions #edit").on("click", showEditUser);
-	
+
+    //Inactivate image click
+    jQuery("#actions #inactivate").on("click", inactivateUser);
+
+    //Inactivate image click
+    jQuery("#actions #activate").on("click", activateUser);
+
 	//Delete image click
-	jQuery("#actions #deactivate").on("click", showDeleteDialog);
+	jQuery("#actions #delete").on("click", showDeleteDialog);
 	
 });
 
 function showEditUser() {
 	jQuery("#editUser").show();
 	jQuery("#editUser #editSubmit").click(editUser);
+
 	hideResult();
 }
 
@@ -110,12 +108,12 @@ function showDeleteDialog() {
 	
 	var userName = jQuery("#userDetails #username").text();
 	var deleteDialog = jQuery("<div id='deleteConfirm'>" +
-			"<div><label>Are you sure you want to deactivate user: </label>" +
+			"<div><label>Are you sure you want to delete user: </label>" +
 			"<label id='deleteMessage'>" +userName + "</label></div>" +
 			"<div id='deleteButtons'><button id='deleteSubmit'>OK</button>" +
 			"<label id='deleteCancel'>Cancel</label></div></div>")
 			.dialog({
-				title: "Deactivate User?",
+				title: "Delete User?",
 				autoOpen: false,
 				height: "auto",
 				width: "auto",
@@ -125,7 +123,7 @@ function showDeleteDialog() {
 	deleteDialog.dialog('open');
 	
 	var confirmButton = deleteDialog.find("#deleteSubmit");
-	confirmButton.on("click", {"dialog": deleteDialog}, deactivateUser);
+	confirmButton.on("click", {"dialog": deleteDialog}, deleteUser);
 	
 	var cancelButton = deleteDialog.find("#deleteCancel");
 	cancelButton.on("click", function(){
@@ -134,15 +132,41 @@ function showDeleteDialog() {
 	});
 }
 
-function deactivateUser(event) {
-	var deleteDialog = event.data.dialog;
+function deleteUser(event) {
+    var deleteDialog = event.data.dialog;
+
+    var userData = new Object();
+    userData.id = jQuery("#userDetails #userId").val();
+    userData.userName = jQuery("#userDetails #username").text();
+
+    jQuery.ajax({
+        url:"manage-users!deleteUser.action",
+        type: "POST",
+        dataType: "json",
+        data : {"userData":JSON.stringify(userData)},
+        traditional: true,
+        success: function(response) {
+            jQuery("#userResult #result").text(response);
+            showResult();
+            deleteDialog.dialog('close');
+            jQuery("#search #searchUser").val("");
+            jQuery("#userDetails").hide();
+            turnOnEditClick();
+        },
+        error: function() {
+            alert("Error deactivating user");
+        }
+    });
+}
+
+function inactivateUser() {
 	
 	var userData = new Object();
 	userData.id = jQuery("#userDetails #userId").val();
 	userData.userName = jQuery("#userDetails #username").text();
 	
 	jQuery.ajax({
-		url:"manage-users!deactivateUser.action",
+		url:"manage-users!inactivateUser.action",
 		type: "POST",
 		dataType: "json",
 		data : {"userData":JSON.stringify(userData)},
@@ -150,15 +174,41 @@ function deactivateUser(event) {
 		success: function(response) {
 			jQuery("#userResult #result").text(response);
 			showResult();
-			deleteDialog.dialog('close');
 			jQuery("#search #searchUser").val("");
 			jQuery("#userDetails").hide();
 			turnOnEditClick();
+            showUserToEdit(userData.userName);
 		},
 		error: function() {
-			alert("Error deactivating user");
+			alert("Error inactivating user");
 		}
 	});
+}
+
+function activateUser() {
+
+    var userData = new Object();
+    userData.id = jQuery("#userDetails #userId").val();
+    userData.userName = jQuery("#userDetails #username").text();
+
+    jQuery.ajax({
+        url:"manage-users!activateUser.action",
+        type: "POST",
+        dataType: "json",
+        data : {"userData":JSON.stringify(userData)},
+        traditional: true,
+        success: function(response) {
+            jQuery("#userResult #result").text(response);
+            showResult();
+            jQuery("#search #searchUser").val("");
+            jQuery("#userDetails").hide();
+            turnOnEditClick();
+            showUserToEdit(userData.userName);
+        },
+        error: function() {
+            alert("Error activating user");
+        }
+    });
 }
 
 function turnOffEditClick() {
@@ -186,6 +236,29 @@ function showResult() {
 	jQuery("#userResult").show();
 }
 
+function showUserDetails(response) {
+    jQuery("#userDetails #userId").val(response.id);
+    jQuery("#userDetails #username").text(response.username);
+    var userRole = response.role;
+    jQuery("#userDetails #userRole").text(userRole.split('_')[1]);
+    jQuery("#userDetails #disabled").text(response.disabled);
+    jQuery("#userDetails").show();
+    var isDisabled = response.disabled;
+    if(isDisabled) {
+        jQuery("#inactive").show();
+        jQuery("#activate").show();
+        jQuery("#inactivate").hide();
+    }
+    else {
+        jQuery("#inactive").hide();
+        jQuery("#activate").hide();
+        jQuery("#inactivate").show();
+    }
+    jQuery("#editUser #editUserName").text(response.username);
+    jQuery("#editUser #newPassword").val("");
+    jQuery("#editUser #newRole").val(userRole).attr("selected", true);
+}
+
 function showUserToEdit(username) {
     /* if we've come to this page from list-users, we might have a username
      * if we do, set it and get User Details for editing
@@ -198,15 +271,7 @@ function showUserToEdit(username) {
             type: "GET",
             async: false,
             success: function(response) {
-                jQuery("#userDetails #userId").val(response.id);
-                jQuery("#userDetails #username").text(response.username);
-                var userRole = response.role;
-                jQuery("#userDetails #userRole").text(userRole.split('_')[1]);
-                jQuery("#userDetails").show();
-
-                jQuery("#editUser #editUserName").text(response.username);
-                jQuery("#editUser #newPassword").val("");
-                jQuery("#editUser #newRole").val(userRole).attr("selected", true);
+                showUserDetails(response);
             },
             error: function(request) {
                 alert("There was an error processing your request. Please try again.");

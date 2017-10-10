@@ -19,14 +19,14 @@
 }
 
 #search {  
-    width: 300px;
+    width: 350px;
     padding:3px 0; 
     cursor:text;  
     float: left;
 }
 
 #searchUser {
-	width: 240px;
+	width: 350px;
 }
 
 #createUser {
@@ -103,7 +103,7 @@ header h2 {
 #userDetails #detailsTable {
 	border: solid 1px #666;
 	margin: 10px 0;
-	width: 250px;
+	width: 350px;
 }
 
 .apiKeysTable {

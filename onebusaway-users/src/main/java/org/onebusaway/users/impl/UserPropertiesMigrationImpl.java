@@ -25,15 +25,19 @@ import org.onebusaway.users.model.properties.Bookmark;
 import org.onebusaway.users.model.properties.RouteFilter;
 import org.onebusaway.users.model.properties.UserPropertiesV2;
 import org.onebusaway.users.model.properties.UserPropertiesV3;
+import org.onebusaway.users.model.properties.UserPropertiesV4;
 import org.onebusaway.users.services.UserDao;
 import org.onebusaway.users.services.UserPropertiesMigration;
 import org.onebusaway.users.services.UserPropertiesMigrationStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class UserPropertiesMigrationImpl implements UserPropertiesMigration {
 
+    private static Logger _log = LoggerFactory.getLogger(UserPropertiesMigrationImpl.class);
   private Object _userPropertiesMigrationOperationLock = new Object();
 
   private UserPropertiesMigrationBulkOperation<?> _operation = null;
@@ -65,32 +69,58 @@ public class UserPropertiesMigrationImpl implements UserPropertiesMigration {
     if (target.isAssignableFrom(properties.getClass()))
       return (T) properties;
 
+    //if you are migrating from V1 to V2, V3 or V4
     if (UserPropertiesV1.class.isAssignableFrom(properties.getClass())) {
-      if (target == UserPropertiesV2.class) {
-        return (T) getV2Properties((UserPropertiesV1) properties);
-      } else if (target == UserPropertiesV3.class) {
-        properties = getV2Properties((UserPropertiesV1) properties);
-        return (T) getV3Properties((UserPropertiesV2) properties);
-      }
+        if (target == UserPropertiesV2.class) {
+            return (T) getV2Properties((UserPropertiesV1) properties);
+        } else if (target == UserPropertiesV3.class) {
+            properties = getV2Properties((UserPropertiesV1) properties);
+            return (T) getV3Properties((UserPropertiesV2) properties);
+        } else if (target == UserPropertiesV4.class) {
+            properties = getV2Properties((UserPropertiesV1) properties);
+            properties = getV3Properties((UserPropertiesV2) properties);
+            return (T) getV4Properties((UserPropertiesV3) properties);
+        }
     }
 
+    //if you are migrating from V2 to V1, V3 or V4
     if (UserPropertiesV2.class.isAssignableFrom(properties.getClass())) {
       if (target == UserPropertiesV1.class) {
         return (T) getV1Properties((UserPropertiesV2) properties);
       } else if (target == UserPropertiesV3.class) {
         return (T) getV3Properties((UserPropertiesV2) properties);
+      } else if (target == UserPropertiesV4.class) {
+          properties = getV3Properties((UserPropertiesV2) properties);
+          return (T) getV4Properties((UserPropertiesV3) properties);
       }
     }
-    
+
+    //if you are migrating from V3 to V1, V2 or V4
     if (UserPropertiesV3.class.isAssignableFrom(properties.getClass())) {
       if (target == UserPropertiesV1.class) {
         properties = getV2PropertiesFromV3((UserPropertiesV3) properties);
         return (T) getV1Properties((UserPropertiesV2) properties);
       } else if (target == UserPropertiesV2.class) {
         return (T) getV2PropertiesFromV3((UserPropertiesV3) properties);
+      } else if (target == UserPropertiesV4.class) {
+          return (T) getV4Properties((UserPropertiesV3) properties);
       }
     }
-      
+
+      //if you are migrating from V4 to V1, V2 or V3
+      if (UserPropertiesV4.class.isAssignableFrom(properties.getClass())) {
+          if (target == UserPropertiesV1.class) {
+              properties = getV3PropertiesFromV4((UserPropertiesV4) properties);
+              properties = getV2PropertiesFromV3((UserPropertiesV3) properties);
+              return (T) getV1Properties((UserPropertiesV2) properties);
+          } else if (target == UserPropertiesV2.class) {
+              properties = getV3PropertiesFromV4((UserPropertiesV4) properties);
+              return (T) getV2PropertiesFromV3((UserPropertiesV3) properties);
+          } else if (target == UserPropertiesV3.class) {
+              return (T) getV3PropertiesFromV4((UserPropertiesV4) properties);
+          }
+      }
+
     throw new IllegalStateException("can't convert properties: from="
         + properties.getClass() + " to=" + target);
   }
@@ -118,9 +148,45 @@ public class UserPropertiesMigrationImpl implements UserPropertiesMigration {
 
   /****
    * 
-   * @param v1
-   * @return
+   * param UserPropertiesVersion
+   * return
    */
+
+  private UserPropertiesV4 getV4Properties(UserPropertiesV3 v3) {
+
+      UserPropertiesV4 v4 = new UserPropertiesV4();
+
+      v4.setRememberPreferencesEnabled(v3.isRememberPreferencesEnabled());
+
+      v4.setDefaultLocationLat(v3.getDefaultLocationLat());
+      v4.setDefaultLocationLon(v3.getDefaultLocationLon());
+      v4.setDefaultLocationName(v3.getDefaultLocationName());
+      v4.setBookmarks(v3.getBookmarks());
+      v4.setMinApiRequestInterval(v3.getMinApiRequestInterval());
+      v4.setReadSituationIdsWithReadTime(v3.getReadSituationIdsWithReadTime());
+      v4.setContactCompany(v3.getContactCompany());
+      v4.setContactDetails(v3.getContactDetails());
+      v4.setContactName(v3.getContactName());
+      v4.setContactEmail(v3.getContactEmail());
+
+      return v4;
+  }
+
+  private UserPropertiesV3 getV3PropertiesFromV4(UserPropertiesV4 v4) {
+
+    UserPropertiesV3 v3 = new UserPropertiesV3();
+
+    v3.setRememberPreferencesEnabled(v4.isRememberPreferencesEnabled());
+
+    v3.setDefaultLocationLat(v4.getDefaultLocationLat());
+    v3.setDefaultLocationLon(v4.getDefaultLocationLon());
+    v3.setDefaultLocationName(v4.getDefaultLocationName());
+    v3.setBookmarks(v4.getBookmarks());
+    v3.setMinApiRequestInterval(v4.getMinApiRequestInterval());
+    v3.setReadSituationIdsWithReadTime(v4.getReadSituationIdsWithReadTime());
+
+    return v3;
+  }
 
   private UserPropertiesV3 getV3Properties(UserPropertiesV2 v2) {
 
@@ -136,7 +202,7 @@ public class UserPropertiesMigrationImpl implements UserPropertiesMigration {
     v3.setReadSituationIdsWithReadTime(v2.getReadSituationIdsWithReadTime());
 
     return v3;
-  }
+    }
 
   private UserPropertiesV2 getV2PropertiesFromV3(UserPropertiesV3 v3) {
 
