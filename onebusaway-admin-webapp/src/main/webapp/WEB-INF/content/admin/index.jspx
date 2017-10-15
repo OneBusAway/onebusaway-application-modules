@@ -86,7 +86,15 @@
 								namespace="/admin/vehiclestatus" /> <s:a href="%{url}">Vehicle Status Display Utility</s:a>
 						</li>
 					</s:if>
-					<s:if test="isPageAvailable('showUpdateConfig', 'org.onebusaway.webapp.actions.admin.DeployConfigAction')">
+
+                        <li><s:url var="url" action="vehicle-status-map"
+                                   namespace="/admin/vehiclestatusmap" /> <s:a href="%{url}">Vehicle Status Map</s:a>
+                        </li>
+                    <li><s:url var="url" action="api-key"
+                               namespace="/admin/apikeymanagement" />  <s:a href="%{url}">Manage API Keys</s:a>
+                    </li>
+
+                    <s:if test="isPageAvailable('showUpdateConfig', 'org.onebusaway.webapp.actions.admin.DeployConfigAction')">
 						<li><s:url var="url" action="parameters" namespace="/admin" />
 							<s:a href="%{url}">Configuration Parameters Utility</s:a></li>
 						<li><s:url var="url" action="deploy-config"

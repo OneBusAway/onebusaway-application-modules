@@ -19,6 +19,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.onebusaway.admin.service.AccessControlService;
 import org.onebusaway.presentation.impl.NextActionSupport;
 import org.onebusaway.users.client.model.UserBean;
@@ -114,7 +115,11 @@ public class OneBusAwayNYCAdminActionSupport extends NextActionSupport {
 	private AccessControlService _accessControlService;
 
 	public boolean isPageAvailable(String key, String actionName) {
-		return getConfig(key) && hasPrivilegeForPage(actionName);
+	    if (key.equals("showVehicleStatus")) {
+            _log.error("Is page available: " + key + " (key) and action: " + actionName);
+            _log.error("getConfig(key) " + getConfig(key) + " hasPrivilegeForPage: " + hasPrivilegeForPage(actionName));
+        }
+	    return getConfig(key) && hasPrivilegeForPage(actionName);
 	}
 
 	public boolean hasPrivilegeForPage(String privilege) {
@@ -131,20 +136,20 @@ public class OneBusAwayNYCAdminActionSupport extends NextActionSupport {
 		return authorized;
 	}
 	public boolean getConfig(String partialKey) {
-		_log.debug("partialKey=" + partialKey);
+		_log.error("partialKey=" + partialKey);
 		boolean result = true; // default is to show feature
 		try {
 			List<Map<String, String>> components = _configurationServiceClient.getItems("api", "config", "list");
 			if (components == null) {
-				_log.debug("getItems call failed");
+				_log.error("getItems call failed");
 				return result;
 			}
 			for (Map<String, String> component: components) {
-				_log.debug("component=" + component);
+				_log.error("component=" + component);
 				if (component.containsKey("component") && "admin".equals(component.get("component"))) {
-					_log.debug("found admin component");
+					_log.error("found admin component");
 					if (partialKey.equals(component.get("key"))) {
-						_log.debug("found key=" + partialKey + ", and value=" + component.get("value"));
+						_log.error("found key=" + partialKey + ", and value=" + component.get("value"));
 						return "true".equalsIgnoreCase(component.get("value"));
 					}
 				}

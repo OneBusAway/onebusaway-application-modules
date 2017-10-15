@@ -278,24 +278,6 @@
 					<contextPath>/</contextPath>
 				</configuration>
 			</plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-war-plugin</artifactId>
-                <version>2.1</version>
-                <configuration>
-                    <archive>
-                        <manifestEntries>
-                            <Implementation-Build>${gitDescribe}</Implementation-Build>
-                        </manifestEntries>
-                    </archive>
-                    <overlays>
-                        <overlay>
-                              <groupId>org.onebusaway</groupId>
-                              <artifactId>onebusaway-frontend-webapp</artifactId>
-                        </overlay>
-                    </overlays>
-                </configuration>
-            </plugin>
 		</plugins>
 		<resources>
 			<resource>
@@ -343,6 +325,24 @@
 						</lifecycleMappingMetadata>
 					</configuration>
 				</plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-war-plugin</artifactId>
+                    <version>2.1</version>
+                    <configuration>
+                        <archive>
+                            <manifestEntries>
+                                <Implementation-Build>${gitDescribe}</Implementation-Build>
+                            </manifestEntries>
+                        </archive>
+                        <overlays>
+                            <overlay>
+                                <groupId>org.onebusaway</groupId>
+                                <artifactId>onebusaway-frontend-webapp</artifactId>
+                            </overlay>
+                        </overlays>
+                    </configuration>
+                </plugin>
 				<plugin>
 				  <groupId>com.mycila</groupId>
 				  <artifactId>license-maven-plugin</artifactId>
