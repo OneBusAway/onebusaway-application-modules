@@ -708,7 +708,7 @@ public class BeanFactoryV2 {
       stiBean.setDepartureTime(sti.getDepartureTime());
       stiBean.setServiceId(sti.getServiceId());
       stiBean.setTripId(sti.getTripId());
-      stiBean.setStopHeadsign(stiBean.getStopHeadsign());
+      stiBean.setStopHeadsign(sti.getStopHeadsign());
       stopTimes.add(stiBean);
     }
 

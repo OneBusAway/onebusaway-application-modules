@@ -77,4 +77,9 @@ public interface StopTimeEntry {
    * @return the accumulated slack time, in seconds
    */
   public int getAccumulatedSlackTime();
+  
+  /**
+   * @return stop headsign defined in GTFS
+   */
+  public String getStopHeadsign();
 }
