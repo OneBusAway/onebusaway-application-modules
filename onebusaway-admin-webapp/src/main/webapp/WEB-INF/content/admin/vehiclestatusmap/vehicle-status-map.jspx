@@ -21,6 +21,16 @@ limitations under the License.
 <jsp:directive.page contentType="text/html" />
 <head>
 
+    <s:url var="url" value="/js/lib/jquery.js" />
+    <script type="text/javascript" src="${url}">
+        <!-- prevent jspx minimization -->
+    </script>
+
+    <s:url var="url" value="/js/oba/Config.js">
+        <s:param name="v"><s:property value="frontEndVersion" /></s:param>
+    </s:url>
+    <script type="text/javascript" src="${url}"><!-- //prevent jspx minimization --></script>
+
     <s:url var="url" value="/css/map/map.css">
         <s:param name="v"><s:property value="frontEndVersion" /></s:param>
     </s:url>
@@ -90,7 +100,8 @@ limitations under the License.
     </s:url>
     <script type="text/javascript" src="${url}"><!-- //prevent jspx minimization --></script>
 
-    <s:url var="url" value="/api/config">
+    <s:url var="url" value="http://localhost:8080/api/config">
+    <!--<s:url var="url" value="/api/config">-->
         <s:param name="v"><s:property value="cacheBreaker" /></s:param>
     </s:url>
     <script type="text/javascript" src="${url}"><!-- //prevent jspx minimization --></script>
