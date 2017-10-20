@@ -101,7 +101,6 @@ limitations under the License.
     <script type="text/javascript" src="${url}"><!-- //prevent jspx minimization --></script>
 
     <s:url var="url" value="http://localhost:8080/api/config">
-    <!--<s:url var="url" value="/api/config">-->
         <s:param name="v"><s:property value="cacheBreaker" /></s:param>
     </s:url>
     <script type="text/javascript" src="${url}"><!-- //prevent jspx minimization --></script>
@@ -192,7 +191,7 @@ limitations under the License.
             </div>
 
             <!-- Include the welcome div with example searches -->
-            <c:import url="includes/welcome.jspx" />
+            <c:import url="../../includes/welcome.jspx" />
 
             <s:url var="url" namespace="/routes" action="index"/>
             <div id="available-routes"><a href="${url}">Click here</a> for a list of available routes.</div>
@@ -214,7 +213,7 @@ limitations under the License.
             </s:if>
 
             <!-- Include the Google ad -->
-            <c:import url="includes/ad.jspx" />
+            <c:import url="../../includes/ad.jspx" />
 
         </div>
         <div class="container clear"><!-- jspx --></div>
