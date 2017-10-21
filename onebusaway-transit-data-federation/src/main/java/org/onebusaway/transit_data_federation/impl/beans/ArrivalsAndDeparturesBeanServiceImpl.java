@@ -42,7 +42,6 @@ import org.onebusaway.transit_data_federation.services.realtime.ArrivalAndDepart
 import org.onebusaway.transit_data_federation.services.realtime.BlockLocation;
 import org.onebusaway.transit_data_federation.services.realtime.RealTimeHistoryService;
 import org.onebusaway.transit_data_federation.services.realtime.ScheduleDeviationHistogram;
-import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.FrequencyEntry;
@@ -50,7 +49,6 @@ import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jmx.export.annotation.ManagedAttribute;
 import org.springframework.jmx.export.annotation.ManagedResource;
@@ -86,7 +84,7 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
   private RealTimeHistoryService _realTimeHistoryService;
   
   private GtfsRealtimeNegativeArrivals _gtfsRealtimeNegativeArrivals;
-
+  
   @Autowired
   public void setTransitGraphDao(TransitGraphDao transitGraphDao) {
     _transitGraphDao = transitGraphDao;
@@ -246,7 +244,7 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
     if (!this.useScheduleDeviationHistory) {
       return bean;
     }
-    
+
     int step = 120;
 
     ScheduleDeviationHistogram histo = _realTimeHistoryService.getScheduleDeviationHistogramForArrivalAndDepartureInstance(
@@ -288,7 +286,6 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
 
     BlockStopTimeEntry blockStopTime = instance.getBlockStopTime();
     BlockTripEntry blockTrip = blockStopTime.getTrip();
-    BlockConfigurationEntry blockConfig = blockTrip.getBlockConfiguration();
     StopTimeEntry stopTime = blockStopTime.getStopTime();
     StopEntry stop = stopTime.getStop();
     TripEntry trip = stopTime.getTrip();
@@ -297,9 +294,9 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
     pab.setTrip(tripBean);
     pab.setBlockTripSequence(blockTrip.getSequence());
 
-    pab.setArrivalEnabled(blockStopTime.getBlockSequence() > 0);
-    pab.setDepartureEnabled(blockStopTime.getBlockSequence() + 1 < blockConfig.getStopTimes().size());
-
+    pab.setArrivalEnabled(stopTime.getSequence() > 0);
+    pab.setDepartureEnabled(stopTime.getSequence() + 1 < trip.getStopTimes().size());
+    
     StopTimeNarrative stopTimeNarrative = _narrativeService.getStopTimeForEntry(stopTime);
     pab.setRouteShortName(stopTimeNarrative.getRouteShortName());
     pab.setTripHeadsign(stopTimeNarrative.getStopHeadsign());

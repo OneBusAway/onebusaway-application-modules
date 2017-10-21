@@ -129,4 +129,11 @@ public class FederatedTransitDataBundle {
     return new File(_path, "TripRunData.obj");
   }
   
+  public File getBlockRunDataPath() {
+    return new File(_path, "BlockRunData.obj");
+  }
+
+  public File getStopConsolidationFile() {
+    return new File(_path, "StopConsolidation.txt");
+  }
 }

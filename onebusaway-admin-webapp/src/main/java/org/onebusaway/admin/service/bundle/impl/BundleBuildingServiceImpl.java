@@ -41,6 +41,7 @@ import org.onebusaway.admin.model.BundleBuildRequest;
 import org.onebusaway.admin.model.BundleBuildResponse;
 import org.onebusaway.admin.model.BundleRequestResponse;
 import org.onebusaway.admin.service.FileService;
+import org.onebusaway.admin.service.bundle.BundleBuildResponseDao;
 import org.onebusaway.admin.service.bundle.BundleBuildingService;
 import org.onebusaway.admin.util.NYCFileUtils;
 import org.onebusaway.admin.util.ProcessUtil;
@@ -52,10 +53,12 @@ import org.onebusaway.transit_data_federation.bundle.model.GtfsBundle;
 import org.onebusaway.transit_data_federation.bundle.model.GtfsBundles;
 import org.onebusaway.transit_data_federation.bundle.model.StatusMessages;
 import org.onebusaway.transit_data_federation.bundle.model.TaskDefinition;
+import org.onebusaway.transit_data_federation.bundle.tasks.EntityReplacementLoggerImpl;
 import org.onebusaway.transit_data_federation.bundle.tasks.EntityReplacementStrategyFactory;
 import org.onebusaway.transit_data_federation.bundle.tasks.MultiCSVLogger;
 import org.onebusaway.transit_data_federation.bundle.tasks.stif.StifTask;
 import org.onebusaway.transit_data_federation.services.FederatedTransitDataBundle;
+import org.onebusaway.util.SystemTime;
 import org.onebusaway.util.logging.LoggingService;
 import org.onebusaway.util.services.configuration.ConfigurationService;
 import org.onebusaway.util.services.configuration.ConfigurationServiceClient;
@@ -91,10 +94,13 @@ public class BundleBuildingServiceImpl implements BundleBuildingService {
   public void setDebug(boolean flag) {
     _debug = flag;
   }
-  
+
   @Autowired
   private ConfigurationServiceClient configurationServiceClient;
-  
+
+  @Autowired
+  private BundleBuildResponseDao _buildBundleResponseDao;
+
   @Autowired
   public void setFileService(FileService service) {
     _fileService = service;
@@ -165,15 +171,13 @@ public class BundleBuildingServiceImpl implements BundleBuildingService {
     
     NYCFileUtils fs = new NYCFileUtils();
     
+    String parentDir = _fileService.getGtfsPath(); // Parent of agency dir
     for (String file : gtfs) {
       _log.debug("downloading gtfs:" + file);
       response.addStatusMessage("downloading gtfs " + file);
       // write some meta_data into the file name for later use
-      String agencyDir = parseAgencyDir(file);
-      
+      String agencyDir = parseAgencyDir(parentDir, file);
       String gtfsFileName = _fileService.get(file, tmpDirectory);
-      
-      
       // if we have metadata, rename file to encode metadata
       if (agencyDir != null) {
         File toRename = new File(gtfsFileName);
@@ -197,10 +201,11 @@ public class BundleBuildingServiceImpl implements BundleBuildingService {
     // download aux files, which could be stif or hastus, etc
     List<String> aux = _fileService.list(
         bundleDir + "/" + _fileService.getAuxPath(), -1);
+    parentDir = _fileService.getAuxPath(); // Parent of agency dir
     for (String file : aux) {
       _log.info("downloading aux:" + aux);
       response.addStatusMessage("downloading aux files " + file);
-      String agencyDir = parseAgencyDir(file);
+      String agencyDir = parseAgencyDir(parentDir, file);
       if (agencyDir == null) {
         response.addAuxZipFile(_fileService.get(file, tmpDirectory));
       } else {
@@ -267,7 +272,6 @@ public class BundleBuildingServiceImpl implements BundleBuildingService {
     File dataDir = new File(dataPath);
     response.setBundleDataDirectory(dataPath);
     dataDir.mkdirs();
-    
     for (String gtfs : response.getGtfsList()) {
       String outputFilename = null;
       if (!gtfs.endsWith(".zip")) {
@@ -380,12 +384,11 @@ public class BundleBuildingServiceImpl implements BundleBuildingService {
     
   }
 
-  private String parseAgencyDir(String path) {
-    
-    Pattern pattern = Pattern.compile("/(\\d{1,2})/");
+  private String parseAgencyDir(String parentDir, String path) {
+    Pattern pattern = Pattern.compile(parentDir + "/(.+)/");
     Matcher matcher = pattern.matcher(path);
     if (matcher.find()) {
-      return matcher.group(0).replace(File.separator, "");
+      return matcher.group(1).replace(File.separator, "");
     }
     return null;
   }
@@ -448,6 +451,10 @@ public class BundleBuildingServiceImpl implements BundleBuildingService {
       BeanDefinitionBuilder multiCSVLogger = BeanDefinitionBuilder.genericBeanDefinition(MultiCSVLogger.class);
       multiCSVLogger.addPropertyValue("basePath", loggingPath);
       beans.put("multiCSVLogger", multiCSVLogger.getBeanDefinition());
+      
+      BeanDefinitionBuilder entityReplacementLogger = BeanDefinitionBuilder.genericBeanDefinition(EntityReplacementLoggerImpl.class);
+      beans.put("entityReplacementLogger", entityReplacementLogger.getBeanDefinition());
+      
 
       BeanDefinitionBuilder requestDef = BeanDefinitionBuilder.genericBeanDefinition(BundleRequestResponse.class);
       requestDef.addPropertyValue("request", request);
@@ -485,6 +492,10 @@ public class BundleBuildingServiceImpl implements BundleBuildingService {
       if (this.getStopVerificationURL() != null) {
         cmdOverrides.setProperty("stopVerificationTask.path", this.getStopVerificationURL());
         cmdOverrides.setProperty("stopVerificationDistanceTask.path", this.getStopVerificationURL());
+      }
+      String stopMappingUrl = getStopMappingUrl();
+      if (stopMappingUrl != null) {
+        cmdOverrides.setProperty("stopConsolidationFileTask.stopConsolidationUrl", stopMappingUrl);
       }
       creator.setAdditionalBeanPropertyOverrides(cmdOverrides);
 
@@ -538,6 +549,12 @@ public class BundleBuildingServiceImpl implements BundleBuildingService {
       }
     }
 
+  }
+
+  private String getStopMappingUrl() {
+    if (configurationService == null)
+      return null;
+    return configurationService.getConfigurationValueAsString("admin.stopMappingUrl", null);
   }
   
   private void monitorStatus(BundleBuildResponse response,
@@ -942,7 +959,7 @@ public class BundleBuildingServiceImpl implements BundleBuildingService {
     String bundleName = request.getBundleName();
     _log.info("createVersionString found bundleName=" + bundleName);
     if (bundleName == null || bundleName.length() == 0) {
-      bundleName = "b" + System.currentTimeMillis();
+      bundleName = "b" + SystemTime.currentTimeMillis();
     }
     return request.getBundleDirectory() + File.separator + 
         _fileService.getBuildPath() +  File.separator +
@@ -990,5 +1007,25 @@ public class BundleBuildingServiceImpl implements BundleBuildingService {
         }
       }
     }
+  }
+
+  @Override
+  public void createBundleBuildResponse(BundleBuildResponse bundleBuildResponse) {
+    _buildBundleResponseDao.saveOrUpdate(bundleBuildResponse);
+  }
+
+  @Override
+  public void updateBundleBuildResponse(BundleBuildResponse bundleBuildResponse) {
+    _buildBundleResponseDao.saveOrUpdate(bundleBuildResponse);
+  }
+
+  @Override
+  public BundleBuildResponse getBundleBuildResponseForId(String id) {
+    return _buildBundleResponseDao.getBundleBuildResponseForId(id);
+  }
+
+  @Override
+  public int getBundleBuildResponseMaxId() {
+    return _buildBundleResponseDao.getBundleBuildResponseMaxId();
   }
 }

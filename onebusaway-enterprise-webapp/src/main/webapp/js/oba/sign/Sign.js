@@ -1,17 +1,17 @@
 /*
  * Copyright (c) 2011 Metropolitan Transportation Authority
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *         http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 var OBA = window.OBA || {};
@@ -20,6 +20,7 @@ OBA.Sign = function() {
 	
 	var refreshInterval = 30;
 	var timeout = 30;
+	var scrollSpeed = 2; // pixels per frame.  1 or 2 are good defaults
 	var configurableMessageHtml = null;
 	var stopIdsToRequest = null;
 	var stopInfo = {};
@@ -27,6 +28,7 @@ OBA.Sign = function() {
 	var vehiclesPerStop = 3;
 	var sortByRoute = false; // otherwise sort by arrival distance/departure time
 	var showHeader = false;
+	var lineRef = "";
 	
 	var url = window.location.href;
 	var signPosition = url.indexOf("/sign/sign");
@@ -34,10 +36,11 @@ OBA.Sign = function() {
 
 	var hostname = window.location.hostname;
 	var hostnamePosition = url.indexOf(hostname);
-	var obaApiBaseUrlPosition = url.indexOf("/", hostnamePosition);
-	var obaApiBaseUrl = url.substring(0, obaApiBaseUrlPosition);
-	
+    var obaApiBaseUrlPosition = url.indexOf("/", hostnamePosition);
+    var obaApiBaseUrl = url.substring(0, obaApiBaseUrlPosition);
+
 	var setupUITimeout = null;
+	var disableAlerts = false;
 	
 	function getParameterByName(name, defaultValue) {
 		name = name.replace(/[\[]/,"\\\[").replace(/[\]]/,"\\\]");
@@ -86,9 +89,13 @@ OBA.Sign = function() {
 	function setupUI() {
 		
 		jQuery.fx.interval = 50;
-		
+
 		// configure interface with URL params
 		refreshInterval = getParameterByName("refresh", refreshInterval);
+		var disableAlertsStr = getParameterByName("disableAlerts", "false");
+		disableAlerts = (disableAlertsStr.toLowerCase() == "true");
+
+		scrollSpeed = parseInt(getParameterByName("scrollSpeed", 2));
 
 		vehiclesPerStop = getParameterByName("vehiclesPerStop", vehiclesPerStop);
 		
@@ -96,11 +103,12 @@ OBA.Sign = function() {
 		sortByRoute = (sortByRouteStr.toLowerCase() == "true");
 		var showHeaderStr = getParameterByName("showHeader", "false");
 		showHeader = (showHeaderStr.toLowerCase() == "true");
-		
+
 		var fontSize = getParameterByName("fontSize", null);
 		if (fontSize) {
 			$("body, body input, body textarea").attr("style", "font-size: " + fontSize + "em;")
 		}
+		lineRef = getParameterByName("routeId", "");
 		
 		timeout = refreshInterval;
 			
@@ -160,7 +168,7 @@ OBA.Sign = function() {
 		});
 
 		updateClock();
-		setInterval(updateClock, 1000);
+		setInterval(updateClock, 10 * 1000);
 	}
 	
 	function advance() {
@@ -170,9 +178,29 @@ OBA.Sign = function() {
 	}
 	
 	function updateClock() {
-		var now = new Date();
-		jQuery("#clock #time").text(now.format("h:MM TT"));
-		jQuery("#clock #day").text(now.format("dddd, mmmm d"));
+		// try and get date from server
+		jQuery.ajax({
+                dataType: "json",
+                url: obaApiBaseUrl + OBA.Config.timeApiUrl,
+                success: function (json, textStatus, jqXHR) {
+                    var now;
+                    if (json.data == null) {
+                        //console.log("call to time server failed: url=" + obaApiBaseUrl + OBA.Config.timeApiUrl);
+                        now = new Date();
+                    } else {
+                        now = new Date(json.data.entry.time);
+                    }
+                    jQuery("#clock #time").text(now.format("h:MM TT"));
+                    jQuery("#clock #day").text(now.format("dddd, mmmm d"));
+                },
+                error: function (jqxhr, textStatus, error) {
+                    now = new Date();
+                    jQuery("#clock #time").text(now.format("h:MM TT"));
+                    jQuery("#clock #day").text(now.format("dddd, mmmm d"));
+                }
+            }
+			);
+		
 	}
 	
 	function initStop(stopId, initMonitor) {
@@ -188,11 +216,19 @@ OBA.Sign = function() {
 		});
 	}
 	
-	function signForRoute(routeId, element) {
+	function signForRoute(routeId, tripShortName, element) {
 		var sign = element.addClass("sign");
 		sign.css("border-left-color", routeInfo[routeId].color);
 		sign.css("border-left-style", "solid");
-		sign.text(routeInfo[routeId].shortName);
+		var shortName = routeInfo[routeId].shortName;
+		if (shortName == null || shortName == "")
+			shortName = routeId.split("_")[1];
+		if (tripShortName != null && tripShortName != "") {
+			// use the trip override
+            sign.text(tripShortName);
+        } else {
+            sign.text(shortName);
+        }
 		return sign;
 	}
 	
@@ -216,7 +252,7 @@ OBA.Sign = function() {
 			'</div>').addClass("slide");
 		
 		_gaq.push(['_trackEvent', "DIY Sign", "Add Stop", stopId.id]);
-		
+
 		return newElement;
 	}
 	
@@ -234,21 +270,11 @@ OBA.Sign = function() {
 
 		// situations
 		stopElement.find(".alerts .scroller").html("").empty();
-		if (jQuery.isEmptyObject(applicableSituations)) {
+		if (disableAlerts || jQuery.isEmptyObject(applicableSituations)) {
 			stopElement.find(".alerts").hide();
 			stopElement.find(".arrivals").width("100%");
-		} else {
-			// make sure we have a valid alert before showing
-			var found = false;
-			jQuery.each(applicableSituations, function(situationId, situation) {
-				if (typeof situation.Affects.VehicleJourneys != "undefined") {
-					if (journey.LineRef in routeInfo && jQuery.inArray(journey.LineRef, existingSigns) < 0) {
-						found = true;
-					}
-				}
-			});
-			if (!found) return;
-			
+		} else if (isValidAlert(applicableSituations)) {
+
 			stopElement.find(".alerts").show();
 			stopElement.find(".arrivals").width("70%");
 
@@ -263,15 +289,19 @@ OBA.Sign = function() {
 
 				var existingSigns = [];
 
-				jQuery.each(situation.Affects.VehicleJourneys.AffectedVehicleJourney, function(_, journey) {
-					if (journey.LineRef in routeInfo && jQuery.inArray(journey.LineRef, existingSigns) < 0) {
-						var sign = signForRoute(journey.LineRef, jQuery("<div></div>"));
-						sign.addClass("alert_sign");
-						signWrapper.append(sign);
-						existingSigns.push(journey.LineRef);
-					}
-				});
+				// this loop grabs the route name if present
+				if (typeof situation.Affects.VehicleJourneys != "undefined") {
+					jQuery.each(situation.Affects.VehicleJourneys.AffectedVehicleJourney, function(_, journey) {
+						if (journey.LineRef in routeInfo && jQuery.inArray(journey.LineRef, existingSigns) < 0) {
+							var sign = signForRoute(journey.LineRef, null, jQuery("<div></div>"));
+							sign.addClass("alert_sign");
+							signWrapper.append(sign);
+							existingSigns.push(journey.LineRef);
+						}
+					});
+				}
 
+				// even if route name/ affected journeys not present we still display the alert
 				var alert = jQuery("<div></div>")
 								.addClass("alert")
 								.html('<p class="alert_summary">' + situation.Summary.replace(/\n\n/g, "<br/><br/>").replace(/\n/g, " ") + '</p><p>' + situation.Description.replace(/$/g, "<br/><br/>").replace(/\n\n/g, "<br/><br/>").replace(/\n/g, " ") + '</p>');
@@ -281,7 +311,7 @@ OBA.Sign = function() {
 				stopElement.find("div.scroller").append(alert);
 			});
 		}
-		
+
 		// arrivals
 		var r = 0;
 		var table = [];
@@ -294,6 +324,7 @@ OBA.Sign = function() {
 					etaCount : 0,
 					vehicleInfo : null,
 					lineRef : null,
+					tripShortName : null, // if the trip has an override route name (Express)
 					headsign : headsign,
 					vehicleId : null,
 					monitored : false,
@@ -312,6 +343,7 @@ OBA.Sign = function() {
 				if (row.etaCount == 0) {
 					row.vehicleInfo = vehicleInfo;
 					row.lineRef = vehicleInfo.lineRef;
+					row.tripShortName = vehicleInfo.tripShortName;
 					row.vehicleId = vehicleInfo.vehicleId;
 					row.monitored = vehicleInfo.monitored;
 				}
@@ -337,12 +369,12 @@ OBA.Sign = function() {
 				}
 				
 				// sign
-				var sign = signForRoute(rowInfo.lineRef, jQuery("<td></td>"));
+				var sign = signForRoute(rowInfo.lineRef, rowInfo.tripShortName, jQuery("<td></td>"));
 				sign.addClass("arrival_sign");
 				sign.appendTo(row);
 				
 				// name cell
-				var spanTxt = " Bus #" + rowInfo.vehicleId
+				var spanTxt = " Vehicle #" + rowInfo.vehicleId;
 				if (!rowInfo.monitored) {
 					spanTxt = "";
 				}
@@ -354,10 +386,6 @@ OBA.Sign = function() {
 					.text(rowInfo.headsign)
 					.append(vehicleIdSpan)
 					.appendTo(row);
-
-				var scheduledSpan = jQuery("<span></span>")
-				.addClass("bus-id")
-				.text(rowInfo.monitoried==true?"":"(scheduled) ");
 
 				jQuery('<td></td>')
 				.addClass("distance")
@@ -378,7 +406,7 @@ OBA.Sign = function() {
 			stopElement.find("thead").html("").empty(); // clear out the header when there is no data to show
 			jQuery('<tr class="last">' + 
 					'<td colspan="4">' + 
-						'No buses en-route to this stop. Please check back shortly for an update.</li>' +
+						'No vehicles en-route to this stop. Please check back shortly for an update.</li>' +
 					'</td>' +
 				   '</tr>')
 				   .appendTo(tableBody);
@@ -389,10 +417,55 @@ OBA.Sign = function() {
 		
 	}
 	
+	function isValidAlert(applicableSituations) {
+		var found = false;
+		jQuery.each(applicableSituations, function(situationId, situation) {
+			if (typeof situation.Affects.VehicleJourneys != "undefined"
+				&& typeof situation.Affects.VehicleJourneys.AffectedVehicleJourney != "undefined") {
+				jQuery.each(situation.Affects.VehicleJourneys.AffectedVehicleJourney, function(_, journey) {
+					// journey.LineRef does not have an agency ID
+					for (routeId in routeInfo) {
+						if (trimAgencyId(routeId) == journey.LineRef) {
+							found = true;
+						}
+					}
+				});
+			}
+		});
+
+		if (!found) {
+			// check for a global service alert
+            jQuery.each(applicableSituations, function(situationId, situation) {
+                if (typeof situation.Affects.Operators != "undefined") {
+                    jQuery.each(situation.Affects.Operators, function (_, operator) {
+                        found = true;
+                    });
+                }
+            });
+        }
+		return found;
+	}
+	
+	function trimAgencyId(id) {
+		return id.split("_")[1];
+	}
+	
 	// from jQuery 1.7
 	function isNumeric(n) {
 		var number = !jQuery.isArray( n ) && (n - parseFloat( n ) + 1) >= 0;
 		return number;
+	}
+
+	function hasLeadingNumber(n) {
+		return leadingNumber(n) != null;
+	}
+
+	function leadingNumber(n) {
+		var leadingNumberRegex = /^\d+/g;
+
+		var result = leadingNumberRegex.exec(n);
+		if (result == null) return null;
+		return result[0];
 	}
 	
 	function toEtaSpan1(etas, monitored) {
@@ -404,7 +477,7 @@ OBA.Sign = function() {
 				list = list + "<br/>" + etas[index];
 			}
 		}
-		list += "</div>"
+		list += "</div>";
 		return list;
 	}
 
@@ -460,8 +533,12 @@ OBA.Sign = function() {
 		}
 
 		var stopElement = getNewElementForStop(stopId);
-		
+
 		var params = { OperatorRef: stopId.agency, MonitoringRef: stopId.id, StopMonitoringDetailLevel: "normal", MinimumStopVisitsPerLine: 3 };
+		if (lineRef) {
+			params.LineRef = lineRef;
+		}
+
 		jQuery.getJSON(obaApiBaseUrl + OBA.Config.siriSMUrl, params, function(json) {	
 			//updateTimestamp(OBA.Util.ISO8601StringToDate(json.Siri.ServiceDelivery.ResponseTimestamp));
 			//hideError();
@@ -494,6 +571,11 @@ OBA.Sign = function() {
 				var headsign = journey.DestinationName;
 				var routeIdAndHeadsign = routeId + "_" + headsign;
 				var updateTimestampReference = OBA.Util.ISO8601StringToDate(json.Siri.ServiceDelivery.ResponseTimestamp).getTime();
+				var journeyTimestamp = updateTimestampReference;
+				if (monitoredStopVisit.RecordedAtTime != 'undefined') {
+					// if we have a stop visit time use it, its more accurate
+					journeyTimestamp = OBA.Util.ISO8601StringToDate(monitoredStopVisit.RecordedAtTime).getTime();
+				}
 				if(typeof headsignToDistanceAways[routeIdAndHeadsign] === 'undefined') {
 					headsignToDistanceAways[routeIdAndHeadsign] = [];
 					r++;
@@ -509,19 +591,26 @@ OBA.Sign = function() {
 				vehicleInfo.distanceAway = journey.MonitoredCall.Extensions.Distances.PresentableDistance;
 				vehicleInfo.vehicleId = journey.VehicleRef.split("_")[1];
 				vehicleInfo.lineRef = journey.LineRef;
+				vehicleInfo.tripShortName = null;
 				vehicleInfo.monitored = journey.Monitored;
 				if (typeof journey.MonitoredCall.ExpectedDepartureTime != 'undefined') {
 					//vehicleInfo.expectedDepartureTime = OBA.Util.ISO8601StringToDate(journey.MonitoredCall.ExpectedDepartureTime);
 					vehicleInfo.timePrediction = OBA.Util.getArrivalEstimateForISOString(
 							journey.MonitoredCall.ExpectedArrivalTime, 
-							updateTimestampReference, "min");
+							journeyTimestamp, "min");
+					
 				}
-				
-				headsignToDistanceAways[routeIdAndHeadsign].push(vehicleInfo);
+
+                // trip may have a route override like an express designator
+				if (journey.PublishedLineName != null) {
+                    vehicleInfo.tripShortName = journey.PublishedLineName;
+                }
+
+                headsignToDistanceAways[routeIdAndHeadsign].push(vehicleInfo);
 				var routeShortName = routeInfo[routeId].shortName;
 				var sortKeys = {
 						routeIdAndHeadsign: routeIdAndHeadsign,
-						routeShortName: routeShortName,
+						routeShortName: routeShortName
 						
 				};
 				
@@ -533,18 +622,42 @@ OBA.Sign = function() {
 				}
 			});
 
-			var sortOrderAndRouteIdAndHeadsign = sortedArrivalTimes;
+			// now look for stop-based service alerts
+			if (json.Siri.ServiceDelivery.SituationExchangeDelivery != null
+			       && json.Siri.ServiceDelivery.SituationExchangeDelivery.length > 0) {
+                jQuery.each(json.Siri.ServiceDelivery.SituationExchangeDelivery[0].Situations.PtSituationElement, function (_, ptSituationElement) {
+                    if (typeof situationsById[ptSituationElement.SituationNumber] !== 'undefined') {
+                        applicableSituations[ptSituationElement.SituationNumber] = ptSituationElement;
+                    }
+                });
+            }
+
+
+            var sortOrderAndRouteIdAndHeadsign = sortedArrivalTimes;
 			// default is to sort by arrival times / arrival distances			
 			if (sortByRoute) {
 				  sortedRouteIds.sort(function(a, b) {
 					     var routeShortNameA=a.routeShortName;
+					     if (hasLeadingNumber(routeShortNameA))
+					     	routeShortNameA = leadingNumber(routeShortNameA);
 						 var routeShortNameB=b.routeShortName;
+					     if (hasLeadingNumber(routeShortNameB))
+					     	routeShortNameB = leadingNumber(routeShortNameB);
 
 						 // perform a true numeric sort if possible
 						 if (isNumeric(routeShortNameA) && isNumeric(routeShortNameB)) {
 							 return routeShortNameA - routeShortNameB;
 						 }
-						 
+						 // try to handle "21" vs "21E" vs "A Line" in a reasonable/stable manner
+						 if (isNumeric(routeShortNameA)) {
+                             return  -1 * routeShortNameB.localeCompare(parseInt(routeShortNameA));
+                         }
+
+						 if (isNumeric(routeShortNameB)) {
+                             return routeShortNameA.localeCompare(parseInt(routeShortNameB));
+                         }
+
+                         // by here we are comparing txt to txt "A Line" to "B Line"
 						 routeShortNameA = routeShortNameA.toLowerCase();
 						 routeShortNameB = routeShortNameB.toLowerCase();
 						 // otherwise to string-based sort
@@ -568,6 +681,12 @@ OBA.Sign = function() {
 			stopElement.appendTo(newContent);
 			
 			jQuery("body").prepend(newContent);
+			
+			var header = jQuery(".header");
+			if (header[0].offsetHeight <  header[0].scrollHeight)
+				header.simplyScroll({
+					customClass: 'title_header'
+			 	});			
 			
 			if (stopIdsToRequest.length < 2) {
 				newContent.css("bottom", "80px").css("margin-bottom", "0px");
@@ -609,12 +728,12 @@ OBA.Sign = function() {
 						pauseOnHover: false,
 						autoMode: 'loop',
 						frameRate: 20,
-						speed: 2
+						speed: scrollSpeed
 					});
 				}
 				
 				var arrivalsHeight = 0;
-				var alerts = stopElement.find(".arrivals");
+				alerts = stopElement.find(".arrivals");
 				jQuery.each(alerts, function(_, arrival) {
 					arrivalsHeight += jQuery(arrival).height();
 				});
@@ -629,7 +748,7 @@ OBA.Sign = function() {
 						pauseOnHover: false,
 						autoMode: 'loop',
 						frameRate: 20,
-						speed: 2
+						speed: scrollSpeed
 					});
 				}
 				

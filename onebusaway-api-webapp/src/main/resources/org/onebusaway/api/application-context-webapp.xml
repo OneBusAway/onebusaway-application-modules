@@ -40,6 +40,7 @@
   <aop:aspectj-autoproxy />
 
   <context:component-scan base-package="org.onebusaway.api.impl,org.onebusaway.presentation.impl.realtime,org.onebusaway.presentation.services.cachecontrol,org.onebusaway.agency_metadata"/>
+  <context:component-scan base-package="org.onebusaway.api.actions.siri.impl" />
   <context:component-scan base-package="org.onebusaway.agency_metadata" />
   
   <bean id="taskScheduler" class="org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler" />
@@ -55,5 +56,7 @@
   <bean id="createAPIKeyOnInitAction" class="org.onebusaway.users.impl.CreateApiKeyAction" 	>
     	<property name="key" value="OBA" />
   </bean>
+
+  <bean class="org.onebusaway.api.impl.ConsolidatedStopIdModificationStrategy" />
   
 </beans>

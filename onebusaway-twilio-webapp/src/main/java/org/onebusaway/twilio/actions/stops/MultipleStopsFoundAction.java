@@ -1,9 +1,3 @@
-package org.onebusaway.twilio.actions.stops;
-
-import java.util.List;
-
-import org.onebusaway.presentation.services.text.TextModification;
-import org.onebusaway.transit_data.model.StopBean;
 /**
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
  *
@@ -19,56 +13,87 @@ import org.onebusaway.transit_data.model.StopBean;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.onebusaway.twilio.actions.stops;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.struts2.convention.annotation.Result;
+import org.apache.struts2.convention.annotation.Results;
+import org.apache.struts2.interceptor.SessionAware;
+import org.onebusaway.presentation.services.text.TextModification;
+import org.onebusaway.transit_data.model.StopBean;
+import org.onebusaway.transit_data.model.StopsWithArrivalsAndDeparturesBean;
 import org.onebusaway.twilio.actions.Messages;
 import org.onebusaway.twilio.actions.TwilioSupport;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
-import com.opensymphony.xwork2.ActionContext;
-import com.opensymphony.xwork2.util.ValueStack;
+public class MultipleStopsFoundAction extends TwilioSupport implements
+		SessionAware {
 
-public class MultipleStopsFoundAction extends TwilioSupport {
+	private TextModification _destinationPronunciation;
 
-  private TextModification _destinationPronunciation;
+	private List<String> _stopIds;
 
-  @Autowired
-  public void setDestinationPronunciation(
-      @Qualifier("destinationPronunciation") TextModification destinationPronunciation) {
-    _destinationPronunciation = destinationPronunciation;
-  }
+	public List<String> getStopIds() {
+		return _stopIds;
+	}
 
+	@Autowired
+	public void setDestinationPronunciation(
+			@Qualifier("destinationPronunciation") TextModification destinationPronunciation) {
+		_destinationPronunciation = destinationPronunciation;
+	}
 
-  @Override
-  public String execute() throws Exception {
+	@Override
+	public String execute() throws Exception {
 
-	ActionContext context = ActionContext.getContext();
-    ValueStack vs = context.getValueStack();
-    List<StopBean> stops = (List<StopBean>) vs.findValue("stops");
-    
-    int index = 1;
-    
-    addMessage(Messages.MULTIPLE_STOPS_WERE_FOUND);
-    
-    for( StopBean stop : stops) {
-      
-      addMessage(Messages.FOR);
-      
-      String destination = _destinationPronunciation.modify(stop.getName());
-      destination = destination.replaceAll("\\&", "and");      
-      addText(destination);
-      addText(", ");
-      
-      addMessage(Messages.PLEASE_PRESS);
-      
-      String key = Integer.toString(index++);
-      addText(key);
-      addText(". ");
-   }
+		Integer navState = (Integer) sessionMap.get("navState");
+		if (navState == null) {
+			navState = DISPLAY_DATA;
+		}
 
-    addMessage(Messages.HOW_TO_GO_BACK);
-    //addAction("\\*", "/back");
+		if (navState == DISPLAY_DATA) {
+			return displayData();
+		}
+		// navigation options after rendering a stop
+		return INPUT;
+	}
 
-    addMessage(Messages.TO_REPEAT);
-    
-    return SUCCESS;
-  }}
+	private String displayData() {
+
+		List<StopBean> stops = (List<StopBean>) sessionMap.get("stops");
+
+		int index = 1;
+
+		addMessage(Messages.MULTIPLE_STOPS_WERE_FOUND);
+
+		for (StopBean stop : stops) {
+
+			addMessage(Messages.FOR);
+
+			String destination = _destinationPronunciation.modify(stop
+					.getName());
+			destination = destination.replaceAll("\\&", "and");
+			addText(destination);
+			addText(", ");
+
+			addMessage(Messages.PLEASE_PRESS);
+
+			String key = Integer.toString(index++);
+			addText(key);
+			addText(". ");
+		}
+
+		addMessage(Messages.TO_REPEAT);
+
+		sessionMap.put("stops", stops);
+		sessionMap.put("navState", new Integer(DO_ROUTING));
+
+		return SUCCESS;
+	}
+
+}

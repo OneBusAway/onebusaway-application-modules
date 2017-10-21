@@ -27,6 +27,7 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 import org.onebusaway.twilio.services.SessionManager;
+import org.onebusaway.util.SystemTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -104,7 +105,7 @@ public class SessionManagerImpl implements SessionManager {
       ContextEntry existingEntry = _contextEntriesByKey.putIfAbsent(key, entry);
       entry = (existingEntry == null) ? entry : existingEntry;
       if (!entry.getContext().containsKey("twilioCreationTime")) {
-        entry.getContext().put("twilioCreationTime", System.currentTimeMillis());
+        entry.getContext().put("twilioCreationTime", SystemTime.currentTimeMillis());
       }
       if (entry.isValidAfterTouch())
         return entry;
@@ -123,7 +124,7 @@ public class SessionManagerImpl implements SessionManager {
       //_log.debug("isValidAfterTouch");
       if (!_valid)
         return false;
-      _lastAccess = System.currentTimeMillis();
+      _lastAccess = SystemTime.currentTimeMillis();
       return true;
     }
 
@@ -146,7 +147,7 @@ public class SessionManagerImpl implements SessionManager {
     public void run() {
       //_log.debug("run");
 
-      long minTime = System.currentTimeMillis() - _sessionTimeout * 1000;
+      long minTime = SystemTime.currentTimeMillis() - _sessionTimeout * 1000;
 
       Iterator<ContextEntry> it = _contextEntriesByKey.values().iterator();
 

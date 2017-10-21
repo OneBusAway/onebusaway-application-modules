@@ -30,6 +30,7 @@ import org.onebusaway.aws.cloudwatch.service.CloudwatchService;
 import org.onebusaway.aws.monitoring.model.metrics.Metric;
 import org.onebusaway.aws.monitoring.model.metrics.MetricName;
 import org.onebusaway.aws.monitoring.model.metrics.MetricResponse;
+import org.onebusaway.util.SystemTime;
 import org.onebusaway.util.services.configuration.ConfigurationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -96,7 +97,7 @@ public abstract class MetricsTemplate {
 	}
 	
 	public MetricResponse getUrlWithResponseTime(String url) {
-		long startTime = System.currentTimeMillis();
+		long startTime = SystemTime.currentTimeMillis();
 		double metric;
 		HttpURLConnection con = null;
 		try {
@@ -126,7 +127,7 @@ public abstract class MetricsTemplate {
 		}
 		
 		return new MetricResponse(metric,
-				(double) (System.currentTimeMillis() - startTime));
+				(double) (SystemTime.currentTimeMillis() - startTime));
 	}
 	
 	public String getUrlResponse(String url){

@@ -47,6 +47,7 @@ import org.onebusaway.gtfs.services.HibernateGtfsFactory;
 import org.onebusaway.king_county_metro_gtfs.model.PatternPair;
 import org.onebusaway.transit_data_federation.bundle.model.GtfsBundle;
 import org.onebusaway.transit_data_federation.bundle.model.GtfsBundles;
+import org.onebusaway.util.SystemTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,6 +62,7 @@ public class GtfsArchiveTask implements  Runnable {
     "tmp_pattern_pairs",
     "tmp_gtfs_calendar_dates",
     "tmp_gtfs_calendars",
+    "tmp_gtfs_block",
     "tmp_gtfs_fare_rules",
     "tmp_gtfs_fare_attributes",
     "tmp_gtfs_feed_info",
@@ -78,6 +80,7 @@ public class GtfsArchiveTask implements  Runnable {
   private static Map<String, String> PRIMARY_KEY_MAP = new HashMap<String, String>();
   static {
     PRIMARY_KEY_MAP.put("gtfs_agencies", "id");
+    PRIMARY_KEY_MAP.put("gtfs_block", "gid");
     PRIMARY_KEY_MAP.put("gtfs_calendar_dates", "gid");
     PRIMARY_KEY_MAP.put("gtfs_calendars", "gid");
     PRIMARY_KEY_MAP.put("gtfs_fare_attributes", "agencyId,id");
@@ -111,7 +114,7 @@ public class GtfsArchiveTask implements  Runnable {
       return;
     }
     
-    long start = System.currentTimeMillis();
+    long start = SystemTime.currentTimeMillis();
     _log.info("archiving gtfs");
     
     Configuration config = getConfiguration();
@@ -151,7 +154,7 @@ public class GtfsArchiveTask implements  Runnable {
     session.flush();
     session.close();
 
-    long stop = System.currentTimeMillis();
+    long stop = SystemTime.currentTimeMillis();
     _log.info("archiving gtfs complete in " + (stop-start)/1000 + "s");
     
   }
@@ -244,11 +247,18 @@ public class GtfsArchiveTask implements  Runnable {
   }
   
   private int logUpdate(Session session, String sql) {
-    long start = System.currentTimeMillis();
+    long start = SystemTime.currentTimeMillis();
     SQLQuery query = session.createSQLQuery(sql);
     _log.debug("query:  " + sql);
-    int rc = query.executeUpdate();
-    long stop = System.currentTimeMillis();
+    int rc = -1;
+    try {
+      rc = query.executeUpdate();
+    } catch (Throwable t) {
+      _log.error("Exception from sql=" + sql);
+      _log.error("Exception:", t);
+      throw t;
+    }
+    long stop = SystemTime.currentTimeMillis();
     _log.info("result: " + rc + " in " + (stop-start)/1000 + "s for query: " + sql);
     return rc;
   }
@@ -322,12 +332,12 @@ public class GtfsArchiveTask implements  Runnable {
     public void execute(Connection conn) throws SQLException {
       PreparedStatement ps = null;
       try {
-        long start = System.currentTimeMillis();
+        long start = SystemTime.currentTimeMillis();
         String sql = "show tables like '" + newTable + "'";
         ps = conn.prepareStatement(sql);
         ResultSet query = ps.executeQuery();
         exists = query.first();
-        long stop = System.currentTimeMillis();
+        long stop = SystemTime.currentTimeMillis();
         _log.info("TableExists(" + newTable + ") took " + (stop-start)/1000 + "s");
       } finally {
         ps.close();
@@ -352,7 +362,7 @@ public class GtfsArchiveTask implements  Runnable {
     public void execute(Connection conn) throws SQLException {
       PreparedStatement ps = null;
       try {
-        long start = System.currentTimeMillis();
+        long start = SystemTime.currentTimeMillis();
         String sql = "Select * from " + newTable + " limit 1";
         ps = conn.prepareStatement(sql);
         ResultSet rs = ps.executeQuery();
@@ -360,7 +370,7 @@ public class GtfsArchiveTask implements  Runnable {
         for (int i = 1; i <= rsmd.getColumnCount(); i++) {
           columnNames.add(rsmd.getColumnName(i));
         }
-        long stop = System.currentTimeMillis();
+        long stop = SystemTime.currentTimeMillis();
         _log.info("columnNames(" + newTable + ") took " + (stop-start)/1000 + "s");
       } finally {
         ps.close();

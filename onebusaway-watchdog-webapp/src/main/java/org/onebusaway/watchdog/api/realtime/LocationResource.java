@@ -24,6 +24,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 
 import org.onebusaway.geospatial.model.CoordinateBounds;
@@ -38,7 +39,7 @@ public class LocationResource extends MetricResource {
   @Path("{agencyId}/total")
   @GET
   @Produces("application/json")
-  public Response getTotalLatLonCount(@PathParam("agencyId") String agencyId) {
+  public Response getTotalLatLonCount(@PathParam("agencyId") String agencyId, @QueryParam("feedId") String feedId) {
     try {
       List<CoordinatePoint> totalLatLons = new ArrayList<CoordinatePoint>();
       if (this.getDataSources() == null || this.getDataSources().isEmpty()) {
@@ -49,9 +50,11 @@ public class LocationResource extends MetricResource {
       for (MonitoredDataSource mds : getDataSources()) {
         MonitoredResult result = mds.getMonitoredResult();
         if (result == null) continue;
-        for (String mAgencyId : result.getAgencyIds()) {
-          if (agencyId.equals(mAgencyId)) {
-            totalLatLons.addAll(result.getAllCoordinates());
+        if (feedId == null || feedId.equals(mds.getFeedId())) {
+          for (String mAgencyId : result.getAgencyIds()) {
+            if (agencyId.equals(mAgencyId)) {
+              totalLatLons.addAll(result.getAllCoordinates());
+            }
           }
         }
       }
@@ -65,7 +68,7 @@ public class LocationResource extends MetricResource {
   @Path("{agencyId}/invalid")
   @GET
   @Produces("application/json")
-  public Response getInvalidLatLonCount(@PathParam("agencyId") String agencyId) {
+  public Response getInvalidLatLonCount(@PathParam("agencyId") String agencyId, @QueryParam("feedId") String feedId) {
     try {
       List<CoordinatePoint> invalidLatLons = new ArrayList<CoordinatePoint>();
       if (this.getDataSources() == null || this.getDataSources().isEmpty()) {
@@ -76,9 +79,11 @@ public class LocationResource extends MetricResource {
       for (MonitoredDataSource mds : getDataSources()) {
         MonitoredResult result = mds.getMonitoredResult();
         if (result == null) continue;
-        for (String mAgencyId : result.getAgencyIds()) {
-          if (agencyId.equals(mAgencyId)) {
-            invalidLatLons.addAll(findInvalidLatLon(agencyId, result.getAllCoordinates()));
+        if (feedId == null || feedId.equals(mds.getFeedId())) {
+          for (String mAgencyId : result.getAgencyIds()) {
+            if (agencyId.equals(mAgencyId)) {
+              invalidLatLons.addAll(findInvalidLatLon(agencyId, result.getAllCoordinates()));
+            }
           }
         }
       }
@@ -92,7 +97,7 @@ public class LocationResource extends MetricResource {
   @Path("{agencyId}/invalid-lat-lons")
   @GET
   @Produces("application/json")
-  public Response getInvalidLatLons(@PathParam("agencyId") String agencyId) {
+  public Response getInvalidLatLons(@PathParam("agencyId") String agencyId, @QueryParam("feedId") String feedId) {
     try {
       List<CoordinatePoint> invalidLatLons = new ArrayList<CoordinatePoint>();
       if (this.getDataSources() == null || this.getDataSources().isEmpty()) {
@@ -103,9 +108,11 @@ public class LocationResource extends MetricResource {
       for (MonitoredDataSource mds : getDataSources()) {
         MonitoredResult result = mds.getMonitoredResult();
         if (result == null) continue;
-        for (String mAgencyId : result.getAgencyIds()) {
-          if (agencyId.equals(mAgencyId)) {
-            invalidLatLons.addAll(findInvalidLatLon(agencyId, result.getAllCoordinates()));
+        if (feedId == null || feedId.equals(mds.getFeedId())) {
+          for (String mAgencyId : result.getAgencyIds()) {
+            if (agencyId.equals(mAgencyId)) {
+              invalidLatLons.addAll(findInvalidLatLon(agencyId, result.getAllCoordinates()));
+            }
           }
         }
       }

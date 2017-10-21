@@ -555,14 +555,20 @@ public class ServiceAlertsServiceImplTest extends AbstractTransactionalJUnit4Spr
 
   @Test
   public void testRefresh() {
-    
+    long now = System.currentTimeMillis();
+
     // ensure we have no records;
     List<ServiceAlertRecord> alerts = _service.getAllServiceAlerts();
     assertEquals(0, alerts.size());
+    ServiceAlertRecord alert1 = new ServiceAlertRecord();
+    alert1.setAgencyId("1");
+    alert1.setServiceAlertId("A");
 
-      ServiceAlertRecord alert1 = new ServiceAlertRecord();
-      alert1.setAgencyId("1");
-      alert1.setServiceAlertId("A");
+    // we need to set an effects clause for the agency index to triggeer
+    ServiceAlertsSituationAffectsClause affectsClause = new ServiceAlertsSituationAffectsClause();
+    affectsClause.setAgencyId("1");
+    alert1.getAllAffects().add(affectsClause);
+
     _persister.getHibernateTemplate().saveOrUpdate(alert1);
 
     alerts = _service.getAllServiceAlerts();
@@ -578,7 +584,9 @@ public class ServiceAlertsServiceImplTest extends AbstractTransactionalJUnit4Spr
     // see the update
     alerts = _service.getAllServiceAlerts();
     assertEquals(1, alerts.size());
-
+    // ensure the sub-index has it as well
+    alerts = _service.getServiceAlertsForAgencyId(now, alert1.getAgencyId());
+    assertEquals(1, alerts.size());
   }
 
   @Test
@@ -656,4 +664,117 @@ public class ServiceAlertsServiceImplTest extends AbstractTransactionalJUnit4Spr
     alerts = _service.getAllServiceAlerts();
     assertEquals(0, alerts.size());
   }
+
+  @Test
+  public void testAsyncPublicationWindow() {
+      Long now = System.currentTimeMillis();
+      // ensure we have no records;
+      List<ServiceAlertRecord> alerts = _service.getAllServiceAlerts();
+      assertEquals(0, alerts.size());
+
+      // and for agency index
+      alerts = _service.getServiceAlertsForAgencyId(now, "1");
+      assertEquals(0, alerts.size());
+
+      // and sto index
+      alerts = _service.getServiceAlertsForStopId(
+              now, AgencyAndId.convertFromString("1_10020"));
+      assertEquals(0, alerts.size());
+
+      // now create a service alert
+      ServiceAlertRecord alert1 = new ServiceAlertRecord();
+      alert1.setAgencyId("1");
+      alert1.setServiceAlertId("A");
+
+      // affects mandatory for update to work
+      ServiceAlertsSituationAffectsClause affectsClause = new ServiceAlertsSituationAffectsClause();
+      affectsClause.setAgencyId("1");
+      affectsClause.setStopId("10020");
+      alert1.getAllAffects().add(affectsClause);
+
+      // test a publication window of a few seconds around now
+      ServiceAlertTimeRange range = new ServiceAlertTimeRange();
+
+      range.setFromValue(now - 1000);
+      range.setToValue(now + 2 * 1000);
+      alert1.setPublicationWindows(new HashSet<ServiceAlertTimeRange>());
+      alert1.getPublicationWindows().add(range);
+      _persister.getHibernateTemplate().saveOrUpdate(alert1);
+
+      _service.loadServiceAlerts();
+
+      // see the update
+      alerts = _service.getAllServiceAlerts();
+      assertEquals(1, alerts.size());
+
+      // agency will not trigger as we have a stopid instead
+      alerts = _service.getServiceAlertsForAgencyId(now, alert1.getAgencyId());
+      assertEquals(0, alerts.size());
+
+      alerts = _service.getServiceAlertsForStopId(
+              now, AgencyAndId.convertFromString("1_10020"));
+      assertEquals(1, alerts.size());
+
+      // all service alerts bypasses filtering by time
+      alerts = _service.getAllServiceAlerts();
+      assertEquals(1, alerts.size());
+
+      // still not there
+      alerts = _service.getServiceAlertsForAgencyId(now + 3 * 1000, alert1.getAgencyId());
+      assertEquals(0, alerts.size());
+
+      // window expired
+      alerts = _service.getServiceAlertsForStopId(
+              now + 3 * 1000, AgencyAndId.convertFromString("1_10020"));
+      assertEquals(0, alerts.size());
+
+  }
+
+
+    @Test
+    public void testPublicationWindowServiceAlert() {
+        Long now = System.currentTimeMillis();
+        ServiceAlertRecord alert1 = new ServiceAlertRecord();
+        alert1.setAgencyId("1");
+        alert1.setServiceAlertId("A");
+
+        ServiceAlertsSituationAffectsClause affectsClause = new ServiceAlertsSituationAffectsClause();
+        affectsClause.setAgencyId("1");
+        alert1.getAllAffects().add(affectsClause);
+        alert1.getPublicationWindows().add(createTimeRange(now - 60 * 1000, now + 60 * 1000));
+
+        alert1 = _service.createOrUpdateServiceAlert(alert1);
+
+        List<ServiceAlertRecord> alerts = _service.getServiceAlertsForAgencyId(
+                now, "1");
+        assertEquals(1, alerts.size());
+
+        alerts = _service.getServiceAlertsForStopId(
+                now, AgencyAndId.convertFromString("1_10020"));
+        assertEquals(1, alerts.size());
+        assertTrue(alerts.contains(alert1));
+
+        // too early
+        alerts = _service.getServiceAlertsForAgencyId(
+                now-61*1000, "1");
+        alerts = _service.getServiceAlertsForStopId(
+                now-61*1000, AgencyAndId.convertFromString("1_10020"));
+        assertEquals(0, alerts.size());
+
+        // too late
+        alerts = _service.getServiceAlertsForAgencyId(
+                now+61*1000, "1");
+        alerts = _service.getServiceAlertsForStopId(
+                now+61*1000, AgencyAndId.convertFromString("1_10020"));
+        assertEquals(0, alerts.size());
+
+        // re-assure ourselves we still get the correct answer
+        alerts = _service.getServiceAlertsForAgencyId(
+                now, "1");
+        alerts = _service.getServiceAlertsForStopId(
+                now, AgencyAndId.convertFromString("1_10020"));
+        assertEquals(1, alerts.size());
+        assertTrue(alerts.contains(alert1));
+
+    }
 }

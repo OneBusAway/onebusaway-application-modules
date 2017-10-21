@@ -22,6 +22,7 @@ import org.onebusaway.collections.Min;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.realtime.api.TimepointPredictionRecord;
 import org.onebusaway.transit_data.model.TimeIntervalBean;
+import org.onebusaway.transit_data.model.TransitDataConstants;
 import org.onebusaway.transit_data_federation.model.StopTimeInstance;
 import org.onebusaway.transit_data_federation.model.TargetTime;
 import org.onebusaway.transit_data_federation.services.ArrivalAndDepartureQuery;
@@ -136,6 +137,9 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
 
         if (sti.getFrequency() != null
             && sti.getFrequency().getExactTimes() == 0) {
+          /*
+           * adjust following schedule times relative to current realtime data
+           */
           applyPostInterpolateForFrequencyNoSchedule(sti, fromTime, toTime,
               frequencyOffsetTime, blockInstance, instances);
         }
@@ -435,19 +439,24 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
     int d1 = bst.getStopTime().getDepartureTime();
     int stopDelta = d1 - d0;
 
-    int stopStartTime = sti.getFrequency().getStartTime() + stopDelta;
     int stopEndTime = sti.getFrequency().getEndTime() + stopDelta;
-    long stopStartTimeExact = sti.getServiceDate() + stopStartTime * 1000;
     long stopEndTimeExact = sti.getServiceDate() + stopEndTime * 1000;
 
     int headwayMs = sti.getFrequency().getHeadwaySecs() * 1000;
 
+    /*
+     * TODO: if start_time is available from feed we should use it over this calculation
+     */
     long time = instance.getBestDepartureTime();
     if (time == 0)
       time = instance.getBestArrivalTime();
     // Do not extrapolate trips starting at the headway change:
     stopEndTimeExact -= headwayMs;
 
+    /*
+     * here we correct the scheduled departures to offset from the current
+     * realtime.
+     */
     // Extrapolate future stop times.
     while ((time += headwayMs) < Math.min(toTime, stopEndTimeExact)) {
       ArrivalAndDepartureInstance newInstance = createArrivalAndDepartureForStopTimeInstanceWithTime(
@@ -490,6 +499,10 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
     return Collections.max(instances, cmp);
   }
 
+  /*
+   * here we map realtime on top of schedule and also filter
+   * out canceled trips.
+   */
   private void applyRealTimeToStopTimeInstance(StopTimeInstance sti,
       TargetTime targetTime, long fromTime, long toTime,
       long frequencyOffsetTime, BlockInstance blockInstance,
@@ -501,6 +514,9 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
       if (sti.isFrequencyOffsetSpecified()
           && ((blockInstance.getBlock().getDepartureTimeForIndex(0)
               + sti.getFrequencyOffset()) != location.getBlockStartTime())) {
+        continue;
+      }
+      if (TransitDataConstants.STATUS_CANCELED.equals(location.getStatus())) {
         continue;
       }
 
@@ -623,6 +639,7 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
     // is not set.
 
     int stopSequence = instance.getBlockStopTime().getStopTime().getSequence();
+    int gtfsSequence = instance.getBlockStopTime().getStopTime().getGtfsSequence();
 
     int totalCandidates = 0;
     int thisStopIndex = 0; // index (with respect to stop sequence) among stops
@@ -651,7 +668,7 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
       boolean stopMatches = tpr.getTimepointId().equals(
           instance.getStop().getId());
       boolean sequenceMatches = tpr.getStopSequence() > 0
-          && tpr.getStopSequence() == stopSequence;
+          && tpr.getStopSequence() == gtfsSequence;
 
       if (!tripMatches || !stopMatches)
         continue;

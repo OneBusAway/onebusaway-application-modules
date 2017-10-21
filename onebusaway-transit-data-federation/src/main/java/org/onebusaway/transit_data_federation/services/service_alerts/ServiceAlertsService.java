@@ -47,6 +47,8 @@ public interface ServiceAlertsService {
   public ServiceAlertRecord createOrUpdateServiceAlert(ServiceAlertRecord serviceAlertRecord);
 
   public void removeServiceAlert(AgencyAndId serviceAlertId);
+  
+  public ServiceAlertRecord copyServiceAlert(ServiceAlertRecord serviceAlertRecord);
 
   public void removeServiceAlerts(List<AgencyAndId> serviceAlertIds);
 

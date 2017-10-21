@@ -300,6 +300,11 @@ public class StopsForRouteNavigationAction extends TwilioSupport implements Sess
 		    }
 
 		    addMessage(Messages.PLEASE_PRESS);
-		    addText(key);
-		  }
+		    addText(key + ".");
+
+		    // Add additional navigation instructions for STOP_NAME type.
+		    if (SelectionNameTypes.STOP_NAME.equals(type)) {
+		      addMessage(Messages.NAVIGATION_ACTIONS);
+		    }
+		}
 }

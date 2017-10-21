@@ -1,9 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Copyright (c) 2011 Metropolitan Transportation Authority Licensed under the Apache License, Version 2.0 (the "License"); 
-    you may not use this file except in compliance with the License. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0 
-    Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS 
-    IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language 
-    governing permissions and limitations under the License. -->
+<!--
+
+    Copyright (c) 2011 Metropolitan Transportation Authority
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+            http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
 <beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns:context="http://www.springframework.org/schema/context" xmlns:aop="http://www.springframework.org/schema/aop"
     xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
@@ -48,6 +60,21 @@
       <property name="resourceRef"
                 value="true" />
     </bean>
+     <!-- Database Connection Configuration for Bundle Build Response -->
+    <bean id="bundleBuildResponseDataSource"
+          class="org.springframework.jndi.JndiObjectFactoryBean">
+      <property name="jndiName"
+                value="java:comp/env/jdbc/appDB"/>
+      <property name="lookupOnStartup"
+                value="true"/>
+      <property name="cache"
+                value="true"/>
+      <property name="proxyInterface"
+                value="javax.sql.DataSource"/>
+      <property name="resourceRef"
+                value="true" />
+    </bean>
+    
     
     <!--  Email connection -->
      <bean id="mailSession"
@@ -64,6 +91,21 @@
     	<property name="session" ref="mailSession"/> 
 	</bean>
     
+    <!-- Database Connection Configuration for retrieving archived data -->
+    <bean id="gtfsRealtimeArchiveDataSource"
+          class="org.springframework.jndi.JndiObjectFactoryBean">
+      <property name="jndiName"
+                value="java:comp/env/jdbc/archiveDB"/>
+      <property name="lookupOnStartup"
+                value="true"/>
+      <property name="cache"
+                value="true"/>
+      <property name="proxyInterface"
+                value="javax.sql.DataSource"/>
+      <property name="resourceRef"
+                value="true" />
+    </bean>
+
 <!-- Other Stuff: -->
 
     <bean id="externalGeocoderImpl" class="org.onebusaway.geocoder.enterprise.impl.EnterpriseGoogleGeocoderImpl">
@@ -128,12 +170,60 @@
 				<prop key="hibernate.connection.pool_size">1</prop>
 				<prop key="hibernate.current_session_context_class">thread</prop>
 				<prop key="hibernate.cache.provider_class">org.hibernate.cache.NoCacheProvider</prop>
-				<prop key="hibernate.show_sql">true</prop>
+				<prop key="hibernate.show_sql">false</prop>
 				<prop key="hibernate.hbm2ddl.auto">update</prop>
 				<prop key="hibernate.jdbc.batch_size">1000</prop>
 			</props>
 		</property>
 	</bean>
+     <bean id="bundleBuildResponseSessionFactory"
+    class="org.springframework.orm.hibernate3.annotation.AnnotationSessionFactoryBean">
+    <property name="dataSource" ref="bundleBuildResponseDataSource" />
+    <property name="annotatedClasses">
+      <list>
+        <value>org.onebusaway.admin.model.BundleBuildResponse</value>
+        <value>org.onebusaway.admin.service.bundle.impl.BundleBuildResponseDaoImpl</value>
+      </list>
+    </property>
+    <property name="hibernateProperties">
+      <props>
+        <prop key="hibernate.dialect">org.hibernate.dialect.MySQLDialect</prop>
+        <prop key="hibernate.connection.pool_size">1</prop>
+        <prop key="hibernate.current_session_context_class">thread</prop>
+        <prop key="hibernate.cache.provider_class">org.hibernate.cache.NoCacheProvider</prop>
+        <prop key="hibernate.show_sql">false</prop>
+        <prop key="hibernate.hbm2ddl.auto">update</prop>
+        <prop key="hibernate.jdbc.batch_size">1000</prop>
+      </props>
+    </property>
+  </bean>
+ 
+  <bean id="gtfsRealtimeArchiveSessionFactory" class="org.springframework.orm.hibernate3.annotation.AnnotationSessionFactoryBean">
+    <property name="dataSource" ref="gtfsRealtimeArchiveDataSource" />
+    <property name="annotatedClasses">
+      <list>
+        <value>org.onebusaway.admin.service.bundle.task.model.GtfsBundleInfo</value>
+        <value>org.onebusaway.admin.service.bundle.impl.GtfsArchiveDaoImpl</value>
+      </list>
+    </property>
+    <property name="hibernateProperties">
+      <props>
+        <prop key="hibernate.connection.pool_size">1</prop>
+        <prop key="hibernate.current_session_context_class">thread</prop>
+        <prop key="hibernate.cache.provider_class">org.hibernate.cache.NoCacheProvider</prop>
+        <prop key="hibernate.show_sql">false</prop>
+        <prop key="hibernate.hbm2ddl.auto">none</prop>
+        <prop key="hibernate.jdbc.batch_size">1000</prop>
+        <prop key="hibernate.order_inserts">false</prop>
+        <prop key="hibernate.order_updates">false</prop>
+      </props>
+    </property>
+    <property name="mappingResources">
+      <list>
+        <value>org/onebusaway/gtfs/model/GtfsArchiveMapping.hibernate.xml</value>
+      </list>
+    </property>
+  </bean>
 
 	<!-- quartz scheduling for PingJob -->
 	<bean name="pingJob" class="org.springframework.scheduling.quartz.JobDetailBean">

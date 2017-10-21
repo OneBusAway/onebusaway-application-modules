@@ -23,14 +23,44 @@
 <head>
 <title><s:text name="ServiceAlert" /></title>
 <link rel="stylesheet" type="text/css" media="all" href="${oba:resource('/css/admin.css')}"/>
+
+<s:url var="url" value="/css/jquery-ui.css" />
+<link rel="stylesheet" type="text/css" href="${url}">
+	<!-- //prevent jspx minimization -->
+</link>
+
+<s:url var="url" value="/css/service-alerts.css" />
+<link rel="stylesheet" type="text/css" href="${url}">
+	<!-- //prevent jspx minimization -->
+</link>
+
+<s:url var="url" value="/js/lib/jquery.js" />
+<script type="text/javascript" src="${url}">
+<!-- //prevent jspx minimization -->
+	
+</script>
+
+<s:url var="url" value="/js/lib/jquery.ui.js" />
+<script type="text/javascript" src="${url}">
+<!-- //prevent jspx minimization -->
+	
+</script>
+
+<s:url var="url" value="/js/oba/service-alerts.js">
+	<!-- //prevent jspx minimization -->
+</s:url>
+<script type="text/javascript" src="${url}">
+<!-- //prevent jspx minimization -->
+	
+</script>
+
 </head>
 <body>
 
 <s:set name="theme" value="'xhtml'" scope="page" />
 
 <s:if test="agencyId != null">
-<s:url var="url" action="service-alerts!agency">
-  <s:param name="agencyId" value="agencyId"/>
+<s:url var="url" action="service-alerts">
 </s:url>
 <p><s:a href="%{url}">Back to Agency Service Alerts</s:a></p>
 </s:if>
@@ -43,6 +73,9 @@
 <s:textarea label="Description" name="description" value="%{description}" cols="80" rows="5"/>
 <s:select label="Reason" name="reason" headerKey="null" headerValue="Select Reason" list="reasonValues" value="%{reason}"/>
 <s:select label="Severity" name="severity" headerKey="null" headerValue="Select Severity" list="severityValues" value="%{severity}"/>
+<s:textfield label="Start Date" id="publicationWindowStartDate" name="startDate" value="%{startDate}" theme="xhtml"/>
+<s:textfield label="End Date" id="publicationWindowEndDate" name="endDate" value="%{endDate}" theme="xhtml"/>
+
 <s:textarea label="Raw" name="raw" value="%{raw}" cols="80" rows="10" readonly="true"/>
 <s:hidden name="agencyId" value="%{agencyId}"/>
 <s:hidden name="id" value="%{id}"/>
@@ -94,5 +127,8 @@
 <p><s:a href="%{url}">Delete</s:a></p>
 </s:if>
 
+<s:hidden name="favorite" value="%{favorite}"/>
+<s:hidden name="newServiceAlert" value="%{newServiceAlert}"/>
+<s:hidden name="fromFavorite" value="%{fromFavorite}"/>
 </body>
 </html>

@@ -29,6 +29,7 @@ class AffectsAgencyKeyFactory implements AffectsKeyFactory<String> {
     Set<String> agencyIds = new HashSet<String>();
 
     for (ServiceAlertsSituationAffectsClause affects : serviceAlert.getAllAffects()) {
+      // this logic ensure this is an agency only affect, no other affects are set
       if (affects.getAgencyId() != null
           && !(affects.getDirectionId() != null || affects.getRouteId() != null
               || affects.getStopId() != null || affects.getTripId() != null)) {

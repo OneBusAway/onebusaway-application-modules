@@ -1,17 +1,17 @@
 /**
  * Copyright (C) 2011 Metropolitan Transportation Authority
  * 
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
- * 
- * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.onebusaway.enterprise.webapp.actions.m;
 
@@ -33,6 +33,7 @@ import org.onebusaway.presentation.services.search.SearchResultFactory;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.transit_data_federation.siri.SiriDistanceExtension;
 import org.onebusaway.transit_data_federation.siri.SiriExtensionWrapper;
+import org.onebusaway.util.SystemTime;
 import org.onebusaway.util.services.configuration.ConfigurationService;
 import org.onebusaway.enterprise.webapp.actions.m.model.GeocodeResult;
 import org.onebusaway.enterprise.webapp.actions.m.model.RouteAtStop;
@@ -92,7 +93,7 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
     // add stops in both directions
     
     List<VehicleActivityStructure> journeyList = _realtimeService.getVehicleActivityForRoute(
-        routeBean.getId(), null, 0, System.currentTimeMillis());
+        routeBean.getId(), null, 0, SystemTime.currentTimeMillis());
 
     Map<String, List<String>> stopIdToDistanceAwayStringMap = new HashMap<String, List<String>>();
     Map<String, List<String>> stopIdToVehicleIdMap = new HashMap<String, List<String>>();
@@ -125,12 +126,12 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
         // service in this direction
         Boolean hasUpcomingScheduledService = _transitDataService.routeHasUpcomingScheduledService(
         	(routeBean.getAgency()!=null?routeBean.getAgency().getId():null),	
-            System.currentTimeMillis(), routeBean.getId(),
+            SystemTime.currentTimeMillis(), routeBean.getId(),
             stopGroupBean.getId());
 
         // if there are buses on route, always have "scheduled service"
         Boolean routeHasVehiclesInService = 
-      		  _realtimeService.getVehiclesInServiceForRoute(routeBean.getId(), stopGroupBean.getId(), System.currentTimeMillis());
+      		  _realtimeService.getVehiclesInServiceForRoute(routeBean.getId(), stopGroupBean.getId(), SystemTime.currentTimeMillis());
 
         if(routeHasVehiclesInService) {
       	  hasUpcomingScheduledService = true;
@@ -208,7 +209,7 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
           // service in this direction
           Boolean hasUpcomingScheduledService = _transitDataService.stopHasUpcomingScheduledService(
         	  (routeBean.getAgency()!=null?routeBean.getAgency().getId():null),
-              System.currentTimeMillis(), stopBean.getId(), routeBean.getId(),
+              SystemTime.currentTimeMillis(), stopBean.getId(), routeBean.getId(),
               stopGroupBean.getId());
 
           // if there are buses on route, always have "scheduled service"
@@ -263,7 +264,7 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
 
     // stop visits
     List<MonitoredStopVisitStructure> visitList = _realtimeService.getMonitoredStopVisitsForStop(
-        stopBean.getId(), 0, System.currentTimeMillis());
+        stopBean.getId(), 0, SystemTime.currentTimeMillis());
 
     for (MonitoredStopVisitStructure visit : visitList) {
       String routeId = visit.getMonitoredVehicleJourney().getLineRef().getValue();
@@ -271,7 +272,7 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
         continue;
 
       String directionId = visit.getMonitoredVehicleJourney().getDirectionRef().getValue();
-      if (!stopGroupBean.getId().equals(directionId))
+      if (directionId != null && !stopGroupBean.getId().equals(directionId)) 
         continue;
 
       // on detour?
@@ -374,7 +375,7 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
 	  }
 	  
 	  int staleTimeout = _configurationService.getConfigurationValueAsInteger("display.staleTimeout", 120);
-	  long age = (System.currentTimeMillis() - updateTime) / 1000;
+	  long age = (SystemTime.currentTimeMillis() - updateTime) / 1000;
 
 	  if (age > staleTimeout) {
 		  return null;
@@ -434,7 +435,7 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
     	
     int staleTimeout = _configurationService.getConfigurationValueAsInteger(
         "display.staleTimeout", 120);
-    long age = (System.currentTimeMillis() - updateTime) / 1000;
+    long age = (SystemTime.currentTimeMillis() - updateTime) / 1000;
 
     if (age > staleTimeout) {
       if (message.length() > 0) {

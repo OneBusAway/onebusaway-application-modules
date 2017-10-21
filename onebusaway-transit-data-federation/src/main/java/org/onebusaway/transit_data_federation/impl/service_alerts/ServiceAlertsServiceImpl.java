@@ -23,6 +23,7 @@ import org.onebusaway.transit_data_federation.services.blocks.BlockTripInstance;
 import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects;
 import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlertsService;
 import org.onebusaway.transit_data_federation.services.transit_graph.*;
+import org.onebusaway.util.SystemTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +31,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+
 import java.util.*;
 
 @Component
@@ -58,9 +60,9 @@ class ServiceAlertsServiceImpl implements ServiceAlertsService {
 	}
 	
 	public ServiceAlertsCache getServiceAlertsCache() {
-	  return _cache;
+		return _cache;
 	}
-	
+
 	@Autowired
 	public void setServiceAlertsPersistence(ServiceAlertsPersistence persister) {
 	  _persister = persister;
@@ -99,7 +101,7 @@ class ServiceAlertsServiceImpl implements ServiceAlertsService {
 			serviceAlertRecord.setServiceAlertId(uuid.toString());
 		}
 
-		long lastModified = System.currentTimeMillis();
+		long lastModified = SystemTime.currentTimeMillis();
 		if (serviceAlertRecord.getCreationTime() < 1l)
         serviceAlertRecord.setCreationTime(lastModified);
 
@@ -107,6 +109,22 @@ class ServiceAlertsServiceImpl implements ServiceAlertsService {
 		saveDBServiceAlerts(serviceAlertRecord, lastModified);
 		return serviceAlertRecord;
 	}
+	
+	@Override
+	public synchronized ServiceAlertRecord copyServiceAlert(ServiceAlertRecord serviceAlertRecord) {
+		
+		if (_persister.needsSync()) this.loadServiceAlerts();
+		UUID uuid = UUID.randomUUID();
+		serviceAlertRecord.setServiceAlertId(uuid.toString());
+
+		long lastModified = SystemTime.currentTimeMillis();
+        serviceAlertRecord.setCreationTime(lastModified);
+        serviceAlertRecord.setCopy(Boolean.TRUE);
+		
+		updateReferences(serviceAlertRecord);
+		saveDBServiceAlerts(serviceAlertRecord, lastModified);
+		return serviceAlertRecord;
+	}	
 
 	@Override
 	public synchronized void removeServiceAlert(AgencyAndId serviceAlertId) {
@@ -434,18 +452,18 @@ class ServiceAlertsServiceImpl implements ServiceAlertsService {
 			ids.remove(id);
 			if (ids.isEmpty())
 				map.remove(existingEffect);
-		}
+			}
 
 		for (T newEffect : newEffects) {
 			if (existingEffects.contains(newEffect))
 				continue;
-      AgencyAndId id = ServiceAlertLibrary.agencyAndId(serviceAlert.getAgencyId(), serviceAlert.getServiceAlertId());
+      		AgencyAndId id = ServiceAlertLibrary.agencyAndId(serviceAlert.getAgencyId(), serviceAlert.getServiceAlertId());
 			Set<AgencyAndId> ids = map.get(newEffect);
 			if (ids == null) {
 				ids = new HashSet<AgencyAndId>();
 				map.put(newEffect, ids);
 			}
-			ids.add(id);
+				ids.add(id);
 		}
 	}
 
@@ -480,7 +498,7 @@ class ServiceAlertsServiceImpl implements ServiceAlertsService {
 		if (time == -1 || serviceAlert.getPublicationWindows().size() == 0)
 			return true;
 		for (ServiceAlertTimeRange publicationWindow : serviceAlert.getPublicationWindows()) {
-			if ((publicationWindow.getFromValue() == null || publicationWindow.getToValue() <= time)
+			if ((publicationWindow.getFromValue() == null || publicationWindow.getFromValue() <= time)
 					&& (publicationWindow.getToValue() == null || publicationWindow.getToValue() >= time)) {
 				return true;
 			}
@@ -551,7 +569,7 @@ class ServiceAlertsServiceImpl implements ServiceAlertsService {
 	 ****/
 
 	synchronized void loadServiceAlerts() {
-	  
+
 	  _cache.clear(); //we need to clear the cache in case records were deleted
 		List<ServiceAlertRecord> alerts = _persister.getAlerts();
 		_log.debug("Loaded " + alerts.size() + " service alerts from DB");
@@ -561,13 +579,13 @@ class ServiceAlertsServiceImpl implements ServiceAlertsService {
 
 		} catch (Exception ex) {
 			_log.error("error loading service alerts from DB ", ex);
-		}		
+		}
 	}
 
 	// this is admittedly slow performing, but it is only called on an update
 	// of a single service alert
 	private synchronized void saveDBServiceAlerts(ServiceAlertRecord alert, Long lastModified) {
-          if (lastModified == null) lastModified = System.currentTimeMillis();
+          if (lastModified == null) lastModified = SystemTime.currentTimeMillis();
           alert.setModifiedTime(lastModified); // we need to assume its changed, as we don't track the affects clause
           ServiceAlertRecord persistedServiceAlertRecord = _persister.getServiceAlertRecordByAlertId(alert.getAgencyId(), alert.getServiceAlertId());
           if(persistedServiceAlertRecord != null)
@@ -582,6 +600,6 @@ class ServiceAlertsServiceImpl implements ServiceAlertsService {
 	 */
 	private ServiceAlertRecord getServiceAlertRecordByAlertId(String agencyId, String serviceAlertId) {
 	  return _persister.getServiceAlertRecordByAlertId(agencyId, serviceAlertId);
-	}	
+	}
 
 }

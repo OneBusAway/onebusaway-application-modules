@@ -16,7 +16,6 @@
 package org.onebusaway.agency_metadata.service;
 
 import org.onebusaway.agency_metadata.model.AgencyMetadata;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,7 +38,8 @@ public class AgencyMetadataServiceImpl implements AgencyMetadataService {
 
   @Override
   public void createAgencyMetadata(String gtfsId, String name, String shortName, String legacyId, 
-      String gtfsFeedUrl, String gtfsRtFeedUrl, String boundingBox, String ntdId) {
+      String gtfsFeedUrl, String gtfsRtFeedUrl, String boundingBox, String ntdId,
+      String agencyMessage) {
 
     // Verify that boundingBox is a valid Well Known Text Polygon format for an agency bounding box.
     if (!isValidBoundingBox(boundingBox)) {
@@ -56,49 +56,70 @@ public class AgencyMetadataServiceImpl implements AgencyMetadataService {
     model.setGtfsRtFeedUrl(gtfsRtFeedUrl);
     model.setBoundingBox(boundingBox);
     model.setNtdId(ntdId);
+    model.setAgencyMessage(agencyMessage);
     
     _agencyMetadataDao.saveOrUpdate(model);
   }
 
   @Override
-  public void updateAgencyMetadata(long id, String gtfsId, String name, String shortName, String legacyId, 
-      String gtfsFeedUrl, String gtfsRtFeedUrl, String boundingBox, String ntdId) {
-	AgencyMetadata model = getAgencyMetadataForId(String.valueOf(id)).get(0);
-	if (gtfsId != null) {
-		model.setGtfsId(gtfsId);
-	}
-	if (name != null) {
-		model.setName(name);
-	}
-	if (shortName != null) {
-	    model.setShortName(shortName);
-	}
-	if (legacyId != null) {
-	    model.setLegacyId(legacyId);
-	}
-	if (gtfsFeedUrl != null) {
-	    model.setGtfsFeedUrl(gtfsFeedUrl);
-	}
-	if (gtfsRtFeedUrl != null) {
-	    model.setGtfsRtFeedUrl(gtfsRtFeedUrl);
-	}
-	// Verify that boundingBox is a valid Well Known Text Polygon format for an agency bounding box.
-	if (!isValidBoundingBox(boundingBox)) {
-	  boundingBox = null;
-	}
-	if (boundingBox != null) {
-	    model.setBoundingBox(boundingBox);
-	}
-	if (ntdId != null) {
-	    model.setNtdId(ntdId);
-	}
-    
+  public void createAgencyMetadata(AgencyMetadata model) {
+    model.setId(0L);      // Create a new record with generated id.
     _agencyMetadataDao.saveOrUpdate(model);
   }
-  
+
+  @Override
+  public void updateAgencyMetadata(long id, String gtfsId, String name, String shortName, String legacyId, 
+      String gtfsFeedUrl, String gtfsRtFeedUrl, String boundingBox, String ntdId,
+      String agencyMessage) {
+  	AgencyMetadata model = getAgencyMetadataForId(String.valueOf(id)).get(0);
+  	if (gtfsId != null) {
+  		model.setGtfsId(gtfsId);
+  	}
+  	if (name != null) {
+  		model.setName(name);
+  	}
+  	if (shortName != null) {
+  	    model.setShortName(shortName);
+  	}
+  	if (legacyId != null) {
+  	    model.setLegacyId(legacyId);
+  	}
+  	if (gtfsFeedUrl != null) {
+  	    model.setGtfsFeedUrl(gtfsFeedUrl);
+  	}
+  	if (gtfsRtFeedUrl != null) {
+  	    model.setGtfsRtFeedUrl(gtfsRtFeedUrl);
+  	}
+  	// Verify that boundingBox is a valid Well Known Text Polygon format for an agency bounding box.
+  	if (!isValidBoundingBox(boundingBox)) {
+  	  boundingBox = null;
+  	}
+  	if (boundingBox != null) {
+  	    model.setBoundingBox(boundingBox);
+  	}
+  	if (ntdId != null) {
+  	    model.setNtdId(ntdId);
+  	}
+  	if (agencyMessage != null) {
+  	    model.setAgencyMessage(agencyMessage);
+  	}
+
+    _agencyMetadataDao.saveOrUpdate(model);
+  }
+
+  @Override
+  public void updateAgencyMetadata(AgencyMetadata model) {
+    _agencyMetadataDao.saveOrUpdate(model);
+  }
+
   @Override
   public void delete(long id) {
     _agencyMetadataDao.delete(id);
+  }
+
+  @Override
+  public void removeAgencyMetadata(String agencyMetadataId) {
+    _agencyMetadataDao.removeAgencyMetadata(agencyMetadataId);
   }
 
   @Override
@@ -136,6 +157,16 @@ public class AgencyMetadataServiceImpl implements AgencyMetadataService {
     return _agencyMetadataDao.getAgencyMetadataForNtdId(ntdId);
   }
 
+  @Override
+  public String getAgencyMetadataMessage(String id) {
+    String message = "";
+    List<AgencyMetadata> agencyMetadataList =  _agencyMetadataDao.getAgencyMetadataForId(id);
+    if (agencyMetadataList != null && agencyMetadataList.size() > 0) {
+      message = agencyMetadataList.get(0).getAgencyMessage();
+    }
+    return message;
+  }
+
   /* Private functions */
   private boolean isValidBoundingBox(String wkt) { 
     _log.info("Validating: " + wkt);
@@ -149,5 +180,5 @@ public class AgencyMetadataServiceImpl implements AgencyMetadataService {
     _log.info("Validation of POLYGON succeeded");
     return true;
   }
-  
+
 }

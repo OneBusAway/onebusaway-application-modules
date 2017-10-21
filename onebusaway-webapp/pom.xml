@@ -3,7 +3,7 @@
   <parent>
     <groupId>org.onebusaway</groupId>
     <artifactId>onebusaway-application-modules</artifactId>
-    <version>1.1.16-SNAPSHOT</version>
+    <version>1.1.17-SNAPSHOT</version>
   </parent>
   <artifactId>onebusaway-webapp</artifactId>
   <packaging>war</packaging>
@@ -31,7 +31,6 @@
       <artifactId>onebusaway-presentation</artifactId>
       <version>${project.version}</version>
     </dependency>
-    
     <dependency>
       <groupId>org.onebusaway</groupId>
       <artifactId>onebusaway-util</artifactId>
@@ -157,11 +156,7 @@
       <artifactId>mockito-core</artifactId>
       <scope>test</scope>
     </dependency>
-    <dependency>
-      <groupId>net.java.dev.rome</groupId>
-      <artifactId>rome</artifactId>
-      <version>1.0.0</version>
-    </dependency>
+
   </dependencies>
 
   <build>

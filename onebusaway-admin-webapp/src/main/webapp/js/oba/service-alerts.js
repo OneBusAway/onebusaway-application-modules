@@ -1,26 +1,81 @@
-/**
- * Copyright (c) 2016 Cambridge Systematics, Inc.
+/*
+ * Copyright (C) 2016 Cambridge Systematics, Inc.
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *         http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 jQuery(function() {
 	// add another condition for the service alert
 	jQuery("#addAnotherCondition").click(onAddAnotherCondition);
-	
+
 	// delete the condition for this service alert
 	jQuery(".deleteCondition").click(onDeleteCondition);
+	
+	// hook up service alert links
+    for (var i = 0; i < 1000; i++) {
+    	var selector = "#tweetAlertLink" + i;
+
+    	if (jQuery(selector).length ) {
+            jQuery(selector).click(onTweetCondition);
+        } else {
+    		// first element not found signifies break
+    		break;
+		}
+    }
+    
+	// show service alerts template list
+	jQuery("#loadTemplate").click(showHideLoadTemplate);
+
+	// Check  if this is the "Edit Service Alert" page
+	if ($("#service-alert_submit").length > 0) {
+		// Only enable the Save button if an "owning agency" is selected.
+		if ($("#service-alert_agencyId option:selected").val() == "null") {
+			$("#service-alert_submit").attr("disabled", "disabled");
+		}
+		$("#service-alert_agencyId").change(function() {
+			if ($("#service-alert_agencyId option:selected").val() == "null") {
+				$("#service-alert_submit").attr("disabled", "disabled");
+			} else {
+				$("#service-alert_submit").removeAttr("disabled");
+			}
+		});
+	}
+	
+	jQuery("#publicationWindowStartDate").datepicker({ 
+		dateFormat: "yy-mm-dd",
+		onSelect: function(selectedDate) {
+			jQuery("#publicationWindowEndDate").datepicker("option", "minDate", selectedDate);
+		}
+	});
+	
+	jQuery("#publicationWindowEndDate").datepicker({ 
+		dateFormat: "yy-mm-dd",
+		onSelect: function(selectedDate) {
+			jQuery("#publicationWindowStartDate").datepicker("option", "maxDate", selectedDate);
+		}
+	});
+	
+	jQuery("#loadTemplateInput [name='template']").click(function(){
+		var selectedTemplateId = jQuery("#loadTemplateInput [name='template']").val();
+		loadTemplate(selectedTemplateId);
+	})
+	
+	jQuery("#loadTemplate").click(function(){
+		jQuery("#loadTemplateInput").toggle();
+	});
+	
 });
+
 
 function getAgencySelectOptions() {
 	var optionsList = "";
@@ -93,4 +148,50 @@ function onDeleteCondition() {
 			$(this).attr('name', nameAttr);
 		});
 	});
+}
+
+function showHideLoadTemplate(){
+	
+}
+
+function loadTemplate(id) {
+	if(id != "null"){
+		var urlArray = window.location.href.split('?');
+		var url = urlArray[0] + "?";
+		if(url.length > 2 && urlArray[1].includes("newServiceAlert=true")){
+			url += 'newServiceAlert=true&';
+		}	
+		url += 'alertId=' + id + '&';
+		url += 'fromFavorite=true'
+			
+		window.location.href = url;
+	}
+}
+function onTweetCondition(handler) {
+    var aId = handler.target.id;
+    var id = aId.replace("tweetA", "");
+    var divSelector = "#tweetDiv" + id;
+    var alertDiv = jQuery(divSelector);
+    var alertId = alertDiv.html();
+    sendAndShowTweet(alertId);
+}
+function sendAndShowTweet(alertId) {
+    jQuery.ajax({
+        url: "service-alert-edit!tweetAlert.action",
+        data: {
+            "alertId": alertId
+        },
+        type: "GET",
+        async: false,
+        success: function (data) {
+            jQuery("#dialog").show();
+            jQuery("#dialog").html(data);
+            jQuery("#dialog").dialog();
+        },
+        error: function (data) {
+            jQuery("#dialog").show();
+            jQuery("#dialog").html(data);
+            jQuery("#dialog").dialog();
+        }
+    })
 }

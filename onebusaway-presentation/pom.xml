@@ -1,13 +1,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-
-    <modelVersion>4.0.0</modelVersion>
-    <parent>
-        <groupId>org.onebusaway</groupId>
-        <artifactId>onebusaway-application-modules</artifactId>
-        <version>1.1.16-SNAPSHOT</version>
-    </parent>
-    <artifactId>onebusaway-presentation</artifactId>
-    <packaging>jar</packaging>
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.onebusaway</groupId>
+		<artifactId>onebusaway-application-modules</artifactId>
+		<version>1.1.17-SNAPSHOT</version>
+	</parent>
+	<artifactId>onebusaway-presentation</artifactId>
+	<packaging>jar</packaging>
 
     <name>onebusaway-presentation</name>
 
@@ -101,6 +100,12 @@
             <groupId>net.sourceforge.cssparser</groupId>
             <artifactId>cssparser</artifactId>
             <version>0.9.5</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.rometools</groupId>
+            <artifactId>rome</artifactId>
+            <version>1.7.0</version>
         </dependency>
 
         <dependency>

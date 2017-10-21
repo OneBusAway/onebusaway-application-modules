@@ -38,6 +38,7 @@ import org.onebusaway.transit_data.model.realtime.CurrentVehicleEstimateQueryBea
 import org.onebusaway.transit_data.model.realtime.VehicleLocationRecordBean;
 import org.onebusaway.transit_data.model.realtime.VehicleLocationRecordQueryBean;
 import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
+import org.onebusaway.transit_data.model.service_alerts.ServiceAlertRecordBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationQueryBean;
 import org.onebusaway.transit_data.model.trips.*;
 import org.onebusaway.transit_data.services.TransitDataService;
@@ -122,6 +123,9 @@ public class TransitDataServiceTemplateImpl implements TransitDataServiceTemplat
   
   @Autowired
   private ScheduleHelperService _scheduleHelperService;
+
+  @Autowired
+  private ConsolidatedStopsService _consolidatedStopsService;
   
 
   /****
@@ -452,6 +456,11 @@ public class TransitDataServiceTemplateImpl implements TransitDataServiceTemplat
   public void updateServiceAlert(ServiceAlertBean situation) {
     _serviceAlertsBeanService.updateServiceAlert(situation);
   }
+  
+  public ServiceAlertBean copyServiceAlert(String agencyId,
+	      ServiceAlertBean situation) {
+    return _serviceAlertsBeanService.copyServiceAlert(agencyId, situation);
+  }
 
   //@Override
   public ServiceAlertBean getServiceAlertForId(String situationId) {
@@ -473,6 +482,14 @@ public class TransitDataServiceTemplateImpl implements TransitDataServiceTemplat
     
     List<ServiceAlertBean> situations = _serviceAlertsBeanService.getServiceAlertsForFederatedAgencyId(agencyId);
     return new ListBean<ServiceAlertBean>(situations, false);
+  }
+  
+  //@Override
+  public ListBean<ServiceAlertRecordBean> getAllServiceAlertRecordsForAgencyId(
+      String agencyId) {
+    
+    List<ServiceAlertRecordBean> situations = _serviceAlertsBeanService.getServiceAlertRecordsForFederatedAgencyId(agencyId);
+    return new ListBean<ServiceAlertRecordBean>(situations, false);
   }
 
   //@Override
@@ -597,17 +614,17 @@ public class TransitDataServiceTemplateImpl implements TransitDataServiceTemplat
   }
 
   //@Override
-  public Boolean routeHasUpcomingScheduledService(String agencyId, long time, String routeId,
+  public Boolean routeHasUpcomingScheduledService(String routeAgencyId, long time, String routeId,
 		String directionId) {
     
-	  return _scheduleHelperService.routeHasUpcomingScheduledService(agencyId, time, routeId, directionId);
+	  return _scheduleHelperService.routeHasUpcomingScheduledService(routeAgencyId, time, routeId, directionId);
   }
 
   //@Override
-  public Boolean stopHasUpcomingScheduledService(String agencyId, long time, String stopId,
+  public Boolean stopHasUpcomingScheduledService(String stopAgencyId, long time, String stopId,
 		String routeId, String directionId) {
     
-	  return _scheduleHelperService.stopHasUpcomingScheduledService(agencyId, time, stopId, routeId, directionId);
+	  return _scheduleHelperService.stopHasUpcomingScheduledService(stopAgencyId, time, stopId, routeId, directionId);
   }
 
   //@Override
@@ -615,8 +632,8 @@ public class TransitDataServiceTemplateImpl implements TransitDataServiceTemplat
 	  return _scheduleHelperService.getSearchSuggestions(agencyId, input);
   }
   
-  public Boolean stopHasRevenueServiceOnRoute(String agencyId, String stopId, String routeId, String directionId) {
-      return _scheduleHelperService.stopHasRevenueServiceOnRoute(agencyId, stopId, routeId, directionId);
+  public Boolean stopHasRevenueServiceOnRoute(String stopAgencyId, String stopId, String routeId, String directionId) {
+      return _scheduleHelperService.stopHasRevenueServiceOnRoute(stopAgencyId, stopId, routeId, directionId);
   }
   
   public Boolean stopHasRevenueService(String agencyId, String stopId) {
@@ -634,7 +651,7 @@ public class TransitDataServiceTemplateImpl implements TransitDataServiceTemplat
     bounds.addPoint(lat - latSpan, lon - lonSpan);
     bounds.addPoint(lat + latSpan, lon + lonSpan);
     query.setBounds(bounds);
-    
+    query.setMaxCount(Integer.MAX_VALUE);
     return _scheduleHelperService.filterRevenueService(agency.getAgency(), getStops(query));
   }
 
@@ -649,6 +666,13 @@ public class TransitDataServiceTemplateImpl implements TransitDataServiceTemplat
   public BundleMetadata getBundleMetadata() {
     // TODO Auto-generated method stub
     return null;
+  }
+
+  public ListBean<ConsolidatedStopMapBean> getAllConsolidatedStops() {
+    ListBean<ConsolidatedStopMapBean> ret = new ListBean<ConsolidatedStopMapBean>();
+    Collection<ConsolidatedStopMapBean> beans = _consolidatedStopsService.getAllConsolidatedStops();
+    ret.setList(new ArrayList<ConsolidatedStopMapBean>(beans));
+    return ret;
   }
 
   /****

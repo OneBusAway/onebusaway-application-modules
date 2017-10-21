@@ -19,6 +19,7 @@ package org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime;
 
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -28,9 +29,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.lang.StringUtils;
 import org.onebusaway.collections.MappingLibrary;
 import org.onebusaway.collections.Min;
+import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
 import org.onebusaway.gtfs.serialization.mappings.InvalidStopTimeException;
@@ -39,13 +43,16 @@ import org.onebusaway.realtime.api.EVehiclePhase;
 import org.onebusaway.realtime.api.TimepointPredictionRecord;
 import org.onebusaway.realtime.api.VehicleLocationRecord;
 import org.onebusaway.transit_data_federation.services.blocks.BlockCalendarService;
+import org.onebusaway.transit_data_federation.services.blocks.BlockGeospatialService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
+import org.onebusaway.transit_data_federation.services.blocks.ScheduledBlockLocation;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
+import org.onebusaway.util.SystemTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,21 +69,33 @@ import com.google.transit.realtime.GtfsRealtime.VehiclePosition;
 import com.google.transit.realtime.GtfsRealtimeOneBusAway;
 import com.google.transit.realtime.GtfsRealtimeOneBusAway.OneBusAwayTripUpdate;
 
-class GtfsRealtimeTripLibrary {
+public class GtfsRealtimeTripLibrary {
 
   private static final Logger _log = LoggerFactory.getLogger(GtfsRealtimeTripLibrary.class);
 
   private GtfsRealtimeEntitySource _entitySource;
 
   private BlockCalendarService _blockCalendarService;
-
+   
+  private BlockGeospatialService _blockGeospatialService;
+  
   /**
    * This is primarily here to assist with unit testing.
    */
   private long _currentTime = 0;
 
+  private boolean _validateCurrentTime = true;
+  public void setValidateCurrentTime(boolean validate) {
+    _validateCurrentTime = validate;
+  }
+  private boolean validateCurrentTime() {
+    return _validateCurrentTime;
+  }
+
   private StopModificationStrategy _stopModificationStrategy = null;
 
+  private boolean _scheduleAdherenceFromLocation = false;
+  
   public void setEntitySource(GtfsRealtimeEntitySource entitySource) {
     _entitySource = entitySource;
   }
@@ -90,12 +109,34 @@ class GtfsRealtimeTripLibrary {
   }
 
   public void setCurrentTime(long currentTime) {
+    setCurrentTime(currentTime, 0);
+  }
+  
+  public void setCurrentTime(long currentTime, int originOffsetHours) {
+    if (originOffsetHours != 0) {
+      Calendar c = Calendar.getInstance();
+      c.setTime(new Date(currentTime));
+      c.roll(Calendar.HOUR, originOffsetHours);
+      _currentTime = c.getTimeInMillis();
+      _log.info("currentTime set to " + new Date(_currentTime) + " from offset " + originOffsetHours);
+    } else {
     _currentTime = currentTime;
+    }
+    
   }
   
   public void setStopModificationStrategy(StopModificationStrategy strategy) {
     _stopModificationStrategy = strategy;
   }
+  
+  public void setScheduleAdherenceFromLocation(boolean scheduleAdherenceFromLocation) {
+    _scheduleAdherenceFromLocation = scheduleAdherenceFromLocation;
+  }
+  
+  public void setBlockGeospatialService(BlockGeospatialService blockGeospatialService) {
+    _blockGeospatialService = blockGeospatialService;
+  }
+ 
 
   /**
    * Trip updates describe a trip which is undertaken by a vehicle (which is
@@ -122,7 +163,8 @@ class GtfsRealtimeTripLibrary {
       FeedMessage tripUpdateMessage, FeedMessage vehiclePositionsMessage) {
 
     List<CombinedTripUpdatesAndVehiclePosition> updates = new ArrayList<CombinedTripUpdatesAndVehiclePosition>();
-    Map<String, TripUpdate> tripUpdatesByVehicleId = new HashMap<String, TripUpdate>();
+    Map<String, TripUpdate> bestTripByVehicleId = new HashMap<String, TripUpdate>();
+    ListMultimap<String, TripUpdate> tripUpdatesByVehicleId = ArrayListMultimap.create();
     Map<String, VehiclePosition> vehiclePositionsByVehicleId = new HashMap<String, VehiclePosition>();
 
     ListMultimap<BlockDescriptor, TripUpdate> anonymousTripUpdatesByBlock = ArrayListMultimap.<BlockDescriptor, TripUpdate> create();
@@ -137,19 +179,21 @@ class GtfsRealtimeTripLibrary {
 
       TripUpdate tu = fe.getTripUpdate();
 
-      if (tu.hasVehicle() && tu.getVehicle().hasId()) {
+      if (tu.hasVehicle() && tu.getVehicle().hasId() && StringUtils.isNotBlank(tu.getVehicle().getId())) {
         // Trip update has a vehicle ID - index by vehicle ID
         String vehicleId = tu.getVehicle().getId();
 
-        if (!tripUpdatesByVehicleId.containsKey(vehicleId)) {
-          tripUpdatesByVehicleId.put(vehicleId, tu);
+        tripUpdatesByVehicleId.put(vehicleId, tu);
+
+        if (!bestTripByVehicleId.containsKey(vehicleId)) {
+          bestTripByVehicleId.put(vehicleId, tu);
         } else {
           // upcoming merge will fix this
           _log.debug("Multiple TripUpdates for vehicle {}; taking best.",
               vehicleId);
 
-          if (tripMoreAppropriate(tu, tripUpdatesByVehicleId.get(vehicleId), vehicleId)) {
-            tripUpdatesByVehicleId.put(vehicleId, tu);
+          if (tripMoreAppropriate(tu, bestTripByVehicleId.get(vehicleId), vehicleId)) {
+            bestTripByVehicleId.put(vehicleId, tu);
           }
 
         }
@@ -159,7 +203,8 @@ class GtfsRealtimeTripLibrary {
          * (includes start date and time).
          */
         TripDescriptor td = tu.getTrip();
-        BlockDescriptor bd = getTripDescriptorAsBlockDescriptor(result, td);
+        long time = tu.hasTimestamp() ? tu.getTimestamp() * 1000 : currentTime();
+        BlockDescriptor bd = getTripDescriptorAsBlockDescriptor(result, td, time);
 
         if (bd == null) {
           continue;
@@ -210,7 +255,8 @@ class GtfsRealtimeTripLibrary {
          */
 
         TripDescriptor td = vp.getTrip();
-        BlockDescriptor bd = getTripDescriptorAsBlockDescriptor(result, td);
+        long time = vp.hasTimestamp() ? vp.getTimestamp() * 1000 : currentTime();
+        BlockDescriptor bd = getTripDescriptorAsBlockDescriptor(result, td, time);
 
         if (bd == null) {
           continue;
@@ -245,13 +291,17 @@ class GtfsRealtimeTripLibrary {
     }
 
     // Map updates by vehicle ID
-    for (Map.Entry<String, TripUpdate> e : tripUpdatesByVehicleId.entrySet()) {
+    for (Map.Entry<String, Collection<TripUpdate>> e : tripUpdatesByVehicleId.asMap().entrySet()) {
       CombinedTripUpdatesAndVehiclePosition update = new CombinedTripUpdatesAndVehiclePosition();
 
       String vehicleId = e.getKey();
-      TripUpdate tu = e.getValue();
-      update.block = getTripDescriptorAsBlockDescriptor(result, tu.getTrip());
-      update.tripUpdates = Collections.singletonList(tu);
+      Collection<TripUpdate> tripUpdates = e.getValue();
+      TripUpdate tu = bestTripByVehicleId.get(vehicleId);
+
+      long time = tu.hasTimestamp() ? tu.getTimestamp() * 1000 : currentTime();
+      update.block = getTripDescriptorAsBlockDescriptor(result, tu.getTrip(), time);
+      update.tripUpdates = new ArrayList<TripUpdate>(tripUpdates);
+      update.bestTrip = tu.getTrip().getTripId();
 
       if (vehiclePositionsByVehicleId.containsKey(vehicleId)) {
         update.vehiclePosition = vehiclePositionsByVehicleId.get(vehicleId);
@@ -331,6 +381,11 @@ class GtfsRealtimeTripLibrary {
         if (delta < closest) {
           closest = delta;
         }
+      } else if (stu.hasDeparture()) {
+        long delta = Math.abs(stu.getDeparture().getTime() * 1000 - getCurrentTime());
+        if (delta < closest) {
+          closest = delta;
+        }
       }
     }
     return closest;
@@ -359,11 +414,12 @@ class GtfsRealtimeTripLibrary {
     if (update.block == null) return null;
     String vehicleId = update.block.getVehicleId();
     record.setBlockId(blockDescriptor.getBlockInstance().getBlock().getBlock().getId());
+    record.setStatus(blockDescriptor.getScheduleRelationship().toString());
 
-    applyTripUpdatesToRecord(result, blockDescriptor, update.tripUpdates, record, vehicleId);
+    applyTripUpdatesToRecord(result, blockDescriptor, update.tripUpdates, record, vehicleId, update.bestTrip);
 
     if (update.vehiclePosition != null) {
-      applyVehiclePositionToRecord(result, update.vehiclePosition, record);
+      applyVehiclePositionToRecord(result, blockDescriptor, update.vehiclePosition, record);
     }
 
     /**
@@ -412,7 +468,7 @@ class GtfsRealtimeTripLibrary {
   }
 
   private BlockDescriptor getTripDescriptorAsBlockDescriptor(MonitoredResult result,
-      TripDescriptor trip) {
+      TripDescriptor trip, long currentTime) {
     if (!trip.hasTripId()) {
       return null;
     }
@@ -449,16 +505,15 @@ class GtfsRealtimeTripLibrary {
     		return null;
     	}
     } else {
-    	long t = currentTime();
-    	long timeFrom = t - 30 * 60 * 1000;
-    	long timeTo = t + 30 * 60 * 1000;
+    	long timeFrom = currentTime - 30 * 60 * 1000;
+    	long timeTo = currentTime + 30 * 60 * 1000;
     	
     	List<BlockInstance> instances = _blockCalendarService.getActiveBlocks(
     			block.getId(), timeFrom, timeTo);
     	
     	if (instances.isEmpty()) {
     		instances = _blockCalendarService.getClosestActiveBlocks(block.getId(), 
-    				t);
+    				currentTime);
     	}
     	
     	if (instances.isEmpty()) {
@@ -476,6 +531,9 @@ class GtfsRealtimeTripLibrary {
     BlockDescriptor blockDescriptor = new BlockDescriptor();
     blockDescriptor.setBlockInstance(instance);
     blockDescriptor.setStartDate(serviceDate);
+    if (trip.hasScheduleRelationship()) {
+      blockDescriptor.setScheduleRelationshipValue(trip.getScheduleRelationship().toString());
+    }
     int tripStartTime = 0;
     int blockStartTime = 0;
     if (trip.hasStartTime() && !"0".equals(trip.getStartTime())) {
@@ -494,7 +552,7 @@ class GtfsRealtimeTripLibrary {
 
   
   private void applyTripUpdatesToRecord(MonitoredResult result, BlockDescriptor blockDescriptor,
-      List<TripUpdate> tripUpdates, VehicleLocationRecord record, String vehicleId) {
+      List<TripUpdate> tripUpdates, VehicleLocationRecord record, String vehicleId, String bestTripId) {
 
     BlockInstance instance = blockDescriptor.getBlockInstance();
 
@@ -514,13 +572,19 @@ class GtfsRealtimeTripLibrary {
       AgencyAndId tripId = trip.getId();
       List<TripUpdate> updatesForTrip = tripUpdatesByTripId.get(tripId.getId());
       
+      boolean tripUpdateHasDelay = false;
+
+      // onBestTrip is only relevant if bestTripId is set, which indicates that the TripUpdates
+      // came from the vehicleId map (as opposed to block index).
+      boolean onBestTrip = bestTripId == null || tripId.getId().equals(bestTripId);
+
       if (updatesForTrip != null) {
         for (TripUpdate tripUpdate : updatesForTrip) {
           /**
            * TODO: delete this code once all upstream systems have been
            * migrated the new "delay" and "timestamp" fields.
            */
-          if (tripUpdate.hasExtension(GtfsRealtimeOneBusAway.obaTripUpdate)) {
+          if (tripUpdate.hasExtension(GtfsRealtimeOneBusAway.obaTripUpdate) && onBestTrip) {
             OneBusAwayTripUpdate obaTripUpdate = tripUpdate.getExtension(GtfsRealtimeOneBusAway.obaTripUpdate);
             if (obaTripUpdate.hasDelay()) {
               /**
@@ -531,14 +595,15 @@ class GtfsRealtimeTripLibrary {
               best.isInPast = false;
               best.scheduleDeviation = delay;
               best.tripId = tripId;
+              tripUpdateHasDelay = true;
             }
 
-            if (obaTripUpdate.hasTimestamp()) {
+            if (obaTripUpdate.hasTimestamp() && onBestTrip) {
               best.timestamp = obaTripUpdate.getTimestamp() * 1000;
             }
           }
 
-          if (tripUpdate.hasDelay()) {
+          if (tripUpdate.hasDelay() && onBestTrip) {
             /**
              * TODO: Improved logic around picking the "best" schedule deviation
              */
@@ -546,8 +611,9 @@ class GtfsRealtimeTripLibrary {
             best.isInPast = false;
             best.scheduleDeviation = tripUpdate.getDelay();
             best.tripId = tripId;
+            tripUpdateHasDelay = true;
           }
-          if (tripUpdate.hasTimestamp()) {
+          if (tripUpdate.hasTimestamp() && onBestTrip) {
             best.timestamp = tripUpdate.getTimestamp() * 1000;
           }
 
@@ -573,16 +639,20 @@ class GtfsRealtimeTripLibrary {
                 stopTimeUpdate, instance.getServiceDate());
 
             if (currentArrivalTime >= 0) {
-              updateBestScheduleDeviation(currentTime,
-                  stopTime.getArrivalTime(), currentArrivalTime, best, tripId, vehicleId);
+              if (onBestTrip) {
+                updateBestScheduleDeviation(currentTime,
+                        stopTime.getArrivalTime(), currentArrivalTime, best, tripId, vehicleId);
+              }
 
               long timepointPredictedTime = instance.getServiceDate() + (currentArrivalTime * 1000L);
               tpr.setTimepointPredictedArrivalTime(timepointPredictedTime);
             } 
 
             if (currentDepartureTime >= 0) {
-              updateBestScheduleDeviation(currentTime,
-                  stopTime.getDepartureTime(), currentDepartureTime, best, tripId, vehicleId);
+              if (onBestTrip) {
+                updateBestScheduleDeviation(currentTime,
+                        stopTime.getDepartureTime(), currentDepartureTime, best, tripId, vehicleId);
+              }
 
               long timepointPredictedTime = instance.getServiceDate() + (currentDepartureTime * 1000L);
               tpr.setTimepointPredictedDepartureTime(timepointPredictedTime);
@@ -592,6 +662,36 @@ class GtfsRealtimeTripLibrary {
                 tpr.getTimepointPredictedDepartureTime() != -1) {
               timepointPredictions.add(tpr);
             }
+          }
+        }
+      }
+      
+      // If we have a TripUpdate delay and timepoint predictions, interpolate
+      // timepoint predictions for close, unserved stops. See GtfsRealtimeTripLibraryTest
+      // for full explanation
+      // tripUpdateHasDelay = true => best.scheduleDeviation is TripUpdate delay
+      if (timepointPredictions.size() > 0 && tripUpdateHasDelay) {
+        Set<AgencyAndId> records = new HashSet<AgencyAndId>();
+        for (TimepointPredictionRecord tpr : timepointPredictions) {
+          records.add(tpr.getTimepointId());
+        }
+        long tprStartTime = getEarliestTimeInRecords(timepointPredictions);
+        for (StopTimeEntry stopTime : trip.getStopTimes()) {
+          if (records.contains(stopTime.getStop().getId())) {
+            continue;
+          }
+          long predictionOffset = instance.getServiceDate() + (best.scheduleDeviation * 1000L);
+          long predictedDepartureTime = (stopTime.getDepartureTime() * 1000L) + predictionOffset;
+          long predictedArrivalTime = (stopTime.getArrivalTime() * 1000L) + predictionOffset;
+          long time = best.timestamp != 0 ? best.timestamp : currentTime();
+          if (predictedDepartureTime > time && predictedDepartureTime < tprStartTime) {
+            TimepointPredictionRecord tpr = new TimepointPredictionRecord();
+            tpr.setTimepointId(stopTime.getStop().getId());
+            tpr.setTripId(stopTime.getTrip().getId());
+            tpr.setStopSequence(stopTime.getGtfsSequence());
+            tpr.setTimepointPredictedArrivalTime(predictedArrivalTime);
+            tpr.setTimepointPredictedDepartureTime(predictedDepartureTime);
+            timepointPredictions.add(tpr);
           }
         }
       }
@@ -706,9 +806,10 @@ class GtfsRealtimeTripLibrary {
         return (int) ((t - serviceDate) / 1000 - departure.getDelay());
       }
     }
-    throw new IllegalStateException(
-        "expected at least an arrival or departure time or delay for update: "
+    // instead of illegal state exception we return -1 to not corrupt the read
+    _log.debug("expected at least an arrival or departure time or delay for update: "
             + stopTimeUpdate);
+    return -1;
   }
 
   private int computeArrivalTime(StopTimeEntry stopTime,
@@ -720,8 +821,8 @@ class GtfsRealtimeTripLibrary {
       return stopTime.getArrivalTime() + arrival.getDelay();
     if (arrival.hasTime())
       return (int) (arrival.getTime() - serviceDate / 1000);
-    throw new IllegalStateException(
-        "expected arrival delay or time for stopTimeUpdate " + stopTimeUpdate);
+    // instead of illegal state exception we return -1 to not corrupt the read
+    return -1;
   }
 
   private int computeDepartureTime(StopTimeEntry stopTime,
@@ -733,8 +834,9 @@ class GtfsRealtimeTripLibrary {
       return stopTime.getDepartureTime() + departure.getDelay();
     if (departure.hasTime())
       return (int) (departure.getTime() - serviceDate / 1000);
-    throw new IllegalStateException(
-        "expected departure delay or time for stopTimeUpdate " + stopTimeUpdate);
+    // instead of throwing an exception here, simply return -1
+    // so as to not stop the rest of the processing
+    return -1;
   }
 
   private void updateBestScheduleDeviation(int currentTime,
@@ -753,23 +855,55 @@ class GtfsRealtimeTripLibrary {
   }
 
   private void applyVehiclePositionToRecord(MonitoredResult result,
+      BlockDescriptor blockDescriptor,
       VehiclePosition vehiclePosition,
       VehicleLocationRecord record) {
     Position position = vehiclePosition.getPosition();
     if (vehiclePosition.hasTimestamp()) {
-      record.setTimeOfLocationUpdate(vehiclePosition.getTimestamp());
+      record.setTimeOfLocationUpdate(TimeUnit.SECONDS.toMillis(vehiclePosition.getTimestamp())); //vehicle timestamp is in seconds
     }
     record.setCurrentLocationLat(position.getLatitude());
     record.setCurrentLocationLon(position.getLongitude());
     if (result != null) {
       result.addLatLon(position.getLatitude(), position.getLongitude());
     }
+    if (_scheduleAdherenceFromLocation) {
+      CoordinatePoint location = new CoordinatePoint(position.getLatitude(), position.getLongitude());
+      double totalDistance = blockDescriptor.getBlockInstance().getBlock().getTotalBlockDistance();
+      long timestamp = vehiclePosition.hasTimestamp() ? record.getTimeOfLocationUpdate() : record.getTimeOfRecord();
+      ScheduledBlockLocation loc = _blockGeospatialService.getBestScheduledBlockLocationForLocation(
+          blockDescriptor.getBlockInstance(), location, timestamp, 0, totalDistance);
+      
+      long serviceDateTime = record.getServiceDate();
+      long effectiveScheduleTime = loc.getScheduledTime() + (serviceDateTime/1000);
+      double deviation =  timestamp/1000 - effectiveScheduleTime;
+      record.setScheduleDeviation(deviation);
+    }
+  }
+  
+  private static long getEarliestTimeInRecords(Collection<TimepointPredictionRecord> records) {
+    long min = Long.MAX_VALUE;
+    for (TimepointPredictionRecord tpr : records) {
+      if (tpr.getTimepointPredictedArrivalTime() != -1) {
+        min = Math.min(min, tpr.getTimepointPredictedArrivalTime());
+      }
+      else if (tpr.getTimepointPredictedDepartureTime() != -1) {
+        min = Math.min(min, tpr.getTimepointPredictedDepartureTime());
+      }
+    }
+    return min;
   }
 
   private long currentTime() {
-    if (_currentTime != 0)
+    if (_currentTime != 0) {
+      // if the feed clock is off by more than an hour we most likely have a timezone issue
+      if (validateCurrentTime() && Math.abs(_currentTime - SystemTime.currentTimeMillis()) > 60 * 60 * 1000) {
+        _log.error("timestamp invalid at " + new Date(_currentTime) + ", overriding with system time");
+        _currentTime = SystemTime.currentTimeMillis();
+      }
       return _currentTime;
-    return System.currentTimeMillis();
+    }
+    return SystemTime.currentTimeMillis();
   }
 
   private static class BestScheduleDeviation {

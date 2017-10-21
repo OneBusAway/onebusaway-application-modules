@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2011 Metropolitan Transportation Authority
+    Copyright (C) 2011 Metropolitan Transportation Authority
 
-    Licensed under the Apache License, Version 2.0 (the "License"); you may not
-    use this file except in compliance with the License. You may obtain a copy of
-    the License at
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+            http://www.apache.org/licenses/LICENSE-2.0
 
     Unless required by applicable law or agreed to in writing, software
-    distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
-    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
-    License for the specific language governing permissions and limitations under
-    the License.
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
 
 -->
 <html xmlns:jsp="http://java.sun.com/JSP/Page"
@@ -48,9 +48,10 @@
 &lt;![endif]--&gt;
 </jsp:text>
 
-<s:url var="url" value="http://maps.googleapis.com/maps/api/js">				
+<s:url var="url" value="https://maps.googleapis.com/maps/api/js">				
 	<s:param name="v">3</s:param>
 	<s:param name="client"><s:property value="googleMapsClientId" /></s:param>
+	<s:param name="channel"><s:property value="googleMapsChannelId" /></s:param>
 	<s:param name="sensor">false</s:param>
 </s:url>
 <script src="${url}" type="text/javascript"><!-- //prevent jspx minimization --></script>
@@ -120,7 +121,7 @@
 </s:url>
 <script type="text/javascript" src="${url}"><!-- //prevent jspx minimization --></script>
 
-<script type="text/javascript" src="http://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"><!-- jspx --></script>
+<script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"><!-- jspx --></script>
 
 </head>
 <body>
@@ -183,12 +184,12 @@
 			<!-- Include the welcome div with example searches -->
 			<c:import url="includes/welcome.jspx" />
 		   
-			<s:url var="url" namespace="/" action="routes"/>
+			<s:url var="url" namespace="/routes" action="index"/>
 			<div id="available-routes"><a href="${url}">Click here</a> for a list of available routes.</div>
 		   
 			<div id="cant-find">
 				<h2>Can't find your bus route?</h2>
-				<s:url var="url" namespace="/" action="routes" />
+				<s:url var="url" namespace="/routes" action="index" />
 				<p><s:property value="getText('main.cantfindroute.text')" /> <a href="${url}">Click here</a> to see which routes are currently available.</p>
 			</div>
 			

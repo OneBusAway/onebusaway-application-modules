@@ -1,7 +1,3 @@
-package org.onebusaway.admin.service.bundle.task.model;
-
-import java.util.Date;
-
 /**
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
  * Copyright (C) 2011 Google, Inc.
@@ -18,23 +14,47 @@ import java.util.Date;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.onebusaway.admin.service.bundle.task.model;
+
+import java.util.Date;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
+import org.hibernate.annotations.Index;
+
+@Entity
+@Table(name="gtfs_bundle_info")
+@org.hibernate.annotations.Entity(mutable = true)
 
 public final class GtfsBundleInfo  {
 
   private static final long serialVersionUID = 1L;
+  private static final int NAME_LEN = 255;
 
-  private String bundleId;
-
+  @Id @GeneratedValue
+  @Column(nullable = false, name = "gid")
   private Integer id;
 
+  @Column(nullable = true, name = "bundleId", length = NAME_LEN)
+  private String bundleId;
+
+  @Column(nullable = true, name = "name", length = NAME_LEN)
   private String name;
   
+  @Column(nullable = true, name = "directory", length = NAME_LEN)
   private String directory;
   
+  @Column(nullable = true, name = "startDate")
   private Date startDate;
   
+  @Column(nullable = true, name = "endDate")
   private Date endDate;
 
+  @Column(nullable = true, name = "timestamp")
   private Date timestamp;
 
   public GtfsBundleInfo() {

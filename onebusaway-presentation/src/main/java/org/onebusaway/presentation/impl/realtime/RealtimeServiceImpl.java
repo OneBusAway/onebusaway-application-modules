@@ -45,6 +45,7 @@ import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.siri.SiriExtensionWrapper;
 import org.onebusaway.transit_data_federation.siri.SiriJsonSerializer;
 import org.onebusaway.transit_data_federation.siri.SiriXmlSerializer;
+import org.onebusaway.util.SystemTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -89,7 +90,7 @@ public class RealtimeServiceImpl implements RealtimeService {
     if(_now != null)
       return _now;
     else
-      return System.currentTimeMillis();
+      return SystemTime.currentTimeMillis();
   }
 
   @Autowired
@@ -235,16 +236,30 @@ public class RealtimeServiceImpl implements RealtimeService {
       TripBean tripBeanForAd = adBean.getTrip();
       final RouteBean routeBean = tripBeanForAd.getRoute();
       
-      if(statusBeanForCurrentTrip == null)
+      if(statusBeanForCurrentTrip == null) {
+        _log.debug("status drop");
     	  continue;
+      }
 
-      if(!_presentationService.include(statusBeanForCurrentTrip) || !_presentationService.include(adBean, statusBeanForCurrentTrip))
+      if(!_presentationService.include(statusBeanForCurrentTrip) || !_presentationService.include(adBean, statusBeanForCurrentTrip)) {
+          _log.debug("presentation drop for vehicle=" + statusBeanForCurrentTrip.getVehicleId());
           continue;
+      }
       
       if(!_transitDataService.stopHasRevenueServiceOnRoute((routeBean.getAgency()!=null?routeBean.getAgency().getId():null), 
-  	    	  stopId, routeBean.getId(), adBean.getTrip().getDirectionId()))
+  	    	  stopId, routeBean.getId(), adBean.getTrip().getDirectionId())) {
+        _log.debug("non reveunue drop");
     	  continue;
+      }
       
+      // Filter out if the vehicle has realtime information and is ahead of current stop
+      if (statusBeanForCurrentTrip.isPredicted() && !(adBean.hasPredictedArrivalTime() || adBean.hasPredictedDepartureTime())) {
+        _log.debug("no realtime drop");
+        continue;
+      }
+      if (statusBeanForCurrentTrip.getVehicleId() != null) {
+        _log.debug("valid vehicle " + statusBeanForCurrentTrip.getVehicleId());
+      }
       MonitoredStopVisitStructure stopVisit = new MonitoredStopVisitStructure();
      
       // Check for Realtime Data
@@ -311,10 +326,12 @@ public class RealtimeServiceImpl implements RealtimeService {
 		  if(routeId != null && !tripDetails.getTrip().getRoute().getId().equals(routeId))
 			  continue;
 
-		  // filtered out by user
-		  if(directionId != null && tripDetails.getTrip().getDirectionId() != null && !tripDetails.getTrip().getDirectionId().equals(directionId))
-			  continue;
-
+		  // filtered out by direction
+		  if (directionId != null && tripDetails.getTrip().getDirectionId() != null) {
+		    if( !tripDetails.getTrip().getDirectionId().equals(directionId)) {
+		      continue;
+		    }
+		  }
 		  return true;
 	  } 
 

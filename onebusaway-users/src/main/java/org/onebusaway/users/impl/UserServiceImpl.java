@@ -38,7 +38,7 @@ import org.onebusaway.users.model.UserIndex;
 import org.onebusaway.users.model.UserIndexKey;
 import org.onebusaway.users.model.UserPropertiesV1;
 import org.onebusaway.users.model.UserRole;
-import org.onebusaway.users.model.properties.UserPropertiesV3;
+import org.onebusaway.users.model.properties.UserPropertiesV4;
 import org.onebusaway.users.services.StandardAuthoritiesService;
 import org.onebusaway.users.services.UserDao;
 import org.onebusaway.users.services.UserIndexTypes;
@@ -50,6 +50,7 @@ import org.onebusaway.users.services.internal.UserIndexRegistrationService;
 import org.onebusaway.users.services.internal.UserRegistration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.encoding.PasswordEncoder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -246,6 +247,16 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
+  public Integer getApiKeyCount(){
+    return _userDao.getUserKeyCount(UserIndexTypes.API_KEY);
+  }
+
+  @Override
+  public List<User> getApiKeys(final int start, final int maxResults){
+    return _userDao.getUsersForKeyType(start, maxResults, UserIndexTypes.API_KEY);
+  }
+
+  @Override
   public UserIndex getOrCreateUserForIndexKey(UserIndexKey key,
       String credentials, boolean isAnonymous) {
 
@@ -256,7 +267,7 @@ public class UserServiceImpl implements UserService {
       User user = new User();
       user.setCreationTime(new Date());
       user.setTemporary(true);
-      user.setProperties(new UserPropertiesV3());
+      user.setProperties(new UserPropertiesV4());
       Set<UserRole> roles = new HashSet<UserRole>();
       if (isAnonymous)
         roles.add(_authoritiesService.getAnonymousRole());
@@ -289,6 +300,27 @@ public class UserServiceImpl implements UserService {
   @Override
   public UserIndex getUserIndexForId(UserIndexKey key) {
     return _userDao.getUserIndexForId(key);
+  }
+
+  @Override
+  public UserIndex getUserIndexForUsername(String username)
+          throws UsernameNotFoundException {
+
+      int index = username.indexOf('_');
+      if (index == -1)
+          throw new UsernameNotFoundException(
+                  "username did not take the form type_value: " + username);
+
+      String type = username.substring(0, index);
+      String value = username.substring(index + 1);
+
+      UserIndexKey key = new UserIndexKey(type, value);
+      UserIndex userIndex = getUserIndexForId(key);
+
+      if (userIndex == null)
+          throw new UsernameNotFoundException(key.toString());
+
+      return userIndex;
   }
 
   @Override

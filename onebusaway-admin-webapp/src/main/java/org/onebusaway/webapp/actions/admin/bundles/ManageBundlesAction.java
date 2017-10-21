@@ -16,11 +16,10 @@
 package org.onebusaway.webapp.actions.admin.bundles;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -28,13 +27,18 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.SortedMap;
+import java.util.SortedSet;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
 import javax.servlet.ServletContext;
@@ -43,17 +47,17 @@ import org.apache.struts2.convention.annotation.Namespace;
 import org.apache.struts2.convention.annotation.Result;
 import org.apache.struts2.convention.annotation.Results;
 import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
 import org.json.simple.JSONArray;
+import org.onebusaway.admin.bundle.AgencyList;
 import org.onebusaway.admin.model.BundleBuildResponse;
 import org.onebusaway.admin.model.BundleResponse;
 import org.onebusaway.admin.model.ui.DirectoryStatus;
 import org.onebusaway.admin.model.ui.ExistingDirectory;
 import org.onebusaway.admin.service.BundleRequestService;
-import org.onebusaway.admin.service.DiffService;
 import org.onebusaway.admin.service.FileService;
+import org.onebusaway.admin.service.bundle.GtfsArchiveService;
+import org.onebusaway.admin.util.BundleInfo;
 import org.onebusaway.admin.util.NYCFileUtils;
-import org.onebusaway.agency_metadata.service.AgencyMetadataService;
 import org.onebusaway.util.services.configuration.ConfigurationService;
 import org.onebusaway.webapp.actions.OneBusAwayNYCAdminActionSupport;
 import org.slf4j.Logger;
@@ -62,6 +66,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.context.ServletContextAware;
 
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 
@@ -87,8 +92,6 @@ import com.google.gson.JsonParser;
 			params={"root", "fileList"}),
 			@Result(name="existingBuildList", type="json", 
 			params={"root", "existingBuildList"}),
-			@Result(name="diffResult", type="json", 
-			params={"root", "diffResult"}),
 			@Result(name="downloadZip", type="stream", 
 			params={"contentType", "application/zip", 
 					"inputName", "downloadInputStream",
@@ -108,25 +111,17 @@ import com.google.gson.JsonParser;
 public class ManageBundlesAction extends OneBusAwayNYCAdminActionSupport implements ServletContextAware {
 	private static Logger _log = LoggerFactory.getLogger(ManageBundlesAction.class);
 	private static final long serialVersionUID = 1L;
+	private static final String API_LATEST_BUNDLE = "/api/bundle/latest";
 
 	private String bundleDirectory; // holds the final directory name 
 	private String directoryName; // holds the value entered in the text box
 	private String destDirectoryName; // holds copy directory name
-	private String bundleBuildName; // holds the build name selected in the Compare tab
-	private String bundleName; // what to call the bundle, entered in the text box
-	private String agencyId; // agencyId from the Upload tab
-	private String agencyDataSourceType; // 'gtfs' or 'aux', from the Upload tab
-	private String agencyProtocol;  // 'http', 'ftp', or 'file', from the Upload tab
-	private String agencyDataSource; // URL for the source data file, from the Upload tab
-	private boolean cleanDir;    // on file upload, should target directory be cleaned first
-	private File agencySourceFile;
-	private String agencySourceFileContentType;
-	private String agencySourceFileFileName;
 	private boolean productionTarget;
 	private String comments;
 	private FileService fileService;
 	private BundleRequestService bundleRequestService;
 	private ConfigurationService configService;
+	private GtfsArchiveService gtfsArchiveService;
 	private static final int MAX_RESULTS = -1;
 	private BundleResponse bundleResponse;
 	private BundleBuildResponse bundleBuildResponse;
@@ -135,16 +130,23 @@ public class ManageBundlesAction extends OneBusAwayNYCAdminActionSupport impleme
 	private String downloadFilename;
 	private InputStream downloadInputStream;
 	private List<String> fileList = new ArrayList<String>();
-	private String diffBundleName;
-	private String diffBuildName;
-	private List<String> existingBuildList = new ArrayList<String>();
-	private List<String> diffResult = new ArrayList<String>();
+	private String selectedBundleName;
+	private SortedMap<String, String> existingBuildList = new TreeMap<String, String>();
 	private DirectoryStatus directoryStatus;
+	private BundleInfo bundleInfo;
+	private boolean useArchivedGtfs;
+	private String stagingDeployedDataset;
+	private String stagingDeployedBundleName;
 	// where the bundle is deployed to
 	private String s3Path = "s3://bundle-data/activebundle/<env>/";
 	private String environment = "dev";
-	private DiffService diffService;
+
 	private static final String TRACKING_INFO = "info.json";
+
+  @Autowired
+  public void setBundleInfo(BundleInfo bundleInfo) {
+    this.bundleInfo = bundleInfo;
+  }
 
 	@Override
 	public String input() {
@@ -159,26 +161,25 @@ public class ManageBundlesAction extends OneBusAwayNYCAdminActionSupport impleme
 	public String copyDirectory() {
 		_log.info("Finally in copyDirectory action");		
 		
-		JSONObject sourceObject = getBundleTrackingObject(directoryName);
+    JSONObject sourceObject = bundleInfo.getBundleTrackingObject(directoryName);
 		JSONObject destObject = new JSONObject();		
 		destObject = sourceObject;
 		destObject.put("directoryName", destDirectoryName);
+		// Note that the bundle comments are part of the buildResponse object and
+		// will not be retained on the copy.
+		destObject.remove("buildResponse");
+		destObject.remove("validationResponse");
 		
 		String createDirectoryMessage = null;
 		boolean directoryCreated = false;
 		String timestamp = "";
 
-		_log.debug("in copy directory with dir=" + destDirectoryName);
-
 		if (destDirectoryName.contains(" ")){
-			_log.info("destination bundle dir contains a space");
 			createDirectoryMessage = "Directory name cannot contain spaces. Please try again!";
 		} else {
 			if(fileService.bundleDirectoryExists(destDirectoryName)) {
-				_log.info("bundle dir exists");
 				createDirectoryMessage = destDirectoryName + " already exists. Please try again!";
 			} else {
-				_log.info("creating bundledir=" + destDirectoryName);
 				//Create the directory if it does not exist.
 				directoryCreated = fileService.createBundleDirectory(destDirectoryName);
 				
@@ -187,16 +188,16 @@ public class ManageBundlesAction extends OneBusAwayNYCAdminActionSupport impleme
           Path gtfsTempDir = Files.createTempDirectory("gtfs_latest");
           Path auxTempDir = Files.createTempDirectory("aux_latest");
           
-          String s3GtfsKey = directoryName +  File.separator + fileService.getGtfsPath();
-          String s3AuxKey = directoryName +  File.separator + fileService.getAuxPath();
+          String srcGtfsDir = directoryName +  File.separator + fileService.getGtfsPath();
+          String srcAuxDir = directoryName +  File.separator + fileService.getAuxPath();
           
-          String gtfsCopy = fileService.get(s3GtfsKey, gtfsTempDir.toString());
-          String auxCopy = fileService.get(s3AuxKey, auxTempDir.toString());
+          String gtfsCopy = fileService.get(srcGtfsDir, gtfsTempDir.toString());
+          String auxCopy = fileService.get(srcAuxDir, auxTempDir.toString());
 
-          String newS3GtfsKey = destDirectoryName + File.separator + fileService.getGtfsPath();
-          String newS3AuxKey = destDirectoryName + File.separator + fileService.getAuxPath();
-          fileService.put(newS3GtfsKey, gtfsCopy);
-          fileService.put(newS3AuxKey, auxCopy);
+          String destGtfsDir = destDirectoryName + File.separator + fileService.getGtfsPath();
+          String destAuxDir = destDirectoryName + File.separator + fileService.getAuxPath();
+          fileService.put(destGtfsDir, gtfsTempDir.toString());
+          fileService.put(destAuxDir, auxTempDir.toString());
           _log.info("copy complete");
           
         } catch (IOException e) {
@@ -208,7 +209,6 @@ public class ManageBundlesAction extends OneBusAwayNYCAdminActionSupport impleme
 					_log.info("Copied from: "+directoryName+ " to: "+destDirectoryName);
 					directoryName = destDirectoryName;
 					createDirectoryMessage = "Successfully copied into new directory: " + destDirectoryName;
-					createDirectoryMessage += ". Validate and Build now!";
 					timestamp = fileService.getBundleDirTimestamp(destDirectoryName);
 				} else {
 					createDirectoryMessage = "Unable to create direcory: " + destDirectoryName;
@@ -216,11 +216,23 @@ public class ManageBundlesAction extends OneBusAwayNYCAdminActionSupport impleme
 			}
 		}		
 		directoryStatus = createDirectoryStatus(createDirectoryMessage, directoryCreated, timestamp, destDirectoryName);
-		writeBundleTrackingInfo(destObject, destDirectoryName);
+    bundleInfo.writeBundleTrackingInfo(destObject, destDirectoryName);
 		directoryStatus.setBundleInfo(destObject);
 		return "selectDirectory";
 	}
 	
+  /**
+   * Deletes an existing directory
+   */
+  @SuppressWarnings("unchecked")
+  public String deleteDirectory() {
+    boolean directoryDeleted = false;
+
+    directoryDeleted = fileService.deleteBundleDirectory(directoryName);
+    directoryStatus = createDirectoryStatus("Directory deleted", directoryDeleted, "", "");
+    return "selectDirectory";
+  }
+
 	/**
 	 * Creates directory for uploading bundles on AWS
 	 */
@@ -229,18 +241,12 @@ public class ManageBundlesAction extends OneBusAwayNYCAdminActionSupport impleme
 		String createDirectoryMessage = null;
 		boolean directoryCreated = false;
 		String timestamp = "";
-
-		_log.debug("in create directory with dir=" + directoryName);
-
 		if (directoryName.contains(" ")){
-			_log.info("bundle dir contains a space");
 			createDirectoryMessage = "Directory name cannot contain spaces. Please try again!";
 		} else {
 			if(fileService.bundleDirectoryExists(directoryName)) {
-				_log.info("bundle dir exists");
 				createDirectoryMessage = directoryName + " already exists. Please try again!";
 			} else {
-				_log.info("creating bundledir=" + directoryName);
 				//Create the directory if it does not exist.
 				directoryCreated = fileService.createBundleDirectory(directoryName);
 				bundleDirectory = directoryName;
@@ -254,50 +260,18 @@ public class ManageBundlesAction extends OneBusAwayNYCAdminActionSupport impleme
 		}
 
 		directoryStatus = createDirectoryStatus(createDirectoryMessage, directoryCreated, timestamp, directoryName);
-		JSONObject obj = getBundleTrackingObject(directoryName);
+		JSONObject obj = bundleInfo.getBundleTrackingObject(directoryName);
 		if(obj == null){
 			obj = new JSONObject();
 		}
 		obj.put("directoryName", directoryName);			
-		writeBundleTrackingInfo(obj, directoryName);
+		bundleInfo.writeBundleTrackingInfo(obj, directoryName);
 
 		return "selectDirectory";
 	}
 
-	private void writeBundleTrackingInfo(JSONObject bundleObject, String directoryName) {
-		if(fileService.getBucketName() != null){
-			String pathname = fileService.getBucketName() + File.separatorChar + directoryName + File.separatorChar + TRACKING_INFO;
-			
-			File file = new File(pathname);		
-			FileWriter handle = null;
-
-			try {			
-				if(!file.exists()){
-					file.createNewFile();
-				}
-
-				handle = new FileWriter(file);
-				if(bundleObject != null){
-					handle.write(bundleObject.toJSONString());
-				}		
-				handle.flush();
-			}
-			catch(Exception e){
-				_log.error("Bundle Tracker Writing:: " +e.getMessage());
-			}
-			finally{
-				try{
-					handle.close();
-				}catch(IOException ie){
-					_log.error("Bundle Tracker Writing :: File Handle Failed to Close");
-				}
-			}
-		}
-	}
-
 	public String selectDirectory() {
 		List<String[]> existingDirectories = fileService.listBundleDirectories(MAX_RESULTS);
-		_log.info("in selectDirectory with dirname=" + directoryName);
 		bundleDirectory = directoryName;
 		directoryStatus = createDirectoryStatus("Failed to find directory " + directoryName, false, null, directoryName);
 		for (String[] directory: existingDirectories){
@@ -305,9 +279,11 @@ public class ManageBundlesAction extends OneBusAwayNYCAdminActionSupport impleme
 				directoryStatus = createDirectoryStatus("Loaded existing directory " + directoryName, true, null, directoryName);
 				JSONObject bundleInfo = directoryStatus.getBundleInfo();
 				// Update the agency list to reflect what's actually on the file system
-				JSONArray updatedAgencyList = updateAgencyList(directoryStatus, directoryName);
-				bundleInfo.put("agencyList", updatedAgencyList);
-				directoryStatus.setBundleInfo(bundleInfo);
+				JSONArray updatedAgencyList = (new AgencyList(fileService)).updateAgencyList(directoryStatus, directoryName);
+				if (bundleInfo != null && !bundleInfo.isEmpty()) {
+				  bundleInfo.put("agencyList", updatedAgencyList);
+				  directoryStatus.setBundleInfo(bundleInfo);
+				}
 				break;
 			}
 		}
@@ -325,10 +301,10 @@ public class ManageBundlesAction extends OneBusAwayNYCAdminActionSupport impleme
 		directoryStatus.setAuxPath(fileService.getAuxPath());
 		directoryStatus.setBucketName(fileService.getBucketName());	
 		if(selected){
-			JSONObject bundleInfo = getBundleTrackingObject(directoryName);
-			if(bundleInfo != null) { //Added for JUnit
-				if(!bundleInfo.isEmpty()) {
-					directoryStatus.setBundleInfo(bundleInfo);
+			JSONObject bundleObj = bundleInfo.getBundleTrackingObject(directoryName);
+			if(bundleInfo != null && bundleObj != null) { //Added for JUnit
+				if(!bundleObj.isEmpty()) {
+					directoryStatus.setBundleInfo(bundleObj);
 				}
 				else {
 					directoryStatus.setBundleInfo(null);
@@ -343,6 +319,7 @@ public class ManageBundlesAction extends OneBusAwayNYCAdminActionSupport impleme
 	 * @return list of existing directories
 	 */
 	public Set<ExistingDirectory> getExistingDirectories() {
+
 		List<String[]> existingDirectories = fileService.listBundleDirectories(MAX_RESULTS);
 		Set<ExistingDirectory> directories = new TreeSet<ExistingDirectory> ();
 		for(String[] existingDirectory : existingDirectories) {
@@ -352,6 +329,25 @@ public class ManageBundlesAction extends OneBusAwayNYCAdminActionSupport impleme
 		}
 		return directories;
 	}
+
+  /**
+   * Returns the existing directories in the current bucket on AWS, but sorted
+   * by date.
+   * @return list of existing directories
+   */
+  public Set<ExistingDirectory> getSortedByDateDirectories() {
+    Set<ExistingDirectory> directories = getExistingDirectories();
+    // Resort by date
+    Set<ExistingDirectory> sortedDirectories
+      = new TreeSet<ExistingDirectory>(new DirectoryByDateComp());
+    sortedDirectories.addAll(directories);
+    return sortedDirectories;
+  }
+
+  public SortedSet<String> getExistingArchivedDirectories() {
+    SortedSet<String> existingArchivedDirectories = gtfsArchiveService.getAllDatasets();
+    return existingArchivedDirectories;
+  }
 
 	@SuppressWarnings("unchecked")
 	public String fileList() {
@@ -366,9 +362,10 @@ public class ManageBundlesAction extends OneBusAwayNYCAdminActionSupport impleme
 		JSONArray validationFiles = new JSONArray();
 		JSONArray statusMessages = new JSONArray();
 		JSONObject validationObj = new JSONObject();		
-		JSONObject bundleObj = getBundleTrackingObject(bundleResponse.getDirectoryName());		
-		if(bundleObj.get("validationResponse") == null){
+		JSONObject bundleObj = bundleInfo.getBundleTrackingObject(bundleResponse.getDirectoryName());		
+		if(bundleObj == null || bundleObj.get("validationResponse") == null){
 			validationObj = new JSONObject();
+			bundleObj = new JSONObject();
 		}else {
 			validationObj = (JSONObject)bundleObj.get("validationResponse");
 
@@ -386,7 +383,7 @@ public class ManageBundlesAction extends OneBusAwayNYCAdminActionSupport impleme
 		validationObj.put("statusMessages", statusMessages);
 		bundleObj.put("validationResponse", validationObj);
 
-		writeBundleTrackingInfo(bundleObj, bundleResponse.getDirectoryName());
+		bundleInfo.writeBundleTrackingInfo(bundleObj, bundleResponse.getDirectoryName());
 		return "fileList";
 	}
 
@@ -396,7 +393,7 @@ public class ManageBundlesAction extends OneBusAwayNYCAdminActionSupport impleme
   @SuppressWarnings("unchecked")
   public String updateBundleComments() {
     JSONObject buildObj = new JSONObject();
-    JSONObject bundleObj = getBundleTrackingObject(directoryName);
+    JSONObject bundleObj = bundleInfo.getBundleTrackingObject(directoryName);
     if (bundleObj == null) {
       bundleObj = new JSONObject();
     }
@@ -405,209 +402,28 @@ public class ManageBundlesAction extends OneBusAwayNYCAdminActionSupport impleme
     }
     buildObj.put("comment", comments);
     bundleObj.put("buildResponse", buildObj);
-    writeBundleTrackingInfo(bundleObj, directoryName);
+    bundleInfo.writeBundleTrackingInfo(bundleObj, directoryName);
     return "uploadStatus";
   }
 
-	/**
-	 * Uploads the bundle source data for the specified agency
-	 */
-	@SuppressWarnings("unchecked")
-	public String uploadSourceData() {
-		_log.info("uploadSourceData called"); 
-		_log.info("agencyId: " + agencyId + ", agencyDataSourceType: " + agencyDataSourceType + ", agencyProtocol: " + agencyProtocol 
-				+ ", agencyDataSource: " + agencyDataSource);
-		_log.info("gtfs path: " + fileService.getGtfsPath());
-		_log.info("aux path: " + fileService.getAuxPath());
-		_log.info("build path: " + fileService.getBuildPath());
-		_log.info("directory name: " + directoryName);
-		_log.info("base path: " + fileService.getBucketName());
-		_log.info("cleanDir: " + cleanDir);
-		// Build URL/File path
-		String src = agencyDataSource;
-		if (agencyProtocol.equals("http")) {
-			if (src.startsWith("//")) {
-				src = "http:" + src;
-			} else if (src.startsWith("/")) {
-				src = "http:/" + src;
-			} else if (!src.toLowerCase().startsWith("http")) {
-				src = "http://" + src;
-			}
-		} else if (agencyProtocol.equals("ftp")) {
-			if (src.startsWith("//")) {
-				src = "ftp:" + src;
-			} else if (src.startsWith("/")) {
-				src = "ftp:/" + src;
-			} else if (!src.toLowerCase().startsWith("ftp")) {
-				src = "ftp://" + src;
-			}      
-		}
-		_log.info("Source: " + src);
-
-		// Build target path
-		String target = fileService.getBucketName() + "/" + directoryName + "/";
-		if (agencyDataSourceType.equals("gtfs")) {
-			target += fileService.getGtfsPath();
-		} else {
-			target += fileService.getAuxPath();
-		}
-		target += "/" + agencyId;
-		// Clean target directory before appending the file name to the target string
-		if (cleanDir) {
-  	  File targetDir = new File(target);
-  	  if (targetDir.exists()) {
-    	  for (File file: targetDir.listFiles()) {
-    	    file.delete();
-    	  }
-  	  }
-		}
-		target += src.substring(src.lastIndexOf('/'));
-		_log.info("Target: " + target);
-
-		// Copy file
-		if (agencyProtocol.equals("http") || agencyProtocol.equals("ftp")) {
-			try {
-				URL website = new URL(src);
-				File targetPath = new File(target);
-				targetPath.mkdirs();
-				Files.copy(website.openStream(), targetPath.toPath(), StandardCopyOption.REPLACE_EXISTING);
-			} catch (Exception e) {
-				_log.info(e.getMessage());
-			}
-		}
-		//Writing JSON for agency just uploaded
-		JSONArray agencyList = null;		
-		JSONObject agencyObj = new JSONObject();
-		JSONObject bundleObj = getBundleTrackingObject(directoryName);
-		if(bundleObj.get("agencyList") == null){
-			agencyList = new JSONArray();
-		}else {
-			agencyList = (JSONArray)bundleObj.get("agencyList");
-		}
-
-    // Don't retain any existing agencyList entries for this agency.
-		JSONArray updatedAgencyList = new JSONArray();
-    for (Object existingObj : agencyList) {
-      JSONObject existingAgencyObj = (JSONObject) existingObj;
-      String existingAgencyId = (String)existingAgencyObj.get("agencyId");
-      if (existingAgencyId != null &&  !existingAgencyId.equals(agencyId)) {
-        updatedAgencyList.add(existingObj);
-      }
-    }
-    agencyList = updatedAgencyList;
-
-		agencyObj.put("agencyId", agencyId);
-		agencyObj.put("agencyDataSource", agencyDataSource);
-		agencyObj.put("agencyDataSourceType", agencyDataSourceType);
-		agencyObj.put("agencyProtocol", agencyProtocol);	
-    agencyObj.put("agencyBundleUploadDate", 
-        new SimpleDateFormat("MMM dd yyyy").format(new Date()));
-		agencyList.add(agencyObj);
-		bundleObj.put("agencyList", agencyList);
-		writeBundleTrackingInfo(bundleObj, directoryName);
-		return "uploadStatus";
-	}
-
-	@SuppressWarnings("unchecked")
-	public String uploadSourceFile() {
-		_log.info("in uploadSourceFile");
-		_log.info("agencyId: " + agencyId + ", agencyDataSourceType: " + agencyDataSourceType);
-		_log.info("gtfs path: " + fileService.getGtfsPath());
-		_log.info("aux path: " + fileService.getAuxPath());
-		_log.info("build path: " + fileService.getBuildPath());
-		_log.info("directory name: " + directoryName);
-		_log.info("base path: " + fileService.getBucketName());
-		_log.info("upload file name: " + agencySourceFileFileName);
-		_log.info("file content type: " + agencySourceFileContentType);
-		_log.info("file name: " +  agencySourceFile.getName());
-    _log.info("cleanDir: " + cleanDir);
-
-		// Build target path
-		String target = fileService.getBucketName() + "/" + directoryName + "/";
-		if (agencyDataSourceType.equals("gtfs")) {
-			target += fileService.getGtfsPath();
-		} else {
-			target += fileService.getAuxPath();
-		}
-		target += "/" + agencyId;
-    // Clean target directory before appending the file name to the target string
-    if (cleanDir) {
-      File targetDir = new File(target);
-      if (targetDir.exists()) {
-        for (File file: targetDir.listFiles()) {
-          file.delete();
-        }
-      }
-    }		
-		target += "/" + agencySourceFileFileName;
-		_log.info("Target: " + target);
-
-		// Copy file
-		try {
-			File targetPath = new File(target);
-			targetPath.mkdirs();
-			Files.copy(agencySourceFile.toPath(), targetPath.toPath(), StandardCopyOption.REPLACE_EXISTING);
-		} catch (Exception e) {
-			_log.info(e.getMessage());
-		}
-
-		//Writing JSON for agency just uploaded
-		JSONArray agencyList = null;		
-		JSONObject agencyObj = new JSONObject();
-		JSONObject bundleObj = getBundleTrackingObject(directoryName);
-		if(bundleObj.get("agencyList") == null){
-			agencyList = new JSONArray();
-		}else {
-			agencyList = (JSONArray)bundleObj.get("agencyList");
-		}
-
-    // Don't retain any existing agencyList entries for this agency.
-    JSONArray updatedAgencyList = new JSONArray();
-    for (Object existingObj : agencyList) {
-      JSONObject existingAgencyObj = (JSONObject) existingObj;
-      String existingAgencyId = (String)existingAgencyObj.get("agencyId");
-      if (existingAgencyId != null &&  !existingAgencyId.equals(agencyId)) {
-        updatedAgencyList.add(existingObj);
-      }
-    }
-    agencyList = updatedAgencyList;
-
-		agencyObj.put("agencyId", agencyId);
-		agencyObj.put("agencyDataSource", agencyDataSource);
-		agencyObj.put("agencyDataSourceType", agencyDataSourceType);
-		agencyObj.put("agencyProtocol", agencyProtocol);	
-		agencyObj.put("agencyBundleUploadDate", 
-		    new SimpleDateFormat("MMM dd yyyy").format(new Date()));
-		agencyList.add(agencyObj);
-		bundleObj.put("agencyList", agencyList);
-		writeBundleTrackingInfo(bundleObj, directoryName);
-		return "uploadStatus";
-	}	  
-
 	public String existingBuildList() {
-		_log.info("existingBuildList called for path=" + fileService.getBucketName()+"/"+ diffBundleName +"/"+fileService.getBuildPath()); 
-		File builds = new File(fileService.getBucketName()+"/"+ diffBundleName +"/"+fileService.getBuildPath());
-		File[] existingDirectories = builds.listFiles();
-		existingBuildList.clear();
-		if(existingDirectories == null){
-			return null;
-		}
-		for(File file: existingDirectories) {
-			existingBuildList.add(file.getName());
-		}
-		return "existingBuildList";
-	}
+    existingBuildList.clear();
+    if (!useArchivedGtfs) {
+      _log.info("existingBuildList called for path=" + fileService.getBucketName()+"/"+ selectedBundleName +"/"+fileService.getBuildPath());
+      File builds = new File(fileService.getBucketName()+"/"+ selectedBundleName +"/"+fileService.getBuildPath());
+      File[] existingDirectories = builds.listFiles();
+      if(existingDirectories == null){
+        return null;
+      }
+      int i = 1;
+      for(File file: existingDirectories) {
+        existingBuildList.put(file.getName(), ""+i++);
+      }
+	  } else {
+	    existingBuildList = gtfsArchiveService.getBuildNameMapForDataset(selectedBundleName);
+	  }
 
-	public String diffResult() {
-		String currentBundlePath = fileService.getBucketName() + File.separator 
-				+ bundleDirectory + "/builds/" + bundleName + "/outputs/gtfs_stats.csv"; 
-		String selectedBundlePath = fileService.getBucketName()
-				+ File.separator
-				+ diffBundleName + "/builds/"
-				+ diffBuildName + "/outputs/gtfs_stats.csv";
-		diffResult.clear();
-		diffResult = diffService.diff(selectedBundlePath, currentBundlePath);
-		return "diffResult";
+		return "existingBuildList";
 	}
 
 	public String download() {
@@ -634,7 +450,7 @@ public class ManageBundlesAction extends OneBusAwayNYCAdminActionSupport impleme
 		JSONArray buildFiles = new JSONArray();
 		JSONArray statusMessages = new JSONArray();
 		JSONObject buildObj = new JSONObject();		
-		JSONObject bundleObj = getBundleTrackingObject(bundleBuildResponse.getBundleDirectoryName());
+    JSONObject bundleObj = bundleInfo.getBundleTrackingObject(bundleBuildResponse.getBundleDirectoryName());
 		if (bundleObj == null) {
 		  bundleObj = new JSONObject();
 		}
@@ -661,7 +477,7 @@ public class ManageBundlesAction extends OneBusAwayNYCAdminActionSupport impleme
 		buildObj.put("statusMessages", statusMessages);
 		bundleObj.put("buildResponse", buildObj);
 
-		writeBundleTrackingInfo(bundleObj, bundleBuildResponse.getBundleDirectoryName());
+    bundleInfo.writeBundleTrackingInfo(bundleObj, bundleBuildResponse.getBundleDirectoryName());
 		return "fileList";
 	}
 
@@ -683,15 +499,34 @@ public class ManageBundlesAction extends OneBusAwayNYCAdminActionSupport impleme
 		fileService.validateFileName(downloadFilename);
 		this.bundleBuildResponse = this.bundleRequestService.lookupBuildRequest(getId());
 		if (this.bundleBuildResponse != null) {
-			String s3Key = bundleBuildResponse.getRemoteOutputDirectory() + File.separator + this.downloadFilename;
+		  String dir = bundleBuildResponse.getRemoteOutputDirectory();
+		  if (dir == null) {
+		    // something went very wrong but we don't have enough information to know what
+		    // return link to bundlebuilder log and hope that contains the relevant info to debug
+		    _log.error("bundle build response did not have a valid remote output dir!");
+		    this.downloadInputStream = createDefaultSummaryStream();
+		    return "download";
+		  }
+			String s3Key = dir + File.separator + this.downloadFilename;
 			_log.info("get request for s3Key=" + s3Key);
-			this.downloadInputStream = this.fileService.get(s3Key);
+			try {
+			  this.downloadInputStream = this.fileService.get(s3Key);
+			} catch (Exception e) {
+			  // bundle build failed and summary was not written to disk
+			  // return a standard version so the log can be examined
+			  this.downloadInputStream = createDefaultSummaryStream();
+			}
 			return "download";
 		}
 		// TODO
 		return "error";
 	}
 
+	private InputStream createDefaultSummaryStream() {
+	  String summary = "filename,description,lines\n";
+	  return new ByteArrayInputStream(summary.getBytes());
+	}
+	
 	public String downloadBundle() {
     fileService.validateFileName(downloadFilename);
     String s3Key = this.downloadDataSet + "/builds/" + this.downloadFilename
@@ -715,32 +550,12 @@ public class ManageBundlesAction extends OneBusAwayNYCAdminActionSupport impleme
 		return "error";
 	}
 
-	/**
-	 * @return the directoryName
-	 */
 	public String getDirectoryName() {
 		return directoryName;
 	}
 
-	/**
-	 * @param directoryName the directoryName to set
-	 */
 	public void setDirectoryName(String directoryName) {
 		this.directoryName = directoryName;
-	}
-
-	/**
-	 * @return the bundleBuildName
-	 */
-	public String getBundleBuildName() {
-		return bundleBuildName;
-	}
-
-	/**
-	 * @param bundleBuildName
-	 */
-	public void setBundleBuildName(String bundleBuildName) {
-		this.bundleBuildName = bundleBuildName;
 	}
 
 	/**
@@ -780,14 +595,6 @@ public class ManageBundlesAction extends OneBusAwayNYCAdminActionSupport impleme
 	}
 
 	/**
-	 * @param diffService the diffService to set
-	 */
-	@Autowired
-	public void setDiffService(DiffService diffService) {
-		this.diffService = diffService;
-	}
-
-	/**
 	 * @return the bundleDirectory
 	 */
 	public String getBundleDirectory() {
@@ -819,6 +626,11 @@ public class ManageBundlesAction extends OneBusAwayNYCAdminActionSupport impleme
 		this.configService = configService;
 	}
 
+  @Autowired
+  public void setGtfsArchiveService(GtfsArchiveService gtfsArchiveService) {
+    this.gtfsArchiveService = gtfsArchiveService;
+  }
+
 	public BundleResponse getBundleResponse() {
 		return bundleResponse;
 	}
@@ -835,70 +647,6 @@ public class ManageBundlesAction extends OneBusAwayNYCAdminActionSupport impleme
 		return id;
 	}
 
-	public void setBundleName(String bundleName) {
-		this.bundleName = bundleName;
-	}
-
-	public String getBundleName() {
-		return bundleName;
-	}
-
-	public void setAgencyId(String agencyId) {
-		this.agencyId = agencyId;
-	}
-
-	public String getAgencyId() {
-		return agencyId;
-	}
-
-	public void setAgencyDataSourceType(String agencyDataSourceType) {
-		this.agencyDataSourceType = agencyDataSourceType;
-	}
-
-	public String getAgencyDataSourceType() {
-		return agencyDataSourceType;
-	}
-
-	public void setAgencyProtocol(String agencyProtocol) {
-		this.agencyProtocol = agencyProtocol;
-	}
-
-	public String getAgencyProtocol() {
-		return agencyProtocol;
-	}
-
-	public void setAgencyDataSource(String agencyDataSource) {
-		this.agencyDataSource = agencyDataSource;
-	}
-
-	public String getAgencyDataSource() {
-		return agencyDataSource;
-	}
-
-	public void setCleanDir(boolean cleanDir) {
-		this.cleanDir = cleanDir;
-	}
-
-	public boolean getCleanDir() {
-		return cleanDir;
-	}
-
-	public void setAgencySourceFile(File agencySourceFile) {
-		this.agencySourceFile = agencySourceFile;
-	}
-
-	public File getAgencySourceFile(File agencySourceFile) {
-		return agencySourceFile;
-	}
-
-	public void setAgencySourceFileContentType(String agencySourceFileContentType) {
-		this.agencySourceFileContentType = agencySourceFileContentType;
-	}
-
-	public void setAgencySourceFileFileName(String agencySourceFileFileName) {
-		this.agencySourceFileFileName = agencySourceFileFileName;
-	}
-
 	public String getDeployedBundle() {
 		String apiHostname = configService.getConfigurationValueAsString(
 				"apiHostname", null);
@@ -913,9 +661,7 @@ public class ManageBundlesAction extends OneBusAwayNYCAdminActionSupport impleme
 			}
 
 		}
-
 		String tdmHost = System.getProperty("tdm.host") + "/api/bundle/list";
-
 		try {
 			return getJsonData(tdmHost).getAsJsonObject()
 					.getAsJsonArray("bundles").get(0).getAsJsonObject()
@@ -934,20 +680,12 @@ public class ManageBundlesAction extends OneBusAwayNYCAdminActionSupport impleme
 		return new JsonParser().parse(in.readLine());
 	}
 
-	public void setDiffBundleName(String diffBundleName) {
-		this.diffBundleName = diffBundleName;
+	public void setSelectedBundleName(String selectedBundleName) {
+		this.selectedBundleName = selectedBundleName;
 	}
 
-	public String getDiffBundleName() {
-		return diffBundleName;
-	}
-
-	public void setDiffBuildName(String diffBuildName) {
-		this.diffBuildName = diffBuildName;
-	}
-
-	public String getDiffBuildName() {
-		return diffBuildName;
+	public String getSelectedBundleName() {
+		return selectedBundleName;
 	}
 
 	public DirectoryStatus getDirectoryStatus() {
@@ -978,23 +716,63 @@ public class ManageBundlesAction extends OneBusAwayNYCAdminActionSupport impleme
 		return this.fileList;
 	}
 
-	public List<String> getExistingBuildList() {
+	public SortedMap<String, String> getExistingBuildList() {
 		return this.existingBuildList;
-	}
-
-	public List<String> getDiffResult() {
-		return this.diffResult;
 	}
 
 	public void setEmailTo(String to) {
 	}
 
-	public String getS3Path() {
+	public String getStagingDeployedDataset() {
+	  if (stagingDeployedDataset == null || stagingDeployedDataset.isEmpty()) {
+	    getStagingDeployedBundleData();
+	  }
+	  return stagingDeployedDataset;
+  }
+
+  public void setStagingDeployedDataset(String stagingDeployedDataset) {
+    this.stagingDeployedDataset = stagingDeployedDataset;
+  }
+
+  public String getStagingDeployedBundleName() {
+    if (stagingDeployedBundleName == null || stagingDeployedBundleName.isEmpty()) {
+      getStagingDeployedBundleData();
+    }
+    return stagingDeployedBundleName;
+  }
+
+  public void setStagingDeployedBundleName(String stagingDeployedBundleName) {
+    this.stagingDeployedBundleName = stagingDeployedBundleName;
+  }
+
+  private void getStagingDeployedBundleData() {
+    String adminStagingHost = configService.getConfigurationValueAsString(
+        "adminStaging", null);
+    String adminStagingPort = configService.getConfigurationValueAsString(
+        "adminStagingPort", null);
+    String adminStagingUrl = adminStagingHost + ":" + adminStagingPort
+        + API_LATEST_BUNDLE;
+    JsonObject latestBundle = null;
+    try {
+      latestBundle = getJsonData(adminStagingUrl).getAsJsonObject();
+    }  catch (Exception e) {
+      _log.error("Failed to retrieve name of the latest deployed bundle at: "
+			  + adminStagingUrl);
+    }
+    stagingDeployedDataset = latestBundle.get("dataset").getAsString();
+    stagingDeployedBundleName = latestBundle.get("name").getAsString();
+  }
+
+  public String getS3Path() {
 		return s3Path;
 	}
 
 	public String getEnvironment() {
 		return environment;
+	}
+
+	public void setUseArchivedGtfs(boolean useArchivedGtfs) {
+	  this.useArchivedGtfs = useArchivedGtfs;
 	}
 
 	@Override
@@ -1017,186 +795,41 @@ public class ManageBundlesAction extends OneBusAwayNYCAdminActionSupport impleme
 		}
 	}
 
-	private JSONObject getBundleTrackingObject(String bundleDirectory) {
-		String pathname = fileService.getBucketName() + File.separatorChar + bundleDirectory + File.separatorChar + TRACKING_INFO;		
-		File file = new File(pathname);
-		JSONObject bundleObj =  null;
-		JSONParser parser = new JSONParser();
-		try{							
-			if(!file.exists()){
-				file.createNewFile();	
-				bundleObj = new JSONObject();
-			}else{
-				Object obj = parser.parse(new FileReader(file));
-				bundleObj = (JSONObject) obj;
-			}
-		}
-		catch(Exception e){
-			_log.error(e.getMessage(), e);
-			_log.error("configured pathname was " + pathname);
-		}
-
-		return bundleObj;
-	}
-
-	public FileService getFileService() {
-		return fileService;
-
-	}
-
-	/**
-	 * @return the destDirectoryName
-	 */
 	public String getDestDirectoryName() {
 		return destDirectoryName;
 	}
 
-	/**
-	 * @param destDirectoryName the destDirectoryName to set
-	 */
 	public void setDestDirectoryName(String destDirectoryName) {
 		this.destDirectoryName = destDirectoryName;
 	}
 
-	/**
-	 * This method will create an agencyList JSON array based on the directories
-	 * and files currently in this bundle directory.  That list will then be
-	 * updated based on any additional information in the bundleInfo data from
-	 * the file info.json.
-	 *
-	 * @param directoryStatus contains info about the bundle build process
-	 * @param directoryName name of the directory for this bundle
-	 * @return the updated agency list
-	 */
-  private JSONArray updateAgencyList(DirectoryStatus directoryStatus,
-      String directoryName) {
-    JSONArray newAgencyList = agencyListFromFiles(directoryName);
-    newAgencyList = updateFromLastAgencyList(newAgencyList, directoryStatus);
-    return newAgencyList;
-  }
+	private class DirectoryByDateComp implements Comparator<ExistingDirectory> {
+	  @Override
+	  public int compare(ExistingDirectory ed1, ExistingDirectory ed2) {
+	  	try {
+	  		return unsafeCompare(ed1, ed2);
+		} catch (Throwable t) {
+	  		_log.error("compare failed: " + t);
+		}
+		return 0;
+	  }
 
-  /**
-   * This creates an agencyList JSON array based on the directories
-   * and files currently in this bundle directory.
-   *
-   * @param directoryName name of the directory for this bundle
-   * @return a newly constructed agencyList constructed based on the directories
-   *         and files currently on the file system.
-   */
-  private JSONArray agencyListFromFiles(String directoryName) {
-    JSONArray newAgencyList = new JSONArray();
-    String basePath = fileService.getBucketName();
+	  private int unsafeCompare(ExistingDirectory ed1, ExistingDirectory ed2) throws Exception {
+		  // ExistingDirectory.creationTimestamp is a String 'dow mon dd hh:mm:ss zzz yyyy'
+		  String[] ed1Split = ed1.getCreationTimestamp().split(" ");
+		  String[] ed2Split = ed2.getCreationTimestamp().split(" ");
+		  SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss dd-MMM-yyyy");
+		  Date ed1Date = new Date();
+		  Date ed2Date = new Date();
+			  ed1Date = formatter.parse(ed1Split[3]
+					  + " " + ed1Split[2] + "-" + ed1Split[1]
+					  + "-" + ed1Split[5]);
+			  ed2Date = formatter.parse(ed2Split[3]
+			  		+ " " + ed2Split[2] + "-" + ed2Split[1]
+					  + "-" + ed2Split[5]);
+			  _log.info("" + ed1Date + " ?= " + ed2Date);
+		  return ed1Date.compareTo(ed2Date) * -1;
 
-    // add gtfs files
-    String fullPath = basePath + "/" + directoryName + "/" + fileService.getGtfsPath();
-    File[] agencyDirs = (new File(fullPath)).listFiles();
-    if (agencyDirs != null) {
-      for (File agencyDir : agencyDirs) {
-        String agencyId = agencyDir.getName();
-        String agencyPath = fullPath + "/" + agencyId;
-        File mostRecentFile = getMostRecentGtfsFile(agencyDir);
-        JSONObject agencyRecord = createAgencyRecord(mostRecentFile, "gtfs", agencyId);
-        newAgencyList.add(agencyRecord);
-      }
-    }
-
-    // add aux files
-    fullPath = basePath + "/" + directoryName + "/" + fileService.getAuxPath();
-    agencyDirs = (new File(fullPath)).listFiles();
-    if (agencyDirs != null) {
-      for (File agencyDir : agencyDirs) {
-        String agencyId = agencyDir.getName();
-        String agencyPath = fullPath + "/" + agencyId;
-        File[] auxFiles = agencyDir.listFiles();
-        for (File auxFile : auxFiles) {
-          JSONObject agencyRecord = createAgencyRecord(auxFile, "aux", agencyId);
-          newAgencyList.add(agencyRecord);
-        }
-      }
-    }
-
-    return newAgencyList;
-  }
-
-  /**
-   * Gets the most recent file in a GTFS directory for an agency.  There should
-   * only be one file anyway, but this is needed in case additional versions of
-   * the file have been manually added.
-   *
-   * @param agencyDir the name of the directory for this agency, generally the
-   *                  same as the agency id.
-   * @return the most recent file in this GTFS directory.
-   */
-  private File getMostRecentGtfsFile(File agencyDir) {
-    File[] uploadedFiles =  agencyDir.listFiles();
-    File mostRecentFile = null;
-    if (uploadedFiles.length > 0) {
-      mostRecentFile = uploadedFiles[0];
-      for (File existingFile : uploadedFiles) {
-        if (existingFile.lastModified() > mostRecentFile.lastModified()) {
-          mostRecentFile = existingFile;
-        }
-      }
-    }
-    return mostRecentFile;
-  }
-
-  /**
-   * Creates a new agency record to be added to the agencyList.
-   *
-   * @param bundleFile the file to be added
-   * @param dataSourceType 'aux' or 'http'
-   * @param agencyId the agency id
-   * @return the new agency record
-   */
-  private JSONObject createAgencyRecord(File bundleFile, String dataSourceType, String agencyId) {
-    JSONObject agencyRecord = new JSONObject();
-    String fileDate = new SimpleDateFormat("MMM dd yyyy").format(new Date(bundleFile.lastModified()));
-    agencyRecord.put("agencyBundleUploadDate", fileDate);
-    agencyRecord.put("agencyDataSource", bundleFile.getName());
-    agencyRecord.put("agencyDataSourceType", dataSourceType);
-    agencyRecord.put("agencyId", agencyId);
-    agencyRecord.put("agencyProtocol", "file");
-    return agencyRecord;
-  }
-
-  /**
-   * Updates the new agencyList based on any additional information in the
-   * bundleInfo data from the file info.json.  More specifically, if an entry
-   * from the bundleInfo matches for agency id, filename, and date, then the
-   * data source (URL for this file) and protocol are updated from the
-   * bundleInfo data.
-   *
-   * @param newAgencyList the newly created agencyList
-   * @param directoryStatus contains info about the bundle build process
-   * @return the updated agencyList
-   */
-  private JSONArray updateFromLastAgencyList(JSONArray newAgencyList, DirectoryStatus directoryStatus) {
-    JSONObject bundleInfo = directoryStatus.getBundleInfo();
-    JSONArray agencyList = bundleInfo == null ? null
-        : (JSONArray)bundleInfo.get("agencyList");
-    if (agencyList != null) {
-      for (int i=0; i < agencyList.size(); ++i) {
-        JSONObject agency = (JSONObject)agencyList.get(i);
-        String currentFilename = (String)agency.get("agencyDataSource");
-        if (currentFilename != null) {
-          currentFilename = currentFilename.substring(currentFilename.lastIndexOf("/") + 1);
-        } else {
-          currentFilename = "";
-        }
-        for (int j=0; j<newAgencyList.size(); ++j) {
-          JSONObject updatedAgency = (JSONObject)newAgencyList.get(j);
-          if (agency.get("agencyId").equals(updatedAgency.get("agencyId"))
-              && currentFilename.equals(updatedAgency.get("agencyDataSource"))
-              && agency.get("agencyBundleUploadDate")
-                .equals(updatedAgency.get("agencyBundleUploadDate"))) {
-            updatedAgency.put("agencyDataSource", agency.get("agencyDataSource"));
-            updatedAgency.put("agencyProtocol", agency.get("agencyProtocol"));
-            newAgencyList.set(j, updatedAgency);
-          }
-        }
-      }
-    }
-    return newAgencyList;
-  }
+	  }
+	}
 }

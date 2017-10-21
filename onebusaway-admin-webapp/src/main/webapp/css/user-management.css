@@ -1,33 +1,32 @@
 /**
  * Copyright (c) 2011 Metropolitan Transportation Authority
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *         http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
  
 #container {
  	margin-top: 10px;
- 	overflow: hidden;
 }
 
 #search {  
-    width: 300px;
+    width: 350px;
     padding:3px 0; 
     cursor:text;  
     float: left;
 }
 
 #searchUser {
-	width: 240px;
+	width: 350px;
 }
 
 #createUser {
@@ -35,8 +34,56 @@
 	padding:3px 3px 0;
 }
 
+header {
+    margin-top: 20px;
+}
+
+header h2 {
+    display:inline;
+}
+
+#userAdminList {
+    float: right;
+    display:inline;
+}
+
+#userAdminList ul {
+	padding: 10px 0;
+}
+
+#userAdminList li a {
+
+	display: inline-block;
+	padding: 0px 5px 10px;
+	color: #0000FF;
+}
+
 #createUser img {
 	vertical-align: middle;
+}
+
+.usersTable {
+	border: solid 1px #666;
+	margin: 10px 0;
+}
+
+.usersTable th {
+	padding-right: 10px;
+	text-align: left;
+	font-size: 12px;
+	padding-left: 15px;
+}
+
+.usersTable .headerRow th{
+	border-bottom: solid 1px #666;
+	font-size: 14px;
+}
+
+.usersTable td {
+	padding-right: 10px;
+	padding-top: 5px;
+	padding-bottom: 5px;
+	padding-left: 15px;
 }
 
 #addUser {
@@ -56,7 +103,31 @@
 #userDetails #detailsTable {
 	border: solid 1px #666;
 	margin: 10px 0;
-	width: 250px;
+	width: 350px;
+}
+
+.apiKeysTable {
+	border: solid 1px #666;
+	margin: 10px 0;
+}
+
+.apiKeysTable th {
+	padding-right: 10px;
+	text-align: left;
+	font-size: 12px;
+	padding-left: 15px;
+}
+
+.apiKeysTable .headerRow th{
+	border-bottom: solid 1px #666;
+	font-size: 14px;
+}
+
+.apiKeysTable td {
+	padding-right: 10px;
+	padding-top: 5px;
+	padding-bottom: 5px;
+	padding-left: 15px;
 }
 
 #detailsTable th {
@@ -75,6 +146,8 @@
 	padding-top: 10px;
 	padding-left: 3px;
 }
+
+
 
 .userLabel {
 	font-size: 12px;
@@ -185,6 +258,8 @@
 #newPassword {
 	width: 150px;
 }
+
+
 
 
 

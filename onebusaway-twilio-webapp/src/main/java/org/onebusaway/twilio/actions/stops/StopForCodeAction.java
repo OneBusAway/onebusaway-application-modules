@@ -46,9 +46,15 @@ public class StopForCodeAction extends TwilioSupport implements SessionAware {
   private List<String> _stopIds;
 
   private List<StopBean> _stops;
+  
+  private StopBean _stop;
 
   public void setStopCode(String stopCode) {
     _stopCode = stopCode;
+  }
+  
+  public void setStop(StopBean stop) {
+	_stop = stop;
   }
 
   public List<String> getStopIds() {
@@ -71,18 +77,23 @@ public String execute() throws Exception {
 
     if (_stopCode == null || _stopCode.length() == 0)
       return INPUT;
+    
+    if(_stop != null) {
+    	_stops = Arrays.asList(_stop);
+    }
+    else{
+    	_log.info("searching on stopCode=" + _stopCode);
+	    SearchQueryBean searchQuery = new SearchQueryBean();
+	    searchQuery.setBounds(bounds);
+	    searchQuery.setMaxCount(5);
+	    searchQuery.setType(EQueryType.BOUNDS_OR_CLOSEST);
+	    searchQuery.setQuery(_stopCode);
 
-    _log.info("searching on stopCode=" + _stopCode);
-    SearchQueryBean searchQuery = new SearchQueryBean();
-    searchQuery.setBounds(bounds);
-    searchQuery.setMaxCount(5);
-    searchQuery.setType(EQueryType.BOUNDS_OR_CLOSEST);
-    searchQuery.setQuery(_stopCode);
+	    StopsBean stopsBean = _transitDataService.getStops(searchQuery);
 
-    StopsBean stopsBean = _transitDataService.getStops(searchQuery);
-
-    _stops = stopsBean.getStops();
-
+	    _stops = stopsBean.getStops();
+    }
+   
     logUserInteraction("query", _stopCode);
 
     if (_stops.size() == 0) {
@@ -94,6 +105,7 @@ public String execute() throws Exception {
       _stopIds = Arrays.asList(stop.getId());
       return SUCCESS;
     } else {
+      sessionMap.put("stops", _stops);
       return "multipleStopsFound";
     }
   }

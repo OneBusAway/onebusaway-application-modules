@@ -18,7 +18,7 @@ package org.onebusaway.gtfs_realtime.archiver.service;
 import java.util.Date;
 import java.util.List;
 
-import org.onebusaway.gtfs_realtime.archiver.model.VehiclePositionModel;
+import org.onebusaway.gtfs_realtime.model.VehiclePositionModel;
 
 public interface VehiclePositionDao {
 
@@ -28,4 +28,6 @@ public interface VehiclePositionDao {
 
   List<VehiclePositionModel> getVehiclePositions(String vehicleId,
       Date startDate, Date endDate);
+  
+  List<VehiclePositionModel> findByDate(Date startDate, Date endDate);
 }

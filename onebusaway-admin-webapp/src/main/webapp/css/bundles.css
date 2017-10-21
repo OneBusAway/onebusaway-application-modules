@@ -1,17 +1,17 @@
 /**
  * Copyright (c) 2011 Metropolitan Transportation Authority
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *         http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
  
  
@@ -149,6 +149,7 @@
 #createDirectory,
 #compareBundles,
 #compareBuilds,
+#compareFixedRouteModes,
 #compareDiff {
   padding-top: 20px;
 }
@@ -165,7 +166,7 @@
   padding-left: 30px;
 }
 
-#Create #filenameError {
+#Create #filenameError, #copyFilenameError {
 	color: red;
 }
 
@@ -192,6 +193,10 @@
     border: solid 1px #C0C0C0;
     width: 850px;
   font-size: 12px;
+}
+
+#buildingReportDiv {
+	color: green;
 }
 
 #currentDirectories #listItem,
@@ -234,12 +239,12 @@
 
 .greenListData{
   background-color: #99FF99;
-  table-layout: fixed;
+  //table-layout: fixed;
 }
 
 .blueListData{
   background-color: #CEF6F5;
-  table-layout: fixed;
+  //table-layout: fixed;
 }
 
 #createDirectory #createDirectoryContents #directoryName{
@@ -488,7 +493,7 @@
   margin-right: 20px;
 }
 
-#buildBundle_buildButton, #buildBundle_resetButton {
+#buildBundle_buildButton {
   margin-top: 5px;
   margin-right: 20px;
 }
@@ -566,6 +571,161 @@
 
 #downloadLogs #downloadButton {
   float: left;
+}
+
+#Compare #compareDiff {
+	margin-bottom: 2em;
+}
+
+#Compare #currentBundleDiv {
+	float: left;
+	width: 48%;
+	margin-bottom: 2px;
+}
+
+#Compare #compareToBundleDiv {
+	float: right;
+	width: 48%;
+}
+
+#Compare #currentBundleDiv fieldset,
+#Compare #compareToBundleDiv fieldset {
+	border: 1px solid gray;
+	//width: 45%;
+}
+
+#Compare #selectArchiveDiv,
+#Compare #currentBundleDiv legend,
+#Compare #compareToBundleDiv legend {
+	font-weight: bold;
+	font-size: 1.3em;
+	margin-top: .5em;
+	margin-bottom: .3em;
+	line-height: 1em;
+	text-align: left;
+}
+
+#Compare #diffResultsTable caption,
+#Compare #fixedRouteDiffTable caption {
+	font-weight: bold;
+	font-size: 1.3em;
+	margin-bottom: .3em;
+	line-height: 1em;
+}
+
+#Compare #diffResultsTable th,
+#Compare #fixedRouteDiffTable th {
+	margin-bottom: .1em;
+	padding: .3em;
+}
+
+#Compare #diffResultsTable td {
+	padding-top: 3px;
+	padding-right: 10px;
+	padding-bottom: 3px;
+	padding-left: 10px;
+}
+
+#Compare #compareDiff {
+	margin-top: 10em;
+}
+
+#Compare #fixedRouteDiffTable th.modeColumn {
+	text-align: left;
+}
+
+#Compare #diffResultsTable .numericTd {
+	text-align: right;
+}
+
+#Compare #printFixedRouteRptButton {
+	margin-bottom: 1em;
+}
+
+#Compare #baseBundle, #Compare #compareToBundle {
+	font-size: .7em;
+}
+
+#Compare #fixedRouteDiffTable tr .routeFirstLine {
+	//margin-top: 15px;
+	//padding-top: 15px;
+}
+
+#Compare #fixedRouteDiffTable .modeName {
+	font-weight: bold;
+	padding-right: 1em;
+	padding-left: .3em;
+}
+
+#Compare #fixedRouteDiffTable tr.spacer td {
+	padding-top: 7px;
+	border-top: thin black solid;
+}
+
+//#Compare #fixedRouteDiffTable tr.spacer td {
+//	border-top: thin black solid;
+//}
+
+#Compare #fixedRouteDiffTable tr.spacer td:first-child {
+	border-top: none;
+}
+
+#Compare #fixedRouteDiffTable tr.spacer td:nth-child(2),
+#Compare #fixedRouteDiffTable tr.spacer td:last-child {
+	border-left: none;
+	border-right: none;
+}
+
+#Compare #fixedRouteDiffTable td.rtNum {
+	text-align: right;
+	padding-left: .3em;
+	padding-right: .5em;
+}
+
+#Compare #fixedRouteDiffTable tr.routeFirstLine td {
+	border-top: thin black solid;
+}
+
+#Compare #fixedRouteDiffTable tr.routeFirstLine td:first-child {
+	border-top: none;
+}
+
+#Compare #fixedRouteDiffTable tr td:nth-child(2) {
+	border-left: thin black solid;
+}
+
+#Compare #fixedRouteDiffTable tr td:last-child {
+	border-right: thin black solid;
+}
+/*
+#Compare #fixedRouteDiffTable tr:first-child td {
+	border-bottom: 1px solid gray;
+}
+*/
+
+#Compare #fixedRouteDiffTable td.headsignBorder,
+#Compare #fixedRouteDiffTable td.dirBorder {
+	border-top: 1px solid gray;
+}
+
+#Compare #fixedRouteDiffTable .currentStopCt {
+	text-align: right;
+	padding-right: 30px;
+	background-color: #9F9;
+}
+
+#Compare #fixedRouteDiffTable .selectedStopCt {
+	text-align: right;
+	padding-right: 30px;
+	background-color: #F99;
+}
+
+#Compare #fixedRouteDiffTable .currentRpt {
+	background-color: #9F9;
+}
+
+#Compare #fixedRouteDiffTable .selectedRpt {
+	background-color: #F99;
 }
 
 #downloadLogs #downloadImg {
@@ -658,7 +818,8 @@
   padding-top: 20px;
 }
 
-#staging_bundleName, #download_bundleName, #download_selectedDataset {
+#staging_bundleName, #download_bundleName, #download_selectedDataset,
+#sync_deployedBundleName, #sync_deployedDataset {
 	padding: 10px;
 	margin-bottom: 5px;
 }
@@ -723,6 +884,11 @@
 .validateBundle {
   font-size: 14px;
 }
+
+#csvWikiUrl {
+	width: 30em;
+}
+
 #bundleValidationResults {
   	border-collapse: collapse;
 }
@@ -767,13 +933,20 @@
 	clear: left;
 }
 
+#Sync #syncProgressDiv {
+	margin-top: 20px;
+}
+
 /* Styles added for new UI design */
-.ui-dialog-buttonpane .cancelCopyPopup {
+.ui-dialog-buttonpane .cancelCopyPopup,
+.ui-dialog-buttonpane .cancelDeletePopup,
+.ui-dialog-buttonpane .cancelDeleteSuccessPopup {
 	border: none;
 	background: none;
 }
 
-.ui-dialog-buttonpane .cancelCopyPopup:hover {
+.ui-dialog-buttonpane .cancelCopyPopup:hover,
+.ui-dialog-buttonpane .cancelDeletePopup:hover {
 	border: none;
 	text-decoration: underline !important;
 }
@@ -897,8 +1070,10 @@
     border-spacing: 0em;
 }
 
-#Create #existingDataset .copyDirectory, #Upload .removeAgency, #Upload #addAnotherAgency,
-	#Upload #anyNotes, #Upload #cancelUpload, .bundleLink {
+#Create #existingDataset .copyDirectory,
+#Create #existingDataset .deleteDirectory,
+#Upload .removeAgency, #Upload #addAnotherAgency,
+#Upload #anyNotes, #Upload #cancelUpload, .bundleLink {
 	color: blue;
 }
 
@@ -906,9 +1081,12 @@
 	float: left;
 	text-decoration: none;
 	margin: .4em;
+	padding: .5em;
 }
 
-#Create #existingDataset .copyDirectory:hover, #Upload .removeAgency:hover, 
+#Create #existingDataset .copyDirectory:hover,
+#Create #existingDataset .deleteDirectory:hover,
+#Upload .removeAgency:hover, 
 	#Upload #addAnotherAgency:hover, #Upload #anyNotes:hover,
 	#Upload #cancelUpload:hover, .bundleLink:hover {
 	font-weight: bold;
@@ -920,7 +1098,7 @@
 	width: 1.5em;
 }
 
-#Create .copyDirectory {
+#Create .copyDirectory, #Create .deleteDirectory {
 	width: 4em;
 }
 
@@ -987,8 +1165,9 @@
 	background: #ccc;
 }
 
-/* Modal dialog box for Copy on Choose tab */
-#copyPopupContents #addCommentsPopupContents {
+/* Modal dialog box for Copy and Delete on Choose tab */
+#copyPopupContents, #deletePopupContents, #deleteSuccessPopupContents,
+#addCommentsPopupContents {
 	margin-top: 2em;
 	margin-left: 2.3em;
 }
@@ -1001,7 +1180,7 @@
 	background-color: white;
 }
 
-#copyPopup p, #addCommentsPopup p {
+#copyPopup p, #deletePopup p, #deleteSuccessPopup p, #addCommentsPopup p {
     font-family: "Arial Bold","Arial";
     font-weight: 700;
     font-style: normal;
@@ -1018,7 +1197,7 @@
 	margin-top: 2em;
 }
 
-#copyPopup #datasetNameLabel {
+#copyPopup #datasetNameLabel, #deletePopup #datasetNameLabel {
 	font-weight: bold;
 	padding-right: 1em;
 }
@@ -1037,7 +1216,8 @@
 	text-align: left;
 }
 
-#Upload #selectedDataset {
+#Upload #selectedDataset,
+#Upload #commentsLabel {
     font-family: "Arial Bold","Arial";
     font-weight: 700;
     font-style: normal;
@@ -1046,6 +1226,14 @@
     text-align: left;
     line-height: normal;
     padding-bottom: 1.5em;
+}
+
+#Upload #commentsLabel, #Upload #bundleComment {
+	display: block;
+}
+
+#Upload #commentsLabel {
+	padding-bottom: .1em;
 }
 
 #Upload #Agency {
@@ -1068,23 +1256,6 @@
 #Upload .agencyIdData {
 	width: 30%;
 }
-/*
-#Upload .agencyDataSourceType {
-	width: 10%;
-}
-
-#Upload .agencyProtocol {
-	width: 10%;
-}
-
-#Upload .agencyDataSource {
-	width: 40%;
-}
-
-#Upload .removeAgency {
-	width: 10%;
-}
-*/
 
 #Upload .removeAgency {
 	padding-left: 1em;
@@ -1099,6 +1270,52 @@
 
 #Upload #notesDiv {
 	clear: both;
+}
+
+#Upload #addNewAgencyDiv {
+	margin-top: 1em;
+}
+
+#Upload #addNewAgencyTable {
+	width: 100%;
+}
+
+#Upload #addNewAgencyTable th,
+#Upload #addNewAgencyTable td {
+	padding-right: 1em;
+	margin: 1em;
+}
+
+#Upload .newAgencyNameCell {
+	width: 30%;
+}
+
+#Upload .newAgencyName {
+	width: 100%;
+}
+
+#Upload .newAgencyShortNameCell {
+	width: 15%;
+}
+
+#Upload .newAgencyShortName {
+	width: 100%;
+}
+
+#Upload .newAgencyLegacyIdCell {
+	width: 5%;
+}
+
+#Upload .newAgencyLegacyId {
+	width: 100%;
+}
+
+#Upload .newAgencyAddButtonCell {
+	width: 15%;
+}
+
+#Upload .newAgencyAddButton {
+	width: 100%;
 }
 
 #Upload #existingFilesTable {
@@ -1165,6 +1382,11 @@
 #Build #buildTimeEstimate, #Build #testTimeEstimate {
 	margin-left: 1.5em;
 	float: left;
+}
+
+#Build #buildingTest, #Build #buildingFinal {
+	width: 300px;
+	margin-top: 20px;
 }
 
 #testProgressBarDiv, #finalProgressBarDiv {

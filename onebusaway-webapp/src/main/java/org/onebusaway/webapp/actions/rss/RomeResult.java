@@ -17,13 +17,12 @@ package org.onebusaway.webapp.actions.rss;
 
 import java.io.Writer;
 
+import com.rometools.rome.feed.synd.SyndFeed;
+import com.rometools.rome.io.SyndFeedOutput;
 import org.apache.struts2.ServletActionContext;
 import org.apache.struts2.dispatcher.StrutsResultSupport;
 
 import com.opensymphony.xwork2.ActionInvocation;
-import com.sun.syndication.feed.synd.SyndFeed;
-import com.sun.syndication.io.SyndFeedOutput;
-
 public class RomeResult extends StrutsResultSupport {
 
   private static final long serialVersionUID = 1L;

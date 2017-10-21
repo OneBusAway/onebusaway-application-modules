@@ -41,6 +41,7 @@ import org.onebusaway.transit_data.model.trips.TripsForAgencyQueryBean;
 import org.onebusaway.transit_data.model.trips.TripsForRouteQueryBean;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
+import org.onebusaway.util.SystemTime;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.opensymphony.xwork2.ModelDriven;
@@ -75,7 +76,7 @@ public class VehicleLocationsAction extends NextBusApiBase implements
 
   public long getT() {
     if (time == 0)
-      return System.currentTimeMillis();
+      return SystemTime.currentTimeMillis();
     return time;
   }
 
@@ -111,7 +112,7 @@ public class VehicleLocationsAction extends NextBusApiBase implements
             getVehiclesForRoute(null,
                 getAllTripsForAgency(agencyId, getT())));
       }
-      body.setLastTime(new LastTime(System.currentTimeMillis()));
+      body.setLastTime(new LastTime(SystemTime.currentTimeMillis()));
     }
 
     return body;
@@ -159,7 +160,7 @@ public class VehicleLocationsAction extends NextBusApiBase implements
 
       int secondsSinceUpdate = 0;
       if (tripStatus.getLastUpdateTime() > 0)
-        secondsSinceUpdate = (int) TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis()
+        secondsSinceUpdate = (int) TimeUnit.MILLISECONDS.toSeconds(SystemTime.currentTimeMillis()
             - tripStatus.getLastUpdateTime());
 
       vehicle.setSecsSinceReport(secondsSinceUpdate);

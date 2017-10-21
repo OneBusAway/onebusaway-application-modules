@@ -24,6 +24,7 @@ import org.onebusaway.transit_data.model.RouteBean;
 import org.onebusaway.transit_data.model.StopBean;
 import org.onebusaway.transit_data.model.StopWithArrivalsAndDeparturesBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
+import org.onebusaway.util.SystemTime;
 import org.onebusaway.webapp.gwt.common.widgets.DivWidget;
 import org.onebusaway.webapp.gwt.common.widgets.SpanWidget;
 import org.onebusaway.webapp.gwt.mobile_application.model.Bookmark;
@@ -152,7 +153,7 @@ public class StopWithArrivalsAndDeparturesListViewModel extends ListViewModel {
     if (bean == null)
       System.err.println("null bean!");
 
-    long currentTime = System.currentTimeMillis();
+    long currentTime = SystemTime.currentTimeMillis();
     long bestTime = getBestTime(bean);
 
     String arrivalTime = _timeFormat.format(new Date(bestTime));

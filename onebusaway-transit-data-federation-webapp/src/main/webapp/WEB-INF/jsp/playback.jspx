@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (C) 2016 Cambridge Systematics, Inc.
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+            http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+
+<html xmlns:jsp="http://java.sun.com/JSP/Page"
+    xmlns:c="http://java.sun.com/jsp/jstl/core"
+    xmlns:fmt="http://java.sun.com/jsp/jstl/fmt">
+<jsp:directive.page contentType="text/html" />
+<head>
+<title>Playback</title>
+<style>
+table.data td {
+    border: 1px solid black;
+}
+</style>
+</head>
+<body>
+
+<a href="${pageContext.request.contextPath}" style="float: right;">Home</a>
+<h2>Playback</h2>
+<table class="data">
+
+<b>Playback Enabled?:</b> ${source.playbackEnabled}
+<c:if test="${!source.systemTimeAdjustmentEnabled}">
+	<h3><font color="red">WARNING!</font></h3>
+	<p>
+		System Time adjustment disabled.  This feature will not work!
+		Please configure the JVM with <strong>-Dorg.onebusaway.util.SystemTime.enabled=true</strong>
+	</p>
+</c:if>
+<c:if test="${source.playbackEnabled}">
+	<form action="playback!playback-disable.do" method="POST">
+		<input type="submit" value="disable" />
+	</form>
+</c:if>
+
+<br/>
+<br/>
+
+<!-- iterate over current data sources -->
+	<thead>
+		<tr>
+			<td>Index</td>
+			<td>Id</td>
+			<td>Agency</td>
+			<td>Trip Url</td>
+			<td>Enabled?</td>
+			<td>Actions</td>
+		</tr>
+	</thead>
+	<tbody>
+		<c:forEach var="item" varStatus="status" items="${source.sources}">
+			<tr>
+			    <td>${status.index}</td>
+			    <td>${item.feedId}</td>
+				<td>${item.agencyIds}</td>
+				<td>${item.tripUpdatesUrl}</td>
+				<td>${item.enabled}</td>
+				<td>
+					<form action="playback!datasource-detail.do" method="POST">
+						<input type="hidden" name="index" value="${status.index}"/>
+						<input type="submit" value="details" />
+					</form>
+					<form action="playback!playback-detail.do" method="POST">
+						<input type="hidden" name="index" value="${status.index}"/>
+						<input type="submit" value="playback" />
+					</form>
+					<form action="playback!datasource-toggle.do" method="POST">
+						<input type="hidden" name="index" value="${status.index}"/>
+						<input type="submit" value="toggle" />
+					</form>
+
+				</td>
+			</tr>
+		</c:forEach>
+	</tbody>
+</table>
+</body>
+</html>

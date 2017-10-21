@@ -16,6 +16,7 @@
 package org.onebusaway.admin.service.impl;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -26,15 +27,16 @@ import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.onebusaway.admin.model.ui.UserDetail;
 import org.onebusaway.admin.service.UserManagementService;
+import org.onebusaway.users.client.model.UserBean;
 import org.onebusaway.users.model.User;
 import org.onebusaway.users.model.UserIndex;
 import org.onebusaway.users.model.UserRole;
-import org.onebusaway.users.services.StandardAuthoritiesService;
-import org.onebusaway.users.services.UserDao;
-import org.onebusaway.users.services.UserService;
+import org.onebusaway.users.services.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,6 +55,7 @@ public class UserManagementServiceImpl implements UserManagementService {
 
 	private HibernateTemplate hibernateTemplate;
 	private StandardAuthoritiesService authoritiesService;
+    private UserPropertiesService userPropertiesService;
 	private UserDao userDao;
 	private UserService userService;
 	private PasswordEncoder passwordEncoder;
@@ -82,7 +85,131 @@ public class UserManagementServiceImpl implements UserManagementService {
 		
 		return matchingUserNames;
 	}
-	
+
+	@Override
+    public Integer getUserDetailsCount() {
+        Integer count = hibernateTemplate.execute(new HibernateCallback<Integer>() {
+            @SuppressWarnings("unchecked")
+            @Override
+            public Integer doInHibernate(Session session)
+                    throws HibernateException, SQLException {
+                Criteria criteria = session.createCriteria(User.class)
+                        .createCriteria("userIndices")
+                        .add(Restrictions.eq("id.type", UserIndexTypes.USERNAME))
+						.setProjection(Projections.rowCount());
+                List<User> users = criteria.list();
+                Integer count = (Integer) criteria.uniqueResult();
+                return count;
+            }
+        });
+
+        return count;
+    }
+
+	@Override
+	public List<UserDetail> getUserDetails(final int start, final int maxResults) {
+
+		List<UserDetail> userDetails = new ArrayList<UserDetail>();
+
+		List<User> users = hibernateTemplate.execute(new HibernateCallback<List<User>>() {
+
+			@SuppressWarnings("unchecked")
+			@Override
+			public List<User> doInHibernate(Session session)
+					throws HibernateException, SQLException {
+				Criteria criteria = session.createCriteria(User.class)
+						.createCriteria("userIndices")
+						.add(Restrictions.eq("id.type", UserIndexTypes.USERNAME))
+				        .setFirstResult(start)
+                        .setMaxResults(maxResults);
+				List<User> users = criteria.list();
+				return users;
+			}
+		});
+
+		if(!users.isEmpty()) {
+			for (User user : users) {
+			    if (!user.getUserIndices().isEmpty()) {
+					UserDetail userDetail = buildUserDetail(user);
+					userDetails.add(userDetail);
+				}
+			}
+		}
+		log.debug("Returning user details");
+
+		return userDetails;
+	}
+
+	@Override
+	public List<UserDetail> getActiveUsersDetails() {
+
+		List<UserDetail> userDetails = new ArrayList<UserDetail>();
+
+		List<User> users = hibernateTemplate.execute(new HibernateCallback<List<User>>() {
+
+			@SuppressWarnings("unchecked")
+			@Override
+			public List<User> doInHibernate(Session session)
+					throws HibernateException, SQLException {
+				Criteria criteria = session.createCriteria(User.class)
+						.createCriteria("userIndices")
+						.add(Restrictions.eq("id.type", UserIndexTypes.USERNAME));
+				List<User> users = criteria.list();
+				return users;
+			}
+		});
+
+		if(!users.isEmpty()) {
+			for (User user : users) {
+                UserBean bean = userService.getUserAsBean(user);
+                if (!bean.isDisabled()) {
+                    if (!user.getUserIndices().isEmpty()) {
+                        UserDetail userDetail = buildUserDetail(user);
+                        userDetails.add(userDetail);
+                    }
+                }
+			}
+		}
+		log.debug("Returning user details");
+
+		return userDetails;
+	}
+
+    @Override
+    public List<UserDetail> getInactiveUsersDetails() {
+
+        List<UserDetail> userDetails = new ArrayList<UserDetail>();
+
+        List<User> users = hibernateTemplate.execute(new HibernateCallback<List<User>>() {
+
+            @SuppressWarnings("unchecked")
+            @Override
+            public List<User> doInHibernate(Session session)
+                    throws HibernateException, SQLException {
+                Criteria criteria = session.createCriteria(User.class)
+                        .createCriteria("userIndices")
+                        .add(Restrictions.eq("id.type", UserIndexTypes.USERNAME));
+                List<User> users = criteria.list();
+                return users;
+            }
+        });
+
+        if(!users.isEmpty()) {
+            for (User user : users) {
+                UserBean bean = userService.getUserAsBean(user);
+                if (bean.isDisabled()) {
+                    if (!user.getUserIndices().isEmpty()) {
+                        UserDetail userDetail = buildUserDetail(user);
+                        userDetails.add(userDetail);
+                    }
+                }
+            }
+        }
+        log.debug("Returning user details");
+
+        return userDetails;
+    }
+
 	@Override
 	public UserDetail getUserDetail(final String userName) {
 		List<User> users = hibernateTemplate.execute(new HibernateCallback<List<User>>() {
@@ -98,7 +225,7 @@ public class UserManagementServiceImpl implements UserManagementService {
 				return users;
 			}
 		});
-		
+
 		UserDetail userDetail = null;
 		
 		if(!users.isEmpty()) {
@@ -124,6 +251,9 @@ public class UserManagementServiceImpl implements UserManagementService {
 			//There should be only one role
 			userDetail.setRole(role.getName());
 		}
+
+        UserBean bean = userService.getUserAsBean(user);
+        userDetail.setDisabled(bean.isDisabled());
 		
 		return userDetail;
 	}
@@ -191,7 +321,42 @@ public class UserManagementServiceImpl implements UserManagementService {
 		
 		return true;
 	}
-	
+
+	//Marks the user as inactive, can activate again
+	@Override
+    public boolean inactivateUser(UserDetail userDetail) {
+        User user = userService.getUserForId(userDetail.getId());
+
+        if(user == null) {
+            log.info("User '{}' does not exist in the system", userDetail.getUsername());
+            return false;
+        }
+
+        userPropertiesService.disableUser(user);
+
+        log.info("User '{}' disabled successfully", userDetail.getUsername());
+
+        return true;
+    }
+
+    //Marks the user as active
+    @Override
+    public boolean activateUser(UserDetail userDetail) {
+        User user = userService.getUserForId(userDetail.getId());
+
+        if(user == null) {
+            log.info("User '{}' does not exist in the system", userDetail.getUsername());
+            return false;
+        }
+
+        userPropertiesService.activateUser(user);
+
+        log.info("User '{}' activated successfully", userDetail.getUsername());
+
+        return true;
+    }
+
+    //deletes the user
 	@Override
 	public boolean deactivateUser(UserDetail userDetail) {
 		User user = userService.getUserForId(userDetail.getId());
@@ -208,10 +373,10 @@ public class UserManagementServiceImpl implements UserManagementService {
 			userDao.deleteUserIndex(userIndex);
 			it.remove();
 		}
-		
+
 		userDao.saveOrUpdateUser(user);
 		
-		log.info("User '{}' deactivated successfully", userDetail.getUsername());
+		log.info("User '{}' deleted successfully", userDetail.getUsername());
 		
 		return true;
 	}
@@ -282,5 +447,14 @@ public class UserManagementServiceImpl implements UserManagementService {
 	public List<String> getAllRoleNames() {
 		return StandardAuthoritiesService.STANDARD_AUTHORITIES;
 	}
+
+    /**
+     * Injects {@link UserPropertiesService}
+     * @param userPropertiesService the userPropertiesService to set
+     */
+    @Autowired
+    public void setUserPropertiesService(UserPropertiesService userPropertiesService) {
+        this.userPropertiesService = userPropertiesService;
+    }
 
 }

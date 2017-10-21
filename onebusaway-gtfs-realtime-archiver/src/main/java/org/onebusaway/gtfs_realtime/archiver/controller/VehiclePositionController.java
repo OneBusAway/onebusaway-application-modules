@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import org.onebusaway.gtfs_realtime.archiver.model.VehiclePositionModel;
+import org.onebusaway.gtfs_realtime.model.VehiclePositionModel;
 
 @Controller
 public class VehiclePositionController {

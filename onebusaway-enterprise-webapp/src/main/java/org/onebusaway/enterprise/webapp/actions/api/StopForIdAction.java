@@ -1,17 +1,17 @@
 /**
  * Copyright (C) 2011 Metropolitan Transportation Authority
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *         http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.onebusaway.enterprise.webapp.actions.api;
 
@@ -37,6 +37,7 @@ import org.onebusaway.transit_data.model.StopGroupBean;
 import org.onebusaway.transit_data.model.StopGroupingBean;
 import org.onebusaway.transit_data.model.StopsForRouteBean;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
+import org.onebusaway.util.SystemTime;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import uk.org.siri.siri.MonitoredStopVisitStructure;
@@ -103,12 +104,12 @@ public class StopForIdAction extends OneBusAwayEnterpriseActionSupport {
 		            continue;
 		          
 		          Boolean hasUpcomingScheduledService = 
-		        		  _transitDataService.stopHasUpcomingScheduledService((routeBean.getAgency()!=null?routeBean.getAgency().getId():null), System.currentTimeMillis(), stop.getId(), 
+		        		  _transitDataService.stopHasUpcomingScheduledService((routeBean.getAgency()!=null?routeBean.getAgency().getId():null), SystemTime.currentTimeMillis(), stop.getId(), 
 		        				  routeBean.getId(), stopGroupBean.getId());
 		
 		          // if there are buses on route, always have "scheduled service"
 		          Boolean routeHasVehiclesInService = true;
-		        		  //_realtimeService.getVehiclesInServiceForStopAndRoute(stop.getId(), routeBean.getId(), System.currentTimeMillis());
+		        		  //_realtimeService.getVehiclesInServiceForStopAndRoute(stop.getId(), routeBean.getId(), SystemTime.currentTimeMillis());
 		
 		          if(routeHasVehiclesInService) {
 		        	  hasUpcomingScheduledService = true;
@@ -126,7 +127,7 @@ public class StopForIdAction extends OneBusAwayEnterpriseActionSupport {
     _result = new StopResult(stop, routesAtStop);
 
     List<MonitoredStopVisitStructure> visits = 
-        _realtimeService.getMonitoredStopVisitsForStop(_stopId, 0, System.currentTimeMillis());
+        _realtimeService.getMonitoredStopVisitsForStop(_stopId, 0, SystemTime.currentTimeMillis());
 
     _response = generateSiriResponse(visits, AgencyAndIdLibrary.convertFromString(_stopId));
     

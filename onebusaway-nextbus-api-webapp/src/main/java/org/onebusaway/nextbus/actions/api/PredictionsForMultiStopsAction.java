@@ -31,9 +31,11 @@ import org.onebusaway.nextbus.model.transiTime.Prediction;
 import org.onebusaway.nextbus.model.transiTime.Predictions;
 import org.onebusaway.nextbus.model.transiTime.PredictionsDirection;
 import org.onebusaway.nextbus.util.HttpUtil;
+import org.onebusaway.nextbus.util.HttpUtilImpl;
 import org.onebusaway.nextbus.validation.ErrorMsg;
 import org.onebusaway.transit_data.model.RouteBean;
 import org.onebusaway.transit_data.model.StopBean;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -43,7 +45,8 @@ import com.opensymphony.xwork2.ModelDriven;
 public class PredictionsForMultiStopsAction extends NextBusApiBase implements
     ModelDriven<Body<Predictions>> {
 
-  private HttpUtil _httpUtil = new HttpUtil();
+  @Autowired
+  private HttpUtil _httpUtil;
 
   private String agencyId;
 

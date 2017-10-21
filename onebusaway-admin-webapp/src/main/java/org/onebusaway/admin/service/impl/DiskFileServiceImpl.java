@@ -116,17 +116,32 @@ public class DiskFileServiceImpl implements FileService {
 		return f.mkdirs();
 	}
 
+  @Override
+  public boolean deleteBundleDirectory(String filename) {
+    File dir = new File(_basePath, filename);
+    return deleteFile(dir);
+  }
+
 	@Override
 	public List<String[]> listBundleDirectories(int maxResults) {
 		ArrayList<String[]> bundleDirs = new ArrayList<String[]>();
 		File baseDir = new File(_basePath);
 		String[] list  = baseDir.list();
-		_log.info("empty list for bundleDirectories at basepath=" + _basePath);
-		if (list == null) return bundleDirs;
+		if (list == null) {
+			_log.info("empty list for bundleDirectories at basepath=" + _basePath);
+			return bundleDirs;
+		}
 		// need filename/flag/modified date
 		for (String dir: list) {
 			File fDir = new File(baseDir, dir);
-			String[] a = {dir, " ", new Date(fDir.lastModified()).toString()};
+			String lastModified = new Date(fDir.lastModified()).toString();
+			// Since the bundle directory date does not get updated when a build
+			// is done, get the date on the builds sub-directory.
+			File buildDir = new File(fDir, _buildPath);
+			if (buildDir.exists()) {
+			  lastModified = new Date(buildDir.lastModified()).toString();
+			}
+			String[] a = {dir, " ", lastModified};
 			bundleDirs.add(a);
 		}
 		return bundleDirs;
@@ -168,7 +183,7 @@ public class DiskFileServiceImpl implements FileService {
   // copy file to file
   // copy file to dir
 	public String put(String key, String directory) {
-		_log.info("put(" + key + ", " + directory + ")");
+		_log.debug("put(" + key + ", " + directory + ")");
 		NYCFileUtils fs = new NYCFileUtils();
 		String baseDirectoryName = _basePath + File.separator + fs.parseDirectory(key);
 		File baseDirectory = new File(baseDirectoryName);
@@ -180,7 +195,8 @@ public class DiskFileServiceImpl implements FileService {
 		File srcLocation = new File(directory);
 		
 		try {
-      fs.copyFiles(srcLocation, destLocation);
+			_log.debug("cp " + srcLocation + " " + destLocation);
+      		fs.copyFiles(srcLocation, destLocation);
 		} catch (Exception e) {
 		  _log.error("put failed(" + key + ", " + directory + "):", e);
 		}
@@ -232,6 +248,25 @@ public class DiskFileServiceImpl implements FileService {
 			throw new RuntimeException("File name contains characters that could lead to directory " +
 					"traversal attack");
 		}
+	}
+
+	private boolean deleteFile(File file) {
+
+	  if (file.isDirectory()) {
+	    if (file.list().length == 0){
+	      return file.delete();
+	    } else {
+	      String files[] = file.list();
+	      for (String temp : files) {
+	        File fileDelete = new File(file, temp);
+	        //recursive delete
+	        deleteFile(fileDelete);
+	      }
+	      return file.delete();
+	    }
+	  } else {
+	    return file.delete();
+	  }
 	}
 
 }

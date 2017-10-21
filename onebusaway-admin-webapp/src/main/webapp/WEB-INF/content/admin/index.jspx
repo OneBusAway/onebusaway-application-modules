@@ -2,17 +2,17 @@
 
     Copyright (c) 2011 Metropolitan Transportation Authority
 
-    Licensed under the Apache License, Version 2.0 (the "License"); you may not
-    use this file except in compliance with the License. You may obtain a copy of
-    the License at
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+            http://www.apache.org/licenses/LICENSE-2.0
 
     Unless required by applicable law or agreed to in writing, software
-    distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
-    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
-    License for the specific language governing permissions and limitations under
-    the License.
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
 
 -->
 <html xmlns:jsp="http://java.sun.com/JSP/Page"
@@ -45,9 +45,16 @@
 								namespace="/admin/usermanagement" /> <s:a href="%{url}">Manage Users</s:a>
 						</li>
 					</s:if>
-					
-					<s:if test="isPageAvailable('showApiKey', 'org.onebusaway.webapp.actions.admin.ApiKeyAction')">
-						<li><s:url var="url" action="api-key" /> <s:a href="%{url}">Manage API Keys</s:a>
+
+					<s:if test="isPageAvailable('showAgencyMetadata', 'org.onebusaway.webapp.actions.admin.agencymetadata.AgencyMetadataAction')">
+						<li><s:url var="url" action="agency-metadata" namespace="/admin/agencymetadata"/>
+							<s:a href="%{url}">Manage Agency Metadata</s:a>
+						</li>
+					</s:if>
+
+					<s:if test="isPageAvailable('showApiKey', 'org.onebusaway.webapp.actions.admin.apikeymanagement.ApiKeyAction')">
+						<li><s:url var="url" action="api-key"
+								   namespace="/admin/apikeymanagement" />  <s:a href="%{url}">Manage API Keys</s:a>
 						</li>
 					</s:if>
 					<s:if test="isPageAvailable('showQrCode', 'org.onebusaway.webapp.actions.admin.BarcodeAction')">
@@ -69,6 +76,11 @@
 								namespace="/admin/bundles" /> <s:a href="%{url}">Transit Data Bundle Utility</s:a>
 						</li>
 					</s:if>
+					<s:if test="isPageAvailable('showBundleUtil', 'org.onebusaway.webapp.actions.admin.bundlereports.BundleReportsAction')">
+						<li><s:url var="url" action="bundle-reports" namespace="/admin/bundlereports" />
+							<s:a href="%{url}">Data Bundle Reports</s:a>
+						</li>
+					</s:if>
 					<s:if test="isPageAvailable('showVehicleStatus', 'org.onebusaway.webapp.actions.admin.vehiclestatus.VehicleStatusAction')">
 						<li><s:url var="url" action="vehicle-status"
 								namespace="/admin/vehiclestatus" /> <s:a href="%{url}">Vehicle Status Display Utility</s:a>
@@ -85,7 +97,7 @@
 						<li><s:url var="url" action="reports" namespace="/admin" />
 							<s:a href="%{url}">Transitime Reports</s:a></li>
 					</s:if>
-					<s:if test="isPageAvailable('showVehiclePredictions', 'org.onebusaway.webapp.actions.admin.ReportsAction')">
+					<s:if test="isPageAvailable('showVehiclePredictions', 'org.onebusaway.webapp.actions.admin.vehiclepredictions.IndexAction')">
 						<li><s:url var="url" action="index" namespace="/admin/vehiclepredictions" />
 							<s:a href="%{url}">Vehicle Predictions</s:a></li>
 					</s:if>

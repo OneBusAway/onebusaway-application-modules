@@ -1,17 +1,17 @@
-/**
+/*
  * Copyright (c) 2011 Metropolitan Transportation Authority
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *         http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 var timeout = null;
@@ -21,7 +21,17 @@ var selectedDirectory = "";  //Selected on Choose tab, used by Upload tab
 var destinationDirectory = ""; //For "copy" on Choose tab, used by Upload tab
 var userComments = "";		// User comments about the selected dataset
 var buildBundleId = "";		// Build request id, stored in info.json.
- 
+var fromResultLink = false; // If this was called with a Result Link
+// For Fixed Route Comparison Report on Compare tab
+var currentReportDataset = "";
+var currentReportBuildName = "";
+var currentArchivedReportDataset = "";
+var currentArchivedReportBuildName = "";
+var compareToDataset =  "";
+var compareToBuildName =  "";
+var compareToArchivedDataset =  "";
+var compareToArchivedBuildName =  "";
+
 jQuery(function() {
 	//Initialize tabs
 	jQuery("#tabs").tabs();
@@ -52,29 +62,61 @@ jQuery(function() {
 		// alert("hash=" + hash);
 		$(hash).click();
 	}
-	var qs = parseQuerystring();
-	if (qs["fromEmail"] == "true") {
-		//alert("called from email!");
-		jQuery("#prevalidate_id").text(qs["id"]);
-		jQuery("#buildBundle_id").text(qs["id"]);
-		buildBundleId = qs["id"];
-		jQuery("#Build #bundleBuildName").val(qs["name"]);
-		jQuery("#Build #startDatePicker").val(qs["startDate"]);
-		jQuery("#Build #endDatePicker").val(qs["endDate"]);
-		jQuery("#bundleComment").val(qs["bundleComment"]);
-		//hide the result link when reentering from email
-		jQuery("#buildBundle_resultLink").hide();
-		// just in case set the tab
-		var $tabs = jQuery("#tabs");
-		$tabs.tabs('select', 3);
-		updateBuildStatus();
-	}
-	// hide the Build Progress message
-	jQuery("#buildBundle #buildingTest").hide();
 	// politely set our hash as tabs are changed
 	jQuery("#tabs").bind("tabsshow", function(event, ui) {
 		window.location.hash = ui.tab.hash;
 	});
+
+	// Set values for dataset select lists on Compare tab
+	$("#currentDatasetList > option").each(function(index, value) {
+		$(this).val(index);
+	});
+	$("#compareToDatasetList > option").each(function(index, value) {
+		$(this).val(index);
+	});
+	$("#currentArchivedDatasetList > option").each(function(index, value) {
+		$(this).val(index);
+	});
+	$("#compareToArchivedDatasetList > option").each(function(index, value) {
+		$(this).val(index);
+	});
+	$('#Compare #buildingReportDiv').hide();
+	$("#currentArchivedDatasetList").hide();
+	$("#currentArchivedBuildNameList").hide();
+	$("#compareToArchivedDatasetList").hide();
+	$("#compareToArchivedBuildNameList").hide();
+	
+    $('#Compare #useArchiveCheckbox').change(function() {
+    	$("#diffResultsTable tbody").empty();
+    	$('#fixedRouteDiffTable tbody').empty();
+        if($(this).is(":checked")) {
+        	$("#currentDatasetList").hide();
+        	$("#currentBuildNameList").hide();
+        	$("#compareToDatasetList").hide();
+        	$("#compareToBuildNameList").hide();
+        	$("#currentArchivedDatasetList").show();
+        	$("#currentArchivedBuildNameList").show();
+        	$("#compareToArchivedDatasetList").show();
+        	$("#compareToArchivedBuildNameList").show();
+    		if (currentArchivedReportDataset && currentArchivedReportBuildName
+    				&& compareToArchivedDataset && compareToArchivedBuildName) {
+    			buildDiffReport();
+    		}
+        } else {
+        	$("#currentArchivedDatasetList").hide();
+        	$("#currentArchivedBuildNameList").hide();
+        	$("#compareToArchivedDatasetList").hide();
+        	$("#compareToArchivedBuildNameList").hide();
+        	$("#currentDatasetList").show();
+        	$("#currentBuildNameList").show();
+        	$("#compareToDatasetList").show();
+        	$("#compareToBuildNameList").show();
+    		if (currentReportDataset && currentReportBuildName
+    				&& compareToDataset && compareToBuildName) {
+    			buildDiffReport();
+    		}
+        }
+    });	
 
 	jQuery("#currentDirectories").selectable({ 
 		stop: function() {
@@ -115,7 +157,7 @@ jQuery(function() {
 				jQuery.ajax({
 					url: "manage-bundles!existingBuildList.action",
 					data: {
-						"diffBundleName" : names[0]
+						"selectedBundleName" : names[0]
 					},
 					type: "GET",
 					async: false,
@@ -141,22 +183,170 @@ jQuery(function() {
 				return $(element).text();  
 			});
 			if (buildNames.length > 0) {
+				// Clear any previous results from the tables
+				$('#diffResultsTable tr').slice(1).remove();
+				$('#fixedRouteDiffTable tr').slice(1).remove();
+
 				jQuery.ajax({
-					url: "manage-bundles!diffResult.action",
+					url: "compare-bundles!diffResult.action",
 					data: {
-						"diffBundleName" : bundleNames[0],
-						"diffBuildName" : buildNames[0],
-						"bundleDirectory" : selectedDirectory,
-						"bundleName": jQuery("#bundleBuildName").val()
+						"datasetName" : selectedDirectory,
+						"buildName" : jQuery("#bundleBuildName").val(),
+						"datasetName2" : bundleNames[0],
+						"buildName2": buildNames[0]
 					},
 					type: "GET",
 					async: false,
 					success: function(data) {
-						$('#diffResult').text('');
-						$.each(data, function(index, value) {
-							$('#diffResult').append(
-									"<div id=\"diffResultItem\">"+value+"</div>");
+						$.each(data.diffResults, function(index, value) {
+							// Skip first three rows of results
+							if (index >= 3) {
+								var diffRow = formatDiffRow(value);
+								$("#diffResultsTable").append(diffRow);
+							}
 						});
+						var baseBundle = selectedDirectory + " / " + jQuery("#bundleBuildName").val();
+						var compareToBundle = bundleNames[0] + " / " + buildNames[0];
+						$("#baseBundle").text(baseBundle + " (green)");
+						$("#compareToBundle").text(compareToBundle + " (red)");
+						$.each(data.fixedRouteDiffs, function(index, value) {
+							var modeName = value.modeName;
+							var modeClass = "";
+							var modeFirstLineClass=" modeFirstLine";
+							var addSpacer = true;
+							if (value.srcCode == 1) {
+								modeClass = "currentRpt";
+							} else if (value.srcCode == 2) {
+								modeClass = "selectedRpt";
+							}
+							$.each(value.routes, function(index2, value2) {
+								var routeNum = value2.routeNum;
+								var routeName = value2.routeName;
+								var routeFirstLineClass=" routeFirstLine";
+								addSpacer = false;
+								if (index2 > 0) {
+									modeName = "";
+									modeFirstLineClass = "";
+								}
+								var routeClass = modeClass;
+								if (value2.srcCode == 1) {
+									routeClass = "currentRpt";
+								} else if (value2.srcCode == 2) {
+									routeClass = "selectedRpt";
+								}
+								$.each(value2.headsignCounts, function(headsignIdx, headsign) {
+									var headsignName = headsign.headsign;
+									var headsignBorderClass = "";
+									if (headsignIdx > 0) {
+										modeName = "";
+										routeNum = "";
+										routeName = "";
+										modeFirstLineClass = "";
+										routeFirstLineClass = "";
+										headsignBorderClass = " headsignBorder";
+										addSpacer = false;
+									}
+									var headsignClass = routeClass;
+									if (headsign.srcCode == 1) {
+										headsignClass = "currentRpt";
+									} else if (headsign.srcCode == 2) {
+										headsignClass = "selectedRpt";
+									}
+									$.each(headsign.dirCounts, function(dirIdx, direction) {
+										var dirName = direction.direction;
+										var dirBorderClass = "";
+										if (dirIdx > 0) {
+											modeName = "";
+											routeNum = "";
+											routeName = "";
+											headsignName = "";
+											modeFirstLineClass = "";
+											routeFirstLineClass = "";
+											headsignBorderClass = "";
+											dirBorderClass = " dirBorder";
+											addSpacer = false;
+										}
+										var dirClass = headsignClass;
+										if (direction.srcCode == 1) {
+											dirClass = "currentRpt";
+										} else if (direction.srcCode == 2) {
+											dirClass = "selectedRpt";
+										}
+										$.each(direction.stopCounts, function(index3, value3) {
+											var stopCt = value3.stopCt;
+											var stopClass = "";
+											if (dirClass == "currentRpt") {
+												stopClass = "currentStopCt";
+											} else if (dirClass == "selectedRpt") {
+												stopClass = "selectedStopCt";
+											}
+											if (value3.srcCode == 1) {
+												stopClass = "currentStopCt";
+											} else if (value3.srcCode == 2) {
+												stopClass = "selectedStopCt";
+											}
+											var weekdayTrips = value3.tripCts[0];
+											var satTrips = value3.tripCts[1];
+											var sunTrips = value3.tripCts[2];
+											if (index3 > 0) {
+												modeName = "";
+												modeFirstLineClass = "";
+												routeNum = "";
+												routeName = "";
+												headsignName = "";
+												dirName = "";
+												routeFirstLineClass = "";
+												headsignBorderClass = "";
+												dirBorderClass = "";
+												addSpacer = false;
+											}
+											if (index > 0 && headsignIdx == 0
+													&& dirIdx == 0 && index3 == 0) {
+												addSpacer = true;
+											}
+											if (addSpacer) {
+												var new_spacer_row = '<tr class="spacer"> \
+													<td></td> \
+													<td></td> \
+													<td></td> \
+													<td></td> \
+													<td></td> \
+													<td></td> \
+													<td></td> \
+													<td></td> \
+													<td></td> \
+													</tr>';
+												$('#fixedRouteDiffTable').append(new_spacer_row);
+											}
+											var new_row = '<tr class="fixedRouteDiff' + modeFirstLineClass + routeFirstLineClass + '"> \
+												<td class="' + modeClass + ' modeName" >' + modeName + '</td> \
+												<td class="' + routeClass + routeFirstLineClass + ' rtNum" >' + routeNum + '</td> \
+												<td class="' + routeClass + routeFirstLineClass + '">' + routeName + '</td> \
+												<td class="' + headsignClass + routeFirstLineClass + headsignBorderClass + '">' + headsignName + '</td> \
+												<td class="' + dirClass + routeFirstLineClass + headsignBorderClass + dirBorderClass + '">' + dirName + '</td> \
+												<td class="' + stopClass + routeFirstLineClass + headsignBorderClass + dirBorderClass + '">' + stopCt + '</td> \
+												<td class="' + stopClass + routeFirstLineClass + headsignBorderClass + dirBorderClass + '">' + weekdayTrips + '</td> \
+												<td class="' + stopClass + routeFirstLineClass + headsignBorderClass + dirBorderClass + '">' + satTrips + '</td> \
+												<td class="' + stopClass + routeFirstLineClass + headsignBorderClass + dirBorderClass + '">' + sunTrips + '</td> \
+												</tr>';
+											$('#fixedRouteDiffTable').append(new_row);
+										});
+									});
+								});
+							});
+						});
+						// Add bottom border to reprot
+						var new_spacer_row = '<tr class="spacer"> \
+							<td></td> \
+							<td></td> \
+							<td></td> \
+							<td></td> \
+							<td></td> \
+							<td></td> \
+							<td></td> \
+							<td></td> \
+							</tr>';
+						$('#fixedRouteDiffTable').append(new_spacer_row);
 					}
 				})
 			}
@@ -187,20 +377,20 @@ jQuery(function() {
 		$(this).prop("checked", state);
 		// If this item is selected, enable the "Add files..." button
 		if (state == true) {
-			//jQuery("#existingDirectoryButton").prop("enabled",true);
 			jQuery("#existingDirectoryButton").removeAttr("disabled").css("color", "#000");
 		} else {
 			jQuery("#existingDirectoryButton").attr("disabled", "disabled").css("color", "#999");
 		}
 	});
-	
+
 	// use an existing dataset
 	jQuery("#existingDirectoryButton").click(onExistingDatasetClick);
-	
+
 	// copy existing dataset to a new directory
 	jQuery(".copyDirectory").click(onCopyExistingDatasetClick);
-	
-	jQuery("#continueCopy").click(onContinueCopyClick);
+
+	// copy existing dataset to a new directory
+	jQuery(".deleteDirectory").click(onDeleteExistingDatasetClick);
 	
 	// upload bundle source data for selected agency
 	jQuery("#uploadButton").click(onUploadSelectedAgenciesClick);
@@ -214,8 +404,9 @@ jQuery(function() {
 	// change input type to 'file' if protocol changes to 'file'
 	jQuery("#agency_data").on("change", "tr .agencyProtocol", onAgencyProtocolChange);
 
+	jQuery("#addNewAgency").click(onAddNewAgencyClick);
+
 	// remove selected agencies
-	// jQuery(".removeAgency").click(onRemoveSelectedAgenciesClick);
 	jQuery("#uploadFiles #agency_data").on('click', '.removeAgency', onRemoveSelectedAgenciesClick);
 
 	// popup the Comments box
@@ -238,6 +429,7 @@ jQuery(function() {
 
 	//if bundle build name is entered, enable the Validate button
 	jQuery("#Validate #prevalidate_bundleName").on("input propertychange", onBundleNameChanged);
+	jQuery("#Build #bundleBuildName").on("input propertychange", onBundleNameChanged);
 
 	//initially hide the Validation Progress label
 	jQuery("#prevalidate_progress").hide();
@@ -257,8 +449,6 @@ jQuery(function() {
 	jQuery("#prevalidateInputs #validateBox #validateButton").click(onValidateClick);
 
 	//Handle build button click event
-	//jQuery("#buildBundle_buildButton").click(onBuildClick);
-	//jQuery("#Build #testBundleButton").click(onBuildClick);
 	jQuery("#Build #testBuildBundleButton").click({buildType: "test"}, onBuildClick);
 	jQuery("#Build #finalBuildBundleButton").click({buildType: "final"}, onBuildClick);
 
@@ -267,16 +457,12 @@ jQuery(function() {
 	jQuery("#viewFinalBuildDetails").click({buildType: "final"}, toggleBuildBundleResultList);
 
 
-	//Handle reset button click event
-	jQuery("#buildBundle_resetButton").click(onResetClick);
-
 	//Enable or disable create/select button when user enters/removes directory name
 	//For a copy, a value must also be provided for the destination directory
 	//Using bind() with propertychange event as live() does not work in IE for unknown reasons
 	jQuery("#createDataset #directoryName").bind("input propertychange", function() {
 		var text = jQuery("#createDataset #directoryName").val();
-		var validDatasetNameExp = /^[a-zA-Z_-\d]+$/;
-		//var copyDestText = jQuery("#createDirectory #destDirectoryName").val();
+		var validDatasetNameExp = /^[a-zA-Z0-9_-]+$/;
 		jQuery('#Create #filenameError').hide();
 		disableSelectButton();
 		if (text.length > 0) {
@@ -290,10 +476,42 @@ jQuery(function() {
 			}
 		}
 	});
-	
+
+	//Enable "Continue" button when user enters a destination name for copying
+	//a dataset. If the name is removed or invalid, disable the "Continue" button.
+	//Using bind() with propertychange event as live() does not work in IE for unknown reasons
+	jQuery("#destinationDirectory").bind("input propertychange", function() {
+		var text = jQuery("#destinationDirectory").val();
+		var validDatasetNameExp = /^[a-zA-Z0-9_-]+$/;
+		jQuery('#copyFilenameError').hide();
+		$("#copyContinue").button("disable");
+		if (text.length > 0) {
+			if (text.match(validDatasetNameExp)) {
+				$("#copyContinue").button("enable");
+			} else {
+				jQuery('#copyFilenameError').show();
+			}
+		}
+	});
+
+	// On Compare tab
+	jQuery("#currentDatasetList").on("change", onCurrentDatasetChange);
+	jQuery("#currentBuildNameList").on("change", onCurrentBuildNameChange);
+
+	jQuery("#currentArchivedDatasetList").on("change", onCurrentArchivedDatasetChange);
+	jQuery("#currentArchivedBuildNameList").on("change", onCurrentArchivedBuildNameChange);
+
+	jQuery("#compareToDatasetList").on("change", onCompareToDatasetChange);
+	jQuery("#compareToBuildNameList").on("change", onCompareToBuildNameChange);
+
+	jQuery("#compareToArchivedDatasetList").on("change", onCompareToArchivedDatasetChange);
+	jQuery("#compareToArchivedBuildNameList").on("change", onCompareToArchivedBuildNameChange);
+
+	jQuery("#printFixedRouteRptButton").click(onPrintFixedRouteRptClick);
+
 	disableStageButton();
 	disableDownloadButton();
-	disableBuildButton();
+	disableBuildButtons();
 
 	//toggle bundle staging progress list
 	jQuery("#stageBundle #stageBundle_progress #expand").bind({
@@ -316,29 +534,83 @@ jQuery(function() {
 	//Handle download button click event
 	jQuery("#downloadBundle_downloadButton").click(onDownloadBundleClick);
 
+	//Handle sync button click event
+	jQuery("#syncBundle_syncButton").click(onSyncDeployedBundleClick);
+
 	//Retrieve transit agency metadata
 	getAgencyMetadata();
+	
+	// Retrieve dataset name and build name for bundle currently deployed on staging.
+	//getDeployedOnStagingBundleInfo();
 	
 	// For "Copy" popup to specify a destination directory
 	$("#copyPopup").dialog({
 		autoOpen: false,
 		modal: true,
 		width: 'auto',
-		buttons: {
-			"Cancel": function() {
+		buttons: [{
+			id: "copyCancel",
+			text: "Cancel",
+			click: function() {
 				$(this).dialog("close");
-			},
-			"Continue": function() {
+			}
+		},
+		{
+			id: "copyContinue",
+			text: "Continue",
+			click: function() {
 				destinationDirectory = $("#destinationDirectory").val();
 				$(this).dialog("close");
 				onCopyDestinationSpecified();
 			}
-		},
+		}],
         open: function() {
             $('.ui-dialog-buttonpane').find('button:contains("Cancel")').addClass('cancelCopyPopup');
         }		
 	});
 	
+	// For "Delete" popup to confirm deleting the directory
+	$("#deletePopup").dialog({
+		autoOpen: false,
+		modal: true,
+		width: 'auto',
+		buttons: [{
+			id: "deleteCancel",
+			text: "Cancel",
+			click: function() {
+				$(this).dialog("close");
+			}
+		},
+		{
+			id: "deleteContinue",
+			text: "Delete dataset",
+			click: function() {
+				$(this).dialog("close");
+				onDeleteDatasetConfirmed();
+			}
+		}],
+        open: function() {
+            $('.ui-dialog-buttonpane').find('button:contains("Cancel")').addClass('cancelDeletePopup');
+        }
+	});
+
+	// For "Delete Success" popup to confirm the directory was deleted
+	$("#deleteSuccessPopup").dialog({
+		autoOpen: false,
+		modal: true,
+		width: 'auto',
+		buttons: [{
+			id: "deleteSuccessCancel",
+			text: "Continue",
+			click: function() {
+				$(this).dialog("close");
+			}
+		}],
+        open: function() {
+            $('.ui-dialog-buttonpane').find('button:contains("Continue")').addClass('cancelDeletePopup');
+        }
+	});
+
 	// For "Add Comments" popup to add user commments about a dataset
 	$("#addCommentsPopup").dialog({
 		autoOpen: false,
@@ -349,9 +621,7 @@ jQuery(function() {
 				$(this).dialog("close");
 			},
 			"Continue": function() {
-				//destinationDirectory = $("#destinationDirectory").val();
 				$(this).dialog("close");
-				//onCopyDestinationSpecified();
 			}
 		}
 	});
@@ -369,6 +639,31 @@ jQuery(function() {
 	$("#finalProgressBar").progressbar({
 		value: 0
 	});
+
+	clearPreviousBuildResults();
+	$("#Sync #syncProgressDiv").hide();
+	var qs = parseQuerystring();
+	if (qs["fromEmail"] == "true") {
+		//alert("called from email!");
+		fromResultLink = true;
+		buildBundleId = qs["id"];
+		updateBuildStatus("test");
+		jQuery("#prevalidate_id").text(qs["id"]);
+		jQuery("#buildBundle_id").text(qs["id"]);
+		jQuery("#prevalidate_bundleName").val(qs["name"]);
+		jQuery("#Build #bundleBuildName").val(qs["name"]);
+		jQuery("#Build #startDatePicker").val(qs["startDate"]);
+		jQuery("#Build #endDatePicker").val(qs["endDate"]);
+		// Reshow hidden result elements
+		$("#buildBundle #buildingTest").show();
+		$("#buildBundle_testResultLink").show();
+		$("#bundleTestResultsHolder").show();
+		$("#testProgressBarDiv").show();
+		// just in case set the tab
+		var $tabs = jQuery("#tabs");
+		$tabs.tabs('select', 3);
+	}
+
 });
 
 function onCreateContinueClick() {
@@ -390,9 +685,9 @@ function onAgencyIdSelectClick() {
 	}
 	var previous_protocol = $(this).closest('tr').find(".agencyProtocol").val();
 	var protocol = "file";
-	if (url.toLowerCase().startsWith("http")) {
+	if (url.toLowerCase().substring(0,4) === 'http') {
 	  protocol = "http";
-	} else if (url.toLowerCase().startsWith("ftp")) {
+	} else if (url.toLowerCase().substring(0,3) === 'ftp') {
 		protocol = "ftp";
 	}
 	if ((previous_protocol == "file" && protocol != "file")
@@ -420,6 +715,17 @@ function onBuildContinueClick() {
 	var $tabs = jQuery("#tabs");
 	$tabs.tabs('select', 4);
 }
+/*
+function onCurrentDatasetNameSelectClick() {
+	var idx = $(this).find(":selected").index();
+	if (idx == 0) {
+		//clean data
+	} else {
+		currentReportDataset = $(this).find(":selected").text();
+		currentReportBuildName = getLatestBuildName(currentReportDataset);
+	}
+}
+*/
 
 function onStageContinueClick() {
 	var $tabs = jQuery("#tabs");
@@ -493,7 +799,6 @@ function showBundleInfo(bundleInfo){
 	if (bundleObj.agencyList != undefined) {
 		//Populating Upload Tab Fields
 		$.each(bundleObj.agencyList, function(i, agency) {
-			//showThisAgency(agency);
 			jQuery("#agencyId").val(agency.agencyId);
 		    jQuery("#agencyDataSource").val(agency.agencyDataSource);
 		    jQuery("#agencyDataSourceType").val(agency.agencyDataSourceType);
@@ -525,7 +830,6 @@ function showBundleInfo(bundleInfo){
 			&& bundleObj.buildResponse.email != "null") {
 		jQuery("#buildBundle_email").val(bundleObj.buildResponse.email);
 	}
-	jQuery("#buildBundle_bundleName").val(bundleObj.buildResponse.bundleBuildName);
 	jQuery("#startDatePicker").val(bundleObj.buildResponse.startDate);
 	jQuery("#startDate").val(bundleObj.buildResponse.startDate);
 	jQuery("#endDatePicker").val(bundleObj.buildResponse.endDate);
@@ -533,18 +837,29 @@ function showBundleInfo(bundleInfo){
 	jQuery("#uploadFiles #bundleComment").val(bundleObj.buildResponse.comment);
 	jQuery("#selected_bundleDirectory").text(bundleObj.directoryName);
 	jQuery("#buildBundle_id").text(bundleObj.buildResponse.requestId);
-	buildBundleId = bundleObj.buildResponse.requestId;
-	setDivHtml(document.getElementById('testBuildBundle_resultList'), bundleObj.buildResponse.statusMessages);
-	setDivHtml(document.getElementById('finalBuildBundle_resultList'), bundleObj.buildResponse.statusMessages);
-	showBuildFileList(bundleObj.buildResponse.buildOutputFiles, bundleObj.buildResponse.requestId);
+	if (!fromResultLink) {
+		buildBundleId = bundleObj.buildResponse.requestId;
+	}
+	if (bundleObj.buildResponse.statusMessages != null) {
+		setDivHtml(document.getElementById('testBuildBundle_resultList'), bundleObj.buildResponse.statusMessages);
+		setDivHtml(document.getElementById('finalBuildBundle_resultList'), bundleObj.buildResponse.statusMessages);
+	}
+	if (buildBundleId != null) {
+		showBuildFileList(bundleObj.buildResponse.buildOutputFiles, bundleObj.buildResponse.requestId);
+	}
 }
 
 function onCreateDatasetClick() {
 	selectedDirectory = jQuery("#createDataset #directoryName").val();
 	$("#Download #download_selectedDataset").text(selectedDirectory);
+	// Clear fields on the Upload tab
+	if (agencyMetadataAvailable) {
+		$('#agency_data tr').slice(1).remove();
+		onAddAnotherAgencyClick("file");
+	}
+	$("#uploadFiles #bundleComment").val("");
+	$('#existingFilesTable tr').slice(1).remove();
 	onSelectDataset("create");
-	//var $tabs = jQuery("#tabs");
-	//$tabs.tabs('select', 1);
 }
 
 function onExistingDatasetClick() {
@@ -552,38 +867,42 @@ function onExistingDatasetClick() {
 	selectedDirectory = selectedCheckbox.closest("tr").find(".directoryName").text();
 	$("#Download #download_selectedDataset").text(selectedDirectory);
 	onSelectDataset("existing");
-	//var $tabs = jQuery("#tabs");
-	//$tabs.tabs('select', 1);
+	updateFixedRouteParams(selectedDirectory);
 }
 
 function onCopyExistingDatasetClick() {
 	selectedDirectory = $(this).closest("tr").find(".directoryName").text();
 	$("#Download #download_selectedDataset").text(selectedDirectory);
+	$("#destinationDirectory").val("");
+	jQuery('#copyFilenameError').hide();
+	$("#copyContinue").button("disable");
 	var continueCopy = $("#copyPopup").dialog("open");
 }
 
 function onCopyDestinationSpecified() {
 	onSelectDataset("copy");
-	//var $tabs = jQuery("#tabs");
-	//$tabs.tabs('select', 1);
 }
 
-function onContinueCopyClick() {
-	destinationDirectory = $("#destinationDirectory").text();
-	alert('destination directory: ' + destinationDirectory);
+function onDeleteDatasetConfirmed() {
+	onDeleteDataset();
+}
+
+function onDeleteExistingDatasetClick() {
+	selectedDirectory = $(this).closest("tr").find(".directoryName").text();
+	var continueDelete = $("#deletePopup").dialog("open");
 }
 
 function onAnyCommentsClick() {
 	$("#addCommentsPopup").dialog("open");
 }
 
-
-
 function onSelectDataset(sourceDirectoryType) {
 	var bundleDir = selectedDirectory;
 	var actionName = "selectDirectory";
 	if (sourceDirectoryType=="copy") {
 		actionName = "copyDirectory"
+	} else if (sourceDirectoryType=="delete") {
+		actionName = "deleteDirectory"
 	}
 	var copyDir = destinationDirectory;
 
@@ -603,6 +922,12 @@ function onSelectDataset(sourceDirectoryType) {
 		}
 		actionName = "createDirectory";
 	}
+	// Reset fields on Compare tab
+	resetCurrentReportDataset();
+	resetCompareToDataset();
+	// Clear any previous reports
+	$("#diffResultsTable tbody").empty();
+	$('#fixedRouteDiffTable tbody').empty();
 
 	jQuery.ajax({
 		url: "manage-bundles!" + actionName + ".action?ts=" +new Date().getTime(),
@@ -611,13 +936,15 @@ function onSelectDataset(sourceDirectoryType) {
 			"destDirectoryName" : copyDir},
 			async: false,
 			success: function(response) {
+				clearPreviousBuildResults();
 				disableSelectButton();
 				var status = response;
 				if (status != undefined) {
 					if(status.selected == true) {
 						jQuery("#createDirectoryResult #resultImage").attr("src", "../../css/img/dialog-accept-2.png");
 						jQuery("#createDirectoryMessage").text(status.message).css("color", "green");
-						// Clear the bundle name for the Build and Stage tabs
+						// Clear the bundle name for the Pre-validate, Build and Stage tabs
+						$("#Validate #prevalidate_bundleName").val("");
 						$("#Build #bundleBuildName").val("");
 						$("#Stage #staging_bundleName").text("");
 						$("#Download #download_bundleName").text("");
@@ -660,10 +987,16 @@ function onSelectDataset(sourceDirectoryType) {
 						
 						if (actionName != "createDirectory" && status.bundleInfo != null) {
 							// Display the name of the most recently built bundle on the Build and Stage tabs
-							if (status.bundleInfo.buildResponse != null) {
+							if (status.bundleInfo.buildResponse != null && !fromResultLink) {
+								$("#Validate #prevalidate_bundleName").val(status.bundleInfo.buildResponse.bundleBuildName);
 								$("#Build #bundleBuildName").val(status.bundleInfo.buildResponse.bundleBuildName);
 								$("#Stage #staging_bundleName").text(status.bundleInfo.buildResponse.bundleBuildName);
 								$("#Download #download_bundleName").text(status.bundleInfo.buildResponse.bundleBuildName);
+								// Get results of previous build
+								if (status.bundleInfo.buildResponse.statusMessages != null
+										&& status.bundleInfo.buildResponse.statusMessages.length > 0) {
+									getPreviousBuildResults(status.bundleInfo.buildResponse);
+								}
 							}
 							enableStageButton();
 							enableDownloadButton();
@@ -699,6 +1032,7 @@ function onSelectDataset(sourceDirectoryType) {
 										if (agencyMetadata[j].legacyId == agency.agencyId) {
 											agencyName = agencyMetadata[j].name;
 											agencyName += " (" + agencyMetadata[j].shortName + ")";
+											break;
 										}
 									}
 
@@ -727,14 +1061,12 @@ function onSelectDataset(sourceDirectoryType) {
 								}
 							}
 						}
-						enableBuildButton();
-						enableResetButton();
+						enableBuildButtons();
 					}					
 					else {
 						jQuery("#createDirectoryResult #resultImage").attr("src", "../../css/img/warning_16.png");
 						jQuery("#createDirectoryMessage").text(status.message).css("color", "red");
-						disableBuildButton();
-						disableResetButton();
+						disableBuildButtons();
 					}
 					var continueButton = jQuery("#create_continue");
 					enableContinueButton(continueButton);
@@ -757,14 +1089,39 @@ function onSelectDataset(sourceDirectoryType) {
 					jQuery("#Build #datasetName").text(bundleDir);
 				} else {
 					alert("null status");
-					disableBuildButton();
+					disableBuildButtons();
 				}
-				var $tabs = jQuery("#tabs");
-				$tabs.tabs('select', 1);				
+				if (!fromResultLink) {
+					var $tabs = jQuery("#tabs");
+					$tabs.tabs('select', 1);
+				}
 			},
 			error: function(request) {
 				alert("There was an error processing your request. Please try again.");
 			}
+	});
+}
+
+function onDeleteDataset() {
+	var bundleDir = selectedDirectory;
+	var actionName = "deleteDirectory";
+	jQuery.ajax({
+		url: "manage-bundles!" + actionName + ".action?ts=" +new Date().getTime(),
+		type: "GET",
+		data: {"directoryName" : bundleDir},
+		async: false,
+		success: function(response) {
+			disableSelectButton();
+			$("#deleteSuccessPopup").dialog("open");
+			// Remove dataset from list of datasets
+			var datasetTd = $('td').filter(function(){
+			    return $(this).text() === bundleDir;
+			})
+			datasetTd.parent().remove();
+		},
+		error: function(request) {
+			alert("There was an error processing your request. Please try again.");
+		}
 	});
 }
 
@@ -790,7 +1147,7 @@ function onUploadSelectedAgenciesClick() {
 		if (agencyProtocol != "file") {
 			var actionName = "uploadSourceData";	
 			jQuery.ajax({
-				url: "manage-bundles!" + actionName + ".action?ts=" + new Date().getTime(),
+				url: "upload-gtfs!" + actionName + ".action?ts=" + new Date().getTime(),
 				type: "GET",
 				data: {
 					"directoryName" : bundleDir,
@@ -825,7 +1182,7 @@ function onUploadSelectedAgenciesClick() {
 			formData.append("cleanDir", cleanDir);
 			var actionName = "uploadSourceFile";
 			jQuery.ajax({
-				url: "manage-bundles!" + actionName + ".action",
+				url: "upload-gtfs!" + actionName + ".action",
 				type: "POST",
 				data: formData,
 				cache: false,
@@ -857,12 +1214,66 @@ function onBundleCommentChanged() {
 		}
 	});
 }
-function foo(a,inputType) {
 
+function onAddNewAgencyClick() {
+	// Make ajax call
+	jQuery.ajax({
+		url: "../../api/agency/create",
+		type: "GET",
+		async: false,
+		data: {
+			"gtfs_id" : "",
+			"name" : $("#newAgencyName").val(),
+			"short_name" : $("#newAgencyShortName").val(),
+			"legacy_id" : $("#newAgencyLegacyId").val(),
+			"gtfs_feed_url" : "",
+			"gtfs_rt_feed_url" : "",
+			"bounding_box" : "",
+			"ntd_id" : "",
+			"agency_message" : ""
+		},
+		success: function(response) {
+			getAgencyMetadata();
+			//clear fields for new agency
+			$("#newAgencyName").val("");
+			$("#newAgencyShortName").val("");
+			$("#newAgencyLegacyId").val("");
+		},
+		error: function(request) {
+			console.log("Error adding new agency");
+			alert("There was an error processing your request. Please try again.");
+		}
+	});
 }
+
+/*
+ * When a dataset is selected from the "Choose" tab, this function is called
+ * for displaying the results from the most recent build for the selected
+ * dataset.
+ */
+function getPreviousBuildResults(buildResponse) {
+	// Display the progress messages produced by the build 
+	$("#Build #buildBundle_testResultList").val(buildResponse.statusMessages.join("\n"));
+	// Create the formatted list of bundle build output files.
+	updateBuildList(buildResponse.requestId,"test");
+
+	$("#buildBundle_testResultLink").hide();// Hide the div for the result link
+	$("#testProgressBarDiv #testBuildProgress").text("Previous Build Messages");
+	$("#testProgressBarDiv").show();
+	$("#bundleTestResultsHolder").show();
+}
+
 function onAddAnotherAgencyClick(inputType) {
+	// If no agency metadata defined, just return.
+	if (!agencyMetadataAvailable) {
+		return;
+	}
 	if (inputType === undefined) {
 		inputType = "file";
+	}
+	var file_selected = ""; // For Protocol select group
+	if (inputType === "file") {
+		file_selected = "selected";
 	}
 	var metadata = "";
 	var url = "";
@@ -870,12 +1281,16 @@ function onAddAnotherAgencyClick(inputType) {
 	  metadata = '<select class="agencyIdSelect">';
 	  for (var i=0; i<agencyMetadata.length; ++i) {
 		  metadata += '<option value="' + agencyMetadata[i].legacyId + '">'
-		  + agencyMetadata[i].name + ' (' 
+		  + agencyMetadata[i].name + ' ('
 		  + agencyMetadata[i].shortName + ')</option>';
 	  }
 	  metadata += '</select>';
 	  url = agencyMetadata[0].gtfsFeedUrl;
-	  if (url.toLowerCase().startsWith("http") || url.toLowerCase().startsWith("ftp")) {
+	  if (url == null) {
+		  url = "";
+	  }
+	  if (url.toLowerCase().substring(0,4) === 'http'
+		  || (url.toLowerCase().substring(0,3) === 'ftp')) {
 	  	var urlValue = ' value="' + url + '"';
 	  }
 	}
@@ -888,7 +1303,7 @@ function onAddAnotherAgencyClick(inputType) {
 		<td><select class="agencyProtocol"> \
 		<option value="http">http</option> \
 		<option value="ftp">ftp</option> \
-		<option value="file">file</option> \
+		<option value="file" ' + file_selected + '>file</option> \
 		</select></td> \
 		<td class="agencyDataSourceData"> \
 		<input type=' + inputType + ' class="agencyDataSource" ' + urlValue + '/></td> \
@@ -938,16 +1353,29 @@ function onAgencyProtocolChange() {
 }
 
 function onBundleNameChanged() {
+	// Changes for Pre-validate tab
 	var text = jQuery("#Validate #prevalidate_bundleName").val();
 	if (text.length == 0 || selectedDirectory.length == 0) {
 		disableValidateButton();
 	} else {
 		enableValidateButton();
+		jQuery("#prevalidateInputs #validateBox #validating").hide();
+		jQuery("#prevalidate_progress").hide();
+		jQuery("#prevalidate_exception").hide();
+		jQuery("#prevalidate_resultList").empty();
+		jQuery("#prevalidate_fileList").empty();
 	}
+
+	// Changes for Build tab
+	clearPreviousBuildResults();
 }
 
 function onRemoveSelectedAgenciesClick() {
 	$(this).closest('tr').remove();
+}
+
+function onPrintFixedRouteRptClick() {
+	window.print();
 }
 
 function enableContinueButton(continueButton) {
@@ -1002,30 +1430,12 @@ function disableDeployButton() {
 	disableContinueButton($("#deploy_continue"));
 }
 
-function enableBuildButton() {
-	jQuery("#buildBundle_buildButton").removeAttr("disabled").css("color", "#000");
-	enableContinueButton($("#create_continue"));
-}
-
-function disableBuildButton() {
-	jQuery("#buildBundle_buildButton").attr("disabled", "disabled").css("color", "#999");
-	disableContinueButton($("#create_continue"));
-}
-
 function enableDownloadButton() {
 	jQuery("#downloadBundle_downloadButton").removeAttr("disabled").css("color", "#000");
 }
 
 function disableDownloadButton() {
 	jQuery("#downloadBundle_downloadButton").attr("disabled", "disabled").css("color", "#999");
-}
-
-function enableResetButton() {
-	jQuery("#buildBundle_resetButton").removeAttr("disabled").css("color", "#000");
-}
-
-function disableResetButton() {
-	jQuery("#buildBundle_resetButton").attr("disabled", "disabled").css("color", "#999");
 }
 
 function toggleAdvancedOptions() {
@@ -1158,14 +1568,16 @@ function onValidateClick() {
 		alert("bundle build name cannot contain spaces");
 		return;
 	}
-
 	else {
 		jQuery("#buildBundle_bundleName").val(bundleName);
 	}
-
+	disableValidateButton();
 	jQuery("#prevalidate_progress").show();
 	jQuery("#prevalidate_exception").hide();
-	jQuery("#prevalidateInputs #validateBox #validateButton").attr("disabled", "disabled");
+	jQuery("#prevalidate_resultList").empty();
+	jQuery("#prevalidate_fileList").empty();
+	jQuery("#prevalidate_validationProgress").text("Validating ... ");
+	jQuery("#prevalidateInputs #validateBox #validating #validationProgress").attr("src","../../css/img/ajax-loader.gif");
 	jQuery("#prevalidateInputs #validateBox #validating").show().css("display","inline");
 	jQuery.ajax({
 		url: "../../api/validate/" + bundleDirectory + "/" + bundleName + "/create?ts=" +new Date().getTime(),
@@ -1178,7 +1590,6 @@ function onValidateClick() {
 				if (jQuery("#prevalidate_id").text().length > 0) {
 					jQuery("#prevalidate_id_label").show();
 				}
-				//jQuery("#prevalidate_resultList").text("calling...");
 				jQuery("#Build #bundleBuildName").val(bundleName);
 				window.setTimeout(updateValidateStatus, 5000);
 			} else {
@@ -1187,10 +1598,12 @@ function onValidateClick() {
 				if (jQuery("#prevalidate_id").text().length > 0) {
 					jQuery("#prevalidate_id_label").show();
 				}
+				enableValidateButton();
 			}
 		},
 		error: function(request) {
 			alert("There was an error processing your request. Please try again.");
+			enableValidateButton();
 		}
 	});
 }
@@ -1221,6 +1634,7 @@ function updateValidateStatus() {
 				jQuery("#prevalidate_validationProgress").text("Complete.");
 				jQuery("#prevalidateInputs #validateBox #validating #validationProgress").attr("src","../../css/img/dialog-accept-2.png");
 				updateValidateList(id);
+				enableValidateButton();
 			}
 			txt = txt + "</ul>";
 			jQuery("#prevalidate_resultList").html(txt).css("font-size", "12px");
@@ -1288,34 +1702,38 @@ function onBuildClick(event) {
 	
 	if (buildType == "test") {
 		jQuery("#testProgressBarDiv").show();
+		jQuery("#buildBundle #buildingTest").show();
+		jQuery("#buildBundle #buildingTest #buildingTestProgress").attr("src","../../css/img/ajax-loader.gif");
+		jQuery("#buildBundle_buildTestProgress").text("Bundle Build in Progress...");
+		jQuery("#buildBundle_testFileList").html("");
+		jQuery("#buildBundle #buildingTest").show();
+		// Show result link
+		$("#buildBundle_testResultLink").show();
 	} else {
 		archive = true;
 		consolidate = true;
 		jQuery("#finalProgressBarDiv").show();
+		jQuery("#buildBundle #buildingFinal").show();
+		jQuery("#buildBundle #buildingFinal #buildingFinalProgress").attr("src","../../css/img/ajax-loader.gif");
+		jQuery("#buildBundle_buildFinalProgress").text("Bundle Build in Progress...");
+		jQuery("#buildBundle_finalFileList").html("");
+		jQuery("#buildBundle #buildingFinal").show();
+		// Show result link
+		$("#buildBundle_finalResultLink").show();
 	}
 
 	var valid = validateBundleBuildFields(bundleDir, bundleName, startDate, endDate);
 	if(valid == false) {
 		return;
 	}
-	jQuery("#buildBundle #buildingTest").show();
-	jQuery("#buildBundle #buildingTest #buildingTestProgress").attr("src","../../css/img/ajax-loader.gif");
-	jQuery("#buildBundle_buildTestProgress").text("Bundle Build in Progress...");
-	jQuery("#buildBundle_testFileList").html("");
-	jQuery("#buildBundle #buildingTest").show().css("width","300px").css("margin-top", "20px");
 
-	//disableBuildButton();
-	//disableResetButton();
-	//buildBundle(bundleName, startDate, endDate, bundleComment, archive, consolidate, predate);
+	clearPreviousBuildResults();
+	disableBuildButtons();
+
 	buildBundle(bundleName, startDate, endDate, bundleComment, archive, consolidate, false, buildType);
 }
 
-function onResetClick() {
-	jQuery("#startDatePicker").val("");
-	jQuery("#endDatePicker").val("");
-	jQuery("#buildBundle_bundleName").val("");
-
-	//jQuery("#buildBundle_resultList").html("");
+function clearPreviousBuildResults() {
 	jQuery("#buildBundle_testResultList").val("");
 	jQuery("#buildBundle_finalResultList").val("");
 	jQuery("#buildBundle_testException").html("");
@@ -1323,8 +1741,31 @@ function onResetClick() {
 	jQuery("#buildBundle_testFileList").html("");
 	jQuery("#buildBundle_finalFileList").html("");
 
-	jQuery("#buildBundle #downloadTestLogs").hide();
+	// Hide result divs
+	jQuery("#buildBundle_testResultLink").hide();
+	jQuery("#bundleTestResultsHolder").hide();
+	jQuery("#buildBundle_finalResultLink").hide();
+	jQuery("#bundleFinalResultsHolder").hide();
+
 	jQuery("#buildBundle #buildingTest").hide();
+	jQuery("#buildBundle #buildingFinal").hide();
+
+	//Reset the Progress bar
+	$("#testProgressBar").progressbar('value', 0)
+	$("#finalProgressBar").progressbar('value', 0)
+
+	//Make sure any "Bundle Build Failed" message is cleared
+	$("#testProgressBarDiv #testBuildProgress").text("Previous Build Messages");
+}
+
+function disableBuildButtons() {
+	jQuery("#buildBundle #testBuildBundleButton").prop("disabled", true).css("color", "#999");
+	jQuery("#buildBundle #finalBuildBundleButton").prop("disabled", true).css("color", "#999");
+}
+
+function enableBuildButtons() {
+	jQuery("#buildBundle #testBuildBundleButton").prop("disabled", false).css("color", "#000");
+	jQuery("#buildBundle #finalBuildBundleButton").prop("disabled", false).css("color", "#000");
 }
 
 function validateBundleBuildFields(bundleDir, bundleName, startDate, endDate) {
@@ -1356,9 +1797,12 @@ function validateBundleBuildFields(bundleDir, bundleName, startDate, endDate) {
 	return valid;
 }
 
-function bundleUrl() {
-	//var id = jQuery("#buildBundle_id").text();
+function bundleUrl(buildType) {
 	var id = buildBundleId;
+	var $resultLink = jQuery("#buildBundle #buildBundle_testResultLink #testResultLink");
+	if (buildType == "final") {
+		$resultLink = jQuery("#buildBundle #buildBundle_finalResultLink #finalResultLink");
+	}
 	jQuery("#buildBundle_exception").hide();
 	jQuery.ajax({
 		url: "../../api/build/" + id + "/url?ts=" +new Date().getTime(),
@@ -1367,14 +1811,14 @@ function bundleUrl() {
 		success: function(response) {
 			var bundleResponse = response;
 			if(bundleResponse.exception !=null) {
-				jQuery("#buildBundle #buildBundle_testResultLink #testResultLink")
+				$resultLink
 				.text("(exception)")
 				.css("padding-left", "5px")
 				.css("font-size", "12px")
 				.addClass("adminLabel")
 				.css("color", "red");
 			} else {
-				jQuery("#buildBundle #buildBundle_testResultLink #testResultLink")
+				$resultLink
 				.text(bundleResponse.bundleResultLink)
 				.css("padding-left", "5px")
 				.css("font-size", "12px")
@@ -1384,20 +1828,38 @@ function bundleUrl() {
 		},
 		error: function(request) {
 			clearTimeout(timeout);
-			timeout = setTimeout(bundleUrl, 10000);
+			timeout = setTimeout(bundleUrl.bind(null, buildType), 10000);
 		}
 	});
-	var url = jQuery("#buildBundle #buildBundle_testResultLink #testResultLink").text();
+	var url = $esultLink.text();
 	if (url == null || url == "") {
-		window.setTimeout(bundleUrl, 5000);
+		window.setTimeout(bundleUrl.bind(null, buildType), 5000);
 	}
 }
 function buildBundle(bundleName, startDate, endDate, bundleComment, archive, consolidate, predate, buildType){
-	//var bundleDirectory = jQuery("#selected_bundleDirectory").text();
 	bundleDirectory = selectedDirectory;
-	//var email = jQuery("Build #").val();
+	$("#testProgressBarDiv #testBuildProgress").text("Initializing build process");
 	var $buildBundle_resultList = jQuery("#buildBundle_testResultList");
-	if (buildType == "final") {
+	if (buildType == "test") {
+		$("#buildingTest").show();
+		$("#buildBundle_testResultLink").show();
+		$("#testProgressBarDiv").show();
+		$("#bundleTestResultsHolder").show();
+		$("#bundleTestResults").show();
+		$("#buildingFinal").hide();
+		$("#buildBundle_finalResultLink").hide();
+		$("#finalProgressBarDiv").hide();
+		$("#bundleFinalResults").hide();
+	} else {
+		$("#buildingTest").hide();
+		$("#buildBundle_testResultLink").hide();
+		$("#testProgressBarDiv").hide();
+		$("#bundleFinalResultsHolder").show();
+		$("#bundleTestResults").hide();
+		$("#buildingFinal").show();
+		$("#buildBundle_finalResultLink").show();
+		$("#finalProgressBarDiv").show();
+		$("#bundleFinalResults").show();
 		$buildBundle_resultList = jQuery("#buildBundle_finalResultList");
 	}
 	var email = jQuery("#buildNotificationEmail").val();
@@ -1422,23 +1884,24 @@ function buildBundle(bundleName, startDate, endDate, bundleComment, archive, con
 			if (bundleResponse != undefined) {
 				//display exception message if there is any
 				if(bundleResponse.exception !=null) {
+					enableBuildButtons();
 					alert(bundleResponse.exception.message);
 				} else {
-					//jQuery("#buildBundle_resultList").html("calling...");
 					$buildBundle_resultList.val("calling...");
 					jQuery("#buildBundle_id").text(bundleResponse.id);
 					buildBundleId = bundleResponse.id;
 					window.setTimeout(updateBuildStatus.bind(null, buildType), 5000);
-					bundleUrl();
+					bundleUrl(buildType);
 				}
 			} else {
 				jQuery("#buildBundle_id").text(error);
 				buildBundleId = error;
-				//jQuery("#buildBundle_resultList").html("error");
 				$buildBundle_resultList.val("error");
+				enableBuildButtons();
 			}
 		},
 		error: function(request) {
+			enableBuildButtons();
 			alert("There was an error processing your request. Please try again.");
 		}
 	});
@@ -1448,33 +1911,54 @@ function updateBuildStatus(buildType) {
 	console.log("build type: " + buildType);
 	disableStageButton();
 	disableDownloadButton();
-	//id = jQuery("#buildBundle_id").text();
 	id = buildBundleId;
+	// Initialize vars for Test section
+	var $buildBundle_buildProgress = jQuery("#buildBundle_buildTestProgress");
+	var $resultLink = jQuery("#testResultLink");
 	var $progressBar = jQuery("#testProgressBar");
+	var $buildingProgress = jQuery("#buildBundle #buildingTest #buildingTestProgress");
 	var $buildProgress = jQuery("#testBuildProgress");
 	var $buildBundle_resultList = jQuery("#buildBundle_testResultList");
+	var $buildBundle_exception = jQuery("#buildBundle_testException");
 	if (buildType == "final") {
+		$buildBundle_buildProgress = jQuery("#buildBundle_buildFinalProgress");
+		$resultLink = jQuery("#finalResultLink");
 		$progressBar = jQuery("#finalProgressBar");
+		$buildingProgress = jQuery("#buildBundle #buildingFinal #buildingFinalProgress");
 		$buildProgress = jQuery("#finalBuildProgress");
 		$buildBundle_resultList = jQuery("#buildBundle_finalResultList");
+		$buildBundle_exception = jQuery("#buildBundle_finalException");
 	}
 	jQuery.ajax({
 		url: "../../api/build/" + id + "/list?ts=" +new Date().getTime(),
 		type: "GET",
 		async: false,
 		success: function(response) {
-			//var txt = "<ul>";
 			var txt = "";
 			var currentTask = 0;
 			var totalTasks = 0;
 			var bundleResponse = response;
 			if (bundleResponse == null) {
-				jQuery("#buildBundle_buildProgress").text("Bundle Status Unknown!");
-				jQuery("#buildBundle #buildingTest #buildingTestProgress").attr("src","../../css/img/dialog-warning-4.png");
-				//jQuery("#buildBundle_resultList").html("unknown id=" + id);
+				$buildBundle_buildProgress.text("Bundle Status Unknown!");
+				$buildingProgress.attr("src","../../css/img/dialog-warning-4.png");
 				$buildBundle_resultList.val("unknown id=" + id);
+				enableBuildButtons();
 			} else {
+				if (!$resultLink.text()) {
+					$resultLink
+						.text(bundleResponse.bundleResultLink)
+						.css("padding-left", "5px")
+						.css("font-size", "12px")
+						.addClass("adminLabel")
+						.css("color", "green");
+				}
 				jQuery("#Build #datasetName").text(bundleResponse.bundleDirectoryName);
+				// Check if this was called via a Result Link
+				if ((selectedDirectory == "") && fromResultLink) {
+					selectedDirectory = bundleResponse.bundleDirectoryName;
+					// Initialize all tabs as of selected on Choose tab
+					onSelectDataset("existing");
+				}
 				var size = 0;
 				if (bundleResponse.statusList != null) {
 					size = bundleResponse.statusList.length;
@@ -1498,52 +1982,53 @@ function updateBuildStatus(buildType) {
 							$buildProgress.text("Completed " + currentTask
 									+ " of " + totalTasks + " build tasks.");
 						}
-						//txt = txt + "<li>" + bundleResponse.statusList[i] + "</li>";
 						txt = txt + nextLine + "\n";
 					}
 				}
-				if (bundleResponse.complete == false) {
+				if (bundleResponse.complete == false ) {
 					window.setTimeout(updateBuildStatus.bind(null, buildType), 5000); // recurse
 				} else {
-					jQuery("#buildBundle_buildTestProgress").text("Bundle Complete!");
-					jQuery("#buildBundle #buildingTest #buildingTestProgress").attr("src","../../css/img/dialog-accept-2.png");
-					updateBuildList(id);
+					$buildBundle_buildProgress.text("Bundle Complete!");
+					$buildingProgress.attr("src","../../css/img/dialog-accept-2.png");
+					updateBuildList(id, buildType);
 					$("#Stage #staging_bundleName").text($("#Build #bundleBuildName").val());
 					$("#Download #download_bundleName").text($("#Build #bundleBuildName").val());
 					enableStageButton();
-					enableBuildButton();
-					enableResetButton();
 					enableDownloadButton();
+					enableBuildButtons();
+					// Update fields for Compare tab
+					// Add dataset to lists if it isn't there already
+					addToDatasetLists(selectedDirectory);
+					updateFixedRouteParams(selectedDirectory);
 				}
-				//txt = txt + "</ul>";
-				//jQuery("#buildBundle_resultList").html(txt).css("font-size", "12px");
+				fromResultLink = false;
 				$buildBundle_resultList.val(txt).css("font-size", "12px");
 				// Make sure that the textarea remains scrolled to the bottom.
 				$buildBundle_resultList.scrollTop(1500);  // Just use some arbitrarily large number
 				// check for exception
 				if (bundleResponse.exception != null) {
-					jQuery("#buildBundle_buildTestProgress").text("Bundle Failed!");
-					jQuery("#buildBundle #buildingTest #buildingTestProgress").attr("src","../../css/img/dialog-warning-4.png");
+					$buildBundle_buildProgress.text("Bundle Failed!");
+					$buildProgress.text("Bundle build failed");
+					$buildingProgress.attr("src","../../css/img/dialog-warning-4.png");
 					if (bundleResponse.exception.message != undefined) {
-						jQuery("#buildBundle_testException").show().css("display","inline");
-						jQuery("#buildBundle_testException").html(bundleResponse.exception.message);
+						$buildBundle_exception.show().css("display","inline");
+						$buildBundle_exception.html(bundleResponse.exception.message);
 					}
 					disableStageButton();
 					disableDownloadButton();
 					enableBuildButton();
-					enableResetButton();
 				}
 			}
 		},
 		error: function(request) {
 			clearTimeout(timeout);
-			timeout = setTimeout(updateBuildStatus, 10000);
+			timeout = setTimeout(updateBuildStatus.bind(null, buildType), 10000);
 		}
 	});
 }
 
 //populate list of files that were result of building
-function updateBuildList(id) {
+function updateBuildList(id,buildType) {
 	var summaryList = null;
 	jQuery.ajax({
 		url: "manage-bundles!downloadOutputFile.action?ts=" +new Date().getTime(),
@@ -1556,13 +2041,16 @@ function updateBuildList(id) {
 			}
 	});
 
+	var $buildBundle_fileList = jQuery("#buildBundle_testFileList");
+	if (buildType == "final") {
+		$buildBundle_fileList = jQuery("#buildBundle_finalFileList");
+	}
 	var lines = summaryList.split(/\n/);
 	lines.pop(lines.length-1); // discard header
 	var fileDescriptionMap = new Array();
 	var fileCountMap = new Array();
 	for (var i = 0; i < lines.length; i++) {
 		var dataField = lines[i].split(',');
-
 		fileDescriptionMap[dataField[0]] = dataField[1];
 		fileCountMap[dataField[0]] = dataField[2];
 	}
@@ -1581,6 +2069,11 @@ function updateBuildList(id) {
 					for (var i=0; i<size; i++) {
 						var description = fileDescriptionMap[list[i]];
 						var lineCount = fileCountMap[list[i]];
+						var fileExtension = list[i].substring(list[i].lastIndexOf("."));
+						// for html files, leave lineCount blank
+						if (fileExtension === ".html") {
+							lineCount = "";
+						}
 						if (description != undefined) {
 							var encoded = encodeURIComponent(list[i]);
 							txt = txt + "<li>" + description + ":" + "&nbsp;"
@@ -1588,7 +2081,9 @@ function updateBuildList(id) {
 							+ "<img src=\"../../css/img/go-down-5.png\" />"
 							+ "<a href=\"manage-bundles!downloadOutputFile.action?id="
 							+ id+ "&downloadFilename=" 
-							+ encoded + "\">" + ".csv" +  "</a></li>";
+							+ encoded + "\">"
+							+ fileExtension
+							+  "</a></li>";
 						}
 					}
 				}
@@ -1602,20 +2097,501 @@ function updateBuildList(id) {
 			+ encodeURIComponent("bundleBuilder.out.txt") + "\">" + ".txt" +  "</a></li>";
 
 			txt = txt + "</ul>";
-			jQuery("#buildBundle_testFileList").html(txt).css("display", "block");
+			$buildBundle_fileList.html(txt).css("display", "block");
+			/* This has only been implemented for MTA
 			jQuery("#buildBundle #downloadTestLogs").show().css("display", "block");
 			jQuery("#buildBundle #downloadTestLogs #downloadTestButton").attr("href", "manage-bundles!buildOutputZip.action?id=" + id);
+			*/
 			var continueButton = jQuery("#build_continue");
 			enableContinueButton(continueButton);
 		},
 		error: function(request) {
 			clearTimeout(timeout);
 			timeout = setTimeout(function() {
-				updateBuildList(id);
+				updateBuildList(id, buildType);
 			}, 10000);
 		}
 	});	
 }
+/**
+ * Functions used with the Compare tab for generating reports on differences
+ * between two bundle builds.
+ */
+function onCurrentDatasetChange() {
+	// Clear any previous reports
+	$("#diffResultsTable tbody").empty();
+	$('#fixedRouteDiffTable tbody').empty();
+
+	if ($("#currentDatasetList option:selected").val() == 0) {
+		resetCurrentReportDataset();
+	} else {
+		currentReportDataset = $("#currentDatasetList option:selected").text();
+		currentReportBuildName = "";
+		var buildNameList = getExistingBuildList(currentReportDataset);
+		initBuildNameList($("#currentBuildNameList"), buildNameList);
+	}
+}
+
+function onCurrentBuildNameChange() {
+	// Clear any previous reports
+	$("#diffResultsTable tbody").empty();
+	$('#fixedRouteDiffTable tbody').empty();
+
+	if ($("#currentBuildNameList option:selected").val() == 0) {
+		currentReportBuildName = "";
+	} else {
+		currentReportBuildName = $("#currentBuildNameList option:selected").text();
+		if (currentReportDataset && currentReportBuildName
+				&& compareToDataset && compareToBuildName) {
+			buildDiffReport();
+		}
+	}
+}
+
+function onCurrentArchivedDatasetChange() {
+	// Clear any previous reports
+	$("#diffResultsTable tbody").empty();
+	$('#fixedRouteDiffTable tbody').empty();
+
+	if ($("#currentArchivedDatasetList option:selected").val() == 0) {
+		resetCurrentReportDataset();
+	} else {
+		currentArchivedReportDataset = $("#currentArchivedDatasetList option:selected").text();
+		currentArchivedReportBuildName = "";
+		var buildNameList = getExistingBuildList(currentArchivedReportDataset);
+		initBuildNameList($("#currentArchivedBuildNameList"), buildNameList);
+	}
+}
+
+function onCurrentArchivedBuildNameChange() {
+	// Clear any previous reports
+	$("#diffResultsTable tbody").empty();
+	$('#fixedRouteDiffTable tbody').empty();
+
+	if ($("#currentArchivedBuildNameList option:selected").val() == 0) {
+		currentArchivedReportBuildName = "";
+	} else {
+		currentArchivedReportBuildName = $("#currentArchivedBuildNameList option:selected").text();
+		if (currentArchivedReportDataset && currentArchivedReportBuildName
+				&& compareToArchivedDataset && compareToArchivedBuildName) {
+			buildDiffReport();
+		}
+	}
+}
+
+function onCompareToDatasetChange() {
+	// Clear any previous reports
+	$("#diffResultsTable tbody").empty();
+	$('#fixedRouteDiffTable tbody').empty();
+
+	if ($("#compareToDatasetList option:selected").val() == 0) {
+		resetCompareToDataset();
+	} else {
+		compareToDataset = $("#compareToDatasetList option:selected").text();
+		compareToBuildName = "";
+		var buildNameList = getExistingBuildList(compareToDataset);
+		initBuildNameList($("#compareToBuildNameList"), buildNameList);
+	}
+}
+
+function onCompareToBuildNameChange() {
+	// Clear any previous reports
+	$("#diffResultsTable tbody").empty();
+	$('#fixedRouteDiffTable tbody').empty();
+
+	if ($("#compareToBuildNameList option:selected").val() == 0) {
+		compareToBuildName = "";
+	} else {
+		compareToBuildName = $("#compareToBuildNameList option:selected").text();
+		if (currentReportDataset && currentReportBuildName
+				&& compareToDataset && compareToBuildName) {
+			buildDiffReport();
+		}
+	}
+}
+
+function onCompareToArchivedDatasetChange() {
+	// Clear any previous reports
+	$("#diffResultsTable tbody").empty();
+	$('#fixedRouteDiffTable tbody').empty();
+
+	if ($("#compareToArchivedDatasetList option:selected").val() == 0) {
+		resetCompareToReportDataset();
+	} else {
+		compareToArchivedDataset = $("#compareToArchivedDatasetList option:selected").text();
+		compareToArchivedBuildName = "";
+		var buildNameList = getExistingBuildList(compareToArchivedDataset);
+		initBuildNameList($("#compareToArchivedBuildNameList"), buildNameList);
+	}
+}
+
+function onCompareToArchivedBuildNameChange() {
+	// Clear any previous reports
+	$("#diffResultsTable tbody").empty();
+	$('#fixedRouteDiffTable tbody').empty();
+
+	if ($("#compareToArchivedBuildNameList option:selected").val() == 0) {
+		compareToArchivedBuildName = "";
+	} else {
+		compareToArchivedBuildName = $("#compareToArchivedBuildNameList option:selected").text();
+		if (currentArchivedReportDataset && currentArchivedReportBuildName
+				&& compareToArchivedDataset && compareToArchivedBuildName) {
+			buildDiffReport();
+		}
+	}
+}
+
+// Called when a dataset is selected on the Choose tab.
+function updateFixedRouteParams(datasetName) {
+	// Clear any previous reports
+	$("#diffResultsTable tbody").empty();
+	$('#fixedRouteDiffTable tbody').empty();
+
+	currentReportDataset = datasetName;
+	currentReportBuildName = $("#bundleBuildName").val();
+	// Select the current dataset name
+	$("#currentDatasetList option").filter(function() {
+	    return $(this).text() == datasetName;
+	}).prop('selected', true);
+	// Populate list of build names for this dataset and select the current one
+	var buildNameList = getExistingBuildList(datasetName);
+	initBuildNameList($("#currentBuildNameList"), buildNameList);
+	$("#currentBuildNameList option").filter(function() {
+	    return $(this).text() == $("#bundleBuildName").val();
+	}).prop('selected', true);
+
+	resetCompareToDataset();
+	return;
+}
+
+function getExistingBuildList(datasetName) {
+	var buildNameList;
+	var useArchivedGtfs = jQuery("#useArchiveCheckbox").is(":checked");
+	if (datasetName) {
+		jQuery.ajax({
+			url: "manage-bundles!existingBuildList.action",
+			data: {
+				"selectedBundleName" : datasetName,
+				"useArchivedGtfs" : useArchivedGtfs
+			},
+			type: "GET",
+			async: false,
+			success: function(data) {
+				buildNameList=data;
+			}
+		})
+	}
+	return buildNameList;
+}
+
+function initBuildNameList($buildNameList, buildNameMap) {
+	var row_0 = '<option value="0">Select a build name</option>';
+	$buildNameList.find('option').remove().end().append(row_0);
+	var i;
+	var getKeys = function(buildNameMap) {
+		   var keys = [];
+		   for(var key in buildNameMap){
+		      keys.push(key);
+		   }
+		   return keys;
+		}
+	for (var key in buildNameMap) {
+		var name = key;
+		var gid = buildNameMap[key];
+		//var nextRow = '<option value="' + (i+1) + '">' + buildNameList[i] + '</option>';
+		var nextRow = '<option value="' + buildNameMap[key] + '">' + key + '</option>';
+		$buildNameList.append(nextRow);
+	}
+	$buildNameList.val("0");
+	return;
+}
+
+function resetCurrentReportDataset() {
+	if (!jQuery("#useArchiveCheckbox").is(":checked")) {
+		currentReportDataset = "";
+		currentReportBuildName = "";
+		$("#currentDatasetList").val("0");
+		var row_0 = '<option value="0">Select a build name</option>';
+		$("#currentBuildNameList").find('option').remove().end().append(row_0);
+	} else {
+		currentArchivedReportDataset = "";
+		currentArchivedReportBuildName = "";
+		$("#currentArchivedDatasetList").val("0");
+		var row_0 = '<option value="0">Select an archived build name</option>';
+		$("#currentArchivedBuildNameList").find('option').remove().end().append(row_0);
+	}
+}
+function resetCompareToDataset() {
+	if (!jQuery("#useArchiveCheckbox").is(":checked")) {
+		compareToDataset = "";
+		compareToBuildName = "";
+		$("#compareToDatasetList").val("0");
+		var row_0 = '<option value="0">Select a build name</option>';
+		$("#compareToBuildNameList").find('option').remove().end().append(row_0);
+	} else {
+		compareToArchivedDataset = "";
+		compareToArchivedBuildName = "";
+		$("#compareToArchivedDatasetList").val("0");
+		var row_0 = '<option value="0">Select an archived build name</option>';
+		$("#compareToBuildNameList").find('option').remove().end().append(row_0);		
+	}
+}
+
+function addToDatasetLists(directoryName) {
+	var exists = false;
+	$('#currentDatasetList option').each(function() {
+	    if (this.text == directoryName) {
+	        exists = true;
+	    }
+	});
+
+	if (!exists) {
+		var datasetAdded = false;
+		$("#currentDatasetList option").each(function() {
+			if (this.value > 0 && (directoryName < this.text)) {
+				var newRow = '<option value=' + this.value + '>' + directoryName + '</option>';
+				$(this).before(newRow);
+				datasetAdded = true;
+				return false;
+			}
+		});
+		$("#compareToDatasetList option").each(function() {
+			if (this.value > 0 && (directoryName < this.text)) {
+				var newRow = '<option value=' + this.value + '>' + directoryName + '</option>';
+				$(this).first().before(newRow);
+				return false;
+			}
+		});
+		if (!datasetAdded) {
+			var datasetVal = $("#currentDatasetList > option").length;
+			var newRow = '<option value=' + datasetVal + '>Select a build name</option>';
+			$("#currentDatasetList").find('option').end().append(newRow);
+			$("#compareToDatasetList").find('option').end().append(newRow);
+		}
+	}
+}
+
+function buildDiffReport() {
+	// Clear any previous reports
+	$("#diffResultsTable tbody").empty();
+	$('#fixedRouteDiffTable tbody').empty();
+	var useArchived = jQuery("#useArchiveCheckbox").is(":checked");
+	if (!useArchived) {
+		var dataset_1 = currentReportDataset;
+		var dataset_1_build_id = 0;
+		var dataset_2 = compareToDataset;
+		var dataset_2_build_id = 0;
+		var buildName_1 = currentReportBuildName;
+		var buildName_2 = compareToBuildName;
+	} else {
+		$('#Compare #buildingReportDiv').show();
+		var dataset_1 = currentArchivedReportDataset;
+		var dataset_1_build_id = $('#currentArchivedBuildNameList option:selected').val();
+		var dataset_2 = compareToArchivedDataset;
+		var dataset_2_build_id = $('#compareToArchivedBuildNameList option:selected').val();
+		var buildName_1 = currentArchivedReportBuildName;
+		var buildName_2 = compareToArchivedBuildName;		
+	}
+	jQuery.ajax({
+		url: "compare-bundles!diffResult.action",
+		data: {
+			"useArchived" : useArchived,
+			"datasetName" : dataset_1,
+			"dataset_1_build_id" : dataset_1_build_id,
+			"buildName" : buildName_1,
+			"datasetName2" : dataset_2,
+			"dataset_2_build_id" : dataset_2_build_id,
+			"buildName2": buildName_2
+		},
+		type: "GET",
+		async: false,
+		success: function(data) {
+			$('#Compare #buildingReportDiv').hide();
+			$.each(data.diffResults, function(index, value) {
+				// Skip first three rows of results
+				if (index >= 3) {
+					var diffRow = formatDiffRow(value);
+					$("#diffResultsTable").append(diffRow);
+				}
+			});
+			var baseBundle = dataset_1 + " / " + buildName_1;
+			var compareToBundle = dataset_2 + " / " + buildName_2;
+			$("#baseBundle").text(baseBundle + " (green)");
+			$("#compareToBundle").text(compareToBundle + " (red)");
+			$.each(data.fixedRouteDiffs, function(index, value) {
+				var modeName = value.modeName;
+				var modeClass = "";
+				var modeFirstLineClass=" modeFirstLine";
+				var addSpacer = true;
+				if (value.srcCode == 1) {
+					modeClass = "currentRpt";
+				} else if (value.srcCode == 2) {
+					modeClass = "selectedRpt";
+				}
+				$.each(value.routes, function(index2, value2) {
+					var routeNum = value2.routeNum;
+					var routeName = value2.routeName;
+					var routeFirstLineClass=" routeFirstLine";
+					addSpacer = false;
+					if (index2 > 0) {
+						modeName = "";
+						modeFirstLineClass = "";
+					}
+					var routeClass = modeClass;
+					if (value2.srcCode == 1) {
+						routeClass = "currentRpt";
+					} else if (value2.srcCode == 2) {
+						routeClass = "selectedRpt";
+					}
+					$.each(value2.headsignCounts, function(headsignIdx, headsign) {
+						var headsignName = headsign.headsign;
+						var headsignBorderClass = "";
+						if (headsignIdx > 0) {
+							modeName = "";
+							routeNum = "";
+							routeName = "";
+							modeFirstLineClass = "";
+							routeFirstLineClass = "";
+							headsignBorderClass = " headsignBorder";
+							addSpacer = false;
+						}
+						var headsignClass = routeClass;
+						if (headsign.srcCode == 1) {
+							headsignClass = "currentRpt";
+						} else if (headsign.srcCode == 2) {
+							headsignClass = "selectedRpt";
+						}
+						$.each(headsign.dirCounts, function(dirIdx, direction) {
+							var dirName = direction.direction;
+							var dirBorderClass = "";
+							if (dirIdx > 0) {
+								modeName = "";
+								routeNum = "";
+								routeName = "";
+								headsignName = "";
+								modeFirstLineClass = "";
+								routeFirstLineClass = "";
+								headsignBorderClass = "";
+								dirBorderClass = " dirBorder";
+								addSpacer = false;
+							}
+							var dirClass = headsignClass;
+							if (direction.srcCode == 1) {
+								dirClass = "currentRpt";
+							} else if (direction.srcCode == 2) {
+								dirClass = "selectedRpt";
+							}
+							$.each(direction.stopCounts, function(index3, value3) {
+								var stopCt = value3.stopCt;
+								var stopClass = "";
+								if (dirClass == "currentRpt") {
+									stopClass = "currentStopCt";
+								} else if (dirClass == "selectedRpt") {
+									stopClass = "selectedStopCt";
+								}
+								if (value3.srcCode == 1) {
+									stopClass = "currentStopCt";
+								} else if (value3.srcCode == 2) {
+									stopClass = "selectedStopCt";
+								}
+								var weekdayTrips = value3.tripCts[0];
+								var satTrips = value3.tripCts[1];
+								var sunTrips = value3.tripCts[2];
+								if (index3 > 0) {
+									modeName = "";
+									modeFirstLineClass = "";
+									routeNum = "";
+									routeName = "";
+									headsignName = "";
+									dirName = "";
+									routeFirstLineClass = "";
+									headsignBorderClass = "";
+									dirBorderClass = "";
+									addSpacer = false;
+								}
+								if (index > 0 && headsignIdx == 0
+										&& dirIdx == 0 && index3 == 0) {
+									addSpacer = true;
+								}
+								if (addSpacer) {
+									var new_spacer_row = '<tr class="spacer"> \
+										<td></td> \
+										<td></td> \
+										<td></td> \
+										<td></td> \
+										<td></td> \
+										<td></td> \
+										<td></td> \
+										<td></td> \
+										<td></td> \
+										</tr>';
+									$('#fixedRouteDiffTable').append(new_spacer_row);
+								}
+								var new_row = '<tr class="fixedRouteDiff' + modeFirstLineClass + routeFirstLineClass + '"> \
+									<td class="' + modeClass + ' modeName" >' + modeName + '</td> \
+									<td class="' + routeClass + routeFirstLineClass + ' rtNum" >' + routeNum + '</td> \
+									<td class="' + routeClass + routeFirstLineClass + '">' + routeName + '</td> \
+									<td class="' + headsignClass + routeFirstLineClass + headsignBorderClass + '">' + headsignName + '</td> \
+									<td class="' + dirClass + routeFirstLineClass + headsignBorderClass + dirBorderClass + '">' + dirName + '</td> \
+									<td class="' + stopClass + routeFirstLineClass + headsignBorderClass + dirBorderClass + '">' + stopCt + '</td> \
+									<td class="' + stopClass + routeFirstLineClass + headsignBorderClass + dirBorderClass + '">' + weekdayTrips + '</td> \
+									<td class="' + stopClass + routeFirstLineClass + headsignBorderClass + dirBorderClass + '">' + satTrips + '</td> \
+									<td class="' + stopClass + routeFirstLineClass + headsignBorderClass + dirBorderClass + '">' + sunTrips + '</td> \
+									</tr>';
+								$('#fixedRouteDiffTable').append(new_row);
+							});
+						});
+					});
+				});
+			});
+			// Add bottom border to reprot
+			var new_spacer_row = '<tr class="spacer"> \
+				<td></td> \
+				<td></td> \
+				<td></td> \
+				<td></td> \
+				<td></td> \
+				<td></td> \
+				<td></td> \
+				<td></td> \
+				<td></td> \
+				</tr>';
+			$('#fixedRouteDiffTable').append(new_spacer_row);
+		}
+	})
+}
+
+/*
+ * This is used in the Compare tab to format each row for the
+ * Diff Results table.
+ */
+function formatDiffRow(value) {
+	var tokens = value.split(",");
+	var newRow = "";
+	var dataClass = "redListData";
+	var testChar = tokens[0].charAt(0);
+	if (tokens[0].charAt(0) == '+') {
+		dataClass = "greenListData";
+	}
+	var teststr = tokens[0].substr(1);
+	tokens[0] = tokens[0].substr(1);
+	var dataItems = "";
+	tokens.forEach(function(entry, idx) {
+		if (entry == "null") {
+			entry = "";
+		}
+		var tdClass = "";
+		if (!isNaN(entry) && idx > 0) {
+			tdClass = " class=numericTd ";
+		}
+		dataItems += "<td" + tdClass + ">" + entry + "</td>";
+	});
+	var newRow = "<tr class=" + dataClass + " >"
+		+ dataItems
+		+ "</tr>";
+	return newRow;
+}
+
 
 function onStageClick() {
 	stageBundle();
@@ -1878,10 +2854,30 @@ function onDeployListClick(){
 function onDownloadBundleClick() {
 	var downloadDataset = selectedDirectory;
 	var downloadFileName = $("#Download #download_bundleName").text();
-	//window.location='manage-bundles!downloadBundle.action?downloadFilename=MAY16_TEST_3.tar.gz';
 	window.location='manage-bundles!downloadBundle.action'
 		+ '?downloadDataSet=' + downloadDataset
 		+ '&downloadFilename=' + downloadFileName
+}
+
+// Sync active bundle with staging
+function onSyncDeployedBundleClick() {
+	var environment = jQuery("#deploy_environment").text();
+	$("#Sync #syncProgressIcon").attr("src", "../../css/img/ajax-loader.gif");
+	$("#syncProgressText").text("Syncing bundles in Progress...");
+	$("#Sync #syncProgressDiv").show();
+	jQuery.ajax({
+		url: "sync-bundle!syncBundle.action?ts=" + new Date().getTime(),
+		type: "GET",
+		async: false,
+		success: function(response) {
+			var bundleResponse = response;
+			$("#Sync #syncProgressIcon").attr("src", "../../css/img/dialog-accept-2.png");
+			$("#syncProgressText").text("Syncing bundles complete!");
+		},
+		error: function(request) {
+			alert("There was an error processing your request. Please try again.");
+		}
+	});
 }
 
 //add support for parsing query string
@@ -1914,10 +2910,8 @@ function getAgencyMetadata(){
 				if (url == null) {
 				  url = "";
 				}
-				//console.log("url: " + url);
-				if (url.toLowerCase().startsWith("http")
-						|| url.toLowerCase().startsWith("ftp")) {
-					//console.log("set url");
+				if (url.toLowerCase().substring(0,4) === 'http'
+					|| url.toLowerCase().substring(0,3) === 'ftp') {
 					$("#agency_data tr:last .agencyDataSource").val(url);
 				}	
 			}
@@ -1930,13 +2924,12 @@ function getAgencyMetadata(){
 function addUploadFileAgencyDropdown() {
 	console.log("starting addUploadFileAgencyDropdown");
 	agencyDropDown = $('<select class="agencyIdSelect">');
-	jQuery(agencyMetadata).each(function() {
-		//agencyDropDown.append(jQuery("<option>").attr('value',this.legacyId).text(this.shortName));
-		var name = this.name;
+	for (var i = 0; i < agencyMetadata.length; i++) {
+		var name = agencyMetadata[i].name;
 		name += " (";
-		name += this.shortName;
+		name += agencyMetadata[i].shortName;
 		name += ")";
-		agencyDropDown.append(jQuery("<option>").attr('value',this.legacyId).text(name));
-	});
+		agencyDropDown.append(jQuery("<option>").attr('value',agencyMetadata[i].legacyId).text(name));
+	};
 	agencyDropDown.insertBefore("#agencyId");
 }

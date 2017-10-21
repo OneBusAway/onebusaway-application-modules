@@ -15,7 +15,7 @@
  */
 package org.onebusaway.gtfs_realtime.archiver.service;
 
-import org.onebusaway.gtfs_realtime.archiver.model.AlertModel;
+import org.onebusaway.gtfs_realtime.model.AlertModel;
 
 public interface AlertDao {
 

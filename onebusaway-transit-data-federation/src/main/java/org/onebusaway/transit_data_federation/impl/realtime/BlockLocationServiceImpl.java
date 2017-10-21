@@ -65,7 +65,7 @@ import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
-
+import org.onebusaway.util.SystemTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -131,6 +131,12 @@ public class BlockLocationServiceImpl implements BlockLocationService,
    * Should block location records be stored to the database?
    */
   private boolean _persistBlockLocationRecords = false;
+
+  /**
+   * Should we sample the schedule deviation history?
+   * (this is true for historical reasons)
+   */
+  private boolean _sampleScheduleDeviationHistory = true;
 
   /**
    * We queue up block location records so they can be bulk persisted to the
@@ -234,6 +240,16 @@ public class BlockLocationServiceImpl implements BlockLocationService,
   }
 
   /**
+   * Disablings this saves a database call to the schedule deviation history
+   * table.
+   * @param sampleScheduleDeviationHistory
+   */
+  @ConfigurationParameter
+  public void setSampleScheduleDeviationHistory(Boolean sampleScheduleDeviationHistory) {
+    _sampleScheduleDeviationHistory = sampleScheduleDeviationHistory;
+  }
+
+  /**
    * @param distanceAlongBlockLocationInterpolation
    * 
    * @deprecated in favor of the more general
@@ -300,8 +316,12 @@ public class BlockLocationServiceImpl implements BlockLocationService,
         record.setScheduleDeviation(deviation);
       }
 
-      ScheduleDeviationSamples samples = _realTimeHistoryService.sampleScheduleDeviationsForVehicle(
-          instance, record, scheduledBlockLocation);
+
+      ScheduleDeviationSamples samples = null;
+      if (_sampleScheduleDeviationHistory == true) {
+        samples = _realTimeHistoryService.sampleScheduleDeviationsForVehicle(
+                instance, record, scheduledBlockLocation);
+      }
 
       putBlockLocationRecord(instance, record, scheduledBlockLocation, samples);
     }
@@ -1134,9 +1154,9 @@ public class BlockLocationServiceImpl implements BlockLocationService,
         if (queue.isEmpty())
           return;
 
-        long t1 = System.currentTimeMillis();
+        long t1 = SystemTime.currentTimeMillis();
         _blockLocationRecordDao.saveBlockLocationRecords(queue);
-        long t2 = System.currentTimeMillis();
+        long t2 = SystemTime.currentTimeMillis();
         _lastInsertDuration = t2 - t1;
         _lastInsertCount = queue.size();
       } catch (Throwable ex) {

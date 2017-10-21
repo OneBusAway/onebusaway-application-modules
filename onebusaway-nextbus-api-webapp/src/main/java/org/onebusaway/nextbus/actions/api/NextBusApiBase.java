@@ -56,6 +56,8 @@ public class NextBusApiBase {
 
   @Autowired
   private CacheService _cache;
+  
+  public static final String SUCCESS = "success";
 
   public static final String PREDICTIONS_COMMAND = "/command/predictions";
 

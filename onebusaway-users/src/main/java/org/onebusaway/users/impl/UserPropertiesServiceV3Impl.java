@@ -269,8 +269,18 @@ public class UserPropertiesServiceV3Impl implements UserPropertiesService {
     
     user.setProperties(properties);
     _userDao.saveOrUpdateUser(user);
-  } 
-  
+  }
+
+    @Override
+    public void disableUser(User user) {
+        throw new UnsupportedOperationException();
+  }
+
+    @Override
+    public void activateUser(User user) {
+        throw new UnsupportedOperationException();
+  }
+
   @Override
   public void mergeProperties(User sourceUser, User targetUser) {
     mergeProperties(getProperties(sourceUser), getProperties(targetUser));

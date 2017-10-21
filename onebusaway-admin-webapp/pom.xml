@@ -3,7 +3,7 @@
 	<parent>
 		<groupId>org.onebusaway</groupId>
 		<artifactId>onebusaway-application-modules</artifactId>
-		<version>1.1.16-SNAPSHOT</version>
+		<version>1.1.17-SNAPSHOT</version>
 	</parent>
 	<artifactId>onebusaway-admin-webapp</artifactId>
 	<packaging>war</packaging>
@@ -15,32 +15,25 @@
 		<geotools.version>11-beta</geotools.version>
 		<spring.version>3.0.5.RELEASE</spring.version>
 		<jetty.version>6.1.26</jetty.version>
+		<bundle.builtPath>/var/lib/oba/bundles/builder</bundle.builtPath>
+		<bundle.stagedPath>/var/lib/oba/bundles/staged</bundle.stagedPath>
+		<bundle.deployPath>/var/lib/oba/bundles/active</bundle.deployPath>
 	</properties>
 
 	<repositories>
 		<!-- Required for the xwiki-rendering-macros -->
     <repository>
       <id>releases-camsys-repo</id>
-      <url>http://developer.onebusaway.org/archiva/repository/releases/</url> 
+      <url>http://repo.obaweb.org:8080/archiva/repository/releases/</url> 
     </repository>
     <repository>
       <id>snapshots-camsys-repo</id>
-      <url>http://developer.onebusaway.org/archiva/repository/snapshots/</url> 
+      <url>http://repo.obaweb.org:8080/archiva/repository/snapshots/</url> 
     </repository>
     <repository>
       <id>public.onebusaway.org</id>
       <url>http://nexus.onebusaway.org/content/groups/public/</url>
     </repository>
-        <repository>
-            <id>camsys-cache</id>
-            <url>http://svn2.camsys.com/archiva/repository/internal/</url>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
 		<repository>
 			<id>opengeo</id>
 			<url>http://repo.opengeo.org</url>
@@ -158,6 +151,11 @@
 			<artifactId>onebusaway-transit-data</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+        <dependency>
+          <groupId>org.onebusaway</groupId>
+          <artifactId>onebusaway-gtfs-realtime-model</artifactId>
+          <version>${project.version}</version>
+        </dependency>
 		<dependency>
 			<groupId>org.onebusaway</groupId>
 			<artifactId>onebusaway-agency-metadata</artifactId>
@@ -279,10 +277,15 @@
 			</exclusions>
 		</dependency>
 		<dependency>
+			<groupId>org.twitter4j</groupId>
+			<artifactId>twitter4j-core</artifactId>
+			<version>4.0.6</version>
+		</dependency>
+		<dependency>
 			<groupId>commons-logging</groupId>
 			<artifactId>commons-logging</artifactId>
 			<version>1.1.2</version>
-		</dependency>	
+		</dependency>
 		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>servlet-api</artifactId>
@@ -319,7 +322,20 @@
                   <groupId>org.mitre.dsmiley.httpproxy</groupId>
                   <artifactId>smiley-http-proxy-servlet</artifactId>
                   <version>1.7</version>
-                </dependency>	
+                </dependency>
+        <!-- http://mvnrepository.com/artifact/joda-time/joda-time -->
+        <dependency>
+            <groupId>joda-time</groupId>
+            <artifactId>joda-time</artifactId>
+            <version>2.9.4</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.jsoup/jsoup -->
+        <dependency>
+            <groupId>org.jsoup</groupId>
+            <artifactId>jsoup</artifactId>
+            <version>1.10.1</version>
+        </dependency>
+
 	</dependencies>
 
 	<profiles>
@@ -331,10 +347,6 @@
 			<properties>
 				<tds.path>http://localhost:8080/onebusaway-transit-data-federation-webapp</tds.path>
 				<vtms.path>http://localhost:8080/onebusaway-transit-data-federation-webapp</vtms.path>
-				<bundle.builtPath>/var/lib/oba/bundles/builder</bundle.builtPath>
-				<bundle.stagedPath>/var/lib/oba/bundles/staged</bundle.stagedPath>
-				<bundle.deployPath>/var/lib/oba/bundles/active</bundle.deployPath>
-				<tdm.host>tdm</tdm.host><!-- assumes domain is set -->
 				<log4j.appender>ROLL</log4j.appender>
 				<log4j.priority>info</log4j.priority>
 			</properties>
@@ -395,15 +407,7 @@
 					<contextPath>/</contextPath>
 				</configuration>
 			</plugin>
-		</plugins>
-		<resources>
-			<resource>
-				<directory>src/main/resources</directory>
-				<filtering>true</filtering>
-			</resource>
-		</resources>
-		<pluginManagement>
-			<plugins>
+<!--
 			  <plugin>
 			    <groupId>org.apache.maven.plugins</groupId>
 			    <artifactId>maven-compiler-plugin</artifactId>
@@ -413,23 +417,29 @@
 			      <target>1.7</target>
 			    </configuration>
 			  </plugin>
+-->
+		</plugins>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
+			</resource>
+		</resources>
+		<pluginManagement>
+			<plugins>
       <plugin>
-        <groupId>com.mycila.maven-license-plugin</groupId>
-        <artifactId>maven-license-plugin</artifactId>
+        <groupId>com.mycila</groupId>
+        <artifactId>license-maven-plugin</artifactId>
+        <version>2.11</version>
         <configuration>
           <excludes combine.children="append">
             <!-- JQuery Excludes -->
-            <exclude>**/jquery*.js</exclude>
-            <exclude>**/jquery*.css</exclude>
-            <!-- GWT Excludes -->
-            <exclude>**/*.xml</exclude>
-            <exclude>**/*.jsp</exclude>
-            <exclude>**/*.jspx</exclude>
-            <exclude>**/*.js</exclude>
-            <exclude>**/*.properties</exclude>
-            <exclude>**/*.css</exclude>
-            <exclude>**/BaseLocations.txt</exclude>
-          </excludes>
+            <exclude>**/jqGrid.js</exclude>
+            <exclude>**/grid.*.js</exclude>
+            <exclude>**/CTBusStops*</exclude>
+		    <exclude>**/leaflet.*</exclude>
+
+		  </excludes>
         </configuration>
       </plugin>
 

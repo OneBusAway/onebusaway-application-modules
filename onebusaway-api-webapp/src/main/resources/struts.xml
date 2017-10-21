@@ -35,5 +35,9 @@
     pass on the "/" url, restoring the hello world behavior for Jetty.
   -->
   <constant name="struts.action.excludePattern" value="/"/>
+
+  <constant name="struts.mapper.class" value="org.apache.struts2.dispatcher.mapper.PrefixBasedActionMapper"/>
+  <constant name="struts.mapper.prefixMapping" value="/api:rest,/siri:rest,:struts"/>
+
   <include file="struts-onebusaway-api-webapp.xml"/>
 </struts>

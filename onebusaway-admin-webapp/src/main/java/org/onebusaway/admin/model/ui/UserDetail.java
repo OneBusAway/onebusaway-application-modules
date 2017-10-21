@@ -26,6 +26,7 @@ public class UserDetail {
 	private String username;
 	private String role;
 	private String password;
+	private boolean disabled;
 
 	/**
 	 * @return the userName
@@ -83,4 +84,11 @@ public class UserDetail {
 		this.password = password;
 	}
 
+    public boolean isDisabled() {
+        return disabled;
+    }
+
+    public void setDisabled(boolean disabled) {
+        this.disabled = disabled;
+    }
 }

@@ -97,11 +97,25 @@ public class Messages {
 
   public static final String MULTIPLE_ROUTES_WERE_FOUND = "MULTIPLE_ROUTES_WERE_FOUND";
 
+  public static final String NAVIGATION_ACTIONS = "NAVIGATION_ACTIONS";
+
   public static final String STOP_FOUND_ARRIVAL_INFO = "STOP_FOUND_ARRIVAL_INFO";
 
   public static final String STOP_FOUND_BOOKMARK_THIS_LOCATION = "STOP_FOUND_BOOKMARK_THIS_LOCATION";
 
   public static final String STOP_FOUND_RETURN_TO_MAIN_MENU = "STOP_FOUND_RETURN_TO_MAIN_MENU";
+
+  /***************************************************************************
+   * Alerts Actions
+   **************************************************************************/
+  
+  public static final String SERVICE_ALERTS_ACTION = "SERVICE_ALERTS_ACTION";
+  
+  public static final String NO_SERVICE_ALERTS = "NO_SERVICE_ALERTS";
+  
+  public static final String REPORTING_ALERT = "REPORTING_ALERT";
+  
+  public static final String REPORTING_ALERTS = "REPORTING_ALERTS";
 
   /***************************************************************************
    * Bookmarks
@@ -248,8 +262,6 @@ public class Messages {
   public static final String BOOKMARKS_TO_DELETE_THE_BOOKMARK_FOR = "BOOKMARKS_TO_DELETE_THE_BOOKMARK_FOR";
 
   public static final String THE_STOP_NUMBER_FOR = "THE_STOP_NUMBER_FOR";
-
-  
 
 
 }

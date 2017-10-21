@@ -26,12 +26,15 @@ import java.util.Map;
 import org.onebusaway.collections.Counter;
 import org.onebusaway.csv_entities.EntityHandler;
 import org.onebusaway.gtfs.impl.GenericMutableDaoWrapper;
+import org.onebusaway.gtfs.impl.GtfsDaoImpl;
 import org.onebusaway.gtfs.model.Agency;
 import org.onebusaway.gtfs.model.IdentityBean;
 import org.onebusaway.gtfs.model.ShapePoint;
 import org.onebusaway.gtfs.serialization.GtfsReader;
 import org.onebusaway.gtfs.services.GenericMutableDao;
+import org.onebusaway.transit_data_federation.bundle.services.EntityReplacementLogger;
 import org.onebusaway.transit_data_federation.bundle.services.EntityReplacementStrategy;
+import org.onebusaway.util.SystemTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,8 +59,16 @@ public class GtfsMultiReaderImpl implements Runnable {
   private List<GtfsReader> _readers = new ArrayList<GtfsReader>();
 
   private GenericMutableDao _store;
+  
+  private GtfsDaoImpl _rejectionStore = new GtfsDaoImpl();
 
   private EntityReplacementStrategy _entityReplacementStrategy = new EntityReplacementStrategyImpl();
+  
+  private EntityReplacementLogger _entityLogger = null;
+  
+  public void setEntityReplacementLogger(EntityReplacementLogger logger) {
+    _entityLogger = logger;
+  }
 
   public void setStore(GenericMutableDao store) {
     _store = store;
@@ -84,6 +95,12 @@ public class GtfsMultiReaderImpl implements Runnable {
     if (_readers.isEmpty())
       return;
 
+    if (_entityLogger != null) {
+      _entityReplacementStrategy.setEntityReplacementLogger(_entityLogger);
+      _entityLogger.setStore(_store);
+      _entityLogger.setRejectionStore(_rejectionStore);
+    }
+    
     try {
 
       StoreImpl store = new StoreImpl(_store);
@@ -148,8 +165,10 @@ public class GtfsMultiReaderImpl implements Runnable {
 
         T entity = super.getEntityForId(type, replacementId);
 
-        if (entity != null)
+        if (entity != null) {
+          _entityReplacementStrategy.logReplacement(type, id, replacementId, super.getEntityForId(type, id), entity);
           return entity;
+        }
 
         _log.warn("error replacing entity: type=" + type.getName() + " fromId="
             + id + " toId=" + replacementId + " - replacement not found");
@@ -165,8 +184,10 @@ public class GtfsMultiReaderImpl implements Runnable {
           && _entityReplacementStrategy.hasReplacementEntities(entityType)) {
         IdentityBean<?> bean = (IdentityBean<?>) entity;
         Serializable id = bean.getId();
-        if (_entityReplacementStrategy.hasReplacementEntity(entityType, id))
+        if (_entityReplacementStrategy.hasReplacementEntity(entityType, id)) {
+          _rejectionStore.saveEntity(entity);
           return;
+        }
       }
 
       super.saveEntity(entity);
@@ -193,21 +214,23 @@ public class GtfsMultiReaderImpl implements Runnable {
       _counter.increment(key);
       int c = _counter.getCount(key);
       if (c % logInterval == 0) {
-		  // backoff logging by power of ten
-    	  if (c == logInterval * 10){
-    		  logInterval = logInterval * 10;
-    		  System.out.println("now logging every " + logInterval);
-    	  }
-        double ellapsedTime = (System.currentTimeMillis() - getStartTimeForKey(key)) / 1000.0;
-        System.out.println(key + " = " + c + " rate="
-            + ((long) (c / ellapsedTime)));
+        // backoff logging by power of ten
+        if (c == logInterval * 10) {
+          logInterval = logInterval * 10;
+          System.out.println("now logging every " + logInterval);
+        }
+        if (c % 1000 == 0) {
+          double ellapsedTime = (SystemTime.currentTimeMillis() - getStartTimeForKey(key)) / 1000.0;
+          System.out.println(key + " = " + c + " rate="
+                  + ((long) (c / ellapsedTime)));
+        }
       }
     }
 
     private long getStartTimeForKey(String key) {
       Long value = _startTime.get(key);
       if (value == null) {
-        value = System.currentTimeMillis();
+        value = SystemTime.currentTimeMillis();
         _startTime.put(key, value);
       }
       return value;

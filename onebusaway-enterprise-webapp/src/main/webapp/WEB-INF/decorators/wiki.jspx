@@ -3,17 +3,17 @@
 
     Copyright (c) 2011 Metropolitan Transportation Authority
 
-    Licensed under the Apache License, Version 2.0 (the "License"); you may not
-    use this file except in compliance with the License. You may obtain a copy of
-    the License at
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+            http://www.apache.org/licenses/LICENSE-2.0
 
     Unless required by applicable law or agreed to in writing, software
-    distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
-    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
-    License for the specific language governing permissions and limitations under
-    the License.
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
 
 -->
 <html xmlns:jsp="http://java.sun.com/JSP/Page"
@@ -33,10 +33,10 @@
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=8" />
   
-  <link rel="shortcut icon" href="http://mta.info/siteimages/favicon.ico" type="image/x-icon"/>
-
-  <script type="text/javascript" src="http://mta.info/js/csshorizontalmenu.js"><!-- //prevent jspx minimization --></script>
-  <script type="text/javascript" src="http://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"><!-- jspx --></script>
+  <s:set var="favicon" value="getText('favicon.url')" />
+  <link rel="shortcut icon" href="${favicon}" type="image/x-icon"/>
+  
+  <script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"><!-- jspx --></script>
 
   <s:url var="url" value="/css/reset.css">
 	<s:param name="v"><s:property value="frontEndVersion" /></s:param>

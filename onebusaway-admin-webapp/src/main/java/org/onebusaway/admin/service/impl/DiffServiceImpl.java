@@ -58,7 +58,7 @@ public class DiffServiceImpl implements DiffService {
 		_log.info("Called diff " + this.getClass().getName() +" between (" + filename1 + ") and (" + filename2 + ")");
 		List<String> unifiedDiff = DiffUtils.generateUnifiedDiff(
 				filename1, filename2, fileToLines(filename1), DiffUtils.diff(original, revised), context);
-		return diffTransformer.transform(unifiedDiff);
+		return unifiedDiff;
 	}
 	
 	private List<String> fileToLines(String filename) {

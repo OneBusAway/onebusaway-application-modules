@@ -53,4 +53,10 @@
 	<bean id="createAPIKeyOnInitAction" class="org.onebusaway.users.impl.CreateApiKeyAction">
 		<property name="key" value="OBA" />
 	</bean>
+	
+	<bean id="httpClientPool" class ="org.onebusaway.nextbus.util.HttpClientPool" />
+    
+    <bean id="httpUtil" class ="org.onebusaway.nextbus.util.HttpUtilImpl" scope="request">
+    	<aop:scoped-proxy proxy-target-class="false" />
+    </bean>
 </beans>

@@ -153,7 +153,7 @@ public class RemoteConnectionServiceImpl implements RemoteConnectionService {
 		  IOUtils.copy(connection.getInputStream(), baos);
 			return baos.toString();
 		} catch (IOException e) {
-			 log.error("fromJson caught exception:", e);
+			 log.error("fromJson caught exception for url (" + connection.getURL() + "):", e);
 			e.printStackTrace();
 		}
 		return null;

@@ -18,6 +18,7 @@ package org.onebusaway.transit_data_federation.bundle.services;
 import java.io.Serializable;
 
 import org.onebusaway.transit_data_federation.bundle.tasks.EntityReplacementStrategyFactory;
+import org.onebusaway.transit_data_federation.bundle.tasks.MultiCSVLogger;
 
 /**
  * Generic interface to support swapping out one entity with another. Use
@@ -29,6 +30,12 @@ import org.onebusaway.transit_data_federation.bundle.tasks.EntityReplacementStra
  */
 public interface EntityReplacementStrategy {
 
+  
+  /**
+   * optionally inject a logger for recording replacements
+   * @param logger
+   */
+  public void setEntityReplacementLogger(EntityReplacementLogger logger);
   /**
    * 
    * @param entityType
@@ -55,4 +62,13 @@ public interface EntityReplacementStrategy {
    */
   public Serializable getReplacementEntityId(Class<?> entityType,
       Serializable id);
+
+  /**
+   * Log that replacement has occurred.
+   * @param id
+   * @param originalEntity
+   * @param replacementEntity
+   */
+  public <T> T logReplacement(Class<T> type, Serializable id, Serializable replacementId, 
+      T originalEntity, T replacementEntity);
 }

@@ -24,6 +24,7 @@ import org.onebusaway.gtfs.serialization.GtfsReader;
 import org.onebusaway.gtfs.services.GenericMutableDao;
 import org.onebusaway.transit_data_federation.bundle.model.GtfsBundle;
 import org.onebusaway.transit_data_federation.bundle.model.GtfsBundles;
+import org.onebusaway.transit_data_federation.bundle.services.EntityReplacementLogger;
 import org.onebusaway.transit_data_federation.bundle.services.EntityReplacementStrategy;
 import org.springframework.context.ApplicationContext;
 
@@ -108,6 +109,15 @@ public class GtfsReadingSupport {
     if (!disableStopConsolidation && context.containsBean("entityReplacementStrategy")) {
       EntityReplacementStrategy strategy = (EntityReplacementStrategy) context.getBean("entityReplacementStrategy");
       multiReader.setEntityReplacementStrategy(strategy);
+      if (context.containsBean("multiCSVLogger")) {
+        MultiCSVLogger csvLogger = (MultiCSVLogger) context.getBean("multiCSVLogger");
+        if (context.containsBean("entityReplacementLogger")) {
+          EntityReplacementLogger entityLogger = (EntityReplacementLogger) context.getBean("entityReplacementLogger");
+          entityLogger.setMultiCSVLogger(csvLogger);
+          csvLogger.addListener(entityLogger.getListener());
+          multiReader.setEntityReplacementLogger(entityLogger);
+        }
+      }
     }
 
     GtfsBundles gtfsBundles = getGtfsBundles(context);
@@ -139,7 +149,7 @@ public class GtfsReadingSupport {
    * @param context
    * @return
    */
-  private static GtfsBundles getGtfsBundles(ApplicationContext context) {
+  public static GtfsBundles getGtfsBundles(ApplicationContext context) {
 
     GtfsBundles bundles = (GtfsBundles) context.getBean("gtfs-bundles");
     if (bundles != null)

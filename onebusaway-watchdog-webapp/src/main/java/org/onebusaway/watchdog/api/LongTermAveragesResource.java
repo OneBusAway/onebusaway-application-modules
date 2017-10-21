@@ -198,7 +198,7 @@ public class LongTermAveragesResource extends MetricResource {
 	    	for (String agencyId : agencyIds) {
 	    	  Integer matched = matchedByAgency.get(agencyId);
 	    	  if (matched == null) matched = 0;
-	    	  matched += getValidRealtimeTripIds(agencyId).size();
+	    	  matched += getValidRealtimeTripIds(agencyId, null).size();
 	    	  totalMatchedTripCt += matched;
 	    	  matchedByAgency.put(agencyId, matched);
 	    	}
@@ -206,47 +206,47 @@ public class LongTermAveragesResource extends MetricResource {
         for (String agencyId : agencyIds) {
           Integer unmatched = unmatchedByAgency.get(agencyId);
           if (unmatched == null) unmatched = 0;
-          unmatched += getUnmatchedTripIdCt(agencyId);
+          unmatched += getUnmatchedTripIdCt(agencyId, null);
           totalUnmatchedTripCt += unmatched;
           unmatchedByAgency.put(agencyId, unmatched);
         }
         // Get latest buses in service percentage by agency
         for (String agencyId : agencyIds) {
           double scheduledTrips = getScheduledTrips(agencyId);
-          double validRealtimeTrips = getValidRealtimeTripIds(agencyId).size();
+          double validRealtimeTrips = getValidRealtimeTripIds(agencyId, null).size();
           int percent = (int)(Math.round(scheduledTrips != 0 ? (validRealtimeTrips / scheduledTrips) * 100 : Integer.MAX_VALUE));
           busesInServiceByAgency.put(agencyId, percent);
         }
         // Get latest matched stops
         for (String agencyId : agencyIds) {
-          int matched = getMatchedStopCt(agencyId);
+          int matched = getMatchedStopCt(agencyId, null);
           matchedStopsByAgency.put(agencyId, matched);
         }
         // Get latest unmatched stops
         for (String agencyId : agencyIds) {
-          int unmatched = getUnmatchedStopCt(agencyId);
+          int unmatched = getUnmatchedStopCt(agencyId, null);
           unmatchedStopsByAgency.put(agencyId, unmatched);
         }
         // Get latest trip totals
         for (String agencyId : agencyIds) {
-          int total = getTotalRecordCount(agencyId);
+          int total = getTotalRecordCount(agencyId, null);
           currentTripTotalsByAgency.put(agencyId, total);
         }
         // Get latest trip schedule-realtime diffs
         for (String agencyId : agencyIds) {
           int scheduledTrips = getScheduledTrips(agencyId);
-          int validRealtimeTrips = getValidRealtimeTripIds(agencyId).size();
+          int validRealtimeTrips = getValidRealtimeTripIds(agencyId, null).size();
           int diff = scheduledTrips - validRealtimeTrips;      
           tripsDiffsByAgency.put(agencyId, diff);
         }
         // Get latest location totals
         for (String agencyId : agencyIds) {
-          int total = getLocationTotal(agencyId);
+          int total = getLocationTotal(agencyId, null);
           locsByAgency.put(agencyId, total);
         }
         // Get latest location invalid lat-lon
         for (String agencyId : agencyIds) {
-          int total = getInvalidLocation(agencyId);
+          int total = getInvalidLocation(agencyId, null);
           locsInvalidByAgency.put(agencyId, total);
         }
         

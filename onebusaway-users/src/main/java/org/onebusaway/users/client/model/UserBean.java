@@ -50,11 +50,13 @@ public class UserBean implements Serializable {
   
   private String contactEmail;
   
-  private String contactDetails;  
+  private String contactDetails;
 
   private boolean anonymous = true;
 
   private boolean admin = false;
+
+  private boolean disabled = false;
 
   private List<UserIndexBean> indices = new ArrayList<UserIndexBean>();
 
@@ -197,4 +199,8 @@ public class UserBean implements Serializable {
   public void setContactDetails(String contactDetails) {
     this.contactDetails = contactDetails;
   }
+
+  public boolean isDisabled() { return disabled; }
+
+  public void setDisabled(boolean disabled) { this.disabled = disabled; }
 }

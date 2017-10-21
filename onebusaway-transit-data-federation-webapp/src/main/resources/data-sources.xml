@@ -1,10 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (C) 2008 Brian Ferris <bdferris@onebusaway.org>
+
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+            http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
 <beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns:context="http://www.springframework.org/schema/context"
     xsi:schemaLocation="
 http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
 http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd">
-
 
     <bean id="dataSource"
           class="org.springframework.jndi.JndiObjectFactoryBean">
@@ -28,7 +45,6 @@ http://www.springframework.org/schema/context http://www.springframework.org/sch
          </props>
       </property>
     </bean>
-    
     <bean id="httpServiceClient" class="org.onebusaway.transit_data_federation.util.HttpServiceClientImpl" >
       <constructor-arg type="java.lang.String" value="localhost"/>
       <constructor-arg type="java.lang.Integer" value="9999" />
@@ -38,6 +54,17 @@ http://www.springframework.org/schema/context http://www.springframework.org/sch
     <bean id="bundleManagementService" class="org.onebusaway.transit_data_federation.impl.bundle.BundleManagementServiceImpl">
       <property name="bundleStoreRoot" value="/var/lib/oba/tds/bundle" />
       <property name="standaloneMode" value="false" />
+    </bean>
+
+    <bean class="org.onebusaway.container.spring.PropertyOverrideConfigurer">
+        <property name="properties">
+            <props>
+                <prop key="blockLocationServiceImpl.persistBlockLocationRecords">false</prop>
+                <prop key="blockLocationServiceImpl.locationInterpolation">false</prop>
+                <prop key="blockStatusServiceImpl.runningLateWindow">3600</prop>
+                <prop key="arrivalAndDepartureServiceImpl.removeFuturePredictionsWithoutRealtime">true</prop>
+            </props>
+        </property>
     </bean>
 
 </beans>

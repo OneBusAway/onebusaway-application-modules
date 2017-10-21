@@ -33,7 +33,33 @@ public interface UserManagementService {
 	 * @return list of matching user names that contains the given search string
 	 */
 	List<String> getUserNames(String searchTerm);
-	
+
+	/**
+	 * Returns the number of user details (name, role) for every user in the database
+	 * @return long number (count) of user details
+	 */
+	Integer getUserDetailsCount();
+
+	/**
+	 * Returns a list of user details (name, role) for maxResults of users staring with 'start'
+	 * @return list of userDetails
+	 */
+	List<UserDetail> getUserDetails(final int start, final int maxResults);
+
+	/**
+	 * Returns a list of user details (name, role) for every enabled user in the database
+     * An enabled user is a user where the property isDisabled=false
+	 * @return list of userDetails
+	 */
+	List<UserDetail> getActiveUsersDetails();
+
+    /**
+     * Returns a list of user details (name, role) for every disabled user in the database
+     * An disabled user is a user where the property isDisabled=true
+     * @return list of userDetails
+     */
+    List<UserDetail> getInactiveUsersDetails();
+
 	/**
 	 * Fetches the user details such as user name, user role of the given user
 	 * @param userName user whose details are desired
@@ -77,11 +103,26 @@ public interface UserManagementService {
 	boolean updateUser(UserDetail userDetail);
 	
 	/**
-	 * Deactivates/soft deletes a given user.
+	 * Deactivates/soft deletes a given user.  This action is un-reversible.
+     * Called "delete" in the UI
 	 * @param userDetail userDetails such as id, username etc
 	 * @return true if soft delete operation succeeds, false otherwise
 	 */
 	boolean deactivateUser(UserDetail userDetail);
-	
+
+    /**
+     * Inactivates a given user.  User can be activated again.
+     * @param userDetail userDetails such as id, username etc
+     * @return true if setting isDisabled property succeeds, false otherwise
+     */
+    boolean inactivateUser(UserDetail userDetail);
+
+    /**
+     * Activates a given user that has been deactivated
+     * @param userDetail userDetails such as id, username etc
+     * @return true if setting isDisabled property succeeds, false otherwise
+     */
+    boolean activateUser(UserDetail userDetail);
+
 	List<String> getAllRoleNames();
 }

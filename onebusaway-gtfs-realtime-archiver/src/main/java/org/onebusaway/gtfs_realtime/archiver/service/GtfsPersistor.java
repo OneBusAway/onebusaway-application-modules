@@ -15,11 +15,10 @@
  */
 package org.onebusaway.gtfs_realtime.archiver.service;
 
-import java.util.List;
-
-import org.onebusaway.gtfs_realtime.archiver.model.AlertModel;
-import org.onebusaway.gtfs_realtime.archiver.model.TripUpdateModel;
-import org.onebusaway.gtfs_realtime.archiver.model.VehiclePositionModel;
+import org.onebusaway.gtfs_realtime.archiver.model.LinkAVLData;
+import org.onebusaway.gtfs_realtime.model.AlertModel;
+import org.onebusaway.gtfs_realtime.model.TripUpdateModel;
+import org.onebusaway.gtfs_realtime.model.VehiclePositionModel;
 
 public interface GtfsPersistor {
 
@@ -28,4 +27,6 @@ public interface GtfsPersistor {
   void persist(VehiclePositionModel vehiclePosition);
 
   void persist(AlertModel alert);
+
+  void persist(LinkAVLData linkAvlData);
 }

@@ -29,6 +29,7 @@ import java.net.URL;
 
 import org.apache.commons.io.IOUtils;
 import org.onebusaway.util.FileUtility;
+import org.onebusaway.util.SystemTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -255,7 +256,7 @@ public class NYCFileUtils {
 
   public String createTmpDirectory() {
     String tmpDir = System.getProperty("java.io.tmpdir") + File.separator
-        + "tmp" + System.currentTimeMillis();
+        + "tmp" + SystemTime.currentTimeMillis();
     boolean created = new File(tmpDir).mkdir();
     // if directory already exists, try again
     if (!created) {
@@ -320,11 +321,10 @@ public class NYCFileUtils {
     Process process = null;
     try {
       StringBuffer cmd = new StringBuffer();
-      cmd.append("tar zcC " + baseDir + "  ");
+      cmd.append("tar -c -f " + filename + " -z -C " + baseDir + "  ");
       for (String path : paths) {
         cmd.append(path + " ");
       }
-      cmd.append("-f " + filename);
       _log.info("exec:" + cmd.toString());
       process = Runtime.getRuntime().exec(cmd.toString());
       return process.waitFor();

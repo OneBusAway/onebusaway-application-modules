@@ -32,7 +32,17 @@ public class ExistingDirectory implements Comparable {
 		this.type = type;
 		this.creationTimestamp = creationTimestamp;
 	}
-	
+
+	public String toString() {
+		return "{"
+				+ name
+				+ " : "
+				+ type
+				+ " : "
+				+ creationTimestamp
+				+ "}";
+	}
+
 	/**
 	 * @return the name
 	 */

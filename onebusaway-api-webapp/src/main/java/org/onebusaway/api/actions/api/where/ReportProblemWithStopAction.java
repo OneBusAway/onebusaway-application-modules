@@ -25,6 +25,7 @@ import org.onebusaway.exceptions.ServiceException;
 import org.onebusaway.transit_data.model.problems.EProblemReportStatus;
 import org.onebusaway.transit_data.model.problems.StopProblemReportBean;
 import org.onebusaway.transit_data.services.TransitDataService;
+import org.onebusaway.util.SystemTime;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.opensymphony.xwork2.validator.annotations.RequiredStringValidator;
@@ -101,7 +102,7 @@ public class ReportProblemWithStopAction extends ApiActionSupport {
     if( ! isVersion(V2))
       return setUnknownVersionResponse();
 
-    _model.setTime(System.currentTimeMillis());
+    _model.setTime(SystemTime.currentTimeMillis());
     _model.setStatus(EProblemReportStatus.NEW);
     _service.reportProblemWithStop(_model);
 

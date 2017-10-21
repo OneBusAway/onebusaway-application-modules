@@ -28,6 +28,15 @@ class BlockDescriptor {
 
   private String vehicleId;
 
+  private ScheduleRelationship scheduleRelationship = ScheduleRelationship.SCHEDULED;
+  
+  public enum ScheduleRelationship {
+    SCHEDULED,
+    ADDED,
+    UNSCHEDULED,
+    CANCELED
+  };
+
   public BlockInstance getBlockInstance() {
     return blockInstance;
   }
@@ -58,6 +67,18 @@ class BlockDescriptor {
 
   public void setVehicleId(String vehicleId) {
     this.vehicleId = vehicleId;
+  }
+  
+  public void setScheduleRelationshipValue(String value) {
+    this.scheduleRelationship = ScheduleRelationship.valueOf(value);
+  }
+
+  public void setScheduleRelationship(ScheduleRelationship schedule) {
+    this.scheduleRelationship = schedule;
+  }
+  
+  public ScheduleRelationship getScheduleRelationship() {
+    return scheduleRelationship;
   }
 
   @Override

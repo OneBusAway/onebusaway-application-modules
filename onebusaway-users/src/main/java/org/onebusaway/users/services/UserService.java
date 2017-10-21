@@ -74,10 +74,25 @@ public interface UserService {
   public List<String> getUserIndexKeyValuesForKeyType(String keyType);
 
   /**
+   * @return the number (count) of Users of type=API_KEY
+   */
+  public Integer getApiKeyCount();
+
+  /**
+   * @return the list of Users of type=API_KEY for maxResults of users staring with 'start'
+   */
+  public List<User> getApiKeys(final int start, final int maxResults);
+
+  /**
    * @param key see {@link UserIndex#getId()}
    * @return the user index with the specified key, or null if not found
    */
   public UserIndex getUserIndexForId(UserIndexKey key);
+
+  /**
+   * * @return the user index from the username string
+   * */
+  public UserIndex getUserIndexForUsername(String username);
 
   /**
    * @param key see {@link UserIndex#getId()}

@@ -17,6 +17,7 @@ package org.onebusaway.admin.service.api.keys;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +32,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 
+import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.map.JsonMappingException;
@@ -40,6 +42,8 @@ import org.onebusaway.users.client.model.UserBean;
 import org.onebusaway.users.model.User;
 import org.onebusaway.users.model.UserIndex;
 import org.onebusaway.users.model.UserIndexKey;
+import org.onebusaway.users.model.properties.UserPropertiesV3;
+import org.onebusaway.users.services.CurrentUserService;
 import org.onebusaway.users.services.UserIndexTypes;
 import org.onebusaway.users.services.UserPropertiesService;
 import org.onebusaway.users.services.UserService;
@@ -63,7 +67,35 @@ public class KeysResource {
 	  @Autowired
 	  private UserPropertiesService _userPropertiesService;
 
+  	  protected CurrentUserService currentUserService;
+
+  	  /**
+	   * Injects current user service
+	   * @param currentUserService the currentUserService to set
+	   */
+	  @Autowired
+	  public void setCurrentUserService(CurrentUserService currentUserService) {
+		this.currentUserService = currentUserService;
+	  }
+
+	  protected UserBean getCurrentUser() {
+		UserBean user = currentUserService.getCurrentUser();
+		if (user == null)
+			user = currentUserService.getAnonymousUser();
+		return user;
+	  }
+
+	  public boolean isAdminUser() {
+		return currentUserService.isCurrentUserAdmin();
+	}
+
 	  public KeysResource() {
+	  }
+
+	  private void validateSecurity() throws Exception {
+	  	if (!isAdminUser()) {
+	  		throw new Exception("unauthorized");
+		}
 	  }
 
 	  @Path("/list")
@@ -74,7 +106,8 @@ public class KeysResource {
 	    log.info("Starting listKeys");
 
 	    try {
-	      List<String> apiKeys = 
+			validateSecurity();
+			List<String> apiKeys =
 	        _userService.getUserIndexKeyValuesForKeyType(UserIndexTypes.API_KEY);
 	      Response response = constructResponse(apiKeys);
 		  log.info("Returning response from listKeys");
@@ -85,7 +118,51 @@ public class KeysResource {
 	    }
 	  }
 
-	  @Path("/list/{apiKey}")
+	@Path("/list-emails")
+	@GET
+	@Produces("application/json")
+	public Response listEmails() throws JsonGenerationException,
+			JsonMappingException, IOException {
+		log.info("Starting listEmails");
+
+		try {
+			validateSecurity();
+			List<String> apiKeys =
+					_userService.getUserIndexKeyValuesForKeyType(UserIndexTypes.API_KEY);
+			List<String> emails = new ArrayList<String>();
+			int count = 0;
+			for (String apiKey : apiKeys) {
+				UserIndexKey key = new UserIndexKey(UserIndexTypes.API_KEY, apiKey);
+				UserIndex userIndex = _userService.getUserIndexForId(key);
+				count ++;
+				if (userIndex != null) {
+					if (userIndex.getUser() != null) {
+						if (userIndex.getUser().getProperties() != null) {
+							Object o = userIndex.getUser().getProperties();
+							if (o instanceof UserPropertiesV3) {
+								UserPropertiesV3 v3 = (UserPropertiesV3) o;
+								if (!StringUtils.isBlank(v3.getContactEmail())) {
+									emails.add(v3.getContactEmail());
+								}
+							}
+						}
+					}
+				}
+				if (count % 100 == 0)
+					log.info("processed " + count + " users....");
+			}
+			log.info("processing complete of " + count + " users!");
+			Response response = constructResponse(emails);
+			log.info("Returning response from listEmails");
+
+			return response;
+		} catch (Exception e) {
+			log.error(e.getMessage());
+			throw new WebApplicationException(e, Response.serverError().build());
+		}
+	}
+
+	@Path("/list/{apiKey}")
 	  @GET
 	  @Produces("application/json")
 	  public Response listKeyDetails(@PathParam("apiKey") String apiKey)
@@ -93,6 +170,7 @@ public class KeysResource {
 	    log.info("Starting listKeyDetails");
 
 	    try {
+	    	validateSecurity();
         UserIndexKey key = new UserIndexKey(UserIndexTypes.API_KEY, apiKey);
         UserIndex userIndex = _userService.getUserIndexForId(key);
   
@@ -107,6 +185,7 @@ public class KeysResource {
         result.put("contactCompany", bean.getContactCompany());
         result.put("contactEmail", bean.getContactEmail());
         result.put("contactDetails", bean.getContactDetails());
+        result.put("minApiRequestInterval", bean.getMinApiRequestInterval().toString());
         Response response = constructResponse(result);
         log.info("Returning response from listKeyDetails");
         return response;
@@ -123,12 +202,20 @@ public class KeysResource {
 	    @DefaultValue("") @QueryParam("name") String name, 
 	    @DefaultValue("") @QueryParam("company") String company, 
 	    @DefaultValue("") @QueryParam("email") String email, 
-	    @DefaultValue("") @QueryParam("details") String details
+	    @DefaultValue("") @QueryParam("details") String details,
+	    @DefaultValue("100") @QueryParam("minApiReqInt") String minApiReqInt
 	    ) throws JsonGenerationException,
 	      JsonMappingException, IOException {
+
 	    log.info("Starting createKey with no parameter");
-	    return createKey(UUID.randomUUID().toString(), name, company, 
-	      email, details);
+	    try {
+			validateSecurity();
+			return createKey(UUID.randomUUID().toString(), name, company,
+					email, details, minApiReqInt);
+		} catch (Exception e) {
+	    	log.error(e.getMessage());
+	    	throw new WebApplicationException(e, Response.serverError().build());
+		}
 	  }
 
 	  @Path("/create/{keyValue}")
@@ -139,16 +226,25 @@ public class KeysResource {
 	    @DefaultValue("") @QueryParam("name") String name, 
 	    @DefaultValue("") @QueryParam("company") String company, 
 	    @DefaultValue("") @QueryParam("email") String email, 
-	    @DefaultValue("") @QueryParam("details") String details
+	    @DefaultValue("") @QueryParam("details") String details,
+      @DefaultValue("100") @QueryParam("minApiReqInt") String minApiReqInt
 	    )  throws JsonGenerationException, JsonMappingException, IOException {
-	        
+
 	    log.info("Starting createKey with keyValue: " + keyValue + ", name: " 
 	      + name + ", company: " + company +", email: " + email + ", details: " 
-	      + details);
+	      + details + ", minApiReqInt: " + minApiReqInt);
+
+	    Long minApiReqIntervalLong = 0L;
+	    try {
+	      minApiReqIntervalLong = Long.parseLong(minApiReqInt);
+	    } catch (NumberFormatException e) {
+	      log.error("Could not parse minApiReqInt: " + minApiReqInt);
+	    }
 
 	    String message = "API Key created: " + keyValue;
 	    try {
-	      saveOrUpdateKey(keyValue, 0L, name, company, email, details);
+			validateSecurity();
+	      saveOrUpdateKey(keyValue, minApiReqIntervalLong, name, company, email, details);
 	    } catch (Exception e) {
 	      log.error(e.getMessage());
 	      message = e.getMessage();
@@ -166,16 +262,29 @@ public class KeysResource {
 	    @QueryParam("name") String name, 
 	    @QueryParam("company") String company, 
 	    @QueryParam("email") String email, 
-	    @QueryParam("details") String details
+	    @QueryParam("details") String details,
+	    @QueryParam("minApiReqInt") String minApiReqInt
 	    )  throws JsonGenerationException, JsonMappingException, IOException {
+
 	        
 	    log.info("Starting updateKey with keyValue: " + keyValue + ", name: " 
 	      + name + ", company: " + company +", email: " + email + ", details: " 
-	      + details);
+	      + details + ", minApiReqInt: " + minApiReqInt);
+
+      Long minApiReqIntervalLong = 0L;
+      if (!minApiReqInt.isEmpty()) {
+        try {
+          minApiReqIntervalLong = Long.parseLong(minApiReqInt);
+        } catch (NumberFormatException e) {
+          log.error("Could not parse minApiReqInt: " + minApiReqInt);
+        }
+      }
 
 	    String message = "API Key updated: " + keyValue;
 	    try {
-	      updateKeyContactInfo(keyValue, name, company, email, details);
+			validateSecurity();
+	      updateKeyContactInfo(keyValue, name, company, email, details,
+	          minApiReqIntervalLong);
 	    } catch (Exception e) {
 	      log.error(e.getMessage());
 	      message = e.getMessage();
@@ -191,10 +300,12 @@ public class KeysResource {
 	  public Response deleteKey(@PathParam("keyValue")
 	  String keyValue) throws JsonGenerationException, JsonMappingException,
 	      IOException {
+
 	    log.info("Starting deleteKey with parameter " + keyValue);
 
 	    String message = "API Key deleted: " + keyValue;
 	    try {
+			validateSecurity();
 	      delete(keyValue);
 	    } catch (Exception e) {
 	      log.error(e.getMessage());
@@ -220,7 +331,7 @@ public class KeysResource {
 
 	    _userPropertiesService.authorizeApi(userIndex.getUser(),
 	        minApiRequestInterval);
-	    
+
 	    // Set the API Key contact info
 	    User user = userIndex.getUser();
 	    _userPropertiesService.updateApiKeyContactInfo(user, contactName, 
@@ -232,7 +343,7 @@ public class KeysResource {
 
 	  private void updateKeyContactInfo(String apiKey, String contactName, 
 	      String contactCompany, String contactEmail, 
-	      String contactDetails) throws Exception {
+	      String contactDetails, Long minApiReqIntervalLong) throws Exception {
 	    UserIndexKey key = new UserIndexKey(UserIndexTypes.API_KEY, apiKey);
 	    UserIndex userIndex = _userService.getUserIndexForId(key);
 
@@ -258,11 +369,14 @@ public class KeysResource {
       if (contactDetails != null) {
         keyContactDetails = contactDetails;
       }
-	    
+
+      _userPropertiesService.authorizeApi(userIndex.getUser(),
+          minApiReqIntervalLong);
+
 	    _userPropertiesService.updateApiKeyContactInfo(user, keyContactName, 
         keyContactCompany, keyContactEmail, keyContactDetails);
 	  }
-	  
+
 	  private void delete(String apiKey) throws Exception {
 	    UserIndexKey key = new UserIndexKey(UserIndexTypes.API_KEY, apiKey);
 	    UserIndex userIndex = _userService.getUserIndexForId(key);

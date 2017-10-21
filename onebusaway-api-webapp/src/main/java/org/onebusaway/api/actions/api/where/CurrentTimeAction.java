@@ -22,6 +22,7 @@ import org.onebusaway.api.actions.api.ApiActionSupport;
 import org.onebusaway.api.model.TimeBean;
 import org.onebusaway.api.model.transit.BeanFactoryV2;
 import org.onebusaway.api.model.transit.EntryWithReferencesBean;
+import org.onebusaway.util.SystemTime;
 import org.onebusaway.utility.DateLibrary;
 
 public class CurrentTimeAction extends ApiActionSupport {
@@ -39,6 +40,7 @@ public class CurrentTimeAction extends ApiActionSupport {
   public DefaultHttpHeaders index() {
 
     Date date = new Date();
+    date.setTime(SystemTime.currentTimeMillis());
     String readableTime = DateLibrary.getTimeAsIso8601String(date);
     TimeBean bean = new TimeBean(date, readableTime);
 

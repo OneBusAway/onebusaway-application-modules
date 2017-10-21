@@ -70,7 +70,7 @@ public class BaseModTask {
   }
   
   protected String getEmptyModUrl() {
-    return "https://raw.github.com/wiki/camsys/onebusaway-application-modules/EmptyModifications.md";
+    return "https://raw.githubusercontent.com/wiki/camsys/onebusaway-application-modules/EmptyModifications.md";
   }
 
   protected String runModifications(GtfsBundle gtfsBundle, String agencyId,
@@ -86,6 +86,8 @@ public class BaseModTask {
     mod.getWriter().getEntityClasses().add(PatternPair.class);
     
     TransformFactory factory = mod.getTransformFactory();
+    // the transformer may be called twice causing erroneous duplicate messages
+    mod.getReader().setOverwriteDuplicates(true);
     
     addAgencyMappings(mod.getReader(), gtfsBundle);
     
@@ -97,7 +99,7 @@ public class BaseModTask {
     List<File> paths = new ArrayList<File>();
     paths.add(gtfsBundle.getPath());
     _log.info("transformer path=" + gtfsBundle.getPath() + "; output="
-        + outputDirectory);
+        + outputDirectory + " for modUrl=" + modUrl);
     mod.setGtfsInputDirectories(paths);
     mod.setOutputDirectory(new File(outputDirectory));
     GtfsTransformerLibrary.configureTransformation(mod, modUrl);
@@ -107,11 +109,16 @@ public class BaseModTask {
       factory.addModificationsFromString(transform);
     }
 
+    addExtraMods(mod);
     _log.info("running...");
     mod.run();
     _log.info("done!");
     // cleanup
     return cleanup(gtfsBundle);
+  }
+
+  public void addExtraMods(GtfsTransformer mod) {
+    // default: none
   }
 
   private boolean skipMod(String agencyId) {

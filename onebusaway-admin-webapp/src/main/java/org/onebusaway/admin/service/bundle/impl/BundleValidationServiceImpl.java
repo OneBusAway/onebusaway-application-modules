@@ -269,12 +269,18 @@ public class BundleValidationServiceImpl implements BundleValidationService {
     }
   }
 
-  public void downloadFeedValidator() {
+  public synchronized void downloadFeedValidator() {
     String tmpDir = System.getProperty("java.io.tmpdir");
+    String localFile = tmpDir + File.separatorChar + TRANSIT_FEED + ".tar.gz";
+    if (new File(localFile).exists()) {
+      _log.error("feed Validator found at " + localFile + ", exiting");
+      _log.error("remove the file at " + localFile + " if it is corrupt");
+      return;
+    }
     NYCFileUtils fs = new NYCFileUtils(tmpDir);
     String url = "http://developer.onebusaway.org/tmp/" + TRANSIT_FEED + ".tar.gz";
     fs.wget(url);
-    fs.tarzxf(tmpDir + File.separatorChar + TRANSIT_FEED + ".tar.gz");
+    fs.tarzxf(localFile);
   }
 
   public void upload(BundleRequest request, BundleResponse response) {

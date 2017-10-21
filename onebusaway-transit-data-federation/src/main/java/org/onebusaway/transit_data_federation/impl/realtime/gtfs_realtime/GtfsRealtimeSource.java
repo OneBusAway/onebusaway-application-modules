@@ -48,6 +48,7 @@ import org.onebusaway.transit_data_federation.impl.service_alerts.ServiceAlertTi
 import org.onebusaway.transit_data_federation.impl.service_alerts.ServiceAlertsSituationAffectsClause;
 import org.onebusaway.transit_data_federation.services.AgencyService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockCalendarService;
+import org.onebusaway.transit_data_federation.services.blocks.BlockGeospatialService;
 import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts;
 import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert;
 import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlertsService;
@@ -141,8 +142,16 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   
   private MonitoredResult _monitoredResult = new MonitoredResult();
   
+  private String _feedId = null;
+  
   private StopModificationStrategy _stopModificationStrategy = null;
+  
+  private boolean _scheduleAdherenceFromLocation = false;
 
+  private BlockGeospatialService _blockGeospatialService;
+  
+  private boolean _enabled = true;
+ 
   @Autowired
   public void setAgencyService(AgencyService agencyService) {
     _agencyService = agencyService;
@@ -174,6 +183,11 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
       ScheduledExecutorService scheduledExecutorService) {
     _scheduledExecutorService = scheduledExecutorService;
   }
+  
+  @Autowired
+  public void setBlockGeospatialService(BlockGeospatialService blockGeospatialService) {
+    _blockGeospatialService = blockGeospatialService;
+  }
 
   public void setStopModificationStrategy(StopModificationStrategy strategy) {
     _stopModificationStrategy = strategy;
@@ -182,6 +196,10 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
 
   public void setTripUpdatesUrl(URL tripUpdatesUrl) {
     _tripUpdatesUrl = tripUpdatesUrl;
+  }
+  
+  public URL getTripUpdatesUrl() {
+    return _tripUpdatesUrl;
   }
 
   public void setSftpTripUpdatesUrl(String sftpTripUpdatesUrl) {
@@ -192,6 +210,10 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     _vehiclePositionsUrl = vehiclePositionsUrl;
   }
 
+  public URL getVehiclePositionsUrl() {
+    return _vehiclePositionsUrl;
+  }
+  
   public void setSftpVehiclePositionsUrl(String sftpVehiclePositionsUrl) {
     _sftpVehiclePositionsUrl = sftpVehiclePositionsUrl;
   }
@@ -200,12 +222,20 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     _alertsUrl = alertsUrl;
   }
 
+  public URL getAlertsUrl() {
+    return _alertsUrl;
+  }
+  
   public void setSftpAlertsUrl(String sftpAlertsUrl) {
     _sftpAlertsUrl = sftpAlertsUrl;
   }
 
   public void setRefreshInterval(int refreshInterval) {
     _refreshInterval = refreshInterval;
+  }
+  
+  public int getRefreshInterval() {
+    return _refreshInterval;
   }
 
   public void setHeadersMap(Map<String,String> headersMap) {
@@ -244,6 +274,30 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     return _monitoredResult;
   }
   
+  public String getFeedId() {
+    return _feedId;
+  }
+  
+  public void setFeedId(String id) {
+    _feedId = id;
+  }
+  
+  public void setScheduleAdherenceFromLocation(boolean scheduleAdherenceFromLocation) {
+    _scheduleAdherenceFromLocation = scheduleAdherenceFromLocation;
+  }
+  
+  public void setEnabled(boolean enabled) {
+    this._enabled = enabled;
+  }
+  
+  public boolean getEnabled() {
+    return _enabled;
+  }
+  
+  public GtfsRealtimeTripLibrary getGtfsRealtimeTripLibrary() {
+    return _tripsLibrary;
+  }
+  
   @PostConstruct
   public void start() {
     if (_agencyIds.isEmpty()) {
@@ -267,7 +321,9 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     if (_stopModificationStrategy != null) {
       _tripsLibrary.setStopModificationStrategy(_stopModificationStrategy);
     }
-
+    _tripsLibrary.setScheduleAdherenceFromLocation(_scheduleAdherenceFromLocation);
+    _tripsLibrary.setBlockGeospatialService(_blockGeospatialService);
+    
     _alertLibrary = new GtfsRealtimeAlertLibrary();
     _alertLibrary.setEntitySource(_entitySource);
 
@@ -275,6 +331,10 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
       _refreshTask = _scheduledExecutorService.scheduleAtFixedRate(
           new RefreshTask(), 0, _refreshInterval, TimeUnit.SECONDS);
     }
+  }
+  
+  public void reset() {
+    _lastVehicleUpdate.clear();
   }
 
   @PreDestroy
@@ -334,13 +394,22 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
       VehicleLocationRecord record = _tripsLibrary.createVehicleLocationRecordForUpdate(result, update);
       if (record != null) {
         if (record.getTripId() != null) {
+          // tripId will be null if block was matched
           result.addUnmatchedTripId(record.getTripId().toString());
         }
         AgencyAndId vehicleId = record.getVehicleId();
+        // here we try to get a more accurate count of updates
+        // some providers re-send old data or future data cluttering the feed
+        // the TDS will discard these
+        if (blockNotActive(record)) {
+          _log.debug("discarding v: " + vehicleId + " as block not active");
+          continue;
+        }
         seenVehicles.add(vehicleId);
         Date timestamp = new Date(record.getTimeOfRecord());
         Date prev = _lastVehicleUpdate.get(vehicleId);
         if (prev == null || prev.before(timestamp)) {
+          _log.debug("matched vehicle " + vehicleId + " on block=" + record.getBlockId() + " with scheduleDeviation=" + record.getScheduleDeviation());
           _vehicleLocationListener.handleVehicleLocationRecord(record);
           _lastVehicleUpdate.put(vehicleId, timestamp);
         }
@@ -361,12 +430,26 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
       }
       if (!seenVehicles.contains(vehicleId)
           && lastUpdateTime.before(staleRecordThreshold)) {
+        _log.debug("removing stale vehicleId=" + vehicleId);
         it.remove();
       }
     }
     // NOTE: this implies receiving stale updates is equivalent to not being updated at all
     result.setLastUpdate(newestUpdate);
-    _log.info("active vehicles=" + seenVehicles.size() + " for updates=" + updates.size());
+    _log.info("Agency " + this.getAgencyIds().get(0) + " has active vehicles=" + seenVehicles.size() 
+        + " for updates=" + updates.size() + " with most recent timestamp " + new Date(newestUpdate));
+  }
+
+  private boolean blockNotActive(VehicleLocationRecord record) {
+    if (record.isScheduleDeviationSet()) {
+      if (Math.abs(record.getScheduleDeviation()) > 60 * 60) {
+        // if schedule deviation is way off then ignore
+        _log.debug("discarding v: " + record.getVehicleId() + " for schDev=" + record.getScheduleDeviation());
+        return true;
+      }
+      
+    }
+    return false;
   }
 
   private void handleAlerts(FeedMessage alerts) {
@@ -580,7 +663,7 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
      in = urlConnection.getInputStream();
      return FeedMessage.parseFrom(in, _registry);
    } catch (IOException ex) {
-     _log.error("connection issue with url " + url);
+     _log.error("connection issue with url " + url + ", ex=" + ex);
      return getDefaultFeedMessage();
    } finally {
       try {
@@ -679,7 +762,9 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     @Override
     public void run() {
       try {
-        refresh();
+        if (_enabled) {
+          refresh();
+        }
       } catch (Throwable ex) {
         _log.warn("Error updating from GTFS-realtime data sources", ex);
       }

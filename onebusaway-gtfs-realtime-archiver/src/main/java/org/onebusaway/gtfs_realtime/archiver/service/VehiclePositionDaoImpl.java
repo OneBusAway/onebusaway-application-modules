@@ -19,13 +19,14 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projection;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.criterion.Projections;
-import org.onebusaway.gtfs_realtime.archiver.model.VehiclePositionModel;
+import org.onebusaway.gtfs_realtime.model.VehiclePositionModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,6 +71,7 @@ public class VehiclePositionDaoImpl implements VehiclePositionDao {
   // Get a list of vehicle positions given vehicle ID, start date, and end date
   // If endDate is null choose now
   // If startDate is null choose endDate - 1hr
+  @Override
   public List<VehiclePositionModel> getVehiclePositions(String vehicleId,
       Date startDate, Date endDate) {
 
@@ -85,10 +87,17 @@ public class VehiclePositionDaoImpl implements VehiclePositionDao {
     DetachedCriteria criteria = DetachedCriteria.forClass(
         VehiclePositionModel.class);
 
-    criteria.add(Restrictions.eq("vehicleId", vehicleId));
+    if (!StringUtils.isEmpty(vehicleId)) {
+      criteria.add(Restrictions.eq("vehicleId", vehicleId));
+    }
     criteria.add(Restrictions.between("timestamp", startDate, endDate));
     criteria.addOrder(Order.asc("timestamp"));
 
     return _template.findByCriteria(criteria);
+  }
+  
+  @Override
+  public List<VehiclePositionModel> findByDate(Date startDate, Date endDate) {
+    return getVehiclePositions(null, startDate, endDate);
   }
 }

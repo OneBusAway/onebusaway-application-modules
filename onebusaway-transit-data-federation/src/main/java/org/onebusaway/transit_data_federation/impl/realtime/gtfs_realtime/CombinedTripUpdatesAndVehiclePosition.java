@@ -26,6 +26,7 @@ class CombinedTripUpdatesAndVehiclePosition implements
   public BlockDescriptor block;
   public List<TripUpdate> tripUpdates;
   public VehiclePosition vehiclePosition;
+  public String bestTrip;
 
   @Override
   public int compareTo(CombinedTripUpdatesAndVehiclePosition o) {
