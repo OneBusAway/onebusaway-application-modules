@@ -41,20 +41,34 @@
     <property name="key" value="TEST"/>
   </bean>
 
+  <!-- iOS Client -->
   <bean class="org.onebusaway.users.impl.CreateApiKeyAction">
     <property name="key" value="org.onebusaway.iphone"/>
   </bean>
 
+  <!-- Android Client -->
   <bean class="org.onebusaway.users.impl.CreateApiKeyAction">
     <property name="key" value="v1_BktoDJ2gJlu6nLM6LsT9H8IUbWc=cGF1bGN3YXR0c0BnbWFpbC5jb20="/>
   </bean>
 
+  <!-- Windows Phone Client -->
   <bean class="org.onebusaway.users.impl.CreateApiKeyAction">
     <property name="key" value="v1_C5+aiesgg8DxpmG1yS2F/pj2zHk=c3BoZW5yeUBnbWFpbC5jb20=="/>
   </bean>
 
+  <!-- Windows 8 Client -->
   <bean class="org.onebusaway.users.impl.CreateApiKeyAction">
     <property name="key" value="693c0a55-9ef0-4302-8bc3-f9b2db93e124"/>
+  </bean>
+
+  <!-- Alexa Skill -->
+  <bean class="org.onebusaway.users.impl.CreateApiKeyAction">
+    <property name="key" value="e5c0e97a-729d-4fdb-a3ca-2fccb20ac3ab"/>
+  </bean>
+
+  <!-- Pebble Smartwatch -->
+  <bean class="org.onebusaway.users.impl.CreateApiKeyAction">
+    <property name="key" value="48d59e79-ed33-4be0-9db3-912f8f521fec"/>
   </bean>
 
   <bean id="externalGeocoderImpl" class="org.onebusaway.geocoder.impl.DatabaseCachingGeocoderImpl">

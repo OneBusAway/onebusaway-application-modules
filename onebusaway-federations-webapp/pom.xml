@@ -94,7 +94,7 @@
                 <artifactId>cargo-maven2-plugin</artifactId>
                 <configuration>
                     <configuration>
-                        <home>${project.build.directory}/tomcat5x/container</home>
+                        <home>${project.build.directory}/tomcat7x/container</home>
                         <properties>
                             <cargo.jvmargs>${cargo.jvmargs}</cargo.jvmargs>
                             <cargo.servlet.port>${org_onebusaway_test_port}</cargo.servlet.port>
@@ -106,11 +106,9 @@
                         <containerId>tomcat7x</containerId>
                         <zipUrlInstaller>
                             <url>http://developer.onebusaway.org/dist/apache-tomcat-${tomcat-version}.zip</url>
-                            <extractDir>${java.io.tmpdir}/cargo-installs-sound</extractDir>
+                            <extractDir>${java.io.tmpdir}/cargo-installs</extractDir>
                         </zipUrlInstaller>
                     </container>
-                    <!-- Don't wait around once the container has been started -->
-                    <wait>false</wait>
                 </configuration>
                 <executions>
                     <execution>
@@ -141,7 +139,6 @@
                                     <pingURL>http://localhost:${org_onebusaway_test_port}/onebusaway-federations-webapp/remoting/index.action</pingURL>
                                 </deployable>
                             </deployables>
-
                         </configuration>
                     </execution>
                     <execution>

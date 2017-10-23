@@ -119,13 +119,12 @@ public class BlockEntriesFactoryTest {
 
     // jre8 changes this ordering so explicity search
     BlockEntryImpl block = find(blocks, "blockB");
-    
     assertEquals(aid("blockB"), block.getId());
     assertSame(block, tripEntryC.getBlock());
     Mockito.verify(_blockConfigFactory).processBlockConfigurations(block,
         Arrays.asList(tripEntryC));
 
- // jre8 changes this ordering so explicity search
+    // jre8 changes this ordering so explicity search
     block = find(blocks, "blockA");
     assertEquals(aid("blockA"), block.getId());
     assertSame(block, tripEntryA.getBlock());

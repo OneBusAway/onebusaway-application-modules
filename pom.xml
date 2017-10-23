@@ -38,14 +38,6 @@
 
   <repositories>
     <repository>
-      <id>releases-camsys-repo</id>
-      <url>http://archiva.obaweb.org/archiva/repository/releases/</url> 
-    </repository>
-    <repository>
-      <id>snapshots-camsys-repo</id>
-      <url>http://archiva.obaweb.org/archiva/repository/snapshots/</url> 
-    </repository>
-    <repository>
       <id>public.onebusaway.org</id>
       <url>http://nexus.onebusaway.org/content/groups/public/</url>
     </repository>
@@ -550,7 +542,7 @@
       <plugin>
         <groupId>com.mycila.maven-license-plugin</groupId>
         <artifactId>maven-license-plugin</artifactId>
-        <version>2.11</version>
+        <version>2.12</version>
         <configuration>
           <excludes combine.children="append">
             <exclude>**/data-sources.xml</exclude>

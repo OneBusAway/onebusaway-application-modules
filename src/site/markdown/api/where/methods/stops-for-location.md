@@ -6,7 +6,7 @@ Search for stops near a specific location, optionally by stop code
 
 ## Sample Request
 
-http://api.pugetsound.onebusaway.org/api/where/stops-for-location.xml?key=TEST&lat=47.653435&lon=-122.305641
+http://api.pugetsound.onebusaway.org/api/where/stops-for-location.xml?key=TEST&amp;lat=47.653435&amp;lon=-122.305641
 
 ## Sample Response
 

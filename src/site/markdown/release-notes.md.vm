@@ -3,6 +3,8 @@
 #set( $H = '#' ) ## When using velocity templating (a .vm file), the ## indicates a Velocity comment, which makes Markdown section headers tricky
 
 $H$H ${currentVersion}
+  * CVE-2017-5638; upgrade struts to 2.3.32
+$H$H 1.1.15
   * documentation cleanup
   * quickstart api key fixes
   * Travis configuration

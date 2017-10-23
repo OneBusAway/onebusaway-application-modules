@@ -5,3 +5,4 @@ pom.xml.releaseBackup
 .project
 .classpath
 /.springBeans
+*.iml
