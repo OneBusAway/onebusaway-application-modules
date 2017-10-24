@@ -39,7 +39,8 @@ if(typeof OBA !== 'undefined' &amp;&amp; typeof OBA.Config !== 'undefined') {
 	OBA.Config.siriVMUrl = "<s:property value="siriBaseURL" />" + "/vehicle-monitoring.json?key=" + OBA.Config.obaApiKey;
 	OBA.Config.apiBaseUrl = "<s:property value="apiBaseURL" />";
 	OBA.Config.timeApiUrl = "<s:property value="apiBaseURL" />" + "/api/where/current-time.json?key=" + OBA.Config.obaApiKey;
-	
+
+
 	OBA.Config.infoBubbleFooterFunction = function(type, query) {
 			var html = '';
 

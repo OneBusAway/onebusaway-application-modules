@@ -23,7 +23,7 @@ $.ajaxSetup({ cache: false });
 OBA.Config = {
 		autocompleteUrl: "api/autocomplete",
 		searchUrl: "api/search",
-		configUrl: "api/config",
+		// configUrl: "api/config",
 		stopsWithinBoundsUrl: "api/stops-within-bounds",
 		stopsOnRouteForDirection: "api/stops-on-route-for-direction",
 		stopForId: "api/stop-for-id",

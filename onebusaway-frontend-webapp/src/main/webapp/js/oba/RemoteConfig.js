@@ -21,14 +21,16 @@ var OBA = window.OBA || {};
 $.ajaxSetup({ cache: false });
 
 OBA.Config = {
-    autocompleteUrl: "http://localhost:8080/api/autocomplete",
-    searchUrl: "http://localhost:8080/api/search",
-    configUrl: "http://localhost:8080/api/config",
-    stopsWithinBoundsUrl: "http://localhost:8080/api/stops-within-bounds",
-    stopsOnRouteForDirection: "http://localhost:8080/api/stops-on-route-for-direction",
-    stopForId: "http://localhost:8080/api/stop-for-id",
+    configUrl: "/api/remote-config",
 
     // siriSMUrl and siriVMUrl now moved to config.jspx
+    // as have the following properties -- they are in config.jspx or remote-config.jspx
+    
+    // autocompleteUrl: "http://localhost:8080/api/autocomplete",
+    // searchUrl: "http://localhost:8080/api/search",
+    // stopsWithinBoundsUrl: "http://localhost:8080/api/stops-within-bounds",
+    // stopsOnRouteForDirection: "http://localhost:8080/api/stops-on-route-for-direction",
+    // stopForId: "http://localhost:8080/api/stop-for-id",
 
     refreshInterval: 15000,
 
