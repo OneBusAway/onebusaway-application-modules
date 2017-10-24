@@ -349,10 +349,6 @@
 
 				<configuration>
 					<excludes combine.children="append">
-						<exclude>**/dateFormat.js</exclude>
-						<exclude>**/popover.js</exclude>
-						<exclude>**/markerManager.js</exclude>
-						<exclude>**/rgbcolor.js</exclude>
 						<exclude>**/*.properties</exclude>
 					</excludes>
 				</configuration>

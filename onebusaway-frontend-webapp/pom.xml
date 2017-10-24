@@ -100,12 +100,14 @@
                     </configuration>
                 </plugin>
                 <plugin>
-                    <groupId>com.mycila.maven-license-plugin</groupId>
-                    <artifactId>maven-license-plugin</artifactId>
+                    <groupId>com.mycila</groupId>
+                    <artifactId>license-maven-plugin</artifactId>
                     <configuration>
                         <excludes combine.children="append">
-                            <exclude>src/main/webapp/**</exclude>
-                            <exclude>src/main/resources/**</exclude>
+                            <exclude>**/dateFormat.js</exclude>
+                            <exclude>**/popover.js</exclude>
+                            <exclude>**/markerManager.js</exclude>
+                            <exclude>**/rgbcolor.js</exclude>
                             <exclude>resources/**</exclude>
                         </excludes>
                     </configuration>
