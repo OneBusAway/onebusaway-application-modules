@@ -35,10 +35,10 @@
     OBA.Config.useAgencyId='<s:property value="useAgencyId" />';
     OBA.Config.showVehicleIdInStopPopup='<s:property value="showVehicleIdInStopPopup" />';
 
-    OBA.Config.siriSMUrl = "<s:property value="siriBaseURL" />" + "/stop-monitoring.json?key=" + OBA.Config.obaApiKey;
-    OBA.Config.siriVMUrl = "<s:property value="siriBaseURL" />" + "/vehicle-monitoring.json?key=" + OBA.Config.obaApiKey;
-    OBA.Config.apiBaseUrl = "<s:property value="apiBaseURL" />";
-    OBA.Config.timeApiUrl = "<s:property value="apiBaseURL" />" + "/api/where/current-time.json?key=" + OBA.Config.obaApiKey;
+    OBA.Config.siriSMUrl = "<s:property value="appHostURL" />" + "<s:property value="siriBaseURL" />" + "/stop-monitoring.json?key=" + OBA.Config.obaApiKey;
+    OBA.Config.siriVMUrl = "<s:property value="appHostURL" />" + "<s:property value="siriBaseURL" />" + "/vehicle-monitoring.json?key=" + OBA.Config.obaApiKey;
+    OBA.Config.apiBaseUrl = "<s:property value="appHostURL" />" + "<s:property value="apiBaseURL" />";
+    OBA.Config.timeApiUrl = "<s:property value="appHostURL" />" + "<s:property value="apiBaseURL" />" + "/api/where/current-time.json?key=" + OBA.Config.obaApiKey;
 
 
     OBA.Config.autocompleteUrl = "<s:property value="appHostURL" />" + "/api/autocomplete";
@@ -46,7 +46,6 @@
     OBA.Config.stopsWithinBoundsUrl = "<s:property value="appHostURL" />" +  "/api/stops-within-bounds";
     OBA.Config.stopsOnRouteForDirection = "<s:property value="appHostURL" />" + "/api/stops-on-route-for-direction";
     OBA.Config.stopForId = "<s:property value="appHostURL" />" + "/api/stop-for-id";
-
 
     OBA.Config.infoBubbleFooterFunction = function(type, query) {
     var html = '';
