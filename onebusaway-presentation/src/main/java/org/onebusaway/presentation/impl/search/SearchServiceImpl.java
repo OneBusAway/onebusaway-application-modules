@@ -381,7 +381,7 @@ public class SearchServiceImpl implements SearchService {
         if (results.isEmpty()) {
             tryAsRoutes(results, normalizedQuery, resultFactory);
             if (!results.isEmpty()) {
-                _log.error("Results from tryAsRoute: " + results.toString());
+                _log.error("Results from tryAsRoutes: " + results.toString());
             }
         }
 
@@ -410,16 +410,19 @@ public class SearchServiceImpl implements SearchService {
 		q = URLDecoder.decode(q);
 		
 		q = q.trim();
+		q = q.replace(",", " ");
 
 		List<String> tokens = new ArrayList<String>();
+        _log.error("Tokens 1: " + tokens);
 		if (Boolean.TRUE.equals(configuredAgencyIdHasSpaces())) {
-  		String agencyMatch = matchAgencyIds(q);
-  		if (agencyMatch != null) {
-  		  // handle agencies with spaces
-  		  q = q.replace(agencyMatch, "");
-  		  tokens.add(agencyMatch);
-  		}
+		    String agencyMatch = matchAgencyIds(q);
+		    if (agencyMatch != null) {
+		        // handle agencies with spaces
+                q = q.replace(agencyMatch, "");
+                tokens.add(agencyMatch);
+		    }
 		}
+        _log.error("Tokens 2: " + tokens);
 		
 		StringTokenizer tokenizer = new StringTokenizer(q, " +", true);
 		if (configuredAgencyIdHasSpaces() && !tokens.isEmpty() && tokenizer.hasMoreTokens()) {
@@ -453,6 +456,7 @@ public class SearchServiceImpl implements SearchService {
 		String normalizedQuery = "";
 		for (int i = 0; i < tokens.size(); i++) {
 			String token = tokens.get(i);
+			_log.error("Evaluate Token: " + token);
 			String lastItem = null;
 			String nextItem = null;
 			if (i - 1 >= 0) {
@@ -475,10 +479,11 @@ public class SearchServiceImpl implements SearchService {
 								.containsKey(nextItem.toUpperCase()))) {
 					results.addRouteFilter(_routeShortNameToRouteBeanMap
 							.get(token.toUpperCase()).get(0)); //TODO Filtering on multiple route matches
+                    _log.error("Add this token as a Route Filter and jump to next token");
 					continue;
 				}
 			} else {
-                _log.error("We have a token that not a route, the next or last is a stop then take out the token");
+                _log.error("We have a token that is not a route");
 				// if the token is not a route and the next or last token is a
 				// valid stop id (but not also a route ID),
 				// consider the token a bad filter and remove it from the query.
@@ -487,6 +492,7 @@ public class SearchServiceImpl implements SearchService {
 						|| (nextItem != null && stopsForId(nextItem).size() > 0
 								&& !_routeShortNameToRouteBeanMap.containsKey(nextItem.toUpperCase()))) { // TOOD Filtering on multiple route matches
 					if (!token.contains("_")) {
+                        _log.error("if the token is not a route and the next or last token is a valid stop id (but not also a route ID), consider the token a bad filter and remove it from the query.");
 						// if we have an agency Id, its probably a stop, don't
 						// discard
 						continue;
@@ -603,7 +609,7 @@ public class SearchServiceImpl implements SearchService {
 		if (_routeShortNameToRouteBeanMap.get(routeQuery) != null) {
 		  for (RouteBean routeBean : _routeShortNameToRouteBeanMap.get(routeQuery)) {
 						results.addMatch(resultFactory.getRouteResult(routeBean));
-              _log.error("match 3, why no return?");
+              _log.error("match 3");
 		  }
 		}
 
@@ -661,34 +667,35 @@ public class SearchServiceImpl implements SearchService {
         }
 
         //try to parse routeQuery into separate routes
-        //from the normalizers, if routes are passed in as 90, 92 they will come to us as 90,
-        //90 92 will come to us as 90 92
-        //90, 92, 94, 90 will come to us as Normalized query: 90, 92, 94,
-        //but w/out the commas it comes as Normalized query: 90 92 94 92
-        List<String> tokens = new ArrayList<String>();
+        List<String> routeTokens = new ArrayList<String>();
         StringTokenizer tokenizer = new StringTokenizer(routeQuery, " ", true);
         while (tokenizer.hasMoreTokens()) {
-            String token = tokenizer.nextToken().trim();
-            if (!StringUtils.isEmpty(token)) {
-                tokens.add(token);
-                _log.error("Routes Token:" + token);
+            String routeToken = tokenizer.nextToken().trim();
+            if (!StringUtils.isEmpty(routeToken)) {
+                routeTokens.add(routeToken);
+                _log.error("Routes Token:" + routeToken);
             }
         }
-        for (String route : tokens) {
+        for (String route : routeTokens) {
             _log.error("In my list of routes: " + route);
         }
 
-        for (String route : tokens) {
-            // short name matching
+        for (String route : routeTokens)  {
+            if (_routeIdToRouteBeanMap.get(route) != null) {
+                RouteBean routeBean = _routeIdToRouteBeanMap.get(route);
+                results.addMatch(resultFactory.getRouteResult(routeBean));
+                _log.error("RouteId found match: " + route);
+
+            }
+
             if (_routeShortNameToRouteBeanMap.get(route) != null) {
                 for (RouteBean routeBean : _routeShortNameToRouteBeanMap.get(route)) {
                     results.addMatch(resultFactory.getRouteResult(routeBean));
-                    _log.error("Routes found match: " + route);
+                    _log.error("RouteShortName found match: " + route);
                 }
             }
         }
         return;
-
     }
 
 	private void tryAsStop(SearchResultCollection results, String stopQuery,
