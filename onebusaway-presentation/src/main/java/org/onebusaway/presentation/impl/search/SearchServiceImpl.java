@@ -365,40 +365,26 @@ public class SearchServiceImpl implements SearchService {
 			SearchResultFactory resultFactory) {
 		refreshCachesIfNecessary();
 
-		_log.error("**** Query: " + query);
-
 		SearchResultCollection results = new SearchResultCollection();
 
 		String normalizedQuery = normalizeQuery(results, query);
-		_log.error("Normalized query: " + normalizedQuery);
 
 		tryAsRoute(results, normalizedQuery, resultFactory);
-        if (!results.isEmpty()) {
-            _log.error("Results from tryAsRoute: " + results.toString());
-        }
 
-        //think about this ... will we ever want to try this if there are results, or, try this first??
         if (results.isEmpty()) {
             tryAsRoutes(results, normalizedQuery, resultFactory);
-            if (!results.isEmpty()) {
-                _log.error("Results from tryAsRoutes: " + results.toString());
-            }
         }
-
 
 		// only guess it as a stop if its numeric or has possible agency prefix
 		// results does not support mixed types -- it can only be a route or a stop
 		if (results.isEmpty() && (StringUtils.isNumeric(normalizedQuery) || normalizedQuery.contains("_")) ) {
 			tryAsStop(results, normalizedQuery, resultFactory);
-            _log.error("Results from tryAsStop: " + results.toString());
 		}
 
 		if (results.isEmpty()) {
 			tryAsGeocode(results, normalizedQuery, resultFactory);
-            _log.error("Results from tryAsGeocode: " + results.toString());
 		}
 
-		_log.error("Results: " + results.toString() + " ****");
 		return results;
 	}
 
@@ -410,10 +396,10 @@ public class SearchServiceImpl implements SearchService {
 		q = URLDecoder.decode(q);
 		
 		q = q.trim();
+		//replace commas to handle comma separated routes
 		q = q.replace(",", " ");
 
 		List<String> tokens = new ArrayList<String>();
-        _log.error("Tokens 1: " + tokens);
 		if (Boolean.TRUE.equals(configuredAgencyIdHasSpaces())) {
 		    String agencyMatch = matchAgencyIds(q);
 		    if (agencyMatch != null) {
@@ -422,7 +408,6 @@ public class SearchServiceImpl implements SearchService {
                 tokens.add(agencyMatch);
 		    }
 		}
-        _log.error("Tokens 2: " + tokens);
 		
 		StringTokenizer tokenizer = new StringTokenizer(q, " +", true);
 		if (configuredAgencyIdHasSpaces() && !tokens.isEmpty() && tokenizer.hasMoreTokens()) {
@@ -436,8 +421,6 @@ public class SearchServiceImpl implements SearchService {
 		    }
 		  }
 		}
-
-		_log.error("Tokens after doing agency match: " + tokens);
 		
 		while (tokenizer.hasMoreTokens()) {
 		  /*
@@ -449,14 +432,12 @@ public class SearchServiceImpl implements SearchService {
 
 			if (!StringUtils.isEmpty(token)) {
 				tokens.add(token);
-                _log.error("Token:" + token);
             }
 		}
 
 		String normalizedQuery = "";
 		for (int i = 0; i < tokens.size(); i++) {
 			String token = tokens.get(i);
-			_log.error("Evaluate Token: " + token);
 			String lastItem = null;
 			String nextItem = null;
 			if (i - 1 >= 0) {
@@ -472,18 +453,15 @@ public class SearchServiceImpl implements SearchService {
 				// it's a filter--
 				// so remove it from the normalized query sent to the geocoder
 				// or stop service
-                _log.error("We have a token that is a route");
 				if ((lastItem != null && !_routeShortNameToRouteBeanMap
 						.containsKey(lastItem.toUpperCase()))
 						|| (nextItem != null && !_routeShortNameToRouteBeanMap
 								.containsKey(nextItem.toUpperCase()))) {
 					results.addRouteFilter(_routeShortNameToRouteBeanMap
 							.get(token.toUpperCase()).get(0)); //TODO Filtering on multiple route matches
-                    _log.error("Add this token as a Route Filter and jump to next token");
 					continue;
 				}
 			} else {
-                _log.error("We have a token that is not a route");
 				// if the token is not a route and the next or last token is a
 				// valid stop id (but not also a route ID),
 				// consider the token a bad filter and remove it from the query.
@@ -492,7 +470,6 @@ public class SearchServiceImpl implements SearchService {
 						|| (nextItem != null && stopsForId(nextItem).size() > 0
 								&& !_routeShortNameToRouteBeanMap.containsKey(nextItem.toUpperCase()))) { // TOOD Filtering on multiple route matches
 					if (!token.contains("_")) {
-                        _log.error("if the token is not a route and the next or last token is a valid stop id (but not also a route ID), consider the token a bad filter and remove it from the query.");
 						// if we have an agency Id, its probably a stop, don't
 						// discard
 						continue;
@@ -515,15 +492,11 @@ public class SearchServiceImpl implements SearchService {
 			normalizedQuery += token + " ";
 		}
 
-        if (results.getRouteFilter() != null) {
-            _log.error("Route filters: " + results.getRouteFilter());
-        }
 		// If we parsed more than one route filter from the query, remove route
 		// filters
 		// because user interfaces don't support more than one route filter
 		if (results.getRouteFilter() != null
 				&& results.getRouteFilter().size() > 1) {
-		    _log.error("More than one route filter, clear route filters");
 			results.getRouteFilter().clear();
 		}
 
@@ -591,7 +564,6 @@ public class SearchServiceImpl implements SearchService {
     if (_routeIdToRouteBeanMap.get(routeQueryMixedCase) != null) {
       RouteBean routeBean = _routeIdToRouteBeanMap.get(routeQueryMixedCase);
       results.addMatch(resultFactory.getRouteResult(routeBean));
-      _log.error("match 1");
       // if we've matched, assume no others
       return;
     }
@@ -601,7 +573,6 @@ public class SearchServiceImpl implements SearchService {
       RouteBean routeBean = _routeIdToRouteBeanMap.get(routeQuery);
       results.addMatch(resultFactory.getRouteResult(routeBean));
       // if we've matched, assume no others
-        _log.error("match 2");
       return;
     }
 		
@@ -609,7 +580,6 @@ public class SearchServiceImpl implements SearchService {
 		if (_routeShortNameToRouteBeanMap.get(routeQuery) != null) {
 		  for (RouteBean routeBean : _routeShortNameToRouteBeanMap.get(routeQuery)) {
 						results.addMatch(resultFactory.getRouteResult(routeBean));
-              _log.error("match 3");
 		  }
 		}
 
@@ -627,7 +597,6 @@ public class SearchServiceImpl implements SearchService {
 			  try {
 			    for (RouteBean routeBean : _routeShortNameToRouteBeanMap.get(routeShortName)) {
 			      results.addSuggestion(resultFactory.getRouteResult(routeBean));
-                    _log.error("adding suggestions");
 			    }
   				continue;
 			  } catch (OutOfServiceAreaServiceException oosase) {
@@ -643,7 +612,6 @@ public class SearchServiceImpl implements SearchService {
 			  try {
 			    for (RouteBean routeBean : _routeLongNameToRouteBeanMap.get(routeLongName)) {
 			      results.addSuggestion(resultFactory.getRouteResult(routeBean));
-                    _log.error("match 4 - well, suggestion");
 			    }
 			  } catch (OutOfServiceAreaServiceException oosase) {
 			  }
@@ -673,25 +641,20 @@ public class SearchServiceImpl implements SearchService {
             String routeToken = tokenizer.nextToken().trim();
             if (!StringUtils.isEmpty(routeToken)) {
                 routeTokens.add(routeToken);
-                _log.error("Routes Token:" + routeToken);
             }
         }
-        for (String route : routeTokens) {
-            _log.error("In my list of routes: " + route);
-        }
 
+        //for each route, match to either an agency prefixed route (ex: 1_92)
+        //or a short name of route (ex: 92)
         for (String route : routeTokens)  {
             if (_routeIdToRouteBeanMap.get(route) != null) {
                 RouteBean routeBean = _routeIdToRouteBeanMap.get(route);
                 results.addMatch(resultFactory.getRouteResult(routeBean));
-                _log.error("RouteId found match: " + route);
-
             }
 
             if (_routeShortNameToRouteBeanMap.get(route) != null) {
                 for (RouteBean routeBean : _routeShortNameToRouteBeanMap.get(route)) {
                     results.addMatch(resultFactory.getRouteResult(routeBean));
-                    _log.error("RouteShortName found match: " + route);
                 }
             }
         }
