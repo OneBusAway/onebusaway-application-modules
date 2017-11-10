@@ -32,7 +32,6 @@
     <import resource="classpath:org/onebusaway/presentation/application-context.xml" />
     <import resource="classpath:org/onebusaway/util/application-context.xml" />
 
-    <context:component-scan base-package="org.onebusaway.enterprise.webapp.impl" />
     <!-- notification strategy lives in presentation -->
     <context:component-scan base-package="org.onebusaway.presentation.impl.service_alerts" />
     
@@ -66,5 +65,29 @@
     </bean>
     
     <bean class="org.onebusaway.enterprise.webapp.actions.status.service.StatusProviderImpl" />
+
+    <bean id="CommonResources" class="org.onebusaway.presentation.impl.resources.ResourceFactory">
+        <property name="name" value="CommonResources" />
+        <property name="resources">
+            <list>
+                <value>/js/jquery.js</value>
+                <value>classpath:org/onebusaway/presentation/js/oba-common.js</value>
+                <value>classpath:org/onebusaway/presentation/js/oba-api.js</value>
+                <value>classpath:org/onebusaway/presentation/js/oba-l10n.js</value>
+                <value>classpath:org/onebusaway/presentation/js/oba-presentation.js</value>
+                <value>classpath:org/onebusaway/presentation/js/oba-maps.js</value>
+                <value>messages:DateLibrary</value>
+                <value>collection:Map=classpath:org/onebusaway/presentation/resources/map/*.png</value>
+            </list>
+        </property>
+    </bean>
+    
+  <bean class="org.onebusaway.container.spring.PropertyOverrideConfigurer">
+    <property name="properties">
+      <props>
+        <prop key="resourceServiceImpl.prefix">/resource?id=</prop>
+      </props>
+    </property>
+  </bean>
     
 </beans>

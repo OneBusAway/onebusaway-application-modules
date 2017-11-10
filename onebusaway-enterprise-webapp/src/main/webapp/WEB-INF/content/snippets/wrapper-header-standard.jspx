@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+
+    Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+            http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<jsp:root version="1.2"
+	xmlns:jsp="http://java.sun.com/JSP/Page"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+    xmlns:s="/struts-tags"
+	xmlns:oba="/oba-tags"
+	xmlns:decorator="http://www.opensymphony.com/sitemesh/decorator">
+<jsp:directive.page contentType="text/html" />
+
+<head>
+  <title><decorator:title default="OneBusAway" /></title>
+  <link rel="stylesheet" type="text/css" media="all" href="${oba:resource('/WEB-INF/css/where-standard.css')}"/>
+  <link rel="stylesheet" type="text/css" media="all" href="${oba:resource('/WEB-INF/css/Stylesheet.css')}"/> 
+  <link rel="icon" type="image/png" href="${oba:resource('/images/Bus.png')}"/>
+  <decorator:head />
+</head>
+
+<body>
+
+<div id="wrapper">
+<div id="container">
+
+<div id="header">
+
+<ul id="mainNav" class="tabs">
+
+<s:set var="uri">${pageContext.request.requestURI}</s:set>
+<s:set var="contextPath">${pageContext.request.contextPath}</s:set>
+
+<s:if test="!properties.getProperty('hide_home_tab')">
+  <jsp:element name="li">
+    <jsp:attribute name="class">
+      <s:if test="#uri.startsWith(#contextPath + '/index') or #uri == #contextPath + '/'">current</s:if>
+    </jsp:attribute>
+    <a href="${pageContext.request.contextPath}/">Home</a>
+  </jsp:element>
+</s:if>
+
+<s:if test="!properties.getProperty('hide_tools_tab')">
+  <jsp:element name="li">
+    <jsp:attribute name="class">
+      <s:if test="#uri.startsWith(#contextPath + '/p/Tools')">current</s:if>
+    </jsp:attribute>
+    <a href="${pageContext.request.contextPath}/p/Tools.action">Tools</a>
+  </jsp:element>
+</s:if>
+
+<s:if test="!properties.getProperty('hide_research_tab')">
+    <jsp:element name="li">
+      <jsp:attribute name="class">
+      <s:if test="#uri.startsWith(#contextPath + '/p/Research')">current</s:if>
+    </jsp:attribute>
+    <a href="${pageContext.request.contextPath}/p/Research.action">Research</a>
+  </jsp:element>
+</s:if>
+
+<s:if test="!properties.getProperty('hide_contact_us_tab')">
+<jsp:element name="li">
+    <jsp:attribute name="class">
+      <s:if test="#uri.startsWith(#contextPath + '/p/ContactUs')">current</s:if>
+    </jsp:attribute>
+    <a href="${pageContext.request.contextPath}/p/ContactUs.action">Contact Us</a>
+  </jsp:element>
+</s:if>
+
+<s:if test="!properties.getProperty('hide_settings_tab')">
+  <jsp:element name="li">
+    <jsp:attribute name="class">
+      <s:if test="#uri.startsWith(#contextPath + '/user')">current</s:if>
+    </jsp:attribute>
+    <a href="${pageContext.request.contextPath}/user/index.action">Settings</a>
+  </jsp:element>
+</s:if>
+
+</ul>
+
+<a id="headerTitle" href="${pageContext.request.contextPath}/">OneBusAway</a>
+</div>
+
+<decorator:body />
+<div id="version" style="font-size:14px;color:darkgray;position:absolute;right:2em">
+	<s:property value="properties.getProperty('git.commit.id.describe')" />
+</div>
+</div>
+
+</div>
+
+<div id="feedback">
+  <a href="http://onebusaway.ideascale.com">
+    <img src="${oba:resource('/images/Feedback.png')}"/>
+  </a>
+</div>
+
+<!-- Google Analytics -->
+<script type="text/javascript">
+	var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+	document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<script type="text/javascript">
+	var pageTracker = _gat._getTracker("${oba:configValue('tracker')}");
+pageTracker._initData();
+pageTracker._trackPageview();
+</script>
+</body>
+
+</jsp:root>

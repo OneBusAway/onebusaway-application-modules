@@ -31,6 +31,9 @@
     <constant name="struts.custom.i18n.resources" value="onebusaway-enterprise" />
     <!-- constant name="struts.devMode" value="true" /-->
 
+	<bean type="org.apache.struts2.components.template.TemplateEngine" name="jspx" class="org.apache.struts2.components.template.JspTemplateEngine" />
+
+
     <package name="onebusaway-webapp-default" extends="struts-default">
 
         <result-types>

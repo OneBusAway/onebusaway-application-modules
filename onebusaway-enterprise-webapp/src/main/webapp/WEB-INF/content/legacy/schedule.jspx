@@ -20,19 +20,21 @@
     xmlns:oba="/oba-tags">
 <jsp:directive.page contentType="text/html" />
 <!-- <s:set name="stop" value="result.stop" /> -->
+
 <head>
- <s:url var="url" value="/resource?id=${oba:resource('/WEB-INF/css/where-standard-schedule.css')}">
-  </s:url>
+<s:url var="url" value="/css/schedule/schedule.css" />
 <link rel="stylesheet" type="text/css" media="all" href="${url}"/>
-<script type="text/javascript" src="${oba:resource('CommonResources')}"><jsp:text></jsp:text></script>
-<script type="text/javascript" src="${oba:resource('/js/oba-where-standard-schedule.js')}"><jsp:text></jsp:text></script>
+
+<s:url var="url" value="/js/oba/schedule/schedule.js" />
+<script type="text/javascript" src="${url} }"><jsp:text></jsp:text></script>
+
 <script type="text/javascript">
   jQuery(document).ready(oba_where_standard_schedule);
 </script>
 <title>
   <oba:message key="Schedule"/>
   <jsp:text> - </jsp:text>
-  <s:component templateDir="WEB-INF/content" theme="where/standard" template="stop-name-snippet.jspx">
+  <s:component templateDir="WEB-INF/content" theme="legacy" template="stop-name-snippet.jspx">
     <s:param name="stop" value="result.stop"/>
   </s:component>
 </title>
@@ -49,11 +51,11 @@
 
         <div class="stopScheduleCalendars">
         <div class="stopScheduleCalendarsHeader"><oba:message key="Calendar"/></div>
-        
+
         <oba:group value="result.calendarDays.days" var="months">
           <oba:date format="MMMMM yyyy" value="date"/>
         </oba:group>
-        
+
         <table>
             <s:iterator value="#months">
                 <tr>
@@ -69,11 +71,11 @@
                                   <td><s:property value="top"/></td>
                                 </s:iterator>
                             </tr>
-                            
+
                             <oba:group var="weeks">
                                 <oba:date format="WW" value="date"/>
                             </oba:group>
-                            
+
                             <s:iterator value="#weeks" var="forWeek">
                                 <tr class="stopScheduleRow">
                                     <s:iterator var="day" value="#shortWeekDays">
@@ -82,7 +84,7 @@
                                             <jsp:element name="div">
                                               <jsp:attribute name="class">calendarGroup<s:property value="group" /></jsp:attribute>
                             <s:set var="shiftedDate" value="getShiftedDate(date)" />
-                            <s:url var="scheduleUrl" action="schedule" includeParams="none">
+                            <s:url var="scheduleUrl" action="trip" includeParams="none">
                                 <s:param name="id" value="#stop.id" />
                                 <s:param name="date">
                                     <oba:date format="yyyy-MM-dd" value="#shiftedDate" />
@@ -102,7 +104,7 @@
                 </tr>
             </s:iterator>
         </table>
-        
+
         <p><oba:message key="schedule.clickOnCalendarEntry"/></p>
         <p><oba:message key="schedule.daysWithTheSameSchedule"/></p>
         </div>
@@ -113,11 +115,10 @@
         <div class="stopScheduleStop">
 
         <div class="stopScheduleStopInfo"><jsp:element name="a">
-<jsp:attribute name="href">index.html#p(index)m(stop)lat(<s:property value="#stop.lat" />)lon(<s:property
-                    value="#stop.lon" />)accuracy(8)stop(<s:property value="#stop.id" />)</jsp:attribute>
+<jsp:attribute name="href">${pageContext.request.contextPath}/#<s:property value="#stop.id" /></jsp:attribute>
 <div class="stopScheduleStopAddress"><s:property value="#stop.name" /></div>
 <div class="stopScheduleStopNumber">
-  <s:component templateDir="WEB-INF/content" theme="where/standard" template="stop-name-snippet.jspx">
+  <s:component templateDir="WEB-INF/content" theme="legacy" template="stop-name-snippet.jspx">
     <s:param name="stop" value="result.stop"/>
     <s:param name="excludeStopName" value="true"/>
   </s:component>
@@ -127,14 +128,14 @@
         <s:url var="realtimeUrl" action="stop" includeParams="none">
             <s:param name="id" value="#stop.id" />
         </s:url>
-        
+
         <div class="stopScheduleDate">
           <oba:message key="schedule.scheduleFor"/>
           <jsp:text> </jsp:text>
           <span>
             <oba:date dateStyle="long" value="result.date" />
           </span><jsp:text>. </jsp:text>
-          <oba:message key="schedule.forRealTimeInfo"/>, 
+          <oba:message key="schedule.forRealTimeInfo"/>,
           <s:a href="%{realtimeUrl}">
             <oba:message key="click_here"/>
           </s:a>.
@@ -146,21 +147,21 @@
             <s:if test="! #rowstatus.first">
               <jsp:text>, </jsp:text>
             </s:if>
-            <span><s:a href="#route_%{route.id}"><oba:routeName value="route"/></s:a></span>  
+            <span><s:a href="#route_%{route.id}"><oba:routeName value="route"/></s:a></span>
           </s:iterator>
         </p>
         </div>
-        
+
         <s:iterator value="result.routes">
         	<s:set var="route" value="route" />
-            
-            
+
+
         	<s:iterator value="directions" status="dirstatus">
-            
+
             <jsp:element name="div">
               <jsp:attribute name="class">stopScheduleRouteEntry</jsp:attribute>
               <jsp:attribute name="id"><s:if test="#dirstatus.first">route_<s:property value="%{route.id}"/></s:if></jsp:attribute>
-            
+
             <div class="stopScheduleRouteHeader"><span class="stopScheduleRouteName"><oba:routeName value="#route"/></span> - <span class="stopScheduleRouteDescription"><s:property value="tripHeadsign" /></span></div>
 
             <s:if test="! frequencies.empty">
@@ -174,7 +175,7 @@
                 </thead>
                 <tbody>
                 <s:iterator value="frequencies" status="rowstatus">
-                  <jsp:element name="tr">                    
+                  <jsp:element name="tr">
                     <jsp:attribute name="class"><s:if test="#rowstatus.odd">odd</s:if><s:else>even</s:else></jsp:attribute>
                     <td class="startTime">
                       <oba:date timeStyle="short" value="startTime"/>
@@ -183,18 +184,18 @@
                       <s:if test="#rowstatus.last">
                         <oba:date timeStyle="short" value="endTime"/>
                       </s:if>
-                      
+
                     </td>
                     <td>
                       <oba:message key="EveryXMinutes">
                         <s:param value="headwaySecs / 60" />
                       </oba:message>
                     </td>
-                    <s:url var="url" action="trip">
+                     <s:url var="url" namespace="/legacy" action="trip">
                       <s:param name="id" value="tripId"/>
                       <s:param name="serviceDate" value="serviceDate"/>
                     </s:url>
-                    <td><s:a href="%{url}"><oba:message key="Details"/></s:a></td>
+                    <td><s:a href="url"><oba:message key="Details"/></s:a></td>
                   </jsp:element>
                 </s:iterator>
                 </tbody>
@@ -203,7 +204,7 @@
 
             <s:if test="! stopTimes.empty">
             <s:set var="AmPm" value="amPmClock"/>
-            
+
             <s:if test="#AmPm">
                 <oba:group var="AmPmGroups" value="stopTimes">
                     <oba:date format="aa" value="departureTime"/>
@@ -214,7 +215,7 @@
                     WHAT
                 </oba:group>
             </s:else>
-            
+
             <table class="stopScheduleTable stopScheduleNonFrequencyTable">
               <thead>
                 <tr>
@@ -256,7 +257,7 @@
                       </td>
                       <td class="stopScheduleHoursValues">
                         <s:iterator value="top" >
-                          <s:url var="url" action="trip">
+                          <s:url var="url" namespace="/legacy" action="trip">
                             <s:param name="id" value="tripId"/>
                             <s:param name="serviceDate" value="serviceDate" />
                             <s:param name="stopId" value="result.stop.id"/>
@@ -268,8 +269,8 @@
                                 <s:iterator value="groupIds" status="it">
                                     <s:property value="top"/>
                                     <s:if test="! #it.last"><jsp:text> </jsp:text></s:if>
-                                </s:iterator> 
-                            </jsp:attribute>                            
+                                </s:iterator>
+                            </jsp:attribute>
                             <oba:date format="mm" value="departureTime" />
                           </jsp:element>
                         </s:iterator>
@@ -279,7 +280,7 @@
                 </s:iterator>
               </tbody>
             </table>
-            
+
             <s:if test="! groups.empty">
             <div>
                 <p><s:text name="schedule.To_highlight_specific_trips_select"/></p>
@@ -311,7 +312,7 @@
                 </form>
             </div>
             </s:if>
-            
+
             </s:if>
 
             </jsp:element>
@@ -320,9 +321,13 @@
 
 
         <p>
-            <s:a href="index.html"><oba:message key="schedule.searchForAnotherStop"/></s:a>
+            <jsp:element name="a">
+            <jsp:attribute name="href">${pageContext.request.contextPath}</jsp:attribute>
+                <oba:message key="schedule.searchForAnotherStop"/>
+            </jsp:element>
+
         </p>
-        
+
         </div>
         </td>
     </tr>
