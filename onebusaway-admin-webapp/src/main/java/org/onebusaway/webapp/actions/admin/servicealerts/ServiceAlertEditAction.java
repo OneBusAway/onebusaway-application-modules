@@ -349,6 +349,7 @@ public class ServiceAlertEditAction extends ActionSupport implements
       _log.info("tweet response=" + response);
     } else {
       _log.info("no notification service provided");
+      _twitterResult = "Twitter not configured properly.  Contact your administrator";
     }
     return "twitterResult";
   }
