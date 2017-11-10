@@ -4,7 +4,7 @@
   <parent>
     <artifactId>onebusaway-application-modules</artifactId>
     <groupId>org.onebusaway</groupId>
-    <version>1.1.15.45.1-cs-SNAPSHOT</version>
+    <version>1.1.15.45.1-cs</version>
   </parent>
   <artifactId>onebusaway-enterprise-acta-webapp</artifactId>
   <packaging>war</packaging>
