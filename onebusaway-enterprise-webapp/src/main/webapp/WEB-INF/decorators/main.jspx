@@ -81,7 +81,7 @@
 		<div id="branding">
 			<s:set var="link" value="getText('main.agency.link')" />
 			<a href="${link}">
-			  	<s:url var="url" value="/css/img/agency_logo.gif"></s:url>
+			  	<s:url var="url" value="/css/img/sound_trandsit_logo.png"></s:url>
 				<img src="${url}" alt="Agency logo" />
 			</a>
 		</div>
