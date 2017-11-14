@@ -145,9 +145,6 @@ public class TripAction extends ActionSupport {
   }
   
   @Override
-  @Actions({
-      @Action(value = "/legacy/trip"),
-      @Action(value = "/where/iphone/trip")})
   public String execute() throws ServiceException {
 
     if (_id == null)

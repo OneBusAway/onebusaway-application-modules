@@ -48,34 +48,30 @@ var oba_where_standard_trip = function(data) {
 	/**
 	 * Create map markers for a stop and a pop-up info window for display when clicked
 	 */
-	var stopHandler = function(stop, stopSequence) {
+	var stopHandler = function(stop, stopSequence, routeFilter) {
 		
-		var markers = OBA.Maps.addStopToMarkerManager(stop, markerManager);
-		
+		if(data.stopId == stop.id){
+			var markers = OBA.Maps.addStopToMarkerManager(stop, markerManager, true);
+		} else {
+			var markers = OBA.Maps.addStopToMarkerManager(stop, markerManager);
+		}
+
 		jQuery.each(markers,function(){
-			google.maps.event.addListener(this, 'click', function() {
-				
-				var content = OBA.Presentation.createStopInfoWindow(stop);
-			    
-			    var anchor = content.find(".stopContent>p>a");
-			    var url = anchor.attr("href");
-			    
-				var params = {};
-				
-				params.stopId = stop.id;
-				params.tripId = data.tripId;
-				params.serviceDate = data.serviceDate;
-				params.stopSequence = stopSequence;
-				if( data.vehicleId )
-					params.vehicleId = data.vehicleId;
-				
-				url += OBA.Common.buildUrlQueryString(params);
-			    
-				anchor.attr("href",url);
-			    
-			    infoWindow.setContent(content.show().get(0));
-			    infoWindow.open(map,this);
-		     });	
+			this.title = stop.name;
+			this.stopId = stop.id;
+			
+			 google.maps.event.addListener(this, "click", function(mouseEvent) {
+		    	   var stopIdParts = stop.id.split("_");
+		    	   var stopIdWithoutAgency = stopIdParts[1];
+		    	   
+		    	   OBA.Config.analyticsFunction("Stop Marker Click", stopIdWithoutAgency);
+		    	   
+		    	   OBA.Popups.showPopupWithContentFromRequest(map, this, OBA.Config.stopForId, 
+		    			   { stopId: stop.id },
+		    			   OBA.Popups.getStopContentForResponse, 
+		    			   routeFilter);
+		    	  
+		    	});
 		});
 	};
 	
@@ -92,11 +88,12 @@ var oba_where_standard_trip = function(data) {
 		
 		var schedule = tripDetails.schedule;
 		var stopTimes = schedule.stopTimes;
+		var routeFilter = trip.route.shortName;
 		
 		var bounds = new google.maps.LatLngBounds();
 		
 		jQuery.each(stopTimes, function(index) {
-			stopHandler(this.stop, index);
+			stopHandler(this.stop, index, routeFilter);
 			bounds.extend(new google.maps.LatLng(this.stop.lat,this.stop.lon));
 		});
 		
@@ -138,6 +135,7 @@ var oba_where_standard_trip = function(data) {
 	
 	OBA.Maps.mapReady(map,function(){
 		OBA.Api.tripDetails(params, tripDetailsHandler);
+		console.log(OBA.Api.tripDetails(params, tripDetailsHandler));
 		setInterval(function() {
 			OBA.Api.tripDetails(params, tripStatusHandler);
 		},30000);

@@ -242,7 +242,7 @@ public class ResourceServiceImpl implements ResourceService {
 
     String resourcePathKey = getResourcePathAsKey(resourcePath, localeProvider);
 
-    Resource resource = null;
+    Resource resource = _resourceEntriesByResourcePath.get(resourcePathKey);
 
     if (resource == null) {
 

@@ -25,31 +25,34 @@
     value="result.trip.id" /></title>
 
 <link rel="stylesheet" type="text/css" media="all" href="${oba:resource('/css/legacy/trip.css')}"/>
+<link rel="stylesheet" type="text/css" media="all" href="${oba:resource('/css/legacy/popup-small.css')}"/>
+
+<!-- 
+<s:url var="url" value="/css/map/popup.css">
+	<s:param name="v"><s:property value="frontEndVersion" /></s:param>
+</s:url>
+<link rel="stylesheet" href="${url}" type="text/css" media="screen,print"/>
+ -->
 
 <!-- <script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"><jsp:text></jsp:text></script>
  -->
-<s:url var="url" value="https://maps.googleapis.com/maps/api/js">				
+
+<script type="text/javascript" src="${oba:url('/api/config')}"><jsp:text></jsp:text></script>
+<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"><jsp:text></jsp:text></script>
+<!-- <s:url var="url" value="https://maps.googleapis.com/maps/api/js">				
 	<s:param name="v">3</s:param>
 	<s:param name="client"><s:property value="googleMapsClientId" /></s:param>
 	<s:param name="channel"><s:property value="googleMapsChannelId" /></s:param>
 	<s:param name="sensor">false</s:param>
 </s:url>
-<script type="text/javascript" src="${url}"/>
-
-<script type="text/javascript" src="${oba:url('/api/config')}"><jsp:text></jsp:text></script>
+ -->
+<script type="text/javascript" src="${oba:resource('/js/oba/Util.js')}"><jsp:text></jsp:text></script>
 <script type="text/javascript" src="${oba:resource('/js/oba/legacy/trip.js')}"><jsp:text></jsp:text></script>
+<script type="text/javascript" src="${oba:resource('/js/oba/map/Popups.js')}"><jsp:text></jsp:text></script>
+
 
 <!-- Common -->
-<script type="text/javascript" src="${oba:resource('classpath:org/onebusaway/presentation/js/oba-common.js')}"><jsp:text></jsp:text></script>
-<script type="text/javascript" src="${oba:resource('classpath:org/onebusaway/presentation/js/oba-api.js')}"><jsp:text></jsp:text></script>
-<script type="text/javascript" src="${oba:resource('classpath:org/onebusaway/presentation/js/oba-l10n.js')}"><jsp:text></jsp:text></script>
-<script type="text/javascript" src="${oba:resource('classpath:org/onebusaway/presentation/js/oba-maps.js')}"><jsp:text></jsp:text></script>
-<script type="text/javascript" src="${oba:resource('collection:Map=classpath:org/onebusaway/presentation/resources/map/*.png')}"><jsp:text></jsp:text></script>
-
-
-
-
-
+<script type="text/javascript" src="${oba:resource('CommonResources')}"><jsp:text></jsp:text></script>
 <script type="text/javascript">
   jQuery(document).ready(function() {
 
@@ -172,7 +175,7 @@
                     <td>
                     <jsp:element name="div">
                       <jsp:attribute name="class">TripPage-StopColumn<s:if test="stop.id == stopId"> TripPage-StopColumn-Selected</s:if></jsp:attribute>
-                      <s:url var="url" value="/#%{stopId} %{trip.route.shortName}" />
+                      <s:url var="url" value="/#%{stop.id} %{trip.route.shortName}" />
                       <s:a href="%{url}">
                         <s:property value="stop.name" />
                       </s:a>

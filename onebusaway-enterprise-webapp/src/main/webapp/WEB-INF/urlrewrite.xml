@@ -80,15 +80,15 @@
     <!-- 
     	API rules.
      -->
-    <!-- <rule use-query-string="true">
-        <from>^/api/siri/([^.]*)\.(xml|json)$</from>
-        <to last="true" type="redirect">/onebusaway-api-webapp/siri/$1?type=$2</to>
+    <rule use-query-string="true">
+        <from>^/api/where/([^.]*)\.(xml|json)$</from>
+        <to last="true" type="redirect">/onebusaway-api-webapp/where/$1?type=$2</to>
     </rule>
     
     <rule>
-        <from>^/api/siri/([^.]*)\.(xml|json)$</from>
+        <from>^/api/where/([^.]*)\.(xml|json)$</from>
         <to last="true">/onebusaway-api-webapp/siri/$1.action?type=$2</to>
-    </rule>     -->
+    </rule>    
             
 	<!--
 		Remove action from URLs.

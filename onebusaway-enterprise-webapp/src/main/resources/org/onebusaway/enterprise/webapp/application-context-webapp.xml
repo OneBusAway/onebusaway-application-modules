@@ -70,14 +70,15 @@
         <property name="name" value="CommonResources" />
         <property name="resources">
             <list>
-                <value>/js/jquery.js</value>
+                <!-- <value>/js/lib/jquery.js</value> -->
                 <value>classpath:org/onebusaway/presentation/js/oba-common.js</value>
                 <value>classpath:org/onebusaway/presentation/js/oba-api.js</value>
                 <value>classpath:org/onebusaway/presentation/js/oba-l10n.js</value>
                 <value>classpath:org/onebusaway/presentation/js/oba-presentation.js</value>
-                <value>classpath:org/onebusaway/presentation/js/oba-maps.js</value>
+                <value>/js/oba/legacy/oba-maps.js</value>
                 <value>messages:DateLibrary</value>
-                <value>collection:Map=classpath:org/onebusaway/presentation/resources/map/*.png</value>
+                <!-- <value>collection:Map=classpath:org/onebusaway/presentation/resources/map/*.png</value> -->
+                <value>collection:Map=classpath:org/onebusaway/enterprise/webapp/realtime/stop/*.png</value>
             </list>
         </property>
     </bean>
