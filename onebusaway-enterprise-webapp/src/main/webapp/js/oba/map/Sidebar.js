@@ -26,7 +26,8 @@ OBA.Sidebar = function() {
 		menuBar = jQuery("#cssmenu1"),
 		adDiv = jQuery("#ad"),
 		mapDiv = jQuery("#map"),
-		bottomBarDiv = jQuery("#bottombar");
+		bottomBarDiv = jQuery("#bottombar"),
+		mobileDiv = jQuery("#mobilebox");
 
 	var searchBarDiv = jQuery("#searchbar"), 
 		matches = jQuery("#matches"),
