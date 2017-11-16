@@ -81,7 +81,7 @@
 		<div id="branding">
 			<s:set var="link" value="getText('main.agency.link')" />
 			<a href="${link}">
-			  	<s:url var="url" value="/css/img/sound_transit_logo.png"></s:url>
+			  	<s:url var="url" value="/css/img/oba_puget_sound_web_header.png"></s:url>
 				<img src="${url}" alt="Agency logo" />
 			</a>
 		</div>
@@ -103,10 +103,12 @@
 	<div id="contentbox">
 	<!-- Enter Content here -->
 	
-  		<div id="bustime">
+		<div id="bustime">
 			<decorator:body />
-	    </div>
-	    
+		</div>
+
+		<div id="bottombar"></div>
+
 	<!-- End Content -->
 	</div>
 
