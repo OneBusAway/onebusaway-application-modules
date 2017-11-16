@@ -34,7 +34,7 @@
 <title>
   <oba:message key="Schedule"/>
   <jsp:text> - </jsp:text>
-  <s:component templateDir="WEB-INF/content" theme="legacy" template="stop-name-snippet.jspx">
+  <s:component templateDir="WEB-INF/content" theme="where" template="stop-name-snippet.jspx">
     <s:param name="stop" value="result.stop"/>
   </s:component>
 </title>
@@ -118,7 +118,7 @@
 <jsp:attribute name="href">${pageContext.request.contextPath}/#<s:property value="#stop.id" /></jsp:attribute>
 <div class="stopScheduleStopAddress"><s:property value="#stop.name" /></div>
 <div class="stopScheduleStopNumber">
-  <s:component templateDir="WEB-INF/content" theme="legacy" template="stop-name-snippet.jspx">
+  <s:component templateDir="WEB-INF/content" theme="where" template="stop-name-snippet.jspx">
     <s:param name="stop" value="result.stop"/>
     <s:param name="excludeStopName" value="true"/>
   </s:component>
@@ -191,7 +191,7 @@
                         <s:param value="headwaySecs / 60" />
                       </oba:message>
                     </td>
-                     <s:url var="url" namespace="/legacy" action="trip">
+                     <s:url var="url" namespace="/where" action="trip">
                       <s:param name="id" value="tripId"/>
                       <s:param name="serviceDate" value="serviceDate"/>
                     </s:url>
@@ -257,7 +257,7 @@
                       </td>
                       <td class="stopScheduleHoursValues">
                         <s:iterator value="top" >
-                          <s:url var="url" namespace="/legacy" action="trip">
+                          <s:url var="url" namespace="/where" action="trip">
                             <s:param name="id" value="tripId"/>
                             <s:param name="serviceDate" value="serviceDate" />
                             <s:param name="stopId" value="result.stop.id"/>

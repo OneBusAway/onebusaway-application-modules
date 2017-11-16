@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.onebusaway.enterprise.webapp.actions.legacy;
+package org.onebusaway.enterprise.webapp.actions.where;
 
 import com.opensymphony.xwork2.ActionSupport;
 import com.opensymphony.xwork2.conversion.annotations.TypeConversion;
@@ -145,6 +145,9 @@ public class TripAction extends ActionSupport {
   }
   
   @Override
+  @Actions({
+      @Action(value = "/where/trip"),
+      @Action(value = "/where/iphone/trip")})
   public String execute() throws ServiceException {
 
     if (_id == null)

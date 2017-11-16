@@ -75,10 +75,10 @@
                 <value>classpath:org/onebusaway/presentation/js/oba-api.js</value>
                 <value>classpath:org/onebusaway/presentation/js/oba-l10n.js</value>
                 <value>classpath:org/onebusaway/presentation/js/oba-presentation.js</value>
-                <value>/js/oba/legacy/oba-maps.js</value>
+                <value>/js/oba/where/oba-maps.js</value>
                 <value>messages:DateLibrary</value>
                 <!-- <value>collection:Map=classpath:org/onebusaway/presentation/resources/map/*.png</value> -->
-                <value>collection:Map=classpath:org/onebusaway/enterprise/webapp/realtime/stop/*.png</value>
+                <value>collection:Map=classpath:org/onebusaway/enterprise/webapp/img/realtime/stop/*.png</value>
             </list>
         </property>
     </bean>

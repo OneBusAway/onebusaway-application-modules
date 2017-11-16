@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.onebusaway.enterprise.webapp.actions.legacy;
+package org.onebusaway.enterprise.webapp.actions.where;
 
 import java.text.DateFormatSymbols;
 import java.text.SimpleDateFormat;
@@ -91,6 +91,9 @@ public class ScheduleAction extends ActionSupport {
   }
   
   @Override
+  @Actions({
+      @Action(value = "/where/schedule"),
+      @Action(value = "/where/iphone/schedule")})
   public String execute() throws Exception {
 
     if (_date == null)

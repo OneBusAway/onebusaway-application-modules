@@ -37,6 +37,10 @@
 		<pattern>/routes/*</pattern>
 	</decorator>
 	
+	<decorator name="iphone" page="iphone.jspx">
+    	<pattern>/where/iphone/*</pattern>
+  	</decorator>
+	
 	<decorator name="mobile" page="mobile.jspx">
 		<pattern>/m/*</pattern>
 	</decorator>

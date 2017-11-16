@@ -24,7 +24,7 @@
 <title>Route <s:property value="result.trip.route.shortName" /> - <s:property value="result.trip.tripHeadsign" /> - Trip # <s:property
     value="result.trip.id" /></title>
 
-<link rel="stylesheet" type="text/css" media="all" href="${oba:resource('/css/legacy/trip.css')}"/>
+<link rel="stylesheet" type="text/css" media="all" href="${oba:resource('/css/where/trip.css')}"/>
 <link rel="stylesheet" type="text/css" media="all" href="${oba:url('/css/map/popup-small.css')}"/>
 
 <!-- Google Maps -->
@@ -47,7 +47,7 @@
 <!-- Config Override -->
 <script type="text/javascript" src="${oba:url('/api/config')}"><jsp:text></jsp:text></script>
 
-<script type="text/javascript" src="${oba:resource('/js/oba/legacy/trip.js')}"><jsp:text></jsp:text></script>
+<script type="text/javascript" src="${oba:resource('/js/oba/where/trip.js')}"><jsp:text></jsp:text></script>
 <script type="text/javascript">
   jQuery(document).ready(function() {
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.onebusaway.enterprise.webapp.actions.legacy;
+package org.onebusaway.enterprise.webapp.actions.where;
 
 import java.util.Date;
 import java.util.TimeZone;
@@ -63,6 +63,9 @@ public class BlockAction extends ActionSupport {
   }
 
   @Override
+  @Actions({
+      @Action(value = "/where/block"),
+      @Action(value = "/where/iphone/block")})
   public String execute() throws ServiceException {
 
     if (_id == null)

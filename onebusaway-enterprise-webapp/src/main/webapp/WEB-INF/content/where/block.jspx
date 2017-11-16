@@ -21,7 +21,7 @@
     xmlns:oba="/oba-tags">
 <jsp:directive.page contentType="text/html" />
 <head>
-<link rel="stylesheet" type="text/css" media="all" href="${oba:resource('/css/legacy/block.css')}"/>
+<link rel="stylesheet" type="text/css" media="all" href="${oba:resource('/css/where/block.css')}"/>
 <title><s:text name="BlockNum" /><jsp:text> </jsp:text><s:property value="blockInstance.blockId" /></title>
 </head>
 <body>
