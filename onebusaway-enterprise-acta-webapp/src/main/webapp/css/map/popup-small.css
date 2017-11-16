@@ -254,3 +254,7 @@
 #bustime .popup a:HOVER.alert-link {
 	color: rgb(255,0,0);
 }
+
+.popup #schedule {
+	visibility: hidden;
+}

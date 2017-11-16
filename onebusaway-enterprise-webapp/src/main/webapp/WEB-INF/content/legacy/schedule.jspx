@@ -84,7 +84,7 @@
                                             <jsp:element name="div">
                                               <jsp:attribute name="class">calendarGroup<s:property value="group" /></jsp:attribute>
                             <s:set var="shiftedDate" value="getShiftedDate(date)" />
-                            <s:url var="scheduleUrl" action="trip" includeParams="none">
+                            <s:url var="scheduleUrl" action="schedule" includeParams="none">
                                 <s:param name="id" value="#stop.id" />
                                 <s:param name="date">
                                     <oba:date format="yyyy-MM-dd" value="#shiftedDate" />

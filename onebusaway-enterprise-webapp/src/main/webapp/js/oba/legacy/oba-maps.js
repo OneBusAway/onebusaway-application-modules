@@ -178,10 +178,10 @@ var obaMapFactory = function() {
 		if( element instanceof jQuery )
 			element = element.get(0);
 		
-		var lat = params.lat || OBA.Config.centerLat || 47.606828;
-		var lon = params.lon || OBA.Config.centerLon || -122.332505;
-		var zoom = params.zoom || 10;
-		
+		var lat = params.lat || OBA.Config.mapCenterLat|| 47.606828;
+		var lon = params.lon || OBA.Config.mapCenterLon || -122.332505;
+		var zoom = params.zoom || OBA.Config.mapZoom || 10;
+
 		var mapCenter = new google.maps.LatLng(lat, lon);
 		var mapOptions = {
 			zoom : zoom,
@@ -190,16 +190,14 @@ var obaMapFactory = function() {
 		};
 		
 		var map = new google.maps.Map(element, mapOptions);
-
-		if( ! (params.lat || params.lon || params.zoom ) && OBA.Config.spanLat && OBA.Config.spanLon) {
-			var spanLat = OBA.Config.spanLat;
-			var spanLon = OBA.Config.spanLon;
-			var bounds = new google.maps.LatLngBounds();
-			bounds.extend(new google.maps.LatLng(lat-spanLat/2,lon-spanLon/2));
-			bounds.extend(new google.maps.LatLng(lat+spanLat/2,lon+spanLon/2));
-			map.fitBounds(bounds);
-		};
 		
+		if(OBA.Config.mapBounds) {
+			var swCorner = new google.maps.LatLng(OBA.Config.mapBounds.swLat, OBA.Config.mapBounds.swLon);
+			var neCorner = new google.maps.LatLng(OBA.Config.mapBounds.neLat, OBA.Config.mapBounds.neLon);
+			var bounds = new google.maps.LatLngBounds(swCorner, neCorner);
+			map.fitBounds(bounds);
+		}
+
 		return map;
 	};
 	

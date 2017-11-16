@@ -27,6 +27,8 @@ OBA.Config = {
 		stopsWithinBoundsUrl: "api/stops-within-bounds",
 		stopsOnRouteForDirection: "api/stops-on-route-for-direction",
 		stopForId: "api/stop-for-id",
+		apiUrl: "/onebusaway-api-webapp/api",
+		legacyUrl: "../",
 
 		// siriSMUrl and siriVMUrl now moved to config.jspx
 		

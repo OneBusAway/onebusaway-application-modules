@@ -320,7 +320,7 @@ OBA.Popups = (function() {
 		html += "<ul class='links'>";
 		html += "<a href='#' id='zoomHere'>Center & Zoom Here</a>";
 		html += "</ul>";
-		
+
 		// (end popup)
 		html += '</div>';
 		
@@ -620,7 +620,7 @@ OBA.Popups = (function() {
 		html += OBA.Config.infoBubbleFooterFunction("stop", stopCode);	        
 
 		html += "<ul class='links'>";
-		html += "<a href='#' id='zoomHere'>Center & Zoom Here</a>";
+		html += "<a href='#' id='zoomHere'>Center & Zoom Here</a>&nbsp;&nbsp;&nbsp;<a href='legacy/schedule?id=" + stopResult.id +"' id='schedule'>Complete Schedule</a>";
 		html += "</ul>";
 		
 		// (end popup)

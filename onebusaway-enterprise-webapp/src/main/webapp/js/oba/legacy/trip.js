@@ -63,10 +63,11 @@ var oba_where_standard_trip = function(data) {
 			 google.maps.event.addListener(this, "click", function(mouseEvent) {
 		    	   var stopIdParts = stop.id.split("_");
 		    	   var stopIdWithoutAgency = stopIdParts[1];
+		    	   var stopForIdUrl = OBA.Config.legacyUrl + OBA.Config.stopForId;
 		    	   
 		    	   OBA.Config.analyticsFunction("Stop Marker Click", stopIdWithoutAgency);
 		    	   
-		    	   OBA.Popups.showPopupWithContentFromRequest(map, this, OBA.Config.stopForId, 
+		    	   OBA.Popups.showPopupWithContentFromRequest(map, this, stopForIdUrl, 
 		    			   { stopId: stop.id },
 		    			   OBA.Popups.getStopContentForResponse, 
 		    			   routeFilter);
@@ -135,7 +136,6 @@ var oba_where_standard_trip = function(data) {
 	
 	OBA.Maps.mapReady(map,function(){
 		OBA.Api.tripDetails(params, tripDetailsHandler);
-		console.log(OBA.Api.tripDetails(params, tripDetailsHandler));
 		setInterval(function() {
 			OBA.Api.tripDetails(params, tripStatusHandler);
 		},30000);

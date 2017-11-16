@@ -34,7 +34,7 @@ var obaApiFactory = function() {
 	var createParams = function(otherParams) {
 
 		var params = {
-			key : OBA.Config.apiKey,
+			key : OBA.Config.obaApiKey,
 			version : 2
 		};
 		
