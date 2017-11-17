@@ -184,7 +184,7 @@
 	
 			<!-- Include the welcome div with example searches -->
 			<c:import url="includes/welcome.jspx" />
-		   
+
 			<s:url var="url" namespace="/routes" action="index"/>
 			<div id="available-routes"><a href="${url}">Click here</a> for a list of available routes.</div>
 		   
@@ -205,7 +205,10 @@
 			</s:if>
 
 			<!-- Include the Google ad -->
-			<c:import url="includes/ad.jspx" />
+			<!--<c:import url="includes/ad.jspx" />-->
+
+			<div id="flexSpreader"><!-- jspx --></div>
+			<div class="container clear"><!-- jspx --></div>
 
 			<div id="mobileAvailabilityBox">
 				<h1><s:property value="getText('main.mobileavailability')" /></h1>
@@ -221,7 +224,7 @@
 		
 		</div>
 
-		<div class="container clear"><!-- jspx --></div>
+
     </div>
 
 	<div id="map"><!-- //prevent jspx minimization --></div>
