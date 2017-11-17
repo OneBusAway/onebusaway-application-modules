@@ -210,13 +210,12 @@
 			<div id="flexSpreader"><!-- jspx --></div>
 			<div class="container clear"><!-- jspx --></div>
 
-			<div id="mobileAvailabilityBox">
-				<h1><s:property value="getText('main.mobileavailability')" /></h1>
-			</div>
-
-			<div id="mobilebox">
+			<div id="mobileBox">
+				<div id="mobileAvailabilityBox">
+					<h1><s:property value="getText('main.mobileavailability')" /></h1>
+				</div>
 				<s:set var="link" value="getText('main.agency.link')" />
-				<a href="${link}">
+				<a id="mobileImage" href="${link}">
 					<s:url var="url" value="/css/img/oba_puget_sound_mobile.png"></s:url>
 					<img src="${url}" alt="Agency logo" />
 				</a>
