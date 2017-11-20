@@ -36,11 +36,12 @@ var oba_where_standard_trip = function(data) {
         
         if( path.length > 1) {
         	var startPoint = path[0];
-        	var startIconUrl = OBA.Resources.Map['RouteStart.png'];
+        	var startIconUrl = '../img/realtime/stop/RouteStart.png';
+        	
         	new google.maps.Marker({position: startPoint, map: map, icon: startIconUrl, clickable: false});
         	
         	var endPoint = path[path.length-1];
-        	var endIconUrl = OBA.Resources.Map['RouteEnd.png'];
+        	var endIconUrl = '../img/realtime/stop/RouteEnd.png';
         	new google.maps.Marker({position: endPoint, map: map, icon: endIconUrl, clickable: false});
         }
 	};
@@ -68,7 +69,7 @@ var oba_where_standard_trip = function(data) {
 		    	   OBA.Config.analyticsFunction("Stop Marker Click", stopIdWithoutAgency);
 		    	   
 		    	   OBA.Popups.showPopupWithContentFromRequest(map, this, stopForIdUrl, 
-		    			   { stopId: stop.id },
+		    			   { stopId: stop.id, time: 1510348701000},
 		    			   OBA.Popups.getStopContentForResponse, 
 		    			   routeFilter);
 		    	  
@@ -147,7 +148,7 @@ var oba_where_standard_trip = function(data) {
 	
 	var selectedStopHandler = function(stop) {
 		var point = new google.maps.LatLng(stop.lat,stop.lon);
-		var url = OBA.Resources.Map['SelectionCircle36.png'];
+		var url = '../img/realtime/stop/SelectionCircle36.png';
 		var anchor = new google.maps.Point(18, 18);
 		var icon = new google.maps.MarkerImage(url, null, null, anchor);
 		new google.maps.Marker({position: point, map: map, icon: icon, clickable: false});

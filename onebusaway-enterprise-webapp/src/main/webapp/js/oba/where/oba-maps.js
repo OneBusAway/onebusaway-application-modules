@@ -353,7 +353,8 @@ var obaMapFactory = function() {
 	};
 	
 	that.getWhiteCircle14MarkerImage = function() {
-		var url = OBA.Resources.Map['WhiteCircle14.png'];
+		var urlName = 'WhiteCircle14.png';
+		var url = "../img/realtime/stop/" + urlName;
 		var anchor = new google.maps.Point(7, 7);
 		return new google.maps.MarkerImage(url, null, null, anchor);
 	};
@@ -423,7 +424,7 @@ var obaMapFactory = function() {
 
 		if( direction && iconIncludeDirection) {
 			var urlName = "stop-" + direction + activeIcon + ".png";
-			var url = OBA.Resources.Map[urlName];
+			var url = "../img/realtime/stop/" + urlName;
 			
 			if( url ) {				
 				var anchor = iconAnchors[size][stop.direction];
@@ -435,7 +436,7 @@ var obaMapFactory = function() {
 		}
 		
 		var urlName = "stop-unknown" + activeIcon +".png";
-		var url = OBA.Resources.Map[urlName];
+		var url = "../img/realtime/stop/" + urlName;
 			
 		var anchor = iconAnchors[size]['default'];
 		var icon = new google.maps.MarkerImage(url, null, null, anchor);
