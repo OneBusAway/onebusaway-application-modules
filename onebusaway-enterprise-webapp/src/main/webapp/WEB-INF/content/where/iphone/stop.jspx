@@ -24,7 +24,7 @@
 <s:set name="now" value="getNow()" />
 <head>
 <meta http-equiv="Refresh" content="60" />
-<link rel="stylesheet" type="text/css" media="all" href="${oba:resource('/WEB-INF/css/where-stop.css')}"/>
+<link rel="stylesheet" type="text/css" media="all" href="${oba:resource('/css/where/stop.css')}"/>
 <title><s:iterator value="result.stops" status="stopsIter">
     <s:property value="name" /> - <s:property value="direction" /> bound - Stop # <s:property value="code" />
     <s:if test="!#stopsIter.last">, </s:if>

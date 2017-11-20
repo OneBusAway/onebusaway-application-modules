@@ -23,9 +23,9 @@ import java.util.Set;
 
 import org.apache.struts2.convention.annotation.Action;
 import org.apache.struts2.convention.annotation.Actions;
+import org.onebusaway.enterprise.webapp.impl.WebappArrivalsAndDeparturesModel;
 import org.onebusaway.exceptions.ServiceException;
 import org.onebusaway.transit_data.model.AgencyBean;
-import org.onebusaway.webapp.impl.WebappArrivalsAndDeparturesModel;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.opensymphony.xwork2.ModelDriven;

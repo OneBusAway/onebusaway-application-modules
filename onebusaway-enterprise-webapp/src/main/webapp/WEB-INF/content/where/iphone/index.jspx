@@ -25,11 +25,11 @@
 <body>
 
 <p>You can search for stops by number.  Learn about how to find <a
-    href="stopIdentification.action">your stop number</a>.</p>
+    href="stopIdentification">your stop number</a>.</p>
 
 <h2>Search by stop number:</h2>
 
-<form action="stops.action">
+<form action="stops">
 <div><s:textfield cssClass="inputTextbox" name="code" /></div>
 <div><input id="stops_submit" type="submit" class="inputButton" value="Search By Stop Number" /></div>
 </form>
@@ -39,7 +39,7 @@ bus route.</p>
 
 <h2>Search by route number:</h2>
 
-<form action="routes.action">
+<form action="routes">
 <div><input type="text" class="inputTextbox" name="query" /></div>
 <div><input id="routes_submit" type="submit" class="inputButton" value="Search By Route" /></div>
 </form>
@@ -47,8 +47,7 @@ bus route.</p>
 <h2>Other Links:</h2>
 
 <ul class="buttons">
-	<li><a href="user/index.action">Settings</a></li>
-	<li><a href="agencies.action">Supported Agencies</a></li>
+	<li><a href="agencies">Supported Agencies</a></li>
 </ul>
 
 <p class="credits">Thanks to <a href="http://www.sofianehassaine.com/">Sofiane Hassaine</a> for use of his

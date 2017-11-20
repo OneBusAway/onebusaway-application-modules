@@ -124,10 +124,8 @@
   </s:component>
 </div>
 </jsp:element></div>
-
-        <s:url var="realtimeUrl" action="stop" includeParams="none">
-            <s:param name="id" value="#stop.id" />
-        </s:url>
+        
+        <s:url var="realtimeUrl" value="/#" includeParams="none" />
 
         <div class="stopScheduleDate">
           <oba:message key="schedule.scheduleFor"/>
@@ -136,7 +134,7 @@
             <oba:date dateStyle="long" value="result.date" />
           </span><jsp:text>. </jsp:text>
           <oba:message key="schedule.forRealTimeInfo"/>,
-          <s:a href="%{realtimeUrl}">
+          <s:a href="%{realtimeUrl}%{result.stop.id}">
             <oba:message key="click_here"/>
           </s:a>.
         </div>

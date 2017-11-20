@@ -112,13 +112,13 @@ Your privacy is important to us and we'll do our best to protect your private in
 <s:else>
 
 <s:if test="mode == 'registration'">
-<p>Your account is already registered.  Check out your <a href="user/index.action">User Settings</a> for more information.</p>
+<p>Your account is already registered.  Check out your <a href="user/index">User Settings</a> for more information.</p>
 </s:if>
 <s:elseif test="mode == 'add-account'">
 
 </s:elseif>
 <s:else>
-<p>Your are already logged in.  Click to <a href="logout.action">logout</a>.</p>
+<p>Your are already logged in.  Click to <a href="logout">logout</a>.</p>
 </s:else>
 
 </s:else>

@@ -152,7 +152,7 @@
 			   	</ul>
 		   </div>
 	    
-	       <form action="search.action">
+	       <form action="search">
 	         <input type="text" name="q" value=""/>
 	         <input type="submit" value="Find" class="submit"/>
 	         <p id="tip">TIP: Enter an intersection, bus route or bus stop code.</p>

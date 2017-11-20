@@ -32,6 +32,8 @@
     <import resource="classpath:org/onebusaway/presentation/application-context.xml" />
     <import resource="classpath:org/onebusaway/util/application-context.xml" />
 
+	<context:component-scan base-package="org.onebusaway.enterprise.webapp.impl" />
+
     <!-- notification strategy lives in presentation -->
     <context:component-scan base-package="org.onebusaway.presentation.impl.service_alerts" />
     
@@ -78,7 +80,6 @@
                 <value>/js/oba/where/oba-maps.js</value>
                 <value>messages:DateLibrary</value>
                 <!-- <value>collection:Map=classpath:org/onebusaway/presentation/resources/map/*.png</value> -->
-                <value>collection:Map=classpath:org/onebusaway/enterprise/webapp/img/realtime/stop/*.png</value>
             </list>
         </property>
     </bean>
@@ -89,6 +90,10 @@
         <prop key="resourceServiceImpl.prefix">/resource?id=</prop>
       </props>
     </property>
+  </bean>
+  
+    <bean id="arrivalAndDepartureMessages" class="org.onebusaway.enterprise.webapp.impl.TypedMessagesFactory">
+    <property name="messagesClass" value="org.onebusaway.enterprise.webapp.impl.ArrivalAndDepartureMessages" />
   </bean>
     
 </beans>

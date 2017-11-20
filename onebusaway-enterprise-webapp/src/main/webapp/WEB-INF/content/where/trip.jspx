@@ -125,7 +125,7 @@
                           <s:property value="(top.arrivalTime - #firstStopTime.departureTime) / 60"/> mins
                         </span>
                     </s:if></td>
-                    <td class="TripPage-StopColumn"><a href="stop.action?id=${stop.id}"><s:property value="stop.name" /></a></td>
+                    <td class="TripPage-StopColumn"><a href="stop?id=${stop.id}"><s:property value="stop.name" /></a></td>
                 </tr>
             </s:iterator>
         </s:iterator>

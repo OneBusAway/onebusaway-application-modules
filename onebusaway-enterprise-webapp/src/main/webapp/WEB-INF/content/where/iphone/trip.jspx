@@ -33,7 +33,7 @@
     </div>
 
     <s:if test="schedule.previousTrip != null">
-        <p>Incoming Route:<br/><a href="trip.action?id=${schedule.previousTrip.id}"><oba:routeName
+        <p>Incoming Route:<br/><a href="trip?id=${schedule.previousTrip.id}"><oba:routeName
             value="schedule.previousTrip.route" /> - <s:property
             value="schedule.previousTrip.tripHeadsign" /></a></p>
     </s:if>
@@ -47,12 +47,12 @@
     <s:iterator value="#groups">
         <div class="TripPage-ArrivalTime"><oba:date format="hh:mm aa" value="getStopTime(top[0])" /></div>
         <ul class="buttons"><s:iterator>
-            <li><a href="stop.action?id=${stop.id}"><s:property value="stop.name" /></a></li>
+            <li><a href="stop?id=${stop.id}"><s:property value="stop.name" /></a></li>
         </s:iterator></ul>
     </s:iterator></div>
 
     <s:if test="schedule.nextTrip != null">
-        <p>Continues as Route:<br/><a href="trip.action?id=${schedule.nextTrip.id}"><oba:routeName
+        <p>Continues as Route:<br/><a href="trip?id=${schedule.nextTrip.id}"><oba:routeName
             value="schedule.nextTrip.route" /> - <s:property
             value="schedule.nextTrip.tripHeadsign" /></a></p>
     </s:if>

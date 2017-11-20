@@ -44,7 +44,7 @@ upper-left corner:</p>
 <jsp:attribute name="class">stopIdentificationImage</jsp:attribute>
 </jsp:element>
 
-<p>If you can't find your stop number, you can <a href="index.action">search for stops by route</a>.</p>
+<p>If you can't find your stop number, you can <a href="index">search for stops by route</a>.</p>
 
 </body>
 </html>
