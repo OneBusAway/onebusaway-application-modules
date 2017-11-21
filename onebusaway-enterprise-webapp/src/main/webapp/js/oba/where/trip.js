@@ -36,8 +36,7 @@ var oba_where_standard_trip = function(data) {
         
         if( path.length > 1) {
         	var startPoint = path[0];
-        	var startIconUrl = '../img/realtime/stop/RouteStart.png';
-        	
+        	var startIconUrl = '../img/realtime/stop/RouteStart.png';	
         	new google.maps.Marker({position: startPoint, map: map, icon: startIconUrl, clickable: false});
         	
         	var endPoint = path[path.length-1];
@@ -69,7 +68,7 @@ var oba_where_standard_trip = function(data) {
 		    	   OBA.Config.analyticsFunction("Stop Marker Click", stopIdWithoutAgency);
 		    	   
 		    	   OBA.Popups.showPopupWithContentFromRequest(map, this, stopForIdUrl, 
-		    			   { stopId: stop.id, time: 1510348701000},
+		    			   { stopId: stop.id },
 		    			   OBA.Popups.getStopContentForResponse, 
 		    			   routeFilter);
 		    	  
@@ -102,7 +101,8 @@ var oba_where_standard_trip = function(data) {
 		if( tripDetails.status && tripDetails.status.lastKnownLocation ) {
 			var lastKnownLocation = tripDetails.status.lastKnownLocation;
 			var location = new google.maps.LatLng(lastKnownLocation.lat,lastKnownLocation.lon);
-			vehicleLocationMarker = new google.maps.Marker({position: location, map: map, clickable: false});
+			var vehicleIconUrl = '../img/realtime/vehicle/vehicleMarker.png';
+			vehicleLocationMarker = new google.maps.Marker({position: location, map: map, icon: vehicleIconUrl, clickable: false});
 		}
 		
 		if( ! bounds.isEmpty() )
@@ -116,7 +116,8 @@ var oba_where_standard_trip = function(data) {
 		if( tripDetails.status && tripDetails.status.lastKnownLocation ) {
 			var lastKnownLocation = tripDetails.status.lastKnownLocation;
 			var location = new google.maps.LatLng(lastKnownLocation.lat,lastKnownLocation.lon);
-			vehicleLocationMarker = new google.maps.Marker({position: location, map: map, clickable: false});
+			var vehicleIconUrl = '../img/realtime/vehicle/vehicleMarker.png';
+			vehicleLocationMarker = new google.maps.Marker({position: location, map: map, icon: vehicleIconUrl, clickable: false});
 		}
 	};
 	
