@@ -134,24 +134,24 @@
 				<h2><s:property value="getText('main.shorttext')" /></h2>
 			</div>
 
-			<div id="map_header">
-		   	  	<ul>
-		   	  		<s:url var="url" namespace="/m" action="index"/>
-					<li id="link_mobile" aria-label="Text only version"><a href="${url}">Text / Mobile</a></li>
+			<!--<div id="map_header">-->
+		   	  	<!--<ul>-->
+		   	  		<!--<s:url var="url" namespace="/m" action="index"/>-->
+					<!--<li id="link_mobile" aria-label="Text only version"><a href="${url}">Text / Mobile</a></li>-->
 
-					<s:url var="url" namespace="/wiki" action="About"/>
-					<li id="link_about"><a href="${url}">About</a></li>
+					<!--<s:url var="url" namespace="/wiki" action="About"/>-->
+					<!--<li id="link_about"><a href="${url}">About</a></li>-->
 
-					<s:url var="url" namespace="/wiki" action="ContactUs"/>
-					<li id="link_contact"><a href="${url}">Contact</a></li>
+					<!--<s:url var="url" namespace="/wiki" action="ContactUs"/>-->
+					<!--<li id="link_contact"><a href="${url}">Contact</a></li>-->
 
-		 			<s:url var="url" namespace="/wiki/Developers" action="Index"/>
-		 			<li id="link_developers"><a href="${url}">Developers</a></li>
+		 			<!--<s:url var="url" namespace="/wiki/Developers" action="Index"/>-->
+		 			<!--<li id="link_developers"><a href="${url}">Developers</a></li>-->
 
-		 			<s:url var="url" namespace="/wiki/Help" action="Index"/>
-		 			<li id="link_help"><a href="${url}">Help</a></li>
-			   	</ul>
-		   </div>
+		 			<!--<s:url var="url" namespace="/wiki/Help" action="Index"/>-->
+		 			<!--<li id="link_help"><a href="${url}">Help</a></li>-->
+			   	<!--</ul>-->
+		   <!--</div>-->
 
 	       <form action="search.action">
 	         <input type="text" name="q" value=""/>
