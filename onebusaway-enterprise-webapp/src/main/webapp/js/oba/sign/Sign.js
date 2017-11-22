@@ -18,7 +18,7 @@ var OBA = window.OBA || {};
 
 OBA.Sign = function() {
 	
-	var refreshInterval = 30;
+	var refreshInterval = 30000000000000;
 	var timeout = 30;
 	var scrollSpeed = 2; // pixels per frame.  1 or 2 are good defaults
 	var configurableMessageHtml = null;
@@ -243,10 +243,11 @@ OBA.Sign = function() {
 		var newElement = jQuery(
 			'<div>' +
 				'<div class="error"></div>' +
-				'<div class="header">' + 
-					'<div class="name"><h1>' + stopName + '</h1></div>' + 
-					' <div class="stop-id"><h2>Stop #' + stopId.id + '</h2></div>' +
-				'</div>' + 
+				'<div class="realtime-icon"><div><img src="/css/img/oba_puget_sound_realtime_icon.png" alt="Realtime Icon" /><h2>Real time arrival</h2></div></div>' +
+				'<div class="header">' +
+					'<div class="name"><h1>' + stopName + '</h1></div>' +
+					'<div class="stop-id"><h2>Stop #' + stopId.id + '</h2></div>' +
+        	'</div>' +
 				'<div class="arrivals"><div class="arrivals_scroller"><table></table></div></div>' +
 				'<div class="alerts"><div class="alerts_header"><h2>Service Change Notices</h2></div><div id="stop' + stopId.id + '" class="scroller"></div></div>' +
 			'</div>').addClass("slide");
