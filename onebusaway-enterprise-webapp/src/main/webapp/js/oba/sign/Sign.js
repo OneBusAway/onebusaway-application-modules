@@ -387,11 +387,6 @@ OBA.Sign = function() {
 					.append(vehicleIdSpan)
 					.appendTo(row);
 
-				// jQuery('<td></td>')
-				// .addClass("realtime")
-				// .append(rowInfo.monitored?"":'<img src="/css/img/Realtime_Icon_with _white_bg_400x400.png"/>')
-				// .appendTo(row);
-
 				var distanceColumn = jQuery('<td></td>')
 					.addClass('distance');
 				var distanceDiv = jQuery('<div></div>')
