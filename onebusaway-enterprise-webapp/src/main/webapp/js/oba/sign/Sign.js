@@ -360,8 +360,7 @@ OBA.Sign = function() {
 			});
 			r++;
 		});
-		
-		
+
 		jQuery.each(table, function(_, rowInfo) {
 				var row = jQuery("<tr></tr>");
 
@@ -380,18 +379,36 @@ OBA.Sign = function() {
 					spanTxt = "";
 				}
 				var vehicleIdSpan = jQuery("<span></span>")
-				.addClass(rowInfo.monitored?"bus-id":"scheduled_arrival_indicator")
-				.text(rowInfo.monitored?spanTxt:" (scheduled)");
+				.addClass(rowInfo.monitored?"bus-id":"scheduled_arrival_indicator");
+				// .text(rowInfo.monitored?spanTxt:" (scheduled)");
 			
 				jQuery('<td></td>')
 					.text(rowInfo.headsign)
 					.append(vehicleIdSpan)
 					.appendTo(row);
 
-				jQuery('<td></td>')
-				.addClass("distance")
-				.append(rowInfo.etas[0])
-				.appendTo(row);
+				// jQuery('<td></td>')
+				// .addClass("realtime")
+				// .append(rowInfo.monitored?"":'<img src="/css/img/Realtime_Icon_with _white_bg_400x400.png"/>')
+				// .appendTo(row);
+
+				var distanceColumn = jQuery('<td></td>')
+					.addClass('distance');
+				var distanceDiv = jQuery('<div></div>')
+					.addClass('eta');
+
+				var realtimeIcon = jQuery('<img/>')
+					.addClass('realtimeIconImg')
+					.attr('src', '/css/img/Realtime_Icon_with _white_bg_400x400.png');
+
+				var etaTime = jQuery('<p></p>')
+					.addClass('etaText')
+					.append(rowInfo.etas[0]);
+
+				distanceDiv.append(rowInfo.monitored?"":realtimeIcon);
+				distanceDiv.append(etaTime);
+				distanceColumn.append(distanceDiv);
+				distanceColumn.appendTo(row);
 
 				
 				jQuery('<td></td>')
