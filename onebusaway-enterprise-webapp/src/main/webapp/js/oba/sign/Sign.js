@@ -18,7 +18,7 @@ var OBA = window.OBA || {};
 
 OBA.Sign = function() {
 	
-	var refreshInterval = 30000000000000;
+	var refreshInterval = 30;
 	var timeout = 30;
 	var scrollSpeed = 2; // pixels per frame.  1 or 2 are good defaults
 	var configurableMessageHtml = null;
@@ -165,6 +165,13 @@ OBA.Sign = function() {
 		jQuery.each(stopIdsToRequest, function(_, stopId) {
 			jQuery("#pager").append('<span id="' + stopId.id + '" class="dot"></span>');
 			initStop(stopId, initMonitor);
+		});
+
+		var stopTotal = 0;
+		jQuery.each(stopIdsToRequest, function(_, stopId){
+			stopTotal++;
+			jQuery("#totalpage").text(stopTotal);
+
 		});
 
 		updateClock();

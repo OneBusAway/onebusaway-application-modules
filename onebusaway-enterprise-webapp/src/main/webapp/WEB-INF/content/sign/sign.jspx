@@ -81,6 +81,12 @@
 		<!--<div id="time">&lt;!&ndash; //prevent jspx minimization &ndash;&gt;</div>-->
 		<!--<div id="day">&lt;!&ndash; //prevent jspx minimization &ndash;&gt;</div>-->
 	<!--</div>-->
+	<div id="pagewrapper">
+		<span>Stop</span>
+		<span id="currentpage">0</span>
+		<span>of</span>
+		<span id="totalpage">0</span>
+	</div>
 </div>
 
 <script type="text/javascript">
