@@ -19,7 +19,7 @@ import org.apache.struts2.convention.annotation.Action;
 import org.apache.struts2.convention.annotation.Actions;
 import org.apache.struts2.convention.annotation.Result;
 import org.apache.struts2.convention.annotation.Results;
-import org.onebusaway.enterprise.webapp.impl.ArrivalAndDepartureMessages;
+import org.onebusaway.enterprise.webapp.actions.bundles.ArrivalAndDepartureMessages;
 import org.onebusaway.presentation.impl.service_alerts.SituationsPresentation;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureForStopQueryBean;

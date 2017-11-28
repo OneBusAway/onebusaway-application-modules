@@ -15,7 +15,7 @@
  */
 package org.onebusaway.enterprise.webapp.actions.where;
 
-import org.onebusaway.enterprise.webapp.impl.ArrivalAndDepartureMessages;
+import org.onebusaway.enterprise.webapp.actions.bundles.ArrivalAndDepartureMessages;
 import org.onebusaway.presentation.client.RoutePresenter;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
 import org.onebusaway.transit_data.model.RouteBean;

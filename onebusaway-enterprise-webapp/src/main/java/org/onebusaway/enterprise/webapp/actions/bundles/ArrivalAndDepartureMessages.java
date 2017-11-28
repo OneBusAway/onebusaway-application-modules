@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.onebusaway.enterprise.webapp.impl;
+package org.onebusaway.enterprise.webapp.actions.bundles;
 
 import com.google.gwt.i18n.client.Messages;
 

@@ -93,7 +93,7 @@
   </bean>
   
     <bean id="arrivalAndDepartureMessages" class="org.onebusaway.enterprise.webapp.impl.TypedMessagesFactory">
-    <property name="messagesClass" value="org.onebusaway.enterprise.webapp.impl.ArrivalAndDepartureMessages" />
+    <property name="messagesClass" value="org.onebusaway.enterprise.webapp.actions.bundles.ArrivalAndDepartureMessages" />
   </bean>
     
 </beans>
