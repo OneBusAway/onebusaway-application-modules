@@ -88,6 +88,14 @@
 	font-weight: bold;
 }
 
+.popup .adherence {
+    width: 325px;
+    margin: 0;
+    padding: 0;
+    padding-top: 4px;
+    font-weight: bold;
+}
+
 .popup .meta.stale {
   	color: #d12020;
 }
