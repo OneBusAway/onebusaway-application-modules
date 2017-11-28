@@ -88,7 +88,19 @@
     <rule>
         <from>^/api/where/([^.]*)\.(xml|json)$</from>
         <to last="true">/onebusaway-api-webapp/siri/$1.action?type=$2</to>
-    </rule>    
+    </rule>
+    
+    <!-- 
+    	Legacy Iphone Interface 
+   	-->
+    <rule>
+        <from>^/where/iphone/([^.]*)\.action$</from>
+        <to last="true">/where/iphone/$1.action</to>
+    </rule>
+    <rule>
+        <from>^/where/iphone/$</from>
+        <to last="true">/where/iphone/index.action</to>
+    </rule>       
             
 	<!--
 		Remove action from URLs.
