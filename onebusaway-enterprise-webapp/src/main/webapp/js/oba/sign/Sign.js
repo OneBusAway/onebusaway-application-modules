@@ -243,7 +243,7 @@ OBA.Sign = function() {
 		var newElement = jQuery(
 			'<div>' +
 				'<div class="error"></div>' +
-				'<div class="realtime-icon"><div><img src="/css/img/oba_puget_sound_realtime_icon.png" alt="Realtime Icon" /><h2>Real time arrival</h2></div></div>' +
+				'<div class="preHeader"><div class="iconContainer"><img src="/css/img/oba_puget_sound_realtime_icon.png" alt="Realtime Icon" /><h2>Real time arrival</h2></div></div>' +
 				'<div class="header">' +
 					'<div class="name"><h1>' + stopName + '</h1></div>' +
 					'<div class="stop-id"><h2>Stop #' + stopId.id + '</h2></div>' +
