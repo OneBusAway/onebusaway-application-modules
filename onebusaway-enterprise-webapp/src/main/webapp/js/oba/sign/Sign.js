@@ -387,29 +387,30 @@ OBA.Sign = function() {
 					.append(vehicleIdSpan)
 					.appendTo(row);
 
-				var distanceColumn = jQuery('<td></td>')
+				var distanceTableData = jQuery('<td></td>')
 					.addClass('distance');
-				var distanceDiv = jQuery('<div></div>')
+				var etaDiv = jQuery('<div></div>')
 					.addClass('eta');
 
 				var realtimeIcon = jQuery('<img/>')
 					.addClass('realtimeIconImg')
 					.attr('src', '/css/img/Realtime_Icon_with _white_bg_400x400.png');
 
-				var etaTime = jQuery('<p></p>')
+				var etaTextPara = jQuery('<p></p>')
 					.addClass('etaText')
 					.append(rowInfo.etas[0]);
 
-				distanceDiv.append(rowInfo.monitored?"":realtimeIcon);
-				distanceDiv.append(etaTime);
-				distanceColumn.append(distanceDiv);
-				distanceColumn.appendTo(row);
+				etaDiv.append(rowInfo.monitored?"":realtimeIcon);
+				etaDiv.append(etaTextPara);
+				distanceTableData.append(etaDiv);
 
-				
-				jQuery('<td></td>')
-				.addClass("additional_stops")
-				.append(toEtaSpan1(rowInfo.etas, rowInfo.monitored))
-				.appendTo(row);
+				var additionalStopsDiv = jQuery('<div></div>')
+					.addClass("additional_stops")
+					.append(toEtaSpan1(rowInfo.etas, rowInfo.monitored));
+
+				distanceTableData.append(additionalStopsDiv);
+
+				distanceTableData.appendTo(row);
 				
 				tableBody.append(row);				
 		});
