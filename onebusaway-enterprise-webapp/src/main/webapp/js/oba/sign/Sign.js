@@ -18,7 +18,7 @@ var OBA = window.OBA || {};
 
 OBA.Sign = function() {
 	
-	var refreshInterval = 30;
+	var refreshInterval = 30000;
 	var timeout = 30;
 	var scrollSpeed = 2; // pixels per frame.  1 or 2 are good defaults
 	var configurableMessageHtml = null;
@@ -385,13 +385,13 @@ OBA.Sign = function() {
 				if (!rowInfo.monitored) {
 					spanTxt = "";
 				}
-				var vehicleIdSpan = jQuery("<span></span>")
-				.addClass(rowInfo.monitored?"bus-id":"scheduled_arrival_indicator");
+				// var vehicleIdSpan = jQuery("<span></span>")
+				// .addClass(rowInfo.monitored?"bus-id":"scheduled_arrival_indicator");
 				// .text(rowInfo.monitored?spanTxt:" (scheduled)");
 			
-				jQuery('<td></td>')
+				jQuery('<td class="stopLocation"></td>')
 					.text(rowInfo.headsign)
-					.append(vehicleIdSpan)
+					// .append(vehicleIdSpan)
 					.appendTo(row);
 
 				var distanceTableData = jQuery('<td></td>')
