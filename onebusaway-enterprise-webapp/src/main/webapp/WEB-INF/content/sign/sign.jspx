@@ -74,7 +74,7 @@
 <body>
 
 <div id="content"><!-- //prevent jspx minimization --></div>
-<div id="pager"><!-- //prevent jspx minimization --></div>
+<!--<div id="pager">&lt;!&ndash; //prevent jspx minimization &ndash;&gt;</div>-->
 <div id="footer">
     <!--<div id="branding">&lt;!&ndash; //prevent jspx minimization &ndash;&gt;</div>-->
 	<!--<div id="clock">-->
@@ -83,9 +83,9 @@
 	<!--</div>-->
 	<div id="pagewrapper">
 		<span>Stop</span>
-		<span id="currentpage">0</span>
+		<span id="currentpage">1</span>
 		<span>of</span>
-		<span id="totalpage">0</span>
+		<span id="totalpage">1</span>
 	</div>
 </div>
 

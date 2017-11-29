@@ -729,9 +729,29 @@ OBA.Sign = function() {
 			
 			oldContent.animate({left: contentWidth}, animationSpeed, function() {
 				oldContent.html("").empty().remove();
-				jQuery("span.dot").css('background-color', 'rgb(90,90,90)');
-				jQuery("span#" + stopId.id + ".dot").css('background-color', 'white');
-				
+				// jQuery("span.dot").css('background-color', 'rgb(90,90,90)');
+				// jQuery("span#" + stopId.id + ".dot").css('background-color', 'white');
+
+				var currentStopText = "N/A";
+				var stopList = getParameterByName("stopIds", null);
+				if (stopList !== null && stopList.length > 0){
+					var stopArray = [];
+					jQuery.each(stopList.split(","), function(_, o){
+						var stopIdParts = o.split("_");
+						if (stopIdParts.length === 2) {
+							stopArray.push(stopIdParts[1]);
+						}
+					});
+				}
+
+				for (var i = 0; i < stopArray.length; i ++){
+					if (stopArray[i] === stopId.id) {
+						currentStopText = i + 1;
+					}
+				}
+
+				jQuery("span#currentpage").text(currentStopText);
+
 				var alerts = stopElement.find(".alert");
 				var totalHeight = 0;
 
