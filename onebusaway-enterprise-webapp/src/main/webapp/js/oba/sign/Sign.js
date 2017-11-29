@@ -18,7 +18,7 @@ var OBA = window.OBA || {};
 
 OBA.Sign = function() {
 	
-	var refreshInterval = 30000;
+	var refreshInterval = 30;
 	var timeout = 30;
 	var scrollSpeed = 2; // pixels per frame.  1 or 2 are good defaults
 	var configurableMessageHtml = null;
