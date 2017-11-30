@@ -107,7 +107,22 @@
 			<decorator:body />
 		</div>
 
-		<div id="bottombar"></div>
+		<div id="bottombar">
+			<div class="bottombox">
+				<span id="translate-text">Google Translate</span>
+				<s:set var="link" value="getText('main.agency.link')" />
+				<a href="${link}">
+					<s:url var="url" value="/css/img/google_logo.png"></s:url>
+					<img id="translate-logo" src="${url}" alt="Google Translate" />
+				</a>
+			</div>
+			<div class="bottombox">
+				<s:set var="link" value="getText('main.privacypolicy.link')" />
+				<a href="${link}">
+					<span id="privacy-policy" alt="Privacy Policy">Privacy Policy</span>
+				</a>
+			</div>
+		</div>
 
 	<!-- End Content -->
 	</div>
