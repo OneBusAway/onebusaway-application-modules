@@ -50,9 +50,8 @@ public class AgenciesAction extends ActionSupport implements
 
   @Override
   @Actions({
-      @Action(value = "/where/standard/agencies"),
-      @Action(value = "/where/iphone/agencies"),
-      @Action(value = "/where/text/agencies")})
+      @Action(value = "/where/iphone/agencies")
+  })
   public String execute() throws ServiceException {
     _model = _transitDataService.getAgenciesWithCoverage();
     Collections.sort(_model, new AgencyWithCoverageBeanComparator());

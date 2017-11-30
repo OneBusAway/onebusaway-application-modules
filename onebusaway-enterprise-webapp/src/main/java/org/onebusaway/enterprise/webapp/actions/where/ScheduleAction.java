@@ -92,8 +92,8 @@ public class ScheduleAction extends ActionSupport {
   
   @Override
   @Actions({
-      @Action(value = "/where/schedule"),
-      @Action(value = "/where/iphone/schedule")})
+      @Action(value = "/where/schedule")
+  })
   public String execute() throws Exception {
 
     if (_date == null)

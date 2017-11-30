@@ -80,7 +80,7 @@ public class ArrivalAndDepartureForStopAction extends AbstractWhereAction
   }
 
   @Override
-  @Actions({@Action(value = "/where/standard/arrival-and-departure-for-stop")})
+  @Actions({@Action(value = "/where/arrival-and-departure-for-stop")})
   public String execute() {
 
     if (_model.getTime() == 0)

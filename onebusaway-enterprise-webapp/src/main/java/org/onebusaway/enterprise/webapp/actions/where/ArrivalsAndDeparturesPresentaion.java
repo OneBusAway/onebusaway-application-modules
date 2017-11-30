@@ -23,8 +23,6 @@ import org.onebusaway.transit_data.model.schedule.FrequencyBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.util.SystemTime;
 
-import com.google.gwt.core.client.GWT;
-
 public class ArrivalsAndDeparturesPresentaion {
 
   private static final String CANCELLED = "cancelled";
@@ -37,12 +35,6 @@ public class ArrivalsAndDeparturesPresentaion {
 
   public ArrivalsAndDeparturesPresentaion() {
 
-  }
-
-  public ArrivalsAndDeparturesPresentaion(boolean useDefaultResources) {
-    if (useDefaultResources) {
-      _messages = GWT.create(ArrivalAndDepartureMessages.class);
-    }
   }
 
   public void setMessages(ArrivalAndDepartureMessages messages) {

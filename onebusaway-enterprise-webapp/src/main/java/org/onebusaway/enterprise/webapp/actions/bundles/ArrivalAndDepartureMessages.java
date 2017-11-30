@@ -15,9 +15,7 @@
  */
 package org.onebusaway.enterprise.webapp.actions.bundles;
 
-import com.google.gwt.i18n.client.Messages;
-
-public interface ArrivalAndDepartureMessages extends Messages {
+public interface ArrivalAndDepartureMessages {
 
   /****
    * Arrivals and Departures Fields

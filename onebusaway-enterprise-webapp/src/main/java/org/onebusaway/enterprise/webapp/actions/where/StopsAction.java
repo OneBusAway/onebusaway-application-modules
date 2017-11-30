@@ -54,8 +54,8 @@ public class StopsAction extends AbstractWhereAction {
 
   @Override
   @Actions( {
-      @Action(value = "/where/iphone/stops"),
-      @Action(value = "/where/text/stops")})
+      @Action(value = "/where/iphone/stops")
+  })
   public String execute() throws ServiceException {
 
     CoordinateBounds bounds = getServiceArea();

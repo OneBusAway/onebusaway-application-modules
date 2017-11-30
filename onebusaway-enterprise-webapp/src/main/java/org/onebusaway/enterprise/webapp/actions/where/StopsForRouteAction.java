@@ -72,8 +72,8 @@ public class StopsForRouteAction extends AbstractWhereAction {
 
   @Override
   @Actions( {
-      @Action(value = "/where/iphone/stops-for-route"),
-      @Action(value = "/where/text/stops-for-route")})
+      @Action(value = "/where/iphone/stops-for-route")
+  })
   public String execute() throws ServiceException {
 
     if (_id == null || _id.length() == 0)

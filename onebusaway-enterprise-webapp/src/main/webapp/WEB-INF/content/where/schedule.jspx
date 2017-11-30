@@ -26,7 +26,7 @@
 <link rel="stylesheet" type="text/css" media="all" href="${url}"/>
 
 <s:url var="url" value="/js/oba/schedule/schedule.js" />
-<script type="text/javascript" src="${url} }"><jsp:text></jsp:text></script>
+<script type="text/javascript" src="${url}"><jsp:text></jsp:text></script>
 
 <script type="text/javascript">
   jQuery(document).ready(oba_where_standard_schedule);

@@ -54,8 +54,8 @@ public class RoutesAction extends AbstractWhereAction {
 
   @Override
   @Actions( {
-      @Action(value = "/where/iphone/routes"),
-      @Action(value = "/where/text/routes")})
+      @Action(value = "/where/iphone/routes")
+  })
   public String execute() throws ServiceException {
     
     if( _query == null || _query.length() == 0)
