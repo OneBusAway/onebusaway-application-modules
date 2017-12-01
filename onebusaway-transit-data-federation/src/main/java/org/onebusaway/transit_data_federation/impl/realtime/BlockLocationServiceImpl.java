@@ -507,8 +507,9 @@ public class BlockLocationServiceImpl implements BlockLocationService,
        */
       BlockLocation location = getBlockLocation(blockInstance, elements,
           scheduledBlockLocation, record.getTimeOfRecord());
-      location.setVehicleType(record.getVehicleType());
       if (location != null) {
+        location.setVehicleType(record.getVehicleType());
+
         for (BlockLocationListener listener : _blockLocationListeners) {
           listener.handleBlockLocation(location);
         }
