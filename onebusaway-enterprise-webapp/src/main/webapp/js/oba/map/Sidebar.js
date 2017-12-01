@@ -24,8 +24,10 @@ OBA.Sidebar = function() {
 		topBarDiv = jQuery("#topbar"), 
 		mainbox = jQuery("#mainbox"),
 		menuBar = jQuery("#cssmenu1"),
-		adDiv = jQuery("#ad");
-		mapDiv = jQuery("#map");
+		adDiv = jQuery("#ad"),
+		mapDiv = jQuery("#map"),
+		bottomBarDiv = jQuery("#bottombar"),
+		mobileDiv = jQuery("#mobilebox");
 
 	var searchBarDiv = jQuery("#searchbar"), 
 		matches = jQuery("#matches"),
@@ -104,8 +106,8 @@ OBA.Sidebar = function() {
 			alertsHeight = mapGlobalAlerts.outerHeight();
 		}
 		
-		var h = theWindow.height() - topBarDiv.height() - 1,
-			h2 = theWindow.height() - topBarDiv.height() - alertsHeight - 1;
+		var h = theWindow.height() - topBarDiv.height() - bottomBarDiv.height() - 1,
+			h2 = theWindow.height() - topBarDiv.height() - bottomBarDiv.height() - alertsHeight - 1;
 		
 		searchBarDiv.height(h);
 		mapDiv.height(h2);
