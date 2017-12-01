@@ -115,10 +115,6 @@ public class OneBusAwayNYCAdminActionSupport extends NextActionSupport {
 	private AccessControlService _accessControlService;
 
 	public boolean isPageAvailable(String key, String actionName) {
-	    if (key.equals("showVehicleStatus")) {
-            _log.error("Is page available: " + key + " (key) and action: " + actionName);
-            _log.error("getConfig(key) " + getConfig(key) + " hasPrivilegeForPage: " + hasPrivilegeForPage(actionName));
-        }
 	    return getConfig(key) && hasPrivilegeForPage(actionName);
 	}
 
@@ -136,20 +132,20 @@ public class OneBusAwayNYCAdminActionSupport extends NextActionSupport {
 		return authorized;
 	}
 	public boolean getConfig(String partialKey) {
-		_log.error("partialKey=" + partialKey);
+		_log.debug("partialKey=" + partialKey);
 		boolean result = true; // default is to show feature
 		try {
 			List<Map<String, String>> components = _configurationServiceClient.getItems("api", "config", "list");
 			if (components == null) {
-				_log.error("getItems call failed");
+				_log.debug("getItems call failed");
 				return result;
 			}
 			for (Map<String, String> component: components) {
-				_log.error("component=" + component);
+                _log.debug("component=" + component);
 				if (component.containsKey("component") && "admin".equals(component.get("component"))) {
-					_log.error("found admin component");
+                    _log.debug("found admin component");
 					if (partialKey.equals(component.get("key"))) {
-						_log.error("found key=" + partialKey + ", and value=" + component.get("value"));
+                        _log.debug("found key=" + partialKey + ", and value=" + component.get("value"));
 						return "true".equalsIgnoreCase(component.get("value"));
 					}
 				}

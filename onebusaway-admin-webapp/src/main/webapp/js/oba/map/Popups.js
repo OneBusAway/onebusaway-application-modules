@@ -290,7 +290,7 @@ OBA.Popups = (function() {
                 adherence = adherence * -1;
                 html += '<p class="adherence">Bus is ' + adherence + ' minute(s) early</p>';
             }
-            html += '<p class="adherence">Schedule arrival: ' + aimedArrivalDatetime + '</p>';
+            html += '<p class="adherence">Scheduled arrival: ' + aimedArrivalDatetime + '</p>';
             html += '<p class="adherence">Expected arrival: ' + expectedArrivalDatetime + '</p>';
         }
         else {
