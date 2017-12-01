@@ -316,7 +316,6 @@ public class BlockLocationServiceImpl implements BlockLocationService,
         record.setScheduleDeviation(deviation);
       }
 
-
       ScheduleDeviationSamples samples = null;
       if (_sampleScheduleDeviationHistory == true) {
         samples = _realTimeHistoryService.sampleScheduleDeviationsForVehicle(
@@ -508,7 +507,7 @@ public class BlockLocationServiceImpl implements BlockLocationService,
        */
       BlockLocation location = getBlockLocation(blockInstance, elements,
           scheduledBlockLocation, record.getTimeOfRecord());
-
+      location.setVehicleType(record.getVehicleType());
       if (location != null) {
         for (BlockLocationListener listener : _blockLocationListeners) {
           listener.handleBlockLocation(location);
@@ -573,6 +572,7 @@ public class BlockLocationServiceImpl implements BlockLocationService,
       location.setOrientation(record.getCurrentOrientation());
       location.setPhase(record.getPhase());
       location.setStatus(record.getStatus());
+      location.setVehicleType(record.getVehicleType());
       location.setVehicleId(record.getVehicleId());
 
       List<TimepointPredictionRecord> timepointPredictions = record.getTimepointPredictions();
@@ -1056,6 +1056,7 @@ public class BlockLocationServiceImpl implements BlockLocationService,
 
     builder.setPhase(record.getPhase());
     builder.setStatus(record.getStatus());
+    builder.setVehicleType(record.getVehicleType());
     builder.setVehicleId(record.getVehicleId());
 
     List<TimepointPredictionRecord> predictions = record.getTimepointPredictions();
@@ -1094,6 +1095,7 @@ public class BlockLocationServiceImpl implements BlockLocationService,
         vlr.setScheduleDeviation(record.getScheduleDeviation());
       vlr.setServiceDate(record.getServiceDate());
       vlr.setStatus(record.getStatus());
+      vlr.setVehicleType(record.getVehicleType());
       vlr.setTimeOfRecord(record.getTime());
       vlr.setVehicleId(record.getVehicleId());
 
