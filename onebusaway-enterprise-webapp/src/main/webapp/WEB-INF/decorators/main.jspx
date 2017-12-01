@@ -26,6 +26,8 @@
 
 <jsp:directive.page contentType="text/html" />
 
+<script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"><!-- jspx --></script>
+
 <head>
   <s:set var="title" value="getText('main.title')" /> 	
   <title><decorator:title default="${title}" /></title>
@@ -108,13 +110,11 @@
 		</div>
 
 		<div id="bottombar">
-			<div class="bottombox">
-				<span id="translate-text">Google Translate</span>
+			<div class="bottombox" id="google_translate_element">
+				<span>Google Translate</span>
 				<s:set var="link" value="getText('main.agency.link')" />
-				<a href="${link}">
-					<s:url var="url" value="/css/img/google_logo.png"></s:url>
-					<img id="translate-logo" src="${url}" alt="Google Translate" />
-				</a>
+				<s:url var="url" value="/css/img/google_logo.png"></s:url>
+				<img id="icon" src="${url}" />
 			</div>
 			<div class="bottombox">
 				<s:set var="link" value="getText('main.privacypolicy.link')" />
