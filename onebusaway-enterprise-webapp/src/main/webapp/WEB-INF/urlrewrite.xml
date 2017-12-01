@@ -100,8 +100,16 @@
     <rule>
         <from>^/where/iphone/$</from>
         <to last="true">/where/iphone/index.action</to>
-    </rule>       
-            
+    </rule>
+
+    <!-- 
+    	Legacy Signs Interface 
+   	--> 
+    <rule>
+        <from>^/where/sign/stop.action</from>
+        <to type="redirect" last="true">%{context-path}/sign/sign?stopIds=%{parameter:id}</to>
+    </rule>        
+
 	<!--
 		Remove action from URLs.
 	-->	
