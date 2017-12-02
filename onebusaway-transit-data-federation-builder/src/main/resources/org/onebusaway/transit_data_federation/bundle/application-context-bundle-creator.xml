@@ -38,6 +38,16 @@
 
   <bean id="modifications" class="org.onebusaway.transit_data_federation.model.modifications.Modifications" />
 
+  <bean id="stopToShapeMatchingService" class="org.onebusaway.transit_data_federation.bundle.impl.MultiStopToShapeMatchingServiceImpl">
+    <property name="matchingServiceImplementations">
+      <list>
+          <bean class="org.onebusaway.transit_data_federation.bundle.impl.DistanceBasedStopToShapeMatchingServiceImpl" />
+          <bean class="org.onebusaway.transit_data_federation.bundle.impl.HeuristicStopToShapeMatchingServiceImpl" />
+          <bean class="org.onebusaway.transit_data_federation.bundle.impl.FallbackStopToShapeMatchingServiceImpl" />
+      </list>
+    </property>
+  </bean>
+
   <context:component-scan base-package="org.onebusaway.transit_data_federation.bundle.tasks" />
 
   <!-- Task Definitions -->

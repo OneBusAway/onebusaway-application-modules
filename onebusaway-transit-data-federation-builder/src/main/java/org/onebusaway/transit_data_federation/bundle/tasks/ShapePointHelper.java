@@ -69,6 +69,9 @@ public class ShapePointHelper {
     for (ShapePoint shapePoint : shapePoints) {
       lat[i] = shapePoint.getLat();
       lon[i] = shapePoint.getLon();
+      if (shapePoint.isDistTraveledSet()) {
+        distTraveled[i] = shapePoint.getDistTraveled();
+      }
       i++;
     }
 
