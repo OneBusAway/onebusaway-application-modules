@@ -128,30 +128,33 @@
 <div id="content" class="map">
     <div id="searchbar">
     	<div class="sidebar">
-	    	
 	    	<div id="infoBox">
 				<h1><s:property value="getText('main.headline')" /></h1>
 				<h2><s:property value="getText('main.shorttext')" /></h2>
 			</div>
+			
+			<div id="map_header">
+				<div class="title">
+		   			<s:url var="url" value="/"></s:url>
+					<h1><a href="${url}"><s:property value="getText('main.title')" /></a></h1>
+		  		</div>	  	
+		   	  	<ul>
+		   	  		<s:url var="url" namespace="/m" action="index"/>
+					<li id="link_mobile" aria-label="Text only version"><a href="${url}">Text / Mobile</a></li>
 
-			<!--<div id="map_header">-->
-		   	  	<!--<ul>-->
-		   	  		<!--<s:url var="url" namespace="/m" action="index"/>-->
-					<!--<li id="link_mobile" aria-label="Text only version"><a href="${url}">Text / Mobile</a></li>-->
+					<s:url var="url" namespace="/wiki" action="About"/>
+					<li id="link_about"><a href="${url}">About</a></li>
 
-					<!--<s:url var="url" namespace="/wiki" action="About"/>-->
-					<!--<li id="link_about"><a href="${url}">About</a></li>-->
+					<s:url var="url" namespace="/wiki" action="ContactUs"/>
+					<li id="link_contact"><a href="${url}">Contact</a></li>
 
-					<!--<s:url var="url" namespace="/wiki" action="ContactUs"/>-->
-					<!--<li id="link_contact"><a href="${url}">Contact</a></li>-->
+		 			<s:url var="url" namespace="/wiki/Developers" action="Index"/>
+		 			<li id="link_developers"><a href="${url}">Developers</a></li>
 
-		 			<!--<s:url var="url" namespace="/wiki/Developers" action="Index"/>-->
-		 			<!--<li id="link_developers"><a href="${url}">Developers</a></li>-->
-
-		 			<!--<s:url var="url" namespace="/wiki/Help" action="Index"/>-->
-		 			<!--<li id="link_help"><a href="${url}">Help</a></li>-->
-			   	<!--</ul>-->
-		   <!--</div>-->
+		 			<s:url var="url" namespace="/wiki/Help" action="Index"/>
+		 			<li id="link_help"><a href="${url}">Help</a></li>
+			   	</ul>
+		   </div>
 
 	       <form action="search.action">
 	         <input type="text" name="q" value=""/>
@@ -216,7 +219,7 @@
 				</div>
 				<s:set var="link" value="getText('main.agency.link')" />
 				<a id="mobileImage" href="${link}">
-					<s:url var="url" value="/css/img/oba_puget_sound_mobile.png"></s:url>
+					<s:url var="url" value="/css/img/oba_mobile.png"></s:url>
 					<img src="${url}" alt="Agency logo" />
 				</a>
 			</div>
@@ -224,7 +227,7 @@
 		</div>
 		<div class="container clear"><!-- jspx --></div>
 	  	<s:url var="url" value="/css/img/google_logo.png"></s:url>
-		<div id="google_translate_element">Google Translate <img id="icon" src="${url}" /></div>
+		<div id="google_translate_element_side">Google Translate <img id="icon" src="${url}" /></div>
     </div>
 
 	<div id="map"><!-- //prevent jspx minimization --></div>

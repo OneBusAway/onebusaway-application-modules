@@ -183,12 +183,16 @@
 	padding-bottom: 20px;
 }
 
-#google_translate_element {
+#google_translate_element_side {
 	text-decoration: none;
 	font-weight: bold;
 	color: #0189c7;
 	cursor: pointer;
 	height: 25px;
+}
+
+#google_translate_element_bottom {
+	display: none;
 }
 
 #google_translate_element #icon {
@@ -379,4 +383,9 @@ html, body {
     background-color: #DDDDDD;
     background-image: none;
     color: #0071C1;
+}
+
+#infoBox, #mobileBox, #bottombar{
+	display: none;
+	height: 0px;
 }
