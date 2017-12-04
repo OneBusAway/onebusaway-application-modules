@@ -212,19 +212,18 @@
 
 			<div id="flexSpreader"><!-- jspx --></div>
 			<div class="container clear"><!-- jspx --></div>
-<!--
 
-			<div id="mobileBox">
-				<div id="mobileAvailabilityBox">
-					<h1><s:property value="getText('main.mobileavailability')" /></h1>
+			<s:set var="link" value="getText('main.apps.link')" />
+			<a href="${link}">
+				<div id="mobileBox">
+					<div id="mobileAvailabilityBox">
+						<h1><s:property value="getText('main.mobileavailability')" /></h1>
+					</div>
+						<s:url var="url" value="/css/img/oba_mobile.png"></s:url>
+						<img id="mobileImage" src="${url}" alt="Agency logo" />
 				</div>
-				<s:set var="link" value="getText('main.agency.link')" />
-				<a id="mobileImage" href="${link}">
-					<s:url var="url" value="/css/img/oba_mobile.png"></s:url>
-					<img src="${url}" alt="Agency logo" />
-				</a>
-			</div>
--->
+			</a>
+		
 		</div>
 		<div class="container clear"><!-- jspx --></div>
 	  	<s:url var="url" value="/css/img/google_logo.png"></s:url>
