@@ -19,6 +19,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.onebusaway.admin.service.AccessControlService;
 import org.onebusaway.presentation.impl.NextActionSupport;
 import org.onebusaway.users.client.model.UserBean;
@@ -114,7 +115,7 @@ public class OneBusAwayNYCAdminActionSupport extends NextActionSupport {
 	private AccessControlService _accessControlService;
 
 	public boolean isPageAvailable(String key, String actionName) {
-		return getConfig(key) && hasPrivilegeForPage(actionName);
+	    return getConfig(key) && hasPrivilegeForPage(actionName);
 	}
 
 	public boolean hasPrivilegeForPage(String privilege) {
@@ -140,11 +141,11 @@ public class OneBusAwayNYCAdminActionSupport extends NextActionSupport {
 				return result;
 			}
 			for (Map<String, String> component: components) {
-				_log.debug("component=" + component);
+                _log.debug("component=" + component);
 				if (component.containsKey("component") && "admin".equals(component.get("component"))) {
-					_log.debug("found admin component");
+                    _log.debug("found admin component");
 					if (partialKey.equals(component.get("key"))) {
-						_log.debug("found key=" + partialKey + ", and value=" + component.get("value"));
+                        _log.debug("found key=" + partialKey + ", and value=" + component.get("value"));
 						return "true".equalsIgnoreCase(component.get("value"));
 					}
 				}

@@ -209,6 +209,11 @@ public class TwitterServiceImpl {
             tweet = tweet.substring(0, tweet.length() -2);
         }
 
+        // now add description and assume user is watching length
+        if (bean.getDescriptions() != null && ! bean.getDescriptions().isEmpty()) {
+            tweet += " -- " + bean.getDescriptions().get(0).getValue();
+        }
+
         return tweet;
 
     }
