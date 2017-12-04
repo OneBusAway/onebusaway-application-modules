@@ -17,6 +17,7 @@ package org.onebusaway.webapp.actions.api;
 
 
 import com.opensymphony.xwork2.ActionSupport;
+import org.apache.struts2.ServletActionContext;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.util.SystemTime;
 import org.onebusaway.util.services.configuration.ConfigurationService;
@@ -24,6 +25,7 @@ import org.onebusaway.transit_data.model.AgencyWithCoverageBean;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 /*
@@ -114,7 +116,12 @@ public class RemoteConfigAction extends ActionSupport {
     }
 
     public String getAppHostURL() {
-        // TODO determine protocol
+        HttpServletRequest request = ServletActionContext.getRequest();
+        if (request != null && request.isSecure()) {
+            // if we came from https, all subsequent requests need to be https
+            return "https://" + getAppHostName();
+        }
+
         return "http://" + getAppHostName();
     }
 
