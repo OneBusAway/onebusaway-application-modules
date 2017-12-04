@@ -98,7 +98,6 @@
     <module>onebusaway-users</module>
     <module>onebusaway-util</module>
     <module>onebusaway-watchdog-webapp</module>
-    <module>onebusaway-webapp</module>
   </modules>
   
   <!-- This is where we control the master dependency version used by all modules -->
