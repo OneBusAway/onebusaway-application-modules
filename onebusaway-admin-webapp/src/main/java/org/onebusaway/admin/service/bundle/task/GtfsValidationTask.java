@@ -17,7 +17,9 @@ package org.onebusaway.admin.service.bundle.task;
 
 import java.io.File;
 import java.util.List;
+import java.util.Set;
 
+import org.onebusaway.gtfs.impl.GtfsRelationalDaoImpl;
 import org.onebusaway.gtfs.services.GtfsMutableRelationalDao;
 import org.onebusaway.transit_data_federation.bundle.tasks.MultiCSVLogger;
 import org.onebusaway.transit_data_federation.services.FederatedTransitDataBundle;
@@ -31,7 +33,7 @@ import com.conveyal.gtfs.service.GtfsValidationService;
 
 public class GtfsValidationTask implements Runnable {
   private Logger _log = LoggerFactory.getLogger(GtfsStatisticsTask.class);
-  private GtfsMutableRelationalDao _dao;
+  private GtfsRelationalDaoImpl _dao;
   private FederatedTransitDataBundle _bundle;
   private String filename;
   
@@ -50,7 +52,7 @@ public class GtfsValidationTask implements Runnable {
 
   
   @Autowired
-  public void setGtfsDao(GtfsMutableRelationalDao dao) {
+  public void setGtfsDao(GtfsRelationalDaoImpl dao) {
     _dao = dao;
   }
 
@@ -84,7 +86,7 @@ public class GtfsValidationTask implements Runnable {
 
 
   private void log(ValidationResult vr, String file) {
-    List<InvalidValue> invalidValues = vr.invalidValues;
+    Set<InvalidValue> invalidValues = vr.invalidValues;
     for (InvalidValue iv : invalidValues) {
       logger.logCSV(file, InvalidValueHelper.getCsv(iv));
     }
