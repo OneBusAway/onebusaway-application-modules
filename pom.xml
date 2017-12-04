@@ -76,6 +76,7 @@
     <module>onebusaway-enterprise-webapp</module>
     <module>onebusaway-federations</module>
     <module>onebusaway-federations-webapp</module>
+    <module>onebusaway-frontend-webapp</module>
     <module>onebusaway-geocoder</module>
     <module>onebusaway-geospatial</module>
     <module>onebusaway-gtfs-hibernate-spring</module>
