@@ -26,6 +26,8 @@
 
 <jsp:directive.page contentType="text/html" />
 
+<script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"><!-- jspx --></script>
+
 <head>
   <s:set var="title" value="getText('main.title')" /> 	
   <title><decorator:title default="${title}" /></title>
@@ -81,7 +83,7 @@
 		<div id="branding">
 			<s:set var="link" value="getText('main.agency.link')" />
 			<a href="${link}">
-			  	<s:url var="url" value="/css/img/agency_logo.gif"></s:url>
+			  	<s:url var="url" value="/css/img/oba_puget_sound_web_header.png"></s:url>
 				<img src="${url}" alt="Agency logo" />
 			</a>
 		</div>
@@ -103,10 +105,25 @@
 	<div id="contentbox">
 	<!-- Enter Content here -->
 	
-  		<div id="bustime">
+		<div id="bustime">
 			<decorator:body />
-	    </div>
-	    
+		</div>
+
+		<div id="bottombar">
+			<div class="bottombox" id="google_translate_element">
+				<span>Google Translate</span>
+				<s:set var="link" value="getText('main.agency.link')" />
+				<s:url var="url" value="/css/img/google_logo.png"></s:url>
+				<img id="icon" src="${url}" />
+			</div>
+			<div class="bottombox">
+				<s:set var="link" value="getText('main.privacypolicy.link')" />
+				<a href="${link}">
+					<span id="privacy-policy" alt="Privacy Policy">Privacy Policy</span>
+				</a>
+			</div>
+		</div>
+
 	<!-- End Content -->
 	</div>
 
