@@ -2,8 +2,7 @@
 
 OneBusAway has the concept of a **transit data bundle**, which is a collection of all the data artifacts for a transit
 agency (or group of transit agencies) in the internal format needed to power OneBusAway.  These transit data bundles
-are typically created from external data such as GTFS feeds for transit data and [OpenStreetMap](./open-street-map.html)
-data for the street network.  This document will walk you through the steps in creating a new transit data bundle.
+are typically created from external data such as GTFS feeds for transit data.  This document will walk you through the steps in creating a new transit data bundle.
 
 ## Creating the Bundle
 

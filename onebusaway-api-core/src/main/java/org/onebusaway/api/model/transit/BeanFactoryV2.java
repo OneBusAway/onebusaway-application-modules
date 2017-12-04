@@ -16,10 +16,13 @@
  */
 package org.onebusaway.api.model.transit;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Properties;
 import java.util.Set;
 
 import org.onebusaway.api.impl.MaxCountSupport;
@@ -36,7 +39,6 @@ import org.onebusaway.api.model.transit.service_alerts.SituationConditionDetails
 import org.onebusaway.api.model.transit.service_alerts.SituationConsequenceV2Bean;
 import org.onebusaway.api.model.transit.service_alerts.SituationV2Bean;
 import org.onebusaway.api.model.transit.service_alerts.TimeRangeV2Bean;
-import org.onebusaway.api.model.transit.tripplanning.MinTravelTimeToStopV2Bean;
 import org.onebusaway.collections.CollectionsLibrary;
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.geospatial.model.EncodedPolylineBean;
@@ -66,7 +68,7 @@ import org.onebusaway.transit_data.model.blocks.BlockConfigurationBean;
 import org.onebusaway.transit_data.model.blocks.BlockInstanceBean;
 import org.onebusaway.transit_data.model.blocks.BlockStopTimeBean;
 import org.onebusaway.transit_data.model.blocks.BlockTripBean;
-import org.onebusaway.transit_data.model.oba.MinTravelTimeToStopsBean;
+import org.onebusaway.transit_data.model.config.BundleMetadata;
 import org.onebusaway.transit_data.model.realtime.CurrentVehicleEstimateBean;
 import org.onebusaway.transit_data.model.realtime.VehicleLocationRecordBean;
 import org.onebusaway.transit_data.model.schedule.FrequencyBean;
@@ -171,6 +173,11 @@ public class BeanFactoryV2 {
     return entry(getStopsForRoute(result, includePolylines));
   }
 
+  public EntryWithReferencesBean<ConfigV2Bean> getResponse(
+      BundleMetadata result) {
+    return entry(getConfig(result));
+  }
+
   public ListWithReferencesBean<AgencyWithCoverageV2Bean> getResponse(
       List<AgencyWithCoverageBean> beans) {
     List<AgencyWithCoverageV2Bean> list = new ArrayList<AgencyWithCoverageV2Bean>();
@@ -230,22 +237,8 @@ public class BeanFactoryV2 {
     return entry(getSituation(situation));
   }
 
-  public ListWithReferencesBean<MinTravelTimeToStopV2Bean> getMinTravelTimeToStops(
-      MinTravelTimeToStopsBean travelTimes) {
-    List<MinTravelTimeToStopV2Bean> beans = new ArrayList<MinTravelTimeToStopV2Bean>();
-    for (int i = 0; i < travelTimes.getSize(); i++) {
-      MinTravelTimeToStopV2Bean bean = new MinTravelTimeToStopV2Bean();
-      bean.setStopId(travelTimes.getStopId(i));
-      bean.setLocation(new CoordinatePoint(travelTimes.getStopLat(i),
-          travelTimes.getStopLon(i)));
-      bean.setTravelTime(travelTimes.getTravelTime(i));
-      beans.add(bean);
-    }
-    return list(beans, false);
-  }
-
   /****
-   * 
+   *
    *****/
 
   public ListWithReferencesBean<String> getEntityIdsResponse(
@@ -259,7 +252,7 @@ public class BeanFactoryV2 {
   }
 
   /****
-   * 
+   *
    ***/
 
   public TimeIntervalV2 getTimeInterval(TimeIntervalBean interval) {
@@ -301,6 +294,17 @@ public class BeanFactoryV2 {
     bean.setType(route.getType());
     bean.setUrl(route.getUrl());
 
+    return bean;
+  }
+
+  public ConfigV2Bean getConfig(BundleMetadata meta) {
+    ConfigV2Bean bean = new ConfigV2Bean();
+    bean.setGitProperties(getGitProperties());
+    if (meta == null) return bean;
+    bean.setId(meta.getId());
+    bean.setName(meta.getName());
+    bean.setServiceDateFrom(meta.getServiceDateFrom());
+    bean.setServiceDateTo(meta.getServiceDateTo());
     return bean;
   }
 
@@ -667,7 +671,7 @@ public class BeanFactoryV2 {
     /*
      * StopCalendarDaysBean days = stopSchedule.getCalendarDays();
      * bean.setTimeZone(days.getTimeZone());
-     * 
+     *
      * List<StopCalendarDayV2Bean> dayBeans = new
      * ArrayList<StopCalendarDayV2Bean>(); for (StopCalendarDayBean day :
      * days.getDays()) { StopCalendarDayV2Bean dayBean =
@@ -821,7 +825,8 @@ public class BeanFactoryV2 {
     addToReferences(stop);
     bean.setStopSequence(ad.getStopSequence());
     bean.setBlockTripSequence(ad.getBlockTripSequence());
-
+    bean.setTotalStopsInTrip(ad.getTotalStopsInTrip());
+    
     bean.setRouteId(route.getId());
     addToReferences(route);
 
@@ -887,6 +892,7 @@ public class BeanFactoryV2 {
     bean.setStartTime(frequency.getStartTime());
     bean.setEndTime(frequency.getEndTime());
     bean.setHeadway(frequency.getHeadway());
+    bean.setExactTimes(frequency.getExactTimes());
     return bean;
   }
 
@@ -895,6 +901,7 @@ public class BeanFactoryV2 {
     bean.setStartTime(frequency.getStartTime());
     bean.setEndTime(frequency.getEndTime());
     bean.setHeadway(frequency.getHeadway());
+    bean.setExactTimes(frequency.getExactTimes());
     return bean;
   }
 
@@ -1162,5 +1169,18 @@ public class BeanFactoryV2 {
     }
 
     return true;
+  }
+
+  private Properties getGitProperties(){
+          Properties properties = new Properties();
+          try {
+                  InputStream inputStream = getClass().getClassLoader().getResourceAsStream("git.properties");
+                  if (inputStream != null) {
+                          properties.load(inputStream);
+                  }
+                  return properties;
+          } catch (IOException ioe) {
+                  return null;
+          }
   }
 }

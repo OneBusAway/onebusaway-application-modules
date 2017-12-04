@@ -16,6 +16,7 @@
 package org.onebusaway.sms.actions.sms;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -25,8 +26,12 @@ import org.onebusaway.exceptions.ServiceException;
 import org.onebusaway.presentation.client.RoutePresenter;
 import org.onebusaway.sms.impl.SmsArrivalsAndDeparturesModel;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
+import org.onebusaway.transit_data.model.ListBean;
 import org.onebusaway.transit_data.model.RouteBean;
+import org.onebusaway.transit_data.model.StopBean;
 import org.onebusaway.transit_data.model.StopsWithArrivalsAndDeparturesBean;
+import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
+import org.onebusaway.transit_data.model.service_alerts.SituationQueryBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -74,15 +79,62 @@ public class ArrivalsAndDeparturesAction extends AbstractTextmarksAction
       return INPUT;
 
     _model.process();
+    _model.setAlertPresentText(getAlertPresentText());
 
-    logUserInteraction("stopIds", _model.getStopIds(), "routeIds",
-        _model.getRouteFilter(), "args", _args);
 
+    _model.applyDedupe();
     // Since we have route numbers, not ids, we have to do ad-hoc filtering
     if (_args != null && _args.length > 0)
       filterArrivalsAndDeparturesByRoute(_args);
 
     return SUCCESS;
+  }
+  
+  public boolean hasAlerts(){
+	  if(_model.getResult().getStops() != null && 
+			  stopsHaveAlerts(_model.getResult().getStops())){
+		  return true;
+	  }
+	  if(_model.getResult().getArrivalsAndDepartures() != null){
+		  for(ArrivalAndDepartureBean adb : _model.getResult().getArrivalsAndDepartures()){
+			  if(adb.getSituations() != null && adb.getSituations().size() > 0){
+				  return true;
+		      }
+		  }
+	  }	  
+	  return false;  
+  }
+  
+  private boolean stopsHaveAlerts(List<StopBean> stops){
+	  for(StopBean stop: stops){
+		  if(getServiceAlertsForStop(stop.getId()).size() > 0){
+			return true;  
+		  }
+	  }
+	  return false;
+  }
+
+  private List<ServiceAlertBean> getServiceAlertsForStop(String stopId) {
+    SituationQueryBean query = new SituationQueryBean();
+    SituationQueryBean.AffectsBean affects = new SituationQueryBean.AffectsBean();
+    query.getAffects().add(affects);
+    affects.setStopId(stopId);
+    ListBean<ServiceAlertBean> alerts = _transitDataService.getServiceAlerts(query);
+
+    if (alerts != null) {
+      return alerts.getList();
+    }
+
+    return Collections.emptyList();
+  }
+
+  private String getAlertPresentText() {
+    final String ALERT_TEXT_KEY = "sms.alert.txt";
+    if (System.getProperties().containsKey(ALERT_TEXT_KEY)) {
+      return System.getProperty(ALERT_TEXT_KEY);
+    }
+
+    return "";
   }
 
   private void filterArrivalsAndDeparturesByRoute(String[] tokens) {

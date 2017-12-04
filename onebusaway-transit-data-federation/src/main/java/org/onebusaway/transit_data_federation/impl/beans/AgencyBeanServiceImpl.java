@@ -48,6 +48,7 @@ class AgencyBeanServiceImpl implements AgencyBeanService {
     bean.setLang(agency.getLang());
     bean.setName(agency.getName());
     bean.setPhone(agency.getPhone());
+    bean.setEmail(agency.getEmail());
     bean.setTimezone(agency.getTimezone());
     bean.setUrl(agency.getUrl());
     bean.setDisclaimer(agency.getDisclaimer());

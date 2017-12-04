@@ -24,6 +24,8 @@ import org.onebusaway.users.model.UserIndex;
 import org.onebusaway.users.model.UserProperties;
 import org.onebusaway.users.model.UserPropertiesV1;
 import org.onebusaway.users.model.properties.UserPropertiesV2;
+import org.onebusaway.users.model.properties.UserPropertiesV3;
+import org.onebusaway.users.model.properties.UserPropertiesV4;
 import org.onebusaway.users.services.UserPropertiesService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,11 +41,19 @@ public class UserPropertiesServiceVersionedInvocationHandler implements Invocati
 
   private UserPropertiesService _userServiceV2;
 
+  private UserPropertiesService _userServiceV3;
+
+  private UserPropertiesService _userServiceV4;
+
   private int _preferredVersion = -1;
 
   private AtomicInteger _v1References = new AtomicInteger();
 
   private AtomicInteger _v2References = new AtomicInteger();
+
+  private AtomicInteger _v3References = new AtomicInteger();
+
+  private AtomicInteger _v4References = new AtomicInteger();
 
   public void setUserPropertiesServiceV1(UserPropertiesService userServiceV1) {
     _userServiceV1 = userServiceV1;
@@ -51,6 +61,14 @@ public class UserPropertiesServiceVersionedInvocationHandler implements Invocati
 
   public void setUserPropertiesServiceV2(UserPropertiesService userServiceV2) {
     _userServiceV2 = userServiceV2;
+  }
+
+  public void setUserPropertiesServiceV3(UserPropertiesService userServiceV3) {
+    _userServiceV3 = userServiceV3;
+  }
+
+  public void setUserPropertiesServiceV4(UserPropertiesService userServiceV4) {
+      _userServiceV4 = userServiceV4;
   }
 
   public void setPreferredVersion(int preferredVersion) {
@@ -66,6 +84,16 @@ public class UserPropertiesServiceVersionedInvocationHandler implements Invocati
   public int getV2References() {
     return _v2References.get();
   }
+
+  @ManagedAttribute
+  public int getV3References() {
+    return _v3References.get();
+  }
+
+  @ManagedAttribute
+  public int getV4References() {
+    return _v4References.get();
+}
 
   @Override
   public Object invoke(Object proxy, Method method, Object[] args)
@@ -103,6 +131,10 @@ public class UserPropertiesServiceVersionedInvocationHandler implements Invocati
       return 1;
     if (props instanceof UserPropertiesV2)
       return 2;
+    if (props instanceof UserPropertiesV3)
+      return 3;
+    if (props instanceof UserPropertiesV4)
+        return 4;
 
     _log.warn("unknown user properties version: " + props.getClass());
     return 0;
@@ -117,6 +149,12 @@ public class UserPropertiesServiceVersionedInvocationHandler implements Invocati
       case 2:
         _v2References.incrementAndGet();
         return _userServiceV2;
+      case 3:
+        _v3References.incrementAndGet();
+        return _userServiceV3;
+      case 4:
+        _v4References.incrementAndGet();
+        return _userServiceV4;
     }
   }
 

@@ -1,0 +1,47 @@
+<!--
+
+    Copyright (c) 2011 Metropolitan Transportation Authority
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+            http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<html xmlns:jsp="http://java.sun.com/JSP/Page"
+	xmlns:c="http://java.sun.com/jsp/jstl/core" xmlns:s="/struts-tags"
+	xmlns:wiki="/oba-wiki-tags">
+
+	<h3>
+		Did you mean?
+	</h3>
+	
+	<div class="ambiguousLocations">
+		<s:iterator value="results.suggestions">
+			<p>
+				<s:url var="url" namespace="/m" action="index">
+					<s:param name="q">
+						<s:property value="%{latitude + ',' + longitude}" />
+					</s:param>
+				</s:url>
+
+				<a href="${url}">
+					<s:property value="formattedAddress" />
+				</a> 
+				<br />
+
+				<c:if test="${!empty neighborhood}">
+					(<s:property value="neighborhood" />)
+				</c:if>
+			</p>
+		</s:iterator>
+	</div>
+
+</html>

@@ -1,0 +1,83 @@
+/**
+ * Copyright (C) 2011 Metropolitan Transportation Authority
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#content #text fieldset input, 
+#content #text fieldset select, 
+#content #text fieldset textarea {
+	font-size: 14px;
+}
+
+#content #text fieldset textarea,
+#content #text fieldset select,
+#content #text fieldset p.small {
+	width: 350px;
+}
+
+#content #text fieldset textarea {
+	height: 50px;
+}	
+
+#content #text fieldset input.addStopId {
+	display: block;
+	margin-top: 3px;	
+	font-size: 14px;
+}
+
+#content #text #instructions {
+	margin-right: 400px;
+	min-height: 600px;
+}
+
+#content #text form {
+	position: absolute;
+	top: 10px;
+	right: 10px;
+	width: auto;
+	display: inline-block;
+	padding: 10px;
+	padding-bottom: 0px;
+	background-color: #EFEFEF;
+	border: 1px solid #C0C0C0;
+}
+
+#content #text form h2 {
+	font-weight: bold;
+	color: #666666;
+	font-size: 16px;
+}
+
+#content #text form #stop_id_collection {
+	padding: 0px;
+}
+
+#content #text form #stop_id_collection li {
+	width: 350px;
+	padding-top: 5px;
+	padding-bottom: 5px;
+	list-style-type: none;
+}
+
+#content #text form #stop_id_collection li a {
+	float: right;
+}
+
+#content #text form #error {
+	color: #ff0000;
+}
+
+#content #text form #error li {
+	padding-top: 10px;
+}

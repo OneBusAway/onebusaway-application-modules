@@ -20,6 +20,11 @@
     </dependency>
     <dependency>
       <groupId>org.onebusaway</groupId>
+      <artifactId>onebusaway-util</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.onebusaway</groupId>
       <artifactId>onebusaway-transit-data</artifactId>
       <version>${project.version}</version>
     </dependency>
@@ -36,33 +41,27 @@
     </dependency>
 
     <dependency>
-      <groupId>org.opentripplanner</groupId>
-      <artifactId>opentripplanner-routing</artifactId>
-      <version>${opentripplanner-version}</version>
-      <!-- See similar list in onebusaway-transit-data-federation-builder/pom.xml -->
-      <exclusions>
-        <exclusion>
-          <groupId>hsqldb</groupId>
-          <artifactId>hsqldb</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>mysql</groupId>
-          <artifactId>mysql-connector-java</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.xerial</groupId>
-          <artifactId>sqlite-jdbc</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>postgresql</groupId>
-          <artifactId>postgresql</artifactId>
-        </exclusion>        
-        <exclusion>
-          <groupId>org.geotools</groupId>
-          <artifactId>gt-geotiff</artifactId>
-        </exclusion>
-      </exclusions>
+        <groupId>org.onebusaway</groupId>
+        <artifactId>onebusaway-siri-api-v13</artifactId>
+        <version>${onebusaway-siri-1-api-version}</version>
     </dependency>
+    <!-- -->
+    <dependency>
+        <groupId>org.onebusaway</groupId>
+        <artifactId>onebusaway-siri-api-v20</artifactId>
+        <version>${onebusaway-siri-2-api-version}</version>
+    </dependency>
+    <dependency>
+        <groupId>org.codehaus.jackson</groupId>
+        <artifactId>jackson-mapper-asl</artifactId>
+        <version>1.9.2</version>
+    </dependency>
+    <dependency>
+        <groupId>org.codehaus.jackson</groupId>
+        <artifactId>jackson-jaxrs</artifactId>
+        <version>1.9.2</version>
+    </dependency>
+
 
     <dependency>
       <groupId>colt</groupId>
@@ -85,20 +84,18 @@
     <dependency>
       <groupId>org.onebusaway</groupId>
       <artifactId>onebusaway-gtfs-realtime-api</artifactId>
-      <version>1.2.0</version>
-    </dependency>    
-
-    <!-- Library for accessing MyBus Data Stream -->
-    <dependency>
-      <groupId>edu.washington.its</groupId>
-      <artifactId>sdd</artifactId>
-      <version>1.0.0</version>
-    </dependency>
+      <version>${gtfs-api-version}</version>
+    </dependency> 
 
     <dependency>
       <groupId>org.apache.lucene</groupId>
       <artifactId>lucene-core</artifactId>
       <version>2.4.1</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
     </dependency>
 
     <dependency>
@@ -115,6 +112,31 @@
       <groupId>org.mockito</groupId>
       <artifactId>mockito-core</artifactId>
       <scope>test</scope>
+    </dependency>
+    
+   <dependency>
+   		<groupId>com.google.code.gson</groupId>
+   		<artifactId>gson</artifactId>
+   		<version>1.7.1</version>
+   		<type>jar</type>
+   		<scope>compile</scope>
+   </dependency>
+	 <dependency>
+			<groupId>joda-time</groupId>
+			<artifactId>joda-time</artifactId>
+			<version>2.0</version>
+		</dependency>        
+    <dependency>
+        <groupId>org.codehaus.jackson</groupId>
+        <artifactId>jackson-xc</artifactId>
+        <version>1.9.2</version>
+    </dependency>
+
+    <!--  Support for sftp protocol -->
+    <dependency>
+      <groupId>com.jcraft</groupId>
+      <artifactId>jsch</artifactId>
+      <version>0.1.53</version>
     </dependency>
 
   </dependencies>

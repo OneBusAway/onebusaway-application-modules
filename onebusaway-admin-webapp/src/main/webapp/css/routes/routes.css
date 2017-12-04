@@ -1,0 +1,43 @@
+/**
+ * Copyright (c) 2013 Kurt Raschke
+ * Copyright (c) 2011 Metropolitan Transportation Authority
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+ul.routeList li {
+    width: 45%;
+    display: inline-block;
+    vertical-align: bottom;
+    margin: 5px 10px 10px 10px;
+    color: #000;
+}
+#routes {
+    font-size: 16px;
+}
+#routes .routeList .description {
+    margin-bottom: 5px;
+    font-size: 14px;
+    font-weight: normal;
+}
+#routes .routeList .name {
+    margin-bottom: 5px;
+    font-weight: bold;
+    cursor: pointer;
+    border-bottom-width: 5px;
+    border-bottom-style: solid;
+}
+#routes .routeList .name a {
+    text-decoration: none;
+    color: #000;
+}

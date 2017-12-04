@@ -197,7 +197,7 @@ public void setPreviousStopTimeOffset(int previousStopTimeOffset) {
   public String toString() {
     StringBuilder b = new StringBuilder();
     b.append("ScheduledBlockLocation(");
-    b.append("activeTripe=");
+    b.append("activeTrip=");
     if (activeTrip != null)
       b.append(activeTrip.getTrip().getId());
     else

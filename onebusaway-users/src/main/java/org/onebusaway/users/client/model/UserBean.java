@@ -43,10 +43,20 @@ public class UserBean implements Serializable {
   private Long minApiRequestInterval = null;
 
   private Map<String, Long> readServiceAlerts = null;
+  
+  private String contactName;
+  
+  private String contactCompany;
+  
+  private String contactEmail;
+  
+  private String contactDetails;
 
   private boolean anonymous = true;
 
   private boolean admin = false;
+
+  private boolean disabled = false;
 
   private List<UserIndexBean> indices = new ArrayList<UserIndexBean>();
 
@@ -157,4 +167,40 @@ public class UserBean implements Serializable {
   public void setIndices(List<UserIndexBean> indices) {
     this.indices = indices;
   }
+
+  public String getContactName() {
+    return contactName;
+  }
+  
+  public void setContactName(String contactName) {
+    this.contactName = contactName;
+  }
+  
+  public String getContactCompany() {
+    return contactCompany;
+  }
+  
+  public void setContactCompany(String contactCompany) {
+    this.contactCompany = contactCompany;
+  }
+  
+  public String getContactEmail() {
+    return contactEmail;
+  }
+  
+  public void setContactEmail(String contactEmail) {
+    this.contactEmail = contactEmail;
+  }
+  
+  public String getContactDetails() {
+    return contactDetails;
+  }
+  
+  public void setContactDetails(String contactDetails) {
+    this.contactDetails = contactDetails;
+  }
+
+  public boolean isDisabled() { return disabled; }
+
+  public void setDisabled(boolean disabled) { this.disabled = disabled; }
 }

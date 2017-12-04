@@ -16,13 +16,19 @@
 package org.onebusaway.webapp.actions.p;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
+import java.util.Properties;
 
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.struts2.ServletActionContext;
 import org.apache.struts2.convention.annotation.Namespace;
 import org.apache.struts2.convention.annotation.Result;
 import org.apache.struts2.convention.annotation.Results;
 import org.onebusaway.presentation.services.cachecontrol.CacheControl;
+import org.onebusaway.util.services.configuration.ConfigurationService;
 import org.onebusaway.webapp.actions.AbstractAction;
 import org.onebusaway.wiki.api.WikiAttachmentContent;
 import org.onebusaway.wiki.api.WikiDocumentService;
@@ -59,6 +65,8 @@ public class IndexAction extends AbstractAction {
   private String _renderedContent;
 
   private String _editLink;
+  
+  private Properties _properties;
 
   /****
    * Members for Raw Result
@@ -100,6 +108,16 @@ public class IndexAction extends AbstractAction {
 
   public String getEditLink() {
     return _editLink;
+  }
+  
+  public Properties getProperties(){
+	return _properties;
+  }
+
+  private ConfigurationService _configService;
+  @Autowired
+  public void setConfigService(ConfigurationService configService) {
+    _configService = configService;
   }
 
   public boolean isAdmin() {
@@ -181,6 +199,17 @@ public class IndexAction extends AbstractAction {
     _renderedContent = _wikiRenderingService.renderPage(_page);
     _editLink = _wikiRenderingService.getEditLink(_page);
 
+	_properties = new Properties();
+	try {
+		InputStream inputStream = getClass().getClassLoader().getResourceAsStream("git.properties");
+		if (inputStream != null) {
+			_properties.load(inputStream);
+		}
+	} catch (IOException ioe) {}
+	
+	HttpServletRequest request = ServletActionContext.getRequest();    
+	_properties.putAll(_configService.getConfiguration());
+	
     return SUCCESS;
   }
 

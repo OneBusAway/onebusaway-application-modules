@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (C) 2016 Cambridge Systematics, Inc.
+ 
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+ 
+            http://www.apache.org/licenses/LICENSE-2.0
+ 
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+
+<html xmlns:jsp="http://java.sun.com/JSP/Page"
+	xmlns:c="http://java.sun.com/jsp/jstl/core" xmlns:s="/struts-tags">
+<jsp:directive.page contentType="text/html" />
+		<div class="tabHeader">
+			<label class="headerLabel">Sync Deployed Bundle from Staging</label>
+		</div>
+		<div id="helpfulMessage" class="helpfulMessage"> <s:text name="sync-bundle.helpfulMessage"/>
+			<!-- This will get the currently deployed bundle from staging and deploy it here. -->
+		</div>
+		<div id="deployBundle">
+			<div id="requestLabels">
+				<label class="adminLabel directoryLabel">Request Id :</label> 
+				<label id="downloadBundle_id" class="adminLabel directoryLabel"></label>
+			</div>
+			<label class="bundleHeader">Dataset Deployed on Staging</label>  
+			<div id="sync_deployedDataset">
+				${stagingDeployedDataset}
+			</div>
+			<label class="bundleHeader">Build Name Deployed on Staging</label>  
+			<div id="sync_deployedBundleName">
+				${stagingDeployedBundleName}
+			</div>
+			<div>
+				<input type="button" id="syncBundle_syncButton" value="Sync Deployed Bundle" />
+			</div>
+			<div id="syncProgressDiv">
+				<s:url var="url" value="/css/img/ajax-loader.gif" />
+				<img id="syncProgressIcon" src="${url}" alt="Ajax loader" class="progress" /> 
+				<label id="syncProgressText" class="adminLabel">Syncing bundles in Progress...</label>
+			</div>
+		</div>		
+</html>

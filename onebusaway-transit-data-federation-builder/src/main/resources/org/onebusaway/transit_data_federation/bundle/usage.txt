@@ -28,7 +28,6 @@ Arguments:
   -dataSourceUsername=value         Use the specified username for a GTFS database JDBC data-source.
   -dataSourcePassword=value         Use the specified password for a GTFS database JDBC data-source.
   
-  -osm=path    Load OpenStreetMap data from the specified file instead of using the OSM API.
 
 For more documentation, see:
   

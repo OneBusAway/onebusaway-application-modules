@@ -30,7 +30,7 @@
     <package name="onebusaway-webapp-default" extends="struts-default">
         
         <result-types>
-          <result-type name="rome" class="org.onebusaway.webapp.actions.rss.RomeResult"/>
+          <result-type name="rome" class="org.onebusaway.presentation.rss.RomeResult"/>
           <result-type name="json" class="org.apache.struts2.json.JSONResult"/>
         </result-types>
         

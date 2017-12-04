@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2011 Metropolitan Transportation Authority
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+            http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+
+<html xmlns:jsp="http://java.sun.com/JSP/Page"
+	xmlns:c="http://java.sun.com/jsp/jstl/core" xmlns:s="/struts-tags">
+<jsp:directive.page contentType="text/html" />
+	<div class="tabHeader">
+		<label class="headerLabel">Compare Bundles</label>
+	</div>
+
+	<div id="selectArchiveDiv">
+		<input type="checkbox" id="useArchiveCheckbox" value="useArchivedData">Use archived data for Fixed Route Comparison</input>
+	</div>
+	<div id="buildingReportDiv">
+		<s:url var="url" value="/css/img/ajax-loader.gif" />
+		<img id="buildingReportIcon" src="${url}" alt="Ajax loader" class="progress" />
+		<label id="buildingReportMsg" class="adminLabel">Fixed Route Comparison Report in Progress...</label>
+	</div>
+
+
+	<div id="bundleSelectionDiv">
+		<div id="currentBundleDiv">
+			<fieldset>
+				<legend>Current Bundle</legend>
+				<table id="currentBundleTable">
+					<tr>
+						<td>Dataset Name</td>
+						<td>
+							<select name="currentDatasetList" id="currentDatasetList">
+								<option value="0">Select a dataset</option>
+								<s:iterator value="%{existingDirectories}" status="status">
+									<s:set var="index" value="%{#status.count}" />
+									<option value="">
+										<s:property value="name" />
+									</option>
+								</s:iterator>
+							</select>
+							<select name="currentArchivedDatasetList" id="currentArchivedDatasetList">
+								<option value="0">Select an archived dataset</option>
+								<s:iterator value="%{existingArchivedDirectories}" status="status">
+									<s:set var="index" value="%{#status.count}" />
+									<option value="">
+										<s:property />
+									</option>
+								</s:iterator>
+							</select>
+						</td>
+					</tr>
+					<tr>
+						<td>Build Name</td>
+						<td>
+							<select name="currentBuildNameList" id="currentBuildNameList">
+								<option value="0">Select a build name</option>
+							</select>
+							<select name="currentArchivedBuildNameList" id="currentArchivedBuildNameList">
+								<option value="0">Select an archived build name</option>
+							</select>
+						</td>
+					</tr>
+				</table>
+			</fieldset>
+		</div>
+
+		<div id="compareToBundleDiv">
+			<fieldset>
+				<legend>Compare to Bundle</legend>
+				<table id="compareToBundleTable">
+					<tr>
+						<td>Dataset Name</td>
+						<td>
+							<select name="compareToDatasetList" id="compareToDatasetList">
+								<option value="0">Select a dataset</option>
+								<s:iterator value="%{existingDirectories}" status="status">
+									<s:set var="index" value="%{#status.count}" />
+									<option value="">
+										<s:property value="name" />
+									</option>
+								</s:iterator>
+							</select>
+							<select name="compareToArchivedDatasetList" id="compareToArchivedDatasetList">
+								<option value="0">Select an archived dataset</option>
+								<s:iterator value="%{existingArchivedDirectories}" status="status">
+									<s:set var="index" value="%{#status.count}" />
+									<option value="">
+										<s:property />
+									</option>
+								</s:iterator>
+							</select>
+						</td>
+					</tr>
+					<tr>
+						<td>Build Name</td>
+						<td>
+							<select name="compareToBuildNameList" id="compareToBuildNameList">
+								<option value="0">Select a build name</option>
+							</select>
+							<select name="compareToArchivedBuildNameList" id="compareToArchivedBuildNameList">
+								<option value="0">Select an archived build name</option>
+							</select>
+						</td>
+					</tr>
+				</table>
+			</fieldset>
+		</div>
+	</div>
+
+	<div id="compareDiff">
+		<div>
+			<table id="diffResultsTable">
+				<caption>Diff Results</caption>
+				<thead>
+					<tr>
+						<th>Id</th>
+						<th>Name</th>
+						<th>Routes</th>
+						<th>Trips</th>
+						<th>Stops</th>
+						<th>Stop Times</th>
+						<th>Service Start</th>
+						<th>Service End</th>
+						<th>Calendar Start</th>
+						<th>Calendar End</th>
+					</tr>
+				</thead>
+				<tbody>
+					<!--  prevent jsxp minimiztion -->
+				</tbody>
+			</table>
+		</div>
+	</div>
+	<hr />
+
+	<div id="compareFixedRouteModes">
+		<div>
+			<input id="printFixedRouteRptButton" value="Print Fixed Route Comparison Report" type="button" />
+			<table id="fixedRouteDiffTable">
+				<caption>
+					Comparison of Fixed Route Modes
+					<br />
+					<span id="baseBundle" >
+					<!--  prevent jsxp minimiztion -->
+					</span>
+					<br />
+					<span id="compareToBundle" >
+					<!--  prevent jsxp minimiztion -->
+					</span>
+				</caption>
+				  <thead>
+					<tr>
+						<th class="modeColumn">Mode</th>
+						<th class="rtNumColumn">Rt</th>
+						<th class="rtNameColumn">Route Name</th>
+						<th class="headsignColumn">Headsign</th>
+						<th class="dirColumn">Dir</th>
+						<th class="stopCtColumn"># of Stops</th>
+						<th class="weekdayTripColumn"># of Weekday trips</th>
+						<th class="satTripsColumn" ># of Sat trips</th>
+						<th class="sunTripsColumn" ># of Sun trips</th>
+					</tr>
+				</thead>
+				<tbody class="fixedRouteScrollable">
+					<!--  prevent jsxp minimiztion -->
+				</tbody>
+			</table>
+		</div>
+	</div>
+</html>
+

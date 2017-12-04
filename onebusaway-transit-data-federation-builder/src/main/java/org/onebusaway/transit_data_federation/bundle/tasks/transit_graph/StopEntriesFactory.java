@@ -28,6 +28,7 @@ import org.onebusaway.transit_data_federation.impl.transit_graph.AgencyEntryImpl
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.TransitGraphImpl;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
+import org.onebusaway.transit_data_federation.util.LoggingIntervalUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,12 +56,14 @@ public class StopEntriesFactory {
     int stopIndex = 0;
 
     Collection<Stop> stops = _gtfsDao.getAllStops();
+    int logInterval = LoggingIntervalUtil.getAppropriateLoggingInterval(stops.size());
+    
     Map<String, ArrayList<StopEntry>> stopEntriesByAgencyId = new FactoryMap<String, ArrayList<StopEntry>>(
         new ArrayList<StopEntry>());
 
     for (Stop stop : stops) {
 
-      if (stopIndex % 500 == 0)
+      if (stopIndex % logInterval == 0)
         _log.info("stops: " + stopIndex + "/" + stops.size());
       stopIndex++;
 
@@ -76,6 +79,16 @@ public class StopEntriesFactory {
       ArrayList<StopEntry> stopEntries = entry.getValue();
       stopEntries.trimToSize();
       AgencyEntryImpl agency = graph.getAgencyForId(agencyId);
+      if (agency == null) {
+        String msg = null;
+        if (stopEntries.size() > 0) {
+          msg = "no agency found for agencyId=" + agencyId + " of stop entry " + stopEntries.get(0).getId();
+        } else {
+        msg = "no agency found for agencyId=" + agencyId + " of empty stop entry list.";
+        }
+        _log.error(msg);
+        throw new IllegalStateException(msg);
+      }
       agency.setStops(stopEntries);
     }
 

@@ -16,7 +16,7 @@
  */
 package org.onebusaway.federations.annotations;
 
-import org.onebusaway.collections.PropertyPathExpression;
+import org.onebusaway.collections.beans.PropertyPathExpression;
 import org.onebusaway.exceptions.ServiceException;
 import org.onebusaway.federations.FederatedService;
 import org.onebusaway.federations.FederatedServiceCollection;

@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2011 Metropolitan Transportation Authority
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+            http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+
+<html xmlns:jsp="http://java.sun.com/JSP/Page"
+	xmlns:c="http://java.sun.com/jsp/jstl/core" xmlns:s="/struts-tags">
+<jsp:directive.page contentType="text/html" />
+		<div class="tabHeader">
+			<label class="headerLabel">Deploy Bundle(s)</label>
+		</div>
+		<div id="deploypage_info">
+  			<label id="deploy_environment" class="adminLabel directoryLabel">
+				<s:property value="environment" ></s:property>
+			</label>
+		</div>
+		<div id="helpfulMessage">
+			<s:text name="deploy-bundle.helpfulMessage"/>
+		<!-- Please copy the bundle created in Build And Validate to the <b><s:property value="s3Path" ></s:property></b> directory via the S3 Management Console.--> 
+		</div>
+		<div id="deployBundle">
+			<label class="bundleHeader">Bundle(s) Available to Deploy</label>  
+			<div id="listButton">
+				<input type="button" id="deployBundle_listButton" value="Refresh" />
+			</div>
+			<input type="button" id="deployBundle_deployButton" value="Deploy Bundle(s)" />
+			<div id="deployBundle_bundleList">
+			<!--  space -->
+			</div>
+			
+			<div id="requestLabels">
+				<label class="adminLabel directoryLabel">Request
+					Id :</label> <label id="deployBundle_id" class="adminLabel directoryLabel"></label>
+			</div>
+			<div id="deployContentsHolder">					
+				<div id="deployBox">
+					<div id="deploying">
+						<s:url var="url" value="/css/img/ajax-loader.gif" />
+						<img id="deployingProgress" src="${url}" alt="Ajax loader"
+							class="progress" /> <label id="deployBundle_deployProgress"
+							class="adminLabel">Deploying ... </label>
+					</div>
+					
+				</div>
+			</div>
+			<div id="bundleResultsHolder">
+				<div id="bundleResults">
+					<div id="deployBundle_progress">
+						<s:url var="url" value="/css/img/arrow-right-3.png" />
+						<img src="${url}" alt="Not found" id="expand" /> <label
+							class="adminLabel">Bundles Deployed:</label>
+					</div>
+					<div id="deployBundle_resultList">
+						<!--  space -->
+					</div>
+				</div>
+			</div>
+			<div class="submitForm">
+        <fieldset>
+          <s:url var="url" action="index.action" namespace="/admin" />
+          <a href="${url}" class="link">Cancel</a> 
+            <input type="button" id="deploy_continue" value="Continue" class="submit_disabled" disabled="disabled" />
+        </fieldset>
+      </div>    
+		</div>		
+</html>

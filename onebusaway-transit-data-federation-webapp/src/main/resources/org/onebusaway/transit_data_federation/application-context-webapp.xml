@@ -31,5 +31,6 @@
     <bean id="jmxNamingStategy" class="org.onebusaway.container.spring.jmx.ServletContextAwareMetadataNamingStrategy">
         <constructor-arg ref="jmxAttributeSource"/>
     </bean>
-    
+    <bean id="configurationServiceClient" class="org.onebusaway.util.impl.configuration.ConfigurationServiceClientFileImpl" >
+    </bean>
 </beans>

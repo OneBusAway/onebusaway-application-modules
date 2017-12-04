@@ -20,6 +20,7 @@ import java.util.List;
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.realtime.api.EVehiclePhase;
+import org.onebusaway.realtime.api.EVehicleType;
 import org.onebusaway.realtime.api.TimepointPredictionRecord;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.blocks.BlockTripInstance;
@@ -43,6 +44,8 @@ public class BlockLocation {
    ****/
 
   private BlockInstance blockInstance;
+
+  private int blockStartTime;
 
   private BlockTripEntry activeTrip;
 
@@ -79,6 +82,8 @@ public class BlockLocation {
   private int previousStopTimeOffset;
   
   private EVehiclePhase phase;
+
+  private EVehicleType vehicleType;
 
   private String status;
 
@@ -124,6 +129,14 @@ public class BlockLocation {
 
   public void setBlockInstance(BlockInstance instance) {
     this.blockInstance = instance;
+  }
+
+  public int getBlockStartTime() {
+    return blockStartTime;
+  }
+
+  public void setBlockStartTime(int blockStartTime) {
+    this.blockStartTime = blockStartTime;
   }
 
   /**
@@ -316,19 +329,19 @@ public class BlockLocation {
 	return previousStop;
 }
 
-public void setPreviousStop(BlockStopTimeEntry previousStop) {
+  public void setPreviousStop(BlockStopTimeEntry previousStop) {
 	this.previousStop = previousStop;
 }
 
-public int getPreviousStopTimeOffset() {
+  public int getPreviousStopTimeOffset() {
 	return previousStopTimeOffset;
 }
 
-public void setPreviousStopTimeOffset(int previousStopTimeOffset) {
+  public void setPreviousStopTimeOffset(int previousStopTimeOffset) {
 	this.previousStopTimeOffset = previousStopTimeOffset;
-}
+  }
 
-public EVehiclePhase getPhase() {
+  public EVehiclePhase getPhase() {
     return phase;
   }
 
@@ -343,6 +356,10 @@ public EVehiclePhase getPhase() {
   public void setStatus(String status) {
     this.status = status;
   }
+
+  public EVehicleType getVehicleType() { return vehicleType; }
+
+  public void setVehicleType(EVehicleType vehicleType) { this.vehicleType = vehicleType; }
 
   /**
    * If real-time data is available in any form (schedule deviation,

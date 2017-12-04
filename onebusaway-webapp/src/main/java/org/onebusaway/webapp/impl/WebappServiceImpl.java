@@ -19,7 +19,6 @@ import java.util.Date;
 import java.util.List;
 
 import org.onebusaway.exceptions.ServiceException;
-import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.presentation.services.DefaultSearchLocationService;
 import org.onebusaway.transit_data.model.AgencyWithCoverageBean;
 import org.onebusaway.transit_data.model.ArrivalsAndDeparturesQueryBean;
@@ -33,21 +32,12 @@ import org.onebusaway.transit_data.model.StopScheduleBean;
 import org.onebusaway.transit_data.model.StopWithArrivalsAndDeparturesBean;
 import org.onebusaway.transit_data.model.StopsBean;
 import org.onebusaway.transit_data.model.StopsForRouteBean;
-import org.onebusaway.transit_data.model.oba.LocalSearchResult;
-import org.onebusaway.transit_data.model.oba.MinTransitTimeResult;
-import org.onebusaway.transit_data.model.oba.MinTravelTimeToStopsBean;
-import org.onebusaway.transit_data.model.oba.TimedPlaceBean;
-import org.onebusaway.transit_data.model.tripplanning.ConstraintsBean;
-import org.onebusaway.transit_data.model.tripplanning.ItinerariesBean;
-import org.onebusaway.transit_data.model.tripplanning.TransitLocationBean;
-import org.onebusaway.transit_data.model.tripplanning.TransitShedConstraintsBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsBean;
 import org.onebusaway.transit_data.model.trips.TripsForBoundsQueryBean;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.users.client.model.UserBean;
 import org.onebusaway.users.services.CurrentUserService;
 import org.onebusaway.webapp.gwt.where_library.rpc.WebappService;
-import org.onebusaway.webapp.services.oba.OneBusAwayService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -61,9 +51,6 @@ class WebappServiceImpl implements WebappService {
 
   @Autowired
   private CurrentUserService _currentUserService;
-
-  @Autowired
-  private OneBusAwayService _oneBusAwayService;
 
   @Autowired
   private DefaultSearchLocationService _defaultSearchLocationService;
@@ -152,37 +139,5 @@ class WebappServiceImpl implements WebappService {
   public ListBean<TripDetailsBean> getTripsForBounds(
       TripsForBoundsQueryBean query) {
     return _transitDataService.getTripsForBounds(query);
-  }
-
-  @Override
-  public ItinerariesBean getTripsBetween(CoordinatePoint from,
-      CoordinatePoint to, long time, ConstraintsBean constraints)
-      throws ServiceException {
-    TransitLocationBean fromLoc = new TransitLocationBean();
-    fromLoc.setLat(from.getLat());
-    fromLoc.setLon(from.getLon());
-    TransitLocationBean toLoc = new TransitLocationBean();
-    toLoc.setLat(to.getLat());
-    toLoc.setLon(to.getLon());
-    return _transitDataService.getItinerariesBetween(fromLoc, toLoc, time,
-        constraints);
-  }
-
-  @Override
-  public MinTransitTimeResult getMinTravelTimeToStopsFrom(
-      CoordinatePoint location, long time,
-      TransitShedConstraintsBean constraints, int timeSegmentSize)
-      throws ServiceException {
-    return _oneBusAwayService.getMinTravelTimeToStopsFrom(location, time,
-        constraints, timeSegmentSize);
-  }
-
-  @Override
-  public List<TimedPlaceBean> getLocalPathsToStops(ConstraintsBean constraints,
-      MinTravelTimeToStopsBean travelTimes, List<LocalSearchResult> localResults)
-      throws ServiceException {
-
-    return _oneBusAwayService.getLocalPaths(constraints, travelTimes,
-        localResults);
   }
 }

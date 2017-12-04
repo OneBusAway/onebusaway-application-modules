@@ -17,7 +17,7 @@ package org.onebusaway.container.cache;
 
 import java.io.Serializable;
 
-import org.onebusaway.collections.PropertyPathExpression;
+import org.onebusaway.collections.beans.PropertyPathExpression;
 
 /**
  * Factory for producing a {@link Serializable} cache key from an arbitrary

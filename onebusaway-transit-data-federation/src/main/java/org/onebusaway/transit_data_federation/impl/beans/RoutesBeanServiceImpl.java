@@ -89,17 +89,11 @@ class RoutesBeanServiceImpl implements RoutesBeanService {
   private Map<AgencyAndId, STRtree> _stopTreesByRouteId = new HashMap<AgencyAndId, STRtree>();
 
   @Refreshable(dependsOn = { 
-      RefreshableResources.ROUTE_COLLECTIONS_DATA, 
-      RefreshableResources.TRANSIT_GRAPH,
-      RefreshableResources.NARRATIVE_DATA})
+      RefreshableResources.NARRATIVE_DATA
+      })
   @PostConstruct
   public void setup() {
     _stopTreesByRouteId.clear();
-    
-    if (_graphDao.getAllStops().isEmpty()) {
-      _log.info("setup called with empty graph, exiting");
-      return;
-    }
     
     for (StopEntry stop : _graphDao.getAllStops()) {
       Set<AgencyAndId> routeIds = _routeService.getRouteCollectionIdsForStop(stop.getId());

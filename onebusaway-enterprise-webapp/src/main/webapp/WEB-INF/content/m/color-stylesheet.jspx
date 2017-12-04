@@ -1,0 +1,49 @@
+<!--
+
+    Copyright (C) 2011 Metropolitan Transportation Authority
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+            http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<jsp:root version="2.0" xmlns:jsp="http://java.sun.com/JSP/Page"
+	xmlns:c="http://java.sun.com/jsp/jstl/core" xmlns:s="/struts-tags"
+	xmlns:wiki="/oba-wiki-tags">
+<jsp:directive.page contentType="text/css" />
+<c:forEach var="color" items="${colors}">
+.routeHeaderColor<c:out value="${color}" /> {
+	border-bottom: 5px solid #<c:out value="${color}" />;
+}
+.stopsOnRouteColor<c:out value="${color}" /> {
+	background-color: #<c:out value="${color}" />;
+}
+.stopsOnRouteColor<c:out value="${color}" /> li.middle {
+	background-image: url('../img/stop-on-route/stop_on_route_mobile_middle.png');
+	background-position: left top;
+	background-repeat: no-repeat;
+}
+.stopsOnRouteColor<c:out value="${color}" /> li.start {
+	background-image: url('../img/stop-on-route/stop_on_route_mobile_start.png');
+	background-position: left top;
+	background-repeat: no-repeat;
+}
+.stopsOnRouteColor<c:out value="${color}" /> li.end {
+	background-image: url('../img/stop-on-route/stop_on_route_mobile_end.png');
+	background-position: left top;
+	background-repeat: no-repeat;
+}
+.arrivalsOnRoute {
+	background-color: #FFFFFF;
+}
+</c:forEach>
+
+</jsp:root>

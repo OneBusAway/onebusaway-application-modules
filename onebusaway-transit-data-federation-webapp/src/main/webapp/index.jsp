@@ -15,8 +15,12 @@
     limitations under the License.
 
 --%>
-<html>
+<html xmlns:jsp="http://java.sun.com/JSP/Page" xmlns:c="http://java.sun.com/jsp/jstl/core" xmlns:s="/struts-tags">
 <body>
-<h2>Hello World!</h2>
+<h2>onebusaway-transit-data-federation-webapp</h2>
+	<ul>
+		<li><a href="${pageContext.request.contextPath}/bundles.do">Bundles</a></li>
+		<li><a href="${pageContext.request.contextPath}/playback.do">Playback</a></li>
+	</ul>
 </body>
 </html>

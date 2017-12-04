@@ -146,7 +146,7 @@
                 <g:center>
                     <g:FlowPanel>
                         <g:FlowPanel addStyleNames="{style.searchPanel}">
-                            <g:Label>Search for stops:</g:Label>
+                            <g:Label>Search for stops or routes:</g:Label>
                             <g:FormPanel ui:field="_searchFormPanel">
                                 <g:FlowPanel>
                                     <g:TextBox ui:field="_searchTextBox" visibleLength="55" name="q" />

@@ -23,6 +23,13 @@
             <version>${project.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.onebusaway</groupId>
+            <artifactId>onebusaway-util</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+
         <!-- RMI-like service for wiring up services between VMs -->
         <dependency>
             <groupId>com.caucho</groupId>

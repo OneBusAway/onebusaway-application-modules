@@ -1,0 +1,531 @@
+/**
+ * Copyright (C) 2011 Metropolitan Transportation Authority
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */ 
+
+#wizard {
+	overflow: hidden;
+	position: absolute;
+	width: auto;
+	top: 100%;
+	right: 0;
+	left: 330px;
+	opacity:0.9;
+	z-index: 10;
+	filter:alpha(opacity=90);  /* IE 8- */
+	background-color: #E6E6E6;
+	background-repeat: no-repeat;
+	background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#ffffff), color-stop(25%, #ffffff), to(#e6e6e6));
+	background-image: -webkit-linear-gradient(#ffffff, #ffffff 25%, #e6e6e6);
+	background-image: -moz-linear-gradient(top, #ffffff, #ffffff 25%, #e6e6e6);
+	background-image: -ms-linear-gradient(#ffffff, #ffffff 25%, #e6e6e6);
+	background-image: -o-linear-gradient(#ffffff, #ffffff 25%, #e6e6e6);
+	background-image: linear-gradient(#ffffff, #ffffff 25%, #e6e6e6);
+	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffffff', endColorstr='#e6e6e6', GradientType=0);
+	text-shadow: 0 1px 1px rgba(255, 255, 255, 0.75);
+	color: #333;
+	font-size: 12px;
+	line-height: normal;
+	border-style: solid none none none;
+	border-color: #BBBBBB;
+	border-width: 1px 0 0 0;
+	-webkit-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 1px 2px rgba(0, 0, 0, 0.05);
+	-moz-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 1px 2px rgba(0, 0, 0, 0.05);
+	box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 1px 2px rgba(0, 0, 0, 0.05);
+	-webkit-transition: 0.1s linear all;
+	-moz-transition: 0.1s linear all;
+	-ms-transition: 0.1s linear all;
+	-o-transition: 0.1s linear all;
+	transition: 0.1s linear all;
+}
+
+#wizard_start {
+	width: 100%;
+	position: absolute;
+	left: 0;
+	min-height: 100%;
+}
+
+#wizard a {
+	color: #000000;
+	text-decoration: none;
+}
+
+#wizard_start li {
+	float:left;
+	list-style: none;
+}
+
+/* wizard-col1 includes inner-col1 and inner-col2 text */
+
+#wizard-col1 {
+	background: url("img/wizard/look_arrow.png") no-repeat 3% 5%;
+	border: 0;
+	width: 30%;
+}
+
+#wizard-col1 h2 {
+	font-weight: bold;
+	font-size: 14px;
+	text-align: center;
+	line-height: 150%;
+}
+
+#wizard-col1 p {
+	font-weight: normal;
+	font-size: 12px;
+	font-style: italic;
+	text-align: center;
+	line-height: 150%;
+}
+
+#inner-col1 {
+	width: 75%;
+	margin-left: 10%;
+	margin-top: 20%;
+	float: left;
+	color: #000000;
+}
+
+#inner-col1:hover {
+	color: #3398C7;
+	cursor: pointer;
+}
+
+#inner-col2 {
+	float: left;
+	margin-top: 7%;
+	color: #000000;
+}
+
+/* wizard-col2 includes 'Also available using:' text */
+
+#wizard-col2 {
+	margin-top: 3.5%;
+	width: 7%;
+	text-align: left;
+	line-height: 150%;
+	font-weight: normal;
+}
+
+/* wizard-col3 and wizard-col4 include mobile images/links */
+
+#wizard-col3 {
+	margin-left: .5%;
+	cursor: pointer;
+	height: 135px;
+	width: 177px;
+	position: relative;
+}
+
+#wizard-col4 {
+	margin-left: 4.5%;
+	cursor: pointer;
+	height: 135px;
+	width: 122px;
+	position: relative;
+}
+
+#wizard-col3 p, #wizard-col4 p {
+	padding-top: 12px;
+	font-weight: bold;
+	text-align: center;
+}
+
+#smartphone_img {
+	background: url("img/wizard/smartphone.png") no-repeat center bottom;
+	height: 107px;
+	width: 177px;
+	position: absolute;
+	bottom: 0;
+	display: inline;
+}
+
+#sms_img {
+	background: url("img/wizard/sms_phone.png") no-repeat center bottom;
+	height: 103px;
+	width: 122px;
+	position: absolute;
+	bottom: 0;
+	display: inline;
+}
+
+/* Close buttons */
+
+#wizard_start a.close, #wizard_didyoumean a.close, #wizard_inuse a.close, #wizard_finaltip a.close {
+	color: #000000;
+	font-size: 14px;
+	font-weight: bold;
+	line-height: 13.5px;
+	text-shadow: 0 1px 0 #ffffff;
+	filter: alpha(opacity=35);
+	-khtml-opacity: 0.35;
+	-moz-opacity: 0.35;
+	opacity: 0.35;
+	padding-left: 1px;
+	text-decoration: none;
+	top: 6px;
+	right: 6px;
+	position: absolute;
+	cursor: pointer;
+	font-size: 20px;
+}
+#wizard_start a.close:hover, #wizard_didyoumean a.close:hover, #wizard_inuse a.close:hover, #wizard_finaltip a.close:hover {
+	color: #000000;
+	text-decoration: none;
+	filter: alpha(opacity=60);
+	-khtml-opacity: 0.6;
+	-moz-opacity: 0.6;
+	opacity: 0.6; 
+}
+#wizard_start a.close .close_txt, #wizard_didyoumean a.close .close_text, #wizard_inuse a.close .close_txt, 
+#wizard_finaltip a.close .close_txt  {
+	font-size: 13px;
+	font-weight: normal;
+}
+#wizard_didyoumean {
+	display: none;
+	font-weight: bold;
+	font-size: 12px;
+	line-height: 150%;
+	color: #000000;
+	text-align: center;
+	text-decoration: none;
+	padding-top: 3px;
+}
+
+#wizard_didyoumean a {
+	text-decoration: none;
+}
+#wizard_inuse {
+	display: none;
+	font-weight: bold;
+	font-size: 12px;
+	line-height: 150%;
+	color: #000000;
+	text-align: center;
+	text-decoration: none;
+	padding-top: 3px;
+}
+
+#wizard_inuse a {
+	text-decoration: none;
+}
+
+#wizard_finaltip {
+	display: none;
+	font-weight: bold;
+	font-size: 14px;
+	line-height: 150%;
+	color: #000000;
+	text-align: center;
+	text-decoration: none;
+	height: 90px;
+	padding-top: 8px;
+}
+
+a#wizard_mobile, a#wizard_sms, a#wizard_share, a#tips_code_popup {
+	color: #3398C7;
+	text-decoration: none;
+	font-weight: bold;
+}
+
+#wizard_finaltip .wizard_panel {
+	text-decoration: none;
+}
+
+#wizard_finaltip p {
+	text-align: center;
+}
+
+#wizard_finaltip #sharelinks {
+	margin-top: 10px;
+}
+
+#wizard_finaltip p span.ui-icon-twitter {
+	background: url("img/wizard/twitter.png") no-repeat 0 2%;
+    display: inline-block;
+    position: relative;
+    height: 24px;
+    width: 24px;
+    margin-left: 12px;
+    margin-top: -5px;
+}
+
+#wizard_finaltip p span.ui-icon-facebook  {
+	background: url("img/wizard/facebook.png") no-repeat left top;
+	display: inline-block;
+	margin-left: 10px;
+	height: 24px;
+    width: 24px;
+    margin-left: 12px;
+    margin-top: -5px;
+}
+
+#wizard_finaltip p span.ui-icon-youtube {
+	background: url("img/wizard/youtube.png") no-repeat left top;
+    display: inline-block;
+    position: relative;
+    height: 24px;
+    width: 24px;
+    margin-left: 12px;
+    margin-top: -5px;
+}
+
+#wizard_finaltip p span.ui-icon-flickr {
+	background: url("img/wizard/flickr.png") no-repeat left top;
+    display: inline-block;
+    position: relative;
+    height: 24px;
+    width: 24px;
+    margin-left: 12px;
+    margin-top: -5px;
+    filter: alpha(opacity=100);
+	-khtml-opacity: 1.0;
+	-moz-opacity: 1.0;
+	opacity: 1.0;
+}
+
+#wizard_finaltip a span.text {
+	padding-left: 5px;
+}
+
+#wizard_onmap {
+	height: 0;
+}
+
+/* For wizard context popups */
+
+.fade.in {
+    opacity: 1;
+}
+.fade {
+    -moz-transition: opacity 0.15s linear 0s;
+}
+.popover {
+    padding: 5px;
+    position: absolute;
+    z-index: 100;
+}
+.popover .arrow {
+    height: 0;
+    position: absolute;
+    width: 0;
+}
+.popover.above .arrow {
+  bottom: 0;
+  left: 50%;
+  margin-left: -7px;
+  border-left: 7px solid transparent;
+  border-right: 7px solid transparent;
+  border-top: 7px solid #4B4C51;
+}
+.popover.right .arrow {
+  top: 50%;
+  left: 0;
+  margin-top: -7px;
+  border-top: 7px solid transparent;
+  border-bottom: 7px solid transparent;
+  border-right: 7px solid #4B4C51;
+}
+.popover.below .arrow {
+  top: 0;
+  left: 50%;
+  margin-left: -7px;
+  border-left: 7px solid transparent;
+  border-right: 7px solid transparent;
+  border-bottom: 7px solid #4B4C51;
+}
+.popover.left .arrow {
+  top: 50%;
+  right: 0;
+  margin-top: -7px;
+  border-top: 7px solid transparent;
+  border-bottom: 7px solid transparent;
+  border-left: 7px solid #4B4C51;
+}
+.popover .inner {
+  background: #4B4C51;
+  background: rgba(44, 40, 40, 0.8);
+  padding: 3px;
+  overflow: hidden;
+  width: 260px;
+  -webkit-border-radius: 6px;
+  -moz-border-radius: 6px;
+  border-radius: 6px;
+  -webkit-box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
+  -moz-box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
+}
+.popover .title {
+    background-color: #3398C7;
+    color: #FFFFFF;
+    border-bottom: 1px solid #EEEEEE;
+    border-radius: 3px 3px 0 0;
+    line-height: 1;
+    padding: 9px 15px;
+    font-weight: bold;
+}
+.popover .title .close {
+	float: right;
+	text-decoration: none;
+	font-weight: bold;
+	font-size: 14px;
+	color: #FFF;
+	cursor: pointer;
+	margin: -4px -4px 0 0;
+}
+.popover * h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, acronym, address, cite, code, del, dfn, em, img, q, s, samp, small, strike, sub, sup, tt, var, dd, dl, dt, li, ol, ul, fieldset, form, label, legend, button, table, caption, tbody, tfoot, thead, tr, th, td {
+    border: 0 none;
+    font-family: inherit;
+    font-size: 100%;
+    font-style: normal;
+    font-weight: normal;
+    margin: 0;
+    /*color: #000000;*/
+}
+.popover .content {
+    background-clip: padding-box;
+    background-color: #FFFFFF;
+    border-radius: 0 0 3px 3px;
+    padding: 14px;
+    line-height: 140%;
+}
+.popover .content p, .popover .content ul, .popover .content ol {
+    margin-bottom: 0;
+}
+
+.popover .content p p span.ui-icon-triangle-1-e {
+    background-image: url("img/arrows.png");
+    background-position: 0 0;
+    display: inline-block;
+    top: 4px;
+    height: 20px;
+    position: relative;
+    width: 20px;
+}
+
+.popover .content a.mobile_link {	
+	font-weight:bold;
+	text-decoration:none;
+	color: #000000;
+}
+
+/* info popups on hover within popovers */
+
+.inner_popup {
+	z-index: 200;
+}
+.inner_popup.above .arrow {
+  bottom: 0;
+  margin: 0;
+  border: 0;
+  left: 0;
+}
+.inner_popup.right .arrow {
+  left: 0;
+  margin: 0;
+  border: 0;
+}
+.inner_popup.below .arrow {
+  left: 0;
+  margin: 0;
+  border: 0;
+}
+.inner_popup.left .arrow {
+  left: 0;
+  margin: 0;
+  border: 0;
+}
+.inner_popup .inner {
+  background: #CCCCCC;
+  background: rgba(200, 200, 200, 0.8);
+  padding: 3px;
+  overflow: hidden;
+  width: 280px;
+  -webkit-border-radius: 6px;
+  -moz-border-radius: 6px;
+  border-radius: 6px;
+  -webkit-box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
+  -moz-box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
+}
+.inner_popup .title {
+    background-color: #FFFFFF;
+    color: #000000;
+    border-bottom: 0;
+    border-radius: 3px 3px 0 0;
+    line-height: 1;
+    padding: 12px 0 0 0;
+    font-weight: bold;
+    text-align: center;
+}
+.inner_popup .content p, .popover .content ul, .popover .content ol {
+    font-size: 12px;
+    margin-bottom: 4px;
+}
+
+.content #stop_code_popup {
+	color: #3398C7;
+	text-decoration: underline;
+	cursor: pointer;
+}
+.content #more_specific_popup {
+	color: #3398C7;
+	text-decoration: underline;
+	cursor: pointer;
+}
+.content #more_specific_popup span.emphasize {
+	font-weight: bold;
+}
+
+/* bus stop pole diagram */
+
+.content .pole {
+	overflow: auto;
+	width:100%;
+	text-align: center;
+	/*
+	text-align: center;
+	position: relative;
+	margin-top: -20px;
+	margin-bottom: -15px;*/
+}
+.content .pole .pole_img {
+	margin-left: 10px;
+	float:left;
+}
+.content .pole .pole_caption {
+	font-weight: bold;
+	text-align: left;
+}
+
+
+.twipsy.fade.in {
+  filter: alpha(opacity=80);
+  -khtml-opacity: 0.8;
+  -moz-opacity: 0.8;
+  opacity: 0.8;
+}
+.fade {
+  -webkit-transition: opacity 0.15s linear;
+  -moz-transition: opacity 0.15s linear;
+  -ms-transition: opacity 0.15s linear;
+  -o-transition: opacity 0.15s linear;
+  transition: opacity 0.15s linear;
+  opacity: 0;
+}
+.fade.in {
+  opacity: 1;
+}

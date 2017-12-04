@@ -16,7 +16,28 @@
 
 --%>
 <html>
+<head>
+<script type="text/javascript" src="/onebusaway-watchdog-webapp/js/lib/jquery.js">
+<!-- //prevent jspx minimization -->
+
+</script>
+<script type="text/javascript" src="/js/lib/jquery.js">
+<!-- //prevent jspx minimization -->
+	
+</script>
+<script type="text/javascript" src="/onebusaway-watchdog-webapp/js/metrics.js">
+<!-- //prevent jspx minimization -->
+	
+</script>
+<script type="text/javascript" src="/js/metrics.js">
+<!-- //prevent jspx minimization -->
+	
+</script>
+
+</head>
 <body>
-<h2>Watchdog!</h2>
+<h2>onebusaway-watchdog-webapp</h2>
+  <table id="metrics">
+  </table>
 </body>
 </html>

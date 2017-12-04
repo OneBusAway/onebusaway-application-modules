@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (C) 2011 Metropolitan Transportation Authority
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+            http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+
+<html xmlns:jsp="http://java.sun.com/JSP/Page"
+    xmlns:c="http://java.sun.com/jsp/jstl/core"
+    xmlns:fmt="http://java.sun.com/jsp/jstl/fmt">
+<jsp:directive.page contentType="text/html" />
+<head>
+<title>Bundles</title>
+<style>
+table.data td {
+    border: 1px solid black;
+}
+</style>
+</head>
+<body>
+
+<a href="${pageContext.request.contextPath}" style="float: right;">Home</a>
+<h2>Bundles</h2>
+
+	<p>
+		Standalone mode: <c:out value="${bms.standaloneMode}" />
+		<br/>
+		Current bundle ID: <c:out value="${bms.currentBundleMetadata.id}" />
+	</p>
+	
+	<table>
+		<tr>
+			<td>
+				<form action="bundles!discover.do" method="POST">
+					<input type="submit" value="Discover Bundles from Service"/>
+				</form>
+			</td>
+
+			<td>
+				<form action="bundles!reassign.do" method="POST">
+					<input type="submit" value="Recalculate Best Bundle (given current date)"/>
+				</form>
+			</td>
+
+			<td>
+				<form action="bundles!change.do" method="POST">
+					<select size="1" name="bundleId">
+	        			<c:forEach var="vp" items="${bms.allKnownBundles}">
+							<option value="${vp.id}"><c:out value="${vp.id}" />: <c:out value="${vp.name}" /></option>
+						</c:forEach>		
+					</select>
+					<input type="submit" value="Change Bundle (does NOT consider current date!)"/>
+					<input type="hidden" name="automaticallySetDate" value="true"/>
+				</form>
+			</td>
+		</tr>
+	</table>
+
+	<table class="data">	
+    	<thead>
+        	<tr>
+            	<td>ID</td>
+	            <td>Name</td>
+    	        <td>Service Date From</td>
+        	    <td>Service Date To</td>
+            	<td>Updated</td>
+	            <td>Created</td>
+    	    </tr>
+    	</thead>
+    
+    	<tbody>
+        	<c:forEach var="vp" items="${bms.allKnownBundles}">
+            	<tr>
+                	<td><c:out value="${vp.id}" /></td>
+ 	               <td><c:out value="${vp.name}" /></td>
+    	            <td><c:out value="${vp.serviceDateFrom}" /></td>
+        	        <td><c:out value="${vp.serviceDateTo}" /></td>
+            	    <td><c:out value="${vp.updated}" /></td>
+                	<td><c:out value="${vp.created}" /></td>
+	            </tr>
+    	    </c:forEach>
+	    </tbody>
+	</table>
+
+</body>
+</html>

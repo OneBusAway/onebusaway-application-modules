@@ -18,7 +18,7 @@ package org.onebusaway.federations.annotations;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-import org.onebusaway.collections.PropertyPathExpression;
+import org.onebusaway.collections.beans.PropertyPathExpression;
 import org.onebusaway.exceptions.ServiceAreaServiceException;
 import org.onebusaway.federations.FederatedService;
 import org.onebusaway.federations.FederatedServiceCollection;

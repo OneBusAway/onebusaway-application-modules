@@ -16,14 +16,6 @@
  */
 package org.onebusaway.transit_data_federation.impl.beans;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
-
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
 import org.onebusaway.transit_data.model.ArrivalsAndDeparturesQueryBean;
@@ -33,6 +25,7 @@ import org.onebusaway.transit_data.model.schedule.FrequencyBean;
 import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.transit_data.model.trips.TripStatusBean;
+import org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.GtfsRealtimeNegativeArrivals;
 import org.onebusaway.transit_data_federation.model.TargetTime;
 import org.onebusaway.transit_data_federation.model.narrative.StopTimeNarrative;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
@@ -49,7 +42,6 @@ import org.onebusaway.transit_data_federation.services.realtime.ArrivalAndDepart
 import org.onebusaway.transit_data_federation.services.realtime.BlockLocation;
 import org.onebusaway.transit_data_federation.services.realtime.RealTimeHistoryService;
 import org.onebusaway.transit_data_federation.services.realtime.ScheduleDeviationHistogram;
-import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.FrequencyEntry;
@@ -61,6 +53,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jmx.export.annotation.ManagedAttribute;
 import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Component
 @ManagedResource("org.onebusaway.transit_data_federation.impl.beans:name=ArrivalsAndDeparturesBeanServiceImpl")
@@ -82,7 +82,9 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
   private ServiceAlertsBeanService _serviceAlertsBeanService;
 
   private RealTimeHistoryService _realTimeHistoryService;
-
+  
+  private GtfsRealtimeNegativeArrivals _gtfsRealtimeNegativeArrivals;
+  
   @Autowired
   public void setTransitGraphDao(TransitGraphDao transitGraphDao) {
     _transitGraphDao = transitGraphDao;
@@ -126,6 +128,12 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
       RealTimeHistoryService realTimeHistoryService) {
     _realTimeHistoryService = realTimeHistoryService;;
   }
+  
+  @Autowired
+  public void setGtfsRealtimeNegativeArrivals(
+      GtfsRealtimeNegativeArrivals _gtfsRealtimeNegativeArrivals) {
+    this._gtfsRealtimeNegativeArrivals = _gtfsRealtimeNegativeArrivals;
+  }
 
   private AtomicInteger _stopTimesTotal = new AtomicInteger();
 
@@ -159,7 +167,7 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
       AgencyAndId stopId, ArrivalsAndDeparturesQueryBean query) {
 
     StopEntry stop = _transitGraphDao.getStopEntryForId(stopId, true);
-
+    
     long time = query.getTime();
 
     int minutesBefore = Math.max(query.getMinutesBefore(),
@@ -195,11 +203,20 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
 
       if (!isArrivalAndDepartureInRange(instance, from, to))
         continue;
-
+      
       ArrivalAndDepartureBean bean = getStopTimeInstanceAsBean(time, instance,
           stopBeanCache);
       applyBlockLocationToBean(instance, bean, time);
+      
+      Boolean isNegativeScheduledArrivalsEnabled = _gtfsRealtimeNegativeArrivals.getShowNegativeScheduledArrivalByAgencyId(
+          instance.getBlockTrip().getTrip().getId().getAgencyId());
+      
+      if(isNegativeScheduledArrivalsEnabled != null && !isNegativeScheduledArrivalsEnabled 
+          && bean.getNumberOfStopsAway() < 0 && bean.getPredictedArrivalTime() <= 0)
+        continue;
+      
       applySituationsToBean(time, instance, bean);
+      
       beans.add(bean);
     }
 
@@ -227,7 +244,7 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
     if (!this.useScheduleDeviationHistory) {
       return bean;
     }
-    
+
     int step = 120;
 
     ScheduleDeviationHistogram histo = _realTimeHistoryService.getScheduleDeviationHistogramForArrivalAndDepartureInstance(
@@ -269,7 +286,6 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
 
     BlockStopTimeEntry blockStopTime = instance.getBlockStopTime();
     BlockTripEntry blockTrip = blockStopTime.getTrip();
-    BlockConfigurationEntry blockConfig = blockTrip.getBlockConfiguration();
     StopTimeEntry stopTime = blockStopTime.getStopTime();
     StopEntry stop = stopTime.getStop();
     TripEntry trip = stopTime.getTrip();
@@ -278,9 +294,9 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
     pab.setTrip(tripBean);
     pab.setBlockTripSequence(blockTrip.getSequence());
 
-    pab.setArrivalEnabled(blockStopTime.getBlockSequence() > 0);
-    pab.setDepartureEnabled(blockStopTime.getBlockSequence() + 1 < blockConfig.getStopTimes().size());
-
+    pab.setArrivalEnabled(stopTime.getSequence() > 0);
+    pab.setDepartureEnabled(stopTime.getSequence() + 1 < trip.getStopTimes().size());
+    
     StopTimeNarrative stopTimeNarrative = _narrativeService.getStopTimeForEntry(stopTime);
     pab.setRouteShortName(stopTimeNarrative.getRouteShortName());
     pab.setTripHeadsign(stopTimeNarrative.getStopHeadsign());
@@ -294,7 +310,8 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
 
     pab.setStop(stopBean);
     pab.setStopSequence(stopTime.getSequence());
-
+    pab.setTotalStopsInTrip(stopTime.getTotalStopsInTrip());
+    
     pab.setStatus("default");
 
     pab.setScheduledArrivalTime(instance.getScheduledArrivalTime());
@@ -405,7 +422,7 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
 
     return false;
   }
-
+  
   private static class ArrivalAndDepartureComparator implements
       Comparator<ArrivalAndDepartureBean> {
 

@@ -1,0 +1,269 @@
+/**
+ * Copyright (c) 2011 Metropolitan Transportation Authority
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+ 
+#container {
+ 	margin-top: 10px;
+}
+
+#search {  
+    width: 350px;
+    padding:3px 0; 
+    cursor:text;  
+    float: left;
+}
+
+#searchUser {
+	width: 350px;
+}
+
+#createUser {
+	float: right;
+	padding:3px 3px 0;
+}
+
+header {
+    margin-top: 20px;
+}
+
+header h2 {
+    display:inline;
+}
+
+#userAdminList {
+    float: right;
+    display:inline;
+}
+
+#userAdminList ul {
+	padding: 10px 0;
+}
+
+#userAdminList li a {
+
+	display: inline-block;
+	padding: 0px 5px 10px;
+	color: #0000FF;
+}
+
+#createUser img {
+	vertical-align: middle;
+}
+
+.usersTable {
+	border: solid 1px #666;
+	margin: 10px 0;
+}
+
+.usersTable th {
+	padding-right: 10px;
+	text-align: left;
+	font-size: 12px;
+	padding-left: 15px;
+}
+
+.usersTable .headerRow th{
+	border-bottom: solid 1px #666;
+	font-size: 14px;
+}
+
+.usersTable td {
+	padding-right: 10px;
+	padding-top: 5px;
+	padding-bottom: 5px;
+	padding-left: 15px;
+}
+
+#addUser {
+	margin-left: 5px;
+	padding: 0;
+	font-size: 12px;
+	font-weight: bold;
+	font-family: arial;
+	color: #000;
+}
+
+#userDetails {
+	padding: 10px 0;
+	display: none;
+}
+
+#userDetails #detailsTable {
+	border: solid 1px #666;
+	margin: 10px 0;
+	width: 350px;
+}
+
+.apiKeysTable {
+	border: solid 1px #666;
+	margin: 10px 0;
+}
+
+.apiKeysTable th {
+	padding-right: 10px;
+	text-align: left;
+	font-size: 12px;
+	padding-left: 15px;
+}
+
+.apiKeysTable .headerRow th{
+	border-bottom: solid 1px #666;
+	font-size: 14px;
+}
+
+.apiKeysTable td {
+	padding-right: 10px;
+	padding-top: 5px;
+	padding-bottom: 5px;
+	padding-left: 15px;
+}
+
+#detailsTable th {
+	padding-right: 10px;
+	text-align: left;
+	font-size: 12px;
+	padding-left: 3px;
+}
+
+#detailsTable .headerRow th{
+	border-bottom: solid 1px #666;
+}
+
+#detailsTable td {
+	padding-right: 10px;
+	padding-top: 10px;
+	padding-left: 3px;
+}
+
+
+
+.userLabel {
+	font-size: 12px;
+	font-family: arial;
+	font-weight: bold;
+}
+
+.userField {
+	padding: 10px 0;
+}
+
+.userField #top {
+	display: block;
+	padding-bottom: 3px;
+	font-weight: bold;
+}
+
+.userHeader {
+	display: block;
+	font-size: 14px;
+	font-family: arial;
+	font-weight: bold;
+	padding-top: 10px;
+	margin-bottom: 10px;
+}
+
+#actions {
+}
+
+#actions img {
+	padding: 5px;
+}
+#actions img:hover {
+	cursor: pointer;
+}
+
+#editUser {
+	display: none;
+	padding-left: 5px;
+}
+
+#editUser #editPassword {
+	margin-top: 5px;
+}
+
+#editUser #editPassword input[type='text'] {
+	margin-left: 5px;
+}
+
+#editUser #editRole {
+	margin-top: 5px;
+}
+
+#editUser #editRole select {
+	margin-left: 5px;
+}
+
+#editSubmit {
+	width: auto;
+	height: 30px;
+	margin-top: 10px;
+}
+
+#editUser #editTitle {
+	display: block;
+	font-size: 14px;
+	font-family: arial;
+	font-weight: bold;
+	padding-top: 10px;
+	margin-bottom: 10px;
+}
+
+#deleteConfirm {
+	padding: 15px;
+	overflow: hidden;
+}
+
+#deleteConfirm #deleteMessage {
+	font-weight: bold;
+	display: inline;
+}
+
+#deleteConfirm #deleteCancel {
+	color: rgb(0,0,255);
+	cursor: pointer;
+	margin-left: 5px;
+}
+
+#deleteConfirm button {
+	height: 30px;
+	width: 50px;
+}
+
+#deleteConfirm #deleteButtons {
+	padding-top: 20px;
+	float: right;
+}
+
+#userResult #result {
+	padding: 10px 0;
+	display: none;
+}
+
+#createUserResult {
+	padding-top: 10px;
+}
+
+#newPassword {
+	width: 150px;
+}
+
+
+
+
+
+
+
+ 
+ 

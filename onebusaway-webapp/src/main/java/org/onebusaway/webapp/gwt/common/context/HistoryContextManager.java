@@ -24,8 +24,8 @@ import com.google.gwt.user.client.History;
 
 import java.util.Map;
 
-public class HistoryContextManager extends AbstractContextManager implements
-    ValueChangeHandler<String> {
+public class HistoryContextManager extends AbstractContextManager
+    implements ValueChangeHandler<String> {
 
   private UrlCodingStrategy _codingStrategy = new ParaUrlCodingStrategy();
 
@@ -51,6 +51,13 @@ public class HistoryContextManager extends AbstractContextManager implements
   public String getContextAsString(Context context) {
     return _codingStrategy.getParamMapAsString(context.getParams());
   }
+  
+  
+  // Taken from com.google.gwt.user.client.impl.HistoryImpl
+  protected native String decodeFragment(String encodedFragment) /*-{
+    // decodeURI() does *not* decode the '#' character.
+    return decodeURI(encodedFragment.replace("%23", "#"));
+  }-*/;
 
   public void onValueChange(ValueChangeEvent<String> event) {
     String token = event.getValue();
@@ -58,7 +65,13 @@ public class HistoryContextManager extends AbstractContextManager implements
     fireContextChanged(context);
   }
 
+ // Spaces are not URL-decoded in newer browsers, specifically when
+ // HistoryContextManager is initialized or when an extra event fires.
+ // Probably related to this GWT bug:
+ // https://code.google.com/p/google-web-toolkit/source/detail?spec=svn10832&r=10832
+ // Fixed by adding a decodeFragment call
   private ContextImpl parseContext(String token) {
+    token = decodeFragment(token);
     Map<String, String> m = _codingStrategy.getParamStringAsMap(token);
     return new ContextImpl(m);
   }

@@ -50,6 +50,8 @@ public class VehicleLocationRecord implements Serializable {
 
   private AgencyAndId blockId;
 
+  private int blockStartTime;
+
   private AgencyAndId tripId;
 
   private AgencyAndId vehicleId;
@@ -78,6 +80,8 @@ public class VehicleLocationRecord implements Serializable {
 
   private EVehiclePhase phase;
 
+  private EVehicleType vehicleType;
+
   private String status;
 
   public VehicleLocationRecord() {
@@ -96,6 +100,7 @@ public class VehicleLocationRecord implements Serializable {
     this.serviceDate = r.serviceDate;
     this.tripId = r.tripId;
     this.vehicleId = r.vehicleId;
+    this.vehicleType = r.vehicleType;
 
     List<TimepointPredictionRecord> timepointPredictions = r.getTimepointPredictions();
     if (timepointPredictions != null) {
@@ -121,6 +126,14 @@ public class VehicleLocationRecord implements Serializable {
 
   public void setBlockId(AgencyAndId blockId) {
     this.blockId = blockId;
+  }
+
+  public int getBlockStartTime() {
+    return blockStartTime;
+  }
+
+  public void setBlockStartTime(int blockStartTime) {
+    this.blockStartTime = blockStartTime;
   }
 
   public AgencyAndId getTripId() {
@@ -266,6 +279,14 @@ public class VehicleLocationRecord implements Serializable {
     this.phase = phase;
   }
 
+  public EVehicleType getVehicleType() {
+    return vehicleType;
+  }
+
+  public void setVehicleType(EVehicleType vehicleType) {
+    this.vehicleType = vehicleType;
+  }
+
   public String getStatus() {
     return status;
   }
@@ -285,7 +306,7 @@ public class VehicleLocationRecord implements Serializable {
     if (serviceDate != 0)
       b.append(" serviceDate=").append(serviceDate);
     if (timeOfRecord != 0)
-      b.append(" time=").append(timeOfRecord);
+      b.append(" time=").append(new java.util.Date(timeOfRecord));
     if (vehicleId != null)
       b.append(" vehicleId=").append(vehicleId);
     if (isScheduleDeviationSet())

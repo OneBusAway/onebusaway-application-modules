@@ -226,6 +226,29 @@ public class ArrivalsAndDeparturesModel {
     applyOnlyNextFilter();
   }
 
+  // remove any duplicates that may have occured
+  public void applyDedupe() {
+
+    if (_result.getArrivalsAndDepartures() == null || _result.getArrivalsAndDepartures().size() < 2) {
+      return;
+    }
+
+    Set<String> found = new HashSet<String>();
+    
+    List<ArrivalAndDepartureBean> arrivalsAndDepartures = new ArrayList<ArrivalAndDepartureBean>();
+    
+    
+    for (ArrivalAndDepartureBean ad : _result.getArrivalsAndDepartures()) {
+      if (found.contains(ad.toString())) {
+        // quietly drop 
+      } else {
+        found.add(ad.toString());
+        arrivalsAndDepartures.add(ad);
+      }
+    }
+    _result.setArrivalsAndDepartures(arrivalsAndDepartures);
+  }
+
   private void applyRouteFilter() {
     if (_routeFilter == null || _routeFilter.isEmpty())
       return;

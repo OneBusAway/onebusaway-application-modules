@@ -22,6 +22,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -37,7 +38,7 @@ import org.onebusaway.transit_data_federation.services.transit_graph.RouteCollec
 import org.onebusaway.transit_data_federation.services.transit_graph.RouteEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
-import org.onebusaway.transit_data_federation.services.tripplanner.TripPlannerGraph;
+import org.onebusaway.transit_data_federation.model.transit_graph.TransitGraph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,7 +46,7 @@ import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.index.ItemVisitor;
 import com.vividsolutions.jts.index.strtree.STRtree;
 
-public class TransitGraphImpl implements Serializable, TripPlannerGraph {
+public class TransitGraphImpl implements Serializable, TransitGraph {
 
   private static final long serialVersionUID = 2L;
 
@@ -115,7 +116,7 @@ public class TransitGraphImpl implements Serializable, TripPlannerGraph {
   
   public void initialize() {
     if (_stopLocationTree == null) {
-      System.out.println("initializing trip planner graph...");
+      System.out.println("initializing transit graph...");
 
       if (_stops.size() == 0) {
 
@@ -255,7 +256,7 @@ public class TransitGraphImpl implements Serializable, TripPlannerGraph {
   }
 
   /****
-   * {@link TripPlannerGraph} Interface
+   * {@link TransitGraph} Interface
    ****/
 
   public List<AgencyEntry> getAllAgencies() {

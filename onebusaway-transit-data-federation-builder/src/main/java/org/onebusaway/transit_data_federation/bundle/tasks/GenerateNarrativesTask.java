@@ -60,6 +60,7 @@ import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
+import org.onebusaway.transit_data_federation.util.LoggingIntervalUtil;
 import org.onebusaway.utility.ObjectSerializationLibrary;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -99,7 +100,8 @@ public class GenerateNarrativesTask implements Runnable {
   private RefreshService _refreshService;
 
   private double _stopDirectionStandardDeviationThreshold = 0.7;
-
+  
+  
   @Autowired
   public void setBundle(FederatedTransitDataBundle bundle) {
     _bundle = bundle;
@@ -173,6 +175,7 @@ public class GenerateNarrativesTask implements Runnable {
       narrative.setLang(deduplicate(agency.getLang()));
       narrative.setName(deduplicate(agency.getName()));
       narrative.setPhone(deduplicate(agency.getPhone()));
+      narrative.setEmail(deduplicate(agency.getEmail()));
       narrative.setTimezone(deduplicate(agency.getTimezone()));
       narrative.setUrl(deduplicate(agency.getUrl()));
       narrative.setEmail(agency.getEmail());
@@ -214,11 +217,13 @@ public class GenerateNarrativesTask implements Runnable {
   public void generateShapePointNarratives(NarrativeProviderImpl provider) {
 
     List<AgencyAndId> shapeIds = _gtfsDao.getAllShapeIds();
-    _log.info("shapes to process=" + shapeIds.size());
+    int shapeSize = shapeIds.size();
+    _log.info("shapes to process=" + shapeSize);
+    int logInterval = LoggingIntervalUtil.getAppropriateLoggingInterval(shapeSize) * 10;
     int index = 0;
 
     for (AgencyAndId shapeId : shapeIds) {
-      if (index % 10 == 0)
+      if (index % logInterval == 0)
         _log.info("shapes=" + index);
       index++;
       ShapePoints shapePoints = _shapePointsHelper.getShapePointsForShapeId(shapeId);
@@ -234,10 +239,11 @@ public class GenerateNarrativesTask implements Runnable {
 
     Collection<Stop> allStops = _gtfsDao.getAllStops();
     Map<AgencyAndId, Stop> stopsById = MappingLibrary.mapToValue(allStops, "id");
+    int logInterval = LoggingIntervalUtil.getAppropriateLoggingInterval(allStops.size());
 
     for (StopEntry stopEntry : _transitGraphDao.getAllStops()) {
 
-      if (index % 10 == 0)
+      if (index % logInterval == 0)
         _log.info("stops=" + index);
       index++;
 
@@ -261,10 +267,11 @@ public class GenerateNarrativesTask implements Runnable {
 
     int tripIndex = 0;
     Collection<Trip> trips = _gtfsDao.getAllTrips();
+    int logInterval = LoggingIntervalUtil.getAppropriateLoggingInterval(trips.size());
 
     for (Trip trip : trips) {
 
-      if (tripIndex % 200 == 0) {
+      if (tripIndex % logInterval == 0) {
         _log.info("trips=" + tripIndex + " of " + trips.size());
       }
 

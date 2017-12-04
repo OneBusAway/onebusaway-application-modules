@@ -19,22 +19,20 @@ package org.onebusaway.transit_data_federation.impl.service_alerts;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects;
-import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert;
-
 class AffectsAgencyKeyFactory implements AffectsKeyFactory<String> {
 
   public static final AffectsAgencyKeyFactory INSTANCE = new AffectsAgencyKeyFactory();
 
   @Override
-  public Set<String> getKeysForAffects(ServiceAlert serviceAlert) {
+  public Set<String> getKeysForAffects(ServiceAlertRecord serviceAlert) {
 
     Set<String> agencyIds = new HashSet<String>();
 
-    for (Affects affects : serviceAlert.getAffectsList()) {
-      if (affects.hasAgencyId()
-          && !(affects.hasDirectionId() || affects.hasRouteId()
-              || affects.hasStopId() || affects.hasTripId())) {
+    for (ServiceAlertsSituationAffectsClause affects : serviceAlert.getAllAffects()) {
+      // this logic ensure this is an agency only affect, no other affects are set
+      if (affects.getAgencyId() != null
+          && !(affects.getDirectionId() != null || affects.getRouteId() != null
+              || affects.getStopId() != null || affects.getTripId() != null)) {
         agencyIds.add(affects.getAgencyId());
       }
     }

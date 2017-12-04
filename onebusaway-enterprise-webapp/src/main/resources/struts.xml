@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (C) 2011 Metropolitan Transportation Authority
+    Copyright (C) 2010  OpenPlans Licensed
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+            http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<!DOCTYPE struts PUBLIC 
+    "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+    "http://struts.apache.org/dtds/struts-2.0.dtd">
+<struts>
+	<constant name="struts.locale" value="en_US"/> 
+	<constant name="struts.ui.theme" value="simple"/>   
+	<constant name="struts.convention.action.suffix" value="Action" />    
+    <constant name="struts.convention.action.mapAllMatches" value="true" />
+    <constant name="struts.convention.package.locators.basePackage" value="org.onebusaway.enterprise.webapp.actions" />
+    <constant name="struts.convention.action.checkImplementsAction" value="false" />
+    <constant name="struts.convention.default.parent.package" value="onebusaway-webapp-default" />
+    <constant name="struts.custom.i18n.resources" value="onebusaway-enterprise" />
+    <!-- constant name="struts.devMode" value="true" /-->
+
+    <package name="onebusaway-webapp-default" extends="struts-default">
+
+        <result-types>
+            <result-type name="rss" class="org.onebusaway.presentation.rss.RomeResult"/>
+        </result-types>
+
+        <global-results>
+         	<result name="NotFound">
+                <param name="location">/WEB-INF/content/error/404.jspx</param>
+            </result>
+            <result name="NotSetup" type="redirectAction">
+                <param name="namespace">/setup</param>
+                <param name="actionName">index</param>
+            </result>
+            <result name="AlreadySetup" type="redirectAction">
+                <param name="namespace">/</param>
+                <param name="actionName">index</param>
+            </result>
+			<result name="errorHandler" type="chain">
+		        <param name="actionName">error</param>
+		        <param name="namespace">/</param>
+		    </result>
+        </global-results>
+        <global-exception-mappings>
+    		<exception-mapping exception="java.lang.Exception" result="errorHandler"/>
+		</global-exception-mappings>
+
+    </package>
+
+    <package name="onebusaway-webapp-api" extends="onebusaway-webapp-default" namespace="/api/siri">
+      <interceptors>
+        <interceptor name="ApiKeyInterceptor" class="org.onebusaway.enterprise.webapp.api.ApiKeyInterceptor" />
+        <interceptor-stack name="onebusaway-enterprise-webapp-api-stack">
+          <interceptor-ref name="defaultStack" />
+          <interceptor-ref name="ApiKeyInterceptor" />
+        </interceptor-stack>
+      </interceptors>
+      <default-interceptor-ref name="onebusaway-enterprise-webapp-api-stack" />
+    </package>
+    
+    
+</struts>

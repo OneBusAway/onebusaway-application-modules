@@ -1,0 +1,409 @@
+/**
+ * Copyright (c) 2011 Metropolitan Transportation Authority
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+/********** Vehicles Page *****************/
+.ui-jqgrid { 
+	border-right: solid 1px;
+	border-top: solid 1px;
+	border-bottom: solid 1px; 
+}
+
+
+.ui-jqgrid tr.jqgrow td {
+        white-space: normal !important;
+        height: auto !important;
+   	    padding: 2px;
+   	    font-size: 12px;
+		font: Times New Roman, Times, serif;
+		text-align: center;
+}
+
+.ui-jqgrid .ui-jqgrid-htable th div {
+    white-space:normal !important;
+    height:auto;
+    padding: 2px;
+    font-size: 12px;
+	font: Times New Roman, Times, serif;
+}
+
+#vehicles {
+	padding: 0px;
+	background: none;
+	border-width: 0px;
+}
+
+.vehicleLabel {
+	font-size: 12px;
+	font: Times New Roman, Times, serif;
+}
+
+#topBox {
+	height: 30px;
+	border: transparent 1px;
+	margin-top: 15px;
+}
+
+#topBox #search {
+	width: 250px;
+	float: left;
+	padding-top: 6px;
+}
+
+#topBox #lastUpdateBox {
+	vertical-align: middle;
+	float: left;
+	padding-top: 5px;
+}
+
+#topBox #refresh {
+	margin-left: 30px;
+	float: left;
+	padding: 0px;
+}
+
+#topBox #autoRefreshBox {
+	margin-left: 30px;
+	padding-top: 5px;
+	float: left;
+}
+
+#autoRefreshBox #autoRefresh {
+	color: #0000FF;
+	text-decoration: underline;
+}
+
+#autoRefresh:hover {
+	cursor: pointer;
+}
+
+#refreshDialog {
+	padding: 20px;
+}
+
+#refreshDialog #refreshRate {
+	width: 40px;
+	height: 20px;
+	margin-right: 10px;
+}
+
+#refreshDialog #set {
+	width: 70px;
+	height: 30px;
+	margin-left: 50px;
+	border: 1px transparent;
+	background-image:url('img/Button_background.png');
+}
+
+#mainBox {
+	margin-top: 20px;
+	width: 100%;
+	overflow: auto;
+}
+
+#mainBox #filterBox {
+	width: 163px;
+	height: 593px;
+	float: left;
+	border-top: solid 1px;
+	border-bottom: solid 1px;
+	border-left: solid 1px;
+	padding-left: 10px;
+	display: none;
+}
+
+#mainBox #collapseBox {
+	width: 12px;
+	height: 593px;
+	float: left;
+	border: solid 1px;
+	background-color: #F2F2F2;	
+}
+
+#collapseBox #collapse {
+	margin-top: 300px;
+}
+
+#mainBox #vehiclesBox {
+	float: left;
+}
+
+#pager {
+	margin: 0px;
+}
+
+#filterBox #filterLabel {
+	margin-top: 10px;
+	display: block;
+}
+
+#filterBox #filters {
+	margin-top: 20px;
+}
+
+#filters li {
+	margin-top: 15px;
+	margin-bottom: 15px;
+}
+
+#filters li label {
+	display: block;
+}
+
+#filters li input, #filters li select {
+	width: 150px;
+}
+
+#checkFilters {
+	margin-top: 20px;
+	margin-right: 10px;
+}
+
+#filterBox #filterButtons {
+	margin-top: 25px;
+}
+
+#filterButtons #apply, #filterButtons #reset {
+	width: 75px;
+	height: 30px;
+	background-image:url('img/Button_background.png');
+	border: 1px transparent;
+}
+
+#bottomBox {
+	height: 100px;
+	padding-top: 20px;
+}
+
+.infoBox {
+	width: 150px;
+	height: 75px;
+	border: solid 1px #999999;
+	float: left;
+	margin-right: 10px;
+}
+
+.boxData {
+	padding-top : 8px;
+	padding-left: 5px;
+	padding-right: 5px;
+}
+
+.boxData label{
+	font-size: 24px;
+	font: Times New Roman, Times, serif;
+	margin-right: 10px;
+	float: right;
+	padding-top: 10px;
+}
+
+
+/********** Parameters Page *****************/
+
+.ui-accordion-content-active
+{
+    background-color: transparent;
+    background-image: none;
+}
+
+#parametersBox {
+	overflow: none;
+	border: transparent 1px;
+}
+
+#parametersBox #parameters {
+	max-height: 600px;
+	overflow-y: auto;
+	margin-top: 10px;
+}
+
+#parameters #accordion {
+    list-style: none;
+    padding: 0 0 0 0;
+}
+
+#accordion a {
+	display: block;
+    margin: 1px;
+    cursor: pointer;
+    padding: 5 5 5 7px;
+}
+
+#accordion {
+    list-style: none;
+    padding: 0 0 0 0;
+    margin: 0;
+}
+
+#accordion li {
+    font-weight: normal;
+    cursor: auto;
+    background-color: #FFFFF;
+}
+
+#accordion h3 {
+	background: #F2F2F2;
+}
+
+#accordion a.heading {
+	display: block;
+	font-size: 14px;
+	line-height: 14px;
+	padding: 10px 5px;
+	text-decoration: none;
+	margin-left: 20px;
+	color: #000000;
+	font-weight: normal;
+}
+
+#accordion .propertyHeader {
+	font-weight: bold;
+}
+
+#accordion .propertyValue {
+	width: 40px;
+	height: 20px;
+}
+
+#accordion span {
+	font-weight: bold;
+	color: #080808;
+}
+
+#accordion #tdmSection {
+	margin: 0;
+}
+
+#accordion .propertyHolder {
+	width: 350px;
+	border: transparent 1px;
+	float: left;
+}
+
+#accordion .rightProperty {
+	margin-left: 75px;
+}
+
+#accordion .topSection {
+	border: transparent 1px;
+	overflow: hidden;
+}
+
+#accordion .followingSection {
+	border: transparent 1px;
+	margin-top: 30px;
+	clear: both;
+	overflow: hidden;
+}
+
+#accordion .textPropertyValue {
+	width: 200px;
+}
+
+#vehicleTrackingSection #timePredictionsValue {
+	width: 50px;
+}
+
+#vehicleTrackingSection #bingMapsKeyValue {
+	width: 250px;
+}
+
+
+#parametersBox #results {
+	border: solid 1px;
+	padding: 10px;
+	overflow: none;
+	height: 30px;
+}
+
+#changeDialog {
+	padding: 20px;
+}
+
+#changeDialog #changeText {
+	height: 20px;
+	margin-right: 10px;
+}
+
+#changeDialog #dialogButtons input[type='button'] {
+	width: 100px;
+	height: 30px;
+	border: 1px transparent;
+	background-image:url('img/Button_background.png');
+	margin-right: 10px;
+	margin-top: 20px;
+	margin-bottom: 0px;
+}
+
+#results #messageBox {
+	margin-left: 250px;
+	background-color: #FFFF99;
+	float: left;
+	padding: 5px;
+	display: none;
+}
+
+#results #messageBox label {
+	margin-left: 10px;
+}
+
+#results #submitBox {
+	display: inline;
+	float: right;
+}
+
+#results #submitBox input[type="button"] {
+	margin-left: 10px;
+	color: #999999;
+}
+
+#submitBox .inlineButton {
+	border: 1px transparent;
+	height: 30px;
+	display: inline;
+	background-image:url('img/Button_background.png');
+}
+
+#submitBox #reset {
+	width: 120px;
+}
+
+#submitBox #save {
+	width: 100px;
+}
+
+.tooltip {
+    color: #000000; outline: none;
+    cursor: help; text-decoration: none;
+    position: relative;
+}
+.tooltip span {
+    margin-left: -999em;
+    position: absolute;
+}
+.tooltip:hover span {
+    border-radius: 5px 5px; -moz-border-radius: 5px; -webkit-border-radius: 5px; 
+    box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.1); -webkit-box-shadow: 5px 5px rgba(0, 0, 0, 0.1); -moz-box-shadow: 5px 5px rgba(0, 0, 0, 0.1);
+    font-family: Calibri, Tahoma, Geneva, sans-serif;
+    position: absolute; left: 1em; top: 2em; z-index: 99;
+    margin-left: 0; width: 250px;
+}
+.tooltip:hover img {
+}
+.tooltip:hover em {
+    font-family: Candara, Tahoma, Geneva, sans-serif; font-size: 1.2em; font-weight: bold;
+    display: block; padding: 0.2em 0 0.6em 0;
+}

@@ -25,23 +25,22 @@ public final class RefreshableResources {
 
   public static final String STOP_SEARCH_DATA = "stopSearchData";
 
-  public static final String WALK_PLANNER_GRAPH = "walkPlannerGraph";
-
   public static final String TRANSIT_GRAPH = "transitGraph";
 
   public static final String BLOCK_INDEX_DATA = "blockIndexData";
 
   public static final String BLOCK_INDEX_SERVICE = "blockIndexService";
 
-  public static final String STOP_TRANSFER_DATA = "stopTransferData";
-
   public static final String STOP_GEOSPATIAL_INDEX = "stopGeospatialIndex";
 
   public static final String SHAPE_GEOSPATIAL_INDEX = "shapeGeospatialIndex";
-  
-  public static final String TRANSFER_PATTERNS = "transfer_patterns";
 
   public static final String NARRATIVE_DATA = "narrativeData";
+
+  public static final String STOP_CONSOLIDATION_FILE = "stopConsolidationFile";
+
+  // for use on non-TDS tiers
+  public static final String BUNDLE_SWAP = "bundleSwap";
 
   private RefreshableResources() {
 

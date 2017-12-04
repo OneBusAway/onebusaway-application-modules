@@ -17,11 +17,10 @@ package org.onebusaway.transit_data_federation.services;
 
 import java.util.List;
 
-import org.onebusaway.collections.tuple.Pair;
 import org.onebusaway.transit_data_federation.model.TargetTime;
 import org.onebusaway.transit_data_federation.services.realtime.ArrivalAndDepartureInstance;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
-import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstance;
+import org.onebusaway.transit_data_federation.model.StopTimeInstance;
 
 /**
  * Service methods for determining the set of active stop times at a particular
@@ -82,39 +81,4 @@ public interface ArrivalAndDepartureService {
    */
   public ArrivalAndDepartureInstance getNextStopArrivalAndDeparture(
       ArrivalAndDepartureInstance instance);
-
-  /**
-   * Given an arrival and departure instance, compute the arrival and departure
-   * instance for the next stop along the block. If at the end of the block,
-   * this method will return null.
-   * 
-   * @param instance
-   * @return
-   */
-  public ArrivalAndDepartureInstance getNextTransferStopArrivalAndDeparture(
-      ArrivalAndDepartureInstance instance);
-
-  /**
-   * 
-   * @param fromStop
-   * @param toStop
-   * @param targetTime
-   * @param query query parameters
-   * @return
-   */
-  public List<Pair<ArrivalAndDepartureInstance>> getNextDeparturesForStopPair(
-      StopEntry fromStop, StopEntry toStop, TargetTime targetTime,
-      ArrivalAndDeparturePairQuery query);
-
-  /**
-   * 
-   * @param fromStop
-   * @param toStop
-   * @param targetTime
-   * @param query query parameters
-   * @return
-   */
-  public List<Pair<ArrivalAndDepartureInstance>> getPreviousArrivalsForStopPair(
-      StopEntry fromStop, StopEntry toStop, TargetTime targetTime,
-      ArrivalAndDeparturePairQuery query);
 }

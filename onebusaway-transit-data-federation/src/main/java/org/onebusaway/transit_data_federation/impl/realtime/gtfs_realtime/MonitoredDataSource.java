@@ -19,4 +19,5 @@ package org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime;
 public interface MonitoredDataSource {
 
   MonitoredResult getMonitoredResult();
+  String getFeedId();
 }

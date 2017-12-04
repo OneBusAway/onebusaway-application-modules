@@ -26,13 +26,11 @@ import org.onebusaway.federations.FederatedService;
 import org.onebusaway.federations.annotations.FederatedByAgencyIdMethod;
 import org.onebusaway.federations.annotations.FederatedByAggregateMethod;
 import org.onebusaway.federations.annotations.FederatedByAnyEntityIdMethod;
-import org.onebusaway.federations.annotations.FederatedByBoundsMethod;
 import org.onebusaway.federations.annotations.FederatedByCoordinateBoundsMethod;
 import org.onebusaway.federations.annotations.FederatedByCoordinatePointsMethod;
 import org.onebusaway.federations.annotations.FederatedByCustomMethod;
 import org.onebusaway.federations.annotations.FederatedByEntityIdMethod;
 import org.onebusaway.federations.annotations.FederatedByEntityIdsMethod;
-import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.geospatial.model.EncodedPolylineBean;
 import org.onebusaway.realtime.api.TimepointPredictionRecord;
 import org.onebusaway.transit_data.model.AgencyBean;
@@ -40,6 +38,7 @@ import org.onebusaway.transit_data.model.AgencyWithCoverageBean;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureForStopQueryBean;
 import org.onebusaway.transit_data.model.ArrivalsAndDeparturesQueryBean;
+import org.onebusaway.transit_data.model.ConsolidatedStopMapBean;
 import org.onebusaway.transit_data.model.ListBean;
 import org.onebusaway.transit_data.model.RegisterAlarmQueryBean;
 import org.onebusaway.transit_data.model.RouteBean;
@@ -55,11 +54,8 @@ import org.onebusaway.transit_data.model.VehicleStatusBean;
 import org.onebusaway.transit_data.model.blocks.BlockBean;
 import org.onebusaway.transit_data.model.blocks.BlockInstanceBean;
 import org.onebusaway.transit_data.model.blocks.ScheduledBlockLocationBean;
-import org.onebusaway.transit_data.model.oba.LocalSearchResult;
-import org.onebusaway.transit_data.model.oba.MinTravelTimeToStopsBean;
-import org.onebusaway.transit_data.model.oba.TimedPlaceBean;
+import org.onebusaway.transit_data.model.config.BundleMetadata;
 import org.onebusaway.transit_data.model.problems.ETripProblemGroupBy;
-import org.onebusaway.transit_data.model.problems.PlannedTripProblemReportBean;
 import org.onebusaway.transit_data.model.problems.StopProblemReportBean;
 import org.onebusaway.transit_data.model.problems.StopProblemReportQueryBean;
 import org.onebusaway.transit_data.model.problems.StopProblemReportSummaryBean;
@@ -71,13 +67,9 @@ import org.onebusaway.transit_data.model.realtime.CurrentVehicleEstimateQueryBea
 import org.onebusaway.transit_data.model.realtime.VehicleLocationRecordBean;
 import org.onebusaway.transit_data.model.realtime.VehicleLocationRecordQueryBean;
 import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
+import org.onebusaway.transit_data.model.service_alerts.ServiceAlertRecordBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationQueryBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationQueryBeanFederatedServiceMethodInvocationHandler;
-import org.onebusaway.transit_data.model.tripplanning.ConstraintsBean;
-import org.onebusaway.transit_data.model.tripplanning.ItinerariesBean;
-import org.onebusaway.transit_data.model.tripplanning.TransitLocationBean;
-import org.onebusaway.transit_data.model.tripplanning.TransitShedConstraintsBean;
-import org.onebusaway.transit_data.model.tripplanning.VertexBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsQueryBean;
@@ -86,7 +78,6 @@ import org.onebusaway.transit_data.model.trips.TripStatusBean;
 import org.onebusaway.transit_data.model.trips.TripsForAgencyQueryBean;
 import org.onebusaway.transit_data.model.trips.TripsForBoundsQueryBean;
 import org.onebusaway.transit_data.model.trips.TripsForRouteQueryBean;
-
 /**
  * The {@link TransitDataService} is the primary interface separating
  * user-interface modules that access transit data from the data providers that
@@ -371,66 +362,6 @@ public interface TransitDataService extends FederatedService {
   public ListBean<CurrentVehicleEstimateBean> getCurrentVehicleEstimates(
       CurrentVehicleEstimateQueryBean query);
 
-  /**
-   * Plan a trip between two locations at a particular time, with the specified
-   * constraints.
-   * 
-   * @param from
-   * @param to
-   * @param targetTime
-   * @param constraints
-   * @return a list of trip plans computed between the two locations with the
-   *         specified constraints
-   * @throws ServiceException
-   */
-  @FederatedByCoordinatePointsMethod(arguments = {0, 1}, propertyExpressions = {
-      "location", "location"})
-  public ItinerariesBean getItinerariesBetween(TransitLocationBean from,
-      TransitLocationBean to, long targetTime, ConstraintsBean constraints)
-      throws ServiceException;
-
-  @FederatedByCoordinatePointsMethod(arguments = {0, 1}, propertyExpressions = {
-      "location", "location"})
-  public void reportProblemWithPlannedTrip(TransitLocationBean from,
-      TransitLocationBean to, long targetTime, ConstraintsBean constraints,
-      PlannedTripProblemReportBean report);
-
-  @FederatedByBoundsMethod
-  public ListBean<VertexBean> getStreetGraphForRegion(double latFrom,
-      double lonFrom, double latTo, double lonTo) throws ServiceException;
-
-  /**
-   * 
-   * @param location
-   * @param time
-   * @param constraints
-   * @return min travel time transit-shed computation to a list of stops from
-   *         the specified starting location with the specified travel
-   *         constraints
-   * @throws ServiceException
-   */
-  @FederatedByCoordinatePointsMethod
-  public MinTravelTimeToStopsBean getMinTravelTimeToStopsFrom(
-      CoordinatePoint location, long time,
-      TransitShedConstraintsBean constraints) throws ServiceException;
-
-  /**
-   * 
-   * @param agencyId
-   * @param constraints
-   * @param minTravelTimeToStops
-   * @param localResults
-   * @return finish off the transit-shed computation by computing last-mile
-   *         walking paths to target locations from min-travel-time-to-stops
-   *         results
-   * @throws ServiceException
-   */
-  @FederatedByAgencyIdMethod
-  public List<TimedPlaceBean> getLocalPaths(String agencyId,
-      ConstraintsBean constraints,
-      MinTravelTimeToStopsBean minTravelTimeToStops,
-      List<LocalSearchResult> localResults) throws ServiceException;
-
   /****
    * Historical Data
    ****/
@@ -445,6 +376,9 @@ public interface TransitDataService extends FederatedService {
 
   @FederatedByEntityIdMethod(propertyExpression = "id")
   public void updateServiceAlert(ServiceAlertBean situation);
+  
+  @FederatedByEntityIdMethod
+  public ServiceAlertBean copyServiceAlert(String agencyId, ServiceAlertBean situation);
 
   @FederatedByEntityIdMethod
   public void removeServiceAlert(String situationId);
@@ -566,6 +500,9 @@ public interface TransitDataService extends FederatedService {
   @FederatedByAgencyIdMethod(propertyExpression = "agencyId")
   public String getActiveBundleId();
 
+  @FederatedByAgencyIdMethod(propertyExpression = "agencyId")
+  public BundleMetadata getBundleMetadata();
+  
   /**
    * Retrieve a list of time predictions for the given trip as represented by the TripStatusBean.
    * @param tripStatus the query parameters of the trip
@@ -593,4 +530,49 @@ public interface TransitDataService extends FederatedService {
   @FederatedByAgencyIdMethod
   public List<String> getSearchSuggestions(String agencyId, String input);
 
+  /**
+   * Given a stop, route, and direction, test if that stop has revenue service
+   * on the given route in the given direction.
+   * 
+   * @param agencyId    Agency ID of stop; used only for routing requests
+   *                    to federated backends
+   * @param stopId      Agency-and-ID of stop being tested
+   * @param routeId     Agency-and-ID of route to filter for
+   * @param directionId Direction ID to filter for
+   * @return true if the stop being tested ever permits boarding or alighting
+   *         from the specified route in the specified direction in the 
+   *         currently-loaded bundle; false otherwise
+   */
+  @FederatedByAgencyIdMethod
+  public Boolean stopHasRevenueServiceOnRoute(String agencyId, String stopId,
+                String routeId, String directionId);
+  
+  /**
+   * Given a stop, test if that stop has revenue service.
+   * 
+   * @param agencyId Agency ID of stop; used only for routing requests
+   *                 to federated backends
+   * @param stopId   Agency-and-ID of stop being tested
+   * @return true if the stop being tested ever permits boarding or alighting
+   *         from any route in any direction in the currently-loaded bundle;
+   *         false otherwise
+   */
+  @FederatedByAgencyIdMethod
+  public Boolean stopHasRevenueService(String agencyId, String stopId);
+
+  /**
+   * Get all stops that have revenue service for the listed agency.
+   */
+  @FederatedByAgencyIdMethod
+  public List<StopBean> getAllRevenueStops(AgencyWithCoverageBean agency);
+
+  /**
+   * Get consolidated stops for agency
+   */
+  @FederatedByAgencyIdMethod
+  public ListBean<ConsolidatedStopMapBean> getAllConsolidatedStops();
+  
+  @FederatedByAgencyIdMethod
+  public ListBean<ServiceAlertRecordBean> getAllServiceAlertRecordsForAgencyId(
+		String agencyId);
 }

@@ -1,0 +1,40 @@
+/**
+ * Copyright (C) 2011 Metropolitan Transportation Authority
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+ 
+/* Insert agency-specific branding overrides here */
+
+h2 {
+	display: none;
+}
+
+h1 {
+	text-indent: -9999px;
+	height: 50px;
+	width: 261px;
+	background-image: url('img/onebusaway-nyc-50.png');
+	background-repeat: no-repeat;
+	background-position: 0px 0px;
+	display: block;	
+}
+
+body.landscape.size1000 h1 { height: 60px; width: 314px; background: transparent url(img/onebusaway-nyc-60.png) 0 0 no-repeat scroll; }
+body.landscape.size1200 h1 { height: 75px; width: 392px; background: transparent url(img/onebusaway-nyc-75.png) 0 0 no-repeat scroll; }
+
+body.portrait.size1000 h1 { height: 60px; width: 314px; background: transparent url(img/onebusaway-nyc-60.png) 0 0 no-repeat scroll; }
+body.portrait.size1200 h1 { height: 75px; width: 392px; background: transparent url(img/onebusaway-nyc-75.png) 0 0 no-repeat scroll; }
+body.portrait.size1600 h1 { height: 90px; width: 471px; background: transparent url(img/onebusaway-nyc-90.png) 0 0 no-repeat scroll; }
+body.portrait.size1900 h1 { height: 90px; width: 471px; background: transparent url(img/onebusaway-nyc-90.png) 0 0 no-repeat scroll; }
+

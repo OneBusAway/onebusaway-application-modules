@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2011 Metropolitan Transportation Authority
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+            http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<beans xmlns="http://www.springframework.org/schema/beans" 
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context" 
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:jee="http://www.springframework.org/schema/jee"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
+        http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+        http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-3.0.xsd">
+
+
+    <!-- Transit Data Service -->
+    
+    <bean id="transitDataService" class="org.springframework.remoting.caucho.HessianProxyFactoryBean">
+    	<property name="serviceUrl" value="http://localhost:8080/onebusaway-transit-data-federation-webapp/remoting/transit-data-service" />
+    	<property name="serviceInterface" value="org.onebusaway.transit_data.services.TransitDataService" />
+  	</bean>
+	
+	<bean id="configurationServiceClient" class="org.onebusaway.util.impl.configuration.ConfigurationServiceClientFileImpl" >
+      	<constructor-arg type="java.lang.String" value="/var/lib/obanyc/config.json"/>
+    </bean>
+
+    <!-- Database Configuration -->
+
+    <bean id="dataSource"
+          class="org.springframework.jndi.JndiObjectFactoryBean">
+      <property name="jndiName"
+                value="java:comp/env/jdbc/appDB"/>   
+      <property name="lookupOnStartup"
+                value="true"/>   
+      <property name="cache"
+                value="true"/>   
+      <property name="proxyInterface"
+                value="javax.sql.DataSource"/>   
+      <property name="resourceRef"
+                value="true" />
+    </bean>
+
+    <alias name="dataSource" alias="mutableDataSource" />
+
+
+
+	<!-- Other Stuff: -->
+	<bean id="serviceAreaServiceImpl" class="org.onebusaway.presentation.impl.ServiceAreaServiceImpl" />
+<!--
+	<bean id="defaultServiceBounds" class="org.onebusaway.geospatial.model.CoordinateBounds">
+		<property name="minLat" value="38.598692" />
+		<property name="minLon" value="-77.449457" />
+		<property name="maxLat" value="39.19148899999999" />
+		<property name="maxLon" value="-76.488045" />
+	</bean>
+-->
+	<bean id="externalGeocoderImpl"
+		class="org.onebusaway.geocoder.enterprise.impl.EnterpriseGoogleGeocoderImpl" depends-on="serviceAreaServiceImpl">
+		<!-- <property name="wktFilterPolygon" value="POLYGON((-82.553075 27.978988,-82.533849 
+			27.998997,-82.487511 28.001203, -82.481664 28.055366,-82.426732 28.056578,-82.425359 
+			28.068697,-82.410939 28.069908,-82.410939 28.109889,-82.424672 28.110495,-82.38828 
+			28.146222,-82.389653 28.171042,-82.354634 28.171648,-82.351888 28.143195,-82.314122 
+			28.1438,-82.316182 28.172253,-82.264684 28.170437,-82.305196 28.127451,-82.363561 
+			28.124424,-82.356007 28.069303,-82.402013 28.068697,-82.393086 27.972318,-82.368367 
+			27.970499,-82.377293 27.943205,-82.408193 27.941992,-82.414372 27.914085,-82.461751 
+			27.909231,-82.463811 27.938959,-82.491277 27.920152,-82.47411 27.823034,-82.549641 
+			27.861892,-82.553075 27.978988))" /> -->
+	<!--	<property name="resultBiasingBounds" ref="defaultServiceBounds" /> -->
+	</bean>
+
+
+	<bean
+		class="org.onebusaway.container.spring.SystemPropertyOverrideConfigurer">
+		<property name="properties">
+			<props>
+				<prop key="front-end.version">${git.commit.id}</prop>
+			</props>
+		</property>
+	</bean>
+
+	<bean class="org.onebusaway.container.spring.PropertyOverrideConfigurer">
+		<property name="properties">
+			<props>
+				<prop key="cacheManager.cacheManagerName">org.onebusaway.nyc_webapp.cacheManager</prop>
+			</props>
+		</property>
+	</bean>
+
+	<!-- look up these values from web.xml/context.xml as they change per environment -->
+	<!-- 
+	<jee:jndi-lookup id="xwikiUrlBean" jndi-name="java:comp/env/xwikiUrl"
+		resource-ref="true"></jee:jndi-lookup>
+	<jee:jndi-lookup id="xwikiDocumentEditUrlBean"
+		jndi-name="java:comp/env/wikiDocumentEditUrl" resource-ref="true"></jee:jndi-lookup>
+	<jee:jndi-lookup id="xwikiAttachmentUrlBean" jndi-name="java:comp/env/wikiAttachmentUrl"
+		resource-ref="true"></jee:jndi-lookup>
+
+	<bean id="wikiDocumentService" class="org.onebusaway.wiki.xwiki.impl.XWikiDocumentServiceImpl"
+		lazy-init="true">
+		<property name="xwikiUrl" ref="xwikiUrlBean" />
+	</bean>
+
+	<bean id="wikiRenderingService"
+		class="org.onebusaway.wiki.xwiki.impl.XWikiRenderingServiceImpl"
+		lazy-init="true">
+		<property name="wikiDocumentViewUrl" value="/wiki/%{documentName}" />
+		<property name="wikiDocumentEditUrl" ref="xwikiDocumentEditUrlBean" />
+		<property name="wikiAttachmentUrl" ref="xwikiAttachmentUrlBean" />
+	</bean>
+ -->
+
+	<bean id="siriCacheService"
+		class="org.onebusaway.presentation.services.cachecontrol.SiriCacheServiceImpl">
+		<property name="disabled" value="${siri.cache.disabled}" />
+	</bean>
+</beans>

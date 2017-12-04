@@ -37,6 +37,7 @@ import org.onebusaway.transit_data_federation.impl.transit_graph.TripEntryImpl;
 import org.onebusaway.transit_data_federation.model.ShapePoints;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
+import org.onebusaway.transit_data_federation.util.LoggingIntervalUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -103,15 +104,18 @@ public class TripEntriesFactory {
       routeIndex++;
 
       List<Trip> tripsForRoute = _gtfsDao.getTripsForRoute(route);
+      
+      int tripCount = tripsForRoute.size();
+      int logInterval = LoggingIntervalUtil.getAppropriateLoggingInterval(tripCount);
 
-      _log.info("trips to process: " + tripsForRoute.size());
+      _log.info("trips to process: " + tripCount);
       int tripIndex = 0;
       RouteEntryImpl routeEntry = graph.getRouteForId(route.getId());
       ArrayList<TripEntry> tripEntries = new ArrayList<TripEntry>();
 
       for (Trip trip : tripsForRoute) {
         tripIndex++;
-        if (tripIndex % 500 == 0)
+        if (tripIndex % logInterval == 0)
           _log.info("trips processed: " + tripIndex + "/"
               + tripsForRoute.size());
         TripEntryImpl tripEntry = processTrip(graph, trip);
@@ -168,6 +172,12 @@ public class TripEntriesFactory {
     List<StopTimeEntryImpl> stopTimesForTrip = _stopTimeEntriesFactory.processStopTimes(
         graph, stopTimes, tripEntry, shapePoints);
 
+    // Also:  only set the trip if there are stops for it
+    if (stopTimesForTrip == null || stopTimesForTrip.size() < 2) {
+      _log.error("trip " + trip.getId() + " missing stops!");
+      return null;
+    }
+    
     double tripDistance = getTripDistance(stopTimesForTrip, shapePoints);
     tripEntry.setTotalTripDistance(tripDistance);
 
@@ -189,7 +199,14 @@ public class TripEntriesFactory {
   private double getTripDistance(List<StopTimeEntryImpl> stopTimes,
       ShapePoints shapePoints) {
 
-    StopTimeEntryImpl lastStopTime = stopTimes.get(stopTimes.size() - 1);
+    StopTimeEntryImpl lastStopTime = null;
+    try {
+    lastStopTime = stopTimes.get(stopTimes.size() - 1);
+    } catch (ArrayIndexOutOfBoundsException e) {
+      _log.error("FATAL:  missing last stop " + stopTimes);
+    }
+    
+    
 
     if (shapePoints != null) {
       double[] distances = shapePoints.getDistTraveled();

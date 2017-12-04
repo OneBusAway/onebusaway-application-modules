@@ -26,7 +26,6 @@
            http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-2.0.xsd">
 
   <import resource="classpath:org/onebusaway/transit_data_federation/application-context-common.xml" />
-  <import resource="classpath:org/onebusaway/transit_data_federation/application-context-otp.xml" />
 
   <context:component-scan base-package="org.onebusaway.transit_data_federation.impl" />
     
@@ -43,6 +42,11 @@
         <value>org.onebusaway.transit_data_federation.impl.realtime.history.ScheduleDeviationHistory</value>
         <value>org.onebusaway.transit_data_federation.impl.reporting.StopProblemReportRecord</value>
         <value>org.onebusaway.transit_data_federation.impl.reporting.TripProblemReportRecord</value>
+        <value>org.onebusaway.transit_data_federation.impl.service_alerts.ServiceAlertRecord</value>
+        <value>org.onebusaway.transit_data_federation.impl.service_alerts.ServiceAlertLocalizedString</value>
+        <value>org.onebusaway.transit_data_federation.impl.service_alerts.ServiceAlertTimeRange</value>
+        <value>org.onebusaway.transit_data_federation.impl.service_alerts.ServiceAlertsSituationAffectsClause</value>
+        <value>org.onebusaway.transit_data_federation.impl.service_alerts.ServiceAlertSituationConsequenceClause</value>
       </list>
     </property>
   </bean>
@@ -60,10 +64,13 @@
       </list>
     </property>
   </bean>
-
+  
+  <bean id="taskScheduler" class="org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler" />
+  
   <bean id="refreshServiceImpl" class="org.onebusaway.container.refresh.RefreshServiceImpl" />
 
-  <bean id="tripPlannerConstants" class="org.onebusaway.transit_data_federation.model.tripplanner.TripPlannerConstants" />
+  
+  <bean id="transitDataServiceTemplate" class="org.onebusaway.transit_data_federation.impl.federated.TransitDataServiceTemplateImpl" />
 
   <bean id="extendedCalendarServiceServiceDateRangeCache" class="org.onebusaway.container.spring.ehcache.EhCacheFactoryBean">
     <property name="cacheManager" ref="cacheManager" />
@@ -82,7 +89,7 @@
   </bean>
 
   <bean id="scheduledExecutorService" class="org.springframework.scheduling.concurrent.ScheduledExecutorFactoryBean">
-
+  
   </bean>
 
 </beans>

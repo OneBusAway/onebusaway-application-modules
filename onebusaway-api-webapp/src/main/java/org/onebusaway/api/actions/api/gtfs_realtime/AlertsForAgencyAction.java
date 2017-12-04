@@ -17,6 +17,7 @@ package org.onebusaway.api.actions.api.gtfs_realtime;
 
 import java.util.List;
 
+import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data.model.ListBean;
 import org.onebusaway.transit_data.model.service_alerts.NaturalLanguageStringBean;
 import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
@@ -79,7 +80,10 @@ public class AlertsForAgencyAction extends GtfsRealtimeActionSupport {
             entitySelector.setTrip(trip);
           }
           if (affects.getStopId() != null) {
-            entitySelector.setStopId(normalizeId(affects.getStopId()));
+            AgencyAndId stopId = modifiedStopId(agencyId, affects.getStopId());
+            if (stopId.getAgencyId().equals(agencyId)) {
+              entitySelector.setStopId(normalizeId(stopId.toString()));
+            }
           }
         }
       }

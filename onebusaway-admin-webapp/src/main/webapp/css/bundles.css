@@ -1,0 +1,1414 @@
+/**
+ * Copyright (c) 2011 Metropolitan Transportation Authority
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+ 
+ 
+#tabs {
+  padding: 0px;
+  background: none;
+  border-width: 0px;
+}
+
+#tabs .ui-tabs-nav {
+  padding-left: 0px;
+  background: transparent;
+  border-width: 0px 0px 1px 0px;
+  -moz-border-radius: 0px;
+  -webkit-border-radius: 0px;
+  border-radius: 0px;
+}
+
+#tabs #breadcrumb li {
+    list-style-type:none;
+    float:left;
+    color: #808080;
+}
+
+#tabs #breadcrumb a {
+    display:block;
+    background-repeat:no-repeat;
+    background-position:right;
+    padding-right: 15px;
+    text-decoration: none;
+    color:#454545;
+}
+
+#tabs .ui-tabs-panel {
+  border-width: 0px 1px 1px 1px;
+}
+
+#breadcrumb a:hover {
+    color:#35acc5;
+}
+
+
+
+/** Individual pages for bundle building UI.*/
+
+.tabHeader {
+  padding-top: 20px;
+  height: 30px;
+  background-color:#C0C0C0; 
+}
+
+.tabHeader .headerLabel {
+  padding-top: 10px;
+  padding-bottom: 10px;
+  padding-left: 10px;
+  /*font-size: 18px;
+  font: Times New Roman, Times, serif; */
+  font-size: 2em;
+  font-family: Arial Bold, Arial;
+  font-weight: 700;
+}
+
+.submitForm {
+  overflow: none;
+  height: 80px; 
+  padding-left:20px;
+  padding-right: 20px;
+  margin-bottom: 30px;
+  margin-top: 20px;
+}
+
+.submit_enabled {
+  background-color: #463E3F;
+  height: 60px;
+  width: 150px;
+  float: right;
+  color: white;
+  margin-right: 50px;
+  margin-top: 20px;
+}
+
+.submit_disabled {
+  background-color: #F0F0F0;
+  height: 60px;
+  width: 150px;
+  float: right;
+  color: grey;
+  margin-right: 50px;
+  margin-top: 20px;
+}
+
+.link {
+  float: right;
+  color: #463E3F;
+  margin-top: 40px;
+}
+
+.bundleForm {
+  
+}
+
+.bundleHeader {
+  font-weight: bold;
+  font: Arial, Helvetica, sans-serif;
+  font-size: 16px;
+  padding-top: 20px;
+}
+
+.adminLabel {
+  font-weight: bold;
+  font-size: 12px;
+}
+
+.bundleLabel {
+  display: block;
+}
+
+.horizontalRadio {
+  margin-right: 30px; 
+}
+
+.directoryLabels {
+  vertical-align: middle;
+  padding-top: 20px;
+}
+
+.directoryLabel {
+  margin-right: 50px;
+}
+
+.progress {
+  margin-right: 10px;
+}
+
+#createDirectory,
+#compareBundles,
+#compareBuilds,
+#compareFixedRouteModes,
+#compareDiff {
+  padding-top: 20px;
+}
+
+#createDirectory #directoryOptions,
+#compareBundles #directoryOptions,
+#compareBuilds #directoryOptions {
+  vertical-align: middle;
+  padding-top: 10px;
+  padding-left: 20px;
+}
+
+#createDirectory #createDirectoryContents {
+  padding-left: 30px;
+}
+
+#Create #filenameError, #copyFilenameError {
+	color: red;
+}
+
+#createDirectory #selectExistingContents{
+  display:none;
+  padding-left: 30px;
+  margin-top: 15px;
+}
+
+#createDirectory #selectExistingContents #currentDirectories,
+#compareBundles #compareExistingContents #compareCurrentDirectories,
+#compareBuilds #compareExistingBuilds #compareSelectedBuild {
+    margin-top: 7px;
+    overflow: auto;
+    height: 200px;
+    border: solid 1px #C0C0C0;
+    width: 600px;
+}
+
+#compareDiff #diffResult{
+  margin-top: 7px;
+    overflow: auto;
+    height: 500px;
+    border: solid 1px #C0C0C0;
+    width: 850px;
+  font-size: 12px;
+}
+
+#buildingReportDiv {
+	color: green;
+}
+
+#currentDirectories #listItem,
+#compareCurrentDirectories #compareListItem,
+#compareSelectedBuild #compareBuildListItem {
+   cursor: pointer;
+   display: table-row;
+   width: 600px;
+}
+
+#diffResult #diffResultItems{
+   cursor: pointer;
+   display: table-row;
+   width: 850px;
+}
+
+#currentDirectories .listData,
+#compareCurrentDirectories .listData
+{
+   width: 200px;
+   font-size: 12px;
+   display: table-cell;
+}
+
+#compareSelectedBuild .listData{
+  width: 600px;
+  font-size: 12px;
+  display: table-cell;
+}
+
+.grayListData{
+  background-color: #A8A8A8 ;
+  table-layout: fixed;
+}
+
+.redListData{
+  background-color: #FF9999;
+  table-layout: fixed;
+}
+
+.greenListData{
+  background-color: #99FF99;
+  //table-layout: fixed;
+}
+
+.blueListData{
+  background-color: #CEF6F5;
+  //table-layout: fixed;
+}
+
+#createDirectory #createDirectoryContents #directoryName{
+  width: 420px;
+}
+
+#createDirectory #createDirectoryContents #directoryButton{
+  margin-left: 60px;
+}
+
+#createDirectory #createDirectoryContents #createDirectoryResult{
+  display: none;
+}
+
+#createDirectory #createDirectoryContents #createDirectoryResult #createDirectoryMessage{
+  display: inline;
+  margin-left: 10px;
+}
+
+#createDirectory #advancedOptions {
+  vertical-align: middle;
+  margin-top: 20px;
+  margin-left: 25px;
+}
+
+#expand {
+  margin-right: 10px;
+}
+
+#createDirectory #advancedOptionsContents {
+  display: none;
+}
+
+#advancedOptionsContents #production #productionCheck {
+  margin-top: 10px;
+  margin-left: 50px;
+  margin-right: 10px;
+}
+
+#createDirectory #advancedOptionsContents #commentLabel {
+  padding-left: 50px;
+  display: block;
+  padding-top: 20px;
+}
+
+#createDirectory #advancedOptionsContents #commentBox {
+  padding-left: 50px;
+}
+
+#commentBox #bundleComment {
+  width: 500px;
+  margin-right: 50px;
+  height: 100px;
+  float: left;
+  margin-top: 7px;
+  color: "#999";
+}
+
+#commentBox #create_comments {
+  border: 1px transparent;
+  width: 120px;
+  height: 40px;
+  background-image:url('img/Button_background.png');
+  margin-top: 20px;
+}
+
+#uploadFiles #instruction {
+  background-color: #C3FDB8;
+  z-index: 1;
+  /* These three lines are for transparency in all browsers. */
+    -ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=60)";
+    filter: alpha(opacity=60);
+  opacity: 0.6;
+}
+
+#instruction p {
+  padding-left: 30px;
+  font-weight: bold;
+  color: #004E00;
+  z-index: 5;
+}
+
+#uploadFiles #s3_details {
+  margin-top: 20px;
+  vertical-align: middle;
+}
+
+#uploadFiles #gtfs_details {
+  margin-top: 10px;
+  vertical-align: middle;
+}
+
+#uploadFiles #stif_details {
+  margin-top: 10px;
+  vertical-align: middle;
+}
+
+#gtfs_location, #stif_location, #s3_location {
+  margin-left: 5px;
+  font-size : 12px;
+}
+
+/* #uploadFiles #agency_data {
+  	border-collapse: collapse;
+} */
+/*
+#uploadFiles #agency_data th, #uploadFiles #agency_data td {
+  border: 1px solid black;
+}
+
+#uploadFiles #agency_data th, #uploadFiles #agency_data td {
+  padding: 5px 10px;
+}
+*/
+
+#uploadFiles #agency_data .agencyIdSelect {
+/*
+  width: 50px;
+  */
+  width: 100%;
+}
+
+#uploadFiles #agency_data .agencyDataSourceData {
+  width: 35%;
+}
+
+#uploadFiles #agency_data .agencyDataSource {
+  width: 100%;
+}
+
+#uploadFiles #agency_data .agencyCheckboxUploadSuccess {
+  color: white;
+  background-color: green;
+}
+
+#uploadFiles #agency_data .agencyUploadSuccess {
+  color: green;
+}
+
+#prevalidateInputs {
+  padding-top: 20px;
+}
+
+#prevalidateInputs #validateBox {
+  padding-top: 15px;
+}
+
+#prevalidateInputs #validateBox #validateButton {
+  margin-top: 10px;
+}
+
+#prevalidateInputs #validateBox #validating {
+  display: none;
+  padding: 50px;
+}
+
+#validateBox #bundleNameBox #prevalidate_bundleName {
+  display: block;
+}
+
+#prevalidateInputs #prevalidate_progress {
+  vertical-align: middle;
+  margin-top: 20px;
+  margin-right: 10px;
+}
+
+#prevalidateInputs #prevalidate_resultList {
+  display: none;
+  padding-top : 10px;
+}
+
+#prevalidateInputs #prevalidate_fileList {
+  padding-top : 10px;
+}
+
+#prevalidateInputs #prevalidate_fileList li {
+  margin-bottom: 10px;
+  background-color: #F0F0F0;
+}
+
+#prevalidateInputs #prevalidate_fileList a {
+  font-size : 12px;
+  font-family: arial;
+  color: blue;
+}
+  
+#prevalidate_exception {
+  display: none;
+  background-color:#FF0000;
+}
+
+#buildBundle {
+  padding-top: 20px;
+}
+
+#buildBundle #bundleContentsHolder {
+  border: solid 1px transparent;
+  width: 890px;
+  height: 200px;
+  overflow: none;
+}
+
+#bundleContentsHolder #bundleContents {
+  margin-top: 20px;
+  background-color: #F0F0F0;
+  border: solid 1px transparent;
+  width: 200px;
+  padding: 5px;
+  float: left;
+}
+
+#bundleContentsHolder #bundleContents p {
+  font-weight: bold;
+  font-size: 12px;
+  padding-top : 10px;
+}
+
+#bundleContentsHolder #buildBox {
+  margin-top: 20px;
+  border: solid 1px transparent;
+  padding: 5px;
+  margin-left: 20px;
+  width: 600px;
+  height: 150px;
+  float: left;
+}
+
+#bundleContentsHolder #buildBox #building {
+  display: none;
+  background-color: #F0F0F0;
+}
+
+#buildBox #buildBundle_resultLink {
+  vertical-align: middle;
+  margin-top: 10px;
+  float: left;
+}
+
+#buildBox #bundleParams {
+  overflow: none;
+}
+
+#bundleParams #bundleNameHolder, #bundleParams #bundleStartDateHolder,
+#bundleParams #bundleEndDateHolder {
+  float: left;
+  margin-right: 20px;
+}
+
+#buildBundle_buildButton {
+  margin-top: 5px;
+  margin-right: 20px;
+}
+
+#bundleNameHolder #buildBundle_bundleName {
+  width: 200px;
+  display: block;
+  margin-top: 5px;
+}
+
+#bundleStartDateHolder #startDatePicker,
+#bundleEndDateHolder #endDatePicker {
+  width: 150px;
+  display: block;
+  margin-top: 5px;
+}
+
+#buildBundle_exception {
+  display: none;
+  color: red;
+}
+
+#buildBundle #bundleResultsHolder {
+  border: solid 1px transparent;
+  width: 890px;
+  height: auto;
+  overflow: none;
+  margin-top: 20px;
+}
+
+#bundleResultsHolder #bundleResults, #bundleStagingResultsHolder #bundleStagingResults{
+  border: solid 1px transparent;
+}
+
+#buildBundle #bundleResultsHolder #buildBundle_progress {
+  vertical-align: middle;
+  margin-right: 10px;
+}
+
+#testBuildBundle_resultList, #finalBuildBundle_resultList {
+  display: none;
+  margin-top : .5em;
+  /*
+  font-size: 12px;
+  white-space: nowrap;
+  */
+  overflow-x: auto;
+}
+
+#bundleResultsHolder #buildBundle_fileList {
+  padding-top : 10px;
+  width: 550px;
+  display: none;
+}
+
+#bundleResultsHolder #buildBundle_fileList li {
+  margin-bottom: 10px;
+  background-color: #F0F0F0;
+}
+
+#bundleResultsHolder #buildBundle_fileList a {
+  font-size : 12px;
+  font-family: arial;
+  color: blue;
+}
+
+#buildBundle #downloadLogs {
+  overflow: none;
+  width: 160px;
+  margin-top: 10px;
+  border: solid 1px transparent;
+  height: 20px;
+  display: none;
+}
+
+#downloadLogs #downloadButton {
+  float: left;
+}
+
+#Compare #compareDiff {
+	margin-bottom: 2em;
+}
+
+#Compare #currentBundleDiv {
+	float: left;
+	width: 48%;
+	margin-bottom: 2px;
+}
+
+#Compare #compareToBundleDiv {
+	float: right;
+	width: 48%;
+}
+
+#Compare #currentBundleDiv fieldset,
+#Compare #compareToBundleDiv fieldset {
+	border: 1px solid gray;
+	//width: 45%;
+}
+
+#Compare #selectArchiveDiv,
+#Compare #currentBundleDiv legend,
+#Compare #compareToBundleDiv legend {
+	font-weight: bold;
+	font-size: 1.3em;
+	margin-top: .5em;
+	margin-bottom: .3em;
+	line-height: 1em;
+	text-align: left;
+}
+
+#Compare #diffResultsTable caption,
+#Compare #fixedRouteDiffTable caption {
+	font-weight: bold;
+	font-size: 1.3em;
+	margin-bottom: .3em;
+	line-height: 1em;
+}
+
+#Compare #diffResultsTable th,
+#Compare #fixedRouteDiffTable th {
+	margin-bottom: .1em;
+	padding: .3em;
+}
+
+#Compare #diffResultsTable td {
+	padding-top: 3px;
+	padding-right: 10px;
+	padding-bottom: 3px;
+	padding-left: 10px;
+}
+
+#Compare #compareDiff {
+	margin-top: 10em;
+}
+
+#Compare #fixedRouteDiffTable th.modeColumn {
+	text-align: left;
+}
+
+#Compare #diffResultsTable .numericTd {
+	text-align: right;
+}
+
+#Compare #printFixedRouteRptButton {
+	margin-bottom: 1em;
+}
+
+#Compare #baseBundle, #Compare #compareToBundle {
+	font-size: .7em;
+}
+
+#Compare #fixedRouteDiffTable tr .routeFirstLine {
+	//margin-top: 15px;
+	//padding-top: 15px;
+}
+
+#Compare #fixedRouteDiffTable .modeName {
+	font-weight: bold;
+	padding-right: 1em;
+	padding-left: .3em;
+}
+
+#Compare #fixedRouteDiffTable tr.spacer td {
+	padding-top: 7px;
+	border-top: thin black solid;
+}
+
+//#Compare #fixedRouteDiffTable tr.spacer td {
+//	border-top: thin black solid;
+//}
+
+#Compare #fixedRouteDiffTable tr.spacer td:first-child {
+	border-top: none;
+}
+
+#Compare #fixedRouteDiffTable tr.spacer td:nth-child(2),
+#Compare #fixedRouteDiffTable tr.spacer td:last-child {
+	border-left: none;
+	border-right: none;
+}
+
+#Compare #fixedRouteDiffTable td.rtNum {
+	text-align: right;
+	padding-left: .3em;
+	padding-right: .5em;
+}
+
+#Compare #fixedRouteDiffTable tr.routeFirstLine td {
+	border-top: thin black solid;
+}
+
+#Compare #fixedRouteDiffTable tr.routeFirstLine td:first-child {
+	border-top: none;
+}
+
+#Compare #fixedRouteDiffTable tr td:nth-child(2) {
+	border-left: thin black solid;
+}
+
+#Compare #fixedRouteDiffTable tr td:last-child {
+	border-right: thin black solid;
+}
+/*
+#Compare #fixedRouteDiffTable tr:first-child td {
+	border-bottom: 1px solid gray;
+}
+*/
+
+#Compare #fixedRouteDiffTable td.headsignBorder,
+#Compare #fixedRouteDiffTable td.dirBorder {
+	border-top: 1px solid gray;
+}
+
+#Compare #fixedRouteDiffTable .currentStopCt {
+	text-align: right;
+	padding-right: 30px;
+	background-color: #9F9;
+}
+
+#Compare #fixedRouteDiffTable .selectedStopCt {
+	text-align: right;
+	padding-right: 30px;
+	background-color: #F99;
+}
+
+#Compare #fixedRouteDiffTable .currentRpt {
+	background-color: #9F9;
+}
+
+#Compare #fixedRouteDiffTable .selectedRpt {
+	background-color: #F99;
+}
+
+#downloadLogs #downloadImg {
+  float: left;
+  margin-right: 5px;
+}
+
+#downloadLogs #downloadButton:hover {
+  cursor: pointer; 
+} 
+
+.summaryFont {
+  font: 13px/1.231 helvetica,arial,clean,sans-serif;
+}
+
+#currentDirectories .ui-selecting,
+#compareCurrentDirectories .ui-selecting,
+#compareSelectedBuild .ui-selecting
+ {
+  background: #FEFF9F;  
+}
+
+#currentDirectories .ui-selected,
+#compareCurrentDirectories .ui-selected,
+#compareSelectedBuild .ui-selected {
+    background-color:#eEeF8F;  
+}
+
+/** deploy section **/
+#deployBundle {
+  padding-top: 20px;
+}
+
+#deployBundle #deployContentsHolder {
+  border: solid 1px transparent;
+  width: 890px;
+  height: 200px;
+  overflow: none;
+}
+
+#deployBundle #bundleResultsHolder #deployBundle_progress {
+  vertical-align: middle;
+  margin-right: 10px;
+  display: none;
+}
+
+#bundleResultsHolder #bundleResults #deployBundle_progress {
+  display: none;
+  padding-top : 10px;
+}
+
+#bundleResultsHolder #bundleResults #deployBundle_resultList {
+  display: none;
+  padding-top : 10px;
+}
+
+#deployContentsHolder #deployBox #deploying {
+  display: none;
+  background-color: #F0F0F0;
+}
+
+#deployBundle #requestLabels {
+  padding-top : 20px;
+  display:none;
+}
+
+#deploypage_info {
+  display:none;
+}
+
+#helpfulMessage, .helpfulMessage {
+  padding-top : 20px;
+}
+
+#deployBundle #listButton {
+  padding-left: 20px;
+  display: inline;
+  align: right;
+}
+
+#deployBundle_bundleList {
+  display: block;
+  padding-top : 10px;
+}
+
+
+/** stage section **/
+
+#stageBundle, #downloadBundle {
+  padding-top: 20px;
+}
+
+#staging_bundleName, #download_bundleName, #download_selectedDataset,
+#sync_deployedBundleName, #sync_deployedDataset {
+	padding: 10px;
+	margin-bottom: 5px;
+}
+
+#stageBundle #stageContentsHolder {
+  border: solid 1px transparent;
+  width: 890px;
+  height: 200px;
+  overflow: none;
+}
+
+#stageBundle #bundleStagingResultsHolder #stageBundle_progress {
+  vertical-align: middle;
+  margin-right: 10px;
+  display: none;
+}
+
+#bundleStagingResultsHolder #bundleStagingResults #stageBundle_progress {
+  display: none;
+  padding-top : 10px;
+}
+
+#bundleStagingResultsHolder #bundleStagingResults #stageBundle_resultList {
+  display: none;
+  padding-top : 10px;
+}
+
+#stageContentsHolder #stageBox #staging {
+  display: none;
+  background-color: #F0F0F0;
+}
+
+#stageBundle #requestLabels, #downloadBundle #requestLabels {
+  padding-top : 20px;
+  display:none;
+}
+
+#stagepage_info {
+  display:none;
+}
+
+#stageBundle #listButton {
+  padding-left: 20px;
+  display: inline;
+  align: right;
+}
+
+#stageBundle_bundleList {
+  display: block;
+  padding-top : 10px;
+}
+
+/* Added for Validate Bundle */
+
+#resultsDiv {
+  padding-top: 20px;
+}
+#environmentOptions {
+  padding-top: 20px;
+  padding-bottom: 20px;
+}
+.validateBundle {
+  font-size: 14px;
+}
+
+#csvWikiUrl {
+	width: 30em;
+}
+
+#bundleValidationResults {
+  	border-collapse: collapse;
+}
+
+#bundleValidationResults th,  #bundleValidationResults td {
+  border: 1px solid black;
+}
+.testPass {
+  color: green
+}
+.testFail {
+  color: red
+}
+
+/** download bundle section **/
+
+#downloadBundle {
+	padding-bottom: 2.5em;
+}
+
+#downloadDirBlock label, #downloadDirBlock input {
+	display: block;
+	float: left;
+	clear: left;
+}
+
+#downloadDirBlock label {
+	padding-bottom: 3px;
+	font-weight: bold;
+}
+
+#downloadDirBlock {
+	margin-bottom: 40px;
+	padding-bottom: 20px;
+}
+
+#downloadBundle #downloadBundle_downloadButton,
+#downloadBundle #downloadBundle_bundleList,
+#downloadBundle #downloadBox,
+#downloadBundle #bundleResults {
+	float: left;
+	clear: left;
+}
+
+#Sync #syncProgressDiv {
+	margin-top: 20px;
+}
+
+/* Styles added for new UI design */
+.ui-dialog-buttonpane .cancelCopyPopup,
+.ui-dialog-buttonpane .cancelDeletePopup,
+.ui-dialog-buttonpane .cancelDeleteSuccessPopup {
+	border: none;
+	background: none;
+}
+
+.ui-dialog-buttonpane .cancelCopyPopup:hover,
+.ui-dialog-buttonpane .cancelDeletePopup:hover {
+	border: none;
+	text-decoration: underline !important;
+}
+
+#Create p, #Upload p, #Build p {
+    font-family: "Arial Bold","Arial";
+    font-weight: 700;
+    font-style: normal;
+    font-size: 32px;
+    color: #333;
+    text-align: left;
+    line-height: normal;
+}
+
+#Create div {
+    padding-right: 1.5em;
+    padding-bottom: 1.5em;
+    padding-left: 1.5em;
+    width: 90%;
+}
+
+#Create #newDatasetTableDiv {
+    padding-right: 1.5em;
+    padding-bottom: 1.5em;
+    padding-left: 1.5em;
+    max-width: 100%;	
+}
+
+#Create #existingDatasetTableDiv {
+    padding: 0px;
+    border: 1px solid gray;
+    max-width: 100%;	
+}
+
+#Create table {
+    padding-top: 2em;
+    padding-right: 2em;
+    padding-bottom: 2em;
+    padding-left: 2em;
+    border-spacing: .4em;
+    width: 100%;
+}
+
+#Create #createDataset {
+    border: 1px solid gray;
+}
+
+#Create table thead {
+	 border-bottom: 1px solid gray;
+}
+
+#Create table #createDataset tr td:first-child {
+	color: red;
+    max-width: 25em;
+}
+
+//#Create table #createDataset #newDirectoryButton {
+//	width: 100em;
+//}
+
+#Create .datasetDivHeader, #Upload .existingFilesHeader, #Build .buildDivHeader {
+    font-family: "Arial Bold","Arial";
+    font-weight: 700;
+    font-style: normal;
+    font-size: 24px;
+    color: #333;
+    text-align: left;
+    line-height: normal;
+    padding-bottom: .2em;
+    display: block;
+}
+
+ #Build .buildDivHeader {
+ 	padding: 1em;
+ 	padding-bottom: 0em;
+ }
+
+#Create #datasetNameLabel {
+    font-family: "Arial Bold","Arial";
+    font-weight: 700;
+    font-style: normal;
+    font-size: 14px;
+}
+
+#Create #datasetNameNotes, #Build #datasetNotes {
+    font-family: "Arial Regular","Arial";
+    font-weight: 400;
+    font-style: normal;
+    font-size: 13px;
+    color: #333;
+    text-align: left;
+    line-height: normal;
+}
+
+#Build #datasetNotes {
+	margin-top: 1em;
+	margin-left: 8em;
+}
+
+#Create #directoryName {
+    width: 95%;
+}
+
+
+#Create div #existingDirBtnDiv {
+    border: 1px solid gray;
+    padding-top: 1em;
+    width: 90%;
+}
+
+#Create #existingDatasetDiv {
+    border-collapse:collapse
+}
+
+#Create #existingDataset {
+	padding-top: 1em;
+    padding-right: 0em;
+    padding-bottom: .5em;
+    padding-left: 0em;
+    border-bottom: 1px solid gray;
+    border-spacing: 0em;
+}
+
+#Create #existingDataset .copyDirectory,
+#Create #existingDataset .deleteDirectory,
+#Upload .removeAgency, #Upload #addAnotherAgency,
+#Upload #anyNotes, #Upload #cancelUpload, .bundleLink {
+	color: blue;
+}
+
+#Upload #cancelUpload {
+	float: left;
+	text-decoration: none;
+	margin: .4em;
+	padding: .5em;
+}
+
+#Create #existingDataset .copyDirectory:hover,
+#Create #existingDataset .deleteDirectory:hover,
+#Upload .removeAgency:hover, 
+	#Upload #addAnotherAgency:hover, #Upload #anyNotes:hover,
+	#Upload #cancelUpload:hover, .bundleLink:hover {
+	font-weight: bold;
+	text-decoration: underline;
+	cursor: pointer;
+}
+
+#Create .datasetCheckbox {
+	width: 1.5em;
+}
+
+#Create .copyDirectory, #Create .deleteDirectory {
+	width: 4em;
+}
+
+#Create #existingDataset #existingDirectoryButtonDiv {
+	padding-top: 1.5em;
+}
+
+#Create #existingDatasetTableDiv {
+	width: 100%;
+}
+
+#Create #existingDirectoryButtonDiv {
+	width: 100%;
+}
+
+#Create #existingDirectoryButton {
+	margin-top: 1.5em;
+}
+
+#Create #datasetNameLabel {
+	float: left;
+	margin-right: 15px;
+}
+
+#Create th {
+    font-family: "Arial Bold","Arial";
+    font-weight: 700;
+    font-style: normal;
+    font-size: 13px;
+    color: #333;
+    text-align: left;
+    line-height: normal;
+}
+
+#Create #existingDataset th {
+	padding-bottom: .5em;
+}
+
+#Create input[type="button"],
+#Upload input[type="button"],
+#Build input[type="button"] {
+    font-family: "Arial Regular","Arial";
+    font-weight: 400;
+    font-style: normal;
+    font-size: 13px;
+    width: auto;
+    //color: #333;
+    text-align: center;
+    line-height: normal;
+    padding: .5em;
+}
+#Create input[type="button"]:hover,
+#Upload input[type="button"]:hover,
+#Build input[type="button"]:hover {
+	cursor: pointer;
+}
+
+#Create table tr:first-child th {
+    border-spacing: 0;
+    border-bottom: 1px solid gray;
+}
+
+#Create #existingDataset tbody tr:nth-child(odd) {
+	background: #ccc;
+}
+
+/* Modal dialog box for Copy and Delete on Choose tab */
+#copyPopupContents, #deletePopupContents, #deleteSuccessPopupContents,
+#addCommentsPopupContents {
+	margin-top: 2em;
+	margin-left: 2.3em;
+}
+
+.ui-dialog > .ui-widget-header {
+	/*background: transparent;*/
+}
+
+.ui-dialog-content {
+	background-color: white;
+}
+
+#copyPopup p, #deletePopup p, #deleteSuccessPopup p, #addCommentsPopup p {
+    font-family: "Arial Bold","Arial";
+    font-weight: 700;
+    font-style: normal;
+    font-size: 24px;
+    color: #333;
+    text-align: left;
+    line-height: normal;
+    padding-bottom:0;
+    padding-right: 5em;
+    display: block;
+}
+
+#copyPopup #destinationDirDiv, #addCommentsPopup #addCommentsDiv {
+	margin-top: 2em;
+}
+
+#copyPopup #datasetNameLabel, #deletePopup #datasetNameLabel {
+	font-weight: bold;
+	padding-right: 1em;
+}
+
+#copyPopup #destinationDirectory {
+	width: 60%;
+}
+
+/* For new Upload tab */
+#uploadFiles {
+	padding: 20px;
+	border: 1px solid #808080;	
+}
+
+#Upload th {
+	text-align: left;
+}
+
+#Upload #selectedDataset,
+#Upload #commentsLabel {
+    font-family: "Arial Bold","Arial";
+    font-weight: 700;
+    font-style: normal;
+    font-size: 20px;
+    color: #333;
+    text-align: left;
+    line-height: normal;
+    padding-bottom: 1.5em;
+}
+
+#Upload #commentsLabel, #Upload #bundleComment {
+	display: block;
+}
+
+#Upload #commentsLabel {
+	padding-bottom: .1em;
+}
+
+#Upload #Agency {
+	padding: 20px;
+}
+
+#Upload #agency_data {
+	width: 100%;
+	padding-bottom: .4em;
+}
+
+#Upload #AgencyAndActionDiv {
+	padding: 20px;
+}
+
+#Upload #AgencyTableDiv {
+	padding-bottom: 3em;
+}
+
+#Upload .agencyIdData {
+	width: 30%;
+}
+
+#Upload .removeAgency {
+	padding-left: 1em;
+}
+#Upload #Notes {
+	float: left;
+}
+
+#Upload #UploadButtons {
+	float: right;
+}
+
+#Upload #notesDiv {
+	clear: both;
+}
+
+#Upload #addNewAgencyDiv {
+	margin-top: 1em;
+}
+
+#Upload #addNewAgencyTable {
+	width: 100%;
+}
+
+#Upload #addNewAgencyTable th,
+#Upload #addNewAgencyTable td {
+	padding-right: 1em;
+	margin: 1em;
+}
+
+#Upload .newAgencyNameCell {
+	width: 30%;
+}
+
+#Upload .newAgencyName {
+	width: 100%;
+}
+
+#Upload .newAgencyShortNameCell {
+	width: 15%;
+}
+
+#Upload .newAgencyShortName {
+	width: 100%;
+}
+
+#Upload .newAgencyLegacyIdCell {
+	width: 5%;
+}
+
+#Upload .newAgencyLegacyId {
+	width: 100%;
+}
+
+#Upload .newAgencyAddButtonCell {
+	width: 15%;
+}
+
+#Upload .newAgencyAddButton {
+	width: 100%;
+}
+
+#Upload #existingFilesTable {
+	width: 100%;
+}
+
+#Upload .agencyColumn {
+	width: 30%;
+}
+
+#Upload .typeColumn {
+	width: 10%;
+}
+
+#Upload .fileOrUrl {
+	width: 40%;
+}
+
+#Upload .whenColumn {
+	width: 10%;
+}
+
+#Upload .whoColumn {
+	width: 10%;
+}
+
+#Upload #existingFileListDiv {
+	padding-top: 2em;
+	padding-bottom: 2em;
+}
+
+#Build input[type="button"] {
+	width: 10em;
+}
+
+#Build #buildTestBundleDiv {
+	margin-top: 3em;
+}
+
+#Build #bundleBuildInfoTable {
+	margin-left: 5em;
+	border-collapse:separate;
+	border-spacing: 1em;
+}
+
+#Build #bundleBuildInfoTable tr td:first-child {
+	font-weight: bold;
+	text-align: right;
+}
+
+#Build #buildStep2Div {
+	margin-top: 3em;
+}
+
+#Build #buildButtonSectionDiv, #Build #testButtonSectionDiv {
+	margin-top: 3em;
+	margin-left: 10em;
+}
+
+#Build #buildButtonDiv, #Build #testButtonDiv {
+	float: left;
+}
+
+#Build #buildTimeEstimate, #Build #testTimeEstimate {
+	margin-left: 1.5em;
+	float: left;
+}
+
+#Build #buildingTest, #Build #buildingFinal {
+	width: 300px;
+	margin-top: 20px;
+}
+
+#testProgressBarDiv, #finalProgressBarDiv {
+	display: none;
+}
+
+#testProgressBar, #finalProgressBar {
+	margin-top: 1.5em; 
+	margin-right: 15em;
+	margin-bottom: 1em
+}
+
+#testBuildProgress, #finalBuildProgress {
+	margin-top: 1em;
+	margin-right: 1.5em;
+	margin-bottom: 1.5em;
+	font-family: "Arial Bold","Arial";
+	font-weight: 700;
+	font-style: normal;
+	font-size: 16px;
+}
+
+.clear {
+	clear: both;
+}
