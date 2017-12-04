@@ -37,6 +37,7 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.realtime.api.EVehicleType;
 import org.onebusaway.realtime.api.VehicleLocationListener;
 import org.onebusaway.realtime.api.VehicleLocationRecord;
 import org.onebusaway.transit_data.model.service_alerts.ECause;
@@ -151,6 +152,13 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   private BlockGeospatialService _blockGeospatialService;
   
   private boolean _enabled = true;
+
+  // assume realtime source is a consistent vehicleType
+  private EVehicleType defaultVehicleType = EVehicleType.BUS;
+
+  public void setDefaultVehicleType(String typeString) {
+    defaultVehicleType = EVehicleType.valueOf(typeString);
+  }
  
   @Autowired
   public void setAgencyService(AgencyService agencyService) {
@@ -393,6 +401,9 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     for (CombinedTripUpdatesAndVehiclePosition update : updates) {
       VehicleLocationRecord record = _tripsLibrary.createVehicleLocationRecordForUpdate(result, update);
       if (record != null) {
+        // pass along our real-time vehicle type
+        record.setVehicleType(defaultVehicleType);
+
         if (record.getTripId() != null) {
           // tripId will be null if block was matched
           result.addUnmatchedTripId(record.getTripId().toString());

@@ -45,6 +45,7 @@ http://www.springframework.org/schema/context http://www.springframework.org/sch
          </props>
       </property>
     </bean>
+
     <bean id="httpServiceClient" class="org.onebusaway.transit_data_federation.util.HttpServiceClientImpl" >
       <constructor-arg type="java.lang.String" value="localhost"/>
       <constructor-arg type="java.lang.Integer" value="9999" />
@@ -54,17 +55,6 @@ http://www.springframework.org/schema/context http://www.springframework.org/sch
     <bean id="bundleManagementService" class="org.onebusaway.transit_data_federation.impl.bundle.BundleManagementServiceImpl">
       <property name="bundleStoreRoot" value="/var/lib/oba/tds/bundle" />
       <property name="standaloneMode" value="false" />
-    </bean>
-
-    <bean class="org.onebusaway.container.spring.PropertyOverrideConfigurer">
-        <property name="properties">
-            <props>
-                <prop key="blockLocationServiceImpl.persistBlockLocationRecords">false</prop>
-                <prop key="blockLocationServiceImpl.locationInterpolation">false</prop>
-                <prop key="blockStatusServiceImpl.runningLateWindow">3600</prop>
-                <prop key="arrivalAndDepartureServiceImpl.removeFuturePredictionsWithoutRealtime">true</prop>
-            </props>
-        </property>
     </bean>
 
 </beans>
