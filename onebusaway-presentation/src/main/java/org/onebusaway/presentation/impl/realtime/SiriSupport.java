@@ -611,7 +611,12 @@ public final class SiriSupport {
 			monitoredCallStructure.setExpectedArrivalTime(new Date(scheduledArrivalTime));
 			monitoredCallStructure.setExpectedDepartureTime(new Date(scheduledArrivalTime));
 		}
-		
+
+        //setting the scheduled arrival time.
+        if (monitoredCallStructure.getExpectedArrivalTime()!= null) {
+            monitoredCallStructure.setAimedArrivalTime(new Date(scheduledArrivalTime));
+        }
+
 		// siri extensions
 		SiriExtensionWrapper wrapper = new SiriExtensionWrapper();
 		ExtensionsStructure distancesExtensions = new ExtensionsStructure();

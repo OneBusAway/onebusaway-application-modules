@@ -338,7 +338,15 @@
             <version>1.10.1</version>
         </dependency>
 
-	</dependencies>
+        <!-- for maps -->
+        <dependency>
+            <groupId>org.onebusaway</groupId>
+            <artifactId>onebusaway-frontend-webapp</artifactId>
+            <version>${project.version}</version>
+            <type>war</type>
+        </dependency>
+
+    </dependencies>
 
 	<profiles>
 		<profile>
@@ -466,6 +474,24 @@
 						</lifecycleMappingMetadata>
 					</configuration>
 				</plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-war-plugin</artifactId>
+                    <version>2.1</version>
+                    <configuration>
+                        <archive>
+                            <manifestEntries>
+                                <Implementation-Build>${gitDescribe}</Implementation-Build>
+                            </manifestEntries>
+                        </archive>
+                        <overlays>
+                            <overlay>
+                                <groupId>org.onebusaway</groupId>
+                                <artifactId>onebusaway-frontend-webapp</artifactId>
+                            </overlay>
+                        </overlays>
+                    </configuration>
+                </plugin>
 			</plugins>
 		</pluginManagement>
 	</build>

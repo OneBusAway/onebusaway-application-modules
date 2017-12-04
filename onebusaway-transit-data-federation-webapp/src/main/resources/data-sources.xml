@@ -45,8 +45,21 @@ http://www.springframework.org/schema/context http://www.springframework.org/sch
          </props>
       </property>
     </bean>
-    
-<!--            <bean id="kcm_avl" class="org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.GtfsRealtimeSource"> -->
+
+    <bean class="org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.GtfsRealtimeSource">
+        <property name="tripUpdatesUrl" value="http://gtfsrt.dev.wmata.obaweb.org:8080/api/v1/key/4b248c1b/agency/1/command/gtfs-rt/tripUpdates" />
+        <property name="vehiclePositionsUrl" value="http://gtfsrt.dev.wmata.obaweb.org:8080/api/v1/key/4b248c1b/agency/1/command/gtfs-rt/vehiclePositions" />
+        <property name="refreshInterval" value="30" />
+        <property name="agencyIds">
+            <list>
+                <value>1</value>
+            </list>
+        </property>
+    </bean>
+
+
+
+    <!--            <bean id="kcm_avl" class="org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.GtfsRealtimeSource"> -->
 <!--            <property name="tripUpdatesUrl" value="http://data.onebusaway.org/cgi/trip-updates.sh" /> -->
 <!--            <property name="vehiclePositionsUrl" value="http://data.onebusaway.org/cgi/vehicle-positions.sh" /> -->
 <!--            <property name="refreshInterval" value="30"/> -->
@@ -74,20 +87,20 @@ http://www.springframework.org/schema/context http://www.springframework.org/sch
 <!--            </property> -->
 
 <!--    </bean>  -->
-    
-           <bean id="link_avl" class="org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.GtfsRealtimeSource">
-           <property name="tripUpdatesUrl" value=" http://localhost:7777/onebusaway-gtfs-rt-feed-builder/api/trip-updates/pb" />
-           <property name="refreshInterval" value="15"/>
-           <property name="agencyIds">
-                   <list>
-                           <value>40</value>
-                   </list>
-           </property>
 
-   </bean> 
+    <!--        <bean id="link_avl" class="org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.GtfsRealtimeSource">
+            <property name="tripUpdatesUrl" value=" http://localhost:7777/onebusaway-gtfs-rt-feed-builder/api/trip-updates/pb" />
+            <property name="refreshInterval" value="15"/>
+            <property name="agencyIds">
+                    <list>
+                            <value>40</value>
+                    </list>
+            </property>
 
-    
-<!--         <bean id="everett_avl" class="org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.GtfsRealtimeSource"> -->
+    </bean> -->
+
+
+ <!--         <bean id="everett_avl" class="org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.GtfsRealtimeSource"> -->
 <!-- 		<property name="tripUpdatesUrl" value="http://developer.onebusaway.org/tmp/sound/gtfrealtime.bin" /> -->
 <!--         <property name="refreshInterval" value="30"/> -->
 <!--         <property name="agencyIds"> -->
@@ -100,7 +113,7 @@ http://www.springframework.org/schema/context http://www.springframework.org/sch
     <bean id="httpServiceClient" class="org.onebusaway.transit_data_federation.util.HttpServiceClientImpl" >
       <constructor-arg type="java.lang.String" value="localhost"/>
       <constructor-arg type="java.lang.Integer" value="9999" />
-      <constructor-arg type="java.lang.String" value="/onebusaway-admin-webapp/api/" />
+      <constructor-arg type="java.lang.String" value="/api/" />
     </bean>
 <!--     <bean id="httpServiceClient" class="org.onebusaway.transit_data_federation.util.HttpServiceClientImpl" > -->
 <!--       <constructor-arg type="java.lang.String" value="admin.staging.obast.org"/> -->
