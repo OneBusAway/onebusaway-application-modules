@@ -19,6 +19,7 @@ import java.io.Serializable;
 import java.util.List;
 
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.realtime.api.EVehicleType;
 import org.onebusaway.transit_data_federation.services.transit_graph.RouteCollectionEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.RouteEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
@@ -33,6 +34,8 @@ public class RouteEntryImpl implements RouteEntry, Serializable {
   
   private List<TripEntry> _trips;
 
+  private int _type = EVehicleType.UNSET.getGtfsType();
+
   public void setId(AgencyAndId id) {
     _id = id;
   }
@@ -44,6 +47,8 @@ public class RouteEntryImpl implements RouteEntry, Serializable {
   public void setTrips(List<TripEntry> trips) {
     _trips = trips;
   }
+
+  public void setType(int gtfsType) { _type = gtfsType; }
 
   /****
    * {@link RouteCollectionEntry} Interface
@@ -62,5 +67,10 @@ public class RouteEntryImpl implements RouteEntry, Serializable {
   @Override
   public List<TripEntry> getTrips() {
     return _trips;
+  }
+
+  @Override
+  public int getType() {
+    return _type;
   }
 }

@@ -68,6 +68,7 @@ public class RouteEntriesFactory {
   private RouteEntryImpl processRoute(TransitGraphImpl graph, Route route) {
     RouteEntryImpl routeEntry = new RouteEntryImpl();
     routeEntry.setId(unique(route.getId()));
+    routeEntry.setType(route.getType());
     graph.putRouteEntry(routeEntry);
     return routeEntry;
   }

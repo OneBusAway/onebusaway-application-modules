@@ -17,12 +17,65 @@ package org.onebusaway.realtime.api;
 
 /**
  * Support for realtime vehicle types.
+ * For convenience this maps to Route.types
+ * See https://developers.google.com/transit/gtfs/reference/#routestxt
  */
 public enum EVehicleType {
-    BUS,
-    LIGHT_RAIL,
-    RAIL,
-    FERRY;
+    UNSET (-1),
+    LIGHT_RAIL(0),
+    SUBWAY (1),
+    RAIL (2),
+    BUS (3),
+    FERRY (4),
+    CABLE_CAR (5),
+    GONDOLA (6),
+    FUNICULAR (7);
 
+
+    private final int gtfsType;
+    EVehicleType(int gtfsType) {
+        this.gtfsType = gtfsType;
+    }
+
+    // TODO use a more idiomatic approach here
+    public static EVehicleType toEnum(int i) {
+        EVehicleType type = UNSET;
+        switch (i) {
+            case -1:
+                type = UNSET;
+                break;
+            case 0:
+                type = LIGHT_RAIL;
+                break;
+            case 1:
+                type = SUBWAY;
+                break;
+            case 2:
+                type = RAIL;
+                break;
+            case 3:
+                type = BUS;
+                break;
+            case 4:
+                type = FERRY;
+                break;
+            case 5:
+                type = CABLE_CAR;
+                break;
+            case 6:
+                type = GONDOLA;
+                break;
+            case 7:
+                type = FUNICULAR;
+                break;
+            default:
+                type = UNSET;
+        }
+         return type;
+    }
+
+    public int getGtfsType() {
+        return gtfsType;
+    }
     public String toLabel() { return toString().toLowerCase(); }
 }

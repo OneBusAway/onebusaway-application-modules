@@ -153,13 +153,6 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   
   private boolean _enabled = true;
 
-  // assume realtime source is a consistent vehicleType
-  private EVehicleType defaultVehicleType = EVehicleType.BUS;
-
-  public void setDefaultVehicleType(String typeString) {
-    defaultVehicleType = EVehicleType.valueOf(typeString);
-  }
- 
   @Autowired
   public void setAgencyService(AgencyService agencyService) {
     _agencyService = agencyService;
@@ -401,9 +394,6 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     for (CombinedTripUpdatesAndVehiclePosition update : updates) {
       VehicleLocationRecord record = _tripsLibrary.createVehicleLocationRecordForUpdate(result, update);
       if (record != null) {
-        // pass along our real-time vehicle type
-        record.setVehicleType(defaultVehicleType);
-
         if (record.getTripId() != null) {
           // tripId will be null if block was matched
           result.addUnmatchedTripId(record.getTripId().toString());
