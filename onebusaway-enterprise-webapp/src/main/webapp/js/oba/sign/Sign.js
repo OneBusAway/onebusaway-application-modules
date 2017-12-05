@@ -167,6 +167,13 @@ OBA.Sign = function() {
 			initStop(stopId, initMonitor);
 		});
 
+		var stopTotal = 0;
+		jQuery.each(stopIdsToRequest, function(_, stopId){
+			stopTotal++;
+			jQuery("#totalpage").text(stopTotal);
+
+		});
+
 		updateClock();
 		setInterval(updateClock, 10 * 1000);
 	}
@@ -243,10 +250,11 @@ OBA.Sign = function() {
 		var newElement = jQuery(
 			'<div>' +
 				'<div class="error"></div>' +
-				'<div class="header">' + 
-					'<div class="name"><h1>' + stopName + '</h1></div>' + 
-					' <div class="stop-id"><h2>Stop #' + stopId.id + '</h2></div>' +
-				'</div>' + 
+				'<div class="preHeader"><div class="iconContainer"><img src="/css/img/realtime_icon.png" alt="Realtime Icon" /><h2>Real time arrival</h2></div></div>' +
+				'<div class="header">' +
+					'<div class="name"><h1>' + stopName + '</h1></div>' +
+					'<div class="stop-id"><h2>Stop #' + stopId.id + '</h2></div>' +
+        	'</div>' +
 				'<div class="arrivals"><div class="arrivals_scroller"><table></table></div></div>' +
 				'<div class="alerts"><div class="alerts_header"><h2>Service Change Notices</h2></div><div id="stop' + stopId.id + '" class="scroller"></div></div>' +
 			'</div>').addClass("slide");
@@ -359,8 +367,7 @@ OBA.Sign = function() {
 			});
 			r++;
 		});
-		
-		
+
 		jQuery.each(table, function(_, rowInfo) {
 				var row = jQuery("<tr></tr>");
 
@@ -378,25 +385,39 @@ OBA.Sign = function() {
 				if (!rowInfo.monitored) {
 					spanTxt = "";
 				}
-				var vehicleIdSpan = jQuery("<span></span>")
-				.addClass(rowInfo.monitored?"bus-id":"scheduled_arrival_indicator")
-				.text(rowInfo.monitored?spanTxt:" (scheduled)");
+				// var vehicleIdSpan = jQuery("<span></span>")
+				// .addClass(rowInfo.monitored?"bus-id":"scheduled_arrival_indicator");
+				// .text(rowInfo.monitored?spanTxt:" (scheduled)");
 			
-				jQuery('<td></td>')
+				jQuery('<td class="stopLocation"></td>')
 					.text(rowInfo.headsign)
-					.append(vehicleIdSpan)
+					// .append(vehicleIdSpan)
 					.appendTo(row);
 
-				jQuery('<td></td>')
-				.addClass("distance")
-				.append(rowInfo.etas[0])
-				.appendTo(row);
+				var distanceTableData = jQuery('<td></td>')
+					.addClass('distance');
+				var etaDiv = jQuery('<div></div>')
+					.addClass('eta');
 
-				
-				jQuery('<td></td>')
-				.addClass("additional_stops")
-				.append(toEtaSpan1(rowInfo.etas, rowInfo.monitored))
-				.appendTo(row);
+				var realtimeIcon = jQuery('<img/>')
+					.addClass('realtimeIconImg')
+					.attr('src', '/css/img/Realtime_Icon_with _white_bg_400x400.png');
+
+				var etaTextPara = jQuery('<p></p>')
+					.addClass('etaText')
+					.append(rowInfo.etas[0]);
+
+				etaDiv.append(rowInfo.monitored?"":realtimeIcon);
+				etaDiv.append(etaTextPara);
+				distanceTableData.append(etaDiv);
+
+				var additionalStopsDiv = jQuery('<div></div>')
+					.addClass("additional_stops")
+					.append(toEtaSpan1(rowInfo.etas, rowInfo.monitored));
+
+				distanceTableData.append(additionalStopsDiv);
+
+				distanceTableData.appendTo(row);
 				
 				tableBody.append(row);				
 		});
@@ -708,9 +729,29 @@ OBA.Sign = function() {
 			
 			oldContent.animate({left: contentWidth}, animationSpeed, function() {
 				oldContent.html("").empty().remove();
-				jQuery("span.dot").css('background-color', 'rgb(90,90,90)');
-				jQuery("span#" + stopId.id + ".dot").css('background-color', 'white');
-				
+				// jQuery("span.dot").css('background-color', 'rgb(90,90,90)');
+				// jQuery("span#" + stopId.id + ".dot").css('background-color', 'white');
+
+				var currentStopText = "N/A";
+				var stopList = getParameterByName("stopIds", null);
+				if (stopList !== null && stopList.length > 0){
+					var stopArray = [];
+					jQuery.each(stopList.split(","), function(_, o){
+						var stopIdParts = o.split("_");
+						if (stopIdParts.length === 2) {
+							stopArray.push(stopIdParts[1]);
+						}
+					});
+				}
+
+				for (var i = 0; i < stopArray.length; i ++){
+					if (stopArray[i] === stopId.id) {
+						currentStopText = i + 1;
+					}
+				}
+
+				jQuery("span#currentpage").text(currentStopText);
+
 				var alerts = stopElement.find(".alert");
 				var totalHeight = 0;
 

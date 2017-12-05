@@ -1,0 +1,12 @@
+#container {
+	padding-bottom: 40px;
+}
+#container h2 {
+	font-size: 2.5em;
+	padding-bottom: 10px;
+}
+
+#container ul {
+	padding-left:20px;
+	line-height: 2.1;
+}

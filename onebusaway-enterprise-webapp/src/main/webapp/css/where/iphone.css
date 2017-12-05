@@ -1,0 +1,504 @@
+/**
+ * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+body {
+	margin: 0;
+	padding: 0;
+	min-height: 416px;
+	display: block;
+	font-size: 14pt;
+	font-family: Helvetica, sans-serif;
+	background-image: oba-resource("/img/iphone/bg.png");
+	background-image: oba-resource("/img/iphone/bgbot2.png"), oba-resource("/img/iphone/bgbot.png"), oba-resource("/img/iphone/bg.png");
+	background-repeat: repeat-x, repeat-x, repeat;
+	background-position: left bottom, left bottom, left top;
+}
+
+#root {
+	margin: 0px auto;
+	width: 320px;
+}
+
+#topBar {
+	background-repeat: repeat-x;
+	background-image: oba-resource("/img/iphone/bar.png");
+	text-shadow: -2px -1px #4c4c4c;
+	text-align: center;
+	font-weight: bold;
+	height: 38px;
+	color: white;
+}
+
+#topBarLabel {
+	padding-top: 7px;
+}
+
+#topBar a {
+	color: white;
+	text-decoration: none;
+}
+
+#content {
+	background-color: #E3E3E3;
+	border-color: white;
+	border-style: solid;
+	border-width: 1px 0pt 0pt;
+	padding: 10px 10px 10px 10px;
+	text-align: center;
+}
+
+h1,h2,h3,h4 {
+	font-weight: bold;
+	margin-top: 0;
+}
+
+h2 {
+	font-size: 19px;
+	margin-bottom: 5px;
+}
+
+h3 {
+	font-size: 15px;
+	margin-bottom: 5px;	
+}
+
+p {
+	margin-top: 0;
+	margin-bottom: 1em;
+}
+
+p.small {
+	font-size: 0.8em;	
+}
+
+span.label {
+	 color: #007100;
+	 font-weight: bold;
+	 margin-right: 0.5em;
+}
+
+/****
+ *
+ ****/
+ 
+.buttons {
+	background-color: white;
+	display: block;
+	padding: 0pt;
+	margin-top: 10px;
+}
+
+ul.buttons li {
+	background-image: oba-resource("/img/iphone/arrow.gif");
+	background-position: right center;
+	background-repeat: no-repeat;
+	border: 1px solid #A5A5A5;
+	display: block;
+	font-size: 12pt;
+	font-weight: bold;
+	margin-bottom: -1px;
+	padding: 0;
+	width: 300px;
+}
+
+ul.buttons li a {
+	text-decoration: none;
+	color: black;
+	display: block;
+	padding: 10px 30px 10px 10px;
+}
+
+.button {
+	background-image: oba-resource("/img/iphone/arrow.gif");
+	background-position: right center;
+	background-repeat: no-repeat;
+	border: 1px solid #A5A5A5;
+	cursor: pointer;
+	display: block;
+	font-size: 12pt;
+	font-weight: bold;
+	margin-bottom: -1px;
+	padding: 10px 30px 10px 10px;
+	width: 258px;
+}
+
+.inputTextbox {
+	margin-top: 10px;
+	width: 264px;
+	font-size: 16pt;
+	width: 264px;
+}
+
+.inputButton {
+	background: transparent oba-resource("/img/iphone/hborder.png") repeat-x scroll 0px -27px;
+	border: 1px outset #CCCCCC;
+	cursor: pointer;
+	font-size: small;
+	padding: 3px 5px;
+	text-decoration: none;
+	margin-top: 10px;
+	width: 270px;
+}
+
+.credits {
+	font-size: 10pt;
+	margin-top: 10px;
+}
+
+.section {
+	font-size: 12pt;
+	margin-top: 20px;
+}
+
+.sectionHeader {
+	font-weight: bold;
+}
+
+.sectionDescription {
+
+}
+
+/****
+ * StopsByRoute Styling
+ ****/
+.stopsByRouteSelectionDescription {
+	border: 1px solid #A5A5A5;
+	background-color: #ffffff;
+	display: block;
+	margin-top: 10px;
+	padding: 5px 5px 5px 5px;
+	text-align: center;
+	font-size: 8pt;
+}
+
+.stopsByRouteSelectionAction {
+	margin-top: 10px;
+	padding: 5px 5px 5px 5px;
+}
+
+.buttons a.stop {
+	background-image: oba-resource("/img/iphone/arrow-bus.png");
+	font-size: 10pt;
+}
+
+/****
+ * Arrivals Styling
+ ****/
+.arrivalsStopInfo {
+	border: 1px solid #A5A5A5;
+	background-color: #ffffff;
+	margin-top: 10px;
+	padding: 5px 5px 5px 5px;
+	text-align: center;
+}
+
+.arrivalsStopInfo a:link {
+	color: black;
+}
+
+.arrivalsStopInfo a:visited {
+	color: black;
+}
+
+.arrivalsStopAddress {
+	font-size: 12pt;
+	font-weight: bold;
+}
+
+.arrivalsStopNumber {
+	font-size: 8pt;
+}
+
+.arrivalsTable {
+	background-color: #E3E3E3;
+	border-top-style: groove;
+	border-bottom-style: groove;
+	border-width: 1px 0px 1px;
+	margin-top: 10px;
+	margin-left: -10px;
+	margin-right: -10px;
+	padding-left: 0px;
+	padding-top: 0px;
+	text-align: center;
+	border-collapse: collapse;
+}
+
+.arrivalsTable tr {
+	border-bottom: 1px groove #000000;
+}
+
+.arrivalsHeader a {
+	font-size: 8pt;
+	color: #225F20;
+}
+
+.arrivalsHeader a:link {
+	color: #225F20;
+}
+
+.arrivalsHeader a:visited {
+	color: #225F20;
+}
+
+.arrivalsRouteColumn {
+	width: 70px;
+}
+
+.arrivalsDestinationColumn {
+	width: 190px;
+}
+
+.arrivalsStatusColumn {
+	width: 60px;
+}
+
+.arrivalsRow>td {
+	border-top: 1px solid #000000;
+	padding-top: 5px;
+	padding-left: 0px;
+	padding-right: 0px;
+	padding-bottom: 5px;
+}
+
+.arrivalsRouteEntry {
+	font-size: 18pt;
+}
+
+.arrivalsRouteLongNameEntry {
+	font-size: 10pt;
+}
+
+.arrivalsRouteEntry a:link {
+	color: black;
+	text-decoration: none;
+}
+
+.arrivalsRouteEntry a:visited {
+	color: black;
+	text-decoration: none;	
+}
+
+.arrivalsDestinationEntry {
+	font-size: 10pt;
+	text-align: center;
+}
+
+.arrivalsDestinationEntry a:link {
+	color: black;
+}
+
+.arrivalsDestinationEntry a:visited {
+	color: black;
+}
+
+.arrivalsTimePanel {
+	font-size: 8pt;
+	color: #777777;
+	text-align: center;
+	margin-top: 5px;
+}
+
+.arrivalsLabelEntry {
+	font-size: 8pt;
+	text-align: center;
+	margin-top: 5px;
+}
+
+.arrivalsStatusEntry {
+	font-size: 18pt;
+}
+
+.arrivalStatusNow {
+	font-size: 16pt;
+}
+
+.arrivalStatusDefault {
+	color: green;
+}
+
+.arrivalStatusDeparted {
+	color: green;
+}
+
+.arrivalStatusNoInfo {
+	color: green;
+}
+
+.arrivalStatusEarly {
+	color: red;
+}
+
+.arrivalStatusDelayed {
+	color: blue;
+}
+
+.arrivalStatusCancelled {
+	color: red;
+	font-weight: bold;
+}
+
+.arrivalsFilterPanel {
+	margin-top: 10px;
+	font-size: 10pt;
+	text-decoration: underline;
+}
+
+#arrivalsKey {
+	margin-top: 10px;
+	font-size: 10pt;
+}
+
+.arrivalStatusDefault {
+	color: green;
+}
+
+.arrivalsStatusUpdates {
+	margin-top: 10px;
+	font-size: 10pt;
+	text-align: center;
+}
+
+.arrivalsNearbyStops {
+	margin-top: 10px;
+	font-size: 10pt;
+}
+
+.arrivalsSearchForStops {
+	margin-top: 10px;
+	font-size: 10pt;
+}
+
+#arrivalsNoScheduledArrivals {
+	margin: 10px;
+	font-weight: bold;
+}
+
+/****
+ *
+ ****/
+.stopIdentificationDescription {
+	margin-top: 10px;
+	text-align: center;
+}
+
+.stopIdentificationImage {
+	margin-top: 10px;
+	margin-left: -1px;
+	border: 1px solid #000000;
+}
+
+/****
+ * Update
+ ****/
+
+.update em {
+	color: #225F20;
+}
+
+.adverseWeatherReroute {
+	margin-top: 5px;
+	font-size: 10pt;
+}
+
+/****
+ * Trip Panel
+ ****/
+
+#tripPanel .block {
+	margin-top: 1em;
+}
+
+.tripPanelHeader {
+	margin-top: 1em;
+	border-bottom: 1px solid black;
+}
+
+.tripPanelHeaderRoute {
+	font-weight: bold;
+	font-size: 16px;
+}
+
+.tripPanelHeaderTripId {
+	font-weight: bold;
+	font-size: 12px;
+}
+
+.tripPanelLabel {
+	font-weight: bold;
+	margin-right: 5px;
+}
+
+.tripPanelStatusSuspended {
+	font-weight: bold;
+	color: red;
+}
+
+.tripPanelStatusSuspendedDescription {
+	margin-top: 1em;
+}
+
+.tripStatusDefault {
+	color: green;
+}
+
+.tripStatusEarly {
+	color: red;
+}
+
+.tripStatusDelayed {
+	color: blue;
+}
+
+.snow a:link {
+	color: red;
+}
+
+.snow a:visited {
+	color: red;
+}
+
+.TripPage-ArrivalTime {
+	font-weight: bold;
+	padding-top: 20px;
+	margin-bottom: 5px;
+}
+
+.warning {
+	font-size: 0.9em;	
+}
+
+div.agenciesSection {
+	margin-top: 2em;
+}
+
+div.agencyDisclaimers {
+	margin-top: 1em;
+	border: 1px dashed #aaaaaa;
+	padding-bottom: 0.5em;
+	color: #777777;
+}
+
+div.agencyDisclaimer {
+	margin-top: 0.5em;
+}
+
+div.agencyDisclaimerHeading {
+  font-size: 0.8em;
+}
+
+div.agencyDisclaimerContent {
+	margin-top:0.3em;
+  	font-style:italic;
+}

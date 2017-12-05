@@ -28,13 +28,13 @@ var obaApiFactory = function() {
 	 **************************************************************************/
 
 	var createUrl = function(url) {
-		return OBA.Config.apiUrl + url;// blah
-	};
+		return OBA.Config.apiUrl + url;
+	}
 
 	var createParams = function(otherParams) {
 
 		var params = {
-			key : OBA.Config.apiKey,
+			key : OBA.Config.obaApiKey,
 			version : 2
 		};
 		
