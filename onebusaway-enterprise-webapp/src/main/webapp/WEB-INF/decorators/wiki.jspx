@@ -156,7 +156,7 @@
 	    	<div class="container clear"></div>
 	    	<div id="footer" class="clear">
 			  	<s:url var="url" value="/css/img/google_logo.png"></s:url>
-				<div id="google_translate_element">Google Translate <img id="icon" src="${url}" /></div>
+				<div id="google_translate_element_bottom">Google Translate <img id="icon" src="${url}" /></div>
 			</div>
 		</div>
 
