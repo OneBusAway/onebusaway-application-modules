@@ -23,6 +23,8 @@ import org.onebusaway.util.SystemTime;
 import org.onebusaway.util.services.configuration.ConfigurationService;
 import org.onebusaway.transit_data.model.AgencyWithCoverageBean;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.servlet.http.HttpServletRequest;
@@ -35,6 +37,7 @@ import java.util.List;
 public class RemoteConfigAction extends ActionSupport {
 
     private static final long serialVersionUID = 1L;
+    private static Logger _log = LoggerFactory.getLogger(RemoteConfigAction.class);
 
     @Autowired
     private ConfigurationService _configurationService;
@@ -117,16 +120,20 @@ public class RemoteConfigAction extends ActionSupport {
 
     public boolean isHttps() {
         // force the use of https to remote servers
-        return "true".equalsIgnoreCase(_configurationService.getConfigurationValueAsString("display.useHttps", "false"));
+        String useHttps = _configurationService.getConfigurationValueAsString("display.useHttps", "false");
+        boolean isHttps = "true".equalsIgnoreCase(useHttps);
+        _log.info("isHttps=" + isHttps + " for config value=" + useHttps);
+        return isHttps;
     }
 
     public String getAppHostURL() {
         HttpServletRequest request = ServletActionContext.getRequest();
         if ((request != null && request.isSecure()) || isHttps()) {
             // if we came from https, all subsequent requests need to be https
+            _log.info("returning (1) https://" + getAppHostName());
             return "https://" + getAppHostName();
         }
-
+        _log.info("returning (2) http://" + getAppHostName());
         return "http://" + getAppHostName();
     }
 

@@ -212,6 +212,7 @@
 
 			<div id="flexSpreader"><!-- jspx --></div>
 			<div class="container clear"><!-- jspx --></div>
+<!--
 
 			<div id="mobileBox">
 				<div id="mobileAvailabilityBox">
@@ -223,7 +224,7 @@
 					<img src="${url}" alt="Agency logo" />
 				</a>
 			</div>
-		
+-->
 		</div>
 		<div class="container clear"><!-- jspx --></div>
 	  	<s:url var="url" value="/css/img/google_logo.png"></s:url>
