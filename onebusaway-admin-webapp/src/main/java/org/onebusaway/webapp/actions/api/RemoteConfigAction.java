@@ -122,7 +122,6 @@ public class RemoteConfigAction extends ActionSupport {
         // force the use of https to remote servers
         String useHttps = _configurationService.getConfigurationValueAsString("display.useHttps", "false");
         boolean isHttps = "true".equalsIgnoreCase(useHttps);
-        _log.info("isHttps=" + isHttps + " for config value=" + useHttps);
         return isHttps;
     }
 
@@ -130,10 +129,8 @@ public class RemoteConfigAction extends ActionSupport {
         HttpServletRequest request = ServletActionContext.getRequest();
         if ((request != null && request.isSecure()) || isHttps()) {
             // if we came from https, all subsequent requests need to be https
-            _log.info("returning (1) https://" + getAppHostName());
             return "https://" + getAppHostName();
         }
-        _log.info("returning (2) http://" + getAppHostName());
         return "http://" + getAppHostName();
     }
 
