@@ -47,7 +47,7 @@ OBA.Mobile = (function() {
 	function addRefreshBehavior() {
 		// refresh button logic
 		refreshBar = jQuery("#refresh")
-					.css("position", "absolute")
+					.css("position", "relative")
 					.css("right", "20")
 					.css("left", "12");
 
@@ -70,7 +70,7 @@ OBA.Mobile = (function() {
 				
 		// scrolling/fixed refresh bar logic
 		var contentDiv = jQuery("#content")
-							.css("padding-top", refreshBar.height() * 1.5);				
+							.css("padding-top", refreshBar.height() * 0.1);
 
 		var topLimit = contentDiv.offset().top + (refreshBar.height() * 0.25) - 20;
 		
@@ -85,7 +85,7 @@ OBA.Mobile = (function() {
 				top = topLimit;
 			}
 			
-			refreshBar.css("top", top + 3);
+			// refreshBar.css("top", top + 3);
 		};
 		repositionRefreshBar();
 		

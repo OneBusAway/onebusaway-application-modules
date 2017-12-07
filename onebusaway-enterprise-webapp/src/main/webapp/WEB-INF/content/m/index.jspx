@@ -22,6 +22,7 @@
 <jsp:directive.page contentType="text/html" />
 <jsp:output omit-xml-declaration="yes"/>
 <head>
+
 	<s:url var="url" value="/js/lib/jquery.ui.js">
 		<s:param name="v"><s:property value="frontEndVersion" /></s:param>
   	</s:url>
@@ -76,7 +77,7 @@
 		</div>
 	</s:if>
 	<s:else>
-		
+
 		<div id="refresh">
 			<s:url var="url" namespace="/m" action="index" anchor="top">				
 				<s:param name="q"><s:property value="q" /></s:param>
@@ -86,9 +87,16 @@
 			</s:url>
 	    	<a href="${url}">Refresh (<strong>Updated <s:property value="lastUpdateTime" /></strong>)</a>
 		</div>
-		
+
+		<div id="mapHider">
+			<div id="mapExpander">
+				<span>SHOW MAP</span>
+			</div>
+			<div id="mapContainer"><br/></div>
+		</div>
 		<div id="content">
 			<s:if test="%{results.matches.size&gt;0}">
+
 				<s:if test="results.resultType.equals('RouteResult')">
 					<s:if test="%{results.matches.size&gt;0}"><!--  support multiple agency route matches -->
 						<c:import url="route-result.jspx"/>
@@ -123,7 +131,25 @@
 			</s:if>
 		</div>
 
-		
 	</s:else>
+
+	<script type="text/javascript">
+		$('#mapContainer').html('');
+		var frame = $('<iframe></iframe>');
+		frame.attr("id", "mapFrame");
+		frame.attr("src", "http://localhost:8080/#" + "${q}");
+		$('#mapContainer').append(frame);
+		frame.load(function(){this.contentWindow.document.documentElement.scrollLeft=500});
+
+		$("#mapExpander").click(function () {
+			$mapExpander = $(this);
+			$mapContainer = $mapExpander.next();
+			$mapContainer.slideToggle(500, function () {
+				$mapExpander.children('span').text(function () {
+					return $mapContainer.is(":visible") ? "HIDE MAP" : "SHOW MAP";
+				});
+			});
+		});
+	</script>
 </body>
 </html>
