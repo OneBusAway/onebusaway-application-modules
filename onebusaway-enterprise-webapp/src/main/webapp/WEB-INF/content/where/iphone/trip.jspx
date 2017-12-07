@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+            http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<html xmlns:jsp="http://java.sun.com/JSP/Page" xmlns:c="http://java.sun.com/jsp/jstl/core" xmlns:s="/struts-tags"
+    xmlns:oba="/oba-tags">
+<jsp:directive.page contentType="text/html" />
+<head>
+<title>Route <s:property value="result.trip.route.shortName" /> - <s:property value="result.trip.tripHeadsign" /> - Trip # <s:property
+    value="result.trip.Id" /></title>
+</head>
+<body>
+
+<div id="tripPanel"><s:push value="result">
+
+    <div class="tripPanelHeader">
+    <div class="tripPanelHeaderRoute">Route <s:property value="result.trip.route.shortName" /> - <s:property value="result.trip.tripHeadsign" /></div>
+    <div class="tripPanelHeaderTripId">Trip # <s:property value="result.trip.id" /></div>
+    </div>
+
+    <s:if test="schedule.previousTrip != null">
+        <p>Incoming Route:<br/><a href="trip?id=${schedule.previousTrip.id}"><oba:routeName
+            value="schedule.previousTrip.route" /> - <s:property
+            value="schedule.previousTrip.tripHeadsign" /></a></p>
+    </s:if>
+
+    <div class="section">
+    
+    <oba:group value="schedule.stopTimes" var="groups">
+        <s:property value="departureTime / 300" />
+    </oba:group>
+    
+    <s:iterator value="#groups">
+        <div class="TripPage-ArrivalTime"><oba:date format="hh:mm aa" value="getStopTime(top[0])" /></div>
+        <ul class="buttons"><s:iterator>
+            <li><a href="stop?id=${stop.id}"><s:property value="stop.name" /></a></li>
+        </s:iterator></ul>
+    </s:iterator></div>
+
+    <s:if test="schedule.nextTrip != null">
+        <p>Continues as Route:<br/><a href="trip?id=${schedule.nextTrip.id}"><oba:routeName
+            value="schedule.nextTrip.route" /> - <s:property
+            value="schedule.nextTrip.tripHeadsign" /></a></p>
+    </s:if>
+
+</s:push>
+</div>
+
+</body>
+</html>

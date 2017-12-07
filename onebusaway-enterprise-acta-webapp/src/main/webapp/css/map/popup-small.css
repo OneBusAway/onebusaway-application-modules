@@ -1,0 +1,260 @@
+/**
+ * Copyright (C) 2016 Cambridge Systematics, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+.popup {
+    font-size: 11px;
+	color: #333333;
+	display: block;
+}
+
+.popup.loading {
+	background-image: url('img/ajax-loader.gif');
+	background-repeat: no-repeat;
+	background-position: 35% 48%;
+}
+
+.popup.loading p {
+	padding: 0px;
+	padding-left: 45%;
+	padding-top: 50px;
+	padding-bottom: 50px;
+	font-size: 120%;
+	font-weight: normal;
+	color: #999;
+}
+
+.popup .header {
+	white-space: nowrap;
+	padding-left: 5px;
+	padding-top: 5px;
+	padding-bottom: 5px;
+}
+
+
+
+.popup .header .title {
+	white-space: nowrap;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.popup .header .type {
+	height: 14px;
+	font-weight: bold;	
+	margin-top: 3px;
+}
+
+.popup .header .updated {
+	white-space: nowrap;
+	height: 14px;
+	color: #666666;
+	padding-left: 4px;
+	margin-left: 4px;
+	border-left: 1px solid #bebebe;
+}
+
+.popup .header .updated.stale {
+    color: #d12020;
+}
+
+.popup .service {
+	width: 250px;
+	margin: 0;
+	padding: 0;
+	padding-top: 4px;
+	color: #666666;
+	font-size: 12px;
+	font-weight: bold;
+}
+
+.popup .meta.stale {
+  	color: #d12020;
+}
+
+.popup .serviceAlertContainer {
+	color: #d12020;
+	background-color: #FDEEF4;
+}
+
+.popup .serviceAlertContainer .alerts li {
+	padding-left: 8px;
+	padding-right: 8px;
+	padding-bottom: 8px;
+	color: #D12020;
+	font-size: 11px;
+	line-height: 1.2em;
+}
+
+.popup .serviceAlertContainer .title {
+	padding: 5px;
+	font-weight:bold;
+}
+
+.popup ul li.route {
+	white-space: no-wrap;
+	color: #000099;
+	font-weight: bold;
+	padding: 2px 0 2px 0;
+}
+
+.popup ul li.last {
+	padding-bottom: 4px;
+}
+
+.popup ul li.route.no-padding {
+	margin-top: 0px;
+}
+
+.popup ul li.arrival {
+	white-space: nowrap;
+	height: 14px;
+	font-weight: bold;
+	padding-left: 19px;
+	background: url("img/bullet_bus.png");
+	background-position: left top;
+	background-repeat: no-repeat;
+}
+
+.popup ul li.arrival_schedule {
+	white-space: nowrap;
+	height: 14px;
+	font-weight: bold;
+	padding-left: 19px;
+	background: url("img/schedule_bullet_bus.png");
+	background-position: left top;
+	background-repeat: no-repeat;
+}
+
+.popup ul li.arrival .not_bold {
+	font-weight: normal;
+	white-space: nowrap;
+	position: relative;
+}
+
+.popup ul li.nextStop {
+	white-space: nowrap;
+	color: #000099;
+	height: 16px;
+	font-weight: bold;
+	padding-left: 19px;
+	background: url("img/bullet_stop.png");
+	background-position: left top;
+	background-repeat: no-repeat;
+}
+
+#bustime .popup ul li.nextStop span.stopName {
+	color: #000099;
+	cursor: pointer;
+}
+
+#bustime .popup ul li.nextStop span.stopName:hover {
+	color: #8FC743;
+}
+
+.popup ul.otherRoutes li {
+	display: inline;
+	margin-right: 10px;
+}
+
+.popup ul li.nextStop span,
+.popup ul li.arrival span {
+	white-space: nowrap;
+	color: #333333;
+	padding-left: 0px;
+	margin-left: 4px;
+}
+
+.popup ul li.arrival span:first-child {
+	margin-left: 0px;
+}
+
+.popup .no-service-routes {
+	padding-bottom: 4px;
+}
+
+.popup .no-service-routes li.route {
+	display: inline-block;
+	padding: 0 1.0em 0 0;
+	zoom: 1;
+	display:inline;
+}
+
+.popup li.route a {
+	padding-right: 0.5em;
+}
+
+.popup .route-name {
+	font-weight: bold;
+}
+
+.popup .footer {
+	margin-top: 7px;
+	padding-top: 7px;
+	border-top: 1px solid #bebebe;
+}
+
+.popup .footer .header {
+	padding: 0px;
+	font-size: 12px;
+	font-weight: bold;
+	font-style: italic;	
+}
+
+.popup ul.links {
+	margin-top: 10px;
+}
+
+.popup .popup-filtered-matches ul li {
+	display: inline-block;
+	padding: 0 1.0em 0 0;
+	zoom: 1;
+	display:inline;
+}
+
+#bustime .popup .muted {
+	color: rgb(100,100,100);
+}
+
+#bustime .popup a.muted {
+	color: rgb(130,130,130);
+}
+
+#bustime .popup a:HOVER.muted {
+	color: rgb(100,100,100);
+}
+
+#bustime .popup .scheduleAlert {
+	color: rgb(225,0,0);
+}
+
+#bustime .popup .vehicleId {
+	color: rgb(0,0,255);
+}
+
+#bustime .popup a.alert-link{
+	color: rgb(225,0,0);
+	background: url("img/alert_icon.png");
+	background-position: 0 100%;
+	background-repeat: no-repeat;
+	padding-left: 21px;
+}
+
+#bustime .popup a:HOVER.alert-link {
+	color: rgb(255,0,0);
+}
+
+.popup #schedule {
+	visibility: hidden;
+}

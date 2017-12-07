@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+            http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<jsp:root version="1.2" xmlns:jsp="http://java.sun.com/JSP/Page"
+    xmlns:c="http://java.sun.com/jsp/jstl/core" xmlns:s="/struts-tags"
+    xmlns:oba="/oba-tags">
+
+    <jsp:directive.page contentType="text/html" />
+    
+    <s:set var="arrivalsAndDepartures" value="parameters.arrivalsAndDepartures" />
+
+    <s:set var="excludeOrderLinks"
+        value="parameters.excludeOrderLinks == true" />
+    <s:set var="excludeTripLinks"
+        value="parameters.excludeTripLinks == true" />        
+
+    <table class="arrivalsTable">
+        <tr class="arrivalsHeader">
+            <td class="arrivalsRouteColumn"><s:if
+                test="#excludeOrderLinks">
+                <s:text name="route" />
+            </s:if> <s:else>
+                <s:url var="url" includeParams="get">
+                    <s:param name="order">route</s:param>
+                </s:url>
+                <s:a href="%{url}"><s:text name="route" /></s:a>
+            </s:else></td>
+            <td class="arrivalsDestinationColumn"><s:if
+                test="#excludeOrderLinks">
+                <s:text name="destination" />
+            </s:if> <s:else>
+                <s:url var="url" includeParams="get">
+                    <s:param name="order">destination</s:param>
+                </s:url>
+                <s:a href="%{url}">
+                    <s:text name="destination" />
+                </s:a>
+            </s:else></td>
+            <td class="arrivalsStatusColumn"><s:if
+                test="#excludeOrderLinks">
+                <s:text name="minutes" />
+            </s:if> <s:else>
+                <s:url var="url" includeParams="get">
+                    <s:param name="order">time</s:param>
+                </s:url>
+                <s:a href="%{url}">
+                    <s:text name="minutes" />
+                </s:a>
+            </s:else></td>
+        </tr>
+        
+        <s:iterator value="#arrivalsAndDepartures">
+            <s:component template="arrival-and-departure-table-row-snippet.jspx">
+                <s:param name="arrivalAndDeparture" value="top"/>
+                <s:param name="presentation" value="parameters.presentation"/>
+                <s:param name="excludeOrderLinks" value="#excludeOrderLinks" />
+                <s:param name="excludeTripLinks" value="#excludeTripLinks" />
+            </s:component>
+        </s:iterator>
+
+        <s:if test="#arrivalsAndDepartures.empty">
+            <tr>
+                <td colspan="3">
+                <div id="arrivalsNoScheduledArrivals">
+                	No scheduled
+                	<s:if test="showArrivals">
+                		arrivals
+                	</s:if>
+                	<s:else>
+                		departures
+                	</s:else>
+            		in the next 30 minutes.
+            	</div>
+                </td>
+            </tr>
+        </s:if>
+    </table>
+
+    <div class="arrivalsStatusUpdates">Last Update: <oba:date
+        value="'now'" format="hh:mm aa" /></div>
+
+</jsp:root>
