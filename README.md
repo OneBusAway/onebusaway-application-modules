@@ -31,7 +31,7 @@ Here are the high-level steps you'll need to take to launch the OneBusAway mobil
 1. Get your schedule transit data in the [GTFS format](https://developers.google.com/transit/gtfs/)
 2. Have an AVL system that produces arrival estimates (*Note: we're working removing this requirement - [contact us](https://groups.google.com/forum/#!forum/onebusaway-developers) if you're interested.  Alternatively, you may be able to use other open-source projects, such as [TransiTime](https://github.com/Transitime/core/wiki), to go directly from raw vehicle locations to arrival times that are shared via GTFS-realtime and SIRI - this would replace Steps 2 and 3.*)
 3. Implement a [GTFS-realtime](https://developers.google.com/transit/gtfs-realtime/) or [SIRI](http://en.wikipedia.org/wiki/Service_Interface_for_Real_Time_Information) real-time data feed *(We also support [other formats](https://github.com/OneBusAway/onebusaway-application-modules/wiki/Real-Time-Data-Configuration-Guide))*
-4. Set up [a OneBusAway server](https://github.com/OneBusAway/onebusaway-application-modules/wiki#setting-up-a-onebusaway-server)
+4. Set up [a OneBusAway server](https://github.com/OneBusAway/onebusaway-application-modules#setting-up-a-onebusaway-server)
 5. Do some quality-control testing of arrival times
 6. Request to be added as a OneBusAway region
 

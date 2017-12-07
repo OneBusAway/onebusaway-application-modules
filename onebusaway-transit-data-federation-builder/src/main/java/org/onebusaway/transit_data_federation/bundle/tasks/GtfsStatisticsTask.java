@@ -18,6 +18,7 @@ package org.onebusaway.transit_data_federation.bundle.tasks;
 import java.io.File;
 import java.util.Collection;
 
+import org.onebusaway.gtfs.impl.GtfsRelationalDaoImpl;
 import org.onebusaway.gtfs.model.Agency;
 import org.onebusaway.gtfs.services.GtfsMutableRelationalDao;
 import org.onebusaway.transit_data_federation.services.FederatedTransitDataBundle;
@@ -31,11 +32,17 @@ import com.conveyal.gtfs.service.impl.GtfsStatisticsService;
 public class GtfsStatisticsTask implements Runnable {
 	private Logger _log = LoggerFactory.getLogger(GtfsStatisticsTask.class);
 	private static final String ALL_AGENCIES = "TOTAL";
-	private GtfsMutableRelationalDao _dao;
+	//private GtfsMutableRelationalDao _dao;
+	private GtfsRelationalDaoImpl _dao;
 	private FederatedTransitDataBundle _bundle;
 	
+//	@Autowired
+//	public void setGtfsDao(GtfsMutableRelationalDao dao) {
+//		_dao = dao;
+//	}
+
 	@Autowired
-	public void setGtfsDao(GtfsMutableRelationalDao dao) {
+	public void setGtfsDao(GtfsRelationalDaoImpl dao) {
 		_dao = dao;
 	}
 

@@ -41,6 +41,7 @@ import org.onebusaway.collections.Range;
 import org.onebusaway.container.ConfigurationParameter;
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.realtime.api.EVehicleType;
 import org.onebusaway.realtime.api.TimepointPredictionRecord;
 import org.onebusaway.realtime.api.VehicleLocationRecord;
 import org.onebusaway.transit_data_federation.model.TargetTime;
@@ -219,7 +220,7 @@ public class BlockLocationServiceImpl implements BlockLocationService,
    * Should we persist {@link BlockLocationRecord} records to an underlying
    * datastore. Useful if you wish to query trip status for historic analysis.
    * 
-   * @param persistTripTimePredictions
+   * @param persistBlockLocationRecords
    */
   @ConfigurationParameter
   public void setPersistBlockLocationRecords(boolean persistBlockLocationRecords) {
@@ -360,7 +361,6 @@ public class BlockLocationServiceImpl implements BlockLocationService,
   @Override
   public List<BlockLocation> getLocationsForBlockInstance(
       BlockInstance blockInstance, TargetTime time) {
-
     List<VehicleLocationCacheElements> records = getBlockLocationRecordCollectionForBlock(
         blockInstance, time);
 
@@ -485,7 +485,7 @@ public class BlockLocationServiceImpl implements BlockLocationService,
   }
 
   /**
-   * We add the {@link BlockPositionRecord} to the local cache and persist it to
+   * We add the {@link BlockInstance} to the local cache and persist it to
    * a back-end data-store if necessary
    * 
    * @param scheduledBlockLocation TODO
@@ -508,8 +508,6 @@ public class BlockLocationServiceImpl implements BlockLocationService,
       BlockLocation location = getBlockLocation(blockInstance, elements,
           scheduledBlockLocation, record.getTimeOfRecord());
       if (location != null) {
-        location.setVehicleType(record.getVehicleType());
-
         for (BlockLocationListener listener : _blockLocationListeners) {
           listener.handleBlockLocation(location);
         }
@@ -526,9 +524,9 @@ public class BlockLocationServiceImpl implements BlockLocationService,
   /**
    * 
    * @param blockInstance
-   * @param scheduledBlockLocation TODO
+   * @param cacheElements
+   * @param scheduledLocation
    * @param targetTime
-   * @param record
    * @return null if the effective scheduled block location cannot be determined
    */
   private BlockLocation getBlockLocation(BlockInstance blockInstance,
@@ -573,7 +571,6 @@ public class BlockLocationServiceImpl implements BlockLocationService,
       location.setOrientation(record.getCurrentOrientation());
       location.setPhase(record.getPhase());
       location.setStatus(record.getStatus());
-      location.setVehicleType(record.getVehicleType());
       location.setVehicleId(record.getVehicleId());
 
       List<TimepointPredictionRecord> timepointPredictions = record.getTimepointPredictions();
@@ -660,7 +657,7 @@ public class BlockLocationServiceImpl implements BlockLocationService,
     } else {
       if (scheduledLocation == null)
         scheduledLocation = getScheduledBlockLocationForBlockInstance(
-            blockInstance, targetTime);
+                blockInstance, targetTime);
     }
 
     /**
@@ -674,6 +671,13 @@ public class BlockLocationServiceImpl implements BlockLocationService,
      */
     if (scheduledLocation == null)
       return null;
+
+    // if we have route info, set the vehicleType
+    if (scheduledLocation.getActiveTrip() != null
+            && scheduledLocation.getActiveTrip().getTrip() != null
+            && scheduledLocation.getActiveTrip().getTrip().getRoute() != null) {
+      location.setVehicleType(EVehicleType.toEnum(scheduledLocation.getActiveTrip().getTrip().getRoute().getType()));
+    }
 
     location.setInService(scheduledLocation.isInService());
     location.setActiveTrip(scheduledLocation.getActiveTrip());
@@ -1011,6 +1015,8 @@ public class BlockLocationServiceImpl implements BlockLocationService,
       BlockTripEntry activeTrip = scheduledBlockLocation.getActiveTrip();
       builder.setTripId(activeTrip.getTrip().getId());
       builder.setBlockId(activeTrip.getBlockConfiguration().getBlock().getId());
+      // store the vehicleType for later retrieval
+      builder.setVehicleType(EVehicleType.toEnum(activeTrip.getTrip().getRoute().getType()));
 
       double distanceAlongBlock = scheduledBlockLocation.getDistanceAlongBlock();
       builder.setDistanceAlongBlock(distanceAlongBlock);
@@ -1057,12 +1063,11 @@ public class BlockLocationServiceImpl implements BlockLocationService,
 
     builder.setPhase(record.getPhase());
     builder.setStatus(record.getStatus());
-    builder.setVehicleType(record.getVehicleType());
     builder.setVehicleId(record.getVehicleId());
 
     List<TimepointPredictionRecord> predictions = record.getTimepointPredictions();
     if (predictions == null || predictions.isEmpty())
-      return Arrays.asList(builder.create());
+        return Arrays.asList(builder.create());
 
     List<BlockLocationRecord> results = new ArrayList<BlockLocationRecord>();
     for (TimepointPredictionRecord tpr : predictions) {
@@ -1096,7 +1101,6 @@ public class BlockLocationServiceImpl implements BlockLocationService,
         vlr.setScheduleDeviation(record.getScheduleDeviation());
       vlr.setServiceDate(record.getServiceDate());
       vlr.setStatus(record.getStatus());
-      vlr.setVehicleType(record.getVehicleType());
       vlr.setTimeOfRecord(record.getTime());
       vlr.setVehicleId(record.getVehicleId());
 

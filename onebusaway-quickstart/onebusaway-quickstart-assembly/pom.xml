@@ -3,7 +3,7 @@
   <parent>
     <artifactId>onebusaway-quickstart</artifactId>
     <groupId>org.onebusaway</groupId>
-    <version>1.1.17-SNAPSHOT</version>
+    <version>2.0.0-cs-SNAPSHOT</version>
   </parent>
   <artifactId>onebusaway-quickstart-assembly</artifactId>
   <packaging>pom</packaging>
@@ -37,13 +37,6 @@
       <classifier>api-only</classifier>
       <type>war</type>
     </dependency>    
-    <dependency>
-      <groupId>org.onebusaway</groupId>
-      <artifactId>onebusaway-combined-webapp</artifactId>
-      <version>${project.version}</version>
-      <classifier>full</classifier>
-      <type>war</type>
-    </dependency>
     <dependency>
       <groupId>org.onebusaway</groupId>
       <artifactId>onebusaway-transit-data-federation-builder</artifactId>
