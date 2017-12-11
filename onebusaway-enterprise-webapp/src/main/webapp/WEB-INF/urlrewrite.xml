@@ -80,16 +80,36 @@
     <!-- 
     	API rules.
      -->
-    <!-- <rule use-query-string="true">
-        <from>^/api/siri/([^.]*)\.(xml|json)$</from>
-        <to last="true" type="redirect">/onebusaway-api-webapp/siri/$1?type=$2</to>
+    <rule use-query-string="true">
+        <from>^/api/where/([^.]*)\.(xml|json)$</from>
+        <to last="true" type="redirect">/onebusaway-api-webapp/where/$1?type=$2</to>
     </rule>
     
     <rule>
-        <from>^/api/siri/([^.]*)\.(xml|json)$</from>
+        <from>^/api/where/([^.]*)\.(xml|json)$</from>
         <to last="true">/onebusaway-api-webapp/siri/$1.action?type=$2</to>
-    </rule>     -->
-            
+    </rule>
+    
+    <!-- 
+    	Legacy Iphone Interface 
+   	-->
+    <rule>
+        <from>^/where/iphone/([^.]*)\.action$</from>
+        <to last="true">/where/iphone/$1.action</to>
+    </rule>
+    <rule>
+        <from>^/where/iphone/$</from>
+        <to last="true">/where/iphone/index.action</to>
+    </rule>
+
+    <!-- 
+    	Legacy Signs Interface 
+   	--> 
+    <rule>
+        <from>^/where/sign/stop.action</from>
+        <to type="redirect" last="true">%{context-path}/sign/sign?stopIds=%{parameter:id}</to>
+    </rule>        
+
 	<!--
 		Remove action from URLs.
 	-->	

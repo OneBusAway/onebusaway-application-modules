@@ -68,6 +68,7 @@ import uk.org.siri.siri.ProgressRateEnumeration;
 import uk.org.siri.siri.SituationRefStructure;
 import uk.org.siri.siri.SituationSimpleRefStructure;
 import uk.org.siri.siri.StopPointRefStructure;
+import uk.org.siri.siri.VehicleModesEnumeration;
 import uk.org.siri.siri.VehicleRefStructure;
 
 import static org.apache.commons.lang.StringUtils.isBlank;
@@ -153,6 +154,8 @@ public final class SiriSupport {
 		}
 		
 		monitoredVehicleJourney.setVehicleRef(vehicleRef);
+
+		monitoredVehicleJourney.getVehicleMode().add(toVehicleMode(currentVehicleTripStatus.getVehicleType()));
 
 		monitoredVehicleJourney.setMonitored(currentVehicleTripStatus.isPredicted());
 
@@ -296,7 +299,34 @@ public final class SiriSupport {
 	/***
 	 * PRIVATE STATIC METHODS
 	 */
-	
+
+	public static VehicleModesEnumeration toVehicleMode(String typeString) {
+		VehicleModesEnumeration mode;
+		if (typeString == null) {
+			mode = VehicleModesEnumeration.BUS;
+			return mode;
+		}
+		switch (typeString) {
+			case "bus":
+				mode = VehicleModesEnumeration.BUS;
+				break;
+			case "light_rail":
+				mode = VehicleModesEnumeration.TRAM;
+				break;
+			case "rail":
+				mode = VehicleModesEnumeration.RAIL;
+				break;
+			case "ferry":
+				mode = VehicleModesEnumeration.FERRY;
+				break;
+			default:
+				_log.error("Unknown vehicleMode " + typeString + ", defaulting to BUS");
+				mode = VehicleModesEnumeration.BUS;
+		}
+		return mode;
+	}
+
+
 	private static void fillOnwardCalls(MonitoredVehicleJourneyStructure monitoredVehicleJourney, 
 			BlockInstanceBean blockInstance, TripBean framedJourneyTripBean, TripStatusBean currentVehicleTripStatus, OnwardCallsMode onwardCallsMode,
 			PresentationService presentationService, TransitDataService transitDataService, 
@@ -611,7 +641,12 @@ public final class SiriSupport {
 			monitoredCallStructure.setExpectedArrivalTime(new Date(scheduledArrivalTime));
 			monitoredCallStructure.setExpectedDepartureTime(new Date(scheduledArrivalTime));
 		}
-		
+
+        //setting the scheduled arrival time.
+        if (monitoredCallStructure.getExpectedArrivalTime()!= null) {
+            monitoredCallStructure.setAimedArrivalTime(new Date(scheduledArrivalTime));
+        }
+
 		// siri extensions
 		SiriExtensionWrapper wrapper = new SiriExtensionWrapper();
 		ExtensionsStructure distancesExtensions = new ExtensionsStructure();

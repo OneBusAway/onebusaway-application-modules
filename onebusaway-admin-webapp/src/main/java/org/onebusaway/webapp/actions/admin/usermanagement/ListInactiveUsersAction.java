@@ -23,6 +23,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 public class ListInactiveUsersAction extends OneBusAwayNYCAdminActionSupport {
@@ -34,7 +36,16 @@ public class ListInactiveUsersAction extends OneBusAwayNYCAdminActionSupport {
     public String execute() {
         super.execute();
 
-        setUserDetailsList(userManagementService.getInactiveUsersDetails());
+        List<UserDetail> udl = userManagementService.getInactiveUsersDetails();
+
+        Collections.sort(udl, new Comparator<UserDetail>() {
+            @Override
+            public int compare(UserDetail userDetail, UserDetail userDetail2) {
+                return userDetail.getRole().compareTo(userDetail2.getRole());
+            }
+        });
+
+        setUserDetailsList(udl);
 
         return SUCCESS;
     }

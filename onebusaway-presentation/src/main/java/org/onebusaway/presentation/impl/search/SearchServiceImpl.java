@@ -18,6 +18,7 @@ package org.onebusaway.presentation.impl.search;
 import org.onebusaway.geocoder.enterprise.services.EnterpriseGeocoderResult;
 import org.onebusaway.geocoder.enterprise.services.EnterpriseGeocoderService;
 import org.onebusaway.presentation.impl.RouteComparator;
+import org.onebusaway.presentation.impl.realtime.SiriSupport;
 import org.onebusaway.presentation.model.SearchResult;
 import org.onebusaway.presentation.model.SearchResultCollection;
 import org.onebusaway.presentation.services.search.SearchResultFactory;
@@ -40,6 +41,9 @@ import org.onebusaway.transit_data.model.StopsBean;
 import org.onebusaway.transit_data.model.StopsForRouteBean;
 import org.apache.commons.collections.ListUtils;
 import org.apache.commons.lang.StringUtils;
+import org.onebusaway.util.logging.impl.LoggingServiceImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -67,6 +71,8 @@ import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
  */
 @Component
 public class SearchServiceImpl implements SearchService {
+
+    private static final Logger _log = LoggerFactory.getLogger(SearchServiceImpl.class);
 
 	// the pattern of what can be leftover after prefix/suffix matching for a
 	// route to be a "suggestion" for a given search
@@ -365,6 +371,10 @@ public class SearchServiceImpl implements SearchService {
 
 		tryAsRoute(results, normalizedQuery, resultFactory);
 
+        if (results.isEmpty()) {
+            tryAsRoutes(results, normalizedQuery, resultFactory);
+        }
+
 		// only guess it as a stop if its numeric or has possible agency prefix
 		// results does not support mixed types -- it can only be a route or a stop
 		if (results.isEmpty() && (StringUtils.isNumeric(normalizedQuery) || normalizedQuery.contains("_")) ) {
@@ -386,15 +396,17 @@ public class SearchServiceImpl implements SearchService {
 		q = URLDecoder.decode(q);
 		
 		q = q.trim();
+		//replace commas to handle comma separated routes
+		q = q.replace(",", " ");
 
 		List<String> tokens = new ArrayList<String>();
 		if (Boolean.TRUE.equals(configuredAgencyIdHasSpaces())) {
-  		String agencyMatch = matchAgencyIds(q);
-  		if (agencyMatch != null) {
-  		  // handle agencies with spaces
-  		  q = q.replace(agencyMatch, "");
-  		  tokens.add(agencyMatch);
-  		}
+		    String agencyMatch = matchAgencyIds(q);
+		    if (agencyMatch != null) {
+		        // handle agencies with spaces
+                q = q.replace(agencyMatch, "");
+                tokens.add(agencyMatch);
+		    }
 		}
 		
 		StringTokenizer tokenizer = new StringTokenizer(q, " +", true);
@@ -420,7 +432,7 @@ public class SearchServiceImpl implements SearchService {
 
 			if (!StringUtils.isEmpty(token)) {
 				tokens.add(token);
-			}
+            }
 		}
 
 		String normalizedQuery = "";
@@ -607,6 +619,47 @@ public class SearchServiceImpl implements SearchService {
 		}
 
 	}
+
+    private void tryAsRoutes(SearchResultCollection results, String routeQueryMixedCase,
+                            SearchResultFactory resultFactory) {
+
+        String routeQuery = new String(routeQueryMixedCase);
+        if (routeQuery == null || StringUtils.isEmpty(routeQuery)) {
+            return;
+        }
+
+        routeQuery = routeQuery.toUpperCase().trim();
+
+        if (routeQuery.length() < 1) {
+            return;
+        }
+
+        //try to parse routeQuery into separate routes
+        List<String> routeTokens = new ArrayList<String>();
+        StringTokenizer tokenizer = new StringTokenizer(routeQuery, " ", true);
+        while (tokenizer.hasMoreTokens()) {
+            String routeToken = tokenizer.nextToken().trim();
+            if (!StringUtils.isEmpty(routeToken)) {
+                routeTokens.add(routeToken);
+            }
+        }
+
+        //for each route, match to either an agency prefixed route (ex: 1_92)
+        //or a short name of route (ex: 92)
+        for (String route : routeTokens)  {
+            if (_routeIdToRouteBeanMap.get(route) != null) {
+                RouteBean routeBean = _routeIdToRouteBeanMap.get(route);
+                results.addMatch(resultFactory.getRouteResult(routeBean));
+            }
+
+            if (_routeShortNameToRouteBeanMap.get(route) != null) {
+                for (RouteBean routeBean : _routeShortNameToRouteBeanMap.get(route)) {
+                    results.addMatch(resultFactory.getRouteResult(routeBean));
+                }
+            }
+        }
+        return;
+    }
 
 	private void tryAsStop(SearchResultCollection results, String stopQuery,
 			SearchResultFactory resultFactory) {

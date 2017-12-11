@@ -276,6 +276,7 @@ public class VehicleLocationRecord implements Serializable {
     this.phase = phase;
   }
 
+
   public String getStatus() {
     return status;
   }

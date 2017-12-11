@@ -26,4 +26,6 @@ public interface RouteEntry {
   public RouteCollectionEntry getParent();
   
   public List<TripEntry> getTrips();
+
+  public int getType();
 }

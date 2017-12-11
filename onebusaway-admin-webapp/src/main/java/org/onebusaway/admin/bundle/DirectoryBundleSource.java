@@ -42,12 +42,20 @@ public class DirectoryBundleSource extends AbstractBundleSource implements Bundl
 
   private JsonTool jsonTool;
   private File masterBundleDirectory;
+  private String masterBundleDirectoryPathname;
+  private boolean isInitialized = false;
 
   public File getMasterBundleDirectory() {
     return masterBundleDirectory;
   }
-  
 
+  public void setMasterBundleDirectoryPathname(String pathname) {
+    this.masterBundleDirectoryPathname = pathname;
+  }
+
+  public void setJsonTool(JsonTool tool) {
+    jsonTool = tool;
+  }
 
   /**
    * Construct this DirectoryBundleSource, verifying that the passed directory
@@ -61,24 +69,30 @@ public class DirectoryBundleSource extends AbstractBundleSource implements Bundl
   public DirectoryBundleSource(String masterBundleDirectoryPathname,
       JsonTool jsonTool) throws Exception {
     super();
-
+    this.masterBundleDirectoryPathname = masterBundleDirectoryPathname;
     this.jsonTool = jsonTool;
+  }
+
+  private void init() throws RuntimeException{
+    if (isInitialized) return;
 
     masterBundleDirectory = new File(masterBundleDirectoryPathname);
 
     if (!getMasterBundleDirectory().isDirectory()) { // Check to make sure this
-                                                     // is a directory.
-      throw new Exception(
-          "Can not construct DirectoryBundleSource with directory "
-              + masterBundleDirectoryPathname + ". It is not a directory.");
+      // is a directory.
+      throw new RuntimeException(
+              "Can not construct DirectoryBundleSource with directory "
+                      + masterBundleDirectoryPathname + ". It is not a directory.");
     }
 
     _log.info("Loaded DirectoryBundleSource with "
-        + masterBundleDirectory.getPath() + " as master bundle directory.");
+            + masterBundleDirectory.getPath() + " as master bundle directory.");
+    isInitialized = true;
   }
 
   @Override
   public List<Bundle> getBundles() {
+    init();
     List<Bundle> bundles = new ArrayList<Bundle>();
 
     /* Start with a list of the directories in our bundleDirectory */
@@ -197,8 +211,18 @@ public class DirectoryBundleSource extends AbstractBundleSource implements Bundl
 
     try {
       metadataReader = new FileReader(metadataFile);
-
+      if (jsonTool == null) {
+        // we have an issue with the spring configuration
+        throw new RuntimeException("Configuration Error:  jsonTool not configured!");
+      }
       resultBundle = jsonTool.readJson(metadataReader, Bundle.class);
+    } catch (RuntimeException re) {
+      _log.error("fatal configuration error!", re);
+    } catch (Exception e) {
+      // our bundle is corrupt or we have permissions/configuration issue
+      // give up on this bundle and hope that others exist!
+      _log.error("Configuration Exception:  Unable to load file " + metadataFile, e);
+      return null;
     } finally {
       if (metadataReader != null)
         try {
@@ -212,6 +236,7 @@ public class DirectoryBundleSource extends AbstractBundleSource implements Bundl
 
   @Override
   public boolean checkIsValidBundleFile(String bundleId, String relativeFilePath) {
+    init();
     boolean isValid = false;
 
     Bundle requestedBundle;
@@ -234,6 +259,7 @@ public class DirectoryBundleSource extends AbstractBundleSource implements Bundl
   @Override
   public File getBundleFile(String bundleId, String relativeFilePath)
       throws FileNotFoundException {
+    init();
     return getBundleFile(this.masterBundleDirectory.toString(), bundleId, relativeFilePath);
   }
   

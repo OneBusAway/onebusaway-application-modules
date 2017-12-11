@@ -99,7 +99,7 @@
 		<div id="branding">
 			<s:set var="link" value="getText('main.agency.link')" />
 			<a href="${link}">
-			  	<s:url var="url" value="/css/img/agency_logo.gif"></s:url>
+			  	<s:url var="url" value="/css/img/agency_logo.png"></s:url>
 				<img src="${url}" alt="Agency Logo"/>
 			</a>
 		</div>
@@ -156,7 +156,7 @@
 	    	<div class="container clear"></div>
 	    	<div id="footer" class="clear">
 			  	<s:url var="url" value="/css/img/google_logo.png"></s:url>
-				<div id="google_translate_element">Google Translate <img id="icon" src="${url}" /></div>
+				<div id="google_translate_element_bottom">Google Translate <img id="icon" src="${url}" /></div>
 			</div>
 		</div>
 

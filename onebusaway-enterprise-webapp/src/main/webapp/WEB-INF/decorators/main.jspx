@@ -83,7 +83,7 @@
 		<div id="branding">
 			<s:set var="link" value="getText('main.agency.link')" />
 			<a href="${link}">
-			  	<s:url var="url" value="/css/img/oba_puget_sound_web_header.png"></s:url>
+			  	<s:url var="url" value="/css/img/agency_logo.png"></s:url>
 				<img src="${url}" alt="Agency logo" />
 			</a>
 		</div>
@@ -110,7 +110,7 @@
 		</div>
 
 		<div id="bottombar">
-			<div class="bottombox" id="google_translate_element">
+			<div class="bottombox" id="google_translate_element_bottom">
 				<span>Google Translate</span>
 				<s:set var="link" value="getText('main.agency.link')" />
 				<s:url var="url" value="/css/img/google_logo.png"></s:url>

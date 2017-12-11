@@ -37,6 +37,7 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.realtime.api.EVehicleType;
 import org.onebusaway.realtime.api.VehicleLocationListener;
 import org.onebusaway.realtime.api.VehicleLocationRecord;
 import org.onebusaway.transit_data.model.service_alerts.ECause;
@@ -151,7 +152,7 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   private BlockGeospatialService _blockGeospatialService;
   
   private boolean _enabled = true;
- 
+
   @Autowired
   public void setAgencyService(AgencyService agencyService) {
     _agencyService = agencyService;

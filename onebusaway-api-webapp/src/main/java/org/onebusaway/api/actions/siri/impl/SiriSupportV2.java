@@ -80,6 +80,7 @@ import uk.org.siri.siri_2.SituationRefStructure;
 import uk.org.siri.siri_2.SituationSimpleRefStructure;
 import uk.org.siri.siri_2.StopPointInPatternStructure;
 import uk.org.siri.siri_2.StopPointRefStructure;
+import uk.org.siri.siri_2.VehicleModesEnumeration;
 import uk.org.siri.siri_2.VehicleRefStructure;
 
 import static org.apache.commons.lang.StringUtils.isBlank;
@@ -320,6 +321,7 @@ public final class SiriSupportV2 {
     monitoredVehicleJourney.getDestinationName().add(headsign);
     monitoredVehicleJourney.setMonitored(currentVehicleTripStatus
             .isPredicted());
+    monitoredVehicleJourney.getVehicleMode().add(toVehicleMode(currentVehicleTripStatus.getVehicleType()));
     monitoredVehicleJourney.setVehicleRef(vehicleRef);
     monitoredVehicleJourney.setBearing((float) currentVehicleTripStatus
             .getOrientation());
@@ -374,6 +376,33 @@ public final class SiriSupportV2 {
     fillSituations(monitoredVehicleJourney, currentVehicleTripStatus);
 
     return;
+  }
+
+  public static VehicleModesEnumeration toVehicleMode(String typeString) {
+    VehicleModesEnumeration mode;
+    if (typeString == null) {
+      mode = VehicleModesEnumeration.BUS;
+      return mode;
+    }
+
+    switch (typeString) {
+      case "bus":
+        mode = VehicleModesEnumeration.BUS;
+        break;
+      case "light_rail":
+        mode = VehicleModesEnumeration.TRAM;
+        break;
+      case "rail":
+        mode = VehicleModesEnumeration.RAIL;
+        break;
+      case "ferry":
+        mode = VehicleModesEnumeration.FERRY;
+        break;
+      default:
+        _log.error("Unknown vehicleMode " + typeString + ", defaulting to BUS");
+        mode = VehicleModesEnumeration.BUS;
+    }
+    return mode;
   }
 
   public static boolean fillAnnotatedStopPointStructure(

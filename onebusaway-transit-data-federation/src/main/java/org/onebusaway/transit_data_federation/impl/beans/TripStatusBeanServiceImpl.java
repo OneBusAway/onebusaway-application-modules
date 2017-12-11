@@ -313,6 +313,9 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
     if (status != null)
       bean.setStatus(status);
 
+    if (blockLocation.getVehicleType() != null)
+      bean.setVehicleType(blockLocation.getVehicleType().toLabel());
+
     bean.setPredicted(blockLocation.isPredicted());
 
     AgencyAndId vid = blockLocation.getVehicleId();

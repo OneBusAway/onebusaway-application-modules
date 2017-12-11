@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+            http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<html xmlns:jsp="http://java.sun.com/JSP/Page" xmlns:c="http://java.sun.com/jsp/jstl/core" xmlns:s="/struts-tags">
+<jsp:directive.page contentType="text/html" />
+<head>
+
+<s:if test="mode == 'registration'">
+<title>Register Your Account</title>
+</s:if>
+<s:elseif test="mode == 'add-account'">
+<title>Add an Account</title>
+</s:elseif>
+<s:else>
+<title>Login</title>
+</s:else>
+
+<script type="text/javascript"
+        src="org.onebusaway.everylastlogin.LoginWidget.nocache.js"><jsp:text></jsp:text></script>
+<script type="text/javascript">
+  window.onload = function () {
+      var intervalId = null;
+      /* It takes some time for the GWT LoginWidget iframe to initialize */
+      intervalId = setInterval(function() {
+    	  if(typeof(everylastlogin) !== 'undefined') {
+            var prefix = '${pageContext.request.contextPath}';
+            var mode = '<s:property value="mode" />';
+            everylastlogin.LoginWidgetLibrary.createWidget('login_widget',prefix+'/services/login',prefix+'/everylastlogin_login?mode=' + mode + '&amp;_spring_security_remember_me=true');
+            clearInterval(intervalId);
+          }
+      },10);	  
+  };
+</script>
+</head>
+<body>
+
+<s:if test="mode == 'registration'">
+<h2>Register Your Account</h2>
+</s:if>
+<s:elseif test="mode == 'add-account'">
+<h2>Add an Account</h2>
+</s:elseif>
+<s:else>
+<h2>Login</h2>
+</s:else>
+
+<s:if test="anonymousUser">
+
+<s:if test="failure">
+<p class="login_failure">There was a problem with your login.</p>
+</s:if>
+
+<p>Login using your account from one of the providers listed below:</p>
+
+<table>
+  <tr>
+    <td>
+      <div id="login_widget">
+        <!-- Content will be supplied by the GWT LoginWidget -->
+      </div>
+    </td>
+    <td>
+      <h4>Simple Login</h4>
+      <s:form action="/userIndex_login" method="POST">
+        <s:textfield name="j_username"/>
+        <s:password name="j_password"/>
+        <s:checkbox name="_spring_security_remember_me" value="true" label="Remember Me"/>
+        <s:hidden name="j_indexType" value="username"/>
+        <s:submit value="Login"/>
+      </s:form>
+    </td>
+  </tr>
+</table>
+
+<h3>"Where do I type my username and password?"</h3>
+
+<p>If you're like us, you probably have accounts for websites all over the web, including some of the popular
+sites listed above.  Instead of making you remember one more username and password for our site, we want to let
+you login with an account you already have.</p>
+
+<p>Using technologies like <a href="http://openid.net/">OpenID</a> and <a href="http://oauth.net/">OAuth</a>,
+you can safely and securely login and verify your identity to our site and others on the web using your existing
+account.</p>
+
+<h3>"How do I login?"</h3>
+
+<p>Click one of the login providers shown above, and you'll be taken to that site, where you can login with your
+existing username and password.  Then you'll be redirected back here.</p>
+
+<h3>"What about my privacy?"</h3>
+
+<p>We don't share any information about you or your usage of OneBusAway with any of the login providers listed above.
+We also don't request any information other than your authenticated user id from any of the listed login providers.
+Your privacy is important to us and we'll do our best to protect your private information.</p>
+
+</s:if>
+<s:else>
+
+<s:if test="mode == 'registration'">
+<p>Your account is already registered.  Check out your <a href="user/index">User Settings</a> for more information.</p>
+</s:if>
+<s:elseif test="mode == 'add-account'">
+
+</s:elseif>
+<s:else>
+<p>Your are already logged in.  Click to <a href="logout">logout</a>.</p>
+</s:else>
+
+</s:else>
+
+
+</body>
+</html>

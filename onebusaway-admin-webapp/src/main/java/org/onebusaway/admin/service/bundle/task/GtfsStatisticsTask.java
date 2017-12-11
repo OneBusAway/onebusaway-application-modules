@@ -18,6 +18,7 @@ package org.onebusaway.admin.service.bundle.task;
 import java.io.File;
 import java.util.Collection;
 
+import org.onebusaway.gtfs.impl.GtfsRelationalDaoImpl;
 import org.onebusaway.gtfs.model.Agency;
 import org.onebusaway.gtfs.services.GtfsMutableRelationalDao;
 import org.onebusaway.transit_data_federation.bundle.tasks.MultiCSVLogger;
@@ -33,7 +34,7 @@ public class GtfsStatisticsTask implements Runnable {
   private static final String FILENAME = "gtfs_stats.csv";
   private Logger _log = LoggerFactory.getLogger(GtfsStatisticsTask.class);
   private static final String ALL_AGENCIES = "TOTAL";
-  private GtfsMutableRelationalDao _dao;
+  private GtfsRelationalDaoImpl _dao;
   private FederatedTransitDataBundle _bundle;
   @Autowired
   private MultiCSVLogger logger;
@@ -45,7 +46,7 @@ public class GtfsStatisticsTask implements Runnable {
 
   
     @Autowired
-    public void setGtfsDao(GtfsMutableRelationalDao dao) {
+    public void setGtfsDao(GtfsRelationalDaoImpl dao) {
       _dao = dao;
     }
 
