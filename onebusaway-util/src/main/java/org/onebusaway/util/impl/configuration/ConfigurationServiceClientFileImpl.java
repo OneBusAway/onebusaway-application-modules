@@ -133,7 +133,7 @@ public class ConfigurationServiceClientFileImpl implements
 		            });
 		        _config = o;
 		      } catch (Exception e) {
-		        _log.info("Failed to get configuration out of /var/lib/oba/config.json, continuing without it.", e);
+		        _log.info("Failed to get configuration out of " + this.configFile + ", continuing without it.", e);
 
 		      }
 		      return _config;
