@@ -52,38 +52,6 @@ public class IndexActionTest {
   }
 
   @Test
-  public void testWeekenderLinkWeekday() throws Exception {
-    IndexAction action = new IndexAction();
-    action.setTime(DateLibrary.getIso8601StringAsTime("2012-01-25T00:00:00-05:00").getTime());
-    
-    assertEquals(action.getShowWeekender(), false);
-  }
-  
-  @Test
-  public void testWeekenderLinkFriday() throws Exception {
-    IndexAction action = new IndexAction();
-    action.setTime(DateLibrary.getIso8601StringAsTime("2012-01-20T18:00:00-05:00").getTime());
-    
-    assertEquals(action.getShowWeekender(), true);
-  }
-
-  @Test
-  public void testWeekenderLinkWeekend() throws Exception {
-    IndexAction action = new IndexAction();
-    action.setTime(DateLibrary.getIso8601StringAsTime("2012-01-21T18:00:00-05:00").getTime());
-    
-    assertEquals(action.getShowWeekender(), true);
-  }
-
-  @Test
-  public void testWeekenderLinkMonday() throws Exception {
-    IndexAction action = new IndexAction();
-    action.setTime(DateLibrary.getIso8601StringAsTime("2012-01-23T02:00:00-05:00").getTime());
-    
-    assertEquals(action.getShowWeekender(), true);
-  }
-
-  @Test
   public void test404() throws Exception {
 
     ActionProxy proxy = Mockito.mock(ActionProxy.class);

@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2011 Metropolitan Transportation Authority
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+            http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<html xmlns:jsp="http://java.sun.com/JSP/Page"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:decorator="http://www.opensymphony.com/sitemesh/decorator" xmlns:s="/struts-tags">
+
+<jsp:output doctype-root-element="html"
+	doctype-public="-//W3C//DTD XHTML 1.1 Transitional//EN"
+	doctype-system="http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd" />
+
+<jsp:directive.page contentType="text/html" />
+
+<script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"><!-- jspx --></script>
+
+<head>
+  <s:set var="title" value="getText('main.title')" /> 	
+  <title><decorator:title default="${title}" /></title>
+
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=8" />
+  
+  <s:set var="favicon" value="getText('favicon.url')" />
+  <link rel="shortcut icon" href="${favicon}" type="image/x-icon"/>
+
+  <s:url var="url" value="/css/reset.css">
+	<s:param name="v"><s:property value="frontEndVersion" /></s:param>
+  </s:url>
+  <link rel="stylesheet" type="text/css" href="${url}"/>
+
+  <s:url var="url" value="/css/screen.css">
+	<s:param name="v"><s:property value="frontEndVersion" /></s:param>
+  </s:url>
+  <link rel="stylesheet" type="text/css" href="${url}"/>
+
+  <s:url var="url" value="/css/branding.css">
+	<s:param name="v"><s:property value="frontEndVersion" /></s:param>
+  </s:url>
+  <link rel="stylesheet" type="text/css" href="${url}"/>
+
+<jsp:text>
+&lt;!--[if IE 6]&gt;
+</jsp:text>
+  <s:url var="url" value="/css/ie6.css">
+	<s:param name="v"><s:property value="frontEndVersion" /></s:param>
+  </s:url>
+  <link rel="stylesheet" href="${url}" type="text/css" media="screen,print"/>
+<jsp:text>
+&lt;![endif]--&gt;
+</jsp:text>
+
+  <s:url var="url" value="/js/lib/jquery.js">
+	<s:param name="v"><s:property value="frontEndVersion" /></s:param>
+  </s:url>
+  <script type="text/javascript" src="${url}"><!-- //prevent jspx minimization --></script>
+    
+  <s:url var="url" value="/js/oba/Config.js">
+	<s:param name="v"><s:property value="frontEndVersion" /></s:param>
+  </s:url>
+  <script type="text/javascript" src="${url}"><!-- //prevent jspx minimization --></script>
+  
+  <decorator:head />
+</head>
+
+<body>
+<div id="mainbox">
+	<div id="topbar">
+		<div id="branding">
+			<s:set var="link" value="getText('main.agency.link')" />
+			<a href="${link}">
+			  	<s:url var="url" value="/css/img/agency_logo.png"></s:url>
+				<img src="${url}" alt="Agency logo" />
+			</a>
+		</div>
+		
+		<div id="search">
+			<ul id="topbar-links">
+				<c:if test="${showWeekender}">
+					<s:set var="link" value="getText('main.weekender.link')" />
+					<li class="list_h" style="margin-left:4px;"><a href="${link}">The Weekender</a></li>
+				</c:if>			
+			</ul>
+		</div>
+		
+		<!-- Include the tabs.jspx that provides branded links -->
+		<c:import url="/WEB-INF/decorators/includes/tabs.jspx" />
+		
+	</div> <!-- close topbar -->
+	
+	<div id="contentbox">
+	<!-- Enter Content here -->
+	
+		<div id="bustime">
+			<decorator:body />
+		</div>
+
+		<div id="bottombar">
+			<div class="bottombox" id="google_translate_element_bottom">
+				<span>Google Translate</span>
+				<s:set var="link" value="getText('main.agency.link')" />
+				<s:url var="url" value="/css/img/google_logo.png"></s:url>
+				<img id="icon" src="${url}" />
+			</div>
+			<div class="bottombox">
+				<s:set var="link" value="getText('main.privacypolicy.link')" />
+				<a href="${link}">
+					<span id="privacy-policy" alt="Privacy Policy">Privacy Policy</span>
+				</a>
+			</div>
+		</div>
+
+	<!-- End Content -->
+	</div>
+
+	<div class="container clear"></div>
+</div> <!-- close mainbox -->
+
+</body>
+</html>

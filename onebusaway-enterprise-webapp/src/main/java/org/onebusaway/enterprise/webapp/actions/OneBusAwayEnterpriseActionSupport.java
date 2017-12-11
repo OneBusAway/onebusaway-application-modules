@@ -68,27 +68,6 @@ public abstract class OneBusAwayEnterpriseActionSupport extends NextActionSuppor
 
   // hide or show MTA "weekender" link
   public boolean getShowWeekender() {
-    Calendar calendar = new GregorianCalendar();
-    calendar.setTimeInMillis(getTime());
-
-    int dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
-    int hour = calendar.get(Calendar.HOUR_OF_DAY);
-    
-    switch(dayOfWeek) {
-      case Calendar.SATURDAY:
-        return true;
-      case Calendar.SUNDAY:
-        return true;
-      case Calendar.FRIDAY:
-        if(hour >= 15) {
-          return true;
-        }                
-      case Calendar.MONDAY:
-        if(hour < 5) {
-          return true;
-        }        
-    }
-    
     return false;
   }
   

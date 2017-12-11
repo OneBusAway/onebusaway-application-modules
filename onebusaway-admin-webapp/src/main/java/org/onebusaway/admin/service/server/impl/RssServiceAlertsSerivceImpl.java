@@ -127,7 +127,7 @@ public class RssServiceAlertsSerivceImpl implements RssServiceAlertsService {
     }
     
     protected List<ServiceAlertBean> pollServiceAdvisoryRssFeed() throws Exception {
-      
+
         List<ServiceAlertBean> alerts = new ArrayList<ServiceAlertBean>();
         if (_serviceAdvisoryUrlString == null) return alerts;
         
@@ -152,7 +152,8 @@ public class RssServiceAlertsSerivceImpl implements RssServiceAlertsService {
             String link = itemElement.getChild("link").getValue();
             String description = itemElement.getChild("description").getValue();
             String pubDateString = itemElement.getChild("pubDate").getValue();
-            String guid = itemElement.getChild("guid").getValue();
+            // guid may spread across multiple routes, differentiate based on title
+            String guid = itemElement.getChild("guid").getValue() + "_" + title;
             Date pubDate = _sdf.parse(pubDateString);
             List<SituationAffectsBean> affectedRouteIds = getRouteIds(title);
             ServiceAlertBean serviceAlertBean = new ServiceAlertBean();
