@@ -94,11 +94,15 @@ public class RemoteConfigAction extends ActionSupport {
     }
 
     public String getSiriBaseURL() {
-        return _configurationService.getConfigurationValueAsString("display.siriBaseUrl", "/onebusaway-api-webapp/siri");
+        return _configurationService.getConfigurationValueAsString("display.siriBaseUrl", getApiBaseURL() + "/siri");
     }
 
     public String getApiBaseURL() {
         return _configurationService.getConfigurationValueAsString("display.apiBaseUrl", "/onebusaway-api-webapp");
+    }
+    
+    public String getAppBaseUrl() {
+        return _configurationService.getConfigurationValueAsString("display.appBaseUrl", "/");
     }
 
     public String getUseAgencyId() {
@@ -115,9 +119,8 @@ public class RemoteConfigAction extends ActionSupport {
     public String getAppHostName() {
         return _configurationService.getConfigurationValueAsString(
                 "appHostname", null);
-
     }
-
+    
     public boolean isHttps() {
         // force the use of https to remote servers
         String useHttps = _configurationService.getConfigurationValueAsString("display.useHttps", "false");

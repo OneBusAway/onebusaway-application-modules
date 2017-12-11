@@ -41,11 +41,11 @@
     OBA.Config.timeApiUrl = "<s:property value="appHostURL" />" + "<s:property value="apiBaseURL" />" + "/api/where/current-time.json?key=" + OBA.Config.obaApiKey;
 
 
-    OBA.Config.autocompleteUrl = "<s:property value="appHostURL" />" + "/api/autocomplete";
-    OBA.Config.searchUrl = "<s:property value="appHostURL" />" + "/api/search";
-    OBA.Config.stopsWithinBoundsUrl = "<s:property value="appHostURL" />" +  "/api/stops-within-bounds";
-    OBA.Config.stopsOnRouteForDirection = "<s:property value="appHostURL" />" + "/api/stops-on-route-for-direction";
-    OBA.Config.stopForId = "<s:property value="appHostURL" />" + "/api/stop-for-id";
+    OBA.Config.autocompleteUrl = "<s:property value="appHostURL" />" + "<s:property value="appBaseUrl" />" + "/api/autocomplete";
+    OBA.Config.searchUrl = "<s:property value="appHostURL" />" + "<s:property value="appBaseUrl" />" + "/api/search";
+    OBA.Config.stopsWithinBoundsUrl = "<s:property value="appHostURL" />" + "<s:property value="siriBaseURL" />" +  "/api/stops-within-bounds";
+    OBA.Config.stopsOnRouteForDirection = "<s:property value="appHostURL" />" + "<s:property value="siriBaseURL" />" + "/api/stops-on-route-for-direction";
+    OBA.Config.stopForId = "<s:property value="appHostURL" />" + "<s:property value="siriBaseURL" />" + "/api/stop-for-id";
 
     OBA.Config.infoBubbleFooterFunction = function(type, query) {
     var html = '';
