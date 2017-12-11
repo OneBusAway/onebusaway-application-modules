@@ -236,6 +236,7 @@ OBA.RouteMap = function(mapNode, initCallbackFn, serviceAlertCallbackFn) {
 				var vehicleIdWithoutAgency = vehicleIdParts[1];
 				var marker = vehiclesById[vehicleId];
 				var markerImage = 'img/realtime/vehicle/vehicle-';
+				var newMarker = false;
 				
 				// has route been removed while in the process of updating?
 				if(typeof vehiclesByRoute[routeId] === 'undefined') {
@@ -252,6 +253,7 @@ OBA.RouteMap = function(mapNode, initCallbackFn, serviceAlertCallbackFn) {
 						routeId: routeId
 					};
 
+					newMarker =true;
 					marker = new google.maps.Marker(markerOptions);
 			        
 			    	google.maps.event.addListener(marker, "click", function(mouseEvent) {
@@ -280,11 +282,17 @@ OBA.RouteMap = function(mapNode, initCallbackFn, serviceAlertCallbackFn) {
 						new google.maps.Point(25, 25));
 
 				marker.setIcon(icon);
-
-				// position
+				
+				
 				var position = new google.maps.LatLng(latitude, longitude);
-				marker.setPosition(position);
-							    	
+				
+				if(newMarker){
+					marker.setPosition(position);
+				}
+				else{
+					marker.animateTo(position);
+				}
+				
 				// (mark that this vehicle is still in the response)
 				vehiclesByIdInResponse[vehicleId] = true;
 
