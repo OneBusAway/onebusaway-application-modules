@@ -236,7 +236,7 @@ OBA.RouteMap = function(mapNode, initCallbackFn, serviceAlertCallbackFn) {
 				var vehicleIdParts = vehicleId.split("_");
 				var vehicleIdWithoutAgency = vehicleIdParts[1];
 				var marker = vehiclesById[vehicleId];
-				var markerImage = 'img/realtime/vehicle/' + vehicleType + '-';
+				var markerImage = 'img/realtime/' + vehicleType + '/' + vehicleType + '-';
 				
 				// has route been removed while in the process of updating?
 				if(typeof vehiclesByRoute[routeId] === 'undefined') {
@@ -266,7 +266,7 @@ OBA.RouteMap = function(mapNode, initCallbackFn, serviceAlertCallbackFn) {
 				
 				// change marker image depending on whether realtime data is available
 				if(typeof hasRealtime === 'undefined' || hasRealtime === null || hasRealtime == false){
-					markerImage = 'img/scheduled/vehicle/' + vehicleType + '-';
+					markerImage = 'img/scheduled/' + vehicleType + '/' + vehicleType + '-';
 				}
 				
 				// icon
