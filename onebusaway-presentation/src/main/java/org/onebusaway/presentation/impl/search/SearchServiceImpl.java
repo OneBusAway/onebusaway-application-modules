@@ -382,11 +382,36 @@ public class SearchServiceImpl implements SearchService {
 		}
 
 		if (results.isEmpty()) {
+			tryAsStopName(results, query, resultFactory);
+		}
+
+
+			if (results.isEmpty()) {
 			tryAsGeocode(results, normalizedQuery, resultFactory);
 		}
 
 		return results;
 	}
+
+	// use LUCENE index to search on stop name
+	private void tryAsStopName(SearchResultCollection results, String q, SearchResultFactory resultFactory){
+		StopsBean beans =_transitDataService.getStopsByName(q);
+		int count = 0;
+		for (StopBean stopBean : beans.getStops()) {
+			String agencyId = AgencyAndIdLibrary.convertFromString(stopBean.getId()).getAgencyId();
+			// filter out stops not in service
+			if (_transitDataService.stopHasRevenueService(agencyId, stopBean.getId())) {
+				// this is a fuzzy match so just a suggestion
+				results.addSuggestion(resultFactory.getStopResult(stopBean,
+						results.getRouteFilter()));
+				count++;
+			}
+			if (count > MAX_STOPS) {
+				break;
+			}
+		}
+		return;
+		}
 
 	private String normalizeQuery(SearchResultCollection results, String q) {
 		if (q == null) {

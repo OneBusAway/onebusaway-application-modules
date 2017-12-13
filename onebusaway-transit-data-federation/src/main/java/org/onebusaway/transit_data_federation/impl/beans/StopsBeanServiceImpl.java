@@ -54,6 +54,7 @@ class StopsBeanServiceImpl implements StopsBeanService {
   private static Logger _log = LoggerFactory.getLogger(StopsBeanServiceImpl.class);
 
   private static final double MIN_SCORE = 1.0;
+  private static final int MAX_STOPS = 10;
 
   @Autowired
   private StopSearchService _searchService;
@@ -74,6 +75,30 @@ class StopsBeanServiceImpl implements StopsBeanService {
       return getStopsByBounds(queryBean);
     else
       return getStopsByBoundsAndQuery(queryBean);
+  }
+
+  @Override
+  public StopsBean getStopsByName(String stopName) throws ServiceException {
+    List<StopBean> stopBeans = new ArrayList<StopBean>();
+    SearchResult<AgencyAndId> results = null;
+    try {
+
+      results =
+       _searchService.searchForStopsByName(stopName,
+              MAX_STOPS, MIN_SCORE);
+      for (AgencyAndId aid : results.getResults()) {
+        StopBean stopBean = _stopBeanService.getStopForId(aid);
+        if (stopBean != null) {
+          stopBeans.add(stopBean);
+        }
+      }
+    } catch (Exception e) {
+      _log.error("search failed!", e);
+    }
+    if (results == null) {
+      return new StopsBean();
+    }
+    return constructResult(stopBeans, results.size() == MAX_STOPS);
   }
 
   private StopsBean getStopsByBounds(SearchQueryBean queryBean)
