@@ -39,7 +39,7 @@ if(typeof OBA !== 'undefined' &amp;&amp; typeof OBA.Config !== 'undefined') {
 	OBA.Config.siriVMUrl = "<s:property value="siriBaseURL" />" + "/vehicle-monitoring.json?key=" + OBA.Config.obaApiKey;
 	OBA.Config.apiBaseUrl = "<s:property value="apiBaseURL" />";
 	OBA.Config.timeApiUrl = "<s:property value="apiBaseURL" />" + "/api/where/current-time.json?key=" + OBA.Config.obaApiKey;
-
+	OBA.Config.showSMS = "<s:property value="showSMS" />";
 
 	OBA.Config.infoBubbleFooterFunction = function(type, query) {
 			var html = '';
@@ -48,11 +48,16 @@ if(typeof OBA !== 'undefined' &amp;&amp; typeof OBA.Config !== 'undefined') {
 				html += '<div class="footer">';
 				html += '<span class="header">While at the bus stop...</span>';
 				html += '<br/>';
-
-				html += 'Send ' + OBA.Config.txtPrefix + ' <strong>' + query + '</strong> as a text to <strong>' + OBA.Config.shortCode + '</strong>';
-				html += '<br/>';
-				html += 'or check <a href="m/?q=' + query + '">this stop</a> on your smartphone.';
-
+				
+				if(OBA.Config.showSMS === "true"){
+					html += 'Send ' + OBA.Config.txtPrefix + ' <strong>' + query + '</strong> as a text to <strong>' + OBA.Config.shortCode + '</strong>';
+					html += '<br/>';
+					html += 'or check <a href="m/?q=' + query + '">this stop</a> on your smartphone.';
+				}
+				else{
+					html += 'Check <a href="m/?q=' + query + '">this stop</a> on your smartphone.';
+					
+				}	
 				html += '</div>';
 
 			} else if(type === "route") {
