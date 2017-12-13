@@ -45,12 +45,14 @@ public class ConfigurationServiceClientFileImpl implements
 	private String configFile = "/var/lib/oba/config.json";
 
 	public void setConfigFile(String file) {
+		_log.info("config service override of configFile=" + file);
 		configFile = file;
 	}
 
 	public ConfigurationServiceClientFileImpl() {}
 	
 	public ConfigurationServiceClientFileImpl(String configFile) {
+		_log.info("config service using configFile=" + configFile);
 		this.configFile = configFile;
 	}
 	
