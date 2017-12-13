@@ -87,16 +87,10 @@
 		</div>
 		
 		<div id="search">
-			<ul id="topbar-links">
-				<c:if test="${showWeekender}">
-					<s:set var="link" value="getText('main.weekender.link')" />
-					<li class="list_h" style="margin-left:4px;"><a href="${link}">The Weekender</a></li>
-				</c:if>			
-			</ul>
 		</div>
 		
 		<!-- Include the tabs.jspx that provides branded links -->
-		<c:import url="/WEB-INF/decorators/includes/tabs.jspx" />
+		<!-- <c:import url="/WEB-INF/decorators/includes/tabs.jspx" />  -->
 		
 	</div> <!-- close topbar -->
 	
