@@ -22,7 +22,6 @@ import org.onebusaway.exceptions.ServiceException;
 import org.onebusaway.federations.annotations.FederatedByAgencyIdMethod;
 import org.onebusaway.federations.annotations.FederatedByEntityIdMethod;
 import org.onebusaway.geospatial.model.CoordinateBounds;
-import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.geospatial.model.EncodedPolylineBean;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
@@ -209,6 +208,13 @@ public class TransitDataServiceTemplateImpl implements TransitDataServiceTemplat
     checkBounds(query.getBounds());
     return _stopsBeanService.getStops(query);
   }
+
+  //@Override
+  public StopsBean getStopsByName(String stopName) throws ServiceException {
+
+    return _stopsBeanService.getStopsByName(stopName);
+  }
+
 
   //@Override
   public StopBean getStop(String stopId) throws ServiceException {

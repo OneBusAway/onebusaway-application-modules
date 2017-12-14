@@ -25,9 +25,12 @@ OBA.Sidebar = function() {
 		mainbox = jQuery("#mainbox"),
 		menuBar = jQuery("#cssmenu1"),
 		adDiv = jQuery("#ad");
-		mapDiv = jQuery("#map");
+		mapDiv = jQuery("#map"),
+	    bottomBarDiv = jQuery("#bottombar"),
+		mobileDiv = jQuery("#mobilebox");
 
-	var searchBarDiv = jQuery("#searchbar"), 
+
+    var searchBarDiv = jQuery("#searchbar"),
 		matches = jQuery("#matches"),
 		filteredMatches = jQuery("#filtered-matches"),
 		suggestions = jQuery("#suggestions"),
@@ -628,7 +631,7 @@ OBA.Sidebar = function() {
 				routeMap.panToRoute(matches[0].id);
 				(wizard && wizard.enabled()) ? results.triggerHandler('route_result') : null;
 			} else if (matches.length > 1 && resultType == "StopResult") {
-				// we've matched multiple stops across agenes -- disambiguate
+				// we've matched multiple stops across agencies -- disambiguate
 				showStopPickerList(matches);
 				
 			} else if(suggestions.length > 0){    // did you mean suggestions
@@ -645,6 +648,10 @@ OBA.Sidebar = function() {
 						showRoutePickerList(suggestions);								
 						(wizard && wizard.enabled()) ? results.triggerHandler('route_result') : null;
 						break;
+					case "StopResult":
+						// this is a new option based on search on stop name
+                        showStopPickerList(suggestions);
+                        break;
 				}
 			}
 		});
@@ -652,13 +659,16 @@ OBA.Sidebar = function() {
 	
 	function googleTranslateElementInit() {
 		
-		var translate_element = jQuery("#google_translate_element");		
-		translate_element.click(function (e) {
+		var translate_element_id = jQuery("#google_translate_element_bottom").is(":visible")
+			? "google_translate_element_bottom"
+			: "google_translate_element_side";
+        var translate_element = jQuery("#" + translate_element_id);
+        translate_element.click(function (e) {
 			e.preventDefault();
 			translate_element.html(' ')
 							 .attr('src','//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit');
 			new google.translate.TranslateElement({pageLanguage: 'en', 
-				layout: google.translate.TranslateElement.InlineLayout.SIMPLE}, 'google_translate_element');
+				layout: google.translate.TranslateElement.InlineLayout.SIMPLE}, 'translate_element_id');
 			translate_element.unbind('click');
 		});						
 	}

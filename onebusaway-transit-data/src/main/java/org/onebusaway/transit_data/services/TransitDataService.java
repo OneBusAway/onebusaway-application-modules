@@ -327,11 +327,22 @@ public interface TransitDataService extends FederatedService {
   @FederatedByCoordinateBoundsMethod(propertyExpression = "bounds")
   public StopsBean getStops(SearchQueryBean query) throws ServiceException;
 
+
   /**
-   * @param stopId
-   * @return the stop with the specified id, or null if not found
+   * Search for stops based on stop name
+   * @param stopName
+   * @return
    * @throws ServiceException
    */
+  @FederatedByAggregateMethod
+  public StopsBean getStopsByName(String stopName) throws ServiceException;
+
+
+    /**
+     * @param stopId
+     * @return the stop with the specified id, or null if not found
+     * @throws ServiceException
+     */
   @FederatedByEntityIdMethod
   public StopBean getStop(String stopId) throws ServiceException;
 
