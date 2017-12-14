@@ -65,7 +65,7 @@ OBA.Sidebar = function() {
 					if (window.location.hash !== "#" + searchInput.val()) {
 						jQuery.history.load(searchInput.val());	
 					} else {
-						doSearch(searchInput.val());
+						doSearch(searchInput.val(), true);
 					}
 		        }
 		    }
@@ -81,13 +81,43 @@ OBA.Sidebar = function() {
 			if (window.location.hash !== "#" + searchInput.val()) {
 				jQuery.history.load(searchInput.val());	
 			} else {
-				doSearch(searchInput.val());
+				doSearch(searchInput.val(), true);
 			}
 			
 			(wizard && wizard.enabled()) ? results.triggerHandler('search_launched') : null;
 		});
 	}
-	
+
+    function getParameters(hashBased) {
+        var query;
+        if(hashBased) {
+            var pos = location.href.indexOf("?");
+            if(pos==-1) return [];
+            query = location.href.substr(pos+1);
+        } else {
+            query = location.search.substr(1);
+        }
+        var result = {};
+        query.split("&").forEach(function(part) {
+            if(!part) return;
+            part = part.split("+").join(" "); // replace every + with space, regexp-free version
+            var eq = part.indexOf("=");
+            var key = eq>-1 ? part.substr(0,eq) : part;
+            var val = eq>-1 ? decodeURIComponent(part.substr(eq+1)) : "";
+            var from = key.indexOf("[");
+            if(from==-1) result[decodeURIComponent(key)] = val;
+            else {
+                var to = key.indexOf("]",from);
+                var index = decodeURIComponent(key.substring(from+1,to));
+                key = decodeURIComponent(key.substring(0,from));
+                if(!result[key]) result[key] = [];
+                if(!index) result[key].push(val);
+                else result[key][index] = val;
+            }
+        });
+        return result;
+    }
+
 	var resize = function() {
 		var w = theWindow.width();
 		
@@ -107,8 +137,8 @@ OBA.Sidebar = function() {
 			alertsHeight = mapGlobalAlerts.outerHeight();
 		}
 		
-		var h = theWindow.height() - topBarDiv.height() - 1,
-			h2 = theWindow.height() - topBarDiv.height() - alertsHeight - 1;
+		var h = theWindow.height() - topBarDiv.height() - bottomBarDiv.outerHeight() - 1,
+			h2 = theWindow.height() - topBarDiv.height() - bottomBarDiv.outerHeight() - alertsHeight - 1;
 		
 		searchBarDiv.height(h);
 		mapDiv.height(h2);
@@ -471,7 +501,6 @@ OBA.Sidebar = function() {
 		var resultsList = suggestions.find("ul");
 
 		jQuery.each(stopResults, function(_, stop) {
-			console.log("stop=" + Object.getOwnPropertyNames(stop));
 			var link = jQuery('<a href="#' + stop.id+ '"></a>') /*shortName*/
 							.text(stop.name)/*shortName*/
 							.attr("title", stop.name);/*description*/
@@ -524,7 +553,7 @@ OBA.Sidebar = function() {
 	}
 
 	// process search results
-	function doSearch(q) {
+	function doSearch(q, showPopup) {
 		resetSearchPanelAndMap();		
 
 		(wizard && wizard.enabled()) ? results.triggerHandler('search_launched') : null;
@@ -615,10 +644,14 @@ OBA.Sidebar = function() {
 						addRoutesToLegend(matches[0].routesAvailable, "Routes available:", routeFilterShortName, matches[0].id);
 
 						var latlng = new google.maps.LatLng(matches[0].latitude, matches[0].longitude);
-						routeMap.addStop(matches[0], function(marker) {
-							routeMap.showPopupForStopId(matches[0].id, routeFilterShortName);						
-						});
-						
+                        if (showPopup != undefined && !showPopup) {
+                        	// TODO:  make stop marker purple (active?)
+							routeMap.addStop(matches[0], null);
+                        } else {
+                            routeMap.addStop(matches[0], function(marker) {
+                                routeMap.showPopupForStopId(matches[0].id, routeFilterShortName);
+                            });
+						}
 						routeMap.showLocation(latlng);
 						
 						(wizard && wizard.enabled()) ? results.triggerHandler('stop_result') : null;
@@ -697,9 +730,17 @@ OBA.Sidebar = function() {
 				// deep link handler
 				jQuery.history.init(function(hash) {
 					if(hash !== null && hash !== "") {
+                        var params = getParameters(true);
+						var pos = hash.indexOf("?");
+						if (pos > 0) {
+							hash = hash.substring(0, pos);
+						}
 						var searchInput = jQuery("#searchbar form input[type=text]");
 						searchInput.val(decodeURIComponent(hash));
-						doSearch(hash);
+						var showPopup = true;
+						if (params['showPopup'] != undefined)
+							showPopup = !(params['showPopup'] == "false");
+						doSearch(hash, showPopup);
 					} else {
 						// Launch wizard
 						(wizard !== null) ? null : wizard = OBA.Wizard(routeMap);

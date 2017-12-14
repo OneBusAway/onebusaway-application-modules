@@ -94,6 +94,8 @@ class StopsBeanServiceImpl implements StopsBeanService {
       }
     } catch (Exception e) {
       _log.error("search failed!", e);
+      // simply return no results, the search was not understood
+      return new StopsBean();
     }
     if (results == null) {
       return new StopsBean();

@@ -397,6 +397,7 @@ public class SearchServiceImpl implements SearchService {
 	private void tryAsStopName(SearchResultCollection results, String q, SearchResultFactory resultFactory){
 		StopsBean beans =_transitDataService.getStopsByName(q);
 		int count = 0;
+		if (beans == null || beans.getStops() == null) return;
 		for (StopBean stopBean : beans.getStops()) {
 			String agencyId = AgencyAndIdLibrary.convertFromString(stopBean.getId()).getAgencyId();
 			// filter out stops not in service
