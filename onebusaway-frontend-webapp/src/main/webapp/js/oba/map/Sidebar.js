@@ -294,7 +294,7 @@ OBA.Sidebar = function() {
 				var serviceAlertList = jQuery("<ul></ul>")
 								.addClass("alerts");
 								
-				var serviceAlertHeader = jQuery("<p class='serviceAlert'>Service Alert for " + routeResult.shortName + "</p>")
+				var serviceAlertHeader = jQuery("<p class='serviceAlert'>Service Alert for " + getRouteShortName(routeResult) + "</p>")
 												.append(jQuery("<span class='click_info'> + Click for info</span>"));
 				
 				var serviceAlertContainer = jQuery("<div></div>")
@@ -315,12 +315,11 @@ OBA.Sidebar = function() {
 					expandAlerts = false;
 				}
 				
-				var longName = routeResult.longName;
-				if (longName == null) longName = "";
+
 				// sidebar item
 				var titleBox = jQuery("<p></p>")
 								.addClass("name")
-								.text(routeResult.shortName + " " + longName)
+								.text(getRouteShortLongName(routeResult))
 								.css("border-bottom", "5px solid #" + routeResult.color);
 				
 				var descriptionBox = jQuery("<p></p>")
@@ -370,7 +369,7 @@ OBA.Sidebar = function() {
 						var noServiceMessage = jQuery("<div></div>")
 													.addClass("no-service")
 													.text("No scheduled service for the " + 
-															routeResult.shortName + 
+															getRouteShortName(routeResult) + 
 															" to " + direction.destination + " at this time.");
 	
 						directionHeader.append(noServiceMessage);
@@ -410,7 +409,7 @@ OBA.Sidebar = function() {
 			if (filter && routeResult.shortName !== filter && filterExistsInResults) {
 				
 				var filteredMatch = jQuery("<li></li>").addClass("filtered-match");
-				var link = jQuery('<a href="#' + OBA.Util.displayStopId(stopId) + '%20' + routeResult.shortName + '">' + routeResult.shortName + '</a>');
+				var link = jQuery('<a href="#' + OBA.Util.displayStopId(stopId) + '%20' + getRouteShortName(routeResult) + '">' + getRouteShortName(routeResult) + '</a>');
 				
 				var allPolylines = [];
 				jQuery.each(routeResult.directions, function(_, direction) {
@@ -446,6 +445,8 @@ OBA.Sidebar = function() {
 			filteredMatches.find("li").width(maxWidth);
 		}
 	}
+	
+	
 
 	// show multiple route choices to user
 	function showRoutePickerList(routeResults) {	
@@ -454,8 +455,8 @@ OBA.Sidebar = function() {
 		var resultsList = suggestions.find("ul");
 
 		jQuery.each(routeResults, function(_, route) {
-			var link = jQuery('<a href="#' + route.shortName + '"></a>')
-							.text(route.shortName)
+			var link = jQuery('<a href="#' + getRouteShortName(route) + '"></a>')
+							.text(getRouteShortName(route))
 							.attr("title", route.description);
 
 			var listItem = jQuery("<li></li>")
@@ -492,6 +493,43 @@ OBA.Sidebar = function() {
 		});
 		
 		suggestions.show();
+	}
+	
+	function getRouteShortName(routeResult){
+		var longName = routeResult.longName;
+		var shortName = routeResult.shortName;
+		
+		if(longName == null && shortName == null){
+			shortName = "route";
+		}
+		else if (shortName == null){
+			shortName = longName;
+		}
+		return shortName;
+	}
+	
+	function getRouteShortLongName(routeResult){
+
+		var longName = routeResult.longName;
+		var shortName = routeResult.shortName;
+		var shortAndLongName = shortName + " " + longName;
+		var description = routeResult.description;
+		
+		if(longName == null && shortName == null){
+			if(description == null){
+				shortAndLongName = "";
+			}
+			else{
+				shortAndLongName = description;
+			}
+		}
+		else if (longName == null){ 
+			shortAndLongName = shortName;
+		}
+		else if (shortName == null){
+			shortAndLongName = longName;
+		}
+		return shortAndLongName;
 	}
 	
 	// show multiple stop choices to user

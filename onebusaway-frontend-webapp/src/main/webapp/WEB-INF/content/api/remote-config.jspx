@@ -49,35 +49,43 @@
 
     OBA.Config.infoBubbleFooterFunction = function(type, query) {
     var html = '';
+    
+    
 
     if(type === "stop")	{
-    html += '<div class="footer">';
-    html += '<span class="header">While at the bus stop...</span>';
-    html += '<br/>';
-
-    html += 'Send ' + OBA.Config.txtPrefix + ' <strong>' + query + '</strong> as a text to <strong>' + OBA.Config.shortCode + '</strong>';
-    html += '<br/>';
-    html += 'or check <a href="m/?q=' + query + '">this stop</a> on your smartphone.';
-
-    html += '</div>';
+	    html += '<div class="footer">';
+	    html += '<span class="header">While at the bus stop...</span>';
+	    html += '<br/>';
+		
+		if(OBA.Config.showSMS === "true"){
+			html += 'Send ' + OBA.Config.txtPrefix + ' <strong>' + query + '</strong> as a text to <strong>' + OBA.Config.shortCode + '</strong>';
+			html += '<br/>';
+			html += 'or check <a href="m/?q=' + query + '">this stop</a> on your smartphone.';
+		}
+		else{
+			html += 'Check <a href="m/?q=' + query + '">this stop</a> on your smartphone.';
+			
+		}	
+	    
+	    html += '</div>';
 
     } else if(type === "route") {
-    html += '<div class="footer">';
-    html += '<span class="header">While at the bus stop...</span>';
-    html += '<br/>';
-
-    html += 'Check <a href="m/?q=' + query + '">this route</a> on your smartphone.';
-
-    html += '</div>';
+	    html += '<div class="footer">';
+	    html += '<span class="header">While at the bus stop...</span>';
+	    html += '<br/>';
+	
+	    html += 'Check <a href="m/?q=' + query + '">this route</a> on your smartphone.';
+	
+	    html += '</div>';
 
     } else if(type === "sign") {
-    html += 'Text <strong> ' + query + '</strong> to <strong>' + OBA.Config.shortCode + '</strong> ';
-    html += 'or check this stop on your smartphone at <strong>http://' + window.location.hostname + ((window.location.port !== '') ? ':' + window.location.port : '') + '/m/?q=' + query + '</strong>';
-    }
-
-    return html;
-    };
-
-    OBA.Config.configurationHasLoaded();
+	    html += 'Text <strong> ' + query + '</strong> to <strong>' + OBA.Config.shortCode + '</strong> ';
+	    html += 'or check this stop on your smartphone at <strong>http://' + window.location.hostname + ((window.location.port !== '') ? ':' + window.location.port : '') + '/m/?q=' + query + '</strong>';
+	    }
+	
+	    return html;
+	    };
+	
+	    OBA.Config.configurationHasLoaded();
     }
 </jsp:root>

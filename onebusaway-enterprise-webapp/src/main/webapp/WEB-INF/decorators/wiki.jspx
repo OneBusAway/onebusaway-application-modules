@@ -106,15 +106,11 @@
 		
 		<div id="search">
 			<ul id="topbar-links">
-				<c:if test="${showWeekender}">
-					<s:set var="link" value="getText('main.weekender.link')" />
-					<li class="list_h" style="margin-left:4px;"><a href="${link}">The Weekender</a></li>
-				</c:if>		
 			</ul>
 		</div>
 
 		<!-- Include the tabs.jspx that provides branded links -->
-		<c:import url="/WEB-INF/decorators/includes/tabs.jspx" />
+		<c:import url="/WEB-INF/decorators/includes/tabs.jspx" /> 
 		
 	</div> <!-- close topbar -->
 	
@@ -122,31 +118,7 @@
 	<!-- Enter Content here -->
 
   		<div id="bustime">
-  			<div class="holding_box">
-				<div id="header">
-	    	  		<div class="title">
-		      			<s:url var="url" value="/"></s:url>
-			  			<h1><a href="${url}"><s:property value="getText('main.title')" /></a></h1>
-		  	  		</div>
-	
-		      	  	<ul>
-						<s:url var="url" namespace="/m" action="index"/>
-						<li><a href="${url}">Text / Mobile</a></li>
-		    	  	
-						<s:url var="url" namespace="/wiki" action="About"/>
-						<li><a href="${url}">About</a></li>
-		
-						<s:url var="url" namespace="/wiki" action="ContactUs"/>
-						<li><a href="${url}">Contact</a></li>
-		 				    
-		 				<s:url var="url" namespace="/wiki/Developers" action="Index"/>
-		 				<li><a href="${url}">Developers</a></li>
-		 			
-			 			<s:url var="url" namespace="/wiki/Help" action="Index"/>
-			 			<li><a href="${url}">Help</a></li>
-				    </ul>
-				</div>  		
-	  		
+  			<div class="holding_box">		  		
 				<decorator:body />
 			</div>
 	
