@@ -106,8 +106,8 @@ OBA.Sidebar = function() {
 			alertsHeight = mapGlobalAlerts.outerHeight();
 		}
 		
-		var h = theWindow.height() - topBarDiv.height() - bottomBarDiv.height() - 1,
-			h2 = theWindow.height() - topBarDiv.height() - bottomBarDiv.height() - alertsHeight - 1;
+		var h = theWindow.height() - topBarDiv.height() - bottomBarDiv.outerHeight() - 1,
+			h2 = theWindow.height() - topBarDiv.height() - bottomBarDiv.outerHeight() - alertsHeight - 1;
 		
 		searchBarDiv.height(h);
 		mapDiv.height(h2);
