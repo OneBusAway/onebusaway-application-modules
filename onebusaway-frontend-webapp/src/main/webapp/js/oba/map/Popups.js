@@ -520,13 +520,17 @@ OBA.Popups = (function() {
 							&& monitoredVehicleJourney.ProgressRate === "noProgress") {
 							stalled = true;
 						}
-						
-						var arrival = 'arrival';
+
+
+                        var vehicleType = monitoredVehicleJourney.VehicleMode[0];
+						console.log("MY VEHICLE TYPE IS " + vehicleType);
+
+						var arrival = 'arrival arrival_' + vehicleType;
 						
 						// Alert if Realtime data is unavailable
 						if(typeof hasRealtime === 'undefined' || hasRealtime === null || hasRealtime == false){
 							distance += '<span class="scheduleAlert"><span class="not_bold"> (using schedule time)</span></span>';
-							arrival = 'arrival_schedule';
+							arrival = 'arrival_schedule arrival_schedule_' + vehicleType;
 						}
 						// If realtime data is available and config is set, add vehicleID
 						else if (OBA.Config.showVehicleIdInStopPopup == "true"){

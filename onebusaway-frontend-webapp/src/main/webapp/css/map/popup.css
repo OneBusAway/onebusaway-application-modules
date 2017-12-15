@@ -139,7 +139,25 @@
 	height: 16px;
 	font-weight: bold;
 	padding-left: 19px;
+}
+
+.popup ul li.arrival_bus {
 	background: url("img/bullet_bus.png");
+	background-position: left top;
+	background-repeat: no-repeat;
+}
+.popup ul li.arrival_ferry {
+	background: url("img/bullet_ferry.png");
+	background-position: left top;
+	background-repeat: no-repeat;
+}
+.popup ul li.arrival_rail {
+	background: url("img/bullet_rail.png");
+	background-position: left top;
+	background-repeat: no-repeat;
+}
+.popup ul li.arrival_tram {
+	background: url("img/bullet_tram.png");
 	background-position: left top;
 	background-repeat: no-repeat;
 }
@@ -149,7 +167,25 @@
 	height: 16px;
 	font-weight: bold;
 	padding-left: 19px;
+}
+
+.popup ul li.arrival_schedule_bus {
 	background: url("img/schedule_bullet_bus.png");
+	background-position: left top;
+	background-repeat: no-repeat;
+}
+.popup ul li.arrival_schedule_ferry {
+	background: url("img/schedule_bullet_ferry.png");
+	background-position: left top;
+	background-repeat: no-repeat;
+}
+.popup ul li.arrival_schedule_rail {
+	 background: url("img/schedule_bullet_rail.png");
+	background-position: left top;
+	background-repeat: no-repeat;
+ }
+.popup ul li.arrival_schedule_tram {
+	background: url("img/schedule_bullet_tram.png");
 	background-position: left top;
 	background-repeat: no-repeat;
 }
