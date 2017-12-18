@@ -683,8 +683,8 @@ OBA.Sidebar = function() {
 
 						var latlng = new google.maps.LatLng(matches[0].latitude, matches[0].longitude);
                         if (showPopup != undefined && !showPopup) {
-                        	// TODO:  make stop marker purple (active?)
 							routeMap.addStop(matches[0], null);
+                            routeMap.highlightStop(matches[0]);
                         } else {
                             routeMap.addStop(matches[0], function(marker) {
                                 routeMap.showPopupForStopId(matches[0].id, routeFilterShortName);
