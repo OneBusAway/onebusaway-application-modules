@@ -197,10 +197,11 @@ OBA.Mobile = (function() {
 			$('#mapContainer').append(mapFrame);
 			$('#mapFrame').hide();
 			$('#mapFrame').load(function () {
-				$('#mapFrame').contents().scrollLeft(500);
+
 				setTimeout(function(){
 					$('#loadingCover').fadeToggle();
 					$('#mapFrame').fadeToggle();
+					$('#mapFrame').contents().scrollLeft(500);
 				}, 2000);
 				var frameCover = $('<div></div>');
 				frameCover.attr("id", "frameCover");
