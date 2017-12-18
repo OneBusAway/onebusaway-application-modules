@@ -79,6 +79,9 @@ public class SearchServiceImpl implements SearchService {
 	private static final Pattern leftOverMatchPattern = Pattern
 			.compile("^([A-Z]|-)+$");
 
+	private static final Pattern latLonPattern = Pattern
+			.compile("^([-+]?)([1-8]?\\d(\\.\\d+)?|90(\\.0+)?),\\s*([-+]?)(180(\\.0+)?|((1[0-7]\\d)|([1-9]?\\d))(\\.\\d+)?)$");
+
 	// when querying for routes from a lat/lng, use this distance in meters
 	private static final double DISTANCE_TO_ROUTES = 600;
 
@@ -367,9 +370,13 @@ public class SearchServiceImpl implements SearchService {
 
 		SearchResultCollection results = new SearchResultCollection();
 
+		tryAsLatLon(results, query, resultFactory);
+
 		String normalizedQuery = normalizeQuery(results, query);
 
-		tryAsRoute(results, normalizedQuery, resultFactory);
+		if (results.isEmpty()) {
+			tryAsRoute(results, normalizedQuery, resultFactory);
+		}
 
         if (results.isEmpty()) {
             tryAsRoutes(results, normalizedQuery, resultFactory);
@@ -386,7 +393,7 @@ public class SearchServiceImpl implements SearchService {
 		}
 
 
-			if (results.isEmpty()) {
+		if (results.isEmpty()) {
 			tryAsGeocode(results, normalizedQuery, resultFactory);
 		}
 
@@ -570,6 +577,29 @@ public class SearchServiceImpl implements SearchService {
       }
     }
     return _agencyIds;
+  }
+
+  private void tryAsLatLon(SearchResultCollection results, String rawQuery,
+						   SearchResultFactory resultFactory) {
+  	List<SearchResult> routesNearby = null;
+	Matcher m = latLonPattern.matcher(rawQuery);
+	if (m.find()) {
+		String latStr = m.group(1) + m.group(2);
+		String lonStr = m.group(5) + m.group(6);
+		_log.info("parse lat/lon = " + latStr + ", " + lonStr);
+		try {
+			Double lat = Double.parseDouble(latStr);
+			Double lon = Double.parseDouble(lonStr);
+			EnterpriseGeocoderResult egr = new SimpleEnterpriseGeocoderResult(lat, lon);
+
+			_log.info("found lat/lon");
+			results.addMatch(resultFactory.getGeocoderResult(egr,
+					results.getRouteFilter()));
+		} catch (Exception any) {
+			_log.info("no results, exception=" + any);
+		}
+
+	}
   }
 
   private void tryAsRoute(SearchResultCollection results, String routeQueryMixedCase,
@@ -864,6 +894,46 @@ public class SearchServiceImpl implements SearchService {
 			}
 
 			return minDistanceToRoute;
+		}
+	}
+
+	public static class SimpleEnterpriseGeocoderResult implements EnterpriseGeocoderResult {
+
+  		private Double lat = null;
+  		private Double lon = null;
+  		public SimpleEnterpriseGeocoderResult(Double lat, Double lon) {
+  			this.lat = lat;
+  			this.lon = lon;
+		}
+
+		@Override
+		public Double getLatitude() {
+			return lat;
+		}
+
+		@Override
+		public Double getLongitude() {
+			return lon;
+		}
+
+		@Override
+		public String getNeighborhood() {
+			return null;
+		}
+
+		@Override
+		public String getFormattedAddress() {
+			return lat + ", " + lon;
+		}
+
+		@Override
+		public CoordinateBounds getBounds() {
+			return new CoordinateBounds(lat, lon);
+		}
+
+		@Override
+		public boolean isRegion() {
+			return false;
 		}
 	}
 }
