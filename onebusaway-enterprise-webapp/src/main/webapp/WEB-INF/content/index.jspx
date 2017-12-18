@@ -137,6 +137,7 @@
 	    	<div id="infoBox">
 				<h1><s:property value="getText('main.headline')" /></h1>
 				<h2><s:property value="getText('main.shorttext')" /></h2>
+				<h2><s:property value="getText('main.shorttext2')" /></h2>
 			</div>
 			
 			<div id="map_header">
