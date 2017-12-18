@@ -44,6 +44,8 @@ public class EnterpriseBingGeocoderImpl extends EnterpriseFilteredGeocoderBase {
   
   private String id;
 
+  private String _regionalSuggestion;
+
   private CoordinateBounds _resultBiasingBounds = null;
     
   public void setResultBiasingBounds(CoordinateBounds bounds) {
@@ -57,10 +59,14 @@ public class EnterpriseBingGeocoderImpl extends EnterpriseFilteredGeocoderBase {
       StringBuilder q = new StringBuilder();
       q.append("includeNeighborhood=true");
       q.append("&output=xml");
-    
+
+      if (location != null && StringUtils.isNotBlank(_regionalSuggestion) && location.indexOf(",") == -1) {
+        location = location + ", " + _regionalSuggestion;
+      }
+
       String encodedLocation = URLEncoder.encode(location, "UTF-8");
       q.append("&query=").append(encodedLocation);
-    
+
       if(_resultBiasingBounds != null) {
         q.append("&userMapView=").append(
             _resultBiasingBounds.getMinLat() + "," + 
@@ -74,9 +80,11 @@ public class EnterpriseBingGeocoderImpl extends EnterpriseFilteredGeocoderBase {
       if(secretKey != null && !StringUtils.isEmpty(secretKey)) {
         q.append("&key=").append(secretKey);
       }
-    
+
+
+
       URL url = new URL(GEOCODE_URL_PREFIX + "?" + q.toString());        
-      
+
       Digester digester = createDigester();
       digester.push(results);
 
@@ -97,7 +105,7 @@ public class EnterpriseBingGeocoderImpl extends EnterpriseFilteredGeocoderBase {
   }
   
   public List<EnterpriseGeocoderResult> enterpriseGeocode(String location) {
-	  return this.enterpriseGeocode(location, null, null);
+	  return this.enterpriseGeocode(location, getId(), getKey());
   }
 
   private Digester createDigester() {
@@ -135,5 +143,16 @@ public class EnterpriseBingGeocoderImpl extends EnterpriseFilteredGeocoderBase {
 	public void setId(String id) {
 		this.id = id;
 	}
+
+  /**
+   * add text to the search query to clarify the location.
+   * @param suggestion for example state abbr "WA"
+   */
+	public void setRegionalSuggestion(String suggestion) {
+      this._regionalSuggestion = suggestion;
+    }
+    public String getRegionalSuggestion() {
+	  return this._regionalSuggestion;
+    }
 
 }
