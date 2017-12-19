@@ -29,6 +29,7 @@
 
 </head>
 <body>
+<h2 id="wiki_title"><s:property value="title"/></h2>
 <s:if test="hasToc">
 	<div id="content" class="sidebar">
 		<div id="sidebar">
