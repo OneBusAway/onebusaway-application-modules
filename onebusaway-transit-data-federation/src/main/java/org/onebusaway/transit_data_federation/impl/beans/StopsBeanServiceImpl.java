@@ -54,6 +54,7 @@ class StopsBeanServiceImpl implements StopsBeanService {
   private static Logger _log = LoggerFactory.getLogger(StopsBeanServiceImpl.class);
 
   private static final double MIN_SCORE = 1.0;
+  private static final double NAME_MIN_SCORE = 1.6;
   private static final int MAX_STOPS = 10;
 
   @Autowired
@@ -85,8 +86,9 @@ class StopsBeanServiceImpl implements StopsBeanService {
 
       results =
        _searchService.searchForStopsByName(stopName,
-              MAX_STOPS, MIN_SCORE);
-      for (AgencyAndId aid : results.getResults()) {
+              MAX_STOPS, NAME_MIN_SCORE);
+
+      for (AgencyAndId aid : results.getResultsByTopScore()) {
         StopBean stopBean = _stopBeanService.getStopForId(aid);
         if (stopBean != null) {
           stopBeans.add(stopBean);

@@ -15,7 +15,9 @@
  */
 package org.onebusaway.transit_data_federation.model;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -54,7 +56,54 @@ public class SearchResult<T> {
     return _results;
   }
 
+  public List<T> getResultsByTopScore() {
+    if (_scores == null || _scores.length == 0) {
+      return _results;
+    }
+    // we do a trivial search here expecting elements to be small
+    List<ScoredResult<T>> sortedElements = new ArrayList<ScoredResult<T>>();
+    for (int i = 0; i < _results.size(); i++) {
+      sortedElements.add(new ScoredResult<>(_results.get(i), _scores[i]));
+    }
+    Collections.sort(sortedElements, new TopScoreComparator());
+    List<T> sortedIds = new ArrayList<T>();
+    for (ScoredResult<T> sr : sortedElements) {
+      sortedIds.add(sr.getResult());
+    }
+    return sortedIds;
+  }
+
   public double getScore(int index) {
     return _scores[index];
   }
+
+  /**
+   * Associate a score with T so it can be sorted
+   * @param <T> the element that has a score
+   */
+  public class ScoredResult<T> {
+    private T _result;
+    private double _score;
+
+    public ScoredResult(T aresult, double ascore) {
+      this._result = aresult;
+      this._score = ascore;
+    }
+
+    public T getResult() { return _result; }
+    public double getScore() { return _score; }
+  }
+
+  /**
+   * Sort based on highest score.
+   * @param <T>
+   */
+  public class TopScoreComparator<T> implements Comparator<T> {
+    public int compare(T a, T b) {
+      ScoredResult<T> sra = (ScoredResult<T>) a;
+      ScoredResult<T> srb = (ScoredResult<T>) b;
+      return Double.compare(sra.getScore(), srb.getScore());
+    }
+  }
+
 }
