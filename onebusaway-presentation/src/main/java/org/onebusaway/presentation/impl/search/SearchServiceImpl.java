@@ -407,15 +407,11 @@ public class SearchServiceImpl implements SearchService {
 		}
 
 		if (results.isEmpty() && !hasComma) {
-			_log.info("1 trying as stop");
 			tryAsStopName(results, query, resultFactory);
-			_log.info("1stop results=" + results.getMatches() + "/" + results.getSuggestions());
 		}
 
 		if (results.isEmpty()) {
-			_log.info("1trying as geocode");
 			tryAsGeocode(results, query, resultFactory);
-			_log.info("1 geocode results=" + results.getMatches() + "/" + results.getSuggestions());
 		}
 
 		return results;
