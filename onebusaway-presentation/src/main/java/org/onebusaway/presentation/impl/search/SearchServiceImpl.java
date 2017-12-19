@@ -367,34 +367,55 @@ public class SearchServiceImpl implements SearchService {
 	public SearchResultCollection getSearchResults(String query,
 			SearchResultFactory resultFactory) {
 		refreshCachesIfNecessary();
-
+		/*
+		*  This method now makes a series of assumptions!
+		*  - using a ',' means our query is a lat/lon or a mailing address
+		*  - using a ';' means you are searching for multiple routes
+		*  - entering 3 tokens means you are not looking for routes
+		*
+		*  Combined with the above, this is the search order
+		*  1) lat/lon (if its matches regex)
+		*  2) route (if no comma, tokens < 2
+ 		*  3) routes (has semicolon)
+ 		*  4) stop (if no comma, numeric query, query contains '_')
+ 		*  5) stop name (no comma)
+ 		*  6) geocode
+		*/
 		SearchResultCollection results = new SearchResultCollection();
+		boolean hasComma = query.indexOf(',') > 0;
+		boolean hasSemiColon = query.indexOf(';') > 0;
 
 		tryAsLatLon(results, query, resultFactory);
 
 		String normalizedQuery = normalizeQuery(results, query);
+		int normalizedTokens = normalizedQuery.length()
+				- normalizedQuery.replaceAll(" ", "").length() + 1;
 
-		if (results.isEmpty()) {
+		// if we have a comma, we are not a single route
+		if (results.isEmpty() && !hasComma && normalizedTokens < 2) {
 			tryAsRoute(results, normalizedQuery, resultFactory);
 		}
 
-        if (results.isEmpty()) {
+        if (results.isEmpty() && hasSemiColon) {
             tryAsRoutes(results, normalizedQuery, resultFactory);
         }
 
 		// only guess it as a stop if its numeric or has possible agency prefix
 		// results does not support mixed types -- it can only be a route or a stop
-		if (results.isEmpty() && (StringUtils.isNumeric(normalizedQuery) || normalizedQuery.contains("_")) ) {
+		if (results.isEmpty() && !hasComma && (StringUtils.isNumeric(normalizedQuery) || normalizedQuery.contains("_")) ) {
 			tryAsStop(results, normalizedQuery, resultFactory);
 		}
 
-		if (results.isEmpty()) {
+		if (results.isEmpty() && !hasComma) {
+			_log.info("1 trying as stop");
 			tryAsStopName(results, query, resultFactory);
+			_log.info("1stop results=" + results.getMatches() + "/" + results.getSuggestions());
 		}
 
-
 		if (results.isEmpty()) {
-			tryAsGeocode(results, normalizedQuery, resultFactory);
+			_log.info("1trying as geocode");
+			tryAsGeocode(results, query, resultFactory);
+			_log.info("1 geocode results=" + results.getMatches() + "/" + results.getSuggestions());
 		}
 
 		return results;
@@ -431,6 +452,7 @@ public class SearchServiceImpl implements SearchService {
 		q = q.trim();
 		//replace commas to handle comma separated routes
 		q = q.replace(",", " ");
+		q = q.replace(";", " ");
 
 		List<String> tokens = new ArrayList<String>();
 		if (Boolean.TRUE.equals(configuredAgencyIdHasSpaces())) {

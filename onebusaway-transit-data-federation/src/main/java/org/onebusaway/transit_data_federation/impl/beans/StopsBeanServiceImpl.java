@@ -54,7 +54,7 @@ class StopsBeanServiceImpl implements StopsBeanService {
   private static Logger _log = LoggerFactory.getLogger(StopsBeanServiceImpl.class);
 
   private static final double MIN_SCORE = 1.0;
-  private static final double NAME_MIN_SCORE = 1.6;
+  private static final double NAME_MIN_SCORE = 4.0;
   private static final int MAX_STOPS = 10;
 
   @Autowired
