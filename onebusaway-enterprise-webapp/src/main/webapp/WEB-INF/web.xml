@@ -73,9 +73,18 @@
 		<filter-name>CorsFilter</filter-name>
 		<filter-class>org.apache.catalina.filters.CorsFilter</filter-class>
 	</filter>
+	<filter>
+		<filter-name>SignsFilter</filter-name>
+		<filter-class>org.onebusaway.presentation.impl.sign.SignsRequestFilter</filter-class>
+	</filter>
+	
 	<filter-mapping>
 		<filter-name>CorsFilter</filter-name>
 		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+	<filter-mapping>
+		<filter-name>SignsFilter</filter-name>
+		<url-pattern>/where/sign/*</url-pattern>
 	</filter-mapping>
 	<filter-mapping>
 		<filter-name>UrlRewriteFilter</filter-name>
