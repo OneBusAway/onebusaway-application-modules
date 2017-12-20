@@ -122,24 +122,6 @@
 					<span id="privacy-policy" alt="Privacy">Privacy</span>
 				</a>
 			</div>
-			<div class="bottombox">
-				<s:set var="link" value="getText('main.terms.link')" />
-				<a href="${link}">
-					<span alt="Terms of Use">Terms of Use</span>
-				</a>
-			</div>
-			<div class="bottombox">
-				<s:set var="link" value="getText('main.developers.link')" />
-				<a href="${link}">
-					<span alt="Developers">Developers</span>
-				</a>
-			</div>
-			<div class="bottombox">
-				<s:set var="link" value="getText('main.apps.link')" />
-				<a href="${link}">
-					<span alt="Apps">Apps</span>
-				</a>
-			</div>
 		</div>
 
 	<!-- End Content -->
