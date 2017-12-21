@@ -392,7 +392,7 @@ public class SearchServiceImpl implements SearchService {
 				- normalizedQuery.replaceAll(" ", "").length() + 1;
 
 		// if we have a comma, we are not a single route
-		if (results.isEmpty() && !hasComma && normalizedTokens < 2) {
+		if (results.isEmpty() && !hasComma && normalizedTokens < 3) {
 			tryAsRoute(results, normalizedQuery, resultFactory);
 		}
 
