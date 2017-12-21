@@ -739,7 +739,7 @@ OBA.Sidebar = function() {
 			translate_element.html(' ')
 							 .attr('src','//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit');
 			new google.translate.TranslateElement({pageLanguage: 'en', 
-				layout: google.translate.TranslateElement.InlineLayout.SIMPLE}, 'translate_element_id');
+				layout: google.translate.TranslateElement.InlineLayout.SIMPLE}, translate_element_id);
 			translate_element.unbind('click');
 		});						
 	}
