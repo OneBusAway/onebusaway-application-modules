@@ -237,7 +237,7 @@
     </div>
 
 	<div id="map"><!-- //prevent jspx minimization --></div>
-
+	<div id="legend"><h3>Vehicle Legend</h3></div>
     <div id="wizard">
 	   	<div id="wizard_start">
 	   		<ul>

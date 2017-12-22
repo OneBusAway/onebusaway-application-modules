@@ -364,6 +364,35 @@ OBA.RouteMap = function(mapNode, initCallbackFn, serviceAlertCallbackFn) {
 		}
 		highlightedStop = null;
 	}
+
+
+
+	function showLegend(map) {
+	 	var iconBase = 'img/';
+	        var icons = {
+	          realtime: {
+	            name: 'Real-Time ',
+	            icon: iconBase + 'realtime/bus/bus.png'
+	          },
+	          scheduled: {
+	            name: 'Scheduled',
+	            icon: iconBase + 'scheduled/bus/bus.png'
+	          }
+	        };
+	        
+	        var legend = document.getElementById('legend');
+	        for (var key in icons) {
+	          var type = icons[key];
+	          var name = type.name;
+	          var icon = type.icon;
+	          var div = document.createElement('div');
+	          div.innerHTML = '<img src="' + icon + '"> ' + name;
+	          legend.appendChild(div);
+	        }
+	
+
+	        map.controls[google.maps.ControlPosition.RIGHT_TOP].push(legend);
+	}
 		
 	//////////////////// CONSTRUCTOR /////////////////////
 
@@ -385,7 +414,11 @@ OBA.RouteMap = function(mapNode, initCallbackFn, serviceAlertCallbackFn) {
 		// start adding things to map once it's ready...
 		if(initialized === false) {
 			initialized = true;
+			
+		showLegend(map);
 
+
+			
 			if(typeof initCallbackFn === 'function') {
 				initCallbackFn();
 			}
