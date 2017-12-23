@@ -622,7 +622,7 @@ public class SearchServiceImpl implements SearchService {
 
   private void tryAsRoute(SearchResultCollection results, String routeQueryMixedCase,
 			SearchResultFactory resultFactory) {
-	  
+
 	  String routeQuery = new String(routeQueryMixedCase);
 		if (routeQuery == null || StringUtils.isEmpty(routeQuery)) {
 			return;
@@ -634,7 +634,7 @@ public class SearchServiceImpl implements SearchService {
 			return;
 		}
 
-		// agency + route id matching (from direct links)
+		// agency + route id matching (from direct links) as exact case
     if (_routeIdToRouteBeanMap.get(routeQueryMixedCase) != null) {
       RouteBean routeBean = _routeIdToRouteBeanMap.get(routeQueryMixedCase);
       results.addMatch(resultFactory.getRouteResult(routeBean));
@@ -642,7 +642,7 @@ public class SearchServiceImpl implements SearchService {
       return;
     }
 
-    // agency + route id matching (from direct links)
+    // agency + route id matching (from direct links) as upper case
     if (_routeIdToRouteBeanMap.get(routeQuery) != null) {
       RouteBean routeBean = _routeIdToRouteBeanMap.get(routeQuery);
       results.addMatch(resultFactory.getRouteResult(routeBean));
