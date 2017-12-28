@@ -117,7 +117,7 @@
 	<bean id="wikiRenderingService"
 		class="org.onebusaway.wiki.xwiki.impl.XWikiRenderingServiceImpl"
 		lazy-init="true">
-		<property name="wikiDocumentViewUrl" value="/wiki/%{documentName}" />
+		<property name="wikiDocumentViewUrl" ref="/wiki/%{documentName}" />
 		<property name="wikiDocumentEditUrl" ref="xwikiDocumentEditUrlBean" />
 		<property name="wikiAttachmentUrl" ref="xwikiAttachmentUrlBean" />
 	</bean>
