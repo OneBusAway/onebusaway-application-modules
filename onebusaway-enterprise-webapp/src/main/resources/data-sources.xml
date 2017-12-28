@@ -108,16 +108,22 @@
 		jndi-name="java:comp/env/wikiDocumentEditUrl" resource-ref="true"></jee:jndi-lookup>
 	<jee:jndi-lookup id="xwikiAttachmentUrlBean" jndi-name="java:comp/env/wikiAttachmentUrl"
 		resource-ref="true"></jee:jndi-lookup>
+    <jee:jndi-lookup id="xwikiViewUrlBean" jndi-name="java:comp/env/wikiViewUrl" resource-ref="true" ></jee:jndi-lookup>
 
-	<bean id="wikiDocumentService" class="org.onebusaway.wiki.xwiki.impl.XWikiDocumentServiceImpl"
-		lazy-init="true">
-		<property name="xwikiUrl" ref="xwikiUrlBean" />
-	</bean>
 
-	<bean id="wikiRenderingService"
-		class="org.onebusaway.wiki.xwiki.impl.XWikiRenderingServiceImpl"
-		lazy-init="true">
-		<property name="wikiDocumentViewUrl" ref="/wiki/%{documentName}" />
+        <bean id="wikiDocumentService" class="org.onebusaway.wiki.xwiki.impl.XWikiDocumentServiceImpl"
+                lazy-init="true">
+                <property name="xwikiUrl" ref="xwikiUrlBean" />
+        </bean>
+
+        <bean id="wikiRenderingService"
+                class="org.onebusaway.wiki.xwiki.impl.XWikiRenderingServiceImpl"
+                lazy-init="true">
+                <property name="wikiDocumentViewUrl" ref="xwikiViewUrlBean" />
+                <property name="wikiDocumentEditUrl" ref="xwikiDocumentEditUrlBean" />
+                <property name="wikiAttachmentUrl" ref="xwikiAttachmentUrlBean" />
+        </bean>
+
 		<property name="wikiDocumentEditUrl" ref="xwikiDocumentEditUrlBean" />
 		<property name="wikiAttachmentUrl" ref="xwikiAttachmentUrlBean" />
 	</bean>
