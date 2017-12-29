@@ -22,6 +22,7 @@
 	overflow-y: auto;
 	font-size: 14px;
 	position: relative;
+	margin-left: 20px;
 }
 
 #content #searchbar .sidebar {
