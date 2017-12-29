@@ -122,13 +122,18 @@
 				<decorator:body />
 			</div>
 	
-		    <!-- Include Google ad -->
-			<c:import url="/WEB-INF/decorators/includes/wikiAd.jspx" />
-	    	
-	    	<div class="container clear"></div>
-	    	<div id="footer" class="clear">
-			  	<s:url var="url" value="/css/img/google_logo.png"></s:url>
-				<div id="google_translate_element_bottom">Google Translate <img id="icon" src="${url}" /></div>
+		   <div id="bottombar">
+				<div class="bottombox" id="google_translate_element_bottom">
+					<span>Google Translate</span>
+					<s:set var="link" value="getText('main.agency.link')" />
+					<s:url var="url" value="/css/img/google_logo.png"></s:url>
+					<img id="icon" src="${url}" />
+				</div>
+				<div class="bottombox">
+					<s:set var="link" value="getText('main.privacypolicy.link')" />
+					<a href="${link}"> <span id="privacy-policy" alt="Privacy">Privacy</span>
+					</a>
+				</div>
 			</div>
 		</div>
 
