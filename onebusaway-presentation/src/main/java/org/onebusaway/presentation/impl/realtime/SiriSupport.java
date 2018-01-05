@@ -206,6 +206,16 @@ public final class SiriSupport {
 		  if (currentVehicleTripStatus.getLocation() != null) {
 		    location.setLatitude(new BigDecimal(df.format(currentVehicleTripStatus.getLocation().getLat())));
 		    location.setLongitude(new BigDecimal(df.format(currentVehicleTripStatus.getLocation().getLon())));
+		    if (currentVehicleTripStatus.getLastKnownLocation() != null) {
+				_log.debug("v(" + currentVehicleTripStatus.getVehicleId() + ")"
+						+ " raw= " + currentVehicleTripStatus.getLastKnownLocation().getLat()
+						+ ", " + currentVehicleTripStatus.getLastKnownLocation().getLon()
+						+ " snapped= " + currentVehicleTripStatus.getLocation().getLat()
+						+ ", " + currentVehicleTripStatus.getLocation().getLon()
+				);
+			} else {
+		    	_log.info("last known location is null for " + currentVehicleTripStatus.getVehicleId());
+			}
 		  }
 		}
 
