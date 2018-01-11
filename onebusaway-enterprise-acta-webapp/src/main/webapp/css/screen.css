@@ -32,9 +32,13 @@
 	border-radius: 10px;
 	border: 1px solid #C0C0C0;
 	background-color: #FFFFFF;
-	margin-right: 225px;
-	margin-top: 50px;
+	width: 85%;
+	margin: auto;
+	margin-top: 30px;
 	margin-bottom: 30px;
+	/* margin-right: 225px;
+	margin-top: 50px;
+	margin-bottom: 30px; */
 	padding: 25px;
 	padding-top: 10px;
 	min-height: 590px;

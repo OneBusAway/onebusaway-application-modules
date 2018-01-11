@@ -29,6 +29,7 @@ OBA.Sign = function() {
 	var sortByRoute = false; // otherwise sort by arrival distance/departure time
 	var showHeader = false;
 	var lineRef = "";
+	var showVehicleIds = false;
 	
 	var url = window.location.href;
 	var signPosition = url.indexOf("/sign/sign");
@@ -103,6 +104,8 @@ OBA.Sign = function() {
 		sortByRoute = (sortByRouteStr.toLowerCase() == "true");
 		var showHeaderStr = getParameterByName("showHeader", "false");
 		showHeader = (showHeaderStr.toLowerCase() == "true");
+
+		showVehicleIds = getParameterByName("showVehicleIds", "false");
 
 		var fontSize = getParameterByName("fontSize", null);
 		if (fontSize) {
@@ -250,7 +253,7 @@ OBA.Sign = function() {
 		var newElement = jQuery(
 			'<div>' +
 				'<div class="error"></div>' +
-				'<div class="preHeader"><div class="iconContainer"><img src="/css/img/realtime_icon.png" alt="Realtime Icon" /><h2>Real time arrival</h2></div></div>' +
+				'<div class="preHeader"><div class="iconContainer"><img src="/css/img/Realtime_Icon_with_white_bg_400x400.png" alt="Realtime Icon" /><h2>Real time arrival</h2></div></div>' +
 				'<div class="header">' +
 					'<div class="name"><h1>' + stopName + '</h1></div>' +
 					'<div class="stop-id"><h2>Stop #' + stopId.id + '</h2></div>' +
@@ -381,17 +384,18 @@ OBA.Sign = function() {
 				sign.appendTo(row);
 				
 				// name cell
-				var spanTxt = " Vehicle #" + rowInfo.vehicleId;
-				if (!rowInfo.monitored) {
-					spanTxt = "";
+				var spanTxt = ""
+				if (showVehicleIds == "true") {
+					spanTxt = " Vehicle #" + rowInfo.vehicleId;
 				}
-				// var vehicleIdSpan = jQuery("<span></span>")
-				// .addClass(rowInfo.monitored?"bus-id":"scheduled_arrival_indicator");
-				// .text(rowInfo.monitored?spanTxt:" (scheduled)");
+
+	            var vehicleIdSpan = jQuery("<span></span>")
+					.addClass("bus-id")
+					.text(spanTxt);
 			
 				jQuery('<td class="stopLocation"></td>')
 					.text(rowInfo.headsign)
-					// .append(vehicleIdSpan)
+					.append(vehicleIdSpan)
 					.appendTo(row);
 
 				var distanceTableData = jQuery('<td></td>')
@@ -401,13 +405,15 @@ OBA.Sign = function() {
 
 				var realtimeIcon = jQuery('<img/>')
 					.addClass('realtimeIconImg')
-					.attr('src', '/css/img/Realtime_Icon_with _white_bg_400x400.png');
+					.attr('src', '/css/img/Realtime_Icon_with_white_bg_400x400.png');
 
 				var etaTextPara = jQuery('<p></p>')
 					.addClass('etaText')
 					.append(rowInfo.etas[0]);
 
-				etaDiv.append(rowInfo.monitored?"":realtimeIcon);
+				if (rowInfo.monitored) {
+					etaDiv.append(realtimeIcon);
+				}
 				etaDiv.append(etaTextPara);
 				distanceTableData.append(etaDiv);
 

@@ -171,7 +171,44 @@ OBA.Mobile = (function() {
 		refreshBar.find("a").click();
 		setTimeout(refreshContent, defaultTimeout);
 	}
-		
+
+	function addMapBehaviour() {
+        $("#mapExpander").click(function () {
+            $mapExpander = $(this);
+            $mapContainer = $('#mapContainer');
+            $mapContainer.slideToggle(500, function () {
+                $mapExpander.children('span').text(function () {
+                    return $mapContainer.is(":visible") ? "HIDE MAP" : "SHOW MAP";
+                });
+            });
+        });
+    }
+
+	function loadMap(queryString) {
+		if (!document.getElementById("mapFrame")) {
+			window.setTimeout(function () {
+				$('#loadingCover').show();
+			}, 500);
+			$('#mapContainer').html('');
+			var mapFrame = $('<iframe></iframe>');
+			mapFrame.attr("id", "mapFrame");
+			mapFrame.attr("src", "/#" + queryString + "?showPopup=false");
+			mapFrame.attr("display", "none");
+			$('#mapContainer').append(mapFrame);
+			$('#mapFrame').hide();
+			$('#mapFrame').load(function () {
+
+				setTimeout(function(){
+					$('#loadingCover').fadeToggle();
+					$('#mapFrame').fadeToggle();
+					$('#mapFrame').contents().scrollLeft(500);
+				}, 2000);
+				var frameCover = $('<div></div>');
+				frameCover.attr("id", "frameCover");
+				$('#mapContainer').append(frameCover);
+			});
+		}
+	}
 	return {
 		initialize: function() {
 			locationField = jQuery("#l");
@@ -183,7 +220,10 @@ OBA.Mobile = (function() {
 			
 			addRefreshBehavior();
 			addAutocompleteBehavior();
-		}
+			addMapBehaviour();
+		},
+		// declare loadMap as public function
+		loadMap: loadMap
 	};
 })();
 

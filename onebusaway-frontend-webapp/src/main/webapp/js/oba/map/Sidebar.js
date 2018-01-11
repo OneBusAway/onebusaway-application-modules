@@ -25,9 +25,12 @@ OBA.Sidebar = function() {
 		mainbox = jQuery("#mainbox"),
 		menuBar = jQuery("#cssmenu1"),
 		adDiv = jQuery("#ad");
-		mapDiv = jQuery("#map");
+		mapDiv = jQuery("#map"),
+	    bottomBarDiv = jQuery("#bottombar"),
+		mobileDiv = jQuery("#mobilebox");
 
-	var searchBarDiv = jQuery("#searchbar"), 
+
+    var searchBarDiv = jQuery("#searchbar"),
 		matches = jQuery("#matches"),
 		filteredMatches = jQuery("#filtered-matches"),
 		suggestions = jQuery("#suggestions"),
@@ -62,7 +65,7 @@ OBA.Sidebar = function() {
 					if (window.location.hash !== "#" + searchInput.val()) {
 						jQuery.history.load(searchInput.val());	
 					} else {
-						doSearch(searchInput.val());
+						doSearch(searchInput.val(), true);
 					}
 		        }
 		    }
@@ -78,13 +81,43 @@ OBA.Sidebar = function() {
 			if (window.location.hash !== "#" + searchInput.val()) {
 				jQuery.history.load(searchInput.val());	
 			} else {
-				doSearch(searchInput.val());
+				doSearch(searchInput.val(), true);
 			}
 			
 			(wizard && wizard.enabled()) ? results.triggerHandler('search_launched') : null;
 		});
 	}
-	
+
+    function getParameters(hashBased) {
+        var query;
+        if(hashBased) {
+            var pos = location.href.indexOf("?");
+            if(pos==-1) return [];
+            query = location.href.substr(pos+1);
+        } else {
+            query = location.search.substr(1);
+        }
+        var result = {};
+        query.split("&").forEach(function(part) {
+            if(!part) return;
+            part = part.split("+").join(" "); // replace every + with space, regexp-free version
+            var eq = part.indexOf("=");
+            var key = eq>-1 ? part.substr(0,eq) : part;
+            var val = eq>-1 ? decodeURIComponent(part.substr(eq+1)) : "";
+            var from = key.indexOf("[");
+            if(from==-1) result[decodeURIComponent(key)] = val;
+            else {
+                var to = key.indexOf("]",from);
+                var index = decodeURIComponent(key.substring(from+1,to));
+                key = decodeURIComponent(key.substring(0,from));
+                if(!result[key]) result[key] = [];
+                if(!index) result[key].push(val);
+                else result[key][index] = val;
+            }
+        });
+        return result;
+    }
+
 	var resize = function() {
 		var w = theWindow.width();
 		
@@ -104,8 +137,8 @@ OBA.Sidebar = function() {
 			alertsHeight = mapGlobalAlerts.outerHeight();
 		}
 		
-		var h = theWindow.height() - topBarDiv.height() - 1,
-			h2 = theWindow.height() - topBarDiv.height() - alertsHeight - 1;
+		var h = theWindow.height() - topBarDiv.height() - bottomBarDiv.outerHeight() - 1,
+			h2 = theWindow.height() - topBarDiv.height() - bottomBarDiv.outerHeight() - alertsHeight - 1;
 		
 		searchBarDiv.height(h);
 		mapDiv.height(h2);
@@ -261,7 +294,7 @@ OBA.Sidebar = function() {
 				var serviceAlertList = jQuery("<ul></ul>")
 								.addClass("alerts");
 								
-				var serviceAlertHeader = jQuery("<p class='serviceAlert'>Service Alert for " + routeResult.shortName + "</p>")
+				var serviceAlertHeader = jQuery("<p class='serviceAlert'>Service Alert for " + getRouteShortName(routeResult) + "</p>")
 												.append(jQuery("<span class='click_info'> + Click for info</span>"));
 				
 				var serviceAlertContainer = jQuery("<div></div>")
@@ -282,12 +315,11 @@ OBA.Sidebar = function() {
 					expandAlerts = false;
 				}
 				
-				var longName = routeResult.longName;
-				if (longName == null) longName = "";
+
 				// sidebar item
 				var titleBox = jQuery("<p></p>")
 								.addClass("name")
-								.text(routeResult.shortName + " " + longName)
+								.text(getRouteShortLongName(routeResult))
 								.css("border-bottom", "5px solid #" + routeResult.color);
 				
 				var descriptionBox = jQuery("<p></p>")
@@ -337,7 +369,7 @@ OBA.Sidebar = function() {
 						var noServiceMessage = jQuery("<div></div>")
 													.addClass("no-service")
 													.text("No scheduled service for the " + 
-															routeResult.shortName + 
+															getRouteShortName(routeResult) + 
 															" to " + direction.destination + " at this time.");
 	
 						directionHeader.append(noServiceMessage);
@@ -377,7 +409,7 @@ OBA.Sidebar = function() {
 			if (filter && routeResult.shortName !== filter && filterExistsInResults) {
 				
 				var filteredMatch = jQuery("<li></li>").addClass("filtered-match");
-				var link = jQuery('<a href="#' + OBA.Util.displayStopId(stopId) + '%20' + routeResult.shortName + '">' + routeResult.shortName + '</a>');
+				var link = jQuery('<a href="#' + OBA.Util.displayStopId(stopId) + '%20' + getRouteShortName(routeResult) + '">' + getRouteShortName(routeResult) + '</a>');
 				
 				var allPolylines = [];
 				jQuery.each(routeResult.directions, function(_, direction) {
@@ -413,6 +445,8 @@ OBA.Sidebar = function() {
 			filteredMatches.find("li").width(maxWidth);
 		}
 	}
+	
+	
 
 	// show multiple route choices to user
 	function showRoutePickerList(routeResults) {	
@@ -421,8 +455,8 @@ OBA.Sidebar = function() {
 		var resultsList = suggestions.find("ul");
 
 		jQuery.each(routeResults, function(_, route) {
-			var link = jQuery('<a href="#' + route.shortName + '"></a>')
-							.text(route.shortName)
+			var link = jQuery('<a href="#' + getRouteShortName(route) + '"></a>')
+							.text(getRouteShortName(route))
 							.attr("title", route.description);
 
 			var listItem = jQuery("<li></li>")
@@ -461,6 +495,43 @@ OBA.Sidebar = function() {
 		suggestions.show();
 	}
 	
+	function getRouteShortName(routeResult){
+		var longName = routeResult.longName;
+		var shortName = routeResult.shortName;
+		
+		if(longName == null && shortName == null){
+			shortName = "route";
+		}
+		else if (shortName == null){
+			shortName = longName;
+		}
+		return shortName;
+	}
+	
+	function getRouteShortLongName(routeResult){
+
+		var longName = routeResult.longName;
+		var shortName = routeResult.shortName;
+		var shortAndLongName = shortName + " " + longName;
+		var description = routeResult.description;
+		
+		if(longName == null && shortName == null){
+			if(description == null){
+				shortAndLongName = "";
+			}
+			else{
+				shortAndLongName = description;
+			}
+		}
+		else if (longName == null){ 
+			shortAndLongName = shortName;
+		}
+		else if (shortName == null){
+			shortAndLongName = longName;
+		}
+		return shortAndLongName;
+	}
+	
 	// show multiple stop choices to user
 	function showStopPickerList(stopResults) {
 		suggestions.find("h2").text("Did you mean?");
@@ -468,7 +539,6 @@ OBA.Sidebar = function() {
 		var resultsList = suggestions.find("ul");
 
 		jQuery.each(stopResults, function(_, stop) {
-			console.log("stop=" + Object.getOwnPropertyNames(stop));
 			var link = jQuery('<a href="#' + stop.id+ '"></a>') /*shortName*/
 							.text(stop.name)/*shortName*/
 							.attr("title", stop.name);/*description*/
@@ -521,7 +591,7 @@ OBA.Sidebar = function() {
 	}
 
 	// process search results
-	function doSearch(q) {
+	function doSearch(q, showPopup) {
 		resetSearchPanelAndMap();		
 
 		(wizard && wizard.enabled()) ? results.triggerHandler('search_launched') : null;
@@ -612,10 +682,14 @@ OBA.Sidebar = function() {
 						addRoutesToLegend(matches[0].routesAvailable, "Routes available:", routeFilterShortName, matches[0].id);
 
 						var latlng = new google.maps.LatLng(matches[0].latitude, matches[0].longitude);
-						routeMap.addStop(matches[0], function(marker) {
-							routeMap.showPopupForStopId(matches[0].id, routeFilterShortName);						
-						});
-						
+                        if (showPopup != undefined && !showPopup) {
+							routeMap.addStop(matches[0], null);
+                            routeMap.highlightStop(matches[0]);
+                        } else {
+                            routeMap.addStop(matches[0], function(marker) {
+                                routeMap.showPopupForStopId(matches[0].id, routeFilterShortName);
+                            });
+						}
 						routeMap.showLocation(latlng);
 						
 						(wizard && wizard.enabled()) ? results.triggerHandler('stop_result') : null;
@@ -628,7 +702,7 @@ OBA.Sidebar = function() {
 				routeMap.panToRoute(matches[0].id);
 				(wizard && wizard.enabled()) ? results.triggerHandler('route_result') : null;
 			} else if (matches.length > 1 && resultType == "StopResult") {
-				// we've matched multiple stops across agenes -- disambiguate
+				// we've matched multiple stops across agencies -- disambiguate
 				showStopPickerList(matches);
 				
 			} else if(suggestions.length > 0){    // did you mean suggestions
@@ -645,29 +719,22 @@ OBA.Sidebar = function() {
 						showRoutePickerList(suggestions);								
 						(wizard && wizard.enabled()) ? results.triggerHandler('route_result') : null;
 						break;
+					case "StopResult":
+						// this is a new option based on search on stop name
+                        showStopPickerList(suggestions);
+                        break;
 				}
 			}
 		});
 	}
 	
-	function googleTranslateElementInit() {
-		
-		var translate_element = jQuery("#google_translate_element");		
-		translate_element.click(function (e) {
-			e.preventDefault();
-			translate_element.html(' ')
-							 .attr('src','//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit');
-			new google.translate.TranslateElement({pageLanguage: 'en', 
-				layout: google.translate.TranslateElement.InlineLayout.SIMPLE}, 'google_translate_element');
-			translate_element.unbind('click');
-		});						
-	}
+	
 	
 	return {
 		initialize: function() {
 			addSearchBehavior();
 			addResizeBehavior();
-			googleTranslateElementInit();
+			//googleTranslateElementInit();
 			
 			// Add behavior to the close link in the global alert dialog under the map
 			// so it closes when the link is clicked.
@@ -687,9 +754,17 @@ OBA.Sidebar = function() {
 				// deep link handler
 				jQuery.history.init(function(hash) {
 					if(hash !== null && hash !== "") {
+                        var params = getParameters(true);
+						var pos = hash.indexOf("?");
+						if (pos > 0) {
+							hash = hash.substring(0, pos);
+						}
 						var searchInput = jQuery("#searchbar form input[type=text]");
 						searchInput.val(decodeURIComponent(hash));
-						doSearch(hash);
+						var showPopup = true;
+						if (params['showPopup'] != undefined)
+							showPopup = !(params['showPopup'] == "false");
+						doSearch(hash, showPopup);
 					} else {
 						// Launch wizard
 						(wizard !== null) ? null : wizard = OBA.Wizard(routeMap);

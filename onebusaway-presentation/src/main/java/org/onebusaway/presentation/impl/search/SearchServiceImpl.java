@@ -79,6 +79,9 @@ public class SearchServiceImpl implements SearchService {
 	private static final Pattern leftOverMatchPattern = Pattern
 			.compile("^([A-Z]|-)+$");
 
+	private static final Pattern latLonPattern = Pattern
+			.compile("^([-+]?)([1-8]?\\d(\\.\\d+)?|90(\\.0+)?),\\s*([-+]?)(180(\\.0+)?|((1[0-7]\\d)|([1-9]?\\d))(\\.\\d+)?)$");
+
 	// when querying for routes from a lat/lng, use this distance in meters
 	private static final double DISTANCE_TO_ROUTES = 600;
 
@@ -364,29 +367,76 @@ public class SearchServiceImpl implements SearchService {
 	public SearchResultCollection getSearchResults(String query,
 			SearchResultFactory resultFactory) {
 		refreshCachesIfNecessary();
-
+		/*
+		*  This method now makes a series of assumptions!
+		*  - using a ',' means our query is a lat/lon or a mailing address
+		*  - using a ';' means you are searching for multiple routes
+		*  - entering 3 tokens means you are not looking for routes
+		*
+		*  Combined with the above, this is the search order
+		*  1) lat/lon (if its matches regex)
+		*  2) route (if no comma, tokens < 2
+ 		*  3) routes (has semicolon)
+ 		*  4) stop (if no comma, numeric query, query contains '_')
+ 		*  5) stop name (no comma)
+ 		*  6) geocode
+		*/
 		SearchResultCollection results = new SearchResultCollection();
+		boolean hasComma = query.indexOf(',') > 0;
+		boolean hasSemiColon = query.indexOf(';') > 0;
+
+		tryAsLatLon(results, query, resultFactory);
 
 		String normalizedQuery = normalizeQuery(results, query);
+		int normalizedTokens = normalizedQuery.length()
+				- normalizedQuery.replaceAll(" ", "").length() + 1;
 
-		tryAsRoute(results, normalizedQuery, resultFactory);
+		// if we have a comma, we are not a single route
+		if (results.isEmpty() && !hasComma) {
+			tryAsRoute(results, normalizedQuery, resultFactory);
+		}
 
-        if (results.isEmpty()) {
+        if (results.isEmpty() && hasSemiColon) {
             tryAsRoutes(results, normalizedQuery, resultFactory);
         }
 
 		// only guess it as a stop if its numeric or has possible agency prefix
 		// results does not support mixed types -- it can only be a route or a stop
-		if (results.isEmpty() && (StringUtils.isNumeric(normalizedQuery) || normalizedQuery.contains("_")) ) {
+		if (results.isEmpty() && !hasComma && (StringUtils.isNumeric(normalizedQuery) || normalizedQuery.contains("_")) ) {
 			tryAsStop(results, normalizedQuery, resultFactory);
 		}
 
+		if (results.isEmpty() && !hasComma) {
+			tryAsStopName(results, query, resultFactory);
+		}
+
 		if (results.isEmpty()) {
-			tryAsGeocode(results, normalizedQuery, resultFactory);
+			tryAsGeocode(results, query, resultFactory);
 		}
 
 		return results;
 	}
+
+	// use LUCENE index to search on stop name
+	private void tryAsStopName(SearchResultCollection results, String q, SearchResultFactory resultFactory){
+		StopsBean beans =_transitDataService.getStopsByName(q);
+		int count = 0;
+		if (beans == null || beans.getStops() == null) return;
+		for (StopBean stopBean : beans.getStops()) {
+			String agencyId = AgencyAndIdLibrary.convertFromString(stopBean.getId()).getAgencyId();
+			// filter out stops not in service
+			if (_transitDataService.stopHasRevenueService(agencyId, stopBean.getId())) {
+				// this is a fuzzy match so just a suggestion
+				results.addSuggestion(resultFactory.getStopResult(stopBean,
+						results.getRouteFilter()));
+				count++;
+			}
+			if (count > MAX_STOPS) {
+				break;
+			}
+		}
+		return;
+		}
 
 	private String normalizeQuery(SearchResultCollection results, String q) {
 		if (q == null) {
@@ -398,6 +448,7 @@ public class SearchServiceImpl implements SearchService {
 		q = q.trim();
 		//replace commas to handle comma separated routes
 		q = q.replace(",", " ");
+		q = q.replace(";", " ");
 
 		List<String> tokens = new ArrayList<String>();
 		if (Boolean.TRUE.equals(configuredAgencyIdHasSpaces())) {
@@ -546,9 +597,32 @@ public class SearchServiceImpl implements SearchService {
     return _agencyIds;
   }
 
+  private void tryAsLatLon(SearchResultCollection results, String rawQuery,
+						   SearchResultFactory resultFactory) {
+  	List<SearchResult> routesNearby = null;
+	Matcher m = latLonPattern.matcher(rawQuery);
+	if (m.find()) {
+		String latStr = m.group(1) + m.group(2);
+		String lonStr = m.group(5) + m.group(6);
+		_log.info("parse lat/lon = " + latStr + ", " + lonStr);
+		try {
+			Double lat = Double.parseDouble(latStr);
+			Double lon = Double.parseDouble(lonStr);
+			EnterpriseGeocoderResult egr = new SimpleEnterpriseGeocoderResult(lat, lon);
+
+			_log.info("found lat/lon");
+			results.addMatch(resultFactory.getGeocoderResult(egr,
+					results.getRouteFilter()));
+		} catch (Exception any) {
+			_log.info("no results, exception=" + any);
+		}
+
+	}
+  }
+
   private void tryAsRoute(SearchResultCollection results, String routeQueryMixedCase,
 			SearchResultFactory resultFactory) {
-	  
+
 	  String routeQuery = new String(routeQueryMixedCase);
 		if (routeQuery == null || StringUtils.isEmpty(routeQuery)) {
 			return;
@@ -560,7 +634,7 @@ public class SearchServiceImpl implements SearchService {
 			return;
 		}
 
-		// agency + route id matching (from direct links)
+		// agency + route id matching (from direct links) as exact case
     if (_routeIdToRouteBeanMap.get(routeQueryMixedCase) != null) {
       RouteBean routeBean = _routeIdToRouteBeanMap.get(routeQueryMixedCase);
       results.addMatch(resultFactory.getRouteResult(routeBean));
@@ -568,7 +642,7 @@ public class SearchServiceImpl implements SearchService {
       return;
     }
 
-    // agency + route id matching (from direct links)
+    // agency + route id matching (from direct links) as upper case
     if (_routeIdToRouteBeanMap.get(routeQuery) != null) {
       RouteBean routeBean = _routeIdToRouteBeanMap.get(routeQuery);
       results.addMatch(resultFactory.getRouteResult(routeBean));
@@ -838,6 +912,46 @@ public class SearchServiceImpl implements SearchService {
 			}
 
 			return minDistanceToRoute;
+		}
+	}
+
+	public static class SimpleEnterpriseGeocoderResult implements EnterpriseGeocoderResult {
+
+  		private Double lat = null;
+  		private Double lon = null;
+  		public SimpleEnterpriseGeocoderResult(Double lat, Double lon) {
+  			this.lat = lat;
+  			this.lon = lon;
+		}
+
+		@Override
+		public Double getLatitude() {
+			return lat;
+		}
+
+		@Override
+		public Double getLongitude() {
+			return lon;
+		}
+
+		@Override
+		public String getNeighborhood() {
+			return null;
+		}
+
+		@Override
+		public String getFormattedAddress() {
+			return lat + ", " + lon;
+		}
+
+		@Override
+		public CoordinateBounds getBounds() {
+			return new CoordinateBounds(lat, lon);
+		}
+
+		@Override
+		public boolean isRegion() {
+			return false;
 		}
 	}
 }

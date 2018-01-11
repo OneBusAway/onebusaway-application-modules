@@ -320,7 +320,7 @@ OBA.Popups = (function() {
 		html += "<ul class='links'>";
 		html += "<a href='#' id='zoomHere'>Center & Zoom Here</a>";
 		html += "</ul>";
-		
+
 		// (end popup)
 		html += '</div>';
 		
@@ -478,7 +478,7 @@ OBA.Popups = (function() {
 				html += '<ul>';
 
 				html += '<li class="route">';
-				html += '<a href="#' + stopCode + '%20' + mvj.PublishedLineName + '"><span class="route-name">' + mvj.PublishedLineName + "</span>&nbsp;&nbsp; " + mvj.DestinationName + '</a>';
+				html += '<a href="#' + uniqueStopId + '%20' + mvj.PublishedLineName + '"><span class="route-name">' + mvj.PublishedLineName + "</span>&nbsp;&nbsp; " + mvj.DestinationName + '</a>';
 				if(mvj.Monitored)
 				if (mvj.LineRef in alertData) {
 					html += ' <a id="alert-link|' + uniqueStopId + '|' + mvj.LineRef + '|' + mvj.PublishedLineName + '" class="alert-link" href="#">Alert</a>';
@@ -520,13 +520,17 @@ OBA.Popups = (function() {
 							&& monitoredVehicleJourney.ProgressRate === "noProgress") {
 							stalled = true;
 						}
-						
-						var arrival = 'arrival';
+
+
+                        var vehicleType = monitoredVehicleJourney.VehicleMode[0];
+						console.log("MY VEHICLE TYPE IS " + vehicleType);
+
+						var arrival = 'arrival arrival_' + vehicleType;
 						
 						// Alert if Realtime data is unavailable
 						if(typeof hasRealtime === 'undefined' || hasRealtime === null || hasRealtime == false){
 							distance += '<span class="scheduleAlert"><span class="not_bold"> (using schedule time)</span></span>';
-							arrival = 'arrival_schedule';
+							arrival = 'arrival_schedule arrival_schedule_' + vehicleType;
 						}
 						// If realtime data is available and config is set, add vehicleID
 						else if (OBA.Config.showVehicleIdInStopPopup == "true"){
@@ -620,7 +624,7 @@ OBA.Popups = (function() {
 		html += OBA.Config.infoBubbleFooterFunction("stop", stopCode);	        
 
 		html += "<ul class='links'>";
-		html += "<a href='#' id='zoomHere'>Center & Zoom Here</a>";
+		html += "<a href='#' id='zoomHere'>Center & Zoom Here</a>&nbsp;&nbsp;&nbsp;<a href='where/schedule?id=" + stopResult.id +"' id='schedule'>Complete Schedule</a>";
 		html += "</ul>";
 		
 		// (end popup)

@@ -228,6 +228,7 @@ OBA.RouteMap = function(mapNode, initCallbackFn, serviceAlertCallbackFn) {
 				var headsign = activity.MonitoredVehicleJourney.DestinationName;
 				var routeName = activity.MonitoredVehicleJourney.PublishedLineName;
 				var hasRealtime = activity.MonitoredVehicleJourney.Monitored;
+				var vehicleType = activity.MonitoredVehicleJourney.VehicleMode[0];
 				
 				var tripId = activity.MonitoredVehicleJourney.FramedVehicleJourneyRef.DatedVehicleJourneyRef;
 				
@@ -235,9 +236,9 @@ OBA.RouteMap = function(mapNode, initCallbackFn, serviceAlertCallbackFn) {
 				var vehicleIdParts = vehicleId.split("_");
 				var vehicleIdWithoutAgency = vehicleIdParts[1];
 				var marker = vehiclesById[vehicleId];
-				var markerImage = 'img/realtime/vehicle/vehicle-';
 				var newMarker = false;
-				
+				var markerImage = 'img/realtime/' + vehicleType + '/' + vehicleType + '-';
+
 				// has route been removed while in the process of updating?
 				if(typeof vehiclesByRoute[routeId] === 'undefined') {
 					return false;
@@ -267,7 +268,7 @@ OBA.RouteMap = function(mapNode, initCallbackFn, serviceAlertCallbackFn) {
 				
 				// change marker image depending on whether realtime data is available
 				if(typeof hasRealtime === 'undefined' || hasRealtime === null || hasRealtime == false){
-					markerImage = 'img/scheduled/vehicle/vehicle-';
+					markerImage = 'img/scheduled/' + vehicleType + '/' + vehicleType + '-';
 				}
 				
 				// icon
@@ -363,6 +364,35 @@ OBA.RouteMap = function(mapNode, initCallbackFn, serviceAlertCallbackFn) {
 		}
 		highlightedStop = null;
 	}
+
+
+
+	function showLegend(map) {
+	 	var iconBase = 'img/';
+	        var icons = {
+	          realtime: {
+	            name: 'Real-Time ',
+	            icon: iconBase + 'realtime/bus/bus.png'
+	          },
+	          scheduled: {
+	            name: 'Scheduled',
+	            icon: iconBase + 'scheduled/bus/bus.png'
+	          }
+	        };
+	        
+	        var legend = document.getElementById('legend');
+	        for (var key in icons) {
+	          var type = icons[key];
+	          var name = type.name;
+	          var icon = type.icon;
+	          var div = document.createElement('div');
+	          div.innerHTML = '<img src="' + icon + '"> ' + name;
+	          legend.appendChild(div);
+	        }
+	
+
+	        map.controls[google.maps.ControlPosition.RIGHT_TOP].push(legend);
+	}
 		
 	//////////////////// CONSTRUCTOR /////////////////////
 
@@ -384,7 +414,11 @@ OBA.RouteMap = function(mapNode, initCallbackFn, serviceAlertCallbackFn) {
 		// start adding things to map once it's ready...
 		if(initialized === false) {
 			initialized = true;
+			
+		showLegend(map);
 
+
+			
 			if(typeof initCallbackFn === 'function') {
 				initCallbackFn();
 			}

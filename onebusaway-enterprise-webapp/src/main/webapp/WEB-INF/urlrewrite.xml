@@ -102,13 +102,6 @@
         <to last="true">/where/iphone/index.action</to>
     </rule>
 
-    <!-- 
-    	Legacy Signs Interface 
-   	--> 
-    <rule>
-        <from>^/where/sign/stop.action</from>
-        <to type="redirect" last="true">%{context-path}/sign/sign?stopIds=%{parameter:id}</to>
-    </rule>        
 
 	<!--
 		Remove action from URLs.
@@ -133,9 +126,11 @@
         <from>^(.*?)(?:\;jsessionid=[^\?#]*)?(\?[^#]*)?(#.*)?$</from>
         <to last="true">$1.action$2$3</to>
     </rule>
+    
     <!-- 
     	Outbound Rules
      -->
+     
     <outbound-rule>
     	<from>^(.*)\.action\?(.*)$</from>
     	<to>$1?$2</to>

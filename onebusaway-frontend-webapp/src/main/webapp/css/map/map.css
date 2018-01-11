@@ -22,6 +22,7 @@
 	overflow-y: auto;
 	font-size: 14px;
 	position: relative;
+	margin-left: 20px;
 }
 
 #content #searchbar .sidebar {
@@ -429,4 +430,24 @@
 
 #subwayControl a:hover { 
 	background-color: #EEEEEE;
+}
+
+#legend {
+        font-family: Arial, sans-serif;
+        background: #fff;
+        padding: 15px;
+        margin: 20px;
+        border: 2px solid #696969;
+}
+#legend h3 {
+  margin-top: 0;
+  font-weight: bold;
+  font-size: 1.05em;
+}
+#legend img {
+  vertical-align: middle;
+}
+
+#legend div {
+  margin-top: 6px;
 }

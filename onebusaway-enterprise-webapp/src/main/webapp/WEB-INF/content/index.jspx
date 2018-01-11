@@ -127,7 +127,11 @@
 </s:url>
 <script type="text/javascript" src="${url}"><!-- //prevent jspx minimization --></script>
 
-<script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"><!-- jspx --></script>
+<s:url var="url" value="/js/oba/GoogleTranslate.js">
+	<s:param name="v"><s:property value="frontEndVersion" /></s:param>
+</s:url>
+<script type="text/javascript" src="${url}"><!-- //prevent jspx minimization --></script>
+
 
 </head>
 <body>
@@ -219,7 +223,7 @@
 			<div id="flexSpreader"><!-- jspx --></div>
 			<div class="container clear"><!-- jspx --></div>
 
-			<s:set var="link" value="getText('main.apps.link')" />
+			<s:set var="link" value="getText('main.tools.link')" />
 			<a href="${link}">
 				<div id="mobileBox">
 					<div id="mobileAvailabilityBox">
@@ -237,7 +241,8 @@
     </div>
 
 	<div id="map"><!-- //prevent jspx minimization --></div>
-
+	<div id="legend"><!-- //prevent jspx minimization --></div>
+	
     <div id="wizard">
 	   	<div id="wizard_start">
 	   		<ul>

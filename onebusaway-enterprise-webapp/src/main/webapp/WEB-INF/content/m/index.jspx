@@ -88,12 +88,18 @@
 	    	<a href="${url}">Refresh (<strong>Updated <s:property value="lastUpdateTime" /></strong>)</a>
 		</div>
 
-		<div id="mapHider">
-			<div id="mapExpander">
-				<span>SHOW MAP</span>
+		<s:if test="%{results.matches.size==1}">
+		  <s:if test="results.resultType.equals('StopResult')">
+			<div id="mapHider" onclick="OBA.Mobile.loadMap('${q}')">
+				<div id="mapExpander">
+					<span>SHOW MAP</span>
+					<s:url var="url" value="/css/img/loading.gif"></s:url>
+					<img id="loadingCover" src="${url}" style="display: none;"/>
+				</div>
+				<div id="mapContainer"><br/></div>
 			</div>
-			<div id="mapContainer"><br/></div>
-		</div>
+		  </s:if>
+		</s:if>
 		<div id="content">
 			<s:if test="%{results.matches.size&gt;0}">
 
@@ -133,23 +139,5 @@
 
 	</s:else>
 
-	<script type="text/javascript">
-		$('#mapContainer').html('');
-		var frame = $('<iframe></iframe>');
-		frame.attr("id", "mapFrame");
-		frame.attr("src", "http://localhost:8080/#" + "${q}");
-		$('#mapContainer').append(frame);
-		frame.load(function(){this.contentWindow.document.documentElement.scrollLeft=500});
-
-		$("#mapExpander").click(function () {
-			$mapExpander = $(this);
-			$mapContainer = $mapExpander.next();
-			$mapContainer.slideToggle(500, function () {
-				$mapExpander.children('span').text(function () {
-					return $mapContainer.is(":visible") ? "HIDE MAP" : "SHOW MAP";
-				});
-			});
-		});
-	</script>
 </body>
 </html>

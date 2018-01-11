@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,6 +35,7 @@ import org.onebusaway.csv_entities.EntityHandler;
 import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.realtime.api.EVehiclePhase;
+import org.onebusaway.realtime.api.TimepointPredictionRecord;
 import org.onebusaway.realtime.api.VehicleLocationListener;
 import org.onebusaway.realtime.api.VehicleLocationRecord;
 import org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.MonitoredDataSource;
@@ -44,6 +46,7 @@ import org.onebusaway.transit_data_federation.services.blocks.ScheduledBlockLoca
 import org.onebusaway.transit_data_federation.services.blocks.ScheduledBlockLocationService;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
 import org.onebusaway.util.SystemTime;
 import org.slf4j.Logger;
@@ -341,7 +344,9 @@ public abstract class AbstractOrbcadRecordSource implements MonitoredDataSource 
 
     
     private void postHandleRefresh() {
-      _log.debug("" + _agencyIds + ": runningCount=" + _recordsTotal  + ", currentCount=" + _currentResult.getRecordsTotal() + " for agency " + _currentResult.getAgencyIds());
+      _log.info("Agencies " + _agencyIds + " have active vehicles=" +_currentResult.getMatchedTripIds().size()
+              + " for updates=" + _currentResult.getRecordsTotal()
+              + "  with most recent timestamp " + new Date(_latestUpdate));
       if (_currentResult.getRecordsTotal() > 0) {
         // only consider it a successful update if we got some records
         // ftp impl may not have a new file to download
@@ -421,9 +426,10 @@ public abstract class AbstractOrbcadRecordSource implements MonitoredDataSource 
         BlockTripEntry activeTrip = location.getActiveTrip();
         if (activeTrip != null) {
           message.setTripId(activeTrip.getTrip().getId());
+
+          addTimepointRecords(message, activeTrip, blockInstance.getServiceDate());
           _currentResult.addMatchedTripId(activeTrip.getTrip().getId().toString());
         } else {
-          _log.error("invalid trip for location=" + location);
           _currentResult.addUnmatchedTripId(blockId.toString()); // this isn't exactly right
         }
         // Are we at the start of the block?
@@ -452,6 +458,41 @@ public abstract class AbstractOrbcadRecordSource implements MonitoredDataSource 
       _recordsValid++;
 
       _lastRecordByVehicleId.put(message.getVehicleId(), message);
+    }
+
+    private void addTimepointRecords(VehicleLocationRecord message, BlockTripEntry activeTrip, long serviceDate) {
+      if (activeTrip == null) {
+        return;
+      }
+
+      if (activeTrip.getStopTimes() == null) {
+        return;
+      }
+      List<BlockStopTimeEntry> stopTimes = activeTrip.getStopTimes();
+
+      for (BlockStopTimeEntry stopTime : stopTimes) {
+        long scheduleTime = serviceDate + stopTime.getStopTime().getDepartureTime() * 1000;
+        long now = message.getTimeOfRecord();
+        long delay = (long)message.getScheduleDeviation();
+        long predictedTime = delay * 1000 + scheduleTime;
+
+        // only create records for predictions in the future
+        if (predictedTime >= now) {
+          TimepointPredictionRecord tpr = new TimepointPredictionRecord();
+          tpr.setTimepointId(stopTime.getStopTime().getStop().getId());
+          tpr.setTripId(activeTrip.getTrip().getId());
+          tpr.setTimepointScheduledTime(scheduleTime);
+          // propagate delay across the trip as a trivial prediction
+          tpr.setTimepointPredictedArrivalTime(predictedTime);
+          tpr.setTimepointPredictedDepartureTime(predictedTime);
+          if (message.getTimepointPredictions() == null) {
+            message.setTimepointPredictions(new ArrayList<TimepointPredictionRecord>());
+          }
+          message.getTimepointPredictions().add(tpr);
+        }
+
+      }
+
     }
   }
 }

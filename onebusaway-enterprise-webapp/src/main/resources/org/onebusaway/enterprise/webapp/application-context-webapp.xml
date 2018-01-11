@@ -39,9 +39,10 @@
     
     <bean id="currentUserStrategyImpl" class="org.onebusaway.users.impl.CurrentUserStrategyImpl" primary="true" />
 
-    <bean id="geocoderImpl" class="org.onebusaway.geocoder.impl.DatabaseCachingGeocoderImpl" primary="true">
-        <property name="geocoderService" ref="externalGeocoderImpl" />
-    </bean>
+    <!-- this is no longer needed, its been replaced with enterprise geocoder degined in data-sources.xml -->
+    <!--<bean id="geocoderImpl" class="org.onebusaway.geocoder.impl.DatabaseCachingGeocoderImpl" primary="true">-->
+        <!--<property name="geocoderService" ref="externalGeocoderImpl" />-->
+    <!--</bean>-->
     
     <bean id="minApiRequestIntervalForKeyCache" class="org.onebusaway.container.spring.ehcache.EhCacheFactoryBean" primary="true">
         <property name="cacheManager" ref="cacheManager" />

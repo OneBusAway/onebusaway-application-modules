@@ -564,6 +564,8 @@ public class GtfsRealtimeTripLibrary {
     long t = currentTime();
     int currentTime = (int) ((t - instance.getServiceDate()) / 1000);
     BestScheduleDeviation best = new BestScheduleDeviation();
+    long lastStopScheduleTime = Long.MIN_VALUE;
+    boolean singleTimepointRecord = false;
 
     List<TimepointPredictionRecord> timepointPredictions = new ArrayList<TimepointPredictionRecord>();
 
@@ -621,6 +623,16 @@ public class GtfsRealtimeTripLibrary {
             BlockStopTimeEntry blockStopTime = getBlockStopTimeForStopTimeUpdate(result,
                 tripUpdate, stopTimeUpdate, blockTrip.getStopTimes(),
                 instance.getServiceDate());
+
+            // loop through and store last stop time on trip
+            List<BlockStopTimeEntry> stopTimes = blockTrip.getStopTimes();
+            for (BlockStopTimeEntry bste : stopTimes) {
+              long scheduleTime = instance.getServiceDate() + bste.getStopTime().getArrivalTime() * 1000;
+              if (scheduleTime > lastStopScheduleTime) {
+                lastStopScheduleTime = scheduleTime;
+              }
+            }
+
             if (blockStopTime == null)
               continue;
 
@@ -629,6 +641,7 @@ public class GtfsRealtimeTripLibrary {
             TimepointPredictionRecord tpr = new TimepointPredictionRecord();
             tpr.setTimepointId(stopTime.getStop().getId());
             tpr.setTripId(stopTime.getTrip().getId());
+            tpr.setTimepointScheduledTime(instance.getServiceDate() + stopTime.getArrivalTime() * 1000);
             if (stopTimeUpdate.hasStopSequence()) {
               tpr.setStopSequence(stopTimeUpdate.getStopSequence());
             }
@@ -665,12 +678,17 @@ public class GtfsRealtimeTripLibrary {
           }
         }
       }
-      
+
+
+      if (timepointPredictions.size() == 1 && tripUpdates.get(0).getStopTimeUpdateList().size() == 1) {
+        singleTimepointRecord = true;
+      }
       // If we have a TripUpdate delay and timepoint predictions, interpolate
       // timepoint predictions for close, unserved stops. See GtfsRealtimeTripLibraryTest
       // for full explanation
       // tripUpdateHasDelay = true => best.scheduleDeviation is TripUpdate delay
-      if (timepointPredictions.size() > 0 && tripUpdateHasDelay) {
+      if ((timepointPredictions.size() > 0 && tripUpdateHasDelay)
+              || singleTimepointRecord) {
         Set<AgencyAndId> records = new HashSet<AgencyAndId>();
         for (TimepointPredictionRecord tpr : timepointPredictions) {
           records.add(tpr.getTimepointId());
@@ -683,14 +701,26 @@ public class GtfsRealtimeTripLibrary {
           long predictionOffset = instance.getServiceDate() + (best.scheduleDeviation * 1000L);
           long predictedDepartureTime = (stopTime.getDepartureTime() * 1000L) + predictionOffset;
           long predictedArrivalTime = (stopTime.getArrivalTime() * 1000L) + predictionOffset;
+          long scheduledArrivalTime = instance.getServiceDate() + stopTime.getArrivalTime() * 1000;
           long time = best.timestamp != 0 ? best.timestamp : currentTime();
-          if (predictedDepartureTime > time && predictedDepartureTime < tprStartTime) {
+
+            /*
+             * if the timpepointrecord needs interpolated (one before, one after),
+             * OR
+             * we have a single Timepoint record and the arrival is
+              * in the future and before the last stop
+             */
+            if ((predictedDepartureTime > time && predictedDepartureTime < tprStartTime)
+                    || (singleTimepointRecord
+                    && (predictedDepartureTime > time
+                    && scheduledArrivalTime <= lastStopScheduleTime))) {
             TimepointPredictionRecord tpr = new TimepointPredictionRecord();
             tpr.setTimepointId(stopTime.getStop().getId());
             tpr.setTripId(stopTime.getTrip().getId());
             tpr.setStopSequence(stopTime.getGtfsSequence());
             tpr.setTimepointPredictedArrivalTime(predictedArrivalTime);
             tpr.setTimepointPredictedDepartureTime(predictedDepartureTime);
+            tpr.setTimepointScheduledTime(scheduledArrivalTime);
             timepointPredictions.add(tpr);
           }
         }
