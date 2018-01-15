@@ -41,4 +41,11 @@ public class SiriExtensionWrapper {
     this.distances = distances;
   }
 
+  @XmlElement(name="Deviation")
+  private String deviation;
+
+  public String getDeviation() {return deviation; }
+
+  public void setDeviation(String deviation) { this.deviation = deviation; }
+
 }

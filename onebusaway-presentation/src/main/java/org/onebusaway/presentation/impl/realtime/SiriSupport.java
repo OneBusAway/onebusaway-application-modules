@@ -91,7 +91,7 @@ public final class SiriSupport {
 	public static void fillMonitoredVehicleJourney(MonitoredVehicleJourneyStructure monitoredVehicleJourney, 
 			TripBean framedJourneyTripBean, TripStatusBean currentVehicleTripStatus, StopBean monitoredCallStopBean, OnwardCallsMode onwardCallsMode,
 			PresentationService presentationService, TransitDataService transitDataService,
-			int maximumOnwardCalls, List<TimepointPredictionRecord> stopLevelPredictions, boolean hasRealtimeData, long responseTimestamp) {
+			int maximumOnwardCalls, List<TimepointPredictionRecord> stopLevelPredictions, boolean hasRealtimeData, long responseTimestamp, boolean showRawLocation) {
 			
 		BlockInstanceBean blockInstance = 
 				transitDataService.getBlockInstance(currentVehicleTripStatus.getActiveTrip().getBlockId(), currentVehicleTripStatus.getServiceDate());
@@ -199,25 +199,21 @@ public final class SiriSupport {
 		DecimalFormat df = new DecimalFormat();
 		df.setMaximumFractionDigits(6);
 
-		if (presentationService.isOnDetour(currentVehicleTripStatus)) {
-			location.setLatitude(new BigDecimal(df.format(currentVehicleTripStatus.getLastKnownLocation().getLat())));
-			location.setLongitude(new BigDecimal(df.format(currentVehicleTripStatus.getLastKnownLocation().getLon())));
-		} else {
-		  if (currentVehicleTripStatus.getLocation() != null) {
-		    location.setLatitude(new BigDecimal(df.format(currentVehicleTripStatus.getLocation().getLat())));
-		    location.setLongitude(new BigDecimal(df.format(currentVehicleTripStatus.getLocation().getLon())));
-		    if (currentVehicleTripStatus.getLastKnownLocation() != null) {
-				_log.debug("v(" + currentVehicleTripStatus.getVehicleId() + ")"
-						+ " raw= " + currentVehicleTripStatus.getLastKnownLocation().getLat()
-						+ ", " + currentVehicleTripStatus.getLastKnownLocation().getLon()
-						+ " snapped= " + currentVehicleTripStatus.getLocation().getLat()
-						+ ", " + currentVehicleTripStatus.getLocation().getLon()
-				);
-			} else {
-		    	_log.info("last known location is null for " + currentVehicleTripStatus.getVehicleId());
-			}
-		  }
-		}
+        if (!currentVehicleTripStatus.getLocation().equals(currentVehicleTripStatus.getLastKnownLocation())) {
+            _log.error("**Locations don't match.  Route: " + routeShortName.getValue() + " vehicleId " + currentVehicleTripStatus.getVehicleId());
+        }
+
+        if ((showRawLocation) || (presentationService.isOnDetour(currentVehicleTripStatus))) {
+            location.setLatitude(new BigDecimal(df.format(currentVehicleTripStatus.getLastKnownLocation().getLat())));
+            location.setLongitude(new BigDecimal(df.format(currentVehicleTripStatus.getLastKnownLocation().getLon())));
+            _log.error("isAdmin or onDetour  Used last known location");
+        } else {
+            if (currentVehicleTripStatus.getLocation() != null) {
+                location.setLatitude(new BigDecimal(df.format(currentVehicleTripStatus.getLocation().getLat())));
+                location.setLongitude(new BigDecimal(df.format(currentVehicleTripStatus.getLocation().getLon())));
+                _log.error("isApp.  Used location");
+            }
+        }
 
 		monitoredVehicleJourney.setVehicleLocation(location);
 
@@ -671,7 +667,17 @@ public final class SiriSupport {
 		distances.setDistanceFromCall(NumberUtils.toDouble(df.format(distanceOfVehicleFromCall)));		
 		distances.setPresentableDistance(presentationService.getPresentableDistance(distances));
 
-		wrapper.setDistances(distances);
+        long deviation = 0L;
+        if (monitoredCallStructure.getExpectedArrivalTime() != null &&
+                monitoredCallStructure.getAimedArrivalTime() != null) {
+            //get schedule deviation in milliseconds
+            long deviationSeconds = monitoredCallStructure.getExpectedArrivalTime().getTime() -
+                    monitoredCallStructure.getAimedArrivalTime().getTime();
+            deviation = Math.round(deviationSeconds/(1000.0 * 60.0));
+        }
+
+        wrapper.setDeviation(String.valueOf(deviation));
+        wrapper.setDistances(distances);
 		distancesExtensions.setAny(wrapper);
 		monitoredCallStructure.setExtensions(distancesExtensions);
 
