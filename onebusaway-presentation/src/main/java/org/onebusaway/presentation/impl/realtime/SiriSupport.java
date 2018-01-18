@@ -200,18 +200,15 @@ public final class SiriSupport {
 		df.setMaximumFractionDigits(6);
 
         if (!currentVehicleTripStatus.getLocation().equals(currentVehicleTripStatus.getLastKnownLocation())) {
-            _log.error("**Locations don't match.  Route: " + routeShortName.getValue() + " vehicleId " + currentVehicleTripStatus.getVehicleId());
         }
 
         if ((showRawLocation) || (presentationService.isOnDetour(currentVehicleTripStatus))) {
             location.setLatitude(new BigDecimal(df.format(currentVehicleTripStatus.getLastKnownLocation().getLat())));
             location.setLongitude(new BigDecimal(df.format(currentVehicleTripStatus.getLastKnownLocation().getLon())));
-            _log.error("isAdmin or onDetour  Used last known location");
         } else {
             if (currentVehicleTripStatus.getLocation() != null) {
                 location.setLatitude(new BigDecimal(df.format(currentVehicleTripStatus.getLocation().getLat())));
                 location.setLongitude(new BigDecimal(df.format(currentVehicleTripStatus.getLocation().getLon())));
-                _log.error("isApp.  Used location");
             }
         }
 
