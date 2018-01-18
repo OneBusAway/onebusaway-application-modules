@@ -46,6 +46,7 @@ jQuery(function() {
 
     jQuery("#newKey").click(function(e) {
         e.preventDefault();
+        clearApiKeyFields();
         handleGenerateApiKeyClick();
         hideDelete();
         hideSearch();

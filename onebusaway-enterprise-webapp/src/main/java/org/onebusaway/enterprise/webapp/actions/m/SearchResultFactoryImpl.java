@@ -93,7 +93,7 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
     // add stops in both directions
     
     List<VehicleActivityStructure> journeyList = _realtimeService.getVehicleActivityForRoute(
-        routeBean.getId(), null, 0, SystemTime.currentTimeMillis());
+        routeBean.getId(), null, 0, SystemTime.currentTimeMillis(), false);
 
     Map<String, List<String>> stopIdToDistanceAwayStringMap = new HashMap<String, List<String>>();
     Map<String, List<String>> stopIdToVehicleIdMap = new HashMap<String, List<String>>();
