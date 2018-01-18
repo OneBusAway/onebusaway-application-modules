@@ -446,7 +446,7 @@
             <exclude>**/grid.*.js</exclude>
             <exclude>**/CTBusStops*</exclude>
 		    <exclude>**/leaflet.*</exclude>
-
+			<exclude>overlays/**</exclude>
 		  </excludes>
         </configuration>
       </plugin>
