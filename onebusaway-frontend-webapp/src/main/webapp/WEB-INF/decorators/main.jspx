@@ -31,7 +31,6 @@
   <title><decorator:title default="${title}" /></title>
 
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-  <meta http-equiv="X-UA-Compatible" content="IE=8" />
   
   <s:set var="favicon" value="getText('favicon.url')" />
   <link rel="shortcut icon" href="${favicon}" type="image/x-icon"/>
