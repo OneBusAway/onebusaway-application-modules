@@ -7,7 +7,7 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>onebusaway-application-modules</artifactId>
-  <version>2.0.0-cs-rc8-SNAPSHOT</version>
+  <version>2.0.0-cs-rc9-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>onebusaway-application-modules</name>
@@ -36,14 +36,20 @@
     <maven.compiler.target>1.7</maven.compiler.target>
   </properties>
 
+  <scm>
+    <connection>scm:git:git@github.com:camsys/onebusaway-application-modules.git</connection>
+    <developerConnection>scm:git:git@github.com:camsys/onebusaway-application-modules.git</developerConnection>
+    <url>scm:git:git@github.com:camsys/onebusaway-application-modules</url>
+  </scm>
+
   <repositories>
     <repository>
       <id>releases-camsys-repo</id>
-      <url>http://archiva.obaweb.org/archiva/repository/releases/</url>
+      <url>http://repo.obaweb.org:8080/archiva/repository/releases/</url>
     </repository>
     <repository>
       <id>snapshots-camsys-repo</id>
-      <url>http://archiva.obaweb.org/archiva/repository/snapshots/</url>
+      <url>http://repo.obaweb.org:8080/archiva/repository/snapshots/</url>
     </repository>
     <repository>
       <id>public.onebusaway.org</id>
@@ -506,6 +512,8 @@
             <plugin>
               <groupId>org.apache.maven.plugins</groupId>
               <artifactId>maven-javadoc-plugin</artifactId>
+              <version>2.10.3</version>
+
               <configuration>
                 <!--
                   bdferris: I ran into an issue where the javadoc process crashed with the following exception:
@@ -519,6 +527,9 @@
                   Thus, we exclude this package to avoid the bug.
                    -->
                 <excludePackageNames>com.google.gwt.user.client.ui</excludePackageNames>
+                 <!-- Turn off Java 8 strict Javadoc checking -->
+                 <additionalparam>-Xdoclint:none</additionalparam>
+
               </configuration>
               <reportSets>
                 <reportSet>

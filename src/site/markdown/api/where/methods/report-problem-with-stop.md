@@ -9,7 +9,7 @@ problem reporting admin interface.
 
 ## Sample Request
 
-http://api.pugetsound.onebusaway.org/api/where/report-problem-with-stop/1_75403.xml?key=TEST&code=stop_name_wrong
+http://api.pugetsound.onebusaway.org/api/where/report-problem-with-stop/1_75403.xml?key=TEST&amp;code=stop_name_wrong
 
 ## Sample Response
 
