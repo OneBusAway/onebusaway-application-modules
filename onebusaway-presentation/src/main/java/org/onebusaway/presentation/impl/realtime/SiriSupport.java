@@ -199,13 +199,11 @@ public final class SiriSupport {
 		DecimalFormat df = new DecimalFormat();
 		df.setMaximumFractionDigits(6);
 
-        if (!currentVehicleTripStatus.getLocation().equals(currentVehicleTripStatus.getLastKnownLocation())) {
-        }
-
-        if ((showRawLocation) || (presentationService.isOnDetour(currentVehicleTripStatus))) {
+        //if we want to show the raw location AND we have realtime or if its on detour, show actual location
+        if ((showRawLocation && currentVehicleTripStatus.getLastKnownLocation() != null) || (presentationService.isOnDetour(currentVehicleTripStatus))) {
             location.setLatitude(new BigDecimal(df.format(currentVehicleTripStatus.getLastKnownLocation().getLat())));
             location.setLongitude(new BigDecimal(df.format(currentVehicleTripStatus.getLastKnownLocation().getLon())));
-        } else {
+        } else { //show snapped location
             if (currentVehicleTripStatus.getLocation() != null) {
                 location.setLatitude(new BigDecimal(df.format(currentVehicleTripStatus.getLocation().getLat())));
                 location.setLongitude(new BigDecimal(df.format(currentVehicleTripStatus.getLocation().getLon())));
