@@ -142,7 +142,7 @@
 				<h1><s:property value="getText('main.headline')" /></h1>
 				<h2><s:property value="getText('main.shorttext')" /></h2>
 			</div>
-			
+
 			<div id="map_header">
 				<div class="title">
 		   			<s:url var="url" value="/"></s:url>
@@ -233,7 +233,7 @@
 						<img id="mobileImage" src="${url}" alt="Agency logo" />
 				</div>
 			</a>
-		
+
 		</div>
 		<div class="container clear"><!-- jspx --></div>
 	  	<s:url var="url" value="/css/img/google_logo.png"></s:url>

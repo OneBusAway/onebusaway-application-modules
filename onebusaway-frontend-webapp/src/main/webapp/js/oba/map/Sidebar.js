@@ -28,6 +28,7 @@ OBA.Sidebar = function() {
 		mapDiv = jQuery("#map"),
 	    bottomBarDiv = jQuery("#bottombar"),
 		mobileDiv = jQuery("#mobilebox");
+		bottomBox = jQuery("#bottombox");
 
 
     var searchBarDiv = jQuery("#searchbar"),
@@ -136,9 +137,19 @@ OBA.Sidebar = function() {
 		if (mapGlobalAlerts.length > 0) {
 			alertsHeight = mapGlobalAlerts.outerHeight();
 		}
-		
+
+		if (bottomBox.height() == 0){
+			bottomBarDiv.height(0)
+		}
+
+		// Check if bottomBar is enabled and adjust height accordingly
+		if (bottomBarDiv.is(':visible') == true){
 		var h = theWindow.height() - topBarDiv.height() - bottomBarDiv.outerHeight() - 1,
 			h2 = theWindow.height() - topBarDiv.height() - bottomBarDiv.outerHeight() - alertsHeight - 1;
+		} else {
+			var h = theWindow.height() - topBarDiv.height() - 1,
+			h2 = theWindow.height() - topBarDiv.height() - alertsHeight - 1;
+		}
 		
 		searchBarDiv.height(h);
 		mapDiv.height(h2);
