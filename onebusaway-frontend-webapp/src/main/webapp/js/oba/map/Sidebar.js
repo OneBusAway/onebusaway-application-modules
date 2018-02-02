@@ -28,8 +28,6 @@ OBA.Sidebar = function() {
 		mapDiv = jQuery("#map"),
 	    bottomBarDiv = jQuery("#bottombar"),
 		mobileDiv = jQuery("#mobilebox");
-		bottomBox = jQuery("#bottombox");
-
 
     var searchBarDiv = jQuery("#searchbar"),
 		matches = jQuery("#matches"),
@@ -136,10 +134,6 @@ OBA.Sidebar = function() {
 		
 		if (mapGlobalAlerts.length > 0) {
 			alertsHeight = mapGlobalAlerts.outerHeight();
-		}
-
-		if (bottomBox.height() == 0){
-			bottomBarDiv.height(0)
 		}
 
 		// Check if bottomBar is enabled and adjust height accordingly
