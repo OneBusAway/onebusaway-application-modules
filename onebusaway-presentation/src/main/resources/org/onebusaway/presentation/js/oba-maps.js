@@ -186,6 +186,7 @@ var obaMapFactory = function() {
 		var mapOptions = {
 			zoom : zoom,
 			center : mapCenter,
+			gestureHandling: 'greedy',
 			mapTypeId : google.maps.MapTypeId.ROADMAP
 		};
 		
