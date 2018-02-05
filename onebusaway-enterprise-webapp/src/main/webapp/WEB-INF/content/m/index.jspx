@@ -93,7 +93,7 @@
 			<div id="mapHider" onclick="OBA.Mobile.loadMap('${q}')">
 				<div id="mapExpander">
 					<span>SHOW MAP</span>
-					<s:url var="url" value="/css/img/loading.gif"></s:url>
+					<s:url var="url" value="/css/mobile/img/loading.gif"></s:url>
 					<img id="loadingCover" src="${url}" style="display: none;"/>
 				</div>
 				<div id="mapContainer"><br/></div>
