@@ -32,17 +32,17 @@ public class ServletLibrary {
   public static String getContextPath(ServletContext context) {
 
     // Get the context path without the request.
-    String contextPath = "";
-    try {
+	String contextPath = context.getContextPath();
+    try {     
       String path = context.getResource("/").getPath();
       if (path.contains("jetty")
           && path.contains("onebusaway-quickstart-assembly")) {
         return "";
       }
-      contextPath = path.substring(0, path.lastIndexOf("/"));
-      contextPath = contextPath.substring(contextPath.lastIndexOf("/"));
-      if (contextPath.equals("/localhost"))
-        contextPath = "";
+      String localPath = path.substring(0, path.lastIndexOf("/"));
+      localPath = contextPath.substring(contextPath.lastIndexOf("/"));
+      if (localPath.equals("/localhost"))
+        return "";
     } catch (Exception e) {
       e.printStackTrace();
     }
