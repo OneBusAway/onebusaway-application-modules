@@ -371,7 +371,7 @@ OBA.RouteMap = function(mapNode, initCallbackFn, serviceAlertCallbackFn) {
 	 	var iconBase = 'img/';
 	        var icons = {
 	          realtime: {
-	            name: 'Real-Time ',
+	            name: 'Real-Time',
 	            icon: iconBase + 'realtime/bus/bus.png'
 	          },
 	          scheduled: {
@@ -386,7 +386,7 @@ OBA.RouteMap = function(mapNode, initCallbackFn, serviceAlertCallbackFn) {
 	          var name = type.name;
 	          var icon = type.icon;
 	          var div = document.createElement('div');
-	          div.innerHTML = '<img src="' + icon + '"> ' + name;
+	          div.innerHTML = '<img src="' + icon + '"> ' + '<span>' + name + '</span>';
 	          legend.appendChild(div);
 	        }
 	
