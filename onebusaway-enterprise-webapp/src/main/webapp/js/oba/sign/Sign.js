@@ -396,10 +396,6 @@ OBA.Sign = function() {
 				var etaDiv = jQuery('<div></div>')
 					.addClass('eta');
 
-				var realtimeIcon = jQuery('<img/>')
-					.addClass('realtimeIconImg')
-					.attr('src', '/css/img/Realtime_Icon_with_white_bg_400x400.png');
-
 				var etaTextPara = jQuery('<p></p>')
 					.addClass('etaText')
 					.append(rowInfo.etas[0]);
