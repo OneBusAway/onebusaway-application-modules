@@ -292,6 +292,15 @@
 	color: rgb(225,0,0);
 }
 
+#bustime .popup .stopAlert {
+    color: rgb(255,0,0);
+}
+
+#bustime .popup .stopAlertHeader {
+    color: rgb(255,0,0);
+    font-weight:bold;
+}
+
 #bustime .popup .vehicleId {
 	color: rgb(0,0,255);
 }
