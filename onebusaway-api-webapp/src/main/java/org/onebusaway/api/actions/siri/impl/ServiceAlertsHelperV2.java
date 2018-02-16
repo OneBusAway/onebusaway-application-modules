@@ -41,7 +41,6 @@ import org.onebusaway.transit_data.model.service_alerts.SituationQueryBean;
 import org.onebusaway.transit_data.services.TransitDataService;
 
 import uk.org.siri.siri_2.AffectedOperatorStructure;
-import uk.org.siri.siri_2.AffectedStopPointStructure;
 import uk.org.siri.siri_2.AffectedVehicleJourneyStructure;
 import uk.org.siri.siri_2.AffectsScopeStructure;
 import uk.org.siri.siri_2.AffectsScopeStructure.Operators;
@@ -62,7 +61,6 @@ import uk.org.siri.siri_2.SeverityEnumeration;
 import uk.org.siri.siri_2.SituationExchangeDeliveryStructure;
 import uk.org.siri.siri_2.SituationExchangeDeliveryStructure.Situations;
 import uk.org.siri.siri_2.SituationRefStructure;
-import uk.org.siri.siri_2.StopPointRefStructure;
 import uk.org.siri.siri_2.VehicleActivityStructure;
 
 public class ServiceAlertsHelperV2 {
@@ -407,7 +405,6 @@ public class ServiceAlertsHelperV2 {
       }
       String routeId = affects.getRouteId(); // LineRef
       String directionId = affects.getDirectionId();
-      String stopId = affects.getStopId();
       if (!StringUtils.isBlank(routeId)) {
         AffectedVehicleJourneyStructure affectedVehicleJourneyStructure = new AffectedVehicleJourneyStructure();
         LineRefStructure lineRefStructure = new LineRefStructure();
@@ -421,18 +418,6 @@ public class ServiceAlertsHelperV2 {
         vehicleJourneys.getAffectedVehicleJourney().add(
             affectedVehicleJourneyStructure);
       }
-      // add support for stop level alerts
-      if (!StringUtils.isBlank(stopId)) {
-        AffectedStopPointStructure stop = new AffectedStopPointStructure();
-        StopPointRefStructure stopRef = new StopPointRefStructure();
-        stopRef.setValue(stopId);
-        stop.setStopPointRef(stopRef);
-        if (affectsStructure.getStopPoints() == null) {
-          affectsStructure.setStopPoints(new AffectsScopeStructure.StopPoints());
-        }
-        affectsStructure.getStopPoints().getAffectedStopPoint().add(stop);
-      }
-
     }
     if (vehicleJourneys.getAffectedVehicleJourney().size() > 0) {
       affectsStructure.setVehicleJourneys(vehicleJourneys);
