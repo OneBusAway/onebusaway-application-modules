@@ -34,7 +34,6 @@ import org.onebusaway.transit_data.services.TransitDataService;
 import org.apache.commons.lang.StringUtils;
 
 import uk.org.siri.siri.AffectedOperatorStructure;
-import uk.org.siri.siri.AffectedStopPointStructure;
 import uk.org.siri.siri.AffectedVehicleJourneyStructure;
 import uk.org.siri.siri.AffectsScopeStructure;
 import uk.org.siri.siri.AffectsScopeStructure.Operators;
@@ -57,7 +56,6 @@ import uk.org.siri.siri.SeverityEnumeration;
 import uk.org.siri.siri.SituationExchangeDeliveryStructure;
 import uk.org.siri.siri.SituationExchangeDeliveryStructure.Situations;
 import uk.org.siri.siri.SituationRefStructure;
-import uk.org.siri.siri.StopPointRefStructure;
 import uk.org.siri.siri.VehicleActivityStructure;
 import uk.org.siri.siri.WorkflowStatusEnumeration;
 
@@ -435,7 +433,6 @@ public class ServiceAlertsHelper {
       }
       String routeId = affects.getRouteId(); // LineRef
       String directionId = affects.getDirectionId();
-      String stopId = affects.getStopId();
       if (!StringUtils.isBlank(routeId)) {
         AffectedVehicleJourneyStructure affectedVehicleJourneyStructure = new AffectedVehicleJourneyStructure();
         LineRefStructure lineRefStructure = new LineRefStructure();
@@ -449,22 +446,7 @@ public class ServiceAlertsHelper {
         vehicleJourneys.getAffectedVehicleJourney().add(
             affectedVehicleJourneyStructure);
       }
-      // add support for stop level alerts
-      if (!StringUtils.isBlank(stopId)) {
-        AffectedStopPointStructure stop = new AffectedStopPointStructure();
-        StopPointRefStructure stopRef = new StopPointRefStructure();
-        stopRef.setValue(stopId);
-        stop.setStopPointRef(stopRef);
-        if (affectsStructure.getStopPoints() == null) {
-          affectsStructure.setStopPoints(new AffectsScopeStructure.StopPoints());
-        }
-        affectsStructure.getStopPoints().getAffectedStopPoint().add(stop);
-      }
-
     }
-
-
-
     if (vehicleJourneys.getAffectedVehicleJourney().size() > 0) {
       affectsStructure.setVehicleJourneys(vehicleJourneys);
     }

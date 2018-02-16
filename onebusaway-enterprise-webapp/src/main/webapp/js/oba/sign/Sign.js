@@ -170,7 +170,14 @@ OBA.Sign = function() {
 			initStop(stopId, initMonitor);
 		});
 
-		updateClock();
+        var stopTotal = 0;
+        jQuery.each(stopIdsToRequest, function(_, stopId){
+            stopTotal++;
+            jQuery("#totalpage").text(stopTotal);
+
+        });
+
+        updateClock();
 		setInterval(updateClock, 10 * 1000);
 	}
 
@@ -400,7 +407,7 @@ OBA.Sign = function() {
 					.addClass('etaText')
 					.append(rowInfo.etas[0]);
 
-				if (rowInfo.monitored) {
+				if (rowInfo.monitored && typeof realtimeIcon !== 'undefined') {
 					etaDiv.append(realtimeIcon);
 				}
 				etaDiv.append(etaTextPara);
@@ -726,6 +733,26 @@ OBA.Sign = function() {
 				oldContent.html("").empty().remove();
 				jQuery("span.dot").css('background-color', 'rgb(90,90,90)');
 				jQuery("span#" + stopId.id + ".dot").css('background-color', 'white');
+
+                var currentStopText = "N/A";
+                var stopList = getParameterByName("stopIds", null);
+                if (stopList !== null && stopList.length > 0){
+                    var stopArray = [];
+                    jQuery.each(stopList.split(","), function(_, o){
+                        var stopIdParts = o.split("_");
+                        if (stopIdParts.length === 2) {
+                            stopArray.push(stopIdParts[1]);
+                        }
+                    });
+                }
+
+                for (var i = 0; i < stopArray.length; i ++){
+                    if (stopArray[i] === stopId.id) {
+                        currentStopText = i + 1;
+                    }
+                }
+
+                jQuery("span#currentpage").text(currentStopText);
 
 				var alerts = stopElement.find(".alert");
 				var totalHeight = 0;
