@@ -27,6 +27,7 @@ OBA.RouteMap = function(mapNode, initCallbackFn, serviceAlertCallbackFn) {
 
 	var vehiclesByRoute = {};
 	var vehiclesById = {};
+    var adherenceMarkersByVehicleId = {};
 	var polylinesByRoute = {};
 	var hoverPolylinesByRoute = {};
 	var stopsById = {};
@@ -236,6 +237,13 @@ OBA.RouteMap = function(mapNode, initCallbackFn, serviceAlertCallbackFn) {
 				var vehicleIdWithoutAgency = vehicleIdParts[1];
 				var marker = vehiclesById[vehicleId];
 				var markerImage = 'img/realtime/vehicle/vehicle-';
+                var adherence = parseInt(activity.MonitoredVehicleJourney.MonitoredCall.Extensions.Deviation);
+                var adherenceMarker = adherenceMarkersByVehicleId[vehicleId];
+                var lateMarkerImage = 'img/realtime/adherence/transOrangeCircleRborder.png';
+                var earlyMarkerImage = 'img/realtime/adherence/transYellowCircleYborder.png';
+                var defaultMarkerImage = 'img/realtime/adherence/transCircle.png';
+                var early = -3;
+                var late = 7;
 				
 				// has route been removed while in the process of updating?
 				if(typeof vehiclesByRoute[routeId] === 'undefined') {
@@ -267,6 +275,50 @@ OBA.RouteMap = function(mapNode, initCallbackFn, serviceAlertCallbackFn) {
 				if(typeof hasRealtime === 'undefined' || hasRealtime === null || hasRealtime == false){
 					markerImage = 'img/scheduled/vehicle/vehicle-';
 				}
+
+                // create adherence marker if it doesn't exist
+                if(typeof adherenceMarker === 'undefined' || adherenceMarker === null) {
+                    var adhMarkerOptions = {
+                        zIndex: 3,
+                        map: map,
+                        vehicleId: vehicleId,
+                        routeId: routeId
+                    };
+
+                    adherenceMarker = new google.maps.Marker(adhMarkerOptions);
+
+                    google.maps.event.addListener(adherenceMarker, "click", function(mouseEvent) {
+                        OBA.Config.analyticsFunction("Vehicle Marker Click", vehicleIdWithoutAgency);
+
+                        OBA.Popups.showPopupWithContentFromRequest(map, this, OBA.Config.siriVMUrl + "&callback=?",
+                            { OperatorRef: agencyId, VehicleRef: vehicleIdWithoutAgency, MaximumNumberOfCallsOnwards: "3", VehicleMonitoringDetailLevel: "calls", TripId: tripId },
+                            OBA.Popups.getVehicleContentForResponse, null);
+                    });
+                }
+
+                //set/change the adherence icon based on adherence
+                var adherenceIcon;
+                if (adherence != null && (adherence < early || adherence > late)) {
+                    if (adherence > late ) {
+                        adherenceIcon = new google.maps.MarkerImage(lateMarkerImage,
+                            new google.maps.Size(51, 51),
+                            new google.maps.Point(0, 0),
+                            new google.maps.Point(25, 25));
+                    } else {   //early
+                        adherenceIcon = new google.maps.MarkerImage(earlyMarkerImage,
+                            new google.maps.Size(51, 51),
+                            new google.maps.Point(0, 0),
+                            new google.maps.Point(25, 25));
+                    }
+                }
+                else {
+                    adherenceIcon = new google.maps.MarkerImage(defaultMarkerImage,
+                        new google.maps.Size(1, 1),
+                        new google.maps.Point(0, 0),
+                        new google.maps.Point(25, 25));
+                }
+                adherenceMarker.setIcon(adherenceIcon);
+                adherenceMarkersByVehicleId[vehicleId] = adherenceMarker;
 				
 				// icon
 				var orientationAngle = "unknown";
@@ -284,13 +336,15 @@ OBA.RouteMap = function(mapNode, initCallbackFn, serviceAlertCallbackFn) {
 				// position
 				var position = new google.maps.LatLng(latitude, longitude);
 				marker.setPosition(position);
+                adherenceMarker.setPosition(position);
 							    	
 				// (mark that this vehicle is still in the response)
 				vehiclesByIdInResponse[vehicleId] = true;
 
 				// maps used to keep track of marker
 				vehiclesByRoute[routeId][vehicleId] = marker;
-				vehiclesById[vehicleId] = marker; 
+				vehiclesById[vehicleId] = marker;
+
 			});
 			
 			// remove vehicles from map that are no longer in the response, for all routes in the query
@@ -306,6 +360,9 @@ OBA.RouteMap = function(mapNode, initCallbackFn, serviceAlertCallbackFn) {
 					vehicleOnMap.setMap(null);
 					delete vehiclesById[vehicleOnMap_vehicleId];
 					delete vehiclesByRoute[vehicleOnMap_routeId][vehicleOnMap_vehicleId];
+
+                    adherenceMarkersByVehicleId[vehicleOnMap_vehicleId].setMap(null);
+                    delete adherenceMarkersByVehicleId[vehicleOnMap_vehicleId];
 				}
 			});
 		});
@@ -321,6 +378,9 @@ OBA.RouteMap = function(mapNode, initCallbackFn, serviceAlertCallbackFn) {
 				
 				marker.setMap(null);
 				delete vehiclesById[vehicleId];
+
+                adherenceMarkersByVehicleId[vehicleId].setMap(null);
+                delete adherenceMarkersByVehicleId[vehicleId];
 			});
 		}
 	}

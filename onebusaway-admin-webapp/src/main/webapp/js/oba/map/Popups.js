@@ -261,7 +261,7 @@ OBA.Popups = (function() {
 		html += '</div>';
 
         var adherence = parseInt(activity.MonitoredVehicleJourney.MonitoredCall.Extensions.Deviation);
-        if (adherence !== null) {
+        if (hasRealtime && adherence !== null) {
             //late
             if (adherence > 0) {
                 html += '<p class="adherence">Bus is ' + adherence + ' minute(s) late</p>';
@@ -276,18 +276,15 @@ OBA.Popups = (function() {
                 html += '<p class="adherence">Bus is ' + adherence + ' minute(s) early</p>';
             }
             //get the expected and aimed times
-            if(hasRealtime && typeof activity.MonitoredVehicleJourney.MonitoredCall !== 'undefined'
+            if(typeof activity.MonitoredVehicleJourney.MonitoredCall !== 'undefined'
                 && typeof activity.MonitoredVehicleJourney.MonitoredCall.ExpectedArrivalTime !== 'undefined'
                 && activity.MonitoredVehicleJourney.MonitoredCall.ExpectedArrivalTime !== null
                 && typeof activity.MonitoredVehicleJourney.MonitoredCall.AimedArrivalTime !== 'undefined'
                 && activity.MonitoredVehicleJourney.MonitoredCall.AimedArrivalTime !== null) {
                 var expectedArrivalDate = OBA.Util.ISO8601StringToDate(activity.MonitoredVehicleJourney.MonitoredCall.ExpectedArrivalTime);
                 var aimedArrivalDate = OBA.Util.ISO8601StringToDate(activity.MonitoredVehicleJourney.MonitoredCall.AimedArrivalTime);
-                var expectedArrivalDatetime = expectedArrivalDate.toTimeString();
-                var aimedArrivalDatetime = aimedArrivalDate.toTimeString();
-
-                var expectedArrivalTime = expectedArrivalDate.getTime();
-                var aimedArrivalTime = aimedArrivalDate.getTime();
+                var expectedArrivalDatetime = expectedArrivalDate.toLocaleTimeString();
+                var aimedArrivalDatetime = aimedArrivalDate.toLocaleTimeString();
 
                 html += '<p class="adherence">Scheduled arrival: ' + aimedArrivalDatetime + '</p>';
                 html += '<p class="adherence">Expected arrival: ' + expectedArrivalDatetime + '</p>';
