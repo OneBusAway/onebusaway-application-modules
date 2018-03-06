@@ -239,8 +239,8 @@ OBA.RouteMap = function(mapNode, initCallbackFn, serviceAlertCallbackFn) {
 				var markerImage = 'img/realtime/vehicle/vehicle-';
                 var adherence = parseInt(activity.MonitoredVehicleJourney.MonitoredCall.Extensions.Deviation);
                 var adherenceMarker = adherenceMarkersByVehicleId[vehicleId];
-                var lateMarkerImage = 'img/realtime/adherence/transOrangeCircleRborder.png';
-                var earlyMarkerImage = 'img/realtime/adherence/transYellowCircleYborder.png';
+                var lateMarkerImage = 'img/realtime/adherence/redBlueCircle.png';
+                var earlyMarkerImage = 'img/realtime/adherence/yellowBlueCircle.png';
                 var defaultMarkerImage = 'img/realtime/adherence/transCircle.png';
                 var early = -3;
                 var late = 7;
@@ -415,7 +415,43 @@ OBA.RouteMap = function(mapNode, initCallbackFn, serviceAlertCallbackFn) {
 		}
 		highlightedStop = null;
 	}
-		
+
+
+    function showLegend(map) {
+        var iconBase = 'img/legend/';
+        var icons = {
+            realtime: {
+                name: 'RealTime',
+                icon: iconBase + 'bus.png'
+            },
+            scheduled: {
+                name: 'Scheduled',
+                icon: iconBase + 'scheduled_bus.png'
+            },
+            early: {
+                name: 'Early',
+                icon: iconBase + 'early_bus.png'
+            },
+            late: {
+                name: 'Late',
+                icon: iconBase + 'late_bus.png'
+            }
+        };
+
+        var legend = document.getElementById('legend');
+        for (var key in icons) {
+            var type = icons[key];
+            var name = type.name;
+            var icon = type.icon;
+            var div = document.createElement('div');
+            div.innerHTML = '<img src="' + icon + '"> ' + '<span>' + name + '</span>';
+            legend.appendChild(div);
+        }
+
+
+        map.controls[google.maps.ControlPosition.RIGHT_TOP].push(legend);
+    }
+
 	//////////////////// CONSTRUCTOR /////////////////////
 
 	map = new OBA.GoogleMapWrapper(document.getElementById("map"));
@@ -436,6 +472,8 @@ OBA.RouteMap = function(mapNode, initCallbackFn, serviceAlertCallbackFn) {
 		// start adding things to map once it's ready...
 		if(initialized === false) {
 			initialized = true;
+
+            showLegend(map);
 
 			if(typeof initCallbackFn === 'function') {
 				initCallbackFn();

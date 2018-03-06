@@ -210,6 +210,7 @@
     </div>
 
     <div id="map"><!-- //prevent jspx minimization --></div>
+    <div id="legend"><!-- //prevent jspx minimization --></div>
 
     <div id="wizard">
         <div id="wizard_start">
