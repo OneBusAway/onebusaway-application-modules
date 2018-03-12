@@ -196,7 +196,7 @@ OBA.Popups = (function() {
 			var stopId = idParts[1];
 			var routeId = idParts[2];
 			var routeShortName = idParts[3];
-			
+
 			element.click(function(e) {
 				e.preventDefault();
 				var alertElement = jQuery('#alerts-' + routeId.hashCode());
@@ -206,7 +206,7 @@ OBA.Popups = (function() {
 				} else {
 					$("#searchbar").animate({
 						scrollTop: alertElement.parent().offset().top - jQuery("#searchbar").offset().top + jQuery("#searchbar").scrollTop()
-						}, 
+						},
 						500,
 						function() {
 							if (alertElement.accordion("option", "active") !== 0) {
@@ -223,7 +223,7 @@ OBA.Popups = (function() {
 						});
 				}
 			});
-			
+
 		});
 	}
 	
@@ -404,17 +404,31 @@ OBA.Popups = (function() {
 
         //check for stop level alerts
          if (stopId in alertData) {
-             html += '<p class="stopAlertHeader">Service Alert for ' + stopCode + ' </p>';
+
+             var serviceAlertHeader = jQuery("<p class='popupServiceAlert'>Service Alert for " + stopCode + ". Click for info</p>");
+
+             var serviceAlertList = jQuery("" +
+                 "<ul></ul>")
+                 .addClass("popupAlerts");
+
              jQuery.each(alertData[stopId], function (_, ptSituationElement) {
                  if (ptSituationElement.Affects.hasOwnProperty('StopPoints')) {
                      jQuery.each(ptSituationElement.Affects.StopPoints.AffectedStopPoint, function (_, affectedStopPoint) {
                          var stopPointRef = affectedStopPoint.StopPointRef;
                          if (stopId == stopPointRef) {
-                             html += '<p class="stopAlert">' + ptSituationElement.Description + ' </p>';
+                             serviceAlertList.append('<li>' + ptSituationElement.Description + '</li>');
                          }
                      });
                  }
              });
+
+             var serviceAlertContainer = jQuery("<div></div>")
+                 .addClass("popupServiceAlertContainer")
+                 .append(serviceAlertHeader)
+                 .append(serviceAlertList);
+
+             html += serviceAlertContainer[0].outerHTML;
+
          }
 
          var routeAndDirectionWithArrivals = {};
@@ -659,11 +673,21 @@ OBA.Popups = (function() {
 
 		zoomHereLink.click(function(e) {
 			e.preventDefault();
-			
+
 			var map = marker.map;
 			map.setCenter(marker.getPosition());
 			map.setZoom(16);
 		});
+
+        var popupServiceAlertContainer = content.find(".popupServiceAlertContainer:first");
+
+        popupServiceAlertContainer.accordion({
+            header: 'p.popupServiceAlert',
+            collapsible: true,
+            active: false,
+            autoHeight: false
+        });
+
 		
 		marker.setVisible(true);
 		
@@ -688,19 +712,19 @@ OBA.Popups = (function() {
 
 	//////////////////// CONSTRUCTOR /////////////////////
 
-	// timer to update data periodically 
-	setInterval(function() {
-		if(infoWindow !== null && typeof infoWindow.refreshFn === 'function') {
-			infoWindow.refreshFn();
-		}
-	}, OBA.Config.refreshInterval);
-
-	// updates timestamp in popup bubble every second
-	setInterval(function() {
-		if(infoWindow !== null && typeof infoWindow.updateTimestamp === 'function') {
-			infoWindow.updateTimestamp();
-		}
-	}, 1000);
+	// // timer to update data periodically
+	// setInterval(function() {
+	// 	if(infoWindow !== null && typeof infoWindow.refreshFn === 'function') {
+	// 		infoWindow.refreshFn();
+	// 	}
+	// }, OBA.Config.refreshInterval);
+    //
+	// // updates timestamp in popup bubble every second
+	// setInterval(function() {
+	// 	if(infoWindow !== null && typeof infoWindow.updateTimestamp === 'function') {
+	// 		infoWindow.updateTimestamp();
+	// 	}
+	// }, 1000);
 	
 	return {
 		reset: function() {
