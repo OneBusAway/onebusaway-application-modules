@@ -15,9 +15,11 @@
  */
 package org.onebusaway.sms.impl;
 
+import org.onebusaway.container.ConfigurationParameter;
 import org.onebusaway.presentation.impl.ArrivalsAndDeparturesModel;
 import org.onebusaway.presentation.services.text.TextModification;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
+import org.onebusaway.util.SystemTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Scope;
@@ -27,7 +29,10 @@ import org.springframework.stereotype.Component;
 @Scope("request")
 public class SmsArrivalsAndDeparturesModel extends ArrivalsAndDeparturesModel {
 
+  private static final String DEFAULT_MINUTE_LOCALIZATION = "m";
   private TextModification _abbreviations;
+  private String _minuteLocalization = DEFAULT_MINUTE_LOCALIZATION;
+  private String alertPresentText = "";
   
   @Autowired(required=false)
   public void setDestinationAbbreviations(
@@ -35,14 +40,26 @@ public class SmsArrivalsAndDeparturesModel extends ArrivalsAndDeparturesModel {
     _abbreviations = strategy;
   }
 
+  @ConfigurationParameter
+  public void setMinuteLocalization(String abbrev) {
+    _minuteLocalization = abbrev;
+  }
+
+  public void setAlertPresentText(String msg) {
+    alertPresentText = msg;
+  }
+
+  public String getAlertPresentText() { return alertPresentText; }
+
+
   public String getMinutesLabel(ArrivalAndDepartureBean pab) {
-    long now = System.currentTimeMillis();
+    long now = SystemTime.currentTimeMillis();
     long t = pab.getScheduledDepartureTime();
     if (pab.hasPredictedDepartureTime())
       t = pab.getPredictedDepartureTime();
     int minutes = (int) Math.round((t - now) / (1000.0 * 60.0));
     boolean isNow = Math.abs(minutes) <= 1;
-    return isNow ? "NOW" : (Integer.toString(minutes) + "m");
+    return isNow ? "NOW" : (Integer.toString(minutes) + _minuteLocalization);
   }
 
   public String abbreviate(String destination) {

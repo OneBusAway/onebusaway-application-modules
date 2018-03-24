@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2011 Metropolitan Transportation Authority
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+            http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+
+<html xmlns:jsp="http://java.sun.com/JSP/Page"
+	xmlns:c="http://java.sun.com/jsp/jstl/core" xmlns:s="/struts-tags">
+<jsp:directive.page contentType="text/html" />
+		<div class="tabHeader">
+			<label class="headerLabel">Stage Bundle</label>
+		</div>
+		<div id="stagepage_info">
+		<!-- 
+  			<label id="stage_environment" class="adminLabel directoryLabel">
+				<s:property value="environment" ></s:property>
+			</label>
+		 -->
+		</div>
+		<div id="helpfulMessage" class="helpfulMessage"> <s:text name="stage-bundle.helpfulMessage"/>
+		<!-- Staging a bundle marks the bundle as then next bundle suitable for production.  -->
+		</div>
+		<div id="stageBundle">
+			<label class="bundleHeader">Stage this Bundle</label>  
+			<div id="listButton">
+				<!-- <input type="button" id="stageBundle_listButton" value="Refresh" /> -->
+			</div>
+			<div id="staging_bundleName">
+			<!--  Prevent JSP minimization -->
+			</div>
+			<input type="button" id="stageBundle_stageButton" value="Stage Bundle" />
+			<div id="stageBundle_bundleList">
+			<!--  space -->
+			</div>
+			
+			<div id="requestLabels">
+				<label class="adminLabel directoryLabel">Request Id :</label> 
+				<label id="stageBundle_id" class="adminLabel directoryLabel"></label>
+			</div>
+			<div id="stageContentsHolder">					
+				<div id="stageBox">
+					<div id="staging">
+						<s:url var="url" value="/css/img/ajax-loader.gif" />
+						<img id="stagingProgress" src="${url}" alt="Ajax loader"
+							class="progress" /> <label id="stageBundle_stageProgress"
+							class="adminLabel">Staging ... </label>
+					</div>
+					
+				</div>
+			</div>
+			<div id="bundleResultsHolder">
+				<div id="bundleResults">
+					<div id="stageBundle_progress">
+						<s:url var="url" value="/css/img/arrow-right-3.png" />
+						<img src="${url}" alt="Not found" id="expand" /> <label
+							class="adminLabel">Staged Bundles:</label>
+					</div>
+					<div id="stageBundle_resultList">
+						<!--  space -->
+					</div>
+				</div>
+			</div>
+			<div class="submitForm">
+        <fieldset>
+          <s:url var="url" action="index.action" namespace="/admin" />
+          <a href="${url}" class="link">Cancel</a> 
+            <input type="button" id="stage_continue" value="Continue" class="submit_disabled" disabled="disabled" />
+        </fieldset>
+      </div>			
+		</div>		
+</html>

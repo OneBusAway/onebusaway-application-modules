@@ -33,6 +33,7 @@ import org.hibernate.annotations.Type;
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.realtime.api.EVehiclePhase;
+import org.onebusaway.realtime.api.EVehicleType;
 
 /**
  * A block location record is a database-serializable record that captures the
@@ -115,6 +116,11 @@ public class BlockLocationRecord {
   @Column(length = 50)
   private final EVehiclePhase phase;
 
+  @Type(type = "org.onebusaway.container.hibernate.EnumUserType", parameters = {@Parameter(name = "enumClassName", value = "org.onebusaway.realtime.api.EVehicleType")})
+  @Column(length = 10)
+  private final EVehicleType vehicleType;
+
+
   private final String status;
 
   @Embedded
@@ -145,6 +151,7 @@ public class BlockLocationRecord {
     phase = null;
     status = null;
     vehicleId = null;
+    vehicleType = EVehicleType.BUS;
   }
 
   private BlockLocationRecord(Builder builder) {
@@ -165,6 +172,7 @@ public class BlockLocationRecord {
     this.phase = builder.phase;
     this.status = builder.status;
     this.vehicleId = builder.vehicleId;
+    this.vehicleType = builder.vehicleType;
   }
 
   /**
@@ -278,6 +286,8 @@ public class BlockLocationRecord {
     return phase;
   }
 
+  public EVehicleType getVehicleType() { return vehicleType; }
+
   public String getStatus() {
     return status;
   }
@@ -330,6 +340,8 @@ public class BlockLocationRecord {
     private long timepointPredictedDepartureTime;
 
     private EVehiclePhase phase;
+
+    private EVehicleType vehicleType;
 
     private String status;
 
@@ -408,6 +420,10 @@ public class BlockLocationRecord {
     public void setStatus(String status) {
       this.status = status;
     }
+
+    public EVehicleType getVehicleType() { return vehicleType; }
+
+    public void setVehicleType(EVehicleType vehicleType) { this.vehicleType = vehicleType; }
 
     public void setVehicleId(AgencyAndId vehicleId) {
       this.vehicleId = vehicleId;

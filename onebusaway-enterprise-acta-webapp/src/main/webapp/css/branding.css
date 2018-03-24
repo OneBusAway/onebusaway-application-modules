@@ -1,0 +1,394 @@
+/**
+ * Copyright (C) 2011 Metropolitan Transportation Authority
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+ 
+/* Insert agency-specific branding overrides here */
+
+#contentbox {
+	padding:0;
+	height: 100%;   /* For IE */
+}
+
+#map {
+	height: 100%;  /* For IE */
+}
+
+#bustime {
+	margin: 0 0 0 20px;
+	height: 100%;   /* For IE */
+	position: relative;
+}
+
+#bustime a:visited,
+#bustime a:active,
+#bustime a {
+	color: #0189c7;
+}
+
+#bustime a:hover {
+	color: #33CCFF;
+}
+
+/* header on wiki pages */
+#bustime #header {
+	padding-top: 10px;
+	padding-bottom: 15px;
+	position: relative;
+	height: 58px;
+}
+
+#bustime #header .title {
+	margin: 0px;
+	padding: 0px;
+}
+
+#bustime #header .title h1 a {
+	width: 302px;
+	height: 58px;
+	display: block;
+	background-image: url('img/onebusaway-nyc.png');
+	background-repeat: no-repeat;
+	text-indent: -9999px;
+}
+
+#bustime #header ul {
+	position: absolute;
+	left: 330px;
+	bottom: 25px;
+}
+
+#bustime #header ul li {
+	list-style: none;
+	float: left;
+	font-size: 125%;
+	margin-right: 20px;
+	display: inline;
+	margin: 0;
+	margin-right: 1px;
+	height: 14px;
+}
+
+#bustime #header ul li a {
+	text-decoration: none;
+   	background-color: #3399C9;
+    color: #FFFFFF;
+    display: block;
+    font-weight: bold;
+    font-size: 12px;
+    padding: 4px 6px;
+    text-align: center;
+}
+#bustime #header ul #link_mobile {
+	width: 84px;
+}
+#bustime #header ul #link_about {
+	width: 46px;
+}
+#bustime #header ul #link_contact {
+	width: 55px;
+}
+#bustime #header ul #link_developers {
+	width: 75px;
+}
+#bustime #header ul #link_help {
+	width: 37px;
+}
+#bustime #header ul li a:hover {
+    background-color: #94CB45;
+}
+
+
+/* header on map page */
+#bustime #map_header {
+	width: 302px;
+	height: 105px;
+	padding-top: 10px;
+	display: block;
+}
+
+#bustime #map_header .title h1 a {
+	width: 302px;
+	height: 58px;
+	display: block;
+	background-image: url('img/onebusaway-nyc.png');
+	background-repeat: no-repeat;
+	text-indent: -9999px;
+}
+
+#bustime #map_header ul {
+	position: relative;
+	margin-top: 10px;
+	width: 302px;
+}
+
+#bustime #map_header ul li {
+	list-style: none;
+	float: left;
+    display: inline;
+    height: 14px;
+    margin: 0;
+    z-index: 100;
+    margin-right: 1px;
+}
+
+#bustime #map_header ul li a {
+	text-decoration: none;
+   	background-color: #3399C9;
+    color: #FFFFFF;
+    display: block;
+    font-weight: bold;
+    font-size: 12px;
+    padding: 0px;
+	padding-top: 4px;
+    padding-bottom: 4px;
+    text-align: center;
+}
+#bustime #map_header ul #link_mobile {
+	width: 84px;
+}
+#bustime #map_header ul #link_about {
+	width: 46px;
+}
+#bustime #map_header ul #link_contact {
+	width: 55px;
+}
+#bustime #map_header ul #link_developers {
+	width: 75px;
+}
+#bustime #map_header ul #link_help {
+	width: 37px;
+}
+#bustime #map_header ul li a:hover {
+    background-color: #94CB45;
+}
+#bustime #content {
+	padding-top: 0;
+}
+
+/* For Help wiki markup */
+
+#bustime #footer {
+	padding-bottom: 20px;
+}
+
+#google_translate_element_side {
+	text-decoration: none;
+	font-weight: bold;
+	color: #0189c7;
+	cursor: pointer;
+	height: 25px;
+}
+
+#google_translate_element_bottom {
+	display: none;
+}
+
+#google_translate_element #icon {
+	vertical-align: baseline;
+}
+
+.wiki_content .meta span#timestamp {
+	color: #FFFFFF;
+}
+
+.wiki_content {
+	font-size: 14px; 
+	line-height: 1.2em;
+	border: 0;
+}
+
+.wiki_content a {
+	text-decoration: none;
+}
+
+.wiki_content a img {
+	border: 0;
+}
+
+#wiki_title {
+	font-size: 2.2em;
+}
+
+/* from MTA CSS: */
+
+html, body {
+    background-image: url("img/grey_bg.jpg");
+    background-repeat: repeat-x;
+    color: #333333;
+    font: 13px/1.231 helvetica,arial,clean,sans-serif;
+}
+#mainbox {
+    background-color: #FFFFFF;
+    margin: 0 auto;
+    position: relative;
+    width: 960px;
+}
+#topbar {
+    height: 121px;
+}
+#topbar #branding {
+    float: left;
+    height: 90px;
+}
+#topbar #branding a img,
+#topbar #branding a {
+	border: none;
+	text-decoration: none;
+}
+#topbar #search {
+    float: right;
+    margin: 4px 20px 0 0;
+    width: 460px;
+}
+#topbar #search ul#topbar-links {
+    float: right;
+    list-style-type: none;
+    margin: 10px 0 6px 4px;
+}
+#topbar #search ul#topbar-links li a {
+    color: #000099;
+    font-size: 88%;
+    text-decoration: none;
+}
+#topbar #search ul#topbar-links li a:visited {
+    color: #000099;
+}
+#topbar #search ul#topbar-links li a:hover {
+    color: #000000;
+}
+#topbar #search form#searchform {
+    float: right;
+    margin: 10px 0 0;
+}
+#topbar #search form#searchform input#searchbutton, #topbar #search form#searchform input#searchinputbox {
+    float: right;
+    margin: 0;
+    padding: 0;
+}
+#topbar #search form#searchform input#searchinputbox {
+    -moz-border-bottom-colors: none;
+    -moz-border-image: none;
+    -moz-border-left-colors: none;
+    -moz-border-right-colors: none;
+    -moz-border-top-colors: none;
+    -moz-box-sizing: border-box;
+    background-color: #FFFFFF;
+    border-color: #848484 #C1C1C1 #E1E1E1;
+    border-radius: 0 0 0 0;
+    border-style: solid;
+    border-width: 1px;
+    color: #000000;
+    font-family: Arial,sans-serif;
+    font-size: 13px;
+    height: 1.8em;
+    outline: 0 none;
+    padding: 2px 3px;
+	margin-right: 6px;
+    width: 12.25em;
+}
+#topbar #search form#searchform input#searchbutton {
+    -moz-border-bottom-colors: none;
+    -moz-border-image: none;
+    -moz-border-left-colors: none;
+    -moz-border-right-colors: none;
+    -moz-border-top-colors: none;
+    background: -moz-linear-gradient(center top , #FFFFFF 0%, #DDDDDD 100%) repeat scroll 0 0 transparent;
+    border-color: #DDDDDD #BBBBBB #999999;
+    border-radius: 11px 11px 11px 11px;
+    border-style: solid;
+    border-width: 1px;
+    color: #333333;
+    cursor: pointer;
+    font: bold 12px/1.2 Arial,sans-serif;
+    outline: 0 none;
+    overflow: visible;
+    padding: 1px 8px;
+    text-shadow: 0 1px 1px #FFFFFF;
+    width: auto;	
+}
+#topbar .list_h {
+    background-image: url("img/arrow-gn.gif");
+    background-position: left -1px;
+    background-repeat: no-repeat;
+    display: inline;
+    padding-left: 10px;
+}
+#topbar .list_h a {
+    font-weight: bold;
+}
+#horizontalcssmenu {
+	clear: both;
+}
+
+#horizontalcssmenu ul#cssmenu1 {
+	overflow: hidden;
+	position: relative;
+	list-style-type: none;
+    margin: 0;
+}
+#horizontalcssmenu ul#cssmenu1 li {
+    border-left: 1px solid #AEAEB0;
+    display: inline;
+    float: left;
+    height: 31px;
+    position: relative;
+}
+#horizontalcssmenu ul#cssmenu1 li a {
+    background: url("img/nav_bg.jpg") repeat-x scroll left top #FFFFFF;
+    color: #FFFFFF;
+    display: block;
+    font-weight: bold;
+    height: 16px;
+    padding: 8px;
+    text-align: center;
+    text-decoration: none;
+}
+#horizontalcssmenu ul#cssmenu1 li a:hover {
+    background: url("img/nav_bg_on.jpg") repeat-x scroll left top #FFFFFF;
+}
+#horizontalcssmenu ul#cssmenu1 li ul {
+    background-color: #DDDDDD;
+    display: block;
+    margin: 0;
+    padding: 6px 0;
+    position: absolute;
+    visibility: hidden;
+    z-index: 100;
+}
+#horizontalcssmenu ul#cssmenu1 li ul li {
+    border-left: medium none;
+    display: inline;
+    float: none;
+}
+#horizontalcssmenu ul#cssmenu1 li ul li a {
+    background-color: #DDDDDD;
+    background-image: none;
+    border-width: 0 1px 1px;
+    color: #000000;
+    font-size: 88%;
+    padding: 4px 10px;
+    text-align: left;
+    width: 175px;
+}
+#horizontalcssmenu ul#cssmenu1 li ul li a:hover {
+    background-color: #DDDDDD;
+    background-image: none;
+    color: #0071C1;
+}
+
+#infoBox, #mobileBox, #bottombar{
+	display: none;
+	height: 0px;
+}

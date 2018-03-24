@@ -17,11 +17,17 @@ package org.onebusaway.users.impl.authentication;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.springframework.security.ui.webapp.AuthenticationProcessingFilter;
+import org.onebusaway.users.client.model.UserBean;
+import org.onebusaway.users.model.UserIndex;
+import org.onebusaway.users.services.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.web.authentication.AuthenticationProcessingFilter;
+
 
 public class IndexedUserAuthenticationProcessorFilter extends
     AuthenticationProcessingFilter {
 
+  private UserService _userService;
   private String _indexTypeParameter = "j_indexType";
 
   public void setIndexTypeParameter(String indexTypeParameter) {
@@ -32,14 +38,23 @@ public class IndexedUserAuthenticationProcessorFilter extends
     return _indexTypeParameter;
   }
 
+  /* during authentication, if you are trying to retrieve the username
+  and the user isDisabled in the properties, it will return null
+  Without the username, the user can not log in
+  */
   @Override
   protected String obtainUsername(HttpServletRequest request) {
     String username = super.obtainUsername(request);
     if (username != null) {
       username = username.trim();
       if (username.length() > 0) {
-        username = obtainUserIndexType(request) + "_" + username;
+          username = obtainUserIndexType(request) + "_" + username;
       }
+    }
+    UserIndex userIndex = _userService.getUserIndexForUsername(username);
+    UserBean bean = _userService.getUserAsBean(userIndex.getUser());
+    if (bean == null | bean.isDisabled()) {
+        return null;
     }
     return username;
   }
@@ -47,4 +62,10 @@ public class IndexedUserAuthenticationProcessorFilter extends
   protected String obtainUserIndexType(HttpServletRequest request) {
     return request.getParameter(_indexTypeParameter);
   }
+
+  @Autowired
+  public void setUserService(UserService userService) {
+        _userService = userService;
+    }
+
 }

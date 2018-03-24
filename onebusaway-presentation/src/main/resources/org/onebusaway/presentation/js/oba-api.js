@@ -28,13 +28,13 @@ var obaApiFactory = function() {
 	 **************************************************************************/
 
 	var createUrl = function(url) {
-		return OBA.Config.apiUrl + url;// blah
-	};
+		return OBA.Config.apiUrl + url;
+	}
 
 	var createParams = function(otherParams) {
 
 		var params = {
-			key : OBA.Config.apiKey,
+			key : OBA.Config.obaApiKey,
 			version : 2
 		};
 		
@@ -327,13 +327,6 @@ var obaApiFactory = function() {
 		var params = createParams(userParams);
 		var handler = createEntryHandler(callback, errorCallback,
 				processArrivalAndDepartureForStop);
-		jQuery.getJSON(url, params, handler);
-	};
-	
-	that.planTrip = function(params, callback, errorCallback) {
-		var url = createUrl('/where/plan-trip.json');
-		params = createParams(params);
-		var handler = createEntryHandler(callback, errorCallback, processItineraries);
 		jQuery.getJSON(url, params, handler);
 	};
 	

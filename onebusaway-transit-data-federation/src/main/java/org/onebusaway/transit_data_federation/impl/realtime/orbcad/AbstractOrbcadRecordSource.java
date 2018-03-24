@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,6 +35,7 @@ import org.onebusaway.csv_entities.EntityHandler;
 import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.realtime.api.EVehiclePhase;
+import org.onebusaway.realtime.api.TimepointPredictionRecord;
 import org.onebusaway.realtime.api.VehicleLocationListener;
 import org.onebusaway.realtime.api.VehicleLocationRecord;
 import org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.MonitoredDataSource;
@@ -44,7 +46,9 @@ import org.onebusaway.transit_data_federation.services.blocks.ScheduledBlockLoca
 import org.onebusaway.transit_data_federation.services.blocks.ScheduledBlockLocationService;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
+import org.onebusaway.util.SystemTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -102,7 +106,11 @@ public abstract class AbstractOrbcadRecordSource implements MonitoredDataSource 
 
   private transient int _recordsValid = 0;
   
+  private transient long _latestUpdate = 0;
+  
   private MonitoredResult _monitoredResult, _currentResult = new MonitoredResult();
+  
+  private String _feedId = null;
 
   public void setRefreshInterval(int refreshIntervalInSeconds) {
     _refreshInterval = refreshIntervalInSeconds;
@@ -145,6 +153,13 @@ public abstract class AbstractOrbcadRecordSource implements MonitoredDataSource 
     return _monitoredResult;
   }
   
+  public String getFeedId() {
+    return _feedId;
+  }
+  
+  public void setFeedId(String id) {
+    _feedId = id;
+  }
   
   /****
    * JMX Attributes
@@ -294,7 +309,7 @@ public abstract class AbstractOrbcadRecordSource implements MonitoredDataSource 
         _log.debug("checking if we need to refresh");
 
         synchronized (this) {
-          long t = System.currentTimeMillis();
+          long t = SystemTime.currentTimeMillis();
           if (_lastRefresh + _refreshInterval * 1000 > t)
             return;
           _lastRefresh = t;
@@ -304,6 +319,7 @@ public abstract class AbstractOrbcadRecordSource implements MonitoredDataSource 
 
         preHandleRefresh();
         handleRefresh();
+        _currentResult.setLastUpdate(_latestUpdate);
         postHandleRefresh();
 
         try {
@@ -328,7 +344,9 @@ public abstract class AbstractOrbcadRecordSource implements MonitoredDataSource 
 
     
     private void postHandleRefresh() {
-      _log.debug("" + _agencyIds + ": runningCount=" + _recordsTotal  + ", currentCount=" + _currentResult.getRecordsTotal());
+      _log.info("Agencies " + _agencyIds + " have active vehicles=" +_currentResult.getMatchedTripIds().size()
+              + " for updates=" + _currentResult.getRecordsTotal()
+              + "  with most recent timestamp " + new Date(_latestUpdate));
       if (_currentResult.getRecordsTotal() > 0) {
         // only consider it a successful update if we got some records
         // ftp impl may not have a new file to download
@@ -376,6 +394,9 @@ public abstract class AbstractOrbcadRecordSource implements MonitoredDataSource 
 
       message.setServiceDate(blockInstance.getServiceDate());
       message.setTimeOfRecord(record.getTime() * 1000);
+      if (message.getTimeOfRecord() > _latestUpdate) {
+        _latestUpdate = message.getTimeOfRecord();
+      }
       message.setTimeOfLocationUpdate(message.getTimeOfRecord());
       
       // In Orbcad, +scheduleDeviation means the bus is early and -schedule
@@ -389,6 +410,7 @@ public abstract class AbstractOrbcadRecordSource implements MonitoredDataSource 
       if (record.hasLat() && record.hasLon()) {
         message.setCurrentLocationLat(record.getLat());
         message.setCurrentLocationLon(record.getLon());
+        _currentResult.addLatLon(record.getLat(), record.getLon());
       }
 
       int effectiveScheduleTime = (int) (record.getTime() - blockInstance.getServiceDate() / 1000);
@@ -404,9 +426,10 @@ public abstract class AbstractOrbcadRecordSource implements MonitoredDataSource 
         BlockTripEntry activeTrip = location.getActiveTrip();
         if (activeTrip != null) {
           message.setTripId(activeTrip.getTrip().getId());
+
+          addTimepointRecords(message, activeTrip, blockInstance.getServiceDate());
           _currentResult.addMatchedTripId(activeTrip.getTrip().getId().toString());
         } else {
-          _log.error("invalid trip for location=" + location);
           _currentResult.addUnmatchedTripId(blockId.toString()); // this isn't exactly right
         }
         // Are we at the start of the block?
@@ -435,6 +458,41 @@ public abstract class AbstractOrbcadRecordSource implements MonitoredDataSource 
       _recordsValid++;
 
       _lastRecordByVehicleId.put(message.getVehicleId(), message);
+    }
+
+    private void addTimepointRecords(VehicleLocationRecord message, BlockTripEntry activeTrip, long serviceDate) {
+      if (activeTrip == null) {
+        return;
+      }
+
+      if (activeTrip.getStopTimes() == null) {
+        return;
+      }
+      List<BlockStopTimeEntry> stopTimes = activeTrip.getStopTimes();
+
+      for (BlockStopTimeEntry stopTime : stopTimes) {
+        long scheduleTime = serviceDate + stopTime.getStopTime().getDepartureTime() * 1000;
+        long now = message.getTimeOfRecord();
+        long delay = (long)message.getScheduleDeviation();
+        long predictedTime = delay * 1000 + scheduleTime;
+
+        // only create records for predictions in the future
+        if (predictedTime >= now) {
+          TimepointPredictionRecord tpr = new TimepointPredictionRecord();
+          tpr.setTimepointId(stopTime.getStopTime().getStop().getId());
+          tpr.setTripId(activeTrip.getTrip().getId());
+          tpr.setTimepointScheduledTime(scheduleTime);
+          // propagate delay across the trip as a trivial prediction
+          tpr.setTimepointPredictedArrivalTime(predictedTime);
+          tpr.setTimepointPredictedDepartureTime(predictedTime);
+          if (message.getTimepointPredictions() == null) {
+            message.setTimepointPredictions(new ArrayList<TimepointPredictionRecord>());
+          }
+          message.getTimepointPredictions().add(tpr);
+        }
+
+      }
+
     }
   }
 }

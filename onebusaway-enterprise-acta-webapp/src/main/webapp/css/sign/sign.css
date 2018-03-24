@@ -1,0 +1,665 @@
+/**
+ * Copyright (C) 2011 Metropolitan Transportation Authority
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/* =Reset default browser CSS
+-------------------------------------------------------------- */
+
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, font, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+b, u, i, center,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    outline: 0;
+    font-size: 100%;
+    vertical-align: baseline;
+    background: transparent;
+}
+body {
+    line-height: 1;
+}
+ol, ul {
+    list-style: none;
+}
+blockquote, q {
+    quotes: none;
+}
+blockquote:before, blockquote:after,
+q:before, q:after {
+    content: '';
+    content: none;
+}
+
+/* remember to define focus styles! */
+:focus {
+    outline: 0;
+}
+
+/* remember to highlight inserts somehow! */
+ins {
+    text-decoration: none;
+}
+del {
+    text-decoration: line-through;
+}
+
+/* tables still need 'cellspacing="0"' in the markup */
+table {
+    border-collapse: collapse;
+    border-spacing: 0;
+}
+
+a img { border: none; }
+
+
+/* =Utility Classes
+-------------------------------------------------------------- */
+
+.nobreak { white-space: nowrap; }
+.noshow { display: none; }
+.leftwise { float: left; }
+.rightwise { float: right; }
+
+/* self clearing float */
+ .selfclear:after {
+    content: ".";
+    display: block;
+    height: 0;
+    clear: both;
+    visibility: hidden;
+}
+.selfclear {
+    display: inline-block; /*silly IE 7 */
+}
+.selfclear {
+    display: block;
+}
+
+/* Alpha transparency for IE6 */
+* html .pngfix {
+    zoom: 1;
+    behavior: expression((this.runtimeStyle.behavior="none")&&(this.pngSet?this.pngSet=true:(this.nodeName == "IMG" && this.src.toLowerCase().indexOf('.png')>-1 ?  (this.runtimeStyle.backgroundImage = "none", this.runtimeStyle.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(src='" + this.src + "', sizingMethod='image')", this.src = "../img/transparent.gif") : (this.origBg = this.origBg ? this.origBg :  this.currentStyle.backgroundImage.toString().replace('url("','').replace('")',''), this.runtimeStyle.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(src='" + this.origBg + "', sizingMethod='" + (this.currentStyle.backgroundRepeat=='no-repeat' ? 'crop' : 'scale') +"')", this.runtimeStyle.backgroundImage = "none")),this.pngSet=true));
+}
+
+
+/* =Global Elements
+-------------------------------------------------------------- */
+
+body, input, textarea {
+    font-family: Helvetica,Arial,sans-serif;
+    font-size: 20px;
+    line-height: 2em;
+    overflow: hidden;
+}
+body {
+    background-color: rgb(0,0,0);
+}
+h1,h2,h3,h4,h5,h6 { 
+    font-weight:normal;
+    clear:both;
+}
+
+h1 {
+	font-size: 2em;
+	text-align: left;
+	font-weight: bold;
+	letter-spacing: .1em;
+}
+
+h2 {
+	font-size: 1em;
+	font-weight: bold;
+	letter-spacing: .1em;
+}
+
+p, ul, ol, dd, pre {
+    margin-bottom: 2em;
+}
+pre, code {
+    font: 0.8em Monaco, monospace;
+    line-height: 2em;
+}
+blockquote {
+    color: #666;
+    font-style: italic;
+}
+hr {
+    background-color: #ccc;
+    border: 0;
+    color: #ccc;
+    height: 1px;
+    margin-bottom: 2em;
+}
+a:link,
+a:visited {
+    color: #1919be;
+    text-decoration: none;
+}
+a:hover,
+a:focus {
+    color: #000;
+    text-decoration: underline;
+}
+a:active {
+    color: red;
+    text-decoration: underline;
+}
+p {
+    margin: 0;
+    line-height: 1.5em;
+}
+small {
+    font-size: 0.8em;
+}
+
+/* =Error
+-------------------------------------------------------------- */
+#error {
+	font-size: 1.25em;
+	background-color: #eaff7f;
+   	border-top: 2px solid #999;
+}
+
+#error p {
+	font-weight: bold;
+	padding: 1.1em;
+}
+
+/* =Pager
+-------------------------------------------------------------- */
+#pager {
+    position: fixed;
+	bottom: 80px;
+    height: 20px;
+	line-height: 20px;
+    width: 100%;
+    background: rgb(40,40,40);
+	text-align:center;
+}
+
+.dot {
+    display: inline-block;
+    width: 12px;
+	height: 12px;
+    border-radius: 6px;
+    background-color: rgb(90,90,90);
+	margin: 4px 15px 0px 15px;
+	zoom: 1;
+	*display:inline;
+}
+
+/* =Footer
+-------------------------------------------------------------- */
+#footer {
+    position: fixed;
+    bottom: 0;
+	height: 80px;
+	width: 100%;
+    left: 0;
+    right: 0;
+    background: rgb(0,0,0);
+	font-size: 1em;
+	color: white;
+}
+
+#footer span {
+	float: left;
+	line-height: 1.25em;
+	font-size: 0.75em;
+    padding: 0.5em;
+}
+
+#branding {
+	background-image: url('img/onebusaway-nyc-56.png');
+	background-position: center center;
+	background-repeat: no-repeat;
+	height: 100%;
+	width: 320px;
+	float: left;
+	margin-left: 10px;
+	display: inline-block;
+	zoom: 1;
+	*display:inline;
+}
+
+#instructions {
+	display: inline-block;
+	width: 60%;
+	height: 100%;
+	text-align: center;
+	zoom: 1;
+	*display:inline;
+}
+
+#instructions ul {
+	display: inline-block;
+	list-style-type: none;
+	text-align: center;
+	width: 100%;
+	zoom: 1;
+	*display:inline;
+}
+
+#instructions li {
+	display: inline-block;
+	position: relative;
+	bottom: 15;
+	zoom: 1;
+	*display:inline;
+}
+
+.instructions_number {
+	font-weight: bold;
+	font-size: 3.0em;
+	margin-right: 0.2em;
+}
+
+#text1 {
+	background-image: url('img/Text_Instructions.png');
+	background-position: center center;
+	background-repeat: no-repeat;
+	height: 100%;
+	width: 307px;
+	position: relative;
+	top: 0;
+	margin-right: 15px;
+	margin-left: 15px;
+}
+
+.fixed_width_instruction {
+	width: 130px;
+	line-height: 1.3em;
+	text-align: left;
+	padding-right: 10px;
+}
+
+#clock {
+	float: right;
+	text-align: center;
+	margin-right: 20px;
+	margin-top: 8px;
+	display: inline-block;
+	zoom: 1;
+	*display:inline;
+}
+
+#clock #time {
+	font-size: 1.5em;
+	line-height: 1.5em;
+}
+
+#clock #day {
+	font-size: 0.8em;
+	line-height: 0.8em;
+}
+
+.bubble p {
+  display: table-cell;
+  vertical-align: middle;
+  text-align: center;
+/*  width: 100%;*/
+}
+
+.sms {
+	background: rgb(100,100,100);
+	width: 100;
+	height: 66px;
+	float: left;
+	position: relative;
+	top: 7;
+	margin: 0 5px 0 5px;
+	border-radius: 5px;
+	
+}
+
+
+/* =The Content
+-------------------------------------------------------------- */
+table {
+    margin: 0;
+    text-align: left;
+    width: 100%;
+}
+caption {
+    text-align: left;
+}
+th {
+    vertical-align: middle;
+    background-color: #fff;
+	padding: .5em;
+    font-size: 1.4em;
+    line-height: 1.1em;
+    /* width: 60%; */
+    border-bottom: 2px solid #999;
+}
+th.routeHeader {
+    text-align: center;
+    padding: .25em;
+    /*width: 10%;*/
+    /*border-right: 1px solid #999 */
+}
+th.headsignHeader {
+    text-align: center;
+    padding: .25em;
+    /* border-right: 1px solid #999 */
+}
+th.nextArrivalHeader {
+    text-align: right;
+    padding: .25em;
+    /* border-right: 1px solid #999 */
+}
+th.futureArrivalHeader {
+    text-align: center;
+    width: 10%;
+    font-size: 1.0em;
+    line-height: 0.9em;
+    padding: .1em;
+    /* border-right: 1px solid #999 */
+}
+td {
+    vertical-align: middle;
+    padding: 0.9em 1.5em;
+    font-size: 1.0em;
+    font-weight: bold;
+    line-height: 1.1em;
+}
+
+tr.even {
+	background-color: #eeeeee;
+}
+
+tr.odd {
+	background-color: #E0E0E0;
+}
+
+tr {
+	border: 1px solid rgb(150,150,150);
+}
+span.bus-id {
+    font-size: 0.8em;
+    font-weight: normal;
+    color: #333;
+}
+span.stop-id {
+    font-size: 0.8em;
+    font-weight: normal;
+    color: #666;
+}
+span.scheduled_arrival_indicator {
+    font-size: 0.8em;
+    font-weight: normal;
+    color: red;
+}
+td.distance {
+    text-align: right;
+    font-size: 1.2em;
+    white-space: nowrap;
+    padding: 0.2em 1em 0.2em 0;
+}
+td.additional_stops {
+	width: 75px;
+	padding: 0 0 0.1em 0;
+}
+div.prediction {
+	height: 100px;
+	line-height: 100%;
+	vertical-align: middle;
+	padding-top: 0px;
+	padding-right: 5px; 
+	padding-left: 0;
+	padding-bottom: 0;
+	margin: 0 0 0 0;
+	border: 0 0 0 0;
+	text-align: center;
+}
+p.alert {
+	display: block;
+    color: white;
+    font-size: 1.0em;
+    font-weight: normal;
+    position: relative; 
+    line-height: 1.2em;
+}
+
+/* New stuff*/
+#content {
+	position:fixed;
+	top: 0px;
+    width: 100%;
+    bottom: 100px;
+	margin-bottom: 7px;
+}
+
+.slide {
+	position:relative;
+	width: 100%;
+	height: 100%;
+	background: rgb(0,0,0);
+	overflow: hidden;
+}
+
+.header {
+	position: relative;
+	top: 0;
+	width: 100%;
+	height: 90px;
+	background: rgb(0,0,0);
+	line-height: 90px;
+}
+
+div.name {
+	float: left;
+	padding-left: 30px;
+	color: white;
+	font-weight: bold;
+}
+
+div.stop-id {
+	float: right;
+	padding-right: 30px;
+	color: white;
+}
+
+.arrivals {
+	position: absolute;
+	width: 70%;
+	float: left;
+	top: 90;
+	bottom: 0;
+	background: rgb(50,50,50);
+}
+
+.arrivals_body {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	padding: 0px;
+	margin-left: 0px;
+	background: rgb(50,50,50);
+	color: white;
+}
+
+.additional_stops {
+	font-size: 0.6em;
+	display: table-cell;
+	height: 75%;
+	float: right;
+}
+
+.arrivals_body .simply-scroll-clip {
+	width: 100%;
+	height: 100%;
+}
+
+.alerts {
+	position: absolute;
+	width: 30%;
+	float: right;
+	top: 90;
+	bottom: 0;
+	right: 0;
+	background: rgb(0,0,0);
+}
+
+.alerts_header {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	height: 40px;
+	line-height: 40px;
+	padding-left: 10px;
+	margin-left: 7px;
+	background: rgb(40,40,40);
+	color: white;
+	text-align: center;
+}
+
+.scroller {
+	position: absolute;
+	top: 40;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	padding: 10px;
+	margin-left: 7px;
+	background: rgb(50,50,50);
+	color: white;
+}
+
+.alerts_body {
+	position: absolute;
+	top: 40;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	padding: 10px;
+	margin-left: 7px;
+	background: rgb(50,50,50);
+	color: white;
+}
+
+.alerts_body .simply-scroll-clip {
+	width: 100%;
+	height: 100%;
+}
+
+.alert {
+	float:left;
+	width: 100%;
+	height: auto;
+	color: white;
+}
+
+.alert_summary {
+	font-weight: bold;
+	padding-bottom: 20px;
+}
+
+.sign_wrapper {
+	display: inline-block;
+}
+
+.sign {
+	background-color: white;
+	color: black;
+	font-weight: bold;
+	padding: 0 0.3em 0 0.3em;
+	margin: 0 0.2em 0.4em 0.2em;
+	text-align: center;
+}
+
+.alert_sign {
+	border-left-width: 10px;
+	display: inline-block;
+	zoom: 1;
+	*display:inline;
+}
+
+.arrival_sign {
+	border-left-width: 15px;
+	font-size: 2em;
+	border-right: 2px solid rgb(150,150,150);
+	margin: 0;
+	line-height: 1em;
+	text-align: center;
+}
+
+.loading_overlay {
+    background: rgba(0,0,0,.5) url('../Images/ajax-loader-bright.gif') no-repeat;
+	width:100%;
+	height:100%;
+	position:fixed;
+	top:0;
+	left:0;
+	z-index:999;
+}
+
+#overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #000;
+    filter:alpha(opacity=70);
+    -moz-opacity:0.7;
+    -khtml-opacity: 0.7;
+    opacity: 0.7;
+    z-index: 10000;
+}
+
+/* landscape configurations */
+body.landscape.sizeTIS, 
+body.landscape.sizeTIS input, 
+body.landscape.sizeTIS textarea { font-size: 2.0em; }
+
+body.landscape.size700, 
+body.landscape.size700 input, 
+body.landscape.size700 textarea { font-size: 1.25em; }
+
+body.landscape.size1000, 
+body.landscape.size1000 input, 
+body.landscape.size1000 textarea { font-size: 1.60em; }
+
+body.landscape.size1200, 
+body.landscape.size1200 input, 
+body.landscape.size1200 textarea { font-size: 2.2em; }
+
+/* portrait configurations */
+body.portrait.size1000, 
+body.portrait.size1000 input, 
+body.portrait.size1000 textarea { font-size: 0.9em; }
+
+body.portrait.size1200, 
+body.portrait.size1200 input, 
+body.portrait.size1200 textarea { font-size: 1.3em; }
+
+body.portrait.size1600, 
+body.portrait.size1600 input, 
+body.portrait.size1600 textarea { font-size: 1.5em; }
+
+body.portrait.size1900, 
+body.portrait.size1900 input, 
+body.portrait.size1900 textarea { font-size: 1.7em; }

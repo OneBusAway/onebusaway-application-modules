@@ -20,8 +20,8 @@ import org.onebusaway.users.services.ApiKeyPermissionService;
 public class DummyApiKeyPermissionService implements ApiKeyPermissionService {
 
   @Override
-  public boolean getPermission(String key, String service) {
-    return true;
+  public Status getPermission(String key, String service) {
+    return Status.AUTHORIZED;
   }
   
 }

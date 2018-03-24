@@ -23,6 +23,7 @@ import org.onebusaway.api.actions.OneBusAwayApiActionSupport;
 import org.onebusaway.api.impl.MaxCountSupport;
 import org.onebusaway.api.model.ResponseBean;
 import org.onebusaway.api.model.transit.BeanFactoryV2;
+import org.onebusaway.util.SystemTime;
 
 import com.opensymphony.xwork2.ModelDriven;
 
@@ -42,6 +43,21 @@ public class ApiActionSupport extends OneBusAwayApiActionSupport implements
   private String _key;
 
   private boolean _includeReferences = true;
+  
+  private Long time = null;
+  
+  public void setTime(long time) {
+    this.time = time;
+  }
+  
+  public long getTime() {
+    if(time != null) {
+      return time;
+    } else {
+      return SystemTime.currentTimeMillis();
+    }
+  }
+  
 
   public ApiActionSupport(int defaultVersion) {
     _defaultVersion = defaultVersion;

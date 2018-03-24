@@ -82,4 +82,10 @@ public interface StopTimeEntry {
    * @return stop headsign defined in GTFS
    */
   public String getStopHeadsign();
+  
+  /**
+   * @return the total number of stops in this trip
+   */
+  public int getTotalStopsInTrip();
+
 }

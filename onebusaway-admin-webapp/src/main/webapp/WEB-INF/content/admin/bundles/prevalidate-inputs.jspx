@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2011 Metropolitan Transportation Authority
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+            http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+
+<html xmlns:jsp="http://java.sun.com/JSP/Page"
+	xmlns:c="http://java.sun.com/jsp/jstl/core" xmlns:s="/struts-tags">
+<jsp:directive.page contentType="text/html" />
+		<div class="tabHeader">
+			<label class="headerLabel">Validate Bundle Inputs</label>
+				</div>
+		<div id="prevalidateInputs">
+			<label class="bundleHeader">Pre-Bundle Building Validation of
+				GTFS and AUX Files</label>
+			<div class="directoryLabels">
+				<label class="adminLabel directoryLabel">Bundle Directory :</label> 
+				<label id="prevalidate_bundleDirectory" class="adminLabel directoryLabel">
+					<s:property value="bundleDirectory" />
+				</label> 
+				<label id="prevalidate_id_label" class="adminLabel directoryLabel">Request Id :</label> 
+				<label id="prevalidate_id" class="adminLabel directoryLabel">
+					<s:property value="id" />
+				</label>
+			</div>
+			<div id="validateBox">
+				<div id="bundleNameBox">
+					<label class="adminLabel">Bundle Build Name</label>
+					<label class="required">*</label>  
+					<input type="text" id="prevalidate_bundleName" /> 
+				</div>
+				<input type="button" id="validateButton" value="Validate"
+					class="formButton" />
+				<div id="validating">
+					<s:url var="url" value="/css/img/ajax-loader.gif" />
+					<img id="validationProgress" src="${url}" alt="Ajax loader"
+						class="progress" /> <label id="prevalidate_validationProgress"
+						class="adminLabel">Validating ... </label>
+				</div>
+			</div>
+			<div id="prevalidate_progress">
+				<s:url var="url" value="/css/img/arrow-right-3.png" />
+				<img src="${url}" alt="Not found" id="expand" /> <label
+					class="adminLabel">Validation Progress</label>
+			</div>
+			<div id="prevalidate_resultList">
+				<!--  space -->
+			</div>
+			<div id="prevalidate_exception">
+				<!--  space -->
+			</div>
+			<div id="prevalidate_fileList">
+				<!--  space -->
+			</div>
+			<div class="submitForm">
+				<fieldset>
+					<s:url var="url" action="index" namespace="/admin" />
+					<a href="${url}" class="link">Cancel</a> 
+					<input type="button" id="prevalidate_continue" value="Continue" class="submit_disabled" disabled="disabled" />
+				</fieldset>
+			</div>
+		</div>
+</html>

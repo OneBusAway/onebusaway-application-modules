@@ -21,35 +21,43 @@ import java.util.List;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 
 import org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.MonitoredDataSource;
 import org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.MonitoredResult;
+import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.onebusaway.watchdog.api.MetricResource;
 
 @Path("/metric/realtime/stop")
 public class StopResource extends MetricResource {
 
-  @Path("/{agencyId}/matched")
+  @Path("{agencyId}/matched")
   @GET
-  public Response getMatchedStopCount(@PathParam("agencyId") String agencyId) {
+  @Produces("application/json")
+  public Response getMatchedStopCount(@PathParam("agencyId") String agencyId, @QueryParam("feedId") String feedId) {
     List<String> matchedStopIds = new ArrayList<String>();
     try {
       if (this.getDataSources() == null || this.getDataSources().isEmpty()) {
         _log.error("no configured data sources");
         return Response.ok(error("matched-stops", "con configured data sources")).build();
       }
-
+      
       for (MonitoredDataSource mds : getDataSources()) {
         MonitoredResult result = mds.getMonitoredResult();
         if (result == null) continue;
-        for (String mAgencyId : result.getAgencyIds()) {
-          if (agencyId.equals(mAgencyId)) {
-            matchedStopIds.addAll(result.getMatchedStopIds());
+        if (feedId == null || feedId.equals(mds.getFeedId())) {
+          for (String mAgencyId : result.getAgencyIds()) {
+            if (agencyId.equals(mAgencyId)) {
+              for (String stopId : result.getMatchedStopIds()) {
+                matchedStopIds.add(stopId);
+              }
+            }
           }
-        }
+        }                
       }
-
+      
       return Response.ok(ok("matched-stops", matchedStopIds.size())).build();
     } catch (Exception e) {
       _log.error("getMatchedStopCount broke", e);
@@ -57,9 +65,10 @@ public class StopResource extends MetricResource {
     }
   }
 
-  @Path("/{agencyId}/unmatched")
+  @Path("{agencyId}/unmatched")
   @GET
-  public Response getUnmatchedStops(@PathParam("agencyId") String agencyId) {
+  @Produces("application/json")
+  public Response getUnmatchedStops(@PathParam("agencyId") String agencyId, @QueryParam("feedId") String feedId) {
     try {
       int unmatchedStops = 0;
       if (this.getDataSources() == null || this.getDataSources().isEmpty()) {
@@ -70,10 +79,12 @@ public class StopResource extends MetricResource {
       for (MonitoredDataSource mds : getDataSources()) {
         MonitoredResult result = mds.getMonitoredResult();
         if (result == null) continue;
-        for (String mAgencyId : result.getAgencyIds()) {
-          _log.debug("examining agency=" + mAgencyId + " with unmatched stops=" + result.getUnmatchedStopIds().size());
-          if (agencyId.equals(mAgencyId)) {
-            unmatchedStops += result.getUnmatchedStopIds().size();
+        if (feedId == null || feedId.equals(mds.getFeedId())) {
+          for (String mAgencyId : result.getAgencyIds()) {
+            _log.debug("examining agency=" + mAgencyId + " with unmatched stops=" + result.getUnmatchedStopIds().size());
+            if (agencyId.equals(mAgencyId)) {
+              unmatchedStops += result.getUnmatchedStopIds().size();
+            }
           }
         }
       }
@@ -84,9 +95,10 @@ public class StopResource extends MetricResource {
     }
   }
 
-  @Path("/{agencyId}/unmatched-ids")
+  @Path("{agencyId}/unmatched-ids")
   @GET
-  public Response getUnmatchedStopIds(@PathParam("agencyId") String agencyId) {
+  @Produces("application/json")
+  public Response getUnmatchedStopIds(@PathParam("agencyId") String agencyId, @QueryParam("feedId") String feedId) {
     try {
       List<String> unmatchedStopIds = new ArrayList<String>();
       if (this.getDataSources() == null || this.getDataSources().isEmpty()) {
@@ -97,9 +109,11 @@ public class StopResource extends MetricResource {
       for (MonitoredDataSource mds : getDataSources()) {
         MonitoredResult result = mds.getMonitoredResult();
         if (result == null) continue;
-        for (String mAgencyId : result.getAgencyIds()) {
-          if (agencyId.equals(mAgencyId)) {
-            unmatchedStopIds.addAll(result.getUnmatchedStopIds());
+        if (feedId == null || feedId.equals(mds.getFeedId())) {
+          for (String mAgencyId : result.getAgencyIds()) {
+            if (agencyId.equals(mAgencyId)) {
+              unmatchedStopIds.addAll(result.getUnmatchedStopIds());
+            }
           }
         }
       }

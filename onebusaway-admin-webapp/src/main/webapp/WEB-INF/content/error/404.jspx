@@ -1,0 +1,45 @@
+<!--
+
+    Copyright (c) 2011 Metropolitan Transportation Authority
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+            http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<html xmlns:jsp="http://java.sun.com/JSP/Page"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:s="/struts-tags">
+
+<jsp:output doctype-root-element="html"
+	doctype-public="-//W3C//DTD XHTML 1.1 Transitional//EN"
+	doctype-system="http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd" />
+
+<jsp:directive.page contentType="text/html" />
+<jsp:scriptlet>
+<![CDATA[
+    // todo this isn't very pretty
+	response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+]]>
+</jsp:scriptlet>
+<head>
+  <title>404 Not Found</title>
+</head>
+
+<body>
+	<div id="content">
+		<div id="text">
+			<h1>404 Not Found</h1>
+			<p>The page you requested cannot be found</p>
+		</div>
+	</div>
+</body>
+</html>

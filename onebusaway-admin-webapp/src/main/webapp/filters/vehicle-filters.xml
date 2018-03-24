@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!--
+
+    Copyright (c) 2011 Metropolitan Transportation Authority
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+            http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<Filters>
+	<Depots>
+		<Depot>CA</Depot>
+		<Depot>CH</Depot>
+		<Depot>YU</Depot>
+		<Depot>EC</Depot>
+		<Depot>GH</Depot>
+		<Depot>KB</Depot>
+		<Depot>WF</Depot>
+		<Depot>TO</Depot>
+		<Depot>MA</Depot>
+		<Depot>JG</Depot>
+		<Depot>FR</Depot>
+		<Depot>JA</Depot>
+		<Depot>FB</Depot>
+		<Depot>JK</Depot>
+		<Depot>MV</Depot>
+		<Depot>YO</Depot>
+		<Depot>QV</Depot>
+		<Depot>GA</Depot>
+		<Depot>EN</Depot>
+		<Depot>FP</Depot>
+		<Depot>SC</Depot>
+		<Depot>EA</Depot>
+		<Depot>OH</Depot>
+		<Depot>OS</Depot>
+		<Depot>BP</Depot>
+		<Depot>RC</Depot>
+		<Depot>MQ</Depot>
+		<Depot>UP</Depot>
+		<Depot>CS</Depot>
+		<Depot>CP</Depot>
+		<Depot>LA</Depot>
+		<Depot>NL</Depot>
+		<Depot>FRK</Depot>
+		<Depot>JAM</Depot>
+		<Depot>FLAT</Depot>
+		<Depot>JFK</Depot>
+		<Depot>MANVI</Depot>
+		<Depot>YNK</Depot>
+		<Depot>GRAND</Depot>
+		<Depot>ENY</Depot>
+		<Depot>SPRCK</Depot>
+		<Depot>100th</Depot>
+		<Depot>126</Depot>
+		<Depot>BPK</Depot>
+		<Depot>RVC</Depot>
+		<Depot>MJQ</Depot>
+		<Depot>ULPK</Depot>
+		<Depot>STG</Depot>
+		<Depot>LAG</Depot>
+		<Depot>NJL</Depot>
+	</Depots>
+	<Pullouts>
+		<PulloutStatus>Active</PulloutStatus>
+	</Pullouts>
+	<InferredPhases>
+		<InferredPhase>IN PROGRESS</InferredPhase>
+		<InferredPhase>DEADHEAD</InferredPhase>
+		<InferredPhase>LAYOVER</InferredPhase>
+	</InferredPhases>
+</Filters>

@@ -21,6 +21,8 @@ import java.util.List;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 
 import org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.MonitoredDataSource;
@@ -30,16 +32,17 @@ import org.onebusaway.watchdog.api.MetricResource;
 @Path("/metric/realtime/trip")
 public class TripResource extends MetricResource {
 
-  @Path("/{agencyId}/total")
+  @Path("{agencyId}/total")
   @GET
-  public Response getTotalRecords(@PathParam("agencyId") String agencyId) {
+  @Produces("application/json")
+  public Response getTotalRecords(@PathParam("agencyId") String agencyId, @QueryParam("feedId") String feedId) {
     try {
       int totalRecords = 0;
       if (this.getDataSources() == null || this.getDataSources().isEmpty()) {
         _log.error("no configured data sources");
         return Response.ok(error("total-records", "no configured data sources")).build();
       }
-      totalRecords = getTotalRecordCount(agencyId);
+      totalRecords = getTotalRecordCount(agencyId, feedId);
       return Response.ok(ok("total-records", totalRecords)).build();
     } catch (Exception e) {
       _log.error("getTotalRecords broke", e);
@@ -47,16 +50,17 @@ public class TripResource extends MetricResource {
     }
   }
   
-  @Path("/{agencyId}/matched")
+  @Path("{agencyId}/matched")
   @GET
-  public Response getMatchedTripCount(@PathParam("agencyId") String agencyId) {
+  @Produces("application/json")
+  public Response getMatchedTripCount(@PathParam("agencyId") String agencyId, @QueryParam("feedId") String feedId) {
     try {
       if (this.getDataSources() == null || this.getDataSources().isEmpty()) {
         _log.error("no configured data sources");
         return Response.ok(error("matched-trips", "con configured data sources")).build();
       }
 
-      int validRealtimeTrips = getValidRealtimeTripIds(agencyId).size();
+      int validRealtimeTrips = getValidRealtimeTripIds(agencyId, feedId).size();
       return Response.ok(ok("matched-trips", validRealtimeTrips)).build();
     } catch (Exception e) {
       _log.error("getMatchedTripCount broke", e);
@@ -65,9 +69,10 @@ public class TripResource extends MetricResource {
   }
   
   
-  @Path("/{agencyId}/unmatched")
+  @Path("{agencyId}/unmatched")
   @GET
-  public Response getUnmatchedTrips(@PathParam("agencyId") String agencyId) {
+  @Produces("application/json")
+  public Response getUnmatchedTrips(@PathParam("agencyId") String agencyId, @QueryParam("feedId") String feedId) {
     try {
       int unmatchedTrips = 0;
       if (this.getDataSources() == null || this.getDataSources().isEmpty()) {
@@ -78,10 +83,12 @@ public class TripResource extends MetricResource {
       for (MonitoredDataSource mds : getDataSources()) {
         MonitoredResult result = mds.getMonitoredResult();
         if (result == null) continue;
-        for (String mAgencyId : result.getAgencyIds()) {
-          _log.debug("examining agency=" + mAgencyId + " with unmatched trips=" + result.getUnmatchedTripIds().size());
-          if (agencyId.equals(mAgencyId)) {
-            unmatchedTrips += result.getUnmatchedTripIds().size();
+        if (feedId == null || feedId.equals(mds.getFeedId())) {
+          for (String mAgencyId : result.getAgencyIds()) {
+            _log.debug("examining agency=" + mAgencyId + " with unmatched trips=" + result.getUnmatchedTripIds().size());
+            if (agencyId.equals(mAgencyId)) {
+              unmatchedTrips += result.getUnmatchedTripIds().size();
+            }
           }
         }
       }
@@ -94,9 +101,10 @@ public class TripResource extends MetricResource {
 
 
   
-  @Path("/{agencyId}/unmatched-ids")
+  @Path("{agencyId}/unmatched-ids")
   @GET
-  public Response getUnmatchedTripIds(@PathParam("agencyId") String agencyId) {
+  @Produces("application/json")
+  public Response getUnmatchedTripIds(@PathParam("agencyId") String agencyId, @QueryParam("feedId") String feedId) {
     try {
       List<String> unmatchedTripIds = new ArrayList<String>();
       if (this.getDataSources() == null || this.getDataSources().isEmpty()) {
@@ -107,9 +115,11 @@ public class TripResource extends MetricResource {
       for (MonitoredDataSource mds : getDataSources()) {
         MonitoredResult result = mds.getMonitoredResult();
         if (result == null) continue;
-        for (String mAgencyId : result.getAgencyIds()) {
-          if (agencyId.equals(mAgencyId)) {
-            unmatchedTripIds.addAll(result.getUnmatchedTripIds());
+        if (feedId == null || feedId.equals(mds.getFeedId())) {
+          for (String mAgencyId : result.getAgencyIds()) {
+            if (agencyId.equals(mAgencyId)) {
+              unmatchedTripIds.addAll(result.getUnmatchedTripIds());
+            }
           }
         }
       }
@@ -120,18 +130,21 @@ public class TripResource extends MetricResource {
     }
   }
 
-  @Path("/{agencyId}/schedule-realtime-delta")
+  @Path("{agencyId}/schedule-realtime-delta")
   @GET
-  public Response getScheduleRealtimeTripsDelta(@PathParam("agencyId") String agencyId) {
+  @Produces("application/json")
+  public Response getScheduleRealtimeTripsDelta(@PathParam("agencyId") String agencyId, 
+      @QueryParam("feedId") String feedId,
+      @QueryParam("routeId") String routeId) {
     try {
       if (this.getDataSources() == null || this.getDataSources().isEmpty()) {
         _log.error("no configured data sources");
         return Response.ok(error("schedule-realtime-trips-delta", "con configured data sources")).build();
       }
 
-      int scheduleTrips = getScheduledTrips(agencyId);
-      int totalRecords = getTotalRecordCount(agencyId);
-      int validRealtimeTrips = getValidRealtimeTripIds(agencyId).size();
+      int scheduleTrips = getScheduledTrips(agencyId, routeId);
+      int totalRecords = getTotalRecordCount(agencyId, feedId);
+      int validRealtimeTrips = getValidRealtimeTripIds(agencyId, feedId).size();
       _log.debug("agencytrips size=" + scheduleTrips + ", validRealtimeTrips=" + validRealtimeTrips + ", totalRecords=" + totalRecords);
       int delta = scheduleTrips - validRealtimeTrips;
       return Response.ok(ok("schedule-realtime-trips-delta", delta)).build();
@@ -142,23 +155,28 @@ public class TripResource extends MetricResource {
   }
 
 
-  @Path("/{agencyId}/buses-in-service-percent")
+  @Path("{agencyId}/buses-in-service-percent")
   @GET
-  public Response getBusesInServicePercent(@PathParam("agencyId") String agencyId) {
+  @Produces("application/json")
+  public Response getBusesInServicePercent(@PathParam("agencyId") String agencyId, 
+       @QueryParam("feedId") String feedId,
+       @QueryParam("routeId") String routeId) {
     try {
       if (this.getDataSources() == null || this.getDataSources().isEmpty()) {
         _log.error("no configured data sources");
         return Response.ok(error("buses-in-service-percent", "con configured data sources")).build();
       }
 
-      double scheduleTrips = getScheduledTrips(agencyId);
+      double scheduleTrips = getScheduledTrips(agencyId, routeId);
       if (scheduleTrips < 1) {
         // prevent NaN -- late night service may not have scheduled trips
-        return Response.ok(ok("buses-in-service-percent", 100.)).build();
+        // changed this to return 0 if no service -- makes more sense
+        return Response.ok(ok("buses-in-service-percent", 0.)).build();
       }
-      double validRealtimeTrips = getValidRealtimeTripIds(agencyId).size();
+      double validRealtimeTrips = getValidRealtimeTripIds(agencyId, feedId).size();
 
-      _log.debug("agencytrips size=" + scheduleTrips + ", validRealtimeTrips=" + validRealtimeTrips);
+      _log.info("agencytrips size=" + scheduleTrips + ", validRealtimeTrips=" + validRealtimeTrips
+              + " for feedId=" + feedId + ", routeId=" + routeId);
       double percent = Math.abs((validRealtimeTrips / scheduleTrips) * 100);
       return Response.ok(ok("buses-in-service-percent", percent)).build();
     } catch (Exception e) {
@@ -166,6 +184,4 @@ public class TripResource extends MetricResource {
       return Response.ok(error("buses-in-service-percent", e)).build();
     }
   }
-
-
 }

@@ -15,8 +15,7 @@ one of the webapps to host your OneBusAway instance.
 
 OneBusAway has the concept of a transit data bundle, which is a collection of all the data artifacts for a transit
 agency (or group of transit agencies) in the internal format needed to power OneBusAway. These transit data bundles
-are typically created from external data such as GTFS feeds for transit data and OpenStreetMap data for the street
-network.
+are typically created from external data such as GTFS feeds for transit data.
 
 You will use the downloaded `onebusaway-transit-data-federation-builder.jar` to build the bundle, but the instructions
 are complex enough to deserve there own page:

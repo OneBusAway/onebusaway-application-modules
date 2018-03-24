@@ -1,0 +1,168 @@
+/**
+ * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+div#mapAndSchedulePanel {
+    position: relative;
+    margin-top: 1em;
+    height: auto;
+}
+
+div#map {
+	width: 460px;
+	height: 530px;
+}
+
+div#mapPanel {
+	float: left;
+	width: 480px;
+	height: 100%;
+}
+
+div#schedulePanel {
+	float: left;
+	width: 420px;
+	height: 100%;
+	padding-left: 10px;
+	
+}
+
+div#mapLegendLabel {
+	margin-top: 1em;
+	font-weight: bold;
+	border-bottom: 1px black solid;		
+	width: 400px;
+}
+
+table#mapLegend {
+	margin-top: 1em; 	
+}
+
+table#mapLegend td {
+	padding: 4px;
+}
+
+table#mapLegend td:first-child {
+	text-align: center;
+}
+
+
+div#schedulePanel {
+    
+}
+#container {
+	height: auto;
+}
+ 
+#tripPanel {
+	text-align: left;
+	margin-left: 20px;
+	padding-top: 20px;
+	height: auto;
+}
+
+#tripPanel .block {
+	margin-top: 1em;
+}
+
+.tripPanelHeader {
+	border-bottom: 1px solid black;
+	height: auto;
+}
+
+.tripPanelHeaderRoute {
+	font-weight: bold;
+	font-size: 30px;
+}
+
+.tripPanelHeaderTripId {
+	font-weight: bold;
+	font-size: 12px;
+}
+
+.tripPanelLabel {
+	font-weight: bold;
+	margin-right: 5px;
+}
+
+.tripPanelStatusSuspended {
+	font-weight: bold;
+	color: red;
+}
+
+.tripPanelStatusSuspendedDescription {
+	margin-top: 1em;
+}
+
+.tripStatusDefault {
+	color: green;
+}
+
+.tripStatusEarly {
+	color: red;
+}
+
+.tripStatusDelayed {
+	color: blue;
+}
+
+.snow a:link {
+	color: red;
+}
+
+.snow a:visited {
+	color: red;
+}
+
+td.TripPage-TimeColumn {
+	text-align: right;
+	padding-right: 1em;
+}
+
+.TripPage-StopColumn { 
+	padding: 5px;
+}
+
+.TripPage-StopColumn-Selected {
+	border-radius: 7px;
+	background-color: #ffefef;
+	border: 2px solid #ff0000;
+}
+
+.TripPage-ArrivalTime {
+	font-weight: bold;
+}
+
+.StopInfoWindow > .stopName {
+	font-size: 18px;
+}
+
+.StopInfoWindow > .stopCode {
+	font-size: 14px;
+}
+
+.StopInfoWindow > .stopDirection {
+	font-size: 14px;
+}
+
+.routesSubSection > .routeShortName {
+    border: 2px solid #000000;
+    float: left;
+    font-weight: bold;
+    margin-right: 5px;
+    margin-top: 5px;
+    padding: 2px;
+    text-align: center;
+    width: 25px;
+}

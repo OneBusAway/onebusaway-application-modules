@@ -16,36 +16,20 @@
  */
 package org.onebusaway.transit_data_federation.impl.beans;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
 import org.onebusaway.collections.CollectionsLibrary;
 import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.transit_data.model.service_alerts.NaturalLanguageStringBean;
-import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
-import org.onebusaway.transit_data.model.service_alerts.SituationAffectsBean;
-import org.onebusaway.transit_data.model.service_alerts.SituationConsequenceBean;
-import org.onebusaway.transit_data.model.service_alerts.SituationQueryBean;
-import org.onebusaway.transit_data.model.service_alerts.TimeRangeBean;
-import org.onebusaway.transit_data_federation.impl.service_alerts.ServiceAlertLibrary;
+import org.onebusaway.transit_data.model.service_alerts.*;
+import org.onebusaway.transit_data_federation.impl.service_alerts.*;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.beans.ServiceAlertsBeanService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.blocks.BlockTripInstance;
-import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts;
-import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects;
-import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence;
-import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id;
-import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert;
-import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert.Cause;
-import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange;
-import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString;
-import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation;
 import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlertsService;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.*;
 
 @Component
 class ServiceAlertsBeanServiceImpl implements ServiceAlertsBeanService {
@@ -60,16 +44,36 @@ class ServiceAlertsBeanServiceImpl implements ServiceAlertsBeanService {
   @Override
   public ServiceAlertBean createServiceAlert(String agencyId,
       ServiceAlertBean situationBean) {
-    ServiceAlert.Builder serviceAlertBuilder = getBeanAsServiceAlertBuilder(situationBean);
-    ServiceAlert serviceAlert = _serviceAlertsService.createOrUpdateServiceAlert(
-        serviceAlertBuilder, agencyId);
-    return getServiceAlertAsBean(serviceAlert);
+    ServiceAlertRecord serviceAlertRecord = getServiceAlertRecordFromServiceAlertBean(
+        situationBean, agencyId);
+    serviceAlertRecord = _serviceAlertsService.createOrUpdateServiceAlert(
+        serviceAlertRecord);
+    return getServiceAlertAsBean(serviceAlertRecord);
   }
 
   @Override
   public void updateServiceAlert(ServiceAlertBean situationBean) {
-    ServiceAlert.Builder serviceAlertBuilder = getBeanAsServiceAlertBuilder(situationBean);
-    _serviceAlertsService.createOrUpdateServiceAlert(serviceAlertBuilder, null);
+    AgencyAndId id = AgencyAndIdLibrary.convertFromString(situationBean.getId());
+    ServiceAlertRecord serviceAlertRecord = getServiceAlertRecordFromServiceAlertBean(
+        situationBean, id.getAgencyId());
+    
+    ServiceAlertRecord dbServiceAlertRecord = _serviceAlertsService.getServiceAlertForId(id);
+    
+    if(dbServiceAlertRecord != null){
+  	  serviceAlertRecord.setCopy(dbServiceAlertRecord.isCopy());
+    }
+    
+    _serviceAlertsService.createOrUpdateServiceAlert(serviceAlertRecord);
+  }
+  
+  @Override
+  public ServiceAlertBean copyServiceAlert(String agencyId,
+	      ServiceAlertBean situationBeanToCopy) {
+	  situationBeanToCopy.setId(null);
+	  ServiceAlertRecord serviceAlertRecordCopy = getServiceAlertRecordFromServiceAlertBean(
+			  situationBeanToCopy, agencyId);
+	  serviceAlertRecordCopy = _serviceAlertsService.copyServiceAlert(serviceAlertRecordCopy);
+	  return getServiceAlertAsBean(serviceAlertRecordCopy);  
   }
 
   @Override
@@ -79,7 +83,7 @@ class ServiceAlertsBeanServiceImpl implements ServiceAlertsBeanService {
 
   @Override
   public ServiceAlertBean getServiceAlertForId(AgencyAndId situationId) {
-    ServiceAlert serviceAlert = _serviceAlertsService.getServiceAlertForId(situationId);
+    ServiceAlertRecord serviceAlert = _serviceAlertsService.getServiceAlertForId(situationId);
     if (serviceAlert == null)
       return null;
     return getServiceAlertAsBean(serviceAlert);
@@ -88,8 +92,15 @@ class ServiceAlertsBeanServiceImpl implements ServiceAlertsBeanService {
   @Override
   public List<ServiceAlertBean> getServiceAlertsForFederatedAgencyId(
       String agencyId) {
-    List<ServiceAlert> serviceAlerts = _serviceAlertsService.getServiceAlertsForFederatedAgencyId(agencyId);
+    List<ServiceAlertRecord> serviceAlerts = _serviceAlertsService.getServiceAlertsForFederatedAgencyId(agencyId);
     return list(serviceAlerts);
+  }
+  
+  @Override
+  public List<ServiceAlertRecordBean> getServiceAlertRecordsForFederatedAgencyId(
+      String agencyId) {
+    List<ServiceAlertRecord> serviceAlerts = _serviceAlertsService.getServiceAlertsForFederatedAgencyId(agencyId);
+    return listRecordBeans(serviceAlerts);
   }
 
   @Override
@@ -100,7 +111,7 @@ class ServiceAlertsBeanServiceImpl implements ServiceAlertsBeanService {
   @Override
   public List<ServiceAlertBean> getServiceAlertsForStopId(long time,
       AgencyAndId stopId) {
-    List<ServiceAlert> serviceAlerts = _serviceAlertsService.getServiceAlertsForStopId(
+    List<ServiceAlertRecord> serviceAlerts = _serviceAlertsService.getServiceAlertsForStopId(
         time, stopId);
     return list(serviceAlerts);
   }
@@ -110,7 +121,7 @@ class ServiceAlertsBeanServiceImpl implements ServiceAlertsBeanService {
       BlockInstance blockInstance, BlockStopTimeEntry blockStopTime,
       AgencyAndId vehicleId) {
 
-    List<ServiceAlert> serviceAlerts = _serviceAlertsService.getServiceAlertsForStopCall(
+    List<ServiceAlertRecord> serviceAlerts = _serviceAlertsService.getServiceAlertsForStopCall(
         time, blockInstance, blockStopTime, vehicleId);
 
     return list(serviceAlerts);
@@ -120,7 +131,7 @@ class ServiceAlertsBeanServiceImpl implements ServiceAlertsBeanService {
   public List<ServiceAlertBean> getServiceAlertsForVehicleJourney(long time,
       BlockTripInstance blockTripInstance, AgencyAndId vehicleId) {
 
-    List<ServiceAlert> serviceAlerts = _serviceAlertsService.getServiceAlertsForVehicleJourney(
+    List<ServiceAlertRecord> serviceAlerts = _serviceAlertsService.getServiceAlertsForVehicleJourney(
         time, blockTripInstance, vehicleId);
 
     return list(serviceAlerts);
@@ -128,7 +139,7 @@ class ServiceAlertsBeanServiceImpl implements ServiceAlertsBeanService {
 
   @Override
   public List<ServiceAlertBean> getServiceAlerts(SituationQueryBean query) {
-    List<ServiceAlert> serviceAlerts = _serviceAlertsService.getServiceAlerts(query);
+    List<ServiceAlertRecord> serviceAlerts = _serviceAlertsService.getServiceAlerts(query);
     return list(serviceAlerts);
   }
 
@@ -136,149 +147,203 @@ class ServiceAlertsBeanServiceImpl implements ServiceAlertsBeanService {
    * Private Methods
    ****/
 
-  private List<ServiceAlertBean> list(List<ServiceAlert> serviceAlerts) {
+  private List<ServiceAlertBean> list(List<ServiceAlertRecord> serviceAlerts) {
     List<ServiceAlertBean> beans = new ArrayList<ServiceAlertBean>();
-    for (ServiceAlert serviceAlert : serviceAlerts)
+    for (ServiceAlertRecord serviceAlert : serviceAlerts)
       beans.add(getServiceAlertAsBean(serviceAlert));
     return beans;
   }
 
-  private ServiceAlertBean getServiceAlertAsBean(ServiceAlert serviceAlert) {
-
+  private ServiceAlertBean getServiceAlertAsBean(ServiceAlertRecord serviceAlert) {
+	
     ServiceAlertBean bean = new ServiceAlertBean();
 
-    AgencyAndId id = ServiceAlertLibrary.agencyAndId(serviceAlert.getId());
+    AgencyAndId id = ServiceAlertLibrary.agencyAndId(serviceAlert.getAgencyId(), serviceAlert.getServiceAlertId());
     bean.setId(AgencyAndIdLibrary.convertToString(id));
     bean.setCreationTime(serviceAlert.getCreationTime());
 
-    bean.setActiveWindows(getRangesAsBeans(serviceAlert.getActiveWindowList()));
-    bean.setPublicationWindows(getRangesAsBeans(serviceAlert.getPublicationWindowList()));
+    bean.setActiveWindows(getRangesAsBeans(serviceAlert.getActiveWindows()));
+    bean.setPublicationWindows(getRangesAsBeans(serviceAlert.getPublicationWindows()));
 
     /**
      * Reasons
      */
-    if (serviceAlert.hasCause())
+    if (serviceAlert.getCause() != null)
       bean.setReason(getCauseAsReason(serviceAlert.getCause()));
 
     /**
      * Text descriptions
      */
-    bean.setSummaries(getTranslatedStringsAsNLSBeans(serviceAlert.getSummary()));
-    bean.setDescriptions(getTranslatedStringsAsNLSBeans(serviceAlert.getDescription()));
-    bean.setUrls(getTranslatedStringsAsNLSBeans(serviceAlert.getUrl()));
+    bean.setSummaries(getTranslatedStringsAsNLSBeans(serviceAlert.getSummaries()));
+    bean.setDescriptions(getTranslatedStringsAsNLSBeans(serviceAlert.getDescriptions()));
+    bean.setUrls(getTranslatedStringsAsNLSBeans(serviceAlert.getUrls()));
 
-    if (serviceAlert.hasSeverity())
-      bean.setSeverity(ServiceAlertLibrary.convertSeverity(serviceAlert.getSeverity()));
+    if (serviceAlert.getSeverity() != null)
+      bean.setSeverity(serviceAlert.getSeverity());
 
     bean.setAllAffects(getAffectsAsBeans(serviceAlert));
     bean.setConsequences(getConsequencesAsBeans(serviceAlert));
-
+    bean.setSource(serviceAlert.getSource());
+    
     return bean;
   }
+  
+  private List<ServiceAlertRecordBean> listRecordBeans(List<ServiceAlertRecord> serviceAlerts) {
+    List<ServiceAlertRecordBean> beans = new ArrayList<ServiceAlertRecordBean>();
+    for (ServiceAlertRecord serviceAlert : serviceAlerts)
+      beans.add(getServiceAlertAsRecordBean(serviceAlert));
+    return beans;
+  }
+  
+  private ServiceAlertRecordBean getServiceAlertAsRecordBean(ServiceAlertRecord serviceAlert) {
+	ServiceAlertBean bean = getServiceAlertAsBean(serviceAlert);
+	ServiceAlertRecordBean serviceAlertRecordBean = new ServiceAlertRecordBean();
+    serviceAlertRecordBean.setServiceAlertBean(bean);
+    serviceAlertRecordBean.setCopy(serviceAlert.isCopy());
+    
+    return serviceAlertRecordBean;
+  }
 
-  private ServiceAlert.Builder getBeanAsServiceAlertBuilder(
-      ServiceAlertBean bean) {
-
-    ServiceAlert.Builder situation = ServiceAlert.newBuilder();
-
+  private ServiceAlertRecord getServiceAlertRecordFromServiceAlertBean(
+      ServiceAlertBean bean, String agencyId) {
+	  
+    ServiceAlertRecord serviceAlertRecord = new ServiceAlertRecord();
+    serviceAlertRecord.setAgencyId(agencyId);
     if (bean.getId() != null && !bean.getId().isEmpty()) {
-      AgencyAndId id = AgencyAndIdLibrary.convertFromString(bean.getId());
-      situation.setId(ServiceAlertLibrary.id(id));
+      AgencyAndId id;
+      if(bean.getId().indexOf("_") > -1){
+        id = AgencyAndIdLibrary.convertFromString(bean.getId());
+      }else{
+        id = AgencyAndIdLibrary.convertFromString(agencyId + "_" + bean.getId());
+      }
+      serviceAlertRecord.setServiceAlertId(id.getId());
+      serviceAlertRecord.setAgencyId(id.getAgencyId());
     }
-    situation.setCreationTime(bean.getCreationTime());
-
-    situation.addAllActiveWindow(getBeansAsRanges(bean.getActiveWindows()));
-    situation.addAllPublicationWindow(getBeansAsRanges(bean.getPublicationWindows()));
+    serviceAlertRecord.setCreationTime(bean.getCreationTime());
+    serviceAlertRecord.setActiveWindows(getBeansAsRanges(bean.getActiveWindows()));
+    serviceAlertRecord.setPublicationWindows(getBeansAsRanges(bean.getPublicationWindows()));
 
     /**
      * Reasons
      */
-    situation.setCause(getReasonAsCause(bean.getReason()));
+    serviceAlertRecord.setCause(getReasonAsCause(bean.getReason()));
 
     /**
      * Text descriptions
      */
-    situation.setSummary(getNLSBeansAsTranslatedString(bean.getSummaries()));
-    situation.setDescription(getNLSBeansAsTranslatedString(bean.getDescriptions()));
-    situation.setUrl(getNLSBeansAsTranslatedString(bean.getUrls()));
+    serviceAlertRecord.setSummaries(new HashSet<ServiceAlertLocalizedString>());
+    if(bean.getSummaries() != null){
+        for(NaturalLanguageStringBean summary : bean.getSummaries()){
+            ServiceAlertLocalizedString string = new ServiceAlertLocalizedString();
+            string.setLanguage(summary.getLang());
+            string.setValue(summary.getValue());
+            string.setServiceAlertRecord(serviceAlertRecord);
+            serviceAlertRecord.getSummaries().add(string);
+        }
+    }
+
+    serviceAlertRecord.setDescriptions(new HashSet<ServiceAlertLocalizedString>());
+      if(bean.getDescriptions() != null){
+          for(NaturalLanguageStringBean summary : bean.getDescriptions()){
+              ServiceAlertLocalizedString string = new ServiceAlertLocalizedString();
+              string.setLanguage(summary.getLang());
+              string.setValue(summary.getValue());
+              string.setServiceAlertRecord(serviceAlertRecord);
+              serviceAlertRecord.getDescriptions().add(string);
+          }
+      }
+
+    serviceAlertRecord.setUrls(new HashSet<ServiceAlertLocalizedString>());
+      if(bean.getUrls() != null){
+          for(NaturalLanguageStringBean url : bean.getUrls()){
+              ServiceAlertLocalizedString string = new ServiceAlertLocalizedString();
+              string.setLanguage(url.getLang());
+              string.setValue(url.getValue());
+              string.setServiceAlertRecord(serviceAlertRecord);
+              serviceAlertRecord.getUrls().add(string);
+          }
+      }
 
     if (bean.getSeverity() != null)
-      situation.setSeverity(ServiceAlertLibrary.convertSeverity(bean.getSeverity()));
+      serviceAlertRecord.setSeverity(bean.getSeverity());
 
-    situation.addAllAffects(getBeanAsAffects(bean));
-    situation.addAllConsequence(getBeanAsConsequences(bean));
+    serviceAlertRecord.setAllAffects(getBeanAsAffects(bean));
+    for(ServiceAlertsSituationAffectsClause clause : serviceAlertRecord.getAllAffects()){
+        clause.setServiceAlertRecord(serviceAlertRecord);
+    }
 
-    return situation;
+    serviceAlertRecord.setConsequences(getBeanAsConsequences(bean));
+    for(ServiceAlertSituationConsequenceClause clause : serviceAlertRecord.getConsequences()){
+        clause.setServiceAlertRecord(serviceAlertRecord);
+    }
+
+    serviceAlertRecord.setSource(bean.getSource());
+
+    return serviceAlertRecord;
   }
 
   /****
    * Situations Affects
    ****/
 
-  private List<SituationAffectsBean> getAffectsAsBeans(ServiceAlert serviceAlert) {
+  private List<SituationAffectsBean> getAffectsAsBeans(ServiceAlertRecord serviceAlert) {
 
-    if (serviceAlert.getAffectsCount() == 0)
+    if (serviceAlert.getAllAffects().size() == 0)
       return null;
 
     List<SituationAffectsBean> beans = new ArrayList<SituationAffectsBean>();
 
-    for (Affects affects : serviceAlert.getAffectsList()) {
+    for (ServiceAlertsSituationAffectsClause affects : serviceAlert.getAllAffects()) {
       SituationAffectsBean bean = new SituationAffectsBean();
-      if (affects.hasAgencyId())
+      if (affects.getAgencyId() != null)
         bean.setAgencyId(affects.getAgencyId());
-      if (affects.hasApplicationId())
+      if (affects.getApplicationId() != null)
         bean.setApplicationId(affects.getApplicationId());
-      if (affects.hasRouteId()) {
-        AgencyAndId routeId = ServiceAlertLibrary.agencyAndId(affects.getRouteId());
-        bean.setRouteId(AgencyAndId.convertToString(routeId));
+      if (affects.getRouteId() != null) {
+        bean.setRouteId(affects.getRouteId());
       }
-      if (affects.hasDirectionId())
+      if (affects.getDirectionId() != null)
         bean.setDirectionId(affects.getDirectionId());
-      if (affects.hasTripId()) {
-        AgencyAndId tripId = ServiceAlertLibrary.agencyAndId(affects.getTripId());
-        bean.setTripId(AgencyAndId.convertToString(tripId));
+      if (affects.getTripId() != null) {
+        bean.setTripId(affects.getTripId());
       }
-      if (affects.hasStopId()) {
-        AgencyAndId stopId = ServiceAlertLibrary.agencyAndId(affects.getStopId());
-        bean.setStopId(AgencyAndId.convertToString(stopId));
+      if (affects.getStopId() != null) {
+        bean.setStopId(affects.getStopId());
       }
-      if (affects.hasApplicationId())
+      if (affects.getApplicationId()  != null)
         bean.setApplicationId(affects.getApplicationId());
       beans.add(bean);
     }
     return beans;
   }
 
-  private List<Affects> getBeanAsAffects(ServiceAlertBean bean) {
+  private Set<ServiceAlertsSituationAffectsClause> getBeanAsAffects(ServiceAlertBean bean) {
 
-    List<Affects> affects = new ArrayList<ServiceAlerts.Affects>();
+    Set<ServiceAlertsSituationAffectsClause> affectsList = new HashSet<ServiceAlertsSituationAffectsClause>();
 
     if (!CollectionsLibrary.isEmpty(bean.getAllAffects())) {
       for (SituationAffectsBean affectsBean : bean.getAllAffects()) {
-        Affects.Builder builder = Affects.newBuilder();
+        ServiceAlertsSituationAffectsClause affects = new ServiceAlertsSituationAffectsClause();
         if (affectsBean.getAgencyId() != null)
-          builder.setAgencyId(affectsBean.getAgencyId());
+          affects.setAgencyId(affectsBean.getAgencyId());
         if (affectsBean.getApplicationId() != null)
-          builder.setApplicationId(affectsBean.getApplicationId());
+          affects.setApplicationId(affectsBean.getApplicationId());
         if (affectsBean.getRouteId() != null) {
-          AgencyAndId routeId = AgencyAndId.convertFromString(affectsBean.getRouteId());
-          builder.setRouteId(ServiceAlertLibrary.id(routeId));
+          affects.setRouteId(affectsBean.getRouteId());
         }
         if (affectsBean.getDirectionId() != null)
-          builder.setDirectionId(affectsBean.getDirectionId());
+          affects.setDirectionId(affectsBean.getDirectionId());
         if (affectsBean.getTripId() != null) {
-          AgencyAndId tripId = AgencyAndId.convertFromString(affectsBean.getTripId());
-          builder.setTripId(ServiceAlertLibrary.id(tripId));
+          affects.setTripId(affectsBean.getTripId());
         }
         if (affectsBean.getStopId() != null) {
-          AgencyAndId stopId = AgencyAndId.convertFromString(affectsBean.getStopId());
-          builder.setStopId(ServiceAlertLibrary.id(stopId));
+          affects.setStopId(affectsBean.getStopId());
         }
-        affects.add(builder.build());
+        affectsList.add(affects);
       }
     }
 
-    return affects;
+    return affectsList;
   }
 
   /****
@@ -286,20 +351,20 @@ class ServiceAlertsBeanServiceImpl implements ServiceAlertsBeanService {
    ****/
 
   private List<SituationConsequenceBean> getConsequencesAsBeans(
-      ServiceAlert serviceAlert) {
-    if (serviceAlert.getConsequenceCount() == 0)
+      ServiceAlertRecord serviceAlert) {
+    if (serviceAlert.getConsequences().size() == 0)
       return null;
     List<SituationConsequenceBean> beans = new ArrayList<SituationConsequenceBean>();
-    for (Consequence consequence : serviceAlert.getConsequenceList()) {
+    for (ServiceAlertSituationConsequenceClause consequence : serviceAlert.getConsequences()) {
       SituationConsequenceBean bean = new SituationConsequenceBean();
-      if (consequence.hasEffect())
-        bean.setEffect(ServiceAlertLibrary.convertEffect(consequence.getEffect()));
-      if (consequence.hasDetourPath())
+      if (consequence.getEffect() != null)
+        bean.setEffect(consequence.getEffect());
+      if (consequence.getDetourPath() != null)
         bean.setDetourPath(consequence.getDetourPath());
-      if (consequence.getDetourStopIdsCount() != 0) {
+      if (consequence.getDetourStopIds().size() != 0) {
         List<String> stopIds = new ArrayList<String>();
-        for (Id stopId : consequence.getDetourStopIdsList()) {
-          AgencyAndId id = ServiceAlertLibrary.agencyAndId(stopId);
+        for (String stopId : consequence.getDetourStopIds()) {
+          AgencyAndId id = ServiceAlertLibrary.agencyAndId(serviceAlert.getAgencyId(), stopId);
           stopIds.add(AgencyAndId.convertToString(id));
         }
         bean.setDetourStopIds(stopIds);
@@ -309,26 +374,25 @@ class ServiceAlertsBeanServiceImpl implements ServiceAlertsBeanService {
     return beans;
   }
 
-  private List<Consequence> getBeanAsConsequences(ServiceAlertBean bean) {
+  private Set<ServiceAlertSituationConsequenceClause> getBeanAsConsequences(ServiceAlertBean bean) {
 
-    List<Consequence> consequences = new ArrayList<Consequence>();
+    Set<ServiceAlertSituationConsequenceClause> consequences = new HashSet<ServiceAlertSituationConsequenceClause>();
 
     if (!CollectionsLibrary.isEmpty(bean.getConsequences())) {
       for (SituationConsequenceBean consequence : bean.getConsequences()) {
-        Consequence.Builder builder = Consequence.newBuilder();
+        ServiceAlertSituationConsequenceClause consequenceClause = new ServiceAlertSituationConsequenceClause();
         if (consequence.getEffect() != null)
-          builder.setEffect(ServiceAlertLibrary.convertEffect(consequence.getEffect()));
+          consequenceClause.setEffect(consequence.getEffect());
         if (consequence.getDetourPath() != null)
-          builder.setDetourPath(consequence.getDetourPath());
+          consequenceClause.setDetourPath(consequence.getDetourPath());
         if (!CollectionsLibrary.isEmpty(consequence.getDetourStopIds())) {
-          List<Id> detourStopIds = new ArrayList<Id>();
+          Set<String> detourStopIds = new HashSet<String>();
           for (String detourStopId : consequence.getDetourStopIds()) {
-            Id id = ServiceAlertLibrary.id(AgencyAndId.convertFromString(detourStopId));
-            detourStopIds.add(id);
+            detourStopIds.add(detourStopId);
           }
-          builder.addAllDetourStopIds(detourStopIds);
+          consequenceClause.setDetourStopIds(detourStopIds);
         }
-        consequences.add(builder.build());
+        consequences.add(consequenceClause);
       }
     }
 
@@ -339,13 +403,13 @@ class ServiceAlertsBeanServiceImpl implements ServiceAlertsBeanService {
    * 
    ****/
 
-  private Cause getReasonAsCause(String reason) {
+  private ECause getReasonAsCause(String reason) {
     if (reason == null)
-      return Cause.UNKNOWN_CAUSE;
-    return Cause.valueOf(reason);
+      return ECause.UNKNOWN_CAUSE;
+    return ECause.valueOf(reason);
   }
 
-  private String getCauseAsReason(Cause cause) {
+  private String getCauseAsReason(ECause cause) {
     return cause.toString();
   }
 
@@ -353,63 +417,47 @@ class ServiceAlertsBeanServiceImpl implements ServiceAlertsBeanService {
    * 
    ****/
 
-  private List<TimeRangeBean> getRangesAsBeans(List<TimeRange> ranges) {
+  private List<TimeRangeBean> getRangesAsBeans(Set<ServiceAlertTimeRange> ranges) {
     if (ranges == null || ranges.isEmpty())
       return null;
     List<TimeRangeBean> beans = new ArrayList<TimeRangeBean>();
-    for (TimeRange range : ranges) {
+    for (ServiceAlertTimeRange range : ranges) {
       TimeRangeBean bean = new TimeRangeBean();
-      if (range.hasStart())
-        bean.setFrom(range.getStart());
-      if (range.hasEnd())
-        bean.setTo(range.getEnd());
+      if (range.getFromValue() != null)
+        bean.setFrom(range.getFromValue());
+      if (range.getToValue() != null)
+        bean.setTo(range.getToValue());
       beans.add(bean);
     }
     return beans;
   }
 
-  private List<TimeRange> getBeansAsRanges(List<TimeRangeBean> beans) {
+  private Set<ServiceAlertTimeRange> getBeansAsRanges(List<TimeRangeBean> beans) {
     if (beans == null)
-      return Collections.emptyList();
-    List<TimeRange> ranges = new ArrayList<TimeRange>();
+      return Collections.emptySet();
+      Set<ServiceAlertTimeRange> ranges = new HashSet<ServiceAlertTimeRange>();
     for (TimeRangeBean bean : beans) {
-      TimeRange.Builder range = TimeRange.newBuilder();
+      ServiceAlertTimeRange range = new ServiceAlertTimeRange();
       if (bean.getFrom() > 0)
-        range.setStart(bean.getFrom());
+        range.setFromValue(bean.getFrom());
       if (bean.getTo() > 0)
-        range.setEnd(bean.getTo());
-      if (range.hasStart() || range.hasEnd())
-        ranges.add(range.build());
+        range.setToValue(bean.getTo());
+      if (range.getFromValue() != null || range.getToValue() != null)
+        ranges.add(range);
     }
     return ranges;
   }
 
-  private TranslatedString getNLSBeansAsTranslatedString(
-      List<NaturalLanguageStringBean> nlsBeans) {
-    TranslatedString.Builder builder = TranslatedString.newBuilder();
-    if (!CollectionsLibrary.isEmpty(nlsBeans)) {
-      for (NaturalLanguageStringBean nlsBean : nlsBeans) {
-        if (nlsBean.getValue() == null)
-          continue;
-        Translation.Builder translation = Translation.newBuilder();
-        translation.setText(nlsBean.getValue());
-        translation.setLanguage(nlsBean.getLang());
-        builder.addTranslation(translation);
-      }
-    }
-    return builder.build();
-  }
-
   private List<NaturalLanguageStringBean> getTranslatedStringsAsNLSBeans(
-      TranslatedString strings) {
+      Set<ServiceAlertLocalizedString> strings) {
 
-    if (strings == null || strings.getTranslationCount() == 0)
+    if (strings == null || strings.size() == 0)
       return null;
 
     List<NaturalLanguageStringBean> nlsBeans = new ArrayList<NaturalLanguageStringBean>();
-    for (Translation translation : strings.getTranslationList()) {
+    for (ServiceAlertLocalizedString translation : strings) {
       NaturalLanguageStringBean nls = new NaturalLanguageStringBean();
-      nls.setValue(translation.getText());
+      nls.setValue(translation.getValue());
       nls.setLang(translation.getLanguage());
       nlsBeans.add(nls);
     }

@@ -49,4 +49,12 @@ public interface StopsBeanService {
    * @return the list of all stops for the specified agency
    */
   public ListBean<String> getStopsIdsForAgencyId(String agencyId);
+
+  /**
+   * search for a stop based on name.
+   * @param stopName
+   * @return the list of all stops that are close to the given name
+   * @throws ServiceException
+   */
+  public StopsBean getStopsByName(String stopName) throws ServiceException;
 }

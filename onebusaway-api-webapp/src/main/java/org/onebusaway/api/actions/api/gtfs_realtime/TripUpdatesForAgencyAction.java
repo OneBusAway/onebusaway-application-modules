@@ -16,6 +16,7 @@
  */
 package org.onebusaway.api.actions.api.gtfs_realtime;
 
+import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data.model.ListBean;
 import org.onebusaway.transit_data.model.RouteBean;
 import org.onebusaway.transit_data.model.StopBean;
@@ -62,16 +63,19 @@ public class TripUpdatesForAgencyAction extends GtfsRealtimeActionSupport {
 
       if (tripStatus.getTimepointPredictions() != null && tripStatus.getTimepointPredictions().size() > 0) {
         for (TimepointPredictionBean timepointPrediction: tripStatus.getTimepointPredictions()) {
+          AgencyAndId stopId = modifiedStopId(agencyId, timepointPrediction.getTimepointId());
+          if (!stopId.getAgencyId().equals(agencyId))
+            continue;
           TripUpdate.StopTimeUpdate.Builder stopTimeUpdate = tripUpdate.addStopTimeUpdateBuilder();
-          stopTimeUpdate.setStopId(normalizeId(timepointPrediction.getTimepointId()));
+          stopTimeUpdate.setStopId(normalizeId(stopId.toString()));
           TripUpdate.StopTimeEvent.Builder arrival = stopTimeUpdate.getArrivalBuilder();
           if (timepointPrediction.getTimepointPredictedArrivalTime() != -1) {
-            arrival.setTime(timepointPrediction.getTimepointPredictedArrivalTime());
+            arrival.setTime(timepointPrediction.getTimepointPredictedArrivalTime()/1000L);
           }
   
           TripUpdate.StopTimeEvent.Builder departure = stopTimeUpdate.getDepartureBuilder();
           if (timepointPrediction.getTimepointPredictedDepartureTime() != -1) {
-            departure.setTime(timepointPrediction.getTimepointPredictedDepartureTime());
+            departure.setTime(timepointPrediction.getTimepointPredictedDepartureTime()/1000L);
           }
 
 	      
@@ -81,10 +85,13 @@ public class TripUpdatesForAgencyAction extends GtfsRealtimeActionSupport {
       } else {
         StopBean nextStop = tripStatus.getNextStop();
         if (nextStop != null) {
-          TripUpdate.StopTimeUpdate.Builder stopTimeUpdate = tripUpdate.addStopTimeUpdateBuilder();
-          stopTimeUpdate.setStopId(normalizeId(nextStop.getId()));
-          TripUpdate.StopTimeEvent.Builder departure = stopTimeUpdate.getDepartureBuilder();
-          departure.setTime(timestamp / 1000 + tripStatus.getNextStopTimeOffset());
+          AgencyAndId stopId = modifiedStopId(agencyId, nextStop.getId());
+          if (stopId.getAgencyId().equals(agencyId)) {
+            TripUpdate.StopTimeUpdate.Builder stopTimeUpdate = tripUpdate.addStopTimeUpdateBuilder();
+            stopTimeUpdate.setStopId(normalizeId(stopId.toString()));
+            TripUpdate.StopTimeEvent.Builder departure = stopTimeUpdate.getDepartureBuilder();
+            departure.setTime(timestamp / 1000 + tripStatus.getNextStopTimeOffset());
+          }
         }
         
       }
@@ -92,4 +99,5 @@ public class TripUpdatesForAgencyAction extends GtfsRealtimeActionSupport {
       tripUpdate.setTimestamp(vehicle.getLastUpdateTime() / 1000);
     }
   }
+
 }

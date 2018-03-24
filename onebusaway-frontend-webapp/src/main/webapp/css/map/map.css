@@ -1,0 +1,453 @@
+/**
+ * Copyright (C) 2011 Metropolitan Transportation Authority
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/* search/sidebar */
+
+#content #searchbar {
+	float: left;
+	width: 330px;
+	overflow-y: auto;
+	font-size: 14px;
+	position: relative;
+	margin-left: 20px;
+}
+
+#content #searchbar .sidebar {
+	min-height: 92%;
+}
+
+#content #searchbar form {
+	position: relative;
+	display: block;
+	width: 302px;
+	background-image: url('img/search_background.png');
+	background-repeat: no-repeat;
+}
+
+#content #searchbar form input {
+	width: 252px;
+	height: 25px;
+	font-weight: bold;
+	font-family: inherit;
+	font-size: 120%;	
+	border: 0;
+	background-color: transparent;
+	margin-top: 6px;
+	margin-left: 8px;
+}
+
+#content #searchbar #tip {
+	font-size: .85em;
+	color: #666666;
+	margin-top: 5px;
+}
+
+#content #searchbar #ad {
+	padding-top: 20px;
+	padding-bottom: 10px;	
+}
+
+#content #searchbar form input.submit {
+	position: absolute;
+	top: 0px;
+	right: 0px;
+	width: 30px;
+	height: 30px;
+	border: 0;
+	cursor: pointer;
+	margin: 3px 6px 0 0;
+	text-indent: -9999px;
+	background: url('img/search_icon.png') no-repeat scroll 0 0 transparent;
+	font-size: 0;
+	line-height: 0;
+}
+
+#content #no-results,
+#content #suggestions,
+#content #matches,
+#content #filtered-matches,
+#content #cant-find {
+	width: 280px;
+	display: none;
+	font-size: 16px;
+	clear: both;
+}
+
+#content #welcome,
+#content #available-routes {
+	font-size: 16px;
+}
+
+#content #no-results h2,
+#content #welcome h2,
+#content #suggestions h2,
+#content #matches h2,
+#content #filtered-matches h2 {
+	font-weight: bold;
+	color: #818181;	
+	font-size: 1em;
+	padding-bottom: 2px;
+	padding-top: 12px;
+}
+
+#content #cant-find h2 {
+	font-weight: bold;
+	font-size: 1em;
+	padding-bottom: 10px;
+	padding-top: 20px;
+}
+
+#content #welcome ul {
+	padding-top: 5px;
+}
+
+#content #welcome ul li {
+	line-height: 150%;	
+	font-size: 1em;
+}
+
+#content #available-routes {
+	padding-top: 15px;
+}
+
+/* result types */
+
+#content #suggestions ul li.routeItem {
+	width: 33%;
+	height: 25px;
+	display: block;
+	float: left;
+	text-align: center;
+}
+
+#content #suggestions ul li.locationItem {
+	padding-left: 2.5em;
+	margin-top: .5em;
+	background-position: 0 .3em;
+	background-repeat: no-repeat;
+	min-height: 40px;
+}
+
+#content #matches ul li.legendItem {
+	margin-top: 5px;
+	margin-bottom: 10px;
+	position: relative;
+	width: 300px;
+	color: #000;
+}
+
+#content #matches ul li.legendItem .name {
+	margin-bottom: 5px;
+	font-weight: bold;
+	cursor: pointer;
+}
+
+#content #matches ul li.legendItem .no-service {
+	font-weight: bold;
+	margin-top: 5px;
+	margin-left: 20px;
+	padding: 5px;
+	color: #1C75BC;
+	background-color: #DCF0F7;
+}
+
+#content #matches ul li.legendItem .description {
+	margin-bottom: 5px;
+	font-size: 14px;
+	font-weight: normal;
+}
+
+#content #matches ul li.legendItem .serviceAlertContainer {
+	font-size: 12px;
+	width: 300px;
+	padding-bottom: 5px;
+	display: none;
+}
+
+#content #matches ul li.legendItem .serviceAlertContainer p.serviceAlert {
+	color: #D12020;
+	font-weight: bold;
+	font-size: 13px;
+	padding: 5px 5px 5px 5px;
+	position: relative;
+	cursor: pointer;
+	background-color: #FDEEF4;
+}
+
+#content #matches ul li.legendItem .serviceAlertContainer p.serviceAlert:focus { 
+	outline: none; 
+} 
+
+#content #matches ul li.legendItem .serviceAlertContainer p.serviceAlert span.click_info {
+	color: #D12020;
+	font-weight: normal;
+	font-size: 12px;
+	padding-left: 12px;
+	cursor: pointer;
+	display: inline;
+}
+
+#content #matches ul li.legendItem .serviceAlertContainer .alerts li {
+	padding-left: 10px;
+	padding-right: 10px;
+	padding-bottom: 10px;
+	color: #D12020;
+	font-size: 13px;
+	background-color: #FDEEF4;
+	line-height: 1.2em;
+}
+
+#content #matches ul li.legendItem .destination {
+	font-size: 12px;
+	width: 280px;
+}
+
+#content #matches ul li.legendItem .destination p {
+	color: #1c75bc;
+	padding: 4px;
+	font-weight: bold;
+	position: relative;
+	cursor: pointer;
+	outline: 0;
+}
+
+#content #matches ul li.legendItem .destination p span {
+	display: block;
+	padding-left: 20px;
+}
+
+#content #matches ul li.legendItem p.destination p span.ui-icon-triangle-1-s {
+	background-image: url("img/arrows.png");
+	background-position: 0px -20px;
+	width: 20px;
+	height: 20px;
+	display: block;
+	position: absolute;
+	padding: 0px;
+	top: 0px;
+	left: 0px;
+}
+
+#content #matches ul li.legendItem p.destination p span.ui-icon-triangle-1-e {
+	background-image: url("img/arrows.png");
+	background-position: 0px 0px;
+	width: 20px;
+	height: 20px;
+	display: block;
+	position: absolute;
+	padding: 0px;
+	top: 0px;
+	left: 0px;
+}
+
+#content #matches ul li.legendItem p.destination ul.stops {
+	margin-top: 5px;
+	margin-bottom: 20px;
+	margin-left: 25px;
+	outline: none;
+}
+
+#content #matches ul li.legendItem p.destination ul.stops li {
+	background-repeat: no-repeat;
+	background-position: left center;
+	padding: 3px 3px 5px 20px;
+}
+
+/* default--this is overrideen  by javascript */
+#content #matches ul li.legendItem p.destination ul.stops li.r_none {
+	background-image: url('img/stop_on_route_background.png');
+}
+
+#content #matches ul li.legendItem p.destination ul.stops li a {
+	height: 20px;
+	color: #000000;
+	text-decoration: none;
+	font-weight: normal;
+}
+
+#content #matches ul li.legendItem p.destination ul.stops li a:hover {
+	font-size: 125%;
+	font-weight: bold;
+	color: #000000;
+}
+
+#content #matches ul li.legendItem p.destination ul.stops li a.stopHover:hover {
+	color: #3398C7;
+	text-decoration: underline;
+}
+
+#content #filtered-matches ul li {
+	display: inline-block;
+	padding: 0.2em;
+	zoom: 1;
+	*display:inline;
+}
+
+/* loading indicators */
+
+#content #searchbar #loading {
+	padding-left: 40px;	
+	padding-top: 25px;
+	padding-bottom: 25px;
+	display: none;
+}
+
+.destination .loading {
+	display: none;
+	margin-left: 25px;
+	margin-top: 10px;
+	margin-bottom: 10px;
+}
+
+.loading {
+	text-align: center;
+	width: 200px;
+	padding-top: 25px;
+	background-image: url('img/ajax-loader.gif');
+	background-repeat: no-repeat;
+	background-position: 50% 0;
+}
+
+.loading span {
+	font-size: 16px;
+	font-weight: normal;
+	color: #999;
+}
+
+/* global alerts */
+
+.global-alerts {
+	background-color: rgb(242,247,203);
+	border: 1px solid black;
+	padding: 10px;
+}
+
+#global-alerts {
+	width:280px;
+	margin-top: 15px;
+	margin-bottom: 15px;
+}
+
+#map-global-alerts {
+	position: absolute;
+	right: 0;
+	left: 330px;
+	padding-top: 4px;
+}
+
+#close-map-global-alerts {
+	text-align: right;
+	padding-bottom: 2px;
+}
+
+/* google translate */
+
+#google_translate_element {
+	margin-bottom: 10px;
+}
+
+/* suggestions */
+
+.ui-autocomplete.ui-widget {
+	background-color: #FFFFFF;
+	padding: 0px;
+	margin: 0px;
+	width: 250px;
+	border: 1px solid #EFEFEF;
+}
+
+.ui-autocomplete.ui-widget .ui-menu-item {
+	padding: 0px;
+	margin: 0px;	
+}
+
+.ui-autocomplete.ui-widget .ui-menu-item a {
+	color: #000000;
+	font-size: 120%;
+	font-weight: bold;
+	margin: 0px;
+	padding: 5px;
+	display: block;
+	cursor: pointer;
+}
+
+.ui-autocomplete.ui-widget .ui-menu-item a.ui-state-hover {
+	background-color: #EFEFEF;
+}
+
+/* subway map control */
+
+#subwayControlContainer { /* For IE box shadow */
+	margin: 10px;
+    z-index: 5px; /* IE bug */
+}
+ 
+#subwayControl {
+	padding: 0;
+	-moz-border-radius: 2px;
+	border-radius: 2px;
+	margin: 3px;
+    background-color: rgb(100,100,100); /* Needed for IEs */
+    -moz-box-shadow: 1px 2px 2px rgba(100,100,100,0.6);
+    -webkit-box-shadow: 1px 2px 2px rgba(100,100,100,0.6);
+    box-shadow: 1px 2px 2px rgba(100,100,100,0.6);
+    filter: progid:DXImageTransform.Microsoft.Blur(PixelRadius=4,MakeShadow=true,ShadowOpacity=0.30);
+    -ms-filter: "progid:DXImageTransform.Microsoft.Blur(PixelRadius=4,MakeShadow=true,ShadowOpacity=0.30)";
+    z-index: 4px;  /* IE bug */
+}
+
+#subwayControl a {
+	background-color: #FFFFFF;
+	border: 1px solid #AAAAAA;
+	-moz-border-radius: 2px;
+	border-radius: 2px;
+	display: block;
+	padding: 3px;
+	text-align: center;
+	text-decoration: none;
+	font-size: 12px;
+	width: 86px;
+	position: relative;
+	z-index: 3; /* IE bug */
+}
+
+#subwayControl a:focus { 
+	outline: none; 
+}
+
+#subwayControl a:hover { 
+	background-color: #EEEEEE;
+}
+
+#legend {
+        font-family: Arial, sans-serif;
+        background: #fff;
+        padding: 15px;
+        margin: 20px;
+        border: 2px solid #696969;
+}
+#legend h3 {
+  margin-top: 0;
+  font-weight: bold;
+  font-size: 1.05em;
+}
+#legend img {
+  vertical-align: middle;
+}
+
+#legend div {
+  margin-top: 6px;
+}

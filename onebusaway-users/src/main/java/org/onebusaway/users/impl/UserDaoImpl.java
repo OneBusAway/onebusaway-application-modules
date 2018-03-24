@@ -20,15 +20,15 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import org.hibernate.HibernateException;
-import org.hibernate.Query;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
+import org.hibernate.*;
+import org.hibernate.criterion.Projections;
+import org.hibernate.criterion.Restrictions;
 import org.onebusaway.users.model.User;
 import org.onebusaway.users.model.UserIndex;
 import org.onebusaway.users.model.UserIndexKey;
 import org.onebusaway.users.model.UserRole;
 import org.onebusaway.users.services.UserDao;
+import org.onebusaway.users.services.UserIndexTypes;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.orm.hibernate3.HibernateCallback;
 import org.springframework.orm.hibernate3.HibernateTemplate;
@@ -164,6 +164,46 @@ class UserDaoImpl implements UserDao {
   public List<String> getUserIndexKeyValuesForKeyType(String keyType) {
     return _template.findByNamedQueryAndNamedParam(
         "userIndexKeyValuesForKeyType", "type", keyType);
+  }
+
+  @Override
+  public Integer getUserKeyCount(final String keyType) {
+      Integer count = _template.execute(new HibernateCallback<Integer>() {
+            @SuppressWarnings("unchecked")
+            @Override
+            public Integer doInHibernate(Session session)
+                    throws HibernateException, SQLException {
+                Criteria criteria = session.createCriteria(User.class)
+                        .createCriteria("userIndices")
+                        .add(Restrictions.eq("id.type", keyType))
+                        .setProjection(Projections.rowCount());
+                List<User> users = criteria.list();
+                Integer count = (Integer) criteria.uniqueResult();
+                return count;
+            }
+      });
+      return count;
+  }
+
+  @Override
+  public List<User> getUsersForKeyType(final int start, final int maxResults, final String keyType) {
+
+    List<User> users = _template.execute(new HibernateCallback<List<User>>() {
+
+            @SuppressWarnings("unchecked")
+            @Override
+            public List<User> doInHibernate(Session session)
+                    throws HibernateException, SQLException {
+            Criteria criteria = session.createCriteria(User.class)
+                    .createCriteria("userIndices")
+                    .add(Restrictions.eq("id.type", keyType))
+                    .setFirstResult(start)
+                    .setMaxResults(maxResults);
+            List<User> users = criteria.list();
+            return users;
+        }
+    });
+    return users;
   }
 
   @Transactional

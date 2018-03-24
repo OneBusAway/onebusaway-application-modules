@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2011 Metropolitan Transportation Authority
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+            http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+
+<html xmlns:jsp="http://java.sun.com/JSP/Page"
+	xmlns:c="http://java.sun.com/jsp/jstl/core" xmlns:s="/struts-tags">
+<jsp:directive.page contentType="text/html" />
+	<div id="buildBundle">
+		<p>Build Bundle</p>
+		<div>
+			<span class="buildDivHeader">Step 1: Build your Bundle</span>
+			<div id="buildTestBundleDiv">
+				<table id="bundleBuildInfoTable">
+					<tr>
+						<td>Dataset</td>
+						<td id="datasetName"></td>
+					</tr>
+					<tr>
+						<td>Build Name</td>
+						<td><input id="bundleBuildName" type="text"></input></td>
+					</tr>
+					<tr>
+						<td>Start Date</td>
+						<td>
+							<div id="bundleStartDateHolder">
+								<input type="text" id="startDatePicker"/>
+								<input type="hidden" id="startDate" />
+							</div>
+						</td>
+					</tr>
+					<tr>
+						<td>End Date</td>
+						<td>
+							<div id="bundleEndDateHolder">
+								<input type="text" id="endDatePicker"/>
+								<input type="hidden" id="endDate" />
+							</div>
+						</td>
+					</tr>
+					<tr>
+						<td>Email</td>
+						<td><input id="buildNotificationEmail" type="text"></input></td>
+					</tr>
+				</table>
+				<div id="testButtonSectionDiv">
+					<div id="testButtonDiv">
+						<input id="testBuildBundleButton" type="button" value="Build"></input>
+					</div>
+					<div id="testTimeEstimate">
+						This step takes roughly<br/>
+						10 minutes to complete.
+					</div>
+					<div class="clear">		
+						<!-- space -->
+					</div>
+				</div>
+				<div id="buildingTest">
+					<s:url var="url" value="/css/img/ajax-loader.gif" />
+					<img id="buildingTestProgress" src="${url}" alt="Ajax loader" class="progress" /> 
+					<label id="buildBundle_buildTestProgress" class="adminLabel">Bundle Build in Progress...</label>
+				</div>
+
+				<div id="buildBundle_testResultLink">
+					<label class="adminLabel">Result Link :</label>
+					<label id="testResultLink">
+
+					<!-- -->
+					<!-- For IE -->
+					<!-- -->
+
+					<s:property value="" /></label>
+				</div>
+
+				<div id="testProgressBarDiv">
+					<div id="testProgressBar">
+						<!--  space -->
+					</div>
+					<div class="clear">
+						<!--  space -->
+					</div>
+					<div>
+						<span id="testBuildProgress">Initializing build process</span>
+						<span id="viewTestBuildDetails" class="bundleLink">View details</span>
+					</div>
+					<!-- <div> -->
+						<!-- <textarea id="buildBundle_testResultList" rows="10" cols="70"> -->
+						<!-- <textarea> -->
+							<!-- space -->
+						<!-- </textarea> -->
+					<!-- </div> -->
+				</div>
+				<div id="bundleTestResultsHolder">
+					<div id="bundleTestResults">
+						<!--
+						<div id="buildBundle_progress">
+							<s:url var="url" value="/css/img/arrow-right-3.png" />
+							<img src="${url}" alt="Not found" id="expand" /> <label
+								class="adminLabel">Bundle Build Progress</label>
+						</div>
+						-->
+						<!-- <div id="buildBundle_testResultList"> -->
+						<div>
+							<textarea id="buildBundle_testResultList" rows="10" cols="70">
+								<!--  space -->
+							</textarea>
+						</div>
+						<div id="buildBundle_testException">
+							<!--  space -->
+						</div>
+						<div id="buildBundle_testFileList">
+							<!--  space -->
+						</div>
+					</div>
+				</div>
+				<!-- This has only been implemented for MTA
+				<div id="downloadTestLogs">
+					<s:url var="url" value="/css/img/go-down-10.png" />
+					<img src="${url}" alt="Image not found" id="downloadImg"/>
+					<a id="downloadTestButton" class="adminLabel">Download as zip</a>
+				</div>
+				-->
+			</div>
+		</div>
+		<div id="buildStep2Div">
+			<span class="buildDivHeader">Step 2: Build, Archive, and Consolidate Bundle</span>
+			<div id="datasetNotes">
+				Once you have confirmed that the bundle data is valid, <br/>
+				you may build, archive and consolidate your bundle. <br/>
+				This step could take up to 3 hours to complete.
+			</div>
+			<div id="buildButtonSectionDiv">f
+				<div id="buildButtonDiv">
+					<input id="finalBuildBundleButton" type="button" value="Build and Archive"></input>
+				</div>
+				<div id="buildTimeEstimate">
+					This step will likely take<br/>
+					2.5 hours to complete.
+				</div>
+				<div class="clear">
+					<!--  space -->
+				</div>
+			</div>
+			<div id="buildingFinal">
+				<s:url var="url" value="/css/img/ajax-loader.gif" />
+				<img id="buildingFinalProgress" src="${url}" alt="Ajax loader" class="progress" /> 
+				<label id="buildBundle_buildFinalProgress" class="adminLabel">Bundle Build in Progress...</label>
+			</div>
+
+			<div id="buildBundle_finalResultLink">
+				<label class="adminLabel">Result Link :</label>
+				<label id="finalResultLink">
+
+				<!-- -->
+				<!-- For IE -->
+				<!-- -->
+
+				<s:property value="" /></label>
+			</div>
+			<div id="finalProgressBarDiv">
+				<div id="finalProgressBar">
+					<!--  space -->
+				</div>
+				<div class="clear">
+					<!--  space -->
+				</div>
+				<div>
+					<span id="finalBuildProgress">Initializing build process</span>
+					<span id="viewFinalBuildDetails" class="bundleLink">View details</span>
+				</div>
+				<!--
+				<div>
+					<textarea id="buildBundle_finalResultList" rows="10" cols="70">
+					-->
+						<!-- space -->
+						<!--
+					</textarea>
+				</div>
+				-->
+			</div>
+			<div id="bundleFinalResultsHolder">
+				<div id="bundleFinalResults">
+					<!--
+					<div id="buildBundle_progress">
+						<s:url var="url" value="/css/img/arrow-right-3.png" />
+						<img src="${url}" alt="Not found" id="expand" /> <label
+							class="adminLabel">Bundle Build Progress</label>
+					</div>
+					-->
+					<!-- <div id="buildBundle_testResultList"> -->
+					<div>
+						<textarea id="buildBundle_finalResultList" rows="10" cols="70">
+							<!--  space -->
+						</textarea>
+					</div>
+					<div id="buildBundle_finalException">
+						<!--  space -->
+					</div>
+					<div id="buildBundle_finalFileList">
+						<!--  space -->
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</html>

@@ -23,7 +23,7 @@ import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEnt
 
 public class StopTimeEntryImpl implements StopTimeEntry, Serializable {
 
-  private static final long serialVersionUID = 7L;
+  private static final long serialVersionUID = 8L;
 
   private int _stopTimeId;
   private int _arrivalTime;
@@ -36,6 +36,7 @@ public class StopTimeEntryImpl implements StopTimeEntry, Serializable {
   private double _shapeDistTraveled = Double.NaN;
   private int _accumulatedSlackTime = 0;
   private String _stopHeadsign;
+  private int _totalStopsInTrip;
 
   private StopEntryImpl _stop;
 
@@ -103,6 +104,10 @@ public class StopTimeEntryImpl implements StopTimeEntry, Serializable {
 	public void setStopHeadsign(String stopHeadsign) {
 		_stopHeadsign = stopHeadsign;
 	}
+  
+  public void setTotalStopsInTrip(int totalStopsInTrip) {
+    _totalStopsInTrip = totalStopsInTrip;
+  }
 
   /****
    * {@link StopTimeEntry} Interface
@@ -177,6 +182,11 @@ public class StopTimeEntryImpl implements StopTimeEntry, Serializable {
 		return _stopHeadsign;
 	}
 
+  @Override
+  public int getTotalStopsInTrip() {
+    return _totalStopsInTrip;
+  }
+  
   @Override
   public String toString() {
     return "StopTimeEntryImpl(stop=" + _stop.getId() + " trip=" + _trip

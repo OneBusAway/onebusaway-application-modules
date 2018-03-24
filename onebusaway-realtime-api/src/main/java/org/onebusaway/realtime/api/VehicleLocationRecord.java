@@ -50,6 +50,8 @@ public class VehicleLocationRecord implements Serializable {
 
   private AgencyAndId blockId;
 
+  private int blockStartTime;
+
   private AgencyAndId tripId;
 
   private AgencyAndId vehicleId;
@@ -121,6 +123,14 @@ public class VehicleLocationRecord implements Serializable {
 
   public void setBlockId(AgencyAndId blockId) {
     this.blockId = blockId;
+  }
+
+  public int getBlockStartTime() {
+    return blockStartTime;
+  }
+
+  public void setBlockStartTime(int blockStartTime) {
+    this.blockStartTime = blockStartTime;
   }
 
   public AgencyAndId getTripId() {
@@ -266,6 +276,7 @@ public class VehicleLocationRecord implements Serializable {
     this.phase = phase;
   }
 
+
   public String getStatus() {
     return status;
   }
@@ -285,7 +296,7 @@ public class VehicleLocationRecord implements Serializable {
     if (serviceDate != 0)
       b.append(" serviceDate=").append(serviceDate);
     if (timeOfRecord != 0)
-      b.append(" time=").append(timeOfRecord);
+      b.append(" time=").append(new java.util.Date(timeOfRecord));
     if (vehicleId != null)
       b.append(" vehicleId=").append(vehicleId);
     if (isScheduleDeviationSet())

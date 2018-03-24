@@ -55,7 +55,9 @@ public class DistanceAlongShapeLibrary {
 
   private double _maxDistanceFromStopToShapePoint = 1000;
 
-  private int _maximumNumberOfPotentialAssignments = 10000;
+  private int _maximumNumberOfPotentialAssignments = Integer.MAX_VALUE;
+  
+  private boolean _lenientStopShapeAssignment = false;
 
   private Set<AgencyAndId> _shapeIdsWeHavePrinted = new HashSet<AgencyAndId>();
 
@@ -107,6 +109,15 @@ public class DistanceAlongShapeLibrary {
     _maximumNumberOfPotentialAssignments = maximumNumberOfPotentialAssignments;
   }
 
+  /**
+   * Some shapes (ferries paths for instance) don't match to stops very well.
+   * In these cases pick an assignment and hope for the best.
+   * @param lenient
+   */
+  @ConfigurationParameter
+  public void setLenientStopShapeAssignment(boolean lenient) {
+    _lenientStopShapeAssignment = lenient;
+  }
   public PointAndIndex[] getDistancesAlongShape(ShapePoints shapePoints,
       List<StopTimeEntryImpl> stopTimes)
       throws DistanceAlongShapeException {
@@ -333,7 +344,8 @@ public class DistanceAlongShapeLibrary {
               + ")" + ", trip=" + st.getTrip().getId() + "), ";
         }
         _log.error(msg);
-        throw new IllegalStateException(msg);    	  
+        if (!_lenientStopShapeAssignment)
+          throw new IllegalStateException(msg);    	  
       }
       bestAssignment.add(possibleAssignment.get(0));
     }

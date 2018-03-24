@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2011 Metropolitan Transportation Authority
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+            http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+
+<html xmlns:jsp="http://java.sun.com/JSP/Page"
+	xmlns:c="http://java.sun.com/jsp/jstl/core" xmlns:s="/struts-tags">
+<jsp:directive.page contentType="text/html" />
+	<p>Dataset for Bundle Creation</p>
+	<!--Create a blank dataset -->
+    <div id="newDatasetTableDiv">
+        <span class="datasetDivHeader">Create a new dataset</span>
+		<table id="createDataset">
+			<tr>
+				<td id="datasetNameLabel">What do you want to name your dataset?</td>
+				<td></td>
+			</tr>
+			<tr>
+				<td><input type="text" id="directoryName"/></td>
+				<td><input type="button" id="newDirectoryButton" value="Save and Continue" disabled="disabled"/></td>
+			</tr>
+			<tr id="filenameError">
+				<td id="filenameErrorMsg">Name is not valid; it cannot contain spaces or symbols.</td>
+			</tr>
+			<tr>
+				<td id="datasetNameNotes">
+					This name will become the name of your Bundle<br/>later on. Avoid spaces or symbols in your name.
+				</td>
+			</tr>
+		</table>
+	</div>
+	<div id="existingDatasetDiv">
+        <span class="datasetDivHeader">Or select an existing dataset</span>
+		<div id="existingDatasetTableDiv">
+			<table id="existingDataset">
+				<thead>
+					<tr id="existingDatasetLabel">
+						<th></th>
+						<th>Dataset Name</th>
+						<th>Last Updated Date</th>
+						<th></th>
+						<th></th>
+					</tr>
+				</thead>
+				<tbody>
+					<s:iterator value="%{sortedByDateDirectories}" status="directoryStatus">
+						 <tr>
+						 	<td class="datasetCheckbox"><input type="checkbox"/></td>
+							<td class="directoryName">
+								<!--
+								<strong><s:property value="name" /></strong>
+								-->
+								<s:property value="name" />
+							</td>
+							<td class="timestamp">
+								<s:property value="creationTimestamp" />
+							</td>
+							<td class="copyDirectory">copy</td>
+							<td class="deleteDirectory">delete</td>
+						</tr> 
+					</s:iterator>
+				</tbody>
+			</table>
+			
+			<div id="existingDirectoryButtonDiv">
+	    		<input type="button" id="existingDirectoryButton" value="Add files to this dataset"
+					disabled="disabled"/>
+			</div>
+		</div>      
+	</div>
+	<!-- Div for "Copy" popup -->
+	<div id="copyPopup" class="ui-helper-hidden">
+		<div id="copyPopupContents">
+			<div id="copyPopupHeader">
+				<p>You are duplicating a dataset.</p>
+				You will want to give it a unique name.
+			</div>
+			<div id="destinationDirDiv">
+				<label for="destinationDirectory" id="datasetNameLabel">New dataset name</label>
+				<input type="text" name="destinationDirectory" id="destinationDirectory"></input>
+			</div>
+			<div id="copyFilenameError">
+				Name is not valid; it cannot contain spaces or symbols.
+			</div>
+		</div>
+		<!--
+		<div>
+			<input type="button" id="cancelCopy" value="Cancel"/>
+			<input type="button" id="continueCopy" value="Continue"/>
+		</div>
+		-->
+	</div>
+	<!-- Div for "Delete" popup -->
+	<div id="deletePopup">
+		<div id="deletePopupContents">
+			<div id="DeletePopupHeader">
+				<p>You are about to delete a dataset.</p>
+				The files will be removed from the file system.
+				Are you sure you want to do this?
+			</div>
+		</div>
+	</div>
+	<!-- Div for "Delete Success" popup -->
+	<div id="deleteSuccessPopup">
+		<div id="deleteSuccessPopupContents">
+			<div id="DeleteSuccessPopupHeader">
+				<p>Dataset was successfully deleted.</p>
+			</div>
+		</div>
+	</div>
+</html>

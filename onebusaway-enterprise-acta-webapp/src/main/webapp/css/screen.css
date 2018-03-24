@@ -1,0 +1,201 @@
+/**
+ * Copyright (c) 2011 Metropolitan Transportation Authority
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#skyscraper_ad {
+	position: absolute;
+	right: 20px;
+	top: 0px;
+	padding: 10px;
+	-webkit-border-radius: 10px;
+	-moz-border-radius: 10px;
+	border-radius: 10px;
+	border: 1px solid #C0C0C0;
+	background-color: #FFFFFF;
+}
+
+.holding_box {
+	-webkit-border-radius: 10px;
+	-moz-border-radius: 10px;
+	border-radius: 10px;
+	border: 1px solid #C0C0C0;
+	background-color: #FFFFFF;
+	width: 85%;
+	margin: auto;
+	margin-top: 30px;
+	margin-bottom: 30px;
+	/* margin-right: 225px;
+	margin-top: 50px;
+	margin-bottom: 30px; */
+	padding: 25px;
+	padding-top: 10px;
+	min-height: 590px;
+}
+
+#content #text {
+    position: relative;
+	padding-top: 5px;
+	margin-right: 20px;
+	line-height: 120%;
+	overflow: hidden;
+}
+
+#content.sidebar #text {
+	margin-left: 260px;
+	font-size: 14px;	
+}
+
+#content.sidebar.right #text {
+	margin-left: 0px;
+}
+
+#content.sidebar #sidebar {
+	float: left;
+}
+
+#content.sidebar #sidebar .wrapper {
+	padding: 20px;
+	padding-top: 0px;
+	width: 240px;
+	padding-left: 0px;
+	line-height: 140%;	
+}
+
+#content.sidebar #sidebar .wrapper .toc {
+	padding: 10px;
+	background-color: #EFEFEF;
+	border: 1px solid #C0C0C0;
+}
+
+#content.sidebar #sidebar .wrapper .toc a.active {
+	font-weight: bold;
+}
+
+#content.sidebar #sidebar .wrapper .toc .header {
+	font-weight: bold;
+	color: #666666;	
+}
+
+#content.sidebar #sidebar .wrapper .toc ul {
+	padding-top: 5px;
+}
+	
+#content.sidebar #sidebar .wrapper .toc ul li ul {
+	padding: 0px;
+	padding-left: 10px;
+	padding-bottom: 5px;	
+	border: none;
+}
+
+#content #text p {
+	padding-top: 10px;
+	padding-bottom: 10px;
+}
+
+#content #text p.small {
+	font-size: 10px;
+	padding-top: 5px;
+	padding-bottom: 0px;
+}
+
+#content #text table {
+	padding: 20px;
+	padding-left: 0px;
+	padding-right: 0px;
+}
+
+#content #text td {
+	padding: 5px;
+}
+	
+#content #text h1,
+#content #text h2 {
+	font-weight: normal;
+	font-size: 22px;
+	padding-top: 30px;
+	padding-bottom: 5px;
+}
+
+#content #text h3,
+#content #text h4 {
+	margin: 0px;
+	padding: 0px;
+	font-weight: bold;
+	font-size: 18px;
+	padding-top: 10px;
+	padding-bottom: 5px;
+}
+
+#content #text h1:first-child,
+#content #text h2:first-child,
+#content #text h3:first-child,
+#content #text h4:first-child {
+	padding-top: 0px;
+}
+
+#content #text fieldset {
+	padding: 10px;
+	padding-left: 0px;
+	padding-right: 0px;
+}
+
+#content #text fieldset label {
+	display: block;
+	padding-bottom: 3px;
+	font-weight: bold;
+}
+
+#content #text fieldset label.inline {
+	display: inline;
+}
+
+#content #text fieldset input, 
+#content #text fieldset select, 
+#content #text fieldset textarea {
+	font-family:inherit;
+	font-size:15px;
+}
+
+#content #text .error {
+	color: red;
+}
+
+#content #text .meta {
+	margin-top: 15px;
+	padding-top: 5px;	
+	color: #C0C0C0;
+	font-size: 10px;
+}
+
+#content #text .meta a {
+	margin-left: 10px;
+}
+
+#content #text ul {
+	padding: 15px;
+	padding-left: 30px;
+	padding-top: 0px;
+	padding-bottom: 0px;
+}
+
+#content #text ul li {
+	list-style-type: disc;
+	padding-top: 2px;
+	padding-bottom: 2px;
+}
+
+.clear {
+	clear: both;	
+}

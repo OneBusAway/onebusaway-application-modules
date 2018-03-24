@@ -16,47 +16,33 @@
  */
 package org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime;
 
-import java.util.Date;
-import java.util.List;
-
+import com.google.transit.realtime.GtfsRealtime.*;
+import com.google.transit.realtime.GtfsRealtime.FeedHeader.Incrementality;
+import com.google.transit.realtime.GtfsRealtime.TranslatedString.Translation;
+import com.google.transit.realtime.GtfsRealtime.TripDescriptor.ScheduleRelationship;
+import com.google.transit.realtime.GtfsRealtime.TripUpdate.StopTimeEvent;
+import com.google.transit.realtime.GtfsRealtime.TripUpdate.StopTimeUpdate;
+import com.google.transit.realtime.GtfsRealtimeConstants;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.realtime.api.TimepointPredictionRecord;
 import org.onebusaway.realtime.api.VehicleLocationRecord;
+import org.onebusaway.transit_data_federation.impl.service_alerts.ServiceAlertLocalizedString;
+import org.onebusaway.transit_data_federation.impl.service_alerts.ServiceAlertRecord;
+import org.onebusaway.transit_data_federation.impl.service_alerts.ServiceAlertTimeRange;
+import org.onebusaway.transit_data_federation.impl.service_alerts.ServiceAlertsSituationAffectsClause;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.blocks.BlockStatusService;
 import org.onebusaway.transit_data_federation.services.realtime.BlockLocation;
 import org.onebusaway.transit_data_federation.services.realtime.VehicleStatus;
 import org.onebusaway.transit_data_federation.services.realtime.VehicleStatusService;
-import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects;
-import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id;
-import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert;
-import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange;
 import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlertsService;
-import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
-import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
-import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
-import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
-import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.*;
+import org.onebusaway.util.SystemTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.google.transit.realtime.GtfsRealtime.Alert;
-import com.google.transit.realtime.GtfsRealtime.EntitySelector;
-import com.google.transit.realtime.GtfsRealtime.FeedEntity;
-import com.google.transit.realtime.GtfsRealtime.FeedHeader;
-import com.google.transit.realtime.GtfsRealtime.FeedHeader.Incrementality;
-import com.google.transit.realtime.GtfsRealtime.FeedMessage;
-import com.google.transit.realtime.GtfsRealtime.Position;
-import com.google.transit.realtime.GtfsRealtime.TranslatedString;
-import com.google.transit.realtime.GtfsRealtime.TranslatedString.Translation;
-import com.google.transit.realtime.GtfsRealtime.TripDescriptor;
-import com.google.transit.realtime.GtfsRealtime.TripDescriptor.ScheduleRelationship;
-import com.google.transit.realtime.GtfsRealtime.TripUpdate;
-import com.google.transit.realtime.GtfsRealtime.TripUpdate.StopTimeEvent;
-import com.google.transit.realtime.GtfsRealtime.TripUpdate.StopTimeUpdate;
-import com.google.transit.realtime.GtfsRealtime.VehicleDescriptor;
-import com.google.transit.realtime.GtfsRealtime.VehiclePosition;
-import com.google.transit.realtime.GtfsRealtimeConstants;
+import java.util.Date;
+import java.util.List;
 
 @Component
 class GtfsRealtimeServiceImpl implements GtfsRealtimeService {
@@ -87,7 +73,7 @@ class GtfsRealtimeServiceImpl implements GtfsRealtimeService {
 
     FeedMessage.Builder feedMessage = createFeedWithDefaultHeader();
 
-    List<BlockLocation> activeBlocks = _blockStatusService.getAllActiveBlocks(System.currentTimeMillis());
+    List<BlockLocation> activeBlocks = _blockStatusService.getAllActiveBlocks(SystemTime.currentTimeMillis());
     for (BlockLocation activeBlock : activeBlocks) {
 
       // Only interested in blocks with real-time data
@@ -219,52 +205,57 @@ class GtfsRealtimeServiceImpl implements GtfsRealtimeService {
   @Override
   public FeedMessage getAlerts() {
     FeedMessage.Builder feedMessage = createFeedWithDefaultHeader();
-    List<ServiceAlert> serviceAlerts = _serviceAlertsService.getAllServiceAlerts();
-    for (ServiceAlert serviceAlert : serviceAlerts) {
+    List<ServiceAlertRecord> serviceAlerts = _serviceAlertsService.getAllServiceAlerts();
+    for (ServiceAlertRecord serviceAlert : serviceAlerts) {
 
       Alert.Builder alert = Alert.newBuilder();
 
-      if (serviceAlert.hasSummary()) {
-        TranslatedString translated = convertTranslatedString(serviceAlert.getSummary());
-        alert.setHeaderText(translated);
+      if (serviceAlert.getSummaries() != null) {
+        for(ServiceAlertLocalizedString string : serviceAlert.getSummaries()){
+          TranslatedString translated = convertTranslatedString(string);
+          alert.setHeaderText(translated);
+        }
       }
 
-      if (serviceAlert.hasDescription()) {
-        TranslatedString translated = convertTranslatedString(serviceAlert.getDescription());
-        alert.setDescriptionText(translated);
+      if (serviceAlert.getDescriptions() != null) {
+        for(ServiceAlertLocalizedString string : serviceAlert.getDescriptions()){
+          TranslatedString translated = convertTranslatedString(string);
+          alert.setDescriptionText(translated);
+        }
       }
 
-      for (TimeRange range : serviceAlert.getActiveWindowList()) {
+      for (ServiceAlertTimeRange range : serviceAlert.getActiveWindows()) {
         com.google.transit.realtime.GtfsRealtime.TimeRange.Builder timeRange = com.google.transit.realtime.GtfsRealtime.TimeRange.newBuilder();
-        if (range.hasStart())
-          timeRange.setStart(range.getStart());
-        if (range.hasEnd())
-          timeRange.setEnd(range.getEnd());
+        if (range.getFromValue() != null)
+          timeRange.setStart(range.getFromValue());
+        if (range.getToValue() != null)
+          timeRange.setEnd(range.getToValue());
         alert.addActivePeriod(timeRange);
       }
 
       /**
        * What does this situation affect?
        */
-      for (Affects affects : serviceAlert.getAffectsList()) {
+      for (ServiceAlertsSituationAffectsClause affects : serviceAlert.getAllAffects()) {
         EntitySelector.Builder entitySelector = EntitySelector.newBuilder();
-        if (affects.hasAgencyId())
+        if (affects.getAgencyId() != null)
           entitySelector.setAgencyId(affects.getAgencyId());
-        if (affects.hasRouteId())
-          entitySelector.setRouteId(id(affects.getRouteId()));
-        if (affects.hasTripId()) {
+        if (affects.getRouteId() != null)
+          entitySelector.setRouteId(id(serviceAlert.getAgencyId(), affects.getRouteId()));
+        if (affects.getTripId() != null) {
           TripDescriptor.Builder trip = TripDescriptor.newBuilder();
-          trip.setTripId(id(affects.getTripId()));
+          trip.setTripId(id(serviceAlert.getAgencyId(), affects.getTripId()));
           entitySelector.setTrip(trip);
         }
-        if (affects.hasStopId())
-          entitySelector.setStopId(id(affects.getStopId()));
+        if (affects.getStopId() != null)
+          entitySelector.setStopId(
+              id(serviceAlert.getAgencyId(), affects.getStopId()));
         alert.addInformedEntity(entitySelector);
       }
 
       FeedEntity.Builder feedEntity = FeedEntity.newBuilder();
       feedEntity.setAlert(alert);
-      feedEntity.setId(id(serviceAlert.getId()));
+      feedEntity.setId(id(serviceAlert.getAgencyId(), serviceAlert.getServiceAlertId()));
       feedMessage.addEntity(feedEntity);
     }
     return feedMessage.build();
@@ -285,21 +276,18 @@ class GtfsRealtimeServiceImpl implements GtfsRealtimeService {
   }
 
   private TranslatedString convertTranslatedString(
-      org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString ts) {
+      ServiceAlertLocalizedString ts) {
     TranslatedString.Builder translated = TranslatedString.newBuilder();
 
-    for (org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation translation : ts.getTranslationList()) {
-      Translation.Builder builder = Translation.newBuilder();
-      builder.setText(translation.getText());
-      if (translation.hasLanguage())
-        builder.setLanguage(translation.getLanguage());
-      translated.addTranslation(builder);
-    }
+    Translation.Builder builder = Translation.newBuilder();
+    builder.setText(ts.getValue());
+    if (ts.getLanguage() != null)
+      builder.setLanguage(ts.getLanguage());
+    translated.addTranslation(builder);
     return translated.build();
   }
 
-  private String id(Id id) {
-    return AgencyAndId.convertToString(new AgencyAndId(id.getAgencyId(),
-        id.getId()));
+  private String id(String agencyId, String id) {
+    return AgencyAndId.convertToString(new AgencyAndId(agencyId, id));
   }
 }

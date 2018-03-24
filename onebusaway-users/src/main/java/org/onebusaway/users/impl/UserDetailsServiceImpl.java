@@ -23,11 +23,12 @@ import org.onebusaway.users.services.IndexedUserDetailsService;
 import org.onebusaway.users.services.StandardAuthoritiesService;
 import org.onebusaway.users.services.UserService;
 import org.onebusaway.users.services.internal.UserLastAccessTimeService;
+import org.onebusaway.util.SystemTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
-import org.springframework.security.userdetails.UserDetails;
-import org.springframework.security.userdetails.UserDetailsService;
-import org.springframework.security.userdetails.UsernameNotFoundException;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -111,7 +112,7 @@ public class UserDetailsServiceImpl implements UserDetailsService,
 
   private void setLastAccessTimeForUser(UserIndex userIndex) {
     User user = userIndex.getUser();
-    _userLastAccessTimeService.handleAccessForUser(user.getId(), System.currentTimeMillis());
+    _userLastAccessTimeService.handleAccessForUser(user.getId(), SystemTime.currentTimeMillis());
   }
 
   @Override

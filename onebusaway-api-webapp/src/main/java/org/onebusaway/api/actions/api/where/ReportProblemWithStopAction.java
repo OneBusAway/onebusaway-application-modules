@@ -25,6 +25,7 @@ import org.onebusaway.exceptions.ServiceException;
 import org.onebusaway.transit_data.model.problems.EProblemReportStatus;
 import org.onebusaway.transit_data.model.problems.StopProblemReportBean;
 import org.onebusaway.transit_data.services.TransitDataService;
+import org.onebusaway.util.SystemTime;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.opensymphony.xwork2.validator.annotations.RequiredStringValidator;
@@ -32,6 +33,8 @@ import com.opensymphony.xwork2.validator.annotations.RequiredStringValidator;
 public class ReportProblemWithStopAction extends ApiActionSupport {
 
   private static final long serialVersionUID = 1L;
+
+  private static final int V2 = 2;
 
   @Autowired
   private TransitDataService _service;
@@ -43,12 +46,16 @@ public class ReportProblemWithStopAction extends ApiActionSupport {
   }
 
   @RequiredStringValidator(message = "requiredField.stopId")
-  public void setStopId(String stopId) {
+  public void setId(String stopId) {
     _model.setStopId(stopId);
   }
 
-  public String getStopId() {
+  public String getId() {
     return _model.getStopId();
+  }
+  
+  public void setStopId(String stopId) {
+    setId(stopId);
   }
 
   @Deprecated
@@ -79,6 +86,10 @@ public class ReportProblemWithStopAction extends ApiActionSupport {
     _model.setUserLocationAccuracy(userLocationAccuracy);
   }
 
+  public DefaultHttpHeaders show() throws IOException, ServiceException {   
+    return index();
+  }
+
   public DefaultHttpHeaders create() throws IOException, ServiceException {
     return index();
   }
@@ -88,7 +99,10 @@ public class ReportProblemWithStopAction extends ApiActionSupport {
     if (hasErrors())
       return setValidationErrorsResponse();
 
-    _model.setTime(System.currentTimeMillis());
+    if( ! isVersion(V2))
+      return setUnknownVersionResponse();
+
+    _model.setTime(SystemTime.currentTimeMillis());
     _model.setStatus(EProblemReportStatus.NEW);
     _service.reportProblemWithStop(_model);
 

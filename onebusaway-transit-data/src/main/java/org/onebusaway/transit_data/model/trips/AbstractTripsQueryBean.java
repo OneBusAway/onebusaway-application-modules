@@ -18,6 +18,7 @@ package org.onebusaway.transit_data.model.trips;
 import java.io.Serializable;
 
 import org.onebusaway.transit_data.model.QueryBean;
+import org.onebusaway.util.SystemTime;
 
 @QueryBean
 public abstract class AbstractTripsQueryBean implements Serializable {

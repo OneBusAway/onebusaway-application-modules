@@ -31,9 +31,11 @@
     </div>            
 </s:iterator>
 
-<s:if test="result.arrivalsAndDepartures.empty">
+<s:if test="%{result.arrivalsAndDepartures.empty}">
     <div>No scheduled arrivals in the next 30 minutes.</div>
 </s:if>
-
+<s:if test="%{hasAlerts()}">
+    <s:property value="alertPresentText" />
+</s:if>
 </body>
 </html>

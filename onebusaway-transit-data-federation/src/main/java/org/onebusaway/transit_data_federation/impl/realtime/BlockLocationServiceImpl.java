@@ -41,6 +41,7 @@ import org.onebusaway.collections.Range;
 import org.onebusaway.container.ConfigurationParameter;
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.realtime.api.EVehicleType;
 import org.onebusaway.realtime.api.TimepointPredictionRecord;
 import org.onebusaway.realtime.api.VehicleLocationRecord;
 import org.onebusaway.transit_data_federation.model.TargetTime;
@@ -65,7 +66,7 @@ import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
-
+import org.onebusaway.util.SystemTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -131,6 +132,12 @@ public class BlockLocationServiceImpl implements BlockLocationService,
    * Should block location records be stored to the database?
    */
   private boolean _persistBlockLocationRecords = false;
+
+  /**
+   * Should we sample the schedule deviation history?
+   * (this is true for historical reasons)
+   */
+  private boolean _sampleScheduleDeviationHistory = true;
 
   /**
    * We queue up block location records so they can be bulk persisted to the
@@ -213,7 +220,7 @@ public class BlockLocationServiceImpl implements BlockLocationService,
    * Should we persist {@link BlockLocationRecord} records to an underlying
    * datastore. Useful if you wish to query trip status for historic analysis.
    * 
-   * @param persistTripTimePredictions
+   * @param persistBlockLocationRecords
    */
   @ConfigurationParameter
   public void setPersistBlockLocationRecords(boolean persistBlockLocationRecords) {
@@ -231,6 +238,16 @@ public class BlockLocationServiceImpl implements BlockLocationService,
   @ConfigurationParameter
   public void setLocationInterpolation(boolean locationInterpolation) {
     _locationInterpolation = locationInterpolation;
+  }
+
+  /**
+   * Disablings this saves a database call to the schedule deviation history
+   * table.
+   * @param sampleScheduleDeviationHistory
+   */
+  @ConfigurationParameter
+  public void setSampleScheduleDeviationHistory(Boolean sampleScheduleDeviationHistory) {
+    _sampleScheduleDeviationHistory = sampleScheduleDeviationHistory;
   }
 
   /**
@@ -300,8 +317,11 @@ public class BlockLocationServiceImpl implements BlockLocationService,
         record.setScheduleDeviation(deviation);
       }
 
-      ScheduleDeviationSamples samples = _realTimeHistoryService.sampleScheduleDeviationsForVehicle(
-          instance, record, scheduledBlockLocation);
+      ScheduleDeviationSamples samples = null;
+      if (_sampleScheduleDeviationHistory == true) {
+        samples = _realTimeHistoryService.sampleScheduleDeviationsForVehicle(
+                instance, record, scheduledBlockLocation);
+      }
 
       putBlockLocationRecord(instance, record, scheduledBlockLocation, samples);
     }
@@ -341,7 +361,6 @@ public class BlockLocationServiceImpl implements BlockLocationService,
   @Override
   public List<BlockLocation> getLocationsForBlockInstance(
       BlockInstance blockInstance, TargetTime time) {
-
     List<VehicleLocationCacheElements> records = getBlockLocationRecordCollectionForBlock(
         blockInstance, time);
 
@@ -394,6 +413,9 @@ public class BlockLocationServiceImpl implements BlockLocationService,
 
     // TODO : We might take a bit more care in picking the collection if
     // multiple collections are returned
+    if (cacheRecords.size() > 1) {
+      _log.error("multiple cache entries for vehicle " + vehicleId);
+    }
     for (VehicleLocationCacheElements cacheRecord : cacheRecords) {
       BlockInstance blockInstance = cacheRecord.getBlockInstance();
       BlockLocation location = getBlockLocation(blockInstance, cacheRecord,
@@ -463,7 +485,7 @@ public class BlockLocationServiceImpl implements BlockLocationService,
   }
 
   /**
-   * We add the {@link BlockPositionRecord} to the local cache and persist it to
+   * We add the {@link BlockInstance} to the local cache and persist it to
    * a back-end data-store if necessary
    * 
    * @param scheduledBlockLocation TODO
@@ -485,7 +507,6 @@ public class BlockLocationServiceImpl implements BlockLocationService,
        */
       BlockLocation location = getBlockLocation(blockInstance, elements,
           scheduledBlockLocation, record.getTimeOfRecord());
-
       if (location != null) {
         for (BlockLocationListener listener : _blockLocationListeners) {
           listener.handleBlockLocation(location);
@@ -503,9 +524,9 @@ public class BlockLocationServiceImpl implements BlockLocationService,
   /**
    * 
    * @param blockInstance
-   * @param scheduledBlockLocation TODO
+   * @param cacheElements
+   * @param scheduledLocation
    * @param targetTime
-   * @param record
    * @return null if the effective scheduled block location cannot be determined
    */
   private BlockLocation getBlockLocation(BlockInstance blockInstance,
@@ -535,6 +556,7 @@ public class BlockLocationServiceImpl implements BlockLocationService,
 
       }
 
+      location.setBlockStartTime(record.getBlockStartTime());
       location.setPredicted(true);
       location.setLastUpdateTime(record.getTimeOfRecord());
       location.setLastLocationUpdateTime(record.getTimeOfLocationUpdate());
@@ -559,6 +581,7 @@ public class BlockLocationServiceImpl implements BlockLocationService,
 
         BlockConfigurationEntry blockConfig = blockInstance.getBlock();
 
+        int tprIndexCounter = 0;
         for (TimepointPredictionRecord tpr : timepointPredictions) {
           AgencyAndId stopId = tpr.getTimepointId();
           long predictedTime;
@@ -576,6 +599,28 @@ public class BlockLocationServiceImpl implements BlockLocationService,
             // StopSequence equals to -1 when there is no stop sequence in the GTFS-rt
             if (stopId.equals(stop.getId()) && stopTime.getTrip().getId().equals(tpr.getTripId()) &&
                (tpr.getStopSequence() == -1 || stopTime.getSequence() == tpr.getStopSequence())) {
+              
+              if (tpr.getStopSequence() == -1 && isFirstOrLastStopInTrip(stopTime) && isLoopRoute(stopTime)) {
+                // GTFS-rt feed didn't provide stop_sequence, and we have a loop, and we're attempting to apply the update to the first/last stop
+                
+                if (isSinglePredictionForTrip(timepointPredictions, tpr, tprIndexCounter)) {
+                  continue;
+                }
+                
+                // If this isn't the last prediction, and we're on the first stop, then apply it
+                if (isLastPrediction(stopTime, timepointPredictions, tpr, tprIndexCounter) 
+                    && isFirstStopInRoute(stopTime)) {
+                  // Do not calculate schedule deviation
+                  continue;
+                }
+                
+                // If this is the last prediction, and we're on the last stop, then apply it
+                if (isFirstPrediction(stopTime, timepointPredictions, tpr, tprIndexCounter) 
+                    && isLastStopInRoute(stopTime)) {
+                  // Do not calculate schedule deviation
+                  continue;
+                }
+              }
               int arrivalOrDepartureTime;
               // We currently use the scheduled arrival time of the stop as the search index
               // This MUST be consistent with the index search in ArrivalAndSepartureServiceImpl.getBestScheduleDeviation()
@@ -590,6 +635,7 @@ public class BlockLocationServiceImpl implements BlockLocationService,
               scheduleDeviations.put(index, (double) deviation);
             }
           }
+          tprIndexCounter++;
         }
 
         double[] scheduleTimes = new double[scheduleDeviations.size()];
@@ -611,7 +657,7 @@ public class BlockLocationServiceImpl implements BlockLocationService,
     } else {
       if (scheduledLocation == null)
         scheduledLocation = getScheduledBlockLocationForBlockInstance(
-            blockInstance, targetTime);
+                blockInstance, targetTime);
     }
 
     /**
@@ -625,6 +671,13 @@ public class BlockLocationServiceImpl implements BlockLocationService,
      */
     if (scheduledLocation == null)
       return null;
+
+    // if we have route info, set the vehicleType
+    if (scheduledLocation.getActiveTrip() != null
+            && scheduledLocation.getActiveTrip().getTrip() != null
+            && scheduledLocation.getActiveTrip().getTrip().getRoute() != null) {
+      location.setVehicleType(EVehicleType.toEnum(scheduledLocation.getActiveTrip().getTrip().getRoute().getType()));
+    }
 
     location.setInService(scheduledLocation.isInService());
     location.setActiveTrip(scheduledLocation.getActiveTrip());
@@ -640,6 +693,125 @@ public class BlockLocationServiceImpl implements BlockLocationService,
     return location;
   }
 
+  /**
+   * @param timepointPredictions is contains all tprs for the block 
+   * @param tpr is the current time-point prediction for given stop
+   * @param tprIndexCounter
+   * @return true if there is only one time-point prediction
+   * for given trip
+   */
+  private boolean isSinglePredictionForTrip(
+      List<TimepointPredictionRecord> timepointPredictions,
+      TimepointPredictionRecord tpr, int tprIndexCounter) {
+    
+    if (timepointPredictions.size() == 1) {
+      return true;
+    } 
+    
+    boolean isNextPredictionHasSameTripId = true;
+    if(tprIndexCounter + 1 < timepointPredictions.size()){
+      isNextPredictionHasSameTripId = timepointPredictions.get(tprIndexCounter + 1).
+          getTripId().equals(tpr.getTripId());
+      if (isNextPredictionHasSameTripId) {
+        return false;
+      }
+    }
+    
+    if (tprIndexCounter - 1 >= 0) {
+      return !timepointPredictions.get(tprIndexCounter - 1).getTripId().equals(tpr.getTripId());
+    }
+    
+    return !isNextPredictionHasSameTripId;
+  }
+  
+  /**
+   * Checks if the first and the last stop of the trip are the same
+   * @param stopTime
+   * @return true if its loop route
+   */
+  private boolean isLoopRoute(StopTimeEntry stopTime) {
+    List<StopTimeEntry> stopTimes = stopTime.getTrip().getStopTimes();
+    AgencyAndId firstStopId = stopTimes.get(0).getStop().getId();
+    AgencyAndId lastStopId = stopTimes.get(stopTimes.size() -1).getStop().getId();
+    return firstStopId.equals(lastStopId);
+  }
+
+  /**
+   * @param stopTime
+   * @return true if the given stop is the first or the last stop in given trip
+   */
+  private boolean isFirstOrLastStopInTrip(StopTimeEntry stopTime) {
+    List<StopTimeEntry> stopTimes = stopTime.getTrip().getStopTimes();
+    AgencyAndId firstStopId = stopTimes.get(0).getStop().getId();
+    AgencyAndId lastStopId = stopTimes.get(stopTimes.size() -1).getStop().getId();
+    AgencyAndId currentStopId = stopTime.getStop().getId();
+    return firstStopId.equals(currentStopId) || lastStopId.equals(currentStopId);
+  }
+  
+  /**
+   * 
+   * @param stopTime
+   * @return true if the given stop is the first stop of the route
+   */
+  private boolean isFirstStopInRoute(StopTimeEntry stopTime) {
+    List<StopTimeEntry> stopTimes = stopTime.getTrip().getStopTimes();
+    return stopTimes.get(0).getSequence() == stopTime.getSequence(); 
+  }
+  
+  /**
+   * 
+   * @param stopTime
+   * @return true if the given stop is the last stop of the route
+   */
+  private boolean isLastStopInRoute(StopTimeEntry stopTime) {
+    List<StopTimeEntry> stopTimes = stopTime.getTrip().getStopTimes();
+    return stopTimes.get(stopTimes.size() -1).getSequence() == stopTime.getSequence(); 
+  }
+  
+  /**
+   * 
+   * @param stopTime is the current stop
+   * @param timepointPredictions is the all time-point predictions in the block
+   * @param timepointPredictionRecord is the current tpr for the stop
+   * @param index is the index of the current tpr in timepointPredictions
+   * @return true if the given tpr is the first prediction for the trip
+   */
+  private boolean isFirstPrediction (StopTimeEntry stopTime, List<TimepointPredictionRecord> timepointPredictions,
+      TimepointPredictionRecord timepointPredictionRecord, int index) {
+    
+    List<StopTimeEntry> stopTimes = stopTime.getTrip().getStopTimes();
+    AgencyAndId firstStopId = stopTimes.get(0).getStop().getId();
+    
+    if (firstStopId.equals(timepointPredictionRecord.getTimepointId())
+        && stopTime.getTrip().getId().equals(timepointPredictionRecord.getTripId())) {
+      return index == 0 || ( index > 0 &&
+          !timepointPredictions.get(index - 1).getTripId().equals(timepointPredictionRecord.getTripId()));
+    }
+    return false;
+  }
+  
+  /**
+   * 
+   * @param stopTime is the current stop
+   * @param timepointPredictions is the all time-point predictions in the block
+   * @param timepointPredictionRecord is the current tpr for the stop
+   * @param index is the index of the current tpr in timepointPredictions
+   * @return return true if the given tpr is the last prediction for the trip
+   */
+  private boolean isLastPrediction (StopTimeEntry stopTime, List<TimepointPredictionRecord> timepointPredictions,
+      TimepointPredictionRecord timepointPredictionRecord, int index) {
+    
+    List<StopTimeEntry> stopTimes = stopTime.getTrip().getStopTimes();
+    AgencyAndId lastStopId = stopTimes.get(stopTimes.size() - 1).getStop().getId();
+    
+    if (lastStopId.equals(timepointPredictionRecord.getTimepointId())
+        && stopTime.getTrip().getId().equals(timepointPredictionRecord.getTripId())) {
+      return index + 1 == timepointPredictions.size() || ( index < timepointPredictions.size() &&
+          !timepointPredictions.get(index + 1).getTripId().equals(timepointPredictionRecord.getTripId()));
+    }
+    return false;
+  }
+  
   /****
    * {@link ScheduledBlockLocation} Methods
    ****/
@@ -843,6 +1015,8 @@ public class BlockLocationServiceImpl implements BlockLocationService,
       BlockTripEntry activeTrip = scheduledBlockLocation.getActiveTrip();
       builder.setTripId(activeTrip.getTrip().getId());
       builder.setBlockId(activeTrip.getBlockConfiguration().getBlock().getId());
+      // store the vehicleType for later retrieval
+      builder.setVehicleType(EVehicleType.toEnum(activeTrip.getTrip().getRoute().getType()));
 
       double distanceAlongBlock = scheduledBlockLocation.getDistanceAlongBlock();
       builder.setDistanceAlongBlock(distanceAlongBlock);
@@ -893,7 +1067,7 @@ public class BlockLocationServiceImpl implements BlockLocationService,
 
     List<TimepointPredictionRecord> predictions = record.getTimepointPredictions();
     if (predictions == null || predictions.isEmpty())
-      return Arrays.asList(builder.create());
+        return Arrays.asList(builder.create());
 
     List<BlockLocationRecord> results = new ArrayList<BlockLocationRecord>();
     for (TimepointPredictionRecord tpr : predictions) {
@@ -987,9 +1161,9 @@ public class BlockLocationServiceImpl implements BlockLocationService,
         if (queue.isEmpty())
           return;
 
-        long t1 = System.currentTimeMillis();
+        long t1 = SystemTime.currentTimeMillis();
         _blockLocationRecordDao.saveBlockLocationRecords(queue);
-        long t2 = System.currentTimeMillis();
+        long t2 = SystemTime.currentTimeMillis();
         _lastInsertDuration = t2 - t1;
         _lastInsertCount = queue.size();
       } catch (Throwable ex) {
@@ -1037,6 +1211,7 @@ public class BlockLocationServiceImpl implements BlockLocationService,
       _vehicleId = vehicleId;
     }
 
+    @Override
     public List<VehicleLocationCacheElements> getRecordsFromCache() {
       VehicleLocationCacheElements elementsForVehicleId = _cache.getRecordForVehicleId(_vehicleId);
       if (elementsForVehicleId == null)
@@ -1044,6 +1219,7 @@ public class BlockLocationServiceImpl implements BlockLocationService,
       return Arrays.asList(elementsForVehicleId);
     }
 
+    @Override
     public List<BlockLocationRecord> getRecordsFromDao(long fromTime,
         long toTime) {
       return _blockLocationRecordDao.getBlockLocationRecordsForVehicleAndTimeRange(

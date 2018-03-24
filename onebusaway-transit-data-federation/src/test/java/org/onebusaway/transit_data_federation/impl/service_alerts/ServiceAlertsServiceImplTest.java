@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.onebusaway.transit_data_federation.impl.service_alerts;
 
 import static org.junit.Assert.assertEquals;
@@ -30,176 +31,127 @@ import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.time;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.trip;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.UUID;
 
+import org.hibernate.SessionFactory;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.transit_data.model.service_alerts.SituationQueryBean;
-import org.onebusaway.transit_data.model.service_alerts.SituationQueryBean.AffectsBean;
 import org.onebusaway.transit_data_federation.impl.transit_graph.BlockEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.RouteEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.TripEntryImpl;
+import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.blocks.BlockTripInstance;
 import org.onebusaway.transit_data_federation.services.blocks.InstanceState;
-import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects;
-import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert;
-import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlertsCollection;
-import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange;
-import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange.Builder;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.AbstractTransactionalJUnit4SpringContextTests;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.transaction.TransactionConfiguration;
+import org.springframework.transaction.annotation.Transactional;
 
-public class ServiceAlertsServiceImplTest {
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(locations={"classpath:service-alerts-data-sources.xml", 
+    "classpath:org/onebusaway/transit_data_federation/application-context-services.xml"})
+@TransactionConfiguration(transactionManager="transactionManager")
+@Transactional
+public class ServiceAlertsServiceImplTest extends AbstractTransactionalJUnit4SpringContextTests {
 
-  private ServiceAlertsServiceImpl _service;
 
-  private File _serviceAlertsPath;
+    private ServiceAlertsServiceImpl _service;
+    private ServiceAlertsPersistenceDB _persister;
+    private SessionFactory _sessionFactory;
 
-  @Before
-  public void setup() throws IOException {
-    _service = new ServiceAlertsServiceImpl();
 
-    _serviceAlertsPath = File.createTempFile("Test-", "-"
-        + ServiceAlertsServiceImpl.class.getName() + ".pb2");
-    _service.setServiceAlertsPath(_serviceAlertsPath);
-  }
+    @Autowired
+    public void setSessionFactory(SessionFactory sessionFactory) {
+        _sessionFactory = sessionFactory;
+    }
+
+    @Before
+    public void setup() throws IOException {
+        ServiceAlertsCache cache = new ServiceAlertsCacheInMemoryImpl();
+        _service = new ServiceAlertsServiceImpl();
+        _service.setServiceAlertsCache(cache);
+        _persister = new ServiceAlertsPersistenceDB();
+        _service.setServiceAlertsPersistence(_persister);
+        _persister._refreshInterval = 1000;
+        _persister.setSessionFactory(_sessionFactory);
+        assertTrue("we need a template to continue", _persister.getHibernateTemplate() != null);
+    }
 
   @Test
   public void testCreateServiceAlert() {
-    ServiceAlert.Builder builder = ServiceAlert.newBuilder();
-    ServiceAlert serviceAlert = _service.createOrUpdateServiceAlert(builder,
-        "1");
-
-    assertTrue(serviceAlert.hasCreationTime());
-    assertTrue(serviceAlert.hasId());
-    assertEquals("1", serviceAlert.getId().getAgencyId());
-  }
-
-  @Test
-  public void testSerialization() throws IOException {
-    ServiceAlert.Builder builder = ServiceAlert.newBuilder();
-    ServiceAlert serviceAlert = _service.createOrUpdateServiceAlert(builder,
-        "1");
-
-    FileInputStream in = new FileInputStream(_serviceAlertsPath);
-    ServiceAlertsCollection collection = ServiceAlertsCollection.parseFrom(in);
-    in.close();
-
-    assertEquals(1, collection.getServiceAlertsCount());
-    ServiceAlert read = collection.getServiceAlerts(0);
-    assertEquals(serviceAlert.getId().getAgencyId(), read.getId().getAgencyId());
-    assertEquals(serviceAlert.getId().getId(), read.getId().getId());
-    assertEquals(serviceAlert.getCreationTime(), read.getCreationTime());
+    ServiceAlertRecord alert = new ServiceAlertRecord();
+    alert.setAgencyId("1");
+    alert.setServiceAlertId("A");
+    _service.createOrUpdateServiceAlert(alert);
+    _service.getServiceAlertForId(AgencyAndIdLibrary.convertFromString("1_A"));
+    assertTrue(alert.getCreationTime() > 0);
+    assertTrue(alert.getId() > -1);
+    assertEquals("1", alert.getAgencyId());
   }
 
   @Test
   public void testGetAllServiceAlerts() {
-    ServiceAlert.Builder builder1 = ServiceAlert.newBuilder();
-    ServiceAlert serviceAlert1 = _service.createOrUpdateServiceAlert(builder1,
-        "1");
+    ServiceAlertRecord alert1 = new ServiceAlertRecord();
+    alert1.setAgencyId("1");
+    alert1.setServiceAlertId("A");
+    _service.createOrUpdateServiceAlert(alert1);
 
-    ServiceAlert.Builder builder2 = ServiceAlert.newBuilder();
-    ServiceAlert serviceAlert2 = _service.createOrUpdateServiceAlert(builder2,
-        "1");
+    ServiceAlertRecord alert2 = new ServiceAlertRecord();
+    alert2.setAgencyId("1");
+    alert2.setServiceAlertId("B");
+    _service.createOrUpdateServiceAlert(alert2);
 
-    List<ServiceAlert> alerts = _service.getAllServiceAlerts();
+
+    List<ServiceAlertRecord> alerts = _service.getAllServiceAlerts();
     assertEquals(2, alerts.size());
-    assertTrue(alerts.contains(serviceAlert1));
-    assertTrue(alerts.contains(serviceAlert2));
+    assertTrue(alerts.contains(alert1));
+    assertTrue(alerts.contains(alert2));
   }
 
-  // Time is not supported by SituationQueryBean anymore, but leaving this code
-  // here (not as a test)
-  // for future reference.
-  // @Test
-  public void testGetServiceAlertsWithTime() {
-    String agencyId = "1";
-
-    // No publication window
-    ServiceAlert.Builder builder1 = ServiceAlert.newBuilder();
-    Affects.Builder builderForValue = Affects.newBuilder();
-    builderForValue.setAgencyId(agencyId);
-    builder1.addAffects(builderForValue);
-    ServiceAlert serviceAlert1 = _service.createOrUpdateServiceAlert(builder1,
-        agencyId);
-
-    // Time is not supported by SituationQueryBean anymore, but leaving these
-    // here for future reference.
-    // Open-ended publication window ends in the past, should get filtered out
-    ServiceAlert serviceAlert2 = addServiceAlertWithTimeRange(agencyId,
-        createTimeRange(0, System.currentTimeMillis()));
-
-    // Closed publication window starts in future, should get filtered out
-    ServiceAlert serviceAlert3 = addServiceAlertWithTimeRange(
-        agencyId,
-        createTimeRange(System.currentTimeMillis() + (60 * 60 * 1000),
-            System.currentTimeMillis() + (60 * 60 * 1000 * 2)));
-
-    // Closed publication window contains time, should get included
-    ServiceAlert serviceAlert4 = addServiceAlertWithTimeRange(
-        agencyId,
-        createTimeRange(System.currentTimeMillis() - (60 * 60 * 1000),
-            System.currentTimeMillis() + (60 * 60 * 1000)));
-
-    SituationQueryBean query = new SituationQueryBean();
-    // query.setAgencyId(agencyId);
-
-    List<AffectsBean> affects = new ArrayList<AffectsBean>();
-    AffectsBean e = new AffectsBean();
-    e.setAgencyId(agencyId);
-    affects.add(e);
-    query.setAffects(affects);
-    // Time is not supported by SituationQueryBean anymore
-    // query.setTime(System.currentTimeMillis());
-
-    List<ServiceAlert> alerts = _service.getServiceAlerts(query);
-    assertEquals(2, alerts.size());
-    assertTrue(alerts.contains(serviceAlert1));
-    assertTrue(!alerts.contains(serviceAlert2));
-    assertTrue(!alerts.contains(serviceAlert3));
-    assertTrue(alerts.contains(serviceAlert4));
-  }
-
-  private TimeRange createTimeRange(long start, long end) {
-    Builder timeRangeBuilder = TimeRange.newBuilder();
+  private ServiceAlertTimeRange createTimeRange(long start, long end) {
+    ServiceAlertTimeRange timeRange = new ServiceAlertTimeRange();
     if (start != 0)
-      timeRangeBuilder.setStart(start);
+        timeRange.setFromValue(start);
     if (end != 0)
-      timeRangeBuilder.setEnd(end);
-    TimeRange timeRange = timeRangeBuilder.build();
+      timeRange.setToValue(end);
     return timeRange;
   }
 
-  private ServiceAlert addServiceAlertWithTimeRange(String agencyId,
-      TimeRange timeRange) {
-    ServiceAlert.Builder builder2 = ServiceAlert.newBuilder();
-    Affects.Builder builderForValue2 = Affects.newBuilder();
-    builderForValue2.setAgencyId(agencyId);
-    builder2.addAffects(builderForValue2);
-    builder2.addPublicationWindow(timeRange);
-    ServiceAlert serviceAlert2 = _service.createOrUpdateServiceAlert(builder2,
-        agencyId);
-    return serviceAlert2;
+  private ServiceAlertRecord addServiceAlertWithTimeRange(String agencyId,
+                                                          ServiceAlertTimeRange timeRange) {
+      ServiceAlertRecord alert1 = new ServiceAlertRecord();
+      alert1.setAgencyId(agencyId);
+      alert1.setServiceAlertId(UUID.randomUUID().toString());
+      alert1.setPublicationWindows(new HashSet<ServiceAlertTimeRange>());
+      alert1.setAllAffects(new HashSet<ServiceAlertsSituationAffectsClause>());
+      alert1.getPublicationWindows().add(timeRange);
+      ServiceAlertsSituationAffectsClause affectsClause = new ServiceAlertsSituationAffectsClause();
+      affectsClause.setAgencyId(agencyId);
+      alert1.getAllAffects().add(affectsClause);
+      _service.createOrUpdateServiceAlert(alert1);
+      return alert1;
   }
 
   @Test
   public void testGetServiceAlertsForFederatedAgencyId() {
-    ServiceAlert.Builder builder = ServiceAlert.newBuilder();
-    Affects.Builder affects = Affects.newBuilder();
-    affects.setAgencyId("2");
-    builder.addAffects(affects);
-    ServiceAlert serviceAlert = _service.createOrUpdateServiceAlert(builder,
-        "1");
+      ServiceAlertRecord alert = new ServiceAlertRecord();
+      alert.setAgencyId("1");
+      alert.setServiceAlertId("A");
+      _service.createOrUpdateServiceAlert(alert);
 
-    List<ServiceAlert> alerts = _service.getServiceAlertsForFederatedAgencyId("1");
+    List<ServiceAlertRecord> alerts = _service.getServiceAlertsForFederatedAgencyId("1");
     assertEquals(1, alerts.size());
-    assertTrue(alerts.contains(serviceAlert));
+    assertTrue(alerts.contains(alert));
 
     alerts = _service.getServiceAlertsForFederatedAgencyId("2");
     assertEquals(0, alerts.size());
@@ -207,34 +159,42 @@ public class ServiceAlertsServiceImplTest {
 
   @Test
   public void testGetServiceAlertForId() {
-    ServiceAlert.Builder builder1 = ServiceAlert.newBuilder();
-    ServiceAlert serviceAlert1 = _service.createOrUpdateServiceAlert(builder1,
-        "1");
+      ServiceAlertRecord alert1 = new ServiceAlertRecord();
+      alert1.setAgencyId("1");
+      alert1.setServiceAlertId("A");
+      _service.createOrUpdateServiceAlert(alert1);
 
-    ServiceAlert.Builder builder2 = ServiceAlert.newBuilder();
-    ServiceAlert serviceAlert2 = _service.createOrUpdateServiceAlert(builder2,
-        "1");
+      ServiceAlertRecord alert2 = new ServiceAlertRecord();
+      alert2.setAgencyId("1");
+      alert2.setServiceAlertId("B");
+      _service.createOrUpdateServiceAlert(alert2);
 
-    ServiceAlert alert = _service.getServiceAlertForId(ServiceAlertLibrary.agencyAndId(serviceAlert1.getId()));
-    assertSame(serviceAlert1, alert);
+      ServiceAlertRecord alert = _service.getServiceAlertForId(AgencyAndId.convertFromString("1_A"));
+    assertSame(alert1, alert);
 
-    alert = _service.getServiceAlertForId(ServiceAlertLibrary.agencyAndId(serviceAlert2.getId()));
-    assertSame(serviceAlert2, alert);
+      alert = _service.getServiceAlertForId(AgencyAndId.convertFromString("1_B"));
+    assertSame(alert2, alert);
 
     alert = _service.getServiceAlertForId(new AgencyAndId("1", "dne"));
     assertNull(alert);
   }
 
+
+
   @Test
   public void testGetServiceAlertsForAgencyId() {
-    ServiceAlert.Builder builder = ServiceAlert.newBuilder();
-    Affects.Builder affects = Affects.newBuilder();
-    affects.setAgencyId("2");
-    builder.addAffects(affects);
-    ServiceAlert serviceAlert = _service.createOrUpdateServiceAlert(builder,
-        "1");
 
-    List<ServiceAlert> alerts = _service.getServiceAlertsForAgencyId(
+      ServiceAlertRecord alert1 = new ServiceAlertRecord();
+      alert1.setAgencyId("1");
+      alert1.setServiceAlertId("A");
+
+      ServiceAlertsSituationAffectsClause affectsClause = new ServiceAlertsSituationAffectsClause();
+      affectsClause.setAgencyId("2");
+      alert1.getAllAffects().add(affectsClause);
+
+      ServiceAlertRecord serviceAlert = _service.createOrUpdateServiceAlert(alert1);
+
+    List<ServiceAlertRecord> alerts = _service.getServiceAlertsForAgencyId(
         System.currentTimeMillis(), "1");
     assertEquals(0, alerts.size());
 
@@ -250,203 +210,293 @@ public class ServiceAlertsServiceImplTest {
     /**
      * These alerts should match
      */
-    ServiceAlert.Builder builder1 = ServiceAlert.newBuilder();
-    Affects.Builder affects1 = Affects.newBuilder();
-    affects1.setStopId(ServiceAlertLibrary.id("1", "10020"));
-    affects1.setTripId(ServiceAlertLibrary.id("1", "TripA"));
-    builder1.addAffects(affects1);
-    ServiceAlert serviceAlert1 = _service.createOrUpdateServiceAlert(builder1,
-        "1");
 
-    ServiceAlert.Builder builder2 = ServiceAlert.newBuilder();
-    Affects.Builder affects2 = Affects.newBuilder();
-    affects2.setTripId(ServiceAlertLibrary.id("1", "TripA"));
-    builder2.addAffects(affects2);
-    ServiceAlert serviceAlert2 = _service.createOrUpdateServiceAlert(builder2,
-        "1");
+      ServiceAlertRecord alert1 = new ServiceAlertRecord();
+      alert1.setAgencyId("1");
+      alert1.setServiceAlertId("A");
 
-    ServiceAlert.Builder builder3 = ServiceAlert.newBuilder();
-    Affects.Builder affects3 = Affects.newBuilder();
-    affects3.setRouteId(ServiceAlertLibrary.id("1", "RouteX"));
-    builder3.addAffects(affects3);
-    ServiceAlert serviceAlert3 = _service.createOrUpdateServiceAlert(builder3,
-        "1");
+      ServiceAlertsSituationAffectsClause affectsClause = new ServiceAlertsSituationAffectsClause();
+      affectsClause.setAgencyId("1");
+      affectsClause.setStopId("10020");
+      affectsClause.setTripId("TripA");
+      alert1.getAllAffects().add(affectsClause);
+      alert1 = _service.createOrUpdateServiceAlert(alert1);
 
-    ServiceAlert.Builder builder4 = ServiceAlert.newBuilder();
-    Affects.Builder affects4 = Affects.newBuilder();
-    affects4.setRouteId(ServiceAlertLibrary.id("1", "RouteX"));
-    affects4.setDirectionId("1");
-    builder4.addAffects(affects4);
-    ServiceAlert serviceAlert4 = _service.createOrUpdateServiceAlert(builder4,
-        "1");
+      ServiceAlertRecord alert2 = new ServiceAlertRecord();
+      alert2.setAgencyId("1");
+      alert2.setServiceAlertId("B");
 
-    /**
-     * These alerts shouldn't match
-     */
-    ServiceAlert.Builder builder5 = ServiceAlert.newBuilder();
-    Affects.Builder affects5 = Affects.newBuilder();
-    affects5.setStopId(ServiceAlertLibrary.id("1", "10021"));
-    affects5.setTripId(ServiceAlertLibrary.id("1", "TripA"));
-    builder5.addAffects(affects5);
-    _service.createOrUpdateServiceAlert(builder5, "1");
+      ServiceAlertsSituationAffectsClause affectsClause2 = new ServiceAlertsSituationAffectsClause();
+      affectsClause2.setAgencyId("1");
+      affectsClause2.setTripId("TripA");
+      alert2.getAllAffects().add(affectsClause2);
+      alert2 = _service.createOrUpdateServiceAlert(alert2);
 
-    ServiceAlert.Builder builder6 = ServiceAlert.newBuilder();
-    Affects.Builder affects6 = Affects.newBuilder();
-    affects6.setStopId(ServiceAlertLibrary.id("1", "10020"));
-    affects6.setTripId(ServiceAlertLibrary.id("1", "TripB"));
-    builder6.addAffects(affects6);
-    _service.createOrUpdateServiceAlert(builder6, "1");
+      ServiceAlertRecord alert3 = new ServiceAlertRecord();
+      alert3.setAgencyId("1");
+      alert3.setServiceAlertId("C");
 
-    ServiceAlert.Builder builder7 = ServiceAlert.newBuilder();
-    Affects.Builder affects7 = Affects.newBuilder();
-    affects7.setTripId(ServiceAlertLibrary.id("1", "TripB"));
-    builder7.addAffects(affects7);
-    _service.createOrUpdateServiceAlert(builder7, "1");
+      ServiceAlertsSituationAffectsClause affectsClause3 = new ServiceAlertsSituationAffectsClause();
+      affectsClause3.setAgencyId("1");
+      affectsClause3.setRouteId("RouteX");
+      alert3.getAllAffects().add(affectsClause3);
+      alert3 = _service.createOrUpdateServiceAlert(alert3);
 
-    ServiceAlert.Builder builder8 = ServiceAlert.newBuilder();
-    Affects.Builder affects8 = Affects.newBuilder();
-    affects8.setRouteId(ServiceAlertLibrary.id("1", "RouteY"));
-    builder8.addAffects(affects8);
-    _service.createOrUpdateServiceAlert(builder8, "1");
+      ServiceAlertRecord alert4 = new ServiceAlertRecord();
+      alert4.setAgencyId("1");
+      alert4.setServiceAlertId("D");
 
-    ServiceAlert.Builder builder9 = ServiceAlert.newBuilder();
-    Affects.Builder affects9 = Affects.newBuilder();
-    affects9.setRouteId(ServiceAlertLibrary.id("1", "RouteX"));
-    affects9.setDirectionId("0");
-    builder9.addAffects(affects9);
-    _service.createOrUpdateServiceAlert(builder9, "1");
+      ServiceAlertsSituationAffectsClause affectsClause4 = new ServiceAlertsSituationAffectsClause();
+      affectsClause4.setAgencyId("1");
+      affectsClause4.setRouteId("RouteX");
+      affectsClause4.setDirectionId("1");
+      alert4.getAllAffects().add(affectsClause4);
+      alert4 = _service.createOrUpdateServiceAlert(alert4);
 
-    RouteEntryImpl route = route("RouteX");
-    routeCollection("RouteX", route);
-    StopEntryImpl stop = stop("10020", 47.0, -122.0);
-    TripEntryImpl trip = trip("TripA");
-    trip.setRoute(route);
-    trip.setDirectionId("1");
-    stopTime(0, stop, trip, time(8, 53), 0);
-    BlockEntryImpl block = block("block");
-    BlockConfigurationEntry blockConfig = blockConfiguration(block,
-        serviceIds(lsids("a"), lsids()), trip);
+      /**
+       * These alerts shouldn't match
+       */
 
-    BlockInstance blockInstance = new BlockInstance(blockConfig,
-        System.currentTimeMillis());
-    List<ServiceAlert> alerts = _service.getServiceAlertsForStopCall(
-        System.currentTimeMillis(), blockInstance,
-        blockConfig.getStopTimes().get(0), new AgencyAndId("1", "1111"));
-    assertEquals(4, alerts.size());
-    assertTrue(alerts.contains(serviceAlert1));
-    assertTrue(alerts.contains(serviceAlert2));
-    assertTrue(alerts.contains(serviceAlert3));
-    assertTrue(alerts.contains(serviceAlert4));
+      ServiceAlertRecord alert5 = new ServiceAlertRecord();
+      alert5.setAgencyId("1");
+      alert5.setServiceAlertId("E");
+
+      ServiceAlertsSituationAffectsClause affectsClause5 = new ServiceAlertsSituationAffectsClause();
+      affectsClause5.setAgencyId("1");
+      affectsClause5.setStopId("10021");
+      affectsClause5.setTripId("TripA");
+      alert5.getAllAffects().add(affectsClause5);
+      alert5 = _service.createOrUpdateServiceAlert(alert5);
+
+      ServiceAlertRecord alert6 = new ServiceAlertRecord();
+      alert6.setAgencyId("1");
+      alert6.setServiceAlertId("F");
+
+      ServiceAlertsSituationAffectsClause affectsClause6 = new ServiceAlertsSituationAffectsClause();
+      affectsClause6.setAgencyId("1");
+      affectsClause6.setStopId("10020");
+      affectsClause6.setTripId("TripB");
+      alert6.getAllAffects().add(affectsClause6);
+      alert6 = _service.createOrUpdateServiceAlert(alert6);
+
+
+      ServiceAlertRecord alert7 = new ServiceAlertRecord();
+      alert7.setAgencyId("1");
+      alert7.setServiceAlertId("G");
+
+      ServiceAlertsSituationAffectsClause affectsClause7 = new ServiceAlertsSituationAffectsClause();
+      affectsClause7.setAgencyId("1");
+      affectsClause7.setTripId("TripB");
+      alert7.getAllAffects().add(affectsClause7);
+      alert7 = _service.createOrUpdateServiceAlert(alert7);
+
+      ServiceAlertRecord alert8 = new ServiceAlertRecord();
+      alert8.setAgencyId("1");
+      alert8.setServiceAlertId("H");
+
+      ServiceAlertsSituationAffectsClause affectsClause8 = new ServiceAlertsSituationAffectsClause();
+      affectsClause8.setAgencyId("1");
+      affectsClause8.setRouteId("RouteY");
+      alert8.getAllAffects().add(affectsClause8);
+      alert8 = _service.createOrUpdateServiceAlert(alert8);
+
+
+      ServiceAlertRecord alert9 = new ServiceAlertRecord();
+      alert9.setAgencyId("1");
+      alert9.setServiceAlertId("I");
+
+      ServiceAlertsSituationAffectsClause affectsClause9 = new ServiceAlertsSituationAffectsClause();
+      affectsClause9.setAgencyId("1");
+      affectsClause9.setRouteId("RouteX");
+      affectsClause9.setDirectionId("0");
+      alert9.getAllAffects().add(affectsClause9);
+      alert9 = _service.createOrUpdateServiceAlert(alert9);
+
+      RouteEntryImpl route = route("RouteX");
+      routeCollection("RouteX", route);
+      StopEntryImpl stop = stop("10020", 47.0, -122.0);
+      TripEntryImpl trip = trip("TripA");
+      trip.setRoute(route);
+      trip.setDirectionId("1");
+      stopTime(0, stop, trip, time(8, 53), 0);
+      BlockEntryImpl block = block("block");
+      BlockConfigurationEntry blockConfig = blockConfiguration(block,
+              serviceIds(lsids("a"), lsids()), trip);
+
+      BlockInstance blockInstance = new BlockInstance(blockConfig,
+              System.currentTimeMillis());
+
+      List<ServiceAlertRecord> alerts = _service.getServiceAlertsForStopCall(
+              System.currentTimeMillis(), blockInstance,
+              blockConfig.getStopTimes().get(0), new AgencyAndId("1", "1111"));
+      assertEquals(4, alerts.size());
+      assertTrue(alerts.contains(alert1));
+      assertTrue(alerts.contains(alert2));
+      assertTrue(alerts.contains(alert3));
+      assertTrue(alerts.contains(alert4));
   }
 
   @Test
   public void testGetServiceAlertsForStopId() {
-    ServiceAlert.Builder builder = ServiceAlert.newBuilder();
-    Affects.Builder affects = Affects.newBuilder();
-    affects.setStopId(ServiceAlertLibrary.id("1", "10020"));
-    builder.addAffects(affects);
-    ServiceAlert serviceAlert = _service.createOrUpdateServiceAlert(builder,
-        "1");
 
-    List<ServiceAlert> alerts = _service.getServiceAlertsForStopId(
+      ServiceAlertRecord alert1 = new ServiceAlertRecord();
+      alert1.setAgencyId("1");
+      alert1.setServiceAlertId("A");
+
+      ServiceAlertsSituationAffectsClause affectsClause = new ServiceAlertsSituationAffectsClause();
+      affectsClause.setAgencyId("1");
+      affectsClause.setStopId("10020");
+      alert1.getAllAffects().add(affectsClause);
+      alert1 = _service.createOrUpdateServiceAlert(alert1);
+
+
+    List<ServiceAlertRecord> alerts = _service.getServiceAlertsForStopId(
         System.currentTimeMillis(), new AgencyAndId("1", "10020"));
     assertEquals(1, alerts.size());
-    assertTrue(alerts.contains(serviceAlert));
+    assertTrue(alerts.contains(alert1));
 
     alerts = _service.getServiceAlertsForStopId(System.currentTimeMillis(),
         new AgencyAndId("1", "10021"));
     assertEquals(0, alerts.size());
   }
 
-  @Test
-  public void testGetServiceAlertsForVehicleJourney() {
+    @Test
+    public void testGetServiceAlertsForVehicleJourney() {
 
-    /**
-     * These alerts should match
-     */
-    ServiceAlert.Builder builder2 = ServiceAlert.newBuilder();
-    Affects.Builder affects2 = Affects.newBuilder();
-    affects2.setTripId(ServiceAlertLibrary.id("1", "TripA"));
-    builder2.addAffects(affects2);
-    ServiceAlert serviceAlert2 = _service.createOrUpdateServiceAlert(builder2,
-        "1");
+        /**
+         * These alerts should match
+         */
 
-    ServiceAlert.Builder builder3 = ServiceAlert.newBuilder();
-    Affects.Builder affects3 = Affects.newBuilder();
-    affects3.setRouteId(ServiceAlertLibrary.id("1", "RouteX"));
-    builder3.addAffects(affects3);
-    ServiceAlert serviceAlert3 = _service.createOrUpdateServiceAlert(builder3,
-        "1");
 
-    ServiceAlert.Builder builder4 = ServiceAlert.newBuilder();
-    Affects.Builder affects4 = Affects.newBuilder();
-    affects4.setRouteId(ServiceAlertLibrary.id("1", "RouteX"));
-    affects4.setDirectionId("1");
-    builder4.addAffects(affects4);
-    ServiceAlert serviceAlert4 = _service.createOrUpdateServiceAlert(builder4,
-        "1");
+        ServiceAlertRecord alert2 = new ServiceAlertRecord();
+        alert2.setAgencyId("1");
+        alert2.setServiceAlertId("B");
 
-    /**
-     * These alerts shouldn't match
-     */
-    ServiceAlert.Builder builder1 = ServiceAlert.newBuilder();
-    Affects.Builder affects1 = Affects.newBuilder();
-    affects1.setStopId(ServiceAlertLibrary.id("1", "10020"));
-    affects1.setTripId(ServiceAlertLibrary.id("1", "TripA"));
-    builder1.addAffects(affects1);
-    _service.createOrUpdateServiceAlert(builder1, "1");
+        ServiceAlertsSituationAffectsClause affectsClause2 = new ServiceAlertsSituationAffectsClause();
+        affectsClause2.setAgencyId("1");
+        affectsClause2.setTripId("TripA");
+        alert2.getAllAffects().add(affectsClause2);
+        alert2 = _service.createOrUpdateServiceAlert(alert2);
 
-    ServiceAlert.Builder builder7 = ServiceAlert.newBuilder();
-    Affects.Builder affects7 = Affects.newBuilder();
-    affects7.setTripId(ServiceAlertLibrary.id("1", "TripB"));
-    builder7.addAffects(affects7);
-    _service.createOrUpdateServiceAlert(builder7, "1");
+        ServiceAlertRecord alert3 = new ServiceAlertRecord();
+        alert3.setAgencyId("1");
+        alert3.setServiceAlertId("C");
 
-    ServiceAlert.Builder builder8 = ServiceAlert.newBuilder();
-    Affects.Builder affects8 = Affects.newBuilder();
-    affects8.setRouteId(ServiceAlertLibrary.id("1", "RouteY"));
-    builder8.addAffects(affects8);
-    _service.createOrUpdateServiceAlert(builder8, "1");
+        ServiceAlertsSituationAffectsClause affectsClause3 = new ServiceAlertsSituationAffectsClause();
+        affectsClause3.setAgencyId("1");
+        affectsClause3.setRouteId("RouteX");
+        alert3.getAllAffects().add(affectsClause3);
+        alert3 = _service.createOrUpdateServiceAlert(alert3);
 
-    ServiceAlert.Builder builder9 = ServiceAlert.newBuilder();
-    Affects.Builder affects9 = Affects.newBuilder();
-    affects9.setRouteId(ServiceAlertLibrary.id("1", "RouteX"));
-    affects9.setDirectionId("0");
-    builder9.addAffects(affects9);
-    _service.createOrUpdateServiceAlert(builder9, "1");
+        ServiceAlertRecord alert4 = new ServiceAlertRecord();
+        alert4.setAgencyId("1");
+        alert4.setServiceAlertId("D");
 
-    RouteEntryImpl route = route("RouteX");
-    routeCollection("RouteX", route);
-    StopEntryImpl stop = stop("10020", 47.0, -122.0);
-    TripEntryImpl trip = trip("TripA");
-    trip.setRoute(route);
-    trip.setDirectionId("1");
-    stopTime(0, stop, trip, time(8, 53), 0);
-    BlockEntryImpl block = block("block");
-    BlockConfigurationEntry blockConfig = blockConfiguration(block,
-        serviceIds(lsids("a"), lsids()), trip);
+        ServiceAlertsSituationAffectsClause affectsClause4 = new ServiceAlertsSituationAffectsClause();
+        affectsClause4.setAgencyId("1");
+        affectsClause4.setRouteId("RouteX");
+        affectsClause4.setDirectionId("1");
+        alert4.getAllAffects().add(affectsClause4);
+        alert4 = _service.createOrUpdateServiceAlert(alert4);
 
-    BlockTripInstance blockTripInstance = new BlockTripInstance(
-        blockConfig.getTrips().get(0), new InstanceState(
-            System.currentTimeMillis()));
 
-    List<ServiceAlert> alerts = _service.getServiceAlertsForVehicleJourney(
-        System.currentTimeMillis(), blockTripInstance, new AgencyAndId("1",
-            "1111"));
-    assertEquals(3, alerts.size());
-    assertTrue(alerts.contains(serviceAlert2));
-    assertTrue(alerts.contains(serviceAlert3));
-    assertTrue(alerts.contains(serviceAlert4));
-  }
+        /**
+         * These alerts shouldn't match
+         */
+
+        ServiceAlertRecord alert5 = new ServiceAlertRecord();
+        alert5.setAgencyId("1");
+        alert5.setServiceAlertId("E");
+
+        ServiceAlertsSituationAffectsClause affectsClause5 = new ServiceAlertsSituationAffectsClause();
+        affectsClause5.setAgencyId("1");
+        affectsClause5.setStopId("10021");
+        affectsClause5.setTripId("TripA");
+        alert5.getAllAffects().add(affectsClause5);
+        alert5 = _service.createOrUpdateServiceAlert(alert5);
+
+        ServiceAlertRecord alert6 = new ServiceAlertRecord();
+        alert6.setAgencyId("1");
+        alert6.setServiceAlertId("F");
+
+        ServiceAlertsSituationAffectsClause affectsClause6 = new ServiceAlertsSituationAffectsClause();
+        affectsClause6.setAgencyId("1");
+        affectsClause6.setStopId("10020");
+        affectsClause6.setTripId("TripB");
+        alert6.getAllAffects().add(affectsClause6);
+        alert6 = _service.createOrUpdateServiceAlert(alert6);
+
+
+        ServiceAlertRecord alert7 = new ServiceAlertRecord();
+        alert7.setAgencyId("1");
+        alert7.setServiceAlertId("G");
+
+        ServiceAlertsSituationAffectsClause affectsClause7 = new ServiceAlertsSituationAffectsClause();
+        affectsClause7.setAgencyId("1");
+        affectsClause7.setTripId("TripB");
+        alert7.getAllAffects().add(affectsClause7);
+        alert7 = _service.createOrUpdateServiceAlert(alert7);
+
+        ServiceAlertRecord alert8 = new ServiceAlertRecord();
+        alert8.setAgencyId("1");
+        alert8.setServiceAlertId("H");
+
+        ServiceAlertsSituationAffectsClause affectsClause8 = new ServiceAlertsSituationAffectsClause();
+        affectsClause8.setAgencyId("1");
+        affectsClause8.setRouteId("RouteY");
+        alert8.getAllAffects().add(affectsClause8);
+        alert8 = _service.createOrUpdateServiceAlert(alert8);
+
+
+        ServiceAlertRecord alert9 = new ServiceAlertRecord();
+        alert9.setAgencyId("1");
+        alert9.setServiceAlertId("I");
+
+        ServiceAlertsSituationAffectsClause affectsClause9 = new ServiceAlertsSituationAffectsClause();
+        affectsClause9.setAgencyId("1");
+        affectsClause9.setRouteId("RouteX");
+        affectsClause9.setDirectionId("0");
+        alert9.getAllAffects().add(affectsClause9);
+        alert9 = _service.createOrUpdateServiceAlert(alert9);
+
+        RouteEntryImpl route = route("RouteX");
+        routeCollection("RouteX", route);
+        StopEntryImpl stop = stop("10020", 47.0, -122.0);
+        TripEntryImpl trip = trip("TripA");
+        trip.setRoute(route);
+        trip.setDirectionId("1");
+        stopTime(0, stop, trip, time(8, 53), 0);
+        BlockEntryImpl block = block("block");
+        BlockConfigurationEntry blockConfig = blockConfiguration(block,
+                serviceIds(lsids("a"), lsids()), trip);
+
+        BlockTripInstance blockTripInstance = new BlockTripInstance(
+                blockConfig.getTrips().get(0), new InstanceState(
+                System.currentTimeMillis()));
+
+        List<ServiceAlertRecord> alerts = _service.getServiceAlertsForVehicleJourney(
+                System.currentTimeMillis(), blockTripInstance, new AgencyAndId("1",
+                        "1111"));
+        assertEquals(3, alerts.size());
+        assertTrue(alerts.contains(alert2));
+        assertTrue(alerts.contains(alert3));
+        assertTrue(alerts.contains(alert4));
+    }
+
 
   @Test
   public void testRemoveServiceAlertsForFederatedAgencyId() {
 
-    ServiceAlert.Builder builder1 = ServiceAlert.newBuilder();
-    _service.createOrUpdateServiceAlert(builder1, "1");
+    ServiceAlertRecord alert1 = new ServiceAlertRecord();
+    alert1.setAgencyId("1");
+    alert1.setServiceAlertId("A");
+    _service.createOrUpdateServiceAlert(alert1);
 
-    ServiceAlert.Builder builder2 = ServiceAlert.newBuilder();
-    _service.createOrUpdateServiceAlert(builder2, "1");
+      ServiceAlertRecord alert2 = new ServiceAlertRecord();
+      alert2.setAgencyId("1");
+      alert2.setServiceAlertId("B");
+      _service.createOrUpdateServiceAlert(alert2);
+
 
     _service.removeAllServiceAlertsForFederatedAgencyId("2");
 
@@ -462,42 +512,269 @@ public class ServiceAlertsServiceImplTest {
   @Test
   public void testRemoveServiceAlert() {
 
-    ServiceAlert.Builder builder = ServiceAlert.newBuilder();
-    ServiceAlert serviceAlert = _service.createOrUpdateServiceAlert(builder,
-        "1");
+      ServiceAlertRecord alert1 = new ServiceAlertRecord();
+      alert1.setAgencyId("1");
+      alert1.setServiceAlertId("A");
+      _service.createOrUpdateServiceAlert(alert1);
 
-    AgencyAndId id = ServiceAlertLibrary.agencyAndId(serviceAlert.getId());
-    _service.removeServiceAlert(id);
+    _service.removeServiceAlert(AgencyAndId.convertFromString("1_A"));
 
-    assertNull(_service.getServiceAlertForId(id));
+    assertNull(_service.getServiceAlertForId(AgencyAndId.convertFromString("1_A")));
   }
 
   @Test
   public void testUpdateServiceAlert() {
 
-    ServiceAlert.Builder builder = ServiceAlert.newBuilder();
-    Affects.Builder affects = Affects.newBuilder();
-    affects.setAgencyId("2");
-    builder.addAffects(affects);
-    ServiceAlert serviceAlert1 = _service.createOrUpdateServiceAlert(builder,
-        "1");
+      ServiceAlertRecord alert1 = new ServiceAlertRecord();
+      alert1.setAgencyId("1");
+      alert1.setServiceAlertId("A");
 
-    builder = ServiceAlert.newBuilder(serviceAlert1);
-    builder.clearAffects();
-    affects = Affects.newBuilder();
-    affects.setStopId(ServiceAlertLibrary.id("1", "10020"));
-    builder.addAffects(affects);
+      ServiceAlertsSituationAffectsClause affectsClause = new ServiceAlertsSituationAffectsClause();
+      affectsClause.setAgencyId("2");
+      alert1.getAllAffects().add(affectsClause);
+      alert1 = _service.createOrUpdateServiceAlert(alert1);
 
-    ServiceAlert serviceAlert2 = _service.createOrUpdateServiceAlert(builder,
-        null);
+      alert1.setAllAffects(new HashSet<ServiceAlertsSituationAffectsClause>());
+      affectsClause = new ServiceAlertsSituationAffectsClause();
+      affectsClause.setAgencyId("1");
+      affectsClause.setStopId("10020");
+      alert1.getAllAffects().add(affectsClause);
+      alert1 = _service.createOrUpdateServiceAlert(alert1);
 
-    List<ServiceAlert> alerts = _service.getServiceAlertsForAgencyId(
-        System.currentTimeMillis(), "2");
+
+      List<ServiceAlertRecord> alerts = _service.getServiceAlertsForAgencyId(
+              System.currentTimeMillis(), "2");
+
+      assertEquals(0, alerts.size());
+
+      alerts = _service.getServiceAlertsForStopId(
+              System.currentTimeMillis(), AgencyAndId.convertFromString("1_10020"));
+      assertEquals(1, alerts.size());
+      assertTrue(alerts.contains(alert1));
+  }
+
+  @Test
+  public void testRefresh() {
+    long now = System.currentTimeMillis();
+
+    // ensure we have no records;
+    List<ServiceAlertRecord> alerts = _service.getAllServiceAlerts();
+    assertEquals(0, alerts.size());
+    ServiceAlertRecord alert1 = new ServiceAlertRecord();
+    alert1.setAgencyId("1");
+    alert1.setServiceAlertId("A");
+
+    // we need to set an effects clause for the agency index to triggeer
+    ServiceAlertsSituationAffectsClause affectsClause = new ServiceAlertsSituationAffectsClause();
+    affectsClause.setAgencyId("1");
+    alert1.getAllAffects().add(affectsClause);
+
+    _persister.getHibernateTemplate().saveOrUpdate(alert1);
+
+    alerts = _service.getAllServiceAlerts();
+    assertEquals(0, alerts.size());
+    
+    // wait for the database to refresh
+    try {
+      Thread.sleep(1 * 1000);
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    }
+    
+    // see the update
+    alerts = _service.getAllServiceAlerts();
+    assertEquals(1, alerts.size());
+    // ensure the sub-index has it as well
+    alerts = _service.getServiceAlertsForAgencyId(now, alert1.getAgencyId());
+    assertEquals(1, alerts.size());
+  }
+
+  @Test
+  public void testAsyncDBUpdate() {
+    
+    // ensure we have no records;
+    List<ServiceAlertRecord> alerts = _service.getAllServiceAlerts();
     assertEquals(0, alerts.size());
 
-    alerts = _service.getServiceAlertsForStopId(System.currentTimeMillis(),
-        new AgencyAndId("1", "10020"));
+
+      ServiceAlertRecord alert1 = new ServiceAlertRecord();
+      alert1.setAgencyId("1");
+      alert1.setServiceAlertId("A");
+
+      ServiceAlertsSituationAffectsClause affectsClause = new ServiceAlertsSituationAffectsClause();
+      affectsClause.setAgencyId("1");
+      affectsClause.setStopId("10020");
+      affectsClause.setTripId("TripA");
+      alert1.getAllAffects().add(affectsClause);
+    _persister.getHibernateTemplate().saveOrUpdate(alert1);
+
+    // service should not have seen it
+    alerts = _service.getAllServiceAlerts();
+    assertEquals(0, alerts.size());
+
+    // wait for the database to refresh
+    try {
+      Thread.sleep(1 * 1000);
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    }
+    // see the update
+    alerts = _service.getAllServiceAlerts();
     assertEquals(1, alerts.size());
-    assertTrue(alerts.contains(serviceAlert2));
+
   }
+
+  @Test
+  public void testAsyncDBDelete() {
+    
+    // ensure we have no records;
+    List<ServiceAlertRecord> alerts = _service.getAllServiceAlerts();
+    assertEquals(0, alerts.size());
+
+
+      ServiceAlertRecord alert1 = new ServiceAlertRecord();
+      alert1.setAgencyId("1");
+      alert1.setServiceAlertId("A");
+      _persister.getHibernateTemplate().saveOrUpdate(alert1);
+
+
+    // wait for the database to refresh
+    try {
+      Thread.sleep(1 * 1000);
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    }
+    // see the update
+    alerts = _service.getAllServiceAlerts();
+    assertEquals(1, alerts.size());
+
+    // delete that record
+    _persister.getHibernateTemplate().delete(alert1);
+    // service should not have seen it yet
+    alerts = _service.getAllServiceAlerts();
+    assertEquals(1, alerts.size());
+
+    // wait for the database to refresh
+    try {
+      Thread.sleep(1 * 1000);
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    }
+    // now we see the update (a deletion)
+    alerts = _service.getAllServiceAlerts();
+    assertEquals(0, alerts.size());
+  }
+
+  @Test
+  public void testAsyncPublicationWindow() {
+      Long now = System.currentTimeMillis();
+      // ensure we have no records;
+      List<ServiceAlertRecord> alerts = _service.getAllServiceAlerts();
+      assertEquals(0, alerts.size());
+
+      // and for agency index
+      alerts = _service.getServiceAlertsForAgencyId(now, "1");
+      assertEquals(0, alerts.size());
+
+      // and sto index
+      alerts = _service.getServiceAlertsForStopId(
+              now, AgencyAndId.convertFromString("1_10020"));
+      assertEquals(0, alerts.size());
+
+      // now create a service alert
+      ServiceAlertRecord alert1 = new ServiceAlertRecord();
+      alert1.setAgencyId("1");
+      alert1.setServiceAlertId("A");
+
+      // affects mandatory for update to work
+      ServiceAlertsSituationAffectsClause affectsClause = new ServiceAlertsSituationAffectsClause();
+      affectsClause.setAgencyId("1");
+      affectsClause.setStopId("10020");
+      alert1.getAllAffects().add(affectsClause);
+
+      // test a publication window of a few seconds around now
+      ServiceAlertTimeRange range = new ServiceAlertTimeRange();
+
+      range.setFromValue(now - 1000);
+      range.setToValue(now + 2 * 1000);
+      alert1.setPublicationWindows(new HashSet<ServiceAlertTimeRange>());
+      alert1.getPublicationWindows().add(range);
+      _persister.getHibernateTemplate().saveOrUpdate(alert1);
+
+      _service.loadServiceAlerts();
+
+      // see the update
+      alerts = _service.getAllServiceAlerts();
+      assertEquals(1, alerts.size());
+
+      // agency will not trigger as we have a stopid instead
+      alerts = _service.getServiceAlertsForAgencyId(now, alert1.getAgencyId());
+      assertEquals(0, alerts.size());
+
+      alerts = _service.getServiceAlertsForStopId(
+              now, AgencyAndId.convertFromString("1_10020"));
+      assertEquals(1, alerts.size());
+
+      // all service alerts bypasses filtering by time
+      alerts = _service.getAllServiceAlerts();
+      assertEquals(1, alerts.size());
+
+      // still not there
+      alerts = _service.getServiceAlertsForAgencyId(now + 3 * 1000, alert1.getAgencyId());
+      assertEquals(0, alerts.size());
+
+      // window expired
+      alerts = _service.getServiceAlertsForStopId(
+              now + 3 * 1000, AgencyAndId.convertFromString("1_10020"));
+      assertEquals(0, alerts.size());
+
+  }
+
+
+    @Test
+    public void testPublicationWindowServiceAlert() {
+        Long now = System.currentTimeMillis();
+        ServiceAlertRecord alert1 = new ServiceAlertRecord();
+        alert1.setAgencyId("1");
+        alert1.setServiceAlertId("A");
+
+        ServiceAlertsSituationAffectsClause affectsClause = new ServiceAlertsSituationAffectsClause();
+        affectsClause.setAgencyId("1");
+        alert1.getAllAffects().add(affectsClause);
+        alert1.getPublicationWindows().add(createTimeRange(now - 60 * 1000, now + 60 * 1000));
+
+        alert1 = _service.createOrUpdateServiceAlert(alert1);
+
+        List<ServiceAlertRecord> alerts = _service.getServiceAlertsForAgencyId(
+                now, "1");
+        assertEquals(1, alerts.size());
+
+        alerts = _service.getServiceAlertsForStopId(
+                now, AgencyAndId.convertFromString("1_10020"));
+        assertEquals(1, alerts.size());
+        assertTrue(alerts.contains(alert1));
+
+        // too early
+        alerts = _service.getServiceAlertsForAgencyId(
+                now-61*1000, "1");
+        alerts = _service.getServiceAlertsForStopId(
+                now-61*1000, AgencyAndId.convertFromString("1_10020"));
+        assertEquals(0, alerts.size());
+
+        // too late
+        alerts = _service.getServiceAlertsForAgencyId(
+                now+61*1000, "1");
+        alerts = _service.getServiceAlertsForStopId(
+                now+61*1000, AgencyAndId.convertFromString("1_10020"));
+        assertEquals(0, alerts.size());
+
+        // re-assure ourselves we still get the correct answer
+        alerts = _service.getServiceAlertsForAgencyId(
+                now, "1");
+        alerts = _service.getServiceAlertsForStopId(
+                now, AgencyAndId.convertFromString("1_10020"));
+        assertEquals(1, alerts.size());
+        assertTrue(alerts.contains(alert1));
+
+    }
 }

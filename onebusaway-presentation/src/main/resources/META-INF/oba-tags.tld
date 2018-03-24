@@ -193,4 +193,10 @@
     <function-class>org.onebusaway.presentation.tags.UrlFunction</function-class>
     <function-signature>java.lang.String url( java.lang.String )</function-signature>
   </function>
+  <function>
+    <name>configValue</name>
+    <function-class>org.onebusaway.presentation.tags.ConfigurationValueFunction</function-class>
+    <function-signature>java.lang.String configValue( java.lang.String )</function-signature>
+  </function>
+  
 </taglib>

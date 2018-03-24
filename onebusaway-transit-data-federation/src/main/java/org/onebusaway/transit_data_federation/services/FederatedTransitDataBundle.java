@@ -16,9 +16,6 @@
 package org.onebusaway.transit_data_federation.services;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * Captures the file structure of various file artifacts of a federated transit
@@ -29,8 +26,7 @@ import java.util.List;
 public class FederatedTransitDataBundle {
 
   private File _path;
-
-  private String _key;
+  
 
   public FederatedTransitDataBundle(File path) {
     _path = path;
@@ -48,14 +44,6 @@ public class FederatedTransitDataBundle {
     return _path;
   }
 
-  public String getKey() {
-    return _key;
-  }
-
-  public void setKey(String key) {
-    _key = key;
-  }
-
   public File getCalendarServiceDataPath() {
     return new File(_path, "CalendarServiceData.obj");
   }
@@ -68,16 +56,8 @@ public class FederatedTransitDataBundle {
     return new File(_path, "StopSearchIndex");
   }
 
-  public File getWalkPlannerGraphPath() {
-    return new File(_path, "WalkPlannerGraph.obj");
-  }
-
   public File getTransitGraphPath() {
     return new File(_path, "TransitGraph.obj");
-  }
-
-  public File getGraphPath() {
-    return new File(_path, "Graph.obj");
   }
 
   public File getNarrativeProviderPath() {
@@ -96,48 +76,8 @@ public class FederatedTransitDataBundle {
     return new File(_path, "FrequencyBlockTripIndices.obj");
   }
 
-  public File getStopTransfersPath() {
-    return new File(_path, "StopTransfers.obj");
-  }
-
   public File getShapeGeospatialIndexDataPath() {
     return new File(_path, "ShapeGeospatialIndexData.obj.gz");
-  }
-
-  public File getHubStopsPath(boolean keyed) {
-    return new File(_path, keyed("HubStops.txt", keyed));
-  }
-
-  public File getTransferPatternsSourceStopsPath() {
-    return new File(_path, keyed("TransferPatternsSourceStops.txt"));
-  }
-
-  public File getTransferPatternsParentPath() {
-    File parent = new File(_path, "TransferPatterns");
-    if (!parent.exists())
-      parent.mkdirs();
-    return parent;
-  }
-
-  public File getTransferPatternsPath() {
-    File parent = getTransferPatternsParentPath();
-    return new File(parent, keyed("TransferPatterns.gz"));
-  }
-
-  public List<File> getAllTransferPatternsPaths() {
-    File path = getTransferPatternsParentPath();
-    List<File> paths = new ArrayList<File>();
-    getAllTransferPatternsPaths(path, paths);
-    Collections.sort(paths);
-    return paths;
-  }
-
-  public File getTransferPatternsTransferPointCountsPath() {
-    return new File(_path, "TransferPatternsTransferPointCounts.txt");
-  }
-
-  public File getSerializedTransferPatternsPath() {
-    return new File(_path, "SerializedTransferPatterns.gz");
   }
 
   public File getServiceAlertsPath() {
@@ -147,28 +87,53 @@ public class FederatedTransitDataBundle {
   public File getCachePath() {
     return new File(_path, "cache");
   }
-
-  private String keyed(String value) {
-    return keyed(value, true);
+  
+  public File getBundleMetadataPath() {
+    return new File(_path, "metadata.json");
   }
 
-  private String keyed(String value, boolean applyKey) {
-    if (_key != null && applyKey) {
-      int index = value.lastIndexOf('.');
-      if (index == -1)
-        return value + "-" + _key;
-      else
-        return value.substring(0, index) + "-" + _key + value.substring(index);
-    }
-    return value;
+  /* NYC specific additions */
+  public File getNonRevenueMoveLocationsPath() {
+    return new File(_path, "NonRevenueMoveLocations.obj");
   }
 
-  private void getAllTransferPatternsPaths(File path, List<File> paths) {
-    if (path.isDirectory()) {
-      for (File subPath : path.listFiles())
-        getAllTransferPatternsPaths(subPath, paths);
-    } else if (path.getName().matches("^TransferPatterns(-\\d+){0,1}\\.gz$")) {
-      paths.add(path);
-    }
+  public File getNonRevenueMovePath() {
+    return new File(_path, "NonRevenueMoves.obj");
+  }
+
+  public File getNonRevenueStopsPath() {
+    return new File(_path, "NonRevenueStops.obj");
+  }
+
+  public File getNotInServiceDSCs() {
+    return new File(_path, "NotInServiceDSCs.obj");
+  }
+
+  public File getTripsForDSCIndex() {
+    return new File(_path, "TripsForDSCIndices.obj");
+  }
+
+  public File getDSCForTripIndex() {
+    return new File(_path, "DSCForTripIndices.obj");
+  }
+
+  public File getBaseLocationsPath() {
+    return new File(_path, "BaseLocations.txt");
+  }
+
+  public File getTerminalLocationsPath() {
+    return new File(_path, "TerminalLocations.txt");
+  }
+
+  public File getTripRunDataPath() {
+    return new File(_path, "TripRunData.obj");
+  }
+  
+  public File getBlockRunDataPath() {
+    return new File(_path, "BlockRunData.obj");
+  }
+
+  public File getStopConsolidationFile() {
+    return new File(_path, "StopConsolidation.txt");
   }
 }

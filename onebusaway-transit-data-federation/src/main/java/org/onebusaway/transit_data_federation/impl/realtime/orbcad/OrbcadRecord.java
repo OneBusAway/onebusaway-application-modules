@@ -22,7 +22,7 @@ import org.onebusaway.csv_entities.schema.annotations.CsvFields;
     "vehicle_id", "route_id", "direction", "block", "service_type",
     "schedule_deviation", "timepoint_arrival_time", "timepoint_id",
     "timepoint_time", "lat", "lon", "time", "logon_route_id", "block_number",
-    "off_route", "run_id", "next_sign_timepoint_id"})
+    "off_route", "run_id", "next_sign_timepoint_id", "trip_id"})
 public class OrbcadRecord {
 
   private static final double LAT_MISSING_VALUE = 99.000000;
@@ -115,6 +115,9 @@ public class OrbcadRecord {
   private int offRoute;
 
   private int runId;
+  
+  @CsvField(optional = true)
+  private int tripId;
 
   @CsvField(optional = true)
   private String nextSignTimepointId;
@@ -305,5 +308,13 @@ public class OrbcadRecord {
 
   public void setNextSignTimepointId(String nextSignTimepointId) {
     this.nextSignTimepointId = nextSignTimepointId;
+  }
+  
+  public int getTripId() {
+    return tripId;
+  }
+  
+  public void setTripId(int tripId) {
+    this.tripId = tripId;
   }
 }
