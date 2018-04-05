@@ -52,22 +52,27 @@ if(typeof OBA !== 'undefined' &amp;&amp; typeof OBA.Config !== 'undefined') {
 				if(OBA.Config.showSMS === "true"){
 					html += 'Send ' + OBA.Config.txtPrefix + ' <strong>' + query + '</strong> as a text to <strong>' + OBA.Config.shortCode + '</strong>';
 					html += '<br/>';
-					html += 'or check <a href="m/?q=' + query + '">this stop</a> on your smartphone.';
+					html += 'or check <a href="queryLink">this stop</a> on your smartphone.';
 				}
 				else{
-					html += 'Check <a href="m/?q=' + query + '">this stop</a> on your smartphone.';
+					html += 'Check <a href="queryLink">this stop</a> on your smartphone.';
 					
 				}	
 				html += '</div>';
+
+				var queryLink = "m/?q=" + query;
+				html = html.replace("queryLink", queryLink);
 
 			} else if(type === "route") {
 				html += '<div class="footer">';
 				html += '<span class="header">While at the bus stop...</span>';
 				html += '<br/>';
-				
-				html += 'Check <a href="m/?q=' + query + '">this route</a> on your smartphone.';
+				html += 'Check <a href="queryLink">this route</a> on your smartphone.';
 
-				html += '</div>';				
+				html += '</div>';
+
+				var queryLink = "m/?q=" + query;
+				html = html.replace("queryLink", queryLink);
 
 			} else if(type === "sign") {
 				html += 'Text <strong> ' + query + '</strong> to <strong>' + OBA.Config.shortCode + '</strong> ';
