@@ -329,7 +329,7 @@ OBA.Sidebar = function() {
 				
 				var descriptionBox = jQuery("<p></p>")
 								.addClass("description")
-								.text(routeResult.description);
+								.text(routeResult.description == null ? '' : routeResult.description);
 	
 				var listItem = jQuery("<li></li>")
 								.addClass("legendItem")
