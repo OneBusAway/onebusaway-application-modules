@@ -58,12 +58,12 @@
 					<label class="top">Password:</label>
 					<s:password name="j_password"/>
 				</fieldset>
-
+<!--
 				<fieldset>
 					<s:checkbox name="_spring_security_remember_me" value="true" label="Remember Me"/>
 					<label class="inline">Remember Me</label>
 				</fieldset>
-
+-->
 				<s:hidden name="j_indexType" value="username"/>
 				<s:submit value="Login"/>
 			</s:form>
