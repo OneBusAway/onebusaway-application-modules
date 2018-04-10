@@ -326,6 +326,10 @@ public final class SiriSupportV2 {
     monitoredVehicleJourney.setBearing((float) currentVehicleTripStatus
             .getOrientation());
     monitoredVehicleJourney.setVehicleLocation(location);
+      // block ref
+        BlockRefStructure blockRef = new BlockRefStructure();
+        blockRef.setValue(framedJourneyTripBean.getBlockId());
+        monitoredVehicleJourney.setBlockRef(blockRef);
     }
     
     // detail level - basic
@@ -350,12 +354,6 @@ public final class SiriSupportV2 {
     // detail level - normal
     if (detailLevel.equals(DetailLevel.NORMAL) || detailLevel.equals(DetailLevel.CALLS)){
       monitoredVehicleJourney.setOperatorRef(operatorRef);
-      // block ref
-      if (presentationService.isBlockLevelInference(currentVehicleTripStatus)) {
-        BlockRefStructure blockRef = new BlockRefStructure();
-        blockRef.setValue(framedJourneyTripBean.getBlockId());
-        monitoredVehicleJourney.setBlockRef(blockRef);
-      }
 
       monitoredVehicleJourney.setOriginRef(origin);
       monitoredVehicleJourney.setJourneyPatternRef(journeyPattern);

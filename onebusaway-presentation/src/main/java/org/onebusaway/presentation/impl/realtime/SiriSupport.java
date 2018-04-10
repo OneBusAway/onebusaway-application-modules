@@ -92,7 +92,7 @@ public final class SiriSupport {
 			TripBean framedJourneyTripBean, TripStatusBean currentVehicleTripStatus, StopBean monitoredCallStopBean, OnwardCallsMode onwardCallsMode,
 			PresentationService presentationService, TransitDataService transitDataService,
 			int maximumOnwardCalls, List<TimepointPredictionRecord> stopLevelPredictions, boolean hasRealtimeData, long responseTimestamp, boolean showRawLocation) {
-			
+
 		BlockInstanceBean blockInstance = 
 				transitDataService.getBlockInstance(currentVehicleTripStatus.getActiveTrip().getBlockId(), currentVehicleTripStatus.getServiceDate());
 		
@@ -230,12 +230,10 @@ public final class SiriSupport {
 			monitoredVehicleJourney.setProgressStatus(progressStatus);    	
 		}
 
-		// block ref
-		if (presentationService.isBlockLevelInference(currentVehicleTripStatus)) {
+		// block ref (including it all the time in case needed)
 			BlockRefStructure blockRef = new BlockRefStructure();
 			blockRef.setValue(framedJourneyTripBean.getBlockId());
 			monitoredVehicleJourney.setBlockRef(blockRef);
-		}
 
 		// scheduled depature time
 		if (presentationService.isBlockLevelInference(currentVehicleTripStatus) 
