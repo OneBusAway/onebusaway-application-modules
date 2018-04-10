@@ -228,31 +228,40 @@ OBA.Popups = (function() {
 	}
 	
 	function getVehicleContentForResponse(r, popupContainerId, marker) {
-		var alertData = processAlertData(r.Siri.ServiceDelivery.SituationExchangeDelivery);
-		
-		var activity = r.Siri.ServiceDelivery.VehicleMonitoringDelivery[0].VehicleActivity[0];
-		if(activity === null || typeof activity == 'undefined' || activity.MonitoredVehicleJourney === null) {
-			return null;
-		}
+        var alertData = processAlertData(r.Siri.ServiceDelivery.SituationExchangeDelivery);
 
-		var vehicleId = activity.MonitoredVehicleJourney.VehicleRef;
-		var vehicleIdParts = vehicleId.split("_");
-		var vehicleIdWithoutAgency = vehicleIdParts[1];
-		var routeName = activity.MonitoredVehicleJourney.LineRef;
-		var hasRealtime = activity.MonitoredVehicleJourney.Monitored
+        var activity = r.Siri.ServiceDelivery.VehicleMonitoringDelivery[0].VehicleActivity[0];
+        if (activity === null || typeof activity == 'undefined' || activity.MonitoredVehicleJourney === null) {
+            return null;
+        }
 
-		var html = '<div id="' + popupContainerId + '" class="popup">';
-		
-		// Don't show Vehicle Id if no Realtime data
-		if(typeof hasRealtime === 'undefined' || hasRealtime === null || hasRealtime == false){
-			hasRealtime = false;
-			vehicleIdWithoutAgency = 'N/A';
+        var vehicleId = activity.MonitoredVehicleJourney.VehicleRef;
+        var vehicleIdParts = vehicleId.split("_");
+        var blockId = activity.MonitoredVehicleJourney.BlockRef;
+        var vehicleIdWithoutAgency = vehicleIdParts[1];
+        var blockIdWithoutAgency = blockId.split("_")[1];
+        var routeName = activity.MonitoredVehicleJourney.LineRef;
+        var hasRealtime = activity.MonitoredVehicleJourney.Monitored
+
+        var html = '<div id="' + popupContainerId + '" class="popup">';
+
+        // Don't show Vehicle Id if no Realtime data
+        if (typeof hasRealtime === 'undefined' || hasRealtime === null || hasRealtime == false) {
+            hasRealtime = false;
+            vehicleIdWithoutAgency = 'N/A';
+        }
+
+        // header
+        html += '<div class="header vehicle">';
+        html += '<p class="title">' + activity.MonitoredVehicleJourney.PublishedLineName + " " + activity.MonitoredVehicleJourney.DestinationName + '</p><p>';
+
+        //don't show block id if there is none or if config says no
+        if (OBA.Config.showBlockIdInVehiclePopup == false || typeof blockIdWithoutAgency === 'undefined' || blockIdWithoutAgency === null) {
+            html += '<span class="type">Vehicle #' + vehicleIdWithoutAgency + '</span>';
 		}
-		
-		// header
-		html += '<div class="header vehicle">';
-		html += '<p class="title">' + activity.MonitoredVehicleJourney.PublishedLineName + " " + activity.MonitoredVehicleJourney.DestinationName + '</p><p>';
-		html += '<span class="type">Vehicle #' + vehicleIdWithoutAgency + '</span>';
+		else {
+            html += '<span class="type">Vehicle #' + vehicleIdWithoutAgency + ' - ' + blockIdWithoutAgency + '</span>';
+		}
 
 		var updateTimestamp = OBA.Util.ISO8601StringToDate(activity.RecordedAtTime).getTime();
 		var updateTimestampReference = OBA.Util.ISO8601StringToDate(r.Siri.ServiceDelivery.ResponseTimestamp).getTime();
