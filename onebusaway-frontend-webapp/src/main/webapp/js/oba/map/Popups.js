@@ -332,7 +332,7 @@ OBA.Popups = (function() {
 		
 		// service alerts
 		if (routeName in alertData) {
-			html += ' <a id="alert-link||' + routeName + '" class="alert-link" href="#">Service Alert for ' + activity.MonitoredVehicleJourney.PublishedLineName + '</a>';
+			html += ' <a id="alert-link||' + routeName + '" class="alert-link" href="#">' + OBA.Config.serviceAlertText + ' for ' + activity.MonitoredVehicleJourney.PublishedLineName + '</a>';
 		}
 
 		html += OBA.Config.infoBubbleFooterFunction('route', activity.MonitoredVehicleJourney.PublishedLineName);
@@ -414,7 +414,7 @@ OBA.Popups = (function() {
         //check for stop level alerts
          if (stopId in alertData) {
 
-             var serviceAlertHeader = jQuery("<p class='popupServiceAlert'>Service Alert for " + stopCode + ". Click for info</p>");
+             var serviceAlertHeader = jQuery("<p class='popupServiceAlert'>" + OBA.Config.serviceAlertText + " for " + stopCode + ". Click for info</p>");
 
              var serviceAlertList = jQuery("" +
                  "<ul></ul>")

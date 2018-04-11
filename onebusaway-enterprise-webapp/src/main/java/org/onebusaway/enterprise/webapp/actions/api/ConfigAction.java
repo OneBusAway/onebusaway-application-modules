@@ -110,4 +110,8 @@ public class ConfigAction extends OneBusAwayEnterpriseActionSupport {
   public String getShowBlockIdInVehiclePopup() {
     return _configurationService.getConfigurationValueAsString("display.showBlockIdInVehiclePopup", "false");
   }
+
+  public String getServiceAlertText() {
+    return _configurationService.getConfigurationValueAsString("display.getServiceAlertText", "Service Alert");
+  }
 }
