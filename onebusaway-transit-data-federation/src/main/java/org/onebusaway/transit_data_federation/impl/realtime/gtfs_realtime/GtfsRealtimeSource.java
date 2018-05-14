@@ -78,6 +78,8 @@ import com.jcraft.jsch.SftpException;
 
 public class GtfsRealtimeSource implements MonitoredDataSource {
 
+  public static final String GTFS_CONNECT_TIMEOUT = "gtfs.connect_timeout";
+  public static final String GTFS_READ_TIMEOUT = "gtfs.read_timeout";
   private static final Logger _log = LoggerFactory.getLogger(GtfsRealtimeSource.class);
 
   private static final ExtensionRegistry _registry = ExtensionRegistry.newInstance();
@@ -728,6 +730,12 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
    */
   private FeedMessage readFeedFromUrl(URL url) throws IOException {
    URLConnection urlConnection = url.openConnection();
+   if (System.getProperty(GTFS_CONNECT_TIMEOUT) != null) {
+     urlConnection.setConnectTimeout(Integer.parseInt(System.getProperty(GTFS_CONNECT_TIMEOUT)));
+   }
+   if (System.getProperty(GTFS_READ_TIMEOUT) != null) {
+     urlConnection.setReadTimeout(Integer.parseInt(System.getProperty(GTFS_READ_TIMEOUT)));
+   }
    setHeadersToUrlConnection(urlConnection);
    InputStream in = null;
    try {
