@@ -52,6 +52,9 @@ public class CreateAPIKeyOnInitAction {
 
   private String contactDetails;
 
+  private int DEFAULT_LIMIT = 100;
+  private int limit = DEFAULT_LIMIT;
+
   private boolean createAPIKey = false;
 
   @Autowired
@@ -105,6 +108,18 @@ public class CreateAPIKeyOnInitAction {
     this.contactDetails = contactDetails;
   }
 
+  public void setLimit(String limit) {
+    if (StringUtils.isBlank(limit)) {
+      this.limit = DEFAULT_LIMIT;
+      return;
+    }
+    try {
+      this.limit = Integer.parseInt(limit);
+    } catch (NumberFormatException nfe) {
+      this.limit = DEFAULT_LIMIT;
+    }
+  }
+
   public void init() {
     // no-op, createAPIKey determines if execute is called or not
   }
@@ -116,7 +131,7 @@ public class CreateAPIKeyOnInitAction {
       UserIndexKey userIndexKey = new UserIndexKey(UserIndexTypes.API_KEY, key);
       UserIndex userIndex = _userService.getOrCreateUserForIndexKey(
           userIndexKey, key, false);
-      _userPropertiesService.authorizeApi(userIndex.getUser(), 0);
+      _userPropertiesService.authorizeApi(userIndex.getUser(), limit);
 
       if (StringUtils.isNotBlank(contactName)
               || StringUtils.isNotBlank(contactCompany)
@@ -126,7 +141,8 @@ public class CreateAPIKeyOnInitAction {
                 + contactName + ", "
                 + contactCompany + ", "
                 + contactEmail + ", "
-                + contactDetails);
+                + contactDetails + ", limit="
+                + limit);
         _userPropertiesService.updateApiKeyContactInfo(userIndex.getUser(),
                 contactName,
                 contactCompany,
