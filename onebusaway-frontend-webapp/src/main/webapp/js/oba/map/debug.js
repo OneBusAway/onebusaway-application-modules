@@ -25,7 +25,8 @@ var agencyId = vehicleId.split("_")[0];
 var vehicleStr = vehicleId.split("_")[1];
 // drop the map marker arbitrarily
 var errorLatLng = new google.maps.LatLng(38.905216, -77.06301);
-
+var age = -999;
+var deviation = -999;
 var map;
 
 function getParameterByName(name, defaultValue) {
@@ -39,6 +40,15 @@ function getParameterByName(name, defaultValue) {
 		return decodeURIComponent(results[1].replace(/\+/g, " "));
 	}
 }
+function showLegend(map) {
+    var div = document.createElement('div');
+    console.log("showing legend with " + age + ", " + deviation);
+    div.innerHTML = 'Age: ' + age + '<br/>' + 'Deviation: ' + deviation + '<br/>';
+    var legend = document.getElementById('legend');
+    legend.appendChild(div);
+
+    map.controls[google.maps.ControlPosition.RIGHT_TOP].push(legend);
+}
 
 function initialize() {
 	console.log("looking for vehicleId=" + vehicleId);
@@ -49,6 +59,7 @@ function initialize() {
 
 	
    var smParams = { OperatorRef: agencyId, VehicleRef: vehicleStr, MaximumNumberOfCallsOnwards: "1", VehicleMonitoringDetailLevel: "calls" }
+   console.log("smurl=" + smurl);
 	jQuery.getJSON(smurl, smParams, function(r) {
 		var activity = r.Siri.ServiceDelivery.VehicleMonitoringDelivery[0].VehicleActivity[0];
 		if(typeof(activity) == "undefined" || activity === null || activity.MonitoredVehicleJourney === null) {
@@ -64,6 +75,12 @@ function initialize() {
             console.log("have activity for vehicle " + vehicleStr);
             var latitude = activity.MonitoredVehicleJourney.VehicleLocation.Latitude;
             var longitude = activity.MonitoredVehicleJourney.VehicleLocation.Longitude;
+            var extensions = activity.MonitoredVehicleJourney.MonitoredCall.Extensions;
+            if (typeof(extensions) !== "undefined") {
+                deviation = extensions.Deviation;
+                console.log("deviation=" + deviation);
+                showLegend(map);
+            }
             blockLocation.lat = latitude;
             blockLocation.lng = longitude;
             console.log("lat/lng set");
