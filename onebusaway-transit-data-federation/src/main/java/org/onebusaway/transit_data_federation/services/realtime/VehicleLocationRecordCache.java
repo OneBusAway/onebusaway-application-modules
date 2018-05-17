@@ -32,4 +32,7 @@ public interface VehicleLocationRecordCache {
   public VehicleLocationCacheElements addRecord(BlockInstance blockInstance, VehicleLocationRecord record, ScheduledBlockLocation scheduledBlockLocation, ScheduleDeviationSamples samples);
 
   public void clearRecordsForVehicleId(AgencyAndId vehicleId);
+
+  public void addRawPosition(AgencyAndId vehicleId, VehicleLocationRecord point);
+  public VehicleLocationRecord getRawPosition(AgencyAndId vehicleId);
 }

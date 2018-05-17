@@ -15,11 +15,16 @@
  */
 var expandAlerts = false;
 
-var siriVMRequestsByRouteId = {};
 var blockLocation = {lat:null, lng:null};
-var smurl = "/onebusaway-api-webapp/siri/vehicle-monitoring?key=OBA&type=json";
-var gtfsrUrl = "/onebusaway-enterprise-acta-webapp/api/gtfsrt-proxy";
-var vehicleId = getParameterByName("vehicleId", "2233");
+var apiKey = getParameterByName("key", "TEST");
+var smurl = "/onebusaway-api-webapp/siri/vehicle-monitoring?key=" + apiKey + "&type=json";
+var rawUrlPre = "/onebusaway-api-webapp/api/where/vehicle-position-for-vehicle/";
+var rawUrlPost = ".json?key=" + apiKey + "&version=2";
+var vehicleId = getParameterByName("vehicleId", "1");
+var agencyId = vehicleId.split("_")[0];
+var vehicleStr = vehicleId.split("_")[1];
+// drop the map marker arbitrarily
+var errorLatLng = new google.maps.LatLng(38.905216, -77.06301);
 
 var map;
 
@@ -41,85 +46,69 @@ function initialize() {
 		zoom: 16,
 	});
 
+
 	
-   var smParams = { OperatorRef: "USF BullRunner", VehicleRef: vehicleId, MaximumNumberOfCallsOnwards: "1", VehicleMonitoringDetailLevel: "calls" } 
+   var smParams = { OperatorRef: agencyId, VehicleRef: vehicleStr, MaximumNumberOfCallsOnwards: "1", VehicleMonitoringDetailLevel: "calls" }
 	jQuery.getJSON(smurl, smParams, function(r) {
 		var activity = r.Siri.ServiceDelivery.VehicleMonitoringDelivery[0].VehicleActivity[0];
 		if(typeof(activity) == "undefined" || activity === null || activity.MonitoredVehicleJourney === null) {
-			console.log("no activity");
+			console.log("no activity for vehicle " + vehicleStr);
+			var infoWindow = new google.maps.InfoWindow(
+				{
+					content: "unable to find SIRI vehicle " + vehicleStr,
+					position: errorLatLng
+				});
+			infoWindow.open(map);
 			return null;
-		}
-		console.log("have activity");
-		var latitude = activity.MonitoredVehicleJourney.VehicleLocation.Latitude;
-		var longitude = activity.MonitoredVehicleJourney.VehicleLocation.Longitude;
-		blockLocation.lat = latitude;
-		blockLocation.lng = longitude;
-		console.log("lat/lng set");
-		map.panTo(blockLocation);
-		var markerBlockLocation = new google.maps.Marker({
-		    position: blockLocation,
-		    map: map,
-		    title: 'Vehicle Position'
-		  });
+		} else {
+            console.log("have activity for vehicle " + vehicleStr);
+            var latitude = activity.MonitoredVehicleJourney.VehicleLocation.Latitude;
+            var longitude = activity.MonitoredVehicleJourney.VehicleLocation.Longitude;
+            blockLocation.lat = latitude;
+            blockLocation.lng = longitude;
+            console.log("lat/lng set");
+            map.panTo(blockLocation);
+            var markerBlockLocation = new google.maps.Marker({
+                position: blockLocation,
+                map: map,
+                title: 'Vehicle Position'
+            });
+        }
+	});
+
+    var gtfsrUrl = rawUrlPre + vehicleId + rawUrlPost;
+    console.log("making raw call = " + gtfsrUrl);
+   jQuery.getJSON(gtfsrUrl, {}, function(data) {
+	   var code = data.code;
+	   if (code == null || code == 404 || typeof data.data == "undefined") {
+		   console.log("no raw position");
+           var infoWindow = new google.maps.InfoWindow(
+           	{
+				content: "unable to find raw position for vehicle " + vehicleStr,
+				position: errorLatLng
+           	});
+           infoWindow.open(map);
+
+           return;
+	   }
+	   console.log("have raw data= " + data.data);
+	   lat = data.data.currentLocation.lat;
+	   lng = data.data.currentLocation.lon;
+	   console.log("lat=" + lat + ", lon=" + lng);
+	   age = (new Date() / 1000) - data.data.timeOfLocationUpdate;
+	   console.log("record is " + age + "s old");
+       var gtfsrLocation = {lat: parseFloat(lat), lng: parseFloat(lng)};
+       var markerGtfsr = new google.maps.Marker({
+           icon: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png',
+           position: gtfsrLocation,
+           map: map,
+           title: 'GTFS-R!'
+       });
+
+       map.panTo(gtfsrLocation);
 
 	});
-	
-   
-   jQuery.getJSON(gtfsrUrl, {}, function(data) {
-//	   console.log("gtfsrt data=" + data);
-	   var entities = data.results.split(/entity/);
-	   if (entities == null || entities.length == 0) {
-		   console.log("no entities");
-		   return;
-	   }
-	   jQuery.each(entities, function(i, entity) {
-		   if (entity.indexOf("id: \"" + vehicleId + "\"") > -1) {
-//			   console.log("found vehicle " + vehicleId + " in entity=" + entity);
-			   var latStart = entity.indexOf("latitude:");
-			   var lngStart = entity.indexOf("longitude:");
-			   if (latStart > 0 && lngStart > 0) {
-				   var latStop = entity.indexOf("\n", latStart);
-				   var lngStop = entity.indexOf("\n", lngStart);
-//				   console.log("lat " + latStart + "->" + latStop);
-//				   console.log("lon " + lngStart + "->" + lngStop);
-			   }
-			   if (latStop > 0 && lngStop > 0) {
-				   lat = entity.substring(latStart+"latitude: ".length, latStop);
-				   lng = entity.substring(lngStart+"longitude: ".length, lngStop);
-//				   console.log("lat=" + lat + ", lng=" + lng);
-				   var gtfsrLocation = {lat: parseFloat(lat), lng: parseFloat(lng)};
-					var markerGtfsr = new google.maps.Marker({
-						icon: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png',
-					    position: gtfsrLocation,
-					    map: map,
-					    title: 'GTFS-R!'
-					  });
-					
-					map.panTo(gtfsrLocation);
-			   } else {
-//				   console.log("missing latStop")
-			   }
-		   } else {
-			   // missing vehicle
-//			   console.log("skipping");
-			   }
-		   });
-});
-   
-   
-	
-//	if (blockLocation.lat != null) {
-//		console.log("valid lat");
-//		var markerBlockLocation = new google.maps.Marker({
-//		    position: blockLocation,
-//		    map: map,
-//		    title: 'Hello World!'
-//		  });
-//		
-//	} else {
-//		console.log("invalid lat");
-//	}
-	
+
 }	
 
 	google.maps.event.addDomListener(window, 'load', initialize);

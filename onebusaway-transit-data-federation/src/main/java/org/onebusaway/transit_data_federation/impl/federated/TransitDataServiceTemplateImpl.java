@@ -390,6 +390,12 @@ public class TransitDataServiceTemplateImpl implements TransitDataServiceTemplat
   }
 
   //@Override
+  public VehicleLocationRecordBean getVehiclePositionForVehicleId(String vehicleId) {
+    AgencyAndId id = convertAgencyAndId(vehicleId);
+    return _vehicleStatusBeanService.getVehiclePositionForVehicleId(id);
+  }
+
+    //@Override
   public TripDetailsBean getTripDetailsForVehicleAndTime(
       TripForVehicleQueryBean query) {
     

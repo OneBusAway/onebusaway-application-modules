@@ -36,6 +36,7 @@ import java.util.concurrent.TimeUnit;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
+import com.google.transit.realtime.GtfsRealtime;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.realtime.api.EVehicleType;
 import org.onebusaway.realtime.api.VehicleLocationListener;
@@ -383,7 +384,23 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
         tripUpdates, vehiclePositions);
     result.setRecordsTotal(combinedUpdates.size());
     handleCombinedUpdates(result, combinedUpdates);
+    cacheVehicleLocations(vehiclePositions);
     handleAlerts(alerts);
+  }
+
+  private void cacheVehicleLocations(FeedMessage vehiclePositions) {
+
+
+    for (FeedEntity entity : vehiclePositions.getEntityList()) {
+      if (entity.hasVehicle()) {
+        GtfsRealtime.VehiclePosition vehicle = entity.getVehicle();
+        _vehicleLocationListener.handleRawPosition(
+                new AgencyAndId(getAgencyIds().get(0), vehicle.getVehicle().getId()),
+                vehicle.getPosition().getLatitude(),
+                vehicle.getPosition().getLongitude(),
+                vehicle.getTimestamp());
+      }
+    }
   }
 
   private void handleCombinedUpdates(MonitoredResult result,

@@ -907,7 +907,10 @@ public class GtfsRealtimeTripLibrary {
       long serviceDateTime = record.getServiceDate();
       long effectiveScheduleTime = loc.getScheduledTime() + (serviceDateTime/1000);
       double deviation =  timestamp/1000 - effectiveScheduleTime;
+      double oldDeviation = record.getScheduleDeviation();
       record.setScheduleDeviation(deviation);
+      _log.debug("deviation reset to {} from {} for vehicle {}", deviation, oldDeviation, vehiclePosition.getVehicle().getId());
+
     }
   }
   

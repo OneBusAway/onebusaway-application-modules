@@ -16,8 +16,10 @@
 package org.onebusaway.transit_data_federation.impl.realtime;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -60,6 +62,8 @@ public class VehicleLocationRecordCacheImpl implements VehicleLocationRecordCach
   private ConcurrentMap<AgencyAndId, VehicleLocationCacheEntry> _entriesByVehicleId = new ConcurrentHashMap<AgencyAndId, VehicleLocationCacheEntry>();
 
   private ConcurrentMap<BlockInstance, Set<AgencyAndId>> _vehicleIdsByBlockInstance = new ConcurrentHashMap<BlockInstance, Set<AgencyAndId>>();
+
+  private Map<AgencyAndId, VehicleLocationRecord> rawPositionMap = new HashMap<>();
 
   /**
    * By default, we keep around 20 minutes of cache entries
@@ -109,6 +113,16 @@ public class VehicleLocationRecordCacheImpl implements VehicleLocationRecordCach
   /****
    * {@link VehicleLocationRecordCache} Interface
    ****/
+  @Override
+  public void addRawPosition(AgencyAndId vehicleId, VehicleLocationRecord point) {
+    rawPositionMap.put(vehicleId, point);
+  }
+
+  @Override
+  public VehicleLocationRecord getRawPosition(AgencyAndId vehicleId) {
+    return rawPositionMap.get(vehicleId);
+  }
+
 
   @Override
   public VehicleLocationCacheElements getRecordForVehicleId(

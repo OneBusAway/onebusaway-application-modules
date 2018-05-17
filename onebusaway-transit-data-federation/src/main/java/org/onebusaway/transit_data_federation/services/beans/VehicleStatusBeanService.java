@@ -38,4 +38,7 @@ public interface VehicleStatusBeanService {
 
   public void resetVehicleLocation(AgencyAndId vehicleId);
 
+  public VehicleLocationRecordBean getVehiclePositionForVehicleId(
+          AgencyAndId vehicleId);
+
 }
