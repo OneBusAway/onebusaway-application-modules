@@ -27,6 +27,8 @@ var vehicleStr = vehicleId.split("_")[1];
 var errorLatLng = new google.maps.LatLng(38.905216, -77.06301);
 var age = -999;
 var deviation = -999;
+var block = "";
+var trip = "";
 var map;
 
 function getParameterByName(name, defaultValue) {
@@ -42,8 +44,11 @@ function getParameterByName(name, defaultValue) {
 }
 function showLegend(map) {
     var div = document.createElement('div');
-    console.log("showing legend with " + age + ", " + deviation);
-    div.innerHTML = 'Age: ' + age + '<br/>' + 'Deviation: ' + deviation + '<br/>';
+    console.log("showing legend with " + Math.round(age * 100) / 100 + ", " + deviation);
+    div.innerHTML = '<b>Age: </b> ' + Math.round(age * 100) / 100 + 's<br/>';
+    div.innerHTML += '<b>Deviation: </b> ' + deviation + 'min<br/>'
+	div.innerHTML += '<b>Block: </b> ' + block + '<br/>';
+    div.innerHTML += 'Trip: ' + trip + '<br/>&nbsp;&nbsp;';
     var legend = document.getElementById('legend');
     legend.appendChild(div);
 
@@ -79,8 +84,10 @@ function initialize() {
             if (typeof(extensions) !== "undefined") {
                 deviation = extensions.Deviation;
                 console.log("deviation=" + deviation);
-                showLegend(map);
             }
+            block = activity.MonitoredVehicleJourney.BlockRef;
+            trip = activity.MonitoredVehicleJourney.FramedVehicleJourneyRef.DatedVehicleJourneyRef;
+            showLegend(map);
             blockLocation.lat = latitude;
             blockLocation.lng = longitude;
             console.log("lat/lng set");
