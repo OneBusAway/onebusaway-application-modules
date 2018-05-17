@@ -48,7 +48,7 @@ function showLegend(map) {
     div.innerHTML = '<b>Age: </b> ' + Math.round(age * 100) / 100 + 's<br/>';
     div.innerHTML += '<b>Deviation: </b> ' + deviation + 'min<br/>'
 	div.innerHTML += '<b>Block: </b> ' + block + '<br/>';
-    div.innerHTML += 'Trip: ' + trip + '<br/>&nbsp;&nbsp;';
+    div.innerHTML += '<b>Trip: </b>' + trip + '<br/>&nbsp;&nbsp;';
     var legend = document.getElementById('legend');
     legend.appendChild(div);
 
