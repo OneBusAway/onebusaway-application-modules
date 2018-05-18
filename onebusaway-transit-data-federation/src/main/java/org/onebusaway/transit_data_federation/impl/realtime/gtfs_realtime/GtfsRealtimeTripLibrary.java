@@ -136,7 +136,6 @@ public class GtfsRealtimeTripLibrary {
   public void setBlockGeospatialService(BlockGeospatialService blockGeospatialService) {
     _blockGeospatialService = blockGeospatialService;
   }
- 
 
   /**
    * Trip updates describe a trip which is undertaken by a vehicle (which is
