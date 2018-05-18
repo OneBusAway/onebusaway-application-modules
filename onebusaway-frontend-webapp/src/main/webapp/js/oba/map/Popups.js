@@ -721,19 +721,19 @@ OBA.Popups = (function() {
 
 	//////////////////// CONSTRUCTOR /////////////////////
 
-	// // timer to update data periodically
-	// setInterval(function() {
-	// 	if(infoWindow !== null && typeof infoWindow.refreshFn === 'function') {
-	// 		infoWindow.refreshFn();
-	// 	}
-	// }, OBA.Config.refreshInterval);
-    //
-	// // updates timestamp in popup bubble every second
-	// setInterval(function() {
-	// 	if(infoWindow !== null && typeof infoWindow.updateTimestamp === 'function') {
-	// 		infoWindow.updateTimestamp();
-	// 	}
-	// }, 1000);
+	// timer to update data periodically
+	setInterval(function() {
+		if(infoWindow !== null && typeof infoWindow.refreshFn === 'function') {
+			infoWindow.refreshFn();
+		}
+	}, OBA.Config.refreshInterval);
+
+	// updates timestamp in popup bubble every second
+	setInterval(function() {
+		if(infoWindow !== null && typeof infoWindow.updateTimestamp === 'function') {
+			infoWindow.updateTimestamp();
+		}
+	}, 1000);
 	
 	return {
 		reset: function() {
