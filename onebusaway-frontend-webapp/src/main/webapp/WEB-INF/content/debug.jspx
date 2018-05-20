@@ -38,8 +38,12 @@ html, body {
 </s:url>
 <script src="${url}" type="text/javascript"><!-- //prevent jspx minimization --></script>
 
+	<s:url var="url" value="/js/oba/map/debug.js">
+		<s:param name="v"><s:property value="frontEndVersion" /></s:param>
+	</s:url>
+<script type="text/javascript" src="${url}"><!-- //prevent jspx minimization --></script>
 
-<s:url var="url" value="/js/oba/map/debug.js">
+<s:url var="url" value="/js/oba/Util.js">
 	<s:param name="v"><s:property value="frontEndVersion" /></s:param>
 </s:url>
 <script type="text/javascript" src="${url}"><!-- //prevent jspx minimization --></script>
@@ -70,6 +74,10 @@ html, body {
 	  <b>Trip: </b><div id="trip">unset</div>
 	  <b>Distance: </b><div id="distance">unset</div>
 	  <b>Timestamp: </b><div id="timestamp">unset</div>
+	  <b>Next Stop Id:</b><div id="nextStopId">unset</div>
+	  <b>Next Stop:</b><div id="nextStop">unset</div>
+	  <b>Scheduled: </b><div id="scheduled">unset</div>
+	  <b>Predicted: </b><div id="predicted">unset</div>
   </div>
   <div id="map"><!-- //prevent jspx minimization --></div>
 </body>

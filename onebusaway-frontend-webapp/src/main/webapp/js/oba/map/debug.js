@@ -20,6 +20,12 @@ var apiKey = getParameterByName("key", "TEST");
 var smurl = "/onebusaway-api-webapp/siri/vehicle-monitoring?key=" + apiKey + "&type=json";
 var rawUrlPre = "/onebusaway-api-webapp/api/where/vehicle-position-for-vehicle/";
 var rawUrlPost = ".json?key=" + apiKey + "&version=2";
+var shapeUrlPre = "/onebusaway-api-webapp/api/where/shape/";
+var shapeUrlPost = ".json?key=" + apiKey + "&version=2";
+var stopUrlPre = "/onebusaway-api-webapp/api/where/stop/";
+var stopUrlPost = ".json?key=" + apiKey + "&version=2";
+
+
 var vehicleId = getParameterByName("vehicleId", "1");
 var agencyId = vehicleId.split("_")[0];
 var vehicleStr = vehicleId.split("_")[1];
@@ -28,6 +34,8 @@ var errorLatLng = new google.maps.LatLng(38.905216, -77.06301);
 var lengendInit = false;
 var markerGtfsr;
 var markerBlockLocation;
+var shape;
+var markerStop;
 var map;
 var refreshSeconds = getParameterByName("refresh", "5");
 
@@ -111,12 +119,13 @@ function update() {
         var activity = r.Siri.ServiceDelivery.VehicleMonitoringDelivery[0].VehicleActivity[0];
         if(typeof(activity) == "undefined" || activity === null || activity.MonitoredVehicleJourney === null) {
             console.log("no activity for vehicle " + vehicleStr);
-            // var infoWindow = new google.maps.InfoWindow(
-            //     {
-            //         content: "unable to find SIRI vehicle " + vehicleStr,
-            //         position: errorLatLng
-            //     });
-            // infoWindow.open(map);
+            document.getElementById("block").innerHTML = "unavailable";
+            document.getElementById("trip").innerHTML = "unavailable";
+            document.getElementById("nextStopId").innerHTML = "unavailable";
+            document.getElementById("nextStop").innerHTML = "unavailable";
+            document.getElementById("scheduled").innerHTML = "unavailable";
+            document.getElementById("predicted").innerHTML = "unavailable";
+            document.getElementById("deviation").innerHTML = "unavailable";
             return null;
         } else {
             console.log("have activity for vehicle " + vehicleStr);
@@ -129,11 +138,29 @@ function update() {
             }
             document.getElementById("block").innerHTML = activity.MonitoredVehicleJourney.BlockRef;
             document.getElementById("trip").innerHTML = activity.MonitoredVehicleJourney.FramedVehicleJourneyRef.DatedVehicleJourneyRef;
+            document.getElementById("nextStopId").innerHTML = activity.MonitoredVehicleJourney.MonitoredCall.StopPointRef;
+            document.getElementById("nextStop").innerHTML = activity.MonitoredVehicleJourney.MonitoredCall.StopPointName;
+            if (typeof(activity.MonitoredVehicleJourney.MonitoredCall.AimedArrivalTime) !== "undefined") {
+                console.log("aimed=" + activity.MonitoredVehicleJourney.MonitoredCall.AimedArrivalTime);
+                document.getElementById("scheduled").innerHTML
+                    = activity.MonitoredVehicleJourney.MonitoredCall.AimedArrivalTime.split("T")[1].split("-")[0].split(".")[0];
+            }   else {
+                document.getElementById("scheduled").innerHTML = "unavailable";
+            }
+            if (typeof(activity.MonitoredVehicleJourney.MonitoredCall.AimedArrivalTime) !== "undefined") {
+                document.getElementById("predicted").innerHTML
+                    = activity.MonitoredVehicleJourney.MonitoredCall.ExpectedArrivalTime.split("T")[1].split("-")[0].split(".")[0];
+            } else {
+                document.getElementById("predicted").innerHTML = "unavailable";
+            }
+            updateShape(activity.MonitoredVehicleJourney.JourneyPatternRef);
+            updateStop(activity.MonitoredVehicleJourney.MonitoredCall.StopPointRef);
+
 
             blockLocation.lat = latitude;
             blockLocation.lng = longitude;
             console.log("lat/lng set");
-            updatePan();
+
             if (markerBlockLocation == null) {
                 markerBlockLocation = new google.maps.Marker({
                     position: blockLocation,
@@ -152,14 +179,9 @@ function update() {
         var code = data.code;
         if (code == null || code == 404 || typeof data.data == "undefined") {
             console.log("no raw position");
-            var infoWindow = new google.maps.InfoWindow(
-                {
-                    content: "unable to find raw position for vehicle " + vehicleStr,
-                    position: errorLatLng
-                });
-            infoWindow.open(map);
-
-            return;
+            document.getElementById("age").innerHTML = "unavailable";
+            document.getElementById("timestamp").innerHTML = "unavailable";
+            return null;
         }
         console.log("have raw data= " + data.data.timeOfLocationUpdate);
         lat = data.data.currentLocation.lat;
@@ -175,25 +197,78 @@ function update() {
                 icon: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png',
                 position: gtfsrLocation,
                 map: map,
-                title: 'GTFS-R!'
+                title: 'GTFS-RT'
             });
         } else {
             markerGtfsr.setPosition(gtfsrLocation);
         }
-        updatePan();
+
 
     });
     if (lengendInit == false) {
         createLegend(map);
     }
     updateDistance();
-
+    updatePan();
     setTimeout(function() {
         update();
     }, (refreshSeconds * 1000));
 
 }
 
+function updateShape(shapeId) {
+    var shapeUrl = shapeUrlPre + shapeId + shapeUrlPost;
+    console.log("making shape call = " + shapeUrl);
+    jQuery.getJSON(shapeUrl, {}, function(data) {
+        var encodedShape = data.data.entry.points;
+
+        if (shape != null) {
+            shape.setMap(null);
+        }
+        var points = OBA.Util.decodePolyline(encodedShape);
+
+        var latlngs = jQuery.map(points, function(x) {
+            return new google.maps.LatLng(x[0], x[1]);
+        });
+
+        var color = "999999";
+        var options = {
+            path: latlngs,
+            strokeColor: "#" + color,
+            strokeOpacity: 1.0,
+            strokeWeight: 3,
+            clickable: false,
+            map: map,
+            zIndex: 2
+        };
+
+        shape = new google.maps.Polyline(options);
+        shape.setMap(map);
+
+    });
+}
+
+function updateStop(stopId) {
+    var stopUrl = stopUrlPre + stopId + stopUrlPost;
+    console.log("making stop call = " + stopUrl);
+    jQuery.getJSON(stopUrl, {}, function (data) {
+        stoplat = data.data.entry.lat;
+        stoplon = data.data.entry.lon;
+
+        var stopLocation = {lat: parseFloat(stoplat), lng: parseFloat(stoplon)};
+        if (markerStop == null) {
+            markerStop = new google.maps.Marker({
+                icon: 'img/realtime/stop/stop-unknown.png',
+                position: stopLocation,
+                map: map,
+                title: 'Stop'
+            });
+        } else {
+            markerStop.setPosition(stopLocation);
+        }
+
+    });
+}
 function updatePan() {
     if (typeof(markerGtfsr) !== "undefined"
         && typeof(markerBlockLocation) !== "undefined"
@@ -240,6 +315,7 @@ function updateDistance() {
 
     } else {
         console.log("skipping distance");
+        document.getElementById("distance").innerHTML = "unavailable";
     }
 }
 function initialize() {
