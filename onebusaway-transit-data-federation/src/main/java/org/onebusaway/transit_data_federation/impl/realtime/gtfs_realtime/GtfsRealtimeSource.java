@@ -487,7 +487,9 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     if (_maxDeltaLocationMeters == null) return true; // validation turned off
     CoordinatePoint reported = new CoordinatePoint(update.vehiclePosition.getPosition().getLatitude(),
             update.vehiclePosition.getPosition().getLongitude());
+
     BlockLocation blockLocation = _blockLocationService.getScheduledLocationForBlockInstance(update.block.getBlockInstance(), record.getTimeOfRecord());
+      if (blockLocation == null) return true; // this record will be tossed for other reasons
     CoordinatePoint calculated = blockLocation.getLocation();
     double delta = SphericalGeometryLibrary.distanceFaster(reported.getLat(), reported.getLon(),
             calculated.getLat(), calculated.getLon());
