@@ -54,6 +54,10 @@ public class IndexAction extends OneBusAwayEnterpriseActionSupport {
 	return _configurationService.getConfigurationValueAsString("display.googleAdsClientId", "");    
   }
 
+  public String getGoogleMapsApiKey() {
+    return _configurationService.getConfigurationValueAsString("display.googleMapsApiKey", "");
+  }
+
   public List<ServiceAlertBean> getGlobalServiceAlerts() {
     List<ServiceAlertBean> results = _realtimeService.getServiceAlertsGlobal();
     return (results != null && results.size() > 0) ? results : null;
