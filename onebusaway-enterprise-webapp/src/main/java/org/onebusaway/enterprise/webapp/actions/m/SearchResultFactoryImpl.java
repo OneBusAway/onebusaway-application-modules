@@ -30,6 +30,8 @@ import org.onebusaway.presentation.impl.search.AbstractSearchResultFactoryImpl;
 import org.onebusaway.presentation.model.SearchResult;
 import org.onebusaway.presentation.services.realtime.RealtimeService;
 import org.onebusaway.presentation.services.search.SearchResultFactory;
+import org.onebusaway.transit_data.model.*;
+import org.onebusaway.transit_data.model.service_alerts.SituationQueryBean;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.transit_data_federation.siri.SiriDistanceExtension;
 import org.onebusaway.transit_data_federation.siri.SiriExtensionWrapper;
@@ -42,12 +44,6 @@ import org.onebusaway.enterprise.webapp.actions.m.model.RouteInRegionResult;
 import org.onebusaway.enterprise.webapp.actions.m.model.RouteResult;
 import org.onebusaway.enterprise.webapp.actions.m.model.StopOnRoute;
 import org.onebusaway.enterprise.webapp.actions.m.model.StopResult;
-import org.onebusaway.transit_data.model.NameBean;
-import org.onebusaway.transit_data.model.RouteBean;
-import org.onebusaway.transit_data.model.StopBean;
-import org.onebusaway.transit_data.model.StopGroupBean;
-import org.onebusaway.transit_data.model.StopGroupingBean;
-import org.onebusaway.transit_data.model.StopsForRouteBean;
 import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 
@@ -246,10 +242,28 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
     		  routesWithNoVehiclesEnRoute.add(routeAtStop);
       }
     }
+
+      // add stop level service alerts
+      List<ServiceAlertBean> stopServiceAlertBeans = getServiceAlertsForStop(stopBean.getId());
+      populateServiceAlerts(serviceAlertDescriptions, stopServiceAlertBeans);
     
     return new StopResult(stopBean, routesWithArrivals,
         routesWithNoVehiclesEnRoute, routesWithNoScheduledService, filteredRoutes, serviceAlertDescriptions);
   }
+
+    private List<ServiceAlertBean> getServiceAlertsForStop(String stopId) {
+        SituationQueryBean query = new SituationQueryBean();
+        SituationQueryBean.AffectsBean affects = new SituationQueryBean.AffectsBean();
+        query.getAffects().add(affects);
+        affects.setStopId(stopId);
+        ListBean<ServiceAlertBean> alerts = _transitDataService.getServiceAlerts(query);
+
+        if (alerts != null) {
+            return alerts.getList();
+        }
+
+        return Collections.emptyList();
+    }
 
   @Override
   public SearchResult getGeocoderResult(EnterpriseGeocoderResult geocodeResult, Set<RouteBean> routeFilter) {
