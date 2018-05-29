@@ -173,8 +173,14 @@ function update() {
         }
     });
 
-    var gtfsrUrl = rawUrlPre + vehicleId + rawUrlPost;
+    var gtfsUrl;
+    if (typeof(OBA.Config) == "undefined" || typeof(OBA.Config.apiBaseUrl) == "undefined") {
+        gtfsrUrl = "http://localhost:8080" + rawUrlPre + vehicleId + rawUrlPost;
+    } else {
+        gtfsrUrl = OBA.Config.apiBaseUrl + rawUrlPre + vehicleId + rawUrlPost;
+    }
     console.log("making raw call = " + gtfsrUrl);
+
     jQuery.getJSON(gtfsrUrl, {}, function(data) {
         var code = data.code;
         if (code == null || code == 404 || typeof data.data == "undefined") {
