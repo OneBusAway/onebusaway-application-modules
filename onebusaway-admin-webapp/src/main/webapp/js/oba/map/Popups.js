@@ -353,7 +353,8 @@ OBA.Popups = (function() {
 		html += OBA.Config.infoBubbleFooterFunction('route', activity.MonitoredVehicleJourney.PublishedLineName);
 		
 		html += "<ul class='links'>";
-		html += "<a href='#' id='zoomHere'>Center & Zoom Here</a>";
+		html += "<a href='#' id='zoomHere'>Center & Zoom Here</a><br/>";
+        html += "<a target='_new' href='" + OBA.Config.obaUrl +"/debug?vehicleId=" + vehicleId + "&key="+ OBA.Config.obaApiKey + "' id='debug'>Debug vehicle</a>";
 		html += "</ul>";
 		
 		// (end popup)

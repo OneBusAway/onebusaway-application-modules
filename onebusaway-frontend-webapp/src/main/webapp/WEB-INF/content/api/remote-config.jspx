@@ -24,6 +24,8 @@
     OBA.Config.googleAnalyticsSiteId="<s:property value="googleAnalyticsSiteId" />";
     OBA.Config.bingMapsKey="<s:property value="bingMapsKey" />";
     OBA.Config.obaApiKey="<s:property value="obaApiKey" />";
+    OBA.Config.obaUrl="<s:property value="appHostURL" />";
+    OBA.Config.serviceAlertText='<s:property value="serviceAlertText" />';
     OBA.Config.mapBounds=<s:property value="mapBounds" />;
     OBA.Config.mapCenterLat=<s:property value="mapCenterLat" default="null" />;
     OBA.Config.mapCenterLon=<s:property value="mapCenterLon" default="null" />;
