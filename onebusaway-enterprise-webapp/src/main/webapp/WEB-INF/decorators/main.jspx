@@ -104,8 +104,11 @@
 	<div id="mainbox">
 		<div id="topbar">
 			<div id="branding">
-				<s:set var="link" value="getText('main.agency.link')" />
-				<a href="${link}" id="agency-logo"></a>
+				<a href="${link}">
+					<s:url var="url" value="/css/img/agency_logo.png"></s:url>
+					<img src="${url}" alt="Agency logo" />
+				</a>
+
 			</div>
 
 			<div id="search">
