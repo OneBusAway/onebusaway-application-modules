@@ -226,7 +226,9 @@ OBA.Popups = (function() {
 
 		var vehicleId = activity.MonitoredVehicleJourney.VehicleRef;
 		var vehicleIdParts = vehicleId.split("_");
-		var vehicleIdWithoutAgency = vehicleIdParts[1];
+        var blockId = activity.MonitoredVehicleJourney.BlockRef;
+        var vehicleIdWithoutAgency = vehicleIdParts[1];
+        var blockIdWithoutAgency = blockId.split("_")[1];
 		var routeName = activity.MonitoredVehicleJourney.LineRef;
 		var hasRealtime = activity.MonitoredVehicleJourney.Monitored;
 
@@ -241,8 +243,13 @@ OBA.Popups = (function() {
 		// header
 		html += '<div class="header vehicle">';
 		html += '<p class="title">' + activity.MonitoredVehicleJourney.PublishedLineName + " " + activity.MonitoredVehicleJourney.DestinationName + '</p><p>';
-		html += '<span class="type">Vehicle #' + vehicleIdWithoutAgency + '</span>';
-
+        //don't show block id if there is none or if config says no
+        if (OBA.Config.showBlockIdInVehiclePopup == false || typeof blockIdWithoutAgency === 'undefined' || blockIdWithoutAgency === null) {
+            html += '<span class="type">Vehicle #' + vehicleIdWithoutAgency + '</span>';
+        }
+        else {
+            html += '<span class="type">Vehicle #' + vehicleIdWithoutAgency + ' - ' + blockIdWithoutAgency + '</span>';
+        }
 		var updateTimestamp = OBA.Util.ISO8601StringToDate(activity.RecordedAtTime).getTime();
 		var updateTimestampReference = OBA.Util.ISO8601StringToDate(r.Siri.ServiceDelivery.ResponseTimestamp).getTime();
 
