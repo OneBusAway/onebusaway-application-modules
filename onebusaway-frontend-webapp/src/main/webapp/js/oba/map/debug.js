@@ -165,7 +165,7 @@ function update() {
                 markerBlockLocation = new google.maps.Marker({
                     position: blockLocation,
                     map: map,
-                    title: 'Vehicle Position'
+                    title: 'Calculated Position: ' + vehicleId
                 });
             } else {
                 markerBlockLocation.setPosition(blockLocation);
@@ -203,7 +203,7 @@ function update() {
                 icon: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png',
                 position: gtfsrLocation,
                 map: map,
-                title: 'GTFS-RT'
+                title: 'Raw Position: ' + vehicleId
             });
         } else {
             markerGtfsr.setPosition(gtfsrLocation);
@@ -267,7 +267,7 @@ function updateStop(stopId) {
                 icon: 'img/realtime/stop/stop-unknown.png',
                 position: stopLocation,
                 map: map,
-                title: 'Stop'
+                title: 'Stop ' + stopId
             });
         } else {
             markerStop.setPosition(stopLocation);
@@ -338,6 +338,7 @@ function initialize() {
 
     createLegend(map);
 	google.maps.event.addDomListener(window, 'load', initialize);
+	update();
 
 
  

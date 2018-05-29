@@ -112,6 +112,6 @@ public class ConfigAction extends OneBusAwayEnterpriseActionSupport {
   }
 
   public String getServiceAlertText() {
-    return _configurationService.getConfigurationValueAsString("display.getServiceAlertText", "Service Alert");
+    return _configurationService.getConfigurationValueAsString("display.serviceAlertText", "Service Alert");
   }
 }

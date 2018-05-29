@@ -121,7 +121,7 @@ public class RemoteConfigAction extends ActionSupport {
                 "appHostname", null);
     }
     public String getServiceAlertText() {
-        return _configurationService.getConfigurationValueAsString("display.getServiceAlertText", "Service Alert");
+        return _configurationService.getConfigurationValueAsString("display.serviceAlertText", "Service Alert");
     }
     
     public boolean isHttps() {
