@@ -65,6 +65,7 @@ OBA.Mobile = (function() {
 				.load(location.href + " #content>*", null, function() {
 					refreshTimestamp.text("Updated " + new Date().format("mediumTime"));
 					refreshBar.removeClass("loading");
+					updateServiceAlertHeaderText();
 				});
 		});
 				
@@ -209,6 +210,9 @@ OBA.Mobile = (function() {
 			});
 		}
 	}
+	function updateServiceAlertHeaderText() {
+		$('#serviceAlertHeader span').html("<strong>" + OBA.Config.serviceAlertText + ":</strong>");
+	}
 	return {
 		initialize: function() {
 			locationField = jQuery("#l");
@@ -221,10 +225,11 @@ OBA.Mobile = (function() {
 			addRefreshBehavior();
 			addAutocompleteBehavior();
 			addMapBehaviour();
+            updateServiceAlertHeaderText()
 		},
 		// declare loadMap as public function
 		loadMap: loadMap
 	};
 })();
 
-jQuery(document).ready(function() { OBA.Mobile.initialize(); });
+jQuery(document).ready(function() { OBA.Mobile.initialize();});

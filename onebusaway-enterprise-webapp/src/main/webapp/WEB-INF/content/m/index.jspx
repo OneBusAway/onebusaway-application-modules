@@ -23,6 +23,11 @@
 <jsp:output omit-xml-declaration="yes"/>
 <head>
 
+	<s:url var="url" value="/api/config">
+		<s:param name="v"><s:property value="cacheBreaker" /></s:param>
+	</s:url>
+	<script type="text/javascript" src="${url}"><!-- //prevent jspx minimization --></script>
+
 	<s:url var="url" value="/js/lib/jquery.ui.js">
 		<s:param name="v"><s:property value="frontEndVersion" /></s:param>
   	</s:url>
@@ -65,7 +70,10 @@
 		<div id="global-alerts" class="global-alerts">
 			<s:iterator value="globalServiceAlerts">
 				<s:iterator value="descriptions">
-					<p class="global-alert-content"><strong>Service Alert: </strong><s:property value="value" /></p>
+					<p id="serviceAlertHeader" class="global-alert-content">
+						<span>Service Alert Text Here</span>
+						<s:property value="value" />
+					</p>
 				</s:iterator>
 			</s:iterator>
 		 </div>

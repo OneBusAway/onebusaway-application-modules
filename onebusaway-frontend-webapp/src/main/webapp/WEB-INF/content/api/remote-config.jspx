@@ -36,6 +36,7 @@
     OBA.Config.signDefaultAgencyId='<s:text name="sign.default.agency.id" />';
     OBA.Config.useAgencyId='<s:property value="useAgencyId" />';
     OBA.Config.showVehicleIdInStopPopup='<s:property value="showVehicleIdInStopPopup" />';
+    OBA.Config.serviceAlertText='<s:property value="serviceAlertText" />';
 
     OBA.Config.siriSMUrl = "<s:property value="appHostURL" />" + "<s:property value="siriBaseURL" />" + "/stop-monitoring.json?key=" + OBA.Config.obaApiKey;
     OBA.Config.siriVMUrl = "<s:property value="appHostURL" />" + "<s:property value="siriBaseURL" />" + "/vehicle-monitoring.json?key=" + OBA.Config.obaApiKey;
