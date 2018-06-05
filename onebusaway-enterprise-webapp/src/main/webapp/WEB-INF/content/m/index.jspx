@@ -96,7 +96,7 @@
 	    	<a href="${url}">Refresh (<strong>Updated <s:property value="lastUpdateTime" /></strong>)</a>
 		</div>
 
-		<s:if test="%{results.matches.size==1}">
+		<!--<s:if test="%{results.matches.size==1}">
 		  <s:if test="results.resultType.equals('StopResult')">
 			<div id="mapHider" onclick="OBA.Mobile.loadMap('${q}')">
 				<div id="mapExpander">
@@ -107,7 +107,7 @@
 				<div id="mapContainer"><br/></div>
 			</div>
 		  </s:if>
-		</s:if>
+		</s:if>-->
 		<div id="content">
 			<s:if test="%{results.matches.size&gt;0}">
 
