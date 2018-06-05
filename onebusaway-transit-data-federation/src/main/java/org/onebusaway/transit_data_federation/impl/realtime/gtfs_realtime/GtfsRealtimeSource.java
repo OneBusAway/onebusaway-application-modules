@@ -161,6 +161,8 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   
   private boolean _enabled = true;
 
+  private boolean _useLabelAsId = false;
+
   @Autowired
   public void setAgencyService(AgencyService agencyService) {
     _agencyService = agencyService;
@@ -316,6 +318,14 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   public boolean getEnabled() {
     return _enabled;
   }
+
+  /**
+   * use the vehicle label as the id.
+   * @param useLabelAsId
+   */
+  public void setUseLabelAsId(boolean useLabelAsId) {
+    _useLabelAsId = useLabelAsId;
+  }
   
   public GtfsRealtimeTripLibrary getGtfsRealtimeTripLibrary() {
     return _tripsLibrary;
@@ -346,6 +356,7 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     }
     _tripsLibrary.setScheduleAdherenceFromLocation(_scheduleAdherenceFromLocation);
     _tripsLibrary.setBlockGeospatialService(_blockGeospatialService);
+    _tripsLibrary.setUseLabelAsVehicleId(_useLabelAsId);
     
     _alertLibrary = new GtfsRealtimeAlertLibrary();
     _alertLibrary.setEntitySource(_entitySource);
