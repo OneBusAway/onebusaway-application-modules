@@ -32,11 +32,10 @@ public class TripResource extends MetricResource {
   @Produces("application/json")
   public Response getScheduleTripCount(@PathParam("agencyId") String agencyId, @QueryParam("routeId") String routeId) {
     try {
-      if (this.getDataSources() == null || this.getDataSources().isEmpty()) {
-        _log.error("no configured data sources");
-        return Response.ok(error("scheduled-trips", "con configured data sources")).build();
-      }
-
+      /*
+       * we don't need any configured real-time sources to check schedule
+       * so skip the usual check here
+       */
       int scheduleTrips = getScheduledTrips(agencyId, routeId);
       
       return Response.ok(ok("scheduled-trips", scheduleTrips)).build();
