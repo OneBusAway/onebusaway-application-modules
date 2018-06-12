@@ -44,7 +44,7 @@ OBA.RouteMap = function(mapNode, initCallbackFn, serviceAlertCallbackFn) {
 	var locationIconArrays = OBA.Config.loadLocationIcons();
 	var locationIcons = locationIconArrays[0], activeLocationIcons = locationIconArrays[1], iconShadow = locationIconArrays[2];    
 	var normalLocationIcon = locationIcons[0], activeLocationIcon = activeLocationIcons[0];
-	    
+
 	// POLYLINE
 	function removePolylines(routeId) {
 		if(typeof polylinesByRoute[routeId] !== 'undefined') {
@@ -149,12 +149,31 @@ OBA.RouteMap = function(mapNode, initCallbackFn, serviceAlertCallbackFn) {
 		if(directionKey === null) {
 			directionKey = "unknown";
 		}
-		
-		var icon = new google.maps.MarkerImage(OBA.Config.urlPrefix + "img/realtime/stop/stop-" + directionKey + ".png",
+
+        var stopsOnRoute = jQuery("body").data("savedData").stops;
+
+		var onRoute = false;
+		jQuery.each(stopsOnRoute, function(_, stopOnRoute) {
+			if (String(stopOnRoute) === String(stop.id)) {
+				onRoute = true;
+			}
+        });
+
+		if (onRoute === true) {
+            var icon = {
+                url: "img/realtime/stop/stop-" + directionKey + ".png",
+                size: new google.maps.Size(31, 31),
+                origin: new google.maps.Point(0, 0),
+                anchor: new google.maps.Point(15, 15),
+                scaledSize: new google.maps.Size(33, 33)
+            }
+        } else {
+            var icon = new google.maps.MarkerImage("img/realtime/stop/stop-off-route-" + directionKey + ".png",
 				new google.maps.Size(21, 21),
 				new google.maps.Point(0,0),
 				new google.maps.Point(10, 10));
-		
+		}
+
 		var defaultVisibility = (map.getZoom() < 16) ? false : true;
 		var markerOptions = {
 				position: new google.maps.LatLng(latitude, longitude),
@@ -364,8 +383,6 @@ OBA.RouteMap = function(mapNode, initCallbackFn, serviceAlertCallbackFn) {
 		}
 		highlightedStop = null;
 	}
-
-
 
 	function showLegend(map) {
 	 	var iconBase = OBA.Config.urlPrefix + 'img/';
