@@ -275,16 +275,29 @@ OBA.Sidebar = function() {
 	}
 	
 	function addRoutesToLegend(routeResults, title, filter, stopId) {
-		
+
 		var filterExistsInResults = false;
-		
+
+		// Need route and stop info for highlighting stops in RouteMap.js
+		var savedData = { routes:[], stops:[]}
+
 		jQuery.each(routeResults, function(_, routeResult) {
 			if (routeResult.shortName === filter) {
 				filterExistsInResults = true;
 				return false;
 			}
+            savedData.routes.push(routeResult.id);
+            jQuery.getJSON(OBA.Config.stopsOnRoute + "?callback=?", { routeId: routeResult.id }, function (json) {
+                jQuery.each(json.stops, function(_, stop){
+                    if (savedData.stops.indexOf(stop.id) === -1) {
+						savedData.stops.push(stop.id);
+					}
+				});
+            });
 		});
-		
+
+        jQuery("body").data( "savedData", savedData );
+
 		if(typeof title !== "undefined" && title !== null) {
 			matches.find("h2").text(title);
 		}
