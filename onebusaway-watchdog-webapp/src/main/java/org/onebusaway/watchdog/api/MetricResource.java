@@ -34,8 +34,7 @@ import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data.model.ListBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsBean;
-import org.onebusaway.transit_data.model.trips.TripDetailsInclusionBean;
-import org.onebusaway.transit_data.model.trips.TripsForBoundsQueryBean;
+import org.onebusaway.transit_data.model.trips.TripsForAgencyQueryBean;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.MonitoredDataSource;
 import org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.MonitoredResult;
@@ -91,31 +90,23 @@ public abstract class MetricResource {
   
   protected int getScheduledTrips(String agencyId, String routeId) {
     Set<TripDetailsBean> agencyTrips = new HashSet<TripDetailsBean>();
-    TripsForBoundsQueryBean query = new TripsForBoundsQueryBean();
-    List<CoordinateBounds> allBounds = getTDS().getAgencyIdsWithCoverageArea().get(agencyId);
-    
-    for (CoordinateBounds bounds : allBounds) {
-      query.setBounds(bounds);
-      query.setTime(SystemTime.currentTimeMillis());
+      TripsForAgencyQueryBean query = new TripsForAgencyQueryBean();
+      query.setAgencyId(agencyId);
       query.setMaxCount(Integer.MAX_VALUE);
-      
-      TripDetailsInclusionBean inclusion = query.getInclusion();
-      inclusion.setIncludeTripBean(true);
-      ListBean<TripDetailsBean> allTrips =  getTDS().getTripsForBounds(query);
-      if (allTrips == null) {
-        continue;
+      ListBean<TripDetailsBean> tripsForAgency = getTDS().getTripsForAgency(query);
+      if (tripsForAgency == null) {
+        return 0;
       }
-  
-      _log.debug("allTrips size=" + allTrips.getList().size());
+
       AgencyAndId routeAndId = new AgencyAndId(agencyId, routeId);
-      for (TripDetailsBean trip : allTrips.getList()) {
-        if (trip.getTripId().startsWith(agencyId)) {
+      for (TripDetailsBean trip : tripsForAgency.getList()) {
+        if (trip.getTripId().startsWith(agencyId + "_")) {
           if (routeId == null || routeAndId.toString().equals(trip.getTrip().getRoute().getId())) {
             agencyTrips.add(trip);
           }
         }
       }
-    }
+    _log.debug("scheduledTrips for (" + agencyId + ", " + routeId + "): " + agencyTrips.size() + " matched trips");
     return agencyTrips.size();
   }
   
