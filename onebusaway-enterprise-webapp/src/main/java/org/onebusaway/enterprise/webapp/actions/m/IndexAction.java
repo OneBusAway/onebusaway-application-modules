@@ -144,6 +144,10 @@ public class IndexAction extends OneBusAwayEnterpriseActionSupport {
     return (results != null && results.size() > 0) ? results : null;
   }
 
+  public String getGoogleMapsApiKey() {
+    return _configurationService.getConfigurationValueAsString("display.googleMapsApiKey", "");
+  }
+
   public String getGoogleAnalyticsSiteId() {
 	  return _configurationService.getConfigurationValueAsString(
               "display.googleAnalyticsSiteId", null);

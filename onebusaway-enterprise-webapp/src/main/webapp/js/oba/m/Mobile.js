@@ -16,7 +16,13 @@
 var OBA = window.OBA || {};
 
 OBA.Mobile = (function() {
-	
+    var expandAlerts = false;
+
+    var theWindow = jQuery(window);
+    var mainbox = jQuery("#mainbox");
+    var topBarDiv = jQuery("#branding");
+    var bottomBarDiv = jQuery("#footer");
+    var routeMap = null;
 	var locationField = null;
 	var typeField = null;
 	var refreshBar = null;
@@ -59,12 +65,12 @@ OBA.Mobile = (function() {
 			e.preventDefault();
 
 			refreshTimestamp.text("Loading...");
-			refreshBar.addClass("loading");
+			refreshBar.addClass("loadingRefresh");
 
 			jQuery("#content")
 				.load(location.href + " #content>*", null, function() {
 					refreshTimestamp.text("Updated " + new Date().format("mediumTime"));
-					refreshBar.removeClass("loading");
+					refreshBar.removeClass("loadingRefresh");
 					updateServiceAlertHeaderText();
 				});
 		});
@@ -176,43 +182,327 @@ OBA.Mobile = (function() {
 	function addMapBehaviour() {
         $("#mapExpander").click(function () {
             $mapExpander = $(this);
-            $mapContainer = $('#mapContainer');
-            $mapContainer.slideToggle(500, function () {
+            $mapDiv = $('#map');
+            $mapDiv.slideToggle(500, function () {
                 $mapExpander.children('span').text(function () {
-                    return $mapContainer.is(":visible") ? "HIDE MAP" : "SHOW MAP";
+                    return $mapDiv.is(":visible") ? "HIDE MAP" : "SHOW MAP";
                 });
+                if ($mapDiv.is(":visible")) updateMap();
             });
         });
     }
 
-	function loadMap(queryString) {
-		if (!document.getElementById("mapFrame")) {
-			window.setTimeout(function () {
-				$('#loadingCover').show();
-			}, 500);
-			$('#mapContainer').html('');
-			var mapFrame = $('<iframe></iframe>');
-			mapFrame.attr("id", "mapFrame");
-			mapFrame.attr("src", "/#" + queryString + "?showPopup=false");
-			mapFrame.attr("display", "none");
-			$('#mapContainer').append(mapFrame);
-			$('#mapFrame').hide();
-			$('#mapFrame').load(function () {
-
-				setTimeout(function(){
-					$('#loadingCover').fadeToggle();
-					$('#mapFrame').fadeToggle();
-					$('#mapFrame').contents().scrollLeft(500);
-				}, 2000);
-				var frameCover = $('<div></div>');
-				frameCover.attr("id", "frameCover");
-				$('#mapContainer').append(frameCover);
-			});
-		}
-	}
 	function updateServiceAlertHeaderText() {
 		$('#serviceAlertHeader span').html("<strong>" + OBA.Config.serviceAlertText + ":</strong>");
 	}
+
+    function getRouteShortName(routeResult){
+        var longName = routeResult.longName;
+        var shortName = routeResult.shortName;
+
+        if(longName == null && shortName == null){
+            shortName = "route";
+        }
+        else if (shortName == null){
+            shortName = longName;
+        }
+        return shortName;
+    }
+
+    function getRouteShortLongName(routeResult){
+
+        var longName = routeResult.longName;
+        var shortName = routeResult.shortName;
+        var shortAndLongName = shortName + " " + longName;
+        var description = routeResult.description;
+
+        if(longName == null && shortName == null){
+            if(description == null){
+                shortAndLongName = "";
+            }
+            else{
+                shortAndLongName = description;
+            }
+        }
+        else if (longName == null){
+            shortAndLongName = shortName;
+        }
+        else if (shortName == null){
+            shortAndLongName = longName;
+        }
+        return shortAndLongName;
+    }
+
+    function addRoutesToLegend(routeResults, title, filter, stopId) {
+
+        var filterExistsInResults = false;
+
+        jQuery.each(routeResults, function(_, routeResult) {
+            if (routeResult.shortName === filter) {
+                filterExistsInResults = true;
+                return false;
+            }
+        });
+
+        // if(typeof title !== "undefined" && title !== null) {
+        //     matches.find("h2").text(title);
+        // }
+
+        //var resultsList = matches.find("ul");
+
+        jQuery.each(routeResults, function(_, routeResult) {
+
+            if (!filter || routeResult.shortName === filter || !filterExistsInResults) {
+
+                // service alerts
+                // var serviceAlertList = jQuery("<ul></ul>")
+                //     .addClass("alerts");
+                //
+                // var serviceAlertHeader = jQuery("<p class='serviceAlert'>" + OBA.Config.serviceAlertText + " for " + getRouteShortName(routeResult) + "</p>")
+                //     .append(jQuery("<span class='click_info'> + Click for info</span>"));
+                //
+                // var serviceAlertContainer = jQuery("<div></div>")
+                //     .attr("id", "alerts-" + routeResult.id.hashCode())
+                //     .addClass("serviceAlertContainer")
+                //     .append(serviceAlertHeader)
+                //     .append(serviceAlertList);
+                //
+                // serviceAlertContainer.accordion({ header: 'p.serviceAlert',
+                //     collapsible: true,
+                //     active: false,
+                //     autoHeight: false });
+
+                // If popup.js has specified to expand alerts, that has been taken into account above and we
+                // reset the global state to not expand alerts.
+                // if (expandAlerts) {
+                //     serviceAlertContainer.accordion("activate" , 0);
+                //     expandAlerts = false;
+                // }
+
+
+                // sidebar item
+                // var titleBox = jQuery("<p></p>")
+                //     .addClass("name")
+                //     .text(getRouteShortLongName(routeResult))
+                //     .css("border-bottom", "5px solid #" + routeResult.color);
+                //
+                // var descriptionBox = jQuery("<p></p>")
+                //     .addClass("description")
+                //     .text(routeResult.description == null ? '' : routeResult.description);
+                //
+                // var listItem = jQuery("<li></li>")
+                //     .addClass("legendItem")
+                //     .append(titleBox)
+                //     .append(descriptionBox)
+                //     .append(serviceAlertContainer);
+                //
+                // resultsList.append(listItem);
+
+                // on click of title, pan to route extent
+                // titleBox.click(function(e) {
+                //     e.preventDefault();
+                //
+                //     routeMap.panToRoute(routeResult.id);
+                // });
+
+                // hover polylines
+                // titleBox.hover(function(e) {
+                //     titleBox.css("color", "#" + routeResult.color);
+                // }, function(e) {
+                //     titleBox.css("color", "");
+                // });
+
+                // titleBox.hoverIntent({
+                //     over: function(e) {
+                //         routeMap.highlightRoute(routeResult.id);
+                //     }, out: function(e) {
+                //         routeMap.unhighlightRoute(routeResult.id);
+                //     },
+                //     sensitivity: 10
+                // });
+
+                // direction picker
+                // jQuery.each(routeResult.directions, function(_, direction) {
+                //     var directionHeader = jQuery("<p></p>");
+                //
+                //     jQuery("<span></span>")
+                //         .text("to " + direction.destination)
+                //         .appendTo(directionHeader);
+                //
+                //     if(direction.hasUpcomingScheduledService === false) {
+                //         var noServiceMessage = jQuery("<div></div>")
+                //             .addClass("no-service")
+                //             .text("No scheduled service for the " +
+                //                 getRouteShortName(routeResult) +
+                //                 " to " + direction.destination + " at this time.");
+                //
+                //         directionHeader.append(noServiceMessage);
+                //     }
+                //
+                //     var stopsList = jQuery("<ul></ul>")
+                //         .addClass("stops")
+                //         .addClass("not-loaded");
+                //
+                //     var loading = jQuery("<div><span>Loading...</span></div>")
+                //         .addClass("loading");
+                //
+                //     var destinationContainer = jQuery("<p></p>")
+                //         .addClass("destination")
+                //         .append(directionHeader)
+                //         .append(stopsList)
+                //         .append(loading);
+
+                    // load stops when user expands stop list
+                    // directionHeader.click(function(e) {
+                    //     loadStopsForRouteAndDirection(routeResult, direction, destinationContainer);
+                    // });
+
+                    // accordion-ize
+                    // destinationContainer.accordion({ header: 'p',
+                    //     collapsible: true,
+                    //     active: false,
+                    //     autoHeight: false });
+                    //
+                    // listItem.append(destinationContainer);
+                //});
+
+                // add to map
+                routeMap.addRoute(routeResult);
+            }
+
+            // if (filter && routeResult.shortName !== filter && filterExistsInResults) {
+            //
+            //     var filteredMatch = jQuery("<li></li>").addClass("filtered-match");
+            //     var link = jQuery('<a href="#' + OBA.Util.displayStopId(stopId) + '%20' + getRouteShortName(routeResult) + '">' + getRouteShortName(routeResult) + '</a>');
+            //
+            //     var allPolylines = [];
+            //     jQuery.each(routeResult.directions, function(_, direction) {
+            //         allPolylines = allPolylines.concat(direction.polylines);
+            //     });
+            //
+            //     link.hover(function() {
+            //         routeMap.showHoverPolyline(allPolylines, routeResult.color);
+            //     }, function() {
+            //         routeMap.removeHoverPolyline();
+            //     });
+            //
+            //     link.appendTo(filteredMatch);
+            //
+            //     filteredMatches.find("ul").append(filteredMatch);
+            // }
+        });
+
+       // matches.show();
+
+        // if (filteredMatches.find("li").length > 1) {
+        //     var showAll = jQuery("<li></li>").addClass("filtered-match").html('<a href="#' + OBA.Util.displayStopId(stopId) + '">See&nbsp;All</a>');
+        //     filteredMatches.find("ul").append(showAll);
+        //     filteredMatches.show();
+        //
+        //     var maxWidth = 0;
+        //     jQuery.each(filteredMatches.find("li"), function(_, item) {
+        //         var wrappedItem = jQuery(item);
+        //         if (wrappedItem.width() > maxWidth) {
+        //             maxWidth = wrappedItem.width();
+        //         }
+        //     });
+        //     filteredMatches.find("li").width(maxWidth);
+        // }
+    }
+
+    var resize = function() {
+        var w = theWindow.width();
+
+        if (w <= 1060) {
+            mainbox.css("width", "960px");
+        } else {
+            mainbox.css("width", w - 150); // 75px margin on each
+                                           // side for dropdown menus
+        }
+
+        // Check if bottomBar is enabled and adjust height accordingly
+        if (bottomBarDiv.is(':visible') == true){
+            var h = theWindow.height() - topBarDiv.height() - bottomBarDiv.outerHeight() - 1;
+        } else {
+            var h = theWindow.height() - topBarDiv.height()  - 1;
+        }
+
+        jQuery("#map").height(h * 0.5);//only use half of that space
+		jQuery("#map").width(w * 0.92); //match refresh button width
+    };
+
+    function addResizeBehavior() {
+
+        resize();
+
+        // call when the window is resized
+        theWindow.resize(resize);
+    }
+
+    function updateMap() {
+        var q = jQuery(".q").val();
+        if (q != '' && q != null && $('#map').is(":visible")) {
+
+				var searchResponse = jQuery.getJSON(OBA.Config.searchUrl + "?callback=?", {q: q}, function (json) {
+
+					var resultType = json.searchResults.resultType;
+				var matches = json.searchResults.matches;
+                    var routeFilter = json.searchResults.routeFilter;
+                    var routeFilterShortName;
+                    if (routeFilter.length > 0) {
+                        routeFilterShortName = routeFilter[0].shortName;
+                    }
+				var showPopup = true;
+				// direct matches
+				if(matches.length === 1 ) {
+					switch(resultType) {
+
+						case "RouteResult":
+							addRoutesToLegend(matches, "Routes:", null, null);
+
+							routeMap.panToRoute(matches[0].id);
+							break;
+
+						case "StopResult":
+							addRoutesToLegend(matches[0].routesAvailable, "Routes available:", routeFilterShortName, matches[0].id);
+
+							var latlng = new google.maps.LatLng(matches[0].latitude, matches[0].longitude);
+							if (showPopup != undefined && !showPopup) {
+								routeMap.addStop(matches[0], null);
+								routeMap.highlightStop(matches[0]);
+							} else {
+								routeMap.addStop(matches[0], function(marker) {
+									routeMap.showPopupForStopId(matches[0].id, routeFilterShortName);
+								});
+							}
+							routeMap.showLocation(latlng);
+
+							break;
+					}
+
+				} else if (matches.length > 1 && resultType == "RouteResult") {
+					// suppport multiple routes found
+					addRoutesToLegend(matches, "Routes:", null, null);
+					routeMap.panToRoute(matches[0].id);
+				}
+
+			});
+		}
+	}
+
+    function loadMap() {
+    	// initialize map, and continue initialization of things that use the map
+		// on load only when google maps says it's ready.
+		routeMap = OBA.RouteMap(document.getElementById("map"), function() {
+			// deep link handler
+			updateMap();
+
+		}, function(routeId, serviceAlerts) { // service alert notification handler
+
+
+		});
+    }
+
 	return {
 		initialize: function() {
 			locationField = jQuery("#l");
@@ -225,9 +515,14 @@ OBA.Mobile = (function() {
 			addRefreshBehavior();
 			addAutocompleteBehavior();
 			addMapBehaviour();
-            updateServiceAlertHeaderText()
+            addResizeBehavior();
+
+            updateServiceAlertHeaderText();
+            loadMap();
+
+            $('#map').hide();
+
 		},
-		// declare loadMap as public function
 		loadMap: loadMap
 	};
 })();

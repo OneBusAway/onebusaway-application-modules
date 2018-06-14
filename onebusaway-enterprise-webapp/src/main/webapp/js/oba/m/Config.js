@@ -21,17 +21,17 @@ var OBA = window.OBA || {};
 $.ajaxSetup({ cache: false });
 
 OBA.Config = {
-		autocompleteUrl: "api/autocomplete",
-		searchUrl: "api/search",
-		configUrl: "api/config",
-		stopsWithinBoundsUrl: "api/stops-within-bounds",
-		stopsOnRouteForDirection: "api/stops-on-route-for-direction",
-		stopForId: "api/stop-for-id",
+		autocompleteUrl: "../api/autocomplete",
+		searchUrl: "../api/search",
+		configUrl: "../api/config",
+		stopsWithinBoundsUrl: "../api/stops-within-bounds",
+		stopsOnRouteForDirection: "../api/stops-on-route-for-direction",
+		stopForId: "../api/stop-for-id",
 		apiUrl: "/onebusaway-api-webapp/api",
 		legacyUrl: "../",
-		urlPrefix: "",
-    	searchParamsPrefix: "#",
-		includeBubbleFooter: true,
+		urlPrefix: "../",
+		searchParamsPrefix: "?q=",
+		includeBubbleFooter: false,
 
 		// siriSMUrl and siriVMUrl now moved to config.jspx
 		
