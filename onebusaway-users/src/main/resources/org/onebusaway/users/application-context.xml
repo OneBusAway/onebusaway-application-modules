@@ -74,7 +74,7 @@
     <bean id="userRoleCache" class="org.onebusaway.container.spring.ehcache.EhCacheFactoryBean">
         <property name="cacheManager" ref="cacheManager" />
         <property name="cacheName" value="org.onebusaway.users.model.UserRole" />
-        <property name="maxElementsInMemory" value="5" />
+        <property name="maxElementsInMemory" value="10" />
         <property name="eternal" value="false" />
         <property name="timeToLive" value="0" />
         <property name="timeToIdle" value="0" />
@@ -198,10 +198,10 @@
     <bean id="minApiRequestIntervalForKeyCache" class="org.onebusaway.container.spring.ehcache.EhCacheFactoryBean">
         <property name="cacheManager" ref="cacheManager" />
         <property name="cacheName" value="org.onebusaway.users.services.UserService.getMinApiRequestIntervalForKey" />
-        <property name="maxElementsInMemory" value="50" />
+        <property name="maxElementsInMemory" value="1000" />
         <property name="eternal" value="false" />
-        <property name="timeToLive" value="0" />
-        <property name="timeToIdle" value="3600" />
+        <property name="timeToLive" value="43200" /> <!-- 12 hours -->
+        <property name="timeToIdle" value="3600" /> <!-- 1 hour -->
         <property name="overflowToDisk" value="false" />
         <property name="diskPersistent" value="false" />
     </bean>
