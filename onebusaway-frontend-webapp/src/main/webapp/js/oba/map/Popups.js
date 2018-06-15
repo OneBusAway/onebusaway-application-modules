@@ -312,8 +312,8 @@ OBA.Popups = (function() {
 					}
 					var lastClass = ((_ === activity.MonitoredVehicleJourney.OnwardCalls.OnwardCall.length - 1) ? " last" : "");
 
-					html += '<li class="nextStop' + lastClass + '">';	
-					html += '<a href="#' + stopRef + '">' + onwardCall.StopPointName + '</a>';
+					html += '<li class="nextStop' + lastClass + '">';
+                    html += '<a href="' + OBA.Config.searchParamsPrefix + stopRef + '">' + onwardCall.StopPointName + '</a>';
 					html += '<span>';
 						
 					if(typeof onwardCall.ExpectedArrivalTime !== 'undefined' && onwardCall.ExpectedArrivalTime !== null) {
@@ -335,7 +335,8 @@ OBA.Popups = (function() {
 			html += ' <a id="alert-link||' + routeName + '" class="alert-link" href="#">' + OBA.Config.serviceAlertText + ' for ' + activity.MonitoredVehicleJourney.PublishedLineName + '</a>';
 		}
 
-		html += OBA.Config.infoBubbleFooterFunction('route', activity.MonitoredVehicleJourney.PublishedLineName);
+		if (OBA.Config.includeBubbleFooter)
+			html += OBA.Config.infoBubbleFooterFunction('route', activity.MonitoredVehicleJourney.PublishedLineName);
 		
 		html += "<ul class='links'>";
 		html += "<a href='#' id='zoomHere'>Center & Zoom Here</a>";
@@ -467,7 +468,7 @@ OBA.Popups = (function() {
          jQuery.each(stopResult.routesAvailable, function(_, route) {
              if (filterExistsInResults && route.shortName !== routeFilter) {
                  var filteredMatch = jQuery("<li></li>").addClass("filtered-match");
-                 var link = jQuery('<a href="#' + OBA.Util.displayStopId(stopResult.id) + '%20' + route.shortName + '"><span class="route-name">' + route.shortName + '</span></a>');
+                 var link = jQuery('<a href="' + OBA.Config.searchParamsPrefix + OBA.Util.displayStopId(stopResult.id) + '%20' + route.shortName + '"><span class="route-name">' + route.shortName + '</span></a>');
                  link.appendTo(filteredMatch);
                  filteredMatches.find("ul").append(filteredMatch);
                  return true; //continue
@@ -527,7 +528,7 @@ OBA.Popups = (function() {
                      html += '<ul>';
 
                      html += '<li class="route">';
-                     html += '<a href="#' + uniqueStopId + '%20' + mvj.PublishedLineName + '"><span class="route-name">' + mvj.PublishedLineName + "</span>&nbsp;&nbsp; " + mvj.DestinationName + '</a>';
+                     html += '<a href="' + OBA.Config.searchParamsPrefix + uniqueStopId + '%20' + mvj.PublishedLineName + '"><span class="route-name">' + mvj.PublishedLineName + "</span>&nbsp;&nbsp; " + mvj.DestinationName + '</a>';
                      if(mvj.Monitored)
                      if (mvj.LineRef in alertData) {
                          html += ' <a id="alert-link|' + uniqueStopId + '|' + mvj.LineRef + '|' + mvj.PublishedLineName + '" class="alert-link" href="#">Alert</a>';
@@ -634,8 +635,8 @@ OBA.Popups = (function() {
 			var i = 0;
 			jQuery.each(routeAndDirectionWithoutArrivals, function(_, d) {
 				html += '<li class="route">';
-				html += '<a class="muted" href="#' + uniqueStopId + "%20" + d.shortName + '"><span class="route-name">' + d.shortName + "</span>&nbsp;&nbsp; " + d.destination + '</a>';
-				if (d.id in alertData) {
+				html += '<a class="muted" href="' + OBA.Config.searchParamsPrefix + uniqueStopId + "%20" + d.shortName + '"><span class="route-name">' + d.shortName + "</span>&nbsp;&nbsp; " + d.destination + '</a>';
+                if (d.id in alertData) {
 					html += ' <a id="alert-link|' + uniqueStopId + '|' + d.id + '|' + d.shortName + '" class="alert-link" href="#">Alert</a>';
 				}
 				html += '</li>';
@@ -653,8 +654,8 @@ OBA.Popups = (function() {
 			var i = 0;
 			jQuery.each(routeAndDirectionWithoutSerivce, function(_, d) {
 				html += '<li class="route">';
-				html += '<a class="muted" href="#' + stopCode + "%20" + d.shortName + '"><span class="route-name">' + d.shortName + '</span></a>';
-				html += '</li>';
+				html += '<a class="muted" href="' + OBA.Config.searchParamsPrefix + stopCode + "%20" + d.shortName + '"><span class="route-name">' + d.shortName + '</span></a>';
+                html += '</li>';
 				
 				i++;
 			});
@@ -663,15 +664,16 @@ OBA.Popups = (function() {
 		
 		// filtered out roues
 		if (filteredMatches.find("li").length > 0) {
-			var showAll = jQuery("<li></li>").addClass("filtered-match").html('<a href="#' + OBA.Util.displayStopId(stopResult.id) + '"><span class="route-name">See&nbsp;All</span></a>');
-			filteredMatches.find("ul").append(showAll);
+			var showAll = jQuery("<li></li>").addClass("filtered-match").html('<a href="' + OBA.Config.searchParamsPrefix + OBA.Util.displayStopId(stopResult.id) + '"><span class="route-name">See&nbsp;All</span></a>');
+            filteredMatches.find("ul").append(showAll);
 			html += filteredMatches.html();
 		}
 
-		html += OBA.Config.infoBubbleFooterFunction("stop", stopCode);	        
+		if (OBA.Config.includeBubbleFooter)
+			html += OBA.Config.infoBubbleFooterFunction("stop", stopCode);
 
 		html += "<ul class='links'>";
-		html += "<a href='#' id='zoomHere'>Center & Zoom Here</a>&nbsp;&nbsp;&nbsp;<a href='where/schedule?id=" + stopResult.id +"' id='schedule'>Complete Schedule</a>";
+		html += "<a href='#' id='zoomHere'>Center & Zoom Here</a>&nbsp;&nbsp;&nbsp;<a href='" + OBA.Config.urlPrefix + "where/schedule?id=" + stopResult.id +"' id='schedule'>Complete Schedule</a>";
 		html += "</ul>";
 		
 		// (end popup)

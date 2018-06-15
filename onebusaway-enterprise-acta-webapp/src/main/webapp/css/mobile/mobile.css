@@ -256,7 +256,7 @@ small {
 }
 
 /* refresh */
-#refresh {
+#refresh, #mapExpander  {
 	text-align: center;
 	display: block;
 	width: 92%;
@@ -291,7 +291,7 @@ small {
 	color: #FFFFFF;
 }
 
-#refresh.loading {
+#refresh.loadingRefresh {
 	border: 1px solid rgba(220,220,220,0.75);
 	background: rgb(30,87,153); /* Old browsers */
 	background: -moz-linear-gradient(top,  rgba(30,87,153,0.73) 0%, rgba(125,185,232,0.73) 100%); /* FF3.6+ */
@@ -647,4 +647,23 @@ small {
 
 .global-alert-content {
 	color: red;
+}
+
+#showMapSpan {
+	font-size: 0.85em;
+	padding: 0.6em;
+	display: block;
+	text-align: center;
+	font-weight: bold;
+	text-transform: uppercase;
+	color: #FFFFFF;
+}
+
+#mapHider {
+	position: relative;
+	left: 12px;
+}
+
+#mapExpander{
+	cursor: pointer;
 }

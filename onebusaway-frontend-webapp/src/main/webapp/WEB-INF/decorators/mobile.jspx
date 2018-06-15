@@ -45,7 +45,7 @@
 	</s:url>
 	<script type="text/javascript" src="${url}"><!-- //prevent jspx minimization --></script>
   	
-  	<s:url var="url" value="/js/oba/Config.js">
+  	<s:url var="url" value="/js/oba/m/Config.js">
 		<s:param name="v"><s:property value="frontEndVersion" /></s:param>
 	</s:url>
   	<script type="text/javascript" src="${url}"><!-- //prevent jspx minimization --></script>

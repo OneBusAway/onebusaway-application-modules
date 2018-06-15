@@ -150,7 +150,7 @@ OBA.RouteMap = function(mapNode, initCallbackFn, serviceAlertCallbackFn) {
 			directionKey = "unknown";
 		}
 		
-		var icon = new google.maps.MarkerImage("img/realtime/stop/stop-" + directionKey + ".png",
+		var icon = new google.maps.MarkerImage(OBA.Config.urlPrefix + "img/realtime/stop/stop-" + directionKey + ".png",
 				new google.maps.Size(21, 21),
 				new google.maps.Point(0,0),
 				new google.maps.Point(10, 10));
@@ -237,7 +237,7 @@ OBA.RouteMap = function(mapNode, initCallbackFn, serviceAlertCallbackFn) {
 				var vehicleIdWithoutAgency = vehicleIdParts[1];
 				var marker = vehiclesById[vehicleId];
 				var newMarker = false;
-				var markerImage = 'img/realtime/' + vehicleType + '/' + vehicleType + '-';
+				var markerImage = OBA.Config.urlPrefix + 'img/realtime/' + vehicleType + '/' + vehicleType + '-';
 
 				// has route been removed while in the process of updating?
 				if(typeof vehiclesByRoute[routeId] === 'undefined') {
@@ -268,7 +268,7 @@ OBA.RouteMap = function(mapNode, initCallbackFn, serviceAlertCallbackFn) {
 				
 				// change marker image depending on whether realtime data is available
 				if(typeof hasRealtime === 'undefined' || hasRealtime === null || hasRealtime == false){
-					markerImage = 'img/scheduled/' + vehicleType + '/' + vehicleType + '-';
+					markerImage = OBA.Config.urlPrefix + 'img/scheduled/' + vehicleType + '/' + vehicleType + '-';
 				}
 				
 				// icon
@@ -368,7 +368,7 @@ OBA.RouteMap = function(mapNode, initCallbackFn, serviceAlertCallbackFn) {
 
 
 	function showLegend(map) {
-	 	var iconBase = 'img/';
+	 	var iconBase = OBA.Config.urlPrefix + 'img/';
 	        var icons = {
 	          realtime: {
 	            name: 'Real-Time',
@@ -387,7 +387,7 @@ OBA.RouteMap = function(mapNode, initCallbackFn, serviceAlertCallbackFn) {
 	          var icon = type.icon;
 	          var div = document.createElement('div');
 	          div.innerHTML = '<img src="' + icon + '"> ' + '<span>' + name + '</span>';
-	          legend.appendChild(div);
+	          if (legend) legend.appendChild(div);
 	        }
 	
 
@@ -467,7 +467,7 @@ OBA.RouteMap = function(mapNode, initCallbackFn, serviceAlertCallbackFn) {
 				directionKey = "unknown";
 			}
 			
-			var highlightedIcon = new google.maps.MarkerImage("img/realtime/stop/stop-" + directionKey + "-active.png",
+			var highlightedIcon = new google.maps.MarkerImage(OBA.Config.urlPrefix + "img/realtime/stop/stop-" + directionKey + "-active.png",
 					new google.maps.Size(21, 21),
 					new google.maps.Point(0,0),
 					new google.maps.Point(10, 10));
