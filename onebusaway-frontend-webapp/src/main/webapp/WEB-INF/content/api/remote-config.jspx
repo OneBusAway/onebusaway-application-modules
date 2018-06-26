@@ -48,6 +48,7 @@
     OBA.Config.searchUrl = "<s:property value="appHostURL" />" + "<s:property value="appBaseUrl" />" + "/api/search";
     OBA.Config.stopsWithinBoundsUrl = "<s:property value="appHostURL" />" +  "/api/stops-within-bounds";
     OBA.Config.stopsOnRouteForDirection = "<s:property value="appHostURL" />" + "/api/stops-on-route-for-direction";
+    OBA.Config.stopsOnRoute = "<s:property value="appHostURL" />" + "/api/stops-on-route";
     OBA.Config.stopForId = "<s:property value="appHostURL" />" + "/api/stop-for-id";
 
     OBA.Config.infoBubbleFooterFunction = function(type, query) {

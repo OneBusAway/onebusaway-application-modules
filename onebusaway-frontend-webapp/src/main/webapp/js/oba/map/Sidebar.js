@@ -279,6 +279,7 @@ OBA.Sidebar = function() {
 		var filterExistsInResults = false;
 
 		// Need stop info for highlighting stops in RouteMap.js
+
 		var stopsOnRoutes = { stops:[] };
 
 		jQuery.each(routeResults, function(_, routeResult) {
