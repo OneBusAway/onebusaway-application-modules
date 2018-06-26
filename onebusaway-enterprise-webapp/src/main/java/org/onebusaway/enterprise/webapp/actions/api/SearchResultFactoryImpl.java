@@ -120,8 +120,11 @@ public class SearchResultFactoryImpl implements SearchResultFactory {
   public SearchResult getStopResult(StopBean stopBean, Set<RouteBean> routeFilter) {
     List<RouteAtStop> routesAtStop = new ArrayList<RouteAtStop>();
 
+    List<StopsForRouteBean> fullStopList = new ArrayList<>();
+
     for(RouteBean routeBean : stopBean.getRoutes()) {
       StopsForRouteBean stopsForRoute = _transitDataService.getStopsForRoute(routeBean.getId());
+      fullStopList.add(stopsForRoute);
 
       List<RouteDirection> directions = new ArrayList<RouteDirection>();
       List<StopGroupingBean> stopGroupings = stopsForRoute.getStopGroupings();
@@ -164,8 +167,8 @@ public class SearchResultFactoryImpl implements SearchResultFactory {
       RouteAtStop routeAtStop = new RouteAtStop(routeBean, directions);
       routesAtStop.add(routeAtStop);
     }
-
-    return new StopResult(stopBean, routesAtStop);
+    return new StopResult(stopBean, routesAtStop, fullStopList);
+//    return new StopResult(stopBean, routesAtStop);
   }
 
   @Override

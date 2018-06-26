@@ -278,25 +278,12 @@ OBA.Sidebar = function() {
 
 		var filterExistsInResults = false;
 
-		// Need stop info for highlighting stops in RouteMap.js
-		var stopsOnRoutes = { stops:[] };
-
 		jQuery.each(routeResults, function(_, routeResult) {
 			if (routeResult.shortName === filter) {
 				filterExistsInResults = true;
 				return false;
 			}
-
-			if (routeResult.stopIdsForRoute) {
-                jQuery.each(routeResult.stopIdsForRoute, function (_, stop) {
-                    if (stopsOnRoutes.stops.length < 1 || stopsOnRoutes.stops.indexOf(stop.id) === -1) {
-                        stopsOnRoutes.stops.push(stop);
-                    }
-                });
-            }
 		});
-
-        jQuery("body").data( "savedData", stopsOnRoutes );
 
 		if(typeof title !== "undefined" && title !== null) {
 			matches.find("h2").text(title);
@@ -636,12 +623,28 @@ OBA.Sidebar = function() {
 			
 			var routeFilter = json.searchResults.routeFilter;
 			var routeFilterShortName;
+
+            // Get stopIds for coloring stops in RouteMap.js
+            var stopsOnRoutes = { stops:[] };
+
+            jQuery.each(matches, function(_, match) {
+                if (match.stopIdsForRoute) {
+                    jQuery.each(match.stopIdsForRoute, function (_, stop) {
+                        if (stopsOnRoutes.stops.length < 1 || stopsOnRoutes.stops.indexOf(stop.id) === -1) {
+                            stopsOnRoutes.stops.push(stop);
+                        }
+                    });
+                }
+			});
+
+            jQuery("body").data( "savedData", stopsOnRoutes);
+
 			if (routeFilter.length > 0) {
 				routeFilterShortName = routeFilter[0].shortName;
 			}
 
 			OBA.Config.analyticsFunction("Search", q + " [M:" + matches.length + " S:" + suggestions.length + "]");
-			
+
 			if(empty === true) {
 				showNoResults("No matches.");
 				return;

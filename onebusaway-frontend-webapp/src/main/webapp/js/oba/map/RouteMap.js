@@ -152,7 +152,7 @@ OBA.RouteMap = function(mapNode, initCallbackFn, serviceAlertCallbackFn) {
 
         var stopsOnRoute = jQuery("body").data("savedData").stops;
 
-		var onRoute = false;
+        var onRoute = false;
 		jQuery.each(stopsOnRoute, function(_, stopOnRoute) {
 			if (String(stopOnRoute) === String(stop.id)) {
 				onRoute = true;
