@@ -168,10 +168,12 @@ OBA.RouteMap = function(mapNode, initCallbackFn, serviceAlertCallbackFn) {
                 scaledSize: new google.maps.Size(33, 33)
             }
         } else {
-            var icon = new google.maps.MarkerImage("img/realtime/stop/stop-off-route-" + directionKey + ".png",
-				new google.maps.Size(21, 21),
-				new google.maps.Point(0,0),
-				new google.maps.Point(10, 10));
+            var icon = {
+            	url: "img/realtime/stop/stop-off-route-" + directionKey + ".png",
+				size: new google.maps.Size(21, 21),
+				origin: new google.maps.Point(0,0),
+				anchor: new google.maps.Point(10, 10)
+			}
 		}
 
 		var defaultVisibility = (map.getZoom() < 16) ? false : true;
