@@ -244,170 +244,13 @@ OBA.Mobile = (function() {
             }
         });
 
-        // if(typeof title !== "undefined" && title !== null) {
-        //     matches.find("h2").text(title);
-        // }
-
-        //var resultsList = matches.find("ul");
-
         jQuery.each(routeResults, function(_, routeResult) {
 
             if (!filter || routeResult.shortName === filter || !filterExistsInResults) {
-
-                // service alerts
-                // var serviceAlertList = jQuery("<ul></ul>")
-                //     .addClass("alerts");
-                //
-                // var serviceAlertHeader = jQuery("<p class='serviceAlert'>" + OBA.Config.serviceAlertText + " for " + getRouteShortName(routeResult) + "</p>")
-                //     .append(jQuery("<span class='click_info'> + Click for info</span>"));
-                //
-                // var serviceAlertContainer = jQuery("<div></div>")
-                //     .attr("id", "alerts-" + routeResult.id.hashCode())
-                //     .addClass("serviceAlertContainer")
-                //     .append(serviceAlertHeader)
-                //     .append(serviceAlertList);
-                //
-                // serviceAlertContainer.accordion({ header: 'p.serviceAlert',
-                //     collapsible: true,
-                //     active: false,
-                //     autoHeight: false });
-
-                // If popup.js has specified to expand alerts, that has been taken into account above and we
-                // reset the global state to not expand alerts.
-                // if (expandAlerts) {
-                //     serviceAlertContainer.accordion("activate" , 0);
-                //     expandAlerts = false;
-                // }
-
-
-                // sidebar item
-                // var titleBox = jQuery("<p></p>")
-                //     .addClass("name")
-                //     .text(getRouteShortLongName(routeResult))
-                //     .css("border-bottom", "5px solid #" + routeResult.color);
-                //
-                // var descriptionBox = jQuery("<p></p>")
-                //     .addClass("description")
-                //     .text(routeResult.description == null ? '' : routeResult.description);
-                //
-                // var listItem = jQuery("<li></li>")
-                //     .addClass("legendItem")
-                //     .append(titleBox)
-                //     .append(descriptionBox)
-                //     .append(serviceAlertContainer);
-                //
-                // resultsList.append(listItem);
-
-                // on click of title, pan to route extent
-                // titleBox.click(function(e) {
-                //     e.preventDefault();
-                //
-                //     routeMap.panToRoute(routeResult.id);
-                // });
-
-                // hover polylines
-                // titleBox.hover(function(e) {
-                //     titleBox.css("color", "#" + routeResult.color);
-                // }, function(e) {
-                //     titleBox.css("color", "");
-                // });
-
-                // titleBox.hoverIntent({
-                //     over: function(e) {
-                //         routeMap.highlightRoute(routeResult.id);
-                //     }, out: function(e) {
-                //         routeMap.unhighlightRoute(routeResult.id);
-                //     },
-                //     sensitivity: 10
-                // });
-
-                // direction picker
-                // jQuery.each(routeResult.directions, function(_, direction) {
-                //     var directionHeader = jQuery("<p></p>");
-                //
-                //     jQuery("<span></span>")
-                //         .text("to " + direction.destination)
-                //         .appendTo(directionHeader);
-                //
-                //     if(direction.hasUpcomingScheduledService === false) {
-                //         var noServiceMessage = jQuery("<div></div>")
-                //             .addClass("no-service")
-                //             .text("No scheduled service for the " +
-                //                 getRouteShortName(routeResult) +
-                //                 " to " + direction.destination + " at this time.");
-                //
-                //         directionHeader.append(noServiceMessage);
-                //     }
-                //
-                //     var stopsList = jQuery("<ul></ul>")
-                //         .addClass("stops")
-                //         .addClass("not-loaded");
-                //
-                //     var loading = jQuery("<div><span>Loading...</span></div>")
-                //         .addClass("loading");
-                //
-                //     var destinationContainer = jQuery("<p></p>")
-                //         .addClass("destination")
-                //         .append(directionHeader)
-                //         .append(stopsList)
-                //         .append(loading);
-
-                    // load stops when user expands stop list
-                    // directionHeader.click(function(e) {
-                    //     loadStopsForRouteAndDirection(routeResult, direction, destinationContainer);
-                    // });
-
-                    // accordion-ize
-                    // destinationContainer.accordion({ header: 'p',
-                    //     collapsible: true,
-                    //     active: false,
-                    //     autoHeight: false });
-                    //
-                    // listItem.append(destinationContainer);
-                //});
-
                 // add to map
                 routeMap.addRoute(routeResult);
             }
-
-            // if (filter && routeResult.shortName !== filter && filterExistsInResults) {
-            //
-            //     var filteredMatch = jQuery("<li></li>").addClass("filtered-match");
-            //     var link = jQuery('<a href="#' + OBA.Util.displayStopId(stopId) + '%20' + getRouteShortName(routeResult) + '">' + getRouteShortName(routeResult) + '</a>');
-            //
-            //     var allPolylines = [];
-            //     jQuery.each(routeResult.directions, function(_, direction) {
-            //         allPolylines = allPolylines.concat(direction.polylines);
-            //     });
-            //
-            //     link.hover(function() {
-            //         routeMap.showHoverPolyline(allPolylines, routeResult.color);
-            //     }, function() {
-            //         routeMap.removeHoverPolyline();
-            //     });
-            //
-            //     link.appendTo(filteredMatch);
-            //
-            //     filteredMatches.find("ul").append(filteredMatch);
-            // }
         });
-
-       // matches.show();
-
-        // if (filteredMatches.find("li").length > 1) {
-        //     var showAll = jQuery("<li></li>").addClass("filtered-match").html('<a href="#' + OBA.Util.displayStopId(stopId) + '">See&nbsp;All</a>');
-        //     filteredMatches.find("ul").append(showAll);
-        //     filteredMatches.show();
-        //
-        //     var maxWidth = 0;
-        //     jQuery.each(filteredMatches.find("li"), function(_, item) {
-        //         var wrappedItem = jQuery(item);
-        //         if (wrappedItem.width() > maxWidth) {
-        //             maxWidth = wrappedItem.width();
-        //         }
-        //     });
-        //     filteredMatches.find("li").width(maxWidth);
-        // }
     }
 
     var resize = function() {
@@ -443,16 +286,34 @@ OBA.Mobile = (function() {
         var q = jQuery(".q").val();
         if (q != '' && q != null && $('#map').is(":visible")) {
 
-				var searchResponse = jQuery.getJSON(OBA.Config.searchUrl + "?callback=?", {q: q}, function (json) {
+			var searchResponse = jQuery.getJSON(OBA.Config.searchUrl + "?callback=?", {q: q}, function (json) {
 
-					var resultType = json.searchResults.resultType;
+				var resultType = json.searchResults.resultType;
 				var matches = json.searchResults.matches;
-                    var routeFilter = json.searchResults.routeFilter;
-                    var routeFilterShortName;
-                    if (routeFilter.length > 0) {
-                        routeFilterShortName = routeFilter[0].shortName;
+				var routeFilter = json.searchResults.routeFilter;
+				var routeFilterShortName;
+
+				if (routeFilter.length > 0) {
+					routeFilterShortName = routeFilter[0].shortName;
+				}
+
+                // Get stopIds for coloring stops in RouteMap.js
+                var stopsOnRoutes = { stops:[] };
+
+                jQuery.each(matches, function(_, match) {
+                    if (match.stopIdsForRoute) {
+                        jQuery.each(match.stopIdsForRoute, function (_, stop) {
+                            if (stopsOnRoutes.stops.length < 1 || stopsOnRoutes.stops.indexOf(stop.id) === -1) {
+                                stopsOnRoutes.stops.push(stop);
+                            }
+                        });
                     }
+                });
+
+                jQuery("body").data( "savedData", stopsOnRoutes);
+
 				var showPopup = true;
+
 				// direct matches
 				if(matches.length === 1 ) {
 					switch(resultType) {
