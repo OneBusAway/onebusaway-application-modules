@@ -168,7 +168,6 @@ public class SearchResultFactoryImpl implements SearchResultFactory {
       routesAtStop.add(routeAtStop);
     }
     return new StopResult(stopBean, routesAtStop, fullStopList);
-//    return new StopResult(stopBean, routesAtStop);
   }
 
   @Override
