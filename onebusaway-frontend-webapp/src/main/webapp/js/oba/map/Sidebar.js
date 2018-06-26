@@ -158,8 +158,8 @@ OBA.Sidebar = function() {
 	}
 
 	// show user list of addresses
-	function disambiguateLocations(locations) {	
-		
+	function disambiguateLocations(locations) {
+
 		suggestions.find("h2")
 			.text("Did you mean?");
 
@@ -170,7 +170,7 @@ OBA.Sidebar = function() {
 			var latlng = new google.maps.LatLng(location.latitude, location.longitude);
 			var address = location.formattedAddress;
 			var neighborhood = location.neighborhood;
-			
+
 		    // sidebar item
 			var link = jQuery("<a href='#" + location.latitude + "%2C" + location.longitude + "'></a>")
 							.text(address);
@@ -183,7 +183,7 @@ OBA.Sidebar = function() {
 			resultsList.append(listItem);
 
 			// marker
-			var marker = routeMap.addDisambiguationMarker(latlng, address, neighborhood, (i + 1));			
+			var marker = routeMap.addDisambiguationMarker(latlng, address, neighborhood, (i + 1));
 
 			listItem.hover(function() {
 				routeMap.highlightDisambiguationMarker(marker, (i + 1));
@@ -200,12 +200,12 @@ OBA.Sidebar = function() {
 				bounds.extend(latlng);
 			}
 		});
-		
+
 		routeMap.showBounds(bounds);
-		
+
 		suggestions.show();
 	}
-		
+
 	function loadStopsForRouteAndDirection(routeResult, direction, destinationContainer) {
 		var stopsList = destinationContainer.find("ul");
 		
@@ -279,7 +279,7 @@ OBA.Sidebar = function() {
 		var filterExistsInResults = false;
 
 		// Need stop info for highlighting stops in RouteMap.js
-		var savedData = { stops:[] };
+		var stopsOnRoutes = { stops:[] };
 
 		jQuery.each(routeResults, function(_, routeResult) {
 			if (routeResult.shortName === filter) {
@@ -287,16 +287,16 @@ OBA.Sidebar = function() {
 				return false;
 			}
 
-            jQuery.getJSON(OBA.Config.stopsOnRoute + "?callback=?", { routeId: routeResult.id }, function (json) {
-                jQuery.each(json.stops, function(_, stop){
-                    if (savedData.stops.indexOf(stop.id) === -1) {
-						savedData.stops.push(stop.id);
-					}
-				});
-            });
+			if (routeResults.stopIdsForRoute) {
+                jQuery.each(routeResult.stopIdsForRoute, function (_, stop) {
+                    if (stopsOnRoutes.stops.length < 1 || stopsOnRoutes.stops.indexOf(stop.id) === -1) {
+                        stopsOnRoutes.stops.push(stop);
+                    }
+                });
+            }
 		});
 
-        jQuery("body").data( "savedData", savedData );
+        jQuery("body").data( "savedData", stopsOnRoutes );
 
 		if(typeof title !== "undefined" && title !== null) {
 			matches.find("h2").text(title);
@@ -463,8 +463,6 @@ OBA.Sidebar = function() {
 			filteredMatches.find("li").width(maxWidth);
 		}
 	}
-	
-	
 
 	// show multiple route choices to user
 	function showRoutePickerList(routeResults) {	
@@ -623,8 +621,8 @@ OBA.Sidebar = function() {
 		if(searchRequest !== null) {
 			searchRequest.abort();
 		}		
-		searchRequest = jQuery.getJSON(OBA.Config.searchUrl + "?callback=?", { q: q }, function(json) { 
-			
+		searchRequest = jQuery.getJSON(OBA.Config.searchUrl + "?callback=?", { q: q }, function(json) {
+
 			// Be sure the autocomplete list is closed
 			jQuery("#searchbar form input[type=text]").autocomplete("close");
 			
@@ -745,9 +743,7 @@ OBA.Sidebar = function() {
 			}
 		});
 	}
-	
-	
-	
+
 	return {
 		initialize: function() {
 			addSearchBehavior();

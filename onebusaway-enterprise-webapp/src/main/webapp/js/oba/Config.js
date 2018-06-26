@@ -26,7 +26,6 @@ OBA.Config = {
 		configUrl: "api/config",
 		stopsWithinBoundsUrl: "api/stops-within-bounds",
 		stopsOnRouteForDirection: "api/stops-on-route-for-direction",
-		stopsOnRoute: "api/stops-on-route",
 		stopForId: "api/stop-for-id",
 		apiUrl: "/onebusaway-api-webapp/api",
 		legacyUrl: "../",
