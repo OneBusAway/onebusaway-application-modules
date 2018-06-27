@@ -161,7 +161,7 @@ OBA.RouteMap = function(mapNode, initCallbackFn, serviceAlertCallbackFn) {
 
 		if (onRoute === true) {
             var icon = {
-                url: "img/realtime/stop/stop-" + directionKey + ".png",
+                url: OBA.Config.urlPrefix + "img/realtime/stop/stop-" + directionKey + ".png",
                 size: new google.maps.Size(31, 31),
                 origin: new google.maps.Point(0, 0),
                 anchor: new google.maps.Point(15, 15),
@@ -169,7 +169,7 @@ OBA.RouteMap = function(mapNode, initCallbackFn, serviceAlertCallbackFn) {
             }
         } else {
             var icon = {
-            	url: "img/realtime/stop/stop-off-route-" + directionKey + ".png",
+            	url: OBA.Config.urlPrefix + "img/realtime/stop/stop-off-route-" + directionKey + ".png",
 				size: new google.maps.Size(21, 21),
 				origin: new google.maps.Point(0,0),
 				anchor: new google.maps.Point(10, 10)
