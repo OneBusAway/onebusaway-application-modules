@@ -32,6 +32,7 @@ OBA.Config = {
 		urlPrefix: "",
     	searchParamsPrefix: "#",
 		includeBubbleFooter: true,
+		hasSidebar: true,
 
 		// siriSMUrl and siriVMUrl now moved to config.jspx
 		

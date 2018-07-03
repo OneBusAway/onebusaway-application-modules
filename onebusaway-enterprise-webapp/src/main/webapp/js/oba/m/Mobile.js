@@ -196,43 +196,6 @@ OBA.Mobile = (function() {
 		$('#serviceAlertHeader span').html("<strong>" + OBA.Config.serviceAlertText + ":</strong>");
 	}
 
-    function getRouteShortName(routeResult){
-        var longName = routeResult.longName;
-        var shortName = routeResult.shortName;
-
-        if(longName == null && shortName == null){
-            shortName = "route";
-        }
-        else if (shortName == null){
-            shortName = longName;
-        }
-        return shortName;
-    }
-
-    function getRouteShortLongName(routeResult){
-
-        var longName = routeResult.longName;
-        var shortName = routeResult.shortName;
-        var shortAndLongName = shortName + " " + longName;
-        var description = routeResult.description;
-
-        if(longName == null && shortName == null){
-            if(description == null){
-                shortAndLongName = "";
-            }
-            else{
-                shortAndLongName = description;
-            }
-        }
-        else if (longName == null){
-            shortAndLongName = shortName;
-        }
-        else if (shortName == null){
-            shortAndLongName = longName;
-        }
-        return shortAndLongName;
-    }
-
     function addRoutesToLegend(routeResults, title, filter, stopId) {
 
         var filterExistsInResults = false;
@@ -351,19 +314,6 @@ OBA.Mobile = (function() {
 		}
 	}
 
-    function loadMap() {
-    	// initialize map, and continue initialization of things that use the map
-		// on load only when google maps says it's ready.
-		routeMap = OBA.RouteMap(document.getElementById("map"), function() {
-			// deep link handler
-			updateMap();
-
-		}, function(routeId, serviceAlerts) { // service alert notification handler
-
-
-		});
-    }
-
 	return {
 		initialize: function() {
 			locationField = jQuery("#l");
@@ -379,12 +329,21 @@ OBA.Mobile = (function() {
             addResizeBehavior();
 
             updateServiceAlertHeaderText();
-            loadMap();
+
+            // initialize map, and continue initialization of things that use the map
+            // on load only when google maps says it's ready.
+            routeMap = OBA.RouteMap(document.getElementById("map"), function() {
+                // deep link handler
+                updateMap();
+
+            }, function(routeId, serviceAlerts) { // service alert notification handler
+
+
+            });
 
             $('#map').hide();
 
-		},
-		loadMap: loadMap
+		}
 	};
 })();
 

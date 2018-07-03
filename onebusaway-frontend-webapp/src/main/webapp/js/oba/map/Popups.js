@@ -330,8 +330,8 @@ OBA.Popups = (function() {
 			}
 		}
 		
-		// service alerts
-		if (routeName in alertData) {
+		// service alert links to sidebar if relevant
+		if (routeName in alertData && OBA.Config.hasSidebar) {
 			html += ' <a id="alert-link||' + routeName + '" class="alert-link" href="#">' + OBA.Config.serviceAlertText + ' for ' + activity.MonitoredVehicleJourney.PublishedLineName + '</a>';
 		}
 
