@@ -314,7 +314,7 @@ OBA.RouteMap = function(mapNode, initCallbackFn, serviceAlertCallbackFn) {
 				else{
 
 					// try shape animation, otherwise revert to straight-line
-					if (!tryAnimateAlongShape(routeId, marker, marker.getPosition(), position)) {
+					if (!tryAnimateAlongShape(vehicleId, routeId, marker, marker.getPosition(), position)) {
                         marker.animateTo(position);
                     }
 				}
@@ -345,7 +345,7 @@ OBA.RouteMap = function(mapNode, initCallbackFn, serviceAlertCallbackFn) {
 		});
 	}
 
-    function tryAnimateAlongShape(routeId, marker, oldPosition, newPosition) {
+    function tryAnimateAlongShape(vehicleId, routeId, marker, oldPosition, newPosition) {
         if (typeof polylinesByRoute[routeId] === 'undefined')
             return false;
 
@@ -356,11 +356,12 @@ OBA.RouteMap = function(mapNode, initCallbackFn, serviceAlertCallbackFn) {
         for (var i = 0; i < polylines.length; i++) {
             var polyline = polylines[i];
 
-            var startIndex = findClosestPoint(oldPosition, polyline.getPath(), 10);
-            var endIndex = findClosestPoint(newPosition, polyline.getPath(), 10);
-            if (startIndex >= 0 && endIndex >= 0 && endIndex > startIndex) {
+            var startIndex = findClosestPoint(oldPosition, polyline.getPath(), 100);
+            var endIndex = findClosestPoint(newPosition, polyline.getPath(), 100);
 
-                // animate
+            if (startIndex >= 0 && endIndex >= 0 && endIndex > startIndex) {
+                // console.log(""  + vehicleId + " ascend from " + startIndex + " to " + endIndex);
+                // animate startIndex up to endIndex
                 var index = startIndex;
 
                 var distances = [0];
@@ -387,7 +388,41 @@ OBA.RouteMap = function(mapNode, initCallbackFn, serviceAlertCallbackFn) {
                 step();
 
                 return true;
-            }
+            } else if (startIndex >= 0 && endIndex >= 0 && endIndex < startIndex) {
+                // console.log(""  + vehicleId + " descend from " + startIndex + " to " + endIndex);
+                // animate startIndex downto endIndex
+                var index = startIndex;
+
+                var distances = [0];
+                var maxDistance = 0;
+                for (var j = startIndex - 1; j > endIndex; j--) {
+                    var dist = haversine(polyline.getPath().getAt(j - 1), polyline.getPath().getAt(j));
+                    maxDistance += dist;
+                    distances.push(dist);
+                }
+                var durations = distances.map(function (d) {
+                    return (d / maxDistance) * 1000
+                });
+
+                function step() {
+                    if (index < endIndex)
+                        return;
+                    var pos = polyline.getPath().getAt(index);
+                    var duration = durations[index - startIndex];
+                    marker.animateTo(pos, {"duration": duration, "complete": step, "easing": "linear"});
+                    index--;
+                }
+
+                index--;
+                step();
+
+                return true;
+
+			} else {
+            	// nothing to do!
+                // console.log(""  + vehicleId + " abort:  " + startIndex + " , " + endIndex);
+			}
+
         }
 
         return false;
