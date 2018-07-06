@@ -155,12 +155,10 @@
 
 		<s:if test="%{results.matches.size&gt;0}">
 			<div id="mapHider" class="map">
-				<!--<div id="mapExpander" onclick="OBA.Mobile.loadMap()">-->
 				<div id="mapExpander">
 					<span id="showMapSpan">SHOW MAP</span>
 				</div>
 				<div id="map"><!-- //prevent jspx minimization --></div>
-				<!--<div id="legend">&lt;!&ndash; //prevent jspx minimization &ndash;&gt;</div>-->
 			</div>
 		</s:if>
 
@@ -181,18 +179,6 @@
 				<a href="${url}">Refresh (<strong>Updated <s:property value="lastUpdateTime" /></strong>)</a>
 			</div>
 
-			<!--<s:if test="%{results.matches.size==1}">
-			  <s:if test="results.resultType.equals('StopResult')">
-				<div id="mapHider" onclick="OBA.Mobile.loadMap('${q}')">
-					<div id="mapExpander">
-						<span>SHOW MAP</span>
-						<s:url var="url" value="/css/mobile/img/loading.gif"></s:url>
-						<img id="loadingCover" src="${url}" style="display: none;"/>
-					</div>
-					<div id="mapContainer"><br/></div>
-				</div>
-			  </s:if>
-			</s:if>-->
 			<div id="content">
 				<s:if test="%{results.matches.size&gt;0}">
 

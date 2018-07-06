@@ -312,7 +312,11 @@ OBA.RouteMap = function(mapNode, initCallbackFn, serviceAlertCallbackFn) {
 					marker.setPosition(position);
 				}
 				else{
-					marker.animateTo(position);
+
+					// try shape animation, otherwise revert to straight-line
+					if (!tryAnimateAlongShape(vehicleId, routeId, marker, marker.getPosition(), position)) {
+                        marker.animateTo(position);
+                    }
 				}
 				
 				// (mark that this vehicle is still in the response)
@@ -340,7 +344,126 @@ OBA.RouteMap = function(mapNode, initCallbackFn, serviceAlertCallbackFn) {
 			});
 		});
 	}
-	
+
+    function tryAnimateAlongShape(vehicleId, routeId, marker, oldPosition, newPosition) {
+        if (typeof polylinesByRoute[routeId] === 'undefined')
+            return false;
+
+        var polylines = polylinesByRoute[routeId];
+        if (polylines.length == 0)
+            return false;
+
+        for (var i = 0; i < polylines.length; i++) {
+            var polyline = polylines[i];
+
+            var startIndex = findClosestPoint(oldPosition, polyline.getPath(), 100);
+            var endIndex = findClosestPoint(newPosition, polyline.getPath(), 100);
+
+            if (startIndex >= 0 && endIndex >= 0 && endIndex > startIndex) {
+                // console.log(""  + vehicleId + " ascend from " + startIndex + " to " + endIndex);
+                // animate startIndex up to endIndex
+                var index = startIndex;
+
+                var distances = [0];
+                var maxDistance = 0;
+                for (var j = startIndex + 1; j < endIndex; j++) {
+                    var dist = haversine(polyline.getPath().getAt(j - 1), polyline.getPath().getAt(j));
+                    maxDistance += dist;
+                    distances.push(dist);
+                }
+                var durations = distances.map(function (d) {
+                    return (d / maxDistance) * 1000
+                });
+
+                function step() {
+                    if (index > endIndex)
+                        return;
+                    var pos = polyline.getPath().getAt(index);
+                    var duration = durations[index - startIndex];
+                    marker.animateTo(pos, {"duration": duration, "complete": step, "easing": "linear"});
+                    index++;
+                }
+
+                index++;
+                step();
+
+                return true;
+            } else if (startIndex >= 0 && endIndex >= 0 && endIndex < startIndex) {
+                // console.log(""  + vehicleId + " descend from " + startIndex + " to " + endIndex);
+                // animate startIndex downto endIndex
+                var index = startIndex;
+
+                var distances = [0];
+                var maxDistance = 0;
+                for (var j = startIndex - 1; j > endIndex; j--) {
+                    var dist = haversine(polyline.getPath().getAt(j - 1), polyline.getPath().getAt(j));
+                    maxDistance += dist;
+                    distances.push(dist);
+                }
+                var durations = distances.map(function (d) {
+                    return (d / maxDistance) * 1000
+                });
+
+                function step() {
+                    if (index < endIndex)
+                        return;
+                    var pos = polyline.getPath().getAt(index);
+                    var duration = durations[index - startIndex];
+                    marker.animateTo(pos, {"duration": duration, "complete": step, "easing": "linear"});
+                    index--;
+                }
+
+                index--;
+                step();
+
+                return true;
+
+			} else {
+            	// nothing to do!
+                // console.log(""  + vehicleId + " abort:  " + startIndex + " , " + endIndex);
+			}
+
+        }
+
+        return false;
+    }
+
+    function findClosestPoint(point, line, threshold) {
+
+        var minDistance = Number.MAX_VALUE;
+        var closestIndex = -1;
+
+        line.forEach(function (p, i) {
+            var distance = haversine(point, p);
+            if (distance < threshold && distance < minDistance) {
+                minDistance = distance;
+                closestIndex = i;
+            }
+        });
+
+        return closestIndex;
+    }
+
+    // adapted from https://github.com/njj/haversine
+    function haversine(start, end) {
+        var R = 6371000; // radius of the earth in meters
+
+        var toRad = function (num) {
+            return num * Math.PI / 180
+        };
+
+        var dLat = toRad(end.lat() - start.lat());
+        var dLon = toRad(end.lng() - start.lng());
+        var lat1 = toRad(start.lat());
+        var lat2 = toRad(end.lng());
+
+        var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.sin(dLon / 2) * Math.sin(dLon / 2) * Math.cos(lat1) * Math.cos(lat2)
+        var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+        return R * c;
+    }
+
 	function removeVehicles(routeId) {
 		if(typeof vehiclesByRoute[routeId] !== 'undefined') {
 			var vehicles = vehiclesByRoute[routeId];

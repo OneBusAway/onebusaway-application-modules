@@ -330,8 +330,8 @@ OBA.Popups = (function() {
 			}
 		}
 		
-		// service alerts
-		if (routeName in alertData) {
+		// service alert links to sidebar if relevant
+		if (routeName in alertData && OBA.Config.hasSidebar) {
 			html += ' <a id="alert-link||' + routeName + '" class="alert-link" href="#">' + OBA.Config.serviceAlertText + ' for ' + activity.MonitoredVehicleJourney.PublishedLineName + '</a>';
 		}
 
@@ -643,7 +643,7 @@ OBA.Popups = (function() {
 				
 				i++;
 			});
-			html += '<li class="last muted">(check back shortly for an update)</li>';
+			html += "<li><a href=\'" + OBA.Config.urlPrefix + "where/schedule?id=" + stopResult.id +"\'>(click here for schedule)</a></li>";
 			html += '</ul>';
 		}
 
@@ -673,7 +673,7 @@ OBA.Popups = (function() {
 			html += OBA.Config.infoBubbleFooterFunction("stop", stopCode);
 
 		html += "<ul class='links'>";
-		html += "<a href='#' id='zoomHere'>Center & Zoom Here</a>&nbsp;&nbsp;&nbsp;<a href='" + OBA.Config.urlPrefix + "where/schedule?id=" + stopResult.id +"' id='schedule'>Complete Schedule</a>";
+		html += "<a href='#' id='zoomHere'>Center & Zoom Here</a>&nbsp;&nbsp;&nbsp;<a href='" + OBA.Config.urlPrefix + "where/schedule?id=" + stopResult.id +"' id='schedule'>View Schedule</a>";
 		html += "</ul>";
 		
 		// (end popup)
