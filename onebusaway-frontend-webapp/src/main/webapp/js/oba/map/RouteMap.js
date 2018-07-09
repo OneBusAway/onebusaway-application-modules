@@ -356,11 +356,11 @@ OBA.RouteMap = function(mapNode, initCallbackFn, serviceAlertCallbackFn) {
         for (var i = 0; i < polylines.length; i++) {
             var polyline = polylines[i];
 
-            var startIndex = findClosestPoint(oldPosition, polyline.getPath(), 100);
-            var endIndex = findClosestPoint(newPosition, polyline.getPath(), 100);
+            // if we don't find a result within this threshold, we can't trust the results
+            var startIndex = findClosestPoint(oldPosition, polyline.getPath(), 10);
+            var endIndex = findClosestPoint(newPosition, polyline.getPath(), 10);
 
             if (startIndex >= 0 && endIndex >= 0 && endIndex > startIndex) {
-                // console.log(""  + vehicleId + " ascend from " + startIndex + " to " + endIndex);
                 // animate startIndex up to endIndex
                 var index = startIndex;
 
@@ -389,7 +389,6 @@ OBA.RouteMap = function(mapNode, initCallbackFn, serviceAlertCallbackFn) {
 
                 return true;
             } else if (startIndex >= 0 && endIndex >= 0 && endIndex < startIndex) {
-                // console.log(""  + vehicleId + " descend from " + startIndex + " to " + endIndex);
                 // animate startIndex downto endIndex
                 var index = startIndex;
 
@@ -418,9 +417,6 @@ OBA.RouteMap = function(mapNode, initCallbackFn, serviceAlertCallbackFn) {
 
                 return true;
 
-			} else {
-            	// nothing to do!
-                // console.log(""  + vehicleId + " abort:  " + startIndex + " , " + endIndex);
 			}
 
         }
