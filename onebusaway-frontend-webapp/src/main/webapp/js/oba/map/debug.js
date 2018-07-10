@@ -200,7 +200,7 @@ function update() {
         var gtfsrLocation = {lat: parseFloat(lat), lng: parseFloat(lng)};
         if (markerGtfsr == null) {
             markerGtfsr = new google.maps.Marker({
-                icon: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png',
+                icon: 'img/icons/green-dot.png',
                 position: gtfsrLocation,
                 map: map,
                 title: 'Raw Position: ' + vehicleId
