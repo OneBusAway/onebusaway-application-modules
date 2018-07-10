@@ -30,6 +30,13 @@ html, body {
       #map {
         height: 100%;
       }
+#legend {
+	font-family: Arial, sans-serif;
+	background: #fff;
+	padding: 15px;
+	margin: 20px;
+	border: 2px solid #696969;
+}
 </style>
 <s:url var="url" value="https://maps.googleapis.com/maps/api/js">				
 	<s:param name="v">3</s:param>
