@@ -206,7 +206,11 @@
 
         </div>
         <div class="container clear"><!-- jspx --></div>
-        <s:url var="url" value="/css/img/google_logo.png"></s:url>
+        <s:url var="url" value="/css/img/google_logo.png">
+            <s:param name="v">
+                <s:property value="frontEndVersion" />
+            </s:param>
+        </s:url>
         <div id="google_translate_element">Google Translate <img id="icon" src="${url}" /></div>
     </div>
 
