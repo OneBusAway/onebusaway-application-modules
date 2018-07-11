@@ -606,9 +606,10 @@ OBA.RouteMap = function(mapNode, initCallbackFn, serviceAlertCallbackFn) {
 			}
 			
 			var highlightedIcon = new google.maps.MarkerImage(OBA.Config.urlPrefix + "img/realtime/stop/stop-" + directionKey + "-active.png",
-					new google.maps.Size(21, 21),
+					new google.maps.Size(31, 31),
 					new google.maps.Point(0,0),
-					new google.maps.Point(10, 10));
+					new google.maps.Point(15, 15));
+			highlightedIcon.scaledSize = new google.maps.Size(33, 33);
 		
 			stopMarker.previousIcon = stopMarker.getIcon();
 			stopMarker.setIcon(highlightedIcon);
