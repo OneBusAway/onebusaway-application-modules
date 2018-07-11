@@ -161,7 +161,7 @@ OBA.RouteMap = function(mapNode, initCallbackFn, serviceAlertCallbackFn) {
 
 		if (onRoute === true) {
             var icon = {
-                url: OBA.Config.urlPrefix + "img/realtime/stop/stop-" + directionKey + ".png?v=frontEndVersion",
+                url: OBA.Config.urlPrefix + "img/realtime/stop/stop-" + directionKey + ".png",
                 size: new google.maps.Size(31, 31),
                 origin: new google.maps.Point(0, 0),
                 anchor: new google.maps.Point(15, 15),
@@ -169,7 +169,7 @@ OBA.RouteMap = function(mapNode, initCallbackFn, serviceAlertCallbackFn) {
             }
         } else {
             var icon = {
-            	url: OBA.Config.urlPrefix + "img/realtime/stop/stop-off-route-" + directionKey + ".png?v=frontEndVersion",
+            	url: OBA.Config.urlPrefix + "img/realtime/stop/stop-off-route-" + directionKey + ".png",
 				size: new google.maps.Size(21, 21),
 				origin: new google.maps.Point(0,0),
 				anchor: new google.maps.Point(10, 10)
@@ -298,7 +298,7 @@ OBA.RouteMap = function(mapNode, initCallbackFn, serviceAlertCallbackFn) {
 					orientationAngle = Math.floor(orientation / 5) * 5;
 				}
 					
-				var icon = new google.maps.MarkerImage(markerImage + orientationAngle + ".png?v=frontEndVersion",
+				var icon = new google.maps.MarkerImage(markerImage + orientationAngle + ".png",
 						new google.maps.Size(51, 51),
 						new google.maps.Point(0,0),
 						new google.maps.Point(25, 25));
@@ -510,11 +510,11 @@ OBA.RouteMap = function(mapNode, initCallbackFn, serviceAlertCallbackFn) {
 	        var icons = {
 	          realtime: {
 	            name: 'Real-Time',
-	            icon: iconBase + 'realtime/bus/bus.png?v=frontEndVersion'
+	            icon: iconBase + 'realtime/bus/bus.png'
 	          },
 	          scheduled: {
 	            name: 'Scheduled',
-	            icon: iconBase + 'scheduled/bus/bus.png?v=frontEndVersion'
+	            icon: iconBase + 'scheduled/bus/bus.png'
 	          }
 	        };
 	        
@@ -605,7 +605,7 @@ OBA.RouteMap = function(mapNode, initCallbackFn, serviceAlertCallbackFn) {
 				directionKey = "unknown";
 			}
 			
-			var highlightedIcon = new google.maps.MarkerImage(OBA.Config.urlPrefix + "img/realtime/stop/stop-" + directionKey + "-active.png?v=frontEndVersion",
+			var highlightedIcon = new google.maps.MarkerImage(OBA.Config.urlPrefix + "img/realtime/stop/stop-" + directionKey + "-active.png",
 					new google.maps.Size(21, 21),
 					new google.maps.Point(0,0),
 					new google.maps.Point(10, 10));
