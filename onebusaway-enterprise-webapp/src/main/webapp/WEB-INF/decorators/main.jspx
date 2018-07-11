@@ -105,7 +105,7 @@
 		<div id="topbar">
 			<div id="branding">
 				<a href="${link}">
-					<s:url var="url" value="/css/img/agency_logo.png">
+					<s:url var="url" value="css/img/agency_logo.png">
 						<s:param name="v">
 							<s:property value="frontEndVersion" />
 						</s:param>
