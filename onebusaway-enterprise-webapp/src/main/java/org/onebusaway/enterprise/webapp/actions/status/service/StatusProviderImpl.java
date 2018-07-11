@@ -172,7 +172,7 @@ public class StatusProviderImpl implements StatusProvider {
         "http://localhost:8080/onebusaway-api-webapp/");
     String endpoint = _config.getConfigurationValueAsString("status.obaApiAgencyMetadata", 
         "api/where/agency-metadata/list.json");
-    String apikey = _config.getConfigurationValueAsString("display.obaApiKey", "OBA");
+    String apikey = _config.getConfigurationValueAsString("display.obaApiKey", "OBAKEY");    
     
     String url = api + endpoint + "?key=" + apikey;
     
