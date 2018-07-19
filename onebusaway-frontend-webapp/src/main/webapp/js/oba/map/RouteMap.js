@@ -216,10 +216,10 @@ OBA.RouteMap = function(mapNode, initCallbackFn, serviceAlertCallbackFn) {
 		if(typeof vehiclesByRoute[routeId] === 'undefined') {
 			vehiclesByRoute[routeId] = {};
 		}
-		
-		var routeIdParts = routeId.split("_");
-		var agencyId = routeIdParts[0];
-		var routeIdWithoutAgency = routeIdParts[1];
+
+		var underscoreIndex = routeId.indexOf("_");//only the first "_" should be considered
+		var agencyId = routeId.substr(0, underscoreIndex);
+		var routeIdWithoutAgency = routeId.substr(underscoreIndex + 1);
 		
 		var params = { OperatorRef: agencyId, LineRef: routeIdWithoutAgency };		
 
@@ -242,90 +242,98 @@ OBA.RouteMap = function(mapNode, initCallbackFn, serviceAlertCallbackFn) {
 			
 			// service delivery
 			var vehiclesByIdInResponse = {};
-			jQuery.each(json.Siri.ServiceDelivery.VehicleMonitoringDelivery[0].VehicleActivity, function(_, activity) {
-				var latitude = activity.MonitoredVehicleJourney.VehicleLocation.Latitude;
-				var longitude = activity.MonitoredVehicleJourney.VehicleLocation.Longitude;
-				var orientation = activity.MonitoredVehicleJourney.Bearing;
-				var headsign = activity.MonitoredVehicleJourney.DestinationName;
-				var routeName = activity.MonitoredVehicleJourney.PublishedLineName;
-				var hasRealtime = activity.MonitoredVehicleJourney.Monitored;
-				var vehicleType = activity.MonitoredVehicleJourney.VehicleMode[0];
-				
-				var tripId = activity.MonitoredVehicleJourney.FramedVehicleJourneyRef.DatedVehicleJourneyRef;
-				
-				var vehicleId = activity.MonitoredVehicleJourney.VehicleRef;
-				var vehicleIdParts = vehicleId.split("_");
-				var vehicleIdWithoutAgency = vehicleIdParts[1];
-				var marker = vehiclesById[vehicleId];
-				var newMarker = false;
-				var markerImage = OBA.Config.urlPrefix + 'img/realtime/' + vehicleType + '/' + vehicleType + '-';
+			if (json.Siri.ServiceDelivery.VehicleMonitoringDelivery[0].VehicleActivity != undefined) {
+                jQuery.each(json.Siri.ServiceDelivery.VehicleMonitoringDelivery[0].VehicleActivity, function (_, activity) {
+                    var latitude = activity.MonitoredVehicleJourney.VehicleLocation.Latitude;
+                    var longitude = activity.MonitoredVehicleJourney.VehicleLocation.Longitude;
+                    var orientation = activity.MonitoredVehicleJourney.Bearing;
+                    var headsign = activity.MonitoredVehicleJourney.DestinationName;
+                    var routeName = activity.MonitoredVehicleJourney.PublishedLineName;
+                    var hasRealtime = activity.MonitoredVehicleJourney.Monitored;
+                    var vehicleType = activity.MonitoredVehicleJourney.VehicleMode[0];
 
-				// has route been removed while in the process of updating?
-				if(typeof vehiclesByRoute[routeId] === 'undefined') {
-					return false;
-				}
+                    var tripId = activity.MonitoredVehicleJourney.FramedVehicleJourneyRef.DatedVehicleJourneyRef;
 
-				// create marker if it doesn't exist				
-				if(typeof marker === 'undefined' || marker === null) {
-					var markerOptions = {
-						zIndex: 3,
-						map: map,
-						title: "Vehicle " + vehicleIdWithoutAgency + ", " + routeName + " to " + headsign,
-						vehicleId: vehicleId,
-						routeId: routeId
-					};
+                    var vehicleId = activity.MonitoredVehicleJourney.VehicleRef;
+                    var vehicleIdParts = vehicleId.split("_");
+                    var vehicleIdWithoutAgency = vehicleIdParts[1];
+                    var marker = vehiclesById[vehicleId];
+                    var newMarker = false;
+                    var markerImage = OBA.Config.urlPrefix + 'img/realtime/' + vehicleType + '/' + vehicleType + '-';
 
-					newMarker =true;
-					marker = new google.maps.Marker(markerOptions);
-			        
-			    	google.maps.event.addListener(marker, "click", function(mouseEvent) {
-			    		OBA.Config.analyticsFunction("Vehicle Marker Click", vehicleIdWithoutAgency);
-
-			    		OBA.Popups.showPopupWithContentFromRequest(map, this, OBA.Config.siriVMUrl + "&callback=?", 
-			    				{ OperatorRef: agencyId, VehicleRef: vehicleIdWithoutAgency, MaximumNumberOfCallsOnwards: "3", VehicleMonitoringDetailLevel: "calls", TripId: tripId }, 
-			    				OBA.Popups.getVehicleContentForResponse, null);
-			    	});
-				}
-				
-				// change marker image depending on whether realtime data is available
-				if(typeof hasRealtime === 'undefined' || hasRealtime === null || hasRealtime == false){
-					markerImage = OBA.Config.urlPrefix + 'img/scheduled/' + vehicleType + '/' + vehicleType + '-';
-				}
-				
-				// icon
-				var orientationAngle = "unknown";
-				if(orientation !== null && orientation !== 'NaN') {
-					orientationAngle = Math.floor(orientation / 5) * 5;
-				}
-					
-				var icon = new google.maps.MarkerImage(markerImage + orientationAngle + ".png",
-						new google.maps.Size(51, 51),
-						new google.maps.Point(0,0),
-						new google.maps.Point(25, 25));
-
-				marker.setIcon(icon);
-				
-				
-				var position = new google.maps.LatLng(latitude, longitude);
-				
-				if(newMarker){
-					marker.setPosition(position);
-				}
-				else{
-
-					// try shape animation, otherwise revert to straight-line
-					if (!tryAnimateAlongShape(vehicleId, routeId, marker, marker.getPosition(), position)) {
-                        marker.animateTo(position);
+                    // has route been removed while in the process of updating?
+                    if (typeof vehiclesByRoute[routeId] === 'undefined') {
+                        return false;
                     }
-				}
-				
-				// (mark that this vehicle is still in the response)
-				vehiclesByIdInResponse[vehicleId] = true;
 
-				// maps used to keep track of marker
-				vehiclesByRoute[routeId][vehicleId] = marker;
-				vehiclesById[vehicleId] = marker; 
-			});
+                    // create marker if it doesn't exist
+                    if (typeof marker === 'undefined' || marker === null) {
+                        var markerOptions = {
+                            zIndex: 3,
+                            map: map,
+                            title: "Vehicle " + vehicleIdWithoutAgency + ", " + routeName + " to " + headsign,
+                            vehicleId: vehicleId,
+                            routeId: routeId
+                        };
+
+                        newMarker = true;
+                        marker = new google.maps.Marker(markerOptions);
+
+                        google.maps.event.addListener(marker, "click", function (mouseEvent) {
+                            OBA.Config.analyticsFunction("Vehicle Marker Click", vehicleIdWithoutAgency);
+
+                            OBA.Popups.showPopupWithContentFromRequest(map, this, OBA.Config.siriVMUrl + "&callback=?",
+                                {
+                                    OperatorRef: agencyId,
+                                    VehicleRef: vehicleIdWithoutAgency,
+                                    MaximumNumberOfCallsOnwards: "3",
+                                    VehicleMonitoringDetailLevel: "calls",
+                                    TripId: tripId
+                                },
+                                OBA.Popups.getVehicleContentForResponse, null);
+                        });
+                    }
+
+                    // change marker image depending on whether realtime data is available
+                    if (typeof hasRealtime === 'undefined' || hasRealtime === null || hasRealtime == false) {
+                        markerImage = OBA.Config.urlPrefix + 'img/scheduled/' + vehicleType + '/' + vehicleType + '-';
+                    }
+
+                    // icon
+                    var orientationAngle = "unknown";
+                    if (orientation !== null && orientation !== 'NaN') {
+                        orientationAngle = Math.floor(orientation / 5) * 5;
+                    }
+
+                    var icon = new google.maps.MarkerImage(markerImage + orientationAngle + ".png",
+                        new google.maps.Size(51, 51),
+                        new google.maps.Point(0, 0),
+                        new google.maps.Point(25, 25));
+
+                    marker.setIcon(icon);
+
+
+                    var position = new google.maps.LatLng(latitude, longitude);
+
+                    if (newMarker) {
+                        marker.setPosition(position);
+                    }
+                    else {
+
+                        // try shape animation, otherwise revert to straight-line
+                        if (!tryAnimateAlongShape(vehicleId, routeId, marker, marker.getPosition(), position)) {
+                            marker.animateTo(position);
+                        }
+                    }
+
+                    // (mark that this vehicle is still in the response)
+                    vehiclesByIdInResponse[vehicleId] = true;
+
+                    // maps used to keep track of marker
+                    vehiclesByRoute[routeId][vehicleId] = marker;
+                    vehiclesById[vehicleId] = marker;
+                });
+            }
 			
 			// remove vehicles from map that are no longer in the response, for all routes in the query
 			jQuery.each(vehiclesById, function(vehicleOnMap_vehicleId, vehicleOnMap) {
