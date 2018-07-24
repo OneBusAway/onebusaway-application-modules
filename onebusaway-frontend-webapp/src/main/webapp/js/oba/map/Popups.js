@@ -256,7 +256,7 @@ OBA.Popups = (function() {
         html += '<p class="title">' + activity.MonitoredVehicleJourney.PublishedLineName + " " + activity.MonitoredVehicleJourney.DestinationName + '</p><p>';
 
         //don't show block id if there is none or if config says no
-        if (OBA.Config.showBlockIdInVehiclePopup == false || typeof blockIdWithoutAgency === 'undefined' || blockIdWithoutAgency === null) {
+        if (OBA.Config.showBlockIdInVehiclePopup == 'false' || typeof blockIdWithoutAgency === 'undefined' || blockIdWithoutAgency === null) {
             html += '<span class="type">Vehicle #' + vehicleIdWithoutAgency + '</span>';
 		}
 		else {
