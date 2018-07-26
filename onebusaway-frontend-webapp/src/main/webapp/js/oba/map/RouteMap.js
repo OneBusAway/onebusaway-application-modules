@@ -395,6 +395,9 @@ OBA.RouteMap = function(mapNode, initCallbackFn, serviceAlertCallbackFn) {
                 index++;
                 step();
 
+                //make sure marker ends at the correct final position no matter what happened along the way
+                marker.setPosition(position);
+
                 return true;
             } else if (startIndex >= 0 && endIndex >= 0 && endIndex < startIndex) {
                 // animate startIndex downto endIndex
@@ -422,6 +425,9 @@ OBA.RouteMap = function(mapNode, initCallbackFn, serviceAlertCallbackFn) {
 
                 index--;
                 step();
+
+                //make sure marker ends at the correct final position no matter what happened along the way
+                marker.setPosition(position);
 
                 return true;
 
