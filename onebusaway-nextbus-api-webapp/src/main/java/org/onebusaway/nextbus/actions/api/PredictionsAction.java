@@ -118,8 +118,10 @@ public class PredictionsAction extends NextBusApiBase implements
       String routeStop = "";
 
       for (AgencyAndId routeId : routeIds) {
-        routeStop += "rs=" + getIdNoAgency(routeId.toString()) + "|"
-            + getIdNoAgency(stopId) + "&";
+        if (isValidRoute(routeId)) {
+          routeStop += "rs=" + getIdNoAgency(routeId.toString()) + "|"
+                  + getIdNoAgency(stopId) + "&";
+        }
       }
       String uri = serviceUrl + routeStop + "format=" + REQUEST_TYPE;
       _log.info(uri);
