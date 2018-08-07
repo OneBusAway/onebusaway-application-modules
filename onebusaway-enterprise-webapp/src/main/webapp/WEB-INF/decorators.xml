@@ -31,6 +31,10 @@
 		<pattern>/*</pattern>
 	</decorator>
 
+	<decorator name="where" page="where_main.jspx">
+		<pattern>/where/*</pattern>
+	</decorator>
+
 	<decorator name="wiki" page="wiki.jspx">
 		<pattern>/wiki/*</pattern>
 		<pattern>/error/*</pattern>
