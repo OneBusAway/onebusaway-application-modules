@@ -157,11 +157,14 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
 
     //include both agency level and route level alerts
     List<ServiceAlertBean> serviceAlertBeansRoute = _realtimeService.getServiceAlertsForRoute(routeBean.getId());
-    List<ServiceAlertBean> serviceAlertBeansAgency = _realtimeService.getServiceAlertsForAgency(routeBean.getAgency().getId());
 
     List<ServiceAlertBean> serviceAlertBeans = new ArrayList<ServiceAlertBean>();
     serviceAlertBeans.addAll(serviceAlertBeansRoute);
-    serviceAlertBeans.addAll(serviceAlertBeansAgency);
+
+    if (routeBean.getAgency() != null) {
+        List<ServiceAlertBean> serviceAlertBeansAgency = _realtimeService.getServiceAlertsForAgency(routeBean.getAgency().getId());
+        serviceAlertBeans.addAll(serviceAlertBeansAgency);
+    }
     populateServiceAlerts(serviceAlertDescriptions, serviceAlertBeans);
 
     return new RouteResult(routeBean, directions, serviceAlertDescriptions);
