@@ -363,6 +363,18 @@ public class RealtimeServiceImpl implements RealtimeService {
   /**
    * SERVICE ALERTS METHODS
    */
+
+  @Override
+  public List<ServiceAlertBean> getServiceAlertsForAgency(String agencyId) {
+    SituationQueryBean query = new SituationQueryBean();
+    SituationQueryBean.AffectsBean affects = new SituationQueryBean.AffectsBean();
+    query.getAffects().add(affects);
+
+    affects.setAgencyId(agencyId);
+
+    ListBean<ServiceAlertBean> serviceAlerts = _transitDataService.getServiceAlerts(query);
+    return serviceAlerts.getList();
+  }
   
   @Override
   public List<ServiceAlertBean> getServiceAlertsForRoute(String routeId) {

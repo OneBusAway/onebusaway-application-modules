@@ -155,7 +155,13 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
     // service alerts in this direction
     Set<String> serviceAlertDescriptions = new HashSet<String>();
 
-    List<ServiceAlertBean> serviceAlertBeans = _realtimeService.getServiceAlertsForRoute(routeBean.getId());
+    //include both agency level and route level alerts
+    List<ServiceAlertBean> serviceAlertBeansRoute = _realtimeService.getServiceAlertsForRoute(routeBean.getId());
+    List<ServiceAlertBean> serviceAlertBeansAgency = _realtimeService.getServiceAlertsForAgency(routeBean.getAgency().getId());
+
+    List<ServiceAlertBean> serviceAlertBeans = new ArrayList<ServiceAlertBean>();
+    serviceAlertBeans.addAll(serviceAlertBeansRoute);
+    serviceAlertBeans.addAll(serviceAlertBeansAgency);
     populateServiceAlerts(serviceAlertDescriptions, serviceAlertBeans);
 
     return new RouteResult(routeBean, directions, serviceAlertDescriptions);
