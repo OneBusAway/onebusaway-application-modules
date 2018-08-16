@@ -175,7 +175,7 @@ function update() {
 
     var gtfsUrl;
     if (typeof(OBA.Config) == "undefined" || typeof(OBA.Config.apiBaseUrl) == "undefined") {
-        gtfsrUrl = "http://localhost:8080" + rawUrlPre + vehicleId + rawUrlPost;
+        gtfsrUrl = rawUrlPre + vehicleId + rawUrlPost;
     } else {
         gtfsrUrl = OBA.Config.apiBaseUrl + rawUrlPre + vehicleId + rawUrlPost;
     }
