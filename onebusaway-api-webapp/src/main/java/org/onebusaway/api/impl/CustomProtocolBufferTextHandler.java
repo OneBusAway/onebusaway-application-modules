@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
 
+import com.opensymphony.xwork2.ActionInvocation;
 import org.apache.struts2.rest.handler.ContentTypeHandler;
 import org.onebusaway.api.model.ResponseBean;
 
@@ -32,8 +33,25 @@ public class CustomProtocolBufferTextHandler implements ContentTypeHandler {
   }
 
   @Override
+  public void toObject(ActionInvocation actionInvocation, Reader reader, Object o) throws IOException {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
   public String fromObject(Object obj, String resultCode, Writer stream)
       throws IOException {
+    ResponseBean response = (ResponseBean) obj;
+    if (response.getData() != null && response.getData() instanceof Message) {
+      Message message = (Message) response.getData();
+      stream.write(message.toString());
+    } else {
+      stream.write(response.getText());
+    }
+    return null;
+  }
+
+  @Override
+  public String fromObject(ActionInvocation actionInvocation, Object obj, String s, Writer stream) throws IOException {
     ResponseBean response = (ResponseBean) obj;
     if (response.getData() != null && response.getData() instanceof Message) {
       Message message = (Message) response.getData();

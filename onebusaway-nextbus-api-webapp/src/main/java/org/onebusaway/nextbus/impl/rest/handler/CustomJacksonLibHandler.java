@@ -16,6 +16,7 @@
 
 package org.onebusaway.nextbus.impl.rest.handler;
 
+import com.opensymphony.xwork2.ActionInvocation;
 import com.opensymphony.xwork2.inject.Inject;
 
 import org.apache.struts2.StrutsConstants;
@@ -54,6 +55,14 @@ public class CustomJacksonLibHandler implements ContentTypeHandler {
     or.readValue(in); // , new TypeReference<clazz>);
   }
 
+  @Override
+  public void toObject(ActionInvocation actionInvocation, Reader reader, Object o) throws IOException {
+    mapper.configure(SerializationFeature.WRITE_NULL_MAP_VALUES, false);
+    ObjectReader or = mapper.readerForUpdating(o);
+    or.readValue(reader); // , new TypeReference<clazz>);
+
+  }
+
   public String fromObject(Object obj, String resultCode, Writer stream) throws IOException {
         mapper.configure(SerializationFeature.WRITE_NULL_MAP_VALUES, false);
         mapper.configure(SerializationFeature.WRITE_EMPTY_JSON_ARRAYS, false);
@@ -62,6 +71,16 @@ public class CustomJacksonLibHandler implements ContentTypeHandler {
        
         return null;
     }
+
+  @Override
+  public String fromObject(ActionInvocation actionInvocation, Object o, String s, Writer writer) throws IOException {
+    mapper.configure(SerializationFeature.WRITE_NULL_MAP_VALUES, false);
+    mapper.configure(SerializationFeature.WRITE_EMPTY_JSON_ARRAYS, false);
+    mapper.configure(SerializationFeature.WRITE_SINGLE_ELEM_ARRAYS_UNWRAPPED, true);
+    mapper.writeValue(writer, o);
+
+    return null;
+  }
 
   public String getContentType() {
     return DEFAULT_CONTENT_TYPE + ";charset=" + this.defaultEncoding;
