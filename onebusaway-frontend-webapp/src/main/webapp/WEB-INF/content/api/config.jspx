@@ -34,6 +34,7 @@ if(typeof OBA !== 'undefined' &amp;&amp; typeof OBA.Config !== 'undefined') {
 	OBA.Config.signDefaultAgencyId='<s:text name="sign.default.agency.id" />';
 	OBA.Config.useAgencyId='<s:property value="useAgencyId" />';
 	OBA.Config.showVehicleIdInStopPopup='<s:property value="showVehicleIdInStopPopup" />';
+	OBA.Config.showExpectedArrivalTimeInStopPopup='<s:property value="showExpectedArrivalTimeInStopPopup" />';
 	OBA.Config.showBlockIdInVehiclePopup='<s:property value="showBlockIdInVehiclePopup" />';
 	OBA.Config.serviceAlertText='<s:property value="serviceAlertText" />';
 

@@ -546,11 +546,14 @@ OBA.Popups = (function() {
                              var distance = monitoredVehicleJourney.MonitoredCall.Extensions.Distances.PresentableDistance;
 
                              var timePrediction = null;
+                             var expectedArrivalTime = null;
                              if(typeof monitoredVehicleJourney.MonitoredCall.ExpectedArrivalTime !== 'undefined'
                                  && monitoredVehicleJourney.MonitoredCall.ExpectedArrivalTime !== null) {
                                  timePrediction = OBA.Util.getArrivalEstimateForISOString(
                                          monitoredVehicleJourney.MonitoredCall.ExpectedArrivalTime,
                                          monitoredVehicleJourney.RecordedAtTime/*synthetic property*/);
+                                 expectedArrivalTime =
+									 OBA.Util.ISO8601StringToDate(monitoredVehicleJourney.MonitoredCall.ExpectedArrivalTime).format(dateFormat.masks.shortTime);
 						}
 
 						var wrapped = false;
@@ -585,10 +588,15 @@ OBA.Popups = (function() {
 							var vehicleId = monitoredVehicleJourney.VehicleRef.split("_")[1];
 							distance += '<span class="vehicleId"> (#' + vehicleId + ')</span>';
 						}
+
+
 						
 						
 						// time mode
 						if(timePrediction != null && stalled === false) {
+							if (expectedArrivalTime != null && OBA.Config.showExpectedArrivalTimeInStopPopup == "true") {
+                                timePrediction += ', ' + expectedArrivalTime;
+                        	}
 							if(wrapped === false) {
 								timePrediction += ", " + distance;
 							}

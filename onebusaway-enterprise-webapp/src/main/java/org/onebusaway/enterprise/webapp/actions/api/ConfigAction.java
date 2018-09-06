@@ -107,6 +107,10 @@ public class ConfigAction extends OneBusAwayEnterpriseActionSupport {
     return _configurationService.getConfigurationValueAsString("display.showVehicleIdInStopPopup", "false");
   }
 
+  public String getShowExpectedArrivalTimeInStopPopup() {
+    return _configurationService.getConfigurationValueAsString("display.showExpectedArrivalTimeInStopPopup", "false");
+  }
+
   public String getShowBlockIdInVehiclePopup() {
     return _configurationService.getConfigurationValueAsString("display.showBlockIdInVehiclePopup", "false");
   }
