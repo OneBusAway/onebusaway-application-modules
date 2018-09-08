@@ -325,6 +325,11 @@ public class TransitDataServiceImpl implements TransitDataService {
   }
 
   @Override
+  public VehicleLocationRecordBean getVehiclePositionForVehicleId(String vehicleId) {
+    return _transitDataService.getVehiclePositionForVehicleId(vehicleId);
+  }
+
+  @Override
   public TripDetailsBean getTripDetailsForVehicleAndTime(
       TripForVehicleQueryBean query) {
     blockUntilBundleIsReady();

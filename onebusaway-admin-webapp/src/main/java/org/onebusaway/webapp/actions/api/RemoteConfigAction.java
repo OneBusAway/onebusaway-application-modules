@@ -120,6 +120,9 @@ public class RemoteConfigAction extends ActionSupport {
         return _configurationService.getConfigurationValueAsString(
                 "appHostname", null);
     }
+    public String getServiceAlertText() {
+        return _configurationService.getConfigurationValueAsString("display.serviceAlertText", "Service Alert");
+    }
     
     public boolean isHttps() {
         // force the use of https to remote servers

@@ -44,7 +44,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 
 public class NextBusApiBase {
-  
+
   @Autowired
   protected TransitDataService _transitDataService;
 
@@ -68,13 +68,16 @@ public class NextBusApiBase {
   // CACHE
   
   public AgencyBean getCachedAgencyBean(String id) {
-    AgencyBean bean = _cache.getAgency(id);
-    if (bean == null) {
-      bean = _transitDataService.getAgency(id);
-      if (bean != null)
-        _cache.putAgency(id, bean);
+    if (_configUtil.getAgencyMapper().values().contains(id)) {
+      AgencyBean bean = _cache.getAgency(id);
+      if (bean == null) {
+        bean = _transitDataService.getAgency(id);
+        if (bean != null)
+          _cache.putAgency(id, bean);
+      }
+      return bean;
     }
-    return bean;
+    return null;
   }
 
   public StopBean getCachedStopBean(String id) {
@@ -113,7 +116,7 @@ public class NextBusApiBase {
     return true;
   }
 
-  private boolean isValidAgency(String agencyId) {
+  protected boolean isValidAgency(String agencyId) {
     try {
       return (getCachedAgencyBean(agencyId) != null);
     } catch (Exception e) {
@@ -124,6 +127,9 @@ public class NextBusApiBase {
 
   protected boolean isValidRoute(AgencyAndId routeId) {
     if (routeId != null && routeId.hasValues()) {
+      if (!isValidAgency(routeId.getAgencyId())) {
+        return false;
+      }
       Boolean result = _cache.getRoute(routeId.toString());
       if (result != null) {
         return result;

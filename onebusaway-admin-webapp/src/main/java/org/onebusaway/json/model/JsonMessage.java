@@ -25,6 +25,6 @@ public class JsonMessage {
   public void setStatus(String status) {
     this.status = status;
   }
-  
+   /*to push Jenkins build*/
   
 }

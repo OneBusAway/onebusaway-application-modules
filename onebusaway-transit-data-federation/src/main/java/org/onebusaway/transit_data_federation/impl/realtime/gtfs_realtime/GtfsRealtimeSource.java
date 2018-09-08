@@ -36,8 +36,10 @@ import java.util.concurrent.TimeUnit;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
+import com.google.transit.realtime.GtfsRealtime;
+import org.onebusaway.geospatial.model.CoordinatePoint;
+import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
 import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.realtime.api.EVehicleType;
 import org.onebusaway.realtime.api.VehicleLocationListener;
 import org.onebusaway.realtime.api.VehicleLocationRecord;
 import org.onebusaway.transit_data.model.service_alerts.ECause;
@@ -50,6 +52,8 @@ import org.onebusaway.transit_data_federation.impl.service_alerts.ServiceAlertsS
 import org.onebusaway.transit_data_federation.services.AgencyService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockCalendarService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockGeospatialService;
+import org.onebusaway.transit_data_federation.services.realtime.BlockLocation;
+import org.onebusaway.transit_data_federation.services.realtime.BlockLocationService;
 import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts;
 import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert;
 import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlertsService;
@@ -74,6 +78,8 @@ import com.jcraft.jsch.SftpException;
 
 public class GtfsRealtimeSource implements MonitoredDataSource {
 
+  public static final String GTFS_CONNECT_TIMEOUT = "gtfs.connect_timeout";
+  public static final String GTFS_READ_TIMEOUT = "gtfs.read_timeout";
   private static final Logger _log = LoggerFactory.getLogger(GtfsRealtimeSource.class);
 
   private static final ExtensionRegistry _registry = ExtensionRegistry.newInstance();
@@ -88,6 +94,8 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   private TransitGraphDao _transitGraphDao;
 
   private BlockCalendarService _blockCalendarService;
+
+  private BlockLocationService _blockLocationService;
 
   private VehicleLocationListener _vehicleLocationListener;
 
@@ -110,7 +118,9 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   private String _sftpAlertsUrl;
 
   private int _refreshInterval = 30;
-  
+
+  private Integer _maxDeltaLocationMeters = null; // by default don't validate
+
   private boolean _showNegativeScheduledArrivals = true;
 
   private Map<String,String> _headersMap;
@@ -153,6 +163,8 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   
   private boolean _enabled = true;
 
+  private boolean _useLabelAsId = false;
+
   @Autowired
   public void setAgencyService(AgencyService agencyService) {
     _agencyService = agencyService;
@@ -166,6 +178,11 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   @Autowired
   public void setBlockCalendarService(BlockCalendarService blockCalendarService) {
     _blockCalendarService = blockCalendarService;
+  }
+
+  @Autowired
+  public void setBlockLocationService(BlockLocationService blockLocationService) {
+    _blockLocationService = blockLocationService;
   }
 
   @Autowired
@@ -239,6 +256,15 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     return _refreshInterval;
   }
 
+  /**
+   * add validation to drop record if difference between calculated and reported positions is greater
+   * than max.  If null, validation is not applied.  Distance is in meters.
+   * @param max
+   */
+  public void setMaxDeltaLocationMeters(Integer max) { _maxDeltaLocationMeters = max; }
+
+  public Integer getMaxDeltaLocationMeters() { return _maxDeltaLocationMeters; }
+
   public void setHeadersMap(Map<String,String> headersMap) {
 	_headersMap = headersMap;
   }
@@ -294,6 +320,14 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   public boolean getEnabled() {
     return _enabled;
   }
+
+  /**
+   * use the vehicle label as the id.
+   * @param useLabelAsId
+   */
+  public void setUseLabelAsId(boolean useLabelAsId) {
+    _useLabelAsId = useLabelAsId;
+  }
   
   public GtfsRealtimeTripLibrary getGtfsRealtimeTripLibrary() {
     return _tripsLibrary;
@@ -324,6 +358,7 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     }
     _tripsLibrary.setScheduleAdherenceFromLocation(_scheduleAdherenceFromLocation);
     _tripsLibrary.setBlockGeospatialService(_blockGeospatialService);
+    _tripsLibrary.setUseLabelAsVehicleId(_useLabelAsId);
     
     _alertLibrary = new GtfsRealtimeAlertLibrary();
     _alertLibrary.setEntitySource(_entitySource);
@@ -383,7 +418,23 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
         tripUpdates, vehiclePositions);
     result.setRecordsTotal(combinedUpdates.size());
     handleCombinedUpdates(result, combinedUpdates);
+    cacheVehicleLocations(vehiclePositions);
     handleAlerts(alerts);
+  }
+
+  private void cacheVehicleLocations(FeedMessage vehiclePositions) {
+
+
+    for (FeedEntity entity : vehiclePositions.getEntityList()) {
+      if (entity.hasVehicle()) {
+        GtfsRealtime.VehiclePosition vehicle = entity.getVehicle();
+        _vehicleLocationListener.handleRawPosition(
+                new AgencyAndId(getAgencyIds().get(0), vehicle.getVehicle().getId()),
+                vehicle.getPosition().getLatitude(),
+                vehicle.getPosition().getLongitude(),
+                vehicle.getTimestamp());
+      }
+    }
   }
 
   private void handleCombinedUpdates(MonitoredResult result,
@@ -404,6 +455,10 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
         // the TDS will discard these
         if (blockNotActive(record)) {
           _log.debug("discarding v: " + vehicleId + " as block not active");
+          continue;
+        }
+        if (!isValidLocation(record, update)) {
+          _log.debug("discarding v: " + vehicleId + " as location is bad");
           continue;
         }
         seenVehicles.add(vehicleId);
@@ -439,6 +494,23 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     result.setLastUpdate(newestUpdate);
     _log.info("Agency " + this.getAgencyIds().get(0) + " has active vehicles=" + seenVehicles.size() 
         + " for updates=" + updates.size() + " with most recent timestamp " + new Date(newestUpdate));
+  }
+
+  private boolean isValidLocation(VehicleLocationRecord record, CombinedTripUpdatesAndVehiclePosition update) {
+    if (_maxDeltaLocationMeters == null) return true; // validation turned off
+    CoordinatePoint reported = new CoordinatePoint(update.vehiclePosition.getPosition().getLatitude(),
+            update.vehiclePosition.getPosition().getLongitude());
+
+    BlockLocation blockLocation = _blockLocationService.getScheduledLocationForBlockInstance(update.block.getBlockInstance(), record.getTimeOfRecord());
+      if (blockLocation == null) return true; // this record will be tossed for other reasons
+    CoordinatePoint calculated = blockLocation.getLocation();
+    double delta = SphericalGeometryLibrary.distanceFaster(reported.getLat(), reported.getLon(),
+            calculated.getLat(), calculated.getLon());
+    if (delta < _maxDeltaLocationMeters)
+      return true;
+    _log.info("dropped vehicle {} has distance of {} with deviation {} when limit is {}",
+            record.getVehicleId(), delta, record.getScheduleDeviation(), _maxDeltaLocationMeters);
+    return false;
   }
 
   private boolean blockNotActive(VehicleLocationRecord record) {
@@ -658,6 +730,12 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
    */
   private FeedMessage readFeedFromUrl(URL url) throws IOException {
    URLConnection urlConnection = url.openConnection();
+   if (System.getProperty(GTFS_CONNECT_TIMEOUT) != null) {
+     urlConnection.setConnectTimeout(Integer.parseInt(System.getProperty(GTFS_CONNECT_TIMEOUT)));
+   }
+   if (System.getProperty(GTFS_READ_TIMEOUT) != null) {
+     urlConnection.setReadTimeout(Integer.parseInt(System.getProperty(GTFS_READ_TIMEOUT)));
+   }
    setHeadersToUrlConnection(urlConnection);
    InputStream in = null;
    try {

@@ -30,6 +30,13 @@ html, body {
       #map {
         height: 100%;
       }
+#legend {
+	font-family: Arial, sans-serif;
+	background: #fff;
+	padding: 15px;
+	margin: 20px;
+	border: 2px solid #696969;
+}
 </style>
 <s:url var="url" value="https://maps.googleapis.com/maps/api/js">				
 	<s:param name="v">3</s:param>
@@ -38,8 +45,12 @@ html, body {
 </s:url>
 <script src="${url}" type="text/javascript"><!-- //prevent jspx minimization --></script>
 
+	<s:url var="url" value="/js/oba/map/debug.js">
+		<s:param name="v"><s:property value="frontEndVersion" /></s:param>
+	</s:url>
+<script type="text/javascript" src="${url}"><!-- //prevent jspx minimization --></script>
 
-<s:url var="url" value="/js/oba/map/debug.js">
+<s:url var="url" value="/js/oba/Util.js">
 	<s:param name="v"><s:property value="frontEndVersion" /></s:param>
 </s:url>
 <script type="text/javascript" src="${url}"><!-- //prevent jspx minimization --></script>
@@ -62,6 +73,19 @@ html, body {
 
 </head>
 <body>
+  <div id="legend" style="display:none">
+	  <h3>Legend</h3>
+	  <b>Age: </b><div id="age">unset</div>
+	  <b>Deviation: </b><div id="deviation">unset</div>
+	  <b>Block: </b><div id="block">unset</div>
+	  <b>Trip: </b><div id="trip">unset</div>
+	  <b>Distance: </b><div id="distance">unset</div>
+	  <b>Timestamp: </b><div id="timestamp">unset</div>
+	  <b>Next Stop Id:</b><div id="nextStopId">unset</div>
+	  <b>Next Stop:</b><div id="nextStop">unset</div>
+	  <b>Scheduled: </b><div id="scheduled">unset</div>
+	  <b>Predicted: </b><div id="predicted">unset</div>
+  </div>
   <div id="map"><!-- //prevent jspx minimization --></div>
 </body>
 </html>

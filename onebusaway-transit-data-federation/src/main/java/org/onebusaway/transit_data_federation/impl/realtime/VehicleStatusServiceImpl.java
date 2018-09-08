@@ -116,6 +116,24 @@ class VehicleStatusServiceImpl implements VehicleLocationListener,
     _blockVehicleLocationService.resetVehicleLocation(vehicleId);
   }
 
+  public void handleRawPosition(AgencyAndId vehicle, double lat, double lon, long timestamp) {
+    VehicleLocationRecord record = new VehicleLocationRecord();
+    record.setVehicleId(vehicle);
+    record.setCurrentLocationLat(lat);
+    record.setCurrentLocationLon(lon);
+    record.setTimeOfLocationUpdate(timestamp);
+    record.setTimeOfRecord(timestamp);
+    // these need to be set to prevent serialzation issues
+    record.setScheduleDeviation(-999.);
+    record.setDistanceAlongBlock(-999.);
+    record.setCurrentOrientation(-999.);
+    _vehicleLocationRecordCache.addRawPosition(vehicle, record);
+  }
+
+  public VehicleLocationRecord getRawPosition(AgencyAndId vehicle) {
+    return _vehicleLocationRecordCache.getRawPosition(vehicle);
+  }
+
   /****
    * {@link VehicleStatusService} Interface
    ****/

@@ -29,8 +29,6 @@ import com.opensymphony.xwork2.conversion.TypeConversionException;
  */
 public class DateConverter extends StrutsTypeConverter {
 
-  private static SimpleDateFormat _format = new SimpleDateFormat("yyyy-MM-dd");
-
   @SuppressWarnings("rawtypes")
   public Object convertFromString(Map context, String[] values, Class toClass) {
 
@@ -48,7 +46,8 @@ public class DateConverter extends StrutsTypeConverter {
       }
 
       try {
-        Date d = _format.parse(value);
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+        Date d = format.parse(value);
         if( toClass == Long.TYPE || toClass == Long.class)
           return d.getTime();
         return d;
@@ -62,8 +61,10 @@ public class DateConverter extends StrutsTypeConverter {
 
   @SuppressWarnings("rawtypes")
   public String convertToString(Map context, Object o) {
-    if (o instanceof Date)
-      return _format.format((Date) o);
+    if (o instanceof Date) {
+      SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+      return format.format((Date) o);
+    }
     return "";
   }
 }

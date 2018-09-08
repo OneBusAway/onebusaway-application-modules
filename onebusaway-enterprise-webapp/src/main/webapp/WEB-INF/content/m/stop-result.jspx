@@ -120,8 +120,8 @@
 		
 		<s:if test="%{uniqueServiceAlertsForResults.size&gt;0}">
 			<div class="alerts">
-				<p>
-					<strong>Service Alert:</strong>
+				<p id="serviceAlertHeader">
+					<span>Service Alert Text Here</span>
 				</p>
 				<ul class="alerts">
 					<c:forEach var="uniqueServiceAlert" items="${uniqueServiceAlertsForResults}">

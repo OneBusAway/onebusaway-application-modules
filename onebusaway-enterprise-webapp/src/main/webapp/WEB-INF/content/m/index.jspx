@@ -22,10 +22,53 @@
 <jsp:directive.page contentType="text/html" />
 <jsp:output omit-xml-declaration="yes"/>
 <head>
+	<s:url var="url" value="/css/map/map.css">
+		<s:param name="v"><s:property value="frontEndVersion" /></s:param>
+	</s:url>
+	<link rel="stylesheet" href="${url}" type="text/css" media="screen,print"/>
+
+	<s:url var="url" value="/css/map/popup.css">
+		<s:param name="v"><s:property value="frontEndVersion" /></s:param>
+	</s:url>
+	<link rel="stylesheet" href="${url}" type="text/css" media="screen,print"/>
+
+	<s:url var="url" value="/css/map/wizard.css">
+		<s:param name="v"><s:property value="frontEndVersion" /></s:param>
+	</s:url>
+	<link rel="stylesheet" href="${url}" type="text/css" media="screen,print"/>
+
+	<s:url var="url" value="https://maps.googleapis.com/maps/api/js">
+		<s:param name="v">3</s:param>
+		<s:param name="client"><s:property value="googleMapsClientId" /></s:param>
+		<s:param name="channel"><s:property value="googleMapsChannelId" /></s:param>
+		<s:param name="key"><s:property value="googleMapsApiKey" /></s:param>
+		<s:param name="sensor">false</s:param>
+	</s:url>
+	<script src="${url}" type="text/javascript"><!-- //prevent jspx minimization --></script>
+
+	<s:url var="url" value="/api/config">
+		<s:param name="v"><s:property value="cacheBreaker" /></s:param>
+	</s:url>
+	<script type="text/javascript" src="${url}"><!-- //prevent jspx minimization --></script>
 
 	<s:url var="url" value="/js/lib/jquery.ui.js">
 		<s:param name="v"><s:property value="frontEndVersion" /></s:param>
   	</s:url>
+	<script type="text/javascript" src="${url}"><!-- //prevent jspx minimization --></script>
+
+	<s:url var="url" value="/js/lib/jquery.history.js">
+		<s:param name="v"><s:property value="frontEndVersion" /></s:param>
+	</s:url>
+	<script type="text/javascript" src="${url}"><!-- //prevent jspx minimization --></script>
+
+	<s:url var="url" value="/js/lib/markerManager.js">
+		<s:param name="v"><s:property value="frontEndVersion" /></s:param>
+	</s:url>
+	<script type="text/javascript" src="${url}"><!-- //prevent jspx minimization --></script>
+
+	<s:url var="url" value="/js/lib/rgbcolor.js">
+		<s:param name="v"><s:property value="frontEndVersion" /></s:param>
+	</s:url>
 	<script type="text/javascript" src="${url}"><!-- //prevent jspx minimization --></script>
 
 	<s:url var="url" value="/js/lib/dateFormat.js">
@@ -36,6 +79,41 @@
 	<s:url var="url" value="/js/oba/m/Mobile.js">
 		<s:param name="v"><s:property value="frontEndVersion" /></s:param>
   	</s:url>
+	<script type="text/javascript" src="${url}"><!-- //prevent jspx minimization --></script>
+
+	<s:url var="url" value="/js/lib/popover.js">
+		<s:param name="v"><s:property value="frontEndVersion" /></s:param>
+	</s:url>
+	<script type="text/javascript" src="${url}"><!-- //prevent jspx minimization --></script>
+
+	<s:url var="url" value="/js/oba/map/Wizard.js">
+		<s:param name="v"><s:property value="frontEndVersion" /></s:param>
+	</s:url>
+	<script type="text/javascript" src="${url}"><!-- //prevent jspx minimization --></script>
+
+	<s:url var="url" value="/js/oba/Util.js">
+		<s:param name="v"><s:property value="frontEndVersion" /></s:param>
+	</s:url>
+	<script type="text/javascript" src="${url}"><!-- //prevent jspx minimization --></script>
+
+	<s:url var="url" value="/js/oba/map/GoogleMapWrapper.js">
+		<s:param name="v"><s:property value="frontEndVersion" /></s:param>
+	</s:url>
+	<script type="text/javascript" src="${url}"><!-- //prevent jspx minimization --></script>
+
+	<s:url var="url" value="/js/oba/map/Popups.js">
+		<s:param name="v"><s:property value="frontEndVersion" /></s:param>
+	</s:url>
+	<script type="text/javascript" src="${url}"><!-- //prevent jspx minimization --></script>
+
+	<s:url var="url" value="/js/oba/map/RouteMap.js">
+		<s:param name="v"><s:property value="frontEndVersion" /></s:param>
+	</s:url>
+	<script type="text/javascript" src="${url}"><!-- //prevent jspx minimization --></script>
+
+	<s:url var="url" value="/js/lib/markerAnimate.js">
+		<s:param name="v"><s:property value="frontEndVersion" /></s:param>
+	</s:url>
 	<script type="text/javascript" src="${url}"><!-- //prevent jspx minimization --></script>
 	
 	<s:if test="!routeColors.equals('')">	
@@ -48,96 +126,98 @@
 </head>
 
 <body>
-	<div id="searchPanel">
-		<s:form namespace="/m" action="index" method="GET">
-			<label for="bustimesearch" class="obscure">Enter search terms</label>
-			<input type="text" id="bustimesearch" name="q" class="q" value="${q}" aria-label="Enter search: " />
-			<input type="submit" class="s" value="Find" id="submitButton" alt="search" />
-			
-			<input type="hidden" name="l" id="l" />
-			<input type="hidden" name="t" id="t" />
-		</s:form>
+	<div id="mainbox">
+		<div id="searchPanel">
+			<s:form namespace="/m" action="index" method="GET">
+				<label for="bustimesearch" class="obscure">Enter search terms</label>
+				<input type="text" id="bustimesearch" name="q" class="q" value="${q}" aria-label="Enter search: " />
+				<input type="submit" class="s" value="Find" id="submitButton" alt="search" />
 
-		<small>TIP: Enter an intersection, bus route or bus stop code.</small>
-	</div>
-	
-	<s:if test="globalServiceAlerts!=null">
-		<div id="global-alerts" class="global-alerts">
-			<s:iterator value="globalServiceAlerts">
-				<s:iterator value="descriptions">
-					<p class="global-alert-content"><strong>Service Alert: </strong><s:property value="value" /></p>
+				<input type="hidden" name="l" id="l" />
+				<input type="hidden" name="t" id="t" />
+			</s:form>
+
+			<small>TIP: Enter an intersection, bus route or bus stop code.</small>
+		</div>
+
+		<s:if test="globalServiceAlerts!=null">
+			<div id="global-alerts" class="global-alerts">
+				<s:iterator value="globalServiceAlerts">
+					<s:iterator value="descriptions">
+						<p id="serviceAlertHeader" class="global-alert-content">
+							<span>Service Alert Text Here</span>
+							<s:property value="value" />
+						</p>
+					</s:iterator>
 				</s:iterator>
-			</s:iterator>
-		 </div>
-	</s:if>
-
-	<s:if test="%{results.empty}">
-		<div id="content">
-			<c:import url="welcome.jspx"/>
-		</div>
-	</s:if>
-	<s:else>
-
-		<div id="refresh">
-			<s:url var="url" namespace="/m" action="index" anchor="top">				
-				<s:param name="q"><s:property value="q" /></s:param>
-				<s:param name="l"><s:property value="l" /></s:param>
-				<s:param name="t"><s:property value="t" /></s:param>
-				<s:param name="cacheBreaker"><s:property value="cacheBreaker" /></s:param>
-			</s:url>
-	    	<a href="${url}">Refresh (<strong>Updated <s:property value="lastUpdateTime" /></strong>)</a>
-		</div>
-
-		<s:if test="%{results.matches.size==1}">
-		  <s:if test="results.resultType.equals('StopResult')">
-			<div id="mapHider" onclick="OBA.Mobile.loadMap('${q}')">
-				<div id="mapExpander">
-					<span>SHOW MAP</span>
-					<s:url var="url" value="/css/img/loading.gif"></s:url>
-					<img id="loadingCover" src="${url}" style="display: none;"/>
-				</div>
-				<div id="mapContainer"><br/></div>
-			</div>
-		  </s:if>
+			 </div>
 		</s:if>
-		<div id="content">
-			<s:if test="%{results.matches.size&gt;0}">
 
-				<s:if test="results.resultType.equals('RouteResult')">
-					<s:if test="%{results.matches.size&gt;0}"><!--  support multiple agency route matches -->
-						<c:import url="route-result.jspx"/>
+		<s:if test="%{results.matches.size&gt;0}">
+			<div id="mapHider" class="map">
+				<div id="mapExpander">
+					<span id="showMapSpan">SHOW MAP</span>
+				</div>
+				<div id="map"><!-- //prevent jspx minimization --></div>
+			</div>
+		</s:if>
+
+		<s:if test="%{results.empty}">
+			<div id="content">
+				<c:import url="welcome.jspx"/>
+			</div>
+		</s:if>
+		<s:else>
+
+			<div id="refresh">
+				<s:url var="url" namespace="/m" action="index" anchor="top">
+					<s:param name="q"><s:property value="q" /></s:param>
+					<s:param name="l"><s:property value="l" /></s:param>
+					<s:param name="t"><s:property value="t" /></s:param>
+					<s:param name="cacheBreaker"><s:property value="cacheBreaker" /></s:param>
+				</s:url>
+				<a href="${url}">Refresh (<strong>Updated <s:property value="lastUpdateTime" /></strong>)</a>
+			</div>
+
+			<div id="content">
+				<s:if test="%{results.matches.size&gt;0}">
+
+					<s:if test="results.resultType.equals('RouteResult')">
+						<s:if test="%{results.matches.size&gt;0}"><!--  support multiple agency route matches -->
+							<c:import url="route-result.jspx"/>
+						</s:if>
+						<s:else>
+							<c:import url="route-picker.jspx"/>
+						</s:else>
 					</s:if>
-					<s:else>
-						<c:import url="route-picker.jspx"/>
-					</s:else>
+					<s:elseif test="results.resultType.equals('RouteInRegionResult')">
+							<c:import url="route-in-region-picker.jspx"/>
+					</s:elseif>
+					<s:elseif test="results.resultType.equals('StopResult')">
+						<s:if test="%{results.matches.size==1}">
+							<c:import url="stop-result.jspx"/>
+						</s:if>
+						<s:else>
+							<c:import url="stop-result-lb.jspx"/>
+						</s:else>
+					</s:elseif>
 				</s:if>
-				<s:elseif test="results.resultType.equals('RouteInRegionResult')">
-						<c:import url="route-in-region-picker.jspx"/>
-				</s:elseif>
-				<s:elseif test="results.resultType.equals('StopResult')">
-					<s:if test="%{results.matches.size==1}">
-						<c:import url="stop-result.jspx"/>
+
+				<s:if test="%{results.suggestions.size&gt;0}">
+					<!-- route search with no direct matches -->
+					<s:if test="results.resultType.equals('RouteResult')">
+						<c:import url="route-suggestion-picker.jspx"/>
 					</s:if>
-					<s:else>
-						<c:import url="stop-result-lb.jspx"/>
-					</s:else>
-				</s:elseif>
-			</s:if>
 
-			<s:if test="%{results.suggestions.size&gt;0}">
-				<!-- route search with no direct matches -->
-				<s:if test="results.resultType.equals('RouteResult')">
-					<c:import url="route-suggestion-picker.jspx"/>
+					<!-- amigbuous address -->
+					<s:elseif test="results.resultType.equals('GeocodeResult')">
+							<c:import url="geocode-result.jspx"/>
+					</s:elseif>
 				</s:if>
-	
-				<!-- amigbuous address -->
-				<s:elseif test="results.resultType.equals('GeocodeResult')">
-						<c:import url="geocode-result.jspx"/>
-				</s:elseif>
-			</s:if>
-		</div>
+			</div>
 
-	</s:else>
+		</s:else>
+	</div>
 
 </body>
 </html>

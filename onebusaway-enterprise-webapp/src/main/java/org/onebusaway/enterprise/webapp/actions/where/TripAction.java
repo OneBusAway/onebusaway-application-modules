@@ -78,6 +78,10 @@ public class TripAction extends ActionSupport {
 	return _configurationService.getConfigurationValueAsString("display.googleAdsClientId", "");    
   }
 
+  public String getGoogleMapsApiKey() {
+    return _configurationService.getConfigurationValueAsString("display.googleMapsApiKey", "");
+  }
+
   public void setId(String id) {
     _id = id;
   }

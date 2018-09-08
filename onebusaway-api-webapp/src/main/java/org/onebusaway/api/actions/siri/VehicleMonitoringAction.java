@@ -109,7 +109,7 @@ public class VehicleMonitoringAction extends ApiActionSupport
 
   //@Override
   public String index() {
-	  
+
 	processGoogleAnalytics();
 
     long currentTimestamp = getTime();
@@ -119,8 +119,9 @@ public class VehicleMonitoringAction extends ApiActionSupport
     String directionId = _request.getParameter("DirectionRef");
     
     String tripId = _request.getParameter("TripId");
-    
-    
+
+    boolean showRawLocation = Boolean.valueOf(_request.getParameter("ShowRawLocation"));
+
     // We need to support the user providing no agency id which means 'all agencies'.
     // So, this array will hold a single agency if the user provides it or all
     // agencies if the user provides none. We'll iterate over them later while 
@@ -205,15 +206,14 @@ public class VehicleMonitoringAction extends ApiActionSupport
       // No vehicle id validation, so we pass null for error
       _response = generateSiriResponse(activities, null, null, currentTimestamp);
 
-      // *** CASE 2: by route, using direction id, if provided
+        // *** CASE 2: by route, using direction id, if provided
     } else if (_request.getParameter("LineRef") != null) {
-      
       List<VehicleActivityStructure> activities = new ArrayList<VehicleActivityStructure>();
       
       for (AgencyAndId routeId : routeIds) {
         
         List<VehicleActivityStructure> activitiesForRoute = _realtimeService.getVehicleActivityForRoute(
-            routeId.toString(), directionId, maximumOnwardCalls, currentTimestamp);
+            routeId.toString(), directionId, maximumOnwardCalls, currentTimestamp, showRawLocation);
         if (activitiesForRoute != null) {
           activities.addAll(activitiesForRoute);
         }

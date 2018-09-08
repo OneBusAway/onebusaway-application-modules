@@ -52,6 +52,7 @@
 	<s:param name="v">3</s:param>
 	<s:param name="client"><s:property value="googleMapsClientId" /></s:param>
 	<s:param name="channel"><s:property value="googleMapsChannelId" /></s:param>
+	<s:param name="key"><s:property value="googleMapsApiKey" /></s:param>
 	<s:param name="sensor">false</s:param>
 </s:url>
 <script src="${url}" type="text/javascript"><!-- //prevent jspx minimization --></script>
@@ -142,7 +143,7 @@
 				<h1><s:property value="getText('main.headline')" /></h1>
 				<h2><s:property value="getText('main.shorttext')" /></h2>
 			</div>
-			
+
 			<div id="map_header">
 				<div class="title">
 		   			<s:url var="url" value="/"></s:url>
@@ -224,16 +225,16 @@
 			<div class="container clear"><!-- jspx --></div>
 
 			<s:set var="link" value="getText('main.tools.link')" />
+			<s:set var="mobile_image" value="getText('main.tools.mobile_image')" />
 			<a href="${link}">
 				<div id="mobileBox">
 					<div id="mobileAvailabilityBox">
 						<h1><s:property value="getText('main.mobileavailability')" /></h1>
 					</div>
-						<s:url var="url" value="/css/img/oba_mobile.png"></s:url>
-						<img id="mobileImage" src="${url}" alt="Agency logo" />
+						<img id="mobileImage" src="${mobile_image}" alt="Agency logo" />
 				</div>
 			</a>
-		
+
 		</div>
 		<div class="container clear"><!-- jspx --></div>
 	  	<s:url var="url" value="/css/img/google_logo.png"></s:url>

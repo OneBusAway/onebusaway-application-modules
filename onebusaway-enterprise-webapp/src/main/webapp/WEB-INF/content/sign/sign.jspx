@@ -76,11 +76,11 @@
 <div id="content"><!-- //prevent jspx minimization --></div>
 <!--<div id="pager">&lt;!&ndash; //prevent jspx minimization &ndash;&gt;</div>-->
 <div id="footer">
-    <!--<div id="branding">&lt;!&ndash; //prevent jspx minimization &ndash;&gt;</div>-->
-	<!--<div id="clock">-->
-		<!--<div id="time">&lt;!&ndash; //prevent jspx minimization &ndash;&gt;</div>-->
-		<!--<div id="day">&lt;!&ndash; //prevent jspx minimization &ndash;&gt;</div>-->
-	<!--</div>-->
+    <div id="branding"><!-- //prevent jspx minimization --></div>
+	<div id="clock">
+		<div id="time"><!-- //prevent jspx minimization --></div>
+		<div id="day"><!-- //prevent jspx minimization --></div>
+	</div>
 	<div id="pagewrapper">
 		<span>Stop</span>
 		<span id="currentpage">1</span>

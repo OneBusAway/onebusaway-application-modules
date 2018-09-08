@@ -126,6 +126,22 @@ class VehicleStatusBeanServiceImpl implements VehicleStatusBeanService {
     return getBlockLocationAsVehicleLocationRecord(blockLocation);
   }
 
+  public VehicleLocationRecordBean getVehiclePositionForVehicleId(
+          AgencyAndId vehicleId) {
+    VehicleLocationRecord record = _vehicleStatusService.getRawPosition(vehicleId);
+
+    if (record == null) return null;
+    VehicleLocationRecordBean bean = new VehicleLocationRecordBean();
+    bean.setTimeOfLocationUpdate(record.getTimeOfLocationUpdate());
+    bean.setTimeOfRecord(record.getTimeOfRecord());
+    bean.setCurrentLocation(new CoordinatePoint(record.getCurrentLocationLat(), record.getCurrentLocationLon()));
+    bean.setCurrentOrientation(record.getCurrentOrientation());
+    bean.setDistanceAlongBlock(record.getDistanceAlongBlock());
+    bean.setScheduleDeviation(record.getScheduleDeviation());
+    return bean;
+  }
+
+
   @Override
   public ListBean<VehicleLocationRecordBean> getVehicleLocations(
       VehicleLocationRecordQueryBean query) {

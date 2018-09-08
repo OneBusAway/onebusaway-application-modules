@@ -17,6 +17,7 @@ package org.onebusaway.nextbus.impl.rest.handler;
 
 import com.google.protobuf.Message;
 import com.google.transit.realtime.GtfsRealtime.FeedMessage;
+import com.opensymphony.xwork2.ActionInvocation;
 import org.apache.struts2.ServletActionContext;
 import org.apache.struts2.rest.handler.ContentTypeHandler;
 import org.onebusaway.api.model.ResponseBean;
@@ -34,8 +35,28 @@ public class CustomProtocolBufferHandler implements ContentTypeHandler {
   }
 
   @Override
+  public void toObject(ActionInvocation actionInvocation, Reader reader, Object o) throws IOException {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
   public String fromObject(Object obj, String resultCode, Writer stream)
       throws IOException {
+    if (obj != null && obj instanceof FeedMessage) {
+      FeedMessage message = (FeedMessage) obj;
+      /**
+       * Instead of writing to the output Writer, we write directly to the
+       * HttpServletResponse output stream. That way, we can avoid any weirdness
+       * with encoding the serialized protobuf to a String.
+       */
+      HttpServletResponse res = ServletActionContext.getResponse();
+      message.writeTo(res.getOutputStream());
+    }
+    return null;
+  }
+
+  @Override
+  public String fromObject(ActionInvocation actionInvocation, Object obj, String s, Writer stream) throws IOException {
     if (obj != null && obj instanceof FeedMessage) {
       FeedMessage message = (FeedMessage) obj;
       /**

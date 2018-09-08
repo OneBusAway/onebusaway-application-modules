@@ -91,8 +91,8 @@ public final class SiriSupport {
 	public static void fillMonitoredVehicleJourney(MonitoredVehicleJourneyStructure monitoredVehicleJourney, 
 			TripBean framedJourneyTripBean, TripStatusBean currentVehicleTripStatus, StopBean monitoredCallStopBean, OnwardCallsMode onwardCallsMode,
 			PresentationService presentationService, TransitDataService transitDataService,
-			int maximumOnwardCalls, List<TimepointPredictionRecord> stopLevelPredictions, boolean hasRealtimeData, long responseTimestamp) {
-			
+			int maximumOnwardCalls, List<TimepointPredictionRecord> stopLevelPredictions, boolean hasRealtimeData, long responseTimestamp, boolean showRawLocation) {
+
 		BlockInstanceBean blockInstance = 
 				transitDataService.getBlockInstance(currentVehicleTripStatus.getActiveTrip().getBlockId(), currentVehicleTripStatus.getServiceDate());
 		
@@ -199,15 +199,16 @@ public final class SiriSupport {
 		DecimalFormat df = new DecimalFormat();
 		df.setMaximumFractionDigits(6);
 
-		if (presentationService.isOnDetour(currentVehicleTripStatus)) {
-			location.setLatitude(new BigDecimal(df.format(currentVehicleTripStatus.getLastKnownLocation().getLat())));
-			location.setLongitude(new BigDecimal(df.format(currentVehicleTripStatus.getLastKnownLocation().getLon())));
-		} else {
-		  if (currentVehicleTripStatus.getLocation() != null) {
-		    location.setLatitude(new BigDecimal(df.format(currentVehicleTripStatus.getLocation().getLat())));
-		    location.setLongitude(new BigDecimal(df.format(currentVehicleTripStatus.getLocation().getLon())));
-		  }
-		}
+        //if we want to show the raw location AND we have realtime or if its on detour, show actual location
+        if ((showRawLocation && currentVehicleTripStatus.getLastKnownLocation() != null) || (presentationService.isOnDetour(currentVehicleTripStatus))) {
+            location.setLatitude(new BigDecimal(df.format(currentVehicleTripStatus.getLastKnownLocation().getLat())));
+            location.setLongitude(new BigDecimal(df.format(currentVehicleTripStatus.getLastKnownLocation().getLon())));
+        } else { //show snapped location
+            if (currentVehicleTripStatus.getLocation() != null) {
+                location.setLatitude(new BigDecimal(df.format(currentVehicleTripStatus.getLocation().getLat())));
+                location.setLongitude(new BigDecimal(df.format(currentVehicleTripStatus.getLocation().getLon())));
+            }
+        }
 
 		monitoredVehicleJourney.setVehicleLocation(location);
 
@@ -229,12 +230,10 @@ public final class SiriSupport {
 			monitoredVehicleJourney.setProgressStatus(progressStatus);    	
 		}
 
-		// block ref
-		if (presentationService.isBlockLevelInference(currentVehicleTripStatus)) {
+		// block ref (including it all the time in case needed)
 			BlockRefStructure blockRef = new BlockRefStructure();
 			blockRef.setValue(framedJourneyTripBean.getBlockId());
 			monitoredVehicleJourney.setBlockRef(blockRef);
-		}
 
 		// scheduled depature time
 		if (presentationService.isBlockLevelInference(currentVehicleTripStatus) 
@@ -661,7 +660,17 @@ public final class SiriSupport {
 		distances.setDistanceFromCall(NumberUtils.toDouble(df.format(distanceOfVehicleFromCall)));		
 		distances.setPresentableDistance(presentationService.getPresentableDistance(distances));
 
-		wrapper.setDistances(distances);
+        long deviation = 0L;
+        if (monitoredCallStructure.getExpectedArrivalTime() != null &&
+                monitoredCallStructure.getAimedArrivalTime() != null) {
+            //get schedule deviation in milliseconds
+            long deviationSeconds = monitoredCallStructure.getExpectedArrivalTime().getTime() -
+                    monitoredCallStructure.getAimedArrivalTime().getTime();
+            deviation = Math.round(deviationSeconds/(1000.0 * 60.0));
+        }
+
+        wrapper.setDeviation(String.valueOf(deviation));
+        wrapper.setDistances(distances);
 		distancesExtensions.setAny(wrapper);
 		monitoredCallStructure.setExtensions(distancesExtensions);
 

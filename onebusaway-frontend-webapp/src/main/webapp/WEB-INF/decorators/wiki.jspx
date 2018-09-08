@@ -31,7 +31,6 @@
   <title><decorator:title default="${title}" /></title>
 
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-  <meta http-equiv="X-UA-Compatible" content="IE=8" />
   
   <s:set var="favicon" value="getText('favicon.url')" />
   <link rel="shortcut icon" href="${favicon}" type="image/x-icon"/>
@@ -99,7 +98,9 @@
 		<div id="branding">
 			<s:set var="link" value="getText('main.agency.link')" />
 			<a href="${link}">
-			  	<s:url var="url" value="/css/img/agency_logo.png"></s:url>
+			  	<s:url var="url" value="/css/img/agency_logo.png">
+					<s:param name="v"><s:property value="frontEndVersion" /></s:param>
+				</s:url>
 				<img src="${url}" alt="Agency Logo"/>
 			</a>
 		</div>

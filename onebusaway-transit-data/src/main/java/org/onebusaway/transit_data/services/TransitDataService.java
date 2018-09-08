@@ -244,6 +244,9 @@ public interface TransitDataService extends FederatedService {
   public VehicleLocationRecordBean getVehicleLocationRecordForVehicleId(
       String vehicleId, long targetTime);
 
+  @FederatedByEntityIdMethod
+  public VehicleLocationRecordBean getVehiclePositionForVehicleId(String vehicleId);
+
   /**
    * 
    * @param query

@@ -226,7 +226,9 @@ OBA.Popups = (function() {
 
 		var vehicleId = activity.MonitoredVehicleJourney.VehicleRef;
 		var vehicleIdParts = vehicleId.split("_");
-		var vehicleIdWithoutAgency = vehicleIdParts[1];
+        var blockId = activity.MonitoredVehicleJourney.BlockRef;
+        var vehicleIdWithoutAgency = vehicleIdParts[1];
+        var blockIdWithoutAgency = blockId.split("_")[1];
 		var routeName = activity.MonitoredVehicleJourney.LineRef;
 		var hasRealtime = activity.MonitoredVehicleJourney.Monitored;
 
@@ -241,8 +243,13 @@ OBA.Popups = (function() {
 		// header
 		html += '<div class="header vehicle">';
 		html += '<p class="title">' + activity.MonitoredVehicleJourney.PublishedLineName + " " + activity.MonitoredVehicleJourney.DestinationName + '</p><p>';
-		html += '<span class="type">Vehicle #' + vehicleIdWithoutAgency + '</span>';
-
+        //don't show block id if there is none or if config says no
+        if (OBA.Config.showBlockIdInVehiclePopup == false || typeof blockIdWithoutAgency === 'undefined' || blockIdWithoutAgency === null) {
+            html += '<span class="type">Vehicle #' + vehicleIdWithoutAgency + '</span>';
+        }
+        else {
+            html += '<span class="type">Vehicle #' + vehicleIdWithoutAgency + ' - ' + blockIdWithoutAgency + '</span>';
+        }
 		var updateTimestamp = OBA.Util.ISO8601StringToDate(activity.RecordedAtTime).getTime();
 		var updateTimestampReference = OBA.Util.ISO8601StringToDate(r.Siri.ServiceDelivery.ResponseTimestamp).getTime();
 
@@ -260,23 +267,8 @@ OBA.Popups = (function() {
 		html += '</p>';
 		html += '</div>';
 
-        //schedule adherence
-        var adherence = null;
-        if(hasRealtime && typeof activity.MonitoredVehicleJourney.MonitoredCall !== 'undefined'
-            && typeof activity.MonitoredVehicleJourney.MonitoredCall.ExpectedArrivalTime !== 'undefined'
-            && activity.MonitoredVehicleJourney.MonitoredCall.ExpectedArrivalTime !== null
-            && typeof activity.MonitoredVehicleJourney.MonitoredCall.AimedArrivalTime !== 'undefined'
-            && activity.MonitoredVehicleJourney.MonitoredCall.AimedArrivalTime !== null) {
-            var expectedArrivalDate = OBA.Util.ISO8601StringToDate(activity.MonitoredVehicleJourney.MonitoredCall.ExpectedArrivalTime);
-            var aimedArrivalDate = OBA.Util.ISO8601StringToDate(activity.MonitoredVehicleJourney.MonitoredCall.AimedArrivalTime);
-            var expectedArrivalDatetime = expectedArrivalDate.toTimeString();
-            var aimedArrivalDatetime = aimedArrivalDate.toTimeString();
-
-            var expectedArrivalTime = expectedArrivalDate.getTime();
-            var aimedArrivalTime = aimedArrivalDate.getTime();
-            var adherence = Math.round((expectedArrivalTime - aimedArrivalTime)/ (1000.0 * 60.0));
-        }
-        if (adherence !== null) {
+        var adherence = parseInt(activity.MonitoredVehicleJourney.MonitoredCall.Extensions.Deviation);
+        if (hasRealtime && adherence !== null) {
             //late
             if (adherence > 0) {
                 html += '<p class="adherence">Bus is ' + adherence + ' minute(s) late</p>';
@@ -290,8 +282,20 @@ OBA.Popups = (function() {
                 adherence = adherence * -1;
                 html += '<p class="adherence">Bus is ' + adherence + ' minute(s) early</p>';
             }
-            html += '<p class="adherence">Scheduled arrival: ' + aimedArrivalDatetime + '</p>';
-            html += '<p class="adherence">Expected arrival: ' + expectedArrivalDatetime + '</p>';
+            //get the expected and aimed times
+            if(typeof activity.MonitoredVehicleJourney.MonitoredCall !== 'undefined'
+                && typeof activity.MonitoredVehicleJourney.MonitoredCall.ExpectedArrivalTime !== 'undefined'
+                && activity.MonitoredVehicleJourney.MonitoredCall.ExpectedArrivalTime !== null
+                && typeof activity.MonitoredVehicleJourney.MonitoredCall.AimedArrivalTime !== 'undefined'
+                && activity.MonitoredVehicleJourney.MonitoredCall.AimedArrivalTime !== null) {
+                var expectedArrivalDate = OBA.Util.ISO8601StringToDate(activity.MonitoredVehicleJourney.MonitoredCall.ExpectedArrivalTime);
+                var aimedArrivalDate = OBA.Util.ISO8601StringToDate(activity.MonitoredVehicleJourney.MonitoredCall.AimedArrivalTime);
+                var expectedArrivalDatetime = expectedArrivalDate.toLocaleTimeString();
+                var aimedArrivalDatetime = aimedArrivalDate.toLocaleTimeString();
+
+                html += '<p class="adherence">Scheduled arrival: ' + aimedArrivalDatetime + '</p>';
+                html += '<p class="adherence">Expected arrival: ' + expectedArrivalDatetime + '</p>';
+            }
         }
         else {
             html += '<p class="adherence">Adherence data currently unavailable for this vehicle</p>';
@@ -350,13 +354,14 @@ OBA.Popups = (function() {
 		
 		// service alerts
 		if (routeName in alertData) {
-			html += ' <a id="alert-link||' + routeName + '" class="alert-link" href="#">Service Alert for ' + activity.MonitoredVehicleJourney.PublishedLineName + '</a>';
+			html += ' <a id="alert-link||' + routeName + '" class="alert-link" href="#">' + OBA.Config.serviceAlertText + ' for ' + activity.MonitoredVehicleJourney.PublishedLineName + '</a>';
 		}
 		
 		html += OBA.Config.infoBubbleFooterFunction('route', activity.MonitoredVehicleJourney.PublishedLineName);
 		
 		html += "<ul class='links'>";
-		html += "<a href='#' id='zoomHere'>Center & Zoom Here</a>";
+		html += "<a href='#' id='zoomHere'>Center & Zoom Here</a><br/>";
+        html += "<a target='_new' href='" + OBA.Config.obaUrl +"/debug?vehicleId=" + vehicleId + "&key="+ OBA.Config.obaApiKey + "' id='debug'>Debug vehicle</a>";
 		html += "</ul>";
 		
 		// (end popup)

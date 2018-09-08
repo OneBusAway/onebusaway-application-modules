@@ -95,6 +95,8 @@ public class GtfsRealtimeTripLibrary {
   private StopModificationStrategy _stopModificationStrategy = null;
 
   private boolean _scheduleAdherenceFromLocation = false;
+
+  private boolean _useLabelAsVehicleId = false;
   
   public void setEntitySource(GtfsRealtimeEntitySource entitySource) {
     _entitySource = entitySource;
@@ -136,7 +138,14 @@ public class GtfsRealtimeTripLibrary {
   public void setBlockGeospatialService(BlockGeospatialService blockGeospatialService) {
     _blockGeospatialService = blockGeospatialService;
   }
- 
+
+  /**
+   * use the vehicle label as the id.
+   * @param useLabelAsVehicleId
+   */
+  public void setUseLabelAsVehicleId(boolean useLabelAsVehicleId) {
+    _useLabelAsVehicleId = useLabelAsVehicleId;
+  }
 
   /**
    * Trip updates describe a trip which is undertaken by a vehicle (which is
@@ -150,8 +159,6 @@ public class GtfsRealtimeTripLibrary {
    * are provided for a block, they are all used, but cannot be mapped to
    * vehicle positions.
    *
-   * @param tripUpdates
-   * @param vehiclePositions
    * @return
    */
   public List<CombinedTripUpdatesAndVehiclePosition> groupTripUpdatesAndVehiclePositions(
@@ -181,7 +188,7 @@ public class GtfsRealtimeTripLibrary {
 
       if (tu.hasVehicle() && tu.getVehicle().hasId() && StringUtils.isNotBlank(tu.getVehicle().getId())) {
         // Trip update has a vehicle ID - index by vehicle ID
-        String vehicleId = tu.getVehicle().getId();
+        String vehicleId = getVehicleId(tu);
 
         tripUpdatesByVehicleId.put(vehicleId, tu);
 
@@ -231,7 +238,7 @@ public class GtfsRealtimeTripLibrary {
 
       if (vp.hasVehicle() && vp.getVehicle().hasId()) {
         // Vehicle position has a vehicle ID - index by vehicle ID
-        String vehicleId = vp.getVehicle().getId();
+        String vehicleId = getVehicleId(vp);
 
         if (!vehiclePositionsByVehicleId.containsKey(vehicleId)) {
           vehiclePositionsByVehicleId.put(vehicleId, vp);
@@ -332,7 +339,7 @@ public class GtfsRealtimeTripLibrary {
 
       for (TripUpdate tu : update.tripUpdates) {
         if (tu.hasVehicle() && tu.getVehicle().hasId()) {
-          vehicleId = tu.getVehicle().getId();
+          vehicleId = getVehicleId(tu);
           break;
         }
       }
@@ -340,7 +347,7 @@ public class GtfsRealtimeTripLibrary {
       if (vehicleId == null && update.vehiclePosition != null
           && update.vehiclePosition.hasVehicle()
           && update.vehiclePosition.getVehicle().hasId()) {
-        vehicleId = update.vehiclePosition.getVehicle().getId();
+        vehicleId = getVehicleId(update.vehiclePosition);
       }
 
       if (vehicleId != null && update.block != null) {
@@ -907,7 +914,10 @@ public class GtfsRealtimeTripLibrary {
       long serviceDateTime = record.getServiceDate();
       long effectiveScheduleTime = loc.getScheduledTime() + (serviceDateTime/1000);
       double deviation =  timestamp/1000 - effectiveScheduleTime;
+      double oldDeviation = record.getScheduleDeviation();
       record.setScheduleDeviation(deviation);
+      _log.debug("deviation reset to {} from {} for vehicle {}", deviation, oldDeviation, vehiclePosition.getVehicle().getId());
+
     }
   }
   
@@ -934,6 +944,17 @@ public class GtfsRealtimeTripLibrary {
       return _currentTime;
     }
     return SystemTime.currentTimeMillis();
+  }
+
+  private String getVehicleId(TripUpdate tu) {
+    if (_useLabelAsVehicleId && tu.hasVehicle() && tu.getVehicle().hasLabel())
+      return tu.getVehicle().getLabel();
+    return tu.getVehicle().getId();
+  }
+  private String getVehicleId(VehiclePosition vp) {
+    if (_useLabelAsVehicleId && vp.hasVehicle() && vp.getVehicle().hasLabel())
+      return vp.getVehicle().getLabel();
+    return vp.getVehicle().getId();
   }
 
   private static class BestScheduleDeviation {

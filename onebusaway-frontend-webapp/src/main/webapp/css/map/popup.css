@@ -100,15 +100,29 @@
   	color: #d12020;
 }
 
-.popup .serviceAlertContainer {
+.popup .popupServiceAlertContainer {
 	color: #d12020;
 	background-color: #FDEEF4;
+    font-size: 12px;
+    width: 300px;
+    padding-bottom: 5px;
 }
 
-.popup .serviceAlertContainer .alerts li {
-	padding-left: 10px;
-	padding-right: 10px;
-	padding-bottom: 10px;
+.popup .ui-state-focus {
+    outline: none;
+}
+
+.popup p.popupServiceAlert {
+    color: #D12020;
+    font-weight: bold;
+    font-size: 13px;
+    padding: 5px 5px 5px 5px;
+    position: relative;
+    cursor: pointer;
+}
+
+.popup .popupAlerts li {
+	padding: 5px 5px 5px 10px;
 	color: #D12020;
 	font-size: 13px;
 	line-height: 1.2em;
@@ -290,6 +304,15 @@
 
 #bustime .popup .scheduleAlert {
 	color: rgb(225,0,0);
+}
+
+#bustime .popup .stopAlert {
+    color: rgb(255,0,0);
+}
+
+#bustime .popup .stopAlertHeader {
+    color: rgb(255,0,0);
+    font-weight:bold;
 }
 
 #bustime .popup .vehicleId {

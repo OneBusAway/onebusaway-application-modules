@@ -38,7 +38,6 @@
 <title><decorator:title default="${title}" /></title>
 
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<meta http-equiv="X-UA-Compatible" content="IE=8" />
 
 <s:set var="favicon" value="getText('favicon.url')" />
 <link rel="shortcut icon" href="${favicon}" type="image/x-icon" />
@@ -105,11 +104,15 @@
 	<div id="mainbox">
 		<div id="topbar">
 			<div id="branding">
-				<s:set var="link" value="getText('main.agency.link')" />
-				<a href="${link}"> <s:url var="url"
-						value="/css/img/agency_logo.png"></s:url> <img src="${url}"
-					alt="Agency logo" />
+				<a href="${link}">
+					<s:url var="url" value="css/img/agency_logo.png">
+						<s:param name="v">
+							<s:property value="frontEndVersion" />
+						</s:param>
+					</s:url>
+					<img src="${url}" alt="Agency logo" />
 				</a>
+
 			</div>
 
 			<div id="search">
@@ -134,7 +137,11 @@
 				<div class="bottombox" id="google_translate_element_bottom">
 					<span>Google Translate</span>
 					<s:set var="link" value="getText('main.agency.link')" />
-					<s:url var="url" value="/css/img/google_logo.png"></s:url>
+					<s:url var="url" value="/css/img/google_logo.png">
+						<s:param name="v">
+							<s:property value="frontEndVersion" />
+						</s:param>
+					</s:url>
 					<img id="icon" src="${url}" />
 				</div>
 				<div class="bottombox">

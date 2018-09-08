@@ -33,4 +33,7 @@ public interface VehicleLocationListener {
   public void handleVehicleLocationRecords(List<VehicleLocationRecord> records);
   
   public void resetVehicleLocation(AgencyAndId vehicleId);
+
+  public void handleRawPosition(AgencyAndId vehicleId, double lat, double lon, long timestamp);
+
 }
