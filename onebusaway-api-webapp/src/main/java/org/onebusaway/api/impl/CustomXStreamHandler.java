@@ -16,6 +16,7 @@
  */
 package org.onebusaway.api.impl;
 
+import com.opensymphony.xwork2.ActionInvocation;
 import org.apache.struts2.rest.handler.XStreamHandler;
 
 import org.onebusaway.api.actions.api.ValidationErrorBean;
@@ -75,6 +76,11 @@ import org.onebusaway.transit_data.model.StopGroupingBean;
 import com.thoughtworks.xstream.XStream;
 
 public class CustomXStreamHandler extends XStreamHandler {
+
+  @Override
+  protected XStream createXStream(ActionInvocation invocation) {
+    return createXStream();
+  }
 
   @Override
   protected XStream createXStream() {
