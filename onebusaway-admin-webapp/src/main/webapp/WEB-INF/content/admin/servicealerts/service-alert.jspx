@@ -46,6 +46,18 @@
 	
 </script>
 
+<s:url var="url" value="/js/lib/jquery.timepicker-1.3.5.min.js">
+    <!-- //prevent jspx minimization -->
+</s:url>
+<script type="text/javascript" src="${url}">
+    <!-- //prevent jspx minimization -->
+
+</script>
+<s:url var="url" value="/css/jquery.timepicker-1.3.5.min.css">
+    <!-- //prevent jspx minimization -->
+</s:url>
+<link rel="stylesheet" type="text/css" href="${url}" ></link>
+
 <s:url var="url" value="/js/oba/service-alerts.js">
 	<!-- //prevent jspx minimization -->
 </s:url>
@@ -74,9 +86,22 @@
 <s:select label="Reason" name="reason" headerKey="null" headerValue="Select Reason" list="reasonValues" value="%{reason}"/>
 <s:select label="Severity" name="severity" headerKey="null" headerValue="Select Severity" list="severityValues" value="%{severity}"/>
 <s:textfield label="Start Date" id="publicationWindowStartDate" name="startDate" value="%{startDate}" theme="xhtml"/>
-<s:textfield label="End Date" id="publicationWindowEndDate" name="endDate" value="%{endDate}" theme="xhtml"/>
+    <s:textfield label="Start Time" id="publicationWindowStartTime" name="startTime" value="%{startTime}" theme="xhtml" autocomplete="off" class="time ui-timepicker-input"></s:textfield>
+    <s:textfield label="End Date" id="publicationWindowEndDate" name="endDate" value="%{endDate}" theme="xhtml"/>
+    <s:textfield label="End Time" id="publicationWindowEndTime" name="endTime" value="%{endTime}" theme="xhtml" autocomplete="off" class="time ui-timepicker-input"></s:textfield>
 
-<s:textarea label="Raw" name="raw" value="%{raw}" cols="80" rows="10" readonly="true"/>
+    <script type="text/javascript">
+        $( "#publicationWindowStartTime" ).timepicker(
+            {
+                timeFormat: 'HH:mm'
+            });
+        $( "#publicationWindowEndTime" ).timepicker(
+            {
+                timeFormat: 'HH:mm'
+            });
+    </script>
+
+    <s:textarea label="Raw" name="raw" value="%{raw}" cols="80" rows="10" readonly="true"/>
 <s:hidden name="agencyId" value="%{agencyId}"/>
 <s:hidden name="id" value="%{id}"/>
 <s:if test="id != null">

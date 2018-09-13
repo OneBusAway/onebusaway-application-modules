@@ -46,6 +46,18 @@
 	
 </script>
 
+<s:url var="url" value="/js/lib/jquery.timepicker-1.3.5.min.js">
+	<!-- //prevent jspx minimization -->
+</s:url>
+<script type="text/javascript" src="${url}">
+	<!-- //prevent jspx minimization -->
+
+</script>
+<s:url var="url" value="/css/jquery.timepicker-1.3.5.min.css">
+	<!-- //prevent jspx minimization -->
+</s:url>
+<link rel="stylesheet" type="text/css" href="${url}" ></link>
+
 <s:url var="url" value="/js/oba/service-alerts.js">
 	<!-- //prevent jspx minimization -->
 </s:url>
@@ -95,9 +107,24 @@
 						listKey="%{agency.id}" listValue="%{agency.name}" theme="xhtml"/>
 					<s:if test="%{!favorite}" >	
 						<s:textfield label="Start Date" id="publicationWindowStartDate" name="startDate" value="%{startDate}" theme="xhtml"/>
+						<s:textfield label="Start Time" id="publicationWindowStartTime" name="startTime" value="%{startTime}" theme="xhtml" autocomplete="off" class="time ui-timepicker-input"></s:textfield>
 						<s:textfield label="End Date" id="publicationWindowEndDate" name="endDate" value="%{endDate}" theme="xhtml"/>
+						<s:textfield label="End Time" id="publicationWindowEndTime" name="endTime" value="%{endTime}" theme="xhtml" autocomplete="off" class="time ui-timepicker-input"></s:textfield>
 					</s:if>
 				</table>
+
+
+
+				<script type="text/javascript">
+                    $( "#publicationWindowStartTime" ).timepicker(
+                        {
+                            timeFormat: 'HH:mm'
+                        });
+                    $( "#publicationWindowEndTime" ).timepicker(
+                        {
+                            timeFormat: 'HH:mm'
+                        });
+				</script>
 			</div>
 			<s:hidden name="alertId" value="%{model.id}"/>
 			<s:hidden name="favorite" value="%{favorite}"/>
@@ -177,4 +204,5 @@
 	</s:form>
 </div>
 </body>
+
 </html>

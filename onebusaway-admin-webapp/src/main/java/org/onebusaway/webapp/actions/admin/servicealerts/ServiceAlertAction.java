@@ -18,13 +18,7 @@ package org.onebusaway.webapp.actions.admin.servicealerts;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.TimeZone;
-import java.util.UUID;
+import java.util.*;
 
 import org.apache.struts2.convention.annotation.Action;
 import org.apache.struts2.convention.annotation.InterceptorRef;
@@ -99,6 +93,11 @@ public class ServiceAlertAction extends ActionSupport implements
   private boolean submit;
   private boolean cancel;
   private boolean addToFavorites;
+
+  private String _endTime;
+  private String _startTime;
+  private Date _endDate;
+  private Date _startDate;
 
   
   @Autowired
@@ -232,26 +231,78 @@ public String getStartDate() {
 	  return sdf.format(date);
   }
 
-  public void setStartDate(Date startDate) {
-	  List<TimeRangeBean> publicationWindows = _model.getPublicationWindows();
-	  if (publicationWindows == null) {
-		  publicationWindows = new ArrayList<TimeRangeBean>();
-	      _model.setPublicationWindows(publicationWindows);
-	  }
-	  
-	  if (publicationWindows.isEmpty()) {
-		  publicationWindows.add(new TimeRangeBean());
-	  }
-	  
-	  TimeRangeBean timeRangeBean = publicationWindows.get(0);
-	  
-	  if(startDate != null){
-		  timeRangeBean.setFrom(startDate.getTime());
-	  }
-	  else{
-		  timeRangeBean.setFrom(0); 
-	  }
+  public void setStartDate(Date startDate) throws java.text.ParseException {
+    _startDate = startDate;
+
+    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm");
+
+    Date time = null;
+    if (_startTime != null && !_startTime.isEmpty()) {
+      time = simpleDateFormat.parse(_startTime);
+      Calendar cal = Calendar.getInstance();
+      cal.setTime(time);
+      int hour = cal.get(Calendar.HOUR_OF_DAY);
+      int min = cal.get(Calendar.MINUTE);
+      setCombinedStartDate(((hour * 60)  + min) * 60 * 1000);
+    }
+    else setCombinedStartDate(0);
 	 
+  }
+
+  public String getStartTime() {
+    List<TimeRangeBean> publicationWindows = _model.getPublicationWindows();
+    if(publicationWindows == null || publicationWindows.isEmpty() || publicationWindows.get(0).getFrom() == 0){
+      return null;
+    }
+    Date date = new Date(publicationWindows.get(0).getFrom());
+    SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
+    return sdf.format(date);
+  }
+
+  public void setStartTime(String startTime) throws java.text.ParseException {
+  _startTime = startTime;
+
+    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm");
+
+    Date time = null;
+    if (_startTime != null && !_startTime.isEmpty()) {
+      time = simpleDateFormat.parse(_startTime);
+      Calendar cal = Calendar.getInstance();
+      cal.setTime(time);
+      int hour = cal.get(Calendar.HOUR_OF_DAY);
+      int min = cal.get(Calendar.MINUTE);
+      setCombinedStartDate(((hour * 60)  + min) * 60 * 1000);
+    }
+    else setCombinedStartDate(0);
+  }
+
+  private void setCombinedStartDate(long startTime) {
+    List<TimeRangeBean> publicationWindows = _model.getPublicationWindows();
+    if (publicationWindows == null) {
+      publicationWindows = new ArrayList<TimeRangeBean>();
+      _model.setPublicationWindows(publicationWindows);
+    }
+
+    if (publicationWindows.isEmpty()) {
+      publicationWindows.add(new TimeRangeBean());
+    }
+
+    TimeRangeBean timeRangeBean = publicationWindows.get(0);
+
+    if (startTime == 0 && _startDate != null) {//just have date
+      timeRangeBean.setFrom(_startDate.getTime());
+    }
+    else if(_startDate != null){//have both date and time
+      timeRangeBean.setFrom(_startDate.getTime() + startTime);
+    }
+    else{
+      timeRangeBean.setFrom(0);
+    }
+
+    //adjust times if they aren't in order
+    if (timeRangeBean.getTo() < timeRangeBean.getFrom()){
+      timeRangeBean.setFrom(timeRangeBean.getTo());
+    }
   }
   
   public String getEndDate() {
@@ -264,26 +315,78 @@ public String getStartDate() {
 	  return sdf.format(date);
   }
 
-  public void setEndDate(Date endDate) {
-	  List<TimeRangeBean> publicationWindows = _model.getPublicationWindows();
-	  if (publicationWindows == null) {
-		  publicationWindows = new ArrayList<TimeRangeBean>();
-	      _model.setPublicationWindows(publicationWindows);
-	  }
-	  
-	  if (publicationWindows.isEmpty()) {
-		  publicationWindows.add(new TimeRangeBean());
-	  }
-	  
-	  TimeRangeBean timeRangeBean = publicationWindows.get(0);
-	  
-	  if(endDate != null){
-		  timeRangeBean.setTo(endDate.getTime());
-	  }
-	  else{
-		  timeRangeBean.setTo(0); 
-	  }
+  public void setEndDate(Date endDate) throws java.text.ParseException {
+    _endDate = endDate;
+
+    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm");
+
+    Date time = null;
+    if (_endTime != null && !_endTime.isEmpty()) {
+      time = simpleDateFormat.parse(_endTime);
+      Calendar cal = Calendar.getInstance();
+      cal.setTime(time);
+      int hour = cal.get(Calendar.HOUR_OF_DAY);
+      int min = cal.get(Calendar.MINUTE);
+      setCombinedEndDate(((hour * 60)  + min) * 60 * 1000);
+    }
+    else setCombinedEndDate(0);
 	 
+  }
+
+  public String getEndTime() {
+    List<TimeRangeBean> publicationWindows = _model.getPublicationWindows();
+    if(publicationWindows == null || publicationWindows.isEmpty() || publicationWindows.get(0).getTo() == 0){
+      return null;
+    }
+    Date date = new Date(publicationWindows.get(0).getTo());
+    SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
+    return sdf.format(date);
+  }
+
+  public void setEndTime(String endTime) throws java.text.ParseException {
+    _endTime = endTime;
+
+    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm");
+
+    Date time = null;
+    if (_endTime != null && !_endTime.isEmpty()) {
+      time = simpleDateFormat.parse(_endTime);
+      Calendar cal = Calendar.getInstance();
+      cal.setTime(time);
+      int hour = cal.get(Calendar.HOUR_OF_DAY);
+      int min = cal.get(Calendar.MINUTE);
+      setCombinedEndDate(((hour * 60)  + min) * 60 * 1000);
+    }
+    else setCombinedEndDate(0);
+  }
+
+  public void setCombinedEndDate(long endTime) {
+    List<TimeRangeBean> publicationWindows = _model.getPublicationWindows();
+    if (publicationWindows == null) {
+      publicationWindows = new ArrayList<TimeRangeBean>();
+      _model.setPublicationWindows(publicationWindows);
+    }
+
+    if (publicationWindows.isEmpty()) {
+      publicationWindows.add(new TimeRangeBean());
+    }
+
+    TimeRangeBean timeRangeBean = publicationWindows.get(0);
+
+    if (_endDate != null && endTime == 0) {
+      timeRangeBean.setTo(_endDate.getTime());
+    }
+    else if(_endDate != null){
+      timeRangeBean.setTo(_endDate.getTime() + endTime);
+    }
+    else{
+      timeRangeBean.setTo(0);
+    }
+
+    //adjust times if they aren't in order
+    if (timeRangeBean.getTo() < timeRangeBean.getFrom()){
+      timeRangeBean.setFrom(timeRangeBean.getTo());
+    }
   }
 
   @Override
