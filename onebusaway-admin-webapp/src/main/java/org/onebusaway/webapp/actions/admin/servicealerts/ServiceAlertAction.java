@@ -299,8 +299,8 @@ public String getStartDate() {
       timeRangeBean.setFrom(0);
     }
 
-    //adjust times if they aren't in order
-    if (timeRangeBean.getTo() < timeRangeBean.getFrom()){
+    //adjust times if they aren't in order (if there is an end date)
+    if (timeRangeBean.getTo() > 0 && timeRangeBean.getTo() < timeRangeBean.getFrom()){
       timeRangeBean.setFrom(timeRangeBean.getTo());
     }
   }
@@ -383,10 +383,10 @@ public String getStartDate() {
       timeRangeBean.setTo(0);
     }
 
-    //adjust times if they aren't in order
-    if (timeRangeBean.getTo() < timeRangeBean.getFrom()){
-      timeRangeBean.setFrom(timeRangeBean.getTo());
-    }
+    //adjust times if they aren't in order (if there is an end date)
+      if (timeRangeBean.getTo() > 0 && timeRangeBean.getTo() < timeRangeBean.getFrom()){
+          timeRangeBean.setFrom(timeRangeBean.getTo());
+      }
   }
 
   @Override
