@@ -32,6 +32,7 @@ import org.onebusaway.federations.annotations.FederatedByCustomMethod;
 import org.onebusaway.federations.annotations.FederatedByEntityIdMethod;
 import org.onebusaway.federations.annotations.FederatedByEntityIdsMethod;
 import org.onebusaway.geospatial.model.EncodedPolylineBean;
+import org.onebusaway.gtfs.model.calendar.ServiceDate;
 import org.onebusaway.realtime.api.TimepointPredictionRecord;
 import org.onebusaway.transit_data.model.AgencyBean;
 import org.onebusaway.transit_data.model.AgencyWithCoverageBean;
@@ -165,6 +166,16 @@ public interface TransitDataService extends FederatedService {
   @FederatedByEntityIdMethod
   public StopsForRouteBean getStopsForRoute(String routeId)
       throws ServiceException;
+
+  /**
+   * @param routeId
+   * @param serviceDate
+   * @return the stops for the specified route and service date, or null if not found
+   * @throws ServiceException
+   */
+  @FederatedByEntityIdMethod
+  public StopsForRouteBean getStopsForRouteForServiceDate(String routeId, ServiceDate serviceDate)
+          throws ServiceException;
 
   /**
    * @param tripId
@@ -348,6 +359,15 @@ public interface TransitDataService extends FederatedService {
      */
   @FederatedByEntityIdMethod
   public StopBean getStop(String stopId) throws ServiceException;
+
+  /**
+   * @param stopId
+   * @param serviceDate
+   * @return the stop with the specified id, or null if not found
+   * @throws ServiceException
+   */
+  @FederatedByEntityIdMethod
+  public StopBean getStopForServiceDate(String stopId, ServiceDate serviceDate) throws ServiceException;
 
   /**
    * @param agencyId

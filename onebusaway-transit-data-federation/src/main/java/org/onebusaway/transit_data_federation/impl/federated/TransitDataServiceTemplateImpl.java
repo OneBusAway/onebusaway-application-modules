@@ -224,6 +224,13 @@ public class TransitDataServiceTemplateImpl implements TransitDataServiceTemplat
   }
 
   //@Override
+  public StopBean getStopForServiceDate(String stopId, ServiceDate serviceDate) throws ServiceException {
+
+    AgencyAndId id = convertAgencyAndId(stopId);
+    return _stopBeanService.getStopForIdForServiceDate(id, serviceDate);
+  }
+
+  //@Override
   public ListBean<String> getStopIdsForAgencyId(String agencyId) {
     
     return _stopsBeanService.getStopsIdsForAgencyId(agencyId);
@@ -301,6 +308,12 @@ public class TransitDataServiceTemplateImpl implements TransitDataServiceTemplat
   public StopsForRouteBean getStopsForRoute(String routeId) {
     
     return _routeBeanService.getStopsForRoute(convertAgencyAndId(routeId));
+  }
+
+  //@Override
+  public StopsForRouteBean getStopsForRouteForServiceDate(String routeId, ServiceDate serviceDate) {
+
+    return _routeBeanService.getStopsForRouteForServiceDate(convertAgencyAndId(routeId), serviceDate);
   }
 
   //@Override

@@ -23,6 +23,7 @@ import java.util.List;
 
 import org.codehaus.jackson.map.ObjectMapper;
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.gtfs.model.calendar.ServiceDate;
 import org.onebusaway.presentation.impl.service_alerts.ServiceAlertsHelper;
 import org.onebusaway.presentation.services.realtime.RealtimeService;
 import org.onebusaway.transit_data.services.TransitDataService;
@@ -38,6 +39,7 @@ import org.onebusaway.transit_data.model.StopGroupingBean;
 import org.onebusaway.transit_data.model.StopsForRouteBean;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.onebusaway.util.SystemTime;
+import org.onebusaway.util.services.configuration.ConfigurationService;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import uk.org.siri.siri.MonitoredStopVisitStructure;
@@ -54,6 +56,9 @@ public class StopForIdAction extends OneBusAwayEnterpriseActionSupport {
 
   @Autowired
   private TransitDataService _transitDataService;
+
+  @Autowired
+  private ConfigurationService _configService;
 
   private ObjectMapper _mapper = new ObjectMapper();    
 
@@ -74,8 +79,15 @@ public class StopForIdAction extends OneBusAwayEnterpriseActionSupport {
     if(_stopId == null) {
       return SUCCESS;
     }
-    
-    StopBean stop = _transitDataService.getStop(_stopId);    
+
+      boolean serviceDateFilterOn = Boolean.parseBoolean(_configService.getConfigurationValueAsString("display.serviceDateFiltering", "false"));
+      StopBean stop;
+
+      if (serviceDateFilterOn) {
+          stop = _transitDataService.getStopForServiceDate(_stopId, new ServiceDate());
+      } else {
+          stop = _transitDataService.getStop(_stopId);
+      }
 
     if(stop == null) {
       return SUCCESS;
@@ -84,7 +96,12 @@ public class StopForIdAction extends OneBusAwayEnterpriseActionSupport {
     List<RouteAtStop> routesAtStop = new ArrayList<RouteAtStop>();
     
     for(RouteBean routeBean : stop.getRoutes()) {
-      StopsForRouteBean stopsForRoute = _transitDataService.getStopsForRoute(routeBean.getId());
+        StopsForRouteBean stopsForRoute;
+        if (serviceDateFilterOn) {
+            stopsForRoute = _transitDataService.getStopsForRouteForServiceDate(routeBean.getId(), new ServiceDate());
+        } else {
+            stopsForRoute = _transitDataService.getStopsForRoute(routeBean.getId());
+        }
 
       List<RouteDirection> routeDirections = new ArrayList<RouteDirection>();
       List<StopGroupingBean> stopGroupings = stopsForRoute.getStopGroupings();

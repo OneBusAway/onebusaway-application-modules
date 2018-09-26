@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.onebusaway.geocoder.enterprise.services.EnterpriseGeocoderResult;
+import org.onebusaway.gtfs.model.calendar.ServiceDate;
 import org.onebusaway.presentation.impl.search.AbstractSearchResultFactoryImpl;
 import org.onebusaway.presentation.model.SearchResult;
 import org.onebusaway.presentation.services.realtime.RealtimeService;
@@ -78,7 +79,15 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
   public SearchResult getRouteResult(RouteBean routeBean) {
     List<RouteDirection> directions = new ArrayList<RouteDirection>();
 
-    StopsForRouteBean stopsForRoute = _transitDataService.getStopsForRoute(routeBean.getId());
+      ServiceDate serviceDate = null;
+      boolean serviceDateFilterOn = Boolean.parseBoolean(_configurationService.getConfigurationValueAsString("display.serviceDateFiltering", "false"));
+      if (serviceDateFilterOn) serviceDate = new ServiceDate();
+
+      StopsForRouteBean stopsForRoute;
+      if (serviceDate == null)
+          stopsForRoute = _transitDataService.getStopsForRoute(routeBean.getId());
+      else
+          stopsForRoute = _transitDataService.getStopsForRouteForServiceDate(routeBean.getId(), serviceDate);
 
     // create stop ID->stop bean map
     Map<String, StopBean> stopIdToStopBeanMap = new HashMap<String, StopBean>();
@@ -186,7 +195,17 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
         continue;
       }
 
-      StopsForRouteBean stopsForRoute = _transitDataService.getStopsForRoute(routeBean.getId());
+        ServiceDate serviceDate = null;
+        boolean serviceDateFilterOn = Boolean.parseBoolean(_configurationService.getConfigurationValueAsString("display.serviceDateFiltering", "false"));
+        if (serviceDateFilterOn) serviceDate = new ServiceDate();
+
+        StopsForRouteBean stopsForRoute;
+        if (serviceDate != null) {
+            stopsForRoute = _transitDataService.getStopsForRouteForServiceDate(routeBean.getId(), serviceDate);
+        }
+        else {
+            stopsForRoute = _transitDataService.getStopsForRoute(routeBean.getId());
+        }
 
       List<RouteDirection> directions = new ArrayList<RouteDirection>();
       List<StopGroupingBean> stopGroupings = stopsForRoute.getStopGroupings();

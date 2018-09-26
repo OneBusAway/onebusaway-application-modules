@@ -24,6 +24,7 @@ import java.util.Set;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.onebusaway.geospatial.model.CoordinatePoint;
+import org.onebusaway.gtfs.model.calendar.ServiceDate;
 import org.onebusaway.presentation.model.SearchResult;
 import org.onebusaway.presentation.model.SearchResultCollection;
 import org.onebusaway.presentation.services.realtime.RealtimeService;
@@ -56,6 +57,9 @@ public class IndexAction extends OneBusAwayEnterpriseActionSupport {
 
   @Autowired
   private SearchService _searchService;
+
+  @Autowired
+  private ConfigurationService _configService;
 
   private SearchResultCollection _results = new SearchResultCollection();
 
@@ -109,7 +113,13 @@ public class IndexAction extends OneBusAwayEnterpriseActionSupport {
         return SUCCESS;
       }
 
-      _results = _searchService.getSearchResults(_q, factory);
+      boolean serviceDateFilterOn = Boolean.parseBoolean(_configService.getConfigurationValueAsString("display.serviceDateFiltering", "false"));
+      if (serviceDateFilterOn) {
+        _results = _searchService.getSearchResultsForServiceDate(_q, factory, new ServiceDate());
+      }
+      else {
+        _results = _searchService.getSearchResults(_q, factory);
+      }
 
       // do a bit of a hack with location matches--since we have no map to show
       // locations on,

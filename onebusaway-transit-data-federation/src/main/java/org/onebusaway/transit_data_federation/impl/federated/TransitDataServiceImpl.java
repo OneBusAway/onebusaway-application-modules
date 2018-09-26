@@ -27,6 +27,7 @@ import org.onebusaway.federations.annotations.FederatedByAgencyIdMethod;
 import org.onebusaway.federations.annotations.FederatedByEntityIdMethod;
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.geospatial.model.EncodedPolylineBean;
+import org.onebusaway.gtfs.model.calendar.ServiceDate;
 import org.onebusaway.realtime.api.TimepointPredictionRecord;
 import org.onebusaway.transit_data.model.AgencyBean;
 import org.onebusaway.transit_data.model.AgencyWithCoverageBean;
@@ -176,6 +177,12 @@ public class TransitDataServiceImpl implements TransitDataService {
   }
 
   @Override
+  public StopBean getStopForServiceDate(String stopId, ServiceDate serviceDate) throws ServiceException {
+    blockUntilBundleIsReady();
+    return _transitDataService.getStopForServiceDate(stopId, serviceDate);
+  }
+
+  @Override
   public ListBean<String> getStopIdsForAgencyId(String agencyId) {
     blockUntilBundleIsReady();
     return _transitDataService.getStopIdsForAgencyId(agencyId);
@@ -241,6 +248,12 @@ public class TransitDataServiceImpl implements TransitDataService {
   public StopsForRouteBean getStopsForRoute(String routeId) {
     blockUntilBundleIsReady();
     return _transitDataService.getStopsForRoute(routeId);
+  }
+
+  @Override
+  public StopsForRouteBean getStopsForRouteForServiceDate(String routeId, ServiceDate serviceDate) {
+    blockUntilBundleIsReady();
+    return _transitDataService.getStopsForRouteForServiceDate(routeId, serviceDate);
   }
 
   @Override
