@@ -31,6 +31,7 @@ import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationAffectsBean;
 import org.onebusaway.transit_data.model.service_alerts.TimeRangeBean;
 import org.onebusaway.transit_data.services.TransitDataService;
+import org.onebusaway.util.SystemTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -123,7 +124,7 @@ public class AlertsAction extends RssFeedAction {
             return;
         }
         
-        long time = System.currentTimeMillis();
+        long time = SystemTime.currentTimeMillis();
 
         for (ServiceAlertBean sab : allServiceAlertsForAgencyId.getList()) {
         	

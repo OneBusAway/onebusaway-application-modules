@@ -41,6 +41,7 @@ import org.onebusaway.transit_data.model.service_alerts.SituationQueryBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationQueryBean.AffectsBean;
 import org.onebusaway.transit_data.model.service_alerts.TimeRangeBean;
 import org.onebusaway.transit_data.services.TransitDataService;
+import org.onebusaway.util.SystemTime;
 import org.onebusaway.util.services.configuration.ConfigurationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -79,7 +80,7 @@ public class StatusProviderImpl implements StatusProvider {
       query.setAffects(Collections.singletonList(ab));
       ListBean<ServiceAlertBean> alerts = _transitDataService.getServiceAlerts(
           query);
-      List<ServiceAlertBean> beans = filterByTime(alerts.getList(), System.currentTimeMillis());
+      List<ServiceAlertBean> beans = filterByTime(alerts.getList(), SystemTime.currentTimeMillis());
       for (ServiceAlertBean bean : beans) {
         StatusItem item = new StatusItem();
         item.setDescription(bean.getDescriptions().get(0).getValue());

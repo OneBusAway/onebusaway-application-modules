@@ -27,13 +27,12 @@ import org.onebusaway.transit_data.model.StopsForRouteBean;
 
 import org.apache.struts2.convention.annotation.ParentPackage;
 import org.apache.struts2.convention.annotation.Result;
+import org.onebusaway.util.SystemTime;
 import org.onebusaway.util.services.configuration.ConfigurationService;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 
 @ParentPackage("json-default")
@@ -71,7 +70,7 @@ public class StopsOnRouteForDirectionAction extends OneBusAwayEnterpriseActionSu
     boolean serviceDateFilterOn = Boolean.parseBoolean(_configService.getConfigurationValueAsString("display.serviceDateFiltering", "false"));
     StopsForRouteBean stopsForRoute;
     if (serviceDateFilterOn) {
-      stopsForRoute = _transitDataService.getStopsForRouteForServiceDate(_routeId, new ServiceDate());
+      stopsForRoute = _transitDataService.getStopsForRouteForServiceDate(_routeId, new ServiceDate(new Date(SystemTime.currentTimeMillis())));
     }
     else {
       stopsForRoute = _transitDataService.getStopsForRoute(_routeId);

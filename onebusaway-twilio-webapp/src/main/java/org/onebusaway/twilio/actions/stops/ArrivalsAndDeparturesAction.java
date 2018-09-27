@@ -285,7 +285,7 @@ public class ArrivalsAndDeparturesAction extends TwilioSupport {
         List<ServiceAlertBean> alerts = entry.getValue();
        
         for (ServiceAlertBean alert : alerts) {
-          if(containsActiveAlert(alert, System.currentTimeMillis())){
+          if(containsActiveAlert(alert, SystemTime.currentTimeMillis())){
             if (entry.getKey().hasRoute()) {
               routeIds.add(entry.getKey().getRoute()); 
               break;

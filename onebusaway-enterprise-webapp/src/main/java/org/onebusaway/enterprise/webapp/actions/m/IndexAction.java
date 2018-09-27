@@ -115,7 +115,7 @@ public class IndexAction extends OneBusAwayEnterpriseActionSupport {
 
       boolean serviceDateFilterOn = Boolean.parseBoolean(_configService.getConfigurationValueAsString("display.serviceDateFiltering", "false"));
       if (serviceDateFilterOn) {
-        _results = _searchService.getSearchResultsForServiceDate(_q, factory, new ServiceDate());
+        _results = _searchService.getSearchResultsForServiceDate(_q, factory, new ServiceDate(new Date(SystemTime.currentTimeMillis())));
       }
       else {
         _results = _searchService.getSearchResults(_q, factory);
@@ -245,7 +245,7 @@ public class IndexAction extends OneBusAwayEnterpriseActionSupport {
   }
 
   public String getLastUpdateTime() {
-    return DateFormat.getTimeInstance().format(new Date());
+    return DateFormat.getTimeInstance().format(new Date(SystemTime.currentTimeMillis()));
   }
 
   public String getResultType() {

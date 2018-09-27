@@ -27,6 +27,7 @@ import org.onebusaway.transit_data.model.trips.TripDetailsBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsInclusionBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsQueryBean;
 import org.onebusaway.transit_data.services.TransitDataService;
+import org.onebusaway.util.SystemTime;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.opensymphony.xwork2.conversion.annotations.TypeConversion;
@@ -45,7 +46,7 @@ public class TripDetailsAction extends ApiActionSupport {
 
   private Date _serviceDate;
 
-  private Date _time = new Date();
+  private Date _time = new Date(SystemTime.currentTimeMillis());
   
   private String _vehicleId;
   

@@ -20,6 +20,7 @@ import java.util.List;
 import org.apache.struts2.convention.annotation.Result;
 import org.apache.struts2.convention.annotation.Results;
 import org.apache.struts2.interceptor.validation.SkipValidation;
+import org.onebusaway.util.SystemTime;
 import org.onebusaway.webapp.actions.OneBusAwayNYCAdminActionSupport;
 import org.onebusaway.transit_data.model.AgencyWithCoverageBean;
 import org.onebusaway.transit_data.model.ListBean;
@@ -164,7 +165,7 @@ public class ServiceAlertsAction extends OneBusAwayNYCAdminActionSupport {
   
   public boolean isActive(List<TimeRangeBean> windows){
 	  if(windows != null && !windows.isEmpty()){
-		  long now = System.currentTimeMillis();
+		  long now = SystemTime.currentTimeMillis();
 		  TimeRangeBean timeRangeBean = windows.get(0);
 		  if((timeRangeBean.getTo() > 0 &&  timeRangeBean.getTo() <= now) ||
 				  (timeRangeBean.getFrom() > 0 &&  timeRangeBean.getFrom() >= now)){

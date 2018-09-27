@@ -81,7 +81,7 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
 
       ServiceDate serviceDate = null;
       boolean serviceDateFilterOn = Boolean.parseBoolean(_configurationService.getConfigurationValueAsString("display.serviceDateFiltering", "false"));
-      if (serviceDateFilterOn) serviceDate = new ServiceDate();
+      if (serviceDateFilterOn) serviceDate = new ServiceDate(new Date(SystemTime.currentTimeMillis()));
 
       StopsForRouteBean stopsForRoute;
       if (serviceDate == null)
@@ -197,7 +197,7 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
 
         ServiceDate serviceDate = null;
         boolean serviceDateFilterOn = Boolean.parseBoolean(_configurationService.getConfigurationValueAsString("display.serviceDateFiltering", "false"));
-        if (serviceDateFilterOn) serviceDate = new ServiceDate();
+        if (serviceDateFilterOn) serviceDate = new ServiceDate(new Date(SystemTime.currentTimeMillis()));
 
         StopsForRouteBean stopsForRoute;
         if (serviceDate != null) {
@@ -462,7 +462,7 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
     	if(journey.getOriginAimedDepartureTime() != null) {
         	DateFormat formatter = DateFormat.getTimeInstance(DateFormat.SHORT);
         	
-        	if(journey.getOriginAimedDepartureTime().getTime() < new Date().getTime()) {
+        	if(journey.getOriginAimedDepartureTime().getTime() < new Date(SystemTime.currentTimeMillis()).getTime()) {
         		message += "at terminal";
         	} else {    			
         		message += "at terminal, scheduled to depart " + formatter.format(journey.getOriginAimedDepartureTime());

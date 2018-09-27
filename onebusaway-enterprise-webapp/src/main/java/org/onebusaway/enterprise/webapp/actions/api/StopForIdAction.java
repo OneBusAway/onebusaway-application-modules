@@ -84,7 +84,7 @@ public class StopForIdAction extends OneBusAwayEnterpriseActionSupport {
       StopBean stop;
 
       if (serviceDateFilterOn) {
-          stop = _transitDataService.getStopForServiceDate(_stopId, new ServiceDate());
+          stop = _transitDataService.getStopForServiceDate(_stopId, new ServiceDate(new Date(SystemTime.currentTimeMillis())));
       } else {
           stop = _transitDataService.getStop(_stopId);
       }
@@ -98,7 +98,7 @@ public class StopForIdAction extends OneBusAwayEnterpriseActionSupport {
     for(RouteBean routeBean : stop.getRoutes()) {
         StopsForRouteBean stopsForRoute;
         if (serviceDateFilterOn) {
-            stopsForRoute = _transitDataService.getStopsForRouteForServiceDate(routeBean.getId(), new ServiceDate());
+            stopsForRoute = _transitDataService.getStopsForRouteForServiceDate(routeBean.getId(), new ServiceDate(new Date(SystemTime.currentTimeMillis())));
         } else {
             stopsForRoute = _transitDataService.getStopsForRoute(routeBean.getId());
         }

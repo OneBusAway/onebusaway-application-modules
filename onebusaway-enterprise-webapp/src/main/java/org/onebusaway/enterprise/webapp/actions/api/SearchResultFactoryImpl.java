@@ -16,6 +16,7 @@
 package org.onebusaway.enterprise.webapp.actions.api;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -65,7 +66,7 @@ public class SearchResultFactoryImpl implements SearchResultFactory {
 
     ServiceDate serviceDate = null;
     boolean serviceDateFilterOn = Boolean.parseBoolean(_configService.getConfigurationValueAsString("display.serviceDateFiltering", "false"));
-    if (serviceDateFilterOn) serviceDate = new ServiceDate();
+    if (serviceDateFilterOn) serviceDate = new ServiceDate(new Date(SystemTime.currentTimeMillis()));
 
     StopsForRouteBean stopsForRoute;
     if (serviceDate == null)
@@ -97,7 +98,7 @@ public class SearchResultFactoryImpl implements SearchResultFactory {
 
     ServiceDate serviceDate = null;
     boolean serviceDateFilterOn = Boolean.parseBoolean(_configService.getConfigurationValueAsString("display.serviceDateFiltering", "false"));
-    if (serviceDateFilterOn) serviceDate = new ServiceDate();
+    if (serviceDateFilterOn) serviceDate = new ServiceDate(new Date(SystemTime.currentTimeMillis()));
 
     StopsForRouteBean stopsForRoute;
     if (serviceDate != null) {
@@ -147,7 +148,7 @@ public class SearchResultFactoryImpl implements SearchResultFactory {
 
     ServiceDate serviceDate = null;
     boolean serviceDateFilterOn = Boolean.parseBoolean(_configService.getConfigurationValueAsString("display.serviceDateFiltering", "false"));
-    if (serviceDateFilterOn) serviceDate = new ServiceDate();
+    if (serviceDateFilterOn) serviceDate = new ServiceDate(new Date(SystemTime.currentTimeMillis()));
 
     for(RouteBean routeBean : stopBean.getRoutes()) {
       StopsForRouteBean stopsForRoute;
