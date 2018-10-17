@@ -11,7 +11,7 @@
 	<name>onebusaway-admin-webapp</name>
 	<properties>
 		<xwiki.version>2.3.1</xwiki.version>
-		<xwiki.integration.version>0.0.2</xwiki.integration.version>
+		<xwiki.integration.version>1.0.1</xwiki.integration.version>
 		<geotools.version>11-beta</geotools.version>
 		<spring.version>3.0.5.RELEASE</spring.version>
 		<jetty.version>6.1.26</jetty.version>
