@@ -1,0 +1,28 @@
+<?xml version = "1.0" encoding = "UTF-8"?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Confi 3.0//EN" "http://www.mybatis.org/dtd/mybatis-3-config.dtd">
+
+<configuration>
+
+    <typeAliases>
+        <typeAlias alias = "IcingaItem" type = "org.onebusaway.statusagent.model.IcingaItem"/>
+    </typeAliases>
+
+    <environments default = "development">
+        <environment id = "development">
+            <transactionManager type = "JDBC"/>
+
+            <dataSource type = "UNPOOLED">
+                <property name = "driver" value = "com.mysql.jdbc.Driver"/>
+                <property name = "url" value = "jdbc:mysql://localhost:3306/oba_sound"/>
+                <property name = "username" value = "root"/>
+                <property name = "password" value = "rootpwd"/>
+            </dataSource>
+
+        </environment>
+    </environments>
+
+    <mappers>
+        <mapper resource="IcingaItem-mapper.xml"></mapper>
+    </mappers>
+
+</configuration>

@@ -56,6 +56,9 @@ public class StatusProviderImpl implements StatusProvider {
   private TransitDataService _transitDataService;
 
   @Autowired
+  private IcingaItemPersistence _icingaItemPersistence;
+
+  @Autowired
   private ConfigurationService _config;
     
   @Override
@@ -101,38 +104,14 @@ public class StatusProviderImpl implements StatusProvider {
     group.setScope("Monitoring and Infrastructure notices");
     group.setSource("Monitoring subsystem -- automated notifications");
 
-    IcingaResponse response = null;
-    
-    // fail if not configured!
-    String baseUrl = _config.getConfigurationValueAsString("icinga.baseUrl", null);
-    String command = _config.getConfigurationValueAsString("icinga.command", null);
+    List<IcingaItem> results = _icingaItemPersistence.getIcingaItems();
 
-    // be careful -- by default we aren't configured to do anything!
-    if (baseUrl == null || command == null) {
-      _log.info("missing required configuration for status group: baseUrl="
-              + baseUrl + ", command=" + command);
+    if (results == null || results.size() == 0) {
+      _log.info("could not find icinga items in db");
       return group;
     }
-    try {
-      HttpClient client = new HttpClient();
-      String url = baseUrl + encode(command);
-      HttpMethod method = new GetMethod(url);
-      client.executeMethod(method);
-      InputStream result = method.getResponseBodyAsStream();
-      ObjectMapper mapper = new ObjectMapper();
-      response = mapper.readValue(result, IcingaResponse.class);
-    } catch (IOException e) {
-      _log.error("Exception getting Icinga data " + e);
-      group.addItem(exceptionStatus(e));
-      return group;
-    }
-    
-    if (response == null) {
-      group.addItem(exceptionStatus());
-      return group;
-    }
-    
-    for (IcingaItem bean : response.getResult()) {
+
+    for (IcingaItem bean : results) {
       StatusItem item = new StatusItem();
       item.setDescription(bean.getServiceName());
       item.setTitle(bean.getServiceDisplayName());
@@ -207,18 +186,6 @@ public class StatusProviderImpl implements StatusProvider {
     }
     
     return group;
-  }
-  
-  private static String encode(String command) throws UnsupportedEncodingException {
-    StringBuffer encoded = new StringBuffer();
-    if (command == null) return encoded.toString();
-    String[] tokens = command.split("/");
-    for (String token : tokens) {
-      String enc = URLEncoder.encode(token, "utf-8");
-      encoded.append("/").append(enc);
-    }
-    
-    return encoded.toString();
   }
   
   private static StatusItem exceptionStatus(Exception e) {

@@ -127,6 +127,7 @@
     <module>onebusaway-users</module>
     <module>onebusaway-util</module>
     <module>onebusaway-watchdog-webapp</module>
+    <module>onebusaway-status-agent</module>
   </modules>
   
   <!-- This is where we control the master dependency version used by all modules -->

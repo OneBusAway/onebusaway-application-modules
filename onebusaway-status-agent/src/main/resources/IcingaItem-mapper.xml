@@ -1,0 +1,16 @@
+<?xml version = "1.0" encoding = "UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace = "IcingaItem">
+    <insert id="insert" parameterType="IcingaItem">
+        INSERT INTO ICINGA_ITEMS
+        (SERVICE_NAME, SERVICE_DISPLAY_NAME, SERVICE_CURRENT_STATE,
+        SERVICE_OUTPUT, SERVICE_PERFDATA, SERVICE_IS_PENDING, UPDATED_ON )
+        VALUES (#{serviceName}, #{serviceDisplayName}, #{serviceCurrentState},
+        #{serviceOutput}, #{servicePerfdata}, #{serviceIsPending}, CURRENT_TIMESTAMP);
+    </insert>
+    <delete id="delete">
+        delete from ICINGA_ITEMS;
+    </delete>
+</mapper>

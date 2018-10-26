@@ -68,6 +68,7 @@
     </bean>
     
     <bean class="org.onebusaway.enterprise.webapp.actions.status.service.StatusProviderImpl" />
+    <bean class="org.onebusaway.enterprise.webapp.actions.status.service.IcingaItemPersistenceDB" />
 
     <bean id="CommonResources" class="org.onebusaway.presentation.impl.resources.ResourceFactory">
         <property name="name" value="CommonResources" />
@@ -96,5 +97,14 @@
     <bean id="arrivalAndDepartureMessages" class="org.onebusaway.enterprise.webapp.impl.TypedMessagesFactory">
     <property name="messagesClass" value="org.onebusaway.enterprise.webapp.actions.bundles.ArrivalAndDepartureMessages" />
   </bean>
+
+    <bean id="enterpriseHibernateAnnotatedClasses" class="org.onebusaway.container.spring.ListBeanPostProcessor">
+        <property name="target" value="hibernateAnnotatedClasses" />
+        <property name="values">
+            <list>
+                <value>org.onebusaway.enterprise.webapp.actions.status.model.IcingaItem</value>
+            </list>
+        </property>
+    </bean>
     
 </beans>
