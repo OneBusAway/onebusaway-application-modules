@@ -78,8 +78,8 @@
 		<!-- This is where we control the master plugin version used by all modules -->
 		<plugins>
 			<plugin>
-				<groupId>com.mycila.maven-license-plugin</groupId>
-				<artifactId>maven-license-plugin</artifactId>
+				<groupId>com.mycila</groupId>
+				<artifactId>license-maven-plugin</artifactId>
 				<configuration>
 					<excludes combine.children="append">
 						<exclude>**/onebusaway/util/**</exclude>

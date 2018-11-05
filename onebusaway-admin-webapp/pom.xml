@@ -14,7 +14,6 @@
 		<xwiki.integration.version>1.0.1</xwiki.integration.version>
 		<geotools.version>11-beta</geotools.version>
 		<spring.version>3.0.5.RELEASE</spring.version>
-		<jetty.version>6.1.26</jetty.version>
 		<bundle.builtPath>/var/lib/oba/bundles/builder</bundle.builtPath>
 		<bundle.stagedPath>/var/lib/oba/bundles/staged</bundle.stagedPath>
 		<bundle.deployPath>/var/lib/oba/bundles/active</bundle.deployPath>
@@ -405,14 +404,6 @@
 						<dirty>-dirty</dirty>
 						<forceLongFormat>false</forceLongFormat>
 					</gitDescribe>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.mortbay.jetty</groupId>
-				<artifactId>maven-jetty-plugin</artifactId>
-				<version>${jetty.version}</version>
-				<configuration>
-					<contextPath>/</contextPath>
 				</configuration>
 			</plugin>
 <!--
