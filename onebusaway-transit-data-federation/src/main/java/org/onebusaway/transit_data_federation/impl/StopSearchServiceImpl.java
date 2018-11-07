@@ -27,16 +27,17 @@ import javax.annotation.PostConstruct;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
+import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
-import org.apache.lucene.queryParser.MultiFieldQueryParser;
-import org.apache.lucene.queryParser.ParseException;
-import org.apache.lucene.queryParser.QueryParser;
+import org.apache.lucene.queryparser.classic.MultiFieldQueryParser;
+import org.apache.lucene.queryparser.classic.ParseException;
+import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
-import org.apache.lucene.search.Searcher;
-import org.apache.lucene.search.TopDocCollector;
 import org.apache.lucene.search.TopDocs;
+import org.apache.lucene.search.similarities.ClassicSimilarity;
+import org.apache.lucene.store.FSDirectory;
 import org.onebusaway.container.refresh.Refreshable;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.model.SearchResult;
@@ -57,7 +58,7 @@ public class StopSearchServiceImpl implements StopSearchService {
 
   private FederatedTransitDataBundle _bundle;
 
-  private Searcher _searcher;
+  private IndexSearcher _searcher;
 
   @Autowired
   public void setBundle(FederatedTransitDataBundle bundle) {
@@ -70,7 +71,7 @@ public class StopSearchServiceImpl implements StopSearchService {
     File path = _bundle.getStopSearchIndexPath();
 
     if (path.exists()) {
-      IndexReader reader = IndexReader.open(path);
+      IndexReader reader = DirectoryReader.open(FSDirectory.open(path.toPath()));
       _searcher = new IndexSearcher(reader);
     } else {
       _searcher = null;
@@ -79,7 +80,7 @@ public class StopSearchServiceImpl implements StopSearchService {
 
   public SearchResult<AgencyAndId> searchForStopsByCode(String id,
       int maxResultCount, double minScoreToKeep) throws IOException,
-      ParseException {
+          ParseException {
     return search(new MultiFieldQueryParser(CODE_FIELDS, _analyzer), id,
         maxResultCount, minScoreToKeep);
   }
@@ -92,18 +93,22 @@ public class StopSearchServiceImpl implements StopSearchService {
   }
 
   private SearchResult<AgencyAndId> search(QueryParser parser, String value,
-      int maxResultCount, double minScoreToKeep) throws IOException,
+                                           int maxResultCount, double minScoreToKeep) throws IOException,
       ParseException {
 
     if (_searcher == null)
       return new SearchResult<AgencyAndId>();
 
-    TopDocCollector collector = new TopDocCollector(maxResultCount);
-
     Query query = parser.parse(value);
-    _searcher.search(query, collector);
 
-    TopDocs top = collector.topDocs();
+    /* NOTE:  idf changed from
+    (float)(Math.log(numDocs/(double)(docFreq+1)) + 1.0) to
+    (float)Math.log(1 + (docCount - docFreq + 0.5) / (docFreq + 0.5))
+    sometime after version 2.4.1
+     */
+    _searcher.setSimilarity(new ClassicSimilarity()); // new default is now BM25Similarity but conflicts with MIN_SCORE
+
+    TopDocs top = _searcher.search(query, maxResultCount);
 
     Map<AgencyAndId, Float> topScores = new HashMap<AgencyAndId, Float>();
 
@@ -120,8 +125,10 @@ public class StopSearchServiceImpl implements StopSearchService {
         topScores.put(id, sd.score);
     }
 
-    List<AgencyAndId> ids = new ArrayList<AgencyAndId>(top.totalHits);
-    double[] scores = new double[top.totalHits];
+
+    // we can safely cast to int here, maxResultCount can't exceed 2 billion results
+    List<AgencyAndId> ids = new ArrayList<AgencyAndId>((int)top.totalHits);
+    double[] scores = new double[(int)top.totalHits];
 
     int index = 0;
     for (AgencyAndId id : topScores.keySet()) {
