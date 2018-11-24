@@ -14,7 +14,7 @@
   
   	<properties>
 		<branding-webapp>{project.name}</branding-webapp>
-		<jetty.version>6.1.26</jetty.version>
+		<jetty.version>9.2.9.v20150224</jetty.version>
 		<xwiki.integration.version>1.0.1</xwiki.integration.version>
 	</properties>
 

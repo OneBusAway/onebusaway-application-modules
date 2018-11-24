@@ -29,9 +29,11 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.Parser;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Handler;
+import org.eclipse.jetty.server.HttpConfiguration;
+import org.eclipse.jetty.server.HttpConnectionFactory;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.bio.SocketConnector;
+import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 import org.eclipse.jetty.server.handler.ContextHandler.Context;
 import org.eclipse.jetty.server.handler.HandlerList;
@@ -76,13 +78,15 @@ public class WebappBootstrapMain {
       port = Integer.parseInt(cli.getOptionValue(ARG_PORT));
 
     Server server = new Server();
-    SocketConnector connector = new SocketConnector();
 
-    // Set some timeout options to make debugging easier.
-    connector.setMaxIdleTime(1000 * 60 * 60);
-    connector.setSoLingerTime(-1);
-    connector.setPort(port);
-    server.setConnectors(new Connector[] {connector});
+    HttpConfiguration http_config = new HttpConfiguration();
+    http_config.setSecureScheme("https");
+    http_config.setSecurePort(8443);
+    http_config.setOutputBufferSize(32768);
+    ServerConnector http = new ServerConnector(server,new HttpConnectionFactory(http_config));
+    http.setPort(port);
+    http.setIdleTimeout(30000);
+
 
     WebAppContext context = new WebAppContext();
     context.setContextPath("/");
