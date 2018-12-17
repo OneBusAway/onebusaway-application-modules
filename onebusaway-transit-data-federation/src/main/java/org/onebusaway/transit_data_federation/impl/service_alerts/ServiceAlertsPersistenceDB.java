@@ -26,9 +26,8 @@ import org.onebusaway.util.SystemTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.orm.hibernate3.HibernateCallback;
-import org.springframework.orm.hibernate3.HibernateTemplate;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
 public class ServiceAlertsPersistenceDB implements ServiceAlertsPersistence {
@@ -36,7 +35,7 @@ public class ServiceAlertsPersistenceDB implements ServiceAlertsPersistence {
   private static final long DEFAULT_REFRESH_INTERVAL = 60 * 1000; // 60 seconds
   private static Logger _log = LoggerFactory.getLogger(ServiceAlertsPersistenceDB.class);
   
-  private HibernateTemplate _template;
+  private SessionFactory _sessionFactory;
   
   private long lastModified = 0;
   
@@ -48,17 +47,18 @@ public class ServiceAlertsPersistenceDB implements ServiceAlertsPersistence {
   
   @Autowired
   public void setSessionFactory(SessionFactory sessionFactory) {
-    _template = new HibernateTemplate(sessionFactory);
+    _sessionFactory = sessionFactory;
   }
 
-  public HibernateTemplate getHibernateTemplate() {
-    return _template;
+  private Session getSession(){
+    return _sessionFactory.getCurrentSession();
   }
 
   @Override
+  @Transactional
   public void delete(ServiceAlertRecord existingServiceAlertRecord) {
     _log.info("deleting " + (existingServiceAlertRecord==null?"NuLl":existingServiceAlertRecord.getServiceAlertId()));
-    _template.delete(existingServiceAlertRecord);
+    getSession().delete(existingServiceAlertRecord);
   }
 
   
@@ -66,6 +66,7 @@ public class ServiceAlertsPersistenceDB implements ServiceAlertsPersistence {
    * check if our local cache has expired, and if so, sync
    * with persister
    */
+  @Transactional
   public synchronized boolean cachedNeedsSync() {
     long now = SystemTime.currentTimeMillis();
     
@@ -80,6 +81,7 @@ public class ServiceAlertsPersistenceDB implements ServiceAlertsPersistence {
    *  check if the persister has more recent info then we do, and if so
    *  load it into the cache
    */
+  @Transactional
   public synchronized boolean needsSync() {
     Long dbLastModified = getLastModified();
     if (dbLastModified == null) {
@@ -103,17 +105,11 @@ public class ServiceAlertsPersistenceDB implements ServiceAlertsPersistence {
     return false; // no updates necessary
   }
   
-  
-  private long getRowCount() {
+  @Transactional
+  long getRowCount() {
     try {
-      return _template.execute(new HibernateCallback<Long>() {
-        @Override
-        public Long doInHibernate(Session session) throws HibernateException,
-            SQLException {
-          Query query = session.createQuery("SELECT count(serviceAlert) FROM ServiceAlertRecord serviceAlert");
-          return (Long) query.list().get(0);
-        }
-      });
+        Query query = getSession().createQuery("SELECT count(serviceAlert) FROM ServiceAlertRecord serviceAlert");
+        return (Long) query.list().get(0);
     } catch (Throwable t) {
       _log.error("hibernate blew:", t);
       return -1;
@@ -121,50 +117,34 @@ public class ServiceAlertsPersistenceDB implements ServiceAlertsPersistence {
   }
 
   @Override
+  @Transactional
   public List<ServiceAlertRecord> getAlerts() {
-    return _template.execute(new HibernateCallback<List<ServiceAlertRecord>>() {
-      @SuppressWarnings("unchecked")
-      @Override
-      public List<ServiceAlertRecord> doInHibernate(Session session)
-          throws HibernateException, SQLException {
-        Query query = session.createQuery("SELECT serviceAlert FROM ServiceAlertRecord serviceAlert " +
+        Query query = getSession().createQuery("SELECT serviceAlert FROM ServiceAlertRecord serviceAlert " +
                 "left join fetch serviceAlert.consequences cs " +
                 "left join fetch cs.detourStopIds dsi ");
         return query.list();
-      }
-    });
   }
 
   @Override
+  @Transactional
   public void saveOrUpdate(ServiceAlertRecord record) {
-      _template.saveOrUpdate(record);
+      getSession().saveOrUpdate(record);
   }
 
   @Override
+  @Transactional
   public ServiceAlertRecord getServiceAlertRecordByAlertId(final String agencyId, final String serviceAlertId) {
-    return _template.execute(new HibernateCallback<ServiceAlertRecord>() {      
-      @Override
-      public ServiceAlertRecord doInHibernate(Session session)
-          throws HibernateException, SQLException {
-        Query query = session.createQuery("SELECT serviceAlert FROM ServiceAlertRecord serviceAlert WHERE serviceAlertId = :serviceAlertId and agencyId = :agencyId");
-        query.setString("serviceAlertId", serviceAlertId);
-        query.setString("agencyId", agencyId);
-        return (ServiceAlertRecord) query.uniqueResult();
-      }
-    });
+      Query query = getSession().createQuery("SELECT serviceAlert FROM ServiceAlertRecord serviceAlert WHERE serviceAlertId = :serviceAlertId and agencyId = :agencyId");
+      query.setString("serviceAlertId", serviceAlertId);
+      query.setString("agencyId", agencyId);
+      return (ServiceAlertRecord) query.uniqueResult();
   }
 
   private Long getLastModified() {
     long start = SystemTime.currentTimeMillis();
     try {
-      return _template.execute(new HibernateCallback<Long>() {
-        @Override
-        public Long doInHibernate(Session session) throws HibernateException,
-            SQLException {
-          Query query = session.createQuery("SELECT max(serviceAlert.modifiedTime) FROM ServiceAlertRecord serviceAlert");
-          return (Long) query.list().get(0);
-        }
-      });
+        Query query = getSession().createQuery("SELECT max(serviceAlert.modifiedTime) FROM ServiceAlertRecord serviceAlert");
+        return (Long) query.list().get(0);
     } catch (Throwable t) {
       _log.error("hibernate blew:", t);
       return null;

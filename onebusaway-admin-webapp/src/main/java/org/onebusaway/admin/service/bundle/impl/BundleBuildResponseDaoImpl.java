@@ -18,6 +18,7 @@ package org.onebusaway.admin.service.bundle.impl;
 import java.util.List;
 
 import org.hibernate.Hibernate;
+import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -29,8 +30,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.orm.hibernate3.HibernateTemplate;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Heretofore BundleBuildResponses were stored by id in a Map. However, whenever
@@ -46,34 +47,44 @@ public class BundleBuildResponseDaoImpl implements BundleBuildResponseDao {
 
   protected static Logger _log = LoggerFactory
       .getLogger(BundleBuildResponseDaoImpl.class);
-  private HibernateTemplate _template;
+  private SessionFactory _sessionFactory;
   
   @Autowired
   @Qualifier("bundleBuildResponseSessionFactory")
   public void setSessionFactory(SessionFactory sessionFactory) {
-    _template = new HibernateTemplate(sessionFactory);
+    _sessionFactory = sessionFactory;
   }
-  
-  @Override
-  public void saveOrUpdate(BundleBuildResponse bundleBuildResponse) {
-    _template.saveOrUpdate(bundleBuildResponse);
+
+  private Session getSession(){
+    return _sessionFactory.getCurrentSession();
   }
 
   @Override
+  @Transactional
+  public void saveOrUpdate(BundleBuildResponse bundleBuildResponse) {
+    getSession().saveOrUpdate(bundleBuildResponse);
+  }
+
+  @Override
+  @Transactional
   public BundleBuildResponse getBundleBuildResponseForId(String id) {
-    Session session = _template.getSessionFactory().getCurrentSession();
+    Session session = getSession();
     Transaction tx = session.beginTransaction();
-    List<BundleBuildResponse> responses = _template
-        .findByNamedParam("from BundleBuildResponse where id=:id", "id", id);
+    List<BundleBuildResponse> responses;
+    Query query = getSession()
+        .createQuery("from BundleBuildResponse where id=:id");
+    query.setParameter("id", id);
+    responses = query.list();
     BundleBuildResponse bbr = responses.get(0);
     tx.commit();
     return bbr;
   }
 
   @Override
+  @Transactional
   public int getBundleBuildResponseMaxId() {
     int maxId = 0;
-    Session session = _template.getSessionFactory().getCurrentSession();
+    Session session = getSession();
     Transaction tx = session.beginTransaction();
     List<String> bundleIds = session.createCriteria(BundleBuildResponse.class)
         .setProjection(Projections.property("id")).list();

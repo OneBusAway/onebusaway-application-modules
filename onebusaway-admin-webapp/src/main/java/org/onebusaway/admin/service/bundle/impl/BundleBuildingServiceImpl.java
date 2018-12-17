@@ -589,7 +589,9 @@ public class BundleBuildingServiceImpl implements BundleBuildingService {
       beans.put("entityReplacementStrategyFactory", erFactory.getBeanDefinition());
       
       BeanDefinitionBuilder er = BeanDefinitionBuilder.genericBeanDefinition();
-      er.setFactoryBean("entityReplacementStrategyFactory", "create");
+
+      er.getRawBeanDefinition().setFactoryBeanName("entityReplacementStrategyFactory");
+      er.getRawBeanDefinition().setFactoryMethodName("create");
       beans.put("entityReplacementStrategy", er.getBeanDefinition());
       
       response.addStatusMessage("configuration StopMappingUrl=" + stopMappingUrl);

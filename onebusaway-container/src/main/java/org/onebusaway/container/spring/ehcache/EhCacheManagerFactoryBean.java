@@ -21,6 +21,7 @@ import net.sf.ehcache.CacheException;
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.config.Configuration;
 
+import net.sf.ehcache.config.ConfigurationFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.DisposableBean;
@@ -74,25 +75,23 @@ public class EhCacheManagerFactoryBean implements FactoryBean<CacheManager>,
     logger.info("Initializing EHCache CacheManager");
 
     // Independent CacheManager instance (the default).
+    Configuration config;
     if (this.configuration != null) {
-       if (this.cacheManagerName != null) {
-    	   // ehcache enforces named instances, it will only allow one anonymous instance
-    	   this.configuration.setName(this.cacheManagerName);
-       }
-      this.cacheManager = new CacheManager(this.configuration);
+      config = this.configuration;
     } else if (this.configLocation != null) {
-      this.cacheManager = new CacheManager(this.configLocation.getInputStream());
+      config = ConfigurationFactory.parseConfiguration(this.configLocation.getInputStream());
     } else {
-      this.cacheManager = new CacheManager();
+      config = new Configuration();
     }
 
     if (this.cacheManagerName != null) {
-    	// this appears to have moved to the configuration instead
-      this.cacheManager.setName(this.cacheManagerName);
+      config.setName(this.cacheManagerName);
     }
-    
+
+    this.cacheManager = new CacheManager(config);
+
     if (!this.cacheManager.isNamed()) {
-    	logger.error("cacheManager is not named, this may cause problems.  Please set cacheManagerName in your spring configuration");
+      logger.error("cacheManager is not named, this may cause problems.  Please set cacheManagerName in your spring configuration");
     }
   }
 

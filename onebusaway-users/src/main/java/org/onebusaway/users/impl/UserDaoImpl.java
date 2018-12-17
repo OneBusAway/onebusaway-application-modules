@@ -18,6 +18,7 @@ package org.onebusaway.users.impl;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 
 import org.hibernate.*;
@@ -28,30 +29,26 @@ import org.onebusaway.users.model.UserIndex;
 import org.onebusaway.users.model.UserIndexKey;
 import org.onebusaway.users.model.UserRole;
 import org.onebusaway.users.services.UserDao;
-import org.onebusaway.users.services.UserIndexTypes;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.orm.hibernate3.HibernateCallback;
-import org.springframework.orm.hibernate3.HibernateTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 @Component
 class UserDaoImpl implements UserDao {
 
-  private HibernateTemplate _template;
+  private SessionFactory _sessionFactory;
 
   @Autowired
-  public void setSessionFactory(SessionFactory sessionFactory) {
-    _template = new HibernateTemplate(sessionFactory);
+  public void setSessionFactory(SessionFactory sessionFactory){
+    _sessionFactory = sessionFactory;
   }
 
-  public HibernateTemplate getHibernateTemplate() {
-    return _template;
-  }
 
   @Override
+  @Transactional
   public int getNumberOfUsers() {
-    List<?> values = _template.findByNamedQuery("numberOfUsers");
+    Query query = getSession().getNamedQuery("numberOfUsers");
+    List<?> values = query.list();
     if (values == null || values.size() == 0)
       return 0;
     Number v = (Number) values.get(0);
@@ -60,29 +57,25 @@ class UserDaoImpl implements UserDao {
 
   @SuppressWarnings("unchecked")
   @Override
+  @Transactional
   public List<Integer> getAllUserIds() {
-    return _template.find("SELECT user.id FROM User user");
+    return getSession().createQuery("SELECT user.id FROM User user").list();
   }
 
   @Override
+  @Transactional
   public List<Integer> getAllUserIdsInRange(final int firstResult,
       final int maxResults) {
-    return _template.execute(new HibernateCallback<List<Integer>>() {
-      @SuppressWarnings("unchecked")
-      @Override
-      public List<Integer> doInHibernate(Session session)
-          throws HibernateException, SQLException {
-        Query query = session.createQuery("SELECT user.id FROM User user");
-        query.setFirstResult(firstResult);
-        query.setMaxResults(maxResults);
-        return query.list();
-      }
-    });
+    Query query = getSession().createQuery("SELECT user.id FROM User user");
+    query.setFirstResult(firstResult);
+    query.setMaxResults(maxResults);
+    return query.list();
   }
   
   @Override
+  @Transactional
   public long getNumberOfStaleUsers(Date lastAccessTime) {
-    List<?> values = _template.findByNamedQueryAndNamedParam("numberOfStaleUsers", "lastAccessTime", lastAccessTime);
+    List<?> values = getSession().getNamedQuery("numberOfStaleUsers").setTimestamp("lastAccessTime", lastAccessTime).list();
     if (values == null || values.size() == 0)
       return 0;
     Number v = (Number) values.get(0);
@@ -91,48 +84,47 @@ class UserDaoImpl implements UserDao {
   }
   
   @Override
+  @Transactional
   public List<Integer> getStaleUserIdsInRange(final Date lastAccessTime, final int firstResult, final int maxResults) {
-    return _template.execute(new HibernateCallback<List<Integer>>() {
-      @SuppressWarnings("unchecked")
-      @Override
-      public List<Integer> doInHibernate(Session session)
-          throws HibernateException, SQLException {
-        Query query = session.createQuery("SELECT user.id FROM User user WHERE lastAccessTime < :lastAccessTime");
-        query.setFirstResult(firstResult);
-        query.setMaxResults(maxResults);
-        query.setTimestamp("lastAccessTime", lastAccessTime);
-        return query.list();
-      }
-    });  
+    Query query = getSession().createQuery("SELECT user.id FROM User user WHERE lastAccessTime < :lastAccessTime");
+    query.setFirstResult(firstResult);
+    query.setMaxResults(maxResults);
+    query.setTimestamp("lastAccessTime", lastAccessTime);
+    return query.list();
   }
 
   @Override
+  @Transactional
   public User getUserForId(int id) {
-    return (User) _template.get(User.class, id);
+    return (User) getSession().get(User.class, id);
   }
 
   @Transactional
   @Override
   public void saveOrUpdateUser(User user) {
-    _template.saveOrUpdate(user);
+    getSession().saveOrUpdate(user);
   }
 
   @Override
   public void saveOrUpdateUsers(User... users) {
+    Session session = getSession();
     List<User> list = new ArrayList<User>(users.length);
-    for (User user : users)
-      list.add(user);
-    _template.saveOrUpdateAll(list);
+
+    for (Iterator<User> it = list.iterator(); it.hasNext();) {
+      session.saveOrUpdate(it.next());
+    }
   }
 
   @Override
+  @Transactional
   public void deleteUser(User user) {
-    _template.delete(user);
+    getSession().delete(user);
   }
 
   @Override
+  @Transactional
   public int getNumberOfUserRoles() {
-    List<?> values = _template.findByNamedQuery("numberOfUserRoles");
+    List<?> values = getSession().getNamedQuery("numberOfUserRoles").list();
     if (values == null || values.size() == 0)
       return 0;
     Number v = (Number) values.get(0);
@@ -140,9 +132,11 @@ class UserDaoImpl implements UserDao {
   }
 
   @Override
+  @Transactional
   public int getNumberOfUsersWithRole(UserRole role) {
-    List<?> values = _template.findByNamedQueryAndNamedParam(
-        "numberOfUsersWithRole", "role", role);
+    Query query = getSession().getNamedQuery("numberOfUsersWithRole");
+    query.setParameter("role", role);
+    List<?> values = query.list();
     if (values == null || values.size() == 0)
       return 0;
     Number v = (Number) values.get(0);
@@ -150,76 +144,69 @@ class UserDaoImpl implements UserDao {
   }
 
   @Override
+  @Transactional
   public UserRole getUserRoleForName(String name) {
-    return (UserRole) _template.get(UserRole.class, name);
+    return (UserRole) getSession().get(UserRole.class, name);
   }
 
   @Override
+  @Transactional
   public void saveOrUpdateUserRole(UserRole userRole) {
-    _template.saveOrUpdate(userRole);
+    getSession().saveOrUpdate(userRole);
   }
 
   @SuppressWarnings("unchecked")
   @Override
+  @Transactional
   public List<String> getUserIndexKeyValuesForKeyType(String keyType) {
-    return _template.findByNamedQueryAndNamedParam(
-        "userIndexKeyValuesForKeyType", "type", keyType);
+    return getSession()
+            .getNamedQuery("userIndexKeyValuesForKeyType")
+            .setString("type", keyType)
+            .list();
   }
 
   @Override
+  @Transactional
   public Integer getUserKeyCount(final String keyType) {
-      Integer count = _template.execute(new HibernateCallback<Integer>() {
-            @SuppressWarnings("unchecked")
-            @Override
-            public Integer doInHibernate(Session session)
-                    throws HibernateException, SQLException {
-                Criteria criteria = session.createCriteria(User.class)
-                        .createCriteria("userIndices")
-                        .add(Restrictions.eq("id.type", keyType))
-                        .setProjection(Projections.rowCount());
-                List<User> users = criteria.list();
-                Integer count = (Integer) criteria.uniqueResult();
-                return count;
-            }
-      });
+      Criteria criteria = getSession().createCriteria(User.class)
+              .createCriteria("userIndices")
+              .add(Restrictions.eq("id.type", keyType))
+              .setProjection(Projections.rowCount());
+      List<User> users = criteria.list();
+      Integer count = (Integer) criteria.uniqueResult();
       return count;
   }
 
   @Override
+  @Transactional
   public List<User> getUsersForKeyType(final int start, final int maxResults, final String keyType) {
 
-    List<User> users = _template.execute(new HibernateCallback<List<User>>() {
-
-            @SuppressWarnings("unchecked")
-            @Override
-            public List<User> doInHibernate(Session session)
-                    throws HibernateException, SQLException {
-            Criteria criteria = session.createCriteria(User.class)
-                    .createCriteria("userIndices")
-                    .add(Restrictions.eq("id.type", keyType))
-                    .setFirstResult(start)
-                    .setMaxResults(maxResults);
-            List<User> users = criteria.list();
-            return users;
-        }
-    });
+    Criteria criteria = getSession().createCriteria(User.class)
+            .createCriteria("userIndices")
+            .add(Restrictions.eq("id.type", keyType))
+            .setFirstResult(start)
+            .setMaxResults(maxResults);
+    List<User> users = criteria.list();
     return users;
   }
 
   @Transactional
   @Override
   public UserIndex getUserIndexForId(UserIndexKey key) {
-    return (UserIndex) _template.get(UserIndex.class, key);
+    return (UserIndex) getSession().get(UserIndex.class, key);
   }
 
   @Override
   public void saveOrUpdateUserIndex(UserIndex userIndex) {
-    _template.saveOrUpdate(userIndex);
+    getSession().saveOrUpdate(userIndex);
   }
 
   @Override
   public void deleteUserIndex(UserIndex index) {
-    _template.delete(index);
+    getSession().delete(index);
   }
 
+  private Session getSession(){
+    return _sessionFactory.getCurrentSession();
+  }
 }

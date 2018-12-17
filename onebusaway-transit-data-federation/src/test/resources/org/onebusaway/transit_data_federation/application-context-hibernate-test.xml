@@ -17,29 +17,15 @@
 
 -->
 <beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xmlns:context="http://www.springframework.org/schema/context" xmlns:aop="http://www.springframework.org/schema/aop"
-    xmlns:tx="http://www.springframework.org/schema/tx" xmlns:sec="http://www.springframework.org/schema/security"
-    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
-           http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd
-           http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.0.xsd
-           http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd
-           http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-4.2.xsd">
+       xmlns:context="http://www.springframework.org/schema/context" xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx" xmlns:sec="http://www.springframework.org/schema/security"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+           http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+           http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+           http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
+           http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security.xsd">
 
-    <import resource="classpath:org/onebusaway/container/application-context-caching.xml" />
 
-    <!--
-        See documentation in org.onebusaway.container.spring.ehcache.EhCacheRegionFactory regarding why we have to go
-        through these static CacheManager instance shenanigans
-    -->
-    <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
-        <property name="targetClass" value="org.onebusaway.container.spring.ehcache.EhCacheRegionFactory" />
-        <property name="targetMethod" value="setStaticCacheManagerInstance" />
-        <property name="arguments">
-            <list>
-                <ref bean="cacheManager" />
-            </list>
-        </property>
-    </bean>
 
     <!--
         Common Hibernate properties, can be extended and overriden with
@@ -49,10 +35,10 @@
         <property name="properties">
             <props>
                 <prop key="hibernate.hbm2ddl.auto">update</prop>
-                <prop key="hibernate.show_sql">false</prop>
+                <prop key="hibernate.show_sql">true</prop>
                 <prop key="hibernate.use_sql_comments">true</prop>
                 <prop key="hibernate.cache.use_query_cache">false</prop>
-                <prop key="hibernate.cache.use_second_level_cache">true</prop>
+                <prop key="hibernate.cache.use_second_level_cache">false</prop>
                 <prop key="hibernate.cache.region.factory_class">org.onebusaway.container.spring.ehcache.EhCacheRegionFactory</prop>
                 <prop key="hibernate.generate_statistics">true</prop>
                 <prop key="hibernate.cache.use_structured_entries">true</prop>
@@ -68,7 +54,12 @@
     -->
     <bean id="hibernateAnnotatedClasses" class="org.springframework.beans.factory.config.ListFactoryBean">
         <property name="sourceList">
-            <list />
+            <list>
+                <value>org.onebusaway.transit_data_federation.impl.realtime.BlockLocationRecord</value>
+                <value>org.onebusaway.transit_data_federation.impl.realtime.history.ScheduleDeviationHistory</value>
+                <value>org.onebusaway.transit_data_federation.impl.reporting.StopProblemReportRecord</value>
+                <value>org.onebusaway.transit_data_federation.impl.reporting.TripProblemReportRecord</value>
+            </list>
         </property>
     </bean>
 
@@ -78,13 +69,24 @@
     -->
     <bean id="hibernateMappingLocations" class="org.springframework.beans.factory.config.ListFactoryBean">
         <property name="sourceList">
-            <list />
+            <list>
+                <value>classpath:org/onebusaway/transit_data_federation/impl/realtime/BlockLocationRecordDaoImpl.hibernate.xml</value>
+                <value>classpath:org/onebusaway/transit_data_federation/impl/reporting/UserReportingDaoImpl.hibernate.xml</value>
+
+            </list>
         </property>
+    </bean>
+
+    <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+        <property name="driverClassName" value="org.hsqldb.jdbcDriver" />
+        <property name="url" value="jdbc:hsqldb:mem:org_onebusaway_temporary" />
+        <property name="username" value="sa" />
+        <property name="password" value="" />
     </bean>
 
     <!-- Hibernate session factory, where all the pieces above are wired together -->
     <bean id="sessionFactory" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean"
-        primary="true">
+          primary="true">
         <qualifier value="main" />
         <property name="dataSource" ref="dataSource" />
         <property name="hibernateProperties" ref="hibernateProperties" />

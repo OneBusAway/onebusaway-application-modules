@@ -36,7 +36,17 @@
 			<br></br>
 			<div id="navigation">
 				<s:url var="url" namespace="/" action="logout"></s:url>
-				<s:a href="%{url}">Go Back to Login</s:a>
+				<s:form action="%{url}"
+						method="post">
+					<input type="submit"
+						   class="logoutButton"
+						   value="Logout" />
+					<input type="hidden"
+						   id="csrfField"
+						   name="${_csrf.parameterName}"
+						   value="${_csrf.token}"/>
+				</s:form>
+
 			</div>
 		</s:if>
 		<s:elseif test="forbidden">
@@ -44,11 +54,21 @@
 
 			<div id="navigation">
 				<s:url var="url" namespace="/" action="logout"></s:url>
-				<s:a href="%{url}">Go Back to Login</s:a>
+				<s:form action="%{url}"
+						method="post">
+					<input type="submit"
+						   class="logoutButton"
+						   value="Logout" />
+					<input type="hidden"
+						   id="csrfField"
+						   name="${_csrf.parameterName}"
+						   value="${_csrf.token}"/>
+				</s:form>
+
 			</div>
 		</s:elseif>
 		<s:else>
-			<s:form action="/userIndex_login" namespace="/admin" method="POST">
+			<s:form action="/userIndex_login" method="put">
 				<fieldset>
 					<label class="top">Username:</label>
 					<s:textfield key="username" name="j_username"/>

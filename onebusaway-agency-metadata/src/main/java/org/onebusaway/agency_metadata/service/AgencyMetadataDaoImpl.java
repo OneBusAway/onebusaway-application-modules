@@ -16,16 +16,16 @@
 package org.onebusaway.agency_metadata.service;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
+import org.hibernate.Query;
+import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.onebusaway.agency_metadata.model.AgencyMetadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.orm.hibernate3.HibernateTemplate;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,48 +37,60 @@ import org.springframework.transaction.annotation.Transactional;
 public class AgencyMetadataDaoImpl implements AgencyMetadataDao {
 
   protected static Logger _log = LoggerFactory.getLogger(AgencyMetadataDaoImpl.class);
-  private HibernateTemplate _template;
+  private SessionFactory _sessionFactory;
   
   @Autowired
   @Qualifier("agencyMetadataSessionFactory")
   public void setSessionFactory(SessionFactory sessionFactory) {
-    _template = new HibernateTemplate(sessionFactory);
+    _sessionFactory = sessionFactory;
   }
   
-  //@Transactional(rollbackFor = Throwable.class)
+  @Transactional(rollbackFor = Throwable.class)
   @Override
   public void saveOrUpdate(AgencyMetadata metadata) {
-    _template.saveOrUpdate(metadata);
+    getSession().saveOrUpdate(metadata);
   }
 
-  //@Transactional(rollbackFor = Throwable.class)
+  @Transactional(rollbackFor = Throwable.class)
   @Override
   public void saveOrUpdate(AgencyMetadata... array) {
-    _template.saveOrUpdateAll(Arrays.asList(array));
-    _template.flush();
-    _template.clear();
+    for (int i = 0; i<array.length; i++) {
+      getSession().saveOrUpdate(array[i]);
+    }
+    getSession().flush();
+    getSession().clear();
   }
 
+  @Transactional(rollbackFor = Throwable.class)
   @Override
   public void delete(long id) {
-    List<AgencyMetadata> models = _template.findByNamedParam("from AgencyMetadata where id=:id", "id", Long.valueOf(id));
-    _template.delete(models.get(0));
+    List<AgencyMetadata> models;
+    Query query = getSession().createQuery("from AgencyMetadata where id=:id");
+    query.setParameter("id", Long.valueOf(id));
+    models = query.list();
+    getSession().delete(models.get(0));
   }
 
+  @Transactional(rollbackFor = Throwable.class)
   @Override
   public void removeAgencyMetadata(String agencyMetadataId) {
-    List<AgencyMetadata> models = _template.findByNamedParam("from AgencyMetadata where id=:id", "id", Long.valueOf(agencyMetadataId));
-    _template.delete(models.get(0));
+    List<AgencyMetadata> models;
+    Query query = getSession().createQuery("from AgencyMetadata where id=:id");
+    query.setParameter("id", Long.valueOf(agencyMetadataId));
+    models = query.list();
+    getSession().delete(models.get(0));
   }
 
+  @Transactional(readOnly = true)
   @Override
   public List<AgencyMetadata> getAllAgencyMetadata() {
-    return _template.find("from AgencyMetadata");
+    return getSession().createQuery("from AgencyMetadata").list();
   }
 
+  @Transactional(readOnly = true)
   @Override
   public List<AgencyMetadata> getAgencyMetadataForId(String id) {
-	AgencyMetadata model = (AgencyMetadata) _template.get(AgencyMetadata.class, Long.valueOf(id));
+	AgencyMetadata model = (AgencyMetadata) getSession().get(AgencyMetadata.class, Long.valueOf(id));
 	List<AgencyMetadata> metadata = new ArrayList<AgencyMetadata>();
 	metadata.add(model);
 	return metadata;
@@ -86,27 +98,45 @@ public class AgencyMetadataDaoImpl implements AgencyMetadataDao {
   
   @Override
   public List<AgencyMetadata> getAgencyMetadataForGtfsId(String gtfsId) {
-    return _template.findByNamedParam("from AgencyMetadata where gtfsId=:gtfsId", "gtfsId", gtfsId);
+    Query query = getSession().createQuery("from AgencyMetadata where gtfsId=:gtfsId");
+    query.setParameter("gtfsId", gtfsId);
+    return query.list();
   }
-  
+
+  @Transactional(readOnly = true)
   @Override
   public List<AgencyMetadata> getAgencyMetadataForName(String name) {
-    return _template.findByNamedParam("from AgencyMetadata where name=:name", "name", name);
+    Query query = getSession().createQuery("from AgencyMetadata where name=:name");
+    query.setParameter("name", name);
+    return query.list();
   }
-  
+
+  @Transactional(readOnly = true)
   @Override
   public List<AgencyMetadata> getAgencyMetadataForShortName(String shortName) {
-    return _template.findByNamedParam("from AgencyMetadata where shortName=:shortName", "shortName", shortName);
+    Query query = getSession().createQuery("from AgencyMetadata where shortName=:shortName");
+    query.setParameter("shortName", shortName);
+    return query.list();
   }
-  
+
+  @Transactional(readOnly = true)
   @Override
   public List<AgencyMetadata> getAgencyMetadataForLegacyId(String legacyId) {
-    return _template.findByNamedParam("from AgencyMetadata where legacyId=:legacyId", "legacyId", legacyId);
+    Query query = getSession().createQuery("from AgencyMetadata where legacyId=:legacyId");
+    query.setParameter("legacyId", legacyId);
+    return query.list();
   }
-    
+
+  @Transactional(readOnly = true)
   @Override
   public List<AgencyMetadata> getAgencyMetadataForNtdId(String ntdId) {
-    return _template.findByNamedParam("from AgencyMetadata where ntdId=:ntdId", "ntdId", ntdId);
+    Query query = getSession().createQuery("from AgencyMetadata where ntdId=:ntdId");
+    query.setParameter("ntdId", ntdId);
+    return query.list();
   }
-  
+
+  private Session getSession(){
+    return _sessionFactory.getCurrentSession();
+  }
+
 }

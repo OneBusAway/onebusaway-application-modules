@@ -568,7 +568,8 @@ class ServiceAlertsServiceImpl implements ServiceAlertsService {
 	 * Serialization
 	 ****/
 
-	synchronized void loadServiceAlerts() {
+	@Override
+	public synchronized void loadServiceAlerts() {
 
 	  _cache.clear(); //we need to clear the cache in case records were deleted
 		List<ServiceAlertRecord> alerts = _persister.getAlerts();

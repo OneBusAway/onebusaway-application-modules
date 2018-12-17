@@ -55,6 +55,7 @@ public class BundleInfo {
     catch(Exception e){
       _log.error(e.getMessage(), e);
       _log.error("configured pathname was " + pathname);
+      bundleObj = new JSONObject();
     }
     return bundleObj;
   }

@@ -54,7 +54,16 @@
 				<s:if test="!anonymousUser">
 					<div id="navigation">
 						<s:url var="url" namespace="/" action="logout"></s:url>
-						<s:a href="%{url}">Logout</s:a>
+						<s:form action="%{url}"
+								method="post">
+							<input type="submit"
+								   class="logoutButton"
+								   value="Logout" />
+							<input type="hidden"
+								   id="csrfField"
+								   name="${_csrf.parameterName}"
+								   value="${_csrf.token}"/>
+						</s:form>
 						<s:url var="url" namespace="/admin" action="index"/>
 						<a href="${url}">Main Menu</a>
 					</div>

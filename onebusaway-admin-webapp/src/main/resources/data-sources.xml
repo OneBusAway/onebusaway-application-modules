@@ -156,7 +156,7 @@
     </bean>
     
 	<bean id="agencyMetadataSessionFactory"
-		class="org.springframework.orm.hibernate3.annotation.AnnotationSessionFactoryBean">
+		class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
 		<property name="dataSource" ref="agencyMetadataDataSource" />
 		<property name="annotatedClasses">
 			<list>
@@ -168,8 +168,8 @@
 			<props>
 				<prop key="hibernate.dialect">org.hibernate.dialect.MySQLDialect</prop>
 				<prop key="hibernate.connection.pool_size">1</prop>
-				<prop key="hibernate.current_session_context_class">thread</prop>
-				<prop key="hibernate.cache.provider_class">org.hibernate.cache.NoCacheProvider</prop>
+				<!--<prop key="hibernate.current_session_context_class">thread</prop>-->
+				<prop key="hibernate.cache.provider_class">org.hibernate.cache.internal.NoCachingRegionFactory</prop>
 				<prop key="hibernate.show_sql">false</prop>
 				<prop key="hibernate.hbm2ddl.auto">update</prop>
 				<prop key="hibernate.jdbc.batch_size">1000</prop>
@@ -177,7 +177,7 @@
 		</property>
 	</bean>
      <bean id="bundleBuildResponseSessionFactory"
-    class="org.springframework.orm.hibernate3.annotation.AnnotationSessionFactoryBean">
+    class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
     <property name="dataSource" ref="bundleBuildResponseDataSource" />
     <property name="annotatedClasses">
       <list>
@@ -189,8 +189,8 @@
       <props>
         <prop key="hibernate.dialect">org.hibernate.dialect.MySQLDialect</prop>
         <prop key="hibernate.connection.pool_size">1</prop>
-        <prop key="hibernate.current_session_context_class">thread</prop>
-        <prop key="hibernate.cache.provider_class">org.hibernate.cache.NoCacheProvider</prop>
+        <!--<prop key="hibernate.current_session_context_class">thread</prop>-->
+        <prop key="hibernate.cache.provider_class">org.hibernate.cache.internal.NoCachingRegionFactory</prop>
         <prop key="hibernate.show_sql">false</prop>
         <prop key="hibernate.hbm2ddl.auto">update</prop>
         <prop key="hibernate.jdbc.batch_size">1000</prop>
@@ -198,7 +198,7 @@
     </property>
   </bean>
  
-  <bean id="gtfsRealtimeArchiveSessionFactory" class="org.springframework.orm.hibernate3.annotation.AnnotationSessionFactoryBean">
+  <bean id="gtfsRealtimeArchiveSessionFactory" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
     <property name="dataSource" ref="gtfsRealtimeArchiveDataSource" />
     <property name="annotatedClasses">
       <list>
@@ -209,8 +209,8 @@
     <property name="hibernateProperties">
       <props>
         <prop key="hibernate.connection.pool_size">1</prop>
-        <prop key="hibernate.current_session_context_class">thread</prop>
-        <prop key="hibernate.cache.provider_class">org.hibernate.cache.NoCacheProvider</prop>
+        <!--<prop key="hibernate.current_session_context_class">thread</prop>-->
+        <prop key="hibernate.cache.provider_class">org.hibernate.cache.internal.NoCachingRegionFactory</prop>
         <prop key="hibernate.show_sql">false</prop>
         <prop key="hibernate.hbm2ddl.auto">none</prop>
         <prop key="hibernate.jdbc.batch_size">1000</prop>
@@ -226,17 +226,17 @@
   </bean>
 
 	<!-- quartz scheduling for PingJob -->
-	<bean name="pingJob" class="org.springframework.scheduling.quartz.JobDetailBean">
+	<bean name="pingJob" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
 		<property name="jobClass" value="org.onebusaway.admin.job.PingJob" />
 		<property name="jobDataAsMap">
 			<map>
       			<entry key="userManagementService" value-ref="userManagementServiceImpl"/>
      		</map>
 		</property>
-		
+        <property name="durability" value="true" />
 	</bean>
 	
-	<bean id="pingTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
+	<bean id="pingTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
 		<property name="jobDetail" ref="pingJob" />
 		<property name="cronExpression" value="0 * * * * ?" /><!--  every minute -->
 	</bean>

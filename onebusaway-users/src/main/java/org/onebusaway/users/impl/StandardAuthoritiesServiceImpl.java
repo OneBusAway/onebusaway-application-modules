@@ -21,7 +21,7 @@ import org.onebusaway.users.services.UserDao;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.GrantedAuthorityImpl;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -63,7 +63,7 @@ class StandardAuthoritiesServiceImpl implements StandardAuthoritiesService {
     }
     _userRoles.put(name, role);
 
-    final GrantedAuthority auth = new GrantedAuthorityImpl(name);
+    final GrantedAuthority auth = new SimpleGrantedAuthority(name);
     _standardAuthoritiesMap.put(name, auth);
     return auth;
   }
@@ -71,7 +71,7 @@ class StandardAuthoritiesServiceImpl implements StandardAuthoritiesService {
   public GrantedAuthority getNameBasedAuthority(final String name) {
     final GrantedAuthority auth = _standardAuthoritiesMap.get(name);
     if (null == auth) {
-      return new GrantedAuthorityImpl(name);
+      return new SimpleGrantedAuthority(name);
     } else {
       return auth;
     }

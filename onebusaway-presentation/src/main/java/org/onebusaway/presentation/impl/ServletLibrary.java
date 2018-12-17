@@ -40,6 +40,8 @@ public class ServletLibrary {
         return "";
       }
       String localPath = path.substring(0, path.lastIndexOf("/"));
+      if (contextPath == null || contextPath.indexOf("/") == -1)
+        return "";
       localPath = contextPath.substring(contextPath.lastIndexOf("/"));
       if (localPath.equals("/localhost"))
         return "";
