@@ -871,7 +871,9 @@ public class BundleBuildingServiceImpl implements BundleBuildingService {
   private String getStopVerificationURL() {
     String path = null;
     try {
-      path = configurationServiceClient.getItem(null, "admin.stopVerificationUrl");
+      if (configurationServiceClient != null) {
+        path = configurationServiceClient.getItem(null, "admin.stopVerificationUrl");
+      }
     } catch (Exception e) {
       _log.error("configuration service lookup issue:", e); 
     }
