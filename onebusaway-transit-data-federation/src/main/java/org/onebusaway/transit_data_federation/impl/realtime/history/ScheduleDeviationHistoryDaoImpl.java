@@ -24,6 +24,7 @@ import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.services.realtime.ScheduleDeviationHistoryDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
 public class ScheduleDeviationHistoryDaoImpl implements
@@ -43,11 +44,13 @@ public class ScheduleDeviationHistoryDaoImpl implements
   }
 
   @Override
+  @Transactional
   public void saveScheduleDeviationHistory(ScheduleDeviationHistory record) {
     getSession().save(record);
   }
 
   @Override
+  @Transactional
   public void saveScheduleDeviationHistory(
       List<ScheduleDeviationHistory> records) {
     Session session = getSession();
@@ -57,6 +60,7 @@ public class ScheduleDeviationHistoryDaoImpl implements
   }
 
   @Override
+  @Transactional
   public ScheduleDeviationHistory getScheduleDeviationHistoryForTripId(
       AgencyAndId tripId) {
     return (ScheduleDeviationHistory) getSession().get(ScheduleDeviationHistory.class, tripId);
