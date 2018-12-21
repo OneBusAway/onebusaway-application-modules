@@ -412,6 +412,17 @@
 
   <bean id="blockRunIndexTask" class="org.onebusaway.transit_data_federation.bundle.tasks.BlockRunTask" />
 
+
+  <!-- Historical Records -->
+  <bean class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
+    <property name="taskName" value="historical_record_index" />
+    <property name="afterTaskName" value="block_run_index" />
+    <property name="task" ref="historicalRecordIndexTask" />
+  </bean>
+
+  <bean id="historicalRecordIndexTask" class="org.onebusaway.transit_data_federation.bundle.tasks.HistoricalRecordTask" />
+
+
   <!-- Pre Cache -->
 
   <bean class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
