@@ -45,19 +45,6 @@
 <!-- //prevent jspx minimization -->
 	
 </script>
-<!--
-<s:url var="url" value="/js/oba/service-alerts.js">
- -->
-	<!-- //prevent jspx minimization -->
-<!--
-</s:url>
-
-<script type="text/javascript" src="${url}">
- -->
-<!-- //prevent jspx minimization -->
-	<!--
-</script>
- -->
 
 </head>
 
@@ -73,9 +60,6 @@
 	<s:form action="agency-metadata-edit">
 	
 		<div id="describeMetadataDiv">
-			<!--
-			<span  id="describeAlertHeader">Step 1: Describe the alert</span>
-			-->
 			<div id="describeMetadataTableDiv">
 				<table>
 					<s:textfield label="Agency Name" name="name" value="%{model.name}" theme="xhtml"/>
@@ -86,90 +70,14 @@
 					<s:textfield label="Legacy Id" name="legacyId" value="%{model.legacyId}" theme="xhtml"/>
 					<s:textfield label="NTD Id" name="ntdId" value="%{model.ntdId}" theme="xhtml"/>
 					<s:textfield label="Bounding Box" name="boundingBox" value="%{model.boundingBox}" theme="xhtml"/>
-					
-					<!--
-					<s:select label="Reason" name="reason" headerKey="null" 
-						headerValue="What caused this situation?" list="reasonValues" 
-						value="model.reason"
-						theme="xhtml"/>
-					<s:select label="Severity" name="severity" headerKey="null" headerValue="How severe is the situation?" list="severityValues" value="model.severity" theme="xhtml"/>
-					<s:select label="Owning Agency" name="agencyId" headerKey="null" 
-						headerValue="Which agency owns this alert?" list="agencies" 
-						value="agencyId" 
-						listKey="%{agency.id}" listValue="%{agency.name}" theme="xhtml"/>
-						-->
 				</table>
 			</div>
 			<s:hidden name="id" value="%{model.id}"/>
 		</div>
-		<!--
-		<div id="alertAffectsDiv">
-			<span  id="describeAlertHeader">Step 2: Tie this alert to a specific agency, route and/or stop</span>
-			<div id="conditionListDiv">
-				<table id="conditionTable">
-				<s:set var="letterArray" value='{"A","B","C","D","E","F","G",
-					"H","I","J","K","L","M","N","O","P","Q","R","S","T","U",
-					"V","W","X","Y","Z"}' />
-				<s:iterator value="model.allAffects" status="rowStatus" >
-				<s:if test="%{agencyId!=null || routeId!=null || stopId!=null}" >
-					<tr class="affectsClause">
-					<td>
-						<div class="conditionClauseLabel">
-							<div class="conditionClauseLabelFirstLine">Condition</div>
-							<div class="conditionClauseLabelLetter">
-								<s:property value="%{#letterArray[#rowStatus.index]}" />
-							</div>
-						</div>
-					</td>
-					<td>
-						<table class="affectsClauseConditions">
-							<s:select label="Agency" cssClass="alertCondition"
-								name="allAffects[%{#rowStatus.index}].agencyId" headerKey="null" 
-								headerValue="Select agency affected" list="agencies" 
-								listKey="agency.id" listValue="agency.name" 
-								value="agencyId" theme="xhtml"/>
-							<s:textfield label="Route" cssClass="alertCondition"
-								name="allAffects[%{#rowStatus.index}].routeId" value="%{routeId}" theme="xhtml"/>
-							<s:textfield label="Stop" cssClass="alertCondition"
-								name="allAffects[%{#rowStatus.index}].stopId" value="%{stopId}" theme="xhtml"/>
-						</table>
-					</td>
-					<td class="deleteCondition">Delete Condition</td>
-					</tr>
-				</s:if>
-				</s:iterator>
-				<s:if test="model.allAffects==null">
-					<tr class="affectsClause">
-					<td>
-						<div class="conditionClauseLabel">
-							<div class="conditionClauseLabelFirstLine">Condition</div>
-							<div class="conditionClauseLabelLetter">A</div>
-						</div>
-					</td>
-					<td>
-						<table class="affectsClauseConditions">
-							<s:select label="Agency" cssClass="alertCondition"
-								name="allAffects[0].agencyId" headerKey="null" 
-								headerValue="Select agency affected" list="agencies" 
-								listKey="agency.id" listValue="agency.name" 
-								theme="xhtml"/>
-							<s:textfield label="Route" cssClass="alertCondition"
-								name="allAffects[0].routeId" theme="xhtml"/>
-							<s:textfield label="Stop" cssClass="alertCondition"
-								name="allAffects[0].stopId" theme="xhtml"/>
-						</table>
-					</td>
-					<td class="deleteCondition">Delete Condition</td>
-					</tr>
-				</s:if>
-				</table>
-				<span id="addAnotherCondition">Add another condition</span>
-			</div>
-		</div>
-		-->
 		<div id="buttonsDiv">
 			<s:submit value="Cancel" name="cancel" method="cancel" />
 			<s:submit value="Save" name="submit" method="submit" />
+			<input type="hidden" id="csrfField" name="${_csrf.parameterName}" value="${_csrf.token}"/>
 		</div>
 	</s:form>
 </div>
