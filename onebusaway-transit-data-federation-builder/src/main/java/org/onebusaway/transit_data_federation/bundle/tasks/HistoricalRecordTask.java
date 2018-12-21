@@ -20,6 +20,7 @@ import org.onebusaway.gtfs.model.Ridership;
 import org.onebusaway.gtfs.services.GtfsRelationalDao;
 import org.onebusaway.transit_data_federation.model.bundle.HistoricalRidership;
 import org.onebusaway.transit_data_federation.services.FederatedTransitDataBundle;
+import org.onebusaway.utility.ObjectSerializationLibrary;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * load Ridership data (from ridership.txt) into HistoricalRiderhip Bundle Index
+ * load Ridership data (from ridership.txt) into HistoricalRidership Bundle Index
  */
 public class HistoricalRecordTask implements Runnable {
     private FederatedTransitDataBundle _bundle;
@@ -48,10 +49,14 @@ public class HistoricalRecordTask implements Runnable {
     @Override
     public void run() {
         try {
+            _log.info("gtfsDao has " + _gtfsDao.getAllRiderships().size() + " records ");
             List<HistoricalRidership> historicalRiderships = new ArrayList<>();
             for (Ridership r : _gtfsDao.getAllRiderships()) {
                 historicalRiderships.add(toHistoricalRidership(r));
             }
+            _log.info("translated " + historicalRiderships.size() + " records ");
+            ObjectSerializationLibrary.writeObject(_bundle.getHistoricalRidershipPath(), historicalRiderships);
+            _log.info("wrote " + historicalRiderships.size() + " records to " + _bundle.getHistoricalRidershipPath());
         } catch (Exception ex) {
             _log.error("fatal exception building HistoricalRecordTask:", ex);
         }
