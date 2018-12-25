@@ -1865,7 +1865,7 @@ function buildBundle(bundleName, startDate, endDate, bundleComment, archive, con
 	var email = jQuery("#buildNotificationEmail").val();
 	if (email == "") { email = "null"; }
 	jQuery.ajax({
-		url: "../../api/build/create?ts=" +new Date().getTime(),
+		url: "../../api/build/create",
 		type: "POST",
 		async: false,
 		data: {
