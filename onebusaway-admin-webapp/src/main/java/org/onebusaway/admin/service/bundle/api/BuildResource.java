@@ -47,7 +47,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 
-@Path("/build/")
+@Path("/build")
 @Component
 @Scope("singleton")
 public class BuildResource extends AuthenticatedResource {
@@ -67,7 +67,7 @@ public class BuildResource extends AuthenticatedResource {
 	private final ObjectMapper _mapper = new ObjectMapper();
 	private static Logger _log = LoggerFactory.getLogger(BuildResource.class);
 
-	@Path("create")
+	@Path("/create")
 	@POST
 	@Produces("application/json")
 	public Response build(
