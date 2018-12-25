@@ -80,6 +80,7 @@ public class BuildResource extends AuthenticatedResource {
 			@FormParam("archive") boolean archiveFlag,
 			@FormParam("consolidate") boolean consolidateFlag,
 			@FormParam("predate") boolean predateFlag) {
+		_log.info("in build....");
 		Response response = null;
 		directoryName = bundleDirectory;
 		this.bundleName = bundleName;
@@ -92,13 +93,16 @@ public class BuildResource extends AuthenticatedResource {
 		predate = predateFlag;
 		
 		if (!isAuthorized()) {
+			_log.warn("build unauthorized!");
 			return Response.noContent().build();
 		}
 		
 		BundleBuildResponse buildResponse = null;
 
 		try {
+			_log.info("validating dates....");
 			validateDates(bundleStartDate, bundleEndDate);
+			_log.info("dates valid");
 		} catch(DateValidationException e) {
 			try {
 				buildResponse = new BundleBuildResponse();
@@ -129,6 +133,7 @@ public class BuildResource extends AuthenticatedResource {
 			try {
 				String message = "Starting bundle building process for bundle '" + buildRequest.getBundleName()
 						+ "' initiated by user : " + _currentUserService.getCurrentUserDetails().getUsername();
+				_log.warn(message);
 				String component = System.getProperty("admin.chefRole");
 				loggingService.log(component, Level.INFO, message);
 				buildResponse =_bundleService.build(buildRequest);
@@ -138,6 +143,8 @@ public class BuildResource extends AuthenticatedResource {
 				_log.error("exception in build:", any);
 				response = Response.serverError().build();
 			}
+		} else {
+			_log.warn("something went wrong with validation");
 		}
 
 		return response;
