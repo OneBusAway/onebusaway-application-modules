@@ -17,7 +17,6 @@
 package org.onebusaway.transit_data_federation.impl;
 
 import org.onebusaway.collections.FactoryMap;
-import org.onebusaway.collections.MappingLibrary;
 import org.onebusaway.collections.Min;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.realtime.api.TimepointPredictionRecord;
@@ -50,22 +49,13 @@ import org.onebusaway.utility.EInRangeStrategy;
 import org.onebusaway.utility.EOutOfRangeStrategy;
 import org.onebusaway.utility.InterpolationLibrary;
 import org.onebusaway.utility.TransitInterpolationLibrary;
+//import org.onebusaway.nextbus.service.CacheService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import net.sf.ehcache.util.TimeUtil;
-
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Component
 class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
@@ -77,6 +67,9 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
   private BlockLocationService _blockLocationService;
 
   private BlockStatusService _blockStatusService;
+
+//  private CacheService _CacheService; // TODO Clarify
+
 
   private boolean removeFuturePredictionsWithoutRealtime = false;
 
@@ -169,6 +162,26 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
       return filteredInstances;
     }
 
+    // Might be useful later, so keeping it here for now. If it proves to be a conflict later, remove this.
+//    for (ArrivalAndDepartureInstance instance : instances) {
+//      try {
+//
+//        instance.setHistoricalOccupancy(_occupancyService.getOccupancyForStop(stop.getId()));
+//        instance.setPredictedOccupancy(_occupancyService.getOccupancyForStop(stop.getId()));
+//
+//      } catch (Exception e) {
+//
+//
+//        HistoricalRidership.Builder builder = new HistoricalRidership.Builder();
+//        builder.setStopId(stop.getId());
+//        builder.setLoadFactor(-1);
+//        List<HistoricalRidership> hrs = Arrays.asList(builder.create());
+//        instance.setHistoricalOccupancy(hrs);
+//        instance.setPredictedOccupancy(hrs);
+//
+//      }
+//
+//    }
     return instances;
   }
 

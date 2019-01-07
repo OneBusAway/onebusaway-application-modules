@@ -26,6 +26,7 @@ import org.onebusaway.geospatial.model.EncodedPolylineBean;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
 import org.onebusaway.realtime.api.TimepointPredictionRecord;
+import org.onebusaway.transit_data.HistoricalRidershipBean;
 import org.onebusaway.transit_data.model.*;
 import org.onebusaway.transit_data.model.blocks.BlockBean;
 import org.onebusaway.transit_data.model.blocks.BlockInstanceBean;
@@ -41,6 +42,7 @@ import org.onebusaway.transit_data.model.service_alerts.ServiceAlertRecordBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationQueryBean;
 import org.onebusaway.transit_data.model.trips.*;
 import org.onebusaway.transit_data.services.TransitDataService;
+import org.onebusaway.transit_data_federation.model.bundle.HistoricalRidership;
 import org.onebusaway.transit_data_federation.services.*;
 import org.onebusaway.transit_data_federation.services.beans.*;
 import org.onebusaway.transit_data_federation.services.bundle.TransitDataServiceTemplate;
@@ -125,6 +127,9 @@ public class TransitDataServiceTemplateImpl implements TransitDataServiceTemplat
 
   @Autowired
   private ConsolidatedStopsService _consolidatedStopsService;
+
+  @Autowired
+  private RidershipService _ridershipService;
   
 
   /****
@@ -443,6 +448,79 @@ public class TransitDataServiceTemplateImpl implements TransitDataServiceTemplat
     return _currentVehicleEstimateService.getCurrentVehicleEstimates(query);
   }
 
+//  @Override
+  public List<HistoricalRidershipBean> getHistoricalRidershipForStop(HistoricalOccupancyByStopQueryBean query){
+    List<HistoricalRidershipBean> beans = new ArrayList<>();
+    AgencyAndId id = AgencyAndIdLibrary.convertFromString(query.getStopId());
+    for (HistoricalRidership hr : _ridershipService.getHistoricalRidershipsForStop(id)) {
+      HistoricalRidershipBean hrb = new HistoricalRidershipBean();
+      hrb.setStopId(hr.getStopId());
+      hrb.setLoadFactor(hr.getLoadFactor());
+      hrb.setRouteId(hr.getRouteId());
+      hrb.setTripId(hr.getTripId());
+      beans.add(hrb);
+    }
+
+    return beans;
+  }
+
+  public List<HistoricalRidershipBean> getHistoricalRidershipsForTrip(AgencyAndId tripId) {
+    List<HistoricalRidershipBean> beans = new ArrayList<>();
+    for (HistoricalRidership hr : _ridershipService.getHistoricalRidershipsForTrip(tripId)) {
+      HistoricalRidershipBean hrb = new HistoricalRidershipBean();
+      hrb.setStopId(hr.getStopId());
+      hrb.setLoadFactor(hr.getLoadFactor());
+      hrb.setRouteId(hr.getRouteId());
+      hrb.setTripId(hr.getTripId());
+      beans.add(hrb);
+    }
+    return beans;
+  }
+
+  public List<HistoricalRidershipBean> getHistoricalRidershipsForRoute(AgencyAndId routeId) {
+    List<HistoricalRidershipBean> beans = new ArrayList<>();
+    for (HistoricalRidership hr : _ridershipService.getHistoricalRidershipsForRoute(routeId)) {
+      HistoricalRidershipBean hrb = new HistoricalRidershipBean();
+      hrb.setStopId(hr.getStopId());
+      hrb.setLoadFactor(hr.getLoadFactor());
+      hrb.setRouteId(hr.getRouteId());
+      hrb.setTripId(hr.getTripId());
+      beans.add(hrb);
+    }
+    return beans;
+  }
+
+  public List<HistoricalRidershipBean> getHistoricalRiderships(AgencyAndId routeId, AgencyAndId tripId, AgencyAndId stopId) {
+    List<HistoricalRidershipBean> beans = new ArrayList<>();
+    try {
+      for (HistoricalRidership hr : _ridershipService.getHistoricalRiderships(routeId, tripId, stopId)) {
+        HistoricalRidershipBean hrb = new HistoricalRidershipBean();
+        hrb.setStopId(hr.getStopId());
+        hrb.setLoadFactor(hr.getLoadFactor());
+        hrb.setRouteId(hr.getRouteId());
+        hrb.setTripId(hr.getTripId());
+        beans.add(hrb);
+      }
+    }
+    catch(Exception e) {
+
+    }
+    return beans;
+  }
+
+  public List<HistoricalRidershipBean> getAllHistoricalRiderships() {
+    List<HistoricalRidershipBean> beans = new ArrayList<>();
+    for (HistoricalRidership hr : _ridershipService.getAllHistoricalRiderships()) {
+      HistoricalRidershipBean hrb = new HistoricalRidershipBean();
+      hrb.setStopId(hr.getStopId());
+      hrb.setLoadFactor(hr.getLoadFactor());
+      hrb.setRouteId(hr.getRouteId());
+      hrb.setTripId(hr.getTripId());
+      beans.add(hrb);
+    }
+    return beans;
+  }
+
   /****
    * 
    ****/
@@ -753,6 +831,4 @@ public class TransitDataServiceTemplateImpl implements TransitDataServiceTemplat
 
     throw new OutOfServiceAreaServiceException();
   }
-
-
 }

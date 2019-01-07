@@ -15,8 +15,7 @@
  */
 package org.onebusaway.transit_data_federation.impl;
 
-import static org.junit.Assert.assertEquals;
-
+import static org.junit.Assert.*;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.block;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.blockConfiguration;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.date;
@@ -419,6 +418,32 @@ public class StopTimeServiceImplTest {
     assertEquals(dayB.getTime(), sti.getServiceDate());
     assertEquals(date("2009-09-04 01:00").getTime(), sti.getArrivalTime());
     assertEquals(date("2009-09-04 01:30").getTime(), sti.getDepartureTime());
+  }
+
+  @Test
+  public void test04() {
+    Date dayA = getTimeAsDay(date("2009-09-02 00:00"));
+    Date dayB = getTimeAsDay(date("2009-09-03 00:00"));
+
+    StopTimeEntryImpl stA = stopTime(0, _stop, trip("A", "sA"), time(10, 00),
+        time(10, 30), 0, -1, 2);
+    StopTimeEntryImpl stB = stopTime(1, _stop, trip("B", "sA"), time(25, 0),
+        time(25, 30), 0, -1, 2);
+    StopTimeEntryImpl stC = stopTime(2, _stop, trip("C", "sB"), time(10, 00),
+        time(10, 30), 0, -1, 2);
+    StopTimeEntryImpl stD = stopTime(3, _stop, trip("D", "sB"), time(25, 0),
+        time(25, 30), 0, -1, 2);
+
+
+    assertNotNull(stA.getHistoricalOccupancy());
+    assertNotNull(stB.getHistoricalOccupancy());
+    assertNotNull(stC.getHistoricalOccupancy());
+    assertNotNull(stD.getHistoricalOccupancy());
+
+    assertEquals( 2.0, stA.getTrip().getStopTimes().get(0).getHistoricalOccupancy().valueOf(), 0);
+//    assertEquals(2.0, stB.getStop().getStopTimeIndices().get(0).getOccupancyForIndex(stB.getStop().getIndex()).get(0).getLoadFactor(),0);
+
+
   }
 
   /****

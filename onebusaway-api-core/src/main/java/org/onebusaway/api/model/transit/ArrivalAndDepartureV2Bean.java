@@ -15,6 +15,9 @@
  */
 package org.onebusaway.api.model.transit;
 
+import org.onebusaway.realtime.api.OccupancyStatus;
+import org.onebusaway.transit_data.HistoricalRidershipBean;
+
 import java.io.Serializable;
 import java.util.List;
 
@@ -49,6 +52,10 @@ public class ArrivalAndDepartureV2Bean implements Serializable {
   private TimeIntervalV2 scheduledDepartureInterval;
 
   private long predictedDepartureTime;
+
+  private OccupancyStatus historicalOccupancy;
+
+  private OccupancyStatus predictedOccupancy;
 
   private TimeIntervalV2 predictedDepartureInterval;
   
@@ -306,6 +313,16 @@ public class ArrivalAndDepartureV2Bean implements Serializable {
   public void setPredictedDepartureTime(long predictedDepartureTime) {
     this.predictedDepartureTime = predictedDepartureTime;
   }
+
+  public OccupancyStatus getHistoricalOccupancy() { return historicalOccupancy; }
+
+  public void setHistoricalOccupancy(List<HistoricalRidershipBean> historicalOccupancy) { this.historicalOccupancy = OccupancyStatus.toEnum(historicalOccupancy.get(0).getLoadFactor()); }
+  public void setHistoricalOccupancy(OccupancyStatus historicalOccupancy) { this.historicalOccupancy = historicalOccupancy; }
+
+  public OccupancyStatus getPredictedOccupancy() { return predictedOccupancy; }
+
+  public void setPredictedOccupancy(List<HistoricalRidershipBean> predictedOccupancy) { this.predictedOccupancy = OccupancyStatus.toEnum(predictedOccupancy.get(0).getLoadFactor()); }
+  public void setPredictedOccupancy(OccupancyStatus predOccupancy) { this.predictedOccupancy = predOccupancy; }
 
   public TimeIntervalV2 getPredictedDepartureInterval() {
     return predictedDepartureInterval;

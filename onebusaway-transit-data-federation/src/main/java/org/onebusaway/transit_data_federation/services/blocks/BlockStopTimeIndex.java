@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.onebusaway.gtfs.model.calendar.ServiceInterval;
+import org.onebusaway.realtime.api.OccupancyStatus;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
@@ -90,4 +91,9 @@ public class BlockStopTimeIndex extends AbstractBlockStopTimeIndex implements
     return blockConfig.getDistanceAlongBlockForIndex(stopIndex);
   }
 
+  public OccupancyStatus getOccupancyForIndex(int index) {
+    BlockConfigurationEntry blockConfig = _blockConfigs.get(index);
+    int stopIndex = _stopIndices[index];
+    return blockConfig.getOccupancyForIndex(stopIndex);
+  }
 }

@@ -18,7 +18,10 @@
 package org.onebusaway.transit_data_federation.impl.transit_graph;
 
 import java.io.Serializable;
+import java.util.List;
 
+import org.onebusaway.realtime.api.OccupancyStatus;
+import org.onebusaway.transit_data_federation.model.bundle.HistoricalRidership;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
 
 public class StopTimeEntryImpl implements StopTimeEntry, Serializable {
@@ -28,6 +31,7 @@ public class StopTimeEntryImpl implements StopTimeEntry, Serializable {
   private int _stopTimeId;
   private int _arrivalTime;
   private int _departureTime;
+  private OccupancyStatus _historicalOccupancy;
   private int _sequence;
   private int _gtfsSequence;
   private int _dropOffType;
@@ -52,6 +56,8 @@ public class StopTimeEntryImpl implements StopTimeEntry, Serializable {
   public void setDepartureTime(int departureTime) {
     _departureTime = departureTime;
   }
+
+  public void setHistoricalOccupancy(List<HistoricalRidership> historicalOccupancy) { _historicalOccupancy = OccupancyStatus.toEnum(historicalOccupancy.get(0).getLoadFactor()); }
   
   public StopTimeEntryImpl setTime(int time) {
     _arrivalTime = time;
@@ -122,6 +128,9 @@ public class StopTimeEntryImpl implements StopTimeEntry, Serializable {
   public int getDepartureTime() {
     return _departureTime;
   }
+
+  @Override
+  public OccupancyStatus getHistoricalOccupancy() { return _historicalOccupancy; }
 
   @Override
   public int getSequence() {

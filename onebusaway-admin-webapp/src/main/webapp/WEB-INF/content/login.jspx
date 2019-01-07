@@ -57,7 +57,6 @@
 				<s:form action="%{url}"
 						method="post">
 					<input type="submit"
-						   class="logoutButton"
 						   value="Logout" />
 					<input type="hidden"
 						   id="csrfField"

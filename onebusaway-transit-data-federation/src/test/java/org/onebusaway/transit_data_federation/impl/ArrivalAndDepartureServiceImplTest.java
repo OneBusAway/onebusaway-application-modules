@@ -1647,7 +1647,7 @@ public class ArrivalAndDepartureServiceImplTest {
     
   }
 
-  
+
   /**
    * Set up the BlockLocationServiceImpl for the test, using the given
    * timepointPredictions

@@ -37,6 +37,8 @@ public final class TripStatusBean implements Serializable {
 
   private long serviceDate;
 
+//  private String realtimeOccupancy;
+
   private FrequencyBean frequency;
 
   private double scheduledDistanceAlongTrip = Double.NaN;
@@ -124,6 +126,10 @@ public final class TripStatusBean implements Serializable {
   public void setServiceDate(long serviceDate) {
     this.serviceDate = serviceDate;
   }
+
+//  public String getRealtimeOccupancy() { return realtimeOccupancy; }
+//
+//  public void setRealtimeOccupancy(String realtimeOccupancy) { this.realtimeOccupancy = realtimeOccupancy; }
 
   public FrequencyBean getFrequency() {
     return frequency;

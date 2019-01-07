@@ -48,6 +48,7 @@ import org.onebusaway.transit_data_federation.impl.transit_graph.StopEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopTimeEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.TripEntryImpl;
 import org.onebusaway.transit_data_federation.model.ShapePoints;
+import org.onebusaway.transit_data_federation.model.bundle.HistoricalRidership;
 import org.onebusaway.transit_data_federation.services.blocks.BlockIndexFactoryService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockTripIndex;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
@@ -58,6 +59,8 @@ import org.onebusaway.transit_data_federation.services.transit_graph.RouteEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.ServiceIdActivation;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
+
+import static java.util.Arrays.asList;
 
 public class UnitTestingSupport {
 
@@ -145,7 +148,7 @@ public class UnitTestingSupport {
       RouteEntry... routes) {
     RouteCollectionEntryImpl route = new RouteCollectionEntryImpl();
     route.setId(aid(id));
-    route.setChildren(Arrays.asList(routes));
+    route.setChildren(asList(routes));
     for (RouteEntry routeEntry : routes) {
       ((RouteEntryImpl) routeEntry).setParent(route);
     }
@@ -312,6 +315,43 @@ public class UnitTestingSupport {
   }
 
   public static StopTimeEntryImpl stopTime(int id, StopEntryImpl stop,
+      TripEntryImpl trip, int arrivalTime, int departureTime,
+      double shapeDistTraveled, double loadFactor){
+
+    StopTimeEntryImpl stopTime = stopTime(id, stop, trip, arrivalTime, departureTime, shapeDistTraveled);
+
+    HistoricalRidership.Builder bldr = HistoricalRidership.builder();
+//    bldr.setRouteId(trip.getRoute().getId());
+    bldr.setTripId(trip.getId());
+    bldr.setStopId(stop.getId());
+    bldr.setLoadFactor(loadFactor);
+    HistoricalRidership hr = bldr.create();
+    List<HistoricalRidership> hrs = Arrays.asList(hr);
+
+    stopTime.setHistoricalOccupancy(hrs);
+    return stopTime;
+
+  }
+  public static StopTimeEntryImpl stopTime(int id, StopEntryImpl stop,
+                                           TripEntryImpl trip, int arrivalTime, int departureTime,
+                                           double shapeDistTraveled, int shapeIndex, double loadFactor){
+
+    StopTimeEntryImpl stopTime = stopTime(id, stop, trip, arrivalTime, departureTime, shapeDistTraveled, shapeIndex);
+
+    HistoricalRidership.Builder bldr = HistoricalRidership.builder();
+//    bldr.setRouteId(trip.getRoute().getId());
+    bldr.setTripId(trip.getId());
+    bldr.setStopId(stop.getId());
+    bldr.setLoadFactor(loadFactor);
+    HistoricalRidership hr = bldr.create();
+    List<HistoricalRidership> hrs = Arrays.asList(hr);
+
+    stopTime.setHistoricalOccupancy(hrs);
+    return stopTime;
+
+  }
+
+  public static StopTimeEntryImpl stopTime(int id, StopEntryImpl stop,
       TripEntryImpl trip, int time, double shapeDistTraveled) {
     return stopTime(id, stop, trip, time, time, shapeDistTraveled);
   }
@@ -321,7 +361,7 @@ public class UnitTestingSupport {
     Builder builder = BlockConfigurationEntryImpl.builder();
     builder.setBlock(block);
     builder.setServiceIds(serviceIds);
-    builder.setTrips(Arrays.asList(trips));
+    builder.setTrips(asList(trips));
     builder.setTripGapDistances(new double[trips.length]);
     BlockConfigurationEntry blockConfig = builder.create();
 
@@ -432,7 +472,7 @@ public class UnitTestingSupport {
     LocalizedServiceId lsid = lsid(sid);
 
     data.putTimeZoneForAgencyId(serviceId.getAgencyId(), timeZone());
-    data.putServiceDatesForServiceId(serviceId, Arrays.asList(serviceDates));
+    data.putServiceDatesForServiceId(serviceId, asList(serviceDates));
 
     List<Date> dates = new ArrayList<Date>();
 
@@ -449,7 +489,7 @@ public class UnitTestingSupport {
     LocalizedServiceId lsid = lsid(sid);
 
     data.putTimeZoneForAgencyId(serviceId.getAgencyId(), timeZone());
-    data.putDatesForLocalizedServiceId(lsid, Arrays.asList(dates));
+    data.putDatesForLocalizedServiceId(lsid, asList(dates));
 
     Calendar c = Calendar.getInstance();
     c.setTimeZone(timeZone());

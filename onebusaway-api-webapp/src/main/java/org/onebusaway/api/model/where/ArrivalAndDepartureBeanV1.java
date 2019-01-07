@@ -15,7 +15,11 @@
  */
 package org.onebusaway.api.model.where;
 
+import org.onebusaway.realtime.api.OccupancyStatus;
+import org.onebusaway.transit_data.HistoricalRidershipBean;
+
 import java.io.Serializable;
+import java.util.List;
 
 public class ArrivalAndDepartureBeanV1 implements Serializable {
 
@@ -36,6 +40,10 @@ public class ArrivalAndDepartureBeanV1 implements Serializable {
   private long scheduledArrivalTime;
 
   private long predictedDepartureTime;
+
+  private OccupancyStatus historicalOccupancy;
+
+  private OccupancyStatus predictedOccupancy;
 
   private long scheduledDepartureTime;
 
@@ -104,6 +112,16 @@ public class ArrivalAndDepartureBeanV1 implements Serializable {
   public void setPredictedDepartureTime(long predictedDepartureTime) {
     this.predictedDepartureTime = predictedDepartureTime;
   }
+
+  public OccupancyStatus getHistoricalOccupancy() { return historicalOccupancy; }
+
+  public void setHistoricalOccupancy(List<HistoricalRidershipBean> historicalOccupancy) { this.historicalOccupancy = OccupancyStatus.toEnum(historicalOccupancy.get(0).getLoadFactor()); }
+  public void setHistoricalOccupancy(OccupancyStatus historicalOccupancy) { this.historicalOccupancy = historicalOccupancy; }
+
+  public OccupancyStatus getPredictedOccupancy() { return predictedOccupancy; }
+
+  public void setPredictedOccupancy(List<HistoricalRidershipBean> predictedOccupancy) { this.predictedOccupancy = OccupancyStatus.toEnum(predictedOccupancy.get(0).getLoadFactor()); }
+  public void setPredictedOccupancy(OccupancyStatus predOccupancy) { this.historicalOccupancy = predOccupancy; }
 
   public long getScheduledDepartureTime() {
     return scheduledDepartureTime;
