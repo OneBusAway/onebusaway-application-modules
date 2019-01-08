@@ -451,6 +451,7 @@ public class BeanFactoryV2 {
 
       stiBean.setStopId(sti.getStop().getId());
       stiBean.setHistoricalOccupancy(sti.getHistoricalOccupancy());
+
       addToReferences(sti.getStop());
 
       instances.add(stiBean);

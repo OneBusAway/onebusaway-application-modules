@@ -15,6 +15,7 @@
  */
 package org.onebusaway.transit_data_federation.impl;
 
+import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.block;
@@ -28,6 +29,7 @@ import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.trip;
 
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.realtime.api.OccupancyStatus;
 import org.onebusaway.realtime.api.TimepointPredictionRecord;
 import org.onebusaway.realtime.api.VehicleLocationRecord;
 import org.onebusaway.transit_data.model.TransitDataConstants;
@@ -1647,6 +1649,21 @@ public class ArrivalAndDepartureServiceImplTest {
     
   }
 
+  @Test
+  public void testGetArrivalsAndDeparturesForStopInTimeRange19() {
+
+    TimepointPredictionRecord tprA = new TimepointPredictionRecord();
+    tprA.setTimepointId(mStopA.getId());
+    long tprATime = createPredictedTime(time(13, 30));
+    tprA.setTimepointPredictedDepartureTime(tprATime);
+    tprA.setTripId(mTrip1.getId());
+
+    List<ArrivalAndDepartureInstance> arrivalsAndDepartures = getArrivalsAndDeparturesForStopInTimeRangeByTimepointPredictionRecord(Arrays.asList(tprA));
+    assertTrue(arrivalsAndDepartures.get(0).getHistoricalOccupancy() instanceof OccupancyStatus);
+
+
+  }
+
 
   /**
    * Set up the BlockLocationServiceImpl for the test, using the given
@@ -1671,8 +1688,8 @@ public class ArrivalAndDepartureServiceImplTest {
     // Setup block
     BlockEntryImpl block = block("blockA");
 
-    stopTime(0, mStopA, mTrip1, time(13, 30), time(13, 35), 1000);
-    stopTime(1, mStopB, mTrip1, time(13, 45), time(13, 50), 2000);
+    stopTime(0, mStopA, mTrip1, time(13, 30), time(13, 35), 1000,  40.0);
+    stopTime(1, mStopB, mTrip1, time(13, 45), time(13, 50), 2000,  20.0);
 
     BlockConfigurationEntry blockConfig = blockConfiguration(block,
         serviceIds(lsids("sA"), lsids()), mTrip1);

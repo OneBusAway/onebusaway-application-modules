@@ -80,7 +80,7 @@ public enum OccupancyStatus implements Serializable {
     return false;
   }
   public String toString() {
-    return toCamelCase(String.valueOf(_status));
+    return toCamelCase(this.name());
   }
 
   public static OccupancyStatus toEnum(int status) {
@@ -107,15 +107,17 @@ public enum OccupancyStatus implements Serializable {
     int status;
     if(rid < 0.0) {
       status = -1;
-    } else if(rid < 25.0) {
+    } else if (rid == 0.0) {
+      status = 0;
+    }else if(rid <= 25.0) {
       status = 1;
-    } else if(rid < 33.3) {
+    } else if(rid <= 50.0) {
       status = 2;
-    } else if(rid < 50.0) {
+    } else if(rid <= 75.0) {
       status = 3;
-    } else if(rid < 66.6) {
+    } else if(rid <= 90.0) {
       status = 4;
-    } else if(rid < 75.0) {
+    } else if(rid <= 99.0) {
       status = 5;
     } else {
       status = 6;

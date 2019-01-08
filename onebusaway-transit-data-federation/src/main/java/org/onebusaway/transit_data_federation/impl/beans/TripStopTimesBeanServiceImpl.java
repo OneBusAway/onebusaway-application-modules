@@ -103,7 +103,7 @@ public class TripStopTimesBeanServiceImpl implements TripStopTimesBeanService {
           AgencyAndId.convertFromString(st.getStop().getId()));
 
       hrs = getHistoricalRidershipBeansForRidership(rid);
-      st.setHistoricalOccupancy(hrs);
+      if(hrs.size() > 0) st.setHistoricalOccupancy(hrs);
     }
 
     return bean;
@@ -135,7 +135,7 @@ public class TripStopTimesBeanServiceImpl implements TripStopTimesBeanService {
       stBean.setDistanceAlongTrip(stopTime.getShapeDistTraveled());
       List<HistoricalRidershipBean> hrs = new ArrayList<>();
       hrs = getHistoricalRidershipBeansForRidership(_ridershipService.getHistoricalRiderships(trip.getRoute().getId(), trip.getId(), stopEntry.getId()));
-      stBean.setHistoricalOccupancy(hrs);
+      if(hrs.size() > 0) stBean.setHistoricalOccupancy(hrs);
 
       bean.addStopTime(stBean);
     }

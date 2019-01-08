@@ -53,9 +53,9 @@ public class ArrivalAndDepartureV2Bean implements Serializable {
 
   private long predictedDepartureTime;
 
-  private OccupancyStatus historicalOccupancy;
+  private String historicalOccupancy;
 
-  private OccupancyStatus predictedOccupancy;
+  private String predictedOccupancy;
 
   private TimeIntervalV2 predictedDepartureInterval;
   
@@ -314,18 +314,16 @@ public class ArrivalAndDepartureV2Bean implements Serializable {
     this.predictedDepartureTime = predictedDepartureTime;
   }
 
-  public String getHistoricalOccupancy() {
-    if (historicalOccupancy == null) return null;
-    return historicalOccupancy.toString();
-  }
+  public String getHistoricalOccupancy() { return historicalOccupancy; }
 
-  public void setHistoricalOccupancy(List<HistoricalRidershipBean> historicalOccupancy) { this.historicalOccupancy = OccupancyStatus.toEnum(historicalOccupancy.get(0).getLoadFactor()); }
-  public void setHistoricalOccupancy(OccupancyStatus historicalOccupancy) { this.historicalOccupancy = historicalOccupancy; }
 
-  public OccupancyStatus getPredictedOccupancy() { return predictedOccupancy; }
+  public void setHistoricalOccupancy(List<HistoricalRidershipBean> historicalOccupancy) { this.historicalOccupancy = OccupancyStatus.toEnum(historicalOccupancy.get(0).getLoadFactor()).toString(); }
+  public void setHistoricalOccupancy(OccupancyStatus historicalOccupancy) { if(historicalOccupancy != null) this.historicalOccupancy = historicalOccupancy.toString(); }
 
-  public void setPredictedOccupancy(List<HistoricalRidershipBean> predictedOccupancy) { this.predictedOccupancy = OccupancyStatus.toEnum(predictedOccupancy.get(0).getLoadFactor()); }
-  public void setPredictedOccupancy(OccupancyStatus predOccupancy) { this.predictedOccupancy = predOccupancy; }
+  public String getPredictedOccupancy() { return predictedOccupancy; }
+
+  public void setPredictedOccupancy(List<HistoricalRidershipBean> predictedOccupancy) { this.predictedOccupancy = OccupancyStatus.toEnum(predictedOccupancy.get(0).getLoadFactor()).toString(); }
+  public void setPredictedOccupancy(OccupancyStatus predOccupancy) { this.predictedOccupancy = predOccupancy.toString(); }
 
   public TimeIntervalV2 getPredictedDepartureInterval() {
     return predictedDepartureInterval;

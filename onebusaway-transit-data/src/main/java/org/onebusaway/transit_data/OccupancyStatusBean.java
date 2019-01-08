@@ -20,7 +20,8 @@ import org.onebusaway.realtime.api.OccupancyStatus;
 
 public class OccupancyStatusBean {
 
-  private OccupancyStatus _status;
+  private OccupancyStatus _occStatus;
+  private String _status;
   // For Debugging
 //  private AgencyAndId _stopId;
 //
@@ -28,9 +29,14 @@ public class OccupancyStatusBean {
 //
 //  private AgencyAndId _tripId;
 
-  public void setStatus(OccupancyStatus status) { _status = status; }
+  public void setOccStatus(OccupancyStatus status) { _occStatus = status; }
 
-  public OccupancyStatus getStatus() { return _status; }
+  public OccupancyStatus getOccStatus() { return _occStatus; }
+
+  public void setStatus(String status) {_status = status; }
+  public void setStatus(OccupancyStatus status) { if (status != null) _status = status.toString(); }
+
+  public String getStaus() {return _status; }
 
 //  public void setStopId(AgencyAndId stopId) {
 //    _stopId = stopId;

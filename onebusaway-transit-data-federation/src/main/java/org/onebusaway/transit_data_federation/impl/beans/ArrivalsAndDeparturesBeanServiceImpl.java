@@ -328,7 +328,8 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
 
     if (_ridershipService != null) {
       List<HistoricalRidership> occ = _ridershipService.getHistoricalRiderships(trip.getRoute().getId(), trip.getId(), stop.getId());
-      pab.setHistoricalOccupancy(getHistoricalRidershipBeansForRidership(occ));
+      List<HistoricalRidershipBean> beans = getHistoricalRidershipBeansForRidership(occ);
+      if(beans.size() > 0) pab.setHistoricalOccupancy(beans);
     }
     return pab;
   }
@@ -444,14 +445,17 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
 
   private List<HistoricalRidershipBean> getHistoricalRidershipBeansForRidership(List<HistoricalRidership> hrs) {
     List<HistoricalRidershipBean> ret = new ArrayList<HistoricalRidershipBean>();
-    for (HistoricalRidership hr : hrs) {
-      HistoricalRidershipBean bean = new HistoricalRidershipBean();
-      bean.setRouteId(hr.getRouteId());
-      bean.setTripId(hr.getTripId());
-      bean.setStopId(hr.getStopId());
-      bean.setLoadFactor(hr.getLoadFactor());
-      ret.add(bean);
+    if (hrs != null) {
+      for (HistoricalRidership hr : hrs) {
+        HistoricalRidershipBean bean = new HistoricalRidershipBean();
+        bean.setRouteId(hr.getRouteId());
+        bean.setTripId(hr.getTripId());
+        bean.setStopId(hr.getStopId());
+        bean.setLoadFactor(hr.getLoadFactor());
+        ret.add(bean);
+      }
     }
+
     return ret;
   }
 
