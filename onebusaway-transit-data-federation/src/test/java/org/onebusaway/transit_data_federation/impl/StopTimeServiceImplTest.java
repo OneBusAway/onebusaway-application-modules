@@ -44,6 +44,7 @@ import org.mockito.Mockito;
 import org.onebusaway.gtfs.impl.calendar.CalendarServiceImpl;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.CalendarServiceData;
+import org.onebusaway.realtime.api.OccupancyStatus;
 import org.onebusaway.transit_data_federation.impl.blocks.BlockIndexFactoryServiceImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopTimeEntryImpl;
@@ -440,7 +441,7 @@ public class StopTimeServiceImplTest {
     assertNotNull(stC.getHistoricalOccupancy());
     assertNotNull(stD.getHistoricalOccupancy());
 
-    assertEquals( 2.0, stA.getTrip().getStopTimes().get(0).getHistoricalOccupancy().valueOf(), 0);
+    assertEquals( OccupancyStatus.MANY_SEATS_AVAILABLE, stA.getTrip().getStopTimes().get(0).getHistoricalOccupancy());
 //    assertEquals(2.0, stB.getStop().getStopTimeIndices().get(0).getOccupancyForIndex(stB.getStop().getIndex()).get(0).getLoadFactor(),0);
 
 
