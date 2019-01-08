@@ -34,6 +34,10 @@ public final class HistoricalOccupancyByStopQueryBean implements Serializable {
 
   private String routeId;
 
+  private long serviceDate;
+
+  private long time;
+
   private Date date = new Date(SystemTime.currentTimeMillis());
 
   public String getStopId() {
@@ -60,8 +64,16 @@ public final class HistoricalOccupancyByStopQueryBean implements Serializable {
 
   public String getRouteId() { return routeId; }
 
-  public void setServiceDate(Date date){ this.date = date; }
+  public void setServiceDate(long serviceDate){ this.serviceDate = serviceDate; }
 
-  public Date getServiceDate() { return date;}
+  public long getServiceDate() { return serviceDate;}
+
+  public long getTime() {
+    return time;
+  }
+
+  public void setTime(long time) {
+    this.time = time;
+  }
 
 }

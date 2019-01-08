@@ -60,10 +60,10 @@ public class HistoricalOccupancyByStopAction extends ApiActionSupport {
 
   @TypeConversion(converter = "org.onebusaway.presentation.impl.conversion.DateConverter")
   public void setServiceDate(Date date) {
-    _query.setServiceDate(date);
+    _query.setServiceDate(date.getTime());
   }
 
-  public Date getServiceDate() {
+  public long getServiceDate() {
     return _query.getServiceDate();
   }
 
@@ -74,15 +74,6 @@ public class HistoricalOccupancyByStopAction extends ApiActionSupport {
   public void setRouteId(String routeId) { _query.setRouteId(routeId); }
 
   public String getRouteId() { return _query.getRouteId(); }
-
-//  @RequiredFieldValidator
-//  public void setAgencyId(String id) {
-//    _query.setAgencyId(id);
-//  }
-//
-//  public String getAgencyId() {
-//    return _query.getAgencyId();
-//  }
 
   @Autowired
   private TransitDataService _service;
@@ -132,9 +123,9 @@ public class HistoricalOccupancyByStopAction extends ApiActionSupport {
       }
     }
     // Then filter for the Service Date
-    if(_query.getServiceDate() != null) {
+    if(_query.getServiceDate() != 0) {
       // Gather the list of routes, from the schedule for this Stop on the given Service Date
-      StopScheduleBean schedule = _service.getScheduleForStop(stopId.toString(), _query.getServiceDate());
+      StopScheduleBean schedule = _service.getScheduleForStop(stopId.toString(), new Date(_query.getServiceDate()));
       List<String> schedRoutes = new ArrayList<>();
       for (StopRouteScheduleBean srsb : schedule.getRoutes()) { // no lambdas, so no pretty map
         schedRoutes.add(srsb.getRoute().getId());
