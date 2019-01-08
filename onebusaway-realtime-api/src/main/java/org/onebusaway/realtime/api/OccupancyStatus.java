@@ -15,6 +15,9 @@
  */
 package org.onebusaway.realtime.api;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.Serializable;
 
 /**
@@ -76,7 +79,10 @@ public enum OccupancyStatus implements Serializable {
     }
     return false;
   }
-  public String toString() { return String.valueOf(_status); }
+  public String toString() {
+    return toCamelCase(String.valueOf(_status));
+  }
+
   public static OccupancyStatus toEnum(int status) {
     if (status == UNKNOWN.valueOf() || status < 0)
       return UNKNOWN;
@@ -115,5 +121,17 @@ public enum OccupancyStatus implements Serializable {
       status = 6;
     }
     return OccupancyStatus.toEnum(status);
+  }
+
+  private String toCamelCase(String upperCase) {
+    if (upperCase == null || upperCase.length() == 0) return upperCase;
+    String[] parts = upperCase.split("_");
+    StringBuffer camelCase = new StringBuffer();
+    for (String part : parts) {
+      camelCase.append(part.substring(0,1).toUpperCase());
+      camelCase.append(part.substring(1).toLowerCase());
+    }
+    String result = camelCase.substring(0,1).toLowerCase() + camelCase.substring(1);
+    return result;
   }
 }

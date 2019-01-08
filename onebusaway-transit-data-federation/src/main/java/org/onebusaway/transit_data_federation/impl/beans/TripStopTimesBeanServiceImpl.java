@@ -99,26 +99,11 @@ public class TripStopTimesBeanServiceImpl implements TripStopTimesBeanService {
 
     for (TripStopTimeBean st : bean.getStopTimes()) {
       List<HistoricalRidershipBean> hrs = new ArrayList<>();
-      try {
-        List<HistoricalRidership> rid = _ridershipService.getHistoricalRiderships(blockTrip.getTrip().getRoute().getId(), blockTrip.getTrip().getId(),
-            AgencyAndId.convertFromString(st.getStop().getId()));
+      List<HistoricalRidership> rid = _ridershipService.getHistoricalRiderships(blockTrip.getTrip().getRoute().getId(), blockTrip.getTrip().getId(),
+          AgencyAndId.convertFromString(st.getStop().getId()));
 
-        hrs = getHistoricalRidershipBeansForRidership(rid);
-        st.setHistoricalOccupancy(hrs);
-      } catch (Exception e) {
-        System.err.println("getStopTimesForBlockTrip: Ridership Failed with these inputs: ");
-        System.err.println(blockTrip.getTrip().getRoute().getId());
-        System.err.println(blockTrip.getTrip().getId());
-        System.err.println(blockTrip.getTrip().getId().getAgencyId());
-        System.err.println(st.getStop().getId());
-//        HistoricalRidership.Builder builder = new HistoricalRidership.Builder();
-//        builder.setStopId(AgencyAndId.convertFromString(st.getStop().getId()));
-//        builder.setTripId(blockTrip.getTrip().getId());
-//        builder.setRouteId(blockTrip.getTrip().getRoute().getId());
-//        builder.setLoadFactor(-1);
-//        hrs = getHistoricalRidershipBeansForRidership(Arrays.asList(builder.create()));
-
-      }
+      hrs = getHistoricalRidershipBeansForRidership(rid);
+      st.setHistoricalOccupancy(hrs);
     }
 
     return bean;
@@ -149,22 +134,8 @@ public class TripStopTimesBeanServiceImpl implements TripStopTimesBeanService {
       stBean.setStop(stopBean);
       stBean.setDistanceAlongTrip(stopTime.getShapeDistTraveled());
       List<HistoricalRidershipBean> hrs = new ArrayList<>();
-      try {
-        hrs = getHistoricalRidershipBeansForRidership(_ridershipService.getHistoricalRiderships(trip.getRoute().getId(), trip.getId(), stopEntry.getId()));
-        stBean.setHistoricalOccupancy(hrs);
-      } catch (Exception e) {
-        System.err.println("getStopTimesForTrip: Ridership Failed with these inputs:");
-        System.err.println(trip.getRoute().getId());
-        System.err.println(trip.getId());
-        System.err.println(stopEntry.getId());
-//        HistoricalRidership.Builder builder = new HistoricalRidership.Builder();
-//        builder.setStopId(stopEntry.getId());
-//        builder.setTripId(trip.getId());
-//        builder.setRouteId(trip.getRoute().getId());
-//        builder.setLoadFactor(-1);
-//        hrs = getHistoricalRidershipBeansForRidership(Arrays.asList(builder.create()));
-      }
-
+      hrs = getHistoricalRidershipBeansForRidership(_ridershipService.getHistoricalRiderships(trip.getRoute().getId(), trip.getId(), stopEntry.getId()));
+      stBean.setHistoricalOccupancy(hrs);
 
       bean.addStopTime(stBean);
     }
@@ -174,6 +145,7 @@ public class TripStopTimesBeanServiceImpl implements TripStopTimesBeanService {
 
   private List<HistoricalRidershipBean> getHistoricalRidershipBeansForRidership(List<HistoricalRidership> hrs) {
     List<HistoricalRidershipBean> ret = new ArrayList<HistoricalRidershipBean>();
+    if (hrs == null) return ret;
     for (HistoricalRidership hr : hrs) {
       HistoricalRidershipBean bean = new HistoricalRidershipBean();
       bean.setRouteId(hr.getRouteId());

@@ -314,7 +314,10 @@ public class ArrivalAndDepartureV2Bean implements Serializable {
     this.predictedDepartureTime = predictedDepartureTime;
   }
 
-  public OccupancyStatus getHistoricalOccupancy() { return historicalOccupancy; }
+  public String getHistoricalOccupancy() {
+    if (historicalOccupancy == null) return null;
+    return historicalOccupancy.toString();
+  }
 
   public void setHistoricalOccupancy(List<HistoricalRidershipBean> historicalOccupancy) { this.historicalOccupancy = OccupancyStatus.toEnum(historicalOccupancy.get(0).getLoadFactor()); }
   public void setHistoricalOccupancy(OccupancyStatus historicalOccupancy) { this.historicalOccupancy = historicalOccupancy; }

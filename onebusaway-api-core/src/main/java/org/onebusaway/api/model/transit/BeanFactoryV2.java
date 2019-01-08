@@ -370,7 +370,6 @@ public class BeanFactoryV2 {
     }
 
     bean.setServiceDate(tripStatus.getServiceDate());
-//    bean.setRealtimeOccupancy(tripStatus.getRealtimeOccupancy());
 
     FrequencyBean frequency = tripStatus.getFrequency();
     if (frequency != null)

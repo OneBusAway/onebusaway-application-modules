@@ -326,19 +326,9 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
       pab.setFrequency(fb);
     }
 
-    try {
+    if (_ridershipService != null) {
       List<HistoricalRidership> occ = _ridershipService.getHistoricalRiderships(trip.getRoute().getId(), trip.getId(), stop.getId());
       pab.setHistoricalOccupancy(getHistoricalRidershipBeansForRidership(occ));
-//      pab.setPredictedOccupancy(getHistoricalRidershipBeansForRidership(occ));
-    } catch (Exception e) {
-//      pab.setHistoricalOccupancyWithEnum(OccupancyStatus.toEnum((double)-1));
-//      pab.setPredictedOccupancy(OccupancyStatus.toEnum((double)-1));
-      //System.err.println("getStopTimeInstanceAsBean: Ridership Failed with these inputs:");
-//      System.err.println(trip.getRoute().getId().getId());
-//      System.err.println(trip.getId());
-//      System.err.println(trip.getRoute().getId().getAgencyId());
-//      System.err.println(stop.getId());
-
     }
     return pab;
   }

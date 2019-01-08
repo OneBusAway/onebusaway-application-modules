@@ -77,7 +77,10 @@ public class TripStopTimeV2Bean implements Serializable {
     this.distanceAlongTrip = distanceAlongTrip;
   }
 
-  public OccupancyStatus getHistoricalOccupancy() {return historicalOccupancy; }
+  public String getHistoricalOccupancy() {
+    if (historicalOccupancy == null) return null;
+    return historicalOccupancy.toString();
+  }
 
   public void setHistoricalOccupancy(List<HistoricalRidershipBean> historicalOccupancy) {this.historicalOccupancy = OccupancyStatus.toEnum(historicalOccupancy.get(0).getLoadFactor()); }
   public void setHistoricalOccupancy(OccupancyStatus historicalOccupancy) {this.historicalOccupancy = historicalOccupancy; }

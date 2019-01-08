@@ -79,5 +79,11 @@ public class TripStopTimeBean implements Serializable {
 
   public OccupancyStatus getHistoricalOccupancy() {return historicalOccupancy; }
 
-  public void setHistoricalOccupancy(List<HistoricalRidershipBean> historicalOccupancy) {this.historicalOccupancy = OccupancyStatus.toEnum(historicalOccupancy.get(0).getLoadFactor()); }
+  public void setHistoricalOccupancy(List<HistoricalRidershipBean> historicalOccupancy) {
+    if (historicalOccupancy != null && historicalOccupancy.size() > 0) {
+      this.historicalOccupancy = OccupancyStatus.toEnum(historicalOccupancy.get(0).getLoadFactor());
+    } else {
+      this.historicalOccupancy = null;
+    }
+  }
 }
