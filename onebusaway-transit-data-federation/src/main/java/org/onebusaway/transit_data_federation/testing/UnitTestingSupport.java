@@ -34,6 +34,7 @@ import org.onebusaway.gtfs.model.ShapePoint;
 import org.onebusaway.gtfs.model.calendar.CalendarServiceData;
 import org.onebusaway.gtfs.model.calendar.LocalizedServiceId;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
+import org.onebusaway.realtime.api.OccupancyStatus;
 import org.onebusaway.transit_data_federation.impl.blocks.BlockIndexFactoryServiceImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.AgencyEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.BlockConfigurationEntryImpl;
@@ -326,9 +327,9 @@ public class UnitTestingSupport {
     bldr.setStopId(stop.getId());
     bldr.setLoadFactor(loadFactor);
     HistoricalRidership hr = bldr.create();
-    List<HistoricalRidership> hrs = Arrays.asList(hr);
+    OccupancyStatus status = OccupancyStatus.toEnum(hr.getLoadFactor());
 
-    stopTime.setHistoricalOccupancy(hrs);
+    stopTime.setHistoricalOccupancy(status);
     return stopTime;
 
   }
@@ -344,9 +345,9 @@ public class UnitTestingSupport {
     bldr.setStopId(stop.getId());
     bldr.setLoadFactor(loadFactor);
     HistoricalRidership hr = bldr.create();
-    List<HistoricalRidership> hrs = Arrays.asList(hr);
+    OccupancyStatus status = OccupancyStatus.toEnum(hr.getLoadFactor());
 
-    stopTime.setHistoricalOccupancy(hrs);
+    stopTime.setHistoricalOccupancy(status);
     return stopTime;
 
   }

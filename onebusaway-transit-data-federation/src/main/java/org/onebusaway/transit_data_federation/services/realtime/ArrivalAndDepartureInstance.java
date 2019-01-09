@@ -154,11 +154,11 @@ public class ArrivalAndDepartureInstance {
 
   public OccupancyStatus getHistoricalOccupancy() { return historicalOccupancy; }
 
-  public void setHistoricalOccupancy(List<HistoricalRidership> historicalOccupancy) { this.historicalOccupancy = OccupancyStatus.toEnum(historicalOccupancy.get(0).getLoadFactor()); }
+  public void setHistoricalOccupancy(OccupancyStatus historicalOccupancy) { this.historicalOccupancy = historicalOccupancy; }
 
   public OccupancyStatus getPredictedOccupancy() { return predictedOccupancy; }
 
-  public void setPredictedOccupancy(List<HistoricalRidership> predictedOccupancy) { this.predictedOccupancy = OccupancyStatus.toEnum(predictedOccupancy.get(0).getLoadFactor()); }
+  public void setPredictedOccupancy(OccupancyStatus predictedOccupancy) { this.predictedOccupancy = predictedOccupancy; }
 
   public TimeIntervalBean getPredictedDepartureInterval() {
     return predictedDepartureInterval;

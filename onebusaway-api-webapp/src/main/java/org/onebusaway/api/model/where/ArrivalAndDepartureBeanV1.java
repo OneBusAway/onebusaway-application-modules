@@ -41,9 +41,9 @@ public class ArrivalAndDepartureBeanV1 implements Serializable {
 
   private long predictedDepartureTime;
 
-  private OccupancyStatus historicalOccupancy;
+  private String historicalOccupancy;
 
-  private OccupancyStatus predictedOccupancy;
+  private String predictedOccupancy;
 
   private long scheduledDepartureTime;
 
@@ -113,15 +113,13 @@ public class ArrivalAndDepartureBeanV1 implements Serializable {
     this.predictedDepartureTime = predictedDepartureTime;
   }
 
-  public OccupancyStatus getHistoricalOccupancy() { return historicalOccupancy; }
+  public String getHistoricalOccupancy() { return historicalOccupancy; }
 
-  public void setHistoricalOccupancy(List<HistoricalRidershipBean> historicalOccupancy) { this.historicalOccupancy = OccupancyStatus.toEnum(historicalOccupancy.get(0).getLoadFactor()); }
-  public void setHistoricalOccupancy(OccupancyStatus historicalOccupancy) { this.historicalOccupancy = historicalOccupancy; }
+  public void setHistoricalOccupancy(OccupancyStatus historicalOccupancy) { if(historicalOccupancy != null) this.historicalOccupancy = historicalOccupancy.toString(); }
 
-  public OccupancyStatus getPredictedOccupancy() { return predictedOccupancy; }
+  public String getPredictedOccupancy() { return predictedOccupancy; }
 
-  public void setPredictedOccupancy(List<HistoricalRidershipBean> predictedOccupancy) { this.predictedOccupancy = OccupancyStatus.toEnum(predictedOccupancy.get(0).getLoadFactor()); }
-  public void setPredictedOccupancy(OccupancyStatus predOccupancy) { this.historicalOccupancy = predOccupancy; }
+  public void setPredictedOccupancy(OccupancyStatus predOccupancy) { if(predOccupancy!= null) this.predictedOccupancy = predOccupancy.toString(); }
 
   public long getScheduledDepartureTime() {
     return scheduledDepartureTime;

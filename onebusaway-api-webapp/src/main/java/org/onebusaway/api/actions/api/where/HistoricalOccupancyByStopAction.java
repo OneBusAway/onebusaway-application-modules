@@ -105,7 +105,7 @@ public class HistoricalOccupancyByStopAction extends ApiActionSupport {
       hrs = _service.getHistoricalRidershipForStop(_query);
       // filter for given route
       if (_query.getRouteId() != null) {
-        for( HistoricalRidershipBean hr : hrs ) { // no lambdas, so no filter
+        for( HistoricalRidershipBean hr : hrs ) {
           if(hr.getRouteId().getId().equals(routeId.getId())) {
             fil.add(hr);
           }
@@ -114,7 +114,7 @@ public class HistoricalOccupancyByStopAction extends ApiActionSupport {
       }
       // filter for given trip
       else if(_query.getTripId() != null) {
-        for( HistoricalRidershipBean hr : hrs ) { // no lambdas, so no filter
+        for( HistoricalRidershipBean hr : hrs ) {
           if(hr.getTripId().getId().equals(tripId.getId())) {
             fil.add(hr);
           }
@@ -124,15 +124,15 @@ public class HistoricalOccupancyByStopAction extends ApiActionSupport {
     }
     // Then filter for the Service Date
     if(_query.getServiceDate() != 0) {
-      // Gather the list of routes, from the schedule for this Stop on the given Service Date
+      // Gather the list of routes, from the schedule for this Stop, on this Service Date
       StopScheduleBean schedule = _service.getScheduleForStop(stopId.toString(), new Date(_query.getServiceDate()));
       List<String> schedRoutes = new ArrayList<>();
-      for (StopRouteScheduleBean srsb : schedule.getRoutes()) { // no lambdas, so no pretty map
+      for (StopRouteScheduleBean srsb : schedule.getRoutes()) {
         schedRoutes.add(srsb.getRoute().getId());
       }
       fil = new ArrayList<>();
       for (HistoricalRidershipBean hr : hrs) {
-        if (schedRoutes.contains(hr.getRouteId().toString())) { // no lambdas, so no filter
+        if (schedRoutes.contains(hr.getRouteId().toString())) {
           fil.add(hr);
         }
       }

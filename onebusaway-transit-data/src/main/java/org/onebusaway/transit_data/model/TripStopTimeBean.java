@@ -35,7 +35,7 @@ public class TripStopTimeBean implements Serializable {
   
   private double distanceAlongTrip;
 
-  private OccupancyStatus historicalOccupancy; // Intended to be 1 element
+  private String historicalOccupancy;
 
   public int getArrivalTime() {
     return arrivalTime;
@@ -77,13 +77,7 @@ public class TripStopTimeBean implements Serializable {
     this.distanceAlongTrip = distanceAlongTrip;
   }
 
-  public OccupancyStatus getHistoricalOccupancy() {return historicalOccupancy; }
+  public String getHistoricalOccupancy() {return historicalOccupancy; }
 
-  public void setHistoricalOccupancy(List<HistoricalRidershipBean> historicalOccupancy) {
-    if (historicalOccupancy != null && historicalOccupancy.size() > 0) {
-      this.historicalOccupancy = OccupancyStatus.toEnum(historicalOccupancy.get(0).getLoadFactor());
-    } else {
-      this.historicalOccupancy = null;
-    }
-  }
+  public void setHistoricalOccupancy(OccupancyStatus historicalOccupancy) {this.historicalOccupancy = historicalOccupancy.toString(); }
 }

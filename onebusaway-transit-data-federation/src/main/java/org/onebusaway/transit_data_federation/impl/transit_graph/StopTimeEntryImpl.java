@@ -57,7 +57,7 @@ public class StopTimeEntryImpl implements StopTimeEntry, Serializable {
     _departureTime = departureTime;
   }
 
-  public void setHistoricalOccupancy(List<HistoricalRidership> historicalOccupancy) { _historicalOccupancy = OccupancyStatus.toEnum(historicalOccupancy.get(0).getLoadFactor()); }
+  public void setHistoricalOccupancy(OccupancyStatus historicalOccupancy) {_historicalOccupancy = historicalOccupancy; }
   
   public StopTimeEntryImpl setTime(int time) {
     _arrivalTime = time;

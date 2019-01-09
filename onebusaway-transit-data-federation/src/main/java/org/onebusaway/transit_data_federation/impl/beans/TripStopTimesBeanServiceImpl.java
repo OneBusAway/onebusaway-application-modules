@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.TimeZone;
 
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.realtime.api.OccupancyStatus;
 import org.onebusaway.transit_data.HistoricalRidershipBean;
 import org.onebusaway.transit_data.model.StopBean;
 import org.onebusaway.transit_data.model.TripStopTimeBean;
@@ -98,12 +99,10 @@ public class TripStopTimesBeanServiceImpl implements TripStopTimesBeanService {
     }
 
     for (TripStopTimeBean st : bean.getStopTimes()) {
-      List<HistoricalRidershipBean> hrs = new ArrayList<>();
       List<HistoricalRidership> rid = _ridershipService.getHistoricalRiderships(blockTrip.getTrip().getRoute().getId(), blockTrip.getTrip().getId(),
           AgencyAndId.convertFromString(st.getStop().getId()));
 
-      hrs = getHistoricalRidershipBeansForRidership(rid);
-      if(hrs.size() > 0) st.setHistoricalOccupancy(hrs);
+      if(rid != null && rid.size() > 0) st.setHistoricalOccupancy(OccupancyStatus.toEnum(rid.get(0).getLoadFactor()));
     }
 
     return bean;
@@ -133,28 +132,13 @@ public class TripStopTimesBeanServiceImpl implements TripStopTimesBeanService {
       StopBean stopBean = _stopBeanService.getStopForId(stopEntry.getId());
       stBean.setStop(stopBean);
       stBean.setDistanceAlongTrip(stopTime.getShapeDistTraveled());
-      List<HistoricalRidershipBean> hrs = new ArrayList<>();
-      hrs = getHistoricalRidershipBeansForRidership(_ridershipService.getHistoricalRiderships(trip.getRoute().getId(), trip.getId(), stopEntry.getId()));
-      if(hrs.size() > 0) stBean.setHistoricalOccupancy(hrs);
+      List<HistoricalRidership> rid = _ridershipService.getHistoricalRiderships(trip.getRoute().getId(), trip.getId(), stopEntry.getId());
+      if(rid != null && rid.size() > 0) stBean.setHistoricalOccupancy(OccupancyStatus.toEnum(rid.get(0).getLoadFactor()));
 
       bean.addStopTime(stBean);
     }
 
     return bean;
-  }
-
-  private List<HistoricalRidershipBean> getHistoricalRidershipBeansForRidership(List<HistoricalRidership> hrs) {
-    List<HistoricalRidershipBean> ret = new ArrayList<HistoricalRidershipBean>();
-    if (hrs == null) return ret;
-    for (HistoricalRidership hr : hrs) {
-      HistoricalRidershipBean bean = new HistoricalRidershipBean();
-      bean.setRouteId(hr.getRouteId());
-      bean.setTripId(hr.getTripId());
-      bean.setStopId(hr.getStopId());
-      bean.setLoadFactor(hr.getLoadFactor());
-      ret.add(bean);
-    }
-    return ret;
   }
 }
 

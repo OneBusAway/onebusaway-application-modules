@@ -214,13 +214,11 @@ public class ArrivalAndDepartureBean extends ApplicationBean {
 
   public OccupancyStatus getHistoricalOccupancy() { return historicalOccupancy; }
 
-  public void setHistoricalOccupancyWithEnum(OccupancyStatus histOccupancy) { this.historicalOccupancy = histOccupancy; }
-  public void setHistoricalOccupancy(List<HistoricalRidershipBean> histOccupancy) { this.historicalOccupancy = OccupancyStatus.toEnum(histOccupancy.get(0).getLoadFactor()); }
+  public void setHistoricalOccupancy(OccupancyStatus histOccupancy) { this.historicalOccupancy = histOccupancy; }
 
   public OccupancyStatus getPredictedOccupancy() { return predictedOccupancy; }
 
   public void setPredictedOccupancy(OccupancyStatus predOccupancy) { this.predictedOccupancy = predOccupancy; }
-  public void setPredictedOccupancy(List<HistoricalRidershipBean> predictedOccupancy) { this.predictedOccupancy = OccupancyStatus.toEnum(predictedOccupancy.get(0).getLoadFactor()); }
 
   public TimeIntervalBean getPredictedDepartureInterval() {
     return predictedDepartureInterval;
