@@ -132,23 +132,6 @@ public class RidershipServiceImpl implements RidershipService {
         return _stopRiderships.get(stopId);
     }
 
-
-//    @Override
-//    public List<HistoricalRidership> getHistoricalRidershipsForStop(AgencyAndId stopId, ServiceDate sd) {
-//
-//        return filter(_stopRiderships.get(stopId), sd);
-//    }
-//
-//    private List<HistoricalRidership> filter(List<HistoricalRidership> input, ServiceDate sd) {
-//        List<HistoricalRidership> results = new ArrayList<>();
-//        for (HistoricalRidership hr : input) {
-//            if (isWeekday(sd) && hr.getCalendarType() == HistoricalRidership.CalendarType.WEEKDAY)
-//                results.add(hr);
-//        }
-//        return results;
-//    }
-//
-
     @Override
     public List<HistoricalRidership> getHistoricalRidershipsForRoute(AgencyAndId routeId) {
         return _routeRiderships.get(routeId);
