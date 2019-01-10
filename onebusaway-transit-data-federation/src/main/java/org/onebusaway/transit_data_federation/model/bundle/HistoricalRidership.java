@@ -23,9 +23,17 @@ import java.io.Serializable;
  * Historical ridership data index
  */
 public class HistoricalRidership implements Serializable {
+
+    public enum CalendarType {
+        WEEKDAY,
+        SATURDAY,
+        SUNDAY
+    }
+
     private AgencyAndId tripId;
     private AgencyAndId routeId;
     private AgencyAndId stopId;
+    private CalendarType calendarType;
     private double loadFactor;
 
     public static Builder builder() { return new Builder(); }
@@ -34,6 +42,7 @@ public class HistoricalRidership implements Serializable {
         this.tripId = builder.tripId;
         this.routeId = builder.routeId;
         this.stopId = builder.stopId;
+        this.calendarType = builder.calendarType;
         this.loadFactor = builder.loadFactor;
     }
 
@@ -53,10 +62,13 @@ public class HistoricalRidership implements Serializable {
         return tripId;
     }
 
+    public CalendarType getCalendarType() { return calendarType; }
+
     public static class Builder {
         private AgencyAndId tripId;
         private AgencyAndId routeId;
         private AgencyAndId stopId;
+        private CalendarType calendarType = CalendarType.WEEKDAY;  // DEFAULT
         private double loadFactor;
 
         public HistoricalRidership create() { return new HistoricalRidership(this); }
@@ -64,6 +76,7 @@ public class HistoricalRidership implements Serializable {
         public void setTripId(AgencyAndId tripId) { this.tripId = tripId; }
         public void setRouteId(AgencyAndId routeId) { this.routeId = routeId; }
         public void setStopId(AgencyAndId stopId) { this.stopId = stopId; }
+        public void setCalendarType(CalendarType calendarType) { this.calendarType = calendarType; }
         public void setLoadFactor(double loadFactor) { this.loadFactor = loadFactor; }
     }
 

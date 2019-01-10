@@ -17,6 +17,7 @@ package org.onebusaway.transit_data_federation.impl;
 
 import org.onebusaway.container.refresh.Refreshable;
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.gtfs.model.calendar.ServiceDate;
 import org.onebusaway.transit_data_federation.model.bundle.HistoricalRidership;
 import org.onebusaway.transit_data_federation.services.FederatedTransitDataBundle;
 import org.onebusaway.transit_data_federation.services.RidershipService;
@@ -130,6 +131,23 @@ public class RidershipServiceImpl implements RidershipService {
     public List<HistoricalRidership> getHistoricalRidershipsForStop(AgencyAndId stopId) {
         return _stopRiderships.get(stopId);
     }
+
+
+//    @Override
+//    public List<HistoricalRidership> getHistoricalRidershipsForStop(AgencyAndId stopId, ServiceDate sd) {
+//
+//        return filter(_stopRiderships.get(stopId), sd);
+//    }
+//
+//    private List<HistoricalRidership> filter(List<HistoricalRidership> input, ServiceDate sd) {
+//        List<HistoricalRidership> results = new ArrayList<>();
+//        for (HistoricalRidership hr : input) {
+//            if (isWeekday(sd) && hr.getCalendarType() == HistoricalRidership.CalendarType.WEEKDAY)
+//                results.add(hr);
+//        }
+//        return results;
+//    }
+//
 
     @Override
     public List<HistoricalRidership> getHistoricalRidershipsForRoute(AgencyAndId routeId) {

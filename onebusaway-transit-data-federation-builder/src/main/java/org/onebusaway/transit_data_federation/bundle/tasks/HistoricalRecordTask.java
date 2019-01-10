@@ -67,6 +67,7 @@ public class HistoricalRecordTask implements Runnable {
         hr.setStopId(findStopId(r.getStopId()));
         hr.setTripId(findTripId(r.getTripId()));
         hr.setRouteId(findRouteId(r.getRouteId()));
+        hr.setCalendarType(HistoricalRidership.CalendarType.WEEKDAY);
         hr.setLoadFactor(r.getAverageLoad());
         _log.info("created Ridership " + r.getRouteId() + ":" + r.getTripId() + ":" + r.getStopId() + "=" + r.getAverageLoad());
         return hr.create();
