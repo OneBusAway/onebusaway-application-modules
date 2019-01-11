@@ -197,8 +197,10 @@ public class RidershipServiceImpl implements RidershipService {
         }
         List<HistoricalRidership> results = new ArrayList<>();
         for (HistoricalRidership hr : input) {
-            if (isWeekday(sd) && hr.getCalendarType() == HistoricalRidership.CalendarType.WEEKDAY) {
-                results.add(hr);
+            if (isWeekday(sd)) {
+                if(hr.getCalendarType() == HistoricalRidership.CalendarType.WEEKDAY) {
+                    results.add(hr);
+                }
             } else if (hr.getCalendarType() == HistoricalRidership.CalendarType.SATURDAY || hr.getCalendarType() == HistoricalRidership.CalendarType.SUNDAY) {
                 results.add(hr);
             }
@@ -207,7 +209,7 @@ public class RidershipServiceImpl implements RidershipService {
     }
     private boolean isWeekday(long sd) {
         Calendar cal = new ServiceDate(new Date(sd)).getAsCalendar(TimeZone.getDefault());
-        return !(cal.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY || cal.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY);
+        return !(cal.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY || cal.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY);
     }
 
 }
