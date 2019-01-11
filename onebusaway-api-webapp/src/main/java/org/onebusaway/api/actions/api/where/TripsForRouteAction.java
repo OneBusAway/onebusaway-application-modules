@@ -53,9 +53,9 @@ public class TripsForRouteAction extends ApiActionSupport {
 
   private boolean _includeTrip = true;
   
-  private boolean _includeStatus = false;
+  private boolean _includeStatus = true;
 
-  private boolean _includeSchedule = false;
+  private boolean _includeSchedule = true;
 
   public TripsForRouteAction() {
     super(V2);

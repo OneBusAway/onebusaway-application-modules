@@ -32,26 +32,11 @@ import org.onebusaway.federations.annotations.FederatedByCustomMethod;
 import org.onebusaway.federations.annotations.FederatedByEntityIdMethod;
 import org.onebusaway.federations.annotations.FederatedByEntityIdsMethod;
 import org.onebusaway.geospatial.model.EncodedPolylineBean;
+import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
 import org.onebusaway.realtime.api.TimepointPredictionRecord;
-import org.onebusaway.transit_data.model.AgencyBean;
-import org.onebusaway.transit_data.model.AgencyWithCoverageBean;
-import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
-import org.onebusaway.transit_data.model.ArrivalAndDepartureForStopQueryBean;
-import org.onebusaway.transit_data.model.ArrivalsAndDeparturesQueryBean;
-import org.onebusaway.transit_data.model.ConsolidatedStopMapBean;
-import org.onebusaway.transit_data.model.ListBean;
-import org.onebusaway.transit_data.model.RegisterAlarmQueryBean;
-import org.onebusaway.transit_data.model.RouteBean;
-import org.onebusaway.transit_data.model.RoutesBean;
-import org.onebusaway.transit_data.model.SearchQueryBean;
-import org.onebusaway.transit_data.model.StopBean;
-import org.onebusaway.transit_data.model.StopScheduleBean;
-import org.onebusaway.transit_data.model.StopWithArrivalsAndDeparturesBean;
-import org.onebusaway.transit_data.model.StopsBean;
-import org.onebusaway.transit_data.model.StopsForRouteBean;
-import org.onebusaway.transit_data.model.StopsWithArrivalsAndDeparturesBean;
-import org.onebusaway.transit_data.model.VehicleStatusBean;
+import org.onebusaway.transit_data.HistoricalRidershipBean;
+import org.onebusaway.transit_data.model.*;
 import org.onebusaway.transit_data.model.blocks.BlockBean;
 import org.onebusaway.transit_data.model.blocks.BlockInstanceBean;
 import org.onebusaway.transit_data.model.blocks.ScheduledBlockLocationBean;
@@ -399,6 +384,11 @@ public interface TransitDataService extends FederatedService {
   /****
    * Historical Data
    ****/
+  List<HistoricalRidershipBean> getHistoricalRidershipForStop(HistoricalOccupancyByStopQueryBean query);
+  List<HistoricalRidershipBean> getAllHistoricalRiderships();
+  List<HistoricalRidershipBean> getHistoricalRidershipsForTrip(AgencyAndId tripId);
+  List<HistoricalRidershipBean> getHistoricalRidershipsForRoute(AgencyAndId routeId);
+  List<HistoricalRidershipBean> getHistoricalRiderships(AgencyAndId routeId, AgencyAndId tripId, AgencyAndId stopId);
 
   /****
    * Service Alert Methods

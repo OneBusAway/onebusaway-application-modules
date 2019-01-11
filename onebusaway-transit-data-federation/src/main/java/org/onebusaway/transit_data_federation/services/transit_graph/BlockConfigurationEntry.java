@@ -18,6 +18,7 @@ package org.onebusaway.transit_data_federation.services.transit_graph;
 
 import java.util.List;
 
+import org.onebusaway.realtime.api.OccupancyStatus;
 import org.onebusaway.transit_data_federation.services.blocks.HasIndexedBlockStopTimes;
 
 /**
@@ -54,4 +55,5 @@ public interface BlockConfigurationEntry extends HasIndexedBlockStopTimes {
   public double getTotalBlockDistance();
 
   public double getDistanceAlongBlockForIndex(int blockSequence);
+  public OccupancyStatus getOccupancyForIndex(int stopIndex);
 }

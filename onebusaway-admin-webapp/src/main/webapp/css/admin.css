@@ -240,6 +240,17 @@ html, body {
 	color: white;
 }
 
+.logoutButton {
+	float: right;
+    color: white;
+    background: none;
+    border: none;
+    text-decoration: underline;
+    cursor: pointer;
+	padding: 0px 10px 0px 0px;
+	font: 13px/1.231 helvetica,arial,clean,sans-serif;
+}
+
 #topbar #branding a img,
 #topbar #branding a {
 	border: none;

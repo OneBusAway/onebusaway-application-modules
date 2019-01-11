@@ -27,26 +27,11 @@ import org.onebusaway.federations.annotations.FederatedByAgencyIdMethod;
 import org.onebusaway.federations.annotations.FederatedByEntityIdMethod;
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.geospatial.model.EncodedPolylineBean;
+import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
 import org.onebusaway.realtime.api.TimepointPredictionRecord;
-import org.onebusaway.transit_data.model.AgencyBean;
-import org.onebusaway.transit_data.model.AgencyWithCoverageBean;
-import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
-import org.onebusaway.transit_data.model.ArrivalAndDepartureForStopQueryBean;
-import org.onebusaway.transit_data.model.ArrivalsAndDeparturesQueryBean;
-import org.onebusaway.transit_data.model.ConsolidatedStopMapBean;
-import org.onebusaway.transit_data.model.ListBean;
-import org.onebusaway.transit_data.model.RegisterAlarmQueryBean;
-import org.onebusaway.transit_data.model.RouteBean;
-import org.onebusaway.transit_data.model.RoutesBean;
-import org.onebusaway.transit_data.model.SearchQueryBean;
-import org.onebusaway.transit_data.model.StopBean;
-import org.onebusaway.transit_data.model.StopScheduleBean;
-import org.onebusaway.transit_data.model.StopWithArrivalsAndDeparturesBean;
-import org.onebusaway.transit_data.model.StopsBean;
-import org.onebusaway.transit_data.model.StopsForRouteBean;
-import org.onebusaway.transit_data.model.StopsWithArrivalsAndDeparturesBean;
-import org.onebusaway.transit_data.model.VehicleStatusBean;
+import org.onebusaway.transit_data.HistoricalRidershipBean;
+import org.onebusaway.transit_data.model.*;
 import org.onebusaway.transit_data.model.blocks.BlockBean;
 import org.onebusaway.transit_data.model.blocks.BlockInstanceBean;
 import org.onebusaway.transit_data.model.blocks.ScheduledBlockLocationBean;
@@ -372,6 +357,36 @@ public class TransitDataServiceImpl implements TransitDataService {
       CurrentVehicleEstimateQueryBean query) {
     blockUntilBundleIsReady();
     return _transitDataService.getCurrentVehicleEstimates(query);
+  }
+
+  @Override
+  public List<HistoricalRidershipBean> getHistoricalRidershipForStop(HistoricalOccupancyByStopQueryBean query){
+    blockUntilBundleIsReady();
+    return _transitDataService.getHistoricalRidershipForStop(query);
+  }
+
+  @Override
+  public List<HistoricalRidershipBean> getAllHistoricalRiderships() {
+    blockUntilBundleIsReady();
+    return _transitDataService.getAllHistoricalRiderships();
+  }
+
+  @Override
+  public List<HistoricalRidershipBean> getHistoricalRidershipsForTrip(AgencyAndId tripId) {
+    blockUntilBundleIsReady();
+    return _transitDataService.getHistoricalRidershipsForTrip(tripId);
+  }
+
+  @Override
+  public List<HistoricalRidershipBean> getHistoricalRidershipsForRoute(AgencyAndId routeId) {
+    blockUntilBundleIsReady();
+    return _transitDataService.getHistoricalRidershipsForRoute(routeId);
+  }
+
+  @Override
+  public List<HistoricalRidershipBean> getHistoricalRiderships(AgencyAndId routeId, AgencyAndId tripId, AgencyAndId stopId) {
+    blockUntilBundleIsReady();
+    return _transitDataService.getHistoricalRiderships(routeId, tripId, stopId);
   }
 
 

@@ -42,6 +42,10 @@ import org.onebusaway.api.model.transit.service_alerts.TimeRangeV2Bean;
 import org.onebusaway.collections.CollectionsLibrary;
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.geospatial.model.EncodedPolylineBean;
+import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.realtime.api.OccupancyStatus;
+import org.onebusaway.transit_data.HistoricalRidershipBean;
+import org.onebusaway.transit_data.OccupancyStatusBean;
 import org.onebusaway.transit_data.model.AgencyBean;
 import org.onebusaway.transit_data.model.AgencyWithCoverageBean;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
@@ -230,6 +234,10 @@ public class BeanFactoryV2 {
   public EntryWithReferencesBean<VehicleStatusV2Bean> getVehicleStatusResponse(
       VehicleStatusBean vehicleStatus) {
     return entry(getVehicleStatus(vehicleStatus));
+  }
+
+  public EntryWithReferencesBean<ListBean<OccupancyStatusBean>> getHistoricalOccupancyResponse(List<OccupancyStatusBean> occ) {
+    return entry(new ListBean<>(occ, false));
   }
 
   public EntryWithReferencesBean<SituationV2Bean> getResponse(
@@ -442,6 +450,8 @@ public class BeanFactoryV2 {
       stiBean.setDistanceAlongTrip(sti.getDistanceAlongTrip());
 
       stiBean.setStopId(sti.getStop().getId());
+      stiBean.setHistoricalOccupancy(sti.getHistoricalOccupancy());
+
       addToReferences(sti.getStop());
 
       instances.add(stiBean);
@@ -851,6 +861,8 @@ public class BeanFactoryV2 {
     bean.setScheduledDepartureTime(ad.getScheduledDepartureTime());
     bean.setPredictedArrivalTime(ad.getPredictedArrivalTime());
     bean.setPredictedDepartureTime(ad.getPredictedDepartureTime());
+    bean.setHistoricalOccupancy(ad.getHistoricalOccupancy());
+//    bean.setPredictedOccupancy(ad.getPredictedOccupancy());
 
     bean.setScheduledArrivalInterval(getTimeInterval(ad.getScheduledArrivalInterval()));
     bean.setScheduledDepartureInterval(getTimeInterval(ad.getScheduledDepartureInterval()));

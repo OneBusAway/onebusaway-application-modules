@@ -110,7 +110,7 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
   }
 
   /****
-   * {@link TripStatusBeanService} Interface
+   * {@link TripDetailsBeanService} Interface
    ****/
 
   @Override
@@ -342,6 +342,7 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
       }
       bean.setTimepointPredictions(timepointPredictions);
     }
+    // bean.setRealtimeOccupancy(_realtimeOccupancyService.getRealtimeOccupancyForBlockLocation(blockLocation));
 
     return bean;
   }
@@ -402,7 +403,6 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
     }
 
     if (inclusion.isIncludeTripSchedule()) {
-
       stopTimes = _tripStopTimesBeanService.getStopTimesForBlockTrip(blockTripInstance);
 
       if (stopTimes == null)

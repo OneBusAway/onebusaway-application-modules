@@ -16,6 +16,8 @@
  */
 package org.onebusaway.transit_data_federation.services.transit_graph;
 
+import org.onebusaway.realtime.api.OccupancyStatus;
+
 public interface StopTimeEntry {
 
   public int getId();
@@ -43,6 +45,8 @@ public interface StopTimeEntry {
    * @return departure time, in seconds since midnight
    */
   public int getDepartureTime();
+
+  public OccupancyStatus getHistoricalOccupancy();
 
   public int getPickupType();
 
