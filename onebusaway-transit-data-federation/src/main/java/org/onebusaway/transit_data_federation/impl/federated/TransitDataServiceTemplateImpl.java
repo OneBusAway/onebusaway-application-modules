@@ -16,6 +16,7 @@
  */
 package org.onebusaway.transit_data_federation.impl.federated;
 
+import com.vividsolutions.jts.algorithm.match.HausdorffSimilarityMeasure;
 import org.onebusaway.exceptions.NoSuchTripServiceException;
 import org.onebusaway.exceptions.OutOfServiceAreaServiceException;
 import org.onebusaway.exceptions.ServiceException;
@@ -24,9 +25,12 @@ import org.onebusaway.federations.annotations.FederatedByEntityIdMethod;
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.geospatial.model.EncodedPolylineBean;
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.gtfs.model.calendar.LocalizedServiceId;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
+import org.onebusaway.gtfs.services.calendar.CalendarService;
+import org.onebusaway.realtime.api.OccupancyStatus;
 import org.onebusaway.realtime.api.TimepointPredictionRecord;
-import org.onebusaway.transit_data.HistoricalRidershipBean;
+import org.onebusaway.transit_data.OccupancyStatusBean;
 import org.onebusaway.transit_data.model.*;
 import org.onebusaway.transit_data.model.blocks.BlockBean;
 import org.onebusaway.transit_data.model.blocks.BlockInstanceBean;
@@ -130,6 +134,9 @@ public class TransitDataServiceTemplateImpl implements TransitDataServiceTemplat
 
   @Autowired
   private RidershipService _ridershipService;
+
+  @Autowired
+  private CalendarService _calendarService;
   
 
   /****
@@ -448,77 +455,36 @@ public class TransitDataServiceTemplateImpl implements TransitDataServiceTemplat
     return _currentVehicleEstimateService.getCurrentVehicleEstimates(query);
   }
 
-//  @Override
-  public List<HistoricalRidershipBean> getHistoricalRidershipForStop(HistoricalOccupancyByStopQueryBean query){
-    List<HistoricalRidershipBean> beans = new ArrayList<>();
+
+  public List<OccupancyStatusBean> getHistoricalRidershipForStop(HistoricalOccupancyByStopQueryBean query){
     AgencyAndId id = AgencyAndIdLibrary.convertFromString(query.getStopId());
-    for (HistoricalRidership hr : _ridershipService.getHistoricalRidershipsForStop(id)) {
-      HistoricalRidershipBean hrb = new HistoricalRidershipBean();
-      hrb.setStopId(hr.getStopId());
-      hrb.setLoadFactor(hr.getLoadFactor());
-      hrb.setRouteId(hr.getRouteId());
-      hrb.setTripId(hr.getTripId());
-      beans.add(hrb);
-    }
-
-    return beans;
+    List<HistoricalRidership> hrs = _ridershipService.getHistoricalRidershipsForStop(id, query.getServiceDate());
+    return _ridershipService.convertToOccupancyStatusBeans(hrs);
   }
 
-  public List<HistoricalRidershipBean> getHistoricalRidershipsForTrip(AgencyAndId tripId) {
-    List<HistoricalRidershipBean> beans = new ArrayList<>();
-    for (HistoricalRidership hr : _ridershipService.getHistoricalRidershipsForTrip(tripId)) {
-      HistoricalRidershipBean hrb = new HistoricalRidershipBean();
-      hrb.setStopId(hr.getStopId());
-      hrb.setLoadFactor(hr.getLoadFactor());
-      hrb.setRouteId(hr.getRouteId());
-      hrb.setTripId(hr.getTripId());
-      beans.add(hrb);
-    }
-    return beans;
+
+  public List<OccupancyStatusBean> getHistoricalRidershipsForTrip(AgencyAndId tripId, long serviceDate) {
+
+    List<HistoricalRidership> hrs = _ridershipService.getHistoricalRidershipsForTrip(tripId, serviceDate);
+    return _ridershipService.convertToOccupancyStatusBeans(hrs);
   }
 
-  public List<HistoricalRidershipBean> getHistoricalRidershipsForRoute(AgencyAndId routeId) {
-    List<HistoricalRidershipBean> beans = new ArrayList<>();
-    for (HistoricalRidership hr : _ridershipService.getHistoricalRidershipsForRoute(routeId)) {
-      HistoricalRidershipBean hrb = new HistoricalRidershipBean();
-      hrb.setStopId(hr.getStopId());
-      hrb.setLoadFactor(hr.getLoadFactor());
-      hrb.setRouteId(hr.getRouteId());
-      hrb.setTripId(hr.getTripId());
-      beans.add(hrb);
-    }
-    return beans;
+  public List<OccupancyStatusBean> getHistoricalRidershipsForRoute(AgencyAndId routeId, long serviceDate) {
+
+    List<HistoricalRidership> hrs = _ridershipService.getHistoricalRidershipsForRoute(routeId, serviceDate);
+    return _ridershipService.convertToOccupancyStatusBeans(hrs);
   }
 
-  public List<HistoricalRidershipBean> getHistoricalRiderships(AgencyAndId routeId, AgencyAndId tripId, AgencyAndId stopId) {
-    List<HistoricalRidershipBean> beans = new ArrayList<>();
-    try {
-      for (HistoricalRidership hr : _ridershipService.getHistoricalRiderships(routeId, tripId, stopId)) {
-        HistoricalRidershipBean hrb = new HistoricalRidershipBean();
-        hrb.setStopId(hr.getStopId());
-        hrb.setLoadFactor(hr.getLoadFactor());
-        hrb.setRouteId(hr.getRouteId());
-        hrb.setTripId(hr.getTripId());
-        beans.add(hrb);
-      }
-    }
-    catch(Exception e) {
+  public List<OccupancyStatusBean> getHistoricalRiderships(AgencyAndId routeId, AgencyAndId tripId, AgencyAndId stopId, long serviceDate) {
 
-    }
-    return beans;
+    List<HistoricalRidership> hrs = _ridershipService.getHistoricalRiderships(routeId, tripId, stopId, serviceDate);
+    return _ridershipService.convertToOccupancyStatusBeans(hrs);
   }
 
-  public List<HistoricalRidershipBean> getAllHistoricalRiderships() {
-    List<HistoricalRidershipBean> beans = new ArrayList<>();
-    for (HistoricalRidership hr : _ridershipService.getAllHistoricalRiderships()) {
-      HistoricalRidershipBean hrb = new HistoricalRidershipBean();
-      hrb.setStopId(hr.getStopId());
-      hrb.setLoadFactor(hr.getLoadFactor());
-      hrb.setRouteId(hr.getRouteId());
-      hrb.setTripId(hr.getTripId());
-      beans.add(hrb);
-    }
-    return beans;
+  public List<OccupancyStatusBean> getAllHistoricalRiderships(long serviceDate) {
+
+    List<HistoricalRidership> hrs = _ridershipService.getAllHistoricalRiderships(serviceDate);
+    return _ridershipService.convertToOccupancyStatusBeans(hrs);
   }
 
   /****
@@ -777,6 +743,12 @@ public class TransitDataServiceTemplateImpl implements TransitDataServiceTemplat
     ret.setList(new ArrayList<ConsolidatedStopMapBean>(beans));
     return ret;
   }
+
+
+  public boolean isLocalizedServiceIdActiveOnDate(LocalizedServiceId localServId, Date date) {
+    return _calendarService.isLocalizedServiceIdActiveOnDate(localServId, date);
+  }
+
 
   /****
    * Private Methods

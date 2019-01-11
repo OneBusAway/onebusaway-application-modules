@@ -17,48 +17,20 @@
 package org.onebusaway.transit_data;
 
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.realtime.api.OccupancyStatus;
 
 import java.io.Serializable;
 
 public class HistoricalRidershipBean implements Serializable {
 
-  private AgencyAndId _stopId;
-  private double _loadFactor;
-  private AgencyAndId _routeId;
-  private AgencyAndId _tripId;
+  private String status;
 
-  public HistoricalRidershipBean() {
-
+  public HistoricalRidershipBean(OccupancyStatus status) {
+    this.status = status.toString();
   }
 
-  public void setStopId(AgencyAndId stopId) {
-    _stopId = stopId;
-  }
+  public void setOccupancyStatus(OccupancyStatus status) {this.status = status.toString(); }
+  public void setOccupancyStatus(String status) {this.status = status; }
 
-  public void setLoadFactor(double loadFactor) {
-    _loadFactor = loadFactor;
-  }
-
-  public void setRouteId(AgencyAndId routeId) {
-    _routeId = routeId;
-  }
-
-  public void setTripId(AgencyAndId tripId) {
-    _tripId = tripId;
-  }
-  public AgencyAndId getStopId() {
-    return _stopId;
-  }
-
-  public double getLoadFactor() {
-    return _loadFactor;
-  }
-
-  public AgencyAndId getRouteId() {
-    return _routeId;
-  }
-
-  public AgencyAndId getTripId() {
-    return _tripId;
-  }
+  public String getOccupancyStatus() {return status; }
 }

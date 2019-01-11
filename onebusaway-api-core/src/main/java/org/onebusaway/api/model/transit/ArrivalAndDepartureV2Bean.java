@@ -16,7 +16,6 @@
 package org.onebusaway.api.model.transit;
 
 import org.onebusaway.realtime.api.OccupancyStatus;
-import org.onebusaway.transit_data.HistoricalRidershipBean;
 
 import java.io.Serializable;
 import java.util.List;

@@ -16,49 +16,54 @@
 
 package org.onebusaway.transit_data;
 
+import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.realtime.api.OccupancyStatus;
 
-public class OccupancyStatusBean {
+import java.io.Serializable;
+
+public class OccupancyStatusBean implements Serializable {
 
   private OccupancyStatus _occStatus;
+
   private String _status;
-  // For Debugging
-//  private AgencyAndId _stopId;
-//
-//  private AgencyAndId _routeId;
-//
-//  private AgencyAndId _tripId;
 
-  public void setOccStatus(OccupancyStatus status) { _occStatus = status; }
+  private AgencyAndId _stopId;
 
-  public OccupancyStatus getOccStatus() { return _occStatus; }
+  private AgencyAndId _routeId;
+
+  private AgencyAndId _tripId;
+
+  public void setOccpancyStatus(OccupancyStatus status) { _occStatus = status; _status = status.toString(); }
+
+  public OccupancyStatus getOccupancyStatus() { return _occStatus; }
 
   public void setStatus(String status) {_status = status; }
+
   public void setStatus(OccupancyStatus status) { if (status != null) _status = status.toString(); }
 
   public String getStaus() {return _status; }
 
-//  public void setStopId(AgencyAndId stopId) {
-//    _stopId = stopId;
-//  }
-//
-//  public void setRouteId(AgencyAndId routeId) {
-//    _routeId = routeId;
-//  }
-//
-//  public void setTripId(AgencyAndId tripId) {
-//    _tripId = tripId;
-//  }
-//
-//  public AgencyAndId getStopId() {
-//    return _stopId;
-//  }
-//
-//  public AgencyAndId getRouteId() {
-//    return _routeId;
-//  }
-//
-//  public AgencyAndId getTripId() {
-//    return _tripId;
-//  }
+  public void setStopId(AgencyAndId stopId) {
+    _stopId = stopId;
+  }
+
+  public void setRouteId(AgencyAndId routeId) {
+    _routeId = routeId;
+  }
+
+  public void setTripId(AgencyAndId tripId) {
+    _tripId = tripId;
+  }
+
+  public AgencyAndId getStopId() {
+    return _stopId;
+  }
+
+  public AgencyAndId getRouteId() {
+    return _routeId;
+  }
+
+  public AgencyAndId getTripId() {
+    return _tripId;
+  }
 }
