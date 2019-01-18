@@ -60,13 +60,13 @@
                 <param name="namespace">/</param>
                 <param name="actionName">index</param>
             </result>
-            <result name="errorHandler" type="chain">
-		        <param name="actionName">error</param>
-		        <param name="namespace">/</param>
-		    </result>
+            <!--<result name="errorHandler" type="chain">-->
+		        <!--<param name="actionName">error</param>-->
+		        <!--<param name="namespace">/</param>-->
+		    <!--</result>-->
         </global-results>
-        <global-exception-mappings>
-    		<exception-mapping exception="java.lang.Exception" result="errorHandler"/>
-		</global-exception-mappings>
+        <!--<global-exception-mappings>-->
+    		<!--<exception-mapping exception="java.lang.Exception" result="errorHandler"/>-->
+		<!--</global-exception-mappings>-->
     </package>
 </struts>

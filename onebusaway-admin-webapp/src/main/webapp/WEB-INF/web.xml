@@ -175,8 +175,8 @@
     <exception-type>org.springframework.transaction.CannotCreateTransactionException</exception-type>
     <location>/redirect?uri=/down.action</location>
   </error-page>
-  <error-page>
-    <exception-type>java.lang.RuntimeException</exception-type>
-    <location>/redirect?uri=/error.action</location>
-  </error-page>
+  <!--<error-page>-->
+    <!--<exception-type>java.lang.RuntimeException</exception-type>-->
+    <!--<location>/redirect?uri=/error.action</location>-->
+  <!--</error-page>-->
 </web-app>
