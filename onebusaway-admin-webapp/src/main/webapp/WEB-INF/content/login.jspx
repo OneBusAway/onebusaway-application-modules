@@ -57,7 +57,7 @@
 				<s:form action="%{url}"
 						method="post">
 					<input type="submit"
-						   value="Logout" />
+						   value="Continue" />
 					<input type="hidden"
 						   id="csrfField"
 						   name="${_csrf.parameterName}"
