@@ -31,8 +31,18 @@ var compareToDataset =  "";
 var compareToBuildName =  "";
 var compareToArchivedDataset =  "";
 var compareToArchivedBuildName =  "";
+var csrfParameter = "";
+var csrfHeader = "";
+var csrfToken = "";
+
 
 jQuery(function() {
+	// these are provided by sec:csrfMetaTags
+	csrfParameter = $("meta[name='_csrf_parameter']").attr("content");
+	csrfHeader = $("meta[name='_csrf_header']").attr("content");
+	csrfToken = $("meta[name='_csrf']").attr("content");
+
+
 	//Initialize tabs
 	jQuery("#tabs").tabs();
 
@@ -116,7 +126,7 @@ jQuery(function() {
     			buildDiffReport();
     		}
         }
-    });	
+	});
 
 	jQuery("#currentDirectories").selectable({ 
 		stop: function() {
@@ -154,11 +164,13 @@ jQuery(function() {
 				return $(element).text();  
 			}); 
 			if (names.length > 0) {
+				var data = {};
+				data[csrfParameter] = csrfToken;
+				data["selectedBundleName"] = names[0];
+
 				jQuery.ajax({
 					url: "manage-bundles!existingBuildList.action",
-					data: {
-						"selectedBundleName" : names[0]
-					},
+					data: data,
 					type: "GET",
 					async: false,
 					success: function(data) {
@@ -186,15 +198,16 @@ jQuery(function() {
 				// Clear any previous results from the tables
 				$('#diffResultsTable tr').slice(1).remove();
 				$('#fixedRouteDiffTable tr').slice(1).remove();
+				var data = {};
+				data[csrfParameter] = csrfToken;
+				data["datasetName"] = selectedDirectory;
+				data["buildName"] = jQuery("#bundleBuildName").val();
+				data["datasetName2"] = bundleNames[0];
+				data["buildName2"] = buildNames[0];
 
 				jQuery.ajax({
 					url: "compare-bundles!diffResult.action",
-					data: {
-						"datasetName" : selectedDirectory,
-						"buildName" : jQuery("#bundleBuildName").val(),
-						"datasetName2" : bundleNames[0],
-						"buildName2": buildNames[0]
-					},
+					data: data,
 					type: "GET",
 					async: false,
 					success: function(data) {
@@ -928,12 +941,16 @@ function onSelectDataset(sourceDirectoryType) {
 	// Clear any previous reports
 	$("#diffResultsTable tbody").empty();
 	$('#fixedRouteDiffTable tbody').empty();
+	var data = {};
+	data[csrfParameter] = csrfToken;
+	data["directoryName"] = bundleDir;
+	data["destDirectoryName"] = copyDir;
+	data["ts"] = new Date().getTime();
 
 	jQuery.ajax({
-		url: "manage-bundles!" + actionName + ".action?ts=" +new Date().getTime(),
-		type: "GET",
-		data: {"directoryName" : bundleDir,
-			"destDirectoryName" : copyDir},
+		url: "manage-bundles!" + actionName + ".action",
+		type: "POST",
+		data: data,
 			async: false,
 			success: function(response) {
 				clearPreviousBuildResults();
@@ -1105,10 +1122,15 @@ function onSelectDataset(sourceDirectoryType) {
 function onDeleteDataset() {
 	var bundleDir = selectedDirectory;
 	var actionName = "deleteDirectory";
+	var data = {};
+	data[csrfParameter] = csrfToken;
+	data["ts"] = new Date().getTime();
+	data["directoryName"] = bundleDir;
+
 	jQuery.ajax({
-		url: "manage-bundles!" + actionName + ".action?ts=" +new Date().getTime(),
-		type: "GET",
-		data: {"directoryName" : bundleDir},
+		url: "manage-bundles!" + actionName + ".action",
+		type: "POST",
+		data: data,
 		async: false,
 		success: function(response) {
 			disableSelectButton();
@@ -1180,6 +1202,7 @@ function onUploadSelectedAgenciesClick() {
 			formData.append("agencyProtocol", agencyProtocol);
 			formData.append("agencySourceFile", agencyDataFile);
 			formData.append("cleanDir", cleanDir);
+			formData.append(csrfParameter, csrfToken);
 			var actionName = "uploadSourceFile";
 			jQuery.ajax({
 				url: "upload-gtfs!" + actionName + ".action",
@@ -1205,33 +1228,38 @@ function onUploadSelectedAgenciesClick() {
 }
 
 function onBundleCommentChanged() {
+	var data = {};
+	data[csrfParameter] = csrfToken;
+	data["ts"] = new Date().getTime();
+	data["directoryName"] = selectedDirectory;
+	data["comments"] = $("#uploadFiles #bundleComment").val();
+
 	jQuery.ajax({
-		url: "manage-bundles!updateBundleComments.action?ts=" + new Date().getTime(),
-		type: "GET",
-		data: {
-			"directoryName" : selectedDirectory,
-			"comments" : $("#uploadFiles #bundleComment").val()
-		}
+		url: "manage-bundles!updateBundleComments.action",
+		type: "POST",
+		data: data
 	});
 }
 
 function onAddNewAgencyClick() {
+	var data = {};
+	data[csrfParameter] = csrfToken;
+	data["gtfs_id"] = "";
+	data["name"] = $("#newAgencyName").val();
+	data["short_name"] = $("#newAgencyShortName").val();
+	data["legacy_id"] = $("#newAgencyLegacyId").val();
+	data["gtfs_feed_url"] = "";
+	data["gtfs_rt_feed_url"] = "";
+	data["bounding_box"] = "";
+	data["ntd_id"] = "";
+	data["agency_message"] = "";
+
 	// Make ajax call
 	jQuery.ajax({
 		url: "../../api/agency/create",
-		type: "GET",
+		type: "POST",
 		async: false,
-		data: {
-			"gtfs_id" : "",
-			"name" : $("#newAgencyName").val(),
-			"short_name" : $("#newAgencyShortName").val(),
-			"legacy_id" : $("#newAgencyLegacyId").val(),
-			"gtfs_feed_url" : "",
-			"gtfs_rt_feed_url" : "",
-			"bounding_box" : "",
-			"ntd_id" : "",
-			"agency_message" : ""
-		},
+		data: data,
 		success: function(response) {
 			getAgencyMetadata();
 			//clear fields for new agency
@@ -1579,6 +1607,7 @@ function onValidateClick() {
 	jQuery("#prevalidate_validationProgress").text("Validating ... ");
 	jQuery("#prevalidateInputs #validateBox #validating #validationProgress").attr("src","../../css/img/ajax-loader.gif");
 	jQuery("#prevalidateInputs #validateBox #validating").show().css("display","inline");
+	// TODO consider POST
 	jQuery.ajax({
 		url: "../../api/validate/" + bundleDirectory + "/" + bundleName + "/create?ts=" +new Date().getTime(),
 		type: "GET",
@@ -1610,6 +1639,7 @@ function onValidateClick() {
 
 function updateValidateStatus() {
 	var id = jQuery("#prevalidate_id").text();
+	// TODO consider POST
 	jQuery.ajax({
 		url: "../../api/validate/" + id + "/list?ts=" +new Date().getTime(),
 		type: "GET",
@@ -1655,10 +1685,15 @@ function updateValidateStatus() {
 
 //populate list of files that were result of validation
 function updateValidateList(id) {
+	var data = {};
+	data[csrfParameter] = csrfToken;
+	data["id"] = id;
+	data["ts"] = new Date().getTime();
+
 	jQuery.ajax({
-		url: "manage-bundles!fileList.action?ts=" +new Date().getTime(),
-		type: "GET",
-		data: {"id": id},
+		url: "manage-bundles!fileList.action",
+		type: "POST",
+		data: data,
 		async: false,
 		success: function(response) {
 			var txt = "<ul>";
@@ -1804,6 +1839,7 @@ function bundleUrl(buildType) {
 		$resultLink = jQuery("#buildBundle #buildBundle_finalResultLink #finalResultLink");
 	}
 	jQuery("#buildBundle_exception").hide();
+	// TODO consider POST
 	jQuery.ajax({
 		url: "../../api/build/" + id + "/url?ts=" +new Date().getTime(),
 		type: "GET",
@@ -1864,21 +1900,23 @@ function buildBundle(bundleName, startDate, endDate, bundleComment, archive, con
 	}
 	var email = jQuery("#buildNotificationEmail").val();
 	if (email == "") { email = "null"; }
+	var data = {};
+	data[csrfParameter] = csrfToken;
+	data["bundleDirectory"] = bundleDirectory;
+	data["bundleName"] = bundleName;
+	data["email"] = email;
+	data["bundleStartDate"] = startDate;
+	data["bundleEndDate"] = endDate;
+	data["archive"] = archive;
+	data["consolidate"] = consolidate;
+	data["predate"] = predate;
+	data["bundleComment"] = bundleComment; /*comment needs to be the last on the form*/
+
 	jQuery.ajax({
 		url: "../../api/build/create",
 		type: "POST",
 		async: false,
-		data: {
-			bundleDirectory: bundleDirectory,
-			bundleName: bundleName,
-			email: email,
-			bundleStartDate: startDate,
-			bundleEndDate: endDate,
-			archive: archive,
-			consolidate: consolidate,
-			predate: predate,
-			bundleComment: bundleComment /*comment needs to be the last on the form*/
-		},
+		data: data,
 		success: function(response) {
 			var bundleResponse = response;
 			if (bundleResponse != undefined) {
@@ -1929,6 +1967,7 @@ function updateBuildStatus(buildType) {
 		$buildBundle_resultList = jQuery("#buildBundle_finalResultList");
 		$buildBundle_exception = jQuery("#buildBundle_finalException");
 	}
+	// TODO consider POST
 	jQuery.ajax({
 		url: "../../api/build/" + id + "/list?ts=" +new Date().getTime(),
 		type: "GET",
@@ -2030,11 +2069,15 @@ function updateBuildStatus(buildType) {
 //populate list of files that were result of building
 function updateBuildList(id,buildType) {
 	var summaryList = null;
+	var data = {};
+	data[csrfParameter] = csrfToken;
+	data["ts"] = new Date().getTime();
+	data["id"] = id;
+	data["downloadFilename"] = "summary.csv";
 	jQuery.ajax({
-		url: "manage-bundles!downloadOutputFile.action?ts=" +new Date().getTime(),
-		type: "GET",
-		data: {"id": id,
-			"downloadFilename": "summary.csv"},
+		url: "manage-bundles!downloadOutputFile.action",
+		type: "POST",
+		data: data,
 			async: false,
 			success: function(response){
 				summaryList = response;
@@ -2267,14 +2310,16 @@ function updateFixedRouteParams(datasetName) {
 function getExistingBuildList(datasetName) {
 	var buildNameList;
 	var useArchivedGtfs = jQuery("#useArchiveCheckbox").is(":checked");
+	var data = {};
+	data[csrfParameter] = csrfToken;
+	data["selectedBundleName"] = datasetName;
+	data["useArchivedGtfs"] = useArchivedGtfs;
+
 	if (datasetName) {
 		jQuery.ajax({
 			url: "manage-bundles!existingBuildList.action",
-			data: {
-				"selectedBundleName" : datasetName,
-				"useArchivedGtfs" : useArchivedGtfs
-			},
-			type: "GET",
+			data: data,
+			type: "POST",
 			async: false,
 			success: function(data) {
 				buildNameList=data;
@@ -2392,18 +2437,20 @@ function buildDiffReport() {
 		var buildName_1 = currentArchivedReportBuildName;
 		var buildName_2 = compareToArchivedBuildName;		
 	}
+	var data = {};
+	data[csrfParameter] = csrfToken;
+	data["useArchived"] = useArchived;
+	data["datasetName"] = dataset_1;
+	data["dataset_1_build_id"] = dataset_1_build_id;
+	data["buildName"] =buildName_1;
+	data["datasetName2"] = dataset_2;
+	data["dataset_2_build_id"] =dataset_2_build_id;
+	data["buildName2"] = buildName_2;
+
 	jQuery.ajax({
 		url: "compare-bundles!diffResult.action",
-		data: {
-			"useArchived" : useArchived,
-			"datasetName" : dataset_1,
-			"dataset_1_build_id" : dataset_1_build_id,
-			"buildName" : buildName_1,
-			"datasetName2" : dataset_2,
-			"dataset_2_build_id" : dataset_2_build_id,
-			"buildName2": buildName_2
-		},
-		type: "GET",
+		data: data,
+		type: "POST",
 		async: false,
 		success: function(data) {
 			$('#Compare #buildingReportDiv').hide();
@@ -2601,6 +2648,7 @@ function stageBundle() {
 	var environment = jQuery("#deploy_environment").text();
 	var bundleDir = selectedDirectory;
 	var bundleName = jQuery("#Build #bundleBuildName").val();
+	// TODO consider POST
 	jQuery.ajax({
 		url: "../../api/bundle/stagerequest/" + environment + "/" + bundleDir + "/" + bundleName + "?ts=" +new Date().getTime(), 
 		type: "GET",
@@ -2650,6 +2698,7 @@ function stageBundle() {
 
 function updateStageStatus() {
 	id = jQuery("#stageBundle_id").text();
+	// TODO consider POST
 	jQuery.ajax({
 		url: "../../api/bundle/stage/status/" + id + "/list?ts=" +new Date().getTime(),
 		type: "GET",
@@ -2722,7 +2771,7 @@ function onDeployClick() {
 
 function deployBundle(){
 	var environment = jQuery("#deploy_environment").text();
-
+	// TODO consider POST
 	jQuery.ajax({
 		url: "../../api/bundle/deploy/from/" + environment + "?ts=" +new Date().getTime(),
 		type: "GET",
@@ -2754,6 +2803,7 @@ function deployBundle(){
 
 function updateDeployStatus() {
 	id = jQuery("#deployBundle_id").text();
+	// TODO consider POST
 	jQuery.ajax({
 		url: "../../api/bundle/deploy/status/" + id + "/list?ts=" +new Date().getTime(),
 		type: "GET",
@@ -2820,6 +2870,7 @@ function updateDeployStatus() {
 
 function onDeployListClick(){
 	var environment = jQuery("#deploy_environment").text();
+	// TODO consider POST
 	jQuery.ajax({
 		url: "../../api/bundle/deploy/list/" + environment + "?ts=" +new Date().getTime(),
 		type: "GET",
@@ -2895,6 +2946,7 @@ function parseQuerystring (){
 
 //retrieve transit agency metadata from server
 function getAgencyMetadata(){
+	// TODO consider POST
 	jQuery.ajax({
 		url: "../../api/agency/list",
 		type: "GET",
