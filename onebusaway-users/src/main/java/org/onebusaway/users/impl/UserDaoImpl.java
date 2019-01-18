@@ -15,6 +15,7 @@
  */
 package org.onebusaway.users.impl;
 
+import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -173,7 +174,8 @@ class UserDaoImpl implements UserDao {
               .add(Restrictions.eq("id.type", keyType))
               .setProjection(Projections.rowCount());
       List<User> users = criteria.list();
-      Integer count = (Integer) criteria.uniqueResult();
+      Long lcount = (Long) criteria.uniqueResult();
+      Integer count = BigDecimal.valueOf(lcount).intValueExact(); // do range checking
       return count;
   }
 
@@ -202,6 +204,7 @@ class UserDaoImpl implements UserDao {
   }
 
   @Override
+  @Transactional
   public void deleteUserIndex(UserIndex index) {
     getSession().delete(index);
   }
