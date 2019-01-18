@@ -482,10 +482,10 @@ public class GtfsRealtimeTripLibrary {
     TripEntry tripEntry = _entitySource.getTrip(trip.getTripId());
     if (tripEntry == null) {
       if (result != null) {
-        _log.debug("reporting unmatched trip with id=" + trip.getTripId());
+        _log.debug("discarding: reporting unmatched trip with id=" + trip.getTripId());
         result.addUnmatchedTripId(trip.getTripId());
       } else {
-        _log.warn("no trip found with id=" + trip.getTripId());
+        _log.warn("discarding: no trip found with id=" + trip.getTripId());
       }
       
       return null;
