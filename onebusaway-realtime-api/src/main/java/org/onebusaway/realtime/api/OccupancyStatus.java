@@ -28,6 +28,7 @@ import java.io.Serializable;
  * https://github.com/OneBusAway/onebusaway-application-modules/issues/121
  */
 public enum OccupancyStatus implements Serializable {
+
   /** proposed addition */
   UNKNOWN(-1),
   /**
@@ -66,8 +67,8 @@ public enum OccupancyStatus implements Serializable {
    */
   NOT_ACCEPTING_PASSENGERS(6);
 
+  private static Logger _log = LoggerFactory.getLogger(OccupancyStatus.class);
   private int _status;
-
   OccupancyStatus() {_status = -1; }
   OccupancyStatus(int status) { _status = status; }
   public int valueOf() { return _status; }
@@ -98,11 +99,13 @@ public enum OccupancyStatus implements Serializable {
       return CRUSHED_STANDING_ROOM_ONLY;
     if (status == FULL.valueOf())
       return FULL;
-    if (status == NOT_ACCEPTING_PASSENGERS.valueOf())
+    if (status == NOT_ACCEPTING_PASSENGERS.valueOf()) {
+      _log.warn("Occupancy Status set to NotAcceptingPassengers");
       return NOT_ACCEPTING_PASSENGERS;
+    }
     throw new IllegalArgumentException("unexpected value " + status);
-
   }
+
   public static OccupancyStatus toEnum(double rid) {
     int status;
     if(rid < 0.0) {
@@ -117,7 +120,7 @@ public enum OccupancyStatus implements Serializable {
       status = 3;
     } else if(rid <= 90.0) {
       status = 4;
-    } else if(rid <= 99.0) {
+    } else if(rid <= 100.0) {
       status = 5;
     } else {
       status = 6;
