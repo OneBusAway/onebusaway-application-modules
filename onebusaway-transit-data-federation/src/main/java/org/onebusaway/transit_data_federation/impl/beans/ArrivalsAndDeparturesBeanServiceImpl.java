@@ -327,7 +327,7 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
 
     if (_ridershipService != null) {
       List<HistoricalRidership> occ = _ridershipService.getHistoricalRiderships(trip.getRoute().getId(), trip.getId(), stop.getId(), pab.getServiceDate());
-      if(occ.size() > 0) pab.setHistoricalOccupancy(OccupancyStatus.toEnum(occ.get(0).getLoadFactor()));
+      if(occ != null && occ.size() > 0 && occ.get(0) != null) pab.setHistoricalOccupancy(OccupancyStatus.toEnum(occ.get(0).getLoadFactor()));
     }
     return pab;
   }

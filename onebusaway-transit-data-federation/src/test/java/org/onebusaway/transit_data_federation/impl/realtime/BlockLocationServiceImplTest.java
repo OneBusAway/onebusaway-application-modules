@@ -85,7 +85,7 @@ public class BlockLocationServiceImplTest {
     TripEntryImpl tripA = trip("tripA", "serviceId");
     TripEntryImpl tripB = trip("tripB", "serviceId");
 
-    stopTime(0, stopA, tripA, 30, 90, 0);
+    stopTime(0, stopA, tripA, 30, 90, 0, 50.0);
     stopTime(1, stopB, tripA, 120, 120, 100);
     stopTime(2, stopC, tripA, 180, 210, 200);
 
@@ -145,6 +145,7 @@ public class BlockLocationServiceImplTest {
     assertEquals(-122.5, location.getLocation().getLon(), epsilon);
     assertEquals(blockConfig.getStopTimes().get(0), location.getClosestStop());
     assertEquals(0, location.getClosestStopTimeOffset());
+    assertEquals("fewSeatsAvailable", blockConfig.getStopTimes().get(0).getStopTime().getHistoricalOccupancy().toString());
   }
 
   private long t(long serviceDate, int hours, double minutes) {

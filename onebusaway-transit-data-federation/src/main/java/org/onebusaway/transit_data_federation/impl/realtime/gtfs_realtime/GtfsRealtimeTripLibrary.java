@@ -410,7 +410,7 @@ public class GtfsRealtimeTripLibrary {
     return createVehicleLocationRecordForUpdate(null, update);
   }    
     
-    public VehicleLocationRecord createVehicleLocationRecordForUpdate(MonitoredResult result,
+  public VehicleLocationRecord createVehicleLocationRecordForUpdate(MonitoredResult result,
         CombinedTripUpdatesAndVehiclePosition update) {
 
 
@@ -652,7 +652,11 @@ public class GtfsRealtimeTripLibrary {
             if (stopTimeUpdate.hasStopSequence()) {
               tpr.setStopSequence(stopTimeUpdate.getStopSequence());
             }
-
+            if (stopTimeUpdate.getScheduleRelationship().equals(StopTimeUpdate.ScheduleRelationship.SKIPPED)) {
+              tpr.setScheduleRealtionship(1); // set tpr scheduleRelationship enum to SKIPPED
+            } else {
+              tpr.setScheduleRealtionship(0);
+            }
             int currentArrivalTime = computeArrivalTime(stopTime,
                 stopTimeUpdate, instance.getServiceDate());
             int currentDepartureTime = computeDepartureTime(stopTime,

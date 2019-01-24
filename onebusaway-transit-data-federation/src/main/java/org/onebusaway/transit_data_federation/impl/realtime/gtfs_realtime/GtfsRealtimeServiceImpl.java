@@ -101,7 +101,7 @@ class GtfsRealtimeServiceImpl implements GtfsRealtimeService {
         for (TimepointPredictionRecord tpr: timepointPredictions) {
            StopTimeUpdate.Builder stopTimeUpdate = StopTimeUpdate.newBuilder();
            stopTimeUpdate.setStopId(AgencyAndId.convertToString(tpr.getTimepointId()));
-           stopTimeUpdate.setScheduleRelationship(com.google.transit.realtime.GtfsRealtime.TripUpdate.StopTimeUpdate.ScheduleRelationship.SCHEDULED);
+           stopTimeUpdate.setScheduleRelationship(StopTimeUpdate.ScheduleRelationship.valueOf(tpr.getScheduleRelationship().getValue()));
       
            if (tpr.getTimepointPredictedArrivalTime() != -1) {
              StopTimeEvent.Builder arrivalStopTimeEvent = StopTimeEvent.newBuilder();

@@ -411,7 +411,7 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
 
     if (inclusion.isIncludeTripStatus() && blockLocation != null) {
       status = getBlockLocationAsStatusBean(blockLocation, time);
-      if (status == null)
+      if (status == null || status.getStatus().equals("SKIPPED"))
         missing = true;
       else
         vehicleId = AgencyAndIdLibrary.convertFromString(status.getVehicleId());

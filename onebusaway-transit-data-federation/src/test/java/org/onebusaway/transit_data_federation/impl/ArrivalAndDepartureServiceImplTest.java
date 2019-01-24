@@ -16,8 +16,7 @@
 package org.onebusaway.transit_data_federation.impl;
 
 import static junit.framework.TestCase.assertTrue;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.block;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.blockConfiguration;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.dateAsLong;
@@ -32,6 +31,7 @@ import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.realtime.api.OccupancyStatus;
 import org.onebusaway.realtime.api.TimepointPredictionRecord;
 import org.onebusaway.realtime.api.VehicleLocationRecord;
+import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
 import org.onebusaway.transit_data.model.TransitDataConstants;
 import org.onebusaway.transit_data_federation.impl.blocks.BlockStatusServiceImpl;
 import org.onebusaway.transit_data_federation.impl.blocks.ScheduledBlockLocationServiceImpl;
@@ -42,6 +42,7 @@ import org.onebusaway.transit_data_federation.impl.transit_graph.StopEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.TripEntryImpl;
 import org.onebusaway.transit_data_federation.model.StopTimeInstance;
 import org.onebusaway.transit_data_federation.model.TargetTime;
+import org.onebusaway.transit_data_federation.services.ArrivalAndDepartureQuery;
 import org.onebusaway.transit_data_federation.services.StopTimeService;
 import org.onebusaway.transit_data_federation.services.StopTimeService.EFrequencyStopTimeBehavior;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
@@ -56,6 +57,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import java.sql.Time;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -96,7 +98,7 @@ public class ArrivalAndDepartureServiceImplTest {
   private StopEntryImpl mStopD = stop("stopD", 47.0, -134.0);
   
   private TripEntryImpl mTrip1 = trip("tripA", "sA", 3000);
-  
+
   private TripEntryImpl mTrip2 = trip("tripB", "sB", 3000);
   
   private TripEntryImpl mTrip3 = trip("tripC", "sC", 3000);
@@ -1649,6 +1651,9 @@ public class ArrivalAndDepartureServiceImplTest {
     
   }
 
+  /**
+   * Testing Historical Occupancy Functionality
+   */
   @Test
   public void testGetArrivalsAndDeparturesForStopInTimeRange19() {
 
@@ -1659,10 +1664,49 @@ public class ArrivalAndDepartureServiceImplTest {
     tprA.setTripId(mTrip1.getId());
 
     List<ArrivalAndDepartureInstance> arrivalsAndDepartures = getArrivalsAndDeparturesForStopInTimeRangeByTimepointPredictionRecord(Arrays.asList(tprA));
-    assertTrue(arrivalsAndDepartures.get(0).getHistoricalOccupancy() instanceof OccupancyStatus);
-
+    assertNotNull(arrivalsAndDepartures.get(0).getHistoricalOccupancy());
+    assertNotNull(arrivalsAndDepartures.get(0).getBlockStopTime().getStopTime().getHistoricalOccupancy());
+    assertNotNull(arrivalsAndDepartures.get(0).getStopTimeInstance().getStopTime().getStopTime().getHistoricalOccupancy());
 
   }
+
+  /**
+   * Testing StopTime update SKIPPED stops support
+   */
+  @Test
+  public void testGetArrivalsAndDeparturesForStopInTimeRange(){
+
+    List<TimepointPredictionRecord> tprs = getTimepointPredictionsWithSkippedStop();
+    List<ArrivalAndDepartureInstance> arrivalsAndDepartures = getArrivalsAndDeparturesForStopInTimeRangeByTimepointPredictionRecord(tprs);
+
+    assertEquals(2, arrivalsAndDepartures.size());
+    assertEquals(2, arrivalsAndDepartures.get(0).getBlockLocation().getTimepointPredictions().size());
+    assertNotNull(arrivalsAndDepartures.get(0).getBlockLocation().getTimepointPredictions().get(0).getScheduleRelationship());
+    assertEquals(1, arrivalsAndDepartures.get(0).getBlockLocation().getTimepointPredictions().get(0).getScheduleRelationship().getValue());
+
+
+    // Instance doesn't have arrival time from first TPR because its skipped
+    assertEquals(arrivalsAndDepartures.get(0).getBlockLocation().getTimepointPredictions().get(1).getTimepointPredictedArrivalTime(), arrivalsAndDepartures.get(0).getPredictedArrivalTime());
+
+  }
+
+  private List<TimepointPredictionRecord> getTimepointPredictionsWithSkippedStop() {
+
+    TimepointPredictionRecord tprA = new TimepointPredictionRecord();
+    tprA.setTimepointId(mStopA.getId());
+    tprA.setTripId(mTrip1.getId());
+    tprA.setScheduleRealtionship(1);
+
+    TimepointPredictionRecord tprB = new TimepointPredictionRecord();
+    tprB.setTimepointId(mStopB.getId());
+    long tprBTime = createPredictedTime(time(13, 46));
+    tprB.setTimepointPredictedArrivalTime(tprBTime);
+    tprB.setTripId(mTrip1.getId());
+
+
+    return Arrays.asList(tprA, tprB);
+  }
+
 
 
   /**
@@ -1749,7 +1793,7 @@ public class ArrivalAndDepartureServiceImplTest {
 
     // Create ScheduledBlockLocation for cache
     ScheduledBlockLocation sbl = new ScheduledBlockLocation();
-    sbl.setActiveTrip(blockLocationB.getActiveTrip());
+
 
     // Add data to cache
     _cache.addRecord(blockInstance, vlr, sbl, null);
@@ -1858,7 +1902,6 @@ public class ArrivalAndDepartureServiceImplTest {
   }
 
   
-  
   /**
    * Set up the BlockLocationServiceImpl for the test, using the given
    * timepointPredictions
@@ -1879,8 +1922,7 @@ public class ArrivalAndDepartureServiceImplTest {
    *         predicted arrival/departure times for a stop, for comparison
    *         against the expected values
    */
-  private List<ArrivalAndDepartureInstance> 
-      getArrivalsAndDeparturesForLoopInTheMiddleOfRouteInTimeRangeByTimepointPredictionRecord(
+  private List<ArrivalAndDepartureInstance> getArrivalsAndDeparturesForLoopInTheMiddleOfRouteInTimeRangeByTimepointPredictionRecord(
       List<TimepointPredictionRecord> timepointPredictions) {
     TargetTime target = new TargetTime(mCurrentTime, mCurrentTime);
 

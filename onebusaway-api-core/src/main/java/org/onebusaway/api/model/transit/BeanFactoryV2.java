@@ -207,8 +207,11 @@ public class BeanFactoryV2 {
       ListBean<TripDetailsBean> trips) {
 
     List<TripDetailsV2Bean> beans = new ArrayList<TripDetailsV2Bean>();
-    for (TripDetailsBean trip : trips.getList())
-      beans.add(getTripDetails(trip));
+    for (TripDetailsBean trip : trips.getList()){
+      if(trip != null)
+        beans.add(getTripDetails(trip));
+    }
+
     return list(beans, trips.isLimitExceeded(), false);
   }
 

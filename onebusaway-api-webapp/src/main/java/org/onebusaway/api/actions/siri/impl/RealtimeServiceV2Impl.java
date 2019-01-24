@@ -153,6 +153,7 @@ public class RealtimeServiceV2Impl implements RealtimeServiceV2 {
     ListBean<TripDetailsBean> trips = getAllTripsForRoute(routeId,
         currentTime);
     for (TripDetailsBean tripDetails : trips.getList()) {
+      if(tripDetails == null) continue;
       // filter out interlined routes
       if (routeId != null
           && !tripDetails.getTrip().getRoute().getId()
@@ -550,6 +551,7 @@ public class RealtimeServiceV2Impl implements RealtimeServiceV2 {
     ListBean<TripDetailsBean> trips = getAllTripsForRoute(routeId,
         currentTime);
     for (TripDetailsBean tripDetails : trips.getList()) {
+      if(tripDetails == null) continue;
       // filter out interlined routes
       if (routeId != null
           && !tripDetails.getTrip().getRoute().getId()

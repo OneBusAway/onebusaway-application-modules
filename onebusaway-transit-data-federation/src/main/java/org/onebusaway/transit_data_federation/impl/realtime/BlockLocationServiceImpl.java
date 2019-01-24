@@ -593,6 +593,11 @@ public class BlockLocationServiceImpl implements BlockLocationService,
           if (stopId == null || predictedTime == 0)
             continue;
 
+          if (tpr.isSkipped()) {
+            _log.info("\nRecord has Timepoint with SKIPPED schedule relationship\n");
+            location.setStatus("SKIPPED");
+          }
+
           for (BlockStopTimeEntry blockStopTime : blockConfig.getStopTimes()) {
             StopTimeEntry stopTime = blockStopTime.getStopTime();
             StopEntry stop = stopTime.getStop();
@@ -608,7 +613,7 @@ public class BlockLocationServiceImpl implements BlockLocationService,
                 }
                 
                 // If this isn't the last prediction, and we're on the first stop, then apply it
-                if (isLastPrediction(stopTime, timepointPredictions, tpr, tprIndexCounter) 
+                if (isLastPrediction(stopTime, timepointPredictions, tpr, tprIndexCounter)
                     && isFirstStopInRoute(stopTime)) {
                   // Do not calculate schedule deviation
                   continue;

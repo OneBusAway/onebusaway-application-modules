@@ -423,8 +423,6 @@ public class StopTimeServiceImplTest {
 
   @Test
   public void test04() {
-    Date dayA = getTimeAsDay(date("2009-09-02 00:00"));
-    Date dayB = getTimeAsDay(date("2009-09-03 00:00"));
 
     StopTimeEntryImpl stA = stopTime(0, _stop, trip("A", "sA"), time(10, 00),
         time(10, 30), 0, -1, 20.0);
@@ -432,19 +430,19 @@ public class StopTimeServiceImplTest {
         time(25, 30), 0, -1, 40.0);
     StopTimeEntryImpl stC = stopTime(2, _stop, trip("C", "sB"), time(10, 00),
         time(10, 30), 0, -1, 60.0);
-    StopTimeEntryImpl stD = stopTime(3, _stop, trip("D", "sB"), time(25, 0),
+    StopTimeEntryImpl stE = stopTime(3, _stop, trip("D", "sB"), time(25, 0),
         time(25, 30), 0, -1, 80.0);
 
 
     assertNotNull(stA.getHistoricalOccupancy());
     assertNotNull(stB.getHistoricalOccupancy());
     assertNotNull(stC.getHistoricalOccupancy());
-    assertNotNull(stD.getHistoricalOccupancy());
+    assertNotNull(stE.getHistoricalOccupancy());
 
     assertEquals( OccupancyStatus.MANY_SEATS_AVAILABLE, stA.getHistoricalOccupancy());
     assertEquals( OccupancyStatus.FEW_SEATS_AVAILABLE, stB.getHistoricalOccupancy());
     assertEquals( OccupancyStatus.STANDING_ROOM_ONLY, stC.getHistoricalOccupancy());
-    assertEquals( OccupancyStatus.CRUSHED_STANDING_ROOM_ONLY, stD.getHistoricalOccupancy());
+    assertEquals( OccupancyStatus.CRUSHED_STANDING_ROOM_ONLY, stE.getHistoricalOccupancy());
 
     assertEquals( OccupancyStatus.MANY_SEATS_AVAILABLE, stA.getTrip().getStopTimes().get(0).getHistoricalOccupancy());
 
