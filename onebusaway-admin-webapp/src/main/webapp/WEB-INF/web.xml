@@ -85,6 +85,11 @@
     <filter>
         <filter-name>CorsFilter</filter-name>
         <filter-class>org.apache.catalina.filters.CorsFilter</filter-class>
+        <!-- https://bz.apache.org/bugzilla/show_bug.cgi?id=62343 wildcard is no longer default -->
+        <init-param>
+            <param-name>cors.allowed.origins</param-name>
+            <param-value>*</param-value>
+        </init-param>
     </filter>
     <filter-mapping>
         <filter-name>CorsFilter</filter-name>
