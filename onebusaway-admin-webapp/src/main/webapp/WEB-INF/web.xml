@@ -174,14 +174,23 @@
   </servlet-mapping>
   <error-page>
     <error-code>404</error-code>
-    <location>/error/404.action</location>
-  </error-page> 
+      <location>/redirect?uri=/error/404.action</location>
+  </error-page>
   <error-page>
     <exception-type>org.springframework.transaction.CannotCreateTransactionException</exception-type>
     <location>/redirect?uri=/down.action</location>
   </error-page>
-  <!--<error-page>-->
-    <!--<exception-type>java.lang.RuntimeException</exception-type>-->
-    <!--<location>/redirect?uri=/error.action</location>-->
-  <!--</error-page>-->
+    <error-page>
+        <exception-type>org.springframework.security.web.csrf.CsrfException</exception-type>
+        <location>/redirect?uri=/error.action?type=CsrfException</location>
+    </error-page>
+    <error-page>
+        <exception-type>org.springframework.remoting.RemoteConnectFailureException</exception-type>
+        <location>/redirect?uri=/error.action?type=Cannot%20Connect%20To%20TDS</location>
+    </error-page>
+  <error-page>
+    <exception-type>java.lang.RuntimeException</exception-type>
+    <location>/redirect?uri=/error.action?type=RuntimeException</location>
+  </error-page>
+
 </web-app>
