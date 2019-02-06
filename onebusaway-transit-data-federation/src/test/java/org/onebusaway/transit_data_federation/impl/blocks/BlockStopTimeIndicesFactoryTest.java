@@ -268,7 +268,7 @@ public class BlockStopTimeIndicesFactoryTest {
     assertEquals(OccupancyStatus.STANDING_ROOM_ONLY, bcG.getStopTimes().get(3).getStopTime().getHistoricalOccupancy());
     assertEquals(OccupancyStatus.CRUSHED_STANDING_ROOM_ONLY, bcG.getStopTimes().get(4).getStopTime().getHistoricalOccupancy());
     assertEquals(OccupancyStatus.FULL, bcG.getStopTimes().get(5).getStopTime().getHistoricalOccupancy());
-    assertEquals(OccupancyStatus.NOT_ACCEPTING_PASSENGERS, bcG.getStopTimes().get(6).getStopTime().getHistoricalOccupancy());
+    assertEquals(OccupancyStatus.FULL, bcG.getStopTimes().get(6).getStopTime().getHistoricalOccupancy());
   }
 
   @Test
