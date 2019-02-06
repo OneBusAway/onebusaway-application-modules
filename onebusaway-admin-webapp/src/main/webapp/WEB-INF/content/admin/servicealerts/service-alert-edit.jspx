@@ -90,6 +90,10 @@
 		</div>
 	</s:if>
 	<s:form action="service-alert">
+		<input type="hidden"
+			   id="csrfField"
+			   name="${_csrf.parameterName}"
+			   value="${_csrf.token}"/>
 		<div id="describeAlertDiv">
 			<span  id="describeAlertHeader">Step 1: Describe the alert</span>
 			<div id="describeAlertsTableDiv">

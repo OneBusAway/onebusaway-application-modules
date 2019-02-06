@@ -172,6 +172,10 @@
     <servlet-name>transitime</servlet-name>
 	<url-pattern>/transitime/*</url-pattern>
   </servlet-mapping>
+    <error-page>
+        <error-code>403</error-code>
+        <location>/redirect?uri=/error.action?type=Forbidden%20or%20CSRF%20Token%20Missing</location>
+    </error-page>
   <error-page>
     <error-code>404</error-code>
       <location>/redirect?uri=/error/404.action</location>

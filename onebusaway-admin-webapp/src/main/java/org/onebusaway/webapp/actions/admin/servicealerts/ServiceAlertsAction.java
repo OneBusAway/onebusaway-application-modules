@@ -34,6 +34,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.opensymphony.xwork2.validator.annotations.RequiredStringValidator;
 import com.opensymphony.xwork2.validator.annotations.Validations;
+import org.springframework.remoting.RemoteConnectFailureException;
 
 @Results({@Result(type = "redirectAction", name = "redirect", params = {
     "actionName", "service-alerts!agency", "agencyId", "${agencyId}", "parse",
@@ -158,7 +159,7 @@ public class ServiceAlertsAction extends OneBusAwayNYCAdminActionSupport {
     } catch (Throwable t) {
       _log.error("unable to retrieve agencies with coverage", t);
       _log.error("issue connecting to TDS -- check your configuration in data-sources.xml");
-      throw new RuntimeException("Check your onebusaway-nyc-transit-data-federation-webapp configuration", t);
+      throw new RemoteConnectFailureException("Check your onebusaway-nyc-transit-data-federation-webapp configuration", t);
     }
     return SUCCESS;
   }
