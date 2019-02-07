@@ -743,6 +743,9 @@ public class GtfsRealtimeTripLibrary {
       record.setBlockStartTime(blockDescriptor.getStartTime());
     }
 
+    if(blockDescriptor.getScheduleRelationship() != null)
+      record.setStatus(blockDescriptor.getScheduleRelationship().toString());
+
 
     record.setScheduleDeviation(best.scheduleDeviation);
     if (best.timestamp != 0) {

@@ -143,7 +143,10 @@ class GtfsRealtimeServiceImpl implements GtfsRealtimeService {
 
       TripDescriptor.Builder tripDescriptor = TripDescriptor.newBuilder();
       tripDescriptor.setRouteId(AgencyAndId.convertToString(routeId));
-      tripDescriptor.setScheduleRelationship(ScheduleRelationship.SCHEDULED);
+      if (activeBlock.getStatus() != null)
+        tripDescriptor.setScheduleRelationship(com.google.transit.realtime.GtfsRealtime.TripDescriptor.ScheduleRelationship.valueOf(activeBlock.getStatus()));
+      else
+        tripDescriptor.setScheduleRelationship(ScheduleRelationship.SCHEDULED);
       tripDescriptor.setStartDate(startDate);
       tripDescriptor.setTripId(AgencyAndId.convertToString(tripId));
       tripUpdate.setTrip(tripDescriptor);
