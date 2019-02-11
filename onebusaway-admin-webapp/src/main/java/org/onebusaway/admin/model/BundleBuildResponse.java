@@ -258,7 +258,11 @@ public class BundleBuildResponse {
 	    return;
 	  }
 	  if (_exception == null) {
-	  _exception = new SerializableException(e.getMessage(), e);
+	  	String msg = "";
+	  	if (e.getMessage() != null) {
+	  		msg = e.getMessage().substring(0, Math.min(e.getMessage().length(), BundleBuildResponse.EX_MSG_LEN));
+		}
+	  _exception = new SerializableException(msg, e);
 	  } else {
 	    _exception = new SerializableException(e, _exception);
 	  }
