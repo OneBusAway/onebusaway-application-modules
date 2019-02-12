@@ -15,6 +15,7 @@
  */
 package org.onebusaway.admin.service.impl;
 
+import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -83,7 +84,8 @@ public class UserManagementServiceImpl implements UserManagementService {
 				.add(Restrictions.eq("id.type", UserIndexTypes.USERNAME))
 				.setProjection(Projections.rowCount());
 		List<User> users = criteria.list();
-		Integer count = (Integer) criteria.uniqueResult();
+		Long lcount = (Long)criteria.uniqueResult();
+		Integer count = BigDecimal.valueOf(lcount).intValueExact(); // do some range checking on the cast
 		return count;
     }
 

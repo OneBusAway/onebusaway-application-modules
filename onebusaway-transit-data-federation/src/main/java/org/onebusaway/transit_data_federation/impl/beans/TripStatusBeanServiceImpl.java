@@ -23,6 +23,7 @@ import java.util.Map;
 
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.realtime.api.EVehiclePhase;
+import org.onebusaway.realtime.api.EVehicleStatus;
 import org.onebusaway.realtime.api.TimepointPredictionRecord;
 import org.onebusaway.transit_data.model.ListBean;
 import org.onebusaway.transit_data.model.StopBean;
@@ -411,7 +412,7 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
 
     if (inclusion.isIncludeTripStatus() && blockLocation != null) {
       status = getBlockLocationAsStatusBean(blockLocation, time);
-      if (status == null || status.getStatus().equals("SKIPPED"))
+      if (status == null || status.getStatus().equals(EVehicleStatus.SKIPPED.toString()))
         missing = true;
       else
         vehicleId = AgencyAndIdLibrary.convertFromString(status.getVehicleId());

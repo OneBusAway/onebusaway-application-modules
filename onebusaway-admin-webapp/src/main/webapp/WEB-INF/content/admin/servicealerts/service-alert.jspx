@@ -81,6 +81,10 @@
 </s:else>
 
 <s:form action="service-alert!submit" theme="xhtml">
+<input type="hidden"
+       id="csrfField"
+       name="${_csrf.parameterName}"
+       value="${_csrf.token}"/>
 <s:textfield label="Summary" name="summary" value="%{summary}"/>
 <s:textarea label="Description" name="description" value="%{description}" cols="80" rows="5"/>
 <s:select label="Reason" name="reason" headerKey="null" headerValue="Select Reason" list="reasonValues" value="%{reason}"/>

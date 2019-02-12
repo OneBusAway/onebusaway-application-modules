@@ -15,7 +15,6 @@
  */
 package org.onebusaway.transit_data_federation.impl;
 
-import org.joda.time.DateTimeConstants;
 import org.onebusaway.container.refresh.Refreshable;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
@@ -29,7 +28,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import java.io.File;
@@ -118,35 +116,6 @@ public class RidershipServiceImpl implements RidershipService {
             return a1.toString() + "." + a2.toString() + "." + a3.toString();
         return null;
     }
-//    @Override
-//    public List<HistoricalRidership> getAllHistoricalRiderships() {
-//        return _riderships;
-//    }
-//
-//    @Override
-//    public List<HistoricalRidership> getHistoricalRidershipsForTrip(AgencyAndId tripId) {
-//        return _tripRiderships.get(tripId);
-//    }
-//
-//    @Override
-//    public List<HistoricalRidership> getHistoricalRidershipsForStop(AgencyAndId stopId) {
-//        return _stopRiderships.get(stopId);
-//    }
-//
-//    @Override
-//    public List<HistoricalRidership> getHistoricalRidershipsForRoute(AgencyAndId routeId) {
-//        return _routeRiderships.get(routeId);
-//    }
-//
-//    @Override
-//    public List<HistoricalRidership> getHistoricalRiderships(AgencyAndId routeId, AgencyAndId tripId, AgencyAndId stopId) {
-//        String hash = hash(routeId, tripId, stopId);
-//        if (hash == null)
-//            return  new ArrayList<>();
-//        return _tuppleRiderships.get(hash);
-//    }
-
-
     @Override
     public List<HistoricalRidership> getAllHistoricalRiderships(long serviceDate) {
         return filterByServiceDate(_riderships, serviceDate);

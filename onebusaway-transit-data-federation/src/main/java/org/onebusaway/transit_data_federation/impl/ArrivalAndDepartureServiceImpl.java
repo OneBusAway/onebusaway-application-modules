@@ -193,7 +193,6 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
 
           BlockLocation scheduledLocation = _blockLocationService.getScheduledLocationForBlockInstance(
               blockInstance, currentTime);
-          System.err.println(scheduledLocation.getActiveTrip().getTrip().getId().getId());
           if (scheduledLocation != null)
             applyBlockLocationToInstance(instance, scheduledLocation,
                 currentTime);

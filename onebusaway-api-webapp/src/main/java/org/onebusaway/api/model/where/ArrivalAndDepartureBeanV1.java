@@ -21,7 +21,7 @@ import java.io.Serializable;
 
 public class ArrivalAndDepartureBeanV1 implements Serializable {
 
-  private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 2L;
 
   private String routeId;
 

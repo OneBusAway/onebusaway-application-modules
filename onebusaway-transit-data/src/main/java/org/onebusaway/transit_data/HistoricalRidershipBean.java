@@ -16,7 +16,6 @@
 
 package org.onebusaway.transit_data;
 
-import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.realtime.api.OccupancyStatus;
 
 import java.io.Serializable;

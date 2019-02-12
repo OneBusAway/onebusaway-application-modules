@@ -26,7 +26,7 @@
 
     <appender name="ROLL" class="org.apache.log4j.rolling.RollingFileAppender">
         <rollingPolicy class="org.apache.log4j.rolling.TimeBasedRollingPolicy">
-            <param name="FileNamePattern" value="/tmp/tds.%d.log" />
+            <param name="FileNamePattern" value="/var/log/tomcat6/tds.%d.log" />
         </rollingPolicy>
 
         <layout class="org.apache.log4j.PatternLayout">
@@ -44,6 +44,13 @@
     </appender>
 
     <!-- 0 or more logger/category elements -->
+    <!-- org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.GtfsRealtimeTripLibrary -->
+    <!--category name="org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.GtfsRealtimeTripLibrary">
+         <priority value="debug" />
+    </category-->
+    <!--category name="org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.GtfsRealtimeSource">
+        <priority value="debug" />
+    </category-->
 
     <!-- 0 or 1 root elements -->
 

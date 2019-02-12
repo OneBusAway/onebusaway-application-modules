@@ -468,6 +468,8 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
           _log.debug("matched vehicle " + vehicleId + " on block=" + record.getBlockId() + " with scheduleDeviation=" + record.getScheduleDeviation());
           _vehicleLocationListener.handleVehicleLocationRecord(record);
           _lastVehicleUpdate.put(vehicleId, timestamp);
+        } else {
+          _log.debug("discarding: update for vehicle " + vehicleId + " as timestamp in past");
         }
       }
     }
@@ -492,7 +494,7 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     }
     // NOTE: this implies receiving stale updates is equivalent to not being updated at all
     result.setLastUpdate(newestUpdate);
-    _log.info("Agency " + this.getAgencyIds().get(0) + " has active vehicles=" + seenVehicles.size() 
+    _log.info("Agency " + this.getAgencyIds().get(0) + " has active vehicles=" + seenVehicles.size()
         + " for updates=" + updates.size() + " with most recent timestamp " + new Date(newestUpdate));
   }
 

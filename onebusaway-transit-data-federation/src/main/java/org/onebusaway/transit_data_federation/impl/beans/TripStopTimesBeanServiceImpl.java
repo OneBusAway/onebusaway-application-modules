@@ -76,7 +76,7 @@ public class TripStopTimesBeanServiceImpl implements TripStopTimesBeanService {
   public TripStopTimesBean getStopTimesForBlockTrip(BlockTripInstance blockTripInstance) {
 
     BlockTripEntry blockTrip = blockTripInstance.getBlockTrip();
-    TripStopTimesBean bean = getStopTimesForTrip(blockTrip.getTrip());
+    TripStopTimesBean bean = getStopTimesForTrip(blockTrip.getTrip(), blockTripInstance.getServiceDate());
     if (blockTrip.getPreviousTrip() != null) {
       BlockTripEntry previous = blockTrip.getPreviousTrip();
       TripBean previousTrip = _tripBeanService.getTripForId(previous.getTrip().getId());
@@ -111,7 +111,7 @@ public class TripStopTimesBeanServiceImpl implements TripStopTimesBeanService {
    * Private Methods
    ****/
 
-  private TripStopTimesBean getStopTimesForTrip(TripEntry trip) {
+  private TripStopTimesBean getStopTimesForTrip(TripEntry trip, long serviceDate) {
 
     AgencyAndId tripId = trip.getId();
 
@@ -131,7 +131,7 @@ public class TripStopTimesBeanServiceImpl implements TripStopTimesBeanService {
       StopBean stopBean = _stopBeanService.getStopForId(stopEntry.getId());
       stBean.setStop(stopBean);
       stBean.setDistanceAlongTrip(stopTime.getShapeDistTraveled());
-      List<HistoricalRidership> rid = _ridershipService.getHistoricalRiderships(trip.getRoute().getId(), trip.getId(), stopEntry.getId(), 0);
+      List<HistoricalRidership> rid = _ridershipService.getHistoricalRiderships(trip.getRoute().getId(), trip.getId(), stopEntry.getId(), serviceDate);
       if(rid != null && rid.size() > 0) stBean.setHistoricalOccupancy(OccupancyStatus.toEnum(rid.get(0).getLoadFactor()));
 
       bean.addStopTime(stBean);

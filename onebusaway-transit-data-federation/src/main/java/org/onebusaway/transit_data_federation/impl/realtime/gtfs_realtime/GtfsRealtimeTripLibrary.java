@@ -482,10 +482,10 @@ public class GtfsRealtimeTripLibrary {
     TripEntry tripEntry = _entitySource.getTrip(trip.getTripId());
     if (tripEntry == null) {
       if (result != null) {
-        _log.debug("reporting unmatched trip with id=" + trip.getTripId());
+        _log.debug("discarding: reporting unmatched trip with id=" + trip.getTripId());
         result.addUnmatchedTripId(trip.getTripId());
       } else {
-        _log.warn("no trip found with id=" + trip.getTripId());
+        _log.warn("discarding: no trip found with id=" + trip.getTripId());
       }
       
       return null;
@@ -653,9 +653,9 @@ public class GtfsRealtimeTripLibrary {
               tpr.setStopSequence(stopTimeUpdate.getStopSequence());
             }
             if (stopTimeUpdate.getScheduleRelationship().equals(StopTimeUpdate.ScheduleRelationship.SKIPPED)) {
-              tpr.setScheduleRealtionship(1); // set tpr scheduleRelationship enum to SKIPPED
+              tpr.setScheduleRealtionship(StopTimeUpdate.ScheduleRelationship.SKIPPED_VALUE); // set tpr scheduleRelationship enum to SKIPPED
             } else {
-              tpr.setScheduleRealtionship(0);
+              tpr.setScheduleRealtionship(StopTimeUpdate.ScheduleRelationship.SCHEDULED_VALUE);
             }
             int currentArrivalTime = computeArrivalTime(stopTime,
                 stopTimeUpdate, instance.getServiceDate());

@@ -41,6 +41,7 @@ import org.onebusaway.collections.Range;
 import org.onebusaway.container.ConfigurationParameter;
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.realtime.api.EVehicleStatus;
 import org.onebusaway.realtime.api.EVehicleType;
 import org.onebusaway.realtime.api.TimepointPredictionRecord;
 import org.onebusaway.realtime.api.VehicleLocationRecord;
@@ -595,7 +596,7 @@ public class BlockLocationServiceImpl implements BlockLocationService,
 
           if (tpr.isSkipped()) {
             _log.info("\nRecord has Timepoint with SKIPPED schedule relationship\n");
-            location.setStatus("SKIPPED");
+            location.setStatus(EVehicleStatus.SKIPPED.toString());
           }
 
           for (BlockStopTimeEntry blockStopTime : blockConfig.getStopTimes()) {

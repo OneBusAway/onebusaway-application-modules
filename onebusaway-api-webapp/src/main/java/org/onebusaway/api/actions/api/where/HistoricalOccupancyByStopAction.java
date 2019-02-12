@@ -40,8 +40,6 @@ public class HistoricalOccupancyByStopAction extends ApiActionSupport {
 
   private HistoricalOccupancyByStopQueryBean _query = new HistoricalOccupancyByStopQueryBean();
 
-
-
   public HistoricalOccupancyByStopAction() { super(V2); }
 
   @RequiredFieldValidator
@@ -73,10 +71,7 @@ public class HistoricalOccupancyByStopAction extends ApiActionSupport {
   @Autowired
   private TransitDataService _service;
 
-  private static Logger _log = LoggerFactory.getLogger(HistoricalOccupancyByStopAction.class);
-
   public DefaultHttpHeaders show() throws IOException, ServiceException {
-
 
     if (!isVersion(V2))
        return setUnknownVersionResponse();
@@ -93,10 +88,6 @@ public class HistoricalOccupancyByStopAction extends ApiActionSupport {
      *  then return only the ridership values for the stop
      *  which are associated with them
      */
-
-
-
-
     List<OccupancyStatusBean> hrs = _service.getHistoricalRidershipForStop(_query);
     List<OccupancyStatusBean> fil = new ArrayList<>();
 

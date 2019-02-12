@@ -25,11 +25,10 @@ import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.trip;
 
 import com.google.transit.realtime.GtfsRealtime;
-import org.onebusaway.gtfs.model.StopTime;
+import org.onebusaway.realtime.api.EVehicleStatus;
 import org.onebusaway.realtime.api.VehicleLocationRecord;
 import org.onebusaway.transit_data_federation.impl.transit_graph.BlockEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopEntryImpl;
-import org.onebusaway.transit_data_federation.impl.transit_graph.StopTimeEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.TripEntryImpl;
 import org.onebusaway.transit_data_federation.services.blocks.BlockCalendarService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
@@ -381,9 +380,10 @@ public class GtfsRealtimeTripLibraryTest {
 
 
     assertTrue(stopTimeUpdate.hasScheduleRelationship());
-    assertEquals("SKIPPED", stopTimeUpdate.getScheduleRelationship().name());
-    assertEquals("SKIPPED", tripUpdate.getStopTimeUpdate(0).getScheduleRelationship().name());
-    assertEquals("SCHEDULED", tripUpdate.getTrip().getScheduleRelationship().name());
+    assertEquals(EVehicleStatus.SKIPPED.toString(), stopTimeUpdate.getScheduleRelationship().name());
+    assertEquals(EVehicleStatus.SKIPPED.toString(), tripUpdate.getStopTimeUpdate(0).getScheduleRelationship().name());
+    assertEquals(EVehicleStatus.SCHEDULED.toString(), tripUpdate.getTrip().getScheduleRelationship().name());
+    assertEquals(EVehicleStatus.SCHEDULED.toString(), tripUpdate.getTrip().getScheduleRelationship().name());
 
     assertEquals("blockA", record.getBlockId().getId());
 

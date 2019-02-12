@@ -22,7 +22,7 @@ import java.util.List;
 
 public class ArrivalAndDepartureV2Bean implements Serializable {
 
-  private static final long serialVersionUID = 3L;
+  private static final long serialVersionUID = 4L;
 
   private String routeId;
 

@@ -16,7 +16,8 @@
 package org.onebusaway.transit_data_federation.impl;
 
 import static junit.framework.TestCase.assertTrue;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.block;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.blockConfiguration;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.dateAsLong;
@@ -28,10 +29,8 @@ import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.trip;
 
 import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.realtime.api.OccupancyStatus;
 import org.onebusaway.realtime.api.TimepointPredictionRecord;
 import org.onebusaway.realtime.api.VehicleLocationRecord;
-import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
 import org.onebusaway.transit_data.model.TransitDataConstants;
 import org.onebusaway.transit_data_federation.impl.blocks.BlockStatusServiceImpl;
 import org.onebusaway.transit_data_federation.impl.blocks.ScheduledBlockLocationServiceImpl;
@@ -42,7 +41,6 @@ import org.onebusaway.transit_data_federation.impl.transit_graph.StopEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.TripEntryImpl;
 import org.onebusaway.transit_data_federation.model.StopTimeInstance;
 import org.onebusaway.transit_data_federation.model.TargetTime;
-import org.onebusaway.transit_data_federation.services.ArrivalAndDepartureQuery;
 import org.onebusaway.transit_data_federation.services.StopTimeService;
 import org.onebusaway.transit_data_federation.services.StopTimeService.EFrequencyStopTimeBehavior;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
@@ -57,7 +55,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import java.sql.Time;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -1793,7 +1790,7 @@ public class ArrivalAndDepartureServiceImplTest {
 
     // Create ScheduledBlockLocation for cache
     ScheduledBlockLocation sbl = new ScheduledBlockLocation();
-
+    sbl.setActiveTrip(blockLocationB.getActiveTrip());
 
     // Add data to cache
     _cache.addRecord(blockInstance, vlr, sbl, null);
@@ -1901,7 +1898,7 @@ public class ArrivalAndDepartureServiceImplTest {
         stopTimeFrom, stopTimeTo);
   }
 
-  
+
   /**
    * Set up the BlockLocationServiceImpl for the test, using the given
    * timepointPredictions
@@ -1922,7 +1919,8 @@ public class ArrivalAndDepartureServiceImplTest {
    *         predicted arrival/departure times for a stop, for comparison
    *         against the expected values
    */
-  private List<ArrivalAndDepartureInstance> getArrivalsAndDeparturesForLoopInTheMiddleOfRouteInTimeRangeByTimepointPredictionRecord(
+  private List<ArrivalAndDepartureInstance>
+      getArrivalsAndDeparturesForLoopInTheMiddleOfRouteInTimeRangeByTimepointPredictionRecord(
       List<TimepointPredictionRecord> timepointPredictions) {
     TargetTime target = new TargetTime(mCurrentTime, mCurrentTime);
 

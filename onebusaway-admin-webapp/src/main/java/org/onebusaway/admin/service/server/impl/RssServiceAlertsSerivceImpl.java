@@ -245,6 +245,7 @@ public class RssServiceAlertsSerivceImpl implements RssServiceAlertsService {
 
         @Override
         public void run() {
+            _log.info("PollRssTask.run enter");
             try {
                 if (!isEnabled()) {
                     return;
@@ -315,6 +316,8 @@ public class RssServiceAlertsSerivceImpl implements RssServiceAlertsService {
                 }
             } catch (Exception e) {
                 e.printStackTrace();
+            } finally {
+                _log.info("PollRssTask.run exit");
             }
         }
 

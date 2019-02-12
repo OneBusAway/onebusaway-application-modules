@@ -18,7 +18,6 @@ package org.onebusaway.transit_data.model;
 import org.onebusaway.realtime.api.OccupancyStatus;
 
 import java.io.Serializable;
-import java.util.List;
 
 public class TripStopTimeBean implements Serializable {
 

@@ -16,7 +16,6 @@
  */
 package org.onebusaway.transit_data_federation.impl.federated;
 
-import com.vividsolutions.jts.algorithm.match.HausdorffSimilarityMeasure;
 import org.onebusaway.exceptions.NoSuchTripServiceException;
 import org.onebusaway.exceptions.OutOfServiceAreaServiceException;
 import org.onebusaway.exceptions.ServiceException;
@@ -25,10 +24,7 @@ import org.onebusaway.federations.annotations.FederatedByEntityIdMethod;
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.geospatial.model.EncodedPolylineBean;
 import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.gtfs.model.calendar.LocalizedServiceId;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
-import org.onebusaway.gtfs.services.calendar.CalendarService;
-import org.onebusaway.realtime.api.OccupancyStatus;
 import org.onebusaway.realtime.api.TimepointPredictionRecord;
 import org.onebusaway.transit_data.OccupancyStatusBean;
 import org.onebusaway.transit_data.model.*;
@@ -134,10 +130,6 @@ public class TransitDataServiceTemplateImpl implements TransitDataServiceTemplat
 
   @Autowired
   private RidershipService _ridershipService;
-
-  @Autowired
-  private CalendarService _calendarService;
-  
 
   /****
    * {@link TransitDataService} Interface
@@ -743,12 +735,6 @@ public class TransitDataServiceTemplateImpl implements TransitDataServiceTemplat
     ret.setList(new ArrayList<ConsolidatedStopMapBean>(beans));
     return ret;
   }
-
-
-  public boolean isLocalizedServiceIdActiveOnDate(LocalizedServiceId localServId, Date date) {
-    return _calendarService.isLocalizedServiceIdActiveOnDate(localServId, date);
-  }
-
 
   /****
    * Private Methods

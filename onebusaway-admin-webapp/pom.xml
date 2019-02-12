@@ -3,7 +3,7 @@
 	<parent>
 		<groupId>org.onebusaway</groupId>
 		<artifactId>onebusaway-application-modules</artifactId>
-		<version>2.0.3-cs-SNAPSHOT</version>
+		<version>2.0.4-cs-SNAPSHOT</version>
 	</parent>
 	<artifactId>onebusaway-admin-webapp</artifactId>
 	<packaging>war</packaging>
@@ -74,6 +74,12 @@
 		<dependency>
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-config</artifactId>
+			<version>${spring.security.version}</version>
+		</dependency>
+		<!-- support sec:csrfMetaTags -->
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-taglibs</artifactId>
 			<version>${spring.security.version}</version>
 		</dependency>
 		<dependency>

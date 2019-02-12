@@ -136,6 +136,7 @@ public class TimepointPredictionRecord implements Serializable {
     return scheduleRelationship;
   }
   public boolean isSkipped() {
-    return (this.scheduleRelationship != null && this.scheduleRelationship.getValue() == 1);
+    return (this.scheduleRelationship != null
+            && this.scheduleRelationship.getValue() == ScheduleRelationship.SKIPPED.getValue());
   }
 }
