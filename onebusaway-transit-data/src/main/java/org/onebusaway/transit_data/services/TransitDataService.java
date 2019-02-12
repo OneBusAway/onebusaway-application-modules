@@ -35,7 +35,7 @@ import org.onebusaway.geospatial.model.EncodedPolylineBean;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
 import org.onebusaway.realtime.api.TimepointPredictionRecord;
-import org.onebusaway.transit_data.HistoricalRidershipBean;
+import org.onebusaway.transit_data.OccupancyStatusBean;
 import org.onebusaway.transit_data.model.*;
 import org.onebusaway.transit_data.model.blocks.BlockBean;
 import org.onebusaway.transit_data.model.blocks.BlockInstanceBean;
@@ -384,11 +384,13 @@ public interface TransitDataService extends FederatedService {
   /****
    * Historical Data
    ****/
-  List<HistoricalRidershipBean> getHistoricalRidershipForStop(HistoricalOccupancyByStopQueryBean query);
-  List<HistoricalRidershipBean> getAllHistoricalRiderships();
-  List<HistoricalRidershipBean> getHistoricalRidershipsForTrip(AgencyAndId tripId);
-  List<HistoricalRidershipBean> getHistoricalRidershipsForRoute(AgencyAndId routeId);
-  List<HistoricalRidershipBean> getHistoricalRiderships(AgencyAndId routeId, AgencyAndId tripId, AgencyAndId stopId);
+
+  List<OccupancyStatusBean> getHistoricalRidershipForStop(HistoricalOccupancyByStopQueryBean query);
+  List<OccupancyStatusBean> getAllHistoricalRiderships(long serviceDate);
+  List<OccupancyStatusBean> getHistoricalRidershipsForTrip(AgencyAndId tripId, long serviceDate);
+  List<OccupancyStatusBean> getHistoricalRidershipsForRoute(AgencyAndId routeId, long serviceDate);
+  List<OccupancyStatusBean> getHistoricalRiderships(AgencyAndId routeId, AgencyAndId tripId, AgencyAndId stopId, long serviceDate);
+
 
   /****
    * Service Alert Methods

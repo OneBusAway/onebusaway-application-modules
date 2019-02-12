@@ -16,14 +16,12 @@
 package org.onebusaway.api.model.where;
 
 import org.onebusaway.realtime.api.OccupancyStatus;
-import org.onebusaway.transit_data.HistoricalRidershipBean;
 
 import java.io.Serializable;
-import java.util.List;
 
 public class ArrivalAndDepartureBeanV1 implements Serializable {
 
-  private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 2L;
 
   private String routeId;
 

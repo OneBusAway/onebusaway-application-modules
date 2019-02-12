@@ -18,7 +18,6 @@ package org.onebusaway.transit_data_federation.impl.beans;
 
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.realtime.api.OccupancyStatus;
-import org.onebusaway.transit_data.HistoricalRidershipBean;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
 import org.onebusaway.transit_data.model.ArrivalsAndDeparturesQueryBean;
 import org.onebusaway.transit_data.model.StopBean;
@@ -327,7 +326,7 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
     }
 
     if (_ridershipService != null) {
-      List<HistoricalRidership> occ = _ridershipService.getHistoricalRiderships(trip.getRoute().getId(), trip.getId(), stop.getId());
+      List<HistoricalRidership> occ = _ridershipService.getHistoricalRiderships(trip.getRoute().getId(), trip.getId(), stop.getId(), pab.getServiceDate());
       if(occ != null && occ.size() > 0) pab.setHistoricalOccupancy(OccupancyStatus.toEnum(occ.get(0).getLoadFactor()));
     }
     return pab;
@@ -440,22 +439,6 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
         t2 = o2.getPredictedArrivalTime();
       return (int) (t1 - t2);
     }
-  }
-
-  private List<HistoricalRidershipBean> getHistoricalRidershipBeansForRidership(List<HistoricalRidership> hrs) {
-    List<HistoricalRidershipBean> ret = new ArrayList<HistoricalRidershipBean>();
-    if (hrs != null) {
-      for (HistoricalRidership hr : hrs) {
-        HistoricalRidershipBean bean = new HistoricalRidershipBean();
-        bean.setRouteId(hr.getRouteId());
-        bean.setTripId(hr.getTripId());
-        bean.setStopId(hr.getStopId());
-        bean.setLoadFactor(hr.getLoadFactor());
-        ret.add(bean);
-      }
-    }
-
-    return ret;
   }
 
 }

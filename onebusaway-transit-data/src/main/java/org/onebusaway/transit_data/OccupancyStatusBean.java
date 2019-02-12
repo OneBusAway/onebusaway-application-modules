@@ -19,9 +19,12 @@ package org.onebusaway.transit_data;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.realtime.api.OccupancyStatus;
 
-public class OccupancyStatusBean {
+import java.io.Serializable;
+
+public class OccupancyStatusBean implements Serializable {
 
   private OccupancyStatus _occStatus;
+
   private String _status;
 
   private AgencyAndId _stopId;
@@ -30,11 +33,12 @@ public class OccupancyStatusBean {
 
   private AgencyAndId _tripId;
 
-  public void setOccStatus(OccupancyStatus status) { _occStatus = status; }
+  public void setOccpancyStatus(OccupancyStatus status) { _occStatus = status; _status = status.toString(); }
 
-  public OccupancyStatus getOccStatus() { return _occStatus; }
+  public OccupancyStatus getOccupancyStatus() { return _occStatus; }
 
   public void setStatus(String status) {_status = status; }
+
   public void setStatus(OccupancyStatus status) { if (status != null) _status = status.toString(); }
 
   public String getStaus() {return _status; }

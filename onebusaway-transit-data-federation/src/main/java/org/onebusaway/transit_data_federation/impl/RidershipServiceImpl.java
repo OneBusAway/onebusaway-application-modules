@@ -18,6 +18,8 @@ package org.onebusaway.transit_data_federation.impl;
 import org.onebusaway.container.refresh.Refreshable;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
+import org.onebusaway.realtime.api.OccupancyStatus;
+import org.onebusaway.transit_data.OccupancyStatusBean;
 import org.onebusaway.transit_data_federation.model.bundle.HistoricalRidership;
 import org.onebusaway.transit_data_federation.services.FederatedTransitDataBundle;
 import org.onebusaway.transit_data_federation.services.RidershipService;
@@ -30,10 +32,7 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Manage HistoricalRidership Bundle Operations.
@@ -118,30 +117,68 @@ public class RidershipServiceImpl implements RidershipService {
         return null;
     }
     @Override
-    public List<HistoricalRidership> getAllHistoricalRiderships() {
-        return _riderships;
+    public List<HistoricalRidership> getAllHistoricalRiderships(long serviceDate) {
+        return filterByServiceDate(_riderships, serviceDate);
     }
 
     @Override
-    public List<HistoricalRidership> getHistoricalRidershipsForTrip(AgencyAndId tripId) {
-        return _tripRiderships.get(tripId);
+    public List<HistoricalRidership> getHistoricalRidershipsForTrip(AgencyAndId tripId, long serviceDate) {
+        return filterByServiceDate(_tripRiderships.get(tripId), serviceDate);
     }
 
     @Override
-    public List<HistoricalRidership> getHistoricalRidershipsForStop(AgencyAndId stopId) {
-        return _stopRiderships.get(stopId);
+    public List<HistoricalRidership> getHistoricalRidershipsForStop(AgencyAndId stopId, long serviceDate) {
+        return filterByServiceDate(_stopRiderships.get(stopId), serviceDate);
     }
 
     @Override
-    public List<HistoricalRidership> getHistoricalRidershipsForRoute(AgencyAndId routeId) {
-        return _routeRiderships.get(routeId);
+    public List<HistoricalRidership> getHistoricalRidershipsForRoute(AgencyAndId routeId, long serviceDate) {
+        return filterByServiceDate(_routeRiderships.get(routeId), serviceDate);
     }
 
     @Override
-    public List<HistoricalRidership> getHistoricalRiderships(AgencyAndId routeId, AgencyAndId tripId, AgencyAndId stopId) {
+    public List<HistoricalRidership> getHistoricalRiderships(AgencyAndId routeId, AgencyAndId tripId, AgencyAndId stopId, long serviceDate) {
         String hash = hash(routeId, tripId, stopId);
         if (hash == null)
             return  new ArrayList<>();
-        return _tuppleRiderships.get(hash);
+        return filterByServiceDate(_tuppleRiderships.get(hash), serviceDate);
     }
+    @Override
+    public List<OccupancyStatusBean> convertToOccupancyStatusBeans(List<HistoricalRidership> hrs) {
+        List<OccupancyStatusBean> beans = new ArrayList<>();
+        if (hrs != null) {
+            for (HistoricalRidership hr : hrs) {
+                OccupancyStatusBean bean = new OccupancyStatusBean();
+                bean.setStopId(hr.getStopId());
+                bean.setTripId(hr.getTripId());
+                bean.setRouteId(hr.getRouteId());
+                bean.setOccpancyStatus(OccupancyStatus.toEnum(hr.getLoadFactor()));
+                beans.add(bean);
+            }
+        }
+        return beans;
+    }
+
+
+    private List<HistoricalRidership> filterByServiceDate(List<HistoricalRidership> input, long sd) {
+        if (sd == 0 || input == null) {
+            return input;
+        }
+        List<HistoricalRidership> results = new ArrayList<>();
+        for (HistoricalRidership hr : input) {
+            if (isWeekday(sd)) {
+                if(hr.getCalendarType() == HistoricalRidership.CalendarType.WEEKDAY) {
+                    results.add(hr);
+                }
+            } else if (hr.getCalendarType() == HistoricalRidership.CalendarType.SATURDAY || hr.getCalendarType() == HistoricalRidership.CalendarType.SUNDAY) {
+                results.add(hr);
+            }
+        }
+        return results;
+    }
+    private boolean isWeekday(long sd) {
+        Calendar cal = new ServiceDate(new Date(sd)).getAsCalendar(TimeZone.getDefault());
+        return !(cal.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY || cal.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY);
+    }
+
 }
