@@ -42,7 +42,6 @@ import org.onebusaway.api.model.transit.service_alerts.TimeRangeV2Bean;
 import org.onebusaway.collections.CollectionsLibrary;
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.geospatial.model.EncodedPolylineBean;
-import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.realtime.api.OccupancyStatus;
 import org.onebusaway.transit_data.HistoricalRidershipBean;
 import org.onebusaway.transit_data.OccupancyStatusBean;
@@ -208,8 +207,11 @@ public class BeanFactoryV2 {
       ListBean<TripDetailsBean> trips) {
 
     List<TripDetailsV2Bean> beans = new ArrayList<TripDetailsV2Bean>();
-    for (TripDetailsBean trip : trips.getList())
-      beans.add(getTripDetails(trip));
+    for (TripDetailsBean trip : trips.getList()){
+      if(trip != null)
+        beans.add(getTripDetails(trip));
+    }
+
     return list(beans, trips.isLimitExceeded(), false);
   }
 
@@ -236,8 +238,13 @@ public class BeanFactoryV2 {
     return entry(getVehicleStatus(vehicleStatus));
   }
 
-  public EntryWithReferencesBean<ListBean<OccupancyStatusBean>> getHistoricalOccupancyResponse(List<OccupancyStatusBean> occ) {
-    return entry(new ListBean<>(occ, false));
+  public ListWithReferencesBean<HistoricalRidershipBean> getHistoricalOccupancyResponse(
+      List<OccupancyStatusBean> beans) {
+    List<HistoricalRidershipBean> rid = new ArrayList<>();
+    for (OccupancyStatusBean bean : beans) {
+      rid.add(new HistoricalRidershipBean(bean.getOccupancyStatus()));
+    }
+    return list(rid, false, false);
   }
 
   public EntryWithReferencesBean<SituationV2Bean> getResponse(

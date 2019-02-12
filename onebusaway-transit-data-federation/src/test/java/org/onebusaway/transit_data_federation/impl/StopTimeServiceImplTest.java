@@ -423,8 +423,6 @@ public class StopTimeServiceImplTest {
 
   @Test
   public void test04() {
-    Date dayA = getTimeAsDay(date("2009-09-02 00:00"));
-    Date dayB = getTimeAsDay(date("2009-09-03 00:00"));
 
     StopTimeEntryImpl stA = stopTime(0, _stop, trip("A", "sA"), time(10, 00),
         time(10, 30), 0, -1, 20.0);

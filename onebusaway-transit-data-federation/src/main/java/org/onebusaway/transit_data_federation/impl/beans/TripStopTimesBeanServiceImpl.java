@@ -23,7 +23,6 @@ import java.util.TimeZone;
 
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.realtime.api.OccupancyStatus;
-import org.onebusaway.transit_data.HistoricalRidershipBean;
 import org.onebusaway.transit_data.model.StopBean;
 import org.onebusaway.transit_data.model.TripStopTimeBean;
 import org.onebusaway.transit_data.model.TripStopTimesBean;
@@ -77,7 +76,7 @@ public class TripStopTimesBeanServiceImpl implements TripStopTimesBeanService {
   public TripStopTimesBean getStopTimesForBlockTrip(BlockTripInstance blockTripInstance) {
 
     BlockTripEntry blockTrip = blockTripInstance.getBlockTrip();
-    TripStopTimesBean bean = getStopTimesForTrip(blockTrip.getTrip());
+    TripStopTimesBean bean = getStopTimesForTrip(blockTrip.getTrip(), blockTripInstance.getServiceDate());
     if (blockTrip.getPreviousTrip() != null) {
       BlockTripEntry previous = blockTrip.getPreviousTrip();
       TripBean previousTrip = _tripBeanService.getTripForId(previous.getTrip().getId());
@@ -100,7 +99,7 @@ public class TripStopTimesBeanServiceImpl implements TripStopTimesBeanService {
 
     for (TripStopTimeBean st : bean.getStopTimes()) {
       List<HistoricalRidership> rid = _ridershipService.getHistoricalRiderships(blockTrip.getTrip().getRoute().getId(), blockTrip.getTrip().getId(),
-          AgencyAndId.convertFromString(st.getStop().getId()));
+          AgencyAndId.convertFromString(st.getStop().getId()), blockTripInstance.getServiceDate());
 
       if(rid != null && rid.size() > 0) st.setHistoricalOccupancy(OccupancyStatus.toEnum(rid.get(0).getLoadFactor()));
     }
@@ -112,7 +111,7 @@ public class TripStopTimesBeanServiceImpl implements TripStopTimesBeanService {
    * Private Methods
    ****/
 
-  private TripStopTimesBean getStopTimesForTrip(TripEntry trip) {
+  private TripStopTimesBean getStopTimesForTrip(TripEntry trip, long serviceDate) {
 
     AgencyAndId tripId = trip.getId();
 
@@ -132,7 +131,7 @@ public class TripStopTimesBeanServiceImpl implements TripStopTimesBeanService {
       StopBean stopBean = _stopBeanService.getStopForId(stopEntry.getId());
       stBean.setStop(stopBean);
       stBean.setDistanceAlongTrip(stopTime.getShapeDistTraveled());
-      List<HistoricalRidership> rid = _ridershipService.getHistoricalRiderships(trip.getRoute().getId(), trip.getId(), stopEntry.getId());
+      List<HistoricalRidership> rid = _ridershipService.getHistoricalRiderships(trip.getRoute().getId(), trip.getId(), stopEntry.getId(), serviceDate);
       if(rid != null && rid.size() > 0) stBean.setHistoricalOccupancy(OccupancyStatus.toEnum(rid.get(0).getLoadFactor()));
 
       bean.addStopTime(stBean);

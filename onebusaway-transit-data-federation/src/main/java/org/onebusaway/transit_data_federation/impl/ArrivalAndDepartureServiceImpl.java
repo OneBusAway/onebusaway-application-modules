@@ -161,27 +161,6 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
 
       return filteredInstances;
     }
-
-    // Might be useful later, so keeping it here for now. If it proves to be a conflict later, remove this.
-//    for (ArrivalAndDepartureInstance instance : instances) {
-//      try {
-//
-//        instance.setHistoricalOccupancy(_occupancyService.getOccupancyForStop(stop.getId()));
-//        instance.setPredictedOccupancy(_occupancyService.getOccupancyForStop(stop.getId()));
-//
-//      } catch (Exception e) {
-//
-//
-//        HistoricalRidership.Builder builder = new HistoricalRidership.Builder();
-//        builder.setStopId(stop.getId());
-//        builder.setLoadFactor(-1);
-//        List<HistoricalRidership> hrs = Arrays.asList(builder.create());
-//        instance.setHistoricalOccupancy(hrs);
-//        instance.setPredictedOccupancy(hrs);
-//
-//      }
-//
-//    }
     return instances;
   }
 
@@ -682,10 +661,12 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
           instance.getStop().getId());
       boolean sequenceMatches = tpr.getStopSequence() > 0
           && tpr.getStopSequence() == gtfsSequence;
-
       if (!tripMatches || !stopMatches)
         continue;
-
+      if (tpr.isSkipped()) {
+        _log.debug("Skipped Stop: " + instance.getStop().getId().getId());
+        break;
+      }
       if (sequenceMatches || tprStopIndex == thisStopIndex) {
 
         success = true;

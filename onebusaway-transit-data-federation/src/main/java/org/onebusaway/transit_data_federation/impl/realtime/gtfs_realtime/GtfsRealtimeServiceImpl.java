@@ -101,7 +101,7 @@ class GtfsRealtimeServiceImpl implements GtfsRealtimeService {
         for (TimepointPredictionRecord tpr: timepointPredictions) {
            StopTimeUpdate.Builder stopTimeUpdate = StopTimeUpdate.newBuilder();
            stopTimeUpdate.setStopId(AgencyAndId.convertToString(tpr.getTimepointId()));
-           stopTimeUpdate.setScheduleRelationship(com.google.transit.realtime.GtfsRealtime.TripUpdate.StopTimeUpdate.ScheduleRelationship.SCHEDULED);
+           stopTimeUpdate.setScheduleRelationship(StopTimeUpdate.ScheduleRelationship.valueOf(tpr.getScheduleRelationship().getValue()));
       
            if (tpr.getTimepointPredictedArrivalTime() != -1) {
              StopTimeEvent.Builder arrivalStopTimeEvent = StopTimeEvent.newBuilder();
@@ -143,7 +143,10 @@ class GtfsRealtimeServiceImpl implements GtfsRealtimeService {
 
       TripDescriptor.Builder tripDescriptor = TripDescriptor.newBuilder();
       tripDescriptor.setRouteId(AgencyAndId.convertToString(routeId));
-      tripDescriptor.setScheduleRelationship(ScheduleRelationship.SCHEDULED);
+      if (activeBlock.getStatus() != null)
+        tripDescriptor.setScheduleRelationship(com.google.transit.realtime.GtfsRealtime.TripDescriptor.ScheduleRelationship.valueOf(activeBlock.getStatus()));
+      else
+        tripDescriptor.setScheduleRelationship(ScheduleRelationship.SCHEDULED);
       tripDescriptor.setStartDate(startDate);
       tripDescriptor.setTripId(AgencyAndId.convertToString(tripId));
       tripUpdate.setTrip(tripDescriptor);

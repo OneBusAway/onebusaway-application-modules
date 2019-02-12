@@ -30,7 +30,7 @@ import org.onebusaway.geospatial.model.EncodedPolylineBean;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
 import org.onebusaway.realtime.api.TimepointPredictionRecord;
-import org.onebusaway.transit_data.HistoricalRidershipBean;
+import org.onebusaway.transit_data.OccupancyStatusBean;
 import org.onebusaway.transit_data.model.*;
 import org.onebusaway.transit_data.model.blocks.BlockBean;
 import org.onebusaway.transit_data.model.blocks.BlockInstanceBean;
@@ -359,34 +359,33 @@ public class TransitDataServiceImpl implements TransitDataService {
     return _transitDataService.getCurrentVehicleEstimates(query);
   }
 
-  @Override
-  public List<HistoricalRidershipBean> getHistoricalRidershipForStop(HistoricalOccupancyByStopQueryBean query){
+  public List<OccupancyStatusBean> getHistoricalRidershipForStop(HistoricalOccupancyByStopQueryBean query){
     blockUntilBundleIsReady();
     return _transitDataService.getHistoricalRidershipForStop(query);
   }
 
   @Override
-  public List<HistoricalRidershipBean> getAllHistoricalRiderships() {
+  public List<OccupancyStatusBean> getAllHistoricalRiderships(long serviceDate) {
     blockUntilBundleIsReady();
-    return _transitDataService.getAllHistoricalRiderships();
+    return _transitDataService.getAllHistoricalRiderships(serviceDate);
   }
 
   @Override
-  public List<HistoricalRidershipBean> getHistoricalRidershipsForTrip(AgencyAndId tripId) {
+  public List<OccupancyStatusBean> getHistoricalRidershipsForTrip(AgencyAndId tripId, long serviceDate) {
     blockUntilBundleIsReady();
-    return _transitDataService.getHistoricalRidershipsForTrip(tripId);
+    return _transitDataService.getHistoricalRidershipsForTrip(tripId, serviceDate);
   }
 
   @Override
-  public List<HistoricalRidershipBean> getHistoricalRidershipsForRoute(AgencyAndId routeId) {
+  public List<OccupancyStatusBean> getHistoricalRidershipsForRoute(AgencyAndId routeId, long serviceDate) {
     blockUntilBundleIsReady();
-    return _transitDataService.getHistoricalRidershipsForRoute(routeId);
+    return _transitDataService.getHistoricalRidershipsForRoute(routeId, serviceDate);
   }
 
   @Override
-  public List<HistoricalRidershipBean> getHistoricalRiderships(AgencyAndId routeId, AgencyAndId tripId, AgencyAndId stopId) {
+  public List<OccupancyStatusBean> getHistoricalRiderships(AgencyAndId routeId, AgencyAndId tripId, AgencyAndId stopId, long serviceDate) {
     blockUntilBundleIsReady();
-    return _transitDataService.getHistoricalRiderships(routeId, tripId, stopId);
+    return _transitDataService.getHistoricalRiderships(routeId, tripId, stopId, serviceDate);
   }
 
 
