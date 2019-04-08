@@ -62,9 +62,10 @@ public class VehicleAssignmentResource extends AuthenticatedResource {
         return _service.getActiveBlocks(serviceDate, filterRoutes);
     }
 
-    // TODO!  Needs integration testing
     @Path("/active-blocks/{serviceDate}/{routeList}")
+    @GET
     public Response getActiveBlocksAsCSV(@PathParam("serviceDate") String serviceDate, @PathParam("routeList") String routes) {
+        _log.info("getActiveBlocksAsCSV(" + serviceDate + ", " + routes);
         if (!isAuthorized()) {
             return Response.noContent().build();
         }
@@ -89,12 +90,14 @@ public class VehicleAssignmentResource extends AuthenticatedResource {
         }
 
         List <BlockBean> blockBeans = getActiveBlocks(new ServiceDate(date), routeIds);
+        _log.info("found " + blockBeans.size() + " active blocks");
         StringBuffer csv = new StringBuffer();
         csv.append("block").append('\n');
         for (BlockBean bb: blockBeans) {
+            _log.debug("block=" + bb.getId());
             csv.append(bb.getId()).append('\n');
         }
-        return Response.ok(csv).build();
+        return Response.ok(csv.toString()).build();
     }
 
     public Map<String, String> getAssignments() {

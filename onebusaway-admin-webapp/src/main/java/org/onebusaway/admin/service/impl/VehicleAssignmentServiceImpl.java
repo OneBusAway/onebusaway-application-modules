@@ -57,22 +57,28 @@ public class VehicleAssignmentServiceImpl implements VehicleAssignmentService {
     public List<BlockBean> getActiveBlocks(ServiceDate serviceDate, List<AgencyAndId> filterRoutes) {
         Set<String> filteredBlockIds = new HashSet<>();
         for (AgencyAndId aid : filterRoutes) {
+            _log.debug("agency id=" + aid);
             ListBean<RouteBean> routesForAgencyId = _tds.getRoutesForAgencyId(aid.getAgencyId());
+            _log.debug("routes for agency = " + routesForAgencyId.getList());
             for (RouteBean rb : routesForAgencyId.getList()) {
                 TripsForRouteQueryBean query = new TripsForRouteQueryBean();
                 query.setRouteId(rb.getId());
                 ListBean<TripDetailsBean> tripsForRoute = _tds.getTripsForRoute(query);
+                _log.debug("trips for route " + rb.getId() + " = " + tripsForRoute);
                 for (TripDetailsBean tdb : tripsForRoute.getList()) {
                     TimeZone tz = TimeZone.getTimeZone(rb.getAgency().getTimezone());
                     if (isActive(tdb.getTrip().getBlockId(), serviceDate.getAsDate().getTime())) {
+                        _log.debug(tdb.getTrip().getBlockId() + " is active!");
                         filteredBlockIds.add(tdb.getTrip().getBlockId());
+                    } else {
+                        _log.debug(tdb.getTrip().getBlockId() + " is NOT active!");
                     }
                 }
             }
         }
         List<BlockBean> activeBlocks = new ArrayList<>(filteredBlockIds.size());
         for (String blockId : filteredBlockIds) {
-            _tds.getBlockForId(blockId);
+            activeBlocks.add(_tds.getBlockForId(blockId));
         }
         return activeBlocks;
     }
