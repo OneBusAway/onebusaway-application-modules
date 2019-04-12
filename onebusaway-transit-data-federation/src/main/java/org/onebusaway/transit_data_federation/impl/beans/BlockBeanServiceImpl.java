@@ -172,11 +172,8 @@ public class BlockBeanServiceImpl implements BlockBeanService {
     return getBlockLocationAsBean(blockLocation);
   }
 
-  /****
-   * Private Methods
-   ****/
-
-  private BlockInstanceBean getBlockInstanceAsBean(BlockInstance blockInstance) {
+  @Override
+  public BlockInstanceBean getBlockInstanceAsBean(BlockInstance blockInstance) {
 
     BlockInstanceBean bean = new BlockInstanceBean();
 
@@ -189,6 +186,10 @@ public class BlockBeanServiceImpl implements BlockBeanService {
 
     return bean;
   }
+
+  /****
+   * Private Methods
+   ****/
 
   private ScheduledBlockLocationBean getBlockLocationAsBean(
       ScheduledBlockLocation blockLocation) {

@@ -225,6 +225,9 @@ public interface TransitDataService extends FederatedService {
   public ScheduledBlockLocationBean getScheduledBlockLocationFromScheduledTime(
       String blockId, long serviceDate, int scheduledTime);
 
+  @FederatedByEntityIdMethod
+  public List<BlockInstanceBean> getActiveBlocksForRoute(AgencyAndId route, long timeFrom, long timeTo);
+
   /****
    * Vehicle Methods
    *****/

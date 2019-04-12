@@ -45,6 +45,8 @@ import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.transit_data_federation.model.bundle.HistoricalRidership;
 import org.onebusaway.transit_data_federation.services.*;
 import org.onebusaway.transit_data_federation.services.beans.*;
+import org.onebusaway.transit_data_federation.services.blocks.BlockCalendarService;
+import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.bundle.TransitDataServiceTemplate;
 import org.onebusaway.transit_data_federation.services.realtime.CurrentVehicleEstimationService;
 import org.onebusaway.transit_data_federation.services.reporting.UserReportingService;
@@ -103,6 +105,8 @@ public class TransitDataServiceTemplateImpl implements TransitDataServiceTemplat
   @Autowired
   private BlockBeanService _blockBeanService;
 
+  @Autowired
+  private BlockCalendarService _blockCalendarService;
 
   @Autowired
   private ShapeBeanService _shapeBeanService;
@@ -381,6 +385,16 @@ public class TransitDataServiceTemplateImpl implements TransitDataServiceTemplat
     AgencyAndId id = AgencyAndIdLibrary.convertFromString(blockId);
     return _blockBeanService.getScheduledBlockLocationFromScheduledTime(id,
         serviceDate, scheduledTime);
+  }
+
+  public List<BlockInstanceBean> getActiveBlocksForRoute(AgencyAndId route, long timeFrom, long timeTo){
+    List<BlockInstanceBean> blockInstanceBeans = new ArrayList<>();
+    List<BlockInstance> blockInstances = _blockCalendarService.getActiveBlocksForRouteInTimeRange(route, timeFrom, timeTo);
+    for(BlockInstance block : blockInstances){
+      // TODO - Refactor blockBeanService.getBlockInstanceAsBean to factory
+      blockInstanceBeans.add(_blockBeanService.getBlockInstanceAsBean(block));
+    }
+    return blockInstanceBeans;
   }
 
   //@Override

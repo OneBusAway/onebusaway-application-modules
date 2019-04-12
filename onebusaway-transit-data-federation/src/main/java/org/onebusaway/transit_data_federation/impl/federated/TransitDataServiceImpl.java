@@ -302,6 +302,11 @@ public class TransitDataServiceImpl implements TransitDataService {
   }
 
   @Override
+  public List<BlockInstanceBean> getActiveBlocksForRoute(AgencyAndId route, long timeFrom, long timeTo) {
+    return _transitDataService.getActiveBlocksForRoute(route, timeFrom, timeTo);
+  }
+
+  @Override
   public VehicleStatusBean getVehicleForAgency(String vehicleId, long time) {
     blockUntilBundleIsReady();
     return _transitDataService.getVehicleForAgency(vehicleId, time);
