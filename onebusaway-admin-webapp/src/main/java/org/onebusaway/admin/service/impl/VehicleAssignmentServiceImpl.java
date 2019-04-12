@@ -15,31 +15,24 @@
  */
 package org.onebusaway.admin.service.impl;
 
+import org.onebusaway.admin.model.ActiveBlock;
 import org.onebusaway.admin.service.VehicleAssignmentService;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
-import org.onebusaway.transit_data.model.ListBean;
 import org.onebusaway.transit_data.model.RouteBean;
-import org.onebusaway.transit_data.model.blocks.BlockBean;
 import org.onebusaway.transit_data.model.blocks.BlockInstanceBean;
-import org.onebusaway.transit_data.model.trips.TripDetailsBean;
-import org.onebusaway.transit_data.model.trips.TripsForRouteQueryBean;
+import org.onebusaway.transit_data.model.blocks.BlockStopTimeBean;
+import org.onebusaway.transit_data.model.blocks.BlockTripBean;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TimeZone;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.TimeUnit;
 
 @Component
 /**
@@ -69,50 +62,101 @@ public class VehicleAssignmentServiceImpl implements VehicleAssignmentService {
     }
 
     @Override
-    public List<BlockBean> getActiveBlocks(ServiceDate serviceDate, List<AgencyAndId> filterRoutes) {
-        Set<String> filteredBlockIds = new HashSet<>();
-        for (AgencyAndId aid : filterRoutes) {
-            _log.debug("agency id=" + aid);
-            ListBean<RouteBean> routesForAgencyId = _tds.getRoutesForAgencyId(aid.getAgencyId());
-            _log.debug("routes for agency = " + routesForAgencyId.getList());
-            for (RouteBean rb : routesForAgencyId.getList()) {
-                TripsForRouteQueryBean query = new TripsForRouteQueryBean();
-                query.setRouteId(rb.getId());
-                ListBean<TripDetailsBean> tripsForRoute = _tds.getTripsForRoute(query);
-                _log.debug("trips for route " + rb.getId() + " = " + tripsForRoute);
-                for (TripDetailsBean tdb : tripsForRoute.getList()) {
-                    TimeZone tz = TimeZone.getTimeZone(rb.getAgency().getTimezone());
-                    if (isActive(tdb.getTrip().getBlockId(), serviceDate.getAsDate().getTime())) {
-                        _log.debug(tdb.getTrip().getBlockId() + " is active!");
-                        filteredBlockIds.add(tdb.getTrip().getBlockId());
-                    } else {
-                        _log.debug(tdb.getTrip().getBlockId() + " is NOT active!");
-                    }
-                }
-            }
-        }
-        List<BlockBean> activeBlocks = new ArrayList<>(filteredBlockIds.size());
-        for (String blockId : filteredBlockIds) {
-            activeBlocks.add(_tds.getBlockForId(blockId));
-        }
-        return activeBlocks;
-    }
-
-    private boolean isActive(String blockId, long serviceDate) {
-        // to determine if we are active or not we try to load the block on the given service data
-        BlockInstanceBean blockInstance = _tds.getBlockInstance(blockId, serviceDate);
-        if (blockInstance == null) {
-            _log.info("discarding block " + blockId + " because it is not active on " + new Date(serviceDate));
-            return false;
-        }
-        return true;
-    }
-
-    @Override
     public Map<String, String> getAssignments() {
         Map<String, String> sortedMap = new TreeMap<String, String>();
         sortedMap.putAll(_blockAssignments);
         return sortedMap;
+    }
+
+    @Override
+    public List<ActiveBlock> getActiveBlocks(ServiceDate serviceDate, List<AgencyAndId> filterRoutes) {
+
+        Map<String, ActiveBlock> activeBlocks = new HashMap<>();
+
+        for (AgencyAndId agencyAndRouteId : filterRoutes) {
+            _log.debug("agency and route id=" + agencyAndRouteId);
+            RouteBean rb = _tds.getRouteForId(AgencyAndId.convertToString(agencyAndRouteId));
+            _log.debug("route for agency = " + rb.getId());
+            if(rb !=null) {
+                TimeZone tz = TimeZone.getTimeZone(rb.getAgency().getTimezone());
+                Date date = serviceDate.getAsDate(tz);
+                long fromTime = getFirstTimeOfDate(date);
+                long toTime = getLastTimeOfDay(date);
+
+                List<BlockInstanceBean> blockInstanceBeans = _tds.getActiveBlocksForRoute(agencyAndRouteId, fromTime, toTime);
+
+                for (BlockInstanceBean blockInstanceBean : blockInstanceBeans) {
+                    if (!activeBlocks.containsKey(blockInstanceBean.getBlockId())) {
+                        activeBlocks.put(blockInstanceBean.getBlockId(), getActiveBlock(blockInstanceBean, agencyAndRouteId.getId()));
+                    } else {
+                        activeBlocks.get(blockInstanceBean.getBlockId()).getRoutes().add(agencyAndRouteId.getId());
+                    }
+                }
+            }
+        }
+        return new ArrayList<>(activeBlocks.values());
+    }
+
+    private static long getFirstTimeOfDate(Date serviceDate) {
+        final Calendar cal = Calendar.getInstance();
+        cal.setTime(serviceDate);
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 000);
+        return cal.getTime().getTime();
+    }
+
+    private static long getLastTimeOfDay(Date serviceDate) {
+        final Calendar cal = Calendar.getInstance();
+        cal.setTime(serviceDate);
+        cal.set(Calendar.HOUR_OF_DAY, 23);
+        cal.set(Calendar.MINUTE, 59);
+        cal.set(Calendar.SECOND, 59);
+        cal.set(Calendar.MILLISECOND, 999);
+        return cal.getTime().getTime();
+    }
+
+    private ActiveBlock getActiveBlock(BlockInstanceBean blockInstance, String routeId){
+        ActiveBlock activeBlock = new ActiveBlock();
+        activeBlock.setBlockId(blockInstance.getBlockId());
+        activeBlock.setBlockInstanceBean(blockInstance);
+        activeBlock.setStartTime(getBlockStartTime(blockInstance));
+        activeBlock.setEndTime(getBlockEndTime(blockInstance));
+        activeBlock.getRoutes().add(routeId);
+        return activeBlock;
+    }
+
+    private String getBlockStartTime(BlockInstanceBean blockInstanceBean){
+        List<BlockTripBean> trips = blockInstanceBean.getBlockConfiguration().getTrips();
+        if(trips != null && trips.size() > 0){
+            List<BlockStopTimeBean> blockStopTimes = trips.get(0).getBlockStopTimes();
+            if(blockInstanceBean != null && trips.size() > 0){
+                int arrivalTime =  blockStopTimes.get(0).getStopTime().getArrivalTime();
+                return convertSecondsToTime(arrivalTime);
+            }
+        }
+        return "xx:xx:xx";
+    }
+
+    private String getBlockEndTime(BlockInstanceBean blockInstanceBean){
+        List<BlockTripBean> trips = blockInstanceBean.getBlockConfiguration().getTrips();
+        if(trips != null && trips.size() > 0){
+            List<BlockStopTimeBean> blockStopTimes = trips.get(trips.size() -1).getBlockStopTimes();
+            if(blockInstanceBean != null && trips.size() > 0){
+                int arrivalTime =  blockStopTimes.get(blockStopTimes.size() -1).getStopTime().getArrivalTime();
+                return convertSecondsToTime(arrivalTime);
+            }
+        }
+        return "xx:xx:xx";
+    }
+
+    private static String convertSecondsToTime(int arrivalTime){
+        long hours = TimeUnit.SECONDS.toHours(arrivalTime);
+        long minutes = TimeUnit.SECONDS.toMinutes(arrivalTime) - (TimeUnit.SECONDS.toHours(arrivalTime)* 60);
+        long seconds = TimeUnit.SECONDS.toSeconds(arrivalTime) - (TimeUnit.SECONDS.toMinutes(arrivalTime) *60);
+
+        return String.format("%02d:%02d:%02d", hours, minutes, seconds);
     }
 
     private boolean insert(String blockId, String vehicleId) {

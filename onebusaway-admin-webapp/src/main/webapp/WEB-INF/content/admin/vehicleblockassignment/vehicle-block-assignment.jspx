@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (C) 2019 Cambridge Systematics, Inc.
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+            http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<jsp:root xmlns:jsp="http://java.sun.com/JSP/Page" xmlns="http://www.w3.org/1999/xhtml" version="2.0"
+          xmlns:c="http://java.sun.com/jsp/jstl/core" xmlns:s="/struts-tags"
+          xmlns:sec="http://www.springframework.org/security/tags">
+    <jsp:directive.page contentType="text/html" />
+    <head>
+        <sec:csrfMetaTags />
+
+        <!-- STYLING -->
+        <s:url var="url" value="/css/jquery-ui.css" />
+        <link rel="stylesheet" type="text/css" href="${url}">
+            <!-- //prevent jspx minimization -->
+        </link>
+
+        <s:url var="url" value="/css/vehicle-block-assignment.css" />
+        <link rel="stylesheet" type="text/css" href="${url}">
+            <!-- //prevent jspx minimization -->
+        </link>
+
+        <s:url var="url" value="//cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css" />
+        <link rel="stylesheet" type="text/css" href="${url}">
+            <!-- //prevent jspx minimization -->
+        </link>
+
+        <!-- JAVASCRIPT -->
+        <s:url var="url" value="/js/lib/jquery.js">
+        </s:url>
+        <script type="text/javascript" src="${url}">
+            <!-- //prevent jspx minimization -->
+        </script>
+
+        <s:url var="url" value="/js/lib/jquery.ui.js">
+            <!-- //prevent jspx minimization -->
+        </s:url>
+        <script type="text/javascript" src="${url}">
+            <!-- //prevent jspx minimization -->
+        </script>
+
+        <s:url var="url" value="//cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js">
+            <!-- //prevent jspx minimization -->
+        </s:url>
+        <script type="text/javascript" src="${url}">
+            <!-- //prevent jspx minimization -->
+        </script>
+
+        <s:url var="url" value="/js/oba/vehicleblockassignment/vehicle-block-assignment.js">
+        </s:url>
+        <script type="text/javascript" src="${url}">
+            <!-- //prevent jspx minimization -->
+        </script>
+
+    </head>
+    <body>
+        <s:set name="theme" value="'xhtml'" scope="page" />
+        <div id="vehicleBlockAssignment">
+            <div id="titleContent">
+                <div id="title">Vehicle Block Assignment</div>
+            </div>
+            <div id="dateLogoContent">
+                <div id="serviceDate"><span id="sdLabel">Service Date:</span><span id="sdDate"><s:date name = "currentDate" format = "EEE MMM dd yyyy" /></span></div>
+                <div id="logo"/>
+            </div>
+            <div id="findInputFieldsContent">
+                <div><s:textfield label="Find Vehicle" id="findVehicleField" name="findVehicle" value="%{vehicleId}" theme="xhtml"/></div>
+                <div><s:textfield label="Find Block" id="findBlockField" name="findBlock" value="%{vehicleId}" theme="xhtml"/></div>
+            </div>
+            <div id="blockSummaryContent">
+                <s:form action="vehicle-block-assignment!submit">
+                    <div id="blockSummaryHeader">
+                        <span  id="blockSummaryLabel">Block Summary</span>
+                        <span><s:submit id="saveTop" value="Save Changes" theme="simple"/></span>
+                    </div>
+
+                    <input type="hidden"
+                           id="csrfField"
+                           name="${_csrf.parameterName}"
+                           value="${_csrf.token}"/>
+                    <div id="blockSummaryTableDiv" >
+                        <table id="blockSummaryTable" class="display">
+                            <thead>
+                                <tr>
+                                    <th>Block</th>
+                                    <th>Route</th>
+                                    <th>Start</th>
+                                    <th>End</th>
+                                    <th>Vehicle</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <s:iterator value="model" status="rowStatus">
+                                    <tr>
+                                        <td><s:property value="blockId" /> </td>
+                                        <td><s:property value="routeName" /> </td>
+                                        <td><s:property value="startTime" /> </td>
+                                        <td><s:property value="endTime" /> </td>
+                                        <td><s:textfield name="model[%{#rowStatus.index}].vehicleId" value="%{vehicleId}" theme="simple"/></td>
+                                        <td></td>
+                                    </tr>
+                                </s:iterator>
+                            </tbody>
+                        </table>
+                    </div>
+                    <s:submit id="saveBottom" value="Save Changes" theme="simple"/>
+                </s:form>
+            </div>
+        </div>
+    </body>
+</jsp:root>

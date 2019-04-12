@@ -16,7 +16,9 @@
 package org.onebusaway.admin.service.api;
 
 import org.junit.Test;
+import org.onebusaway.admin.model.ActiveBlock;
 import org.onebusaway.admin.service.impl.VehicleAssignmentServiceImpl;
+import org.onebusaway.exceptions.ServiceException;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
 import org.onebusaway.transit_data.model.AgencyBean;
@@ -30,10 +32,7 @@ import org.onebusaway.transit_data.model.trips.TripsForRouteQueryBean;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.transit_data_federation.impl.federated.TransitDataServiceImpl;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -116,6 +115,20 @@ public class VehicleAssignmentResourceTest {
                 return bib;
             }
 
+            @Override
+            public RouteBean getRouteForId(String routeId) throws ServiceException {
+                RouteBean.Builder builder = RouteBean.builder();
+                builder.setId("1_route1");
+                AgencyBean agency = new AgencyBean();
+                agency.setTimezone("America/New_York");
+                builder.setAgency(agency);
+                return builder.create();
+            }
+
+            @Override
+            public List<BlockInstanceBean> getActiveBlocksForRoute(AgencyAndId route, long timeFrom, long timeTo) {
+                return Collections.EMPTY_LIST;
+            }
         };
         vas.setTransitDataService(tds);
         var.setVehicleAssignmentService(vas);
@@ -125,7 +138,8 @@ public class VehicleAssignmentResourceTest {
         AgencyAndId filterRoute = new AgencyAndId("1", "route1");
         ArrayList<AgencyAndId> filterRoutes = new ArrayList<>();
         filterRoutes.add(filterRoute);
-        List<BlockBean> beans = var.getActiveBlocks(today, filterRoutes);
+
+        List<ActiveBlock> beans = var.getActiveBlocks(today, filterRoutes);
         assertNotNull(beans);
 
     }

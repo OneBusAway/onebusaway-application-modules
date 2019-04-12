@@ -15,12 +15,14 @@
  */
 package org.onebusaway.admin.service.api;
 
+import org.onebusaway.admin.model.ActiveBlock;
 import org.onebusaway.admin.service.VehicleAssignmentService;
 import org.onebusaway.admin.service.bundle.api.AuthenticatedResource;
 import org.onebusaway.admin.service.impl.VehicleAssignmentServiceImpl;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
 import org.onebusaway.transit_data.model.blocks.BlockBean;
+import org.onebusaway.transit_data.model.blocks.BlockInstanceBean;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,10 +35,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Response;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Endpoint for vehicle assignment services, such as manually associating a vehicle
@@ -73,7 +72,7 @@ public class VehicleAssignmentResource extends AuthenticatedResource {
         return _service.getAssignmentByBlockId(blockId);
     }
 
-    public List<BlockBean> getActiveBlocks(ServiceDate serviceDate, List<AgencyAndId> filterRoutes) {
+    public List<ActiveBlock> getActiveBlocks(ServiceDate serviceDate, List<AgencyAndId> filterRoutes) {
         return _service.getActiveBlocks(serviceDate, filterRoutes);
     }
 
@@ -104,14 +103,14 @@ public class VehicleAssignmentResource extends AuthenticatedResource {
             return Response.serverError().build();
         }
 
-        List <BlockBean> blockBeans = getActiveBlocks(new ServiceDate(date), routeIds);
+        List<ActiveBlock> blockBeans = getActiveBlocks(new ServiceDate(date), routeIds);
         _log.info("found " + blockBeans.size() + " active blocks");
         StringBuffer csv = new StringBuffer();
         csv.append("block").append('\n');
-        for (BlockBean bb: blockBeans) {
+        /*for (BlockInstanceBean bb: blockBeans) {
             _log.debug("block=" + bb.getId());
             csv.append(bb.getId()).append('\n');
-        }
+        }*/
         return Response.ok(csv.toString()).build();
     }
 
