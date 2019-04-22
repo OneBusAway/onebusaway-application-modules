@@ -25,13 +25,15 @@ jQuery(function() {
     csrfHeader = $("meta[name='_csrf_header']").attr("content");
     csrfToken = $("meta[name='_csrf']").attr("content");
 
+
     var table = $('#blockSummaryTable').DataTable({
-        "paging":false
+        "paging":false,
+        columnDefs: [ { orderable: false, targets: [4,6] }]
     });
 
     $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
 
-        var vehicleIdInput =  table.cell(dataIndex,4).nodes().to$().find('input').val();
+        var vehicleIdInput =  table.cell(dataIndex,5).nodes().to$().find('input').val();
         var vehicleIdField = $('#findVehicleField').val().trim();
         var regex = new RegExp(vehicleIdField,"g");
 
@@ -42,23 +44,230 @@ jQuery(function() {
     });
 
     // Search By Block
-    $('#findBlockField').keyup(function (e) {
+    $('#findBlockField').keyup(delay(function (e) {
         table
             .column( 0 )
             .search( this.value )
             .draw();
-    });
+    },300));
 
     // Search By VehicleID
-    $('#findVehicleField').keyup(function (e) {
+    $('#findVehicleField').keyup(delay(function (e) {
         table.draw();
-    });
-})
+        var info = table.page.info();
+        if(info && info.recordsDisplay < 1){
+            $('#notAssignedWrapper').show();
+        } else {
+            $('#notAssignedWrapper').hide();
+        }
+    }, 300));
 
-var delay = (function(){
+    $('#notAssignedApplyButton').click(function (e) {
+        var selectedBlock = $('#notAssignedDropDown').val()
+        table.rows().eq(0).each( function ( index ) {
+            var row = table.row( index );
+            var data = row.data();
+            var rowBlockId = data[0];
+            if(rowBlockId == selectedBlock){
+                var vehicleId = $('#findVehicleField').val();
+                table.cell(index,5).nodes().to$().find('input').val(vehicleId);
+                table.draw();
+            }
+        } );
+    })
+
+    $( "#dialog-message" ).dialog({
+        autoOpen: false,
+        buttons: {
+            Ok: function() {
+                $( this ).dialog( "close" );
+            }
+        },
+        width: 700
+    });
+
+    $('.trips').click(function(e){
+        var blockId = $(this).parent().parent().find(".blockId").text();
+        var tripsForBlockUrl = '/api/vehicle-assign/trips/block/' + blockId;
+        console.log(tripsForBlockUrl);
+        $.ajax({
+            url: tripsForBlockUrl,
+            type: "GET",
+            dataType: 'text json',
+            success: function (data) {
+                $("#dialog-body tbody").empty();
+                if (data) {
+                    for (var i = 0; i < data.length; i++) {
+                        content = "<tr>";
+                        content += "<td>" + data[i].tripId + "</td>";
+                        content += "<td>" + data[i].headSign + "</td>";
+                        content += "<td>" + data[i].startTime + "</td>";
+                        content += "<td>" + data[i].endTime + "</td>";
+                        content += "</tr>";
+                        $("#dialog-body tbody").append(content);
+                    }
+
+                }
+                $( "#dialog-message" ).dialog( "open" );
+            }
+        });
+    })
+});
+
+$( function() {
+    $.widget( "custom.combobox", {
+        _create: function() {
+            this.wrapper = $( "<span>" )
+                .addClass( "custom-combobox" )
+                .insertAfter( this.element );
+
+            this.element.hide();
+            this._createAutocomplete();
+            this._createShowAllButton();
+        },
+
+        _createAutocomplete: function() {
+            var selected = this.element.children( ":selected" ),
+                value = selected.val() ? selected.text() : "";
+
+            var name = this.element.parent().find(".vehicleName").first().val();
+            var savedValue = this.element.parent().find(".savedVehicleIdValue").first().val();
+
+            this.input = $( "<input>" )
+                .appendTo( this.wrapper )
+                .val( savedValue )
+                .attr( "title", "" )
+                .attr("name", name)
+                .addClass( "custom-combobox-input ui-widget ui-widget-content ui-state-default ui-corner-left vehicleIdInput" )
+                .change(vehicleIdChange)
+                .autocomplete({
+                    delay: 0,
+                    minLength: 0,
+                    source: function( request, response ) {
+                        $.ajax({
+                            url: "/api/vehicle-assign/active-vehicles/list",
+                            dataType: "json",
+                            data: {
+                                q: request.term
+                            },
+                            success: function( data ) {
+                                response( data );
+                            }
+                        });
+                    }
+                })
+                .tooltip({
+                    classes: {
+                        "ui-tooltip": "ui-state-highlight"
+                    }
+                });
+
+            this._on( this.input, {
+                autocompleteselect: function( event, ui ) {
+                    ui.item.selected = true;
+                    this._trigger( "select", event, {
+                        item: ui.item
+                    });
+                },
+
+                autocompletechange: "_removeIfInvalid"
+            });
+        },
+
+        _createShowAllButton: function() {
+            var input = this.input,
+                wasOpen = false;
+
+            $( "<a>" )
+                .attr( "tabIndex", -1 )
+                .attr( "title", "Show All Items" )
+                .tooltip()
+                .appendTo( this.wrapper )
+                .button({
+                    icons: {
+                        primary: "ui-icon-triangle-1-s"
+                    },
+                    text: false
+                })
+                .removeClass( "ui-corner-all" )
+                .addClass( "custom-combobox-toggle ui-corner-right" )
+                .on( "mousedown", function() {
+                    wasOpen = input.autocomplete( "widget" ).is( ":visible" );
+                })
+                .on( "click", function() {
+                    input.trigger( "focus" );
+
+                    // Close if already visible
+                    if ( wasOpen ) {
+                        return;
+                    }
+
+                    // Pass empty string as value to search for, displaying all results
+                    input.autocomplete( "search", "" );
+                });
+        },
+
+        _removeIfInvalid: function( event, ui ) {
+            // Selected an item, nothing to do
+            if ( ui.item ) {
+                return;
+            }
+
+            // Search for a match (case-insensitive)
+            var value = this.input.val(),
+                valueLowerCase = value.toLowerCase(),
+                valid = false;
+            $("#hiddenVehicles").children( "option" ).each(function() {
+                if ( $( this ).text().toLowerCase() === valueLowerCase ) {
+                    this.selected = valid = true;
+                    return false;
+                }
+            });
+
+            // Found a match, nothing to do
+            if ( valid ) {
+                return;
+            }
+
+            // Remove invalid value
+            this.input
+                .val( "" )
+                .attr( "title", value + " didn't match any item" )
+                .tooltip( "open" );
+            this.element.val( "" );
+            this._delay(function() {
+                this.input.tooltip( "close" ).attr( "title", "" );
+            }, 2500 );
+            this.input.autocomplete( "instance" ).term = "";
+        },
+
+        _destroy: function() {
+            this.wrapper.remove();
+            this.element.show();
+        }
+    });
+
+    $( ".combobox" ).combobox();
+
+} );
+
+function vehicleIdChange(e) {
+    var currentVehicleIdVal = $(this).val();
+    var savedVehicleIdVal = $(this).parent().parent().find(".savedVehicleIdValue").val();
+    var validationField = $(this).parent().parent().parent().next().find(".validation");
+
+    if(currentVehicleIdVal != savedVehicleIdVal) {
+        validationField.hide();
+    }
+};
+
+function delay(callback, ms) {
     var timer = 0;
-    return function(callback, ms){
-        clearTimeout (timer);
-        timer = setTimeout(callback, ms);
+    return function() {
+        var context = this, args = arguments;
+        clearTimeout(timer);
+        timer = setTimeout(function () {
+            callback.apply(context, args);
+        }, ms || 0);
     };
-})();
+}
