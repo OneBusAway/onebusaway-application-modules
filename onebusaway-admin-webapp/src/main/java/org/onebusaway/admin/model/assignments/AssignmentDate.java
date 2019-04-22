@@ -13,21 +13,38 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.onebusaway.admin.service;
+package org.onebusaway.admin.model.assignments;
 
-import org.onebusaway.admin.model.ActiveBlock;
-import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.gtfs.model.calendar.ServiceDate;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import java.util.Date;
 
-import java.util.List;
-import java.util.Map;
+@Entity
+public class AssignmentDate {
+    @Id
+    private String key;
+    private Date value;
 
-public interface VehicleAssignmentService {
-    boolean assign(String blockId, String vehicleId);
+    public AssignmentDate(){}
 
-    String getAssignmentByBlockId(String blockId);
+    public AssignmentDate(String key, Date value){
+        this.key = key;
+        this.value = value;
+    }
 
-    List<ActiveBlock> getActiveBlocks(ServiceDate serviceDate, List<AgencyAndId> filterRoutes);
+    public String getKey() {
+        return key;
+    }
 
-    Map<String, String> getAssignments();
+    public void setKey(String key) {
+        this.key = key;
+    }
+
+    public Date getValue() {
+        return value;
+    }
+
+    public void setValue(Date value) {
+        this.value = value;
+    }
 }

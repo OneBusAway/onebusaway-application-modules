@@ -13,23 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.onebusaway.admin.model;
+package org.onebusaway.admin.model.assignments;
 
-import org.onebusaway.transit_data.model.blocks.BlockInstanceBean;
-import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
-
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-
-public class ActiveBlock {
-
+public class BlockSummary {
     private String blockId;
-    private BlockInstanceBean blockInstanceBean;
-    private Set<String> routes;
+    private String formattedBlockId;
+    private String routeName;
     private String startTime;
     private String endTime;
+    private String vehicleId;
+    private boolean duplicateVehicleId;
 
     public String getBlockId() {
         return blockId;
@@ -39,23 +32,20 @@ public class ActiveBlock {
         this.blockId = blockId;
     }
 
-    public BlockInstanceBean getBlockInstanceBean() {
-        return blockInstanceBean;
+    public String getFormattedBlockId() {
+        return formattedBlockId;
     }
 
-    public void setBlockInstanceBean(BlockInstanceBean blockInstanceBean) {
-        this.blockInstanceBean = blockInstanceBean;
+    public void setFormattedBlockId(String formattedBlockId) {
+        this.formattedBlockId = formattedBlockId;
     }
 
-    public Set<String> getRoutes() {
-        if(routes == null){
-            this.routes = new HashSet<>();
-        }
-        return routes;
+    public String getRouteName() {
+        return routeName;
     }
 
-    public void setRoutes(Set<String> routes) {
-        this.routes = routes;
+    public void setRouteName(String routeName) {
+        this.routeName = routeName;
     }
 
     public String getStartTime() {
@@ -74,16 +64,19 @@ public class ActiveBlock {
         this.endTime = endTime;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        ActiveBlock that = (ActiveBlock) o;
-        return blockId.equals(that.blockId);
+    public String getVehicleId() {
+        return vehicleId;
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(blockId);
+    public void setVehicleId(String vehicleId) {
+        this.vehicleId = vehicleId;
+    }
+
+    public boolean isDuplicateVehicleId() {
+        return duplicateVehicleId;
+    }
+
+    public void setDuplicateVehicleId(boolean duplicateVehicleId) {
+        this.duplicateVehicleId = duplicateVehicleId;
     }
 }

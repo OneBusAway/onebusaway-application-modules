@@ -106,6 +106,14 @@
                 value="true" />
     </bean>
 
+    <!-- Database Connection Configuration for retrieving assigned vehicle data -->
+    <bean id="assignedVehicleDataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+        <property name="driverClassName" value="org.hsqldb.jdbcDriver" />
+        <property name="url" value="jdbc:hsqldb:mem:assigned_vehicles" />
+        <property name="username" value="sa" />
+        <property name="password" value="" />
+    </bean>
+
 <!-- Other Stuff: -->
 
     <bean id="externalGeocoderImpl" class="org.onebusaway.geocoder.enterprise.impl.EnterpriseGoogleGeocoderImpl">
@@ -224,6 +232,30 @@
       </list>
     </property>
   </bean>
+
+    <bean id="assignmentSessionFactory"
+          class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+        <property name="dataSource" ref="assignedVehicleDataSource" />
+        <property name="annotatedClasses">
+            <list>
+                <value>org.onebusaway.admin.model.assignments.Assignment</value>
+                <value>org.onebusaway.admin.model.assignments.AssignmentDate</value>
+                <value>org.onebusaway.admin.service.assignments.impl.AssignmentDaoImpl</value>
+                <value>org.onebusaway.admin.service.assignments.impl.AssignmentDateDaoImpl</value>
+            </list>
+        </property>
+        <property name="hibernateProperties">
+            <props>
+                <prop key="hibernate.dialect">org.hibernate.dialect.HSQLDialect</prop>
+                <prop key="hibernate.connection.pool_size">1</prop>
+                <!--<prop key="hibernate.current_session_context_class">thread</prop>-->
+                <prop key="hibernate.cache.provider_class">org.hibernate.cache.internal.NoCachingRegionFactory</prop>
+                <prop key="hibernate.show_sql">false</prop>
+                <prop key="hibernate.hbm2ddl.auto">update</prop>
+                <prop key="hibernate.jdbc.batch_size">1000</prop>
+            </props>
+        </property>
+    </bean>
 
 	<!-- quartz scheduling for PingJob -->
 	<bean name="pingJob" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">

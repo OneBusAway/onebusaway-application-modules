@@ -36,6 +36,7 @@
     <context:component-scan base-package="org.onebusaway.admin.service.bundle.api" />
     <context:component-scan base-package="org.onebusaway.admin.service.api" />
     <context:component-scan base-package="org.onebusaway.admin.service.impl" />
+    <context:component-scan base-package="org.onebusaway.admin.service.assignments.impl" />
     <context:component-scan base-package="org.onebusaway.admin.service.bundle.impl" />
     
     
