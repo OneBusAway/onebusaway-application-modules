@@ -67,7 +67,8 @@ jQuery(function() {
         table.rows().eq(0).each( function ( index ) {
             var row = table.row( index );
             var data = row.data();
-            var rowBlockId = data[0];
+            var rowBlockIdTag = $.parseHTML(data[0])[0];
+            var rowBlockId = rowBlockIdTag.innerText;
             if(rowBlockId == selectedBlock){
                 var vehicleId = $('#findVehicleField').val();
                 table.cell(index,5).nodes().to$().find('input').val(vehicleId);
