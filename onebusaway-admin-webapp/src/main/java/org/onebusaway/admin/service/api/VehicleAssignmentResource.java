@@ -131,10 +131,6 @@ public class VehicleAssignmentResource extends AuthenticatedResource {
     @Path("/get/csv")
     @GET
     public Response getAssignmentsAsCSV() {
-        if (!isAuthorized()) {
-            return Response.noContent().build();
-        }
-
         StringBuffer csv = new StringBuffer();
         csv.append("block").append(",").append("vehicle").append('\n');
         Map<String, String> assignments = getAssignments();
