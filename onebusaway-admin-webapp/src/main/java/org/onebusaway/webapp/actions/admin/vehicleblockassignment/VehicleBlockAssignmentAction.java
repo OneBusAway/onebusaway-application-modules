@@ -18,17 +18,19 @@ package org.onebusaway.webapp.actions.admin.vehicleblockassignment;
 import com.opensymphony.xwork2.ActionSupport;
 import com.opensymphony.xwork2.ModelDriven;
 import com.opensymphony.xwork2.Preparable;
+import org.apache.commons.lang.StringUtils;
 import org.apache.struts2.convention.annotation.Namespace;
 import org.jsoup.helper.StringUtil;
-import org.onebusaway.admin.model.ActiveBlock;
-import org.onebusaway.admin.model.BlockSummary;
-import org.onebusaway.admin.service.VehicleAssignmentService;
+import org.onebusaway.admin.model.assignments.ActiveBlock;
+import org.onebusaway.admin.model.assignments.BlockSummary;
+import org.onebusaway.admin.service.assignments.VehicleAssignmentService;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
 import org.onebusaway.util.services.configuration.ConfigurationService;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 
 @Namespace(value="/admin/vehicleblockassignment")
 public class VehicleBlockAssignmentAction extends ActionSupport implements
@@ -37,12 +39,10 @@ public class VehicleBlockAssignmentAction extends ActionSupport implements
     @Autowired
     private VehicleAssignmentService vehicleAssignmentService;
 
-    @Autowired
-    private ConfigurationService configurationService;
-
     private String vehicleId;
     private String blockId;
     private List<BlockSummary> _model;
+    private List<String> _activeVehicleIds;
 
     public String execute(){
         return SUCCESS;
@@ -54,17 +54,23 @@ public class VehicleBlockAssignmentAction extends ActionSupport implements
     }
 
     @Override
-    public void prepare() throws Exception {
+    public void prepare() throws ExecutionException {
         _model = getBlockSummaries();
+        _activeVehicleIds = vehicleAssignmentService.getActiveVehicles();
     }
 
-    public String submit() {
+    public String submit() throws ExecutionException {
         for(BlockSummary blockSummary : _model){
             if(!StringUtil.isBlank(blockSummary.getBlockId())) {
                 vehicleAssignmentService.assign(blockSummary.getBlockId(), blockSummary.getVehicleId());
             }
         }
+        prepare();
         return SUCCESS;
+    }
+
+    public List<String> getActiveVehicles(){
+        return _activeVehicleIds;
     }
 
     public String getVehicleId() {
@@ -87,35 +93,55 @@ public class VehicleBlockAssignmentAction extends ActionSupport implements
         return new Date();
     }
 
-    private List<BlockSummary> getBlockSummaries(){
+    public Date getLastUpdated() { return vehicleAssignmentService.getLastUpdated();}
+
+
+    private List<BlockSummary> getBlockSummaries() throws ExecutionException {
         List<BlockSummary> blockSummaries = new ArrayList<>();
         ServiceDate serviceDate = new ServiceDate(getCurrentDate());
-        List<AgencyAndId> routes = getVehicleAssignmentRoutes();
+        Map<String, Integer> vehicleIdCounts = new HashMap<>();
 
-        List<ActiveBlock> activeBlocks = vehicleAssignmentService.getActiveBlocks(serviceDate, routes);
+        List<ActiveBlock> activeBlocks = vehicleAssignmentService.getActiveBlocks(serviceDate);
+        Map<String, String> assignments = vehicleAssignmentService.getAssignments();
 
         for (ActiveBlock activeBlock : activeBlocks) {
+            String vehicleId = assignments.get(activeBlock.getBlockId());
+
             BlockSummary blockSummary = new BlockSummary();
             blockSummary.setBlockId(activeBlock.getBlockId());
             blockSummary.setRouteName(String.join(", ",  activeBlock.getRoutes()));
             blockSummary.setStartTime(activeBlock.getStartTime());
             blockSummary.setEndTime(activeBlock.getEndTime());
-            blockSummary.setVehicleId(vehicleAssignmentService.getAssignmentByBlockId(activeBlock.getBlockId()));
+            blockSummary.setVehicleId(vehicleId);
+
+            if(!StringUtils.isBlank(vehicleId)){
+                // count vehicleIds
+                Integer vehicleIdCount = vehicleIdCounts.get(vehicleId);
+                if(vehicleIdCount == null){
+                    vehicleIdCounts.put(vehicleId,1);
+                } else {
+                    vehicleIdCounts.put(vehicleId, vehicleIdCount + 1);
+                }
+
+                // add asterix for block list dropdown
+                blockSummary.setFormattedBlockId(blockSummary.getBlockId() + "*");
+            }
+            else{
+                blockSummary.setFormattedBlockId(blockSummary.getBlockId());
+            }
             blockSummaries.add(blockSummary);
         }
 
+        for(BlockSummary blockSummary : blockSummaries){
+            String vehicleId = blockSummary.getVehicleId();
+            if(StringUtils.isNotBlank(vehicleId)){
+                Integer vehicleIdCount = vehicleIdCounts.get(vehicleId);
+                if(vehicleIdCount > 1){
+                    blockSummary.setDuplicateVehicleId(Boolean.TRUE);
+                }
+            }
+        }
 
         return blockSummaries;
     }
-
-    private List<AgencyAndId> getVehicleAssignmentRoutes(){
-        List<AgencyAndId> routesAsAgencyAndId = new ArrayList<>();
-        String vehicleAssignmentRoutes = configurationService.getConfigurationValueAsString("vehicleAssignmentRoutes", "");
-        List<String> routes = Arrays.asList(vehicleAssignmentRoutes.split("\\s*,\\s*"));
-        for(String route : routes){
-            routesAsAgencyAndId.add(AgencyAndId.convertFromString(route));
-        }
-        return routesAsAgencyAndId;
-    }
-
 }

@@ -13,29 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.onebusaway.admin.model;
+package org.onebusaway.admin.model.assignments;
 
-public class BlockSummary {
-    private String blockId;
-    private String routeName;
+public class TripSummary {
+    private String tripId;
+    private String headSign;
     private String startTime;
     private String endTime;
-    private String vehicleId;
 
-    public String getBlockId() {
-        return blockId;
+    public String getTripId() {
+        return tripId;
     }
 
-    public void setBlockId(String blockId) {
-        this.blockId = blockId;
+    public void setTripId(String tripId) {
+        this.tripId = tripId;
     }
 
-    public String getRouteName() {
-        return routeName;
+    public String getHeadSign() {
+        return headSign;
     }
 
-    public void setRouteName(String routeName) {
-        this.routeName = routeName;
+    public void setHeadSign(String headSign) {
+        this.headSign = headSign;
     }
 
     public String getStartTime() {
@@ -52,13 +51,5 @@ public class BlockSummary {
 
     public void setEndTime(String endTime) {
         this.endTime = endTime;
-    }
-
-    public String getVehicleId() {
-        return vehicleId;
-    }
-
-    public void setVehicleId(String vehicleId) {
-        this.vehicleId = vehicleId;
     }
 }

@@ -15,42 +15,52 @@
  */
 package org.onebusaway.admin.service.api;
 
-import org.onebusaway.admin.model.ActiveBlock;
-import org.onebusaway.admin.service.VehicleAssignmentService;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.onebusaway.admin.model.assignments.ActiveBlock;
+import org.onebusaway.admin.model.assignments.Assignment;
+import org.onebusaway.admin.service.assignments.ActiveVehiclesService;
+import org.onebusaway.admin.service.assignments.VehicleAssignmentService;
+import org.onebusaway.admin.service.assignments.impl.ActiveVehiclesServiceImpl;
 import org.onebusaway.admin.service.bundle.api.AuthenticatedResource;
-import org.onebusaway.admin.service.impl.VehicleAssignmentServiceImpl;
+import org.onebusaway.admin.service.assignments.impl.VehicleAssignmentServiceImpl;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
-import org.onebusaway.transit_data.model.blocks.BlockBean;
-import org.onebusaway.transit_data.model.blocks.BlockInstanceBean;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.RestController;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
+import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Endpoint for vehicle assignment services, such as manually associating a vehicle
  * with a block, and managing that relationship life cycle.
  */
 @Path("/vehicle-assign")
-@Component
+@RestController
 public class VehicleAssignmentResource extends AuthenticatedResource {
 
     private static Logger _log = LoggerFactory.getLogger(VehicleAssignmentResource.class);
+    private ObjectMapper _mapper = new ObjectMapper();
+
 
     @Autowired
     private VehicleAssignmentService _service;
     public void setVehicleAssignmentService(VehicleAssignmentServiceImpl vehicleAssignmentService) {
         _service = vehicleAssignmentService;
+    }
+
+    @Autowired
+    private ActiveVehiclesService _activeVehiclesService;
+    public void setActiveVehiclesService(ActiveVehiclesServiceImpl activeVehiclesService){
+        _activeVehiclesService = activeVehiclesService;
     }
 
     public boolean assign(String blockId, String vehicleId) {
@@ -72,13 +82,13 @@ public class VehicleAssignmentResource extends AuthenticatedResource {
         return _service.getAssignmentByBlockId(blockId);
     }
 
-    public List<ActiveBlock> getActiveBlocks(ServiceDate serviceDate, List<AgencyAndId> filterRoutes) {
+    public List<ActiveBlock> getActiveBlocks(ServiceDate serviceDate, List<AgencyAndId> filterRoutes) throws ExecutionException {
         return _service.getActiveBlocks(serviceDate, filterRoutes);
     }
 
     @Path("/active-blocks/{serviceDate}/{routeList}")
     @GET
-    public Response getActiveBlocksAsCSV(@PathParam("serviceDate") String serviceDate, @PathParam("routeList") String routes) {
+    public Response getActiveBlocksAsCSV(@PathParam("serviceDate") String serviceDate, @PathParam("routeList") String routes) throws ExecutionException {
         _log.info("getActiveBlocksAsCSV(" + serviceDate + ", " + routes);
         if (!isAuthorized()) {
             return Response.noContent().build();
@@ -128,6 +138,33 @@ public class VehicleAssignmentResource extends AuthenticatedResource {
             csv.append(block).append(",").append(assignments.get(block)).append('\n');
         }
         return Response.ok(csv.toString()).build();
+    }
+
+    @Path("/list")
+    @GET @Produces("application/json")
+    public Response getAssignmentsAsJson() throws IOException {
+        final List assignmentsList = new ArrayList<>();
+        final Map<String, String> assignments = getAssignments();
+        for(Map.Entry<String,String> entry : assignments.entrySet()){
+            assignmentsList.add(new Assignment(entry.getKey(), entry.getValue()));
+        }
+
+        String assignmentListAsString = _mapper.writeValueAsString(assignmentsList);
+        return Response.ok(assignmentListAsString).build();
+    }
+
+    @Path("/active-vehicles/list")
+    @GET @Produces("application/json")
+    public Response getActiveVehiclesAsJson(@QueryParam("q") String query) throws IOException {
+        String activeVehiclesList = _mapper.writeValueAsString(_activeVehiclesService.getActiveVehicles(query));
+        return Response.ok(activeVehiclesList).build();
+    }
+
+    @Path("/trips/block/{blockId}")
+    @GET @Produces("application/json")
+    public Response getTripsForBlockAsJson(@PathParam("blockId") String blockId) throws IOException, ExecutionException {
+        String activeVehiclesList = _mapper.writeValueAsString(_service.getTripsForBlock(blockId));
+        return Response.ok(activeVehiclesList).build();
     }
 
 }
