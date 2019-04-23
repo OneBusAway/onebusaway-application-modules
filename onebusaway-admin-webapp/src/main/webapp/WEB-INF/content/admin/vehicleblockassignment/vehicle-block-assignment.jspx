@@ -175,7 +175,7 @@
                     <thead>
                         <tr>
                             <th>Trip Id</th>
-                            <th>Header</th>
+                            <th>HeadSign</th>
                             <th>Start</th>
                             <th>End</th>
                         </tr>
