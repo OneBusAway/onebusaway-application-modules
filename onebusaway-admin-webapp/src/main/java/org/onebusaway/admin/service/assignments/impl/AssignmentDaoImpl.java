@@ -18,6 +18,7 @@ package org.onebusaway.admin.service.assignments.impl;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
 import org.onebusaway.admin.model.assignments.Assignment;
 import org.onebusaway.admin.service.assignments.AssignmentDao;
 import org.slf4j.Logger;
@@ -74,6 +75,7 @@ public class AssignmentDaoImpl implements AssignmentDao {
     }
 
     @Override
+    @Transactional(rollbackFor = Throwable.class)
     public void deleteAll() {
         Query query = getSession().createQuery("DELETE from Assignment");
         query.executeUpdate();

@@ -15,6 +15,8 @@
  */
 package org.onebusaway.admin.model.assignments;
 
+import java.util.Objects;
+
 public class TripSummary {
     private String tripId;
     private String headSign;
@@ -51,5 +53,21 @@ public class TripSummary {
 
     public void setEndTime(String endTime) {
         this.endTime = endTime;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        TripSummary that = (TripSummary) o;
+        return tripId.equals(that.tripId) &&
+                headSign.equals(that.headSign) &&
+                startTime.equals(that.startTime) &&
+                endTime.equals(that.endTime);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(tripId, headSign, startTime, endTime);
     }
 }

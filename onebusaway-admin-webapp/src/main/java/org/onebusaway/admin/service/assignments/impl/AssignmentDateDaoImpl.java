@@ -15,6 +15,7 @@
  */
 package org.onebusaway.admin.service.assignments.impl;
 
+import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.onebusaway.admin.model.assignments.AssignmentDate;
@@ -69,6 +70,13 @@ public class AssignmentDateDaoImpl implements AssignmentDateDao {
     @Transactional(rollbackFor = Throwable.class)
     public void delete(AssignmentDate assignmentDate) {
         getSession().delete(assignmentDate);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Throwable.class)
+    public void deleteAll() {
+        Query query = getSession().createQuery("DELETE from AssignmentDate");
+        query.executeUpdate();
     }
 
     private Session getSession(){

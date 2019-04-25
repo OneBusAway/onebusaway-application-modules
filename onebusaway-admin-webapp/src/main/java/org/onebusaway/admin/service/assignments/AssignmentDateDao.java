@@ -16,6 +16,7 @@
 package org.onebusaway.admin.service.assignments;
 
 import org.onebusaway.admin.model.assignments.AssignmentDate;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -25,4 +26,5 @@ public interface AssignmentDateDao {
     public void save(AssignmentDate assignmentDate);
     public void saveAll(List<AssignmentDate> assignmentDateList);
     public void delete(AssignmentDate assignmentDate);
+    public void deleteAll();
 }

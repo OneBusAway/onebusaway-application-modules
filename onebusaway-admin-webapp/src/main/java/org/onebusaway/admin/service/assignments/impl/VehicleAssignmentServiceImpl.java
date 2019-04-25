@@ -71,8 +71,16 @@ public class VehicleAssignmentServiceImpl implements VehicleAssignmentService {
     LoadingCache<String, List<TripSummary>> tripSummaryCache;
 
 
+    public void setAssignmentDao(AssignmentDao assignmentDao) {
+        this.assignmentDao = assignmentDao;
+    }
+
+    public void setAssignmentDateDao(AssignmentDateDao assignmentDateDao) {
+        this.assignmentDateDao = assignmentDateDao;
+    }
+
     @PostConstruct
-    private void setup(){
+    public void setup(){
         CacheLoader<ServiceDate,  List<ActiveBlock>> activeBlocksLoader;
         activeBlocksLoader = new CacheLoader<ServiceDate, List<ActiveBlock>>() {
             @Override
