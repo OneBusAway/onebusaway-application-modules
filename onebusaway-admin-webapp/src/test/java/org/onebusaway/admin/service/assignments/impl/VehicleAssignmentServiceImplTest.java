@@ -261,4 +261,24 @@ public class VehicleAssignmentServiceImplTest {
 
     }
 
+    @Test
+    public void resetAssignmentsTest(){
+        VehicleAssignmentServiceImpl vas = new VehicleAssignmentServiceImpl();
+        vas.setAssignmentDao(_assignmentDao);
+        vas.setAssignmentDateDao(_assignmentDateDao);
+        vas.setTransitDataService(tds);
+        vas.setup();
+
+        vas.assign(BLOCK_ID, VEHICLE_ID);
+
+        assertEquals(1, vas.getAssignments().size());
+        assertNotNull(vas.getLastUpdated());
+
+        vas.resetAssignments();
+
+        assertEquals(0, vas.getAssignments().size());
+        assertNull(vas.getLastUpdated());
+
+    }
+
 }

@@ -41,6 +41,8 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 @Component
@@ -56,6 +58,8 @@ public class VehicleAssignmentServiceImpl implements VehicleAssignmentService {
 
     @Autowired
     private ConfigurationService configurationService;
+
+    private ScheduledExecutorService _executor;
 
     @Autowired
     private AssignmentDao assignmentDao;
@@ -81,6 +85,10 @@ public class VehicleAssignmentServiceImpl implements VehicleAssignmentService {
 
     @PostConstruct
     public void setup(){
+        _executor = Executors.newSingleThreadScheduledExecutor();
+        // check for bundle change every 60 seconds
+        _executor.scheduleAtFixedRate(new VehicleAssignmentServiceImpl.CheckForBundleChange(), 0, 60, TimeUnit.SECONDS);
+
         CacheLoader<ServiceDate,  List<ActiveBlock>> activeBlocksLoader;
         activeBlocksLoader = new CacheLoader<ServiceDate, List<ActiveBlock>>() {
             @Override
@@ -302,5 +310,29 @@ public class VehicleAssignmentServiceImpl implements VehicleAssignmentService {
         assignmentDateDao.save(assignmentDate);
 
         return true;
+    }
+
+    public void resetAssignments(){
+        activeBlocksCache.invalidateAll();
+        tripSummaryCache.invalidateAll();
+
+        assignmentDao.deleteAll();
+        assignmentDateDao.deleteAll();
+    }
+
+    private class CheckForBundleChange implements Runnable{
+        private String bundleId ;
+        @Override
+        public void run() {
+            if(bundleId == null){
+                bundleId = _tds.getActiveBundleId();
+            }
+            else{
+                if(!bundleId.equalsIgnoreCase(_tds.getActiveBundleId())){
+                    resetAssignments();
+                }
+            }
+
+        }
     }
 }
