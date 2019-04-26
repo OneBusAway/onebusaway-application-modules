@@ -55,8 +55,9 @@ jQuery(function() {
     // Search By VehicleID
     $('#findVehicleField').keyup(delay(function (e) {
         table.draw();
+        var valid = hasValidVehicle($(this).val());
         var info = table.page.info();
-        if(info && info.recordsDisplay < 1){
+        if(info && info.recordsDisplay < 1 && valid){
             $('#notAssignedWrapper').show();
         } else {
             $('#notAssignedWrapper').hide();
@@ -216,15 +217,8 @@ $( function() {
             }
 
             // Search for a match (case-insensitive)
-            var value = this.input.val(),
-                valueLowerCase = value.toLowerCase(),
-                valid = false;
-            $("#hiddenVehicles").children( "option" ).each(function() {
-                if ( $( this ).text().toLowerCase() === valueLowerCase ) {
-                    this.selected = valid = true;
-                    return false;
-                }
-            });
+            var value = this.input.val();
+            var valid = hasValidVehicle(value);
 
             // Found a match, nothing to do
             if ( valid ) {
@@ -252,6 +246,19 @@ $( function() {
     $( ".combobox" ).combobox();
 
 } );
+
+function hasValidVehicle(value){
+    // Search for a match (case-insensitive)
+    var valueLowerCase = value.toLowerCase(),
+        valid = false;
+    $("#hiddenVehicles").children( "option" ).each(function() {
+        if ( $( this ).text().toLowerCase() === valueLowerCase ) {
+            valid = true;
+            return false;
+        }
+    });
+    return valid;
+}
 
 function vehicleIdChange(e) {
     var currentVehicleIdVal = $(this).val();
