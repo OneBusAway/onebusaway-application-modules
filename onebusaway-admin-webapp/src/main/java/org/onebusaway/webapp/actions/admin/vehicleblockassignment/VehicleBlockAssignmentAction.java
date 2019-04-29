@@ -102,7 +102,7 @@ public class VehicleBlockAssignmentAction extends ActionSupport implements
         Map<String, Integer> vehicleIdCounts = new HashMap<>();
 
         List<ActiveBlock> activeBlocks = vehicleAssignmentService.getActiveBlocks(serviceDate);
-        Map<String, String> assignments = vehicleAssignmentService.getAssignments();
+        Map<String, String> assignments = vehicleAssignmentService.getAssignmentsAsMap();
 
         for (ActiveBlock activeBlock : activeBlocks) {
             String vehicleId = assignments.get(activeBlock.getBlockId());

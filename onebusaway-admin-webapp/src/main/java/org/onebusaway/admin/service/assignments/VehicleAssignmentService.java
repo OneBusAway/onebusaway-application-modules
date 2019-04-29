@@ -16,6 +16,7 @@
 package org.onebusaway.admin.service.assignments;
 
 import org.onebusaway.admin.model.assignments.ActiveBlock;
+import org.onebusaway.admin.model.assignments.Assignment;
 import org.onebusaway.admin.model.assignments.TripSummary;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
@@ -28,15 +29,25 @@ import java.util.concurrent.ExecutionException;
 public interface VehicleAssignmentService {
     Date getLastUpdated();
 
+    boolean assign(String blockId, String vehicleId, Date date);
+
     boolean assign(String blockId, String vehicleId);
 
+    Map<String, String> getAssignmentsAsMap(Date date);
+
+    String getAssignmentByBlockId(String blockId, Date date);
+
     String getAssignmentByBlockId(String blockId);
+
+    List<Assignment> getAssignments(Date date);
 
     List<String> getActiveVehicles(String query);
 
     List<String> getActiveVehicles();
 
-    Map<String, String> getAssignments();
+    Map<String, String> getAssignmentsAsMap();
+
+    List<Assignment> getAssignments();
 
     List<ActiveBlock> getActiveBlocks(ServiceDate serviceDate) throws ExecutionException;
 

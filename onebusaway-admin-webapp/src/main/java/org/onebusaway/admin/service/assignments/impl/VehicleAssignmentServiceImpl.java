@@ -74,7 +74,6 @@ public class VehicleAssignmentServiceImpl implements VehicleAssignmentService {
 
     LoadingCache<String, List<TripSummary>> tripSummaryCache;
 
-
     public void setAssignmentDao(AssignmentDao assignmentDao) {
         this.assignmentDao = assignmentDao;
     }
@@ -127,13 +126,56 @@ public class VehicleAssignmentServiceImpl implements VehicleAssignmentService {
     }
 
     @Override
-    public boolean assign(String blockId, String vehicleId) {
-        return insert(blockId, vehicleId);
+    public boolean assign(String blockId, String vehicleId, Date date) {
+        Date currentDate = getCurrentDate();
+        Assignment assignment = new Assignment(blockId, vehicleId, date);
+        assignmentDao.save(assignment);
+
+        AssignmentDate assignmentDate = new AssignmentDate("lastUpdated", currentDate);
+        assignmentDateDao.save(assignmentDate);
+
+        return true;
     }
 
     @Override
-    public String getAssignmentByBlockId(String blockId) {
-        Assignment assignment = assignmentDao.getAssignment(blockId);
+    public boolean assign(String blockId, String vehicleId) {
+        Date currentDate = getCurrentDate();
+        return assign(blockId, vehicleId, currentDate);
+    }
+
+
+    @Override
+    public List<Assignment> getAssignments(){
+        return getAssignments(getCurrentDate());
+    }
+
+    @Override
+    public List<Assignment> getAssignments(Date date){
+        List<Assignment> assignments = assignmentDao.getAll(date);
+        return assignments;
+    }
+
+    @Override
+    public Map<String, String> getAssignmentsAsMap() {
+        Map<String, String> sortedMap = new LinkedHashMap<String, String>();
+        for(Assignment assignment :  getAssignments()){
+            sortedMap.put(assignment.getBlockId(), assignment.getVehicleId());
+        }
+        return sortedMap;
+    }
+
+    @Override
+    public Map<String, String> getAssignmentsAsMap(Date date) {
+        Map<String, String> sortedMap = new LinkedHashMap<String, String>();
+        for(Assignment assignment :  getAssignments(date)){
+            sortedMap.put(assignment.getBlockId(), assignment.getVehicleId());
+        }
+        return sortedMap;
+    }
+
+    @Override
+    public String getAssignmentByBlockId(String blockId, Date date) {
+        Assignment assignment = assignmentDao.getAssignment(blockId, date);
         if(assignment != null){
             return assignment.getVehicleId();
         }
@@ -141,13 +183,12 @@ public class VehicleAssignmentServiceImpl implements VehicleAssignmentService {
     }
 
     @Override
-    public Map<String, String> getAssignments() {
-        Map<String, String> sortedMap = new TreeMap<String, String>();
-        List<Assignment> assignments = assignmentDao.getAll();
-        for(Assignment assignment :  assignments){
-            sortedMap.put(assignment.getBlockId(), assignment.getVehicleId());
+    public String getAssignmentByBlockId(String blockId) {
+        Assignment assignment = assignmentDao.getAssignment(blockId, getCurrentDate());
+        if(assignment != null){
+            return assignment.getVehicleId();
         }
-        return sortedMap;
+        return null;
     }
 
     @Override
@@ -185,8 +226,8 @@ public class VehicleAssignmentServiceImpl implements VehicleAssignmentService {
             if(rb !=null) {
                 TimeZone tz = TimeZone.getTimeZone(rb.getAgency().getTimezone());
                 Date date = serviceDate.getAsDate(tz);
-                long fromTime = getFirstTimeOfDate(date);
-                long toTime = getLastTimeOfDay(date);
+                long fromTime = getStartOfDay(date).getTime();
+                long toTime = getEndOfDay(date).getTime();
 
                 List<BlockInstanceBean> blockInstanceBeans = _tds.getActiveBlocksForRoute(agencyAndRouteId, fromTime, toTime);
 
@@ -240,24 +281,24 @@ public class VehicleAssignmentServiceImpl implements VehicleAssignmentService {
         return routesAsAgencyAndId;
     }
 
-    private static long getFirstTimeOfDate(Date serviceDate) {
+    private static Date getStartOfDay(Date serviceDate) {
         final Calendar cal = Calendar.getInstance();
         cal.setTime(serviceDate);
         cal.set(Calendar.HOUR_OF_DAY, 0);
         cal.set(Calendar.MINUTE, 0);
         cal.set(Calendar.SECOND, 0);
         cal.set(Calendar.MILLISECOND, 000);
-        return cal.getTime().getTime();
+        return cal.getTime();
     }
 
-    private static long getLastTimeOfDay(Date serviceDate) {
+    private static Date getEndOfDay(Date serviceDate) {
         final Calendar cal = Calendar.getInstance();
         cal.setTime(serviceDate);
         cal.set(Calendar.HOUR_OF_DAY, 23);
         cal.set(Calendar.MINUTE, 59);
         cal.set(Calendar.SECOND, 59);
         cal.set(Calendar.MILLISECOND, 999);
-        return cal.getTime().getTime();
+        return cal.getTime();
     }
 
     private ActiveBlock getActiveBlock(BlockInstanceBean blockInstance, String routeId){
@@ -302,14 +343,9 @@ public class VehicleAssignmentServiceImpl implements VehicleAssignmentService {
         return String.format("%02d:%02d:%02d", hours, minutes, seconds);
     }
 
-    private boolean insert(String blockId, String vehicleId) {
-        Assignment assignment = new Assignment(blockId, vehicleId);
-        assignmentDao.save(assignment);
-
-        AssignmentDate assignmentDate = new AssignmentDate("lastUpdated", new Date());
-        assignmentDateDao.save(assignmentDate);
-
-        return true;
+    public Date getCurrentDate(){
+        Date date = new Date();
+        return date;
     }
 
     public void resetAssignments(){

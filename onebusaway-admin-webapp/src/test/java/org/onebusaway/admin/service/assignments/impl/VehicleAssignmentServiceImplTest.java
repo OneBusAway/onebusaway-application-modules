@@ -19,6 +19,7 @@ import org.hibernate.SessionFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.onebusaway.admin.model.assignments.ActiveBlock;
 import org.onebusaway.admin.model.assignments.AssignmentDate;
 import org.onebusaway.admin.model.assignments.TripSummary;
@@ -46,6 +47,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.transaction.TransactionConfiguration;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -279,6 +282,41 @@ public class VehicleAssignmentServiceImplTest {
         assertEquals(0, vas.getAssignments().size());
         assertNull(vas.getLastUpdated());
 
+    }
+
+    @Test
+    public void testDateTransition() throws ParseException {
+        VehicleAssignmentServiceImpl vas = new VehicleAssignmentServiceImpl();
+        VehicleAssignmentServiceImpl vasSpy = Mockito.spy(vas);
+        vasSpy.setAssignmentDao(_assignmentDao);
+        vasSpy.setAssignmentDateDao(_assignmentDateDao);
+        vasSpy.setTransitDataService(tds);
+
+        SimpleDateFormat sdf =new SimpleDateFormat("dd/MM/yyyy");
+        Date firstDate = sdf.parse("01/01/2019");
+        Date secondDate = sdf.parse("01/02/2019");
+
+        Mockito.when(vasSpy.getCurrentDate()).thenReturn(firstDate);
+
+        vasSpy.assign(BLOCK_ID, VEHICLE_ID);
+
+        assertEquals(1, vasSpy.getAssignments().size());
+
+        Mockito.when(vasSpy.getCurrentDate()).thenReturn(secondDate);
+
+        assertEquals(0, vasSpy.getAssignments().size());
+
+
+    }
+
+    private static Date getDate(Date serviceDate) {
+        final Calendar cal = Calendar.getInstance();
+        cal.setTime(serviceDate);
+        cal.set(Calendar.HOUR_OF_DAY, 23);
+        cal.set(Calendar.MINUTE, 59);
+        cal.set(Calendar.SECOND, 59);
+        cal.set(Calendar.MILLISECOND, 999);
+        return cal.getTime();
     }
 
 }
