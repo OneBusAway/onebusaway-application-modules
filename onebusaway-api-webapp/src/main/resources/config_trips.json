@@ -1,0 +1,6 @@
+{
+ "config":
+ [
+  {"component": "trip", "line": "AGENCY_LINE", "direction": "0", "old_trip": "OldTripName", "new_trip": "NewTripName"}
+ ]
+}
