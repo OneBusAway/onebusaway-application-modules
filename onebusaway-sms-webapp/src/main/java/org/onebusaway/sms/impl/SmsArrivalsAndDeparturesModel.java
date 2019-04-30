@@ -55,11 +55,14 @@ public class SmsArrivalsAndDeparturesModel extends ArrivalsAndDeparturesModel {
   public String getMinutesLabel(ArrivalAndDepartureBean pab) {
     long now = SystemTime.currentTimeMillis();
     long t = pab.getScheduledDepartureTime();
-    if (pab.hasPredictedDepartureTime())
+    boolean isScheduled = true;
+    if (pab.hasPredictedDepartureTime()) {
       t = pab.getPredictedDepartureTime();
+      isScheduled = false;
+    }
     int minutes = (int) Math.round((t - now) / (1000.0 * 60.0));
     boolean isNow = Math.abs(minutes) <= 1;
-    return isNow ? "NOW" : (Integer.toString(minutes) + _minuteLocalization);
+    return isNow ? "NOW"  + (isScheduled ? "*" : ""): (Integer.toString(minutes) + _minuteLocalization) + (isScheduled ? "*" : "");
   }
 
   public String abbreviate(String destination) {
