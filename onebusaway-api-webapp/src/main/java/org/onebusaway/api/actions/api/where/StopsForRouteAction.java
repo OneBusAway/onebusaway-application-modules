@@ -17,7 +17,9 @@ package org.onebusaway.api.actions.api.where;
 
 import org.apache.struts2.rest.DefaultHttpHeaders;
 import org.onebusaway.api.actions.api.ApiActionSupport;
+import org.onebusaway.api.impl.TripsConfigurationServiceClientFileImpl;
 import org.onebusaway.api.model.transit.BeanFactoryV2;
+import org.onebusaway.api.services.TripsConfigurationServiceClient;
 import org.onebusaway.exceptions.ServiceException;
 import org.onebusaway.transit_data.model.StopsForRouteBean;
 import org.onebusaway.transit_data.services.TransitDataService;
@@ -39,6 +41,9 @@ public class StopsForRouteAction extends ApiActionSupport {
   private String _id;
 
   private boolean _includePolylines = true;
+  
+  @Autowired
+  private TripsConfigurationServiceClientFileImpl tConfigurationServiceClientFileImpl;
 
   public StopsForRouteAction() {
     super(LegacyV1ApiSupport.isDefaultToV1() ? V1 : V2);
@@ -65,6 +70,21 @@ public class StopsForRouteAction extends ApiActionSupport {
       return setValidationErrorsResponse();
 
     StopsForRouteBean result = _service.getStopsForRoute(_id);
+    
+    for(int i = 0; i < result.getStopGroupings().size(); i++) {
+    	for(int j = 0; j < result.getStopGroupings().get(i).getStopGroups().size(); j++) {
+    		try {
+				String new_trip = tConfigurationServiceClientFileImpl.getItem("trip", _id, 
+						result.getStopGroupings().get(i).getStopGroups().get(j).getId(), 
+						result.getStopGroupings().get(i).getStopGroups().get(j).getName().getName());
+				if(new_trip != null)
+					result.getStopGroupings().get(i).getStopGroups().get(j).getName().setName(new_trip);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+    	}
+    }
 
     if (result == null)
       return setResourceNotFoundResponse();
