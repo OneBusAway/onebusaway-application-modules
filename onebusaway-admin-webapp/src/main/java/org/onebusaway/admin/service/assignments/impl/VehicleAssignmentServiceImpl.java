@@ -20,12 +20,9 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import org.onebusaway.admin.model.assignments.ActiveBlock;
 import org.onebusaway.admin.model.assignments.Assignment;
-import org.onebusaway.admin.model.assignments.AssignmentDate;
+import org.onebusaway.admin.model.assignments.AssignmentConfig;
 import org.onebusaway.admin.model.assignments.TripSummary;
-import org.onebusaway.admin.service.assignments.ActiveVehiclesService;
-import org.onebusaway.admin.service.assignments.AssignmentDao;
-import org.onebusaway.admin.service.assignments.AssignmentDateDao;
-import org.onebusaway.admin.service.assignments.VehicleAssignmentService;
+import org.onebusaway.admin.service.assignments.*;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
 import org.onebusaway.transit_data.model.RouteBean;
@@ -39,6 +36,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
@@ -65,7 +63,7 @@ public class VehicleAssignmentServiceImpl implements VehicleAssignmentService {
     private AssignmentDao assignmentDao;
 
     @Autowired
-    private AssignmentDateDao assignmentDateDao;
+    private AssignmentConfigService assignmentConfigService;
 
     @Autowired
     private ActiveVehiclesService activeVehicleService;
@@ -78,8 +76,8 @@ public class VehicleAssignmentServiceImpl implements VehicleAssignmentService {
         this.assignmentDao = assignmentDao;
     }
 
-    public void setAssignmentDateDao(AssignmentDateDao assignmentDateDao) {
-        this.assignmentDateDao = assignmentDateDao;
+    public void setAssignmentConfigService(AssignmentConfigService assignmentConfigService) {
+        this.assignmentConfigService = assignmentConfigService;
     }
 
     @PostConstruct
@@ -116,11 +114,9 @@ public class VehicleAssignmentServiceImpl implements VehicleAssignmentService {
 
     @Override
     public Date getLastUpdated(){
-        AssignmentDate assignmentDate = assignmentDateDao.getAssignmentDate("lastUpdated");
-        if(assignmentDate != null){
-            if(assignmentDate.getValue() != null){
-                return assignmentDate.getValue();
-            }
+        Date lastUpdated = assignmentConfigService.getConfigValueAsDateTime("lastUpdated");
+        if(lastUpdated != null){
+            return lastUpdated;
         }
         return null;
     }
@@ -131,8 +127,7 @@ public class VehicleAssignmentServiceImpl implements VehicleAssignmentService {
         Assignment assignment = new Assignment(blockId, vehicleId, date);
         assignmentDao.save(assignment);
 
-        AssignmentDate assignmentDate = new AssignmentDate("lastUpdated", currentDate);
-        assignmentDateDao.save(assignmentDate);
+        assignmentConfigService.setConfigValueAsDateTime("lastUpdated", currentDate);
 
         return true;
     }
@@ -353,18 +348,21 @@ public class VehicleAssignmentServiceImpl implements VehicleAssignmentService {
         tripSummaryCache.invalidateAll();
 
         assignmentDao.deleteAll();
-        assignmentDateDao.deleteAll();
+        assignmentConfigService.deleteConfigValue("lastUpdated");
     }
 
     private class CheckForBundleChange implements Runnable{
-        private String bundleId ;
         @Override
         public void run() {
+
+            String bundleId = assignmentConfigService.getConfigValueAsString("bundleId");
+            String tdsBundleId = _tds.getActiveBundleId();
+
             if(bundleId == null){
-                bundleId = _tds.getActiveBundleId();
+                assignmentConfigService.setConfigValue("bundleId", tdsBundleId);
             }
             else{
-                if(!bundleId.equalsIgnoreCase(_tds.getActiveBundleId())){
+                if(!bundleId.equalsIgnoreCase(tdsBundleId)){
                     resetAssignments();
                 }
             }

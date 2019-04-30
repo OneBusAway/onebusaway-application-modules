@@ -18,8 +18,8 @@ package org.onebusaway.admin.service.assignments.impl;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.onebusaway.admin.model.assignments.AssignmentDate;
-import org.onebusaway.admin.service.assignments.AssignmentDateDao;
+import org.onebusaway.admin.model.assignments.AssignmentConfig;
+import org.onebusaway.admin.service.assignments.AssignmentConfigDao;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,9 +30,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 @Component
-public class AssignmentDateDaoImpl implements AssignmentDateDao {
+public class AssignmentConfigDaoImpl implements AssignmentConfigDao {
 
-    protected static Logger _log = LoggerFactory.getLogger(AssignmentDateDaoImpl.class);
+    protected static Logger _log = LoggerFactory.getLogger(AssignmentConfigDaoImpl.class);
     private SessionFactory _sessionFactory;
 
     @Autowired
@@ -42,40 +42,40 @@ public class AssignmentDateDaoImpl implements AssignmentDateDao {
     }
 
     @Override
-    public List<AssignmentDate> getAll() {
-        return getSession().createCriteria(AssignmentDate.class).list();
+    public List<AssignmentConfig> getAll() {
+        return getSession().createCriteria(AssignmentConfig.class).list();
     }
 
     @Override
     @Transactional(readOnly = true)
-    public AssignmentDate getAssignmentDate(String key) {
-        return (AssignmentDate) getSession().get(AssignmentDate.class, key);
+    public AssignmentConfig getAssignmentConfig(String key) {
+        return (AssignmentConfig) getSession().get(AssignmentConfig.class, key);
     }
 
     @Override
     @Transactional(rollbackFor = Throwable.class)
-    public void save(AssignmentDate assignmentDate) {
-        getSession().saveOrUpdate(assignmentDate);
+    public void save(AssignmentConfig assignmentConfig) {
+        getSession().saveOrUpdate(assignmentConfig);
     }
 
     @Override
     @Transactional(rollbackFor = Throwable.class)
-    public void saveAll(List<AssignmentDate> assignmentDateList) {
-        for(AssignmentDate assignmentDate : assignmentDateList){
-            getSession().saveOrUpdate(assignmentDate);
+    public void saveAll(List<AssignmentConfig> assignmentConfigList) {
+        for(AssignmentConfig assignmentConfig : assignmentConfigList){
+            getSession().saveOrUpdate(assignmentConfig);
         }
     }
 
     @Override
     @Transactional(rollbackFor = Throwable.class)
-    public void delete(AssignmentDate assignmentDate) {
-        getSession().delete(assignmentDate);
+    public void delete(AssignmentConfig assignmentConfig) {
+        getSession().delete(assignmentConfig);
     }
 
     @Override
     @Transactional(rollbackFor = Throwable.class)
     public void deleteAll() {
-        Query query = getSession().createQuery("DELETE from AssignmentDate");
+        Query query = getSession().createQuery("DELETE from AssignmentConfig");
         query.executeUpdate();
     }
 

@@ -56,9 +56,10 @@
         <property name="sourceList">
             <list>
                 <value>org.onebusaway.admin.model.assignments.Assignment</value>
-                <value>org.onebusaway.admin.model.assignments.AssignmentDate</value>
+                <value>org.onebusaway.admin.model.assignments.AssignmentConfig</value>
                 <value>org.onebusaway.admin.service.assignments.impl.AssignmentDaoImpl</value>
-                <value>org.onebusaway.admin.service.assignments.impl.AssignmentDateDaoImpl</value>
+                <value>org.onebusaway.admin.service.assignments.impl.AssignmentConfigDaoImpl</value>
+                <value>org.onebusaway.admin.service.assignments.impl.AssignmentConfigServiceImpl</value>
             </list>
         </property>
     </bean>

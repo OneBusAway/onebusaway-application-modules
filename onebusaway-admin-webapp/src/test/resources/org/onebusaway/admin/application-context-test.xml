@@ -32,8 +32,11 @@
         <property name="sessionFactory" ref="sessionFactory" />
     </bean>
 
-    <bean id="assignmentDateDao" class="org.onebusaway.admin.service.assignments.impl.AssignmentDateDaoImpl">
+    <bean id="assignmentConfigDao" class="org.onebusaway.admin.service.assignments.impl.AssignmentConfigDaoImpl">
         <property name="sessionFactory" ref="sessionFactory" />
+    </bean>
+
+    <bean id="assignmentConfigService" class="org.onebusaway.admin.service.assignments.impl.AssignmentConfigServiceImpl">
     </bean>
 
 </beans>

@@ -15,22 +15,19 @@
  */
 package org.onebusaway.admin.service.api;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import org.codehaus.jackson.map.DeserializationConfig;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.onebusaway.admin.model.assignments.ActiveBlock;
 import org.onebusaway.admin.model.assignments.Assignment;
-import org.onebusaway.admin.model.assignments.AssignmentDate;
+import org.onebusaway.admin.model.assignments.AssignmentConfig;
+import org.onebusaway.admin.service.assignments.AssignmentConfigService;
 import org.onebusaway.admin.service.assignments.AssignmentDao;
-import org.onebusaway.admin.service.assignments.AssignmentDateDao;
+import org.onebusaway.admin.service.assignments.AssignmentConfigDao;
 import org.onebusaway.admin.service.assignments.impl.VehicleAssignmentServiceImpl;
 import org.onebusaway.exceptions.ServiceException;
 import org.onebusaway.gtfs.model.AgencyAndId;
@@ -49,7 +46,6 @@ import org.onebusaway.transit_data_federation.impl.federated.TransitDataServiceI
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 
@@ -68,7 +64,7 @@ public class VehicleAssignmentResourceTest {
     private AssignmentDao assignmentDao;
 
     @Mock
-    private AssignmentDateDao assignmentDateDao;
+    private AssignmentConfigService assignmentConfigService;
 
     Date currentDate = new Date();
 
@@ -82,7 +78,7 @@ public class VehicleAssignmentResourceTest {
         VehicleAssignmentServiceImpl vas = new VehicleAssignmentServiceImpl();
         VehicleAssignmentServiceImpl vasSpy = Mockito.spy(vas);
         vasSpy.setAssignmentDao(assignmentDao);
-        vasSpy.setAssignmentDateDao(assignmentDateDao);
+        vasSpy.setAssignmentConfigService(assignmentConfigService);
 
         Mockito.when(vasSpy.getCurrentDate()).thenReturn(today());
 
@@ -90,7 +86,7 @@ public class VehicleAssignmentResourceTest {
         var.setVehicleAssignmentService(vasSpy);
 
         doNothing().when(assignmentDao).save(any(Assignment.class));
-        doNothing().when(assignmentDateDao).save(any(AssignmentDate.class));
+        doNothing().when(assignmentConfigService).setConfigValue(anyString(), anyString());
 
         String blockId = "block_1";
         String vehicleId = "vehicle_1";
@@ -103,7 +99,7 @@ public class VehicleAssignmentResourceTest {
         VehicleAssignmentServiceImpl vas = new VehicleAssignmentServiceImpl();
         VehicleAssignmentServiceImpl vasSpy = Mockito.spy(vas);
         vasSpy.setAssignmentDao(assignmentDao);
-        vasSpy.setAssignmentDateDao(assignmentDateDao);
+        vasSpy.setAssignmentConfigService(assignmentConfigService);
 
         Mockito.when(vasSpy.getCurrentDate()).thenReturn(today());
 
@@ -115,7 +111,7 @@ public class VehicleAssignmentResourceTest {
         Assignment assignment = new Assignment(blockId, vehicleId, today());
 
         doNothing().when(assignmentDao).save(any(Assignment.class));
-        doNothing().when(assignmentDateDao).save(any(AssignmentDate.class));
+        doNothing().when(assignmentConfigService).setConfigValue(anyString(), anyString());
 
         String vehicleIdAssignment = var.getAssignmentByBlockId(blockId);
 
@@ -214,7 +210,7 @@ public class VehicleAssignmentResourceTest {
         VehicleAssignmentServiceImpl vas = new VehicleAssignmentServiceImpl();
         VehicleAssignmentServiceImpl vasSpy = Mockito.spy(vas);
         vasSpy.setAssignmentDao(assignmentDao);
-        vasSpy.setAssignmentDateDao(assignmentDateDao);
+        vasSpy.setAssignmentConfigService(assignmentConfigService);
 
         Mockito.when(vasSpy.getCurrentDate()).thenReturn(today());
 
@@ -222,7 +218,7 @@ public class VehicleAssignmentResourceTest {
         var.setVehicleAssignmentService(vasSpy);
 
         doNothing().when(assignmentDao).save(any(Assignment.class));
-        doNothing().when(assignmentDateDao).save(any(AssignmentDate.class));
+        doNothing().when(assignmentConfigService).setConfigValue(anyString(), anyString());
 
         String blockId = "1_block1";
         String vehicleId = "1_vehicle1";

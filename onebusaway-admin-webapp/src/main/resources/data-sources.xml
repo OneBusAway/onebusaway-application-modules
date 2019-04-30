@@ -239,9 +239,9 @@
         <property name="annotatedClasses">
             <list>
                 <value>org.onebusaway.admin.model.assignments.Assignment</value>
-                <value>org.onebusaway.admin.model.assignments.AssignmentDate</value>
+                <value>org.onebusaway.admin.model.assignments.AssignmentConfig</value>
                 <value>org.onebusaway.admin.service.assignments.impl.AssignmentDaoImpl</value>
-                <value>org.onebusaway.admin.service.assignments.impl.AssignmentDateDaoImpl</value>
+                <value>org.onebusaway.admin.service.assignments.impl.AssignmentConfigDaoImpl</value>
             </list>
         </property>
         <property name="hibernateProperties">
@@ -272,7 +272,24 @@
 		<property name="jobDetail" ref="pingJob" />
 		<property name="cronExpression" value="0 * * * * ?" /><!--  every minute -->
 	</bean>
-	
+
+    <!-- quartz scheduling for ResetVehicleAssignmentsJob -->
+    <bean name="resetJob" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+        <property name="jobClass" value="org.onebusaway.admin.job.ResetVehicleAssignmentsJob" />
+        <property name="jobDataAsMap">
+            <map>
+                <entry key="assignmentDao" value-ref="assignmentDaoImpl"/>
+                <entry key="assignmentConfigDao" value-ref="assignmentConfigDaoImpl"/>
+            </map>
+        </property>
+        <property name="durability" value="true" />
+    </bean>
+
+    <bean id="resetTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+        <property name="jobDetail" ref="resetJob" />
+        <property name="cronExpression" value="0 3 * * * ?" /><!--  03:00 every day -->
+    </bean>
+
 	<bean id="gsonTool" class="org.onebusaway.admin.json.LowerCaseWDashesGsonJsonTool">
     <property name="prettyPrintOutput" value="false" />
   </bean>
@@ -281,7 +298,8 @@
 		<property name="triggers">
 			<list>
 				<ref bean="pingTrigger" />
-			</list>
+                <ref bean="resetTrigger" />
+            </list>
 		</property>
 	</bean>
 	

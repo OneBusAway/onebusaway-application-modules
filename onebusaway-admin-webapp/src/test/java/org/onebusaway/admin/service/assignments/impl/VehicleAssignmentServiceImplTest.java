@@ -15,20 +15,17 @@
  */
 package org.onebusaway.admin.service.assignments.impl;
 
-import org.hibernate.SessionFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.onebusaway.admin.model.assignments.ActiveBlock;
-import org.onebusaway.admin.model.assignments.AssignmentDate;
 import org.onebusaway.admin.model.assignments.TripSummary;
+import org.onebusaway.admin.service.assignments.AssignmentConfigDao;
+import org.onebusaway.admin.service.assignments.AssignmentConfigService;
 import org.onebusaway.admin.service.assignments.AssignmentDao;
-import org.onebusaway.admin.service.assignments.AssignmentDateDao;
 import org.onebusaway.exceptions.ServiceException;
 import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.gtfs.model.StopTime;
-import org.onebusaway.gtfs.model.Trip;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
 import org.onebusaway.transit_data.model.AgencyBean;
 import org.onebusaway.transit_data.model.ListBean;
@@ -40,7 +37,6 @@ import org.onebusaway.transit_data.model.trips.TripDetailsBean;
 import org.onebusaway.transit_data.model.trips.TripsForRouteQueryBean;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.transit_data_federation.impl.federated.TransitDataServiceImpl;
-import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
@@ -64,7 +60,7 @@ import static org.junit.Assert.*;
 public class VehicleAssignmentServiceImplTest {
 
     @Autowired
-    private AssignmentDateDao _assignmentDateDao;
+    private AssignmentConfigService _assignmentConfigService;
 
     @Autowired
     private AssignmentDao _assignmentDao;
@@ -80,7 +76,7 @@ public class VehicleAssignmentServiceImplTest {
 
     @Before
     public void setup(){
-        _assignmentDateDao.deleteAll();
+        _assignmentConfigService.deleteAll();
         _assignmentDao.deleteAll();
     }
 
@@ -188,7 +184,7 @@ public class VehicleAssignmentServiceImplTest {
     public void activeBlocksTest() throws ExecutionException {
         VehicleAssignmentServiceImpl vas = new VehicleAssignmentServiceImpl();
         vas.setAssignmentDao(_assignmentDao);
-        vas.setAssignmentDateDao(_assignmentDateDao);
+        vas.setAssignmentConfigService(_assignmentConfigService);
         vas.setTransitDataService(tds);
 
         AgencyAndId route = new AgencyAndId(AGENCY_ID,ROUTE_ID);
@@ -211,7 +207,7 @@ public class VehicleAssignmentServiceImplTest {
     public void assignmentByBlockIdTest() throws ExecutionException {
         VehicleAssignmentServiceImpl vas = new VehicleAssignmentServiceImpl();
         vas.setAssignmentDao(_assignmentDao);
-        vas.setAssignmentDateDao(_assignmentDateDao);
+        vas.setAssignmentConfigService(_assignmentConfigService);
         vas.setTransitDataService(tds);
 
         String vehicleId = vas.getAssignmentByBlockId("1");
@@ -231,7 +227,7 @@ public class VehicleAssignmentServiceImplTest {
 
         VehicleAssignmentServiceImpl vas = new VehicleAssignmentServiceImpl();
         vas.setAssignmentDao(_assignmentDao);
-        vas.setAssignmentDateDao(_assignmentDateDao);
+        vas.setAssignmentConfigService(_assignmentConfigService);
         vas.setTransitDataService(tds);
 
         Date lastUpdated = vas.getLastUpdated();
@@ -251,7 +247,7 @@ public class VehicleAssignmentServiceImplTest {
 
         VehicleAssignmentServiceImpl vas = new VehicleAssignmentServiceImpl();
         vas.setAssignmentDao(_assignmentDao);
-        vas.setAssignmentDateDao(_assignmentDateDao);
+        vas.setAssignmentConfigService(_assignmentConfigService);
         vas.setTransitDataService(tds);
         vas.setup();
 
@@ -268,7 +264,7 @@ public class VehicleAssignmentServiceImplTest {
     public void resetAssignmentsTest(){
         VehicleAssignmentServiceImpl vas = new VehicleAssignmentServiceImpl();
         vas.setAssignmentDao(_assignmentDao);
-        vas.setAssignmentDateDao(_assignmentDateDao);
+        vas.setAssignmentConfigService(_assignmentConfigService);
         vas.setTransitDataService(tds);
         vas.setup();
 
@@ -289,7 +285,7 @@ public class VehicleAssignmentServiceImplTest {
         VehicleAssignmentServiceImpl vas = new VehicleAssignmentServiceImpl();
         VehicleAssignmentServiceImpl vasSpy = Mockito.spy(vas);
         vasSpy.setAssignmentDao(_assignmentDao);
-        vasSpy.setAssignmentDateDao(_assignmentDateDao);
+        vasSpy.setAssignmentConfigService(_assignmentConfigService);
         vasSpy.setTransitDataService(tds);
 
         SimpleDateFormat sdf =new SimpleDateFormat("dd/MM/yyyy");
