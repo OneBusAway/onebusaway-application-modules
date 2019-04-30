@@ -205,11 +205,18 @@
 /* autocomplete */
 .ui-autocomplete {
     max-height: 200px;
+    width: 150px;
     overflow-y: auto;
     /* prevent horizontal scrollbar */
     overflow-x: hidden;
     /* add padding to account for vertical scrollbar */
     padding-right: 20px;
+}
+
+.ui-menu-item {
+    font-size: 16px;
+    padding: 6px;
+
 }
 
 .custom-combobox {
