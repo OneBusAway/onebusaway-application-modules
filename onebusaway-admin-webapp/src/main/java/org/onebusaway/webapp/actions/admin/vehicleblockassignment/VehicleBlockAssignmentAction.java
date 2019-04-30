@@ -19,7 +19,10 @@ import com.opensymphony.xwork2.ActionSupport;
 import com.opensymphony.xwork2.ModelDriven;
 import com.opensymphony.xwork2.Preparable;
 import org.apache.commons.lang.StringUtils;
+import org.apache.struts2.convention.annotation.Action;
 import org.apache.struts2.convention.annotation.Namespace;
+import org.apache.struts2.convention.annotation.Result;
+import org.apache.struts2.convention.annotation.Results;
 import org.jsoup.helper.StringUtil;
 import org.onebusaway.admin.model.assignments.ActiveBlock;
 import org.onebusaway.admin.model.assignments.BlockSummary;
@@ -32,6 +35,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 
+@Results({
+        @Result(type = "redirectAction", name ="submitSuccess", params = {
+                "actionName", "vehicle-block-assignment"})
+})
 @Namespace(value="/admin/vehicleblockassignment")
 public class VehicleBlockAssignmentAction extends ActionSupport implements
         ModelDriven<List<BlockSummary>>, Preparable {
@@ -66,7 +73,7 @@ public class VehicleBlockAssignmentAction extends ActionSupport implements
             }
         }
         prepare();
-        return SUCCESS;
+        return "submitSuccess";
     }
 
     public List<String> getActiveVehicles(){
