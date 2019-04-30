@@ -21,6 +21,7 @@ import org.onebusaway.presentation.model.SearchResultCollection;
 import org.onebusaway.presentation.services.realtime.RealtimeService;
 import org.onebusaway.presentation.services.search.SearchService;
 import org.onebusaway.transit_data.services.TransitDataService;
+import org.onebusaway.enterprise.services.impl.TripsConfigurationServiceClientFileImpl;
 import org.onebusaway.enterprise.webapp.actions.OneBusAwayEnterpriseActionSupport;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -38,6 +39,9 @@ public class SearchAction extends OneBusAwayEnterpriseActionSupport {
 
   @Autowired
   private RealtimeService _realtimeService;
+  
+  @Autowired
+  private TripsConfigurationServiceClientFileImpl _tConfigurationServiceClientFileImpl
 
   private SearchResultCollection _results = null;
   
@@ -54,7 +58,8 @@ public class SearchAction extends OneBusAwayEnterpriseActionSupport {
     if(_q == null || _q.isEmpty())
       return SUCCESS;
     
-    _results = _searchService.getSearchResults(_q, new SearchResultFactoryImpl(_searchService, _transitDataService, _realtimeService));
+    _results = _searchService.getSearchResults(_q, new SearchResultFactoryImpl(_searchService, _transitDataService, _realtimeService, 
+    		_tConfigurationServiceClientFileImpl));
 
     return SUCCESS;
   }   
