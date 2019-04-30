@@ -27,6 +27,8 @@ import org.onebusaway.presentation.services.search.SearchResultFactory;
 import org.onebusaway.presentation.services.search.SearchService;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.util.SystemTime;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.onebusaway.enterprise.services.impl.TripsConfigurationServiceClientFileImpl;
 import org.onebusaway.enterprise.webapp.actions.api.model.GeocodeResult;
 import org.onebusaway.enterprise.webapp.actions.api.model.RouteAtStop;
 import org.onebusaway.enterprise.webapp.actions.api.model.RouteDirection;
@@ -47,11 +49,15 @@ public class SearchResultFactoryImpl implements SearchResultFactory {
   private TransitDataService _transitDataService;
 
   private RealtimeService _realtimeService;
+  
+  private TripsConfigurationServiceClientFileImpl _tConfigurationServiceClientFileImpl;
 
-  public SearchResultFactoryImpl(SearchService searchService, TransitDataService transitDataService, RealtimeService realtimeService) {
+  public SearchResultFactoryImpl(SearchService searchService, TransitDataService transitDataService, RealtimeService realtimeService,
+                                TripsConfigurationServiceClientFileImpl tConfigurationServiceClientFileImpl) {
     _searchService = searchService;
     _transitDataService = transitDataService;
     _realtimeService = realtimeService;
+    _tConfigurationServiceClientFileImpl = tConfigurationServiceClientFileImpl;
   }
 
   @Override
@@ -108,7 +114,21 @@ public class SearchResultFactoryImpl implements SearchResultFactory {
         if(routeHasVehiclesInService) {
       	  hasUpcomingScheduledService = true;
         }
-
+        
+        try {
+        	if(routeBean != null) {
+				    String new_trip = _tConfigurationServiceClientFileImpl.getItem("trip", routeBean.getId(), 
+						stopGroupBean.getId(), 
+						stopGroupBean.getName().getName());
+	        	
+				    if(new_trip != null)
+					    stopGroupBean.getName().setName(new_trip);
+        	}
+		    } catch (Exception e) {
+		    	// TODO Auto-generated catch block
+		    	e.printStackTrace();
+	    	}
+        
         directions.add(new RouteDirection(stopGroupBean, polylines, null, hasUpcomingScheduledService));
       }
     }

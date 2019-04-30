@@ -26,6 +26,7 @@ import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.presentation.impl.service_alerts.ServiceAlertsHelper;
 import org.onebusaway.presentation.services.realtime.RealtimeService;
 import org.onebusaway.transit_data.services.TransitDataService;
+import org.onebusaway.enterprise.services.impl.TripsConfigurationServiceClientFileImpl;
 import org.onebusaway.enterprise.webapp.actions.OneBusAwayEnterpriseActionSupport;
 import org.onebusaway.enterprise.webapp.actions.api.model.RouteAtStop;
 import org.onebusaway.enterprise.webapp.actions.api.model.RouteDirection;
@@ -54,6 +55,9 @@ public class StopForIdAction extends OneBusAwayEnterpriseActionSupport {
 
   @Autowired
   private TransitDataService _transitDataService;
+	
+  @Autowired
+  private TripsConfigurationServiceClientFileImpl tConfigurationServiceClientFileImpl;
 
   private ObjectMapper _mapper = new ObjectMapper();    
 
@@ -114,6 +118,16 @@ public class StopForIdAction extends OneBusAwayEnterpriseActionSupport {
 		          if(routeHasVehiclesInService) {
 		        	  hasUpcomingScheduledService = true;
 		          }
+			  try {
+			    	String new_trip = tConfigurationServiceClientFileImpl.getItem("trip", routeBean.getId(), 
+				stopGroupBean.getId(), 
+				stopGroupBean.getName().getName());
+				if(new_trip != null)
+				  stopGroupBean.getName().setName(new_trip);
+			  } catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			  }
 		          
 		          routeDirections.add(new RouteDirection(stopGroupBean, null, null, hasUpcomingScheduledService));
 	        }
