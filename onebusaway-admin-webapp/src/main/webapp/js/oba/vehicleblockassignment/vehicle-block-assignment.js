@@ -48,7 +48,7 @@ jQuery(function() {
     $('#findBlockField').keyup(delay(function (e) {
         table
             .column( 0 )
-            .search( this.value )
+            .search( this.value.trim() )
             .draw();
     },300));
 
