@@ -243,7 +243,14 @@ $( function() {
         }
     });
 
-    $( ".combobox" ).combobox();
+    $(".combobox").combobox();
+
+   $(".ui-autocomplete-input").keypress(function(e) {
+        var code = (e.keyCode ? e.keyCode : e.which);
+        if(code == 13) { //Enter keycode
+            return false;
+        }
+    });
 
 } );
 
