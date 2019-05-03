@@ -49,7 +49,7 @@ public class VehicleBlockAssignmentAction extends ActionSupport implements
     private String vehicleId;
     private String blockId;
     private List<BlockSummary> _model;
-    private List<String> _activeVehicleIds;
+    private Set<String> _activeVehicleIds;
 
     public String execute(){
         return SUCCESS;
@@ -62,21 +62,24 @@ public class VehicleBlockAssignmentAction extends ActionSupport implements
 
     @Override
     public void prepare() throws ExecutionException {
+        _activeVehicleIds = new HashSet<>(vehicleAssignmentService.getActiveVehicles());
         _model = getBlockSummaries();
-        _activeVehicleIds = vehicleAssignmentService.getActiveVehicles();
     }
 
     public String submit() throws ExecutionException {
         for(BlockSummary blockSummary : _model){
-            if(!StringUtil.isBlank(blockSummary.getBlockId())) {
-                vehicleAssignmentService.assign(blockSummary.getBlockId(), blockSummary.getVehicleId());
+            String blockId = blockSummary.getBlockId();
+            String vehicleId = blockSummary.getVehicleId();
+
+            if(!StringUtil.isBlank(blockId) && !StringUtil.isBlank(vehicleId) && _activeVehicleIds.contains(vehicleId)) {
+                vehicleAssignmentService.assign(blockId, vehicleId);
             }
         }
         prepare();
         return "submitSuccess";
     }
 
-    public List<String> getActiveVehicles(){
+    public Set<String> getActiveVehicles(){
         return _activeVehicleIds;
     }
 
