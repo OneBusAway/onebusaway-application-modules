@@ -81,8 +81,9 @@ jQuery(function() {
 
     $( "#dialog-message" ).dialog({
         autoOpen: false,
+        modal: true,
         buttons: {
-            Ok: function() {
+            OK: function() {
                 $( this ).dialog( "close" );
             }
         },
@@ -92,7 +93,6 @@ jQuery(function() {
     $('.trips').click(function(e){
         var blockId = $(this).parent().parent().find(".blockId").text();
         var tripsForBlockUrl = '/api/vehicle-assign/trips/block/' + blockId;
-        console.log(tripsForBlockUrl);
         $.ajax({
             url: tripsForBlockUrl,
             type: "GET",
@@ -111,7 +111,7 @@ jQuery(function() {
                     }
 
                 }
-                $( "#dialog-message" ).dialog( "open" );
+                $( "#dialog-message" ).dialog("open");
             }
         });
     })

@@ -16,13 +16,17 @@
 
 
 /* General Styling */
-.button {
+.button, .ui-dialog-buttonset >.ui-button{
     border: 1px gray solid;
     border-radius: 4px;
     color: #080808;
     background-color: #e6e6e6;
     padding: 12px 26px;
     cursor:pointer;
+}
+
+.ui-dialog-buttonset >.ui-button {
+    width: 120px;
 }
 
 /* Content Styling */
