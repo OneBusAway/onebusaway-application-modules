@@ -96,7 +96,7 @@
                 </div>
             </div>
             <div id="blockSummaryContent">
-                <s:form action="vehicle-block-assignment!submit">
+                <s:form id="vehicleAssignmentForm" action="vehicle-block-assignment!submit">
                     <div id="blockSummaryHeader">
                         <div id="leftBlockSummaryHeader">
                             <span  id="blockSummaryLabel">Block Summary</span>
@@ -175,7 +175,7 @@
                     <thead>
                         <tr>
                             <th>Trip Id</th>
-                            <th>Header</th>
+                            <th>HeadSign</th>
                             <th>Start</th>
                             <th>End</th>
                         </tr>

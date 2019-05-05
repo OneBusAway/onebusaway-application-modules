@@ -16,33 +16,33 @@
 package org.onebusaway.admin.model.assignments;
 
 import javax.persistence.Column;
+import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import java.util.Date;
 
 @Entity
 public class Assignment {
 
-    @Id
-    private String blockId;
+    @EmbeddedId
+    private AssignmentId assignmentId;
 
-    @Column(nullable = true)
     private String vehicleId;
 
-    public Assignment(){}
+    public Assignment() {
+    }
 
-    public Assignment(String blockId, String vehicleId){
-        this.blockId = blockId;
+    public Assignment(String blockId, String vehicleId, Date date) {
+        this.assignmentId = new AssignmentId(blockId, date);
         this.vehicleId = vehicleId;
     }
 
-
-    public String getBlockId() {
-        return blockId;
+    public AssignmentId getAssignmentId() {
+        return assignmentId;
     }
 
-    public void setBlockId(String blockId) {
-        this.blockId = blockId;
+    public void setAssignmentId(AssignmentId assignmentId) {
+        this.assignmentId = assignmentId;
     }
 
     public String getVehicleId() {
@@ -52,4 +52,19 @@ public class Assignment {
     public void setVehicleId(String vehicleId) {
         this.vehicleId = vehicleId;
     }
+
+    public String getBlockId(){
+        if(this.assignmentId != null){
+            return this.assignmentId.getBlockId();
+        }
+        return null;
+    }
+
+    public Date getAssignmentDate(){
+        if(this.assignmentId != null){
+            return this.assignmentId.getAssignmentDate();
+        }
+        return null;
+    }
+
 }

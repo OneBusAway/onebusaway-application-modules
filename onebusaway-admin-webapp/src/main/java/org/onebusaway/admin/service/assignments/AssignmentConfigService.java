@@ -15,18 +15,19 @@
  */
 package org.onebusaway.admin.service.assignments;
 
-import org.onebusaway.admin.model.assignments.Assignment;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.util.Date;
-import java.util.List;
 
-public interface AssignmentDao {
-    public List<Assignment> getAll(Date date);
-    public Assignment getAssignment(String blockId, Date date);
-    public void save(Assignment assignment);
-    public void saveAll(List<Assignment> assignmentList);
-    public void delete(Assignment assignment);
-    public void deleteAll();
-    public void deleteAllExceptDate(Date date);
+public interface AssignmentConfigService {
+    public String getConfigValueAsString(String key);
+    public Date getConfigValueAsDate(String key);
+
+    Date getConfigValueAsDateTime(String key);
+
+    public void setConfigValue(String key, String value);
+
+    void setConfigValueAsDateTime(String key, Date date);
+
+    void deleteConfigValue(String key);
+
+    void deleteAll();
 }

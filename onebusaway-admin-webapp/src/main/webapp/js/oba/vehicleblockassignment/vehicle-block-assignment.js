@@ -28,6 +28,7 @@ jQuery(function() {
 
     var table = $('#blockSummaryTable').DataTable({
         "paging":false,
+        "order": [[ 2, "asc" ]],
         columnDefs: [ { orderable: false, targets: [4,6] }]
     });
 
@@ -47,15 +48,16 @@ jQuery(function() {
     $('#findBlockField').keyup(delay(function (e) {
         table
             .column( 0 )
-            .search( this.value )
+            .search( this.value.trim() )
             .draw();
     },300));
 
     // Search By VehicleID
     $('#findVehicleField').keyup(delay(function (e) {
         table.draw();
+        var valid = hasValidVehicle($(this).val());
         var info = table.page.info();
-        if(info && info.recordsDisplay < 1){
+        if(info && info.recordsDisplay < 1 && valid){
             $('#notAssignedWrapper').show();
         } else {
             $('#notAssignedWrapper').hide();
@@ -67,7 +69,8 @@ jQuery(function() {
         table.rows().eq(0).each( function ( index ) {
             var row = table.row( index );
             var data = row.data();
-            var rowBlockId = data[0];
+            var rowBlockIdTag = $.parseHTML(data[0])[0];
+            var rowBlockId = rowBlockIdTag.innerText;
             if(rowBlockId == selectedBlock){
                 var vehicleId = $('#findVehicleField').val();
                 table.cell(index,5).nodes().to$().find('input').val(vehicleId);
@@ -78,8 +81,9 @@ jQuery(function() {
 
     $( "#dialog-message" ).dialog({
         autoOpen: false,
+        modal: true,
         buttons: {
-            Ok: function() {
+            OK: function() {
                 $( this ).dialog( "close" );
             }
         },
@@ -89,7 +93,6 @@ jQuery(function() {
     $('.trips').click(function(e){
         var blockId = $(this).parent().parent().find(".blockId").text();
         var tripsForBlockUrl = '/api/vehicle-assign/trips/block/' + blockId;
-        console.log(tripsForBlockUrl);
         $.ajax({
             url: tripsForBlockUrl,
             type: "GET",
@@ -108,10 +111,31 @@ jQuery(function() {
                     }
 
                 }
-                $( "#dialog-message" ).dialog( "open" );
+                $( "#dialog-message" ).dialog("open");
             }
         });
     })
+
+    $('#vehicleAssignmentForm').on('submit', function(e){
+        var form = this;
+
+        // Encode a set of form elements from all pages as an array of names and values
+        var params = table.$('input,select,textarea').serializeArray();
+
+        // Iterate over all form elements
+        $.each(params, function(){
+            // If element doesn't exist in DOM
+            if(!$.contains(document, form[this.name])){
+                // Create a hidden element
+                $(form).append(
+                    $('<input>')
+                        .attr('type', 'hidden')
+                        .attr('name', this.name)
+                        .val(this.value)
+                );
+            }
+        });
+    });
 });
 
 $( function() {
@@ -214,15 +238,8 @@ $( function() {
             }
 
             // Search for a match (case-insensitive)
-            var value = this.input.val(),
-                valueLowerCase = value.toLowerCase(),
-                valid = false;
-            $("#hiddenVehicles").children( "option" ).each(function() {
-                if ( $( this ).text().toLowerCase() === valueLowerCase ) {
-                    this.selected = valid = true;
-                    return false;
-                }
-            });
+            var value = this.input.val();
+            var valid = hasValidVehicle(value);
 
             // Found a match, nothing to do
             if ( valid ) {
@@ -232,7 +249,7 @@ $( function() {
             // Remove invalid value
             this.input
                 .val( "" )
-                .attr( "title", value + " didn't match any item" )
+                .attr( "title", value + " is not a valid vehicle id" )
                 .tooltip( "open" );
             this.element.val( "" );
             this._delay(function() {
@@ -247,9 +264,29 @@ $( function() {
         }
     });
 
-    $( ".combobox" ).combobox();
+    $(".combobox").combobox();
+
+   $(".ui-autocomplete-input").keypress(function(e) {
+        var code = (e.keyCode ? e.keyCode : e.which);
+        if(code == 13) { //Enter keycode
+            return false;
+        }
+    });
 
 } );
+
+function hasValidVehicle(value){
+    // Search for a match (case-insensitive)
+    var valueLowerCase = value.toLowerCase(),
+        valid = false;
+    $("#hiddenVehicles").children( "option" ).each(function() {
+        if ( $( this ).text().toLowerCase() === valueLowerCase ) {
+            valid = true;
+            return false;
+        }
+    });
+    return valid;
+}
 
 function vehicleIdChange(e) {
     var currentVehicleIdVal = $(this).val();

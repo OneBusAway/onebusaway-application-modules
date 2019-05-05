@@ -19,7 +19,10 @@ import com.opensymphony.xwork2.ActionSupport;
 import com.opensymphony.xwork2.ModelDriven;
 import com.opensymphony.xwork2.Preparable;
 import org.apache.commons.lang.StringUtils;
+import org.apache.struts2.convention.annotation.Action;
 import org.apache.struts2.convention.annotation.Namespace;
+import org.apache.struts2.convention.annotation.Result;
+import org.apache.struts2.convention.annotation.Results;
 import org.jsoup.helper.StringUtil;
 import org.onebusaway.admin.model.assignments.ActiveBlock;
 import org.onebusaway.admin.model.assignments.BlockSummary;
@@ -32,6 +35,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 
+@Results({
+        @Result(type = "redirectAction", name ="submitSuccess", params = {
+                "actionName", "vehicle-block-assignment"})
+})
 @Namespace(value="/admin/vehicleblockassignment")
 public class VehicleBlockAssignmentAction extends ActionSupport implements
         ModelDriven<List<BlockSummary>>, Preparable {
@@ -42,7 +49,7 @@ public class VehicleBlockAssignmentAction extends ActionSupport implements
     private String vehicleId;
     private String blockId;
     private List<BlockSummary> _model;
-    private List<String> _activeVehicleIds;
+    private Set<String> _activeVehicleIds;
 
     public String execute(){
         return SUCCESS;
@@ -55,21 +62,24 @@ public class VehicleBlockAssignmentAction extends ActionSupport implements
 
     @Override
     public void prepare() throws ExecutionException {
+        _activeVehicleIds = new HashSet<>(vehicleAssignmentService.getActiveVehicles());
         _model = getBlockSummaries();
-        _activeVehicleIds = vehicleAssignmentService.getActiveVehicles();
     }
 
     public String submit() throws ExecutionException {
         for(BlockSummary blockSummary : _model){
-            if(!StringUtil.isBlank(blockSummary.getBlockId())) {
-                vehicleAssignmentService.assign(blockSummary.getBlockId(), blockSummary.getVehicleId());
+            String blockId = blockSummary.getBlockId();
+            String vehicleId = blockSummary.getVehicleId();
+
+            if(!StringUtil.isBlank(blockId) && !StringUtil.isBlank(vehicleId) && _activeVehicleIds.contains(vehicleId)) {
+                vehicleAssignmentService.assign(blockId, vehicleId);
             }
         }
         prepare();
-        return SUCCESS;
+        return "submitSuccess";
     }
 
-    public List<String> getActiveVehicles(){
+    public Set<String> getActiveVehicles(){
         return _activeVehicleIds;
     }
 
@@ -102,7 +112,7 @@ public class VehicleBlockAssignmentAction extends ActionSupport implements
         Map<String, Integer> vehicleIdCounts = new HashMap<>();
 
         List<ActiveBlock> activeBlocks = vehicleAssignmentService.getActiveBlocks(serviceDate);
-        Map<String, String> assignments = vehicleAssignmentService.getAssignments();
+        Map<String, String> assignments = vehicleAssignmentService.getAssignmentsAsMap();
 
         for (ActiveBlock activeBlock : activeBlocks) {
             String vehicleId = assignments.get(activeBlock.getBlockId());

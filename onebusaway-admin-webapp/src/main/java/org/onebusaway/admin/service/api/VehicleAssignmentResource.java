@@ -124,18 +124,14 @@ public class VehicleAssignmentResource extends AuthenticatedResource {
         return Response.ok(csv.toString()).build();
     }
 
-    public Map<String, String> getAssignments() {
-        return _service.getAssignments();
-    }
 
     @Path("/get/csv")
     @GET
     public Response getAssignmentsAsCSV() {
         StringBuffer csv = new StringBuffer();
         csv.append("block").append(",").append("vehicle").append('\n');
-        Map<String, String> assignments = getAssignments();
-        for (String block: assignments.keySet()) {
-            csv.append(block).append(",").append(assignments.get(block)).append('\n');
+        for (Assignment assignment: _service.getAssignments()) {
+            csv.append(assignment.getAssignmentId().getBlockId()).append(",").append(assignment.getVehicleId()).append('\n');
         }
         return Response.ok(csv.toString()).build();
     }
@@ -143,13 +139,7 @@ public class VehicleAssignmentResource extends AuthenticatedResource {
     @Path("/list")
     @GET @Produces("application/json")
     public Response getAssignmentsAsJson() throws IOException {
-        final List assignmentsList = new ArrayList<>();
-        final Map<String, String> assignments = getAssignments();
-        for(Map.Entry<String,String> entry : assignments.entrySet()){
-            assignmentsList.add(new Assignment(entry.getKey(), entry.getValue()));
-        }
-
-        String assignmentListAsString = _mapper.writeValueAsString(assignmentsList);
+        String assignmentListAsString = _mapper.writeValueAsString(_service.getAssignments());
         return Response.ok(assignmentListAsString).build();
     }
 

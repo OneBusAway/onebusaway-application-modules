@@ -20,14 +20,14 @@ import javax.persistence.Id;
 import java.util.Date;
 
 @Entity
-public class AssignmentDate {
+public class AssignmentConfig {
     @Id
     private String key;
-    private Date value;
+    private String value;
 
-    public AssignmentDate(){}
+    public AssignmentConfig(){}
 
-    public AssignmentDate(String key, Date value){
+    public AssignmentConfig(String key, String value){
         this.key = key;
         this.value = value;
     }
@@ -40,11 +40,12 @@ public class AssignmentDate {
         this.key = key;
     }
 
-    public Date getValue() {
+    public String getValue() {
         return value;
     }
 
-    public void setValue(Date value) {
+    public void setValue(String value) {
         this.value = value;
     }
+
 }

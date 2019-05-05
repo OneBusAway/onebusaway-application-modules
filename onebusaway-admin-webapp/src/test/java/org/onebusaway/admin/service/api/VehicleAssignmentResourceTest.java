@@ -15,9 +15,19 @@
  */
 package org.onebusaway.admin.service.api;
 
-import org.junit.Ignore;
+import org.codehaus.jackson.map.DeserializationConfig;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.runners.MockitoJUnitRunner;
 import org.onebusaway.admin.model.assignments.ActiveBlock;
+import org.onebusaway.admin.model.assignments.Assignment;
+import org.onebusaway.admin.model.assignments.AssignmentConfig;
+import org.onebusaway.admin.service.assignments.AssignmentConfigService;
+import org.onebusaway.admin.service.assignments.AssignmentDao;
+import org.onebusaway.admin.service.assignments.AssignmentConfigDao;
 import org.onebusaway.admin.service.assignments.impl.VehicleAssignmentServiceImpl;
 import org.onebusaway.exceptions.ServiceException;
 import org.onebusaway.gtfs.model.AgencyAndId;
@@ -33,6 +43,9 @@ import org.onebusaway.transit_data.model.trips.TripsForRouteQueryBean;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.transit_data_federation.impl.federated.TransitDataServiceImpl;
 
+import javax.ws.rs.core.Response;
+import java.io.IOException;
+import java.text.ParseException;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 
@@ -40,14 +53,40 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.when;
+@RunWith(MockitoJUnitRunner.class)
 public class VehicleAssignmentResourceTest {
 
+    @Mock
+    private AssignmentDao assignmentDao;
+
+    @Mock
+    private AssignmentConfigService assignmentConfigService;
+
+    Date currentDate = new Date();
+
+    private Date today(){
+        return currentDate;
+    }
+
     @Test
-    @Ignore
-    public void testAddAssignment() {
+    public void testAddAssignment() throws ParseException {
+
+        VehicleAssignmentServiceImpl vas = new VehicleAssignmentServiceImpl();
+        VehicleAssignmentServiceImpl vasSpy = Mockito.spy(vas);
+        vasSpy.setAssignmentDao(assignmentDao);
+        vasSpy.setAssignmentConfigService(assignmentConfigService);
+
+        Mockito.when(vasSpy.getCurrentDate()).thenReturn(today());
+
         VehicleAssignmentResource var = new VehicleAssignmentResource();
-        var.setVehicleAssignmentService(new VehicleAssignmentServiceImpl());
+        var.setVehicleAssignmentService(vasSpy);
+
+        doNothing().when(assignmentDao).save(any(Assignment.class));
+        doNothing().when(assignmentConfigService).setConfigValue(anyString(), anyString());
 
         String blockId = "block_1";
         String vehicleId = "vehicle_1";
@@ -56,22 +95,36 @@ public class VehicleAssignmentResourceTest {
     }
 
     @Test
-    @Ignore
     public void testGetAssignment() {
+        VehicleAssignmentServiceImpl vas = new VehicleAssignmentServiceImpl();
+        VehicleAssignmentServiceImpl vasSpy = Mockito.spy(vas);
+        vasSpy.setAssignmentDao(assignmentDao);
+        vasSpy.setAssignmentConfigService(assignmentConfigService);
+
+        Mockito.when(vasSpy.getCurrentDate()).thenReturn(today());
+
         VehicleAssignmentResource var = new VehicleAssignmentResource();
-        var.setVehicleAssignmentService(new VehicleAssignmentServiceImpl());
+        var.setVehicleAssignmentService(vasSpy);
 
         String blockId = "block_1";
         String vehicleId = "vehicle_1";
+        Assignment assignment = new Assignment(blockId, vehicleId, today());
 
-        String assignment = var.getAssignmentByBlockId(blockId);
-        assertNull(assignment);
+        doNothing().when(assignmentDao).save(any(Assignment.class));
+        doNothing().when(assignmentConfigService).setConfigValue(anyString(), anyString());
+
+        String vehicleIdAssignment = var.getAssignmentByBlockId(blockId);
+
+        assertNull(vehicleIdAssignment);
 
         assertTrue(var.assign(blockId, vehicleId));
 
-        assignment = var.getAssignmentByBlockId(blockId);
-        assertNotNull(assignment);
-        assertEquals(vehicleId, assignment);
+        when(assignmentDao.getAssignment(blockId, today())).thenReturn(assignment);
+
+        vehicleIdAssignment = var.getAssignmentByBlockId(blockId);
+
+        assertNotNull(vehicleIdAssignment);
+        assertEquals(vehicleId, vehicleIdAssignment);
     }
 
 
@@ -149,24 +202,48 @@ public class VehicleAssignmentResourceTest {
     }
 
     @Test
-    @Ignore
-    public void testGetAssignments() {
-        VehicleAssignmentResource var = new VehicleAssignmentResource();
-        var.setVehicleAssignmentService(new VehicleAssignmentServiceImpl());
+    public void testGetAssignments() throws IOException {
+        ObjectMapper _mapper = new ObjectMapper();
+        _mapper.configure(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
-        Map<String, String> assignments = var.getAssignments();
+
+        VehicleAssignmentServiceImpl vas = new VehicleAssignmentServiceImpl();
+        VehicleAssignmentServiceImpl vasSpy = Mockito.spy(vas);
+        vasSpy.setAssignmentDao(assignmentDao);
+        vasSpy.setAssignmentConfigService(assignmentConfigService);
+
+        Mockito.when(vasSpy.getCurrentDate()).thenReturn(today());
+
+        VehicleAssignmentResource var = new VehicleAssignmentResource();
+        var.setVehicleAssignmentService(vasSpy);
+
+        doNothing().when(assignmentDao).save(any(Assignment.class));
+        doNothing().when(assignmentConfigService).setConfigValue(anyString(), anyString());
+
+        String blockId = "1_block1";
+        String vehicleId = "1_vehicle1";
+
+        Assignment assignment = new Assignment(blockId, vehicleId, today());
+        List<Assignment> assignmentsList = new ArrayList<>();
+
+        when(assignmentDao.getAll(any(Date.class))).thenReturn(assignmentsList);
+
+        Response response = var.getAssignmentsAsJson();
+        String assignmentsJson = (String)response.getEntity();
+        Assignment[]  assignments = _mapper.readValue(assignmentsJson, Assignment[].class);
         assertNotNull(assignments);
-        assertEquals(0, assignments.size());
+        assertEquals(0, assignments.length);
+
+        assignmentsList.add(assignment);
 
         var.assign("1_block1", "1_vehicle1");
-        assignments = var.getAssignments();
+        response = var.getAssignmentsAsJson();
+        assignmentsJson = (String)response.getEntity();
+        assignments = _mapper.readValue(assignmentsJson, Assignment[].class);
         assertNotNull(assignments);
-        Iterator<String> iterator = assignments.keySet().iterator();
 
-        String key = iterator.next();
-        assertEquals("1_block1", key);
-        assertEquals("1_vehicle1", assignments.get(key));
+        assertEquals("1_block1", assignments[0].getBlockId());
+        assertEquals("1_vehicle1", assignments[0].getVehicleId());
 
     }
-
 }
