@@ -317,7 +317,7 @@ OBA.Popups = (function() {
 					html += '<span>';
 						
 					if(typeof onwardCall.ExpectedArrivalTime !== 'undefined' && onwardCall.ExpectedArrivalTime !== null) {
-						console.log("ExpectedArrivalTime=" + onwardCall.ExpectedArrivalTime + " for " + stopRef + " but is " + onwardCall.Extensions.Distances.PresentableDistance + " away");
+						console.log("ExpectedArrivalTime=" + onwardCall.ExpectedArrivalTime + " for " + stopRef + " and is " + onwardCall.Extensions.Distances.PresentableDistance + " away");
 						html += OBA.Util.getArrivalEstimateForISOStringWithCheck(onwardCall.ExpectedArrivalTime, updateTimestampReference,onwardCall.Extensions.Distances.DistanceFromCall);
 						html += ", " + onwardCall.Extensions.Distances.PresentableDistance;
 					} else {
