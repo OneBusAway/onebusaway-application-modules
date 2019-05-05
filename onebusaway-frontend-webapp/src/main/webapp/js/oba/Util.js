@@ -122,7 +122,9 @@ OBA.Util = (function() {
 			var predictionDateObj = ISO8601StringToDate(predictionDateString);
 
 			var minutesAway = Math.floor((predictionDateObj - referenceDateObj) / 60 / 1000);
-			if (minutesAway === 0 && distanceAway > 1000 /* 1000 m*/) return "coming soon!"
+			if (minutesAway === 0 && distanceAway > 1000 /* 1000 m*/) {
+			    return "coming soon!"
+            }
 			return minutesAway + " " + (minutesText || "minute") + ((Math.abs(minutesAway) === 1) ? "" : "s");
 		},
 

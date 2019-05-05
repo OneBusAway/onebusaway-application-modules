@@ -318,7 +318,7 @@ OBA.Popups = (function() {
 						
 					if(typeof onwardCall.ExpectedArrivalTime !== 'undefined' && onwardCall.ExpectedArrivalTime !== null) {
 						console.log("ExpectedArrivalTime=" + onwardCall.ExpectedArrivalTime + " for " + stopRef + " and is " + onwardCall.Extensions.Distances.PresentableDistance + " away");
-						html += OBA.Util.getArrivalEstimateForISOStringWithCheck(onwardCall.ExpectedArrivalTime, updateTimestampReference,onwardCall.Extensions.Distances.DistanceFromCall);
+						html += OBA.Util.getArrivalEstimateForISOStringWithCheck(onwardCall.ExpectedArrivalTime, updateTimestampReference,"minute",onwardCall.Extensions.Distances.DistanceFromCall);
 						html += ", " + onwardCall.Extensions.Distances.PresentableDistance;
 					} else {
 						html += onwardCall.Extensions.Distances.PresentableDistance;
