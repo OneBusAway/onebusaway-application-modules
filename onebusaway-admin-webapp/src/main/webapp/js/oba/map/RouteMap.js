@@ -456,7 +456,7 @@ OBA.RouteMap = function(mapNode, initCallbackFn, serviceAlertCallbackFn) {
 
 		// create traffic overlay
 		var trafficLayer = new google.maps.TrafficLayer();
-		trafficLayer.setMap(map);
+		//trafficLayer.setMap(map); // uncomment for traffic on by default
 
 		// click event listener
 		google.maps.event.addDomListener(toggle, 'click', function(){
