@@ -340,9 +340,9 @@ OBA.Popups = (function() {
 							}
 							// this is handy for debugging arrival/departure issues
 							//html += "(" + OBA.Util.debugTime(onwardCall.ExpectedArrivalTime) + ", " + OBA.Util.debugTime(onwardCall.ExpectedDepartureTime) + ") "
-							html += onwardCall.Extensions.Distances.PresentableDistance;
-						}
 
+						}
+						html += onwardCall.Extensions.Distances.PresentableDistance;
 						html += '</span></li>';
 					});
 
