@@ -293,41 +293,61 @@ OBA.Popups = (function() {
 			if(typeof activity.MonitoredVehicleJourney.OnwardCalls !== 'undefined'
 				&& typeof activity.MonitoredVehicleJourney.OnwardCalls.OnwardCall !== 'undefined') {
 
-				html += '<p class="service">Next stops:</p>';
-				
-				// Alert if Realtime Data is unavailable
-				if(!hasRealtime){
-					html += '<div class="scheduleAlert"><p>Realtime data currently unavailable for this vehicle</p></div>';
-				}
-				
-				html += '<ul>';			
-
+				var lastExpectedArrivalTime = null;
+				// SIRI occasionally gives us historical info -- if all calls are older than staleTimeout don't display
 				jQuery.each(activity.MonitoredVehicleJourney.OnwardCalls.OnwardCall, function(_, onwardCall) {
-					var stopIdParts = onwardCall.StopPointRef.split("_");
-					var stopIdWithoutAgencyId = stopIdParts[1];
-					var stopRef = onwardCall.StopPointRef;
-					if (onwardCall.ArrivalPlatformName != undefined) {
-						// here we override the arrivalPlatformName to contain the stopcode
-						stopRef = onwardCall.ArrivalPlatformName;
-					}
-					var lastClass = ((_ === activity.MonitoredVehicleJourney.OnwardCalls.OnwardCall.length - 1) ? " last" : "");
-
-					html += '<li class="nextStop' + lastClass + '">';
-                    html += '<a href="' + OBA.Config.searchParamsPrefix + stopRef + '">' + onwardCall.StopPointName + '</a>';
-					html += '<span>';
-						
 					if(typeof onwardCall.ExpectedArrivalTime !== 'undefined' && onwardCall.ExpectedArrivalTime !== null) {
-						console.log("ExpectedArrivalTime=" + onwardCall.ExpectedArrivalTime + " for " + stopRef + " and is " + onwardCall.Extensions.Distances.PresentableDistance + " away");
-						html += OBA.Util.getArrivalEstimateForISOStringWithCheck(onwardCall.ExpectedArrivalTime, updateTimestampReference,"minute",onwardCall.Extensions.Distances.DistanceFromCall);
-						html += ", " + onwardCall.Extensions.Distances.PresentableDistance;
-					} else {
-						html += onwardCall.Extensions.Distances.PresentableDistance;
+						var staleThresholdDate = new Date(updateTimestampReference - (OBA.Config.staleTimeout*1000)).getTime();
+						if (OBA.Util.ISO8601StringToDate(onwardCall.ExpectedArrivalTime).getTime()  > staleThresholdDate) {
+							lastExpectedArrivalTime = OBA.Util.ISO8601StringToDate(onwardCall.ExpectedArrivalTime);
+						}
+					}
+				}
+				);
+
+				if (lastExpectedArrivalTime === null) {
+					// we have nothing to show
+					//console.log("no valid arrivals for " + vehicleId);
+				} else {
+
+					html += '<p class="service">Next stops:</p>';
+
+					// Alert if Realtime Data is unavailable
+					if(!hasRealtime){
+						html += '<div class="scheduleAlert"><p>Realtime data currently unavailable for this vehicle</p></div>';
 					}
 
-					html += '</span></li>';
-				});
-				
-				html += '</ul>';
+					html += '<ul>';
+
+					jQuery.each(activity.MonitoredVehicleJourney.OnwardCalls.OnwardCall, function (_, onwardCall) {
+						var stopIdParts = onwardCall.StopPointRef.split("_");
+						var stopIdWithoutAgencyId = stopIdParts[1];
+						var stopRef = onwardCall.StopPointRef;
+						if (onwardCall.ArrivalPlatformName != undefined) {
+							// here we override the arrivalPlatformName to contain the stopcode
+							stopRef = onwardCall.ArrivalPlatformName;
+						}
+						var lastClass = ((_ === activity.MonitoredVehicleJourney.OnwardCalls.OnwardCall.length - 1) ? " last" : "");
+
+						html += '<li class="nextStop' + lastClass + '">';
+						html += '<a href="' + OBA.Config.searchParamsPrefix + stopRef + '">' + onwardCall.StopPointName + '</a>';
+						html += '<span>';
+
+						if (typeof onwardCall.ExpectedArrivalTime !== 'undefined' && onwardCall.ExpectedArrivalTime !== null) {
+							var timePrediction = OBA.Util.getArrivalEstimateForISOStringWithCheck(onwardCall.ExpectedArrivalTime, updateTimestampReference, "minute", onwardCall.Extensions.Distances.DistanceFromCall);
+							if (timePrediction != null && timePrediction != "null") {
+								html += timePrediction + ", "
+							}
+							// this is handy for debugging arrival/departure issues
+							//html += "(" + OBA.Util.debugTime(onwardCall.ExpectedArrivalTime) + ", " + OBA.Util.debugTime(onwardCall.ExpectedDepartureTime) + ") "
+							html += onwardCall.Extensions.Distances.PresentableDistance;
+						}
+
+						html += '</span></li>';
+					});
+
+					html += '</ul>';
+				}
 			}
 		}
 		
