@@ -565,7 +565,7 @@ public final class SiriSupport {
 		NaturalLanguageStringStructure stopPoint = new NaturalLanguageStringStructure();
 		stopPoint.setValue(stopBean.getName());
 		onwardCallStructure.setStopPointName(stopPoint);
-		_log.info("V1");
+
 		if(prediction != null) {
 			if (prediction.getTimepointPredictedArrivalTime() < responseTimestamp) {
 				// we have a bad prediction, try schedule deviation + schedule and see if that's better
@@ -589,14 +589,6 @@ public final class SiriSupport {
 					}
 				}
 			} else {
-				_log.info("valid prediction, arrival = " + new Date(prediction.getTimepointPredictedArrivalTime())
-						+ ", departure = " + new Date(prediction.getTimepointPredictedDepartureTime())
-						+ " for stop=" + stopBean.getId()
-						+ " and dAT=" + distanceOfCallAlongTrip
-						+ " and dFromCall=" + distanceOfVehicleFromCall
-						+ " and visit=" + visitNumber
-						+ " with index=" + index);
-
 				onwardCallStructure.setExpectedArrivalTime(new Date(prediction.getTimepointPredictedArrivalTime()));
 				onwardCallStructure.setExpectedDepartureTime(new Date(prediction.getTimepointPredictedDepartureTime()));
 			}
