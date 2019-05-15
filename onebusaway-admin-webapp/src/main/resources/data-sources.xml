@@ -107,11 +107,18 @@
     </bean>
 
     <!-- Database Connection Configuration for retrieving assigned vehicle data -->
-    <bean id="assignedVehicleDataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
-        <property name="driverClassName" value="org.hsqldb.jdbcDriver" />
-        <property name="url" value="jdbc:hsqldb:mem:assigned_vehicles" />
-        <property name="username" value="sa" />
-        <property name="password" value="" />
+    <bean id="assignedVehicleDataSource"
+          class="org.springframework.jndi.JndiObjectFactoryBean">
+        <property name="jndiName"
+                  value="java:comp/env/jdbc/appDB"/>
+        <property name="lookupOnStartup"
+                  value="true"/>
+        <property name="cache"
+                  value="true"/>
+        <property name="proxyInterface"
+                  value="javax.sql.DataSource"/>
+        <property name="resourceRef"
+                  value="true" />
     </bean>
 
 <!-- Other Stuff: -->
