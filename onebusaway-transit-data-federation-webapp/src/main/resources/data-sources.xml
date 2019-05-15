@@ -46,32 +46,14 @@ http://www.springframework.org/schema/context http://www.springframework.org/sch
       </property>
     </bean>
 
-    <bean class="org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.GtfsRealtimeSource">
-        <property name="tripUpdatesUrl" value="http://gtfsrt.dev.dash.obaweb.org:8080/api/v1/key/612bek1/agency/71/command/gtfs-rt/tripUpdates" />
-        <property name="vehiclePositionsUrl" value="http://gtfsrt.dev.dash.obaweb.org:8080/api/v1/key/612bek1/agency/71/command/gtfs-rt/vehiclePositions" />
-        <property name="refreshInterval" value="5" />
-        <property name="agencyIds">
-            <list>
-                <value>71</value>
-            </list>
-        </property>
-    </bean>
-
-
-
-    <!--    <bean id="httpServiceClient" class="org.onebusaway.transit_data_federation.util.HttpServiceClientImpl" >-->
-<!--      <constructor-arg type="java.lang.String" value="localhost"/>-->
-<!--      <constructor-arg type="java.lang.Integer" value="9999" />-->
-<!--      <constructor-arg type="java.lang.String" value="/api/" />-->
-<!--    </bean>-->
     <bean id="httpServiceClient" class="org.onebusaway.transit_data_federation.util.HttpServiceClientImpl" >
-        <constructor-arg type="java.lang.String" value="admin.dev.wmata.obaweb.org"/>
-        <constructor-arg type="java.lang.Integer" value="80" />
-        <constructor-arg type="java.lang.String" value="/api/" />
+      <constructor-arg type="java.lang.String" value="localhost"/>
+      <constructor-arg type="java.lang.Integer" value="9999" />
+      <constructor-arg type="java.lang.String" value="/api/" />
     </bean>
 
     <bean id="bundleManagementService" class="org.onebusaway.transit_data_federation.impl.bundle.BundleManagementServiceImpl">
-      <property name="bundleStoreRoot" value="/opt/wmata/oba/tds/bundle" />
+      <property name="bundleStoreRoot" value="/var/lib/oba/tds/bundle" />
       <property name="standaloneMode" value="false" />
     </bean>
 

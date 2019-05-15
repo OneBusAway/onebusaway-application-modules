@@ -156,11 +156,6 @@
 <!--         <prop key="rssServiceAlertsService.alertSource">WMATA</prop> -->
 <!--         <prop key="rssServiceAlertsService.serviceStatusUrlString">http://www.metroalerts.info/rss.aspx?bus</prop> -->
 <!--         <prop key="rssServiceAlertsService.serviceAdvisoryUrlString">http://www.wmata.com/rider_tools/metro_service_status/feeds/bus_Advisories.xml</prop> -->
-          <prop key="bundleStager.builtBundleDirectory">/opt/wmata/oba/bundles/builder</prop>
-          <prop key="bundleStager.stagedBundleDirectory">/opt/wmata/oba/bundles/staged</prop>
-          <prop key="bundleDeploySource.masterBundleDirectoryPathname">/opt/wmata/oba/bundles/active</prop>
-          <prop key="bundleDeployer.deployBundleDirectory">/opt/wmata/oba/bundles/active</prop>
-          <prop key="configurationServiceClient.configFile">/opt/wmata/oba/config.json</prop>
       </props>
     </property>
 	</bean>

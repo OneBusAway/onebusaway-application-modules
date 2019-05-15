@@ -19,7 +19,6 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -886,11 +885,9 @@ public final class SiriSupportV2 {
     NaturalLanguageStringStructure stopPoint = new NaturalLanguageStringStructure();
     stopPoint.setValue(stopBean.getName());
     onwardCallStructure.getStopPointName().add(stopPoint);
-    _log.info("V2");
+
     if (prediction != null) {
       if (prediction.getTimepointPredictedArrivalTime() < responseTimestamp) {
-        _log.info("prediction in past =" + new Date(prediction.getTimepointPredictedArrivalTime())
-        + " for stop=" + stopBean.getId() + " with index=" + index);
         // TODO - LCARABALLO - should this be setExpectedArrivalTime?
         onwardCallStructure.setExpectedArrivalTime(DateUtil
             .toXmlGregorianCalendar(responseTimestamp));
