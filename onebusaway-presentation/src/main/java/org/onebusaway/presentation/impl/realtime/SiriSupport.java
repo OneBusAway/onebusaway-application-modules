@@ -430,7 +430,8 @@ public final class SiriSupport {
 								distanceOfVehicleFromCall, 
 								visitNumber, blockTripStopsAfterTheVehicle - 1,
 								stopLevelPredictions.get(stopTime.getStopTime().getStop().getId()),
-								hasRealtimeData, responseTimestamp, (currentVehicleTripStatus.getServiceDate() + stopTime.getStopTime().getArrivalTime() * 1000)));
+								hasRealtimeData, responseTimestamp, (currentVehicleTripStatus.getServiceDate() + stopTime.getStopTime().getArrivalTime() * 1000),
+								currentVehicleTripStatus.getScheduleDeviation()));
 
 				onwardCallsAdded++;
 
@@ -544,7 +545,8 @@ public final class SiriSupport {
 	private static OnwardCallStructure getOnwardCallStructure(StopBean stopBean, 
 			PresentationService presentationService, 
 			double distanceOfCallAlongTrip, double distanceOfVehicleFromCall, int visitNumber, int index,
-			TimepointPredictionRecord prediction, boolean hasRealtimeData, long responseTimestamp, long scheduledArrivalTime) {
+			TimepointPredictionRecord prediction, boolean hasRealtimeData, long responseTimestamp, long scheduledArrivalTime,
+															  double scheduleDeviation) {
 
 		OnwardCallStructure onwardCallStructure = new OnwardCallStructure();
 		onwardCallStructure.setVisitNumber(BigInteger.valueOf(visitNumber));
@@ -563,12 +565,38 @@ public final class SiriSupport {
 		NaturalLanguageStringStructure stopPoint = new NaturalLanguageStringStructure();
 		stopPoint.setValue(stopBean.getName());
 		onwardCallStructure.setStopPointName(stopPoint);
-
+		_log.info("V1");
 		if(prediction != null) {
 			if (prediction.getTimepointPredictedArrivalTime() < responseTimestamp) {
-				onwardCallStructure.setExpectedArrivalTime(new Date(responseTimestamp)); 
-				onwardCallStructure.setExpectedDepartureTime(new Date(responseTimestamp));
+				// we have a bad prediction, try schedule deviation + schedule and see if that's better
+				// TODO FIXME!!! If this is due to terminal arrival / departure of next trip, this should
+				// be fixed upstream
+				long arrivalTime = scheduledArrivalTime + (long)scheduleDeviation*1000;
+				if (arrivalTime < responseTimestamp) {
+					onwardCallStructure.setExpectedArrivalTime(new Date(responseTimestamp));
+					if (prediction.getTimepointPredictedDepartureTime() < responseTimestamp) {
+						// don't set departure time -- we don't know it
+					} else {
+						onwardCallStructure.setExpectedDepartureTime(new Date(prediction.getTimepointPredictedDepartureTime()));
+					}
+				} else {
+					// TODO
+					onwardCallStructure.setExpectedArrivalTime(new Date(arrivalTime));
+					if (prediction.getTimepointPredictedDepartureTime() < responseTimestamp) {
+						// don't set departure time -- we don't know it
+					} else {
+						onwardCallStructure.setExpectedDepartureTime(new Date(prediction.getTimepointPredictedDepartureTime()));
+					}
+				}
 			} else {
+				_log.info("valid prediction, arrival = " + new Date(prediction.getTimepointPredictedArrivalTime())
+						+ ", departure = " + new Date(prediction.getTimepointPredictedDepartureTime())
+						+ " for stop=" + stopBean.getId()
+						+ " and dAT=" + distanceOfCallAlongTrip
+						+ " and dFromCall=" + distanceOfVehicleFromCall
+						+ " and visit=" + visitNumber
+						+ " with index=" + index);
+
 				onwardCallStructure.setExpectedArrivalTime(new Date(prediction.getTimepointPredictedArrivalTime()));
 				onwardCallStructure.setExpectedDepartureTime(new Date(prediction.getTimepointPredictedDepartureTime()));
 			}

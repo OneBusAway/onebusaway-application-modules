@@ -449,6 +449,29 @@ OBA.RouteMap = function(mapNode, initCallbackFn, serviceAlertCallbackFn) {
         }
 
 
+		// create button
+		var toggle = document.createElement('button');
+		toggle.setAttribute('id', 'toggle_traffic');
+		toggle.innerHTML = "Traffic";
+
+		// create traffic overlay
+		var trafficLayer = new google.maps.TrafficLayer();
+		//trafficLayer.setMap(map); // uncomment for traffic on by default
+
+		// click event listener
+		google.maps.event.addDomListener(toggle, 'click', function(){
+			// toggle 'setMap' between null and map
+			trafficLayer.setMap((trafficLayer.getMap()) ? null : map);
+		});
+
+		// wrap button in div, and append to map legend
+		var toggle_div = document.createElement('div');
+		toggle_div.appendChild(toggle);
+		legend.appendChild(toggle_div);
+
+
+
+
         map.controls[google.maps.ControlPosition.RIGHT_TOP].push(legend);
     }
 
