@@ -29,7 +29,7 @@ public class AssignmentId implements Serializable {
     private String blockId;
 
     @Column(name="assignment_date")
-    @Temporal(TemporalType.DATE)
+    @Temporal(TemporalType.TIMESTAMP)
     private Date assignmentDate;
 
     public AssignmentId(){}

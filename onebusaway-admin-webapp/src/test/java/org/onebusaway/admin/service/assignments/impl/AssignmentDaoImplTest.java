@@ -51,34 +51,84 @@ public class AssignmentDaoImplTest {
 
     }
 
-    private Date today(){
-        return currentDate;
+    private Date currentServiceDate(){
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(currentDate);
+
+        cal.set(Calendar.HOUR_OF_DAY, 3);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 000);
+        return cal.getTime();
     }
 
-    private Date yesterday() {
-        final Calendar cal = Calendar.getInstance();
+    private Date previousServiceDate() {
+        Calendar cal = Calendar.getInstance();
         cal.setTime(currentDate);
-        cal.add(Calendar.DATE, -1);
+
+        cal.set(Calendar.HOUR_OF_DAY, 2);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 000);
+        return cal.getTime();
+    }
+
+    private Date laterPreviousServiceDate() {
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(currentDate);
+
+        cal.set(Calendar.HOUR_OF_DAY, 2);
+        cal.set(Calendar.MINUTE, 10);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 000);
         return cal.getTime();
     }
 
 
    @Test
     public void getAssignmentTest() {
-        Assignment assignment = new Assignment("blockId", "vehicleId", today());
+        Date currentServiceDate = currentServiceDate();
+        Date previousServiceDate = previousServiceDate();
 
-        Assignment retrievedAssignment = _dao.getAssignment("blockId", today());
+        Assignment assignment = new Assignment("blockId", "vehicleId", currentServiceDate);
+
+        Assignment retrievedAssignment = _dao.getAssignment("blockId", currentServiceDate);
 
         assertNull(retrievedAssignment);
 
         _dao.save(assignment);
 
-        retrievedAssignment = _dao.getAssignment("blockId", today());
+        retrievedAssignment = _dao.getAssignment("blockId", currentServiceDate);
 
         assertEquals("blockId", retrievedAssignment.getBlockId());
         assertEquals("vehicleId", retrievedAssignment.getVehicleId());
 
-        retrievedAssignment = _dao.getAssignment("blockId", yesterday());
+        retrievedAssignment = _dao.getAssignment("blockId", previousServiceDate);
+        assertNull("blockId", retrievedAssignment);
+
+    }
+
+    @Test
+    public void getAssignmentServiceDayChangeTest() {
+        Date currentServiceDate = currentServiceDate();
+        Date previousServiceDate = previousServiceDate();
+        Date laterPreviousServiceDate = laterPreviousServiceDate();
+
+        Assignment assignment = new Assignment("blockId", "vehicleId", previousServiceDate);
+
+        // Check to make sure that we still get assignment with same service date but different time
+        Assignment retrievedAssignment = _dao.getAssignment("blockId", laterPreviousServiceDate);
+
+        assertNull(retrievedAssignment);
+
+        _dao.save(assignment);
+
+        retrievedAssignment = _dao.getAssignment("blockId", laterPreviousServiceDate);
+
+        assertEquals("blockId", retrievedAssignment.getBlockId());
+        assertEquals("vehicleId", retrievedAssignment.getVehicleId());
+
+        retrievedAssignment = _dao.getAssignment("blockId", currentServiceDate);
         assertNull("blockId", retrievedAssignment);
 
     }
@@ -86,15 +136,18 @@ public class AssignmentDaoImplTest {
     @Test
     public void getAllTest() {
 
-        List<Assignment> assignmentList = _dao.getAll(today());
+        Date currentServiceDate = currentServiceDate();
+        Date previousServiceDate = previousServiceDate();
+
+        List<Assignment> assignmentList = _dao.getAll(currentServiceDate());
 
         assertEquals(0, assignmentList.size());
 
-        Assignment assignment = new Assignment("blockId", "vehicleId", today());
+        Assignment assignment = new Assignment("blockId", "vehicleId", currentServiceDate);
 
         _dao.save(assignment);
 
-        assignmentList = _dao.getAll(today());
+        assignmentList = _dao.getAll(currentServiceDate());
 
         assertEquals(1, assignmentList.size());
         Assignment retrievedAssignment = assignmentList.get(0);
@@ -102,76 +155,57 @@ public class AssignmentDaoImplTest {
         assertEquals("blockId", retrievedAssignment.getBlockId());
         assertEquals("vehicleId", retrievedAssignment.getVehicleId());
 
-        assignmentList = _dao.getAll(yesterday());
+        assignmentList = _dao.getAll(previousServiceDate);
 
         assertEquals(0, assignmentList.size());
     }
 
     @Test
     public void deleteTest() {
-        Assignment retrievedAssignment = _dao.getAssignment("blockId", today());
+
+        Date currentServiceDate = currentServiceDate();
+
+        Assignment retrievedAssignment = _dao.getAssignment("blockId", currentServiceDate);
 
         assertNull(retrievedAssignment);
 
-        Assignment assignment = new Assignment("blockId", "vehicleId", today());
+        Assignment assignment = new Assignment("blockId", "vehicleId", currentServiceDate);
 
         _dao.save(assignment);
 
-        retrievedAssignment = _dao.getAssignment("blockId", today());
+        retrievedAssignment = _dao.getAssignment("blockId", currentServiceDate);
 
         assertNotNull(retrievedAssignment);
 
         _dao.delete(retrievedAssignment);
 
-        retrievedAssignment = _dao.getAssignment("blockId", today());
+        retrievedAssignment = _dao.getAssignment("blockId", currentServiceDate);
 
         assertNull(retrievedAssignment);
     }
 
     @Test
     public void deleteAllTest() {
-        Assignment retrievedAssignment = _dao.getAssignment("blockId", today());
+
+        Date currentServiceDate = currentServiceDate();
+
+        Assignment retrievedAssignment = _dao.getAssignment("blockId", currentServiceDate);
 
         assertNull(retrievedAssignment);
 
-        Assignment assignment = new Assignment("blockId", "vehicleId", today());
+        Assignment assignment = new Assignment("blockId", "vehicleId", currentServiceDate);
 
         _dao.save(assignment);
 
-        retrievedAssignment = _dao.getAssignment("blockId", today());
+        retrievedAssignment = _dao.getAssignment("blockId", currentServiceDate);
 
         assertNotNull(retrievedAssignment);
 
         _dao.deleteAll();
 
-        retrievedAssignment = _dao.getAssignment("blockId", today());
+        retrievedAssignment = _dao.getAssignment("blockId", currentServiceDate);
 
         assertNull(retrievedAssignment);
     }
 
-    @Test
-    public void deleteAllExceptDateTest() {
-        Assignment retrievedAssignment = _dao.getAssignment("blockId", today());
-
-        assertNull(retrievedAssignment);
-
-        Assignment assignment = new Assignment("blockId", "vehicleId", today());
-
-        _dao.save(assignment);
-
-        retrievedAssignment = _dao.getAssignment("blockId", today());
-
-        assertNotNull(retrievedAssignment);
-
-        _dao.deleteAllExceptDate(today());
-
-        retrievedAssignment = _dao.getAssignment("blockId", today());
-
-        assertNotNull(retrievedAssignment);
-
-        retrievedAssignment = _dao.getAssignment("blockId", yesterday());
-
-        assertNull(retrievedAssignment);
-
-    }
 }

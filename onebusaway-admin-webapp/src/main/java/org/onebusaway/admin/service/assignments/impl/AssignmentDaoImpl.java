@@ -29,6 +29,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import static org.onebusaway.admin.util.DateTimeUtil.*;
+
 import java.util.Date;
 import java.util.List;
 
@@ -47,15 +49,25 @@ public class AssignmentDaoImpl implements AssignmentDao {
     @Override
     @Transactional(readOnly = true)
     public List<Assignment> getAll(Date date) {
-        Query query = getSession().createQuery("SELECT assign FROM Assignment assign WHERE assign.assignmentId.assignmentDate =:date");
-        query.setParameter("date", date);
+        Date from = getStartOfServiceDay(date);
+        Date to = getEndOfServiceDay(date);
+        Query query = getSession().createQuery("FROM Assignment assign WHERE assign.assignmentId.assignmentDate between :from and :to");
+        query.setParameter("from", from);
+        query.setParameter("to", to);
         return query.list();
     }
 
     @Override
     @Transactional(readOnly = true)
     public Assignment getAssignment(String blockId, Date date) {
-        return  (Assignment) getSession().get(Assignment.class, new AssignmentId(blockId, date));
+
+        Date from = getStartOfServiceDay(date);
+        Date to = getEndOfServiceDay(date);
+        Query query = getSession().createQuery("FROM Assignment assign WHERE assign.assignmentId.blockId=:blockId AND assign.assignmentId.assignmentDate between :from and :to");
+        query.setParameter("blockId", blockId);
+        query.setParameter("from", from);
+        query.setParameter("to", to);
+        return (Assignment) query.uniqueResult();
     }
 
     @Override
@@ -82,14 +94,6 @@ public class AssignmentDaoImpl implements AssignmentDao {
     @Transactional(rollbackFor = Throwable.class)
     public void deleteAll() {
         Query query = getSession().createQuery("DELETE FROM Assignment");
-        query.executeUpdate();
-    }
-
-    @Override
-    @Transactional(rollbackFor = Throwable.class)
-    public void deleteAllExceptDate(Date date) {
-        Query query = getSession().createQuery("DELETE FROM Assignment assign WHERE assign.assignmentId.assignmentDate !=:date");
-        query.setParameter("date", date);
         query.executeUpdate();
     }
 

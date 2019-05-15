@@ -41,7 +41,7 @@ public class ResetVehicleAssignmentsJob extends QuartzJobBean {
                 (AssignmentConfigDao)arg0.getJobDetail().getJobDataMap().get("assignmentConfigDao");
 
         assignmentConfigDao.deleteAll();
-        assignmentDao.deleteAllExceptDate(getCurrentDate());
+        assignmentDao.deleteAll();
         _log.info("Vehicle assignments reset");
     }
 

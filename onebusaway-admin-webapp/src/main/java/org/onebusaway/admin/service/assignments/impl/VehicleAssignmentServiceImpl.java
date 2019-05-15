@@ -43,6 +43,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import static org.onebusaway.admin.util.DateTimeUtil.*;
+
 @Component
 public class VehicleAssignmentServiceImpl implements VehicleAssignmentService {
 
@@ -274,26 +276,6 @@ public class VehicleAssignmentServiceImpl implements VehicleAssignmentService {
             routesAsAgencyAndId.add(AgencyAndId.convertFromString(route));
         }
         return routesAsAgencyAndId;
-    }
-
-    private static Date getStartOfDay(Date serviceDate) {
-        final Calendar cal = Calendar.getInstance();
-        cal.setTime(serviceDate);
-        cal.set(Calendar.HOUR_OF_DAY, 0);
-        cal.set(Calendar.MINUTE, 0);
-        cal.set(Calendar.SECOND, 0);
-        cal.set(Calendar.MILLISECOND, 000);
-        return cal.getTime();
-    }
-
-    private static Date getEndOfDay(Date serviceDate) {
-        final Calendar cal = Calendar.getInstance();
-        cal.setTime(serviceDate);
-        cal.set(Calendar.HOUR_OF_DAY, 23);
-        cal.set(Calendar.MINUTE, 59);
-        cal.set(Calendar.SECOND, 59);
-        cal.set(Calendar.MILLISECOND, 999);
-        return cal.getTime();
     }
 
     private ActiveBlock getActiveBlock(BlockInstanceBean blockInstance, String routeId){

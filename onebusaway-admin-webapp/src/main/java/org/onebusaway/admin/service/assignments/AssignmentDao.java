@@ -28,5 +28,4 @@ public interface AssignmentDao {
     public void saveAll(List<Assignment> assignmentList);
     public void delete(Assignment assignment);
     public void deleteAll();
-    public void deleteAllExceptDate(Date date);
 }
