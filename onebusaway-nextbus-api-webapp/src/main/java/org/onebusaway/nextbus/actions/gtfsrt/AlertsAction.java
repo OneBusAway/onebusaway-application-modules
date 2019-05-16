@@ -92,17 +92,20 @@ public class AlertsAction extends NextBusApiBase implements
 
 				for (ServiceAlertBean serviceAlert : serviceAlertBeans.getList()) {
 					try {
-						Alert.Builder alert = Alert.newBuilder();
 
-						fillAlertHeader(alert, serviceAlert.getSummaries());
-						fillAlertDescriptions(alert, serviceAlert.getDescriptions());
-						fillActiveWindows(alert, serviceAlert.getActiveWindows());
-						fillSituationAffects(alert, serviceAlert.getAllAffects());
+						if (matchesFilter(serviceAlert)) {
+							Alert.Builder alert = Alert.newBuilder();
 
-						FeedEntity.Builder feedEntity = FeedEntity.newBuilder();
-						feedEntity.setAlert(alert);
-						feedEntity.setId(id(agencyId, serviceAlert.getId()));
-						feedMessage.addEntity(feedEntity);
+							fillAlertHeader(alert, serviceAlert.getSummaries());
+							fillAlertDescriptions(alert, serviceAlert.getDescriptions());
+							fillActiveWindows(alert, serviceAlert.getActiveWindows());
+							fillSituationAffects(alert, serviceAlert.getAllAffects());
+
+							FeedEntity.Builder feedEntity = FeedEntity.newBuilder();
+							feedEntity.setAlert(alert);
+							feedEntity.setId(id(agencyId, serviceAlert.getId()));
+							feedMessage.addEntity(feedEntity);
+						}
 					} catch (Exception e) {
 						_log.error("Unable to process service alert", e);
 					}
@@ -115,6 +118,15 @@ public class AlertsAction extends NextBusApiBase implements
 			return builtFeedMessage;
 		}
 
+	}
+
+	private boolean matchesFilter(ServiceAlertBean bean) {
+		if (_cache.getAlertFilter() == null || bean.getSource() == null) {
+			return true;
+		}
+
+		boolean match = bean.getSource().matches(_cache.getAlertFilter());
+		return match;
 	}
 
 	private void fillAlertHeader(Alert.Builder alert, List<NaturalLanguageStringBean> summaries){
