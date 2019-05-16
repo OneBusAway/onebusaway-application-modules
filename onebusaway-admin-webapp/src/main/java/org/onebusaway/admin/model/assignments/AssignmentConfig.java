@@ -15,6 +15,7 @@
  */
 package org.onebusaway.admin.model.assignments;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import java.util.Date;
@@ -22,7 +23,9 @@ import java.util.Date;
 @Entity
 public class AssignmentConfig {
     @Id
+    @Column(name="key_id")
     private String key;
+
     private String value;
 
     public AssignmentConfig(){}
