@@ -29,6 +29,9 @@ import java.util.concurrent.TimeUnit;
 public class GtfsrtCache {
 
     Cache<CacheKey, FeedMessage> _cache;
+    private String alertFilter;
+    public String getAlertFilter() { return alertFilter; }
+    public void setAlertFilter(String filter) { this.alertFilter = filter; }
 
     public enum CacheKey{
         TRIP_UPDATES,

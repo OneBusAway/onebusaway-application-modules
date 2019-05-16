@@ -157,7 +157,7 @@ public class RssServiceAlertsSerivceImpl implements RssServiceAlertsService {
             Date pubDate = _sdf.parse(pubDateString);
             List<SituationAffectsBean> affectedRouteIds = getRouteIds(title);
             ServiceAlertBean serviceAlertBean = new ServiceAlertBean();
-            serviceAlertBean.setSource(_alertSource);
+            serviceAlertBean.setSource(_alertSource+"_advisory");
             serviceAlertBean.setAllAffects(affectedRouteIds);
             serviceAlertBean.setSeverity(ESeverity.UNKNOWN);
             serviceAlertBean.setSummaries(Arrays.asList(new NaturalLanguageStringBean[]{new NaturalLanguageStringBean(description, language)}));
@@ -204,7 +204,7 @@ public class RssServiceAlertsSerivceImpl implements RssServiceAlertsService {
             Date pubDate = _sdf.parse(pubDateString);
             List<SituationAffectsBean> affectedRouteIds = getRouteIds(title);
             ServiceAlertBean serviceAlertBean = new ServiceAlertBean();
-            serviceAlertBean.setSource(_alertSource);
+            serviceAlertBean.setSource(_alertSource+"_alert");
             serviceAlertBean.setAllAffects(affectedRouteIds);
             serviceAlertBean.setSeverity(ESeverity.UNKNOWN);
             serviceAlertBean.setSummaries(Arrays.asList(new NaturalLanguageStringBean[]{new NaturalLanguageStringBean(description, language)}));
