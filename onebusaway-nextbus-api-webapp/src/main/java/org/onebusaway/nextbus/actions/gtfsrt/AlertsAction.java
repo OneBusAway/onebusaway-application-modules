@@ -18,6 +18,7 @@ package org.onebusaway.nextbus.actions.gtfsrt;
 import com.google.transit.realtime.GtfsRealtime.*;
 import com.google.transit.realtime.GtfsRealtime.TranslatedString.Translation;
 import com.opensymphony.xwork2.ModelDriven;
+import org.apache.commons.lang.StringUtils;
 import org.apache.struts2.rest.DefaultHttpHeaders;
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.nextbus.actions.api.NextBusApiBase;
@@ -37,6 +38,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import static org.onebusaway.nextbus.impl.gtfsrt.GtfsrtCache.ALL_AGENCIES;
 
 public class AlertsAction extends NextBusApiBase implements
 		ModelDriven<FeedMessage> {
@@ -60,6 +63,13 @@ public class AlertsAction extends NextBusApiBase implements
 		return agencyId;
 	}
 
+	public String getAgencyIdHashKey() {
+		if (StringUtils.isBlank(agencyId)) {
+			return ALL_AGENCIES;
+		}
+		return agencyId;
+	}
+
 	public void setAgencyId(String agencyId) {
 		this.agencyId = agencyId;
 	}
@@ -70,7 +80,7 @@ public class AlertsAction extends NextBusApiBase implements
 
 	@Override
 	public FeedMessage getModel() {
-		FeedMessage cachedAlerts = _cache.getAlerts();
+		FeedMessage cachedAlerts = _cache.getAlerts(getAgencyIdHashKey());
 		if(cachedAlerts != null){
 			return cachedAlerts;
 		}
@@ -113,7 +123,7 @@ public class AlertsAction extends NextBusApiBase implements
 			}
 
 			FeedMessage builtFeedMessage = feedMessage.build();
-			_cache.putAlerts(builtFeedMessage);
+			_cache.putAlerts(getAgencyIdHashKey(), builtFeedMessage);
 
 			return builtFeedMessage;
 		}

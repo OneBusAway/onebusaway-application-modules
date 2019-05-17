@@ -27,7 +27,6 @@ import org.onebusaway.nextbus.model.transiTime.Prediction;
 import org.onebusaway.nextbus.model.transiTime.Predictions;
 import org.onebusaway.nextbus.model.transiTime.PredictionsDirection;
 import org.onebusaway.nextbus.util.HttpUtil;
-import org.onebusaway.nextbus.util.HttpUtilImpl;
 import org.onebusaway.nextbus.validation.ErrorMsg;
 import org.onebusaway.transit_data.model.RouteBean;
 import org.onebusaway.transit_data.model.StopBean;
@@ -110,9 +109,9 @@ public class PredictionsAction extends NextBusApiBase implements
     List<AgencyAndId> stopIds = new ArrayList<AgencyAndId>();
     List<AgencyAndId> routeIds = new ArrayList<AgencyAndId>();
 
-    if (isValid(body, stopIds, routeIds)) {
+    if (isValid(body, stopIds, routeIds) && hasServiceUrl(agencyId)) {
 
-      String serviceUrl = getServiceUrl() + agencyId + PREDICTIONS_COMMAND
+      String serviceUrl = getServiceUrl(agencyId) + agencyId + PREDICTIONS_COMMAND
           + "?";
 
       String routeStop = "";
@@ -126,7 +125,7 @@ public class PredictionsAction extends NextBusApiBase implements
       String uri = serviceUrl + routeStop + "format=" + REQUEST_TYPE;
       _log.info(uri);
       try {
-        int timeout = _configUtil.getHttpTimeoutSeconds();
+        int timeout = _configMapUtil.getConfig(agencyId).getHttpTimeoutSeconds();
         JsonArray predictionsJson = _httpUtil.getJsonObject(uri, timeout).getAsJsonArray(
             "predictions");
         Type listType = new TypeToken<List<Predictions>>() {

@@ -28,7 +28,8 @@ import java.util.concurrent.TimeUnit;
 @Component
 public class GtfsrtCache {
 
-    Cache<CacheKey, FeedMessage> _cache;
+    public static final String ALL_AGENCIES = "_ALL_";
+    Cache<String, FeedMessage> _cache;
     private String alertFilter;
     public String getAlertFilter() { return alertFilter; }
     public void setAlertFilter(String filter) { this.alertFilter = filter; }
@@ -46,29 +47,32 @@ public class GtfsrtCache {
 
     }
 
-    public void putTripUpdates(FeedMessage feedMessage){
-        _cache.put(CacheKey.TRIP_UPDATES, feedMessage);
+    public void putTripUpdates(String hashKey, FeedMessage feedMessage){
+        _cache.put(hash(hashKey, CacheKey.TRIP_UPDATES), feedMessage);
     }
 
-    public void putVehiclePositions(FeedMessage feedMessage){
-        _cache.put(CacheKey.VEHICLE_POSITIONS, feedMessage);
+    public void putVehiclePositions(String hashKey, FeedMessage feedMessage){
+        _cache.put(hash(hashKey, CacheKey.VEHICLE_POSITIONS), feedMessage);
     }
 
-    public void putAlerts(FeedMessage feedMessage){
-        _cache.put(CacheKey.ALERTS, feedMessage);
+    public void putAlerts(String hashKey, FeedMessage feedMessage){
+        _cache.put(hash(hashKey, CacheKey.ALERTS), feedMessage);
     }
 
-    public FeedMessage getTripUpdates(){
-        return _cache.getIfPresent(CacheKey.TRIP_UPDATES);
+    public FeedMessage getTripUpdates(String hashKey){
+        return _cache.getIfPresent(hash(hashKey, CacheKey.TRIP_UPDATES));
     }
 
-    public FeedMessage getVehiclePositions(){
-        return _cache.getIfPresent(CacheKey.VEHICLE_POSITIONS);
+    public FeedMessage getVehiclePositions(String hashKey){
+        return _cache.getIfPresent(hash(hashKey, CacheKey.VEHICLE_POSITIONS));
     }
 
-    public FeedMessage getAlerts(){
-        return _cache.getIfPresent(CacheKey.ALERTS);
+    public FeedMessage getAlerts(String hashKey){
+        return _cache.getIfPresent(hash(hashKey, CacheKey.ALERTS));
     }
 
+    private String hash(String hashKey, CacheKey elementKey) {
+        return hashKey + ":" + elementKey.toString();
+    }
 
 }

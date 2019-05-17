@@ -17,6 +17,7 @@ package org.onebusaway.nextbus.actions.gtfsrt;
 
 import com.google.transit.realtime.GtfsRealtime.FeedMessage;
 import com.opensymphony.xwork2.ModelDriven;
+import org.apache.commons.lang.StringUtils;
 import org.apache.struts2.rest.DefaultHttpHeaders;
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.nextbus.actions.api.NextBusApiBase;
@@ -30,6 +31,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import static org.onebusaway.nextbus.impl.gtfsrt.GtfsrtCache.ALL_AGENCIES;
 
 public class VehiclePositionsAction extends NextBusApiBase  implements
         ModelDriven<FeedMessage> {
@@ -56,13 +59,21 @@ public class VehiclePositionsAction extends NextBusApiBase  implements
         this.agencyId = agencyId;
     }
 
+    public String getAgencyIdHashKey() {
+        if (StringUtils.isBlank(agencyId)) {
+            return ALL_AGENCIES;
+        }
+        return agencyId;
+    }
+
+
     public DefaultHttpHeaders index() {
         return new DefaultHttpHeaders("success");
     }
 
     @Override
     public FeedMessage getModel() {
-        FeedMessage cachedVehiclePositions = _cache.getVehiclePositions();
+        FeedMessage cachedVehiclePositions = _cache.getVehiclePositions(getAgencyIdHashKey());
         if(cachedVehiclePositions != null){
             return cachedVehiclePositions;
         }
@@ -80,16 +91,18 @@ public class VehiclePositionsAction extends NextBusApiBase  implements
             }
 
             for (String agencyId : agencyIds) {
-                String gtfsrtUrl = getServiceUrl() + agencyId + VEHICLE_UPDATES_COMMAND;
-                try {
-                    remoteFeedMessage = _httpUtil.getFeedMessage(gtfsrtUrl, 30);
-                    feedMessage.addAllEntity(remoteFeedMessage.getEntityList());
-                } catch (Exception e) {
-                    _log.error(e.getMessage());
+                if (hasServiceUrl(agencyId)) {
+                    String gtfsrtUrl = getServiceUrl(agencyId) + agencyId + VEHICLE_UPDATES_COMMAND;
+                    try {
+                        remoteFeedMessage = _httpUtil.getFeedMessage(gtfsrtUrl, 30);
+                        feedMessage.addAllEntity(remoteFeedMessage.getEntityList());
+                    } catch (Exception e) {
+                        _log.error(e.getMessage());
+                    }
                 }
             }
             FeedMessage builtFeedMessage = feedMessage.build();
-            _cache.putVehiclePositions(builtFeedMessage);
+            _cache.putVehiclePositions(getAgencyIdHashKey(), builtFeedMessage);
             return builtFeedMessage;
         }
     }

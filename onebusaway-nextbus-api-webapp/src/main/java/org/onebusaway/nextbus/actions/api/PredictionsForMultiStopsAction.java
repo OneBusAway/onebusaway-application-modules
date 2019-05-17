@@ -16,12 +16,10 @@
 package org.onebusaway.nextbus.actions.api;
 
 import java.lang.reflect.Type;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.commons.lang3.text.WordUtils;
 import org.apache.struts2.rest.DefaultHttpHeaders;
 import org.onebusaway.exceptions.ServiceException;
 import org.onebusaway.gtfs.model.AgencyAndId;
@@ -31,7 +29,6 @@ import org.onebusaway.nextbus.model.transiTime.Prediction;
 import org.onebusaway.nextbus.model.transiTime.Predictions;
 import org.onebusaway.nextbus.model.transiTime.PredictionsDirection;
 import org.onebusaway.nextbus.util.HttpUtil;
-import org.onebusaway.nextbus.util.HttpUtilImpl;
 import org.onebusaway.nextbus.validation.ErrorMsg;
 import org.onebusaway.transit_data.model.RouteBean;
 import org.onebusaway.transit_data.model.StopBean;
@@ -89,13 +86,13 @@ public class PredictionsForMultiStopsAction extends NextBusApiBase implements
     Body<Predictions> body = new Body<Predictions>();
 
     if (isValid(body)) {
-      String serviceUrl = getServiceUrl() + agencyId + PREDICTIONS_COMMAND
+      String serviceUrl = getServiceUrl(agencyId) + agencyId + PREDICTIONS_COMMAND
           + "?";
       String routeStopIds = getStopParams();
       String uri = serviceUrl + routeStopIds + "format=" + REQUEST_TYPE;
 
       try {
-        int timeout = _configUtil.getHttpTimeoutSeconds();
+        int timeout = _configMapUtil.getConfig(agencyId).getHttpTimeoutSeconds();
         JsonArray predictionsJson = _httpUtil.getJsonObject(uri, timeout).getAsJsonArray(
             "predictions");
         Type listType = new TypeToken<List<Predictions>>() {
