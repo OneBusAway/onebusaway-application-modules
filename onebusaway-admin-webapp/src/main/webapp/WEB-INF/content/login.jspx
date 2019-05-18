@@ -20,6 +20,11 @@
 <jsp:directive.page contentType="text/html" />
 <head>
 	<title><s:text name="admin.title"/>: Login</title>
+	<script type="text/javascript">
+		function goBackToLogin() {
+			document.getElementById('tryagain').click();
+		}
+	</script>
 </head>
 <body>
 <div id="content">
@@ -33,12 +38,13 @@
 				Enter your username <s:textfield name="username" /> and 
 				<s:submit value="Click here" />
 			</s:form>
+			<p class="error"><a href="#" onclick='javascript:goBackToLogin();'>Go Back to Login</a></p>
 			<br></br>
 			<div id="navigation">
 				<s:url var="url" namespace="/" action="logout"></s:url>
-				<s:form action="%{url}"
+				<s:form  action="%{url}"
 						method="post">
-					<input type="submit"
+					<input id="tryagain" type="submit"
 						   class="logoutButton"
 						   value="Logout" />
 					<input type="hidden"
@@ -46,7 +52,6 @@
 						   name="${_csrf.parameterName}"
 						   value="${_csrf.token}"/>
 				</s:form>
-
 			</div>
 		</s:if>
 		<s:elseif test="forbidden">
