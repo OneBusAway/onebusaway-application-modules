@@ -140,6 +140,14 @@ public class IndexAction extends OneBusAwayEnterpriseActionSupport {
           _results = _searchService.findStopsNearPoint(result.getLatitude(),
               result.getLongitude(), factory, _results.getRouteFilter());
         }
+      } else {
+        if (_results.getMatches().isEmpty() && _results.getSuggestions().size() > 1 && !_q.contains(",")) {
+          // we have multiple suggestions but we don't support disambiguation
+          // force a geocode search on the former argument
+          // TODO SUPPORT DISAMBIGUATION!!!!
+          _q = _q + ',';
+          execute();
+        }
       }
     }
 
