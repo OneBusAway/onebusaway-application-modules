@@ -177,15 +177,16 @@ public class AlertsAction extends NextBusApiBase implements
 			if (affects.getAgencyId() != null)
 				entitySelector.setAgencyId(affects.getAgencyId());
 			if (affects.getRouteId() != null) {
-				entitySelector.setRouteId(id(agencyId, sanitize(affects.getRouteId())));
+				entitySelector.setRouteId(sanitize(affects.getRouteId()));
 			}
 			if (affects.getTripId() != null) {
 				TripDescriptor.Builder trip = TripDescriptor.newBuilder();
-				trip.setTripId(id(agencyId, sanitize(affects.getTripId())));
+				trip.setTripId(sanitize(affects.getTripId()));
 				entitySelector.setTrip(trip);
 			}
-			if (affects.getStopId() != null)
-				entitySelector.setStopId(id(agencyId, sanitize(affects.getStopId())));
+			if (affects.getStopId() != null) {
+				entitySelector.setStopId(sanitize(affects.getStopId()));
+			}
 			alert.addInformedEntity(entitySelector);
 		}
 	}
