@@ -40,6 +40,7 @@ import org.onebusaway.transit_data.model.StopsBean;
 import org.onebusaway.transit_data.model.StopsForRouteBean;
 import org.apache.commons.collections.ListUtils;
 import org.apache.commons.lang.StringUtils;
+import org.onebusaway.util.services.configuration.ConfigurationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -91,6 +92,9 @@ public class SearchServiceImpl implements SearchService {
 
 	// The max number of closest stops to display
 	private static final int MAX_STOPS = 10;
+
+	@Autowired
+	private ConfigurationService _configurationService;
 
 	@Autowired
 	private EnterpriseGeocoderService _geocoderService;
@@ -410,8 +414,12 @@ public class SearchServiceImpl implements SearchService {
 			tryAsStop(results, normalizedQuery, resultFactory, serviceDate);
 		}
 
-		if (results.isEmpty() && !hasComma) {
-			tryAsStopName(results, query, resultFactory);
+		if (!"true".equalsIgnoreCase(_configurationService
+				.getConfigurationValueAsString("display.skipStopNameSearch", "false"))) {
+			// this may be controversial -- include configuration to remove
+			if (results.isEmpty() && !hasComma) {
+				tryAsStopName(results, query, resultFactory);
+			}
 		}
 
 		if (results.isEmpty()) {
