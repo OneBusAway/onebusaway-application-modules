@@ -106,7 +106,7 @@
 						<li><s:url var="url" action="index" namespace="/admin/vehiclepredictions" />
 							<s:a href="%{url}">Vehicle Predictions</s:a></li>
 					</s:if>
-					<s:if test="isPageAvailable('showVehicleAssignments', 'org.onebusaway.webapp.actions.admin.vehiclepredictions.VehicleBlockAssignmentAction')">
+					<s:if test="isPageAvailable('showVehicleAssignments', 'org.onebusaway.webapp.actions.admin.vehicleblockassignment.VehicleBlockAssignmentAction')">
 						<li><s:url var="url" action="vehicle-block-assignment" namespace="/admin/vehicleblockassignment" />
 							<s:a href="%{url}">Vehicle Block Assignment</s:a></li>
 					</s:if>
