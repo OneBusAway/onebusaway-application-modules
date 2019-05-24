@@ -137,7 +137,7 @@
 				<input type="hidden" name="t" id="t" />
 			</s:form>
 
-			<small>TIP: Enter an intersection, bus route or bus stop code.</small>
+			<small>TIP: Enter a bus stop code, route, or street address.</small>
 		</div>
 
 		<s:if test="globalServiceAlerts!=null">
