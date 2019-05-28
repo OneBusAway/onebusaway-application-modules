@@ -71,7 +71,7 @@ public class VehicleBlockAssignmentAction extends ActionSupport implements
             String blockId = blockSummary.getBlockId();
             String vehicleId = blockSummary.getVehicleId();
 
-            if(!StringUtil.isBlank(blockId) && (StringUtil.isBlank(vehicleId) || _activeVehicleIds.contains(vehicleId))) {
+            if(!StringUtil.isBlank(blockId) && !StringUtil.isBlank(vehicleId) && _activeVehicleIds.contains(vehicleId)) {
                 vehicleAssignmentService.assign(blockId, vehicleId);
             }
         }
