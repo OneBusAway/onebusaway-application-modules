@@ -138,8 +138,7 @@ jQuery(function() {
     });
 
     $(".close").click(function(e){
-        this.input.val( "" );
-        this.element.val( "" );
+        this.parent().parent().find( ".combobox" ).val( "" );
     })
 });
 
