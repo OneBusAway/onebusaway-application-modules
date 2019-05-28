@@ -175,6 +175,13 @@
     display: block;
 }
 
+.close {
+    width: 20px;
+    height: 20px;
+    background: url("/css/img/x-mark.png") center right no-repeat;
+    display: block;
+}
+
 .error {
     width: 20px;
     height: 20px;

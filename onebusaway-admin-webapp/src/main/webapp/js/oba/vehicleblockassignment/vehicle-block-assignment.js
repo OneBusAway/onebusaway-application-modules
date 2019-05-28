@@ -136,6 +136,11 @@ jQuery(function() {
             }
         });
     });
+
+    $(".close").click(function(e){
+        this.input.val( "" );
+        this.element.val( "" );
+    })
 });
 
 $( function() {
