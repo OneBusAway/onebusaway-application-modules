@@ -140,6 +140,7 @@ jQuery(function() {
     $(".close").click(function(e){
         e.preventDefault();
         $(this).parent().parent().find(".custom-combobox-input").val("");
+        $(this).parent().parent().find()
     })
 });
 
