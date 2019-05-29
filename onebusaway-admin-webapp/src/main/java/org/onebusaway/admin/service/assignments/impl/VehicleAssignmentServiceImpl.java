@@ -223,7 +223,6 @@ public class VehicleAssignmentServiceImpl implements VehicleAssignmentService {
         for (AgencyAndId agencyAndRouteId : filterRoutes) {
             _log.debug("agency and route id=" + agencyAndRouteId);
             RouteBean rb = _tds.getRouteForId(AgencyAndId.convertToString(agencyAndRouteId));
-            _log.debug("route for agency = " + rb.getId());
             if(rb !=null) {
                 TimeZone tz = TimeZone.getTimeZone(rb.getAgency().getTimezone());
                 Date date = serviceDate.getAsDate(tz);
