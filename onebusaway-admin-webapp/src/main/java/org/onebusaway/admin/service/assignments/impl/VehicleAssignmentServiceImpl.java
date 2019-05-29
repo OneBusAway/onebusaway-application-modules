@@ -125,19 +125,19 @@ public class VehicleAssignmentServiceImpl implements VehicleAssignmentService {
 
     @Override
     public boolean assign(String blockId, String vehicleId, Date date) {
-        Date currentDate = getCurrentDate();
-        Assignment assignment = new Assignment(blockId, vehicleId, date);
+        Date serviceDate = getCurrentServiceDate(date);
+        Assignment assignment = new Assignment(blockId, vehicleId, serviceDate);
         assignmentDao.save(assignment);
 
-        assignmentConfigService.setConfigValueAsDateTime("lastUpdated", currentDate);
+        assignmentConfigService.setConfigValueAsDateTime("lastUpdated", serviceDate);
 
         return true;
     }
 
     @Override
     public boolean assign(String blockId, String vehicleId) {
-        Date currentDate = getCurrentDate();
-        return assign(blockId, vehicleId, currentDate);
+        Date serviceDate = getCurrentServiceDate();
+        return assign(blockId, vehicleId, serviceDate);
     }
 
 
@@ -323,9 +323,18 @@ public class VehicleAssignmentServiceImpl implements VehicleAssignmentService {
         return String.format("%02d:%02d:%02d", hours, minutes, seconds);
     }
 
+
     public Date getCurrentDate(){
         Date date = new Date();
         return date;
+    }
+
+    private Date getCurrentServiceDate(){
+        return getStartOfServiceDay(getCurrentDate());
+    }
+
+    private Date getCurrentServiceDate(Date date){
+        return getStartOfServiceDay(date);
     }
 
     public void resetAssignments(){
