@@ -226,8 +226,8 @@ public class VehicleAssignmentServiceImpl implements VehicleAssignmentService {
             if(rb !=null) {
                 TimeZone tz = TimeZone.getTimeZone(rb.getAgency().getTimezone());
                 Date date = serviceDate.getAsDate(tz);
-                long fromTime = getStartOfDay(date).getTime();
-                long toTime = getEndOfDay(date).getTime();
+                long fromTime = getStartOfServiceDay(date).getTime();
+                long toTime = getEndOfServiceDay(date).getTime();
 
                 List<BlockInstanceBean> blockInstanceBeans = _tds.getActiveBlocksForRoute(agencyAndRouteId, fromTime, toTime);
 
