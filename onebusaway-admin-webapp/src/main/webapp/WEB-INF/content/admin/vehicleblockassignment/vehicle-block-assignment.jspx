@@ -128,7 +128,8 @@
                                     <th>End</th>
                                     <th style="width: 70px;"></th>
                                     <th >Vehicle</th>
-                                    <th style="width: 180px;"></th>
+                                    <th style="width: 110px;"></th>
+                                    <th style="width: 100px;">Clear Vehicle</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -156,6 +157,9 @@
                                             <s:else>
                                                 <div class="validation"/>
                                             </s:else>
+                                        </td>
+                                        <td >
+                                            <div class="validation close" style="width: 100px; margin:0 auto;"></div>
                                         </td>
                                     </tr>
                                 </s:iterator>

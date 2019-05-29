@@ -175,6 +175,14 @@
     display: block;
 }
 
+.close {
+    width: 20px;
+    height: 20px;
+    background: url("/css/img/x-mark-circle.png") center no-repeat;
+    cursor:pointer;
+    display: block;
+}
+
 .error {
     width: 20px;
     height: 20px;
