@@ -200,7 +200,11 @@ public class VehicleAssignmentServiceImpl implements VehicleAssignmentService {
 
     @Override
     public List<ActiveBlock> getActiveBlocks(ServiceDate serviceDate) throws ExecutionException {
-        return activeBlocksCache.get(serviceDate);
+        if (activeBlocksCache != null) {
+            // on startup we may be called before initialized
+            return activeBlocksCache.get(serviceDate);
+        }
+        return new ArrayList<>();
     }
 
     @Override
