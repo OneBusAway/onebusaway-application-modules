@@ -136,9 +136,9 @@ public class BlockLocationServiceImpl implements BlockLocationService,
 
   /**
    * Should we sample the schedule deviation history?
-   * (this is true for historical reasons)
+   * (expensive -- off by default)
    */
-  private boolean _sampleScheduleDeviationHistory = true;
+  private boolean _sampleScheduleDeviationHistory = false;
 
   /**
    * We queue up block location records so they can be bulk persisted to the
