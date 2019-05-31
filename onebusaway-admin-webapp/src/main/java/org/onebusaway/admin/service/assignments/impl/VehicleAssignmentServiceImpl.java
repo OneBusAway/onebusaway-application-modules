@@ -129,15 +129,15 @@ public class VehicleAssignmentServiceImpl implements VehicleAssignmentService {
         Assignment assignment = new Assignment(blockId, vehicleId, serviceDate);
         assignmentDao.save(assignment);
 
-        assignmentConfigService.setConfigValueAsDateTime("lastUpdated", serviceDate);
+        assignmentConfigService.setConfigValueAsDateTime("lastUpdated", getCurrentDate());
 
         return true;
     }
 
     @Override
     public boolean assign(String blockId, String vehicleId) {
-        Date serviceDate = getCurrentServiceDate();
-        return assign(blockId, vehicleId, serviceDate);
+        Date currentDate = getCurrentDate();
+        return assign(blockId, vehicleId, currentDate);
     }
 
 
