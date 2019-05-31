@@ -253,7 +253,7 @@
         </property>
         <property name="hibernateProperties">
             <props>
-                <prop key="hibernate.dialect">org.hibernate.dialect.HSQLDialect</prop>
+                <prop key="hibernate.dialect">org.hibernate.dialect.MySQLDialect</prop>
                 <prop key="hibernate.connection.pool_size">1</prop>
                 <!--<prop key="hibernate.current_session_context_class">thread</prop>-->
                 <prop key="hibernate.cache.provider_class">org.hibernate.cache.internal.NoCachingRegionFactory</prop>
@@ -294,7 +294,7 @@
 
     <bean id="resetTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
         <property name="jobDetail" ref="resetJob" />
-        <property name="cronExpression" value="0 3 * * * ?" /><!--  03:00 every day -->
+        <property name="cronExpression" value="0 0 3 * * ?" /><!--  03:00 every day -->
     </bean>
 
 	<bean id="gsonTool" class="org.onebusaway.admin.json.LowerCaseWDashesGsonJsonTool">
