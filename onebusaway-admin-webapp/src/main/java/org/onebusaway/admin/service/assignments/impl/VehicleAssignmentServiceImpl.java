@@ -20,9 +20,9 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import org.onebusaway.admin.model.assignments.ActiveBlock;
 import org.onebusaway.admin.model.assignments.Assignment;
-import org.onebusaway.admin.model.assignments.AssignmentConfig;
 import org.onebusaway.admin.model.assignments.TripSummary;
 import org.onebusaway.admin.service.assignments.*;
+import org.onebusaway.admin.util.DateTimeUtil;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
 import org.onebusaway.transit_data.model.RouteBean;
@@ -36,7 +36,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
@@ -70,7 +69,7 @@ public class VehicleAssignmentServiceImpl implements VehicleAssignmentService {
     @Autowired
     private ActiveVehiclesService activeVehicleService;
 
-    LoadingCache<ServiceDate, List<ActiveBlock>> activeBlocksCache;
+    LoadingCache<Date, List<ActiveBlock>> activeBlocksCache;
 
     LoadingCache<String, List<TripSummary>> tripSummaryCache;
 
@@ -88,10 +87,10 @@ public class VehicleAssignmentServiceImpl implements VehicleAssignmentService {
         // check for bundle change every 60 seconds
         _executor.scheduleAtFixedRate(new VehicleAssignmentServiceImpl.CheckForBundleChange(), 0, 60, TimeUnit.SECONDS);
 
-        CacheLoader<ServiceDate,  List<ActiveBlock>> activeBlocksLoader;
-        activeBlocksLoader = new CacheLoader<ServiceDate, List<ActiveBlock>>() {
+        CacheLoader<Date,  List<ActiveBlock>> activeBlocksLoader;
+        activeBlocksLoader = new CacheLoader<Date, List<ActiveBlock>>() {
             @Override
-            public List<ActiveBlock> load(ServiceDate serviceDate) {
+            public List<ActiveBlock> load(Date serviceDate) {
                 return getUncachedActiveBlocks(serviceDate);
             }
         };
@@ -125,7 +124,7 @@ public class VehicleAssignmentServiceImpl implements VehicleAssignmentService {
 
     @Override
     public boolean assign(String blockId, String vehicleId, Date date) {
-        Date serviceDate = getCurrentServiceDate(date);
+        Date serviceDate = getStartOfServiceDay(date);
         Assignment assignment = new Assignment(blockId, vehicleId, serviceDate);
         assignmentDao.save(assignment);
 
@@ -200,24 +199,27 @@ public class VehicleAssignmentServiceImpl implements VehicleAssignmentService {
 
     @Override
     public List<ActiveBlock> getActiveBlocks(ServiceDate serviceDate) throws ExecutionException {
+        Date updatedServiceDate = getAdjustedServiceDate(serviceDate);
+
         if (activeBlocksCache != null) {
             // on startup we may be called before initialized
-            return activeBlocksCache.get(serviceDate);
+            return activeBlocksCache.get(updatedServiceDate);
         }
         return new ArrayList<>();
     }
 
     @Override
     public List<ActiveBlock> getActiveBlocks(ServiceDate serviceDate, List<AgencyAndId> filterRoutes) throws ExecutionException {
-        return getUncachedActiveBlocks(serviceDate, filterRoutes);
+        Date updatedServiceDate = getAdjustedServiceDate(serviceDate);
+        return getUncachedActiveBlocks(updatedServiceDate, filterRoutes);
     }
 
-    private List<ActiveBlock> getUncachedActiveBlocks(ServiceDate serviceDate){
+    private List<ActiveBlock> getUncachedActiveBlocks(Date serviceDate){
         List<AgencyAndId> filterRoutes = getVehicleAssignmentRoutes();
         return getUncachedActiveBlocks(serviceDate, filterRoutes);
     }
 
-    private List<ActiveBlock> getUncachedActiveBlocks(ServiceDate serviceDate, List<AgencyAndId> filterRoutes){
+    private List<ActiveBlock> getUncachedActiveBlocks(Date serviceDate, List<AgencyAndId> filterRoutes){
         Map<String, ActiveBlock> activeBlocks = new HashMap<>();
 
         for (AgencyAndId agencyAndRouteId : filterRoutes) {
@@ -225,9 +227,8 @@ public class VehicleAssignmentServiceImpl implements VehicleAssignmentService {
             RouteBean rb = _tds.getRouteForId(AgencyAndId.convertToString(agencyAndRouteId));
             if(rb !=null) {
                 TimeZone tz = TimeZone.getTimeZone(rb.getAgency().getTimezone());
-                Date date = serviceDate.getAsDate(tz);
-                long fromTime = getStartOfServiceDay(date).getTime();
-                long toTime = getEndOfServiceDay(date).getTime();
+                long fromTime = getStartOfServiceDay(serviceDate).getTime();
+                long toTime = getEndOfServiceDay(serviceDate).getTime();
 
                 List<BlockInstanceBean> blockInstanceBeans = _tds.getActiveBlocksForRoute(agencyAndRouteId, fromTime, toTime);
 
@@ -329,12 +330,32 @@ public class VehicleAssignmentServiceImpl implements VehicleAssignmentService {
         return date;
     }
 
-    private Date getCurrentServiceDate(){
-        return getStartOfServiceDay(getCurrentDate());
+    private Date getStartOfServiceDay(){
+        return DateTimeUtil.getStartOfServiceDay(getCurrentDate());
     }
 
-    private Date getCurrentServiceDate(Date date){
-        return getStartOfServiceDay(date);
+    private Date getStartOfServiceDay(Date date){
+        return DateTimeUtil.getStartOfServiceDay(date);
+    }
+
+    /* Returns service date based on time of day.
+       If current time is between 3:00 and 26:59:59.999, returns specified service date.
+       Time < 3:00 returns previous day
+       Time >= 27:00:00 returns tomorrow
+     */
+    private Date getAdjustedServiceDate(ServiceDate serviceDate){
+        Calendar currentCalendar = Calendar.getInstance();
+        TimeZone tz = currentCalendar.getTimeZone();
+
+        Calendar serviceDateCalendar  = serviceDate.getAsCalendar(tz);
+        serviceDateCalendar.set(serviceDateCalendar.HOUR_OF_DAY,  currentCalendar.get(Calendar.HOUR_OF_DAY));
+        serviceDateCalendar.set(serviceDateCalendar.MINUTE,  currentCalendar.get(Calendar.MINUTE));
+        serviceDateCalendar.set(serviceDateCalendar.SECOND,  currentCalendar.get(Calendar.SECOND));
+        serviceDateCalendar.set(serviceDateCalendar.MILLISECOND,  currentCalendar.get(Calendar.MILLISECOND));
+
+        Date startOfServiceDay = getStartOfServiceDay(serviceDateCalendar.getTime());
+
+        return startOfServiceDay;
     }
 
     public void resetAssignments(){
