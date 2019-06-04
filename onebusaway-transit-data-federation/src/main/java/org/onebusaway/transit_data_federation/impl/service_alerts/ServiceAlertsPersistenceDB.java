@@ -67,6 +67,7 @@ public class ServiceAlertsPersistenceDB implements ServiceAlertsPersistence {
    * check if our local cache has expired, and if so, sync
    * with persister
    */
+  @Transactional(readOnly = true, propagation= Propagation.NOT_SUPPORTED)
   public synchronized boolean cachedNeedsSync() {
     long now = SystemTime.currentTimeMillis();
     
