@@ -80,7 +80,7 @@ public class ServiceAlertsPersistenceDB implements ServiceAlertsPersistence {
    *  check if the persister has more recent info then we do, and if so
    *  load it into the cache
    */
-  @Transactional
+  @Transactional(readOnly = true, propagation= Propagation.NOT_SUPPORTED)
   public synchronized boolean needsSync() {
     Long dbLastModified = getLastModified();
     if (dbLastModified == null) {
@@ -104,7 +104,7 @@ public class ServiceAlertsPersistenceDB implements ServiceAlertsPersistence {
     return false; // no updates necessary
   }
   
-  @Transactional
+  @Transactional(readOnly = true, propagation= Propagation.NOT_SUPPORTED)
   long getRowCount() {
     try {
         Query query = getSession().createQuery("SELECT count(serviceAlert) FROM ServiceAlertRecord serviceAlert");
