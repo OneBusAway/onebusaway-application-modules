@@ -15,11 +15,14 @@
  */
 package org.onebusaway.nextbus.service;
 
+import org.onebusaway.gtfs.model.AgencyAndId;
+
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 public interface TdsMappingService {
   ConcurrentHashMap<String, String> getRouteShortNameToRouteIdMap();
   ConcurrentHashMap<String, String> getStopCodeToStopIdMap();
   String getRouteIdFromShortName(String id);
-  String getStopIdFromStopCode(String code);
+  Set<AgencyAndId> getStopIdsFromStopCode(String code);
 }
