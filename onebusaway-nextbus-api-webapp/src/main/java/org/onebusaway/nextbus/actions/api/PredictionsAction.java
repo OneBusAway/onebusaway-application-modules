@@ -178,6 +178,7 @@ public class PredictionsAction extends NextBusApiBase implements
     _agencies.add(agencyId);
 
     _stopIds = new ArrayList<>(_tdsMappingService.getStopIdsFromStopCode(getStopId()));
+    _routeIds = new ArrayList<>();
 
     if (!processStopIds(getStopId(), _stopIds, _agencies, body))
       return false;
