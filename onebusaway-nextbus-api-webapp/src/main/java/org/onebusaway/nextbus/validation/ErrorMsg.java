@@ -27,8 +27,9 @@ public enum ErrorMsg {
   STOP_S_NULL("stop parameter \"s\" must be specified in query string"),
   STOP_STOPS_NULL("must specify \"stops\" parameter in query string"),
   ROUTE_LIMIT("Command would return more routes than the maximum: %01d. Try specifying batches of routes from \"routeList\"."),
-  SERVICE_ERROR("Unable to communicate with remote service");
-  
+  SERVICE_ERROR("Unable to communicate with remote service"),
+  DEFAULT_ERROR("No valid results found.");
+
   private final String description;
 
   private ErrorMsg(String description) {

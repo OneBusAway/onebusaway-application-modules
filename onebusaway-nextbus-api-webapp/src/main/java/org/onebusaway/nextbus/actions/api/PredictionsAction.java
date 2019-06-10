@@ -15,21 +15,29 @@
  */
 package org.onebusaway.nextbus.actions.api;
 
+import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.*;
 
 import org.apache.struts2.rest.DefaultHttpHeaders;
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.nextbus.impl.exceptions.*;
 import org.onebusaway.nextbus.model.RouteStopId;
 import org.onebusaway.nextbus.model.nextbus.Body;
 import org.onebusaway.nextbus.model.nextbus.BodyError;
 import org.onebusaway.nextbus.model.transiTime.Prediction;
 import org.onebusaway.nextbus.model.transiTime.Predictions;
 import org.onebusaway.nextbus.model.transiTime.PredictionsDirection;
+import org.onebusaway.nextbus.service.TdsMappingService;
+import org.onebusaway.nextbus.service.cache.TdsCacheService;
+import org.onebusaway.nextbus.service.validators.AgencyValidator;
+import org.onebusaway.nextbus.service.validators.RouteValidator;
+import org.onebusaway.nextbus.service.validators.StopValidator;
 import org.onebusaway.nextbus.util.HttpUtil;
 import org.onebusaway.nextbus.validation.ErrorMsg;
 import org.onebusaway.transit_data.model.RouteBean;
 import org.onebusaway.transit_data.model.StopBean;
+import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +46,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.reflect.TypeToken;
 import com.opensymphony.xwork2.ModelDriven;
+import org.springframework.security.access.method.P;
 
 public class PredictionsAction extends NextBusApiBase implements
     ModelDriven<Body<Predictions>> {
@@ -47,11 +56,20 @@ public class PredictionsAction extends NextBusApiBase implements
   @Autowired
   private HttpUtil _httpUtil;
 
-  List<String> _agencies = new ArrayList<String>();
-  List<AgencyAndId> _stopIds;
-  List<AgencyAndId> _routeIds;
+  @Autowired
+  private AgencyValidator _agencyValidator;
 
-  Map<String, Set<RouteStopId>>  _agencyRouteIdStopIdMap = new HashMap<>();
+  @Autowired
+  private StopValidator _stopValidator;
+
+  @Autowired
+  private RouteValidator _routeValidator;
+
+  @Autowired
+  private TdsMappingService _tdsMappingService;
+
+  @Autowired
+  private TdsCacheService _tdsCacheService;
 
   // Next Bus API vars
   private String agencyId;
@@ -102,140 +120,164 @@ public class PredictionsAction extends NextBusApiBase implements
 	  return SUCCESS;
   }
 
-  public Body<Predictions> getModel() {
 
-    Body<Predictions> body = new Body<Predictions>();
+  public Body getPredictions(){
+    Body body = new Body();
 
-    if (isValid(body) && hasServiceUrl(agencyId)) {
+    String agencyId = getA();
+    String route = getR();
+    String stop = getS();
 
-      List<Predictions> allPredictions = new ArrayList<>();
+    Set<AgencyAndId> stopIds;
+    Set<AgencyAndId> routeIds = new HashSet<>();
+    Map<String, Set<RouteStopId>> agencyRouteIdStopIdMap = new HashMap<>();
+    List<Predictions> allPredictions = new ArrayList<>();
 
-      try {
-
-        for (Map.Entry<String, Set<RouteStopId>> entry : _agencyRouteIdStopIdMap.entrySet()) {
-
-          String agencyId = entry.getKey();
-
-          String serviceUrl = getServiceUrl(agencyId) + agencyId + PREDICTIONS_COMMAND + "?";
-
-          String routeStop = "";
-
-          Set<RouteStopId> routeStopIds = entry.getValue();
-
-          for(RouteStopId routeStopId: routeStopIds){
-            if (isValidRoute(routeStopId.getRouteId())) {
-              routeStop += "rs=" + getIdNoAgency(routeStopId.getRouteId().toString()) + "|"
-                      + getIdNoAgency(routeStopId.getStopId().toString()) + "&";
-            }
-          }
-
-          String uri = serviceUrl + routeStop + "format=" + REQUEST_TYPE;
-          _log.info(uri);
-
-
-            int timeout = _configMapUtil.getConfig(agencyId).getHttpTimeoutSeconds();
-            JsonArray predictionsJson = _httpUtil.getJsonObject(uri, timeout).getAsJsonArray(
-                    "predictions");
-            Type listType = new TypeToken<List<Predictions>>() {
-            }.getType();
-
-            List<Predictions> predictions = new Gson().fromJson(predictionsJson, listType);
-            allPredictions.addAll(predictions);
-
-        }
-        modifyJSONObject(allPredictions);
-        body.getResponse().addAll(allPredictions);
+    try {
+      // Agencies
+      _agencyValidator.validate(agencyId);
+      if(!hasServiceUrl(agencyId)){
+        throw new AgencyInvalidException(agencyId);
       }
-      catch (Exception e) {
-          body.getErrors().add(new BodyError("No valid results found."));
-          _log.error(e.getMessage());
+
+      // Stops
+      AgencyAndId stopCode = getStopAndId(agencyId, stop);
+      stopIds = _tdsMappingService.getStopIdsFromStopCode(stopCode.getId());
+      _stopValidator.validate(stopCode, stopIds);
+
+      // Routes
+      if(route != null) {
+        AgencyAndId routeId = getRouteAndId(agencyId, route);
+        _routeValidator.validate(routeId);
+        routeIds.add(routeId);
+      }
+      processRoutes(agencyId, route, stopIds, routeIds, agencyRouteIdStopIdMap);
+
+      for (Map.Entry<String, Set<RouteStopId>> entry : agencyRouteIdStopIdMap.entrySet()) {
+        String uri = buildPredictionsUrl(entry.getKey(), entry.getValue());
+        allPredictions.addAll(getRemotePredictions(uri));
+      }
+
+      modifyJSONObject(allPredictions);
+      body.getResponse().addAll(allPredictions);
+
+    } catch (AgencyNullException ane) {
+      body.getErrors().add(new BodyError(ane.getMessage()));
+    } catch (AgencyInvalidException aie) {
+      body.getErrors().add(new BodyError(aie.getMessage(), aie.getAgencyId()));
+    } catch (StopNullException sne) {
+      body.getErrors().add(new BodyError(sne.getMessage()));
+    } catch (StopInvalidException sie) {
+      body.getErrors().add(new BodyError(sie.getMessage(), sie.getStop()));
+    } catch (RouteNullException rne) {
+      body.getErrors().add(new BodyError(rne.getMessage(), rne.getAgencyId()));
+    } catch (RouteUnavailableException rue) {
+      body.getErrors().add(new BodyError(rue.getMessage(), rue.getAgency(), rue.getRoute()));
+    } catch (Exception e) {
+      body.getErrors().add(new BodyError(ErrorMsg.DEFAULT_ERROR.getDescription()));
+      _log.error(e.getMessage(), e);
+    }
+    return body;
+  }
+
+  private AgencyAndId getStopAndId(String agencyId, String stop){
+    try {
+      return AgencyAndIdLibrary.convertFromString(stop);
+    } catch (IllegalStateException ise){
+      return new AgencyAndId(agencyId, stop);
+    } catch (Exception e){
+      return null;
+    }
+  }
+
+  private AgencyAndId getRouteAndId(String agencyId, String route){
+    try {
+      return AgencyAndIdLibrary.convertFromString(route);
+    } catch (IllegalStateException ise){
+      return new AgencyAndId(agencyId, route);
+    } catch (Exception e){
+      return null;
+    }
+  }
+
+  private void processRoutes(String agencyId, String route, Set<AgencyAndId> stopIds, Set<AgencyAndId> routeIds,
+                             Map<String, Set<RouteStopId>> agencyRouteIdStopIdMap) throws RouteUnavailableException {
+
+    boolean noRouteSet = routeIds.size() == 0;
+
+    for(AgencyAndId stopId : stopIds){
+      StopBean stopBean = _tdsCacheService.getCachedStopBean(stopId.toString());
+
+      for (RouteBean routeBean : stopBean.getRoutes()) {
+        AgencyAndId routeId = AgencyAndId.convertFromString(routeBean.getId());
+        if(noRouteSet || routeIds.contains(routeId)){
+          processAgencyRouteStop(agencyRouteIdStopIdMap, routeId, stopId);
+        }
       }
     }
 
-    return body;
+    if(!noRouteSet && agencyRouteIdStopIdMap.size() == 0){
+      throw new RouteUnavailableException(agencyId, route);
+    }
+  }
 
+  private void processAgencyRouteStop(Map<String, Set<RouteStopId>> agencyRouteIdStopIdMap,
+                                      AgencyAndId routeId, AgencyAndId stopId){
+    if(agencyRouteIdStopIdMap.get(routeId.getAgencyId()) == null){
+      agencyRouteIdStopIdMap.put(routeId.getAgencyId(), new HashSet<RouteStopId>());
+    }
+    Set<RouteStopId> routeStopIds = agencyRouteIdStopIdMap.get(routeId.getAgencyId());
+    routeStopIds.add(new RouteStopId(routeId, stopId));
+  }
+
+  private String buildPredictionsUrl(String agencyId, Set<RouteStopId> routeStopIds){
+
+    String serviceUrl = getServiceUrl(agencyId) + agencyId + PREDICTIONS_COMMAND + "?";
+    StringBuilder routeStop = new StringBuilder();
+
+    for(RouteStopId routeStopId: routeStopIds){
+      routeStop.append("rs=");
+      routeStop.append(routeStopId.getRouteId().getId());
+      routeStop.append("|");
+      routeStop.append(routeStopId.getStopId().getId());
+      routeStop.append("&");
+    }
+
+    String uri = serviceUrl + routeStop.toString() + "format=" + REQUEST_TYPE;
+    _log.info(uri);
+
+    return uri;
+  }
+
+  private List<Predictions> getRemotePredictions(String uri) throws IOException {
+    int timeout = _configMapUtil.getConfig(agencyId).getHttpTimeoutSeconds();
+    JsonArray predictionsJson = _httpUtil.getJsonObject(uri, timeout).getAsJsonArray(
+            "predictions");
+    Type listType = new TypeToken<List<Predictions>>() {
+    }.getType();
+
+    List<Predictions> predictions = new Gson().fromJson(predictionsJson, listType);
+    return predictions;
   }
 
   private void modifyJSONObject(List<Predictions> predictions) {
-
-    String agencyTitle = getCachedAgencyBean(agencyId).getName();
+    String agencyTitle = _tdsCacheService.getCachedAgencyBean(agencyId).getName();
 
     for (Predictions prediction : predictions) {
-      for (PredictionsDirection direction : prediction.getDest()) {
-        for (Prediction dirPrediction : direction.getPred()) {
-          dirPrediction.setDirTag(direction.getDir());
+        for (PredictionsDirection direction : prediction.getDest()) {
+            for (Prediction dirPrediction : direction.getPred()) {
+                dirPrediction.setDirTag(direction.getDir());
+            }
         }
-      }
 
-      prediction.setAgencyTitle(agencyTitle);
+        prediction.setAgencyTitle(agencyTitle);
     }
   }
 
-  private boolean isValid(Body body) {
-    if (!isValidAgency(body, agencyId))
-      return false;
 
-    _agencies.add(agencyId);
-
-    _stopIds = new ArrayList<>(_tdsMappingService.getStopIdsFromStopCode(getStopId()));
-    _routeIds = new ArrayList<>();
-
-    if (!processStopIds(getStopId(), _stopIds, _agencies, body))
-      return false;
-
-    for(AgencyAndId stopId : _stopIds){
-
-      StopBean stopBean = getCachedStopBean(stopId.toString());
-
-      if (routeTag == null) {
-        processRouteStopIdsNoRouteTag(stopId, stopBean);
-      }
-      else {
-        if (!processRouteIds(getRouteTag(), _routeIds, _agencies, body))
-          return false;
-
-        boolean stopServesRoute = processRouteStopIdsWithRouteTag(stopId, stopBean);
-
-        if (!stopServesRoute) {
-          body.getErrors().add(
-                  new BodyError(ErrorMsg.ROUTE_UNAVAILABLE.getDescription(),
-                          agencyId, routeTag));
-          return false;
-        }
-      }
-
-    }
-    return true;
-  }
-
-  private void processRouteStopIdsNoRouteTag(AgencyAndId stopId, StopBean stopBean){
-    for (RouteBean routeBean : stopBean.getRoutes()) {
-      String agencyId = routeBean.getAgency().getId();
-      AgencyAndId routeId = AgencyAndId.convertFromString(routeBean.getId());
-      if(_agencyRouteIdStopIdMap.get(agencyId) == null){
-        _agencyRouteIdStopIdMap.put(agencyId, new HashSet<RouteStopId>());
-      }
-      Set<RouteStopId> routeStopIds = _agencyRouteIdStopIdMap.get(agencyId);
-      routeStopIds.add(new RouteStopId(routeId, stopId));
-    }
-  }
-
-  private boolean processRouteStopIdsWithRouteTag(AgencyAndId stopId, StopBean stopBean){
-    boolean stopServesRoute = false;
-    for (RouteBean routeBean : stopBean.getRoutes()) {
-      String agencyId = routeBean.getAgency().getId();
-      AgencyAndId routeId = AgencyAndId.convertFromString(routeBean.getId());
-      if (_routeIds.contains(routeId)) {
-        if(_agencyRouteIdStopIdMap.get(agencyId) == null){
-          _agencyRouteIdStopIdMap.put(agencyId, new HashSet<RouteStopId>());
-        }
-        Set<RouteStopId> routeStopIds = _agencyRouteIdStopIdMap.get(agencyId);
-        routeStopIds.add(new RouteStopId(routeId, stopId));
-
-        stopServesRoute = true;
-      }
-    }
-    return stopServesRoute;
+  public Body<Predictions> getModel() {
+    Body<Predictions> body = getPredictions();
+    return body;
   }
 
 }
