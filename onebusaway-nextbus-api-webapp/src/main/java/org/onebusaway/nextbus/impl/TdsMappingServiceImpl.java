@@ -15,9 +15,7 @@
  */
 package org.onebusaway.nextbus.impl;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.onebusaway.gtfs.model.AgencyAndId;
@@ -106,23 +104,36 @@ public class TdsMappingServiceImpl implements TdsMappingService {
           // Stops Mapping
           List<StopBean> stopsList  = _transitDataService.getAllRevenueStops(agency);
 
+          Map<String, List<AgencyAndId>> stopIdsMap = getStopIdToConsolidatedStopIdsMap();
+
           for (StopBean stop : stopsList) {
             Set<AgencyAndId> stopIds = stopCodeToStopIdMap.get(stop.getCode().toUpperCase());
             if(stopIds == null){
-              Set<AgencyAndId> stopIdsSet = new HashSet<>();
-              stopIdsSet.add(AgencyAndId.convertFromString(stop.getId()));
-              stopCodeToStopIdMap.put(stop.getCode().toUpperCase(), stopIdsSet);
-            } else {
-              stopIds.add(AgencyAndId.convertFromString(stop.getId()));
-              System.out.println(stopCodeToStopIdMap.get(stop.getCode().toUpperCase()));
+              stopIds = new HashSet<>();
+              stopCodeToStopIdMap.put(stop.getCode().toUpperCase(), stopIds);
+            }
+            stopIds.add(AgencyAndId.convertFromString(stop.getId()));
+            List<AgencyAndId> consolidatedStopIds = stopIdsMap.get(stop.getId());
+            if(consolidatedStopIds !=null) {
+              stopIds.addAll(consolidatedStopIds);
             }
           }
-          
           _log.info("mapped stop codes to stop ids");
         }
       } catch (Exception e) {
         e.printStackTrace();
       }
+    }
+
+    private Map<String, List<AgencyAndId>> getStopIdToConsolidatedStopIdsMap(){
+      ListBean<ConsolidatedStopMapBean> conslidatedStopsBean = _transitDataService.getAllConsolidatedStops();
+      Map<String, List<AgencyAndId>> consolidatedStopIds = new HashMap<>();
+      List<ConsolidatedStopMapBean> consolidatedStops =  conslidatedStopsBean.getList();
+      for(ConsolidatedStopMapBean csmb: consolidatedStops){
+        consolidatedStopIds.put(csmb.getConsolidatedStopId().toString(), csmb.getHiddenStopIds());
+        _log.info("Stop Id: " + csmb.getConsolidatedStopId() + ", Consolidated Stop Ids:" + csmb.getHiddenStopIds());
+      }
+      return consolidatedStopIds;
     }
 
     private CoordinateBounds getAgencyBounds(AgencyWithCoverageBean agency) {
