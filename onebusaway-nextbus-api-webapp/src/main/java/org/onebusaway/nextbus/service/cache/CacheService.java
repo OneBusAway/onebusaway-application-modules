@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.onebusaway.nextbus.service;
+package org.onebusaway.nextbus.service.cache;
 
 import org.onebusaway.transit_data.model.AgencyBean;
 import org.onebusaway.transit_data.model.StopBean;
