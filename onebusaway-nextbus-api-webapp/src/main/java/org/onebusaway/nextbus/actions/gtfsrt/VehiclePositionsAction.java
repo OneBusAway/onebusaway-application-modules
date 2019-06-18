@@ -78,7 +78,7 @@ public class VehiclePositionsAction extends NextBusApiBase  implements
             return cachedVehiclePositions;
         }
         else {
-            FeedMessage.Builder feedMessage = createFeedWithDefaultHeader();
+            FeedMessage.Builder feedMessage = null; // delay creation until we have a timestamp
             FeedMessage remoteFeedMessage = null;
 
             List<String> agencyIds = new ArrayList<String>();
@@ -95,6 +95,16 @@ public class VehiclePositionsAction extends NextBusApiBase  implements
                     String gtfsrtUrl = getServiceUrl(agencyId) + agencyId + VEHICLE_UPDATES_COMMAND;
                     try {
                         remoteFeedMessage = _httpUtil.getFeedMessage(gtfsrtUrl, 30);
+                        if (feedMessage == null) {
+                            if (remoteFeedMessage.hasHeader()
+                                    && remoteFeedMessage.getHeader().hasTimestamp()) {
+                                // we set the age of our feed to the age of the first feed that has a timestamp
+                                feedMessage = createFeedWithDefaultHeader(remoteFeedMessage.getHeader().getTimestamp());
+                            } else {
+                                feedMessage = createFeedWithDefaultHeader(null);
+                            }
+                        }
+
                         feedMessage.addAllEntity(remoteFeedMessage.getEntityList());
                     } catch (Exception e) {
                         _log.error(e.getMessage());
@@ -107,7 +117,7 @@ public class VehiclePositionsAction extends NextBusApiBase  implements
         }
     }
 
-    public FeedMessage.Builder createFeedWithDefaultHeader() {
-        return _gtfsrtHelper.createFeedWithDefaultHeader();
+    public FeedMessage.Builder createFeedWithDefaultHeader(Long timestampInSeconds) {
+        return _gtfsrtHelper.createFeedWithDefaultHeader(timestampInSeconds);
     }
 }

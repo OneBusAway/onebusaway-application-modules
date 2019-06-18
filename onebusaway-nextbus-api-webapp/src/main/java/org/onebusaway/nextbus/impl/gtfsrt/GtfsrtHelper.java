@@ -19,14 +19,21 @@ import com.google.transit.realtime.GtfsRealtime;
 import com.google.transit.realtime.GtfsRealtimeConstants;
 import org.onebusaway.gtfs.model.AgencyAndId;
 
+import java.util.Date;
+
 public class GtfsrtHelper {
 
-    public GtfsRealtime.FeedMessage.Builder createFeedWithDefaultHeader() {
+    public GtfsRealtime.FeedMessage.Builder createFeedWithDefaultHeader(Long timestampInSeconds) {
         GtfsRealtime.FeedMessage.Builder feedMessage = GtfsRealtime.FeedMessage.newBuilder();
 
         GtfsRealtime.FeedHeader.Builder feedHeader = GtfsRealtime.FeedHeader.newBuilder();
         feedHeader.setIncrementality(GtfsRealtime.FeedHeader.Incrementality.FULL_DATASET);
         feedHeader.setGtfsRealtimeVersion(GtfsRealtimeConstants.VERSION);
+        if (timestampInSeconds != null) {
+            feedHeader.setTimestamp(timestampInSeconds);
+        } else {
+            feedHeader.setTimestamp(new Date().getTime()/1000);
+        }
         feedMessage.setHeader(feedHeader);
         return feedMessage;
     }

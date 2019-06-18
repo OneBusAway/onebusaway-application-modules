@@ -86,7 +86,7 @@ public class AlertsAction extends NextBusApiBase implements
 		}
 		else {
 
-			FeedMessage.Builder feedMessage = createFeedWithDefaultHeader();
+			FeedMessage.Builder feedMessage = createFeedWithDefaultHeader(null);
 
 			List<String> agencyIds = new ArrayList<String>();
 
@@ -211,8 +211,8 @@ public class AlertsAction extends NextBusApiBase implements
 		return translated.build();
 	}
 
-	private FeedMessage.Builder createFeedWithDefaultHeader() {
-		return _gtfsrtHelper.createFeedWithDefaultHeader();
+	private FeedMessage.Builder createFeedWithDefaultHeader(Long timestampInSeconds) {
+		return _gtfsrtHelper.createFeedWithDefaultHeader(timestampInSeconds);
 	}
 
 	private String id(String agencyId, String id) {
