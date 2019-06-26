@@ -216,131 +216,19 @@ OBA.Popups = (function() {
 		});
 	}
 
+	function getHeadwayText(marker){
+		var headWayText = "Headway: ";
+		var headWay = marker.headWay;
+		var nextVehicleId = marker.nextVehicleId;
 
+		if(typeof headWay != 'undefined' && headWay != null && typeof nextVehicleId != 'undefined'){
 
+			var vehicleIdParts = marker.nextVehicleId.split("_");
+			var vehicleIdWithoutAgency = vehicleIdParts[1];
 
-	function getHeadway(r, trip) {
-		var trips = [];
-		var tripInfo = {};
-		var tripSchedules = {};
-		this.headwayBehind = "N/A";
-		this.headwayAhead = "N/A";
-		var self = this;
-		var nextStopOffset = 0;
-		var deviation = 0;
-		var curIndex = 0;
-
-		try {
-			var act = r.Siri.ServiceDelivery.VehicleMonitoringDelivery[0].VehicleActivity[0];
-			var tripId = act.MonitoredVehicleJourney.FramedVehicleJourneyRef.DatedVehicleJourneyRef;
-			var routeId = act.MonitoredVehicleJourney.LineRef;
-			// var vehicleId= act.MonitoredVehicleJourney.VehicleRef;
-			// var expTime = act.MonitoredVehicleJourney.MonitoredCall.ExpectedArrivalTime;
-			// var schTime = act.MonitoredVehicleJourney.MonitoredCall.ScheduledArrivalTime;
-			// var direction = act.MonitoredVehicleJourney.DirectionRef;
-			var nextStop = act.MonitoredVehicleJourney.MonitoredCall.StopPointRef;
-			var distanceAlong = act.MonitoredVehicleJourney.MonitoredCall.Extensions.Distances.CallDistanceAlongRoute;
-			var origin = act.MonitoredVehicleJourney.OriginRef;
-
-			var url = OBA.Config.apiBaseUrl + "/api/where/trips-for-route/" + routeId + ".json?key=OBA&includeStatus=true&includeSchedule=true";
-			var index = 0;
-			var r = $.ajax({
-				url:url,
-				async: false,
-				success: function(response) {
-					if(typeof response !== 'undefined' && response !== null) {
-						$.each(response.data.list, function (_, tripD) {
-							$.each(tripD.schedule.stopTimes, function(_, s){
-								tripSchedules[index.toString()+ '-' + tripD.tripId.toString() + '-' + s.stopId] = s.arrivalTime + tripD.serviceDate;
-							});
-							if(tripD.tripId == tripId) {
-								deviation = tripD.status.scheduleDeviation;
-								nextStopOffset = tripD.status.nextStopTimeOffset;
-								curIndex = index;
-							} else {
-								trips.push(tripD);
-							}
-
-						});
-
-						$.each(response.data.references.trips, function (_, t) {
-							tripInfo[t.id] = t;
-						});
-
-					}
-					var curB = 0;
-					var curA = 999999;
-					var behind = {
-						"tripId": trip,
-						"nextStopOffset":0,
-						"scheduleDeviation":0,
-						"show":false
-					};
-					var ahead = {
-						"tripId": trip,
-						"scheduleDeviation":0,
-						"nextStopOffset":0,
-						"show":false
-					};
-					var index2 = 0;
-					trips.forEach(function(a){
-						var dist = null;
-						if(a.schedule.stopTimes[0].stopId == origin){
-							dist = a.status.scheduledDistanceAlongTrip;
-							if(dist <= distanceAlong){
-								if(dist >= curB){
-									curB = dist;
-									behind["tripId"] = a.tripId;
-									behind["scheduleDeviation"] = a.status.scheduleDeviation;
-									behind["index"] = index2;
-									behind["show"] = true;
-									if(!a.status.scheduleDeviation){
-										behind["scheduleDeviation"] = 0;
-									}
-								}
-							} else {
-								if(dist < curA){
-									curA = dist;
-									ahead["tripId"] = a.tripId;
-									ahead["stopId"] = a.status.nextStop;
-									ahead["nextStopOffset"] = a.status.nextStopTimeOffset;
-									ahead["scheduleDeviation"] = a.status.scheduleDeviation;
-									ahead["index"] = index2;
-									ahead["show"] = true;
-									if(!a.status.scheduleDeviation){
-										ahead["scheduleDeviation"] = 0;
-									}
-								}
-							}
-						}
-					});
-					var cur = tripSchedules[curIndex + '-' + tripId + '-' + nextStop] - nextStopOffset;
-					if(behind["show"]) {
-						self.headwayBehind = tripSchedules[behind["index"] + '-' + behind["tripId"] + '-' + nextStop]- cur + nextStopOffset - deviation - behind["scheduleDeviation"];
-						self.headwayBehind = self.headwayBehind.toString() + " seconds";
-					} else { self.headwayBehind = "N/A";}
-					if(ahead["show"]) {
-						self.headwayAhead = tripSchedules[curIndex + '-' + tripId + '-' + ahead["stopId"]] - tripSchedules[ahead["index"] + '-' + ahead["tripId"] + '-' + ahead["stopId"]] - ahead["nextStopOffset"] - deviation - ahead["scheduleDeviation"];
-						self.headwayAhead = self.headwayAhead.toString() + " seconds";
-					} else { self.headwayAhead = "N/A";}
-					console.log([self.headwayBehind, self.headwayAhead]);
-				}
-			});
+			return headWayText + headWay + ' behind Vehicle #' + vehicleIdWithoutAgency;
 		}
-		catch(error){
-			console.log(error);
-			return ["N/A", "N/A"];
-		}
-
-		// TEMP
-		if(this.headwayBehind == "NaN seconds"){
-			this.headwayBehind = "N/A";
-		}
-		// TEMP
-		if(this.headwayAhead == "NaN seconds"){
-			this.headwayAhead = "N/A";
-		}
-		return [this.headwayBehind, this.headwayAhead];
+		return headWayText + 'N/A';
 	}
 
 
@@ -430,10 +318,8 @@ OBA.Popups = (function() {
 
         }
 
-		var headway = getHeadway(r, activity.MonitoredVehicleJourney.FramedVehicleJourneyRef.DatedVehicleJourneyRef);
-		html += '<div> Headway Behind: ' + headway[0] + '</div>';
-		html += '<div> Headway Ahead: ' + headway[1] + '</div>';
-
+		var headwayText = getHeadwayText(marker);
+		html += '<p class="adherence"> ' + headwayText + '</p>';
 
 		// service available at stop
 		if(typeof activity.MonitoredVehicleJourney.MonitoredCall === 'undefined' && (
