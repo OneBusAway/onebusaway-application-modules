@@ -267,7 +267,8 @@ OBA.RouteMap = function(mapNode, initCallbackFn, serviceAlertCallbackFn) {
 						if (index < vehiclesByDirection.length - 1) {
 							var nextActivity = vehiclesByDirection[index + 1];
 							var nextActivityMonitoredCall = nextActivity.MonitoredVehicleJourney.MonitoredCall;
-							var nextActivityVehicleId = nextActivity.MonitoredVehicleJourney.VehicleRef;
+							var nextActivityVehicleIdWithoutAgency = nextActivity.MonitoredVehicleJourney.VehicleRef.split("_")[1];
+							var nextActivityBlockIdWithoutAgency = nextActivity.MonitoredVehicleJourney.BlockRef.split("_")[1];
 							var nextActivityStop = nextActivityMonitoredCall.StopPointRef;
 							var nextActivityArrivalTime = findArrivalTimeForMonitoredCall(nextActivityMonitoredCall);
 
@@ -295,7 +296,8 @@ OBA.RouteMap = function(mapNode, initCallbackFn, serviceAlertCallbackFn) {
 								vehicleId: vehicleId,
 								routeId: routeId,
 								headWay: headWay,
-								nextVehicleId: nextActivityVehicleId
+								nextVehicleId: nextActivityVehicleIdWithoutAgency,
+								nextBlockId: nextActivityBlockIdWithoutAgency
 							};
 
 							marker = new google.maps.Marker(markerOptions);
@@ -328,7 +330,8 @@ OBA.RouteMap = function(mapNode, initCallbackFn, serviceAlertCallbackFn) {
 								vehicleId: vehicleId,
 								routeId: routeId,
 								headWay: headWay,
-								nextVehicleId: nextActivityVehicleId
+								nextVehicleId: nextActivityVehicleIdWithoutAgency,
+								nextBlockId: nextActivityBlockIdWithoutAgency
 							};
 
 							adherenceMarker = new google.maps.Marker(adhMarkerOptions);
