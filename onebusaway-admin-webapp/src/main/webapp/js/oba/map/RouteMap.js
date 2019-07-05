@@ -278,6 +278,9 @@ OBA.RouteMap = function(mapNode, initCallbackFn, serviceAlertCallbackFn) {
 							if (nextActivityArrivalTime != null && activityArrivalTime != null) {
 								var nextActivityArrivalTimestamp = OBA.Util.ISO8601StringToDate(nextActivityArrivalTime);
 								var headWay = OBA.Util.getArrivalEstimateForISOString(activityArrivalTime, nextActivityArrivalTimestamp);
+								if(headWay == null){
+
+								}
 							}
 						}
 
@@ -456,11 +459,11 @@ OBA.RouteMap = function(mapNode, initCallbackFn, serviceAlertCallbackFn) {
 			var distanceAlongRoute2 = vehicleActivity2.MonitoredVehicleJourney.MonitoredCall.Extensions.Distances.CallDistanceAlongRoute;
 			var distanceDelta2 = distanceAlongRoute2 - distanceFromCall2;
 
-			if(distanceDelta1 > distanceDelta2){
-				return 1;
-			}
-			if(distanceDelta2 > distanceDelta1){
+			if(distanceDelta1 < distanceDelta2){
 				return -1;
+			}
+			if(distanceDelta2 < distanceDelta1){
+				return 1;
 			}
 		}
 		if(typeof vehicleActivity1.MonitoredVehicleJourney.MonitoredCall !== 'undefined' &&
