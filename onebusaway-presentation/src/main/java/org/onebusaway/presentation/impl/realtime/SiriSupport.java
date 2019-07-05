@@ -566,38 +566,36 @@ public final class SiriSupport {
 		stopPoint.setValue(stopBean.getName());
 		onwardCallStructure.setStopPointName(stopPoint);
 
-		if(prediction != null) {
-			if (prediction.getTimepointPredictedArrivalTime() < responseTimestamp) {
+		if(hasRealtimeData) {
+			if (prediction == null || prediction.getTimepointPredictedArrivalTime() < responseTimestamp) {
 				// we have a bad prediction, try schedule deviation + schedule and see if that's better
 				// TODO FIXME!!! If this is due to terminal arrival / departure of next trip, this should
 				// be fixed upstream
-				long arrivalTime = scheduledArrivalTime + (long)scheduleDeviation*1000;
+				long arrivalTime = scheduledArrivalTime + (long) scheduleDeviation * 1000;
+
+				// Set Expected Arrival Time
 				if (arrivalTime < responseTimestamp) {
 					onwardCallStructure.setExpectedArrivalTime(new Date(responseTimestamp));
-					if (prediction.getTimepointPredictedDepartureTime() < responseTimestamp) {
-						// don't set departure time -- we don't know it
-					} else {
-						onwardCallStructure.setExpectedDepartureTime(new Date(prediction.getTimepointPredictedDepartureTime()));
-					}
 				} else {
-					// TODO
 					onwardCallStructure.setExpectedArrivalTime(new Date(arrivalTime));
-					if (prediction.getTimepointPredictedDepartureTime() < responseTimestamp) {
-						// don't set departure time -- we don't know it
-					} else {
-						onwardCallStructure.setExpectedDepartureTime(new Date(prediction.getTimepointPredictedDepartureTime()));
-					}
+				}
+
+				// Set Expected Departure Time
+				if(prediction != null && prediction.getTimepointPredictedDepartureTime() >= responseTimestamp) {
+					onwardCallStructure.setExpectedDepartureTime(new Date(prediction.getTimepointPredictedDepartureTime()));
 				}
 			} else {
 				onwardCallStructure.setExpectedArrivalTime(new Date(prediction.getTimepointPredictedArrivalTime()));
 				onwardCallStructure.setExpectedDepartureTime(new Date(prediction.getTimepointPredictedDepartureTime()));
 			}
 		}
-		else if(!hasRealtimeData){
+		else{
 			_log.debug("using arrival time of " + new Date(scheduledArrivalTime));
 			onwardCallStructure.setExpectedArrivalTime(new Date(scheduledArrivalTime)); 
 			onwardCallStructure.setExpectedDepartureTime(new Date(scheduledArrivalTime));
 		}
+
+		onwardCallStructure.setAimedArrivalTime(new Date(scheduledArrivalTime));
 
 		// siri extensions
 		SiriExtensionWrapper wrapper = new SiriExtensionWrapper();
