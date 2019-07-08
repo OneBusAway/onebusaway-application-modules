@@ -277,10 +277,23 @@ OBA.RouteMap = function(mapNode, initCallbackFn, serviceAlertCallbackFn) {
 
 							if (nextActivityArrivalTime != null && activityArrivalTime != null) {
 								var nextActivityArrivalTimestamp = OBA.Util.ISO8601StringToDate(nextActivityArrivalTime);
-								var headWay = OBA.Util.getArrivalEstimateForISOString(activityArrivalTime, nextActivityArrivalTimestamp);
-								if(headWay == null){
+								var nextHeadway = OBA.Util.getArrivalEstimateForISOString(activityArrivalTime, nextActivityArrivalTimestamp);
+							}
+						}
+						if(index > 0){
+							var activityMonitoredCall = activity.MonitoredVehicleJourney.MonitoredCall;
+							var activityStop = activityMonitoredCall.StopPointRef;
+							var activityArrivalTime = findArrivalTimeForMonitoredCall(activityMonitoredCall);
 
-								}
+							var previousActivity = vehiclesByDirection[index - 1];
+							var previousActivityVehicleIdWithoutAgency = previousActivity.MonitoredVehicleJourney.VehicleRef.split("_")[1];
+							var previousActivityBlockIdWithoutAgency = previousActivity.MonitoredVehicleJourney.BlockRef.split("_")[1];
+							var previousActivityOnwardCalls = previousActivity.MonitoredVehicleJourney.OnwardCalls.OnwardCall;
+							var previousActivityArrivalTime = findArrivalTimeForOnwardCallStop(previousActivityOnwardCalls, activityStop);
+
+							if (activityArrivalTime != null && previousActivityArrivalTime != null) {
+								var activityArrivalTimestamp = OBA.Util.ISO8601StringToDate(activityArrivalTime);
+								var prevHeadway = OBA.Util.getArrivalEstimateForISOString(previousActivityArrivalTime, activityArrivalTimestamp);
 							}
 						}
 
@@ -298,9 +311,12 @@ OBA.RouteMap = function(mapNode, initCallbackFn, serviceAlertCallbackFn) {
 								title: "Vehicle " + vehicleIdWithoutAgency + ", " + routeName + " to " + headsign,
 								vehicleId: vehicleId,
 								routeId: routeId,
-								headWay: headWay,
+								nextHeadway: nextHeadway,
 								nextVehicleId: nextActivityVehicleIdWithoutAgency,
-								nextBlockId: nextActivityBlockIdWithoutAgency
+								nextBlockId: nextActivityBlockIdWithoutAgency,
+								prevHeadway: prevHeadway,
+								prevVehicleId: previousActivityVehicleIdWithoutAgency,
+								prevBlockId: previousActivityBlockIdWithoutAgency
 							};
 
 							marker = new google.maps.Marker(markerOptions);
@@ -332,9 +348,12 @@ OBA.RouteMap = function(mapNode, initCallbackFn, serviceAlertCallbackFn) {
 								map: map,
 								vehicleId: vehicleId,
 								routeId: routeId,
-								headWay: headWay,
+								nextHeadway: nextHeadway,
 								nextVehicleId: nextActivityVehicleIdWithoutAgency,
-								nextBlockId: nextActivityBlockIdWithoutAgency
+								nextBlockId: nextActivityBlockIdWithoutAgency,
+								prevHeadway: prevHeadway,
+								prevVehicleId: previousActivityVehicleIdWithoutAgency,
+								prevBlockId: previousActivityBlockIdWithoutAgency
 							};
 
 							adherenceMarker = new google.maps.Marker(adhMarkerOptions);

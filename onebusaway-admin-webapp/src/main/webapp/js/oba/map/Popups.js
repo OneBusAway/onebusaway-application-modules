@@ -216,18 +216,6 @@ OBA.Popups = (function() {
 		});
 	}
 
-	function getHeadwayText(marker, hasRealtime){
-		var headWayText = "Headway: ";
-		var headWay = marker.headWay;
-		var nextVehicleId = marker.nextVehicleId;
-		var nextBlockId = marker.nextBlockId;
-
-		if(typeof headWay != 'undefined' && headWay != null && typeof nextVehicleId != 'undefined'){
-			return headWayText + headWay + ' behind Vehicle #' + getVehicleId(hasRealtime, nextVehicleId, nextBlockId);
-		}
-		return headWayText + 'N/A';
-	}
-
 
 	function getVehicleContentForResponse(r, popupContainerId, marker) {
 		var alertData = processAlertData(r.Siri.ServiceDelivery.SituationExchangeDelivery);
@@ -309,8 +297,11 @@ OBA.Popups = (function() {
 
         }
 
-		var headwayText = getHeadwayText(marker, hasRealtime);
-		html += '<p class="adherence"> ' + headwayText + '</p>';
+		var prevHeadwayText = getPrevHeadwayText(marker, hasRealtime);
+		html += '<p class="adherence"> ' + prevHeadwayText + '</p>';
+
+		var nextHeadwayText = getNextHeadwayText(marker, hasRealtime);
+		html += '<p class="adherence"> ' + nextHeadwayText + '</p>';
 
 		// service available at stop
 		if(typeof activity.MonitoredVehicleJourney.MonitoredCall === 'undefined' && (
@@ -742,6 +733,31 @@ OBA.Popups = (function() {
 		}
 		return vehicleId;
 
+	}
+
+	function getPrevHeadwayText(marker, hasRealtime){
+		var headwayText = "Headway Behind: ";
+		var headway = marker.prevHeadway;
+		var vehicleId = marker.prevVehicleId;
+		var blockId = marker.prevBlockId;
+
+
+		if(typeof headway != 'undefined' && headway != null && typeof vehicleId != 'undefined'){
+			return headwayText + headway + ' ahead Vehicle #' + getVehicleId(hasRealtime, vehicleId, blockId);
+		}
+		return headwayText + 'N/A';
+	}
+
+	function getNextHeadwayText(marker, hasRealtime){
+		var headwayText = "Headway Ahead: ";
+		var headway = marker.nextHeadway;
+		var vehicleId = marker.nextVehicleId;
+		var blockId = marker.nextBlockId;
+
+		if(typeof headway != 'undefined' && headway != null && typeof vehicleId != 'undefined'){
+			return headwayText + headway + ' behind Vehicle #' + getVehicleId(hasRealtime, vehicleId, blockId);
+		}
+		return headwayText + 'N/A';
 	}
 
 
