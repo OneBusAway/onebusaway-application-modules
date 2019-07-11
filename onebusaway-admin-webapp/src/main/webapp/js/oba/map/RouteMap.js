@@ -16,6 +16,29 @@
 
 var OBA = window.OBA || {};
 
+OBA.Headway =(function() {
+
+    var headwayByVehicleId = {}
+
+    return {
+    	getAllHeadways: function(){
+    		return headwayByVehicleId;
+		},
+
+        getHeadwayByVehicleId: function(vehicleId) {
+            return headwayByVehicleId[vehicleId];
+        },
+
+        addHeadwayByVehicleId: function(vehicleId, headway) {
+            headwayByVehicleId[vehicleId] = headway;
+        },
+
+        removeHeadwayByVehicleId: function(vehicleId) {
+		    delete headwayByVehicleId[vehicleId];
+        }
+	}
+})();
+
 OBA.RouteMap = function(mapNode, initCallbackFn, serviceAlertCallbackFn) {
 
 	var initialized = false;
@@ -297,6 +320,16 @@ OBA.RouteMap = function(mapNode, initCallbackFn, serviceAlertCallbackFn) {
 							}
 						}
 
+                        headway = {};
+                        headway.nextHeadway  =  nextHeadway;
+                        headway.nextVehicleId = nextActivityVehicleIdWithoutAgency;
+                        headway.nextBlockId = nextActivityBlockIdWithoutAgency;
+                        headway.prevHeadway = prevHeadway;
+                        headway.prevVehicleId = previousActivityVehicleIdWithoutAgency;
+                        headway.prevBlockId = previousActivityBlockIdWithoutAgency;
+                        headway.hasRealtime = hasRealtime;
+
+                        OBA.Headway.addHeadwayByVehicleId(vehicleId, headway);
 
 						// has route been removed while in the process of updating?
 						if (typeof vehiclesByRoute[routeId] === 'undefined') {
@@ -310,13 +343,7 @@ OBA.RouteMap = function(mapNode, initCallbackFn, serviceAlertCallbackFn) {
 								map: map,
 								title: "Vehicle " + vehicleIdWithoutAgency + ", " + routeName + " to " + headsign,
 								vehicleId: vehicleId,
-								routeId: routeId,
-								nextHeadway: nextHeadway,
-								nextVehicleId: nextActivityVehicleIdWithoutAgency,
-								nextBlockId: nextActivityBlockIdWithoutAgency,
-								prevHeadway: prevHeadway,
-								prevVehicleId: previousActivityVehicleIdWithoutAgency,
-								prevBlockId: previousActivityBlockIdWithoutAgency
+								routeId: routeId
 							};
 
 							marker = new google.maps.Marker(markerOptions);
@@ -334,7 +361,10 @@ OBA.RouteMap = function(mapNode, initCallbackFn, serviceAlertCallbackFn) {
 									},
 									OBA.Popups.getVehicleContentForResponse, null);
 							});
+
 						}
+
+
 
 						// change marker image depending on whether realtime data is available
 						if (typeof hasRealtime === 'undefined' || hasRealtime === null || hasRealtime == false) {
@@ -347,13 +377,7 @@ OBA.RouteMap = function(mapNode, initCallbackFn, serviceAlertCallbackFn) {
 								zIndex: 3,
 								map: map,
 								vehicleId: vehicleId,
-								routeId: routeId,
-								nextHeadway: nextHeadway,
-								nextVehicleId: nextActivityVehicleIdWithoutAgency,
-								nextBlockId: nextActivityBlockIdWithoutAgency,
-								prevHeadway: prevHeadway,
-								prevVehicleId: previousActivityVehicleIdWithoutAgency,
-								prevBlockId: previousActivityBlockIdWithoutAgency
+								routeId: routeId
 							};
 
 							adherenceMarker = new google.maps.Marker(adhMarkerOptions);
@@ -371,6 +395,7 @@ OBA.RouteMap = function(mapNode, initCallbackFn, serviceAlertCallbackFn) {
 									},
 									OBA.Popups.getVehicleContentForResponse, null);
 							});
+
 						}
 
 						//set/change the adherence icon based on adherence
@@ -437,13 +462,14 @@ OBA.RouteMap = function(mapNode, initCallbackFn, serviceAlertCallbackFn) {
 						vehicleOnMap.setMap(null);
 						delete vehiclesById[vehicleOnMap_vehicleId];
 						delete vehiclesByRoute[vehicleOnMap_routeId][vehicleOnMap_vehicleId];
+						OBA.Headway.removeHeadwayByVehicleId(vehicleOnMap_vehicleId);
 
 						adherenceMarkersByVehicleId[vehicleOnMap_vehicleId].setMap(null);
 						delete adherenceMarkersByVehicleId[vehicleOnMap_vehicleId];
 					}
 				});
 			});
-
+		
 	}
 
 	function findArrivalTimeForMonitoredCall(monitoredCall){

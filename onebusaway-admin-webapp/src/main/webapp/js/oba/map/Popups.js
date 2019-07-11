@@ -17,7 +17,7 @@
 var OBA = window.OBA || {};
 
 // do not add constructor params here!
-OBA.Popups = (function() {	
+OBA.Popups = (function() {
 
 	var infoWindow = null;
 
@@ -297,10 +297,10 @@ OBA.Popups = (function() {
 
         }
 
-		var prevHeadwayText = getPrevHeadwayText(marker, hasRealtime);
+		var prevHeadwayText = getPrevHeadwayText(vehicleId);
 		html += '<p class="adherence"> ' + prevHeadwayText + '</p>';
 
-		var nextHeadwayText = getNextHeadwayText(marker, hasRealtime);
+		var nextHeadwayText = getNextHeadwayText(vehicleId);
 		html += '<p class="adherence"> ' + nextHeadwayText + '</p>';
 
 		// service available at stop
@@ -735,27 +735,33 @@ OBA.Popups = (function() {
 
 	}
 
-	function getPrevHeadwayText(marker, hasRealtime){
+	function getPrevHeadwayText(vehicleId){
 		var headwayText = "Headway Behind: ";
-		var headway = marker.prevHeadway;
-		var vehicleId = marker.prevVehicleId;
-		var blockId = marker.prevBlockId;
+		var headway = OBA.Headway.getHeadwayByVehicleId(vehicleId);
+
+		var prevHeadwayTime = headway.prevHeadway;
+		var prevVehicleId = headway.prevVehicleId;
+		var prevBlockId = headway.prevBlockId;
+		var hasRealtime = headway.hasRealtime;
 
 
-		if(typeof headway != 'undefined' && headway != null && typeof vehicleId != 'undefined'){
-			return headwayText + headway + ' ahead Vehicle #' + getVehicleId(hasRealtime, vehicleId, blockId);
+		if(typeof prevHeadwayTime != 'undefined' && prevHeadwayTime != null && typeof prevVehicleId != 'undefined'){
+			return headwayText + prevHeadwayTime + ' ahead Vehicle #' + getVehicleId(hasRealtime, prevVehicleId, prevBlockId);
 		}
 		return headwayText + 'N/A';
 	}
 
-	function getNextHeadwayText(marker, hasRealtime){
+	function getNextHeadwayText(vehicleId){
 		var headwayText = "Headway Ahead: ";
-		var headway = marker.nextHeadway;
-		var vehicleId = marker.nextVehicleId;
-		var blockId = marker.nextBlockId;
+		var headway = OBA.Headway.getHeadwayByVehicleId(vehicleId);
 
-		if(typeof headway != 'undefined' && headway != null && typeof vehicleId != 'undefined'){
-			return headwayText + headway + ' behind Vehicle #' + getVehicleId(hasRealtime, vehicleId, blockId);
+		var nextHeadwayTime = headway.nextHeadway;
+		var nextVehicleId = headway.nextVehicleId;
+		var nextBlockId = headway.nextBlockId;
+		var hasRealtime = headway.hasRealtime;
+
+		if(typeof nextHeadwayTime != 'undefined' && nextHeadwayTime != null && typeof nextVehicleId != 'undefined'){
+			return headwayText + nextHeadwayTime + ' behind Vehicle #' + getVehicleId(hasRealtime, nextVehicleId, nextBlockId);
 		}
 		return headwayText + 'N/A';
 	}
