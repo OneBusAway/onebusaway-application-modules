@@ -210,7 +210,7 @@ public class PredictionsAction extends NextBusApiBase implements
 
       for (RouteBean routeBean : stopBean.getRoutes()) {
         AgencyAndId routeId = AgencyAndId.convertFromString(routeBean.getId());
-        boolean stopRouteAgenciesMatch = routeId.getAgencyId().equals(stopId.getAgencyId());
+        boolean stopRouteAgenciesMatch = routeId.getAgencyId().equals(stopId.getAgencyId()) && agencyId.equals(routeId.getAgencyId());
         if((noRouteSet || routeIds.contains(routeId)) && stopRouteAgenciesMatch){
           processAgencyRouteStop(agencyRouteIdStopIdMap, routeId, stopId);
         }
