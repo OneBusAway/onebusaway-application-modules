@@ -298,10 +298,14 @@ OBA.Popups = (function() {
         }
 
 		var prevHeadwayText = getPrevHeadwayText(vehicleId);
-		html += '<p class="adherence"> ' + prevHeadwayText + '</p>';
+        if(prevHeadwayText != null){
+			html += '<p class="adherence"> ' + prevHeadwayText + '</p>';
+		}
 
 		var nextHeadwayText = getNextHeadwayText(vehicleId);
-		html += '<p class="adherence"> ' + nextHeadwayText + '</p>';
+		if(nextHeadwayText != null){
+			html += '<p class="adherence"> ' + nextHeadwayText + '</p>';
+		}
 
 		// service available at stop
 		if(typeof activity.MonitoredVehicleJourney.MonitoredCall === 'undefined' && (
@@ -736,7 +740,6 @@ OBA.Popups = (function() {
 	}
 
 	function getPrevHeadwayText(vehicleId){
-		var headwayText = "Headway Behind: ";
 		var headway = OBA.Headway.getHeadwayByVehicleId(vehicleId);
 
 		var prevHeadwayTime = headway.prevHeadway;
@@ -746,13 +749,12 @@ OBA.Popups = (function() {
 
 
 		if(typeof prevHeadwayTime != 'undefined' && prevHeadwayTime != null && typeof prevVehicleId != 'undefined'){
-			return headwayText + prevHeadwayTime + ' ahead Vehicle #' + getVehicleId(hasRealtime, prevVehicleId, prevBlockId);
+			return prevHeadwayTime + ' ahead of Vehicle #' + getVehicleId(hasRealtime, prevVehicleId, prevBlockId);
 		}
-		return headwayText + 'N/A';
+		return null;
 	}
 
 	function getNextHeadwayText(vehicleId){
-		var headwayText = "Headway Ahead: ";
 		var headway = OBA.Headway.getHeadwayByVehicleId(vehicleId);
 
 		var nextHeadwayTime = headway.nextHeadway;
@@ -761,9 +763,9 @@ OBA.Popups = (function() {
 		var hasRealtime = headway.hasRealtime;
 
 		if(typeof nextHeadwayTime != 'undefined' && nextHeadwayTime != null && typeof nextVehicleId != 'undefined'){
-			return headwayText + nextHeadwayTime + ' behind Vehicle #' + getVehicleId(hasRealtime, nextVehicleId, nextBlockId);
+			return nextHeadwayTime + ' behind Vehicle #' + getVehicleId(hasRealtime, nextVehicleId, nextBlockId);
 		}
-		return headwayText + 'N/A';
+		return null;
 	}
 
 
