@@ -300,7 +300,7 @@ OBA.RouteMap = function(mapNode, initCallbackFn, serviceAlertCallbackFn) {
 
 							if (nextActivityArrivalTime != null && activityArrivalTime != null) {
 								var nextActivityArrivalTimestamp = OBA.Util.ISO8601StringToDate(nextActivityArrivalTime);
-								var nextHeadway = OBA.Util.getArrivalEstimateForISOString(activityArrivalTime, nextActivityArrivalTimestamp);
+								var nextHeadway = OBA.Util.getArrivalEstimateForISOStringWithCheck(activityArrivalTime, nextActivityArrivalTimestamp);
 							}
 						}
 						if(index > 0){
@@ -316,7 +316,7 @@ OBA.RouteMap = function(mapNode, initCallbackFn, serviceAlertCallbackFn) {
 
 							if (activityArrivalTime != null && previousActivityArrivalTime != null) {
 								var activityArrivalTimestamp = OBA.Util.ISO8601StringToDate(activityArrivalTime);
-								var prevHeadway = OBA.Util.getArrivalEstimateForISOString(previousActivityArrivalTime, activityArrivalTimestamp);
+								var prevHeadway = OBA.Util.getArrivalEstimateForISOStringWithCheck(previousActivityArrivalTime, activityArrivalTimestamp);
 							}
 						}
 
