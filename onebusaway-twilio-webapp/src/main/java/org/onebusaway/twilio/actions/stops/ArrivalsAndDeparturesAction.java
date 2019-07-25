@@ -235,7 +235,7 @@ public class ArrivalsAndDeparturesAction extends TwilioSupport {
       for (int i = 0; i < agencies.size(); i++) {
         AgencyBean agency = agencies.get(i);
         if (i == agencies.size() - 1 && agencies.size() > 1)
-          addText(Messages.AND);
+          addText(" " + Messages.AND + " ");
         addText(agency.getName());
         addText(",");
       }
