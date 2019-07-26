@@ -128,6 +128,10 @@ public class SearchServiceImpl implements SearchService {
 				.equals(currentBundleId)) || currentBundleId == null) {
 			return;
 		}
+		_bundleIdForCaches = _transitDataService.getActiveBundleId();
+		refreshCaches();
+	}
+	private synchronized void refreshCaches() {
 
 		_routeShortNameToRouteBeanMap.clear();
 		_routeIdToRouteBeanMap.clear();
@@ -163,7 +167,7 @@ public class SearchServiceImpl implements SearchService {
 			}
 		}
 
-		_bundleIdForCaches = currentBundleId;
+
 	}
 
 
