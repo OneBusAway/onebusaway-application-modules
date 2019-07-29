@@ -16,9 +16,11 @@
 package org.onebusaway.enterprise.webapp.actions.wiki.model;
 
 import java.util.Date;
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.opensymphony.xwork2.ActionContext;
 import org.onebusaway.wiki.api.WikiPage;
 
 /*
@@ -48,6 +50,13 @@ public class NycWikiPageWrapper implements WikiPage {
 
 	public String getName() {
 		return this.page.getName();
+	}
+
+	@Override
+	public Locale getLocale() {
+		ActionContext context = ActionContext.getContext();
+		Locale locale = context.getLocale();
+		return locale;
 	}
 
 	public String getTitle() {

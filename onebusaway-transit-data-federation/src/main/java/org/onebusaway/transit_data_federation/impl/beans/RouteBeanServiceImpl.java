@@ -16,17 +16,13 @@
  */
 package org.onebusaway.transit_data_federation.impl.beans;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import org.onebusaway.container.cache.Cacheable;
 import org.onebusaway.geospatial.model.EncodedPolylineBean;
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.gtfs.model.calendar.ServiceDate;
+import org.onebusaway.gtfs.services.calendar.CalendarService;
 import org.onebusaway.transit_data.model.AgencyBean;
 import org.onebusaway.transit_data.model.NameBean;
 import org.onebusaway.transit_data.model.NameBeanTypes;
@@ -41,6 +37,7 @@ import org.onebusaway.transit_data_federation.impl.StopGraphComparator;
 import org.onebusaway.transit_data_federation.model.StopSequence;
 import org.onebusaway.transit_data_federation.model.StopSequenceCollection;
 import org.onebusaway.transit_data_federation.model.narrative.RouteCollectionNarrative;
+import org.onebusaway.transit_data_federation.services.ExtendedCalendarService;
 import org.onebusaway.transit_data_federation.services.RouteService;
 import org.onebusaway.transit_data_federation.services.StopSequenceCollectionService;
 import org.onebusaway.transit_data_federation.services.StopSequencesService;
@@ -82,6 +79,10 @@ class RouteBeanServiceImpl implements RouteBeanService {
   private StopSequenceCollectionService _stopSequenceBlocksService;
 
   private BlockIndexService _blockIndexService;
+
+  private CalendarService _calendarService;
+
+  private ExtendedCalendarService _extCalendarService;
 
   @Autowired
   public void setTransitGraphDao(TransitGraphDao transitGraphDao) {
@@ -129,6 +130,12 @@ class RouteBeanServiceImpl implements RouteBeanService {
     _blockIndexService = blockIndexService;
   }
 
+  @Autowired
+  public void setCalendarService(CalendarService calendarService) { _calendarService = calendarService; }
+
+  @Autowired
+  public void setExtCalendarService(ExtendedCalendarService extCalendarService) { _extCalendarService = extCalendarService; }
+
   @Cacheable
   public RouteBean getRouteForId(AgencyAndId id) {
     RouteCollectionNarrative rc = _narrativeService.getRouteCollectionForId(id);
@@ -144,7 +151,17 @@ class RouteBeanServiceImpl implements RouteBeanService {
     if (routeCollectionEntry == null || narrative == null)
       return null;
     return getStopsForRouteCollectionAndNarrative(routeCollectionEntry,
-        narrative);
+        narrative, null);
+  }
+
+  @Cacheable
+  public StopsForRouteBean getStopsForRouteForServiceDate(AgencyAndId routeId, ServiceDate serviceDate) {
+    RouteCollectionEntry routeCollectionEntry = _transitGraphDao.getRouteCollectionForId(routeId);
+    RouteCollectionNarrative narrative = _narrativeService.getRouteCollectionForId(routeId);
+    if (routeCollectionEntry == null || narrative == null)
+      return null;
+    return getStopsForRouteCollectionAndNarrative(routeCollectionEntry,
+            narrative, serviceDate);
   }
 
   /****
@@ -170,9 +187,14 @@ class RouteBeanServiceImpl implements RouteBeanService {
     return bean.create();
   }
 
-  private List<StopBean> getStopBeansForRoute(AgencyAndId routeId) {
-
-    Collection<AgencyAndId> stopIds = _routeService.getStopsForRouteCollection(routeId);
+  private List<StopBean> getStopBeansForRoute(AgencyAndId routeId, ServiceDate serviceDate) {
+    Collection<AgencyAndId> stopIds;
+    if (serviceDate == null){
+      stopIds = _routeService.getStopsForRouteCollection(routeId);
+    }
+    else {
+      stopIds = _routeService.getStopsForRouteCollectionForServiceDate(routeId, serviceDate);
+    }
     List<StopBean> stops = new ArrayList<StopBean>();
 
     for (AgencyAndId stopId : stopIds) {
@@ -184,15 +206,15 @@ class RouteBeanServiceImpl implements RouteBeanService {
   }
 
   private StopsForRouteBean getStopsForRouteCollectionAndNarrative(
-      RouteCollectionEntry routeCollection, RouteCollectionNarrative narrative) {
+      RouteCollectionEntry routeCollection, RouteCollectionNarrative narrative, ServiceDate serviceDate) {
 
     StopsForRouteBean result = new StopsForRouteBean();
 
     AgencyAndId routeCollectionId = routeCollection.getId();
     result.setRoute(getRouteBeanForRouteCollection(routeCollectionId, narrative));
-    result.setStops(getStopBeansForRoute(routeCollectionId));
+    result.setStops(getStopBeansForRoute(routeCollectionId, serviceDate));
 
-    result.setPolylines(getEncodedPolylinesForRoute(routeCollection));
+    result.setPolylines(getEncodedPolylinesForRoute(routeCollection, serviceDate));
 
     StopGroupingBean directionGrouping = new StopGroupingBean();
     directionGrouping.setType(TransitDataConstants.STOP_GROUPING_TYPE_DIRECTION);
@@ -204,12 +226,24 @@ class RouteBeanServiceImpl implements RouteBeanService {
     List<BlockTripIndex> blockIndices = _blockIndexService.getBlockTripIndicesForRouteCollectionId(routeCollectionId);
     List<FrequencyBlockTripIndex> frequencyBlockIndices = _blockIndexService.getFrequencyBlockTripIndicesForRouteCollectionId(routeCollectionId);
 
+    List<BlockTripEntry> blockTripsUnfiltered = new ArrayList<BlockTripEntry>();
     List<BlockTripEntry> blockTrips = new ArrayList<BlockTripEntry>();
 
     getBlockTripsForIndicesMatchingRouteCollection(blockIndices,
-        routeCollectionId, blockTrips);
+        routeCollectionId, blockTripsUnfiltered);
     getBlockTripsForIndicesMatchingRouteCollection(frequencyBlockIndices,
-        routeCollectionId, blockTrips);
+        routeCollectionId, blockTripsUnfiltered);
+
+    if (serviceDate == null) {
+      blockTrips.addAll(blockTripsUnfiltered);//add all the block trips if there is no service date provided
+    }
+    else {
+      for (BlockTripEntry blockTrip : blockTripsUnfiltered) {
+        TimeZone serviceTimezone = blockTrip.getBlockConfiguration().getServiceIds().getTimeZone();
+        boolean isActiveTrip = _extCalendarService.areServiceIdsActiveOnServiceDate(blockTrip.getBlockConfiguration().getServiceIds(), serviceDate.getAsDate(serviceTimezone));
+        if (isActiveTrip) blockTrips.add(blockTrip);
+      }
+    }
 
     List<StopSequence> sequences = _stopSequencesService.getStopSequencesForTrips(blockTrips);
 
@@ -265,13 +299,22 @@ class RouteBeanServiceImpl implements RouteBeanService {
   }
 
   private List<EncodedPolylineBean> getEncodedPolylinesForRoute(
-      RouteCollectionEntry routeCollection) {
+      RouteCollectionEntry routeCollection, ServiceDate serviceDate) {
 
     Set<AgencyAndId> shapeIds = new HashSet<AgencyAndId>();
     for (RouteEntry route : routeCollection.getChildren()) {
       for (TripEntry trip : route.getTrips()) {
-        if (trip.getShapeId() != null)
-          shapeIds.add(trip.getShapeId());
+        if (trip.getShapeId() != null) {
+          if (serviceDate == null) {
+            shapeIds.add(trip.getShapeId());
+          } else {
+            TimeZone serviceTimezone = trip.getServiceId().getTimeZone();
+            boolean isActiveTrip = _calendarService.isLocalizedServiceIdActiveOnDate(trip.getServiceId(), serviceDate.getAsDate(serviceTimezone));
+
+            if (isActiveTrip)
+              shapeIds.add(trip.getShapeId());
+          }
+        }
       }
     }
 

@@ -23,6 +23,7 @@ import java.util.Map;
 
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.realtime.api.EVehiclePhase;
+import org.onebusaway.realtime.api.EVehicleStatus;
 import org.onebusaway.realtime.api.TimepointPredictionRecord;
 import org.onebusaway.transit_data.model.ListBean;
 import org.onebusaway.transit_data.model.StopBean;
@@ -110,7 +111,7 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
   }
 
   /****
-   * {@link TripStatusBeanService} Interface
+   * {@link TripDetailsBeanService} Interface
    ****/
 
   @Override
@@ -342,6 +343,7 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
       }
       bean.setTimepointPredictions(timepointPredictions);
     }
+    // bean.setRealtimeOccupancy(_realtimeOccupancyService.getRealtimeOccupancyForBlockLocation(blockLocation));
 
     return bean;
   }
@@ -402,7 +404,6 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
     }
 
     if (inclusion.isIncludeTripSchedule()) {
-
       stopTimes = _tripStopTimesBeanService.getStopTimesForBlockTrip(blockTripInstance);
 
       if (stopTimes == null)
@@ -411,7 +412,7 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
 
     if (inclusion.isIncludeTripStatus() && blockLocation != null) {
       status = getBlockLocationAsStatusBean(blockLocation, time);
-      if (status == null)
+      if (status == null || status.getStatus().equals(EVehicleStatus.SKIPPED.toString()))
         missing = true;
       else
         vehicleId = AgencyAndIdLibrary.convertFromString(status.getVehicleId());

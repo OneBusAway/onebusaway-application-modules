@@ -15,7 +15,9 @@
  */
 package org.onebusaway.transit_data_federation.impl.bundle;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.GtfsRealtimeSource;
@@ -54,5 +56,9 @@ public class RealtimeSourceServiceImpl {
   }
 
   public boolean getSystemTimeAdjustmentEnabled() { return SystemTime.isEnabled(); }
+
+  public String getCurrentTime() {
+    return new SimpleDateFormat("yyyy-MM-dd HH:mm").format(new Date(SystemTime.currentTimeMillis()));
+  }
 
 }

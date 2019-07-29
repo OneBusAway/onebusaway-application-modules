@@ -23,6 +23,7 @@ import org.onebusaway.api.model.transit.BeanFactoryV2;
 import org.onebusaway.exceptions.ServiceException;
 import org.onebusaway.transit_data.model.StopScheduleBean;
 import org.onebusaway.transit_data.services.TransitDataService;
+import org.onebusaway.util.SystemTime;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.opensymphony.xwork2.conversion.annotations.TypeConversion;
@@ -39,7 +40,7 @@ public class ScheduleForStopAction extends ApiActionSupport {
 
   private String _id;
 
-  private Date _date = new Date();
+  private Date _date = new Date(SystemTime.currentTimeMillis());
 
   public ScheduleForStopAction() {
     super(V2);

@@ -44,6 +44,8 @@ public interface ServiceAlertsService {
    * @return the built service alert
    */
 
+  void loadServiceAlerts();
+
   public ServiceAlertRecord createOrUpdateServiceAlert(ServiceAlertRecord serviceAlertRecord);
 
   public void removeServiceAlert(AgencyAndId serviceAlertId);

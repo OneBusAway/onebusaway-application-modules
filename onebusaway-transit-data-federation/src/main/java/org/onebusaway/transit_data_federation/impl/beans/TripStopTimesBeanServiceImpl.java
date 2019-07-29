@@ -16,15 +16,21 @@
  */
 package org.onebusaway.transit_data_federation.impl.beans;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.TimeZone;
 
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.realtime.api.OccupancyStatus;
 import org.onebusaway.transit_data.model.StopBean;
 import org.onebusaway.transit_data.model.TripStopTimeBean;
 import org.onebusaway.transit_data.model.TripStopTimesBean;
 import org.onebusaway.transit_data.model.schedule.FrequencyBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
+import org.onebusaway.transit_data_federation.model.bundle.HistoricalRidership;
 import org.onebusaway.transit_data_federation.services.AgencyService;
+import org.onebusaway.transit_data_federation.services.RidershipService;
 import org.onebusaway.transit_data_federation.services.beans.StopBeanService;
 import org.onebusaway.transit_data_federation.services.beans.TripBeanService;
 import org.onebusaway.transit_data_federation.services.beans.TripStopTimesBeanService;
@@ -46,6 +52,8 @@ public class TripStopTimesBeanServiceImpl implements TripStopTimesBeanService {
 
   private AgencyService _agencyService;
 
+  private RidershipService _ridershipService;
+
   @Autowired
   public void setAgencyService(AgencyService agencyService) {
     _agencyService = agencyService;
@@ -61,12 +69,14 @@ public class TripStopTimesBeanServiceImpl implements TripStopTimesBeanService {
     _stopBeanService = stopBeanService;
   }
 
+  @Autowired
+  public void setOccupancyService(RidershipService ridershipService) { _ridershipService = ridershipService; } // TODO
+
   @Override
   public TripStopTimesBean getStopTimesForBlockTrip(BlockTripInstance blockTripInstance) {
 
     BlockTripEntry blockTrip = blockTripInstance.getBlockTrip();
-    TripStopTimesBean bean = getStopTimesForTrip(blockTrip.getTrip());
-
+    TripStopTimesBean bean = getStopTimesForTrip(blockTrip.getTrip(), blockTripInstance.getServiceDate());
     if (blockTrip.getPreviousTrip() != null) {
       BlockTripEntry previous = blockTrip.getPreviousTrip();
       TripBean previousTrip = _tripBeanService.getTripForId(previous.getTrip().getId());
@@ -78,13 +88,20 @@ public class TripStopTimesBeanServiceImpl implements TripStopTimesBeanService {
       TripBean nextTrip = _tripBeanService.getTripForId(next.getTrip().getId());
       bean.setNextTrip(nextTrip);
     }
-    
+
     FrequencyEntry frequencyLabel = blockTripInstance.getFrequencyLabel();
     
     if( frequencyLabel != null) {
       long serviceDate = blockTripInstance.getServiceDate();
       FrequencyBean fb = FrequencyBeanLibrary.getBeanForFrequency(serviceDate, frequencyLabel);
       bean.setFrequency(fb);
+    }
+
+    for (TripStopTimeBean st : bean.getStopTimes()) {
+      List<HistoricalRidership> rid = _ridershipService.getHistoricalRiderships(blockTrip.getTrip().getRoute().getId(), blockTrip.getTrip().getId(),
+          AgencyAndId.convertFromString(st.getStop().getId()), blockTripInstance.getServiceDate());
+
+      if(rid != null && rid.size() > 0) st.setHistoricalOccupancy(OccupancyStatus.toEnum(rid.get(0).getLoadFactor()));
     }
 
     return bean;
@@ -94,7 +111,7 @@ public class TripStopTimesBeanServiceImpl implements TripStopTimesBeanService {
    * Private Methods
    ****/
 
-  private TripStopTimesBean getStopTimesForTrip(TripEntry trip) {
+  private TripStopTimesBean getStopTimesForTrip(TripEntry trip, long serviceDate) {
 
     AgencyAndId tripId = trip.getId();
 
@@ -114,9 +131,14 @@ public class TripStopTimesBeanServiceImpl implements TripStopTimesBeanService {
       StopBean stopBean = _stopBeanService.getStopForId(stopEntry.getId());
       stBean.setStop(stopBean);
       stBean.setDistanceAlongTrip(stopTime.getShapeDistTraveled());
+      List<HistoricalRidership> rid = _ridershipService.getHistoricalRiderships(trip.getRoute().getId(), trip.getId(), stopEntry.getId(), serviceDate);
+      if(rid != null && rid.size() > 0) stBean.setHistoricalOccupancy(OccupancyStatus.toEnum(rid.get(0).getLoadFactor()));
+
       bean.addStopTime(stBean);
     }
 
     return bean;
   }
 }
+
+

@@ -30,6 +30,7 @@
  */
 package org.onebusaway.nextbus.impl.rest.handler;
 
+import com.opensymphony.xwork2.ActionInvocation;
 import org.apache.struts2.rest.handler.XStreamHandler;
 import org.onebusaway.nextbus.impl.rest.xstream.BodyErrorConverter;
 import org.onebusaway.nextbus.impl.rest.xstream.ScheduleHeaderConverter;
@@ -50,6 +51,11 @@ import com.thoughtworks.xstream.XStream;
 
 
 public class CustomXStreamHandler extends XStreamHandler {
+
+  @Override
+  protected XStream createXStream(ActionInvocation invocation) {
+    return createXStream();
+  }
 
   @Override
   protected XStream createXStream() {

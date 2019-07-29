@@ -34,6 +34,8 @@ public final class TripStatusV2Bean implements Serializable {
 
   private long serviceDate;
 
+//  private String realtimeOccupancy;
+
   private FrequencyV2Bean frequency;
 
   private Double scheduledDistanceAlongTrip;
@@ -108,6 +110,10 @@ public final class TripStatusV2Bean implements Serializable {
   public void setServiceDate(long serviceDate) {
     this.serviceDate = serviceDate;
   }
+
+//  public String getRealtimeOccupancy() { return realtimeOccupancy; }
+//
+//  public void setRealtimeOccupancy(String realtimeOccupancy) { this.realtimeOccupancy = realtimeOccupancy; }
 
   public FrequencyV2Bean getFrequency() {
     return frequency;

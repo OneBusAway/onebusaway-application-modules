@@ -17,6 +17,7 @@ package org.onebusaway.nextbus.actions.gtfsrt;
 
 import com.google.transit.realtime.GtfsRealtime.FeedMessage;
 import com.opensymphony.xwork2.ModelDriven;
+import org.apache.commons.lang.StringUtils;
 import org.apache.struts2.rest.DefaultHttpHeaders;
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.nextbus.actions.api.NextBusApiBase;
@@ -30,6 +31,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import static org.onebusaway.nextbus.impl.gtfsrt.GtfsrtCache.ALL_AGENCIES;
 
 public class TripUpdatesAction extends NextBusApiBase  implements
         ModelDriven<FeedMessage> {
@@ -56,18 +59,26 @@ public class TripUpdatesAction extends NextBusApiBase  implements
         this.agencyId = agencyId;
     }
 
+    public String getAgencyIdHashKey() {
+        if (StringUtils.isBlank(agencyId)) {
+            return ALL_AGENCIES;
+        }
+        return agencyId;
+    }
+
+
     public DefaultHttpHeaders index() {
         return new DefaultHttpHeaders("success");
     }
 
     @Override
     public FeedMessage getModel() {
-        FeedMessage cachedTripUpdates = _cache.getTripUpdates();
+        FeedMessage cachedTripUpdates = _cache.getTripUpdates(getAgencyIdHashKey());
         if(cachedTripUpdates != null){
             return cachedTripUpdates;
         }
         else {
-            FeedMessage.Builder feedMessage = createFeedWithDefaultHeader();
+            FeedMessage.Builder feedMessage = null; // delay creation until we have a timestamp
             FeedMessage remoteFeedMessage = null;
 
             List<String> agencyIds = new ArrayList<String>();
@@ -81,21 +92,32 @@ public class TripUpdatesAction extends NextBusApiBase  implements
 
 
             for (String agencyId : agencyIds) {
-                String gtfsrtUrl = getServiceUrl() + agencyId + TRIP_UPDATES_COMMAND;
-                try {
-                    remoteFeedMessage = _httpUtil.getFeedMessage(gtfsrtUrl, 30);
-                    feedMessage.addAllEntity(remoteFeedMessage.getEntityList());
-                } catch (Exception e) {
-                    _log.error(e.getMessage());
+                if (hasServiceUrl(agencyId)) {
+                    String gtfsrtUrl = getServiceUrl(agencyId) + agencyId + TRIP_UPDATES_COMMAND;
+                    try {
+                        remoteFeedMessage = _httpUtil.getFeedMessage(gtfsrtUrl, 30);
+                        if (feedMessage == null) {
+                            if (remoteFeedMessage.hasHeader()
+                                    && remoteFeedMessage.getHeader().hasTimestamp()) {
+                                // we set the age of our feed to the age of the first feed that has a timestamp
+                                feedMessage = createFeedWithDefaultHeader(remoteFeedMessage.getHeader().getTimestamp());
+                            } else {
+                                feedMessage = createFeedWithDefaultHeader(null);
+                            }
+                        }
+                        feedMessage.addAllEntity(remoteFeedMessage.getEntityList());
+                    } catch (Exception e) {
+                        _log.error(e.getMessage());
+                    }
                 }
             }
             FeedMessage builtFeedMessage = feedMessage.build();
-            _cache.putTripUpdates(builtFeedMessage);
+            _cache.putTripUpdates(getAgencyIdHashKey(), builtFeedMessage);
             return builtFeedMessage;
         }
     }
     
-    public FeedMessage.Builder createFeedWithDefaultHeader() {
-        return _gtfsrtHelper.createFeedWithDefaultHeader();
+    public FeedMessage.Builder createFeedWithDefaultHeader(Long timestampInSeconds) {
+        return _gtfsrtHelper.createFeedWithDefaultHeader(timestampInSeconds);
     }
 }

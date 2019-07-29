@@ -41,6 +41,7 @@ import org.onebusaway.collections.Range;
 import org.onebusaway.container.ConfigurationParameter;
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.realtime.api.EVehicleStatus;
 import org.onebusaway.realtime.api.EVehicleType;
 import org.onebusaway.realtime.api.TimepointPredictionRecord;
 import org.onebusaway.realtime.api.VehicleLocationRecord;
@@ -135,9 +136,9 @@ public class BlockLocationServiceImpl implements BlockLocationService,
 
   /**
    * Should we sample the schedule deviation history?
-   * (this is true for historical reasons)
+   * (expensive -- off by default)
    */
-  private boolean _sampleScheduleDeviationHistory = true;
+  private boolean _sampleScheduleDeviationHistory = false;
 
   /**
    * We queue up block location records so they can be bulk persisted to the
@@ -593,6 +594,11 @@ public class BlockLocationServiceImpl implements BlockLocationService,
           if (stopId == null || predictedTime == 0)
             continue;
 
+          if (tpr.isSkipped()) {
+            _log.info("\nRecord has Timepoint with SKIPPED schedule relationship\n");
+            location.setStatus(EVehicleStatus.SKIPPED.toString());
+          }
+
           for (BlockStopTimeEntry blockStopTime : blockConfig.getStopTimes()) {
             StopTimeEntry stopTime = blockStopTime.getStopTime();
             StopEntry stop = stopTime.getStop();
@@ -608,7 +614,7 @@ public class BlockLocationServiceImpl implements BlockLocationService,
                 }
                 
                 // If this isn't the last prediction, and we're on the first stop, then apply it
-                if (isLastPrediction(stopTime, timepointPredictions, tpr, tprIndexCounter) 
+                if (isLastPrediction(stopTime, timepointPredictions, tpr, tprIndexCounter)
                     && isFirstStopInRoute(stopTime)) {
                   // Do not calculate schedule deviation
                   continue;

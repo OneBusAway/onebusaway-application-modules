@@ -15,6 +15,8 @@
  */
 package org.onebusaway.transit_data.model;
 
+import org.onebusaway.realtime.api.OccupancyStatus;
+
 import java.io.Serializable;
 
 public class TripStopTimeBean implements Serializable {
@@ -30,6 +32,8 @@ public class TripStopTimeBean implements Serializable {
   private String stopHeadsign;
   
   private double distanceAlongTrip;
+
+  private String historicalOccupancy;
 
   public int getArrivalTime() {
     return arrivalTime;
@@ -70,4 +74,8 @@ public class TripStopTimeBean implements Serializable {
   public void setDistanceAlongTrip(double distanceAlongTrip) {
     this.distanceAlongTrip = distanceAlongTrip;
   }
+
+  public String getHistoricalOccupancy() {return historicalOccupancy; }
+
+  public void setHistoricalOccupancy(OccupancyStatus historicalOccupancy) {this.historicalOccupancy = historicalOccupancy.toString(); }
 }

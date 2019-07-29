@@ -31,12 +31,11 @@ import javax.naming.InitialContext;
 import javax.sql.DataSource;
 
 import org.hibernate.SQLQuery;
+import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.cfg.Configuration;
-import org.hibernate.classic.Session;
 import org.hibernate.jdbc.Work;
-import org.hibernate.stat.Statistics;
 import org.onebusaway.admin.model.BundleBuildRequest;
 import org.onebusaway.admin.model.BundleBuildResponse;
 import org.onebusaway.admin.model.BundleRequestResponse;
@@ -277,7 +276,7 @@ public class GtfsArchiveTask implements  Runnable {
       config.setProperty("hibernate.connection.datasource", "java:comp/env/jdbc/archiveDB");
       config.setProperty("hibernate.connection.pool_size", "1");
       config.setProperty("hibernate.cache.provider_class",
-          "org.hibernate.cache.NoCacheProvider");
+          "org.hibernate.cache.internal.NoCachingRegionFactory");
       config.setProperty("hibernate.hbm2ddl.auto", "update");
       config.addResource("org/onebusaway/gtfs/model/GtfsArchiveMapping.hibernate.xml");
       config.addResource("org/onebusaway/gtfs/impl/HibernateGtfsRelationalDaoImpl.hibernate.xml");

@@ -17,6 +17,7 @@
 package org.onebusaway.transit_data_federation.impl.beans;
 
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.realtime.api.OccupancyStatus;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
 import org.onebusaway.transit_data.model.ArrivalsAndDeparturesQueryBean;
 import org.onebusaway.transit_data.model.StopBean;
@@ -27,10 +28,9 @@ import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.transit_data.model.trips.TripStatusBean;
 import org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.GtfsRealtimeNegativeArrivals;
 import org.onebusaway.transit_data_federation.model.TargetTime;
+import org.onebusaway.transit_data_federation.model.bundle.HistoricalRidership;
 import org.onebusaway.transit_data_federation.model.narrative.StopTimeNarrative;
-import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
-import org.onebusaway.transit_data_federation.services.ArrivalAndDepartureQuery;
-import org.onebusaway.transit_data_federation.services.ArrivalAndDepartureService;
+import org.onebusaway.transit_data_federation.services.*;
 import org.onebusaway.transit_data_federation.services.beans.ArrivalsAndDeparturesBeanService;
 import org.onebusaway.transit_data_federation.services.beans.ServiceAlertsBeanService;
 import org.onebusaway.transit_data_federation.services.beans.StopBeanService;
@@ -54,12 +54,7 @@ import org.springframework.jmx.export.annotation.ManagedAttribute;
 import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Component
@@ -84,6 +79,8 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
   private RealTimeHistoryService _realTimeHistoryService;
   
   private GtfsRealtimeNegativeArrivals _gtfsRealtimeNegativeArrivals;
+
+  private RidershipService _ridershipService;
   
   @Autowired
   public void setTransitGraphDao(TransitGraphDao transitGraphDao) {
@@ -110,6 +107,9 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
   public void setStopBeanService(StopBeanService stopBeanService) {
     _stopBeanService = stopBeanService;
   }
+
+  @Autowired
+  public void setRidershipService(RidershipService ridershipService) { _ridershipService = ridershipService; }
 
   @Autowired
   public void setTripDetailsBeanService(
@@ -216,7 +216,7 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
         continue;
       
       applySituationsToBean(time, instance, bean);
-      
+
       beans.add(bean);
     }
 
@@ -325,6 +325,10 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
       pab.setFrequency(fb);
     }
 
+    if (_ridershipService != null) {
+      List<HistoricalRidership> occ = _ridershipService.getHistoricalRiderships(trip.getRoute().getId(), trip.getId(), stop.getId(), pab.getServiceDate());
+      if(occ != null && occ.size() > 0) pab.setHistoricalOccupancy(OccupancyStatus.toEnum(occ.get(0).getLoadFactor()));
+    }
     return pab;
   }
 

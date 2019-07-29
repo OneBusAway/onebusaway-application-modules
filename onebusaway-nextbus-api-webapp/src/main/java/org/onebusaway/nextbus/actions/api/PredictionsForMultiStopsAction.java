@@ -16,25 +16,23 @@
 package org.onebusaway.nextbus.actions.api;
 
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
-import org.apache.commons.lang3.text.WordUtils;
 import org.apache.struts2.rest.DefaultHttpHeaders;
 import org.onebusaway.exceptions.ServiceException;
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.nextbus.model.RouteStopId;
 import org.onebusaway.nextbus.model.nextbus.Body;
 import org.onebusaway.nextbus.model.nextbus.BodyError;
 import org.onebusaway.nextbus.model.transiTime.Prediction;
 import org.onebusaway.nextbus.model.transiTime.Predictions;
 import org.onebusaway.nextbus.model.transiTime.PredictionsDirection;
 import org.onebusaway.nextbus.util.HttpUtil;
-import org.onebusaway.nextbus.util.HttpUtilImpl;
 import org.onebusaway.nextbus.validation.ErrorMsg;
 import org.onebusaway.transit_data.model.RouteBean;
 import org.onebusaway.transit_data.model.StopBean;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.google.gson.Gson;
@@ -44,6 +42,8 @@ import com.opensymphony.xwork2.ModelDriven;
 
 public class PredictionsForMultiStopsAction extends NextBusApiBase implements
     ModelDriven<Body<Predictions>> {
+
+  private static Logger _log = LoggerFactory.getLogger(PredictionsForMultiStopsAction.class);
 
   @Autowired
   private HttpUtil _httpUtil;
@@ -55,6 +55,8 @@ public class PredictionsForMultiStopsAction extends NextBusApiBase implements
   private Set<String> mappedStops = new HashSet<String>();
 
   private String routeTag;
+
+  Map<String, Set<RouteStopId>> _agencyRouteIdStopIdMap = new HashMap<>();
 
   public String getA() {
     return agencyId;
@@ -89,27 +91,42 @@ public class PredictionsForMultiStopsAction extends NextBusApiBase implements
     Body<Predictions> body = new Body<Predictions>();
 
     if (isValid(body)) {
-      String serviceUrl = getServiceUrl() + agencyId + PREDICTIONS_COMMAND
-          + "?";
-      String routeStopIds = getStopParams();
-      String uri = serviceUrl + routeStopIds + "format=" + REQUEST_TYPE;
+
+      List<Predictions> allPredictions = new ArrayList<>();
 
       try {
-        int timeout = _configUtil.getHttpTimeoutSeconds();
-        JsonArray predictionsJson = _httpUtil.getJsonObject(uri, timeout).getAsJsonArray(
-            "predictions");
-        Type listType = new TypeToken<List<Predictions>>() {
-        }.getType();
 
-        List<Predictions> predictions = new Gson().fromJson(predictionsJson,
-            listType);
+        for (Map.Entry<String, Set<RouteStopId>> entry : _agencyRouteIdStopIdMap.entrySet()) {
 
-        modifyJSONObject(predictions);
+          String agencyId = entry.getKey();
 
-        body.getResponse().addAll(predictions);
-      } catch (Exception e) {
+          String serviceUrl = getServiceUrl(agencyId) + agencyId + PREDICTIONS_COMMAND + "?";
 
+          Set<RouteStopId> routeStopIds = entry.getValue();
+
+          String stopParams = getStopParams(routeStopIds);
+
+          String uri = serviceUrl + stopParams + "format=" + REQUEST_TYPE;
+
+          _log.info(uri);
+
+          int timeout = _configMapUtil.getConfig(agencyId).getHttpTimeoutSeconds();
+          JsonArray predictionsJson = _httpUtil.getJsonObject(uri, timeout).getAsJsonArray(
+                  "predictions");
+          Type listType = new TypeToken<List<Predictions>>() {
+          }.getType();
+
+          List<Predictions> predictions = new Gson().fromJson(predictionsJson, listType);
+          allPredictions.addAll(predictions);
+
+        }
+        modifyJSONObject(allPredictions);
+        body.getResponse().addAll(allPredictions);
+
+      }
+      catch (Exception e) {
         body.getErrors().add(new BodyError("No valid results found."));
+        _log.error(e.getMessage());
       }
     }
 
@@ -127,26 +144,14 @@ public class PredictionsForMultiStopsAction extends NextBusApiBase implements
     }
   }
 
-  private String getStopIdParams() {
-    StringBuilder sb = new StringBuilder();
-    for (String stopId : stops) {
-      StopBean stopBean = _transitDataService.getStop(stopId);
-      for (RouteBean routeBean : stopBean.getRoutes()) {
-        sb.append("rs=");
-        sb.append(routeBean.getId());
-        sb.append("|");
-        sb.append(stopId);
-        sb.append("&");
-      }
-    }
-    return sb.toString();
-  }
 
-  private String getStopParams() {
+  private String getStopParams(Set<RouteStopId> routeStopIds) {
     StringBuilder sb = new StringBuilder();
-    for (String stop : mappedStops) {
+    for (RouteStopId routeStopId : routeStopIds) {
       sb.append("rs=");
-      sb.append(stop);
+      sb.append(routeStopId.getRouteId().getId());
+      sb.append("|");
+      sb.append(routeStopId.getStopId().getId());
       sb.append("&");
     }
     return sb.toString();
@@ -175,42 +180,51 @@ public class PredictionsForMultiStopsAction extends NextBusApiBase implements
       }
 
       try {
-        String stopId = _tdsMappingService.getStopIdFromStopCode(stopArray[1]);
+        List<AgencyAndId> stopIds = new ArrayList<>(_tdsMappingService.getStopIdsFromStopCode(stopArray[1]));
 
         StopBean stopBean;
-
-        try {
-          stopBean = _transitDataService.getStop(stopId);
-        } catch (ServiceException se) {
-          // The user didn't provide an agency id in stopId, so use provided
-          // agency
-          String stopIdVal = new AgencyAndId(agencyId, stopId).toString();
-          stopBean = _transitDataService.getStop(stopIdVal);
-        }
-
         boolean routeExists = false;
-        for (RouteBean routeBean : stopBean.getRoutes()) {
-          if (routeBean.getId().equals(
-              _tdsMappingService.getRouteIdFromShortName(stopArray[0]))) {
-            routeExists = true;
-            break;
+
+        for (AgencyAndId stopId : stopIds) {
+          if(routeExists) break;
+          try {
+            stopBean = _transitDataService.getStop(stopId.toString());
+          } catch (ServiceException se) {
+            // The user didn't provide an agency id in stopId, so use provided
+            // agency
+            String stopIdVal = new AgencyAndId(agencyId, stopId.getId()).toString();
+            stopBean = _transitDataService.getStop(stopIdVal);
+          }
+
+          for (RouteBean routeBean : stopBean.getRoutes()) {
+            if (routeBean.getId().equals(
+                    _tdsMappingService.getRouteIdFromShortName(stopArray[0]))) {
+
+              AgencyAndId routeId = AgencyAndId.convertFromString(_tdsMappingService.getRouteIdFromShortName(stopArray[0]));
+              String routeAgencyId = routeBean.getAgency().getId();
+
+              if (_agencyRouteIdStopIdMap.get(routeAgencyId) == null) {
+                _agencyRouteIdStopIdMap.put(routeAgencyId, new HashSet<RouteStopId>());
+              }
+              Set<RouteStopId> routeStopIds = _agencyRouteIdStopIdMap.get(routeAgencyId);
+              routeStopIds.add(new RouteStopId(routeId, stopId));
+
+              routeExists = true;
+              break;
+            }
           }
         }
         if (!routeExists) {
           String error = "For agency=" + getA() + " route r=" + stopArray[0]
-              + " is not currently available. It might be initializing still.";
+                  + " is not currently available. It might be initializing still.";
           body.getErrors().add(new BodyError(error));
           return false;
         }
-        String routeTag = getIdNoAgency(_tdsMappingService.getRouteIdFromShortName(stopArray[0]));
-        String routeStop = getIdNoAgency(_tdsMappingService.getStopIdFromStopCode(stopArray[1]));
-
-        mappedStops.add(routeTag + "|" + routeStop);
-
-      } catch (ServiceException se) {
+      }
+      catch (ServiceException se) {
         String error = "For agency=" + getA() + " stop s=" + stopArray[1]
-            + " is on none of the directions for r=" + stopArray[0]
-            + " so cannot determine which stop to provide data for.";
+                + " is on none of the directions for r=" + stopArray[0]
+                + " so cannot determine which stop to provide data for.";
 
         body.getErrors().add(new BodyError(error));
         return false;

@@ -29,11 +29,13 @@ import org.onebusaway.users.services.CurrentUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.web.authentication.AbstractProcessingFilter;
+import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 
 @SuppressWarnings("deprecation")
 public class EveryLastLoginAuthenticationProcessorFilter extends
-    AbstractProcessingFilter {
+        AbstractAuthenticationProcessingFilter {
 
   protected EveryLastLoginAuthenticationProcessorFilter(
       String defaultFilterProcessesUrl) {
@@ -73,12 +75,24 @@ public class EveryLastLoginAuthenticationProcessorFilter extends
     return new DefaultUserAuthenticationToken(details);
   }
 
-  @Override
-  public String getFilterProcessesUrl() {
-    if (super.getFilterProcessesUrl() == null)
-      return "/everylastlogin_login";
-    return super.getFilterProcessesUrl();
+  public void setSuccessHandler(AuthenticationSuccessHandler successHandler) {
+    super.setAuthenticationSuccessHandler(successHandler);
   }
+
+  public void setFailureHandler(AuthenticationFailureHandler failureHandler) {
+    super.setAuthenticationFailureHandler(failureHandler);
+  }
+
+  @Override
+  public AuthenticationSuccessHandler getSuccessHandler() {
+    return super.getSuccessHandler();
+  }
+
+  @Override
+  public AuthenticationFailureHandler getFailureHandler() {
+    return super.getFailureHandler();
+  }
+
 
 
 }

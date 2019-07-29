@@ -16,6 +16,7 @@
  */
 package org.onebusaway.transit_data_federation.impl.beans;
 
+import org.apache.lucene.queryparser.classic.ParseException;
 import org.onebusaway.container.cache.Cacheable;
 import org.onebusaway.container.refresh.Refreshable;
 import org.onebusaway.exceptions.InvalidArgumentServiceException;
@@ -46,7 +47,6 @@ import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.index.ItemVisitor;
 import com.vividsolutions.jts.index.strtree.STRtree;
 
-import org.apache.lucene.queryParser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

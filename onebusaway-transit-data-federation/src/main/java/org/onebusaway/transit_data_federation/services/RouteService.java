@@ -19,6 +19,7 @@ import java.util.Collection;
 import java.util.Set;
 
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.gtfs.model.calendar.ServiceDate;
 import org.onebusaway.transit_data_federation.services.transit_graph.RouteCollectionEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.RouteEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
@@ -47,10 +48,32 @@ public interface RouteService {
       AgencyAndId routeCollectionId);
 
   /**
+   * Joins over the relation {@link RouteCollectionEntry} -> {@link RouteEntry}
+   * -> {@link TripEntry} -> {@link StopTimeEntry} -> {@link StopEntry},
+   * constructing the unique set of stops.
+   *
+   * @param routeCollectionId the {@link RouteCollectionEntry} id
+   * @serviceDate
+   * @return the set of all stop ids for stops servicing the particular route
+   *         collection and service date
+   */
+  public Collection<AgencyAndId> getStopsForRouteCollectionForServiceDate(
+          AgencyAndId routeCollectionId, ServiceDate serviceDate);
+
+  /**
    * Return the set of route collection ids serving the specified stop.
    * 
    * @param stopId
    * @return the set of of route collection ids
    */
   public Set<AgencyAndId> getRouteCollectionIdsForStop(AgencyAndId stopId);
+
+  /**
+   * Return the set of route collection ids serving the specified stop and service date.
+   *
+   * @param stopId
+   * @param serviceDate
+   * @return the set of of route collection ids
+   */
+  public Set<AgencyAndId> getRouteCollectionIdsForStopForServiceDate(AgencyAndId stopId, ServiceDate serviceDate);
 }

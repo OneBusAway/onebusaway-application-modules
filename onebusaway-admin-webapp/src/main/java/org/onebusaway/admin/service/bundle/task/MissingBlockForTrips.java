@@ -15,6 +15,7 @@
  */
 package org.onebusaway.admin.service.bundle.task;
 
+import org.apache.commons.lang.StringUtils;
 import org.onebusaway.transit_data_federation.bundle.model.GtfsBundle;
 import org.onebusaway.transit_data_federation.bundle.model.GtfsBundles;
 import org.onebusaway.transit_data_federation.bundle.tasks.MultiCSVLogger;
@@ -60,7 +61,7 @@ public class MissingBlockForTrips extends GtfsFileHandler implements Runnable {
 
     @Override
     public void run() {
-        _log.info("MissingBlockForTrips Task Starting (v2)");
+        _log.info("MissingBlockForTrips Task Starting (v3)");
 
         Set<String> linkTrips = new HashSet<String>();
         Set<String> linkBlocks = new HashSet<String>();
@@ -76,8 +77,15 @@ public class MissingBlockForTrips extends GtfsFileHandler implements Runnable {
             if (gtfsBundle.getAgencyIdMappings().containsKey(LINK_AGENCY)) {
 
                 CSVData blockCsvData = getCSVData(gtfsFilePath, GTFS_BLOCK);
+                if (blockCsvData == null) {
+                    continue;
+                }
                 String blockHeaders = blockCsvData.getHeader();
                 List<String> blockRows = blockCsvData.getRows();
+                if (StringUtils.isBlank(blockHeaders)) {
+                    _log.info("missing blocks.txt for " + gtfsBundle);
+                    continue;
+                }
                 int routeIndex = getIndexForValue(blockHeaders, "block_route_num");
                 int blockSeqIndex = getIndexForValue(blockHeaders, "block_seq_num");
 

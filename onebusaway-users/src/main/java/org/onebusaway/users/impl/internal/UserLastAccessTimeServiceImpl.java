@@ -19,7 +19,6 @@ import java.util.Date;
 
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.Element;
-import net.sf.ehcache.Statistics;
 
 import org.onebusaway.users.model.User;
 import org.onebusaway.users.services.UserDao;
@@ -48,8 +47,7 @@ public class UserLastAccessTimeServiceImpl implements UserLastAccessTimeService 
   }
 
   public long getNumberOfActiveUsers() {
-    Statistics stats = _cache.getStatistics();
-    return stats.getObjectCount();
+    return _cache.getSize();
   }
 
   public void handleAccessForUser(int userId, long accessTime) {

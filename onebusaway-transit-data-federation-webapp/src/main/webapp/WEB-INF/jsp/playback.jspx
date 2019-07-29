@@ -36,13 +36,23 @@ table.data td {
 <table class="data">
 
 <b>Playback Enabled?:</b> ${source.playbackEnabled}
-<c:if test="${!source.systemTimeAdjustmentEnabled}">
-	<h3><font color="red">WARNING!</font></h3>
-	<p>
-		System Time adjustment disabled.  This feature will not work!
-		Please configure the JVM with <strong>-Dorg.onebusaway.util.SystemTime.enabled=true</strong>
-	</p>
-</c:if>
+<c:choose>
+	<c:when test="${!source.systemTimeAdjustmentEnabled}">
+		<h3><font color="red">WARNING!</font></h3>
+		<p>
+			System Time adjustment disabled.  This feature will not work!
+			Please configure the JVM with <strong>-Dorg.onebusaway.util.SystemTime.enabled=true</strong>
+		</p>
+	</c:when>
+	<c:otherwise>
+		<!-- allow arbitrary setting of time -->
+		<form action="playback!set-time.do" method="POST">
+			<input type="text" name="time" value="${source.currentTime}"/>
+			<input type="submit" value="Change Time" />
+		</form>
+	</c:otherwise>
+</c:choose>
+
 <c:if test="${source.playbackEnabled}">
 	<form action="playback!playback-disable.do" method="POST">
 		<input type="submit" value="disable" />

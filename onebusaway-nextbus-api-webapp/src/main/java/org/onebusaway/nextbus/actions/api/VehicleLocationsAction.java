@@ -127,7 +127,7 @@ public class VehicleLocationsAction extends NextBusApiBase implements
 
     List<Vehicle> vehiclesList = new ArrayList<Vehicle>();
     for (TripDetailsBean tripDetails : trips.getList()) {
-
+      if(tripDetails == null) continue;
       TripStatusBean tripStatus = tripDetails.getStatus();
 
       // filter out interlined routes

@@ -22,6 +22,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import org.apache.commons.lang.StringUtils;
 import org.onebusaway.transit_data_federation.impl.bundle.RealtimeSourceServiceImpl;
@@ -99,7 +100,19 @@ public class PlaybackController {
     return new ModelAndView("redirect:/playback.do");
   }
 
-  
+
+  @RequestMapping("/playback!set-time")
+  public ModelAndView setTime(String time) throws Exception {
+    _log.info("input date of " + time);
+    if (time != null || time != "") {
+      Date selectedDate = new SimpleDateFormat("yyyy-MM-dd HH:mm").parse(time);
+      adjustment = selectedDate.getTime() - System.currentTimeMillis();
+      _log.info("setting adjustment to " + adjustment + " based on time " + selectedDate);
+      SystemTime.setAdjustment(adjustment);
+    }
+    return new ModelAndView("redirect:/playback.do");
+  }
+
   @RequestMapping("/playback!playback.do")
   public ModelAndView playback(int index,
      String date,

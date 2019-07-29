@@ -49,6 +49,9 @@
           <interceptor-ref name="paramsPrepareParamsStack">
             <param name="modelDriven.refreshModelBeforeResult">true</param>
           </interceptor-ref>
+            <interceptor-ref name="defaultStack">
+                <param name="params.excludeParams">dojo\..*,^struts\..*,^session\..*,^request\..*,^application\..*,^servlet(Request|Response)\..*,parameters\...*,_csrf</param>
+            </interceptor-ref>
         </interceptor-stack>
       </interceptors>
 

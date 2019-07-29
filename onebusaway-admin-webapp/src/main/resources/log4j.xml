@@ -32,7 +32,7 @@
 		<layout class="org.apache.log4j.PatternLayout">
 			<!-- The log message pattern -->
 			<param name="ConversionPattern" value="%d{ISO8601} %-5p [%F:%L] : %m%n" />
-		</layout>
+		</layout>`
 	</appender>
 	
 	<appender name="stdout" class="org.apache.log4j.ConsoleAppender">

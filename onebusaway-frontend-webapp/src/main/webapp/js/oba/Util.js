@@ -111,8 +111,32 @@ OBA.Util = (function() {
 			var predictionDateObj = ISO8601StringToDate(predictionDateString);
 
 			var minutesAway = Math.floor((predictionDateObj - referenceDateObj) / 60 / 1000);
-			
+
 			return minutesAway + " " + (minutesText || "minute") + ((Math.abs(minutesAway) === 1) ? "" : "s");
+		},
+		getArrivalEstimateForISOStringWithCheck: function(predictionDateString, referenceDateObj, minutesText, distanceAway) {
+			if(typeof predictionDateString === 'undefined' || predictionDateString === null) {
+				return null;
+			}
+
+			var predictionDateObj = ISO8601StringToDate(predictionDateString);
+
+			var minutesAway = Math.floor((predictionDateObj - referenceDateObj) / 60 / 1000);
+			if (minutesAway === 0 && distanceAway > 1000 /* 1000 m*/) {
+				// prediction and distance disagree, hide prediction
+			    return null;
+            }
+			if (minutesAway < 0) {
+				//prediction is in the past
+				return null;
+			}
+			return minutesAway + " " + (minutesText || "minute") + ((Math.abs(minutesAway) === 1) ? "" : "s");
+		},
+		debugTime: function(timestamp) {
+			if (typeof timestamp === 'undefined' || timestamp === null) {
+				return "nSt";
+			}
+			return ISO8601StringToDate(timestamp).toLocaleTimeString('it-IT');
 		},
 		displayTime: function(secondsAgo) {
 			secondsAgo = Math.floor(secondsAgo);

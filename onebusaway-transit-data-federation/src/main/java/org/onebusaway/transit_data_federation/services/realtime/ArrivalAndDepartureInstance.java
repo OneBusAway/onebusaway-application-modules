@@ -18,9 +18,12 @@ package org.onebusaway.transit_data_federation.services.realtime;
 
 import java.text.DateFormat;
 import java.util.Date;
+import java.util.List;
 
+import org.onebusaway.realtime.api.OccupancyStatus;
 import org.onebusaway.transit_data.model.TimeIntervalBean;
 import org.onebusaway.transit_data_federation.impl.blocks.BlockSequence;
+import org.onebusaway.transit_data_federation.model.bundle.HistoricalRidership;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.blocks.BlockTripInstance;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
@@ -51,6 +54,10 @@ public class ArrivalAndDepartureInstance {
 
   private long predictedDepartureTime;
 
+  private OccupancyStatus historicalOccupancy;
+
+  private OccupancyStatus predictedOccupancy;
+
   private TimeIntervalBean predictedDepartureInterval;
 
   public ArrivalAndDepartureInstance(StopTimeInstance stopTimeInstance,
@@ -60,6 +67,7 @@ public class ArrivalAndDepartureInstance {
     this.stopTimeInstance = stopTimeInstance;
     this.scheduledArrivalTime = scheduledTime.getArrivalTime();
     this.scheduledDepartureTime = scheduledTime.getDepartureTime();
+    this.historicalOccupancy = stopTimeInstance.getStopTime().getStopTime().getHistoricalOccupancy();
   }
 
   public ArrivalAndDepartureInstance(StopTimeInstance stopTimeInstance) {
@@ -143,6 +151,14 @@ public class ArrivalAndDepartureInstance {
   public void setPredictedDepartureTime(long predictedDepartureTime) {
     this.predictedDepartureTime = predictedDepartureTime;
   }
+
+  public OccupancyStatus getHistoricalOccupancy() { return historicalOccupancy; }
+
+  public void setHistoricalOccupancy(OccupancyStatus historicalOccupancy) { this.historicalOccupancy = historicalOccupancy; }
+
+  public OccupancyStatus getPredictedOccupancy() { return predictedOccupancy; }
+
+  public void setPredictedOccupancy(OccupancyStatus predictedOccupancy) { this.predictedOccupancy = predictedOccupancy; }
 
   public TimeIntervalBean getPredictedDepartureInterval() {
     return predictedDepartureInterval;

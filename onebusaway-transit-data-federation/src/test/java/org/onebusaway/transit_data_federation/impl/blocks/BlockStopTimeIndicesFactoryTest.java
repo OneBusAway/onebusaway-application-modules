@@ -15,6 +15,7 @@
  */
 package org.onebusaway.transit_data_federation.impl.blocks;
 
+import static junit.framework.TestCase.assertNotNull;
 import static org.junit.Assert.assertEquals;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.aid;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.block;
@@ -31,6 +32,7 @@ import java.util.List;
 
 import org.junit.Test;
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.realtime.api.OccupancyStatus;
 import org.onebusaway.transit_data_federation.impl.transit_graph.BlockEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.TripEntryImpl;
@@ -163,6 +165,29 @@ public class BlockStopTimeIndicesFactoryTest {
 
     BlockConfigurationEntry bcF = linkBlockTrips(blockF, tripF1, tripF2, tripF3);
 
+
+    /**
+     *  Block G - Copy of A, but with Historical Occupancy
+     */
+    BlockEntryImpl blockG = block("g");
+
+    TripEntryImpl tripG1 = trip("g1", "s1");
+    TripEntryImpl tripG2 = trip("g2", "s1");
+    TripEntryImpl tripG3 = trip("g3", "s1");
+
+    stopTime(0, stopA, tripG1,  0, 10, 0, 0.0);
+    stopTime(0, stopB, tripG1, 20, 20, 0, 25.0);
+    stopTime(0, stopC, tripG2, 30, 30, 0, 50.0);
+    stopTime(0, stopA, tripG2, 40, 40, 0, 75.0);
+    stopTime(0, stopA, tripG3, 50, 50, 0, 90.0);
+    stopTime(0, stopA, tripG3, 50, 50, 0, 99.0);
+    stopTime(0, stopB, tripG3, 60, 70, 0, 100.0);
+
+    BlockConfigurationEntry bcG = linkBlockTrips(blockG, tripG1, tripG2, tripG3);
+
+
+
+
     BlockStopTimeIndicesFactory factory = new BlockStopTimeIndicesFactory();
 
     List<BlockStopTimeIndex> allIndices = factory.createIndices(Arrays.asList(
@@ -234,6 +259,16 @@ public class BlockStopTimeIndicesFactoryTest {
     index = indices.get(0);
     assertEquals(1, index.getStopTimes().size());
     assertEquals(bcD.getStopTimes().get(2), index.getStopTimes().get(0));
+
+
+    assertNotNull(bcG.getStopTimes());
+    assertEquals(OccupancyStatus.EMPTY, bcG.getStopTimes().get(0).getStopTime().getHistoricalOccupancy());
+    assertEquals(OccupancyStatus.MANY_SEATS_AVAILABLE, bcG.getStopTimes().get(1).getStopTime().getHistoricalOccupancy());
+    assertEquals(OccupancyStatus.FEW_SEATS_AVAILABLE, bcG.getStopTimes().get(2).getStopTime().getHistoricalOccupancy());
+    assertEquals(OccupancyStatus.STANDING_ROOM_ONLY, bcG.getStopTimes().get(3).getStopTime().getHistoricalOccupancy());
+    assertEquals(OccupancyStatus.CRUSHED_STANDING_ROOM_ONLY, bcG.getStopTimes().get(4).getStopTime().getHistoricalOccupancy());
+    assertEquals(OccupancyStatus.FULL, bcG.getStopTimes().get(5).getStopTime().getHistoricalOccupancy());
+    assertEquals(OccupancyStatus.FULL, bcG.getStopTimes().get(6).getStopTime().getHistoricalOccupancy());
   }
 
   @Test

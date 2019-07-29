@@ -16,7 +16,6 @@
  */
 package org.onebusaway.transit_data_federation.impl.service_alerts;
 
-import org.hibernate.annotations.CollectionOfElements;
 import org.onebusaway.transit_data.model.service_alerts.EEffect;
 
 import javax.persistence.*;
@@ -36,9 +35,7 @@ public class ServiceAlertSituationConsequenceClause {
 
   private String detourPath;
 
-  @CollectionOfElements(
-      targetElement = java.lang.String.class
-  )
+  @ElementCollection(targetClass = String.class)
   private Set<String> detourStopIds = new HashSet<String>();
 
   @ManyToOne

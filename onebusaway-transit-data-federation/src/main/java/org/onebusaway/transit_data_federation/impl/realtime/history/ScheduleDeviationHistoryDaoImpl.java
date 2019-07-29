@@ -15,20 +15,22 @@
  */
 package org.onebusaway.transit_data_federation.impl.realtime.history;
 
+import java.util.Iterator;
 import java.util.List;
 
+import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.services.realtime.ScheduleDeviationHistoryDao;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.orm.hibernate3.HibernateTemplate;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
 public class ScheduleDeviationHistoryDaoImpl implements
     ScheduleDeviationHistoryDao {
 
-  private HibernateTemplate _template;
+  private SessionFactory _sessionFactory;
 
   /**
    * Note we are requesting the "mutable" {@link SessionFactory}, aka the one we
@@ -38,23 +40,33 @@ public class ScheduleDeviationHistoryDaoImpl implements
    */
   @Autowired
   public void setSessionFactory(SessionFactory sessionFactory) {
-    _template = new HibernateTemplate(sessionFactory);
+    _sessionFactory = sessionFactory;
   }
 
   @Override
+  @Transactional
   public void saveScheduleDeviationHistory(ScheduleDeviationHistory record) {
-    _template.save(record);
+    getSession().save(record);
   }
 
   @Override
+  @Transactional
   public void saveScheduleDeviationHistory(
       List<ScheduleDeviationHistory> records) {
-    _template.saveOrUpdateAll(records);
+    Session session = getSession();
+    for (Iterator<ScheduleDeviationHistory> it = records.iterator(); it.hasNext();) {
+      session.saveOrUpdate(it.next());
+    }
   }
 
   @Override
+  @Transactional
   public ScheduleDeviationHistory getScheduleDeviationHistoryForTripId(
       AgencyAndId tripId) {
-    return _template.get(ScheduleDeviationHistory.class, tripId);
+    return (ScheduleDeviationHistory) getSession().get(ScheduleDeviationHistory.class, tripId);
+  }
+
+  private Session getSession(){
+    return _sessionFactory.getCurrentSession();
   }
 }

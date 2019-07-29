@@ -306,6 +306,10 @@ var obaApiFactory = function() {
 	var processTripStatus = function(tripStatus, references) {
 		
 	};
+
+	var processHistoricalOccupancy = function(occupancy, references) {
+
+	};
 	
 	/***************************************************************************
 	 * Public API Methods
@@ -400,6 +404,12 @@ var obaApiFactory = function() {
 		var url = createUrl('/where/trip-details/' + params.tripId + '.json');
 		var params = createParams(params);
 		var handler = createEntryHandler(callback, errorCallback, processTripDetails);
+		jQuery.getJSON(url, params, handler);
+	};
+	that.historicalOccupancyForStop = function(params, callback, errorCallback) {
+		var url = createUrl('/where/historical-occupancy-by-stop/' + params.stopId + '.json');
+		var params = createParams(params);
+		var handler = createEntryHandler(callback, errorCallback, processHistoricalOccupancy);
 		jQuery.getJSON(url, params, handler);
 	};
 	
