@@ -17,7 +17,7 @@
 var OBA = window.OBA || {};
 
 // do not add constructor params here!
-OBA.Popups = (function() {	
+OBA.Popups = (function() {
 
 	var infoWindow = null;
 
@@ -46,7 +46,7 @@ OBA.Popups = (function() {
 		infoWindow.setContent(content);
 		infoWindow.open(map, marker);
 	}
-	
+
 	function showPopupWithContentFromRequest(map, marker, url, params, contentFn, routeFilter) {
 		closeInfoWindow();
 		
@@ -215,7 +215,8 @@ OBA.Popups = (function() {
 			
 		});
 	}
-	
+
+
 	function getVehicleContentForResponse(r, popupContainerId, marker) {
 		var alertData = processAlertData(r.Siri.ServiceDelivery.SituationExchangeDelivery);
 		
@@ -230,26 +231,20 @@ OBA.Popups = (function() {
         var vehicleIdWithoutAgency = vehicleIdParts[1];
         var blockIdWithoutAgency = blockId.split("_")[1];
 		var routeName = activity.MonitoredVehicleJourney.LineRef;
-		var hasRealtime = activity.MonitoredVehicleJourney.Monitored;
+		var isMonitored = activity.MonitoredVehicleJourney.Monitored;
 
 		var html = '<div id="' + popupContainerId + '" class="popup">';
 		
-		// Don't show Vehicle Id if no Realtime data
-		if(typeof hasRealtime === 'undefined' || hasRealtime === null || hasRealtime == false){
-			hasRealtime = false;
-			vehicleIdWithoutAgency = 'N/A';
-		}
+		var hasRealtime = isVehicleMonitored(isMonitored);
+		var hasBlockId = showBlockId(blockIdWithoutAgency);
+		var formattedVehicleId = getVehicleId(hasRealtime, vehicleIdWithoutAgency, blockIdWithoutAgency);
+
 		
 		// header
 		html += '<div class="header vehicle">';
 		html += '<p class="title">' + activity.MonitoredVehicleJourney.PublishedLineName + " " + activity.MonitoredVehicleJourney.DestinationName + '</p><p>';
-        //don't show block id if there is none or if config says no
-        if (OBA.Config.showBlockIdInVehiclePopup == false || typeof blockIdWithoutAgency === 'undefined' || blockIdWithoutAgency === null) {
-            html += '<span class="type">Vehicle #' + vehicleIdWithoutAgency + '</span>';
-        }
-        else {
-            html += '<span class="type">Vehicle #' + vehicleIdWithoutAgency + ' - ' + blockIdWithoutAgency + '</span>';
-        }
+		html += '<span class="type">Vehicle #' + formattedVehicleId + '</span>';
+
 		var updateTimestamp = OBA.Util.ISO8601StringToDate(activity.RecordedAtTime).getTime();
 		var updateTimestampReference = OBA.Util.ISO8601StringToDate(r.Siri.ServiceDelivery.ResponseTimestamp).getTime();
 
@@ -302,7 +297,17 @@ OBA.Popups = (function() {
 
         }
 
-        // service available at stop
+		var prevHeadwayText = getPrevHeadwayText(vehicleId);
+        if(prevHeadwayText != null){
+			html += '<p class="adherence"> ' + prevHeadwayText + '</p>';
+		}
+
+		var nextHeadwayText = getNextHeadwayText(vehicleId);
+		if(nextHeadwayText != null){
+			html += '<p class="adherence"> ' + nextHeadwayText + '</p>';
+		}
+
+		// service available at stop
 		if(typeof activity.MonitoredVehicleJourney.MonitoredCall === 'undefined' && (
 			(typeof activity.MonitoredVehicleJourney.OnwardCalls === 'undefined'
 				|| typeof activity.MonitoredVehicleJourney.OnwardCalls.OnwardCall === 'undefined') 
@@ -382,6 +387,8 @@ OBA.Popups = (function() {
 		
 		return content.get(0);
 	}
+
+
 
 	function getStopContentForResponse(r, popupContainerId, marker, routeFilter) {
 		var siri = r.siri;
@@ -700,6 +707,67 @@ OBA.Popups = (function() {
 		stopBubbleTrigger = null;
 		return null;
 	}
+
+
+	// Helper Functions
+	function isVehicleMonitored(monitored){
+		if(typeof monitored === 'undefined' || monitored === null || monitored == false){
+			return false;
+		}
+		return true;
+	}
+
+	function showBlockId(blockIdWithoutAgency){
+		if (OBA.Config.showBlockIdInVehiclePopup == false || typeof blockIdWithoutAgency === 'undefined' || blockIdWithoutAgency === null) {
+			return false;
+		}
+		return true;
+	}
+
+	function getVehicleId(hasRealtime, vehicleIdWithoutAgency, blockIdWithoutAgency){
+
+		var hasValidBlockId = showBlockId(blockIdWithoutAgency);
+		var vehicleId = 'N/A';
+
+		if(hasRealtime){
+			vehicleId = vehicleIdWithoutAgency;
+		}
+		if(hasValidBlockId){
+			vehicleId += ' - ' + blockIdWithoutAgency
+		}
+		return vehicleId;
+
+	}
+
+	function getPrevHeadwayText(vehicleId){
+		var headway = OBA.Headway.getHeadwayByVehicleId(vehicleId);
+
+		var prevHeadwayTime = headway.prevHeadway;
+		var prevVehicleId = headway.prevVehicleId;
+		var prevBlockId = headway.prevBlockId;
+		var hasRealtime = headway.hasRealtime;
+
+
+		if(typeof prevHeadwayTime != 'undefined' && prevHeadwayTime != null && typeof prevVehicleId != 'undefined'){
+			return prevHeadwayTime + ' ahead of Vehicle #' + getVehicleId(hasRealtime, prevVehicleId, prevBlockId);
+		}
+		return null;
+	}
+
+	function getNextHeadwayText(vehicleId){
+		var headway = OBA.Headway.getHeadwayByVehicleId(vehicleId);
+
+		var nextHeadwayTime = headway.nextHeadway;
+		var nextVehicleId = headway.nextVehicleId;
+		var nextBlockId = headway.nextBlockId;
+		var hasRealtime = headway.hasRealtime;
+
+		if(typeof nextHeadwayTime != 'undefined' && nextHeadwayTime != null && typeof nextVehicleId != 'undefined'){
+			return nextHeadwayTime + ' behind Vehicle #' + getVehicleId(hasRealtime, nextVehicleId, nextBlockId);
+		}
+		return null;
+	}
+
 
 	//////////////////// CONSTRUCTOR /////////////////////
 

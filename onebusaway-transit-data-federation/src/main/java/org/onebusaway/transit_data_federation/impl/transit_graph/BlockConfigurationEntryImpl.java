@@ -21,6 +21,7 @@ import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.onebusaway.realtime.api.OccupancyStatus;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
@@ -132,6 +133,12 @@ public class BlockConfigurationEntryImpl implements BlockConfigurationEntry,
     StopTimeEntry stopTime = stopTimes.get(stopTimeIndex);
 
     return blockTrip.getDistanceAlongBlock() + stopTime.getShapeDistTraveled();
+  }
+
+  @Override
+  public OccupancyStatus getOccupancyForIndex(int index) {
+    StopTimeEntry stopTime = getStopTimeForIndex(index);
+    return stopTime.getHistoricalOccupancy();
   }
 
   @Override

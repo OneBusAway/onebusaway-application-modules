@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.onebusaway.nextbus.impl;
+package org.onebusaway.nextbus.impl.cache;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -23,7 +23,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
 
-import org.onebusaway.nextbus.service.CacheService;
+import org.onebusaway.nextbus.service.cache.CacheService;
 import org.onebusaway.transit_data.model.AgencyBean;
 import org.onebusaway.transit_data.model.StopBean;
 import org.springframework.stereotype.Component;

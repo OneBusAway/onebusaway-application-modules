@@ -589,7 +589,9 @@ public class BundleBuildingServiceImpl implements BundleBuildingService {
       beans.put("entityReplacementStrategyFactory", erFactory.getBeanDefinition());
       
       BeanDefinitionBuilder er = BeanDefinitionBuilder.genericBeanDefinition();
-      er.setFactoryBean("entityReplacementStrategyFactory", "create");
+
+      er.getRawBeanDefinition().setFactoryBeanName("entityReplacementStrategyFactory");
+      er.getRawBeanDefinition().setFactoryMethodName("create");
       beans.put("entityReplacementStrategy", er.getBeanDefinition());
       
       response.addStatusMessage("configuration StopMappingUrl=" + stopMappingUrl);
@@ -869,7 +871,9 @@ public class BundleBuildingServiceImpl implements BundleBuildingService {
   private String getStopVerificationURL() {
     String path = null;
     try {
-      path = configurationServiceClient.getItem(null, "admin.stopVerificationUrl");
+      if (configurationServiceClient != null) {
+        path = configurationServiceClient.getItem(null, "admin.stopVerificationUrl");
+      }
     } catch (Exception e) {
       _log.error("configuration service lookup issue:", e); 
     }

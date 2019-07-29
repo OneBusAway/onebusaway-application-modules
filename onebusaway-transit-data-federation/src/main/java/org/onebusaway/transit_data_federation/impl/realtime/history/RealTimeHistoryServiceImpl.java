@@ -25,6 +25,7 @@ import org.onebusaway.transit_data_federation.services.blocks.ScheduledBlockLoca
 import org.onebusaway.transit_data_federation.services.realtime.ArrivalAndDepartureInstance;
 import org.onebusaway.transit_data_federation.services.realtime.RealTimeHistoryService;
 import org.onebusaway.transit_data_federation.services.realtime.ScheduleDeviationHistogram;
+import org.onebusaway.transit_data_federation.services.realtime.ScheduleDeviationHistoryDao;
 import org.onebusaway.transit_data_federation.services.realtime.ScheduleDeviationSamples;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
@@ -42,7 +43,7 @@ import cern.jet.stat.Descriptive;
 @Component
 public class RealTimeHistoryServiceImpl implements RealTimeHistoryService {
 
-  private ScheduleDeviationHistoryDaoImpl _scheduleDeviationHistoryDao;
+  private ScheduleDeviationHistoryDao _scheduleDeviationHistoryDao;
 
   private int _predictionLookahead = 20 * 60;
 
@@ -51,7 +52,7 @@ public class RealTimeHistoryServiceImpl implements RealTimeHistoryService {
 
   @Autowired
   public void setScheduleDeviationHistoryDao(
-      ScheduleDeviationHistoryDaoImpl scheduleDeviationHistoryDao) {
+          ScheduleDeviationHistoryDao scheduleDeviationHistoryDao) {
     _scheduleDeviationHistoryDao = scheduleDeviationHistoryDao;
   }
 

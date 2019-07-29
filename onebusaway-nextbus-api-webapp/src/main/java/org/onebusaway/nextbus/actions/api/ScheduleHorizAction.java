@@ -22,15 +22,9 @@ import java.util.List;
 import org.apache.struts2.rest.DefaultHttpHeaders;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.nextbus.model.nextbus.Body;
-import org.onebusaway.nextbus.model.transiTime.Prediction;
-import org.onebusaway.nextbus.model.transiTime.Predictions;
-import org.onebusaway.nextbus.model.transiTime.PredictionsDirection;
-import org.onebusaway.nextbus.model.transiTime.ScheduleHeader;
 import org.onebusaway.nextbus.model.transiTime.ScheduleRoute;
-import org.onebusaway.nextbus.model.transiTime.ScheduleStop;
 import org.onebusaway.nextbus.model.transiTime.ScheduleTableRow;
 import org.onebusaway.nextbus.util.HttpUtil;
-import org.onebusaway.nextbus.util.HttpUtilImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,14 +73,14 @@ public class ScheduleHorizAction extends NextBusApiBase implements
     Body<List<ScheduleRoute>> body = new Body<List<ScheduleRoute>>();
     List<AgencyAndId> routeIds = new ArrayList<AgencyAndId>();
 
-    if (isValid(body, routeIds)) {
+    if (isValid(body, routeIds) && hasServiceUrl(agencyId)) {
 
-      String serviceUrl = getServiceUrl() + agencyId + SCHEDULE_COMMAND + "?";
+      String serviceUrl = getServiceUrl(agencyId) + agencyId + SCHEDULE_COMMAND + "?";
       String route = "r=" + getIdNoAgency(routeId);
       String uri = serviceUrl + route + "&format=" + REQUEST_TYPE;
 
       try {
-        int timeout = _configUtil.getHttpTimeoutSeconds();
+        int timeout = _configMapUtil.getConfig(agencyId).getHttpTimeoutSeconds();
         JsonArray scheduleJson = _httpUtil.getJsonObject(uri, timeout).getAsJsonArray(
             "schedule");
         Type listType = new TypeToken<List<ScheduleRoute>>() {

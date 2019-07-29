@@ -22,5 +22,6 @@ public class StopSearchIndexConstants {
   public static final String FIELD_STOP_ID = "stopId";
   public static final String FIELD_STOP_NAME = "name";
   public static final String FIELD_STOP_CODE = "code";
+  public static final int MAX_LIMIT = 10000;
 
 }

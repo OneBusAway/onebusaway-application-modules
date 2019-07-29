@@ -19,7 +19,7 @@
 -->
 <!DOCTYPE hibernate-configuration PUBLIC
         "-//Hibernate/Hibernate Configuration DTD 3.0//EN"
-        "http://hibernate.sourceforge.net/hibernate-configuration-3.0.dtd">
+        "http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd">
 
 <hibernate-configuration>
 
@@ -38,7 +38,8 @@
         <property name="dialect">org.hibernate.dialect.HSQLDialect</property>
 
         <!-- Enable Hibernate's automatic session context management -->
-        <property name="current_session_context_class">thread</property>
+        <!-- the test is mult-threaded, we can't use thread level context -->
+        <!--<property name="current_session_context_class">thread</property>-->
 
         <!-- Disable the second-level cache  -->
         <property name="cache.provider_class">org.hibernate.cache.HashtableCacheProvider</property>

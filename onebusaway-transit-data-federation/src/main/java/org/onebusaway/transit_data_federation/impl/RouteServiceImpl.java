@@ -16,26 +16,18 @@
  */
 package org.onebusaway.transit_data_federation.impl;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import org.onebusaway.container.cache.Cacheable;
 import org.onebusaway.exceptions.InternalErrorServiceException;
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.gtfs.model.calendar.ServiceDate;
+import org.onebusaway.gtfs.services.calendar.CalendarService;
 import org.onebusaway.transit_data_federation.services.RouteService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockIndexService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockStopTimeIndex;
 import org.onebusaway.transit_data_federation.services.blocks.FrequencyBlockStopTimeIndex;
-import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
-import org.onebusaway.transit_data_federation.services.transit_graph.RouteCollectionEntry;
-import org.onebusaway.transit_data_federation.services.transit_graph.RouteEntry;
-import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
-import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
-import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
-import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -45,6 +37,8 @@ class RouteServiceImpl implements RouteService {
   private TransitGraphDao _transitGraphDao;
 
   private BlockIndexService _blockIndexService;
+
+  private CalendarService _calendarService;
 
   @Autowired
   public void setTransitGraphDao(TransitGraphDao transitGraphDao) {
@@ -56,19 +50,34 @@ class RouteServiceImpl implements RouteService {
     _blockIndexService = blockIndexService;
   }
 
+  @Autowired
+  public void setCalendarService(CalendarService calendarService) { _calendarService = calendarService; }
+
   @Override
   @Cacheable
   public Collection<AgencyAndId> getStopsForRouteCollection(AgencyAndId id) {
+    return getStopsForRouteCollectionForServiceDate(id, null);
+  }
 
+  @Override
+  @Cacheable
+  public Collection<AgencyAndId> getStopsForRouteCollectionForServiceDate(AgencyAndId id, ServiceDate serviceDate) {
     Set<AgencyAndId> stopIds = new HashSet<AgencyAndId>();
     RouteCollectionEntry routeCollectionEntry = _transitGraphDao.getRouteCollectionForId(id);
 
     for (RouteEntry route : routeCollectionEntry.getChildren()) {
       List<TripEntry> trips = route.getTrips();
       for (TripEntry trip : trips) {
+        if (serviceDate != null) {
+          TimeZone serviceTimezone = trip.getServiceId().getTimeZone();
+          boolean isActiveTrip = _calendarService.isLocalizedServiceIdActiveOnDate(trip.getServiceId(), serviceDate.getAsDate(serviceTimezone));
+          if (!isActiveTrip) continue;//skip this trip if not active
+        }
+
         List<StopTimeEntry> stopTimes = trip.getStopTimes();
         for (StopTimeEntry stopTime : stopTimes)
           stopIds.add(stopTime.getStop().getId());
+
       }
     }
 
@@ -78,7 +87,12 @@ class RouteServiceImpl implements RouteService {
   @Override
   @Cacheable
   public Set<AgencyAndId> getRouteCollectionIdsForStop(AgencyAndId stopId) {
+    return getRouteCollectionIdsForStopForServiceDate(stopId, null);
+  }
 
+  @Override
+  @Cacheable
+  public Set<AgencyAndId> getRouteCollectionIdsForStopForServiceDate(AgencyAndId stopId, ServiceDate serviceDate) {
     StopEntry stopEntry = _transitGraphDao.getStopEntryForId(stopId);
     if (stopEntry == null)
       throw new InternalErrorServiceException("no such stop: id=" + stopId);
@@ -90,6 +104,13 @@ class RouteServiceImpl implements RouteService {
     for (BlockStopTimeIndex blockStopTimeIndex : indices) {
       for (BlockTripEntry blockTrip : blockStopTimeIndex.getTrips()) {
         TripEntry trip = blockTrip.getTrip();
+
+        if (serviceDate != null) {
+          TimeZone serviceTimezone = trip.getServiceId().getTimeZone();
+          boolean isActiveTrip = _calendarService.isLocalizedServiceIdActiveOnDate(trip.getServiceId(), serviceDate.getAsDate(serviceTimezone));
+          if (!isActiveTrip) continue;//skip this trip if not active
+        }
+
         routeCollectionIds.add(trip.getRouteCollection().getId());
       }
     }
@@ -99,6 +120,13 @@ class RouteServiceImpl implements RouteService {
     for (FrequencyBlockStopTimeIndex blockStopTimeIndex : frequencyIndices) {
       for (BlockTripEntry blockTrip : blockStopTimeIndex.getTrips()) {
         TripEntry trip = blockTrip.getTrip();
+
+        if (serviceDate != null) {
+          TimeZone serviceTimezone = trip.getServiceId().getTimeZone();
+          boolean isActiveTrip = _calendarService.isLocalizedServiceIdActiveOnDate(trip.getServiceId(), serviceDate.getAsDate(serviceTimezone));
+          if (!isActiveTrip) continue;//skip this trip if not active
+        }
+
         routeCollectionIds.add(trip.getRouteCollection().getId());
       }
     }

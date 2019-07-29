@@ -17,12 +17,20 @@
 package org.onebusaway.transit_data_federation.bundle.tasks;
 
 import java.io.IOException;
+import java.util.Arrays;
 
+import org.apache.lucene.analysis.CharArraySet;
+import org.apache.lucene.analysis.miscellaneous.LimitTokenCountAnalyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
+import org.apache.lucene.document.StringField;
+import org.apache.lucene.document.TextField;
 import org.apache.lucene.index.IndexWriter;
-import org.apache.lucene.queryParser.ParseException;
+import org.apache.lucene.index.IndexWriterConfig;
+import org.apache.lucene.queryparser.classic.ParseException;
+import org.apache.lucene.store.Directory;
+import org.apache.lucene.store.FSDirectory;
 import org.onebusaway.container.refresh.RefreshService;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.impl.RefreshableResources;
@@ -31,6 +39,7 @@ import org.onebusaway.transit_data_federation.model.narrative.RouteCollectionNar
 import org.onebusaway.transit_data_federation.services.FederatedTransitDataBundle;
 import org.onebusaway.transit_data_federation.services.RouteCollectionSearchIndexConstants;
 import org.onebusaway.transit_data_federation.services.RouteCollectionSearchService;
+import org.onebusaway.transit_data_federation.services.StopSearchIndexConstants;
 import org.onebusaway.transit_data_federation.services.narrative.NarrativeService;
 import org.onebusaway.transit_data_federation.services.transit_graph.RouteCollectionEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
@@ -95,15 +104,20 @@ public class GenerateRouteCollectionSearchIndexTask implements Runnable {
   }
 
   private void buildIndex() throws IOException, ParseException {
-    IndexWriter writer = new IndexWriter(_bundle.getRouteSearchIndexPath(),
-        new StandardAnalyzer(ENGLISH_STOP_WORDS), true, IndexWriter.MaxFieldLength.LIMITED);
+    LimitTokenCountAnalyzer limitTokenCountAnalyzer
+            = new LimitTokenCountAnalyzer(
+                    new StandardAnalyzer(new CharArraySet(Arrays.asList(ENGLISH_STOP_WORDS), true)),
+            StopSearchIndexConstants.MAX_LIMIT);
+    Directory index = FSDirectory.open(_bundle.getRouteSearchIndexPath().toPath());
+    IndexWriterConfig config = new IndexWriterConfig(limitTokenCountAnalyzer);
+    IndexWriter writer = new IndexWriter(index, config);
+
     for (RouteCollectionEntry routeCollection : _transitGraphDao.getAllRouteCollections()) {
       RouteCollectionNarrative narrative = _narrativeService.getRouteCollectionForId(routeCollection.getId());
       Document document = getRouteCollectionAsDocument(routeCollection,
           narrative);
       writer.addDocument(document);
     }
-    writer.optimize();
     writer.close();
 
     _refreshService.refresh(RefreshableResources.ROUTE_COLLECTION_SEARCH_DATA);
@@ -117,25 +131,25 @@ public class GenerateRouteCollectionSearchIndexTask implements Runnable {
     Document document = new Document();
 
     // Route Collection
-    document.add(new Field(
+    document.add(new StringField(
         RouteCollectionSearchIndexConstants.FIELD_ROUTE_COLLECTION_AGENCY_ID,
-        routeCollectionId.getAgencyId(), Field.Store.YES, Field.Index.NO));
-    document.add(new Field(
+        routeCollectionId.getAgencyId(), Field.Store.YES));
+    document.add(new StringField(
         RouteCollectionSearchIndexConstants.FIELD_ROUTE_COLLECTION_ID,
-        routeCollectionId.getId(), Field.Store.YES, Field.Index.NO));
+        routeCollectionId.getId(), Field.Store.YES));
 
     if (isValue(narrative.getShortName()))
-      document.add(new Field(
+      document.add(new TextField(
           RouteCollectionSearchIndexConstants.FIELD_ROUTE_SHORT_NAME,
-          narrative.getShortName(), Field.Store.YES, Field.Index.ANALYZED));
+          narrative.getShortName(), Field.Store.YES));
     if (isValue(narrative.getLongName()))
-      document.add(new Field(
+      document.add(new TextField(
           RouteCollectionSearchIndexConstants.FIELD_ROUTE_LONG_NAME,
-          narrative.getLongName(), Field.Store.NO, Field.Index.ANALYZED));
+          narrative.getLongName(), Field.Store.NO));
     if (isValue(narrative.getDescription()))
-      document.add(new Field(
+      document.add(new TextField(
           RouteCollectionSearchIndexConstants.FIELD_ROUTE_DESCRIPTION,
-          narrative.getDescription(), Field.Store.NO, Field.Index.ANALYZED));
+          narrative.getDescription(), Field.Store.NO));
 
     return document;
   }

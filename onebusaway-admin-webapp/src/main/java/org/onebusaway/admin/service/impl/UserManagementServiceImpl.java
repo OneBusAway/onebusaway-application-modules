@@ -15,6 +15,7 @@
  */
 package org.onebusaway.admin.service.impl;
 
+import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -40,10 +41,9 @@ import org.onebusaway.users.services.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.orm.hibernate3.HibernateCallback;
-import org.springframework.orm.hibernate3.HibernateTemplate;
 import org.springframework.security.authentication.encoding.PasswordEncoder;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Default implementation of {@link UserManagementService}
@@ -53,7 +53,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class UserManagementServiceImpl implements UserManagementService {
 
-	private HibernateTemplate hibernateTemplate;
+	private SessionFactory _sessionFactory;
 	private StandardAuthoritiesService authoritiesService;
     private UserPropertiesService userPropertiesService;
 	private UserDao userDao;
@@ -65,67 +65,41 @@ public class UserManagementServiceImpl implements UserManagementService {
 	
 	@Override
 	@SuppressWarnings("unchecked")
+	@Transactional(readOnly=true)
 	public List<String> getUserNames(final String searchString) {
 		
 		final String hql = "select ui.id.value from UserIndex ui where ui.id.value like :searchString and " + 
 			 "ui.id.type = 'username'";
 		
-		List<String> matchingUserNames = hibernateTemplate.execute(new HibernateCallback<List<String>>() {
-
-			@Override
-			public List<String> doInHibernate(Session session)
-					throws HibernateException, SQLException {
-				Query query = session.createQuery(hql);
-				query.setParameter("searchString", "%" +searchString + "%");
-				return query.list();
-			}
-		});
-		
-		log.debug("Returning user names matching with string : {}", searchString);
-		
-		return matchingUserNames;
+		Query query = getSession().createQuery(hql);
+		query.setParameter("searchString", "%" +searchString + "%");
+		return query.list();
 	}
 
 	@Override
+	@Transactional(readOnly=true)
     public Integer getUserDetailsCount() {
-        Integer count = hibernateTemplate.execute(new HibernateCallback<Integer>() {
-            @SuppressWarnings("unchecked")
-            @Override
-            public Integer doInHibernate(Session session)
-                    throws HibernateException, SQLException {
-                Criteria criteria = session.createCriteria(User.class)
-                        .createCriteria("userIndices")
-                        .add(Restrictions.eq("id.type", UserIndexTypes.USERNAME))
-						.setProjection(Projections.rowCount());
-                List<User> users = criteria.list();
-                Integer count = (Integer) criteria.uniqueResult();
-                return count;
-            }
-        });
-
-        return count;
+		Criteria criteria = getSession().createCriteria(User.class)
+				.createCriteria("userIndices")
+				.add(Restrictions.eq("id.type", UserIndexTypes.USERNAME))
+				.setProjection(Projections.rowCount());
+		List<User> users = criteria.list();
+		Long lcount = (Long)criteria.uniqueResult();
+		Integer count = BigDecimal.valueOf(lcount).intValueExact(); // do some range checking on the cast
+		return count;
     }
 
 	@Override
+	@Transactional(readOnly=true)
 	public List<UserDetail> getUserDetails(final int start, final int maxResults) {
 
 		List<UserDetail> userDetails = new ArrayList<UserDetail>();
-
-		List<User> users = hibernateTemplate.execute(new HibernateCallback<List<User>>() {
-
-			@SuppressWarnings("unchecked")
-			@Override
-			public List<User> doInHibernate(Session session)
-					throws HibernateException, SQLException {
-				Criteria criteria = session.createCriteria(User.class)
-						.createCriteria("userIndices")
-						.add(Restrictions.eq("id.type", UserIndexTypes.USERNAME))
-				        .setFirstResult(start)
-                        .setMaxResults(maxResults);
-				List<User> users = criteria.list();
-				return users;
-			}
-		});
+		Criteria criteria = getSession().createCriteria(User.class)
+				.createCriteria("userIndices")
+				.add(Restrictions.eq("id.type", UserIndexTypes.USERNAME))
+				.setFirstResult(start)
+				.setMaxResults(maxResults);
+		List<User> users = criteria.list();
 
 		if(!users.isEmpty()) {
 			for (User user : users) {
@@ -141,23 +115,14 @@ public class UserManagementServiceImpl implements UserManagementService {
 	}
 
 	@Override
+	@Transactional(readOnly=true)
 	public List<UserDetail> getActiveUsersDetails() {
 
 		List<UserDetail> userDetails = new ArrayList<UserDetail>();
-
-		List<User> users = hibernateTemplate.execute(new HibernateCallback<List<User>>() {
-
-			@SuppressWarnings("unchecked")
-			@Override
-			public List<User> doInHibernate(Session session)
-					throws HibernateException, SQLException {
-				Criteria criteria = session.createCriteria(User.class)
-						.createCriteria("userIndices")
-						.add(Restrictions.eq("id.type", UserIndexTypes.USERNAME));
-				List<User> users = criteria.list();
-				return users;
-			}
-		});
+		Criteria criteria = getSession().createCriteria(User.class)
+				.createCriteria("userIndices")
+				.add(Restrictions.eq("id.type", UserIndexTypes.USERNAME));
+		List<User> users = criteria.list();
 
 		if(!users.isEmpty()) {
 			for (User user : users) {
@@ -176,23 +141,14 @@ public class UserManagementServiceImpl implements UserManagementService {
 	}
 
     @Override
+	@Transactional(readOnly=true)
     public List<UserDetail> getInactiveUsersDetails() {
 
         List<UserDetail> userDetails = new ArrayList<UserDetail>();
-
-        List<User> users = hibernateTemplate.execute(new HibernateCallback<List<User>>() {
-
-            @SuppressWarnings("unchecked")
-            @Override
-            public List<User> doInHibernate(Session session)
-                    throws HibernateException, SQLException {
-                Criteria criteria = session.createCriteria(User.class)
-                        .createCriteria("userIndices")
-                        .add(Restrictions.eq("id.type", UserIndexTypes.USERNAME));
-                List<User> users = criteria.list();
-                return users;
-            }
-        });
+		Criteria criteria = getSession().createCriteria(User.class)
+				.createCriteria("userIndices")
+				.add(Restrictions.eq("id.type", UserIndexTypes.USERNAME));
+		List<User> users = criteria.list();
 
         if(!users.isEmpty()) {
             for (User user : users) {
@@ -211,20 +167,12 @@ public class UserManagementServiceImpl implements UserManagementService {
     }
 
 	@Override
+	@Transactional(readOnly=true)
 	public UserDetail getUserDetail(final String userName) {
-		List<User> users = hibernateTemplate.execute(new HibernateCallback<List<User>>() {
-
-			@SuppressWarnings("unchecked")
-			@Override
-			public List<User> doInHibernate(Session session)
-					throws HibernateException, SQLException {
-				Criteria criteria = session.createCriteria(User.class)
-						.createCriteria("userIndices")
-						.add(Restrictions.like("id.value", userName));
-				List<User> users = criteria.list();
-				return users;
-			}
-		});
+		Criteria criteria = getSession().createCriteria(User.class)
+				.createCriteria("userIndices")
+				.add(Restrictions.like("id.value", userName));
+		List<User> users = criteria.list();
 
 		UserDetail userDetail = null;
 		
@@ -259,6 +207,7 @@ public class UserManagementServiceImpl implements UserManagementService {
 	}
 
 	@Override
+	@Transactional
 	public void disableOperatorRole(User user) {
 		UserRole operatorRole = authoritiesService.getUserRoleForName(StandardAuthoritiesService.USER);
 		
@@ -270,6 +219,7 @@ public class UserManagementServiceImpl implements UserManagementService {
 	}
 	
 	@Override
+	@Transactional
 	public boolean createUser(String userName, String password, boolean admin) {
 		UserIndex userIndex = userService.getOrCreateUserForUsernameAndPassword(userName, password);
 
@@ -288,13 +238,15 @@ public class UserManagementServiceImpl implements UserManagementService {
 		
 		return true;
 	}
-	
+
+
 	public boolean createUser(String userName, String password, String role) {
 		boolean admin = (role == StandardAuthoritiesService.ADMINISTRATOR);
 		return createUser(userName, password, admin);
 	}
 	
 	@Override
+	@Transactional
 	public boolean updateUser(UserDetail userDetail) {
 		
 		User user = userService.getUserForId(userDetail.getId());
@@ -324,6 +276,7 @@ public class UserManagementServiceImpl implements UserManagementService {
 
 	//Marks the user as inactive, can activate again
 	@Override
+	@Transactional
     public boolean inactivateUser(UserDetail userDetail) {
         User user = userService.getUserForId(userDetail.getId());
 
@@ -341,6 +294,7 @@ public class UserManagementServiceImpl implements UserManagementService {
 
     //Marks the user as active
     @Override
+	@Transactional
     public boolean activateUser(UserDetail userDetail) {
         User user = userService.getUserForId(userDetail.getId());
 
@@ -358,6 +312,7 @@ public class UserManagementServiceImpl implements UserManagementService {
 
     //deletes the user
 	@Override
+	@Transactional
 	public boolean deactivateUser(UserDetail userDetail) {
 		User user = userService.getUserForId(userDetail.getId());
 		
@@ -406,8 +361,13 @@ public class UserManagementServiceImpl implements UserManagementService {
 
 	@Autowired
 	public void setSesssionFactory(SessionFactory sessionFactory) {
-		hibernateTemplate = new HibernateTemplate(sessionFactory);
+		_sessionFactory = sessionFactory;
 	}
+
+	private Session getSession(){
+		return _sessionFactory.getCurrentSession();
+	}
+
 
 	/**
 	 * @param authoritiesService the authoritiesService to set

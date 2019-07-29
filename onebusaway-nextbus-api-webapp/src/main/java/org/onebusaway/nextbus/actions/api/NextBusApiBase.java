@@ -15,25 +15,17 @@
  */
 package org.onebusaway.nextbus.actions.api;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLConnection;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.nextbus.impl.util.ConfigurationMapUtil;
 import org.onebusaway.nextbus.impl.util.ConfigurationUtil;
 import org.onebusaway.nextbus.model.nextbus.Body;
 import org.onebusaway.nextbus.model.nextbus.BodyError;
-import org.onebusaway.nextbus.service.CacheService;
+import org.onebusaway.nextbus.service.cache.CacheService;
 import org.onebusaway.nextbus.service.TdsMappingService;
 import org.onebusaway.nextbus.validation.ErrorMsg;
 import org.onebusaway.transit_data.model.AgencyBean;
@@ -52,7 +44,7 @@ public class NextBusApiBase {
   protected TdsMappingService _tdsMappingService;
 
   @Autowired
-  protected ConfigurationUtil _configUtil;
+  protected ConfigurationMapUtil _configMapUtil;
 
   @Autowired
   private CacheService _cache;
@@ -66,9 +58,9 @@ public class NextBusApiBase {
   public static final String REQUEST_TYPE = "json";
 
   // CACHE
-  
+
   public AgencyBean getCachedAgencyBean(String id) {
-    if (_configUtil.getAgencyMapper().values().contains(id)) {
+    if (_configMapUtil.getConfig(id) != null) {
       AgencyBean bean = _cache.getAgency(id);
       if (bean == null) {
         bean = _transitDataService.getAgency(id);
@@ -86,7 +78,7 @@ public class NextBusApiBase {
       if (_cache.isInvalidStop(id)) {
         return null;
       }
-      
+
       try {
         stop = _transitDataService.getStop(id);
       } catch (Throwable t) {
@@ -102,7 +94,7 @@ public class NextBusApiBase {
   }
 
   // VALIDATION
-  
+
   protected boolean isValidAgency(Body body, String agencyId) {
     if (agencyId == null) {
       body.getErrors().add(new BodyError(ErrorMsg.AGENCY_NULL.getDescription()));
@@ -118,7 +110,7 @@ public class NextBusApiBase {
 
   protected boolean isValidAgency(String agencyId) {
     try {
-      return (getCachedAgencyBean(agencyId) != null);
+      return getCachedAgencyBean(agencyId) != null;
     } catch (Exception e) {
       // This means the agency id is not valid.
     }
@@ -278,8 +270,9 @@ public class NextBusApiBase {
   // HELPER METHODS
   
   protected String getMappedAgency(String agencyId) {
-    if (_configUtil.getAgencyMapper().containsKey(agencyId.toUpperCase()))
-      return _configUtil.getAgencyMapper().get(agencyId.toUpperCase());
+    if (!_configMapUtil.containsId(agencyId)) return agencyId;
+    if (_configMapUtil.getConfig(agencyId).getAgencyMapper().containsKey(agencyId.toUpperCase()))
+      return _configMapUtil.getConfig(agencyId).getAgencyMapper().get(agencyId.toUpperCase());
     return agencyId;
   }
   
@@ -306,10 +299,19 @@ public class NextBusApiBase {
     return id;
   }
 
-  public String getServiceUrl() {
-    String host = _configUtil.getTransiTimeHost();
-    String port = _configUtil.getTransiTimePort();
-    String apiKey = _configUtil.getTransiTimeKey();
+  public boolean hasServiceUrl(String gtfsAgencyId) {
+    return _configMapUtil.getConfig(gtfsAgencyId) != null;
+  }
+
+  public String getServiceUrl(String gtfsAgencyId) {
+    ConfigurationUtil configUtil = _configMapUtil.getConfig(gtfsAgencyId);
+    if (configUtil == null) {
+      return null;
+    }
+
+    String host = configUtil.getTransiTimeHost();
+    String port = configUtil.getTransiTimePort();
+    String apiKey = configUtil.getTransiTimeKey();
     String serviceUrl = "http://" + host + ":" + port + "/api/v1/key/" + apiKey
         + "/agency/";
     return serviceUrl;

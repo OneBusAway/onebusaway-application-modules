@@ -64,7 +64,7 @@ public class IndexAction extends OneBusAwayEnterpriseActionSupport implements
 			try {
 				NycWikiPageWrapper page = new NycWikiPageWrapper(
 						_wikiDocumentService
-								.getWikiPage(namespace, name, false));
+								.getWikiPage(namespace, name, getLocale(),false));
 
 				if (page.pageExists()) {
 					content = _wikiRenderingService.renderPage(page);

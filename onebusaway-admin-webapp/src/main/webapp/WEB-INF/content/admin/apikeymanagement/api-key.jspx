@@ -99,6 +99,10 @@
                     <s:actionmessage />
                     <s:fielderror />
                 </div>
+                <input type="hidden"
+                       id="csrfField"
+                       name="${_csrf.parameterName}"
+                       value="${_csrf.token}"/>
 			</s:form>
 		</div>
 	</div>

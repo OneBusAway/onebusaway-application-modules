@@ -17,7 +17,7 @@ package org.onebusaway.transit_data_federation.services;
 
 import java.io.IOException;
 
-import org.apache.lucene.queryParser.ParseException;
+import org.apache.lucene.queryparser.classic.ParseException;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.model.SearchResult;
 import org.onebusaway.transit_data_federation.services.transit_graph.RouteCollectionEntry;
@@ -44,5 +44,5 @@ public interface RouteCollectionSearchService {
    */
   public SearchResult<AgencyAndId> searchForRoutesByName(String nameQuery,
       int maxResultCount, double minScoreToKeep) throws IOException,
-      ParseException;
+          ParseException;
 }

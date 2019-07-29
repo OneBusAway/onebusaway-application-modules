@@ -15,8 +15,7 @@
  */
 package org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
+import static org.junit.Assert.*;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.block;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.blockConfiguration;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.serviceIds;
@@ -26,10 +25,10 @@ import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.trip;
 
 import com.google.transit.realtime.GtfsRealtime;
+import org.onebusaway.realtime.api.EVehicleStatus;
 import org.onebusaway.realtime.api.VehicleLocationRecord;
 import org.onebusaway.transit_data_federation.impl.transit_graph.BlockEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopEntryImpl;
-import org.onebusaway.transit_data_federation.impl.transit_graph.StopTimeEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.TripEntryImpl;
 import org.onebusaway.transit_data_federation.services.blocks.BlockCalendarService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
@@ -292,7 +291,7 @@ public class GtfsRealtimeTripLibraryTest {
     
     StopTimeUpdate.Builder stopTimeUpdate = stopTimeUpdateWithDepartureDelay("stopA", 180);
    
-    TripUpdate.Builder tripUpdate = tripUpdate("tripA", (_library.getCurrentTime() + day)/1000, 
+    TripUpdate.Builder tripUpdate = tripUpdate("tripA", (_library.getCurrentTime() + day)/1000,
         120, stopTimeUpdate);
 
     TripEntryImpl tripA = trip("tripA");
@@ -340,6 +339,60 @@ public class GtfsRealtimeTripLibraryTest {
     long departure = tpr.getTimepointPredictedDepartureTime();
     assertEquals(departure, time(7, 33) * 1000 + day); // 7:30 + 3 min delay + on next day
   }
+
+  @Test
+  public void testHandlingScheduleRealtionshipSkipped() {
+
+    _library.setCurrentTime(time(7, 31) * 1000);
+
+    TripEntryImpl tripA = trip("tripA");
+    stopTime(0, stop("stopA", 0, 0), tripA, time(7, 30), 0.0);
+    stopTime(1, stop("stopB", 0, 0), tripA, time(7, 40), 10.0);
+    BlockEntryImpl blockA = block("blockA");
+    BlockConfigurationEntry blockConfigA = blockConfiguration(blockA,
+        serviceIds("s1"), tripA);
+    BlockInstance blockInstanceA = new BlockInstance(blockConfigA, 0L);
+
+    StopTimeUpdate.Builder stopTimeUpdateBuilder = stopTimeUpdateWithScheduleRelationship("stopB", 1);
+    TripUpdate.Builder tripUpdateBuilder = tripUpdate("tripA", _library.getCurrentTime(), 0, stopTimeUpdateBuilder);
+
+    Mockito.when(_entitySource.getTrip("tripA")).thenReturn(tripA);
+
+    Mockito.when(
+        _blockCalendarService.getActiveBlocks(Mockito.eq(blockA.getId()),
+            Mockito.anyLong(), Mockito.anyLong())).thenReturn(Arrays.asList(blockInstanceA));
+
+    StopTimeUpdate stopTimeUpdate = stopTimeUpdateBuilder.build();
+    TripUpdate tripUpdate = tripUpdateBuilder.build();
+
+    FeedMessage.Builder TU = createFeed();
+    TU.addEntity(feed(tripUpdateBuilder));
+
+    FeedMessage.Builder VP = createFeed();
+
+    List<CombinedTripUpdatesAndVehiclePosition> updates =
+        _library.groupTripUpdatesAndVehiclePositions(TU.build(), VP.build());
+
+    CombinedTripUpdatesAndVehiclePosition update = updates.get(0);
+
+    VehicleLocationRecord record = _library.createVehicleLocationRecordForUpdate(update);
+
+
+
+    assertTrue(stopTimeUpdate.hasScheduleRelationship());
+    assertEquals(EVehicleStatus.SKIPPED.toString(), stopTimeUpdate.getScheduleRelationship().name());
+    assertEquals(EVehicleStatus.SKIPPED.toString(), tripUpdate.getStopTimeUpdate(0).getScheduleRelationship().name());
+    assertEquals(EVehicleStatus.SCHEDULED.toString(), tripUpdate.getTrip().getScheduleRelationship().name());
+    assertEquals(EVehicleStatus.SCHEDULED.toString(), tripUpdate.getTrip().getScheduleRelationship().name());
+
+    assertEquals("blockA", record.getBlockId().getId());
+
+    // TODO: How should skipped stops be handled?
+
+
+  }
+
+
   
   /**
    * This method tests that we create timepoint prediction records for stops
@@ -561,6 +614,13 @@ public class GtfsRealtimeTripLibraryTest {
     StopTimeEvent.Builder stopTimeEvent = StopTimeEvent.newBuilder();
     stopTimeEvent.setDelay(delay);
     stopTimeUpdate.setDeparture(stopTimeEvent);
+    return stopTimeUpdate;
+  }
+
+  private static StopTimeUpdate.Builder stopTimeUpdateWithScheduleRelationship(String stopId, int status) {
+    StopTimeUpdate.Builder stopTimeUpdate = StopTimeUpdate.newBuilder();
+    stopTimeUpdate.setStopId(stopId);
+    stopTimeUpdate.setScheduleRelationship(StopTimeUpdate.ScheduleRelationship.valueOf(status));
     return stopTimeUpdate;
   }
 

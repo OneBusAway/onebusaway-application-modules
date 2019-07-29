@@ -18,11 +18,17 @@ package org.onebusaway.transit_data_federation.bundle.tasks;
 
 import java.io.IOException;
 
+import org.apache.lucene.analysis.miscellaneous.LimitTokenCountAnalyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
+import org.apache.lucene.document.StringField;
+import org.apache.lucene.document.TextField;
 import org.apache.lucene.index.IndexWriter;
-import org.apache.lucene.queryParser.ParseException;
+import org.apache.lucene.index.IndexWriterConfig;
+import org.apache.lucene.queryparser.classic.ParseException;
+import org.apache.lucene.store.Directory;
+import org.apache.lucene.store.FSDirectory;
 import org.onebusaway.container.refresh.RefreshService;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.impl.RefreshableResources;
@@ -85,14 +91,17 @@ public class GenerateStopSearchIndexTask implements Runnable {
   }
 
   private void buildIndex() throws IOException, ParseException {
-    IndexWriter writer = new IndexWriter(_bundle.getStopSearchIndexPath(),
-        new StandardAnalyzer(), true, IndexWriter.MaxFieldLength.LIMITED);
+    LimitTokenCountAnalyzer limitTokenCountAnalyzer
+            = new LimitTokenCountAnalyzer(new StandardAnalyzer(), StopSearchIndexConstants.MAX_LIMIT);
+    Directory index = FSDirectory.open(_bundle.getStopSearchIndexPath().toPath());
+    IndexWriterConfig config = new IndexWriterConfig(limitTokenCountAnalyzer);
+    IndexWriter writer = new IndexWriter(index, config);
+
     for (StopEntry stopEntry : _transitGraphDao.getAllStops()) {
       StopNarrative narrative = _narrativeService.getStopForId(stopEntry.getId());
       Document document = getStopAsDocument(stopEntry, narrative);
       writer.addDocument(document);
     }
-    writer.optimize();
     writer.close();
     _refreshService.refresh(RefreshableResources.STOP_SEARCH_DATA);
   }
@@ -104,22 +113,22 @@ public class GenerateStopSearchIndexTask implements Runnable {
 
     // Id
     AgencyAndId id = stopEntry.getId();
-    document.add(new Field(StopSearchIndexConstants.FIELD_AGENCY_ID,
-        id.getAgencyId(), Field.Store.YES, Field.Index.NO));
-    document.add(new Field(StopSearchIndexConstants.FIELD_STOP_ID, id.getId(),
-        Field.Store.YES, Field.Index.ANALYZED));
+    document.add(new StringField(StopSearchIndexConstants.FIELD_AGENCY_ID,
+        id.getAgencyId(), Field.Store.YES));
+    document.add(new TextField(StopSearchIndexConstants.FIELD_STOP_ID, id.getId(),
+        Field.Store.YES));
 
     // Code
     if (narrative.getCode() != null && narrative.getCode().length() > 0)
-      document.add(new Field(StopSearchIndexConstants.FIELD_STOP_CODE,
-          narrative.getCode(), Field.Store.NO, Field.Index.ANALYZED));
+      document.add(new StringField(StopSearchIndexConstants.FIELD_STOP_CODE,
+              narrative.getCode(), Field.Store.NO));
     else
-      document.add(new Field(StopSearchIndexConstants.FIELD_STOP_CODE,
-          stopEntry.getId().getId(), Field.Store.NO, Field.Index.ANALYZED));
+      document.add(new TextField(StopSearchIndexConstants.FIELD_STOP_CODE,
+          stopEntry.getId().getId(), Field.Store.NO));
 
     if (narrative.getName() != null && narrative.getName().length() > 0)
-      document.add(new Field(StopSearchIndexConstants.FIELD_STOP_NAME,
-          narrative.getName(), Field.Store.YES, Field.Index.ANALYZED));
+      document.add(new TextField(StopSearchIndexConstants.FIELD_STOP_NAME,
+          narrative.getName(), Field.Store.YES));
 
     return document;
   }

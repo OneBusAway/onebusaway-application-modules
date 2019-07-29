@@ -118,7 +118,7 @@ that define common Hibernate configuration properties.  These properties are eve
 SessionFactory bean:
 
     <!-- Hibernate session factory, where all the pieces above are wired together -->
-    <bean id="sessionFactory" class="org.springframework.orm.hibernate3.annotation.AnnotationSessionFactoryBean" primary="true">
+    <bean id="sessionFactory" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean" primary="true">
         <qualifier value="main" />
         <property name="dataSource" ref="dataSource" />
         <property name="hibernateProperties" ref="hibernateProperties" />

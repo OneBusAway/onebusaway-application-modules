@@ -29,6 +29,7 @@ import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.Stop;
 import org.onebusaway.gtfs.model.StopTime;
+import org.onebusaway.gtfs.serialization.mappings.StopTimeFieldMappingFactory;
 import org.onebusaway.transit_data_federation.bundle.tasks.transit_graph.DistanceAlongShapeLibrary.DistanceAlongShapeException;
 import org.onebusaway.transit_data_federation.bundle.tasks.transit_graph.DistanceAlongShapeLibrary.StopIsTooFarFromShapeException;
 import org.onebusaway.transit_data_federation.impl.shapes.PointAndIndex;
@@ -98,11 +99,13 @@ public class StopTimeEntriesFactory {
 		} else {
 			_log.error("found stopTime without a stop id for tripEntry=" + tripEntry
 					+ "(" + (stopTime.getTrip() == null?"NuLl":stopTime.getTrip().getId()) +")"
-					+ "; stop=" + stopTime.getStopHeadsign() + ":" + stopTime.getArrivalTime() + ":"
-					+ stopTime.getDepartureTime() + ":" + stopTime.getRouteShortName()
+					+ "; stop=" + stopTime.getStopHeadsign() + ":" + StopTimeFieldMappingFactory.getSecondsAsString(stopTime.getArrivalTime()) + ":"
+					+ StopTimeFieldMappingFactory.getSecondsAsString(stopTime.getDepartureTime()) + ":" + stopTime.getRouteShortName()
 					+ "; route=" + (tripEntry.getRoute() == null?"NuLl":tripEntry.getRoute().getId())
 					+ "; blockId=" + (tripEntry.getBlock() == null?"NuLl":tripEntry.getBlock().getId())
-					+ "; stop=" + (stopTime.getStop() == null?"NuLl":stopTime.getId() + ":" + stopTime.getRouteShortName()));
+					+ "; stop=" + (stopTime.getStop() == null?"NuLl":stopTime.getId() + ":" + stopTime.getRouteShortName())
+                    + "; stopTime=" + stopTime.toString()
+            );
 		}
 	}
 

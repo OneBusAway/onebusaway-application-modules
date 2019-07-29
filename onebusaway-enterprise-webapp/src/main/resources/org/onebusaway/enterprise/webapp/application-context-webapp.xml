@@ -21,7 +21,7 @@
 	xmlns:sec="http://www.springframework.org/schema/security"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
            http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd
-           http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-2.0.xsd">
+           http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-4.2.xsd">
            
     <!-- This turns on automatic annotation configuration -->
     <context:annotation-config />
@@ -68,6 +68,7 @@
     </bean>
     
     <bean class="org.onebusaway.enterprise.webapp.actions.status.service.StatusProviderImpl" />
+    <bean class="org.onebusaway.enterprise.webapp.actions.status.service.IcingaItemPersistenceDB" />
 
     <bean id="CommonResources" class="org.onebusaway.presentation.impl.resources.ResourceFactory">
         <property name="name" value="CommonResources" />
@@ -96,5 +97,14 @@
     <bean id="arrivalAndDepartureMessages" class="org.onebusaway.enterprise.webapp.impl.TypedMessagesFactory">
     <property name="messagesClass" value="org.onebusaway.enterprise.webapp.actions.bundles.ArrivalAndDepartureMessages" />
   </bean>
+
+    <bean id="enterpriseHibernateAnnotatedClasses" class="org.onebusaway.container.spring.ListBeanPostProcessor">
+        <property name="target" value="hibernateAnnotatedClasses" />
+        <property name="values">
+            <list>
+                <value>org.onebusaway.enterprise.webapp.actions.status.model.IcingaItem</value>
+            </list>
+        </property>
+    </bean>
     
 </beans>

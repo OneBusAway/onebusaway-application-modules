@@ -49,9 +49,11 @@ import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.blocks.BlockTripInstance;
 import org.onebusaway.transit_data_federation.services.blocks.InstanceState;
+import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlertsService;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.AbstractTransactionalJUnit4SpringContextTests;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.transaction.TransactionConfiguration;
@@ -60,12 +62,13 @@ import org.springframework.transaction.annotation.Transactional;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations={"classpath:service-alerts-data-sources.xml", 
     "classpath:org/onebusaway/transit_data_federation/application-context-services.xml"})
-@TransactionConfiguration(transactionManager="transactionManager")
-@Transactional
+@TestPropertySource(properties = { "bundlePath = /tmp/foo"})
+@Transactional(transactionManager = "transactionManager")
 public class ServiceAlertsServiceImplTest extends AbstractTransactionalJUnit4SpringContextTests {
 
 
-    private ServiceAlertsServiceImpl _service;
+    @Autowired
+    private ServiceAlertsService _service;
     private ServiceAlertsPersistenceDB _persister;
     private SessionFactory _sessionFactory;
 
@@ -79,12 +82,12 @@ public class ServiceAlertsServiceImplTest extends AbstractTransactionalJUnit4Spr
     public void setup() throws IOException {
         ServiceAlertsCache cache = new ServiceAlertsCacheInMemoryImpl();
         _service = new ServiceAlertsServiceImpl();
-        _service.setServiceAlertsCache(cache);
+        ((ServiceAlertsServiceImpl)_service).setServiceAlertsCache(cache);
         _persister = new ServiceAlertsPersistenceDB();
-        _service.setServiceAlertsPersistence(_persister);
+        ((ServiceAlertsServiceImpl)_service).setServiceAlertsPersistence(_persister);
         _persister._refreshInterval = 1000;
         _persister.setSessionFactory(_sessionFactory);
-        assertTrue("we need a template to continue", _persister.getHibernateTemplate() != null);
+
     }
 
   @Test
@@ -569,7 +572,7 @@ public class ServiceAlertsServiceImplTest extends AbstractTransactionalJUnit4Spr
     affectsClause.setAgencyId("1");
     alert1.getAllAffects().add(affectsClause);
 
-    _persister.getHibernateTemplate().saveOrUpdate(alert1);
+    _persister.saveOrUpdate(alert1);
 
     alerts = _service.getAllServiceAlerts();
     assertEquals(0, alerts.size());
@@ -606,7 +609,7 @@ public class ServiceAlertsServiceImplTest extends AbstractTransactionalJUnit4Spr
       affectsClause.setStopId("10020");
       affectsClause.setTripId("TripA");
       alert1.getAllAffects().add(affectsClause);
-    _persister.getHibernateTemplate().saveOrUpdate(alert1);
+    _persister.saveOrUpdate(alert1);
 
     // service should not have seen it
     alerts = _service.getAllServiceAlerts();
@@ -635,7 +638,7 @@ public class ServiceAlertsServiceImplTest extends AbstractTransactionalJUnit4Spr
       ServiceAlertRecord alert1 = new ServiceAlertRecord();
       alert1.setAgencyId("1");
       alert1.setServiceAlertId("A");
-      _persister.getHibernateTemplate().saveOrUpdate(alert1);
+      _persister.saveOrUpdate(alert1);
 
 
     // wait for the database to refresh
@@ -649,7 +652,7 @@ public class ServiceAlertsServiceImplTest extends AbstractTransactionalJUnit4Spr
     assertEquals(1, alerts.size());
 
     // delete that record
-    _persister.getHibernateTemplate().delete(alert1);
+    _persister.delete(alert1);
     // service should not have seen it yet
     alerts = _service.getAllServiceAlerts();
     assertEquals(1, alerts.size());
@@ -699,7 +702,7 @@ public class ServiceAlertsServiceImplTest extends AbstractTransactionalJUnit4Spr
       range.setToValue(now + 2 * 1000);
       alert1.setPublicationWindows(new HashSet<ServiceAlertTimeRange>());
       alert1.getPublicationWindows().add(range);
-      _persister.getHibernateTemplate().saveOrUpdate(alert1);
+      _persister.saveOrUpdate(alert1);
 
       _service.loadServiceAlerts();
 

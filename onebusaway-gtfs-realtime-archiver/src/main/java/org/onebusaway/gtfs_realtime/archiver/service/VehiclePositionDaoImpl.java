@@ -20,6 +20,8 @@ import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+import org.hibernate.Criteria;
+import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Order;
@@ -31,27 +33,32 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.orm.hibernate3.HibernateTemplate;
 import org.springframework.transaction.annotation.Transactional;
 
 public class VehiclePositionDaoImpl implements VehiclePositionDao {
 
   protected static Logger _log = LoggerFactory.getLogger(
       VehiclePositionDaoImpl.class);
-  private HibernateTemplate _template;
+  private SessionFactory _sessionFactory;
+
+  private Session getSession(){
+    return _sessionFactory.getCurrentSession();
+  }
 
   @Autowired
   @Qualifier("gtfsRealtimeArchiveSessionFactory")
   public void setSessionFactory(SessionFactory sessionFactory) {
-    _template = new HibernateTemplate(sessionFactory);
+    _sessionFactory = sessionFactory;
   }
 
   @Transactional(rollbackFor = Throwable.class)
   @Override
   public void saveOrUpdate(VehiclePositionModel... array) {
-    _template.saveOrUpdateAll(Arrays.asList(array));
-    _template.flush();
-    _template.clear();
+    for (int i = 0; i < array.length; i++) {
+      getSession().saveOrUpdate(array[i]);
+    }
+    getSession().flush();
+    getSession().clear();
   }
 
   @Override
@@ -61,10 +68,10 @@ public class VehiclePositionDaoImpl implements VehiclePositionDao {
 
     Projection prop = Projections.distinct(Projections.property("vehicleId"));
 
-    DetachedCriteria criteria = DetachedCriteria.forClass(
-        VehiclePositionModel.class).setProjection(prop);
+    Criteria criteria = getSession().createCriteria(
+            VehiclePositionModel.class).setProjection(prop);
 
-    return _template.findByCriteria(criteria);
+    return criteria.list();
 
   }
 
@@ -84,8 +91,8 @@ public class VehiclePositionDaoImpl implements VehiclePositionDao {
     // from VehiclePositionModel where vehicleId=:vehicleId and timestamp >=
     // :startDate and timestamp < :endDate order by timestamp
 
-    DetachedCriteria criteria = DetachedCriteria.forClass(
-        VehiclePositionModel.class);
+    Criteria criteria = getSession().createCriteria(
+            VehiclePositionModel.class);
 
     if (!StringUtils.isEmpty(vehicleId)) {
       criteria.add(Restrictions.eq("vehicleId", vehicleId));
@@ -93,7 +100,7 @@ public class VehiclePositionDaoImpl implements VehiclePositionDao {
     criteria.add(Restrictions.between("timestamp", startDate, endDate));
     criteria.addOrder(Order.asc("timestamp"));
 
-    return _template.findByCriteria(criteria);
+    return criteria.list();
   }
   
   @Override

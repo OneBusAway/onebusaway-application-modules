@@ -128,6 +128,8 @@ public class RealtimeServiceImpl implements RealtimeService {
         
     ListBean<TripDetailsBean> trips = getAllTripsForRoute(routeId, currentTime);
     for(TripDetailsBean tripDetails : trips.getList()) {
+      if(tripDetails == null)
+        continue;
       
       // filter out interlined routes
       if(routeId != null && !tripDetails.getTrip().getRoute().getId().equals(routeId))
@@ -322,6 +324,8 @@ public class RealtimeServiceImpl implements RealtimeService {
   public boolean getVehiclesInServiceForRoute(String routeId, String directionId, long currentTime) {
 	  ListBean<TripDetailsBean> trips = getAllTripsForRoute(routeId, currentTime);
 	  for(TripDetailsBean tripDetails : trips.getList()) {
+	    if(tripDetails == null)
+	      continue;
 		  // filter out interlined routes
 		  if(routeId != null && !tripDetails.getTrip().getRoute().getId().equals(routeId))
 			  continue;

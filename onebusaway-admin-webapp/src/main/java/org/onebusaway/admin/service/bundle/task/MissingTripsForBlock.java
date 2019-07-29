@@ -29,6 +29,7 @@ import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+import org.apache.commons.lang.StringUtils;
 import org.onebusaway.admin.model.BundleRequestResponse;
 import org.onebusaway.transit_data_federation.bundle.model.GtfsBundle;
 import org.onebusaway.transit_data_federation.bundle.model.GtfsBundles;
@@ -77,7 +78,14 @@ public class MissingTripsForBlock extends GtfsFileHandler implements Runnable {
       if (gtfsBundle.getAgencyIdMappings().containsKey(LINK_AGENCY)) {
 
         CSVData blockCsvData = getCSVData(gtfsFilePath, GTFS_BLOCK);
+        if (blockCsvData == null) {
+          continue;
+        }
         String blockHeaders = blockCsvData.getHeader();
+        if (StringUtils.isBlank(blockHeaders)) {
+          _log.info("no block.txt for bundle " + gtfsBundle);
+          continue;
+        }
         List<String> blockRows = blockCsvData.getRows();
         int blockSeqIndex = getIndexForValue(blockHeaders, "block_seq_num");
         int routeIndex = getIndexForValue(blockHeaders, "block_route_num");

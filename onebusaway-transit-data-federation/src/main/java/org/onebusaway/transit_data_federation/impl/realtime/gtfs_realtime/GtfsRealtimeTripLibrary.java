@@ -410,7 +410,7 @@ public class GtfsRealtimeTripLibrary {
     return createVehicleLocationRecordForUpdate(null, update);
   }    
     
-    public VehicleLocationRecord createVehicleLocationRecordForUpdate(MonitoredResult result,
+  public VehicleLocationRecord createVehicleLocationRecordForUpdate(MonitoredResult result,
         CombinedTripUpdatesAndVehiclePosition update) {
 
 
@@ -482,10 +482,10 @@ public class GtfsRealtimeTripLibrary {
     TripEntry tripEntry = _entitySource.getTrip(trip.getTripId());
     if (tripEntry == null) {
       if (result != null) {
-        _log.debug("reporting unmatched trip with id=" + trip.getTripId());
+        _log.debug("discarding: reporting unmatched trip with id=" + trip.getTripId());
         result.addUnmatchedTripId(trip.getTripId());
       } else {
-        _log.warn("no trip found with id=" + trip.getTripId());
+        _log.warn("discarding: no trip found with id=" + trip.getTripId());
       }
       
       return null;
@@ -652,7 +652,11 @@ public class GtfsRealtimeTripLibrary {
             if (stopTimeUpdate.hasStopSequence()) {
               tpr.setStopSequence(stopTimeUpdate.getStopSequence());
             }
-
+            if (stopTimeUpdate.getScheduleRelationship().equals(StopTimeUpdate.ScheduleRelationship.SKIPPED)) {
+              tpr.setScheduleRealtionship(StopTimeUpdate.ScheduleRelationship.SKIPPED_VALUE); // set tpr scheduleRelationship enum to SKIPPED
+            } else {
+              tpr.setScheduleRealtionship(StopTimeUpdate.ScheduleRelationship.SCHEDULED_VALUE);
+            }
             int currentArrivalTime = computeArrivalTime(stopTime,
                 stopTimeUpdate, instance.getServiceDate());
             int currentDepartureTime = computeDepartureTime(stopTime,
@@ -738,6 +742,9 @@ public class GtfsRealtimeTripLibrary {
     if (blockDescriptor.getStartTime() != null) {
       record.setBlockStartTime(blockDescriptor.getStartTime());
     }
+
+    if(blockDescriptor.getScheduleRelationship() != null)
+      record.setStatus(blockDescriptor.getScheduleRelationship().toString());
 
 
     record.setScheduleDeviation(best.scheduleDeviation);

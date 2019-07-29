@@ -24,7 +24,9 @@ import org.onebusaway.users.services.StandardAuthoritiesService;
 
 import org.springframework.security.core.GrantedAuthority;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 
 public class IndexedUserDetailsImpl extends
@@ -94,13 +96,13 @@ public class IndexedUserDetailsImpl extends
     return false;
   }
 
-  private static GrantedAuthority[] getGrantedAuthoritiesForUser(
+  private static Collection<? extends GrantedAuthority> getGrantedAuthoritiesForUser(
       StandardAuthoritiesService authoritiesService, User user) {
     Set<UserRole> roles = user.getRoles();
-    GrantedAuthority[] authorities = new GrantedAuthority[roles.size()];
+    List<GrantedAuthority> authorities = new ArrayList<>(roles.size());
     int index = 0;
     for (UserRole role : roles)
-      authorities[index++] = authoritiesService.getNameBasedAuthority(role.getName());
+      authorities.add(index++, authoritiesService.getNameBasedAuthority(role.getName()));
     return authorities;
   }
 }

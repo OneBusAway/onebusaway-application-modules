@@ -153,7 +153,7 @@
             <form action="search.action">
                 <input type="text" name="q" value=""/>
                 <input type="submit" value="Find" class="submit"/>
-                <p id="tip">TIP: Enter an intersection, bus route or bus stop code.</p>
+                <p id="tip">TIP: Enter a bus stop code, route, or street address.</p>
             </form>
 
             <div id="matches">

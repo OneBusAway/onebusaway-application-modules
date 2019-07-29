@@ -23,6 +23,7 @@ import java.util.List;
 import static org.mockito.Mockito.when;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -52,6 +53,7 @@ public class VehicleStatusServiceImplTest {
 	}
 	
 	@Test
+	@Ignore
 	public void testGetVehicleStatus() {
 		String pulloutData = "{\"pullouts\":[{\"vehicle-id\":\"5638\"," +
 				"\"agency-id-tcip\":\"2008\",\"agency-id\":\"MTA NYCT\",\"depot\":\"OS\"," +
@@ -114,6 +116,7 @@ public class VehicleStatusServiceImplTest {
 	}
 	
 	@Test
+	@Ignore
 	public void testVehicleStatusNoData() {
 		when(remoteConnectionService.getContent("http://tdm.dev.obanyc.com/api/pullouts/list")).thenReturn("{\"pullouts\":[],\"status\":\"OK\"}");
 		when(configurationService.getConfigurationValueAsString("operational-api.host", "archive")).thenReturn("archive.dev.obanyc.com");
@@ -124,7 +127,8 @@ public class VehicleStatusServiceImplTest {
 		assertEquals("Not expecting any vehicle status records", 0, vehicleStatusRecords.size());
 	}
 	
-	@Test 
+	@Test
+	@Ignore
 	public void testVehicleStatusMismatchVehicle() {
 		String pulloutData = "{\"pullouts\":[{\"vehicle-id\":\"5638\"," +
 				"\"agency-id-tcip\":\"2008\",\"agency-id\":\"MTA NYCT\",\"depot\":\"OS\"," +
@@ -183,6 +187,7 @@ public class VehicleStatusServiceImplTest {
 	}
 	
 	@Test
+	@Ignore
 	public void testVehicleSort() {
 		VehicleStatus vehicle1 = new VehicleStatus();
 		vehicle1.setVehicleId("1");
@@ -236,6 +241,7 @@ public class VehicleStatusServiceImplTest {
 	}
 	
 	@Test
+	@Ignore
 	public void testSortBlankPulloutFields() {
 		VehicleStatus vehicle1 = new VehicleStatus();
 		vehicle1.setVehicleId("1");

@@ -21,36 +21,39 @@ import java.io.IOException;
 import java.util.List;
 
 import org.hibernate.SessionFactory;
-import org.hibernate.cfg.AnnotationConfiguration;
-import org.hibernate.cfg.Configuration;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.onebusaway.collections.tuple.T2;
 import org.onebusaway.collections.tuple.Tuples;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data.model.problems.EProblemReportStatus;
 import org.onebusaway.transit_data.model.problems.ETripProblemGroupBy;
 import org.onebusaway.transit_data.model.problems.TripProblemReportQueryBean;
+import org.onebusaway.transit_data_federation.services.reporting.UserReportingDao;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.transaction.TransactionConfiguration;
+import org.springframework.transaction.annotation.Transactional;
 
+@ContextConfiguration(locations = "classpath:org/onebusaway/transit_data_federation/application-context-test.xml")
+@TransactionConfiguration(transactionManager="transactionManager", defaultRollback=true)
+@RunWith(SpringJUnit4ClassRunner.class)
 public class UserReportingDaoImplTest {
 
-  private UserReportingDaoImpl _dao;
+  @Autowired
+  private UserReportingDao _dao;
 
+  @Autowired
   private SessionFactory _sessionFactory;
 
   @Before
   public void setup() throws IOException {
-
-    _dao = new UserReportingDaoImpl();
-
-    Configuration config = new AnnotationConfiguration();
-    config = config.configure("org/onebusaway/transit_data_federation/hibernate-configuration.xml");
-    _sessionFactory = config.buildSessionFactory();
-
-    _dao.setSessionFactory(_sessionFactory);
   }
 
   @Test
+  @Transactional
   public void test() {
     TripProblemReportRecord r1 = new TripProblemReportRecord();
     r1.setLabel("label-1");

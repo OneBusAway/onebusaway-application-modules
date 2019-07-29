@@ -24,9 +24,9 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import org.hibernate.Query;
+import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
-import org.hibernate.classic.Session;
 import org.onebusaway.admin.service.bundle.GtfsArchiveDao;
 import org.onebusaway.admin.service.bundle.task.model.ArchivedAgency;
 import org.onebusaway.admin.service.bundle.task.model.ArchivedCalendar;
@@ -38,7 +38,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.orm.hibernate3.HibernateTemplate;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -46,12 +45,12 @@ public class GtfsArchiveDaoImpl implements GtfsArchiveDao {
 
   protected static Logger _log = LoggerFactory
       .getLogger(GtfsArchiveDaoImpl.class);
-  private HibernateTemplate _template;
+  private SessionFactory _sessionFactory;
 
   @Autowired
   @Qualifier("gtfsRealtimeArchiveSessionFactory")
   public void setSessionFactory(SessionFactory sessionFactory) {
-    _template = new HibernateTemplate(sessionFactory);
+    _sessionFactory = sessionFactory;
   }
 
   /** 
@@ -62,12 +61,13 @@ public class GtfsArchiveDaoImpl implements GtfsArchiveDao {
    */
   @Override
   public List<ArchivedAgency> getAllAgenciesByBundleId(int buildId) {
-    Session session = _template.getSessionFactory().getCurrentSession();
+    Session session = getSession();
     Transaction tx = session.beginTransaction();
-    List<ArchivedAgency> archivedAgencies = _template
-        .findByNamedParam("from ArchivedAgency where gtfsBundleInfoId=:id", "id", buildId);
+    Query query = getSession()
+        .createQuery("from ArchivedAgency where gtfsBundleInfoId=:id");
+    query.setParameter("id", buildId);
     tx.commit();
-    return archivedAgencies;
+    return query.list();
   }
 
   /** 
@@ -78,34 +78,34 @@ public class GtfsArchiveDaoImpl implements GtfsArchiveDao {
    */
   @Override
   public List<ArchivedCalendar> getAllCalendarsByBundleId(int buildId) {
-    Session session = _template.getSessionFactory().getCurrentSession();
+    Session session = getSession();
     Transaction tx = session.beginTransaction();
-    List<ArchivedCalendar> archivedCalendars = _template
-        .findByNamedParam("from ArchivedCalendar where gtfsBundleInfoId=:id", "id", buildId);
-//    List<ArchivedCalendar> archivedCalendars = session.createCriteria(ArchivedCalendar.class).list();
+    Query query = session.createQuery("from ArchivedCalendar where gtfsBundleInfoId=:id");
+    query.setParameter("id", buildId);
     tx.commit();
-    //GtfsBundleInfo bundleInfo = responses.get(0);
-    return archivedCalendars;
+    return query.list();
   }
   
   @Override
   public List<ArchivedRoute> getAllRoutesByBundleId(int buildId) {
-    Session session = _template.getSessionFactory().getCurrentSession();
+    Session session = getSession();
     Transaction tx = session.beginTransaction();
-    List<ArchivedRoute> archivedRoutes = _template
-        .findByNamedParam("from ArchivedRoute where gtfsBundleInfoId=:id", "id", buildId);
+    Query query = session
+        .createQuery("from ArchivedRoute where gtfsBundleInfoId=:id");
+    query.setParameter("id", buildId);
     tx.commit();
-    return archivedRoutes;
+    return query.list();
   }
 
   @Override
   public List<ArchivedTrip> getAllTripsByBundleId(int buildId) {
-    Session session = _template.getSessionFactory().getCurrentSession();
+    Session session = getSession();
     Transaction tx = session.beginTransaction();
-    List<ArchivedTrip> archivedTrips = _template
-        .findByNamedParam("from ArchivedTrip where gtfsBundleInfoId=:id order by route_agencyId, route_id", "id", buildId);
+    Query query = session
+        .createQuery("from ArchivedTrip where gtfsBundleInfoId=:id order by route_agencyId, route_id");
+    query.setParameter("id", buildId);
     tx.commit();
-    return archivedTrips;
+    return query.list();
   }
 
   /** 
@@ -117,7 +117,7 @@ public class GtfsArchiveDaoImpl implements GtfsArchiveDao {
   public SortedSet<String> getAllDatasets() {
     SortedSet<String> datasets = new TreeSet<>();
     
-    Session session = _template.getSessionFactory().getCurrentSession();
+    Session session = getSession();
     Transaction tx = session.beginTransaction();
     List<GtfsBundleInfo> archivedBundles = session.createCriteria(GtfsBundleInfo.class).list();
     tx.commit();
@@ -136,7 +136,7 @@ public class GtfsArchiveDaoImpl implements GtfsArchiveDao {
   @Override
   public SortedSet<String> getBuildNamesForDataset(String dataset) {
     SortedSet<String> buildNames = new TreeSet<>();
-    Session session = _template.getSessionFactory().getCurrentSession();
+    Session session = getSession();
     Transaction tx = session.beginTransaction();
     List<GtfsBundleInfo> archivedBundles = session.createCriteria(GtfsBundleInfo.class).list();
     tx.commit();
@@ -151,7 +151,7 @@ public class GtfsArchiveDaoImpl implements GtfsArchiveDao {
   @Override
   public SortedMap<String, String> getBuildNameMapForDataset(String dataset) {
     SortedMap<String, String> buildNameMap = new TreeMap<>();
-    Session session = _template.getSessionFactory().getCurrentSession();
+    Session session = getSession();
     Transaction tx = session.beginTransaction();
     List<GtfsBundleInfo> archivedBundles = session.createCriteria(GtfsBundleInfo.class).list();
     tx.commit();
@@ -166,19 +166,22 @@ public class GtfsArchiveDaoImpl implements GtfsArchiveDao {
 
   @Override
   public GtfsBundleInfo getBundleInfoForId(int buildId) {
-    Session session = _template.getSessionFactory().getCurrentSession();
+    Session session = getSession();
     Transaction tx = session.beginTransaction();
-    List<GtfsBundleInfo> responses = _template
-        .findByNamedParam("from GtfsBundleInfo where gid=:id", "id", buildId);
+    Query query = session
+        .createQuery("from GtfsBundleInfo where gid=:id");
+    query.setParameter("id", buildId);
     tx.commit();
-    GtfsBundleInfo bundleInfo = responses.get(0);
-    return bundleInfo;
+    List<GtfsBundleInfo> list = query.list();
+    if (list == null || list.isEmpty())
+      return null;
+    return list.get(0);
   }
 
   @Override
   public List<ArchivedRoute> getRoutesForAgencyAndBundleId(
       String agencyId, int buildId) {
-    Session session = _template.getSessionFactory().getCurrentSession();
+    Session session = getSession();
     Transaction tx = session.beginTransaction();
     Query query = session.createQuery("from ArchivedRoute where gtfs_bundle_info_id=:build_id and agencyId=:agencyId")
         .setParameter("build_id", buildId)
@@ -194,7 +197,7 @@ public class GtfsArchiveDaoImpl implements GtfsArchiveDao {
       ArchivedTrip trip, int buildId) {
     String tripAgencyId = trip.getAgencyId();
     String tripId = trip.getId();
-    Session session = _template.getSessionFactory().getCurrentSession();
+    Session session = getSession();
     Transaction tx = session.beginTransaction();
     Query query = session.createQuery("from ArchivedStopTime where gtfs_bundle_info_id=:build_id and trip_agencyId=:tripAgencyId "
         + "and trip_id=:tripId")
@@ -212,7 +215,7 @@ public class GtfsArchiveDaoImpl implements GtfsArchiveDao {
       int buildId) {
     String routeAgencyId = routeAgencyAndId.split("_")[0];
     String routeId = routeAgencyAndId.split("_")[1];
-    Session session = _template.getSessionFactory().getCurrentSession();
+    Session session = getSession();
     Transaction tx = session.beginTransaction();
     Query query = session.createQuery("from ArchivedTrip where gtfs_bundle_info_id=:build_id and route_agencyId=:routeAgencyId "
         + "and route_id=:routeId")
@@ -227,7 +230,7 @@ public class GtfsArchiveDaoImpl implements GtfsArchiveDao {
 
   @Override
   public List getTripStopCounts(int buildId) {
-    Session session = _template.getSessionFactory().getCurrentSession();
+    Session session = getSession();
     Transaction tx = session.beginTransaction();
     Query query = session.getNamedQuery("tripStopCts")
         .setParameter("bundleId", buildId);
@@ -236,5 +239,10 @@ public class GtfsArchiveDaoImpl implements GtfsArchiveDao {
     tx.commit();
     return results;
   }
+
+  private Session getSession(){
+    return _sessionFactory.getCurrentSession();
+  }
+
 
 }

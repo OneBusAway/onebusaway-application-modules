@@ -16,25 +16,46 @@
 package org.onebusaway.enterprise.webapp.actions.status.model;
 
 import org.codehaus.jackson.annotate.JsonProperty;
+import org.hibernate.annotations.AccessType;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
+@Entity
+@Table(name = "icinga_items")
+@AccessType("field")
+@Cache(usage = CacheConcurrencyStrategy.NONE)
 public class IcingaItem {
+
+  @Id
+  int id;
   
   @JsonProperty("SERVICE_NAME")
+  @Column (name="SERVICE_NAME", length = 255)
   String serviceName;
   
   @JsonProperty("SERVICE_DISPLAY_NAME")
+  @Column (name="SERVICE_DISPLAY_NAME", length = 255)
   String serviceDisplayName;
   
   @JsonProperty("SERVICE_CURRENT_STATE")
+  @Column (name="SERVICE_CURRENT_STATE")
   int serviceCurrentState;
   
   @JsonProperty("SERVICE_OUTPUT")
+  @Column (name="SERVICE_OUTPUT", length = 255)
   String serviceOutput;
   
   @JsonProperty("SERVICE_PERFDATA")
+  @Column (name="SERVICE_PERFDATA", length = 255)
   String servicePerfdata;
   
   @JsonProperty("SERVICE_IS_PENDING")
+  @Column (name="SERVICE_IS_PENDING")
   int serviceIsPending;
  
   public String getServiceName() {

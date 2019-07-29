@@ -106,6 +106,21 @@
                 value="true" />
     </bean>
 
+    <!-- Database Connection Configuration for retrieving assigned vehicle data -->
+    <bean id="assignedVehicleDataSource"
+          class="org.springframework.jndi.JndiObjectFactoryBean">
+        <property name="jndiName"
+                  value="java:comp/env/jdbc/appDB"/>
+        <property name="lookupOnStartup"
+                  value="true"/>
+        <property name="cache"
+                  value="true"/>
+        <property name="proxyInterface"
+                  value="javax.sql.DataSource"/>
+        <property name="resourceRef"
+                  value="true" />
+    </bean>
+
 <!-- Other Stuff: -->
 
     <bean id="externalGeocoderImpl" class="org.onebusaway.geocoder.enterprise.impl.EnterpriseGoogleGeocoderImpl">
@@ -156,7 +171,7 @@
     </bean>
     
 	<bean id="agencyMetadataSessionFactory"
-		class="org.springframework.orm.hibernate3.annotation.AnnotationSessionFactoryBean">
+		class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
 		<property name="dataSource" ref="agencyMetadataDataSource" />
 		<property name="annotatedClasses">
 			<list>
@@ -168,8 +183,8 @@
 			<props>
 				<prop key="hibernate.dialect">org.hibernate.dialect.MySQLDialect</prop>
 				<prop key="hibernate.connection.pool_size">1</prop>
-				<prop key="hibernate.current_session_context_class">thread</prop>
-				<prop key="hibernate.cache.provider_class">org.hibernate.cache.NoCacheProvider</prop>
+				<!--<prop key="hibernate.current_session_context_class">thread</prop>-->
+				<prop key="hibernate.cache.provider_class">org.hibernate.cache.internal.NoCachingRegionFactory</prop>
 				<prop key="hibernate.show_sql">false</prop>
 				<prop key="hibernate.hbm2ddl.auto">update</prop>
 				<prop key="hibernate.jdbc.batch_size">1000</prop>
@@ -177,7 +192,7 @@
 		</property>
 	</bean>
      <bean id="bundleBuildResponseSessionFactory"
-    class="org.springframework.orm.hibernate3.annotation.AnnotationSessionFactoryBean">
+    class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
     <property name="dataSource" ref="bundleBuildResponseDataSource" />
     <property name="annotatedClasses">
       <list>
@@ -189,8 +204,8 @@
       <props>
         <prop key="hibernate.dialect">org.hibernate.dialect.MySQLDialect</prop>
         <prop key="hibernate.connection.pool_size">1</prop>
-        <prop key="hibernate.current_session_context_class">thread</prop>
-        <prop key="hibernate.cache.provider_class">org.hibernate.cache.NoCacheProvider</prop>
+        <!--<prop key="hibernate.current_session_context_class">thread</prop>-->
+        <prop key="hibernate.cache.provider_class">org.hibernate.cache.internal.NoCachingRegionFactory</prop>
         <prop key="hibernate.show_sql">false</prop>
         <prop key="hibernate.hbm2ddl.auto">update</prop>
         <prop key="hibernate.jdbc.batch_size">1000</prop>
@@ -198,7 +213,7 @@
     </property>
   </bean>
  
-  <bean id="gtfsRealtimeArchiveSessionFactory" class="org.springframework.orm.hibernate3.annotation.AnnotationSessionFactoryBean">
+  <bean id="gtfsRealtimeArchiveSessionFactory" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
     <property name="dataSource" ref="gtfsRealtimeArchiveDataSource" />
     <property name="annotatedClasses">
       <list>
@@ -209,8 +224,8 @@
     <property name="hibernateProperties">
       <props>
         <prop key="hibernate.connection.pool_size">1</prop>
-        <prop key="hibernate.current_session_context_class">thread</prop>
-        <prop key="hibernate.cache.provider_class">org.hibernate.cache.NoCacheProvider</prop>
+        <!--<prop key="hibernate.current_session_context_class">thread</prop>-->
+        <prop key="hibernate.cache.provider_class">org.hibernate.cache.internal.NoCachingRegionFactory</prop>
         <prop key="hibernate.show_sql">false</prop>
         <prop key="hibernate.hbm2ddl.auto">none</prop>
         <prop key="hibernate.jdbc.batch_size">1000</prop>
@@ -225,22 +240,63 @@
     </property>
   </bean>
 
+    <bean id="assignmentSessionFactory"
+          class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+        <property name="dataSource" ref="assignedVehicleDataSource" />
+        <property name="annotatedClasses">
+            <list>
+                <value>org.onebusaway.admin.model.assignments.Assignment</value>
+                <value>org.onebusaway.admin.model.assignments.AssignmentConfig</value>
+                <value>org.onebusaway.admin.service.assignments.impl.AssignmentDaoImpl</value>
+                <value>org.onebusaway.admin.service.assignments.impl.AssignmentConfigDaoImpl</value>
+            </list>
+        </property>
+        <property name="hibernateProperties">
+            <props>
+                <prop key="hibernate.dialect">org.hibernate.dialect.MySQLDialect</prop>
+                <prop key="hibernate.connection.pool_size">1</prop>
+                <!--<prop key="hibernate.current_session_context_class">thread</prop>-->
+                <prop key="hibernate.cache.provider_class">org.hibernate.cache.internal.NoCachingRegionFactory</prop>
+                <prop key="hibernate.show_sql">false</prop>
+                <prop key="hibernate.hbm2ddl.auto">update</prop>
+                <prop key="hibernate.jdbc.batch_size">1000</prop>
+            </props>
+        </property>
+    </bean>
+
 	<!-- quartz scheduling for PingJob -->
-	<bean name="pingJob" class="org.springframework.scheduling.quartz.JobDetailBean">
+	<bean name="pingJob" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
 		<property name="jobClass" value="org.onebusaway.admin.job.PingJob" />
 		<property name="jobDataAsMap">
 			<map>
       			<entry key="userManagementService" value-ref="userManagementServiceImpl"/>
      		</map>
 		</property>
-		
+        <property name="durability" value="true" />
 	</bean>
 	
-	<bean id="pingTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
+	<bean id="pingTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
 		<property name="jobDetail" ref="pingJob" />
 		<property name="cronExpression" value="0 * * * * ?" /><!--  every minute -->
 	</bean>
-	
+
+    <!-- quartz scheduling for ResetVehicleAssignmentsJob -->
+    <bean name="resetJob" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+        <property name="jobClass" value="org.onebusaway.admin.job.ResetVehicleAssignmentsJob" />
+        <property name="jobDataAsMap">
+            <map>
+                <entry key="assignmentDao" value-ref="assignmentDaoImpl"/>
+                <entry key="assignmentConfigDao" value-ref="assignmentConfigDaoImpl"/>
+            </map>
+        </property>
+        <property name="durability" value="true" />
+    </bean>
+
+    <bean id="resetTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+        <property name="jobDetail" ref="resetJob" />
+        <property name="cronExpression" value="0 0 3 * * ?" /><!--  03:00 every day -->
+    </bean>
+
 	<bean id="gsonTool" class="org.onebusaway.admin.json.LowerCaseWDashesGsonJsonTool">
     <property name="prettyPrintOutput" value="false" />
   </bean>
@@ -249,7 +305,8 @@
 		<property name="triggers">
 			<list>
 				<ref bean="pingTrigger" />
-			</list>
+                <ref bean="resetTrigger" />
+            </list>
 		</property>
 	</bean>
 	
