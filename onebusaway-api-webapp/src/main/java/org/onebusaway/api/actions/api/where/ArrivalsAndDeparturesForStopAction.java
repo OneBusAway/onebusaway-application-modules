@@ -33,6 +33,7 @@ import org.onebusaway.transit_data.model.StopWithArrivalsAndDeparturesBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.util.SystemTime;
+import org.onebusaway.util.services.configuration.ConfigurationService;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.opensymphony.xwork2.conversion.annotations.TypeConversion;
@@ -48,6 +49,9 @@ public class ArrivalsAndDeparturesForStopAction extends ApiActionSupport {
 
   @Autowired
   private TransitDataService _service;
+
+  @Autowired
+  private ConfigurationService _configService;
 
   private String _id;
   
@@ -93,7 +97,8 @@ public class ArrivalsAndDeparturesForStopAction extends ApiActionSupport {
     if (hasErrors())
       return setValidationErrorsResponse();
 
-    if( _query.getTime() == 0)
+    boolean serviceDateFilterOn = Boolean.parseBoolean(_configService.getConfigurationValueAsString("display.serviceDateFiltering", "false"));
+    if(serviceDateFilterOn || _query.getTime() == 0)
       _query.setTime(SystemTime.currentTimeMillis());
 
     StopWithArrivalsAndDeparturesBean result = _service.getStopWithArrivalsAndDepartures(
