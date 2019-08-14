@@ -732,7 +732,9 @@ OBA.RouteMap = function(mapNode, initCallbackFn, serviceAlertCallbackFn) {
 		panToRoute: function(routeId) {
 			var polylines = polylinesByRoute[routeId];
 
-			if(polylines === null) {
+			if(polylines === null
+				|| typeof polylines === 'undefined'
+				|| typeof polylines.length === 'undefined') {
 				return;
 			}
 			

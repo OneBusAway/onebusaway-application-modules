@@ -43,20 +43,32 @@
 					</ul>
 				</div>
 			</s:if>
-		
-			<ul>
-				<li class="direction-jump">Choose your direction:</li>
-				<s:iterator value="directions">
-					<s:url var="url" value="" anchor="%{directionId}"></s:url>
-					<li>
-						<a href="${url}" class="direction-link">
-							to&amp;nbsp;<s:property value="destination" />
-						</a>
-					</li>
-				</s:iterator>
-			</ul>
+
+			<c:choose>
+				<c:when test="${empty directions}">
+					<ul>
+						<p class="noService">
+							No scheduled service today for the <s:property value="shortName" />.
+						</p>
+					</ul>
+				</c:when>
+				<c:when test="${!empty directions}">
+					<ul>
+						<li class="direction-jump">Choose your direction:</li>
+						<s:iterator value="directions">
+							<s:url var="url" value="" anchor="%{directionId}"></s:url>
+							<li>
+								<a href="${url}" class="direction-link">
+									to&amp;nbsp;<s:property value="destination" />
+								</a>
+							</li>
+						</s:iterator>
+					</ul>
+				</c:when>
+			</c:choose>
+
 		</div>
-		
+
 		<s:iterator value="directions">
 			<a name="${directionId}" class="directionAnchor" tabindex="0">&amp;nbsp;</a>
 			<div class="directionForRoute">
