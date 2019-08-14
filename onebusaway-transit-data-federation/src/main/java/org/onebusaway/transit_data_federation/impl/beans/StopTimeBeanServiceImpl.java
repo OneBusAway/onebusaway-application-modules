@@ -45,7 +45,7 @@ class StopTimeBeanServiceImpl implements StopTimeBeanService {
     bean.setDropOffType(stopTime.getDropOffType());
     bean.setPickupType(stopTime.getPickupType());
 
-    StopBean stopBean = _stopBeanService.getStopForId(stopTime.getStop().getId());
+    StopBean stopBean = _stopBeanService.getStopForId(stopTime.getStop().getId(), null);
     bean.setStop(stopBean);
 
     return bean;

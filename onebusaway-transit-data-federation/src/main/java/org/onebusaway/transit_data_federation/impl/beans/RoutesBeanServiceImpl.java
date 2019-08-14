@@ -164,7 +164,7 @@ class RoutesBeanServiceImpl implements RoutesBeanService {
 
     Set<RouteBean> routes = new HashSet<RouteBean>();
     for (AgencyAndId stopId : stops) {
-      StopBean stop = _stopService.getStopForId(stopId);
+      StopBean stop = _stopService.getStopForId(stopId, null);
       routes.addAll(stop.getRoutes());
     }
 

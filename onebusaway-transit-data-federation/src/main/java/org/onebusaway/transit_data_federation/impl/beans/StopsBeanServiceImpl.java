@@ -89,7 +89,7 @@ class StopsBeanServiceImpl implements StopsBeanService {
               MAX_STOPS, NAME_MIN_SCORE);
 
       for (AgencyAndId aid : results.getResultsByTopScore()) {
-        StopBean stopBean = _stopBeanService.getStopForId(aid);
+        StopBean stopBean = _stopBeanService.getStopForId(aid, null);
         if (stopBean != null) {
           stopBeans.add(stopBean);
         }
@@ -117,7 +117,7 @@ class StopsBeanServiceImpl implements StopsBeanService {
     List<StopBean> stopBeans = new ArrayList<StopBean>();
 
     for (AgencyAndId stopId : stopIds) {
-      StopBean stopBean = _stopBeanService.getStopForId(stopId);
+      StopBean stopBean = _stopBeanService.getStopForId(stopId, null);
       if (stopBean == null)
         throw new ServiceException();
 
@@ -158,7 +158,7 @@ class StopsBeanServiceImpl implements StopsBeanService {
     List<StopBean> stopBeans = new ArrayList<StopBean>();
 
     for (AgencyAndId aid : stops.getResults()) {
-      StopBean stopBean = _stopBeanService.getStopForId(aid);
+      StopBean stopBean = _stopBeanService.getStopForId(aid, null);
       if (bounds.contains(stopBean.getLat(), stopBean.getLon()))
         stopBeans.add(stopBean);
       double distance = SphericalGeometryLibrary.distance(center.getLat(),

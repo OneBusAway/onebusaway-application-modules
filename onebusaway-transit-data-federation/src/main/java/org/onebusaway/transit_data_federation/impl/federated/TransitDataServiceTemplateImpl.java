@@ -195,7 +195,7 @@ public class TransitDataServiceTemplateImpl implements TransitDataServiceTemplat
     bean.setDate(date);
 
     AgencyAndId id = convertAgencyAndId(stopId);
-    StopBean stopBean = _stopBeanService.getStopForId(id);
+    StopBean stopBean = _stopBeanService.getStopForId(id, null);
     if (stopBean == null)
       return null;
     bean.setStop(stopBean);
@@ -228,7 +228,7 @@ public class TransitDataServiceTemplateImpl implements TransitDataServiceTemplat
   public StopBean getStop(String stopId) throws ServiceException {
     
     AgencyAndId id = convertAgencyAndId(stopId);
-    return _stopBeanService.getStopForId(id);
+    return _stopBeanService.getStopForId(id, null);
   }
 
   //@Override

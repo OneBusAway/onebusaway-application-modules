@@ -198,7 +198,7 @@ class RouteBeanServiceImpl implements RouteBeanService {
     List<StopBean> stops = new ArrayList<StopBean>();
 
     for (AgencyAndId stopId : stopIds) {
-      StopBean stop = _stopBeanService.getStopForId(stopId);
+      StopBean stop = _stopBeanService.getStopForId(stopId, null);
       stops.add(stop);
     }
 
