@@ -101,7 +101,7 @@ public class StopBeanServiceImplTest {
     RouteBean route = routeBuilder.create();
     Mockito.when(_routeBeanService.getRouteForId(routeId)).thenReturn(route);
 
-    StopBean stopBean = _service.getStopForId(stopId);
+    StopBean stopBean = _service.getStopForId(stopId, null);
 
     assertNotNull(stopBean);
     assertEquals(stopId.toString(), stopBean.getId());

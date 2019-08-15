@@ -58,8 +58,7 @@ class StopWithArrivalsAndDeparturesBeanServiceImpl implements
   public StopWithArrivalsAndDeparturesBean getArrivalsAndDeparturesByStopId(
       AgencyAndId id, ArrivalsAndDeparturesQueryBean query) {
 
-    StopBean stop = _stopBeanService.getStopForIdForServiceDate(id, new ServiceDate(new Date(query.getTime())));
-    //StopBean stop = _stopBeanService.getStopForId(id);
+    StopBean stop = _stopBeanService.getStopForId(id, new ServiceDate(new Date(query.getTime())));
     if (stop == null)
       return null;
 
@@ -70,7 +69,7 @@ class StopWithArrivalsAndDeparturesBeanServiceImpl implements
         stop, 100);
     List<StopBean> nearbyStops = new ArrayList<StopBean>();
     for (AgencyAndId nearbyStopId : nearbyStopIds)
-      nearbyStops.add(_stopBeanService.getStopForId(nearbyStopId));
+      nearbyStops.add(_stopBeanService.getStopForId(nearbyStopId, null));
 
     List<ServiceAlertBean> situations = _serviceAlertsBeanService.getServiceAlertsForStopId(
         query.getTime(), id);
@@ -91,7 +90,7 @@ class StopWithArrivalsAndDeparturesBeanServiceImpl implements
 
     for (AgencyAndId id : ids) {
 
-      StopBean stopBean = _stopBeanService.getStopForId(id);
+      StopBean stopBean = _stopBeanService.getStopForId(id, null);
       stops.add(stopBean);
 
       List<ArrivalAndDepartureBean> arrivalsAndDepartures = _arrivalsAndDeparturesBeanService.getArrivalsAndDeparturesByStopId(
@@ -115,7 +114,7 @@ class StopWithArrivalsAndDeparturesBeanServiceImpl implements
     List<StopBean> nearbyStops = new ArrayList<StopBean>();
 
     for (AgencyAndId id : allNearbyStopIds) {
-      StopBean stop = _stopBeanService.getStopForId(id);
+      StopBean stop = _stopBeanService.getStopForId(id, null);
       nearbyStops.add(stop);
     }
 
