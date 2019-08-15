@@ -70,7 +70,7 @@
     		<s:url var="desktopUrl" namespace="/" action="index"/>	
     		<a href="${desktopUrl}">Desktop Site</a> |
     		
-    		<s:url var="contactUrl" namespace="/m/wiki" action="ContactUs"/>	
+    		<s:url var="contactUrl" namespace="/wiki" action="ContactUs"/>
     		<a href="${contactUrl}">Contact</a> |
 
 			<s:set var="link" value="getText('main.agency.link')" />
