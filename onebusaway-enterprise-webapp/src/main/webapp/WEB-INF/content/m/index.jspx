@@ -126,6 +126,18 @@
 </head>
 
 <body>
+	<div id="debug" style="display:none">
+		<p>resultType: <s:property value="results.resultType" /></p>
+		<p>matches: <s:property value="results.matches.size" /></p>
+		<p>suggestions: <s:property value="results.suggestions.size" /></p>
+		<p>routeFilter: <s:property value="results.routeFilter" /></p>
+		<p>lat/lon: <s:property value="results.queryLat" /> / <s:property value="results.queryLon" /></p>
+		<p>Geocode: <s:property value="results.isGeocode" /></p>
+		<p>Hint: <s:property value="results.hint" /></p>
+		<p>q: <s:property value="q" /></p>
+		<p>l: <s:property value="l" /></p>
+		<p>t: <s:property value="t" /></p>
+	</div>
 	<div id="mainbox">
 		<div id="searchPanel">
 			<s:form namespace="/m" action="index" method="GET">
@@ -153,13 +165,15 @@
 			 </div>
 		</s:if>
 
-		<s:if test="%{results.matches.size&gt;0}">
-			<div id="mapHider" class="map">
-				<div id="mapExpander">
-					<span id="showMapSpan">SHOW MAP</span>
+		<s:if test="results.resultType.equals('StopResult')">
+			<s:if test="%{results.matches.size==1 and results.isGeocode==false}">
+				<div id="mapHider" class="map">
+					<div id="mapExpander">
+						<span id="showMapSpan">SHOW MAP</span>
+					</div>
+					<div id="map"><!-- //prevent jspx minimization --></div>
 				</div>
-				<div id="map"><!-- //prevent jspx minimization --></div>
-			</div>
+			</s:if>
 		</s:if>
 
 		<s:if test="%{results.empty}">
@@ -168,7 +182,7 @@
 			</div>
 		</s:if>
 		<s:else>
-
+		<s:if test="%{results.isGeocode==false}">
 			<div id="refresh">
 				<s:url var="url" namespace="/m" action="index" anchor="top">
 					<s:param name="q"><s:property value="q" /></s:param>
@@ -178,6 +192,7 @@
 				</s:url>
 				<a href="${url}">Refresh (<strong>Updated <s:property value="lastUpdateTime" /></strong>)</a>
 			</div>
+		</s:if>
 
 			<div id="content">
 				<s:if test="%{results.matches.size&gt;0}">
@@ -218,6 +233,5 @@
 
 		</s:else>
 	</div>
-
 </body>
 </html>

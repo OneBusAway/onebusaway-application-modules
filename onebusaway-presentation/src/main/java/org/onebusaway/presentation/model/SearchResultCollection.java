@@ -38,7 +38,11 @@ public class SearchResultCollection implements Serializable {
   private Double _queryLat = null;
   
   private Double _queryLon = null;
-  
+
+  private Boolean _isGeocode = false;
+
+  private String _hint = "not set";
+
   public void addMatch(SearchResult thing) throws IllegalArgumentException {
     if(_resultType == null) { 
       _resultType = thing.getClass();
@@ -109,7 +113,15 @@ public class SearchResultCollection implements Serializable {
   public void setQueryLon(Double queryLon) {
     this._queryLon = queryLon;
   }
-  
+
+  public void setGeocode(Boolean isGeocode) { this._isGeocode = isGeocode; }
+
+  public Boolean getIsGeocode() { return this._isGeocode; }
+
+  public void setHint(String hint) { this._hint = hint; }
+
+  public String getHint() { return _hint; }
+
   public String toString() {
     return "{matches=" + _matches 
         + ", suggestions=" + _suggestions
