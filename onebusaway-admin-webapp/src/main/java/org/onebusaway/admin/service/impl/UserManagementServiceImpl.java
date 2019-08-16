@@ -408,6 +408,12 @@ public class UserManagementServiceImpl implements UserManagementService {
 		return StandardAuthoritiesService.STANDARD_AUTHORITIES;
 	}
 
+	@Override
+	public List<String> getManagedRoleNames() {
+		return StandardAuthoritiesService.MANAGED_AUTHORITIES;
+	}
+
+
     /**
      * Injects {@link UserPropertiesService}
      * @param userPropertiesService the userPropertiesService to set

@@ -45,6 +45,10 @@ public interface StandardAuthoritiesService {
   public final static List<String> STANDARD_AUTHORITIES = Collections.unmodifiableList(Arrays.asList(
       ADMINISTRATOR, OPERATOR, SUPPORT, REPORTING, ANONYMOUS, USER));
 
+  public final static List<String> MANAGED_AUTHORITIES = Collections.unmodifiableList(Arrays.asList(
+          ADMINISTRATOR, OPERATOR, SUPPORT, REPORTING));
+
+
   /**
    * Get the GrantedAuthority used by Spring Security for the role by name
    * 
