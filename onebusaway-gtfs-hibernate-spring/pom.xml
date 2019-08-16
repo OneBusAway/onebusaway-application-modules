@@ -6,7 +6,7 @@
   <parent>
     <artifactId>onebusaway-application-modules</artifactId>
     <groupId>org.onebusaway</groupId>
-    <version>2.0.24-cs</version>
+    <version>2.0.25-cs-SNAPSHOT</version>
   </parent>
 
   <dependencies>
