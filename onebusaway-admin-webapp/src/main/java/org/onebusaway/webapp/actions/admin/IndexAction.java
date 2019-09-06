@@ -57,7 +57,7 @@ public class IndexAction extends OneBusAwayNYCAdminActionSupport {
 		if (_temporaryPasswordService.isTemporaryPassword(username)) {
 			HttpServletResponse response = ServletActionContext.getResponse();
 			try {
-				response.sendRedirect("usermanagement/update-password.action");
+				response.sendRedirect("/admin/usermanagement/update-password.action");
 			} catch (IOException e) {
 				_log.error(e.getMessage());
 			}

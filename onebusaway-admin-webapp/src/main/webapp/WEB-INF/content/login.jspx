@@ -42,7 +42,7 @@
 			<p class="error"><a href="#" onclick='javascript:goBackToLogin();'>Go Back to Login</a></p>
 			<br></br>
 			<div id="navigation">
-				<s:url var="url" namespace="/" action="logout"></s:url>
+				<s:url var="url" namespace="/admin" action="logout"></s:url>
 				<s:form  action="%{url}"
 						method="post">
 					<input id="tryagain" type="submit"
@@ -59,7 +59,7 @@
 				<p class="error">Please login to view this resource.</p>
 
 			<div id="navigation">
-				<s:url var="url" namespace="/" action="logout"></s:url>
+				<s:url var="url" namespace="/admin" action="logout"></s:url>
 				<s:form action="%{url}"
 						method="post">
 					<input type="submit"

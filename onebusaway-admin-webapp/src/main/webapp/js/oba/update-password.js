@@ -16,10 +16,15 @@
 $("#messageSuccess, #messageFailure").hide();
 $("#updatePassword").submit(function(evt) {
 	evt.preventDefault();
+	var csrfParameter = $("meta[name='_csrf_parameter']").attr("content");
+	var csrfHeader = $("meta[name='_csrf_header']").attr("content");
+	var csrfToken = $("meta[name='_csrf']").attr("content");
 	var data = {
 		"newPassword": $("#newPassword").val(),
 		"confirmPassword": $("#confirmPassword").val()
 	}
+	data[csrfParameter] = csrfToken;
+
 	$.post("update-password!updatePassword.action", data, function(resp) {
 		$("#messageSuccess, #messageFailure").hide();
 		if (resp == "success")
