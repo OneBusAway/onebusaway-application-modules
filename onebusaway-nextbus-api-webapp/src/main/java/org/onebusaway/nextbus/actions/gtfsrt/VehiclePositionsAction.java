@@ -15,6 +15,7 @@
  */
 package org.onebusaway.nextbus.actions.gtfsrt;
 
+import com.google.transit.realtime.GtfsRealtime;
 import com.google.transit.realtime.GtfsRealtime.FeedMessage;
 import com.opensymphony.xwork2.ModelDriven;
 import org.apache.commons.lang.StringUtils;
@@ -66,6 +67,16 @@ public class VehiclePositionsAction extends NextBusApiBase  implements
         return agencyId;
     }
 
+    private static long DEFAULT_STALE_TIMEOUT = 10 * 60;
+    private long _staleTimeout = DEFAULT_STALE_TIMEOUT;
+
+    public long getStaleTimeout() {
+        return _staleTimeout;
+    }
+
+    public void setStaleTimeout(long timeout) {
+        _staleTimeout = timeout;
+    }
 
     public DefaultHttpHeaders index() {
         return new DefaultHttpHeaders("success");
@@ -105,7 +116,7 @@ public class VehiclePositionsAction extends NextBusApiBase  implements
                             }
                         }
 
-                        feedMessage.addAllEntity(remoteFeedMessage.getEntityList());
+                        feedMessage.addAllEntity(filter(remoteFeedMessage.getEntityList()));
                     } catch (Exception e) {
                         _log.error(e.getMessage());
                     }
@@ -119,5 +130,24 @@ public class VehiclePositionsAction extends NextBusApiBase  implements
 
     public FeedMessage.Builder createFeedWithDefaultHeader(Long timestampInSeconds) {
         return _gtfsrtHelper.createFeedWithDefaultHeader(timestampInSeconds);
+    }
+
+    private List<GtfsRealtime.FeedEntity> filter(List<GtfsRealtime.FeedEntity> allUpdates) {
+        long nowInSeconds = System.currentTimeMillis() / 1000;
+        ArrayList<GtfsRealtime.FeedEntity> filtered = new ArrayList<>();
+        if (allUpdates == null || allUpdates.isEmpty()) return filtered;
+        for (GtfsRealtime.FeedEntity entity : allUpdates) {
+            if (entity.hasVehicle()) {
+                if (nowInSeconds - entity.getVehicle().getTimestamp() <= getStaleTimeout()) {
+//                    _log.debug("keeping record " + entity.getVehicle().getVehicle().getId()
+//                            + " that is " + (nowInSeconds - entity.getVehicle().getTimestamp()) + "s old");
+                    filtered.add(entity);
+                } else {
+//                    _log.debug("dropping record " + entity.getVehicle().getVehicle().getId()
+//                    + " that is " + (nowInSeconds - entity.getVehicle().getTimestamp()) + "s old");
+                }
+            }
+        }
+        return filtered;
     }
 }
