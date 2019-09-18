@@ -138,16 +138,21 @@ public class VehiclePositionsAction extends NextBusApiBase  implements
         if (allUpdates == null || allUpdates.isEmpty()) return filtered;
         for (GtfsRealtime.FeedEntity entity : allUpdates) {
             if (entity.hasVehicle()) {
-                if (nowInSeconds - entity.getVehicle().getTimestamp() <= getStaleTimeout()) {
-//                    _log.debug("keeping record " + entity.getVehicle().getVehicle().getId()
-//                            + " that is " + (nowInSeconds - entity.getVehicle().getTimestamp()) + "s old");
-                    filtered.add(entity);
+                if (entity.getVehicle().hasTrip()) {
+                    if (nowInSeconds - entity.getVehicle().getTimestamp() <= getStaleTimeout()) {
+                        // record has a trip and is recent -- pass it through
+                        filtered.add(entity);
+                    }
                 } else {
-//                    _log.debug("dropping record " + entity.getVehicle().getVehicle().getId()
-//                    + " that is " + (nowInSeconds - entity.getVehicle().getTimestamp()) + "s old");
+                    // missing trip therefore non-revenue serivce
                 }
+            } else {
+                // old record, filter it
             }
         }
         return filtered;
     }
 }
+/*
+
+ */
