@@ -14,7 +14,7 @@
 
 	<properties>
 		<jetty.version>9.2.9.v20150224</jetty.version>
-		<xwiki.integration.version>1.0.1</xwiki.integration.version>
+		<xwiki.integration.version>1.0.2-SNAPSHOT</xwiki.integration.version>
 	</properties>
 
 
