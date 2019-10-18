@@ -16,11 +16,15 @@
 package org.onebusaway.enterprise.webapp.api;
 
 import javax.annotation.PostConstruct;
+
+import org.apache.commons.lang.StringUtils;
 import org.onebusaway.users.model.UserIndex;
 import org.onebusaway.users.model.UserIndexKey;
 import org.onebusaway.users.services.UserIndexTypes;
 import org.onebusaway.users.services.UserPropertiesService;
 import org.onebusaway.users.services.UserService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -32,11 +36,21 @@ import org.springframework.beans.factory.annotation.Autowired;
  */
 public class CreateAPIKeyOnInitAction {
 
+  private static Logger _log = LoggerFactory.getLogger(CreateAPIKeyOnInitAction.class);
+
   private UserService _userService;
 
   private UserPropertiesService _userPropertiesService;
 
   private String key;
+
+  private String contactName;
+
+  private String contactCompany;
+
+  private String contactEmail;
+
+  private String contactDetails;
 
   private boolean createAPIKey = false;
 
@@ -59,6 +73,38 @@ public class CreateAPIKeyOnInitAction {
     this.key = key;
   }
 
+  public String getContactName() {
+    return contactName;
+  }
+
+  public void setContactName(String contactName) {
+    this.contactName = contactName;
+  }
+
+  public String getContactCompany() {
+    return contactCompany;
+  }
+
+  public void setContactCompany(String contactCompany) {
+    this.contactCompany = contactCompany;
+  }
+
+  public String getContactEmail() {
+    return contactEmail;
+  }
+
+  public void setContactEmail(String contactEmail) {
+    this.contactEmail = contactEmail;
+  }
+
+  public String getContactDetails() {
+    return contactDetails;
+  }
+
+  public void setContactDetails(String contactDetails) {
+    this.contactDetails = contactDetails;
+  }
+
   public void init() {
     // no-op, createAPIKey determines if execute is called or not
   }
@@ -66,10 +112,27 @@ public class CreateAPIKeyOnInitAction {
   @PostConstruct
   public void execute() {
     if (createAPIKey) {
+      _log.info("creating api key for " + key);
       UserIndexKey userIndexKey = new UserIndexKey(UserIndexTypes.API_KEY, key);
       UserIndex userIndex = _userService.getOrCreateUserForIndexKey(
           userIndexKey, key, false);
       _userPropertiesService.authorizeApi(userIndex.getUser(), 0);
+
+      if (StringUtils.isNotBlank(contactName)
+              || StringUtils.isNotBlank(contactCompany)
+              || StringUtils.isNotBlank(contactEmail)
+              || StringUtils.isNotBlank(contactDetails)) {
+        _log.info("updating user contact info "
+                + contactName + ", "
+                + contactCompany + ", "
+                + contactEmail + ", "
+                + contactDetails);
+        _userPropertiesService.updateApiKeyContactInfo(userIndex.getUser(),
+                contactName,
+                contactCompany,
+                contactEmail,
+                contactDetails);
+      }
     }
   }
 
