@@ -28,7 +28,7 @@ var obaApiFactory = function() {
 	 **************************************************************************/
 
 	var createUrl = function(url) {
-		return OBA.Config.apiBaseUrl + url;
+		return OBA.Config.apiBaseUrl + "/api" + url;
 	}
 
 	var createParams = function(otherParams) {
