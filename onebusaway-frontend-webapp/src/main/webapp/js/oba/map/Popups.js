@@ -65,7 +65,7 @@ OBA.Popups = (function() {
 				params.time = OBA.Config.time;
 			}
 			
-			if(refreshPopupRequest !== null) {
+			if( typeof refreshPopupRequest !== 'undefined' && refreshPopupRequest !== null) {
 				refreshPopupRequest.abort();
 				openBubble = true;
 			}
@@ -610,7 +610,7 @@ OBA.Popups = (function() {
 							distance += '<span class="vehicleId"> (#' + vehicleId + ')</span>';
 						}
 
-
+							distance +=  ' (' + monitoredVehicleJourney.ProgressRate + ',' + monitoredVehicleJourney.ProgressStatus + ')';
 						
 						
 						// time mode
