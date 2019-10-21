@@ -610,9 +610,6 @@ OBA.Popups = (function() {
 							distance += '<span class="vehicleId"> (#' + vehicleId + ')</span>';
 						}
 
-							distance +=  ' (' + monitoredVehicleJourney.ProgressRate + ',' + monitoredVehicleJourney.ProgressStatus + ')';
-						
-						
 						// time mode
 						if(timePrediction != null && stalled === false) {
 							if (expectedArrivalTime != null && OBA.Config.showExpectedArrivalTimeInStopPopup == "true") {
