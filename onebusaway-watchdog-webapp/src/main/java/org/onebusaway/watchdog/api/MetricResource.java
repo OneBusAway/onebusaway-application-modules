@@ -100,7 +100,8 @@ public abstract class MetricResource {
 
       AgencyAndId routeAndId = new AgencyAndId(agencyId, routeId);
       for (TripDetailsBean trip : tripsForAgency.getList()) {
-        if (trip.getTripId().startsWith(agencyId + "_")) {
+        // trip and tripId can be null for cancelled trips!
+        if (trip != null && trip.getTripId() != null && trip.getTripId().startsWith(agencyId + "_")) {
           if (routeId == null || routeAndId.toString().equals(trip.getTrip().getRoute().getId())) {
             agencyTrips.add(trip);
           }
