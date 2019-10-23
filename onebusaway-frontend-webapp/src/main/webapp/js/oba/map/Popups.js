@@ -66,7 +66,9 @@ OBA.Popups = (function() {
 			}
 			
 			if( typeof refreshPopupRequest !== 'undefined' && refreshPopupRequest !== null) {
-				refreshPopupRequest.abort();
+				if ('abort' in refreshPopupRequest) {
+					refreshPopupRequest.abort();
+				}
 				openBubble = true;
 			}
 			refreshPopupRequest = jQuery.getJSON(url, params, function(json) {
