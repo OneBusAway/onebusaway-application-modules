@@ -18,6 +18,7 @@
  */
 package org.onebusaway.transit_data_federation.impl.realtime;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -575,7 +576,7 @@ public class BlockLocationServiceImpl implements BlockLocationService,
       location.setVehicleId(record.getVehicleId());
 
       List<TimepointPredictionRecord> timepointPredictions = record.getTimepointPredictions();
-      location.setTimepointPredictions(timepointPredictions);
+      ArrayList<TimepointPredictionRecord> filteredTimePointPredictions = new ArrayList<>();
       if (timepointPredictions != null && !timepointPredictions.isEmpty()) {
 
         SortedMap<Integer, Double> scheduleDeviations = new TreeMap<Integer, Double>();
@@ -583,7 +584,14 @@ public class BlockLocationServiceImpl implements BlockLocationService,
         BlockConfigurationEntry blockConfig = blockInstance.getBlock();
 
         int tprIndexCounter = 0;
+        _log.info("timpointpredictions len= " + timepointPredictions.size());
         for (TimepointPredictionRecord tpr : timepointPredictions) {
+          if (tpr.isSkipped()) {
+            _log.info("Skipped in blocklocationserviceimpl   seq:" + tpr.getStopSequence() + " trip: " + tpr.getTripId());
+            continue;
+          }
+          filteredTimePointPredictions.add(tpr);
+
           AgencyAndId stopId = tpr.getTimepointId();
           long predictedTime;
           if (tpr.getTimepointPredictedDepartureTime() != -1) {
@@ -593,12 +601,6 @@ public class BlockLocationServiceImpl implements BlockLocationService,
           }
           if (stopId == null || predictedTime == 0)
             continue;
-
-          if (tpr.isSkipped()) {
-            _log.info("\nRecord has Timepoint with SKIPPED schedule relationship\n");
-            location.setStatus(EVehicleStatus.SKIPPED.toString());
-          }
-
           for (BlockStopTimeEntry blockStopTime : blockConfig.getStopTimes()) {
             StopTimeEntry stopTime = blockStopTime.getStopTime();
             StopEntry stop = stopTime.getStop();
@@ -643,6 +645,8 @@ public class BlockLocationServiceImpl implements BlockLocationService,
           }
           tprIndexCounter++;
         }
+        _log.info("FILTERED timepointpredictions len= " + filteredTimePointPredictions.size());
+        location.setTimepointPredictions(filteredTimePointPredictions);
 
         double[] scheduleTimes = new double[scheduleDeviations.size()];
         double[] scheduleDeviationMus = new double[scheduleDeviations.size()];

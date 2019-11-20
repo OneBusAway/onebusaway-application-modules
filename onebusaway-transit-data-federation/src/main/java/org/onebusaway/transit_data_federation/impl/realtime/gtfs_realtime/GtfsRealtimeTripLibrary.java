@@ -654,6 +654,7 @@ public class GtfsRealtimeTripLibrary {
             }
             if (stopTimeUpdate.getScheduleRelationship().equals(StopTimeUpdate.ScheduleRelationship.SKIPPED)) {
               tpr.setScheduleRealtionship(StopTimeUpdate.ScheduleRelationship.SKIPPED_VALUE); // set tpr scheduleRelationship enum to SKIPPED
+              _log.info("SKIPPED at gtfsrealtimetriplibrary   seq: " + tpr.getStopSequence() + " trip: " + tpr.getTripId());
             } else {
               tpr.setScheduleRealtionship(StopTimeUpdate.ScheduleRelationship.SCHEDULED_VALUE);
             }

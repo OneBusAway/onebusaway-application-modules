@@ -221,7 +221,6 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
   @Override
   public TripStatusBean getBlockLocationAsStatusBean(
       BlockLocation blockLocation, long time) {
-
     TripStatusBean bean = new TripStatusBean();
     bean.setStatus("default");
 
@@ -329,11 +328,14 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
       if (!situations.isEmpty())
         bean.setSituations(situations);
     }
-
     if (blockLocation.getTimepointPredictions() != null && blockLocation.getTimepointPredictions().size() > 0) {
       List<TimepointPredictionBean> timepointPredictions = new ArrayList<TimepointPredictionBean>();
       for (TimepointPredictionRecord tpr: blockLocation.getTimepointPredictions()) {
         TimepointPredictionBean tpb = new TimepointPredictionBean();
+        if (tpr.isSkipped()) {
+//          _log.info("Skipped stop in tripstatusbeanservimpl  seq: " + tpr.getStopSequence() + " trip: " + tpr.getTripId());
+          continue;
+        }
         tpb.setTimepointId(tpr.getTimepointId().toString());
         tpb.setTripId(tpr.getTripId().toString());
         tpb.setStopSequence(tpr.getStopSequence());
@@ -367,7 +369,6 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
   private TripDetailsBean getBlockLocationAsTripDetails(
       BlockTripInstance targetBlockTrip, BlockLocation blockLocation,
       TripDetailsInclusionBean inclusion, long time) {
-
     if (targetBlockTrip == null || blockLocation == null)
       return null;
 
@@ -378,6 +379,7 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
   private TripDetailsBean getTripEntryAndBlockLocationAsTripDetails(
       BlockTripInstance blockTripInstance, BlockLocation blockLocation,
       TripDetailsInclusionBean inclusion, long time) {
+
 
     TripBean trip = null;
     long serviceDate = blockTripInstance.getServiceDate();
@@ -409,13 +411,13 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
       if (stopTimes == null)
         missing = true;
     }
-
+//    _log.info("TripStatusBeanServiceImpl status. include trip status: " + inclusion.isIncludeTripStatus() + " blockLocation not null: " + (blockLocation != null));
     if (inclusion.isIncludeTripStatus() && blockLocation != null) {
       status = getBlockLocationAsStatusBean(blockLocation, time);
-      if (status == null || status.getStatus().equals(EVehicleStatus.SKIPPED.toString()))
-        missing = true;
-      else
-        vehicleId = AgencyAndIdLibrary.convertFromString(status.getVehicleId());
+//      if (status == null || status.getStatus().equals(EVehicleStatus.SKIPPED.toString()))
+//        missing = true;
+//      else
+      vehicleId = AgencyAndIdLibrary.convertFromString(status.getVehicleId());
     }
 
     List<ServiceAlertBean> situations = _serviceAlertBeanService.getServiceAlertsForVehicleJourney(
