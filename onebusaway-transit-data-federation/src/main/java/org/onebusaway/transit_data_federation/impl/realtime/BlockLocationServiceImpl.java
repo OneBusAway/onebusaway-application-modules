@@ -576,7 +576,6 @@ public class BlockLocationServiceImpl implements BlockLocationService,
       location.setVehicleId(record.getVehicleId());
 
       List<TimepointPredictionRecord> timepointPredictions = record.getTimepointPredictions();
-      ArrayList<TimepointPredictionRecord> filteredTimePointPredictions = new ArrayList<>();
       if (timepointPredictions != null && !timepointPredictions.isEmpty()) {
 
         SortedMap<Integer, Double> scheduleDeviations = new TreeMap<Integer, Double>();
@@ -584,13 +583,7 @@ public class BlockLocationServiceImpl implements BlockLocationService,
         BlockConfigurationEntry blockConfig = blockInstance.getBlock();
 
         int tprIndexCounter = 0;
-        _log.info("timpointpredictions len= " + timepointPredictions.size());
         for (TimepointPredictionRecord tpr : timepointPredictions) {
-          if (tpr.isSkipped()) {
-            _log.info("Skipped in blocklocationserviceimpl   seq:" + tpr.getStopSequence() + " trip: " + tpr.getTripId());
-            continue;
-          }
-          filteredTimePointPredictions.add(tpr);
 
           AgencyAndId stopId = tpr.getTimepointId();
           long predictedTime;
@@ -645,8 +638,7 @@ public class BlockLocationServiceImpl implements BlockLocationService,
           }
           tprIndexCounter++;
         }
-        _log.info("FILTERED timepointpredictions len= " + filteredTimePointPredictions.size());
-        location.setTimepointPredictions(filteredTimePointPredictions);
+        location.setTimepointPredictions(timepointPredictions);
 
         double[] scheduleTimes = new double[scheduleDeviations.size()];
         double[] scheduleDeviationMus = new double[scheduleDeviations.size()];

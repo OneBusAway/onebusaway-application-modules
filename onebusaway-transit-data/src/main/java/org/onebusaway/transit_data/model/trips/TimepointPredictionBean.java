@@ -16,6 +16,8 @@
  */
 package org.onebusaway.transit_data.model.trips;
 
+import org.onebusaway.realtime.api.TimepointPredictionRecord;
+
 import java.io.Serializable;
 
 public class TimepointPredictionBean implements Serializable {
@@ -33,6 +35,32 @@ public class TimepointPredictionBean implements Serializable {
   private long timepointPredictedArrivalTime = -1;
 
   private long timepointPredictedDepartureTime = -1;
+
+  private ScheduleRelationship scheduleRelationship;
+
+  public enum ScheduleRelationship {
+    SCHEDULED(0),
+    SKIPPED(1),
+    NO_DATA(2);
+
+    private int value;
+
+    ScheduleRelationship(int i) {
+      this.value = i;
+    }
+
+    public static ScheduleRelationship toEnum(int val) {
+      switch(val) {
+        case 0: return SCHEDULED;
+        case 1: return SKIPPED;
+        case 2: return NO_DATA;
+        default: return SCHEDULED;
+      }
+    }
+    public int getValue() {
+      return this.value;
+    }
+  }
 
   public TimepointPredictionBean() {
 
@@ -85,5 +113,15 @@ public class TimepointPredictionBean implements Serializable {
   public void setTimepointPredictedDepartureTime(
 		  long timepointPredictedDepartureTime) {
 	  this.timepointPredictedDepartureTime = timepointPredictedDepartureTime;
+  }
+  public void setScheduleRealtionship(int status) {
+    this.scheduleRelationship = ScheduleRelationship.toEnum(status);
+  }
+  public ScheduleRelationship getScheduleRelationship() {
+    return scheduleRelationship;
+  }
+  public boolean isSkipped() {
+    return (this.scheduleRelationship != null
+        && this.scheduleRelationship.getValue() == ScheduleRelationship.SKIPPED.getValue());
   }
 }

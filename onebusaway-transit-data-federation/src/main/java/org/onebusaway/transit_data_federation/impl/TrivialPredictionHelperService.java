@@ -67,6 +67,7 @@ public class TrivialPredictionHelperService implements PredictionHelperService {
 				tpr.setTimepointPredictedDepartureTime(bean.getTimepointPredictedDepartureTime());
 				tpr.setStopSequence(bean.getStopSequence());
 				tpr.setTripId(AgencyAndIdLibrary.convertFromString(bean.getTripId()));
+				tpr.setScheduleRealtionship(bean.getScheduleRelationship().getValue());
 				
 				records.add(tpr);
 			}
@@ -79,7 +80,7 @@ public class TrivialPredictionHelperService implements PredictionHelperService {
 		tpr.setTimepointScheduledTime(tripStatus.getLastUpdateTime() + tripStatus.getNextStopTimeOffset() * 1000);
 		tpr.setTimepointPredictedArrivalTime((long) (tpr.getTimepointScheduledTime() + tripStatus.getScheduleDeviation()));
 		tpr.setTimepointPredictedDepartureTime((long) (tpr.getTimepointScheduledTime() + tripStatus.getScheduleDeviation()));
-		
+		tpr.setScheduleRealtionship(tpr.getScheduleRelationship().getValue());
 		
 		records.add(tpr);
 		return records;

@@ -221,6 +221,7 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
   @Override
   public TripStatusBean getBlockLocationAsStatusBean(
       BlockLocation blockLocation, long time) {
+
     TripStatusBean bean = new TripStatusBean();
     bean.setStatus("default");
 
@@ -334,8 +335,12 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
         TimepointPredictionBean tpb = new TimepointPredictionBean();
         if (tpr.isSkipped()) {
 //          _log.info("Skipped stop in tripstatusbeanservimpl  seq: " + tpr.getStopSequence() + " trip: " + tpr.getTripId());
-          continue;
+//          continue;
+          tpb.setScheduleRealtionship(tpr.getScheduleRelationship().getValue());
+        } else {
+          tpb.setScheduleRealtionship(TimepointPredictionBean.ScheduleRelationship.SCHEDULED.getValue());
         }
+
         tpb.setTimepointId(tpr.getTimepointId().toString());
         tpb.setTripId(tpr.getTripId().toString());
         tpb.setStopSequence(tpr.getStopSequence());
