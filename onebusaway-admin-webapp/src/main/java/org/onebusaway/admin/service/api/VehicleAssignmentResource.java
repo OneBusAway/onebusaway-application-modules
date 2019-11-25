@@ -117,10 +117,10 @@ public class VehicleAssignmentResource extends AuthenticatedResource {
         _log.info("found " + blockBeans.size() + " active blocks");
         StringBuffer csv = new StringBuffer();
         csv.append("block").append('\n');
-        /*for (BlockInstanceBean bb: blockBeans) {
-            _log.debug("block=" + bb.getId());
-            csv.append(bb.getId()).append('\n');
-        }*/
+        for (ActiveBlock bb: blockBeans) {
+            _log.debug("block=" + bb.getBlockId());
+            csv.append(bb.getBlockId()).append('\n');
+        }
         return Response.ok(csv.toString()).build();
     }
 

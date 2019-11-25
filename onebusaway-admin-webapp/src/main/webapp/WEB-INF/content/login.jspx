@@ -34,14 +34,15 @@
 	<s:if test="anonymousUser">
 		<s:if test="failure">
 			<p class="error">Your username and or password are incorrect. To reset your password: </p>
-			<s:form action="/forgot-password.action">
+			<s:form action="/forgot-password.action" method="post">
 				Enter your username <s:textfield name="username" /> and 
 				<s:submit value="Click here" />
+				<input type="hidden" id="csrfField" name="${_csrf.parameterName}" value="${_csrf.token}"/>
 			</s:form>
 			<p class="error"><a href="#" onclick='javascript:goBackToLogin();'>Go Back to Login</a></p>
 			<br></br>
 			<div id="navigation">
-				<s:url var="url" namespace="/" action="logout"></s:url>
+				<s:url var="url" namespace="/admin" action="logout"></s:url>
 				<s:form  action="%{url}"
 						method="post">
 					<input id="tryagain" type="submit"
@@ -58,7 +59,7 @@
 				<p class="error">Please login to view this resource.</p>
 
 			<div id="navigation">
-				<s:url var="url" namespace="/" action="logout"></s:url>
+				<s:url var="url" namespace="/admin" action="logout"></s:url>
 				<s:form action="%{url}"
 						method="post">
 					<input type="submit"

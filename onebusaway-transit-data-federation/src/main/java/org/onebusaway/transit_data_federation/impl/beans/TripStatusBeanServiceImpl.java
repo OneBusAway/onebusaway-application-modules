@@ -281,7 +281,7 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
     BlockStopTimeEntry closestStop = blockLocation.getClosestStop();
     if (closestStop != null) {
       StopTimeEntry stopTime = closestStop.getStopTime();
-      StopBean stopBean = _stopBeanService.getStopForId(stopTime.getStop().getId());
+      StopBean stopBean = _stopBeanService.getStopForId(stopTime.getStop().getId(), null);
       bean.setClosestStop(stopBean);
       bean.setClosestStopTimeOffset(blockLocation.getClosestStopTimeOffset());
     }
@@ -289,7 +289,7 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
     BlockStopTimeEntry nextStop = blockLocation.getNextStop();
     if (nextStop != null) {
       StopTimeEntry stopTime = nextStop.getStopTime();
-      StopBean stopBean = _stopBeanService.getStopForId(stopTime.getStop().getId());
+      StopBean stopBean = _stopBeanService.getStopForId(stopTime.getStop().getId(), null);
       bean.setNextStop(stopBean);
       bean.setNextStopTimeOffset(blockLocation.getNextStopTimeOffset());
       bean.setNextStopDistanceFromVehicle(blockLocation.getNextStop().getDistanceAlongBlock()
@@ -299,7 +299,7 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
     BlockStopTimeEntry previousStop = blockLocation.getPreviousStop();
     if (previousStop != null) {
       StopTimeEntry stopTime = previousStop.getStopTime();
-      StopBean stopBean = _stopBeanService.getStopForId(stopTime.getStop().getId());
+      StopBean stopBean = _stopBeanService.getStopForId(stopTime.getStop().getId(), null);
       bean.setPreviousStop(stopBean);
       bean.setPreviousStopTimeOffset(blockLocation.getPreviousStopTimeOffset());
       bean.setPreviousStopDistanceFromVehicle(blockLocation.getPreviousStop().getDistanceAlongBlock()

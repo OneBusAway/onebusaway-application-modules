@@ -25,7 +25,7 @@ import org.onebusaway.nextbus.impl.util.ConfigurationMapUtil;
 import org.onebusaway.nextbus.impl.util.ConfigurationUtil;
 import org.onebusaway.nextbus.model.nextbus.Body;
 import org.onebusaway.nextbus.model.nextbus.BodyError;
-import org.onebusaway.nextbus.service.CacheService;
+import org.onebusaway.nextbus.service.cache.CacheService;
 import org.onebusaway.nextbus.service.TdsMappingService;
 import org.onebusaway.nextbus.validation.ErrorMsg;
 import org.onebusaway.transit_data.model.AgencyBean;
@@ -58,7 +58,7 @@ public class NextBusApiBase {
   public static final String REQUEST_TYPE = "json";
 
   // CACHE
-  
+
   public AgencyBean getCachedAgencyBean(String id) {
     if (_configMapUtil.getConfig(id) != null) {
       AgencyBean bean = _cache.getAgency(id);
@@ -78,7 +78,7 @@ public class NextBusApiBase {
       if (_cache.isInvalidStop(id)) {
         return null;
       }
-      
+
       try {
         stop = _transitDataService.getStop(id);
       } catch (Throwable t) {
@@ -94,7 +94,7 @@ public class NextBusApiBase {
   }
 
   // VALIDATION
-  
+
   protected boolean isValidAgency(Body body, String agencyId) {
     if (agencyId == null) {
       body.getErrors().add(new BodyError(ErrorMsg.AGENCY_NULL.getDescription()));

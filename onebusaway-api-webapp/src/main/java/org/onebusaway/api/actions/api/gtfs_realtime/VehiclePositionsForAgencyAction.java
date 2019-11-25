@@ -39,6 +39,13 @@ public class VehiclePositionsForAgencyAction extends GtfsRealtimeActionSupport {
 
     ListBean<VehicleStatusBean> vehicles = _service.getAllVehiclesForAgency(
         agencyId, timestamp);
+    
+    //Filter for last vehicle positions < 60'
+    for (int i = vehicles.getList().size() - 1; i >= 0; i--) {
+      if ((((timestamp / 1000) - (vehicles.getList().get(i).getLastUpdateTime() / 1000)) >= 600) || 
+        vehicles.getList().get(i).getLocation() == null)
+        vehicles.getList().remove(i);
+    }
 
     for (VehicleStatusBean vehicle : vehicles.getList()) {
       FeedEntity.Builder entity = feed.addEntityBuilder();

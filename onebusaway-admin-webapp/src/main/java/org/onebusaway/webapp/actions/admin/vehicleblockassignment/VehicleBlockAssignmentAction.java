@@ -51,7 +51,10 @@ public class VehicleBlockAssignmentAction extends ActionSupport implements
     private List<BlockSummary> _model;
     private Set<String> _activeVehicleIds;
 
-    public String execute(){
+    public String execute() throws ExecutionException {
+
+        _model = getBlockSummaries();
+
         return SUCCESS;
     }
 
@@ -60,10 +63,13 @@ public class VehicleBlockAssignmentAction extends ActionSupport implements
         return _model;
     }
 
+    public void setModel(List<BlockSummary> blockSummaries) {
+        _model = blockSummaries;
+    }
+
     @Override
     public void prepare() throws ExecutionException {
         _activeVehicleIds = new HashSet<>(vehicleAssignmentService.getActiveVehicles());
-        _model = getBlockSummaries();
     }
 
     public String submit() throws ExecutionException {
@@ -75,7 +81,6 @@ public class VehicleBlockAssignmentAction extends ActionSupport implements
                 vehicleAssignmentService.assign(blockId, vehicleId);
             }
         }
-        prepare();
         return "submitSuccess";
     }
 

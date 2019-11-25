@@ -15,21 +15,18 @@
  */
 package org.onebusaway.nextbus.impl;
 
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.nextbus.impl.util.ConfigurationMapUtil;
+import org.onebusaway.transit_data.model.*;
 import org.slf4j.Logger;
 
 import javax.annotation.PostConstruct;
 
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.nextbus.service.TdsMappingService;
-import org.onebusaway.transit_data.model.AgencyWithCoverageBean;
-import org.onebusaway.transit_data.model.ListBean;
-import org.onebusaway.transit_data.model.RouteBean;
-import org.onebusaway.transit_data.model.SearchQueryBean;
-import org.onebusaway.transit_data.model.StopBean;
-import org.onebusaway.transit_data.model.StopsBean;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,19 +40,21 @@ public class TdsMappingServiceImpl implements TdsMappingService {
   @Autowired
   private TransitDataService _transitDataService;
 
-  private ConcurrentHashMap<String, String> routeShortNameToRouteIdMap = new ConcurrentHashMap<String, String>(
-      200);
+  @Autowired
+  ConfigurationMapUtil _configurationMapUtil;
 
-  private ConcurrentHashMap<String, String> stopCodeToStopIdMap = new ConcurrentHashMap<String, String>(
-      200);
+  private ConcurrentHashMap<String, String> routeShortNameToRouteIdMap = new ConcurrentHashMap<String, String>(
+      2000);
+
+  private ConcurrentHashMap<String, Set<AgencyAndId>> stopCodeToStopIdMap = new ConcurrentHashMap<String, Set<AgencyAndId>>(
+      20000);
 
   private static Logger _log = LoggerFactory.getLogger(TdsMappingServiceImpl.class);
 
   @PostConstruct
   public void setup() {
     final RefreshDataTask refreshDataTask = new RefreshDataTask();
-    _taskScheduler.scheduleWithFixedDelay(refreshDataTask, 60 * 60 * 1000); // every
-                                                                            // hour
+    _taskScheduler.scheduleWithFixedDelay(refreshDataTask, 60 * 60 * 1000); // every hour
   }
 
   public ConcurrentHashMap<String, String> getRouteShortNameToRouteIdMap() {
@@ -73,11 +72,16 @@ public class TdsMappingServiceImpl implements TdsMappingService {
     return shortName;
   }
 
-  public String getStopIdFromStopCode(String code) {
+  public Set<AgencyAndId> getStopIdsFromStopCode(String code) {
     if (code != null
         && stopCodeToStopIdMap.containsKey(code.toUpperCase()))
       return stopCodeToStopIdMap.get(code.toUpperCase());
-    return code;
+
+    Set<AgencyAndId> codeSet = new HashSet<>();
+    String agencyId = _configurationMapUtil.getDefaultAgencyId();
+    codeSet.add(new AgencyAndId(agencyId, code));
+
+    return codeSet;
   }
 
   private class RefreshDataTask implements Runnable {
@@ -85,6 +89,7 @@ public class TdsMappingServiceImpl implements TdsMappingService {
     @Override
     public void run() {
       try {
+        String defaultAgencyId = _configurationMapUtil.getDefaultAgencyId();
         for (AgencyWithCoverageBean agency : _transitDataService.getAgenciesWithCoverage()) {
           String agencyId = agency.getAgency().getId();
 
@@ -97,22 +102,38 @@ public class TdsMappingServiceImpl implements TdsMappingService {
           _log.info("mapped routes short names to route ids");
 
           // Stops Mapping
-          SearchQueryBean query = new SearchQueryBean();
-          query.setBounds(getAgencyBounds(agency));
-          query.setMaxCount(Integer.MAX_VALUE);
+          List<StopBean> stopsList  = _transitDataService.getAllRevenueStops(agency);
 
-          StopsBean stops = _transitDataService.getStops(query);
-          List<StopBean> stopsList = stops.getStops();
+          Map<String, List<AgencyAndId>> stopIdsMap = getStopIdToConsolidatedStopIdsMap();
 
           for (StopBean stop : stopsList) {
-            stopCodeToStopIdMap.put(stop.getCode().toUpperCase(), stop.getId());
+            Set<AgencyAndId> stopIds = stopCodeToStopIdMap.get(stop.getCode().toUpperCase());
+            if(stopIds == null){
+              stopIds = new HashSet<>();
+              stopCodeToStopIdMap.put(stop.getCode().toUpperCase(), stopIds);
+            }
+            stopIds.add(AgencyAndId.convertFromString(stop.getId()));
+            List<AgencyAndId> consolidatedStopIds = stopIdsMap.get(stop.getId());
+            if(consolidatedStopIds !=null) {
+              stopIds.addAll(consolidatedStopIds);
+            }
           }
-          
           _log.info("mapped stop codes to stop ids");
         }
       } catch (Exception e) {
         e.printStackTrace();
       }
+    }
+
+    private Map<String, List<AgencyAndId>> getStopIdToConsolidatedStopIdsMap(){
+      ListBean<ConsolidatedStopMapBean> conslidatedStopsBean = _transitDataService.getAllConsolidatedStops();
+      Map<String, List<AgencyAndId>> consolidatedStopIds = new HashMap<>();
+      List<ConsolidatedStopMapBean> consolidatedStops =  conslidatedStopsBean.getList();
+      for(ConsolidatedStopMapBean csmb: consolidatedStops){
+        consolidatedStopIds.put(csmb.getConsolidatedStopId().toString(), csmb.getHiddenStopIds());
+        _log.info("Stop Id: " + csmb.getConsolidatedStopId() + ", Consolidated Stop Ids:" + csmb.getHiddenStopIds());
+      }
+      return consolidatedStopIds;
     }
 
     private CoordinateBounds getAgencyBounds(AgencyWithCoverageBean agency) {

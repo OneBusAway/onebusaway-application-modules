@@ -15,15 +15,17 @@
  */
 package org.onebusaway.api.actions.api.where;
 
-import org.apache.struts2.rest.DefaultHttpHeaders;
-import org.onebusaway.api.actions.api.ApiActionSupport;
-import org.onebusaway.api.model.transit.BeanFactoryV2;
-import org.onebusaway.exceptions.ServiceException;
-import org.onebusaway.transit_data.model.StopsForRouteBean;
-import org.onebusaway.transit_data.services.TransitDataService;
-import org.springframework.beans.factory.annotation.Autowired;
+    import org.apache.struts2.rest.DefaultHttpHeaders;
+    import org.onebusaway.api.actions.api.ApiActionSupport;
+    import org.onebusaway.api.model.transit.BeanFactoryV2;
+    import org.onebusaway.exceptions.ServiceException;
+    import org.onebusaway.transit_data.model.StopsForRouteBean;
+    import org.onebusaway.gtfs.model.calendar.ServiceDate;
+    import org.onebusaway.transit_data.services.TransitDataService;
+    import org.onebusaway.util.services.configuration.ConfigurationService;
+    import org.springframework.beans.factory.annotation.Autowired;
 
-import com.opensymphony.xwork2.validator.annotations.RequiredFieldValidator;
+    import com.opensymphony.xwork2.validator.annotations.RequiredFieldValidator;
 
 public class StopsForRouteAction extends ApiActionSupport {
 
@@ -37,6 +39,9 @@ public class StopsForRouteAction extends ApiActionSupport {
   private TransitDataService _service;
 
   private String _id;
+
+  @Autowired
+  private ConfigurationService _configService;
 
   private boolean _includePolylines = true;
 
@@ -52,8 +57,8 @@ public class StopsForRouteAction extends ApiActionSupport {
   public String getId() {
     return _id;
   }
-  
-  
+
+
   public void setIncludePolylines(boolean includePolylines) {
     _includePolylines = includePolylines;
   }
@@ -64,8 +69,14 @@ public class StopsForRouteAction extends ApiActionSupport {
     if (hasErrors())
       return setValidationErrorsResponse();
 
-    StopsForRouteBean result = _service.getStopsForRoute(_id);
-
+//    StopsForRouteBean result = _service.getStopsForRoute(_id);
+    boolean serviceDateFilterOn = Boolean.parseBoolean(_configService.getConfigurationValueAsString("display.serviceDateFiltering", "false"));
+    StopsForRouteBean result;
+    if (serviceDateFilterOn) {
+      result = _service.getStopsForRouteForServiceDate(_id, new ServiceDate());
+    } else {
+      result = _service.getStopsForRoute(_id);
+    }
     if (result == null)
       return setResourceNotFoundResponse();
 

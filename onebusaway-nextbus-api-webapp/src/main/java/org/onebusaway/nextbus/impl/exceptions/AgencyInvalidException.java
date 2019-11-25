@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2015 Cambridge Systematics
+ * Copyright (C) 2019 Cambridge Systematics
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,26 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.onebusaway.nextbus.service;
+package org.onebusaway.nextbus.impl.exceptions;
 
-import org.onebusaway.transit_data.model.AgencyBean;
-import org.onebusaway.transit_data.model.StopBean;
+import org.onebusaway.nextbus.validation.ErrorMsg;
 
-public interface CacheService {
+public class AgencyInvalidException extends Exception {
 
-  AgencyBean getAgency(String string);
+    private static final long serialVersionUID = 1L;
 
-  void putAgency(String string, AgencyBean value);
+    private String agencyId;
 
-  Boolean getRoute(String string);
+    public AgencyInvalidException(String agencyId){
+        super(ErrorMsg.AGENCY_INVALID.getDescription());
+        this.agencyId = agencyId;
+    }
 
-  void putRoute(String string, Boolean true1);
-
-  StopBean getStop(String key);
-
-  void putStop(String key, StopBean value);
-
-  boolean isInvalidStop(String key);
-
-  void setInvalidStop(String key);
+    public String getAgencyId() {
+        return agencyId;
+    }
 }

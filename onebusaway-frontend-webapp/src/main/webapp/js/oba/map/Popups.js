@@ -65,8 +65,10 @@ OBA.Popups = (function() {
 				params.time = OBA.Config.time;
 			}
 			
-			if(refreshPopupRequest !== null) {
-				refreshPopupRequest.abort();
+			if( typeof refreshPopupRequest !== 'undefined' && refreshPopupRequest !== null) {
+				if ('abort' in refreshPopupRequest) {
+					refreshPopupRequest.abort();
+				}
 				openBubble = true;
 			}
 			refreshPopupRequest = jQuery.getJSON(url, params, function(json) {
@@ -610,9 +612,6 @@ OBA.Popups = (function() {
 							distance += '<span class="vehicleId"> (#' + vehicleId + ')</span>';
 						}
 
-
-						
-						
 						// time mode
 						if(timePrediction != null && stalled === false) {
 							if (expectedArrivalTime != null && OBA.Config.showExpectedArrivalTimeInStopPopup == "true") {

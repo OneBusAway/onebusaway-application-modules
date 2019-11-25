@@ -136,6 +136,7 @@
                                 <s:iterator value="model" status="rowStatus">
                                     <tr>
                                         <td><span class="blockId"><s:property value="blockId" /></span></td>
+                                        <s:hidden name="model[%{#rowStatus.index}].blockId" value="%{blockId}" theme="simple"/>
                                         <td><s:property value="routeName" /> </td>
                                         <td><s:property value="startTime" /> </td>
                                         <td><s:property value="endTime" /> </td>

@@ -304,7 +304,7 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
     StopBean stopBean = stopBeanCache.get(stop.getId());
 
     if (stopBean == null) {
-      stopBean = _stopBeanService.getStopForId(stop.getId());
+      stopBean = _stopBeanService.getStopForId(stop.getId(), null);
       stopBeanCache.put(stop.getId(), stopBean);
     }
 

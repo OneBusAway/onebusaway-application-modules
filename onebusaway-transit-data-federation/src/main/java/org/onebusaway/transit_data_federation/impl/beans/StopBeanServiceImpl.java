@@ -83,9 +83,11 @@ class StopBeanServiceImpl implements StopBeanService {
   }
 
   @Cacheable
-  public StopBean getStopForId(AgencyAndId id) {
-
-    return getStopForIdForServiceDate(id, null);
+  /** serviceDate can be null.
+   *  If included, the routes returned in the stopBean will be filtered by service date
+  **/
+  public StopBean getStopForId(AgencyAndId id, ServiceDate serviceDate) {
+      return getStopForIdForServiceDate(id, serviceDate);
   }
 
   @Cacheable
@@ -98,7 +100,7 @@ class StopBeanServiceImpl implements StopBeanService {
       // try looking up consolidated id
       AgencyAndId consolidatedId = _consolidatedStopsService.getConsolidatedStopIdForHiddenStopId(id);
       if (consolidatedId != null)
-        return getStopForId(consolidatedId);
+        return getStopForId(consolidatedId, serviceDate);
       throw new NoSuchStopServiceException(
               AgencyAndIdLibrary.convertToString(id));
     }

@@ -282,17 +282,17 @@ public class ArrivalsAndDeparturesBeanServiceImplTest {
 
     StopBean stopABean = new StopBean();
     stopABean.setId("1_stopA");
-    Mockito.when(_stopBeanService.getStopForId(stopA.getId())).thenReturn(
+    Mockito.when(_stopBeanService.getStopForId(stopA.getId(), null)).thenReturn(
         stopABean);
 
     StopBean stopBBean = new StopBean();
     stopBBean.setId("1_stopB");
-    Mockito.when(_stopBeanService.getStopForId(stopB.getId())).thenReturn(
+    Mockito.when(_stopBeanService.getStopForId(stopB.getId(), null)).thenReturn(
         stopBBean);
 
     StopBean stopCBean = new StopBean();
     stopCBean.setId("1_stopC");
-    Mockito.when(_stopBeanService.getStopForId(stopC.getId())).thenReturn(
+    Mockito.when(_stopBeanService.getStopForId(stopC.getId(), null)).thenReturn(
         stopCBean);
 
     /****
