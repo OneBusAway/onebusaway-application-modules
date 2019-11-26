@@ -302,8 +302,6 @@ public final class SiriSupportV2 {
         if(!tpr.isSkipped()){
           stopIdToPredictionRecordMap.put(
               AgencyAndId.convertToString(tpr.getTimepointId()), tpr);
-        } else {
-          _log.info("SIRIv2 skipped stop made it through   seq: " + tpr.getStopSequence() + " on trip: " + tpr.getTripId().getId());
         }
       }
     }

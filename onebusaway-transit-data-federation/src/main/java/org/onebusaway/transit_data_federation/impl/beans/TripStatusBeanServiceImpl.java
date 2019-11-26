@@ -334,9 +334,7 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
       for (TimepointPredictionRecord tpr: blockLocation.getTimepointPredictions()) {
         TimepointPredictionBean tpb = new TimepointPredictionBean();
         if (tpr.isSkipped()) {
-//          _log.info("Skipped stop in tripstatusbeanservimpl  seq: " + tpr.getStopSequence() + " trip: " + tpr.getTripId());
-//          continue;
-          tpb.setScheduleRealtionship(tpr.getScheduleRelationship().getValue());
+          tpb.setScheduleRealtionship(TimepointPredictionBean.ScheduleRelationship.SKIPPED.getValue());
         } else {
           tpb.setScheduleRealtionship(TimepointPredictionBean.ScheduleRelationship.SCHEDULED.getValue());
         }
@@ -416,12 +414,8 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
       if (stopTimes == null)
         missing = true;
     }
-//    _log.info("TripStatusBeanServiceImpl status. include trip status: " + inclusion.isIncludeTripStatus() + " blockLocation not null: " + (blockLocation != null));
     if (inclusion.isIncludeTripStatus() && blockLocation != null) {
       status = getBlockLocationAsStatusBean(blockLocation, time);
-//      if (status == null || status.getStatus().equals(EVehicleStatus.SKIPPED.toString()))
-//        missing = true;
-//      else
       vehicleId = AgencyAndIdLibrary.convertFromString(status.getVehicleId());
     }
 

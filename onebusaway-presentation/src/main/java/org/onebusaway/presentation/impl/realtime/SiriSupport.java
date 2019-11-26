@@ -274,11 +274,7 @@ public final class SiriSupport {
 		// (build map of vehicle IDs to TPRs)
 		if(stopLevelPredictions != null) {
 			for(TimepointPredictionRecord tpr : stopLevelPredictions) {
-//				if (!tpr.isSkipped()) {
 					stopIdToPredictionRecordMap.put(AgencyAndId.convertToString(tpr.getTimepointId()), tpr);
-//				} else {
-//					_log.info("SIRI: skipped stop made it through"); //" + tpr.getStopSequence() + " on trip: " + tpr.getTripId()
-//				}
 			}
 		}
 		
@@ -652,10 +648,6 @@ public final class SiriSupport {
 			predictedDepartureTime = prediction.getTimepointPredictedDepartureTime();
 		}
 
-//		if (prediction.isSkipped()) {
-//			_log.info("SKIPPED STOP: " + stopBean.getId());
-//			return null;
-//		}
 		MonitoredCallStructure monitoredCallStructure = new MonitoredCallStructure();
 		monitoredCallStructure.setVisitNumber(BigInteger.valueOf(visitNumber));
 
