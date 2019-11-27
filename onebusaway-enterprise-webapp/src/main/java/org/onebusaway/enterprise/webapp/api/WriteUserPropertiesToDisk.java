@@ -94,7 +94,7 @@ public class WriteUserPropertiesToDisk {
                 } else if (up instanceof UserPropertiesV4) {
                     write(user, (UserPropertiesV4) up);
                 } else {
-                    _log.info("unsuppored user " + up.getClass().getName()
+                    _log.info("unsupported user " + up.getClass().getName()
                             + " with id" + userId);
                 }
 
