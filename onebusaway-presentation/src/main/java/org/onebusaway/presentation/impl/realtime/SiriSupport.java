@@ -648,6 +648,11 @@ public final class SiriSupport {
 			predictedDepartureTime = prediction.getTimepointPredictedDepartureTime();
 		}
 
+		if (prediction != null && prediction.getScheduleRelationship() != null && prediction.isSkipped()) {
+			_log.info("SKIPPED STOP (MONITORED): " + stopBean.getId());
+			return null;
+		}
+
 		MonitoredCallStructure monitoredCallStructure = new MonitoredCallStructure();
 		monitoredCallStructure.setVisitNumber(BigInteger.valueOf(visitNumber));
 
