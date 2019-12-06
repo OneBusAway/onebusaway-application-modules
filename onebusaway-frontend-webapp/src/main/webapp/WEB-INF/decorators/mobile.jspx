@@ -73,7 +73,7 @@
     		<s:url var="contactUrl" namespace="/wiki" action="ContactUs"/>
     		<a href="${contactUrl}">Contact</a> |
 
-			<s:set var="link" value="getText('main.agency.link')" />
+			<s:set var="link" value="getText('main.agencysite.link')" />
 			<a href="${link}"><s:property value="getText('mobile.agency.name')" /></a>
 		</p>
 	</div>

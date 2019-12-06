@@ -224,7 +224,7 @@
 			<div id="flexSpreader"><!-- jspx --></div>
 			<div class="container clear"><!-- jspx --></div>
 
-			<s:set var="link" value="getText('main.tools.link')" />
+			<s:set var="link" value="getText('main.apps.link')" />
 			<s:set var="mobile_image" value="getText('main.tools.mobile_image')" />
 			<a href="${link}">
 				<div id="mobileBox">
