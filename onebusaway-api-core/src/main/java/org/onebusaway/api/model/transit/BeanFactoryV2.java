@@ -801,10 +801,10 @@ public class BeanFactoryV2 {
 
     List<ArrivalAndDepartureV2Bean> ads = new ArrayList<ArrivalAndDepartureV2Bean>();
     for (ArrivalAndDepartureBean ad : sad.getArrivalsAndDepartures()) {
-		if(ad.isPredicted() && ad.getPredictedArrivalTime() == 0 && ad.getNumberOfStopsAway() < 0)
-    	continue;
-		ads.add(getArrivalAndDeparture(ad));
-	}
+      if(ad.isPredicted() && ad.getPredictedArrivalTime() == 0 && ad.getNumberOfStopsAway() < 0)
+        continue;
+      ads.add(getArrivalAndDeparture(ad));
+    }
     bean.setArrivalsAndDepartures(ads);
 
     List<String> nearbyStopIds = new ArrayList<String>();
