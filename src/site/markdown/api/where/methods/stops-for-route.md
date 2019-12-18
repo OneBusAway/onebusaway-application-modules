@@ -54,6 +54,8 @@ http://api.pugetsound.onebusaway.org/api/where/stops-for-route/1_100224.xml?key=
 
 * `id` - The route id, encoded directly in the URL:
     * `http://api.pugetsound.onebusaway.org/api/where/stops-for-route/[ID GOES HERE].xml`
-* includePolylines=true|false = Optional parameter that controls whether polyline elements are included in the response.  Defaults to true.
+* `includePolylines=true|false` = Optional parameter that controls whether polyline elements are included in the response.  Defaults to true.
+* `time=YYYY-MM-DD|epoch` = if service date filtering is enabled by external configuration, specify the service date explicitly.  Defaults to today.
+* `includeAllService=true|false` = if service date filtering is enabled by external configuration, explicitly disable it and search all calendar.  Doing so makes the time param invalid.
 
 ## Response
