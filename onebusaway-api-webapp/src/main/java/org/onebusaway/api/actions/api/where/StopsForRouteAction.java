@@ -15,6 +15,7 @@
  */
 package org.onebusaway.api.actions.api.where;
 
+    import com.opensymphony.xwork2.conversion.annotations.TypeConversion;
     import org.apache.struts2.rest.DefaultHttpHeaders;
     import org.onebusaway.api.actions.api.ApiActionSupport;
     import org.onebusaway.api.model.transit.BeanFactoryV2;
@@ -22,10 +23,13 @@ package org.onebusaway.api.actions.api.where;
     import org.onebusaway.transit_data.model.StopsForRouteBean;
     import org.onebusaway.gtfs.model.calendar.ServiceDate;
     import org.onebusaway.transit_data.services.TransitDataService;
+    import org.onebusaway.util.SystemTime;
     import org.onebusaway.util.services.configuration.ConfigurationService;
     import org.springframework.beans.factory.annotation.Autowired;
 
     import com.opensymphony.xwork2.validator.annotations.RequiredFieldValidator;
+
+    import java.util.Date;
 
 public class StopsForRouteAction extends ApiActionSupport {
 
@@ -39,6 +43,9 @@ public class StopsForRouteAction extends ApiActionSupport {
   private TransitDataService _service;
 
   private String _id;
+
+  private Date _date = new Date(SystemTime.currentTimeMillis());
+
 
   @Autowired
   private ConfigurationService _configService;
@@ -58,22 +65,36 @@ public class StopsForRouteAction extends ApiActionSupport {
     return _id;
   }
 
+  private boolean _includeAllService = false;
+  public void setIncludeAllService( boolean allService) {
+    _includeAllService = allService;
+  }
+
+  public boolean getIncludeAllService() {
+    return _includeAllService;
+  }
 
   public void setIncludePolylines(boolean includePolylines) {
     _includePolylines = includePolylines;
   }
 
+  @TypeConversion(converter = "org.onebusaway.presentation.impl.conversion.DateConverter")
+  public void setDate(Date date) {
+    _date = date;
+  }
 
   public DefaultHttpHeaders show() throws ServiceException {
 
     if (hasErrors())
       return setValidationErrorsResponse();
 
-//    StopsForRouteBean result = _service.getStopsForRoute(_id);
     boolean serviceDateFilterOn = Boolean.parseBoolean(_configService.getConfigurationValueAsString("display.serviceDateFiltering", "false"));
+    if (_includeAllService) {
+      serviceDateFilterOn = false;
+    }
     StopsForRouteBean result;
     if (serviceDateFilterOn) {
-      result = _service.getStopsForRouteForServiceDate(_id, new ServiceDate());
+      result = _service.getStopsForRouteForServiceDate(_id, new ServiceDate(_date));
     } else {
       result = _service.getStopsForRoute(_id);
     }
