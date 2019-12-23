@@ -25,6 +25,8 @@ package org.onebusaway.api.actions.api.where;
     import org.onebusaway.transit_data.services.TransitDataService;
     import org.onebusaway.util.SystemTime;
     import org.onebusaway.util.services.configuration.ConfigurationService;
+    import org.slf4j.Logger;
+    import org.slf4j.LoggerFactory;
     import org.springframework.beans.factory.annotation.Autowired;
 
     import com.opensymphony.xwork2.validator.annotations.RequiredFieldValidator;
@@ -34,6 +36,8 @@ package org.onebusaway.api.actions.api.where;
 public class StopsForRouteAction extends ApiActionSupport {
 
   private static final long serialVersionUID = 1L;
+
+  private static Logger _log = LoggerFactory.getLogger(StopsForRouteAction.class);
 
   private static final int V1 = 1;
 
@@ -89,13 +93,16 @@ public class StopsForRouteAction extends ApiActionSupport {
       return setValidationErrorsResponse();
 
     boolean serviceDateFilterOn = Boolean.parseBoolean(_configService.getConfigurationValueAsString("display.serviceDateFiltering", "false"));
+    _log.info("serviceDateFilterOn=" + serviceDateFilterOn);
     if (_includeAllService) {
       serviceDateFilterOn = false;
     }
     StopsForRouteBean result;
     if (serviceDateFilterOn) {
+      _log.info("using serviceDate " + _date + " with id=" + _id);
       result = _service.getStopsForRouteForServiceDate(_id, new ServiceDate(_date));
     } else {
+      _log.info("using all service with id=" + _id);
       result = _service.getStopsForRoute(_id);
     }
     if (result == null)
