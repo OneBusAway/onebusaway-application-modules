@@ -48,7 +48,7 @@ public class StopsForRouteAction extends ApiActionSupport {
 
   private String _id;
 
-  private Date _date = new Date(SystemTime.currentTimeMillis());
+  private Date _date = null;
 
 
   @Autowired
@@ -69,15 +69,6 @@ public class StopsForRouteAction extends ApiActionSupport {
     return _id;
   }
 
-  private boolean _includeAllService = false;
-  public void setIncludeAllService( boolean allService) {
-    _includeAllService = allService;
-  }
-
-  public boolean getIncludeAllService() {
-    return _includeAllService;
-  }
-
   public void setIncludePolylines(boolean includePolylines) {
     _includePolylines = includePolylines;
   }
@@ -94,11 +85,11 @@ public class StopsForRouteAction extends ApiActionSupport {
 
     boolean serviceDateFilterOn = Boolean.parseBoolean(_configService.getConfigurationValueAsString("display.serviceDateFiltering", "false"));
     _log.info("serviceDateFilterOn=" + serviceDateFilterOn);
-    if (_includeAllService) {
-      serviceDateFilterOn = false;
+    if (serviceDateFilterOn && _date == null) {
+      _date = new Date(System.currentTimeMillis());
     }
     StopsForRouteBean result;
-    if (serviceDateFilterOn) {
+    if (serviceDateFilterOn || _date != null) {
       _log.info("using serviceDate " + _date + " with id=" + _id);
       result = _service.getStopsForRouteForServiceDate(_id, new ServiceDate(_date));
     } else {
