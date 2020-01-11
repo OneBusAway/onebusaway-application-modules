@@ -224,7 +224,7 @@
 			<div id="flexSpreader"><!-- jspx --></div>
 			<div class="container clear"><!-- jspx --></div>
 
-			<s:set var="link" value="getText('main.tools.link')" />
+			<s:set var="link" value="getText('main.apps.link')" />
 			<s:set var="mobile_image" value="getText('main.tools.mobile_image')" />
 			<a href="${link}">
 				<div id="mobileBox">
@@ -262,7 +262,7 @@
 			    	<p>using:</p>
 			    </li>
 			    <li id="wizard-col3">
-			    	<s:url var="url" namespace="/wiki/Help" action="MobileOverview"/>
+			    	<s:url var="url" namespace="/m" action=""/>
 			    	<a href="${url}" target="_new">
 			    		<p>Mobile Web</p>
 			    		<a rel="popover"><div id="smartphone_img">&amp;nbsp;</div></a>

@@ -15,6 +15,7 @@
  */
 package org.onebusaway.presentation.impl.realtime;
 
+import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -308,6 +309,8 @@ public class RealtimeServiceImpl implements RealtimeService {
     tpr.setTimepointScheduledTime(adBean.getScheduledArrivalTime());
     tpr.setTimepointPredictedArrivalTime(adBean.getPredictedArrivalTime());
     tpr.setTimepointPredictedDepartureTime(adBean.getPredictedDepartureTime());
+
+
     tprs.add(tpr);
     return tprs;
   }

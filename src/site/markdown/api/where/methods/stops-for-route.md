@@ -54,6 +54,7 @@ http://api.pugetsound.onebusaway.org/api/where/stops-for-route/1_100224.xml?key=
 
 * `id` - The route id, encoded directly in the URL:
     * `http://api.pugetsound.onebusaway.org/api/where/stops-for-route/[ID GOES HERE].xml`
-* includePolylines=true|false = Optional parameter that controls whether polyline elements are included in the response.  Defaults to true.
+* `includePolylines=true|false` = Optional parameter that controls whether polyline elements are included in the response.  Defaults to true.
+* `time=YYYY-MM-DD|epoch` = specify the service date explicitly.  Defaults to today.
 
 ## Response

@@ -150,7 +150,9 @@ OBA.RouteMap = function(mapNode, initCallbackFn, serviceAlertCallbackFn) {
 			directionKey = "unknown";
 		}
 
-        var stopsOnRoute = jQuery("body").data("savedData").stops;
+		var stopsOnRoute = [];
+		if (typeof jQuery("body").data("savedData") === 'undefined' && jQuery("body").data("savedData") != null)
+			stopsOnRoute = jQuery("body").data("savedData").stops;
 
         var onRoute = false;
 		jQuery.each(stopsOnRoute, function(_, stopOnRoute) {
@@ -732,7 +734,9 @@ OBA.RouteMap = function(mapNode, initCallbackFn, serviceAlertCallbackFn) {
 		panToRoute: function(routeId) {
 			var polylines = polylinesByRoute[routeId];
 
-			if(polylines === null) {
+			if(polylines === null
+				|| typeof polylines === 'undefined'
+				|| typeof polylines.length === 'undefined') {
 				return;
 			}
 			

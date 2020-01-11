@@ -25,12 +25,13 @@ public interface StopBeanService {
 
   /**
    * @param stopId see {@link Stop#getId()}
+   * @param serviceDate
    * @return the populated stop bean, or null if a stop with the specified id
    *         was not found
    * @throws NoSuchStopServiceException if the stop with the specified id could
    *           not be found
    */
-  public StopBean getStopForId(AgencyAndId stopId);
+  public StopBean getStopForId(AgencyAndId stopId, ServiceDate serviceDate);
 
   /**
    * @param stopId see {@link Stop#getId()}

@@ -220,11 +220,11 @@ public class RouteBeanServiceImplTest {
     Mockito.when(_routeService.getStopsForRouteCollection(routeId)).thenReturn(
         stopIds);
 
-    Mockito.when(_stopBeanService.getStopForId(stopA.getId())).thenReturn(
+    Mockito.when(_stopBeanService.getStopForId(stopA.getId(), null)).thenReturn(
         stopBeanA);
-    Mockito.when(_stopBeanService.getStopForId(stopB.getId())).thenReturn(
+    Mockito.when(_stopBeanService.getStopForId(stopB.getId(), null)).thenReturn(
         stopBeanB);
-    Mockito.when(_stopBeanService.getStopForId(stopC.getId())).thenReturn(
+    Mockito.when(_stopBeanService.getStopForId(stopC.getId(), null)).thenReturn(
         stopBeanC);
 
     AgencyAndId shapeId = new AgencyAndId("1", "shapeId");

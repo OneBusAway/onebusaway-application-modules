@@ -362,6 +362,17 @@ OBA.Sidebar = function() {
 					sensitivity: 10
 				});
 	
+
+				// if we don't have any directions then there is no service today
+				if (routeResult.directions.length == 0) {
+					var noServiceMessage = jQuery("<div></div>")
+						.addClass("no-service")
+						.text("No scheduled service today for the " +
+							getRouteShortName(routeResult));
+
+					descriptionBox.append(noServiceMessage);
+				}
+
 				// direction picker
 				jQuery.each(routeResult.directions, function(_, direction) {
 					var directionHeader = jQuery("<p></p>");

@@ -65,7 +65,7 @@
               default-target-url="/admin/index.action" always-use-default-target="true" />
         -->
         <sec:remember-me />
-        <sec:logout invalidate-session="true" logout-url="/logout.action" logout-success-url="/" />
+        <sec:logout invalidate-session="true" logout-url="/admin/logout.action" logout-success-url="/" />
         <sec:custom-filter position="BASIC_AUTH_FILTER" ref="everyLastLoginAuthenticationFilter"/>
         <sec:custom-filter position="FORM_LOGIN_FILTER" ref="userIndexAuthenticationFilter"/>
         <!-- our APIs don't suport csrf yet -->

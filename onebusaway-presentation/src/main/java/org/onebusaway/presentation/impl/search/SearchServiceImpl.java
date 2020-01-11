@@ -295,6 +295,8 @@ public class SearchServiceImpl implements SearchService {
 		// stop
 		// results from each of those stops, and add them to the search results.
 		SearchResultCollection results = new SearchResultCollection();
+		results.setHint("findStopsNearPoint");
+		results.setGeocode(true);
 		results.addRouteFilters(routeFilter);
 
 		for (StopBean stop : stopsForResults) {
@@ -310,6 +312,8 @@ public class SearchServiceImpl implements SearchService {
 	public SearchResultCollection findRoutesStoppingWithinRegion(
 			CoordinateBounds bounds, SearchResultFactory resultFactory) {
 	  SearchResultCollection results = new SearchResultCollection();
+		results.setHint("findRoutesStoppingWithinRegion");
+		results.setGeocode(true);
 		SearchQueryBean queryBean = new SearchQueryBean();
 		queryBean.setType(SearchQueryBean.EQueryType.BOUNDS_OR_CLOSEST);
 		queryBean.setBounds(bounds);
@@ -338,6 +342,7 @@ public class SearchServiceImpl implements SearchService {
 				longitude, DISTANCE_TO_ROUTES);
 
 		SearchResultCollection results = new SearchResultCollection();
+		results.setHint("findRoutesStoppingNearPoint");
 		SearchQueryBean queryBean = new SearchQueryBean();
 		queryBean.setType(SearchQueryBean.EQueryType.BOUNDS_OR_CLOSEST);
 		queryBean.setBounds(bounds);
@@ -445,6 +450,7 @@ public class SearchServiceImpl implements SearchService {
 				// this is a fuzzy match so just a suggestion
 				results.addSuggestion(resultFactory.getStopResult(stopBean,
 						results.getRouteFilter()));
+				results.setHint("tryAsStopName");
 				count++;
 			}
 			if (count > MAX_STOPS) {
@@ -629,6 +635,7 @@ public class SearchServiceImpl implements SearchService {
 			_log.info("found lat/lon");
 			results.addMatch(resultFactory.getGeocoderResult(egr,
 					results.getRouteFilter()));
+			results.setHint("tryAsLatLon");
 		} catch (Exception any) {
 			_log.info("no results, exception=" + any);
 		}
@@ -654,6 +661,7 @@ public class SearchServiceImpl implements SearchService {
     if (_routeIdToRouteBeanMap.get(routeQueryMixedCase) != null) {
       RouteBean routeBean = _routeIdToRouteBeanMap.get(routeQueryMixedCase);
       results.addMatch(resultFactory.getRouteResult(routeBean));
+      results.setHint("tryAsRoute");
       // if we've matched, assume no others
       return;
     }
@@ -662,6 +670,7 @@ public class SearchServiceImpl implements SearchService {
     if (_routeIdToRouteBeanMap.get(routeQuery) != null) {
       RouteBean routeBean = _routeIdToRouteBeanMap.get(routeQuery);
       results.addMatch(resultFactory.getRouteResult(routeBean));
+		results.setHint("tryAsRoute");
       // if we've matched, assume no others
       return;
     }
@@ -669,7 +678,8 @@ public class SearchServiceImpl implements SearchService {
 		// short name matching
 		if (_routeShortNameToRouteBeanMap.get(routeQuery) != null) {
 		  for (RouteBean routeBean : _routeShortNameToRouteBeanMap.get(routeQuery)) {
-						results.addMatch(resultFactory.getRouteResult(routeBean));
+				results.addMatch(resultFactory.getRouteResult(routeBean));
+			  	results.setHint("tryAsRoute");
 		  }
 		}
 
@@ -687,6 +697,7 @@ public class SearchServiceImpl implements SearchService {
 			  try {
 			    for (RouteBean routeBean : _routeShortNameToRouteBeanMap.get(routeShortName)) {
 			      results.addSuggestion(resultFactory.getRouteResult(routeBean));
+				  results.setHint("tryAsRoute");
 			    }
   				continue;
 			  } catch (OutOfServiceAreaServiceException oosase) {
@@ -702,6 +713,7 @@ public class SearchServiceImpl implements SearchService {
 			  try {
 			    for (RouteBean routeBean : _routeLongNameToRouteBeanMap.get(routeLongName)) {
 			      results.addSuggestion(resultFactory.getRouteResult(routeBean));
+			      results.setHint("tryAsRoute");
 			    }
 			  } catch (OutOfServiceAreaServiceException oosase) {
 			  }
@@ -740,11 +752,13 @@ public class SearchServiceImpl implements SearchService {
             if (_routeIdToRouteBeanMap.get(route) != null) {
                 RouteBean routeBean = _routeIdToRouteBeanMap.get(route);
                 results.addMatch(resultFactory.getRouteResult(routeBean));
+				results.setHint("tryAsRoute");
             }
 
             if (_routeShortNameToRouteBeanMap.get(route) != null) {
                 for (RouteBean routeBean : _routeShortNameToRouteBeanMap.get(route)) {
                     results.addMatch(resultFactory.getRouteResult(routeBean));
+					results.setHint("tryAsRoute");
                 }
             }
         }
@@ -768,6 +782,7 @@ public class SearchServiceImpl implements SearchService {
                       if (_transitDataService.stopHasRevenueService(agencyId, stopBean.getId())) {
 		        results.addMatch(resultFactory.getStopResult(stopBean,
 		          results.getRouteFilter()));
+			  		results.setHint("tryAsStop");
                       }
 		  }
 		else {
@@ -776,6 +791,7 @@ public class SearchServiceImpl implements SearchService {
                             if (_transitDataService.stopHasRevenueService(agencyId, match.getId())) {
 				results.addSuggestion(resultFactory.getStopResult(match,
 						results.getRouteFilter()));
+								results.setHint("tryAsStop");
                             }
 			}
 		}
@@ -793,9 +809,13 @@ public class SearchServiceImpl implements SearchService {
 			if (geocoderResults.size() == 1) {
 				results.addMatch(resultFactory.getGeocoderResult(result,
 						results.getRouteFilter()));
+				results.setGeocode(true);
+				results.setHint("tryAsGeocode");
 			} else {
 				results.addSuggestion(resultFactory.getGeocoderResult(result,
 						results.getRouteFilter()));
+				results.setGeocode(true);
+				results.setHint("tryAsGeocode");
 			}
 		}
 	}
