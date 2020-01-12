@@ -39,7 +39,7 @@
     </bean>
 
     <!-- Database Configuration -->
-
+	<!-- mysql configuration
     <bean id="dataSource"
           class="org.springframework.jndi.JndiObjectFactoryBean">
       <property name="jndiName"
@@ -53,8 +53,19 @@
       <property name="resourceRef"
                 value="true" />
     </bean>
+	-->
+	<!-- standalone non-production usage -->
+	<!-- to use hsql run from the command line
+ 		see https://github.com/OneBusAway/onebusaway-application-modules/wiki/HSQLDB-Configuration
+	-->
+	<bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+		<property name="driverClassName" value="org.hsqldb.jdbcDriver" />
+		<property name="url" value="jdbc:hsqldb:hsql//localhost/web;hsqldb.lock_file=false" />
+		<property name="username" value="sa" />
+		<property name="password" value="" />
+	</bean>
 
-    <alias name="dataSource" alias="mutableDataSource" />
+	<alias name="dataSource" alias="mutableDataSource" />
 
 
 
@@ -69,7 +80,7 @@
 		class="org.onebusaway.container.spring.SystemPropertyOverrideConfigurer">
 		<property name="properties">
 			<props>
-				<prop key="front-end.version">${git.commit.id}</prop>
+				<prop key="front-end.version">${git.commit.id:}</prop>
 			</props>
 		</property>
 	</bean>

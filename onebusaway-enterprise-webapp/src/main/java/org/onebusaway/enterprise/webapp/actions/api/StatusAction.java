@@ -108,7 +108,7 @@ public class StatusAction extends OneBusAwayEnterpriseActionSupport {
   
   private List<StatusGroup> createGroups() {
     groups = new ArrayList<StatusGroup>();
-    groups.add(_statusProvider.getIcingaStatus());
+//    groups.add(_statusProvider.getIcingaStatus());
     groups.add(_statusProvider.getAgencyServiceAlertStatus());
     groups.add(_statusProvider.getAgencyMetadataStatus());
     

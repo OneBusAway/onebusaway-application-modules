@@ -59,21 +59,25 @@ OBA.Mobile = (function() {
 
 		var refreshTimestamp = refreshBar
 								.find("strong");
-		
-		// ajax refresh for browsers that support it
-		refreshBar.find("a").click(function(e) {
-			e.preventDefault();
 
-			refreshTimestamp.text("Loading...");
-			refreshBar.addClass("loadingRefresh");
+		var titleText = refreshBar.find("a");
+		// only refresh if a single search result
+		if (titleText.text().includes("Refresh")) {
+			// ajax refresh for browsers that support it
+			refreshBar.find("a").click(function(e) {
+				e.preventDefault();
 
-			jQuery("#content")
-				.load(location.href + " #content>*", null, function() {
-					refreshTimestamp.text("Updated " + new Date().format("mediumTime"));
-					refreshBar.removeClass("loadingRefresh");
-					updateServiceAlertHeaderText();
-				});
-		});
+				refreshTimestamp.text("Loading...");
+				refreshBar.addClass("loadingRefresh");
+
+				jQuery("#content")
+					.load(location.href + " #content>*", null, function() {
+						refreshTimestamp.text("Updated " + new Date().format("mediumTime"));
+						refreshBar.removeClass("loadingRefresh");
+						updateServiceAlertHeaderText();
+					});
+			});
+		}
 				
 		// scrolling/fixed refresh bar logic
 		var contentDiv = jQuery("#content")
@@ -180,16 +184,19 @@ OBA.Mobile = (function() {
 	}
 
 	function addMapBehaviour() {
-        $("#mapExpander").click(function () {
-            $mapExpander = $(this);
-            $mapDiv = $('#map');
-            $mapDiv.slideToggle(500, function () {
-                $mapExpander.children('span').text(function () {
-                    return $mapDiv.is(":visible") ? "HIDE MAP" : "SHOW MAP";
-                });
-                if ($mapDiv.is(":visible")) updateMap();
-            });
-        });
+		var mapElement = document.getElementById("map");
+		if (mapElement !== null) {
+			$("#mapExpander").click(function () {
+				$mapExpander = $(this);
+				$mapDiv = $('#map');
+				$mapDiv.slideToggle(500, function () {
+					$mapExpander.children('span').text(function () {
+						return $mapDiv.is(":visible") ? "HIDE MAP" : "SHOW MAP";
+					});
+					if ($mapDiv.is(":visible")) updateMap();
+				});
+			});
+		}
     }
 
 	function updateServiceAlertHeaderText() {
@@ -332,16 +339,18 @@ OBA.Mobile = (function() {
 
             // initialize map, and continue initialization of things that use the map
             // on load only when google maps says it's ready.
-            routeMap = OBA.RouteMap(document.getElementById("map"), function() {
-                // deep link handler
-                updateMap();
+			var mapElement = document.getElementById("map");
+			if (mapElement !== null) {
+				routeMap = OBA.RouteMap(mapElement, function() {
+					// deep link handler
+					updateMap();
 
-            }, function(routeId, serviceAlerts) { // service alert notification handler
+				}, function(routeId, serviceAlerts) { // service alert notification handler
+				});
 
+			$('#map').hide();
+			}
 
-            });
-
-            $('#map').hide();
 
 		}
 	};

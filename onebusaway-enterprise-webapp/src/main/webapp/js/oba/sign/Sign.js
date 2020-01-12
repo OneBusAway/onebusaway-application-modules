@@ -38,7 +38,16 @@ OBA.Sign = function() {
 	var hostname = window.location.hostname;
 	var hostnamePosition = url.indexOf(hostname);
     var obaApiBaseUrlPosition = url.indexOf("/", hostnamePosition);
-    var obaApiBaseUrl = url.substring(0, obaApiBaseUrlPosition);
+
+    var obaApiBaseUrl = "";
+	if (OBA.Config.apiBaseUrl.startsWith("/")) {
+		// if we have a relative path, guess it as our api path as well
+		obaApiBaseUrl = url.substring(0, obaApiBaseUrlPosition);
+	} else {
+		// the api tier is configured on a separate tier
+		// OBA.Config.apiBaseUrl will fully specify the path and the variable should be empty
+		obaApiBaseUrl = "";
+	}
 
 	var setupUITimeout = null;
 	var disableAlerts = false;

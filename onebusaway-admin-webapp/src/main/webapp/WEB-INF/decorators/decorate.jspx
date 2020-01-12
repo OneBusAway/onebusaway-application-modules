@@ -53,7 +53,7 @@
 				</div>
 				<s:if test="!anonymousUser">
 					<div id="navigation">
-						<s:url var="url" namespace="/" action="logout"></s:url>
+						<s:url var="url" namespace="/admin" action="logout"></s:url>
 						<s:form action="%{url}"
 								method="post">
 							<input type="submit"

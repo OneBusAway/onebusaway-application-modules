@@ -74,13 +74,13 @@
 		    </result>
 		    
 		    <!-- OBA App Mods Results -->
-		    <result name="ServiceException">/WEB-INF/content/exception.jspx</result>
-            <result name="NoSuchStopServiceException">/WEB-INF/content/exception-noSuchStop.jspx</result>
-            <result name="NoSuchTripServiceException">/WEB-INF/content/exception-noSuchTrip.jspx</result>
-            <result name="InvalidArgumentServiceException">/WEB-INF/content/exception-invalidArgument.jspx</result>
-            <result name="OutOfServiceAreaServiceException">/WEB-INF/content/exception-outOfServiceArea.jspx</result>
-            <result name="MultipleServiceAreasServiceException">/WEB-INF/content/exception-multipleServiceAreas.jspx</result>
-            <result name="NoSuchAgencyServiceException">/WEB-INF/content/exception-noSuchAgency.jspx</result>
+		    <result name="ServiceException">/WEB-INF/content/where/exception.jspx</result>
+            <result name="NoSuchStopServiceException">/WEB-INF/content/where/exception-noSuchStop.jspx</result>
+            <result name="NoSuchTripServiceException">/WEB-INF/content/where/exception-noSuchTrip.jspx</result>
+            <result name="InvalidArgumentServiceException">/WEB-INF/content/where/exception-invalidArgument.jspx</result>
+            <result name="OutOfServiceAreaServiceException">/WEB-INF/content/where/exception-outOfServiceArea.jspx</result>
+            <result name="MultipleServiceAreasServiceException">/WEB-INF/content/where/exception-multipleServiceAreas.jspx</result>
+            <result name="NoSuchAgencyServiceException">/WEB-INF/content/where/exception-noSuchAgency.jspx</result>
             <result name="NotSetup" type="redirectAction">
                 <param name="namespace">/setup</param>
                 <param name="actionName">index</param>

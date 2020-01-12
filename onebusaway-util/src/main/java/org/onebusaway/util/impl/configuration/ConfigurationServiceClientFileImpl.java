@@ -49,9 +49,21 @@ public class ConfigurationServiceClientFileImpl implements
 		configFile = file;
 	}
 
-	public ConfigurationServiceClientFileImpl() {}
+	public ConfigurationServiceClientFileImpl() {
+		if (System.getProperty("config.json") != null) {
+			this.configFile = System.getProperty("config.json");
+			_log.info("config service using system override configFile=" + this.configFile);
+			return;
+		}
+		_log.info("using default configuration file=" + this.configFile);
+	}
 	
 	public ConfigurationServiceClientFileImpl(String configFile) {
+		if (System.getProperty("config.json") != null) {
+			this.configFile = System.getProperty("config.json");
+			_log.info("config service using system override configFile=" + this.configFile);
+			return;
+		}
 		_log.info("config service using configFile=" + configFile);
 		this.configFile = configFile;
 	}
@@ -135,7 +147,7 @@ public class ConfigurationServiceClientFileImpl implements
 		            });
 		        _config = o;
 		      } catch (Exception e) {
-		        _log.info("Failed to get configuration out of " + this.configFile + ", continuing without it.", e);
+		        _log.info("Failed to get configuration out of " + this.configFile + ", continuing without it.");
 
 		      }
 		      return _config;

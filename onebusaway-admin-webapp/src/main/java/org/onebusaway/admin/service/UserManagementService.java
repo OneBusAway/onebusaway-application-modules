@@ -125,4 +125,6 @@ public interface UserManagementService {
     boolean activateUser(UserDetail userDetail);
 
 	List<String> getAllRoleNames();
+
+    List<String> getManagedRoleNames();
 }

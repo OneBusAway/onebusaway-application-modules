@@ -65,7 +65,7 @@ OBA.Popups = (function() {
 				params.time = OBA.Config.time;
 			}
 			
-			if(refreshPopupRequest !== null) {
+			if( typeof refreshPopupRequest !== 'undefined' && refreshPopupRequest !== null) {
 				refreshPopupRequest.abort();
 				openBubble = true;
 			}

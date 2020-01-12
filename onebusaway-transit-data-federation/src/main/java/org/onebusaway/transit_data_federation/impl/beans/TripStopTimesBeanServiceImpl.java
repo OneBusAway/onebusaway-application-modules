@@ -128,7 +128,7 @@ public class TripStopTimesBeanServiceImpl implements TripStopTimesBeanService {
       stBean.setDepartureTime(stopTime.getDepartureTime());
 
       StopEntry stopEntry = stopTime.getStop();
-      StopBean stopBean = _stopBeanService.getStopForId(stopEntry.getId());
+      StopBean stopBean = _stopBeanService.getStopForId(stopEntry.getId(), null);
       stBean.setStop(stopBean);
       stBean.setDistanceAlongTrip(stopTime.getShapeDistTraveled());
       List<HistoricalRidership> rid = _ridershipService.getHistoricalRiderships(trip.getRoute().getId(), trip.getId(), stopEntry.getId(), serviceDate);

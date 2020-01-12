@@ -654,7 +654,9 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
     boolean success = false;
 
     for (TimepointPredictionRecord tpr : records) {
-
+      if (tpr.isSkipped()) {
+        continue;
+      }
       boolean tripMatches = tpr.getTripId().equals(
           instance.getBlockTrip().getTrip().getId());
       boolean stopMatches = tpr.getTimepointId().equals(
@@ -663,10 +665,7 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
           && tpr.getStopSequence() == gtfsSequence;
       if (!tripMatches || !stopMatches)
         continue;
-      if (tpr.isSkipped()) {
-        _log.debug("Skipped Stop: " + instance.getStop().getId().getId());
-        break;
-      }
+
       if (sequenceMatches || tprStopIndex == thisStopIndex) {
 
         success = true;

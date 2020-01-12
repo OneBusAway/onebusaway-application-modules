@@ -465,6 +465,12 @@ public class GtfsRealtimeTripLibrary {
 
     int rawBlockStartTime = block.getDepartureTimeForIndex(0);
 
+    if (!blockTripsById.containsKey(tripId)) {
+      _log.warn("getBlockStartTimeForTripStartTime(" + instance + ", " + tripId + ", "
+      + tripStartTime + ") did not find matching trip; aborting");
+      return -1;
+    }
+
     int rawTripStartTime = blockTripsById.get(tripId).getDepartureTimeForIndex(
         0);
 
@@ -548,10 +554,14 @@ public class GtfsRealtimeTripLibrary {
     		tripStartTime = StopTimeFieldMappingFactory.getStringAsSeconds(trip.getStartTime());
     	} catch (InvalidStopTimeException iste) {
     		_log.error("invalid stopTime of " + trip.getStartTime() + " for trip " + trip);
+    		return null;
     	}
     	blockStartTime = getBlockStartTimeForTripStartTime(instance,
     			tripEntry.getId(), tripStartTime);
-    	
+    	if (blockStartTime < 0) {
+          _log.error("invalid blockStartTime for trip " + trip);
+          return null;
+        }
     	blockDescriptor.setStartTime(blockStartTime);
     }
     return blockDescriptor;
@@ -654,6 +664,9 @@ public class GtfsRealtimeTripLibrary {
             }
             if (stopTimeUpdate.getScheduleRelationship().equals(StopTimeUpdate.ScheduleRelationship.SKIPPED)) {
               tpr.setScheduleRealtionship(StopTimeUpdate.ScheduleRelationship.SKIPPED_VALUE); // set tpr scheduleRelationship enum to SKIPPED
+              timepointPredictions.add(tpr);
+              _log.info("SKIPPED stop:" + tpr.getTimepointId() + "  seq: " + tpr.getStopSequence() + " trip: " + tpr.getTripId());
+              continue;
             } else {
               tpr.setScheduleRealtionship(StopTimeUpdate.ScheduleRelationship.SCHEDULED_VALUE);
             }
