@@ -465,6 +465,12 @@ public class GtfsRealtimeTripLibrary {
 
     int rawBlockStartTime = block.getDepartureTimeForIndex(0);
 
+    if (!blockTripsById.containsKey(tripId)) {
+      _log.warn("getBlockStartTimeForTripStartTime(" + instance + ", " + tripId + ", "
+      + tripStartTime + ") did not find matching trip; aborting");
+      return -1;
+    }
+
     int rawTripStartTime = blockTripsById.get(tripId).getDepartureTimeForIndex(
         0);
 
@@ -548,10 +554,14 @@ public class GtfsRealtimeTripLibrary {
     		tripStartTime = StopTimeFieldMappingFactory.getStringAsSeconds(trip.getStartTime());
     	} catch (InvalidStopTimeException iste) {
     		_log.error("invalid stopTime of " + trip.getStartTime() + " for trip " + trip);
+    		return null;
     	}
     	blockStartTime = getBlockStartTimeForTripStartTime(instance,
     			tripEntry.getId(), tripStartTime);
-    	
+    	if (blockStartTime < 0) {
+          _log.error("invalid blockStartTime for trip " + trip);
+          return null;
+        }
     	blockDescriptor.setStartTime(blockStartTime);
     }
     return blockDescriptor;
