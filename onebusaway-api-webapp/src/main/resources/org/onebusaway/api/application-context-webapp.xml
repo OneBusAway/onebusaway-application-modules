@@ -54,7 +54,7 @@
     </property>
   </bean>
   <bean id="createAPIKeyOnInitAction" class="org.onebusaway.users.impl.CreateApiKeyAction" 	>
-    	<property name="key" value="OBA" />
+    	<property name="key" value="OBAKEY" />
   </bean>
 
   <bean class="org.onebusaway.api.impl.ConsolidatedStopIdModificationStrategy" />
