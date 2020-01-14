@@ -590,6 +590,15 @@
         </configuration>
       </plugin>
     </plugins>
+    <!-- force a newer version of ssh for site:deploy -->
+    <extensions>
+      <extension>
+        <groupId>org.apache.maven.wagon</groupId>
+        <artifactId>wagon-ssh</artifactId>
+        <version>3.3.4</version>
+      </extension>
+    </extensions>
+
   </build>
   <profiles>
     <profile>
