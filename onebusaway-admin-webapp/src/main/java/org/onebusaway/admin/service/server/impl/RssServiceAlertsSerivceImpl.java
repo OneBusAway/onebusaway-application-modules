@@ -166,7 +166,8 @@ public class RssServiceAlertsSerivceImpl implements RssServiceAlertsService {
             situationConsequenceBean.setEffect(EEffect.SIGNIFICANT_DELAYS);
             serviceAlertBean.setConsequences(Arrays.asList(new SituationConsequenceBean[]{situationConsequenceBean}));
             serviceAlertBean.setCreationTime(pubDate.getTime());
-            serviceAlertBean.setDescriptions(Arrays.asList(new NaturalLanguageStringBean[]{new NaturalLanguageStringBean(description, language)}));
+            // don't set description if duplicate of summary
+            //serviceAlertBean.setDescriptions(Arrays.asList(new NaturalLanguageStringBean[]{new NaturalLanguageStringBean(description, language)}));
             serviceAlertBean.setId(new AgencyAndId(getAgencyId(), guid).toString());
             serviceAlertBean.setUrls(Arrays.asList(new NaturalLanguageStringBean[]{new NaturalLanguageStringBean(link, language)}));
             alerts.add(serviceAlertBean);
