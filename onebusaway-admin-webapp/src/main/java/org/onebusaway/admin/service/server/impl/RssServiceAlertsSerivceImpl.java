@@ -259,11 +259,11 @@ public class RssServiceAlertsSerivceImpl implements RssServiceAlertsService {
                 
                 ListBean<ServiceAlertBean> currentObaAlerts = _transitDataService.getAllServiceAlertsForAgencyId(getAgencyId());
                 for(ServiceAlertBean serviceAlertBean : currentObaAlerts.getList()){
-                    _log.info("found existing sa=" + serviceAlertBean.getDescriptions() + " with source=" + serviceAlertBean.getSource());
+                    _log.info("found existing sa=" + serviceAlertBean.getSummaries() + " with source=" + serviceAlertBean.getSource());
                     if(!_alertCache.keySet().contains(serviceAlertBean.getId())
                             && serviceAlertBean.getSource() != null
                             && serviceAlertBean.getSource().equals(_alertSource)){
-                        _log.info("new service alert=" + serviceAlertBean.getDescriptions());
+                        _log.info("new service alert=" + serviceAlertBean.getSummaries());
                         _alertCache.put(serviceAlertBean.getId(), serviceAlertBean);
                     }
                 }
