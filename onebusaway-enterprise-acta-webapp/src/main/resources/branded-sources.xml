@@ -29,7 +29,7 @@
 	<bean class="org.onebusaway.container.spring.SystemPropertyOverrideConfigurer">
 		<property name="properties">
 			<props>
-				<prop key="front-end.version">${git.commit.id}</prop>
+				<prop key="front-end.version">${git.commit.id:}</prop>
 			</props>
 		</property>
 	</bean>
