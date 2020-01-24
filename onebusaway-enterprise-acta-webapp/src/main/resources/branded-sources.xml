@@ -26,6 +26,14 @@
         http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
         http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-3.0.xsd">
 
+	<bean class="org.onebusaway.container.spring.SystemPropertyOverrideConfigurer">
+		<property name="properties">
+			<props>
+				<prop key="front-end.version">${git.commit.id}</prop>
+			</props>
+		</property>
+	</bean>
+
 	<bean class="org.onebusaway.container.spring.PropertyOverrideConfigurer">
 		<property name="properties">
 			<props>
