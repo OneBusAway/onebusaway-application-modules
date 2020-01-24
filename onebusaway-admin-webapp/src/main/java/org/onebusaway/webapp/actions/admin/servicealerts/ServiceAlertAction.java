@@ -65,6 +65,8 @@ public class ServiceAlertAction extends ActionSupport implements
     ModelDriven<ServiceAlertBean>, Preparable {
 
   private static final long serialVersionUID = 1L;
+
+  private static final String EDITOR_SOURCE = "oba_admin_console";
   
   private static Logger _log = LoggerFactory.getLogger(ServiceAlertsAction.class);
 
@@ -451,15 +453,12 @@ public String getStartDate() {
     
     try { 
       if (_model.getId() == null || _model.getId().trim().isEmpty() ) {
-    	 
+    	 _model.setSource(EDITOR_SOURCE);
     	 _model = _transitDataService.createServiceAlert(_agencyId, _model);
       }
       else {
-        //ServiceAlertBean existing = _transitDataService.getServiceAlertForId(_model.getId());
-        //if (existing != null) {
-          // The updated service alert constructed from the POST won't include affects clauses.
-        //  _model.setAllAffects(existing.getAllAffects());
-        //}
+        // if we've edited a service alert from some other agency, we now own it
+        _model.setSource(EDITOR_SOURCE);
         _transitDataService.updateServiceAlert(_model);
       }
     } catch (RuntimeException e) {

@@ -824,8 +824,10 @@ OBA.Sidebar = function() {
 						// If this is not a global alert, display it
 						if (!serviceAlert.Affects.Operators || (serviceAlert.Affects.Operators && !serviceAlert.Affects.Operators.hasOwnProperty("AllOperators"))) {
 							var text = null;
-							
-							if(typeof serviceAlert.Description !== 'undefined') {
+							if(typeof serviceAlert.Description !== 'undefined' && typeof serviceAlert.Summary !== 'undefined') {
+							// we have a service alert with both summary and description, do a little formatting
+							text = '<strong>' + serviceAlert.Summary + '</strong><br/><br/>' + serviceAlert.Description;
+							} else if(typeof serviceAlert.Description !== 'undefined') {
 								text = serviceAlert.Description;
 							} else if(typeof serviceAlert.Summary !== 'undefined') {
 								text = serviceAlert.Summary;

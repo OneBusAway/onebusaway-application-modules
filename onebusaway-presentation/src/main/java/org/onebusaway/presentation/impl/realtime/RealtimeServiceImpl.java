@@ -15,7 +15,6 @@
  */
 package org.onebusaway.presentation.impl.realtime;
 
-import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -418,7 +417,22 @@ public class RealtimeServiceImpl implements RealtimeService {
     ListBean<ServiceAlertBean> serviceAlerts = _transitDataService.getServiceAlerts(query);
     return serviceAlerts.getList();
   }
-  
+  @Override
+  public List<ServiceAlertBean> getServiceAlertsForRouteAndStop(
+          String routeId, String stopId) {
+    SituationQueryBean query = new SituationQueryBean();
+    SituationQueryBean.AffectsBean affects = new SituationQueryBean.AffectsBean();
+    query.getAffects().add(affects);
+
+    affects.setRouteId(routeId);
+    if (stopId != null) {
+      affects.setStopId(stopId);
+    }
+
+    ListBean<ServiceAlertBean> serviceAlerts = _transitDataService.getServiceAlerts(query);
+    return serviceAlerts.getList();
+  }
+
   @Override
   public List<ServiceAlertBean> getServiceAlertsGlobal() {
     SituationQueryBean query = new SituationQueryBean();

@@ -50,6 +50,7 @@ import org.onebusaway.transit_data_federation.impl.service_alerts.ServiceAlertSi
 import org.onebusaway.transit_data_federation.impl.service_alerts.ServiceAlertTimeRange;
 import org.onebusaway.transit_data_federation.impl.service_alerts.ServiceAlertsSituationAffectsClause;
 import org.onebusaway.transit_data_federation.services.AgencyService;
+import org.onebusaway.transit_data_federation.services.ConsolidatedStopsService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockCalendarService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockGeospatialService;
 import org.onebusaway.transit_data_federation.services.realtime.BlockLocation;
@@ -102,6 +103,8 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   private ServiceAlertsService _serviceAlertService;
 
   private ScheduledExecutorService _scheduledExecutorService;
+
+  private ConsolidatedStopsService _consolidatedStopsService;
 
   private ScheduledFuture<?> _refreshTask;
 
@@ -165,6 +168,8 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
 
   private boolean _useLabelAsId = false;
 
+  private boolean _ignoreAlertTripId = false;
+
   @Autowired
   public void setAgencyService(AgencyService agencyService) {
     _agencyService = agencyService;
@@ -183,6 +188,11 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   @Autowired
   public void setBlockLocationService(BlockLocationService blockLocationService) {
     _blockLocationService = blockLocationService;
+  }
+
+  @Autowired
+  public void setConsolidatedStopsService(ConsolidatedStopsService service) {
+    _consolidatedStopsService = service;
   }
 
   @Autowired
@@ -302,6 +312,8 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   }
   
   public String getFeedId() {
+    if (_feedId == null)
+      _feedId = _agencyIds.toString();
     return _feedId;
   }
   
@@ -328,7 +340,16 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   public void setUseLabelAsId(boolean useLabelAsId) {
     _useLabelAsId = useLabelAsId;
   }
-  
+
+  /**
+   * if the alerts feed contains trip ids ignore them.  This helps
+   * surface the alerts inside OBA.
+   * @param ignore
+   */
+  public void setIgnoreAlertTripId(boolean ignore) {
+    _ignoreAlertTripId = ignore;
+  }
+
   public GtfsRealtimeTripLibrary getGtfsRealtimeTripLibrary() {
     return _tripsLibrary;
   }
@@ -349,6 +370,7 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     _entitySource = new GtfsRealtimeEntitySource();
     _entitySource.setAgencyIds(_agencyIds);
     _entitySource.setTransitGraphDao(_transitGraphDao);
+    _entitySource.setConsolidatedStopService(_consolidatedStopsService);
 
     _tripsLibrary = new GtfsRealtimeTripLibrary();
     _tripsLibrary.setBlockCalendarService(_blockCalendarService);
@@ -528,10 +550,12 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   }
 
   private void handleAlerts(FeedMessage alerts) {
+    Set<AgencyAndId> currentAlerts = new HashSet<AgencyAndId>();
+
     for (FeedEntity entity : alerts.getEntityList()) {
       Alert alert = entity.getAlert();
       if (alert == null) {
-        _log.warn("epxected a FeedEntity with an Alert");
+        _log.warn("expected a FeedEntity with an Alert");
         continue;
       }
 
@@ -542,13 +566,23 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
         _serviceAlertService.removeServiceAlert(id);
       } else {
         ServiceAlert.Builder serviceAlertBuilder = _alertLibrary.getAlertAsServiceAlert(
-            id, alert, _alertAgencyIdMap);
+            id, alert, _alertAgencyIdMap, _ignoreAlertTripId);
         ServiceAlert serviceAlert = serviceAlertBuilder.build();
+        // cache value of alert
         ServiceAlert existingAlert = _alertsById.get(id);
-        if (existingAlert == null || !existingAlert.equals(serviceAlert)) {
+        // data store value of service alert
+        ServiceAlertRecord existingRecord = _serviceAlertService.getServiceAlertForId(new AgencyAndId(_agencyIds.get(0), id.getId()));
+
+        // don't update if there's nothing to do or if the owner changed to admin console
+        if ((existingAlert == null
+                || !existingAlert.equals(serviceAlert))
+                && (existingRecord == null
+                || !"oba_admin_console".equals(existingRecord.getSource()))) {
           _alertsById.put(id, serviceAlert);
 
           ServiceAlertRecord serviceAlertRecord = new ServiceAlertRecord();
+          // indicate this came from a feed so we can prune expired alerts
+          serviceAlertRecord.setSource(getFeedId());
           serviceAlertRecord.setAgencyId(_agencyIds.get(0));
           serviceAlertRecord.setActiveWindows(new HashSet<ServiceAlertTimeRange>());
           if(serviceAlert.getActiveWindowList() != null){
@@ -567,9 +601,13 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
               serviceAlertsSituationAffectsClause.setAgencyId(affects.getAgencyId());
               serviceAlertsSituationAffectsClause.setApplicationId(affects.getApplicationId());
               serviceAlertsSituationAffectsClause.setDirectionId(affects.getDirectionId());
-              serviceAlertsSituationAffectsClause.setRouteId(affects.getRouteId().getId());
-              serviceAlertsSituationAffectsClause.setStopId(affects.getStopId().getId());
-              serviceAlertsSituationAffectsClause.setTripId(affects.getTripId().getId());
+              serviceAlertsSituationAffectsClause.setRouteId(new AgencyAndId(affects.getRouteId().getAgencyId(), affects.getRouteId().getId()).toString());
+              if (affects.getStopId().getId() != null && affects.getStopId().getId().length() > 0) {
+                serviceAlertsSituationAffectsClause.setStopId(new AgencyAndId(affects.getStopId().getAgencyId(), affects.getStopId().getId()).toString());
+              }
+
+              if (!_ignoreAlertTripId)
+                serviceAlertsSituationAffectsClause.setTripId(new AgencyAndId(affects.getTripId().getAgencyId(), affects.getTripId().getId()).toString());
               serviceAlertRecord.getAllAffects().add(serviceAlertsSituationAffectsClause);
             }
           }
@@ -605,7 +643,7 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
           serviceAlertRecord.setModifiedTime(serviceAlert.getModifiedTime());
           serviceAlertRecord.setPublicationWindows(new HashSet<ServiceAlertTimeRange>());
 
-          serviceAlertRecord.setServiceAlertId(serviceAlert.getId().getId());
+          serviceAlertRecord.setServiceAlertId(new AgencyAndId(serviceAlert.getId().getAgencyId(), serviceAlert.getId().getId()).toString()); // this needs to be agency qualified
           serviceAlertRecord.setSeverity(getESeverity(serviceAlert.getSeverity()));
 
           serviceAlertRecord.setSummaries(new HashSet<ServiceAlertLocalizedString>());
@@ -628,10 +666,30 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
             }
           }
 
-          _serviceAlertService.createOrUpdateServiceAlert(serviceAlertRecord);
+          ServiceAlertRecord updatedServiceAlert = _serviceAlertService.createOrUpdateServiceAlert(serviceAlertRecord);
+          _log.debug("existing alert " + updatedServiceAlert.getAgencyId() + ":" + updatedServiceAlert.getServiceAlertId());
+          currentAlerts.add(new AgencyAndId(updatedServiceAlert.getAgencyId(), updatedServiceAlert.getServiceAlertId()));
+        } else {
+          _log.debug("not updating alert " + id);
         }
       }
     }
+
+
+    Set<AgencyAndId> toBeDeleted = new HashSet<AgencyAndId>();
+    for ( ServiceAlertRecord sa : _serviceAlertService.getAllServiceAlerts()) {
+      if (sa.getSource() != null && sa.getSource().equals(getFeedId())) {
+        AgencyAndId testId = new AgencyAndId(sa.getAgencyId(), sa.getServiceAlertId());
+        if (!currentAlerts.contains(testId)) {
+          _log.debug("cleaning up alert id " + testId);
+          toBeDeleted.add(testId);
+        }
+      }
+    }
+
+    _serviceAlertService.removeServiceAlerts(new ArrayList<AgencyAndId>(toBeDeleted));
+
+
   }
 
   private ESeverity getESeverity(ServiceAlert.Severity severity){

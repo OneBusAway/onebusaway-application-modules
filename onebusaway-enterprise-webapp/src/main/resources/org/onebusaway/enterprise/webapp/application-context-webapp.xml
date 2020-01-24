@@ -59,7 +59,9 @@
     	init-method="init">
     	<property name="createAPIKey" value="true" />
     	<property name="key" value="OBAKEY" />
+        <property name="limit" value="0" />
     </bean>
+<!--    <bean id="exportKeys" class="org.onebusaway.enterprise.webapp.api.WriteUserPropertiesToDisk" />-->
 
     <bean id="createAPITestKeyOnInitAction" class="org.onebusaway.enterprise.webapp.api.CreateAPIKeyOnInitAction"
     	init-method="init">

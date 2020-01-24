@@ -270,7 +270,11 @@ public class IndexAction extends OneBusAwayEnterpriseActionSupport {
 
       } else if (_results.getResultType().equals("StopResult")) {
         StopResult result = (StopResult) _result;
-        for (RouteAtStop route : result.getAllRoutesAvailable()) {
+        // add stop level service alerts
+        uniqueServiceAlerts.addAll(result.getStopServiceAlerts());
+        // then add route level service alerts -- being careful to
+        // display alerts even if buses aren't present
+        for (RouteAtStop route : result.getAllRoutesPossible()) {
           uniqueServiceAlerts.addAll(route.getServiceAlerts());
         }
       }

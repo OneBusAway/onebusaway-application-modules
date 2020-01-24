@@ -93,6 +93,16 @@ public class StopResult implements SearchResult {
 		return fullList;
 	}
 
+	public List<RouteAtStop> getAllRoutesPossible() {
+		List<RouteAtStop> fullList = new ArrayList<RouteAtStop>();
+		fullList.addAll(routesWithArrivals);
+		fullList.addAll(routesWithNoVehiclesEnRoute);
+		fullList.addAll(routesWithNoVehiclesEnRoute);
+		fullList.addAll(routesWithNoScheduledService);
+
+		return fullList;
+	}
+
 	public List<RouteAtStop> getRoutesWithNoVehiclesEnRoute() {
 		return routesWithNoVehiclesEnRoute;
 	}
