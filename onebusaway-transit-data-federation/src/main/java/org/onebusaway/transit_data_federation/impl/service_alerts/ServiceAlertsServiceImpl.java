@@ -591,7 +591,7 @@ class ServiceAlertsServiceImpl implements ServiceAlertsService {
           ServiceAlertRecord persistedServiceAlertRecord = _persister.getServiceAlertRecordByAlertId(alert.getAgencyId(), alert.getServiceAlertId());
           if(persistedServiceAlertRecord != null)
               alert.setId(persistedServiceAlertRecord.getId());
-          _log.info("Saving Service Alert to DataBase:" + alert.getServiceAlertId());
+          _log.debug("Saving Service Alert to DataBase:" + alert.getServiceAlertId());
           _persister.saveOrUpdate(alert);
 	}
 
