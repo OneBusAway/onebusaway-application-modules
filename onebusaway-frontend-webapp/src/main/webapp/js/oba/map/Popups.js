@@ -399,6 +399,7 @@ OBA.Popups = (function() {
 		var stopIdParts = stopId.split("_");
 		var uniqueStopId = OBA.Util.displayStopId(stopId);
 		var stopCode = stopResult.code;
+		var alertIds = [];
 
 		if(stopCode == null)
 			stopCode = uniqueStopId;
@@ -455,10 +456,14 @@ OBA.Popups = (function() {
                          	if (ptSituationElement.Summary != null && ptSituationElement.Summary.length > 0) {
                          		summary = '<strong>' + ptSituationElement.Summary + ':</strong><br/><br/>';
 							}
-                             serviceAlertList.append('<li>'
-								 + summary
-								 + ptSituationElement.Description
-								 + '</li>');
+                         	var message = '<li>'
+								+ summary
+								+ ptSituationElement.Description
+								+ '</li>';
+                         	if (!alertIds.includes(ptSituationElement.SituationNumber)) {
+                         		alertIds.push(ptSituationElement.SituationNumber)
+								serviceAlertList.append(message);
+							}
                          }
                      });
                  }

@@ -814,6 +814,7 @@ OBA.Sidebar = function() {
 					var showAlerts = false;
 					var moreInfoLinkPrefix = "";
 					var moreInfoLinkSuffix = "";
+					var alertIds = [];
 			        
 					jQuery.each(serviceAlerts, function(_, serviceAlert) {
 				        if (serviceAlert.InfoLinks && serviceAlert.InfoLinks.InfoLink.length > 0) {
@@ -834,8 +835,13 @@ OBA.Sidebar = function() {
 							}
 							text = moreInfoLinkPrefix + text + moreInfoLinkSuffix;
 							if(text !== null) {
-								serviceAlertsList.append(jQuery("<li></li>").html(text.replace(/\n/g, "<br/>")));
-								showAlerts = true;
+								text = text.replace(/\n/g, "<br/>");
+								var newText = jQuery("<li></li>").html(text);
+								if (!alertIds.includes(serviceAlert.SituationNumber)) {
+									alertIds.push(serviceAlert.SituationNumber)
+									serviceAlertsList.append(newText);
+									showAlerts = true;
+								}
 							}
 						}
 					});
