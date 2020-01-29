@@ -66,7 +66,7 @@ public class ServiceAlertAction extends ActionSupport implements
 
   private static final long serialVersionUID = 1L;
 
-  private static final String EDITOR_SOURCE = "oba_admin_console";
+  private static final String EDITOR_SOURCE = "console";
   
   private static Logger _log = LoggerFactory.getLogger(ServiceAlertsAction.class);
 

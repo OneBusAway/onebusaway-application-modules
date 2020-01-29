@@ -588,7 +588,7 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
         if ((existingAlert == null
                 || !existingAlert.equals(serviceAlert))
                 && (existingRecord == null
-                || !"oba_admin_console".equals(existingRecord.getSource()))) {
+                || !"console".equals(existingRecord.getSource()))) {
           _alertsById.put(id, serviceAlert);
 
           ServiceAlertRecord serviceAlertRecord = new ServiceAlertRecord();

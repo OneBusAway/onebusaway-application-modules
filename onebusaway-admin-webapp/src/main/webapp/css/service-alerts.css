@@ -140,7 +140,10 @@
  	float: left; 
     width: 33%;
  }
- 
+
+#ServiceAlerts #alertsTable tr:nth-child(even) {background: #eEeF8F }
+
+
 #ServiceAlerts tr.affectsClause {
 	border-spacing: 10em;
 	margin-bottom: 5em;
