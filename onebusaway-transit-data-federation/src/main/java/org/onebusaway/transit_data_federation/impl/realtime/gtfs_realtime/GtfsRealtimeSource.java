@@ -570,6 +570,7 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
         continue;
       }
 
+      // NOTE!! Here we default agencyID to be of feed name
       AgencyAndId id = createId(entity.getId());
 
       if (entity.getIsDeleted()) {
@@ -582,7 +583,7 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
         // cache value of alert
         ServiceAlert existingAlert = _alertsById.get(id);
         // data store value of service alert
-        ServiceAlertRecord existingRecord = _serviceAlertService.getServiceAlertForId(new AgencyAndId(_agencyIds.get(0), id.getId()));
+        ServiceAlertRecord existingRecord = _serviceAlertService.getServiceAlertForId(new AgencyAndId(id.getAgencyId(), id.getId()));
 
         // don't update if there's nothing to do or if the owner changed to admin console
         if ((existingAlert == null
@@ -594,7 +595,9 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
           ServiceAlertRecord serviceAlertRecord = new ServiceAlertRecord();
           // indicate this came from a feed so we can prune expired alerts
           serviceAlertRecord.setSource(getFeedId());
-          serviceAlertRecord.setAgencyId(_agencyIds.get(0));
+          serviceAlertRecord.setAgencyId(id.getAgencyId()); // AGENCY from feed configuration
+          serviceAlertRecord.setServiceAlertId(id.getId()); // ID ONLY
+
           serviceAlertRecord.setActiveWindows(new HashSet<ServiceAlertTimeRange>());
           if (serviceAlert.getActiveWindowList() != null) {
             for (ServiceAlerts.TimeRange timeRange : serviceAlert.getActiveWindowList()) {
@@ -654,7 +657,6 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
           serviceAlertRecord.setModifiedTime(serviceAlert.getModifiedTime());
           serviceAlertRecord.setPublicationWindows(new HashSet<ServiceAlertTimeRange>());
 
-          serviceAlertRecord.setServiceAlertId(new AgencyAndId(serviceAlert.getId().getAgencyId(), serviceAlert.getId().getId()).toString()); // this needs to be agency qualified
           serviceAlertRecord.setSeverity(getESeverity(serviceAlert.getSeverity()));
 
           serviceAlertRecord.setSummaries(new HashSet<ServiceAlertLocalizedString>());
@@ -677,12 +679,28 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
             }
           }
 
+          if (serviceAlert.getActiveWindowList().size() > 0) {
+            _log.info("[" + serviceAlert.getId().getId() + "] "
+                    + serviceAlert.getActiveWindowList().size() + " active windows");
+            List<ServiceAlerts.TimeRange> activeWindowList = serviceAlert.getActiveWindowList();
+            for (ServiceAlerts.TimeRange str : serviceAlert.getActiveWindowList()) {
+              ServiceAlertTimeRange satr = new ServiceAlertTimeRange();
+              if (str.hasStart())
+                satr.setFromValue(str.getStart());
+              if (str.hasEnd())
+                satr.setToValue(str.getEnd());
+              _log.info("[" + serviceAlert.getId().getId() + "] adding "
+                      + satr.getFromValue() + "->" + satr.getToValue());
+              serviceAlertRecord.getActiveWindows().add(satr);
+            }
+          }
+
           if (existingAlert == null) {
-            _log.info("creating alert " + serviceAlertRecord.getServiceAlertId());
+            _log.info("creating alert " + serviceAlertRecord.getAgencyId() + ":" + serviceAlertRecord.getServiceAlertId());
           }
           ServiceAlertRecord updatedServiceAlert = _serviceAlertService.createOrUpdateServiceAlert(serviceAlertRecord);
-          _log.debug("updating alert " + updatedServiceAlert.getServiceAlertId());
-          currentAlerts.add(AgencyAndIdLibrary.convertFromString(updatedServiceAlert.getServiceAlertId()));
+          _log.debug("updating alert " + serviceAlertRecord.getAgencyId() + ":" + updatedServiceAlert.getServiceAlertId());
+          currentAlerts.add(new AgencyAndId(updatedServiceAlert.getAgencyId(), updatedServiceAlert.getServiceAlertId()));
         } else {
           _log.debug("not updating alert " + id);
           currentAlerts.add(id);
@@ -699,6 +717,8 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
             _log.info("[" + getFeedId() + "] cleaning up alert id " + testId
                     + " with source=" + sa.getSource());
             toBeDeleted.add(testId);
+          } else {
+            _log.info("[" + getFeedId() + "] appears to still be valid with id=" + testId);
           }
         } catch (Exception e) {
           _log.error("invalid AgencyAndId " + sa.getServiceAlertId());
@@ -708,7 +728,11 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
 
     _serviceAlertService.removeServiceAlerts(new ArrayList<AgencyAndId>(toBeDeleted));
 
-    _log.info("[" + getFeedId() + "] handleAlerts complete!");
+    _log.info("[" + getFeedId() + "] handleAlerts complete with "
+            + currentAlerts.size()
+            + " active alerts and "
+            + toBeDeleted.size()
+            + " deleted");
 
   }
 
