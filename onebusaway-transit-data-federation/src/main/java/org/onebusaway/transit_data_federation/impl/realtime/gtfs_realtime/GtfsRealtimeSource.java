@@ -712,7 +712,7 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     for (ServiceAlertRecord sa : _serviceAlertService.getAllServiceAlerts()) {
       if (sa.getSource() != null && sa.getSource().equals(getFeedId())) {
         try {
-          AgencyAndId testId = AgencyAndId.convertFromString(sa.getServiceAlertId());
+          AgencyAndId testId = new AgencyAndId(sa.getAgencyId(), sa.getServiceAlertId());
           if (!currentAlerts.contains(testId) && getFeedId().equals(sa.getSource())) {
             _log.info("[" + getFeedId() + "] cleaning up alert id " + testId
                     + " with source=" + sa.getSource());
@@ -721,6 +721,7 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
             _log.info("[" + getFeedId() + "] appears to still be valid with id=" + testId);
           }
         } catch (Exception e) {
+
           _log.error("invalid AgencyAndId " + sa.getServiceAlertId());
         }
       }
