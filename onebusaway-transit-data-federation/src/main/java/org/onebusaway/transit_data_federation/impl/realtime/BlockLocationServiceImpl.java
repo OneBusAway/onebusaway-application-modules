@@ -46,6 +46,7 @@ import org.onebusaway.realtime.api.EVehicleStatus;
 import org.onebusaway.realtime.api.EVehicleType;
 import org.onebusaway.realtime.api.TimepointPredictionRecord;
 import org.onebusaway.realtime.api.VehicleLocationRecord;
+import org.onebusaway.transit_data.model.TransitDataConstants;
 import org.onebusaway.transit_data_federation.model.TargetTime;
 import org.onebusaway.transit_data_federation.services.blocks.BlockCalendarService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
@@ -314,9 +315,9 @@ public class BlockLocationServiceImpl implements BlockLocationService,
       ScheduledBlockLocation scheduledBlockLocation = getScheduledBlockLocationForVehicleLocationRecord(
           record, instance);
 
-      if (!record.isScheduleDeviationSet()) {
-        int deviation = (int) ((record.getTimeOfRecord() - record.getServiceDate()) / 1000 - scheduledBlockLocation.getScheduledTime());
-        record.setScheduleDeviation(deviation);
+      if (!record.isScheduleDeviationSet() && scheduledBlockLocation != null ) {
+          int deviation = (int) ((record.getTimeOfRecord() - record.getServiceDate()) / 1000 - scheduledBlockLocation.getScheduledTime());
+          record.setScheduleDeviation(deviation);
       }
 
       ScheduleDeviationSamples samples = null;
@@ -325,7 +326,7 @@ public class BlockLocationServiceImpl implements BlockLocationService,
                 instance, record, scheduledBlockLocation);
       }
 
-      putBlockLocationRecord(instance, record, scheduledBlockLocation, samples);
+        putBlockLocationRecord(instance, record, scheduledBlockLocation, samples);
     }
   }
 
@@ -541,6 +542,7 @@ public class BlockLocationServiceImpl implements BlockLocationService,
     location.setBlockInstance(blockInstance);
 
     VehicleLocationCacheElement cacheElement = null;
+    boolean isCancelled = false;
     if (cacheElements != null)
       cacheElement = cacheElements.getElementForTimestamp(targetTime);
 
@@ -572,6 +574,10 @@ public class BlockLocationServiceImpl implements BlockLocationService,
       }
       location.setOrientation(record.getCurrentOrientation());
       location.setPhase(record.getPhase());
+      if (TransitDataConstants.STATUS_CANCELED.equals(record.getStatus())) {
+        isCancelled = true;
+        _log.debug("vehicle " + record.getVehicleId() + " is cancelled");
+      }
       location.setStatus(record.getStatus());
       location.setVehicleId(record.getVehicleId());
 
@@ -671,8 +677,13 @@ public class BlockLocationServiceImpl implements BlockLocationService,
      * 2) When the effective distance along block is outside the range of the
      * block's shape.
      */
-    if (scheduledLocation == null)
+    if (scheduledLocation == null) {
+      if (isCancelled) {
+        // we need to let the record flow through if cancelled
+        return location;
+      }
       return null;
+    }
 
     // if we have route info, set the vehicleType
     if (scheduledLocation.getActiveTrip() != null
