@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 @Results({
   @Result(name="registration", location="registration", type="redirectAction"),
   @Result(name="help", location="index", type="redirectAction", params={"From", "${phoneNumber}"}),
+  @Result(name="contact", location="contact", type="redirectAction", params={"From", "${phoneNumber}"}),
   @Result(name="stops-index", location="stops/index", type="redirectAction", params={"From", "${phoneNumber}"}),
   @Result(name="find-your-stop", location="find-your-stop", type="redirectAction", params={"From", "${phoneNumber}"}),
   @Result(name="bookmarks-index", location="bookmarks/index", type="redirectAction", params={"From", "${phoneNumber}"}),
@@ -63,7 +64,7 @@ public class IndexAction extends TwilioSupport implements SessionAware {
 			navState = DISPLAY_DATA;
 		}
     
-		if (navState == DISPLAY_DATA) {
+    if (navState == DISPLAY_DATA) {
       if( _currentUserService.hasPhoneNumberRegistration() ) {
         _log.debug("registration needed");
         return "registration";
@@ -83,7 +84,7 @@ public class IndexAction extends TwilioSupport implements SessionAware {
       }
 			_log.debug("key: " + key);
 			switch(key) {  
-				case 0: return "help";
+				case 0: return "contact";
 				case 1: return "stops-index";
 				case 2: return "find-your-stop";
 				case 3: return "bookmarks-index";
