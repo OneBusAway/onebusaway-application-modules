@@ -35,6 +35,12 @@ public class IndexAction extends OneBusAwayEnterpriseActionSupport {
     private RouteListService _routeListService;
     @Autowired
     private ConfigurationService _configurationService;
+
+    public String _agencyFilter = null;
+
+    public void setAgencyFilter(String filter) {
+        _agencyFilter = filter;
+    }
     
     public boolean getShowAgencyNames() {
         return _routeListService.getShowAgencyNames();
@@ -45,6 +51,8 @@ public class IndexAction extends OneBusAwayEnterpriseActionSupport {
     }
 
     public List<RouteBean> getRoutes() {
+        if (_agencyFilter != null)
+            return _routeListService.getFilteredRoutes(_agencyFilter);
         return _routeListService.getRoutes();
 
     }

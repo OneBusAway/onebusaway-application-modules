@@ -1,0 +1,20 @@
+<div xmlns:jsp="http://java.sun.com/JSP/Page"
+     xmlns:c="http://java.sun.com/jsp/jstl/core"
+     xmlns:s="/struts-tags"
+     xmlns:wiki="/oba-wiki-tags"
+     class="welcome">
+<!-- allow branded apps to customize when route list is shown -->
+    <c:choose>
+        <c:when test="${!queryIsEmpty}">
+            <div id="cant-find">
+                <h2>Can't find your bus route?</h2>
+                <s:url var="url" namespace="/m/routes" action="index" />
+                <p><s:property value="getText('main.cantfindroute.text')" /> <a href="${url}">Click here</a> to see which routes are currently available.</p>
+            </div>
+        </c:when>
+        <c:otherwise>
+            <s:url var="url" namespace="/m/routes" action="index" />
+            <div id="available-routes"><a href="${url}">Click here</a> for a list of available routes.</div>
+        </c:otherwise>
+    </c:choose>
+</div>

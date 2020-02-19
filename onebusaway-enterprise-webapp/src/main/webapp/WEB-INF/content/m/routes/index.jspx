@@ -22,43 +22,7 @@
       xmlns:wiki="/oba-wiki-tags">
     <jsp:directive.page contentType="text/html" />
     <jsp:output omit-xml-declaration="yes"/>
-    <s:set name="useAgencyId" value="useAgencyId" />
-    <s:set name="showAgencyNames" value="showAgencyNames" />
-    <head>
-
-
-    </head>
     <body>
-        <div id="content">
-            <h3>Routes</h3>
-            <div class="routeList">
-                <p>
-                    <s:iterator value="routes">
-                        <s:url var="url" value="/m/">
-                            <s:param name="q">
-                                <s:if test="#useAgencyId">
-                                    <s:property value="id" />
-                                </s:if>
-                                <s:else>
-                                    <s:property value="shortName" />
-                                </s:else>
-                            </s:param>
-                        </s:url>
-
-                        <a href="${url}">
-                            <s:if test="#showAgencyNames">
-                                <s:property value="agency.name" />&amp;nbsp;
-                            </s:if>
-                            <s:if test="shortName != null">
-                                <s:property value="shortName" />
-                            </s:if>
-                            <s:elseif test="longName != null">
-                                <s:property value="longName" />
-                            </s:elseif>
-                        </a>  &amp;nbsp;
-                    </s:iterator>
-                </p>
-            </div>
-        </div>
+        <c:import url="../includes/route-list.jspx" />
     </body>
 </html>

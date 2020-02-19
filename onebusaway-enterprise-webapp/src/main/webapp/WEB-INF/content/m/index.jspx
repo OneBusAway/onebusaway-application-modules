@@ -229,6 +229,11 @@
 							<c:import url="geocode-result.jspx"/>
 					</s:elseif>
 				</s:if>
+
+				<!-- show route list if nothing else showing -->
+				<s:if test="%{results.matches.size==0 &amp;&amp; results.suggestions.size==0}">
+					<c:import url="includes/route-list.jspx" />
+				</s:if>
 			</div>
 
 		</s:else>

@@ -36,7 +36,7 @@ public class ObjectSerializationLibrary {
   public static void main(String[] args) throws IOException,
       ClassNotFoundException {
     for (int i = 0; i < args.length; i++)
-      System.out.println(readObject(new File(args[i])));
+      System.out.println((String) readObject(new File(args[i])));
   }
 
   /**

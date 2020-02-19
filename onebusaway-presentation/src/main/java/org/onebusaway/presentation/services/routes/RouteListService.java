@@ -28,4 +28,6 @@ public interface RouteListService {
     public boolean getUseAgencyId();
 
     public List<RouteBean> getRoutes();
+
+    public List<RouteBean> getFilteredRoutes(String agencyFilter);
 }
