@@ -3,7 +3,7 @@
   <parent>
     <artifactId>onebusaway</artifactId>
     <groupId>org.onebusaway</groupId>
-    <version>1.2.4</version>
+    <version>1.2.6-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>onebusaway-application-modules</artifactId>
@@ -43,34 +43,16 @@
     <tag>HEAD</tag>
   </scm>
 
-  <repositories>
-    <repository>
-      <id>releases-camsys-repo</id>
-      <url>http://repo.obaweb.org:8080/archiva/repository/releases/</url>
-    </repository>
-    <repository>
-      <id>snapshots-camsys-repo</id>
-      <url>http://repo.obaweb.org:8080/archiva/repository/snapshots/</url>
-    </repository>
-    <repository>
-      <id>public.onebusaway.org</id>
-      <url>http://nexus.onebusaway.org/content/groups/public/</url>
-    </repository>
+  <!-- repositories are inherited from onebusaway parent -->
+<!--  <repositories>-->
+<!--  </repositories>-->
 
-    <!-- Added for Siri V2.0 -->
-    <repository>
-      <id>wmata-repo</id>
-      <url>http://repo.prod.wmata.obaweb.org:8080/archiva/repository/releases/</url>
-    </repository>
-    
-  </repositories>
-
-  <pluginRepositories>
-    <pluginRepository>
-      <id>public.onebusaway.org</id>
-      <url>http://nexus.onebusaway.org/content/groups/public/</url>
-    </pluginRepository>
-  </pluginRepositories>
+<!--  <pluginRepositories>-->
+<!--    <pluginRepository>-->
+<!--      <id>public.onebusaway.org</id>-->
+<!--      <url>http://nexus.onebusaway.org/content/groups/public/</url>-->
+<!--    </pluginRepository>-->
+<!--  </pluginRepositories>-->
 
 
   <issueManagement>
@@ -78,17 +60,8 @@
     <url>https://github.com/OneBusAway/onebusaway-application-modules/issues</url>
   </issueManagement>
 
+  <!-- releases and snapshots should be inherited -->
   <distributionManagement>
-    <repository>
-      <id>releases-obaweb-repo</id>
-      <name>OneBusAway OBAWEB Release Repo</name>
-      <url>http://repo.obaweb.org:8080/archiva/repository/releases/</url>
-    </repository>
-    <snapshotRepository>
-      <id>snapshots-obaweb-repo</id>
-      <name>OneBusAway OBAWEB Snapshot Repo</name>
-      <url>http://repo.obaweb.org:8080/archiva/repository/snapshots/</url>
-    </snapshotRepository>
     <site>
       <id>${site_id}</id>
       <url>${site_url}</url>
