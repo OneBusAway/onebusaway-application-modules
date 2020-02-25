@@ -3,7 +3,7 @@
   <parent>
     <artifactId>onebusaway</artifactId>
     <groupId>org.onebusaway</groupId>
-    <version>1.2.6-SNAPSHOT</version>
+    <version>1.2.6</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>onebusaway-application-modules</artifactId>
@@ -43,16 +43,12 @@
     <tag>HEAD</tag>
   </scm>
 
-  <!-- repositories are inherited from onebusaway parent -->
-<!--  <repositories>-->
-<!--  </repositories>-->
-
-<!--  <pluginRepositories>-->
-<!--    <pluginRepository>-->
-<!--      <id>public.onebusaway.org</id>-->
-<!--      <url>http://nexus.onebusaway.org/content/groups/public/</url>-->
-<!--    </pluginRepository>-->
-<!--  </pluginRepositories>-->
+  <pluginRepositories>
+    <pluginRepository>
+      <id>public.onebusaway.org</id>
+      <url>http://nexus.onebusaway.org/content/groups/public/</url>
+    </pluginRepository>
+  </pluginRepositories>
 
 
   <issueManagement>
