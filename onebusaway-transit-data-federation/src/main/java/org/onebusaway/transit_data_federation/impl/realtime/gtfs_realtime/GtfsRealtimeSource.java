@@ -436,9 +436,9 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
 	  
 	long time = tripUpdates.getHeader().getTimestamp() * 1000;
 	_tripsLibrary.setCurrentTime(time);
-	
+
     List<CombinedTripUpdatesAndVehiclePosition> combinedUpdates = _tripsLibrary.groupTripUpdatesAndVehiclePositions(result,
-        tripUpdates, vehiclePositions);
+            tripUpdates, vehiclePositions);
     result.setRecordsTotal(combinedUpdates.size());
     handleCombinedUpdates(result, combinedUpdates);
     cacheVehicleLocations(vehiclePositions);

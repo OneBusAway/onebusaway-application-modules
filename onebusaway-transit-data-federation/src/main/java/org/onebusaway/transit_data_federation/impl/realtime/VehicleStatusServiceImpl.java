@@ -23,6 +23,7 @@ import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.realtime.api.EVehiclePhase;
 import org.onebusaway.realtime.api.VehicleLocationListener;
 import org.onebusaway.realtime.api.VehicleLocationRecord;
+import org.onebusaway.transit_data.model.TransitDataConstants;
 import org.onebusaway.transit_data_federation.services.blocks.BlockVehicleLocationListener;
 import org.onebusaway.transit_data_federation.services.realtime.VehicleLocationCacheElement;
 import org.onebusaway.transit_data_federation.services.realtime.VehicleLocationCacheElements;
@@ -71,7 +72,9 @@ class VehicleStatusServiceImpl implements VehicleLocationListener,
   @Override
   public void handleVehicleLocationRecord(VehicleLocationRecord record) {
 	  if (record.getPhase() == null) {
-	    record.setPhase(EVehiclePhase.IN_PROGRESS); // if we've received a report, assume it is in progress/in service
+	    // if the trip is cancelled, the vehicle may not exist
+	    if (!TransitDataConstants.STATUS_CANCELED.equals(record.getStatus()))
+          record.setPhase(EVehiclePhase.IN_PROGRESS); // if we've received a report, assume it is in progress/in service
 	  } 
     if (record.getTimeOfRecord() == 0)
       throw new IllegalArgumentException("you must specify a record time");

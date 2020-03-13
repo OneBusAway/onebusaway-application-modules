@@ -55,6 +55,7 @@ import org.onebusaway.transit_data.model.StopGroupingBean;
 import org.onebusaway.transit_data.model.StopWithArrivalsAndDeparturesBean;
 import org.onebusaway.transit_data.model.StopsBean;
 import org.onebusaway.transit_data.model.StopsForRouteBean;
+import org.onebusaway.transit_data.model.TransitDataConstants;
 import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationQueryBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
@@ -180,16 +181,16 @@ public class RealtimeServiceV2Impl implements RealtimeServiceV2 {
               .convertFromString(routeId).getAgencyId(),
                 tripDetails.getStatus());
 
-      activity.setMonitoredVehicleJourney(new MonitoredVehicleJourney());
-
-      SiriSupportV2.fillMonitoredVehicleJourney(
-          activity.getMonitoredVehicleJourney(),
-          tripDetails.getTrip(), tripDetails.getStatus(), null,
-          OnwardCallsMode.VEHICLE_MONITORING, _presentationService,
-          _transitDataService, maximumOnwardCalls,
-          timePredictionRecords, tripDetails.getStatus().isPredicted(),
-          detailLevel, currentTime, null);
-
+      if (!TransitDataConstants.STATUS_CANCELED.equals(tripDetails.getStatus().getStatus())) {
+        activity.setMonitoredVehicleJourney(new MonitoredVehicleJourney());
+        SiriSupportV2.fillMonitoredVehicleJourney(
+                activity.getMonitoredVehicleJourney(),
+                tripDetails.getTrip(), tripDetails.getStatus(), null,
+                OnwardCallsMode.VEHICLE_MONITORING, _presentationService,
+                _transitDataService, maximumOnwardCalls,
+                timePredictionRecords, tripDetails.getStatus().isPredicted(),
+                detailLevel, currentTime, null);
+      }
       output.add(activity);
     }
 
@@ -249,16 +250,17 @@ public class RealtimeServiceV2Impl implements RealtimeServiceV2 {
               .convertFromString(vehicleId).getAgencyId(),
               tripDetailsForCurrentTrip.getStatus());
 
-      output.setMonitoredVehicleJourney(new MonitoredVehicleJourney());
-      SiriSupportV2.fillMonitoredVehicleJourney(
-          output.getMonitoredVehicleJourney(),
-          tripDetailsForCurrentTrip.getTrip(),
-          tripDetailsForCurrentTrip.getStatus(), null,
-          OnwardCallsMode.VEHICLE_MONITORING, _presentationService,
-          _transitDataService, maximumOnwardCalls,
-          timePredictionRecords, tripDetailsForCurrentTrip.getStatus().isPredicted(),
-          detailLevel,currentTime, null);
-
+      if (!TransitDataConstants.STATUS_CANCELED.equals(tripDetailsForCurrentTrip.getStatus().getStatus())) {
+        output.setMonitoredVehicleJourney(new MonitoredVehicleJourney());
+        SiriSupportV2.fillMonitoredVehicleJourney(
+                output.getMonitoredVehicleJourney(),
+                tripDetailsForCurrentTrip.getTrip(),
+                tripDetailsForCurrentTrip.getStatus(), null,
+                OnwardCallsMode.VEHICLE_MONITORING, _presentationService,
+                _transitDataService, maximumOnwardCalls,
+                timePredictionRecords, tripDetailsForCurrentTrip.getStatus().isPredicted(),
+                detailLevel, currentTime, null);
+      }
       return output;
     }
 
@@ -304,16 +306,18 @@ public class RealtimeServiceV2Impl implements RealtimeServiceV2 {
                 statusBeanForCurrentTrip);
 
       MonitoredVehicleJourneyStructure mvjourney = new MonitoredVehicleJourneyStructure();
-      stopVisit.setMonitoredVehicleJourney(mvjourney);
 
-      SiriSupportV2.fillMonitoredVehicleJourney(
-          mvjourney, tripBeanForAd,
-          statusBeanForCurrentTrip, adBean.getStop(),
-          OnwardCallsMode.STOP_MONITORING, _presentationService,
-          _transitDataService, maximumOnwardCalls,
-          timePredictionRecords, statusBeanForCurrentTrip.isPredicted(),
-          detailLevel, currentTime, filters);
+      if (!TransitDataConstants.STATUS_CANCELED.equals(statusBeanForCurrentTrip.getStatus())) {
+        stopVisit.setMonitoredVehicleJourney(mvjourney);
 
+        SiriSupportV2.fillMonitoredVehicleJourney(
+                mvjourney, tripBeanForAd,
+                statusBeanForCurrentTrip, adBean.getStop(),
+                OnwardCallsMode.STOP_MONITORING, _presentationService,
+                _transitDataService, maximumOnwardCalls,
+                timePredictionRecords, statusBeanForCurrentTrip.isPredicted(),
+                detailLevel, currentTime, filters);
+      }
       // FILTERS
       AgencyAndId thisRouteId = AgencyAndIdLibrary
           .convertFromString(mvjourney.getLineRef().getValue());

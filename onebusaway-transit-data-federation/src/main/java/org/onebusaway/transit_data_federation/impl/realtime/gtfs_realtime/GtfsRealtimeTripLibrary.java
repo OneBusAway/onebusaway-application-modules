@@ -21,7 +21,6 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -39,7 +38,6 @@ import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
 import org.onebusaway.gtfs.serialization.mappings.InvalidStopTimeException;
 import org.onebusaway.gtfs.serialization.mappings.StopTimeFieldMappingFactory;
-import org.onebusaway.realtime.api.EVehiclePhase;
 import org.onebusaway.realtime.api.TimepointPredictionRecord;
 import org.onebusaway.realtime.api.VehicleLocationRecord;
 import org.onebusaway.transit_data_federation.services.blocks.BlockCalendarService;
@@ -409,7 +407,7 @@ public class GtfsRealtimeTripLibrary {
       CombinedTripUpdatesAndVehiclePosition update) {
     return createVehicleLocationRecordForUpdate(null, update);
   }    
-    
+
   public VehicleLocationRecord createVehicleLocationRecordForUpdate(MonitoredResult result,
         CombinedTripUpdatesAndVehiclePosition update) {
 
@@ -421,6 +419,7 @@ public class GtfsRealtimeTripLibrary {
     if (update.block == null) return null;
     String vehicleId = update.block.getVehicleId();
     record.setBlockId(blockDescriptor.getBlockInstance().getBlock().getBlock().getId());
+    // this is the default, trip updates may cancel this trip
     record.setStatus(blockDescriptor.getScheduleRelationship().toString());
 
     applyTripUpdatesToRecord(result, blockDescriptor, update.tripUpdates, record, vehicleId, update.bestTrip);
@@ -636,6 +635,12 @@ public class GtfsRealtimeTripLibrary {
             best.timestamp = tripUpdate.getTimestamp() * 1000;
           }
 
+          if (tripId != null) {
+            best.isCanceled = tripUpdate.getTrip().getScheduleRelationship().equals(TripDescriptor.ScheduleRelationship.CANCELED);
+            record.setStatus(tripUpdate.getTrip().getScheduleRelationship().toString());
+            _log.debug("schedule=" + tripUpdate.getTrip().getScheduleRelationship() + "; isCanceled=" + best.isCanceled);
+          }
+
           for (StopTimeUpdate stopTimeUpdate : tripUpdate.getStopTimeUpdateList()) {
             BlockStopTimeEntry blockStopTime = getBlockStopTimeForStopTimeUpdate(result,
                 tripUpdate, stopTimeUpdate, blockTrip.getStopTimes(),
@@ -658,14 +663,16 @@ public class GtfsRealtimeTripLibrary {
             TimepointPredictionRecord tpr = new TimepointPredictionRecord();
             tpr.setTimepointId(stopTime.getStop().getId());
             tpr.setTripId(stopTime.getTrip().getId());
-            tpr.setTimepointScheduledTime(instance.getServiceDate() + stopTime.getArrivalTime() * 1000);
+            if (!stopTimeUpdate.getScheduleRelationship().equals(StopTimeUpdate.ScheduleRelationship.SKIPPED)) {
+              tpr.setTimepointScheduledTime(instance.getServiceDate() + stopTime.getArrivalTime() * 1000);
+            }
             if (stopTimeUpdate.hasStopSequence()) {
               tpr.setStopSequence(stopTimeUpdate.getStopSequence());
             }
             if (stopTimeUpdate.getScheduleRelationship().equals(StopTimeUpdate.ScheduleRelationship.SKIPPED)) {
               tpr.setScheduleRealtionship(StopTimeUpdate.ScheduleRelationship.SKIPPED_VALUE); // set tpr scheduleRelationship enum to SKIPPED
               timepointPredictions.add(tpr);
-              _log.info("SKIPPED stop:" + tpr.getTimepointId() + "  seq: " + tpr.getStopSequence() + " trip: " + tpr.getTripId());
+                _log.info("SKIPPED stop:" + tpr.getTimepointId() + "  seq: " + tpr.getStopSequence() + " trip: " + tpr.getTripId());
               continue;
             } else {
               tpr.setScheduleRealtionship(StopTimeUpdate.ScheduleRelationship.SCHEDULED_VALUE);
@@ -756,14 +763,15 @@ public class GtfsRealtimeTripLibrary {
       record.setBlockStartTime(blockDescriptor.getStartTime());
     }
 
-    if(blockDescriptor.getScheduleRelationship() != null)
+    if(blockDescriptor.getScheduleRelationship() != null && !best.isCanceled)
       record.setStatus(blockDescriptor.getScheduleRelationship().toString());
 
-
-    record.setScheduleDeviation(best.scheduleDeviation);
+    if (!best.isCanceled)
+      record.setScheduleDeviation(best.scheduleDeviation);
     if (best.timestamp != 0) {
       record.setTimeOfRecord(best.timestamp);
     }
+
 
     record.setTimepointPredictions(timepointPredictions);
   }
@@ -983,5 +991,6 @@ public class GtfsRealtimeTripLibrary {
     public boolean isInPast = true;
     public long timestamp = 0;
     public AgencyAndId tripId = null;
+    public boolean isCanceled = false;
   }
 }

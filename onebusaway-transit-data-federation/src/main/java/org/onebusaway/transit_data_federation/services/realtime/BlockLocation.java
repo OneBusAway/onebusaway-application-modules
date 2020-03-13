@@ -491,8 +491,9 @@ public class BlockLocation {
   public String toString() {
     StringBuilder b = new StringBuilder();
     b.append("BlockLocation(");
-    b.append("block=").append(blockInstance.getBlock().getBlock().getId()).append(
-        ",");
+    if (blockInstance != null && blockInstance.getBlock() != null)
+      b.append("block=").append(blockInstance.getBlock().getBlock().getId()).append(
+          ",");
     if (phase != null)
       b.append("phase=").append(phase).append(",");
     if (status != null)

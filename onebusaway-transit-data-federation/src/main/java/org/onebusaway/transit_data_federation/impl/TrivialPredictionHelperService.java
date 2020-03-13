@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.onebusaway.realtime.api.TimepointPredictionRecord;
+import org.onebusaway.transit_data.model.TransitDataConstants;
 import org.onebusaway.transit_data.model.trips.TimepointPredictionBean;
 import org.onebusaway.transit_data.model.trips.TripStatusBean;
 import org.onebusaway.transit_data.services.TransitDataService;
@@ -52,6 +53,9 @@ public class TrivialPredictionHelperService implements PredictionHelperService {
 		if (tripStatus == null)
 			return records;
 		if (!tripStatus.isPredicted())
+			return records;
+		// don't return predictions for a canceled trip
+		if (TransitDataConstants.STATUS_CANCELED.equals(tripStatus.getStatus()))
 			return records;
 
 		records = new ArrayList<TimepointPredictionRecord>();
