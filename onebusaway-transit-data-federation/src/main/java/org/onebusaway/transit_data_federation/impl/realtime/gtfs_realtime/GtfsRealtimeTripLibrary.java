@@ -643,8 +643,8 @@ public class GtfsRealtimeTripLibrary {
 
           for (StopTimeUpdate stopTimeUpdate : tripUpdate.getStopTimeUpdateList()) {
             BlockStopTimeEntry blockStopTime = getBlockStopTimeForStopTimeUpdate(result,
-                tripUpdate, stopTimeUpdate, blockTrip.getStopTimes(),
-                instance.getServiceDate());
+                    tripUpdate, stopTimeUpdate, blockTrip.getStopTimes(),
+                    instance.getServiceDate());
 
             // loop through and store last stop time on trip
             List<BlockStopTimeEntry> stopTimes = blockTrip.getStopTimes();
@@ -672,40 +672,43 @@ public class GtfsRealtimeTripLibrary {
             if (stopTimeUpdate.getScheduleRelationship().equals(StopTimeUpdate.ScheduleRelationship.SKIPPED)) {
               tpr.setScheduleRealtionship(StopTimeUpdate.ScheduleRelationship.SKIPPED_VALUE); // set tpr scheduleRelationship enum to SKIPPED
               timepointPredictions.add(tpr);
-                _log.info("SKIPPED stop:" + tpr.getTimepointId() + "  seq: " + tpr.getStopSequence() + " trip: " + tpr.getTripId());
-              continue;
+              _log.info("SKIPPED stop:" + tpr.getTimepointId() + "  seq: " + tpr.getStopSequence() + " trip: " + tpr.getTripId());
             } else {
               tpr.setScheduleRealtionship(StopTimeUpdate.ScheduleRelationship.SCHEDULED_VALUE);
             }
-            int currentArrivalTime = computeArrivalTime(stopTime,
-                stopTimeUpdate, instance.getServiceDate());
-            int currentDepartureTime = computeDepartureTime(stopTime,
-                stopTimeUpdate, instance.getServiceDate());
 
-            if (currentArrivalTime >= 0) {
-              if (onBestTrip) {
-                updateBestScheduleDeviation(currentTime,
-                        stopTime.getArrivalTime(), currentArrivalTime, best, tripId, vehicleId);
+            if (!stopTimeUpdate.getScheduleRelationship().equals(StopTimeUpdate.ScheduleRelationship.SKIPPED)) {
+              int currentArrivalTime = computeArrivalTime(stopTime,
+                      stopTimeUpdate, instance.getServiceDate());
+              int currentDepartureTime = computeDepartureTime(stopTime,
+                      stopTimeUpdate, instance.getServiceDate());
+
+              if (currentArrivalTime >= 0) {
+                if (onBestTrip) {
+                  updateBestScheduleDeviation(currentTime,
+                          stopTime.getArrivalTime(), currentArrivalTime, best, tripId, vehicleId);
+                }
+
+                long timepointPredictedTime = instance.getServiceDate() + (currentArrivalTime * 1000L);
+                tpr.setTimepointPredictedArrivalTime(timepointPredictedTime);
               }
 
-              long timepointPredictedTime = instance.getServiceDate() + (currentArrivalTime * 1000L);
-              tpr.setTimepointPredictedArrivalTime(timepointPredictedTime);
-            } 
+              if (currentDepartureTime >= 0) {
+                if (onBestTrip) {
+                  updateBestScheduleDeviation(currentTime,
+                          stopTime.getDepartureTime(), currentDepartureTime, best, tripId, vehicleId);
+                }
 
-            if (currentDepartureTime >= 0) {
-              if (onBestTrip) {
-                updateBestScheduleDeviation(currentTime,
-                        stopTime.getDepartureTime(), currentDepartureTime, best, tripId, vehicleId);
+                long timepointPredictedTime = instance.getServiceDate() + (currentDepartureTime * 1000L);
+                tpr.setTimepointPredictedDepartureTime(timepointPredictedTime);
               }
 
-              long timepointPredictedTime = instance.getServiceDate() + (currentDepartureTime * 1000L);
-              tpr.setTimepointPredictedDepartureTime(timepointPredictedTime);
-            }
+              if (tpr.getTimepointPredictedArrivalTime() != -1 ||
+                      tpr.getTimepointPredictedDepartureTime() != -1) {
+                timepointPredictions.add(tpr);
+              }
 
-            if (tpr.getTimepointPredictedArrivalTime() != -1 || 
-                tpr.getTimepointPredictedDepartureTime() != -1) {
-              timepointPredictions.add(tpr);
-            }
+            } // end not skipped
           }
         }
       }
@@ -752,6 +755,7 @@ public class GtfsRealtimeTripLibrary {
             tpr.setTimepointPredictedArrivalTime(predictedArrivalTime);
             tpr.setTimepointPredictedDepartureTime(predictedDepartureTime);
             tpr.setTimepointScheduledTime(scheduledArrivalTime);
+            tpr.setScheduleRealtionship(StopTimeUpdate.ScheduleRelationship.SCHEDULED_VALUE);
             timepointPredictions.add(tpr);
           }
         }

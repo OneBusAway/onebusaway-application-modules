@@ -278,7 +278,10 @@ public class RealtimeServiceImpl implements RealtimeService {
       }
   
       List<TimepointPredictionRecord> timePredictionRecords = null;
-      timePredictionRecords = createTimePredictionRecordsForStop(adBean, stopId);
+      timePredictionRecords = _transitDataService
+              .getPredictionRecordsForTrip(AgencyAndId
+                              .convertFromString(stopId).getAgencyId(),
+                      statusBeanForCurrentTrip);
 
       if (!TransitDataConstants.STATUS_CANCELED.equals(statusBeanForCurrentTrip.getStatus())) {
         stopVisit.setMonitoredVehicleJourney(new MonitoredVehicleJourneyStructure());
@@ -304,21 +307,6 @@ public class RealtimeServiceImpl implements RealtimeService {
     });
     
     return output;
-  }
-  
-  private List<TimepointPredictionRecord> createTimePredictionRecordsForStop(
-      ArrivalAndDepartureBean adBean, String stopId) {
-
-    List<TimepointPredictionRecord> tprs = new ArrayList<TimepointPredictionRecord>();
-    TimepointPredictionRecord tpr = new TimepointPredictionRecord();
-    tpr.setTimepointId(AgencyAndIdLibrary.convertFromString(stopId));
-    tpr.setTimepointScheduledTime(adBean.getScheduledArrivalTime());
-    tpr.setTimepointPredictedArrivalTime(adBean.getPredictedArrivalTime());
-    tpr.setTimepointPredictedDepartureTime(adBean.getPredictedDepartureTime());
-
-
-    tprs.add(tpr);
-    return tprs;
   }
 
   /**

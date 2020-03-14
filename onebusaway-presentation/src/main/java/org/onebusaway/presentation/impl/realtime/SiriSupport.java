@@ -281,7 +281,10 @@ public final class SiriSupport {
 		// (build map of vehicle IDs to TPRs)
 		if(stopLevelPredictions != null) {
 			for(TimepointPredictionRecord tpr : stopLevelPredictions) {
+				if (!tpr.isSkipped()) {
+					// prune skipped stops from prediction map
 					stopIdToPredictionRecordMap.put(AgencyAndId.convertToString(tpr.getTimepointId()), tpr);
+				}
 			}
 		}
 		

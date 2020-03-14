@@ -1084,11 +1084,14 @@ public class BlockLocationServiceImpl implements BlockLocationService,
 
     List<BlockLocationRecord> results = new ArrayList<BlockLocationRecord>();
     for (TimepointPredictionRecord tpr : predictions) {
-      builder.setTimepointId(tpr.getTimepointId());
-      builder.setTimepointScheduledTime(tpr.getTimepointScheduledTime());
-      builder.setTimepointPredictedArrivalTime(tpr.getTimepointPredictedArrivalTime());
-      builder.setTimepointPredictedDepartureTime(tpr.getTimepointPredictedDepartureTime());
-      results.add(builder.create());
+      // because the builder does not support schedule relationship suppress skipped stops
+      if (!tpr.isSkipped()) {
+        builder.setTimepointId(tpr.getTimepointId());
+        builder.setTimepointScheduledTime(tpr.getTimepointScheduledTime());
+        builder.setTimepointPredictedArrivalTime(tpr.getTimepointPredictedArrivalTime());
+        builder.setTimepointPredictedDepartureTime(tpr.getTimepointPredictedDepartureTime());
+        results.add(builder.create());
+      }
     }
     return results;
   }

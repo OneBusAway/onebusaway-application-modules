@@ -654,9 +654,6 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
     boolean success = false;
 
     for (TimepointPredictionRecord tpr : records) {
-      if (tpr.isSkipped()) {
-        continue;
-      }
       boolean tripMatches = tpr.getTripId().equals(
           instance.getBlockTrip().getTrip().getId());
       boolean stopMatches = tpr.getTimepointId().equals(
