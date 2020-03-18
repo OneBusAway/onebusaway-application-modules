@@ -211,7 +211,7 @@ function onValidateCondition(handler) {
 	var routeField = document.getElementById(selector + "__routeId");
 	var routeId = routeField.value;
 	if (stopId != null && stopId != "") {
-		var url = OBA.Config.apiBaseUrl + "/where/stop/" + stopId + ".json?key=" + OBA.Config.obaApiKey;
+		var url = OBA.Config.apiBaseUrl + "/api/where/stop/" + stopId + ".json?key=" + OBA.Config.obaApiKey;
 		jQuery.ajax({
 			url: url,
 			data: {},
@@ -229,7 +229,7 @@ function onValidateCondition(handler) {
 	}
 	if (routeId != null && routeId != "") {
 
-		var url = OBA.Config.apiBaseUrl + "/where/route/" + routeId + ".json?key=" + OBA.Config.obaApiKey;
+		var url = OBA.Config.apiBaseUrl + "/api/where/route/" + routeId + ".json?key=" + OBA.Config.obaApiKey;
 		jQuery.ajax({
 			url: url,
 			data: {},
