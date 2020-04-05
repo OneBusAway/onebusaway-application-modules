@@ -24,7 +24,7 @@ import org.onebusaway.gtfs_realtime.interfaces.FeedEntityModel;
 import org.onebusaway.gtfs_realtime.model.StopTimeUpdateModel;
 import org.onebusaway.gtfs_realtime.model.TripUpdateModel;
 import org.onebusaway.gtfs_realtime.model.VehiclePositionModel;
-import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
+import org.onebusaway.util.AgencyAndIdLibrary;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

@@ -25,7 +25,7 @@ import org.onebusaway.admin.service.bundle.api.AuthenticatedResource;
 import org.onebusaway.admin.service.assignments.impl.VehicleAssignmentServiceImpl;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
-import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
+import org.onebusaway.util.AgencyAndIdLibrary;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

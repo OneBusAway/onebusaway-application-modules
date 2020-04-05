@@ -18,9 +18,9 @@ package org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime;
 import java.util.List;
 
 import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.transit_data_federation.impl.service_alerts.ServiceAlertLibrary;
+import org.onebusaway.alerts.impl.ServiceAlertLibrary;
 import org.onebusaway.transit_data_federation.services.ConsolidatedStopsService;
-import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id;
+import org.onebusaway.alerts.service.ServiceAlerts.Id;
 import org.onebusaway.transit_data_federation.services.transit_graph.RouteCollectionEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.RouteEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
@@ -84,9 +84,8 @@ class GtfsRealtimeEntitySource {
 
     }
 
-    _log.warn("route not found with id \"{}\"", routeId);
-
     AgencyAndId id = new AgencyAndId(_agencyIds.get(0), routeId);
+    _log.warn("route not found with id \"{}\", defaulting to {}", routeId, id);
     return ServiceAlertLibrary.id(id);
   }
 

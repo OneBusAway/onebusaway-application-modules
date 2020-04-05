@@ -181,23 +181,32 @@ public class ServiceAlertsHelper {
       List<VehicleActivityStructure> activities,
       TransitDataService transitDataService, List<AgencyAndId> routeIds) {
 
-    if (activities == null)
-      return;
     Map<String, PtSituationElementStructure> ptSituationElements = new HashMap<String, PtSituationElementStructure>();
-    for (VehicleActivityStructure activity : activities) {
-      if (activity.getMonitoredVehicleJourney() != null) {
-        addSituationElement(transitDataService, ptSituationElements,
-            activity.getMonitoredVehicleJourney().getSituationRef());
+    if (activities != null) {
+      for (VehicleActivityStructure activity : activities) {
+        if (activity.getMonitoredVehicleJourney() != null) {
+          addSituationElement(transitDataService, ptSituationElements,
+                  activity.getMonitoredVehicleJourney().getSituationRef());
+        }
       }
+      addPtSituationElementsToServiceDelivery(serviceDelivery,
+              ptSituationElements);
     }
-    addPtSituationElementsToServiceDelivery(serviceDelivery,
-        ptSituationElements);
-    
+
     if (routeIds == null)
       return;
     
     List<ServiceAlertBean> serviceAlerts = new ArrayList<ServiceAlertBean>();
-    
+
+    SituationQueryBean agencyAlerts = new SituationQueryBean();
+    SituationQueryBean.AffectsBean agencyAffects = new SituationQueryBean.AffectsBean();
+    agencyAlerts.getAffects().add(agencyAffects);
+    agencyAffects.setAgencyId(routeIds.get(0).getAgencyId());
+    ListBean<ServiceAlertBean> serviceAlertsForAgency = transitDataService.getServiceAlerts(agencyAlerts);
+    if (serviceAlertsForAgency != null) {
+      serviceAlerts.addAll(serviceAlertsForAgency.getList());
+    }
+
     for (AgencyAndId routeId :  routeIds) {
       SituationQueryBean query = new SituationQueryBean();
       SituationQueryBean.AffectsBean affects = new SituationQueryBean.AffectsBean();

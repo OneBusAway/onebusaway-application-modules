@@ -38,11 +38,29 @@
     <context:component-scan base-package="org.onebusaway.admin.service.impl" />
     <context:component-scan base-package="org.onebusaway.admin.service.assignments.impl" />
     <context:component-scan base-package="org.onebusaway.admin.service.bundle.impl" />
-    
+    <context:component-scan base-package="org.onebusaway.alerts.impl" />
+
     
     <bean id="currentUserStrategyImpl" class="org.onebusaway.users.impl.CurrentUserStrategyImpl" primary="true" />
 
-    
+    <!-- force hibernates understanding of the following classes -->
+    <bean id="adminHibernateAnnotatedClasses" class="org.onebusaway.container.spring.ListBeanPostProcessor">
+        <property name="target" value="hibernateAnnotatedClasses" />
+        <property name="values">
+            <list>
+                <value>org.onebusaway.transit_data_federation.impl.realtime.BlockLocationRecord</value>
+                <value>org.onebusaway.transit_data_federation.impl.realtime.history.ScheduleDeviationHistory</value>
+                <value>org.onebusaway.transit_data_federation.impl.reporting.StopProblemReportRecord</value>
+                <value>org.onebusaway.transit_data_federation.impl.reporting.TripProblemReportRecord</value>
+                <value>org.onebusaway.alerts.impl.ServiceAlertRecord</value>
+                <value>org.onebusaway.alerts.impl.ServiceAlertLocalizedString</value>
+                <value>org.onebusaway.alerts.impl.ServiceAlertTimeRange</value>
+                <value>org.onebusaway.alerts.impl.ServiceAlertsSituationAffectsClause</value>
+                <value>org.onebusaway.alerts.impl.ServiceAlertSituationConsequenceClause</value>
+            </list>
+        </property>
+    </bean>
+
     <bean id="createAdmin" class="org.onebusaway.webapp.actions.admin.usermanagement.RegisterUserAction"
         init-method="init">
       <property name="username" value="admin"/>

@@ -28,7 +28,7 @@ import org.onebusaway.transit_data.model.oba.RunData;
 import org.onebusaway.transit_data_federation.bundle.tasks.MultiCSVLogger;
 import org.onebusaway.transit_data_federation.bundle.tasks.stif.model.GeographyRecord;
 import org.onebusaway.transit_data_federation.bundle.tasks.stif.model.ServiceCode;
-import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
+import org.onebusaway.util.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.FederatedTransitDataBundle;
 import org.onebusaway.utility.ObjectSerializationLibrary;
 

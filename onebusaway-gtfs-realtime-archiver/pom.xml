@@ -35,6 +35,7 @@
       <artifactId>onebusaway-gtfs-realtime-model</artifactId>
       <version>${project.version}</version>
     </dependency>
+
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-log4j12</artifactId>
@@ -72,6 +73,11 @@
       <artifactId>mockito-core</artifactId>
       <version>1.9.0-rc1</version>
       <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.onebusaway</groupId>
+      <artifactId>onebusaway-alerts-persistence</artifactId>
+      <version>${project.version}</version>
     </dependency>
     <!-- support mysql out of the box -->
     <dependency>

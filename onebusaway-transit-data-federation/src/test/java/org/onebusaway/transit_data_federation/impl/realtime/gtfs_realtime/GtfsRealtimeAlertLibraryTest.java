@@ -21,14 +21,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.transit_data_federation.impl.service_alerts.ServiceAlertLibrary;
-import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts;
-import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects;
-import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence;
-import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence.Effect;
-import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id;
-import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert;
-
+import org.onebusaway.alerts.impl.ServiceAlertLibrary;
+import org.onebusaway.alerts.service.ServiceAlerts;
+import org.onebusaway.alerts.service.ServiceAlerts.*;
 import com.google.transit.realtime.GtfsRealtime;
 import com.google.transit.realtime.GtfsRealtime.Alert;
 import com.google.transit.realtime.GtfsRealtime.EntitySelector;
@@ -120,7 +115,7 @@ public class GtfsRealtimeAlertLibraryTest {
 
     assertEquals(1, serviceAlert.getConsequenceCount());
     Consequence consequence = serviceAlert.getConsequence(0);
-    assertEquals(Effect.DETOUR, consequence.getEffect());
+    assertEquals(Consequence.Effect.DETOUR, consequence.getEffect());
 
     ServiceAlerts.TranslatedString summaries = serviceAlert.getSummary();
     assertEquals(1, summaries.getTranslationCount());

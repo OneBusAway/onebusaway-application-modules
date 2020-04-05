@@ -42,7 +42,7 @@
         <value>org.onebusaway.transit_data_federation.impl.realtime.history.ScheduleDeviationHistory</value>
         <value>org.onebusaway.transit_data_federation.impl.reporting.StopProblemReportRecord</value>
         <value>org.onebusaway.transit_data_federation.impl.reporting.TripProblemReportRecord</value>
-        <value>org.onebusaway.transit_data_federation.impl.service_alerts.ServiceAlertRecord</value>
+        <value>org.onebusaway.alerts.impl.ServiceAlertRecord</value>
       	<value>org.onebusaway.users.model.UserRole</value>
       	<value>org.onebusaway.users.model.UserIndex</value>
       	<value>org.onebusaway.users.model.User</value>

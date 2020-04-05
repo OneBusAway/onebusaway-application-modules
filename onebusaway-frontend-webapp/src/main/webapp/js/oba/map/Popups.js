@@ -456,9 +456,13 @@ OBA.Popups = (function() {
                          	if (ptSituationElement.Summary != null && ptSituationElement.Summary.length > 0) {
                          		summary = '<strong>' + ptSituationElement.Summary + ':</strong><br/><br/>';
 							}
+                         	var description = "";
+                         	if (ptSituationElement.Description != null && summary != ptSituationElement.Description) {
+                         		description = ptSituationElement.Description;
+							}
                          	var message = '<li>'
 								+ summary
-								+ ptSituationElement.Description
+								+ description
 								+ '</li>';
                          	if (!alertIds.includes(ptSituationElement.SituationNumber)) {
                          		alertIds.push(ptSituationElement.SituationNumber)

@@ -120,6 +120,11 @@
 		</dependency>
 		<dependency>
 			<groupId>org.onebusaway</groupId>
+			<artifactId>onebusaway-alerts-persistence</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.onebusaway</groupId>
 			<artifactId>onebusaway-presentation</artifactId>
 			<version>${project.version}</version>
 			<exclusions>

@@ -17,9 +17,9 @@ package org.onebusaway.gtfs_realtime.archiver.listener;
 
 import java.util.List;
 
+import org.onebusaway.alerts.service.ServiceAlerts;
 import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.transit_data_federation.impl.service_alerts.ServiceAlertLibrary;
-import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id;
+import org.onebusaway.alerts.impl.ServiceAlertLibrary;
 import org.onebusaway.transit_data_federation.services.transit_graph.RouteCollectionEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.RouteEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
@@ -65,7 +65,7 @@ public class GtfsRealtimeEntitySource {
    * mostly deals with RouteCollections.
    * 
    * If no route is found in the {@link TransitGraphDao} with the specified id
-   * for any of the configured agencies, a {@link Id} will be constructed with
+   * for any of the configured agencies, a {@link ServiceAlerts.Id} will be constructed with
    * the first agency id from the agency list.
    * 
    * @param routeId
@@ -95,7 +95,7 @@ public class GtfsRealtimeEntitySource {
     return null; // If not found, just return null.
   }
 
-  public Id getTripId(String tripId) {
+  public ServiceAlerts.Id getTripId(String tripId) {
 
     TripEntry trip = getTrip(tripId);
     if (trip != null)

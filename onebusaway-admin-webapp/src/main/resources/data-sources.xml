@@ -292,6 +292,8 @@
         <property name="durability" value="true" />
     </bean>
 
+    <bean id="serviceAlerts" class="org.onebusaway.admin.service.server.impl.ConsoleServiceAlertsServiceImpl" />
+
     <bean id="resetTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
         <property name="jobDetail" ref="resetJob" />
         <property name="cronExpression" value="0 0 3 * * ?" /><!--  03:00 every day -->

@@ -115,6 +115,7 @@
 				<table>
 					<s:textfield label="Summary Title" name="summary" value="%{summary}" theme="xhtml"/>
 					<s:textarea label="Detailed Description" name="description" value="%{description}" cols="80" rows="5" theme="xhtml"/>
+					<s:textfield label="link" id="link" name="link" value="%{link}" theme="xhtml" size="80" />
 					<s:select label="Reason" name="reason" headerKey="null" 
 						headerValue="What caused this situation?" list="reasonValues" 
 						value="model.reason"
@@ -130,6 +131,9 @@
 						<s:textfield label="End Date" id="publicationWindowEndDate" name="endDate" value="%{endDate}" theme="xhtml"/>
 						<s:textfield label="End Time" id="publicationWindowEndTime" name="endTime" value="%{endTime}" theme="xhtml" autocomplete="off" class="time ui-timepicker-input"></s:textfield>
 					</s:if>
+					<!-- these help in debugging -->
+<!--					<s:textfield label="favorite status" id="favorite status" name="favorite status" value="%{favorite}" theme="xhtml" />-->
+<!--					<s:textfield label="source" id="source" name="source" value="%{model.source}" theme="xhtml" />-->
 				</table>
 
 
@@ -209,10 +213,13 @@
 								theme="xhtml"/>
 							<s:textfield label="Route" cssClass="alertCondition"
 								name="allAffects[0].routeId" theme="xhtml"/>
+							<td style="text-align:center" colspan="2" id="routeValidation0">Click Validate to lookup Route</td>
 							<s:textfield label="Stop" cssClass="alertCondition"
 								name="allAffects[0].stopId" theme="xhtml"/>
+							<td style="text-align:center" colspan="2" id="stopValidation0">Click Validate to lookup Stop</td>
 						</table>
 					</td>
+					<td id="validateCondition0" class="validateCondition">Validate</td>
 					<td class="deleteCondition">Delete Condition</td>
 					</tr>
 				</s:if>
@@ -226,7 +233,6 @@
 			</s:if>
 			<s:submit value="Cancel" name="cancel" method="cancel" />
 			<s:submit value="Save" name="submit" />
-			
 		</div>
 	</s:form>
 </div>

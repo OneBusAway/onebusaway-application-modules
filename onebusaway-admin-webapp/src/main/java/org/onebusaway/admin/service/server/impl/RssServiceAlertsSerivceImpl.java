@@ -17,21 +17,22 @@ package org.onebusaway.admin.service.server.impl;
 
 
 import com.google.transit.realtime.GtfsRealtime.*;
-import com.google.transit.realtime.GtfsRealtime.TranslatedString.Translation;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.methods.GetMethod;
+import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpStatus;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.input.SAXBuilder;
+import org.onebusaway.admin.service.server.ConsoleServiceAlertsService;
 import org.onebusaway.admin.service.server.RssServiceAlertsService;
+import org.onebusaway.alerts.service.ServiceAlerts;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data.model.ListBean;
 import org.onebusaway.transit_data.model.RouteBean;
 import org.onebusaway.transit_data.model.service_alerts.*;
 import org.onebusaway.transit_data.services.TransitDataService;
-import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,7 +63,9 @@ public class RssServiceAlertsSerivceImpl implements RssServiceAlertsService {
     private SimpleDateFormat _sdf = new SimpleDateFormat("E, dd MMM yyyy HH:mm:ss zzz");
     private ScheduledExecutorService _executor;
     private TransitDataService _transitDataService;
+    private ConsoleServiceAlertsService _serviceAlertsService;
     private Map<String, String> _routeShortNameToRouteIdMap;
+    // NOTE!  because we cache alerts here, we may hold on to alerts that have been manually deleted from db
     private Map<String, ServiceAlertBean> _alertCache;
     private boolean _removeAgencyIds = true;
     private FeedMessage _feed = null;
@@ -72,7 +75,11 @@ public class RssServiceAlertsSerivceImpl implements RssServiceAlertsService {
     public void setTransitDataService(TransitDataService tds) {
       _transitDataService = tds;
     }
-    
+
+    @Autowired
+    public void setConsoleServiceAlertsService(ConsoleServiceAlertsService service) {
+        _serviceAlertsService = service;
+    }
     public void setDefaultAgencyId(String agencyId) {
       this._defaultAgencyId = agencyId;
     }
@@ -149,7 +156,9 @@ public class RssServiceAlertsSerivceImpl implements RssServiceAlertsService {
         }
         for(Element itemElement : elements){
             String title = itemElement.getChild("title").getValue();
-            String link = itemElement.getChild("link").getValue();
+            String link = "";
+            if ( itemElement.getChild("link") != null)
+                link = itemElement.getChild("link").getValue();
             String description = itemElement.getChild("description").getValue();
             String pubDateString = itemElement.getChild("pubDate").getValue();
             // guid may spread across multiple routes, differentiate based on title
@@ -169,7 +178,8 @@ public class RssServiceAlertsSerivceImpl implements RssServiceAlertsService {
             // don't set description if duplicate of summary
             //serviceAlertBean.setDescriptions(Arrays.asList(new NaturalLanguageStringBean[]{new NaturalLanguageStringBean(description, language)}));
             serviceAlertBean.setId(new AgencyAndId(getAgencyId(), guid).toString());
-            serviceAlertBean.setUrls(Arrays.asList(new NaturalLanguageStringBean[]{new NaturalLanguageStringBean(link, language)}));
+            if (StringUtils.isNotBlank(link))
+                serviceAlertBean.setUrls(Arrays.asList(new NaturalLanguageStringBean[]{new NaturalLanguageStringBean(link, language)}));
             alerts.add(serviceAlertBean);
         }
         return alerts;
@@ -198,7 +208,9 @@ public class RssServiceAlertsSerivceImpl implements RssServiceAlertsService {
         }
         for(Element itemElement : elements){
             String title = itemElement.getChild("title").getValue();
-            String link = itemElement.getChild("link").getValue();
+            String link = "";
+            if (itemElement.getChild("link") != null)
+                link = itemElement.getChild("link").getValue();
             String description = itemElement.getChild("description").getValue();
             String pubDateString = itemElement.getChild("pubDate").getValue();
             String guid = itemElement.getChild("guid").getValue();
@@ -217,7 +229,8 @@ public class RssServiceAlertsSerivceImpl implements RssServiceAlertsService {
             // don't set description if duplicate of summary
             // serviceAlertBean.setDescriptions(Arrays.asList(new NaturalLanguageStringBean[]{new NaturalLanguageStringBean(description, language)}));
             serviceAlertBean.setId(new AgencyAndId(getAgencyId(), guid).toString());
-            serviceAlertBean.setUrls(Arrays.asList(new NaturalLanguageStringBean[]{new NaturalLanguageStringBean(link, language)}));
+            if (StringUtils.isNotBlank(link))
+                serviceAlertBean.setUrls(Arrays.asList(new NaturalLanguageStringBean[]{new NaturalLanguageStringBean(link, language)}));
             alerts.add(serviceAlertBean);
         }
         return alerts;
@@ -247,163 +260,104 @@ public class RssServiceAlertsSerivceImpl implements RssServiceAlertsService {
 
         @Override
         public void run() {
+            long start = System.currentTimeMillis();
+            List<ServiceAlertBean> toAdd = new ArrayList<>();
+            List<AgencyAndId> toRemove = new ArrayList<>();
+            List<ServiceAlertBean> toUpdate = new ArrayList<>();
+
             _log.info("PollRssTask.run enter");
             try {
                 if (!isEnabled()) {
                     return;
                 }
-              
-                if(_routeShortNameToRouteIdMap == null) {
+
+                if (_routeShortNameToRouteIdMap == null) {
                     _log.info("empty route map, exiting");
                     return;
                 }
-                
-                ListBean<ServiceAlertBean> currentObaAlerts = _transitDataService.getAllServiceAlertsForAgencyId(getAgencyId());
-                for(ServiceAlertBean serviceAlertBean : currentObaAlerts.getList()){
-                    _log.info("found existing sa=" + serviceAlertBean.getSummaries() + " with source=" + serviceAlertBean.getSource());
-                    if(!_alertCache.keySet().contains(serviceAlertBean.getId())
+
+                ListBean<ServiceAlertBean> currentObaAlerts = _serviceAlertsService.getAllServiceAlertsForAgencyId(getAgencyId());
+                for (ServiceAlertBean serviceAlertBean : currentObaAlerts.getList()) {
+                    String linkText = "NuLl";
+                    if (serviceAlertBean.getUrls() != null
+                            && !serviceAlertBean.getUrls().isEmpty()
+                            && serviceAlertBean.getUrls().get(0) != null) {
+                        linkText = serviceAlertBean.getUrls().get(0).getValue();
+                    }
+                    _log.info("found existing sa=" + serviceAlertBean.getSummaries().get(0).getValue()
+                            + " with source=" + serviceAlertBean.getSource()
+                            + " and link=" + linkText);
+                    if (!_alertCache.keySet().contains(serviceAlertBean.getId())
                             && serviceAlertBean.getSource() != null
-                            && serviceAlertBean.getSource().equals(_alertSource)){
-                        _log.info("new service alert=" + serviceAlertBean.getSummaries());
+                            && serviceAlertBean.getSource().equals(_alertSource)) {
+                        _log.info("new service alert=" + serviceAlertBean.getSummaries().get(0).getValue()
+                            + " and link=" + linkText);
                         _alertCache.put(serviceAlertBean.getId(), serviceAlertBean);
                     }
                 }
 
                 List<ServiceAlertBean> rssAlerts = new ArrayList<ServiceAlertBean>();
-                try{
+                try {
                     rssAlerts.addAll(pollServiceAdvisoryRssFeed());
-                }catch (Exception e){
+                } catch (Exception e) {
                     _log.warn(e.getMessage());
                     e.printStackTrace();
                 }
 
-                try{
+                try {
                     rssAlerts.addAll(pollServiceStatusRssFeed());
-                }catch (Exception e){
+                } catch (Exception e) {
                     _log.warn(e.getMessage());
                     e.printStackTrace();
                 }
 
                 Map<String, ServiceAlertBean> currentRssAlertMap = new HashMap<String, ServiceAlertBean>();
-                for(ServiceAlertBean alert : rssAlerts){
+                for (ServiceAlertBean alert : rssAlerts) {
                     currentRssAlertMap.put(alert.getId(), alert);
                 }
 
                 Iterator<String> cachedAlertsGuidIter = _alertCache.keySet().iterator();
                 //first, check for expired alerts and existing alerts that have been updated
-                while(cachedAlertsGuidIter.hasNext()){
+                while (cachedAlertsGuidIter.hasNext()) {
                     String guid = cachedAlertsGuidIter.next();
-                    if(!currentRssAlertMap.keySet().contains(guid)){
+                    if (!currentRssAlertMap.keySet().contains(guid)) {
                         _log.info("Removing expired alert with guid " + guid);
-                        _transitDataService.removeServiceAlert(guid);
+
+                        toRemove.add(new AgencyAndId(getAgencyId(), guid));
                         cachedAlertsGuidIter.remove();
-                    }else{
+                    } else {
                         ServiceAlertBean currentAlert = _alertCache.get(guid);
                         ServiceAlertBean rssAlert = currentRssAlertMap.get(guid);
-                        if(rssAlert.getCreationTime() > currentAlert.getCreationTime()) {
+                        if (rssAlert.getCreationTime() > currentAlert.getCreationTime()) {
                             _log.info("Updating alert with guid " + guid);
                             _alertCache.put(guid, rssAlert);
-                            _transitDataService.updateServiceAlert(rssAlert);
+
+                            toUpdate.add(rssAlert);
                         }
                     }
                 }
 
                 //now create alerts for any new guids on the RSS feed
-                for(String currentRssGuid : currentRssAlertMap.keySet()){
-                    if(!_alertCache.keySet().contains(currentRssGuid)){
+                for (String currentRssGuid : currentRssAlertMap.keySet()) {
+                    if (!_alertCache.keySet().contains(currentRssGuid)) {
                         _log.info("Creating alert with guid " + currentRssGuid);
-                        _transitDataService.createServiceAlert(getAgencyId(), currentRssAlertMap.get(currentRssGuid));
+
+                        toAdd.add(currentRssAlertMap.get(currentRssGuid));
                         _alertCache.put(currentRssGuid, currentRssAlertMap.get(currentRssGuid));
                     }
                 }
+
+                _serviceAlertsService.removeServiceAlerts(toRemove);
+                _serviceAlertsService.updateServiceAlerts(getAgencyId(), toUpdate);
+                _serviceAlertsService.createServiceAlerts(getAgencyId(), toAdd);
             } catch (Exception e) {
                 e.printStackTrace();
             } finally {
-                _log.info("PollRssTask.run exit");
+                long end = System.currentTimeMillis();
+                _log.info("PollRssTask.run exit in " + (end - start) + "ms");
             }
         }
-
-        // this code borrowed from AlertsForAgencyAction
-        private void fillFeedMessage(FeedMessage.Builder feedEntity,
-            Map<String, ServiceAlertBean> wmataAlertCache) {
-          
-          List<ServiceAlertBean> alerts = new ArrayList<ServiceAlertBean>();
-          for (Entry<String, ServiceAlertBean> beanEntry: wmataAlertCache.entrySet()) {
-            alerts.add(beanEntry.getValue());
-          }
-          ListBean<ServiceAlertBean> alertsBean = new ListBean<ServiceAlertBean>();
-          alertsBean.setList(alerts);
-          fillAlert(feedEntity, alertsBean);
-        }
-
-        private void fillAlert(FeedMessage.Builder feed, ListBean<ServiceAlertBean> alerts) {
-          for (ServiceAlertBean serviceAlert : alerts.getList()) {
-            FeedEntity.Builder entity = feed.addEntityBuilder();
-            entity.setId(serviceAlert.getId());
-            Alert.Builder alert = entity.getAlertBuilder();
-
-
-            fillTranslations(serviceAlert.getSummaries(),
-                alert.getHeaderTextBuilder());
-            fillTranslations(serviceAlert.getDescriptions(),
-                alert.getDescriptionTextBuilder());
-
-            if (serviceAlert.getActiveWindows() != null) {
-              for (TimeRangeBean range : serviceAlert.getActiveWindows()) {
-                TimeRange.Builder timeRange = alert.addActivePeriodBuilder();
-                if (range.getFrom() != 0) {
-                  timeRange.setStart(range.getFrom() / 1000);
-                }
-                if (range.getTo() != 0) {
-                  timeRange.setEnd(range.getTo() / 1000);
-                }
-              }
-            }
-
-            if (serviceAlert.getAllAffects() != null) {
-              for (SituationAffectsBean affects : serviceAlert.getAllAffects()) {
-                EntitySelector.Builder entitySelector = alert.addInformedEntityBuilder();
-                if (affects.getAgencyId() != null) {
-                  entitySelector.setAgencyId(affects.getAgencyId());
-                }
-                if (affects.getRouteId() != null) {
-                  entitySelector.setRouteId(normalizeId(affects.getRouteId()));
-                }
-                if (affects.getTripId() != null) {
-                  TripDescriptor.Builder trip = entitySelector.getTripBuilder();
-                  trip.setTripId(normalizeId(affects.getTripId()));
-                  entitySelector.setTrip(trip);
-                }
-                if (affects.getStopId() != null) {
-                  entitySelector.setStopId(normalizeId(affects.getStopId()));
-                }
-              }
-            }
-          }
-        }
     }
-
-    private void fillTranslations(List<NaturalLanguageStringBean> input,
-        TranslatedString.Builder output) {
-      for (NaturalLanguageStringBean nls : input) {
-        Translation.Builder translation = output.addTranslationBuilder();
-        translation.setText(nls.getValue());
-        if (nls.getLang() != null) {
-          translation.setLanguage(nls.getLang());
-        }
-      }
-    }
-    
-    protected String normalizeId(String id) {
-      if (_removeAgencyIds) {
-        int index = id.indexOf('_');
-        if (index != -1) {
-          id = id.substring(index + 1);
-        }
-      }
-      return id;
-    }
-
     private class RefreshDataTask implements Runnable {
 
         @Override

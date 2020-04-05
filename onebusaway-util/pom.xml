@@ -73,6 +73,12 @@
 		<groupId>org.apache.httpcomponents</groupId>
 		<artifactId>httpclient</artifactId>
 	</dependency>
+	<dependency>
+		<groupId>org.onebusaway</groupId>
+		<artifactId>onebusaway-realtime-api</artifactId>
+		<version>${project.version}</version>
+	</dependency>
+
 	</dependencies>
 	<build>
 		<!-- This is where we control the master plugin version used by all modules -->

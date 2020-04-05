@@ -46,7 +46,6 @@ import org.onebusaway.enterprise.webapp.actions.m.model.RouteResult;
 import org.onebusaway.enterprise.webapp.actions.m.model.StopOnRoute;
 import org.onebusaway.enterprise.webapp.actions.m.model.StopResult;
 import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
-import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 
 import uk.org.siri.siri.MonitoredCallStructure;
 import uk.org.siri.siri.MonitoredStopVisitStructure;

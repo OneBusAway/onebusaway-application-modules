@@ -28,7 +28,7 @@ import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.AgencyAndIdInstance;
 import org.onebusaway.transit_data_federation.impl.realtime.history.BlockLocationArchiveRecord;
 import org.onebusaway.transit_data_federation.impl.realtime.history.ScheduleDeviationHistory;
-import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
+import org.onebusaway.util.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.realtime.ScheduleDeviationHistoryDao;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;

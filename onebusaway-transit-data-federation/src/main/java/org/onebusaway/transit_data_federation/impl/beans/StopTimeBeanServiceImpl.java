@@ -18,7 +18,7 @@ package org.onebusaway.transit_data_federation.impl.beans;
 import org.onebusaway.transit_data.model.StopBean;
 import org.onebusaway.transit_data.model.StopTimeInstanceBean;
 import org.onebusaway.transit_data.model.schedule.StopTimeBean;
-import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
+import org.onebusaway.util.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.beans.StopBeanService;
 import org.onebusaway.transit_data_federation.services.beans.StopTimeBeanService;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;

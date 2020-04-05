@@ -123,6 +123,7 @@
     <module>onebusaway-transit-data-federation-webapp</module>
     <module>onebusaway-users</module>
     <module>onebusaway-util</module>
+    <module>onebusaway-alerts-persistence</module>
     <module>onebusaway-watchdog-webapp</module>
     <module>onebusaway-status-agent</module>
   </modules>
