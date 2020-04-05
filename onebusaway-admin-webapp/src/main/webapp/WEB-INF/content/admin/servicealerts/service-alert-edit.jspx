@@ -113,9 +113,9 @@
 			<span  id="describeAlertHeader">Step 1: Describe the alert</span>
 			<div id="describeAlertsTableDiv">
 				<table>
-					<s:textfield label="Summary Title" name="summary" value="%{summary}" theme="xhtml"/>
-					<s:textarea label="Detailed Description" name="description" value="%{description}" cols="80" rows="5" theme="xhtml"/>
-					<s:textfield label="link" id="link" name="link" value="%{link}" theme="xhtml" size="80" />
+					<s:textfield label="Summary Title" name="summary" value="%{summary}" theme="xhtml" maxchars="4000"/>
+					<s:textarea label="Detailed Description" name="description" value="%{description}" cols="80" rows="5" theme="xhtml" maxchars="4000"/>
+					<s:textfield label="link" id="link" name="link" value="%{link}" theme="xhtml" size="80" maxchars="4000" />
 					<s:select label="Reason" name="reason" headerKey="null" 
 						headerValue="What caused this situation?" list="reasonValues" 
 						value="model.reason"
