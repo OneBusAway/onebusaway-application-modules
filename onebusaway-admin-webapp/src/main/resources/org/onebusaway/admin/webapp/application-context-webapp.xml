@@ -61,6 +61,8 @@
         </property>
     </bean>
 
+    <bean id="serviceAlerts" class="org.onebusaway.admin.service.server.impl.ConsoleServiceAlertsServiceImpl" />
+
     <bean id="createAdmin" class="org.onebusaway.webapp.actions.admin.usermanagement.RegisterUserAction"
         init-method="init">
       <property name="username" value="admin"/>
