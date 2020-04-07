@@ -62,7 +62,7 @@ public class ServiceAlertsPersistenceDB implements ServiceAlertsPersistence {
   @Override
   @Transactional
   public void delete(ServiceAlertRecord existingServiceAlertRecord) {
-    _log.info("deleting " + (existingServiceAlertRecord==null?"NuLl":existingServiceAlertRecord.getServiceAlertId()));
+    _log.debug("deleting " + (existingServiceAlertRecord==null?"NuLl":existingServiceAlertRecord.getServiceAlertId()));
     getSession().delete(existingServiceAlertRecord);
   }
 
@@ -91,7 +91,7 @@ public class ServiceAlertsPersistenceDB implements ServiceAlertsPersistence {
     Long dbLastModified = getLastModified();
     if (dbLastModified != null) {
     } else {
-      _log.error("no dbLastModified with this.lastModified=" + new Date(this.lastModified));
+      _log.debug("no dbLastModified with this.lastModified=" + new Date(this.lastModified));
     }
     if (dbLastModified == null) {
       // if the database doesn't have an answer for us, fall back on or refresh interval
