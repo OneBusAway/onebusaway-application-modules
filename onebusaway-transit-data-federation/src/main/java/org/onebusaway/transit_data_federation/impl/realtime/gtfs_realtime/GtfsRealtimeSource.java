@@ -429,10 +429,16 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
    * Private Methods
    ****/
 
+  // test if the transit graph is ready
   private boolean graphReady() {
-    return _transitGraphDao != null
-            && _transitGraphDao.getAllRoutes() != null
-            && !_transitGraphDao.getAllRoutes().isEmpty();
+    try {
+      return _transitGraphDao != null
+              && _transitGraphDao.getAllRoutes() != null
+              && !_transitGraphDao.getAllRoutes().isEmpty();
+    } catch (Exception any) {
+      // on first load we can catch the graph in a state, bury this exception
+      return false;
+    }
   }
 
   /**
@@ -710,7 +716,7 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
           }
 
           if (serviceAlert.getActiveWindowList().size() > 0) {
-            _log.info("[" + serviceAlert.getId().getId() + "] "
+            _log.debug("[" + serviceAlert.getId().getId() + "] "
                     + serviceAlert.getActiveWindowList().size() + " active windows");
             List<ServiceAlerts.TimeRange> activeWindowList = serviceAlert.getActiveWindowList();
             for (ServiceAlerts.TimeRange str : serviceAlert.getActiveWindowList()) {
@@ -719,14 +725,14 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
                 satr.setFromValue(str.getStart());
               if (str.hasEnd())
                 satr.setToValue(str.getEnd());
-              _log.info("[" + serviceAlert.getId().getId() + "] adding "
+              _log.debug("[" + serviceAlert.getId().getId() + "] adding "
                       + satr.getFromValue() + "->" + satr.getToValue());
               serviceAlertRecord.getActiveWindows().add(satr);
             }
           }
 
           if (existingAlert == null) {
-            _log.info("creating alert " + serviceAlertRecord.getAgencyId() + ":" + serviceAlertRecord.getServiceAlertId());
+            _log.debug("creating alert " + serviceAlertRecord.getAgencyId() + ":" + serviceAlertRecord.getServiceAlertId());
             toAdd.add(serviceAlertRecord);
           } else {
             _log.debug("updating alert " + serviceAlertRecord.getAgencyId() + ":" + serviceAlertRecord.getServiceAlertId());
@@ -750,15 +756,14 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
         try {
           AgencyAndId testId = new AgencyAndId(sa.getAgencyId(), sa.getServiceAlertId());
           if (!currentAlerts.contains(testId) && getFeedId().equals(sa.getSource())) {
-            _log.info("[" + getFeedId() + "] cleaning up alert id " + testId
+            _log.debug("[" + getFeedId() + "] cleaning up alert id " + testId
                     + " with source=" + sa.getSource());
             toBeDeleted.add(testId);
           } else {
-            _log.info("[" + getFeedId() + "] appears to still be valid with id=" + testId + ", ("
+            _log.debug("[" + getFeedId() + "] appears to still be valid with id=" + testId + ", ("
                     + sa.getAllAffects().iterator().next().getRouteId() + ")");
           }
         } catch (Exception e) {
-
           _log.error("invalid AgencyAndId " + sa.getServiceAlertId());
         }
       }

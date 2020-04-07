@@ -72,7 +72,7 @@ public class TrivialPredictionHelperService implements PredictionHelperService {
 				tpr.setTimepointPredictedDepartureTime(bean.getTimepointPredictedDepartureTime());
 				tpr.setStopSequence(bean.getStopSequence());
 				tpr.setTripId(AgencyAndIdLibrary.convertFromString(bean.getTripId()));
-				tpr.setScheduleRealtionship(bean.getScheduleRelationship().getValue());
+					tpr.setScheduleRealtionship(bean.getScheduleRelationship().getValue());
 
 				records.add(tpr);
 			}

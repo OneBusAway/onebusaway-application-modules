@@ -155,7 +155,7 @@ public class ServiceAlertsServiceImpl implements ServiceAlertsService {
 	public synchronized void removeServiceAlerts(List<AgencyAndId> serviceAlertIds) {
 	  if (_persister.needsSync()) this.loadServiceAlerts();
 		for (AgencyAndId serviceAlertId : serviceAlertIds) {
-      		ServiceAlertRecord existingServiceAlert = _cache.removeServiceAlert(serviceAlertId);
+      ServiceAlertRecord existingServiceAlert = _cache.removeServiceAlert(serviceAlertId);
 
 			if (existingServiceAlert != null) {
 				updateReferences(existingServiceAlert, null);
@@ -163,7 +163,7 @@ public class ServiceAlertsServiceImpl implements ServiceAlertsService {
 			
 			//Now remove from the DataBase.
 			ServiceAlertRecord existingServiceAlertRecord = getServiceAlertRecordByAlertId(serviceAlertId.getAgencyId(), serviceAlertId.getId());
-			_log.info("deleting service alert " + serviceAlertId.getId());
+			_log.debug("deleting service alert " + serviceAlertId.getId());
 			if (existingServiceAlertRecord != null) {
 			  _persister.delete(existingServiceAlertRecord);
 			}
@@ -566,7 +566,7 @@ public class ServiceAlertsServiceImpl implements ServiceAlertsService {
 
 	  _cache.clear(); //we need to clear the cache in case records were deleted
 		List<ServiceAlertRecord> alerts = _persister.getAlerts();
-		_log.info("Loaded " + alerts.size() + " service alerts from DB");
+		_log.debug("Loaded " + alerts.size() + " service alerts from DB");
 		try {			
 			for (ServiceAlertRecord serviceAlert : alerts) {
 				updateReferences(serviceAlert);

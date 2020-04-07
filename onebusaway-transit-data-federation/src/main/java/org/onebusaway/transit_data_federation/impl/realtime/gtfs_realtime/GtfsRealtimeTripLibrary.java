@@ -218,7 +218,7 @@ public class GtfsRealtimeTripLibrary {
         if (!anonymousTripUpdatesByBlock.containsKey(bd)) {
           anonymousTripUpdatesByBlock.put(bd, tu);
         } else {
-          _log.warn(
+          _log.debug(
               "Multiple anonymous TripUpdates for trip {}; will not map to VehiclePosition.",
               td.getTripId());
           anonymousTripUpdatesByBlock.put(bd, tu);
@@ -275,7 +275,7 @@ public class GtfsRealtimeTripLibrary {
            * uniquely distinguish them there is nothing useful or reasonable we
            * can do with the data.
            */
-          _log.warn(
+          _log.debug(
               "Multiple anonymous VehiclePositions for trip {}; giving up.",
               td.getTripId());
           badAnonymousVehiclePositions.add(bd);
@@ -465,7 +465,7 @@ public class GtfsRealtimeTripLibrary {
     int rawBlockStartTime = block.getDepartureTimeForIndex(0);
 
     if (!blockTripsById.containsKey(tripId)) {
-      _log.warn("getBlockStartTimeForTripStartTime(" + instance + ", " + tripId + ", "
+      _log.debug("getBlockStartTimeForTripStartTime(" + instance + ", " + tripId + ", "
       + tripStartTime + ") did not find matching trip; aborting");
       return -1;
     }
@@ -490,7 +490,7 @@ public class GtfsRealtimeTripLibrary {
         _log.debug("discarding: reporting unmatched trip with id=" + trip.getTripId());
         result.addUnmatchedTripId(trip.getTripId());
       } else {
-        _log.warn("discarding: no trip found with id=" + trip.getTripId());
+        _log.debug("discarding: no trip found with id=" + trip.getTripId());
       }
       
       return null;
@@ -504,7 +504,7 @@ public class GtfsRealtimeTripLibrary {
     	try {
     		serviceDate = ServiceDate.parseString(trip.getStartDate());
     	} catch (ParseException ex) {
-    		_log.warn("Could not parse service date " + trip.getStartDate(), ex);
+    		_log.debug("Could not parse service date " + trip.getStartDate(), ex);
     	}
     }
     
@@ -512,7 +512,7 @@ public class GtfsRealtimeTripLibrary {
     	instance = _blockCalendarService.getBlockInstance(block.getId(),
     			serviceDate.getAsDate().getTime());
     	if (instance == null) {
-    		_log.warn("block " + block.getId() + " does not exist on service date "
+    		_log.debug("block " + block.getId() + " does not exist on service date "
     				+ serviceDate);
     		return null;
     	}
@@ -529,7 +529,7 @@ public class GtfsRealtimeTripLibrary {
     	}
     	
     	if (instances.isEmpty()) {
-    		_log.warn("could not find any active instances for the specified block="
+    		_log.debug("could not find any active instances for the specified block="
     				+ block.getId() + " trip=" + trip);
     		return null;
     	}
@@ -552,13 +552,13 @@ public class GtfsRealtimeTripLibrary {
     	try {
     		tripStartTime = StopTimeFieldMappingFactory.getStringAsSeconds(trip.getStartTime());
     	} catch (InvalidStopTimeException iste) {
-    		_log.error("invalid stopTime of " + trip.getStartTime() + " for trip " + trip);
+    		_log.debug("invalid stopTime of " + trip.getStartTime() + " for trip " + trip);
     		return null;
     	}
     	blockStartTime = getBlockStartTimeForTripStartTime(instance,
     			tripEntry.getId(), tripStartTime);
     	if (blockStartTime < 0) {
-          _log.error("invalid blockStartTime for trip " + trip);
+          _log.debug("invalid blockStartTime for trip " + trip);
           return null;
         }
     	blockDescriptor.setStartTime(blockStartTime);
@@ -672,7 +672,7 @@ public class GtfsRealtimeTripLibrary {
             if (stopTimeUpdate.getScheduleRelationship().equals(StopTimeUpdate.ScheduleRelationship.SKIPPED)) {
               tpr.setScheduleRealtionship(StopTimeUpdate.ScheduleRelationship.SKIPPED_VALUE); // set tpr scheduleRelationship enum to SKIPPED
               timepointPredictions.add(tpr);
-              _log.info("SKIPPED stop:" + tpr.getTimepointId() + "  seq: " + tpr.getStopSequence() + " trip: " + tpr.getTripId());
+              _log.debug("SKIPPED stop:" + tpr.getTimepointId() + "  seq: " + tpr.getStopSequence() + " trip: " + tpr.getTripId());
             } else {
               tpr.setScheduleRealtionship(StopTimeUpdate.ScheduleRelationship.SCHEDULED_VALUE);
             }
