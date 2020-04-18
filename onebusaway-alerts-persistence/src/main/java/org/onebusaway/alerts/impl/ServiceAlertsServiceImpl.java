@@ -563,6 +563,7 @@ public class ServiceAlertsServiceImpl implements ServiceAlertsService {
 
 	@Override
 	public synchronized void loadServiceAlerts() {
+		_persister.deleteOrphans();
 
 	  _cache.clear(); //we need to clear the cache in case records were deleted
 		List<ServiceAlertRecord> alerts = _persister.getAlerts();
@@ -575,7 +576,7 @@ public class ServiceAlertsServiceImpl implements ServiceAlertsService {
 					+ _cache.getServiceAlertIdsByAgencyId().size() + " agency alerts, "
 					+ _cache.getServiceAlertIdsByRouteAndStop().size() + " route and stop alerts, "
 					+ _cache.getServiceAlertIdsByRouteId().size() + " route alerts, and "
-					+ _cache.getServiceAlerts().size() + " total alerts");
+					+ _cache.getServiceAlerts().size() + " distinct alerts");
 
 
 		} catch (Exception ex) {

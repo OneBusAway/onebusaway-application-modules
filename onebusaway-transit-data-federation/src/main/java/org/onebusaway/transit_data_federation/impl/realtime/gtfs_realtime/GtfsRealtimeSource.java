@@ -586,6 +586,7 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     Set<ServiceAlertRecord> toAdd = new HashSet<>();
     Set<ServiceAlertRecord> toUpdate = new HashSet<>();
 
+    long start = System.currentTimeMillis();
     _log.info("[" + getFeedId() + "] handleAlerts running....");
     for (FeedEntity entity : alerts.getEntityList()) {
       Alert alert = entity.getAlert();
@@ -746,7 +747,6 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
       }
     }
 
-
     _serviceAlertService.createOrUpdateServiceAlerts(getAgencyIds().get(0), new ArrayList<ServiceAlertRecord>(toAdd));
     _serviceAlertService.createOrUpdateServiceAlerts(getAgencyIds().get(0), new ArrayList<ServiceAlertRecord>(toUpdate));
 
@@ -775,7 +775,8 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
             + currentAlerts.size()
             + " active alerts and "
             + toBeDeleted.size()
-            + " deleted");
+            + " deleted in "
+            + (System.currentTimeMillis() - start) + " ms");
 
   }
 
