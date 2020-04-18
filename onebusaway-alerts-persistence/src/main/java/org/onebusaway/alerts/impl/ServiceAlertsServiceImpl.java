@@ -562,9 +562,12 @@ public class ServiceAlertsServiceImpl implements ServiceAlertsService {
 	 ****/
 
 	@Override
-	public synchronized void loadServiceAlerts() {
+	public synchronized void cleanup() {
 		_persister.deleteOrphans();
+	}
 
+	@Override
+	public synchronized void loadServiceAlerts() {
 	  _cache.clear(); //we need to clear the cache in case records were deleted
 		List<ServiceAlertRecord> alerts = _persister.getAlerts();
 		_log.debug("Loaded " + alerts.size() + " service alerts from DB");

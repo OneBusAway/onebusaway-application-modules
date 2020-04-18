@@ -770,7 +770,7 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     }
 
     _serviceAlertService.removeServiceAlerts(new ArrayList<AgencyAndId>(toBeDeleted));
-
+    _serviceAlertService.cleanup();
     _log.info("[" + getFeedId() + "] handleAlerts complete with "
             + currentAlerts.size()
             + " active alerts and "
