@@ -47,7 +47,7 @@
     </repository>
     <repository>
       <id>public.onebusaway.org</id>
-      <url>http://nexus.onebusaway.org/content/groups/public/</url>
+      <url>https://repo.camsys-apps.com/releases/</url>
     </repository>
 
     <!-- Added for Siri V2.0 -->
@@ -61,7 +61,7 @@
   <pluginRepositories>
     <pluginRepository>
       <id>public.onebusaway.org</id>
-      <url>http://nexus.onebusaway.org/content/groups/public/</url>
+      <url>https://repo.camsys-apps.com/releases/</url>
     </pluginRepository>
   </pluginRepositories>
 
