@@ -18,8 +18,9 @@ package org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime;
 import java.util.List;
 
 import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.transit_data_federation.impl.service_alerts.ServiceAlertLibrary;
-import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id;
+import org.onebusaway.alerts.impl.ServiceAlertLibrary;
+import org.onebusaway.transit_data_federation.services.ConsolidatedStopsService;
+import org.onebusaway.alerts.service.ServiceAlerts.Id;
 import org.onebusaway.transit_data_federation.services.transit_graph.RouteCollectionEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.RouteEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
@@ -34,11 +35,15 @@ class GtfsRealtimeEntitySource {
 
   private TransitGraphDao _transitGraphDao;
 
+  private ConsolidatedStopsService _consolidatedStopsService;
+
   private List<String> _agencyIds;
 
   public void setTransitGraphDao(TransitGraphDao transitGraphDao) {
     _transitGraphDao = transitGraphDao;
   }
+
+  public void setConsolidatedStopService(ConsolidatedStopsService service) { _consolidatedStopsService = service; }
 
   public void setAgencyIds(List<String> agencyIds) {
     _agencyIds = agencyIds;
@@ -79,9 +84,8 @@ class GtfsRealtimeEntitySource {
 
     }
 
-    _log.warn("route not found with id \"{}\"", routeId);
-
     AgencyAndId id = new AgencyAndId(_agencyIds.get(0), routeId);
+    _log.warn("route not found with id \"{}\", defaulting to {}", routeId, id);
     return ServiceAlertLibrary.id(id);
   }
 
@@ -120,6 +124,11 @@ class GtfsRealtimeEntitySource {
   public Id getStopId(String stopId) {
 
     for (String agencyId : _agencyIds) {
+      /*
+       * even though the entity may have give us an agency_id
+       * routes, stops, and trips may each belong to separate
+       * agencies, so we try all agencies
+       */
       AgencyAndId id = new AgencyAndId(agencyId, stopId);
       StopEntry stop = _transitGraphDao.getStopEntryForId(id);
       if (stop != null)
@@ -127,6 +136,10 @@ class GtfsRealtimeEntitySource {
     }
 
     try {
+      /*
+       * here we see if we already have an agencyAndId encoded
+       * as a string
+       */
       AgencyAndId id = AgencyAndId.convertFromString(stopId);
       StopEntry stop = _transitGraphDao.getStopEntryForId(id);
       if (stop != null)
@@ -135,7 +148,27 @@ class GtfsRealtimeEntitySource {
 
     }
 
-    _log.warn("stop not found with id \"{}\"", stopId);
+    /*
+     * if we made it here the stop was either consolidated or
+     * doesn't exist in the GTFS due to a data mismatch
+     */
+    if (_consolidatedStopsService != null) {
+      if (stopId.indexOf('_') > 0) {
+        AgencyAndId consolidatedId = _consolidatedStopsService.getConsolidatedStopIdForHiddenStopId(AgencyAndId.convertFromString(stopId));
+        if (consolidatedId != null) {
+          return ServiceAlertLibrary.id(consolidatedId);
+        }
+      } else {
+        for (String agencyId : _agencyIds) {
+          AgencyAndId consolidatedId = _consolidatedStopsService.getConsolidatedStopIdForHiddenStopId(new AgencyAndId(agencyId, stopId));
+          if (consolidatedId != null) {
+            return ServiceAlertLibrary.id(consolidatedId);
+          }
+        }
+      }
+    }
+
+    _log.warn("alert stop not found with id \"{}\"", stopId);
 
     AgencyAndId id = new AgencyAndId(_agencyIds.get(0), stopId);
     return ServiceAlertLibrary.id(id);

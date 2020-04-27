@@ -37,6 +37,7 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 import com.google.transit.realtime.GtfsRealtime;
+import org.apache.commons.lang.StringUtils;
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
 import org.onebusaway.gtfs.model.AgencyAndId;
@@ -44,19 +45,20 @@ import org.onebusaway.realtime.api.VehicleLocationListener;
 import org.onebusaway.realtime.api.VehicleLocationRecord;
 import org.onebusaway.transit_data.model.service_alerts.ECause;
 import org.onebusaway.transit_data.model.service_alerts.ESeverity;
-import org.onebusaway.transit_data_federation.impl.service_alerts.ServiceAlertLocalizedString;
-import org.onebusaway.transit_data_federation.impl.service_alerts.ServiceAlertRecord;
-import org.onebusaway.transit_data_federation.impl.service_alerts.ServiceAlertSituationConsequenceClause;
-import org.onebusaway.transit_data_federation.impl.service_alerts.ServiceAlertTimeRange;
-import org.onebusaway.transit_data_federation.impl.service_alerts.ServiceAlertsSituationAffectsClause;
+import org.onebusaway.alerts.impl.ServiceAlertLocalizedString;
+import org.onebusaway.alerts.impl.ServiceAlertRecord;
+import org.onebusaway.alerts.impl.ServiceAlertSituationConsequenceClause;
+import org.onebusaway.alerts.impl.ServiceAlertTimeRange;
+import org.onebusaway.alerts.impl.ServiceAlertsSituationAffectsClause;
 import org.onebusaway.transit_data_federation.services.AgencyService;
+import org.onebusaway.transit_data_federation.services.ConsolidatedStopsService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockCalendarService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockGeospatialService;
 import org.onebusaway.transit_data_federation.services.realtime.BlockLocation;
 import org.onebusaway.transit_data_federation.services.realtime.BlockLocationService;
-import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts;
-import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert;
-import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlertsService;
+import org.onebusaway.alerts.service.ServiceAlerts;
+import org.onebusaway.alerts.service.ServiceAlerts.ServiceAlert;
+import org.onebusaway.alerts.service.ServiceAlertsService;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -102,6 +104,8 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   private ServiceAlertsService _serviceAlertService;
 
   private ScheduledExecutorService _scheduledExecutorService;
+
+  private ConsolidatedStopsService _consolidatedStopsService;
 
   private ScheduledFuture<?> _refreshTask;
 
@@ -165,6 +169,8 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
 
   private boolean _useLabelAsId = false;
 
+  private boolean _ignoreAlertTripId = false;
+
   @Autowired
   public void setAgencyService(AgencyService agencyService) {
     _agencyService = agencyService;
@@ -183,6 +189,11 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   @Autowired
   public void setBlockLocationService(BlockLocationService blockLocationService) {
     _blockLocationService = blockLocationService;
+  }
+
+  @Autowired
+  public void setConsolidatedStopsService(ConsolidatedStopsService service) {
+    _consolidatedStopsService = service;
   }
 
   @Autowired
@@ -302,6 +313,8 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   }
   
   public String getFeedId() {
+    if (_feedId == null)
+      _feedId = _agencyIds.toString();
     return _feedId;
   }
   
@@ -328,7 +341,16 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   public void setUseLabelAsId(boolean useLabelAsId) {
     _useLabelAsId = useLabelAsId;
   }
-  
+
+  /**
+   * if the alerts feed contains trip ids ignore them.  This helps
+   * surface the alerts inside OBA.
+   * @param ignore
+   */
+  public void setIgnoreAlertTripId(boolean ignore) {
+    _ignoreAlertTripId = ignore;
+  }
+
   public GtfsRealtimeTripLibrary getGtfsRealtimeTripLibrary() {
     return _tripsLibrary;
   }
@@ -349,6 +371,7 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     _entitySource = new GtfsRealtimeEntitySource();
     _entitySource.setAgencyIds(_agencyIds);
     _entitySource.setTransitGraphDao(_transitGraphDao);
+    _entitySource.setConsolidatedStopService(_consolidatedStopsService);
 
     _tripsLibrary = new GtfsRealtimeTripLibrary();
     _tripsLibrary.setBlockCalendarService(_blockCalendarService);
@@ -382,6 +405,10 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   }
 
   public void refresh() throws IOException {
+    if (!graphReady()) {
+      _log.warn("skipping update " + getAgencyIds() + ", bundle not ready");
+      return;
+    }
     FeedMessage tripUpdates = _sftpTripUpdatesUrl != null ?
         readOrReturnDefault(_sftpTripUpdatesUrl)
         : readOrReturnDefault(_tripUpdatesUrl);
@@ -393,7 +420,7 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
         : readOrReturnDefault(_alertsUrl);
     MonitoredResult result = new MonitoredResult();
     result.setAgencyIds(_agencyIds);
-    handeUpdates(result, tripUpdates, vehiclePositions, alerts);
+    handleUpdates(result, tripUpdates, vehiclePositions, alerts);
     // update reference in a thread safe manner
     _monitoredResult = result;
   }
@@ -402,20 +429,32 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
    * Private Methods
    ****/
 
+  // test if the transit graph is ready
+  private boolean graphReady() {
+    try {
+      return _transitGraphDao != null
+              && _transitGraphDao.getAllRoutes() != null
+              && !_transitGraphDao.getAllRoutes().isEmpty();
+    } catch (Exception any) {
+      // on first load we can catch the graph in a state, bury this exception
+      return false;
+    }
+  }
+
   /**
    * 
    * @param tripUpdates
    * @param vehiclePositions
    * @param alerts
    */
-  private synchronized void handeUpdates(MonitoredResult result, FeedMessage tripUpdates,
-      FeedMessage vehiclePositions, FeedMessage alerts) {
+  private synchronized void handleUpdates(MonitoredResult result, FeedMessage tripUpdates,
+                                          FeedMessage vehiclePositions, FeedMessage alerts) {
 	  
 	long time = tripUpdates.getHeader().getTimestamp() * 1000;
 	_tripsLibrary.setCurrentTime(time);
-	
+
     List<CombinedTripUpdatesAndVehiclePosition> combinedUpdates = _tripsLibrary.groupTripUpdatesAndVehiclePositions(result,
-        tripUpdates, vehiclePositions);
+            tripUpdates, vehiclePositions);
     result.setRecordsTotal(combinedUpdates.size());
     handleCombinedUpdates(result, combinedUpdates);
     cacheVehicleLocations(vehiclePositions);
@@ -439,6 +478,9 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
 
   private void handleCombinedUpdates(MonitoredResult result,
       List<CombinedTripUpdatesAndVehiclePosition> updates) {
+
+    // exit if we are configured in alerts mode
+    if (_tripUpdatesUrl == null) return;
 
     Set<AgencyAndId> seenVehicles = new HashSet<AgencyAndId>();
 
@@ -528,13 +570,32 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   }
 
   private void handleAlerts(FeedMessage alerts) {
+
+    // exit if we are configured only in trip updates mode
+    if (_alertsUrl == null) {
+      return;
+    }
+
+    if (!alerts.hasHeader() || !alerts.getHeader().hasTimestamp()) {
+      // don't let a single connection issue wipe out the set of alerts
+      _log.error("missing alert header for " + getFeedId() + ", assuming connection issue and aborting");
+      return;
+    }
+
+    Set<AgencyAndId> currentAlerts = new HashSet<AgencyAndId>();
+    Set<ServiceAlertRecord> toAdd = new HashSet<>();
+    Set<ServiceAlertRecord> toUpdate = new HashSet<>();
+
+    long start = System.currentTimeMillis();
+    _log.info("[" + getFeedId() + "] handleAlerts running....");
     for (FeedEntity entity : alerts.getEntityList()) {
       Alert alert = entity.getAlert();
       if (alert == null) {
-        _log.warn("epxected a FeedEntity with an Alert");
+        _log.warn("expected a FeedEntity with an Alert");
         continue;
       }
 
+      // NOTE!! Here we default agencyID to be of feed name
       AgencyAndId id = createId(entity.getId());
 
       if (entity.getIsDeleted()) {
@@ -542,47 +603,75 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
         _serviceAlertService.removeServiceAlert(id);
       } else {
         ServiceAlert.Builder serviceAlertBuilder = _alertLibrary.getAlertAsServiceAlert(
-            id, alert, _alertAgencyIdMap);
+                id, alert, _alertAgencyIdMap, _ignoreAlertTripId);
         ServiceAlert serviceAlert = serviceAlertBuilder.build();
+        // cache value of alert
         ServiceAlert existingAlert = _alertsById.get(id);
-        if (existingAlert == null || !existingAlert.equals(serviceAlert)) {
+        // data store value of service alert
+        ServiceAlertRecord existingRecord = _serviceAlertService.getServiceAlertForId(new AgencyAndId(id.getAgencyId(), id.getId()));
+
+        // don't update if there's nothing to do or if the owner changed to admin console
+        if ((existingAlert == null
+                || !existingAlert.equals(serviceAlert))
+                && (existingRecord == null
+                || !"console".equals(existingRecord.getSource()))) {
           _alertsById.put(id, serviceAlert);
 
           ServiceAlertRecord serviceAlertRecord = new ServiceAlertRecord();
-          serviceAlertRecord.setAgencyId(_agencyIds.get(0));
+          // indicate this came from a feed so we can prune expired alerts
+          serviceAlertRecord.setSource(getFeedId());
+          serviceAlertRecord.setAgencyId(id.getAgencyId()); // AGENCY from feed configuration
+          serviceAlertRecord.setServiceAlertId(id.getId()); // ID ONLY
+
           serviceAlertRecord.setActiveWindows(new HashSet<ServiceAlertTimeRange>());
-          if(serviceAlert.getActiveWindowList() != null){
-            for(ServiceAlerts.TimeRange timeRange : serviceAlert.getActiveWindowList()){
+          if (serviceAlert.getActiveWindowList() != null) {
+            for (ServiceAlerts.TimeRange timeRange : serviceAlert.getActiveWindowList()) {
               ServiceAlertTimeRange serviceAlertTimeRange = new ServiceAlertTimeRange();
               serviceAlertTimeRange.setFromValue(timeRange.getStart());
               serviceAlertTimeRange.setToValue(timeRange.getEnd());
-                serviceAlertRecord.getActiveWindows().add(serviceAlertTimeRange);
+              serviceAlertRecord.getActiveWindows().add(serviceAlertTimeRange);
             }
           }
 
           serviceAlertRecord.setAllAffects(new HashSet<ServiceAlertsSituationAffectsClause>());
-          if(serviceAlert.getAffectsList() != null){
-            for(ServiceAlerts.Affects affects : serviceAlertBuilder.getAffectsList()){
+          if (serviceAlert.getAffectsList() != null) {
+            for (ServiceAlerts.Affects affects : serviceAlertBuilder.getAffectsList()) {
               ServiceAlertsSituationAffectsClause serviceAlertsSituationAffectsClause = new ServiceAlertsSituationAffectsClause();
+
+              /*
+              * if the affects clause has empty but non-null fields the Affects...Factory references will break
+               */
+              if (!StringUtils.isBlank(affects.getAgencyId()))
               serviceAlertsSituationAffectsClause.setAgencyId(affects.getAgencyId());
+
+              if (!StringUtils.isBlank(affects.getApplicationId()))
               serviceAlertsSituationAffectsClause.setApplicationId(affects.getApplicationId());
-              serviceAlertsSituationAffectsClause.setDirectionId(affects.getDirectionId());
-              serviceAlertsSituationAffectsClause.setRouteId(affects.getRouteId().getId());
-              serviceAlertsSituationAffectsClause.setStopId(affects.getStopId().getId());
-              serviceAlertsSituationAffectsClause.setTripId(affects.getTripId().getId());
+
+              if (!StringUtils.isBlank(affects.getDirectionId()))
+                serviceAlertsSituationAffectsClause.setDirectionId(affects.getDirectionId());
+
+              if (affects.getRouteId() != null && affects.getRouteId().hasId())
+                serviceAlertsSituationAffectsClause.setRouteId(new AgencyAndId(affects.getRouteId().getAgencyId(), affects.getRouteId().getId()).toString());
+
+              if (affects.getStopId().getId() != null && affects.getStopId().hasId()) {
+                serviceAlertsSituationAffectsClause.setStopId(new AgencyAndId(affects.getStopId().getAgencyId(), affects.getStopId().getId()).toString());
+              }
+
+              if (!_ignoreAlertTripId && affects.getTripId() != null && affects.getTripId().hasId())
+                serviceAlertsSituationAffectsClause.setTripId(new AgencyAndId(affects.getTripId().getAgencyId(), affects.getTripId().getId()).toString());
               serviceAlertRecord.getAllAffects().add(serviceAlertsSituationAffectsClause);
             }
           }
 
           serviceAlertRecord.setCause(getECause(serviceAlert.getCause()));
           serviceAlertRecord.setConsequences(new HashSet<ServiceAlertSituationConsequenceClause>());
-          if(serviceAlert.getConsequenceList() != null){
-            for(ServiceAlerts.Consequence consequence : serviceAlert.getConsequenceList()){
+          if (serviceAlert.getConsequenceList() != null) {
+            for (ServiceAlerts.Consequence consequence : serviceAlert.getConsequenceList()) {
               ServiceAlertSituationConsequenceClause serviceAlertSituationConsequenceClause = new ServiceAlertSituationConsequenceClause();
               serviceAlertSituationConsequenceClause.setDetourPath(consequence.getDetourPath());
               serviceAlertSituationConsequenceClause.setDetourStopIds(new HashSet<String>());
-              if(consequence.getDetourStopIdsList() != null){
-                for(ServiceAlerts.Id stopId : consequence.getDetourStopIdsList()){
+              if (consequence.getDetourStopIdsList() != null) {
+                for (ServiceAlerts.Id stopId : consequence.getDetourStopIdsList()) {
                   serviceAlertSituationConsequenceClause.getDetourStopIds().add(stopId.getId());
                 }
               }
@@ -592,9 +681,9 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
 
           serviceAlertRecord.setCreationTime(serviceAlert.getCreationTime());
           serviceAlertRecord.setDescriptions(
-              new HashSet<ServiceAlertLocalizedString>());
-          if(serviceAlert.getDescription() != null){
-            for(ServiceAlerts.TranslatedString.Translation translation : serviceAlert.getDescription().getTranslationList()){
+                  new HashSet<ServiceAlertLocalizedString>());
+          if (serviceAlert.getDescription() != null) {
+            for (ServiceAlerts.TranslatedString.Translation translation : serviceAlert.getDescription().getTranslationList()) {
               ServiceAlertLocalizedString string = new ServiceAlertLocalizedString();
               string.setValue(translation.getText());
               string.setLanguage(translation.getLanguage());
@@ -605,12 +694,11 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
           serviceAlertRecord.setModifiedTime(serviceAlert.getModifiedTime());
           serviceAlertRecord.setPublicationWindows(new HashSet<ServiceAlertTimeRange>());
 
-          serviceAlertRecord.setServiceAlertId(serviceAlert.getId().getId());
           serviceAlertRecord.setSeverity(getESeverity(serviceAlert.getSeverity()));
 
           serviceAlertRecord.setSummaries(new HashSet<ServiceAlertLocalizedString>());
-          if(serviceAlert.getSummary() != null){
-            for(ServiceAlerts.TranslatedString.Translation translation : serviceAlert.getSummary().getTranslationList()){
+          if (serviceAlert.getSummary() != null) {
+            for (ServiceAlerts.TranslatedString.Translation translation : serviceAlert.getSummary().getTranslationList()) {
               ServiceAlertLocalizedString string = new ServiceAlertLocalizedString();
               string.setValue(translation.getText());
               string.setLanguage(translation.getLanguage());
@@ -619,8 +707,8 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
           }
 
           serviceAlertRecord.setUrls(new HashSet<ServiceAlertLocalizedString>());
-          if(serviceAlert.getUrl() != null){
-            for(ServiceAlerts.TranslatedString.Translation translation : serviceAlert.getUrl().getTranslationList()){
+          if (serviceAlert.getUrl() != null) {
+            for (ServiceAlerts.TranslatedString.Translation translation : serviceAlert.getUrl().getTranslationList()) {
               ServiceAlertLocalizedString string = new ServiceAlertLocalizedString();
               string.setValue(translation.getText());
               string.setLanguage(translation.getLanguage());
@@ -628,10 +716,68 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
             }
           }
 
-          _serviceAlertService.createOrUpdateServiceAlert(serviceAlertRecord);
+          if (serviceAlert.getActiveWindowList().size() > 0) {
+            _log.debug("[" + serviceAlert.getId().getId() + "] "
+                    + serviceAlert.getActiveWindowList().size() + " active windows");
+            List<ServiceAlerts.TimeRange> activeWindowList = serviceAlert.getActiveWindowList();
+            for (ServiceAlerts.TimeRange str : serviceAlert.getActiveWindowList()) {
+              ServiceAlertTimeRange satr = new ServiceAlertTimeRange();
+              if (str.hasStart())
+                satr.setFromValue(str.getStart());
+              if (str.hasEnd())
+                satr.setToValue(str.getEnd());
+              _log.debug("[" + serviceAlert.getId().getId() + "] adding "
+                      + satr.getFromValue() + "->" + satr.getToValue());
+              serviceAlertRecord.getActiveWindows().add(satr);
+            }
+          }
+
+          if (existingAlert == null) {
+            _log.debug("creating alert " + serviceAlertRecord.getAgencyId() + ":" + serviceAlertRecord.getServiceAlertId());
+            toAdd.add(serviceAlertRecord);
+          } else {
+            _log.debug("updating alert " + serviceAlertRecord.getAgencyId() + ":" + serviceAlertRecord.getServiceAlertId());
+            toUpdate.add(serviceAlertRecord);
+          }
+          currentAlerts.add(new AgencyAndId(serviceAlertRecord.getAgencyId(), serviceAlertRecord.getServiceAlertId()));
+        } else {
+          _log.debug("not updating alert " + id);
+          currentAlerts.add(id);
         }
       }
     }
+
+    _serviceAlertService.createOrUpdateServiceAlerts(getAgencyIds().get(0), new ArrayList<ServiceAlertRecord>(toAdd));
+    _serviceAlertService.createOrUpdateServiceAlerts(getAgencyIds().get(0), new ArrayList<ServiceAlertRecord>(toUpdate));
+
+    Set<AgencyAndId> toBeDeleted = new HashSet<AgencyAndId>();
+    for (ServiceAlertRecord sa : _serviceAlertService.getAllServiceAlerts()) {
+      if (sa.getSource() != null && sa.getSource().equals(getFeedId())) {
+        try {
+          AgencyAndId testId = new AgencyAndId(sa.getAgencyId(), sa.getServiceAlertId());
+          if (!currentAlerts.contains(testId) && getFeedId().equals(sa.getSource())) {
+            _log.debug("[" + getFeedId() + "] cleaning up alert id " + testId
+                    + " with source=" + sa.getSource());
+            toBeDeleted.add(testId);
+          } else {
+            _log.debug("[" + getFeedId() + "] appears to still be valid with id=" + testId + ", ("
+                    + sa.getAllAffects().iterator().next().getRouteId() + ")");
+          }
+        } catch (Exception e) {
+          _log.error("invalid AgencyAndId " + sa.getServiceAlertId());
+        }
+      }
+    }
+
+    _serviceAlertService.removeServiceAlerts(new ArrayList<AgencyAndId>(toBeDeleted));
+    _serviceAlertService.cleanup();
+    _log.info("[" + getFeedId() + "] handleAlerts complete with "
+            + currentAlerts.size()
+            + " active alerts and "
+            + toBeDeleted.size()
+            + " deleted in "
+            + (System.currentTimeMillis() - start) + " ms");
+
   }
 
   private ESeverity getESeverity(ServiceAlert.Severity severity){

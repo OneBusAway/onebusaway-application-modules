@@ -39,7 +39,7 @@ import org.onebusaway.gtfs.model.Agency;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.Stop;
 import org.onebusaway.gtfs.serialization.GtfsReader;
-import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
+import org.onebusaway.util.AgencyAndIdLibrary;
 import org.onebusaway.utility.IOLibrary;
 import org.onebusaway.utility.collections.TreeUnionFind;
 import org.onebusaway.utility.collections.TreeUnionFind.Sentry;

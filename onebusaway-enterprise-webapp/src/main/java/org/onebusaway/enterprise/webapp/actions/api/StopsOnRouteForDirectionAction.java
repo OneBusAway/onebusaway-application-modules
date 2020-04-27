@@ -33,7 +33,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.*;
 
-import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
+import org.onebusaway.util.AgencyAndIdLibrary;
 
 @ParentPackage("json-default")
 @Result(type="json", params={"callbackParameter", "callback"})

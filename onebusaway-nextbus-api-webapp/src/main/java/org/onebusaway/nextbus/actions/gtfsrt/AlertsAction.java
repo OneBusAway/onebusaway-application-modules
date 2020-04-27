@@ -107,7 +107,12 @@ public class AlertsAction extends NextBusApiBase implements
 							Alert.Builder alert = Alert.newBuilder();
 
 							fillAlertHeader(alert, serviceAlert.getSummaries());
+							// description is no longer populated
 							fillAlertDescriptions(alert, serviceAlert.getDescriptions());
+							if (!alert.hasDescriptionText()) {
+								_log.info("copying header text of " + alert.getHeaderText().getTranslation(0));
+								alert.setDescriptionText(alert.getHeaderText());
+							}
 							fillActiveWindows(alert, serviceAlert.getActiveWindows());
 							fillSituationAffects(alert, serviceAlert.getAllAffects());
 

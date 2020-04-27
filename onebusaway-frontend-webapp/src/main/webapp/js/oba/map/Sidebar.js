@@ -812,11 +812,13 @@ OBA.Sidebar = function() {
 					serviceAlertsList.empty();
 					
 					var showAlerts = false;
-					var moreInfoLinkPrefix = "";
-					var moreInfoLinkSuffix = "";
+					var alertIds = [];
 			        
 					jQuery.each(serviceAlerts, function(_, serviceAlert) {
-				        if (serviceAlert.InfoLinks && serviceAlert.InfoLinks.InfoLink.length > 0) {
+						var moreInfoLinkPrefix = "";
+						var moreInfoLinkSuffix = "";
+
+						if (serviceAlert.InfoLinks && serviceAlert.InfoLinks.InfoLink.length > 0) {
 				        	moreInfoLinkPrefix = ' <a href="' + serviceAlert.InfoLinks.InfoLink[0].Uri + '" target="alert">';
 				        	moreInfoLinkSuffix = "</a>";
 				        }
@@ -824,16 +826,27 @@ OBA.Sidebar = function() {
 						// If this is not a global alert, display it
 						if (!serviceAlert.Affects.Operators || (serviceAlert.Affects.Operators && !serviceAlert.Affects.Operators.hasOwnProperty("AllOperators"))) {
 							var text = null;
-							
-							if(typeof serviceAlert.Description !== 'undefined') {
+							if(typeof serviceAlert.Description !== 'undefined' && typeof serviceAlert.Summary !== 'undefined') {
+								// we have a service alert with both summary and description, do a little formatting
+								if (serviceAlert.Summary == serviceAlert.Description) {
+									text = '<strong>' + serviceAlert.Summary + '</strong>';
+								} else {
+									text = '<strong>' + serviceAlert.Summary + '</strong><br/><br/>' + serviceAlert.Description;
+								}
+							} else if(typeof serviceAlert.Description !== 'undefined') {
 								text = serviceAlert.Description;
 							} else if(typeof serviceAlert.Summary !== 'undefined') {
 								text = serviceAlert.Summary;
 							}
 							text = moreInfoLinkPrefix + text + moreInfoLinkSuffix;
 							if(text !== null) {
-								serviceAlertsList.append(jQuery("<li></li>").html(text.replace(/\n/g, "<br/>")));
-								showAlerts = true;
+								text = text.replace(/\n/g, "<br/>");
+								var newText = jQuery("<li></li>").html(text);
+								if (!alertIds.includes(serviceAlert.SituationNumber)) {
+									alertIds.push(serviceAlert.SituationNumber)
+									serviceAlertsList.append(newText);
+									showAlerts = true;
+								}
 							}
 						}
 					});

@@ -46,7 +46,6 @@ import org.onebusaway.enterprise.webapp.actions.m.model.RouteResult;
 import org.onebusaway.enterprise.webapp.actions.m.model.StopOnRoute;
 import org.onebusaway.enterprise.webapp.actions.m.model.StopResult;
 import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
-import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 
 import uk.org.siri.siri.MonitoredCallStructure;
 import uk.org.siri.siri.MonitoredStopVisitStructure;
@@ -119,6 +118,9 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
       fillRealtimeData(journey.getMonitoredVehicleJourney(), stopId, stopIdToRealtimeDataMap);
     }
 
+    // Service Alerts for Route + Stop combinations
+    Set<ServiceAlertBean> serviceAlertBeansRouteStop = new HashSet<>();
+
     List<StopGroupingBean> stopGroupings = stopsForRoute.getStopGroupings();
     for (StopGroupingBean stopGroupingBean : stopGroupings) {
       for (StopGroupBean stopGroupBean : stopGroupingBean.getStopGroups()) {
@@ -148,6 +150,8 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
           stopsOnRoute = new ArrayList<StopOnRoute>();
 
           for (String stopId : stopGroupBean.getStopIds()) {
+              List<ServiceAlertBean> routeStops = _realtimeService.getServiceAlertsForRouteAndStop(routeBean.getId(), stopId);
+              if (!routeStops.isEmpty()) serviceAlertBeansRouteStop.addAll(routeStops);
             if (_transitDataService.stopHasRevenueServiceOnRoute((routeBean.getAgency()!=null?routeBean.getAgency().getId():null),
                     stopId, routeBean.getId(), stopGroupBean.getId())) {
               stopsOnRoute.add(new StopOnRoute(stopIdToStopBeanMap.get(stopId),
@@ -168,7 +172,11 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
     List<ServiceAlertBean> serviceAlertBeansRoute = _realtimeService.getServiceAlertsForRoute(routeBean.getId());
 
     List<ServiceAlertBean> serviceAlertBeans = new ArrayList<ServiceAlertBean>();
+    serviceAlertBeans.addAll(new ArrayList<>(serviceAlertBeansRouteStop));
     serviceAlertBeans.addAll(serviceAlertBeansRoute);
+    populateServiceAlerts(serviceAlertDescriptions, serviceAlertBeans);
+
+    serviceAlertBeans = new ArrayList<ServiceAlertBean>();
 
     if (routeBean.getAgency() != null) {
         List<ServiceAlertBean> serviceAlertBeansAgency = _realtimeService.getServiceAlertsForAgency(routeBean.getAgency().getId());
@@ -229,7 +237,12 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
           List<ServiceAlertBean> serviceAlertBeans = _realtimeService.getServiceAlertsForRouteAndDirection(
               routeBean.getId(), stopGroupBean.getId());
           populateServiceAlerts(serviceAlertDescriptions, serviceAlertBeans);
-          
+
+          // also include service alerts for route + stop
+          serviceAlertBeans = _realtimeService.getServiceAlertsForRouteAndStop(
+                    routeBean.getId(), stopBean.getId());
+          populateServiceAlerts(serviceAlertDescriptions, serviceAlertBeans);
+
           // service in this direction
           Boolean hasUpcomingScheduledService = _transitDataService.stopHasUpcomingScheduledService(
         	  (routeBean.getAgency()!=null?routeBean.getAgency().getId():null),

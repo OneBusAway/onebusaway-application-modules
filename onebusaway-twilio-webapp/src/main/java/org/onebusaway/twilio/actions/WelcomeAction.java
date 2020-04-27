@@ -26,9 +26,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @Results ({
-	@Result (name="registration", location="/registration", type="chain"),
-	@Result (name="repeat", location="welcome", type="redirectAction", params={"From", "${phoneNumber}"}),
+  @Result(name="registration", location="/registration", type="chain"),
+  @Result(name="repeat", location="welcome", type="redirectAction", params={"From", "${phoneNumber}"}),
   @Result(name="help", location="index", type="redirectAction", params={"From", "${phoneNumber}"}),
+  @Result(name="contact", location="contact", type="redirectAction", params={"From", "${phoneNumber}"}),
   @Result(name="stops-index", location="stops/index", type="redirectAction", params={"From", "${phoneNumber}"}),
   @Result(name="find-your-stop", location="find-your-stop", type="redirectAction", params={"From", "${phoneNumber}"}),
   @Result(name="bookmarks-index", location="bookmarks/index", type="redirectAction", params={"From", "${phoneNumber}"}),
@@ -61,7 +62,14 @@ public class WelcomeAction extends TwilioSupport implements SessionAware {
     // Added the welcomeJustDisplayed flag for the case where a user hangs up with navState = DO_ROUTING, and
     // then calls again before the session times out.
     String welcomeJustDisplayed = (String)sessionMap.get("welcomeJustDisplayed");
-    _log.debug("execute - welcomeJustDisplayed: " + welcomeJustDisplayed);
+    _log.debug("execute - welcomeJustDisplayed: " + welcomeJustDisplayed +  ", navState=" + navState);
+    if (navState != null) {
+		if ("0".equals(getInput()) && navState == DO_ROUTING && "false".equals(welcomeJustDisplayed)) {
+			// under these circumstances go to contact page not help
+			_log.debug("custom contact");
+			return "contact";
+		}
+	}
 		if (navState == null || welcomeJustDisplayed == null || welcomeJustDisplayed.equals("false")) {
 			navState = DISPLAY_DATA;
 		}
@@ -87,7 +95,7 @@ public class WelcomeAction extends TwilioSupport implements SessionAware {
       }
 			_log.debug("key: " + key);
 			switch(key) {
-			  case 0: return "help";
+				case 0: return "help";
 				case 1: return "stops-index";
 				case 2: return "find-your-stop";
 				case 3: return "bookmarks-index";

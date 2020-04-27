@@ -28,7 +28,20 @@
 				<s:property value="name" /> 
 			</div>
 		</div>
-						
+
+		<s:if test="%{uniqueServiceAlertsForResults.size&gt;0}">
+			<div class="alerts">
+				<p id="serviceAlertHeader">
+					<span>Service Alert Text Here</span>
+				</p>
+				<ul class="alerts">
+					<c:forEach var="uniqueServiceAlert" items="${uniqueServiceAlertsForResults}">
+						<li><c:out value="${uniqueServiceAlert}" escapeXml="false"/></li>
+					</c:forEach>
+				</ul>
+			</div>
+		</s:if>
+
 		<s:if test="%{routesWithArrivals.size+routesWithNoVehiclesEnRoute.size+routesWithNoScheduledService.size==0}">
 			<s:if test="%{results.routeFilter.size&gt;0}">
 				<p class="noService">No <s:property value="routeFilterShortName" /> service available at this stop.</p>
@@ -117,19 +130,7 @@
 					</p>
 			</s:if>
 		</s:else>
-		
-		<s:if test="%{uniqueServiceAlertsForResults.size&gt;0}">
-			<div class="alerts">
-				<p id="serviceAlertHeader">
-					<span>Service Alert Text Here</span>
-				</p>
-				<ul class="alerts">
-					<c:forEach var="uniqueServiceAlert" items="${uniqueServiceAlertsForResults}">
-						<li><c:out value="${uniqueServiceAlert}" escapeXml="false"/></li>
-					</c:forEach>
-				</ul>
-			</div>
-		</s:if>
+
 	</div>
 	
 	<s:if test="%{results.routeFilter.size>0 and filteredRoutes.size>0}">

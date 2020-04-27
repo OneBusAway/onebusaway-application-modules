@@ -199,6 +199,20 @@ public class ServiceAlertsHelperV2 {
       query.getAffects().add(affects);
       affects.setRouteId(routeId.toString());
       ListBean<ServiceAlertBean> serviceAlertsForRoute = transitDataService.getServiceAlerts(query);
+      // now query route + stop combinations
+      StopsForRouteBean stopsForRoute = transitDataService.getStopsForRoute(routeId.toString());
+      if (stopsForRoute != null) {
+        for (StopBean stopBean : stopsForRoute.getStops()) {
+          SituationQueryBean stopRouteQuery = new SituationQueryBean();
+          SituationQueryBean.AffectsBean stopRouteAffects = new SituationQueryBean.AffectsBean();
+          stopRouteQuery.getAffects().add(stopRouteAffects);
+          stopRouteAffects.setRouteId(routeId.toString());
+          stopRouteAffects.setStopId(stopBean.getId());
+          ListBean<ServiceAlertBean> serviceAlertsForRouteStop = transitDataService.getServiceAlerts(stopRouteQuery);
+          if (serviceAlertsForRouteStop != null)
+            serviceAlerts.addAll(serviceAlertsForRouteStop.getList());
+        }
+      }
       if (serviceAlertsForRoute != null) {
         serviceAlerts.addAll(serviceAlertsForRoute.getList());
       }
@@ -443,8 +457,10 @@ public class ServiceAlertsHelperV2 {
     for (SituationConsequenceBean consequence : consequences) {
       EEffect effect = consequence.getEffect();
       PtConsequenceStructure ptConsequenceStructure = new PtConsequenceStructure();
-      ServiceConditionEnumeration serviceCondition = getEFfectAsCondition(effect);
-      ptConsequenceStructure.getCondition().add(serviceCondition);
+      if (effect != null) {
+        ServiceConditionEnumeration serviceCondition = getEFfectAsCondition(effect);
+        ptConsequenceStructure.getCondition().add(serviceCondition);
+      }
 
       String detourPath = consequence.getDetourPath();
       if (!StringUtils.isBlank(detourPath)) {

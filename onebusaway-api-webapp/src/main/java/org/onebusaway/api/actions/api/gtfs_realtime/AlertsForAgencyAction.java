@@ -15,23 +15,12 @@
  */
 package org.onebusaway.api.actions.api.gtfs_realtime;
 
-import java.util.List;
 
-import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.alerts.impl.ServiceAlertBuilderHelper;
 import org.onebusaway.transit_data.model.ListBean;
-import org.onebusaway.transit_data.model.service_alerts.NaturalLanguageStringBean;
 import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
-import org.onebusaway.transit_data.model.service_alerts.SituationAffectsBean;
-import org.onebusaway.transit_data.model.service_alerts.TimeRangeBean;
 
-import com.google.transit.realtime.GtfsRealtime.Alert;
-import com.google.transit.realtime.GtfsRealtime.EntitySelector;
-import com.google.transit.realtime.GtfsRealtime.FeedEntity;
 import com.google.transit.realtime.GtfsRealtime.FeedMessage;
-import com.google.transit.realtime.GtfsRealtime.TimeRange;
-import com.google.transit.realtime.GtfsRealtime.TranslatedString;
-import com.google.transit.realtime.GtfsRealtime.TranslatedString.Translation;
-import com.google.transit.realtime.GtfsRealtime.TripDescriptor;
 
 public class AlertsForAgencyAction extends GtfsRealtimeActionSupport {
 
@@ -42,62 +31,6 @@ public class AlertsForAgencyAction extends GtfsRealtimeActionSupport {
       long timestamp) {
 
     ListBean<ServiceAlertBean> alerts = _service.getAllServiceAlertsForAgencyId(agencyId);
-
-    for (ServiceAlertBean serviceAlert : alerts.getList()) {
-      FeedEntity.Builder entity = feed.addEntityBuilder();
-      entity.setId(Integer.toString(feed.getEntityCount()));
-      Alert.Builder alert = entity.getAlertBuilder();
-
-      fillTranslations(serviceAlert.getSummaries(),
-          alert.getHeaderTextBuilder());
-      fillTranslations(serviceAlert.getDescriptions(),
-          alert.getDescriptionTextBuilder());
-
-      if (serviceAlert.getActiveWindows() != null) {
-        for (TimeRangeBean range : serviceAlert.getActiveWindows()) {
-          TimeRange.Builder timeRange = alert.addActivePeriodBuilder();
-          if (range.getFrom() != 0) {
-            timeRange.setStart(range.getFrom() / 1000);
-          }
-          if (range.getTo() != 0) {
-            timeRange.setEnd(range.getTo() / 1000);
-          }
-        }
-      }
-
-      if (serviceAlert.getAllAffects() != null) {
-        for (SituationAffectsBean affects : serviceAlert.getAllAffects()) {
-          EntitySelector.Builder entitySelector = alert.addInformedEntityBuilder();
-          if (affects.getAgencyId() != null) {
-            entitySelector.setAgencyId(affects.getAgencyId());
-          }
-          if (affects.getRouteId() != null) {
-            entitySelector.setRouteId(normalizeId(affects.getRouteId()));
-          }
-          if (affects.getTripId() != null) {
-            TripDescriptor.Builder trip = entitySelector.getTripBuilder();
-            trip.setTripId(normalizeId(affects.getTripId()));
-            entitySelector.setTrip(trip);
-          }
-          if (affects.getStopId() != null) {
-            AgencyAndId stopId = modifiedStopId(agencyId, affects.getStopId());
-            if (stopId.getAgencyId().equals(agencyId)) {
-              entitySelector.setStopId(normalizeId(stopId.toString()));
-            }
-          }
-        }
-      }
-    }
-  }
-
-  private void fillTranslations(List<NaturalLanguageStringBean> input,
-      TranslatedString.Builder output) {
-    for (NaturalLanguageStringBean nls : input) {
-      Translation.Builder translation = output.addTranslationBuilder();
-      translation.setText(nls.getValue());
-      if (nls.getLang() != null) {
-        translation.setLanguage(nls.getLang());
-      }
-    }
+    ServiceAlertBuilderHelper.fillFeedMessage(feed, alerts, agencyId, timestamp);
   }
 }

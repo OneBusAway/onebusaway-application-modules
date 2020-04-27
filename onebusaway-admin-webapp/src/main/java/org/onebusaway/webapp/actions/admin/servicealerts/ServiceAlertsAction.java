@@ -20,6 +20,8 @@ import java.util.List;
 import org.apache.struts2.convention.annotation.Result;
 import org.apache.struts2.convention.annotation.Results;
 import org.apache.struts2.interceptor.validation.SkipValidation;
+import org.onebusaway.admin.service.server.ConsoleServiceAlertsService;
+import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.util.SystemTime;
 import org.onebusaway.webapp.actions.OneBusAwayNYCAdminActionSupport;
 import org.onebusaway.transit_data.model.AgencyWithCoverageBean;
@@ -44,6 +46,7 @@ public class ServiceAlertsAction extends OneBusAwayNYCAdminActionSupport {
   private static final long serialVersionUID = 1L;
   private static Logger _log = LoggerFactory.getLogger(ServiceAlertsAction.class);
   private TransitDataService _transitDataService;
+  private ConsoleServiceAlertsService _alerts;
   private String _agencyId;
   private String _alertId;
   private List<AgencyWithCoverageBean> _agencies;
@@ -60,6 +63,11 @@ public class ServiceAlertsAction extends OneBusAwayNYCAdminActionSupport {
   @Autowired
   public void setTransitDataService(TransitDataService transitDataService) {
     _transitDataService = transitDataService;
+  }
+
+  @Autowired
+  public void setAlertsService(ConsoleServiceAlertsService service) {
+    _alerts = service;
   }
 
   public void setAgencyId(String agencyId) {
@@ -145,7 +153,7 @@ public class ServiceAlertsAction extends OneBusAwayNYCAdminActionSupport {
       for (int i=0; i<_agencies.size(); ++i) {
         AgencyWithCoverageBean agency = _agencies.get(i);
         String agencyId = agency.getAgency().getId();
-        ListBean<ServiceAlertRecordBean> result = _transitDataService.getAllServiceAlertRecordsForAgencyId(agencyId);
+        ListBean<ServiceAlertRecordBean> result = _alerts.getAllServiceAlertRecordsForAgencyId(agencyId);
         List<ServiceAlertRecordBean> serviceAlerts = result.getList();
         _situationsByAgency[i] = serviceAlerts;
       }
@@ -178,7 +186,7 @@ public class ServiceAlertsAction extends OneBusAwayNYCAdminActionSupport {
 
   @Validations(requiredStrings = {@RequiredStringValidator(fieldName = "agencyId", message = "missing required agencyId field")})
   public String agency() {
-    ListBean<ServiceAlertBean> result = _transitDataService.getAllServiceAlertsForAgencyId(_agencyId);
+    ListBean<ServiceAlertBean> result = _alerts.getAllServiceAlertsForAgencyId(_agencyId);
     _situations = result.getList();
     return SUCCESS;
   }
@@ -186,7 +194,7 @@ public class ServiceAlertsAction extends OneBusAwayNYCAdminActionSupport {
   public String deleteAlert() {
     String id = _alertId;
     try {
-      _transitDataService.removeServiceAlert(_alertId);
+      _alerts.removeServiceAlert(AgencyAndId.convertFromString(_alertId));
     } catch (RuntimeException e) {
       _log.error("Error deleting service alert", e);
       throw e;
@@ -198,7 +206,7 @@ public class ServiceAlertsAction extends OneBusAwayNYCAdminActionSupport {
   @Validations(requiredStrings = {@RequiredStringValidator(fieldName = "agencyId", message = "missing required agencyId field")})
   public String removeAllForAgency() {
     try {
-      _transitDataService.removeAllServiceAlertsForAgencyId(_agencyId);
+      _alerts.removeAllServiceAlertsForAgencyId(_agencyId);
     } catch (RuntimeException e) {
       _log.error("Unable to remove all service alerts for agency", e);
       throw e;

@@ -38,7 +38,7 @@ import org.onebusaway.presentation.impl.service_alerts.ServiceAlertsHelper;
 import org.onebusaway.presentation.services.realtime.RealtimeService;
 import org.onebusaway.transit_data.model.StopBean;
 import org.onebusaway.transit_data.services.TransitDataService;
-import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
+import org.onebusaway.util.AgencyAndIdLibrary;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.onebusaway.util.impl.analytics.GoogleAnalyticsServiceImpl;
 
@@ -52,14 +52,6 @@ import uk.org.siri.siri.Siri;
 import uk.org.siri.siri.StopMonitoringDeliveryStructure;
 import com.brsanthu.googleanalytics.EventHit;
 import com.brsanthu.googleanalytics.PageViewHit;
-import uk.org.siri.siri.ErrorDescriptionStructure;
-import uk.org.siri.siri.MonitoredStopVisitStructure;
-import uk.org.siri.siri.MonitoredVehicleJourneyStructure;
-import uk.org.siri.siri.OtherErrorStructure;
-import uk.org.siri.siri.ServiceDelivery;
-import uk.org.siri.siri.ServiceDeliveryErrorConditionStructure;
-import uk.org.siri.siri.Siri;
-import uk.org.siri.siri.StopMonitoringDeliveryStructure;
 
 public class StopMonitoringAction extends ApiActionSupport 
   implements ServletRequestAware, ServletResponseAware {

@@ -53,7 +53,7 @@ import org.onebusaway.transit_data_federation.impl.transit_graph.StopEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.TripEntryImpl;
 import org.onebusaway.transit_data_federation.model.narrative.RouteCollectionNarrative;
 import org.onebusaway.transit_data_federation.model.narrative.TripNarrative;
-import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
+import org.onebusaway.util.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.RouteService;
 import org.onebusaway.transit_data_federation.services.beans.AgencyBeanService;
 import org.onebusaway.transit_data_federation.services.beans.ShapeBeanService;

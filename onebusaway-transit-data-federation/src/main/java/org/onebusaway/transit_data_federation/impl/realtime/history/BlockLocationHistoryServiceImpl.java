@@ -33,7 +33,7 @@ import org.onebusaway.csv_entities.DelimiterTokenizerStrategy;
 import org.onebusaway.csv_entities.EntityHandler;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.AgencyAndIdInstance;
-import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
+import org.onebusaway.util.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.realtime.BlockLocationHistoryService;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;

@@ -3,7 +3,7 @@
   <parent>
     <artifactId>onebusaway</artifactId>
     <groupId>org.onebusaway</groupId>
-    <version>1.2.4</version>
+    <version>1.2.6</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>onebusaway-application-modules</artifactId>
@@ -32,37 +32,41 @@
     <org_onebusaway_test_port>9900</org_onebusaway_test_port>
     <org_onebusaway_test_ajp_port>9901</org_onebusaway_test_ajp_port>
     <org_onebusaway_test_rmi_port>9902</org_onebusaway_test_rmi_port>
-    <maven.compiler.source>1.7</maven.compiler.source>
-    <maven.compiler.target>1.7</maven.compiler.target>
+    <maven.compiler.source>1.8</maven.compiler.source>
+    <maven.compiler.target>1.8</maven.compiler.target>
   </properties>
 
   <scm>
     <connection>scm:git:http://github.com/OneBusAway/onebusaway-application-modules.git</connection>
     <developerConnection>scm:git:ssh://git@github.com/OneBusAway/onebusaway-application-modules.git</developerConnection>
     <url>http://github.com/OneBusAway/onebusaway-application-modules</url>
-    <tag>HEAD</tag>
   </scm>
 
   <repositories>
     <repository>
-      <id>releases-camsys-repo</id>
-      <url>http://repo.obaweb.org:8080/archiva/repository/releases/</url>
+      <id>repo.camsys-apps.com</id>
+      <url>https://repo.camsys-apps.com/third-party/</url>
     </repository>
     <repository>
-      <id>snapshots-camsys-repo</id>
-      <url>http://repo.obaweb.org:8080/archiva/repository/snapshots/</url>
+      <id>releases-camsys-public-repo</id>
+      <url>https://repo.camsys-apps.com/releases/</url>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
     </repository>
     <repository>
-      <id>public.onebusaway.org</id>
-      <url>http://nexus.onebusaway.org/content/groups/public/</url>
+      <id>snapshots-camsys-public-repo</id>
+      <url>https://repo.camsys-apps.com/snapshots/</url>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
     </repository>
-
-    <!-- Added for Siri V2.0 -->
-    <repository>
-      <id>wmata-repo</id>
-      <url>http://repo.prod.wmata.obaweb.org:8080/archiva/repository/releases/</url>
-    </repository>
-    
   </repositories>
 
   <pluginRepositories>
@@ -78,13 +82,13 @@
     <url>https://github.com/OneBusAway/onebusaway-application-modules/issues</url>
   </issueManagement>
 
+  <!-- releases and snapshots should be inherited -->
   <distributionManagement>
     <site>
       <id>${site_id}</id>
       <url>${site_deployment_base}/onebusaway-application-modules/${project.version}</url>
     </site>
   </distributionManagement>
-
   <modules>
     <module>onebusaway-admin-webapp</module>
     <module>onebusaway-agency-metadata</module>
@@ -118,6 +122,7 @@
     <module>onebusaway-transit-data-federation-webapp</module>
     <module>onebusaway-users</module>
     <module>onebusaway-util</module>
+    <module>onebusaway-alerts-persistence</module>
     <module>onebusaway-watchdog-webapp</module>
     <module>onebusaway-status-agent</module>
   </modules>
@@ -469,8 +474,8 @@
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
         <configuration>
-          <source>1.7</source>
-          <target>1.7</target>
+          <source>1.8</source>
+          <target>1.8</target>
         </configuration>
       </plugin>
       <plugin>
@@ -581,6 +586,15 @@
         </configuration>
       </plugin>
     </plugins>
+    <!-- force a newer version of ssh for site:deploy -->
+    <extensions>
+      <extension>
+        <groupId>org.apache.maven.wagon</groupId>
+        <artifactId>wagon-ssh</artifactId>
+        <version>3.3.4</version>
+      </extension>
+    </extensions>
+
   </build>
   <profiles>
     <profile>

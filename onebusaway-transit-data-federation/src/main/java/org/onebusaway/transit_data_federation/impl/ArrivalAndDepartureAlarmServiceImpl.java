@@ -35,7 +35,7 @@ import javax.annotation.PreDestroy;
 import org.onebusaway.exceptions.ServiceException;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data.model.RegisterAlarmQueryBean;
-import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
+import org.onebusaway.util.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.AlarmAction;
 import org.onebusaway.transit_data_federation.services.ArrivalAndDepartureAlarmService;
 import org.onebusaway.transit_data_federation.services.ArrivalAndDepartureQuery;

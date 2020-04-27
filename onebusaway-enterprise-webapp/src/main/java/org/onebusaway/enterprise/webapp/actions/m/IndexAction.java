@@ -28,6 +28,7 @@ import org.onebusaway.gtfs.model.calendar.ServiceDate;
 import org.onebusaway.presentation.model.SearchResult;
 import org.onebusaway.presentation.model.SearchResultCollection;
 import org.onebusaway.presentation.services.realtime.RealtimeService;
+import org.onebusaway.presentation.services.routes.RouteListService;
 import org.onebusaway.presentation.services.search.SearchResultFactory;
 import org.onebusaway.presentation.services.search.SearchService;
 import org.onebusaway.transit_data.services.TransitDataService;
@@ -61,6 +62,9 @@ public class IndexAction extends OneBusAwayEnterpriseActionSupport {
   @Autowired
   private ConfigurationService _configService;
 
+  @Autowired
+  private RouteListService _routeListService;
+
   private SearchResultCollection _results = new SearchResultCollection();
 
   private boolean _resultsOriginatedFromGeocode = false;
@@ -70,6 +74,20 @@ public class IndexAction extends OneBusAwayEnterpriseActionSupport {
   private CoordinatePoint _location = null;
 
   private String _type = null;
+
+  private String _agencyFilter = null;
+
+  public void setAgencyFilter(String filter) {
+    _agencyFilter = filter;
+  }
+
+  public List<RouteBean> getRoutes() {
+    if (_agencyFilter != null)
+      return _routeListService.getFilteredRoutes(_agencyFilter);
+    return _routeListService.getRoutes();
+
+  }
+
 
   public void setQ(String q) {
     if (q != null) {
@@ -270,7 +288,11 @@ public class IndexAction extends OneBusAwayEnterpriseActionSupport {
 
       } else if (_results.getResultType().equals("StopResult")) {
         StopResult result = (StopResult) _result;
-        for (RouteAtStop route : result.getAllRoutesAvailable()) {
+        // add stop level service alerts
+        uniqueServiceAlerts.addAll(result.getStopServiceAlerts());
+        // then add route level service alerts -- being careful to
+        // display alerts even if buses aren't present
+        for (RouteAtStop route : result.getAllRoutesPossible()) {
           uniqueServiceAlerts.addAll(route.getServiceAlerts());
         }
       }

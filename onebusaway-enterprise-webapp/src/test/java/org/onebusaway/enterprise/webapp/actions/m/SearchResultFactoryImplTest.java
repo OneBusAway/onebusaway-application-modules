@@ -95,13 +95,18 @@ public class SearchResultFactoryImplTest {
     RouteResult result = runGetRouteResult(createServiceAlerts(new String[] {
         TEST_DESCRIPTION, TEST_DESCRIPTION2}, new String[] {TEST_SUMMARY}));
     Set<String> alerts = result.getServiceAlerts();
-    assertEquals(2, alerts.size());
+    assertEquals(3, alerts.size());
     String[] array = alerts.toArray(new String[] {});
     // array position is no longer guaranteed
-    boolean found0 = ((TEST_DESCRIPTION).equals(array[0])) || ((TEST_DESCRIPTION).equals(array[1]));
-    boolean found1 = ((TEST_DESCRIPTION2).equals(array[0])) || ((TEST_DESCRIPTION2).equals(array[1]));
+    boolean found0 = false, found1 = false, found2 = false;
+    for (String s : array) {
+      if (TEST_DESCRIPTION.equals(s)) found0 = true;
+      if (TEST_DESCRIPTION2.equals(s)) found1 = true;
+      if (markup(TEST_SUMMARY).equals(s)) found2 = true;
+    }
     assertTrue(found0);
     assertTrue(found1);
+    assertTrue(found2);
     assertEquals("name not expected", ROUTE_ID, result.getId());
   }
 
@@ -111,7 +116,7 @@ public class SearchResultFactoryImplTest {
         new String[] {TEST_SUMMARY}));
     Set<String> alerts = result.getServiceAlerts();
     assertEquals(1, alerts.size());
-    assertEquals(TEST_SUMMARY, alerts.toArray()[0]);
+    assertEquals(markup(TEST_SUMMARY), alerts.toArray()[0]);
     assertEquals("name not expected", ROUTE_ID, result.getId());
   }
 
@@ -121,10 +126,17 @@ public class SearchResultFactoryImplTest {
         new String[] {TEST_DESCRIPTION}, new String[] {TEST_SUMMARY}));
     Set<String> alerts = result.getServiceAlerts();
     assertEquals(1, alerts.size());
-    assertEquals(TEST_DESCRIPTION, alerts.toArray()[0]);
+    // NOTE!  we now merge and markup SUMMARY + DESCRIPTION, we no longer ignore SUMMARY
+    assertEquals(markup(TEST_SUMMARY, TEST_DESCRIPTION), alerts.toArray()[0]);
     assertEquals("name not expected", ROUTE_ID, result.getId());
   }
 
+  private String markup(String description) {
+    return "<strong>" + description + "</strong>";
+  }
+  private String markup(String summary, String description) {
+    return "<strong>" + summary + "</strong><br/><br/>" + description;
+  }
   // getStopResult tests
   
   @Test
@@ -140,16 +152,22 @@ public class SearchResultFactoryImplTest {
 
   @Test
   public void testGetStopResultServiceAlertWithDescriptionsOnly() {
+    // this behaviour changes -- summaries and descriptions are merged together
     StopResult result = runGetStopResult(createServiceAlerts(new String[] {
         TEST_DESCRIPTION, TEST_DESCRIPTION2}, new String[] {TEST_SUMMARY}));
     assertEquals(1, result.getAllRoutesAvailable().size());
     Set<String> alerts = result.getAllRoutesAvailable().get(0).getServiceAlerts();
-    assertEquals(2, alerts.size());
+    assertEquals(3, alerts.size());
     String[] array = alerts.toArray(new String[] {});
-    boolean found0 = ((TEST_DESCRIPTION).equals(array[0])) || ((TEST_DESCRIPTION).equals(array[1]));
-    boolean found1 = ((TEST_DESCRIPTION2).equals(array[0])) || ((TEST_DESCRIPTION2).equals(array[1]));
+    boolean found0 = false, found1 = false, found2 = false;
+    for (String s : array) {
+      if (TEST_DESCRIPTION.equals(s)) found0 = true;
+      if (TEST_DESCRIPTION2.equals(s)) found1 = true;
+      if (markup(TEST_SUMMARY).equals(s)) found2 = true;
+    }
     assertTrue(found0);
     assertTrue(found1);
+    assertTrue(found2);
     assertEquals("name not expected", TEST_STOP_ID, result.getId());
   }
 
@@ -160,7 +178,7 @@ public class SearchResultFactoryImplTest {
     assertEquals(1, result.getAllRoutesAvailable().size());
     Set<String> alerts = result.getAllRoutesAvailable().get(0).getServiceAlerts();
     assertEquals(1, alerts.size());
-    assertEquals(TEST_SUMMARY, alerts.toArray()[0]);
+    assertEquals("<strong>" + TEST_SUMMARY + "</strong>", alerts.toArray()[0]);
     assertEquals("name not expected", TEST_STOP_ID, result.getId());
   }
 
@@ -171,7 +189,8 @@ public class SearchResultFactoryImplTest {
     assertEquals(1, result.getAllRoutesAvailable().size());
     Set<String> alerts = result.getAllRoutesAvailable().get(0).getServiceAlerts();
     assertEquals(1, alerts.size());
-    assertEquals(TEST_DESCRIPTION, alerts.toArray()[0]);
+    // NOTE!!! this changed to a merged summary + description from just a summary
+    assertEquals(markup(TEST_SUMMARY, TEST_DESCRIPTION), alerts.toArray()[0]);
     assertEquals("name not expected", TEST_STOP_ID, result.getId());
   }
 

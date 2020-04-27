@@ -32,7 +32,19 @@ jQuery(function() {
     		break;
 		}
     }
-    
+
+	for (var i = 0; i < 1000; i++) {
+		var selector = "#validateCondition" + i;
+
+		if (jQuery(selector).length ) {
+			jQuery(selector).click(onValidateCondition);
+		} else {
+			// first element not found signifies break
+			break;
+		}
+	}
+
+
 	// show service alerts template list
 	jQuery("#loadTemplate").click(showHideLoadTemplate);
 
@@ -105,41 +117,53 @@ function onAddAnotherCondition() {
 			</td> \
 		</tr> \
 		<tr> \
-	    	<td class="tdLabel"><label for="service-alert_allAffects_routeId" class="label">Route:</label></td> \
+	    	<td class="tdLabel"><label for="service-alert_allAffects_' + currentConditionsCt + '__routeId" class="label">Route:</label></td> \
 	    	<td><input class="alertCondition" name="allAffects['
 			+ currentConditionsCt
-			+ '].routeId" value="" id="service-alert_routeId" type="text"></td> \
+			+ '].routeId" value="" id="service-alert_allAffects_' + currentConditionsCt + '__routeId" type="text"></td> \
 		</tr> \
+		<tr><td style="text-align:center" colspan="2" id="routeValidation' + currentConditionsCt + '">Click Validate to lookup Route</td></tr> \
 		<tr> \
-	    	<td class="tdLabel"><label for="service-alert__allAffectsstopId" class="label">Stop:</label></td> \
+	    	<td class="tdLabel"><label for="service-alert_allAffects_' + currentConditionsCt + '__stopId" class="label">Stop:</label></td> \
 	    	<td><input class="alertCondition" name="allAffects['
 			+ currentConditionsCt
-			+ '].stopId" value="" id="service-alert_stopId" type="text"></td> \
+			+ '].stopId" value="" id="service-alert_allAffects_' + currentConditionsCt + '__stopId" type="text"></td> \
 		</tr> \
+		<tr><td style="text-align:center" colspan="2" id="stopValidation' + currentConditionsCt + '">Click Validate to lookup Stop</td></tr> \
 		</table>';
-	
+	var labelLetter = String.fromCharCode('A'.charCodeAt(0) + currentConditionsCt);
+	if (currentConditionsCt >= 26) {
+		labelLetter = String.fromCharCode('A'.charCodeAt(0) + (currentConditionsCt%26)) + String.fromCharCode('A'.charCodeAt(0) + (currentConditionsCt%26));
+	}
 	var newRow = '<tr class="affectsClause"> \
 		<td> \
 			<div class="conditionClauseLabel"> \
 				<div class="conditionClauseLabelFirstLine">Condition</div> \
 				<div class="conditionClauseLabelLetter">'
-					+ String.fromCharCode('A'.charCodeAt(0) + currentConditionsCt)
+					+ labelLetter
 				+ '</div> \
 			</div> \
 		</td> \
 		<td>' + newConditionTable + '</td> \
+		<td id="validateCondition'+ currentConditionsCt + '" class="validateCondition">Validate</td>\
 		<td class="deleteCondition">Delete Condition</td> \
 		</tr>';
 
 	$('#conditionTable').append(newRow);
 	$("#conditionTable td:last.deleteCondition").click(onDeleteCondition);
+	$("#conditionTable td:last.validateCondition").click(onValidateCondition);
 }
 function onDeleteCondition() {
 	$(this).closest('tr').remove();
 	// Reset the name attributes for the remaining conditions to match their 
 	// new positions in the list.
 	$('#conditionTable tr.affectsClause').each(function(index) {
-		$(this).find('.conditionClauseLabelLetter').text(String.fromCharCode('A'.charCodeAt(0) + index));
+		var labelLetter = String.fromCharCode('A'.charCodeAt(0) + index);
+		if (index >= 26) {
+			labelLetter = String.fromCharCode('A'.charCodeAt(0) + Math.floor(index/26)) + String.fromCharCode('A'.charCodeAt(0) + (index%26));
+		}
+
+		$(this).find('.conditionClauseLabelLetter').text(labelLetter);
 		$(this).find('.alertCondition').each(function() {
 			var nameAttr = $(this).attr('name');
 			var idx1 = nameAttr.indexOf('[');
@@ -174,6 +198,56 @@ function onTweetCondition(handler) {
     var alertDiv = jQuery(divSelector);
     var alertId = alertDiv.html();
     sendAndShowTweet(alertId);
+}
+function onValidateCondition(handler) {
+	var aId = handler.target.id;
+	var id = aId.replace("validateCondition", "");
+	var selector = "service-alert_allAffects_"+ id;
+	var stopField = document.getElementById(selector + "__stopId");
+	if (stopField == null) {
+		return;
+	}
+	var stopId = stopField.value;
+	var routeField = document.getElementById(selector + "__routeId");
+	var routeId = routeField.value;
+	if (stopId != null && stopId != "") {
+		var url = OBA.Config.apiBaseUrl + "/api/where/stop/" + stopId + ".json?key=" + OBA.Config.obaApiKey;
+		jQuery.ajax({
+			url: url,
+			data: {},
+			type: "GET",
+			async: true,
+			success: function (data) {
+				if (data && data.code && data.code == 200) {
+					document.getElementById("stopValidation" + id).innerText = data.data.entry.name
+
+				} else {
+					document.getElementById("stopValidation" + id).innerText = "Stop not found";
+				}
+			}
+		})
+	}
+	if (routeId != null && routeId != "") {
+
+		var url = OBA.Config.apiBaseUrl + "/api/where/route/" + routeId + ".json?key=" + OBA.Config.obaApiKey;
+		jQuery.ajax({
+			url: url,
+			data: {},
+			type: "GET",
+			async: true,
+			success: function (data) {
+				if (data && data.code && data.code == 200) {
+					document.getElementById("routeValidation" + id).innerText = data.data.entry.shortName
+
+				} else {
+					document.getElementById("routeValidation" + id).innerText = "Route not found";
+				}
+			},
+			error: function (data) {
+				document.getElementById("routeValidation" + id).innerText = "Route not found";
+			}
+		})
+	}
 }
 function sendAndShowTweet(alertId) {
     jQuery.ajax({

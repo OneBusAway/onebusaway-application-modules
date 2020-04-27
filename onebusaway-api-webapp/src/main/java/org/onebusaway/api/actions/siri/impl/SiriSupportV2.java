@@ -36,6 +36,7 @@ import org.onebusaway.presentation.impl.DateUtil;
 import org.onebusaway.presentation.services.realtime.PresentationService;
 import org.onebusaway.realtime.api.TimepointPredictionRecord;
 import org.onebusaway.transit_data.model.StopBean;
+import org.onebusaway.transit_data.model.TransitDataConstants;
 import org.onebusaway.transit_data.model.blocks.BlockInstanceBean;
 import org.onebusaway.transit_data.model.blocks.BlockStopTimeBean;
 import org.onebusaway.transit_data.model.blocks.BlockTripBean;
@@ -117,6 +118,11 @@ public final class SiriSupportV2 {
       boolean hasRealtimeData,
       DetailLevel detailLevel,
       long responseTimestamp, Map<Filters, String> filters) {
+
+    if (currentVehicleTripStatus != null && TransitDataConstants.STATUS_CANCELED.equals(currentVehicleTripStatus.getStatus())) {
+      _log.error("aborting fillMVJ as trip is canceled");
+      return;
+    }
     BlockInstanceBean blockInstance = transitDataService
         .getBlockInstance(currentVehicleTripStatus.getActiveTrip()
             .getBlockId(), currentVehicleTripStatus

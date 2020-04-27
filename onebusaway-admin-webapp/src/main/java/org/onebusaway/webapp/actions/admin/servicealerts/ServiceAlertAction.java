@@ -20,6 +20,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.struts2.convention.annotation.Action;
 import org.apache.struts2.convention.annotation.InterceptorRef;
 import org.apache.struts2.convention.annotation.InterceptorRefs;
@@ -27,6 +28,8 @@ import org.apache.struts2.convention.annotation.ParentPackage;
 import org.apache.struts2.convention.annotation.Result;
 import org.apache.struts2.convention.annotation.Results;
 import org.json.JSONException;
+import org.onebusaway.admin.service.server.ConsoleServiceAlertsService;
+import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.presentation.bundles.ResourceBundleSupport;
 import org.onebusaway.presentation.bundles.service_alerts.Reasons;
 import org.onebusaway.presentation.bundles.service_alerts.Severity;
@@ -65,12 +68,13 @@ public class ServiceAlertAction extends ActionSupport implements
     ModelDriven<ServiceAlertBean>, Preparable {
 
   private static final long serialVersionUID = 1L;
+
+  private static final String EDITOR_SOURCE = "console";
   
   private static Logger _log = LoggerFactory.getLogger(ServiceAlertsAction.class);
 
-  private TransitDataService _transitDataService;
+  private ConsoleServiceAlertsService _alerts;
 
-  //private ServiceAlertBean _model = new ServiceAlertBean();
   private ServiceAlertBean _model;
 
   private String _agencyId;
@@ -98,11 +102,11 @@ public class ServiceAlertAction extends ActionSupport implements
   private String _startTime;
   private Date _endDate;
   private Date _startDate;
+  private String link;
 
-  
   @Autowired
-  public void setTransitDataService(TransitDataService transitDataService) {
-    _transitDataService = transitDataService;
+  public void setAlertsService(ConsoleServiceAlertsService service) {
+    _alerts = service;
   }
 
   @Override
@@ -389,11 +393,33 @@ public String getStartDate() {
       }
   }
 
+  public void setLink(String link) {
+    this.link = link;
+  }
+
+  private void setUrl(String link) {
+    if (_model != null) {
+      if (StringUtils.isBlank(link)) {
+        _model.setUrls(null);
+        return;
+      }
+      List<NaturalLanguageStringBean> urls = _model.getUrls();
+      if (urls == null) {
+        urls = new ArrayList<>();
+        _model.setUrls(urls);
+      }
+      if (urls.isEmpty()) {
+        urls.add(new NaturalLanguageStringBean());
+      }
+      urls.get(0).setValue(link);
+    }
+  }
+
   @Override
   public void prepare() throws Exception {
     try {
       if (_alertId != null && !_alertId.trim().isEmpty()) {
-       	_model = _transitDataService.getServiceAlertForId(_alertId);
+       	_model = _alerts.getServiceAlertForId(_alertId);
        	_model.setAllAffects(null);
       } else {
         _model = new ServiceAlertBean();
@@ -423,10 +449,11 @@ public String getStartDate() {
          addToFavorites();
          return "addToFavorites";
       }
+
   
     try {
       if (_model.getId() != null && !_model.getId().trim().isEmpty())
-        _model = _transitDataService.getServiceAlertForId(_model.getId());
+        _model = _alerts.getServiceAlertForId(_model.getId());
     } catch (RuntimeException e) {
       _log.error("Unable to retrieve Service Alerts for agency Id", e);
       throw e;
@@ -442,7 +469,8 @@ public String getStartDate() {
   }
 
   public String submit() throws IOException, JSONException, ParseException {
-	  
+
+    setUrl(this.link);
     _model.setReason(string(_model.getReason()));
     
     if(isNewServiceAlert() || isFromFavorite()){
@@ -451,16 +479,13 @@ public String getStartDate() {
     
     try { 
       if (_model.getId() == null || _model.getId().trim().isEmpty() ) {
-    	 
-    	 _model = _transitDataService.createServiceAlert(_agencyId, _model);
+    	 _model.setSource(EDITOR_SOURCE);
+    	 _model = _alerts.createServiceAlert(_agencyId, _model);
       }
       else {
-        //ServiceAlertBean existing = _transitDataService.getServiceAlertForId(_model.getId());
-        //if (existing != null) {
-          // The updated service alert constructed from the POST won't include affects clauses.
-        //  _model.setAllAffects(existing.getAllAffects());
-        //}
-        _transitDataService.updateServiceAlert(_model);
+        // if we've edited a service alert from some other agency, we now own it
+        _model.setSource(EDITOR_SOURCE);
+        _alerts.updateServiceAlert(_agencyId, _model, isFavorite());
       }
     } catch (RuntimeException e) {
       _log.error("Error creating or updating Service Alert", e);
@@ -482,7 +507,7 @@ public String getStartDate() {
     	// Set End Date in past to make inactive
     	Date endDate = new Date(20000000L);
 	    setEndDate(endDate);
-	    _transitDataService.copyServiceAlert(_agencyId, _model);
+	    _alerts.copyServiceAlert(_agencyId, _model);
     } catch (RuntimeException e) {
         _log.error("Error creating Service Alert Favorite", e);
         throw e;
@@ -496,7 +521,7 @@ public String getStartDate() {
       return INPUT;
     }
     try {
-      _model = _transitDataService.getServiceAlertForId(_model.getId());
+      _model = _alerts.getServiceAlertForId(_model.getId());
   
       List<SituationAffectsBean> allAffects = _model.getAllAffects();
       if (allAffects == null) {
@@ -504,7 +529,7 @@ public String getStartDate() {
         _model.setAllAffects(allAffects);
       }
       allAffects.add(new SituationAffectsBean());
-      _transitDataService.updateServiceAlert(_model);
+      _alerts.updateServiceAlert(_agencyId, _model);
     } catch (RuntimeException e) {
       _log.error("Error updating Service Alert Affects clause", e);
       throw e;
@@ -517,7 +542,7 @@ public String getStartDate() {
 
     try {
       if (_model.getId() != null) {
-        _transitDataService.removeServiceAlert(_model.getId());
+        _alerts.removeServiceAlert(new AgencyAndId(_agencyId, _model.getId()));
       }
     } catch (RuntimeException e) {
       _log.error("Error removing Service Alert", e);

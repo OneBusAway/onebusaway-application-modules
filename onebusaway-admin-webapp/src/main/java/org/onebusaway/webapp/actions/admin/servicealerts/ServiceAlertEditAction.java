@@ -26,6 +26,8 @@ import org.apache.struts2.convention.annotation.Result;
 import org.apache.struts2.convention.annotation.Results;
 import org.onebusaway.admin.service.NotificationService;
 import org.onebusaway.admin.service.impl.TwitterServiceImpl;
+import org.onebusaway.admin.service.server.ConsoleServiceAlertsService;
+import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.presentation.bundles.ResourceBundleSupport;
 import org.onebusaway.presentation.bundles.service_alerts.Reasons;
 import org.onebusaway.presentation.bundles.service_alerts.Severity;
@@ -75,6 +77,8 @@ public class ServiceAlertEditAction extends ActionSupport implements
   private boolean _fromFavorite = false;
   
   private TransitDataService _transitDataService;
+
+    private ConsoleServiceAlertsService _alerts;
     private String _endTime;
     private String _startTime;
     private Date _endDate;
@@ -141,6 +145,11 @@ public class ServiceAlertEditAction extends ActionSupport implements
   public void setTransitDataService(TransitDataService transitDataService) {
     _transitDataService = transitDataService;
   }
+
+    @Autowired
+    public void setAlertsService(ConsoleServiceAlertsService service) {
+        _alerts = service;
+    }
 
   public void setSummary(String summary) {
     List<NaturalLanguageStringBean> summaries = _model.getSummaries();
@@ -362,11 +371,26 @@ public class ServiceAlertEditAction extends ActionSupport implements
 	  return _situationTemplatesByAgency;
   }
 
+  public String getLink() {
+      if (_model.getUrls() == null || _model.getUrls().isEmpty()) return "";
+      return _model.getUrls().get(0).getValue();
+  }
+
+  public void setLink(String link) {
+      if (_model.getUrls() == null) {
+          _model.setUrls(new ArrayList<NaturalLanguageStringBean>());
+      }
+      if (_model.getUrls().get(0) == null) {
+          _model.getUrls().set(0, new NaturalLanguageStringBean());
+      }
+      _model.getUrls().get(0).setValue(link);
+  }
+
   @Override
   public String execute() {
 	 try {
 		  if (_alertId != null && !_alertId.trim().isEmpty()){
-	    	  _model = _transitDataService.getServiceAlertForId(_alertId);
+	    	  _model = _alerts.getServiceAlertForId(_alertId);
 		      if(_agencyId == null){
 		      	_agencyId = ServiceAlertsUtil.getAgencyFromAlertId(_alertId);
 		      }
@@ -383,7 +407,7 @@ public class ServiceAlertEditAction extends ActionSupport implements
 		  for (int i=0; i<_agencies.size(); ++i) {
 	        AgencyWithCoverageBean agency = _agencies.get(i);
 	        String agencyId = agency.getAgency().getId();
-	        ListBean<ServiceAlertRecordBean> result = _transitDataService.getAllServiceAlertRecordsForAgencyId(agencyId);
+	        ListBean<ServiceAlertRecordBean> result = _alerts.getAllServiceAlertRecordsForAgencyId(agencyId);
 	        for(ServiceAlertRecordBean serviceAlertRecord : result.getList())
 	        {
 	        	if(Boolean.TRUE.equals(serviceAlertRecord.isCopy())){
@@ -422,7 +446,7 @@ public class ServiceAlertEditAction extends ActionSupport implements
   
   public String deleteAlert() {
     try {
-      _transitDataService.removeServiceAlert(_alertId);
+      _alerts.removeServiceAlert(AgencyAndId.convertFromString(_alertId));
     } catch (RuntimeException e) {
       _log.error("Error deleting service alert", e);
       throw e;
@@ -444,7 +468,7 @@ public class ServiceAlertEditAction extends ActionSupport implements
       try {
         _log.info("calling tweet....");
         response = _notificationService.tweet(
-        	    TwitterServiceImpl.toTweet(_transitDataService.getServiceAlertForId(_alertId),
+        	    TwitterServiceImpl.toTweet(_alerts.getServiceAlertForId(_alertId),
                         _notificationService.getNotificationStrategy()));
         _log.info("tweet succeeded with response=" + response);
         _twitterResult = response;
