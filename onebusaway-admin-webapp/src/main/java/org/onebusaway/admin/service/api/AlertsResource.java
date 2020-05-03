@@ -26,6 +26,7 @@ import javax.ws.rs.core.StreamingOutput;
 import com.google.transit.realtime.GtfsRealtime;
 import com.sun.jersey.api.spring.Autowire;
 import org.onebusaway.admin.service.server.ConsoleServiceAlertsService;
+import org.onebusaway.alerts.service.ServiceAlerts;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,9 +48,9 @@ public class AlertsResource {
     private ConsoleServiceAlertsService _alerts;
 
 
-    @Path("/{agencyId}.pb")
+    @Path("/gtfsrt/{agencyId}.pb")
     @GET
-    @Produces("application/x-google-protobuff")
+    @Produces("application/x-google-protobuf")
     public Response get(@PathParam("agencyId") String agencyId) {
         GtfsRealtime.FeedMessage feed = _alerts.getAlerts(agencyId);
         if (feed == null) {
@@ -67,13 +68,42 @@ public class AlertsResource {
 
     }
 
+    @Path("/service/{agencyId}.pb")
+    @GET
+    @Produces("application/x-google-protobuf")
+    public Response gets(@PathParam("agencyId") String agencyId) {
+        ServiceAlerts.ServiceAlertsCollection alertsCollection = _alerts.getActiveAlertsCollection(agencyId);
+        if (alertsCollection == null) {
+            return Response.ok().build();
+        }
+        StreamingOutput stream = new StreamingOutput() {
+            @Override
+            public void write(OutputStream os) throws IOException, WebApplicationException {
+                // Service Alerts know how to write themselves as protocol buffers
+                alertsCollection.writeTo(os);
+            }
+        };
+        Response response = Response.ok(stream).build();
+        return response;
+
+    }
+
 
     @GET
-    @Path("/{agencyId}.pbtext")
+    @Path("/gtfsrt/{agencyId}.pbtext")
     @Produces("text/plain")
     public Response getText(@PathParam("agencyId") String agencyId) {
-        GtfsRealtime.FeedMessage feed = _alerts.getAlerts(agencyId);
+        GtfsRealtime.FeedMessage feed = _alerts.getActiveAlerts(agencyId);
         Response response = Response.ok(feed.toString()).build();
+        return response;
+    }
+
+    @GET
+    @Path("/service/{agencyId}.pbtext")
+    @Produces("text/plain")
+    public Response getTexts(@PathParam("agencyId") String agencyId) {
+        ServiceAlerts.ServiceAlertsCollection alertsCollection = _alerts.getActiveAlertsCollection(agencyId);
+        Response response = Response.ok(alertsCollection.toString()).build();
         return response;
     }
 

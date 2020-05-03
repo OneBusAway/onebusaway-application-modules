@@ -21,6 +21,8 @@ import org.onebusaway.admin.service.server.ConsoleServiceAlertsService;
 import org.onebusaway.alerts.impl.ServiceAlertBeanHelper;
 import org.onebusaway.alerts.impl.ServiceAlertBuilderHelper;
 import org.onebusaway.alerts.impl.ServiceAlertRecord;
+import org.onebusaway.alerts.impl.ServiceAlertTimeRange;
+import org.onebusaway.alerts.service.ServiceAlerts;
 import org.onebusaway.alerts.service.ServiceAlertsService;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data.model.ListBean;
@@ -49,7 +51,17 @@ public class ConsoleServiceAlertsServiceImpl implements ConsoleServiceAlertsServ
 
     @Override
     public GtfsRealtime.FeedMessage getAlerts(String agencyId) {
-        ListBean<ServiceAlertBean> listBean = getAllServiceAlertsForAgencyId(agencyId);
+        return getAlerts(agencyId, true);
+    }
+
+    @Override
+    public GtfsRealtime.FeedMessage getActiveAlerts(String agencyId) {
+        return getAlerts(agencyId, false);
+    }
+
+
+    public GtfsRealtime.FeedMessage getAlerts(String agencyId, boolean includeInactive) {
+        ListBean<ServiceAlertBean> listBean = getAllServiceAlertsForAgencyId(agencyId, includeInactive);
 
         GtfsRealtime.FeedMessage.Builder feed = GtfsRealtime.FeedMessage.newBuilder();
         GtfsRealtime.FeedHeader.Builder header = feed.getHeaderBuilder();
@@ -57,10 +69,23 @@ public class ConsoleServiceAlertsServiceImpl implements ConsoleServiceAlertsServ
         long time = SystemTime.currentTimeMillis();
         header.setTimestamp(time / 1000);
 
-
         ServiceAlertBuilderHelper.fillFeedMessage(feed, listBean, agencyId, time);
 
         return feed.build();
+    }
+
+    @Override
+    public ServiceAlerts.ServiceAlertsCollection getActiveAlertsCollection(String agencyId) {
+        ListBean<ServiceAlertBean> listBean = getActiveServiceAlertsForAgencyId(agencyId);
+        long time = SystemTime.currentTimeMillis();
+        return ServiceAlertBuilderHelper.fillServiceAlerts(listBean, agencyId, time);
+    }
+
+    @Override
+    public ServiceAlerts.ServiceAlertsCollection getAlertsCollection(String agencyId) {
+        ListBean<ServiceAlertBean> listBean = getAllServiceAlertsForAgencyId(agencyId);
+        long time = SystemTime.currentTimeMillis();
+        return ServiceAlertBuilderHelper.fillServiceAlerts(listBean, agencyId, time);
     }
 
     @Override
@@ -148,15 +173,27 @@ public class ConsoleServiceAlertsServiceImpl implements ConsoleServiceAlertsServ
     }
 
     @Override
+    public ListBean<ServiceAlertBean> getAllServiceAlertsForAgencyId(String agencyId) {
+        return getAllServiceAlertsForAgencyId(agencyId, true);
+    }
+
+    @Override
+    public ListBean<ServiceAlertBean> getActiveServiceAlertsForAgencyId(String agencyId) {
+        return getAllServiceAlertsForAgencyId(agencyId, false);
+    }
+
     /**
      * retrieve service alerts as beans OWNED by the agency -- not agency level service alerts
      */
-    public ListBean<ServiceAlertBean> getAllServiceAlertsForAgencyId(String agencyId) {
+    public ListBean<ServiceAlertBean> getAllServiceAlertsForAgencyId(String agencyId, boolean includeInactive) {
         List<ServiceAlertRecord> serviceAlertsForAgencyId = _service.getAllServiceAlerts();
         List<ServiceAlertRecord> filtered = new ArrayList<>();
         if (serviceAlertsForAgencyId != null) {
             for (ServiceAlertRecord record : serviceAlertsForAgencyId) {
                 if (record == null) continue;
+
+                if (!includeInactive && !inService(record))
+                    continue;
                 // don't pass on favorites
                 if (agencyId.equals(record.getAgencyId()) && !Boolean.TRUE.equals(record.isCopy())) {
                     filtered.add(record);
@@ -168,6 +205,27 @@ public class ConsoleServiceAlertsServiceImpl implements ConsoleServiceAlertsServ
         listBean.setList(alertBeans);
         listBean.setLimitExceeded(false);
         return listBean;
+    }
+
+    private boolean inService(ServiceAlertRecord record) {
+        long now = System.currentTimeMillis();
+        if (record.getPublicationWindows() == null || record.getPublicationWindows().isEmpty()) {
+            // no date specified is active
+            return true;
+        }
+
+        for (ServiceAlertTimeRange range : record.getPublicationWindows()) {
+            if (range == null || range.getToValue() == null) {
+                // no end date specified is active
+                return true;
+            }
+            if ((range.getFromValue() == null || range.getFromValue() <= now)
+                    && now <= range.getToValue()) {
+                // no start date needs; still compare end date
+                return true;
+            }
+        }
+        return false;
     }
 
 }

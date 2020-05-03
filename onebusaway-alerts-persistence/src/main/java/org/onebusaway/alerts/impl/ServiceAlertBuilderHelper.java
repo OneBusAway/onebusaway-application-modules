@@ -16,12 +16,17 @@
 package org.onebusaway.alerts.impl;
 
 import com.google.transit.realtime.GtfsRealtime;
+import org.onebusaway.alerts.service.ServiceAlerts;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data.model.ListBean;
+import org.onebusaway.transit_data.model.service_alerts.EEffect;
+import org.onebusaway.transit_data.model.service_alerts.ESeverity;
 import org.onebusaway.transit_data.model.service_alerts.NaturalLanguageStringBean;
 import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationAffectsBean;
+import org.onebusaway.transit_data.model.service_alerts.SituationConsequenceBean;
 import org.onebusaway.transit_data.model.service_alerts.TimeRangeBean;
+import org.onebusaway.util.AgencyAndIdLibrary;
 
 import java.util.List;
 
@@ -83,6 +88,172 @@ public class ServiceAlertBuilderHelper {
         }
     }
 }
+
+    public static ServiceAlerts.ServiceAlertsCollection fillServiceAlerts(ListBean<ServiceAlertBean> alerts,
+                                                                          String agencyId, long time) {
+
+        ServiceAlerts.ServiceAlertsCollection.Builder feedCollection = ServiceAlerts.ServiceAlertsCollection.newBuilder();
+
+        for (ServiceAlertBean serviceAlert : alerts.getList()) {
+            ServiceAlerts.ServiceAlert.Builder feedAlert =  ServiceAlerts.ServiceAlert.newBuilder();
+            feedAlert.setId(normalizeToId(agencyId, serviceAlert.getId()));
+            feedAlert.setSummary(toTranslatedString(serviceAlert.getSummaries()));
+            feedAlert.setDescription(toTranslatedString(serviceAlert.getDescriptions()));
+            feedAlert.setUrl(toTranslatedString(serviceAlert.getUrls()));
+            feedAlert.setCreationTime(serviceAlert.getCreationTime());
+            feedAlert.setModifiedTime(serviceAlert.getCreationTime());
+
+            if (serviceAlert.getActiveWindows() != null) {
+                for (TimeRangeBean activeWindow : serviceAlert.getActiveWindows()) {
+                    feedAlert.addActiveWindow(toTimeRange(activeWindow));
+                }
+            }
+
+            if (serviceAlert.getAllAffects() != null) {
+                for (SituationAffectsBean affect : serviceAlert.getAllAffects()) {
+                    feedAlert.addAffects(toAffects(affect));
+                }
+            }
+
+            if (serviceAlert.getConsequences() != null) {
+                for (SituationConsequenceBean bean : serviceAlert.getConsequences()) {
+                    feedAlert.addConsequence(toConsequence(bean));
+                }
+            }
+
+            if (serviceAlert.getPublicationWindows() != null) {
+                for (TimeRangeBean trb : serviceAlert.getPublicationWindows()) {
+                    feedAlert.addPublicationWindow(toTimeRange(trb));
+                }
+            }
+
+            if (serviceAlert.getSeverity() != null
+                    && toSeverity(serviceAlert.getSeverity()) != null)
+                feedAlert.setSeverity(toSeverity(serviceAlert.getSeverity()));
+            if (serviceAlert.getReason() != null
+                    && toCause(serviceAlert.getReason()) != null)
+                feedAlert.setCause(toCause(serviceAlert.getReason()));
+
+            feedCollection.addServiceAlerts(feedAlert);
+        }
+        return feedCollection.build();
+    }
+
+    private static ServiceAlerts.ServiceAlert.Cause toCause(String reason) {
+        switch (reason) {
+            case "OTHER_CAUSE":
+                return ServiceAlerts.ServiceAlert.Cause.OTHER_CAUSE;
+            case "TECHNICAL_PROBLEM":
+                return ServiceAlerts.ServiceAlert.Cause.TECHNICAL_PROBLEM;
+            case "STRIKE":
+                return ServiceAlerts.ServiceAlert.Cause.STRIKE;
+            case "DEMONSTRATION":
+                return ServiceAlerts.ServiceAlert.Cause.DEMONSTRATION;
+            case "ACCIDENT":
+                return ServiceAlerts.ServiceAlert.Cause.ACCIDENT;
+            case "HOLIDAY":
+                return ServiceAlerts.ServiceAlert.Cause.HOLIDAY;
+            case "WEATHER":
+                return ServiceAlerts.ServiceAlert.Cause.WEATHER;
+            case "MAINTENANCE":
+                return ServiceAlerts.ServiceAlert.Cause.MAINTENANCE;
+            case "CONSTRUCTION":
+                return ServiceAlerts.ServiceAlert.Cause.CONSTRUCTION;
+            case "POLICE_ACTIVITY":
+                return ServiceAlerts.ServiceAlert.Cause.POLICE_ACTIVITY;
+            case "MEDICAL_EMERGENCY":
+                return ServiceAlerts.ServiceAlert.Cause.MEDICAL_EMERGENCY;
+            case "UNKNOWN_CAUSE":
+            default:
+                return ServiceAlerts.ServiceAlert.Cause.UNKNOWN_CAUSE;
+        }
+    }
+
+    private static ServiceAlerts.ServiceAlert.Severity toSeverity(ESeverity eValue) {
+        switch (eValue) {
+            case VERY_SLIGHT:
+                return ServiceAlerts.ServiceAlert.Severity.VERY_SLIGHT;
+            case SLIGHT:
+                return ServiceAlerts.ServiceAlert.Severity.SLIGHT;
+            case NORMAL:
+                return ServiceAlerts.ServiceAlert.Severity.NORMAL;
+            case SEVERE:
+                return ServiceAlerts.ServiceAlert.Severity.SEVERE;
+            case VERY_SEVERE:
+                return ServiceAlerts.ServiceAlert.Severity.VERY_SEVERE;
+            case UNDEFINED:
+            case UNKNOWN:
+            default:
+                return ServiceAlerts.ServiceAlert.Severity.UNKNOWN;
+        }
+
+    }
+
+    private static ServiceAlerts.Consequence toConsequence(SituationConsequenceBean bean) {
+        ServiceAlerts.Consequence.Builder builder = ServiceAlerts.Consequence.newBuilder();
+        builder.setEffect(toEffect(bean.getEffect()));
+        return builder.build();
+    }
+
+    private static ServiceAlerts.Consequence.Effect toEffect(EEffect effect) {
+        return ServiceAlerts.Consequence.Effect.valueOf(effect.toString());
+    }
+
+    private static ServiceAlerts.Affects toAffects(SituationAffectsBean affect) {
+        ServiceAlerts.Affects.Builder builder = ServiceAlerts.Affects.newBuilder();
+        if (affect.getAgencyId() != null)
+            builder.setAgencyId(affect.getAgencyId());
+
+        if (affect.getApplicationId() != null)
+            builder.setApplicationId(affect.getApplicationId());
+
+        if (affect.getRouteId() != null)
+            builder.setRouteId(normalizeToId(affect.getAgencyId(), affect.getRouteId()));
+
+        if (affect.getDirectionId() != null)
+            builder.setDirectionId(affect.getDirectionId());
+
+        if (affect.getStopId() != null)
+            builder.setStopId(normalizeToId(affect.getAgencyId(), affect.getStopId()));
+
+        if (affect.getTripId() != null)
+            builder.setTripId(normalizeToId(affect.getAgencyId(), affect.getTripId()));
+        return builder.build();
+    }
+
+    private static ServiceAlerts.TimeRange toTimeRange(TimeRangeBean activeWindow) {
+        ServiceAlerts.TimeRange.Builder tr = ServiceAlerts.TimeRange.newBuilder();
+        tr.setStart(activeWindow.getTo());
+        tr.setEnd(activeWindow.getFrom());
+        return tr.build();
+    }
+
+    // NOTE: we only grab the first translation, we don't respect languages here
+    private static ServiceAlerts.TranslatedString toTranslatedString(List<NaturalLanguageStringBean> input) {
+        if (input == null || input.isEmpty()) return null;
+        ServiceAlerts.TranslatedString.Builder builderTS = ServiceAlerts.TranslatedString.newBuilder();
+        ServiceAlerts.TranslatedString.Translation.Builder translation = ServiceAlerts.TranslatedString.Translation.newBuilder();
+        translation.setLanguage(input.get(0).getLang());
+        translation.setText(input.get(0).getValue());
+        builderTS.addTranslation(translation);
+        return builderTS.build();
+    }
+
+    private static ServiceAlerts.Id normalizeToId(String defaultAgencyId, String id) {
+        if (id == null) return null;
+        ServiceAlerts.Id.Builder builder = ServiceAlerts.Id.newBuilder();
+        if (id.contains("_")) {
+            // id is compound, use both parts
+            AgencyAndId agencyAndId = AgencyAndIdLibrary.convertFromString(id);
+            builder.setAgencyId(agencyAndId.getAgencyId());
+            builder.setId(agencyAndId.getId());
+        } else {
+            // use default agency
+            builder.setAgencyId(defaultAgencyId);
+            builder.setId(id);
+        }
+        return builder.build();
+    }
 
     public static void fillTranslations(List<NaturalLanguageStringBean> input,
                                   GtfsRealtime.TranslatedString.Builder output) {
