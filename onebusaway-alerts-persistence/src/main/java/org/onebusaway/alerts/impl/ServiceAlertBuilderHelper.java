@@ -97,9 +97,15 @@ public class ServiceAlertBuilderHelper {
         for (ServiceAlertBean serviceAlert : alerts.getList()) {
             ServiceAlerts.ServiceAlert.Builder feedAlert =  ServiceAlerts.ServiceAlert.newBuilder();
             feedAlert.setId(normalizeToId(agencyId, serviceAlert.getId()));
-            feedAlert.setSummary(toTranslatedString(serviceAlert.getSummaries()));
-            feedAlert.setDescription(toTranslatedString(serviceAlert.getDescriptions()));
-            feedAlert.setUrl(toTranslatedString(serviceAlert.getUrls()));
+            ServiceAlerts.TranslatedString translatedSummary = toTranslatedString(serviceAlert.getSummaries());
+            if (translatedSummary != null)
+                feedAlert.setSummary(translatedSummary);
+            ServiceAlerts.TranslatedString translatedDescription = toTranslatedString(serviceAlert.getDescriptions());
+            if (translatedDescription != null)
+                feedAlert.setDescription(translatedDescription);
+            ServiceAlerts.TranslatedString translatedUrl = toTranslatedString(serviceAlert.getUrls());
+            if (translatedUrl != null)
+                feedAlert.setUrl(translatedUrl);
             feedAlert.setCreationTime(serviceAlert.getCreationTime());
             feedAlert.setModifiedTime(serviceAlert.getCreationTime());
 
