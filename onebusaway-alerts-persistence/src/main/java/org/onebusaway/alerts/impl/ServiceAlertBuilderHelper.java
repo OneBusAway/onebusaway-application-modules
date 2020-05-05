@@ -239,8 +239,15 @@ public class ServiceAlertBuilderHelper {
         if (input == null || input.isEmpty()) return null;
         ServiceAlerts.TranslatedString.Builder builderTS = ServiceAlerts.TranslatedString.newBuilder();
         ServiceAlerts.TranslatedString.Translation.Builder translation = ServiceAlerts.TranslatedString.Translation.newBuilder();
-        translation.setLanguage(input.get(0).getLang());
-        translation.setText(input.get(0).getValue());
+        String lang = input.get(0).getLang();
+        if (lang == null)
+            translation.setLanguage("en");
+        else
+            translation.setLanguage(lang);
+        String txt = input.get(0).getValue();
+        if (txt == null)
+            return null;
+        translation.setText(txt);
         builderTS.addTranslation(translation);
         return builderTS.build();
     }
