@@ -24,6 +24,7 @@ import org.onebusaway.api.actions.api.ApiActionSupport;
 import org.onebusaway.api.model.transit.BeanFactoryV2;
 import org.onebusaway.api.model.where.ArrivalAndDepartureBeanV1;
 import org.onebusaway.api.model.where.StopWithArrivalsAndDeparturesBeanV1;
+import org.onebusaway.exceptions.NoSuchStopServiceException;
 import org.onebusaway.exceptions.ServiceException;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
 import org.onebusaway.transit_data.model.ArrivalsAndDeparturesQueryBean;
@@ -105,6 +106,10 @@ public class ArrivalsAndDeparturesForStopAction extends ApiActionSupport {
     try {
       result = _service.getStopWithArrivalsAndDepartures(
               _id, _query);
+    } catch (NoSuchStopServiceException nsse) {
+      return setResourceNotFoundResponse();
+    } catch (ServiceException any) {
+      return setResourceNotFoundResponse();
     } catch (Exception any) {
       return setExceptionResponse();
     }
