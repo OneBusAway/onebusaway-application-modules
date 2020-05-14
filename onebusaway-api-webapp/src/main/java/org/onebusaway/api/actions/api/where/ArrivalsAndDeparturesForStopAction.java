@@ -101,8 +101,13 @@ public class ArrivalsAndDeparturesForStopAction extends ApiActionSupport {
     if(serviceDateFilterOn || _query.getTime() == 0)
       _query.setTime(SystemTime.currentTimeMillis());
 
-    StopWithArrivalsAndDeparturesBean result = _service.getStopWithArrivalsAndDepartures(
-        _id, _query);
+    StopWithArrivalsAndDeparturesBean result = null;
+    try {
+      result = _service.getStopWithArrivalsAndDepartures(
+              _id, _query);
+    } catch (Exception any) {
+      return setExceptionResponse();
+    }
 
     if (result == null)
       return setResourceNotFoundResponse();
