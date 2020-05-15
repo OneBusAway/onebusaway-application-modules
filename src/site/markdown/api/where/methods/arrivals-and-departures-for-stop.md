@@ -48,3 +48,5 @@ http://api.pugetsound.onebusaway.org/api/where/arrivals-and-departures-for-stop/
 The response is primarily composed of [`<arrivalAndDeparture/>` elements](../elements/arrival-and-departure.html),  so see the element documentation for specific details.
 
 The nearby stop list is designed to capture stops that are very close by (like across the street) for quick navigation.
+
+Trips will not show up in the results if the schedule_relationship is SKIPPED.
