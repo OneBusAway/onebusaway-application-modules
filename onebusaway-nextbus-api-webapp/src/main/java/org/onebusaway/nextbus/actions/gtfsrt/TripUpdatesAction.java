@@ -108,6 +108,8 @@ public class TripUpdatesAction extends NextBusApiBase  implements
                         feedMessage.addAllEntity(remoteFeedMessage.getEntityList());
                     } catch (Exception e) {
                         _log.error(e.getMessage());
+                        // something went horribly wrong -- serve an empty header in case its a no service period
+                        feedMessage = createFeedWithDefaultHeader(null);
                     }
                 }
             }

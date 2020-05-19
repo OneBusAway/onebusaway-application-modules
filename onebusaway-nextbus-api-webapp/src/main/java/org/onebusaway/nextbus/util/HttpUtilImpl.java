@@ -93,7 +93,9 @@ public class HttpUtilImpl implements HttpUtil {
 			_log.error("Error handling url: " + urlString, e);
 			throw e;
 		} finally {
-			response.close();
+			if (response != null) {
+				response.close();
+			}
 		}
 	}
 
