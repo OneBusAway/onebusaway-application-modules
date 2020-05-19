@@ -27,6 +27,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URLEncodedUtils;
@@ -54,7 +55,7 @@ public class HttpUtilImpl implements HttpUtil {
 		CloseableHttpResponse response = null;
 
 		try {
-			response = getResponse(urlString);
+			response = getResponse(urlString, timeoutSeconds);
 			HttpEntity entity = getEntity(response);
 			InputStream content = entity.getContent();
 			try{
@@ -79,7 +80,7 @@ public class HttpUtilImpl implements HttpUtil {
 		CloseableHttpResponse response = null;
 
 		try {
-			response = getResponse(urlString);
+			response = getResponse(urlString, timeoutSeconds);
 			HttpEntity entity = getEntity(response);
 			InputStream content = entity.getContent();
 			try{
@@ -99,9 +100,14 @@ public class HttpUtilImpl implements HttpUtil {
 		}
 	}
 
-	public CloseableHttpResponse getResponse(String urlString) throws ClientProtocolException, IOException{
+	public CloseableHttpResponse getResponse(String urlString, int timeoutSeconds) throws ClientProtocolException, IOException{
 		HttpGet request = new HttpGet(getEncodedUrl(urlString));
+		RequestConfig.Builder config = RequestConfig.custom()
+				.setConnectTimeout(timeoutSeconds * 1000)
+				.setSocketTimeout(timeoutSeconds * 1000);
+		request.setConfig(config.build());
 		CloseableHttpClient httpClient = _httpClientPool.getClient();
+
 		return httpClient.execute(request);
 	}
 
