@@ -6,7 +6,7 @@ Get extended details for a specific trip
 
 ## Sample Request
 
-http://api.pugetsound.onebusaway.org/api/where/trip-details/1_12540399.xml?key=TEST
+http://api.pugetsound.onebusaway.org/api/where/trip-details/1_47805860.xml?key=TEST
 
 ## Sample Response
 
@@ -46,3 +46,5 @@ http://api.pugetsound.onebusaway.org/api/where/trip-details/1_12540399.xml?key=T
 The response `<entry/>` element is a
 [`<tripDetails/>` element](../elements/trip-details.html) that captures extended
 details about a trip.
+
+The status element will indicate whether the trip is scheduled or canceled.
