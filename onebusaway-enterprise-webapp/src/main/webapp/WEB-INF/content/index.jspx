@@ -257,7 +257,7 @@
 			    	<s:url var="url" namespace="/m" action=""/>
 			    	<a href="${url}" target="_new">
 			    		<p>Mobile Web</p>
-			    		<a rel="popover"><div id="smartphone_img">&amp;nbsp;</div></a>
+			    		<a href="${url}" target="_new" rel="popover"><div id="smartphone_img">&amp;nbsp;</div></a>
 			    	</a>
 			    </li>
 			    <li id="wizard-col4">

@@ -57,6 +57,8 @@ public class NextBusApiBase {
 
   public static final String REQUEST_TYPE = "json";
 
+  public static final long MAX_HEADER_AGE = 90 * 1000;
+
   // CACHE
 
   public AgencyBean getCachedAgencyBean(String id) {
@@ -316,5 +318,13 @@ public class NextBusApiBase {
         + "/agency/";
     return serviceUrl;
   }
+
+  protected boolean isTimely(long timestamp) {
+    if (System.currentTimeMillis() - timestamp > MAX_HEADER_AGE)
+      return false;
+    return true;
+  }
+
+
 
 }
