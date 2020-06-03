@@ -215,6 +215,7 @@ private void removeDuplicateStopTimes(List<StopTime> stopTimes) {
       stopTimeEntry.setDropOffType(stopTime.getDropOffType());
       stopTimeEntry.setPickupType(stopTime.getPickupType());
       stopTimeEntry.setStop(stopEntry);
+      stopTimeEntry.setStopHeadsign(stopTime.getStopHeadsign());
 
       stopTimeEntries.add(stopTimeEntry);
       sequence++;

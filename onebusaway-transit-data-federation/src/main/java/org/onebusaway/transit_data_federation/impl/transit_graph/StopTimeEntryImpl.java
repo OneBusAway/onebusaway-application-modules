@@ -39,6 +39,7 @@ public class StopTimeEntryImpl implements StopTimeEntry, Serializable {
   private int _shapePointIndex = -1;
   private double _shapeDistTraveled = Double.NaN;
   private int _accumulatedSlackTime = 0;
+  private String _stopHeadsign;
   private int _totalStopsInTrip;
 
   private StopEntryImpl _stop;
@@ -105,6 +106,10 @@ public class StopTimeEntryImpl implements StopTimeEntry, Serializable {
   public void setAccumulatedSlackTime(int accumulatedSlackTime) {
     _accumulatedSlackTime = accumulatedSlackTime;
   }
+  
+	public void setStopHeadsign(String stopHeadsign) {
+		_stopHeadsign = stopHeadsign;
+	}
   
   public void setTotalStopsInTrip(int totalStopsInTrip) {
     _totalStopsInTrip = totalStopsInTrip;
@@ -181,6 +186,10 @@ public class StopTimeEntryImpl implements StopTimeEntry, Serializable {
   public int getAccumulatedSlackTime() {
     return _accumulatedSlackTime;
   }
+  
+	public String getStopHeadsign() {
+		return _stopHeadsign;
+	}
 
   @Override
   public int getTotalStopsInTrip() {
