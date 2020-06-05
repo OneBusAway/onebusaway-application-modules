@@ -138,6 +138,7 @@
 				 	<div id="editRole">
 				 		<label class="userLabel">New Role:</label>
 				 		<select name="Role" id="newRole">
+								<option></option>
 				 			<c:forEach items="${possibleRoles}" var="role">
 				 				<option value="${role}">${fn:split(role, "_")[1]}</option>
 				 			</c:forEach>

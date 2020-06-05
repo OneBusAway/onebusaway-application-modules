@@ -90,20 +90,26 @@ function editUser() {
 	data[csrfParameter] = csrfToken;
 	data["userData"] = JSON.stringify(userData);
 
-	jQuery.ajax({
-		url:"manage-users!editUser.action",
-		type: "POST",
-		dataType: "json",
-		data : data,
-		traditional: true,
-		success: function(response) {
-			jQuery("#userResult #result").text(response);
-			showResult();
-		},
-		error: function() {
-			alert("Error updating user");
-		}
-	});
+	//make sure a role is selected before calling server to edit the user
+	if (!userData.role || 0 === userData.role.length) {
+		alert("Role is required");
+	}
+	else {
+        jQuery.ajax({
+            url: "manage-users!editUser.action",
+            type: "POST",
+            dataType: "json",
+            data: data,
+            traditional: true,
+            success: function (response) {
+                jQuery("#userResult #result").text(response);
+                showResult();
+            },
+            error: function () {
+                alert("Error updating user");
+            }
+        });
+    }
 }
 
 function showDeleteDialog() {
