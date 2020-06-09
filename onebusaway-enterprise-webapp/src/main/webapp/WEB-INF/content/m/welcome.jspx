@@ -59,7 +59,7 @@
 	</c:when>
 	<c:otherwise>
 		<s:url var="url" namespace="/m/routes" action="index" />
-		<div id="available-routes"><a href="${url}">Click here</a> for a list of available routes.</div>
+		<div id="available-routes"><a href="${url}" style="font-size:1.5em">Click here</a> for a list of available routes.</div>
 	</c:otherwise>
 </c:choose>
 </html>
