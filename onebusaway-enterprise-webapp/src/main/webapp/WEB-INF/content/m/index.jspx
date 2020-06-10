@@ -148,8 +148,9 @@
 				<input type="hidden" name="l" id="l" />
 				<input type="hidden" name="t" id="t" />
 			</s:form>
-
-			<small>TIP: Enter a bus stop code, route, or street address.</small>
+			<s:if test="%{results.empty}">
+				<small>Enter a bus stop code, route, or street address.</small>
+			</s:if>
 		</div>
 
 		<s:if test="globalServiceAlerts!=null">
