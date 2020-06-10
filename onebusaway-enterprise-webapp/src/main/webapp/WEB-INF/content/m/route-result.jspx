@@ -57,7 +57,7 @@
 						<li class="direction-jump">Choose your direction:</li>
 						<s:iterator value="directions">
 							<s:url var="url" value="" anchor="%{directionId}"></s:url>
-							<li>
+							<li class="direction-li">
 								<a href="${url}" class="direction-link">
 									to&amp;nbsp;<s:property value="destination" />
 								</a>
