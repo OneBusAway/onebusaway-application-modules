@@ -148,7 +148,9 @@
 				<div class="title">
 		   			<s:url var="url" value="/"></s:url>
 					<h1><a href="${url}"><s:property value="getText('main.title')" /></a></h1>
-		  		</div>	  	
+		  		</div>
+				<div id="map_header_link"><a></a></div>
+				<div>
 		   	  	<ul>
 		   	  		<s:url var="url" namespace="/m" action="index"/>
 					<li id="link_mobile" aria-label="Text only version"><a href="${url}">Text / Mobile</a></li>
@@ -165,6 +167,7 @@
 		 			<s:url var="url" namespace="/wiki/Help" action="Index"/>
 		 			<li id="link_help"><a href="${url}">Help</a></li>
 			   	</ul>
+				</div>
 		   </div>
 
 	       <form action="search.action">
