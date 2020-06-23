@@ -42,7 +42,10 @@ public class TripUpdatesForAgencyAction extends GtfsRealtimeActionSupport {
     ListBean<VehicleStatusBean> vehicles = _service.getAllVehiclesForAgency(
         agencyId, timestamp);
 
+    boolean showDelay = true;  
+	  
     for (VehicleStatusBean vehicle : vehicles.getList()) {
+      showDelay = true; 
       TripStatusBean tripStatus = vehicle.getTripStatus();
       if (tripStatus == null) {
         continue;
@@ -78,6 +81,7 @@ public class TripUpdatesForAgencyAction extends GtfsRealtimeActionSupport {
           TripUpdate.StopTimeEvent.Builder departure = stopTimeUpdate.getDepartureBuilder();
           if (timepointPrediction.getTimepointPredictedDepartureTime() != -1) {
             departure.setTime(timepointPrediction.getTimepointPredictedDepartureTime()/1000L);
+            showDelay = false;
           }
 
 	      
@@ -93,11 +97,13 @@ public class TripUpdatesForAgencyAction extends GtfsRealtimeActionSupport {
             stopTimeUpdate.setStopId(normalizeId(stopId.toString()));
             TripUpdate.StopTimeEvent.Builder departure = stopTimeUpdate.getDepartureBuilder();
             departure.setTime(timestamp / 1000 + tripStatus.getNextStopTimeOffset());
+            if(departure.getTime() != 0)
+	      showDelay = false;
           }
         }
         
       }
-      tripUpdate.setDelay((int) tripStatus.getScheduleDeviation());
+      if(showDelay) tripUpdate.setDelay((int) tripStatus.getScheduleDeviation());
       tripUpdate.setTimestamp(vehicle.getLastUpdateTime() / 1000);
     }
   }
