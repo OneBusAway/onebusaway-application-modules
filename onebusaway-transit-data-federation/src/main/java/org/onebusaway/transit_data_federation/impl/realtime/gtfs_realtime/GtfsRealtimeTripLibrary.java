@@ -197,10 +197,9 @@ public class GtfsRealtimeTripLibrary {
           _log.debug("Multiple TripUpdates for vehicle {}; taking best.",
               vehicleId);
 
-          if (tripMoreAppropriate(tu, bestTripByVehicleId.get(vehicleId), vehicleId)) {
-            bestTripByVehicleId.put(vehicleId, tu);
+            if (tripMoreAppropriate(tu, bestTripByVehicleId.get(vehicleId), vehicleId)) {
+              bestTripByVehicleId.put(vehicleId, tu);
           }
-
         }
       } else {
         /*
@@ -705,7 +704,10 @@ public class GtfsRealtimeTripLibrary {
 
               if (tpr.getTimepointPredictedArrivalTime() != -1 ||
                       tpr.getTimepointPredictedDepartureTime() != -1) {
-                timepointPredictions.add(tpr);
+                // sadly we can only consume this tpr if onBestTrip
+                // TODO refactor TDS to support timepoint records for multiple trips
+                if (onBestTrip)
+                  timepointPredictions.add(tpr);
               }
 
             } // end not skipped
@@ -886,10 +888,12 @@ public class GtfsRealtimeTripLibrary {
     if (!stopTimeUpdate.hasArrival())
       return -1;
     StopTimeEvent arrival = stopTimeUpdate.getArrival();
-    if (arrival.hasDelay())
-      return stopTime.getArrivalTime() + arrival.getDelay();
     if (arrival.hasTime())
       return (int) (arrival.getTime() - serviceDate / 1000);
+    //prefer time to delay usage to be consistent with elsewhere
+    if (arrival.hasDelay())
+      return stopTime.getArrivalTime() + arrival.getDelay();
+
     // instead of illegal state exception we return -1 to not corrupt the read
     return -1;
   }
@@ -899,10 +903,11 @@ public class GtfsRealtimeTripLibrary {
     if (!stopTimeUpdate.hasDeparture())
       return -1;
     StopTimeEvent departure = stopTimeUpdate.getDeparture();
-    if (departure.hasDelay())
-      return stopTime.getDepartureTime() + departure.getDelay();
     if (departure.hasTime())
       return (int) (departure.getTime() - serviceDate / 1000);
+    //prefer time to delay usage to be consistent with elsewhere
+    if (departure.hasDelay())
+      return stopTime.getDepartureTime() + departure.getDelay();
     // instead of throwing an exception here, simply return -1
     // so as to not stop the rest of the processing
     return -1;
