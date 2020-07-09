@@ -517,13 +517,19 @@ public class GtfsRealtimeTripLibraryTest {
   }
 
   /**
-   * This method tests that we propagate a time point prediction record
+   * This method tests that we DO NOT propagate a time point prediction record
    * when it comes from a trip that hasn't started yet.
    *
    * Current time = 7:31. Trip update delay = 2 minutes
    *                  Schedule time    Real-time from feed
    * Stop A (trip A)  7:30             7:33
    * Stop A (trip B)  7:40             7:44
+   *
+   * TODO:  Ideally this would be propagated, but the TDS expects the trp
+   * to correspond to the trip, and will serve bad predictions otherwise
+   * TODO:  Refactor the TDS to have block level support for predictions
+   * and improve GtfsRealtimeTripLibrary to parse all predictions along
+   * that block
    */
   @Test
   public void testTprOnFutureTrip() {
@@ -562,7 +568,9 @@ public class GtfsRealtimeTripLibraryTest {
     assertEquals(tripADept, time(7, 33) * 1000);
 
     long tripBDept = getPredictedDepartureTimeByStopIdAndTripId(record, "stopA", "tripB");
-    assertEquals(tripBDept, time(7, 44) * 1000);
+    // TODO
+    //assertEquals(tripBDept, time(7, 44) * 1000);
+    assertEquals(tripBDept, -1);
   }
  
   private static FeedMessage.Builder createFeed() {
