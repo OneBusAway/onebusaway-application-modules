@@ -204,13 +204,34 @@
 			<c:import url="includes/available-routes.jspx" />
 
 			<s:if test="globalServiceAlerts!=null">
-			 <div id="global-alerts" class="global-alerts">
-				<s:iterator value="globalServiceAlerts">
-					<s:iterator value="descriptions">
-						<p class="global-alert-content"><strong>Service Notice: </strong><s:property value="value" /></p>
+				<div id="global-alerts" class="global-alerts">
+					<s:iterator value="globalServiceAlerts">
+
+						<s:if test="urls.size > 0">
+							<s:iterator value="urls" status="iter">
+								<p>
+									<a class="global-alert-content" href="${value}" target="alert">
+										<strong><s:property value="summaries[#iter.index].value" /></strong>
+										<s:if test="summaries[#iter.index].value != descriptions[#iter.index].value">
+											<br/>
+											<s:property value="descriptions[#iter.index].value" />
+										</s:if>
+									</a>
+								</p>
+								<br/>
+							</s:iterator>
+						</s:if>
+						<s:else>
+							<s:iterator value="summaries" status="iter">
+								<p><strong><s:property value="value" /></strong></p>
+								<s:if test="value != descriptions[#iter.index].value">
+									<p><s:property value="descriptions[#iter.index].value" /></p>
+								</s:if>
+								<br/>
+							</s:iterator>
+						</s:else>
 					</s:iterator>
-				</s:iterator>
-			 </div>
+				</div>
 			</s:if>
 	
 			<!-- Include the Google ad -->
@@ -238,7 +259,7 @@
 
 	<div id="map"><!-- //prevent jspx minimization --></div>
 	<div id="legend"><!-- //prevent jspx minimization --></div>
-	
+
     <div id="wizard">
 	   	<div id="wizard_start">
 	   		<ul>
@@ -302,12 +323,32 @@
 	</div>
 
 	<div id="map-global-alerts" class="global-alerts">
-		<div id="close-map-global-alerts"><a href="#">[close]</a></div>
+		<div id="close-map-global-alerts"><a id="closeMapGlobalAlerts" href="#">[close]</a></div>
 		<div class="global-alerts-content">
 			<s:iterator value="globalServiceAlerts">
-				<s:iterator value="descriptions">
-					<p class="global-alert-content"><strong>Service Notice: </strong><s:property value="value" /></p>
-				</s:iterator>
+				<s:if test="urls.size > 0">
+					<s:iterator value="urls" status="iter">
+						<p>
+							<a class="global-alert-content" href="${value}" target="alert">
+								<strong><s:property value="summaries[#iter.index].value" /></strong>
+								<s:if test="summaries[#iter.index].value != descriptions[#iter.index].value">
+									<br/>
+									<s:property value="descriptions[#iter.index].value" />
+								</s:if>
+							</a>
+						</p>
+						<br/>
+					</s:iterator>
+				</s:if>
+				<s:else>
+					<s:iterator value="summaries" status="iter">
+						<p><strong><s:property value="value" /></strong></p>
+						<s:if test="value != descriptions[#iter.index].value">
+							<p><s:property value="descriptions[#iter.index].value" /></p>
+						</s:if>
+						<br/>
+					</s:iterator>
+				</s:else>
 			</s:iterator>
 		</div>
 	</div>

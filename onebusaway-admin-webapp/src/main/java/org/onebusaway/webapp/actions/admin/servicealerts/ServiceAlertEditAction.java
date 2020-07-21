@@ -31,6 +31,7 @@ import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.presentation.bundles.ResourceBundleSupport;
 import org.onebusaway.presentation.bundles.service_alerts.Reasons;
 import org.onebusaway.presentation.bundles.service_alerts.Severity;
+import org.onebusaway.transit_data.model.AgencyBean;
 import org.onebusaway.transit_data.model.AgencyWithCoverageBean;
 import org.onebusaway.transit_data.model.ListBean;
 import org.onebusaway.transit_data.model.service_alerts.NaturalLanguageStringBean;
@@ -39,6 +40,7 @@ import org.onebusaway.transit_data.model.service_alerts.ServiceAlertRecordBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationAffectsBean;
 import org.onebusaway.transit_data.model.service_alerts.TimeRangeBean;
 import org.onebusaway.transit_data.services.TransitDataService;
+import org.onebusaway.webapp.actions.OneBusAwayNYCAdminActionSupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,7 +58,7 @@ import com.opensymphony.xwork2.Preparable;
 
 })
 
-public class ServiceAlertEditAction extends ActionSupport implements
+public class ServiceAlertEditAction extends OneBusAwayNYCAdminActionSupport implements
     ModelDriven<ServiceAlertBean> {
   private static Logger _log = LoggerFactory.getLogger(ServiceAlertEditAction.class);
   
@@ -97,8 +99,22 @@ public class ServiceAlertEditAction extends ActionSupport implements
     this._model = model;
   }
 
+  //used for the affected agencies list so that a global option is available
+    public List<AgencyWithCoverageBean> getAffectedAgencies() {
+        ArrayList<AgencyWithCoverageBean> resultList = new ArrayList<AgencyWithCoverageBean>();
+        if (isAdminUser()) {
+            AgencyWithCoverageBean globalAlert = new AgencyWithCoverageBean();
+            globalAlert.setAgency(new AgencyBean());
+            globalAlert.getAgency().setId("__ALL_OPERATORS__");
+            globalAlert.getAgency().setName("Global Emergency Message");
+            resultList.add(globalAlert);
+        }
+        resultList.addAll(_agencies);
+        return resultList;
+    }
+
   public List<AgencyWithCoverageBean> getAgencies() {
-    return _agencies;
+      return _agencies;
   }
 
   public String getAlertId() {

@@ -156,12 +156,27 @@
 		<s:if test="globalServiceAlerts!=null">
 			<div id="global-alerts" class="global-alerts">
 				<s:iterator value="globalServiceAlerts">
-					<s:iterator value="descriptions">
-						<p id="serviceAlertHeader" class="global-alert-content">
-							<span>Service Alert Text Here</span>
-							<s:property value="value" />
-						</p>
-					</s:iterator>
+					<s:if test="urls.size > 0">
+						<s:iterator value="urls" status="iter">
+							<p>
+								<a class="global-alert-content" href="${value}" target="alert">
+									<strong><s:property value="summaries[#iter.index].value" /></strong>
+									<s:if test="summaries[#iter.index].value != descriptions[#iter.index].value">
+										: <s:property value="descriptions[#iter.index].value" />
+									</s:if>
+								</a>
+							</p>
+						</s:iterator>
+					</s:if>
+					<s:else>
+						<s:iterator value="summaries" status="iter">
+							<p><strong><s:property value="value" /></strong>
+							<s:if test="value != descriptions[#iter.index].value">
+								: <s:property value="descriptions[#iter.index].value" />
+							</s:if>
+							</p>
+						</s:iterator>
+					</s:else>
 				</s:iterator>
 			 </div>
 		</s:if>

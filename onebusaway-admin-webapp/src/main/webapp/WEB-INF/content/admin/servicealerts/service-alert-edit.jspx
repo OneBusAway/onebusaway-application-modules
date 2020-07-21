@@ -178,9 +178,9 @@
 					<td>
 						<table class="affectsClauseConditions">
 							<s:select label="Agency" cssClass="alertCondition"
-								name="allAffects[%{#rowStatus.index}].agencyId" headerKey="null" 
-								headerValue="Select agency affected" list="agencies" 
-								listKey="agency.id" listValue="agency.name" 
+								name="allAffects[%{#rowStatus.index}].agencyId" headerKey="null"
+								headerValue="Select agency affected" list="affectedAgencies"
+								listKey="agency.id" listValue="agency.name"
 								value="agencyId" theme="xhtml"/>
 							<s:textfield label="Route" cssClass="alertCondition"
 								name="allAffects[%{#rowStatus.index}].routeId" value="%{routeId}" theme="xhtml"/>
@@ -207,9 +207,9 @@
 					<td>
 						<table class="affectsClauseConditions">
 							<s:select label="Agency" cssClass="alertCondition"
-								name="allAffects[0].agencyId" headerKey="null" 
-								headerValue="Select agency affected" list="agencies" 
-								listKey="agency.id" listValue="agency.name" 
+								name="allAffects[0].agencyId" headerKey="null"
+								headerValue="Select agency affected" list="affectedAgencies"
+								listKey="agency.id" listValue="agency.name"
 								theme="xhtml"/>
 							<s:textfield label="Route" cssClass="alertCondition"
 								name="allAffects[0].routeId" theme="xhtml"/>

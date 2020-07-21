@@ -15,6 +15,7 @@
  */
 package org.onebusaway.webapp.actions.admin.servicealerts;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.struts2.convention.annotation.Result;
@@ -154,7 +155,18 @@ public class ServiceAlertsAction extends OneBusAwayNYCAdminActionSupport {
         AgencyWithCoverageBean agency = _agencies.get(i);
         String agencyId = agency.getAgency().getId();
         ListBean<ServiceAlertRecordBean> result = _alerts.getAllServiceAlertRecordsForAgencyId(agencyId);
-        List<ServiceAlertRecordBean> serviceAlerts = result.getList();
+
+        //don't include alerts that are global for non-admin
+        List<ServiceAlertRecordBean> serviceAlerts = new ArrayList<>();
+        if (!isAdminUser()) {
+          for (int j = 0; j < result.getList().size(); j++)
+            for (int k = 0; k < result.getList().get(j).getServiceAlertBean().getAllAffects().size(); k++) {
+              if (!"__ALL_OPERATORS__".equals(result.getList().get(j).getServiceAlertBean().getAllAffects().get(k).getAgencyId()))
+                serviceAlerts.add(result.getList().get(j));
+            }
+        }
+        else serviceAlerts = result.getList();
+
         _situationsByAgency[i] = serviceAlerts;
       }
       for (int i=0; i<_agencies.size(); ++i) {
