@@ -50,15 +50,19 @@ jQuery(function() {
 
 	// Check  if this is the "Edit Service Alert" page
 	if ($("#service-alert_submit").length > 0) {
-		// Only enable the Save button if an "owning agency" is selected.
+		// Only enable the Save and Add to Fav buttons if an "owning agency" is selected.
 		if ($("#service-alert_agencyId option:selected").val() == "null") {
 			$("#service-alert_submit").attr("disabled", "disabled");
+            $("#service-alert_addToFav").attr("disabled", "disabled");
+			$("")
 		}
 		$("#service-alert_agencyId").change(function() {
 			if ($("#service-alert_agencyId option:selected").val() == "null") {
 				$("#service-alert_submit").attr("disabled", "disabled");
+                $("#service-alert_addToFav").attr("disabled", "disabled");
 			} else {
 				$("#service-alert_submit").removeAttr("disabled");
+                $("#service-alert_addToFav").removeAttr("disabled");
 			}
 		});
 	}
