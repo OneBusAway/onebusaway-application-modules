@@ -20,6 +20,8 @@ import org.onebusaway.admin.service.UserManagementService;
 import org.onebusaway.webapp.actions.OneBusAwayNYCAdminActionSupport;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.List;
+
 
 /**
  * Creates a user in the database. 
@@ -32,6 +34,7 @@ public class RegisterUserAction extends OneBusAwayNYCAdminActionSupport {
 	private String username;
 	private String password;
 	private boolean admin;
+	private String role;
 	
 	private UserManagementService userManagementService;
 	
@@ -42,7 +45,7 @@ public class RegisterUserAction extends OneBusAwayNYCAdminActionSupport {
 	public String createUser() {
 		boolean valid = validateFields();
 		if(valid) {
-			boolean success = userManagementService.createUser(username, password, admin);
+			boolean success = userManagementService.createUser(username, password, role);
 			
 			if(success) {
 				addActionMessage("User '" +username + "' created successfully");
@@ -69,6 +72,12 @@ public class RegisterUserAction extends OneBusAwayNYCAdminActionSupport {
 			valid = false;
 			addFieldError("password", "Password is required");
 		}
+
+		//only check role if admin is not set to true
+		if(StringUtils.isBlank(role)) {
+			valid = false;
+			addFieldError("role", "Role is required");
+		}
 		
 		return valid;
 	}
@@ -76,7 +85,10 @@ public class RegisterUserAction extends OneBusAwayNYCAdminActionSupport {
 	public void init() {
 		createUser();
 	}
-	
+
+	public List<String> getPossibleRoles() {
+		return userManagementService.getManagedRoleNames();
+	}
 
 	/**
 	 * Returns user name of the user being created
@@ -108,6 +120,22 @@ public class RegisterUserAction extends OneBusAwayNYCAdminActionSupport {
 	 */
 	public void setPassword(String password) {
 		this.password = password;
+	}
+
+	/**
+	 * Injects role of the user being created
+	 * @param role the role to set
+	 */
+	public void setRole(String role) {
+		this.role = role;
+	}
+
+	/**
+	 * Returns role of the user being created
+	 * @return the role
+	 */
+	public String getRole() {
+		return role;
 	}
 
 	/**

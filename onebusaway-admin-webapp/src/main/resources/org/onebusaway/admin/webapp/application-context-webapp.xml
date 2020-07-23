@@ -67,13 +67,14 @@
         init-method="init">
       <property name="username" value="admin"/>
       <property name="password" value="admin"/>
-      <property name="admin" value="true"/>
+      <property name="role" value="ROLE_ADMINISTRATOR"/>
     </bean>
     
     <bean id="createOperator" class="org.onebusaway.webapp.actions.admin.usermanagement.RegisterUserAction"
         init-method="init">
       <property name="username" value="operator"/>
       <property name="password" value="operator"/>
+        <property name="role" value="ROLE_OPERATOR"/>
     </bean>
     
     <sec:http auto-config="false" entry-point-ref="loginUrlAuthenticationEntryPoint">

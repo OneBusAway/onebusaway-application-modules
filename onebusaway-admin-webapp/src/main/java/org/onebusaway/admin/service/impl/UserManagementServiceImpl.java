@@ -241,8 +241,19 @@ public class UserManagementServiceImpl implements UserManagementService {
 
 
 	public boolean createUser(String userName, String password, String role) {
-		boolean admin = (role == StandardAuthoritiesService.ADMINISTRATOR);
-		return createUser(userName, password, admin);
+		UserIndex userIndex = userService.getOrCreateUserForUsernameAndPassword(userName, password);
+
+		if(userIndex == null)
+			return false;
+
+		User user = userIndex.getUser();
+		updateRole(role, user);
+		userDao.saveOrUpdateUser(user);
+
+		log.info("User '{}' created successfully", userName);
+
+		return true;
+
 	}
 	
 	@Override
