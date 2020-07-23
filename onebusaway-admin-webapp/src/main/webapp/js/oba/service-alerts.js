@@ -80,8 +80,8 @@ jQuery(function() {
 			jQuery("#publicationWindowStartDate").datepicker("option", "maxDate", selectedDate);
 		}
 	});
-	
-	jQuery("#loadTemplateInput [name='template']").click(function(){
+
+    jQuery("#loadTemplateInput [name='template']").change(function(){
 		var selectedTemplateId = jQuery("#loadTemplateInput [name='template']").val();
 		loadTemplate(selectedTemplateId);
 	})
