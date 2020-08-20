@@ -337,6 +337,10 @@ OBA.Mobile = (function() {
 
             updateServiceAlertHeaderText();
 
+            $("#all-routes-button").click(function() {
+                window.location = "/m/routes/index";
+            });
+
             // initialize map, and continue initialization of things that use the map
             // on load only when google maps says it's ready.
 			var mapElement = document.getElementById("map");
