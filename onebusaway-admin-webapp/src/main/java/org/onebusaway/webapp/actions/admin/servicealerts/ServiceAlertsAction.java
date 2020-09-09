@@ -160,10 +160,14 @@ public class ServiceAlertsAction extends OneBusAwayNYCAdminActionSupport {
         List<ServiceAlertRecordBean> serviceAlerts = new ArrayList<>();
         if (!isAdminUser()) {
           for (int j = 0; j < result.getList().size(); j++)
-            for (int k = 0; k < result.getList().get(j).getServiceAlertBean().getAllAffects().size(); k++) {
-              if (!"__ALL_OPERATORS__".equals(result.getList().get(j).getServiceAlertBean().getAllAffects().get(k).getAgencyId()))
-                serviceAlerts.add(result.getList().get(j));
+            if (result.getList().get(j).getServiceAlertBean() != null &&
+                    result.getList().get(j).getServiceAlertBean().getAllAffects() != null) {
+              for (int k = 0; k < result.getList().get(j).getServiceAlertBean().getAllAffects().size(); k++) {
+                if (!"__ALL_OPERATORS__".equals(result.getList().get(j).getServiceAlertBean().getAllAffects().get(k).getAgencyId()))
+                  serviceAlerts.add(result.getList().get(j));
+              }
             }
+            else serviceAlerts.add(result.getList().get(j));//just add it since there aren't any affects
         }
         else serviceAlerts = result.getList();
 
