@@ -338,7 +338,7 @@ OBA.Mobile = (function() {
             updateServiceAlertHeaderText();
 
             $("#all-routes-button").click(function() {
-                window.location = "/m/routes/index";
+                window.location = OBA.Config.urlPrefix + "m/routes/index";
             });
 
             // initialize map, and continue initialization of things that use the map
