@@ -716,7 +716,7 @@ OBA.Popups = (function() {
 		}
 
 		if (OBA.Config.includeBubbleFooter)
-			html += OBA.Config.infoBubbleFooterFunction("stop", stopCode);
+			html += OBA.Config.infoBubbleFooterFunction("stop", uniqueStopId);
 
 		html += "<ul class='links'>";
 		html += "<a href='#' id='zoomHere'>Center & Zoom Here</a>&nbsp;&nbsp;&nbsp;<a href='" + OBA.Config.urlPrefix + "where/schedule?id=" + stopResult.id +"' id='schedule'>View Schedule</a>";
