@@ -38,8 +38,10 @@ import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
 import org.onebusaway.gtfs.serialization.mappings.InvalidStopTimeException;
 import org.onebusaway.gtfs.serialization.mappings.StopTimeFieldMappingFactory;
+import org.onebusaway.realtime.api.OccupancyStatus;
 import org.onebusaway.realtime.api.TimepointPredictionRecord;
 import org.onebusaway.realtime.api.VehicleLocationRecord;
+import org.onebusaway.realtime.api.VehicleOccupancyRecord;
 import org.onebusaway.transit_data_federation.services.blocks.BlockCalendarService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockGeospatialService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
@@ -994,7 +996,23 @@ public class GtfsRealtimeTripLibrary {
     return vp.getVehicle().getId();
   }
 
-  private static class BestScheduleDeviation {
+    public VehicleOccupancyRecord createVehicleOccupancyRecordForUpdate(MonitoredResult result, CombinedTripUpdatesAndVehiclePosition update) {
+      if (update == null) return null;
+      if (update.vehiclePosition == null) return null;
+      if (update.vehiclePosition.hasOccupancyStatus()) {
+        VehicleOccupancyRecord vor = new VehicleOccupancyRecord();
+        vor.setOccupancyStatus(OccupancyStatus.valueOf(update.vehiclePosition.getOccupancyStatus().name()));
+        if (vor.getOccupancyStatus() == null) {
+          // the valueOf failed to match, the spec may have added new fields...
+          _log.warn("unmatched occupancy status " + update.vehiclePosition.getOccupancyStatus().name());
+          return null;
+        }
+        return vor;
+      }
+      return null;
+    }
+
+    private static class BestScheduleDeviation {
     public int delta = Integer.MAX_VALUE;
     public int scheduleDeviation = 0;
     public boolean isInPast = true;

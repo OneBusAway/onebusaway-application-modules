@@ -43,6 +43,8 @@ import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.realtime.api.VehicleLocationListener;
 import org.onebusaway.realtime.api.VehicleLocationRecord;
+import org.onebusaway.realtime.api.VehicleOccupancyListener;
+import org.onebusaway.realtime.api.VehicleOccupancyRecord;
 import org.onebusaway.transit_data.model.service_alerts.ECause;
 import org.onebusaway.transit_data.model.service_alerts.ESeverity;
 import org.onebusaway.alerts.impl.ServiceAlertLocalizedString;
@@ -100,6 +102,8 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   private BlockLocationService _blockLocationService;
 
   private VehicleLocationListener _vehicleLocationListener;
+
+  private VehicleOccupancyListener _vehicleOccupancyListener;
 
   private ServiceAlertsService _serviceAlertService;
 
@@ -202,6 +206,11 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   public void setVehicleLocationListener(
       VehicleLocationListener vehicleLocationListener) {
     _vehicleLocationListener = vehicleLocationListener;
+  }
+
+  @Autowired
+  public void setVehicleOccupancyListener(VehicleOccupancyListener vehicleOccupancyListener) {
+    _vehicleOccupancyListener = vehicleOccupancyListener;
   }
 
   @Autowired
@@ -521,11 +530,15 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
           continue;
         }
         seenVehicles.add(vehicleId);
+        VehicleOccupancyRecord vor = _tripsLibrary.createVehicleOccupancyRecordForUpdate(result, update);
         Date timestamp = new Date(record.getTimeOfRecord());
         Date prev = _lastVehicleUpdate.get(vehicleId);
         if (prev == null || prev.before(timestamp)) {
           _log.debug("matched vehicle " + vehicleId + " on block=" + record.getBlockId() + " with scheduleDeviation=" + record.getScheduleDeviation());
           _vehicleLocationListener.handleVehicleLocationRecord(record);
+          if (vor != null) {
+            _vehicleOccupancyListener.handleVehicleOccupancyRecord(vor);
+          }
           _lastVehicleUpdate.put(vehicleId, timestamp);
         } else {
           _log.debug("discarding: update for vehicle " + vehicleId + " as timestamp in past");

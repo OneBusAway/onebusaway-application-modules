@@ -628,6 +628,20 @@ public class BeanFactoryV2 {
     bean.setPhase(vehicleStatus.getPhase());
     bean.setStatus(vehicleStatus.getStatus());
     bean.setVehicleId(vehicleStatus.getVehicleId());
+    if (vehicleStatus.getOccupancyStatus() != null &&
+            vehicleStatus.getOccupancyStatus() != OccupancyStatus.UNKNOWN) {
+      bean.setOccupancyStatus(vehicleStatus.getOccupancyStatus().valueOf());
+    } else {
+      bean.setOccupancyStatus((null));
+    }
+
+    if(vehicleStatus.getOccupancyCount() != null){
+      bean.setOccupancyCount(vehicleStatus.getOccupancyCount());
+    }
+
+    if(vehicleStatus.getOccupancyCapacity() != null){
+      bean.setOccupancyCapacity(vehicleStatus.getOccupancyCapacity());
+    }
 
     TripBean trip = vehicleStatus.getTrip();
     if (trip != null) {
