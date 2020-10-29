@@ -38,6 +38,14 @@
 		<from>^/S/([0-9]+)$</from>
 		<to last="true">/m/index.action?q=$1</to>
 	</rule>
+	<rule>
+		<note>
+		This rule added by C Savitzky is to redirect mobile site traffic from http to https 
+		The rule was added to meet an https requirement when collecting location data
+		</note>
+		<from>http(.*/m/.*)</from>
+		<to last="true">https$1</to>
+	</rule>
 	<!--
 	<rule>
 		<note>
