@@ -84,6 +84,8 @@ class RouteBeanServiceImpl implements RouteBeanService {
 
   private ExtendedCalendarService _extCalendarService;
 
+  private List<String> _doNotSortRouteIdList = new ArrayList<>();
+
   @Autowired
   public void setTransitGraphDao(TransitGraphDao transitGraphDao) {
     _transitGraphDao = transitGraphDao;
@@ -135,6 +137,17 @@ class RouteBeanServiceImpl implements RouteBeanService {
 
   @Autowired
   public void setExtCalendarService(ExtendedCalendarService extCalendarService) { _extCalendarService = extCalendarService; }
+
+  public void setDoNotSortRouteIdList(String doNotSortRouteIds) {
+    if (doNotSortRouteIds == null) {
+      _doNotSortRouteIdList = new ArrayList<>();
+    } else if (!doNotSortRouteIds.contains(",")) {
+      _doNotSortRouteIdList = new ArrayList<>();
+      _doNotSortRouteIdList.add(doNotSortRouteIds);
+    } else {
+      _doNotSortRouteIdList = Arrays.asList(doNotSortRouteIds.split(","));
+    }
+  }
 
   @Cacheable
   public RouteBean getRouteForId(AgencyAndId id) {
@@ -254,7 +267,7 @@ class RouteBeanServiceImpl implements RouteBeanService {
       NameBean name = new NameBean(NameBeanTypes.DESTINATION,
           block.getDescription());
 
-      List<StopEntry> stops = getStopsInOrder(block);
+      List<StopEntry> stops = getStopsInOrder(routeCollection.getId(), block);
       List<String> groupStopIds = new ArrayList<String>();
       for (StopEntry stop : stops)
         groupStopIds.add(ApplicationBeanLibrary.getId(stop.getId()));
@@ -321,22 +334,34 @@ class RouteBeanServiceImpl implements RouteBeanService {
     return _shapeBeanService.getMergedPolylinesForShapeIds(shapeIds);
   }
 
-  private List<StopEntry> getStopsInOrder(StopSequenceCollection block) {
+  private List<StopEntry> getStopsInOrder(AgencyAndId routeId, StopSequenceCollection block) {
+    List<StopEntry> stopsInDefaultOrder = new ArrayList<>();
     DirectedGraph<StopEntry> graph = new DirectedGraph<StopEntry>();
     for (StopSequence sequence : block.getStopSequences()) {
       StopEntry prev = null;
       for (StopEntry stop : sequence.getStops()) {
         if (prev != null) {
           // We do this to avoid cycles
-          if (!graph.isConnected(stop, prev))
+          if (!graph.isConnected(stop, prev)) {
             graph.addEdge(prev, stop);
+            // this tells us if the stop is already used
+            stopsInDefaultOrder.add(stop);
+          }
+
         }
         prev = stop;
       }
     }
 
+    if (_doNotSortRouteIdList.contains(routeId.toString())) {
+      // don't sort this as its too complex
+      return stopsInDefaultOrder;
+    }
+    // here we guess at a canonical route pattern via a topological sort order
+    // works well for simple routes, does poorly for loops
     StopGraphComparator c = new StopGraphComparator(graph);
     return graph.getTopologicalSort(c);
+
   }
 
   private Set<AgencyAndId> getShapeIdsForStopSequenceBlock(
