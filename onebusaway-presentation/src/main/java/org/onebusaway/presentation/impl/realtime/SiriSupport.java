@@ -31,6 +31,7 @@ import org.apache.commons.lang3.math.NumberUtils;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.presentation.services.realtime.PresentationService;
 import org.onebusaway.realtime.api.TimepointPredictionRecord;
+import org.onebusaway.realtime.api.VehicleOccupancyRecord;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
 import org.onebusaway.transit_data.model.ArrivalsAndDeparturesQueryBean;
 import org.onebusaway.transit_data.model.StopBean;
@@ -61,6 +62,7 @@ import uk.org.siri.siri.LocationStructure;
 import uk.org.siri.siri.MonitoredCallStructure;
 import uk.org.siri.siri.MonitoredVehicleJourneyStructure;
 import uk.org.siri.siri.NaturalLanguageStringStructure;
+import uk.org.siri.siri.OccupancyEnumeration;
 import uk.org.siri.siri.OnwardCallStructure;
 import uk.org.siri.siri.OnwardCallsStructure;
 import uk.org.siri.siri.OperatorRefStructure;
@@ -91,7 +93,7 @@ public final class SiriSupport {
 	public static void fillMonitoredVehicleJourney(MonitoredVehicleJourneyStructure monitoredVehicleJourney, 
 			TripBean framedJourneyTripBean, TripStatusBean currentVehicleTripStatus, StopBean monitoredCallStopBean, OnwardCallsMode onwardCallsMode,
 			PresentationService presentationService, TransitDataService transitDataService,
-			int maximumOnwardCalls, List<TimepointPredictionRecord> stopLevelPredictions, boolean hasRealtimeData, long responseTimestamp, boolean showRawLocation) {
+			int maximumOnwardCalls, List<TimepointPredictionRecord> stopLevelPredictions, boolean hasRealtimeData, long responseTimestamp, boolean showRawLocation, boolean showApc) {
 
 
 		if (currentVehicleTripStatus != null && TransitDataConstants.STATUS_CANCELED.equals(currentVehicleTripStatus.getStatus())) {
@@ -169,6 +171,10 @@ public final class SiriSupport {
 
 		monitoredVehicleJourney.setProgressRate(getProgressRateForPhaseAndStatus(
 				currentVehicleTripStatus.getStatus(), currentVehicleTripStatus.getPhase()));
+
+		if (showApc) {
+			fillOccupancy(monitoredVehicleJourney, transitDataService, currentVehicleTripStatus);
+		}
 
 		// origin-destination
 		for(int i = 0; i < blockTrips.size(); i++) {
@@ -303,7 +309,42 @@ public final class SiriSupport {
 
 		return;
 	}
-	
+
+	private static void fillOccupancy(MonitoredVehicleJourneyStructure mvj, TransitDataService tds, TripStatusBean tripStatus) {
+		if (tripStatus == null
+				|| tripStatus.getActiveTrip() == null
+				|| tripStatus.getActiveTrip().getRoute() ==  null
+				|| tripStatus.getVehicleId() == null) {
+			return;
+		}
+		VehicleOccupancyRecord vor =
+				tds.getVehicleOccupancyRecordForVehicleIdAndRoute(
+						AgencyAndId.convertFromString(tripStatus.getVehicleId()),
+						tripStatus.getActiveTrip().getRoute().getId(),
+						tripStatus.getActiveTrip().getDirectionId());
+		mvj.setOccupancy(mapOccupancyStatusToEnumeration(vor));
+	}
+
+	private static OccupancyEnumeration mapOccupancyStatusToEnumeration(VehicleOccupancyRecord vor) {
+		if (vor == null) return null;
+		switch (vor.getOccupancyStatus()) {
+			case UNKNOWN:
+				return null;
+			case EMPTY:
+			case MANY_SEATS_AVAILABLE:
+			case FEW_SEATS_AVAILABLE:
+				return OccupancyEnumeration.SEATS_AVAILABLE;
+			case STANDING_ROOM_ONLY:
+				return OccupancyEnumeration.STANDING_AVAILABLE;
+			case FULL:
+			case CRUSHED_STANDING_ROOM_ONLY:
+			case NOT_ACCEPTING_PASSENGERS:
+				return OccupancyEnumeration.FULL;
+			default:
+				return null;
+		}
+	}
+
 	/***
 	 * PRIVATE STATIC METHODS
 	 */

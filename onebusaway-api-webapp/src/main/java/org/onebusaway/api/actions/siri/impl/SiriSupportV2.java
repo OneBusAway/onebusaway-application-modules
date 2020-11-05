@@ -35,6 +35,7 @@ import org.onebusaway.presentation.impl.AgencySupportLibrary;
 import org.onebusaway.presentation.impl.DateUtil;
 import org.onebusaway.presentation.services.realtime.PresentationService;
 import org.onebusaway.realtime.api.TimepointPredictionRecord;
+import org.onebusaway.realtime.api.VehicleOccupancyRecord;
 import org.onebusaway.transit_data.model.StopBean;
 import org.onebusaway.transit_data.model.TransitDataConstants;
 import org.onebusaway.transit_data.model.blocks.BlockInstanceBean;
@@ -48,6 +49,7 @@ import org.onebusaway.transit_data_federation.siri.SiriPolyLinesExtension;
 import org.onebusaway.transit_data_federation.siri.SiriUpcomingServiceExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 
 import uk.org.siri.siri_2.AnnotatedDestinationStructure;
 import uk.org.siri.siri_2.AnnotatedLineStructure;
@@ -69,6 +71,7 @@ import uk.org.siri.siri_2.LocationStructure;
 import uk.org.siri.siri_2.MonitoredCallStructure;
 import uk.org.siri.siri_2.MonitoredVehicleJourneyStructure;
 import uk.org.siri.siri_2.NaturalLanguageStringStructure;
+import uk.org.siri.siri_2.OccupancyEnumeration;
 import uk.org.siri.siri_2.OnwardCallStructure;
 import uk.org.siri.siri_2.OnwardCallsStructure;
 import uk.org.siri.siri_2.OperatorRefStructure;
@@ -116,6 +119,7 @@ public final class SiriSupportV2 {
       int maximumOnwardCalls,
       List<TimepointPredictionRecord> stopLevelPredictions,
       boolean hasRealtimeData,
+      boolean showApc,
       DetailLevel detailLevel,
       long responseTimestamp, Map<Filters, String> filters) {
 
@@ -358,7 +362,11 @@ public final class SiriSupportV2 {
                 currentVehicleTripStatus.getStatus(),
                 currentVehicleTripStatus.getPhase()));
     }
-    
+
+    if (showApc) {
+      fillOccupancy(monitoredVehicleJourney, transitDataService, currentVehicleTripStatus);
+    }
+
     // detail level - normal
     if (detailLevel.equals(DetailLevel.NORMAL) || detailLevel.equals(DetailLevel.CALLS)){
       monitoredVehicleJourney.setOperatorRef(operatorRef);
@@ -383,6 +391,42 @@ public final class SiriSupportV2 {
 
     return;
   }
+
+  private static void fillOccupancy(MonitoredVehicleJourneyStructure mvj, TransitDataService tds, TripStatusBean tripStatus) {
+    if (tripStatus == null
+            || tripStatus.getActiveTrip() == null
+            || tripStatus.getActiveTrip().getRoute() ==  null
+            || tripStatus.getVehicleId() == null) {
+      return;
+    }
+    VehicleOccupancyRecord vor =
+            tds.getVehicleOccupancyRecordForVehicleIdAndRoute(
+                    AgencyAndId.convertFromString(tripStatus.getVehicleId()),
+                    tripStatus.getActiveTrip().getRoute().getId(),
+                    tripStatus.getActiveTrip().getDirectionId());
+    mvj.setOccupancy(mapOccupancyStatusToEnumeration(vor));
+  }
+
+  private static OccupancyEnumeration mapOccupancyStatusToEnumeration(VehicleOccupancyRecord vor) {
+    if (vor == null) return null;
+    switch (vor.getOccupancyStatus()) {
+      case UNKNOWN:
+        return null;
+      case EMPTY:
+      case MANY_SEATS_AVAILABLE:
+      case FEW_SEATS_AVAILABLE:
+        return OccupancyEnumeration.SEATS_AVAILABLE;
+      case STANDING_ROOM_ONLY:
+        return OccupancyEnumeration.STANDING_AVAILABLE;
+      case FULL:
+      case CRUSHED_STANDING_ROOM_ONLY:
+      case NOT_ACCEPTING_PASSENGERS:
+        return OccupancyEnumeration.FULL;
+      default:
+        return null;
+    }
+  }
+
 
   public static VehicleModesEnumeration toVehicleMode(String typeString) {
     VehicleModesEnumeration mode;

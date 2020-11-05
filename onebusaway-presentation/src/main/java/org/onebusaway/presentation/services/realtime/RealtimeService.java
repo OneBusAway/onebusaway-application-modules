@@ -63,5 +63,6 @@ public interface RealtimeService {
     public List<ServiceAlertBean> getServiceAlertsForAgency(String agencyId);
   
   public List<ServiceAlertBean> getServiceAlertsGlobal();
-    
+
+  boolean showApc();
 }

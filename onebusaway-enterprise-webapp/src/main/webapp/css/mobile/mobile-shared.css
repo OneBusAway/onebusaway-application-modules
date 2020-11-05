@@ -688,3 +688,81 @@ small {
 #mapExpander{
 	cursor: pointer;
 }
+
+/* apc defaults */
+   .apcLadderContainer {
+	   display: inline-block;
+	   height: 0;
+   }
+
+.apcDotG {
+	height: 12px;
+	width: 12px;
+	background-color: #268C0B;
+	border-radius: 50%;
+	display: inline-block;
+}
+
+.apcTextG {
+	color: #268C0B;
+	display: inline-block;
+	white-space: nowrap;
+	font-size: 14px;
+	font-weight: bold;
+}
+
+.apcDotY {
+	height: 12px;
+	width: 12px;
+	background-color: #EF8424;
+	border-radius: 50%;
+	display: inline-block;
+}
+
+.apcTextY {
+	color: #EF8424;
+	display: inline-block;
+	white-space: nowrap;
+	font-size: 14px;
+	font-weight: bold;
+}
+
+.apcDotR {
+	height: 12px;
+	width: 12px;
+	background-color: #CA001F;
+	border-radius: 50%;
+	display: inline-block;
+}
+
+.apcTextR {
+	color: #CA001F;
+	display: inline-block;
+	white-space: nowrap;
+	font-size: 14px;
+	font-weight: bold;
+}
+
+.apcicong {
+	background-image: url("img/apcicong.png");
+	background-repeat: no-repeat;
+	height: 18px;
+	width: 15px;
+	display: inline-block;
+}
+
+.apcicony {
+	background-image: url("img/apcicony.png");
+	background-repeat: no-repeat;
+	height: 18px;
+	width: 15px;
+	display: inline-block;
+}
+
+.apciconr {
+	background-image: url("img/apciconr.png");
+	background-repeat: no-repeat;
+	height: 18px;
+	width: 15px;
+	display: inline-block;
+}

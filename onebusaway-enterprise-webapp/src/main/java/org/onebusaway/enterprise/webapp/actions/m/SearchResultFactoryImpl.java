@@ -62,6 +62,11 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
 
   private TransitDataService _transitDataService;
 
+  private Integer _staleTimeout = null;
+  private Boolean _serviceDateFilter = null;
+  private String _apcMode = null;
+
+
   public SearchResultFactoryImpl(TransitDataService transitDataService,
       RealtimeService realtimeService, ConfigurationService configurationService) {
     _transitDataService = transitDataService;
@@ -79,7 +84,7 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
     List<RouteDirection> directions = new ArrayList<RouteDirection>();
 
       ServiceDate serviceDate = null;
-      boolean serviceDateFilterOn = Boolean.parseBoolean(_configurationService.getConfigurationValueAsString("display.serviceDateFiltering", "false"));
+      boolean serviceDateFilterOn = getServiceDateFilter();
       if (serviceDateFilterOn) serviceDate = new ServiceDate(new Date(SystemTime.currentTimeMillis()));
 
       StopsForRouteBean stopsForRoute;
@@ -187,6 +192,7 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
     return new RouteResult(routeBean, directions, serviceAlertDescriptions);
   }
 
+
   @Override
   public SearchResult getStopResult(StopBean stopBean, Set<RouteBean> routeFilter) {
     List<RouteAtStop> routesWithArrivals = new ArrayList<RouteAtStop>();
@@ -204,7 +210,7 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
       }
 
         ServiceDate serviceDate = null;
-        boolean serviceDateFilterOn = Boolean.parseBoolean(_configurationService.getConfigurationValueAsString("display.serviceDateFiltering", "false"));
+        boolean serviceDateFilterOn = getServiceDateFilter();
         if (serviceDateFilterOn) serviceDate = new ServiceDate(new Date(SystemTime.currentTimeMillis()));
 
         StopsForRouteBean stopsForRoute;
@@ -317,6 +323,8 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
     
     Map<String, List<StopOnRoute>> results = new HashMap<String, List<StopOnRoute>>();
 
+    Boolean showApc = _realtimeService.showApc();
+
     // stop visits
     List<MonitoredStopVisitStructure> visitList = _realtimeService.getMonitoredStopVisitsForStop(
         stopBean.getId(), 0, SystemTime.currentTimeMillis());
@@ -343,7 +351,7 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
       
       String distance = getPresentableDistance(visit.getMonitoredVehicleJourney(),
     		visit.getRecordedAtTime().getTime(), true);
-    	  
+
       String timePrediction = getPresentableTime(visit.getMonitoredVehicleJourney(),
     	 	visit.getRecordedAtTime().getTime(), true);
       
@@ -370,7 +378,50 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
 
     return results;
   }
-  
+
+  private String getPresentableOccupancy(MonitoredVehicleJourneyStructure journey, long updateTime) {
+    // if data is old, no occupancy
+    int staleTimeout = getStaleTimeout();
+    long age = (System.currentTimeMillis() - updateTime) / 1000;
+    if (age > staleTimeout) {
+//      System.out.println("tossing record " + journey.getVehicleRef().getValue()
+//              + " with age " + age + "s old");
+      return "";
+    }
+
+    String apcMode = getApcMode();
+
+    String occupancyStr = "";
+    if (apcMode != null) {
+      occupancyStr = getApcModeOccupancy(journey);
+    }
+    return occupancyStr;
+  }
+
+
+
+  private String getApcModeOccupancy(MonitoredVehicleJourneyStructure journey) {
+
+    if (journey.getOccupancy() != null) {
+
+      String loadOccupancy = journey.getOccupancy().toString();
+      loadOccupancy = loadOccupancy.toUpperCase();
+
+      if (loadOccupancy.equals("SEATS_AVAILABLE") || loadOccupancy.equals("MANY_SEATS_AVAILABLE")) {
+        loadOccupancy = "<div class='apcLadderContainer'><span class='apcDotG'></span> <span class='apcTextG'>Seats Available</span></div>";
+        //loadOccupancy = "<icon class='apcicong'> </icon>";
+      } else if (loadOccupancy.equals("FEW_SEATS_AVAILABLE") || loadOccupancy.equals("STANDING_AVAILABLE")) {
+        loadOccupancy = "<div class='apcLadderContainer'><span class='apcDotY'></span> <span class='apcTextY'>Limited Seating</span></div>";
+        //loadOccupancy = "<icon class='apcicony'> </icon>";
+      } else if (loadOccupancy.equals("FULL")) {
+        loadOccupancy = "<div class='apcLadderContainer'><span class='apcDotR'></span> <span class='apcTextR'>Standing Room Only</span></div>";
+        //loadOccupancy = "<icon class='apciconr'> </icon>";
+      }
+
+      return " " + loadOccupancy;
+    } else
+      return "";
+  }
 
   private void fillDistanceAwayStringsList(
 	  MonitoredVehicleJourney mvj,
@@ -429,7 +480,7 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
 		  return null;
 	  }
 	  
-	  int staleTimeout = _configurationService.getConfigurationValueAsInteger("display.staleTimeout", 120);
+	  int staleTimeout = getStaleTimeout();
 	  long age = (SystemTime.currentTimeMillis() - updateTime) / 1000;
 
 	  if (age > staleTimeout) {
@@ -465,6 +516,7 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
 
     String message = "";
     String distance = "<strong>" + distanceExtension.getPresentableDistance() + "</strong>";
+    String loadOccupancy = getPresentableOccupancy(journey, updateTime);
 
     NaturalLanguageStringStructure progressStatus = journey.getProgressStatus();
 
@@ -488,8 +540,7 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
     	message += "+ scheduled layover at terminal";
     }
     	
-    int staleTimeout = _configurationService.getConfigurationValueAsInteger(
-        "display.staleTimeout", 120);
+    int staleTimeout = getStaleTimeout();
     long age = (SystemTime.currentTimeMillis() - updateTime) / 1000;
 
     if (age > staleTimeout) {
@@ -501,8 +552,29 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
     }
 
     if (message.length() > 0)
+      // here we choose not to show occupancy as it is likely a different trip
       return distance + " (" + message + ")";
     else
-      return distance;
+      return distance + loadOccupancy;
   }
+
+  private int getStaleTimeout() {
+    if (_staleTimeout == null)
+      _staleTimeout = _configurationService.getConfigurationValueAsInteger("display.staleTimeout", 120);
+    return _staleTimeout;
+  }
+
+  private boolean getServiceDateFilter() {
+    if (_serviceDateFilter == null)
+      _serviceDateFilter =  _configurationService.getConfigurationValueAsBoolean("display.serviceDateFiltering", false);
+    return _serviceDateFilter;
+  }
+
+
+  private String getApcMode() {
+    if (_apcMode == null)
+      _apcMode =_configurationService.getConfigurationValueAsString("display.apcMode", "OCCUPANCY");
+    return _apcMode;
+  }
+
 }

@@ -52,6 +52,7 @@ import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTi
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
+import org.onebusaway.util.AgencyAndIdLibrary;
 import org.onebusaway.util.SystemTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -422,6 +423,7 @@ public class GtfsRealtimeTripLibrary {
     record.setBlockId(blockDescriptor.getBlockInstance().getBlock().getBlock().getId());
     // this is the default, trip updates may cancel this trip
     record.setStatus(blockDescriptor.getScheduleRelationship().toString());
+
 
     applyTripUpdatesToRecord(result, blockDescriptor, update.tripUpdates, record, vehicleId, update.bestTrip);
 
@@ -996,12 +998,24 @@ public class GtfsRealtimeTripLibrary {
     return vp.getVehicle().getId();
   }
 
-    public VehicleOccupancyRecord createVehicleOccupancyRecordForUpdate(MonitoredResult result, CombinedTripUpdatesAndVehiclePosition update) {
+    public VehicleOccupancyRecord createVehicleOccupancyRecordForUpdate(MonitoredResult result,
+                                                                        CombinedTripUpdatesAndVehiclePosition update) {
       if (update == null) return null;
       if (update.vehiclePosition == null) return null;
-      if (update.vehiclePosition.hasOccupancyStatus()) {
+      if (update.vehiclePosition.hasOccupancyStatus()
+              && update.vehiclePosition.hasVehicle()
+              && update.vehiclePosition.getVehicle().hasId()
+              && update.bestTrip != null) {  // if we are not on an active trip, we don't store
         VehicleOccupancyRecord vor = new VehicleOccupancyRecord();
+        // here we assume the vehicle's agency matches that of its block
+        vor.setVehicleId(new AgencyAndId(update.block.getBlockInstance().getBlock().getBlock().getId().getAgencyId(), update.block.getVehicleId()));
         vor.setOccupancyStatus(OccupancyStatus.valueOf(update.vehiclePosition.getOccupancyStatus().name()));
+        TripEntry trip = _entitySource.getTrip(update.bestTrip);
+        // link this occupancy to route+direction so it will expire at end of trip
+        if (trip != null && trip.getRoute() != null) {
+          vor.setRouteId(AgencyAndIdLibrary.convertToString(trip.getRoute().getId()));
+          vor.setDirectionId(trip.getDirectionId());
+        }
         if (vor.getOccupancyStatus() == null) {
           // the valueOf failed to match, the spec may have added new fields...
           _log.warn("unmatched occupancy status " + update.vehiclePosition.getOccupancyStatus().name());

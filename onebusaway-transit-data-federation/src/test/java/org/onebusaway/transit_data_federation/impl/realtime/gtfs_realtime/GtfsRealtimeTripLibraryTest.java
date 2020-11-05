@@ -16,13 +16,7 @@
 package org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime;
 
 import static org.junit.Assert.*;
-import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.block;
-import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.blockConfiguration;
-import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.serviceIds;
-import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.stop;
-import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.stopTime;
-import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.time;
-import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.trip;
+import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.*;
 
 import com.google.transit.realtime.GtfsRealtime;
 import org.onebusaway.realtime.api.EVehicleStatus;
@@ -586,6 +580,8 @@ public class GtfsRealtimeTripLibraryTest {
             120, stopTimeUpdate);
 
     TripEntryImpl tripA = trip("tripA");
+    tripA.setRoute(route("routeA"));
+    tripA.setDirectionId("d");
     stopTime(0, stop("stopA", 0, 0), tripA, time(7, 30), 0.0);
     BlockEntryImpl blockA = block("blockA");
     BlockConfigurationEntry blockConfigA = blockConfiguration(blockA,
@@ -617,7 +613,7 @@ public class GtfsRealtimeTripLibraryTest {
 
     FeedMessage.Builder tripUpdates = createFeed();
     GtfsRealtime.VehicleDescriptor.Builder vd = GtfsRealtime.VehicleDescriptor.newBuilder();
-    vd.setId("v1");
+    vd.setId("1_v1");
     tripUpdate.setVehicle(vd);
     tripUpdates.addEntity(feed(tripUpdate));
     FeedMessage.Builder vehiclePositions = createFeed();
@@ -662,6 +658,9 @@ public class GtfsRealtimeTripLibraryTest {
     record = _library.createVehicleOccupancyRecordForUpdate(null, groups.get(0));
     assertNotNull(record);
     assertEquals("FULL", record.getOccupancyStatus().toString().toUpperCase());
+    assertEquals("1_routeA", record.getRouteId());
+    assertEquals("d", record.getDirectionId());
+
 
   }
 

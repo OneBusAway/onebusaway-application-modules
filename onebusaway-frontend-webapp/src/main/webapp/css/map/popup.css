@@ -75,6 +75,12 @@
 	border-left: 1px solid #bebebe;
 }
 
+.popup .occupancy {
+	height: 16px;
+	font-weight: bold;
+	margin-top: 3px;
+}
+
 .popup .header .updated.stale {
     color: #d12020;
 }

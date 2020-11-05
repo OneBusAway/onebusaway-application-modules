@@ -283,7 +283,7 @@ OBA.Popups = (function() {
 		// (end header)
 		html += '</p>';
 		html += '</div>';
-		
+		html += getOccupancyForBus(activity.MonitoredVehicleJourney);
 		// service available at stop
 		if(typeof activity.MonitoredVehicleJourney.MonitoredCall === 'undefined' && (
 			(typeof activity.MonitoredVehicleJourney.OnwardCalls === 'undefined'
@@ -384,6 +384,65 @@ OBA.Popups = (function() {
 		activateAlertLinks(content);
 		
 		return content.get(0);
+	}
+
+	function getOccupancyApcModeOccupancy(MonitoredVehicleJourney, addDashedLine){
+
+		if(MonitoredVehicleJourney.Occupancy === undefined)
+			return '';
+
+		var occupancyLoad = "N/A";
+
+		//console.log('occupancy: '+ MonitoredVehicleJourney.Occupancy);
+
+		if(MonitoredVehicleJourney.Occupancy == "seatsAvailable"){
+			occupancyLoad = '<span class="apcDotG"></span>'+
+				'<span id="apcTextG">Seats Available</span>';
+			if(addDashedLine == true){
+				occupancyLoad += '<div class="apcDashedLine"><img src="img/occupancy/apcLoadG.png"></div>';
+			}
+			//occupancyLoad = '<span class="apcicong"> </span>';
+		}
+		else if(MonitoredVehicleJourney.Occupancy == "standingAvailable"){
+			occupancyLoad = '<span class="apcDotY"></span>'+
+				'<span id="apcTextY">Limited Seating</span>';
+			if(addDashedLine == true){
+				occupancyLoad += '<div class="apcDashedLine"><img src="img/occupancy/apcLoadY.png"></div>';
+			}
+			//occupancyLoad = '<span class="apcicony"> </span>';
+		}
+		else if(MonitoredVehicleJourney.Occupancy == "full"){
+			occupancyLoad = '<span class="apcDotR"></span>'+
+				'<span id="apcTextR">Standing Room Only</span>';
+			if(addDashedLine == true){
+				occupancyLoad += '<div class="apcDashedLine"><img src="img/occupancy/apcLoadR.png"></div>';
+			}
+			//occupancyLoad = '<span class="apciconr"> </span>';
+		}
+
+		return occupancyLoad;
+	}
+
+	function getOccupancy(MonitoredVehicleJourney, addDashedLine){
+		return getOccupancyApcModeOccupancy(MonitoredVehicleJourney, addDashedLine);
+	}
+
+
+	function getOccupancyForBus(MonitoredVehicleJourney){
+		var occupancyLoad = getOccupancy(MonitoredVehicleJourney, true);
+		if (occupancyLoad == '')
+			return '';
+		else
+			return '<p><span class="service">Occupancy: </span> <span class="occupancy">'+occupancyLoad+'</span> </p>';
+
+	}
+
+	function getOccupancyForStop(MonitoredVehicleJourney){
+		var occupancyLoad = getOccupancy(MonitoredVehicleJourney, false);
+		if (occupancyLoad == '')
+			return '';
+		else
+			return occupancyLoad;
 	}
 
 	function getStopContentForResponse(r, popupContainerId, marker, routeFilter) {
@@ -584,7 +643,9 @@ OBA.Popups = (function() {
                          var hasRealtime = monitoredVehicleJourney.Monitored
 
                          if(typeof monitoredVehicleJourney.MonitoredCall !== 'undefined') {
-                             var distance = monitoredVehicleJourney.MonitoredCall.Extensions.Distances.PresentableDistance;
+							 var loadOccupancy = getOccupancyForStop(monitoredVehicleJourney);
+                             var distance = monitoredVehicleJourney.MonitoredCall.Extensions.Distances.PresentableDistance + loadOccupancy;
+
 
                              var timePrediction = null;
                              var expectedArrivalTime = null;
