@@ -244,6 +244,9 @@ class VehicleStatusBeanServiceImpl implements VehicleStatusBeanService {
       }
     }
 
+    if (status.getOccupancyRecord() != null)
+      bean.setOccupancyStatus(status.getOccupancyRecord().getOccupancyStatus());
+
     return bean;
   }
 
