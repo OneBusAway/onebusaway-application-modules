@@ -332,8 +332,8 @@ public final class SiriSupport {
 				return null;
 			case EMPTY:
 			case MANY_SEATS_AVAILABLE:
-			case FEW_SEATS_AVAILABLE:
 				return OccupancyEnumeration.SEATS_AVAILABLE;
+			case FEW_SEATS_AVAILABLE:
 			case STANDING_ROOM_ONLY:
 				return OccupancyEnumeration.STANDING_AVAILABLE;
 			case FULL:
