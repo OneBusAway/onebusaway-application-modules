@@ -30,6 +30,9 @@ if(typeof OBA !== 'undefined' &amp;&amp; typeof OBA.Config !== 'undefined') {
 	OBA.Config.mapZoom=<s:property value="mapZoom" default="null" />;
 	OBA.Config.shortCode='<s:text name="sms.shortcode" />';
 	OBA.Config.stopTerm='<s:text name="stopTerm" />';
+	OBA.Config.occupancy_seatsAvailable='<s:property value="occupancySeatsAvailable" />';
+	OBA.Config.occupancy_standingAvailable='<s:property value="occupancyStandingAvailable" />';
+	OBA.Config.occupancy_full='<s:property value="occupancyFull" />';
 	OBA.Config.txtPrefix='<s:text name="sms.prefix" />';
 	OBA.Config.signDefaultAgencyId='<s:text name="sign.default.agency.id" />';
 	OBA.Config.useAgencyId='<s:property value="useAgencyId" />';

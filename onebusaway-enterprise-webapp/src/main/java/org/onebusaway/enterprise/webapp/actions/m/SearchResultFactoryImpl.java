@@ -27,15 +27,18 @@ import java.util.Set;
 
 import org.onebusaway.geocoder.enterprise.services.EnterpriseGeocoderResult;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
+import org.onebusaway.presentation.impl.realtime.SiriSupport;
 import org.onebusaway.presentation.impl.search.AbstractSearchResultFactoryImpl;
 import org.onebusaway.presentation.model.SearchResult;
 import org.onebusaway.presentation.services.realtime.RealtimeService;
 import org.onebusaway.presentation.services.search.SearchResultFactory;
+import org.onebusaway.realtime.api.OccupancyStatus;
 import org.onebusaway.transit_data.model.*;
 import org.onebusaway.transit_data.model.service_alerts.SituationQueryBean;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.transit_data_federation.siri.SiriDistanceExtension;
 import org.onebusaway.transit_data_federation.siri.SiriExtensionWrapper;
+import org.onebusaway.util.OneBusAwayFormats;
 import org.onebusaway.util.SystemTime;
 import org.onebusaway.util.services.configuration.ConfigurationService;
 import org.onebusaway.enterprise.webapp.actions.m.model.GeocodeResult;
@@ -51,6 +54,7 @@ import uk.org.siri.siri.MonitoredCallStructure;
 import uk.org.siri.siri.MonitoredStopVisitStructure;
 import uk.org.siri.siri.MonitoredVehicleJourneyStructure;
 import uk.org.siri.siri.NaturalLanguageStringStructure;
+import uk.org.siri.siri.OccupancyEnumeration;
 import uk.org.siri.siri.VehicleActivityStructure;
 import uk.org.siri.siri.VehicleActivityStructure.MonitoredVehicleJourney;
 
@@ -65,7 +69,7 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
   private Integer _staleTimeout = null;
   private Boolean _serviceDateFilter = null;
   private String _apcMode = null;
-
+  private Map<String, String> occupancyStatusEnumToDisplay = new HashMap<>();
 
   public SearchResultFactoryImpl(TransitDataService transitDataService,
       RealtimeService realtimeService, ConfigurationService configurationService) {
@@ -407,20 +411,38 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
       String loadOccupancy = journey.getOccupancy().toString();
       loadOccupancy = loadOccupancy.toUpperCase();
 
-      if (loadOccupancy.equals("SEATS_AVAILABLE") || loadOccupancy.equals("MANY_SEATS_AVAILABLE")) {
-        loadOccupancy = "<div class='apcLadderContainer'><span class='apcDotG'></span> <span class='apcTextG'>Seats Available</span></div>";
+      if (loadOccupancy.equals(OccupancyEnumeration.SEATS_AVAILABLE.name()) || loadOccupancy.equals(OccupancyStatus.MANY_SEATS_AVAILABLE.name())) {
+        loadOccupancy = "<div class='apcLadderContainer'><span class='apcDotG'></span> <span class='apcTextG'>" + getOccupancyString(OccupancyEnumeration.SEATS_AVAILABLE.name()) + "</span></div>";
         //loadOccupancy = "<icon class='apcicong'> </icon>";
-      } else if (loadOccupancy.equals("FEW_SEATS_AVAILABLE") || loadOccupancy.equals("STANDING_AVAILABLE")) {
-        loadOccupancy = "<div class='apcLadderContainer'><span class='apcDotY'></span> <span class='apcTextY'>Limited Seating</span></div>";
+      } else if (loadOccupancy.equals(OccupancyEnumeration.STANDING_AVAILABLE.name()) || loadOccupancy.equals(OccupancyStatus.FEW_SEATS_AVAILABLE.name())) {
+        loadOccupancy = "<div class='apcLadderContainer'><span class='apcDotY'></span> <span class='apcTextY'>" + getOccupancyString(OccupancyEnumeration.STANDING_AVAILABLE.name()) + "</span></div>";
         //loadOccupancy = "<icon class='apcicony'> </icon>";
-      } else if (loadOccupancy.equals("FULL")) {
-        loadOccupancy = "<div class='apcLadderContainer'><span class='apcDotR'></span> <span class='apcTextR'>Standing Room Only</span></div>";
+      } else if (loadOccupancy.equals(OccupancyEnumeration.FULL.name()) || loadOccupancy.equals(OccupancyStatus.FULL.name())) {
+        loadOccupancy = "<div class='apcLadderContainer'><span class='apcDotR'></span> <span class='apcTextR'>" + getOccupancyString(OccupancyEnumeration.FULL.name()) + "</span></div>";
         //loadOccupancy = "<icon class='apciconr'> </icon>";
       }
 
       return " " + loadOccupancy;
     } else
       return "";
+  }
+
+  // allow for the occupancy strings to be overridden per local configuration
+  // if not explicitly overridden, prefer GTFS-RT description to SIRI values
+  private String getOccupancyString(String siriEnum) {
+    String occupancyEnum = SiriSupport.mapSiriEnumToOccupancyStatus(siriEnum);
+    String display = occupancyStatusEnumToDisplay.get(occupancyEnum);
+    if (display == null) {
+      display = _configurationService.getConfigurationValueAsString("display.occupancy." + siriEnum, prettyPrintOccupancyEnum(occupancyEnum));
+      occupancyStatusEnumToDisplay.put(occupancyEnum, display);
+    }
+
+    return display;
+  }
+
+
+  private String prettyPrintOccupancyEnum(String loadOccupancy) {
+    return OneBusAwayFormats.toPascalCaseWithSpaces(loadOccupancy);
   }
 
   private void fillDistanceAwayStringsList(

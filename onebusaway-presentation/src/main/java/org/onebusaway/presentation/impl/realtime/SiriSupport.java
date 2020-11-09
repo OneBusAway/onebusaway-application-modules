@@ -30,6 +30,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.presentation.services.realtime.PresentationService;
+import org.onebusaway.realtime.api.OccupancyStatus;
 import org.onebusaway.realtime.api.TimepointPredictionRecord;
 import org.onebusaway.realtime.api.VehicleOccupancyRecord;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
@@ -344,6 +345,19 @@ public final class SiriSupport {
 				return null;
 		}
 	}
+
+	public static String mapSiriEnumToOccupancyStatus(String siriEnum) {
+		if (siriEnum == null) return null;
+
+		if (OccupancyEnumeration.SEATS_AVAILABLE.name().equals(siriEnum))
+			return OccupancyStatus.MANY_SEATS_AVAILABLE.name();
+		if (OccupancyEnumeration.STANDING_AVAILABLE.name().equals(siriEnum))
+			return OccupancyStatus.FEW_SEATS_AVAILABLE.name();
+		if (OccupancyEnumeration.FULL.name().equals(siriEnum))
+			return OccupancyStatus.FULL.name();
+		return OccupancyStatus.UNKNOWN.name();
+	}
+
 
 	/***
 	 * PRIVATE STATIC METHODS
