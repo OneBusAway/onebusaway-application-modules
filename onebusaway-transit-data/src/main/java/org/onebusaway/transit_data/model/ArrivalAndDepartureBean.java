@@ -58,6 +58,8 @@ public class ArrivalAndDepartureBean extends ApplicationBean {
 
   private long predictedDepartureTime;
 
+  private OccupancyStatus occupancyStatus;
+
   private OccupancyStatus historicalOccupancy;
 
   private OccupancyStatus predictedOccupancy;
@@ -210,6 +212,10 @@ public class ArrivalAndDepartureBean extends ApplicationBean {
   public void setPredictedDepartureTime(long predictedDepartureTime) {
     this.predictedDepartureTime = predictedDepartureTime;
   }
+
+  public OccupancyStatus getOccupancyStatus() { return occupancyStatus; }
+
+  public void setOccupancyStatus(OccupancyStatus occupancyStatus) { this.occupancyStatus = occupancyStatus; }
 
   public OccupancyStatus getHistoricalOccupancy() { return historicalOccupancy; }
 

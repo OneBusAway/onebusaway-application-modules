@@ -52,6 +52,8 @@ public class ArrivalAndDepartureV2Bean implements Serializable {
 
   private long predictedDepartureTime;
 
+  private String occupancyStatus;
+
   private String historicalOccupancy;
 
   private String predictedOccupancy;
@@ -312,6 +314,10 @@ public class ArrivalAndDepartureV2Bean implements Serializable {
   public void setPredictedDepartureTime(long predictedDepartureTime) {
     this.predictedDepartureTime = predictedDepartureTime;
   }
+
+  public String getOccupancyStatus() { return occupancyStatus; }
+
+  public void setOccupancyStatus(OccupancyStatus occupancyStatus) { if (occupancyStatus != null) this.occupancyStatus = occupancyStatus.name(); }
 
   public String getHistoricalOccupancy() { return historicalOccupancy; }
 

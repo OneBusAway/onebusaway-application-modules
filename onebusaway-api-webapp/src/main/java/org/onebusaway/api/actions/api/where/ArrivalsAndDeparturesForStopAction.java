@@ -156,8 +156,8 @@ public class ArrivalsAndDeparturesForStopAction extends ApiActionSupport {
       v1.setStopId(stop.getId());
       v1.setTripHeadsign(trip.getTripHeadsign());
       v1.setTripId(trip.getId());
+      v1.setOccupancyStatus(bean.getOccupancyStatus());
       v1.setHistoricalOccupancy(bean.getHistoricalOccupancy());
-//      v1.setPredictedOccupancy(bean.getPredictedOccupancy());
 
       v1s.add(v1);
     }

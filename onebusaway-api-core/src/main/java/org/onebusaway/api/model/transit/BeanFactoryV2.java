@@ -428,6 +428,9 @@ public class BeanFactoryV2 {
       bean.setDistanceAlongTrip(tripStatus.getDistanceAlongTrip());
     bean.setVehicleId(tripStatus.getVehicleId());
 
+    if (tripStatus.getOccupancyStatus() != null)
+      bean.setOccupancyStatus(OccupancyStatus.valueOf(tripStatus.getOccupancyStatus()));
+
     List<ServiceAlertBean> situations = tripStatus.getSituations();
     if (situations != null && !situations.isEmpty()) {
       List<String> situationIds = new ArrayList<String>();
@@ -630,7 +633,7 @@ public class BeanFactoryV2 {
     bean.setVehicleId(vehicleStatus.getVehicleId());
     if (vehicleStatus.getOccupancyStatus() != null &&
             vehicleStatus.getOccupancyStatus() != OccupancyStatus.UNKNOWN) {
-      bean.setOccupancyStatus(vehicleStatus.getOccupancyStatus().valueOf());
+      bean.setOccupancyStatus(vehicleStatus.getOccupancyStatus());
     } else {
       bean.setOccupancyStatus((null));
     }
@@ -883,7 +886,7 @@ public class BeanFactoryV2 {
     bean.setPredictedArrivalTime(ad.getPredictedArrivalTime());
     bean.setPredictedDepartureTime(ad.getPredictedDepartureTime());
     bean.setHistoricalOccupancy(ad.getHistoricalOccupancy());
-//    bean.setPredictedOccupancy(ad.getPredictedOccupancy());
+    bean.setOccupancyStatus(ad.getOccupancyStatus());
 
     bean.setScheduledArrivalInterval(getTimeInterval(ad.getScheduledArrivalInterval()));
     bean.setScheduledDepartureInterval(getTimeInterval(ad.getScheduledDepartureInterval()));
