@@ -635,7 +635,7 @@ public class BeanFactoryV2 {
             vehicleStatus.getOccupancyStatus() != OccupancyStatus.UNKNOWN) {
       bean.setOccupancyStatus(vehicleStatus.getOccupancyStatus());
     } else {
-      bean.setOccupancyStatus((null));
+      bean.setOccupancyStatus(null);
     }
 
     if(vehicleStatus.getOccupancyCount() != null){
