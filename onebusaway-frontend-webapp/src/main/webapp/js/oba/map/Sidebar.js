@@ -585,7 +585,7 @@ OBA.Sidebar = function() {
 
 		routeMap.reset();
 		
-		if (mapGlobalAlerts.find(".global-alert-content").length > 0){
+		if (mapGlobalAlerts.find(".global-alerts-content").length > 0){
 			mapGlobalAlerts.appendTo(contentDiv);
 			resize();
 		}
