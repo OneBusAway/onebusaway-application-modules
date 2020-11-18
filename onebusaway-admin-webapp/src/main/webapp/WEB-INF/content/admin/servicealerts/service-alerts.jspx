@@ -77,7 +77,7 @@
 				<table id="alertsTable">
 					<tr>
 						<th>Active</th>
-						<th>Agency</th>
+						<th>Agency:Source</th>
 						<th>Summary Title</th>
 						<th>Severity</th>
 						<th>Reason</th>
@@ -94,7 +94,7 @@
 							<c:set var="encodedId" value="${fn:substringAfter(encodedId, '=')}" />
 							<tr>
 								<td><s:property value="isActive(serviceAlertBean.publicationWindows)" /></td>
-								<td><s:property value="agency.id" /></td>
+								<td><s:property value="agency.id" />:<s:property value="serviceAlertBean.source" /></td>
 								<td><s:property value="serviceAlertBean.summaries[0].value" /></td>
 								<td><s:property value="serviceAlertBean.severity" /></td>
 								<td><s:property value="serviceAlertBean.reason" /></td>
@@ -125,21 +125,6 @@
 												<a href="#" id="tweetA${alertIdx}" class="tweetCondition">Tweet</a>
 												<div id="tweetDiv${alertIdx}" style="display:none" ><c:out value="${serviceAlertBean.id}" /></div>
 											</span>
-										</s:if>
-										<s:else>
-											<!-- blank -->
-										</s:else>
-									</fieldset>
-								</td>
-
-								<!-- everbridge -->
-								<td>
-									<fieldset>
-										<s:if test="isPageAvailable('showEverbridge', 'org.onebusaway.webapp.actions.admin.servicealerts.ServiceAlertEditAction')">
-											<s:url var="url" action="service-alert-edit!everbridgeAlert.action" namespace="/admin/servicealerts" >
-												<s:param name="alertId" value="serviceAlertBean.id" />
-											</s:url>
-											<a href="${url}" id="everbridgeAlertLink" class="link">Everbridge</a>
 										</s:if>
 										<s:else>
 											<!-- blank -->

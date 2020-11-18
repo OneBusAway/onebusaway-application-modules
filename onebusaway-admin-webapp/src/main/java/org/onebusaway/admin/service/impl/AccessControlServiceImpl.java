@@ -61,7 +61,11 @@ public class AccessControlServiceImpl implements AccessControlService {
 	public boolean userHasPrivilege(User user, Privilege privilege) {
 		if (user == null) { // anonymous user
 			Role role = roleByName.get(StandardAuthoritiesService.ANONYMOUS);
-			return roleHasPrivilege(role, privilege);
+			boolean allowed = roleHasPrivilege(role, privilege);
+			if (!allowed) {
+				_log.warn("user " + user + " denied " + privilege);
+			}
+			return allowed;
 		}
 		
 		Set<UserRole> roles = user.getRoles();
@@ -69,7 +73,7 @@ public class AccessControlServiceImpl implements AccessControlService {
 			
 			Role role = roleByName.get(userRole.getName());
 			if (role == null)
-				_log.info("No privileges found for role " + userRole.getName());
+				_log.warn("No privileges found for role " + userRole.getName());
 			
 			else if (role.hasAllPrivileges() || 
 					(privilege != null && roleHasPrivilege(role, privilege))) {

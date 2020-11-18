@@ -33,8 +33,8 @@
 			
 			<s:if test="%{uniqueServiceAlertsForResults.size&gt;0}">
 				<div class="alerts">
-					<p>
-						<strong>Service Alert for Route:</strong>
+					<p id="serviceAlertHeader">
+						<span>Service Alert Text Here</span>
 					</p>
 					<ul class="alerts">
 						<c:forEach var="uniqueServiceAlert" items="${uniqueServiceAlertsForResults}">
@@ -43,22 +43,35 @@
 					</ul>
 				</div>
 			</s:if>
-		
-			<ul>
-				<li class="direction-jump">Choose your direction:</li>
-				<s:iterator value="directions">
-					<s:url var="url" value="" anchor="%{directionId}"></s:url>
-					<li>
-						<a href="${url}" class="direction-link">
-							to&amp;nbsp;<s:property value="destination" />
-						</a>
-					</li>
-				</s:iterator>
-			</ul>
+
+			<c:choose>
+				<c:when test="${empty directions}">
+					<ul>
+						<p class="noService">
+							No scheduled service today for the <s:property value="shortName" />.
+						</p>
+					</ul>
+				</c:when>
+				<c:when test="${!empty directions}">
+					<ul>
+						<li class="direction-jump">Choose your direction:</li>
+						<s:iterator value="directions">
+							<s:url var="url" value="" anchor="%{id + '__' + directionId}"></s:url>
+							<li class="direction-li">
+								<a href="${url}" class="direction-link">
+									to&amp;nbsp;<s:property value="destination" />
+								</a>
+							</li>
+						</s:iterator>
+					</ul>
+				</c:when>
+			</c:choose>
+
 		</div>
-		
+
 		<s:iterator value="directions">
-			<a name="${directionId}" class="directionAnchor" tabindex="0">&amp;nbsp;</a>
+			<s:set var="routeplusdir" value="%{id + '__' + directionId}"></s:set>
+			<a name="${routeplusdir}" class="directionAnchor" tabindex="0">&amp;nbsp;</a>
 			<div class="directionForRoute">
 				<p class="directionTitle">
 					<strong>

@@ -17,7 +17,9 @@ package org.onebusaway.enterprise.webapp.actions.api.model;
 
 import org.onebusaway.presentation.model.SearchResult;
 import org.onebusaway.transit_data.model.StopBean;
+import org.onebusaway.transit_data.model.StopsForRouteBean;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -32,15 +34,37 @@ public class StopResult implements SearchResult {
 
 	private List<RouteAtStop> routesAvailable;
 
+	private List<StopBean> stops;
+
+	private List<String> stopIdsForRoute = new ArrayList<>();
+
 	public StopResult(StopBean stop, List<RouteAtStop> routesAvailable) {
 		this.stop = stop;
 		this.routesAvailable = routesAvailable;
+	}
+
+	public StopResult(StopBean stop, List<RouteAtStop> routesAvailable, List<StopsForRouteBean> fullStopList) {
+		this.stop = stop;
+		this.routesAvailable = routesAvailable;
+		for (StopsForRouteBean stopsForRouteBean : fullStopList) {
+			this.stops = stopsForRouteBean.getStops();
+			for (StopBean stopBean : stops) {
+				String stopId = stopBean.getId();
+				if (stopIdsForRoute.size() == 0 || !stopIdsForRoute.contains(stopId)) {
+					this.stopIdsForRoute.add(stopId);
+				}
+			}
+		}
 	}
 	
 	public String toString() {
 	  return "{stop=" + stop 
 	      + ", routesAvailable=" + routesAvailable
 	      + "}";
+	}
+
+	public List<String> getStopIdsForRoute() {
+		return stopIdsForRoute;
 	}
 
 	public String getId() {

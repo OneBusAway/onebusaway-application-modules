@@ -158,8 +158,8 @@ OBA.Sidebar = function() {
 	}
 
 	// show user list of addresses
-	function disambiguateLocations(locations) {	
-		
+	function disambiguateLocations(locations) {
+
 		suggestions.find("h2")
 			.text("Did you mean?");
 
@@ -170,7 +170,7 @@ OBA.Sidebar = function() {
 			var latlng = new google.maps.LatLng(location.latitude, location.longitude);
 			var address = location.formattedAddress;
 			var neighborhood = location.neighborhood;
-			
+
 		    // sidebar item
 			var link = jQuery("<a href='#" + location.latitude + "%2C" + location.longitude + "'></a>")
 							.text(address);
@@ -183,7 +183,7 @@ OBA.Sidebar = function() {
 			resultsList.append(listItem);
 
 			// marker
-			var marker = routeMap.addDisambiguationMarker(latlng, address, neighborhood, (i + 1));			
+			var marker = routeMap.addDisambiguationMarker(latlng, address, neighborhood, (i + 1));
 
 			listItem.hover(function() {
 				routeMap.highlightDisambiguationMarker(marker, (i + 1));
@@ -200,12 +200,12 @@ OBA.Sidebar = function() {
 				bounds.extend(latlng);
 			}
 		});
-		
+
 		routeMap.showBounds(bounds);
-		
+
 		suggestions.show();
 	}
-		
+
 	function loadStopsForRouteAndDirection(routeResult, direction, destinationContainer) {
 		var stopsList = destinationContainer.find("ul");
 		
@@ -275,16 +275,16 @@ OBA.Sidebar = function() {
 	}
 	
 	function addRoutesToLegend(routeResults, title, filter, stopId) {
-		
+
 		var filterExistsInResults = false;
-		
+
 		jQuery.each(routeResults, function(_, routeResult) {
 			if (routeResult.shortName === filter) {
 				filterExistsInResults = true;
 				return false;
 			}
 		});
-		
+
 		if(typeof title !== "undefined" && title !== null) {
 			matches.find("h2").text(title);
 		}
@@ -299,7 +299,7 @@ OBA.Sidebar = function() {
 				var serviceAlertList = jQuery("<ul></ul>")
 								.addClass("alerts");
 								
-				var serviceAlertHeader = jQuery("<p class='serviceAlert'>Service Alert for " + getRouteShortName(routeResult) + "</p>")
+				var serviceAlertHeader = jQuery("<p class='serviceAlert'>" + OBA.Config.serviceAlertText + " for " + getRouteShortName(routeResult) + "</p>")
 												.append(jQuery("<span class='click_info'> + Click for info</span>"));
 				
 				var serviceAlertContainer = jQuery("<div></div>")
@@ -329,7 +329,7 @@ OBA.Sidebar = function() {
 				
 				var descriptionBox = jQuery("<p></p>")
 								.addClass("description")
-								.text(routeResult.description);
+								.text(routeResult.description == null ? '' : routeResult.description);
 	
 				var listItem = jQuery("<li></li>")
 								.addClass("legendItem")
@@ -362,6 +362,17 @@ OBA.Sidebar = function() {
 					sensitivity: 10
 				});
 	
+
+				// if we don't have any directions then there is no service today
+				if (routeResult.directions.length == 0) {
+					var noServiceMessage = jQuery("<div></div>")
+						.addClass("no-service")
+						.text("No scheduled service today for the " +
+							getRouteShortName(routeResult));
+
+					descriptionBox.append(noServiceMessage);
+				}
+
 				// direction picker
 				jQuery.each(routeResult.directions, function(_, direction) {
 					var directionHeader = jQuery("<p></p>");
@@ -450,8 +461,6 @@ OBA.Sidebar = function() {
 			filteredMatches.find("li").width(maxWidth);
 		}
 	}
-	
-	
 
 	// show multiple route choices to user
 	function showRoutePickerList(routeResults) {	
@@ -576,7 +585,7 @@ OBA.Sidebar = function() {
 
 		routeMap.reset();
 		
-		if (mapGlobalAlerts.find(".global-alert-content").length > 0){
+		if (mapGlobalAlerts.find(".global-alerts-content").length > 0){
 			mapGlobalAlerts.appendTo(contentDiv);
 			resize();
 		}
@@ -610,8 +619,8 @@ OBA.Sidebar = function() {
 		if(searchRequest !== null) {
 			searchRequest.abort();
 		}		
-		searchRequest = jQuery.getJSON(OBA.Config.searchUrl + "?callback=?", { q: q }, function(json) { 
-			
+		searchRequest = jQuery.getJSON(OBA.Config.searchUrl + "?callback=?", { q: q }, function(json) {
+
 			// Be sure the autocomplete list is closed
 			jQuery("#searchbar form input[type=text]").autocomplete("close");
 			
@@ -625,12 +634,28 @@ OBA.Sidebar = function() {
 			
 			var routeFilter = json.searchResults.routeFilter;
 			var routeFilterShortName;
+
+            // Get stopIds for coloring stops in RouteMap.js
+            var stopsOnRoutes = { stops:[] };
+
+            jQuery.each(matches, function(_, match) {
+                if (match.stopIdsForRoute) {
+                    jQuery.each(match.stopIdsForRoute, function (_, stop) {
+                        if (stopsOnRoutes.stops.length < 1 || stopsOnRoutes.stops.indexOf(stop.id) === -1) {
+                            stopsOnRoutes.stops.push(stop);
+                        }
+                    });
+                }
+			});
+
+            jQuery("body").data( "savedData", stopsOnRoutes);
+
 			if (routeFilter.length > 0) {
 				routeFilterShortName = routeFilter[0].shortName;
 			}
 
 			OBA.Config.analyticsFunction("Search", q + " [M:" + matches.length + " S:" + suggestions.length + "]");
-			
+
 			if(empty === true) {
 				showNoResults("No matches.");
 				return;
@@ -732,9 +757,7 @@ OBA.Sidebar = function() {
 			}
 		});
 	}
-	
-	
-	
+
 	return {
 		initialize: function() {
 			addSearchBehavior();
@@ -743,7 +766,7 @@ OBA.Sidebar = function() {
 			
 			// Add behavior to the close link in the global alert dialog under the map
 			// so it closes when the link is clicked.
-			mapGlobalAlerts.find("a").click(function(event){
+			mapGlobalAlerts.find("a#closeMapGlobalAlerts").click(function(event){
 				event.preventDefault();
 				mapGlobalAlerts.detach();
 				resize();
@@ -789,11 +812,13 @@ OBA.Sidebar = function() {
 					serviceAlertsList.empty();
 					
 					var showAlerts = false;
-					var moreInfoLinkPrefix = "";
-					var moreInfoLinkSuffix = "";
+					var alertIds = [];
 			        
 					jQuery.each(serviceAlerts, function(_, serviceAlert) {
-				        if (serviceAlert.InfoLinks && serviceAlert.InfoLinks.InfoLink.length > 0) {
+						var moreInfoLinkPrefix = "";
+						var moreInfoLinkSuffix = "";
+
+						if (serviceAlert.InfoLinks && serviceAlert.InfoLinks.InfoLink.length > 0) {
 				        	moreInfoLinkPrefix = ' <a href="' + serviceAlert.InfoLinks.InfoLink[0].Uri + '" target="alert">';
 				        	moreInfoLinkSuffix = "</a>";
 				        }
@@ -801,16 +826,27 @@ OBA.Sidebar = function() {
 						// If this is not a global alert, display it
 						if (!serviceAlert.Affects.Operators || (serviceAlert.Affects.Operators && !serviceAlert.Affects.Operators.hasOwnProperty("AllOperators"))) {
 							var text = null;
-							
-							if(typeof serviceAlert.Description !== 'undefined') {
+							if(typeof serviceAlert.Description !== 'undefined' && typeof serviceAlert.Summary !== 'undefined') {
+								// we have a service alert with both summary and description, do a little formatting
+								if (serviceAlert.Summary == serviceAlert.Description) {
+									text = '<strong>' + serviceAlert.Summary + '</strong>';
+								} else {
+									text = '<strong>' + serviceAlert.Summary + '</strong><br/><br/>' + serviceAlert.Description;
+								}
+							} else if(typeof serviceAlert.Description !== 'undefined') {
 								text = serviceAlert.Description;
 							} else if(typeof serviceAlert.Summary !== 'undefined') {
 								text = serviceAlert.Summary;
 							}
 							text = moreInfoLinkPrefix + text + moreInfoLinkSuffix;
 							if(text !== null) {
-								serviceAlertsList.append(jQuery("<li></li>").html(text.replace(/\n/g, "<br/>")));
-								showAlerts = true;
+								text = text.replace(/\n/g, "<br/>");
+								var newText = jQuery("<li></li>").html(text);
+								if (!alertIds.includes(serviceAlert.SituationNumber)) {
+									alertIds.push(serviceAlert.SituationNumber)
+									serviceAlertsList.append(newText);
+									showAlerts = true;
+								}
 							}
 						}
 					});

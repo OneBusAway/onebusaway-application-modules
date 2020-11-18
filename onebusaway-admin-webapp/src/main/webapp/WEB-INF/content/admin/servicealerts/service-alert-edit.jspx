@@ -40,11 +40,38 @@
 	
 </script>
 
+<s:url var="url" value="/js/oba/RemoteConfig.js">
+	<s:param name="v"><s:property value="frontEndVersion" /></s:param>
+</s:url>
+<script type="text/javascript" src="${url}"><!-- //prevent jspx minimization --></script>
+
 <s:url var="url" value="/js/lib/jquery.ui.js" />
 <script type="text/javascript" src="${url}">
 <!-- //prevent jspx minimization -->
 	
 </script>
+
+<s:url var="url" value="/js/lib/jquery.timepicker-1.3.5.min.js">
+	<!-- //prevent jspx minimization -->
+</s:url>
+<script type="text/javascript" src="${url}">
+	<!-- //prevent jspx minimization -->
+
+</script>
+<s:url var="url" value="/css/jquery.timepicker-1.3.5.min.css">
+	<!-- //prevent jspx minimization -->
+</s:url>
+<link rel="stylesheet" type="text/css" href="${url}" ></link>
+
+<s:url var="url" value="/api/remote-config.action">
+	<s:param name="v"><s:property value="frontEndVersion" /></s:param>
+</s:url>
+<script type="text/javascript" src="${url}"><!-- //prevent jspx minimization --></script>
+
+<s:url var="url" value="/js/oba/Util.js">
+	<s:param name="v"><s:property value="frontEndVersion" /></s:param>
+</s:url>
+<script type="text/javascript" src="${url}"><!-- //prevent jspx minimization --></script>
 
 <s:url var="url" value="/js/oba/service-alerts.js">
 	<!-- //prevent jspx minimization -->
@@ -78,12 +105,17 @@
 		</div>
 	</s:if>
 	<s:form action="service-alert">
+		<input type="hidden"
+			   id="csrfField"
+			   name="${_csrf.parameterName}"
+			   value="${_csrf.token}"/>
 		<div id="describeAlertDiv">
 			<span  id="describeAlertHeader">Step 1: Describe the alert</span>
 			<div id="describeAlertsTableDiv">
 				<table>
-					<s:textfield label="Summary Title" name="summary" value="%{summary}" theme="xhtml"/>
-					<s:textarea label="Detailed Description" name="description" value="%{description}" cols="80" rows="5" theme="xhtml"/>
+					<s:textfield label="Summary Title" name="summary" value="%{summary}" theme="xhtml" maxchars="4000"/>
+					<s:textarea label="Detailed Description" name="description" value="%{description}" cols="80" rows="5" theme="xhtml" maxchars="4000"/>
+					<s:textfield label="link" id="link" name="link" value="%{link}" theme="xhtml" size="80" maxchars="4000" />
 					<s:select label="Reason" name="reason" headerKey="null" 
 						headerValue="What caused this situation?" list="reasonValues" 
 						value="model.reason"
@@ -95,9 +127,27 @@
 						listKey="%{agency.id}" listValue="%{agency.name}" theme="xhtml"/>
 					<s:if test="%{!favorite}" >	
 						<s:textfield label="Start Date" id="publicationWindowStartDate" name="startDate" value="%{startDate}" theme="xhtml"/>
+						<s:textfield label="Start Time" id="publicationWindowStartTime" name="startTime" value="%{startTime}" theme="xhtml" autocomplete="off" class="time ui-timepicker-input"></s:textfield>
 						<s:textfield label="End Date" id="publicationWindowEndDate" name="endDate" value="%{endDate}" theme="xhtml"/>
+						<s:textfield label="End Time" id="publicationWindowEndTime" name="endTime" value="%{endTime}" theme="xhtml" autocomplete="off" class="time ui-timepicker-input"></s:textfield>
 					</s:if>
+					<!-- these help in debugging -->
+<!--					<s:textfield label="favorite status" id="favorite status" name="favorite status" value="%{favorite}" theme="xhtml" />-->
+<!--					<s:textfield label="source" id="source" name="source" value="%{model.source}" theme="xhtml" />-->
 				</table>
+
+
+
+				<script type="text/javascript">
+                    $( "#publicationWindowStartTime" ).timepicker(
+                        {
+                            timeFormat: 'HH:mm'
+                        });
+                    $( "#publicationWindowEndTime" ).timepicker(
+                        {
+                            timeFormat: 'HH:mm'
+                        });
+				</script>
 			</div>
 			<s:hidden name="alertId" value="%{model.id}"/>
 			<s:hidden name="favorite" value="%{favorite}"/>
@@ -109,7 +159,11 @@
 				<table id="conditionTable">
 				<s:set var="letterArray" value='{"A","B","C","D","E","F","G",
 					"H","I","J","K","L","M","N","O","P","Q","R","S","T","U",
-					"V","W","X","Y","Z"}' />
+					"V","W","X","Y","Z","AA","AB","AC","AD","AE","AF","AG",
+					"AH","AI","AJ","AK","AL","AM","AN","AO","AP","AQ","AR","AS","AT","AU",
+					"AV","AW","AX","AY","AZ","BA","BB","BC","BD","BE","BF","BG",
+					"BH","BI","BJ","BK","BL","BM","BN","BO","BP","BQ","BR","BS","BT","BU",
+					"BV","BA","BX","BY","BZ"}' />
 				<s:iterator value="model.allAffects" status="rowStatus" >
 				<s:if test="%{agencyId!=null || routeId!=null || stopId!=null}" >
 					<tr class="affectsClause">
@@ -124,17 +178,21 @@
 					<td>
 						<table class="affectsClauseConditions">
 							<s:select label="Agency" cssClass="alertCondition"
-								name="allAffects[%{#rowStatus.index}].agencyId" headerKey="null" 
-								headerValue="Select agency affected" list="agencies" 
-								listKey="agency.id" listValue="agency.name" 
+								name="allAffects[%{#rowStatus.index}].agencyId" headerKey="null"
+								headerValue="Select agency affected" list="affectedAgencies"
+								listKey="agency.id" listValue="agency.name"
 								value="agencyId" theme="xhtml"/>
 							<s:textfield label="Route" cssClass="alertCondition"
 								name="allAffects[%{#rowStatus.index}].routeId" value="%{routeId}" theme="xhtml"/>
+							<td style="text-align:center" colspan="2" id="routeValidation${rowStatus.index}">Click Validate to lookup Route</td>
 							<s:textfield label="Stop" cssClass="alertCondition"
 								name="allAffects[%{#rowStatus.index}].stopId" value="%{stopId}" theme="xhtml"/>
+							<td style="text-align:center" colspan="2" id="stopValidation${rowStatus.index}">Click Validate to lookup Stop</td>
+
 						</table>
 					</td>
-					<td class="deleteCondition">Delete Condition</td>
+						<td id="validateCondition${rowStatus.index}" class="validateCondition">Validate</td>
+						<td class="deleteCondition">Delete Condition</td>
 					</tr>
 				</s:if>
 				</s:iterator>
@@ -149,16 +207,19 @@
 					<td>
 						<table class="affectsClauseConditions">
 							<s:select label="Agency" cssClass="alertCondition"
-								name="allAffects[0].agencyId" headerKey="null" 
-								headerValue="Select agency affected" list="agencies" 
-								listKey="agency.id" listValue="agency.name" 
+								name="allAffects[0].agencyId" headerKey="null"
+								headerValue="Select agency affected" list="affectedAgencies"
+								listKey="agency.id" listValue="agency.name"
 								theme="xhtml"/>
 							<s:textfield label="Route" cssClass="alertCondition"
 								name="allAffects[0].routeId" theme="xhtml"/>
+							<td style="text-align:center" colspan="2" id="routeValidation0">Click Validate to lookup Route</td>
 							<s:textfield label="Stop" cssClass="alertCondition"
 								name="allAffects[0].stopId" theme="xhtml"/>
+							<td style="text-align:center" colspan="2" id="stopValidation0">Click Validate to lookup Stop</td>
 						</table>
 					</td>
+					<td id="validateCondition0" class="validateCondition">Validate</td>
 					<td class="deleteCondition">Delete Condition</td>
 					</tr>
 				</s:if>
@@ -172,9 +233,9 @@
 			</s:if>
 			<s:submit value="Cancel" name="cancel" method="cancel" />
 			<s:submit value="Save" name="submit" />
-			
 		</div>
 	</s:form>
 </div>
 </body>
+
 </html>

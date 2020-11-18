@@ -31,7 +31,7 @@ import org.onebusaway.transit_data.model.RouteBean;
 import org.onebusaway.transit_data.model.StopBean;
 import org.onebusaway.transit_data.model.StopsForRouteBean;
 import org.onebusaway.transit_data.services.TransitDataService;
-import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
+import org.onebusaway.util.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
 import org.slf4j.Logger;

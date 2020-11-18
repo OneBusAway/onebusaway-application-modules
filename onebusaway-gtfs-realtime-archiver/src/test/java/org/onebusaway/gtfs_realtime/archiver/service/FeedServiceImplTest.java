@@ -16,7 +16,10 @@
 package org.onebusaway.gtfs_realtime.archiver.service;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
+import org.hibernate.Query;
+import org.hibernate.Session;
 import org.onebusaway.gtfs_realtime.archiver.listener.GtfsRealtimeEntitySource;
 import org.onebusaway.gtfs_realtime.model.AlertModel;
 import org.onebusaway.gtfs_realtime.model.EntitySelectorModel;
@@ -45,21 +48,18 @@ import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.orm.hibernate3.HibernateTemplate;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.AbstractTransactionalJUnit4SpringContextTests;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.transaction.TransactionConfiguration;
 import org.springframework.transaction.annotation.Transactional;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = {
     "classpath:service-alerts-data-sources.xml",
     "classpath:org/onebusaway/archiver/application-context-testing.xml"})
-@TransactionConfiguration(transactionManager = "transactionManager")
-@Transactional
-public class FeedServiceImplTest
-    extends AbstractTransactionalJUnit4SpringContextTests {
+@Transactional(transactionManager = "transactionManager")
+public class FeedServiceImplTest {
   private GtfsRealtimeEntitySource _entitySource;
 
   private static final long NOW = System.currentTimeMillis();
@@ -97,34 +97,25 @@ public class FeedServiceImplTest
 
   private static Logger _log = LoggerFactory.getLogger(FeedServiceImpl.class);
 
-  private FeedServiceImpl _feedService;
-  private GtfsPersistor _persistor;
+  @Autowired
+  @Qualifier("feedServiceImpl")
+  private FeedService _feedService;
 
+  @Autowired
+  @Qualifier("gtfsRealtimeArchiveSessionFactory")
   private SessionFactory _sessionFactory;
-  private HibernateTemplate _template;
 
-  @Autowired
-  public void setGtfsPersistor(GtfsPersistor persistor) {
-    _persistor = persistor;
-  }
-
-  @Autowired
-  public void setFeedService(FeedServiceImpl feedService) {
-    _feedService = feedService;
-  }
-
-  @Autowired
-  public void setSessionFactory(SessionFactory sessionFactory) {
-    _sessionFactory = sessionFactory;
+  private Session getSession() {
+    return _sessionFactory.getCurrentSession();
   }
 
   @Before
   public void setup() throws IOException {
     _entitySource = Mockito.mock(GtfsRealtimeEntitySource.class);
-    _template = new HibernateTemplate(_sessionFactory);
   }
 
   @Test
+  @Transactional
   public void testReadAlerts() {
     // Create GTFS Feed with service alerts
     FeedEntity alertEntityA = createAlert("alertA", TEST_1, DESC_1, CAUSE_1,
@@ -152,12 +143,13 @@ public class FeedServiceImplTest
 
     // Get data that was persisted to the database
     try {
-      alertsFromDB = (Collection<AlertModel>) _template.find("from AlertModel");
+      Query query = getSession().createQuery("from AlertModel");
+      alertsFromDB = query.list();
     } catch (Exception ex) {
       ex.getMessage();
       _log.info("find failed: " + ex.getMessage());
     }
-
+    assertNotNull("database query failed!", alertsFromDB);
     // Check persisted data against the original value.
     _log.info("results size: " + alertsFromDB.size());
     assertEquals(3, alertsFromDB.size());

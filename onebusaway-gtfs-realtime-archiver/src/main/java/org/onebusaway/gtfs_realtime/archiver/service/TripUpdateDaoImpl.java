@@ -19,6 +19,8 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
+import org.hibernate.Criteria;
+import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Restrictions;
@@ -27,7 +29,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.orm.hibernate3.HibernateTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,27 +41,33 @@ public class TripUpdateDaoImpl implements TripUpdateDao {
 
   protected static Logger _log = LoggerFactory.getLogger(
       TripUpdateDaoImpl.class);
-  private HibernateTemplate _template;
+  private SessionFactory _sessionFactory;
 
   @Autowired
   @Qualifier("gtfsRealtimeArchiveSessionFactory")
   public void setSessionFactory(SessionFactory sessionFactory) {
-    _template = new HibernateTemplate(sessionFactory);
+    _sessionFactory = sessionFactory;
+  }
+
+  private Session getSession(){
+    return _sessionFactory.getCurrentSession();
   }
 
   @Transactional(rollbackFor = Throwable.class)
   @Override
   public void saveOrUpdate(TripUpdateModel... array) {
-    _template.saveOrUpdateAll(Arrays.asList(array));
-    _template.flush();
-    _template.clear();
+    for (int i = 0; i< array.length; i++) {
+      getSession().saveOrUpdate(array[i]);
+    }
+    getSession().flush();
+    getSession().clear();
   }
   
   @Override
   public List<TripUpdateModel> findByDate(Date startDate, Date endDate) {
-    DetachedCriteria criteria = DetachedCriteria.forClass(TripUpdateModel.class);
+    Criteria criteria = getSession().createCriteria(TripUpdateModel.class);
     criteria.add(Restrictions.between("timestamp", startDate, endDate));
-    return (List<TripUpdateModel>)  _template.findByCriteria(criteria);
+    return criteria.list();
   }
 
 }

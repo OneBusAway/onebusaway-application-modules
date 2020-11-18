@@ -20,11 +20,12 @@
 <html xmlns:jsp="http://java.sun.com/JSP/Page"
 	xmlns:c="http://java.sun.com/jsp/jstl/core" 
 	xmlns:fn="http://java.sun.com/jsp/jstl/functions"
-	xmlns:s="/struts-tags">
+	xmlns:s="/struts-tags"
+    xmlns:sec="http://www.springframework.org/security/tags">
 <jsp:directive.page contentType="text/html" />
 <head>
 <title>Create, Update or Delete users/roles</title>
-
+<sec:csrfMetaTags />
 <s:url var="url" value="/css/jquery-ui.css"/>
 <link rel="stylesheet" href="${url}" type="text/css"/>
 
@@ -137,6 +138,7 @@
 				 	<div id="editRole">
 				 		<label class="userLabel">New Role:</label>
 				 		<select name="Role" id="newRole">
+								<option></option>
 				 			<c:forEach items="${possibleRoles}" var="role">
 				 				<option value="${role}">${fn:split(role, "_")[1]}</option>
 				 			</c:forEach>

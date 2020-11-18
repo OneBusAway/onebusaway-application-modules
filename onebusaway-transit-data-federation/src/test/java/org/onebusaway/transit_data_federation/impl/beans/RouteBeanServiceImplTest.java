@@ -53,7 +53,7 @@ import org.onebusaway.transit_data_federation.impl.transit_graph.StopEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.TripEntryImpl;
 import org.onebusaway.transit_data_federation.model.narrative.RouteCollectionNarrative;
 import org.onebusaway.transit_data_federation.model.narrative.TripNarrative;
-import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
+import org.onebusaway.util.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.RouteService;
 import org.onebusaway.transit_data_federation.services.beans.AgencyBeanService;
 import org.onebusaway.transit_data_federation.services.beans.ShapeBeanService;
@@ -220,11 +220,11 @@ public class RouteBeanServiceImplTest {
     Mockito.when(_routeService.getStopsForRouteCollection(routeId)).thenReturn(
         stopIds);
 
-    Mockito.when(_stopBeanService.getStopForId(stopA.getId())).thenReturn(
+    Mockito.when(_stopBeanService.getStopForId(stopA.getId(), null)).thenReturn(
         stopBeanA);
-    Mockito.when(_stopBeanService.getStopForId(stopB.getId())).thenReturn(
+    Mockito.when(_stopBeanService.getStopForId(stopB.getId(), null)).thenReturn(
         stopBeanB);
-    Mockito.when(_stopBeanService.getStopForId(stopC.getId())).thenReturn(
+    Mockito.when(_stopBeanService.getStopForId(stopC.getId(), null)).thenReturn(
         stopBeanC);
 
     AgencyAndId shapeId = new AgencyAndId("1", "shapeId");

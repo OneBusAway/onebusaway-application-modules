@@ -29,6 +29,7 @@ import org.onebusaway.transit_data.model.trips.TripDetailsBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsQueryBean;
 import org.onebusaway.transit_data.model.trips.TripStatusBean;
 import org.onebusaway.transit_data.services.TransitDataService;
+import org.onebusaway.util.SystemTime;
 import org.onebusaway.util.services.configuration.ConfigurationService;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -76,6 +77,10 @@ public class TripAction extends ActionSupport {
 
   public String getGoogleAdClientId() {
 	return _configurationService.getConfigurationValueAsString("display.googleAdsClientId", "");    
+  }
+
+  public String getGoogleMapsApiKey() {
+    return _configurationService.getConfigurationValueAsString("display.googleMapsApiKey", "");
   }
 
   public void setId(String id) {
@@ -154,7 +159,7 @@ public class TripAction extends ActionSupport {
       return INPUT;
 
     if (_time == null)
-      _time = new Date();
+      _time = new Date(SystemTime.currentTimeMillis());
 
     TripDetailsQueryBean query = new TripDetailsQueryBean();
     query.setTripId(_id);

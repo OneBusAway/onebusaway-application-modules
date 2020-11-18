@@ -18,6 +18,7 @@
  */
 package org.onebusaway.transit_data_federation.impl.realtime;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -41,9 +42,11 @@ import org.onebusaway.collections.Range;
 import org.onebusaway.container.ConfigurationParameter;
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.realtime.api.EVehicleStatus;
 import org.onebusaway.realtime.api.EVehicleType;
 import org.onebusaway.realtime.api.TimepointPredictionRecord;
 import org.onebusaway.realtime.api.VehicleLocationRecord;
+import org.onebusaway.transit_data.model.TransitDataConstants;
 import org.onebusaway.transit_data_federation.model.TargetTime;
 import org.onebusaway.transit_data_federation.services.blocks.BlockCalendarService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
@@ -135,9 +138,9 @@ public class BlockLocationServiceImpl implements BlockLocationService,
 
   /**
    * Should we sample the schedule deviation history?
-   * (this is true for historical reasons)
+   * (expensive -- off by default)
    */
-  private boolean _sampleScheduleDeviationHistory = true;
+  private boolean _sampleScheduleDeviationHistory = false;
 
   /**
    * We queue up block location records so they can be bulk persisted to the
@@ -312,9 +315,9 @@ public class BlockLocationServiceImpl implements BlockLocationService,
       ScheduledBlockLocation scheduledBlockLocation = getScheduledBlockLocationForVehicleLocationRecord(
           record, instance);
 
-      if (!record.isScheduleDeviationSet()) {
-        int deviation = (int) ((record.getTimeOfRecord() - record.getServiceDate()) / 1000 - scheduledBlockLocation.getScheduledTime());
-        record.setScheduleDeviation(deviation);
+      if (!record.isScheduleDeviationSet() && scheduledBlockLocation != null ) {
+          int deviation = (int) ((record.getTimeOfRecord() - record.getServiceDate()) / 1000 - scheduledBlockLocation.getScheduledTime());
+          record.setScheduleDeviation(deviation);
       }
 
       ScheduleDeviationSamples samples = null;
@@ -323,7 +326,7 @@ public class BlockLocationServiceImpl implements BlockLocationService,
                 instance, record, scheduledBlockLocation);
       }
 
-      putBlockLocationRecord(instance, record, scheduledBlockLocation, samples);
+        putBlockLocationRecord(instance, record, scheduledBlockLocation, samples);
     }
   }
 
@@ -539,6 +542,7 @@ public class BlockLocationServiceImpl implements BlockLocationService,
     location.setBlockInstance(blockInstance);
 
     VehicleLocationCacheElement cacheElement = null;
+    boolean isCancelled = false;
     if (cacheElements != null)
       cacheElement = cacheElements.getElementForTimestamp(targetTime);
 
@@ -570,11 +574,14 @@ public class BlockLocationServiceImpl implements BlockLocationService,
       }
       location.setOrientation(record.getCurrentOrientation());
       location.setPhase(record.getPhase());
+      if (TransitDataConstants.STATUS_CANCELED.equals(record.getStatus())) {
+        isCancelled = true;
+        _log.debug("vehicle " + record.getVehicleId() + " is cancelled");
+      }
       location.setStatus(record.getStatus());
       location.setVehicleId(record.getVehicleId());
 
       List<TimepointPredictionRecord> timepointPredictions = record.getTimepointPredictions();
-      location.setTimepointPredictions(timepointPredictions);
       if (timepointPredictions != null && !timepointPredictions.isEmpty()) {
 
         SortedMap<Integer, Double> scheduleDeviations = new TreeMap<Integer, Double>();
@@ -583,6 +590,7 @@ public class BlockLocationServiceImpl implements BlockLocationService,
 
         int tprIndexCounter = 0;
         for (TimepointPredictionRecord tpr : timepointPredictions) {
+
           AgencyAndId stopId = tpr.getTimepointId();
           long predictedTime;
           if (tpr.getTimepointPredictedDepartureTime() != -1) {
@@ -592,7 +600,6 @@ public class BlockLocationServiceImpl implements BlockLocationService,
           }
           if (stopId == null || predictedTime == 0)
             continue;
-
           for (BlockStopTimeEntry blockStopTime : blockConfig.getStopTimes()) {
             StopTimeEntry stopTime = blockStopTime.getStopTime();
             StopEntry stop = stopTime.getStop();
@@ -608,7 +615,7 @@ public class BlockLocationServiceImpl implements BlockLocationService,
                 }
                 
                 // If this isn't the last prediction, and we're on the first stop, then apply it
-                if (isLastPrediction(stopTime, timepointPredictions, tpr, tprIndexCounter) 
+                if (isLastPrediction(stopTime, timepointPredictions, tpr, tprIndexCounter)
                     && isFirstStopInRoute(stopTime)) {
                   // Do not calculate schedule deviation
                   continue;
@@ -637,6 +644,7 @@ public class BlockLocationServiceImpl implements BlockLocationService,
           }
           tprIndexCounter++;
         }
+        location.setTimepointPredictions(timepointPredictions);
 
         double[] scheduleTimes = new double[scheduleDeviations.size()];
         double[] scheduleDeviationMus = new double[scheduleDeviations.size()];
@@ -669,8 +677,13 @@ public class BlockLocationServiceImpl implements BlockLocationService,
      * 2) When the effective distance along block is outside the range of the
      * block's shape.
      */
-    if (scheduledLocation == null)
+    if (scheduledLocation == null) {
+      if (isCancelled) {
+        // we need to let the record flow through if cancelled
+        return location;
+      }
       return null;
+    }
 
     // if we have route info, set the vehicleType
     if (scheduledLocation.getActiveTrip() != null
@@ -1071,11 +1084,14 @@ public class BlockLocationServiceImpl implements BlockLocationService,
 
     List<BlockLocationRecord> results = new ArrayList<BlockLocationRecord>();
     for (TimepointPredictionRecord tpr : predictions) {
-      builder.setTimepointId(tpr.getTimepointId());
-      builder.setTimepointScheduledTime(tpr.getTimepointScheduledTime());
-      builder.setTimepointPredictedArrivalTime(tpr.getTimepointPredictedArrivalTime());
-      builder.setTimepointPredictedDepartureTime(tpr.getTimepointPredictedDepartureTime());
-      results.add(builder.create());
+      // because the builder does not support schedule relationship suppress skipped stops
+      if (!tpr.isSkipped()) {
+        builder.setTimepointId(tpr.getTimepointId());
+        builder.setTimepointScheduledTime(tpr.getTimepointScheduledTime());
+        builder.setTimepointPredictedArrivalTime(tpr.getTimepointPredictedArrivalTime());
+        builder.setTimepointPredictedDepartureTime(tpr.getTimepointPredictedDepartureTime());
+        results.add(builder.create());
+      }
     }
     return results;
   }

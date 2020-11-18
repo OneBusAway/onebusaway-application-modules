@@ -75,6 +75,85 @@
 	border-left: 1px solid #bebebe;
 }
 
+.popup .occupancy {
+	height: 16px;
+	font-weight: bold;
+	margin-top: 3px;
+}
+
+.popup .apcDotG {
+	height: 12px;
+	width: 12px;
+	background-color: #268C0B;
+	border-radius: 50%;
+	display: inline-block;
+}
+#apcTextG {
+	color: #268C0B;
+	display: inline-block;
+	white-space: nowrap;
+	font-size: 12px;
+	font-weight: bold;
+}
+
+.popup .apcDotY {
+	height: 12px;
+	width: 12px;
+	background-color: #EF8424;
+	border-radius: 50%;
+	display: inline-block;
+}
+#apcTextY {
+	color: #EF8424;
+	display: inline-block;
+	white-space: nowrap;
+	font-size: 12px;
+	font-weight: bold;
+}
+.popup .apcDotR {
+	height: 12px;
+	width: 12px;
+	background-color: #CA001F;
+	border-radius: 50%;
+	display: inline-block;
+}
+#apcTextR {
+	color: #CA001F;
+	display: inline-block;
+	white-space: nowrap;
+	font-size: 12px;
+	font-weight: bold;
+}
+
+.popup .apcDashedLine {
+	margin-top: -1px;
+	height: 10px;
+}
+
+.popup .apcicong {
+	background-image: url("img/apcicong.png");
+	background-repeat: no-repeat;
+	height: 12px;
+	width: 10px;
+	display: inline-block;
+}
+
+.popup .apcicony {
+	background-image: url("img/apcicony.png");
+	background-repeat: no-repeat;
+	height: 12px;
+	width: 10px;
+	display: inline-block;
+}
+
+.popup .apciconr {
+	background-image: url("img/apciconr.png");
+	background-repeat: no-repeat;
+	height: 12px;
+	width: 10px;
+	display: inline-block;
+}
+
 .popup .header .updated.stale {
     color: #d12020;
 }
@@ -100,15 +179,29 @@
   	color: #d12020;
 }
 
-.popup .serviceAlertContainer {
+.popup .popupServiceAlertContainer {
 	color: #d12020;
 	background-color: #FDEEF4;
+    font-size: 12px;
+    width: 300px;
+    padding-bottom: 5px;
 }
 
-.popup .serviceAlertContainer .alerts li {
-	padding-left: 10px;
-	padding-right: 10px;
-	padding-bottom: 10px;
+.popup .ui-state-focus {
+    outline: none;
+}
+
+.popup p.popupServiceAlert {
+    color: #D12020;
+    font-weight: bold;
+    font-size: 13px;
+    padding: 5px 5px 5px 5px;
+    position: relative;
+    cursor: pointer;
+}
+
+.popup .popupAlerts li {
+	padding: 5px 5px 5px 10px;
 	color: #D12020;
 	font-size: 13px;
 	line-height: 1.2em;

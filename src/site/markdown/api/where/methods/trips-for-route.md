@@ -47,4 +47,5 @@ http://api.pugetsound.onebusaway.org/api/where/trips-for-route/1_100224.xml?key=
 The response is a list of
 [`<tripDetails/>` element](../elements/trip-details.html) that captures extended
 details about each active trip.  The set of active trips includes any trip that
-serves that specified route that is currently active.
+serves that specified route that is currently active.  
+The status element will indicate whether the trip is scheduled or canceled.

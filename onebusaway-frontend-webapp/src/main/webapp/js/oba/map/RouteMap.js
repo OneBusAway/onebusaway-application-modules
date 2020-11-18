@@ -44,7 +44,7 @@ OBA.RouteMap = function(mapNode, initCallbackFn, serviceAlertCallbackFn) {
 	var locationIconArrays = OBA.Config.loadLocationIcons();
 	var locationIcons = locationIconArrays[0], activeLocationIcons = locationIconArrays[1], iconShadow = locationIconArrays[2];    
 	var normalLocationIcon = locationIcons[0], activeLocationIcon = activeLocationIcons[0];
-	    
+
 	// POLYLINE
 	function removePolylines(routeId) {
 		if(typeof polylinesByRoute[routeId] !== 'undefined') {
@@ -149,12 +149,35 @@ OBA.RouteMap = function(mapNode, initCallbackFn, serviceAlertCallbackFn) {
 		if(directionKey === null) {
 			directionKey = "unknown";
 		}
-		
-		var icon = new google.maps.MarkerImage("img/realtime/stop/stop-" + directionKey + ".png",
-				new google.maps.Size(21, 21),
-				new google.maps.Point(0,0),
-				new google.maps.Point(10, 10));
-		
+
+		var stopsOnRoute = [];
+		if (typeof jQuery("body").data("savedData") === 'undefined' && jQuery("body").data("savedData") != null)
+			stopsOnRoute = jQuery("body").data("savedData").stops;
+
+        var onRoute = false;
+		jQuery.each(stopsOnRoute, function(_, stopOnRoute) {
+			if (String(stopOnRoute) === String(stop.id)) {
+				onRoute = true;
+			}
+        });
+
+		if (onRoute === true) {
+            var icon = {
+                url: OBA.Config.urlPrefix + "img/realtime/stop/stop-" + directionKey + ".png",
+                size: new google.maps.Size(31, 31),
+                origin: new google.maps.Point(0, 0),
+                anchor: new google.maps.Point(15, 15),
+                scaledSize: new google.maps.Size(33, 33)
+            }
+        } else {
+            var icon = {
+            	url: OBA.Config.urlPrefix + "img/realtime/stop/stop-off-route-" + directionKey + ".png",
+				size: new google.maps.Size(21, 21),
+				origin: new google.maps.Point(0,0),
+				anchor: new google.maps.Point(10, 10)
+			}
+		}
+
 		var defaultVisibility = (map.getZoom() < 16) ? false : true;
 		var markerOptions = {
 				position: new google.maps.LatLng(latitude, longitude),
@@ -195,10 +218,10 @@ OBA.RouteMap = function(mapNode, initCallbackFn, serviceAlertCallbackFn) {
 		if(typeof vehiclesByRoute[routeId] === 'undefined') {
 			vehiclesByRoute[routeId] = {};
 		}
-		
-		var routeIdParts = routeId.split("_");
-		var agencyId = routeIdParts[0];
-		var routeIdWithoutAgency = routeIdParts[1];
+
+		var underscoreIndex = routeId.indexOf("_");//only the first "_" should be considered
+		var agencyId = routeId.substr(0, underscoreIndex);
+		var routeIdWithoutAgency = routeId.substr(underscoreIndex + 1);
 		
 		var params = { OperatorRef: agencyId, LineRef: routeIdWithoutAgency };		
 
@@ -221,86 +244,98 @@ OBA.RouteMap = function(mapNode, initCallbackFn, serviceAlertCallbackFn) {
 			
 			// service delivery
 			var vehiclesByIdInResponse = {};
-			jQuery.each(json.Siri.ServiceDelivery.VehicleMonitoringDelivery[0].VehicleActivity, function(_, activity) {
-				var latitude = activity.MonitoredVehicleJourney.VehicleLocation.Latitude;
-				var longitude = activity.MonitoredVehicleJourney.VehicleLocation.Longitude;
-				var orientation = activity.MonitoredVehicleJourney.Bearing;
-				var headsign = activity.MonitoredVehicleJourney.DestinationName;
-				var routeName = activity.MonitoredVehicleJourney.PublishedLineName;
-				var hasRealtime = activity.MonitoredVehicleJourney.Monitored;
-				var vehicleType = activity.MonitoredVehicleJourney.VehicleMode[0];
-				
-				var tripId = activity.MonitoredVehicleJourney.FramedVehicleJourneyRef.DatedVehicleJourneyRef;
-				
-				var vehicleId = activity.MonitoredVehicleJourney.VehicleRef;
-				var vehicleIdParts = vehicleId.split("_");
-				var vehicleIdWithoutAgency = vehicleIdParts[1];
-				var marker = vehiclesById[vehicleId];
-				var newMarker = false;
-				var markerImage = 'img/realtime/' + vehicleType + '/' + vehicleType + '-';
+			if (json.Siri.ServiceDelivery.VehicleMonitoringDelivery[0].VehicleActivity != undefined) {
+                jQuery.each(json.Siri.ServiceDelivery.VehicleMonitoringDelivery[0].VehicleActivity, function (_, activity) {
+                    var latitude = activity.MonitoredVehicleJourney.VehicleLocation.Latitude;
+                    var longitude = activity.MonitoredVehicleJourney.VehicleLocation.Longitude;
+                    var orientation = activity.MonitoredVehicleJourney.Bearing;
+                    var headsign = activity.MonitoredVehicleJourney.DestinationName;
+                    var routeName = activity.MonitoredVehicleJourney.PublishedLineName;
+                    var hasRealtime = activity.MonitoredVehicleJourney.Monitored;
+                    var vehicleType = activity.MonitoredVehicleJourney.VehicleMode[0];
 
-				// has route been removed while in the process of updating?
-				if(typeof vehiclesByRoute[routeId] === 'undefined') {
-					return false;
-				}
+                    var tripId = activity.MonitoredVehicleJourney.FramedVehicleJourneyRef.DatedVehicleJourneyRef;
 
-				// create marker if it doesn't exist				
-				if(typeof marker === 'undefined' || marker === null) {
-					var markerOptions = {
-						zIndex: 3,
-						map: map,
-						title: "Vehicle " + vehicleIdWithoutAgency + ", " + routeName + " to " + headsign,
-						vehicleId: vehicleId,
-						routeId: routeId
-					};
+                    var vehicleId = activity.MonitoredVehicleJourney.VehicleRef;
+                    var vehicleIdParts = vehicleId.split("_");
+                    var vehicleIdWithoutAgency = vehicleIdParts[1];
+                    var marker = vehiclesById[vehicleId];
+                    var newMarker = false;
+                    var markerImage = OBA.Config.urlPrefix + 'img/realtime/' + vehicleType + '/' + vehicleType + '-';
 
-					newMarker =true;
-					marker = new google.maps.Marker(markerOptions);
-			        
-			    	google.maps.event.addListener(marker, "click", function(mouseEvent) {
-			    		OBA.Config.analyticsFunction("Vehicle Marker Click", vehicleIdWithoutAgency);
+                    // has route been removed while in the process of updating?
+                    if (typeof vehiclesByRoute[routeId] === 'undefined') {
+                        return false;
+                    }
 
-			    		OBA.Popups.showPopupWithContentFromRequest(map, this, OBA.Config.siriVMUrl + "&callback=?", 
-			    				{ OperatorRef: agencyId, VehicleRef: vehicleIdWithoutAgency, MaximumNumberOfCallsOnwards: "3", VehicleMonitoringDetailLevel: "calls", TripId: tripId }, 
-			    				OBA.Popups.getVehicleContentForResponse, null);
-			    	});
-				}
-				
-				// change marker image depending on whether realtime data is available
-				if(typeof hasRealtime === 'undefined' || hasRealtime === null || hasRealtime == false){
-					markerImage = 'img/scheduled/' + vehicleType + '/' + vehicleType + '-';
-				}
-				
-				// icon
-				var orientationAngle = "unknown";
-				if(orientation !== null && orientation !== 'NaN') {
-					orientationAngle = Math.floor(orientation / 5) * 5;
-				}
-					
-				var icon = new google.maps.MarkerImage(markerImage + orientationAngle + ".png",
-						new google.maps.Size(51, 51),
-						new google.maps.Point(0,0),
-						new google.maps.Point(25, 25));
+                    // create marker if it doesn't exist
+                    if (typeof marker === 'undefined' || marker === null) {
+                        var markerOptions = {
+                            zIndex: 3,
+                            map: map,
+                            title: "Vehicle " + vehicleIdWithoutAgency + ", " + routeName + " to " + headsign,
+                            vehicleId: vehicleId,
+                            routeId: routeId
+                        };
 
-				marker.setIcon(icon);
-				
-				
-				var position = new google.maps.LatLng(latitude, longitude);
-				
-				if(newMarker){
-					marker.setPosition(position);
-				}
-				else{
-					marker.animateTo(position);
-				}
-				
-				// (mark that this vehicle is still in the response)
-				vehiclesByIdInResponse[vehicleId] = true;
+                        newMarker = true;
+                        marker = new google.maps.Marker(markerOptions);
 
-				// maps used to keep track of marker
-				vehiclesByRoute[routeId][vehicleId] = marker;
-				vehiclesById[vehicleId] = marker; 
-			});
+                        google.maps.event.addListener(marker, "click", function (mouseEvent) {
+                            OBA.Config.analyticsFunction("Vehicle Marker Click", vehicleIdWithoutAgency);
+
+                            OBA.Popups.showPopupWithContentFromRequest(map, this, OBA.Config.siriVMUrl + "&callback=?",
+                                {
+                                    OperatorRef: agencyId,
+                                    VehicleRef: vehicleIdWithoutAgency,
+                                    MaximumNumberOfCallsOnwards: "3",
+                                    VehicleMonitoringDetailLevel: "calls",
+                                    TripId: tripId
+                                },
+                                OBA.Popups.getVehicleContentForResponse, null);
+                        });
+                    }
+
+                    // change marker image depending on whether realtime data is available
+                    if (typeof hasRealtime === 'undefined' || hasRealtime === null || hasRealtime == false) {
+                        markerImage = OBA.Config.urlPrefix + 'img/scheduled/' + vehicleType + '/' + vehicleType + '-';
+                    }
+
+                    // icon
+                    var orientationAngle = "unknown";
+                    if (orientation !== null && orientation !== 'NaN') {
+                        orientationAngle = Math.floor(orientation / 5) * 5;
+                    }
+
+                    var icon = new google.maps.MarkerImage(markerImage + orientationAngle + ".png",
+                        new google.maps.Size(51, 51),
+                        new google.maps.Point(0, 0),
+                        new google.maps.Point(25, 25));
+
+                    marker.setIcon(icon);
+
+
+                    var position = new google.maps.LatLng(latitude, longitude);
+
+                    if (newMarker) {
+                        marker.setPosition(position);
+                    }
+                    else {
+
+                        // try shape animation, otherwise revert to straight-line
+                        if (!tryAnimateAlongShape(vehicleId, routeId, marker, marker.getPosition(), position)) {
+                            marker.animateTo(position);
+                        }
+                    }
+
+                    // (mark that this vehicle is still in the response)
+                    vehiclesByIdInResponse[vehicleId] = true;
+
+                    // maps used to keep track of marker
+                    vehiclesByRoute[routeId][vehicleId] = marker;
+                    vehiclesById[vehicleId] = marker;
+                });
+            }
 			
 			// remove vehicles from map that are no longer in the response, for all routes in the query
 			jQuery.each(vehiclesById, function(vehicleOnMap_vehicleId, vehicleOnMap) {
@@ -319,7 +354,128 @@ OBA.RouteMap = function(mapNode, initCallbackFn, serviceAlertCallbackFn) {
 			});
 		});
 	}
-	
+
+    function tryAnimateAlongShape(vehicleId, routeId, marker, oldPosition, newPosition) {
+        if (typeof polylinesByRoute[routeId] === 'undefined')
+            return false;
+
+        var polylines = polylinesByRoute[routeId];
+        if (polylines.length == 0)
+            return false;
+
+        for (var i = 0; i < polylines.length; i++) {
+            var polyline = polylines[i];
+
+            // if we don't find a result within this threshold, we can't trust the results
+            var startIndex = findClosestPoint(oldPosition, polyline.getPath(), 10);
+            var endIndex = findClosestPoint(newPosition, polyline.getPath(), 10);
+
+            if (startIndex >= 0 && endIndex >= 0 && endIndex > startIndex) {
+                // animate startIndex up to endIndex
+                var index = startIndex;
+
+                var distances = [0];
+                var maxDistance = 0;
+                for (var j = startIndex + 1; j < endIndex; j++) {
+                    var dist = haversine(polyline.getPath().getAt(j - 1), polyline.getPath().getAt(j));
+                    maxDistance += dist;
+                    distances.push(dist);
+                }
+                var durations = distances.map(function (d) {
+                    return (d / maxDistance) * 1000
+                });
+
+                function step() {
+                    if (index > endIndex)
+                        return;
+                    var pos = polyline.getPath().getAt(index);
+                    var duration = durations[index - startIndex];
+                    marker.animateTo(pos, {"duration": duration, "complete": step, "easing": "linear"});
+                    index++;
+                }
+
+                index++;
+                step();
+
+                //make sure marker ends at the correct final position no matter what happened along the way
+                marker.setPosition(newPosition);
+
+                return true;
+            } else if (startIndex >= 0 && endIndex >= 0 && endIndex < startIndex) {
+                // animate startIndex downto endIndex
+                var index = startIndex;
+
+                var distances = [0];
+                var maxDistance = 0;
+                for (var j = startIndex - 1; j > endIndex; j--) {
+                    var dist = haversine(polyline.getPath().getAt(j - 1), polyline.getPath().getAt(j));
+                    maxDistance += dist;
+                    distances.push(dist);
+                }
+                var durations = distances.map(function (d) {
+                    return (d / maxDistance) * 1000
+                });
+
+                function step() {
+                    if (index < endIndex)
+                        return;
+                    var pos = polyline.getPath().getAt(index);
+                    var duration = durations[index - startIndex];
+                    marker.animateTo(pos, {"duration": duration, "complete": step, "easing": "linear"});
+                    index--;
+                }
+
+                index--;
+                step();
+
+                //make sure marker ends at the correct final position no matter what happened along the way
+                marker.setPosition(newPosition);
+
+                return true;
+
+			}
+
+        }
+
+        return false;
+    }
+
+    function findClosestPoint(point, line, threshold) {
+
+        var minDistance = Number.MAX_VALUE;
+        var closestIndex = -1;
+
+        line.forEach(function (p, i) {
+            var distance = haversine(point, p);
+            if (distance < threshold && distance < minDistance) {
+                minDistance = distance;
+                closestIndex = i;
+            }
+        });
+
+        return closestIndex;
+    }
+
+    // adapted from https://github.com/njj/haversine
+    function haversine(start, end) {
+        var R = 6371000; // radius of the earth in meters
+
+        var toRad = function (num) {
+            return num * Math.PI / 180
+        };
+
+        var dLat = toRad(end.lat() - start.lat());
+        var dLon = toRad(end.lng() - start.lng());
+        var lat1 = toRad(start.lat());
+        var lat2 = toRad(end.lng());
+
+        var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.sin(dLon / 2) * Math.sin(dLon / 2) * Math.cos(lat1) * Math.cos(lat2)
+        var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+        return R * c;
+    }
+
 	function removeVehicles(routeId) {
 		if(typeof vehiclesByRoute[routeId] !== 'undefined') {
 			var vehicles = vehiclesByRoute[routeId];
@@ -365,10 +521,8 @@ OBA.RouteMap = function(mapNode, initCallbackFn, serviceAlertCallbackFn) {
 		highlightedStop = null;
 	}
 
-
-
 	function showLegend(map) {
-	 	var iconBase = 'img/';
+	 	var iconBase = OBA.Config.urlPrefix + 'img/';
 	        var icons = {
 	          realtime: {
 	            name: 'Real-Time',
@@ -387,7 +541,7 @@ OBA.RouteMap = function(mapNode, initCallbackFn, serviceAlertCallbackFn) {
 	          var icon = type.icon;
 	          var div = document.createElement('div');
 	          div.innerHTML = '<img src="' + icon + '"> ' + '<span>' + name + '</span>';
-	          legend.appendChild(div);
+	          if (legend) legend.appendChild(div);
 	        }
 	
 
@@ -452,7 +606,7 @@ OBA.RouteMap = function(mapNode, initCallbackFn, serviceAlertCallbackFn) {
 	//////////////////// PUBLIC INTERFACE /////////////////////
 	return {
 		// STOP HOVER 
-		highlightStop: function(stopResult) {
+		highlightStop: function(stopResult, usePin) {
 			unhighlightStop();
 			
 			var stopMarker = stopsById[stopResult.id];
@@ -466,11 +620,18 @@ OBA.RouteMap = function(mapNode, initCallbackFn, serviceAlertCallbackFn) {
 			if(directionKey === null) {
 				directionKey = "unknown";
 			}
-			
-			var highlightedIcon = new google.maps.MarkerImage("img/realtime/stop/stop-" + directionKey + "-active.png",
-					new google.maps.Size(21, 21),
-					new google.maps.Point(0,0),
-					new google.maps.Point(10, 10));
+
+			var highlightedIcon;
+			if (usePin) {
+				highlightedIcon = new google.maps.MarkerImage(OBA.Config.urlPrefix + "img/icons/red-dot.png");
+			}
+			else {
+                highlightedIcon = new google.maps.MarkerImage(OBA.Config.urlPrefix + "img/realtime/stop/stop-" + directionKey + "-active.png",
+                    new google.maps.Size(31, 31),
+                    new google.maps.Point(0, 0),
+                    new google.maps.Point(15, 15));
+                highlightedIcon.scaledSize = new google.maps.Size(33, 33);
+            }
 		
 			stopMarker.previousIcon = stopMarker.getIcon();
 			stopMarker.setIcon(highlightedIcon);
@@ -579,7 +740,9 @@ OBA.RouteMap = function(mapNode, initCallbackFn, serviceAlertCallbackFn) {
 		panToRoute: function(routeId) {
 			var polylines = polylinesByRoute[routeId];
 
-			if(polylines === null) {
+			if(polylines === null
+				|| typeof polylines === 'undefined'
+				|| typeof polylines.length === 'undefined') {
 				return;
 			}
 			

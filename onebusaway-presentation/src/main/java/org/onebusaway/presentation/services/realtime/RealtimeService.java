@@ -56,7 +56,13 @@ public interface RealtimeService {
 
   public List<ServiceAlertBean> getServiceAlertsForRouteAndDirection(
       String routeId, String directionId);
+
+  public List<ServiceAlertBean> getServiceAlertsForRouteAndStop(
+          String routeId, String stopId);
+
+    public List<ServiceAlertBean> getServiceAlertsForAgency(String agencyId);
   
   public List<ServiceAlertBean> getServiceAlertsGlobal();
-    
+
+  boolean showApc();
 }

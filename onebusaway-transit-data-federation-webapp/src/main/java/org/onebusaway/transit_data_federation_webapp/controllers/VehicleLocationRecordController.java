@@ -23,7 +23,7 @@ import java.util.Date;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.realtime.api.VehicleLocationListener;
 import org.onebusaway.realtime.api.VehicleLocationRecord;
-import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
+import org.onebusaway.util.AgencyAndIdLibrary;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;

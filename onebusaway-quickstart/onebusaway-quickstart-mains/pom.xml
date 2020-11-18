@@ -3,7 +3,7 @@
   <parent>
     <artifactId>onebusaway-quickstart</artifactId>
     <groupId>org.onebusaway</groupId>
-    <version>2.0.0-cs-rc13-SNAPSHOT</version>
+    <version>2.0.66-cs-SNAPSHOT</version>
   </parent>
   <artifactId>onebusaway-quickstart-mains</artifactId>
   <name>onebusaway-quickstart-mains</name>
@@ -13,7 +13,7 @@
   </description>
 
   <properties>
-    <jetty.version>7.4.1.v20110513</jetty.version>
+    <jetty.version>9.2.9.v20150224</jetty.version>
   </properties>
 
   <dependencies>
@@ -84,8 +84,8 @@
   <build>
     <plugins>
       <plugin>
-        <groupId>com.mycila.maven-license-plugin</groupId>
-        <artifactId>maven-license-plugin</artifactId>
+        <groupId>com.mycila</groupId>
+        <artifactId>license-maven-plugin</artifactId>
         <configuration>
           <excludes combine.children="append">
             <exclude>**/usage-webapp.txt</exclude>

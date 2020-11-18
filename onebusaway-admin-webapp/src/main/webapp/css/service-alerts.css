@@ -26,12 +26,12 @@
     color: #333;
     text-align: left;
     line-height: normal;
-}}
+}
 
 #ServiceAlerts #createAlertLink {
   /* color: #463E3F; */
-  /* color: #06F; */
-  color: red;
+  color: #06F;
+  /*color: red;*/
 }
 
 #ServiceAlerts #serviceAlertActions {
@@ -140,7 +140,10 @@
  	float: left; 
     width: 33%;
  }
- 
+
+#ServiceAlerts #alertsTable tr:nth-child(even) {background: #eEeF8F }
+
+
 #ServiceAlerts tr.affectsClause {
 	border-spacing: 10em;
 	margin-bottom: 5em;
@@ -163,7 +166,8 @@
 }
  
  #ServiceAlerts #addAnotherCondition,
- #ServiceAlerts .deleteCondition {
+ #ServiceAlerts .deleteCondition,
+ #ServiceAlerts .validateCondition {
  	color: blue;
  	font-family: Trebuchet MS,Tahoma,Verdana,Arial,sans-serif;
  	font-size: 1.1em;
@@ -176,7 +180,8 @@
   }
  
  #ServiceAlerts #addAnotherCondition:hover,
- #ServiceAlerts .deleteCondition:hover {
+ #ServiceAlerts .deleteCondition:hover,
+ #ServiceAlerts .validateCondition:hover {
  	font-weight: bold;
 	text-decoration: underline;
 	cursor: pointer;

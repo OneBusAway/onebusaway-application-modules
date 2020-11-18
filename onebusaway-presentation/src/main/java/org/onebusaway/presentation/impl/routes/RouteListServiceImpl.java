@@ -52,6 +52,18 @@ public class RouteListServiceImpl implements RouteListService {
         return Boolean.parseBoolean(_configurationService.getConfigurationValueAsString("display.useAgencyId", "false"));
     }
 
+    public List<RouteBean> getFilteredRoutes(String agencyFilter) {
+        List<RouteBean> filteredRoutes = new ArrayList<>();
+
+        List<AgencyWithCoverageBean> agencies = _transitDataService.getAgenciesWithCoverage();
+        for (AgencyWithCoverageBean agency : agencies) {
+            if (agencyFilter.equals(agency.getAgency().getId())) {
+                filteredRoutes.addAll(_transitDataService.getRoutesForAgencyId(agency.getAgency().getId()).getList());
+            }
+        }
+        return filteredRoutes;
+    }
+
     @Override
     public List<RouteBean> getRoutes() {
         List<RouteBean> allRoutes = new ArrayList<RouteBean>();

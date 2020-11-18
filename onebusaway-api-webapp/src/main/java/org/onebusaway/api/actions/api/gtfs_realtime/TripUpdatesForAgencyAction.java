@@ -64,9 +64,11 @@ public class TripUpdatesForAgencyAction extends GtfsRealtimeActionSupport {
       if (tripStatus.getTimepointPredictions() != null && tripStatus.getTimepointPredictions().size() > 0) {
         for (TimepointPredictionBean timepointPrediction: tripStatus.getTimepointPredictions()) {
           AgencyAndId stopId = modifiedStopId(agencyId, timepointPrediction.getTimepointId());
-          if (!stopId.getAgencyId().equals(agencyId))
-            continue;
           TripUpdate.StopTimeUpdate.Builder stopTimeUpdate = tripUpdate.addStopTimeUpdateBuilder();
+          /*
+           NOTE: here we may serve a stop that belongs to a separate agency and GTFS-RT leaves no way
+           * to indicate that
+           */
           stopTimeUpdate.setStopId(normalizeId(stopId.toString()));
           TripUpdate.StopTimeEvent.Builder arrival = stopTimeUpdate.getArrivalBuilder();
           if (timepointPrediction.getTimepointPredictedArrivalTime() != -1) {

@@ -23,6 +23,7 @@ import java.util.List;
 
 import org.codehaus.jackson.map.ObjectMapper;
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.gtfs.model.calendar.ServiceDate;
 import org.onebusaway.presentation.impl.service_alerts.ServiceAlertsHelper;
 import org.onebusaway.presentation.services.realtime.RealtimeService;
 import org.onebusaway.transit_data.services.TransitDataService;
@@ -36,8 +37,11 @@ import org.onebusaway.transit_data.model.StopBean;
 import org.onebusaway.transit_data.model.StopGroupBean;
 import org.onebusaway.transit_data.model.StopGroupingBean;
 import org.onebusaway.transit_data.model.StopsForRouteBean;
-import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
+import org.onebusaway.util.AgencyAndIdLibrary;
 import org.onebusaway.util.SystemTime;
+import org.onebusaway.util.services.configuration.ConfigurationService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import uk.org.siri.siri.MonitoredStopVisitStructure;
@@ -55,6 +59,9 @@ public class StopForIdAction extends OneBusAwayEnterpriseActionSupport {
   @Autowired
   private TransitDataService _transitDataService;
 
+  @Autowired
+  private ConfigurationService _configService;
+
   private ObjectMapper _mapper = new ObjectMapper();    
 
   private ServiceAlertsHelper _serviceAlertsHelper = new ServiceAlertsHelper();
@@ -68,69 +75,89 @@ public class StopForIdAction extends OneBusAwayEnterpriseActionSupport {
   public void setStopId(String stopId) {
     _stopId = stopId;
   }
+
+  private static Logger _log = LoggerFactory.getLogger(StopForIdAction.class);
+
   
   @Override
-  public String execute() {    
-    if(_stopId == null) {
-      return SUCCESS;
-    }
-    
-    StopBean stop = _transitDataService.getStop(_stopId);    
-
-    if(stop == null) {
-      return SUCCESS;
-    }
-
-    List<RouteAtStop> routesAtStop = new ArrayList<RouteAtStop>();
-    
-    for(RouteBean routeBean : stop.getRoutes()) {
-      StopsForRouteBean stopsForRoute = _transitDataService.getStopsForRoute(routeBean.getId());
-
-      List<RouteDirection> routeDirections = new ArrayList<RouteDirection>();
-      List<StopGroupingBean> stopGroupings = stopsForRoute.getStopGroupings();
-      for (StopGroupingBean stopGroupingBean : stopGroupings) {
-        for (StopGroupBean stopGroupBean : stopGroupingBean.getStopGroups()) {
-        	if (_transitDataService.stopHasRevenueServiceOnRoute((routeBean.getAgency()!=null?routeBean.getAgency().getId():null),
-        			 _stopId, routeBean.getId(), stopGroupBean.getId())) {
-        	
-		          NameBean name = stopGroupBean.getName();
-		          String type = name.getType();
-		
-		          if (!type.equals("destination"))
-		            continue;
-		        
-		          // filter out route directions that don't stop at this stop
-		          if(!stopGroupBean.getStopIds().contains(_stopId))
-		            continue;
-		          
-		          Boolean hasUpcomingScheduledService = 
-		        		  _transitDataService.stopHasUpcomingScheduledService((routeBean.getAgency()!=null?routeBean.getAgency().getId():null), SystemTime.currentTimeMillis(), stop.getId(), 
-		        				  routeBean.getId(), stopGroupBean.getId());
-		
-		          // if there are buses on route, always have "scheduled service"
-		          Boolean routeHasVehiclesInService = true;
-		        		  //_realtimeService.getVehiclesInServiceForStopAndRoute(stop.getId(), routeBean.getId(), SystemTime.currentTimeMillis());
-		
-		          if(routeHasVehiclesInService) {
-		        	  hasUpcomingScheduledService = true;
-		          }
-		          
-		          routeDirections.add(new RouteDirection(stopGroupBean, null, null, hasUpcomingScheduledService));
-	        }
-		}
+  public String execute() {
+    try {
+      if (_stopId == null) {
+        return SUCCESS;
       }
-      
-      RouteAtStop routeAtStop = new RouteAtStop(routeBean, routeDirections);
-      routesAtStop.add(routeAtStop);
+
+      boolean serviceDateFilterOn = Boolean.parseBoolean(_configService.getConfigurationValueAsString("display.serviceDateFiltering", "false"));
+      StopBean stop;
+
+      if (serviceDateFilterOn) {
+        stop = _transitDataService.getStopForServiceDate(_stopId, new ServiceDate(new Date(SystemTime.currentTimeMillis())));
+      } else {
+        stop = _transitDataService.getStop(_stopId);
+      }
+
+      if (stop == null) {
+        return SUCCESS;
+      }
+
+      List<RouteAtStop> routesAtStop = new ArrayList<RouteAtStop>();
+
+      for (RouteBean routeBean : stop.getRoutes()) {
+        StopsForRouteBean stopsForRoute;
+        if (serviceDateFilterOn) {
+          stopsForRoute = _transitDataService.getStopsForRouteForServiceDate(routeBean.getId(), new ServiceDate(new Date(SystemTime.currentTimeMillis())));
+        } else {
+          stopsForRoute = _transitDataService.getStopsForRoute(routeBean.getId());
+        }
+
+        List<RouteDirection> routeDirections = new ArrayList<RouteDirection>();
+        List<StopGroupingBean> stopGroupings = stopsForRoute.getStopGroupings();
+        for (StopGroupingBean stopGroupingBean : stopGroupings) {
+          for (StopGroupBean stopGroupBean : stopGroupingBean.getStopGroups()) {
+            if (_transitDataService.stopHasRevenueServiceOnRoute((routeBean.getAgency() != null ? routeBean.getAgency().getId() : null),
+                _stopId, routeBean.getId(), stopGroupBean.getId())) {
+
+              NameBean name = stopGroupBean.getName();
+              String type = name.getType();
+
+              if (!type.equals("destination"))
+                continue;
+
+              // filter out route directions that don't stop at this stop
+              if (!stopGroupBean.getStopIds().contains(_stopId))
+                continue;
+
+              Boolean hasUpcomingScheduledService =
+                  _transitDataService.stopHasUpcomingScheduledService((routeBean.getAgency() != null ? routeBean.getAgency().getId() : null), SystemTime.currentTimeMillis(), stop.getId(),
+                      routeBean.getId(), stopGroupBean.getId());
+
+              // if there are buses on route, always have "scheduled service"
+              Boolean routeHasVehiclesInService = true;
+              //_realtimeService.getVehiclesInServiceForStopAndRoute(stop.getId(), routeBean.getId(), SystemTime.currentTimeMillis());
+
+              if (routeHasVehiclesInService) {
+                hasUpcomingScheduledService = true;
+              }
+
+              routeDirections.add(new RouteDirection(stopGroupBean, null, null, hasUpcomingScheduledService));
+            }
+          }
+        }
+
+        RouteAtStop routeAtStop = new RouteAtStop(routeBean, routeDirections);
+        routesAtStop.add(routeAtStop);
+      }
+
+      _result = new StopResult(stop, routesAtStop);
+
+      List<MonitoredStopVisitStructure> visits =
+          _realtimeService.getMonitoredStopVisitsForStop(_stopId, 0, SystemTime.currentTimeMillis());
+
+      _response = generateSiriResponse(visits, AgencyAndIdLibrary.convertFromString(_stopId));
+
+      return SUCCESS;
+    } catch (Exception e) {
+      _log.error("Error processing stop for id action: ", e);
     }
-
-    _result = new StopResult(stop, routesAtStop);
-
-    List<MonitoredStopVisitStructure> visits = 
-        _realtimeService.getMonitoredStopVisitsForStop(_stopId, 0, SystemTime.currentTimeMillis());
-
-    _response = generateSiriResponse(visits, AgencyAndIdLibrary.convertFromString(_stopId));
-    
     return SUCCESS;
   }   
   

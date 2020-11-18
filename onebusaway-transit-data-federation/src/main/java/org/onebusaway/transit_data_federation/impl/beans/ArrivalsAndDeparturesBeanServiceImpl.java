@@ -17,6 +17,8 @@
 package org.onebusaway.transit_data_federation.impl.beans;
 
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.realtime.api.OccupancyStatus;
+import org.onebusaway.realtime.api.VehicleOccupancyRecord;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
 import org.onebusaway.transit_data.model.ArrivalsAndDeparturesQueryBean;
 import org.onebusaway.transit_data.model.StopBean;
@@ -25,12 +27,12 @@ import org.onebusaway.transit_data.model.schedule.FrequencyBean;
 import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.transit_data.model.trips.TripStatusBean;
+import org.onebusaway.transit_data_federation.impl.realtime.apc.VehicleOccupancyRecordCache;
 import org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.GtfsRealtimeNegativeArrivals;
 import org.onebusaway.transit_data_federation.model.TargetTime;
+import org.onebusaway.transit_data_federation.model.bundle.HistoricalRidership;
 import org.onebusaway.transit_data_federation.model.narrative.StopTimeNarrative;
-import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
-import org.onebusaway.transit_data_federation.services.ArrivalAndDepartureQuery;
-import org.onebusaway.transit_data_federation.services.ArrivalAndDepartureService;
+import org.onebusaway.transit_data_federation.services.*;
 import org.onebusaway.transit_data_federation.services.beans.ArrivalsAndDeparturesBeanService;
 import org.onebusaway.transit_data_federation.services.beans.ServiceAlertsBeanService;
 import org.onebusaway.transit_data_federation.services.beans.StopBeanService;
@@ -49,17 +51,13 @@ import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
+import org.onebusaway.util.AgencyAndIdLibrary;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jmx.export.annotation.ManagedAttribute;
 import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Component
@@ -84,6 +82,10 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
   private RealTimeHistoryService _realTimeHistoryService;
   
   private GtfsRealtimeNegativeArrivals _gtfsRealtimeNegativeArrivals;
+
+  private RidershipService _ridershipService;
+
+  private VehicleOccupancyRecordCache _vehicleOccupancyRecordCache;
   
   @Autowired
   public void setTransitGraphDao(TransitGraphDao transitGraphDao) {
@@ -110,6 +112,12 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
   public void setStopBeanService(StopBeanService stopBeanService) {
     _stopBeanService = stopBeanService;
   }
+
+  @Autowired
+  public void setRidershipService(RidershipService ridershipService) { _ridershipService = ridershipService; }
+
+  @Autowired
+  public void setVehicleOccupancyRecordCache(VehicleOccupancyRecordCache cache) { _vehicleOccupancyRecordCache = cache; }
 
   @Autowired
   public void setTripDetailsBeanService(
@@ -216,7 +224,7 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
         continue;
       
       applySituationsToBean(time, instance, bean);
-      
+
       beans.add(bean);
     }
 
@@ -304,7 +312,7 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
     StopBean stopBean = stopBeanCache.get(stop.getId());
 
     if (stopBean == null) {
-      stopBean = _stopBeanService.getStopForId(stop.getId());
+      stopBean = _stopBeanService.getStopForId(stop.getId(), null);
       stopBeanCache.put(stop.getId(), stopBean);
     }
 
@@ -325,6 +333,10 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
       pab.setFrequency(fb);
     }
 
+    if (_ridershipService != null) {
+      List<HistoricalRidership> occ = _ridershipService.getHistoricalRiderships(trip.getRoute().getId(), trip.getId(), stop.getId(), pab.getServiceDate());
+      if(occ != null && occ.size() > 0) pab.setHistoricalOccupancy(OccupancyStatus.toEnum(occ.get(0).getLoadFactor()));
+    }
     return pab;
   }
 
@@ -374,8 +386,19 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
     if (blockLocation.getLastUpdateTime() > 0)
       bean.setLastUpdateTime(blockLocation.getLastUpdateTime());
 
-    if (blockLocation.getVehicleId() != null)
+    if (blockLocation.getVehicleId() != null) {
       bean.setVehicleId(AgencyAndIdLibrary.convertToString(blockLocation.getVehicleId()));
+      if (_vehicleOccupancyRecordCache != null && blockLocation.getActiveTrip() != null) {
+        // be specific in our vehicle lookup -- we only want to apply occupancy if its the same route/direction
+        VehicleOccupancyRecord vor = _vehicleOccupancyRecordCache.getRecordForVehicleIdAndRoute(AgencyAndIdLibrary.convertFromString(bean.getVehicleId()),
+                blockLocation.getActiveTrip().getTrip().getRoute().getId().toString(),
+                blockLocation.getActiveTrip().getTrip().getDirectionId());
+        if (vor != null)
+          bean.setOccupancyStatus(vor.getOccupancyStatus());
+      }
+
+
+    }
 
     TripStatusBean tripStatusBean = _tripDetailsBeanService.getBlockLocationAsStatusBean(
         blockLocation, targetTime);

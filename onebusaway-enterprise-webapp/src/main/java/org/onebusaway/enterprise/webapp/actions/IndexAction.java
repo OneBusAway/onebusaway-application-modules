@@ -20,6 +20,8 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.onebusaway.presentation.services.realtime.RealtimeService;
+import org.onebusaway.presentation.services.routes.RouteListService;
+import org.onebusaway.transit_data.model.RouteBean;
 import org.onebusaway.util.services.configuration.ConfigurationService;
 import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +44,31 @@ public class IndexAction extends OneBusAwayEnterpriseActionSupport {
   @Autowired
   private RealtimeService _realtimeService;
 
+  @Autowired
+  private RouteListService _routeListService;
+
+  public String _agencyFilter = null;
+
+  public void setAgencyFilter(String filter) {
+    _agencyFilter = filter;
+  }
+
+  public boolean getShowAgencyNames() {
+    return _routeListService.getShowAgencyNames();
+  }
+
+  public boolean getUseAgencyId() {
+    return _routeListService.getUseAgencyId();
+  }
+
+  public List<RouteBean> getRoutes() {
+    if (_agencyFilter != null)
+      return _routeListService.getFilteredRoutes(_agencyFilter);
+    return _routeListService.getRoutes();
+
+  }
+
+
   public String getGoogleMapsClientId() {
     return _configurationService.getConfigurationValueAsString("display.googleMapsClientId", "");    
   }
@@ -52,6 +79,10 @@ public class IndexAction extends OneBusAwayEnterpriseActionSupport {
 
   public String getGoogleAdClientId() {
 	return _configurationService.getConfigurationValueAsString("display.googleAdsClientId", "");    
+  }
+
+  public String getGoogleMapsApiKey() {
+    return _configurationService.getConfigurationValueAsString("display.googleMapsApiKey", "");
   }
 
   public List<ServiceAlertBean> getGlobalServiceAlerts() {

@@ -15,11 +15,11 @@
  */
 package org.onebusaway.transit_data_federation.services;
 
+import org.apache.lucene.queryparser.classic.ParseException;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.Stop;
 import org.onebusaway.transit_data_federation.model.SearchResult;
 
-import org.apache.lucene.queryParser.ParseException;
 
 import java.io.IOException;
 
@@ -51,7 +51,7 @@ public interface StopSearchService {
   /**
    * Search for stop ids by stop name (see {@link Stop#getName()})
    * 
-   * @param code the stop code query
+   * @param name the stop code query
    * @param maxResultCount maximum number of results to return
    * @param minScoreToKeep implementation-specific score cutoff for search
    *          results

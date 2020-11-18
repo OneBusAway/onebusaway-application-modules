@@ -27,25 +27,12 @@ import org.onebusaway.federations.annotations.FederatedByAgencyIdMethod;
 import org.onebusaway.federations.annotations.FederatedByEntityIdMethod;
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.geospatial.model.EncodedPolylineBean;
+import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.gtfs.model.calendar.ServiceDate;
 import org.onebusaway.realtime.api.TimepointPredictionRecord;
-import org.onebusaway.transit_data.model.AgencyBean;
-import org.onebusaway.transit_data.model.AgencyWithCoverageBean;
-import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
-import org.onebusaway.transit_data.model.ArrivalAndDepartureForStopQueryBean;
-import org.onebusaway.transit_data.model.ArrivalsAndDeparturesQueryBean;
-import org.onebusaway.transit_data.model.ConsolidatedStopMapBean;
-import org.onebusaway.transit_data.model.ListBean;
-import org.onebusaway.transit_data.model.RegisterAlarmQueryBean;
-import org.onebusaway.transit_data.model.RouteBean;
-import org.onebusaway.transit_data.model.RoutesBean;
-import org.onebusaway.transit_data.model.SearchQueryBean;
-import org.onebusaway.transit_data.model.StopBean;
-import org.onebusaway.transit_data.model.StopScheduleBean;
-import org.onebusaway.transit_data.model.StopWithArrivalsAndDeparturesBean;
-import org.onebusaway.transit_data.model.StopsBean;
-import org.onebusaway.transit_data.model.StopsForRouteBean;
-import org.onebusaway.transit_data.model.StopsWithArrivalsAndDeparturesBean;
-import org.onebusaway.transit_data.model.VehicleStatusBean;
+import org.onebusaway.realtime.api.VehicleOccupancyRecord;
+import org.onebusaway.transit_data.OccupancyStatusBean;
+import org.onebusaway.transit_data.model.*;
 import org.onebusaway.transit_data.model.blocks.BlockBean;
 import org.onebusaway.transit_data.model.blocks.BlockInstanceBean;
 import org.onebusaway.transit_data.model.blocks.ScheduledBlockLocationBean;
@@ -176,6 +163,12 @@ public class TransitDataServiceImpl implements TransitDataService {
   }
 
   @Override
+  public StopBean getStopForServiceDate(String stopId, ServiceDate serviceDate) throws ServiceException {
+    blockUntilBundleIsReady();
+    return _transitDataService.getStopForServiceDate(stopId, serviceDate);
+  }
+
+  @Override
   public ListBean<String> getStopIdsForAgencyId(String agencyId) {
     blockUntilBundleIsReady();
     return _transitDataService.getStopIdsForAgencyId(agencyId);
@@ -244,6 +237,12 @@ public class TransitDataServiceImpl implements TransitDataService {
   }
 
   @Override
+  public StopsForRouteBean getStopsForRouteForServiceDate(String routeId, ServiceDate serviceDate) {
+    blockUntilBundleIsReady();
+    return _transitDataService.getStopsForRouteForServiceDate(routeId, serviceDate);
+  }
+
+  @Override
   public TripBean getTrip(String tripId) throws ServiceException {
     blockUntilBundleIsReady();
     return _transitDataService.getTrip(tripId);
@@ -304,6 +303,11 @@ public class TransitDataServiceImpl implements TransitDataService {
   }
 
   @Override
+  public List<BlockInstanceBean> getActiveBlocksForRoute(AgencyAndId route, long timeFrom, long timeTo) {
+    return _transitDataService.getActiveBlocksForRoute(route, timeFrom, timeTo);
+  }
+
+  @Override
   public VehicleStatusBean getVehicleForAgency(String vehicleId, long time) {
     blockUntilBundleIsReady();
     return _transitDataService.getVehicleForAgency(vehicleId, time);
@@ -322,6 +326,11 @@ public class TransitDataServiceImpl implements TransitDataService {
     blockUntilBundleIsReady();
     return _transitDataService.getVehicleLocationRecordForVehicleId(vehicleId,
         targetTime);
+  }
+
+  @Override
+  public VehicleLocationRecordBean getVehiclePositionForVehicleId(String vehicleId) {
+    return _transitDataService.getVehiclePositionForVehicleId(vehicleId);
   }
 
   @Override
@@ -356,6 +365,35 @@ public class TransitDataServiceImpl implements TransitDataService {
     return _transitDataService.getCurrentVehicleEstimates(query);
   }
 
+  public List<OccupancyStatusBean> getHistoricalRidershipForStop(HistoricalOccupancyByStopQueryBean query){
+    blockUntilBundleIsReady();
+    return _transitDataService.getHistoricalRidershipForStop(query);
+  }
+
+  @Override
+  public List<OccupancyStatusBean> getAllHistoricalRiderships(long serviceDate) {
+    blockUntilBundleIsReady();
+    return _transitDataService.getAllHistoricalRiderships(serviceDate);
+  }
+
+  @Override
+  public List<OccupancyStatusBean> getHistoricalRidershipsForTrip(AgencyAndId tripId, long serviceDate) {
+    blockUntilBundleIsReady();
+    return _transitDataService.getHistoricalRidershipsForTrip(tripId, serviceDate);
+  }
+
+  @Override
+  public List<OccupancyStatusBean> getHistoricalRidershipsForRoute(AgencyAndId routeId, long serviceDate) {
+    blockUntilBundleIsReady();
+    return _transitDataService.getHistoricalRidershipsForRoute(routeId, serviceDate);
+  }
+
+  @Override
+  public List<OccupancyStatusBean> getHistoricalRiderships(AgencyAndId routeId, AgencyAndId tripId, AgencyAndId stopId, long serviceDate) {
+    blockUntilBundleIsReady();
+    return _transitDataService.getHistoricalRiderships(routeId, tripId, stopId, serviceDate);
+  }
+
 
   /****
    * 
@@ -365,6 +403,12 @@ public class TransitDataServiceImpl implements TransitDataService {
       VehicleLocationRecordQueryBean query) {
     blockUntilBundleIsReady();
     return _transitDataService.getVehicleLocationRecords(query);
+  }
+
+  @Override
+  public VehicleOccupancyRecord getVehicleOccupancyRecordForVehicleIdAndRoute(AgencyAndId vehicleId, String routeId, String directionId) {
+    blockUntilBundleIsReady();
+    return _transitDataService.getVehicleOccupancyRecordForVehicleIdAndRoute(vehicleId, routeId, directionId);
   }
 
   @Override

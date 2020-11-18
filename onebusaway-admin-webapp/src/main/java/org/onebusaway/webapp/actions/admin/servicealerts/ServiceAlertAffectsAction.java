@@ -25,6 +25,7 @@ import org.apache.struts2.convention.annotation.InterceptorRefs;
 import org.apache.struts2.convention.annotation.Result;
 import org.apache.struts2.convention.annotation.Results;
 import org.json.JSONException;
+import org.onebusaway.admin.service.server.ConsoleServiceAlertsService;
 import org.onebusaway.exceptions.NoSuchStopServiceException;
 import org.onebusaway.transit_data.model.AgencyWithCoverageBean;
 import org.onebusaway.transit_data.model.RouteBean;
@@ -59,6 +60,8 @@ public class ServiceAlertAffectsAction extends ActionSupport implements
 
   private TransitDataService _transitDataService;
 
+  private ConsoleServiceAlertsService _alerts;
+
   private SituationAffectsBean _model = new SituationAffectsBean();
 
   private String _id;
@@ -70,6 +73,11 @@ public class ServiceAlertAffectsAction extends ActionSupport implements
   @Autowired
   public void setTransitDataService(TransitDataService transitDataService) {
     _transitDataService = transitDataService;
+  }
+
+  @Autowired
+  public void setAlertsService(ConsoleServiceAlertsService service) {
+    _alerts = service;
   }
 
   @Override
@@ -101,7 +109,7 @@ public class ServiceAlertAffectsAction extends ActionSupport implements
 
     ServiceAlertBean alert = null;
     try {
-      alert = _transitDataService.getServiceAlertForId(_id);
+      alert = _alerts.getServiceAlertForId(_id);
     } catch (RuntimeException e) {
       _log.error("Error retrieving Service Alerts", e);
       throw e;
@@ -125,7 +133,7 @@ public class ServiceAlertAffectsAction extends ActionSupport implements
     allAffects.set(_index, _model);
     
     try {
-      _transitDataService.updateServiceAlert(alert);
+      _alerts.updateServiceAlert(_model.getAgencyId(), alert);
     } catch (RuntimeException e) {
       _log.error("Error updating Service Alert Affects clause", e);
       throw e;
@@ -143,7 +151,7 @@ public class ServiceAlertAffectsAction extends ActionSupport implements
     ServiceAlertBean alert = null;
     
     try {
-      alert = _transitDataService.getServiceAlertForId(_id);
+      alert = _alerts.getServiceAlertForId(_id);
     } catch (RuntimeException e) {
       _log.error("Error retrieving Service Alert", e);
       throw e;
@@ -161,7 +169,7 @@ public class ServiceAlertAffectsAction extends ActionSupport implements
     allAffects.remove(_index);
     
     try {
-      _transitDataService.updateServiceAlert(alert);
+      _alerts.updateServiceAlert(_model.getAgencyId(), alert);
     } catch (RuntimeException e) {
       _log.error("Error removing Service Alert Affects clause", e);
       throw e;

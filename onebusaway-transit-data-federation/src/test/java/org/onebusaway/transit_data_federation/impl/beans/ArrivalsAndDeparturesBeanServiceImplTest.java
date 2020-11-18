@@ -16,9 +16,7 @@
  */
 package org.onebusaway.transit_data_federation.impl.beans;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
+import static org.junit.Assert.*;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.aid;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.block;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.blockConfiguration;
@@ -37,6 +35,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import org.onebusaway.realtime.api.OccupancyStatus;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
 import org.onebusaway.transit_data.model.ArrivalsAndDeparturesQueryBean;
 import org.onebusaway.transit_data.model.StopBean;
@@ -117,11 +116,14 @@ public class ArrivalsAndDeparturesBeanServiceImplTest {
 
     StopEntryImpl stopA = stop("stopA", 47.0, -122.0);
     StopEntryImpl stopB = stop("stopB", 47.0, -122.0);
+    StopEntryImpl stopC = stop("stopC", 47.0, -122.0);
 
     Mockito.when(_transitGraphDao.getStopEntryForId(stopA.getId(), true)).thenReturn(
         stopA);
     Mockito.when(_transitGraphDao.getStopEntryForId(stopB.getId(), true)).thenReturn(
         stopB);
+    Mockito.when(_transitGraphDao.getStopEntryForId(stopC.getId(), true)).thenReturn(
+        stopC);
 
     /****
      * Block A
@@ -130,9 +132,9 @@ public class ArrivalsAndDeparturesBeanServiceImplTest {
     BlockEntryImpl blockA = block("blockA");
     TripEntryImpl tripA = trip("tripA", "sA", 3000);
 
-    stopTime(0, stopA, tripA, time(16, 30), time(16, 35), 1000);
+    stopTime(0, stopA, tripA, time(16, 30), time(16, 35), 1000,50.0);
     StopTimeEntryImpl stopTimeAB = stopTime(1, stopB, tripA, time(16, 40),
-        time(16, 45), 2000);
+        time(16, 45), 2000,75.0);
 
     BlockConfigurationEntry blockConfigA = blockConfiguration(blockA,
         serviceIds(lsids("sA"), lsids()), tripA);
@@ -146,14 +148,29 @@ public class ArrivalsAndDeparturesBeanServiceImplTest {
     BlockEntryImpl blockB = block("blockB");
     TripEntryImpl tripB = trip("tripB", "sA", 3000);
 
-    stopTime(2, stopA, tripB, time(16, 40), time(16, 45), 1000);
+    stopTime(2, stopA, tripB, time(16, 40), time(16, 45), 1000,50.0);
     StopTimeEntryImpl stopTimeBB = stopTime(3, stopB, tripB, time(16, 50),
-        time(16, 55), 2000);
+        time(16, 55), 2000,75.0);
 
     BlockConfigurationEntry blockConfigB = blockConfiguration(blockB,
         serviceIds(lsids("sA"), lsids()), tripB);
     BlockStopTimeEntry bstBA = blockConfigB.getStopTimes().get(0);
     BlockStopTimeEntry bstBB = blockConfigB.getStopTimes().get(1);
+
+    /****
+     * Block C
+     ****/
+
+    BlockEntryImpl blockC = block("blockC");
+    TripEntryImpl tripC = trip("tripC", "sA", 3000);
+
+    stopTime(4, stopC, tripC, time(16, 40), time(16, 45), 1000,50.0);
+    StopTimeEntryImpl stopTimeCB = stopTime(5, stopC, tripC, time(16, 50), time(16, 55), 2000, 75.0);
+
+    BlockConfigurationEntry blockConfigC = blockConfiguration(blockC,
+        serviceIds(lsids("sA"), lsids()), tripC);
+    BlockStopTimeEntry bstCA = blockConfigC.getStopTimes().get(0);
+    BlockStopTimeEntry bstCB = blockConfigC.getStopTimes().get(1);
 
     /****
      * 
@@ -195,6 +212,22 @@ public class ArrivalsAndDeparturesBeanServiceImplTest {
      * 
      ****/
 
+    BlockInstance blockInstanceC = new BlockInstance(blockConfigC, serviceDate);
+
+    BlockLocation blockLocationC = new BlockLocation();
+    blockLocationC.setActiveTrip(bstCA.getTrip());
+    blockLocationC.setBlockInstance(blockInstanceC);
+    blockLocationC.setClosestStop(bstCB);
+    blockLocationC.setDistanceAlongBlock(400);
+    blockLocationC.setInService(true);
+    blockLocationC.setNextStop(bstCB);
+    blockLocationC.setPredicted(false);
+    blockLocationC.setScheduledDistanceAlongBlock(400);
+
+    /****
+     *
+     ****/
+
     long stopTimeFrom = t - minutesBefore * 60 * 1000;
     long stopTimeTo = t + minutesAfter * 60 * 1000;
 
@@ -208,12 +241,21 @@ public class ArrivalsAndDeparturesBeanServiceImplTest {
     ArrivalAndDepartureInstance in2 = new ArrivalAndDepartureInstance(sti2);
     in2.setBlockLocation(blockLocationB);
 
+    StopTimeInstance sti3 = new StopTimeInstance(bstCB, blockInstanceC.getState());
+    ArrivalAndDepartureInstance in3 = new ArrivalAndDepartureInstance(sti3);
+    in3.setBlockLocation(blockLocationC);
+
     TargetTime target = new TargetTime(t, t);
 
     Mockito.when(
         _arrivalAndDepartureService.getArrivalsAndDeparturesForStopInTimeRange(
             stopB, target, stopTimeFrom, stopTimeTo)).thenReturn(
-        Arrays.asList(in1, in2));
+        Arrays.asList(in1, in2, in3));
+
+    Mockito.when(
+        _arrivalAndDepartureService.getArrivalsAndDeparturesForStopInTimeRange(
+            stopC, target, stopTimeFrom, stopTimeTo)).thenReturn(
+        Arrays.asList(in3));
 
     /****
      * 
@@ -229,19 +271,29 @@ public class ArrivalsAndDeparturesBeanServiceImplTest {
     Mockito.when(_narrativeService.getStopTimeForEntry(stopTimeBB)).thenReturn(
         stopTimeNarrative.create());
 
+    stopTimeNarrative = StopTimeNarrative.builder();
+    stopTimeNarrative.setRouteShortName("YY");
+    Mockito.when(_narrativeService.getStopTimeForEntry(stopTimeCB)).thenReturn(
+        stopTimeNarrative.create());
+
     /****
      * 
      ****/
 
     StopBean stopABean = new StopBean();
     stopABean.setId("1_stopA");
-    Mockito.when(_stopBeanService.getStopForId(stopA.getId())).thenReturn(
+    Mockito.when(_stopBeanService.getStopForId(stopA.getId(), null)).thenReturn(
         stopABean);
 
     StopBean stopBBean = new StopBean();
     stopBBean.setId("1_stopB");
-    Mockito.when(_stopBeanService.getStopForId(stopB.getId())).thenReturn(
+    Mockito.when(_stopBeanService.getStopForId(stopB.getId(), null)).thenReturn(
         stopBBean);
+
+    StopBean stopCBean = new StopBean();
+    stopCBean.setId("1_stopC");
+    Mockito.when(_stopBeanService.getStopForId(stopC.getId(), null)).thenReturn(
+        stopCBean);
 
     /****
      * 
@@ -255,12 +307,17 @@ public class ArrivalsAndDeparturesBeanServiceImplTest {
     Mockito.when(_tripBeanService.getTripForId(aid("tripB"))).thenReturn(
         tripBBean);
 
+    TripBean tripCBean = new TripBean();
+    Mockito.when(_tripBeanService.getTripForId(aid("tripC"))).thenReturn(
+        tripCBean);
+
     /****
      * 
      ****/
 
     TripStatusBean tripStatusBeanA = new TripStatusBean();
     TripStatusBean tripStatusBeanB = new TripStatusBean();
+    TripStatusBean tripStatusBeanC = new TripStatusBean();
 
     Mockito.when(
         _tripDetailsBeanService.getBlockLocationAsStatusBean(blockLocationA, t)).thenReturn(
@@ -269,6 +326,10 @@ public class ArrivalsAndDeparturesBeanServiceImplTest {
     Mockito.when(
         _tripDetailsBeanService.getBlockLocationAsStatusBean(blockLocationB, t)).thenReturn(
         tripStatusBeanB);
+
+    Mockito.when(
+        _tripDetailsBeanService.getBlockLocationAsStatusBean(blockLocationC, t)).thenReturn(
+        tripStatusBeanC);
 
     /****
      * 
@@ -284,7 +345,7 @@ public class ArrivalsAndDeparturesBeanServiceImplTest {
     List<ArrivalAndDepartureBean> arrivalsAndDepartures = _service.getArrivalsAndDeparturesByStopId(
         stopB.getId(), query);
 
-    assertEquals(2, arrivalsAndDepartures.size());
+    assertEquals(3, arrivalsAndDepartures.size());
 
     ArrivalAndDepartureBean bean = arrivalsAndDepartures.get(0);
     assertEquals(1500, bean.getDistanceFromStop(), 0.0);
@@ -322,5 +383,12 @@ public class ArrivalsAndDeparturesBeanServiceImplTest {
     assertSame(tripStatusBeanB, bean.getTripStatus());
     assertNull(bean.getTripHeadsign());
     assertNull(bean.getVehicleId());
+
+    bean = arrivalsAndDepartures.get(2);
+    assertSame(tripCBean, bean.getTrip());
+    assertSame(stopCBean, bean.getStop());
+    assertEquals(serviceDate, bean.getServiceDate());
+    assertEquals("YY", bean.getRouteShortName());
+    assertEquals("default", bean.getStatus());
   }
 }

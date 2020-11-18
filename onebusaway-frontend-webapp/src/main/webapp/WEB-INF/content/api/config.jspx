@@ -30,10 +30,16 @@ if(typeof OBA !== 'undefined' &amp;&amp; typeof OBA.Config !== 'undefined') {
 	OBA.Config.mapZoom=<s:property value="mapZoom" default="null" />;
 	OBA.Config.shortCode='<s:text name="sms.shortcode" />';
 	OBA.Config.stopTerm='<s:text name="stopTerm" />';
+	OBA.Config.occupancy_seatsAvailable='<s:property value="occupancySeatsAvailable" />';
+	OBA.Config.occupancy_standingAvailable='<s:property value="occupancyStandingAvailable" />';
+	OBA.Config.occupancy_full='<s:property value="occupancyFull" />';
 	OBA.Config.txtPrefix='<s:text name="sms.prefix" />';
 	OBA.Config.signDefaultAgencyId='<s:text name="sign.default.agency.id" />';
 	OBA.Config.useAgencyId='<s:property value="useAgencyId" />';
 	OBA.Config.showVehicleIdInStopPopup='<s:property value="showVehicleIdInStopPopup" />';
+	OBA.Config.showExpectedArrivalTimeInStopPopup='<s:property value="showExpectedArrivalTimeInStopPopup" />';
+	OBA.Config.showBlockIdInVehiclePopup='<s:property value="showBlockIdInVehiclePopup" />';
+	OBA.Config.serviceAlertText='<s:property value="serviceAlertText" />';
 
 	OBA.Config.siriSMUrl = "<s:property value="siriBaseURL" />" + "/stop-monitoring.json?key=" + OBA.Config.obaApiKey;
 	OBA.Config.siriVMUrl = "<s:property value="siriBaseURL" />" + "/vehicle-monitoring.json?key=" + OBA.Config.obaApiKey;
@@ -52,22 +58,27 @@ if(typeof OBA !== 'undefined' &amp;&amp; typeof OBA.Config !== 'undefined') {
 				if(OBA.Config.showSMS === "true"){
 					html += 'Send ' + OBA.Config.txtPrefix + ' <strong>' + query + '</strong> as a text to <strong>' + OBA.Config.shortCode + '</strong>';
 					html += '<br/>';
-					html += 'or check <a href="m/?q=' + query + '">this stop</a> on your smartphone.';
+					html += 'or check <a href="queryLink">this stop</a> on your smartphone.';
 				}
 				else{
-					html += 'Check <a href="m/?q=' + query + '">this stop</a> on your smartphone.';
+					html += 'Check <a href="queryLink">this stop</a> on your smartphone.';
 					
 				}	
 				html += '</div>';
+
+				var queryLink = "m/?q=" + query;
+				html = html.replace("queryLink", queryLink);
 
 			} else if(type === "route") {
 				html += '<div class="footer">';
 				html += '<span class="header">While at the bus stop...</span>';
 				html += '<br/>';
-				
-				html += 'Check <a href="m/?q=' + query + '">this route</a> on your smartphone.';
+				html += 'Check <a href="queryLink">this route</a> on your smartphone.';
 
-				html += '</div>';				
+				html += '</div>';
+
+				var queryLink = "m/?q=" + query;
+				html = html.replace("queryLink", queryLink);
 
 			} else if(type === "sign") {
 				html += 'Text <strong> ' + query + '</strong> to <strong>' + OBA.Config.shortCode + '</strong> ';

@@ -35,7 +35,7 @@ import org.onebusaway.transit_data.model.problems.StopProblemReportSummaryBean;
 import org.onebusaway.transit_data.model.problems.TripProblemReportBean;
 import org.onebusaway.transit_data.model.problems.TripProblemReportQueryBean;
 import org.onebusaway.transit_data.model.problems.TripProblemReportSummaryBean;
-import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
+import org.onebusaway.util.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.ArrivalAndDepartureQuery;
 import org.onebusaway.transit_data_federation.services.ArrivalAndDepartureService;
 import org.onebusaway.transit_data_federation.services.beans.StopBeanService;
@@ -225,7 +225,7 @@ class UserReportingServiceImpl implements UserReportingService {
       AgencyAndId stopId = record.getFirst();
       Integer count = record.getSecond();
       StopProblemReportSummaryBean bean = new StopProblemReportSummaryBean();
-      bean.setStop(_stopBeanService.getStopForId(stopId));
+      bean.setStop(_stopBeanService.getStopForId(stopId, null));
       bean.setStatus(query.getStatus());
       bean.setCount(count);
       beans.add(bean);
@@ -403,7 +403,7 @@ class UserReportingServiceImpl implements UserReportingService {
 
     if (stopId != null) {
       try {
-        bean.setStop(_stopBeanService.getStopForId(stopId));
+        bean.setStop(_stopBeanService.getStopForId(stopId, null));
       } catch (NoSuchStopServiceException ex) {
 
       }
@@ -446,7 +446,7 @@ class UserReportingServiceImpl implements UserReportingService {
 
     if (stopId != null) {
       try {
-        bean.setStop(_stopBeanService.getStopForId(stopId));
+        bean.setStop(_stopBeanService.getStopForId(stopId, null));
       } catch (NoSuchStopServiceException ex) {
 
       }

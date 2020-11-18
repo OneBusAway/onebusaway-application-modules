@@ -6,7 +6,7 @@ Retrieve a shape (the path traveled by a transit vehicle) by id
 
 ## Sample Request
 
-http://api.pugetsound.onebusaway.org/api/where/shape/1_40046045.xml?key=TEST
+http://api.pugetsound.onebusaway.org/api/where/shape/1_10002005.xml?key=TEST
 
 ## Sample Response
 

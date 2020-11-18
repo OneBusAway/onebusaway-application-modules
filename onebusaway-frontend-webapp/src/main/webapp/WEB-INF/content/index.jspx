@@ -52,6 +52,7 @@
 	<s:param name="v">3</s:param>
 	<s:param name="client"><s:property value="googleMapsClientId" /></s:param>
 	<s:param name="channel"><s:property value="googleMapsChannelId" /></s:param>
+	<s:param name="key"><s:property value="googleMapsApiKey" /></s:param>
 	<s:param name="sensor">false</s:param>
 </s:url>
 <script src="${url}" type="text/javascript"><!-- //prevent jspx minimization --></script>
@@ -155,7 +156,7 @@
 	       <form action="search.action">
 	         <input type="text" name="q" value=""/>
 	         <input type="submit" value="Find" class="submit"/>
-	         <p id="tip">TIP: Enter an intersection, bus route or bus stop code.</p>
+	         <p id="tip">TIP: Enter a bus stop code, route, or street address.</p>
 	       </form>
 	       
 	       <div id="matches">
@@ -183,24 +184,38 @@
 	
 			<!-- Include the welcome div with example searches -->
 			<c:import url="includes/welcome.jspx" />
-		   
-			<s:url var="url" namespace="/routes" action="index"/>
-			<div id="available-routes"><a href="${url}">Click here</a> for a list of available routes.</div>
-		   
-			<div id="cant-find">
-				<h2>Can't find your bus route?</h2>
-				<s:url var="url" namespace="/routes" action="index" />
-				<p><s:property value="getText('main.cantfindroute.text')" /> <a href="${url}">Click here</a> to see which routes are currently available.</p>
-			</div>
-			
+
+			<c:import url="includes/available-routes.jspx" />
+
 			<s:if test="globalServiceAlerts!=null">
-			 <div id="global-alerts" class="global-alerts">
-				<s:iterator value="globalServiceAlerts">
-					<s:iterator value="descriptions">
-						<p class="global-alert-content"><strong>Service Notice: </strong><s:property value="value" /></p>
+				<div id="global-alerts" class="global-alerts">
+					<s:iterator value="globalServiceAlerts">
+
+						<s:if test="urls.size > 0">
+							<s:iterator value="urls" status="iter">
+								<p>
+									<a class="global-alert-content" href="${value}" target="alert">
+										<strong><s:property value="summaries[#iter.index].value" /></strong>
+										<s:if test="summaries[#iter.index].value != descriptions[#iter.index].value">
+											<br/>
+											<s:property value="descriptions[#iter.index].value" />
+										</s:if>
+									</a>
+								</p>
+								<br/>
+							</s:iterator>
+						</s:if>
+						<s:else>
+							<s:iterator value="summaries" status="iter">
+								<p><strong><s:property value="value" /></strong></p>
+								<s:if test="value != descriptions[#iter.index].value">
+									<p><s:property value="descriptions[#iter.index].value" /></p>
+								</s:if>
+								<br/>
+							</s:iterator>
+						</s:else>
 					</s:iterator>
-				</s:iterator>
-			 </div>
+				</div>
 			</s:if>
 	
 			<!-- Include the Google ad -->
@@ -208,7 +223,11 @@
 		
 		</div>
 		<div class="container clear"><!-- jspx --></div>
-	  	<s:url var="url" value="/css/img/google_logo.png"></s:url>
+	  	<s:url var="url" value="/css/img/google_logo.png">
+			<s:param name="v">
+				<s:property value="frontEndVersion" />
+			</s:param>
+		</s:url>
 		<div id="google_translate_element">Google Translate <img id="icon" src="${url}" /></div>
     </div>
 
@@ -232,10 +251,10 @@
 			    	<p>using:</p>
 			    </li>
 			    <li id="wizard-col3">
-			    	<s:url var="url" namespace="/wiki/Help" action="MobileOverview"/>
+			    	<s:url var="url" namespace="/m" action=""/>
 			    	<a href="${url}" target="_new">
 			    		<p>Mobile Web</p>
-			    		<a rel="popover"><div id="smartphone_img">&amp;nbsp;</div></a>
+			    		<a href="${url}" target="_new" rel="popover"><div id="smartphone_img">&amp;nbsp;</div></a>
 			    	</a>
 			    </li>
 			    <li id="wizard-col4">
@@ -280,9 +299,29 @@
 		<div id="close-map-global-alerts"><a href="#">[close]</a></div>
 		<div class="global-alerts-content">
 			<s:iterator value="globalServiceAlerts">
-				<s:iterator value="descriptions">
-					<p class="global-alert-content"><strong>Service Notice: </strong><s:property value="value" /></p>
-				</s:iterator>
+				<s:if test="urls.size > 0">
+					<s:iterator value="urls" status="iter">
+						<p>
+							<a class="global-alert-content" href="${value}" target="alert">
+								<strong><s:property value="summaries[#iter.index].value" /></strong>
+								<s:if test="summaries[#iter.index].value != descriptions[#iter.index].value">
+									<br/>
+									<s:property value="descriptions[#iter.index].value" />
+								</s:if>
+							</a>
+						</p>
+						<br/>
+					</s:iterator>
+				</s:if>
+				<s:else>
+					<s:iterator value="summaries" status="iter">
+						<p><strong><s:property value="value" /></strong></p>
+						<s:if test="value != descriptions[#iter.index].value">
+							<p><s:property value="descriptions[#iter.index].value" /></p>
+						</s:if>
+						<br/>
+					</s:iterator>
+				</s:else>
 			</s:iterator>
 		</div>
 	</div>

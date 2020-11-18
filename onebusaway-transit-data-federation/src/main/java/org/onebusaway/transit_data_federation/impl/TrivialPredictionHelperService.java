@@ -19,13 +19,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.onebusaway.realtime.api.TimepointPredictionRecord;
-import org.onebusaway.transit_data.model.blocks.BlockInstanceBean;
-import org.onebusaway.transit_data.model.blocks.BlockTripBean;
+import org.onebusaway.transit_data.model.TransitDataConstants;
 import org.onebusaway.transit_data.model.trips.TimepointPredictionBean;
 import org.onebusaway.transit_data.model.trips.TripStatusBean;
 import org.onebusaway.transit_data.services.TransitDataService;
-import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
+import org.onebusaway.util.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.PredictionHelperService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -37,6 +38,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class TrivialPredictionHelperService implements PredictionHelperService {
 
+	private static Logger _log = LoggerFactory.getLogger(TrivialPredictionHelperService.class);
 	
 	@Autowired
 	private TransitDataService _transitDataService;
@@ -45,41 +47,51 @@ public class TrivialPredictionHelperService implements PredictionHelperService {
 	public List<TimepointPredictionRecord> getPredictionRecordsForTrip(String agencyId,
 			TripStatusBean tripStatus) {
 		List<TimepointPredictionRecord> records = null;
-		
+
 		if (agencyId == null)
 			return records;
 		if (tripStatus == null)
 			return records;
 		if (!tripStatus.isPredicted())
 			return records;
+		// don't return predictions for a canceled trip
+		if (TransitDataConstants.STATUS_CANCELED.equals(tripStatus.getStatus()))
+			return records;
 
 		records = new ArrayList<TimepointPredictionRecord>();
 
 		List<TimepointPredictionBean> beans = tripStatus.getTimepointPredictions();
-		
+
 		if (beans != null && beans.size() > 0) {
 			for (TimepointPredictionBean bean : beans) {
 				TimepointPredictionRecord tpr = new TimepointPredictionRecord();
-				
+
 				tpr.setTimepointId(AgencyAndIdLibrary.convertFromString(bean.getTimepointId()));
 				tpr.setTimepointScheduledTime(bean.getTimepointScheduledTime());
 				tpr.setTimepointPredictedArrivalTime(bean.getTimepointPredictedArrivalTime());
 				tpr.setTimepointPredictedDepartureTime(bean.getTimepointPredictedDepartureTime());
 				tpr.setStopSequence(bean.getStopSequence());
 				tpr.setTripId(AgencyAndIdLibrary.convertFromString(bean.getTripId()));
-				
+					tpr.setScheduleRealtionship(bean.getScheduleRelationship().getValue());
+
 				records.add(tpr);
 			}
-			
+
 			return records;
 		}
-		
+
 		TimepointPredictionRecord tpr = new TimepointPredictionRecord();
 		tpr.setTimepointId(AgencyAndIdLibrary.convertFromString(tripStatus.getNextStop().getId()));
 		tpr.setTimepointScheduledTime(tripStatus.getLastUpdateTime() + tripStatus.getNextStopTimeOffset() * 1000);
 		tpr.setTimepointPredictedArrivalTime((long) (tpr.getTimepointScheduledTime() + tripStatus.getScheduleDeviation()));
 		tpr.setTimepointPredictedDepartureTime((long) (tpr.getTimepointScheduledTime() + tripStatus.getScheduleDeviation()));
-		
+		if (tpr.getScheduleRelationship() != null) {
+			tpr.setScheduleRealtionship(tpr.getScheduleRelationship().getValue());
+		} else {
+			_log.info("no schedule relationship for trip " + tripStatus.getActiveTrip().getId());
+			tpr.setScheduleRealtionship(TimepointPredictionRecord.ScheduleRelationship.SKIPPED.getValue());
+		}
+
 		
 		records.add(tpr);
 		return records;

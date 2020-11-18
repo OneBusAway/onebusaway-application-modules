@@ -15,17 +15,12 @@
  */
 package org.onebusaway.transit_data_federation.impl.beans;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TimeZone;
+import java.util.*;
 
 import org.onebusaway.collections.Counter;
 import org.onebusaway.exceptions.NoSuchStopServiceException;
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.gtfs.model.calendar.ServiceDate;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
 import org.onebusaway.transit_data.model.ArrivalsAndDeparturesQueryBean;
 import org.onebusaway.transit_data.model.StopBean;
@@ -63,8 +58,7 @@ class StopWithArrivalsAndDeparturesBeanServiceImpl implements
   public StopWithArrivalsAndDeparturesBean getArrivalsAndDeparturesByStopId(
       AgencyAndId id, ArrivalsAndDeparturesQueryBean query) {
 
-    StopBean stop = _stopBeanService.getStopForId(id);
-
+    StopBean stop = _stopBeanService.getStopForId(id, new ServiceDate(new Date(query.getTime())));
     if (stop == null)
       return null;
 
@@ -75,7 +69,7 @@ class StopWithArrivalsAndDeparturesBeanServiceImpl implements
         stop, 100);
     List<StopBean> nearbyStops = new ArrayList<StopBean>();
     for (AgencyAndId nearbyStopId : nearbyStopIds)
-      nearbyStops.add(_stopBeanService.getStopForId(nearbyStopId));
+      nearbyStops.add(_stopBeanService.getStopForId(nearbyStopId, null));
 
     List<ServiceAlertBean> situations = _serviceAlertsBeanService.getServiceAlertsForStopId(
         query.getTime(), id);
@@ -96,7 +90,7 @@ class StopWithArrivalsAndDeparturesBeanServiceImpl implements
 
     for (AgencyAndId id : ids) {
 
-      StopBean stopBean = _stopBeanService.getStopForId(id);
+      StopBean stopBean = _stopBeanService.getStopForId(id, null);
       stops.add(stopBean);
 
       List<ArrivalAndDepartureBean> arrivalsAndDepartures = _arrivalsAndDeparturesBeanService.getArrivalsAndDeparturesByStopId(
@@ -120,7 +114,7 @@ class StopWithArrivalsAndDeparturesBeanServiceImpl implements
     List<StopBean> nearbyStops = new ArrayList<StopBean>();
 
     for (AgencyAndId id : allNearbyStopIds) {
-      StopBean stop = _stopBeanService.getStopForId(id);
+      StopBean stop = _stopBeanService.getStopForId(id, null);
       nearbyStops.add(stop);
     }
 

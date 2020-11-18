@@ -25,7 +25,7 @@ import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data.model.realtime.CurrentVehicleEstimateQueryBean;
 import org.onebusaway.transit_data.model.realtime.CurrentVehicleEstimateQueryBean.Record;
 import org.onebusaway.transit_data_federation.model.TargetTime;
-import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
+import org.onebusaway.util.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.realtime.BlockLocation;
 import org.onebusaway.transit_data_federation.services.realtime.BlockLocationService;
 import org.onebusaway.util.SystemTime;

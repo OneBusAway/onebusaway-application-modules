@@ -54,6 +54,8 @@ public class VehiclePositionsForAgencyActionTest {
   @Test
   public void test() {
     long now = System.currentTimeMillis();
+    long v1Timestamp = now - 24*1000;
+    long v2Timestamp = now - 11*1000;
 
     List<VehicleStatusBean> vehicles = new ArrayList<VehicleStatusBean>();
     RouteBean.Builder routeBuilder = RouteBean.builder();
@@ -63,7 +65,7 @@ public class VehiclePositionsForAgencyActionTest {
     {
       VehicleStatusBean vehicle = new VehicleStatusBean();
       vehicles.add(vehicle);
-      vehicle.setLastUpdateTime(1234 * 1000);
+      vehicle.setLastUpdateTime(v1Timestamp);
       vehicle.setVehicleId("1_v1");
 
       TripStatusBean tripStatus = new TripStatusBean();
@@ -79,7 +81,7 @@ public class VehiclePositionsForAgencyActionTest {
     {
       VehicleStatusBean vehicle = new VehicleStatusBean();
       vehicles.add(vehicle);
-      vehicle.setLastUpdateTime(5678 * 1000);
+      vehicle.setLastUpdateTime(v2Timestamp);
       vehicle.setVehicleId("1_v2");
 
       TripStatusBean tripStatus = new TripStatusBean();
@@ -114,7 +116,7 @@ public class VehiclePositionsForAgencyActionTest {
       assertEquals("t0", vehiclePosition.getTrip().getTripId());
       assertEquals("r1", vehiclePosition.getTrip().getRouteId());
       assertEquals("v1", vehiclePosition.getVehicle().getId());
-      assertEquals(1234, vehiclePosition.getTimestamp());
+      assertEquals(v1Timestamp/1000, vehiclePosition.getTimestamp());
       assertEquals(47.0, vehiclePosition.getPosition().getLatitude(), 0.01);
       assertEquals(-122.0, vehiclePosition.getPosition().getLongitude(), 0.01);
     }
@@ -126,7 +128,7 @@ public class VehiclePositionsForAgencyActionTest {
       assertEquals("t1", vehiclePosition.getTrip().getTripId());
       assertEquals("r1", vehiclePosition.getTrip().getRouteId());
       assertEquals("v2", vehiclePosition.getVehicle().getId());
-      assertEquals(5678, vehiclePosition.getTimestamp());
+      assertEquals(v2Timestamp/1000, vehiclePosition.getTimestamp());
       assertEquals(47.1, vehiclePosition.getPosition().getLatitude(), 0.01);
       assertEquals(-122.1, vehiclePosition.getPosition().getLongitude(), 0.01);
     }

@@ -116,7 +116,7 @@ public class RestApiLibrary {
 		}
 		catch(IOException ioe){
 			String url = requestUrl != null ? requestUrl.toExternalForm() : "url unavailable";
-			log.error("Error getting contents of url: " + url);	
+			log.error("Error getting contents of url: " + url + ", " + ioe.toString());
 			throw ioe;
 		}finally{
 			try{

@@ -24,6 +24,8 @@
     OBA.Config.googleAnalyticsSiteId="<s:property value="googleAnalyticsSiteId" />";
     OBA.Config.bingMapsKey="<s:property value="bingMapsKey" />";
     OBA.Config.obaApiKey="<s:property value="obaApiKey" />";
+    OBA.Config.obaUrl="<s:property value="appHostURL" />";
+    OBA.Config.serviceAlertText='<s:property value="serviceAlertText" />';
     OBA.Config.mapBounds=<s:property value="mapBounds" />;
     OBA.Config.mapCenterLat=<s:property value="mapCenterLat" default="null" />;
     OBA.Config.mapCenterLon=<s:property value="mapCenterLon" default="null" />;
@@ -34,6 +36,7 @@
     OBA.Config.signDefaultAgencyId='<s:text name="sign.default.agency.id" />';
     OBA.Config.useAgencyId='<s:property value="useAgencyId" />';
     OBA.Config.showVehicleIdInStopPopup='<s:property value="showVehicleIdInStopPopup" />';
+    OBA.Config.serviceAlertText='<s:property value="serviceAlertText" />';
 
     OBA.Config.siriSMUrl = "<s:property value="appHostURL" />" + "<s:property value="siriBaseURL" />" + "/stop-monitoring.json?key=" + OBA.Config.obaApiKey;
     OBA.Config.siriVMUrl = "<s:property value="appHostURL" />" + "<s:property value="siriBaseURL" />" + "/vehicle-monitoring.json?key=" + OBA.Config.obaApiKey;
@@ -43,9 +46,9 @@
 
     OBA.Config.autocompleteUrl = "<s:property value="appHostURL" />" + "<s:property value="appBaseUrl" />" + "/api/autocomplete";
     OBA.Config.searchUrl = "<s:property value="appHostURL" />" + "<s:property value="appBaseUrl" />" + "/api/search";
-    OBA.Config.stopsWithinBoundsUrl = "<s:property value="appHostURL" />" + "<s:property value="siriBaseURL" />" +  "/api/stops-within-bounds";
-    OBA.Config.stopsOnRouteForDirection = "<s:property value="appHostURL" />" + "<s:property value="siriBaseURL" />" + "/api/stops-on-route-for-direction";
-    OBA.Config.stopForId = "<s:property value="appHostURL" />" + "<s:property value="siriBaseURL" />" + "/api/stop-for-id";
+    OBA.Config.stopsWithinBoundsUrl = "<s:property value="appHostURL" />" +  "/api/stops-within-bounds";
+    OBA.Config.stopsOnRouteForDirection = "<s:property value="appHostURL" />" + "/api/stops-on-route-for-direction";
+    OBA.Config.stopForId = "<s:property value="appHostURL" />" + "/api/stop-for-id";
 
     OBA.Config.infoBubbleFooterFunction = function(type, query) {
     var html = '';
@@ -60,23 +63,28 @@
 		if(OBA.Config.showSMS === "true"){
 			html += 'Send ' + OBA.Config.txtPrefix + ' <strong>' + query + '</strong> as a text to <strong>' + OBA.Config.shortCode + '</strong>';
 			html += '<br/>';
-			html += 'or check <a href="m/?q=' + query + '">this stop</a> on your smartphone.';
+			html += 'or check <a href="queryLink">this stop</a> on your smartphone.';
 		}
 		else{
-			html += 'Check <a href="m/?q=' + query + '">this stop</a> on your smartphone.';
+			html += 'Check <a href="queryLink">this stop</a> on your smartphone.';
 			
 		}	
 	    
 	    html += '</div>';
 
+        var queryLink = "m/?q=" + query;
+        html = html.replace("queryLink", queryLink);
+
     } else if(type === "route") {
-	    html += '<div class="footer">';
-	    html += '<span class="header">While at the bus stop...</span>';
-	    html += '<br/>';
-	
-	    html += 'Check <a href="m/?q=' + query + '">this route</a> on your smartphone.';
-	
-	    html += '</div>';
+        html += '<div class="footer">';
+        html += '<span class="header">While at the bus stop...</span>';
+        html += '<br/>';
+        html += 'Check <a href="queryLink">this route</a> on your smartphone.';
+
+        html += '</div>';
+
+        var queryLink = "m/?q=" + query;
+        html = html.replace("queryLink", queryLink);
 
     } else if(type === "sign") {
 	    html += 'Text <strong> ' + query + '</strong> to <strong>' + OBA.Config.shortCode + '</strong> ';

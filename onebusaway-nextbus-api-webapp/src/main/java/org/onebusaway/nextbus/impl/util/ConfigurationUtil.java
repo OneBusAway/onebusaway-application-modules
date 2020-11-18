@@ -27,7 +27,6 @@ public class ConfigurationUtil {
   private int httpTimeoutSeconds = 15;
   
   public ConfigurationUtil(){}
-  
   public String getTransiTimeHost() {
     return transiTimeHost;
   }
@@ -67,5 +66,9 @@ public class ConfigurationUtil {
   public void setHttpTimeoutSeconds(int httpTimeoutSeconds) {
     this.httpTimeoutSeconds = httpTimeoutSeconds;
   }
-  
+
+  public String toString() {
+    return "{" + transiTimeHost + ":" + transiTimePort + "/" + transiTimeKey + "}";
+  }
+
 }

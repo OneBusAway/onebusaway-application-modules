@@ -136,4 +136,6 @@ public class FederatedTransitDataBundle {
   public File getStopConsolidationFile() {
     return new File(_path, "StopConsolidation.txt");
   }
+
+  public File getHistoricalRidershipPath() { return new File(_path, "HistoricalRiderships.obj"); }
 }

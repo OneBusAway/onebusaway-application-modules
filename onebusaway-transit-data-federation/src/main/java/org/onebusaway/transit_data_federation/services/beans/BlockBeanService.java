@@ -21,6 +21,7 @@ import org.onebusaway.transit_data.model.blocks.BlockBean;
 import org.onebusaway.transit_data.model.blocks.BlockInstanceBean;
 import org.onebusaway.transit_data.model.blocks.BlockTripBean;
 import org.onebusaway.transit_data.model.blocks.ScheduledBlockLocationBean;
+import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
 
 /**
@@ -46,4 +47,6 @@ public interface BlockBeanService {
       long serviceDate);
   
   public ScheduledBlockLocationBean getScheduledBlockLocationFromScheduledTime(AgencyAndId blockId, long serviceDate, int scheduledTime);
+
+  BlockInstanceBean getBlockInstanceAsBean(BlockInstance blockInstance);
 }

@@ -20,6 +20,11 @@
 <jsp:directive.page contentType="text/html" />
 <head>
 	<title><s:text name="admin.title"/>: Login</title>
+	<script type="text/javascript">
+		function goBackToLogin() {
+			document.getElementById('tryagain').click();
+		}
+	</script>
 </head>
 <body>
 <div id="content">
@@ -29,26 +34,46 @@
 	<s:if test="anonymousUser">
 		<s:if test="failure">
 			<p class="error">Your username and or password are incorrect. To reset your password: </p>
-			<s:form action="/forgot-password.action">
+			<s:form action="/forgot-password.action" method="post">
 				Enter your username <s:textfield name="username" /> and 
 				<s:submit value="Click here" />
+				<input type="hidden" id="csrfField" name="${_csrf.parameterName}" value="${_csrf.token}"/>
 			</s:form>
+			<p class="error"><a href="#" onclick='javascript:goBackToLogin();'>Go Back to Login</a></p>
 			<br></br>
 			<div id="navigation">
-				<s:url var="url" namespace="/" action="logout"></s:url>
-				<s:a href="%{url}">Go Back to Login</s:a>
+				<s:url var="url" namespace="/admin" action="logout"></s:url>
+				<s:form  action="%{url}"
+						method="post">
+					<input id="tryagain" type="submit"
+						   class="logoutButton"
+						   value="Logout" />
+					<input type="hidden"
+						   id="csrfField"
+						   name="${_csrf.parameterName}"
+						   value="${_csrf.token}"/>
+				</s:form>
 			</div>
 		</s:if>
 		<s:elseif test="forbidden">
 				<p class="error">Please login to view this resource.</p>
 
 			<div id="navigation">
-				<s:url var="url" namespace="/" action="logout"></s:url>
-				<s:a href="%{url}">Go Back to Login</s:a>
+				<s:url var="url" namespace="/admin" action="logout"></s:url>
+				<s:form action="%{url}"
+						method="post">
+					<input type="submit"
+						   value="Continue" />
+					<input type="hidden"
+						   id="csrfField"
+						   name="${_csrf.parameterName}"
+						   value="${_csrf.token}"/>
+				</s:form>
+
 			</div>
 		</s:elseif>
 		<s:else>
-			<s:form action="/userIndex_login" namespace="/admin" method="POST">
+			<s:form action="/userIndex_login" method="put">
 				<fieldset>
 					<label class="top">Username:</label>
 					<s:textfield key="username" name="j_username"/>
@@ -58,12 +83,12 @@
 					<label class="top">Password:</label>
 					<s:password name="j_password"/>
 				</fieldset>
-
+<!--
 				<fieldset>
 					<s:checkbox name="_spring_security_remember_me" value="true" label="Remember Me"/>
 					<label class="inline">Remember Me</label>
 				</fieldset>
-
+-->
 				<s:hidden name="j_indexType" value="username"/>
 				<s:submit value="Login"/>
 			</s:form>

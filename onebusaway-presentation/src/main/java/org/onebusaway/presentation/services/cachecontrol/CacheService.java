@@ -41,8 +41,7 @@ public abstract class CacheService<K, V> {
   protected static Logger _log = LoggerFactory.getLogger(CacheService.class);
   protected Cache<K, V> _cache;
 
-  private ScheduledFuture<CacheService.StatusThread> _statusTask = null;
-
+  private ScheduledFuture<CacheService<K, V>.StatusThread> _statusTask = null;
   @Autowired
   private ThreadPoolTaskScheduler _taskScheduler;
 
@@ -160,8 +159,9 @@ public abstract class CacheService<K, V> {
   private void startStatusTask() {
     if (_statusTask == null) {
       if (!_disabled) {
-        _statusTask = _taskScheduler.scheduleWithFixedDelay(new StatusThread(),
-            STATUS_INTERVAL_MINUTES * 60 * 1000);
+        _statusTask = (ScheduledFuture<StatusThread>) _taskScheduler.scheduleWithFixedDelay(new StatusThread(),
+                STATUS_INTERVAL_MINUTES * 60 * 1000);
+
       } else {
         this.logStatus();
       }

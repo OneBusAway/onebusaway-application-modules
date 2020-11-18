@@ -23,6 +23,7 @@ import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.quartz.QuartzJobBean;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * A simple job to ping the database to keep the connection pool active.
@@ -30,11 +31,13 @@ import org.springframework.scheduling.quartz.QuartzJobBean;
  * error messages.
  *
  */
+@Transactional(transactionManager = "transactionManager")
 public class PingJob extends QuartzJobBean {
 
   private static Logger _log = LoggerFactory.getLogger(PingJob.class);
 
   @Override
+  @Transactional
   protected void executeInternal(JobExecutionContext arg0)
       throws JobExecutionException {
     // execute a simple query to keep db connection alive

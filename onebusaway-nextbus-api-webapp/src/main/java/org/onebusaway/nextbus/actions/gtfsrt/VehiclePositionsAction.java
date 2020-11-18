@@ -15,8 +15,10 @@
  */
 package org.onebusaway.nextbus.actions.gtfsrt;
 
+import com.google.transit.realtime.GtfsRealtime;
 import com.google.transit.realtime.GtfsRealtime.FeedMessage;
 import com.opensymphony.xwork2.ModelDriven;
+import org.apache.commons.lang.StringUtils;
 import org.apache.struts2.rest.DefaultHttpHeaders;
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.nextbus.actions.api.NextBusApiBase;
@@ -30,6 +32,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import static org.onebusaway.nextbus.impl.gtfsrt.GtfsrtCache.ALL_AGENCIES;
 
 public class VehiclePositionsAction extends NextBusApiBase  implements
         ModelDriven<FeedMessage> {
@@ -56,18 +60,36 @@ public class VehiclePositionsAction extends NextBusApiBase  implements
         this.agencyId = agencyId;
     }
 
+    public String getAgencyIdHashKey() {
+        if (StringUtils.isBlank(agencyId)) {
+            return ALL_AGENCIES;
+        }
+        return agencyId;
+    }
+
+    private static long DEFAULT_STALE_TIMEOUT = 10 * 60;
+    private long _staleTimeout = DEFAULT_STALE_TIMEOUT;
+
+    public long getStaleTimeout() {
+        return _staleTimeout;
+    }
+
+    public void setStaleTimeout(long timeout) {
+        _staleTimeout = timeout;
+    }
+
     public DefaultHttpHeaders index() {
         return new DefaultHttpHeaders("success");
     }
 
     @Override
     public FeedMessage getModel() {
-        FeedMessage cachedVehiclePositions = _cache.getVehiclePositions();
+        FeedMessage cachedVehiclePositions = _cache.getVehiclePositions(getAgencyIdHashKey());
         if(cachedVehiclePositions != null){
             return cachedVehiclePositions;
         }
         else {
-            FeedMessage.Builder feedMessage = createFeedWithDefaultHeader();
+            FeedMessage.Builder feedMessage = null; // delay creation until we have a timestamp
             FeedMessage remoteFeedMessage = null;
 
             List<String> agencyIds = new ArrayList<String>();
@@ -80,21 +102,60 @@ public class VehiclePositionsAction extends NextBusApiBase  implements
             }
 
             for (String agencyId : agencyIds) {
-                String gtfsrtUrl = getServiceUrl() + agencyId + VEHICLE_UPDATES_COMMAND;
-                try {
-                    remoteFeedMessage = _httpUtil.getFeedMessage(gtfsrtUrl, 30);
-                    feedMessage.addAllEntity(remoteFeedMessage.getEntityList());
-                } catch (Exception e) {
-                    _log.error(e.getMessage());
+                if (hasServiceUrl(agencyId)) {
+                    String gtfsrtUrl = getServiceUrl(agencyId) + agencyId + VEHICLE_UPDATES_COMMAND;
+                    try {
+                        remoteFeedMessage = _httpUtil.getFeedMessage(gtfsrtUrl, 30);
+                        if (feedMessage == null) {
+                            if (remoteFeedMessage.hasHeader()
+                                    && remoteFeedMessage.getHeader().hasTimestamp()
+                                    && isTimely(remoteFeedMessage.getHeader().getTimestamp())) {
+                                // we set the age of our feed to the age of the first feed that has a timestamp
+                                // unless its too old, then we serve the time the response was generated
+                                feedMessage = createFeedWithDefaultHeader(remoteFeedMessage.getHeader().getTimestamp());
+                            } else {
+                                feedMessage = createFeedWithDefaultHeader(null);
+                            }
+                        }
+
+                        feedMessage.addAllEntity(filter(remoteFeedMessage.getEntityList()));
+                    } catch (Exception e) {
+                        _log.error(e.getMessage());
+                        feedMessage = createFeedWithDefaultHeader(null);
+                    }
                 }
             }
             FeedMessage builtFeedMessage = feedMessage.build();
-            _cache.putVehiclePositions(builtFeedMessage);
+            _cache.putVehiclePositions(getAgencyIdHashKey(), builtFeedMessage);
             return builtFeedMessage;
         }
     }
 
-    public FeedMessage.Builder createFeedWithDefaultHeader() {
-        return _gtfsrtHelper.createFeedWithDefaultHeader();
+    public FeedMessage.Builder createFeedWithDefaultHeader(Long timestampInSeconds) {
+        return _gtfsrtHelper.createFeedWithDefaultHeader(timestampInSeconds);
+    }
+
+    private List<GtfsRealtime.FeedEntity> filter(List<GtfsRealtime.FeedEntity> allUpdates) {
+        long nowInSeconds = System.currentTimeMillis() / 1000;
+        ArrayList<GtfsRealtime.FeedEntity> filtered = new ArrayList<>();
+        if (allUpdates == null || allUpdates.isEmpty()) return filtered;
+        for (GtfsRealtime.FeedEntity entity : allUpdates) {
+            if (entity.hasVehicle()) {
+                if (entity.getVehicle().hasTrip()) {
+                    if (nowInSeconds - entity.getVehicle().getTimestamp() <= getStaleTimeout()) {
+                        // record has a trip and is recent -- pass it through
+                        filtered.add(entity);
+                    }
+                } else {
+                    // missing trip therefore non-revenue serivce
+                }
+            } else {
+                // old record, filter it
+            }
+        }
+        return filtered;
     }
 }
+/*
+
+ */

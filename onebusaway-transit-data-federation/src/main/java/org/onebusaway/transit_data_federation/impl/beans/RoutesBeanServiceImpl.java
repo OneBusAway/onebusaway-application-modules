@@ -16,6 +16,7 @@
  */
 package org.onebusaway.transit_data_federation.impl.beans;
 
+import org.apache.lucene.queryparser.classic.ParseException;
 import org.onebusaway.container.cache.Cacheable;
 import org.onebusaway.container.refresh.Refreshable;
 import org.onebusaway.exceptions.InvalidArgumentServiceException;
@@ -30,7 +31,7 @@ import org.onebusaway.transit_data.model.SearchQueryBean;
 import org.onebusaway.transit_data.model.StopBean;
 import org.onebusaway.transit_data_federation.impl.RefreshableResources;
 import org.onebusaway.transit_data_federation.model.SearchResult;
-import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
+import org.onebusaway.util.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.RouteCollectionSearchService;
 import org.onebusaway.transit_data_federation.services.RouteService;
 import org.onebusaway.transit_data_federation.services.beans.GeospatialBeanService;
@@ -46,7 +47,6 @@ import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.index.ItemVisitor;
 import com.vividsolutions.jts.index.strtree.STRtree;
 
-import org.apache.lucene.queryParser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -164,7 +164,7 @@ class RoutesBeanServiceImpl implements RoutesBeanService {
 
     Set<RouteBean> routes = new HashSet<RouteBean>();
     for (AgencyAndId stopId : stops) {
-      StopBean stop = _stopService.getStopForId(stopId);
+      StopBean stop = _stopService.getStopForId(stopId, null);
       routes.addAll(stop.getRoutes());
     }
 

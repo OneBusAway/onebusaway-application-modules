@@ -185,7 +185,19 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			return defaultValue;
 		}
 	}
-	
+
+	@Override
+	public Boolean getConfigurationValueAsBoolean(String configurationItemKey, Boolean defaultValue) {
+		try {
+			String defaultValueAsString = ((defaultValue != null) ? defaultValue.toString() : null);
+			String valueAsString = getConfigurationValueAsString(configurationItemKey, defaultValueAsString);
+			if (valueAsString == null) return defaultValue;
+			return Boolean.parseBoolean(valueAsString);
+		} catch(Exception any) {
+			return defaultValue;
+		}
+	}
+
 	@Override
 	public Double getConfigurationValueAsDouble(String configurationItemKey,
 			Double defaultValue) {

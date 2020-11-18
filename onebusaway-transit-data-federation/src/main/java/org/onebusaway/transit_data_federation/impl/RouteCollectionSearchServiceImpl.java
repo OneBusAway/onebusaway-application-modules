@@ -19,6 +19,7 @@ package org.onebusaway.transit_data_federation.impl;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -28,18 +29,19 @@ import java.util.Set;
 import javax.annotation.PostConstruct;
 
 import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.CharArraySet;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
+import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
-import org.apache.lucene.queryParser.MultiFieldQueryParser;
-import org.apache.lucene.queryParser.ParseException;
-import org.apache.lucene.queryParser.QueryParser;
+import org.apache.lucene.queryparser.classic.MultiFieldQueryParser;
+import org.apache.lucene.queryparser.classic.ParseException;
+import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
-import org.apache.lucene.search.Searcher;
-import org.apache.lucene.search.TopDocCollector;
 import org.apache.lucene.search.TopDocs;
+import org.apache.lucene.store.FSDirectory;
 import org.onebusaway.container.refresh.Refreshable;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.model.SearchResult;
@@ -60,7 +62,8 @@ public class RouteCollectionSearchServiceImpl implements
     "that", "the", "their", "then", "there", "these",
     "they", "this", "to", "was", "will", "with"
   };
-  private static Analyzer _analyzer = new StandardAnalyzer(ENGLISH_STOP_WORDS);
+  private static Analyzer _analyzer
+          = new StandardAnalyzer(new CharArraySet(Arrays.asList(ENGLISH_STOP_WORDS), true));
 
   private static String[] NAME_FIELDS = {
       RouteCollectionSearchIndexConstants.FIELD_ROUTE_SHORT_NAME,
@@ -68,7 +71,7 @@ public class RouteCollectionSearchServiceImpl implements
 
   private FederatedTransitDataBundle _bundle;
 
-  private Searcher _searcher;
+  private IndexSearcher _searcher;
 
   @Autowired
   public void setBundle(FederatedTransitDataBundle bundle) {
@@ -82,7 +85,7 @@ public class RouteCollectionSearchServiceImpl implements
     File path = _bundle.getRouteSearchIndexPath();
 
     if (path.exists()) {
-      IndexReader reader = IndexReader.open(path);
+      IndexReader reader = DirectoryReader.open(FSDirectory.open(path.toPath()));
       _searcher = new IndexSearcher(reader);
     } else {
       _searcher = null;
@@ -91,7 +94,7 @@ public class RouteCollectionSearchServiceImpl implements
 
   public SearchResult<AgencyAndId> searchForRoutesByName(String value,
       int maxResultCount, double minScoreToKeep) throws IOException,
-      ParseException {
+          ParseException {
 
     return search(new MultiFieldQueryParser(NAME_FIELDS, _analyzer), value,
         maxResultCount, minScoreToKeep);
@@ -104,12 +107,8 @@ public class RouteCollectionSearchServiceImpl implements
     if (_searcher == null)
       return new SearchResult<AgencyAndId>();
 
-    TopDocCollector collector = new TopDocCollector(maxResultCount);
-
     Query query = parser.parse(value);
-    _searcher.search(query, collector);
-
-    TopDocs top = collector.topDocs();
+    TopDocs top = _searcher.search(query, maxResultCount);
 
     Map<AgencyAndId, Float> topScores = new HashMap<AgencyAndId, Float>();
 

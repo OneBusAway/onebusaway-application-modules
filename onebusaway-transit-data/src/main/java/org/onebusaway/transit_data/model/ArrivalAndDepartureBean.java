@@ -17,6 +17,7 @@ package org.onebusaway.transit_data.model;
 
 import java.util.List;
 
+import org.onebusaway.realtime.api.OccupancyStatus;
 import org.onebusaway.transit_data.model.realtime.HistogramBean;
 import org.onebusaway.transit_data.model.schedule.FrequencyBean;
 import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
@@ -56,6 +57,12 @@ public class ArrivalAndDepartureBean extends ApplicationBean {
   private TimeIntervalBean scheduledDepartureInterval;
 
   private long predictedDepartureTime;
+
+  private OccupancyStatus occupancyStatus;
+
+  private OccupancyStatus historicalOccupancy;
+
+  private OccupancyStatus predictedOccupancy;
 
   private TimeIntervalBean predictedDepartureInterval;
 
@@ -205,6 +212,18 @@ public class ArrivalAndDepartureBean extends ApplicationBean {
   public void setPredictedDepartureTime(long predictedDepartureTime) {
     this.predictedDepartureTime = predictedDepartureTime;
   }
+
+  public OccupancyStatus getOccupancyStatus() { return occupancyStatus; }
+
+  public void setOccupancyStatus(OccupancyStatus occupancyStatus) { this.occupancyStatus = occupancyStatus; }
+
+  public OccupancyStatus getHistoricalOccupancy() { return historicalOccupancy; }
+
+  public void setHistoricalOccupancy(OccupancyStatus histOccupancy) { this.historicalOccupancy = histOccupancy; }
+
+  public OccupancyStatus getPredictedOccupancy() { return predictedOccupancy; }
+
+  public void setPredictedOccupancy(OccupancyStatus predOccupancy) { this.predictedOccupancy = predOccupancy; }
 
   public TimeIntervalBean getPredictedDepartureInterval() {
     return predictedDepartureInterval;

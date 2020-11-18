@@ -23,12 +23,12 @@
            http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd
            http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.0.xsd
            http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd
-           http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-2.0.xsd">
+           http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-4.2.xsd">
 
   <import resource="classpath:org/onebusaway/transit_data_federation/application-context-common.xml" />
 
   <context:component-scan base-package="org.onebusaway.transit_data_federation.impl" />
-    
+  <context:component-scan base-package="org.onebusaway.alerts.impl" />
   <!--
       List of Hibernate annotated classes: classes configured for Hibernate using annotations, as opposed to a
       Hibernate xml mapping file. This list can be extended by other modules with an
@@ -42,11 +42,11 @@
         <value>org.onebusaway.transit_data_federation.impl.realtime.history.ScheduleDeviationHistory</value>
         <value>org.onebusaway.transit_data_federation.impl.reporting.StopProblemReportRecord</value>
         <value>org.onebusaway.transit_data_federation.impl.reporting.TripProblemReportRecord</value>
-        <value>org.onebusaway.transit_data_federation.impl.service_alerts.ServiceAlertRecord</value>
-        <value>org.onebusaway.transit_data_federation.impl.service_alerts.ServiceAlertLocalizedString</value>
-        <value>org.onebusaway.transit_data_federation.impl.service_alerts.ServiceAlertTimeRange</value>
-        <value>org.onebusaway.transit_data_federation.impl.service_alerts.ServiceAlertsSituationAffectsClause</value>
-        <value>org.onebusaway.transit_data_federation.impl.service_alerts.ServiceAlertSituationConsequenceClause</value>
+        <value>org.onebusaway.alerts.impl.ServiceAlertRecord</value>
+        <value>org.onebusaway.alerts.impl.ServiceAlertLocalizedString</value>
+        <value>org.onebusaway.alerts.impl.ServiceAlertTimeRange</value>
+        <value>org.onebusaway.alerts.impl.ServiceAlertsSituationAffectsClause</value>
+        <value>org.onebusaway.alerts.impl.ServiceAlertSituationConsequenceClause</value>
       </list>
     </property>
   </bean>

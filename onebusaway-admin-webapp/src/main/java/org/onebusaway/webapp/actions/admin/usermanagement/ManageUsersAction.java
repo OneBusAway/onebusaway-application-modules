@@ -144,7 +144,7 @@ public class ManageUsersAction extends OneBusAwayNYCAdminActionSupport {
 	}
 	
 	public List<String> getPossibleRoles() {
-		return userManagementService.getAllRoleNames();
+		return userManagementService.getManagedRoleNames();
 	}
 
     /**

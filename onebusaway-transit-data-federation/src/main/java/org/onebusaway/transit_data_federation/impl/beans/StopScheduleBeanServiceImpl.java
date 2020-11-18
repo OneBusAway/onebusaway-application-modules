@@ -44,7 +44,7 @@ import org.onebusaway.transit_data.model.StopTimeGroupBean;
 import org.onebusaway.transit_data.model.StopTimeInstanceBean;
 import org.onebusaway.transit_data.model.schedule.FrequencyInstanceBean;
 import org.onebusaway.transit_data_federation.model.narrative.TripNarrative;
-import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
+import org.onebusaway.util.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.AgencyService;
 import org.onebusaway.transit_data_federation.services.ExtendedCalendarService;
 import org.onebusaway.transit_data_federation.services.beans.RouteBeanService;

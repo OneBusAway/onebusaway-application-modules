@@ -105,7 +105,15 @@
 		<div id="topbar">
 			<div id="branding">
 				<s:set var="link" value="getText('main.agency.link')" />
-				<a href="${link}" id="agency-logo"></a>
+				<a href="${link}">
+					<s:url var="url" value="css/img/agency_logo.png">
+						<s:param name="v">
+							<s:property value="frontEndVersion" />
+						</s:param>
+					</s:url>
+					<img src="${url}" alt="Agency logo" />
+				</a>
+
 			</div>
 
 			<div id="search">
@@ -130,7 +138,11 @@
 				<div class="bottombox" id="google_translate_element_bottom">
 					<span>Google Translate</span>
 					<s:set var="link" value="getText('main.agency.link')" />
-					<s:url var="url" value="/css/img/google_logo.png"></s:url>
+					<s:url var="url" value="/css/img/google_logo.png">
+						<s:param name="v">
+							<s:property value="frontEndVersion" />
+						</s:param>
+					</s:url>
 					<img id="icon" src="${url}" />
 				</div>
 				<div class="bottombox">

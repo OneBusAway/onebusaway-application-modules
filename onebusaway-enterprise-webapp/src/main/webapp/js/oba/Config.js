@@ -29,6 +29,10 @@ OBA.Config = {
 		stopForId: "api/stop-for-id",
 		apiUrl: "/onebusaway-api-webapp/api",
 		legacyUrl: "../",
+		urlPrefix: "",
+    	searchParamsPrefix: "#",
+		includeBubbleFooter: true,
+		hasSidebar: true,
 
 		// siriSMUrl and siriVMUrl now moved to config.jspx
 		

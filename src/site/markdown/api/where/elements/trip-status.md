@@ -25,6 +25,7 @@ The `<tripStatus/>` element captures information about the current status of a t
   <closestStopTimeOffset>-10</closestStopTimeOffset>
   <nextStop>1_1108</nextStop>
   <nextStopTimeOffset>72</nextStopTimeOffset>
+  <occupancyStatus>MANY_SEATS_AVAILABLE</occupancyStatus>
   <phase>in_progress</phase>
   <status>default</status>
   <predicted>true</predicted>
@@ -58,6 +59,7 @@ The `<tripStatus/>` element captures information about the current status of a t
 * closestStop - the id of the closest stop to the current location of the transit vehicle, whether from schedule or real-time predicted location data
 * closestStopTimeOffset - the time offset, in seconds, from the closest stop to the current position of the transit vehicle among the stop times of the current trip. If the number is positive, the stop is coming up. If negative, the stop has already been passed. 
 * nextStop and nextStopTimeOffset - these are similar to the existing closestStop and closestStopTimeOffset, except that it always captures the next stop, not the closest stop.  Optional, as a vehicle may have progressed past the last stop in a trip. *OPTIONAL*
+* occupancyStatus - name() values of GTFS-RT OccupancyStatus enum if available
 * phase - the current journey phase of the trip (more docs to come)
 * status - status modifiers for the trip (more docs to come)
 * predicted - true if we have real-time arrival info available for this trip

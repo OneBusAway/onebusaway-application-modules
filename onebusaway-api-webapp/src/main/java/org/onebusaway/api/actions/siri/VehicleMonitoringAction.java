@@ -35,7 +35,7 @@ import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data.model.ListBean;
 import org.onebusaway.transit_data.model.VehicleStatusBean;
 import org.onebusaway.transit_data.services.TransitDataService;
-import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
+import org.onebusaway.util.AgencyAndIdLibrary;
 import org.onebusaway.util.impl.analytics.GoogleAnalyticsServiceImpl;
 import org.onebusaway.presentation.impl.service_alerts.ServiceAlertsHelper;
 import org.onebusaway.presentation.services.cachecontrol.CacheService;
@@ -202,7 +202,7 @@ public class VehicleMonitoringAction extends ApiActionSupport
           activities.add(activity);
         }
       }
-      
+
       // No vehicle id validation, so we pass null for error
       _response = generateSiriResponse(activities, null, null, currentTimestamp);
 
@@ -211,7 +211,7 @@ public class VehicleMonitoringAction extends ApiActionSupport
       List<VehicleActivityStructure> activities = new ArrayList<VehicleActivityStructure>();
       
       for (AgencyAndId routeId : routeIds) {
-        
+
         List<VehicleActivityStructure> activitiesForRoute = _realtimeService.getVehicleActivityForRoute(
             routeId.toString(), directionId, maximumOnwardCalls, currentTimestamp, showRawLocation);
         if (activitiesForRoute != null) {
@@ -242,7 +242,7 @@ public class VehicleMonitoringAction extends ApiActionSupport
       }
 
       _response = generateSiriResponse(activities, routeIds, error, currentTimestamp);
-      
+
       // *** CASE 3: all vehicles
     } else {
       try {
@@ -287,8 +287,7 @@ public class VehicleMonitoringAction extends ApiActionSupport
 
   /**
    * Generate a siri response for a set of VehicleActivities
-   * 
-   * @param routeId
+   *
    */
   
   private Siri generateSiriResponse(List<VehicleActivityStructure> activities,
@@ -344,7 +343,7 @@ public class VehicleMonitoringAction extends ApiActionSupport
       // check the cache first
       return _cachedResponse;
     }
-    
+
     try {
       if (_type.equals("xml")) {
         this._servletResponse.setContentType("application/xml");
@@ -374,8 +373,8 @@ public class VehicleMonitoringAction extends ApiActionSupport
   }
   
   private void processGoogleAnalytics(){
-	  processGoogleAnalyticsPageView();
-	  processGoogleAnalyticsApiKeys();  
+//	  processGoogleAnalyticsPageView();
+//	  processGoogleAnalyticsApiKeys();
   }
   
   private void processGoogleAnalyticsPageView(){

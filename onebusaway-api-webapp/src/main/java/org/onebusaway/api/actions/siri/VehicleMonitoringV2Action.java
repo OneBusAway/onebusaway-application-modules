@@ -21,7 +21,6 @@ import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.List;
 
-import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -34,10 +33,9 @@ import org.onebusaway.api.actions.siri.impl.SiriSupportV2;
 import org.onebusaway.api.actions.siri.model.DetailLevel;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.presentation.impl.DateUtil;
-import org.onebusaway.presentation.services.cachecontrol.CacheService;
 import org.onebusaway.transit_data.model.ListBean;
 import org.onebusaway.transit_data.model.VehicleStatusBean;
-import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
+import org.onebusaway.util.AgencyAndIdLibrary;
 import org.onebusaway.util.impl.analytics.GoogleAnalyticsServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -29,7 +29,7 @@ import org.onebusaway.transit_data_federation.impl.transit_graph.RouteCollection
 import org.onebusaway.transit_data_federation.impl.transit_graph.RouteEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.TripEntryImpl;
-import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id;
+import org.onebusaway.alerts.service.ServiceAlerts.Id;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
 

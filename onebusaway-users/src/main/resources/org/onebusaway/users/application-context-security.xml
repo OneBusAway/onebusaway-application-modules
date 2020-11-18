@@ -23,7 +23,7 @@
            http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
            http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.0.xsd
            http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd
-           http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.0.xsd">
+           http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-4.2.xsd">
 
    	<bean id="indexedUserDetailsSaltSourceImpl" class="org.onebusaway.users.impl.authentication.IndexedUserDetailsSaltSourceImpl" />
 
@@ -55,21 +55,6 @@
     <bean id="defaultUserAuthenticationProvider" class="org.onebusaway.users.impl.authentication.DefaultUserAuthenticationProvider">
     </bean>
     
-    <bean id="securityContextPersistenceFilter" class="org.springframework.security.web.context.SecurityContextPersistenceFilter">
-      <property name="forceEagerSessionCreation" value="false" />
-      <property name="securityContextRepository">
-      	<bean class="org.springframework.security.web.context.HttpSessionSecurityContextRepository">
-      		<property name="allowSessionCreation" value="false" />
-      	</bean>
-      </property>
-    </bean>
-    
-    <bean id="authenticationProcessingFilterEntryPoint" class="org.springframework.security.web.authentication.AuthenticationProcessingFilterEntryPoint">
-      <property name="loginFormUrl" value="/userIndex_login" />
-      <property name="forceHttps" value="false" />
-      <property name="useForward" value="true" />
-    </bean>
- 
 
 	<sec:authentication-manager alias="authenticationManager">
 	  <sec:authentication-provider ref="daoAuthenticationProvider">

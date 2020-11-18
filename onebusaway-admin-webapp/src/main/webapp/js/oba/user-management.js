@@ -78,25 +78,38 @@ function editUser() {
 	
 	var userData = new Object();
 	userData.id = jQuery("#userDetails #userId").val();
-	console.log(jQuery("#userDetails #userId"));
+	//console.log(jQuery("#userDetails #userId"));
 	userData.username = jQuery("#editUser #editUserName").text();
 	userData.password = jQuery("#editUser #newPassword").val();
 	userData.role = jQuery("#editUser #newRole option:selected").val();
-	
-	jQuery.ajax({
-		url:"manage-users!editUser.action",
-		type: "POST",
-		dataType: "json",
-		data : {"userData":JSON.stringify(userData)},
-		traditional: true,
-		success: function(response) {
-			jQuery("#userResult #result").text(response);
-			showResult();
-		},
-		error: function() {
-			alert("Error updating user");
-		}
-	});
+	// these are provided by sec:csrfMetaTags
+	var csrfParameter = $("meta[name='_csrf_parameter']").attr("content");
+	var csrfHeader = $("meta[name='_csrf_header']").attr("content");
+	var csrfToken = $("meta[name='_csrf']").attr("content");
+	var data = {};
+	data[csrfParameter] = csrfToken;
+	data["userData"] = JSON.stringify(userData);
+
+	//make sure a role is selected before calling server to edit the user
+	if (!userData.role || 0 === userData.role.length) {
+		alert("Role is required");
+	}
+	else {
+        jQuery.ajax({
+            url: "manage-users!editUser.action",
+            type: "POST",
+            dataType: "json",
+            data: data,
+            traditional: true,
+            success: function (response) {
+                jQuery("#userResult #result").text(response);
+                showResult();
+            },
+            error: function () {
+                alert("Error updating user");
+            }
+        });
+    }
 }
 
 function showDeleteDialog() {
@@ -138,12 +151,20 @@ function deleteUser(event) {
     var userData = new Object();
     userData.id = jQuery("#userDetails #userId").val();
     userData.userName = jQuery("#userDetails #username").text();
+	// these are provided by sec:csrfMetaTags
+	var csrfParameter = $("meta[name='_csrf_parameter']").attr("content");
+	var csrfHeader = $("meta[name='_csrf_header']").attr("content");
+	var csrfToken = $("meta[name='_csrf']").attr("content");
+	var data = {};
+	data[csrfParameter] = csrfToken;
+	data["userData"] = JSON.stringify(userData);
 
-    jQuery.ajax({
+
+	jQuery.ajax({
         url:"manage-users!deleteUser.action",
         type: "POST",
         dataType: "json",
-        data : {"userData":JSON.stringify(userData)},
+        data : data,
         traditional: true,
         success: function(response) {
             jQuery("#userResult #result").text(response);
@@ -164,12 +185,20 @@ function inactivateUser() {
 	var userData = new Object();
 	userData.id = jQuery("#userDetails #userId").val();
 	userData.userName = jQuery("#userDetails #username").text();
-	
+	// these are provided by sec:csrfMetaTags
+	var csrfParameter = $("meta[name='_csrf_parameter']").attr("content");
+	var csrfHeader = $("meta[name='_csrf_header']").attr("content");
+	var csrfToken = $("meta[name='_csrf']").attr("content");
+	var data = {};
+	data[csrfParameter] = csrfToken;
+	data["userData"] = JSON.stringify(userData);
+
+
 	jQuery.ajax({
 		url:"manage-users!inactivateUser.action",
 		type: "POST",
 		dataType: "json",
-		data : {"userData":JSON.stringify(userData)},
+		data : data,
 		traditional: true,
 		success: function(response) {
 			jQuery("#userResult #result").text(response);
@@ -190,12 +219,20 @@ function activateUser() {
     var userData = new Object();
     userData.id = jQuery("#userDetails #userId").val();
     userData.userName = jQuery("#userDetails #username").text();
+	// these are provided by sec:csrfMetaTags
+	var csrfParameter = $("meta[name='_csrf_parameter']").attr("content");
+	var csrfHeader = $("meta[name='_csrf_header']").attr("content");
+	var csrfToken = $("meta[name='_csrf']").attr("content");
+	var data = {};
+	data[csrfParameter] = csrfToken;
+	data["userData"] = JSON.stringify(userData);
 
-    jQuery.ajax({
+
+	jQuery.ajax({
         url:"manage-users!activateUser.action",
         type: "POST",
         dataType: "json",
-        data : {"userData":JSON.stringify(userData)},
+        data : data,
         traditional: true,
         success: function(response) {
             jQuery("#userResult #result").text(response);

@@ -21,11 +21,13 @@ import org.onebusaway.users.client.model.UserBean;
 import org.onebusaway.users.model.UserIndex;
 import org.onebusaway.users.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.web.authentication.AuthenticationProcessingFilter;
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 
 public class IndexedUserAuthenticationProcessorFilter extends
-    AuthenticationProcessingFilter {
+        UsernamePasswordAuthenticationFilter {
 
   private UserService _userService;
   private String _indexTypeParameter = "j_indexType";
@@ -68,4 +70,21 @@ public class IndexedUserAuthenticationProcessorFilter extends
         _userService = userService;
     }
 
+  public void setSuccessHandler(AuthenticationSuccessHandler successHandler) {
+    super.setAuthenticationSuccessHandler(successHandler);
+  }
+
+  public void setFailureHandler(AuthenticationFailureHandler failureHandler) {
+    super.setAuthenticationFailureHandler(failureHandler);
+  }
+
+  @Override
+  public AuthenticationSuccessHandler getSuccessHandler() {
+    return super.getSuccessHandler();
+  }
+
+  @Override
+  public AuthenticationFailureHandler getFailureHandler() {
+    return super.getFailureHandler();
+  }
 }

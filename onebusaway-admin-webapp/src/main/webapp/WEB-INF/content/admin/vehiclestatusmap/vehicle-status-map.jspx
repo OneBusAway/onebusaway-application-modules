@@ -62,6 +62,7 @@
         <s:param name="v">3</s:param>
         <s:param name="client"><s:property value="googleMapsClientId" /></s:param>
         <s:param name="channel"><s:property value="googleMapsChannelId" /></s:param>
+        <s:param name="key"><s:property value="googleMapsApiKey" /></s:param>
         <s:param name="sensor">false</s:param>
     </s:url>
     <script src="${url}" type="text/javascript"><!-- //prevent jspx minimization --></script>
@@ -152,7 +153,7 @@
             <form action="search.action">
                 <input type="text" name="q" value=""/>
                 <input type="submit" value="Find" class="submit"/>
-                <p id="tip">TIP: Enter an intersection, bus route or bus stop code.</p>
+                <p id="tip">TIP: Enter a bus stop code, route, or street address.</p>
             </form>
 
             <div id="matches">
@@ -205,11 +206,16 @@
 
         </div>
         <div class="container clear"><!-- jspx --></div>
-        <s:url var="url" value="/css/img/google_logo.png"></s:url>
+        <s:url var="url" value="/css/img/google_logo.png">
+            <s:param name="v">
+                <s:property value="frontEndVersion" />
+            </s:param>
+        </s:url>
         <div id="google_translate_element">Google Translate <img id="icon" src="${url}" /></div>
     </div>
 
     <div id="map"><!-- //prevent jspx minimization --></div>
+    <div id="legend"><!-- //prevent jspx minimization --></div>
 
     <div id="wizard">
         <div id="wizard_start">
@@ -229,7 +235,7 @@
                     <p>using:</p>
                 </li>
                 <li id="wizard-col3">
-                    <s:url var="url" namespace="/wiki/Help" action="MobileOverview"/>
+                    <s:url var="url" namespace="/" action="m"/>
                     <a href="${url}" target="_new">
                         <p>Mobile Web</p>
                         <a rel="popover"><div id="smartphone_img">&amp;nbsp;</div></a>

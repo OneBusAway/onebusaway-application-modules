@@ -23,12 +23,12 @@ import java.util.List;
 import javax.persistence.AttributeOverride;
 import javax.persistence.AttributeOverrides;
 import javax.persistence.Column;
+import javax.persistence.ElementCollection;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-import org.hibernate.annotations.CollectionOfElements;
 import org.hibernate.annotations.Index;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
@@ -71,32 +71,32 @@ public class BundleBuildResponse {
   @Column(nullable = true, name="id", length = ID_LEN)
   private String id = null;
 
-  @CollectionOfElements
+  @ElementCollection
   @LazyCollection (LazyCollectionOption.FALSE)
   @Column(nullable = true, name="gtfs_list", length = NAME_LEN)
 	private List<String> _gtfsList = Collections.synchronizedList(new ArrayList<String>());
 
-  @CollectionOfElements
+  @ElementCollection
   @LazyCollection (LazyCollectionOption.FALSE)
   @Column(nullable = true, name="aux_zip_list", length = NAME_LEN)
 	private List<String> _auxZipList = Collections.synchronizedList(new ArrayList<String>());
 
-  @CollectionOfElements
+  @ElementCollection
   @LazyCollection (LazyCollectionOption.FALSE)
   @Column(nullable = true, name="config_list", length = NAME_LEN)
 	private List<String> _configList = Collections.synchronizedList(new ArrayList<String>());
 
-  @CollectionOfElements
+  @ElementCollection
   @LazyCollection (LazyCollectionOption.FALSE)
   @Column(nullable = true, name="status_list", length = STATUS_LEN)
 	private List<String> _statusList = Collections.synchronizedList(new ArrayList<String>());
 
-  @CollectionOfElements
+  @ElementCollection
   @LazyCollection (LazyCollectionOption.FALSE)
   @Column(nullable = true, name="output_file_list", length = NAME_LEN)
 	private List<String> _outputFileList = Collections.synchronizedList(new ArrayList<String>());
 
-  @CollectionOfElements
+  @ElementCollection
   @LazyCollection (LazyCollectionOption.FALSE)
   @Column(nullable = true, name="output_gtfs_file_list", length = NAME_LEN)
 	private List<String> _outputGtfsFileList = Collections.synchronizedList(new ArrayList<String>());
@@ -258,7 +258,11 @@ public class BundleBuildResponse {
 	    return;
 	  }
 	  if (_exception == null) {
-	  _exception = new SerializableException(e.getMessage(), e);
+	  	String msg = "";
+	  	if (e.getMessage() != null) {
+	  		msg = e.getMessage().substring(0, Math.min(e.getMessage().length(), BundleBuildResponse.EX_MSG_LEN));
+		}
+	  _exception = new SerializableException(msg, e);
 	  } else {
 	    _exception = new SerializableException(e, _exception);
 	  }

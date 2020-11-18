@@ -15,11 +15,13 @@
  */
 package org.onebusaway.api.model.where;
 
+import org.onebusaway.realtime.api.OccupancyStatus;
+
 import java.io.Serializable;
 
 public class ArrivalAndDepartureBeanV1 implements Serializable {
 
-  private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 2L;
 
   private String routeId;
 
@@ -36,6 +38,12 @@ public class ArrivalAndDepartureBeanV1 implements Serializable {
   private long scheduledArrivalTime;
 
   private long predictedDepartureTime;
+
+  private String occupancyStatus;
+
+  private String historicalOccupancy;
+
+  private String predictedOccupancy;
 
   private long scheduledDepartureTime;
 
@@ -104,6 +112,18 @@ public class ArrivalAndDepartureBeanV1 implements Serializable {
   public void setPredictedDepartureTime(long predictedDepartureTime) {
     this.predictedDepartureTime = predictedDepartureTime;
   }
+
+  public String getOccupancyStatus() { return occupancyStatus; }
+
+  public void setOccupancyStatus(OccupancyStatus occupancyStatus) { if (occupancyStatus != null) this.occupancyStatus = occupancyStatus.name(); }
+
+  public String getHistoricalOccupancy() { return historicalOccupancy; }
+
+  public void setHistoricalOccupancy(OccupancyStatus historicalOccupancy) { if(historicalOccupancy != null) this.historicalOccupancy = historicalOccupancy.toString(); }
+
+  public String getPredictedOccupancy() { return predictedOccupancy; }
+
+  public void setPredictedOccupancy(OccupancyStatus predOccupancy) { if(predOccupancy!= null) this.predictedOccupancy = predOccupancy.toString(); }
 
   public long getScheduledDepartureTime() {
     return scheduledDepartureTime;

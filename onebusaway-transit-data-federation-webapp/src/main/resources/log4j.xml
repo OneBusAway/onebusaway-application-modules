@@ -44,7 +44,13 @@
     </appender>
 
     <!-- 0 or more logger/category elements -->
-
+    <!-- org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.GtfsRealtimeTripLibrary -->
+    <!--category name="org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.GtfsRealtimeTripLibrary">
+         <priority value="debug" />
+    </category-->
+    <!--category name="org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.GtfsRealtimeSource">
+        <priority value="debug" />
+    </category-->
     <!-- 0 or 1 root elements -->
 
     <root>
@@ -53,5 +59,9 @@
     </root>
 
     <!-- 0 or 1 categoryFactory elements -->
+    <logger name="org.springframework.remoting.support.RemoteInvocationTraceInterceptor" additivity="false">
+        <level value="OFF" />
+        <appender-ref ref="ROLL" />
+    </logger>
 
 </log4j:configuration>

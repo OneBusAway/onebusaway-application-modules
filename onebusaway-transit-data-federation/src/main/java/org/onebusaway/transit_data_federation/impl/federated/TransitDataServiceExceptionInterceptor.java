@@ -40,7 +40,9 @@ public class TransitDataServiceExceptionInterceptor {
     } catch (Throwable ex) {
       if (!(ex instanceof NoSuchStopServiceException)) {
         // quiet the logs on no such stop service
-        _log.error("error executing TransitDataService method", ex);
+        _log.error("error executing TransitDataService method", ex.getClass().getName() + ":" + ex.getMessage());
+        if (_log.isDebugEnabled())
+          _log.debug("detailed message", ex);
       }
       throw new ServiceException(ex);
     }

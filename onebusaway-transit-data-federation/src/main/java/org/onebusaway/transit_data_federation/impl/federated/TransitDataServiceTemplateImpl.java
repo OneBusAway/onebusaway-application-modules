@@ -26,6 +26,8 @@ import org.onebusaway.geospatial.model.EncodedPolylineBean;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
 import org.onebusaway.realtime.api.TimepointPredictionRecord;
+import org.onebusaway.realtime.api.VehicleOccupancyRecord;
+import org.onebusaway.transit_data.OccupancyStatusBean;
 import org.onebusaway.transit_data.model.*;
 import org.onebusaway.transit_data.model.blocks.BlockBean;
 import org.onebusaway.transit_data.model.blocks.BlockInstanceBean;
@@ -41,14 +43,19 @@ import org.onebusaway.transit_data.model.service_alerts.ServiceAlertRecordBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationQueryBean;
 import org.onebusaway.transit_data.model.trips.*;
 import org.onebusaway.transit_data.services.TransitDataService;
+import org.onebusaway.transit_data_federation.impl.realtime.apc.VehicleOccupancyRecordCache;
+import org.onebusaway.transit_data_federation.model.bundle.HistoricalRidership;
 import org.onebusaway.transit_data_federation.services.*;
 import org.onebusaway.transit_data_federation.services.beans.*;
+import org.onebusaway.transit_data_federation.services.blocks.BlockCalendarService;
+import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.bundle.TransitDataServiceTemplate;
 import org.onebusaway.transit_data_federation.services.realtime.CurrentVehicleEstimationService;
 import org.onebusaway.transit_data_federation.services.reporting.UserReportingService;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
+import org.onebusaway.util.AgencyAndIdLibrary;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -101,6 +108,8 @@ public class TransitDataServiceTemplateImpl implements TransitDataServiceTemplat
   @Autowired
   private BlockBeanService _blockBeanService;
 
+  @Autowired
+  private BlockCalendarService _blockCalendarService;
 
   @Autowired
   private ShapeBeanService _shapeBeanService;
@@ -125,7 +134,12 @@ public class TransitDataServiceTemplateImpl implements TransitDataServiceTemplat
 
   @Autowired
   private ConsolidatedStopsService _consolidatedStopsService;
-  
+
+  @Autowired
+  private RidershipService _ridershipService;
+
+  @Autowired
+  private VehicleOccupancyRecordCache _vehicleOccupancyRecordCache;
 
   /****
    * {@link TransitDataService} Interface
@@ -187,7 +201,7 @@ public class TransitDataServiceTemplateImpl implements TransitDataServiceTemplat
     bean.setDate(date);
 
     AgencyAndId id = convertAgencyAndId(stopId);
-    StopBean stopBean = _stopBeanService.getStopForId(id);
+    StopBean stopBean = _stopBeanService.getStopForId(id, null);
     if (stopBean == null)
       return null;
     bean.setStop(stopBean);
@@ -220,7 +234,14 @@ public class TransitDataServiceTemplateImpl implements TransitDataServiceTemplat
   public StopBean getStop(String stopId) throws ServiceException {
     
     AgencyAndId id = convertAgencyAndId(stopId);
-    return _stopBeanService.getStopForId(id);
+    return _stopBeanService.getStopForId(id, null);
+  }
+
+  //@Override
+  public StopBean getStopForServiceDate(String stopId, ServiceDate serviceDate) throws ServiceException {
+
+    AgencyAndId id = convertAgencyAndId(stopId);
+    return _stopBeanService.getStopForIdForServiceDate(id, serviceDate);
   }
 
   //@Override
@@ -304,6 +325,12 @@ public class TransitDataServiceTemplateImpl implements TransitDataServiceTemplat
   }
 
   //@Override
+  public StopsForRouteBean getStopsForRouteForServiceDate(String routeId, ServiceDate serviceDate) {
+
+    return _routeBeanService.getStopsForRouteForServiceDate(convertAgencyAndId(routeId), serviceDate);
+  }
+
+  //@Override
   public TripBean getTrip(String tripId) throws ServiceException {
     
     return _tripBeanService.getTripForId(convertAgencyAndId(tripId));
@@ -366,6 +393,16 @@ public class TransitDataServiceTemplateImpl implements TransitDataServiceTemplat
         serviceDate, scheduledTime);
   }
 
+  public List<BlockInstanceBean> getActiveBlocksForRoute(AgencyAndId route, long timeFrom, long timeTo){
+    List<BlockInstanceBean> blockInstanceBeans = new ArrayList<>();
+    List<BlockInstance> blockInstances = _blockCalendarService.getActiveBlocksForRouteInTimeRange(route, timeFrom, timeTo);
+    for(BlockInstance block : blockInstances){
+      // TODO - Refactor blockBeanService.getBlockInstanceAsBean to factory
+      blockInstanceBeans.add(_blockBeanService.getBlockInstanceAsBean(block));
+    }
+    return blockInstanceBeans;
+  }
+
   //@Override
   public VehicleStatusBean getVehicleForAgency(String vehicleId, long time) {
     
@@ -390,6 +427,12 @@ public class TransitDataServiceTemplateImpl implements TransitDataServiceTemplat
   }
 
   //@Override
+  public VehicleLocationRecordBean getVehiclePositionForVehicleId(String vehicleId) {
+    AgencyAndId id = convertAgencyAndId(vehicleId);
+    return _vehicleStatusBeanService.getVehiclePositionForVehicleId(id);
+  }
+
+    //@Override
   public TripDetailsBean getTripDetailsForVehicleAndTime(
       TripForVehicleQueryBean query) {
     
@@ -424,6 +467,38 @@ public class TransitDataServiceTemplateImpl implements TransitDataServiceTemplat
     return _currentVehicleEstimateService.getCurrentVehicleEstimates(query);
   }
 
+
+  public List<OccupancyStatusBean> getHistoricalRidershipForStop(HistoricalOccupancyByStopQueryBean query){
+    AgencyAndId id = AgencyAndIdLibrary.convertFromString(query.getStopId());
+    List<HistoricalRidership> hrs = _ridershipService.getHistoricalRidershipsForStop(id, query.getServiceDate());
+    return _ridershipService.convertToOccupancyStatusBeans(hrs);
+  }
+
+
+  public List<OccupancyStatusBean> getHistoricalRidershipsForTrip(AgencyAndId tripId, long serviceDate) {
+
+    List<HistoricalRidership> hrs = _ridershipService.getHistoricalRidershipsForTrip(tripId, serviceDate);
+    return _ridershipService.convertToOccupancyStatusBeans(hrs);
+  }
+
+  public List<OccupancyStatusBean> getHistoricalRidershipsForRoute(AgencyAndId routeId, long serviceDate) {
+
+    List<HistoricalRidership> hrs = _ridershipService.getHistoricalRidershipsForRoute(routeId, serviceDate);
+    return _ridershipService.convertToOccupancyStatusBeans(hrs);
+  }
+
+  public List<OccupancyStatusBean> getHistoricalRiderships(AgencyAndId routeId, AgencyAndId tripId, AgencyAndId stopId, long serviceDate) {
+
+    List<HistoricalRidership> hrs = _ridershipService.getHistoricalRiderships(routeId, tripId, stopId, serviceDate);
+    return _ridershipService.convertToOccupancyStatusBeans(hrs);
+  }
+
+  public List<OccupancyStatusBean> getAllHistoricalRiderships(long serviceDate) {
+
+    List<HistoricalRidership> hrs = _ridershipService.getAllHistoricalRiderships(serviceDate);
+    return _ridershipService.convertToOccupancyStatusBeans(hrs);
+  }
+
   /****
    * 
    ****/
@@ -433,6 +508,13 @@ public class TransitDataServiceTemplateImpl implements TransitDataServiceTemplat
     
     return _vehicleStatusBeanService.getVehicleLocations(query);
   }
+
+
+  //@Override
+  public VehicleOccupancyRecord getVehicleOccupancyRecordForVehicleIdAndRoute(AgencyAndId vehicleId, String routeId, String directionId) {
+    return _vehicleOccupancyRecordCache.getRecordForVehicleIdAndRoute(vehicleId, routeId, directionId);
+  }
+
 
   //@Override
   public void submitVehicleLocation(VehicleLocationRecordBean record) {
@@ -734,6 +816,4 @@ public class TransitDataServiceTemplateImpl implements TransitDataServiceTemplat
 
     throw new OutOfServiceAreaServiceException();
   }
-
-
 }

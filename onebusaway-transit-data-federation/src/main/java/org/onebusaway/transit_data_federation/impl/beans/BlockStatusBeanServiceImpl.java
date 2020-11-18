@@ -137,7 +137,7 @@ public class BlockStatusBeanServiceImpl implements BlockStatusBeanService {
 
     BlockStopTimeEntry stop = blockLocation.getClosestStop();
     if (stop != null) {
-      StopBean stopBean = _stopBeanService.getStopForId(stop.getStopTime().getStop().getId());
+      StopBean stopBean = _stopBeanService.getStopForId(stop.getStopTime().getStop().getId(), null);
       bean.setClosestStop(stopBean);
       bean.setClosestStopTimeOffset(blockLocation.getClosestStopTimeOffset());
     }

@@ -25,6 +25,11 @@ public class SimpleFeedVersionStrategy implements GtfsTransformStrategy {
     private String _version;
 
     @Override
+    public String getName() {
+        return this.getClass().getName();
+    }
+
+    @Override
     public void run(TransformContext context, GtfsMutableRelationalDao dao) {
         if (_version == null)
             return;

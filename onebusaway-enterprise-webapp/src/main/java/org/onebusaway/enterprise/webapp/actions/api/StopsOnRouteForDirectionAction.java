@@ -15,6 +15,7 @@
  */
 package org.onebusaway.enterprise.webapp.actions.api;
 
+import org.onebusaway.gtfs.model.calendar.ServiceDate;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.enterprise.webapp.actions.OneBusAwayEnterpriseActionSupport;
 import org.onebusaway.enterprise.webapp.actions.api.model.StopOnRoute;
@@ -26,13 +27,13 @@ import org.onebusaway.transit_data.model.StopsForRouteBean;
 
 import org.apache.struts2.convention.annotation.ParentPackage;
 import org.apache.struts2.convention.annotation.Result;
+import org.onebusaway.util.SystemTime;
+import org.onebusaway.util.services.configuration.ConfigurationService;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
+import java.util.*;
+
+import org.onebusaway.util.AgencyAndIdLibrary;
 
 @ParentPackage("json-default")
 @Result(type="json", params={"callbackParameter", "callback"})
@@ -42,6 +43,9 @@ public class StopsOnRouteForDirectionAction extends OneBusAwayEnterpriseActionSu
 
   @Autowired
   private TransitDataService _transitDataService;
+
+  @Autowired
+  private ConfigurationService _configService;
 
   private List<StopOnRoute> _stops = new ArrayList<StopOnRoute>();
 
@@ -62,8 +66,15 @@ public class StopsOnRouteForDirectionAction extends OneBusAwayEnterpriseActionSu
     if(_routeId == null) {
       return SUCCESS;
     }
-    
-    StopsForRouteBean stopsForRoute = _transitDataService.getStopsForRoute(_routeId);
+
+    boolean serviceDateFilterOn = Boolean.parseBoolean(_configService.getConfigurationValueAsString("display.serviceDateFiltering", "false"));
+    StopsForRouteBean stopsForRoute;
+    if (serviceDateFilterOn) {
+      stopsForRoute = _transitDataService.getStopsForRouteForServiceDate(_routeId, new ServiceDate(new Date(SystemTime.currentTimeMillis())));
+    }
+    else {
+      stopsForRoute = _transitDataService.getStopsForRoute(_routeId);
+    }
 
     // create stop ID->stop bean map
     Map<String, StopBean> stopIdToStopBeanMap = new HashMap<String, StopBean>();

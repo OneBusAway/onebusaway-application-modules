@@ -42,6 +42,9 @@ import org.onebusaway.api.model.transit.service_alerts.TimeRangeV2Bean;
 import org.onebusaway.collections.CollectionsLibrary;
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.geospatial.model.EncodedPolylineBean;
+import org.onebusaway.realtime.api.OccupancyStatus;
+import org.onebusaway.transit_data.HistoricalRidershipBean;
+import org.onebusaway.transit_data.OccupancyStatusBean;
 import org.onebusaway.transit_data.model.AgencyBean;
 import org.onebusaway.transit_data.model.AgencyWithCoverageBean;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
@@ -204,8 +207,11 @@ public class BeanFactoryV2 {
       ListBean<TripDetailsBean> trips) {
 
     List<TripDetailsV2Bean> beans = new ArrayList<TripDetailsV2Bean>();
-    for (TripDetailsBean trip : trips.getList())
-      beans.add(getTripDetails(trip));
+    for (TripDetailsBean trip : trips.getList()){
+      if(trip != null)
+        beans.add(getTripDetails(trip));
+    }
+
     return list(beans, trips.isLimitExceeded(), false);
   }
 
@@ -230,6 +236,15 @@ public class BeanFactoryV2 {
   public EntryWithReferencesBean<VehicleStatusV2Bean> getVehicleStatusResponse(
       VehicleStatusBean vehicleStatus) {
     return entry(getVehicleStatus(vehicleStatus));
+  }
+
+  public ListWithReferencesBean<HistoricalRidershipBean> getHistoricalOccupancyResponse(
+      List<OccupancyStatusBean> beans) {
+    List<HistoricalRidershipBean> rid = new ArrayList<>();
+    for (OccupancyStatusBean bean : beans) {
+      rid.add(new HistoricalRidershipBean(bean.getOccupancyStatus()));
+    }
+    return list(rid, false, false);
   }
 
   public EntryWithReferencesBean<SituationV2Bean> getResponse(
@@ -413,6 +428,9 @@ public class BeanFactoryV2 {
       bean.setDistanceAlongTrip(tripStatus.getDistanceAlongTrip());
     bean.setVehicleId(tripStatus.getVehicleId());
 
+    if (tripStatus.getOccupancyStatus() != null)
+      bean.setOccupancyStatus(OccupancyStatus.valueOf(tripStatus.getOccupancyStatus()));
+
     List<ServiceAlertBean> situations = tripStatus.getSituations();
     if (situations != null && !situations.isEmpty()) {
       List<String> situationIds = new ArrayList<String>();
@@ -442,6 +460,8 @@ public class BeanFactoryV2 {
       stiBean.setDistanceAlongTrip(sti.getDistanceAlongTrip());
 
       stiBean.setStopId(sti.getStop().getId());
+      stiBean.setHistoricalOccupancy(sti.getHistoricalOccupancy());
+
       addToReferences(sti.getStop());
 
       instances.add(stiBean);
@@ -611,6 +631,20 @@ public class BeanFactoryV2 {
     bean.setPhase(vehicleStatus.getPhase());
     bean.setStatus(vehicleStatus.getStatus());
     bean.setVehicleId(vehicleStatus.getVehicleId());
+    if (vehicleStatus.getOccupancyStatus() != null &&
+            vehicleStatus.getOccupancyStatus() != OccupancyStatus.UNKNOWN) {
+      bean.setOccupancyStatus(vehicleStatus.getOccupancyStatus());
+    } else {
+      bean.setOccupancyStatus(null);
+    }
+
+    if(vehicleStatus.getOccupancyCount() != null){
+      bean.setOccupancyCount(vehicleStatus.getOccupancyCount());
+    }
+
+    if(vehicleStatus.getOccupancyCapacity() != null){
+      bean.setOccupancyCapacity(vehicleStatus.getOccupancyCapacity());
+    }
 
     TripBean trip = vehicleStatus.getTrip();
     if (trip != null) {
@@ -851,6 +885,8 @@ public class BeanFactoryV2 {
     bean.setScheduledDepartureTime(ad.getScheduledDepartureTime());
     bean.setPredictedArrivalTime(ad.getPredictedArrivalTime());
     bean.setPredictedDepartureTime(ad.getPredictedDepartureTime());
+    bean.setHistoricalOccupancy(ad.getHistoricalOccupancy());
+    bean.setOccupancyStatus(ad.getOccupancyStatus());
 
     bean.setScheduledArrivalInterval(getTimeInterval(ad.getScheduledArrivalInterval()));
     bean.setScheduledDepartureInterval(getTimeInterval(ad.getScheduledDepartureInterval()));

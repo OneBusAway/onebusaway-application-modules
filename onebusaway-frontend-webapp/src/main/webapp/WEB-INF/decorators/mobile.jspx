@@ -30,6 +30,16 @@
   	<s:set var="favicon" value="getText('favicon.url')" />
   	<link rel="shortcut icon" href="${favicon}" type="image/x-icon"/>
 
+	<s:url var="url" value="/css/mobile/mobile-shared.css">
+		<s:param name="v"><s:property value="frontEndVersion" /></s:param>
+	</s:url>
+	<link rel="stylesheet" href="${url}" type="text/css" media="screen"/>
+
+	<s:url var="url" value="/css/mobile/mobile-shared.css">
+		<s:param name="v"><s:property value="frontEndVersion" /></s:param>
+	</s:url>
+	<link rel="stylesheet" href="${url}" type="text/css" media="screen"/>
+
   	<s:url var="url" value="/css/mobile/mobile.css">
 		<s:param name="v"><s:property value="frontEndVersion" /></s:param>
   	</s:url>
@@ -45,7 +55,7 @@
 	</s:url>
 	<script type="text/javascript" src="${url}"><!-- //prevent jspx minimization --></script>
   	
-  	<s:url var="url" value="/js/oba/Config.js">
+  	<s:url var="url" value="/js/oba/m/Config.js">
 		<s:param name="v"><s:property value="frontEndVersion" /></s:param>
 	</s:url>
   	<script type="text/javascript" src="${url}"><!-- //prevent jspx minimization --></script>
@@ -70,10 +80,10 @@
     		<s:url var="desktopUrl" namespace="/" action="index"/>	
     		<a href="${desktopUrl}">Desktop Site</a> |
     		
-    		<s:url var="contactUrl" namespace="/m/wiki" action="ContactUs"/>	
+    		<s:url var="contactUrl" namespace="/wiki" action="ContactUs"/>
     		<a href="${contactUrl}">Contact</a> |
 
-			<s:set var="link" value="getText('main.agency.link')" />
+			<s:set var="link" value="getText('main.agencysite.link')" />
 			<a href="${link}"><s:property value="getText('mobile.agency.name')" /></a>
 		</p>
 	</div>

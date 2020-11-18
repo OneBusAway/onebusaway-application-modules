@@ -3,7 +3,7 @@
 	<parent>
 		<groupId>org.onebusaway</groupId>
 		<artifactId>onebusaway-application-modules</artifactId>
-		<version>2.0.0-cs-rc13-SNAPSHOT</version>
+		<version>2.0.66-cs-SNAPSHOT</version>
 	</parent>
 	<artifactId>onebusaway-admin-webapp</artifactId>
 	<packaging>war</packaging>
@@ -11,42 +11,14 @@
 	<name>onebusaway-admin-webapp</name>
 	<properties>
 		<xwiki.version>2.3.1</xwiki.version>
-		<xwiki.integration.version>0.0.2</xwiki.integration.version>
+		<xwiki.integration.version>1.0.1</xwiki.integration.version>
 		<geotools.version>11-beta</geotools.version>
-		<spring.version>3.0.5.RELEASE</spring.version>
-		<jetty.version>6.1.26</jetty.version>
+		<spring.security.version>4.2.10.RELEASE</spring.security.version>
 		<bundle.builtPath>/var/lib/oba/bundles/builder</bundle.builtPath>
 		<bundle.stagedPath>/var/lib/oba/bundles/staged</bundle.stagedPath>
 		<bundle.deployPath>/var/lib/oba/bundles/active</bundle.deployPath>
 	</properties>
 
-	<repositories>
-		<!-- Required for the xwiki-rendering-macros -->
-    <repository>
-      <id>releases-camsys-repo</id>
-      <url>http://repo.obaweb.org:8080/archiva/repository/releases/</url> 
-    </repository>
-    <repository>
-      <id>snapshots-camsys-repo</id>
-      <url>http://repo.obaweb.org:8080/archiva/repository/snapshots/</url> 
-    </repository>
-    <repository>
-      <id>public.onebusaway.org</id>
-      <url>http://nexus.onebusaway.org/content/groups/public/</url>
-    </repository>
-		<repository>
-			<id>opengeo</id>
-			<url>http://repo.opengeo.org</url>
-		</repository>
-		<repository>
-			<id>xwiki</id>
-			<url>http://maven.xwiki.org/releases</url>
-		</repository>
-		<repository>
-		  <id>maven.conveyal.com</id>
-		  <url>http://maven.conveyal.com/</url>
-		</repository>
-	</repositories>
 	<dependencies>
       <dependency>
         <groupId>org.slf4j</groupId>
@@ -67,14 +39,25 @@
 			<version>1.9.1</version>
 		</dependency>
 		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-expression</artifactId>
+			<version>${spring-version}</version>
+		</dependency>
+		<dependency>
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-web</artifactId>
-			<version>${spring.version}</version>
+			<version>${spring.security.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-config</artifactId>
-			<version>${spring.version}</version>
+			<version>${spring.security.version}</version>
+		</dependency>
+		<!-- support sec:csrfMetaTags -->
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-taglibs</artifactId>
+			<version>${spring.security.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.sun.jersey.contribs</groupId>
@@ -111,9 +94,9 @@
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
-          <groupId>quartz</groupId>
+          <groupId>org.quartz-scheduler</groupId>
           <artifactId>quartz</artifactId>
-          <version>1.5.2</version>
+          <version>2.2.3</version>
           </dependency>
 		<!-- OneBusAway Dependencies -->
 		<dependency>
@@ -134,6 +117,11 @@
 					<groupId>org.slf4j</groupId>
 				</exclusion>
 			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.onebusaway</groupId>
+			<artifactId>onebusaway-alerts-persistence</artifactId>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.onebusaway</groupId>
@@ -308,6 +296,11 @@
 			<version>2.10.4</version>
 		</dependency>
 		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+			<version>2.9.10.1</version>
+		</dependency>
+		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-csv</artifactId>
 			<version>1.1</version>
@@ -344,7 +337,18 @@
             <type>war</type>
         </dependency>
 
-    </dependencies>
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>27.1-jre</version>
+		</dependency>
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+		</dependency>
+
+
+	</dependencies>
 
 	<profiles>
 		<profile>
@@ -405,14 +409,6 @@
 						<dirty>-dirty</dirty>
 						<forceLongFormat>false</forceLongFormat>
 					</gitDescribe>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.mortbay.jetty</groupId>
-				<artifactId>maven-jetty-plugin</artifactId>
-				<version>${jetty.version}</version>
-				<configuration>
-					<contextPath>/</contextPath>
 				</configuration>
 			</plugin>
 <!--

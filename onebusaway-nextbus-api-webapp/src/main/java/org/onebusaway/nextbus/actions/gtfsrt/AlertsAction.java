@@ -18,6 +18,7 @@ package org.onebusaway.nextbus.actions.gtfsrt;
 import com.google.transit.realtime.GtfsRealtime.*;
 import com.google.transit.realtime.GtfsRealtime.TranslatedString.Translation;
 import com.opensymphony.xwork2.ModelDriven;
+import org.apache.commons.lang.StringUtils;
 import org.apache.struts2.rest.DefaultHttpHeaders;
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.nextbus.actions.api.NextBusApiBase;
@@ -37,6 +38,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import static org.onebusaway.nextbus.impl.gtfsrt.GtfsrtCache.ALL_AGENCIES;
 
 public class AlertsAction extends NextBusApiBase implements
 		ModelDriven<FeedMessage> {
@@ -60,6 +63,13 @@ public class AlertsAction extends NextBusApiBase implements
 		return agencyId;
 	}
 
+	public String getAgencyIdHashKey() {
+		if (StringUtils.isBlank(agencyId)) {
+			return ALL_AGENCIES;
+		}
+		return agencyId;
+	}
+
 	public void setAgencyId(String agencyId) {
 		this.agencyId = agencyId;
 	}
@@ -70,13 +80,13 @@ public class AlertsAction extends NextBusApiBase implements
 
 	@Override
 	public FeedMessage getModel() {
-		FeedMessage cachedAlerts = _cache.getAlerts();
+		FeedMessage cachedAlerts = _cache.getAlerts(getAgencyIdHashKey());
 		if(cachedAlerts != null){
 			return cachedAlerts;
 		}
 		else {
 
-			FeedMessage.Builder feedMessage = createFeedWithDefaultHeader();
+			FeedMessage.Builder feedMessage = createFeedWithDefaultHeader(null);
 
 			List<String> agencyIds = new ArrayList<String>();
 
@@ -92,17 +102,25 @@ public class AlertsAction extends NextBusApiBase implements
 
 				for (ServiceAlertBean serviceAlert : serviceAlertBeans.getList()) {
 					try {
-						Alert.Builder alert = Alert.newBuilder();
 
-						fillAlertHeader(alert, serviceAlert.getSummaries());
-						fillAlertDescriptions(alert, serviceAlert.getDescriptions());
-						fillActiveWindows(alert, serviceAlert.getActiveWindows());
-						fillSituationAffects(alert, serviceAlert.getAllAffects());
+						if (matchesFilter(serviceAlert)) {
+							Alert.Builder alert = Alert.newBuilder();
 
-						FeedEntity.Builder feedEntity = FeedEntity.newBuilder();
-						feedEntity.setAlert(alert);
-						feedEntity.setId(id(agencyId, serviceAlert.getId()));
-						feedMessage.addEntity(feedEntity);
+							fillAlertHeader(alert, serviceAlert.getSummaries());
+							// description is no longer populated
+							fillAlertDescriptions(alert, serviceAlert.getDescriptions());
+							if (!alert.hasDescriptionText()) {
+								_log.info("copying header text of " + alert.getHeaderText().getTranslation(0));
+								alert.setDescriptionText(alert.getHeaderText());
+							}
+							fillActiveWindows(alert, serviceAlert.getActiveWindows());
+							fillSituationAffects(alert, serviceAlert.getAllAffects());
+
+							FeedEntity.Builder feedEntity = FeedEntity.newBuilder();
+							feedEntity.setAlert(alert);
+							feedEntity.setId(id(agencyId, serviceAlert.getId()));
+							feedMessage.addEntity(feedEntity);
+						}
 					} catch (Exception e) {
 						_log.error("Unable to process service alert", e);
 					}
@@ -110,11 +128,20 @@ public class AlertsAction extends NextBusApiBase implements
 			}
 
 			FeedMessage builtFeedMessage = feedMessage.build();
-			_cache.putAlerts(builtFeedMessage);
+			_cache.putAlerts(getAgencyIdHashKey(), builtFeedMessage);
 
 			return builtFeedMessage;
 		}
 
+	}
+
+	private boolean matchesFilter(ServiceAlertBean bean) {
+		if (_cache.getAlertFilter() == null || bean.getSource() == null) {
+			return true;
+		}
+
+		boolean match = bean.getSource().matches(_cache.getAlertFilter());
+		return match;
 	}
 
 	private void fillAlertHeader(Alert.Builder alert, List<NaturalLanguageStringBean> summaries){
@@ -155,15 +182,16 @@ public class AlertsAction extends NextBusApiBase implements
 			if (affects.getAgencyId() != null)
 				entitySelector.setAgencyId(affects.getAgencyId());
 			if (affects.getRouteId() != null) {
-				entitySelector.setRouteId(id(agencyId, sanitize(affects.getRouteId())));
+				entitySelector.setRouteId(sanitize(affects.getRouteId()));
 			}
 			if (affects.getTripId() != null) {
 				TripDescriptor.Builder trip = TripDescriptor.newBuilder();
-				trip.setTripId(id(agencyId, sanitize(affects.getTripId())));
+				trip.setTripId(sanitize(affects.getTripId()));
 				entitySelector.setTrip(trip);
 			}
-			if (affects.getStopId() != null)
-				entitySelector.setStopId(id(agencyId, sanitize(affects.getStopId())));
+			if (affects.getStopId() != null) {
+				entitySelector.setStopId(sanitize(affects.getStopId()));
+			}
 			alert.addInformedEntity(entitySelector);
 		}
 	}
@@ -188,8 +216,8 @@ public class AlertsAction extends NextBusApiBase implements
 		return translated.build();
 	}
 
-	private FeedMessage.Builder createFeedWithDefaultHeader() {
-		return _gtfsrtHelper.createFeedWithDefaultHeader();
+	private FeedMessage.Builder createFeedWithDefaultHeader(Long timestampInSeconds) {
+		return _gtfsrtHelper.createFeedWithDefaultHeader(timestampInSeconds);
 	}
 
 	private String id(String agencyId, String id) {

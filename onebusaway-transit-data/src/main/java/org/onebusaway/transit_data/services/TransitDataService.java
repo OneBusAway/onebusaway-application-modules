@@ -32,25 +32,12 @@ import org.onebusaway.federations.annotations.FederatedByCustomMethod;
 import org.onebusaway.federations.annotations.FederatedByEntityIdMethod;
 import org.onebusaway.federations.annotations.FederatedByEntityIdsMethod;
 import org.onebusaway.geospatial.model.EncodedPolylineBean;
+import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.gtfs.model.calendar.ServiceDate;
 import org.onebusaway.realtime.api.TimepointPredictionRecord;
-import org.onebusaway.transit_data.model.AgencyBean;
-import org.onebusaway.transit_data.model.AgencyWithCoverageBean;
-import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
-import org.onebusaway.transit_data.model.ArrivalAndDepartureForStopQueryBean;
-import org.onebusaway.transit_data.model.ArrivalsAndDeparturesQueryBean;
-import org.onebusaway.transit_data.model.ConsolidatedStopMapBean;
-import org.onebusaway.transit_data.model.ListBean;
-import org.onebusaway.transit_data.model.RegisterAlarmQueryBean;
-import org.onebusaway.transit_data.model.RouteBean;
-import org.onebusaway.transit_data.model.RoutesBean;
-import org.onebusaway.transit_data.model.SearchQueryBean;
-import org.onebusaway.transit_data.model.StopBean;
-import org.onebusaway.transit_data.model.StopScheduleBean;
-import org.onebusaway.transit_data.model.StopWithArrivalsAndDeparturesBean;
-import org.onebusaway.transit_data.model.StopsBean;
-import org.onebusaway.transit_data.model.StopsForRouteBean;
-import org.onebusaway.transit_data.model.StopsWithArrivalsAndDeparturesBean;
-import org.onebusaway.transit_data.model.VehicleStatusBean;
+import org.onebusaway.realtime.api.VehicleOccupancyRecord;
+import org.onebusaway.transit_data.OccupancyStatusBean;
+import org.onebusaway.transit_data.model.*;
 import org.onebusaway.transit_data.model.blocks.BlockBean;
 import org.onebusaway.transit_data.model.blocks.BlockInstanceBean;
 import org.onebusaway.transit_data.model.blocks.ScheduledBlockLocationBean;
@@ -167,6 +154,16 @@ public interface TransitDataService extends FederatedService {
       throws ServiceException;
 
   /**
+   * @param routeId
+   * @param serviceDate
+   * @return the stops for the specified route and service date, or null if not found
+   * @throws ServiceException
+   */
+  @FederatedByEntityIdMethod
+  public StopsForRouteBean getStopsForRouteForServiceDate(String routeId, ServiceDate serviceDate)
+          throws ServiceException;
+
+  /**
    * @param tripId
    * @return the trip with the specifid id, or null if not found
    * @throws ServiceException
@@ -229,6 +226,9 @@ public interface TransitDataService extends FederatedService {
   public ScheduledBlockLocationBean getScheduledBlockLocationFromScheduledTime(
       String blockId, long serviceDate, int scheduledTime);
 
+  @FederatedByEntityIdMethod
+  public List<BlockInstanceBean> getActiveBlocksForRoute(AgencyAndId route, long timeFrom, long timeTo);
+
   /****
    * Vehicle Methods
    *****/
@@ -244,6 +244,9 @@ public interface TransitDataService extends FederatedService {
   public VehicleLocationRecordBean getVehicleLocationRecordForVehicleId(
       String vehicleId, long targetTime);
 
+  @FederatedByEntityIdMethod
+  public VehicleLocationRecordBean getVehiclePositionForVehicleId(String vehicleId);
+
   /**
    * 
    * @param query
@@ -258,6 +261,9 @@ public interface TransitDataService extends FederatedService {
 
   @FederatedByEntityIdMethod
   public void resetVehicleLocation(String vehicleId);
+
+  @FederatedByEntityIdMethod
+  VehicleOccupancyRecord getVehicleOccupancyRecordForVehicleIdAndRoute(AgencyAndId var1, String var2, String var3);
 
   /**
    * 
@@ -347,6 +353,15 @@ public interface TransitDataService extends FederatedService {
   public StopBean getStop(String stopId) throws ServiceException;
 
   /**
+   * @param stopId
+   * @param serviceDate
+   * @return the stop with the specified id, or null if not found
+   * @throws ServiceException
+   */
+  @FederatedByEntityIdMethod
+  public StopBean getStopForServiceDate(String stopId, ServiceDate serviceDate) throws ServiceException;
+
+  /**
    * @param agencyId
    * @return the list of all stops operated by the specified agency
    */
@@ -376,6 +391,13 @@ public interface TransitDataService extends FederatedService {
   /****
    * Historical Data
    ****/
+
+  List<OccupancyStatusBean> getHistoricalRidershipForStop(HistoricalOccupancyByStopQueryBean query);
+  List<OccupancyStatusBean> getAllHistoricalRiderships(long serviceDate);
+  List<OccupancyStatusBean> getHistoricalRidershipsForTrip(AgencyAndId tripId, long serviceDate);
+  List<OccupancyStatusBean> getHistoricalRidershipsForRoute(AgencyAndId routeId, long serviceDate);
+  List<OccupancyStatusBean> getHistoricalRiderships(AgencyAndId routeId, AgencyAndId tripId, AgencyAndId stopId, long serviceDate);
+
 
   /****
    * Service Alert Methods

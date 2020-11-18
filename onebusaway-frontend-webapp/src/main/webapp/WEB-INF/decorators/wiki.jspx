@@ -98,7 +98,9 @@
 		<div id="branding">
 			<s:set var="link" value="getText('main.agency.link')" />
 			<a href="${link}">
-			  	<s:url var="url" value="/css/img/agency_logo.png"></s:url>
+			  	<s:url var="url" value="/css/img/agency_logo.png">
+					<s:param name="v"><s:property value="frontEndVersion" /></s:param>
+				</s:url>
 				<img src="${url}" alt="Agency Logo"/>
 			</a>
 		</div>

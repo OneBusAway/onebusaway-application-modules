@@ -32,7 +32,7 @@ import org.onebusaway.transit_data.model.RouteBean;
 import org.onebusaway.transit_data.model.StopBean;
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopEntryImpl;
 import org.onebusaway.transit_data_federation.model.narrative.StopNarrative;
-import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
+import org.onebusaway.util.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.RouteService;
 import org.onebusaway.transit_data_federation.services.beans.RouteBeanService;
 import org.onebusaway.transit_data_federation.services.narrative.NarrativeService;
@@ -101,7 +101,7 @@ public class StopBeanServiceImplTest {
     RouteBean route = routeBuilder.create();
     Mockito.when(_routeBeanService.getRouteForId(routeId)).thenReturn(route);
 
-    StopBean stopBean = _service.getStopForId(stopId);
+    StopBean stopBean = _service.getStopForId(stopId, null);
 
     assertNotNull(stopBean);
     assertEquals(stopId.toString(), stopBean.getId());

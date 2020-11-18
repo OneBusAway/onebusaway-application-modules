@@ -27,7 +27,6 @@ import javax.ws.rs.core.Response;
 
 import org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.MonitoredDataSource;
 import org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.MonitoredResult;
-import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.onebusaway.watchdog.api.MetricResource;
 
 @Path("/metric/realtime/stop")

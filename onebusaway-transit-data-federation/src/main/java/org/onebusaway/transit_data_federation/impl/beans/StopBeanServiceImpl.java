@@ -25,10 +25,11 @@ import java.util.Set;
 import org.onebusaway.container.cache.Cacheable;
 import org.onebusaway.exceptions.NoSuchStopServiceException;
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.gtfs.model.calendar.ServiceDate;
 import org.onebusaway.transit_data.model.RouteBean;
 import org.onebusaway.transit_data.model.StopBean;
 import org.onebusaway.transit_data_federation.model.narrative.StopNarrative;
-import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
+import org.onebusaway.util.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.ConsolidatedStopsService;
 import org.onebusaway.transit_data_federation.services.RouteService;
 import org.onebusaway.transit_data_federation.services.beans.RouteBeanService;
@@ -82,7 +83,15 @@ class StopBeanServiceImpl implements StopBeanService {
   }
 
   @Cacheable
-  public StopBean getStopForId(AgencyAndId id) {
+  /** serviceDate can be null.
+   *  If included, the routes returned in the stopBean will be filtered by service date
+  **/
+  public StopBean getStopForId(AgencyAndId id, ServiceDate serviceDate) {
+      return getStopForIdForServiceDate(id, serviceDate);
+  }
+
+  @Cacheable
+  public StopBean getStopForIdForServiceDate(AgencyAndId id, ServiceDate serviceDate) {
 
     StopEntry stop = _transitGraphDao.getStopEntryForId(id);
     StopNarrative narrative = _narrativeService.getStopForId(id);
@@ -91,20 +100,24 @@ class StopBeanServiceImpl implements StopBeanService {
       // try looking up consolidated id
       AgencyAndId consolidatedId = _consolidatedStopsService.getConsolidatedStopIdForHiddenStopId(id);
       if (consolidatedId != null)
-        return getStopForId(consolidatedId);
+        return getStopForId(consolidatedId, serviceDate);
       throw new NoSuchStopServiceException(
               AgencyAndIdLibrary.convertToString(id));
     }
 
     StopBean sb = new StopBean();
     fillStopBean(stop, narrative, sb);
-    fillRoutesForStopBean(stop, sb);
+    fillRoutesForStopBean(stop, sb, serviceDate);
     return sb;
   }
 
-  private void fillRoutesForStopBean(StopEntry stop, StopBean sb) {
+  private void fillRoutesForStopBean(StopEntry stop, StopBean sb, ServiceDate serviceDate) {
 
-    Set<AgencyAndId> routeCollectionIds = _routeService.getRouteCollectionIdsForStop(stop.getId());
+    Set<AgencyAndId> routeCollectionIds;
+    if (serviceDate != null)
+      routeCollectionIds = _routeService.getRouteCollectionIdsForStopForServiceDate(stop.getId(), serviceDate);
+    else
+      routeCollectionIds = _routeService.getRouteCollectionIdsForStop(stop.getId());
 
     List<RouteBean> routeBeans = new ArrayList<RouteBean>(
         routeCollectionIds.size());
