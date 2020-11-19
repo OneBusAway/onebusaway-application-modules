@@ -70,7 +70,7 @@ public class ApiKeyInterceptorTest  {
     when(_ai.getProxy()).thenReturn(_ap);
     when(_ap.getConfig()).thenReturn(_ac);
     _aki.setMimeTypeHandlerSelector(mockContentTypeHandlerManager);
-    when(mockContentTypeHandlerManager.handleResult((ActionConfig) anyObject(), anyObject(), anyObject())).thenReturn("SUCCESS");
+    when(mockContentTypeHandlerManager.handleResult((ActionInvocation) anyObject(), anyObject(), anyObject())).thenReturn("SUCCESS");
     methodResultCaptor = ArgumentCaptor.forClass(DefaultHttpHeaders.class);
     responseCaptor = ArgumentCaptor.forClass(ResponseBean.class);
   }
@@ -101,7 +101,7 @@ public class ApiKeyInterceptorTest  {
     
     // we don't care about the result, we need to validate the internal httpCode and reason
     assertEquals(_aki.unauthorized(_ai, reason), "SUCCESS");
-    verify(mockContentTypeHandlerManager).handleResult((ActionConfig) anyObject(), methodResultCaptor.capture(), responseCaptor.capture());
+    verify(mockContentTypeHandlerManager).handleResult((ActionInvocation) anyObject(), methodResultCaptor.capture(), responseCaptor.capture());
     
     assertThat(methodResultCaptor.getValue().getStatus(), equalTo(401));
     assertThat(responseCaptor.getValue().getText(), equalTo("permission denied"));
@@ -119,7 +119,7 @@ public class ApiKeyInterceptorTest  {
 
     // we don't care about the result, we need to validate the internal httpCode and reason
     assertEquals(_aki.unauthorized(_ai, reason), "SUCCESS");
-    verify(mockContentTypeHandlerManager).handleResult((ActionConfig) anyObject(), methodResultCaptor.capture(), responseCaptor.capture());
+    verify(mockContentTypeHandlerManager).handleResult((ActionInvocation) anyObject(), methodResultCaptor.capture(), responseCaptor.capture());
     
     assertThat(methodResultCaptor.getValue().getStatus(), equalTo(429));
     assertThat(responseCaptor.getValue().getText(), equalTo("rate limit exceeded"));
