@@ -516,11 +516,10 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
 		  SiriDistanceExtension distanceExtension = wrapper.getDistances();
 		  String distance = distanceExtension.getPresentableDistance();
       //add space to the distance so that occupancy lines up correctly with time [pjm]
-      String distanceBold = " <strong>" + distance + "</strong>";
 
       double minutes = Math.floor((predictedArrival - updateTime) / 60 / 1000);
 		  String timeString = Math.round(minutes) + " minute" + ((Math.abs(minutes) != 1) ? "s" : "");
-      String timeAndDistance = "<strong>" + timeString + "</strong>," + distance;
+      String timeAndDistance = "<strong>" + timeString + "</strong>, " + distance;
       String loadOccupancy = getPresentableOccupancy(journey, updateTime);
 
       if(progressStatus != null && progressStatus.getValue().contains("prevTrip")) {

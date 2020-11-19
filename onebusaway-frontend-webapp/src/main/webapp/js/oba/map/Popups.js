@@ -648,7 +648,7 @@ OBA.Popups = (function() {
 
                          if(typeof monitoredVehicleJourney.MonitoredCall !== 'undefined') {
 							 var loadOccupancy = getOccupancyForStop(monitoredVehicleJourney);
-                             var distance = monitoredVehicleJourney.MonitoredCall.Extensions.Distances.PresentableDistance + loadOccupancy;
+                             var distance = monitoredVehicleJourney.MonitoredCall.Extensions.Distances.PresentableDistance + " " + loadOccupancy;
 
 
                              var timePrediction = null;
