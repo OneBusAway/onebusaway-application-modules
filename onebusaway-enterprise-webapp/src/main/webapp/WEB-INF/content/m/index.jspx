@@ -198,7 +198,14 @@
 			</div>
 		</s:if>
 		<s:else>
+			<!-- discourage expensive geocoding refreshes -->
 		<s:if test="%{results.isGeocode==false}">
+			<s:if test="%{feedbackFormURL != null}">
+				<div id="feedbackForm">
+					<s:set var="feedbackLink" value="feedbackFormURL" />
+					<a target="_blank" href="${feedbackLink}"><s:property value="feedbackFormText" /></a>
+				</div>
+			</s:if>
 			<div id="refresh">
 				<s:url var="url" namespace="/m" action="index" anchor="top">
 					<s:param name="q"><s:property value="q" /></s:param>
