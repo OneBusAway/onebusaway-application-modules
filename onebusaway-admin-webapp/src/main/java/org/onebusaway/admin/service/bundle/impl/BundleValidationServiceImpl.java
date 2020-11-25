@@ -288,12 +288,14 @@ public class BundleValidationServiceImpl implements BundleValidationService {
     String tmpDir = System.getProperty("java.io.tmpdir");
     String localFolder = tmpDir + File.separatorChar + TRANSIT_FEED;
     String localFile = localFolder + ".tar.gz";
-    if (new File(localFile).exists()) {
-      _log.error("feed Validator found at " + localFile + ", exiting");
-      _log.error("remove the file at " + localFile + " if it is corrupt");
-      return;
-    }
+    String localValidator = localFolder + File.separatorChar + VALIDATOR_NAME;
+    if(validatorLocation!=null){ localValidator = validatorLocation;}
     NYCFileUtils fs = new NYCFileUtils(new File(localFile).getParent());
+    if(new File(localValidator).exists()){
+        _log.info("feed Validator tar found at " + localFile+ ", exiting");
+        _log.error("remove the file at " + localFile + " if it is corrupt");
+        return;
+    }
     String url = "http://developer.onebusaway.org/tmp/" + TRANSIT_FEED + ".tar.gz";
     fs.wget(url);
     fs.tarzxf(localFile);
@@ -307,7 +309,12 @@ public class BundleValidationServiceImpl implements BundleValidationService {
               downloadedFeedValidator.getAbsolutePath() +
               " to config anticipated location: " +
               validatorLocation);
-      fs.copyFiles(downloadedFeedValidator,new File(validatorLocation));
+      if(downloadedFeedValidator.exists()) {
+          fs.copyFiles(downloadedFeedValidator, new File(validatorLocation));
+      } else{
+          _log.error("Could not copy downloadedFeedValidator to configured validator location." +
+                  " Downloaded validator does not exist at: " + downloadedFeedValidator);
+      }
     }
   }
 
