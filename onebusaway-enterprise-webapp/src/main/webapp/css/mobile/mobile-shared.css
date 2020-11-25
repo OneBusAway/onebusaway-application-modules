@@ -257,7 +257,7 @@ small {
 }
 
 /* refresh */
-#refresh, #mapExpander {
+#refresh, #mapExpander, #feedbackForm {
 	text-align: center;
 	display: block;
 	width: 92%;
@@ -282,7 +282,7 @@ small {
 	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ad7594ba', endColorstr='#ab005ba0',GradientType=0 ); /* IE6-8 */
 }
 
-#refresh a {
+#refresh a, #feedbackForm a {
 	font-size: 0.85em;
 	padding: 0.6em;
 	display: block;
@@ -680,7 +680,7 @@ small {
 	color: #FFFFFF;
 }
 
-#mapHider {
+#mapHider, #feedbackForm {
 	position: relative;
 	left: 12px;
 }

@@ -648,7 +648,7 @@ OBA.Popups = (function() {
 
                          if(typeof monitoredVehicleJourney.MonitoredCall !== 'undefined') {
 							 var loadOccupancy = getOccupancyForStop(monitoredVehicleJourney);
-                             var distance = monitoredVehicleJourney.MonitoredCall.Extensions.Distances.PresentableDistance + loadOccupancy;
+                             var distance = monitoredVehicleJourney.MonitoredCall.Extensions.Distances.PresentableDistance + " " + loadOccupancy;
 
 
                              var timePrediction = null;
@@ -784,6 +784,10 @@ OBA.Popups = (function() {
 			html += OBA.Config.infoBubbleFooterFunction("stop", uniqueStopId);
 
 		html += "<ul class='links'>";
+		if (OBA.Config.feedbackFormURL != "") {
+			html += "<a target='_blank' href='" + OBA.Config.feedbackFormURL +"'>"
+			html += OBA.Config.feedbackFormText + "</a>&nbsp;&nbsp;&nbsp;";
+		}
 		html += "<a href='#' id='zoomHere'>Center & Zoom Here</a>&nbsp;&nbsp;&nbsp;<a href='" + OBA.Config.urlPrefix + "where/schedule?id=" + stopResult.id +"' id='schedule'>View Schedule</a>";
 		html += "</ul>";
 		

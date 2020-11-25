@@ -342,7 +342,7 @@
 				</s:if>
 				<s:else>
 					<s:iterator value="summaries" status="iter">
-						<p><strong><s:property value="value" /></strong></p>
+						<p class="global-alert-content"><strong><s:property value="value" /></strong></p>
 						<s:if test="value != descriptions[#iter.index].value">
 							<p><s:property value="descriptions[#iter.index].value" /></p>
 						</s:if>

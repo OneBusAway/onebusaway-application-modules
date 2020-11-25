@@ -105,7 +105,7 @@ public class ApiKeyInterceptor extends AbstractInterceptor {
     
     ResponseBean response = new ResponseBean(1, httpCode, message, null);
     DefaultHttpHeaders methodResult = new DefaultHttpHeaders().withStatus(response.getCode());
-    return _handlerSelector.handleResult(proxy.getConfig(), methodResult, response);
+    return _handlerSelector.handleResult(proxy.getInvocation(), methodResult, response);
   }
 
   @Autowired

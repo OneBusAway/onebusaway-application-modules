@@ -133,4 +133,11 @@ public class ConfigAction extends OneBusAwayEnterpriseActionSupport {
     return _configurationService.getConfigurationValueAsString("display.occupancy.FULL", OneBusAwayFormats.toPascalCaseWithSpaces(OccupancyStatus.FULL.name()));
   }
 
+  public String getFeedbackFormText() {
+    return _configurationService.getConfigurationValueAsString("display.feedbackForm.text", null);
+  }
+
+  public String getFeedbackFormURL() {
+    return _configurationService.getConfigurationValueAsString("display.feedbackForm.url", null);
+  }
 }
