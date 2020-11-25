@@ -253,7 +253,7 @@ public class BundleValidationServiceImpl implements BundleValidationService {
       if(validatorLocation!=null){
         tmpValidator = validatorLocation;
       }
-      String[] cmds = {
+      String[] cmds = {"python",
         tmpValidator,
         "-n",
         "-m",
