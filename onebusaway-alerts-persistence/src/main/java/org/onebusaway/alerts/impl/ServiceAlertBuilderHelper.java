@@ -139,6 +139,8 @@ public class ServiceAlertBuilderHelper {
             if (serviceAlert.getReason() != null
                     && toCause(serviceAlert.getReason()) != null)
                 feedAlert.setCause(toCause(serviceAlert.getReason()));
+            if (serviceAlert.getSource() != null)
+                feedAlert.setSource(serviceAlert.getSource());
 
             feedCollection.addServiceAlerts(feedAlert);
         }
@@ -202,6 +204,8 @@ public class ServiceAlertBuilderHelper {
     }
 
     private static ServiceAlerts.Consequence.Effect toEffect(EEffect effect) {
+        if (effect == null)
+            return ServiceAlerts.Consequence.Effect.UNKNOWN_EFFECT;
         return ServiceAlerts.Consequence.Effect.valueOf(effect.toString());
     }
 

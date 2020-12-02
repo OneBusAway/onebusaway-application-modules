@@ -636,9 +636,6 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
             _log.debug("[" + getFeedId() + "] cleaning up alert id " + testId
                     + " with source=" + sa.getSource());
             toBeDeleted.add(testId);
-          } else {
-            _log.debug("[" + getFeedId() + "] appears to still be valid with id=" + testId + ", ("
-                    + sa.getAllAffects().iterator().next().getRouteId() + ")");
           }
         } catch (Exception e) {
           _log.error("invalid AgencyAndId " + sa.getServiceAlertId());
@@ -679,7 +676,11 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
 
       ServiceAlertRecord serviceAlertRecord = new ServiceAlertRecord();
       // indicate this came from a feed so we can prune expired alerts
-      serviceAlertRecord.setSource(getFeedId());
+      if (serviceAlert.hasSource()) {
+        serviceAlertRecord.setSource(serviceAlert.getSource());
+      } else {
+        serviceAlertRecord.setSource(getFeedId());
+      }
       serviceAlertRecord.setAgencyId(id.getAgencyId()); // AGENCY from feed configuration
       serviceAlertRecord.setServiceAlertId(id.getId()); // ID ONLY
 
