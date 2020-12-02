@@ -133,4 +133,15 @@
 		<extension>ico</extension>
 		<mime-type>image/x-icon</mime-type>
 	</mime-mapping>
+	<session-config>
+		<session-timeout>30</session-timeout>
+		<cookie-config>
+			<!-- this is default -->
+			<http-only>true</http-only>
+			<!-- only transmit cookies of HTTPS -->
+			<!-- this may have side effects to HTTP users -->
+			<secure>true</secure>
+		</cookie-config>
+	</session-config>
+
 </web-app>
