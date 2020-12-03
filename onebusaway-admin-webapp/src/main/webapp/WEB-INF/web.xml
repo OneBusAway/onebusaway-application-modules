@@ -197,15 +197,15 @@
     <location>/redirect?uri=/error.action?type=RuntimeException</location>
   </error-page>
     <session-config>
-        <!-- admin users like to be logged in the entire day -->
-        <session-timeout>480</session-timeout>
-        <cookie-config>
-            <!-- this is default -->
-            <http-only>true</http-only>
-            <!-- only transmit cookies of HTTPS -->
-            <!-- this may have side effects to HTTP users -->
-            <secure>true</secure>
-        </cookie-config>
+        <session-timeout>30</session-timeout>
+        <!-- for production deployments please enable the following -->
+<!--        <cookie-config>-->
+<!--            &lt;!&ndash; this is default &ndash;&gt;-->
+<!--            <http-only>true</http-only>-->
+<!--            &lt;!&ndash; only transmit cookies of HTTPS &ndash;&gt;-->
+<!--            &lt;!&ndash; this may have side effects to HTTP users &ndash;&gt;-->
+<!--            <secure>true</secure>-->
+<!--        </cookie-config>-->
     </session-config>
 
 </web-app>

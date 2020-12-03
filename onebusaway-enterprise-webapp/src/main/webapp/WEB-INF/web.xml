@@ -133,15 +133,16 @@
 		<extension>ico</extension>
 		<mime-type>image/x-icon</mime-type>
 	</mime-mapping>
-	<session-config>
-		<session-timeout>30</session-timeout>
-		<cookie-config>
-			<!-- this is default -->
-			<http-only>true</http-only>
-			<!-- only transmit cookies of HTTPS -->
-			<!-- this may have side effects to HTTP users -->
-			<secure>true</secure>
-		</cookie-config>
-	</session-config>
+	<!-- for production instances please enable this -->
+<!--	<session-config>-->
+<!--		<session-timeout>30</session-timeout>-->
+<!--		<cookie-config>-->
+<!--			&lt;!&ndash; this is default &ndash;&gt;-->
+<!--			<http-only>true</http-only>-->
+<!--			&lt;!&ndash; only transmit cookies of HTTPS &ndash;&gt;-->
+<!--			&lt;!&ndash; this may have side effects to HTTP users &ndash;&gt;-->
+<!--			<secure>true</secure>-->
+<!--		</cookie-config>-->
+<!--	</session-config>-->
 
 </web-app>
