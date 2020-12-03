@@ -41,7 +41,17 @@ public class SituationQueryBean implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
+  private long time = -1;//not set
+
   private List<AffectsBean> affects = new ArrayList<AffectsBean>();
+
+  public long getTime() {
+    return time;
+  }
+
+  public void setTime(long time) {
+    this.time = time;
+  }
 
   public List<AffectsBean> getAffects() {
     return affects;

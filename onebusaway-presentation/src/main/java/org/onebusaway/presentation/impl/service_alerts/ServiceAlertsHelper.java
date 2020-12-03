@@ -83,6 +83,8 @@ public class ServiceAlertsHelper {
             visit.getMonitoredVehicleJourney().getSituationRef());
     }
 
+    long time = System.currentTimeMillis();
+
     if (stopIds != null && stopIds.size() > 0) {
       for (AgencyAndId stopId : stopIds) {
         String stopIdString = stopId.toString();
@@ -94,12 +96,13 @@ public class ServiceAlertsHelper {
         SituationQueryBean.AffectsBean affects = new SituationQueryBean.AffectsBean();
         query.getAffects().add(affects);
         affects.setStopId(stopIdString);
+        query.setTime(time);
 
         addFromQuery(transitDataService, ptSituationElements, query);
 
         // Now also add service alerts for (route+direction)s of the stop
         query = new SituationQueryBean();
-        
+        query.setTime(time);
         StopBean stopBean = transitDataService.getStop(stopIdString);
         List<RouteBean> routes = stopBean.getRoutes();
         for (RouteBean route : routes) {
@@ -197,11 +200,13 @@ public class ServiceAlertsHelper {
       return;
     
     List<ServiceAlertBean> serviceAlerts = new ArrayList<ServiceAlertBean>();
+    long time = System.currentTimeMillis();
 
     SituationQueryBean agencyAlerts = new SituationQueryBean();
     SituationQueryBean.AffectsBean agencyAffects = new SituationQueryBean.AffectsBean();
     agencyAlerts.getAffects().add(agencyAffects);
     agencyAffects.setAgencyId(routeIds.get(0).getAgencyId());
+    agencyAlerts.setTime(time);
     ListBean<ServiceAlertBean> serviceAlertsForAgency = transitDataService.getServiceAlerts(agencyAlerts);
     if (serviceAlertsForAgency != null) {
       serviceAlerts.addAll(serviceAlertsForAgency.getList());
@@ -212,12 +217,14 @@ public class ServiceAlertsHelper {
       SituationQueryBean.AffectsBean affects = new SituationQueryBean.AffectsBean();
       query.getAffects().add(affects);
       affects.setRouteId(routeId.toString());
+      query.setTime(time);
       ListBean<ServiceAlertBean> serviceAlertsForRoute = transitDataService.getServiceAlerts(query);
       // now query route + stop combinations
       StopsForRouteBean stopsForRoute = transitDataService.getStopsForRoute(routeId.toString());
       if (stopsForRoute != null) {
         for (StopBean stopBean : stopsForRoute.getStops()) {
           SituationQueryBean stopRouteQuery = new SituationQueryBean();
+          stopRouteQuery.setTime(time);
           SituationQueryBean.AffectsBean stopRouteAffects = new SituationQueryBean.AffectsBean();
           stopRouteQuery.getAffects().add(stopRouteAffects);
           stopRouteAffects.setRouteId(routeId.toString());

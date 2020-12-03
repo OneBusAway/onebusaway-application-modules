@@ -304,6 +304,7 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
 
     private List<ServiceAlertBean> getServiceAlertsForStop(String stopId) {
         SituationQueryBean query = new SituationQueryBean();
+        query.setTime(System.currentTimeMillis());
         SituationQueryBean.AffectsBean affects = new SituationQueryBean.AffectsBean();
         query.getAffects().add(affects);
         affects.setStopId(stopId);
