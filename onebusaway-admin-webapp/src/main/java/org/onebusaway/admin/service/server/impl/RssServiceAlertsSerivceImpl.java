@@ -289,7 +289,8 @@ public class RssServiceAlertsSerivceImpl implements RssServiceAlertsService {
                             + " and link=" + linkText);
                     if (!_alertCache.keySet().contains(serviceAlertBean.getId())
                             && serviceAlertBean.getSource() != null
-                            && serviceAlertBean.getSource().equals(_alertSource)) {
+                            /* WMATA_alert or WMATA_advisory */
+                            && serviceAlertBean.getSource().contains(_alertSource + "_")) {
                         _log.info("new service alert=" + serviceAlertBean.getSummaries().get(0).getValue()
                             + " and link=" + linkText);
                         _alertCache.put(serviceAlertBean.getId(), serviceAlertBean);
@@ -322,8 +323,11 @@ public class RssServiceAlertsSerivceImpl implements RssServiceAlertsService {
                     String guid = cachedAlertsGuidIter.next();
                     if (!currentRssAlertMap.keySet().contains(guid)) {
                         _log.info("Removing expired alert with guid " + guid);
-
-                        toRemove.add(new AgencyAndId(getAgencyId(), guid));
+                        try {
+                            toRemove.add(AgencyAndId.convertFromString(guid));
+                        } catch (Exception any) {
+                            _log.error("invalid guid=" + guid);
+                        }
                         cachedAlertsGuidIter.remove();
                     } else {
                         ServiceAlertBean currentAlert = _alertCache.get(guid);

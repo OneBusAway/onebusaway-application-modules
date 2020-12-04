@@ -177,6 +177,8 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
 
   private boolean _ignoreAlertTripId = false;
 
+  private String _alertSourcePrefix = null;
+
   @Autowired
   public void setAgencyService(AgencyService agencyService) {
     _agencyService = agencyService;
@@ -370,6 +372,20 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
 
   public GtfsRealtimeTripLibrary getGtfsRealtimeTripLibrary() {
     return _tripsLibrary;
+  }
+
+  public String getAlertSourcePrefix() {
+    return _alertSourcePrefix;
+  }
+
+  /**
+   * if alerts come in via alternative means such as an RSS feed, set the name of that
+   * source here to associate and merge them with this feed
+   *
+   * @param prefix
+   */
+  public void setAlertSourcePrefix(String prefix) {
+    _alertSourcePrefix = prefix;
   }
   
   @PostConstruct
@@ -629,10 +645,13 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
 
     Set<AgencyAndId> toBeDeleted = new HashSet<AgencyAndId>();
     for (ServiceAlertRecord sa : _serviceAlertService.getAllServiceAlerts()) {
-      if (sa.getSource() != null && sa.getSource().equals(getFeedId())) {
+      /* consider other feed sources that may be merged here as well */
+      if (sa.getSource() != null
+              && (sa.getSource().equals(getFeedId())
+                || (_alertSourcePrefix != null && sa.getSource().contains(_alertSourcePrefix)))) {
         try {
           AgencyAndId testId = new AgencyAndId(sa.getAgencyId(), sa.getServiceAlertId());
-          if (!currentAlerts.contains(testId) && getFeedId().equals(sa.getSource())) {
+          if (!currentAlerts.contains(testId)) {
             _log.debug("[" + getFeedId() + "] cleaning up alert id " + testId
                     + " with source=" + sa.getSource());
             toBeDeleted.add(testId);
@@ -860,7 +879,10 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
       if (sa.getSource() != null && sa.getSource().equals(getFeedId())) {
         try {
           AgencyAndId testId = new AgencyAndId(sa.getAgencyId(), sa.getServiceAlertId());
-          if (!currentAlerts.contains(testId) && getFeedId().equals(sa.getSource())) {
+          /* consider other feed sources that may be merged here as well */
+          if (!currentAlerts.contains(testId)
+                  && (getFeedId().equals(sa.getSource())
+                    || (_alertSourcePrefix != null && sa.getSource().contains(_alertSourcePrefix)))) {
             _log.debug("[" + getFeedId() + "] cleaning up alert id " + testId
                     + " with source=" + sa.getSource());
             toBeDeleted.add(testId);
