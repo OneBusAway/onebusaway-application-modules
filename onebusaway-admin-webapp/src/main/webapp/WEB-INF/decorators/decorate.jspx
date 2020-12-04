@@ -32,8 +32,23 @@
 	  
 	  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   	  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-	  
-	  <s:url var="url" value="/css/admin.css">
+
+		<!-- the following is OWASP's recommendation on preventing clickjacking -->
+		<style id="antiClickjack">
+			body{display:none !important;}
+		</style>
+		<s:url var="url" value="/js/oba/AntiClickjack.js">
+			<s:param name="v">
+				<s:property value="frontEndVersion" />
+			</s:param>
+		</s:url>
+		<script type="text/javascript" src="${url}">
+			<!-- //prevent jspx minimization -->
+
+		</script>
+		<!-- end clickjacking prevention-->
+
+		<s:url var="url" value="/css/admin.css">
 		</s:url>
 	  <link rel="stylesheet" type="text/css" href="${url}"/>
 

@@ -91,6 +91,14 @@
             <param-value>*</param-value>
         </init-param>
     </filter>
+    <filter>
+        <filter-name>obaHeaderSecurity</filter-name>
+        <filter-class>org.onebusaway.container.ObaSecurityHeaderFilter</filter-class>
+        <init-param>
+            <param-name>contentSecurityPolicyOption</param-name>
+            <param-value>on</param-value>
+        </init-param>
+    </filter>
     <filter-mapping>
         <filter-name>CorsFilter</filter-name>
         <url-pattern>/*</url-pattern>
@@ -129,6 +137,11 @@
     <dispatcher>FORWARD</dispatcher>
     <dispatcher>REQUEST</dispatcher>
   </filter-mapping>
+    <filter-mapping>
+        <filter-name>obaHeaderSecurity</filter-name>
+        <url-pattern>/*</url-pattern>
+        <dispatcher>REQUEST</dispatcher>
+    </filter-mapping>
 
 	<!-- Listeners -->
   <listener>
