@@ -380,6 +380,7 @@ public class RealtimeServiceImpl implements RealtimeService {
   @Override
   public List<ServiceAlertBean> getServiceAlertsForAgency(String agencyId) {
     SituationQueryBean query = new SituationQueryBean();
+    query.setTime(getTime());
     SituationQueryBean.AffectsBean affects = new SituationQueryBean.AffectsBean();
     query.getAffects().add(affects);
 
@@ -398,6 +399,7 @@ public class RealtimeServiceImpl implements RealtimeService {
   public List<ServiceAlertBean> getServiceAlertsForRouteAndDirection(
       String routeId, String directionId) {
     SituationQueryBean query = new SituationQueryBean();
+    query.setTime(getTime());
     SituationQueryBean.AffectsBean affects = new SituationQueryBean.AffectsBean();
     query.getAffects().add(affects);
 
@@ -428,6 +430,7 @@ public class RealtimeServiceImpl implements RealtimeService {
   public List<ServiceAlertBean> getServiceAlertsForRouteAndStop(
           String routeId, String stopId) {
     SituationQueryBean query = new SituationQueryBean();
+    query.setTime(getTime());
     SituationQueryBean.AffectsBean affects = new SituationQueryBean.AffectsBean();
     query.getAffects().add(affects);
 
@@ -444,6 +447,7 @@ public class RealtimeServiceImpl implements RealtimeService {
   public List<ServiceAlertBean> getServiceAlertsGlobal() {
     SituationQueryBean query = new SituationQueryBean();
     SituationQueryBean.AffectsBean affects = new SituationQueryBean.AffectsBean();
+    query.setTime(getTime());
     
     affects.setAgencyId("__ALL_OPERATORS__");
     query.getAffects().add(affects);
