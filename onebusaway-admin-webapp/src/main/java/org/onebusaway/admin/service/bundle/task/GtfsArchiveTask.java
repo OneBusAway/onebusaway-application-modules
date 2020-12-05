@@ -43,7 +43,6 @@ import org.onebusaway.admin.service.bundle.task.model.GtfsBundleInfo;
 import org.onebusaway.gtfs.serialization.GtfsReader;
 import org.onebusaway.gtfs.services.GtfsMutableRelationalDao;
 import org.onebusaway.gtfs.services.HibernateGtfsFactory;
-import org.onebusaway.king_county_metro_gtfs.model.PatternPair;
 import org.onebusaway.transit_data_federation.bundle.model.GtfsBundle;
 import org.onebusaway.transit_data_federation.bundle.model.GtfsBundles;
 import org.onebusaway.util.SystemTime;
@@ -58,7 +57,6 @@ public class GtfsArchiveTask implements  Runnable {
   
   private BundleRequestResponse requestResponse;
   private static String[] TMP_TABLES = {
-    "tmp_pattern_pairs",
     "tmp_gtfs_calendar_dates",
     "tmp_gtfs_calendars",
     "tmp_gtfs_block",
@@ -93,7 +91,6 @@ public class GtfsArchiveTask implements  Runnable {
     PRIMARY_KEY_MAP.put("gtfs_stops", "agencyId,id");
     PRIMARY_KEY_MAP.put("gtfs_transfers", "gid");
     PRIMARY_KEY_MAP.put("gtfs_trips", "agencyId,id");
-    PRIMARY_KEY_MAP.put("gtfs_pattern_pair", "id");
   }
   
   @Autowired
@@ -132,7 +129,6 @@ public class GtfsArchiveTask implements  Runnable {
     for (GtfsBundle gtfsBundle : gtfsBundles.getBundles()) {
     
       GtfsReader reader = new GtfsReader();
-      reader.getEntityClasses().add(PatternPair.class);
       try {
         
         cleanTempTables(session);
