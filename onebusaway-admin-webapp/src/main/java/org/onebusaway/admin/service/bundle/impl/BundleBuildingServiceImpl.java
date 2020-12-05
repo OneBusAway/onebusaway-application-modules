@@ -59,6 +59,7 @@ import org.onebusaway.transit_data_federation.bundle.tasks.MultiCSVLogger;
 import org.onebusaway.transit_data_federation.bundle.tasks.stif.StifTask;
 import org.onebusaway.transit_data_federation.services.FederatedTransitDataBundle;
 import org.onebusaway.util.SystemTime;
+import org.onebusaway.util.impl.configuration.ConfigurationServiceImpl;
 import org.onebusaway.util.logging.LoggingService;
 import org.onebusaway.util.services.configuration.ConfigurationService;
 import org.onebusaway.util.services.configuration.ConfigurationServiceClient;
@@ -444,6 +445,10 @@ public class BundleBuildingServiceImpl implements BundleBuildingService {
       BeanDefinitionBuilder bean = BeanDefinitionBuilder.genericBeanDefinition(GtfsBundles.class);
       bean.addPropertyValue("bundles", gtfsBundles);
       beans.put("gtfs-bundles", bean.getBeanDefinition());
+
+      // pass through configuration service so its available to tasks
+      bean = BeanDefinitionBuilder.genericBeanDefinition(ConfigurationServiceImpl.class);
+      beans.put("configurationServiceImpl", bean.getBeanDefinition());
 
       bean = BeanDefinitionBuilder.genericBeanDefinition(GtfsRelationalDaoImpl.class);
       beans.put("gtfsRelationalDaoImpl", bean.getBeanDefinition());
