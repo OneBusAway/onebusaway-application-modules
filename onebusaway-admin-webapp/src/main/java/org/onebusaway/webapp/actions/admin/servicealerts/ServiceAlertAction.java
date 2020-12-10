@@ -480,11 +480,13 @@ public String getStartDate() {
     try { 
       if (_model.getId() == null || _model.getId().trim().isEmpty() ) {
     	 _model.setSource(EDITOR_SOURCE);
+        _model.combineAffectsIds();
     	 _model = _alerts.createServiceAlert(_agencyId, _model);
       }
       else {
         // if we've edited a service alert from some other agency, we now own it
         _model.setSource(EDITOR_SOURCE);
+        _model.combineAffectsIds();
         _alerts.updateServiceAlert(_agencyId, _model, isFavorite());
       }
     } catch (RuntimeException e) {

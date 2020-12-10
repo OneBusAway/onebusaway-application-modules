@@ -182,11 +182,21 @@
 								headerValue="Select agency affected" list="affectedAgencies"
 								listKey="agency.id" listValue="agency.name"
 								value="agencyId" theme="xhtml"/>
-							<s:textfield label="Route" cssClass="alertCondition"
-								name="allAffects[%{#rowStatus.index}].routeId" value="%{routeId}" theme="xhtml"/>
+							<s:select label="Agency for Route" cssClass="alertCondition"
+									  name="allAffects[%{#rowStatus.index}].agencyPartRouteId" headerKey="null"
+									  headerValue="Select agency for Route" list="agencies"
+									  listKey="agency.id" listValue="agency.name"
+									  value="agencyPartRouteId" theme="xhtml"/>
+							<s:textfield label="Route Id" cssClass="alertCondition"
+								name="allAffects[%{#rowStatus.index}].routePartRouteId" value="%{routePartRouteId}" theme="xhtml"/>
 							<td style="text-align:center" colspan="2" id="routeValidation${rowStatus.index}">Click Validate to lookup Route</td>
+							<s:select label="Agency for Stop" cssClass="alertCondition"
+									  name="allAffects[%{#rowStatus.index}].agencyPartStopId" headerKey="null"
+									  headerValue="Select agency for Stop" list="agencies"
+									  listKey="agency.id" listValue="agency.name"
+									  value="agencyPartStopId" theme="xhtml"/>
 							<s:textfield label="Stop" cssClass="alertCondition"
-								name="allAffects[%{#rowStatus.index}].stopId" value="%{stopId}" theme="xhtml"/>
+								name="allAffects[%{#rowStatus.index}].stopPartStopId" value="%{stopPartStopId}" theme="xhtml"/>
 							<td style="text-align:center" colspan="2" id="stopValidation${rowStatus.index}">Click Validate to lookup Stop</td>
 
 						</table>
@@ -211,11 +221,21 @@
 								headerValue="Select agency affected" list="affectedAgencies"
 								listKey="agency.id" listValue="agency.name"
 								theme="xhtml"/>
-							<s:textfield label="Route" cssClass="alertCondition"
-								name="allAffects[0].routeId" theme="xhtml"/>
+							<s:select label="Agency for Route" cssClass="alertCondition"
+									  name="allAffects[0].agencyPartRouteId" headerKey="null"
+									  headerValue="Select agency for route" list="agencies"
+									  listKey="agency.id" listValue="agency.name"
+									  theme="xhtml"/>
+							<s:textfield label="Route Id" cssClass="alertCondition"
+								name="allAffects[0].routePartRouteId" theme="xhtml"/>
 							<td style="text-align:center" colspan="2" id="routeValidation0">Click Validate to lookup Route</td>
-							<s:textfield label="Stop" cssClass="alertCondition"
-								name="allAffects[0].stopId" theme="xhtml"/>
+							<s:select label="Agency for Stop" cssClass="alertCondition"
+									  name="allAffects[0].agencyPartStopId" headerKey="null"
+									  headerValue="Select agency for stop" list="agencies"
+									  listKey="agency.id" listValue="agency.name"
+									  theme="xhtml"/>
+							<s:textfield label="Stop Id" cssClass="alertCondition"
+								name="allAffects[0].stopPartStopId" theme="xhtml"/>
 							<td style="text-align:center" colspan="2" id="stopValidation0">Click Validate to lookup Stop</td>
 						</table>
 					</td>

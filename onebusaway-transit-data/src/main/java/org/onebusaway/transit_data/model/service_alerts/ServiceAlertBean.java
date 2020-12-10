@@ -143,4 +143,9 @@ public class ServiceAlertBean implements Serializable {
     this.source = source;
   }
 
+  public void combineAffectsIds() {
+    for (SituationAffectsBean affect : getAllAffects()) {
+      affect.combineIds();
+    }
+  }
 }
