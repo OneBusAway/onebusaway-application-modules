@@ -140,6 +140,7 @@
     <filter-mapping>
         <filter-name>obaHeaderSecurity</filter-name>
         <url-pattern>/*</url-pattern>
+        <dispatcher>FORWARD</dispatcher>
         <dispatcher>REQUEST</dispatcher>
     </filter-mapping>
 
