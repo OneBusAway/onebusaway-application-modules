@@ -22,6 +22,7 @@ import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.CalendarServiceData;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
 import org.onebusaway.transit_data.model.RouteScheduleBean;
+import org.onebusaway.transit_data.model.StopTimeInstanceBean;
 import org.onebusaway.transit_data.model.StopTripDirectionBean;
 import org.onebusaway.transit_data_federation.impl.ExtendedCalendarServiceImpl;
 import org.onebusaway.transit_data_federation.impl.blocks.BlockIndexFactoryServiceImpl;
@@ -33,6 +34,7 @@ import org.onebusaway.transit_data_federation.impl.transit_graph.RouteEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopTimeEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.TripEntryImpl;
+import org.onebusaway.transit_data_federation.model.narrative.AgencyNarrative;
 import org.onebusaway.transit_data_federation.model.narrative.TripNarrative;
 import org.onebusaway.transit_data_federation.services.blocks.BlockTripIndex;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
@@ -106,22 +108,58 @@ public class RouteScheduleBeanServiceImplTest {
     assertEquals(serviceDate, bean.getScheduleDate());
 
     assertEquals(2, bean.getStopTripDirections().size());
-    StopTripDirectionBean stdb1 = bean.getStopTripDirections().get(0);
-    assertEquals("Theater District Station", stdb1.getTripHeadsign());
-    assertEquals("0", stdb1.getDirectionId());
+    StopTripDirectionBean stdb1 = getStopTripDirection(bean.getStopTripDirections(), "Theater District Station", "0");
+    assertNotNull(stdb1);
 
     assertEquals(Arrays.asList(aId( "TacL1000")), stdb1.getTripIds());
     assertEquals(Arrays.asList(aId("TL_TD"), aId("TL_25"), aId("TL_US"), aId("TL_CC")),
             stdb1.getStopIds());
+    assertNotNull(stdb1.getStopTimes());
+    assertEquals(4, stdb1.getStopTimes().size());
+    assertNotNull(stdb1.getStopTimes().get(0).getTripId());
+    assertEquals("1_TacL1000", stdb1.getStopTimes().get(0).getTripId());
+    assertEquals(Arrays.asList((long)time(5,0,0),
+            (long)time(5, 2, 0),
+            (long)time(5, 4, 0),
+            (long)time(5, 6, 0)),
+            Arrays.asList(stdb1.getStopTimes().get(0).getArrivalTime(),
+                    stdb1.getStopTimes().get(1).getArrivalTime(),
+                    stdb1.getStopTimes().get(2).getArrivalTime(),
+                    stdb1.getStopTimes().get(3).getArrivalTime()));
 
-    StopTripDirectionBean stdb2 = bean.getStopTripDirections().get(1);
-    assertEquals("Tacoma Dome Station", stdb2.getTripHeadsign());
-    assertEquals("1", stdb2.getDirectionId());
+    StopTripDirectionBean stdb2 = getStopTripDirection(bean.getStopTripDirections(), "Tacoma Dome Station", "1");
+    assertNotNull(stdb2);
 
     assertEquals(Arrays.asList(aId("TacL1001")), stdb2.getTripIds());
     assertEquals(Arrays.asList(aId("TL_CC"), aId("TL_US"), aId("TL_25"), aId("TL_TD")),
             stdb2.getStopIds());
+    assertNotNull(stdb2.getStopTimes());
+    assertEquals(4, stdb2.getStopTimes().size());
+    assertNotNull(stdb2.getStopTimes().get(0).getTripId());
+    assertEquals("1_TacL1001", stdb2.getStopTimes().get(0).getTripId());
+    StopTimeInstanceBean stib2 = stdb2.getStopTimes().get(0);
+    assertEquals(time(5, 16, 0), stib2.getArrivalTime());
+    assertEquals(time(5, 16, 0), stib2.getDepartureTime());
 
+    assertEquals(Arrays.asList((long)time(5,16,0),
+            (long)time(5, 18, 0),
+            (long)time(5, 20, 0),
+            (long)time(5, 22, 0)),
+            Arrays.asList(stdb2.getStopTimes().get(0).getArrivalTime(),
+                    stdb2.getStopTimes().get(1).getArrivalTime(),
+                    stdb2.getStopTimes().get(2).getArrivalTime(),
+                    stdb2.getStopTimes().get(3).getArrivalTime()));
+
+
+  }
+
+  private StopTripDirectionBean getStopTripDirection(List<StopTripDirectionBean> stopTripDirections, String headsign, String direction) {
+    for (StopTripDirectionBean stdb: stopTripDirections) {
+      if (stdb.getTripHeadsign().equals(headsign)
+          && stdb.getDirectionId().equals(direction))
+        return stdb;
+    }
+    return null;
   }
 
   private AgencyAndId aId(String id) {
@@ -195,25 +233,25 @@ public class RouteScheduleBeanServiceImplTest {
     StopTimeEntryImpl st_2_3 = stopTime(1, s25, t2, time(5, 20, 0), time(5, 20,0 ), 0);
     StopTimeEntryImpl st_2_4 = stopTime(1, std, t2, time(5, 22, 0), time(5, 22,0 ), 0);
 
-    StopTimeEntryImpl st_3_1 = stopTime(1, std, t3, time(5, 0, 0), time(5, 0,0 ), 0);
-    StopTimeEntryImpl st_3_2 = stopTime(1, s25, t3, time(5, 2, 0), time(5, 2,0 ), 0);
-    StopTimeEntryImpl st_3_3 = stopTime(1, sus, t3, time(5, 4, 0), time(5, 4,0 ), 0);
-    StopTimeEntryImpl st_3_4 = stopTime(1, scc, t3, time(5, 6, 0), time(5, 6,0 ), 0);
+    StopTimeEntryImpl st_3_1 = stopTime(1, std, t3, time(6, 0, 0), time(5, 0,0 ), 0);
+    StopTimeEntryImpl st_3_2 = stopTime(1, s25, t3, time(6, 2, 0), time(5, 2,0 ), 0);
+    StopTimeEntryImpl st_3_3 = stopTime(1, sus, t3, time(6, 4, 0), time(5, 4,0 ), 0);
+    StopTimeEntryImpl st_3_4 = stopTime(1, scc, t3, time(6, 6, 0), time(5, 6,0 ), 0);
 
-    StopTimeEntryImpl st_4_1 = stopTime(1, scc, t4, time(5, 16, 0), time(5, 16,0 ), 0);
-    StopTimeEntryImpl st_4_2 = stopTime(1, sus, t4, time(5, 18, 0), time(5, 18,0 ), 0);
-    StopTimeEntryImpl st_4_3 = stopTime(1, s25, t4, time(5, 20, 0), time(5, 20,0 ), 0);
-    StopTimeEntryImpl st_4_4 = stopTime(1, std, t4, time(5, 22, 0), time(5, 22,0 ), 0);
+    StopTimeEntryImpl st_4_1 = stopTime(1, scc, t4, time(6, 16, 0), time(5, 16,0 ), 0);
+    StopTimeEntryImpl st_4_2 = stopTime(1, sus, t4, time(6, 18, 0), time(5, 18,0 ), 0);
+    StopTimeEntryImpl st_4_3 = stopTime(1, s25, t4, time(6, 20, 0), time(5, 20,0 ), 0);
+    StopTimeEntryImpl st_4_4 = stopTime(1, std, t4, time(6, 22, 0), time(5, 22,0 ), 0);
 
-    StopTimeEntryImpl st_5_1 = stopTime(1, std, t5, time(5, 0, 0), time(5, 0,0 ), 0);
-    StopTimeEntryImpl st_5_2 = stopTime(1, s25, t5, time(5, 2, 0), time(5, 2,0 ), 0);
-    StopTimeEntryImpl st_5_3 = stopTime(1, sus, t5, time(5, 4, 0), time(5, 4,0 ), 0);
-    StopTimeEntryImpl st_5_4 = stopTime(1, scc, t5, time(5, 6, 0), time(5, 6,0 ), 0);
+    StopTimeEntryImpl st_5_1 = stopTime(1, std, t5, time(7, 0, 0), time(5, 0,0 ), 0);
+    StopTimeEntryImpl st_5_2 = stopTime(1, s25, t5, time(7, 2, 0), time(5, 2,0 ), 0);
+    StopTimeEntryImpl st_5_3 = stopTime(1, sus, t5, time(7, 4, 0), time(5, 4,0 ), 0);
+    StopTimeEntryImpl st_5_4 = stopTime(1, scc, t5, time(7, 6, 0), time(5, 6,0 ), 0);
 
-    StopTimeEntryImpl st_6_1 = stopTime(1, scc, t6, time(5, 16, 0), time(5, 16,0 ), 0);
-    StopTimeEntryImpl st_6_2 = stopTime(1, sus, t6, time(5, 18, 0), time(5, 18,0 ), 0);
-    StopTimeEntryImpl st_6_3 = stopTime(1, s25, t6, time(5, 20, 0), time(5, 20,0 ), 0);
-    StopTimeEntryImpl st_6_4 = stopTime(1, std, t6, time(5, 22, 0), time(5, 22,0 ), 0);
+    StopTimeEntryImpl st_6_1 = stopTime(1, scc, t6, time(7, 16, 0), time(5, 16,0 ), 0);
+    StopTimeEntryImpl st_6_2 = stopTime(1, sus, t6, time(7, 18, 0), time(5, 18,0 ), 0);
+    StopTimeEntryImpl st_6_3 = stopTime(1, s25, t6, time(7, 20, 0), time(5, 20,0 ), 0);
+    StopTimeEntryImpl st_6_4 = stopTime(1, std, t6, time(7, 22, 0), time(5, 22,0 ), 0);
 
     ServiceIdActivation serviceIdActivationWeekday = serviceIds(lsids("WD_TL"), lsids());
     ServiceIdActivation serviceIdActivationSaturday = serviceIds(lsids("SA"), lsids());
@@ -256,6 +294,16 @@ public class RouteScheduleBeanServiceImplTest {
     Mockito.when(narrativeService.getTripForId(new AgencyAndId(AGENCY_ID, "TacL6001"))).thenReturn(tnB.create());
     Mockito.when(narrativeService.getTripForId(new AgencyAndId(AGENCY_ID, "TacL7000"))).thenReturn(tnA.create());
     Mockito.when(narrativeService.getTripForId(new AgencyAndId(AGENCY_ID, "TacL7001"))).thenReturn(tnB.create());
+    AgencyNarrative.Builder narrative = AgencyNarrative.builder();
+    narrative.setLang("en");
+    narrative.setName("ACTA");
+    narrative.setPhone("123 123-1234");
+    narrative.setEmail("abuse@example.com");
+    narrative.setTimezone("America/Los_Angeles"); // we need to stay consistent with UnitTestingSupport
+    narrative.setUrl("http://example.com");
+    narrative.setFareUrl("http:/example.com");
+
+    Mockito.when(narrativeService.getAgencyForId(AGENCY_ID)).thenReturn(narrative.create());
 
     Mockito.when(dao.getRouteCollectionForId(new AgencyAndId(AGENCY_ID, ROUTE_ID))).thenReturn(routeCollection);
 

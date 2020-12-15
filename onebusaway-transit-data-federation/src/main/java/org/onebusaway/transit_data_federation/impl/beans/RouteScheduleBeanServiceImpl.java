@@ -19,9 +19,11 @@ import org.onebusaway.container.cache.Cacheable;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
 import org.onebusaway.transit_data.model.RouteScheduleBean;
+import org.onebusaway.transit_data.model.StopTimeInstanceBean;
 import org.onebusaway.transit_data.model.StopTripDirectionBean;
 import org.onebusaway.transit_data_federation.impl.DirectedGraph;
 import org.onebusaway.transit_data_federation.impl.StopGraphComparator;
+import org.onebusaway.transit_data_federation.model.narrative.AgencyNarrative;
 import org.onebusaway.transit_data_federation.model.narrative.StopNarrative;
 import org.onebusaway.transit_data_federation.model.narrative.TripNarrative;
 import org.onebusaway.transit_data_federation.services.ExtendedCalendarService;
@@ -29,6 +31,7 @@ import org.onebusaway.transit_data_federation.services.beans.RouteScheduleBeanSe
 import org.onebusaway.transit_data_federation.services.blocks.BlockIndexService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockTripIndex;
 import org.onebusaway.transit_data_federation.services.narrative.NarrativeService;
+import org.onebusaway.transit_data_federation.services.transit_graph.AgencyEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.RouteCollectionEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.ServiceIdActivation;
@@ -36,15 +39,19 @@ import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
+import org.onebusaway.util.AgencyAndIdLibrary;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.TimeZone;
 
 /**
  * Support Schedule queries at the route level.  Similar to
@@ -124,6 +131,7 @@ public class RouteScheduleBeanServiceImpl implements RouteScheduleBeanService {
     Map<DirectionalHeadsign, StopTripDirectionBean> headsignToBeanMap = new HashMap<>();
     Map<DirectionalHeadsign, StopCollections> headsignToStopCollectionMap = new HashMap<>();
     Set<AgencyAndId> serviceIds = new HashSet<>();
+    Set<TripEntry> trips = new LinkedHashSet<>();
 
     for (BlockTripIndex bti : blockTripIndices) {
 
@@ -134,6 +142,8 @@ public class RouteScheduleBeanServiceImpl implements RouteScheduleBeanService {
         if (_calendarService.areServiceIdsActiveOnServiceDate(
                 idActivation,
                 rsb.getScheduleDate().getAsDate(idActivation.getTimeZone()))) {
+
+          trips.add(blockTrip.getTrip());
 
           String directionId = blockTrip.getTrip().getDirectionId();
           TripNarrative tripNarrativeForId = _narrativeService.getTripForId(blockTrip.getTrip().getId());
@@ -178,6 +188,7 @@ public class RouteScheduleBeanServiceImpl implements RouteScheduleBeanService {
     for (DirectionalHeadsign dh : headsignToBeanMap.keySet()) {
       StopTripDirectionBean bean = headsignToBeanMap.get(dh);
       bean.setStopIds(collapse(headsignToStopCollectionMap.get(dh)));
+      bean.getStopTimes().addAll(getStopTimesForTrips(trips, bean.getTripIds(), rsb.getScheduleDate()));
     }
 
     rsb.setServiceIds(new ArrayList<>());
@@ -187,6 +198,42 @@ public class RouteScheduleBeanServiceImpl implements RouteScheduleBeanService {
 
     rsb.getStopTripDirections().addAll(headsignToBeanMap.values());
 
+  }
+
+  private List<StopTimeInstanceBean> getStopTimesForTrips(Set<TripEntry> allTrips, List<AgencyAndId> selectedTrips, ServiceDate serviceDate) {
+    ArrayList<StopTimeInstanceBean> stopTimes = new ArrayList<>();
+    for (AgencyAndId selection : selectedTrips) {
+      for (TripEntry entry : allTrips) {
+        if (entry.getId().equals(selection))
+          stopTimes.addAll(beanify(entry.getStopTimes(), serviceDate));
+      }
+    }
+    return stopTimes;
+  }
+
+  private List<StopTimeInstanceBean> beanify(List<StopTimeEntry> stopTimes, ServiceDate serviceDate) {
+    if (stopTimes == null) return Collections.emptyList();
+    ArrayList<StopTimeInstanceBean> beans = new ArrayList<>();
+
+    for (StopTimeEntry entry : stopTimes) {
+      StopTimeInstanceBean bean = new StopTimeInstanceBean();
+      bean.setTripId(AgencyAndIdLibrary.convertToString(entry.getTrip().getId()));
+      bean.setServiceId(AgencyAndIdLibrary.convertToString(entry.getTrip().getServiceId().getId()));
+      bean.setServiceDate(serviceDate.getAsDate(getTimeZoneForAgency(entry.getTrip().getId().getAgencyId())).getTime());
+      bean.setArrivalEnabled(entry.getArrivalTime() > 0);
+      bean.setArrivalTime(entry.getArrivalTime());
+      bean.setDepartureEnabled(entry.getDepartureTime() > 0);
+      bean.setDepartureTime(entry.getDepartureTime());
+      beans.add(bean);
+    }
+    return beans;
+  }
+
+  private TimeZone getTimeZoneForAgency(String agencyId) {
+    AgencyNarrative agency = _narrativeService.getAgencyForId(agencyId);
+    if (agency == null) return TimeZone.getDefault();
+    if (agency.getTimezone() == null) return TimeZone.getDefault();
+    return TimeZone.getTimeZone(agency.getTimezone());
   }
 
   // this algorithm comes from RouteBeanServiceImpl.getStopsInOrder

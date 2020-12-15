@@ -18,6 +18,7 @@ package org.onebusaway.transit_data.model;
 import org.onebusaway.gtfs.model.AgencyAndId;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -46,6 +47,11 @@ public class StopTripDirectionBean implements Serializable {
   private String tripHeadsign;
   private List<AgencyAndId> stopIds;
   private List<AgencyAndId> tripIds;
+  // this bean needs to support getReferences of API tier
+  // the datasource of any V2 bean needed there needs to be provided here
+  private List<StopTimeInstanceBean> stopTimes = new ArrayList<>();
+
+  // TODO: add support for frequency implementations
 
   public String getDirectionId() {
     return directionId;
@@ -77,6 +83,14 @@ public class StopTripDirectionBean implements Serializable {
 
   public void setTripIds(List<AgencyAndId> tripIds) {
     this.tripIds = tripIds;
+  }
+
+  public List<StopTimeInstanceBean> getStopTimes() {
+    return stopTimes;
+  }
+
+  public void setStopTimes(List<StopTimeInstanceBean> stopTimes) {
+    this.stopTimes = stopTimes;
   }
 
 }
