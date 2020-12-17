@@ -397,7 +397,7 @@ OBA.Popups = (function() {
 
 		if(MonitoredVehicleJourney.Occupancy == "seatsAvailable"){
 			occupancyLoad = '<span class="apcDotG"></span>'+
-				'<span id="apcTextG">' + lookupOccupancy("seatsAvailable") + '</span>';
+				'<span id="apcTextG">&nbsp;' + lookupOccupancy("seatsAvailable") + '</span>';
 			if(addDashedLine == true){
 				occupancyLoad += '<div class="apcDashedLine"><img src="img/occupancy/apcLoadG.png"></div>';
 			}
@@ -405,7 +405,7 @@ OBA.Popups = (function() {
 		}
 		else if(MonitoredVehicleJourney.Occupancy == "standingAvailable"){
 			occupancyLoad = '<span class="apcDotY"></span>'+
-				'<span id="apcTextY">' + lookupOccupancy("standingAvailable") + '</span>';
+				'<span id="apcTextY">&nbsp;' + lookupOccupancy("standingAvailable") + '</span>';
 			if(addDashedLine == true){
 				occupancyLoad += '<div class="apcDashedLine"><img src="img/occupancy/apcLoadY.png"></div>';
 			}
@@ -413,7 +413,7 @@ OBA.Popups = (function() {
 		}
 		else if(MonitoredVehicleJourney.Occupancy == "full"){
 			occupancyLoad = '<span class="apcDotR"></span>'+
-				'<span id="apcTextR">' + lookupOccupancy("full") + '</span>';
+				'<span id="apcTextR">&nbsp;' + lookupOccupancy("full") + '</span>';
 			if(addDashedLine == true){
 				occupancyLoad += '<div class="apcDashedLine"><img src="img/occupancy/apcLoadR.png"></div>';
 			}
