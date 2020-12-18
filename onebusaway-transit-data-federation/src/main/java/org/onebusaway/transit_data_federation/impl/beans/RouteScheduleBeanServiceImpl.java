@@ -18,12 +18,17 @@ package org.onebusaway.transit_data_federation.impl.beans;
 import org.onebusaway.container.cache.Cacheable;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
+import org.onebusaway.transit_data.model.AgencyBean;
+import org.onebusaway.transit_data.model.RouteBean;
 import org.onebusaway.transit_data.model.RouteScheduleBean;
+import org.onebusaway.transit_data.model.StopBean;
 import org.onebusaway.transit_data.model.StopTimeInstanceBean;
 import org.onebusaway.transit_data.model.StopTripDirectionBean;
+import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.transit_data_federation.impl.DirectedGraph;
 import org.onebusaway.transit_data_federation.impl.StopGraphComparator;
 import org.onebusaway.transit_data_federation.model.narrative.AgencyNarrative;
+import org.onebusaway.transit_data_federation.model.narrative.RouteCollectionNarrative;
 import org.onebusaway.transit_data_federation.model.narrative.StopNarrative;
 import org.onebusaway.transit_data_federation.model.narrative.TripNarrative;
 import org.onebusaway.transit_data_federation.services.ExtendedCalendarService;
@@ -31,7 +36,6 @@ import org.onebusaway.transit_data_federation.services.beans.RouteScheduleBeanSe
 import org.onebusaway.transit_data_federation.services.blocks.BlockIndexService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockTripIndex;
 import org.onebusaway.transit_data_federation.services.narrative.NarrativeService;
-import org.onebusaway.transit_data_federation.services.transit_graph.AgencyEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.RouteCollectionEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.ServiceIdActivation;
@@ -131,7 +135,10 @@ public class RouteScheduleBeanServiceImpl implements RouteScheduleBeanService {
     Map<DirectionalHeadsign, StopTripDirectionBean> headsignToBeanMap = new HashMap<>();
     Map<DirectionalHeadsign, StopCollections> headsignToStopCollectionMap = new HashMap<>();
     Set<AgencyAndId> serviceIds = new HashSet<>();
-    Set<TripEntry> trips = new LinkedHashSet<>();
+    Set<TripEntry> activeTrips = new LinkedHashSet<>();
+    BeanReferences references = new BeanReferences();
+    addAgencyReference(references, routeId.getAgencyId());
+    addRouteReference(references, routeId);
 
     for (BlockTripIndex bti : blockTripIndices) {
 
@@ -143,7 +150,7 @@ public class RouteScheduleBeanServiceImpl implements RouteScheduleBeanService {
                 idActivation,
                 rsb.getScheduleDate().getAsDate(idActivation.getTimeZone()))) {
 
-          trips.add(blockTrip.getTrip());
+          activeTrips.add(blockTrip.getTrip());
 
           String directionId = blockTrip.getTrip().getDirectionId();
           TripNarrative tripNarrativeForId = _narrativeService.getTripForId(blockTrip.getTrip().getId());
@@ -188,7 +195,7 @@ public class RouteScheduleBeanServiceImpl implements RouteScheduleBeanService {
     for (DirectionalHeadsign dh : headsignToBeanMap.keySet()) {
       StopTripDirectionBean bean = headsignToBeanMap.get(dh);
       bean.setStopIds(collapse(headsignToStopCollectionMap.get(dh)));
-      bean.getStopTimes().addAll(getStopTimesForTrips(trips, bean.getTripIds(), rsb.getScheduleDate()));
+      addStopTimeReferences(references, bean, activeTrips, bean.getTripIds(), rsb.getScheduleDate());
     }
 
     rsb.setServiceIds(new ArrayList<>());
@@ -197,36 +204,122 @@ public class RouteScheduleBeanServiceImpl implements RouteScheduleBeanService {
     }
 
     rsb.getStopTripDirections().addAll(headsignToBeanMap.values());
+    rsb.getAgencies().addAll(references.getAgencies());
+    rsb.getRoutes().addAll(references.getRoutes());
+    rsb.getTrips().addAll(references.getTrips());
+    rsb.getStops().addAll(references.getStops());
+    rsb.getStopTimes().addAll(references.getStopTimes());
+  }
+
+  private void addRouteReference(BeanReferences references, AgencyAndId routeId) {
+
+    if (references.hasRoute(routeId)) return;
+    RouteBean.Builder builder = RouteBean.builder();
+    builder.setId(AgencyAndIdLibrary.convertToString(routeId));
+    builder.setAgency(references.getAgencyById(routeId.getAgencyId()));
+    RouteCollectionNarrative narrative = _narrativeService.getRouteCollectionForId(routeId);
+    if (narrative == null) {
+      references.getRoutes().add(builder.create());
+      return;
+    }
+    builder.setColor(narrative.getColor());
+    builder.setDescription(narrative.getDescription());
+    builder.setLongName(narrative.getLongName());
+    builder.setShortName(narrative.getShortName());
+    builder.setTextColor(narrative.getTextColor());
+    builder.setType(narrative.getType());
+    builder.setUrl(narrative.getUrl());
+    references.getRoutes().add(builder.create());
 
   }
 
-  private List<StopTimeInstanceBean> getStopTimesForTrips(Set<TripEntry> allTrips, List<AgencyAndId> selectedTrips, ServiceDate serviceDate) {
-    ArrayList<StopTimeInstanceBean> stopTimes = new ArrayList<>();
+  private void addStopTimeReferences(BeanReferences references,
+                                     StopTripDirectionBean stopTripDirectionBean,
+                                     Set<TripEntry> allTrips,
+                                     List<AgencyAndId> selectedTrips,
+                                     ServiceDate serviceDate) {
+
     for (AgencyAndId selection : selectedTrips) {
-      for (TripEntry entry : allTrips) {
-        if (entry.getId().equals(selection))
-          stopTimes.addAll(beanify(entry.getStopTimes(), serviceDate));
+      for (TripEntry tripEntry : allTrips) {
+        if (tripEntry.getId().equals(selection)) {
+          addAgencyReference(references, tripEntry.getId().getAgencyId());
+          addTripReference(references, tripEntry);
+          for (StopTimeEntry stopTimeEntry : tripEntry.getStopTimes()) {
+            addStopTimeReference(references, stopTripDirectionBean, stopTimeEntry, serviceDate);
+            addStopReference(references, stopTimeEntry.getStop());
+          }
+        }
       }
     }
-    return stopTimes;
   }
 
-  private List<StopTimeInstanceBean> beanify(List<StopTimeEntry> stopTimes, ServiceDate serviceDate) {
-    if (stopTimes == null) return Collections.emptyList();
-    ArrayList<StopTimeInstanceBean> beans = new ArrayList<>();
-
-    for (StopTimeEntry entry : stopTimes) {
-      StopTimeInstanceBean bean = new StopTimeInstanceBean();
-      bean.setTripId(AgencyAndIdLibrary.convertToString(entry.getTrip().getId()));
-      bean.setServiceId(AgencyAndIdLibrary.convertToString(entry.getTrip().getServiceId().getId()));
-      bean.setServiceDate(serviceDate.getAsDate(getTimeZoneForAgency(entry.getTrip().getId().getAgencyId())).getTime());
-      bean.setArrivalEnabled(entry.getArrivalTime() > 0);
-      bean.setArrivalTime(entry.getArrivalTime());
-      bean.setDepartureEnabled(entry.getDepartureTime() > 0);
-      bean.setDepartureTime(entry.getDepartureTime());
-      beans.add(bean);
+  private void addAgencyReference(BeanReferences references, String agencyId) {
+    if (references.hasAgency(agencyId)) return;
+    AgencyBean bean = new AgencyBean();
+    references.getAgencies().add(bean);
+    bean.setId(agencyId);
+    AgencyNarrative narrative = _narrativeService.getAgencyForId(agencyId);
+    if (narrative == null) {
+      return;
     }
-    return beans;
+
+    bean.setName(narrative.getName());
+    bean.setLang(narrative.getLang());
+    bean.setEmail(narrative.getEmail());
+    bean.setPhone(narrative.getPhone());
+    bean.setDisclaimer(narrative.getDisclaimer());
+    bean.setTimezone(narrative.getTimezone());
+    bean.setUrl(narrative.getUrl());
+    bean.setFareUrl(narrative.getFareUrl());
+
+    return;
+  }
+
+  private void addTripReference(BeanReferences references, TripEntry tripEntry) {
+    if (references.hasTrip(tripEntry.getId())) return;
+    TripBean bean = new TripBean();
+    bean.setId(AgencyAndIdLibrary.convertToString(tripEntry.getId()));
+    bean.setDirectionId(tripEntry.getDirectionId());
+    bean.setServiceId(AgencyAndIdLibrary.convertToString(tripEntry.getServiceId().getId()));
+    bean.setBlockId(AgencyAndIdLibrary.convertToString(tripEntry.getBlock().getId()));
+    bean.setShapeId(AgencyAndIdLibrary.convertToString(tripEntry.getShapeId()));
+    references.getTrips().add(bean);
+    TripNarrative narrative = _narrativeService.getTripForId(tripEntry.getId());
+    if (narrative == null) return;
+    bean.setTripHeadsign(narrative.getTripHeadsign());
+    bean.setRouteShortName(narrative.getRouteShortName());
+    bean.setTripShortName(narrative.getTripShortName());
+
+  }
+
+  private void addStopReference(BeanReferences references, StopEntry stop) {
+    StopBean bean = new StopBean();
+    bean.setId(AgencyAndIdLibrary.convertToString(stop.getId()));
+    if (references.hasStop(stop.getId())) return;
+    references.getStops().add(bean);
+    bean.setId(AgencyAndIdLibrary.convertToString(stop.getId()));
+    bean.setLat(stop.getStopLat());
+    bean.setLon(stop.getStopLon());
+    StopNarrative narrative = _narrativeService.getStopForId(stop.getId());
+    if (narrative == null) return;
+    bean.setName(narrative.getName());
+    bean.setCode(narrative.getCode());
+    bean.setDirection(narrative.getDirection());
+    return;
+  }
+
+  private void addStopTimeReference(BeanReferences references, StopTripDirectionBean stopTripDirectionBean,
+                                    StopTimeEntry stopTimeEntry, ServiceDate serviceDate) {
+    StopTimeInstanceBean bean = new StopTimeInstanceBean();
+    bean.setTripId(AgencyAndIdLibrary.convertToString(stopTimeEntry.getTrip().getId()));
+    bean.setServiceId(AgencyAndIdLibrary.convertToString(stopTimeEntry.getTrip().getServiceId().getId()));
+    bean.setServiceDate(serviceDate.getAsDate(getTimeZoneForAgency(stopTimeEntry.getTrip().getId().getAgencyId())).getTime());
+    bean.setArrivalEnabled(stopTimeEntry.getArrivalTime() > 0);
+    bean.setArrivalTime(stopTimeEntry.getArrivalTime());
+    bean.setDepartureEnabled(stopTimeEntry.getDepartureTime() > 0);
+    bean.setDepartureTime(stopTimeEntry.getDepartureTime());
+    references.getStopTimes().add(bean);
+    stopTripDirectionBean.getStopTimes().add(bean);
   }
 
   private TimeZone getTimeZoneForAgency(String agencyId) {
@@ -341,6 +434,71 @@ public class RouteScheduleBeanServiceImpl implements RouteScheduleBeanService {
 
     public List<StopEntry> getStops() {
       return stops;
+    }
+  }
+
+  public static class BeanReferences {
+    private Set<AgencyBean> agencies = new LinkedHashSet<>();
+    private Set<RouteBean> routes = new LinkedHashSet<>();
+    private Set<TripBean> trips = new LinkedHashSet<>();
+    private Set<StopBean> stops = new LinkedHashSet<>();
+    private Set<StopTimeInstanceBean> stopTimes = new LinkedHashSet<>();
+    public BeanReferences() {
+    }
+    public Set<AgencyBean> getAgencies() {
+      return agencies;
+    }
+    public Set<RouteBean> getRoutes() {
+      return routes;
+    }
+    public Set<TripBean> getTrips() {
+      return trips;
+    }
+    public Set<StopBean> getStops() {
+      return stops;
+    }
+    public Set<StopTimeInstanceBean> getStopTimes() {
+      return stopTimes;
+    }
+
+    public boolean hasAgency(String agencyId) {
+      for (AgencyBean bean : agencies) {
+        if (bean.getId().equals(agencyId))
+          return true;
+      }
+      return false;
+    }
+
+    public boolean hasTrip(AgencyAndId id) {
+      for (TripBean bean : trips) {
+        if (bean.getId().equals(AgencyAndIdLibrary.convertToString(id)))
+          return true;
+      }
+      return false;
+    }
+
+    public boolean hasStop(AgencyAndId id) {
+      for (StopBean bean : stops) {
+        if (bean.getId().equals(AgencyAndIdLibrary.convertToString(id)))
+          return true;
+      }
+      return false;
+    }
+
+    public boolean hasRoute(AgencyAndId id) {
+      for (RouteBean bean : routes) {
+        if (bean.getId().equals(AgencyAndIdLibrary.convertToString(id)))
+          return true;
+      }
+      return false;
+    }
+
+    public AgencyBean getAgencyById(String agencyId) {
+      for (AgencyBean bean : agencies) {
+        if (bean.getId().equals(agencyId))
+          return bean;
+      }
+      return null;
     }
   }
 }

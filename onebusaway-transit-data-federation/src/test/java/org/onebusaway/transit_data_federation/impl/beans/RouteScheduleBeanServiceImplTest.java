@@ -150,7 +150,12 @@ public class RouteScheduleBeanServiceImplTest {
                     stdb2.getStopTimes().get(2).getArrivalTime(),
                     stdb2.getStopTimes().get(3).getArrivalTime()));
 
-
+    // sanity check the references now
+    assertEquals(1, bean.getAgencies().size());
+    assertEquals(1, bean.getRoutes().size());
+    assertEquals(4, bean.getStops().size());
+    assertEquals(2, bean.getTrips().size());
+    assertEquals(8, bean.getStopTimes().size());
   }
 
   private StopTripDirectionBean getStopTripDirection(List<StopTripDirectionBean> stopTripDirections, String headsign, String direction) {
