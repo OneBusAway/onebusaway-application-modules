@@ -632,12 +632,13 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
 
     long start = System.currentTimeMillis();
     _log.info("[" + getFeedId() + "] handleAlertCollection running....");
+
+    ArrayList<AgencyAndId> idsInCollection = new ArrayList<>();
     for (ServiceAlerts.ServiceAlert alert : alertsCollection.getServiceAlertsList()) {
 
       AgencyAndId id = new AgencyAndId(alert.getId().getAgencyId(), alert.getId().getId());
-
+      idsInCollection.add(id);
       handleSingleAlert(id, alert.toBuilder(), currentAlerts, toAdd, toUpdate, alert);
-
     }
 
     _serviceAlertService.createOrUpdateServiceAlerts(getAgencyIds().get(0), new ArrayList<ServiceAlertRecord>(toAdd));
@@ -645,20 +646,29 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
 
     Set<AgencyAndId> toBeDeleted = new HashSet<AgencyAndId>();
     for (ServiceAlertRecord sa : _serviceAlertService.getAllServiceAlerts()) {
+      AgencyAndId testId = new AgencyAndId(sa.getAgencyId(), sa.getServiceAlertId());
+
       /* consider other feed sources that may be merged here as well */
       if (sa.getSource() != null
               && (sa.getSource().equals(getFeedId())
                 || (_alertSourcePrefix != null && sa.getSource().contains(_alertSourcePrefix)))) {
         try {
-          AgencyAndId testId = new AgencyAndId(sa.getAgencyId(), sa.getServiceAlertId());
           if (!currentAlerts.contains(testId)) {
             _log.debug("[" + getFeedId() + "] cleaning up alert id " + testId
                     + " with source=" + sa.getSource());
             toBeDeleted.add(testId);
           }
+          else if (getAgencyIds().contains(testId.getAgencyId()) && !idsInCollection.contains(testId)) {
+            //delete if the alert came from this feed but isn't there anymore
+            toBeDeleted.add(testId);
+          }
         } catch (Exception e) {
           _log.error("invalid AgencyAndId " + sa.getServiceAlertId());
         }
+      }
+      else if (getAgencyIds().contains(testId.getAgencyId()) && !idsInCollection.contains(testId)) {
+        //delete if the alert came from this feed but isn't there anymore
+        toBeDeleted.add(testId);
       }
     }
 
@@ -686,11 +696,9 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     // data store value of service alert
     ServiceAlertRecord existingRecord = _serviceAlertService.getServiceAlertForId(new AgencyAndId(id.getAgencyId(), id.getId()));
 
-    // don't update if there's nothing to do or if the owner changed to admin console
+    // don't update if there's nothing to do
     if ((existingAlert == null
-            || !existingAlert.equals(serviceAlert))
-            && (existingRecord == null
-            || !"console".equals(existingRecord.getSource()))) {
+            || !existingAlert.equals(serviceAlert))) {
       _alertsById.put(id, serviceAlert);
 
       ServiceAlertRecord serviceAlertRecord = new ServiceAlertRecord();
