@@ -34,7 +34,7 @@
 	<!-- //prevent jspx minimization -->
 </link>
 
-<s:url var="url" value="/js/lib/jquery.js" />
+<s:url var="url" value="/js/biblio/jquery.js" />
 <script type="text/javascript" src="${url}">
 	<!-- prevent jspx minimization -->
 	</script>

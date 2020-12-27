@@ -76,7 +76,7 @@
         <property name="name" value="CommonResources" />
         <property name="resources">
             <list>
-                <!-- <value>/js/lib/jquery.js</value> -->
+                <!-- <value>/js/biblio/jquery.js</value> -->
                 <value>classpath:org/onebusaway/presentation/js/oba-common.js</value>
                 <value>classpath:org/onebusaway/presentation/js/oba-api.js</value>
                 <value>classpath:org/onebusaway/presentation/js/oba-l10n.js</value>

@@ -92,7 +92,7 @@
 &lt;![endif]--&gt;
 </jsp:text>
 
-<s:url var="url" value="/js/lib/jquery.js">
+<s:url var="url" value="/js/biblio/jquery.js">
 	<s:param name="v">
 		<s:property value="frontEndVersion" />
 	</s:param>

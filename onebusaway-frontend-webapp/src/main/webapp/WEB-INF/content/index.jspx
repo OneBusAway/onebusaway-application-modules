@@ -57,32 +57,32 @@
 </s:url>
 <script src="${url}" type="text/javascript"><!-- //prevent jspx minimization --></script>
 
-<s:url var="url" value="/js/lib/jquery.ui.js">
+<s:url var="url" value="/js/biblio/jquery.ui.js">
 	<s:param name="v"><s:property value="frontEndVersion" /></s:param>
 </s:url>
 <script type="text/javascript" src="${url}"><!-- //prevent jspx minimization --></script>
 
-<s:url var="url" value="/js/lib/jquery.history.js">
+<s:url var="url" value="/js/biblio/jquery.history.js">
 	<s:param name="v"><s:property value="frontEndVersion" /></s:param>
 </s:url>
 <script type="text/javascript" src="${url}"><!-- //prevent jspx minimization --></script>
 
-<s:url var="url" value="/js/lib/markerManager.js">
+<s:url var="url" value="/js/biblio/markerManager.js">
 	<s:param name="v"><s:property value="frontEndVersion" /></s:param>
 </s:url>
 <script type="text/javascript" src="${url}"><!-- //prevent jspx minimization --></script>
 
-<s:url var="url" value="/js/lib/rgbcolor.js">
+<s:url var="url" value="/js/biblio/rgbcolor.js">
 	<s:param name="v"><s:property value="frontEndVersion" /></s:param>
 </s:url>
 <script type="text/javascript" src="${url}"><!-- //prevent jspx minimization --></script>
 
-<s:url var="url" value="/js/lib/dateFormat.js">
+<s:url var="url" value="/js/biblio/dateFormat.js">
 	<s:param name="v"><s:property value="frontEndVersion" /></s:param>
 </s:url>
 <script type="text/javascript" src="${url}"><!-- //prevent jspx minimization --></script>
 
-<s:url var="url" value="/js/lib/popover.js">
+<s:url var="url" value="/js/biblio/popover.js">
 	<s:param name="v"><s:property value="frontEndVersion" /></s:param>
 </s:url>
 <script type="text/javascript" src="${url}"><!-- //prevent jspx minimization --></script>
