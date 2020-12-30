@@ -15,15 +15,7 @@
  */
 package org.onebusaway.api.model.transit;
 
-import org.onebusaway.api.model.transit.schedule.StopTimeV2Bean;
-import org.onebusaway.api.model.transit.service_alerts.StopTripGroupingV2Bean;
-import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.gtfs.model.calendar.ServiceDate;
-import org.onebusaway.transit_data.model.*;
-import org.onebusaway.transit_data.model.trips.TripBean;
-
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.List;
 
 
@@ -59,7 +51,7 @@ public class RouteScheduleV2Bean implements Serializable {
     private String routeId;
     private List<String> serviceIds;
     private long scheduleDate;
-    private List<StopTripGroupingV2Bean> stopTripGroupings;
+    private List<StopTripDirectionV2Bean> stopTripGroupings;
 
 
     private List<StopRouteScheduleV2Bean> stopRouteSchedules;
@@ -88,11 +80,11 @@ public class RouteScheduleV2Bean implements Serializable {
         this.scheduleDate = scheduleDate;
     }
 
-    public List<StopTripGroupingV2Bean> getStopTripGroupings() {
+    public List<StopTripDirectionV2Bean> getStopTripGroupings() {
         return stopTripGroupings;
     }
 
-    public void setStopTripGroupings(List<StopTripGroupingV2Bean> stopTripGroupings) {
+    public void setStopTripGroupings(List<StopTripDirectionV2Bean> stopTripGroupings) {
         this.stopTripGroupings = stopTripGroupings;
     }
 }

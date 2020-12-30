@@ -694,22 +694,18 @@ public class BeanFactoryV2 {
 
     bean.setScheduleDate(routeSchedule.getScheduleDate().getAsDate().getTime());
 
-    Map<Integer, StopTripGroupingV2Bean> groupingsMap = new HashMap<>();
-    for (TripBean trip : routeSchedule.getTrips()) {
-      StopTripGroupingV2Bean grouping = new StopTripGroupingV2Bean();
-      grouping.setDirectionId(trip.getDirectionId());
-      grouping.setTripHeadsign(trip.getTripHeadsign());
-      // NOTE WE NEED STOP IDS ***NOT*** HEADSIGNS
-      List<String> stopHeadsigns = routeSchedule.getStopTimes().stream()
-              .filter(stopTime ->{return stopTime.getTripId() == trip.getId();})
-              .map(stopTime -> {return stopTime.getStopHeadsign();})
-              .collect(Collectors.toList());
-      grouping.setStopIds(stopHeadsigns);
-      if(groupingsMap.get(grouping.hashCode()) == null){
-        groupingsMap.put((Integer)grouping.hashCode(),grouping);
-      }
-      groupingsMap.get(grouping.hashCode()).addTripId(trip.getId());
+    List<StopTripDirectionV2Bean> stopTripDirectionBeans = new ArrayList<>();
+    for (StopTripDirectionBean stdb : routeSchedule.getStopTripDirections()) {
+      StopTripDirectionV2Bean v2 = new StopTripDirectionV2Bean();
+      v2.setDirectionId(stdb.getDirectionId());
+      v2.setTripHeadsign(stdb.getTripHeadsign());
+      v2.setStopIds(stdb.getStopIds().stream().map(x->x.toString()).collect(Collectors.toList()));
+      v2.setTripIds(stdb.getTripIds().stream().map(x->x.toString()).collect(Collectors.toList()));
+      stopTripDirectionBeans.add(v2);
     }
+    bean.setStopTripGroupings(stopTripDirectionBeans);
+
+
     return bean;
   }
 
