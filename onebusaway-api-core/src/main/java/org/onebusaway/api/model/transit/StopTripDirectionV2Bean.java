@@ -1,4 +1,4 @@
-package org.onebusaway.api.model.transit.service_alerts;
+package org.onebusaway.api.model.transit;
 
 import org.onebusaway.api.model.transit.AgencyV2Bean;
 import org.onebusaway.api.model.transit.RouteV2Bean;
@@ -17,7 +17,7 @@ import java.util.List;
  *      "tripIds": ["TRIPID1", "TRIPID2"]
  *      }
  **/
-public class StopTripGroupingV2Bean {
+public class StopTripDirectionV2Bean {
     private static final long serialVersionUID = 1L;
 
     private String directionId;
