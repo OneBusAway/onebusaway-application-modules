@@ -24,6 +24,8 @@ import org.onebusaway.transit_data.model.RouteScheduleBean;
 import org.onebusaway.transit_data.model.StopBean;
 import org.onebusaway.transit_data.model.StopTimeInstanceBean;
 import org.onebusaway.transit_data.model.StopTripDirectionBean;
+import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
+import org.onebusaway.transit_data.model.service_alerts.SituationQueryBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.transit_data_federation.impl.DirectedGraph;
 import org.onebusaway.transit_data_federation.impl.StopGraphComparator;
@@ -33,6 +35,7 @@ import org.onebusaway.transit_data_federation.model.narrative.StopNarrative;
 import org.onebusaway.transit_data_federation.model.narrative.TripNarrative;
 import org.onebusaway.transit_data_federation.services.ExtendedCalendarService;
 import org.onebusaway.transit_data_federation.services.beans.RouteScheduleBeanService;
+import org.onebusaway.transit_data_federation.services.beans.ServiceAlertsBeanService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockIndexService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockTripIndex;
 import org.onebusaway.transit_data_federation.services.narrative.NarrativeService;
@@ -47,7 +50,6 @@ import org.onebusaway.util.AgencyAndIdLibrary;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -87,7 +89,9 @@ public class RouteScheduleBeanServiceImpl implements RouteScheduleBeanService {
   protected TransitGraphDao _graph;
   protected ExtendedCalendarService _calendarService;
   protected BlockIndexService _blockIndexService;
-  private NarrativeService _narrativeService;
+  protected NarrativeService _narrativeService;
+  private ServiceAlertsBeanService _serviceAlertsBeanService;
+
 
   @Autowired
   public void setTransitGraphDao(TransitGraphDao graph) {
@@ -109,6 +113,9 @@ public class RouteScheduleBeanServiceImpl implements RouteScheduleBeanService {
     _blockIndexService = blockIndexService;
   }
 
+  @Autowired
+  public void setServiceAlertsBeanService(ServiceAlertsBeanService service) { _serviceAlertsBeanService = service; }
+
   @Override
   @Cacheable
   public RouteScheduleBean getScheduledArrivalsForDate(AgencyAndId routeId, ServiceDate scheduleDate) {
@@ -120,9 +127,19 @@ public class RouteScheduleBeanServiceImpl implements RouteScheduleBeanService {
 
     addStopTripDirectionsViaBlockTrip(rsb, routeId);
 
+    addSituations(rsb, routeId);
+
     return rsb;
   }
 
+  private void addSituations(RouteScheduleBean rsb, AgencyAndId routeId) {
+    SituationQueryBean sqb = new SituationQueryBean();
+    SituationQueryBean.AffectsBean affects = new SituationQueryBean.AffectsBean();
+    sqb.getAffects().add(affects);
+    affects.setRouteId(AgencyAndId.convertToString(routeId));
+    List<ServiceAlertBean> serviceAlerts = _serviceAlertsBeanService.getServiceAlerts(sqb);
+    rsb.setServiceAlerts(serviceAlerts);
+  }
 
 
   /*

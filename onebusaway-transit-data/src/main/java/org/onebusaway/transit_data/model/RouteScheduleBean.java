@@ -17,6 +17,7 @@ package org.onebusaway.transit_data.model;
 
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
+import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
 
 import java.util.ArrayList;
@@ -66,7 +67,7 @@ public class RouteScheduleBean extends ApplicationBean {
   private List<StopBean> stops = new ArrayList<>();
   private List<StopTimeInstanceBean> stopTimes = new ArrayList<>();
   private List<StopTripDirectionBean> stopTripDirections = new ArrayList<>();
-  // TODO situation results
+  private List<ServiceAlertBean> serviceAlertBeans = new ArrayList<>();
 
   public AgencyAndId getRouteId() {
     return routeId;
@@ -109,5 +110,13 @@ public class RouteScheduleBean extends ApplicationBean {
   }
   public List<StopTimeInstanceBean> getStopTimes() {
     return stopTimes;
+  }
+
+  public void setServiceAlerts(List<ServiceAlertBean> serviceAlerts) {
+    serviceAlertBeans = serviceAlerts;
+  }
+
+  public List<ServiceAlertBean> getServiceAlerts() {
+    return serviceAlertBeans;
   }
 }

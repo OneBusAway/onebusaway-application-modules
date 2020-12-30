@@ -45,10 +45,12 @@ import org.onebusaway.transit_data_federation.services.transit_graph.TransitGrap
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.*;
 
@@ -60,6 +62,7 @@ public class RouteScheduleBeanServiceImplTest {
   private NarrativeServiceImpl narrativeService = null;
   private BlockIndexServiceImpl blockIndexService = null;
   private ExtendedCalendarServiceImpl calendarService = null;
+  private ServiceAlertsBeanServiceImpl serviceAlertsService = null;
   private TransitGraphDao dao = null;
   private BlockIndexFactoryServiceImpl factory = null;
   private BlockTripIndex blockIndexWeekday = null;
@@ -88,7 +91,6 @@ public class RouteScheduleBeanServiceImplTest {
             Arrays.asList(date("2009-12-05 00:00")));
     data.putDatesForLocalizedServiceId(lsid("SU"),
             Arrays.asList(date("2009-12-06 00:00")));
-
 
     CalendarServiceImpl simpleCalendarService = new CalendarServiceImpl();
     simpleCalendarService.setData(data);
@@ -187,6 +189,10 @@ public class RouteScheduleBeanServiceImplTest {
 
     dao = Mockito.mock(TransitGraphDao.class);
     impl.setTransitGraphDao(dao);
+
+    serviceAlertsService = Mockito.mock(ServiceAlertsBeanServiceImpl.class);
+    impl.setServiceAlertsBeanService(serviceAlertsService);
+
     return impl;
   }
 
@@ -311,6 +317,9 @@ public class RouteScheduleBeanServiceImplTest {
     Mockito.when(narrativeService.getAgencyForId(AGENCY_ID)).thenReturn(narrative.create());
 
     Mockito.when(dao.getRouteCollectionForId(new AgencyAndId(AGENCY_ID, ROUTE_ID))).thenReturn(routeCollection);
+
+    // no service alerts
+    Mockito.when(serviceAlertsService.getServiceAlerts(any())).thenReturn(Collections.emptyList());
 
     return route.getParent();
   }
