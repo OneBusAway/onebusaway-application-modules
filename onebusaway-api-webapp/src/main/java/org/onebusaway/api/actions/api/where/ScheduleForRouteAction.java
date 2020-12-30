@@ -26,9 +26,8 @@ import org.onebusaway.api.model.transit.BeanFactoryV2;
 import org.onebusaway.exceptions.ServiceException;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
-import org.onebusaway.transit_data.model.AgencyWithCoverageBean;
 import org.onebusaway.transit_data.model.RouteScheduleBean;
-import org.onebusaway.transit_data_federation.services.beans.RouteScheduleBeanService;
+import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.util.AgencyAndIdLibrary;
 import org.onebusaway.util.SystemTime;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,7 +40,7 @@ public class ScheduleForRouteAction extends ApiActionSupport {
     private static final int V2 = 2;
 
     @Autowired
-    private RouteScheduleBeanService _service;
+    private TransitDataService _service;
 
     private String _id;
 
@@ -73,7 +72,7 @@ public class ScheduleForRouteAction extends ApiActionSupport {
         AgencyAndId id = convertAgencyAndId(_id);
         ServiceDate serviceDate = new ServiceDate(_date);
 
-        RouteScheduleBean routeSchedule = _service.getScheduledArrivalsForDate(id, serviceDate);
+        RouteScheduleBean routeSchedule = _service.getScheduleForRoute(id, serviceDate);
 
         BeanFactoryV2 factory = getBeanFactoryV2();
         return setOkResponse(factory.getResponse(routeSchedule));

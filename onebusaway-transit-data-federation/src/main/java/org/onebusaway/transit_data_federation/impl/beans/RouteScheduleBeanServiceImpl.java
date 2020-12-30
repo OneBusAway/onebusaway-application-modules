@@ -48,6 +48,7 @@ import org.onebusaway.transit_data_federation.services.transit_graph.TransitGrap
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
 import org.onebusaway.util.AgencyAndIdLibrary;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -84,6 +85,7 @@ import java.util.TimeZone;
  *   ]
  * }
  */
+@Component
 public class RouteScheduleBeanServiceImpl implements RouteScheduleBeanService {
 
   protected TransitGraphDao _graph;
