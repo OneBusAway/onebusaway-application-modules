@@ -28,16 +28,16 @@
 
     <build>
         <finalName>onebusaway-frontend-webapp</finalName>
-        <plugins>
-            <plugin>
-                <groupId>org.mortbay.jetty</groupId>
-                <artifactId>maven-jetty-plugin</artifactId>
-                <version>${jetty.version}</version>
-                <configuration>
-                    <contextPath>/</contextPath>
-                </configuration>
-            </plugin>
-        </plugins>
+<!--        <plugins>-->
+<!--            <plugin>-->
+<!--                <groupId>org.mortbay.jetty</groupId>-->
+<!--                <artifactId>maven-jetty-plugin</artifactId>-->
+<!--                <version>${jetty.version}</version>-->
+<!--                <configuration>-->
+<!--                    <contextPath>/</contextPath>-->
+<!--                </configuration>-->
+<!--            </plugin>-->
+<!--        </plugins>-->
         <resources>
             <resource>
                 <directory>src/main/resources</directory>
