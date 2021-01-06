@@ -52,11 +52,7 @@ public class RouteScheduleV2Bean implements Serializable {
     private List<String> serviceIds;
     private long scheduleDate;
     private List<StopTripDirectionV2Bean> stopTripGroupings;
-    private List<AgencyV2Bean> agencies;
-    private List<RouteV2Bean> routes;
-//    private List<String> situations;
-//    private List<TripV2Bean> trips;
-//    private List<StopV2Bean> stops;
+
 
 
     private List<StopRouteScheduleV2Bean> stopRouteSchedules;
@@ -92,44 +88,4 @@ public class RouteScheduleV2Bean implements Serializable {
     public void setStopTripGroupings(List<StopTripDirectionV2Bean> stopTripGroupings) {
         this.stopTripGroupings = stopTripGroupings;
     }
-
-    public List<AgencyV2Bean> getAgencies() {
-        return agencies;
-    }
-
-    public void setAgencies(List<AgencyV2Bean> agencies) {
-        this.agencies = agencies;
-    }
-
-    public List<RouteV2Bean> getRoutes() {
-        return routes;
-    }
-
-    public void setRoutes(List<RouteV2Bean> routes) {
-        this.routes = routes;
-    }
-
-//    public void setSituations(List<String> situations) {
-//        this.situations = situations;
-//    }
-//
-//    public List<String> getSituations() {
-//        return situations;
-//    }
-//
-//    public List<StopV2Bean> getStops() {
-//        return stops;
-//    }
-//
-//    public void setStops(List<StopV2Bean> stops) {
-//        this.stops = stops;
-//    }
-//
-//    public List<TripV2Bean> getTrips() {
-//        return trips;
-//    }
-//
-//    public void setTrips(List<TripV2Bean> trips) {
-//        this.trips = trips;
-//    }
 }
