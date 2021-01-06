@@ -715,9 +715,9 @@ public class BeanFactoryV2 {
     _references.setSituations(routeSchedule.getServiceAlerts().stream()
             .map(x->{ return getSituation(x);})
             .collect(Collectors.toList()));
-//    _references.setStops(routeSchedule.getStops().stream()
-//            .map(x->{ return getStop(x);})
-//            .collect(Collectors.toList()));
+    _references.setStops(routeSchedule.getStops().stream()
+            .map(x->{ return getStop(x);})
+            .collect(Collectors.toList()));
 //    _references.setTrips(routeSchedule.getTrips().stream()
 //            .map(x->{ return getTrip(x);})
 //            .collect(Collectors.toList()));
