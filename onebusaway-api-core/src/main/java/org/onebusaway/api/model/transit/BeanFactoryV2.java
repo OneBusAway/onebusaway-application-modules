@@ -144,7 +144,8 @@ public class BeanFactoryV2 {
 
   public EntryWithReferencesBean<RouteScheduleV2Bean> getResponse(
       RouteScheduleBean routeSchedule) {
-    return entry(getRouteSchedule(routeSchedule));
+    return entry(getRouteSchedule(routeSchedule)
+    );
   }
 
   public EntryWithReferencesBean<StopsForRouteV2Bean> getResponse(
@@ -705,6 +706,21 @@ public class BeanFactoryV2 {
     }
     bean.setStopTripGroupings(stopTripDirectionBeans);
 
+    _references.setAgencies(routeSchedule.getAgencies().stream()
+            .map(x->{ return getAgency(x);})
+            .collect(Collectors.toList()));
+    _references.setRoutes(routeSchedule.getRoutes().stream()
+            .map(x->{ return getRoute(x);})
+            .collect(Collectors.toList()));
+    _references.setSituations(routeSchedule.getServiceAlerts().stream()
+            .map(x->{ return getSituation(x);})
+            .collect(Collectors.toList()));
+//    _references.setStops(routeSchedule.getStops().stream()
+//            .map(x->{ return getStop(x);})
+//            .collect(Collectors.toList()));
+//    _references.setTrips(routeSchedule.getTrips().stream()
+//            .map(x->{ return getTrip(x);})
+//            .collect(Collectors.toList()));
 
     return bean;
   }
