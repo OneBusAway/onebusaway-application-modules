@@ -130,9 +130,17 @@ public class RouteScheduleBeanServiceImpl implements RouteScheduleBeanService {
 
   private void addSituations(RouteScheduleBean rsb, AgencyAndId routeId) {
     SituationQueryBean sqb = new SituationQueryBean();
-    SituationQueryBean.AffectsBean affects = new SituationQueryBean.AffectsBean();
-    sqb.getAffects().add(affects);
-    affects.setRouteId(AgencyAndId.convertToString(routeId));
+
+    SituationQueryBean.AffectsBean routeAffects = new SituationQueryBean.AffectsBean();
+    sqb.getAffects().add(routeAffects);
+    routeAffects.setRouteId(AgencyAndId.convertToString(routeId));
+
+    for(StopBean stopBean : rsb.getStops()){
+      SituationQueryBean.AffectsBean stopAffects = new SituationQueryBean.AffectsBean();
+      sqb.getAffects().add(stopAffects);
+      stopAffects.setRouteId(AgencyAndId.convertToString(routeId));
+      stopAffects.setStopId(stopBean.getId());
+    }
     List<ServiceAlertBean> serviceAlerts = _serviceAlertsBeanService.getServiceAlerts(sqb);
     rsb.setServiceAlerts(serviceAlerts);
   }
