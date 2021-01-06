@@ -225,15 +225,16 @@ public class RouteScheduleBeanServiceImpl implements RouteScheduleBeanService {
   }
 
   private void addRouteReference(BeanReferences references, AgencyAndId routeId) {
-
-    if (references.hasRoute(routeId)) return;
-    references.getRoutes().add(buildRouteBean(routeId, references.getAgencyById(routeId.getAgencyId())));
+    findOrBuildRouteBean(references,routeId);
   }
 
-  private RouteBean buildRouteBean(AgencyAndId routeId, AgencyBean agency) {
+  private RouteBean findOrBuildRouteBean(BeanReferences references, AgencyAndId routeId) {
+    RouteBean routeBean = references.getRoute(routeId);
+    if (routeBean!=null) return routeBean;
 
     RouteBean.Builder builder = RouteBean.builder();
     builder.setId(AgencyAndIdLibrary.convertToString(routeId));
+    AgencyBean agency = references.getAgencyById(routeId.getAgencyId());
     builder.setAgency(agency);
     RouteCollectionNarrative narrative = _narrativeService.getRouteCollectionForId(routeId);
     if (narrative == null) {
@@ -246,7 +247,9 @@ public class RouteScheduleBeanServiceImpl implements RouteScheduleBeanService {
     builder.setTextColor(narrative.getTextColor());
     builder.setType(narrative.getType());
     builder.setUrl(narrative.getUrl());
-    return builder.create();
+    routeBean = builder.create();
+    references.getRoutes().add(routeBean);
+    return routeBean;
   }
 
   private void addStopTimeReferences(BeanReferences references,
@@ -259,11 +262,10 @@ public class RouteScheduleBeanServiceImpl implements RouteScheduleBeanService {
       for (TripEntry tripEntry : allTrips) {
         if (tripEntry.getId().equals(selection)) {
           addAgencyReference(references, tripEntry.getId().getAgencyId());
-          AgencyBean agencyBean = references.getAgencyById(tripEntry.getId().getAgencyId());
-          addTripReference(references, tripEntry, agencyBean);
+          addTripReference(references, tripEntry);
           for (StopTimeEntry stopTimeEntry : tripEntry.getStopTimes()) {
             addStopTimeReference(references, stopTripDirectionBean, stopTimeEntry, serviceDate);
-            addStopReference(references,stopTimeEntry.getStop(), stopTimeEntry.getTrip().getRoute(),agencyBean);
+            addStopReference(references,stopTimeEntry.getStop(), stopTimeEntry.getTrip().getRoute());
           }
         }
       }
@@ -292,7 +294,7 @@ public class RouteScheduleBeanServiceImpl implements RouteScheduleBeanService {
     return;
   }
 
-  private void addTripReference(BeanReferences references, TripEntry tripEntry, AgencyBean agency) {
+  private void addTripReference(BeanReferences references, TripEntry tripEntry) {
     if (references.hasTrip(tripEntry.getId())) return;
     TripBean bean = new TripBean();
     bean.setId(AgencyAndIdLibrary.convertToString(tripEntry.getId()));
@@ -306,18 +308,19 @@ public class RouteScheduleBeanServiceImpl implements RouteScheduleBeanService {
     bean.setTripHeadsign(narrative.getTripHeadsign());
     bean.setRouteShortName(narrative.getRouteShortName());
     bean.setTripShortName(narrative.getTripShortName());
-    //We shouldn't be building duplicate route beans, even though this solution is faster
-    bean.setRoute(buildRouteBean(tripEntry.getRoute().getId(),agency));
+    bean.setRoute(findOrBuildRouteBean(references,tripEntry.getRoute().getId()));
   }
 
   private void addStopReference(BeanReferences references, StopEntry stop,
-                                RouteEntry route, AgencyBean agency) {
+                                RouteEntry route) {
     StopBean bean = new StopBean();
     bean.setId(AgencyAndIdLibrary.convertToString(stop.getId()));
     if (references.hasStop(stop.getId())){
-      // It would be better to only build a given route bean once.
-      // Duplicates are not the best solution.
-      references.getStop(stop.getId()).getRoutes().add(buildRouteBean(route.getId(),agency));
+      StopBean stopBean = references.getStop(stop.getId());
+      RouteBean routeBean = findOrBuildRouteBean(references, route.getId());
+      if(!stopBean.getRoutes().contains(routeBean)){
+        stopBean.getRoutes().add(routeBean);
+      }
       return;
     }
     references.getStops().add(bean);
@@ -330,8 +333,7 @@ public class RouteScheduleBeanServiceImpl implements RouteScheduleBeanService {
     bean.setCode(narrative.getCode());
     bean.setDirection(narrative.getDirection());
     ArrayList<RouteBean> routes = new ArrayList<>();
-    //As above building this bean anew is an imperfect solution chosen in haste
-    routes.add(buildRouteBean(route.getId(),agency));
+    routes.add(findOrBuildRouteBean(references, route.getId()));
     bean.setRoutes(routes);
     return;
   }
@@ -527,6 +529,14 @@ public class RouteScheduleBeanServiceImpl implements RouteScheduleBeanService {
           return true;
       }
       return false;
+    }
+
+    public RouteBean getRoute(AgencyAndId id) {
+      for (RouteBean bean : routes) {
+        if (bean.getId().equals(AgencyAndIdLibrary.convertToString(id)))
+          return bean;
+      }
+      return null;
     }
 
     public AgencyBean getAgencyById(String agencyId) {
