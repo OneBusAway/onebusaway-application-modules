@@ -259,12 +259,11 @@ public class RouteScheduleBeanServiceImpl implements RouteScheduleBeanService {
       for (TripEntry tripEntry : allTrips) {
         if (tripEntry.getId().equals(selection)) {
           addAgencyReference(references, tripEntry.getId().getAgencyId());
-          addTripReference(references, tripEntry);
+          AgencyBean agencyBean = references.getAgencyById(tripEntry.getId().getAgencyId());
+          addTripReference(references, tripEntry, agencyBean);
           for (StopTimeEntry stopTimeEntry : tripEntry.getStopTimes()) {
             addStopTimeReference(references, stopTripDirectionBean, stopTimeEntry, serviceDate);
-            addStopReference(references,stopTimeEntry.getStop(),
-                    stopTimeEntry.getTrip().getRoute(),
-                    references.getAgencyById(tripEntry.getId().getAgencyId()));
+            addStopReference(references,stopTimeEntry.getStop(), stopTimeEntry.getTrip().getRoute(),agencyBean);
           }
         }
       }
@@ -293,7 +292,7 @@ public class RouteScheduleBeanServiceImpl implements RouteScheduleBeanService {
     return;
   }
 
-  private void addTripReference(BeanReferences references, TripEntry tripEntry) {
+  private void addTripReference(BeanReferences references, TripEntry tripEntry, AgencyBean agency) {
     if (references.hasTrip(tripEntry.getId())) return;
     TripBean bean = new TripBean();
     bean.setId(AgencyAndIdLibrary.convertToString(tripEntry.getId()));
@@ -307,7 +306,8 @@ public class RouteScheduleBeanServiceImpl implements RouteScheduleBeanService {
     bean.setTripHeadsign(narrative.getTripHeadsign());
     bean.setRouteShortName(narrative.getRouteShortName());
     bean.setTripShortName(narrative.getTripShortName());
-
+    //We shouldn't be building duplicate route beans, even though this solution is faster
+    bean.setRoute(buildRouteBean(tripEntry.getRoute().getId(),agency));
   }
 
   private void addStopReference(BeanReferences references, StopEntry stop,
