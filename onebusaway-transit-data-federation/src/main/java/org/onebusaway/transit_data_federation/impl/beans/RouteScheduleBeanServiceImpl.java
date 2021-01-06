@@ -131,18 +131,23 @@ public class RouteScheduleBeanServiceImpl implements RouteScheduleBeanService {
   private void addSituations(RouteScheduleBean rsb, AgencyAndId routeId) {
     SituationQueryBean sqb = new SituationQueryBean();
 
-    SituationQueryBean.AffectsBean routeAffects = new SituationQueryBean.AffectsBean();
-    sqb.getAffects().add(routeAffects);
-    routeAffects.setRouteId(AgencyAndId.convertToString(routeId));
+    createAffectsBeanInSituationQuerry(sqb).setRouteId(AgencyAndId.convertToString(routeId));
 
     for(StopBean stopBean : rsb.getStops()){
-      SituationQueryBean.AffectsBean stopAffects = new SituationQueryBean.AffectsBean();
-      sqb.getAffects().add(stopAffects);
-      stopAffects.setRouteId(AgencyAndId.convertToString(routeId));
-      stopAffects.setStopId(stopBean.getId());
+      SituationQueryBean.AffectsBean routeStopAffects = createAffectsBeanInSituationQuerry(sqb);
+      routeStopAffects.setRouteId(AgencyAndId.convertToString(routeId));
+      routeStopAffects.setStopId(stopBean.getId());
+
+      createAffectsBeanInSituationQuerry(sqb).setStopId(stopBean.getId());
     }
     List<ServiceAlertBean> serviceAlerts = _serviceAlertsBeanService.getServiceAlerts(sqb);
     rsb.setServiceAlerts(serviceAlerts);
+  }
+
+  private SituationQueryBean.AffectsBean createAffectsBeanInSituationQuerry(SituationQueryBean sqb){
+    SituationQueryBean.AffectsBean routeAffects = new SituationQueryBean.AffectsBean();
+    sqb.getAffects().add(routeAffects);
+    return routeAffects;
   }
 
 
