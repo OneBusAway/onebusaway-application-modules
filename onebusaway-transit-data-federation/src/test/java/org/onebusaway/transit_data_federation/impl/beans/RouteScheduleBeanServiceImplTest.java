@@ -43,10 +43,7 @@ import org.onebusaway.transit_data_federation.services.transit_graph.RouteCollec
 import org.onebusaway.transit_data_federation.services.transit_graph.ServiceIdActivation;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -80,7 +77,7 @@ public class RouteScheduleBeanServiceImplTest {
 
     RouteCollectionEntry route = createRoutes(AGENCY_ID, ROUTE_ID);
     assertNotNull(blockIndexWeekday.getTrips());
-    assertEquals(2, blockIndexWeekday.getTrips().size());
+    assertEquals(4, blockIndexWeekday.getTrips().size());
     doReturn(Arrays.asList(blockIndexWeekday, blockIndexSaturday, blockIndexSunday))
             .when(blockIndexService).getBlockTripIndicesForRouteCollectionId(new AgencyAndId(AGENCY_ID, ROUTE_ID));
 
@@ -110,11 +107,13 @@ public class RouteScheduleBeanServiceImplTest {
     assertEquals(Arrays.asList(aId("WD_TL")), bean.getServiceIds());
     assertEquals(serviceDate, bean.getScheduleDate());
 
-    assertEquals(2, bean.getStopTripDirections().size());
+    assertEquals(4, bean.getStopTripDirections().size());
     StopTripDirectionBean stdb1 = getStopTripDirection(bean.getStopTripDirections(), "Theater District Station", "0");
     assertNotNull(stdb1);
 
-    assertEquals(Arrays.asList(aId( "TacL1000")), stdb1.getTripIds());
+    Comparator<AgencyAndId> comparator = Comparator.comparing(AgencyAndId::getId);
+    assertEquals(Arrays.asList(aId( "TacL1000"),aId( "TacL1002")).stream().sorted(comparator),
+            stdb1.getTripIds().stream().sorted(comparator));
     assertEquals(Arrays.asList(aId("TL_TD"), aId("TL_25"), aId("TL_US"), aId("TL_CC")),
             stdb1.getStopIds());
     assertNotNull(stdb1.getStopTimes());
@@ -133,21 +132,22 @@ public class RouteScheduleBeanServiceImplTest {
     StopTripDirectionBean stdb2 = getStopTripDirection(bean.getStopTripDirections(), "Tacoma Dome Station", "1");
     assertNotNull(stdb2);
 
-    assertEquals(Arrays.asList(aId("TacL1001")), stdb2.getTripIds());
+    assertEquals(Arrays.asList(aId("TacL1003"),aId( "TacL1001")).stream().sorted(comparator),
+            stdb2.getTripIds().stream().sorted(comparator));
     assertEquals(Arrays.asList(aId("TL_CC"), aId("TL_US"), aId("TL_25"), aId("TL_TD")),
             stdb2.getStopIds());
     assertNotNull(stdb2.getStopTimes());
     assertEquals(4, stdb2.getStopTimes().size());
     assertNotNull(stdb2.getStopTimes().get(0).getTripId());
-    assertEquals("1_TacL1001", stdb2.getStopTimes().get(0).getTripId());
+    assertEquals("1_TacL1003", stdb2.getStopTimes().get(0).getTripId());
     StopTimeInstanceBean stib2 = stdb2.getStopTimes().get(0);
-    assertEquals(time(5, 16, 0), stib2.getArrivalTime());
-    assertEquals(time(5, 16, 0), stib2.getDepartureTime());
+    assertEquals(time(5, 24, 0), stib2.getArrivalTime());
+    assertEquals(time(5, 24, 0), stib2.getDepartureTime());
 
-    assertEquals(Arrays.asList((long)time(5,16,0),
-            (long)time(5, 18, 0),
-            (long)time(5, 20, 0),
-            (long)time(5, 22, 0)),
+    assertEquals(Arrays.asList((long)time(5,24,0),
+            (long)time(5, 26, 0),
+            (long)time(5, 28, 0),
+            (long)time(5, 30, 0)),
             Arrays.asList(stdb2.getStopTimes().get(0).getArrivalTime(),
                     stdb2.getStopTimes().get(1).getArrivalTime(),
                     stdb2.getStopTimes().get(2).getArrivalTime(),
@@ -202,13 +202,19 @@ public class RouteScheduleBeanServiceImplTest {
 
     RouteEntryImpl route  = route(ROUTE_ID);
     BlockEntryImpl b1 = block("TacL1000");
-    TripEntryImpl t1 = trip("TacL1000", "WD_TL", 0);
-    t1.setDirectionId("0");
-    t1.setRoute(route);
-    BlockEntryImpl b2 = block("TacL1001");
-    TripEntryImpl t2 = trip("TacL1001", "WD_TL", 0);
-    t2.setDirectionId("1");
-    t2.setRoute(route);
+    TripEntryImpl t1a = trip("TacL1000", "WD_TL", 0);
+    TripEntryImpl t1b = trip("TacL1001", "WD_TL", 0);
+    t1a.setDirectionId("0");
+    t1a.setRoute(route);
+    t1b.setDirectionId("1");
+    t1b.setRoute(route);
+    BlockEntryImpl b2 = block("TacL1003");
+    TripEntryImpl t2a = trip("TacL1002", "WD_TL", 0);
+    TripEntryImpl t2b = trip("TacL1003", "WD_TL", 0);
+    t2a.setDirectionId("0");
+    t2a.setRoute(route);
+    t2b.setDirectionId("1");
+    t2b.setRoute(route);
 
     BlockEntryImpl b3 = block("TacL6000");
     TripEntryImpl t3 = trip("TacL6000", "SA", 0);
@@ -235,15 +241,26 @@ public class RouteScheduleBeanServiceImplTest {
     StopEntryImpl sus = stop("TL_US", 47.244865,-122.436623);
     StopEntryImpl scc = stop("TL_CC", 47.249496,-122.438552);
 
-    StopTimeEntryImpl st_1_1 = stopTime(1, std, t1, time(5, 0, 0), time(5, 0,0 ), 0);
-    StopTimeEntryImpl st_1_2 = stopTime(1, s25, t1, time(5, 2, 0), time(5, 2,0 ), 0);
-    StopTimeEntryImpl st_1_3 = stopTime(1, sus, t1, time(5, 4, 0), time(5, 4,0 ), 0);
-    StopTimeEntryImpl st_1_4 = stopTime(1, scc, t1, time(5, 6, 0), time(5, 6,0 ), 0);
+    StopTimeEntryImpl st_1a_1 = stopTime(1, std, t1a, time(5, 0, 0), time(5, 0,0 ), 0);
+    StopTimeEntryImpl st_1a_2 = stopTime(1, s25, t1a, time(5, 2, 0), time(5, 2,0 ), 0);
+    StopTimeEntryImpl st_1a_3 = stopTime(1, sus, t1a, time(5, 4, 0), time(5, 4,0 ), 0);
+    StopTimeEntryImpl st_1a_4 = stopTime(1, scc, t1a, time(5, 6, 0), time(5, 6,0 ), 0);
 
-    StopTimeEntryImpl st_2_1 = stopTime(1, scc, t2, time(5, 16, 0), time(5, 16,0 ), 0);
-    StopTimeEntryImpl st_2_2 = stopTime(1, sus, t2, time(5, 18, 0), time(5, 18,0 ), 0);
-    StopTimeEntryImpl st_2_3 = stopTime(1, s25, t2, time(5, 20, 0), time(5, 20,0 ), 0);
-    StopTimeEntryImpl st_2_4 = stopTime(1, std, t2, time(5, 22, 0), time(5, 22,0 ), 0);
+    StopTimeEntryImpl st_1b_1 = stopTime(1, scc, t1b, time(5, 8, 0), time(5, 0,0 ), 0);
+    StopTimeEntryImpl st_1b_2 = stopTime(1, sus, t1b, time(5, 10, 0), time(5, 10, 0), 0);
+    StopTimeEntryImpl st_1b_3 = stopTime(1, s25, t1b, time(5, 12, 0), time(5, 12, 0), 0);
+    StopTimeEntryImpl st_1b_4 = stopTime(1, std, t1b, time(5, 14, 0), time(5, 14, 0), 0);
+
+    StopTimeEntryImpl st_2a_1 = stopTime(1, std, t2a, time(5, 16, 0),time(5, 16, 0), 0);
+    StopTimeEntryImpl st_2a_2 = stopTime(1, s25, t2a, time(5, 18, 0),time(5, 18, 0), 0);
+    StopTimeEntryImpl st_2a_3 = stopTime(1, sus, t2a, time(5, 20, 0), time(5, 20, 0), 0);
+    StopTimeEntryImpl st_2a_4 = stopTime(1, scc, t2a, time(5, 22, 0),time(5, 22, 0), 0);
+
+
+    StopTimeEntryImpl st_2_1 = stopTime(1, scc, t2b, time(5, 24, 0),time(5, 24, 0), 0);
+    StopTimeEntryImpl st_2_2 = stopTime(1, sus, t2b, time(5, 26, 0),time(5, 26, 0), 0);
+    StopTimeEntryImpl st_2_3 = stopTime(1, s25, t2b, time(5, 28, 0),time(5, 28, 0), 0);
+    StopTimeEntryImpl st_2_4 = stopTime(1, std, t2b, time(5, 30, 0),time(5, 30, 0), 0);
 
     StopTimeEntryImpl st_3_1 = stopTime(1, std, t3, time(6, 0, 0), time(5, 0,0 ), 0);
     StopTimeEntryImpl st_3_2 = stopTime(1, s25, t3, time(6, 2, 0), time(5, 2,0 ), 0);
@@ -269,18 +286,20 @@ public class RouteScheduleBeanServiceImplTest {
     ServiceIdActivation serviceIdActivationSaturday = serviceIds(lsids("SA"), lsids());
     ServiceIdActivation serviceIdActivationSunday = serviceIds(lsids("SU"), lsids());
 
-    BlockConfigurationEntry bc1 = blockConfiguration(b1, serviceIdActivationWeekday, t1);
-    BlockConfigurationEntry bc2 = blockConfiguration(b2, serviceIdActivationWeekday, t2);
+    BlockConfigurationEntry bc1a = blockConfiguration(b1, serviceIdActivationWeekday, t1a,t1b);
+    BlockConfigurationEntry bc1b = blockConfiguration(b1, serviceIdActivationWeekday, t1b);
+    BlockConfigurationEntry bc2a = blockConfiguration(b2, serviceIdActivationWeekday, t2a,t2b);
+    BlockConfigurationEntry bc2b = blockConfiguration(b2, serviceIdActivationWeekday, t2b);
     BlockConfigurationEntry bc3 = blockConfiguration(b3, serviceIdActivationSaturday, t3);
     BlockConfigurationEntry bc4 = blockConfiguration(b4, serviceIdActivationSaturday, t4);
     BlockConfigurationEntry bc5 = blockConfiguration(b5, serviceIdActivationSunday, t5);
     BlockConfigurationEntry bc6 = blockConfiguration(b6, serviceIdActivationSunday, t6);
     RouteCollectionEntryImpl routeCollection = routeCollection(ROUTE_ID, route);
-    route.setTrips(Arrays.asList(t1, t2, t3, t4, t5, t6));
+    route.setTrips(Arrays.asList(t1a, t1b, t2a, t2b, t3, t4, t5, t6));
 
     List<BlockTripEntry> weekdayTrips = new ArrayList<BlockTripEntry>();
 
-    for (BlockConfigurationEntry blockConfig : Arrays.asList(bc1,bc2)) {
+    for (BlockConfigurationEntry blockConfig : Arrays.asList(bc1a,bc1b,bc2a,bc2b)) {
       weekdayTrips.add(blockConfig.getTrips().get(0));
     }
     blockIndexWeekday = factory.createTripIndexForGroupOfBlockTrips(weekdayTrips);
@@ -302,6 +321,8 @@ public class RouteScheduleBeanServiceImplTest {
 
     Mockito.when(narrativeService.getTripForId(new AgencyAndId(AGENCY_ID, "TacL1000"))).thenReturn(tnA.create());
     Mockito.when(narrativeService.getTripForId(new AgencyAndId(AGENCY_ID, "TacL1001"))).thenReturn(tnB.create());
+    Mockito.when(narrativeService.getTripForId(new AgencyAndId(AGENCY_ID, "TacL1002"))).thenReturn(tnA.create());
+    Mockito.when(narrativeService.getTripForId(new AgencyAndId(AGENCY_ID, "TacL1003"))).thenReturn(tnB.create());
     Mockito.when(narrativeService.getTripForId(new AgencyAndId(AGENCY_ID, "TacL6000"))).thenReturn(tnA.create());
     Mockito.when(narrativeService.getTripForId(new AgencyAndId(AGENCY_ID, "TacL6001"))).thenReturn(tnB.create());
     Mockito.when(narrativeService.getTripForId(new AgencyAndId(AGENCY_ID, "TacL7000"))).thenReturn(tnA.create());
