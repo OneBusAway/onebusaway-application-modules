@@ -51,6 +51,7 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.*;
 
@@ -80,8 +81,8 @@ public class RouteScheduleBeanServiceImplTest {
     RouteCollectionEntry route = createRoutes(AGENCY_ID, ROUTE_ID);
     assertNotNull(blockIndexWeekday.getTrips());
     assertEquals(2, blockIndexWeekday.getTrips().size());
-    when(blockIndexService.getBlockTripIndicesForRouteCollectionId(new AgencyAndId(AGENCY_ID, ROUTE_ID)))
-            .thenReturn(Arrays.asList(blockIndexWeekday, blockIndexSaturday, blockIndexSunday));
+    doReturn(Arrays.asList(blockIndexWeekday, blockIndexSaturday, blockIndexSunday))
+            .when(blockIndexService).getBlockTripIndicesForRouteCollectionId(new AgencyAndId(AGENCY_ID, ROUTE_ID));
 
     TransitGraphDao graph = Mockito.mock(TransitGraphDao.class);
     CalendarServiceData data = new CalendarServiceData();
