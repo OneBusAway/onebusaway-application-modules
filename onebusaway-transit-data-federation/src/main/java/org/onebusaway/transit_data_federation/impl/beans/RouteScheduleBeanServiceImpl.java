@@ -251,7 +251,9 @@ public class RouteScheduleBeanServiceImpl implements RouteScheduleBeanService {
     builder.setAgency(agency);
     RouteCollectionNarrative narrative = _narrativeService.getRouteCollectionForId(routeId);
     if (narrative == null) {
-      return builder.create();
+      routeBean = builder.create();
+      references.getRoutes().add(routeBean);
+      return routeBean;
     }
     builder.setColor(narrative.getColor());
     builder.setDescription(narrative.getDescription());
@@ -340,14 +342,14 @@ public class RouteScheduleBeanServiceImpl implements RouteScheduleBeanService {
     bean.setId(AgencyAndIdLibrary.convertToString(stop.getId()));
     bean.setLat(stop.getStopLat());
     bean.setLon(stop.getStopLon());
+    ArrayList<RouteBean> routes = new ArrayList<>();
+    routes.add(findOrBuildRouteBean(references, route.getId()));
+    bean.setRoutes(routes);
     StopNarrative narrative = _narrativeService.getStopForId(stop.getId());
     if (narrative == null) return;
     bean.setName(narrative.getName());
     bean.setCode(narrative.getCode());
     bean.setDirection(narrative.getDirection());
-    ArrayList<RouteBean> routes = new ArrayList<>();
-    routes.add(findOrBuildRouteBean(references, route.getId()));
-    bean.setRoutes(routes);
     return;
   }
 
