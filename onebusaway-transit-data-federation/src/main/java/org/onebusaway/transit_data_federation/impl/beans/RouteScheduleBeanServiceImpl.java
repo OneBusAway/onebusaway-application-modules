@@ -15,8 +15,10 @@
  */
 package org.onebusaway.transit_data_federation.impl.beans;
 
+import org.apache.commons.collections.map.HashedMap;
 import org.onebusaway.container.cache.Cacheable;
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.gtfs.model.Stop;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
 import org.onebusaway.transit_data.model.AgencyBean;
 import org.onebusaway.transit_data.model.RouteBean;
@@ -158,8 +160,8 @@ public class RouteScheduleBeanServiceImpl implements RouteScheduleBeanService {
   private void addStopTripDirectionsViaBlockTrip(RouteScheduleBean rsb, AgencyAndId routeId) {
     List<BlockTripIndex> blockTripIndices = _blockIndexService.getBlockTripIndicesForRouteCollectionId(routeId);
 
-    Map<DirectionalHeadsign, StopTripDirectionBean> headsignToBeanMap = new HashMap<>();
-    Map<DirectionalHeadsign, StopCollections> headsignToStopCollectionMap = new HashMap<>();
+    Map<Double, StopTripDirectionBean> headsignToBeanMap = new HashMap<>();
+    Map<Double,DirectionHeadsignStopCollection> directionHeadsignStopCollectionHashMap = new HashMap();
     Set<AgencyAndId> serviceIds = new HashSet<>();
     Set<TripEntry> activeTrips = new LinkedHashSet<>();
     BeanReferences references = new BeanReferences();
@@ -186,31 +188,25 @@ public class RouteScheduleBeanServiceImpl implements RouteScheduleBeanService {
           } else {
             headsign = getDestinationForTrip(blockTrip.getTrip());
           }
-          DirectionalHeadsign dh = new DirectionalHeadsign(directionId, headsign);
-          if (!headsignToBeanMap.containsKey(dh)) {
+          StopCollection stops = new StopCollection();
+          stops.addFromTrip(blockTrip.getTrip());
+          DirectionHeadsignStopCollection directionHeadsignStopCollection =
+                  new DirectionHeadsignStopCollection(directionId,headsign,stops);
+          Double dirHeadStopHashVal = directionHeadsignStopCollection.getHash();
+          //Should we be protecting these hashmaps from false matches?
+          if (!directionHeadsignStopCollectionHashMap.containsKey(dirHeadStopHashVal)) {
+            directionHeadsignStopCollectionHashMap.put(dirHeadStopHashVal,directionHeadsignStopCollection);
             StopTripDirectionBean stdb = new StopTripDirectionBean();
             stdb.setDirectionId(directionId);
             stdb.setTripHeadsign(headsign);
             stdb.setTripIds(new ArrayList<>());
             stdb.getTripIds().add(blockTrip.getTrip().getId());
             stdb.setStopIds(new ArrayList<>());
-            headsignToBeanMap.put(dh, stdb);
-
-            // build up a list of stopping patterns
-            StopCollection stops = new StopCollection();
-            stops.addFromTrip(blockTrip.getTrip());
-            StopCollections stopCollections = new StopCollections();
-            stopCollections.addIfNotPresent(stops);
-            headsignToStopCollectionMap.put(dh, stopCollections);
-
+            headsignToBeanMap.put(dirHeadStopHashVal, stdb);
           } else {
-            StopTripDirectionBean stdb = headsignToBeanMap.get(dh);
+            StopTripDirectionBean stdb = headsignToBeanMap.get(dirHeadStopHashVal);
             stdb.getTripIds().add(blockTrip.getTrip().getId());
-
-            StopCollection stops = new StopCollection();
-            stops.addFromTrip(blockTrip.getTrip());
-            StopCollections stopCollections = headsignToStopCollectionMap.get(dh);
-            stopCollections.addIfNotPresent(stops);
+            directionHeadsignStopCollectionHashMap.get(dirHeadStopHashVal).addStopCollection(stops);
           }
           serviceIds.add(blockTrip.getTrip().getServiceId().getId());
         }
@@ -218,9 +214,9 @@ public class RouteScheduleBeanServiceImpl implements RouteScheduleBeanService {
     }
 
     // collapse StopCollections down to canonical pattern
-    for (DirectionalHeadsign dh : headsignToBeanMap.keySet()) {
-      StopTripDirectionBean bean = headsignToBeanMap.get(dh);
-      bean.setStopIds(collapse(headsignToStopCollectionMap.get(dh)));
+    for (Double hash : headsignToBeanMap.keySet()) {
+      StopTripDirectionBean bean = headsignToBeanMap.get(hash);
+      bean.setStopIds(collapse(directionHeadsignStopCollectionHashMap.get(hash).getStopCollections()));
       addStopTimeReferences(references, bean, activeTrips, bean.getTripIds(), rsb.getScheduleDate());
     }
 
@@ -413,16 +409,19 @@ public class RouteScheduleBeanServiceImpl implements RouteScheduleBeanService {
     return stopForId.getName();
   }
 
-
-  private static class DirectionalHeadsign {
+  private class DirectionHeadsignStopCollection{
     private String directionId;
     private String tripHeadsign;
+    private StopCollections stopCollections = new StopCollections();
 
-    public DirectionalHeadsign(
+    public DirectionHeadsignStopCollection(
             String directionId,
-            String tripHeadsign) {
+            String tripHeadsign,
+            StopCollection stopCollection) {
       this.directionId = directionId;
       this.tripHeadsign = tripHeadsign;
+      if (stopCollection == null){ throw new NullPointerException("StopCollection cannot be null");}
+      this.stopCollections.addIfNotPresent(stopCollection);
     }
     public String getDirectionId() {
       return directionId;
@@ -430,7 +429,21 @@ public class RouteScheduleBeanServiceImpl implements RouteScheduleBeanService {
     public String getTripHeadsign() {
       return tripHeadsign;
     }
+    public StopCollections getStopCollections() { return stopCollections; }
+
+    public void addStopCollection(StopCollection stopCollection) {
+      stopCollections.addIfNotPresent(stopCollection);
+    }
+    @Override
+    public String toString() {
+      return directionId + tripHeadsign + stopCollections.getList().get(0).stops.stream()
+              .map(x->x.getId().toString()+x.getStopLat()+x.getStopLon()).sorted().reduce((x,y) ->x+y);
+    }
+    public double getHash(){
+      return this.toString().hashCode();
+    }
   }
+
 
   private static class StopCollections {
     private List<StopCollection> list = new ArrayList<>();
