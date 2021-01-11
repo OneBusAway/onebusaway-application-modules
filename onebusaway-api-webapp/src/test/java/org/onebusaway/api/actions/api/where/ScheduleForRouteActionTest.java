@@ -37,6 +37,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.struts2.rest.DefaultHttpHeaders;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -69,7 +70,7 @@ import org.onebusaway.transit_data_federation.services.transit_graph.*;
 import org.onebusaway.transit_data_federation.siri.SiriXmlSerializerV2;
 import org.onebusaway.util.services.configuration.ConfigurationService;
 
-
+///THIS TEST IS INCOMPLETE
 @RunWith(MockitoJUnitRunner.class)
 public class ScheduleForRouteActionTest {
 
@@ -117,8 +118,8 @@ public class ScheduleForRouteActionTest {
     List<StopGroupingBean> stopGroupings;
     StopsForRouteBean stopsForRouteBean;
 
-
-    @Test
+//THIS TEST IS INCOMPLETE
+    @Ignore
     public void testLineRef() throws Exception {
 
         AgencyAndId routeId = new AgencyAndId(AGENCY_ID,ROUTE_ID);
