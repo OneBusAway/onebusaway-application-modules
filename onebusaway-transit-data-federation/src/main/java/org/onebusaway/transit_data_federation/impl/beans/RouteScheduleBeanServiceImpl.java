@@ -15,10 +15,8 @@
  */
 package org.onebusaway.transit_data_federation.impl.beans;
 
-import org.apache.commons.collections.map.HashedMap;
 import org.onebusaway.container.cache.Cacheable;
 import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.gtfs.model.Stop;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
 import org.onebusaway.transit_data.model.AgencyBean;
 import org.onebusaway.transit_data.model.RouteBean;
@@ -160,8 +158,8 @@ public class RouteScheduleBeanServiceImpl implements RouteScheduleBeanService {
   private void addStopTripDirectionsViaBlockTrip(RouteScheduleBean rsb, AgencyAndId routeId) {
     List<BlockTripIndex> blockTripIndices = _blockIndexService.getBlockTripIndicesForRouteCollectionId(routeId);
 
-    Map<DirectionHeadsignStopCollection, StopTripDirectionBean> headsignToBeanMap = new HashMap<>();
-    Map<DirectionHeadsignStopCollection,DirectionHeadsignStopCollection> directionHeadsignStopCollectionHashMap = new HashMap();
+    Map<DirectionHeadsignStops, StopTripDirectionBean> headsignToBeanMap = new HashMap<>();
+    Map<DirectionHeadsignStops, DirectionHeadsignStops> directionHeadsignStopsHashMap = new HashMap();
     Set<AgencyAndId> serviceIds = new HashSet<>();
     Set<TripEntry> activeTrips = new LinkedHashSet<>();
     BeanReferences references = new BeanReferences();
@@ -190,11 +188,11 @@ public class RouteScheduleBeanServiceImpl implements RouteScheduleBeanService {
           }
           StopCollection stops = new StopCollection();
           stops.addFromTrip(blockTrip.getTrip());
-          DirectionHeadsignStopCollection directionHeadsignStops =
-                  new DirectionHeadsignStopCollection(directionId,headsign,stops);
+          DirectionHeadsignStops directionHeadsignStops =
+                  new DirectionHeadsignStops(directionId,headsign,stops);
           //This hashing could be improved and might be a good choice for refactor
-          if (!directionHeadsignStopCollectionHashMap.containsKey(directionHeadsignStops)) {
-            directionHeadsignStopCollectionHashMap.put(directionHeadsignStops,directionHeadsignStops);
+          if (!directionHeadsignStopsHashMap.containsKey(directionHeadsignStops)) {
+            directionHeadsignStopsHashMap.put(directionHeadsignStops,directionHeadsignStops);
             StopTripDirectionBean stdb = new StopTripDirectionBean();
             stdb.setDirectionId(directionId);
             stdb.setTripHeadsign(headsign);
@@ -205,7 +203,7 @@ public class RouteScheduleBeanServiceImpl implements RouteScheduleBeanService {
           } else {
             StopTripDirectionBean stdb = headsignToBeanMap.get(directionHeadsignStops);
             stdb.getTripIds().add(blockTrip.getTrip().getId());
-            directionHeadsignStopCollectionHashMap.get(directionHeadsignStops).addStopCollection(stops);
+            directionHeadsignStopsHashMap.get(directionHeadsignStops).addStopCollection(stops);
           }
           serviceIds.add(blockTrip.getTrip().getServiceId().getId());
         }
@@ -213,9 +211,9 @@ public class RouteScheduleBeanServiceImpl implements RouteScheduleBeanService {
     }
 
     // collapse StopCollections down to canonical pattern
-    for (DirectionHeadsignStopCollection hash : headsignToBeanMap.keySet()) {
+    for (DirectionHeadsignStops hash : headsignToBeanMap.keySet()) {
       StopTripDirectionBean bean = headsignToBeanMap.get(hash);
-      bean.setStopIds(collapse(directionHeadsignStopCollectionHashMap.get(hash).getStopCollections()));
+      bean.setStopIds(collapse(directionHeadsignStopsHashMap.get(hash).getStopCollections()));
       addStopTimeReferences(references, bean, activeTrips, bean.getTripIds(), rsb.getScheduleDate());
     }
 
@@ -408,12 +406,12 @@ public class RouteScheduleBeanServiceImpl implements RouteScheduleBeanService {
     return stopForId.getName();
   }
 
-  private class DirectionHeadsignStopCollection{
+  private class DirectionHeadsignStops {
     private String directionId;
     private String tripHeadsign;
     private StopCollections stopCollections = new StopCollections();
 
-    public DirectionHeadsignStopCollection(
+    public DirectionHeadsignStops(
             String directionId,
             String tripHeadsign,
             StopCollection stopCollection) {
@@ -441,8 +439,8 @@ public class RouteScheduleBeanServiceImpl implements RouteScheduleBeanService {
 
     @Override
     public boolean equals(Object obj){
-      if (!(obj instanceof DirectionHeadsignStopCollection)) { return false; }
-      DirectionHeadsignStopCollection that = (DirectionHeadsignStopCollection) obj;
+      if (!(obj instanceof DirectionHeadsignStops)) { return false; }
+      DirectionHeadsignStops that = (DirectionHeadsignStops) obj;
       return this.toString().equals(that.toString());
     }
 
