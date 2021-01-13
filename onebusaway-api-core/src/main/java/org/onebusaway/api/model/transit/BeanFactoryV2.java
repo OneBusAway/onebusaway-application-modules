@@ -18,12 +18,8 @@ package org.onebusaway.api.model.transit;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import org.onebusaway.api.impl.MaxCountSupport;
 import org.onebusaway.api.model.transit.blocks.BlockConfigurationV2Bean;
@@ -33,39 +29,14 @@ import org.onebusaway.api.model.transit.blocks.BlockTripV2Bean;
 import org.onebusaway.api.model.transit.blocks.BlockV2Bean;
 import org.onebusaway.api.model.transit.realtime.CurrentVehicleEstimateV2Bean;
 import org.onebusaway.api.model.transit.schedule.StopTimeV2Bean;
-import org.onebusaway.api.model.transit.service_alerts.NaturalLanguageStringV2Bean;
-import org.onebusaway.api.model.transit.service_alerts.SituationAffectsV2Bean;
-import org.onebusaway.api.model.transit.service_alerts.SituationConditionDetailsV2Bean;
-import org.onebusaway.api.model.transit.service_alerts.SituationConsequenceV2Bean;
-import org.onebusaway.api.model.transit.service_alerts.SituationV2Bean;
-import org.onebusaway.api.model.transit.service_alerts.TimeRangeV2Bean;
+import org.onebusaway.api.model.transit.service_alerts.*;
 import org.onebusaway.collections.CollectionsLibrary;
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.geospatial.model.EncodedPolylineBean;
 import org.onebusaway.realtime.api.OccupancyStatus;
 import org.onebusaway.transit_data.HistoricalRidershipBean;
 import org.onebusaway.transit_data.OccupancyStatusBean;
-import org.onebusaway.transit_data.model.AgencyBean;
-import org.onebusaway.transit_data.model.AgencyWithCoverageBean;
-import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
-import org.onebusaway.transit_data.model.ListBean;
-import org.onebusaway.transit_data.model.RouteBean;
-import org.onebusaway.transit_data.model.RoutesBean;
-import org.onebusaway.transit_data.model.StopBean;
-import org.onebusaway.transit_data.model.StopCalendarDayBean;
-import org.onebusaway.transit_data.model.StopGroupBean;
-import org.onebusaway.transit_data.model.StopGroupingBean;
-import org.onebusaway.transit_data.model.StopRouteDirectionScheduleBean;
-import org.onebusaway.transit_data.model.StopRouteScheduleBean;
-import org.onebusaway.transit_data.model.StopScheduleBean;
-import org.onebusaway.transit_data.model.StopTimeInstanceBean;
-import org.onebusaway.transit_data.model.StopWithArrivalsAndDeparturesBean;
-import org.onebusaway.transit_data.model.StopsBean;
-import org.onebusaway.transit_data.model.StopsForRouteBean;
-import org.onebusaway.transit_data.model.TimeIntervalBean;
-import org.onebusaway.transit_data.model.TripStopTimeBean;
-import org.onebusaway.transit_data.model.TripStopTimesBean;
-import org.onebusaway.transit_data.model.VehicleStatusBean;
+import org.onebusaway.transit_data.model.*;
 import org.onebusaway.transit_data.model.blocks.BlockBean;
 import org.onebusaway.transit_data.model.blocks.BlockConfigurationBean;
 import org.onebusaway.transit_data.model.blocks.BlockInstanceBean;
@@ -86,6 +57,7 @@ import org.onebusaway.transit_data.model.service_alerts.TimeRangeBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsBean;
 import org.onebusaway.transit_data.model.trips.TripStatusBean;
+import org.onebusaway.util.AgencyAndIdLibrary;
 
 public class BeanFactoryV2 {
 
@@ -167,8 +139,14 @@ public class BeanFactoryV2 {
   }
 
   public EntryWithReferencesBean<StopScheduleV2Bean> getResponse(
-      StopScheduleBean stopSchedule) {
+          StopScheduleBean stopSchedule) {
     return entry(getStopSchedule(stopSchedule));
+  }
+
+  public EntryWithReferencesBean<RouteScheduleV2Bean> getResponse(
+      RouteScheduleBean routeSchedule) {
+    return entry(getRouteSchedule(routeSchedule)
+    );
   }
 
   public EntryWithReferencesBean<StopsForRouteV2Bean> getResponse(
@@ -679,6 +657,72 @@ public class BeanFactoryV2 {
     bean.setTimeOfLocationUpdate(record.getTimeOfLocationUpdate());
     bean.setTripId(record.getTripId());
     bean.setVehicleId(record.getVehicleId());
+    return bean;
+  }
+
+  /**
+   * Support Schedule queries at the route level.  Similar to
+   * StopScheduleBeanServiceImpl.
+   *
+   *   Ultimate goal to deliver data in this format:
+   *     "entry": {
+   *   "routeId": "40_100479",
+   *   "serviceIds": ["SERVICEIDVALUE1","SERVICEIDVALUE2"],
+   *   "scheduleDate": 1609315200,
+   *   "stopTripGroupings": [
+   *     {
+   *       "directionId": 0,
+   *       "tripHeadsign": "University of Washington Station",
+   *       "stopIds": ["STOPID1", "STOPID2"],
+   *       "tripIds": ["TRIPID1", "TRIPID2"]
+   *     },
+   *     {
+   *       "directionId": 1,
+   *       "tripHeadsign": "Angle Lake Station",
+   *       "stopIds": ["STOPID2", "STOPID3"],
+   *       "tripIds": ["TRIPID3", "TRIPID4"]
+   *     }
+   *   ]
+   * }
+   */
+  public RouteScheduleV2Bean getRouteSchedule(RouteScheduleBean routeSchedule) {
+
+    RouteScheduleV2Bean bean = new RouteScheduleV2Bean();
+
+    bean.setRouteId(AgencyAndIdLibrary.convertToString(routeSchedule.getRouteId()));
+
+    bean.setServiceIds(routeSchedule.getServiceIds().stream().map(
+            serviceId -> serviceId.toString()).collect(Collectors.toList()));
+
+    bean.setScheduleDate(routeSchedule.getScheduleDate().getAsDate().getTime());
+
+    List<StopTripDirectionV2Bean> stopTripDirectionBeans = new ArrayList<>();
+    for (StopTripDirectionBean stdb : routeSchedule.getStopTripDirections()) {
+      StopTripDirectionV2Bean v2 = new StopTripDirectionV2Bean();
+      v2.setDirectionId(stdb.getDirectionId());
+      v2.setTripHeadsign(stdb.getTripHeadsign());
+      v2.setStopIds(stdb.getStopIds().stream().map(x->x.toString()).collect(Collectors.toList()));
+      v2.setTripIds(stdb.getTripIds().stream().map(x->x.toString()).collect(Collectors.toList()));
+      stopTripDirectionBeans.add(v2);
+    }
+    bean.setStopTripGroupings(stopTripDirectionBeans);
+
+    _references.setAgencies(routeSchedule.getAgencies().stream()
+            .map(x->{ return getAgency(x);})
+            .collect(Collectors.toList()));
+    _references.setRoutes(routeSchedule.getRoutes().stream()
+            .map(x->{ return getRoute(x);})
+            .collect(Collectors.toList()));
+    _references.setSituations(routeSchedule.getServiceAlerts().stream()
+            .map(x->{ return getSituation(x);})
+            .collect(Collectors.toList()));
+    _references.setStops(routeSchedule.getStops().stream()
+            .map(x->{ return getStop(x);})
+            .collect(Collectors.toList()));
+    _references.setTrips(routeSchedule.getTrips().stream()
+            .map(x->{ return getTrip(x);})
+            .collect(Collectors.toList()));
+
     return bean;
   }
 

@@ -85,6 +85,9 @@ public class TransitDataServiceTemplateImpl implements TransitDataServiceTemplat
   private StopScheduleBeanService _stopScheduleBeanService;
 
   @Autowired
+  private RouteScheduleBeanService _routeScheduleBeanService;
+
+  @Autowired
   private StopWithArrivalsAndDeparturesBeanService _stopWithArrivalsAndDepaturesBeanService;
 
   @Autowired
@@ -215,6 +218,12 @@ public class TransitDataServiceTemplateImpl implements TransitDataServiceTemplat
     bean.setCalendarDays(calendarDays);
 
     return bean;
+  }
+
+  //@Override
+  public RouteScheduleBean getScheduleForRoute(AgencyAndId routeId, ServiceDate serviceDate) {
+    return _routeScheduleBeanService.getScheduledArrivalsForDate(routeId, serviceDate);
+
   }
 
   //@Override

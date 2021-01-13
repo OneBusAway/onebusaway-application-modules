@@ -325,6 +325,15 @@ public interface TransitDataService extends FederatedService {
       throws ServiceException;
 
   /**
+   * @param routeId
+   * @param serviceDate
+   * @return retrieve the full schedule for the route on the specified date
+   * @throws ServiceException
+   */
+  @FederatedByEntityIdMethod
+  public RouteScheduleBean getScheduleForRoute(AgencyAndId routeId, ServiceDate serviceDate);
+
+  /**
    * 
    * @param query determines the query bounds, along with an optional stop code
    * @return find all stops within the specified bounds query
@@ -608,4 +617,5 @@ public interface TransitDataService extends FederatedService {
   @FederatedByAgencyIdMethod
   public ListBean<ServiceAlertRecordBean> getAllServiceAlertRecordsForAgencyId(
 		String agencyId);
+
 }

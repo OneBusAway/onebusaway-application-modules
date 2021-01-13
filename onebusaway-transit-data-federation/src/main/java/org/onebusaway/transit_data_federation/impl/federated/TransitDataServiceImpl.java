@@ -144,6 +144,11 @@ public class TransitDataServiceImpl implements TransitDataService {
     return _transitDataService.getScheduleForStop(stopId, date);
   }
 
+  public RouteScheduleBean getScheduleForRoute(AgencyAndId routeId, ServiceDate serviceDate) {
+    blockUntilBundleIsReady();
+    return _transitDataService.getScheduleForRoute(routeId, serviceDate);
+  }
+
   @Override
   public StopsBean getStops(SearchQueryBean query) throws ServiceException {
     blockUntilBundleIsReady();
