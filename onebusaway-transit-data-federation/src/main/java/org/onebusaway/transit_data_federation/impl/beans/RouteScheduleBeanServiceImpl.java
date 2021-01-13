@@ -160,8 +160,8 @@ public class RouteScheduleBeanServiceImpl implements RouteScheduleBeanService {
   private void addStopTripDirectionsViaBlockTrip(RouteScheduleBean rsb, AgencyAndId routeId) {
     List<BlockTripIndex> blockTripIndices = _blockIndexService.getBlockTripIndicesForRouteCollectionId(routeId);
 
-    Map<Integer, StopTripDirectionBean> headsignToBeanMap = new HashMap<>();
-    Map<Integer,DirectionHeadsignStopCollection> directionHeadsignStopCollectionHashMap = new HashMap();
+    Map<DirectionHeadsignStopCollection, StopTripDirectionBean> headsignToBeanMap = new HashMap<>();
+    Map<DirectionHeadsignStopCollection,DirectionHeadsignStopCollection> directionHeadsignStopCollectionHashMap = new HashMap();
     Set<AgencyAndId> serviceIds = new HashSet<>();
     Set<TripEntry> activeTrips = new LinkedHashSet<>();
     BeanReferences references = new BeanReferences();
@@ -190,23 +190,22 @@ public class RouteScheduleBeanServiceImpl implements RouteScheduleBeanService {
           }
           StopCollection stops = new StopCollection();
           stops.addFromTrip(blockTrip.getTrip());
-          DirectionHeadsignStopCollection directionHeadsignStopCollection =
+          DirectionHeadsignStopCollection directionHeadsignStops =
                   new DirectionHeadsignStopCollection(directionId,headsign,stops);
-          Integer dirHeadStopHashVal = directionHeadsignStopCollection.getHash();
           //This hashing could be improved and might be a good choice for refactor
-          if (!directionHeadsignStopCollectionHashMap.containsKey(dirHeadStopHashVal)) {
-            directionHeadsignStopCollectionHashMap.put(dirHeadStopHashVal,directionHeadsignStopCollection);
+          if (!directionHeadsignStopCollectionHashMap.containsKey(directionHeadsignStops)) {
+            directionHeadsignStopCollectionHashMap.put(directionHeadsignStops,directionHeadsignStops);
             StopTripDirectionBean stdb = new StopTripDirectionBean();
             stdb.setDirectionId(directionId);
             stdb.setTripHeadsign(headsign);
             stdb.setTripIds(new ArrayList<>());
             stdb.getTripIds().add(blockTrip.getTrip().getId());
             stdb.setStopIds(new ArrayList<>());
-            headsignToBeanMap.put(dirHeadStopHashVal, stdb);
+            headsignToBeanMap.put(directionHeadsignStops, stdb);
           } else {
-            StopTripDirectionBean stdb = headsignToBeanMap.get(dirHeadStopHashVal);
+            StopTripDirectionBean stdb = headsignToBeanMap.get(directionHeadsignStops);
             stdb.getTripIds().add(blockTrip.getTrip().getId());
-            directionHeadsignStopCollectionHashMap.get(dirHeadStopHashVal).addStopCollection(stops);
+            directionHeadsignStopCollectionHashMap.get(directionHeadsignStops).addStopCollection(stops);
           }
           serviceIds.add(blockTrip.getTrip().getServiceId().getId());
         }
@@ -214,7 +213,7 @@ public class RouteScheduleBeanServiceImpl implements RouteScheduleBeanService {
     }
 
     // collapse StopCollections down to canonical pattern
-    for (Integer hash : headsignToBeanMap.keySet()) {
+    for (DirectionHeadsignStopCollection hash : headsignToBeanMap.keySet()) {
       StopTripDirectionBean bean = headsignToBeanMap.get(hash);
       bean.setStopIds(collapse(directionHeadsignStopCollectionHashMap.get(hash).getStopCollections()));
       addStopTimeReferences(references, bean, activeTrips, bean.getTripIds(), rsb.getScheduleDate());
@@ -439,9 +438,19 @@ public class RouteScheduleBeanServiceImpl implements RouteScheduleBeanService {
       return directionId + tripHeadsign + stopCollections.getList().get(0).stops.stream()
               .map(x->x.getId().toString()+x.getStopLat()+x.getStopLon()).sorted().reduce((x,y) ->x+y);
     }
-    public Integer getHash(){
+
+    @Override
+    public boolean equals(Object obj){
+      if (!(obj instanceof DirectionHeadsignStopCollection)) { return false; }
+      DirectionHeadsignStopCollection that = (DirectionHeadsignStopCollection) obj;
+      return this.toString().equals(that.toString());
+    }
+
+    @Override
+    public int hashCode(){
       return this.toString().hashCode();
     }
+
   }
 
 
