@@ -13,7 +13,7 @@
 	<name>onebusaway-enterprise-webapp</name>
 
 	<properties>
-		<jetty.version>9.2.9.v20150224</jetty.version>
+		<jetty.version>9.4.34.v20201102</jetty.version>
 		<xwiki.integration.version>1.0.1</xwiki.integration.version>
 	</properties>
 
@@ -269,14 +269,14 @@
 					</gitDescribe>
 				</configuration>
 			</plugin>
-<!--			<plugin>-->
-<!--				<groupId>org.mortbay.jetty</groupId>-->
-<!--				<artifactId>maven-jetty-plugin</artifactId>-->
-<!--				<version>${jetty.version}</version>-->
-<!--				<configuration>-->
-<!--					<contextPath>/</contextPath>-->
-<!--				</configuration>-->
-<!--			</plugin>-->
+			<plugin>
+				<groupId>org.mortbay.jetty</groupId>
+				<artifactId>maven-jetty-plugin</artifactId>
+				<version>${jetty.version}</version>
+				<configuration>
+					<contextPath>/</contextPath>
+				</configuration>
+			</plugin>
 		</plugins>
 		<resources>
 			<resource>
