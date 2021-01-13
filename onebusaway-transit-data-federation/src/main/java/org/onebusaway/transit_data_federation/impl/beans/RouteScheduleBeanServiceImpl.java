@@ -160,8 +160,8 @@ public class RouteScheduleBeanServiceImpl implements RouteScheduleBeanService {
   private void addStopTripDirectionsViaBlockTrip(RouteScheduleBean rsb, AgencyAndId routeId) {
     List<BlockTripIndex> blockTripIndices = _blockIndexService.getBlockTripIndicesForRouteCollectionId(routeId);
 
-    Map<Double, StopTripDirectionBean> headsignToBeanMap = new HashMap<>();
-    Map<Double,DirectionHeadsignStopCollection> directionHeadsignStopCollectionHashMap = new HashMap();
+    Map<Integer, StopTripDirectionBean> headsignToBeanMap = new HashMap<>();
+    Map<Integer,DirectionHeadsignStopCollection> directionHeadsignStopCollectionHashMap = new HashMap();
     Set<AgencyAndId> serviceIds = new HashSet<>();
     Set<TripEntry> activeTrips = new LinkedHashSet<>();
     BeanReferences references = new BeanReferences();
@@ -192,8 +192,8 @@ public class RouteScheduleBeanServiceImpl implements RouteScheduleBeanService {
           stops.addFromTrip(blockTrip.getTrip());
           DirectionHeadsignStopCollection directionHeadsignStopCollection =
                   new DirectionHeadsignStopCollection(directionId,headsign,stops);
-          Double dirHeadStopHashVal = directionHeadsignStopCollection.getHash();
-          //Should we be protecting these hashmaps from false matches?
+          Integer dirHeadStopHashVal = directionHeadsignStopCollection.getHash();
+          //This hashing could be improved and might be a good choice for refactor
           if (!directionHeadsignStopCollectionHashMap.containsKey(dirHeadStopHashVal)) {
             directionHeadsignStopCollectionHashMap.put(dirHeadStopHashVal,directionHeadsignStopCollection);
             StopTripDirectionBean stdb = new StopTripDirectionBean();
@@ -214,7 +214,7 @@ public class RouteScheduleBeanServiceImpl implements RouteScheduleBeanService {
     }
 
     // collapse StopCollections down to canonical pattern
-    for (Double hash : headsignToBeanMap.keySet()) {
+    for (Integer hash : headsignToBeanMap.keySet()) {
       StopTripDirectionBean bean = headsignToBeanMap.get(hash);
       bean.setStopIds(collapse(directionHeadsignStopCollectionHashMap.get(hash).getStopCollections()));
       addStopTimeReferences(references, bean, activeTrips, bean.getTripIds(), rsb.getScheduleDate());
@@ -439,7 +439,7 @@ public class RouteScheduleBeanServiceImpl implements RouteScheduleBeanService {
       return directionId + tripHeadsign + stopCollections.getList().get(0).stops.stream()
               .map(x->x.getId().toString()+x.getStopLat()+x.getStopLon()).sorted().reduce((x,y) ->x+y);
     }
-    public double getHash(){
+    public Integer getHash(){
       return this.toString().hashCode();
     }
   }
