@@ -57,6 +57,7 @@ import org.onebusaway.transit_data.model.service_alerts.TimeRangeBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsBean;
 import org.onebusaway.transit_data.model.trips.TripStatusBean;
+import org.onebusaway.util.AgencyAndIdLibrary;
 
 public class BeanFactoryV2 {
 
@@ -688,7 +689,7 @@ public class BeanFactoryV2 {
 
     RouteScheduleV2Bean bean = new RouteScheduleV2Bean();
 
-    bean.setRouteId(routeSchedule.getRouteId().toString());
+    bean.setRouteId(AgencyAndIdLibrary.convertToString(routeSchedule.getRouteId()));
 
     bean.setServiceIds(routeSchedule.getServiceIds().stream().map(
             serviceId -> serviceId.toString()).collect(Collectors.toList()));
