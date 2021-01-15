@@ -105,14 +105,19 @@
 
 	<!--
 		Remove action from URLs.
-	-->	
+	-->
     <rule>
         <condition type="request-uri" operator="notequal">^.*_login$</condition>
         <condition type="request-uri" operator="notequal">^.*\.ico$</condition>
         <condition type="request-uri" operator="notequal">^(/.*enterprise.*){0,1}/img/[^;]*$</condition>
+        <condition type="request-uri" operator="notequal">^(/.*enterprise.*){0,1}/img/[^;]*;jsessionid=([^\?#]*)$</condition>
         <condition type="request-uri" operator="notequal">^(/.*enterprise.*){0,1}/m/img/[^;]*$</condition>
+        <condition type="request-uri" operator="notequal">^(/.*enterprise.*){0,1}/m/img/[^;]*;jsessionid=([^\?#]*)$</condition>
         <condition type="request-uri" operator="notequal">^(/.*enterprise.*){0,1}/css/[^;]*$</condition>
+        <condition type="request-uri" operator="notequal">^(/.*enterprise.*){0,1}/css/[^;]*;jsessionid=([^\?#]*)$</condition>
         <condition type="request-uri" operator="notequal">^(/.*enterprise.*){0,1}/js/[^;]*$</condition>
+        <condition type="request-uri" operator="notequal">^(/.*enterprise.*){0,1}/js/[^;]*;jsessionid=([^\?#]*)$</condition>
+
         <condition type="request-uri" operator="notequal">^.*\.action$</condition>
         <from>^(.*?)(?:\;jsessionid=[^\?#]*)$</from>
         <to last="true">$1.action</to>
@@ -121,9 +126,14 @@
         <condition type="request-uri" operator="notequal">^.*_login$</condition>
         <condition type="request-uri" operator="notequal">^.*\.ico$</condition>
         <condition type="request-uri" operator="notequal">^(/.*enterprise.*){0,1}/img/[^;]*$</condition>
+        <condition type="request-uri" operator="notequal">^(/.*enterprise.*){0,1}/img/([^;]*);jsessionid=[^\?#]*(.*)$</condition>
         <condition type="request-uri" operator="notequal">^(/.*enterprise.*){0,1}/m/img/[^;]*$</condition>
+        <condition type="request-uri" operator="notequal">^(/.*enterprise.*){0,1}/m/img/([^;]*);jsessionid=[^\?#]*(.*)$</condition>
         <condition type="request-uri" operator="notequal">^(/.*enterprise.*){0,1}/css/[^;]*$</condition>
+        <condition type="request-uri" operator="notequal">^(/.*enterprise.*){0,1}/css/([^;]*);jsessionid=([^\?#]*)(.*)$</condition>
         <condition type="request-uri" operator="notequal">^(/.*enterprise.*){0,1}/js/[^;]*$</condition>
+        <condition type="request-uri" operator="notequal">^(/.*enterprise.*){0,1}/js/([^;]*);jsessionid=([^\?#]*)(.*)$</condition>
+
         <condition type="request-uri" operator="notequal">^.*\.action\?(.*)$</condition>
         <from>^(.*?)(?:\;jsessionid=[^\?#]*)?(\?[^#]*)?(#.*)?$</from>
         <to last="true">$1.action$2$3</to>
