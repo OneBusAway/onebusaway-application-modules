@@ -45,15 +45,59 @@ http://www.springframework.org/schema/context http://www.springframework.org/sch
          </props>
       </property>
     </bean>
+    <bean class="org.onebusaway.container.spring.PropertyOverrideConfigurer">
+        <property name="properties">
+            <props>
+                <prop key="blockLocationServiceImpl.persistBlockLocationRecords">false</prop>
+                <prop key="blockLocationServiceImpl.locationInterpolation">false</prop>
+                <prop key="blockStatusServiceImpl.runningLateWindow">3600</prop>
+            </props>
+        </property>
+    </bean>
+
+    <bean class="org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.GtfsRealtimeSource">
+        <property name="tripUpdatesUrl" value="http://gtfsrt.prod.mn.obaweb.org:8080/api/v1/key/5c348c1b/agency/1/command/gtfs-rt/tripUpdates" />
+        <property name="vehiclePositionsUrl" value="http://gtfsrt.prod.mn.obaweb.org:8080/api/v1/key/5c348c1b/agency/1/command/gtfs-rt/vehiclePositions" />
+        <property name="refreshInterval" value="15" />
+        <property name="agencyIds">
+            <list>
+                <value>0</value>
+                <value>1</value>
+                <value>2</value>
+                <value>3</value>
+                <value>4</value>
+                <value>5</value>
+                <value>6</value>
+            </list>
+        </property>
+    </bean>
+
+<!--    <bean class="org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.GtfsRealtimeSource">-->
+<!--        <property name="tripUpdatesUrl" value="http://localhost:8089/trip-updates" />-->
+<!--        <property name="vehiclePositionsUrl" value="http://localhost:8089/vehicle-positions" />-->
+
+<!--        <property name="refreshInterval" value="15" />-->
+<!--        <property name="agencyIds">-->
+<!--            <list>-->
+<!--                <value>Hillsborough Area Regional Transit</value>-->
+<!--            </list>-->
+<!--        </property>-->
+<!--    </bean>-->
 
     <bean id="httpServiceClient" class="org.onebusaway.transit_data_federation.util.HttpServiceClientImpl" >
       <constructor-arg type="java.lang.String" value="localhost"/>
-      <constructor-arg type="java.lang.Integer" value="9990" />
+      <constructor-arg type="java.lang.Integer" value="9995" />
       <constructor-arg type="java.lang.String" value="/api/" />
     </bean>
 
+<!--    <bean id="httpServiceClient" class="org.onebusaway.transit_data_federation.util.HttpServiceClientImpl" >-->
+<!--        <constructor-arg type="java.lang.String" value="admin.staging.obahart.org"/>-->
+<!--        <constructor-arg type="java.lang.Integer" value="8080" />-->
+<!--        <constructor-arg type="java.lang.String" value="/api/" />-->
+<!--    </bean>-->
+
     <bean id="bundleManagementService" class="org.onebusaway.transit_data_federation.impl.bundle.BundleManagementServiceImpl">
-      <property name="bundleStoreRoot" value="/var/lib/oba/tds/bundle" />
+      <property name="bundleStoreRoot" value="opt/mnrt/oba/tds/bundle" />
       <property name="standaloneMode" value="false" />
     </bean>
 

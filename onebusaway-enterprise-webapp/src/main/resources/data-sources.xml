@@ -35,7 +35,7 @@
   	</bean>
 	
 	<bean id="configurationServiceClient" class="org.onebusaway.util.impl.configuration.ConfigurationServiceClientFileImpl" >
-      	<constructor-arg type="java.lang.String" value="/var/lib/obanyc/config.json"/>
+      	<constructor-arg type="java.lang.String" value="/opt/mnrt/oba/app-config.json"/>
     </bean>
 
     <!-- Database Configuration -->

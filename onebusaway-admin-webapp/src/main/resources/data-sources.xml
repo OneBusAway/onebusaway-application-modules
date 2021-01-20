@@ -156,6 +156,12 @@
 <!--         <prop key="rssServiceAlertsService.alertSource">WMATA</prop> -->
 <!--         <prop key="rssServiceAlertsService.serviceStatusUrlString">http://www.metroalerts.info/rss.aspx?bus</prop> -->
 <!--         <prop key="rssServiceAlertsService.serviceAdvisoryUrlString">http://www.wmata.com/rider_tools/metro_service_status/feeds/bus_Advisories.xml</prop> -->
+          <prop key="bundleStager.builtBundleDirectory">/opt/mnrt/oba/bundles/builder</prop>
+          <prop key="bundleStager.stagedBundleDirectory">/opt/mnrt/oba/bundles/staged</prop>
+          <prop key="bundleDeploySource.masterBundleDirectoryPathname">/opt/mnrt/oba/bundles/active</prop>
+          <prop key="bundleDeployer.deployBundleDirectory">/opt/mnrt/oba/bundles/active</prop>
+          <prop key="configurationServiceClient.configFile">/opt/mnrt/oba/config.json</prop>
+
       </props>
     </property>
 	</bean>
@@ -243,17 +249,17 @@
     <bean id="assignmentSessionFactory"
           class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
         <property name="dataSource" ref="assignedVehicleDataSource" />
-        <property name="annotatedClasses">
-            <list>
-                <value>org.onebusaway.admin.model.assignments.Assignment</value>
-                <value>org.onebusaway.admin.model.assignments.AssignmentConfig</value>
-                <value>org.onebusaway.admin.service.assignments.impl.AssignmentDaoImpl</value>
-                <value>org.onebusaway.admin.service.assignments.impl.AssignmentConfigDaoImpl</value>
-            </list>
-        </property>
+<!--        <property name="annotatedClasses">-->
+<!--            <list>-->
+<!--                <value>org.onebusaway.admin.model.assignments.Assignment</value>-->
+<!--                <value>org.onebusaway.admin.model.assignments.AssignmentConfig</value>-->
+<!--                <value>org.onebusaway.admin.service.assignments.impl.AssignmentDaoImpl</value>-->
+<!--                <value>org.onebusaway.admin.service.assignments.impl.AssignmentConfigDaoImpl</value>-->
+<!--            </list>-->
+<!--        </property>-->
         <property name="hibernateProperties">
             <props>
-                <prop key="hibernate.dialect">org.hibernate.dialect.MySQLDialect</prop>
+<!--                <prop key="hibernate.dialect">org.hibernate.dialect.HSQLDialect</prop>-->
                 <prop key="hibernate.connection.pool_size">1</prop>
                 <!--<prop key="hibernate.current_session_context_class">thread</prop>-->
                 <prop key="hibernate.cache.provider_class">org.hibernate.cache.internal.NoCachingRegionFactory</prop>
@@ -281,21 +287,21 @@
 	</bean>
 
     <!-- quartz scheduling for ResetVehicleAssignmentsJob -->
-    <bean name="resetJob" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
-        <property name="jobClass" value="org.onebusaway.admin.job.ResetVehicleAssignmentsJob" />
-        <property name="jobDataAsMap">
-            <map>
-                <entry key="assignmentDao" value-ref="assignmentDaoImpl"/>
-                <entry key="assignmentConfigDao" value-ref="assignmentConfigDaoImpl"/>
-            </map>
-        </property>
-        <property name="durability" value="true" />
-    </bean>
+<!--    <bean name="resetJob" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">-->
+<!--        <property name="jobClass" value="org.onebusaway.admin.job.ResetVehicleAssignmentsJob" />-->
+<!--        <property name="jobDataAsMap">-->
+<!--            <map>-->
+<!--                <entry key="assignmentDao" value-ref="assignmentDaoImpl"/>-->
+<!--                <entry key="assignmentConfigDao" value-ref="assignmentConfigDaoImpl"/>-->
+<!--            </map>-->
+<!--        </property>-->
+<!--        <property name="durability" value="true" />-->
+<!--    </bean>-->
 
-    <bean id="resetTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
-        <property name="jobDetail" ref="resetJob" />
-        <property name="cronExpression" value="0 0 3 * * ?" /><!--  03:00 every day -->
-    </bean>
+<!--    <bean id="resetTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">-->
+<!--        <property name="jobDetail" ref="resetJob" />-->
+<!--        <property name="cronExpression" value="0 3 * * * ?" />&lt;!&ndash;  03:00 every day &ndash;&gt;-->
+<!--    </bean>-->
 
 	<bean id="gsonTool" class="org.onebusaway.admin.json.LowerCaseWDashesGsonJsonTool">
     <property name="prettyPrintOutput" value="false" />
@@ -305,7 +311,7 @@
 		<property name="triggers">
 			<list>
 				<ref bean="pingTrigger" />
-                <ref bean="resetTrigger" />
+<!--                <ref bean="resetTrigger" />-->
             </list>
 		</property>
 	</bean>

@@ -42,7 +42,7 @@ public class ConfigurationServiceClientFileImpl implements
 	
 	private boolean isLocal = true;
 	
-	private String configFile = "/var/lib/oba/config.json";
+	private String configFile = "/opt/mnrt/oba/config.json";
 
 	public void setConfigFile(String file) {
 		_log.info("config service override of configFile=" + file);
@@ -114,6 +114,7 @@ public class ConfigurationServiceClientFileImpl implements
 
 	@Override
 	public String getItem(String component, String key) throws Exception {
+		_log.info("getItem(" + key + ") for config " + this.configFile);
 		List<Map<String, String>> settings = getItems("config", "list");
 		if (settings == null) return null;
 		for (Map<String, String> setting : settings) {
