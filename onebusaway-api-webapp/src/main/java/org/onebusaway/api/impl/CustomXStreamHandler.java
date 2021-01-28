@@ -143,6 +143,12 @@ public class CustomXStreamHandler extends XStreamHandler {
     //serialization customizations for RouteScheduleV2Bean
     xstream.alias("routeSchedule", RouteScheduleV2Bean.class);
     xstream.alias("stopTripGrouping", StopTripDirectionV2Bean.class);
+    ClassAliasingMapper routeScheduleMapper = new ClassAliasingMapper(xstream.getMapper());
+    routeScheduleMapper.addClassAlias("serviceId", String.class);
+    xstream.registerLocalConverter(RouteScheduleV2Bean.class, "serviceIds",
+            new CollectionConverter(routeScheduleMapper));
+
+
 
 
     return xstream;
