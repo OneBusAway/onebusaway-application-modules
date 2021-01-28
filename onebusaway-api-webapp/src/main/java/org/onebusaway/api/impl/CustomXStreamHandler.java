@@ -130,14 +130,20 @@ public class CustomXStreamHandler extends XStreamHandler {
     xstream.alias("registeredAlarm", RegisteredAlarmV2Bean.class);
 
 
+    // serialization customizations for StopTripDirectionV2Bean
+    ClassAliasingMapper StopTripDirectionMapper = new ClassAliasingMapper(xstream.getMapper());
+    StopTripDirectionMapper.addClassAlias("stopId", String.class);
+    xstream.registerLocalConverter(StopTripDirectionV2Bean.class, "stopIds",
+            new CollectionConverter(StopTripDirectionMapper));
+    StopTripDirectionMapper = new ClassAliasingMapper(xstream.getMapper());
+    StopTripDirectionMapper.addClassAlias("tripId", String.class);
+    xstream.registerLocalConverter(StopTripDirectionV2Bean.class, "tripIds",
+            new CollectionConverter(StopTripDirectionMapper));
+
+    //serialization customizations for RouteScheduleV2Bean
     xstream.alias("routeSchedule", RouteScheduleV2Bean.class);
     xstream.alias("stopTripGrouping", StopTripDirectionV2Bean.class);
-    ClassAliasingMapper mapper = new ClassAliasingMapper(xstream.getMapper());
 
-    mapper.addClassAlias("stopId", String.class);
-    mapper.addClassAlias("tripId", String.class);
-    xstream.registerLocalConverter(StopTripDirectionV2Bean.class, "stopIds", new CollectionConverter(mapper));
-    xstream.registerLocalConverter(StopTripDirectionV2Bean.class, "tripIds", new CollectionConverter(mapper));
 
     return xstream;
   }
