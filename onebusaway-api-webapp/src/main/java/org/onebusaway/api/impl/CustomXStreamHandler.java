@@ -148,6 +148,7 @@ public class CustomXStreamHandler extends XStreamHandler {
     xstream.registerLocalConverter(RouteScheduleV2Bean.class, "serviceIds",
             new CollectionConverter(routeScheduleMapper));
 
+    // serialization customizations for StopV2Bean
     ClassAliasingMapper StopMapper = new ClassAliasingMapper(xstream.getMapper());
     StopMapper.addClassAlias("routeId", String.class);
     xstream.registerLocalConverter(StopV2Bean.class, "routeIds",
