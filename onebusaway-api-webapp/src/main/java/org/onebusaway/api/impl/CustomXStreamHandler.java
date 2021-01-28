@@ -17,34 +17,14 @@
 package org.onebusaway.api.impl;
 
 import com.opensymphony.xwork2.ActionInvocation;
+import com.thoughtworks.xstream.converters.collections.CollectionConverter;
+import com.thoughtworks.xstream.mapper.ClassAliasingMapper;
 import org.apache.struts2.rest.handler.XStreamHandler;
 
 import org.onebusaway.api.actions.api.ValidationErrorBean;
 import org.onebusaway.api.model.ResponseBean;
 import org.onebusaway.api.model.TimeBean;
-import org.onebusaway.api.model.transit.AgencyV2Bean;
-import org.onebusaway.api.model.transit.AgencyWithCoverageV2Bean;
-import org.onebusaway.api.model.transit.ArrivalAndDepartureV2Bean;
-import org.onebusaway.api.model.transit.EntryWithReferencesBean;
-import org.onebusaway.api.model.transit.ListWithRangeAndReferencesBean;
-import org.onebusaway.api.model.transit.ListWithReferencesBean;
-import org.onebusaway.api.model.transit.ReferencesBean;
-import org.onebusaway.api.model.transit.RegisteredAlarmV2Bean;
-import org.onebusaway.api.model.transit.RouteV2Bean;
-import org.onebusaway.api.model.transit.ScheduleFrequencyInstanceV2Bean;
-import org.onebusaway.api.model.transit.ScheduleStopTimeInstanceV2Bean;
-import org.onebusaway.api.model.transit.StopCalendarDayV2Bean;
-import org.onebusaway.api.model.transit.StopRouteDirectionScheduleV2Bean;
-import org.onebusaway.api.model.transit.StopRouteScheduleV2Bean;
-import org.onebusaway.api.model.transit.StopScheduleV2Bean;
-import org.onebusaway.api.model.transit.StopV2Bean;
-import org.onebusaway.api.model.transit.StopWithArrivalsAndDeparturesV2Bean;
-import org.onebusaway.api.model.transit.StopsForRouteV2Bean;
-import org.onebusaway.api.model.transit.TripDetailsV2Bean;
-import org.onebusaway.api.model.transit.TripStopTimeV2Bean;
-import org.onebusaway.api.model.transit.TripV2Bean;
-import org.onebusaway.api.model.transit.VehicleLocationRecordV2Bean;
-import org.onebusaway.api.model.transit.VehicleStatusV2Bean;
+import org.onebusaway.api.model.transit.*;
 import org.onebusaway.api.model.transit.blocks.BlockConfigurationV2Bean;
 import org.onebusaway.api.model.transit.blocks.BlockInstanceV2Bean;
 import org.onebusaway.api.model.transit.blocks.BlockStopTimeV2Bean;
@@ -148,6 +128,16 @@ public class CustomXStreamHandler extends XStreamHandler {
     xstream.alias("currentVehicleEstimate", CurrentVehicleEstimateV2Bean.class);
     
     xstream.alias("registeredAlarm", RegisteredAlarmV2Bean.class);
+
+
+    xstream.alias("routeSchedule", RouteScheduleV2Bean.class);
+    xstream.alias("stopTripGrouping", StopTripDirectionV2Bean.class);
+    ClassAliasingMapper mapper = new ClassAliasingMapper(xstream.getMapper());
+
+    mapper.addClassAlias("stopId", String.class);
+    mapper.addClassAlias("tripId", String.class);
+    xstream.registerLocalConverter(StopTripDirectionV2Bean.class, "stopIds", new CollectionConverter(mapper));
+    xstream.registerLocalConverter(StopTripDirectionV2Bean.class, "tripIds", new CollectionConverter(mapper));
 
     return xstream;
   }
