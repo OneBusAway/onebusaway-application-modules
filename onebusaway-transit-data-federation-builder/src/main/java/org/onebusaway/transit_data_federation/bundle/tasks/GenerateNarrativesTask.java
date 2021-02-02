@@ -178,7 +178,6 @@ public class GenerateNarrativesTask implements Runnable {
       narrative.setEmail(deduplicate(agency.getEmail()));
       narrative.setTimezone(deduplicate(agency.getTimezone()));
       narrative.setUrl(deduplicate(agency.getUrl()));
-      narrative.setEmail(agency.getEmail());
       narrative.setFareUrl(agency.getFareUrl());
 
       String disclaimer = _modifications.getModificationForTypeAndId(
