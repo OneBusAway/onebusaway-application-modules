@@ -53,10 +53,6 @@ public class RouteScheduleV2Bean implements Serializable {
     private long scheduleDate;
     private List<StopTripDirectionV2Bean> stopTripGroupings;
 
-
-
-    private List<StopRouteScheduleV2Bean> stopRouteSchedules;
-
     public String getRouteId() {
         return routeId;
     }

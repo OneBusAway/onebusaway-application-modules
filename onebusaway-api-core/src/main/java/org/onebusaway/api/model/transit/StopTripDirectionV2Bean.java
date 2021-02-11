@@ -40,6 +40,7 @@ public class StopTripDirectionV2Bean {
     private String tripHeadsign;
     private List<String> stopIds = new ArrayList<>();
     private List<String> tripIds = new ArrayList<>();
+    private List<List<ScheduleStopTimeInstanceV2Bean>> stopTimes = new ArrayList();
 
 
     public void setDirectionId(String directionId){
@@ -76,5 +77,13 @@ public class StopTripDirectionV2Bean {
 
     public void addTripId(String tripId){
         tripIds.add(tripId);
+    }
+
+    public void setStopTimes(List<List<ScheduleStopTimeInstanceV2Bean>> stopTimes) {
+        this.stopTimes = stopTimes;
+    }
+
+    public List<List<ScheduleStopTimeInstanceV2Bean>> getStopTimes() {
+        return stopTimes;
     }
 }
