@@ -22,7 +22,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.collections.transformation.SortedList;
 import org.onebusaway.api.impl.MaxCountSupport;
 import org.onebusaway.api.model.transit.blocks.BlockConfigurationV2Bean;
@@ -734,7 +733,7 @@ public class BeanFactoryV2 {
       v2.setStopIds(stdb.getStopIds().stream().map(x->x.toString()).collect(Collectors.toList()));
       Collections.sort(stdb.getTripIds());
       v2.setTripIds(stdb.getTripIds().stream().map(x->x.toString()).collect(Collectors.toList()));
-      v2.setStopTimes(stdb.getTripIds().stream().
+      v2.setTripsWithStopTimes(stdb.getTripIds().stream().
               map(x-> getStopTimesForTrip(x.toString(),SortedStopTimesList))
               .collect(Collectors.toList()));
       stopTripDirectionBeans.add(v2);
@@ -763,7 +762,7 @@ public class BeanFactoryV2 {
     return bean;
   }
 
-  private List<ScheduleStopTimeInstanceV2Bean> getStopTimesForTrip(
+  private TripWithStopTimesV2Bean getStopTimesForTrip(
           String tripId,
           SortedList<StopTimeInstanceBean> sortedStoptimesList){
     int index = getIndexOfFirstStopTimeMatchForTrip(sortedStoptimesList,tripId);
@@ -778,7 +777,10 @@ public class BeanFactoryV2 {
       }
       stopTime = sortedStoptimesList.get(index);
     }
-    return stopTimesForTrip;
+    TripWithStopTimesV2Bean tripWithStopTimes = new TripWithStopTimesV2Bean();
+    tripWithStopTimes.setTripId(tripId);
+    tripWithStopTimes.setStopTimes(stopTimesForTrip);
+    return tripWithStopTimes;
   }
 
   private int getIndexOfFirstStopTimeMatchForTrip(SortedList<StopTimeInstanceBean> sortedStoptimesList, String trip){

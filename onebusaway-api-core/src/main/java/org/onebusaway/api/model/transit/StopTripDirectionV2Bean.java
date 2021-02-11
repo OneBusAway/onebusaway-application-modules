@@ -16,13 +16,6 @@
 
 package org.onebusaway.api.model.transit;
 
-import org.onebusaway.api.model.transit.AgencyV2Bean;
-import org.onebusaway.api.model.transit.RouteV2Bean;
-import org.onebusaway.api.model.transit.StopV2Bean;
-import org.onebusaway.api.model.transit.TripV2Bean;
-import org.onebusaway.api.model.transit.schedule.StopTimeV2Bean;
-import org.onebusaway.transit_data.model.StopTripDirectionBean;
-
 import java.util.ArrayList;
 import java.util.List;
 /**
@@ -40,7 +33,7 @@ public class StopTripDirectionV2Bean {
     private String tripHeadsign;
     private List<String> stopIds = new ArrayList<>();
     private List<String> tripIds = new ArrayList<>();
-    private List<List<ScheduleStopTimeInstanceV2Bean>> stopTimes = new ArrayList();
+    private List<TripWithStopTimesV2Bean> tripsWithStopTimes = new ArrayList();
 
 
     public void setDirectionId(String directionId){
@@ -79,11 +72,11 @@ public class StopTripDirectionV2Bean {
         tripIds.add(tripId);
     }
 
-    public void setStopTimes(List<List<ScheduleStopTimeInstanceV2Bean>> stopTimes) {
-        this.stopTimes = stopTimes;
+    public void setTripsWithStopTimes(List<TripWithStopTimesV2Bean> tripsWithStopTimes) {
+        this.tripsWithStopTimes = tripsWithStopTimes;
     }
 
-    public List<List<ScheduleStopTimeInstanceV2Bean>> getStopTimes() {
-        return stopTimes;
+    public List<TripWithStopTimesV2Bean> getTripsWithStopTimes() {
+        return tripsWithStopTimes;
     }
 }
