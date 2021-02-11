@@ -37,6 +37,19 @@ http://api.pugetsound.onebusaway.org/api/where/schedule-for-route/97_9.xml?key=T
     						<tripId>97_556</tripId>
     						<!-- More tripId entries... -->
     					</tripIds>
+    					<tripsWithStopTimes>
+                            <tripWithStopTimes>
+                                <TripId>97_556</TripId>
+                                <scheduledStopTimes>
+                                    <arrivalEnabled>true</arrivalEnabled>
+                                    <arrivalTime>52260</arrivalTime>
+                                    <departureEnabled>true</departureEnabled>
+                                    <departureTime>52260</departureTime>
+                                    <tripId>97_556</tripId>
+                                </scheduleStopTime>
+                            </tripWithStopTimes>
+                            <!-- More tripWithStopTimes entries... -->
+                        </tripsWithStopTimes>
     				</stopTripGrouping>
     				<!-- More StopTripGrouping entries... -->
     			</stopTripGroupings>
