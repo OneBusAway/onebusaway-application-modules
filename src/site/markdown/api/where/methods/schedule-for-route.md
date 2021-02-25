@@ -80,6 +80,6 @@ The entry also has concentrated schedule information in the form of stopTripGrou
 * `<directionId\>` - the direction the trips are heading -  for more information see the [GTFS spec](http://code.google.com/transit/spec/transit_feed_specification.html)
 * `<tripHeadsign\>` - the trip headsign - a string indicting the destination of the trip
 * `<stopIds\>` - an ordered list of stop Ids - Each id is of the format `[agency]_[stopIdentifier]`
-* `<tripIds\>` - a list of trip Ids that matched by shared direction, headsign, and stops - Each trip Id is of the format `[agency]_[tripIdentifier]`
+* `<tripIds\>` - a list of trip Ids that matched by shared direction- Each trip Id is of the format `[agency]_[tripIdentifier]`
 
 

@@ -39,7 +39,7 @@ import java.util.List;
  *  *         }
  *  *       ]
  */
-public class StopTripDirectionBean implements Serializable {
+public class StopsAndTripsForDirectionBean implements Serializable {
 
   private static final long serialVersionUID = 1L;
 

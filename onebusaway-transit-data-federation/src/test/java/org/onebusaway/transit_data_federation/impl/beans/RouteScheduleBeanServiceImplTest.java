@@ -23,7 +23,7 @@ import org.onebusaway.gtfs.model.calendar.CalendarServiceData;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
 import org.onebusaway.transit_data.model.RouteScheduleBean;
 import org.onebusaway.transit_data.model.StopTimeInstanceBean;
-import org.onebusaway.transit_data.model.StopTripDirectionBean;
+import org.onebusaway.transit_data.model.StopsAndTripsForDirectionBean;
 import org.onebusaway.transit_data_federation.impl.ExtendedCalendarServiceImpl;
 import org.onebusaway.transit_data_federation.impl.blocks.BlockIndexFactoryServiceImpl;
 import org.onebusaway.transit_data_federation.impl.blocks.BlockIndexServiceImpl;
@@ -108,7 +108,7 @@ public class RouteScheduleBeanServiceImplTest {
     assertEquals(serviceDate, bean.getScheduleDate());
 
     assertEquals(2, bean.getStopTripDirections().size());
-    StopTripDirectionBean stdb1 = getStopTripDirection(bean.getStopTripDirections(), "Theater District Station", "0");
+    StopsAndTripsForDirectionBean stdb1 = getStopTripDirection(bean.getStopTripDirections(), "Theater District Station", "0");
     assertNotNull(stdb1);
 
     Comparator<AgencyAndId> comparator = Comparator.comparing(AgencyAndId::getId);
@@ -129,7 +129,7 @@ public class RouteScheduleBeanServiceImplTest {
                     stdb1.getStopTimes().get(2).getArrivalTime(),
                     stdb1.getStopTimes().get(3).getArrivalTime()));
 
-    StopTripDirectionBean stdb2 = getStopTripDirection(bean.getStopTripDirections(), "Tacoma Dome Station", "1");
+    StopsAndTripsForDirectionBean stdb2 = getStopTripDirection(bean.getStopTripDirections(), "Tacoma Dome Station", "1");
     assertNotNull(stdb2);
 
     assertEquals(Arrays.asList(aId("TacL1001"),aId( "TacL1003")).stream().sorted(comparator).collect(toList()),
@@ -161,8 +161,8 @@ public class RouteScheduleBeanServiceImplTest {
     assertEquals(14, bean.getStopTimes().size());
   }
 
-  private StopTripDirectionBean getStopTripDirection(List<StopTripDirectionBean> stopTripDirections, String headsign, String direction) {
-    for (StopTripDirectionBean stdb: stopTripDirections) {
+  private StopsAndTripsForDirectionBean getStopTripDirection(List<StopsAndTripsForDirectionBean> stopTripDirections, String headsign, String direction) {
+    for (StopsAndTripsForDirectionBean stdb: stopTripDirections) {
       if (stdb.getTripHeadsign().equals(headsign)
           && stdb.getDirectionId().equals(direction))
         return stdb;

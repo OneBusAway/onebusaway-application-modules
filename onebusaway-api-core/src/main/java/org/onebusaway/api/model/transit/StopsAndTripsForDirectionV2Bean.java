@@ -26,7 +26,7 @@ import java.util.List;
  *      "tripIds": ["TRIPID1", "TRIPID2"]
  *      }
  **/
-public class StopTripDirectionV2Bean {
+public class StopsAndTripsForDirectionV2Bean {
     private static final long serialVersionUID = 1L;
 
     private String directionId;

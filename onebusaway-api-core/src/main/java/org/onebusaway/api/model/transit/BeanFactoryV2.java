@@ -720,9 +720,9 @@ public class BeanFactoryV2 {
       }
     };
 
-    List<StopTripDirectionV2Bean> stopTripDirectionBeans = new ArrayList<>();
-    for (StopTripDirectionBean stdb : routeSchedule.getStopTripDirections()) {
-      StopTripDirectionV2Bean v2 = new StopTripDirectionV2Bean();
+    List<StopsAndTripsForDirectionV2Bean> stopTripDirectionBeans = new ArrayList<>();
+    for (StopsAndTripsForDirectionBean stdb : routeSchedule.getStopTripDirections()) {
+      StopsAndTripsForDirectionV2Bean v2 = new StopsAndTripsForDirectionV2Bean();
       v2.setDirectionId(stdb.getDirectionId());
       v2.setTripHeadsign(stdb.getTripHeadsign());
       v2.setStopIds(stdb.getStopIds().stream().map(x->x.toString()).collect(Collectors.toList()));

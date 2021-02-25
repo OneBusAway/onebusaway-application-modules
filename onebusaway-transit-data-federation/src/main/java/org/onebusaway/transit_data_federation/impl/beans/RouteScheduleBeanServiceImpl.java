@@ -23,7 +23,7 @@ import org.onebusaway.transit_data.model.RouteBean;
 import org.onebusaway.transit_data.model.RouteScheduleBean;
 import org.onebusaway.transit_data.model.StopBean;
 import org.onebusaway.transit_data.model.StopTimeInstanceBean;
-import org.onebusaway.transit_data.model.StopTripDirectionBean;
+import org.onebusaway.transit_data.model.StopsAndTripsForDirectionBean;
 import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationQueryBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
@@ -159,7 +159,7 @@ public class RouteScheduleBeanServiceImpl implements RouteScheduleBeanService {
     List<BlockTripIndex> blockTripIndices = _blockIndexService.getBlockTripIndicesForRouteCollectionId(routeId);
 
     Map<String,StopCollections> directionToStopCollectionsMap = new HashMap<>();
-    Map<String, StopTripDirectionBean> directionToStopTripDirectionBeanMap = new HashMap<>();
+    Map<String, StopsAndTripsForDirectionBean> directionToStopTripDirectionBeanMap = new HashMap<>();
     Set<AgencyAndId> serviceIds = new HashSet<>();
     Set<TripEntry> activeTrips = new LinkedHashSet<>();
     BeanReferences references = new BeanReferences();
@@ -192,10 +192,10 @@ public class RouteScheduleBeanServiceImpl implements RouteScheduleBeanService {
           // remove stops as relevant to hashing of stopTripDirectionBean
           // make a map of stopTripDirectionBeans to StopCollections
           // Condense the stop collections and reset the result as the new stops in stopTripDirectionBean
-          StopTripDirectionBean stdb = directionToStopTripDirectionBeanMap.get(directionId);
+          StopsAndTripsForDirectionBean stdb = directionToStopTripDirectionBeanMap.get(directionId);
           StopCollections sc = directionToStopCollectionsMap.get(directionId);
           if(stdb == null){
-            stdb = new StopTripDirectionBean();
+            stdb = new StopsAndTripsForDirectionBean();
             stdb.setDirectionId(directionId);
             stdb.setTripHeadsign(headsign);
             stdb.setTripIds(new ArrayList<>());
@@ -214,7 +214,7 @@ public class RouteScheduleBeanServiceImpl implements RouteScheduleBeanService {
 
     // collapse StopCollections down to canonical pattern
     for (String direction : directionToStopTripDirectionBeanMap.keySet()) {
-      StopTripDirectionBean bean = directionToStopTripDirectionBeanMap.get(direction);
+      StopsAndTripsForDirectionBean bean = directionToStopTripDirectionBeanMap.get(direction);
       StopCollections sc = directionToStopCollectionsMap.get(direction);
       bean.setStopIds(collapse(directionToStopCollectionsMap.get(direction)));
       addStopTimeReferences(references, bean, activeTrips, bean.getTripIds(), rsb.getScheduleDate());
@@ -264,7 +264,7 @@ public class RouteScheduleBeanServiceImpl implements RouteScheduleBeanService {
   }
 
   private void addStopTimeReferences(BeanReferences references,
-                                     StopTripDirectionBean stopTripDirectionBean,
+                                     StopsAndTripsForDirectionBean stopsAndTripsForDirectionBean,
                                      Set<TripEntry> allTrips,
                                      List<AgencyAndId> selectedTrips,
                                      ServiceDate serviceDate) {
@@ -275,7 +275,7 @@ public class RouteScheduleBeanServiceImpl implements RouteScheduleBeanService {
           addAgencyReference(references, tripEntry.getId().getAgencyId());
           addTripReference(references, tripEntry);
           for (StopTimeEntry stopTimeEntry : tripEntry.getStopTimes()) {
-            addStopTimeReference(references, stopTripDirectionBean, stopTimeEntry, serviceDate);
+            addStopTimeReference(references, stopsAndTripsForDirectionBean, stopTimeEntry, serviceDate);
             addStopReference(references,stopTimeEntry.getStop(), stopTimeEntry.getTrip().getRoute());
           }
         }
@@ -349,7 +349,7 @@ public class RouteScheduleBeanServiceImpl implements RouteScheduleBeanService {
     return;
   }
 
-  private void addStopTimeReference(BeanReferences references, StopTripDirectionBean stopTripDirectionBean,
+  private void addStopTimeReference(BeanReferences references, StopsAndTripsForDirectionBean stopsAndTripsForDirectionBean,
                                     StopTimeEntry stopTimeEntry, ServiceDate serviceDate) {
     StopTimeInstanceBean bean = new StopTimeInstanceBean();
     bean.setTripId(AgencyAndIdLibrary.convertToString(stopTimeEntry.getTrip().getId()));
@@ -360,7 +360,7 @@ public class RouteScheduleBeanServiceImpl implements RouteScheduleBeanService {
     bean.setDepartureEnabled(stopTimeEntry.getDepartureTime() > 0);
     bean.setDepartureTime(stopTimeEntry.getDepartureTime());
     references.getStopTimes().add(bean);
-    stopTripDirectionBean.getStopTimes().add(bean);
+    stopsAndTripsForDirectionBean.getStopTimes().add(bean);
   }
 
   private TimeZone getTimeZoneForAgency(String agencyId) {
