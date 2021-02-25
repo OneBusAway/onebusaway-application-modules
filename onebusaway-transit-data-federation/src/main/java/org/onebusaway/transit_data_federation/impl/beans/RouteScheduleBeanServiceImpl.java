@@ -158,8 +158,8 @@ public class RouteScheduleBeanServiceImpl implements RouteScheduleBeanService {
   private void addStopTripDirectionsViaBlockTrip(RouteScheduleBean rsb, AgencyAndId routeId) {
     List<BlockTripIndex> blockTripIndices = _blockIndexService.getBlockTripIndicesForRouteCollectionId(routeId);
 
-    Map<DirectionHeadsignStops, StopTripDirectionBean> headsignToBeanMap = new HashMap<>();
-    Map<DirectionHeadsignStops, DirectionHeadsignStops> directionHeadsignStopsHashMap = new HashMap();
+    Map<String,StopCollections> directionToStopCollectionsMap = new HashMap<>();
+    Map<String, StopTripDirectionBean> directionToStopTripDirectionBeanMap = new HashMap<>();
     Set<AgencyAndId> serviceIds = new HashSet<>();
     Set<TripEntry> activeTrips = new LinkedHashSet<>();
     BeanReferences references = new BeanReferences();
@@ -170,14 +170,14 @@ public class RouteScheduleBeanServiceImpl implements RouteScheduleBeanService {
 
       for (BlockTripEntry blockTrip : bti.getTrips()) {
 
+        //check that the calendar is active and act on that
         ServiceIdActivation idActivation = blockTrip.getPattern().getServiceIds();
-
         if (_calendarService.areServiceIdsActiveOnServiceDate(
                 idActivation,
                 rsb.getScheduleDate().getAsDate(idActivation.getTimeZone()))) {
-
           activeTrips.add(blockTrip.getTrip());
 
+          // get identifying charectoristics of the trip
           String directionId = blockTrip.getTrip().getDirectionId();
           TripNarrative tripNarrativeForId = _narrativeService.getTripForId(blockTrip.getTrip().getId());
           String headsign = null;
@@ -186,34 +186,37 @@ public class RouteScheduleBeanServiceImpl implements RouteScheduleBeanService {
           } else {
             headsign = getDestinationForTrip(blockTrip.getTrip());
           }
+          //make a relevant StopCollection
           StopCollection stops = new StopCollection();
           stops.addFromTrip(blockTrip.getTrip());
-          DirectionHeadsignStops directionHeadsignStops =
-                  new DirectionHeadsignStops(directionId,headsign,stops);
-          //This hashing could be improved and might be a good choice for refactor
-          if (!directionHeadsignStopsHashMap.containsKey(directionHeadsignStops)) {
-            directionHeadsignStopsHashMap.put(directionHeadsignStops,directionHeadsignStops);
-            StopTripDirectionBean stdb = new StopTripDirectionBean();
+          // remove stops as relevant to hashing of stopTripDirectionBean
+          // make a map of stopTripDirectionBeans to StopCollections
+          // Condense the stop collections and reset the result as the new stops in stopTripDirectionBean
+          StopTripDirectionBean stdb = directionToStopTripDirectionBeanMap.get(directionId);
+          StopCollections sc = directionToStopCollectionsMap.get(directionId);
+          if(stdb == null){
+            stdb = new StopTripDirectionBean();
             stdb.setDirectionId(directionId);
             stdb.setTripHeadsign(headsign);
             stdb.setTripIds(new ArrayList<>());
-            stdb.getTripIds().add(blockTrip.getTrip().getId());
             stdb.setStopIds(new ArrayList<>());
-            headsignToBeanMap.put(directionHeadsignStops, stdb);
-          } else {
-            StopTripDirectionBean stdb = headsignToBeanMap.get(directionHeadsignStops);
-            stdb.getTripIds().add(blockTrip.getTrip().getId());
-            directionHeadsignStopsHashMap.get(directionHeadsignStops).addStopCollection(stops);
+            directionToStopTripDirectionBeanMap.put(directionId,stdb);
+
+            sc = new StopCollections();
+            directionToStopCollectionsMap.put(directionId,sc);
           }
+          stdb.getTripIds().add(blockTrip.getTrip().getId());
+          sc.addIfNotPresent(stops);
           serviceIds.add(blockTrip.getTrip().getServiceId().getId());
         }
       }
     }
 
     // collapse StopCollections down to canonical pattern
-    for (DirectionHeadsignStops hash : headsignToBeanMap.keySet()) {
-      StopTripDirectionBean bean = headsignToBeanMap.get(hash);
-      bean.setStopIds(collapse(directionHeadsignStopsHashMap.get(hash).getStopCollections()));
+    for (String direction : directionToStopTripDirectionBeanMap.keySet()) {
+      StopTripDirectionBean bean = directionToStopTripDirectionBeanMap.get(direction);
+      StopCollections sc = directionToStopCollectionsMap.get(direction);
+      bean.setStopIds(collapse(directionToStopCollectionsMap.get(direction)));
       addStopTimeReferences(references, bean, activeTrips, bean.getTripIds(), rsb.getScheduleDate());
     }
 
@@ -222,7 +225,7 @@ public class RouteScheduleBeanServiceImpl implements RouteScheduleBeanService {
       rsb.getServiceIds().add(serviceId);
     }
 
-    rsb.getStopTripDirections().addAll(headsignToBeanMap.values());
+    rsb.getStopTripDirections().addAll(directionToStopTripDirectionBeanMap.values());
     rsb.getAgencies().addAll(references.getAgencies());
     rsb.getRoutes().addAll(references.getRoutes());
     rsb.getTrips().addAll(references.getTrips());

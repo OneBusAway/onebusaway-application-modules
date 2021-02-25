@@ -21,8 +21,6 @@ import java.io.InputStream;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import javafx.collections.FXCollections;
-import javafx.collections.transformation.SortedList;
 import org.onebusaway.api.impl.MaxCountSupport;
 import org.onebusaway.api.model.transit.blocks.BlockConfigurationV2Bean;
 import org.onebusaway.api.model.transit.blocks.BlockInstanceV2Bean;
