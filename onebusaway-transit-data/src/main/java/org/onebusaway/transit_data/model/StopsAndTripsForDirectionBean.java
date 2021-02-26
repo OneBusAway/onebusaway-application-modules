@@ -19,7 +19,9 @@ import org.onebusaway.gtfs.model.AgencyAndId;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Bean to support schedule APIs
@@ -44,7 +46,7 @@ public class StopsAndTripsForDirectionBean implements Serializable {
   private static final long serialVersionUID = 1L;
 
   private String directionId;
-  private String tripHeadsign;
+  private Set<String> tripHeadsigns = new HashSet<>();
   private List<AgencyAndId> stopIds;
   private List<AgencyAndId> tripIds;
   // this bean needs to support getReferences of API tier
@@ -61,13 +63,15 @@ public class StopsAndTripsForDirectionBean implements Serializable {
     this.directionId = directionId;
   }
 
-  public String getTripHeadsign() {
-    return tripHeadsign;
+  public Set<String> getTripHeadsigns() {
+    return tripHeadsigns;
   }
 
-  public void setTripHeadsign(String tripHeadsign) {
-    this.tripHeadsign = tripHeadsign;
+  public void setTripHeadsigns(Set<String> tripHeadsigns) {
+    this.tripHeadsigns = tripHeadsigns;
   }
+
+  public void addTripHeadsign(String tripHeadsign) { this.tripHeadsigns.add(tripHeadsign); }
 
   public List<AgencyAndId> getStopIds() {
     return stopIds;

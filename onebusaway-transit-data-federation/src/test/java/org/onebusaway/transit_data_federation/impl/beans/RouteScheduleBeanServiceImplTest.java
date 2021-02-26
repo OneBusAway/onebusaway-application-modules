@@ -163,8 +163,7 @@ public class RouteScheduleBeanServiceImplTest {
 
   private StopsAndTripsForDirectionBean getStopTripDirection(List<StopsAndTripsForDirectionBean> stopTripDirections, String headsign, String direction) {
     for (StopsAndTripsForDirectionBean stdb: stopTripDirections) {
-      if (stdb.getTripHeadsign().equals(headsign)
-          && stdb.getDirectionId().equals(direction))
+      if (stdb.getDirectionId().equals(direction))
         return stdb;
     }
     return null;

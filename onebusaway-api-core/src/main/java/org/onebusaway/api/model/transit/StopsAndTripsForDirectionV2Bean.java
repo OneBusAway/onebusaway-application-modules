@@ -18,6 +18,8 @@ package org.onebusaway.api.model.transit;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+
 /**
  *      {
  *      "directionId": 0,
@@ -30,7 +32,7 @@ public class StopsAndTripsForDirectionV2Bean {
     private static final long serialVersionUID = 1L;
 
     private String directionId;
-    private String tripHeadsign;
+    private Set<String> tripHeadsigns;
     private List<String> stopIds = new ArrayList<>();
     private List<String> tripIds = new ArrayList<>();
     private List<TripWithStopTimesV2Bean> tripsWithStopTimes = new ArrayList();
@@ -44,12 +46,12 @@ public class StopsAndTripsForDirectionV2Bean {
         return directionId;
     }
 
-    public void setTripHeadsign(String tripHeadsign) {
-        this.tripHeadsign = tripHeadsign;
+    public void setTripHeadsigns(Set<String> tripHeadsigns) {
+        this.tripHeadsigns = tripHeadsigns;
     }
 
-    public String getTripHeadsign() {
-        return tripHeadsign;
+    public Set<String> getTripHeadsigns() {
+        return tripHeadsigns;
     }
 
     public void setStopIds(List<String> stopIds) {

@@ -708,7 +708,6 @@ public class BeanFactoryV2 {
 
     bean.setScheduleDate(routeSchedule.getScheduleDate().getAsDate().getTime());
 
-    int test = 7;
 
     Comparator<StopTimeInstanceBean> comparator = new Comparator<StopTimeInstanceBean>() {
       @Override
@@ -724,7 +723,7 @@ public class BeanFactoryV2 {
     for (StopsAndTripsForDirectionBean stdb : routeSchedule.getStopTripDirections()) {
       StopsAndTripsForDirectionV2Bean v2 = new StopsAndTripsForDirectionV2Bean();
       v2.setDirectionId(stdb.getDirectionId());
-      v2.setTripHeadsign(stdb.getTripHeadsign());
+      v2.setTripHeadsigns(stdb.getTripHeadsigns());
       v2.setStopIds(stdb.getStopIds().stream().map(x->x.toString()).collect(Collectors.toList()));
       Collections.sort(stdb.getTripIds());
       v2.setTripIds(stdb.getTripIds().stream().map(x->x.toString()).collect(Collectors.toList()));

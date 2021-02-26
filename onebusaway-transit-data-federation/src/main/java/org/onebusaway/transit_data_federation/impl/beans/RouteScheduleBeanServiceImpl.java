@@ -197,7 +197,6 @@ public class RouteScheduleBeanServiceImpl implements RouteScheduleBeanService {
           if(stdb == null){
             stdb = new StopsAndTripsForDirectionBean();
             stdb.setDirectionId(directionId);
-            stdb.setTripHeadsign(headsign);
             stdb.setTripIds(new ArrayList<>());
             stdb.setStopIds(new ArrayList<>());
             directionToStopTripDirectionBeanMap.put(directionId,stdb);
@@ -206,6 +205,7 @@ public class RouteScheduleBeanServiceImpl implements RouteScheduleBeanService {
             directionToStopCollectionsMap.put(directionId,sc);
           }
           stdb.getTripIds().add(blockTrip.getTrip().getId());
+          stdb.addTripHeadsign(headsign);
           sc.addIfNotPresent(stops);
           serviceIds.add(blockTrip.getTrip().getServiceId().getId());
         }
