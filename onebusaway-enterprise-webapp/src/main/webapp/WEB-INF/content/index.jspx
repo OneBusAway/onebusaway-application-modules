@@ -171,7 +171,7 @@
 		   </div>
 
 	       <form action="search.action">
-	         <input type="text" name="q" value=""/>
+	         <input type="text" name="q" value="" aria-label="Enter search: "/>
 	         <input type="submit" value="Find" class="submit"/>
 	         <p id="tip">Enter a bus stop code, route, or street address.</p>
 	       </form>
