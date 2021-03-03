@@ -750,6 +750,9 @@ public class BeanFactoryV2 {
     _references.setTrips(routeSchedule.getTrips().stream()
             .map(x->{ return getTrip(x);})
             .collect(Collectors.toList()));
+    _references.setStopTimes(routeSchedule.getStopTimes().stream()
+            .map(x->{ return getStopTime(x);})
+            .collect(Collectors.toList()));
 
     return bean;
   }

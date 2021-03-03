@@ -32,6 +32,8 @@ public class ReferencesBean {
 
   private List<SituationV2Bean> situations;
 
+  private List<ScheduleStopTimeInstanceV2Bean> stopTimes;
+
   public List<AgencyV2Bean> getAgencies() {
     return agencies;
   }
@@ -100,5 +102,19 @@ public class ReferencesBean {
     if (situations == null)
       situations = new ArrayList<SituationV2Bean>();
     situations.add(situation);
+  }
+
+  public List<ScheduleStopTimeInstanceV2Bean> getStopTimes() {
+    return stopTimes;
+  }
+
+  public void setStopTimes(List<ScheduleStopTimeInstanceV2Bean> stopTimes) {
+    this.stopTimes = stopTimes;
+  }
+
+  public void addStopTime(ScheduleStopTimeInstanceV2Bean stopTime) {
+    if (stopTimes == null)
+      stopTimes = new ArrayList<ScheduleStopTimeInstanceV2Bean>();
+    stopTimes.add(stopTime);
   }
 }
