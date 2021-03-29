@@ -16,15 +16,10 @@
 
 package org.onebusaway.api.model.transit;
 
-import org.onebusaway.api.model.transit.AgencyV2Bean;
-import org.onebusaway.api.model.transit.RouteV2Bean;
-import org.onebusaway.api.model.transit.StopV2Bean;
-import org.onebusaway.api.model.transit.TripV2Bean;
-import org.onebusaway.api.model.transit.schedule.StopTimeV2Bean;
-import org.onebusaway.transit_data.model.StopTripDirectionBean;
-
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+
 /**
  *      {
  *      "directionId": 0,
@@ -33,13 +28,14 @@ import java.util.List;
  *      "tripIds": ["TRIPID1", "TRIPID2"]
  *      }
  **/
-public class StopTripDirectionV2Bean {
+public class StopsAndTripsForDirectionV2Bean {
     private static final long serialVersionUID = 1L;
 
     private String directionId;
-    private String tripHeadsign;
+    private Set<String> tripHeadsigns;
     private List<String> stopIds = new ArrayList<>();
     private List<String> tripIds = new ArrayList<>();
+    private List<TripWithStopTimesV2Bean> tripsWithStopTimes = new ArrayList();
 
 
     public void setDirectionId(String directionId){
@@ -50,12 +46,12 @@ public class StopTripDirectionV2Bean {
         return directionId;
     }
 
-    public void setTripHeadsign(String tripHeadsign) {
-        this.tripHeadsign = tripHeadsign;
+    public void setTripHeadsigns(Set<String> tripHeadsigns) {
+        this.tripHeadsigns = tripHeadsigns;
     }
 
-    public String getTripHeadsign() {
-        return tripHeadsign;
+    public Set<String> getTripHeadsigns() {
+        return tripHeadsigns;
     }
 
     public void setStopIds(List<String> stopIds) {
@@ -76,5 +72,13 @@ public class StopTripDirectionV2Bean {
 
     public void addTripId(String tripId){
         tripIds.add(tripId);
+    }
+
+    public void setTripsWithStopTimes(List<TripWithStopTimesV2Bean> tripsWithStopTimes) {
+        this.tripsWithStopTimes = tripsWithStopTimes;
+    }
+
+    public List<TripWithStopTimesV2Bean> getTripsWithStopTimes() {
+        return tripsWithStopTimes;
     }
 }

@@ -572,6 +572,18 @@ public class BeanFactoryV2 {
     return bean;
   }
 
+  public ScheduleStopTimeInstanceV2Bean getStopTime(StopTimeInstanceBean stopTime) {
+    ScheduleStopTimeInstanceV2Bean bean = new ScheduleStopTimeInstanceV2Bean();
+    bean.setArrivalTime(stopTime.getArrivalTime());
+    bean.setDepartureTime(stopTime.getDepartureTime());
+    bean.setArrivalEnabled(stopTime.isArrivalEnabled());
+    bean.setDepartureEnabled(stopTime.isDepartureEnabled());
+    bean.setStopHeadsign(stopTime.getStopHeadsign());
+    bean.setTripId(stopTime.getTripId());
+
+    return bean;
+  }
+
   public ListWithReferencesBean<CurrentVehicleEstimateV2Bean> getCurrentVehicleEstimates(
       ListBean<CurrentVehicleEstimateBean> estimates) {
 
@@ -696,13 +708,29 @@ public class BeanFactoryV2 {
 
     bean.setScheduleDate(routeSchedule.getScheduleDate().getAsDate().getTime());
 
-    List<StopTripDirectionV2Bean> stopTripDirectionBeans = new ArrayList<>();
-    for (StopTripDirectionBean stdb : routeSchedule.getStopTripDirections()) {
-      StopTripDirectionV2Bean v2 = new StopTripDirectionV2Bean();
+
+    Comparator<StopTimeInstanceBean> comparator = new Comparator<StopTimeInstanceBean>() {
+      @Override
+      public int compare(StopTimeInstanceBean s1, StopTimeInstanceBean s2) {
+        if(!s1.getTripId().equals(s2.getTripId())){
+          return s1.getTripId().compareTo(s2.getTripId());
+        }
+        return s1.getArrivalTime()<s2.getArrivalTime() ? -1 :1;
+      }
+    };
+
+    List<StopsAndTripsForDirectionV2Bean> stopTripDirectionBeans = new ArrayList<>();
+    for (StopsAndTripsForDirectionBean stdb : routeSchedule.getStopTripDirections()) {
+      StopsAndTripsForDirectionV2Bean v2 = new StopsAndTripsForDirectionV2Bean();
       v2.setDirectionId(stdb.getDirectionId());
-      v2.setTripHeadsign(stdb.getTripHeadsign());
+      v2.setTripHeadsigns(stdb.getTripHeadsigns());
       v2.setStopIds(stdb.getStopIds().stream().map(x->x.toString()).collect(Collectors.toList()));
+      Collections.sort(stdb.getTripIds());
       v2.setTripIds(stdb.getTripIds().stream().map(x->x.toString()).collect(Collectors.toList()));
+      Collections.sort(stdb.getStopTimes(),comparator);
+      v2.setTripsWithStopTimes(stdb.getTripIds().stream().
+              map(x-> getStopTimesForTrip(x.toString(),stdb.getStopTimes()))
+              .collect(Collectors.toList()));
       stopTripDirectionBeans.add(v2);
     }
     bean.setStopTripGroupings(stopTripDirectionBeans);
@@ -722,8 +750,67 @@ public class BeanFactoryV2 {
     _references.setTrips(routeSchedule.getTrips().stream()
             .map(x->{ return getTrip(x);})
             .collect(Collectors.toList()));
+    _references.setStopTimes(routeSchedule.getStopTimes().stream()
+            .map(x->{ return getStopTime(x);})
+            .collect(Collectors.toList()));
 
     return bean;
+  }
+
+  private TripWithStopTimesV2Bean getStopTimesForTrip(
+          String tripId,
+          List<StopTimeInstanceBean> sortedStoptimesList){
+    int index = getIndexOfFirstStopTimeMatchForTrip(sortedStoptimesList,tripId);
+    List stopTimesForTrip = new ArrayList<ScheduleStopTimeInstanceV2Bean>();
+    StopTimeInstanceBean stopTime = sortedStoptimesList.get(index);
+    while (stopTime.getTripId().equals(tripId)){
+      ScheduleStopTimeInstanceV2Bean v2 = getStopTime(stopTime);
+      stopTimesForTrip.add(v2);
+      index++;
+      if(index>=sortedStoptimesList.size()){
+        break;
+      }
+      stopTime = sortedStoptimesList.get(index);
+    }
+    TripWithStopTimesV2Bean tripWithStopTimes = new TripWithStopTimesV2Bean();
+    tripWithStopTimes.setTripId(tripId);
+    tripWithStopTimes.setStopTimes(stopTimesForTrip);
+    return tripWithStopTimes;
+  }
+
+  private int getIndexOfFirstStopTimeMatchForTrip(List<StopTimeInstanceBean> sortedStoptimesList, String trip){
+    int i = getIndexStopTimesByTrip(sortedStoptimesList, trip);
+    if(i==0){return i;}
+    while(true){
+      i--;
+      if(!sortedStoptimesList.get(i).getTripId().equals(trip)){
+        return i+1;
+      }
+    }
+
+  }
+
+
+  private int getIndexStopTimesByTrip(List<StopTimeInstanceBean> sortedStoptimesList, String trip){
+    int min = 0;
+    int max = sortedStoptimesList.size() -1;
+    int i = 0;
+    if (max ==min){return -1;}
+    if (max == i) {return 0;}
+    while(true){
+      int comparison = sortedStoptimesList.get(i).getTripId().compareTo(trip);
+      if(comparison<0) {
+        min = i;
+        i = (min + max) / 2 + 1;
+      }
+      else if (comparison>0){
+        max = i;
+        i = (min + max)/2;
+      }
+      else{
+        return i;
+      }
+    }
   }
 
   public StopScheduleV2Bean getStopSchedule(StopScheduleBean stopSchedule) {

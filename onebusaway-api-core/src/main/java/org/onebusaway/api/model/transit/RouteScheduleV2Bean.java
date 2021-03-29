@@ -51,11 +51,7 @@ public class RouteScheduleV2Bean implements Serializable {
     private String routeId;
     private List<String> serviceIds;
     private long scheduleDate;
-    private List<StopTripDirectionV2Bean> stopTripGroupings;
-
-
-
-    private List<StopRouteScheduleV2Bean> stopRouteSchedules;
+    private List<StopsAndTripsForDirectionV2Bean> stopTripGroupings;
 
     public String getRouteId() {
         return routeId;
@@ -81,11 +77,11 @@ public class RouteScheduleV2Bean implements Serializable {
         this.scheduleDate = scheduleDate;
     }
 
-    public List<StopTripDirectionV2Bean> getStopTripGroupings() {
+    public List<StopsAndTripsForDirectionV2Bean> getStopTripGroupings() {
         return stopTripGroupings;
     }
 
-    public void setStopTripGroupings(List<StopTripDirectionV2Bean> stopTripGroupings) {
+    public void setStopTripGroupings(List<StopsAndTripsForDirectionV2Bean> stopTripGroupings) {
         this.stopTripGroupings = stopTripGroupings;
     }
 }
