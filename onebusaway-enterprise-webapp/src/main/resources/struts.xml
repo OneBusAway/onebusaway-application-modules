@@ -94,7 +94,7 @@
         </global-results>
         <global-exception-mappings>
     		<exception-mapping exception="java.lang.Exception" result="errorHandler"/>
-    		
+
     		<!-- OBA App Mods Exceptions -->
     		<exception-mapping exception="org.onebusaway.exceptions.NoSuchStopServiceException"
                 result="NoSuchStopServiceException" />

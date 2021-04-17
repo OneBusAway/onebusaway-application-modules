@@ -200,6 +200,14 @@
         <property name="platformCode" />
     </class>
 
+    <class name="org.onebusaway.gtfs.model.StopLocation" table="tmp_gtfs_stop_locations">
+        <composite-id name="id" class="org.onebusaway.gtfs.model.AgencyAndId">
+            <key-property name="agencyId" length="50" />
+            <key-property name="id" />
+        </composite-id>
+        <property name="name" />
+    </class>
+
     <class name="org.onebusaway.gtfs.model.StopTime" table="tmp_gtfs_stop_times">
         <id name="id" column="gid" type="int" length="11" unsaved-value="null">
             <generator class="increment" />
