@@ -17,8 +17,8 @@ package org.onebusaway.admin.service.server;
 
 import com.google.transit.realtime.GtfsRealtime.FeedMessage;
 
-public interface RssServiceAlertsService {
+public interface IntegratingServiceAlertsService {
 
-  public FeedMessage getServlceAlertFeed();
+  public FeedMessage getServiceAlertFeed();
 
 }

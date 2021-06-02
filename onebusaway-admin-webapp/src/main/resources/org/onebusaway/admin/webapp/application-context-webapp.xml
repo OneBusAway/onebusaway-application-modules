@@ -194,6 +194,6 @@
 	  <bean id="configurationServiceClient" class="org.onebusaway.util.impl.configuration.ConfigurationServiceClientFileImpl" >
 	  </bean>
 
-    <bean id="rssServiceAlertsService" class="org.onebusaway.admin.service.server.impl.RssServiceAlertsSerivceImpl" />
+    <bean id="rssServiceAlertsService" class="org.onebusaway.admin.service.server.impl.RssServiceAlertsServiceImpl" />
 
 </beans>

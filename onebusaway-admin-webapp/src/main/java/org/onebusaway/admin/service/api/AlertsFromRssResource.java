@@ -25,7 +25,7 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 
-import org.onebusaway.admin.service.server.RssServiceAlertsService;
+import org.onebusaway.admin.service.server.IntegratingServiceAlertsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,14 +40,14 @@ public class AlertsFromRssResource {
   private static Logger _log = LoggerFactory.getLogger(AlertsFromRssResource.class);
   
   @Autowired
-  private RssServiceAlertsService _alertsService;
+  private IntegratingServiceAlertsService _alertsService;
   
   
   @Path("/service-alerts")
   @GET
   @Produces("application/x-google-protobuff") 
   public Response getAll() {
-    final FeedMessage serviceAlertFeed = _alertsService.getServlceAlertFeed();
+    final FeedMessage serviceAlertFeed = _alertsService.getServiceAlertFeed();
     if (serviceAlertFeed == null) {
       return Response.ok().build();
     }
@@ -67,7 +67,7 @@ public class AlertsFromRssResource {
   @GET
   @Produces("text/plain")
   public Response getAllDebug() {
-    FeedMessage serviceAlertFeed = _alertsService.getServlceAlertFeed();
+    FeedMessage serviceAlertFeed = _alertsService.getServiceAlertFeed();
     if (serviceAlertFeed == null) {
       _log.info("empty feed");
       return Response.ok().build();
