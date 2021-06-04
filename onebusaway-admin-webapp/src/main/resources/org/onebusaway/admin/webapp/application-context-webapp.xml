@@ -195,5 +195,6 @@
 	  </bean>
 
     <bean id="rssServiceAlertsService" class="org.onebusaway.admin.service.server.impl.RssServiceAlertsServiceImpl" />
+    <bean id="cleverServiceAlertsService" class="org.onebusaway.admin.service.server.impl.CleverServiceAlertsServiceImpl" />
 
 </beans>

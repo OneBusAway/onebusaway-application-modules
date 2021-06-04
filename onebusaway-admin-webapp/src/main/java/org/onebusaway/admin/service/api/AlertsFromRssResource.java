@@ -29,6 +29,7 @@ import org.onebusaway.admin.service.server.IntegratingServiceAlertsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import com.google.transit.realtime.GtfsRealtime.FeedMessage;
@@ -40,6 +41,7 @@ public class AlertsFromRssResource {
   private static Logger _log = LoggerFactory.getLogger(AlertsFromRssResource.class);
   
   @Autowired
+  @Qualifier("rssServiceAlertsService")
   private IntegratingServiceAlertsService _alertsService;
   
   
