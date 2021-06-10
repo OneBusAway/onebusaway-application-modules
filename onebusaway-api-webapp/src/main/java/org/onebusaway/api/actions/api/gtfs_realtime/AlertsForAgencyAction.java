@@ -28,9 +28,10 @@ public class AlertsForAgencyAction extends GtfsRealtimeActionSupport {
 
   @Override
   protected void fillFeedMessage(FeedMessage.Builder feed, String agencyId,
-      long timestamp) {
+      long timestamp, FILTER_TYPE filterType, String filterValue) {
 
     ListBean<ServiceAlertBean> alerts = _service.getAllServiceAlertsForAgencyId(agencyId);
+    // TODO add support for filter
     ServiceAlertBuilderHelper.fillFeedMessage(feed, alerts, agencyId, timestamp);
   }
 }
