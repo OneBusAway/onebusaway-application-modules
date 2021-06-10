@@ -36,6 +36,11 @@ public abstract class GtfsRealtimeActionSupport extends ApiActionSupport {
 
   private static final long serialVersionUID = 1L;
 
+  enum FILTER_TYPE {
+    UNFILTERED,
+    ROUTE_ID
+  }
+
   private static final int V2 = 2;
 
   @Autowired
@@ -47,6 +52,8 @@ public abstract class GtfsRealtimeActionSupport extends ApiActionSupport {
   private String _agencyId;
 
   private long _time;
+
+  private String _routeFilterId;
 
   private boolean _removeAgencyIds = true;
 
@@ -66,6 +73,10 @@ public abstract class GtfsRealtimeActionSupport extends ApiActionSupport {
   public String getId() {
     return _agencyId;
   }
+
+  public void setRouteFilterId(String routeId) { _routeFilterId = routeId; }
+
+  public String getRouteFilterId() { return _routeFilterId; }
 
   @TypeConversion(converter = "org.onebusaway.presentation.impl.conversion.DateTimeConverter")
   public void setTime(Date time) {
@@ -91,12 +102,17 @@ public abstract class GtfsRealtimeActionSupport extends ApiActionSupport {
     FeedHeader.Builder header = feed.getHeaderBuilder();
     header.setGtfsRealtimeVersion(GtfsRealtimeConstants.VERSION);
     header.setTimestamp(time / 1000);
-    fillFeedMessage(feed, _agencyId, time);
+    if (getRouteFilterId() != null) {
+      fillFeedMessage(feed, _agencyId, time, FILTER_TYPE.ROUTE_ID, getRouteFilterId());
+    } else {
+      fillFeedMessage(feed, _agencyId, time, FILTER_TYPE.UNFILTERED, null);
+    }
+
     return setOkResponse(feed.build());
   }
 
   protected abstract void fillFeedMessage(FeedMessage.Builder feed,
-      String agencyId, long timestamp);
+      String agencyId, long timestamp, FILTER_TYPE filterType, String filterValue);
 
   protected String normalizeId(String id) {
     if (_removeAgencyIds) {

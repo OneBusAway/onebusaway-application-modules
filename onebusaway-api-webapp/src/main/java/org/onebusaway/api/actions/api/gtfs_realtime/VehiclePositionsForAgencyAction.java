@@ -35,7 +35,7 @@ public class VehiclePositionsForAgencyAction extends GtfsRealtimeActionSupport {
 
   @Override
   protected void fillFeedMessage(FeedMessage.Builder feed, String agencyId,
-      long timestamp) {
+      long timestamp, FILTER_TYPE filterType, String filterValue) {
 
     ListBean<VehicleStatusBean> vehicles = _service.getAllVehiclesForAgency(
         agencyId, timestamp);
