@@ -27,12 +27,10 @@ import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpStatus;
 import org.onebusaway.admin.service.server.ConsoleServiceAlertsService;
 import org.onebusaway.admin.service.server.IntegratingServiceAlertsService;
-import org.onebusaway.alerts.impl.ServiceAlertRecord;
+import org.onebusaway.alerts.impl.ServiceAlertLibrary;
 import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.transit_data.model.service_alerts.NaturalLanguageStringBean;
-import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
-import org.onebusaway.transit_data.model.service_alerts.SituationAffectsBean;
-import org.onebusaway.transit_data.model.service_alerts.TimeRangeBean;
+import org.onebusaway.transit_data.model.ListBean;
+import org.onebusaway.transit_data.model.service_alerts.*;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,16 +43,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * integrate with Clever's Disruption Management API.  For each detour listed,
@@ -66,8 +59,9 @@ public class CleverServiceAlertsServiceImpl implements IntegratingServiceAlertsS
   private static Logger _log = LoggerFactory.getLogger(CleverServiceAlertsServiceImpl.class);
 
   private static final String DEFAULT_AGENCY_ID = "71";
+  private static final String DEFAULT_SOURCE = "clever";
 
-  private String _defaultAgencyId = null;
+  private String _defaultAgencyId = DEFAULT_AGENCY_ID;
   private HttpClient _httpClient = new HttpClient();
   private GtfsRealtime.FeedMessage _feed = null;
   private ScheduledExecutorService _executor;
@@ -77,14 +71,17 @@ public class CleverServiceAlertsServiceImpl implements IntegratingServiceAlertsS
   private String _cleverAPIUrlString
           = null;
 
-  private String agencyId = DEFAULT_AGENCY_ID;
-  private String detourMessage = null;
+  private String source = DEFAULT_SOURCE;
+  private String detourMessage = "Detour for";
   private Map<String, String> cleverRouteToGtfsRouteId = new HashMap<>();
 
   public String getAgencyId() {
     if (_defaultAgencyId != null) return _defaultAgencyId;
     // not configured, default to the first agency
     return _transitDataService.getAgenciesWithCoverage().get(0).getAgency().getId();
+  }
+  public String getSource() {
+    return source;
   }
 
   @Autowired
@@ -101,9 +98,11 @@ public class CleverServiceAlertsServiceImpl implements IntegratingServiceAlertsS
     this._cleverAPIUrlString = urlWithApiKey;
   }
 
-  public void setAgencyId(String agencyId) {
-    this.agencyId = agencyId;
+  public void setDefaultAgencyId(String agencyId) {
+    this._defaultAgencyId = agencyId;
   }
+
+  public void setAlertSource(String source) { this.source = source; }
 
   public void setRouteMapping(Map<String, String> map) {
     this.cleverRouteToGtfsRouteId = map;
@@ -184,16 +183,20 @@ public class CleverServiceAlertsServiceImpl implements IntegratingServiceAlertsS
       // detour is cancelled, do not serve alert
       return null;
     }
-    bean.setId(detour.get("id").getAsString());
-    if (detourMessage == null) {
-      if (detour.has("desc")) {
-        bean.setSummaries(toNLSBeanList(detour.get("desc").getAsString()));
-      }
-    } else {
-      bean.setSummaries(toNLSBeanList(detourMessage));
+    AgencyAndId aid = ServiceAlertLibrary.agencyAndId(getAgencyId(), detour.get("id").getAsString());
+    bean.setId(aid.toString());
+    bean.setSource(getSource());
+    bean.setSeverity(ESeverity.UNKNOWN);
+    if (detour.has("desc")) {
+        bean.setDescriptions(toNLSBeanList(detour.get("desc").getAsString()));
     }
     if (detour.has("rtdirs")) {
       bean.setAllAffects(parseAffects(detour.get("rtdirs").getAsJsonArray()));
+      if (detourMessage != null)
+        bean.setSummaries(toNLSBeanList(parseSummaries(detour.get("rtdirs").getAsJsonArray())));
+      else {//use feed desc if necessary
+        bean.setSummaries(toNLSBeanList(detour.get("desc").getAsString()));
+      }
     }
     String startDate = null;
     String endDate = null;
@@ -204,12 +207,12 @@ public class CleverServiceAlertsServiceImpl implements IntegratingServiceAlertsS
       endDate = detour.get("enddt").getAsString();
     }
     if (startDate != null || endDate != null) {
-      bean.setActiveWindows(parseActiveWindow(startDate, endDate));
+      bean.setPublicationWindows(parsePublicationWindow(startDate, endDate));
     }
     return bean;
   }
 
-  private List<TimeRangeBean> parseActiveWindow(String startDateStr, String endDateStr) {
+  private List<TimeRangeBean> parsePublicationWindow(String startDateStr, String endDateStr) {
     List<TimeRangeBean> beans = new ArrayList<>();
     TimeRangeBean bean = new TimeRangeBean();
     beans.add(bean);
@@ -229,11 +232,30 @@ public class CleverServiceAlertsServiceImpl implements IntegratingServiceAlertsS
       JsonObject rtdir = iterator.next().getAsJsonObject();
       if (rtdir.has("rt")) {
         SituationAffectsBean bean = new SituationAffectsBean();
-        bean.setRouteId(new AgencyAndId(agencyId, lookupRoute(rtdir.get("rt").getAsString())).toString());
+        bean.setRouteId(new AgencyAndId(getAgencyId(), lookupRoute(rtdir.get("rt").getAsString())).toString());
         beans.add(bean);
       }
     }
     return beans;
+  }
+
+  private String parseSummaries(JsonArray rtdirs) {
+    StringBuilder builder = new StringBuilder(detourMessage);
+    List rts = new ArrayList();
+    Iterator<JsonElement> iterator = rtdirs.iterator();
+    while (iterator.hasNext()) {
+      JsonObject rtdir = iterator.next().getAsJsonObject();
+      if (rtdir.has("rt")) {
+        String rtdirString = lookupRoute(rtdir.get("rt").getAsString());
+        if (rtdir.has("dir")) {
+          rtdirString += " " + rtdir.get("dir").getAsString();
+        }
+        rts.add(rtdirString);
+      }
+    }
+    builder.append(" ");
+    builder.append(String.join(", ", rts));
+    return builder.toString();
   }
 
   private String lookupRoute(String rt) {
@@ -245,11 +267,15 @@ public class CleverServiceAlertsServiceImpl implements IntegratingServiceAlertsS
 
   private List<NaturalLanguageStringBean> toNLSBeanList(String text) {
     List<NaturalLanguageStringBean> beans = new ArrayList<>();
-    NaturalLanguageStringBean bean = new NaturalLanguageStringBean();
-    bean.setLang("EN");
-    bean.setValue(text);
-    beans.add(bean);
+    beans.add(toNLSBean(text));
     return beans;
+  }
+
+  private NaturalLanguageStringBean toNLSBean(String text) {
+    NaturalLanguageStringBean bean = new NaturalLanguageStringBean();
+    bean.setLang(Locale.getDefault().getLanguage());
+    bean.setValue(text);
+    return bean;
   }
 
   public Long parseDate(String dateStr) {
@@ -262,26 +288,76 @@ public class CleverServiceAlertsServiceImpl implements IntegratingServiceAlertsS
     return null;
   }
 
+  void runPollDMTask() {
+    List<ServiceAlertBean> toAdd = new ArrayList<>();
+    List<ServiceAlertBean> toUpdate = new ArrayList<>();
+    List<AgencyAndId> toRemove = new ArrayList<>();
+    try {
+
+      //current Clever feed alerts
+      List<ServiceAlertBean> incomingCleverAlerts = pollCleverAPI();
+      if (incomingCleverAlerts == null) {
+        incomingCleverAlerts = new ArrayList<>();//don't let it stay null
+      }
+      //current oba alerts (for the agency for this feed)
+      ListBean<ServiceAlertBean> currentObaAlerts = _serviceAlertsService.getAllServiceAlertsForAgencyId(getAgencyId());
+      if (currentObaAlerts == null) {
+        currentObaAlerts = new ListBean<>();//don't let it stay null
+      }
+      //all alerts in oba currently sourced to clever
+      List<ServiceAlertBean> cleverAlertsInOba = currentObaAlerts.getList().stream()
+              .filter(alert -> getSource().equals(alert.getSource()))
+              .collect(Collectors.toList());
+
+      //the id's of all the incoming clever alerts
+      Set<String> incomingCleverAlertIds = incomingCleverAlerts.stream()
+              .map(alert -> alert.getId())
+              .collect(Collectors.toSet());
+      //id's of all current oba alerts
+      Set<String> alertIdsInOba = currentObaAlerts.getList().stream()
+              .map(alert -> alert.getId())
+              .collect(Collectors.toSet());
+      //the id's of all the clever sourced alerts currently in OBA
+      Set<String> cleverAlertIdsInOba = cleverAlertsInOba.stream()
+              .map(alert -> alert.getId())
+              .collect(Collectors.toSet());
+
+      //add incoming clever alerts that have id's not already in oba
+      toAdd.addAll(
+              incomingCleverAlerts.stream()
+              .filter(alert -> !(alertIdsInOba.contains(alert.getId())))
+              .collect(Collectors.toList())
+      );
+
+      //update using incoming clever alerts if the id exists and it is still sourced to clever
+      toUpdate.addAll(
+              incomingCleverAlerts.stream()
+              .filter(alert -> cleverAlertIdsInOba.contains(alert.getId()))
+              .collect(Collectors.toList())
+      );
+
+      //keep only the orphaned clever alerts that are in oba by removing from this list all that are incoming
+      cleverAlertIdsInOba.removeAll(incomingCleverAlertIds);//NOTE: cleverAlertIdsInOba List is compromised here
+
+      toRemove.addAll(
+              cleverAlertIdsInOba.stream()
+              .map(id -> ServiceAlertLibrary.agencyAndIdAndId(getAgencyId(), id))
+              .collect(Collectors.toList())
+      );
+
+      _serviceAlertsService.removeServiceAlerts(toRemove);
+      _serviceAlertsService.updateServiceAlerts(getAgencyId(), toUpdate);
+      _serviceAlertsService.createServiceAlerts(getAgencyId(), toAdd);
+
+    } catch (Exception any) {
+      _log.error("clever polling failed with " + any, any);
+    }
+  }
+
   private class PollDMTask implements Runnable {
     @Override
     public void run() {
-      Set<AgencyAndId> currentAlerts = new HashSet<AgencyAndId>();
-      Set<ServiceAlertRecord> toAdd = new HashSet<>();
-      Set<ServiceAlertRecord> toUpdate = new HashSet<>();
-
-      ArrayList<AgencyAndId> idsInCollection = new ArrayList<>();
-      try {
-
-        List<ServiceAlertBean> alertsCollection = pollCleverAPI();
-
-      } catch (Exception any) {
-        _log.error("clever polling failed with " + any, any);
-      }
-    }
-
-
-    private AgencyAndId handleSingleAlert(ServiceAlertBean alert) {
-      return null;
+      runPollDMTask();
     }
   }
 

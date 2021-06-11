@@ -79,18 +79,18 @@ public class CleverServiceAlertsServiceImplTest {
     assertNotNull(serviceAlertBeans);
     assertEquals(1, serviceAlertBeans.size());
     ServiceAlertBean bean = serviceAlertBeans.get(0);
-    assertEquals("888F268C-9D40-4456-9CAF-D3D64E3F3C55", bean.getId());
+    assertEquals("71_888F268C-9D40-4456-9CAF-D3D64E3F3C55", bean.getId());
     assertNotNull(bean.getSummaries());
-    assertEquals("AT1 SB SNOW ROUTE", bean.getSummaries().get(0).getValue());
+    assertEquals("AT1 SB SNOW ROUTE", bean.getDescriptions().get(0).getValue());
     assertNotNull(bean.getAllAffects());
     assertEquals(1, bean.getAllAffects().size());
     SituationAffectsBean situationAffectsBean = bean.getAllAffects().get(0);
     assertNull(situationAffectsBean.getAgencyId());
     assertEquals("71", situationAffectsBean.getAgencyPartRouteId());
     assertEquals("AT1", situationAffectsBean.getRoutePartRouteId());
-    assertNotNull(bean.getActiveWindows());
-    assertEquals(1, bean.getActiveWindows().size());
-    TimeRangeBean timeRangeBean = bean.getActiveWindows().get(0);
+    assertNotNull(bean.getPublicationWindows());
+    assertEquals(1, bean.getPublicationWindows().size());
+    TimeRangeBean timeRangeBean = bean.getPublicationWindows().get(0);
     assertEquals((long)impl.parseDate("20210209 00:00"), timeRangeBean.getFrom());
     assertEquals((long)impl.parseDate("20210211 15:00"), timeRangeBean.getTo());
   }
@@ -109,7 +109,7 @@ public class CleverServiceAlertsServiceImplTest {
     Map<String, String> map = new HashMap<>();
     map.put("AT1", "AT1x");
     impl.setRouteMapping(map);
-    impl.setAgencyId("1");
+    impl.setDefaultAgencyId("1");
     impl.setDetourMessage("Route on Detour!");
     List<ServiceAlertBean> serviceAlertBeans = impl.parseAlertsFromStream(getStreamFromString(API_RESULT));
     assertNotNull(serviceAlertBeans);
@@ -124,7 +124,7 @@ public class CleverServiceAlertsServiceImplTest {
     assertEquals("AT1x", situationAffectsBean.getRoutePartRouteId());
 
     assertNotNull(bean.getSummaries());
-    assertEquals("Route on Detour!", bean.getSummaries().get(0).getValue());
+    assertEquals("Route on Detour!", bean.getSummaries().get(0).getValue().substring(0,16));//just first part will match
 
 
   }
