@@ -26,7 +26,7 @@ import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.input.SAXBuilder;
 import org.onebusaway.admin.service.server.ConsoleServiceAlertsService;
-import org.onebusaway.admin.service.server.RssServiceAlertsService;
+import org.onebusaway.admin.service.server.IntegratingServiceAlertsService;
 import org.onebusaway.alerts.service.ServiceAlerts;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data.model.ListBean;
@@ -44,15 +44,14 @@ import javax.annotation.PreDestroy;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.Map.Entry;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 @Component
-public class RssServiceAlertsSerivceImpl implements RssServiceAlertsService {
+public class RssServiceAlertsServiceImpl implements IntegratingServiceAlertsService {
 
-    private static Logger _log = LoggerFactory.getLogger(RssServiceAlertsSerivceImpl.class);
+    private static Logger _log = LoggerFactory.getLogger(RssServiceAlertsServiceImpl.class);
 
     private String _defaultAgencyId = null;
     private String _serviceStatusUrlString = null;
@@ -129,7 +128,7 @@ public class RssServiceAlertsSerivceImpl implements RssServiceAlertsService {
     }
 
     @Override
-    public FeedMessage getServlceAlertFeed() {
+    public FeedMessage getServiceAlertFeed() {
       return _feed;
     }
     
