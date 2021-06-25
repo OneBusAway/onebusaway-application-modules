@@ -47,8 +47,11 @@ public class AssignmentConflictResource extends MetricResource {
   private ScheduledFuture<?> _refreshTask;
   private int _refreshInterval = 30;
   private Map<String, VehicleHistory> vehicleHistoryMap = new HashMap();
+  private Map<String, ActiveVehicles> vehiclesByTrip = new HashMap<>();
   private Map<String, VehicleHistory> tripConflicts = new HashMap<>();
   private Map<String, VehicleHistory> blockConflicts = new HashMap<>();
+  private Map<String, ActiveVehicles> vehicleConflicts = new HashMap<>();
+
 
   @Autowired
   public void setScheduledExecutorService(ScheduledExecutorService scheduledExecutorService) {
@@ -71,6 +74,14 @@ public class AssignmentConflictResource extends MetricResource {
     return Response.ok(ok("block-conflicts-list", blocks)).build();
   }
 
+  @Path("vehicle/list")
+  @GET
+  @Produces("application/json")
+  public Response getAllVehicleConflicts() {
+    Map<String, ActiveVehicles> vehiclesMap = new HashMap<>(vehicleConflicts);
+    return Response.ok(ok("vehicle-conflicts-list", vehiclesMap)).build();
+  }
+
   public synchronized void refresh() {
     long now = System.currentTimeMillis();
     for (AgencyWithCoverageBean ab : getTDS().getAgenciesWithCoverage()) {
@@ -87,13 +98,28 @@ public class AssignmentConflictResource extends MetricResource {
     for (String vehicleId : this.vehicleHistoryMap.keySet()) {
       VehicleHistory vh = this.vehicleHistoryMap.get(vehicleId);
       if (vh.hasTripConflict()) {
-        _log.debug("tripConflict" + vh);
+        _log.debug("tripConflict " + vh);
         this.tripConflicts.put(vehicleId, vh);
       }
       if (vh.hasBlockConflict()) {
-        _log.info("blockConflict" + vh);
+        _log.info("blockConflict " + vh);
         this.blockConflicts.put(vehicleId, vh);
       }
+    }
+
+    this.vehicleConflicts.clear();
+
+    int vcount = 0;
+    for (String tripId : this.vehiclesByTrip.keySet()) {
+      ActiveVehicles av = this.vehiclesByTrip.get(tripId);
+      if (av.hasConflict()) {
+        vcount++;
+        _log.info("vehicle conflict " + av + " for trip " + tripId);
+        this.vehicleConflicts.put(tripId, av);
+      }
+    }
+    if (vcount > 0) {
+      _log.info("" + vcount + " conflicts this run");
     }
   }
 
@@ -103,6 +129,12 @@ public class AssignmentConflictResource extends MetricResource {
     } else {
       VehicleHistory vh = new VehicleHistory(vehicleId, tripId, blockId);
       vehicleHistoryMap.put(vehicleId, vh);
+    }
+    if (vehiclesByTrip.containsKey(tripId)) {
+      vehiclesByTrip.get(tripId).add(vehicleId);
+    } else {
+      ActiveVehicles av = new ActiveVehicles(vehicleId);
+      vehiclesByTrip.put(tripId, av);
     }
   }
 
@@ -213,6 +245,38 @@ public class AssignmentConflictResource extends MetricResource {
               + ", tripId=" + tripId
               + ", blockId=" + blockId
               + "}";
+    }
+  }
+
+  private static class ActiveVehicles {
+    private ArrayList<String> vehicles = new ArrayList<>(2);
+
+    public ActiveVehicles(String vehicleId) {
+      vehicles.add(vehicleId);
+    }
+
+    public void add(String vehicleId) {
+      if (vehicles.size() > 2) vehicles.remove(0);
+      vehicles.add(vehicleId);
+    }
+
+    public boolean hasConflict() {
+      if (vehicles.size() < 2)
+        return false;
+        if (!vehicles.get(0).equals(vehicles.get(1)))
+          return true;
+        return false;
+    }
+
+    public String toString() {
+      StringBuffer sb = new StringBuffer();
+      sb.append("{");
+      if (vehicles.size() > 0)
+        sb.append(vehicles.get(0));
+      if (vehicles.size() > 1)
+        sb.append(", ").append(vehicles.get(1));
+      sb.append("}");
+      return sb.toString();
     }
   }
 }
