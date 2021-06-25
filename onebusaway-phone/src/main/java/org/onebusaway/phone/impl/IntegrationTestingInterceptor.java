@@ -15,6 +15,7 @@
  */
 package org.onebusaway.phone.impl;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.asteriskjava.fastagi.AgiRequest;
@@ -44,9 +45,12 @@ public class IntegrationTestingInterceptor extends AbstractInterceptor {
      */
     Object value = r.remove(RESET_USER);
 
-    if (value != null && value.equals("true"))
-      context.getParameters().put(PhoneNumberLoginInterceptor.RESET_USER,
-          Boolean.TRUE);
+    if (value != null && value.equals("true")) {
+      Map resetMap = new HashMap();
+      resetMap.put(PhoneNumberLoginInterceptor.RESET_USER,
+              Boolean.TRUE);
+      context.getParameters().appendAll(resetMap);
+    }
     return invocation.invoke();
   }
 

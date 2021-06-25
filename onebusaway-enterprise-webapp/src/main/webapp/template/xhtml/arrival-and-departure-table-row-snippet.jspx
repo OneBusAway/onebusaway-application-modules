@@ -30,8 +30,8 @@
 
     <s:push value="parameters.arrivalAndDeparture">
 
-        <s:set name="route" value="trip.route" />
-        <s:set name="arrivalsStatusLabelStyle"
+        <s:set var="route" value="trip.route" />
+        <s:set var="arrivalsStatusLabelStyle"
             value="#presentation.getStatusLabelStyle(top)" />
 
         <jsp:element name="tr">

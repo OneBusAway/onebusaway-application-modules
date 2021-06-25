@@ -20,8 +20,8 @@
       xmlns:c="http://java.sun.com/jsp/jstl/core" xmlns:s="/struts-tags"
       xmlns:wiki="/oba-wiki-tags">
     <jsp:directive.page contentType="text/html" />
-    <s:set name="useAgencyId" value="useAgencyId" />
-    <s:set name="showAgencyNames" value="showAgencyNames" />
+    <s:set var="useAgencyId" value="useAgencyId" />
+    <s:set var="showAgencyNames" value="showAgencyNames" />
     <head>
         <s:url var="url" value="/css/routes/routes.css">
             <s:param name="v"><s:property value="frontEndVersion" /></s:param>

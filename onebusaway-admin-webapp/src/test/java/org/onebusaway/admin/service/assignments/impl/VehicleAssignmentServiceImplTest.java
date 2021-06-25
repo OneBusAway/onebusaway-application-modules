@@ -41,7 +41,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.transaction.TransactionConfiguration;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -54,7 +53,6 @@ import java.util.concurrent.ExecutionException;
 import static org.junit.Assert.*;
 
 @ContextConfiguration(locations = "classpath:org/onebusaway/admin/application-context-test.xml")
-@TransactionConfiguration(transactionManager="transactionManager", defaultRollback=true)
 @RunWith(SpringJUnit4ClassRunner.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class VehicleAssignmentServiceImplTest {

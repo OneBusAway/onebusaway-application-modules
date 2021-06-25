@@ -15,6 +15,7 @@
  */
 package org.onebusaway.sms.impl;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
@@ -58,7 +59,10 @@ public class TextmarksSessionInterceptor extends AbstractInterceptor {
 	processGoogleAnalytics();
 	
     ActionContext context = invocation.getInvocationContext();
-    Map<String, Object> parameters = context.getParameters();
+    Map<String, Object> parameters = new HashMap<>();
+    for (String key : context.getParameters().keySet()) {
+      parameters.put(key, context.getParameters().get(key));
+    }
 
     Object phoneNumber = parameters.get(_phoneNumberParameterName);
 

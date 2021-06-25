@@ -18,7 +18,6 @@
  */
 package org.onebusaway.transit_data_federation.impl.realtime;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -42,7 +41,6 @@ import org.onebusaway.collections.Range;
 import org.onebusaway.container.ConfigurationParameter;
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.realtime.api.EVehicleStatus;
 import org.onebusaway.realtime.api.EVehicleType;
 import org.onebusaway.realtime.api.TimepointPredictionRecord;
 import org.onebusaway.realtime.api.VehicleLocationRecord;

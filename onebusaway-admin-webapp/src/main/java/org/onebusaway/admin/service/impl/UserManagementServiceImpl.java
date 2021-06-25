@@ -34,6 +34,7 @@ import org.hibernate.criterion.Restrictions;
 import org.onebusaway.admin.model.ui.UserDetail;
 import org.onebusaway.admin.service.UserManagementService;
 import org.onebusaway.users.client.model.UserBean;
+import org.onebusaway.users.impl.authentication.LegacyPasswordEncoder;
 import org.onebusaway.users.model.User;
 import org.onebusaway.users.model.UserIndex;
 import org.onebusaway.users.model.UserRole;
@@ -41,7 +42,6 @@ import org.onebusaway.users.services.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.encoding.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -55,11 +55,10 @@ public class UserManagementServiceImpl implements UserManagementService {
 
 	private SessionFactory _sessionFactory;
 	private StandardAuthoritiesService authoritiesService;
-    private UserPropertiesService userPropertiesService;
+	private UserPropertiesService userPropertiesService;
 	private UserDao userDao;
 	private UserService userService;
-	private PasswordEncoder passwordEncoder;
-	
+	private LegacyPasswordEncoder passwordEncoder;
 	
 	private static final Logger log = LoggerFactory.getLogger(UserManagementServiceImpl.class);
 	
@@ -269,6 +268,7 @@ public class UserManagementServiceImpl implements UserManagementService {
 
 		//Update user password
 		if(StringUtils.isNotBlank(userDetail.getPassword())) {
+			// this is done for backward compatibility with Spring 3
 			String credentials = passwordEncoder.encodePassword(userDetail.getPassword(), userDetail.getUsername());
 			for(UserIndex userIndex : user.getUserIndices()) {
 				userIndex.setCredentials(credentials);

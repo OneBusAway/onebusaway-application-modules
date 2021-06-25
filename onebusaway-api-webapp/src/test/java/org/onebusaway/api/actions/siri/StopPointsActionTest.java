@@ -21,8 +21,7 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyListOf;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.anyMapOf;
+import static org.mockito.Mockito.*;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -228,9 +227,9 @@ public class StopPointsActionTest {
     when(servletResponse.getWriter()).thenReturn(nothingPrintWriter);
   
   when(transitDataService.getRouteForId("1_430")).thenReturn(routeBean);
-  when(transitDataService.getStopsForRoute("1_430")).thenReturn(stopsForRouteBean);
-  when(transitDataService.stopHasUpcomingScheduledService(anyString(), anyLong(), anyString(), anyString(), anyString())).thenReturn(true);
-  when(transitDataService.getAgencyIdsWithCoverageArea()).thenReturn(agencies);
+  lenient().when(transitDataService.getStopsForRoute("1_430")).thenReturn(stopsForRouteBean);
+  lenient().when(transitDataService.stopHasUpcomingScheduledService(anyString(), anyLong(), anyString(), anyString(), anyString())).thenReturn(true);
+  lenient().when(transitDataService.getAgencyIdsWithCoverageArea()).thenReturn(agencies);
   
   }
   

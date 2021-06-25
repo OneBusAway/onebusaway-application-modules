@@ -24,9 +24,9 @@ import java.util.Map;
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.io.FileUtils;
-import org.codehaus.jackson.JsonFactory;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.type.TypeReference;
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.core.type.TypeReference;
 import org.onebusaway.util.services.configuration.ConfigurationServiceClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

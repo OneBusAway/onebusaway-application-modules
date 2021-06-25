@@ -72,7 +72,7 @@
   </filter>
   <filter>
     <filter-name>action2-cleanup</filter-name>
-    <filter-class>org.apache.struts2.dispatcher.ng.filter.StrutsPrepareFilter</filter-class>
+    <filter-class>org.apache.struts2.dispatcher.filter.StrutsPrepareFilter</filter-class>
   </filter>
   <filter>
     <filter-name>sitemesh</filter-name>
@@ -80,7 +80,7 @@
   </filter>
   <filter>
     <filter-name>action2</filter-name>
-    <filter-class>org.apache.struts2.dispatcher.ng.filter.StrutsExecuteFilter</filter-class>
+    <filter-class>org.apache.struts2.dispatcher.filter.StrutsExecuteFilter</filter-class>
   </filter>
     <filter>
         <filter-name>CorsFilter</filter-name>
@@ -161,8 +161,16 @@
 
   <servlet>
     <servlet-name>Jersey Spring Web Application</servlet-name>
-    <servlet-class>com.sun.jersey.spi.spring.container.servlet.SpringServlet</servlet-class>
-    <load-on-startup>1</load-on-startup>
+    <servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
+      <init-param>
+          <param-name>jersey.config.server.tracing</param-name>
+          <param-value>ALL</param-value>
+      </init-param>
+      <init-param>
+          <param-name>jersey.config.server.provider.packages</param-name>
+          <param-value>org.onebusaway.admin.service.bundle.api</param-value>
+      </init-param>
+      <load-on-startup>1</load-on-startup>
   </servlet>
   <servlet-mapping>
     <servlet-name>Jersey Spring Web Application</servlet-name>

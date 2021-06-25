@@ -16,6 +16,7 @@
 package org.onebusaway.transit_data_federation.bundle.tasks;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.aid;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.*;
 
@@ -103,24 +104,46 @@ public class ShapeGeospatialIndexTaskTest {
     Mockito.verify(refreshService).refresh(
         RefreshableResources.SHAPE_GEOSPATIAL_INDEX);
 
+    // results are 5 cells bounding the two shapes:
+    //http://developer.onebusaway.org/images/ShapeGeospatialIndexTaskTest.png
     Map<CoordinateBounds, List<AgencyAndId>> shapeIdsByBounds = ObjectSerializationLibrary.readObject(path);
     assertEquals(5, shapeIdsByBounds.size());
 
-    CoordinateBounds b = new CoordinateBounds(47.65048049686506,
-        -122.30767397879845, 47.654977097836735, -122.300997795721);
+//    CoordinateBounds b = new CoordinateBounds(47.65048049686506,
+//        -122.30767397879845, 47.654977097836735, -122.300997795721);
+    // in java11 the precision of this bounding box changed, perhaps due to changes in sin/cos calculation
+    CoordinateBounds b = new CoordinateBounds(47.65048049678976,-122.30767397879845,
+    47.65497709776143,-122.300997795721);
+    assertEquals(shapeIdA.toString(), "1_shapeA");
+    assertNotNull(shapeIdsByBounds.get(b));
     assertEquals(Arrays.asList(shapeIdA), shapeIdsByBounds.get(b));
 
-    b = new CoordinateBounds(47.65947369880841, -122.32102634495334,
-        47.66397029978009, -122.3143501618759);
+//    b = new CoordinateBounds(47.65947369880841, -122.32102634495334,
+//        47.66397029978009, -122.3143501618759);
+    // in java11 the precision of this bounding box changed, perhaps due to changes in sin/cos calculation
+    b = new CoordinateBounds(47.6594736987331,-122.32102634495334,
+    47.66397029970477,-122.3143501618759);
     assertEquals(Arrays.asList(shapeIdB), shapeIdsByBounds.get(b));
-    b = new CoordinateBounds(47.66397029978009, -122.32770252803078,
-        47.66846690075177, -122.32102634495334);
+//    b = new CoordinateBounds(47.66397029978009, -122.32770252803078,
+//        47.66846690075177, -122.32102634495334);
+    // in java11 the precision of this bounding box changed, perhaps due to changes in sin/cos calculation
+    b = new CoordinateBounds(47.66397029970477,-122.32770252803078,
+            47.66846690067644,-122.32102634495334);
+
     assertEquals(Arrays.asList(shapeIdB), shapeIdsByBounds.get(b));
-    b = new CoordinateBounds(47.65947369880841, -122.3143501618759,
-        47.66397029978009, -122.30767397879845);
+//    b = new CoordinateBounds(47.65947369880841, -122.3143501618759,
+//        47.66397029978009, -122.30767397879845);
+    // in java11 the precision of this bounding box changed, perhaps due to changes in sin/cos calculation
+    b = new CoordinateBounds(47.6594736987331,-122.3143501618759,
+    47.66397029970477,-122.30767397879845);
+
     assertEquals(Arrays.asList(shapeIdB), shapeIdsByBounds.get(b));
-    b = new CoordinateBounds(47.65947369880841, -122.32770252803078,
-        47.66397029978009, -122.32102634495334);
+//    b = new CoordinateBounds(47.65947369880841, -122.32770252803078,
+//        47.66397029978009, -122.32102634495334);
+    // in java11 the precision of this bounding box changed, perhaps due to changes in sin/cos calculation
+    b = new CoordinateBounds(47.6594736987331,-122.32770252803078,
+            47.66397029970477,-122.32102634495334);
+
     assertEquals(Arrays.asList(shapeIdB), shapeIdsByBounds.get(b));
   }
 }

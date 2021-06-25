@@ -20,11 +20,6 @@ import static org.junit.Assert.assertEquals;
 import java.util.List;
 
 import org.hibernate.SessionFactory;
-import org.hibernate.cfg.AnnotationConfiguration;
-import org.hibernate.cfg.Configuration;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -34,11 +29,9 @@ import org.onebusaway.geocoder.services.GeocoderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.transaction.TransactionConfiguration;
 import org.springframework.transaction.annotation.Transactional;
 
 @ContextConfiguration(locations = "classpath:org/onebusaway/geocoder/impl/application-context-test.xml")
-@TransactionConfiguration(transactionManager="transactionManager", defaultRollback=true)
 @RunWith(SpringJUnit4ClassRunner.class)
 public class DatabaseCachingGeocoderImplTest {
 

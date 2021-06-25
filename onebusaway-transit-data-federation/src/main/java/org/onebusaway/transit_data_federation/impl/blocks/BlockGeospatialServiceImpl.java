@@ -28,6 +28,8 @@ import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
+import org.locationtech.jts.geom.Envelope;
+import org.locationtech.jts.index.strtree.STRtree;
 import org.onebusaway.collections.CollectionsLibrary;
 import org.onebusaway.collections.MappingLibrary;
 import org.onebusaway.collections.Min;
@@ -66,9 +68,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.index.strtree.STRtree;
 
 @Component
 class BlockGeospatialServiceImpl implements BlockGeospatialService {

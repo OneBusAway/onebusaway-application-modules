@@ -48,7 +48,7 @@
 
 </head>
 <body>
-<s:set name="theme" value="'xhtml'" scope="page" />
+<s:set var="theme" value="'xhtml'" scope="page" />
 <div id="AgencyMetadata">
 	<p>Manage Agency Metadata</p>
 	<div id="agencyMetadataActions">

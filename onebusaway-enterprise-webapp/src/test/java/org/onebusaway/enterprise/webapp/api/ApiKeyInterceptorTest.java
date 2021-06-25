@@ -23,6 +23,8 @@ import static org.mockito.Mockito.when;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.struts2.dispatcher.HttpParameters;
+import org.apache.struts2.dispatcher.Parameter;
 import org.junit.Before;
 import org.junit.Test;
 import org.onebusaway.users.services.ApiKeyPermissionService;
@@ -43,6 +45,7 @@ public class ApiKeyInterceptorTest {
   private ActionContext _ac;
   private ActionInvocation _ai;
   private ApiKeyPermissionService _ks;
+  private HttpParameters _httpParams;
   private Map<String, Object> _params = new HashMap<String, Object>();
   
   @Before
@@ -52,20 +55,27 @@ public class ApiKeyInterceptorTest {
     _ai = mock(ActionInvocation.class);
     _ks = mock(ApiKeyPermissionService.class);
     _aki.setKeyService(_ks);
-    
+    _httpParams = mock(HttpParameters.class);
+    Parameter key = mock(Parameter.class);
+
     _params = new HashMap<String, Object>();
 
     String[] keys = {"akey"};
     _params.put("key", keys);
 
+
     when(_ai.getInvocationContext()).thenReturn(_ac);
-    when(_ac.getParameters()).thenReturn(_params);
+    when(_ac.getParameters()).thenReturn(_httpParams);
+    when(_httpParams.get("key")).thenReturn(key);
+    when(_httpParams.containsKey("key")).thenReturn(true);
+    when(key.getMultipleValues()).thenReturn((String[]) _params.get("key"));
   }
 
   @Test
   public void testIsAllowedNoUser() {
     // try it with now valid API key
     assertNotNull(_params.remove("key"));
+    when(_httpParams.containsKey("key")).thenReturn(false);
     // here we return 401 as the authentication failed/key not found
     assertEquals(401, _aki.isAllowed(_ai));
   }
@@ -73,6 +83,11 @@ public class ApiKeyInterceptorTest {
   @Test
   public void testIsAllowedValidUser() {
     when(_ks.getPermission((String)anyObject(), (String)anyObject())).thenReturn(Status.AUTHORIZED);
+    assertNotNull(_params.get("key"));
+    assertNotNull(_httpParams.get("key"));
+    assertNotNull(_httpParams.get("key").getMultipleValues());
+    assertNotNull(_ac.getParameters());
+    assertTrue(_ac.getParameters().containsKey("key"));
     assertEquals(200, _aki.isAllowed(_ai));
   }
 

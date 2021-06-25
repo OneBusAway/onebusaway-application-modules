@@ -23,11 +23,11 @@
            http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd
            http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.0.xsd
            http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd
-           http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-4.2.xsd">
+           http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-5.3.xsd">
 
  	<context:component-scan base-package="org.onebusaway.agency_metadata" />
 <!--
-	<bean id="agencyMetadataSessionFactory" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+	<bean id="agencyMetadataSessionFactory" class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
 		<property name="dataSource" ref="dataSource" />
     	<property name="annotatedClasses" ref="hibernateAnnotatedClasses"/>
 		<property name="hibernateProperties">

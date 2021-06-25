@@ -18,11 +18,11 @@ package org.onebusaway.geospatial;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.locationtech.jts.geom.Envelope;
+import org.locationtech.jts.index.strtree.STRtree;
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
 
-import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.index.strtree.STRtree;
 
 public class HierarchicalSTRtreeFactory<T> {
 

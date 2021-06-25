@@ -19,10 +19,10 @@ import javax.servlet.RequestDispatcher;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.struts2.ServletActionContext;
-import org.apache.struts2.dispatcher.StrutsResultSupport;
-
 import com.opensymphony.xwork2.ActionInvocation;
+
+import org.apache.struts2.ServletActionContext;
+import org.apache.struts2.result.StrutsResultSupport;
 
 public class XmlResult extends StrutsResultSupport {
 

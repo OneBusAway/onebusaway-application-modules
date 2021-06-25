@@ -33,12 +33,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sun.jersey.api.client.Client;
-import com.sun.jersey.api.client.UniformInterfaceException;
-import com.sun.jersey.api.client.WebResource;
-import com.sun.jersey.api.client.config.ClientConfig;
-import com.sun.jersey.api.client.config.DefaultClientConfig;
-
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.MediaType;
 
 @Component
 public class RemoteConnectionServiceImpl implements RemoteConnectionService {
@@ -128,17 +127,13 @@ public class RemoteConnectionServiceImpl implements RemoteConnectionService {
 	@Override
 	public <T> T postBinaryData(String url, File data, Class<T> responseType) {
 		T response = null;
-		
-		ClientConfig config = new DefaultClientConfig();
-		Client client = Client.create(config);
-		WebResource resource = client.resource(url);
-		
+		Client client = ClientBuilder.newClient();
+		WebTarget target = client.target(url);
+
 		try {
-			response = resource.accept("text/csv").type("text/csv")
-					.post(responseType, new FileInputStream(data));
-		} catch (UniformInterfaceException e) {
-			log.error("Unable to read response from the server.");
-			e.printStackTrace();
+			target.request()
+							.accept("text/csv").accept("text/csv")
+							.post(Entity.entity(new FileInputStream(data), MediaType.APPLICATION_OCTET_STREAM), responseType);
 		} catch (FileNotFoundException e) {
 			log.error("CSV File not found. It is not uploaded correctly");
 			e.printStackTrace();

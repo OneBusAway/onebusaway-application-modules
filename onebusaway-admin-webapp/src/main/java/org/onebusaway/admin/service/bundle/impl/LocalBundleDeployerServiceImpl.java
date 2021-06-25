@@ -39,9 +39,9 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 
-import org.codehaus.jackson.JsonGenerator;
-import org.codehaus.jackson.map.MappingJsonFactory;
-import org.codehaus.jackson.map.ObjectMapper;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.MappingJsonFactory;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.joda.time.LocalDate;
 import org.json.JSONObject;
 import org.onebusaway.admin.bundle.BundleProvider;
@@ -57,9 +57,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Scope;
+import org.springframework.http.ContentDisposition;
 import org.springframework.stereotype.Component;
-
-import com.sun.jersey.core.header.ContentDisposition;
 
 @Component
 @Qualifier("localBundleDeployerImpl")
@@ -297,8 +296,8 @@ public class LocalBundleDeployerServiceImpl implements BundleDeployerService{
         }
       };
 
-      ContentDisposition cd = ContentDisposition.type("file").fileName(
-          requestedFile.getName()).build();
+      ContentDisposition cd = ContentDisposition.builder("file").filename(requestedFile.getName()).build();
+
 
       Response response = Response.ok(output, MediaType.APPLICATION_OCTET_STREAM).header(
           "Content-Disposition", cd).header("Content-Length", fileLength).build();

@@ -159,10 +159,10 @@ public final class CoordinateBounds implements Serializable {
     final int prime = 31;
     int result = 1;
     result = prime * result + (_empty ? 1231 : 1237);
-    result = prime * result + new Double(_maxLat).hashCode();
-    result = prime * result + new Double(_maxLon).hashCode();
-    result = prime * result + new Double(_minLat).hashCode();
-    result = prime * result + new Double(_minLon).hashCode();
+    result = prime * result + Double.valueOf(_maxLat).hashCode();
+    result = prime * result + Double.valueOf(_maxLon).hashCode();
+    result = prime * result + Double.valueOf(_minLat).hashCode();
+    result = prime * result + Double.valueOf(_minLon).hashCode();
     return result;
   }
 

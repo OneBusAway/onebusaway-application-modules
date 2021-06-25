@@ -3,15 +3,23 @@
     <parent>
         <artifactId>onebusaway-application-modules</artifactId>
         <groupId>org.onebusaway</groupId>
-        <version>2.0.75.1-cs-SNAPSHOT</version>
+        <version>2.1.0-cs-SNAPSHOT</version>
     </parent>
     <artifactId>onebusaway-geocoder</artifactId>
 
     <name>onebusaway-geocoder</name>
     
     <properties>
-    	<geotools.version>11-beta</geotools.version>
+    	<geotools.version>20.5</geotools.version>
     </properties>
+
+    <repositories> <!-- remove after copying to repo.camsys-apps.com -->
+        <repository>
+            <id>osgeo</id>
+            <name>Open Source Geospatial Foundation Repository</name>
+            <url>https://repo.osgeo.org/repository/release/</url>
+        </repository>
+    </repositories>
 
     <dependencies>
         <dependency>
@@ -67,6 +75,12 @@
 			<groupId>org.geotools</groupId>
 			<artifactId>gt-main</artifactId>
 			<version>${geotools.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.fasterxml.jackson.core</groupId>
+                    <artifactId>jackson-core</artifactId>
+                </exclusion>
+            </exclusions>
 		</dependency>
 		<dependency>
 			<groupId>commons-codec</groupId>
@@ -74,6 +88,17 @@
 			<version>1.4</version>
 			<scope>provided</scope>
 		</dependency>
+        <!-- java 11 does not bundle xml parsers -->
+        <dependency>
+            <groupId>jakarta.xml.bind</groupId>
+            <artifactId>jakarta.xml.bind-api</artifactId>
+            <version>2.3.3</version>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.jaxb</groupId>
+            <artifactId>jaxb-runtime</artifactId>
+            <version>2.3.3</version>
+        </dependency>
     </dependencies>
 
 </project>

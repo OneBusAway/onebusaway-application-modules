@@ -16,6 +16,7 @@
  */
 package org.onebusaway.transit_data_federation.impl;
 
+import org.locationtech.jts.index.strtree.STRtree;
 import org.onebusaway.container.refresh.Refreshable;
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.gtfs.model.AgencyAndId;
@@ -24,9 +25,8 @@ import org.onebusaway.transit_data_federation.services.beans.RouteBeanService;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 
-import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.index.ItemVisitor;
-import com.vividsolutions.jts.index.strtree.STRtree;
+import org.locationtech.jts.geom.Envelope;
+import org.locationtech.jts.index.ItemVisitor;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

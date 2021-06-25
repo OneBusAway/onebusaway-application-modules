@@ -20,6 +20,7 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.Map;
 
+import com.opensymphony.xwork2.util.StrutsLocalizedTextProvider;
 import org.apache.struts2.interceptor.ParameterAware;
 import org.apache.struts2.interceptor.SessionAware;
 import org.onebusaway.geospatial.model.CoordinateBounds;
@@ -35,7 +36,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.opensymphony.xwork2.ActionContext;
 import com.opensymphony.xwork2.ActionSupport;
-import com.opensymphony.xwork2.util.LocalizedTextUtil;
 import com.opensymphony.xwork2.util.ValueStack;
 
 public class TwilioSupport extends ActionSupport implements ParameterAware, CurrentUserAware, SessionAware {
@@ -72,7 +72,7 @@ public class TwilioSupport extends ActionSupport implements ParameterAware, Curr
     ActionContext context = ActionContext.getContext();
     Locale locale = context.getLocale();
     ValueStack valueStack = context.getValueStack();
-    String text = LocalizedTextUtil.findText(TwilioSupport.this.getClass(), msg, locale, msg, args, valueStack);
+    String text = new StrutsLocalizedTextProvider().findText(TwilioSupport.this.getClass(), msg, locale, msg, args, valueStack);
     _log.debug("message: " + text);
     _message.append(" " + text + " ");
     _log.debug(getText(msg));

@@ -21,13 +21,14 @@ import java.util.Map;
 import java.util.ResourceBundle;
 
 import com.opensymphony.xwork2.LocaleProvider;
+import com.opensymphony.xwork2.StrutsTextProviderFactory;
 import com.opensymphony.xwork2.TextProvider;
 import com.opensymphony.xwork2.TextProviderFactory;
 
 public class ResourceBundleSupport {
   public static Map<String, String> getLocaleMap(LocaleProvider localeProvider, Class<?> resourceType) {
-    TextProviderFactory factory = new TextProviderFactory();
-    TextProvider provider = factory.createInstance(resourceType, localeProvider);
+    TextProviderFactory factory = new StrutsTextProviderFactory();
+    TextProvider provider = factory.createInstance(resourceType);
     ResourceBundle bundle = provider.getTexts();
     Map<String, String> m = new LinkedHashMap<String, String>();
     for (Enumeration<String> en = bundle.getKeys(); en.hasMoreElements();) {

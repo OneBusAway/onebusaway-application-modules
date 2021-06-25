@@ -18,7 +18,7 @@ package org.onebusaway.alerts.impl;
 import java.util.Date;
 import java.util.List;
 
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;

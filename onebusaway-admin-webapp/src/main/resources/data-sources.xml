@@ -50,7 +50,7 @@
     <bean id="agencyMetadataDataSource"
           class="org.springframework.jndi.JndiObjectFactoryBean">
       <property name="jndiName"
-                value="java:comp/env/jdbc/agencyMetadataDB"/>   
+                value="java:comp/env/jdbc/agencyMetadataDB"/>
       <property name="lookupOnStartup"
                 value="true"/>   
       <property name="cache"
@@ -171,7 +171,7 @@
     </bean>
     
 	<bean id="agencyMetadataSessionFactory"
-		class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+		class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
 		<property name="dataSource" ref="agencyMetadataDataSource" />
 		<property name="annotatedClasses">
 			<list>
@@ -192,7 +192,7 @@
 		</property>
 	</bean>
      <bean id="bundleBuildResponseSessionFactory"
-    class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+    class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
     <property name="dataSource" ref="bundleBuildResponseDataSource" />
     <property name="annotatedClasses">
       <list>
@@ -213,7 +213,7 @@
     </property>
   </bean>
  
-  <bean id="gtfsRealtimeArchiveSessionFactory" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+  <bean id="gtfsRealtimeArchiveSessionFactory" class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
     <property name="dataSource" ref="gtfsRealtimeArchiveDataSource" />
     <property name="annotatedClasses">
       <list>
@@ -241,7 +241,7 @@
   </bean>
 
     <bean id="assignmentSessionFactory"
-          class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+          class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
         <property name="dataSource" ref="assignedVehicleDataSource" />
         <property name="annotatedClasses">
             <list>

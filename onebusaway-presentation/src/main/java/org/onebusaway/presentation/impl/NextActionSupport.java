@@ -16,9 +16,11 @@
 package org.onebusaway.presentation.impl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.struts2.dispatcher.HttpParameters;
 import org.apache.struts2.interceptor.SessionAware;
 import org.onebusaway.presentation.model.NextAction;
 
@@ -60,8 +62,11 @@ public abstract class NextActionSupport extends ActionSupport implements
     Map<String, String[]> params = next.getParameters();
     if (params != null && !params.isEmpty()) {
       ActionContext context = ActionContext.getContext();
-      Map<String, Object> contextParameters = context.getParameters();
-      contextParameters.putAll(params);
+      HttpParameters parameters = context.getParameters();
+      Map<String, Object> contextParameters = new HashMap<>();
+      for (String key : parameters.keySet()) {
+        contextParameters.put(key, parameters.get(key).getValue());
+      }
     }
 
     return next.getAction();

@@ -3,7 +3,7 @@
 	<parent>
 		<groupId>org.onebusaway</groupId>
 		<artifactId>onebusaway-application-modules</artifactId>
-		<version>2.0.75.1-cs-SNAPSHOT</version>
+		<version>2.1.0-cs-SNAPSHOT</version>
 	</parent>
 	<artifactId>onebusaway-admin-webapp</artifactId>
 	<packaging>war</packaging>
@@ -12,13 +12,20 @@
 	<properties>
 		<xwiki.version>2.3.1</xwiki.version>
 		<xwiki.integration.version>1.0.1</xwiki.integration.version>
-		<geotools.version>11-beta</geotools.version>
-		<spring.security.version>4.2.10.RELEASE</spring.security.version>
+		<geotools.version>20.5</geotools.version>
+		<spring.security.version>5.3.2.RELEASE</spring.security.version>
 		<bundle.builtPath>/var/lib/oba/bundles/builder</bundle.builtPath>
 		<bundle.stagedPath>/var/lib/oba/bundles/staged</bundle.stagedPath>
 		<bundle.deployPath>/var/lib/oba/bundles/active</bundle.deployPath>
 	</properties>
 
+	<repositories> <!-- remove after copying to repo.camsys-apps.com -->
+	<repository>
+		<id>osgeo</id>
+		<name>Open Source Geospatial Foundation Repository</name>
+		<url>https://repo.osgeo.org/repository/release/</url>
+	</repository>
+	</repositories>
 	<dependencies>
       <dependency>
         <groupId>org.slf4j</groupId>
@@ -28,16 +35,45 @@
         <groupId>org.slf4j</groupId>
         <artifactId>slf4j-log4j12</artifactId>
       </dependency>
-        <dependency>
-            <groupId>org.jdom</groupId>
-            <artifactId>jdom2</artifactId>
-            <version>2.0.5</version>
-        </dependency>
 		<dependency>
-			<groupId>com.sun.jersey</groupId>
-			<artifactId>jersey-server</artifactId>
-			<version>1.9.1</version>
+			<groupId>org.glassfish.jersey.containers</groupId>
+			<artifactId>jersey-container-servlet</artifactId>
+			<version>${jersey-version}</version>
 		</dependency>
+		<dependency>
+			<groupId>org.glassfish.jersey.core</groupId>
+			<artifactId>jersey-server</artifactId>
+			<version>${jersey-version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.glassfish.jersey.inject</groupId>
+			<artifactId>jersey-hk2</artifactId>
+			<version>${jersey-version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.glassfish.jersey.ext</groupId>
+			<artifactId>jersey-spring5</artifactId>
+			<version>2.31</version>
+		</dependency>
+
+		<!-- this is for struts 2.5 on java 11 -->
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+			<version>3.8.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.ow2.asm</groupId>
+			<artifactId>asm</artifactId>
+			<version>${asm-version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.ow2.asm</groupId>
+			<artifactId>asm-commons</artifactId>
+			<version>${asm-version}</version>
+		</dependency>
+
+
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-expression</artifactId>
@@ -60,16 +96,6 @@
 			<version>${spring.security.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>com.sun.jersey.contribs</groupId>
-			<artifactId>jersey-spring</artifactId>
-			<version>1.9.1</version>
-		</dependency>
-		<dependency>
-			<groupId>com.sun.jersey</groupId>
-			<artifactId>jersey-bundle</artifactId>
-			<version>1.10</version>
-		</dependency>
-		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<scope>test</scope>
@@ -78,13 +104,12 @@
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-core</artifactId>
 			<!--  admin web app needs newer version of mockito -->
-			<version>1.9.0-rc1</version>
+			<version>3.3.3</version>
 		</dependency>
 		<!-- for amazon deployment -->
 		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
-			<version>5.1.17</version>
 		</dependency>
 		<dependency>
 			<groupId>org.tuckey</groupId>
@@ -210,6 +235,12 @@
 		<groupId>org.geotools</groupId>
 		<artifactId>gt-main</artifactId>
 		<version>${geotools.version}</version>
+		<exclusions>
+			<exclusion>
+				<groupId>com.fasterxml.jackson.core</groupId>
+				<artifactId>jackson-core</artifactId>
+			</exclusion>
+		</exclusions>
 	</dependency>
 	<dependency>
 		<groupId>org.geotools</groupId>
@@ -217,17 +248,6 @@
 		<version>${geotools.version}</version>
 	</dependency>
 
-	<dependency>
-		<groupId>org.geotools</groupId>
-		<artifactId>gt-epsg-hsql</artifactId>
-		<version>${geotools.version}</version>
-		<exclusions>
-			<exclusion>
-				<artifactId>hsqldb</artifactId>
-				<groupId>hsqldb</groupId>
-			</exclusion>
-		</exclusions>
-	</dependency>
 	<!--  todo refactor to use slf4j  -->
 	<dependency>
 		<groupId>log4j</groupId>
@@ -293,7 +313,7 @@
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
-			<version>2.9.10.1</version>
+			<version>${jackson-version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>
@@ -332,11 +352,6 @@
             <type>war</type>
         </dependency>
 
-		<dependency>
-			<groupId>com.google.guava</groupId>
-			<artifactId>guava</artifactId>
-			<version>27.1-jre</version>
-		</dependency>
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
