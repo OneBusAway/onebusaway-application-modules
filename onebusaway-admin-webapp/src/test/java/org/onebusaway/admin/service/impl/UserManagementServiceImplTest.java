@@ -58,7 +58,7 @@ public class UserManagementServiceImplTest {
 	private UserDao userDao;
 	
 	@Mock
-	private PasswordEncoder passwordEncoder;
+	private LegacyPasswordEncoder passwordEncoder;
 	
 	private UserManagementServiceImpl service;
 	
@@ -71,7 +71,7 @@ public class UserManagementServiceImplTest {
 		service.setUserService(userService);
 		service.setUserDao(userDao);
 		service.setAuthoritiesService(authoritiesService);
-		service.setPasswordEncoder(passwordEncoder);
+		service.setLegacyPasswordEncoder(passwordEncoder);
 		
 	}
 	
@@ -159,7 +159,7 @@ public class UserManagementServiceImplTest {
 		boolean success = service.updateUser(userDetail);
 		
 		assertTrue("User updated successfully", success);
-		
+
 		verify(passwordEncoder).encodePassword("password", "admin");
 		verify(authoritiesService).getUserRoleForName("ROLE_ADMINISTRATOR");
 		verify(userDao).saveOrUpdateUser(user);

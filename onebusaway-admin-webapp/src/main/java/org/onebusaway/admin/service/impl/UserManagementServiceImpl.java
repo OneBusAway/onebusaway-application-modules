@@ -16,7 +16,6 @@
 package org.onebusaway.admin.service.impl;
 
 import java.math.BigDecimal;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -24,11 +23,9 @@ import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.Criteria;
-import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.onebusaway.admin.model.ui.UserDetail;
@@ -410,7 +407,7 @@ public class UserManagementServiceImpl implements UserManagementService {
 	 * @param passwordEncoder the passwordEncoder to set
 	 */
 	@Autowired
-	public void setPasswordEncoder(PasswordEncoder passwordEncoder) {
+	public void setLegacyPasswordEncoder(LegacyPasswordEncoder passwordEncoder) {
 		this.passwordEncoder = passwordEncoder;
 	}
 	

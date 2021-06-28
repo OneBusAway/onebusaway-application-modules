@@ -89,7 +89,7 @@
       <groupId>org.apache.struts</groupId>
       <artifactId>struts2-convention-plugin</artifactId>
     </dependency>
-    <dependency>
+      <dependency>
       <groupId>org.apache.struts</groupId>
       <artifactId>struts2-rest-plugin</artifactId>
     </dependency>
@@ -154,13 +154,6 @@
       <artifactId>junit</artifactId>
       <scope>test</scope>
     </dependency>
-	<dependency>
-		<groupId>org.tuckey</groupId>
-		<artifactId>urlrewritefilter</artifactId>
-		<version>3.2.0</version>
-		<type>jar</type>
-		<scope>compile</scope>
-	</dependency>
 
     <!--  support mysql out of the box -->
 	<dependency>

@@ -139,16 +139,25 @@
             </bean>
         </property>
     </bean>
-    
+
+    <bean id="legacyPasswordEncoder" class="org.onebusaway.users.impl.authentication.LegacyPasswordEncoder">
+        <constructor-arg value="SHA-256" />
+        <property name="encodeHashAsBase64" value="true" />
+    </bean>
+
     <bean id="passwordEncoderV1" class="org.onebusaway.users.impl.authentication.VersionedPasswordEncoder">
         <property name="versionId" value="v1" />
-        <property name="passwordEncoder">
-            <bean class="org.springframework.security.authentication.encoding.ShaPasswordEncoder">
-                <constructor-arg value="256" />
-                <property name="encodeHashAsBase64" value="true" />
-            </bean>
+        <property name="passwordEncoder" ref="legacyPasswordEncoder">
         </property>
+
     </bean>
+<!-- todo migrate to passwordEncoderV2 below via a migration -->
+<!--    <bean id="passwordEncoderV2" class="org.onebusaway.users.impl.authentication.VersionedPasswordEncoder">-->
+<!--        <property name="versionId" value="v2" />-->
+<!--        <property name="passwordEncoder">-->
+<!--            <bean id="encoder" class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder"/>-->
+<!--        </property>-->
+<!--    </bean>-->
 
     <bean id="userLastAccessTimeServiceCache" class="org.onebusaway.container.spring.ehcache.EhCacheFactoryBean">
         <property name="cacheManager" ref="cacheManager" />
