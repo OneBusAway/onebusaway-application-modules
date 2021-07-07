@@ -174,6 +174,7 @@ public class GtfsRealtimeTripLibrary {
     Map<String, TripUpdate> bestTripByVehicleId = new HashMap<String, TripUpdate>();
     ListMultimap<String, TripUpdate> tripUpdatesByVehicleId = ArrayListMultimap.create();
     Map<String, VehiclePosition> vehiclePositionsByVehicleId = new HashMap<String, VehiclePosition>();
+    AssignmentInfo assignmentInfo = getAssignmentInfo(tripUpdateMessage, vehiclePositionsMessage);
 
     ListMultimap<BlockDescriptor, TripUpdate> anonymousTripUpdatesByBlock = ArrayListMultimap.<BlockDescriptor, TripUpdate> create();
     Map<BlockDescriptor, VehiclePosition> anonymousVehiclePositionsByBlock = new HashMap<BlockDescriptor, VehiclePosition>();
@@ -200,7 +201,7 @@ public class GtfsRealtimeTripLibrary {
           _log.debug("Multiple TripUpdates for vehicle {}; taking best.",
               vehicleId);
 
-            if (tripMoreAppropriate(tu, bestTripByVehicleId.get(vehicleId), vehicleId)) {
+            if (Boolean.TRUE.equals(tripMoreAppropriate(assignmentInfo, tu, bestTripByVehicleId.get(vehicleId), vehicleId))) {
               bestTripByVehicleId.put(vehicleId, tu);
           }
         }
@@ -215,6 +216,24 @@ public class GtfsRealtimeTripLibrary {
 
         if (bd == null) {
           continue;
+        }
+
+        // if this block has an assigned vehicle skip this anonymous update
+        // its likely for a future trip
+        TripEntry tripEntry = _entitySource.getTrip(td.getTripId());
+        if (tripEntry != null && tripEntry.getBlock() != null) {
+          String blockId = tripEntry.getBlock().getId().toString();
+          if (assignmentInfo.preferredVehicleByBlockId.containsKey(blockId)) {
+            String preferredVehicleId = assignmentInfo.preferredVehicleByBlockId.get(blockId);
+            if (!td.getTripId().equals(preferredVehicleId)) {
+              _log.info("skipping anonymous update " + td.getTripId()
+                      + " as a vehicle assignment exists for vehicle "
+              + assignmentInfo.preferredVehicleByBlockId.get(blockId)
+              + " for trip "
+              + assignmentInfo.preferredTripByVehicleId.get(preferredVehicleId));
+              continue;
+            }
+          }
         }
 
         if (!anonymousTripUpdatesByBlock.containsKey(bd)) {
@@ -358,6 +377,48 @@ public class GtfsRealtimeTripLibrary {
     return updates;
   }
 
+  // take hints from the vehicle position feed and hold on to for later grouping
+  private AssignmentInfo getAssignmentInfo(FeedMessage tripUpdateMessage, FeedMessage vehiclePositionsMessage) {
+    Map<String, String> preferredTripByVehicleId = new HashMap<>();
+    Map<String, String> preferredVehicleByBlockId = new HashMap<>();
+    if (vehiclePositionsMessage != null) {
+      for (FeedEntity fe : vehiclePositionsMessage.getEntityList()) {
+        if (!fe.hasVehicle()) {
+          continue;
+        }
+
+        if (fe.hasVehicle()
+                && fe.getVehicle().hasVehicle()
+                && fe.getVehicle().getVehicle().hasId()
+                && fe.getVehicle().hasTrip()) {
+
+          String vehicleId = fe.getVehicle().getVehicle().getId();
+          String tripId = fe.getVehicle().getTrip().getTripId();
+          if (preferredTripByVehicleId.containsKey(vehicleId)) {
+            _log.warn("vehicle " + vehicleId
+                    + " on trip " + tripId + " already reported on"
+                    + preferredTripByVehicleId.get(vehicleId));
+            continue;
+          }
+          preferredTripByVehicleId.put(vehicleId,
+                  tripId);
+          TripEntry tripEntry = _entitySource.getTrip(tripId);
+          if (tripEntry != null) {
+            if (tripEntry.getBlock() != null) {
+              String blockId = tripEntry.getBlock().getId().toString();
+              preferredVehicleByBlockId.put(blockId,
+                      vehicleId);
+            }
+          }
+        }
+      }
+    }
+
+
+
+    return new AssignmentInfo(preferredTripByVehicleId,  preferredVehicleByBlockId);
+
+  }
 
   private long getTripStartTime(String tripId) {
     TripEntry tripEntry = _entitySource.getTrip(tripId);
@@ -370,7 +431,18 @@ public class GtfsRealtimeTripLibrary {
     return min;
   }
   
-  private boolean tripMoreAppropriate(TripUpdate newTrip, TripUpdate original, String vehicleId) {
+  private Boolean tripMoreAppropriate(AssignmentInfo assignmentInfo, TripUpdate newTrip, TripUpdate original, String vehicleId) {
+
+    String preferredTripId = assignmentInfo.preferredTripByVehicleId.get(vehicleId);
+
+    if (preferredTripId != null) {
+      if (preferredTripId.equals(newTrip.getTrip().getTripId()))
+        return true;
+      if (preferredTripId.equals(original.getTrip().getTripId()))
+        return false;
+      return null;
+    }
+
     long closestTemporalUpdateNewTrip = closestTemporalUpdate(newTrip);
     long closestTemporalUpdateOriginal = closestTemporalUpdate(original);
     
@@ -561,7 +633,7 @@ public class GtfsRealtimeTripLibrary {
     	blockStartTime = getBlockStartTimeForTripStartTime(instance,
     			tripEntry.getId(), tripStartTime);
     	if (blockStartTime < 0) {
-          _log.debug("invalid blockStartTime for trip " + trip);
+          _log.debug("invalid blockStartTime for trip " + trip + " for instance=" + instance);
           return null;
         }
     	blockDescriptor.setStartTime(blockStartTime);
@@ -1033,5 +1105,15 @@ public class GtfsRealtimeTripLibrary {
     public long timestamp = 0;
     public AgencyAndId tripId = null;
     public boolean isCanceled = false;
+  }
+
+  private static class AssignmentInfo {
+    private Map<String, String> preferredTripByVehicleId;
+    private Map<String, String> preferredVehicleByBlockId;
+    public AssignmentInfo(Map<String, String> preferredTripByVehicleId,
+                          Map<String, String> preferredVehicleByBlockId) {
+     this.preferredTripByVehicleId = preferredTripByVehicleId;
+     this.preferredVehicleByBlockId = preferredVehicleByBlockId;
+    }
   }
 }
