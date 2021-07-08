@@ -63,7 +63,7 @@ public class AssignmentConflictResource extends MetricResource {
   @Produces("application/json")
   public Response getAllTripConflicts() {
     Map<String, VehicleHistory> trips = new HashMap<>(tripConflicts);
-    return Response.ok(ok("trip-conflicts-list", trips)).build();
+    return Response.ok(ok("trip-conflicts-list", printVehicleHistory(trips))).build();
   }
 
   @Path("block/list")
@@ -71,7 +71,7 @@ public class AssignmentConflictResource extends MetricResource {
   @Produces("application/json")
   public Response getAllBlockConflicts() {
     Map<String, VehicleHistory> blocks = new HashMap<>(blockConflicts);
-    return Response.ok(ok("block-conflicts-list", blocks)).build();
+    return Response.ok(ok("block-conflicts-list", printVehicleHistory(blocks))).build();
   }
 
   @Path("vehicle/list")
@@ -79,7 +79,7 @@ public class AssignmentConflictResource extends MetricResource {
   @Produces("application/json")
   public Response getAllVehicleConflicts() {
     Map<String, ActiveVehicles> vehiclesMap = new HashMap<>(vehicleConflicts);
-    return Response.ok(ok("vehicle-conflicts-list", vehiclesMap)).build();
+    return Response.ok(ok("vehicle-conflicts-list", printActiveVehicle(vehiclesMap))).build();
   }
 
   public synchronized void refresh() {
@@ -102,7 +102,7 @@ public class AssignmentConflictResource extends MetricResource {
         this.tripConflicts.put(vehicleId, vh);
       }
       if (vh.hasBlockConflict()) {
-        _log.info("blockConflict " + vh);
+        _log.debug("blockConflict " + vh);
         this.blockConflicts.put(vehicleId, vh);
       }
     }
@@ -114,12 +114,12 @@ public class AssignmentConflictResource extends MetricResource {
       ActiveVehicles av = this.vehiclesByTrip.get(tripId);
       if (av.hasConflict()) {
         vcount++;
-        _log.info("vehicle conflict " + av + " for trip " + tripId);
+        _log.debug("vehicle conflict " + av + " for trip " + tripId);
         this.vehicleConflicts.put(tripId, av);
       }
     }
     if (vcount > 0) {
-      _log.info("" + vcount + " conflicts this run");
+      _log.debug("" + vcount + " conflicts this run");
     }
   }
 
@@ -137,6 +137,39 @@ public class AssignmentConflictResource extends MetricResource {
       vehiclesByTrip.put(tripId, av);
     }
   }
+
+  private String printVehicleHistory(Map<String, VehicleHistory> map) {
+    StringBuffer sb = new StringBuffer();
+    sb.append("map = {");
+    if (map == null) return sb.toString();
+    int i = 0;
+    for (String key : map.keySet()) {
+      if (i > 0) sb.append(",");
+      i++;
+      VehicleHistory vh = map.get(key);
+      sb.append(key).append('=').append(vh.toString());
+    }
+    sb.append("}");
+    return sb.toString();
+  }
+
+
+  private String printActiveVehicle(Map<String, ActiveVehicles> map) {
+    StringBuffer sb = new StringBuffer();
+    sb.append("map = {");
+    if (map == null) return sb.toString();
+    int i = 0;
+    for (String key : map.keySet()) {
+      if (i > 0) sb.append(",");
+      i++;
+      ActiveVehicles av = map.get(key);
+      sb.append(key).append('=').append(av.toString());
+    }
+    sb.append("}");
+    return sb.toString();
+
+  }
+
 
 
   @PostConstruct
