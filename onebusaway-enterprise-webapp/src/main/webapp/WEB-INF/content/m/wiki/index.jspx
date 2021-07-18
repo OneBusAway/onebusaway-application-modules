@@ -22,7 +22,7 @@
 <body>
 <div id="content">
 	<div id="text">
-		<s:property value="content" escape="false"/>
+		<s:property value="content" escapeHtml="false"/>
 
 	  	<p class="meta">
 			<span>
