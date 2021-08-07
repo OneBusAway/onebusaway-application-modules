@@ -33,7 +33,7 @@ import org.onebusaway.container.cache.Cacheable;
 import org.onebusaway.container.cache.CacheableArgument;
 import org.onebusaway.users.client.model.UserBean;
 import org.onebusaway.users.client.model.UserIndexBean;
-import org.onebusaway.users.impl.authentication.LegacyPasswordEncoder;
+import org.onebusaway.users.impl.authentication.VersionedPasswordEncoder;
 import org.onebusaway.users.model.User;
 import org.onebusaway.users.model.UserIndex;
 import org.onebusaway.users.model.UserIndexKey;
@@ -67,7 +67,7 @@ public class UserServiceImpl implements UserService {
 
   private UserIndexRegistrationService _userIndexRegistrationService;
 
-  private LegacyPasswordEncoder _passwordEncoder;
+  private VersionedPasswordEncoder _passwordEncoder;
 
   private ExecutorService _executors;
 
@@ -99,8 +99,8 @@ public class UserServiceImpl implements UserService {
   }
 
   @Autowired
-  @Qualifier(value = "legacyPasswordEncoder")
-  public void setLegacyPasswordEncoder(LegacyPasswordEncoder passwordEncoder) {
+  @Qualifier(value = "passwordEncoderV1")
+  public void setLegacyPasswordEncoder(VersionedPasswordEncoder passwordEncoder) {
     _passwordEncoder = passwordEncoder;
   }
 
