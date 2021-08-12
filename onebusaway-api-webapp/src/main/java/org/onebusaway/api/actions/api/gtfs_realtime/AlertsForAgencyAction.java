@@ -21,6 +21,9 @@ import org.onebusaway.transit_data.model.ListBean;
 import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
 
 import com.google.transit.realtime.GtfsRealtime.FeedMessage;
+import org.onebusaway.transit_data.model.service_alerts.SituationAffectsBean;
+
+import java.util.ArrayList;
 
 public class AlertsForAgencyAction extends GtfsRealtimeActionSupport {
 
@@ -31,7 +34,20 @@ public class AlertsForAgencyAction extends GtfsRealtimeActionSupport {
       long timestamp, FILTER_TYPE filterType, String filterValue) {
 
     ListBean<ServiceAlertBean> alerts = _service.getAllServiceAlertsForAgencyId(agencyId);
-    // TODO add support for filter
-    ServiceAlertBuilderHelper.fillFeedMessage(feed, alerts, agencyId, timestamp);
+    if (FILTER_TYPE.ROUTE_ID == filterType) {
+      ArrayList<ServiceAlertBean> filteredList = new ArrayList<>();
+      for (ServiceAlertBean potentialAlert : alerts.getList()) {
+        for (SituationAffectsBean affects : potentialAlert.getAllAffects())
+        if (filterValue.equals(affects.getAgencyPartRouteId())) {
+          filteredList.add(potentialAlert);
+        }
+      }
+      ListBean<ServiceAlertBean> filteredListBean = new ListBean<ServiceAlertBean>();
+      filteredListBean.setList(filteredList);
+      ServiceAlertBuilderHelper.fillFeedMessage(feed, filteredListBean, agencyId, timestamp);
+    } else {
+      ServiceAlertBuilderHelper.fillFeedMessage(feed, alerts, agencyId, timestamp);
+    }
+
   }
 }
