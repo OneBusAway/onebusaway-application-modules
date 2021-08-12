@@ -49,7 +49,8 @@ public class VehiclePositionsForAgencyAction extends GtfsRealtimeActionSupport {
     }
 
     for (VehicleStatusBean vehicle : vehicles.getList()) {
-
+      FeedEntity.Builder entity = feed.addEntityBuilder();
+      VehiclePosition.Builder vehiclePosition = entity.getVehicleBuilder();
       TripStatusBean tripStatus = vehicle.getTripStatus();
       if (tripStatus != null) {
         TripBean activeTrip = tripStatus.getActiveTrip();
@@ -59,14 +60,12 @@ public class VehiclePositionsForAgencyAction extends GtfsRealtimeActionSupport {
           // skip this route
           continue;
         }
-        FeedEntity.Builder entity = feed.addEntityBuilder();
-        entity.setId(Integer.toString(feed.getEntityCount()));
-        VehiclePosition.Builder vehiclePosition = entity.getVehicleBuilder();
 
         TripDescriptor.Builder tripDesc = vehiclePosition.getTripBuilder();
         tripDesc.setTripId(normalizeId(activeTrip.getId()));
         tripDesc.setRouteId(normalizeId(route.getId()));
       }
+      entity.setId(Integer.toString(feed.getEntityCount()));
 
       VehicleDescriptor.Builder vehicleDesc = vehiclePosition.getVehicleBuilder();
       vehicleDesc.setId(normalizeId(vehicle.getVehicleId()));
