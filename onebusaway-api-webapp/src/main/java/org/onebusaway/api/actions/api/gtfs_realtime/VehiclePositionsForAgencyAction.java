@@ -15,6 +15,8 @@
  */
 package org.onebusaway.api.actions.api.gtfs_realtime;
 
+import com.google.transit.realtime.GtfsRealtime;
+
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.transit_data.model.ListBean;
 import org.onebusaway.transit_data.model.RouteBean;
@@ -49,23 +51,23 @@ public class VehiclePositionsForAgencyAction extends GtfsRealtimeActionSupport {
     }
 
     for (VehicleStatusBean vehicle : vehicles.getList()) {
+      boolean foundMatch = FILTER_TYPE.ROUTE_ID != filterType;
+
+      FeedEntity.Builder entity = GtfsRealtime.FeedEntity.newBuilder();
+      entity.setId(Integer.toString(feed.getEntityCount()+1));
+      VehiclePosition.Builder vehiclePosition = entity.getVehicleBuilder();
 
       TripStatusBean tripStatus = vehicle.getTripStatus();
       if (tripStatus != null) {
         TripBean activeTrip = tripStatus.getActiveTrip();
         RouteBean route = activeTrip.getRoute();
 
-        if (FILTER_TYPE.ROUTE_ID == filterType && !filterValue.equals(AgencyAndIdLibrary.convertFromString(route.getId()).getId())) {
-          // skip this route
-          continue;
-        }
-        FeedEntity.Builder entity = feed.addEntityBuilder();
-        entity.setId(Integer.toString(feed.getEntityCount()));
-        VehiclePosition.Builder vehiclePosition = entity.getVehicleBuilder();
-
         TripDescriptor.Builder tripDesc = vehiclePosition.getTripBuilder();
         tripDesc.setTripId(normalizeId(activeTrip.getId()));
         tripDesc.setRouteId(normalizeId(route.getId()));
+        if (FILTER_TYPE.ROUTE_ID == filterType && filterValue.equals(AgencyAndIdLibrary.convertFromString(route.getId()).getId())) {
+          foundMatch = true;
+        }
       }
 
       VehicleDescriptor.Builder vehicleDesc = vehiclePosition.getVehicleBuilder();
@@ -79,6 +81,9 @@ public class VehiclePositionsForAgencyAction extends GtfsRealtimeActionSupport {
       }
 
       vehiclePosition.setTimestamp(vehicle.getLastUpdateTime() / 1000);
+      if (foundMatch) {
+        feed.addEntity(entity);
+      }
     }
   }
 }
