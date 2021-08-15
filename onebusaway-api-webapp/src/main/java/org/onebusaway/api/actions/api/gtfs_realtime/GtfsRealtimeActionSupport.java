@@ -53,7 +53,7 @@ public abstract class GtfsRealtimeActionSupport extends ApiActionSupport {
 
   private long _time;
 
-  private String _routeFilterId;
+  private String _routeFilterId = null;
 
   private boolean _removeAgencyIds = true;
 

@@ -54,7 +54,7 @@ public class VehiclePositionsForAgencyAction extends GtfsRealtimeActionSupport {
       boolean foundMatch = FILTER_TYPE.ROUTE_ID != filterType;
 
       FeedEntity.Builder entity = GtfsRealtime.FeedEntity.newBuilder();
-      entity.setId(Integer.toString(feed.getEntityCount()));
+      entity.setId(Integer.toString(feed.getEntityCount()+1));
       VehiclePosition.Builder vehiclePosition = entity.getVehicleBuilder();
 
       TripStatusBean tripStatus = vehicle.getTripStatus();
