@@ -30,6 +30,7 @@ import com.google.transit.realtime.GtfsRealtime.TripDescriptor;
 import com.google.transit.realtime.GtfsRealtime.TripUpdate;
 import com.google.transit.realtime.GtfsRealtime.VehicleDescriptor;
 import org.onebusaway.transit_data.model.trips.TimepointPredictionBean;
+import org.onebusaway.util.AgencyAndIdLibrary;
 
 public class TripUpdatesForAgencyAction extends GtfsRealtimeActionSupport {
 
@@ -37,7 +38,7 @@ public class TripUpdatesForAgencyAction extends GtfsRealtimeActionSupport {
 
   @Override
   protected void fillFeedMessage(FeedMessage.Builder feed, String agencyId,
-      long timestamp) {
+      long timestamp, FILTER_TYPE filterType, String filterValue) {
 
     ListBean<VehicleStatusBean> vehicles = _service.getAllVehiclesForAgency(
         agencyId, timestamp);
@@ -49,6 +50,11 @@ public class TripUpdatesForAgencyAction extends GtfsRealtimeActionSupport {
       }
       TripBean activeTrip = tripStatus.getActiveTrip();
       RouteBean route = activeTrip.getRoute();
+
+      if (FILTER_TYPE.ROUTE_ID == filterType && !filterValue.equals(AgencyAndIdLibrary.convertFromString(route.getId()).getId())) {
+        // skip this route
+        continue;
+      }
 
       FeedEntity.Builder entity = feed.addEntityBuilder();
       entity.setId(Integer.toString(feed.getEntityCount()));

@@ -15,6 +15,8 @@
  */
 package org.onebusaway.api.actions.api.gtfs_realtime;
 
+import com.google.transit.realtime.GtfsRealtime;
+
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.transit_data.model.ListBean;
 import org.onebusaway.transit_data.model.RouteBean;
@@ -28,6 +30,7 @@ import com.google.transit.realtime.GtfsRealtime.Position;
 import com.google.transit.realtime.GtfsRealtime.TripDescriptor;
 import com.google.transit.realtime.GtfsRealtime.VehicleDescriptor;
 import com.google.transit.realtime.GtfsRealtime.VehiclePosition;
+import org.onebusaway.util.AgencyAndIdLibrary;
 
 public class VehiclePositionsForAgencyAction extends GtfsRealtimeActionSupport {
 
@@ -35,7 +38,7 @@ public class VehiclePositionsForAgencyAction extends GtfsRealtimeActionSupport {
 
   @Override
   protected void fillFeedMessage(FeedMessage.Builder feed, String agencyId,
-      long timestamp) {
+      long timestamp, FILTER_TYPE filterType, String filterValue) {
 
     ListBean<VehicleStatusBean> vehicles = _service.getAllVehiclesForAgency(
         agencyId, timestamp);
@@ -48,8 +51,10 @@ public class VehiclePositionsForAgencyAction extends GtfsRealtimeActionSupport {
     }
 
     for (VehicleStatusBean vehicle : vehicles.getList()) {
-      FeedEntity.Builder entity = feed.addEntityBuilder();
-      entity.setId(Integer.toString(feed.getEntityCount()));
+      boolean foundMatch = FILTER_TYPE.ROUTE_ID != filterType;
+
+      FeedEntity.Builder entity = GtfsRealtime.FeedEntity.newBuilder();
+      entity.setId(Integer.toString(feed.getEntityCount()+1));
       VehiclePosition.Builder vehiclePosition = entity.getVehicleBuilder();
 
       TripStatusBean tripStatus = vehicle.getTripStatus();
@@ -60,6 +65,9 @@ public class VehiclePositionsForAgencyAction extends GtfsRealtimeActionSupport {
         TripDescriptor.Builder tripDesc = vehiclePosition.getTripBuilder();
         tripDesc.setTripId(normalizeId(activeTrip.getId()));
         tripDesc.setRouteId(normalizeId(route.getId()));
+        if (FILTER_TYPE.ROUTE_ID == filterType && filterValue.equals(AgencyAndIdLibrary.convertFromString(route.getId()).getId())) {
+          foundMatch = true;
+        }
       }
 
       VehicleDescriptor.Builder vehicleDesc = vehiclePosition.getVehicleBuilder();
@@ -73,6 +81,9 @@ public class VehiclePositionsForAgencyAction extends GtfsRealtimeActionSupport {
       }
 
       vehiclePosition.setTimestamp(vehicle.getLastUpdateTime() / 1000);
+      if (foundMatch) {
+        feed.addEntity(entity);
+      }
     }
   }
 }

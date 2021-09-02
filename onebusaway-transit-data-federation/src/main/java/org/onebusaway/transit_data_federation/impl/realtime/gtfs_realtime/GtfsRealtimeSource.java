@@ -518,7 +518,8 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     }
   }
 
-  private void handleCombinedUpdates(MonitoredResult result,
+  // package private for unit tests
+   void handleCombinedUpdates(MonitoredResult result,
       List<CombinedTripUpdatesAndVehiclePosition> updates) {
 
     // exit if we are configured in alerts mode
