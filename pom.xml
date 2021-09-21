@@ -74,7 +74,7 @@
     <connection>scm:git:git@github.com:camsys/onebusaway-application-modules.git</connection>
     <developerConnection>scm:git:git@github.com:camsys/onebusaway-application-modules.git</developerConnection>
     <url>scm:git:git@github.com:camsys/onebusaway-application-modules</url>
-    <tag>onebusaway-application-modules-2.0.75-cs</tag>
+    <tag>HEAD</tag>
   </scm>
 
   <pluginRepositories>

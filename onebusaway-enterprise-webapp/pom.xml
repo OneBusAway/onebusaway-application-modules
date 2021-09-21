@@ -224,10 +224,10 @@
 			<id>local-multi-port</id> <!-- services-vtw-as-tds-multiport --><!-- multi port, also for development -->
 			<!-- assumes we're running on 8080, and vtw and api are on different ports -->
 			<properties>
-				<tds.path>http://localhost:8081/onebusaway-nyc-vehicle-tracking-webapp</tds.path>
-				<vtms.path>http://localhost:8081/onebusaway-nyc-vehicle-tracking-webapp</vtms.path>
-				<config.path>http://localhost:8081/onebusaway-nyc-vehicle-tracking-webapp</config.path>
-				<archive.path>http://localhost:8081/onebusaway-nyc-report-archive</archive.path>
+				<tds.path>http://localhost:8080/onebusaway-nyc-vehicle-tracking-webapp</tds.path>
+				<vtms.path>http://localhost:8080/onebusaway-nyc-vehicle-tracking-webapp</vtms.path>
+				<config.path>http://localhost:8080/onebusaway-nyc-vehicle-tracking-webapp</config.path>
+				<archive.path>http://localhost:8080/onebusaway-nyc-report-archive</archive.path>
 				<log4j.appender>stdout</log4j.appender>
 				<create-apikey>true</create-apikey>
 				<siri.cache.disabled>false</siri.cache.disabled>
