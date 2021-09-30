@@ -16,6 +16,7 @@
 package org.onebusaway.webapp.actions.admin.usermanagement;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.struts2.convention.annotation.AllowedMethods;
 import org.onebusaway.admin.service.UserManagementService;
 import org.onebusaway.webapp.actions.OneBusAwayNYCAdminActionSupport;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +29,7 @@ import java.util.List;
  * @author abelsare
  *
  */
+@AllowedMethods(value="createUser")
 public class RegisterUserAction extends OneBusAwayNYCAdminActionSupport {
 
 	private static final long serialVersionUID = 1L;
