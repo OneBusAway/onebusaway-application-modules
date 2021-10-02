@@ -854,7 +854,11 @@ public class ManageBundlesAction extends OneBusAwayNYCAdminActionSupport impleme
 								+ " " + ed2Split[2] + "-" + ed2Split[1]
 								+ "-" + ed2Split[5]);
 				_log.info("" + ed1Date + " ?= " + ed2Date);
-				return ed1Date.compareTo(ed2Date) * -1;
+				int difference = ed1Date.compareTo(ed2Date) * -1;
+				if (difference == 0) {
+					return ed1.getName().compareTo(ed2.getName());
+				}
+				return difference;
 			} catch (Throwable t) {
 				_log.error("date issue " + t + " for ed1=" + ed1 + " and ed2=" + ed2, t);
 				return -1;
