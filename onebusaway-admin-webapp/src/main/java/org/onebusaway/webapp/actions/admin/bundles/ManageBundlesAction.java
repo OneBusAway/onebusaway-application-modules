@@ -323,13 +323,21 @@ public class ManageBundlesAction extends OneBusAwayNYCAdminActionSupport impleme
 	 * @return list of existing directories
 	 */
 	public Set<ExistingDirectory> getExistingDirectories() {
+		_log.info("enter getExistingDirectories");
+		Set<ExistingDirectory> directories = new TreeSet<ExistingDirectory>();
+		try {
+			List<String[]> existingDirectories = fileService.listBundleDirectories(MAX_RESULTS);
 
-		List<String[]> existingDirectories = fileService.listBundleDirectories(MAX_RESULTS);
-		Set<ExistingDirectory> directories = new TreeSet<ExistingDirectory> ();
-		for(String[] existingDirectory : existingDirectories) {
-			ExistingDirectory directory = new ExistingDirectory(existingDirectory[0], existingDirectory[1], 
-					existingDirectory[2]);
-			directories.add(directory);
+			for (String[] existingDirectory : existingDirectories) {
+				ExistingDirectory directory = new ExistingDirectory(existingDirectory[0], existingDirectory[1],
+								existingDirectory[2]);
+				_log.info("directory=" + directory);
+				directories.add(directory);
+			}
+		} catch (Throwable t) {
+			_log.error("getExistingDirectories exception=" + t, t);
+		} finally {
+			_log.info("exit getExistingDirectories");
 		}
 		return directories;
 	}
@@ -341,15 +349,19 @@ public class ManageBundlesAction extends OneBusAwayNYCAdminActionSupport impleme
    */
   public Set<ExistingDirectory> getSortedByDateDirectories() {
 		Set<ExistingDirectory> directories = getExistingDirectories();
+		_log.error("getSortedByDateDirectories existing directories input=" + directories);
   	try {
 			// Resort by date
 			Set<ExistingDirectory> sortedDirectories
 							= new TreeSet<ExistingDirectory>(new DirectoryByDateComp());
 			sortedDirectories.addAll(directories);
+			_log.info("sorted directories output=" + sortedDirectories);
 			return sortedDirectories;
 		} catch (Throwable t) {
-  		_log.error("exception sorting directory ", t, t);
+  		_log.error("getSortedByDateDirectories exception sorting directory ", t, t);
   		return directories;
+		} finally {
+  		_log.info("getSortedByDateDirectories exit");
 		}
   }
 
