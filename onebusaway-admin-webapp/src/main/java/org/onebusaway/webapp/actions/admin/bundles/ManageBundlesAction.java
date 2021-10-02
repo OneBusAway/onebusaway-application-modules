@@ -340,12 +340,17 @@ public class ManageBundlesAction extends OneBusAwayNYCAdminActionSupport impleme
    * @return list of existing directories
    */
   public Set<ExistingDirectory> getSortedByDateDirectories() {
-    Set<ExistingDirectory> directories = getExistingDirectories();
-    // Resort by date
-    Set<ExistingDirectory> sortedDirectories
-      = new TreeSet<ExistingDirectory>(new DirectoryByDateComp());
-    sortedDirectories.addAll(directories);
-    return sortedDirectories;
+		Set<ExistingDirectory> directories = getExistingDirectories();
+  	try {
+			// Resort by date
+			Set<ExistingDirectory> sortedDirectories
+							= new TreeSet<ExistingDirectory>(new DirectoryByDateComp());
+			sortedDirectories.addAll(directories);
+			return sortedDirectories;
+		} catch (Throwable t) {
+  		_log.error("exception sorting directory ", t, t);
+  		return directories;
+		}
   }
 
   public SortedSet<String> getExistingArchivedDirectories() {
@@ -824,19 +829,24 @@ public class ManageBundlesAction extends OneBusAwayNYCAdminActionSupport impleme
 
 	  private int unsafeCompare(ExistingDirectory ed1, ExistingDirectory ed2) throws Exception {
 		  // ExistingDirectory.creationTimestamp is a String 'dow mon dd hh:mm:ss zzz yyyy'
-		  String[] ed1Split = ed1.getCreationTimestamp().split(" ");
-		  String[] ed2Split = ed2.getCreationTimestamp().split(" ");
-		  SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss dd-MMM-yyyy");
-		  Date ed1Date = new Date();
-		  Date ed2Date = new Date();
-			  ed1Date = formatter.parse(ed1Split[3]
-					  + " " + ed1Split[2] + "-" + ed1Split[1]
-					  + "-" + ed1Split[5]);
-			  ed2Date = formatter.parse(ed2Split[3]
-			  		+ " " + ed2Split[2] + "-" + ed2Split[1]
-					  + "-" + ed2Split[5]);
-			  _log.info("" + ed1Date + " ?= " + ed2Date);
-		  return ed1Date.compareTo(ed2Date) * -1;
+			try {
+				String[] ed1Split = ed1.getCreationTimestamp().split(" ");
+				String[] ed2Split = ed2.getCreationTimestamp().split(" ");
+				SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss dd-MMM-yyyy");
+				Date ed1Date = new Date();
+				Date ed2Date = new Date();
+				ed1Date = formatter.parse(ed1Split[3]
+								+ " " + ed1Split[2] + "-" + ed1Split[1]
+								+ "-" + ed1Split[5]);
+				ed2Date = formatter.parse(ed2Split[3]
+								+ " " + ed2Split[2] + "-" + ed2Split[1]
+								+ "-" + ed2Split[5]);
+				_log.info("" + ed1Date + " ?= " + ed2Date);
+				return ed1Date.compareTo(ed2Date) * -1;
+			} catch (Throwable t) {
+				_log.error("date issue " + t + " for ed1=" + ed1 + " and ed2=" + ed2, t);
+				return -1;
+			}
 
 	  }
 	}
