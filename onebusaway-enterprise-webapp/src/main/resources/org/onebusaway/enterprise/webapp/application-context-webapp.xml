@@ -62,7 +62,11 @@
         <property name="limit" value="0" />
     </bean>
 <!--    <bean id="exportKeys" class="org.onebusaway.enterprise.webapp.api.WriteUserPropertiesToDisk" />-->
-
+<!--
+    <bean id="loadKeys" class="org.onebusaway.enterprise.webapp.api.LoadApiKeysOnInitAction" >
+        <property name="filename" value="/tmp/user_properties.csv" />
+    </bean>
+-->
     <bean id="createAPITestKeyOnInitAction" class="org.onebusaway.enterprise.webapp.api.CreateAPIKeyOnInitAction"
     	init-method="init">
     	<property name="createAPIKey" value="${create-apikey}" />
