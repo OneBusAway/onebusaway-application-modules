@@ -30,7 +30,7 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.onebusaway.admin.model.ui.UserDetail;
-import org.onebusaway.users.impl.authentication.LegacyPasswordEncoder;
+import org.onebusaway.users.impl.authentication.VersionedPasswordEncoder;
 import org.onebusaway.users.model.User;
 import org.onebusaway.users.model.UserIndex;
 import org.onebusaway.users.model.UserRole;
@@ -58,7 +58,7 @@ public class UserManagementServiceImplTest {
 	private UserDao userDao;
 	
 	@Mock
-	private LegacyPasswordEncoder passwordEncoder;
+	private VersionedPasswordEncoder passwordEncoder;
 	
 	private UserManagementServiceImpl service;
 	
@@ -71,7 +71,7 @@ public class UserManagementServiceImplTest {
 		service.setUserService(userService);
 		service.setUserDao(userDao);
 		service.setAuthoritiesService(authoritiesService);
-		service.setLegacyPasswordEncoder(passwordEncoder);
+		service.setPasswordEncoder(passwordEncoder);
 		
 	}
 	

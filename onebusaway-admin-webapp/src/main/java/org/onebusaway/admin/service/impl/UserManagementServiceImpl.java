@@ -31,7 +31,7 @@ import org.hibernate.criterion.Restrictions;
 import org.onebusaway.admin.model.ui.UserDetail;
 import org.onebusaway.admin.service.UserManagementService;
 import org.onebusaway.users.client.model.UserBean;
-import org.onebusaway.users.impl.authentication.LegacyPasswordEncoder;
+import org.onebusaway.users.impl.authentication.VersionedPasswordEncoder;
 import org.onebusaway.users.model.User;
 import org.onebusaway.users.model.UserIndex;
 import org.onebusaway.users.model.UserRole;
@@ -55,7 +55,7 @@ public class UserManagementServiceImpl implements UserManagementService {
 	private UserPropertiesService userPropertiesService;
 	private UserDao userDao;
 	private UserService userService;
-	private LegacyPasswordEncoder passwordEncoder;
+	private VersionedPasswordEncoder passwordEncoder;
 	
 	private static final Logger log = LoggerFactory.getLogger(UserManagementServiceImpl.class);
 	
@@ -407,7 +407,7 @@ public class UserManagementServiceImpl implements UserManagementService {
 	 * @param passwordEncoder the passwordEncoder to set
 	 */
 	@Autowired
-	public void setLegacyPasswordEncoder(LegacyPasswordEncoder passwordEncoder) {
+	public void setPasswordEncoder(VersionedPasswordEncoder passwordEncoder) {
 		this.passwordEncoder = passwordEncoder;
 	}
 	
