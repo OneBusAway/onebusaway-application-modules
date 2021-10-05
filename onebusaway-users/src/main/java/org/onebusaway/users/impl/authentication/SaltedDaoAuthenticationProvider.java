@@ -117,7 +117,7 @@ public class SaltedDaoAuthenticationProvider extends DaoAuthenticationProvider {
     String encPassword = userDetails.getPassword();
     String rawPassword = (String) authentication.getCredentials();
 
-    String proposedPassword = versionPrefix + passwordEncoder.encodePassword(rawPassword, username);
+    String proposedPassword = versionPrefix + passwordEncoder.encodePassword(username, rawPassword);
 
 
     if (!LegacyMessageDigestPasswordEncoder.PasswordEncoderUtils.equals(proposedPassword, encPassword)) {
