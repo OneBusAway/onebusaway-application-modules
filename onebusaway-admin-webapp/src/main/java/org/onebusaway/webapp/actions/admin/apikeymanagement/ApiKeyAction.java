@@ -17,6 +17,7 @@ package org.onebusaway.webapp.actions.admin.apikeymanagement;
 
 import java.util.List;
 
+import org.apache.struts2.convention.annotation.AllowedMethods;
 import org.apache.struts2.convention.annotation.Result;
 import org.apache.struts2.convention.annotation.Results;
 import org.onebusaway.presentation.impl.NextActionSupport;
@@ -36,6 +37,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  */
 @Results({@Result(type = "redirectAction", name = "redirect", params = {
 	     "actionName", "api-key"})})
+@AllowedMethods({"saveAPIKey", "searchAPIKey", "searchContactEmail", "deleteAPIKey"})
 public class ApiKeyAction extends NextActionSupport{
 
 	private static final long serialVersionUID = 1L;
