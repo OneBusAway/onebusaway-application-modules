@@ -100,7 +100,7 @@ public class UserServiceImpl implements UserService {
 
   @Autowired
   @Qualifier(value = "passwordEncoderV1")
-  public void setLegacyPasswordEncoder(VersionedPasswordEncoder passwordEncoder) {
+  public void setPasswordEncoder(VersionedPasswordEncoder passwordEncoder) {
     _passwordEncoder = passwordEncoder;
   }
 
