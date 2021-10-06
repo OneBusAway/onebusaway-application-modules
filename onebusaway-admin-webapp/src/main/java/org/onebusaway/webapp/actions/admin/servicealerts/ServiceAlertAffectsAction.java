@@ -20,6 +20,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.struts2.convention.annotation.AllowedMethods;
 import org.apache.struts2.convention.annotation.InterceptorRef;
 import org.apache.struts2.convention.annotation.InterceptorRefs;
 import org.apache.struts2.convention.annotation.Result;
@@ -49,6 +50,7 @@ import com.opensymphony.xwork2.ModelDriven;
   @Result(type = "redirectAction", name="input", params = {"actionName", "service-alert", "id", "${id}"}),
   @Result(type = "redirectAction", params = {
     "actionName", "service-alert", "id", "${id}", "parse", "true"})})
+@AllowedMethods({"update", "delete"})
 public class ServiceAlertAffectsAction extends ActionSupport implements
     ModelDriven<SituationAffectsBean> {
 

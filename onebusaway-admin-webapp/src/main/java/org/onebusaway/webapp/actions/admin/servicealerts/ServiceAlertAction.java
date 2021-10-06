@@ -22,6 +22,7 @@ import java.util.*;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.struts2.convention.annotation.Action;
+import org.apache.struts2.convention.annotation.AllowedMethods;
 import org.apache.struts2.convention.annotation.InterceptorRef;
 import org.apache.struts2.convention.annotation.InterceptorRefs;
 import org.apache.struts2.convention.annotation.ParentPackage;
@@ -63,6 +64,7 @@ import com.thoughtworks.xstream.XStream;
 	@Result(type = "redirectAction", name = "addToFavoritesSuccess", params = {
         "actionName", "service-alerts", "id", "${id}", "parse", "true"})
 		})
+@AllowedMethods({"submit", "cancel", "addToFavorites", "addAffects", "delete"})
 public class ServiceAlertAction extends ActionSupport implements
     ModelDriven<ServiceAlertBean>, Preparable {
 
@@ -429,7 +431,7 @@ public String getStartDate() {
     }
   }
   
-@Override
+  @Override
   public String execute() throws IOException, JSONException, ParseException {
 
     _log.info("ServiceAlerts.execute()");
