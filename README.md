@@ -10,7 +10,7 @@ The OneBusAway application suite's primary function is to share real-time public
     * A mobile-optimized version of the web interface for smart phone mobile browsers
     * A text-only version of the web interface for more-basic mobile browsers
   * [OneBusAway REST API](http://developer.onebusaway.org/modules/onebusaway-application-modules/current/api/where/index.html) - A RESTful web-service that can be used to quickly write applications built on top of transit data. This API powers the following apps:
-    * [OneBusAway iOS (iPhone)](https://github.com/OneBusAway/onebusaway-iphone)
+    * [OneBusAway iOS (iPhone)](https://github.com/OneBusAway/onebusaway-ios)
     * [OneBusAway Android](https://github.com/OneBusAway/onebusaway-android)
     * [OneBusAway Windows Phone](https://github.com/OneBusAway/onebusaway-windows-phone)
     * [OneBusAway Windows 8](https://github.com/OneBusAway/onebusaway-windows8)
