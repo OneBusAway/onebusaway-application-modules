@@ -42,8 +42,8 @@ See the [multi-region page](https://github.com/OneBusAway/onebusaway/wiki/Multi-
 #### Setting up a OneBusAway server
 
 There are two options for setting up your own OneBusAway instance:
-* [Quick-Start Guide](https://github.com/OneBusAway/onebusaway-application-modules/wiki/OneBusAway-Quickstart-Guide) - We provide a Quick-Start bundle designed to get you up and running quickly with OneBusAway.
-* [Developer Installation Guide](https://github.com/OneBusAway/onebusaway-application-modules/wiki/Developer-Guide) - If you want to get your hands dirty with code, this guide will help you get a OneBusAway instance set up using the source-code and Eclipse.
+* [Configuration and Deployment Guide for v2.x](https://github.com/OneBusAway/onebusaway/wiki/Configuration-and-Deployment-Guide-for-v2.x) - Designed to provide a comprehensive deployment method for users who wish to set up a simple OneBusAway application with minimal configurations.
+* [onebusaway-docker (Under development)](https://github.com/OneBusAway/onebusaway-docker) - A community-supported Docker configuration for OneBusAway v2.x is currently under development.
 
 ## Status
 
