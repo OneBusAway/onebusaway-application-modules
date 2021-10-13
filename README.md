@@ -4,7 +4,7 @@ A project of the non-profit [Open Transit Software Foundation](https://opentrans
 
 The OneBusAway application suite's primary function is to share real-time public transit information with riders across a variety of interfaces:
 
-  * [OneBusAway Web](https://github.com/OneBusAway/onebusaway-application-modules/wiki/OneBusAway-Web) - A variety of web interfaces to transit data
+  * [OneBusAway Web](http://pugetsound.onebusaway.org/) - A variety of web interfaces to transit data
     * A standard web interface to transit data, including maps and stop pages with real-time info
     * [Sign-mode](https://github.com/OneBusAway/onebusaway-application-modules/wiki/Sign-Mode) - Same information as the standard web interface, but in a large format for large displays (e.g., large televisions)
     * A mobile-optimized version of the web interface for smart phone mobile browsers
