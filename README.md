@@ -47,10 +47,11 @@ There are two options for setting up your own OneBusAway instance:
 
 ## Status
 
-You can find the latest releases here:
-
-* [Latest Stable Release](http://developer.onebusaway.org/modules/onebusaway-application-modules/current/)
-* [Latest Development Release](http://developer.onebusaway.org/modules/onebusaway-application-modules/current-SNAPSHOT/)
+* Latest Stable Release - `2.0.55-cs`:
+    * [onebusaway-transit-data-federation-webapp](https://repo.camsys-apps.com/releases/org/onebusaway/onebusaway-transit-data-federation-webapp/2.0.55-cs/onebusaway-transit-data-federation-webapp-2.0.55-cs.war)
+    * [onebusaway-api-webapp](https://repo.camsys-apps.com/releases/org/onebusaway/onebusaway-api-webapp/2.0.55-cs/onebusaway-api-webapp-2.0.55-cs.war)
+    * [onebusaway-enterprise-acta-webapp](https://repo.camsys-apps.com/releases/org/onebusaway/onebusaway-enterprise-acta-webapp/2.0.55-cs/onebusaway-enterprise-acta-webapp-2.0.55-cs.war)
+* [Previous releases](http://nexus.onebusaway.org/nexus/content/groups/public/org/onebusaway/)
 
 ## Deployments
 
