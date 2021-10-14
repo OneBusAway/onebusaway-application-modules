@@ -62,6 +62,11 @@ public class VehiclePositionsForAgencyAction extends GtfsRealtimeActionSupport {
         TripBean activeTrip = tripStatus.getActiveTrip();
         RouteBean route = activeTrip.getRoute();
 
+        if (FILTER_TYPE.ROUTE_ID == filterType && !filterValue.equals(AgencyAndIdLibrary.convertFromString(route.getId()).getId())) {
+          // skip this route
+          continue;
+        }
+
         TripDescriptor.Builder tripDesc = vehiclePosition.getTripBuilder();
         tripDesc.setTripId(normalizeId(activeTrip.getId()));
         tripDesc.setRouteId(normalizeId(route.getId()));
