@@ -33,14 +33,6 @@ public class ContactAction extends TwilioSupport {
     public String execute() throws Exception {
         _log.debug("in ContactAction with input=" + getInput());
 
-        // clean up session for next use
-        for (Object o : this.sessionMap.keySet()) {
-            if (o instanceof String) {
-                String s = (String) o;
-                sessionMap.remove(s);
-            }
-        }
-
         if (getInput() == null) {
             if (System.getProperty("ivr.customerContact") != null) {
                 addMessage(System.getProperty("ivr.customerContact"));
