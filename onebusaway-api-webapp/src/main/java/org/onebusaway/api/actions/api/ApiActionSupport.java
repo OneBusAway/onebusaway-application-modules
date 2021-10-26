@@ -36,7 +36,7 @@ public class ApiActionSupport extends OneBusAwayApiActionSupport implements
 
   private int _defaultVersion;
 
-  private ResponseBean _response;
+  protected ResponseBean _response;
 
   private int _version = -999;
 

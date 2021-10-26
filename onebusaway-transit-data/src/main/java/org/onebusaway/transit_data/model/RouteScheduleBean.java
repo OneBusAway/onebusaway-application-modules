@@ -61,6 +61,7 @@ public class RouteScheduleBean extends ApplicationBean {
   private AgencyAndId routeId;
   private List<AgencyAndId> serviceIds;
   private ServiceDate scheduleDate;
+  private boolean outOfServiceBounds;
   private List<AgencyBean> agencies = new ArrayList<>();
   private List<RouteBean> routes = new ArrayList<>();
   private List<TripBean> trips = new ArrayList<>();
@@ -119,4 +120,8 @@ public class RouteScheduleBean extends ApplicationBean {
   public List<ServiceAlertBean> getServiceAlerts() {
     return serviceAlertBeans;
   }
+
+  public boolean getOutOfServiceBounds() {return outOfServiceBounds;}
+
+  public void setOutOfServiceBounds(boolean outOfServiceBounds){this.outOfServiceBounds = outOfServiceBounds;}
 }
