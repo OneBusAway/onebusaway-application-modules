@@ -86,20 +86,11 @@ public class StopsForRouteNavigationAction extends TwilioSupport implements Sess
 		
 		//Get navigation bean from session
 		_navigation = (NavigationBean)sessionMap.get("navigation");
-		index = _navigation.getCurrentIndex();
-		
 		if (_navigation == null) {
-			_log.debug("StopsForRouteNavigationAction 1: _navigation is null"); 
-			_navigation = (NavigationBean)sessionMap.get("navigation");
-			sessionMap.put("navigation", _navigation);
-			if (_navigation == null) {
-				_log.debug("StopsForRouteNavigationAction 1: _navigation is STILL null"); 
-			} else {
-				_log.debug("StopsForRouteNavigationAction 1: _navigation.indices: " + _navigation.getSelectionIndices());
-				_log.debug("StopsForRouteNavigationAction 1: _navigation.stops: " + _navigation.getStopsForRoute());
-			}
+			return INPUT;
 		}
-		
+		index = _navigation.getCurrentIndex();
+
 		Integer navState = (Integer)sessionMap.get("navState");
 		if (navState == null) {
 			navState = DISPLAY_DATA;
@@ -107,32 +98,16 @@ public class StopsForRouteNavigationAction extends TwilioSupport implements Sess
 		_log.debug("StopsForRouteNavigationAction:navState: " + navState);
 		
 		
-		//if (getInput() != null) {
 		if (navState == DISPLAY_DATA) {
-			//buildPredictedArrivals(result.getArrivalsAndDepartures());
 			buildStopsList();
 			_log.debug("in StopsForRouteNavigationAction with input " + getInput()); 
 			
-			//clearInput();
 			sessionMap.put("navState", new Integer(DO_ROUTING));
 			sessionMap.put("navigation", _navigation);
 			setNextAction("search/stops-for-route-navigation");
-			//return "stops-for-route-navigation";
 			return INPUT;
 		} else {	// Process input and route to the appropriate action.
 			_log.debug("StopsForRouteNavigationAction: DO_ROUTING for index: " + index); 
-			//sessionMap.put("navState", new Integer(DISPLAY_DATA));
-			//sessionMap.put("navigation", _navigation);
-			if (_navigation == null) {
-				_log.debug("StopsForRouteNavigationAction 2: _navigation is null"); 
-				_navigation = (NavigationBean)sessionMap.get("navigation");
-				if (_navigation == null) {
-					_log.debug("StopsForRouteNavigationAction 2: _navigation is STILL null"); 
-				} else {
-					_log.debug("StopsForRouteNavigationAction 2: _navigation.indices: " + _navigation.getSelectionIndices());
-					_log.debug("StopsForRouteNavigationAction 2: _navigation.stops: " + _navigation.getStopsForRoute());
-				}
-			}
 			sessionMap.put("navigation", _navigation);
       if (PREVIOUS_MENU_ITEM.equals(getInput())) {
         return "back";
@@ -144,37 +119,33 @@ public class StopsForRouteNavigationAction extends TwilioSupport implements Sess
 				sessionMap.put("index", index);
 				return "navigate-down";
 			} else if (keysPressed.equals("4")) {
-				index++;
+				index--;  // back one stop
 				_log.debug("Chaining to transfer-to, index = " + index);
 				sessionMap.put("index", index);
 				return "navigate-to";
 			} else if (keysPressed.equals("7")) {
-				index += 10;
+				index -= 10; // skip back
 				_log.debug("Chaining to transfer-to, index = " + index);
 				sessionMap.put("index", index);
 				return "navigate-to";
 			} else if (keysPressed.equals("6")) {
-				index--;
+				index++; // forward one stop
 				_log.debug("Chaining to transfer-to, index = " + index);
 				sessionMap.put("index", index);
 				return "navigate-to";
 			} else if (keysPressed.equals("9")) {
-				index -= 10;
+				index += 10; // skip forward
 				_log.debug("Chaining to transfer-to, index = " + index);
 				sessionMap.put("index", index);
 				return "navigate-to";
 			} else return INPUT;
-			//setNextAction("search/stop-found");
-			//return INPUT;
 		}
 	}
 	
-	//protected void buildPredictedArrivals(List<ArrivalAndDepartureBean> arrivals) {
 	protected void buildStopsList() {
 		ActionContext context = ActionContext.getContext();
 	    ValueStack vs = context.getValueStack();
 
-	    //NavigationBean navigation = (NavigationBean) vs.findValue("navigation");
 	    NavigationBean navigation = (NavigationBean)sessionMap.get("navigation");
 	    List<NameBean> names = navigation.getNames();
 	    index = navigation.getCurrentIndex();

@@ -53,7 +53,7 @@ public class TwilioSupport extends ActionSupport implements ParameterAware, Curr
   protected TransitDataService _transitDataService;
   protected CurrentUserService _currentUserService;
   private ServiceAreaService _serviceAreaService;
-  private Map<String, String[]> _parameters;
+  protected Map<String, String[]> _parameters;
   private StringBuffer _message = new StringBuffer();
   protected UserBean _currentUser;
   protected Map sessionMap;
@@ -136,10 +136,12 @@ public class TwilioSupport extends ActionSupport implements ParameterAware, Curr
   }
 
   protected void setNextAction(String actionName) {
+    _log.debug("next action now " + actionName);
     ActionContext.getContext().getSession().put("twilio.nextAction", actionName);
   }
   
   protected void clearNextAction() {
+    _log.debug("next action cleared");
     ActionContext.getContext().getSession().remove("twilio.nextAction");
   }
   
