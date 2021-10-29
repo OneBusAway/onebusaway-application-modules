@@ -114,6 +114,12 @@ public class LoadApiKeysOnInitAction {
     action.setContactEmail(record.getContactEmail());
     action.setContactDetails(record.getContactDetails());
     action.setLimit(record.getLimit());
+    action.setCreateAPIKey(true);
+    try {
+      action.execute();
+    } catch (Exception any) {
+      _log.error("record " + record.getKey() + " insertion failed: " + any.toString());
+    }
   }
 
 
