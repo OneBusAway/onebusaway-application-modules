@@ -612,12 +612,15 @@ OBA.Sign = function() {
 					headsignToDistanceAways[routeIdAndHeadsign] = [];
 					r++;
 				}
-
-				jQuery.each(journey.SituationRef, function(_, situationRef) {
-					if(typeof situationsById[situationRef.SituationSimpleRef] !== 'undefined') {
-						applicableSituations[situationRef.SituationSimpleRef] = situationsById[situationRef.SituationSimpleRef];
-					}
-				});
+				if (typeof journey.SituationRef === 'undefined') {
+					console.log("issue with journey");
+				} else {
+					jQuery.each(journey.SituationRef, function (_, situationRef) {
+						if (typeof situationsById[situationRef.SituationSimpleRef] !== 'undefined') {
+							applicableSituations[situationRef.SituationSimpleRef] = situationsById[situationRef.SituationSimpleRef];
+						}
+					});
+				}
 
 				var vehicleInfo = {};
 				vehicleInfo.distanceAway = journey.MonitoredCall.Extensions.Distances.PresentableDistance;
