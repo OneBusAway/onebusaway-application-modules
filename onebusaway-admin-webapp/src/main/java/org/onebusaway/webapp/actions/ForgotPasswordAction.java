@@ -78,10 +78,10 @@ public class ForgotPasswordAction extends OneBusAwayNYCAdminActionSupport {
 		try {
 			_mailSender.send(msg);
 			_log.info("Sent email.");
-		} catch(Exception e) {
+		} catch(Throwable e) {
 			_log.error(e.toString(), e);
 			_log.error("Could not send email: " + e.getMessage());
-			throw new RuntimeException("Unable to send email.");
+			throw new RuntimeException("Unable to send email:  " + e.toString());
 		}
 		return SUCCESS;
 	}
