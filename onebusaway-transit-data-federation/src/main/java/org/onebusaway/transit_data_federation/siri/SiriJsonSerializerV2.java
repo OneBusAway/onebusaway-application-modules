@@ -39,9 +39,6 @@ import com.fasterxml.jackson.databind.ser.BeanPropertyWriter;
 import com.fasterxml.jackson.databind.ser.BeanSerializer;
 import com.fasterxml.jackson.databind.ser.BeanSerializerModifier;
 import com.fasterxml.jackson.databind.ser.std.BeanSerializerBase;
-import com.fasterxml.jackson.databind.ser.std.EnumSerializer;
-import com.fasterxml.jackson.databind.ser.std.StdScalarSerializer;
-import com.fasterxml.jackson.databind.util.EnumValues;
 import org.springframework.util.ReflectionUtils;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.ser.impl.ObjectIdWriter;
@@ -110,32 +107,6 @@ public class SiriJsonSerializerV2 {
     }
   }
 
-  /**
-   * force enums to be lower case to be historically consistent.
-   */
-  private static class CustomEnumSerializer extends StdScalarSerializer {
-
-    protected CustomEnumSerializer(EnumSerializer src) {
-      super(src);
-    }
-
-    @Override
-    public void serialize(Object bean, JsonGenerator jgen,
-                          SerializerProvider provider) throws IOException, JsonGenerationException {
-
-      try {
-        provider.defaultSerializeValue(bean.toString().toLowerCase(), jgen);
-      } catch(Exception e) {
-        jgen.writeNull();
-      }
-    }
-
-    public BeanSerializerBase withFilterId(Object var1) {
-      return null;
-    }
-
-  }
-
   private static class CustomBeanSerializerModifier extends BeanSerializerModifier {
 
     @Override
@@ -150,14 +121,6 @@ public class SiriJsonSerializerV2 {
             if(fieldName != null)
               return super.modifySerializer(config, beanDesc, new CustomValueObjectSerializer((BeanSerializer)serializer, fieldName));
           }
-        }
-        
-      } else if (serializer instanceof EnumSerializer) {
-        EnumValues enumValues = ((EnumSerializer) serializer).getEnumValues();
-
-        List<Enum<?>> enums = enumValues.enums();
-        for (Enum anEnum: enumValues.enums()) {
-          return super.modifyEnumSerializer(config, null, beanDesc, new SiriJsonSerializerV2.CustomEnumSerializer((EnumSerializer) serializer));
         }
       }
       
