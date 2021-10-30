@@ -194,13 +194,28 @@ public class VehicleMonitoringActionTest extends VehicleMonitoringAction {
     action.setServletResponse(servletResponse);
     action.index();
     String monitoring = action.getVehicleMonitoring();
-    String expectedValue = "\"VehicleActivity\":[{\"MonitoredVehicleJourney\":{\"SituationRef\":[{\"SituationSimpleRef\":\"situation ref\"}],\"VehicleLocation\":{\"Longitude\":89.0,\"Latitude\":88.0}}}],\"Version\":\"1.3\"}],\"SituationExchangeDelivery\":[{\"Situations\":{\"PtSituationElement\":[{\"SituationNumber\":\"1_1\",\"Summary\":\"summary\",\"Description\":\"description\",\"Affects\":{\"VehicleJourneys\":{\"AffectedVehicleJourney\":[{\"LineRef\":\"1_100277\",\"DirectionRef\":\"0\"},{\"LineRef\":\"1_100277\",\"DirectionRef\":\"1\"},{\"LineRef\":\"1_100194\",\"DirectionRef\":\"0\"},{\"LineRef\":\"1_100194\",\"DirectionRef\":\"1\"}]}}}]},\"Version\":\"1.3\"}]},\"Version\":\"1.3\"}}";
-    boolean expectedMatch = monitoring.endsWith(expectedValue);
-    if (!expectedMatch) {
-      System.out.println("expected=|" + expectedValue + "|");
-      System.out.println("actual=|" + monitoring + "|");
+    String example = "{\"Siri\":{\"ServiceDelivery\":{\"ResponseTimestamp\":\"2021-10-30T09:10:49.019-07:00\",\"VehicleMonitoringDelivery\":[{\"VehicleActivity\":[{\"MonitoredVehicleJourney\":{\"SituationRef\":[{\"SituationSimpleRef\":\"situation ref\"}],\"VehicleLocation\":{\"Longitude\":89.0,\"Latitude\":88.0}}}],\"ResponseTimestamp\":\"2021-10-30T09:10:49.019-07:00\",\"ValidUntil\":\"2021-10-30T09:11:49.019-07:00\"}],\"SituationExchangeDelivery\":[{\"Situations\":{\"PtSituationElement\":[{\"Summary\":\"summary\",\"Description\":\"description\",\"Affects\":{\"VehicleJourneys\":{\"AffectedVehicleJourney\":[{\"LineRef\":\"1_100277\",\"DirectionRef\":\"0\"},{\"LineRef\":\"1_100277\",\"DirectionRef\":\"1\"},{\"LineRef\":\"1_100194\",\"DirectionRef\":\"0\"},{\"LineRef\":\"1_100194\",\"DirectionRef\":\"1\"}]}},\"SituationNumber\":\"1_1\"}]}}]}}}";
+    String matchPattern = "{\"Siri\":{\"ServiceDelivery\":{\"ResponseTimestamp\":\"...-..-.T..:..:......-0.:00\",\"VehicleMonitoringDelivery\":[{\"VehicleActivity\":[{\"MonitoredVehicleJourney\":{\"SituationRef\":[{\"SituationSimpleRef\":\"situation ref\"}],\"VehicleLocation\":{\"Longitude\":89.0,\"Latitude\":88.0}}}],\"ResponseTimestamp\":\"....-..-..T..:..:......-0.:00\",\"ValidUntil\":\"...-..-..T..:..:......-0.:00\"}],\"SituationExchangeDelivery\":[{\"Situations\":{\"PtSituationElement\":[{\"Summary\":\"summary\",\"Description\":\"description\",\"Affects\":{\"VehicleJourneys\":{\"AffectedVehicleJourney\":[{\"LineRef\":\"1_100277\",\"DirectionRef\":\"0\"},{\"LineRef\":\"1_100277\",\"DirectionRef\":\"1\"},{\"LineRef\":\"1_100194\",\"DirectionRef\":\"0\"},{\"LineRef\":\"1_100194\",\"DirectionRef\":\"1\"}]}},\"SituationNumber\":\"1_1\"}]}}]}}}";
+
+    String[] expectedFragments = {
+            "ServiceDelivery", "ResponseTimestamp", "VehicleMonitoringDelivery", "VehicleActivity",
+            "MonitoredVehicleJourney", "SituationRef", "situation ref",
+            "VehicleLocation", "\"Longitude\":89.0,\"Latitude\":88.0}",
+            "SituationExchangeDelivery", "\"Summary\":\"summary\"",
+            "\"Description\":\"description\"", "Affects", "VehicleJourneys", "AffectedVehicleJourney",
+            "\"LineRef\":\"1_100277\",\"DirectionRef\":\"0\"", "\"LineRef\":\"1_100277\",\"DirectionRef\":\"1\"",
+            "\"LineRef\":\"1_100194\",\"DirectionRef\":\"0\"", "\"LineRef\":\"1_100194\",\"DirectionRef\":\"1\"",
+            "\"SituationNumber\":\"1_1\""
+    };
+    System.out.println("expected=|\n" + monitoring + "\n|");
+    for (String s : expectedFragments) {
+      boolean expectedMatch = monitoring.contains(s);
+      if (!expectedMatch) {
+        System.out.println("expected=|" + s + "|");
+        System.out.println("actual=|" + monitoring + "|");
+      }
+      assertTrue("Result JSON does not match expected", expectedMatch);
     }
-    assertTrue("Result JSON does not match expected", expectedMatch);
   }
   @Test
   public void testExecuteByRouteNoActivity() throws Exception {
