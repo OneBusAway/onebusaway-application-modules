@@ -33,7 +33,8 @@ import org.slf4j.LoggerFactory;
   @Result(name="bookmarks-manage", location="bookmarks/manage", type="redirectAction", params={"From", "${phoneNumber}"}),
   @Result(name="most-recent-stop", location="stops/most-recent-stop", type="redirectAction", params={"From", "${phoneNumber}"}),
   @Result(name="search-index", location="search/index", type="redirectAction", params={"From", "${phoneNumber}"}),
-  @Result(name="index", location="index", type="redirectAction", params={"From", "${phoneNumber}"})
+  @Result(name="index", location="index", type="redirectAction", params={"From", "${phoneNumber}"}),
+  @Result(name="repeat", location="index", type="redirectAction", params={"From", "${phoneNumber}"})
 })
 public class IndexAction extends TwilioSupport implements SessionAware {
 

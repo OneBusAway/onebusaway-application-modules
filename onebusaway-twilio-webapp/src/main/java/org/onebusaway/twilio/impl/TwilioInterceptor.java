@@ -33,6 +33,8 @@ import com.opensymphony.xwork2.ActionContext;
 import com.opensymphony.xwork2.ActionInvocation;
 import com.opensymphony.xwork2.interceptor.AbstractInterceptor;
 
+import static org.onebusaway.twilio.impl.TwilioDispatchFilter.NEXT_ACTION;
+
 public class TwilioInterceptor extends AbstractInterceptor {
 
   private static Logger _log = LoggerFactory.getLogger(TwilioInterceptor.class);
@@ -93,7 +95,11 @@ public class TwilioInterceptor extends AbstractInterceptor {
     Map<String, Object> originalSession = context.getSession();
     context.setSession(persistentSession);
 
-    
+    String nextAction = (String) context.get(NEXT_ACTION);
+    if (nextAction != null) {
+      _log.debug("interceptor found nextAction of " + nextAction);
+    }
+
     XWorkRequestAttributes attributes = new XWorkRequestAttributes(context,
         sessionId);
     RequestAttributes originalAttributes = RequestContextHolder.getRequestAttributes();
@@ -104,6 +110,7 @@ public class TwilioInterceptor extends AbstractInterceptor {
       ((SessionAware) action).setSession(persistentSession);
 
     try {
+      _log.debug("forwarding to " + invocation.getClass().getName() + " via " + action.getClass().getName());
       return invocation.invoke();
     } finally {
       RequestContextHolder.setRequestAttributes(originalAttributes);

@@ -21,15 +21,15 @@
      xmlns:s="/struts-tags"
      xmlns:wiki="/oba-wiki-tags">
   <jsp:directive.page contentType="application/xml" />
-  <Gather action="stops-for-route-navigation">
+  <Gather>
     <Say>
       ${message}
     </Say>
     <Pause length="5"/>
     <Say>
-      Please enter your selection. This call will hang up in five seconds
+      Please enter your selection followed by the pound sign.
     </Say>
-    <Pause length="5"/>
+    <Pause length="60"/>
     <Say>
       Thank you for calling. Goodbye.
     </Say>

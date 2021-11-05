@@ -44,15 +44,7 @@ import org.onebusaway.util.AgencyAndIdLibrary;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.TimeZone;
+import java.util.*;
 
 /**
  * Support Schedule queries at the route level.  Similar to
@@ -116,6 +108,7 @@ public class RouteScheduleBeanServiceImpl implements RouteScheduleBeanService {
   @Cacheable
   public RouteScheduleBean getScheduledArrivalsForDate(AgencyAndId routeId, ServiceDate scheduleDate) {
     RouteScheduleBean rsb = new RouteScheduleBean();
+    rsb.setOutOfServiceBounds(true);
     rsb.setRouteId(routeId);
     rsb.setScheduleDate(scheduleDate);
     RouteCollectionEntry routeCollectionForId = _graph.getRouteCollectionForId(routeId);
@@ -175,6 +168,7 @@ public class RouteScheduleBeanServiceImpl implements RouteScheduleBeanService {
         if (_calendarService.areServiceIdsActiveOnServiceDate(
                 idActivation,
                 rsb.getScheduleDate().getAsDate(idActivation.getTimeZone()))) {
+          rsb.setOutOfServiceBounds(false);
           activeTrips.add(blockTrip.getTrip());
 
           // get identifying charectoristics of the trip
@@ -209,6 +203,11 @@ public class RouteScheduleBeanServiceImpl implements RouteScheduleBeanService {
           sc.addIfNotPresent(stops);
           serviceIds.add(blockTrip.getTrip().getServiceId().getId());
         }
+        if (willServiceIdsBeActiveAfterServiceDate(
+                idActivation,
+                rsb.getScheduleDate().getAsDate(idActivation.getTimeZone()))){
+          rsb.setOutOfServiceBounds(false);
+        }
       }
     }
 
@@ -231,6 +230,18 @@ public class RouteScheduleBeanServiceImpl implements RouteScheduleBeanService {
     rsb.getTrips().addAll(references.getTrips());
     rsb.getStops().addAll(references.getStops());
     rsb.getStopTimes().addAll(references.getStopTimes());
+  }
+
+  private boolean willServiceIdsBeActiveAfterServiceDate(ServiceIdActivation serviceIds,
+                                                         Date serviceDate){
+    boolean answer = false;
+    Set<Date> dates = _calendarService.getDatesForServiceIds(serviceIds);
+    for(Date date : dates){
+      if(date.after(serviceDate)){
+        return true;
+      }
+    }
+    return answer;
   }
 
   private void addRouteReference(BeanReferences references, AgencyAndId routeId) {

@@ -18,15 +18,18 @@ package org.onebusaway.twilio.actions.search;
 import org.apache.struts2.convention.annotation.Result;
 import org.apache.struts2.convention.annotation.Results;
 import org.onebusaway.twilio.actions.TwilioSupport;
-import org.onebusaway.twilio.actions.search.IndexAction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Results({
 	  @Result(name="back", type="redirectAction", params={"namespace", "/", "actionName", "index"}),
 	  @Result(name="route-for-name", location="route-for-name", type="chain"),
-	  @Result(name="search-for-code", location="stop-for-code", type="chain")
-	  })
+	  @Result(name="search-for-code", location="stop-for-code", type="chain"),
+		@Result(name="stops-for-route-navigation", location="stops-for-route-navigation", type="chain"),
+		@Result(name="arrivals-and-departures", type="chain",
+								params={"namespace", "/stops", "actionName", "arrivals-and-departures-for-stop-id"}),
+
+})
 public class IndexAction extends TwilioSupport {
 
 	  private static final long serialVersionUID = 1L;
@@ -37,6 +40,11 @@ public class IndexAction extends TwilioSupport {
 	  public String getSearchCode() {
 	    return _searchCode;
 	  }
+
+		public void setDigits(String digits) {
+			String[] digitArray = {digits};
+			_parameters.put(INPUT_KEY, digitArray);
+		}
 	  
 	  public void setSearchCode(String searchCode) {
 		  _searchCode = searchCode;
@@ -53,7 +61,17 @@ public class IndexAction extends TwilioSupport {
 	  @Override
 	  public String execute() throws Exception {
 	    _log.debug("in search index with input=" + getInput());
-	    
+
+			if (sessionMap.containsKey("stop")) {
+				// request meant for realtime
+				return "arrivals-and-departures";
+			}
+
+			if (sessionMap.containsKey("navigation")) {
+				// request meant for navigation
+				return "stops-for-route-navigation";
+			}
+
 	    if (getInput() != null) {
 	      if (PREVIOUS_MENU_ITEM.equals(getInput())) {
 	        return "back";

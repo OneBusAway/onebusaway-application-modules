@@ -124,7 +124,7 @@ public class StopFoundAction extends TwilioSupport implements SessionAware {
 			addMessage(Messages.TO_REPEAT);
 			
 			sessionMap.put("navState", new Integer(DO_ROUTING));			  
-			return SUCCESS;
+			return INPUT;
 		} else {
       if (PREVIOUS_MENU_ITEM.equals(getInput())) {
         return "back";
