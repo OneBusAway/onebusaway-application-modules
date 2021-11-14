@@ -41,44 +41,13 @@ import com.opensymphony.xwork2.util.ValueStack;
 	@Result(name="navigate-to", location="navigate-to", type="chain"),
 	@Result (name="stopFound", location="stop-found", type="chain"),
 	@Result(name="stops-for-route-navigation", location="stops-for-route-navigation", type="chain"),
-  @Result(name="back", location="index", type="chain")
-	//	  @Result(name="success", location="stop-found", type="chain")
+  @Result(name="back", location="index", type="chain"),
+	@Result(name="stops-for-route", location="stops-for-route", type="redirectAction", params={"namespace", "/search", "actionName", "stops-for-route","From", "${phoneNumber}"}),
+	@Result(name="directions-for-route", location="directions-for-route", type="redirectAction", params={"namespace", "/search", "actionName", "directions-for-route","From", "${phoneNumber}"})
 })
-public class StopsForRouteNavigationAction extends TwilioSupport implements SessionAware {
+public class StopsForRouteNavigationAction extends AbstractNavigationAction {
 	  private static final long serialVersionUID = 1L;
 	  private static Logger _log = LoggerFactory.getLogger(StopsForRouteNavigationAction.class);
-
-	  private TextModification _destinationPronunciation;
-	  private SessionManager _sessionManager;
-	  private Map sessionMap;
-	  private int index;
-	  private NavigationBean _navigation;
-	  
-	  @Autowired
-	  public void setDestinationPronunciation(
-	      @Qualifier("destinationPronunciation") TextModification destinationPronunciation) {
-	    _destinationPronunciation = destinationPronunciation;
-	  }
-	  
-	  @Autowired
-	  public void setSessionManager(SessionManager sessionManager) {
-		_sessionManager = sessionManager;
-	  }
-	  	  
-	  public void setSession(Map map) {
-	  	  this.sessionMap = map;
-	  }
-		
-	  public int getIndex() { return this.index; }
-	  public void setIndex(int index) { this.index = index; }
-   
-	  public void setNavigation(NavigationBean navigation) {
-	  	  _navigation = navigation;
-	  }
-
-	  public NavigationBean getNavigation() {
-	  	  return _navigation;
-	  }
 
 	  @Override
 	  public String execute() throws Exception {
@@ -98,13 +67,19 @@ public class StopsForRouteNavigationAction extends TwilioSupport implements Sess
 		_log.debug("StopsForRouteNavigationAction:navState: " + navState);
 		
 		
-		if (navState == DISPLAY_DATA) {
+		if (navState.equals(DISPLAY_DATA)) {
 			buildStopsList();
 			_log.debug("in StopsForRouteNavigationAction with input " + getInput()); 
 			
 			sessionMap.put("navState", new Integer(DO_ROUTING));
 			sessionMap.put("navigation", _navigation);
 			setNextAction("search/stops-for-route-navigation");
+
+			if ("destination".equals(_navigation.getSelection().getType())) {
+				// moved this logic to directions-for-route to simplify this action
+				return "directions-for-route";
+			}
+
 			return INPUT;
 		} else {	// Process input and route to the appropriate action.
 			_log.debug("StopsForRouteNavigationAction: DO_ROUTING for index: " + index); 
@@ -138,144 +113,20 @@ public class StopsForRouteNavigationAction extends TwilioSupport implements Sess
 				_log.debug("Chaining to transfer-to, index = " + index);
 				sessionMap.put("index", index);
 				return "navigate-to";
-			} else return INPUT;
+			} else if (keysPressed.equals("8")) {
+				_log.debug("repeating");
+				buildStopsList();
+				return INPUT;
+			} else if (keysPressed.equals('*')) {
+				_log.debug("chaining to index to go back");
+				return "back";
+			} else {
+				// invalid input
+				addMessage(Messages.TO_REPEAT);
+				addMessage(Messages.HOW_TO_GO_BACK);
+				return INPUT;
+			}
 		}
 	}
 	
-	protected void buildStopsList() {
-		ActionContext context = ActionContext.getContext();
-	    ValueStack vs = context.getValueStack();
-
-	    NavigationBean navigation = (NavigationBean)sessionMap.get("navigation");
-	    List<NameBean> names = navigation.getNames();
-	    index = navigation.getCurrentIndex();
-	    _log.debug("StopsForRoute.buildStopsList: index: " + index);
-	    if (index < 0)
-	      index = 0;
-
-	    /**
-	     * We always listen for the key-press for the previous name in case it takes
-	     * the user a second to press
-	     */
-	     _log.debug("in StopsForRouteNavigationAction, index = " + index + ", names.size = " + names.size()); 
-	     
-	    if (index > 0)
-	        addNavigationSelectionActionForIndex(navigation, index - 1);
-
-	      /**
-	       * If we're at the first entry and there is a second, we allow the user to
-	       * jump ahead
-	       */
-	      if (index == 0 && names.size() > 1) {
-	        addNavigationSelectionActionForIndex(navigation, index + 1);
-	      }
-	      
-	    if (index >= names.size()) {
-
-	        //AgiActionName action = setNextAction("/search/navigate-to");
-	        //action.putParam("navigation", navigation);
-	        //action.putParam("index", 0);
-	        //action.setExcludeFromHistory(true);
-
-	        // Add an extra pause so the user has a chance to make a selection from
-	        // the previous entry
-	    	addMessage("<Pause length=\"1\"/>");
-	        //addPause(1000);
-
-	        addMessage(Messages.TO_REPEAT);
-
-	      } else {
-
-	        String key = addNavigationSelectionActionForIndex(navigation, index);
-
-	        NameBean name = names.get(index);
-	        handleName(name, key);
-
-	        addNavigateToAction(navigation, "4", first(index - 1));
-	        addNavigateToAction(navigation, "6", index + 1);
-	        addNavigateToAction(navigation, "7", first(index - 10));
-	        addNavigateToAction(navigation, "9", index + 10);
-
-	        //AgiActionName action = setNextAction("/search/navigate-to");
-	        //action.putParam("navigation", navigation);
-	        //action.putParam("index", index + 1);
-	        //action.setExcludeFromHistory(true);
-	        //setNextAction("navigate-to");
-	      }
-
-	      sessionMap.put("navigation", navigation);
-	      //addAction("\\*", "/back");
-	    
-	  }
-	
-
-	  private int first(int i) {
-		    if (i < 0)
-		      i = 0;
-		    return i;
-		  }
-
-		  private void addNavigateToAction(NavigationBean navigation, String key,
-		      int index) {
-//		    AgiActionName action = addAction(key, "/search/navigate-to");
-//		    action.putParam("navigation", navigation);
-//		    action.putParam("index", index);
-//		    action.setExcludeFromHistory(true);
-		  }
-	
-	  private String addNavigationSelectionActionForIndex(
-		      NavigationBean navigation, int index) {
-		    int keyIndex = (index % 2) + 1;
-
-		    String key = Integer.toString(keyIndex);
-		    //AgiActionName action = addAction(key, "/search/navigate-down");
-		    //action.putParam("navigation", navigation);
-		    //action.putParam("index", index);
-		    return key;
-	  }
-	  
-
-	  private void handleName(NameBean name, String key) {
-
-		    String type = name.getType();
-
-		    if (SelectionNameTypes.DESTINATION.equals(type)) {
-		      addMessage(Messages.FOR_TRAVEL_FROM);
-		      addText(_destinationPronunciation.modify(name.getName()));
-		    } else if (SelectionNameTypes.REGION_IN.equals(type)) {
-		      addMessage(Messages.FOR_STOPS_IN);
-		      addText(_destinationPronunciation.modify(name.getName()));
-		    } else if (SelectionNameTypes.REGION_AFTER.equals(type)) {
-		      addMessage(Messages.FOR_STOPS_AFTER);
-		      addText(_destinationPronunciation.modify(name.getName()));
-		    } else if (SelectionNameTypes.REGION_BEFORE.equals(type)) {
-		      addMessage(Messages.FOR_STOPS_BEFORE);
-		      addText(_destinationPronunciation.modify(name.getName()));
-		    } else if (SelectionNameTypes.REGION_BETWEEN.equals(type)) {
-		      addMessage(Messages.FOR_STOPS_BETWEEN);
-		      addText(_destinationPronunciation.modify(name.getName(0)));
-		      addMessage(Messages.AND);
-		      addText(_destinationPronunciation.modify(name.getName(1)));
-		    } else if (SelectionNameTypes.MAIN_STREET.equals(type)) {
-		      addMessage(Messages.FOR_STOPS_ALONG);
-		      addText(_destinationPronunciation.modify(name.getName(0)));
-		    } else if (SelectionNameTypes.CROSS_STREET.equals(type)) {
-		      addMessage(Messages.FOR_STOPS_AT);
-		      addText(_destinationPronunciation.modify(name.getName(0)));
-		    } else if (SelectionNameTypes.STOP_NAME.equals(type)) {
-		      addMessage(Messages.FOR);
-		      addText(_destinationPronunciation.modify(name.getName(0)));
-		    } else if (SelectionNameTypes.STOP_DESCRIPTION.equals(type)) {
-		      addMessage(Messages.FOR_STOPS_NUMBER);
-		      addText(_destinationPronunciation.modify(name.getName(0)));
-		    }
-
-		    addMessage(Messages.PLEASE_PRESS);
-				addText("1."); // not relative to index any longer, option 1 means select this stop
-
-		    // Add additional navigation instructions for STOP_NAME type.
-		    if (SelectionNameTypes.STOP_NAME.equals(type)) {
-		      addMessage(Messages.NAVIGATION_ACTIONS);
-		    }
-		}
 }
