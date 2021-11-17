@@ -23,7 +23,7 @@ import org.onebusaway.gtfs.model.calendar.CalendarServiceData;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
 import org.onebusaway.transit_data.model.RouteScheduleBean;
 import org.onebusaway.transit_data.model.StopTimeInstanceBean;
-import org.onebusaway.transit_data.model.StopTripDirectionBean;
+import org.onebusaway.transit_data.model.StopsAndTripsForDirectionBean;
 import org.onebusaway.transit_data_federation.impl.ExtendedCalendarServiceImpl;
 import org.onebusaway.transit_data_federation.impl.blocks.BlockIndexFactoryServiceImpl;
 import org.onebusaway.transit_data_federation.impl.blocks.BlockIndexServiceImpl;
@@ -50,7 +50,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.when;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.*;
 
 public class RouteScheduleBeanServiceImplTest {
@@ -109,7 +108,7 @@ public class RouteScheduleBeanServiceImplTest {
     assertEquals(serviceDate, bean.getScheduleDate());
 
     assertEquals(2, bean.getStopTripDirections().size());
-    StopTripDirectionBean stdb1 = getStopTripDirection(bean.getStopTripDirections(), "Theater District Station", "0");
+    StopsAndTripsForDirectionBean stdb1 = getStopTripDirection(bean.getStopTripDirections(), "Theater District Station", "0");
     assertNotNull(stdb1);
 
     Comparator<AgencyAndId> comparator = Comparator.comparing(AgencyAndId::getId);
@@ -118,7 +117,7 @@ public class RouteScheduleBeanServiceImplTest {
     assertEquals(Arrays.asList(aId("TL_TD"), aId("TL_25"), aId("TL_US"), aId("TL_CC")),
             stdb1.getStopIds());
     assertNotNull(stdb1.getStopTimes());
-    assertEquals(8, stdb1.getStopTimes().size());
+    assertEquals(7, stdb1.getStopTimes().size());
     assertNotNull(stdb1.getStopTimes().get(0).getTripId());
     assertEquals("1_TacL1000", stdb1.getStopTimes().get(0).getTripId());
     assertEquals(Arrays.asList((long)time(5,0,0),
@@ -130,7 +129,7 @@ public class RouteScheduleBeanServiceImplTest {
                     stdb1.getStopTimes().get(2).getArrivalTime(),
                     stdb1.getStopTimes().get(3).getArrivalTime()));
 
-    StopTripDirectionBean stdb2 = getStopTripDirection(bean.getStopTripDirections(), "Tacoma Dome Station", "1");
+    StopsAndTripsForDirectionBean stdb2 = getStopTripDirection(bean.getStopTripDirections(), "Tacoma Dome Station", "1");
     assertNotNull(stdb2);
 
     assertEquals(Arrays.asList(aId("TacL1001"),aId( "TacL1003")).stream().sorted(comparator).collect(toList()),
@@ -138,7 +137,7 @@ public class RouteScheduleBeanServiceImplTest {
     assertEquals(Arrays.asList(aId("TL_CC"), aId("TL_US"), aId("TL_25"), aId("TL_TD")),
             stdb2.getStopIds());
     assertNotNull(stdb2.getStopTimes());
-    assertEquals(8, stdb2.getStopTimes().size());
+    assertEquals(7, stdb2.getStopTimes().size());
     assertNotNull(stdb2.getStopTimes().get(0).getTripId());
     assertEquals("1_TacL1001", stdb2.getStopTimes().get(0).getTripId());
     StopTimeInstanceBean stib2 = stdb2.getStopTimes().get(0);
@@ -159,13 +158,12 @@ public class RouteScheduleBeanServiceImplTest {
     assertEquals(1, bean.getRoutes().size());
     assertEquals(4, bean.getStops().size());
     assertEquals(4, bean.getTrips().size());
-    assertEquals(16, bean.getStopTimes().size());
+    assertEquals(14, bean.getStopTimes().size());
   }
 
-  private StopTripDirectionBean getStopTripDirection(List<StopTripDirectionBean> stopTripDirections, String headsign, String direction) {
-    for (StopTripDirectionBean stdb: stopTripDirections) {
-      if (stdb.getTripHeadsign().equals(headsign)
-          && stdb.getDirectionId().equals(direction))
+  private StopsAndTripsForDirectionBean getStopTripDirection(List<StopsAndTripsForDirectionBean> stopTripDirections, String headsign, String direction) {
+    for (StopsAndTripsForDirectionBean stdb: stopTripDirections) {
+      if (stdb.getDirectionId().equals(direction))
         return stdb;
     }
     return null;
@@ -254,14 +252,14 @@ public class RouteScheduleBeanServiceImplTest {
 
     StopTimeEntryImpl st_2a_1 = stopTime(1, std, t2a, time(5, 16, 0),time(5, 16, 0), 0);
     StopTimeEntryImpl st_2a_2 = stopTime(1, s25, t2a, time(5, 18, 0),time(5, 18, 0), 0);
-    StopTimeEntryImpl st_2a_3 = stopTime(1, sus, t2a, time(5, 20, 0), time(5, 20, 0), 0);
+    //StopTimeEntryImpl st_2a_3 = stopTime(1, sus, t2a, time(5, 20, 0), time(5, 20, 0), 0);
     StopTimeEntryImpl st_2a_4 = stopTime(1, scc, t2a, time(5, 22, 0),time(5, 22, 0), 0);
 
 
-    StopTimeEntryImpl st_2_1 = stopTime(1, scc, t2b, time(5, 24, 0),time(5, 24, 0), 0);
-    StopTimeEntryImpl st_2_2 = stopTime(1, sus, t2b, time(5, 26, 0),time(5, 26, 0), 0);
-    StopTimeEntryImpl st_2_3 = stopTime(1, s25, t2b, time(5, 28, 0),time(5, 28, 0), 0);
-    StopTimeEntryImpl st_2_4 = stopTime(1, std, t2b, time(5, 30, 0),time(5, 30, 0), 0);
+    StopTimeEntryImpl st_2b_1 = stopTime(1, scc, t2b, time(5, 24, 0),time(5, 24, 0), 0);
+    StopTimeEntryImpl st_2b_2 = stopTime(1, sus, t2b, time(5, 26, 0),time(5, 26, 0), 0);
+    //StopTimeEntryImpl st_2b_3 = stopTime(1, s25, t2b, time(5, 28, 0),time(5, 28, 0), 0);
+    StopTimeEntryImpl st_2b_4 = stopTime(1, std, t2b, time(5, 30, 0),time(5, 30, 0), 0);
 
     StopTimeEntryImpl st_3_1 = stopTime(1, std, t3, time(6, 0, 0), time(5, 0,0 ), 0);
     StopTimeEntryImpl st_3_2 = stopTime(1, s25, t3, time(6, 2, 0), time(5, 2,0 ), 0);

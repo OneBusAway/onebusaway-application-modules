@@ -43,7 +43,7 @@
 		<dependency>
 			<groupId>com.conveyal</groupId>
 			<artifactId>gtfs-validation-lib</artifactId>
-			<version>0.1.8</version>
+			<version>0.1.8.1</version>
 			<exclusions>
 				<exclusion>
 					<artifactId>onebusaway-gtfs</artifactId>

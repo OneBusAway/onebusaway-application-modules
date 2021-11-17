@@ -66,7 +66,7 @@ public class RouteScheduleBean extends ApplicationBean {
   private List<TripBean> trips = new ArrayList<>();
   private List<StopBean> stops = new ArrayList<>();
   private List<StopTimeInstanceBean> stopTimes = new ArrayList<>();
-  private List<StopTripDirectionBean> stopTripDirections = new ArrayList<>();
+  private List<StopsAndTripsForDirectionBean> stopTripDirections = new ArrayList<>();
   private List<ServiceAlertBean> serviceAlertBeans = new ArrayList<>();
 
   public AgencyAndId getRouteId() {
@@ -93,7 +93,7 @@ public class RouteScheduleBean extends ApplicationBean {
     this.scheduleDate = scheduleDate;
   }
 
-  public List<StopTripDirectionBean> getStopTripDirections() {
+  public List<StopsAndTripsForDirectionBean> getStopTripDirections() {
     return stopTripDirections;
   }
   public List<AgencyBean> getAgencies() {

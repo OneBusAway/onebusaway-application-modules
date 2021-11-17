@@ -350,6 +350,7 @@
 					<excludes combine.children="append">
 						<exclude>**/dateFormat.js</exclude>
 						<exclude>**/popover.js</exclude>
+						<exclude>**/GoogleTranslate.js</exclude>
 						<exclude>**/markerManager.js</exclude>
 						<exclude>**/markerAnimate.js</exclude>
 						<exclude>**/rgbcolor.js</exclude>
