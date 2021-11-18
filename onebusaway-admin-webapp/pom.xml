@@ -235,7 +235,7 @@
 			<groupId>org.onebusaway</groupId>
 			<artifactId>onebusaway-collections</artifactId>
 			<!--  this is on purpose; gtfs transformer needs a newer version of collections -->
-			<version>1.2.0</version>
+			<version>1.2.3</version>
 		</dependency>
 		<!--  gtfs validation -->
 	<dependency>
