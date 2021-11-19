@@ -335,17 +335,27 @@
 			<artifactId>commons-csv</artifactId>
 			<version>1.1</version>
 		</dependency>
-                <dependency>
-                  <groupId>com.googlecode.json-simple</groupId>
-                  <artifactId>json-simple</artifactId>
-                  <version>1.1</version>
-                  <type>jar</type>
-                </dependency>
-                <dependency>
-                  <groupId>org.mitre.dsmiley.httpproxy</groupId>
-                  <artifactId>smiley-http-proxy-servlet</artifactId>
-                  <version>1.7</version>
-                </dependency>
+		<dependency>
+		  <groupId>com.googlecode.json-simple</groupId>
+		  <artifactId>json-simple</artifactId>
+		  <version>1.1</version>
+		  <type>jar</type>
+			<exclusions>
+				<exclusion>
+					<groupId>org.codehaus.jackson</groupId>
+					<artifactId>jackson-mapper-asl</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.codehaus.jackson</groupId>
+					<artifactId>jackson-core-asl</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+		  <groupId>org.mitre.dsmiley.httpproxy</groupId>
+		  <artifactId>smiley-http-proxy-servlet</artifactId>
+		  <version>1.7</version>
+		</dependency>
         <!-- http://mvnrepository.com/artifact/joda-time/joda-time -->
         <dependency>
             <groupId>joda-time</groupId>

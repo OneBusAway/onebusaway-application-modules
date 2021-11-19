@@ -28,7 +28,7 @@
     <jersey-version>2.31</jersey-version>
     <onebusaway-siri-version>1.0.6</onebusaway-siri-version>
     <onebusaway-siri-1-api-version>1.0.1</onebusaway-siri-1-api-version>
-    <onebusaway-siri-2-api-version>1.0.3</onebusaway-siri-2-api-version>
+    <onebusaway-siri-2-api-version>1.0.5</onebusaway-siri-2-api-version>
     <wiki_integration_version>1.0.0</wiki_integration_version>
     <slf4j.version>1.7.5</slf4j.version>
     <guava-version>16.0.1</guava-version>
