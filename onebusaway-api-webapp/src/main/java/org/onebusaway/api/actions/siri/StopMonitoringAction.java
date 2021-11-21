@@ -39,6 +39,8 @@ import org.onebusaway.presentation.services.realtime.RealtimeService;
 import org.onebusaway.transit_data.model.StopBean;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.util.AgencyAndIdLibrary;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.onebusaway.util.impl.analytics.GoogleAnalyticsServiceImpl;
 
@@ -55,6 +57,8 @@ import com.brsanthu.googleanalytics.PageViewHit;
 
 public class StopMonitoringAction extends ApiActionSupport 
   implements ServletRequestAware, ServletResponseAware {
+
+  private static Logger _log = LoggerFactory.getLogger(StopMonitoringAction.class);
 
   private static final long serialVersionUID = 1L;
   
@@ -93,33 +97,33 @@ public class StopMonitoringAction extends ApiActionSupport
   }
 
   public DefaultHttpHeaders index() throws IOException {
-	
-	processGoogleAnalytics();
 
-  	long responseTimestamp = getTime();
+    processGoogleAnalytics();
+
+    long responseTimestamp = getTime();
 
     _realtimeService.setTime(responseTimestamp);
 
     String directionId = _request.getParameter("DirectionRef");
-    
+
     // We need to support the user providing no agency id which means 'all agencies'.
     // So, this array will hold a single agency if the user provides it or all
     // agencies if the user provides none. We'll iterate over them later while 
     // querying for vehicles and routes
     List<String> agencyIds = new ArrayList<String>();
-    
+
     // Try to get the agency id passed by the user
     String agencyId = _request.getParameter("OperatorRef");
-    
+
     if (agencyId != null) {
       // The user provided an agency id so, use it
       agencyIds.add(agencyId);
     } else {
       // They did not provide an agency id, so interpret that an any/all agencies.
-      Map<String,List<CoordinateBounds>> agencies = _transitDataService.getAgencyIdsWithCoverageArea();
+      Map<String, List<CoordinateBounds>> agencies = _transitDataService.getAgencyIdsWithCoverageArea();
       agencyIds.addAll(agencies.keySet());
     }
-    
+
     List<AgencyAndId> stopIds = new ArrayList<AgencyAndId>();
     String stopIdsErrorString = "";
     if (_request.getParameter("MonitoringRef") != null) {
@@ -148,7 +152,7 @@ public class StopMonitoringAction extends ApiActionSupport
     } else {
       stopIdsErrorString = "You must provide a MonitoringRef.";
     }
-    
+
     List<AgencyAndId> routeIds = new ArrayList<AgencyAndId>();
     String routeIdsErrorString = "";
     if (_request.getParameter("LineRef") != null) {
@@ -174,10 +178,10 @@ public class StopMonitoringAction extends ApiActionSupport
       }
       if (routeIds.size() > 0) routeIdsErrorString = "";
     }
-    
+
     String detailLevel = _request.getParameter("StopMonitoringDetailLevel");
 
-    int maximumOnwardCalls = 0;        
+    int maximumOnwardCalls = 0;
     if (detailLevel != null && detailLevel.equals("calls")) {
       maximumOnwardCalls = Integer.MAX_VALUE;
 
@@ -188,38 +192,38 @@ public class StopMonitoringAction extends ApiActionSupport
       }
     }
 
-    int maximumStopVisits = Integer.MAX_VALUE;        
+    int maximumStopVisits = Integer.MAX_VALUE;
     try {
       maximumStopVisits = Integer.parseInt(_request.getParameter("MaximumStopVisits"));
     } catch (NumberFormatException e) {
       maximumStopVisits = Integer.MAX_VALUE;
     }
 
-    Integer minimumStopVisitsPerLine = null;        
+    Integer minimumStopVisitsPerLine = null;
     try {
       minimumStopVisitsPerLine = Integer.parseInt(_request.getParameter("MinimumStopVisitsPerLine"));
     } catch (NumberFormatException e) {
       minimumStopVisitsPerLine = null;
     }
-        
+
     // Monitored Stop Visits
     List<MonitoredStopVisitStructure> visits = new ArrayList<MonitoredStopVisitStructure>();
     Map<String, MonitoredStopVisitStructure> visitsMap = new HashMap<String, MonitoredStopVisitStructure>();
-    
+
     for (AgencyAndId stopId : stopIds) {
-      
+
       if (!stopId.hasValues()) continue;
-      
+
       // Stop ids can only be valid here because we only added valid ones to stopIds.
       List<MonitoredStopVisitStructure> visitsForStop = _realtimeService.getMonitoredStopVisitsForStop(stopId.toString(), maximumOnwardCalls, responseTimestamp);
-      if (visitsForStop != null) visits.addAll(visitsForStop); 
+      if (visitsForStop != null) visits.addAll(visitsForStop);
     }
-    
+
     List<MonitoredStopVisitStructure> filteredVisits = new ArrayList<MonitoredStopVisitStructure>();
 
     Map<AgencyAndId, Integer> visitCountByLine = new HashMap<AgencyAndId, Integer>();
     int visitCount = 0;
-    
+
     for (MonitoredStopVisitStructure visit : visits) {
       MonitoredVehicleJourneyStructure journey = visit.getMonitoredVehicleJourney();
 
@@ -234,7 +238,7 @@ public class StopMonitoringAction extends ApiActionSupport
         if (directionId != null && !thisDirectionId.equals(directionId))
           continue;
       }
-      
+
       // visit count filters
       Integer visitCountForThisLine = visitCountByLine.get(thisRouteId);
       if (visitCountForThisLine == null) {
@@ -246,51 +250,49 @@ public class StopMonitoringAction extends ApiActionSupport
           break;
         } else {
           if (visitCountForThisLine >= minimumStopVisitsPerLine) {
-            continue;       
+            continue;
           }
         }
       }
-      
+
       // unique stops filters
-      if (visit.getMonitoredVehicleJourney() == null || 
-    		  visit.getMonitoredVehicleJourney().getVehicleRef() == null ||
-    		  StringUtils.isBlank(visit.getMonitoredVehicleJourney().getVehicleRef().getValue())){
-    	  continue;
+      if (visit.getMonitoredVehicleJourney() == null ||
+              visit.getMonitoredVehicleJourney().getVehicleRef() == null ||
+              StringUtils.isBlank(visit.getMonitoredVehicleJourney().getVehicleRef().getValue())) {
+        continue;
+      } else {
+        String visitKey = visit.getMonitoredVehicleJourney().getVehicleRef().getValue();
+        if (visitsMap.containsKey(visit.getMonitoredVehicleJourney().getVehicleRef().getValue())) {
+          if (visit.getMonitoredVehicleJourney().getProgressStatus() == null) {
+            visitsMap.remove(visitKey);
+            visitsMap.put(visitKey, visit);
+          }
+          continue;
+        } else {
+          visitsMap.put(visit.getMonitoredVehicleJourney().getVehicleRef().getValue(), visit);
+        }
       }
-      else{
-    	  String visitKey = visit.getMonitoredVehicleJourney().getVehicleRef().getValue();
-    	  if(visitsMap.containsKey(visit.getMonitoredVehicleJourney().getVehicleRef().getValue())){
-    		  if(visit.getMonitoredVehicleJourney().getProgressStatus() == null){
-    			  visitsMap.remove(visitKey);
-    			  visitsMap.put(visitKey, visit);
-    		  }
-    		  continue; 
-    	  }
-    	  else{
-    		  visitsMap.put(visit.getMonitoredVehicleJourney().getVehicleRef().getValue(), visit);
-    	  }
-      }	  
-      
+
       filteredVisits.add(visit);
 
-      visitCount++;       
+      visitCount++;
       visitCountForThisLine++;
       visitCountByLine.put(thisRouteId, visitCountForThisLine);
     }
     visits = filteredVisits;
-    
+
     Exception error = null;
     if (stopIds.size() == 0 || (_request.getParameter("LineRef") != null && routeIds.size() == 0)) {
       String errorString = (stopIdsErrorString + " " + routeIdsErrorString).trim();
       error = new Exception(errorString);
     }
-    
+
     _response = generateSiriResponse(visits, stopIds, error, responseTimestamp);
-    
+
     try {
       this._servletResponse.getWriter().write(getStopMonitoring());
-    } catch (IOException e) {
-      e.printStackTrace();
+    } catch (Exception e) {
+      _log.error("excepting writing content ", e, e);
     }
 
     return null;
@@ -314,54 +316,54 @@ public class StopMonitoringAction extends ApiActionSupport
   }
   
   private Siri generateSiriResponse(List<MonitoredStopVisitStructure> visits, List<AgencyAndId> stopIds, Exception error, long responseTimestamp) {
-    
-    StopMonitoringDeliveryStructure stopMonitoringDelivery = new StopMonitoringDeliveryStructure();
-    stopMonitoringDelivery.setResponseTimestamp(new Date(responseTimestamp));
-    
-    ServiceDelivery serviceDelivery = new ServiceDelivery();
-    serviceDelivery.setResponseTimestamp(new Date(responseTimestamp));
-    serviceDelivery.getStopMonitoringDelivery().add(stopMonitoringDelivery);
-    
-    if (error != null) {
-      ServiceDeliveryErrorConditionStructure errorConditionStructure = new ServiceDeliveryErrorConditionStructure();
-      
-      ErrorDescriptionStructure errorDescriptionStructure = new ErrorDescriptionStructure();
-      errorDescriptionStructure.setValue(error.getMessage());
-      
-      OtherErrorStructure otherErrorStructure = new OtherErrorStructure();
-      otherErrorStructure.setErrorText(error.getMessage());
-      
-      errorConditionStructure.setDescription(errorDescriptionStructure);
-      errorConditionStructure.setOtherError(otherErrorStructure);
-      
-      stopMonitoringDelivery.setErrorCondition(errorConditionStructure);
-    } else {
-      Calendar gregorianCalendar = new GregorianCalendar();
-      gregorianCalendar.setTimeInMillis(responseTimestamp);
-      gregorianCalendar.add(Calendar.MINUTE, 1);
-      stopMonitoringDelivery.setValidUntil(gregorianCalendar.getTime());
 
-      stopMonitoringDelivery.getMonitoredStopVisit().addAll(visits);
+      StopMonitoringDeliveryStructure stopMonitoringDelivery = new StopMonitoringDeliveryStructure();
+      stopMonitoringDelivery.setResponseTimestamp(new Date(responseTimestamp));
 
+      ServiceDelivery serviceDelivery = new ServiceDelivery();
       serviceDelivery.setResponseTimestamp(new Date(responseTimestamp));
-      
-      _serviceAlertsHelper.addSituationExchangeToSiriForStops(serviceDelivery, visits, _transitDataService, stopIds);
-      _serviceAlertsHelper.addGlobalServiceAlertsToServiceDelivery(serviceDelivery, _realtimeService);
-    }
+      serviceDelivery.getStopMonitoringDelivery().add(stopMonitoringDelivery);
 
-    Siri siri = new Siri();
-    siri.setServiceDelivery(serviceDelivery);
-    
-    return siri;
+      if (error != null) {
+        ServiceDeliveryErrorConditionStructure errorConditionStructure = new ServiceDeliveryErrorConditionStructure();
+
+        ErrorDescriptionStructure errorDescriptionStructure = new ErrorDescriptionStructure();
+        errorDescriptionStructure.setValue(error.getMessage());
+
+        OtherErrorStructure otherErrorStructure = new OtherErrorStructure();
+        otherErrorStructure.setErrorText(error.getMessage());
+
+        errorConditionStructure.setDescription(errorDescriptionStructure);
+        errorConditionStructure.setOtherError(otherErrorStructure);
+
+        stopMonitoringDelivery.setErrorCondition(errorConditionStructure);
+      } else {
+        Calendar gregorianCalendar = new GregorianCalendar();
+        gregorianCalendar.setTimeInMillis(responseTimestamp);
+        gregorianCalendar.add(Calendar.MINUTE, 1);
+        stopMonitoringDelivery.setValidUntil(gregorianCalendar.getTime());
+
+        stopMonitoringDelivery.getMonitoredStopVisit().addAll(visits);
+
+        serviceDelivery.setResponseTimestamp(new Date(responseTimestamp));
+
+        _serviceAlertsHelper.addSituationExchangeToSiriForStops(serviceDelivery, visits, _transitDataService, stopIds);
+        _serviceAlertsHelper.addGlobalServiceAlertsToServiceDelivery(serviceDelivery, _realtimeService);
+      }
+
+      Siri siri = new Siri();
+      siri.setServiceDelivery(serviceDelivery);
+
+      return siri;
   }
 
   public String getStopMonitoring() {
+    // we no longer set response types here -- custom handlers take care of that
+    // based on the type param
     try {
       if(_type.equals("xml")) {
-        this._servletResponse.setContentType("application/xml");
         return _realtimeService.getSiriXmlSerializer().getXml(_response);
       } else {
-        this._servletResponse.setContentType("application/json");
         return _realtimeService.getSiriJsonSerializer().getJson(_response, _request.getParameter("callback"));
       }
     } catch(Exception e) {
@@ -384,8 +386,9 @@ public class StopMonitoringAction extends ApiActionSupport
   }
   
   private void processGoogleAnalytics(){
-	  processGoogleAnalyticsPageView();
-	  processGoogleAnalyticsApiKeys();  
+    // no longer supported
+//	  processGoogleAnalyticsPageView();
+//	  processGoogleAnalyticsApiKeys();
   }
   
   private void processGoogleAnalyticsPageView(){

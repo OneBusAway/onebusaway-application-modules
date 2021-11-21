@@ -224,9 +224,10 @@ OBA.Sign = function() {
 
 	function initStop(stopId, initMonitor) {
 		var stopIdStr = stopId.agency + "_" + stopId.id;
-		var params = { stopId: stopIdStr };
-
-		jQuery.getJSON(baseUrl + "/" + OBA.Config.stopForId, params, function(json) {
+		var params = { stopId: stopIdStr, "type": "json", "key": "OBAKEY" };
+		var stopForIdAPI = "/onebusaway-api-webapp/siri/stop-monitoring";
+		var legacyUrl = baseUrl + "/" + OBA.Config.stopForId;
+		jQuery.getJSON(legacyUrl, params, function(json) {
 			stopInfo[stopIdStr] = json.stop;
 			jQuery.each(json.stop.routesAvailable, function(_, route) {
 				routeInfo[route.id] = route;
@@ -566,12 +567,15 @@ OBA.Sign = function() {
 
 		var stopElement = getNewElementForStop(stopId);
 
-		var params = { OperatorRef: stopId.agency, MonitoringRef: stopId.id, StopMonitoringDetailLevel: "normal", MinimumStopVisitsPerLine: 3 };
+		var params = { OperatorRef: stopId.agency, MonitoringRef: stopId.id, StopMonitoringDetailLevel: "normal",
+			MinimumStopVisitsPerLine: 3, "type": "json", "key": "OBAKEY" };
 		if (lineRef) {
 			params.LineRef = lineRef;
 		}
 
-		jQuery.getJSON(obaApiBaseUrl + OBA.Config.siriSMUrl, params, function(json) {
+		var siriAPI = "/onebusaway-api-webapp/siri/stop-monitoring";
+		var legacyURL = obaApiBaseUrl + OBA.Config.siriSMUrl;
+		jQuery.getJSON(siriAPI, params, function(json) {
 			//updateTimestamp(OBA.Util.ISO8601StringToDate(json.Siri.ServiceDelivery.ResponseTimestamp));
 			//hideError();
 
