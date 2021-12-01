@@ -17,6 +17,7 @@ package org.onebusaway.api.model;
 
 import java.io.Serializable;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.onebusaway.csv_entities.schema.annotations.CsvField;
 import org.onebusaway.util.SystemTime;
 
@@ -24,6 +25,8 @@ public class ResponseBean implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
+  @JsonIgnore
+  private boolean isText = false;
   private int version;
   private int code;
   private long currentTime = SystemTime.currentTimeMillis();
@@ -40,6 +43,15 @@ public class ResponseBean implements Serializable {
     this.text = text;
     this.data = data;
   }
+
+  public ResponseBean(int version, int code, String text, Object data, boolean isText) {
+    this.version = version;
+    this.code = code;
+    this.text = text;
+    this.data = data;
+    this.isText = isText;
+  }
+
 
   public int getCode() {
     return code;
@@ -60,4 +72,6 @@ public class ResponseBean implements Serializable {
   public Object getData() {
     return data;
   }
+  @JsonIgnore
+  public boolean isText() { return isText; }
 }

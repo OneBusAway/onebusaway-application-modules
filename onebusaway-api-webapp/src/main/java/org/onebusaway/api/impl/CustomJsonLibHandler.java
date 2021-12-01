@@ -20,6 +20,7 @@ import com.opensymphony.xwork2.ActionInvocation;
 import com.opensymphony.xwork2.inject.Inject;
 import org.apache.struts2.ServletActionContext;
 import org.apache.struts2.rest.handler.AbstractContentTypeHandler;
+import org.onebusaway.api.model.ResponseBean;
 import org.onebusaway.api.serializers.json.CustomSerializerProvider;
 
 import javax.servlet.http.HttpServletRequest;
@@ -45,13 +46,22 @@ public class CustomJsonLibHandler extends AbstractContentTypeHandler {
         }
 
         public String fromObject(ActionInvocation invocation, Object obj, String resultCode, Writer stream, String callback) throws IOException {
-                mapper.setSerializerProvider(new CustomSerializerProvider());
-                mapper.configure(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY, true);
-                mapper.configure(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS, true);
-                mapper.configure(SerializationFeature.WRITE_NULL_MAP_VALUES, false);
+                boolean isText = false;
+                String value = null;
+                if (obj != null && obj instanceof ResponseBean) {
+                        // check if serialization already occurred as with SIRI calls
+                        ResponseBean bean = (ResponseBean) obj;
+                        isText = bean.isText();
+                        value = bean.getData().toString();
+                }
+                if (!isText) {
+                        mapper.setSerializerProvider(new CustomSerializerProvider());
+                        mapper.configure(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY, true);
+                        mapper.configure(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS, true);
+                        mapper.configure(SerializationFeature.WRITE_NULL_MAP_VALUES, false);
 
-                String value = mapper.writeValueAsString(obj);
-
+                        value = mapper.writeValueAsString(obj);
+                }
                 if (callback != null) {
                         stream.write(callback + "(" + value + ")");
                 }
@@ -79,7 +89,7 @@ public class CustomJsonLibHandler extends AbstractContentTypeHandler {
                 // we used to set charset for callbacks
                 // after Jackson upgrade to 2.12.0 this no longer works
                 //return "application/json;charset=" + this.defaultEncoding;
-                return "application/javascript";
+                return "application/json";
         }
 
         public String getExtension() {

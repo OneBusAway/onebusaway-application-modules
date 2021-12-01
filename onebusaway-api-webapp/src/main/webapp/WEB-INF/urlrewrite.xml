@@ -24,26 +24,15 @@
 -->
 <urlrewrite use-query-string="true" use-context="true">
 
+    <!-- here we removed legacy v2 support -->
+
+
+    <!-- make sure type param is present and infer from URL -->
+    <!-- this changed slightly in now that .json and .xml are support by the action -->
     <rule>
-        <condition type="parameter" name="version">2</condition>
-        <condition type="header" operator="equal" name="X-Forwarded-Proto">^HTTPS$</condition>
-		<from>^([^;]*)/siri/([^.]*)\.(xml|json)(.*)$</from>
-        <to type="redirect" last="true">https://%{server-name}/$1/siri/$2-v2$4&amp;type=$3</to>
-    </rule>
-    <rule>
-        <condition type="header" operator="equal" name="X-Forwarded-Proto">^HTTPS$</condition>
+        <condition type="parameter" name="type">([^json]|[^xml])</condition>
         <from>^([^;]*)/siri/([^.]*)\.(xml|json)(.*)$</from>
-         <to type="redirect" last="true">https://%{server-name}/$1/siri/$2$4&amp;type=$3</to>
+        <to type="redirect" last="true">$1/siri/$2.$3$4&amp;type=$3</to>
     </rule>
-    
-    <rule>
-        <condition type="parameter" name="version">2</condition>
-		<from>^([^;]*)/siri/([^.]*)\.(xml|json)(.*)$</from>
-        <to type="redirect" last="true">$1/siri/$2-v2$4&amp;type=$3</to>
-    </rule>
-    <rule>
-        <from>^([^;]*)/siri/([^.]*)\.(xml|json)(.*)$</from>
-        <to type="redirect" last="true">$1/siri/$2$4&amp;type=$3</to>
-    </rule>
-	
+
 </urlrewrite>

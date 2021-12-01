@@ -113,16 +113,17 @@
 
     </package>
 
-    <package name="onebusaway-webapp-api" extends="onebusaway-webapp-default" namespace="/api/siri">
-      <interceptors>
-        <interceptor name="ApiKeyInterceptor" class="org.onebusaway.enterprise.webapp.api.ApiKeyInterceptor" />
-        <interceptor-stack name="onebusaway-enterprise-webapp-api-stack">
-          <interceptor-ref name="defaultStack" />
-          <interceptor-ref name="ApiKeyInterceptor" />
-        </interceptor-stack>
-      </interceptors>
-      <default-interceptor-ref name="onebusaway-enterprise-webapp-api-stack" />
-    </package>
+    <!-- this isn't used, it was present for when siri used to live in webapp -->
+<!--    <package name="onebusaway-webapp-api" extends="onebusaway-webapp-default" namespace="/api/siri">-->
+<!--      <interceptors>-->
+<!--        <interceptor name="ApiKeyInterceptor" class="org.onebusaway.enterprise.webapp.api.ApiKeyInterceptor" />-->
+<!--        <interceptor-stack name="onebusaway-enterprise-webapp-api-stack">-->
+<!--          <interceptor-ref name="defaultStack" />-->
+<!--          <interceptor-ref name="ApiKeyInterceptor" />-->
+<!--        </interceptor-stack>-->
+<!--      </interceptors>-->
+<!--      <default-interceptor-ref name="onebusaway-enterprise-webapp-api-stack" />-->
+<!--    </package>-->
     
     
 </struts>

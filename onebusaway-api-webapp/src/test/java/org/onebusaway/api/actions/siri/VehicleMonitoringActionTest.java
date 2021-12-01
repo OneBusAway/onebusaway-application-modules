@@ -22,9 +22,6 @@ import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintWriter;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -89,15 +86,7 @@ public class VehicleMonitoringActionTest extends VehicleMonitoringAction {
     
     when(request.getParameter(eq("LineRef"))).thenReturn("40_100479");
     when(request.getParameter(eq("OperatorRef"))).thenReturn("1");
-    
-    PrintWriter nothingPrintWriter = new PrintWriter(new OutputStream() {
-      @Override
-      public void write(int b) throws IOException {
-        // Do nothing
-      }
-    });
-    when(servletResponse.getWriter()).thenReturn(nothingPrintWriter);
-    
+
     List<VehicleActivityStructure> vehicleActivities = new ArrayList<VehicleActivityStructure>();
     when(realtimeService.getVehicleActivityForRoute(eq("40_100479"), any(), eq(0), anyLong(), eq(false))).thenReturn(vehicleActivities);
     
@@ -137,7 +126,7 @@ public class VehicleMonitoringActionTest extends VehicleMonitoringAction {
     action.setServletRequest(request);
     action.setServletResponse(servletResponse);
     action.index();
-    String monitoring = action.getVehicleMonitoring();
+    String monitoring = action.getSiri();
     assertTrue("Result XML does not match expected", monitoring.matches("(?s).*<ServiceDelivery><ResponseTimestamp>.+</ResponseTimestamp><VehicleMonitoringDelivery><ResponseTimestamp>.+</ResponseTimestamp><ValidUntil>.+</ValidUntil><VehicleActivity><MonitoredVehicleJourney><SituationRef><SituationSimpleRef>situation ref</SituationSimpleRef></SituationRef><VehicleLocation><Longitude>89.0</Longitude><Latitude>88.0</Latitude></VehicleLocation></MonitoredVehicleJourney></VehicleActivity></VehicleMonitoringDelivery><SituationExchangeDelivery><Situations><PtSituationElement><SituationNumber>1_1</SituationNumber><Summary xml:lang=\"EN\">summary</Summary><Description xml:lang=\"EN\">description</Description><Affects><VehicleJourneys><AffectedVehicleJourney><LineRef>1_100277</LineRef><DirectionRef>0</DirectionRef></AffectedVehicleJourney><AffectedVehicleJourney><LineRef>1_100277</LineRef><DirectionRef>1</DirectionRef></AffectedVehicleJourney><AffectedVehicleJourney><LineRef>1_100194</LineRef><DirectionRef>0</DirectionRef></AffectedVehicleJourney><AffectedVehicleJourney><LineRef>1_100194</LineRef><DirectionRef>1</DirectionRef></AffectedVehicleJourney></VehicleJourneys></Affects></PtSituationElement></Situations></SituationExchangeDelivery></ServiceDelivery></Siri>.*"));
   }
 
@@ -146,14 +135,6 @@ public class VehicleMonitoringActionTest extends VehicleMonitoringAction {
 
     when(request.getParameter(eq("LineRef"))).thenReturn("40_100479");
     when(request.getParameter(eq("OperatorRef"))).thenReturn("1");
-
-    PrintWriter nothingPrintWriter = new PrintWriter(new OutputStream() {
-      @Override
-      public void write(int b) throws IOException {
-        // Do nothing
-      }
-    });
-    when(servletResponse.getWriter()).thenReturn(nothingPrintWriter);
 
     List<VehicleActivityStructure> vehicleActivities = new ArrayList<VehicleActivityStructure>();
     when(realtimeService.getVehicleActivityForRoute(eq("40_100479"), any(), eq(0), anyLong(), eq(false))).thenReturn(vehicleActivities);
@@ -193,7 +174,7 @@ public class VehicleMonitoringActionTest extends VehicleMonitoringAction {
     action.setServletRequest(request);
     action.setServletResponse(servletResponse);
     action.index();
-    String monitoring = action.getVehicleMonitoring();
+    String monitoring = action.getSiri();
     String example = "{\"Siri\":{\"ServiceDelivery\":{\"ResponseTimestamp\":\"2021-10-30T09:10:49.019-07:00\",\"VehicleMonitoringDelivery\":[{\"VehicleActivity\":[{\"MonitoredVehicleJourney\":{\"SituationRef\":[{\"SituationSimpleRef\":\"situation ref\"}],\"VehicleLocation\":{\"Longitude\":89.0,\"Latitude\":88.0}}}],\"ResponseTimestamp\":\"2021-10-30T09:10:49.019-07:00\",\"ValidUntil\":\"2021-10-30T09:11:49.019-07:00\"}],\"SituationExchangeDelivery\":[{\"Situations\":{\"PtSituationElement\":[{\"Summary\":\"summary\",\"Description\":\"description\",\"Affects\":{\"VehicleJourneys\":{\"AffectedVehicleJourney\":[{\"LineRef\":\"1_100277\",\"DirectionRef\":\"0\"},{\"LineRef\":\"1_100277\",\"DirectionRef\":\"1\"},{\"LineRef\":\"1_100194\",\"DirectionRef\":\"0\"},{\"LineRef\":\"1_100194\",\"DirectionRef\":\"1\"}]}},\"SituationNumber\":\"1_1\"}]}}]}}}";
     String matchPattern = "{\"Siri\":{\"ServiceDelivery\":{\"ResponseTimestamp\":\"...-..-.T..:..:......-0.:00\",\"VehicleMonitoringDelivery\":[{\"VehicleActivity\":[{\"MonitoredVehicleJourney\":{\"SituationRef\":[{\"SituationSimpleRef\":\"situation ref\"}],\"VehicleLocation\":{\"Longitude\":89.0,\"Latitude\":88.0}}}],\"ResponseTimestamp\":\"....-..-..T..:..:......-0.:00\",\"ValidUntil\":\"...-..-..T..:..:......-0.:00\"}],\"SituationExchangeDelivery\":[{\"Situations\":{\"PtSituationElement\":[{\"Summary\":\"summary\",\"Description\":\"description\",\"Affects\":{\"VehicleJourneys\":{\"AffectedVehicleJourney\":[{\"LineRef\":\"1_100277\",\"DirectionRef\":\"0\"},{\"LineRef\":\"1_100277\",\"DirectionRef\":\"1\"},{\"LineRef\":\"1_100194\",\"DirectionRef\":\"0\"},{\"LineRef\":\"1_100194\",\"DirectionRef\":\"1\"}]}},\"SituationNumber\":\"1_1\"}]}}]}}}";
 
@@ -223,14 +204,6 @@ public class VehicleMonitoringActionTest extends VehicleMonitoringAction {
     when(request.getParameter(eq("LineRef"))).thenReturn("40_100479");
     when(request.getParameter(eq("OperatorRef"))).thenReturn("1");
     
-    PrintWriter nothingPrintWriter = new PrintWriter(new OutputStream() {
-      @Override
-      public void write(int b) throws IOException {
-        // Do nothing
-      }
-    });
-    when(servletResponse.getWriter()).thenReturn(nothingPrintWriter);
-    
     List<VehicleActivityStructure> vehicleActivities = new ArrayList<VehicleActivityStructure>();
     lenient().when(realtimeService.getVehicleActivityForRoute(eq("40_100479"), anyString(), eq(0), anyLong(), eq(false))).thenReturn(vehicleActivities);
     
@@ -252,7 +225,7 @@ public class VehicleMonitoringActionTest extends VehicleMonitoringAction {
     action.setServletRequest(request);
     action.setServletResponse(servletResponse);
     action.index();
-    String monitoring = action.getVehicleMonitoring();
+    String monitoring = action.getSiri();
     String regex = "(?s).*<SituationExchangeDelivery><Situations><PtSituationElement><SituationNumber>1_1</SituationNumber><Summary xml:lang=\"EN\">summary</Summary><Description xml:lang=\"EN\">description</Description><Affects><VehicleJourneys><AffectedVehicleJourney><LineRef>1_100277</LineRef><DirectionRef>0</DirectionRef></AffectedVehicleJourney><AffectedVehicleJourney><LineRef>1_100277</LineRef><DirectionRef>1</DirectionRef></AffectedVehicleJourney><AffectedVehicleJourney><LineRef>1_100194</LineRef><DirectionRef>0</DirectionRef></AffectedVehicleJourney><AffectedVehicleJourney><LineRef>1_100194</LineRef><DirectionRef>1</DirectionRef></AffectedVehicleJourney></VehicleJourneys></Affects></PtSituationElement><PtSituationElement><SituationNumber>1_1</SituationNumber><Summary xml:lang=\"EN\">summary</Summary><Description xml:lang=\"EN\">description</Description><Affects><VehicleJourneys><AffectedVehicleJourney><LineRef>1_100277</LineRef><DirectionRef>0</DirectionRef></AffectedVehicleJourney><AffectedVehicleJourney><LineRef>1_100277</LineRef><DirectionRef>1</DirectionRef></AffectedVehicleJourney><AffectedVehicleJourney><LineRef>1_100194</LineRef><DirectionRef>0</DirectionRef></AffectedVehicleJourney><AffectedVehicleJourney><LineRef>1_100194</LineRef><DirectionRef>1</DirectionRef></AffectedVehicleJourney></VehicleJourneys></Affects></PtSituationElement></Situations></SituationExchangeDelivery></ServiceDelivery></Siri>.*";
     boolean success = monitoring.matches(regex);
     if (!success) {
