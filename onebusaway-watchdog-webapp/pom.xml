@@ -49,6 +49,20 @@
 		<groupId>org.apache.wink</groupId>
 		<artifactId>wink-common</artifactId>
 		<version>1.4</version>
+		<exclusions>
+			<exclusion>
+				<groupId>xml-apis</groupId>
+				<artifactId>xml-apis</artifactId>
+			</exclusion>
+			<exclusion>
+				<groupId>org.apache.geronimo.specs</groupId>
+				<artifactId>geronimo-jaxrs_1.1_spec</artifactId>
+			</exclusion>
+			<exclusion>
+				<groupId>org.apache.geronimo.specs</groupId>
+				<artifactId>geronimo-annotation_1.1_spec</artifactId>
+			</exclusion>
+		</exclusions>
 	</dependency>
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
