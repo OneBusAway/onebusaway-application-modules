@@ -30,9 +30,33 @@
     <!-- make sure type param is present and infer from URL -->
     <!-- this changed slightly in now that .json and .xml are support by the action -->
     <rule>
-        <condition type="parameter" name="type">([^json]|[^xml])</condition>
-        <from>^([^;]*)/siri/([^.]*)\.(xml|json)(.*)$</from>
+        <condition type="parameter" name="type">null</condition>
+        <from>^([^;]*)/siri/([^.]*)\.(json|xml)(.*)$</from>
         <to type="redirect" last="true">$1/siri/$2.$3$4&amp;type=$3</to>
+    </rule>
+
+    <rule>
+        <condition type="parameter" name="type">json</condition>
+        <from>^([^;]*)/siri/(vehicle-monitoring)[?](.*)$</from>
+        <to type="redirect" last="true">$1/siri/$2.json?$3</to>
+    </rule>
+
+    <rule>
+        <condition type="parameter" name="type">xml</condition>
+        <from>^([^;]*)/siri/(vehicle-monitoring)[?](.*)$</from>
+        <to type="redirect" last="true">$1/siri/$2.xml?$3</to>
+    </rule>
+
+    <rule>
+        <condition type="parameter" name="type">json</condition>
+        <from>^([^;]*)/siri/(stop-monitoring)[?](.*)$</from>
+        <to type="redirect" last="true">$1/siri/$2.json?$3</to>
+    </rule>
+
+    <rule>
+        <condition type="parameter" name="type">xml</condition>
+        <from>^([^;]*)/siri/(stop-monitoring)[?](.*)$</from>
+        <to type="redirect" last="true">$1/siri/$2.xml?$3</to>
     </rule>
 
 </urlrewrite>
