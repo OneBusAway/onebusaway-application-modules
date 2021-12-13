@@ -51,8 +51,10 @@ public class CustomJsonLibHandler extends AbstractContentTypeHandler {
                 if (obj != null && obj instanceof ResponseBean) {
                         // check if serialization already occurred as with SIRI calls
                         ResponseBean bean = (ResponseBean) obj;
-                        isText = bean.isText();
-                        value = bean.getData().toString();
+                        isText = bean.isString();
+                        if (bean.getData() != null) {
+                                value = bean.getData().toString();
+                        }
                 }
                 if (!isText) {
                         mapper.setSerializerProvider(new CustomSerializerProvider());

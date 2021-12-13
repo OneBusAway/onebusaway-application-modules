@@ -72,6 +72,7 @@ public class ResponseBean implements Serializable {
   public Object getData() {
     return data;
   }
+
   @JsonIgnore
-  public boolean isText() { return isText; }
+  public boolean isString() { return isText; }
 }
