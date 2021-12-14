@@ -15,6 +15,7 @@
  */
 package org.onebusaway.api.impl;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.*;
 import com.opensymphony.xwork2.ActionInvocation;
 import com.opensymphony.xwork2.inject.Inject;
@@ -58,6 +59,7 @@ public class CustomJsonLibHandler extends AbstractContentTypeHandler {
                 }
                 if (!isText) {
                         mapper.setSerializerProvider(new CustomSerializerProvider());
+                        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
                         mapper.configure(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY, true);
                         mapper.configure(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS, true);
                         mapper.configure(SerializationFeature.WRITE_NULL_MAP_VALUES, false);
