@@ -57,16 +57,15 @@ public class CustomJsonLibHandler extends AbstractContentTypeHandler {
                                 value = bean.getData().toString();
                         }
                 }
-                if (!isText) {
+                if (obj != null && !isText) {
                         mapper.setSerializerProvider(new CustomSerializerProvider());
-                        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
                         mapper.configure(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY, true);
                         mapper.configure(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS, true);
                         mapper.configure(SerializationFeature.WRITE_NULL_MAP_VALUES, false);
 
                         value = mapper.writeValueAsString(obj);
                 }
-                if (callback != null) {
+                if (value != null && callback != null) {
                         stream.write(callback + "(" + value + ")");
                 }
                 else {

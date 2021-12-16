@@ -46,7 +46,10 @@ public class CustomSerializerProvider extends DefaultSerializerProvider {
       return Serializers.NULL_LONG_SERIALIZER_INSTANCE;
     if (property.getType().getRawClass().equals(Collection.class) || property.getType().getRawClass().equals(List.class))
       return Serializers.NULL_COLLECTION_SERIALIZER_INSTANCE;
-    else
-      return super.findNullValueSerializer(property);
+    else {
+      // the defaults have changed, so now we explicitly send a hint
+      // not to serialize null values other than those above
+      return null; // don't serialize
+    }
   }
 }
