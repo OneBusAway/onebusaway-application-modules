@@ -43,7 +43,11 @@ public class CustomSerializerProvider extends DefaultSerializerProvider {
     if (property.getType().getRawClass().equals(String.class))
       return Serializers.EMPTY_STRING_SERIALIZER_INSTANCE;
     if (property.getType().getRawClass().equals(Long.class))
-      return Serializers.NULL_LONG_SERIALIZER_INSTANCE;
+      return Serializers.NULL_NUMBER_SERIALIZER_INSTANCE;
+    if (property.getType().getRawClass().equals(Integer.class))
+      return Serializers.NULL_NUMBER_SERIALIZER_INSTANCE;
+    if (property.getType().getRawClass().equals(Double.class))
+      return Serializers.NULL_NUMBER_SERIALIZER_INSTANCE;
     if (property.getType().getRawClass().equals(Collection.class) || property.getType().getRawClass().equals(List.class))
       return Serializers.NULL_COLLECTION_SERIALIZER_INSTANCE;
     else {
