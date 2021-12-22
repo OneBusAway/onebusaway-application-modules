@@ -15,6 +15,7 @@
  */
 package org.onebusaway.api.impl;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.*;
 import com.opensymphony.xwork2.ActionInvocation;
 import com.opensymphony.xwork2.inject.Inject;
@@ -51,10 +52,12 @@ public class CustomJsonLibHandler extends AbstractContentTypeHandler {
                 if (obj != null && obj instanceof ResponseBean) {
                         // check if serialization already occurred as with SIRI calls
                         ResponseBean bean = (ResponseBean) obj;
-                        isText = bean.isText();
-                        value = bean.getData().toString();
+                        isText = bean.isString();
+                        if (bean.getData() != null) {
+                                value = bean.getData().toString();
+                        }
                 }
-                if (!isText) {
+                if (obj != null && !isText) {
                         mapper.setSerializerProvider(new CustomSerializerProvider());
                         mapper.configure(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY, true);
                         mapper.configure(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS, true);
@@ -62,7 +65,7 @@ public class CustomJsonLibHandler extends AbstractContentTypeHandler {
 
                         value = mapper.writeValueAsString(obj);
                 }
-                if (callback != null) {
+                if (value != null && callback != null) {
                         stream.write(callback + "(" + value + ")");
                 }
                 else {

@@ -24,7 +24,7 @@ import java.io.IOException;
 
 public class Serializers extends JsonSerializer<Object> {
   public static final JsonSerializer<Object> EMPTY_STRING_SERIALIZER_INSTANCE = new EmptyStringSerializer();
-  public static final JsonSerializer<Object> NULL_LONG_SERIALIZER_INSTANCE = new NullLongSerializer();
+  public static final JsonSerializer<Object> NULL_NUMBER_SERIALIZER_INSTANCE = new NullNumberSerializer();
   public static final JsonSerializer<Object> NULL_COLLECTION_SERIALIZER_INSTANCE = new NullCollectionSerializer();
 
 
@@ -46,8 +46,8 @@ public class Serializers extends JsonSerializer<Object> {
     }
   }
 
-  private static class NullLongSerializer extends JsonSerializer<Object> {
-    public NullLongSerializer() {}
+  private static class NullNumberSerializer extends JsonSerializer<Object> {
+    public NullNumberSerializer() {}
 
     @Override
     public void serialize(Object o, JsonGenerator jsonGenerator, SerializerProvider serializerProvider)

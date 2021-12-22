@@ -47,7 +47,9 @@ public class MonitoringActionV1Base extends SiriAction {
       if(getType().equals("xml")) {
         return _realtimeService.getSiriXmlSerializer().getXml(_siriResponse);
       } else {
-        return _realtimeService.getSiriJsonSerializer().getJson(_siriResponse, _servletRequest.getParameter("callback"));
+        return _realtimeService.getSiriJsonSerializer().getJson(_siriResponse,
+                /*_servletRequest.getParameter("callback")*/null);
+        // callback happens at a lower level
       }
     } catch(Exception e) {
       _log.error("Siri v1 serialization failed: ", e,e);
