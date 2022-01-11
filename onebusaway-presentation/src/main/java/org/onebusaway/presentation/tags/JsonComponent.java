@@ -23,6 +23,7 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.struts2.components.ContextBean;
+import org.apache.struts2.json.DefaultJSONWriter;
 import org.apache.struts2.json.JSONException;
 import org.apache.struts2.json.JSONUtil;
 
@@ -72,12 +73,6 @@ public class JsonComponent extends ContextBean {
 
     String json = null;
 
-    try {
-      Collection<Pattern> empty = Collections.emptyList();
-      json = JSONUtil.serialize(value, empty, empty, _ignoreHierarchy, _excludeNullProperties);
-    } catch (JSONException ex) {
-      LOG.error("Could not generate json from value", ex);
-    }
 
     if (json != null) {
 
@@ -89,14 +84,22 @@ public class JsonComponent extends ContextBean {
         /**
          * We either write the url out to a variable
          */
+        Collection<Pattern> empty = Collections.emptyList();
+        try {
+          json = new DefaultJSONWriter().write(value, empty, empty, _excludeNullProperties);
+        } catch (JSONException e) {
+          LOG.error("Could not write out json value", e);
+        }
         putInContext(json);
       } else {
         /**
          * Or otherwise print out the url directly
          */
         try {
-          writer.write(json);
-        } catch (IOException e) {
+          Collection<Pattern> empty = Collections.emptyList();
+          new JSONUtil().serialize(writer, value, empty, empty,_ignoreHierarchy, _excludeNullProperties);
+
+        } catch (IOException | JSONException e) {
           LOG.error("Could not write out json value", e);
         }
       }

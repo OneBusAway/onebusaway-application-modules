@@ -17,10 +17,11 @@
 
 -->
 <beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xmlns:context="http://www.springframework.org/schema/context" xmlns:aop="http://www.springframework.org/schema/aop"
-    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
         http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd
-        http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd">
+        http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
 
 
  <!-- Transit Data Service -->
@@ -45,36 +46,16 @@
     </bean>
 
     <alias name="dataSource" alias="mutableDataSource" />
+    <bean id="sessionFactory" class="org.springframework.orm.hibernate5.LocalSessionFactoryBean"
+          primary="true">
+        <qualifier value="main" />
+        <property name="dataSource" ref="dataSource" />
+        <property name="hibernateProperties" ref="hibernateProperties" />
+        <property name="annotatedClasses" ref="hibernateAnnotatedClasses" />
+        <property name="mappingLocations" ref="hibernateMappingLocations" />
+    </bean>
 
-    <!-- Database Connection Configuration for Agency Metadata -->
-    <bean id="agencyMetadataDataSource"
-          class="org.springframework.jndi.JndiObjectFactoryBean">
-      <property name="jndiName"
-                value="java:comp/env/jdbc/agencyMetadataDB"/>   
-      <property name="lookupOnStartup"
-                value="true"/>   
-      <property name="cache"
-                value="true"/>   
-      <property name="proxyInterface"
-                value="javax.sql.DataSource"/>   
-      <property name="resourceRef"
-                value="true" />
-    </bean>
-     <!-- Database Connection Configuration for Bundle Build Response -->
-    <bean id="bundleBuildResponseDataSource"
-          class="org.springframework.jndi.JndiObjectFactoryBean">
-      <property name="jndiName"
-                value="java:comp/env/jdbc/appDB"/>
-      <property name="lookupOnStartup"
-                value="true"/>
-      <property name="cache"
-                value="true"/>
-      <property name="proxyInterface"
-                value="javax.sql.DataSource"/>
-      <property name="resourceRef"
-                value="true" />
-    </bean>
-    
+
     
     <!--  Email connection -->
      <bean id="mailSession"
@@ -91,35 +72,6 @@
     	<property name="session" ref="mailSession"/> 
 	</bean>
     
-    <!-- Database Connection Configuration for retrieving archived data -->
-    <bean id="gtfsRealtimeArchiveDataSource"
-          class="org.springframework.jndi.JndiObjectFactoryBean">
-      <property name="jndiName"
-                value="java:comp/env/jdbc/archiveDB"/>
-      <property name="lookupOnStartup"
-                value="true"/>
-      <property name="cache"
-                value="true"/>
-      <property name="proxyInterface"
-                value="javax.sql.DataSource"/>
-      <property name="resourceRef"
-                value="true" />
-    </bean>
-
-    <!-- Database Connection Configuration for retrieving assigned vehicle data -->
-    <bean id="assignedVehicleDataSource"
-          class="org.springframework.jndi.JndiObjectFactoryBean">
-        <property name="jndiName"
-                  value="java:comp/env/jdbc/appDB"/>
-        <property name="lookupOnStartup"
-                  value="true"/>
-        <property name="cache"
-                  value="true"/>
-        <property name="proxyInterface"
-                  value="javax.sql.DataSource"/>
-        <property name="resourceRef"
-                  value="true" />
-    </bean>
 
 <!-- Other Stuff: -->
 
@@ -170,99 +122,7 @@
         </property> 
     </bean>
     
-	<bean id="agencyMetadataSessionFactory"
-		class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
-		<property name="dataSource" ref="agencyMetadataDataSource" />
-		<property name="annotatedClasses">
-			<list>
-				<value>org.onebusaway.agency_metadata.model.AgencyMetadata</value>
-				<value>org.onebusaway.agency_metadata.service.AgencyMetadataDaoImpl</value>
-			</list>
-		</property>
-		<property name="hibernateProperties">
-			<props>
-				<prop key="hibernate.dialect">org.hibernate.dialect.MySQLDialect</prop>
-				<prop key="hibernate.connection.pool_size">1</prop>
-				<!--<prop key="hibernate.current_session_context_class">thread</prop>-->
-				<prop key="hibernate.cache.provider_class">org.hibernate.cache.internal.NoCachingRegionFactory</prop>
-				<prop key="hibernate.show_sql">false</prop>
-				<prop key="hibernate.hbm2ddl.auto">update</prop>
-				<prop key="hibernate.jdbc.batch_size">1000</prop>
-			</props>
-		</property>
-	</bean>
-     <bean id="bundleBuildResponseSessionFactory"
-    class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
-    <property name="dataSource" ref="bundleBuildResponseDataSource" />
-    <property name="annotatedClasses">
-      <list>
-        <value>org.onebusaway.admin.model.BundleBuildResponse</value>
-        <value>org.onebusaway.admin.service.bundle.impl.BundleBuildResponseDaoImpl</value>
-      </list>
-    </property>
-    <property name="hibernateProperties">
-      <props>
-        <prop key="hibernate.dialect">org.hibernate.dialect.MySQLDialect</prop>
-        <prop key="hibernate.connection.pool_size">1</prop>
-        <!--<prop key="hibernate.current_session_context_class">thread</prop>-->
-        <prop key="hibernate.cache.provider_class">org.hibernate.cache.internal.NoCachingRegionFactory</prop>
-        <prop key="hibernate.show_sql">false</prop>
-        <prop key="hibernate.hbm2ddl.auto">update</prop>
-        <prop key="hibernate.jdbc.batch_size">1000</prop>
-      </props>
-    </property>
-  </bean>
- 
-  <bean id="gtfsRealtimeArchiveSessionFactory" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
-    <property name="dataSource" ref="gtfsRealtimeArchiveDataSource" />
-    <property name="annotatedClasses">
-      <list>
-        <value>org.onebusaway.admin.service.bundle.task.model.GtfsBundleInfo</value>
-        <value>org.onebusaway.admin.service.bundle.impl.GtfsArchiveDaoImpl</value>
-      </list>
-    </property>
-    <property name="hibernateProperties">
-      <props>
-        <prop key="hibernate.connection.pool_size">1</prop>
-        <!--<prop key="hibernate.current_session_context_class">thread</prop>-->
-        <prop key="hibernate.cache.provider_class">org.hibernate.cache.internal.NoCachingRegionFactory</prop>
-        <prop key="hibernate.show_sql">false</prop>
-        <prop key="hibernate.hbm2ddl.auto">none</prop>
-        <prop key="hibernate.jdbc.batch_size">1000</prop>
-        <prop key="hibernate.order_inserts">false</prop>
-        <prop key="hibernate.order_updates">false</prop>
-      </props>
-    </property>
-    <property name="mappingResources">
-      <list>
-        <value>org/onebusaway/gtfs/model/GtfsArchiveMapping.hibernate.xml</value>
-      </list>
-    </property>
-  </bean>
 
-    <bean id="assignmentSessionFactory"
-          class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
-        <property name="dataSource" ref="assignedVehicleDataSource" />
-        <property name="annotatedClasses">
-            <list>
-                <value>org.onebusaway.admin.model.assignments.Assignment</value>
-                <value>org.onebusaway.admin.model.assignments.AssignmentConfig</value>
-                <value>org.onebusaway.admin.service.assignments.impl.AssignmentDaoImpl</value>
-                <value>org.onebusaway.admin.service.assignments.impl.AssignmentConfigDaoImpl</value>
-            </list>
-        </property>
-        <property name="hibernateProperties">
-            <props>
-                <prop key="hibernate.dialect">org.hibernate.dialect.MySQLDialect</prop>
-                <prop key="hibernate.connection.pool_size">1</prop>
-                <!--<prop key="hibernate.current_session_context_class">thread</prop>-->
-                <prop key="hibernate.cache.provider_class">org.hibernate.cache.internal.NoCachingRegionFactory</prop>
-                <prop key="hibernate.show_sql">false</prop>
-                <prop key="hibernate.hbm2ddl.auto">update</prop>
-                <prop key="hibernate.jdbc.batch_size">1000</prop>
-            </props>
-        </property>
-    </bean>
 
 	<!-- quartz scheduling for PingJob -->
 	<bean name="pingJob" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
@@ -281,21 +141,21 @@
 	</bean>
 
     <!-- quartz scheduling for ResetVehicleAssignmentsJob -->
-    <bean name="resetJob" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
-        <property name="jobClass" value="org.onebusaway.admin.job.ResetVehicleAssignmentsJob" />
-        <property name="jobDataAsMap">
-            <map>
-                <entry key="assignmentDao" value-ref="assignmentDaoImpl"/>
-                <entry key="assignmentConfigDao" value-ref="assignmentConfigDaoImpl"/>
-            </map>
-        </property>
-        <property name="durability" value="true" />
-    </bean>
+<!--    <bean name="resetJob" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">-->
+<!--        <property name="jobClass" value="org.onebusaway.admin.job.ResetVehicleAssignmentsJob" />-->
+<!--        <property name="jobDataAsMap">-->
+<!--            <map>-->
+<!--                <entry key="assignmentDao" value-ref="assignmentDaoImpl"/>-->
+<!--                <entry key="assignmentConfigDao" value-ref="assignmentConfigDaoImpl"/>-->
+<!--            </map>-->
+<!--        </property>-->
+<!--        <property name="durability" value="true" />-->
+<!--    </bean>-->
 
-    <bean id="resetTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
-        <property name="jobDetail" ref="resetJob" />
-        <property name="cronExpression" value="0 0 3 * * ?" /><!--  03:00 every day -->
-    </bean>
+<!--    <bean id="resetTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">-->
+<!--        <property name="jobDetail" ref="resetJob" />-->
+<!--        <property name="cronExpression" value="0 0 3 * * ?" />&lt;!&ndash;  03:00 every day &ndash;&gt;-->
+<!--    </bean>-->
 
 	<bean id="gsonTool" class="org.onebusaway.admin.json.LowerCaseWDashesGsonJsonTool">
     <property name="prettyPrintOutput" value="false" />
@@ -305,7 +165,7 @@
 		<property name="triggers">
 			<list>
 				<ref bean="pingTrigger" />
-                <ref bean="resetTrigger" />
+<!--                <ref bean="resetTrigger" />-->
             </list>
 		</property>
 	</bean>

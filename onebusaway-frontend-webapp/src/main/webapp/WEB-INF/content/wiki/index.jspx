@@ -39,13 +39,13 @@
 						Table of Contents
 					</p>
 					
-					<s:property value="toc" escape="false"/>
+					<s:property value="toc" escapeHtml="false"/>
 				</div>
 			</div>
 		</div> 
 
 		<div id="text">
-			<s:property value="content" escape="false"/>
+			<s:property value="content" escapeHtml="false"/>
 
 		  	<p class="meta">
 				<s:if test="admin">
@@ -58,7 +58,7 @@
 <s:else>
 	<div id="content" class="wiki_content">
 		<div id="text">
-			<s:property value="content" escape="false"/>
+			<s:property value="content" escapeHtml="false"/>
 
 		  	<p class="meta">
 				<s:if test="admin">

@@ -21,7 +21,7 @@ import java.text.SimpleDateFormat;
 import javax.annotation.PostConstruct;
 import javax.ws.rs.core.Response;
 
-import org.codehaus.jackson.map.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.onebusaway.admin.service.BundleDeployerService;
 import org.onebusaway.admin.service.RemoteConnectionService;
 import org.onebusaway.admin.service.bundle.api.BundleResource;

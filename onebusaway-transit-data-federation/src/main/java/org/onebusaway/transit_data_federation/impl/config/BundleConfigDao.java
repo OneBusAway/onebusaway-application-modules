@@ -21,8 +21,8 @@ import java.io.IOException;
 
 import javax.annotation.PostConstruct;
 
-import org.codehaus.jackson.map.DeserializationConfig;
-import org.codehaus.jackson.map.ObjectMapper;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.onebusaway.container.refresh.Refreshable;
 import org.onebusaway.transit_data.model.config.BundleMetadata;
 import org.onebusaway.transit_data_federation.impl.RefreshableResources;
@@ -59,7 +59,7 @@ public class BundleConfigDao {
     _log.info("looking for metadata file " + path);
     if (path.exists()) {
       ObjectMapper mapper = new ObjectMapper();
-      mapper.configure(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+      mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
       BundleMetadata meta = null;
       try {
         meta = mapper.readValue(path, BundleMetadata.class);

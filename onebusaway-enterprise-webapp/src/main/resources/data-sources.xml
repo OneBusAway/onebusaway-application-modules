@@ -64,16 +64,6 @@
 		class="org.onebusaway.geocoder.enterprise.impl.EnterpriseGoogleGeocoderImpl" depends-on="serviceAreaServiceImpl">
 	</bean>
 
-
-	<bean
-		class="org.onebusaway.container.spring.SystemPropertyOverrideConfigurer">
-		<property name="properties">
-			<props>
-				<prop key="front-end.version">${git.commit.id}</prop>
-			</props>
-		</property>
-	</bean>
-
 	<bean class="org.onebusaway.container.spring.PropertyOverrideConfigurer">
 		<property name="properties">
 			<props>

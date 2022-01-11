@@ -69,12 +69,14 @@ public class GtfsValidationTask implements Runnable {
       GtfsValidationService service = new GtfsValidationService(_dao);
       ValidationResult vr = service.validateRoutes();
       log(vr, filename);
-      vr = service.validateTrips();
-      log(vr, filename);
-      vr = service.duplicateStops();
-      log(vr, filename);
-      vr = service.listReversedTripShapes();
-      log(vr, filename);
+      // TODO GTFSValidationService needs to be updated to use latest JTS
+      // Until then these methods conflict with geospatial's JTS.
+      //vr = service.validateTrips();
+      //log(vr, filename);
+      //vr = service.duplicateStops();
+      //log(vr, filename);
+      //vr = service.listReversedTripShapes();
+      //log(vr, filename);
       
     } catch (Exception any) {
       // don't let validation issues break the build

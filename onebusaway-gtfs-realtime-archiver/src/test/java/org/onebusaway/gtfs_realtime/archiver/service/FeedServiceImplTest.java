@@ -102,7 +102,7 @@ public class FeedServiceImplTest {
   private FeedService _feedService;
 
   @Autowired
-  @Qualifier("gtfsRealtimeArchiveSessionFactory")
+//  @Qualifier("gtfsRealtimeArchiveSessionFactory")
   private SessionFactory _sessionFactory;
 
   private Session getSession() {

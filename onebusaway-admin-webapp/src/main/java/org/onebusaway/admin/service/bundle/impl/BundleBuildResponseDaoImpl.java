@@ -50,7 +50,6 @@ public class BundleBuildResponseDaoImpl implements BundleBuildResponseDao {
   private SessionFactory _sessionFactory;
   
   @Autowired
-  @Qualifier("bundleBuildResponseSessionFactory")
   public void setSessionFactory(SessionFactory sessionFactory) {
     _sessionFactory = sessionFactory;
   }
@@ -60,35 +59,31 @@ public class BundleBuildResponseDaoImpl implements BundleBuildResponseDao {
   }
 
   @Override
-  @Transactional
+  @Transactional(value="transactionManager", rollbackFor = Throwable.class)
   public void saveOrUpdate(BundleBuildResponse bundleBuildResponse) {
     getSession().saveOrUpdate(bundleBuildResponse);
   }
 
   @Override
-  @Transactional
+  @Transactional(value="transactionManager", rollbackFor = Throwable.class, readOnly = true)
   public BundleBuildResponse getBundleBuildResponseForId(String id) {
     Session session = getSession();
-    Transaction tx = session.beginTransaction();
     List<BundleBuildResponse> responses;
-    Query query = getSession()
+    Query query = session
         .createQuery("from BundleBuildResponse where id=:id");
     query.setParameter("id", id);
     responses = query.list();
     BundleBuildResponse bbr = responses.get(0);
-    tx.commit();
     return bbr;
   }
 
   @Override
-  @Transactional
+  @Transactional(readOnly = true)
   public int getBundleBuildResponseMaxId() {
     int maxId = 0;
     Session session = getSession();
-    Transaction tx = session.beginTransaction();
     List<String> bundleIds = session.createCriteria(BundleBuildResponse.class)
         .setProjection(Projections.property("id")).list();
-    tx.commit();
     for (String bundleId : bundleIds) {
       int thisId = Integer.parseInt(bundleId);
       maxId = (thisId > maxId) ? thisId : maxId;

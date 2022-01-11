@@ -43,6 +43,7 @@ import java.util.regex.Pattern;
 import javax.annotation.PostConstruct;
 import javax.servlet.ServletContext;
 
+import com.opensymphony.xwork2.StrutsTextProviderFactory;
 import org.json.JSONObject;
 import org.onebusaway.presentation.impl.ServletLibrary;
 import org.onebusaway.presentation.services.resources.Resource;
@@ -80,7 +81,7 @@ public class ResourceServiceImpl implements ResourceService {
 
   private static Logger _log = LoggerFactory.getLogger(ResourceServiceImpl.class);
 
-  private static TextProviderFactory _textProviderFactory = new TextProviderFactory();
+  private static StrutsTextProviderFactory _textProviderFactory = new StrutsTextProviderFactory();
 
   private ConcurrentMap<String, Resource> _resourceEntriesByResourcePath = new ConcurrentHashMap<String, Resource>();
 
@@ -403,7 +404,7 @@ public class ResourceServiceImpl implements ResourceService {
     }
 
     TextProvider provider = _textProviderFactory.createInstance(
-        messagesResourceClass, localeProvider);
+        messagesResourceClass);
     ResourceBundle bundle = provider.getTexts();
 
     Map<String, String> resourceMapping = new HashMap<String, String>();
@@ -855,6 +856,21 @@ public class ResourceServiceImpl implements ResourceService {
     public Locale getLocale() {
       return _locale;
     }
+
+    @Override
+    public boolean isValidLocaleString(String s) {
+      if ("en".equalsIgnoreCase(s))
+        return true;
+      return false;
+    }
+
+    @Override
+    public boolean isValidLocale(Locale locale) {
+      if (locale.getDisplayName().equalsIgnoreCase("en"))
+        return true;
+      return false;
+    }
+
   }
 
 }

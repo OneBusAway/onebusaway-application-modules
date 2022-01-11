@@ -33,10 +33,10 @@ import org.onebusaway.container.cache.Cacheable;
 import org.onebusaway.container.cache.CacheableArgument;
 import org.onebusaway.users.client.model.UserBean;
 import org.onebusaway.users.client.model.UserIndexBean;
+import org.onebusaway.users.impl.authentication.VersionedPasswordEncoder;
 import org.onebusaway.users.model.User;
 import org.onebusaway.users.model.UserIndex;
 import org.onebusaway.users.model.UserIndexKey;
-import org.onebusaway.users.model.UserPropertiesV1;
 import org.onebusaway.users.model.UserRole;
 import org.onebusaway.users.model.properties.UserPropertiesV4;
 import org.onebusaway.users.services.StandardAuthoritiesService;
@@ -49,7 +49,7 @@ import org.onebusaway.users.services.UserService;
 import org.onebusaway.users.services.internal.UserIndexRegistrationService;
 import org.onebusaway.users.services.internal.UserRegistration;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.encoding.PasswordEncoder;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -67,7 +67,7 @@ public class UserServiceImpl implements UserService {
 
   private UserIndexRegistrationService _userIndexRegistrationService;
 
-  private PasswordEncoder _passwordEncoder;
+  private VersionedPasswordEncoder _passwordEncoder;
 
   private ExecutorService _executors;
 
@@ -99,7 +99,8 @@ public class UserServiceImpl implements UserService {
   }
 
   @Autowired
-  public void setPasswordEncoder(PasswordEncoder passwordEncoder) {
+  @Qualifier(value = "passwordEncoderV1")
+  public void setPasswordEncoder(VersionedPasswordEncoder passwordEncoder) {
     _passwordEncoder = passwordEncoder;
   }
 

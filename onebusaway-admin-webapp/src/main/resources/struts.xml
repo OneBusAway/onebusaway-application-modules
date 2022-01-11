@@ -19,7 +19,7 @@
 -->
 <!DOCTYPE struts PUBLIC 
     "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
-    "http://struts.apache.org/dtds/struts-2.0.dtd">
+    "http://struts.apache.org/dtds/struts-2.5.dtd">
 <struts>
 	<constant name="struts.multipart.maxSize" value="104857600" />
     <constant name="struts.devMode" value="false" />
@@ -30,11 +30,13 @@
     <constant name="struts.convention.package.locators.basePackage" value="org.onebusaway.webapp.actions" />
     <constant name="struts.convention.action.checkImplementsAction" value="false" />
     <constant name="struts.convention.default.parent.package" value="onebusaway-admin-webapp-default" />
+    <constant name="struts.convention.exclude.parentClassLoader" value="false" />
     <constant name="struts.enable.DynamicMethodInvocation" value="true" />
     
     <!-- <constant name="struts.custom.i18n.resources" value="onebusaway-nyc" /> -->
-    <!-- <constant name="struts.custom.i18n.resources" value="onebusaway-sound" /> -->
-    
+    <!-- see https://issues.apache.org/jira/browse/WW-4829 to parameterize this -->
+     <constant name="struts.custom.i18n.resources" value="onebusaway-sound" />
+
     <constant name="struts.multipart.saveDir" value="/tmp"></constant>
     
     <package name="onebusaway-admin-webapp-default" extends="struts-default">

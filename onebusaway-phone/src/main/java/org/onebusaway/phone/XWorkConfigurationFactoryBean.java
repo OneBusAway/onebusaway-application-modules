@@ -52,7 +52,7 @@ public class XWorkConfigurationFactoryBean implements FactoryBean<Configuration>
 
   public Configuration getObject() throws Exception {
 
-    ConfigurationManager confManager = new ConfigurationManager();
+    ConfigurationManager confManager = new ConfigurationManager("XWorkConfigurationFactoryBean");
 
     confManager.addContainerProvider(new XWorkConfigurationProvider());
 

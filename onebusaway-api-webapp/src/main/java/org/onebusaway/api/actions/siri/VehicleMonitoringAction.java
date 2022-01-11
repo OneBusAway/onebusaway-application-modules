@@ -23,29 +23,16 @@ import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.apache.commons.lang3.StringUtils;
-import org.apache.struts2.interceptor.ServletRequestAware;
-import org.apache.struts2.interceptor.ServletResponseAware;
-import org.onebusaway.api.actions.api.ApiActionSupport;
+import org.apache.struts2.rest.DefaultHttpHeaders;
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data.model.ListBean;
 import org.onebusaway.transit_data.model.VehicleStatusBean;
-import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.util.AgencyAndIdLibrary;
-import org.onebusaway.util.impl.analytics.GoogleAnalyticsServiceImpl;
-import org.onebusaway.presentation.impl.service_alerts.ServiceAlertsHelper;
 import org.onebusaway.presentation.services.cachecontrol.CacheService;
-import org.onebusaway.presentation.services.realtime.RealtimeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import com.brsanthu.googleanalytics.EventHit;
-import com.brsanthu.googleanalytics.PageViewHit;
 
 import uk.org.siri.siri.ErrorDescriptionStructure;
 import uk.org.siri.siri.MonitoredVehicleJourneyStructure;
@@ -56,40 +43,15 @@ import uk.org.siri.siri.Siri;
 import uk.org.siri.siri.VehicleActivityStructure;
 import uk.org.siri.siri.VehicleMonitoringDeliveryStructure;
 
-public class VehicleMonitoringAction extends ApiActionSupport
-    implements ServletRequestAware, ServletResponseAware {
+public class VehicleMonitoringAction extends MonitoringActionV1Base {
 
   private static final long serialVersionUID = 1L;
 
   protected static Logger _log = LoggerFactory.getLogger(VehicleMonitoringAction.class);
   
   private static final int V3 = 3;
-  
-  private static final String GA_EVENT_ACTION = "API Key Request";
-  
-  private static final String GA_EVENT_CATEGORY = "Vehicle Monitoring";
 
-  @Autowired
-  public TransitDataService _transitDataService;
-
-  @Autowired
-  private RealtimeService _realtimeService;
-  
-  private GoogleAnalyticsServiceImpl _gaService;
-  
-  private Siri _response;
-  
   private String _cachedResponse = null;
-
-  private ServiceAlertsHelper _serviceAlertsHelper = new ServiceAlertsHelper();
-
-  HttpServletRequest _request;
-  
-  private HttpServletResponse _servletResponse;
-
-  // See urlrewrite.xml as to how this is set. Which means this action doesn't
-  // respect an HTTP Accept: header.
-  private String _type = "xml";
 
   @Autowired
   private CacheService<Integer, String> _cacheService;
@@ -98,17 +60,8 @@ public class VehicleMonitoringAction extends ApiActionSupport
 	    super(V3);
 	  }
 
-  public void setType(String type) {
-    _type = type;
-  }
 
-  @Autowired
-  public void set_gaService(GoogleAnalyticsServiceImpl _gaService) {
-    this._gaService = _gaService;
-  }
-
-  //@Override
-  public String index() {
+  public DefaultHttpHeaders index() throws IOException {
 
 	processGoogleAnalytics();
 
@@ -116,11 +69,11 @@ public class VehicleMonitoringAction extends ApiActionSupport
     
     _realtimeService.setTime(currentTimestamp);
     
-    String directionId = _request.getParameter("DirectionRef");
+    String directionId = _servletRequest.getParameter(DIRECTION_REF);
     
-    String tripId = _request.getParameter("TripId");
+    String tripId = _servletRequest.getParameter(TRIP_ID);
 
-    boolean showRawLocation = Boolean.valueOf(_request.getParameter("ShowRawLocation"));
+    boolean showRawLocation = Boolean.valueOf(_servletRequest.getParameter(RAW_LOCATION));
 
     // We need to support the user providing no agency id which means 'all agencies'.
     // So, this array will hold a single agency if the user provides it or all
@@ -128,7 +81,7 @@ public class VehicleMonitoringAction extends ApiActionSupport
     // querying for vehicles and routes
     List<String> agencyIds = new ArrayList<String>();
 
-    String agencyId = _request.getParameter("OperatorRef");
+    String agencyId = _servletRequest.getParameter(OPERATOR_REF);
     
     if (agencyId != null) {
       agencyIds.add(agencyId);
@@ -138,16 +91,16 @@ public class VehicleMonitoringAction extends ApiActionSupport
     }
 
     List<AgencyAndId> vehicleIds = new ArrayList<AgencyAndId>();
-    if (_request.getParameter("VehicleRef") != null) {
+    if (_servletRequest.getParameter(VEHICLE_REF) != null) {
       try {
         // If the user included an agency id as part of the vehicle id, ignore any OperatorRef arg
         // or lack of OperatorRef arg and just use the included one.
-        AgencyAndId vehicleId = AgencyAndIdLibrary.convertFromString(_request.getParameter("VehicleRef"));
+        AgencyAndId vehicleId = AgencyAndIdLibrary.convertFromString(_servletRequest.getParameter(VEHICLE_REF));
         vehicleIds.add(vehicleId);
       } catch (Exception e) {
         // The user didn't provide an agency id in the VehicleRef, so use our list of operator refs
         for (String agency : agencyIds) {
-          AgencyAndId vehicleId = new AgencyAndId(agency, _request.getParameter("VehicleRef"));
+          AgencyAndId vehicleId = new AgencyAndId(agency, _servletRequest.getParameter(VEHICLE_REF));
           vehicleIds.add(vehicleId);
         }
       }
@@ -155,10 +108,10 @@ public class VehicleMonitoringAction extends ApiActionSupport
     
     List<AgencyAndId> routeIds = new ArrayList<AgencyAndId>();
     String routeIdErrorString = "";
-    if (_request.getParameter("LineRef") != null) {
+    if (_servletRequest.getParameter(LINE_REF) != null) {
       try {
         // Same as above for vehicle id
-        AgencyAndId routeId = AgencyAndIdLibrary.convertFromString(_request.getParameter("LineRef"));
+        AgencyAndId routeId = AgencyAndIdLibrary.convertFromString(_servletRequest.getParameter(LINE_REF));
         if (isValidRoute(routeId)) {
           routeIds.add(routeId);
         } else {
@@ -167,7 +120,7 @@ public class VehicleMonitoringAction extends ApiActionSupport
       } catch (Exception e) {
         // Same as above for vehicle id
         for (String agency : agencyIds) {
-          AgencyAndId routeId = new AgencyAndId(agency, _request.getParameter("LineRef"));
+          AgencyAndId routeId = new AgencyAndId(agency, _servletRequest.getParameter(LINE_REF));
           if (isValidRoute(routeId)) {
             routeIds.add(routeId);
           } else {
@@ -177,14 +130,14 @@ public class VehicleMonitoringAction extends ApiActionSupport
       }
     }
 
-    String detailLevel = _request.getParameter("VehicleMonitoringDetailLevel");
+    String detailLevel = _servletRequest.getParameter(VEHICLE_MONITORING_DETAIL_LEVEL);
 
     int maximumOnwardCalls = 0;
     if (detailLevel != null && detailLevel.equals("calls")) {
       maximumOnwardCalls = Integer.MAX_VALUE;
 
       try {
-        maximumOnwardCalls = Integer.parseInt(_request.getParameter("MaximumNumberOfCallsOnwards"));
+        maximumOnwardCalls = Integer.parseInt(_servletRequest.getParameter(MAX_ONWARD_CALLS));
       } catch (NumberFormatException e) {
         maximumOnwardCalls = Integer.MAX_VALUE;
       }
@@ -204,10 +157,10 @@ public class VehicleMonitoringAction extends ApiActionSupport
       }
 
       // No vehicle id validation, so we pass null for error
-      _response = generateSiriResponse(activities, null, null, currentTimestamp);
+      _siriResponse = generateSiriResponse(activities, null, null, currentTimestamp);
 
         // *** CASE 2: by route, using direction id, if provided
-    } else if (_request.getParameter("LineRef") != null) {
+    } else if (_servletRequest.getParameter(LINE_REF) != null) {
       List<VehicleActivityStructure> activities = new ArrayList<VehicleActivityStructure>();
       
       for (AgencyAndId routeId : routeIds) {
@@ -237,16 +190,16 @@ public class VehicleMonitoringAction extends ApiActionSupport
       }
       
       Exception error = null;
-      if (_request.getParameter("LineRef") != null && routeIds.size() == 0) {
+      if (_servletRequest.getParameter(LINE_REF) != null && routeIds.size() == 0) {
         error = new Exception(routeIdErrorString.trim());
       }
 
-      _response = generateSiriResponse(activities, routeIds, error, currentTimestamp);
+      _siriResponse = generateSiriResponse(activities, routeIds, error, currentTimestamp);
 
       // *** CASE 3: all vehicles
     } else {
       try {
-      int hashKey = _cacheService.hash(maximumOnwardCalls, agencyIds, _type);
+      int hashKey = _cacheService.hash(maximumOnwardCalls, agencyIds, getType());
       
       List<VehicleActivityStructure> activities = new ArrayList<VehicleActivityStructure>();
       if (!_cacheService.containsKey(hashKey)) {
@@ -264,9 +217,9 @@ public class VehicleMonitoringAction extends ApiActionSupport
           }
         }
         // There is no input (route id) to validate, so pass null error
-        _response = generateSiriResponse(activities, null, null,
+        _siriResponse = generateSiriResponse(activities, null, null,
             currentTimestamp);
-        _cacheService.store(hashKey, getVehicleMonitoring());
+        _cacheService.store(hashKey, getSiri());
       } else {
         _cachedResponse = _cacheService.retrieve(hashKey);
       }
@@ -275,14 +228,9 @@ public class VehicleMonitoringAction extends ApiActionSupport
         throw new RuntimeException(e);
       }
     }
-        
-    try {
-      this._servletResponse.getWriter().write(getVehicleMonitoring());
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
 
-    return null;
+    // use ApiActionSupport to set proper headers instead of writing directly to response
+    return setOkResponseText(getSiri());
   }
 
   /**
@@ -338,55 +286,12 @@ public class VehicleMonitoringAction extends ApiActionSupport
     return false;
   }
 
-  public String getVehicleMonitoring() {
+  public String getSiri() {
     if (_cachedResponse != null) {
       // check the cache first
       return _cachedResponse;
     }
-
-    try {
-      if (_type.equals("xml")) {
-        this._servletResponse.setContentType("application/xml");
-        return _realtimeService.getSiriXmlSerializer().getXml(_response);
-      } else {
-        this._servletResponse.setContentType("application/json");
-        return _realtimeService.getSiriJsonSerializer().getJson(_response,
-            _request.getParameter("callback"));
-      }
-    } catch (Exception e) {
-      return e.getMessage();
-    }
+    return super.getSiri();
   }
 
-  @Override
-  public void setServletRequest(HttpServletRequest request) {
-    this._request = request;
-  }
-
-  @Override
-  public void setServletResponse(HttpServletResponse servletResponse) {
-    this._servletResponse = servletResponse;
-  }
-  
-  public HttpServletResponse getServletResponse(){
-    return _servletResponse;
-  }
-  
-  private void processGoogleAnalytics(){
-//	  processGoogleAnalyticsPageView();
-//	  processGoogleAnalyticsApiKeys();
-  }
-  
-  private void processGoogleAnalyticsPageView(){
-	  _gaService.post(new PageViewHit());
-  }
-  
-  private void processGoogleAnalyticsApiKeys(){
-	  String apiKey = _request.getParameter("key"); 
-	  if(StringUtils.isBlank(apiKey))
-		  apiKey = "Key Information Unavailable";
-	  
-	  _gaService.post(new EventHit(GA_EVENT_CATEGORY, GA_EVENT_ACTION, apiKey, 1));
-  }
-  
 }

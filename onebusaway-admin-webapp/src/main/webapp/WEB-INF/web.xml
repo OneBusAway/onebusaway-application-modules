@@ -72,7 +72,7 @@
   </filter>
   <filter>
     <filter-name>action2-cleanup</filter-name>
-    <filter-class>org.apache.struts2.dispatcher.ng.filter.StrutsPrepareFilter</filter-class>
+    <filter-class>org.apache.struts2.dispatcher.filter.StrutsPrepareFilter</filter-class>
   </filter>
   <filter>
     <filter-name>sitemesh</filter-name>
@@ -80,7 +80,7 @@
   </filter>
   <filter>
     <filter-name>action2</filter-name>
-    <filter-class>org.apache.struts2.dispatcher.ng.filter.StrutsExecuteFilter</filter-class>
+    <filter-class>org.apache.struts2.dispatcher.filter.StrutsExecuteFilter</filter-class>
   </filter>
     <filter>
         <filter-name>CorsFilter</filter-name>
@@ -89,6 +89,23 @@
         <init-param>
             <param-name>cors.allowed.origins</param-name>
             <param-value>*</param-value>
+        </init-param>
+    </filter>
+    <filter>
+        <filter-name>httpHeaderSecurity</filter-name>
+        <filter-class>org.apache.catalina.filters.HttpHeaderSecurityFilter</filter-class>
+        <async-supported>true</async-supported>
+        <init-param>
+            <param-name>hstsEnabled</param-name>
+            <param-value>true</param-value>
+        </init-param>
+        <init-param>
+            <param-name>hstsMaxAgeSeconds</param-name>
+            <param-value>31536000</param-value>
+        </init-param>
+        <init-param>
+            <param-name>hstsIncludeSubDomains</param-name>
+            <param-value>true</param-value>
         </init-param>
     </filter>
     <filter>
@@ -138,6 +155,12 @@
     <dispatcher>REQUEST</dispatcher>
   </filter-mapping>
     <filter-mapping>
+        <filter-name>httpHeaderSecurity</filter-name>
+        <url-pattern>/*</url-pattern>
+        <dispatcher>FORWARD</dispatcher>
+        <dispatcher>REQUEST</dispatcher>
+    </filter-mapping>
+    <filter-mapping>
         <filter-name>obaHeaderSecurity</filter-name>
         <url-pattern>/*</url-pattern>
         <dispatcher>FORWARD</dispatcher>
@@ -161,8 +184,19 @@
 
   <servlet>
     <servlet-name>Jersey Spring Web Application</servlet-name>
-    <servlet-class>com.sun.jersey.spi.spring.container.servlet.SpringServlet</servlet-class>
-    <load-on-startup>1</load-on-startup>
+    <servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
+      <init-param>
+          <param-name>jersey.config.server.tracing</param-name>
+          <param-value>ALL</param-value>
+      </init-param>
+      <init-param>
+          <param-name>jersey.config.server.provider.packages</param-name>
+          <param-value>org.onebusaway.admin.service.bundle.api
+              org.onebusaway.admin.service.api
+              org.onebusaway.admin.service.api.agency_metadata
+          </param-value>
+      </init-param>
+      <load-on-startup>1</load-on-startup>
   </servlet>
   <servlet-mapping>
     <servlet-name>Jersey Spring Web Application</servlet-name>

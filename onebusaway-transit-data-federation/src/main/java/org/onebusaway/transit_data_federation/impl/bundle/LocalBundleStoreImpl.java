@@ -16,14 +16,13 @@
 
 package org.onebusaway.transit_data_federation.impl.bundle;
 
-import org.codehaus.jackson.map.DeserializationConfig;
-import org.codehaus.jackson.map.ObjectMapper;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.joda.time.DateTime;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.CalendarServiceData;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
 import org.onebusaway.transit_data.model.config.BundleMetadata;
-import org.onebusaway.transit_data_federation.impl.config.BundleConfigDao;
 import org.onebusaway.transit_data_federation.model.bundle.BundleItem;
 import org.onebusaway.transit_data_federation.services.bundle.BundleStoreService;
 import org.onebusaway.utility.ObjectSerializationLibrary;
@@ -119,7 +118,7 @@ public class LocalBundleStoreImpl implements BundleStoreService {
     ServiceDate maxServiceDate = null;
     try {
     	ObjectMapper mapper = new ObjectMapper();
-        mapper.configure(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         BundleMetadata meta = null;
         
         meta = mapper.readValue(metadataFile, BundleMetadata.class);

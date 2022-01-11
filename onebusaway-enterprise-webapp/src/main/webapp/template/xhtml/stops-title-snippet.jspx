@@ -33,7 +33,7 @@
   <s:else>
   <s:iterator value="parameters.stops" status="stopsIter">
 
-<s:set name="mapUrl">
+<s:set var="mapUrl">
 index.action#p(index)m(location)lat(<s:property value="lat" />)lon(<s:property value="lon" />)accuracy(8)stop(<s:property value="id" />)
 </s:set>
 	<div>

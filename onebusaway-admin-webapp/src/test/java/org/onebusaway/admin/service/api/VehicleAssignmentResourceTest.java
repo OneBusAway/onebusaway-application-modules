@@ -15,8 +15,8 @@
  */
 package org.onebusaway.admin.service.api;
 
-import org.codehaus.jackson.map.DeserializationConfig;
-import org.codehaus.jackson.map.ObjectMapper;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -46,7 +46,10 @@ import org.onebusaway.transit_data_federation.impl.federated.TransitDataServiceI
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.text.ParseException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import static org.junit.Assert.assertEquals;
@@ -55,8 +58,8 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
+
 @RunWith(MockitoJUnitRunner.class)
 public class VehicleAssignmentResourceTest {
 
@@ -86,7 +89,7 @@ public class VehicleAssignmentResourceTest {
         var.setVehicleAssignmentService(vasSpy);
 
         doNothing().when(assignmentDao).save(any(Assignment.class));
-        doNothing().when(assignmentConfigService).setConfigValue(anyString(), anyString());
+        lenient().doNothing().when(assignmentConfigService).setConfigValue(anyString(), anyString());
 
         String blockId = "block_1";
         String vehicleId = "vehicle_1";
@@ -111,7 +114,7 @@ public class VehicleAssignmentResourceTest {
         Assignment assignment = new Assignment(blockId, vehicleId, today());
 
         doNothing().when(assignmentDao).save(any(Assignment.class));
-        doNothing().when(assignmentConfigService).setConfigValue(anyString(), anyString());
+        lenient().doNothing().when(assignmentConfigService).setConfigValue(anyString(), anyString());
 
         String vehicleIdAssignment = var.getAssignmentByBlockId(blockId);
 
@@ -204,7 +207,7 @@ public class VehicleAssignmentResourceTest {
     @Test
     public void testGetAssignments() throws IOException {
         ObjectMapper _mapper = new ObjectMapper();
-        _mapper.configure(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        _mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
 
         VehicleAssignmentServiceImpl vas = new VehicleAssignmentServiceImpl();
@@ -218,7 +221,7 @@ public class VehicleAssignmentResourceTest {
         var.setVehicleAssignmentService(vasSpy);
 
         doNothing().when(assignmentDao).save(any(Assignment.class));
-        doNothing().when(assignmentConfigService).setConfigValue(anyString(), anyString());
+        lenient().doNothing().when(assignmentConfigService).setConfigValue(anyString(), anyString());
 
         String blockId = "1_block1";
         String vehicleId = "1_vehicle1";

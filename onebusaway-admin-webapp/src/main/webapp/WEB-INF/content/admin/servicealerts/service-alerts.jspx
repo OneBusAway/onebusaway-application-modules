@@ -59,7 +59,7 @@
 </head>
 <body>
 
-<s:set name="theme" value="'xhtml'" scope="page" />
+<s:set var="theme" value="'xhtml'" scope="page" />
 <div id="ServiceAlerts">
 	<p>Manage Service Alerts</p>
 	<div id="serviceAlertActions">

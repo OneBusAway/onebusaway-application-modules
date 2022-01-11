@@ -18,6 +18,7 @@ package org.onebusaway.webapp.actions.admin.usermanagement;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.struts2.ServletActionContext;
+import org.apache.struts2.convention.annotation.AllowedMethods;
 import org.onebusaway.admin.model.ui.UserDetail;
 import org.onebusaway.admin.service.TemporaryPasswordService;
 import org.onebusaway.admin.service.UserManagementService;
@@ -27,7 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-
+@AllowedMethods({"updatePassword"})
 public class UpdatePasswordAction extends OneBusAwayNYCAdminActionSupport {
 
 	private static final long serialVersionUID = 1L;

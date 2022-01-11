@@ -40,7 +40,6 @@ public class AgencyMetadataDaoImpl implements AgencyMetadataDao {
   private SessionFactory _sessionFactory;
   
   @Autowired
-  @Qualifier("agencyMetadataSessionFactory")
   public void setSessionFactory(SessionFactory sessionFactory) {
     _sessionFactory = sessionFactory;
   }
