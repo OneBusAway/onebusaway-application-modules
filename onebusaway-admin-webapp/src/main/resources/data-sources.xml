@@ -85,7 +85,7 @@
     </bean>
 
 
-    
+
     <!--  Email connection -->
      <bean id="mailSession"
           class="org.springframework.jndi.JndiObjectFactoryBean">
