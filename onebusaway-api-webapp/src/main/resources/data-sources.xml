@@ -17,8 +17,8 @@
 
 -->
 <beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xmlns:context="http://www.springframework.org/schema/context"
-    xsi:schemaLocation="
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="
         http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
         http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd">
 
@@ -29,33 +29,33 @@
     </bean>
 
     <bean id="apiKeyValidationService" class="org.onebusaway.users.impl.validation.KeyValidationServiceImpl"/>
-    
-     <!-- Database Configuration -->
+
+    <!-- Database Configuration -->
     <bean id="dataSource"
           class="org.springframework.jndi.JndiObjectFactoryBean">
-      <property name="jndiName"
-                value="java:comp/env/jdbc/appDB"/>   
-      <property name="lookupOnStartup"
-                value="true"/>   
-      <property name="cache"
-                value="true"/>   
-      <property name="proxyInterface"
-                value="javax.sql.DataSource"/>   
-      <property name="resourceRef"
-                value="true" />
-    </bean>   
-        <bean id="agencyMetadataDataSource"
+        <property name="jndiName"
+                  value="java:comp/env/jdbc/appDB"/>
+        <property name="lookupOnStartup"
+                  value="true"/>
+        <property name="cache"
+                  value="true"/>
+        <property name="proxyInterface"
+                  value="javax.sql.DataSource"/>
+        <property name="resourceRef"
+                  value="true" />
+    </bean>
+    <bean id="agencyMetadataDataSource"
           class="org.springframework.jndi.JndiObjectFactoryBean">
-      <property name="jndiName"
-                value="java:comp/env/jdbc/appDB"/>
-      <property name="lookupOnStartup"
-                value="true"/>
-      <property name="cache"
-                value="true"/>
-      <property name="proxyInterface"
-                value="javax.sql.DataSource"/>
-      <property name="resourceRef"
-                value="true" />
+        <property name="jndiName"
+                  value="java:comp/env/jdbc/appDB"/>
+        <property name="lookupOnStartup"
+                  value="true"/>
+        <property name="cache"
+                  value="true"/>
+        <property name="proxyInterface"
+                  value="javax.sql.DataSource"/>
+        <property name="resourceRef"
+                  value="true" />
     </bean>
     <bean id="agencyMetadataSessionFactory"
         class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
@@ -78,12 +78,12 @@
             </props>
         </property>
     </bean>
-    
-     <bean class="org.onebusaway.container.spring.PropertyOverrideConfigurer">
+
+    <bean class="org.onebusaway.container.spring.PropertyOverrideConfigurer">
         <property name="properties">
             <props>
                 <prop key="cacheManager.cacheManagerName">org.onebusaway.api_webapp.cacheManager</prop>
             </props>
         </property>
-    </bean>   
+    </bean>
 </beans>
