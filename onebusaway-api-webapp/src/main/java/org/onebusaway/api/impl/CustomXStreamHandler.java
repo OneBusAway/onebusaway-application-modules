@@ -132,7 +132,10 @@ public class CustomXStreamHandler extends XStreamHandler {
     xstream.alias("tripWithStopTimes", TripWithStopTimesV2Bean.class);
 
 
-
+    // serialization customizations for StopsAndTripsForDirectionV2Bean
+    xstream.alias("scheduleStopTime", ScheduleStopTimeInstanceExtendedWithStopIdV2Bean.class);
+    ClassAliasingMapper stopTimeExtendedWithStopMapper = new ClassAliasingMapper(xstream.getMapper());
+    stopTimeExtendedWithStopMapper.addClassAlias("stopId", String.class);
 
     // serialization customizations for StopsAndTripsForDirectionV2Bean
     ClassAliasingMapper StopTripDirectionMapper = new ClassAliasingMapper(xstream.getMapper());

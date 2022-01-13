@@ -572,14 +572,15 @@ public class BeanFactoryV2 {
     return bean;
   }
 
-  public ScheduleStopTimeInstanceV2Bean getStopTime(StopTimeInstanceBean stopTime) {
-    ScheduleStopTimeInstanceV2Bean bean = new ScheduleStopTimeInstanceV2Bean();
+  public ScheduleStopTimeInstanceExtendedWithStopIdV2Bean getStopTime(StopTimeInstanceBeanExtendedWithStopId stopTime) {
+    ScheduleStopTimeInstanceExtendedWithStopIdV2Bean bean = new ScheduleStopTimeInstanceExtendedWithStopIdV2Bean();
     bean.setArrivalTime(stopTime.getArrivalTime());
     bean.setDepartureTime(stopTime.getDepartureTime());
     bean.setArrivalEnabled(stopTime.isArrivalEnabled());
     bean.setDepartureEnabled(stopTime.isDepartureEnabled());
     bean.setStopHeadsign(stopTime.getStopHeadsign());
     bean.setTripId(stopTime.getTripId());
+    bean.setStopId(stopTime.getStopId().toString());
 
     return bean;
   }
@@ -728,8 +729,9 @@ public class BeanFactoryV2 {
       Collections.sort(stdb.getTripIds());
       v2.setTripIds(stdb.getTripIds().stream().map(x->x.toString()).collect(Collectors.toList()));
       Collections.sort(stdb.getStopTimes(),comparator);
+      List<? extends StopTimeInstanceBean> stopTimesBeans =  stdb.getStopTimes();
       v2.setTripsWithStopTimes(stdb.getTripIds().stream().
-              map(x-> getStopTimesForTrip(x.toString(),stdb.getStopTimes()))
+              map(x-> getStopTimesForTrip(x.toString(), (List<StopTimeInstanceBeanExtendedWithStopId>) stopTimesBeans))
               .collect(Collectors.toList()));
       stopTripDirectionBeans.add(v2);
     }
@@ -759,12 +761,12 @@ public class BeanFactoryV2 {
 
   private TripWithStopTimesV2Bean getStopTimesForTrip(
           String tripId,
-          List<StopTimeInstanceBean> sortedStoptimesList){
+          List<StopTimeInstanceBeanExtendedWithStopId> sortedStoptimesList){
     int index = getIndexOfFirstStopTimeMatchForTrip(sortedStoptimesList,tripId);
     List stopTimesForTrip = new ArrayList<ScheduleStopTimeInstanceV2Bean>();
-    StopTimeInstanceBean stopTime = sortedStoptimesList.get(index);
+    StopTimeInstanceBeanExtendedWithStopId stopTime = sortedStoptimesList.get(index);
     while (stopTime.getTripId().equals(tripId)){
-      ScheduleStopTimeInstanceV2Bean v2 = getStopTime(stopTime);
+      ScheduleStopTimeInstanceExtendedWithStopIdV2Bean v2 = getStopTime(stopTime);
       stopTimesForTrip.add(v2);
       index++;
       if(index>=sortedStoptimesList.size()){
@@ -778,7 +780,7 @@ public class BeanFactoryV2 {
     return tripWithStopTimes;
   }
 
-  private int getIndexOfFirstStopTimeMatchForTrip(List<StopTimeInstanceBean> sortedStoptimesList, String trip){
+  private int getIndexOfFirstStopTimeMatchForTrip(List<StopTimeInstanceBeanExtendedWithStopId> sortedStoptimesList, String trip){
     int i = getIndexStopTimesByTrip(sortedStoptimesList, trip);
     if(i==0){return i;}
     while(true){
@@ -791,7 +793,7 @@ public class BeanFactoryV2 {
   }
 
 
-  private int getIndexStopTimesByTrip(List<StopTimeInstanceBean> sortedStoptimesList, String trip){
+  private int getIndexStopTimesByTrip(List<StopTimeInstanceBeanExtendedWithStopId> sortedStoptimesList, String trip){
     int min = 0;
     int max = sortedStoptimesList.size() -1;
     int i = 0;

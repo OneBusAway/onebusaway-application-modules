@@ -66,7 +66,7 @@ public class RouteScheduleBean extends ApplicationBean {
   private List<RouteBean> routes = new ArrayList<>();
   private List<TripBean> trips = new ArrayList<>();
   private List<StopBean> stops = new ArrayList<>();
-  private List<StopTimeInstanceBean> stopTimes = new ArrayList<>();
+  private List<StopTimeInstanceBeanExtendedWithStopId> stopTimes = new ArrayList<>();
   private List<StopsAndTripsForDirectionBean> stopTripDirections = new ArrayList<>();
   private List<ServiceAlertBean> serviceAlertBeans = new ArrayList<>();
 
@@ -109,7 +109,7 @@ public class RouteScheduleBean extends ApplicationBean {
   public List<StopBean> getStops() {
     return stops;
   }
-  public List<StopTimeInstanceBean> getStopTimes() {
+  public List<StopTimeInstanceBeanExtendedWithStopId> getStopTimes() {
     return stopTimes;
   }
 

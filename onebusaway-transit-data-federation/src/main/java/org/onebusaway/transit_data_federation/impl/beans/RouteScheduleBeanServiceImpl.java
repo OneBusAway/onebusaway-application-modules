@@ -18,12 +18,7 @@ package org.onebusaway.transit_data_federation.impl.beans;
 import org.onebusaway.container.cache.Cacheable;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
-import org.onebusaway.transit_data.model.AgencyBean;
-import org.onebusaway.transit_data.model.RouteBean;
-import org.onebusaway.transit_data.model.RouteScheduleBean;
-import org.onebusaway.transit_data.model.StopBean;
-import org.onebusaway.transit_data.model.StopTimeInstanceBean;
-import org.onebusaway.transit_data.model.StopsAndTripsForDirectionBean;
+import org.onebusaway.transit_data.model.*;
 import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationQueryBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
@@ -362,7 +357,7 @@ public class RouteScheduleBeanServiceImpl implements RouteScheduleBeanService {
 
   private void addStopTimeReference(BeanReferences references, StopsAndTripsForDirectionBean stopsAndTripsForDirectionBean,
                                     StopTimeEntry stopTimeEntry, ServiceDate serviceDate) {
-    StopTimeInstanceBean bean = new StopTimeInstanceBean();
+    StopTimeInstanceBeanExtendedWithStopId bean = new StopTimeInstanceBeanExtendedWithStopId();
     bean.setTripId(AgencyAndIdLibrary.convertToString(stopTimeEntry.getTrip().getId()));
     bean.setServiceId(AgencyAndIdLibrary.convertToString(stopTimeEntry.getTrip().getServiceId().getId()));
     bean.setServiceDate(serviceDate.getAsDate(getTimeZoneForAgency(stopTimeEntry.getTrip().getId().getAgencyId())).getTime());
@@ -370,6 +365,7 @@ public class RouteScheduleBeanServiceImpl implements RouteScheduleBeanService {
     bean.setArrivalTime(stopTimeEntry.getArrivalTime());
     bean.setDepartureEnabled(stopTimeEntry.getDepartureTime() > 0);
     bean.setDepartureTime(stopTimeEntry.getDepartureTime());
+    bean.setStopId(stopTimeEntry.getStop().getId());
     references.getStopTimes().add(bean);
     stopsAndTripsForDirectionBean.getStopTimes().add(bean);
   }
@@ -521,7 +517,7 @@ public class RouteScheduleBeanServiceImpl implements RouteScheduleBeanService {
     private Set<RouteBean> routes = new LinkedHashSet<>();
     private Set<TripBean> trips = new LinkedHashSet<>();
     private Set<StopBean> stops = new LinkedHashSet<>();
-    private Set<StopTimeInstanceBean> stopTimes = new LinkedHashSet<>();
+    private Set<StopTimeInstanceBeanExtendedWithStopId> stopTimes = new LinkedHashSet<>();
     public BeanReferences() {
     }
     public Set<AgencyBean> getAgencies() {
@@ -536,7 +532,7 @@ public class RouteScheduleBeanServiceImpl implements RouteScheduleBeanService {
     public Set<StopBean> getStops() {
       return stops;
     }
-    public Set<StopTimeInstanceBean> getStopTimes() {
+    public Set<StopTimeInstanceBeanExtendedWithStopId> getStopTimes() {
       return stopTimes;
     }
 
