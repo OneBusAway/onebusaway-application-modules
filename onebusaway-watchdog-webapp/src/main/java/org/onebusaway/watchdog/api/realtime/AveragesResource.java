@@ -15,7 +15,6 @@
  */
 package org.onebusaway.watchdog.api.realtime;
 
-import javax.annotation.PostConstruct;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -27,12 +26,6 @@ import org.onebusaway.watchdog.api.LongTermAveragesResource;
 
 @Path("/metric/realtime/delta")
 public class AveragesResource extends LongTermAveragesResource {
-
-  @PostConstruct
-  public void start() {
-    super.start();
-  }
-
   @Path("{agencyId}/average-matched-trips")
   @GET
   @Produces("application/json")
