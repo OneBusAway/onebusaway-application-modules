@@ -118,22 +118,26 @@ public class LongTermAveragesResource extends MetricResource {
 	  // Create timer to update averages every 30 seconds.
 	  @PostConstruct
 	  public void start() {
-	    agencyIds = getAgencyList();
-	    // Initialize maps
-	    for (String agencyId : agencyIds) {
-	      matchedTripAveragesByAgency.put(agencyId, new int[ROLLING_AVERAGE_COUNT]);
-	      unmatchedTripAveragesByAgency.put(agencyId, new int[ROLLING_AVERAGE_COUNT]);
-        busesInServicePctByAgency.put(agencyId, new int[ROLLING_AVERAGE_COUNT]);
-        stopsMatchedByAgency.put(agencyId, new int[ROLLING_AVERAGE_COUNT]);
-        stopsUnmatchedByAgency.put(agencyId, new int[ROLLING_AVERAGE_COUNT]);
-        tripTotalsByAgency.put(agencyId, new int[ROLLING_AVERAGE_COUNT]);
-        tripScheduleRealtimeDiffByAgency.put(agencyId, new int[ROLLING_AVERAGE_COUNT]);
-        locationTotalsByAgency.put(agencyId, new int[ROLLING_AVERAGE_COUNT]);
-        locationInvalidLatLonByAgency.put(agencyId, new int[ROLLING_AVERAGE_COUNT]);
-	    }
-	    if (_refreshInterval > 0) {
-	      _refreshTask = _scheduledExecutorService.scheduleAtFixedRate(new RefreshTask(), 0, _refreshInterval, TimeUnit.SECONDS);
-	    }
+			try {
+				agencyIds = getAgencyList();
+				// Initialize maps
+				for (String agencyId : agencyIds) {
+					matchedTripAveragesByAgency.put(agencyId, new int[ROLLING_AVERAGE_COUNT]);
+					unmatchedTripAveragesByAgency.put(agencyId, new int[ROLLING_AVERAGE_COUNT]);
+					busesInServicePctByAgency.put(agencyId, new int[ROLLING_AVERAGE_COUNT]);
+					stopsMatchedByAgency.put(agencyId, new int[ROLLING_AVERAGE_COUNT]);
+					stopsUnmatchedByAgency.put(agencyId, new int[ROLLING_AVERAGE_COUNT]);
+					tripTotalsByAgency.put(agencyId, new int[ROLLING_AVERAGE_COUNT]);
+					tripScheduleRealtimeDiffByAgency.put(agencyId, new int[ROLLING_AVERAGE_COUNT]);
+					locationTotalsByAgency.put(agencyId, new int[ROLLING_AVERAGE_COUNT]);
+					locationInvalidLatLonByAgency.put(agencyId, new int[ROLLING_AVERAGE_COUNT]);
+				}
+				if (_refreshInterval > 0) {
+					_refreshTask = _scheduledExecutorService.scheduleAtFixedRate(new RefreshTask(), 0, _refreshInterval, TimeUnit.SECONDS);
+				}
+			} catch (Throwable t) {
+				_log.error("exception initalizing: ", t, t);
+			}
 	  }
 
 	  @PreDestroy
