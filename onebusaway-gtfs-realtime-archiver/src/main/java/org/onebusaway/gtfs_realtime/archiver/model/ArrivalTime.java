@@ -15,7 +15,7 @@
  */
 package org.onebusaway.gtfs_realtime.archiver.model;
 
-import org.codehaus.jackson.annotate.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class ArrivalTime {
 

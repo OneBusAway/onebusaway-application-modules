@@ -18,7 +18,7 @@ package org.onebusaway.enterprise.webapp.actions.api;
 
 import java.io.IOException;
 
-import org.codehaus.jackson.map.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.onebusaway.util.git.GitRepositoryHelper;
 import org.onebusaway.util.git.GitRepositoryState;

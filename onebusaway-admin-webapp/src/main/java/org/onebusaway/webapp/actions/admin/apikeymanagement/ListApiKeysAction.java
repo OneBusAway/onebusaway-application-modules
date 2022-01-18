@@ -15,6 +15,7 @@
  */
 package org.onebusaway.webapp.actions.admin.apikeymanagement;
 
+import org.apache.struts2.convention.annotation.AllowedMethods;
 import org.onebusaway.users.client.model.UserBean;
 import org.onebusaway.users.model.User;
 import org.onebusaway.users.services.UserService;
@@ -26,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.ArrayList;
 import java.util.List;
 
+@AllowedMethods({"firstPage", "nextPage", "previousPage"})
 public class ListApiKeysAction extends OneBusAwayNYCAdminActionSupport {
 
     private static Logger log = LoggerFactory.getLogger(ListApiKeysAction.class);

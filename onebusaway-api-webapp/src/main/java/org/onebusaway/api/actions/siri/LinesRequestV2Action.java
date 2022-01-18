@@ -23,25 +23,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.struts2.interceptor.ServletRequestAware;
 import org.apache.struts2.interceptor.ServletResponseAware;
 import org.apache.struts2.rest.DefaultHttpHeaders;
-import org.onebusaway.api.actions.api.ApiActionSupport;
 import org.onebusaway.api.actions.siri.impl.SiriSupportV2.Filters;
 import org.onebusaway.api.actions.siri.model.DetailLevel;
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.presentation.impl.DateUtil;
 import org.onebusaway.transit_data_federation.siri.SiriUpcomingServiceExtension;
-import org.onebusaway.util.impl.analytics.GoogleAnalyticsServiceImpl;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import com.brsanthu.googleanalytics.EventHit;
-import com.brsanthu.googleanalytics.PageViewHit;
 
 import uk.org.siri.siri_2.AnnotatedLineStructure;
 import uk.org.siri.siri_2.ErrorDescriptionStructure;
@@ -51,7 +42,7 @@ import uk.org.siri.siri_2.OtherErrorStructure;
 import uk.org.siri.siri_2.ServiceDeliveryErrorConditionStructure;
 import uk.org.siri.siri_2.Siri;
 
-public class LinesRequestV2Action extends MonitoringActionBase 
+public class LinesRequestV2Action extends MonitoringActionV2Base
     implements ServletRequestAware, ServletResponseAware {
   
   private static final long serialVersionUID = 1L;
@@ -59,23 +50,6 @@ public class LinesRequestV2Action extends MonitoringActionBase
   private static final String LINES_DETAIL_LEVEL = "LinesDetailLevel";
   private static final String INCLUDE_POLYLINES = "includePolylines";
   
-  @Autowired
-  private GoogleAnalyticsServiceImpl _gaService;
-  
-  private Siri _response;
-
-  private HttpServletRequest _request;
-
-  private HttpServletResponse _servletResponse;
-
-  // See urlrewrite.xml as to how this is set. Which means this action doesn't
-  // respect an HTTP Accept: header.
-  private String _type = "xml";
-
-  public void setType(String type) {
-    _type = type;
-  }
-
   public DefaultHttpHeaders index() throws IOException {
 
     long responseTimestamp = getTime();
@@ -90,14 +64,14 @@ public class LinesRequestV2Action extends MonitoringActionBase
     boolean validBoundDistance = true;
     
     // User Parameters
-    String boundingBox = _request.getParameter(BOUNDING_BOX);
-    String circle = _request.getParameter(CIRCLE);
-    String lineRef = _request.getParameter(LINE_REF);
-    String directionId = _request.getParameter(DIRECTION_REF);
-    String agencyId = _request.getParameter(OPERATOR_REF);
-    String hasUpcomingScheduledService = _request.getParameter(UPCOMING_SCHEDULED_SERVICE);
-    String detailLevelParam = _request.getParameter(LINES_DETAIL_LEVEL);
-    String includePolylines = _request.getParameter(INCLUDE_POLYLINES);
+    String boundingBox = _servletRequest.getParameter(BOUNDING_BOX);
+    String circle = _servletRequest.getParameter(CIRCLE);
+    String lineRef = _servletRequest.getParameter(LINE_REF);
+    String directionId = _servletRequest.getParameter(DIRECTION_REF);
+    String agencyId = _servletRequest.getParameter(OPERATOR_REF);
+    String hasUpcomingScheduledService = _servletRequest.getParameter(UPCOMING_SCHEDULED_SERVICE);
+    String detailLevelParam = _servletRequest.getParameter(LINES_DETAIL_LEVEL);
+    String includePolylines = _servletRequest.getParameter(INCLUDE_POLYLINES);
     
     //get the detail level parameter or set it to default if not specified
       DetailLevel detailLevel;
@@ -195,16 +169,11 @@ public class LinesRequestV2Action extends MonitoringActionBase
       }
     }
 
-    _response = generateSiriResponse(lines, upcomingServiceAllStops,
+    _siriResponse = generateSiriResponse(lines, upcomingServiceAllStops,
         error, responseTimestamp);
 
-    try {
-      this._servletResponse.getWriter().write(getLines());
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-
-    return null;
+    // use ApiActionSupport to set proper headers instead of writing directly to response
+    return setOkResponseText(getSiri());
   }
 
   private Siri generateSiriResponse(
@@ -262,53 +231,5 @@ public class LinesRequestV2Action extends MonitoringActionBase
 
     return siri;
   }
-
-  public String getLines() {
-    try {
-      if (_type.equals("xml")) {
-        this._servletResponse.setContentType("application/xml");
-        return _realtimeService.getSiriXmlSerializer()
-            .getXml(_response);
-      } else {
-        this._servletResponse.setContentType("application/json");
-        return _realtimeService.getSiriJsonSerializer().getJson(
-            _response, _request.getParameter("callback"));
-      }
-    } catch (Exception e) {
-      return e.getMessage();
-    }
-  }
-
-  @Override
-  public void setServletRequest(HttpServletRequest request) {
-    this._request = request;
-  }
-
-  @Override
-  public void setServletResponse(HttpServletResponse servletResponse) {
-    this._servletResponse = servletResponse;
-  }
-  
-  public HttpServletResponse getServletResponse(){
-    return _servletResponse;
-  }
-  
-  private void processGoogleAnalytics(){
-    processGoogleAnalyticsPageView();
-    processGoogleAnalyticsApiKeys();  
-  }
-  
-  private void processGoogleAnalyticsPageView(){
-    _gaService.post(new PageViewHit());
-  }
-  
-  private void processGoogleAnalyticsApiKeys(){
-    String apiKey = _request.getParameter("key"); 
-    if(StringUtils.isBlank(apiKey))
-      apiKey = "Key Information Unavailable";
-    
-    _gaService.post(new EventHit(GA_EVENT_CATEGORY, GA_EVENT_ACTION, apiKey, 1));
-  }
-
 
 }

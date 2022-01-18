@@ -357,7 +357,9 @@ public class CleverServiceAlertsServiceImpl implements IntegratingServiceAlertsS
   private class PollDMTask implements Runnable {
     @Override
     public void run() {
-      runPollDMTask();
+      if (_cleverAPIUrlString != null) {
+        runPollDMTask();
+      }
     }
   }
 

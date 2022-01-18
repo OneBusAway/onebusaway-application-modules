@@ -42,9 +42,9 @@ import org.onebusaway.transit_data_federation.model.transit_graph.TransitGraph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.index.ItemVisitor;
-import com.vividsolutions.jts.index.strtree.STRtree;
+import org.locationtech.jts.geom.Envelope;
+import org.locationtech.jts.index.ItemVisitor;
+import org.locationtech.jts.index.strtree.STRtree;
 
 public class TransitGraphImpl implements Serializable, TransitGraph {
 

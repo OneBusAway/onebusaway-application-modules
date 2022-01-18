@@ -15,7 +15,7 @@
  */
 package org.onebusaway.admin.model.json;
 
-import org.codehaus.jackson.annotate.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class DestinationSignCode {
   private String messageId;

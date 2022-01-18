@@ -34,11 +34,9 @@ import org.onebusaway.transit_data_federation.services.reporting.UserReportingDa
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.transaction.TransactionConfiguration;
 import org.springframework.transaction.annotation.Transactional;
 
 @ContextConfiguration(locations = "classpath:org/onebusaway/transit_data_federation/application-context-test.xml")
-@TransactionConfiguration(transactionManager="transactionManager", defaultRollback=true)
 @RunWith(SpringJUnit4ClassRunner.class)
 public class UserReportingDaoImplTest {
 

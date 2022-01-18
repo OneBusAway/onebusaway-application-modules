@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.onebusaway</groupId>
 		<artifactId>onebusaway-application-modules</artifactId>
-		<version>2.0.79-cs-SNAPSHOT</version>
+		<version>2.1.12-cs-SNAPSHOT</version>
 	</parent>
 	<artifactId>onebusaway-enterprise-webapp</artifactId>
 	<packaging>war</packaging>
@@ -157,7 +157,6 @@
 		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
-			<version>5.1.17</version>
 		</dependency>
 		 <!-- for maps -->
         <dependency>
@@ -225,10 +224,10 @@
 			<id>local-multi-port</id> <!-- services-vtw-as-tds-multiport --><!-- multi port, also for development -->
 			<!-- assumes we're running on 8080, and vtw and api are on different ports -->
 			<properties>
-				<tds.path>http://localhost:8081/onebusaway-nyc-vehicle-tracking-webapp</tds.path>
-				<vtms.path>http://localhost:8081/onebusaway-nyc-vehicle-tracking-webapp</vtms.path>
-				<config.path>http://localhost:8081/onebusaway-nyc-vehicle-tracking-webapp</config.path>
-				<archive.path>http://localhost:8081/onebusaway-nyc-report-archive</archive.path>
+				<tds.path>http://localhost:8080/onebusaway-nyc-vehicle-tracking-webapp</tds.path>
+				<vtms.path>http://localhost:8080/onebusaway-nyc-vehicle-tracking-webapp</vtms.path>
+				<config.path>http://localhost:8080/onebusaway-nyc-vehicle-tracking-webapp</config.path>
+				<archive.path>http://localhost:8080/onebusaway-nyc-report-archive</archive.path>
 				<log4j.appender>stdout</log4j.appender>
 				<create-apikey>true</create-apikey>
 				<siri.cache.disabled>false</siri.cache.disabled>

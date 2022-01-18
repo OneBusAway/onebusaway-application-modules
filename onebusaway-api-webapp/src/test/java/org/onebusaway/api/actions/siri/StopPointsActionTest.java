@@ -21,12 +21,9 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyListOf;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.anyMapOf;
+import static org.mockito.Mockito.*;
+import static org.onebusaway.api.actions.siri.SiriAction.STOP_POINTS_DETAIL_LEVEL;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintWriter;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -216,21 +213,11 @@ public class StopPointsActionTest {
   // XML Serializer
   SiriXmlSerializerV2 serializer = new SiriXmlSerializerV2();
   when(realtimeService.getSiriXmlSerializer()).thenReturn(serializer );
-  
 
-  //Print Writer
-  PrintWriter nothingPrintWriter = new PrintWriter(new OutputStream() {
-        @Override
-        public void write(int b) throws IOException {
-          // Do nothing
-        }
-  });
-    when(servletResponse.getWriter()).thenReturn(nothingPrintWriter);
-  
   when(transitDataService.getRouteForId("1_430")).thenReturn(routeBean);
-  when(transitDataService.getStopsForRoute("1_430")).thenReturn(stopsForRouteBean);
-  when(transitDataService.stopHasUpcomingScheduledService(anyString(), anyLong(), anyString(), anyString(), anyString())).thenReturn(true);
-  when(transitDataService.getAgencyIdsWithCoverageArea()).thenReturn(agencies);
+  lenient().when(transitDataService.getStopsForRoute("1_430")).thenReturn(stopsForRouteBean);
+  lenient().when(transitDataService.stopHasUpcomingScheduledService(anyString(), anyLong(), anyString(), anyString(), anyString())).thenReturn(true);
+  lenient().when(transitDataService.getAgencyIdsWithCoverageArea()).thenReturn(agencies);
   
   }
   
@@ -245,7 +232,7 @@ public class StopPointsActionTest {
     action.setServletResponse(servletResponse);
     action.index();
     
-    String monitoring = action.getStopPoints();
+    String monitoring = action.getSiri();
     System.out.println(monitoring);
     
     assertTrue("Result XML does not match expected", monitoring.matches("(?s).*<StopPointsDelivery><ResponseTimestamp>.+</ResponseTimestamp><ValidUntil>.+</ValidUntil><AnnotatedStopPointRef><StopPointRef>.+</StopPointRef><Monitored>true</Monitored><StopName>.+</StopName><Lines><LineDirection><LineRef>.+</LineRef><DirectionRef>(0|1)</DirectionRef></LineDirection></Lines><Location><Longitude>\\-[0-9]{1,3}?\\.[0-9]+</Longitude><Latitude>[0-9]{1,2}?\\.[0-9]+</Latitude></Location></AnnotatedStopPointRef><Extensions><UpcomingScheduledService>true</UpcomingScheduledService></Extensions></StopPointsDelivery></Siri>.*"));
@@ -256,13 +243,13 @@ public class StopPointsActionTest {
   public void testDetailLevelCase() throws Exception {
     
     when(request.getParameter(eq("LineRef"))).thenReturn("430");
-    when(request.getParameter(eq("StopPointsDetailLevel"))).thenReturn("Calls");
+    when(request.getParameter(eq(STOP_POINTS_DETAIL_LEVEL))).thenReturn("Calls");
 
     action.setServletRequest(request);
     action.setServletResponse(servletResponse);
     action.index();
     
-    String monitoring = action.getStopPoints();
+    String monitoring = action.getSiri();
     System.out.println(monitoring);
     
     assertTrue("Result XML does not match expected", monitoring.matches("(?s).*<StopPointsDelivery><ResponseTimestamp>.+</ResponseTimestamp><ValidUntil>.+</ValidUntil><AnnotatedStopPointRef><StopPointRef>.+</StopPointRef><Monitored>true</Monitored><StopName>.+</StopName><Lines><LineDirection><LineRef>.+</LineRef><DirectionRef>(0|1)</DirectionRef></LineDirection></Lines><Location><Longitude>.+</Longitude><Latitude>.+</Latitude></Location></AnnotatedStopPointRef><Extensions><UpcomingScheduledService>true</UpcomingScheduledService></Extensions></StopPointsDelivery></Siri>.*"));

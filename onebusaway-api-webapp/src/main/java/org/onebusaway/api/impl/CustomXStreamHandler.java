@@ -55,7 +55,35 @@ import org.onebusaway.transit_data.model.StopGroupingBean;
 
 import com.thoughtworks.xstream.XStream;
 
+import java.io.IOException;
+import java.io.Reader;
+import java.io.Writer;
+
 public class CustomXStreamHandler extends XStreamHandler {
+
+  @Override
+  public String fromObject(ActionInvocation invocation, Object obj, String resultCode, Writer out) throws IOException {
+    if (obj != null) {
+      if (obj instanceof ResponseBean) {
+        ResponseBean bean = (ResponseBean) obj;
+        if (bean.isString() && bean.getData() != null) {
+          out.write(bean.getData().toString());
+          return null;
+        }
+        XStream xstream = this.createXStream(invocation);
+        xstream.toXML(obj, out);
+      }
+
+    }
+
+    return null;
+  }
+
+  @Override
+  public void toObject(ActionInvocation invocation, Reader in, Object target) {
+    XStream xstream = this.createXStream(invocation);
+    xstream.fromXML(in, target);
+  }
 
   @Override
   protected XStream createXStream(ActionInvocation invocation) {

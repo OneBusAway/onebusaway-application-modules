@@ -43,6 +43,7 @@ import java.util.TreeSet;
 
 import javax.servlet.ServletContext;
 
+import org.apache.struts2.convention.annotation.AllowedMethods;
 import org.apache.struts2.convention.annotation.Namespace;
 import org.apache.struts2.convention.annotation.Result;
 import org.apache.struts2.convention.annotation.Results;
@@ -108,6 +109,9 @@ import com.google.gson.JsonParser;
           "contentDisposition", "attachment;filename=\"${downloadFilename}\"",
           "bufferSize", "1024"})
 })
+@AllowedMethods({"selectDirectory", "copyDirectory", "deleteDirectory", "createDirectory",
+				"fileList", "updateBundleComments", "existingBuildList", "download", "buildList",
+				"buildOutputZip", "downloadOutputFile", "downloadBundle", "downloadValidateFile"})
 public class ManageBundlesAction extends OneBusAwayNYCAdminActionSupport implements ServletContextAware {
 	private static Logger _log = LoggerFactory.getLogger(ManageBundlesAction.class);
 	private static final long serialVersionUID = 1L;
@@ -319,13 +323,21 @@ public class ManageBundlesAction extends OneBusAwayNYCAdminActionSupport impleme
 	 * @return list of existing directories
 	 */
 	public Set<ExistingDirectory> getExistingDirectories() {
+		_log.info("enter getExistingDirectories");
+		Set<ExistingDirectory> directories = new TreeSet<ExistingDirectory>();
+		try {
+			List<String[]> existingDirectories = fileService.listBundleDirectories(MAX_RESULTS);
 
-		List<String[]> existingDirectories = fileService.listBundleDirectories(MAX_RESULTS);
-		Set<ExistingDirectory> directories = new TreeSet<ExistingDirectory> ();
-		for(String[] existingDirectory : existingDirectories) {
-			ExistingDirectory directory = new ExistingDirectory(existingDirectory[0], existingDirectory[1], 
-					existingDirectory[2]);
-			directories.add(directory);
+			for (String[] existingDirectory : existingDirectories) {
+				ExistingDirectory directory = new ExistingDirectory(existingDirectory[0], existingDirectory[1],
+								existingDirectory[2]);
+				_log.info("directory=" + directory);
+				directories.add(directory);
+			}
+		} catch (Throwable t) {
+			_log.error("getExistingDirectories exception=" + t, t);
+		} finally {
+			_log.info("exit getExistingDirectories");
 		}
 		return directories;
 	}
@@ -336,12 +348,21 @@ public class ManageBundlesAction extends OneBusAwayNYCAdminActionSupport impleme
    * @return list of existing directories
    */
   public Set<ExistingDirectory> getSortedByDateDirectories() {
-    Set<ExistingDirectory> directories = getExistingDirectories();
-    // Resort by date
-    Set<ExistingDirectory> sortedDirectories
-      = new TreeSet<ExistingDirectory>(new DirectoryByDateComp());
-    sortedDirectories.addAll(directories);
-    return sortedDirectories;
+		Set<ExistingDirectory> directories = getExistingDirectories();
+		_log.error("getSortedByDateDirectories existing directories input=" + directories);
+  	try {
+			// Resort by date
+			Set<ExistingDirectory> sortedDirectories
+							= new TreeSet<ExistingDirectory>(new DirectoryByDateComp());
+			sortedDirectories.addAll(directories);
+			_log.info("sorted directories output=" + sortedDirectories);
+			return sortedDirectories;
+		} catch (Throwable t) {
+  		_log.error("getSortedByDateDirectories exception sorting directory ", t, t);
+  		return directories;
+		} finally {
+  		_log.info("getSortedByDateDirectories exit");
+		}
   }
 
   public SortedSet<String> getExistingArchivedDirectories() {
@@ -497,7 +518,11 @@ public class ManageBundlesAction extends OneBusAwayNYCAdminActionSupport impleme
 	public String downloadOutputFile() {
 		_log.info("downloadOutputFile with id=" + id + " and file=" + this.downloadFilename);
 		fileService.validateFileName(downloadFilename);
-		this.bundleBuildResponse = this.bundleRequestService.lookupBuildRequest(getId());
+		try {
+			this.bundleBuildResponse = this.bundleRequestService.lookupBuildRequest(getId());
+		} catch (Throwable t) {
+			_log.error("transaction issue " + t, t);
+		}
 		if (this.bundleBuildResponse != null) {
 		  String dir = bundleBuildResponse.getRemoteOutputDirectory();
 		  if (dir == null) {
@@ -816,19 +841,28 @@ public class ManageBundlesAction extends OneBusAwayNYCAdminActionSupport impleme
 
 	  private int unsafeCompare(ExistingDirectory ed1, ExistingDirectory ed2) throws Exception {
 		  // ExistingDirectory.creationTimestamp is a String 'dow mon dd hh:mm:ss zzz yyyy'
-		  String[] ed1Split = ed1.getCreationTimestamp().split(" ");
-		  String[] ed2Split = ed2.getCreationTimestamp().split(" ");
-		  SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss dd-MMM-yyyy");
-		  Date ed1Date = new Date();
-		  Date ed2Date = new Date();
-			  ed1Date = formatter.parse(ed1Split[3]
-					  + " " + ed1Split[2] + "-" + ed1Split[1]
-					  + "-" + ed1Split[5]);
-			  ed2Date = formatter.parse(ed2Split[3]
-			  		+ " " + ed2Split[2] + "-" + ed2Split[1]
-					  + "-" + ed2Split[5]);
-			  _log.info("" + ed1Date + " ?= " + ed2Date);
-		  return ed1Date.compareTo(ed2Date) * -1;
+			try {
+				String[] ed1Split = ed1.getCreationTimestamp().split(" ");
+				String[] ed2Split = ed2.getCreationTimestamp().split(" ");
+				SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss dd-MMM-yyyy");
+				Date ed1Date = new Date();
+				Date ed2Date = new Date();
+				ed1Date = formatter.parse(ed1Split[3]
+								+ " " + ed1Split[2] + "-" + ed1Split[1]
+								+ "-" + ed1Split[5]);
+				ed2Date = formatter.parse(ed2Split[3]
+								+ " " + ed2Split[2] + "-" + ed2Split[1]
+								+ "-" + ed2Split[5]);
+				_log.info("" + ed1Date + " ?= " + ed2Date);
+				int difference = ed1Date.compareTo(ed2Date) * -1;
+				if (difference == 0) {
+					return ed1.getName().compareTo(ed2.getName());
+				}
+				return difference;
+			} catch (Throwable t) {
+				_log.error("date issue " + t + " for ed1=" + ed1 + " and ed2=" + ed2, t);
+				return -1;
+			}
 
 	  }
 	}

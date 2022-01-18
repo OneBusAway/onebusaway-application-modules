@@ -31,7 +31,7 @@
 
 <s:iterator value="parameters.stops" status="stopsIter">
     <s:property value="name" /><s:if test="direction != null"> - <s:property value="direction" /> bound</s:if> - Stop # <s:property value="code" />
-    <s:if test="!#stopsIter.last"><s:property value="#delimiter" escape="false"/></s:if>
+    <s:if test="!#stopsIter.last"><s:property value="#delimiter" escapeHtml="false"/></s:if>
 </s:iterator>
 
 </jsp:root>

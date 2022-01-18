@@ -21,14 +21,7 @@ import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.List;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.apache.commons.lang.StringUtils;
-import org.apache.struts2.interceptor.ServletRequestAware;
-import org.apache.struts2.interceptor.ServletResponseAware;
 import org.apache.struts2.rest.DefaultHttpHeaders;
-import org.onebusaway.api.actions.siri.impl.ServiceAlertsHelperV2;
 import org.onebusaway.api.actions.siri.impl.SiriSupportV2;
 import org.onebusaway.api.actions.siri.model.DetailLevel;
 import org.onebusaway.gtfs.model.AgencyAndId;
@@ -36,13 +29,8 @@ import org.onebusaway.presentation.impl.DateUtil;
 import org.onebusaway.transit_data.model.ListBean;
 import org.onebusaway.transit_data.model.VehicleStatusBean;
 import org.onebusaway.util.AgencyAndIdLibrary;
-import org.onebusaway.util.impl.analytics.GoogleAnalyticsServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import com.brsanthu.googleanalytics.EventHit;
-import com.brsanthu.googleanalytics.PageViewHit;
 
 import uk.org.siri.siri_2.ErrorDescriptionStructure;
 import uk.org.siri.siri_2.MonitoredVehicleJourneyStructure;
@@ -53,47 +41,23 @@ import uk.org.siri.siri_2.Siri;
 import uk.org.siri.siri_2.VehicleActivityStructure;
 import uk.org.siri.siri_2.VehicleMonitoringDeliveryStructure;
 
-public class VehicleMonitoringV2Action extends MonitoringActionBase 
-    implements ServletRequestAware, ServletResponseAware {
+public class VehicleMonitoringV2Action extends MonitoringActionV2Base {
   
   private static final long serialVersionUID = 1L;
   protected static Logger _log = LoggerFactory.getLogger(VehicleMonitoringV2Action.class);
 
   private static final String VEHICLE_REF = "VehicleRef";
 
-  @Autowired
-  private GoogleAnalyticsServiceImpl _gaService;
-  
-  private Siri _response;
-
   private String _cachedResponse = null;
-
-  private ServiceAlertsHelperV2 _serviceAlertsHelper = new ServiceAlertsHelperV2();
-
-  HttpServletRequest _request;
-  
-  private HttpServletResponse _servletResponse;
-
-  // See urlrewrite.xml as to how this is set. Which means this action doesn't
-  // respect an HTTP Accept: header.
-  private String _type = "xml";
-
-  //private MonitoringActionSupport _monitoringActionSupport = new MonitoringActionSupport();
-
-  public void setType(String type) {
-    _type = type;
-  }
 
   public DefaultHttpHeaders index() throws IOException {
     
     long currentTimestamp = getTime();
     
     processGoogleAnalytics();
-    //_monitoringActionSupport.setupGoogleAnalytics(_request, _configurationService);
-    
     _realtimeService.setTime(currentTimestamp);
     
-    String detailLevelParam = _request.getParameter(VEHICLE_MONITORING_DETAIL_LEVEL);
+    String detailLevelParam = _servletRequest.getParameter(VEHICLE_MONITORING_DETAIL_LEVEL);
   
   //get the detail level parameter or set it to default if not specified
     DetailLevel detailLevel;
@@ -106,13 +70,13 @@ public class VehicleMonitoringV2Action extends MonitoringActionBase
     }
     
     // User Parameters
-  String lineRef = _request.getParameter(LINE_REF);
-  String vehicleRef = _request.getParameter(VEHICLE_REF);
-  String directionId = _request.getParameter(DIRECTION_REF);
-  String agencyId = _request.getParameter(OPERATOR_REF);
-  String maxOnwardCallsParam = _request.getParameter(MAX_ONWARD_CALLS);
-  String maxStopVisitsParam = _request.getParameter(MAX_STOP_VISITS);
-  String minStopVisitsParam = _request.getParameter(MIN_STOP_VISITS);
+  String lineRef = _servletRequest.getParameter(LINE_REF);
+  String vehicleRef = _servletRequest.getParameter(VEHICLE_REF);
+  String directionId = _servletRequest.getParameter(DIRECTION_REF);
+  String agencyId = _servletRequest.getParameter(OPERATOR_REF);
+  String maxOnwardCallsParam = _servletRequest.getParameter(MAX_ONWARD_CALLS);
+  String maxStopVisitsParam = _servletRequest.getParameter(MAX_STOP_VISITS);
+  String minStopVisitsParam = _servletRequest.getParameter(MIN_STOP_VISITS);
     
   // Error Strings
   String routeIdsErrorString = "";
@@ -159,7 +123,7 @@ public class VehicleMonitoringV2Action extends MonitoringActionBase
       }
       
       // No vehicle id validation, so we pass null for error
-      _response = generateSiriResponse(activities, null, null, currentTimestamp);
+      _siriResponse = generateSiriResponse(activities, null, null, currentTimestamp);
 
       // *** CASE 2: by route, using direction id, if provided
     } else if (lineRef != null) {
@@ -199,7 +163,7 @@ public class VehicleMonitoringV2Action extends MonitoringActionBase
         error = new Exception(routeIdsErrorString.trim());
       }
 
-      _response = generateSiriResponse(activities, routeIds, error, currentTimestamp);
+      _siriResponse = generateSiriResponse(activities, routeIds, error, currentTimestamp);
       
       // *** CASE 3: all vehicles
     } else {
@@ -224,7 +188,7 @@ public class VehicleMonitoringV2Action extends MonitoringActionBase
           }
         }
         // There is no input (route id) to validate, so pass null error
-        _response = generateSiriResponse(activities, null, null,
+        _siriResponse = generateSiriResponse(activities, null, null,
             currentTimestamp);
         //_siriCacheService.store(hashKey, getVehicleMonitoring());
       //} else {
@@ -235,24 +199,12 @@ public class VehicleMonitoringV2Action extends MonitoringActionBase
         throw new RuntimeException(e);
       }
     }
-    
-    //if (_monitoringActionSupport.canReportToGoogleAnalytics(_configurationService)) {
-    //  _monitoringActionSupport.reportToGoogleAnalytics(_request, "Vehicle Monitoring", gaLabel, _configurationService);
-    //} 
-    
-    try {
-      this._servletResponse.getWriter().write(getVehicleMonitoring());
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-
-    return null;
+    return setOkResponseText(getSiri());
   }
 
   /**
    * Generate a siri response for a set of VehicleActivities
    * 
-   * @param routeId
    */
   private Siri generateSiriResponse(List<VehicleActivityStructure> activities,
       List<AgencyAndId> routeIds, Exception error, long currentTimestamp) {
@@ -295,54 +247,11 @@ public class VehicleMonitoringV2Action extends MonitoringActionBase
     return siri;
   }
 
-  public String getVehicleMonitoring() {
+  public String getSiri() {
     if (_cachedResponse != null) {
       // check the cache first
       return _cachedResponse;
     }
-    
-    try {
-      if (_type.equals("xml")) {
-        this._servletResponse.setContentType("application/xml");
-        return _realtimeService.getSiriXmlSerializer().getXml(_response);
-      } else {
-        this._servletResponse.setContentType("application/json");
-        return _realtimeService.getSiriJsonSerializer().getJson(_response,
-            _request.getParameter("callback"));
-      }
-    } catch (Exception e) {
-      return e.getMessage();
-    }
-  }
-
-  @Override
-  public void setServletRequest(HttpServletRequest request) {
-    this._request = request;
-  }
-
-  @Override
-  public void setServletResponse(HttpServletResponse servletResponse) {
-    this._servletResponse = servletResponse;
-  }
-  
-  public HttpServletResponse getServletResponse(){
-    return _servletResponse;
-  }
-  
-  private void processGoogleAnalytics(){
-    processGoogleAnalyticsPageView();
-    processGoogleAnalyticsApiKeys();  
-  }
-  
-  private void processGoogleAnalyticsPageView(){
-    _gaService.post(new PageViewHit());
-  }
-  
-  private void processGoogleAnalyticsApiKeys(){
-    String apiKey = _request.getParameter("key"); 
-    if(StringUtils.isBlank(apiKey))
-      apiKey = "Key Information Unavailable";
-    
-    _gaService.post(new EventHit(GA_EVENT_CATEGORY, GA_EVENT_ACTION, apiKey, 1));
+    return super.getSiri();
   }
 }

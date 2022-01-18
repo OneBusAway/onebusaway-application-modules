@@ -469,7 +469,7 @@ private void removeDuplicateStopTimes(List<StopTime> stopTimes) {
    * 
    * @param stopTimes
    * @param distances
-   * @param arrivalTimesByDistanceTraveled
+   * @param scheduleTimesByDistanceTraveled
    */
   private void populateArrivalAndDepartureTimesByDistanceTravelledForStopTimes(
       List<StopTime> stopTimes, double[] distances,

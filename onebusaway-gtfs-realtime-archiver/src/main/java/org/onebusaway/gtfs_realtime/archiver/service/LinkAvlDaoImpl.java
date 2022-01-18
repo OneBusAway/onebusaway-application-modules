@@ -39,7 +39,7 @@ public class LinkAvlDaoImpl implements LinkAvlDao {
   private SessionFactory _sessionFactory;
 
   @Autowired
-  @Qualifier("gtfsRealtimeArchiveSessionFactory")
+//  @Qualifier("gtfsRealtimeArchiveSessionFactory")
   public void setSessionFactory(SessionFactory sessionFactory) {
     _sessionFactory = sessionFactory;
   }

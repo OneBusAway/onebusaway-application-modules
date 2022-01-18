@@ -34,11 +34,11 @@ import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.map.DeserializationConfig;
-import org.codehaus.jackson.map.JsonMappingException;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.map.SerializationConfig;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.MapperFeature;
 import org.onebusaway.gtfs_realtime.archiver.model.LinkAVLData;
 import org.onebusaway.gtfs_realtime.archiver.model.StopUpdate;
 import org.onebusaway.gtfs_realtime.archiver.model.TripInfo;
@@ -155,9 +155,8 @@ public class LinkAvlRealtimeArchiverTask extends RealtimeArchiverTask {
 
   private LinkAVLData deserializeAvlJson(String avlJson) {
     LinkAVLData avlData = new LinkAVLData();
-    ObjectMapper mapper = new ObjectMapper().enable(DeserializationConfig
-        .Feature.ACCEPT_SINGLE_VALUE_AS_ARRAY);
-    mapper.configure(SerializationConfig.Feature.AUTO_DETECT_FIELDS, true);
+    ObjectMapper mapper = new ObjectMapper().enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY);
+    mapper.configure(MapperFeature.AUTO_DETECT_FIELDS, true);
     try {
       avlData = mapper.readValue(avlJson, LinkAVLData.class);
     } 

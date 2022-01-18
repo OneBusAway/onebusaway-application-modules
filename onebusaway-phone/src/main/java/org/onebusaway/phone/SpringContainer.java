@@ -59,6 +59,11 @@ public class SpringContainer extends StubConfigurationProvider {
         return f;
 
       }
+
+      @Override
+      public Class<? extends ObjectFactory> type() {
+        return ObjectFactory.class;
+      }
     });
   }
 }

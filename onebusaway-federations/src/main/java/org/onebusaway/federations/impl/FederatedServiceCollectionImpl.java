@@ -22,6 +22,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.locationtech.jts.geom.Envelope;
+import org.locationtech.jts.index.ItemVisitor;
+import org.locationtech.jts.index.strtree.STRtree;
 import org.onebusaway.exceptions.MultipleServiceAreasServiceException;
 import org.onebusaway.exceptions.NoSuchAgencyServiceException;
 import org.onebusaway.exceptions.OutOfServiceAreaServiceException;
@@ -31,9 +34,6 @@ import org.onebusaway.federations.FederatedServiceCollection;
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.geospatial.model.CoordinatePoint;
 
-import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.index.ItemVisitor;
-import com.vividsolutions.jts.index.strtree.STRtree;
 
 /**
  * A basic {@link FederatedServiceCollection} implementation that provides

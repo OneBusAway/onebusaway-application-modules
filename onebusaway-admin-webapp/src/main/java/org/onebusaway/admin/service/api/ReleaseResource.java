@@ -20,18 +20,16 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
 
-import org.codehaus.jackson.map.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.onebusaway.util.git.GitRepositoryHelper;
 import org.onebusaway.util.git.GitRepositoryState;
 import org.springframework.stereotype.Component;
 
-import com.sun.jersey.api.spring.Autowire;
 /**
  * Webservice to show git status.
  *
  */
 @Component
-@Autowire
 @Path("/release")
 public class ReleaseResource {
 	

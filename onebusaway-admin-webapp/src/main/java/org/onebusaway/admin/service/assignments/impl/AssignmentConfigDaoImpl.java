@@ -36,7 +36,6 @@ public class AssignmentConfigDaoImpl implements AssignmentConfigDao {
     private SessionFactory _sessionFactory;
 
     @Autowired
-    @Qualifier("assignmentSessionFactory")
     public void setSessionFactory(SessionFactory sessionFactory) {
         _sessionFactory = sessionFactory;
     }

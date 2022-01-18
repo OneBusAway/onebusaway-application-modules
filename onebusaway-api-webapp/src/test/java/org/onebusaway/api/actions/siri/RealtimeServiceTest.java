@@ -19,6 +19,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.anyLong;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
@@ -161,7 +162,7 @@ public class RealtimeServiceTest {
   @Test
   public void testStopPointsByRoute() throws Exception {
     
-    when(transitDataService.getRouteForId("1_100194")).thenReturn(routeBean);
+    lenient().when(transitDataService.getRouteForId("1_100194")).thenReturn(routeBean);
     when(transitDataService.getStopsForRoute("1_100194")).thenReturn(stopsForRouteBean);
     when(transitDataService.stopHasUpcomingScheduledService(anyString(), anyLong(), anyString(), anyString(), anyString())).thenReturn(true);
     
@@ -243,7 +244,7 @@ public class RealtimeServiceTest {
     StopsBean stopsBean = new StopsBean();
     stopsBean.setStops(stops);
     
-    when(transitDataService.getRouteForId("1_100194")).thenReturn(routeBean);
+    lenient().when(transitDataService.getRouteForId("1_100194")).thenReturn(routeBean);
     
     when(transitDataService.getStops(any(SearchQueryBean.class))).thenReturn(stopsBean);
 
