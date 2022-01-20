@@ -404,6 +404,14 @@
     <pluginManagement>
       <plugins>
         <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-gpg-plugin</artifactId>
+          <version>1.1</version>
+          <configuration>
+            <skip>true</skip>
+           </configuration>
+        </plugin>
+        <plugin>
           <!--
             With the introduction of Eclipse Indigo and the formal adoption of the m2e Maven Eclipse plugin
             as an official part of Eclipse, m2e introduced the concept of Lifecycle Mappings for Maven plugins:
