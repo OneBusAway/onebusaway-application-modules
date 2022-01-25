@@ -95,6 +95,7 @@ public class CustomXStreamHandler extends XStreamHandler {
     XStream xstream = super.createXStream();
     xstream.setMode(XStream.NO_REFERENCES);
     xstream.alias("response", ResponseBean.class);
+    xstream.omitField(ResponseBean.class, "isText");
     xstream.alias("validationError", ValidationErrorBean.class);
     xstream.alias("time", TimeBean.class);
     xstream.alias("stop", StopBean.class);
