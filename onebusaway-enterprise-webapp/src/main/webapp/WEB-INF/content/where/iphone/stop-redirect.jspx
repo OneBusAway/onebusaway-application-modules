@@ -24,7 +24,7 @@
 <head>
   <jsp:element name="meta">
   	<jsp:attribute name="http-equiv">Refresh</jsp:attribute>
-  	<jsp:attribute name="content">10;url=<s:property value="#redirectUrl" escape="false" /></jsp:attribute>
+  	<jsp:attribute name="content">10;url=<s:property value="#redirectUrl" escapeHtml="false" /></jsp:attribute>
   </jsp:element>
 <title></title>
 </head>

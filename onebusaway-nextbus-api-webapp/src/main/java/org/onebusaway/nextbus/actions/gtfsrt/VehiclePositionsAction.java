@@ -108,8 +108,10 @@ public class VehiclePositionsAction extends NextBusApiBase  implements
                         remoteFeedMessage = _httpUtil.getFeedMessage(gtfsrtUrl, 30);
                         if (feedMessage == null) {
                             if (remoteFeedMessage.hasHeader()
-                                    && remoteFeedMessage.getHeader().hasTimestamp()) {
+                                    && remoteFeedMessage.getHeader().hasTimestamp()
+                                    && isTimely(remoteFeedMessage.getHeader().getTimestamp())) {
                                 // we set the age of our feed to the age of the first feed that has a timestamp
+                                // unless its too old, then we serve the time the response was generated
                                 feedMessage = createFeedWithDefaultHeader(remoteFeedMessage.getHeader().getTimestamp());
                             } else {
                                 feedMessage = createFeedWithDefaultHeader(null);
@@ -119,6 +121,7 @@ public class VehiclePositionsAction extends NextBusApiBase  implements
                         feedMessage.addAllEntity(filter(remoteFeedMessage.getEntityList()));
                     } catch (Exception e) {
                         _log.error(e.getMessage());
+                        feedMessage = createFeedWithDefaultHeader(null);
                     }
                 }
             }

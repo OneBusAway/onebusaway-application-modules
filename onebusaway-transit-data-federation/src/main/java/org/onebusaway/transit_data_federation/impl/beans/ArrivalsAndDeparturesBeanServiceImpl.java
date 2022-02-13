@@ -18,6 +18,7 @@ package org.onebusaway.transit_data_federation.impl.beans;
 
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.realtime.api.OccupancyStatus;
+import org.onebusaway.realtime.api.VehicleOccupancyRecord;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
 import org.onebusaway.transit_data.model.ArrivalsAndDeparturesQueryBean;
 import org.onebusaway.transit_data.model.StopBean;
@@ -26,6 +27,7 @@ import org.onebusaway.transit_data.model.schedule.FrequencyBean;
 import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.transit_data.model.trips.TripStatusBean;
+import org.onebusaway.transit_data_federation.impl.realtime.apc.VehicleOccupancyRecordCache;
 import org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.GtfsRealtimeNegativeArrivals;
 import org.onebusaway.transit_data_federation.model.TargetTime;
 import org.onebusaway.transit_data_federation.model.bundle.HistoricalRidership;
@@ -82,6 +84,8 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
   private GtfsRealtimeNegativeArrivals _gtfsRealtimeNegativeArrivals;
 
   private RidershipService _ridershipService;
+
+  private VehicleOccupancyRecordCache _vehicleOccupancyRecordCache;
   
   @Autowired
   public void setTransitGraphDao(TransitGraphDao transitGraphDao) {
@@ -111,6 +115,9 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
 
   @Autowired
   public void setRidershipService(RidershipService ridershipService) { _ridershipService = ridershipService; }
+
+  @Autowired
+  public void setVehicleOccupancyRecordCache(VehicleOccupancyRecordCache cache) { _vehicleOccupancyRecordCache = cache; }
 
   @Autowired
   public void setTripDetailsBeanService(
@@ -379,8 +386,19 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
     if (blockLocation.getLastUpdateTime() > 0)
       bean.setLastUpdateTime(blockLocation.getLastUpdateTime());
 
-    if (blockLocation.getVehicleId() != null)
+    if (blockLocation.getVehicleId() != null) {
       bean.setVehicleId(AgencyAndIdLibrary.convertToString(blockLocation.getVehicleId()));
+      if (_vehicleOccupancyRecordCache != null && blockLocation.getActiveTrip() != null) {
+        // be specific in our vehicle lookup -- we only want to apply occupancy if its the same route/direction
+        VehicleOccupancyRecord vor = _vehicleOccupancyRecordCache.getRecordForVehicleIdAndRoute(AgencyAndIdLibrary.convertFromString(bean.getVehicleId()),
+                blockLocation.getActiveTrip().getTrip().getRoute().getId().toString(),
+                blockLocation.getActiveTrip().getTrip().getDirectionId());
+        if (vor != null)
+          bean.setOccupancyStatus(vor.getOccupancyStatus());
+      }
+
+
+    }
 
     TripStatusBean tripStatusBean = _tripDetailsBeanService.getBlockLocationAsStatusBean(
         blockLocation, targetTime);

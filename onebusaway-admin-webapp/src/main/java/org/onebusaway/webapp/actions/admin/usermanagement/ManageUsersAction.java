@@ -19,6 +19,7 @@ import java.io.StringReader;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.struts2.convention.annotation.AllowedMethods;
 import org.apache.struts2.convention.annotation.Result;
 import org.apache.struts2.convention.annotation.Results;
 import org.onebusaway.admin.json.JsonTool;
@@ -38,7 +39,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 	@Result(name="updateUser", type="json", params= {"root","updateUserMessage"})
 })
 
-
+@AllowedMethods({"editUser", "inactivateUser", "activateUser", "deleteUser"})
 public class ManageUsersAction extends OneBusAwayNYCAdminActionSupport {
 
 	private static final long serialVersionUID = 1L;

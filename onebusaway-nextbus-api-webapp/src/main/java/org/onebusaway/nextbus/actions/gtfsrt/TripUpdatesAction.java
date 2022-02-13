@@ -98,8 +98,10 @@ public class TripUpdatesAction extends NextBusApiBase  implements
                         remoteFeedMessage = _httpUtil.getFeedMessage(gtfsrtUrl, 30);
                         if (feedMessage == null) {
                             if (remoteFeedMessage.hasHeader()
-                                    && remoteFeedMessage.getHeader().hasTimestamp()) {
+                                    && remoteFeedMessage.getHeader().hasTimestamp()
+                                    && isTimely(remoteFeedMessage.getHeader().getTimestamp())) {
                                 // we set the age of our feed to the age of the first feed that has a timestamp
+                                // unless its too old, then we serve the time the response was generated
                                 feedMessage = createFeedWithDefaultHeader(remoteFeedMessage.getHeader().getTimestamp());
                             } else {
                                 feedMessage = createFeedWithDefaultHeader(null);
@@ -108,6 +110,8 @@ public class TripUpdatesAction extends NextBusApiBase  implements
                         feedMessage.addAllEntity(remoteFeedMessage.getEntityList());
                     } catch (Exception e) {
                         _log.error(e.getMessage());
+                        // something went horribly wrong -- serve an empty header in case its a no service period
+                        feedMessage = createFeedWithDefaultHeader(null);
                     }
                 }
             }
@@ -116,7 +120,7 @@ public class TripUpdatesAction extends NextBusApiBase  implements
             return builtFeedMessage;
         }
     }
-    
+
     public FeedMessage.Builder createFeedWithDefaultHeader(Long timestampInSeconds) {
         return _gtfsrtHelper.createFeedWithDefaultHeader(timestampInSeconds);
     }

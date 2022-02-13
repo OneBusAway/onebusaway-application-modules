@@ -19,7 +19,7 @@
 <html xmlns:jsp="http://java.sun.com/JSP/Page" xmlns:c="http://java.sun.com/jsp/jstl/core" xmlns:s="/struts-tags"
     xmlns:oba="/oba-tags">
 <jsp:directive.page contentType="text/html" />
-<!-- <s:set name="stop" value="result.stop" /> -->
+<!-- <s:set var="stop" value="result.stop" /> -->
 
 <head>
 <s:url var="url" value="/css/schedule/schedule.css" />
@@ -262,7 +262,7 @@
                           </s:url>
                           <jsp:element name="a">
                             <jsp:attribute name="class">stopScheduleMinutes</jsp:attribute>
-                            <jsp:attribute name="href"><s:property value="url" escape="false"/></jsp:attribute>
+                            <jsp:attribute name="href"><s:property value="url" escapeHtml="false"/></jsp:attribute>
                             <jsp:attribute name="data-groupIds">
                                 <s:iterator value="groupIds" status="it">
                                     <s:property value="top"/>

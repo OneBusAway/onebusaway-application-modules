@@ -24,6 +24,7 @@ import org.onebusaway.api.actions.api.ApiActionSupport;
 import org.onebusaway.api.model.transit.BeanFactoryV2;
 import org.onebusaway.api.model.where.ArrivalAndDepartureBeanV1;
 import org.onebusaway.api.model.where.StopWithArrivalsAndDeparturesBeanV1;
+import org.onebusaway.exceptions.NoSuchStopServiceException;
 import org.onebusaway.exceptions.ServiceException;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
 import org.onebusaway.transit_data.model.ArrivalsAndDeparturesQueryBean;
@@ -101,8 +102,17 @@ public class ArrivalsAndDeparturesForStopAction extends ApiActionSupport {
     if(serviceDateFilterOn || _query.getTime() == 0)
       _query.setTime(SystemTime.currentTimeMillis());
 
-    StopWithArrivalsAndDeparturesBean result = _service.getStopWithArrivalsAndDepartures(
-        _id, _query);
+    StopWithArrivalsAndDeparturesBean result = null;
+    try {
+      result = _service.getStopWithArrivalsAndDepartures(
+              _id, _query);
+    } catch (NoSuchStopServiceException nsse) {
+      return setResourceNotFoundResponse();
+    } catch (ServiceException any) {
+      return setResourceNotFoundResponse();
+    } catch (Exception any) {
+      return setExceptionResponse();
+    }
 
     if (result == null)
       return setResourceNotFoundResponse();
@@ -146,8 +156,8 @@ public class ArrivalsAndDeparturesForStopAction extends ApiActionSupport {
       v1.setStopId(stop.getId());
       v1.setTripHeadsign(trip.getTripHeadsign());
       v1.setTripId(trip.getId());
+      v1.setOccupancyStatus(bean.getOccupancyStatus());
       v1.setHistoricalOccupancy(bean.getHistoricalOccupancy());
-//      v1.setPredictedOccupancy(bean.getPredictedOccupancy());
 
       v1s.add(v1);
     }

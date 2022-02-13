@@ -37,28 +37,28 @@
 		<!-- //prevent jspx minimization -->
 	</link>
 	
-	<s:url var="url" value="/js/lib/jquery.js" />
+	<s:url var="url" value="/js/biblio/jquery.js" />
 	<script type="text/javascript" src="${url}">
 	<!-- //prevent jspx minimization -->
 	</script>
 	
-	<s:url var="url" value="/js/lib/jquery.ui.js" />
+	<s:url var="url" value="/js/biblio/jquery.ui.js" />
 	<script type="text/javascript" src="${url}">
 	<!-- //prevent jspx minimization -->
 	</script>
 	
-	<s:url var="url" value="/js/lib/grid.locale-en.js" />
+	<s:url var="url" value="/js/biblio/grid.locale-en.js" />
 	<script type="text/javascript" src="${url}">
 	<!-- //prevent jspx minimization -->
 	</script>
 	
-	<s:url var="url" value="/js/lib/jqGrid.js" />
+	<s:url var="url" value="/js/biblio/jqGrid.js" />
 	<script type="text/javascript" src="${url}">
 	<!-- //prevent jspx minimization -->
 	</script>
 	
 	
-	<s:url var="url" value="/js/lib/ember.js" />
+	<s:url var="url" value="/js/biblio/ember.js" />
 	<script type="text/javascript" src="${url}">
 	<!-- //prevent jspx minimization -->
 	</script>
@@ -68,7 +68,7 @@
 	<!-- //prevent jspx minimization -->
 	</script>
 
-	<s:url var="url" value="/js/lib/modal.popup.js" />
+	<s:url var="url" value="/js/biblio/modal.popup.js" />
 	<script type="text/javascript" src="${url}">
 	<!-- //prevent jspx minimization -->
 	</script>

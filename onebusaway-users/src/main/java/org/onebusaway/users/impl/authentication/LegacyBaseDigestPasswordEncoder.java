@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2021 Cambridge Systematics, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,18 +15,20 @@
  */
 package org.onebusaway.users.impl.authentication;
 
-import org.onebusaway.users.model.IndexedUserDetails;
-import org.springframework.security.authentication.dao.SaltSource;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
-public class IndexedUserDetailsSaltSourceImpl implements SaltSource {
+/**
+ * Legacy support for Digest Passwords encoding. Not considered secure.
+ */
+public abstract class LegacyBaseDigestPasswordEncoder implements PasswordEncoder {
+  private boolean encodeHashAsBase64 = false;
 
-  @Override
-  public Object getSalt(UserDetails user) {
-    if (user instanceof IndexedUserDetails) {
-      IndexedUserDetails details = (IndexedUserDetails) user;
-      return details.getUserIndexKey().getValue();
-    }
-    return user.getUsername();
+  public boolean getEncodeHashAsBase64() {
+    return this.encodeHashAsBase64;
   }
+
+  public void setEncodeHashAsBase64(boolean encodeHashAsBase64) {
+    this.encodeHashAsBase64 = encodeHashAsBase64;
+  }
+
 }

@@ -56,8 +56,8 @@
 					<ul>
 						<li class="direction-jump">Choose your direction:</li>
 						<s:iterator value="directions">
-							<s:url var="url" value="" anchor="%{directionId}"></s:url>
-							<li>
+							<s:url var="url" value="" anchor="%{id + '__' + directionId}"></s:url>
+							<li class="direction-li">
 								<a href="${url}" class="direction-link">
 									to&amp;nbsp;<s:property value="destination" />
 								</a>
@@ -70,7 +70,8 @@
 		</div>
 
 		<s:iterator value="directions">
-			<a name="${directionId}" class="directionAnchor" tabindex="0">&amp;nbsp;</a>
+			<s:set var="routeplusdir" value="%{id + '__' + directionId}"></s:set>
+			<a name="${routeplusdir}" class="directionAnchor" tabindex="0">&amp;nbsp;</a>
 			<div class="directionForRoute">
 				<p class="directionTitle">
 					<strong>

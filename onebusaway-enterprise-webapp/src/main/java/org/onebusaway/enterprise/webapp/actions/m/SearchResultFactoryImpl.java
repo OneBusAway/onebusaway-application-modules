@@ -27,15 +27,18 @@ import java.util.Set;
 
 import org.onebusaway.geocoder.enterprise.services.EnterpriseGeocoderResult;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
+import org.onebusaway.presentation.impl.realtime.SiriSupport;
 import org.onebusaway.presentation.impl.search.AbstractSearchResultFactoryImpl;
 import org.onebusaway.presentation.model.SearchResult;
 import org.onebusaway.presentation.services.realtime.RealtimeService;
 import org.onebusaway.presentation.services.search.SearchResultFactory;
+import org.onebusaway.realtime.api.OccupancyStatus;
 import org.onebusaway.transit_data.model.*;
 import org.onebusaway.transit_data.model.service_alerts.SituationQueryBean;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.transit_data_federation.siri.SiriDistanceExtension;
 import org.onebusaway.transit_data_federation.siri.SiriExtensionWrapper;
+import org.onebusaway.util.OneBusAwayFormats;
 import org.onebusaway.util.SystemTime;
 import org.onebusaway.util.services.configuration.ConfigurationService;
 import org.onebusaway.enterprise.webapp.actions.m.model.GeocodeResult;
@@ -51,6 +54,7 @@ import uk.org.siri.siri.MonitoredCallStructure;
 import uk.org.siri.siri.MonitoredStopVisitStructure;
 import uk.org.siri.siri.MonitoredVehicleJourneyStructure;
 import uk.org.siri.siri.NaturalLanguageStringStructure;
+import uk.org.siri.siri.OccupancyEnumeration;
 import uk.org.siri.siri.VehicleActivityStructure;
 import uk.org.siri.siri.VehicleActivityStructure.MonitoredVehicleJourney;
 
@@ -61,6 +65,11 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
   private RealtimeService _realtimeService;
 
   private TransitDataService _transitDataService;
+
+  private Integer _staleTimeout = null;
+  private Boolean _serviceDateFilter = null;
+  private String _apcMode = null;
+  private Map<String, String> occupancyStatusEnumToDisplay = new HashMap<>();
 
   public SearchResultFactoryImpl(TransitDataService transitDataService,
       RealtimeService realtimeService, ConfigurationService configurationService) {
@@ -79,7 +88,7 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
     List<RouteDirection> directions = new ArrayList<RouteDirection>();
 
       ServiceDate serviceDate = null;
-      boolean serviceDateFilterOn = Boolean.parseBoolean(_configurationService.getConfigurationValueAsString("display.serviceDateFiltering", "false"));
+      boolean serviceDateFilterOn = getServiceDateFilter();
       if (serviceDateFilterOn) serviceDate = new ServiceDate(new Date(SystemTime.currentTimeMillis()));
 
       StopsForRouteBean stopsForRoute;
@@ -187,6 +196,7 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
     return new RouteResult(routeBean, directions, serviceAlertDescriptions);
   }
 
+
   @Override
   public SearchResult getStopResult(StopBean stopBean, Set<RouteBean> routeFilter) {
     List<RouteAtStop> routesWithArrivals = new ArrayList<RouteAtStop>();
@@ -204,7 +214,7 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
       }
 
         ServiceDate serviceDate = null;
-        boolean serviceDateFilterOn = Boolean.parseBoolean(_configurationService.getConfigurationValueAsString("display.serviceDateFiltering", "false"));
+        boolean serviceDateFilterOn = getServiceDateFilter();
         if (serviceDateFilterOn) serviceDate = new ServiceDate(new Date(SystemTime.currentTimeMillis()));
 
         StopsForRouteBean stopsForRoute;
@@ -294,6 +304,7 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
 
     private List<ServiceAlertBean> getServiceAlertsForStop(String stopId) {
         SituationQueryBean query = new SituationQueryBean();
+        query.setTime(System.currentTimeMillis());
         SituationQueryBean.AffectsBean affects = new SituationQueryBean.AffectsBean();
         query.getAffects().add(affects);
         affects.setStopId(stopId);
@@ -316,6 +327,8 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
       StopBean stopBean, RouteBean routeBean, StopGroupBean stopGroupBean) {
     
     Map<String, List<StopOnRoute>> results = new HashMap<String, List<StopOnRoute>>();
+
+    Boolean showApc = _realtimeService.showApc();
 
     // stop visits
     List<MonitoredStopVisitStructure> visitList = _realtimeService.getMonitoredStopVisitsForStop(
@@ -343,7 +356,7 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
       
       String distance = getPresentableDistance(visit.getMonitoredVehicleJourney(),
     		visit.getRecordedAtTime().getTime(), true);
-    	  
+
       String timePrediction = getPresentableTime(visit.getMonitoredVehicleJourney(),
     	 	visit.getRecordedAtTime().getTime(), true);
       
@@ -370,7 +383,68 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
 
     return results;
   }
-  
+
+  private String getPresentableOccupancy(MonitoredVehicleJourneyStructure journey, long updateTime) {
+    // if data is old, no occupancy
+    int staleTimeout = getStaleTimeout();
+    long age = (System.currentTimeMillis() - updateTime) / 1000;
+    if (age > staleTimeout) {
+//      System.out.println("tossing record " + journey.getVehicleRef().getValue()
+//              + " with age " + age + "s old");
+      return "";
+    }
+
+    String apcMode = getApcMode();
+
+    String occupancyStr = "";
+    if (apcMode != null) {
+      occupancyStr = getApcModeOccupancy(journey);
+    }
+    return occupancyStr;
+  }
+
+
+
+  private String getApcModeOccupancy(MonitoredVehicleJourneyStructure journey) {
+
+    if (journey.getOccupancy() != null) {
+
+      String loadOccupancy = journey.getOccupancy().toString();
+      loadOccupancy = loadOccupancy.toUpperCase();
+
+      if (loadOccupancy.equals(OccupancyEnumeration.SEATS_AVAILABLE.name()) || loadOccupancy.equals(OccupancyStatus.MANY_SEATS_AVAILABLE.name())) {
+        loadOccupancy = "<div class='apcLadderContainer'><span class='apcDotG'></span> <span class='apcTextG'>" + getOccupancyString(OccupancyEnumeration.SEATS_AVAILABLE.name()) + "</span></div>";
+        //loadOccupancy = "<icon class='apcicong'> </icon>";
+      } else if (loadOccupancy.equals(OccupancyEnumeration.STANDING_AVAILABLE.name()) || loadOccupancy.equals(OccupancyStatus.FEW_SEATS_AVAILABLE.name())) {
+        loadOccupancy = "<div class='apcLadderContainer'><span class='apcDotY'></span> <span class='apcTextY'>" + getOccupancyString(OccupancyEnumeration.STANDING_AVAILABLE.name()) + "</span></div>";
+        //loadOccupancy = "<icon class='apcicony'> </icon>";
+      } else if (loadOccupancy.equals(OccupancyEnumeration.FULL.name()) || loadOccupancy.equals(OccupancyStatus.FULL.name())) {
+        loadOccupancy = "<div class='apcLadderContainer'><span class='apcDotR'></span> <span class='apcTextR'>" + getOccupancyString(OccupancyEnumeration.FULL.name()) + "</span></div>";
+        //loadOccupancy = "<icon class='apciconr'> </icon>";
+      }
+
+      return " " + loadOccupancy;
+    } else
+      return "";
+  }
+
+  // allow for the occupancy strings to be overridden per local configuration
+  // if not explicitly overridden, prefer GTFS-RT description to SIRI values
+  private String getOccupancyString(String siriEnum) {
+    String occupancyEnum = SiriSupport.mapSiriEnumToOccupancyStatus(siriEnum);
+    String display = occupancyStatusEnumToDisplay.get(occupancyEnum);
+    if (display == null) {
+      display = _configurationService.getConfigurationValueAsString("display.occupancy." + siriEnum, prettyPrintOccupancyEnum(occupancyEnum));
+      occupancyStatusEnumToDisplay.put(occupancyEnum, display);
+    }
+
+    return display;
+  }
+
+
+  private String prettyPrintOccupancyEnum(String loadOccupancy) {
+    return OneBusAwayFormats.toPascalCaseWithSpaces(loadOccupancy);
+  }
 
   private void fillDistanceAwayStringsList(
 	  MonitoredVehicleJourney mvj,
@@ -429,7 +503,7 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
 		  return null;
 	  }
 	  
-	  int staleTimeout = _configurationService.getConfigurationValueAsInteger("display.staleTimeout", 120);
+	  int staleTimeout = getStaleTimeout();
 	  long age = (SystemTime.currentTimeMillis() - updateTime) / 1000;
 
 	  if (age > staleTimeout) {
@@ -442,14 +516,17 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
 		  SiriExtensionWrapper wrapper = (SiriExtensionWrapper) monitoredCall.getExtensions().getAny();
 		  SiriDistanceExtension distanceExtension = wrapper.getDistances();
 		  String distance = distanceExtension.getPresentableDistance();
-		  
-		  double minutes = Math.floor((predictedArrival - updateTime) / 60 / 1000);
+      //add space to the distance so that occupancy lines up correctly with time [pjm]
+
+      double minutes = Math.floor((predictedArrival - updateTime) / 60 / 1000);
 		  String timeString = Math.round(minutes) + " minute" + ((Math.abs(minutes) != 1) ? "s" : "");
-				  
-		  if(progressStatus != null && progressStatus.getValue().contains("prevTrip")) {
+      String timeAndDistance = "<strong>" + timeString + "</strong>, " + distance;
+      String loadOccupancy = getPresentableOccupancy(journey, updateTime);
+
+      if(progressStatus != null && progressStatus.getValue().contains("prevTrip")) {
 		    	return timeString;
 		  } else {
-		    	return "<strong>" + timeString + "</strong>" + ", " + distance;
+		    	return timeAndDistance + ", " + loadOccupancy;
 		  }
 	  }
 	  
@@ -465,6 +542,7 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
 
     String message = "";
     String distance = "<strong>" + distanceExtension.getPresentableDistance() + "</strong>";
+    String loadOccupancy = getPresentableOccupancy(journey, updateTime);
 
     NaturalLanguageStringStructure progressStatus = journey.getProgressStatus();
 
@@ -488,8 +566,7 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
     	message += "+ scheduled layover at terminal";
     }
     	
-    int staleTimeout = _configurationService.getConfigurationValueAsInteger(
-        "display.staleTimeout", 120);
+    int staleTimeout = getStaleTimeout();
     long age = (SystemTime.currentTimeMillis() - updateTime) / 1000;
 
     if (age > staleTimeout) {
@@ -501,8 +578,29 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
     }
 
     if (message.length() > 0)
+      // here we choose not to show occupancy as it is likely a different trip
       return distance + " (" + message + ")";
     else
-      return distance;
+      return distance + loadOccupancy;
   }
+
+  private int getStaleTimeout() {
+    if (_staleTimeout == null)
+      _staleTimeout = _configurationService.getConfigurationValueAsInteger("display.staleTimeout", 120);
+    return _staleTimeout;
+  }
+
+  private boolean getServiceDateFilter() {
+    if (_serviceDateFilter == null)
+      _serviceDateFilter =  _configurationService.getConfigurationValueAsBoolean("display.serviceDateFiltering", false);
+    return _serviceDateFilter;
+  }
+
+
+  private String getApcMode() {
+    if (_apcMode == null)
+      _apcMode =_configurationService.getConfigurationValueAsString("display.apcMode", "OCCUPANCY");
+    return _apcMode;
+  }
+
 }

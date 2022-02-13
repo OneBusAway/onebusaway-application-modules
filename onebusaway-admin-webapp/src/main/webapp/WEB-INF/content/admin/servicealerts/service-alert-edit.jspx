@@ -34,7 +34,7 @@
 	<!-- //prevent jspx minimization -->
 </link>
 
-<s:url var="url" value="/js/lib/jquery.js" />
+<s:url var="url" value="/js/biblio/jquery.js" />
 <script type="text/javascript" src="${url}">
 <!-- //prevent jspx minimization -->
 	
@@ -45,13 +45,13 @@
 </s:url>
 <script type="text/javascript" src="${url}"><!-- //prevent jspx minimization --></script>
 
-<s:url var="url" value="/js/lib/jquery.ui.js" />
+<s:url var="url" value="/js/biblio/jquery.ui.js" />
 <script type="text/javascript" src="${url}">
 <!-- //prevent jspx minimization -->
 	
 </script>
 
-<s:url var="url" value="/js/lib/jquery.timepicker-1.3.5.min.js">
+<s:url var="url" value="/js/biblio/jquery.timepicker-1.3.5.min.js">
 	<!-- //prevent jspx minimization -->
 </s:url>
 <script type="text/javascript" src="${url}">
@@ -84,15 +84,15 @@
 </head>
 
 <body>
-<s:set name="theme" value="'simple'" scope="page" />
+<s:set var="theme" value="'simple'" scope="page" />
 <s:if test="newServiceAlert" >
-	<s:set name="serviceAlertsTitle" >Create Service Alert</s:set>
+	<s:set var="serviceAlertsTitle" >Create Service Alert</s:set>
 </s:if>
 <s:elseif test="favorite">
-    <s:set name="serviceAlertsTitle" >Edit Favorite Service Alert</s:set>
+    <s:set var="serviceAlertsTitle" >Edit Favorite Service Alert</s:set>
 </s:elseif>
 <s:else>
-	<s:set name="serviceAlertsTitle" >Edit Service Alert</s:set>
+	<s:set var="serviceAlertsTitle" >Edit Service Alert</s:set>
 </s:else>
 
 <div id="ServiceAlerts">
@@ -178,15 +178,25 @@
 					<td>
 						<table class="affectsClauseConditions">
 							<s:select label="Agency" cssClass="alertCondition"
-								name="allAffects[%{#rowStatus.index}].agencyId" headerKey="null" 
-								headerValue="Select agency affected" list="agencies" 
-								listKey="agency.id" listValue="agency.name" 
+								name="allAffects[%{#rowStatus.index}].agencyId" headerKey="null"
+								headerValue="Select agency affected" list="affectedAgencies"
+								listKey="agency.id" listValue="agency.name"
 								value="agencyId" theme="xhtml"/>
-							<s:textfield label="Route" cssClass="alertCondition"
-								name="allAffects[%{#rowStatus.index}].routeId" value="%{routeId}" theme="xhtml"/>
+							<s:select label="Agency for Route" cssClass="alertCondition"
+									  name="allAffects[%{#rowStatus.index}].agencyPartRouteId" headerKey="null"
+									  headerValue="Select agency for Route" list="agencies"
+									  listKey="agency.id" listValue="agency.name"
+									  value="agencyPartRouteId" theme="xhtml"/>
+							<s:textfield label="Route Id" cssClass="alertCondition"
+								name="allAffects[%{#rowStatus.index}].routePartRouteId" value="%{routePartRouteId}" theme="xhtml"/>
 							<td style="text-align:center" colspan="2" id="routeValidation${rowStatus.index}">Click Validate to lookup Route</td>
+							<s:select label="Agency for Stop" cssClass="alertCondition"
+									  name="allAffects[%{#rowStatus.index}].agencyPartStopId" headerKey="null"
+									  headerValue="Select agency for Stop" list="agencies"
+									  listKey="agency.id" listValue="agency.name"
+									  value="agencyPartStopId" theme="xhtml"/>
 							<s:textfield label="Stop" cssClass="alertCondition"
-								name="allAffects[%{#rowStatus.index}].stopId" value="%{stopId}" theme="xhtml"/>
+								name="allAffects[%{#rowStatus.index}].stopPartStopId" value="%{stopPartStopId}" theme="xhtml"/>
 							<td style="text-align:center" colspan="2" id="stopValidation${rowStatus.index}">Click Validate to lookup Stop</td>
 
 						</table>
@@ -207,15 +217,25 @@
 					<td>
 						<table class="affectsClauseConditions">
 							<s:select label="Agency" cssClass="alertCondition"
-								name="allAffects[0].agencyId" headerKey="null" 
-								headerValue="Select agency affected" list="agencies" 
-								listKey="agency.id" listValue="agency.name" 
+								name="allAffects[0].agencyId" headerKey="null"
+								headerValue="Select agency affected" list="affectedAgencies"
+								listKey="agency.id" listValue="agency.name"
 								theme="xhtml"/>
-							<s:textfield label="Route" cssClass="alertCondition"
-								name="allAffects[0].routeId" theme="xhtml"/>
+							<s:select label="Agency for Route" cssClass="alertCondition"
+									  name="allAffects[0].agencyPartRouteId" headerKey="null"
+									  headerValue="Select agency for route" list="agencies"
+									  listKey="agency.id" listValue="agency.name"
+									  theme="xhtml"/>
+							<s:textfield label="Route Id" cssClass="alertCondition"
+								name="allAffects[0].routePartRouteId" theme="xhtml"/>
 							<td style="text-align:center" colspan="2" id="routeValidation0">Click Validate to lookup Route</td>
-							<s:textfield label="Stop" cssClass="alertCondition"
-								name="allAffects[0].stopId" theme="xhtml"/>
+							<s:select label="Agency for Stop" cssClass="alertCondition"
+									  name="allAffects[0].agencyPartStopId" headerKey="null"
+									  headerValue="Select agency for stop" list="agencies"
+									  listKey="agency.id" listValue="agency.name"
+									  theme="xhtml"/>
+							<s:textfield label="Stop Id" cssClass="alertCondition"
+								name="allAffects[0].stopPartStopId" theme="xhtml"/>
 							<td style="text-align:center" colspan="2" id="stopValidation0">Click Validate to lookup Stop</td>
 						</table>
 					</td>

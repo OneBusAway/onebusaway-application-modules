@@ -34,13 +34,13 @@
 	<!-- //prevent jspx minimization -->
 </link>
 
-<s:url var="url" value="/js/lib/jquery.js" />
+<s:url var="url" value="/js/biblio/jquery.js" />
 <script type="text/javascript" src="${url}">
 <!-- //prevent jspx minimization -->
 	
 </script>
 
-<s:url var="url" value="/js/lib/jquery.ui.js" />
+<s:url var="url" value="/js/biblio/jquery.ui.js" />
 <script type="text/javascript" src="${url}">
 <!-- //prevent jspx minimization -->
 	
@@ -49,11 +49,11 @@
 </head>
 
 <body>
-<s:set name="theme" value="'simple'" scope="page" />
+<s:set var="theme" value="'simple'" scope="page" />
 <s:if test="newAgencyMetadata" >
-	<s:set name="agencyMetadataTitle" >Create Agency Metadata</s:set>
+	<s:set var="agencyMetadataTitle" >Create Agency Metadata</s:set>
 </s:if><s:else>
-	<s:set name="agencyMetadataTitle" >Edit Agency Metadata</s:set>
+	<s:set var="agencyMetadataTitle" >Edit Agency Metadata</s:set>
 </s:else>
 <div id="AgencyMetadata">
 	<p><s:property value="agencyMetadataTitle" /></p>

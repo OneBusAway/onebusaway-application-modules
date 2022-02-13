@@ -17,11 +17,11 @@
 --%>
 <html>
 <head>
-<script type="text/javascript" src="/onebusaway-watchdog-webapp/js/lib/jquery.js">
+<script type="text/javascript" src="/onebusaway-watchdog-webapp/js/biblio/jquery.js">
 <!-- //prevent jspx minimization -->
 
 </script>
-<script type="text/javascript" src="/js/lib/jquery.js">
+<script type="text/javascript" src="/js/biblio/jquery.js">
 <!-- //prevent jspx minimization -->
 	
 </script>

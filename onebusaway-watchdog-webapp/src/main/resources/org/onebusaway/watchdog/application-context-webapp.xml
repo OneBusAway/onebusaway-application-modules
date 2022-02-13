@@ -24,10 +24,11 @@
            http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd
            http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.0.xsd
            http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd
-           http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-4.2.xsd
+           http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-5.3.xsd
            http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-3.0.xsd">
 
-	
+	<!-- This turns on automatic annotation configuration -->
+	<context:annotation-config />
 	<!--  jersey scan of public APIs  -->
     <context:component-scan base-package="org.onebusaway.watchdog.api" />
     
@@ -67,8 +68,12 @@
 	<bean id="realtimeTripResource" class="org.onebusaway.watchdog.api.realtime.TripResource">
 		<property name="metricConfiguration" ref="metricConfiguration" />
 	</bean>
-	
-  <bean id="realtimeAveragesResource" class="org.onebusaway.watchdog.api.realtime.AveragesResource">
+
+	<bean id="realtimeConflictResource" class="org.onebusaway.watchdog.api.realtime.AssignmentConflictResource">
+		<property name="metricConfiguration" ref="metricConfiguration" />
+	</bean>
+
+	<bean id="realtimeAveragesResource" class="org.onebusaway.watchdog.api.realtime.AveragesResource">
     <property name="metricConfiguration" ref="metricConfiguration" />
   </bean>
   

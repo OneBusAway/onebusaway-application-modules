@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2015 Cambridge Systematics, Inc.
+ * Copyright (C) 2020 Cambridge Systematics, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,14 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.onebusaway.util;
+package org.onebusaway.transit_data_federation.services.beans;
 
-import org.joda.time.format.DateTimeFormatter;
-import org.joda.time.format.ISODateTimeFormat;
+import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.gtfs.model.calendar.ServiceDate;
+import org.onebusaway.transit_data.model.RouteScheduleBean;
 
-public class OneBusAwayDateFormats {
+/**
+ * Service methods for querying the full schedule for a particular route.
+ * Inspired by StopScheduleBeanService.
+ */
+public interface RouteScheduleBeanService {
 
-  public static DateTimeFormatter DATETIMEPATTERN_JSON_DATE_TIME = ISODateTimeFormat.dateTimeNoMillis();
-  
-  public static String DATETIMEPATTERN_DATE = "yyyy-MM-dd";
+  public RouteScheduleBean getScheduledArrivalsForDate(
+          AgencyAndId routeId, ServiceDate date);
+
 }

@@ -19,54 +19,59 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.onebusaway.api.actions.api.ApiActionSupport;
+
+import org.onebusaway.api.actions.siri.impl.ServiceAlertsHelperV2;
 import org.onebusaway.api.actions.siri.service.RealtimeServiceV2;
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data.model.StopBean;
-import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.util.AgencyAndIdLibrary;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import uk.org.siri.siri_2.Siri;
 
-public class MonitoringActionBase  extends ApiActionSupport {
+/**
+ * Base action for Siri Monitoring V2 calls.
+ */
+public class MonitoringActionV2Base extends SiriAction {
 
-  private static final int V3 = 3;
-  
-  public static final String GA_EVENT_ACTION = "API Key Request";
-  public static final String GA_EVENT_CATEGORY = "Stop Monitoring";
-
-  public static final double MAX_BOUNDS_DISTANCE= 500;
-  public static final double MAX_BOUNDS_RADIUS= 250;
-
-  public static final String BOUNDING_BOX = "BoundingBox";
-  public static final String CIRCLE = "Circle";
-  public static final String MONITORING_REF = "MonitoringRef";
-  public static final String LINE_REF = "LineRef";
-  public static final String STOP_POINTS_DETAIL_LEVEL = "StopPointsDetailLevel";
-  public static final String DIRECTION_REF = "DirectionRef";
-  public static final String OPERATOR_REF = "OperatorRef";
-  public static final String STOP_MONITORING_DETAIL_LEVEL = "StopMonitoringDetailLevel";
-  public static final String VEHICLE_MONITORING_DETAIL_LEVEL = "VehicleMonitoringDetailLevel";
-  public static final String UPCOMING_SCHEDULED_SERVICE = "hasUpcomingScheduledService";
-  public static final String MAX_ONWARD_CALLS = "MaximumNumberOfCallsOnwards";
-  public static final String MAX_STOP_VISITS = "MaximumStopVisits";
-  public static final String MIN_STOP_VISITS = "MinimumStopVisitsPerLine";
+  private static Logger _log = LoggerFactory.getLogger(MonitoringActionV2Base.class);
 
   // Errors
   public static final String ERROR_REQUIRED_PARAMS = "You must provide a valid Circle, BoundingBox or LineRef value. ";
   public static final String ERROR_NON_NUMERIC = "One or more coordinate values contain a non-numeric value. ";
-  
-  @Autowired
-  public TransitDataService _transitDataService;
 
   @Autowired
   protected RealtimeServiceV2 _realtimeService;
-  
-  public MonitoringActionBase() {
+
+  // note this is a v2 helper
+  protected ServiceAlertsHelperV2 _serviceAlertsHelper = new ServiceAlertsHelperV2();
+  // note this is v2 siri
+  protected Siri _siriResponse;
+
+
+  public MonitoringActionV2Base() {
     super(V3);
   }
-  
+
+  protected String getSiri() {
+    try {
+      if (getType().equals("xml")) {
+        return _realtimeService.getSiriXmlSerializer()
+                .getXml(_siriResponse);
+      } else {
+        return _realtimeService.getSiriJsonSerializer().getJson(
+                _siriResponse, /*_servletRequest.getParameter("callback")*/null);
+        // callback happens at a lower level
+      }
+    } catch (Exception e) {
+      _log.error("Siri v2 serialization failed: ", e,e);
+      return e.toString();
+    }
+  }
+
   protected boolean isValidRoute(AgencyAndId routeId) {
     if (routeId != null
         && routeId.hasValues()

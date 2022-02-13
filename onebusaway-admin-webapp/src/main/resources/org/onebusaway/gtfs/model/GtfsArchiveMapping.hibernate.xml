@@ -200,6 +200,14 @@
         <property name="platformCode" />
     </class>
 
+    <class name="org.onebusaway.gtfs.model.StopLocation" table="tmp_gtfs_stop_locations">
+        <composite-id name="id" class="org.onebusaway.gtfs.model.AgencyAndId">
+            <key-property name="agencyId" length="50" />
+            <key-property name="id" />
+        </composite-id>
+        <property name="name" />
+    </class>
+
     <class name="org.onebusaway.gtfs.model.StopTime" table="tmp_gtfs_stop_times">
         <id name="id" column="gid" type="int" length="11" unsaved-value="null">
             <generator class="increment" />
@@ -285,17 +293,6 @@
         <property name="blockId" index="blockId" />
         <property name="wheelchairAccessible"/>
     </class>
-
-	<class name="org.onebusaway.king_county_metro_gtfs.model.PatternPair" table="tmp_pattern_pairs">
-	  <id name="id" column="id" type="int" length="11" unsaved-value="null">
-            <generator class="increment" />
-	  </id>
-	  <property name="routeFrom" />
-	  <property name="routeTo" />
-	  <property name="stopId" />
-	  <property name="patternFrom" />
-	  <property name="patternTo" />
-	</class>
 
 	<class name="org.onebusaway.admin.service.bundle.task.model.GtfsBundleInfo" table="gtfs_bundle_info">
 		<id name="id" column="gid" type="int" length="11" unsaved-value="null">

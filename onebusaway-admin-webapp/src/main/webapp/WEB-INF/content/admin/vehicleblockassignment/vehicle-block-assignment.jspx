@@ -69,7 +69,7 @@
 
     </head>
     <body>
-        <s:set name="theme" value="'xhtml'" scope="page" />
+        <s:set var="theme" value="'xhtml'" scope="page" />
         <div id="vehicleBlockAssignment">
             <div id="titleContent">
                 <div id="title">Vehicle Block Assignment</div>

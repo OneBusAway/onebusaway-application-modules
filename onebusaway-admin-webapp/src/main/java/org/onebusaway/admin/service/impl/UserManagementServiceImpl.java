@@ -16,7 +16,6 @@
 package org.onebusaway.admin.service.impl;
 
 import java.math.BigDecimal;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -24,16 +23,15 @@ import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.Criteria;
-import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.onebusaway.admin.model.ui.UserDetail;
 import org.onebusaway.admin.service.UserManagementService;
 import org.onebusaway.users.client.model.UserBean;
+import org.onebusaway.users.impl.authentication.VersionedPasswordEncoder;
 import org.onebusaway.users.model.User;
 import org.onebusaway.users.model.UserIndex;
 import org.onebusaway.users.model.UserRole;
@@ -41,7 +39,6 @@ import org.onebusaway.users.services.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.encoding.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -55,11 +52,10 @@ public class UserManagementServiceImpl implements UserManagementService {
 
 	private SessionFactory _sessionFactory;
 	private StandardAuthoritiesService authoritiesService;
-    private UserPropertiesService userPropertiesService;
+	private UserPropertiesService userPropertiesService;
 	private UserDao userDao;
 	private UserService userService;
-	private PasswordEncoder passwordEncoder;
-	
+	private VersionedPasswordEncoder passwordEncoder;
 	
 	private static final Logger log = LoggerFactory.getLogger(UserManagementServiceImpl.class);
 	
@@ -241,8 +237,19 @@ public class UserManagementServiceImpl implements UserManagementService {
 
 
 	public boolean createUser(String userName, String password, String role) {
-		boolean admin = (role == StandardAuthoritiesService.ADMINISTRATOR);
-		return createUser(userName, password, admin);
+		UserIndex userIndex = userService.getOrCreateUserForUsernameAndPassword(userName, password);
+
+		if(userIndex == null)
+			return false;
+
+		User user = userIndex.getUser();
+		updateRole(role, user);
+		userDao.saveOrUpdateUser(user);
+
+		log.info("User '{}' created successfully", userName);
+
+		return true;
+
 	}
 	
 	@Override
@@ -258,6 +265,7 @@ public class UserManagementServiceImpl implements UserManagementService {
 
 		//Update user password
 		if(StringUtils.isNotBlank(userDetail.getPassword())) {
+			// this is done for backward compatibility with Spring 3
 			String credentials = passwordEncoder.encodePassword(userDetail.getPassword(), userDetail.getUsername());
 			for(UserIndex userIndex : user.getUserIndices()) {
 				userIndex.setCredentials(credentials);
@@ -399,7 +407,7 @@ public class UserManagementServiceImpl implements UserManagementService {
 	 * @param passwordEncoder the passwordEncoder to set
 	 */
 	@Autowired
-	public void setPasswordEncoder(PasswordEncoder passwordEncoder) {
+	public void setPasswordEncoder(VersionedPasswordEncoder passwordEncoder) {
 		this.passwordEncoder = passwordEncoder;
 	}
 	

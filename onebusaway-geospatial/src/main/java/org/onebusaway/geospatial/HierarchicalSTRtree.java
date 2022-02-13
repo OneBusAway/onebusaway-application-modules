@@ -18,10 +18,9 @@ package org.onebusaway.geospatial;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.locationtech.jts.geom.Envelope;
+import org.locationtech.jts.index.strtree.STRtree;
 import org.onebusaway.geospatial.model.CoordinateBounds;
-
-import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.index.strtree.STRtree;
 
 public class HierarchicalSTRtree<T> {
 

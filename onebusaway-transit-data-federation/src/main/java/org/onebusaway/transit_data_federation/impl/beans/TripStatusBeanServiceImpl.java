@@ -24,6 +24,7 @@ import java.util.Map;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.realtime.api.EVehiclePhase;
 import org.onebusaway.realtime.api.TimepointPredictionRecord;
+import org.onebusaway.realtime.api.VehicleOccupancyRecord;
 import org.onebusaway.transit_data.model.ListBean;
 import org.onebusaway.transit_data.model.StopBean;
 import org.onebusaway.transit_data.model.TripStopTimesBean;
@@ -38,6 +39,7 @@ import org.onebusaway.transit_data.model.trips.TripStatusBean;
 import org.onebusaway.transit_data.model.trips.TripsForAgencyQueryBean;
 import org.onebusaway.transit_data.model.trips.TripsForBoundsQueryBean;
 import org.onebusaway.transit_data.model.trips.TripsForRouteQueryBean;
+import org.onebusaway.transit_data_federation.impl.realtime.apc.VehicleOccupancyRecordCache;
 import org.onebusaway.util.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.beans.ServiceAlertsBeanService;
 import org.onebusaway.transit_data_federation.services.beans.StopBeanService;
@@ -77,6 +79,8 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
 
   private ServiceAlertsBeanService _serviceAlertBeanService;
 
+  private VehicleOccupancyRecordCache _vehicleOccupancyRecordCache;
+
   @Autowired
   public void setTransitGraphDao(TransitGraphDao transitGraphDao) {
     _transitGraphDao = transitGraphDao;
@@ -109,6 +113,10 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
     _serviceAlertBeanService = serviceAlertBeanService;
   }
 
+  @Autowired
+  public void setVehicleOccupancyRecordCache(VehicleOccupancyRecordCache cache) {
+    this._vehicleOccupancyRecordCache = cache;
+  }
   /****
    * {@link TripDetailsBeanService} Interface
    ****/
@@ -347,7 +355,13 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
       }
       bean.setTimepointPredictions(timepointPredictions);
     }
-    // bean.setRealtimeOccupancy(_realtimeOccupancyService.getRealtimeOccupancyForBlockLocation(blockLocation));
+    if (blockLocation.getVehicleId() != null && blockLocation.getActiveTrip() != null) {
+      VehicleOccupancyRecord vor = _vehicleOccupancyRecordCache.getRecordForVehicleIdAndRoute(blockLocation.getVehicleId(),
+              blockLocation.getActiveTrip().getTrip().getRoute().getId().toString(),
+              blockLocation.getActiveTrip().getTrip().getDirectionId());
+      if (vor != null)
+        bean.setOccupancyStatus(vor.getOccupancyStatus());
+    }
 
     return bean;
   }

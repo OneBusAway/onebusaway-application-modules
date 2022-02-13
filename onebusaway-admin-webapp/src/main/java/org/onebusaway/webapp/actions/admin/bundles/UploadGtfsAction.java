@@ -22,6 +22,7 @@ import java.nio.file.StandardCopyOption;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import org.apache.struts2.convention.annotation.AllowedMethods;
 import org.apache.struts2.convention.annotation.Namespace;
 import org.apache.struts2.convention.annotation.Result;
 import org.apache.struts2.convention.annotation.Results;
@@ -39,6 +40,7 @@ import org.springframework.beans.factory.annotation.Autowired;
   @Result(name="uploadStatus", type="json",
   params={"root", "directoryStatus"})
 })
+@AllowedMethods({"uploadSourceData"})
 public class UploadGtfsAction extends OneBusAwayNYCAdminActionSupport {
   private static Logger _log = LoggerFactory.getLogger(UploadGtfsAction.class);
   private static final long serialVersionUID = 1L;

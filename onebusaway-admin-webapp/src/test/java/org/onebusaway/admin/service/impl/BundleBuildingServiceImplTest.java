@@ -24,6 +24,8 @@ import org.onebusaway.admin.service.bundle.impl.BundleBuildingServiceImpl;
 import org.onebusaway.admin.util.NYCFileUtils;
 import org.apache.log4j.BasicConfigurator;
 import org.junit.Test;
+import org.onebusaway.util.impl.configuration.ConfigurationServiceImpl;
+import org.onebusaway.util.services.configuration.ConfigurationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -145,6 +147,20 @@ public class BundleBuildingServiceImplTest {
     // fileService.setConfigPath("config");
     // fileService.setup();
     _service.setFileService(fileService);
+
+    ConfigurationService configService = new ConfigurationServiceImpl() {
+      @Override
+      public String getConfigurationValueAsString(String configurationItemKey,
+                                                  String defaultValue) {
+        return defaultValue;
+      }
+
+      public String getItem(String component, String key) throws Exception {
+        return null;
+      }
+    };
+    _service.setConfigurationService(configService);
+
     _service.setup();
 
   }

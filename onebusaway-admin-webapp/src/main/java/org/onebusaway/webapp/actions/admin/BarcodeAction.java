@@ -19,6 +19,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.apache.struts2.convention.annotation.AllowedMethods;
 import org.apache.struts2.convention.annotation.Result;
 import org.apache.struts2.convention.annotation.Results;
 import org.onebusaway.admin.service.BarcodeService;
@@ -36,6 +37,7 @@ import org.springframework.beans.factory.annotation.Autowired;
     		  "contentDisposition", "attachment;fileName=\"qrBatch.zip\"",
     		  "bufferSize", "1024"}) 
 })
+@AllowedMethods({"genBusStopCode", "generateCodesBatch"})
 public class BarcodeAction extends OneBusAwayNYCAdminActionSupport {
 	private static Logger _log = LoggerFactory.getLogger(BarcodeAction.class);
 	private static final long serialVersionUID = 1L;

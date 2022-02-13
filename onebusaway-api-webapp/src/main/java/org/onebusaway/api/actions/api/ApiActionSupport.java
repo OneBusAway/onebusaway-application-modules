@@ -115,6 +115,12 @@ public class ApiActionSupport extends OneBusAwayApiActionSupport implements
     return new DefaultHttpHeaders();
   }
 
+  protected DefaultHttpHeaders setOkResponseText(String text) {
+    _response = new ResponseBean(getReturnVersion(), ResponseCodes.RESPONSE_OK,
+            "OK", text, true);
+    return new DefaultHttpHeaders();
+  }
+
   protected DefaultHttpHeaders setValidationErrorsResponse() {
     ValidationErrorBean bean = new ValidationErrorBean(new ArrayList<String>(
         getActionErrors()), getFieldErrors());

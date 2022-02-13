@@ -16,8 +16,6 @@
  */
 package org.onebusaway.transit_data.model.trips;
 
-import org.onebusaway.realtime.api.TimepointPredictionRecord;
-
 import java.io.Serializable;
 
 public class TimepointPredictionBean implements Serializable {

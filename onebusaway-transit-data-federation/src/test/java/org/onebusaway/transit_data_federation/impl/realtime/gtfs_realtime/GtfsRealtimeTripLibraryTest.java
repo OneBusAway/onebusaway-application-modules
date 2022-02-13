@@ -16,17 +16,12 @@
 package org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime;
 
 import static org.junit.Assert.*;
-import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.block;
-import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.blockConfiguration;
-import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.serviceIds;
-import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.stop;
-import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.stopTime;
-import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.time;
-import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.trip;
+import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.*;
 
 import com.google.transit.realtime.GtfsRealtime;
 import org.onebusaway.realtime.api.EVehicleStatus;
 import org.onebusaway.realtime.api.VehicleLocationRecord;
+import org.onebusaway.realtime.api.VehicleOccupancyRecord;
 import org.onebusaway.transit_data_federation.impl.transit_graph.BlockEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.TripEntryImpl;
@@ -306,7 +301,7 @@ public class GtfsRealtimeTripLibraryTest {
     
     Mockito.when(
         _blockCalendarService.getActiveBlocks(Mockito.eq(blockA.getId()),
-            Mockito.anyLong(), Mockito.longThat(new ArgumentMatcher<Long>() {
+            Mockito.anyLong(), Mockito.longThat(new ArgumentMatcher() {
               @Override
               public boolean matches(Object argument) {
                 return ((Long) argument) < day;
@@ -315,7 +310,7 @@ public class GtfsRealtimeTripLibraryTest {
     
     Mockito.when(
         _blockCalendarService.getActiveBlocks(Mockito.eq(blockA.getId()),
-            Mockito.anyLong(), Mockito.longThat(new ArgumentMatcher<Long>() {
+            Mockito.anyLong(), Mockito.longThat(new ArgumentMatcher() {
               @Override
               public boolean matches(Object argument) {
                 return ((Long) argument) >= day;
@@ -517,13 +512,19 @@ public class GtfsRealtimeTripLibraryTest {
   }
 
   /**
-   * This method tests that we propagate a time point prediction record
+   * This method tests that we DO NOT propagate a time point prediction record
    * when it comes from a trip that hasn't started yet.
    *
    * Current time = 7:31. Trip update delay = 2 minutes
    *                  Schedule time    Real-time from feed
    * Stop A (trip A)  7:30             7:33
    * Stop A (trip B)  7:40             7:44
+   *
+   * TODO:  Ideally this would be propagated, but the TDS expects the trp
+   * to correspond to the trip, and will serve bad predictions otherwise
+   * TODO:  Refactor the TDS to have block level support for predictions
+   * and improve GtfsRealtimeTripLibrary to parse all predictions along
+   * that block
    */
   @Test
   public void testTprOnFutureTrip() {
@@ -562,9 +563,194 @@ public class GtfsRealtimeTripLibraryTest {
     assertEquals(tripADept, time(7, 33) * 1000);
 
     long tripBDept = getPredictedDepartureTimeByStopIdAndTripId(record, "stopA", "tripB");
-    assertEquals(tripBDept, time(7, 44) * 1000);
+    // TODO
+    //assertEquals(tripBDept, time(7, 44) * 1000);
+    assertEquals(tripBDept, -1);
   }
- 
+
+  @Test
+  public void testCreateVehicleOccupancyRecordFromUpdate() {
+
+    //we just want a trip -- we don't care about the details
+    final long day = TimeUnit.DAYS.toMillis(1);
+
+    StopTimeUpdate.Builder stopTimeUpdate = stopTimeUpdateWithDepartureDelay("stopA", 180);
+
+    TripUpdate.Builder tripUpdate = tripUpdate("tripA", (_library.getCurrentTime() + day)/1000,
+            120, stopTimeUpdate);
+
+    TripEntryImpl tripA = trip("tripA");
+    tripA.setRoute(route("routeA"));
+    tripA.setDirectionId("d");
+    stopTime(0, stop("stopA", 0, 0), tripA, time(7, 30), 0.0);
+    BlockEntryImpl blockA = block("blockA");
+    BlockConfigurationEntry blockConfigA = blockConfiguration(blockA,
+            serviceIds("s1"), tripA);
+    BlockInstance blockInstanceA = new BlockInstance(blockConfigA, 0L);
+    BlockInstance blockInstanceB = new BlockInstance(blockConfigA, day);
+
+    Mockito.when(_entitySource.getTrip("tripA")).thenReturn(tripA);
+
+    Mockito.when(
+            _blockCalendarService.getActiveBlocks(Mockito.eq(blockA.getId()),
+                    Mockito.anyLong(), Mockito.longThat(new ArgumentMatcher() {
+                      @Override
+                      public boolean matches(Object argument) {
+                        return ((Long) argument) < day;
+                      }
+                    }))).thenReturn(Arrays.asList(blockInstanceA));
+
+    Mockito.when(
+            _blockCalendarService.getActiveBlocks(Mockito.eq(blockA.getId()),
+                    Mockito.anyLong(), Mockito.longThat(new ArgumentMatcher() {
+                      @Override
+                      public boolean matches(Object argument) {
+                        return ((Long) argument) >= day;
+                      }
+                    }))).thenReturn(Arrays.asList(blockInstanceB));
+
+
+
+    FeedMessage.Builder tripUpdates = createFeed();
+    GtfsRealtime.VehicleDescriptor.Builder vd = GtfsRealtime.VehicleDescriptor.newBuilder();
+    vd.setId("1_v1");
+    tripUpdate.setVehicle(vd);
+    tripUpdates.addEntity(feed(tripUpdate));
+    FeedMessage.Builder vehiclePositions = createFeed();
+
+    List<CombinedTripUpdatesAndVehiclePosition> groups = _library.groupTripUpdatesAndVehiclePositions(
+            tripUpdates.build(), vehiclePositions.build());
+
+    VehicleOccupancyRecord record = _library.createVehicleOccupancyRecordForUpdate(null, groups.get(0));
+    assertNull(record);
+
+    // add a vehicle but with no occupancy
+    vehiclePositions = createFeed();
+
+    FeedEntity.Builder vehiclePositionEntity = FeedEntity.newBuilder();
+    GtfsRealtime.VehiclePosition.Builder vehicle = GtfsRealtime.VehiclePosition.newBuilder();
+    vehicle.setVehicle(vd);
+    vehiclePositionEntity.setId("v1");
+    vehiclePositionEntity.setVehicle(vehicle);
+    vehiclePositions.addEntity(vehiclePositionEntity);
+
+    groups = _library.groupTripUpdatesAndVehiclePositions(
+            tripUpdates.build(), vehiclePositions.build());
+
+    record = _library.createVehicleOccupancyRecordForUpdate(null, groups.get(0));
+    assertNull(record);
+
+    // add a status
+    vehiclePositions = createFeed();
+    vehicle = GtfsRealtime.VehiclePosition.newBuilder();
+    vehicle.setVehicle(vd);
+    vehicle.setOccupancyStatus(GtfsRealtime.VehiclePosition.OccupancyStatus.valueOf("FULL"));
+    vehiclePositionEntity = FeedEntity.newBuilder();
+    vehiclePositionEntity.setId("v1");
+    vehiclePositionEntity.setVehicle(vehicle);
+
+    vehiclePositions.addEntity(vehiclePositionEntity);
+
+
+    groups = _library.groupTripUpdatesAndVehiclePositions(
+            tripUpdates.build(), vehiclePositions.build());
+
+    record = _library.createVehicleOccupancyRecordForUpdate(null, groups.get(0));
+    assertNotNull(record);
+    assertEquals("FULL", record.getOccupancyStatus().toString().toUpperCase());
+    assertEquals("1_routeA", record.getRouteId());
+    assertEquals("d", record.getDirectionId());
+
+
+  }
+
+
+  @Test
+  public void testCombinedUpdateWithRealtimeVehicleAndAnonVehicle() {
+    GtfsRealtime.VehiclePosition.Builder vehicleWithVId = GtfsRealtime.VehiclePosition.newBuilder();
+    GtfsRealtime.VehicleDescriptor.Builder vdVehicleId = GtfsRealtime.VehicleDescriptor.newBuilder();
+    vdVehicleId.setId("v1");
+    vehicleWithVId.setVehicle(vdVehicleId);
+
+    GtfsRealtime.VehiclePosition.Builder vehicleWithTripId = GtfsRealtime.VehiclePosition.newBuilder();
+    GtfsRealtime.VehicleDescriptor.Builder vdTripId = GtfsRealtime.VehicleDescriptor.newBuilder();
+    vdTripId.setId("tripA");
+    vehicleWithTripId.setVehicle(vdTripId);
+
+
+    // Trip Update: has v1 Vehicle
+    FeedEntity tripUpdateEntityA = createTripUpdate("tripA", "stopA", 58, true, "v1");
+    assertTrue(tripUpdateEntityA.hasVehicle());
+    assertTrue(tripUpdateEntityA.getVehicle().getVehicle().hasId());
+    // Trip Update: has no vehicle
+    FeedEntity tripUpdateEntityB = createTripUpdate("tripB", "stopA", 59, true);
+    // Trip Update: has no Vehicle
+    FeedEntity tripUpdateEntityC = createTripUpdate("tripC", "stopA", 60, true);
+
+    FeedMessage.Builder tripUpdates = createFeed();
+    tripUpdates.addEntity(tripUpdateEntityA);
+    tripUpdates.addEntity(tripUpdateEntityB);
+    tripUpdates.addEntity(tripUpdateEntityC);
+    TripEntryImpl tripA = trip("tripA");
+    StopEntryImpl stopA = stop("stopA", 0, 0);
+    stopTime(0, stopA, tripA, time(7, 30), 0.0);
+
+    TripEntryImpl tripB = trip("tripB");
+    stopTime(0, stopA, tripB, time(8, 30), 0.0);
+
+    TripEntryImpl tripC = trip("tripC");
+    stopTime(0, stopA, tripC, time(9, 30), 0.0);
+
+    Mockito.when(_entitySource.getTrip("tripA")).thenReturn(tripA);
+    Mockito.when(_entitySource.getTrip("tripB")).thenReturn(tripB);
+    Mockito.when(_entitySource.getTrip("tripC")).thenReturn(tripC);
+    BlockEntryImpl blockA = block("blockA");
+    BlockConfigurationEntry blockConfigA = blockConfiguration(blockA,
+            serviceIds("s1"), tripA, tripB, tripC);
+    BlockInstance blockInstanceA = new BlockInstance(blockConfigA, 0L);
+    Mockito.when(
+            _blockCalendarService.getActiveBlocks(Mockito.eq(blockA.getId()),
+                    Mockito.anyLong(), Mockito.anyLong())).thenReturn(
+            Arrays.asList(blockInstanceA));
+
+    // VehiclePosition:  has tripId "tripA"
+    FeedMessage.Builder vehiclePositions = createFeed();
+    FeedEntity.Builder vehiclePositionEntity = FeedEntity.newBuilder();
+
+
+    // add a trip descriptor to the vehicle position feed
+    TripDescriptor.Builder td = TripDescriptor.newBuilder();
+    td.setTripId("tripA");
+    GtfsRealtime.VehiclePosition.Builder vehiclePositionWithVId = GtfsRealtime.VehiclePosition.newBuilder();
+    vehiclePositionWithVId.setTrip(td);
+    vehiclePositionWithVId.setCurrentStopSequence(25);
+    vehiclePositionWithVId.setStopId("stopA");
+    vehiclePositionWithVId.setCurrentStatus(GtfsRealtime.VehiclePosition.VehicleStopStatus.IN_TRANSIT_TO);
+    vehiclePositionWithVId.setVehicle(vdVehicleId);
+
+    vehiclePositionEntity.setId("v1");
+    vehiclePositionEntity.setVehicle(vehiclePositionWithVId);
+    vehiclePositions.addEntity(vehiclePositionEntity);
+
+    assertTrue(tripUpdateEntityA.hasVehicle()); // vehicle Id
+    assertTrue(tripUpdateEntityA.getVehicle().hasVehicle());
+    assertTrue(tripUpdateEntityA.getVehicle().getVehicle().hasId());
+    assertEquals("v1", tripUpdateEntityA.getVehicle().getVehicle().getId());
+    assertTrue(tripUpdates.getEntity(0).hasTripUpdate());
+    assertEquals("tripA", tripUpdates.getEntity(0).getId());
+    assertFalse(tripUpdateEntityB.hasVehicle());// tripB has no vehicle
+    assertFalse(tripUpdateEntityC.hasVehicle()); // nothing
+
+    List<CombinedTripUpdatesAndVehiclePosition> groups = _library.groupTripUpdatesAndVehiclePositions(
+            tripUpdates.build(), vehiclePositions.build());
+
+    assertEquals(1, groups.size());
+    CombinedTripUpdatesAndVehiclePosition c = groups.get(0);
+    assertNotNull(c.vehiclePosition);
+    assertNotNull(c.tripUpdates);
+    assertEquals(1, c.tripUpdates.size());
+  }
+
   private static FeedMessage.Builder createFeed() {
     FeedMessage.Builder builder = FeedMessage.newBuilder();
     FeedHeader.Builder header = FeedHeader.newBuilder();
@@ -574,7 +760,12 @@ public class GtfsRealtimeTripLibraryTest {
   }
 
   private FeedEntity createTripUpdate(String tripId, String stopId, int delay,
-      boolean arrival) {
+                                      boolean arrival) {
+    return createTripUpdate(tripId, stopId, delay, arrival, null);
+  }
+
+  private FeedEntity createTripUpdate(String tripId, String stopId, int delay,
+      boolean arrival, String vehicleId) {
 
     TripUpdate.Builder tripUpdate = TripUpdate.newBuilder();
 
@@ -591,6 +782,15 @@ public class GtfsRealtimeTripLibraryTest {
 
     tripUpdate.addStopTimeUpdate(stopTimeUpdate);
 
+    GtfsRealtime.VehiclePosition.Builder vp = null;
+    if (vehicleId != null) {
+      GtfsRealtime.VehicleDescriptor.Builder vd = GtfsRealtime.VehicleDescriptor.newBuilder();
+      vd.setId(vehicleId);
+      vp = GtfsRealtime.VehiclePosition.newBuilder();
+      vp.setVehicle(vd);
+      tripUpdate.setVehicle(vd);
+    }
+
     TripDescriptor.Builder tripDescriptor = TripDescriptor.newBuilder();
     tripDescriptor.setTripId(tripId);
     tripUpdate.setTrip(tripDescriptor);
@@ -598,6 +798,10 @@ public class GtfsRealtimeTripLibraryTest {
     FeedEntity.Builder tripUpdateEntity = FeedEntity.newBuilder();
     tripUpdateEntity.setId(tripId);
     tripUpdateEntity.setTripUpdate(tripUpdate);
+    if (vp != null) {
+      tripUpdateEntity.setVehicle(vp);
+    }
+
     return tripUpdateEntity.build();
   }
   

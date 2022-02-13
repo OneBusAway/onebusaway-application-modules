@@ -19,7 +19,7 @@
 -->
 <!DOCTYPE struts PUBLIC 
     "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
-    "http://struts.apache.org/dtds/struts-2.0.dtd">
+    "http://struts.apache.org/dtds/struts-2.5.dtd">
 <struts>
 	<constant name="struts.locale" value="en_US"/> 
 	<constant name="struts.ui.theme" value="simple"/>   
@@ -30,8 +30,9 @@
     <constant name="struts.convention.default.parent.package" value="onebusaway-webapp-default" />
     <constant name="struts.custom.i18n.resources" value="onebusaway-enterprise" />
     <!-- constant name="struts.devMode" value="true" /-->
+    <constant name="struts.localizedTextProvider" value="global-only" />
 
-	<bean type="org.apache.struts2.components.template.TemplateEngine" name="jspx" class="org.apache.struts2.components.template.JspTemplateEngine" />
+    <bean type="org.apache.struts2.components.template.TemplateEngine" name="jspx" class="org.apache.struts2.components.template.JspTemplateEngine" />
 
 
     <package name="onebusaway-webapp-default" extends="struts-default">
@@ -94,7 +95,7 @@
         </global-results>
         <global-exception-mappings>
     		<exception-mapping exception="java.lang.Exception" result="errorHandler"/>
-    		
+
     		<!-- OBA App Mods Exceptions -->
     		<exception-mapping exception="org.onebusaway.exceptions.NoSuchStopServiceException"
                 result="NoSuchStopServiceException" />
@@ -112,16 +113,17 @@
 
     </package>
 
-    <package name="onebusaway-webapp-api" extends="onebusaway-webapp-default" namespace="/api/siri">
-      <interceptors>
-        <interceptor name="ApiKeyInterceptor" class="org.onebusaway.enterprise.webapp.api.ApiKeyInterceptor" />
-        <interceptor-stack name="onebusaway-enterprise-webapp-api-stack">
-          <interceptor-ref name="defaultStack" />
-          <interceptor-ref name="ApiKeyInterceptor" />
-        </interceptor-stack>
-      </interceptors>
-      <default-interceptor-ref name="onebusaway-enterprise-webapp-api-stack" />
-    </package>
+    <!-- this isn't used, it was present for when siri used to live in webapp -->
+<!--    <package name="onebusaway-webapp-api" extends="onebusaway-webapp-default" namespace="/api/siri">-->
+<!--      <interceptors>-->
+<!--        <interceptor name="ApiKeyInterceptor" class="org.onebusaway.enterprise.webapp.api.ApiKeyInterceptor" />-->
+<!--        <interceptor-stack name="onebusaway-enterprise-webapp-api-stack">-->
+<!--          <interceptor-ref name="defaultStack" />-->
+<!--          <interceptor-ref name="ApiKeyInterceptor" />-->
+<!--        </interceptor-stack>-->
+<!--      </interceptors>-->
+<!--      <default-interceptor-ref name="onebusaway-enterprise-webapp-api-stack" />-->
+<!--    </package>-->
     
     
 </struts>

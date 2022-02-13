@@ -36,17 +36,17 @@
 	</s:url>
   	<link rel="stylesheet" href="${url}" type="text/css" media="screen"/>
 
-	<s:url var="url" value="/js/lib/jquery.js">
+	<s:url var="url" value="/js/biblio/jquery.js">
 		<s:param name="v"><s:property value="frontEndVersion" /></s:param>
 	</s:url>
 	<script type="text/javascript" src="${url}"><!-- //prevent jspx minimization --></script>
 	
-	<s:url var="url" value="/js/lib/jquery.simplyscroll.js">
+	<s:url var="url" value="/js/biblio/jquery.simplyscroll.js">
 		<s:param name="v"><s:property value="frontEndVersion" /></s:param>
 	</s:url>
 	<script type="text/javascript" src="${url}"><!-- //prevent jspx minimization --></script>
 
-	<s:url  var="url" value="/js/lib/dateFormat.js">
+	<s:url  var="url" value="/js/biblio/dateFormat.js">
 		<s:param name="v"><s:property value="frontEndVersion" /></s:param>
   	</s:url>
 	<script type="text/javascript" src="${url}"><!-- //prevent jspx minimization --></script>

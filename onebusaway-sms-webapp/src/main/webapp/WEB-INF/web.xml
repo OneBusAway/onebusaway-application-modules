@@ -38,7 +38,7 @@
     <!-- Filters -->
     <filter>
         <filter-name>struts-prepare-and-execute</filter-name>
-        <filter-class>org.apache.struts2.dispatcher.ng.filter.StrutsPrepareAndExecuteFilter</filter-class>
+        <filter-class>org.apache.struts2.dispatcher.filter.StrutsPrepareAndExecuteFilter</filter-class>
     </filter>
     <filter-mapping>
         <filter-name>struts-prepare-and-execute</filter-name>

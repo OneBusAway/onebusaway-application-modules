@@ -24,16 +24,6 @@
 
     <!-- 0 or more appender elements -->
 
-    <appender name="ROLL" class="org.apache.log4j.rolling.RollingFileAppender">
-        <rollingPolicy class="org.apache.log4j.rolling.TimeBasedRollingPolicy">
-            <param name="FileNamePattern" value="/var/log/tomcat6/tds.%d.log" />
-        </rollingPolicy>
-
-        <layout class="org.apache.log4j.PatternLayout">
-            <!-- The log message pattern -->
-            <param name="ConversionPattern" value="%d{ISO8601} %-5p [%F:%L] : %m%n" />
-        </layout>
-    </appender>
 
     <appender name="stdout" class="org.apache.log4j.ConsoleAppender">
 
@@ -55,7 +45,7 @@
 
     <root>
         <priority value="info" />
-        <appender-ref ref="ROLL" />
+        <appender-ref ref="stdout" />
     </root>
 
     <!-- 0 or 1 categoryFactory elements -->

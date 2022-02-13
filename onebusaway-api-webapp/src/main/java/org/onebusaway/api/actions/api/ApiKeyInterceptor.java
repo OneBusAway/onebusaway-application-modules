@@ -15,6 +15,7 @@
  */
 package org.onebusaway.api.actions.api;
 
+import org.apache.struts2.dispatcher.Parameter;
 import org.onebusaway.api.ResponseCodes;
 import org.onebusaway.api.model.ResponseBean;
 import org.onebusaway.users.services.ApiKeyPermissionService;
@@ -74,8 +75,8 @@ public class ApiKeyInterceptor extends AbstractInterceptor {
 
   private ApiKeyPermissionService.Status isAllowed(ActionInvocation invocation) {
     ActionContext context = invocation.getInvocationContext();
-    Map<String, Object> parameters = context.getParameters();
-    String[] keys = (String[]) parameters.get("key");
+    Parameter key = context.getParameters().get("key");
+    String[] keys = (String[]) key.getObject();
     
     if( keys == null || keys.length == 0)
       return ApiKeyPermissionService.Status.UNAUTHORIZED;
@@ -105,7 +106,7 @@ public class ApiKeyInterceptor extends AbstractInterceptor {
     
     ResponseBean response = new ResponseBean(1, httpCode, message, null);
     DefaultHttpHeaders methodResult = new DefaultHttpHeaders().withStatus(response.getCode());
-    return _handlerSelector.handleResult(proxy.getConfig(), methodResult, response);
+    return _handlerSelector.handleResult(proxy.getInvocation(), methodResult, response);
   }
 
   @Autowired

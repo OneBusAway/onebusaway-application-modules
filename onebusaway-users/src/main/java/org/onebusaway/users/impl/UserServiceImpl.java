@@ -33,10 +33,10 @@ import org.onebusaway.container.cache.Cacheable;
 import org.onebusaway.container.cache.CacheableArgument;
 import org.onebusaway.users.client.model.UserBean;
 import org.onebusaway.users.client.model.UserIndexBean;
+import org.onebusaway.users.impl.authentication.VersionedPasswordEncoder;
 import org.onebusaway.users.model.User;
 import org.onebusaway.users.model.UserIndex;
 import org.onebusaway.users.model.UserIndexKey;
-import org.onebusaway.users.model.UserPropertiesV1;
 import org.onebusaway.users.model.UserRole;
 import org.onebusaway.users.model.properties.UserPropertiesV4;
 import org.onebusaway.users.services.StandardAuthoritiesService;
@@ -49,7 +49,7 @@ import org.onebusaway.users.services.UserService;
 import org.onebusaway.users.services.internal.UserIndexRegistrationService;
 import org.onebusaway.users.services.internal.UserRegistration;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.encoding.PasswordEncoder;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -67,7 +67,7 @@ public class UserServiceImpl implements UserService {
 
   private UserIndexRegistrationService _userIndexRegistrationService;
 
-  private PasswordEncoder _passwordEncoder;
+  private VersionedPasswordEncoder _passwordEncoder;
 
   private ExecutorService _executors;
 
@@ -99,7 +99,8 @@ public class UserServiceImpl implements UserService {
   }
 
   @Autowired
-  public void setPasswordEncoder(PasswordEncoder passwordEncoder) {
+  @Qualifier(value = "passwordEncoderV1")
+  public void setPasswordEncoder(VersionedPasswordEncoder passwordEncoder) {
     _passwordEncoder = passwordEncoder;
   }
 
@@ -118,27 +119,32 @@ public class UserServiceImpl implements UserService {
    ****/
 
   @Override
+  @Transactional(readOnly=true)
   public int getNumberOfUsers() {
     return _userDao.getNumberOfUsers();
   }
 
   @Override
+  @Transactional
   public List<Integer> getAllUserIds() {
     return _userDao.getAllUserIds();
   }
 
   @Override
+  @Transactional(readOnly=true)
   public List<Integer> getAllUserIdsInRange(int offset, int limit) {
     return _userDao.getAllUserIdsInRange(offset, limit);
   }
 
   @Override
+  @Transactional(readOnly=true)
   public int getNumberOfAdmins() {
     UserRole admin = _authoritiesService.getAdministratorRole();
     return _userDao.getNumberOfUsersWithRole(admin);
   }
 
   @Override
+  @Transactional(readOnly=true)
   public User getUserForId(int userId) {
     return _userDao.getUserForId(userId);
   }
@@ -194,6 +200,7 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
+  @Transactional
   public void deleteUser(User user) {
     _userDao.deleteUser(user);
   }
@@ -209,6 +216,7 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
+  @Transactional
   public void enableAdminRoleForUser(User user, boolean onlyIfNoOtherAdmins) {
 
     UserRole adminRole = _authoritiesService.getUserRoleForName(StandardAuthoritiesService.ADMINISTRATOR);
@@ -225,6 +233,7 @@ public class UserServiceImpl implements UserService {
       _userDao.saveOrUpdateUser(user);
   }
 
+  @Transactional
   public void disableAdminRoleForUser(User user, boolean onlyIfOtherAdmins) {
 
     UserRole adminRole = _authoritiesService.getUserRoleForName(StandardAuthoritiesService.ADMINISTRATOR);
@@ -242,21 +251,25 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
+  @Transactional(readOnly=true)
   public List<String> getUserIndexKeyValuesForKeyType(String keyType) {
     return _userDao.getUserIndexKeyValuesForKeyType(keyType);
   }
 
   @Override
+  @Transactional(readOnly=true)
   public Integer getApiKeyCount(){
     return _userDao.getUserKeyCount(UserIndexTypes.API_KEY);
   }
 
   @Override
+  @Transactional(readOnly=true)
   public List<User> getApiKeys(final int start, final int maxResults){
     return _userDao.getUsersForKeyType(start, maxResults, UserIndexTypes.API_KEY);
   }
 
   @Override
+  @Transactional
   public UserIndex getOrCreateUserForIndexKey(UserIndexKey key,
       String credentials, boolean isAnonymous) {
 
@@ -289,6 +302,7 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
+  @Transactional
   public UserIndex getOrCreateUserForUsernameAndPassword(String username,
       String password) {
 
@@ -298,6 +312,7 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
+  @Transactional(readOnly=true)
   public UserIndex getUserIndexForId(UserIndexKey key) {
     return _userDao.getUserIndexForId(key);
   }
@@ -324,6 +339,7 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
+  @Transactional
   public UserIndex addUserIndexToUser(User user, UserIndexKey key,
       String credentials) {
     UserIndex index = new UserIndex();
@@ -336,6 +352,7 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
+  @Transactional
   public void removeUserIndexForUser(User user, UserIndexKey key) {
     for (UserIndex index : user.getUserIndices()) {
       if (index.getId().equals(key)) {
@@ -349,12 +366,14 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
+  @Transactional
   public void setCredentialsForUserIndex(UserIndex userIndex, String credentials) {
     userIndex.setCredentials(credentials);
     _userDao.saveOrUpdateUserIndex(userIndex);
   }
 
   @Override
+  @Transactional
   public void setPasswordForUsernameUserIndex(UserIndex userIndex,
       String password) {
 
@@ -369,6 +388,7 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
+  @Transactional
   public void mergeUsers(User sourceUser, User targetUser) {
 
     if (sourceUser.equals(targetUser))
@@ -414,6 +434,7 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
+  @Transactional
   public UserIndex completePhoneNumberRegistration(UserIndex userIndex,
       String registrationCode) {
 
@@ -508,6 +529,7 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
+  @Transactional(readOnly=true)
   public long getNumberOfStaleUsers() {
     Calendar c = Calendar.getInstance();
     c.add(Calendar.MONTH, -1);
@@ -557,7 +579,8 @@ public class UserServiceImpl implements UserService {
    * 
    * @param lastAccessTime
    */
-  private void deleteStaleUsers(Date lastAccessTime) {
+  @Transactional
+  public void deleteStaleUsers(Date lastAccessTime) {
 
     while (true) {
       List<Integer> userIds = _userDao.getStaleUserIdsInRange(lastAccessTime,

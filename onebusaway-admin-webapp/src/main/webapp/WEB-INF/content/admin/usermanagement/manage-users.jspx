@@ -32,12 +32,12 @@
 <s:url var="url" value="/css/user-management.css"/>
 <link rel="stylesheet" href="${url}" type="text/css"/>
 
-<s:url var="url" value="/js/lib/jquery.js" />
+<s:url var="url" value="/js/biblio/jquery.js" />
 <script type="text/javascript" src="${url}">
 <!-- //prevent jspx minimization -->
 </script>
 
-<s:url var="url" value="/js/lib/jquery.ui.js" />
+<s:url var="url" value="/js/biblio/jquery.ui.js" />
 <script type="text/javascript" src="${url}">
 <!-- //prevent jspx minimization -->
 </script>
@@ -61,8 +61,8 @@
                 <h2>User Management Utility</h2>
                 <div id="userAdminList">
                     <ul>
-                        <li><s:url var="url" value="register-user.action" id="addUser"/>
-                            <a href="${url}">Create User</a>
+                        <li><s:url var="addUser" value="register-user.action"/>
+                            <a href="${addUser}">Create User</a>
                         </li>
                         <li><s:url var="url" value="list-users.action" />
                             <a href="${url}">List All Users paginated</a>
@@ -138,6 +138,7 @@
 				 	<div id="editRole">
 				 		<label class="userLabel">New Role:</label>
 				 		<select name="Role" id="newRole">
+								<option></option>
 				 			<c:forEach items="${possibleRoles}" var="role">
 				 				<option value="${role}">${fn:split(role, "_")[1]}</option>
 				 			</c:forEach>

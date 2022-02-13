@@ -125,24 +125,32 @@ public class DiskFileServiceImpl implements FileService {
 	@Override
 	public List<String[]> listBundleDirectories(int maxResults) {
 		ArrayList<String[]> bundleDirs = new ArrayList<String[]>();
-		File baseDir = new File(_basePath);
-		String[] list  = baseDir.list();
-		if (list == null) {
-			_log.info("empty list for bundleDirectories at basepath=" + _basePath);
-			return bundleDirs;
-		}
-		// need filename/flag/modified date
-		for (String dir: list) {
-			File fDir = new File(baseDir, dir);
-			String lastModified = new Date(fDir.lastModified()).toString();
-			// Since the bundle directory date does not get updated when a build
-			// is done, get the date on the builds sub-directory.
-			File buildDir = new File(fDir, _buildPath);
-			if (buildDir.exists()) {
-			  lastModified = new Date(buildDir.lastModified()).toString();
+		_log.info("listBundleDirectories(" + maxResults + ")");
+		try {
+			File baseDir = new File(_basePath);
+			String[] list = baseDir.list();
+			if (list == null) {
+				_log.info("empty list for bundleDirectories at basepath=" + _basePath);
+				return bundleDirs;
 			}
-			String[] a = {dir, " ", lastModified};
-			bundleDirs.add(a);
+			// need filename/flag/modified date
+			for (String dir : list) {
+				_log.info("bundle dir: |" + dir + "|");
+				File fDir = new File(baseDir, dir);
+				String lastModified = new Date(fDir.lastModified()).toString();
+				// Since the bundle directory date does not get updated when a build
+				// is done, get the date on the builds sub-directory.
+				File buildDir = new File(fDir, _buildPath);
+				if (buildDir.exists()) {
+					lastModified = new Date(buildDir.lastModified()).toString();
+				}
+				String[] a = {dir, " ", lastModified};
+				bundleDirs.add(a);
+			}
+		} catch (Throwable t) {
+			_log.error("Exception retrieving listBundleDiretories=", t, t);
+		} finally {
+			_log.info("exiting listBundleDirectories");
 		}
 		return bundleDirs;
 	}

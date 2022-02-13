@@ -35,13 +35,13 @@
 	<!-- //prevent jspx minimization -->
 </link>
 
-<s:url var="url" value="/js/lib/jquery.js" />
+<s:url var="url" value="/js/biblio/jquery.js" />
 <script type="text/javascript" src="${url}">
 <!-- //prevent jspx minimization -->
 	
 </script>
 
-<s:url var="url" value="/js/lib/jquery.ui.js">
+<s:url var="url" value="/js/biblio/jquery.ui.js">
 </s:url>
 <script type="text/javascript" src="${url}">
 <!-- //prevent jspx minimization -->
@@ -59,7 +59,7 @@
 </head>
 <body>
 
-<s:set name="theme" value="'xhtml'" scope="page" />
+<s:set var="theme" value="'xhtml'" scope="page" />
 <div id="ServiceAlerts">
 	<p>Manage Service Alerts</p>
 	<div id="serviceAlertActions">

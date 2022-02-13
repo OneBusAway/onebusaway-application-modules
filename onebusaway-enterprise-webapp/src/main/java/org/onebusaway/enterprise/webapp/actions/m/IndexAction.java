@@ -347,4 +347,11 @@ public class IndexAction extends OneBusAwayEnterpriseActionSupport {
     return _configurationService.getConfigurationValueAsString("display.showAgencyNames", "false");
   }
 
+  public String getFeedbackFormText() {
+    return _configurationService.getConfigurationValueAsString("display.feedbackForm.text", null);
+  }
+
+  public String getFeedbackFormURL() {
+    return _configurationService.getConfigurationValueAsString("display.feedbackForm.url", null);
+  }
 }

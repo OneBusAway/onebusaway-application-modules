@@ -17,34 +17,14 @@
 package org.onebusaway.api.impl;
 
 import com.opensymphony.xwork2.ActionInvocation;
+import com.thoughtworks.xstream.converters.collections.CollectionConverter;
+import com.thoughtworks.xstream.mapper.ClassAliasingMapper;
 import org.apache.struts2.rest.handler.XStreamHandler;
 
 import org.onebusaway.api.actions.api.ValidationErrorBean;
 import org.onebusaway.api.model.ResponseBean;
 import org.onebusaway.api.model.TimeBean;
-import org.onebusaway.api.model.transit.AgencyV2Bean;
-import org.onebusaway.api.model.transit.AgencyWithCoverageV2Bean;
-import org.onebusaway.api.model.transit.ArrivalAndDepartureV2Bean;
-import org.onebusaway.api.model.transit.EntryWithReferencesBean;
-import org.onebusaway.api.model.transit.ListWithRangeAndReferencesBean;
-import org.onebusaway.api.model.transit.ListWithReferencesBean;
-import org.onebusaway.api.model.transit.ReferencesBean;
-import org.onebusaway.api.model.transit.RegisteredAlarmV2Bean;
-import org.onebusaway.api.model.transit.RouteV2Bean;
-import org.onebusaway.api.model.transit.ScheduleFrequencyInstanceV2Bean;
-import org.onebusaway.api.model.transit.ScheduleStopTimeInstanceV2Bean;
-import org.onebusaway.api.model.transit.StopCalendarDayV2Bean;
-import org.onebusaway.api.model.transit.StopRouteDirectionScheduleV2Bean;
-import org.onebusaway.api.model.transit.StopRouteScheduleV2Bean;
-import org.onebusaway.api.model.transit.StopScheduleV2Bean;
-import org.onebusaway.api.model.transit.StopV2Bean;
-import org.onebusaway.api.model.transit.StopWithArrivalsAndDeparturesV2Bean;
-import org.onebusaway.api.model.transit.StopsForRouteV2Bean;
-import org.onebusaway.api.model.transit.TripDetailsV2Bean;
-import org.onebusaway.api.model.transit.TripStopTimeV2Bean;
-import org.onebusaway.api.model.transit.TripV2Bean;
-import org.onebusaway.api.model.transit.VehicleLocationRecordV2Bean;
-import org.onebusaway.api.model.transit.VehicleStatusV2Bean;
+import org.onebusaway.api.model.transit.*;
 import org.onebusaway.api.model.transit.blocks.BlockConfigurationV2Bean;
 import org.onebusaway.api.model.transit.blocks.BlockInstanceV2Bean;
 import org.onebusaway.api.model.transit.blocks.BlockStopTimeV2Bean;
@@ -75,7 +55,35 @@ import org.onebusaway.transit_data.model.StopGroupingBean;
 
 import com.thoughtworks.xstream.XStream;
 
+import java.io.IOException;
+import java.io.Reader;
+import java.io.Writer;
+
 public class CustomXStreamHandler extends XStreamHandler {
+
+  @Override
+  public String fromObject(ActionInvocation invocation, Object obj, String resultCode, Writer out) throws IOException {
+    if (obj != null) {
+      if (obj instanceof ResponseBean) {
+        ResponseBean bean = (ResponseBean) obj;
+        if (bean.isString() && bean.getData() != null) {
+          out.write(bean.getData().toString());
+          return null;
+        }
+        XStream xstream = this.createXStream(invocation);
+        xstream.toXML(obj, out);
+      }
+
+    }
+
+    return null;
+  }
+
+  @Override
+  public void toObject(ActionInvocation invocation, Reader in, Object target) {
+    XStream xstream = this.createXStream(invocation);
+    xstream.fromXML(in, target);
+  }
 
   @Override
   protected XStream createXStream(ActionInvocation invocation) {
@@ -148,6 +156,37 @@ public class CustomXStreamHandler extends XStreamHandler {
     xstream.alias("currentVehicleEstimate", CurrentVehicleEstimateV2Bean.class);
     
     xstream.alias("registeredAlarm", RegisteredAlarmV2Bean.class);
+
+    xstream.alias("tripWithStopTimes", TripWithStopTimesV2Bean.class);
+
+
+
+
+    // serialization customizations for StopsAndTripsForDirectionV2Bean
+    ClassAliasingMapper StopTripDirectionMapper = new ClassAliasingMapper(xstream.getMapper());
+    StopTripDirectionMapper.addClassAlias("stopId", String.class);
+    xstream.registerLocalConverter(StopsAndTripsForDirectionV2Bean.class, "stopIds",
+            new CollectionConverter(StopTripDirectionMapper));
+    StopTripDirectionMapper = new ClassAliasingMapper(xstream.getMapper());
+    StopTripDirectionMapper.addClassAlias("tripId", String.class);
+    xstream.registerLocalConverter(StopsAndTripsForDirectionV2Bean.class, "tripIds",
+            new CollectionConverter(StopTripDirectionMapper));
+
+    //serialization customizations for RouteScheduleV2Bean
+    xstream.alias("routeSchedule", RouteScheduleV2Bean.class);
+    xstream.alias("stopTripGrouping", StopsAndTripsForDirectionV2Bean.class);
+    ClassAliasingMapper routeScheduleMapper = new ClassAliasingMapper(xstream.getMapper());
+    routeScheduleMapper.addClassAlias("serviceId", String.class);
+    xstream.registerLocalConverter(RouteScheduleV2Bean.class, "serviceIds",
+            new CollectionConverter(routeScheduleMapper));
+
+    // serialization customizations for StopV2Bean
+    ClassAliasingMapper StopMapper = new ClassAliasingMapper(xstream.getMapper());
+    StopMapper.addClassAlias("routeId", String.class);
+    xstream.registerLocalConverter(StopV2Bean.class, "routeIds",
+            new CollectionConverter(StopMapper));
+
+
 
     return xstream;
   }

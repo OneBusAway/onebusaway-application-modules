@@ -26,7 +26,13 @@
 <head>
 <title><decorator:title default="iphone" /></title>
 <meta name="viewport" content="user-scalable=no, width=device-width" />
-<link rel="stylesheet" type="text/css" media="all" href="${oba:resource('/css/where/iphone.css')}"/>
+<!-- the following is OWASP's recommendation on preventing clickjacking -->
+<style id="antiClickjack">
+    body{display:none !important;}
+</style>
+<!-- end clickjacking prevention-->
+
+    <link rel="stylesheet" type="text/css" media="all" href="${oba:resource('/css/where/iphone.css')}"/>
 <link rel="icon" type="image/png" href="${oba:resource('/img/iphone/Bus.png')}"/>
 <link rel="apple-touch-icon" type="image/png" href="${oba:resource('/img/iphone/iphone.png')}"/>
 <decorator:head />
@@ -39,6 +45,14 @@
 </div>
 
 <script type="application/x-javascript">
+// the following is OWASP's recommendation on preventing clickjacking
+if (self === top) {
+    var antiClickjack = document.getElementById("antiClickjack");
+    antiClickjack.parentNode.removeChild(antiClickjack);
+} else {
+    top.location = self.location;
+}
+// end clickjacking prevention
 
 if (navigator.userAgent.indexOf('iPhone') != -1)
 	addEventListener("load", function() { setTimeout(hideURLbar, 0); }, false);

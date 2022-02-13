@@ -40,7 +40,10 @@ public interface ConfigurationService {
   
   public Integer getConfigurationValueAsInteger(String configurationItemKey,
 	      Integer defaultValue);
-  
+
+  public Boolean getConfigurationValueAsBoolean(String configurationItemKey,
+                                                Boolean defaultValue);
+
   public Double getConfigurationValueAsDouble(String configurationItemKey, 
 		  Double defaultValue);
   

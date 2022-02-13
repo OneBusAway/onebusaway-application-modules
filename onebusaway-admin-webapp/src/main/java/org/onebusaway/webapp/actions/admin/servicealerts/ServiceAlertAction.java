@@ -22,6 +22,7 @@ import java.util.*;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.struts2.convention.annotation.Action;
+import org.apache.struts2.convention.annotation.AllowedMethods;
 import org.apache.struts2.convention.annotation.InterceptorRef;
 import org.apache.struts2.convention.annotation.InterceptorRefs;
 import org.apache.struts2.convention.annotation.ParentPackage;
@@ -38,7 +39,6 @@ import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationAffectsBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationConsequenceBean;
 import org.onebusaway.transit_data.model.service_alerts.TimeRangeBean;
-import org.onebusaway.transit_data.services.TransitDataService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,6 +64,7 @@ import com.thoughtworks.xstream.XStream;
 	@Result(type = "redirectAction", name = "addToFavoritesSuccess", params = {
         "actionName", "service-alerts", "id", "${id}", "parse", "true"})
 		})
+@AllowedMethods({"submit", "cancel", "addToFavorites", "addAffects", "delete"})
 public class ServiceAlertAction extends ActionSupport implements
     ModelDriven<ServiceAlertBean>, Preparable {
 
@@ -430,7 +431,7 @@ public String getStartDate() {
     }
   }
   
-@Override
+  @Override
   public String execute() throws IOException, JSONException, ParseException {
 
     _log.info("ServiceAlerts.execute()");
@@ -480,11 +481,13 @@ public String getStartDate() {
     try { 
       if (_model.getId() == null || _model.getId().trim().isEmpty() ) {
     	 _model.setSource(EDITOR_SOURCE);
+        _model.combineAffectsIds();
     	 _model = _alerts.createServiceAlert(_agencyId, _model);
       }
       else {
         // if we've edited a service alert from some other agency, we now own it
         _model.setSource(EDITOR_SOURCE);
+        _model.combineAffectsIds();
         _alerts.updateServiceAlert(_agencyId, _model, isFavorite());
       }
     } catch (RuntimeException e) {

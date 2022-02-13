@@ -50,15 +50,19 @@ jQuery(function() {
 
 	// Check  if this is the "Edit Service Alert" page
 	if ($("#service-alert_submit").length > 0) {
-		// Only enable the Save button if an "owning agency" is selected.
+		// Only enable the Save and Add to Fav buttons if an "owning agency" is selected.
 		if ($("#service-alert_agencyId option:selected").val() == "null") {
 			$("#service-alert_submit").attr("disabled", "disabled");
+            $("#service-alert_addToFav").attr("disabled", "disabled");
+			$("")
 		}
 		$("#service-alert_agencyId").change(function() {
 			if ($("#service-alert_agencyId option:selected").val() == "null") {
 				$("#service-alert_submit").attr("disabled", "disabled");
+                $("#service-alert_addToFav").attr("disabled", "disabled");
 			} else {
 				$("#service-alert_submit").removeAttr("disabled");
+                $("#service-alert_addToFav").removeAttr("disabled");
 			}
 		});
 	}
@@ -76,8 +80,8 @@ jQuery(function() {
 			jQuery("#publicationWindowStartDate").datepicker("option", "maxDate", selectedDate);
 		}
 	});
-	
-	jQuery("#loadTemplateInput [name='template']").click(function(){
+
+    jQuery("#loadTemplateInput [name='template']").change(function(){
 		var selectedTemplateId = jQuery("#loadTemplateInput [name='template']").val();
 		loadTemplate(selectedTemplateId);
 	})
@@ -110,24 +114,48 @@ function onAddAnotherCondition() {
 			<td> \
 			<select class="alertCondition" name="allAffects['
 				+ currentConditionsCt
-				+ '].agencyId" id="service-alert_allAffects_agencyId"> \
+				+ '].agencyId" id="service-alert_allAffects_' + currentConditionsCt + '__agencyId"> \
 		    	<option value="null">Select agency affected</option>'
 				+ agencySelectOptions
 			+ '</select> \
 			</td> \
 		</tr> \
 		<tr> \
-	    	<td class="tdLabel"><label for="service-alert_allAffects_' + currentConditionsCt + '__routeId" class="label">Route:</label></td> \
+		    <td class="tdLabel"><label for="service-alert_allAffects_agencyPartRouteId" class="label">Agency for Route:</label> \
+			</td> \
+			<td> \
+			<select class="alertCondition" name="allAffects['
+		+ currentConditionsCt
+		+ '].agencyPartRouteId" id="service-alert_allAffects_' + currentConditionsCt + '__agencyPartRouteId"> \
+		    	<option value="null">Select agency for Route</option>'
+		+ agencySelectOptions
+		+ '</select> \
+			</td> \
+		</tr> \
+		<tr> \
+	    	<td class="tdLabel"><label for="service-alert_allAffects_' + currentConditionsCt + '__routePartRouteId" class="label">Route:</label></td> \
 	    	<td><input class="alertCondition" name="allAffects['
 			+ currentConditionsCt
-			+ '].routeId" value="" id="service-alert_allAffects_' + currentConditionsCt + '__routeId" type="text"></td> \
+			+ '].routePartRouteId" value="" id="service-alert_allAffects_' + currentConditionsCt + '__routePartRouteId" type="text"></td> \
 		</tr> \
 		<tr><td style="text-align:center" colspan="2" id="routeValidation' + currentConditionsCt + '">Click Validate to lookup Route</td></tr> \
 		<tr> \
-	    	<td class="tdLabel"><label for="service-alert_allAffects_' + currentConditionsCt + '__stopId" class="label">Stop:</label></td> \
+		    <td class="tdLabel"><label for="service-alert_allAffects_agencyPartStopId" class="label">Agency for Stop:</label> \
+			</td> \
+			<td> \
+			<select class="alertCondition" name="allAffects['
+		+ currentConditionsCt
+		+ '].agencyPartStopId" id="service-alert_allAffects_' + currentConditionsCt + '__agencyPartStopId"> \
+		    	<option value="null">Select agency for Stop</option>'
+		+ agencySelectOptions
+		+ '</select> \
+			</td> \
+		</tr> \
+		<tr> \
+	    	<td class="tdLabel"><label for="service-alert_allAffects_' + currentConditionsCt + '__stopPartStopIdId" class="label">Stop:</label></td> \
 	    	<td><input class="alertCondition" name="allAffects['
 			+ currentConditionsCt
-			+ '].stopId" value="" id="service-alert_allAffects_' + currentConditionsCt + '__stopId" type="text"></td> \
+			+ '].stopPartStopId" value="" id="service-alert_allAffects_' + currentConditionsCt + '__stopPartStopId" type="text"></td> \
 		</tr> \
 		<tr><td style="text-align:center" colspan="2" id="stopValidation' + currentConditionsCt + '">Click Validate to lookup Stop</td></tr> \
 		</table>';
@@ -203,13 +231,15 @@ function onValidateCondition(handler) {
 	var aId = handler.target.id;
 	var id = aId.replace("validateCondition", "");
 	var selector = "service-alert_allAffects_"+ id;
-	var stopField = document.getElementById(selector + "__stopId");
-	if (stopField == null) {
+	var agencyStopField = document.getElementById(selector + "__agencyPartStopId");
+	var stopField = document.getElementById(selector + "__stopPartStopId");
+	if (agencyStopField == null || stopField == null) {
 		return;
 	}
-	var stopId = stopField.value;
-	var routeField = document.getElementById(selector + "__routeId");
-	var routeId = routeField.value;
+	var stopId = agencyStopField.value + "_" + stopField.value;
+	var agencyRouteField = document.getElementById(selector + "__agencyPartRouteId");
+	var routeField = document.getElementById(selector + "__routePartRouteId");
+	var routeId = agencyRouteField.value + "_" + routeField.value;
 	if (stopId != null && stopId != "") {
 		var url = OBA.Config.apiBaseUrl + "/api/where/stop/" + stopId + ".json?key=" + OBA.Config.obaApiKey;
 		jQuery.ajax({

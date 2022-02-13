@@ -19,7 +19,7 @@ import java.lang.reflect.Type;
 
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
-import org.onebusaway.util.OneBusAwayDateFormats;
+import org.onebusaway.util.OneBusAwayFormats;
 
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
@@ -36,7 +36,7 @@ JsonDeserializer<DateTime>{
   public DateTime deserialize(JsonElement json, Type typeOfT,
       JsonDeserializationContext context) throws JsonParseException {
     
-    DateTimeFormatter fmt = OneBusAwayDateFormats.DATETIMEPATTERN_JSON_DATE_TIME;
+    DateTimeFormatter fmt = OneBusAwayFormats.DATETIMEPATTERN_JSON_DATE_TIME;
     DateTime result = fmt.parseDateTime(json.getAsJsonPrimitive().getAsString());
     
     return result;
@@ -45,7 +45,7 @@ JsonDeserializer<DateTime>{
   @Override
   public JsonElement serialize(DateTime src, Type typeOfSrc,
       JsonSerializationContext context) {
-    DateTimeFormatter fmt = OneBusAwayDateFormats.DATETIMEPATTERN_JSON_DATE_TIME;
+    DateTimeFormatter fmt = OneBusAwayFormats.DATETIMEPATTERN_JSON_DATE_TIME;
     return new JsonPrimitive(fmt.print(src));
   }
 

@@ -39,8 +39,14 @@
 
   <servlet>
     <servlet-name>Jersey Spring Web Application</servlet-name>
-    <servlet-class>com.sun.jersey.spi.spring.container.servlet.SpringServlet</servlet-class>
-    <load-on-startup>1</load-on-startup>
+    <servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
+      <init-param>
+          <param-name>jersey.config.server.provider.packages</param-name>
+          <param-value>
+              org.onebusaway.watchdog.api
+          </param-value>
+      </init-param>
+      <load-on-startup>1</load-on-startup>
   </servlet>
   <servlet-mapping>
     <servlet-name>Jersey Spring Web Application</servlet-name>

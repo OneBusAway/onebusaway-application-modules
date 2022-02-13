@@ -26,6 +26,7 @@ import org.onebusaway.geospatial.model.EncodedPolylineBean;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
 import org.onebusaway.realtime.api.TimepointPredictionRecord;
+import org.onebusaway.realtime.api.VehicleOccupancyRecord;
 import org.onebusaway.transit_data.OccupancyStatusBean;
 import org.onebusaway.transit_data.model.*;
 import org.onebusaway.transit_data.model.blocks.BlockBean;
@@ -42,6 +43,7 @@ import org.onebusaway.transit_data.model.service_alerts.ServiceAlertRecordBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationQueryBean;
 import org.onebusaway.transit_data.model.trips.*;
 import org.onebusaway.transit_data.services.TransitDataService;
+import org.onebusaway.transit_data_federation.impl.realtime.apc.VehicleOccupancyRecordCache;
 import org.onebusaway.transit_data_federation.model.bundle.HistoricalRidership;
 import org.onebusaway.transit_data_federation.services.*;
 import org.onebusaway.transit_data_federation.services.beans.*;
@@ -57,6 +59,7 @@ import org.onebusaway.util.AgencyAndIdLibrary;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.*;
 
@@ -81,6 +84,9 @@ public class TransitDataServiceTemplateImpl implements TransitDataServiceTemplat
 
   @Autowired
   private StopScheduleBeanService _stopScheduleBeanService;
+
+  @Autowired
+  private RouteScheduleBeanService _routeScheduleBeanService;
 
   @Autowired
   private StopWithArrivalsAndDeparturesBeanService _stopWithArrivalsAndDepaturesBeanService;
@@ -135,6 +141,9 @@ public class TransitDataServiceTemplateImpl implements TransitDataServiceTemplat
 
   @Autowired
   private RidershipService _ridershipService;
+
+  @Autowired
+  private VehicleOccupancyRecordCache _vehicleOccupancyRecordCache;
 
   /****
    * {@link TransitDataService} Interface
@@ -210,6 +219,12 @@ public class TransitDataServiceTemplateImpl implements TransitDataServiceTemplat
     bean.setCalendarDays(calendarDays);
 
     return bean;
+  }
+
+  //@Override
+  public RouteScheduleBean getScheduleForRoute(AgencyAndId routeId, ServiceDate serviceDate) {
+    return _routeScheduleBeanService.getScheduledArrivalsForDate(routeId, serviceDate);
+
   }
 
   //@Override
@@ -503,6 +518,13 @@ public class TransitDataServiceTemplateImpl implements TransitDataServiceTemplat
     
     return _vehicleStatusBeanService.getVehicleLocations(query);
   }
+
+
+  //@Override
+  public VehicleOccupancyRecord getVehicleOccupancyRecordForVehicleIdAndRoute(AgencyAndId vehicleId, String routeId, String directionId) {
+    return _vehicleOccupancyRecordCache.getRecordForVehicleIdAndRoute(vehicleId, routeId, directionId);
+  }
+
 
   //@Override
   public void submitVehicleLocation(VehicleLocationRecordBean record) {

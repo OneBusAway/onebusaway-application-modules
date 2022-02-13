@@ -15,8 +15,10 @@
  */
 package org.onebusaway.webapp.actions.admin.servicealerts;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.struts2.convention.annotation.AllowedMethods;
 import org.apache.struts2.convention.annotation.Result;
 import org.apache.struts2.convention.annotation.Results;
 import org.apache.struts2.interceptor.validation.SkipValidation;
@@ -41,6 +43,7 @@ import org.springframework.remoting.RemoteConnectFailureException;
 @Results({@Result(type = "redirectAction", name = "redirect", params = {
     "actionName", "service-alerts!agency", "agencyId", "${agencyId}", "parse",
     "true"})})
+@AllowedMethods({"agency", "deleteAlert", "removeAllForAgency"})
 public class ServiceAlertsAction extends OneBusAwayNYCAdminActionSupport {
 
   private static final long serialVersionUID = 1L;
@@ -154,7 +157,22 @@ public class ServiceAlertsAction extends OneBusAwayNYCAdminActionSupport {
         AgencyWithCoverageBean agency = _agencies.get(i);
         String agencyId = agency.getAgency().getId();
         ListBean<ServiceAlertRecordBean> result = _alerts.getAllServiceAlertRecordsForAgencyId(agencyId);
-        List<ServiceAlertRecordBean> serviceAlerts = result.getList();
+
+        //don't include alerts that are global for non-admin
+        List<ServiceAlertRecordBean> serviceAlerts = new ArrayList<>();
+        if (!isAdminUser()) {
+          for (int j = 0; j < result.getList().size(); j++)
+            if (result.getList().get(j).getServiceAlertBean() != null &&
+                    result.getList().get(j).getServiceAlertBean().getAllAffects() != null) {
+              for (int k = 0; k < result.getList().get(j).getServiceAlertBean().getAllAffects().size(); k++) {
+                if (!"__ALL_OPERATORS__".equals(result.getList().get(j).getServiceAlertBean().getAllAffects().get(k).getAgencyId()))
+                  serviceAlerts.add(result.getList().get(j));
+              }
+            }
+            else serviceAlerts.add(result.getList().get(j));//just add it since there aren't any affects
+        }
+        else serviceAlerts = result.getList();
+
         _situationsByAgency[i] = serviceAlerts;
       }
       for (int i=0; i<_agencies.size(); ++i) {

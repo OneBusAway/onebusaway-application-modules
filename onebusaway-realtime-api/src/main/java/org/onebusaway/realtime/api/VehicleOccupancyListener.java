@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2017 Metropolitan Transportation Authority
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,12 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.onebusaway.admin.service.server;
+package org.onebusaway.realtime.api;
 
-import com.google.transit.realtime.GtfsRealtime.FeedMessage;
+import org.onebusaway.gtfs.model.AgencyAndId;
 
-public interface RssServiceAlertsService {
+import java.util.List;
 
-  public FeedMessage getServlceAlertFeed();
+/**
+ * Integrate with APC.
+ */
+public interface VehicleOccupancyListener {
 
+    public void handleVehicleOccupancyRecord(VehicleOccupancyRecord record);
+
+    public void handleVehicleOccupancyRecords(List<VehicleOccupancyRecord> records);
+
+    public void resetVehicleOccupancy(AgencyAndId vehicleId);
 }

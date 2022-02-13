@@ -22,6 +22,7 @@ import org.onebusaway.admin.service.FileService;
 import org.onebusaway.admin.service.bundle.BundleValidationService;
 import org.onebusaway.admin.util.NYCFileUtils;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
+import org.onebusaway.util.services.configuration.ConfigurationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,8 +46,14 @@ public class BundleValidationServiceImpl implements BundleValidationService {
   private static final String BUILD_DIR = "builds";
   private static final int CHUNK_SIZE = 1024;
   private static final String TRANSIT_FEED = "transitfeed-1.2.15";
+  private static final String VALIDATOR_NAME = "feedvalidator.py";
   private static Logger _log = LoggerFactory.getLogger(BundleValidationServiceImpl.class);
   private FileService _fileService;
+  private String validatorLocation;
+
+  @Autowired
+  private ConfigurationService _configurationService;
+
 
   @Autowired
   public void setFileService(FileService service) {
@@ -167,6 +174,7 @@ public class BundleValidationServiceImpl implements BundleValidationService {
   }
 
   public int installAndValidateGtfs(String gtfsZipFileName, String outputFile) {
+    setValidatorLocationFromConfig();
     int returnCode = -1;
     try {
       returnCode = validateGtfs(gtfsZipFileName, outputFile);
@@ -186,7 +194,7 @@ public class BundleValidationServiceImpl implements BundleValidationService {
         // try again after install
         returnCode = validateGtfs(gtfsZipFileName, outputFile);
         if (returnCode == 2) {
-          _log.error("Error setting up feedvalidator.py!");
+          _log.error("Error setting up " + VALIDATOR_NAME + "!");
           _log.error("It either could not be retrieved or your system needs a softlink to /usr/bin/python2.5");
         }
       } catch (RuntimeException e) {
@@ -200,46 +208,53 @@ public class BundleValidationServiceImpl implements BundleValidationService {
 
   @Override
   public void downloadAndValidate(BundleRequest request, BundleResponse response) {
-            String gtfsDirectory =  request.getBundleDirectory() + File.separator
-            + _fileService.getGtfsPath();
-        _log.info("gtfsDir=" + gtfsDirectory);
-        List<String> files = _fileService.list(gtfsDirectory, -1);
-        if (files == null || files.size() == 0) { 
-          response.addStatusMessage("no files found in " + gtfsDirectory);
-          response.setComplete(true);
-          return;
-        }
-        String tmpDir = request.getTmpDirectory(); 
-        if (tmpDir == null) {
-          tmpDir = new NYCFileUtils().createTmpDirectory();
-          request.setTmpDirectory(tmpDir);
-        }
-        response.setTmpDirectory(request.getTmpDirectory());
-        for (String s3Key : files) {
-          response.addStatusMessage("downloading " + s3Key);
-          _log.info("downloading " + s3Key);
-          String gtfsZipFileName = _fileService.get(s3Key, tmpDir);
-          String outputFile = gtfsZipFileName + ".html";
-          response.addStatusMessage("validating " + s3Key);
-          _log.info("validating " + s3Key);
-          installAndValidateGtfs(gtfsZipFileName,
-              outputFile);
-          _log.info("results of " + gtfsZipFileName + " at " + outputFile);
-          response.addValidationFile(new NYCFileUtils().parseFileName(outputFile));
-          upload(request, response);
-          response.addStatusMessage("complete");
-        }
+    String gtfsDirectory =  request.getBundleDirectory() + File.separator
+      + _fileService.getGtfsPath();
+    _log.info("gtfsDir=" + gtfsDirectory);
+    List<String> files = _fileService.list(gtfsDirectory, -1);
+    if (files == null || files.size() == 0) {
+      response.addStatusMessage("no files found in " + gtfsDirectory);
+      response.setComplete(true);
+      return;
+    }
+    String tmpDir = request.getTmpDirectory();
+    if (tmpDir == null) {
+      tmpDir = new NYCFileUtils().createTmpDirectory();
+      request.setTmpDirectory(tmpDir);
+    }
+    response.setTmpDirectory(request.getTmpDirectory());
+    for (String s3Key : files) {
+      response.addStatusMessage("downloading " + s3Key);
+      _log.info("downloading " + s3Key);
+      String gtfsZipFileName = _fileService.get(s3Key, tmpDir);
+      String outputFile = gtfsZipFileName + ".html";
+      response.addStatusMessage("validating " + s3Key);
+      _log.info("validating " + s3Key);
+      installAndValidateGtfs(gtfsZipFileName,
+          outputFile);
+      _log.info("results of " + gtfsZipFileName + " at " + outputFile);
+      response.addValidationFile(new NYCFileUtils().parseFileName(outputFile));
+      upload(request, response);
+      response.addStatusMessage("complete");
+    }
 
   }
-  
+
+  public void setValidatorLocationFromConfig() {
+    this.validatorLocation = getPythonFeedValidatorLocation();
+  }
+
   @Override
   public int validateGtfs(String gtfsZipFileName, String outputFile) {
     Process process = null;
+    String tmpValidator = System.getProperty("java.io.tmpdir") + File.separator
+            + TRANSIT_FEED + File.separator + VALIDATOR_NAME;
     try {
-      String tmpDir = System.getProperty("java.io.tmpdir") + File.separator
-          + TRANSIT_FEED;
-      String[] cmds = {
-        tmpDir + File.separator + "feedvalidator.py",
+      if(validatorLocation!=null){
+        tmpValidator = validatorLocation;
+      }
+      String[] cmds = {"python",
+        tmpValidator,
         "-n",
         "-m",
         "--service_gap_interval=1",
@@ -271,16 +286,36 @@ public class BundleValidationServiceImpl implements BundleValidationService {
 
   public synchronized void downloadFeedValidator() {
     String tmpDir = System.getProperty("java.io.tmpdir");
-    String localFile = tmpDir + File.separatorChar + TRANSIT_FEED + ".tar.gz";
-    if (new File(localFile).exists()) {
-      _log.error("feed Validator found at " + localFile + ", exiting");
-      _log.error("remove the file at " + localFile + " if it is corrupt");
-      return;
+    String localFolder = tmpDir + File.separatorChar + TRANSIT_FEED;
+    String localFile = localFolder + ".tar.gz";
+    String localValidator = localFolder + File.separatorChar + VALIDATOR_NAME;
+    if(validatorLocation!=null){ localValidator = validatorLocation;}
+    NYCFileUtils fs = new NYCFileUtils(new File(localFile).getParent());
+    if(new File(localValidator).exists()){
+        _log.info("feed Validator tar found at " + localFile+ ", exiting");
+        _log.error("remove the file at " + localFile + " if it is corrupt");
+        return;
     }
-    NYCFileUtils fs = new NYCFileUtils(tmpDir);
     String url = "http://developer.onebusaway.org/tmp/" + TRANSIT_FEED + ".tar.gz";
     fs.wget(url);
     fs.tarzxf(localFile);
+    copyValidatorToConfigSpecifiedLocation(fs, localFolder);
+  }
+
+  private void copyValidatorToConfigSpecifiedLocation(NYCFileUtils fs, String localFolder) {
+    if(validatorLocation!=null) {
+      File downloadedFeedValidator = new File(localFolder + File.separatorChar + VALIDATOR_NAME);
+      _log.info("Copying downloaded feed validator from " +
+              downloadedFeedValidator.getAbsolutePath() +
+              " to config anticipated location: " +
+              validatorLocation);
+      if(downloadedFeedValidator.exists()) {
+          fs.copyFiles(downloadedFeedValidator, new File(validatorLocation));
+      } else{
+          _log.error("Could not copy downloadedFeedValidator to configured validator location." +
+                  " Downloaded validator does not exist at: " + downloadedFeedValidator);
+      }
+    }
   }
 
   public void upload(BundleRequest request, BundleResponse response) {
@@ -309,6 +344,9 @@ public class BundleValidationServiceImpl implements BundleValidationService {
   private void debugCmds(String[] array) {
     NYCFileUtils.debugCmds(array);
   }
-  
+
+  public String getPythonFeedValidatorLocation(){
+    return _configurationService.getConfigurationValueAsString("pythonFeedValidatorLocation", null);
+  }
   
 }

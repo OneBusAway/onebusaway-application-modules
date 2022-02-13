@@ -39,33 +39,14 @@
     </bean>
 
     <!-- Database Configuration -->
-	<!-- mysql configuration
-    <bean id="dataSource"
-          class="org.springframework.jndi.JndiObjectFactoryBean">
-      <property name="jndiName"
-                value="java:comp/env/jdbc/appDB"/>   
-      <property name="lookupOnStartup"
-                value="true"/>   
-      <property name="cache"
-                value="true"/>   
-      <property name="proxyInterface"
-                value="javax.sql.DataSource"/>   
-      <property name="resourceRef"
-                value="true" />
-    </bean>
-	-->
-	<!-- standalone non-production usage -->
-	<!-- to use hsql run from the command line
- 		see https://github.com/OneBusAway/onebusaway-application-modules/wiki/HSQLDB-Configuration
-	-->
 	<bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
-		<property name="driverClassName" value="org.hsqldb.jdbcDriver" />
-		<property name="url" value="jdbc:hsqldb:hsql//localhost/web;hsqldb.lock_file=false" />
-		<property name="username" value="sa" />
-		<property name="password" value="" />
+		<property name="driverClassName" value="com.mysql.jdbc.Driver" />
+		<property name="url" value="jdbc:mysql://localhost:3306/onebusaway" />
+		<property name="username" value="root" />
+		<property name="password" value="root" />
 	</bean>
 
-	<alias name="dataSource" alias="mutableDataSource" />
+    <alias name="dataSource" alias="mutableDataSource" />
 
 
 
@@ -73,16 +54,6 @@
 	<bean id="serviceAreaServiceImpl" class="org.onebusaway.presentation.impl.ServiceAreaServiceImpl" />
 	<bean id="externalGeocoderImpl"
 		class="org.onebusaway.geocoder.enterprise.impl.EnterpriseGoogleGeocoderImpl" depends-on="serviceAreaServiceImpl">
-	</bean>
-
-
-	<bean
-		class="org.onebusaway.container.spring.SystemPropertyOverrideConfigurer">
-		<property name="properties">
-			<props>
-				<prop key="front-end.version">${git.commit.id:}</prop>
-			</props>
-		</property>
 	</bean>
 
 	<bean class="org.onebusaway.container.spring.PropertyOverrideConfigurer">

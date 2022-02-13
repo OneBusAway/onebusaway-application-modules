@@ -22,9 +22,9 @@
   xmlns:s="/struts-tags"
   xmlns:wiki="/oba-wiki-tags"
   id="content">
-    <s:set name="useAgencyId" value="useAgencyId" />
-    <s:set name="showAgencyNames" value="showAgencyNames" />
-    <s:set name="agencyFilter" value="agencyFilter" />
+    <s:set var="useAgencyId" value="useAgencyId" />
+    <s:set var="showAgencyNames" value="showAgencyNames" />
+    <s:set var="agencyFilter" value="agencyFilter" />
     <h3>Routes:</h3>
     <div class="routeList">
         <p>

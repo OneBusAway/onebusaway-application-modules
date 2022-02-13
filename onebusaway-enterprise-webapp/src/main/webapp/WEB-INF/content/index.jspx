@@ -57,32 +57,32 @@
 </s:url>
 <script src="${url}" type="text/javascript"><!-- //prevent jspx minimization --></script>
 
-<s:url var="url" value="/js/lib/jquery.ui.js">
+<s:url var="url" value="/js/biblio/jquery.ui.js">
 	<s:param name="v"><s:property value="frontEndVersion" /></s:param>
 </s:url>
 <script type="text/javascript" src="${url}"><!-- //prevent jspx minimization --></script>
 
-<s:url var="url" value="/js/lib/jquery.history.js">
+<s:url var="url" value="/js/biblio/jquery.history.js">
 	<s:param name="v"><s:property value="frontEndVersion" /></s:param>
 </s:url>
 <script type="text/javascript" src="${url}"><!-- //prevent jspx minimization --></script>
 
-<s:url var="url" value="/js/lib/markerManager.js">
+<s:url var="url" value="/js/biblio/markerManager.js">
 	<s:param name="v"><s:property value="frontEndVersion" /></s:param>
 </s:url>
 <script type="text/javascript" src="${url}"><!-- //prevent jspx minimization --></script>
 
-<s:url var="url" value="/js/lib/rgbcolor.js">
+<s:url var="url" value="/js/biblio/rgbcolor.js">
 	<s:param name="v"><s:property value="frontEndVersion" /></s:param>
 </s:url>
 <script type="text/javascript" src="${url}"><!-- //prevent jspx minimization --></script>
 
-<s:url var="url" value="/js/lib/dateFormat.js">
+<s:url var="url" value="/js/biblio/dateFormat.js">
 	<s:param name="v"><s:property value="frontEndVersion" /></s:param>
 </s:url>
 <script type="text/javascript" src="${url}"><!-- //prevent jspx minimization --></script>
 
-<s:url var="url" value="/js/lib/popover.js">
+<s:url var="url" value="/js/biblio/popover.js">
 	<s:param name="v"><s:property value="frontEndVersion" /></s:param>
 </s:url>
 <script type="text/javascript" src="${url}"><!-- //prevent jspx minimization --></script>
@@ -117,7 +117,7 @@
 </s:url>
 <script type="text/javascript" src="${url}"><!-- //prevent jspx minimization --></script>
 
-<s:url var="url" value="/js/lib/markerAnimate.js">
+<s:url var="url" value="/js/biblio/markerAnimate.js">
 	<s:param name="v"><s:property value="frontEndVersion" /></s:param>
 </s:url>
 <script type="text/javascript" src="${url}"><!-- //prevent jspx minimization --></script>
@@ -148,7 +148,9 @@
 				<div class="title">
 		   			<s:url var="url" value="/"></s:url>
 					<h1><a href="${url}"><s:property value="getText('main.title')" /></a></h1>
-		  		</div>	  	
+		  		</div>
+				<div id="map_header_link"><a></a></div>
+				<div>
 		   	  	<ul>
 		   	  		<s:url var="url" namespace="/m" action="index"/>
 					<li id="link_mobile" aria-label="Text only version"><a href="${url}">Text / Mobile</a></li>
@@ -165,12 +167,13 @@
 		 			<s:url var="url" namespace="/wiki/Help" action="Index"/>
 		 			<li id="link_help"><a href="${url}">Help</a></li>
 			   	</ul>
+				</div>
 		   </div>
 
 	       <form action="search.action">
-	         <input type="text" name="q" value=""/>
+	         <input type="text" name="q" value="" aria-label="Enter search: "/>
 	         <input type="submit" value="Find" class="submit"/>
-	         <p id="tip">TIP: Enter a bus stop code, route, or street address.</p>
+	         <p id="tip">Enter a bus stop code, route, or street address.</p>
 	       </form>
 	       
 	       <div id="matches">
@@ -201,13 +204,34 @@
 			<c:import url="includes/available-routes.jspx" />
 
 			<s:if test="globalServiceAlerts!=null">
-			 <div id="global-alerts" class="global-alerts">
-				<s:iterator value="globalServiceAlerts">
-					<s:iterator value="descriptions">
-						<p class="global-alert-content"><strong>Service Notice: </strong><s:property value="value" /></p>
+				<div id="global-alerts" class="global-alerts">
+					<s:iterator value="globalServiceAlerts">
+
+						<s:if test="urls.size > 0">
+							<s:iterator value="urls" status="iter">
+								<p>
+									<a class="global-alert-content" href="${value}" target="alert">
+										<strong><s:property value="summaries[#iter.index].value" /></strong>
+										<s:if test="summaries[#iter.index].value != descriptions[#iter.index].value">
+											<br/>
+											<s:property value="descriptions[#iter.index].value" />
+										</s:if>
+									</a>
+								</p>
+								<br/>
+							</s:iterator>
+						</s:if>
+						<s:else>
+							<s:iterator value="summaries" status="iter">
+								<p><strong><s:property value="value" /></strong></p>
+								<s:if test="value != descriptions[#iter.index].value">
+									<p><s:property value="descriptions[#iter.index].value" /></p>
+								</s:if>
+								<br/>
+							</s:iterator>
+						</s:else>
 					</s:iterator>
-				</s:iterator>
-			 </div>
+				</div>
 			</s:if>
 	
 			<!-- Include the Google ad -->
@@ -235,7 +259,7 @@
 
 	<div id="map"><!-- //prevent jspx minimization --></div>
 	<div id="legend"><!-- //prevent jspx minimization --></div>
-	
+
     <div id="wizard">
 	   	<div id="wizard_start">
 	   		<ul>
@@ -257,7 +281,7 @@
 			    	<s:url var="url" namespace="/m" action=""/>
 			    	<a href="${url}" target="_new">
 			    		<p>Mobile Web</p>
-			    		<a rel="popover"><div id="smartphone_img">&amp;nbsp;</div></a>
+			    		<a href="${url}" target="_new" rel="popover"><div id="smartphone_img">&amp;nbsp;</div></a>
 			    	</a>
 			    </li>
 			    <li id="wizard-col4">
@@ -299,12 +323,32 @@
 	</div>
 
 	<div id="map-global-alerts" class="global-alerts">
-		<div id="close-map-global-alerts"><a href="#">[close]</a></div>
+		<div id="close-map-global-alerts"><a id="closeMapGlobalAlerts" href="#">[close]</a></div>
 		<div class="global-alerts-content">
 			<s:iterator value="globalServiceAlerts">
-				<s:iterator value="descriptions">
-					<p class="global-alert-content"><strong>Service Notice: </strong><s:property value="value" /></p>
-				</s:iterator>
+				<s:if test="urls.size > 0">
+					<s:iterator value="urls" status="iter">
+						<p>
+							<a class="global-alert-content" href="${value}" target="alert">
+								<strong><s:property value="summaries[#iter.index].value" /></strong>
+								<s:if test="summaries[#iter.index].value != descriptions[#iter.index].value">
+									<br/>
+									<s:property value="descriptions[#iter.index].value" />
+								</s:if>
+							</a>
+						</p>
+						<br/>
+					</s:iterator>
+				</s:if>
+				<s:else>
+					<s:iterator value="summaries" status="iter">
+						<p class="global-alert-content"><strong><s:property value="value" /></strong></p>
+						<s:if test="value != descriptions[#iter.index].value">
+							<p><s:property value="descriptions[#iter.index].value" /></p>
+						</s:if>
+						<br/>
+					</s:iterator>
+				</s:else>
 			</s:iterator>
 		</div>
 	</div>

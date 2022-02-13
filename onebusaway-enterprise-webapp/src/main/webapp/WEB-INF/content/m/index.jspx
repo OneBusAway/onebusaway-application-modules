@@ -51,27 +51,27 @@
 	</s:url>
 	<script type="text/javascript" src="${url}"><!-- //prevent jspx minimization --></script>
 
-	<s:url var="url" value="/js/lib/jquery.ui.js">
+	<s:url var="url" value="/js/biblio/jquery.ui.js">
 		<s:param name="v"><s:property value="frontEndVersion" /></s:param>
   	</s:url>
 	<script type="text/javascript" src="${url}"><!-- //prevent jspx minimization --></script>
 
-	<s:url var="url" value="/js/lib/jquery.history.js">
+	<s:url var="url" value="/js/biblio/jquery.history.js">
 		<s:param name="v"><s:property value="frontEndVersion" /></s:param>
 	</s:url>
 	<script type="text/javascript" src="${url}"><!-- //prevent jspx minimization --></script>
 
-	<s:url var="url" value="/js/lib/markerManager.js">
+	<s:url var="url" value="/js/biblio/markerManager.js">
 		<s:param name="v"><s:property value="frontEndVersion" /></s:param>
 	</s:url>
 	<script type="text/javascript" src="${url}"><!-- //prevent jspx minimization --></script>
 
-	<s:url var="url" value="/js/lib/rgbcolor.js">
+	<s:url var="url" value="/js/biblio/rgbcolor.js">
 		<s:param name="v"><s:property value="frontEndVersion" /></s:param>
 	</s:url>
 	<script type="text/javascript" src="${url}"><!-- //prevent jspx minimization --></script>
 
-	<s:url var="url" value="/js/lib/dateFormat.js">
+	<s:url var="url" value="/js/biblio/dateFormat.js">
 		<s:param name="v"><s:property value="frontEndVersion" /></s:param>
   	</s:url>
 	<script type="text/javascript" src="${url}"><!-- //prevent jspx minimization --></script>
@@ -81,7 +81,7 @@
   	</s:url>
 	<script type="text/javascript" src="${url}"><!-- //prevent jspx minimization --></script>
 
-	<s:url var="url" value="/js/lib/popover.js">
+	<s:url var="url" value="/js/biblio/popover.js">
 		<s:param name="v"><s:property value="frontEndVersion" /></s:param>
 	</s:url>
 	<script type="text/javascript" src="${url}"><!-- //prevent jspx minimization --></script>
@@ -111,7 +111,7 @@
 	</s:url>
 	<script type="text/javascript" src="${url}"><!-- //prevent jspx minimization --></script>
 
-	<s:url var="url" value="/js/lib/markerAnimate.js">
+	<s:url var="url" value="/js/biblio/markerAnimate.js">
 		<s:param name="v"><s:property value="frontEndVersion" /></s:param>
 	</s:url>
 	<script type="text/javascript" src="${url}"><!-- //prevent jspx minimization --></script>
@@ -148,19 +148,35 @@
 				<input type="hidden" name="l" id="l" />
 				<input type="hidden" name="t" id="t" />
 			</s:form>
-
-			<small>TIP: Enter a bus stop code, route, or street address.</small>
+			<s:if test="%{results.empty}">
+				<small>Enter a bus stop code, route, or street address.</small>
+			</s:if>
 		</div>
 
 		<s:if test="globalServiceAlerts!=null">
 			<div id="global-alerts" class="global-alerts">
 				<s:iterator value="globalServiceAlerts">
-					<s:iterator value="descriptions">
-						<p id="serviceAlertHeader" class="global-alert-content">
-							<span>Service Alert Text Here</span>
-							<s:property value="value" />
-						</p>
-					</s:iterator>
+					<s:if test="urls.size > 0">
+						<s:iterator value="urls" status="iter">
+							<p>
+								<a class="global-alert-content" href="${value}" target="alert">
+									<strong><s:property value="summaries[#iter.index].value" /></strong>
+									<s:if test="summaries[#iter.index].value != descriptions[#iter.index].value">
+										: <s:property value="descriptions[#iter.index].value" />
+									</s:if>
+								</a>
+							</p>
+						</s:iterator>
+					</s:if>
+					<s:else>
+						<s:iterator value="summaries" status="iter">
+							<p class="global-alert-content"><strong><s:property value="value" /></strong>
+							<s:if test="value != descriptions[#iter.index].value">
+								: <s:property value="descriptions[#iter.index].value" />
+							</s:if>
+							</p>
+						</s:iterator>
+					</s:else>
 				</s:iterator>
 			 </div>
 		</s:if>
@@ -182,7 +198,14 @@
 			</div>
 		</s:if>
 		<s:else>
+			<!-- discourage expensive geocoding refreshes -->
 		<s:if test="%{results.isGeocode==false}">
+			<s:if test="%{feedbackFormURL != null}">
+				<div id="feedbackForm">
+					<s:set var="feedbackLink" value="feedbackFormURL" />
+					<a target="_blank" href="${feedbackLink}"><s:property value="feedbackFormText" /></a>
+				</div>
+			</s:if>
 			<div id="refresh">
 				<s:url var="url" namespace="/m" action="index" anchor="top">
 					<s:param name="q"><s:property value="q" /></s:param>

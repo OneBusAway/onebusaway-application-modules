@@ -35,6 +35,7 @@ import org.onebusaway.geospatial.model.EncodedPolylineBean;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
 import org.onebusaway.realtime.api.TimepointPredictionRecord;
+import org.onebusaway.realtime.api.VehicleOccupancyRecord;
 import org.onebusaway.transit_data.OccupancyStatusBean;
 import org.onebusaway.transit_data.model.*;
 import org.onebusaway.transit_data.model.blocks.BlockBean;
@@ -261,6 +262,9 @@ public interface TransitDataService extends FederatedService {
   @FederatedByEntityIdMethod
   public void resetVehicleLocation(String vehicleId);
 
+  @FederatedByEntityIdMethod
+  VehicleOccupancyRecord getVehicleOccupancyRecordForVehicleIdAndRoute(AgencyAndId var1, String var2, String var3);
+
   /**
    * 
    * @param query determines the vehicle and time of the trip query
@@ -273,8 +277,7 @@ public interface TransitDataService extends FederatedService {
 
   /**
    * @param stopId
-   * @param timeFrom
-   * @param timeTo
+   * @param query
    * @return stop with arrival and departure information for the specified stop
    *         and time range, or null if not found
    * @throws ServiceException
@@ -286,8 +289,7 @@ public interface TransitDataService extends FederatedService {
 
   /**
    * @param stopIds
-   * @param timeFrom
-   * @param timeTo
+   * @param query
    * @return stops with arrival and departure information for the specified
    *         stops and time range
    * @throws ServiceException
@@ -319,6 +321,15 @@ public interface TransitDataService extends FederatedService {
   @FederatedByEntityIdMethod
   public StopScheduleBean getScheduleForStop(String stopId, Date date)
       throws ServiceException;
+
+  /**
+   * @param routeId
+   * @param serviceDate
+   * @return retrieve the full schedule for the route on the specified date
+   * @throws ServiceException
+   */
+  @FederatedByEntityIdMethod
+  public RouteScheduleBean getScheduleForRoute(AgencyAndId routeId, ServiceDate serviceDate);
 
   /**
    * 

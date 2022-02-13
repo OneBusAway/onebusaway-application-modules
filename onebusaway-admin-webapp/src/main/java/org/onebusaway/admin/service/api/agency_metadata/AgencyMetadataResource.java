@@ -28,10 +28,10 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 
-import org.codehaus.jackson.JsonGenerationException;
-import org.codehaus.jackson.map.JsonMappingException;
-import org.codehaus.jackson.map.MappingJsonFactory;
-import org.codehaus.jackson.map.ObjectMapper;
+import com.fasterxml.jackson.core.JsonGenerationException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.MappingJsonFactory;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.onebusaway.agency_metadata.model.AgencyMetadata;
 import org.onebusaway.agency_metadata.service.AgencyMetadataService;
 import org.slf4j.Logger;
@@ -162,7 +162,7 @@ public class AgencyMetadataResource {
     final MappingJsonFactory jsonFactory = new MappingJsonFactory();
     Response response = null;
     try {
-      final org.codehaus.jackson.JsonGenerator jsonGenerator = jsonFactory.createJsonGenerator(sw);
+      final com.fasterxml.jackson.core.JsonGenerator jsonGenerator = jsonFactory.createJsonGenerator(sw);
       mapper.writeValue(jsonGenerator, result);
       response = Response.ok(sw.toString()).build();
     } catch (JsonGenerationException e) {

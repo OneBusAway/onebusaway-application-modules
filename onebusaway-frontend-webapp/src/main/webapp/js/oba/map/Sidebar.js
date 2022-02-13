@@ -766,7 +766,7 @@ OBA.Sidebar = function() {
 			
 			// Add behavior to the close link in the global alert dialog under the map
 			// so it closes when the link is clicked.
-			mapGlobalAlerts.find("a").click(function(event){
+			mapGlobalAlerts.find("a#closeMapGlobalAlerts").click(function(event){
 				event.preventDefault();
 				mapGlobalAlerts.detach();
 				resize();

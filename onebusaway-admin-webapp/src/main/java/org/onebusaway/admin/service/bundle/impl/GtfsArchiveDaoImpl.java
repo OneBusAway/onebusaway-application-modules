@@ -48,7 +48,6 @@ public class GtfsArchiveDaoImpl implements GtfsArchiveDao {
   private SessionFactory _sessionFactory;
 
   @Autowired
-  @Qualifier("gtfsRealtimeArchiveSessionFactory")
   public void setSessionFactory(SessionFactory sessionFactory) {
     _sessionFactory = sessionFactory;
   }

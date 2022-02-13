@@ -16,7 +16,6 @@
 package org.onebusaway.enterprise.webapp.api;
 
 import java.util.Date;
-import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -96,8 +95,10 @@ public class ApiKeyInterceptor extends AbstractInterceptor {
   // package private for unit tests
   int isAllowed(ActionInvocation invocation) {
     ActionContext context = invocation.getInvocationContext();
-    Map<String, Object> parameters = context.getParameters();
-    String[] keys = (String[]) parameters.get("key");
+    String[] keys = null;
+    if (context.getParameters().containsKey("key")) {
+      keys = (String[]) context.getParameters().get("key").getMultipleValues();
+    }
 
     if (keys == null || keys.length == 0) {
       // 401:  we couldn't find the api key

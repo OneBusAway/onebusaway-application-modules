@@ -43,6 +43,8 @@ import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.realtime.api.VehicleLocationListener;
 import org.onebusaway.realtime.api.VehicleLocationRecord;
+import org.onebusaway.realtime.api.VehicleOccupancyListener;
+import org.onebusaway.realtime.api.VehicleOccupancyRecord;
 import org.onebusaway.transit_data.model.service_alerts.ECause;
 import org.onebusaway.transit_data.model.service_alerts.ESeverity;
 import org.onebusaway.alerts.impl.ServiceAlertLocalizedString;
@@ -101,6 +103,8 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
 
   private VehicleLocationListener _vehicleLocationListener;
 
+  private VehicleOccupancyListener _vehicleOccupancyListener;
+
   private ServiceAlertsService _serviceAlertService;
 
   private ScheduledExecutorService _scheduledExecutorService;
@@ -118,6 +122,8 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   private String _sftpVehiclePositionsUrl;
 
   private URL _alertsUrl;
+
+  private URL _alertCollectionUrl;
 
   private String _sftpAlertsUrl;
 
@@ -171,6 +177,8 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
 
   private boolean _ignoreAlertTripId = false;
 
+  private String _alertSourcePrefix = null;
+
   @Autowired
   public void setAgencyService(AgencyService agencyService) {
     _agencyService = agencyService;
@@ -200,6 +208,11 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   public void setVehicleLocationListener(
       VehicleLocationListener vehicleLocationListener) {
     _vehicleLocationListener = vehicleLocationListener;
+  }
+
+  @Autowired
+  public void setVehicleOccupancyListener(VehicleOccupancyListener vehicleOccupancyListener) {
+    _vehicleOccupancyListener = vehicleOccupancyListener;
   }
 
   @Autowired
@@ -251,9 +264,15 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     _alertsUrl = alertsUrl;
   }
 
+  public void setAlertCollectionUrl(URL alertCollectionUrl) {
+    _alertCollectionUrl = alertCollectionUrl;
+  }
+
   public URL getAlertsUrl() {
     return _alertsUrl;
   }
+
+  public URL getAlertCollectionUrl() { return _alertCollectionUrl; }
   
   public void setSftpAlertsUrl(String sftpAlertsUrl) {
     _sftpAlertsUrl = sftpAlertsUrl;
@@ -354,6 +373,20 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   public GtfsRealtimeTripLibrary getGtfsRealtimeTripLibrary() {
     return _tripsLibrary;
   }
+
+  public String getAlertSourcePrefix() {
+    return _alertSourcePrefix;
+  }
+
+  /**
+   * if alerts come in via alternative means such as an RSS feed, set the name of that
+   * source here to associate and merge them with this feed
+   *
+   * @param prefix
+   */
+  public void setAlertSourcePrefix(String prefix) {
+    _alertSourcePrefix = prefix;
+  }
   
   @PostConstruct
   public void start() {
@@ -418,11 +451,18 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     FeedMessage alerts = _sftpAlertsUrl != null ?
         readOrReturnDefault(_sftpAlertsUrl)
         : readOrReturnDefault(_alertsUrl);
+    ServiceAlerts.ServiceAlertsCollection alertCollection
+            = readOrReturnDefaultCollection(_alertCollectionUrl);
+
     MonitoredResult result = new MonitoredResult();
     result.setAgencyIds(_agencyIds);
-    handleUpdates(result, tripUpdates, vehiclePositions, alerts);
+    handleUpdates(result, tripUpdates, vehiclePositions, alerts, alertCollection);
     // update reference in a thread safe manner
     _monitoredResult = result;
+  }
+
+  private ServiceAlerts.ServiceAlertsCollection readOrReturnDefaultCollection(URL alertCollectionUrl) throws IOException {
+    return readAlertCollectionFromUrl(alertCollectionUrl);
   }
 
   /****
@@ -448,7 +488,8 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
    * @param alerts
    */
   private synchronized void handleUpdates(MonitoredResult result, FeedMessage tripUpdates,
-                                          FeedMessage vehiclePositions, FeedMessage alerts) {
+                                          FeedMessage vehiclePositions, FeedMessage alerts,
+                                          ServiceAlerts.ServiceAlertsCollection alertCollection) {
 	  
 	long time = tripUpdates.getHeader().getTimestamp() * 1000;
 	_tripsLibrary.setCurrentTime(time);
@@ -459,6 +500,7 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     handleCombinedUpdates(result, combinedUpdates);
     cacheVehicleLocations(vehiclePositions);
     handleAlerts(alerts);
+    handleAlertCollection(alertCollection);
   }
 
   private void cacheVehicleLocations(FeedMessage vehiclePositions) {
@@ -476,7 +518,8 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     }
   }
 
-  private void handleCombinedUpdates(MonitoredResult result,
+  // package private for unit tests
+   void handleCombinedUpdates(MonitoredResult result,
       List<CombinedTripUpdatesAndVehiclePosition> updates) {
 
     // exit if we are configured in alerts mode
@@ -504,11 +547,15 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
           continue;
         }
         seenVehicles.add(vehicleId);
+        VehicleOccupancyRecord vor = _tripsLibrary.createVehicleOccupancyRecordForUpdate(result, update);
         Date timestamp = new Date(record.getTimeOfRecord());
         Date prev = _lastVehicleUpdate.get(vehicleId);
         if (prev == null || prev.before(timestamp)) {
           _log.debug("matched vehicle " + vehicleId + " on block=" + record.getBlockId() + " with scheduleDeviation=" + record.getScheduleDeviation());
           _vehicleLocationListener.handleVehicleLocationRecord(record);
+          if (vor != null) {
+            _vehicleOccupancyListener.handleVehicleOccupancyRecord(vor);
+          }
           _lastVehicleUpdate.put(vehicleId, timestamp);
         } else {
           _log.debug("discarding: update for vehicle " + vehicleId + " as timestamp in past");
@@ -569,6 +616,226 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     return false;
   }
 
+  private void handleAlertCollection(ServiceAlerts.ServiceAlertsCollection alertsCollection) {
+    if (_alertCollectionUrl == null) {
+      return;
+    }
+
+    if (alertsCollection == null || alertsCollection.getServiceAlertsCount() == 0) {
+      // don't let a single connection issue wipe out the set of alerts
+      _log.info("handleAlertCollection nothing to do");
+      return;
+    }
+
+    Set<AgencyAndId> currentAlerts = new HashSet<AgencyAndId>();
+    Set<ServiceAlertRecord> toAdd = new HashSet<>();
+    Set<ServiceAlertRecord> toUpdate = new HashSet<>();
+
+    long start = System.currentTimeMillis();
+    _log.info("[" + getFeedId() + "] handleAlertCollection running....");
+
+    ArrayList<AgencyAndId> idsInCollection = new ArrayList<>();
+    for (ServiceAlerts.ServiceAlert alert : alertsCollection.getServiceAlertsList()) {
+
+      AgencyAndId id = new AgencyAndId(alert.getId().getAgencyId(), alert.getId().getId());
+      idsInCollection.add(id);
+      handleSingleAlert(id, alert.toBuilder(), currentAlerts, toAdd, toUpdate, alert);
+    }
+
+    _serviceAlertService.createOrUpdateServiceAlerts(getAgencyIds().get(0), new ArrayList<ServiceAlertRecord>(toAdd));
+    _serviceAlertService.createOrUpdateServiceAlerts(getAgencyIds().get(0), new ArrayList<ServiceAlertRecord>(toUpdate));
+
+    Set<AgencyAndId> toBeDeleted = new HashSet<AgencyAndId>();
+    for (ServiceAlertRecord sa : _serviceAlertService.getAllServiceAlerts()) {
+      AgencyAndId testId = new AgencyAndId(sa.getAgencyId(), sa.getServiceAlertId());
+
+      /* consider other feed sources that may be merged here as well */
+      if (sa.getSource() != null
+              && (sa.getSource().equals(getFeedId())
+                || (_alertSourcePrefix != null && sa.getSource().contains(_alertSourcePrefix)))) {
+        try {
+          if (!currentAlerts.contains(testId)) {
+            _log.debug("[" + getFeedId() + "] cleaning up alert id " + testId
+                    + " with source=" + sa.getSource());
+            toBeDeleted.add(testId);
+          }
+          else if (getAgencyIds().contains(testId.getAgencyId()) && !idsInCollection.contains(testId)) {
+            //delete if the alert came from this feed but isn't there anymore
+            toBeDeleted.add(testId);
+          }
+        } catch (Exception e) {
+          _log.error("invalid AgencyAndId " + sa.getServiceAlertId());
+        }
+      }
+      else if (getAgencyIds().contains(testId.getAgencyId()) && !idsInCollection.contains(testId)) {
+        //delete if the alert came from this feed but isn't there anymore
+        toBeDeleted.add(testId);
+      }
+    }
+
+    _serviceAlertService.removeServiceAlerts(new ArrayList<AgencyAndId>(toBeDeleted));
+    _serviceAlertService.cleanup();
+    _log.info("[" + getFeedId() + "] handleAlertCollection complete with "
+            + currentAlerts.size()
+            + " active alerts and "
+            + toBeDeleted.size()
+            + " deleted in "
+            + (System.currentTimeMillis() - start) + " ms");
+
+  }
+
+  private void handleSingleAlert(AgencyAndId id,
+                                 ServiceAlert.Builder serviceAlertBuilder,
+                                 Set<AgencyAndId> currentAlerts,
+                                 Set<ServiceAlertRecord> toAdd,
+                                 Set<ServiceAlertRecord> toUpdate,
+                                 ServiceAlert alert) {
+
+    ServiceAlert serviceAlert = alert;
+    // cache value of alert
+    ServiceAlert existingAlert = _alertsById.get(id);
+    // data store value of service alert
+    ServiceAlertRecord existingRecord = _serviceAlertService.getServiceAlertForId(new AgencyAndId(id.getAgencyId(), id.getId()));
+
+    // don't update if there's nothing to do
+    if ((existingAlert == null
+            || !existingAlert.equals(serviceAlert))) {
+      _alertsById.put(id, serviceAlert);
+
+      ServiceAlertRecord serviceAlertRecord = new ServiceAlertRecord();
+      // indicate this came from a feed so we can prune expired alerts
+      if (serviceAlert.hasSource()) {
+        serviceAlertRecord.setSource(serviceAlert.getSource());
+      } else {
+        serviceAlertRecord.setSource(getFeedId());
+      }
+      serviceAlertRecord.setAgencyId(id.getAgencyId()); // AGENCY from feed configuration
+      serviceAlertRecord.setServiceAlertId(id.getId()); // ID ONLY
+
+      serviceAlertRecord.setActiveWindows(new HashSet<ServiceAlertTimeRange>());
+      if (serviceAlert.getActiveWindowList() != null) {
+        for (ServiceAlerts.TimeRange timeRange : serviceAlert.getActiveWindowList()) {
+          ServiceAlertTimeRange serviceAlertTimeRange = new ServiceAlertTimeRange();
+          serviceAlertTimeRange.setFromValue(timeRange.getStart());
+          serviceAlertTimeRange.setToValue(timeRange.getEnd());
+          serviceAlertRecord.getActiveWindows().add(serviceAlertTimeRange);
+        }
+      }
+
+      serviceAlertRecord.setAllAffects(new HashSet<ServiceAlertsSituationAffectsClause>());
+      if (serviceAlert.getAffectsList() != null) {
+        for (ServiceAlerts.Affects affects : serviceAlertBuilder.getAffectsList()) {
+          ServiceAlertsSituationAffectsClause serviceAlertsSituationAffectsClause = new ServiceAlertsSituationAffectsClause();
+
+          /*
+           * if the affects clause has empty but non-null fields the Affects...Factory references will break
+           */
+          if (!StringUtils.isBlank(affects.getAgencyId()))
+            serviceAlertsSituationAffectsClause.setAgencyId(affects.getAgencyId());
+
+          if (!StringUtils.isBlank(affects.getApplicationId()))
+            serviceAlertsSituationAffectsClause.setApplicationId(affects.getApplicationId());
+
+          if (!StringUtils.isBlank(affects.getDirectionId()))
+            serviceAlertsSituationAffectsClause.setDirectionId(affects.getDirectionId());
+
+          if (affects.getRouteId() != null && affects.getRouteId().hasId())
+            serviceAlertsSituationAffectsClause.setRouteId(new AgencyAndId(affects.getRouteId().getAgencyId(), affects.getRouteId().getId()).toString());
+
+          if (affects.getStopId().getId() != null && affects.getStopId().hasId()) {
+            serviceAlertsSituationAffectsClause.setStopId(new AgencyAndId(affects.getStopId().getAgencyId(), affects.getStopId().getId()).toString());
+          }
+
+          if (!_ignoreAlertTripId && affects.getTripId() != null && affects.getTripId().hasId())
+            serviceAlertsSituationAffectsClause.setTripId(new AgencyAndId(affects.getTripId().getAgencyId(), affects.getTripId().getId()).toString());
+          serviceAlertRecord.getAllAffects().add(serviceAlertsSituationAffectsClause);
+        }
+      }
+
+      serviceAlertRecord.setCause(getECause(serviceAlert.getCause()));
+      serviceAlertRecord.setConsequences(new HashSet<ServiceAlertSituationConsequenceClause>());
+      if (serviceAlert.getConsequenceList() != null) {
+        for (ServiceAlerts.Consequence consequence : serviceAlert.getConsequenceList()) {
+          ServiceAlertSituationConsequenceClause serviceAlertSituationConsequenceClause = new ServiceAlertSituationConsequenceClause();
+          serviceAlertSituationConsequenceClause.setDetourPath(consequence.getDetourPath());
+          serviceAlertSituationConsequenceClause.setDetourStopIds(new HashSet<String>());
+          if (consequence.getDetourStopIdsList() != null) {
+            for (ServiceAlerts.Id stopId : consequence.getDetourStopIdsList()) {
+              serviceAlertSituationConsequenceClause.getDetourStopIds().add(stopId.getId());
+            }
+          }
+          serviceAlertRecord.getConsequences().add(serviceAlertSituationConsequenceClause);
+        }
+      }
+
+      serviceAlertRecord.setCreationTime(serviceAlert.getCreationTime());
+      serviceAlertRecord.setDescriptions(
+              new HashSet<ServiceAlertLocalizedString>());
+      if (serviceAlert.getDescription() != null) {
+        for (ServiceAlerts.TranslatedString.Translation translation : serviceAlert.getDescription().getTranslationList()) {
+          ServiceAlertLocalizedString string = new ServiceAlertLocalizedString();
+          string.setValue(translation.getText());
+          string.setLanguage(translation.getLanguage());
+          serviceAlertRecord.getDescriptions().add(string);
+        }
+      }
+
+      serviceAlertRecord.setModifiedTime(serviceAlert.getModifiedTime());
+      serviceAlertRecord.setPublicationWindows(new HashSet<ServiceAlertTimeRange>());
+
+      serviceAlertRecord.setSeverity(getESeverity(serviceAlert.getSeverity()));
+
+      serviceAlertRecord.setSummaries(new HashSet<ServiceAlertLocalizedString>());
+      if (serviceAlert.getSummary() != null) {
+        for (ServiceAlerts.TranslatedString.Translation translation : serviceAlert.getSummary().getTranslationList()) {
+          ServiceAlertLocalizedString string = new ServiceAlertLocalizedString();
+          string.setValue(translation.getText());
+          string.setLanguage(translation.getLanguage());
+          serviceAlertRecord.getSummaries().add(string);
+        }
+      }
+
+      serviceAlertRecord.setUrls(new HashSet<ServiceAlertLocalizedString>());
+      if (serviceAlert.getUrl() != null) {
+        for (ServiceAlerts.TranslatedString.Translation translation : serviceAlert.getUrl().getTranslationList()) {
+          ServiceAlertLocalizedString string = new ServiceAlertLocalizedString();
+          string.setValue(translation.getText());
+          string.setLanguage(translation.getLanguage());
+          serviceAlertRecord.getUrls().add(string);
+        }
+      }
+
+      if (serviceAlert.getActiveWindowList().size() > 0) {
+        _log.debug("[" + serviceAlert.getId().getId() + "] "
+                + serviceAlert.getActiveWindowList().size() + " active windows");
+        List<ServiceAlerts.TimeRange> activeWindowList = serviceAlert.getActiveWindowList();
+        for (ServiceAlerts.TimeRange str : serviceAlert.getActiveWindowList()) {
+          ServiceAlertTimeRange satr = new ServiceAlertTimeRange();
+          if (str.hasStart())
+            satr.setFromValue(str.getStart());
+          if (str.hasEnd())
+            satr.setToValue(str.getEnd());
+          _log.debug("[" + serviceAlert.getId().getId() + "] adding "
+                  + satr.getFromValue() + "->" + satr.getToValue());
+          serviceAlertRecord.getActiveWindows().add(satr);
+        }
+      }
+
+      if (existingAlert == null) {
+        _log.debug("creating alert " + serviceAlertRecord.getAgencyId() + ":" + serviceAlertRecord.getServiceAlertId());
+        toAdd.add(serviceAlertRecord);
+      } else {
+        _log.debug("updating alert " + serviceAlertRecord.getAgencyId() + ":" + serviceAlertRecord.getServiceAlertId());
+        toUpdate.add(serviceAlertRecord);
+      }
+      currentAlerts.add(new AgencyAndId(serviceAlertRecord.getAgencyId(), serviceAlertRecord.getServiceAlertId()));
+    } else {
+      _log.debug("not updating alert " + id);
+      currentAlerts.add(id);
+    }
+
+  }
+
   private void handleAlerts(FeedMessage alerts) {
 
     // exit if we are configured only in trip updates mode
@@ -607,143 +874,9 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
         ServiceAlert serviceAlert = serviceAlertBuilder.build();
         // cache value of alert
         ServiceAlert existingAlert = _alertsById.get(id);
-        // data store value of service alert
-        ServiceAlertRecord existingRecord = _serviceAlertService.getServiceAlertForId(new AgencyAndId(id.getAgencyId(), id.getId()));
 
-        // don't update if there's nothing to do or if the owner changed to admin console
-        if ((existingAlert == null
-                || !existingAlert.equals(serviceAlert))
-                && (existingRecord == null
-                || !"console".equals(existingRecord.getSource()))) {
-          _alertsById.put(id, serviceAlert);
+        handleSingleAlert(id, serviceAlertBuilder, currentAlerts, toAdd, toUpdate, serviceAlert);
 
-          ServiceAlertRecord serviceAlertRecord = new ServiceAlertRecord();
-          // indicate this came from a feed so we can prune expired alerts
-          serviceAlertRecord.setSource(getFeedId());
-          serviceAlertRecord.setAgencyId(id.getAgencyId()); // AGENCY from feed configuration
-          serviceAlertRecord.setServiceAlertId(id.getId()); // ID ONLY
-
-          serviceAlertRecord.setActiveWindows(new HashSet<ServiceAlertTimeRange>());
-          if (serviceAlert.getActiveWindowList() != null) {
-            for (ServiceAlerts.TimeRange timeRange : serviceAlert.getActiveWindowList()) {
-              ServiceAlertTimeRange serviceAlertTimeRange = new ServiceAlertTimeRange();
-              serviceAlertTimeRange.setFromValue(timeRange.getStart());
-              serviceAlertTimeRange.setToValue(timeRange.getEnd());
-              serviceAlertRecord.getActiveWindows().add(serviceAlertTimeRange);
-            }
-          }
-
-          serviceAlertRecord.setAllAffects(new HashSet<ServiceAlertsSituationAffectsClause>());
-          if (serviceAlert.getAffectsList() != null) {
-            for (ServiceAlerts.Affects affects : serviceAlertBuilder.getAffectsList()) {
-              ServiceAlertsSituationAffectsClause serviceAlertsSituationAffectsClause = new ServiceAlertsSituationAffectsClause();
-
-              /*
-              * if the affects clause has empty but non-null fields the Affects...Factory references will break
-               */
-              if (!StringUtils.isBlank(affects.getAgencyId()))
-              serviceAlertsSituationAffectsClause.setAgencyId(affects.getAgencyId());
-
-              if (!StringUtils.isBlank(affects.getApplicationId()))
-              serviceAlertsSituationAffectsClause.setApplicationId(affects.getApplicationId());
-
-              if (!StringUtils.isBlank(affects.getDirectionId()))
-                serviceAlertsSituationAffectsClause.setDirectionId(affects.getDirectionId());
-
-              if (affects.getRouteId() != null && affects.getRouteId().hasId())
-                serviceAlertsSituationAffectsClause.setRouteId(new AgencyAndId(affects.getRouteId().getAgencyId(), affects.getRouteId().getId()).toString());
-
-              if (affects.getStopId().getId() != null && affects.getStopId().hasId()) {
-                serviceAlertsSituationAffectsClause.setStopId(new AgencyAndId(affects.getStopId().getAgencyId(), affects.getStopId().getId()).toString());
-              }
-
-              if (!_ignoreAlertTripId && affects.getTripId() != null && affects.getTripId().hasId())
-                serviceAlertsSituationAffectsClause.setTripId(new AgencyAndId(affects.getTripId().getAgencyId(), affects.getTripId().getId()).toString());
-              serviceAlertRecord.getAllAffects().add(serviceAlertsSituationAffectsClause);
-            }
-          }
-
-          serviceAlertRecord.setCause(getECause(serviceAlert.getCause()));
-          serviceAlertRecord.setConsequences(new HashSet<ServiceAlertSituationConsequenceClause>());
-          if (serviceAlert.getConsequenceList() != null) {
-            for (ServiceAlerts.Consequence consequence : serviceAlert.getConsequenceList()) {
-              ServiceAlertSituationConsequenceClause serviceAlertSituationConsequenceClause = new ServiceAlertSituationConsequenceClause();
-              serviceAlertSituationConsequenceClause.setDetourPath(consequence.getDetourPath());
-              serviceAlertSituationConsequenceClause.setDetourStopIds(new HashSet<String>());
-              if (consequence.getDetourStopIdsList() != null) {
-                for (ServiceAlerts.Id stopId : consequence.getDetourStopIdsList()) {
-                  serviceAlertSituationConsequenceClause.getDetourStopIds().add(stopId.getId());
-                }
-              }
-              serviceAlertRecord.getConsequences().add(serviceAlertSituationConsequenceClause);
-            }
-          }
-
-          serviceAlertRecord.setCreationTime(serviceAlert.getCreationTime());
-          serviceAlertRecord.setDescriptions(
-                  new HashSet<ServiceAlertLocalizedString>());
-          if (serviceAlert.getDescription() != null) {
-            for (ServiceAlerts.TranslatedString.Translation translation : serviceAlert.getDescription().getTranslationList()) {
-              ServiceAlertLocalizedString string = new ServiceAlertLocalizedString();
-              string.setValue(translation.getText());
-              string.setLanguage(translation.getLanguage());
-              serviceAlertRecord.getDescriptions().add(string);
-            }
-          }
-
-          serviceAlertRecord.setModifiedTime(serviceAlert.getModifiedTime());
-          serviceAlertRecord.setPublicationWindows(new HashSet<ServiceAlertTimeRange>());
-
-          serviceAlertRecord.setSeverity(getESeverity(serviceAlert.getSeverity()));
-
-          serviceAlertRecord.setSummaries(new HashSet<ServiceAlertLocalizedString>());
-          if (serviceAlert.getSummary() != null) {
-            for (ServiceAlerts.TranslatedString.Translation translation : serviceAlert.getSummary().getTranslationList()) {
-              ServiceAlertLocalizedString string = new ServiceAlertLocalizedString();
-              string.setValue(translation.getText());
-              string.setLanguage(translation.getLanguage());
-              serviceAlertRecord.getSummaries().add(string);
-            }
-          }
-
-          serviceAlertRecord.setUrls(new HashSet<ServiceAlertLocalizedString>());
-          if (serviceAlert.getUrl() != null) {
-            for (ServiceAlerts.TranslatedString.Translation translation : serviceAlert.getUrl().getTranslationList()) {
-              ServiceAlertLocalizedString string = new ServiceAlertLocalizedString();
-              string.setValue(translation.getText());
-              string.setLanguage(translation.getLanguage());
-              serviceAlertRecord.getUrls().add(string);
-            }
-          }
-
-          if (serviceAlert.getActiveWindowList().size() > 0) {
-            _log.debug("[" + serviceAlert.getId().getId() + "] "
-                    + serviceAlert.getActiveWindowList().size() + " active windows");
-            List<ServiceAlerts.TimeRange> activeWindowList = serviceAlert.getActiveWindowList();
-            for (ServiceAlerts.TimeRange str : serviceAlert.getActiveWindowList()) {
-              ServiceAlertTimeRange satr = new ServiceAlertTimeRange();
-              if (str.hasStart())
-                satr.setFromValue(str.getStart());
-              if (str.hasEnd())
-                satr.setToValue(str.getEnd());
-              _log.debug("[" + serviceAlert.getId().getId() + "] adding "
-                      + satr.getFromValue() + "->" + satr.getToValue());
-              serviceAlertRecord.getActiveWindows().add(satr);
-            }
-          }
-
-          if (existingAlert == null) {
-            _log.debug("creating alert " + serviceAlertRecord.getAgencyId() + ":" + serviceAlertRecord.getServiceAlertId());
-            toAdd.add(serviceAlertRecord);
-          } else {
-            _log.debug("updating alert " + serviceAlertRecord.getAgencyId() + ":" + serviceAlertRecord.getServiceAlertId());
-            toUpdate.add(serviceAlertRecord);
-          }
-          currentAlerts.add(new AgencyAndId(serviceAlertRecord.getAgencyId(), serviceAlertRecord.getServiceAlertId()));
-        } else {
-          _log.debug("not updating alert " + id);
-          currentAlerts.add(id);
-        }
       }
     }
 
@@ -755,7 +888,10 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
       if (sa.getSource() != null && sa.getSource().equals(getFeedId())) {
         try {
           AgencyAndId testId = new AgencyAndId(sa.getAgencyId(), sa.getServiceAlertId());
-          if (!currentAlerts.contains(testId) && getFeedId().equals(sa.getSource())) {
+          /* consider other feed sources that may be merged here as well */
+          if (!currentAlerts.contains(testId)
+                  && (getFeedId().equals(sa.getSource())
+                    || (_alertSourcePrefix != null && sa.getSource().contains(_alertSourcePrefix)))) {
             _log.debug("[" + getFeedId() + "] cleaning up alert id " + testId
                     + " with source=" + sa.getSource());
             toBeDeleted.add(testId);
@@ -899,6 +1035,38 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
         _log.error("error closing url stream " + url);
       }
     }
+  }
+
+  private ServiceAlerts.ServiceAlertsCollection readAlertCollectionFromUrl(URL url) throws IOException {
+    if (url == null) return ServiceAlerts.ServiceAlertsCollection.newBuilder().build();
+
+    URLConnection urlConnection = url.openConnection();
+    if (System.getProperty(GTFS_CONNECT_TIMEOUT) != null) {
+      urlConnection.setConnectTimeout(Integer.parseInt(System.getProperty(GTFS_CONNECT_TIMEOUT)));
+    }
+    if (System.getProperty(GTFS_READ_TIMEOUT) != null) {
+      urlConnection.setReadTimeout(Integer.parseInt(System.getProperty(GTFS_READ_TIMEOUT)));
+    }
+    setHeadersToUrlConnection(urlConnection);
+    InputStream in = null;
+    try {
+      in = urlConnection.getInputStream();
+      return ServiceAlerts.ServiceAlertsCollection.parseFrom(in, _registry);
+    } catch (IOException ex) {
+      _log.error("connection issue with url " + url + ", ex=" + ex);
+      return getDefaultServiceAlertsCollection();
+    } finally {
+      try {
+        if (in != null) in.close();
+      } catch (IOException ex) {
+        _log.error("error closing url stream " + url);
+      }
+    }
+  }
+
+  private ServiceAlerts.ServiceAlertsCollection getDefaultServiceAlertsCollection() {
+    ServiceAlerts.ServiceAlertsCollection.Builder builder = ServiceAlerts.ServiceAlertsCollection.newBuilder();
+    return builder.build();
   }
 
   /**

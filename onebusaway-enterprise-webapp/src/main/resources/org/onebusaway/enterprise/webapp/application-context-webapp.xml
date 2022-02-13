@@ -21,7 +21,7 @@
 	xmlns:sec="http://www.springframework.org/schema/security"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
            http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd
-           http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-4.2.xsd">
+           http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-5.3.xsd">
            
     <!-- This turns on automatic annotation configuration -->
     <context:annotation-config />
@@ -62,7 +62,11 @@
         <property name="limit" value="0" />
     </bean>
 <!--    <bean id="exportKeys" class="org.onebusaway.enterprise.webapp.api.WriteUserPropertiesToDisk" />-->
-
+<!--
+    <bean id="loadKeys" class="org.onebusaway.enterprise.webapp.api.LoadApiKeysOnInitAction" >
+        <property name="filename" value="/tmp/user_properties.csv" />
+    </bean>
+-->
     <bean id="createAPITestKeyOnInitAction" class="org.onebusaway.enterprise.webapp.api.CreateAPIKeyOnInitAction"
     	init-method="init">
     	<property name="createAPIKey" value="${create-apikey}" />
@@ -76,7 +80,7 @@
         <property name="name" value="CommonResources" />
         <property name="resources">
             <list>
-                <!-- <value>/js/lib/jquery.js</value> -->
+                <!-- <value>/js/biblio/jquery.js</value> -->
                 <value>classpath:org/onebusaway/presentation/js/oba-common.js</value>
                 <value>classpath:org/onebusaway/presentation/js/oba-api.js</value>
                 <value>classpath:org/onebusaway/presentation/js/oba-l10n.js</value>

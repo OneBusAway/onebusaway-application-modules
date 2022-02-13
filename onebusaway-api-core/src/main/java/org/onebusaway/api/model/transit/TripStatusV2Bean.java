@@ -19,10 +19,11 @@ import java.io.Serializable;
 import java.util.List;
 
 import org.onebusaway.geospatial.model.CoordinatePoint;
+import org.onebusaway.realtime.api.OccupancyStatus;
 
 public final class TripStatusV2Bean implements Serializable {
 
-  private static final long serialVersionUID = 2L;
+  private static final long serialVersionUID = 3L;
 
   /****
    * These are fields that we can supply from schedule data
@@ -66,6 +67,12 @@ public final class TripStatusV2Bean implements Serializable {
   /****
    * These are fields that we can supply only from real-time data
    ****/
+
+  private String occupancyStatus;
+
+  private Integer occupancyCount;
+
+  private Integer occupancyCapacity;
 
   private boolean predicted = false;
 
@@ -281,5 +288,28 @@ public final class TripStatusV2Bean implements Serializable {
 
   public void setSituationIds(List<String> situationIds) {
     this.situationIds = situationIds;
+  }
+
+  public String getOccupancyStatus() { return occupancyStatus; }
+
+  public void setOccupancyStatus(OccupancyStatus occupancyStatus) {
+    if (occupancyStatus != null)
+      this.occupancyStatus = occupancyStatus.name();
+  }
+
+  public Integer getOccupancyCount() {
+    return occupancyCount;
+  }
+
+  public void setOccupancyCount(Integer occupancyCount) {
+    this.occupancyCount = occupancyCount;
+  }
+
+  public Integer getOccupancyCapacity() {
+    return occupancyCapacity;
+  }
+
+  public void setOccupancyCapacity(Integer occupancyCapacity) {
+    this.occupancyCapacity = occupancyCapacity;
   }
 }

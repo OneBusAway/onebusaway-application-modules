@@ -23,56 +23,28 @@
 http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
 http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd">
 
-    <!-- mysql database
-    <bean id="dataSource"
-          class="org.springframework.jndi.JndiObjectFactoryBean">
-      <property name="jndiName"
-                value="java:comp/env/jdbc/appDB"/>
-      <property name="lookupOnStartup"
-                value="true"/>
-      <property name="cache"
-                value="true"/>
-      <property name="proxyInterface"
-                value="javax.sql.DataSource"/>
-      <property name="resourceRef"
-                value="true" />
+    <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+        <property name="driverClassName" value="com.mysql.jdbc.Driver" />
+        <property name="url" value="jdbc:mysql://localhost:3306/onebusaway" />
+        <property name="username" value="root" />
+        <property name="password" value="root" />
     </bean>
-    -->
-    <!-- standalone non-production usage -->
+
     <bean class="org.onebusaway.container.spring.SystemPropertyOverrideConfigurer">
-        <property name="order" value="-2" />
-        <property name="properties">
-            <props>
-                <prop key="bundlePath">/var/lib/obanyc/no-such-dir</prop>
-            </props>
-        </property>
+      <property name="order" value="-2" />
+      <property name="properties">
+          <props>
+              <prop key="bundlePath">/var/lib/obanyc/no-such-dir</prop>
+         </props>
+      </property>
     </bean>
 
-    <!-- if you have GTFS-RT insert it here -->
-    <!-- MBTA example of GTFS-RT
-    <bean id="mbta_avl" class="org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.GtfsRealtimeSource">
-      <property name="tripUpdatesUrl" value="https://cdn.mbta.com/realtime/TripUpdates.pb" />
-      <property name="vehiclePositionsUrl" value="https://cdn.mbta.com/realtime/VehiclePositions.pb" />
-      <property name="refreshInterval" value="30" />
-      <property name="agencyIds">
-                <list>
-                                <value>1</value>
-                                <value>2</value>
-                                <value>3</value>
-                </list>
-       </property>
-
-    </bean>
-    -->
-
-    <!-- this tell the TDS where to look for bundles -->
     <bean id="httpServiceClient" class="org.onebusaway.transit_data_federation.util.HttpServiceClientImpl" >
       <constructor-arg type="java.lang.String" value="localhost"/>
       <constructor-arg type="java.lang.Integer" value="9999" />
       <constructor-arg type="java.lang.String" value="/api/" />
     </bean>
 
-    <!-- this configures the bundle store -->
     <bean id="bundleManagementService" class="org.onebusaway.transit_data_federation.impl.bundle.BundleManagementServiceImpl">
       <property name="bundleStoreRoot" value="/var/lib/oba/tds/bundle" />
       <property name="standaloneMode" value="false" />

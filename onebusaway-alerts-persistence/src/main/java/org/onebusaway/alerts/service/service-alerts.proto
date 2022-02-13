@@ -17,8 +17,8 @@ syntax = "proto2";
 // option cc_api_version = 2;
 // option py_api_version = 1;
 
-option java_package = "org.onebusaway.transit_data_federation.services.service_alerts";
-package org_onebusaway_transit_data_federation_services_service_alerts;
+option java_package = "org.onebusaway.alerts.service";
+package org_onebusaway_alerts_service;
 
 message ServiceAlertsCollection {
   repeated ServiceAlert serviceAlerts = 1;
@@ -39,7 +39,8 @@ message ServiceAlert {
   optional TranslatedString summary = 6;
 
   optional TranslatedString description = 7;
-  
+
+
   enum Cause {
     UNKNOWN_CAUSE = 1;
     OTHER_CAUSE = 2;        // Not machine-representable.
@@ -72,6 +73,8 @@ message ServiceAlert {
   optional Severity severity = 11;
   
   optional TranslatedString url = 12;
+
+  optional string source = 13;
 }
 
 

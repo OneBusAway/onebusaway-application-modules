@@ -38,8 +38,10 @@ import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
 import org.onebusaway.gtfs.serialization.mappings.InvalidStopTimeException;
 import org.onebusaway.gtfs.serialization.mappings.StopTimeFieldMappingFactory;
+import org.onebusaway.realtime.api.OccupancyStatus;
 import org.onebusaway.realtime.api.TimepointPredictionRecord;
 import org.onebusaway.realtime.api.VehicleLocationRecord;
+import org.onebusaway.realtime.api.VehicleOccupancyRecord;
 import org.onebusaway.transit_data_federation.services.blocks.BlockCalendarService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockGeospatialService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
@@ -50,6 +52,7 @@ import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTi
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
+import org.onebusaway.util.AgencyAndIdLibrary;
 import org.onebusaway.util.SystemTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -171,6 +174,7 @@ public class GtfsRealtimeTripLibrary {
     Map<String, TripUpdate> bestTripByVehicleId = new HashMap<String, TripUpdate>();
     ListMultimap<String, TripUpdate> tripUpdatesByVehicleId = ArrayListMultimap.create();
     Map<String, VehiclePosition> vehiclePositionsByVehicleId = new HashMap<String, VehiclePosition>();
+    AssignmentInfo assignmentInfo = getAssignmentInfo(tripUpdateMessage, vehiclePositionsMessage);
 
     ListMultimap<BlockDescriptor, TripUpdate> anonymousTripUpdatesByBlock = ArrayListMultimap.<BlockDescriptor, TripUpdate> create();
     Map<BlockDescriptor, VehiclePosition> anonymousVehiclePositionsByBlock = new HashMap<BlockDescriptor, VehiclePosition>();
@@ -197,10 +201,9 @@ public class GtfsRealtimeTripLibrary {
           _log.debug("Multiple TripUpdates for vehicle {}; taking best.",
               vehicleId);
 
-          if (tripMoreAppropriate(tu, bestTripByVehicleId.get(vehicleId), vehicleId)) {
-            bestTripByVehicleId.put(vehicleId, tu);
+            if (Boolean.TRUE.equals(tripMoreAppropriate(assignmentInfo, tu, bestTripByVehicleId.get(vehicleId), vehicleId))) {
+              bestTripByVehicleId.put(vehicleId, tu);
           }
-
         }
       } else {
         /*
@@ -213,6 +216,24 @@ public class GtfsRealtimeTripLibrary {
 
         if (bd == null) {
           continue;
+        }
+
+        // if this block has an assigned vehicle skip this anonymous update
+        // its likely for a future trip
+        TripEntry tripEntry = _entitySource.getTrip(td.getTripId());
+        if (tripEntry != null && tripEntry.getBlock() != null) {
+          String blockId = tripEntry.getBlock().getId().toString();
+          if (assignmentInfo.preferredVehicleByBlockId.containsKey(blockId)) {
+            String preferredVehicleId = assignmentInfo.preferredVehicleByBlockId.get(blockId);
+            if (!td.getTripId().equals(preferredVehicleId)) {
+              _log.info("skipping anonymous update " + td.getTripId()
+                      + " as a vehicle assignment exists for vehicle "
+              + assignmentInfo.preferredVehicleByBlockId.get(blockId)
+              + " for trip "
+              + assignmentInfo.preferredTripByVehicleId.get(preferredVehicleId));
+              continue;
+            }
+          }
         }
 
         if (!anonymousTripUpdatesByBlock.containsKey(bd)) {
@@ -356,6 +377,48 @@ public class GtfsRealtimeTripLibrary {
     return updates;
   }
 
+  // take hints from the vehicle position feed and hold on to for later grouping
+  private AssignmentInfo getAssignmentInfo(FeedMessage tripUpdateMessage, FeedMessage vehiclePositionsMessage) {
+    Map<String, String> preferredTripByVehicleId = new HashMap<>();
+    Map<String, String> preferredVehicleByBlockId = new HashMap<>();
+    if (vehiclePositionsMessage != null) {
+      for (FeedEntity fe : vehiclePositionsMessage.getEntityList()) {
+        if (!fe.hasVehicle()) {
+          continue;
+        }
+
+        if (fe.hasVehicle()
+                && fe.getVehicle().hasVehicle()
+                && fe.getVehicle().getVehicle().hasId()
+                && fe.getVehicle().hasTrip()) {
+
+          String vehicleId = fe.getVehicle().getVehicle().getId();
+          String tripId = fe.getVehicle().getTrip().getTripId();
+          if (preferredTripByVehicleId.containsKey(vehicleId)) {
+            _log.warn("vehicle " + vehicleId
+                    + " on trip " + tripId + " already reported on"
+                    + preferredTripByVehicleId.get(vehicleId));
+            continue;
+          }
+          preferredTripByVehicleId.put(vehicleId,
+                  tripId);
+          TripEntry tripEntry = _entitySource.getTrip(tripId);
+          if (tripEntry != null) {
+            if (tripEntry.getBlock() != null) {
+              String blockId = tripEntry.getBlock().getId().toString();
+              preferredVehicleByBlockId.put(blockId,
+                      vehicleId);
+            }
+          }
+        }
+      }
+    }
+
+
+
+    return new AssignmentInfo(preferredTripByVehicleId,  preferredVehicleByBlockId);
+
+  }
 
   private long getTripStartTime(String tripId) {
     TripEntry tripEntry = _entitySource.getTrip(tripId);
@@ -368,7 +431,18 @@ public class GtfsRealtimeTripLibrary {
     return min;
   }
   
-  private boolean tripMoreAppropriate(TripUpdate newTrip, TripUpdate original, String vehicleId) {
+  private Boolean tripMoreAppropriate(AssignmentInfo assignmentInfo, TripUpdate newTrip, TripUpdate original, String vehicleId) {
+
+    String preferredTripId = assignmentInfo.preferredTripByVehicleId.get(vehicleId);
+
+    if (preferredTripId != null) {
+      if (preferredTripId.equals(newTrip.getTrip().getTripId()))
+        return true;
+      if (preferredTripId.equals(original.getTrip().getTripId()))
+        return false;
+      return null;
+    }
+
     long closestTemporalUpdateNewTrip = closestTemporalUpdate(newTrip);
     long closestTemporalUpdateOriginal = closestTemporalUpdate(original);
     
@@ -421,6 +495,7 @@ public class GtfsRealtimeTripLibrary {
     record.setBlockId(blockDescriptor.getBlockInstance().getBlock().getBlock().getId());
     // this is the default, trip updates may cancel this trip
     record.setStatus(blockDescriptor.getScheduleRelationship().toString());
+
 
     applyTripUpdatesToRecord(result, blockDescriptor, update.tripUpdates, record, vehicleId, update.bestTrip);
 
@@ -558,7 +633,7 @@ public class GtfsRealtimeTripLibrary {
     	blockStartTime = getBlockStartTimeForTripStartTime(instance,
     			tripEntry.getId(), tripStartTime);
     	if (blockStartTime < 0) {
-          _log.debug("invalid blockStartTime for trip " + trip);
+          _log.debug("invalid blockStartTime for trip " + trip + " for instance=" + instance);
           return null;
         }
     	blockDescriptor.setStartTime(blockStartTime);
@@ -705,7 +780,10 @@ public class GtfsRealtimeTripLibrary {
 
               if (tpr.getTimepointPredictedArrivalTime() != -1 ||
                       tpr.getTimepointPredictedDepartureTime() != -1) {
-                timepointPredictions.add(tpr);
+                // sadly we can only consume this tpr if onBestTrip
+                // TODO refactor TDS to support timepoint records for multiple trips
+                if (onBestTrip)
+                  timepointPredictions.add(tpr);
               }
 
             } // end not skipped
@@ -886,10 +964,12 @@ public class GtfsRealtimeTripLibrary {
     if (!stopTimeUpdate.hasArrival())
       return -1;
     StopTimeEvent arrival = stopTimeUpdate.getArrival();
-    if (arrival.hasDelay())
-      return stopTime.getArrivalTime() + arrival.getDelay();
     if (arrival.hasTime())
       return (int) (arrival.getTime() - serviceDate / 1000);
+    //prefer time to delay usage to be consistent with elsewhere
+    if (arrival.hasDelay())
+      return stopTime.getArrivalTime() + arrival.getDelay();
+
     // instead of illegal state exception we return -1 to not corrupt the read
     return -1;
   }
@@ -899,10 +979,11 @@ public class GtfsRealtimeTripLibrary {
     if (!stopTimeUpdate.hasDeparture())
       return -1;
     StopTimeEvent departure = stopTimeUpdate.getDeparture();
-    if (departure.hasDelay())
-      return stopTime.getDepartureTime() + departure.getDelay();
     if (departure.hasTime())
       return (int) (departure.getTime() - serviceDate / 1000);
+    //prefer time to delay usage to be consistent with elsewhere
+    if (departure.hasDelay())
+      return stopTime.getDepartureTime() + departure.getDelay();
     // instead of throwing an exception here, simply return -1
     // so as to not stop the rest of the processing
     return -1;
@@ -989,12 +1070,50 @@ public class GtfsRealtimeTripLibrary {
     return vp.getVehicle().getId();
   }
 
-  private static class BestScheduleDeviation {
+    public VehicleOccupancyRecord createVehicleOccupancyRecordForUpdate(MonitoredResult result,
+                                                                        CombinedTripUpdatesAndVehiclePosition update) {
+      if (update == null) return null;
+      if (update.vehiclePosition == null) return null;
+      if (update.vehiclePosition.hasOccupancyStatus()
+              && update.vehiclePosition.hasVehicle()
+              && update.vehiclePosition.getVehicle().hasId()
+              && update.bestTrip != null) {  // if we are not on an active trip, we don't store
+        VehicleOccupancyRecord vor = new VehicleOccupancyRecord();
+        // here we assume the vehicle's agency matches that of its block
+        vor.setVehicleId(new AgencyAndId(update.block.getBlockInstance().getBlock().getBlock().getId().getAgencyId(), update.block.getVehicleId()));
+        vor.setOccupancyStatus(OccupancyStatus.valueOf(update.vehiclePosition.getOccupancyStatus().name()));
+        TripEntry trip = _entitySource.getTrip(update.bestTrip);
+        // link this occupancy to route+direction so it will expire at end of trip
+        if (trip != null && trip.getRoute() != null) {
+          vor.setRouteId(AgencyAndIdLibrary.convertToString(trip.getRoute().getId()));
+          vor.setDirectionId(trip.getDirectionId());
+        }
+        if (vor.getOccupancyStatus() == null) {
+          // the valueOf failed to match, the spec may have added new fields...
+          _log.warn("unmatched occupancy status " + update.vehiclePosition.getOccupancyStatus().name());
+          return null;
+        }
+        return vor;
+      }
+      return null;
+    }
+
+    private static class BestScheduleDeviation {
     public int delta = Integer.MAX_VALUE;
     public int scheduleDeviation = 0;
     public boolean isInPast = true;
     public long timestamp = 0;
     public AgencyAndId tripId = null;
     public boolean isCanceled = false;
+  }
+
+  private static class AssignmentInfo {
+    private Map<String, String> preferredTripByVehicleId;
+    private Map<String, String> preferredVehicleByBlockId;
+    public AssignmentInfo(Map<String, String> preferredTripByVehicleId,
+                          Map<String, String> preferredVehicleByBlockId) {
+     this.preferredTripByVehicleId = preferredTripByVehicleId;
+     this.preferredVehicleByBlockId = preferredVehicleByBlockId;
+    }
   }
 }

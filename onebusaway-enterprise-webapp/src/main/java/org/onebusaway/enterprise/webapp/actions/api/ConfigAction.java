@@ -16,7 +16,9 @@
 package org.onebusaway.enterprise.webapp.actions.api;
 
 
+import org.onebusaway.realtime.api.OccupancyStatus;
 import org.onebusaway.transit_data.services.TransitDataService;
+import org.onebusaway.util.OneBusAwayFormats;
 import org.onebusaway.util.services.configuration.ConfigurationService;
 import org.onebusaway.enterprise.webapp.actions.OneBusAwayEnterpriseActionSupport;
 import org.onebusaway.transit_data.model.AgencyWithCoverageBean;
@@ -117,5 +119,25 @@ public class ConfigAction extends OneBusAwayEnterpriseActionSupport {
 
   public String getServiceAlertText() {
     return _configurationService.getConfigurationValueAsString("display.serviceAlertText", "Service Alert");
+  }
+
+  public String getOccupancySeatsAvailable() {
+    return _configurationService.getConfigurationValueAsString("display.occupancy.SEATS_AVAILABLE", OneBusAwayFormats.toPascalCaseWithSpaces(OccupancyStatus.MANY_SEATS_AVAILABLE.name()));
+  }
+
+  public String getOccupancyStandingAvailable() {
+    return _configurationService.getConfigurationValueAsString("display.occupancy.STANDING_AVAILABLE", OneBusAwayFormats.toPascalCaseWithSpaces(OccupancyStatus.FEW_SEATS_AVAILABLE.name()));
+  }
+
+  public String getOccupancyFull() {
+    return _configurationService.getConfigurationValueAsString("display.occupancy.FULL", OneBusAwayFormats.toPascalCaseWithSpaces(OccupancyStatus.FULL.name()));
+  }
+
+  public String getFeedbackFormText() {
+    return _configurationService.getConfigurationValueAsString("display.feedbackForm.text", null);
+  }
+
+  public String getFeedbackFormURL() {
+    return _configurationService.getConfigurationValueAsString("display.feedbackForm.url", null);
   }
 }

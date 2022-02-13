@@ -41,8 +41,8 @@
 	<div id="content">
 		<div id="text">
 			<h1>404 Not Found</h1>
-		
-			<wiki:wiki name="Error404"/>
+<!-- optionally include an error page template from xwiki -->
+<!--			<wiki:wiki name="Error404"/>-->
 		</div>
 	</div>
 

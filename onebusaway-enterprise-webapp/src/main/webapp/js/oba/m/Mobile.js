@@ -282,7 +282,7 @@ OBA.Mobile = (function() {
 
                 jQuery("body").data( "savedData", stopsOnRoutes);
 
-				var showPopup = true;
+				var showPopup = false;//don't want popup to show up initially
 
 				// direct matches
 				if(matches.length === 1 ) {
@@ -300,7 +300,7 @@ OBA.Mobile = (function() {
 							var latlng = new google.maps.LatLng(matches[0].latitude, matches[0].longitude);
 							if (showPopup != undefined && !showPopup) {
 								routeMap.addStop(matches[0], null);
-								routeMap.highlightStop(matches[0]);
+								routeMap.highlightStop(matches[0], OBA.Config.useActiveBusPin);
 							} else {
 								routeMap.addStop(matches[0], function(marker) {
 									routeMap.showPopupForStopId(matches[0].id, routeFilterShortName);
@@ -336,6 +336,10 @@ OBA.Mobile = (function() {
             addResizeBehavior();
 
             updateServiceAlertHeaderText();
+
+            $("#all-routes-button").click(function() {
+                window.location = OBA.Config.urlPrefix + "m/routes/index";
+            });
 
             // initialize map, and continue initialization of things that use the map
             // on load only when google maps says it's ready.

@@ -236,7 +236,9 @@ OBA.RouteMap = function(mapNode, initCallbackFn, serviceAlertCallbackFn) {
 		function(json) {
 			// service alerts
 			if(typeof serviceAlertCallbackFn === 'function') {
-				if(typeof json.Siri.ServiceDelivery.SituationExchangeDelivery !== 'undefined' && json.Siri.ServiceDelivery.SituationExchangeDelivery.length > 0) {
+				if(typeof json.Siri !== 'undefined'
+					&& typeof json.Siri.ServiceDelivery.SituationExchangeDelivery !== 'undefined'
+					&& json.Siri.ServiceDelivery.SituationExchangeDelivery.length > 0) {
 					serviceAlertCallbackFn(routeId, 
 						json.Siri.ServiceDelivery.SituationExchangeDelivery[0].Situations.PtSituationElement);
 				}
@@ -606,7 +608,7 @@ OBA.RouteMap = function(mapNode, initCallbackFn, serviceAlertCallbackFn) {
 	//////////////////// PUBLIC INTERFACE /////////////////////
 	return {
 		// STOP HOVER 
-		highlightStop: function(stopResult) {
+		highlightStop: function(stopResult, usePin) {
 			unhighlightStop();
 			
 			var stopMarker = stopsById[stopResult.id];
@@ -620,12 +622,18 @@ OBA.RouteMap = function(mapNode, initCallbackFn, serviceAlertCallbackFn) {
 			if(directionKey === null) {
 				directionKey = "unknown";
 			}
-			
-			var highlightedIcon = new google.maps.MarkerImage(OBA.Config.urlPrefix + "img/realtime/stop/stop-" + directionKey + "-active.png",
-					new google.maps.Size(31, 31),
-					new google.maps.Point(0,0),
-					new google.maps.Point(15, 15));
-			highlightedIcon.scaledSize = new google.maps.Size(33, 33);
+
+			var highlightedIcon;
+			if (usePin) {
+				highlightedIcon = new google.maps.MarkerImage(OBA.Config.urlPrefix + "img/icons/red-dot.png");
+			}
+			else {
+                highlightedIcon = new google.maps.MarkerImage(OBA.Config.urlPrefix + "img/realtime/stop/stop-" + directionKey + "-active.png",
+                    new google.maps.Size(31, 31),
+                    new google.maps.Point(0, 0),
+                    new google.maps.Point(15, 15));
+                highlightedIcon.scaledSize = new google.maps.Size(33, 33);
+            }
 		
 			stopMarker.previousIcon = stopMarker.getIcon();
 			stopMarker.setIcon(highlightedIcon);
