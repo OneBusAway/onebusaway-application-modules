@@ -47,10 +47,10 @@ There are two options for setting up your own OneBusAway instance:
 
 ## Status
 
-* Latest Stable Release - `2.0.55-cs`:
-    * [onebusaway-transit-data-federation-webapp](https://repo.camsys-apps.com/releases/org/onebusaway/onebusaway-transit-data-federation-webapp/2.0.55-cs/onebusaway-transit-data-federation-webapp-2.0.55-cs.war)
-    * [onebusaway-api-webapp](https://repo.camsys-apps.com/releases/org/onebusaway/onebusaway-api-webapp/2.0.55-cs/onebusaway-api-webapp-2.0.55-cs.war)
-    * [onebusaway-enterprise-acta-webapp](https://repo.camsys-apps.com/releases/org/onebusaway/onebusaway-enterprise-acta-webapp/2.0.55-cs/onebusaway-enterprise-acta-webapp-2.0.55-cs.war)
+* Latest Stable Release - `2.1.0`:
+    * [onebusaway-transit-data-federation-webapp](https://repo.camsys-apps.com/releases/org/onebusaway/onebusaway-transit-data-federation-webapp/2.1.0/onebusaway-transit-data-federation-webapp-2.1.0.war)
+    * [onebusaway-api-webapp](https://repo.camsys-apps.com/releases/org/onebusaway/onebusaway-api-webapp/2.1.0/onebusaway-api-webapp-2.1.0.war)
+    * [onebusaway-enterprise-acta-webapp](https://repo.camsys-apps.com/releases/org/onebusaway/onebusaway-enterprise-acta-webapp/2.1.0/onebusaway-enterprise-acta-webapp-2.1.0.war)
 * [Previous releases](http://nexus.onebusaway.org/nexus/content/groups/public/org/onebusaway/)
 
 ## Deployments
@@ -81,7 +81,7 @@ To create a local copy of the repository, use the following command:
 
 ## Developer Information
 
- * [Installation Guide](https://github.com/OneBusAway/onebusaway-application-modules/wiki/Developer-Guide) - How to set up your own OneBusAway instance using the code and Eclipse.
+ * [Installation Guide](https://github.com/OneBusAway/onebusaway-application-modules/wiki) - How to set up your own OneBusAway instance using the code and Eclipse.
  * [Real-time Data Compatibility](https://github.com/OneBusAway/onebusaway-application-modules/wiki/Real-Time-Data-Configuration-Guide) - Have a real-time transit data source (e.g., GTFS-realtime, SIRI)?  Check out this page to see how you can make it work with OneBusAway.
  * [Troubleshooting tips](https://github.com/OneBusAway/onebusaway/wiki/Troubleshooting) - Having problems?  Check out this guide.
  * [Mobile App Design Considerations](https://github.com/OneBusAway/onebusaway-application-modules/wiki/Mobile-App-Design-Considerations) - Want to create a mobile app for OneBusAway?  Check out this page first.
