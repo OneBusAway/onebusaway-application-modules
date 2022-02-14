@@ -1,4 +1,5 @@
-## The OneBusAway Application Suite [![Build Status](https://travis-ci.org/OneBusAway/onebusaway-application-modules.svg?branch=master)](https://travis-ci.org/OneBusAway/onebusaway-application-modules) [![Join the OneBusAway chat](https://onebusaway.herokuapp.com/badge.svg)](https://onebusaway.herokuapp.com/)
+## The OneBusAway Application Suite [![CI Test](https://github.com/OneBusAway/onebusaway-application-modules
+/workflows/Java%20CI%20With%20Maven/badge.svg)](https://github.com/OneBusAway/onebusaway-application-modules/actions?query=workflow%3A%22Java+CI+With+Maven%22) [![Join the OneBusAway chat](https://onebusaway.herokuapp.com/badge.svg)](https://onebusaway.herokuapp.com/)
 
 A project of the non-profit [Open Transit Software Foundation](https://opentransitsoftwarefoundation.org/)!
 
