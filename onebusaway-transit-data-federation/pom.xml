@@ -3,7 +3,7 @@
   <parent>
     <groupId>org.onebusaway</groupId>
     <artifactId>onebusaway-application-modules</artifactId>
-    <version>2.0.79-cs-SNAPSHOT</version>
+    <version>2.1.17-cs-SNAPSHOT</version>
   </parent>
   <artifactId>onebusaway-transit-data-federation</artifactId>
   <packaging>jar</packaging>
@@ -57,14 +57,24 @@
         <version>${onebusaway-siri-2-api-version}</version>
     </dependency>
     <dependency>
-        <groupId>org.codehaus.jackson</groupId>
-        <artifactId>jackson-mapper-asl</artifactId>
-        <version>1.9.2</version>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-core</artifactId>
+      <version>${jackson-version}</version>
     </dependency>
     <dependency>
-        <groupId>org.codehaus.jackson</groupId>
-        <artifactId>jackson-jaxrs</artifactId>
-        <version>1.9.2</version>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+      <version>${jackson-version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.jaxrs</groupId>
+      <artifactId>jackson-jaxrs-json-provider</artifactId>
+      <version>${jackson-version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.module</groupId>
+      <artifactId>jackson-module-jaxb-annotations</artifactId>
+      <version>${jackson-version}</version>
     </dependency>
 
 
@@ -145,13 +155,23 @@
 			<groupId>joda-time</groupId>
 			<artifactId>joda-time</artifactId>
 			<version>2.0</version>
-		</dependency>        
+		</dependency>
     <dependency>
-        <groupId>org.codehaus.jackson</groupId>
-        <artifactId>jackson-xc</artifactId>
-        <version>1.9.2</version>
+      <groupId>com.fasterxml.jackson.module</groupId>
+      <artifactId>jackson-module-jaxb-annotations</artifactId>
+      <version>${jackson-version}</version>
     </dependency>
-
+    <!-- java 11 xml changes -->
+    <dependency>
+      <groupId>jakarta.xml.bind</groupId>
+      <artifactId>jakarta.xml.bind-api</artifactId>
+      <version>2.3.3</version>
+    </dependency>
+    <dependency>
+      <groupId>org.glassfish.jaxb</groupId>
+      <artifactId>jaxb-runtime</artifactId>
+      <version>2.3.3</version>
+    </dependency>
     <!--  Support for sftp protocol -->
     <dependency>
       <groupId>com.jcraft</groupId>

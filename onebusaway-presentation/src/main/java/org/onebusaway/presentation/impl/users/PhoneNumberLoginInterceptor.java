@@ -15,6 +15,7 @@
  */
 package org.onebusaway.presentation.impl.users;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.onebusaway.users.impl.PhoneNumberLibrary;
@@ -55,7 +56,11 @@ public class PhoneNumberLoginInterceptor extends AbstractInterceptor {
   public String intercept(ActionInvocation invocation) throws Exception {
 
     ActionContext context = invocation.getInvocationContext();
-    Map<String, Object> params = context.getParameters();
+    Map<String, Object> params = new HashMap<>();
+    for (String key : context.getParameters().keySet()) {
+      params.put(key, context.getParameters().get(key).getValue());
+    }
+
     String phoneNumber = getPhoneNumber(params);
 
     phoneNumber = PhoneNumberLibrary.normalizePhoneNumber(phoneNumber);

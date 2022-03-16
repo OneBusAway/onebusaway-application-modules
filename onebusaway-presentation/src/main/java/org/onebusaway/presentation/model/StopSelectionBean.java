@@ -97,4 +97,10 @@ public class StopSelectionBean implements Serializable {
   public List<StopBean> getStops() {
     return _stops;
   }
+  public String getType() {
+    if (getNames() != null && !getNames().isEmpty()) {
+      return getNames().iterator().next().getType();
+    }
+    return "unset";
+  }
 }

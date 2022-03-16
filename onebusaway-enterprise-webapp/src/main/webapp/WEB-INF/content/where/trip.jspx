@@ -23,8 +23,8 @@
 <head>
 <title>Route <s:property value="result.trip.route.shortName" /> - <s:property value="result.trip.tripHeadsign" /> - Trip # <s:property
     value="result.trip.id" /></title>
-
-<link rel="stylesheet" type="text/css" media="all" href="${oba:resource('/css/where/trip.css')}"/>
+<!-- change oba:resource to oba:url due to mime type issues -->
+<link rel="stylesheet" type="text/css" media="all" href="${oba:url('/css/where/trip.css')}"/>
 <link rel="stylesheet" type="text/css" media="all" href="${oba:url('/css/map/popup-small.css')}"/>
 
 <!-- Google Maps -->

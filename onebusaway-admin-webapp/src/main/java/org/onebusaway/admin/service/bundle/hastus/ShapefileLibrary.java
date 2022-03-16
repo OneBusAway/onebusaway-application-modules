@@ -17,8 +17,8 @@ package org.onebusaway.admin.service.bundle.hastus;
 
 import java.io.File;
 
-import org.geotools.data.DefaultQuery;
 import org.geotools.data.FeatureSource;
+import org.geotools.data.Query;
 import org.geotools.data.shapefile.ShapefileDataStore;
 import org.geotools.factory.Hints;
 import org.geotools.feature.FeatureCollection;
@@ -54,7 +54,7 @@ public class ShapefileLibrary {
         "EPSG", hints);
     CoordinateReferenceSystem worldCRS = factory.createCoordinateReferenceSystem("EPSG:4326");
   
-    DefaultQuery query = new DefaultQuery(typeName);
+    Query query = new Query(typeName);
     query.setCoordinateSystem(sourceCRS);
     query.setCoordinateSystemReproject(worldCRS);
     query.setHints(hints);

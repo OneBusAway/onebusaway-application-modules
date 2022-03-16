@@ -26,10 +26,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.map.JsonMappingException;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.map.SerializationConfig;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.MapperFeature;
 import org.onebusaway.admin.model.BundleValidateQuery;
 import org.onebusaway.admin.model.BundleValidationCheckResult;
 import org.slf4j.Logger;
@@ -51,7 +51,7 @@ public class ScheduleTimeResultChecker implements QueryResultChecker {
     ObjectMapper mapper = new ObjectMapper();
     BundleValidationCheckResult checkResult = new BundleValidationCheckResult();
     String result = query.getQueryResult();
-    mapper.configure(SerializationConfig.Feature.AUTO_DETECT_FIELDS, true);
+    mapper.configure(MapperFeature.AUTO_DETECT_FIELDS, true);
     Map<String, Object> parsedResult = new HashMap<String, Object>();
     boolean parseFailed = false;
     try {

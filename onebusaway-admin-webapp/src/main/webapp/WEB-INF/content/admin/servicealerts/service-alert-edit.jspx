@@ -84,15 +84,15 @@
 </head>
 
 <body>
-<s:set name="theme" value="'simple'" scope="page" />
+<s:set var="theme" value="'simple'" scope="page" />
 <s:if test="newServiceAlert" >
-	<s:set name="serviceAlertsTitle" >Create Service Alert</s:set>
+	<s:set var="serviceAlertsTitle" >Create Service Alert</s:set>
 </s:if>
 <s:elseif test="favorite">
-    <s:set name="serviceAlertsTitle" >Edit Favorite Service Alert</s:set>
+    <s:set var="serviceAlertsTitle" >Edit Favorite Service Alert</s:set>
 </s:elseif>
 <s:else>
-	<s:set name="serviceAlertsTitle" >Edit Service Alert</s:set>
+	<s:set var="serviceAlertsTitle" >Edit Service Alert</s:set>
 </s:else>
 
 <div id="ServiceAlerts">

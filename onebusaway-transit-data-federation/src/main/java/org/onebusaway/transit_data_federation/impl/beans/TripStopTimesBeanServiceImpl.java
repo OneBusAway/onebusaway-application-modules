@@ -131,6 +131,8 @@ public class TripStopTimesBeanServiceImpl implements TripStopTimesBeanService {
       StopBean stopBean = _stopBeanService.getStopForId(stopEntry.getId(), null);
       stBean.setStop(stopBean);
       stBean.setDistanceAlongTrip(stopTime.getShapeDistTraveled());
+      stBean.setGtfsSequence(stopTime.getGtfsSequence());
+
       List<HistoricalRidership> rid = _ridershipService.getHistoricalRiderships(trip.getRoute().getId(), trip.getId(), stopEntry.getId(), serviceDate);
       if(rid != null && rid.size() > 0) stBean.setHistoricalOccupancy(OccupancyStatus.toEnum(rid.get(0).getLoadFactor()));
 

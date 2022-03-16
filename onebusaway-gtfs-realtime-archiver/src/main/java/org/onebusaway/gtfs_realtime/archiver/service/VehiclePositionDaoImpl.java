@@ -46,7 +46,7 @@ public class VehiclePositionDaoImpl implements VehiclePositionDao {
   }
 
   @Autowired
-  @Qualifier("gtfsRealtimeArchiveSessionFactory")
+//  @Qualifier("gtfsRealtimeArchiveSessionFactory")
   public void setSessionFactory(SessionFactory sessionFactory) {
     _sessionFactory = sessionFactory;
   }

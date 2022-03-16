@@ -19,8 +19,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import org.apache.struts2.convention.annotation.InterceptorRef;
-import org.apache.struts2.convention.annotation.InterceptorRefs;
+import org.apache.struts2.convention.annotation.AllowedMethods;
 import org.apache.struts2.convention.annotation.ParentPackage;
 import org.apache.struts2.convention.annotation.Result;
 import org.apache.struts2.convention.annotation.Results;
@@ -57,7 +56,7 @@ import com.opensymphony.xwork2.Preparable;
                 params={"root", "twitterResult"}),
 
 })
-
+@AllowedMethods({"deleteAlert", "tweetAlert"})
 public class ServiceAlertEditAction extends OneBusAwayNYCAdminActionSupport implements
     ModelDriven<ServiceAlertBean> {
   private static Logger _log = LoggerFactory.getLogger(ServiceAlertEditAction.class);

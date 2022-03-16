@@ -15,6 +15,8 @@
  */
 package org.onebusaway.twilio.actions.search;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,8 +24,13 @@ import java.util.Map;
 import org.apache.struts2.convention.annotation.Result;
 import org.apache.struts2.convention.annotation.Results;
 import org.apache.struts2.interceptor.SessionAware;
+import org.onebusaway.exceptions.InvalidSelectionServiceException;
+import org.onebusaway.presentation.model.StopSelectionBean;
+import org.onebusaway.presentation.services.StopSelectionService;
 import org.onebusaway.presentation.services.text.TextModification;
+import org.onebusaway.transit_data.model.NameBean;
 import org.onebusaway.transit_data.model.RouteBean;
+import org.onebusaway.transit_data.model.StopsForRouteBean;
 import org.onebusaway.twilio.actions.Messages;
 import org.onebusaway.twilio.actions.TwilioSupport;
 import org.slf4j.Logger;
@@ -36,14 +43,19 @@ import com.opensymphony.xwork2.util.ValueStack;
 
 @Results({
 	  @Result(name="back", location="index", type="chain"),
-	  @Result(name="route-selected", location="stops-for-route", type="chain")
+		// redirect to prevent loop
+	  @Result(name="route-selected", type="redirectAction", params={"From", "${phoneNumber}", "namespace", "/search", "actionName", "stops-for-route-navigation"}),
 })
 public class MultipleRoutesFoundAction extends TwilioSupport implements SessionAware {
-      private static final long serialVersionUID = 1L;
-	  private TextModification _routeNumberPronunciation;
-	  private static Logger _log = LoggerFactory.getLogger(MultipleRoutesFoundAction.class);
+		private static final long serialVersionUID = 1L;
+		private static Logger _log = LoggerFactory.getLogger(MultipleRoutesFoundAction.class);
+
+		private TextModification _routeNumberPronunciation;
 	  private Map sessionMap;
-	  private RouteBean _route;
+		private NavigationBean _navigation;
+		private StopSelectionService _stopSelectionService;
+
+		private RouteBean _route;
 	  
 	  @Autowired
 	  public void setRouteNumberPronunciation(
@@ -51,7 +63,12 @@ public class MultipleRoutesFoundAction extends TwilioSupport implements SessionA
 	    _routeNumberPronunciation = routeNumberPronunciation;
 	  }
 
-	  public void setSession(Map map) {
+		@Autowired
+		public void setStopSelectionService(StopSelectionService stopSelectionService) {
+			_stopSelectionService = stopSelectionService;
+		}
+
+		public void setSession(Map map) {
 	  	  this.sessionMap = map;
 	  }
 		
@@ -75,7 +92,9 @@ public class MultipleRoutesFoundAction extends TwilioSupport implements SessionA
 			ActionContext context = ActionContext.getContext();
 			ValueStack vs = context.getValueStack();
 			List<RouteBean> routes = (List<RouteBean>) vs.findValue("routes");
-			
+			if (routes == null) {
+				routes = (List<RouteBean>) sessionMap.get("routes");
+			}
 			int index = 1;
 			
 			addMessage(Messages.MULTIPLE_ROUTES_WERE_FOUND);
@@ -110,22 +129,67 @@ public class MultipleRoutesFoundAction extends TwilioSupport implements SessionA
 			navState = DO_ROUTING;
 			sessionMap.put("navState", navState);
 			setNextAction("search/multiple-routes-found");
+			return INPUT; // get the selection
 		} else {	// Do the routing, matching the key pressed with the correct route bean.
 			_log.debug("Handling selection of choice of routes.");
 			// Handle "back" request ('*' key pressed)
 			if (PREVIOUS_MENU_ITEM.equals(getInput())) {
 				return "back";
 			}
+			// input is the route direction selection
+			// redirect to its use
 			int key = Integer.parseInt(getInput());
 			Map<Integer, RouteBean> keyMapping = (Map<Integer, RouteBean>)sessionMap.get("keyMapping");
 			_route = (RouteBean)keyMapping.get(key);
 			navState = DISPLAY_DATA;
 			sessionMap.put("navState", navState);
+			// instead of chaining use session map
+			sessionMap.remove("routes");
+			sessionMap.put("route", _route);
+			List<Integer> indices = new ArrayList<>();
 
-			_log.debug("Key " + key + " entered for route: " + _route.getId());
+			try {
+				_navigation = (NavigationBean)sessionMap.get("navigation");
+
+				if (_navigation == null) {
+					StopsForRouteBean stopsForRoute = _transitDataService.getStopsForRoute(_route.getId());
+					List<Integer> selectionIndices = Collections.emptyList();
+					StopSelectionBean selection = _stopSelectionService.getSelectedStops(
+									stopsForRoute, selectionIndices);
+					List<NameBean> names = new ArrayList<NameBean>(selection.getNames());
+
+					_navigation = new NavigationBean();
+					_navigation.setRoute(_route);
+					_navigation.setStopsForRoute(stopsForRoute);
+					_navigation.setSelectionIndices(selectionIndices);
+					_navigation.setCurrentIndex(0);
+					_navigation.setSelection(selection);
+					_navigation.setNames(names);
+					// Set navigation bean in session
+					sessionMap.put("navigation", _navigation);
+
+				}
+
+				StopSelectionBean selection = _stopSelectionService.getSelectedStops(
+								_navigation.getStopsForRoute(), indices);
+				List<NameBean> names = new ArrayList<NameBean>(selection.getNames());
+				_navigation.setSelection(selection);
+				_navigation.setNames(names);
+			} catch (InvalidSelectionServiceException isse) {
+				_log.error("invalid selection");
+				return INPUT;
+			}
+
+			_navigation.setSelectionIndices(indices);
+			_navigation.setCurrentIndex(0);
+
+			if (_route == null) {
+				_log.error("route not found for seleciton=" + getInput() + " and keyMap=" + keyMapping.keySet());
+				return INPUT;
+			}
+			sessionMap.put("navState", new Integer(DISPLAY_DATA));
+			//_log.debug("Key " + key + " entered for route: " + _route.getId());
 			return "route-selected";
 		}
-	    
-	    return SUCCESS;
 	}
 }

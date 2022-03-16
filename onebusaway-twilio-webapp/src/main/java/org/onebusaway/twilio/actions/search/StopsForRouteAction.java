@@ -25,7 +25,6 @@ import org.apache.struts2.convention.annotation.Results;
 import org.apache.struts2.interceptor.SessionAware;
 import org.onebusaway.presentation.model.StopSelectionBean;
 import org.onebusaway.presentation.services.StopSelectionService;
-import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
 import org.onebusaway.transit_data.model.NameBean;
 import org.onebusaway.transit_data.model.RouteBean;
 import org.onebusaway.transit_data.model.StopBean;
@@ -37,6 +36,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 @Results({
   @Result(name="success", location="stops-for-route-navigation", type="chain"),
+	@Result(name="navigation", type="redirectAction", params={"namespace", "/search", "actionName", "stops-for-route-navigation","From", "${phoneNumber}", "Digits", "${input}"}),
 	@Result (name="stopFound", location="stop-found", type="chain")
 })
 public class StopsForRouteAction extends TwilioSupport implements SessionAware {
@@ -80,11 +80,11 @@ public class StopsForRouteAction extends TwilioSupport implements SessionAware {
 	  public void setSession(Map map) {
 	  	  this.sessionMap = map;
 	  }
-		
+
 	  @Override
 	  public String execute() throws Exception {
-	  	  
-	  	/* Need to check this for testing from  the web */
+
+	  	/* Need to check this for testing from the web */
 		Integer navState = (Integer)sessionMap.get("navState");
 		if (navState == null) {
 			_log.debug("StopsForRouteAction:navState is null");
@@ -93,30 +93,49 @@ public class StopsForRouteAction extends TwilioSupport implements SessionAware {
 			navState = DISPLAY_DATA;
 			sessionMap.put("navState", new Integer(navState));
 		}
-	  	  
-		  
+
+			if (_navigation == null) {
+				_navigation = (NavigationBean) sessionMap.get("navigation");
+			}
+
+			if (_route == null) {
+			_route = (RouteBean) sessionMap.remove("route");
+		}
+
+			if (_route == null)
+			throw new IllegalStateException("In StopsForRoute without route");
+
 		_log.debug("in StopsForRoute with input: " + getInput() + " route.getId: " + _route.getId()); 
-		clearInput();
 
-	    StopsForRouteBean stopsForRoute = _transitDataService.getStopsForRoute(_route.getId());
-	    List<Integer> selectionIndices = Collections.emptyList();
-	    StopSelectionBean selection = _stopSelectionService.getSelectedStops(
-	        stopsForRoute, selectionIndices);
-	    List<NameBean> names = new ArrayList<NameBean>(selection.getNames());
 
-	    _navigation = new NavigationBean();
-	    _navigation.setRoute(_route);
-	    _navigation.setStopsForRoute(stopsForRoute);
-	    _navigation.setSelectionIndices(selectionIndices);
-	    _navigation.setCurrentIndex(0);
-	    _navigation.setSelection(selection);
-	    _navigation.setNames(names);
-	    // Set navigation bean in session
-	    sessionMap.put("navigation", _navigation);
+		// no previous state, populate the navigation object
+		if (_navigation == null) {
+			StopsForRouteBean stopsForRoute = _transitDataService.getStopsForRoute(_route.getId());
+			List<Integer> selectionIndices = Collections.emptyList();
+			StopSelectionBean selection = _stopSelectionService.getSelectedStops(
+							stopsForRoute, selectionIndices);
+			List<NameBean> names = new ArrayList<NameBean>(selection.getNames());
 
-	    if (selection.hasStop()) {
+			_navigation = new NavigationBean();
+			_navigation.setRoute(_route);
+			_navigation.setStopsForRoute(stopsForRoute);
+			_navigation.setSelectionIndices(selectionIndices);
+			_navigation.setCurrentIndex(0);
+			_navigation.setSelection(selection);
+			_navigation.setNames(names);
+			// Set navigation bean in session
+			sessionMap.put("navigation", _navigation);
+		} else {
+			// navigation is present, use it
+			sessionMap.put("navState", new Integer(DO_ROUTING));
+			return "navigation";
+		}
+
+
+			// if a stop has been selected redirect to it
+	    if (_navigation.getSelection().hasStop()) {
 	      _log.debug("in StopsForRoute with input=" + getInput());
-	      _stop = selection.getStop();
+	      _stop = _navigation.getSelection().getStop();
 	      return "stopFound";
 	    }
     

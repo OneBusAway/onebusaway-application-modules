@@ -15,6 +15,7 @@
  */
 package org.onebusaway.api.actions.api;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.onebusaway.api.ResponseCodes;
@@ -95,7 +96,10 @@ public class ExceptionInterceptor extends AbstractInterceptor {
     b.append("!");
     b.append(proxy.getMethod());
 
-    Map<String, Object> params = context.getParameters();
+    Map<String, Object> params = new HashMap<>();
+    for (String key : context.getParameters().keySet()) {
+      params.put(key, context.getParameters().get(key).getValue());
+    }
 
     if (!params.isEmpty()) {
       b.append("?");

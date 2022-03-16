@@ -18,6 +18,7 @@ package org.onebusaway.webapp.actions.admin.servicealerts;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.struts2.convention.annotation.AllowedMethods;
 import org.apache.struts2.convention.annotation.Result;
 import org.apache.struts2.convention.annotation.Results;
 import org.apache.struts2.interceptor.validation.SkipValidation;
@@ -42,6 +43,7 @@ import org.springframework.remoting.RemoteConnectFailureException;
 @Results({@Result(type = "redirectAction", name = "redirect", params = {
     "actionName", "service-alerts!agency", "agencyId", "${agencyId}", "parse",
     "true"})})
+@AllowedMethods({"agency", "deleteAlert", "removeAllForAgency"})
 public class ServiceAlertsAction extends OneBusAwayNYCAdminActionSupport {
 
   private static final long serialVersionUID = 1L;

@@ -18,7 +18,7 @@ package org.onebusaway.admin.service.bundle.task;
 import java.io.File;
 import java.util.UUID;
 
-import org.codehaus.jackson.map.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.onebusaway.admin.bundle.model.BundleMetadata;
 import org.onebusaway.admin.model.BundleRequestResponse;
 import org.onebusaway.admin.service.bundle.impl.BundleBuildingUtil;

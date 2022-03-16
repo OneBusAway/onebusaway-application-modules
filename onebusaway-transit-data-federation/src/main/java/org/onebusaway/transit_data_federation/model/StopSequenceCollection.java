@@ -17,10 +17,9 @@ package org.onebusaway.transit_data_federation.model;
 
 import java.util.List;
 
+import org.locationtech.jts.geom.Point;
 import org.onebusaway.container.model.IdentityBean;
 import org.onebusaway.transit_data_federation.services.StopSequenceCollectionService;
-
-import com.vividsolutions.jts.geom.Point;
 
 /**
  * A stop sequence collection contains a list of {@link StopSequence} sequences

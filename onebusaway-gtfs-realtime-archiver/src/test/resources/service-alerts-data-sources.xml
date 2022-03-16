@@ -40,7 +40,7 @@
     </bean>
 
     <!-- these classes are now defined in a separate module -->
-	<bean id="gtfsRealtimeArchiveSessionFactory" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+	<bean id="gtfsRealtimeArchiveSessionFactory" class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
 		<property name="dataSource" ref="gtfsRealtimeArchiveDataSource" />
 		<property name="annotatedClasses">
 			<list>

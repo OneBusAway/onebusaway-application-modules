@@ -15,7 +15,7 @@
  */
 package org.onebusaway.admin.service.api;
 
-import org.codehaus.jackson.map.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.onebusaway.admin.model.assignments.ActiveBlock;
 import org.onebusaway.admin.model.assignments.Assignment;
 import org.onebusaway.admin.service.assignments.ActiveVehiclesService;

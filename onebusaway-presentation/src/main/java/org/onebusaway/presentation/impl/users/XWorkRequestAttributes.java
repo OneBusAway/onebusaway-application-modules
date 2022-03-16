@@ -15,6 +15,7 @@
  */
 package org.onebusaway.presentation.impl.users;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -98,11 +99,13 @@ public class XWorkRequestAttributes extends AbstractRequestAttributes {
   private Map<String, Object> getScopedMap(int scope) {
     switch (scope) {
       case SCOPE_REQUEST:
-        return _context.getParameters();
+        Map<String, Object> map = new HashMap<>();
+        for (String key : _context.getParameters().keySet()) {
+          map.put(key, _context.getParameters().get(key).getValue());
+        }
+        return map;
       case SCOPE_SESSION:
         return _context.getSession();
-      case SCOPE_GLOBAL_SESSION:
-        return _context.getApplication();
       default:
         throw new IllegalStateException("unknown scope=" + scope);
     }

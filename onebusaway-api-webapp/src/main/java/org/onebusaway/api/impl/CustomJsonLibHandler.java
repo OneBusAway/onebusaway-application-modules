@@ -15,138 +15,93 @@
  */
 package org.onebusaway.api.impl;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.*;
+import com.opensymphony.xwork2.ActionInvocation;
+import com.opensymphony.xwork2.inject.Inject;
+import org.apache.struts2.ServletActionContext;
+import org.apache.struts2.rest.handler.AbstractContentTypeHandler;
+import org.onebusaway.api.model.ResponseBean;
+import org.onebusaway.api.serializers.json.CustomSerializerProvider;
+
+import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
-import java.util.Collection;
 
-import javax.servlet.http.HttpServletRequest;
 
-import com.opensymphony.xwork2.ActionInvocation;
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
-import net.sf.json.JsonConfig;
+public class CustomJsonLibHandler extends AbstractContentTypeHandler {
 
-import org.apache.struts2.ServletActionContext;
-import org.apache.struts2.rest.handler.ContentTypeHandler;
+        private String defaultEncoding = "ISO-8859-1";
+        private ObjectMapper mapper = new ObjectMapper();
 
-/**
- * Handles JSON content using json-lib
- */
-public class CustomJsonLibHandler implements ContentTypeHandler {
+        public void toObject(ActionInvocation invocation, Reader in, Object target) throws IOException {
+                this.mapper.configure(SerializationFeature.WRITE_NULL_MAP_VALUES, false);
+                ObjectReader or = this.mapper.readerForUpdating(target);
+                or.readValue(in);
+        }
 
-  public void toObject(Reader in, Object target) throws IOException {
-    StringBuilder sb = new StringBuilder();
-    char[] buffer = new char[1024];
-    int len = 0;
-    while ((len = in.read(buffer)) > 0) {
-      sb.append(buffer, 0, len);
-    }
-    if (target != null && sb.length() > 0 && sb.charAt(0) == '[') {
-      JSONArray jsonArray = JSONArray.fromObject(sb.toString());
-      if (target.getClass().isArray()) {
-        JSONArray.toArray(jsonArray, target, new JsonConfig());
-      } else {
-        JSONArray.toList(jsonArray, target, new JsonConfig());
-      }
+        public String fromObject(ActionInvocation invocation, Object obj, String resultCode, Writer stream) throws IOException {
+                String callback = getCallback();
+                return fromObject(invocation, obj, resultCode, stream, callback);
+        }
 
-    } else {
-      JSONObject jsonObject = JSONObject.fromObject(sb.toString());
-      JSONObject.toBean(jsonObject, target, new JsonConfig());
-    }
-  }
+        public String fromObject(ActionInvocation invocation, Object obj, String resultCode, Writer stream, String callback) throws IOException {
+                boolean isText = false;
+                String value = null;
+                if (obj != null && obj instanceof ResponseBean) {
+                        // check if serialization already occurred as with SIRI calls
+                        ResponseBean bean = (ResponseBean) obj;
+                        isText = bean.isString();
+                        if (bean.getData() != null) {
+                                value = bean.getData().toString();
+                        }
+                }
+                if (obj != null && !isText) {
+                        mapper.setSerializerProvider(new CustomSerializerProvider());
+                        mapper.configure(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY, true);
+                        mapper.configure(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS, true);
+                        mapper.configure(SerializationFeature.WRITE_NULL_MAP_VALUES, false);
+                        mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
 
-  @Override
-  public void toObject(ActionInvocation actionInvocation, Reader in, Object target) throws IOException {
-    StringBuilder sb = new StringBuilder();
-    char[] buffer = new char[1024];
-    int len = 0;
-    while ((len = in.read(buffer)) > 0) {
-      sb.append(buffer, 0, len);
-    }
-    if (target != null && sb.length() > 0 && sb.charAt(0) == '[') {
-      JSONArray jsonArray = JSONArray.fromObject(sb.toString());
-      if (target.getClass().isArray()) {
-        JSONArray.toArray(jsonArray, target, new JsonConfig());
-      } else {
-        JSONArray.toList(jsonArray, target, new JsonConfig());
-      }
+                        value = mapper.writeValueAsString(obj);
+                }
+                if (value != null && callback != null) {
+                        stream.write(callback + "(" + value + ")");
+                }
+                else {
+                        stream.write(value);
+                }
 
-    } else {
-      JSONObject jsonObject = JSONObject.fromObject(sb.toString());
-      JSONObject.toBean(jsonObject, target, new JsonConfig());
-    }
+                return null;
+        }
 
-  }
+        public String getCallback(){
+                String callback = null;
+                HttpServletRequest req = ServletActionContext.getRequest();
+                if (req != null) {
+                        callback = req.getParameter("callback");
+                }
+                return callback;
+        }
 
-  public String fromObject(Object obj, String resultCode, Writer stream)
-      throws IOException {
+        public String getContentType() {
+                String callback = getCallback();
+                if(callback != null){
+                        return "application/javascript";
+                }
+                // we used to set charset for callbacks
+                // after Jackson upgrade to 2.12.0 this no longer works
+                //return "application/json;charset=" + this.defaultEncoding;
+                return "application/json";
+        }
 
-    String callback = null;
-    HttpServletRequest req = ServletActionContext.getRequest();
-    if (req != null)
-      callback = req.getParameter("callback");
+        public String getExtension() {
+                return "json";
+        }
 
-    String value = null;
-
-    if (obj != null) {
-      if (isArray(obj)) {
-        JSONArray jsonArray = JSONArray.fromObject(obj);
-        value = jsonArray.toString();
-      } else {
-        JSONObject jsonObject = JSONObject.fromObject(obj);
-        value = jsonObject.toString();
-      }
-    }
-
-    if (value != null) {
-      if (callback != null)
-        stream.write(callback + "(" + value + ")");
-      else
-        stream.write(value);
-    }
-    
-    return null;
-  }
-
-  @Override
-  public String fromObject(ActionInvocation actionInvocation, Object obj, String s, Writer stream) throws IOException {
-    String callback = null;
-    HttpServletRequest req = ServletActionContext.getRequest();
-    if (req != null)
-      callback = req.getParameter("callback");
-
-    String value = null;
-
-    if (obj != null) {
-      if (isArray(obj)) {
-        JSONArray jsonArray = JSONArray.fromObject(obj);
-        value = jsonArray.toString();
-      } else {
-        JSONObject jsonObject = JSONObject.fromObject(obj);
-        value = jsonObject.toString();
-      }
-    }
-
-    if (value != null) {
-      if (callback != null)
-        stream.write(callback + "(" + value + ")");
-      else
-        stream.write(value);
-    }
-
-    return null;
-  }
-
-  private boolean isArray(Object obj) {
-    return obj instanceof Collection<?> || obj.getClass().isArray();
-  }
-
-  public String getContentType() {
-    return "application/json";
-  }
-
-  public String getExtension() {
-    return "json";
-  }
+        @Inject("struts.i18n.encoding")
+        public void setDefaultEncoding(String val) {
+                this.defaultEncoding = val;
+        }
 }

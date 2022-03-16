@@ -16,62 +16,52 @@
     limitations under the License.
 
 -->
-<beans xmlns="http://www.springframework.org/schema/beans" 
+<beans xmlns="http://www.springframework.org/schema/beans"
 	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xmlns:context="http://www.springframework.org/schema/context" 
-       xmlns:aop="http://www.springframework.org/schema/aop"
-       xmlns:jee="http://www.springframework.org/schema/jee"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+	   xmlns:context="http://www.springframework.org/schema/context"
+	   xmlns:aop="http://www.springframework.org/schema/aop"
+	   xmlns:jee="http://www.springframework.org/schema/jee"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
         http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
         http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
         http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-3.0.xsd">
 
 
-    <!-- Transit Data Service -->
-    
-    <bean id="transitDataService" class="org.springframework.remoting.caucho.HessianProxyFactoryBean">
-    	<property name="serviceUrl" value="http://localhost:8080/onebusaway-transit-data-federation-webapp/remoting/transit-data-service" />
-    	<property name="serviceInterface" value="org.onebusaway.transit_data.services.TransitDataService" />
-  	</bean>
-	
+	<!-- Transit Data Service -->
+
+	<bean id="transitDataService" class="org.springframework.remoting.caucho.HessianProxyFactoryBean">
+		<property name="serviceUrl" value="http://localhost:8080/onebusaway-transit-data-federation-webapp/remoting/transit-data-service" />
+		<property name="serviceInterface" value="org.onebusaway.transit_data.services.TransitDataService" />
+	</bean>
+
 	<bean id="configurationServiceClient" class="org.onebusaway.util.impl.configuration.ConfigurationServiceClientFileImpl" >
       	<constructor-arg type="java.lang.String" value="/opt/mnrt/oba/app-config.json"/>
-    </bean>
+	</bean>
 
-    <!-- Database Configuration -->
+	<!-- Database Configuration -->
 
-    <bean id="dataSource"
-          class="org.springframework.jndi.JndiObjectFactoryBean">
-      <property name="jndiName"
-                value="java:comp/env/jdbc/appDB"/>   
-      <property name="lookupOnStartup"
-                value="true"/>   
-      <property name="cache"
-                value="true"/>   
-      <property name="proxyInterface"
-                value="javax.sql.DataSource"/>   
-      <property name="resourceRef"
-                value="true" />
-    </bean>
+	<bean id="dataSource"
+		  class="org.springframework.jndi.JndiObjectFactoryBean">
+		<property name="jndiName"
+				  value="java:comp/env/jdbc/appDB"/>
+		<property name="lookupOnStartup"
+				  value="true"/>
+		<property name="cache"
+				  value="true"/>
+		<property name="proxyInterface"
+				  value="javax.sql.DataSource"/>
+		<property name="resourceRef"
+				  value="true" />
+	</bean>
 
-    <alias name="dataSource" alias="mutableDataSource" />
+	<alias name="dataSource" alias="mutableDataSource" />
 
 
 
 	<!-- Other Stuff: -->
 	<bean id="serviceAreaServiceImpl" class="org.onebusaway.presentation.impl.ServiceAreaServiceImpl" />
 	<bean id="externalGeocoderImpl"
-		class="org.onebusaway.geocoder.enterprise.impl.EnterpriseGoogleGeocoderImpl" depends-on="serviceAreaServiceImpl">
-	</bean>
-
-
-	<bean
-		class="org.onebusaway.container.spring.SystemPropertyOverrideConfigurer">
-		<property name="properties">
-			<props>
-				<prop key="front-end.version">${git.commit.id}</prop>
-			</props>
-		</property>
+		  class="org.onebusaway.geocoder.enterprise.impl.EnterpriseGoogleGeocoderImpl" depends-on="serviceAreaServiceImpl">
 	</bean>
 
 	<bean class="org.onebusaway.container.spring.PropertyOverrideConfigurer">
@@ -83,7 +73,7 @@
 	</bean>
 
 	<bean id="siriCacheService"
-		class="org.onebusaway.presentation.services.cachecontrol.SiriCacheServiceImpl">
+		  class="org.onebusaway.presentation.services.cachecontrol.SiriCacheServiceImpl">
 		<property name="disabled" value="${siri.cache.disabled}" />
 	</bean>
 	<!--

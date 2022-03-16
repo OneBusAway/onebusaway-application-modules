@@ -277,8 +277,7 @@ public interface TransitDataService extends FederatedService {
 
   /**
    * @param stopId
-   * @param timeFrom
-   * @param timeTo
+   * @param query
    * @return stop with arrival and departure information for the specified stop
    *         and time range, or null if not found
    * @throws ServiceException
@@ -290,8 +289,7 @@ public interface TransitDataService extends FederatedService {
 
   /**
    * @param stopIds
-   * @param timeFrom
-   * @param timeTo
+   * @param query
    * @return stops with arrival and departure information for the specified
    *         stops and time range
    * @throws ServiceException
@@ -617,5 +615,4 @@ public interface TransitDataService extends FederatedService {
   @FederatedByAgencyIdMethod
   public ListBean<ServiceAlertRecordBean> getAllServiceAlertRecordsForAgencyId(
 		String agencyId);
-
 }

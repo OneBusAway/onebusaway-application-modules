@@ -25,11 +25,11 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 
-import org.codehaus.jackson.JsonGenerationException;
-import org.codehaus.jackson.JsonGenerator;
-import org.codehaus.jackson.map.JsonMappingException;
-import org.codehaus.jackson.map.MappingJsonFactory;
-import org.codehaus.jackson.map.ObjectMapper;
+import com.fasterxml.jackson.core.JsonGenerationException;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.MappingJsonFactory;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.onebusaway.admin.model.ui.UserDetail;
 import org.onebusaway.admin.service.UserManagementService;
 import org.onebusaway.admin.service.bundle.api.AuthenticatedResource;

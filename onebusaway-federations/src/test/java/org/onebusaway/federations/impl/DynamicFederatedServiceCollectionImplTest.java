@@ -40,7 +40,7 @@ public class DynamicFederatedServiceCollectionImplTest {
 
   private static final int TIMEOUT = 10000;
 
-  private static final int PORT = 9999;
+  private static final int PORT = 9991;
 
   private FederatedServiceRegistryImpl _registry;
 

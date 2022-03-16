@@ -15,12 +15,13 @@
  */
 package org.onebusaway.container.spring.ehcache;
 
+import java.util.Map;
 import java.util.Properties;
 
 import net.sf.ehcache.CacheManager;
 
+import org.hibernate.boot.spi.SessionFactoryOptions;
 import org.hibernate.cache.CacheException;
-import org.hibernate.cfg.Settings;
 
 /**
  * A Hibernate EhCacheRegionFactory implementation that supports directly
@@ -52,12 +53,12 @@ public class EhCacheRegionFactory extends org.hibernate.cache.ehcache.EhCacheReg
   }
 
   @Override
-  public void start(Settings settings, Properties properties)
+  public void start(SessionFactoryOptions settings, Map<String, Object> configValues)
       throws CacheException {
     if (staticCacheManagerInstance != null)
       manager = staticCacheManagerInstance;
     else
-      super.start(settings, properties);
+      super.start(settings, configValues);
   }
 
   @Override

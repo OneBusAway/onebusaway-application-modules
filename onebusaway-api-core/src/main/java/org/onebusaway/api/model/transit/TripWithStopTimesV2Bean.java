@@ -27,7 +27,7 @@ public final class TripWithStopTimesV2Bean implements Serializable {
 
     private String TripId;
 
-    private List<ScheduleStopTimeInstanceV2Bean> scheduledStopTimes = new ArrayList<ScheduleStopTimeInstanceV2Bean>();
+    private List<ScheduleStopTimeInstanceExtendedWithStopIdV2Bean> scheduledStopTimes = new ArrayList<ScheduleStopTimeInstanceExtendedWithStopIdV2Bean>();
 
     public void setTripId(String tripId) {
         TripId = tripId;
@@ -37,11 +37,11 @@ public final class TripWithStopTimesV2Bean implements Serializable {
         return TripId;
     }
 
-    public void setStopTimes(List<ScheduleStopTimeInstanceV2Bean> scheduledStopTimes) {
+    public void setStopTimes(List<ScheduleStopTimeInstanceExtendedWithStopIdV2Bean> scheduledStopTimes) {
         this.scheduledStopTimes = scheduledStopTimes;
     }
 
-    public List<ScheduleStopTimeInstanceV2Bean> getStopTimes() {
+    public List<ScheduleStopTimeInstanceExtendedWithStopIdV2Bean> getStopTimes() {
         return scheduledStopTimes;
     }
 }

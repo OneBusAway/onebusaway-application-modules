@@ -15,18 +15,14 @@
  */
 package org.onebusaway.admin.service.assignments.impl;
 
-import org.hibernate.SessionFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.onebusaway.admin.model.assignments.Assignment;
 import org.onebusaway.admin.service.assignments.AssignmentDao;
-import org.onebusaway.transit_data_federation.services.reporting.UserReportingDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.transaction.TransactionConfiguration;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.util.Calendar;
@@ -36,7 +32,6 @@ import java.util.List;
 import static org.junit.Assert.*;
 
 @ContextConfiguration(locations = "classpath:org/onebusaway/admin/application-context-test.xml")
-@TransactionConfiguration(transactionManager="transactionManager", defaultRollback=true)
 @RunWith(SpringJUnit4ClassRunner.class)
 public class AssignmentDaoImplTest {
 

@@ -17,6 +17,9 @@
 package org.onebusaway.transit_data_federation.impl.beans;
 
 import org.apache.lucene.queryparser.classic.ParseException;
+import org.locationtech.jts.geom.Envelope;
+import org.locationtech.jts.index.ItemVisitor;
+import org.locationtech.jts.index.strtree.STRtree;
 import org.onebusaway.container.cache.Cacheable;
 import org.onebusaway.container.refresh.Refreshable;
 import org.onebusaway.exceptions.InvalidArgumentServiceException;
@@ -43,23 +46,13 @@ import org.onebusaway.transit_data_federation.services.transit_graph.RouteCollec
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 
-import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.index.ItemVisitor;
-import com.vividsolutions.jts.index.strtree.STRtree;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import javax.annotation.PostConstruct;
 

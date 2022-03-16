@@ -53,7 +53,7 @@ public class CurrentTimeActionTest {
 
     long delta = Math.abs(time.getTime() - t);
     assertTrue("check that time delta is within limits: delta=" + delta,
-        delta < 100);
+        delta < 500);
 
     String readableTime = DateLibrary.getTimeAsIso8601String(new Date(
         time.getTime()));

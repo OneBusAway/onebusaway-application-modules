@@ -17,6 +17,7 @@ package org.onebusaway.twilio.impl;
 
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -55,7 +56,10 @@ public class TwilioInterceptor extends AbstractInterceptor {
   @Override
   public String intercept(ActionInvocation invocation) throws Exception {
     ActionContext context = invocation.getInvocationContext();
-    Map<String, Object> parameters = context.getParameters();
+    Map<String, Object> parameters = new HashMap<>();
+    for (String key : context.getParameters().keySet()) {
+      parameters.put(key, context.getParameters().get(key));
+    }
     
     /* Stringify parameters for debugging output */
     String paramString = "";  

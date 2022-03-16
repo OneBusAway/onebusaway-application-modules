@@ -18,6 +18,7 @@ package org.onebusaway.webapp.actions.admin.agencymetadata;
 import java.io.IOException;
 
 import org.apache.struts2.convention.annotation.Action;
+import org.apache.struts2.convention.annotation.AllowedMethods;
 import org.apache.struts2.convention.annotation.ParentPackage;
 import org.apache.struts2.convention.annotation.Result;
 import org.apache.struts2.convention.annotation.Results;
@@ -40,7 +41,7 @@ import com.opensymphony.xwork2.ModelDriven;
   @Result(type = "redirectAction", name = "cancelResult", params = {
       "actionName", "agency-metadata", "id", "${id}", "parse", "true"})
   })
-
+@AllowedMethods({"submit", "cancel", "deleteAgencyMetadata"})
 public class AgencyMetadataEditAction  extends ActionSupport implements
     ModelDriven<AgencyMetadata> {
   private static final long serialVersionUID = 1L;

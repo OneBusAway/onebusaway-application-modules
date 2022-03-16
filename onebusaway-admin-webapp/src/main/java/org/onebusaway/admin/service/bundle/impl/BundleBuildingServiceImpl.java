@@ -130,7 +130,8 @@ public class BundleBuildingServiceImpl implements BundleBuildingService {
   
   @PreDestroy
   public void stop() {
-    _executorService.shutdownNow();
+    if (_executorService != null)
+      _executorService.shutdownNow();
   }
 
   public void setAuxConfig(String flag) {

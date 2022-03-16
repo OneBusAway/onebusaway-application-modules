@@ -69,7 +69,7 @@
 </head>
 <body>
 
-<s:set name="theme" value="'xhtml'" scope="page" />
+<s:set var="theme" value="'xhtml'" scope="page" />
 
 <s:if test="agencyId != null">
 <s:url var="url" action="service-alerts">

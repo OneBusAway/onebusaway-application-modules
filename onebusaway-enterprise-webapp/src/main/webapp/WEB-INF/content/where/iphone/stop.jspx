@@ -21,7 +21,7 @@
       xmlns:s="/struts-tags"
       xmlns:oba="/oba-tags">
 <jsp:directive.page contentType="text/html" />
-<s:set name="now" value="getNow()" />
+<s:set var="now" value="getNow()" />
 <head>
 <meta http-equiv="Refresh" content="60" />
 <link rel="stylesheet" type="text/css" media="all" href="${oba:resource('/css/where/stop.css')}"/>
@@ -56,8 +56,8 @@
         </s:url><s:a href="%{url}">minutes</s:a></td>
     </tr>
     <s:iterator value="result.arrivalsAndDepartures">
-    	<s:set name="route" value="trip.route"/>
-        <s:set name="arrivalsStatusLabelStyle" value="arrivalsAndDeparturesPresentation.getStatusLabelStyle(top)" />
+    	<s:set var="route" value="trip.route"/>
+        <s:set var="arrivalsStatusLabelStyle" value="arrivalsAndDeparturesPresentation.getStatusLabelStyle(top)" />
         <tr class="arrivalsRow">
             <jsp:element name="td">
         	  <jsp:attribute name="class">arrivalsRouteEntry<s:if test="arrivalsAndDeparturesPresentation.isLongRouteName(#route)"> arrivalsRouteLongNameEntry</s:if></jsp:attribute>
