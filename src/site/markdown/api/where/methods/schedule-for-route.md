@@ -83,3 +83,8 @@ The entry also has concentrated schedule information in the form of stopTripGrou
 * `<tripIds\>` - a list of trip Ids that matched by shared direction- Each trip Id is of the format `[agency]_[tripIdentifier]`
 
 
+Alternate codes:
+404 - returned if the route ID in the request is not found
+510 - returned if the route has no schedules for the day requested
+
+
