@@ -15,6 +15,7 @@
  */
 package org.onebusaway.webapp.actions.admin.usermanagement;
 
+import org.apache.struts2.convention.annotation.AllowedMethods;
 import org.onebusaway.admin.model.ui.UserDetail;
 import org.onebusaway.admin.service.UserManagementService;
 import org.onebusaway.webapp.actions.OneBusAwayNYCAdminActionSupport;
@@ -28,6 +29,7 @@ import java.util.List;
  * Lists the users in the database.
  *
  */
+@AllowedMethods({"firstPage", "nextPage", "previousPage"})
 public class ListUsersAction extends OneBusAwayNYCAdminActionSupport {
 
     private static Logger log = LoggerFactory.getLogger(ListUsersAction.class);
