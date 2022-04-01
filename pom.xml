@@ -613,7 +613,9 @@
             <exclude>**/*.mp3</exclude>
             <exclude>**/*.wav</exclude>
             <exclude>bin/**</exclude>
+            <exclude>.github/**</exclude>
             <exclude>src/test/resources/**</exclude>
+            <exclude>onebusaway-quickstart/**</exclude>
             <exclude>**/git.properties</exclude>
           </excludes>
         </configuration>
