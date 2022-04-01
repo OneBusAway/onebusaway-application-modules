@@ -42,7 +42,7 @@ http://www.springframework.org/schema/context http://www.springframework.org/sch
     <bean id="httpServiceClient" class="org.onebusaway.transit_data_federation.util.HttpServiceClientImpl" >
       <constructor-arg type="java.lang.String" value="localhost"/>
       <constructor-arg type="java.lang.Integer" value="9999" />
-      <constructor-arg type="java.lang.String" value="/api/" />
+        <constructor-arg type="java.lang.String" value="/api/" />
     </bean>
 
     <bean id="bundleManagementService" class="org.onebusaway.transit_data_federation.impl.bundle.BundleManagementServiceImpl">

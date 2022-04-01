@@ -62,6 +62,7 @@ public class CustomJsonLibHandler extends AbstractContentTypeHandler {
                         mapper.configure(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY, true);
                         mapper.configure(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS, true);
                         mapper.configure(SerializationFeature.WRITE_NULL_MAP_VALUES, false);
+                        mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
 
                         value = mapper.writeValueAsString(obj);
                 }

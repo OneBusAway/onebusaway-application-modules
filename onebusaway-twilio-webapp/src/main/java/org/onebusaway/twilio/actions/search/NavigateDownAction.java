@@ -16,12 +16,14 @@
 package org.onebusaway.twilio.actions.search;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.struts2.convention.annotation.Result;
 import org.apache.struts2.convention.annotation.Results;
 import org.apache.struts2.interceptor.SessionAware;
+import org.onebusaway.presentation.impl.ArrivalsAndDeparturesModel;
 import org.onebusaway.presentation.model.StopSelectionBean;
 import org.onebusaway.presentation.services.StopSelectionService;
 import org.onebusaway.transit_data.model.NameBean;
@@ -32,8 +34,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.onebusaway.twilio.actions.TwilioSupport;
 
 @Results ({
-	@Result (name="success", location="stops-for-route-navigation", type="chain"),
-	@Result (name="stopFound", location="stop-found", type="chain")
+  @Result(name="success", type="redirectAction", params={"namespace", "/search", "actionName", "stops-for-route-navigation","From", "${phoneNumber}"}),
+	@Result (name="stopFound", location="stop-found", type="chain"),
+  @Result(name="arrivals-and-departures", type="chain",
+                params={"namespace", "/stops", "actionName", "arrivals-and-departures-for-stop-id"}),
+
 })
 public class NavigateDownAction extends TwilioSupport implements SessionAware {
   private static final long serialVersionUID = 1L;
@@ -47,6 +52,8 @@ public class NavigateDownAction extends TwilioSupport implements SessionAware {
   private int _index;
 
   private StopBean _stop;
+
+  private List<String> _stopIds;
 
   @Autowired
   public void setStopSelectionService(StopSelectionService stopSelectionService) {
@@ -65,12 +72,17 @@ public class NavigateDownAction extends TwilioSupport implements SessionAware {
 	  this.sessionMap = map;
   }
 		
-public void setIndex(int index) {
+  public void setIndex(int index) {
     _index = index;
   }
 
   public StopBean getStop() {
     return _stop;
+  }
+
+  // for chaining from index
+  public List<String> getStopIds() {
+    return _stopIds;
   }
 
   @Override
@@ -82,7 +94,18 @@ public void setIndex(int index) {
 	Integer navState = (Integer)sessionMap.get("navState");
 	_log.debug("NavigateDownAction:navState: " + navState);
 	_log.debug("NavigateDownAction:_index: " + _index);
-	
+
+  if (sessionMap.containsKey("stop")) {
+    // we've been here before, go to real-time
+    StopBean stop = (StopBean) sessionMap.get("stop");
+    _stopIds = Arrays.asList(stop.getId());
+    ArrivalsAndDeparturesModel model = new ArrivalsAndDeparturesModel();
+    model.setStopIds(_stopIds);
+    sessionMap.put("_model", model);
+    sessionMap.put("navState", DISPLAY_DATA);
+    return "arrivals-and-departures";
+  }
+
 	if (_navigation == null) {
 		_log.debug("NavigateDownAction:navigation bean is null");
 		_navigation = (NavigationBean) sessionMap.get("navigation");
@@ -113,7 +136,7 @@ public void setIndex(int index) {
       return "stopFound";
     }
 
-    sessionMap.put("navState", new Integer(DISPLAY_DATA)); //Get input
+    sessionMap.remove("navState");
     sessionMap.put("navigation", _navigation);
     return SUCCESS;
   }

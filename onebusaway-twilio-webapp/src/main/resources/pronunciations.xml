@@ -17,6 +17,9 @@
 
 -->
 <text-modifications>
+    <!-- illegal characters for XML -->
+    <replacement from="&amp;" to="and" atWordBoundary="false" />
+
     <!-- Fix Typos First -->
     <replacement from="ands atlantic" to="and s atlantic" />
     <replacement from="&amp;se" to="&amp; se" />
@@ -148,8 +151,6 @@
     <replacement from="ny" to="new york" />
 
     <!-- General -->
-    <replacement from="&amp;" to="and" />
-
     <replacement from="i-5" to="eye five" />
     <replacement from="i-405" to="eye four oh five" />
     <replacement from="i-90" to="eye ninety" />

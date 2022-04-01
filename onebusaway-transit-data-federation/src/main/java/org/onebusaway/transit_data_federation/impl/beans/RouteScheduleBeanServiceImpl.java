@@ -18,12 +18,7 @@ package org.onebusaway.transit_data_federation.impl.beans;
 import org.onebusaway.container.cache.Cacheable;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
-import org.onebusaway.transit_data.model.AgencyBean;
-import org.onebusaway.transit_data.model.RouteBean;
-import org.onebusaway.transit_data.model.RouteScheduleBean;
-import org.onebusaway.transit_data.model.StopBean;
-import org.onebusaway.transit_data.model.StopTimeInstanceBean;
-import org.onebusaway.transit_data.model.StopsAndTripsForDirectionBean;
+import org.onebusaway.transit_data.model.*;
 import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationQueryBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
@@ -44,15 +39,7 @@ import org.onebusaway.util.AgencyAndIdLibrary;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.TimeZone;
+import java.util.*;
 
 /**
  * Support Schedule queries at the route level.  Similar to
@@ -116,6 +103,7 @@ public class RouteScheduleBeanServiceImpl implements RouteScheduleBeanService {
   @Cacheable
   public RouteScheduleBean getScheduledArrivalsForDate(AgencyAndId routeId, ServiceDate scheduleDate) {
     RouteScheduleBean rsb = new RouteScheduleBean();
+    rsb.setOutOfServiceBounds(true);
     rsb.setRouteId(routeId);
     rsb.setScheduleDate(scheduleDate);
     RouteCollectionEntry routeCollectionForId = _graph.getRouteCollectionForId(routeId);
@@ -175,6 +163,7 @@ public class RouteScheduleBeanServiceImpl implements RouteScheduleBeanService {
         if (_calendarService.areServiceIdsActiveOnServiceDate(
                 idActivation,
                 rsb.getScheduleDate().getAsDate(idActivation.getTimeZone()))) {
+          rsb.setOutOfServiceBounds(false);
           activeTrips.add(blockTrip.getTrip());
 
           // get identifying charectoristics of the trip
@@ -209,6 +198,11 @@ public class RouteScheduleBeanServiceImpl implements RouteScheduleBeanService {
           sc.addIfNotPresent(stops);
           serviceIds.add(blockTrip.getTrip().getServiceId().getId());
         }
+        if (willServiceIdsBeActiveAfterServiceDate(
+                idActivation,
+                rsb.getScheduleDate().getAsDate(idActivation.getTimeZone()))){
+          rsb.setOutOfServiceBounds(false);
+        }
       }
     }
 
@@ -231,6 +225,18 @@ public class RouteScheduleBeanServiceImpl implements RouteScheduleBeanService {
     rsb.getTrips().addAll(references.getTrips());
     rsb.getStops().addAll(references.getStops());
     rsb.getStopTimes().addAll(references.getStopTimes());
+  }
+
+  private boolean willServiceIdsBeActiveAfterServiceDate(ServiceIdActivation serviceIds,
+                                                         Date serviceDate){
+    boolean answer = false;
+    Set<Date> dates = _calendarService.getDatesForServiceIds(serviceIds);
+    for(Date date : dates){
+      if(date.after(serviceDate)){
+        return true;
+      }
+    }
+    return answer;
   }
 
   private void addRouteReference(BeanReferences references, AgencyAndId routeId) {
@@ -351,7 +357,7 @@ public class RouteScheduleBeanServiceImpl implements RouteScheduleBeanService {
 
   private void addStopTimeReference(BeanReferences references, StopsAndTripsForDirectionBean stopsAndTripsForDirectionBean,
                                     StopTimeEntry stopTimeEntry, ServiceDate serviceDate) {
-    StopTimeInstanceBean bean = new StopTimeInstanceBean();
+    StopTimeInstanceBeanExtendedWithStopId bean = new StopTimeInstanceBeanExtendedWithStopId();
     bean.setTripId(AgencyAndIdLibrary.convertToString(stopTimeEntry.getTrip().getId()));
     bean.setServiceId(AgencyAndIdLibrary.convertToString(stopTimeEntry.getTrip().getServiceId().getId()));
     bean.setServiceDate(serviceDate.getAsDate(getTimeZoneForAgency(stopTimeEntry.getTrip().getId().getAgencyId())).getTime());
@@ -359,6 +365,7 @@ public class RouteScheduleBeanServiceImpl implements RouteScheduleBeanService {
     bean.setArrivalTime(stopTimeEntry.getArrivalTime());
     bean.setDepartureEnabled(stopTimeEntry.getDepartureTime() > 0);
     bean.setDepartureTime(stopTimeEntry.getDepartureTime());
+    bean.setStopId(stopTimeEntry.getStop().getId());
     references.getStopTimes().add(bean);
     stopsAndTripsForDirectionBean.getStopTimes().add(bean);
   }
@@ -510,7 +517,7 @@ public class RouteScheduleBeanServiceImpl implements RouteScheduleBeanService {
     private Set<RouteBean> routes = new LinkedHashSet<>();
     private Set<TripBean> trips = new LinkedHashSet<>();
     private Set<StopBean> stops = new LinkedHashSet<>();
-    private Set<StopTimeInstanceBean> stopTimes = new LinkedHashSet<>();
+    private Set<StopTimeInstanceBeanExtendedWithStopId> stopTimes = new LinkedHashSet<>();
     public BeanReferences() {
     }
     public Set<AgencyBean> getAgencies() {
@@ -525,7 +532,7 @@ public class RouteScheduleBeanServiceImpl implements RouteScheduleBeanService {
     public Set<StopBean> getStops() {
       return stops;
     }
-    public Set<StopTimeInstanceBean> getStopTimes() {
+    public Set<StopTimeInstanceBeanExtendedWithStopId> getStopTimes() {
       return stopTimes;
     }
 

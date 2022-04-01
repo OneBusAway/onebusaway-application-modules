@@ -26,6 +26,7 @@ public class Serializers extends JsonSerializer<Object> {
   public static final JsonSerializer<Object> EMPTY_STRING_SERIALIZER_INSTANCE = new EmptyStringSerializer();
   public static final JsonSerializer<Object> NULL_NUMBER_SERIALIZER_INSTANCE = new NullNumberSerializer();
   public static final JsonSerializer<Object> NULL_COLLECTION_SERIALIZER_INSTANCE = new NullCollectionSerializer();
+  public static final JsonSerializer<Object> NULL_VALUE_SERIALIZER_INSTANCE = new NullValueSerializer();
 
 
   public Serializers() {}
@@ -65,5 +66,16 @@ public class Serializers extends JsonSerializer<Object> {
       jsonGenerator.writeStartArray(0);
       jsonGenerator.writeEndArray();
     }
+  }
+
+  private static class NullValueSerializer extends JsonSerializer<Object> {
+    public NullValueSerializer() {}
+    @Override
+    public void serialize(Object o, JsonGenerator jsonGenerator, SerializerProvider serializerProvider)
+            throws IOException, JsonProcessingException {
+      jsonGenerator.writeNull();
+    }
+
+
   }
 }

@@ -18,6 +18,8 @@ package org.onebusaway.api.serializers.json;
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.ser.DefaultSerializerProvider;
 import com.fasterxml.jackson.databind.ser.SerializerFactory;
+import org.onebusaway.api.model.transit.FrequencyV2Bean;
+import org.onebusaway.api.model.transit.TimeIntervalV2;
 
 import java.util.Collection;
 import java.util.List;
@@ -48,6 +50,10 @@ public class CustomSerializerProvider extends DefaultSerializerProvider {
       return Serializers.NULL_NUMBER_SERIALIZER_INSTANCE;
     if (property.getType().getRawClass().equals(Double.class))
       return Serializers.NULL_NUMBER_SERIALIZER_INSTANCE;
+    if (property.getType().getRawClass().equals(TimeIntervalV2.class))
+      return Serializers.NULL_VALUE_SERIALIZER_INSTANCE;
+    if (property.getType().getRawClass().equals(FrequencyV2Bean.class))
+      return Serializers.NULL_VALUE_SERIALIZER_INSTANCE;
     if (property.getType().getRawClass().equals(Collection.class) || property.getType().getRawClass().equals(List.class))
       return Serializers.NULL_COLLECTION_SERIALIZER_INSTANCE;
     else {

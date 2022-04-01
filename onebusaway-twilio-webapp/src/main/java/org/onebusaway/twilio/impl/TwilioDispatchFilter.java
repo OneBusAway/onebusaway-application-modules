@@ -32,6 +32,10 @@ import org.onebusaway.util.SystemTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * FOR TESTING ONLY.  This is not used in the production workflow.  Instead
+ * Twilio follows the redirects.
+ */
 public class TwilioDispatchFilter implements Filter {
 
   private static final long serialVersionUID = 1L;
@@ -40,7 +44,7 @@ public class TwilioDispatchFilter implements Filter {
   
   private SessionManager _sessionManager = null;
   private static final String PHONE_NUMBER_KEY = "From";
-  private static final String NEXT_ACTION = "twilio.nextAction";
+  public static final String NEXT_ACTION = "twilio.nextAction";
   private static final String INDEX_ACTION = "index";
   private static final String WELCOME_ACTION = "welcome";
 
@@ -77,7 +81,7 @@ public class TwilioDispatchFilter implements Filter {
         _log.debug("forwarding to " + nextAction);
         httpResponse.sendRedirect(format(httpRequest, nextAction));
         return;
-      } 
+      }
     }
 
     _log.debug("fall through forwarding to " + WELCOME_ACTION);

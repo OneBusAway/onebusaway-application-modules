@@ -121,6 +121,7 @@ The current list of supported API methods.
 * [route](methods/route.html) - get details for a specific route
 * [routes-for-agency](methods/routes-for-agency.html) - get a list of all routes for an agency
 * [routes-for-location](methods/routes-for-location.html) - search for routes near a location, optionally by route name
+* [schedule-for-route](methods/schedule-for-route.html) - get the full schedule for a route on a particular day
 * [schedule-for-stop](methods/schedule-for-stop.html) - get the full schedule for a stop on a particular day
 * [shape](methods/shape.html) - get details for a specific shape (polyline drawn on a map)
 * [stop-ids-for-agency](methods/stop-ids-for-agency.html) - get a list of all stops for an agency

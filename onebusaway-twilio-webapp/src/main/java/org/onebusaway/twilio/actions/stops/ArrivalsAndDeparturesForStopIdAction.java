@@ -55,8 +55,10 @@ public class ArrivalsAndDeparturesForStopIdAction extends TwilioSupport {
 
   public String execute() throws Exception {
     _log.debug("in execute with stops=" + _model.getStopIds());
+    // cleanup session if we chained into here
+    sessionMap.remove("stop");
     if (_model.isMissingData()) {
-      _log.warn("missing execpted data");
+      _log.warn("missing expected data");
       return INPUT;
     }
 

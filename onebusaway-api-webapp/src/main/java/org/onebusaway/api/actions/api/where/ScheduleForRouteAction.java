@@ -21,7 +21,9 @@ import java.util.List;
 import com.opensymphony.xwork2.conversion.annotations.TypeConversion;
 import com.opensymphony.xwork2.validator.annotations.RequiredFieldValidator;
 import org.apache.struts2.rest.DefaultHttpHeaders;
+import org.onebusaway.api.ResponseCodes;
 import org.onebusaway.api.actions.api.ApiActionSupport;
+import org.onebusaway.api.model.ResponseBean;
 import org.onebusaway.api.model.transit.BeanFactoryV2;
 import org.onebusaway.exceptions.ServiceException;
 import org.onebusaway.gtfs.model.AgencyAndId;
@@ -75,6 +77,16 @@ public class ScheduleForRouteAction extends ApiActionSupport {
         RouteScheduleBean routeSchedule = _service.getScheduleForRoute(id, serviceDate);
 
         BeanFactoryV2 factory = getBeanFactoryV2();
+        if (routeSchedule.getRoutes().size() == 0) {
+            return setResourceNotFoundResponse();
+        }
+        if (routeSchedule.getOutOfServiceBounds())
+        {
+            return setNoServiceResponse(factory.getResponse(routeSchedule));
+        }
+        if(routeSchedule.getTrips().size()==0){
+            return setNoServiceThatDayResponse(factory.getResponse(routeSchedule));
+        }
         return setOkResponse(factory.getResponse(routeSchedule));
     }
 
@@ -84,5 +96,17 @@ public class ScheduleForRouteAction extends ApiActionSupport {
 
     protected AgencyAndId convertAgencyAndId(String id) {
         return AgencyAndIdLibrary.convertFromString(id);
+    }
+
+    protected DefaultHttpHeaders setNoServiceResponse(Object data) {
+        super._response = new ResponseBean(getReturnVersion(), ResponseCodes.RESPONSE_OUT_OF_SERVICE_TIMERANGE,
+                "ServiceDateOutOfRange", null);
+        return new DefaultHttpHeaders();
+    }
+
+    protected DefaultHttpHeaders setNoServiceThatDayResponse(Object data) {
+        super._response = new ResponseBean(getReturnVersion(), ResponseCodes.RESPONSE_OUT_OF_SERVICE_TIMERANGE,
+                "NoServiceThatDay", data);
+        return new DefaultHttpHeaders();
     }
 }

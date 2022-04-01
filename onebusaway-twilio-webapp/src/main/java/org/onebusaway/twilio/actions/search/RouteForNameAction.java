@@ -33,7 +33,8 @@ import org.slf4j.LoggerFactory;
 
 @Results({
 	  @Result(name="success", location="stops-for-route", type="chain"),
-	  @Result(name="multipleRoutesFound", location="multiple-routes-found", type="chain"),
+		// redirect to prevent loop
+	  @Result(name="multipleRoutesFound", type="redirectAction", params={"From", "${phoneNumber}", "namespace", "/search", "actionName", "multiple-routes-found"}),
     @Result(name="noRoutesFound", type="redirectAction", params={"From", "${phoneNumber}", "namespace", "/", "actionName", "message-and-back"})
 })
 public class RouteForNameAction extends TwilioSupport implements SessionAware {
@@ -99,7 +100,8 @@ public class RouteForNameAction extends TwilioSupport implements SessionAware {
 	      return SUCCESS;
 	    } else {
 	      _routes = routes;
-	      return "multipleRoutesFound";
+				sessionMap.put("routes", routes);
+				return "multipleRoutesFound";
 	    }
 	  }
 }

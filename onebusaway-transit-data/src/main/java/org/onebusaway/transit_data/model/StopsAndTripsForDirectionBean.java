@@ -51,7 +51,7 @@ public class StopsAndTripsForDirectionBean implements Serializable {
   private List<AgencyAndId> tripIds;
   // this bean needs to support getReferences of API tier
   // the datasource of any V2 bean needed there needs to be provided here
-  private List<StopTimeInstanceBean> stopTimes = new ArrayList<>();
+  private List<StopTimeInstanceBeanExtendedWithStopId> stopTimes = new ArrayList<>();
 
   // TODO: add support for frequency implementations
 
@@ -89,11 +89,11 @@ public class StopsAndTripsForDirectionBean implements Serializable {
     this.tripIds = tripIds;
   }
 
-  public List<StopTimeInstanceBean> getStopTimes() {
+  public List<StopTimeInstanceBeanExtendedWithStopId> getStopTimes() {
     return stopTimes;
   }
 
-  public void setStopTimes(List<StopTimeInstanceBean> stopTimes) {
+  public void setStopTimes(List<StopTimeInstanceBeanExtendedWithStopId> stopTimes) {
     this.stopTimes = stopTimes;
   }
 

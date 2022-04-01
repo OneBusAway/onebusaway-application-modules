@@ -23,10 +23,12 @@
   <jsp:directive.page contentType="application/xml" />
   <Gather>
     <Say>
-      Note that this menu item has changed.  Listen further for more instructions or skip ahead by entering the number of a route servicing your stop, followed by the pound sign.  When navigating the set of stops for a route, you can move back and forward with the 4 and 6 keys, or skip back and forward even further with the 7 and 9 keys.
+      Listen further for more instructions or skip ahead by entering the number of a route servicing your stop, followed by the pound sign.  When navigating the set of stops for a route, you can move back and forward with the 4 and 6 keys, or skip back and forward even further with the 7 and 9 keys.
     </Say>
     <Say>
       If you wish to return to the previous menu, please press star.
+      Otherwise please enter the route number you wish to search followed by the pound sign.
     </Say>
+    <Pause length="10"/>
   </Gather>
 </Response>
