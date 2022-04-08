@@ -16,12 +16,10 @@
 package org.onebusaway.container.spring.ehcache;
 
 import java.util.Map;
-import java.util.Properties;
 
 import net.sf.ehcache.CacheManager;
 
 import org.hibernate.boot.spi.SessionFactoryOptions;
-import org.hibernate.cache.CacheException;
 
 /**
  * A Hibernate EhCacheRegionFactory implementation that supports directly
@@ -40,30 +38,31 @@ import org.hibernate.cache.CacheException;
  * @author bdferris
  * 
  */
-public class EhCacheRegionFactory extends org.hibernate.cache.ehcache.EhCacheRegionFactory {
+public class EhCacheRegionFactory extends org.hibernate.cache.ehcache.internal.EhcacheRegionFactory {
 
   private static CacheManager staticCacheManagerInstance;
+  private volatile CacheManager manager;
 
   public static void setStaticCacheManagerInstance(CacheManager cacheManager) {
     staticCacheManagerInstance = cacheManager;
   }
 
-  public EhCacheRegionFactory(Properties prop) {
-    super(prop);
-  }
-
   @Override
-  public void start(SessionFactoryOptions settings, Map<String, Object> configValues)
-      throws CacheException {
-    if (staticCacheManagerInstance != null)
-      manager = staticCacheManagerInstance;
-    else
-      super.start(settings, configValues);
-  }
-
-  @Override
-  public void stop() {
+  protected void releaseFromUse() {
     if (staticCacheManagerInstance == null)
       super.stop();
+  }
+
+  public void setCacheManager(CacheManager cacheManager) {
+    manager = cacheManager;
+  }
+
+  @Override
+  protected CacheManager resolveCacheManager(SessionFactoryOptions settings, Map properties) {
+    if (manager != null)
+      return manager;
+    if (staticCacheManagerInstance != null)
+      return staticCacheManagerInstance;
+    return super.resolveCacheManager(settings, properties);
   }
 }

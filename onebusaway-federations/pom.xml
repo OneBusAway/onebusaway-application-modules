@@ -28,6 +28,11 @@
             <artifactId>onebusaway-util</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>javax.annotation</groupId>
+            <artifactId>javax.annotation-api</artifactId>
+        </dependency>
+
 
 
         <!-- RMI-like service for wiring up services between VMs -->
