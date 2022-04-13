@@ -182,6 +182,9 @@ function onAddAnotherCondition() {
 	$("#conditionTable td:last.validateCondition").click(onValidateCondition);
 }
 function onDeleteCondition() {
+	if(!confirm("Are you sure you want to delete this condition?")){
+		return;
+	}
 	$(this).closest('tr').remove();
 	// Reset the name attributes for the remaining conditions to match their 
 	// new positions in the list.
