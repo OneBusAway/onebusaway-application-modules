@@ -64,8 +64,9 @@ public class TwilioSupport extends ActionSupport implements ParameterAware, Curr
   }
   
   protected void addMessage(String msg) {
-    _log.debug(msg);
-    _message.append(" " + getText(msg) + " ");
+    String value = getText(msg);
+    _log.debug(msg + " = " + value);
+    _message.append(" " + value + " ");
   }
   
   protected void addMessage(String msg, Object... args) {
