@@ -118,9 +118,7 @@ public class ArrivalsAndDeparturesAction extends TwilioSupport {
 
   private String displayData() {
     PhoneArrivalsAndDeparturesModel model = (PhoneArrivalsAndDeparturesModel) sessionMap.get("_model");
-    _log.debug("retrieved model=" + model);
     StopsWithArrivalsAndDeparturesBean result = model.getResult();
-    _log.debug("retrieved bean=" + result);
 
     buildPredictedArrivals(result.getArrivalsAndDepartures(), result.getStops());
 
@@ -158,12 +156,9 @@ public class ArrivalsAndDeparturesAction extends TwilioSupport {
 
     long now = SystemTime.currentTimeMillis();
     boolean hasAlerts = stopsHaveAlerts(list);
-    _log.debug("building arrivals with arrivals=" + arrivals
-            + ", and list=" + list
-            + ", and now=" + now
-            + ", and hasAlerts=" + hasAlerts);
+    
     for (ArrivalAndDepartureBean adb : arrivals) {
-      _log.debug("adb=" + adb);
+
       TripBean trip = adb.getTrip();
       RouteBean route = trip.getRoute();
 
@@ -208,12 +203,10 @@ public class ArrivalsAndDeparturesAction extends TwilioSupport {
         if (min > 60) {
           String message = isPrediction ? Messages.PREDICTED_AT_FUTURE_DATE
               : Messages.SCHEDULED_AT_FUTURE_DATE;
-          _log.debug("message1=" + message);
           addMessage(message, new Date(t));
         } else {
           String message = isPrediction ? Messages.PREDICTED_IN_FUTURE
               : Messages.SCHEDULED_IN_FUTURE;
-          _log.debug("message2=" + message);
           addMessage(message, min);
         }
       }
