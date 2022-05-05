@@ -233,7 +233,7 @@ function onTweetCondition(handler) {
 function onValidateCondition(handler) {
 	var aId = handler.target.id;
 	var id = aId.replace("validateCondition", "");
-	var selector = "service-alert_allAffects_"+ id;
+	var selector = "service_alert_allAffects_"+ id;
 	var agencyStopField = document.getElementById(selector + "__agencyPartStopId");
 	var stopField = document.getElementById(selector + "__stopPartStopId");
 	if (agencyStopField == null || stopField == null) {
