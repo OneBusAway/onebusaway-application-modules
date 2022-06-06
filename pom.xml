@@ -33,6 +33,7 @@
         <wiki_integration_version>1.0.0</wiki_integration_version>
         <slf4j.version>1.7.5</slf4j.version>
         <log4j.version>2.17.2</log4j.version>
+
         <guava-version>16.0.1</guava-version>
         <!--  These properties are primarily used in configuring joint integration tests -->
         <org_onebusaway_test_port>9900</org_onebusaway_test_port>
@@ -357,17 +358,6 @@
                 <groupId>com.google.gwt</groupId>
                 <artifactId>gwt-search</artifactId>
                 <version>1.1.0</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-api</artifactId>
-                <version>${slf4j.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-log4j12</artifactId>
-                <version>${slf4j.version}</version>
             </dependency>
 
             <dependency>
