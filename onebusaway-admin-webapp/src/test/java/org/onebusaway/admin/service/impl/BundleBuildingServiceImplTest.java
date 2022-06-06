@@ -22,7 +22,7 @@ import org.onebusaway.admin.model.BundleBuildResponse;
 import org.onebusaway.admin.service.FileService;
 import org.onebusaway.admin.service.bundle.impl.BundleBuildingServiceImpl;
 import org.onebusaway.admin.util.NYCFileUtils;
-import org.apache.logging.log4j.BasicConfigurator;
+import org.apache.logging.log4j.core.config.Configurator;
 import org.junit.Test;
 import org.onebusaway.util.impl.configuration.ConfigurationServiceImpl;
 import org.onebusaway.util.services.configuration.ConfigurationService;
@@ -167,7 +167,6 @@ public class BundleBuildingServiceImplTest {
 
   @Test
   public void testMe() {
-    BasicConfigurator.configure();
     setup();
     testBuildHastus();
   }
