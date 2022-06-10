@@ -42,7 +42,7 @@ public class ServiceAlertBuilderHelper {
 
         for (ServiceAlertBean serviceAlert : alerts.getList()) {
         GtfsRealtime.FeedEntity.Builder entity = feed.addEntityBuilder();
-        entity.setId(Integer.toString(feed.getEntityCount()));
+        entity.setId(serviceAlert.getId());
         GtfsRealtime.Alert.Builder alert = entity.getAlertBuilder();
 
         fillTranslations(serviceAlert.getSummaries(),
