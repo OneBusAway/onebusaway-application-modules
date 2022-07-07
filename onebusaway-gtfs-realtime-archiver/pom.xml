@@ -10,6 +10,7 @@
   <name>onebusaway-gtfs-realtime-archiver</name>
 
   <dependencies>
+
     <dependency>
       <groupId>org.onebusaway</groupId>
       <artifactId>onebusaway-transit-data-federation</artifactId>
@@ -35,9 +36,21 @@
       <artifactId>onebusaway-gtfs-realtime-model</artifactId>
       <version>${project.version}</version>
     </dependency>
+    <!--       Log4j 2 -->
     <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-log4j12</artifactId>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-api</artifactId>
+      <version>${log4j.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-core</artifactId>
+      <version>${log4j.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-slf4j-impl</artifactId>
+      <version>${log4j.version}</version>
     </dependency>
     <dependency>
       <groupId>javax.servlet</groupId>

@@ -24,8 +24,8 @@
 
         <!-- 0 or more appender elements -->
 
-        <appender name="stdout" class="org.apache.log4j.ConsoleAppender">
-                <layout class="org.apache.log4j.PatternLayout">
+        <appender name="stdout" class="org.apache.logging.log4j.ConsoleAppender">
+                <layout class="org.apache.logging.log4j.PatternLayout">
                         <!-- The log message pattern -->
                         <param name="ConversionPattern" value="%d{ISO8601} %-5p [%F:%L] : %m%n" />
                 </layout>

@@ -15,7 +15,7 @@
  */
 package org.onebusaway.util.logging;
 
-import org.apache.log4j.Level;
+import org.apache.logging.log4j.Level;
 
 /**
  * Service interface to log system actions to a central server.

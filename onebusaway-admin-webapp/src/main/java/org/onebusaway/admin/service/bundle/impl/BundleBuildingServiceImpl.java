@@ -15,11 +15,7 @@
  */
 package org.onebusaway.admin.service.bundle.impl;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.PrintStream;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -33,10 +29,12 @@ import java.util.zip.ZipFile;
 
 import javax.annotation.PreDestroy;
 
-import org.apache.log4j.Layout;
-import org.apache.log4j.Level;
-import org.apache.log4j.PatternLayout;
-import org.apache.log4j.WriterAppender;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.logging.log4j.core.appender.WriterAppender;
+import org.apache.logging.log4j.core.config.Configuration;
+import org.apache.logging.log4j.core.layout.PatternLayout;
 import org.onebusaway.admin.model.BundleBuildRequest;
 import org.onebusaway.admin.model.BundleBuildResponse;
 import org.onebusaway.admin.model.BundleRequestResponse;
@@ -719,8 +717,10 @@ public class BundleBuildingServiceImpl implements BundleBuildingService {
       _log.error("deconfigure logging failed:", any);
     }
 
-    org.apache.log4j.Logger logger = org.apache.log4j.Logger.getRootLogger();
-    logger.removeAppender("bundlebuilder.out");
+    final LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
+    final Configuration config = ctx.getConfiguration();
+    config.getRootLogger().removeAppender("bundlebuilder.out");
+    ctx.updateLoggers();
   }
 
   /**
@@ -728,12 +728,19 @@ public class BundleBuildingServiceImpl implements BundleBuildingService {
    */
   private void configureLogging(OutputStream os) {
     if (_debug) return;
-    Layout layout = new PatternLayout(PatternLayout.TTCC_CONVERSION_PATTERN);
-    WriterAppender wa = new WriterAppender(layout, os);
-    wa.setName("bundlebuilder.out");
+    final LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
+    final Configuration config = ctx.getConfiguration();
+
+    PatternLayout layout = PatternLayout.newBuilder().withPattern(PatternLayout.TTCC_CONVERSION_PATTERN).build();
+    Writer writer = new OutputStreamWriter(os);
+    WriterAppender wa = WriterAppender.newBuilder().setName("bundlebuilder.out").setLayout(layout).setTarget(writer).build();
+    wa.start();
+
     // introducing log4j dependency here
-    org.apache.log4j.Logger logger = org.apache.log4j.Logger.getRootLogger();
-    logger.addAppender(wa);
+    config.getRootLogger().addAppender(wa, null, null);
+    config.addAppender(wa);
+    ctx.updateLoggers();
+
     _log.info("configuring logging");
 
   }
