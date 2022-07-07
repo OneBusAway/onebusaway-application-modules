@@ -33,7 +33,8 @@
     <wiki_integration_version>1.0.0</wiki_integration_version>
     <slf4j.version>1.7.5</slf4j.version>
     <guava-version>16.0.1</guava-version>
-    <!--  These properties are primarily used in configuring joint integration tests -->
+    <log4j.version>2.17.2</log4j.version>
+      <!--  These properties are primarily used in configuring joint integration tests -->
     <org_onebusaway_test_port>9900</org_onebusaway_test_port>
     <org_onebusaway_test_ajp_port>9901</org_onebusaway_test_ajp_port>
     <org_onebusaway_test_rmi_port>9902</org_onebusaway_test_rmi_port>
@@ -610,6 +611,8 @@
                         <exclude>bin/**</exclude>
                         <exclude>src/test/resources/**</exclude>
                         <exclude>**/git.properties</exclude>
+                        <exclude>**/log4j2.xml</exclude>
+                        <exclude>**/log4j-stdout.xml</exclude>
                     </excludes>
                 </configuration>
             </plugin>
