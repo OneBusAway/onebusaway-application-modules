@@ -55,9 +55,9 @@ class GtfsRealtimeAlertLibrary {
     for (GtfsRealtime.TimeRange range : alert.getActivePeriodList()) {
       ServiceAlerts.TimeRange.Builder rangeBuilder = ServiceAlerts.TimeRange.newBuilder();
       if (range.hasStart())
-        rangeBuilder.setStart(range.getStart());
+        rangeBuilder.setStart(toMillis(range.getStart()));
       if (range.hasEnd())
-        rangeBuilder.setEnd(range.getEnd());
+        rangeBuilder.setEnd(toMillis(range.getEnd()));
       b.addActiveWindow(rangeBuilder);
     }
     if (alert.hasCause())
@@ -78,6 +78,13 @@ class GtfsRealtimeAlertLibrary {
     if (alert.hasUrl())
       b.setUrl(convertTranslatedString(alert.getUrl()));
     return b;
+  }
+
+  private long toMillis(long secondsOrMillis) {
+    // spec has this as seconds, but internally we use millis
+    if (secondsOrMillis < 1000000000000l)
+      return secondsOrMillis * 1000;
+    return secondsOrMillis;
   }
 
   private Affects.Builder getEntitySelectorAsAffects(EntitySelector selector, Map agencyIdMap, boolean ignoreTripIds) {

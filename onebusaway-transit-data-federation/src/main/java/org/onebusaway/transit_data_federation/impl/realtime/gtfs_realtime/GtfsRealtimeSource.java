@@ -805,22 +805,6 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
         }
       }
 
-      if (serviceAlert.getActiveWindowList().size() > 0) {
-        _log.debug("[" + serviceAlert.getId().getId() + "] "
-                + serviceAlert.getActiveWindowList().size() + " active windows");
-        List<ServiceAlerts.TimeRange> activeWindowList = serviceAlert.getActiveWindowList();
-        for (ServiceAlerts.TimeRange str : serviceAlert.getActiveWindowList()) {
-          ServiceAlertTimeRange satr = new ServiceAlertTimeRange();
-          if (str.hasStart())
-            satr.setFromValue(str.getStart());
-          if (str.hasEnd())
-            satr.setToValue(str.getEnd());
-          _log.debug("[" + serviceAlert.getId().getId() + "] adding "
-                  + satr.getFromValue() + "->" + satr.getToValue());
-          serviceAlertRecord.getActiveWindows().add(satr);
-        }
-      }
-
       if (existingAlert == null) {
         _log.debug("creating alert " + serviceAlertRecord.getAgencyId() + ":" + serviceAlertRecord.getServiceAlertId());
         toAdd.add(serviceAlertRecord);
