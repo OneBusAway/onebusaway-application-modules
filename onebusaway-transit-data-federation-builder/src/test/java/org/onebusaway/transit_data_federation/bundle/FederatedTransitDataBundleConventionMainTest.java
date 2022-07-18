@@ -28,7 +28,7 @@ public class FederatedTransitDataBundleConventionMainTest extends TestCase {
         String bundleOutputDir =
         System.getProperty("java.io.tmpdir") + File.separator
                 + "bundle" + System.currentTimeMillis();
-        String[] args = {"classpath:multi_dir_test", bundleOutputDir};
+        String[] args = {"classpath:multi_dir_test", bundleOutputDir, "v"+System.currentTimeMillis()};
         main.run(args);
     }
 }
