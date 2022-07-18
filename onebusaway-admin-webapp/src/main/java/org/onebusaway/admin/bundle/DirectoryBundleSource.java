@@ -22,7 +22,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.onebusaway.admin.bundle.model.Bundle;
+import org.onebusaway.transit_data_federation.bundle.model.Bundle;
 import org.onebusaway.admin.json.JsonTool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

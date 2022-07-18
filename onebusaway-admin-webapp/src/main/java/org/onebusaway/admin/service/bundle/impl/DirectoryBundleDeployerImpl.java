@@ -22,7 +22,7 @@ import java.util.List;
 
 import javax.annotation.PostConstruct;
 
-import org.onebusaway.admin.bundle.model.BundleStatus;
+import org.onebusaway.transit_data_federation.bundle.model.BundleStatus;
 import org.onebusaway.admin.service.bundle.BundleDeployer;
 import org.onebusaway.admin.util.NYCFileUtils;
 import org.onebusaway.util.FileUtility;

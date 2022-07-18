@@ -23,7 +23,7 @@ import java.util.List;
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.io.FileUtils;
-import org.onebusaway.admin.bundle.model.BundleStatus;
+import org.onebusaway.transit_data_federation.bundle.model.BundleStatus;
 import org.onebusaway.admin.service.RemoteConnectionService;
 import org.onebusaway.admin.service.bundle.BundleStager;
 import org.onebusaway.util.FileUtility;

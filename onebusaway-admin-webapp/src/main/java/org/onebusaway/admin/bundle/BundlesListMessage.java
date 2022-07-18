@@ -17,7 +17,7 @@ package org.onebusaway.admin.bundle;
 
 import java.util.List;
 
-import org.onebusaway.admin.bundle.model.Bundle;
+import org.onebusaway.transit_data_federation.bundle.model.Bundle;
 import org.onebusaway.json.model.JsonMessage;
 
 public class BundlesListMessage extends JsonMessage {

@@ -69,13 +69,12 @@ import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.remoting.RemoteConnectFailureException;
 
+import static org.onebusaway.transit_data_federation.bundle.FederatedTransitDataBundleConventionMain.*;
+
 public class BundleBuildingServiceImpl implements BundleBuildingService {
   private static final String BUNDLE_RESOURCE = "classpath:org/onebusaway/transit_data_federation/bundle/application-context-bundle-admin.xml";
   private static final String DEFAULT_STIF_CLEANUP_URL = "https://github.com/camsys/onebusaway-nyc/raw/master/onebusaway-nyc-stif-loader/fix-stif-date-codes.py";
   private static final String DEFAULT_AGENCY = "MTA";
-  private static final String DATA_DIR = "data";
-  private static final String OUTPUT_DIR = "outputs";
-  private static final String INPUTS_DIR = "inputs";
   private static final String METADATA_FILENAME = "metadata.json";
   private static final String DEFAULT_TRIP_TO_DSC_FILE = "tripToDSCMap.txt";
   private static final String ARG_THROW_EXCEPTION_INVALID_STOPS = "tripEntriesFactory.throwExceptionOnInvalidStopToShapeMappingException";

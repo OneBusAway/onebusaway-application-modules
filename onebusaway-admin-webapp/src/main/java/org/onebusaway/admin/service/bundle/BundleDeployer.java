@@ -17,7 +17,7 @@ package org.onebusaway.admin.service.bundle;
 
 import java.util.List;
 
-import org.onebusaway.admin.bundle.model.BundleStatus;
+import org.onebusaway.transit_data_federation.bundle.model.BundleStatus;
 
 
 

@@ -1,10 +1,12 @@
 Usage:
   [args] gtfs_path [gtfs_path ...] output_directory
   [args] beans.xml output_directory
+  -convention input_directory_tree output_directory
 
   Build a transit data bundle from GTFS feeds and other inputs.  The GTFS feeds can either be specified directly on the
   command line or in a Spring beans.xml file (or combinations of both).  The transit data bundle is written to the
-  specified output directory.
+  specified output directory.  New convention mode allows a convention based GTFS directory structure with no additional
+  configuration.
   
 Arguments:
 
