@@ -61,25 +61,26 @@ public class FederatedTransitDataBundleConventionMain {
 
     public void run(String[] args) {
 
-        if (args == null || args.length != 2) {
-            throw new IllegalStateException("Expecting input_directory_tree and output_directory");
+        if (args == null || args.length != 3) {
+            throw new IllegalStateException("Expecting input_directory_tree, output_directory, bundle_name");
         }
 
         // setup logging
         Configurator.setRootLevel(Level.INFO);
-
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddhhmmss");
-        String format = sdf.format(new Date());
-        String bundleName = format + "-bundle";
-
         String inputPathStr = "/tmp/input";
         String outputPathStr = "/tmp/bundle";
+        String bundleName = "not_specified";
+
         if (args != null) {
             if (args.length > 0) {
                 inputPathStr = args[0];
             }
             if (args.length > 1) {
-                outputPathStr = args[1] + File.separator + bundleName;
+                outputPathStr = args[1] + File.separator;
+            }
+            if (args.length > 2) {
+                bundleName = args[2];
+                outputPathStr = outputPathStr + bundleName;
             }
         }
 
@@ -118,8 +119,6 @@ public class FederatedTransitDataBundleConventionMain {
     private BundleRequest createRequest(String inputPathStr, String outputPathStr, String bundleName) {
         BundleRequest request = new BundleRequest(inputPathStr, outputPathStr);
         request.setDataset("dataset");
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddhhmmss");
-        String format = sdf.format(new Date());
         request.setName(bundleName);
 
         return request;
@@ -303,7 +302,14 @@ public class FederatedTransitDataBundleConventionMain {
         File[] listFiles = dir.listFiles();
         if (listFiles != null) {
             for (File file : listFiles) {
-                list.add(sanitize(file.toURI().toString()));
+                if (file.isFile()) {
+                    list.add(sanitize(file.toURI().toString()));
+                } else if (file.isDirectory()) {
+                    List<String> recurse = listFiles(file.toString());
+                    if (recurse != null && !recurse.isEmpty()) {
+                        list.addAll(recurse);
+                    }
+                }
             }
         }
         return list;
