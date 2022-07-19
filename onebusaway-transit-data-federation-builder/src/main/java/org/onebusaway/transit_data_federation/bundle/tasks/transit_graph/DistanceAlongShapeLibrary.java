@@ -57,7 +57,7 @@ public class DistanceAlongShapeLibrary {
 
   private int _maximumNumberOfPotentialAssignments = Integer.MAX_VALUE;
   
-  private boolean _lenientStopShapeAssignment = false;
+  private boolean _lenientStopShapeAssignment = true;
 
   private Set<AgencyAndId> _shapeIdsWeHavePrinted = new HashSet<AgencyAndId>();
 
