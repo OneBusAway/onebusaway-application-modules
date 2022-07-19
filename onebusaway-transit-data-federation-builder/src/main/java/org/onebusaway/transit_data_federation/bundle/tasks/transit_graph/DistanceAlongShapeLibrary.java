@@ -275,6 +275,12 @@ public class DistanceAlongShapeLibrary {
     int startIndex = 0;
     int assingmentCount = 1;
 
+    if (possibleAssignments.size() > 10000) {
+      _log.warn("stop {} has {} possible assignments.  This may take some time...",
+              stopTimes.get(0).toString(),
+              possibleAssignments.size());
+    }
+
     /**
      * We iterate over each stop, examining its possible assignments. If we find
      * a region of stops where the first and last stop have a single assignment
@@ -302,7 +308,7 @@ public class DistanceAlongShapeLibrary {
             index - startIndex + 1);
         Min<Assignment> bestAssignments = new Min<Assignment>();
         recursivelyConstructAssignments(possibleAssignments, currentAssignment,
-            startIndex, startIndex, index + 1, bestAssignments);
+            startIndex, startIndex, index + 1, bestAssignments, 0, stopTimes.get(0).toString());
         if (bestAssignments.isEmpty()) {
           constructError(shapePoints, stopTimes, possibleAssignments,
               projection);
@@ -432,8 +438,12 @@ public class DistanceAlongShapeLibrary {
   private void recursivelyConstructAssignments(
       List<List<PointAndIndex>> possibleAssignments,
       List<PointAndIndex> currentAssignment, int index, int indexFrom,
-      int indexTo, Min<Assignment> best) {
+      int indexTo, Min<Assignment> best, int depth, String id) {
 
+    if (depth == 10) {
+      _log.warn("complex assignment with depth {} for {} and {} possible assignments",
+              depth, id, possibleAssignments.size());
+    }
     /**
      * If we've made it through ALL assignments, we have a valid assignment!
      */
@@ -480,7 +490,7 @@ public class DistanceAlongShapeLibrary {
       currentAssignment.add(validAssignment);
 
       recursivelyConstructAssignments(possibleAssignments, currentAssignment,
-          index + 1, indexFrom, indexTo, best);
+          index + 1, indexFrom, indexTo, best, depth+1, id);
 
       currentAssignment.remove(currentAssignment.size() - 1);
     }
