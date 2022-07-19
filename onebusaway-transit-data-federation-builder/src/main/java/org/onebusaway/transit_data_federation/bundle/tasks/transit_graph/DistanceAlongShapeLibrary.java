@@ -485,6 +485,11 @@ public class DistanceAlongShapeLibrary {
      * For each valid assignment, pop it onto the current assignment and
      * recursively evaluate
      */
+    if (validAssignments.size() > 100) {
+      _log.warn("complex assignment with depth {} for {} and {} possible assignments",
+              depth, id, possibleAssignments.size());
+
+    }
     for (PointAndIndex validAssignment : validAssignments) {
 
       currentAssignment.add(validAssignment);
