@@ -55,7 +55,7 @@ public class DistanceAlongShapeLibrary {
 
   private double _maxDistanceFromStopToShapePoint = 1000;
 
-  private int _maximumNumberOfPotentialAssignments = Integer.MAX_VALUE;
+  private int _maximumNumberOfPotentialAssignments = 1000; // we give up pretty quickly now
   
   private boolean _lenientStopShapeAssignment = true;
 
@@ -275,12 +275,6 @@ public class DistanceAlongShapeLibrary {
     int startIndex = 0;
     int assingmentCount = 1;
 
-    if (possibleAssignments.size() > 10000) {
-      _log.warn("stop {} has {} possible assignments.  This may take some time...",
-              stopTimes.get(0).toString(),
-              possibleAssignments.size());
-    }
-
     /**
      * We iterate over each stop, examining its possible assignments. If we find
      * a region of stops where the first and last stop have a single assignment
@@ -440,10 +434,6 @@ public class DistanceAlongShapeLibrary {
       List<PointAndIndex> currentAssignment, int index, int indexFrom,
       int indexTo, Min<Assignment> best, int depth, String id) {
 
-    if (depth == 10) {
-      _log.warn("complex assignment with depth {} for {} and {} possible assignments",
-              depth, id, possibleAssignments.size());
-    }
     /**
      * If we've made it through ALL assignments, we have a valid assignment!
      */
