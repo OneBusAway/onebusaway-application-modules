@@ -84,6 +84,8 @@ public class BundleManagementServiceImpl implements BundleManagementService {
   private BundleStoreService _bundleStore = null;
 
   protected boolean _standaloneMode = true;
+
+  private String _remoteSourceURI = null;
   
   protected boolean _builderMode = false;
 
@@ -132,13 +134,17 @@ public class BundleManagementServiceImpl implements BundleManagementService {
       _bundleStore = new HttpBundleStoreImpl(_bundleRootPath, _restApiLibrary);        
     }
     else{
-      _bundleStore = new LocalBundleStoreImpl(_bundleRootPath); 	
+      if (_remoteSourceURI == null) {
+        _bundleStore = new LocalBundleStoreImpl(_bundleRootPath);
+      } else {
+        _bundleStore = new S3BundleStoreImpl(_bundleRootPath, _remoteSourceURI);
+      }
     }
     
     try{
       discoverBundles();
     }catch(Exception e){
-      _log.error("Unable to retreive Bundle List.");
+      _log.error("Unable to retrieve Bundle List.", e);
       if(!(_bundleStore instanceof LocalBundleStoreImpl)){
         _log.info("Attempting to load local Bundle...");
         _bundleStore = new LocalBundleStoreImpl(_bundleRootPath);
@@ -250,6 +256,10 @@ public class BundleManagementServiceImpl implements BundleManagementService {
 
   public void setStandaloneMode(boolean standalone) {
     _standaloneMode = standalone;
+  }
+
+  public void setRemoteSourceURI(String s) {
+    _remoteSourceURI = s;
   }
 
   public boolean getStandaloneMode() {

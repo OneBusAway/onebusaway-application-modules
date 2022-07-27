@@ -45,7 +45,7 @@ import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.onebusaway.transit_data_federation.bundle.FederatedTransitDataBundleConventionMain.META_DATA_FILE;
+import static org.onebusaway.transit_data_federation.bundle.FederatedTransitDataBundleConventionMain.BUNDLE_METADATA_JSON;
 
 public class BundleBuildingUtil {
   private static Logger _log = LoggerFactory.getLogger(BundleBuildingUtil.class);
@@ -97,7 +97,7 @@ public class BundleBuildingUtil {
     
     String output = gson.toJson(bundle);
     
-    String outputFilename = response.getBundleRootDirectory() + File.separator + META_DATA_FILE;
+    String outputFilename = response.getBundleRootDirectory() + File.separator + BUNDLE_METADATA_JSON;
     File outputFile = new File(outputFilename);
     _log.info("creating metadata file=" + outputFilename);
     PrintWriter writer = null;
@@ -122,48 +122,7 @@ public class BundleBuildingUtil {
   }
 
   public List<SourceFile> getSourceFilesWithSumsForDirectory(File baseDir, File dir, File rootDir) throws IllegalArgumentException {
-    List<SourceFile> files = new ArrayList<SourceFile>();
-    if (!dir.isDirectory()) {
-      throw new IllegalArgumentException(dir.getPath() + " is not a directory");
-    } else {
-      for (String filePath : dir.list()) {
-        File listEntry = new File(dir, filePath);
-        String listEntryFilename = null;
-        try {
-          listEntryFilename = listEntry.getCanonicalPath();
-        } catch (Exception e) {
-          // bury
-        }
-        // prevent lock files from insertion into json, they change
-        if (listEntry.isFile()  
-            && listEntryFilename != null 
-            && !listEntryFilename.endsWith(".lck")) {
-          SourceFile file = new SourceFile();
-          file.setCreatedDate(getCreatedDate(listEntry));
-          
-          String relPathToBase = rootDir.toURI().relativize(listEntry.toURI()).getPath();
-          file.setUri(relPathToBase);
-          file.setFilename(relPathToBase);
-          
-          String sum = getMd5ForFile(listEntry);
-          file.setMd5(sum);
-          
-          files.add(file);
-          _log.debug("file:" + listEntry + " has Md5=" + sum + " and createdDate=" + file.getCreatedDate());
-        } else if (listEntry.isDirectory()) {
-          files.addAll(getSourceFilesWithSumsForDirectory(baseDir, listEntry, rootDir));
-        }
-      }
-    }
-    
-    return files;
-  }
-  
-  private Date getCreatedDate(File file) {
-    if (!file.exists()) {
-      _log.error("file " + file + File.separator + file + " does not exist: cannot guess date!");
-    }
-    return new Date(file.lastModified());
+    return new BundleUtilties().getSourceFilesWithSumsForDirectory(baseDir, dir, rootDir);
   }
   
   // Changed to public static to allow call 

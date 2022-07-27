@@ -15,18 +15,17 @@
  */
 package org.onebusaway.transit_data_federation.bundle;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import org.apache.commons.lang.time.DateUtils;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.config.Configurator;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.onebusaway.gtfs.impl.GtfsRelationalDaoImpl;
-import org.onebusaway.transit_data_federation.bundle.model.Bundle;
-import org.onebusaway.transit_data_federation.bundle.model.BundleFile;
-import org.onebusaway.transit_data_federation.bundle.model.GtfsBundle;
-import org.onebusaway.transit_data_federation.bundle.model.GtfsBundles;
+import org.onebusaway.transit_data_federation.bundle.model.*;
 import org.onebusaway.transit_data_federation.bundle.utilities.BundleUtilties;
 import org.onebusaway.transit_data_federation.bundle.utilities.NativeFileUtilities;
 import org.onebusaway.transit_data_federation.bundle.utilities.JodaDateTimeAdapter;
@@ -42,7 +41,6 @@ import java.io.PrintWriter;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Paths;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -53,10 +51,15 @@ public class FederatedTransitDataBundleConventionMain {
 
     private static Logger _log = LoggerFactory.getLogger(FederatedTransitDataBundleConventionMain.class);
 
-    public static final String META_DATA_FILE = "BundleMetadata.json";
+    public static final String BUNDLE_METADATA_JSON = "BundleMetadata.json";
+    public static final String METADATA_JSON = "metadata.json";
     public static final String INPUTS_DIR = "inputs";
     public static final String OUTPUT_DIR = "outputs";
     public static final String DATA_DIR = "data";
+
+    private ObjectMapper mapper = new ObjectMapper();
+    private Date toDate = null;
+    private Date fromDate = null;
 
 
     public void run(String[] args) {
@@ -126,6 +129,12 @@ public class FederatedTransitDataBundleConventionMain {
 
 
     private String assemble(BundleRequest request, String bundleName) {
+
+        _log.info("creating metadata files...");
+        generateJsonBundleMetadata(request);
+        generateJsonMetadata(request);
+        _log.info("created metadata files!");
+
         NativeFileUtilities fs = new NativeFileUtilities();
         String baseDir = request.getOutput().replace(File.separator + bundleName, "");
         String[] paths = {request.getName()};
@@ -236,21 +245,75 @@ public class FederatedTransitDataBundleConventionMain {
         propertyOverrides.setProperty("bundle.path", request.getBundleDataDirectory());
         creator.setAdditionalBeanPropertyOverrides(propertyOverrides);
 
-        generateJsonMetadata(request);
         return creator;
 
 
     }
 
     private void generateJsonMetadata(BundleRequest request) {
+        try {
+            BundleMetadata data = new BundleMetadata();
+            String outputDirectory = request.getOutput();
+            String sourceDirectory = request.getBundleOutputDirectory();
+
+            data.setId(request.getName());
+            data.setName(request.getName());
+            data.setServiceDateFrom(createFromDate());
+            data.setServiceDateTo(createToDate());
+            data.setOutputFiles(getBundleFilesWithSumsForDirectory(
+                    new File(outputDirectory),
+                    new File(request.getBundleDataDirectory()),
+                    null));
+            data.setSourceData(getSourceFilesWithSumsForDirectory(
+                    new File(outputDirectory),
+                    new File(request.getBundleOutputDirectory()),
+                    null));
+            String outputFile = request.getBundleDataDirectory() + File.separator + METADATA_JSON;
+            _log.info("writing metadata file {}", outputFile);
+            mapper.writeValue(new File(outputFile), data);
+
+            outputFile = sourceDirectory + File.separator + METADATA_JSON;
+            mapper.writeValue(new File(outputFile), data);
+        } catch (Exception any) {
+            _log.error("exception serializing metadata.json: ", any);
+        }
+    }
+
+    private List<SourceFile> getSourceFilesWithSumsForDirectory(File baseDir, File dir, File rootDir) {
+        return new BundleUtilties().getSourceFilesWithSumsForDirectory(baseDir, dir, rootDir);
+    }
+
+    private List<BundleFile> getBundleFilesWithSumsForDirectory(File baseDir, File dir, File rootDir) {
+        return new BundleUtilties().getBundleFilesWithSumsForDirectory(baseDir, dir, rootDir);
+    }
+
+
+
+    private Date createToDate() {
+        if (toDate == null) {
+            // by default we go out 30 days
+            toDate = DateUtils.addDays(new Date(), 30);
+        }
+        return toDate;
+    }
+
+    private Date createFromDate() {
+        if (fromDate == null) {
+            // by default the bundle is active as of now
+            fromDate = new Date();
+        }
+        return fromDate;
+    }
+
+    private void generateJsonBundleMetadata(BundleRequest request) {
         File bundleDir = new File(request.getInput());
         List<BundleFile> files = new BundleUtilties().getBundleFilesWithSumsForDirectory(bundleDir, bundleDir, bundleDir);
         Bundle bundle = new Bundle();
-        bundle.setId(createId());
+        bundle.setId(request.getName());
         bundle.setDataset(request.getDataset());
         bundle.setName(request.getName());
-        bundle.setServiceDateFrom(createFromDate());
-        bundle.setServiceDateTo(createToDate());
+        bundle.setServiceDateFrom(createFromLocalDate());
+        bundle.setServiceDateTo(createToLocalDate());
         DateTime now = new DateTime();
         List<String> applicableAgencyIds = new ArrayList<>();
         bundle.setApplicableAgencyIds(applicableAgencyIds);
@@ -258,7 +321,7 @@ public class FederatedTransitDataBundleConventionMain {
 
         String output = getGson().toJson(bundle);
 
-        String outputFilename = request.getOutput() + File.separator + META_DATA_FILE;
+        String outputFilename = request.getOutput() + File.separator + BUNDLE_METADATA_JSON;
         File outputFile = new File(outputFilename);
         _log.info("creating metadata file=" + outputFilename);
         PrintWriter writer = null;
@@ -281,16 +344,12 @@ public class FederatedTransitDataBundleConventionMain {
 
     }
 
-    private LocalDate createToDate() {
-        return null;
+    private LocalDate createToLocalDate() {
+        return new LocalDate(createToDate());
     }
 
-    private LocalDate createFromDate() {
-        return null;
-    }
-
-    private String createId() {
-        return "foo" + System.currentTimeMillis();
+    private LocalDate createFromLocalDate() {
+        return new LocalDate(createFromDate());
     }
 
     private List<String> listFiles(String directory) {

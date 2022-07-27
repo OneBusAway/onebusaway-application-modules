@@ -93,6 +93,12 @@
       <artifactId>jackson-module-jaxb-annotations</artifactId>
       <version>${jackson-version}</version>
     </dependency>
+    <!-- for S3BundleStoreImpl -->
+    <dependency>
+        <groupId>org.onebusaway</groupId>
+        <artifactId>onebusaway-cloud-aws</artifactId>
+        <version>0.0.12</version>
+    </dependency>
 
 
     <dependency>
