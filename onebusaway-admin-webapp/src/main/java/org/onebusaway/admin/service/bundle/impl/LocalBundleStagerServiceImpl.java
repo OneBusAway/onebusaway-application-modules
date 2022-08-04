@@ -103,7 +103,7 @@ public class LocalBundleStagerServiceImpl implements BundleStagerService{
     
 
     /**
-     * request bundles at /var/lib/obanyc/bundles/staged/{environment} be staged
+     * request bundles at /oba/bundles/staged/{environment} be staged
      * @param environment string representing environment (dev/staging/prod/qa)
      * @return status object with id for querying status
      */

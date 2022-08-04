@@ -133,7 +133,7 @@
 
   
   <bean id="bundleManagementService" class="org.onebusaway.transit_data_federation.impl.bundle.BundleManagementServiceImpl">
-    <property name="bundleStoreRoot" value="/var/lib/oba/oba-st-bundle-gtfs" />
+    <property name="bundleStoreRoot" value="/oba/oba-st-bundle-gtfs" />
     <property name="standaloneMode" value="false" />
   </bean>
 
@@ -141,7 +141,7 @@
     <property name="order" value="-2" />
     <property name="properties">
       <props>
-        <prop key="bundlePath">/var/lib/obanyc/no-such-dir</prop>
+        <prop key="bundlePath">/oba/no-such-dir</prop>
       </props>
     </property>
   </bean>

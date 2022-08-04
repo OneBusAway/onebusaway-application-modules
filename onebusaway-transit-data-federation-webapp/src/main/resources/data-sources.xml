@@ -34,7 +34,7 @@ http://www.springframework.org/schema/context http://www.springframework.org/sch
       <property name="order" value="-2" />
       <property name="properties">
           <props>
-              <prop key="bundlePath">/var/lib/obanyc/no-such-dir</prop>
+              <prop key="bundlePath">/oba/gtfs/latest</prop>
          </props>
       </property>
     </bean>
@@ -46,8 +46,8 @@ http://www.springframework.org/schema/context http://www.springframework.org/sch
     </bean>
 
     <bean id="bundleManagementService" class="org.onebusaway.transit_data_federation.impl.bundle.BundleManagementServiceImpl">
-      <property name="bundleStoreRoot" value="/var/lib/oba/tds/bundle" />
-      <property name="standaloneMode" value="false" />
+      <property name="bundleStoreRoot" value="/oba/gtfs/latest" />
+      <property name="standaloneMode" value="true" />
     </bean>
 
 </beans>

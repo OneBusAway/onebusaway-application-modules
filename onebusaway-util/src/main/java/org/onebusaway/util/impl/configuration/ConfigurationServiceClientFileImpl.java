@@ -42,7 +42,7 @@ public class ConfigurationServiceClientFileImpl implements
 	
 	private boolean isLocal = true;
 	
-	private String configFile = "/var/lib/oba/config.json";
+	private String configFile = "/oba/config.json";
 
 	public void setConfigFile(String file) {
 		_log.info("config service override of configFile=" + file);

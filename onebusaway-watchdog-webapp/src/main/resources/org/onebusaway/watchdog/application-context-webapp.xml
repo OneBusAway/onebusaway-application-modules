@@ -92,7 +92,7 @@
     </bean>
 	
 	<bean id="configurationServiceClient" class="org.onebusaway.util.impl.configuration.ConfigurationServiceClientFileImpl">
-		<constructor-arg type="java.lang.String" value="/var/lib/oba/config.json"/>
+		<constructor-arg type="java.lang.String" value="/oba/config.json"/>
 	</bean>
 	
 	
