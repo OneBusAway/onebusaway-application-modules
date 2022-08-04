@@ -50,7 +50,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class StopTimeEntriesFactory {
 
-  private static final boolean DEFAULT_LENIENT_MODE = false;
+  private static final boolean DEFAULT_LENIENT_MODE = true;
   private static final boolean DEFAULT_TIMEPOINT_SUPPORT = false;
   
 
