@@ -121,14 +121,13 @@
 			<div id="branding">
 				<s:set var="link" value="getText('main.agency.link')" />
 				<a href="${link}">
-					<s:url var="url" value="css/img/agency_logo.png">
+					<s:url var="url" value="css/img/onebusaway-agency.png">
 						<s:param name="v">
 							<s:property value="frontEndVersion" />
 						</s:param>
 					</s:url>
 					<img src="${url}" alt="Agency logo" />
 				</a>
-
 			</div>
 
 			<div id="search">

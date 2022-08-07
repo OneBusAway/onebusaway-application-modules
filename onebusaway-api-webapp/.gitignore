@@ -6,3 +6,4 @@ pom.xml.releaseBackup
 .classpath
 git.properties
 *.iml
+/bin/

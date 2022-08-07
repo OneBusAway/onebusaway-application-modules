@@ -85,9 +85,9 @@ public class SyncBundleAction extends OneBusAwayNYCAdminActionSupport {
     String bundleId = latestBundle.get("id").getAsString();
     String bundleFileName = buildName + ".tar.gz";
     String tmpDir = new NYCFileUtils().createTmpDirectory();
-    String bundleDir = "/var/lib/oba/bundles";
-    String deployDir = "/var/lib/oba/bundles/active";
-    String bundleBuildDir = "/var/lib/oba/bundles/builder";
+    String bundleDir = "/oba/bundles";
+    String deployDir = "/oba/bundles/active";
+    String bundleBuildDir = "/oba/bundles/builder";
     
     try {
       String bundleSourceString = "http://admin.staging.obast.org:9999/api/bundle/archive/get-by-name/" 
@@ -111,7 +111,7 @@ public class SyncBundleAction extends OneBusAwayNYCAdminActionSupport {
       e.printStackTrace();
     }
     
-    // Copy to extracted files /var/lib/oba/bundles/active
+    // Copy to extracted files /oba/bundles/active
     try {
       //FileUtils.copyDirectory(new File(tmpDir + File.separator + "untarredBundle" + File.separator +  buildName), new File(deployDir));
       FileUtils.copyDirectory(new File(tmpDir + File.separator + "untarredBundle"), new File(deployDir));

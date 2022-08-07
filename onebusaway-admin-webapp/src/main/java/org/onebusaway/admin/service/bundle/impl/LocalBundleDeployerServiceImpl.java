@@ -167,7 +167,7 @@ public class LocalBundleDeployerServiceImpl implements BundleDeployerService{
     }
 
     /**
-     * request bundles at /var/lib/obanyc/bundles/staged/{environment} be deployed
+     * request bundles at /oba/bundles/staged/{environment} be deployed
      * @param environment string representing environment (dev/staging/prod/qa)
      * @return status object with id for querying status
      */

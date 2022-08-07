@@ -49,11 +49,7 @@
 </jsp:text>
 
 <s:url var="url" value="https://maps.googleapis.com/maps/api/js">				
-	<s:param name="v">3</s:param>
-	<s:param name="client"><s:property value="googleMapsClientId" /></s:param>
-	<s:param name="channel"><s:property value="googleMapsChannelId" /></s:param>
 	<s:param name="key"><s:property value="googleMapsApiKey" /></s:param>
-	<s:param name="sensor">false</s:param>
 </s:url>
 <script src="${url}" type="text/javascript"><!-- //prevent jspx minimization --></script>
 
@@ -152,21 +148,19 @@
 				<div id="map_header_link"><a></a></div>
 				<div>
 		   	  	<ul>
-		   	  		<s:url var="url" namespace="/m" action="index"/>
-					<li id="link_mobile" aria-label="Text only version"><a href="${url}">Text / Mobile</a></li>
+					<li style="width: 15%; border-left: none;"><a href="/">Home</a></li>
 
-					<s:url var="url" namespace="/wiki" action="About"/>
-					<li id="link_about"><a href="${url}">About</a></li>
+					<s:url var="url" namespace="/m" action="index"/>
+					<li style="width: 17%;" id="link_mobile" aria-label="Text only version"><a href="${url}">Text / Mobile</a></li>
 
-					<s:url var="url" namespace="/wiki" action="ContactUs"/>
-					<li id="link_contact"><a href="${url}">Contact</a></li>
+					<li style="width: 17%;"><a href="/routes">Routes</a></li>
 
-		 			<s:url var="url" namespace="/wiki/Developers" action="Index"/>
-		 			<li id="link_developers"><a href="${url}">Developers</a></li>
+					<li style="width: 17%;"><a target="_blank" href="https://www.adelaidemetro.com.au/plan-a-trip">Plan a Trip</a></li>
 
-		 			<s:url var="url" namespace="/wiki/Help" action="Index"/>
-		 			<li id="link_help"><a href="${url}">Help</a></li>
-			   	</ul>
+					<li style="width: 17%;"><a target="_blank" href="https://onebusaway.org/">OneBusAway</a></li>
+
+					<li style="width: 17%;"><a target="_blank" href="https://nautilus-tech.com.au/">About Us</a></li>
+				</ul>
 				</div>
 		   </div>
 

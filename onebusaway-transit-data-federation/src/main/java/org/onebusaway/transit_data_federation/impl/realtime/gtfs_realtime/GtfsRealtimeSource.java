@@ -84,6 +84,7 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
 
   public static final String GTFS_CONNECT_TIMEOUT = "gtfs.connect_timeout";
   public static final String GTFS_READ_TIMEOUT = "gtfs.read_timeout";
+  public static final String GTFS_VERSION = "gtfs.version";
   private static final Logger _log = LoggerFactory.getLogger(GtfsRealtimeSource.class);
 
   private static final ExtensionRegistry _registry = ExtensionRegistry.newInstance();
@@ -128,6 +129,10 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   private String _sftpAlertsUrl;
 
   private int _refreshInterval = 30;
+
+  private String _gftsMimeType = "application/x-google-protobuf";
+
+  private String _gftsVersion = "2.0";
 
   private Integer _maxDeltaLocationMeters = null; // by default don't validate
 
@@ -286,6 +291,17 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     return _refreshInterval;
   }
 
+  public void setGftsMimeType(String gftsMimeType) { _gftsMimeType = gftsMimeType;  }
+
+  public String getGftsMimeType() {
+    return _gftsMimeType;
+  }
+
+  public void setGftsVersion(String gftsVersion) { _gftsVersion = gftsVersion;  }
+
+  public String getGftsVersion() {
+    return _gftsVersion;
+  }
   /**
    * add validation to drop record if difference between calculated and reported positions is greater
    * than max.  If null, validation is not applied.  Distance is in meters.
@@ -1021,10 +1037,17 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
      urlConnection.setReadTimeout(Integer.parseInt(System.getProperty(GTFS_READ_TIMEOUT)));
    }
    setHeadersToUrlConnection(urlConnection);
+
+   urlConnection.setRequestProperty("accept", _gftsMimeType);
+
    InputStream in = null;
    try {
      in = urlConnection.getInputStream();
-     return FeedMessage.parseFrom(in, _registry);
+     GtfsRealtime.FeedMessage.Builder builder = GtfsRealtime.FeedMessage.newBuilder();
+     GtfsRealtime.FeedHeader.Builder header = GtfsRealtime.FeedHeader.newBuilder();
+     header.setGtfsRealtimeVersion(_gftsVersion);
+     builder.setHeader(header);
+     return builder.build().parseFrom(in, _registry);
    } catch (IOException ex) {
      _log.error("connection issue with url " + url + ", ex=" + ex);
      return getDefaultFeedMessage();
