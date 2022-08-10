@@ -33,7 +33,7 @@ public class BarcodeServiceImpl implements BarcodeService {
 	public InputStream getQRCodesInBatch(File stopIdFile, int dimensions) throws IOException{
 		String tdmHost = System.getProperty("tdm.host");
 		String url = buildURL(tdmHost, "/barcode/batchGen?img-dimension=", dimensions);
-		InputStream barCodeZip = remoteConnectionService.postBinaryData(url, stopIdFile, InputStream.class);
+		InputStream barCodeZip = remoteConnectionService.postBinaryData(url, stopIdFile, "text/csv", InputStream.class);
 		return barCodeZip;
 	}
 	

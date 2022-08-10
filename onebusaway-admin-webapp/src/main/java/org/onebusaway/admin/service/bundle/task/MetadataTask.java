@@ -19,7 +19,7 @@ import java.io.File;
 import java.util.UUID;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.onebusaway.admin.bundle.model.BundleMetadata;
+import org.onebusaway.transit_data_federation.bundle.model.BundleMetadata;
 import org.onebusaway.admin.model.BundleRequestResponse;
 import org.onebusaway.admin.service.bundle.impl.BundleBuildingUtil;
 import org.onebusaway.transit_data_federation.bundle.tasks.MultiCSVLogger;

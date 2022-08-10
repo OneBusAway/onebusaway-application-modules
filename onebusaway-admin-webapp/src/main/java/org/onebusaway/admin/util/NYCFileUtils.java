@@ -28,6 +28,7 @@ import java.io.InputStreamReader;
 import java.net.URL;
 
 import org.apache.commons.io.IOUtils;
+import org.onebusaway.transit_data_federation.bundle.utilities.NativeFileUtilities;
 import org.onebusaway.util.FileUtility;
 import org.onebusaway.util.SystemTime;
 import org.slf4j.Logger;
@@ -45,6 +46,8 @@ public class NYCFileUtils {
   private String _workingDirectory = null;
   // more generic file handling functions belong in nyc.util
   private FileUtility _fileUtil = new FileUtility();
+  // native utilities that should be converted to pure java and migrated to FileUtility
+  private NativeFileUtilities _nativeFileUtil = new NativeFileUtilities();
 
   public NYCFileUtils() {
     _workingDirectory = System.getProperty("java.io.tmpdir");
@@ -98,23 +101,11 @@ public class NYCFileUtils {
   }
   
   public String parseFileName(String urlString, String seperator) {
-    if (urlString == null) return null;
-    int i = urlString.lastIndexOf(seperator);
-    // check to see we don't have a trailing slash
-    if (i > 0 && i+1 < urlString.length()) {
-      
-      return urlString.substring(i+1, urlString.length());
-    }
-    // we have a trailing slash, recurse removing trailing slash
-    if (i >= 0) {
-      return parseFileName(urlString.substring(0, urlString.length()-1));
-    }
-    // did not find a slash, return filename as is
-    return urlString;
+    return _nativeFileUtil.parseFileName(urlString, seperator);
   }
   
   public String parseFileName(String urlString) {
-    return parseFileName(urlString, "/");
+    return _nativeFileUtil.parseFileName(urlString);
   }
 
   public String parseDirectory(String urlString) {
@@ -220,38 +211,7 @@ public class NYCFileUtils {
   }
 
   public void copyFiles(File from, File to) {
-    _log.debug("copying " + from + " to " + to);
-    try {
-      if (!from.exists())
-        return;
-      if (from.equals(to) || to.getParent().equals(from))
-        return;
-      if (to.exists() && to.isDirectory()) {
-        if (from.exists() && from.isDirectory()) {
-          org.apache.commons.io.FileUtils.copyDirectory(from, to, true);
-          return;  // Added to prevent dupe dir.  JP 10/14/15
-        }
-        String file = this.parseFileName(from.toString());
-        to = new File(to.toString() + File.separator + file);
-        _log.debug("constructed new destination=" + to.toString());
-      }
-
-      if (from.isDirectory()) {
-        to.mkdirs();
-        File[] files = from.listFiles();
-        if (files == null)
-          return;
-        for (File fromChild : files) {
-          File toChild = new File(to, fromChild.getName());
-          copyFiles(fromChild, toChild);
-        }
-      } else {
-          org.apache.commons.io.FileUtils.copyFile(from, to, true/*preserve date*/);
-      }
-    } catch (IOException ioe) {
-      throw new RuntimeException(ioe);
-    }
-
+    _nativeFileUtil.copyFiles(from, to);
   }
 
   public String createTmpDirectory() {
@@ -318,20 +278,7 @@ public class NYCFileUtils {
   }
 
   public int tarcvf(String baseDir, String[] paths, String filename) {
-    Process process = null;
-    try {
-      StringBuffer cmd = new StringBuffer();
-      cmd.append("tar -c -f " + filename + " -z -C " + baseDir + "  ");
-      for (String path : paths) {
-        cmd.append(path + " ");
-      }
-      _log.info("exec:" + cmd.toString());
-      process = Runtime.getRuntime().exec(cmd.toString());
-      return process.waitFor();
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
-
+    return _nativeFileUtil.tarcvf(baseDir, paths, filename);
   }
 
   public static void copyFile(File srcFile, File destFile) {

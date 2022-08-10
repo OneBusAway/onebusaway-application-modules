@@ -40,10 +40,19 @@ public interface RemoteConnectionService {
 	/**
 	 * Posts binary data to the given url and returns response of the given type
 	 * @param url remote server url
-	 * @param data binary data to post
+	 * @param data binary data to post, posted as application/octet-stream
 	 * @param responseType desired type of post response
 	 * @return response returned by remote server 
 	 */
 	<T> T postBinaryData(String url, File data, Class<T> responseType);
+	/**
+	 * Posts binary data to the given url and returns response of the given type
+	 * @param url remote server url
+	 * @param data binary data to post
+	 * @param contentType the Media type to use to post the data as
+	 * @param responseType desired type of post response
+	 * @return response returned by remote server
+	 */
+	<T> T postBinaryData(String url, File data, String contentType, Class<T> responseType);
 
 }

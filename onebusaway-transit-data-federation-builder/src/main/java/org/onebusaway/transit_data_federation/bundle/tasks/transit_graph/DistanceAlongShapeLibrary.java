@@ -55,9 +55,9 @@ public class DistanceAlongShapeLibrary {
 
   private double _maxDistanceFromStopToShapePoint = 1000;
 
-  private int _maximumNumberOfPotentialAssignments = Integer.MAX_VALUE;
+  private int _maximumNumberOfPotentialAssignments = 1000; // we give up pretty quickly now
   
-  private boolean _lenientStopShapeAssignment = false;
+  private boolean _lenientStopShapeAssignment = true;
 
   private Set<AgencyAndId> _shapeIdsWeHavePrinted = new HashSet<AgencyAndId>();
 
@@ -302,7 +302,7 @@ public class DistanceAlongShapeLibrary {
             index - startIndex + 1);
         Min<Assignment> bestAssignments = new Min<Assignment>();
         recursivelyConstructAssignments(possibleAssignments, currentAssignment,
-            startIndex, startIndex, index + 1, bestAssignments);
+            startIndex, startIndex, index + 1, bestAssignments, 0, stopTimes.get(0).toString());
         if (bestAssignments.isEmpty()) {
           constructError(shapePoints, stopTimes, possibleAssignments,
               projection);
@@ -432,7 +432,7 @@ public class DistanceAlongShapeLibrary {
   private void recursivelyConstructAssignments(
       List<List<PointAndIndex>> possibleAssignments,
       List<PointAndIndex> currentAssignment, int index, int indexFrom,
-      int indexTo, Min<Assignment> best) {
+      int indexTo, Min<Assignment> best, int depth, String id) {
 
     /**
      * If we've made it through ALL assignments, we have a valid assignment!
@@ -475,12 +475,17 @@ public class DistanceAlongShapeLibrary {
      * For each valid assignment, pop it onto the current assignment and
      * recursively evaluate
      */
+    if (validAssignments.size() > 100) {
+      _log.warn("complex assignment with depth {} for {} and {} possible assignments",
+              depth, id, possibleAssignments.size());
+
+    }
     for (PointAndIndex validAssignment : validAssignments) {
 
       currentAssignment.add(validAssignment);
 
       recursivelyConstructAssignments(possibleAssignments, currentAssignment,
-          index + 1, indexFrom, indexTo, best);
+          index + 1, indexFrom, indexTo, best, depth+1, id);
 
       currentAssignment.remove(currentAssignment.size() - 1);
     }

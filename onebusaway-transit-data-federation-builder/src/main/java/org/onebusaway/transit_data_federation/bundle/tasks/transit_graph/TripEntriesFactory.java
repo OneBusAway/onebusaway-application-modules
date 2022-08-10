@@ -56,7 +56,7 @@ public class TripEntriesFactory {
 
   private ShapePointHelper _shapePointsHelper;
 
-  private boolean _throwExceptionOnInvalidStopToShapeMappingException = true;
+  private boolean _throwExceptionOnInvalidStopToShapeMappingException = false;
 
   @Autowired
   public void setUniqueService(UniqueService uniqueService) {

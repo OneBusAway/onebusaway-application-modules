@@ -182,6 +182,9 @@ function onAddAnotherCondition() {
 	$("#conditionTable td:last.validateCondition").click(onValidateCondition);
 }
 function onDeleteCondition() {
+	if(!confirm("Are you sure you want to delete this condition?")){
+		return;
+	}
 	$(this).closest('tr').remove();
 	// Reset the name attributes for the remaining conditions to match their 
 	// new positions in the list.
@@ -230,7 +233,7 @@ function onTweetCondition(handler) {
 function onValidateCondition(handler) {
 	var aId = handler.target.id;
 	var id = aId.replace("validateCondition", "");
-	var selector = "service-alert_allAffects_"+ id;
+	var selector = "service_alert_allAffects_"+ id;
 	var agencyStopField = document.getElementById(selector + "__agencyPartStopId");
 	var stopField = document.getElementById(selector + "__stopPartStopId");
 	if (agencyStopField == null || stopField == null) {

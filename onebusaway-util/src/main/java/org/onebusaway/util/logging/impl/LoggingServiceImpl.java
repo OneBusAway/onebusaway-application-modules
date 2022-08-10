@@ -16,7 +16,7 @@
 package org.onebusaway.util.logging.impl;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Level;
+import org.apache.logging.log4j.Level;
 import org.onebusaway.util.logging.LoggingService;
 import org.onebusaway.util.services.configuration.ConfigurationServiceClient;
 import org.slf4j.Logger;
@@ -41,8 +41,8 @@ public class LoggingServiceImpl implements LoggingService {
 		if(StringUtils.isBlank(message)) {
 			throw new IllegalArgumentException("Message to log cannot be blank");
 		}
-		
-		String responseText = configurationServiceClient.log("log", component, priority.toInt(), message);
+
+		String responseText = configurationServiceClient.log("log", component, priority.intLevel(), message);
 		
 		log.info("Returning response from server");
 		
