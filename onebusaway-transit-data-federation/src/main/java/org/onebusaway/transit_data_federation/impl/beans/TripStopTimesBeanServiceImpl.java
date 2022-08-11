@@ -126,6 +126,7 @@ public class TripStopTimesBeanServiceImpl implements TripStopTimesBeanService {
 
       stBean.setArrivalTime(stopTime.getArrivalTime());
       stBean.setDepartureTime(stopTime.getDepartureTime());
+      stBean.setStopHeadsign(stopTime.getStopHeadsign());
 
       StopEntry stopEntry = stopTime.getStop();
       StopBean stopBean = _stopBeanService.getStopForId(stopEntry.getId(), null);
