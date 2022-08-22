@@ -1081,7 +1081,11 @@ public class GtfsRealtimeTripLibrary {
         VehicleOccupancyRecord vor = new VehicleOccupancyRecord();
         // here we assume the vehicle's agency matches that of its block
         vor.setVehicleId(new AgencyAndId(update.block.getBlockInstance().getBlock().getBlock().getId().getAgencyId(), update.block.getVehicleId()));
-        vor.setOccupancyStatus(OccupancyStatus.valueOf(update.vehiclePosition.getOccupancyStatus().name()));
+        try {
+          vor.setOccupancyStatus(OccupancyStatus.valueOf(update.vehiclePosition.getOccupancyStatus().name()));
+        } catch (IllegalArgumentException iae) {
+          _log.debug("unknown occupancy value: " + iae);
+        }
         TripEntry trip = _entitySource.getTrip(update.bestTrip);
         // link this occupancy to route+direction so it will expire at end of trip
         if (trip != null && trip.getRoute() != null) {
