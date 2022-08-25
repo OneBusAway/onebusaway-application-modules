@@ -227,6 +227,7 @@ public class FederatedTransitDataBundleConventionMain {
                 System.out.println("found gtfs at " + gtfsFile);
                 GtfsBundle gtfsBundle = new GtfsBundle();
                 gtfsBundle.setPath(new File(gtfsFile));
+                gtfsBundle.setDefaultAgencyId(agencyName);
                 gtfsBundles.add(gtfsBundle);
             }
         }
