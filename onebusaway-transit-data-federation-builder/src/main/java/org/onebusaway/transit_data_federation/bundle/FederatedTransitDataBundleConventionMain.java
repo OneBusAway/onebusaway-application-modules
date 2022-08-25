@@ -382,7 +382,7 @@ public class FederatedTransitDataBundleConventionMain {
 
     private String parseAgency(String directory) {
         String[] paths = directory.split("/");
-        int lastIndex = paths.length-1;
+        int lastIndex = paths.length;
         return paths[lastIndex];
     }
 
