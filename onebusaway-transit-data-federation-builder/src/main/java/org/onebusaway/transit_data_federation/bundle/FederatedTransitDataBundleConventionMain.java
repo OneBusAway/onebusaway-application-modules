@@ -221,8 +221,8 @@ public class FederatedTransitDataBundleConventionMain {
 
         boolean found = false;
         for (String directory: directories) {
-            String agencyName = parseAgency(directory);
             for (String gtfsFile: listFiles(directoryName + File.separator + directory)) {
+                String agencyName = parseAgency(gtfsFile);
                 found = true;
                 System.out.println("found gtfs at " + gtfsFile);
                 GtfsBundle gtfsBundle = new GtfsBundle();
@@ -382,7 +382,7 @@ public class FederatedTransitDataBundleConventionMain {
 
     private String parseAgency(String directory) {
         String[] paths = directory.split("/");
-        int lastIndex = paths.length;
+        int lastIndex = paths.length - 2;
         return paths[lastIndex];
     }
 
