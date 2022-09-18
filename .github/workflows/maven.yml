@@ -26,8 +26,8 @@ jobs:
         run: mvn package -Ptravis -Dmaven.javadoc.skip=true -Dvalidate.silent=true -Dlog4j.configuration= -B -V -q
       - name: Configure Git user
         run: |
-          git config user.email "${{ env.GITHUB_ACTOR }}@github.com"
-          git config user.name "${{ env.GITHUB_ACTOR }}"
+          git config --global user.email "${GITHUB_ACTOR}"
+          git config --global user.name "${GITHUB_ACTOR}@users.noreply.github.com"
       - name: Maven Release
         if: github.ref == 'refs/heads/master'
         run: mvn release:prepare release:perform
