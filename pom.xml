@@ -16,6 +16,7 @@
 
   <!-- Common Software Dependency Versions -->
   <properties>
+    <project.scm.id>github</project.scm.id>
     <asm-version>8.0.1</asm-version>
     <struts-version>2.5.26</struts-version>
     <gwt-version>2.4.0</gwt-version>
@@ -72,9 +73,9 @@
   </repositories>
 
   <scm>
-    <connection>scm:git:git@github.com:camsys/onebusaway-application-modules.git</connection>
-    <developerConnection>scm:git:git@github.com:camsys/onebusaway-application-modules.git</developerConnection>
-    <url>scm:git:git@github.com:camsys/onebusaway-application-modules</url>
+    <connection>scm:git:git@github.com:nautilustechnologyau/onebusaway-application-modules.git</connection>
+    <developerConnection>scm:git:git@github.com:nautilustechnologyau/onebusaway-application-modules.git</developerConnection>
+    <url>scm:git:git@github.com:nautilustechnologyau/onebusaway-application-modules.git</url>
     <tag>onebusaway-application-modules-2.1.0</tag>
   </scm>
 
@@ -102,8 +103,8 @@
   <!-- releases and snapshots should be inherited -->
   <distributionManagement>
     <site>
-      <id>${site_id}</id>
-      <url>${site_url}</url>
+      <id>github</id>
+      <url>https://maven.pkg.github.com/nautilustechnologyau/onebusaway-application-modules</url>
     </site>
   </distributionManagement>
   <modules>

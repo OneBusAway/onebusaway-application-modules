@@ -22,17 +22,23 @@
         http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
         http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd">
 
+    <!--
     <bean id="transitDataService" class="org.onebusaway.federations.FederatedServiceFactoryBean">
         <property name="serviceInterface" value="org.onebusaway.transit_data.services.TransitDataService" />
         <property name="serviceProviders">
             <list>
                 <bean class="org.springframework.remoting.caucho.HessianProxyFactoryBean">
                     <property name="serviceUrl"
-                        value="http://soak-transit-data.onebusaway.org/puget_sound/remoting/transit-data-service" />
+                        value="https://transit.nautilus-tech.com.au/onebusaway-transit-data-federation-webapp/remoting/transit-data-service" />
                     <property name="serviceInterface" value="org.onebusaway.transit_data.services.TransitDataService" />
                 </bean>
             </list>
         </property>
+    </bean>
+    -->
+    <bean id="transitDataService" class="org.springframework.remoting.caucho.HessianProxyFactoryBean">
+        <property name="serviceUrl" value="https://transit.nautilus-tech.com.au/onebusaway-transit-data-federation-webapp/remoting/transit-data-service" />
+        <property name="serviceInterface" value="org.onebusaway.transit_data.services.TransitDataService" />
     </bean>
 
     <!-- Database Connection Configuration -->
@@ -62,6 +68,20 @@
     <bean id="geocoder" class="org.onebusaway.geocoder.impl.FixedGeocoderImpl">
         <property name="lat" value="47.586025085"/>
         <property name="lon" value="-122.312681448"/>
+    </bean>
+
+    <bean id="configurationService" class="org.onebusaway.util.impl.configuration.ConfigurationServiceImpl">
+        <property name="refreshService" ref="refreshService"/>
+        <property name="taskScheduler" ref="taskScheduler"/>
+        <property name="configurationServiceClient" ref="configurationServiceClient" />
+    </bean>
+
+    <bean id="refreshService" class="org.onebusaway.container.refresh.RefreshServiceImpl" />
+
+    <bean id="taskScheduler" class="org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler" />
+
+    <bean id="configurationServiceClient" class="org.onebusaway.util.impl.configuration.ConfigurationServiceClientFileImpl" >
+        <constructor-arg type="java.lang.String" value="/oba/config.json"/>
     </bean>
 
 </beans>

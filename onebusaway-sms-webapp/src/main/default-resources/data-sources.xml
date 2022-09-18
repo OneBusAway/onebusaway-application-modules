@@ -29,23 +29,45 @@
     </bean>
 
     <!-- Database Connection Configuration -->
+    <!-- SQLDB
     <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
         <property name="driverClassName" value="org.hsqldb.jdbcDriver" />
         <property name="url" value="jdbc:hsqldb:file:/tmp/org_onebusaway_database_sms" />
         <property name="username" value="sa" />
         <property name="password" value="" />
     </bean>
+    -->
+    <!-- MySQL -->
+    <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+        <property name="driverClassName" value="com.mysql.jdbc.Driver" />
+        <property name="url" value="jdbc:mysql://localhost:3306/oba" />
+        <property name="username" value="" />
+        <property name="password" value="" />
+    </bean>
 
     <!--
         The Geocoder is used in the SMS interface for determining your default search location. The DefaultGeocoderImpl
-        doesn't actually do much geocoding... it's just there for testing
+        doesn't actually do much geocoding... it's just there for testing. Enable for testing.
     -->
+    <!--
     <bean id="externalGeocoderImpl" class="org.onebusaway.geocoder.impl.FixedGeocoderImpl">
         <property name="lat" value="47.65475043477393" />
         <property name="lon" value="-122.3078727722168" />
         <property name="city" value="Seattle" />
         <property name="state" value="WA" />
         <property name="postalCode" value="98105" />
+    </bean>
+    -->
+    <bean id="externalGeocoderImpl" class="org.onebusaway.geocoder.enterprise.impl.EnterpriseGoogleGeocoderImpl">
+        <property name="wktFilterPolygon" value="POLYGON((-73.911209 40.934265,-73.779716 40.889639,-73.794823 40.841606,-73.779373 40.817707,-73.778 40.806793,-73.762207 40.783661,-73.734055 40.75818,-73.721008 40.73321,-73.723068 40.710833,-73.724442 40.682721,-73.729935 40.661889,-73.721008 40.631672,-73.718948 40.606133,-73.716202 40.568589,-73.732681 40.544591,-73.777313 40.525283,-73.924942 40.504402,-74.052658 40.493437,-74.166641 40.486126,-74.242859 40.489782,-74.258652 40.498659,-74.258652 40.510667,-74.250412 40.520585,-74.250412 40.535199,-74.250412 40.548244,-74.236679 40.555026,-74.225006 40.558156,-74.217453 40.558156,-74.21196 40.565981,-74.207153 40.585799,-74.200287 40.599356,-74.205093 40.610304,-74.205093 40.621249,-74.205093 40.63063,-74.200287 40.636883,-74.192047 40.640009,-74.184494 40.64522,-74.171448 40.645741,-74.152908 40.648346,-74.148102 40.642094,-74.132996 40.643657,-74.114456 40.647825,-74.08905 40.650429,-74.069824 40.655118,-74.045792 40.669702,-74.034805 40.696258,-74.024506 40.724885,-74.014893 40.748818,-74.007339 40.773782,-73.985367 40.794578,-73.972321 40.820565,-73.953094 40.848619,-73.927002 40.900539,-73.918076 40.92389,-73.913956 40.93219,-73.911209 40.934265))"/>
+        <property name="resultBiasingBounds">
+            <bean class="org.onebusaway.geospatial.model.CoordinateBounds">
+                <property name="minLat" value="40.57963926492829" />
+                <property name="minLon" value="-74.19498680838014" />
+                <property name="maxLat" value="40.94577345952476" />
+                <property name="maxLon" value="-73.69785546072389" />
+            </bean>
+        </property>
     </bean>
 
     <bean id="smsAbbreviationsFactory" class="org.onebusaway.presentation.impl.text.XmlTextModificationsFactory">
@@ -54,6 +76,20 @@
 
     <bean id="smsAbbreviations" factory-bean="smsAbbreviationsFactory" factory-method="create">
         <qualifier value="smsDestinationAbbreviations" />
+    </bean>
+
+    <bean id="configService" class="org.onebusaway.util.impl.configuration.ConfigurationServiceImpl">
+        <property name="refreshService" ref="refreshService"/>
+        <property name="taskScheduler" ref="taskScheduler"/>
+        <property name="configurationServiceClient" ref="configurationServiceClient" />
+    </bean>
+
+    <bean id="refreshService" class="org.onebusaway.container.refresh.RefreshServiceImpl" />
+
+    <bean id="taskScheduler" class="org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler" />
+
+    <bean id="configurationServiceClient" class="org.onebusaway.util.impl.configuration.ConfigurationServiceClientFileImpl" >
+        <constructor-arg type="java.lang.String" value="/oba/config.json"/>
     </bean>
 
 </beans>
