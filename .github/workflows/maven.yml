@@ -31,6 +31,6 @@ jobs:
           git config user.name "GitHub Actions"
       - name: Maven Release
         if: github.ref == 'refs/heads/master'
-        run: mvn -B release:prepare release:perform
+        run: mvn -B -DskipTests release:prepare release:perform
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
