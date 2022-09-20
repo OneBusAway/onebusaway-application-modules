@@ -448,6 +448,10 @@ public final class SiriSupportV2 {
       case "ferry":
         mode = VehicleModesEnumeration.FERRY;
         break;
+      case "subway":
+        // TODO need iconset for UNDERGROUND
+        mode = VehicleModesEnumeration.TRAM;
+        break;
       default:
         _log.error("Unknown vehicleMode " + typeString + ", defaulting to BUS");
         mode = VehicleModesEnumeration.BUS;

@@ -221,12 +221,14 @@ public class FederatedTransitDataBundleConventionMain {
 
         boolean found = false;
         for (String directory: directories) {
-            String agencyName = parseAgency(directory);
             for (String gtfsFile: listFiles(directoryName + File.separator + directory)) {
+                String agencyName = parseAgency(gtfsFile);
                 found = true;
                 System.out.println("found gtfs at " + gtfsFile);
                 GtfsBundle gtfsBundle = new GtfsBundle();
                 gtfsBundle.setPath(new File(gtfsFile));
+                _log.info("setting default agency id to {} for {} ", agencyName, directoryName + File.separator + directory);
+                gtfsBundle.setDefaultAgencyId(agencyName);
                 gtfsBundles.add(gtfsBundle);
             }
         }
@@ -380,7 +382,7 @@ public class FederatedTransitDataBundleConventionMain {
 
     private String parseAgency(String directory) {
         String[] paths = directory.split("/");
-        int lastIndex = paths.length-1;
+        int lastIndex = paths.length - 2;
         return paths[lastIndex];
     }
 
