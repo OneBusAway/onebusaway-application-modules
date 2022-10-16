@@ -133,6 +133,11 @@ public class BeanFactoryV2 {
     return entry(getStopWithArrivalAndDepartures(result));
   }
 
+  public EntryWithReferencesBean<StopsWithArrivalsAndDeparturesV2Bean> getResponse(
+          StopsWithArrivalsAndDeparturesBean result) {
+      return entry(getStopsWithArrivalAndDepartures(result));
+  }
+
   public EntryWithReferencesBean<ArrivalAndDepartureV2Bean> getResponse(
       ArrivalAndDepartureBean result) {
     return entry(getArrivalAndDeparture(result));
@@ -972,6 +977,41 @@ public class BeanFactoryV2 {
     }
 
     return bean;
+  }
+
+  public StopsWithArrivalsAndDeparturesV2Bean getStopsWithArrivalAndDepartures(
+          StopsWithArrivalsAndDeparturesBean sad) {
+    StopsWithArrivalsAndDeparturesV2Bean bean = new StopsWithArrivalsAndDeparturesV2Bean();
+
+    bean.setStopIds(new ArrayList<>());
+    for (StopBean sb : sad.getStops()) {
+      bean.getStopIds().add(sb.getId());
+    }
+
+    List<ArrivalAndDepartureV2Bean> ads = new ArrayList<ArrivalAndDepartureV2Bean>();
+    for (ArrivalAndDepartureBean ad : sad.getArrivalsAndDepartures())
+      ads.add(getArrivalAndDeparture(ad));
+    bean.setArrivalsAndDepartures(ads);
+
+    List<String> nearbyStopIds = new ArrayList<String>();
+    for (StopBean nearbyStop : sad.getNearbyStops()) {
+      nearbyStopIds.add(nearbyStop.getId());
+      addToReferences(nearbyStop);
+    }
+    bean.setNearbyStopIds(nearbyStopIds);
+
+    List<ServiceAlertBean> situations = sad.getSituations();
+    if (!CollectionsLibrary.isEmpty(situations)) {
+      List<String> situationIds = new ArrayList<String>();
+      for (ServiceAlertBean situation : situations) {
+        addToReferences(situation);
+        situationIds.add(situation.getId());
+      }
+      bean.setSituationIds(situationIds);
+    }
+
+    return bean;
+
   }
 
   public ArrivalAndDepartureV2Bean getArrivalAndDeparture(
