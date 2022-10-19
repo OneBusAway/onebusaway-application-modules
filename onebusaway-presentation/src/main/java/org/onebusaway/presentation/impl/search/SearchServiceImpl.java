@@ -392,9 +392,11 @@ public class SearchServiceImpl implements SearchService {
 		*
 		*  Combined with the above, this is the search order
 		*  1) lat/lon (if its matches regex)
-		*  2) route (if no comma, tokens < 2
+		*  2.1) route exact match (if no comma, ignore normalization)
+		*  2.2) route (if no comma, tokens < 2)
  		*  3) routes (has semicolon)
  		*  4) stop (if no comma, numeric query, query contains '_')
+ 		*  4.1) stop with route filter
  		*  5) stop name (no comma)
  		*  6) geocode
 		*/
@@ -407,6 +409,11 @@ public class SearchServiceImpl implements SearchService {
 		String normalizedQuery = normalizeQuery(results, query, serviceDate);
 		int normalizedTokens = normalizedQuery.length()
 				- normalizedQuery.replaceAll(" ", "").length() + 1;
+
+		if (results.isEmpty() && !hasComma) {
+			// before we consider tokens, try route exactly as queried
+			tryAsExactRoute(results, query.toUpperCase().trim(), resultFactory, serviceDate);
+		}
 
 		// if we have a comma, we are not a single route
 		if (results.isEmpty() && !hasComma) {
@@ -643,7 +650,34 @@ public class SearchServiceImpl implements SearchService {
 	}
   }
 
-  private void tryAsRoute(SearchResultCollection results, String routeQueryMixedCase,
+	private void tryAsExactRoute(SearchResultCollection results, String routeQuery,
+								 SearchResultFactory resultFactory, ServiceDate serviceDate) {
+
+		// short name matching
+		if (_routeShortNameToRouteBeanMap.get(routeQuery) != null) {
+			for (RouteBean routeBean : _routeShortNameToRouteBeanMap.get(routeQuery)) {
+				results.addMatch(resultFactory.getRouteResult(routeBean));
+				results.setHint("tryAsRoute");
+			}
+		}
+
+		// long name matching
+		for (String routeLongName : _routeLongNameToRouteBeanMap.keySet()) {
+			if (routeLongName.contains(routeQuery + " ")
+					|| routeLongName.contains(" " + routeQuery)) {
+				try {
+					for (RouteBean routeBean : _routeLongNameToRouteBeanMap.get(routeLongName)) {
+						results.addSuggestion(resultFactory.getRouteResult(routeBean));
+						results.setHint("tryAsRoute");
+					}
+				} catch (OutOfServiceAreaServiceException oosase) {
+				}
+			}
+		}
+
+	}
+
+	private void tryAsRoute(SearchResultCollection results, String routeQueryMixedCase,
 			SearchResultFactory resultFactory, ServiceDate serviceDate) {
 
 	  String routeQuery = new String(routeQueryMixedCase);
@@ -683,6 +717,7 @@ public class SearchServiceImpl implements SearchService {
 		  }
 		}
 
+		// TOOD make this configurable as it may be expensive on large datasets
 		for (String routeShortName : _routeShortNameToRouteBeanMap.keySet()) {
 			// if the route short name ends or starts with our query, and
 			// whatever's left over
