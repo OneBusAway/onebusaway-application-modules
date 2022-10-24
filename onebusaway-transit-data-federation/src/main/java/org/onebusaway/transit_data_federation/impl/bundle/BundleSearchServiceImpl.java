@@ -50,6 +50,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class BundleSearchServiceImpl implements BundleSearchService, ApplicationListener {
 
+	private static final int MAX_TYPE_AHEAD_LENGTH = 10;
 	@Autowired
 	private TransitDataService _transitDataService = null;
 
@@ -125,6 +126,7 @@ public class BundleSearchServiceImpl implements BundleSearchService, Application
 		for (String part : parts) {
 			int length = part.length();
 			for (int i = 0; i < length; i++) {
+				// here we add keys comprised of all the possible typeaheads for the first term (part)
 				String key = part.substring(0, i+1).toLowerCase();
 				List<String> suggestion = tmpSuggestions.get(key);
 				if (suggestion == null) {
@@ -133,6 +135,33 @@ public class BundleSearchServiceImpl implements BundleSearchService, Application
 				suggestion.add(string + " [" + hint + "]");
 				Collections.sort(suggestion);
 				tmpSuggestions.put(key, suggestion);
+			}
+		}
+		if (parts.length > 1) {
+			// we have more than one term (part)
+			// now add keys comprised of the successive word typeaheads up to MAX_TYPE_AHEAD_LENGTH
+			// this allows auto complete to work for multi-word searches
+			int startPos = parts[0].length();
+			for (int i = startPos; i < Math.min(string.length(), MAX_TYPE_AHEAD_LENGTH); i++) {
+				String key = string.substring(0, i+1).toLowerCase();
+				List<String> suggestion = tmpSuggestions.get(key);
+				if (suggestion == null) {
+					suggestion = new ArrayList<String>();
+				}
+				suggestion.add(string + " [" + hint + "]");
+				Collections.sort(suggestion);
+				tmpSuggestions.put(key, suggestion);
+			}
+
+			if (string.length() > MAX_TYPE_AHEAD_LENGTH) {
+				// add in the entire search term as well
+				List<String> suggestion = tmpSuggestions.get(string);
+				if (suggestion == null) {
+					suggestion = new ArrayList<>();
+				}
+				suggestion.add(string + " [" + hint + "]");
+				Collections.sort(suggestion);
+				tmpSuggestions.put(string.toLowerCase(), suggestion);
 			}
 		}
 	}
