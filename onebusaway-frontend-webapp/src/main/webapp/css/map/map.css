@@ -141,6 +141,10 @@
 	min-height: 40px;
 }
 
+#content #suggestions ul li.locationItem span {
+	font-size: 12px;
+}
+
 #content #matches ul li.legendItem {
 	margin-top: 5px;
 	margin-bottom: 10px;
