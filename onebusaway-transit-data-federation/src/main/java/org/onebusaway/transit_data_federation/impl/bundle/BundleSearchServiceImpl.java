@@ -26,6 +26,7 @@ import javax.annotation.PostConstruct;
 import org.onebusaway.container.refresh.Refreshable;
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.transit_data.model.StopBean;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.transit_data_federation.services.bundle.BundleSearchService;
 import org.onebusaway.transit_data.model.ListBean;
@@ -83,14 +84,25 @@ public class BundleSearchServiceImpl implements BundleSearchService, Application
 					ListBean<RouteBean> routes = _transitDataService.getRoutesForAgencyId(agency);
 					for (RouteBean route : routes.getList()) {
 						String shortName = route.getShortName();
-						generateInputsForString(tmpSuggestions, shortName, "\\s+");
+						String hint = route.getLongName();
+						if (hint == null) hint = route.getId(); // don't let hint be null
+						generateInputsForString(tmpSuggestions, shortName, "\\s+", hint);
 					}
 
 					ListBean<String> stopIds = _transitDataService.getStopIdsForAgencyId(agency);
 					for (String stopId : stopIds.getList()) {
 						if (_transitDataService.stopHasRevenueService(agency, stopId)) {
 							AgencyAndId agencyAndId = AgencyAndIdLibrary.convertFromString(stopId);
-							generateInputsForString(tmpSuggestions, agencyAndId.getId(), null);
+							StopBean stop = _transitDataService.getStop(stopId);
+							String hint = null;
+							if (stop != null) {
+								hint = stop.getName();
+							}
+							// this is unlikley, but prevent hint from being null
+							if (hint == null) {
+								hint = stop.getId();
+							}
+							generateInputsForString(tmpSuggestions, agencyAndId.getId(), null, hint);
 						}
 					}
 				}
@@ -102,7 +114,8 @@ public class BundleSearchServiceImpl implements BundleSearchService, Application
 		new Thread(initThread).start();
 	}
 
-	private void generateInputsForString(Map<String,List<String>> tmpSuggestions, String string, String splitRegex) {
+	private void generateInputsForString(Map<String,List<String>> tmpSuggestions, String string, String splitRegex,
+										 String hint) {
 		String[] parts;
 		if (string == null) return;
 		if (splitRegex != null)
@@ -117,7 +130,7 @@ public class BundleSearchServiceImpl implements BundleSearchService, Application
 				if (suggestion == null) {
 					suggestion = new ArrayList<String>();
 				}
-				suggestion.add(string);
+				suggestion.add(string + " [" + hint + "]");
 				Collections.sort(suggestion);
 				tmpSuggestions.put(key, suggestion);
 			}
