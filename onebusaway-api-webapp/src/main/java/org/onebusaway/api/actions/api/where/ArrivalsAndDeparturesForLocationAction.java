@@ -46,6 +46,7 @@ public class ArrivalsAndDeparturesForLocationAction extends ApiActionSupport {
     // this api doesn't support v1
     private static final int V2 = 2;
     private static final double MAX_BOUNDS_RADIUS = 20000.0;
+    private static boolean EMPTY_RETURNS_NOT_FOUND = false;
 
     @Autowired
     private TransitDataService _service;
@@ -56,6 +57,8 @@ public class ArrivalsAndDeparturesForLocationAction extends ApiActionSupport {
 
     private ArrivalsAndDeparturesQueryBean _query = new ArrivalsAndDeparturesQueryBean();
     private long _time = 0;
+
+    private boolean emptyReturnsNotFound = EMPTY_RETURNS_NOT_FOUND;
 
     public ArrivalsAndDeparturesForLocationAction() {
         super(V2);
@@ -101,6 +104,10 @@ public class ArrivalsAndDeparturesForLocationAction extends ApiActionSupport {
         _time = time.getTime();
     }
 
+    public void setEmptyReturnsNotFound(boolean flag) {
+        emptyReturnsNotFound = flag;
+    }
+
     public DefaultHttpHeaders index() throws IOException, ServiceException {
         if (hasErrors())
             return setValidationErrorsResponse();
@@ -120,21 +127,27 @@ public class ArrivalsAndDeparturesForLocationAction extends ApiActionSupport {
         StopsWithArrivalsAndDeparturesBean adResult = null;
         try {
             StopsBean stopResult = _service.getStops(searchQuery);
-            if (stopResult == null) return setResourceNotFoundResponse();
+            if (stopResult == null) return emptyResponse();
             List<String> stopIds = new ArrayList<>();
             for (StopBean bean : stopResult.getStops()) {
                 stopIds.add(bean.getId());
             }
             if (stopIds.isEmpty())
-                return setResourceNotFoundResponse();
+                return emptyResponse();
             adResult = _service.getStopsWithArrivalsAndDepartures(stopIds, adQuery);
         } catch (OutOfServiceAreaServiceException ex) {
-            return setOkResponse(StopsWithArrivalsAndDeparturesBean.class);
+            return setOkResponse(new StopsWithArrivalsAndDeparturesBean());
         }
         if (adResult == null) {
-            return setResourceNotFoundResponse();
+            return emptyResponse();
         }
         return setOkResponse(factory.getResponse(adResult));
+    }
+
+    private DefaultHttpHeaders emptyResponse() {
+        if (emptyReturnsNotFound)
+            setResourceNotFoundResponse();
+        return setOkResponse(new StopsWithArrivalsAndDeparturesBean());
     }
 
 
