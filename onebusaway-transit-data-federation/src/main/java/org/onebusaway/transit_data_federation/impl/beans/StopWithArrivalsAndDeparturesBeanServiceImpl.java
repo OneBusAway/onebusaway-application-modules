@@ -110,7 +110,9 @@ class StopWithArrivalsAndDeparturesBeanServiceImpl implements
         situationsById.put(situation.getId(), situation);
     }
 
-    allNearbyStopIds.removeAll(ids);
+    if (!query.getIncludeInputIdsInNearby()) {
+      allNearbyStopIds.removeAll(ids);
+    }
     List<StopBean> nearbyStops = new ArrayList<StopBean>();
 
     for (AgencyAndId id : allNearbyStopIds) {

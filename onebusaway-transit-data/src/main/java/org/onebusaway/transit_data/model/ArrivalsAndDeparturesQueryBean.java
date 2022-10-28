@@ -34,6 +34,9 @@ public final class ArrivalsAndDeparturesQueryBean implements Serializable {
 
   private int frequencyMinutesAfter = 30;
 
+  // should the queried for stopIds be included in nearby results
+  private boolean includeInputIdsInNearby = false;
+
   public ArrivalsAndDeparturesQueryBean() {
 
   }
@@ -44,6 +47,7 @@ public final class ArrivalsAndDeparturesQueryBean implements Serializable {
     this.minutesAfter = bean.minutesAfter;
     this.frequencyMinutesBefore = bean.frequencyMinutesBefore;
     this.frequencyMinutesAfter = bean.frequencyMinutesAfter;
+    this.includeInputIdsInNearby = bean .includeInputIdsInNearby;
   }
 
   public long getTime() {
@@ -84,6 +88,21 @@ public final class ArrivalsAndDeparturesQueryBean implements Serializable {
 
   public void setFrequencyMinutesAfter(int frequencyMinutesAfter) {
     this.frequencyMinutesAfter = frequencyMinutesAfter;
+  }
+
+  /**
+   * if the queried for stopIds are included in the nearby results
+   */
+  public boolean getIncludeInputIdsInNearby() {
+    return includeInputIdsInNearby;
+  }
+
+  /**
+   * include the queried for stopIds in the nearby results
+   * @param flag
+   */
+  public void setIncludeInputIdsInNearby(boolean flag) {
+    this.includeInputIdsInNearby = flag;
   }
 
   @Override

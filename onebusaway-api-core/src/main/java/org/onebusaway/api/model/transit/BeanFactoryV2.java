@@ -993,11 +993,16 @@ public class BeanFactoryV2 {
       ads.add(getArrivalAndDeparture(ad));
     bean.setArrivalsAndDepartures(ads);
 
-    List<String> nearbyStopIds = new ArrayList<String>();
+    List<StopsWithArrivalsAndDeparturesV2Bean.StopWithDistance> nearbyStopIds = new ArrayList<>();
     for (StopBean nearbyStop : sad.getNearbyStops()) {
-      nearbyStopIds.add(nearbyStop.getId());
-      addToReferences(nearbyStop);
+      if (nearbyStop.getDistanceAwayFromQuery() != null) {
+        nearbyStopIds.add(new StopsWithArrivalsAndDeparturesV2Bean.StopWithDistance(nearbyStop.getId(), nearbyStop.getDistanceAwayFromQuery()));
+        addToReferences(nearbyStop);
+      }
     }
+    // order by distance of stop away from center of query
+    // this keeps stops consistent across limitExceeded
+    Collections.sort(nearbyStopIds, new StopDistanceComparator());
     bean.setNearbyStopIds(nearbyStopIds);
 
     List<ServiceAlertBean> situations = sad.getSituations();
@@ -1392,4 +1397,18 @@ public class BeanFactoryV2 {
                   return null;
           }
   }
+
+  /**
+   * Sort StopWithDistance by ascending distanceFromQuery.
+   */
+  private static class StopDistanceComparator implements Comparator {
+
+    @Override
+    public int compare(Object o1, Object o2) {
+      StopsWithArrivalsAndDeparturesV2Bean.StopWithDistance t1 = (StopsWithArrivalsAndDeparturesV2Bean.StopWithDistance)o1;
+      StopsWithArrivalsAndDeparturesV2Bean.StopWithDistance t2 = (StopsWithArrivalsAndDeparturesV2Bean.StopWithDistance)o2;
+      return Double.compare(t1.getDistanceFromQuery(), t2.getDistanceFromQuery());
+    }
+  }
+
 }

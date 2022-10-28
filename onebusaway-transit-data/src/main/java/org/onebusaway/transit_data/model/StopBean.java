@@ -40,6 +40,9 @@ public class StopBean implements Serializable {
   
   private EAccessibility wheelchairBoarding;
 
+  // if this bean resulted from a bounds query, how close it was to center of bounds
+  private Double distanceAwayFromQuery;
+
   public String getId() {
     return id;
   }
@@ -114,6 +117,18 @@ public class StopBean implements Serializable {
 
   public void setWheelchairBoarding(EAccessibility wheelchairBoarding) {
     this.wheelchairBoarding = wheelchairBoarding;
+  }
+
+  /**
+   * if this bean resulted from a bounds query, how close it was to center of bounds
+   * @return
+   */
+  public Double getDistanceAwayFromQuery() {
+    return distanceAwayFromQuery;
+  }
+
+  public void setDistanceAwayFromQuery(Double distanceAwayFromQuery) {
+    this.distanceAwayFromQuery = distanceAwayFromQuery;
   }
 
   /***************************************************************************

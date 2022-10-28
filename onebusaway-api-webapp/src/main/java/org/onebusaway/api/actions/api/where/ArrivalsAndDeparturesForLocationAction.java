@@ -121,9 +121,12 @@ public class ArrivalsAndDeparturesForLocationAction extends ApiActionSupport {
         SearchQueryBean searchQuery = new SearchQueryBean();
         searchQuery.setBounds(bounds);
         searchQuery.setMaxCount(maxCount);
-        searchQuery.setType(SearchQueryBean.EQueryType.BOUNDS);
+        // new EQueryType that keeps results consistent if limitExceed is true
+        // previous searches deliberately shuffled results
+        searchQuery.setType(SearchQueryBean.EQueryType.ORDERED_BY_CLOSEST);
 
         ArrivalsAndDeparturesQueryBean adQuery = _query;
+        adQuery.setIncludeInputIdsInNearby(true); // include the queried ids in nearby
         StopsWithArrivalsAndDeparturesBean adResult = null;
         try {
             StopsBean stopResult = _service.getStops(searchQuery);

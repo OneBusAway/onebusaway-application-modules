@@ -19,7 +19,10 @@ package org.onebusaway.transit_data_federation.impl.beans;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.onebusaway.collections.Min;
@@ -109,11 +112,18 @@ class StopsBeanServiceImpl implements StopsBeanService {
       throws ServiceException {
 
     CoordinateBounds bounds = queryBean.getBounds();
+    // center of these bounds
+    CoordinatePoint center = SphericalGeometryLibrary.getCenterOfBounds(bounds);
 
     List<AgencyAndId> stopIds = _geospatialBeanService.getStopsByBounds(bounds);
 
-    boolean limitExceeded = BeanServiceSupport.checkLimitExceeded(stopIds,
-        queryBean.getMaxCount());
+    boolean limitExceeded = false;
+    if (!queryBean.getType().equals(SearchQueryBean.EQueryType.ORDERED_BY_CLOSEST)) {
+      // traditionally limitExceed imposes a side-effect of shuffling the
+      // results and truncating them. This makes the result set non-deterministic.
+      limitExceeded = BeanServiceSupport.checkLimitExceeded(stopIds,
+              queryBean.getMaxCount());
+    }
     List<StopBean> stopBeans = new ArrayList<StopBean>();
 
     for (AgencyAndId stopId : stopIds) {
@@ -121,16 +131,27 @@ class StopsBeanServiceImpl implements StopsBeanService {
       if (stopBean == null)
         throw new ServiceException();
 
-      /**
-       * If the stop doesn't have any routes actively serving it, don't include
-       * it in the results
-       */
+      // if we are ordered add distance
+      if (queryBean.getType().equals(SearchQueryBean.EQueryType.ORDERED_BY_CLOSEST)) {
+        double distance = SphericalGeometryLibrary.distance(center.getLat(),
+                center.getLon(), stopBean.getLat(), stopBean.getLon());
+        stopBean.setDistanceAwayFromQuery(distance);
+      }
+
+        /**
+         * If the stop doesn't have any routes actively serving it, don't include
+         * it in the results
+         */
       if (stopBean.getRoutes().isEmpty())
         continue;
 
       stopBeans.add(stopBean);
     }
-
+    if (queryBean.getType().equals(SearchQueryBean.EQueryType.ORDERED_BY_CLOSEST)) {
+      // this EQueryType specifies we don't shuffle results so they can remain deterministic
+      limitExceeded = stopBeans.size() > queryBean.getMaxCount();
+      // constructResults will perform the truncation if necessary
+    }
     return constructResult(stopBeans, limitExceeded);
   }
 
@@ -156,24 +177,45 @@ class StopsBeanServiceImpl implements StopsBeanService {
 
     Min<StopBean> closest = new Min<StopBean>();
     List<StopBean> stopBeans = new ArrayList<StopBean>();
-
+    Map<String, Double> stopIdToDistanceMap = new HashMap<>();
     for (AgencyAndId aid : stops.getResults()) {
       StopBean stopBean = _stopBeanService.getStopForId(aid, null);
       if (bounds.contains(stopBean.getLat(), stopBean.getLon()))
         stopBeans.add(stopBean);
       double distance = SphericalGeometryLibrary.distance(center.getLat(),
           center.getLon(), stopBean.getLat(), stopBean.getLon());
+      stopIdToDistanceMap.put(aid.toString(), distance);
       closest.add(distance, stopBean);
     }
 
-    boolean limitExceeded = BeanServiceSupport.checkLimitExceeded(stopBeans,
-        maxCount);
+    boolean limitExceeded = false;
+    if (queryBean.getType().equals(SearchQueryBean.EQueryType.ORDERED_BY_CLOSEST)) {
+      // here we sort by distance for possible truncation, but later it will be re-sorted by stopId
+      sortByDistance(stopBeans, stopIdToDistanceMap);
+      limitExceeded = stopBeans.size() > maxCount;
+      // truncate if we exceeded specified limits
+      while (stopBeans.size() > maxCount)
+        stopBeans.remove(stopBeans.size() - 1);
+    } else {
+      limitExceeded = BeanServiceSupport.checkLimitExceeded(stopBeans,
+              maxCount);
+    }
 
     // If nothing was found in range, add the closest result
     if (stopBeans.isEmpty() && !closest.isEmpty())
       stopBeans.add(closest.getMinElement());
 
     return constructResult(stopBeans, limitExceeded);
+  }
+
+  private void sortByDistance(List<StopBean> stopBeans, Map<String, Double> distanceMap) {
+    for (StopBean bean : stopBeans) {
+      Double distance = distanceMap.get(bean.getId());
+      if (distance != null) {
+        bean.setDistanceAwayFromQuery(distance);
+      }
+    }
+    Collections.sort(stopBeans, new DistanceAwayComparator());
   }
 
   @Override
@@ -200,4 +242,19 @@ class StopsBeanServiceImpl implements StopsBeanService {
     return result;
   }
 
+
+  private static class DistanceAwayComparator implements Comparator {
+
+    @Override
+    public int compare(Object o1, Object o2) {
+      StopBean sb1 = (StopBean) o1;
+      StopBean sb2 = (StopBean) o2;
+      try {
+        return Double.compare(sb1.getDistanceAwayFromQuery(), sb2.getDistanceAwayFromQuery());
+      } catch (NullPointerException npe) {
+        _log.error("missing distance in compare for {} vs {}", sb1, sb2);
+        return 0;
+      }
+    }
+  }
 }

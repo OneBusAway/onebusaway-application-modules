@@ -25,7 +25,7 @@ public class SearchQueryBean implements Serializable {
   private static final long serialVersionUID = 1L;
 
   public enum EQueryType implements Serializable {
-    BOUNDS, CLOSEST, BOUNDS_OR_CLOSEST
+    BOUNDS, CLOSEST, BOUNDS_OR_CLOSEST, ORDERED_BY_CLOSEST
   }
 
   private EQueryType type;

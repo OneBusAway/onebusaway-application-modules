@@ -25,7 +25,7 @@ public class StopsWithArrivalsAndDeparturesV2Bean implements Serializable {
 
     private List<ArrivalAndDepartureV2Bean> arrivalsAndDepartures;
 
-    private List<String> nearbyStopIds;
+    private List<StopWithDistance> nearbyStopIds;
 
     private List<String> situationIds;
 
@@ -45,11 +45,11 @@ public class StopsWithArrivalsAndDeparturesV2Bean implements Serializable {
         this.arrivalsAndDepartures = arrivalsAndDepartures;
     }
 
-    public List<String> getNearbyStopIds() {
+    public List<StopWithDistance> getNearbyStopIds() {
         return nearbyStopIds;
     }
 
-    public void setNearbyStopIds(List<String> nearbyStopIds) {
+    public void setNearbyStopIds(List<StopWithDistance> nearbyStopIds) {
         this.nearbyStopIds = nearbyStopIds;
     }
 
@@ -59,6 +59,37 @@ public class StopsWithArrivalsAndDeparturesV2Bean implements Serializable {
 
     public void setSituationIds(List<String> situationIds) {
         this.situationIds = situationIds;
+    }
+
+    /**
+     * inner class to add a distanceFromQuery to a stop.  DistanceFromwQuery
+     * is defined as the distance between center of the bounds specified in the query
+     * and the lat/lon of the specified stopId.
+     */
+    public static class StopWithDistance {
+        private String stopId;
+        private Double distanceFromQuery;
+
+        public StopWithDistance(String stopId, Double distanceFromQuery) {
+            this.stopId = stopId;
+            this.distanceFromQuery = distanceFromQuery;
+        }
+
+        public String getStopId() {
+            return stopId;
+        }
+
+        public void setStopId(String stopId) {
+            this.stopId = stopId;
+        }
+
+        public Double getDistanceFromQuery() {
+            return distanceFromQuery;
+        }
+
+        public void setDistanceFromQuery(Double distanceFromQuery) {
+            this.distanceFromQuery = distanceFromQuery;
+        }
     }
 
 }
