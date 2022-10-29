@@ -19,6 +19,9 @@ import java.util.*;
 
 import org.onebusaway.collections.Counter;
 import org.onebusaway.exceptions.NoSuchStopServiceException;
+import org.onebusaway.geospatial.model.CoordinateBounds;
+import org.onebusaway.geospatial.model.CoordinatePoint;
+import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
@@ -99,6 +102,7 @@ class StopWithArrivalsAndDeparturesBeanServiceImpl implements
 
       List<AgencyAndId> nearbyStopIds = _nearbyStopsBeanService.getNearbyStops(
           stopBean, 100);
+      // these stops need a distanceFromQuery as well -- its added below
       allNearbyStopIds.addAll(nearbyStopIds);
 
       TimeZone timeZone = _agencyService.getTimeZoneForAgencyId(id.getAgencyId());
@@ -114,23 +118,62 @@ class StopWithArrivalsAndDeparturesBeanServiceImpl implements
       allNearbyStopIds.removeAll(ids);
     }
     List<StopBean> nearbyStops = new ArrayList<StopBean>();
-
+    CoordinateBounds bounds = query.getBounds();
+    CoordinatePoint center = null;
+    if (bounds != null) {
+      center = SphericalGeometryLibrary.getCenterOfBounds(bounds);
+    }
     for (AgencyAndId id : allNearbyStopIds) {
       StopBean stop = _stopBeanService.getStopForId(id, null);
+      if (center != null) {
+        // if bounds are present calculate distance of this stop from center
+        double distance = SphericalGeometryLibrary.distance(center.getLat(),
+                center.getLon(), stop.getLat(), stop.getLon());
+        stop.setDistanceAwayFromQuery(distance);
+      }
       nearbyStops.add(stop);
     }
+    // sort the collection so we can trim the furthest
+    Collections.sort(nearbyStops, new StopDistanceComparator());
+    while (nearbyStops.size() > query.getMaxCount())
+      nearbyStops.remove(nearbyStops.size() - 1);
 
     TimeZone timeZone = timeZones.getMax();
     if (timeZone == null)
       timeZone = TimeZone.getDefault();
 
     StopsWithArrivalsAndDeparturesBean result = new StopsWithArrivalsAndDeparturesBean();
+    // trim stops
+    while (stops.size() > query.getMaxCount())
+      stops.remove(stops.size() - 1);
+    // trim arrivals as well
+    while (allArrivalsAndDepartures.size() > query.getMaxCount())
+      allArrivalsAndDepartures.remove(allArrivalsAndDepartures.size() -1);
     result.setStops(stops);
     result.setArrivalsAndDepartures(allArrivalsAndDepartures);
     result.setNearbyStops(nearbyStops);
     result.setSituations(new ArrayList<ServiceAlertBean>(situationsById.values()));
     result.setTimeZone(timeZone.getID());
     return result;
+  }
+
+  private static class StopDistanceComparator implements Comparator {
+    @Override
+    public int compare(Object o1, Object o2) {
+      StopBean s1 = (StopBean)o1;
+      StopBean s2 = (StopBean)o2;
+      if (s1.getDistanceAwayFromQuery() == s2.getDistanceAwayFromQuery())
+        return 0;
+      if (s1.getDistanceAwayFromQuery() == null)
+        return -1;
+      if (s2.getDistanceAwayFromQuery() == null)
+        return 1;
+      try {
+        return Double.compare(s1.getDistanceAwayFromQuery(), s2.getDistanceAwayFromQuery());
+      } catch (NullPointerException npe) {
+        return 0;
+      }
+    }
   }
 
 }

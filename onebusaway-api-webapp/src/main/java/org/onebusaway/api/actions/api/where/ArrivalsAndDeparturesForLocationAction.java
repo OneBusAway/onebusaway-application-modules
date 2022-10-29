@@ -53,7 +53,7 @@ public class ArrivalsAndDeparturesForLocationAction extends ApiActionSupport {
     @Autowired
     private ConfigurationService _configService;
     private SearchBoundsFactory _searchBoundsFactory = new SearchBoundsFactory(MAX_BOUNDS_RADIUS);
-    private MaxCountSupport _maxCount = new MaxCountSupport();
+    private MaxCountSupport _maxCount = new MaxCountSupport(250, 1000);
 
     private ArrivalsAndDeparturesQueryBean _query = new ArrivalsAndDeparturesQueryBean();
     private long _time = 0;
@@ -127,6 +127,8 @@ public class ArrivalsAndDeparturesForLocationAction extends ApiActionSupport {
 
         ArrivalsAndDeparturesQueryBean adQuery = _query;
         adQuery.setIncludeInputIdsInNearby(true); // include the queried ids in nearby
+        adQuery.setMaxCount(maxCount); // limit nearby results appropriately
+        adQuery.setBounds(searchQuery.getBounds());
         StopsWithArrivalsAndDeparturesBean adResult = null;
         try {
             StopsBean stopResult = _service.getStops(searchQuery);

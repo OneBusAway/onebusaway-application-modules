@@ -17,6 +17,7 @@ package org.onebusaway.transit_data.model;
 
 import java.io.Serializable;
 
+import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.util.SystemTime;
 
 @QueryBean
@@ -37,6 +38,10 @@ public final class ArrivalsAndDeparturesQueryBean implements Serializable {
   // should the queried for stopIds be included in nearby results
   private boolean includeInputIdsInNearby = false;
 
+  private int maxCount = Integer.MAX_VALUE;
+
+  private CoordinateBounds bounds;
+
   public ArrivalsAndDeparturesQueryBean() {
 
   }
@@ -48,6 +53,7 @@ public final class ArrivalsAndDeparturesQueryBean implements Serializable {
     this.frequencyMinutesBefore = bean.frequencyMinutesBefore;
     this.frequencyMinutesAfter = bean.frequencyMinutesAfter;
     this.includeInputIdsInNearby = bean .includeInputIdsInNearby;
+    this.bounds = bean.bounds;
   }
 
   public long getTime() {
@@ -103,6 +109,22 @@ public final class ArrivalsAndDeparturesQueryBean implements Serializable {
    */
   public void setIncludeInputIdsInNearby(boolean flag) {
     this.includeInputIdsInNearby = flag;
+  }
+
+  public int getMaxCount() {
+    return maxCount;
+  }
+
+  public void setMaxCount(int maxCount) {
+    this.maxCount = maxCount;
+  }
+
+  public CoordinateBounds getBounds() {
+    return bounds;
+  }
+
+  public void setBounds(CoordinateBounds bounds) {
+    this.bounds = bounds;
   }
 
   @Override
