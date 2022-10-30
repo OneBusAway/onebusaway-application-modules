@@ -108,6 +108,10 @@ public class ArrivalsAndDeparturesForLocationAction extends ApiActionSupport {
         emptyReturnsNotFound = flag;
     }
 
+    public void setMaxCount(int maxCount) {
+        _maxCount.setMaxCount(maxCount);
+    }
+
     public DefaultHttpHeaders index() throws IOException, ServiceException {
         if (hasErrors())
             return setValidationErrorsResponse();

@@ -90,6 +90,7 @@ class StopWithArrivalsAndDeparturesBeanServiceImpl implements
     Set<AgencyAndId> allNearbyStopIds = new HashSet<AgencyAndId>();
     Map<String, ServiceAlertBean> situationsById = new HashMap<String, ServiceAlertBean>();
     Counter<TimeZone> timeZones = new Counter<TimeZone>();
+    boolean limitExceeded = false;
 
     for (AgencyAndId id : ids) {
 
@@ -135,8 +136,10 @@ class StopWithArrivalsAndDeparturesBeanServiceImpl implements
     }
     // sort the collection so we can trim the furthest
     Collections.sort(nearbyStops, new StopDistanceComparator());
-    while (nearbyStops.size() > query.getMaxCount())
+    while (nearbyStops.size() > query.getMaxCount()) {
       nearbyStops.remove(nearbyStops.size() - 1);
+      limitExceeded = true;
+    }
 
     TimeZone timeZone = timeZones.getMax();
     if (timeZone == null)
@@ -144,16 +147,21 @@ class StopWithArrivalsAndDeparturesBeanServiceImpl implements
 
     StopsWithArrivalsAndDeparturesBean result = new StopsWithArrivalsAndDeparturesBean();
     // trim stops
-    while (stops.size() > query.getMaxCount())
+    while (stops.size() > query.getMaxCount()) {
       stops.remove(stops.size() - 1);
+      limitExceeded = true;
+    }
     // trim arrivals as well
-    while (allArrivalsAndDepartures.size() > query.getMaxCount())
-      allArrivalsAndDepartures.remove(allArrivalsAndDepartures.size() -1);
+    while (allArrivalsAndDepartures.size() > query.getMaxCount()) {
+      allArrivalsAndDepartures.remove(allArrivalsAndDepartures.size() - 1);
+      limitExceeded = true;
+    }
     result.setStops(stops);
     result.setArrivalsAndDepartures(allArrivalsAndDepartures);
     result.setNearbyStops(nearbyStops);
     result.setSituations(new ArrayList<ServiceAlertBean>(situationsById.values()));
     result.setTimeZone(timeZone.getID());
+    result.setLimitExceeded(limitExceeded);
     return result;
   }
 

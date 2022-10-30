@@ -993,11 +993,11 @@ public class BeanFactoryV2 {
       ads.add(getArrivalAndDeparture(ad));
     bean.setArrivalsAndDepartures(ads);
 
-    List<StopsWithArrivalsAndDeparturesV2Bean.StopWithDistance> nearbyStopIds = new ArrayList<>();
+    List<StopWithDistance> nearbyStopIds = new ArrayList<>();
     // these stops are already sorted by proximity
     for (StopBean nearbyStop : sad.getNearbyStops()) {
       if (nearbyStop.getDistanceAwayFromQuery() != null) {
-        nearbyStopIds.add(new StopsWithArrivalsAndDeparturesV2Bean.StopWithDistance(nearbyStop.getId(), nearbyStop.getDistanceAwayFromQuery()));
+        nearbyStopIds.add(new StopWithDistance(nearbyStop.getId(), nearbyStop.getDistanceAwayFromQuery()));
         addToReferences(nearbyStop);
       }
     }
@@ -1012,6 +1012,8 @@ public class BeanFactoryV2 {
       }
       bean.setSituationIds(situationIds);
     }
+
+    bean.setLimitExceeded(sad.isLimitExceeded());
 
     return bean;
 

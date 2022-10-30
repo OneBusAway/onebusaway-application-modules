@@ -29,6 +29,8 @@ public class StopsWithArrivalsAndDeparturesV2Bean implements Serializable {
 
     private List<String> situationIds;
 
+    private boolean limitExceeded = false;
+
     public List<String> getStopIds() {
         return stopIds;
     }
@@ -61,35 +63,12 @@ public class StopsWithArrivalsAndDeparturesV2Bean implements Serializable {
         this.situationIds = situationIds;
     }
 
-    /**
-     * inner class to add a distanceFromQuery to a stop.  DistanceFromwQuery
-     * is defined as the distance between center of the bounds specified in the query
-     * and the lat/lon of the specified stopId.
-     */
-    public static class StopWithDistance {
-        private String stopId;
-        private Double distanceFromQuery;
+    public boolean isLimitExceeded() {
+        return limitExceeded;
+    }
 
-        public StopWithDistance(String stopId, Double distanceFromQuery) {
-            this.stopId = stopId;
-            this.distanceFromQuery = distanceFromQuery;
-        }
-
-        public String getStopId() {
-            return stopId;
-        }
-
-        public void setStopId(String stopId) {
-            this.stopId = stopId;
-        }
-
-        public Double getDistanceFromQuery() {
-            return distanceFromQuery;
-        }
-
-        public void setDistanceFromQuery(Double distanceFromQuery) {
-            this.distanceFromQuery = distanceFromQuery;
-        }
+    public void setLimitExceeded(boolean limitExceeded) {
+        this.limitExceeded = limitExceeded;
     }
 
 }

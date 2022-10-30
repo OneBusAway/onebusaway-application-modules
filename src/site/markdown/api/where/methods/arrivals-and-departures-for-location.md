@@ -2,7 +2,7 @@
 
 # Method: arrivals-and-departures-for-location
 
-Get current arrivals and departures for a stops identified by location
+Get current arrivals and departures for stops identified by location
 
 ## Sample Request
 
@@ -19,7 +19,7 @@ http://api.pugetsound.onebusaway.org/api/where/arrivals-and-departures-for-locat
         <references>...</references>
         <entry class="stopsWithArrivalsAndDepartures">
           <stopIds>
-            <stopId>1_75403</stopId>
+            <string>1_75403</string>
           </stopIds>
           <arrivalsAndDepartures>
             <arrivalAndDeparture>...</arrivalAndDeparture>
@@ -27,9 +27,12 @@ http://api.pugetsound.onebusaway.org/api/where/arrivals-and-departures-for-locat
             <arrivalAndDeparture>...</arrivalAndDeparture>
           </arrivalsAndDepartures>
           <nearbyStopIds>
-            <string>1_75414</string>
-            <string>...</string>
+            <stopWithDistance>
+              <stopId>1_75414</stopId>
+              <distanceFromQuery>63.30975615515593</distanceFromQuery>
+            </stopWithDistance>
           </nearbyStopIds>
+          <limitExceeded>false</limitExceeded>
         </entry>
       </data>
     </response>
@@ -44,12 +47,13 @@ http://api.pugetsound.onebusaway.org/api/where/arrivals-and-departures-for-locat
 * time - by default, the method returns the status of the system right now.  However, the system
   can also be queried at a specific time.  This can be useful for testing.  See [timestamps](../index.html#Timestamps)
   for details on the format of the `time` parameter.
+* maxCount - The size of the list of nearbyStopIds, arrivalsAndDepartures, and stops to return.  Defaults to 250, can be up to 1000.
 
 
 ## Response
 
 The response is primarily composed of [`<arrivalAndDeparture/>` elements](../elements/arrival-and-departure.html),  so see the element documentation for specific details.
 
-The nearby stop list is designed to capture stops that are very close by (like across the street) for quick navigation.
+The nearby stop list is designed to capture stops that are very close by (like across the street) for quick navigation.  This is sorted by distance and truncated to maxCount.
 
 Trips will not show up in the results if the schedule_relationship is SKIPPED.

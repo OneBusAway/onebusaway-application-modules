@@ -33,6 +33,8 @@ public class StopsWithArrivalsAndDeparturesBean extends ApplicationBean {
 
   private String timeZone;
 
+  private boolean limitExceeded;
+
   public StopsWithArrivalsAndDeparturesBean() {
 
   }
@@ -85,5 +87,13 @@ public class StopsWithArrivalsAndDeparturesBean extends ApplicationBean {
 
   public void setTimeZone(String timeZone) {
     this.timeZone = timeZone;
+  }
+
+  public boolean isLimitExceeded() {
+    return limitExceeded;
+  }
+
+  public void setLimitExceeded(boolean limitExceeded) {
+    this.limitExceeded = limitExceeded;
   }
 }
