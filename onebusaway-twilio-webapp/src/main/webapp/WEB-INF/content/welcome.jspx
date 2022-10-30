@@ -16,13 +16,13 @@
 
 -->
 <Response xmlns:jsp="http://java.sun.com/JSP/Page"
-      xmlns:c="http://java.sun.com/jsp/jstl/core"
-     xmlns:s="/struts-tags"
-     xmlns:wiki="/oba-wiki-tags">
-  <jsp:directive.page contentType="application/xml" />
-  <Gather numDigits="1">
-    <Say>
-    	Where is your bus... let's find out.  If you are a first time user, or need help, please press zero.
-    </Say>
-  </Gather>
+          xmlns:c="http://java.sun.com/jsp/jstl/core"
+          xmlns:s="/struts-tags"
+          xmlns:wiki="/oba-wiki-tags">
+    <jsp:directive.page contentType="application/xml"/>
+    <Gather numDigits="1">
+        <Play>
+            <s:property value="getLocalisedMessage('WELCOME_ACTION')"/>
+        </Play>
+    </Gather>
 </Response>

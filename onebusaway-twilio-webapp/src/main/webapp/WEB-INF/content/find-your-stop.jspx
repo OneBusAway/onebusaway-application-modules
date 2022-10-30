@@ -16,15 +16,19 @@
 
 -->
 <Response xmlns:jsp="http://java.sun.com/JSP/Page"
-      xmlns:c="http://java.sun.com/jsp/jstl/core"
-     xmlns:s="/struts-tags"
-     xmlns:wiki="/oba-wiki-tags">
-  <jsp:directive.page contentType="application/xml" />
-  <Gather numDigits="1">
-    <Say>
-	    Your stop number is typically located on the stop post or on the posted schedule.  To enter the stop number, please press one.
-	    If your stop is missing its posted schedule, or if you are not at the stop. you can search for stops by bus route.  To search for a stop by route number, please press two.
-	    If you wish to return to the previous menu, please press star.
-    </Say>
-  </Gather>
+          xmlns:c="http://java.sun.com/jsp/jstl/core"
+          xmlns:s="/struts-tags"
+          xmlns:wiki="/oba-wiki-tags">
+    <jsp:directive.page contentType="application/xml"/>
+    <Gather numDigits="1">
+        <Play>
+            <s:property value="getLocalisedMessage('FIND_YOUR_STOP_BY_STOP_NUMBER')"/>
+        </Play>
+        <Play>
+            <s:property value="getLocalisedMessage('FIND_YOUR_STOP_BY_ROUTE_NUMBER')"/>
+        </Play>
+        <Play>
+            <s:property value="getLocalisedMessage('HOW_TO_GO_BACK')"/>
+        </Play>
+    </Gather>
 </Response>

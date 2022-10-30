@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2014 HART (Hillsborough Area Regional Transit) 
+ * Copyright (C) 2014 HART (Hillsborough Area Regional Transit)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 package org.onebusaway.twilio.actions;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -30,6 +32,7 @@ import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.twilio.actions.stops.StopForCodeAction;
 import org.onebusaway.users.client.model.UserBean;
 import org.onebusaway.users.services.CurrentUserService;
+import org.onebusaway.util.services.configuration.ConfigurationServiceClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,9 +50,9 @@ public class TwilioSupport extends ActionSupport implements ParameterAware, Curr
   public static final String NEEDS_DEFAULT_SEARCH_LOCATION = "needsDefaultSearchLocation";
   protected static final int DISPLAY_DATA = 0;
   protected static final int DO_ROUTING = 1;
-  
+
   private static Logger _log = LoggerFactory.getLogger(StopForCodeAction.class);
-  
+
   protected TransitDataService _transitDataService;
   protected CurrentUserService _currentUserService;
   private ServiceAreaService _serviceAreaService;
@@ -57,36 +60,60 @@ public class TwilioSupport extends ActionSupport implements ParameterAware, Curr
   private StringBuffer _message = new StringBuffer();
   protected UserBean _currentUser;
   protected Map sessionMap;
-  
+  protected String _azureCognitiveServiceUrl = System.getProperty("AZURE_COGNITIVE_SERVICE_URL");
+
+  @Autowired
+  private ConfigurationServiceClient _configurationServiceClient;
+
   protected void addText(String txt) {
     _log.debug(txt);
     _message.append(txt);
   }
-  
+
   protected void addMessage(String msg) {
     _log.debug(msg);
     _message.append(" " + getText(msg) + " ");
   }
-  
-  protected void addMessage(String msg, Object... args) {
+
+  protected void clearMessage() {
+    _message.delete(0, _message.length());
+  }
+
+  protected String getLocalisedText(String msg, Object... args) {
     ActionContext context = ActionContext.getContext();
     Locale locale = context.getLocale();
     ValueStack valueStack = context.getValueStack();
-    String text = new StrutsLocalizedTextProvider().findText(TwilioSupport.this.getClass(), msg, locale, msg, args, valueStack);
+    return new StrutsLocalizedTextProvider().findText(TwilioSupport.this.getClass(), msg, locale, msg, args, valueStack);
+  }
+
+  protected void addMessage(String msg, Object... args) {
+    String text = getLocalisedText(msg, args);
     _log.debug("message: " + text);
     _message.append(" " + text + " ");
     _log.debug(getText(msg));
   }
-  
-  public String getMessage() {
-    return _message.toString();
+
+  public String stringToSpeechUrl(String message) throws Exception {
+    if (_azureCognitiveServiceUrl == null || _azureCognitiveServiceUrl.isEmpty()) {
+      _azureCognitiveServiceUrl = _configurationServiceClient.getItem(null, "textToSpeechServiceUrl");
+    }
+    String messageUrl = URLEncoder.encode(message, StandardCharsets.UTF_8);
+    return String.format("%s?text=%s", _azureCognitiveServiceUrl, messageUrl);
   }
-  
+
+  public String getMessage() throws Exception {
+    return stringToSpeechUrl(_message.toString());
+  }
+
+  public String getLocalisedMessage(String messageKey) throws Exception {
+    return stringToSpeechUrl(getLocalisedText(messageKey));
+  }
+
   @Autowired
   public void setTransitDataService(TransitDataService transitDataService) {
     _transitDataService = transitDataService;
   }
-  
+
   @Autowired
   public void setServiceAreaService(ServiceAreaService serviceAreaService) {
     _serviceAreaService = serviceAreaService;
@@ -95,12 +122,12 @@ public class TwilioSupport extends ActionSupport implements ParameterAware, Curr
   public void setParameters(Map<String, String[]> arg0) {
     _parameters = arg0;
   }
-  
+
   @Override
   public void setSession(Map map) {
     this.sessionMap = map;
   }
-  
+
   public String getInput() {
     if (_parameters != null && _parameters.containsKey(INPUT_KEY)) {
       Object val = _parameters.get(INPUT_KEY);
@@ -111,7 +138,7 @@ public class TwilioSupport extends ActionSupport implements ParameterAware, Curr
     }
     return null;
   }
-  
+
   public String clearInput() {
     if (_parameters != null && _parameters.containsKey(INPUT_KEY)) {
       _parameters.remove(INPUT_KEY);
@@ -123,7 +150,7 @@ public class TwilioSupport extends ActionSupport implements ParameterAware, Curr
     }
     return null;
   }
-  
+
   public String getPhoneNumber() {
     if (_parameters != null && _parameters.containsKey(PHONE_NUMBER_KEY)) {
     	Object val = _parameters.get(PHONE_NUMBER_KEY);
@@ -139,16 +166,16 @@ public class TwilioSupport extends ActionSupport implements ParameterAware, Curr
     _log.debug("next action now " + actionName);
     ActionContext.getContext().getSession().put("twilio.nextAction", actionName);
   }
-  
+
   protected void clearNextAction() {
     _log.debug("next action cleared");
     ActionContext.getContext().getSession().remove("twilio.nextAction");
   }
-  
+
   protected CoordinateBounds getDefaultSearchArea() {
     return _serviceAreaService.getServiceArea();
   }
-  
+
   protected void logUserInteraction(Object... objects) {
 	  String text = "logUserInteraction(";
 	  for (int i=0; i<objects.length; ++i) {
@@ -160,7 +187,7 @@ public class TwilioSupport extends ActionSupport implements ParameterAware, Curr
 	  text += ")";
 	  _log.info(text);
   }
-  
+
   @Autowired
   public void setCurrentUserService(CurrentUserService userDataService) {
     _currentUserService = userDataService;
@@ -178,5 +205,4 @@ public class TwilioSupport extends ActionSupport implements ParameterAware, Curr
   protected void clearNavState() {
     sessionMap.remove("navState");
   }
-
 }

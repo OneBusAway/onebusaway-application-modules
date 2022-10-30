@@ -20,12 +20,12 @@
           xmlns:c="http://java.sun.com/jsp/jstl/core"
           xmlns:s="/struts-tags"
           xmlns:wiki="/oba-wiki-tags">
-  <jsp:directive.page contentType="application/xml" />
-  <Gather numDigits="1">
-    <Say>
-      ${message}
-    </Say>
-    <Pause length="1">
-    </Pause>
-  </Gather>
+    <jsp:directive.page contentType="application/xml"/>
+    <Gather numDigits="1">
+        <Play>
+            ${message}
+        </Play>
+        <Pause length="1">
+        </Pause>
+    </Gather>
 </Response>

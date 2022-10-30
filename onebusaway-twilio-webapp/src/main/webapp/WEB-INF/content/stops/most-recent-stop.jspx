@@ -16,14 +16,16 @@
 
 -->
 <Response xmlns:jsp="http://java.sun.com/JSP/Page"
-      xmlns:c="http://java.sun.com/jsp/jstl/core"
-     xmlns:s="/struts-tags"
-     xmlns:wiki="/oba-wiki-tags">
-  <jsp:directive.page contentType="application/xml" />
-  <Gather numDigits="1">
-    <Say>
-        You have no previous stop to check.
-        Please press any key to continue.
-    </Say>
-  </Gather>
+          xmlns:c="http://java.sun.com/jsp/jstl/core"
+          xmlns:s="/struts-tags"
+          xmlns:wiki="/oba-wiki-tags">
+    <jsp:directive.page contentType="application/xml"/>
+    <Gather numDigits="1">
+        <Play>
+            <s:property value="getLocalisedMessage('NO_MOST_RECENT')"/>
+        </Play>
+        <Play>
+            <s:property value="stringToSpeechUrl('Please press any key to continue.')"/>
+        </Play>
+    </Gather>
 </Response>

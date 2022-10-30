@@ -17,19 +17,21 @@
 -->
 
 <Response xmlns:jsp="http://java.sun.com/JSP/Page"
-      xmlns:c="http://java.sun.com/jsp/jstl/core"
-     xmlns:s="/struts-tags"
-     xmlns:wiki="/oba-wiki-tags">
-<jsp:directive.page contentType="application/xml" />
-  <Gather numDigits="1">
-    <Say>
-      ${message}
-    </Say>
-    <Say>
-    	To repeat this message, please press  8.
-    	If you wish to return to the previous menu, please press star.
-    </Say>
-    <Pause length="1">
-    </Pause>
-  </Gather>
+          xmlns:c="http://java.sun.com/jsp/jstl/core"
+          xmlns:s="/struts-tags"
+          xmlns:wiki="/oba-wiki-tags">
+    <jsp:directive.page contentType="application/xml"/>
+    <Gather numDigits="1">
+        <Play>
+            ${message}
+        </Play>
+        <Play>
+            <s:property value="stringToSpeechUrl('To repeat this message, please press  8.')"/>
+        </Play>
+        <Play>
+            <s:property value="getLocalisedMessage('HOW_TO_GO_BACK')"/>
+        </Play>
+        <Pause length="1">
+        </Pause>
+    </Gather>
 </Response>

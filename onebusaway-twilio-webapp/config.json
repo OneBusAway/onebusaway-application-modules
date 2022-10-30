@@ -1,0 +1,9 @@
+{
+  "oba": {
+    "env": "local",
+    "config": "local"
+  },
+  "config": [
+    {"component": "phone", "key": "textToSpeechServiceUrl", "value": "http://onebusaway-cognitive-service.australiaeast.azurecontainer.io:8080/v1/text-to-speech"}
+  ]
+}

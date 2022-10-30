@@ -625,6 +625,13 @@
           </excludes>
         </configuration>
       </plugin>
+      <plugin>
+        <artifactId>maven-release-plugin</artifactId>
+        <version>3.0.0-M6</version>
+        <configuration>
+          <scmCommentPrefix>[ci skip]</scmCommentPrefix>
+        </configuration>
+      </plugin>
     </plugins>
     <!-- force a newer version of ssh for site:deploy -->
     <extensions>

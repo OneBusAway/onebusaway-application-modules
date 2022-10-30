@@ -17,18 +17,20 @@
 -->
 
 <Response xmlns:jsp="http://java.sun.com/JSP/Page"
-      xmlns:c="http://java.sun.com/jsp/jstl/core"
-     xmlns:s="/struts-tags"
-     xmlns:wiki="/oba-wiki-tags">
-  <jsp:directive.page contentType="application/xml" />
-  <Gather>
-    <Say>
-      Listen further for more instructions or skip ahead by entering the number of a route servicing your stop, followed by the pound sign.  When navigating the set of stops for a route, you can move back and forward with the 4 and 6 keys, or skip back and forward even further with the 7 and 9 keys.
-    </Say>
-    <Say>
-      If you wish to return to the previous menu, please press star.
-      Otherwise please enter the route number you wish to search followed by the pound sign.
-    </Say>
-    <Pause length="10"/>
-  </Gather>
+          xmlns:c="http://java.sun.com/jsp/jstl/core"
+          xmlns:s="/struts-tags"
+          xmlns:wiki="/oba-wiki-tags">
+    <jsp:directive.page contentType="application/xml"/>
+    <Gather>
+        <Play>
+            <s:property value="getLocalisedMessage('SEARCH_INDEX_ACTION')"/>
+        </Play>
+        <Play>
+            <s:property value="getLocalisedMessage('HOW_TO_GO_BACK')"/>
+        </Play>
+        <Play>
+            <s:property value="stringToSpeechUrl('Otherwise please enter the route number you wish to search followed by the hash sign.')"/>
+        </Play>
+        <Pause length="10"/>
+    </Gather>
 </Response>

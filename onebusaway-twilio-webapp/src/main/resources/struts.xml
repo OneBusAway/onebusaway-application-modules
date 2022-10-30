@@ -28,6 +28,6 @@
   <constant name="struts.convention.action.checkImplementsAction" value="false" />
   <constant name="struts.action.excludePattern" value="/services/.*,/api/.*" />
   <constant name="struts.enable.DynamicMethodInvocation" value="true" />
-  <constant name="struts.devMode" value="true" />
+  <constant name="struts.devMode" value="false" />
   <include file="struts-twilio-webapp.xml"/>
 </struts>
