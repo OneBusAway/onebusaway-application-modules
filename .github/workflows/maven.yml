@@ -59,7 +59,7 @@ jobs:
         uses: qcastel/github-actions-maven-release@master
         env:
           GITHUB_TOKEN: ${{ github.token }}
-          JAVA_HOME: ${{ env.JAVA_HOME }}
+          JAVA_HOME: /usr/lib/jvm/java-11-openjdk/
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
           maven-args: "-Dmaven.javadoc.skip=true -DskipTests -DskipITs -Ddockerfile.skip -DdockerCompose.skip"
