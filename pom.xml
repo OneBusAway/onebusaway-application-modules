@@ -630,6 +630,7 @@
         <version>3.0.0-M6</version>
         <configuration>
           <scmCommentPrefix>[ci skip]</scmCommentPrefix>
+          <arguments>-Ptravis -Dmaven.javadoc.skip=true -DskipTests -Dmaven.test.skipTests=true -Dmaven.test.skip=true -DskipITs -Ddockerfile.skip -DdockerCompose.skip -Dvalidate.silent=true -Dlog4j.configuration= -B -V -q</arguments>
         </configuration>
       </plugin>
     </plugins>
