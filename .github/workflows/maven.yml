@@ -62,6 +62,7 @@ jobs:
           JAVA_HOME: /usr/lib/jvm/java-11-openjdk/
         with:
 #          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+          access-token: ${{ github.token }}
           maven-args: "-Dmaven.javadoc.skip=true -DskipTests -DskipITs -Ddockerfile.skip -DdockerCompose.skip"
           git-release-bot-name: "$(git --no-pager log --format=format:'%an' -n 1)"
           git-release-bot-email: "$(git --no-pager log --format=format:'%ae' -n 1)"
@@ -69,11 +70,11 @@ jobs:
       - name: Set Image Tag
         run: |
           echo "IMAGE_TAG=${{ env.PROJECT_VERSION }}" >> $GITHUB_ENV
-#          if [[ "${{ env.GIT_BRANCH }}" == "main" ]]; then
+#          if [[ "${{ env.GIT_BRANCH }}" == "master" ]]; then
 #            echo "IMAGE_TAG=${{ env.PROJECT_VERSION }}" >> $GITHUB_ENV
 #          fi
           
-#          if [[ "${{ env.GIT_BRANCH }}" != "main" ]]; then
+#          if [[ "${{ env.GIT_BRANCH }}" != "master" ]]; then
 #            echo "IMAGE_TAG=${{ env.PROJECT_VERSION }}-${{ env.GIT_BRANCH }}" >> $GITHUB_ENV
 #          fi
       - id: set_image_tag
@@ -102,19 +103,19 @@ jobs:
 
       - name: Docker Tag - onebusaway-twilio-webapp
         if: github.event_name != 'pull_request'
-#        if: github.ref == 'refs/heads/main'
+#        if: github.ref == 'refs/heads/master'
         run: |
           docker tag ${{ env.TWILIO_IMAGE_NAME }}:${{ env.IMAGE_TAG }} ${{ secrets.REGISTRY_LOGIN_SERVER }}/${{ env.TWILIO_IMAGE_NAME }}:${{ env.IMAGE_TAG }}
 
       - name: Docker Push - onebusaway-twilio-webapp
         if: github.event_name != 'pull_request'
-#        if: github.ref == 'refs/heads/main'
+#        if: github.ref == 'refs/heads/master'
         run: |
           docker push ${{ secrets.REGISTRY_LOGIN_SERVER }}/${{ env.TWILIO_IMAGE_NAME }}:${{ env.IMAGE_TAG }}
 
-  deploy_to_azure:
+  deploy_to_dev:
     if: github.event_name != 'pull_request'
-#    if: github.ref == 'refs/heads/main'
+#    if: github.ref == 'refs/heads/master'
     needs: build_and_test
 
     runs-on: ubuntu-latest
@@ -130,7 +131,7 @@ jobs:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Deploy Twilio Webapp to Azure Container Instances
-        if: github.ref != 'refs/heads/main'
+        if: github.ref != 'refs/heads/master'
         uses: azure/aci-deploy@v1.1.3
         with:
           resource-group: ${{ secrets.RESOURCE_GROUP }}
@@ -152,10 +153,10 @@ jobs:
             DATABASE_PASSWORD=${{ secrets.TRANSIT_DATABASE_PASSWORD }}
           location: ${{ env.LOCATION }}
           cpu: 1
-          memory: 2
+          memory: 1
 
 #      - name: Deploy Twilio Webapp to Containers App
-#        if: github.ref == 'refs/heads/main'
+#        if: github.ref == 'refs/heads/master'
 #        uses: azure/CLI@v1
 #        with:
 #          inlineScript: |

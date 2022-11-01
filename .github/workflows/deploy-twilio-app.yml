@@ -1,0 +1,54 @@
+# This workflow will build a Java project with Maven, and cache/restore any dependencies to improve the workflow execution time
+# For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-maven
+
+name: Deploy
+
+on:
+  release:
+    types: [ published ]
+
+env:
+  TWILIO_APP_NAME: onebusaway-twilio-webapp
+  TWILIO_IMAGE_NAME: nautilustechnologyau/transit/onebusaway-twilio-webapp
+  SERVER_PORT: 8080
+  LOCATION: 'Australia East'
+
+jobs:
+  deploy_to_azure:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Set env
+        run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Deploy Twilio Webapp to Azure Container Instances
+        uses: azure/aci-deploy@v1.1.3
+        with:
+          resource-group: ${{ secrets.RESOURCE_GROUP }}
+          dns-name-label: ${{ env.TWILIO_APP_NAME }}
+          image: ${{ secrets.REGISTRY_LOGIN_SERVER }}/${{ env.TWILIO_IMAGE_NAME }}:${{ env.RELEASE_VERSION }}
+          registry-login-server: ${{ secrets.REGISTRY_LOGIN_SERVER }}
+          registry-username: ${{ secrets.REGISTRY_USERNAME }}
+          registry-password: ${{ secrets.REGISTRY_PASSWORD }}
+          name: ${{ env.TWILIO_APP_NAME }}
+          ports: ${{ env.SERVER_PORT }}
+          environment-variables: >
+            SERVER_PORT=${{ env.SERVER_PORT }}
+            AZURE_COGNITIVE_SERVICE_URL=${{ secrets.AZURE_COGNITIVE_SERVICE_URL }}
+            TRANSIT_DATA_SERVICE_URL=${{ secrets.TRANSIT_DATA_SERVICE_URL }}
+            DATABASE_HOST=${{ secrets.TRANSIT_DATABASE_HOST }}
+            DATABASE_PORT=${{ secrets.TRANSIT_DATABASE_PORT }}
+            DATABASE_NAME=${{ secrets.TRANSIT_DATABASE_NAME }}
+            DATABASE_USER=${{ secrets.TRANSIT_DATABASE_USER }}
+            DATABASE_PASSWORD=${{ secrets.TRANSIT_DATABASE_PASSWORD }}
+          location: ${{ env.LOCATION }}
+          cpu: 1
+          memory: 2
+
+
+
