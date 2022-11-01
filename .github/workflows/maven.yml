@@ -61,7 +61,7 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
           JAVA_HOME: /usr/lib/jvm/java-11-openjdk/
         with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+#          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
           maven-args: "-Dmaven.javadoc.skip=true -DskipTests -DskipITs -Ddockerfile.skip -DdockerCompose.skip"
           git-release-bot-name: "$(git --no-pager log --format=format:'%an' -n 1)"
           git-release-bot-email: "$(git --no-pager log --format=format:'%ae' -n 1)"
