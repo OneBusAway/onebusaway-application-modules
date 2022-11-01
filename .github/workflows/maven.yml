@@ -63,7 +63,7 @@ jobs:
         with:
 #          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
           access-token: ${{ github.token }}
-          maven-args: "-Dmaven.javadoc.skip=true -DskipTests -DskipITs -Ddockerfile.skip -DdockerCompose.skip"
+          maven-args: "-Ptravis -Dmaven.javadoc.skip=true -DskipTests -DskipITs -Ddockerfile.skip -DdockerCompose.skip -Dvalidate.silent=true -Dlog4j.configuration= -B -V -q"
           git-release-bot-name: "$(git --no-pager log --format=format:'%an' -n 1)"
           git-release-bot-email: "$(git --no-pager log --format=format:'%ae' -n 1)"
 
