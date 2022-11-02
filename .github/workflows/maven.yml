@@ -27,6 +27,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
       - name: Install Tools
         run: sudo apt-get install xmlstarlet
@@ -35,7 +37,6 @@ jobs:
         run: |
           echo "GIT_BRANCH=${GITHUB_REF##*/}" >> $GITHUB_ENV
           echo "PROJECT_VERSION=$(xmlstarlet sel -t -m _:project -m _:properties -v _:project-version pom.xml)" >> $GITHUB_ENV
-          git fetch --all --tags
           echo "TAG_VERSION=$(git tag -l $PROJECT_VERSION)" >> $GITHUB_ENV
 
       - name: Version Check
