@@ -26,9 +26,6 @@ jobs:
       image_tag: ${{ steps.set_image_tag.outputs.image_tag }}
 
     steps:
-      - env:
-          GITHUB_TOKEN: ${{ secrets.GRADLE_PUBLISH_TOKEN }}
-
       - uses: actions/checkout@v3
 
       - name: Install Tools
@@ -109,6 +106,7 @@ jobs:
         if: github.ref == 'refs/heads/master'
         uses: actions/github-script@v6
         with:
+          github-token: ${{ secrets.GRADLE_PUBLISH_TOKEN }}
           script: |
             const { PROJECT_VERSION } = process.env
             github.rest.git.createRef({
