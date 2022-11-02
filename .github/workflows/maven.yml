@@ -27,8 +27,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
 
       - name: Install Tools
         run: sudo apt-get install xmlstarlet
@@ -39,12 +37,15 @@ jobs:
           echo "PROJECT_VERSION=$(xmlstarlet sel -t -m _:project -m _:properties -v _:project-version pom.xml)" >> $GITHUB_ENV
 
       - name: Get Tag with Project Version
-        run: echo "TAG_VERSION=$(git tag -l $PROJECT_VERSION)" >> $GITHUB_ENV
+        run: |
+          git fetch --all --tags
+          echo "TAG_VERSION=$(git tag -l $PROJECT_VERSION)" >> $GITHUB_ENV
 
       - name: Version Check
         run: |
           if [[ "${{ env.TAG_VERSION }}" == "${{ env.PROJECT_VERSION }}" ]]; then
-            echo "There is a tag with ${{ env.TAG_VERSION }} already exists! Please update the project version in pom.xml."
+            echo "There is a tag with ${{ env.PROJECT_VERSION }} already exists! Please update the project version in pom.xml."
+            exit 1
           fi
 
       - name: Set up JDK 11
