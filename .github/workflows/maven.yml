@@ -61,7 +61,7 @@ jobs:
 #        run: |
 #          git config --global user.name "$(git --no-pager log --format=format:'%an' -n 1)"
 #          git config --global user.email "$(git --no-pager log --format=format:'%ae' -n 1)"
-
+#
 #      - name: Release
 #        if: github.ref == 'refs/heads/master'
 #        uses: qcastel/github-actions-maven-release@master
@@ -74,7 +74,7 @@ jobs:
 #          maven-args: "-Ptravis -Dmaven.javadoc.skip=true -DskipTests -DskipITs -Ddockerfile.skip -DdockerCompose.skip -Dvalidate.silent=true -Dlog4j.configuration= -B -V -q"
 #          git-release-bot-name: "$(git --no-pager log --format=format:'%an' -n 1)"
 #          git-release-bot-email: "$(git --no-pager log --format=format:'%ae' -n 1)"
-
+#
       - name: Set Image Tag
         run: |
 #          echo "IMAGE_TAG=${{ env.PROJECT_VERSION }}" >> $GITHUB_ENV
