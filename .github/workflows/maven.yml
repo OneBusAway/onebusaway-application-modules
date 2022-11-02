@@ -38,11 +38,10 @@ jobs:
           echo "TAG_VERSION=$(git tag -l $PROJECT_VERSION)" >> $GITHUB_ENV
 
       - name: Version Check
-        if: env.TAG_VERSION == env.PROJECT_VERSION
-        uses: actions/github-script@v3
-        with:
-          script: |
-            core.setFailed('There is a tag with current project version already exists! Please update the project version in pom.xml.')
+        run: |
+          if [[ "${{ env.TAG_VERSION }}" == "${{ env.PROJECT_VERSION }}" ]]; then
+            echo "There is a tag with ${{ env.TAG_VERSION }} already exists! Please update the project version in pom.xml."
+          fi
 
       - name: Set up JDK 11
         uses: actions/setup-java@v3
@@ -106,7 +105,7 @@ jobs:
         if: github.ref == 'refs/heads/master'
         uses: actions/github-script@v6
         with:
-          github-token: ${{ secrets.GRADLE_PUBLISH_TOKEN }}
+          github-token: ${{ secrets.CICD_TOKEN }}
           script: |
             const { PROJECT_VERSION } = process.env
             github.rest.git.createRef({
