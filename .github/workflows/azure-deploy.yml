@@ -50,6 +50,3 @@ jobs:
           location: ${{ env.LOCATION }}
           cpu: 1
           memory: 2
-
-
-

@@ -16,7 +16,6 @@ env:
 jobs:
   build_and_test:
     runs-on: ubuntu-latest
-#    if: "!contains(github.event.head_commit.message, '[ci skip]')"
 
     permissions:
       contents: write
@@ -76,13 +75,11 @@ jobs:
           echo "::set-output name=project_version::${{ env.PROJECT_VERSION }}"
 
       - name: Azure Login
-#        if: github.event_name != 'pull_request'
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Docker Login [Azure]
-#        if: github.event_name != 'pull_request'
         uses: azure/docker-login@v1
         with:
           login-server: ${{ secrets.REGISTRY_LOGIN_SERVER }}
@@ -90,19 +87,16 @@ jobs:
           password: ${{ secrets.REGISTRY_PASSWORD }}
 
       - name: Docker Build - onebusaway-twilio-webapp
-#        if: github.event_name != 'pull_request'
         run: |
           docker build --build-arg VERSION=${{ env.IMAGE_TAG }} -t ${{ env.TWILIO_IMAGE_NAME }}:${{ env.IMAGE_TAG }} ./onebusaway-twilio-webapp
 
       - name: Docker Tag - onebusaway-twilio-webapp
         if: github.event_name != 'pull_request'
-#        if: github.ref == 'refs/heads/master'
         run: |
           docker tag ${{ env.TWILIO_IMAGE_NAME }}:${{ env.IMAGE_TAG }} ${{ secrets.REGISTRY_LOGIN_SERVER }}/${{ env.TWILIO_IMAGE_NAME }}:${{ env.IMAGE_TAG }}
 
       - name: Docker Push - onebusaway-twilio-webapp
         if: github.event_name != 'pull_request'
-#        if: github.ref == 'refs/heads/master'
         run: |
           docker push ${{ secrets.REGISTRY_LOGIN_SERVER }}/${{ env.TWILIO_IMAGE_NAME }}:${{ env.IMAGE_TAG }}
 
@@ -143,7 +137,6 @@ jobs:
 
   deploy_to_dev:
     if: github.event_name != 'pull_request'
-#    if: github.ref == 'refs/heads/master'
     needs: build_and_test
 
     runs-on: ubuntu-latest
@@ -182,13 +175,3 @@ jobs:
           location: ${{ env.LOCATION }}
           cpu: 1
           memory: 1
-
-#      - name: Deploy Twilio Webapp to Containers App
-#        if: github.ref == 'refs/heads/master'
-#        uses: azure/CLI@v1
-#        with:
-#          inlineScript: |
-#            az config set extension.use_dynamic_install=yes_without_prompt
-#            az containerapp registry set -n ${{ env.TWILIO_APP_NAME }} -g ${{ secrets.RESOURCE_GROUP }} --server ${{ secrets.REGISTRY_LOGIN_SERVER }} --username  ${{ secrets.REGISTRY_USERNAME }} --password ${{ secrets.REGISTRY_PASSWORD }}
-#            az containerapp update -n ${{ env.TWILIO_APP_NAME }} -g ${{ secrets.RESOURCE_GROUP }} --image ${{ secrets.REGISTRY_LOGIN_SERVER }}/${{ env.TWILIO_IMAGE_NAME }}:${{ env.IMAGE_TAG }} --set-env-vars "SERVER_PORT=${{ env.SERVER_PORT }}" "AZURE_COGNITIVE_SERVICE_URL=${{ secrets.AZURE_COGNITIVE_SERVICE_URL }}" "TRANSIT_DATA_SERVICE_URL=${{ secrets.TRANSIT_DATA_SERVICE_URL }}" "DATABASE_HOST=${{ secrets.TRANSIT_DATABASE_HOST }}" "DATABASE_PORT=${{ secrets.TRANSIT_DATABASE_PORT }}" "DATABASE_NAME=${{ secrets.TRANSIT_DATABASE_NAME }}" "DATABASE_USER=${{ secrets.TRANSIT_DATABASE_USER }}" "DATABASE_PASSWORD=${{ secrets.TRANSIT_DATABASE_PASSWORD }}"
-
