@@ -38,7 +38,7 @@ jobs:
           echo "TAG_VERSION=$(git tag -l $PROJECT_VERSION)" >> $GITHUB_ENV
 
       - name: Version Check
-        if: ${{ TAG_VERSION }} == ${{ PROJECT_VERSION }}
+        if: ${{ env.TAG_VERSION }} == ${{ env.PROJECT_VERSION }}
         uses: actions/github-script@v3
         with:
           script: |
