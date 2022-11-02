@@ -58,14 +58,12 @@ jobs:
 
       - name: Set Image Tag
         run: |
-#          echo "IMAGE_TAG=${{ env.PROJECT_VERSION }}" >> $GITHUB_ENV
           if [[ "${{ env.GIT_BRANCH }}" == "master" ]]; then
             echo "IMAGE_TAG=${{ env.PROJECT_VERSION }}" >> $GITHUB_ENV
           fi
           
           if [[ "${{ env.GIT_BRANCH }}" != "master" ]]; then
             echo "IMAGE_TAG=${{ env.PROJECT_VERSION }}-dev" >> $GITHUB_ENV
-#            echo "IMAGE_TAG=${{ env.PROJECT_VERSION }}-${{ env.GIT_BRANCH }}" >> $GITHUB_ENV
           fi
 
       - id: set_image_tag
