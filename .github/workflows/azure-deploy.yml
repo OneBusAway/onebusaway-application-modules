@@ -4,8 +4,9 @@
 name: Deploy
 
 on:
-  release:
-    types: [ published ]
+  push:
+    tags:
+      - "*"
 
 env:
   TWILIO_APP_NAME: onebusaway-twilio-webapp

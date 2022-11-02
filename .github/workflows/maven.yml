@@ -16,7 +16,7 @@ env:
 jobs:
   build_and_test:
     runs-on: ubuntu-latest
-    if: "!contains(github.event.head_commit.message, '[ci skip]')"
+#    if: "!contains(github.event.head_commit.message, '[ci skip]')"
 
     permissions:
       contents: write
@@ -34,7 +34,15 @@ jobs:
       - name: Get Project Version and Branch
         run: |
           echo "GIT_BRANCH=${GITHUB_REF##*/}" >> $GITHUB_ENV
-          echo "PROJECT_VERSION=$(xmlstarlet sel -t -m _:project -v _:version pom.xml)" >> $GITHUB_ENV
+          echo "PROJECT_VERSION=$(xmlstarlet sel -t -m _:project -m _:properties -v _:project-version pom.xml)" >> $GITHUB_ENV
+          echo "TAG_VERSION=$(git tag -l $PROJECT_VERSION)" >> $GITHUB_ENV
+
+      - name: Version Check
+        if: ${{ TAG_VERSION }} == ${{ PROJECT_VERSION }}
+        uses: actions/github-script@v3
+        with:
+          script: |
+            core.setFailed('There is a tag with current project version already exists! Please update the project version in pom.xml.')
 
       - name: Set up JDK 11
         uses: actions/setup-java@v3
@@ -48,35 +56,37 @@ jobs:
       - name: Build with Maven
         run: mvn package -Ptravis -Dmaven.javadoc.skip=true -DskipTests -Dvalidate.silent=true -Dlog4j.configuration= -B -V -q
 
-      - name: Configure Git user
-        if: github.ref == 'refs/heads/master'
-        run: |
-          git config --global user.name "$(git --no-pager log --format=format:'%an' -n 1)"
-          git config --global user.email "$(git --no-pager log --format=format:'%ae' -n 1)"
+#      - name: Configure Git user
+#        if: github.ref == 'refs/heads/master'
+#        run: |
+#          git config --global user.name "$(git --no-pager log --format=format:'%an' -n 1)"
+#          git config --global user.email "$(git --no-pager log --format=format:'%ae' -n 1)"
 
-      - name: Release
-        if: github.ref == 'refs/heads/master'
-        uses: qcastel/github-actions-maven-release@master
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-          JAVA_HOME: /usr/lib/jvm/java-11-openjdk/
-        with:
+#      - name: Release
+#        if: github.ref == 'refs/heads/master'
+#        uses: qcastel/github-actions-maven-release@master
+#        env:
+#          GITHUB_TOKEN: ${{ github.token }}
+#          JAVA_HOME: /usr/lib/jvm/java-11-openjdk/
+#        with:
 #          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-          access-token: ${{ github.token }}
+#          access-token: ${{ github.token }}
 #          maven-args: "-Ptravis -Dmaven.javadoc.skip=true -DskipTests -DskipITs -Ddockerfile.skip -DdockerCompose.skip -Dvalidate.silent=true -Dlog4j.configuration= -B -V -q"
-          git-release-bot-name: "$(git --no-pager log --format=format:'%an' -n 1)"
-          git-release-bot-email: "$(git --no-pager log --format=format:'%ae' -n 1)"
+#          git-release-bot-name: "$(git --no-pager log --format=format:'%an' -n 1)"
+#          git-release-bot-email: "$(git --no-pager log --format=format:'%ae' -n 1)"
 
       - name: Set Image Tag
         run: |
-          echo "IMAGE_TAG=${{ env.PROJECT_VERSION }}" >> $GITHUB_ENV
-#          if [[ "${{ env.GIT_BRANCH }}" == "master" ]]; then
-#            echo "IMAGE_TAG=${{ env.PROJECT_VERSION }}" >> $GITHUB_ENV
-#          fi
+#          echo "IMAGE_TAG=${{ env.PROJECT_VERSION }}" >> $GITHUB_ENV
+          if [[ "${{ env.GIT_BRANCH }}" == "master" ]]; then
+            echo "IMAGE_TAG=${{ env.PROJECT_VERSION }}" >> $GITHUB_ENV
+          fi
           
-#          if [[ "${{ env.GIT_BRANCH }}" != "master" ]]; then
+          if [[ "${{ env.GIT_BRANCH }}" != "master" ]]; then
+            echo "IMAGE_TAG=${{ env.PROJECT_VERSION }}-dev" >> $GITHUB_ENV
 #            echo "IMAGE_TAG=${{ env.PROJECT_VERSION }}-${{ env.GIT_BRANCH }}" >> $GITHUB_ENV
-#          fi
+          fi
+
       - id: set_image_tag
         run: |
           echo "::set-output name=image_tag::${{ env.IMAGE_TAG }}"
@@ -112,6 +122,40 @@ jobs:
 #        if: github.ref == 'refs/heads/master'
         run: |
           docker push ${{ secrets.REGISTRY_LOGIN_SERVER }}/${{ env.TWILIO_IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+
+      - name: Create Tag
+        if: github.ref == 'refs/heads/master'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const { PROJECT_VERSION } = process.env
+            github.rest.git.createRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: `refs/tags/${PROJECT_VERSION}`,
+              sha: context.sha
+            })
+
+      - name: Create release
+        if: github.ref == 'refs/heads/master'
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const { PROJECT_VERSION } = process.env
+            try {
+              await github.rest.repos.createRelease({
+                draft: false,
+                generate_release_notes: true,
+                name: `v${PROJECT_VERSION}`,
+                owner: context.repo.owner,
+                prerelease: false,
+                repo: context.repo.repo,
+                tag_name: `${PROJECT_VERSION}`,
+              });
+            } catch (error) {
+              core.setFailed(error.message);
+            }
 
   deploy_to_dev:
     if: github.event_name != 'pull_request'
