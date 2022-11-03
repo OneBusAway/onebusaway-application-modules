@@ -118,7 +118,8 @@ class StopsBeanServiceImpl implements StopsBeanService {
     List<AgencyAndId> stopIds = _geospatialBeanService.getStopsByBounds(bounds);
 
     boolean limitExceeded = false;
-    if (!queryBean.getType().equals(SearchQueryBean.EQueryType.ORDERED_BY_CLOSEST)) {
+    if (queryBean != null && queryBean.getType() != null
+          && !queryBean.getType().equals(SearchQueryBean.EQueryType.ORDERED_BY_CLOSEST)) {
       // traditionally limitExceed imposes a side-effect of shuffling the
       // results and truncating them. This makes the result set non-deterministic.
       limitExceeded = BeanServiceSupport.checkLimitExceeded(stopIds,
@@ -132,7 +133,8 @@ class StopsBeanServiceImpl implements StopsBeanService {
         throw new ServiceException();
 
       // if we are ordered add distance
-      if (queryBean.getType().equals(SearchQueryBean.EQueryType.ORDERED_BY_CLOSEST)) {
+      if (queryBean != null && queryBean.getType() != null
+              && queryBean.getType().equals(SearchQueryBean.EQueryType.ORDERED_BY_CLOSEST)) {
         double distance = SphericalGeometryLibrary.distance(center.getLat(),
                 center.getLon(), stopBean.getLat(), stopBean.getLon());
         stopBean.setDistanceAwayFromQuery(distance);
@@ -147,7 +149,8 @@ class StopsBeanServiceImpl implements StopsBeanService {
 
       stopBeans.add(stopBean);
     }
-    if (queryBean.getType().equals(SearchQueryBean.EQueryType.ORDERED_BY_CLOSEST)) {
+    if (queryBean != null && queryBean.getType() != null
+            && queryBean.getType().equals(SearchQueryBean.EQueryType.ORDERED_BY_CLOSEST)) {
       // this EQueryType specifies we don't shuffle results so they can remain deterministic
       limitExceeded = stopBeans.size() > queryBean.getMaxCount();
       // constructResults will perform the truncation if necessary
@@ -189,7 +192,8 @@ class StopsBeanServiceImpl implements StopsBeanService {
     }
 
     boolean limitExceeded = false;
-    if (queryBean.getType().equals(SearchQueryBean.EQueryType.ORDERED_BY_CLOSEST)) {
+    if (queryBean != null && queryBean.getType() != null
+            && queryBean.getType().equals(SearchQueryBean.EQueryType.ORDERED_BY_CLOSEST)) {
       // here we sort by distance for possible truncation, but later it will be re-sorted by stopId
       sortByDistance(stopBeans, stopIdToDistanceMap);
       limitExceeded = stopBeans.size() > maxCount;
