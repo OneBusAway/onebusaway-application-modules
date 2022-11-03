@@ -241,6 +241,17 @@ public class IndexAction extends OneBusAwayEnterpriseActionSupport {
     }
   }
 
+  public String getHintless() {
+    if (_q == null || _q.isEmpty()) {
+      return null;
+    } else {
+      if (_q.indexOf('[') > -1) {
+        return StringEscapeUtils.escapeHtml(_q.split("\\[")[0]);
+      }
+      return StringEscapeUtils.escapeHtml(_q);
+    }
+  }
+
   public String getL() {
     if (_location != null)
       return _location.getLat() + "," + _location.getLon();
