@@ -24,8 +24,10 @@ import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.transit_data.model.trips.TripStatusBean;
 import org.onebusaway.transit_data_federation.siri.SiriDistanceExtension;
 import org.onebusaway.util.SystemTime;
+import org.onebusaway.util.services.configuration.ConfigurationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -44,6 +46,9 @@ public class PresentationServiceImpl implements PresentationService {
   private static final String ONE_MILE_WORD = "mile";
   private static final String MULTIPLE_MILES_WORD = "miles";
   private static final String AWAY_WORD = "away";
+
+  @Autowired
+  private ConfigurationService _configService;
 
   private boolean _showArrivals = false;
 
@@ -320,7 +325,18 @@ public class PresentationServiceImpl implements PresentationService {
 	      return false;
 	    }
     }
-    _log.debug("include passed for " + statusBean.getVehicleId());
+
+    // TODO!!  Needs testing
+//    if (statusBean.getVehicleId() != null) {
+//        AgencyAndId agencyFromVehicle = AgencyAndIdLibrary.convertFromString(statusBean.getVehicleId());
+//        boolean hideScheduleInfo = _configService.getConfigurationFlagForAgency(agencyFromVehicle.getAgencyId(),
+//                "hideScheduleInfo");
+//        if (hideScheduleInfo) {
+//            return false;
+//        }
+//    }
+
+          _log.debug("include passed for " + statusBean.getVehicleId());
     return true;
   }
 

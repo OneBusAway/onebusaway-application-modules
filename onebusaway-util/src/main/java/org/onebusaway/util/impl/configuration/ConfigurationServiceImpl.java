@@ -252,7 +252,23 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 		}
 		return _configurationKeyToValueMap;
 	}
-	
+
+	@Override
+	/**
+	 * support for agency-based configuration.  Looks like this:
+	 * {"component": "agency_1", "key": "hideScheduleInfo", "value": "true"}
+	 */
+	public boolean getConfigurationFlagForAgency(String agencyId, String configurationItemKey) {
+		try {
+			// for agency configuration the component is "agency_" + agency_id
+			String item = _configurationServiceClient.getItem("agency_" + agencyId, configurationItemKey);
+			return "true".equalsIgnoreCase(item);
+		} catch (Exception any) {
+			_log.error("exception for (" + agencyId + ", " + configurationItemKey + ")", any);
+			return false;
+		}
+	}
+
 	// Local Config Methods
 	
 	private String getLocalConfigurationValue(String configurationItemKey)
