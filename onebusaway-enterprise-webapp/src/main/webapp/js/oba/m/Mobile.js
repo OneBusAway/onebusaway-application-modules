@@ -323,6 +323,15 @@ OBA.Mobile = (function() {
 
 	return {
 		initialize: function() {
+			// if we have a hash use it as query string
+			// we were redirected here from desktop but mobile doesn't search with hash
+			if (window.location.hash.length > 1) {
+				var queryString = "?q=" + window.location.hash.substring(1);
+				window.location.hash = "";
+				// hash trumps any existing params, we simply overwrite them
+				window.location.search = queryString;
+				return;
+			}
 			locationField = jQuery("#l");
 			typeField = jQuery("#t");
 			
