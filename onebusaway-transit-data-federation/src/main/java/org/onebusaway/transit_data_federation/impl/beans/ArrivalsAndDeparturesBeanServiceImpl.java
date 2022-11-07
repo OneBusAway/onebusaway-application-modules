@@ -21,6 +21,7 @@ import org.onebusaway.realtime.api.OccupancyStatus;
 import org.onebusaway.realtime.api.VehicleOccupancyRecord;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
 import org.onebusaway.transit_data.model.ArrivalsAndDeparturesQueryBean;
+import org.onebusaway.transit_data.model.RouteBean;
 import org.onebusaway.transit_data.model.StopBean;
 import org.onebusaway.transit_data.model.realtime.HistogramBean;
 import org.onebusaway.transit_data.model.schedule.FrequencyBean;
@@ -224,13 +225,25 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
         continue;
       
       applySituationsToBean(time, instance, bean);
-
-      beans.add(bean);
+      if (matchesRouteFilter(query.getRouteType(), bean))
+        beans.add(bean);
     }
 
     Collections.sort(beans, new ArrivalAndDepartureComparator());
 
     return beans;
+  }
+
+  private boolean matchesRouteFilter(int routeType, ArrivalAndDepartureBean bean) {
+    if (routeType < 0)
+      return true; // no filter, always true
+
+    for (RouteBean route : bean.getStop().getRoutes()) {
+      if (routeType == route.getType())
+        return true;
+    }
+    // fall through
+    return false;
   }
 
   @Override

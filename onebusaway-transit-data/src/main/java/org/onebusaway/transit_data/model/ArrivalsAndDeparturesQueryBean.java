@@ -40,6 +40,9 @@ public final class ArrivalsAndDeparturesQueryBean implements Serializable {
 
   private int maxCount = Integer.MAX_VALUE;
 
+  // GTFS Route Type
+  private int routeType =  -1; // no filter test
+
   private CoordinateBounds bounds;
 
   public ArrivalsAndDeparturesQueryBean() {
@@ -127,6 +130,14 @@ public final class ArrivalsAndDeparturesQueryBean implements Serializable {
     this.bounds = bounds;
   }
 
+  public int getRouteType() {
+    return routeType;
+  }
+
+  public void setRouteType(int routeType) {
+    this.routeType = routeType;
+  }
+
   @Override
   public int hashCode() {
     final int prime = 31;
@@ -135,6 +146,7 @@ public final class ArrivalsAndDeparturesQueryBean implements Serializable {
     result = prime * result + frequencyMinutesBefore;
     result = prime * result + minutesAfter;
     result = prime * result + minutesBefore;
+    result = prime * result + routeType;
     result = prime * result + (int) (time ^ (time >>> 32));
     return result;
   }
@@ -157,6 +169,8 @@ public final class ArrivalsAndDeparturesQueryBean implements Serializable {
     if (minutesBefore != other.minutesBefore)
       return false;
     if (time != other.time)
+      return false;
+    if (routeType != other.routeType)
       return false;
     return true;
   }

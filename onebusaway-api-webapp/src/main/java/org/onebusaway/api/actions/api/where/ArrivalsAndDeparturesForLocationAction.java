@@ -108,6 +108,9 @@ public class ArrivalsAndDeparturesForLocationAction extends ApiActionSupport {
         emptyReturnsNotFound = flag;
     }
 
+    public void setRouteType(int routeType) {
+        _query.setRouteType(routeType);
+    }
     public void setMaxCount(int maxCount) {
         _maxCount.setMaxCount(maxCount);
     }
