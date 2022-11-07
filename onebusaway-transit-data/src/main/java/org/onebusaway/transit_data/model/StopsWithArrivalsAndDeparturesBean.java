@@ -18,12 +18,15 @@ package org.onebusaway.transit_data.model;
 import java.util.List;
 
 import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
+import org.onebusaway.transit_data.model.trips.TripBean;
 
 public class StopsWithArrivalsAndDeparturesBean extends ApplicationBean {
 
   private static final long serialVersionUID = 1L;
 
   private List<StopBean> stops;
+
+  private List<TripBean> trips;
 
   private List<ArrivalAndDepartureBean> arrivalsAndDepartures;
 
@@ -54,6 +57,14 @@ public class StopsWithArrivalsAndDeparturesBean extends ApplicationBean {
 
   public void setStops(List<StopBean> stops) {
     this.stops = stops;
+  }
+
+  public List<TripBean> getTrips() {
+    return trips;
+  }
+
+  public void setTrips(List<TripBean> trips) {
+    this.trips = trips;
   }
 
   public List<ArrivalAndDepartureBean> getArrivalsAndDepartures() {

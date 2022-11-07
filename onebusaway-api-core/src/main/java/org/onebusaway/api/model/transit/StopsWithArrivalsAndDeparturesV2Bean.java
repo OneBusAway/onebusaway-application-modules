@@ -29,6 +29,8 @@ public class StopsWithArrivalsAndDeparturesV2Bean implements Serializable {
 
     private List<String> situationIds;
 
+    private List<String> tripIds;
+
     private boolean limitExceeded = false;
 
     public List<String> getStopIds() {
@@ -71,4 +73,11 @@ public class StopsWithArrivalsAndDeparturesV2Bean implements Serializable {
         this.limitExceeded = limitExceeded;
     }
 
+    public List<String> getTripIds() {
+        return tripIds;
+    }
+
+    public void setTripIds(List<String> tripIds) {
+        this.tripIds = tripIds;
+    }
 }

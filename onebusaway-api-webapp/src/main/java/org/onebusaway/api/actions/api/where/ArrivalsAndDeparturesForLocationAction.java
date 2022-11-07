@@ -25,6 +25,7 @@ import org.onebusaway.exceptions.OutOfServiceAreaServiceException;
 import org.onebusaway.exceptions.ServiceException;
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.transit_data.model.*;
+import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.util.SystemTime;
 import org.onebusaway.util.services.configuration.ConfigurationService;
@@ -33,7 +34,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.io.IOException;
 import java.sql.Date;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * inspired by ArrivalsAndDepartureForStop, but returns multiple stops
@@ -99,6 +102,10 @@ public class ArrivalsAndDeparturesForLocationAction extends ApiActionSupport {
         _query.setFrequencyMinutesAfter(frequencyMinutesAfter);
     }
 
+    public void setIncludeTrips(boolean includeTrips) {
+        _query.setIncludeTrips(includeTrips);
+    }
+
     @TypeConversion(converter = "org.onebusaway.presentation.impl.conversion.DateTimeConverter")
     public void setTime(Date time) {
         _time = time.getTime();
@@ -147,6 +154,9 @@ public class ArrivalsAndDeparturesForLocationAction extends ApiActionSupport {
             if (stopIds.isEmpty())
                 return emptyResponse();
             adResult = _service.getStopsWithArrivalsAndDepartures(stopIds, adQuery);
+            if (adQuery.getIncludeTrips()) {
+                collectTrips(adResult);
+            }
         } catch (OutOfServiceAreaServiceException ex) {
             return setOkResponse(new StopsWithArrivalsAndDeparturesBean());
         }
@@ -154,6 +164,16 @@ public class ArrivalsAndDeparturesForLocationAction extends ApiActionSupport {
             return emptyResponse();
         }
         return setOkResponse(factory.getResponse(adResult));
+    }
+
+    private void collectTrips(StopsWithArrivalsAndDeparturesBean adResult) {
+        Set<TripBean> tripIds = new HashSet<>();
+        for (ArrivalAndDepartureBean ads : adResult.getArrivalsAndDepartures()) {
+            if (ads.getTrip() != null) {
+                tripIds.add(ads.getTrip());
+            }
+        }
+        adResult.setTrips(new ArrayList<>(tripIds));
     }
 
     private DefaultHttpHeaders emptyResponse() {
