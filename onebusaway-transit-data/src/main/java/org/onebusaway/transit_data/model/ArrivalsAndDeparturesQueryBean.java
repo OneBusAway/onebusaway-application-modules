@@ -38,8 +38,6 @@ public final class ArrivalsAndDeparturesQueryBean implements Serializable {
   // should the queried for stopIds be included in nearby results
   private boolean includeInputIdsInNearby = false;
 
-  private boolean includeTrips = false;
-
   private int maxCount = Integer.MAX_VALUE;
 
   // GTFS Route Type
@@ -58,7 +56,6 @@ public final class ArrivalsAndDeparturesQueryBean implements Serializable {
     this.frequencyMinutesBefore = bean.frequencyMinutesBefore;
     this.frequencyMinutesAfter = bean.frequencyMinutesAfter;
     this.includeInputIdsInNearby = bean.includeInputIdsInNearby;
-    this.includeTrips = bean.includeTrips;
     this.bounds = bean.bounds;
   }
 
@@ -139,14 +136,6 @@ public final class ArrivalsAndDeparturesQueryBean implements Serializable {
 
   public void setRouteType(int routeType) {
     this.routeType = routeType;
-  }
-
-  public boolean getIncludeTrips() {
-    return includeTrips;
-  }
-
-  public void setIncludeTrips(boolean includeTrips) {
-    this.includeTrips = includeTrips;
   }
 
   @Override

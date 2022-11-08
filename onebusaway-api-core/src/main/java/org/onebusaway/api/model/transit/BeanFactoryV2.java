@@ -1014,14 +1014,6 @@ public class BeanFactoryV2 {
     }
 
     bean.setLimitExceeded(sad.isLimitExceeded());
-    Set<String> tripIds = new HashSet<>();
-    if (sad.getTrips() != null) {
-      for (TripBean tripBean : sad.getTrips()) {
-        tripIds.add(tripBean.getId());
-      }
-      bean.setTripIds(new ArrayList<>(tripIds));
-    }
-
     return bean;
 
   }

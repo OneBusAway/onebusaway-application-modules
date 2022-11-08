@@ -26,8 +26,6 @@ public class StopsWithArrivalsAndDeparturesBean extends ApplicationBean {
 
   private List<StopBean> stops;
 
-  private List<TripBean> trips;
-
   private List<ArrivalAndDepartureBean> arrivalsAndDepartures;
 
   private List<StopBean> nearbyStops;
@@ -57,14 +55,6 @@ public class StopsWithArrivalsAndDeparturesBean extends ApplicationBean {
 
   public void setStops(List<StopBean> stops) {
     this.stops = stops;
-  }
-
-  public List<TripBean> getTrips() {
-    return trips;
-  }
-
-  public void setTrips(List<TripBean> trips) {
-    this.trips = trips;
   }
 
   public List<ArrivalAndDepartureBean> getArrivalsAndDepartures() {
