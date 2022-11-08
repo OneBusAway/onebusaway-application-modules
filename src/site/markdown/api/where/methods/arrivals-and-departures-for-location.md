@@ -48,6 +48,8 @@ http://api.pugetsound.onebusaway.org/api/where/arrivals-and-departures-for-locat
   can also be queried at a specific time.  This can be useful for testing.  See [timestamps](../index.html#Timestamps)
   for details on the format of the `time` parameter.
 * maxCount - The size of the list of nearbyStopIds, arrivalsAndDepartures, and stops to return.  Defaults to 250, can be up to 1000.
+* mode - optional GTFS routeType to filter by
+* includeTrips - include Trip detail of referenced arrival and departures in the references section.
 
 
 ## Response
