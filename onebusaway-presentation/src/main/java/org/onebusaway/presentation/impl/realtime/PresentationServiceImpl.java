@@ -18,11 +18,13 @@ package org.onebusaway.presentation.impl.realtime;
 import javax.annotation.PostConstruct;
 
 import org.onebusaway.container.ConfigurationParameter;
+import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.presentation.services.realtime.PresentationService;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.transit_data.model.trips.TripStatusBean;
 import org.onebusaway.transit_data_federation.siri.SiriDistanceExtension;
+import org.onebusaway.util.AgencyAndIdLibrary;
 import org.onebusaway.util.SystemTime;
 import org.onebusaway.util.services.configuration.ConfigurationService;
 import org.slf4j.Logger;
@@ -326,15 +328,14 @@ public class PresentationServiceImpl implements PresentationService {
 	    }
     }
 
-    // TODO!!  Needs testing
-//    if (statusBean.getVehicleId() != null) {
-//        AgencyAndId agencyFromVehicle = AgencyAndIdLibrary.convertFromString(statusBean.getVehicleId());
-//        boolean hideScheduleInfo = _configService.getConfigurationFlagForAgency(agencyFromVehicle.getAgencyId(),
-//                "hideScheduleInfo");
-//        if (hideScheduleInfo) {
-//            return false;
-//        }
-//    }
+    if (!statusBean.isPredicted()) { //if this is a scheduled trip (lacks realtime data):
+        AgencyAndId agencyFromTrip = AgencyAndIdLibrary.convertFromString(statusBean.getActiveTrip().getId());
+        boolean hideScheduleInfo = _configService.getConfigurationFlagForAgency(agencyFromTrip.getAgencyId(),
+                "hideScheduleInfo");  //Does this agency want to hide scheduled trips?
+        if (hideScheduleInfo) {
+            return false;
+        }
+    }
 
           _log.debug("include passed for " + statusBean.getVehicleId());
     return true;
