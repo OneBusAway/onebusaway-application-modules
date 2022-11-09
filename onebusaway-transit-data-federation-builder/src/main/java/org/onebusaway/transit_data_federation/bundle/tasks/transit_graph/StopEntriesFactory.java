@@ -68,8 +68,13 @@ public class StopEntriesFactory {
         _log.info("stops: " + stopIndex + "/" + stops.size());
       stopIndex++;
 
-      StopEntryImpl stopEntry = new StopEntryImpl(stop.getId(), stop.getLat(),
-          stop.getLon());
+      StopEntryImpl stopEntry;
+      if (stop.getParentStation() != null) {
+        stopEntry = new StopEntryImpl(stop.getId(), stop.getLat(),
+                stop.getLon(), new AgencyAndId(stop.getId().getAgencyId(), stop.getParentStation()));
+      } else {
+        stopEntry = new StopEntryImpl(stop.getId(), stop.getLat(), stop.getLon());
+      }
       stopEntry.setWheelchairBoarding(getWheelchairBoardingAccessibilityForStop(stop));
       graph.putStopEntry(stopEntry);
       stopEntriesByAgencyId.get(stop.getId().getAgencyId()).add(stopEntry);

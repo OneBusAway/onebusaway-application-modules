@@ -323,6 +323,19 @@ public class BeanFactoryV2 {
       addToReferences(route);
     }
     bean.setRouteIds(routeIds);
+    if (stop.getParent() != null) {
+      StopBean parent = stop.getParent();
+      StopV2Bean parentBean = new StopV2Bean();
+      parentBean.setCode(parent.getCode());
+      parentBean.setDirection(parent.getDirection());
+      parentBean.setId(parent.getId());
+      parentBean.setLat(parent.getLat());
+      parentBean.setLon(parent.getLon());
+      parentBean.setLocationType(parent.getLocationType());
+      parentBean.setName(parent.getName());
+      parentBean.setWheelchairBoarding(parent.getWheelchairBoarding());
+      _references.addStop(parentBean);
+    }
 
     return bean;
   }
