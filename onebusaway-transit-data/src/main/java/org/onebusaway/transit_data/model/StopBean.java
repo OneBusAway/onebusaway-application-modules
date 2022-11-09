@@ -43,6 +43,8 @@ public class StopBean implements Serializable {
   // if this bean resulted from a bounds query, how close it was to center of bounds
   private Double distanceAwayFromQuery;
 
+  private StopBean parent;
+
   public String getId() {
     return id;
   }
@@ -129,6 +131,22 @@ public class StopBean implements Serializable {
 
   public void setDistanceAwayFromQuery(Double distanceAwayFromQuery) {
     this.distanceAwayFromQuery = distanceAwayFromQuery;
+  }
+
+  /**
+   * GTFS parent stop reference.
+   * @return AgencyAndId as a string
+   */
+  public StopBean getParent() {
+    return parent;
+  }
+
+  /**
+   * GTFS paretn stop reference.
+   * @param parent AgencyAndId as a string
+   */
+  public void setParent(StopBean parent) {
+    this.parent = parent;
   }
 
   /***************************************************************************

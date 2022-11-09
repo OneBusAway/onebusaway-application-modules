@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.Map;
 
 import org.onebusaway.collections.FactoryMap;
+import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.Stop;
 import org.onebusaway.gtfs.services.GtfsRelationalDao;
 import org.onebusaway.transit_data.model.EAccessibility;
