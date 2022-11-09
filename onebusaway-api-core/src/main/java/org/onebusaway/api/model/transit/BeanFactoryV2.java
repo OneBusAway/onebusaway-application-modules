@@ -334,6 +334,7 @@ public class BeanFactoryV2 {
       parentBean.setLocationType(parent.getLocationType());
       parentBean.setName(parent.getName());
       parentBean.setWheelchairBoarding(parent.getWheelchairBoarding());
+      bean.setParent(parentBean.getId());
       _references.addStop(parentBean);
     }
 
