@@ -53,7 +53,12 @@ public class GitRepositoryHelper {
 	public GitRepositoryState getGitRepositoryState() {
 		Properties properties = new Properties();
 		try {
-		    properties.load(getClass().getClassLoader().getResourceAsStream("git.properties"));
+			InputStream stream = getClass().getClassLoader().getResourceAsStream("git.properties");
+			if (stream != null) {
+				properties.load(stream);
+			} else {
+				return null;
+			}
 		} catch (IOException ioe) {
 		    _log.error("properties file not found:", ioe);
 		}

@@ -30,6 +30,8 @@ import org.onebusaway.transit_data_federation.bundle.utilities.BundleUtilties;
 import org.onebusaway.transit_data_federation.bundle.utilities.NativeFileUtilities;
 import org.onebusaway.transit_data_federation.bundle.utilities.JodaDateTimeAdapter;
 import org.onebusaway.transit_data_federation.bundle.utilities.JodaLocalDateAdapter;
+import org.onebusaway.util.git.GitRepositoryHelper;
+import org.onebusaway.util.git.GitRepositoryState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -63,6 +65,7 @@ public class FederatedTransitDataBundleConventionMain {
 
 
     public void run(String[] args) {
+        logVersion();
 
         if (args == null || args.length != 3) {
             throw new IllegalStateException("Expecting input_directory_tree, output_directory, bundle_name");
@@ -468,6 +471,24 @@ public class FederatedTransitDataBundleConventionMain {
         public String getBundleOutputDirectory() {
             // construct output directory
             return output + File.separator + OUTPUT_DIR;
+        }
+    }
+
+    private void logVersion() {
+        GitRepositoryState gitRepositoryState = new GitRepositoryHelper().getGitRepositoryState();
+        if (gitRepositoryState != null) {
+            final String msg = "onebusaway-application-modules launch with branch '"
+            + gitRepositoryState.getBranch()
+            + "' commit '"
+            + gitRepositoryState.getCommitId()
+            + "' version/commit message '"
+            + gitRepositoryState.getCommitMessageShort() + "'";
+            _log.info(msg);
+            System.out.println(msg);
+        } else {
+            final String msg = "onebusaway-application-modules launch running in development mode";
+            _log.info(msg);
+            System.out.println(msg);
         }
     }
 
