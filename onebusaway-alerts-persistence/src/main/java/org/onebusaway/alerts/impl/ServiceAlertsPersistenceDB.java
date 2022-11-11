@@ -182,8 +182,11 @@ public class ServiceAlertsPersistenceDB implements ServiceAlertsPersistence {
       return (ServiceAlertRecord) query.uniqueResult();
     } catch (NonUniqueResultException nure) {
       List list = query.list();
-      _log.error("expected single result for {}:{}, got {}", agencyId, serviceAlertId, list);
-      return (ServiceAlertRecord) query.list().get(0);
+        _log.error("expected single result for {}:{}, got {}", agencyId, serviceAlertId, list);
+        // TODO: logging not configured for alerts-persistence, go to console for now
+        System.out.println("getServiceAlertRecordByAlertId expected single result for " + agencyId
+                + ":" + serviceAlertId);
+        return (ServiceAlertRecord) query.list().get(0);
     }
   }
 
