@@ -33,10 +33,7 @@ import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
 import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.transit_data.model.ListBean;
-import org.onebusaway.transit_data.model.SearchQueryBean;
-import org.onebusaway.transit_data.model.StopBean;
-import org.onebusaway.transit_data.model.StopsBean;
+import org.onebusaway.transit_data.model.*;
 import org.onebusaway.transit_data_federation.model.SearchResult;
 import org.onebusaway.util.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.StopSearchService;
@@ -147,6 +144,9 @@ class StopsBeanServiceImpl implements StopsBeanService {
       if (stopBean.getRoutes().isEmpty())
         continue;
 
+      if (!matchesRouteTypeFilter(stopBean, queryBean.getRouteTypes()))
+        continue;
+
       stopBeans.add(stopBean);
     }
     if (queryBean != null && queryBean.getType() != null
@@ -156,6 +156,20 @@ class StopsBeanServiceImpl implements StopsBeanService {
       // constructResults will perform the truncation if necessary
     }
     return constructResult(stopBeans, limitExceeded);
+  }
+
+  public boolean matchesRouteTypeFilter(StopBean stop, List<Integer> routeTypesFilter) {
+    if (routeTypesFilter == null  || routeTypesFilter.isEmpty())
+      return true; // no filter, everything matches
+
+    for (Integer routeType : routeTypesFilter) {
+      for (RouteBean route : stop.getRoutes()) {
+        if (routeType == route.getType())
+          return true;
+      }
+    }
+
+    return false;
   }
 
   private StopsBean getStopsByBoundsAndQuery(SearchQueryBean queryBean)

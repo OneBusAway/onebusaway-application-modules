@@ -21,7 +21,6 @@ import org.onebusaway.realtime.api.OccupancyStatus;
 import org.onebusaway.realtime.api.VehicleOccupancyRecord;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
 import org.onebusaway.transit_data.model.ArrivalsAndDeparturesQueryBean;
-import org.onebusaway.transit_data.model.RouteBean;
 import org.onebusaway.transit_data.model.StopBean;
 import org.onebusaway.transit_data.model.realtime.HistogramBean;
 import org.onebusaway.transit_data.model.schedule.FrequencyBean;
@@ -34,11 +33,7 @@ import org.onebusaway.transit_data_federation.model.TargetTime;
 import org.onebusaway.transit_data_federation.model.bundle.HistoricalRidership;
 import org.onebusaway.transit_data_federation.model.narrative.StopTimeNarrative;
 import org.onebusaway.transit_data_federation.services.*;
-import org.onebusaway.transit_data_federation.services.beans.ArrivalsAndDeparturesBeanService;
-import org.onebusaway.transit_data_federation.services.beans.ServiceAlertsBeanService;
-import org.onebusaway.transit_data_federation.services.beans.StopBeanService;
-import org.onebusaway.transit_data_federation.services.beans.TripBeanService;
-import org.onebusaway.transit_data_federation.services.beans.TripDetailsBeanService;
+import org.onebusaway.transit_data_federation.services.beans.*;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.narrative.NarrativeService;
 import org.onebusaway.transit_data_federation.services.realtime.ArrivalAndDepartureInstance;
@@ -76,6 +71,8 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
 
   private StopBeanService _stopBeanService;
 
+  private StopsBeanService _stopsBeanService;
+
   private TripDetailsBeanService _tripDetailsBeanService;
 
   private ServiceAlertsBeanService _serviceAlertsBeanService;
@@ -112,6 +109,11 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
   @Autowired
   public void setStopBeanService(StopBeanService stopBeanService) {
     _stopBeanService = stopBeanService;
+  }
+
+  @Autowired
+  public void setStopsBeanService(StopsBeanService stopsBeanService) {
+    _stopsBeanService = stopsBeanService;
   }
 
   @Autowired
@@ -225,7 +227,7 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
         continue;
       
       applySituationsToBean(time, instance, bean);
-      if (matchesRouteFilter(query.getRouteType(), bean))
+      if (matchesRouteTypeFilter(bean, query.getRouteTypes()))
         beans.add(bean);
     }
 
@@ -234,16 +236,8 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
     return beans;
   }
 
-  private boolean matchesRouteFilter(int routeType, ArrivalAndDepartureBean bean) {
-    if (routeType < 0)
-      return true; // no filter, always true
-
-    for (RouteBean route : bean.getStop().getRoutes()) {
-      if (routeType == route.getType())
-        return true;
-    }
-    // fall through
-    return false;
+  private boolean matchesRouteTypeFilter(ArrivalAndDepartureBean bean, List<Integer> routeTypes) {
+      return _stopsBeanService.matchesRouteTypeFilter(bean.getStop(), routeTypes);
   }
 
   @Override

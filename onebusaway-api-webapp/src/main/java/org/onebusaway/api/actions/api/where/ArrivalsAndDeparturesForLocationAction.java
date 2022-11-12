@@ -111,7 +111,10 @@ public class ArrivalsAndDeparturesForLocationAction extends ApiActionSupport {
         emptyReturnsNotFound = flag;
     }
 
-    public void setRouteType(int routeType) {
+    /**
+     * comma delimited list of GTFS route types
+      */
+    public void setRouteType(String routeType) {
         _query.setRouteType(routeType);
     }
     public void setMaxCount(int maxCount) {
@@ -134,6 +137,7 @@ public class ArrivalsAndDeparturesForLocationAction extends ApiActionSupport {
         // new EQueryType that keeps results consistent if limitExceed is true
         // previous searches deliberately shuffled results
         searchQuery.setType(SearchQueryBean.EQueryType.ORDERED_BY_CLOSEST);
+        searchQuery.setRouteTypes(_query.getRouteTypes());
 
         ArrivalsAndDeparturesQueryBean adQuery = _query;
         adQuery.setIncludeInputIdsInNearby(true); // include the queried ids in nearby

@@ -34,4 +34,6 @@ public interface NearbyStopsBeanService {
    *         target stop id itself)
    */
   public List<AgencyAndId> getNearbyStops(StopBean stopBean, double radius);
+
+  public List<AgencyAndId> getNearbyStops(StopBean stopBean, double radius, List<Integer> routeTypesFilter);
 }

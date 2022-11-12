@@ -16,6 +16,8 @@
 package org.onebusaway.transit_data.model;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.util.SystemTime;
@@ -41,7 +43,7 @@ public final class ArrivalsAndDeparturesQueryBean implements Serializable {
   private int maxCount = Integer.MAX_VALUE;
 
   // GTFS Route Type
-  private int routeType =  -1; // no filter test
+  private List<Integer> routeTypes =  new ArrayList<>();
 
   private CoordinateBounds bounds;
 
@@ -130,12 +132,23 @@ public final class ArrivalsAndDeparturesQueryBean implements Serializable {
     this.bounds = bounds;
   }
 
-  public int getRouteType() {
-    return routeType;
+  public List<Integer> getRouteTypes() {
+    return routeTypes;
   }
 
-  public void setRouteType(int routeType) {
-    this.routeType = routeType;
+  public void setRouteTypes(List<Integer> types) {
+    this.routeTypes = types;
+  }
+  public void setRouteType(String routeType) {
+    if (routeType == null) return;
+    String[] types = routeType.split(",");
+    for (String type : types) {
+      try {
+        routeTypes.add(Integer.parseInt(type));
+      } catch (NumberFormatException nfe) {
+        // bury
+      }
+    }
   }
 
   @Override
@@ -146,8 +159,9 @@ public final class ArrivalsAndDeparturesQueryBean implements Serializable {
     result = prime * result + frequencyMinutesBefore;
     result = prime * result + minutesAfter;
     result = prime * result + minutesBefore;
-    result = prime * result + routeType;
     result = prime * result + (int) (time ^ (time >>> 32));
+    if (routeTypes != null)
+      result = prime * result + routeTypes.hashCode();
     return result;
   }
 
@@ -170,8 +184,11 @@ public final class ArrivalsAndDeparturesQueryBean implements Serializable {
       return false;
     if (time != other.time)
       return false;
-    if (routeType != other.routeType)
-      return false;
+    if (routeTypes == null || other.routeTypes == null)
+      if (routeTypes != other.routeTypes)
+        return false;
+    if (!routeTypes.equals(other.routeTypes))
+        return false;
     return true;
   }
 }
