@@ -685,6 +685,9 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
       	    setPredictedArrivalTimeForInstance(instance, arrivalTime);
       	}
 
+        instance.setScheduledTrack(tpr.getScheduledTrack());
+        instance.setActualTrack(tpr.getActualTrack());
+        instance.setStatus(tpr.getStatus());
 
         if (sequenceMatches)
           return true;

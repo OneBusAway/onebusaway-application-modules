@@ -90,6 +90,10 @@ public class ArrivalAndDepartureBean extends ApplicationBean {
   
   private int totalStopsInTrip;
 
+  private String actualTrack;
+
+  private String scheduledTrack;
+
   public TripBean getTrip() {
     return trip;
   }
@@ -341,6 +345,22 @@ public boolean hasPredictedArrivalTime() {
 
   public boolean hasPredictedDepartureTime() {
     return this.predictedDepartureTime > 0;
+  }
+
+  public String getActualTrack() {
+    return actualTrack;
+  }
+
+  public void setActualTrack(String actualTrack) {
+    this.actualTrack = actualTrack;
+  }
+
+  public String getScheduledTrack() {
+    return scheduledTrack;
+  }
+
+  public void setScheduledTrack(String scheduledTrack) {
+    this.scheduledTrack = scheduledTrack;
   }
 
   public long computeBestArrivalTime() {

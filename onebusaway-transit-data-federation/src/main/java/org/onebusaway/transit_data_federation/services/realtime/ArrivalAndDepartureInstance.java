@@ -60,6 +60,12 @@ public class ArrivalAndDepartureInstance {
 
   private TimeIntervalBean predictedDepartureInterval;
 
+  private String scheduledTrack;
+
+  private String actualTrack;
+
+  private String status;
+
   public ArrivalAndDepartureInstance(StopTimeInstance stopTimeInstance,
       ArrivalAndDepartureTime scheduledTime) {
     if (stopTimeInstance == null)
@@ -208,6 +214,30 @@ public class ArrivalAndDepartureInstance {
 
   public StopEntry getStop() {
     return stopTimeInstance.getStop();
+  }
+
+  public String getScheduledTrack() {
+    return scheduledTrack;
+  }
+
+  public void setScheduledTrack(String scheduledTrack) {
+    this.scheduledTrack = scheduledTrack;
+  }
+
+  public String getActualTrack() {
+    return actualTrack;
+  }
+
+  public void setActualTrack(String actualTrack) {
+    this.actualTrack = actualTrack;
+  }
+
+  public String getStatus() {
+    return status;
+  }
+
+  public void setStatus(String status) {
+    this.status = status;
   }
 
   @Override

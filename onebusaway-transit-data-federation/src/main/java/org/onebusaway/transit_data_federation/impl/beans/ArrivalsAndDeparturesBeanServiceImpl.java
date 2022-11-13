@@ -328,9 +328,15 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
     pab.setTotalStopsInTrip(stopTime.getTotalStopsInTrip());
     
     pab.setStatus("default");
+    if (instance.getStatus() != null && instance.getStatus().length() > 0) {
+      pab.setStatus(instance.getStatus());
+    }
 
     pab.setScheduledArrivalTime(instance.getScheduledArrivalTime());
     pab.setScheduledDepartureTime(instance.getScheduledDepartureTime());
+    pab.setActualTrack(instance.getActualTrack());
+    pab.setScheduledTrack(instance.getScheduledTrack());
+
 
     FrequencyEntry frequency = instance.getFrequencyLabel();
     pab.setFrequency(null);
