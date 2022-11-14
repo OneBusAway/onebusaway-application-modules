@@ -48,9 +48,8 @@ class NearbyStopsBeanServiceImpl implements NearbyStopsBeanService {
     this._stopsBeanService = _stopsBeanService;
   }
 
-  @Cacheable
   public List<AgencyAndId> getNearbyStops(
-          @CacheableArgument(keyProperty = "id") StopBean stopBean, double radius) {
+          StopBean stopBean, double radius) {
     return getNearbyStops(stopBean, radius, Collections.emptyList());
   }
   @Cacheable
