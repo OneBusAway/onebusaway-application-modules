@@ -358,6 +358,7 @@ public class BeanFactoryV2 {
     bean.setServiceId(trip.getServiceId());
     bean.setShapeId(trip.getShapeId());
     bean.setBlockId(trip.getBlockId());
+    bean.setPeakOffpeak(trip.getPeakOffpeak());
 
     return bean;
   }

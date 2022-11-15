@@ -83,6 +83,7 @@ public class TripBeanServiceImpl implements TripBeanService {
 
     tripBean.setDirectionId(tripEntry.getDirectionId());
     tripBean.setTotalTripDistance(tripEntry.getTotalTripDistance());
+    tripBean.setPeakOffpeak(tripNarrative.getPeakOffpeak());
     
     BlockEntry block = tripEntry.getBlock();
     tripBean.setBlockId(ApplicationBeanLibrary.getId(block.getId()));

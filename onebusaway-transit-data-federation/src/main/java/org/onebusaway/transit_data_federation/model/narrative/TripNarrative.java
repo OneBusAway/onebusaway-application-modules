@@ -29,14 +29,16 @@ import org.onebusaway.transit_data_federation.services.narrative.NarrativeServic
  * @see NarrativeService
  */
 public final class TripNarrative implements Serializable {
-
-  private static final long serialVersionUID = 1L;
+ // 2nd version inculdes peakOffpeak
+  private static final long serialVersionUID = 2L;
 
   private final String tripShortName;
 
   private final String tripHeadsign;
 
   private final String routeShortName;
+
+  private final int peakOffpeak;
 
   public static Builder builder() {
     return new Builder();
@@ -46,6 +48,7 @@ public final class TripNarrative implements Serializable {
     this.tripShortName = builder.tripShortName;
     this.tripHeadsign = builder.tripHeadsign;
     this.routeShortName = builder.routeShortName;
+    this.peakOffpeak = builder.peakOffpeak;
   }
 
   public String getTripShortName() {
@@ -60,6 +63,8 @@ public final class TripNarrative implements Serializable {
     return routeShortName;
   }
 
+  public int getPeakOffpeak() { return peakOffpeak; }
+
   public static class Builder {
 
     private String tripShortName;
@@ -67,6 +72,8 @@ public final class TripNarrative implements Serializable {
     private String tripHeadsign;
 
     private String routeShortName;
+
+    private int peakOffpeak;
 
     public TripNarrative create() {
       return new TripNarrative(this);
@@ -84,6 +91,11 @@ public final class TripNarrative implements Serializable {
 
     public Builder setRouteShortName(String routeShortName) {
       this.routeShortName = routeShortName;
+      return this;
+    }
+
+    public Builder setPeakOffpeak(int peakOffpeak) {
+      this.peakOffpeak = peakOffpeak;
       return this;
     }
   }

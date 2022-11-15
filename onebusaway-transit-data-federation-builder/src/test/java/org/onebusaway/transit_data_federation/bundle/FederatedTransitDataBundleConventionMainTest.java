@@ -16,19 +16,55 @@
 package org.onebusaway.transit_data_federation.bundle;
 
 import junit.framework.TestCase;
+import org.onebusaway.transit_data_federation.impl.bundle.S3BundleStoreImpl;
+import org.onebusaway.transit_data_federation.model.bundle.BundleItem;
 
 import java.io.File;
+import java.io.FileWriter;
+import java.util.List;
 
 public class FederatedTransitDataBundleConventionMainTest extends TestCase {
 
 
 
-    public void testRun() {
+    public void testRun() throws Exception {
         FederatedTransitDataBundleConventionMain main = new FederatedTransitDataBundleConventionMain();
         String bundleOutputDir =
         System.getProperty("java.io.tmpdir") + File.separator
                 + "bundle" + System.currentTimeMillis();
-        String[] args = {"classpath:multi_dir_test", bundleOutputDir, "v"+System.currentTimeMillis()};
+        String bundleName = "v"+System.currentTimeMillis();
+        String[] args = {"classpath:multi_dir_test", bundleOutputDir, bundleName};
         main.run(args);
+        // now create index file for this bundle
+        String indexFile = System.getProperty("java.io.tmpdir") + File.separator
+                + "test_bundle_index_file.json";
+        String bundleFile = bundleOutputDir + File.separator + bundleName + File.separator
+                + bundleName + ".tar.gz";
+        FileWriter fw = new FileWriter(indexFile);
+        fw.write("{\"latest\":\"" + bundleFile + "\"}");
+        fw.close();
+        System.out.println("index file written to " + indexFile);
+        File testBundleFile = new File(bundleFile);
+
+        assertTrue(testBundleFile.exists());
+        assertTrue(testBundleFile.isFile());
+
+        // now attempt to load the bundle from the indexfile
+        testS3BundleStoreImpl(indexFile, bundleName);
+        // cleanup after ourselves
+        // comment this out if you want to use these bundle for testing.
+        testBundleFile.delete();
+        new File(indexFile).delete();
+    }
+
+    private void testS3BundleStoreImpl(String indexFile, String bundleName) throws Exception {
+        String bundleRootPath = "/tmp/bundleTest" + System.currentTimeMillis();
+        System.out.println("loading '" + indexFile + "' to store at " + bundleRootPath);
+        S3BundleStoreImpl impl = new S3BundleStoreImpl(bundleRootPath, indexFile);
+        List<BundleItem> bundles = impl.getBundles();
+        assertNotNull(bundles);
+        assertEquals(1, bundles.size());
+        BundleItem item = bundles.get(0);
+        assertEquals(bundleName, item.getName());
     }
 }
