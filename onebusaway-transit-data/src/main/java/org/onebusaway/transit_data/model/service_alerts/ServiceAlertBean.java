@@ -47,6 +47,8 @@ public class ServiceAlertBean implements Serializable {
 
   private String source;
 
+  private String consequenceMessage;
+
   public String getId() {
     return id;
   }
@@ -85,6 +87,14 @@ public class ServiceAlertBean implements Serializable {
 
   public void setReason(String reason) {
     this.reason = reason;
+  }
+
+  public String getConsequenceMessage() {
+    return consequenceMessage;
+  }
+
+  public void setConsequenceMessage(String consequenceMessage) {
+    this.consequenceMessage = consequenceMessage;
   }
 
   public List<NaturalLanguageStringBean> getSummaries() {

@@ -116,7 +116,10 @@ public class ServiceAlertRecord {
 
   @Column(nullable = false, name="service_alert_id", length = 255)
   private String serviceAlertId;
-  
+
+  @Column(nullable = true, name="consequence_message", length= 50)
+  private String consequenceMessage;
+
   private Boolean copy;
  
   private Long creationTime = 0l;
@@ -212,6 +215,14 @@ public class ServiceAlertRecord {
 
   public void setSource(String source) {
     this.source = source;
+  }
+
+  public String getConsequenceMessage() {
+    return consequenceMessage;
+  }
+
+  public void setConsequenceMessage(String consequenceMessage) {
+    this.consequenceMessage = consequenceMessage;
   }
 
   public String getAgencyId() {

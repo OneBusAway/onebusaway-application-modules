@@ -90,6 +90,7 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     _registry.add(GtfsRealtimeOneBusAway.obaFeedEntity);
     _registry.add(GtfsRealtimeOneBusAway.obaTripUpdate);
     _registry.add(GtfsRealtimeMTARR.mtaRailroadStopTimeUpdate); // track number
+    _registry.add(GtfsRealtimeServiceStatus.mercuryAlert);
   }
 
   private AgencyService _agencyService;
@@ -708,6 +709,9 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
       } else {
         serviceAlertRecord.setSource(getFeedId());
       }
+
+      serviceAlertRecord.setConsequenceMessage(serviceAlert.getConsequenceMessage());
+
       serviceAlertRecord.setAgencyId(id.getAgencyId()); // AGENCY from feed configuration
       serviceAlertRecord.setServiceAlertId(id.getId()); // ID ONLY
 

@@ -56,6 +56,11 @@
 		</dependency>
 		<dependency>
 			<groupId>org.onebusaway</groupId>
+			<artifactId>onebusaway-alerts-api</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.onebusaway</groupId>
 			<artifactId>onebusaway-container</artifactId>
 			<version>${project.version}</version>
 		</dependency>

@@ -1190,6 +1190,7 @@ public class BeanFactoryV2 {
     }
 
     bean.setReason(situation.getReason());
+    bean.setConsequenceMessage(situation.getConsequenceMessage());
 
     bean.setSummary(getBestString(situation.getSummaries()));
     bean.setDescription(getBestString(situation.getDescriptions()));
