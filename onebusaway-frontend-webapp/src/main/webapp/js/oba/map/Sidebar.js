@@ -559,7 +559,8 @@ OBA.Sidebar = function() {
 
 			var listItem = jQuery("<li></li>")
 							.addClass("locationItem")
-							.append(link);
+							.append(link)
+							.append('<span>&nbsp;Stop&nbspId:&nbsp;&nbsp;<b>' + stop.id + '</b></span>');
 			
 			resultsList.append(listItem);
 		});

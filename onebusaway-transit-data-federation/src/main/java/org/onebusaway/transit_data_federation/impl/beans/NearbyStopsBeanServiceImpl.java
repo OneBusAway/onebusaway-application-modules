@@ -16,6 +16,7 @@
 package org.onebusaway.transit_data_federation.impl.beans;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.onebusaway.container.cache.Cacheable;
@@ -26,6 +27,7 @@ import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data.model.StopBean;
 import org.onebusaway.transit_data_federation.services.beans.GeospatialBeanService;
 import org.onebusaway.transit_data_federation.services.beans.NearbyStopsBeanService;
+import org.onebusaway.transit_data_federation.services.beans.StopsBeanService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -33,6 +35,7 @@ import org.springframework.stereotype.Component;
 class NearbyStopsBeanServiceImpl implements NearbyStopsBeanService {
 
   private GeospatialBeanService _geospatialBeanService;
+  private StopsBeanService _stopsBeanService;
 
   @Autowired
   public void setGeospatialBeanService(
@@ -40,9 +43,18 @@ class NearbyStopsBeanServiceImpl implements NearbyStopsBeanService {
     _geospatialBeanService = geospatialBeanService;
   }
 
+  @Autowired
+  public void setStopsBeanService(StopsBeanService _stopsBeanService) {
+    this._stopsBeanService = _stopsBeanService;
+  }
+
+  public List<AgencyAndId> getNearbyStops(
+          StopBean stopBean, double radius) {
+    return getNearbyStops(stopBean, radius, Collections.emptyList());
+  }
   @Cacheable
   public List<AgencyAndId> getNearbyStops(
-      @CacheableArgument(keyProperty = "id") StopBean stopBean, double radius) {
+      @CacheableArgument(keyProperty = "id") StopBean stopBean, double radius, List<Integer> routeTypesFilter) {
 
     CoordinateBounds bounds = SphericalGeometryLibrary.bounds(
         stopBean.getLat(), stopBean.getLon(), radius);
@@ -51,9 +63,12 @@ class NearbyStopsBeanServiceImpl implements NearbyStopsBeanService {
     List<AgencyAndId> excludingSource = new ArrayList<AgencyAndId>();
 
     for (AgencyAndId id : ids) {
-      if (!ApplicationBeanLibrary.getId(id).equals(stopBean.getId()))
-        excludingSource.add(id);
+      if (!ApplicationBeanLibrary.getId(id).equals(stopBean.getId())) {
+        if (_stopsBeanService.matchesRouteTypeFilter(stopBean, routeTypesFilter))
+          excludingSource.add(id);
+      }
     }
     return excludingSource;
   }
+
 }

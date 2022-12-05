@@ -26,6 +26,7 @@ import javax.annotation.PostConstruct;
 import org.onebusaway.container.refresh.Refreshable;
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.transit_data.model.StopBean;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.transit_data_federation.services.bundle.BundleSearchService;
 import org.onebusaway.transit_data.model.ListBean;
@@ -49,6 +50,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class BundleSearchServiceImpl implements BundleSearchService, ApplicationListener {
 
+	private static final int MAX_TYPE_AHEAD_LENGTH = 10;
 	@Autowired
 	private TransitDataService _transitDataService = null;
 
@@ -83,14 +85,25 @@ public class BundleSearchServiceImpl implements BundleSearchService, Application
 					ListBean<RouteBean> routes = _transitDataService.getRoutesForAgencyId(agency);
 					for (RouteBean route : routes.getList()) {
 						String shortName = route.getShortName();
-						generateInputsForString(tmpSuggestions, shortName, "\\s+");
+						String hint = route.getLongName();
+						if (hint == null) hint = route.getId(); // don't let hint be null
+						generateInputsForString(tmpSuggestions, shortName, "\\s+", hint);
 					}
 
 					ListBean<String> stopIds = _transitDataService.getStopIdsForAgencyId(agency);
 					for (String stopId : stopIds.getList()) {
 						if (_transitDataService.stopHasRevenueService(agency, stopId)) {
 							AgencyAndId agencyAndId = AgencyAndIdLibrary.convertFromString(stopId);
-							generateInputsForString(tmpSuggestions, agencyAndId.getId(), null);
+							StopBean stop = _transitDataService.getStop(stopId);
+							String hint = null;
+							if (stop != null) {
+								hint = stop.getName();
+							}
+							// this is unlikley, but prevent hint from being null
+							if (hint == null) {
+								hint = stop.getId();
+							}
+							generateInputsForString(tmpSuggestions, agencyAndId.getId(), null, hint);
 						}
 					}
 				}
@@ -102,7 +115,8 @@ public class BundleSearchServiceImpl implements BundleSearchService, Application
 		new Thread(initThread).start();
 	}
 
-	private void generateInputsForString(Map<String,List<String>> tmpSuggestions, String string, String splitRegex) {
+	private void generateInputsForString(Map<String,List<String>> tmpSuggestions, String string, String splitRegex,
+										 String hint) {
 		String[] parts;
 		if (string == null) return;
 		if (splitRegex != null)
@@ -112,14 +126,42 @@ public class BundleSearchServiceImpl implements BundleSearchService, Application
 		for (String part : parts) {
 			int length = part.length();
 			for (int i = 0; i < length; i++) {
+				// here we add keys comprised of all the possible typeaheads for the first term (part)
 				String key = part.substring(0, i+1).toLowerCase();
 				List<String> suggestion = tmpSuggestions.get(key);
 				if (suggestion == null) {
 					suggestion = new ArrayList<String>();
 				}
-				suggestion.add(string);
+				suggestion.add(string + " [" + hint + "]");
 				Collections.sort(suggestion);
 				tmpSuggestions.put(key, suggestion);
+			}
+		}
+		if (parts.length > 1) {
+			// we have more than one term (part)
+			// now add keys comprised of the successive word typeaheads up to MAX_TYPE_AHEAD_LENGTH
+			// this allows auto complete to work for multi-word searches
+			int startPos = parts[0].length();
+			for (int i = startPos; i < Math.min(string.length(), MAX_TYPE_AHEAD_LENGTH); i++) {
+				String key = string.substring(0, i+1).toLowerCase();
+				List<String> suggestion = tmpSuggestions.get(key);
+				if (suggestion == null) {
+					suggestion = new ArrayList<String>();
+				}
+				suggestion.add(string + " [" + hint + "]");
+				Collections.sort(suggestion);
+				tmpSuggestions.put(key, suggestion);
+			}
+
+			if (string.length() > MAX_TYPE_AHEAD_LENGTH) {
+				// add in the entire search term as well
+				List<String> suggestion = tmpSuggestions.get(string);
+				if (suggestion == null) {
+					suggestion = new ArrayList<>();
+				}
+				suggestion.add(string + " [" + hint + "]");
+				Collections.sort(suggestion);
+				tmpSuggestions.put(string.toLowerCase(), suggestion);
 			}
 		}
 	}

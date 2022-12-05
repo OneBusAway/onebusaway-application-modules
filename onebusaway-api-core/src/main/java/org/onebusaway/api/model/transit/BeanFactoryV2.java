@@ -133,6 +133,11 @@ public class BeanFactoryV2 {
     return entry(getStopWithArrivalAndDepartures(result));
   }
 
+  public EntryWithReferencesBean<StopsWithArrivalsAndDeparturesV2Bean> getResponse(
+          StopsWithArrivalsAndDeparturesBean result) {
+      return entry(getStopsWithArrivalAndDepartures(result));
+  }
+
   public EntryWithReferencesBean<ArrivalAndDepartureV2Bean> getResponse(
       ArrivalAndDepartureBean result) {
     return entry(getArrivalAndDeparture(result));
@@ -318,6 +323,20 @@ public class BeanFactoryV2 {
       addToReferences(route);
     }
     bean.setRouteIds(routeIds);
+    if (stop.getParent() != null) {
+      StopBean parent = stop.getParent();
+      StopV2Bean parentBean = new StopV2Bean();
+      parentBean.setCode(parent.getCode());
+      parentBean.setDirection(parent.getDirection());
+      parentBean.setId(parent.getId());
+      parentBean.setLat(parent.getLat());
+      parentBean.setLon(parent.getLon());
+      parentBean.setLocationType(parent.getLocationType());
+      parentBean.setName(parent.getName());
+      parentBean.setWheelchairBoarding(parent.getWheelchairBoarding());
+      bean.setParent(parentBean.getId());
+      _references.addStop(parentBean);
+    }
 
     return bean;
   }
@@ -339,6 +358,7 @@ public class BeanFactoryV2 {
     bean.setServiceId(trip.getServiceId());
     bean.setShapeId(trip.getShapeId());
     bean.setBlockId(trip.getBlockId());
+    bean.setPeakOffpeak(trip.getPeakOffpeak());
 
     return bean;
   }
@@ -974,6 +994,45 @@ public class BeanFactoryV2 {
     return bean;
   }
 
+  public StopsWithArrivalsAndDeparturesV2Bean getStopsWithArrivalAndDepartures(
+          StopsWithArrivalsAndDeparturesBean sad) {
+    StopsWithArrivalsAndDeparturesV2Bean bean = new StopsWithArrivalsAndDeparturesV2Bean();
+
+    bean.setStopIds(new ArrayList<>());
+    for (StopBean sb : sad.getStops()) {
+      bean.getStopIds().add(sb.getId());
+    }
+
+    List<ArrivalAndDepartureV2Bean> ads = new ArrayList<ArrivalAndDepartureV2Bean>();
+    for (ArrivalAndDepartureBean ad : sad.getArrivalsAndDepartures())
+      ads.add(getArrivalAndDeparture(ad));
+    bean.setArrivalsAndDepartures(ads);
+
+    List<StopWithDistance> nearbyStopIds = new ArrayList<>();
+    // these stops are already sorted by proximity
+    for (StopBean nearbyStop : sad.getNearbyStops()) {
+      if (nearbyStop.getDistanceAwayFromQuery() != null) {
+        nearbyStopIds.add(new StopWithDistance(nearbyStop.getId(), nearbyStop.getDistanceAwayFromQuery()));
+        addToReferences(nearbyStop);
+      }
+    }
+    bean.setNearbyStopIds(nearbyStopIds);
+
+    List<ServiceAlertBean> situations = sad.getSituations();
+    if (!CollectionsLibrary.isEmpty(situations)) {
+      List<String> situationIds = new ArrayList<String>();
+      for (ServiceAlertBean situation : situations) {
+        addToReferences(situation);
+        situationIds.add(situation.getId());
+      }
+      bean.setSituationIds(situationIds);
+    }
+
+    bean.setLimitExceeded(sad.isLimitExceeded());
+    return bean;
+
+  }
+
   public ArrivalAndDepartureV2Bean getArrivalAndDeparture(
       ArrivalAndDepartureBean ad) {
 
@@ -1025,6 +1084,9 @@ public class BeanFactoryV2 {
     bean.setScheduledDepartureInterval(getTimeInterval(ad.getScheduledDepartureInterval()));
     bean.setPredictedArrivalInterval(getTimeInterval(ad.getPredictedArrivalInterval()));
     bean.setPredictedDepartureInterval(getTimeInterval(ad.getPredictedDepartureInterval()));
+    bean.setScheduledTrack(ad.getScheduledTrack());
+    bean.setActualTrack(ad.getActualTrack());
+    bean.setStatus(ad.getStatus());
 
     if (ad.getFrequency() != null)
       bean.setFrequency(getFrequency(ad.getFrequency()));
@@ -1128,6 +1190,7 @@ public class BeanFactoryV2 {
     }
 
     bean.setReason(situation.getReason());
+    bean.setConsequenceMessage(situation.getConsequenceMessage());
 
     bean.setSummary(getBestString(situation.getSummaries()));
     bean.setDescription(getBestString(situation.getDescriptions()));
@@ -1352,4 +1415,5 @@ public class BeanFactoryV2 {
                   return null;
           }
   }
+
 }

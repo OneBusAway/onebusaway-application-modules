@@ -60,6 +60,12 @@ public class TimepointPredictionBean implements Serializable {
     }
   }
 
+  private String actualTrack;
+
+  private String scheduledTrack;
+
+  private String status;
+
   public TimepointPredictionBean() {
 
   }
@@ -121,5 +127,29 @@ public class TimepointPredictionBean implements Serializable {
   public boolean isSkipped() {
     return (this.scheduleRelationship != null
         && this.scheduleRelationship.getValue() == ScheduleRelationship.SKIPPED.getValue());
+  }
+
+  public String getActualTrack() {
+    return actualTrack;
+  }
+
+  public void setActualTrack(String actualTrack) {
+    this.actualTrack = actualTrack;
+  }
+
+  public String getScheduledTrack() {
+    return scheduledTrack;
+  }
+
+  public void setScheduledTrack(String scheduledTrack) {
+    this.scheduledTrack = scheduledTrack;
+  }
+
+  public String getStatus() {
+    return status;
+  }
+
+  public void setStatus(String status) {
+    this.status = status;
   }
 }

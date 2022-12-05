@@ -422,7 +422,7 @@ public class BundleManagementServiceImpl implements BundleManagementService {
 
     } catch (Exception e) {
       _log.error("Bundle " + bundleName + "(" + bundleId + ")"
-          + " failed to load. Disabling for this session...");
+          + " failed to load. Disabling for this session...", e);
       _applicableBundles.remove(bundleId);
       reevaluateBundleAssignment();
 

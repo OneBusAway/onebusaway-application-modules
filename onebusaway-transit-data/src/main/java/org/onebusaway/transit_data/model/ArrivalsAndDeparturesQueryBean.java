@@ -16,7 +16,10 @@
 package org.onebusaway.transit_data.model;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
+import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.util.SystemTime;
 
 @QueryBean
@@ -34,6 +37,16 @@ public final class ArrivalsAndDeparturesQueryBean implements Serializable {
 
   private int frequencyMinutesAfter = 30;
 
+  // should the queried for stopIds be included in nearby results
+  private boolean includeInputIdsInNearby = false;
+
+  private int maxCount = Integer.MAX_VALUE;
+
+  // GTFS Route Type
+  private List<Integer> routeTypes =  new ArrayList<>();
+
+  private CoordinateBounds bounds;
+
   public ArrivalsAndDeparturesQueryBean() {
 
   }
@@ -44,6 +57,8 @@ public final class ArrivalsAndDeparturesQueryBean implements Serializable {
     this.minutesAfter = bean.minutesAfter;
     this.frequencyMinutesBefore = bean.frequencyMinutesBefore;
     this.frequencyMinutesAfter = bean.frequencyMinutesAfter;
+    this.includeInputIdsInNearby = bean.includeInputIdsInNearby;
+    this.bounds = bean.bounds;
   }
 
   public long getTime() {
@@ -86,6 +101,56 @@ public final class ArrivalsAndDeparturesQueryBean implements Serializable {
     this.frequencyMinutesAfter = frequencyMinutesAfter;
   }
 
+  /**
+   * if the queried for stopIds are included in the nearby results
+   */
+  public boolean getIncludeInputIdsInNearby() {
+    return includeInputIdsInNearby;
+  }
+
+  /**
+   * include the queried for stopIds in the nearby results
+   * @param flag
+   */
+  public void setIncludeInputIdsInNearby(boolean flag) {
+    this.includeInputIdsInNearby = flag;
+  }
+
+  public int getMaxCount() {
+    return maxCount;
+  }
+
+  public void setMaxCount(int maxCount) {
+    this.maxCount = maxCount;
+  }
+
+  public CoordinateBounds getBounds() {
+    return bounds;
+  }
+
+  public void setBounds(CoordinateBounds bounds) {
+    this.bounds = bounds;
+  }
+
+  public List<Integer> getRouteTypes() {
+    return routeTypes;
+  }
+
+  public void setRouteTypes(List<Integer> types) {
+    this.routeTypes = types;
+  }
+  public void setRouteType(String routeType) {
+    if (routeType == null) return;
+    String[] types = routeType.split(",");
+    for (String type : types) {
+      try {
+        routeTypes.add(Integer.parseInt(type));
+      } catch (NumberFormatException nfe) {
+        // bury
+      }
+    }
+  }
+
   @Override
   public int hashCode() {
     final int prime = 31;
@@ -95,6 +160,8 @@ public final class ArrivalsAndDeparturesQueryBean implements Serializable {
     result = prime * result + minutesAfter;
     result = prime * result + minutesBefore;
     result = prime * result + (int) (time ^ (time >>> 32));
+    if (routeTypes != null)
+      result = prime * result + routeTypes.hashCode();
     return result;
   }
 
@@ -117,6 +184,11 @@ public final class ArrivalsAndDeparturesQueryBean implements Serializable {
       return false;
     if (time != other.time)
       return false;
+    if (routeTypes == null || other.routeTypes == null)
+      if (routeTypes != other.routeTypes)
+        return false;
+    if (!routeTypes.equals(other.routeTypes))
+        return false;
     return true;
   }
 }

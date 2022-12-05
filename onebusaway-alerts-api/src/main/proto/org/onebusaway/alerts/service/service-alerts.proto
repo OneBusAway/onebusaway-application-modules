@@ -75,6 +75,8 @@ message ServiceAlert {
   optional TranslatedString url = 12;
 
   optional string source = 13;
+
+  optional string consequenceMessage = 14;
 }
 
 

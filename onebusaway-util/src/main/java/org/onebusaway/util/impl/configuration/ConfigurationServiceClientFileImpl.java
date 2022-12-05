@@ -39,6 +39,10 @@ public class ConfigurationServiceClientFileImpl implements
 	private static Logger _log = LoggerFactory
 			.getLogger(ConfigurationServiceClientFileImpl.class);
 	private HashMap<String, Object> _config = null;
+	// for unit tests
+	public void setConfig(HashMap<String, Object> config) {
+		_config = config;
+	}
 	
 	private boolean isLocal = true;
 	
@@ -124,7 +128,9 @@ public class ConfigurationServiceClientFileImpl implements
 		      return setting.get("value");  
 		    }
 		  } else {
-  			if ((setting.containsKey("component") && 
+			  // setting is a map of keys "component", "key", and "value"
+			  // corresponding to {"component": "admin", "key": "useTdm", "value": "false"},
+			  if ((setting.containsKey("component") &&
   					component.equals(setting.get("component"))) &&
   				setting.containsKey("key") && 
   				key.equals(setting.get("key"))) {

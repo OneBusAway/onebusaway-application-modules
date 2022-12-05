@@ -35,6 +35,8 @@ public class SituationV2Bean implements HasId, Serializable {
 
   private String reason;
 
+  private String consequenceMessage;
+
   private NaturalLanguageStringV2Bean summary;
 
   private NaturalLanguageStringV2Bean description;
@@ -85,6 +87,14 @@ public class SituationV2Bean implements HasId, Serializable {
 
   public void setReason(String reason) {
     this.reason = reason;
+  }
+
+  public String getConsequenceMessage() {
+    return consequenceMessage;
+  }
+
+  public void setConsequenceMessage(String consequenceMessage) {
+    this.consequenceMessage = consequenceMessage;
   }
 
   public NaturalLanguageStringV2Bean getSummary() {

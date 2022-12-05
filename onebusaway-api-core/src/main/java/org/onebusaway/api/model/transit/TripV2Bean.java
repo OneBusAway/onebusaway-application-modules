@@ -41,6 +41,8 @@ public final class TripV2Bean implements Serializable, HasId {
   
   private String blockId;
 
+  private int peakOffpeak;
+
   public String getId() {
     return id;
   }
@@ -119,5 +121,13 @@ public final class TripV2Bean implements Serializable, HasId {
 
   public void setBlockId(String blockId) {
     this.blockId = blockId;
+  }
+
+  public int getPeakOffpeak() {
+    return peakOffpeak;
+  }
+
+  public void setPeakOffpeak(int peakOffpeak) {
+    this.peakOffpeak = peakOffpeak;
   }
 }

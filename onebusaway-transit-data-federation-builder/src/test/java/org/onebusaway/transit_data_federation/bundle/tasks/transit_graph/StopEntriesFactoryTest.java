@@ -16,9 +16,6 @@
  */
 package org.onebusaway.transit_data_federation.bundle.tasks.transit_graph;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
 import java.util.Arrays;
 import java.util.List;
 
@@ -32,6 +29,8 @@ import org.onebusaway.transit_data_federation.impl.transit_graph.AgencyEntryImpl
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.TransitGraphImpl;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
+
+import static org.junit.Assert.*;
 
 public class StopEntriesFactoryTest {
 
@@ -55,6 +54,7 @@ public class StopEntriesFactoryTest {
     stopB.setLon(-122.1);
     stopB.setLocationType(0);
     stopB.setName("Stop B");
+    stopB.setParentStation("stopA");
 
     GtfsRelationalDao dao = Mockito.mock(GtfsRelationalDao.class);
     Mockito.when(dao.getAllStops()).thenReturn(Arrays.asList(stopA, stopB));
@@ -91,5 +91,7 @@ public class StopEntriesFactoryTest {
     stops = agency.getStops();
     assertTrue(stops.contains(stopEntryA));
     assertTrue(stops.contains(stopEntryB));
+    assertNull(stopA.getParentStation());
+    assertEquals("stopA", stopB.getParentStation());
   }
 }

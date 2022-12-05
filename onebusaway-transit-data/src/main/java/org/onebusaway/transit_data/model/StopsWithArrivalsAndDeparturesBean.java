@@ -18,6 +18,7 @@ package org.onebusaway.transit_data.model;
 import java.util.List;
 
 import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
+import org.onebusaway.transit_data.model.trips.TripBean;
 
 public class StopsWithArrivalsAndDeparturesBean extends ApplicationBean {
 
@@ -32,6 +33,8 @@ public class StopsWithArrivalsAndDeparturesBean extends ApplicationBean {
   private List<ServiceAlertBean> situations;
 
   private String timeZone;
+
+  private boolean limitExceeded;
 
   public StopsWithArrivalsAndDeparturesBean() {
 
@@ -85,5 +88,13 @@ public class StopsWithArrivalsAndDeparturesBean extends ApplicationBean {
 
   public void setTimeZone(String timeZone) {
     this.timeZone = timeZone;
+  }
+
+  public boolean isLimitExceeded() {
+    return limitExceeded;
+  }
+
+  public void setLimitExceeded(boolean limitExceeded) {
+    this.limitExceeded = limitExceeded;
   }
 }

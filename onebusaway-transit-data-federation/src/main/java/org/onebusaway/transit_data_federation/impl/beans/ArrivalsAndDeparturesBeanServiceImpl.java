@@ -33,11 +33,7 @@ import org.onebusaway.transit_data_federation.model.TargetTime;
 import org.onebusaway.transit_data_federation.model.bundle.HistoricalRidership;
 import org.onebusaway.transit_data_federation.model.narrative.StopTimeNarrative;
 import org.onebusaway.transit_data_federation.services.*;
-import org.onebusaway.transit_data_federation.services.beans.ArrivalsAndDeparturesBeanService;
-import org.onebusaway.transit_data_federation.services.beans.ServiceAlertsBeanService;
-import org.onebusaway.transit_data_federation.services.beans.StopBeanService;
-import org.onebusaway.transit_data_federation.services.beans.TripBeanService;
-import org.onebusaway.transit_data_federation.services.beans.TripDetailsBeanService;
+import org.onebusaway.transit_data_federation.services.beans.*;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.narrative.NarrativeService;
 import org.onebusaway.transit_data_federation.services.realtime.ArrivalAndDepartureInstance;
@@ -75,6 +71,8 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
 
   private StopBeanService _stopBeanService;
 
+  private StopsBeanService _stopsBeanService;
+
   private TripDetailsBeanService _tripDetailsBeanService;
 
   private ServiceAlertsBeanService _serviceAlertsBeanService;
@@ -111,6 +109,11 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
   @Autowired
   public void setStopBeanService(StopBeanService stopBeanService) {
     _stopBeanService = stopBeanService;
+  }
+
+  @Autowired
+  public void setStopsBeanService(StopsBeanService stopsBeanService) {
+    _stopsBeanService = stopsBeanService;
   }
 
   @Autowired
@@ -224,13 +227,17 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
         continue;
       
       applySituationsToBean(time, instance, bean);
-
-      beans.add(bean);
+      if (matchesRouteTypeFilter(bean, query.getRouteTypes()))
+        beans.add(bean);
     }
 
     Collections.sort(beans, new ArrivalAndDepartureComparator());
 
     return beans;
+  }
+
+  private boolean matchesRouteTypeFilter(ArrivalAndDepartureBean bean, List<Integer> routeTypes) {
+      return _stopsBeanService.matchesRouteTypeFilter(bean.getStop(), routeTypes);
   }
 
   @Override
@@ -321,9 +328,15 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
     pab.setTotalStopsInTrip(stopTime.getTotalStopsInTrip());
     
     pab.setStatus("default");
+    if (instance.getStatus() != null && instance.getStatus().length() > 0) {
+      pab.setStatus(instance.getStatus());
+    }
 
     pab.setScheduledArrivalTime(instance.getScheduledArrivalTime());
     pab.setScheduledDepartureTime(instance.getScheduledDepartureTime());
+    pab.setActualTrack(instance.getActualTrack());
+    pab.setScheduledTrack(instance.getScheduledTrack());
+
 
     FrequencyEntry frequency = instance.getFrequencyLabel();
     pab.setFrequency(null);

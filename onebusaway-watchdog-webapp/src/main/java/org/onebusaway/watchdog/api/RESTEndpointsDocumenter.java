@@ -34,8 +34,6 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Request;
 
-import org.apache.wink.common.annotations.Parent;
-
 /**
  * Explores the Java classes in a given package, looking for annotations 
  *  indicating REST endpoints. These are written to an HTML table, documenting
@@ -172,14 +170,19 @@ public class RESTEndpointsDocumenter {
             if (annotation != null){
                 path = ((Path)annotation).value() + path;
             }
-            
-            Annotation parent = clazz.getAnnotation(Parent.class);
-            if (parent != null){
-                clazz = ((Parent)parent).value();
-            }
-            else {
-                clazz = null;
-            }
+
+            // this is no longer needed, the tree doesn't need to be recursively parsed
+            // this also removes the apache wink dependency
+//            Annotation parent = clazz.getAnnotation(Parent.class);
+//            if (parent != null){
+//                clazz = ((Parent)parent).value();
+//            }
+//            else {
+//                clazz = null;
+//            }
+            // now we simply exit once we have a path
+            if (path != null)
+                break;
         }
         if (path.endsWith("/") == false){
             path = path + "/";

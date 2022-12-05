@@ -73,7 +73,9 @@ public class TrivialPredictionHelperService implements PredictionHelperService {
 				tpr.setStopSequence(bean.getStopSequence());
 				tpr.setTripId(AgencyAndIdLibrary.convertFromString(bean.getTripId()));
 					tpr.setScheduleRealtionship(bean.getScheduleRelationship().getValue());
-
+				tpr.setActualTrack(bean.getActualTrack());
+				tpr.setScheduledTrack(bean.getScheduledTrack());
+				tpr.setStatus(bean.getStatus());
 				records.add(tpr);
 			}
 

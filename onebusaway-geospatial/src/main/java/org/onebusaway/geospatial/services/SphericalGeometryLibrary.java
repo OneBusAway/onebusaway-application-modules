@@ -125,7 +125,7 @@ public class SphericalGeometryLibrary {
    * @param latOffset
    * @param lonOffset
    * @return 
-   *         CoordinateBounds(lat-latOffser,lon-lonOffset,lat+latOffset,lon+lonOffset
+   *         CoordinateBounds(lat-latOffset,lon-lonOffset,lat+latOffset,lon+lonOffset
    *         )
    */
   public static final CoordinateBounds boundsFromLatLonOffset(double lat,

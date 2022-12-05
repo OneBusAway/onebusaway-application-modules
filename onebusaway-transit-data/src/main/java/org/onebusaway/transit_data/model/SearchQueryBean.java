@@ -18,6 +18,8 @@ package org.onebusaway.transit_data.model;
 import org.onebusaway.geospatial.model.CoordinateBounds;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 @QueryBean
 public class SearchQueryBean implements Serializable {
@@ -25,7 +27,7 @@ public class SearchQueryBean implements Serializable {
   private static final long serialVersionUID = 1L;
 
   public enum EQueryType implements Serializable {
-    BOUNDS, CLOSEST, BOUNDS_OR_CLOSEST
+    BOUNDS, CLOSEST, BOUNDS_OR_CLOSEST, ORDERED_BY_CLOSEST
   }
 
   private EQueryType type;
@@ -38,6 +40,8 @@ public class SearchQueryBean implements Serializable {
   
   // default minimum lucene result score to keep
   private double minScoreToKeep = 1.0;
+
+  private List<Integer> routeTypes = new ArrayList<>();
 
   public EQueryType getType() {
     return type;
@@ -78,4 +82,14 @@ public class SearchQueryBean implements Serializable {
   public void setMinScoreToKeep(double minScoreToKeep) {
     this.minScoreToKeep = minScoreToKeep;
   }
+
+  public List<Integer> getRouteTypes() {
+    return routeTypes;
+  }
+
+  public void setRouteTypes(List<Integer> types) {
+    routeTypes = types;
+  }
+
+
 }

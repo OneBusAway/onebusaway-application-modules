@@ -36,7 +36,7 @@ import java.util.concurrent.TimeUnit;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
-import com.google.transit.realtime.GtfsRealtime;
+import com.google.transit.realtime.*;
 import org.apache.commons.lang.StringUtils;
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
@@ -71,8 +71,6 @@ import com.google.transit.realtime.GtfsRealtime.Alert;
 import com.google.transit.realtime.GtfsRealtime.FeedEntity;
 import com.google.transit.realtime.GtfsRealtime.FeedHeader;
 import com.google.transit.realtime.GtfsRealtime.FeedMessage;
-import com.google.transit.realtime.GtfsRealtimeConstants;
-import com.google.transit.realtime.GtfsRealtimeOneBusAway;
 import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSch;
@@ -91,6 +89,8 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   static {
     _registry.add(GtfsRealtimeOneBusAway.obaFeedEntity);
     _registry.add(GtfsRealtimeOneBusAway.obaTripUpdate);
+    _registry.add(GtfsRealtimeMTARR.mtaRailroadStopTimeUpdate); // track number
+    _registry.add(GtfsRealtimeServiceStatus.mercuryAlert);
   }
 
   private AgencyService _agencyService;
@@ -709,6 +709,9 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
       } else {
         serviceAlertRecord.setSource(getFeedId());
       }
+
+      serviceAlertRecord.setConsequenceMessage(serviceAlert.getConsequenceMessage());
+
       serviceAlertRecord.setAgencyId(id.getAgencyId()); // AGENCY from feed configuration
       serviceAlertRecord.setServiceAlertId(id.getId()); // ID ONLY
 

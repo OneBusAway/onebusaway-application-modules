@@ -29,6 +29,7 @@ import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.trip;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.junit.Before;
@@ -51,10 +52,7 @@ import org.onebusaway.transit_data_federation.model.TargetTime;
 import org.onebusaway.transit_data_federation.model.narrative.StopTimeNarrative;
 import org.onebusaway.transit_data_federation.model.narrative.StopTimeNarrative.Builder;
 import org.onebusaway.transit_data_federation.services.ArrivalAndDepartureService;
-import org.onebusaway.transit_data_federation.services.beans.ServiceAlertsBeanService;
-import org.onebusaway.transit_data_federation.services.beans.StopBeanService;
-import org.onebusaway.transit_data_federation.services.beans.TripBeanService;
-import org.onebusaway.transit_data_federation.services.beans.TripDetailsBeanService;
+import org.onebusaway.transit_data_federation.services.beans.*;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.narrative.NarrativeService;
 import org.onebusaway.transit_data_federation.services.realtime.ArrivalAndDepartureInstance;
@@ -72,6 +70,7 @@ public class ArrivalsAndDeparturesBeanServiceImplTest {
   private ArrivalAndDepartureService _arrivalAndDepartureService;
   private TripBeanService _tripBeanService;
   private StopBeanService _stopBeanService;
+  private StopsBeanService _stopsBeanService;
   private TripDetailsBeanService _tripDetailsBeanService;
   private ServiceAlertsBeanService _serviceAlertsBeanService;
   private GtfsRealtimeNegativeArrivals _gtfsRealtimeNegativeArrivals;
@@ -95,6 +94,9 @@ public class ArrivalsAndDeparturesBeanServiceImplTest {
 
     _stopBeanService = Mockito.mock(StopBeanService.class);
     _service.setStopBeanService(_stopBeanService);
+
+    _stopsBeanService = Mockito.mock(StopsBeanService.class);
+    _service.setStopsBeanService(_stopsBeanService);
 
     _tripDetailsBeanService = Mockito.mock(TripDetailsBeanService.class);
     _service.setTripDetailsBeanService(_tripDetailsBeanService);
@@ -330,6 +332,14 @@ public class ArrivalsAndDeparturesBeanServiceImplTest {
     Mockito.when(
         _tripDetailsBeanService.getBlockLocationAsStatusBean(blockLocationC, t)).thenReturn(
         tripStatusBeanC);
+
+    Mockito.when(
+            _stopsBeanService.matchesRouteTypeFilter(stopABean, Collections.emptyList())).thenReturn(Boolean.TRUE);
+    Mockito.when(
+            _stopsBeanService.matchesRouteTypeFilter(stopBBean, Collections.emptyList())).thenReturn(Boolean.TRUE);
+    Mockito.when(
+            _stopsBeanService.matchesRouteTypeFilter(stopCBean, Collections.emptyList())).thenReturn(Boolean.TRUE);
+
 
     /****
      * 

@@ -18,6 +18,7 @@ package org.onebusaway.alerts.impl;
 import java.util.Date;
 import java.util.List;
 
+import org.hibernate.NonUniqueResultException;
 import org.hibernate.query.Query;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
@@ -174,10 +175,19 @@ public class ServiceAlertsPersistenceDB implements ServiceAlertsPersistence {
   @Override
   @Transactional
   public ServiceAlertRecord getServiceAlertRecordByAlertId(final String agencyId, final String serviceAlertId) {
-      Query query = getSession().createQuery("SELECT serviceAlert FROM ServiceAlertRecord serviceAlert WHERE serviceAlertId = :serviceAlertId and agencyId = :agencyId");
-      query.setString("serviceAlertId", serviceAlertId);
-      query.setString("agencyId", agencyId);
+    Query query = getSession().createQuery("SELECT serviceAlert FROM ServiceAlertRecord serviceAlert WHERE serviceAlertId = :serviceAlertId and agencyId = :agencyId");
+    query.setString("serviceAlertId", serviceAlertId);
+    query.setString("agencyId", agencyId);
+    try {
       return (ServiceAlertRecord) query.uniqueResult();
+    } catch (NonUniqueResultException nure) {
+      List list = query.list();
+        _log.error("expected single result for {}:{}, got {}", agencyId, serviceAlertId, list);
+        // TODO: logging not configured for alerts-persistence, go to console for now
+        System.out.println("getServiceAlertRecordByAlertId expected single result for " + agencyId
+                + ":" + serviceAlertId);
+        return (ServiceAlertRecord) query.list().get(0);
+    }
   }
 
   private Long getLastModified() {

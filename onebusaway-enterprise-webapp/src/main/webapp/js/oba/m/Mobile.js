@@ -325,6 +325,14 @@ OBA.Mobile = (function() {
 		initialize: function() {
 			locationField = jQuery("#l");
 			typeField = jQuery("#t");
+			// if query is not present but hash is, reload with the hash as query
+			if (window.location.href.indexOf('q=') < 0 && window.location.hash.length > 1) {
+				var queryString = "?q=" + window.location.hash.substring(1);
+				window.location.hash = "";
+				// hash trumps any existing params, we simply overwrite them
+				window.location.search = queryString;
+				return;
+			}
 			
 			if(navigator.geolocation) {
 				initLocationUI();

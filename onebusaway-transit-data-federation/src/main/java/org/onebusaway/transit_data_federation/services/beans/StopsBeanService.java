@@ -23,6 +23,8 @@ import org.onebusaway.transit_data.model.SearchQueryBean;
 import org.onebusaway.transit_data.model.StopBean;
 import org.onebusaway.transit_data.model.StopsBean;
 
+import java.util.List;
+
 /**
  * Service methods for retrieving lists of stops, usually with a search query.
  * Note that a {@link StopBean} is our portable representation of a {@link Stop}
@@ -57,4 +59,12 @@ public interface StopsBeanService {
    * @throws ServiceException
    */
   public StopsBean getStopsByName(String stopName) throws ServiceException;
+
+  /**
+   * test if the given stop matches the applied filter
+   * @param stop
+   * @param routeTypesFilter List of GTFS route types, empty means match all
+   * @return
+   */
+  public boolean matchesRouteTypeFilter(StopBean stop, List<Integer> routeTypesFilter);
 }

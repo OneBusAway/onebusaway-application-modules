@@ -64,4 +64,10 @@ public interface ConfigurationService {
    * @return collection of all config key value pairs
    */
   public Map<String, String> getConfiguration();
+
+    /**
+     * support for agency-based configuration.  Looks like this:
+     * {"component": "agency_1", "key": "hideScheduleInfo", "value": "true"}
+     */
+  public boolean getConfigurationFlagForAgency(String agencyId, String configurationItemKey);
 }

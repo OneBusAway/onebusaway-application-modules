@@ -136,6 +136,10 @@ public class CustomXStreamHandler extends XStreamHandler {
     xstream.alias("stopCalendarDay", StopCalendarDayV2Bean.class);
     xstream.alias("stopWithArrivalsAndDepartures",
         StopWithArrivalsAndDeparturesV2Bean.class);
+    xstream.alias("stopsWithArrivalsAndDepartures",
+            StopsWithArrivalsAndDeparturesV2Bean.class);
+    xstream.alias("stopWithDistance",
+            StopWithDistance.class);
     xstream.alias("arrivalAndDeparture", ArrivalAndDepartureV2Bean.class);
     xstream.alias("agencyWithCoverage", AgencyWithCoverageV2Bean.class);
     xstream.alias("stopsForRoute", StopsForRouteV2Bean.class);

@@ -30,6 +30,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+import com.google.transit.realtime.GtfsRealtimeMTARR;
+import com.google.transit.realtime.GtfsRealtimeNYCT;
 import org.apache.commons.lang.StringUtils;
 import org.onebusaway.collections.MappingLibrary;
 import org.onebusaway.collections.Min;
@@ -673,28 +675,6 @@ public class GtfsRealtimeTripLibrary {
 
       if (updatesForTrip != null) {
         for (TripUpdate tripUpdate : updatesForTrip) {
-          /**
-           * TODO: delete this code once all upstream systems have been
-           * migrated the new "delay" and "timestamp" fields.
-           */
-          if (tripUpdate.hasExtension(GtfsRealtimeOneBusAway.obaTripUpdate) && onBestTrip) {
-            OneBusAwayTripUpdate obaTripUpdate = tripUpdate.getExtension(GtfsRealtimeOneBusAway.obaTripUpdate);
-            if (obaTripUpdate.hasDelay()) {
-              /**
-               * TODO: Improved logic around picking the "best" schedule deviation
-               */
-              int delay = obaTripUpdate.getDelay();
-              best.delta = 0;
-              best.isInPast = false;
-              best.scheduleDeviation = delay;
-              best.tripId = tripId;
-              tripUpdateHasDelay = true;
-            }
-
-            if (obaTripUpdate.hasTimestamp() && onBestTrip) {
-              best.timestamp = obaTripUpdate.getTimestamp() * 1000;
-            }
-          }
 
           if (tripUpdate.hasDelay() && onBestTrip) {
             /**
@@ -784,6 +764,25 @@ public class GtfsRealtimeTripLibrary {
                 // TODO refactor TDS to support timepoint records for multiple trips
                 if (onBestTrip)
                   timepointPredictions.add(tpr);
+              }
+
+              if (stopTimeUpdate.hasExtension(GtfsRealtimeNYCT.nyctStopTimeUpdate)) {
+                GtfsRealtimeNYCT.NyctStopTimeUpdate ext = stopTimeUpdate.getExtension(GtfsRealtimeNYCT.nyctStopTimeUpdate);
+                if (ext.hasScheduledTrack()) {
+                  tpr.setScheduledTrack(ext.getScheduledTrack());
+                }
+                if (ext.hasActualTrack()) {
+                  tpr.setActualTrack(ext.getActualTrack());
+                }
+              }
+              if (stopTimeUpdate.hasExtension(GtfsRealtimeMTARR.mtaRailroadStopTimeUpdate)) {
+                GtfsRealtimeMTARR.MtaRailroadStopTimeUpdate ext = stopTimeUpdate.getExtension(GtfsRealtimeMTARR.mtaRailroadStopTimeUpdate);
+                if (ext.hasTrack()) {
+                  tpr.setActualTrack(ext.getTrack());
+                }
+                if (ext.hasTrainStatus()) {
+                  tpr.setStatus(ext.getTrainStatus());
+                }
               }
 
             } // end not skipped
