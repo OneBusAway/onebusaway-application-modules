@@ -15,9 +15,7 @@
  */
 package org.onebusaway.api.actions.api.where;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import org.apache.struts2.rest.DefaultHttpHeaders;
 import org.onebusaway.api.actions.api.ApiActionSupport;
@@ -26,13 +24,11 @@ import org.onebusaway.api.model.where.ArrivalAndDepartureBeanV1;
 import org.onebusaway.api.model.where.StopWithArrivalsAndDeparturesBeanV1;
 import org.onebusaway.exceptions.NoSuchStopServiceException;
 import org.onebusaway.exceptions.ServiceException;
-import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
-import org.onebusaway.transit_data.model.ArrivalsAndDeparturesQueryBean;
-import org.onebusaway.transit_data.model.RouteBean;
-import org.onebusaway.transit_data.model.StopBean;
-import org.onebusaway.transit_data.model.StopWithArrivalsAndDeparturesBean;
+import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.transit_data.model.*;
 import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.transit_data.services.TransitDataService;
+import org.onebusaway.util.AgencyAndIdLibrary;
 import org.onebusaway.util.SystemTime;
 import org.onebusaway.util.services.configuration.ConfigurationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -94,6 +90,15 @@ public class ArrivalsAndDeparturesForStopAction extends ApiActionSupport {
 
 
   public DefaultHttpHeaders show() throws ServiceException {
+    HashSet<String> agenciesExcludingScheduled = new HashSet<String>();
+    List<AgencyWithCoverageBean> allAgencies = _service.getAgenciesWithCoverage();
+    for (AgencyWithCoverageBean agencyBean: allAgencies){
+      String agency = agencyBean.getAgency().getId();
+      if(_configService.getConfigurationFlagForAgency(agency, "hideScheduleInfo")){
+        agenciesExcludingScheduled.add(agency);
+      }
+    }
+    _query.setAgenciesExcludingScheduled(agenciesExcludingScheduled);
 
     if (hasErrors())
       return setValidationErrorsResponse();

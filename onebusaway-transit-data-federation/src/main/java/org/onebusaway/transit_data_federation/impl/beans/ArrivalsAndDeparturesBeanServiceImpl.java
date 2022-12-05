@@ -203,6 +203,13 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
     Map<AgencyAndId, StopBean> stopBeanCache = new HashMap<AgencyAndId, StopBean>();
 
     for (ArrivalAndDepartureInstance instance : instances) {
+      String agency = instance.getBlockInstance().getBlock().getBlock().getId().getAgencyId();
+      HashSet<String> agenciesExcludingScheduled = query.getAgenciesExcludingScheduled();
+      if(!instance.isPredictedArrivalTimeSet() && !instance.isPredictedDepartureTimeSet()){
+        if(query.getAgenciesExcludingScheduled().contains(instance.getBlockInstance().getBlock().getBlock().getId().getAgencyId())){
+          continue;
+        }
+      }
 
       FrequencyEntry frequency = instance.getFrequency();
 
