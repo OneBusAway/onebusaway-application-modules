@@ -16,11 +16,14 @@
 package org.onebusaway.api.actions.api.where;
 
 import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
 
 import org.apache.struts2.rest.DefaultHttpHeaders;
 import org.onebusaway.api.actions.api.ApiActionSupport;
 import org.onebusaway.api.model.transit.BeanFactoryV2;
 import org.onebusaway.exceptions.ServiceException;
+import org.onebusaway.transit_data.model.AgencyWithCoverageBean;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureForStopQueryBean;
 import org.onebusaway.transit_data.services.TransitDataService;
@@ -30,7 +33,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.opensymphony.xwork2.conversion.annotations.TypeConversion;
 import com.opensymphony.xwork2.validator.annotations.RequiredFieldValidator;
 
+import org.onebusaway.util.services.configuration.ConfigurationService;
+
 public class ArrivalAndDepartureForStopAction extends ApiActionSupport {
+
+  private ConfigurationService _configService;
 
   private static final long serialVersionUID = 1L;
 
@@ -104,7 +111,20 @@ public class ArrivalAndDepartureForStopAction extends ApiActionSupport {
     if (_query.getTime() == 0)
       _query.setTime(SystemTime.currentTimeMillis());
 
+    HashSet<String> agenciesExcludingScheduled = new HashSet<String>();
+    List<AgencyWithCoverageBean> allAgencies = _service.getAgenciesWithCoverage();
+    for (AgencyWithCoverageBean agencyBean: allAgencies){
+      String agency = agencyBean.getAgency().getId();
+      if(_configService.getConfigurationFlagForAgency(agency, "hideScheduleInfo")){
+        agenciesExcludingScheduled.add(agency);
+      }
+    }
+    _query.setAgenciesExcludingScheduled(agenciesExcludingScheduled);
+
     ArrivalAndDepartureBean result = _service.getArrivalAndDepartureForStop(_query);
+
+    if(!result.hasPredictedArrivalTime() && !result.hasPredictedDepartureTime()){
+    }
 
     if (result == null)
       return setResourceNotFoundResponse();

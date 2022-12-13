@@ -16,6 +16,7 @@
 package org.onebusaway.transit_data.model;
 
 import java.io.Serializable;
+import java.util.HashSet;
 
 @QueryBean
 public final class ArrivalAndDepartureForStopQueryBean implements Serializable {
@@ -33,6 +34,8 @@ public final class ArrivalAndDepartureForStopQueryBean implements Serializable {
   private int stopSequence = -1;
 
   private long time;
+
+  private HashSet<String> agenciesExcludingScheduled;
 
   public String getTripId() {
     return tripId;
@@ -81,4 +84,13 @@ public final class ArrivalAndDepartureForStopQueryBean implements Serializable {
   public void setTime(long time) {
     this.time = time;
   }
+
+  public void setAgenciesExcludingScheduled(HashSet<String> agenciesExcludingScheduled) {
+    this.agenciesExcludingScheduled = agenciesExcludingScheduled;
+  }
+
+  public HashSet<String> getAgenciesExcludingScheduled(){
+    return this.agenciesExcludingScheduled;
+  }
+
 }

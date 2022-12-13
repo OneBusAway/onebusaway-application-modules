@@ -45,6 +45,7 @@ import org.onebusaway.transit_data_federation.services.transit_graph.FrequencyEn
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
+import org.onebusaway.util.services.configuration.ConfigurationService;
 import org.onebusaway.utility.EInRangeStrategy;
 import org.onebusaway.utility.EOutOfRangeStrategy;
 import org.onebusaway.utility.InterpolationLibrary;
@@ -59,6 +60,8 @@ import java.util.*;
 
 @Component
 class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
+
+  private ConfigurationService _configService;
 
   private static Logger _log = LoggerFactory.getLogger(ArrivalAndDepartureServiceImpl.class);
   
@@ -256,6 +259,14 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
     ArrivalAndDepartureInstance instance = createArrivalAndDeparture(
         blockInstance, trip.getId(), stop.getId(), stopSequence, serviceDate,
         timeOfServiceDate, time);
+
+    String agency = instance.getBlockInstance().getBlock().getBlock().getId().getAgencyId();
+    HashSet<String> agenciesExcludingScheduled = query.getAgenciesExcludingScheduled();
+    if(!instance.isPredictedArrivalTimeSet() && !instance.isPredictedDepartureTimeSet()){
+      if(query.getAgenciesExcludingScheduled().contains(instance.getBlockInstance().getBlock().getBlock().getId().getAgencyId())){
+        return null;
+      }
+    }
 
     if (!locations.isEmpty()) {
 
