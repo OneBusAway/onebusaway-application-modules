@@ -23,7 +23,6 @@ import org.apache.struts2.rest.DefaultHttpHeaders;
 import org.onebusaway.api.actions.api.ApiActionSupport;
 import org.onebusaway.api.model.transit.BeanFactoryV2;
 import org.onebusaway.exceptions.ServiceException;
-import org.onebusaway.transit_data.model.AgencyWithCoverageBean;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureForStopQueryBean;
 import org.onebusaway.transit_data.services.TransitDataService;
@@ -36,8 +35,6 @@ import com.opensymphony.xwork2.validator.annotations.RequiredFieldValidator;
 import org.onebusaway.util.services.configuration.ConfigurationService;
 
 public class ArrivalAndDepartureForStopAction extends ApiActionSupport {
-
-  private ConfigurationService _configService;
 
   private static final long serialVersionUID = 1L;
 
