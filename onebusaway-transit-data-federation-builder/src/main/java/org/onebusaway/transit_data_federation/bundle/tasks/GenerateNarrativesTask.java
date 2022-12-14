@@ -532,6 +532,7 @@ public class GenerateNarrativesTask implements Runnable {
     builder.setRouteShortName(deduplicate(trip.getRouteShortName()));
     builder.setTripHeadsign(deduplicate(headsign));
     builder.setTripShortName(deduplicate(trip.getTripShortName()));
+    builder.setPeakOffpeak(trip.getPeakOffpeak());
     return builder.create();
   }
 

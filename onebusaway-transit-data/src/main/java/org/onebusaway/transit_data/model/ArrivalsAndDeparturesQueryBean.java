@@ -16,9 +16,10 @@
 package org.onebusaway.transit_data.model;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Set;
 
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.util.SystemTime;
@@ -43,6 +44,9 @@ public final class ArrivalsAndDeparturesQueryBean implements Serializable {
 
   private int maxCount = Integer.MAX_VALUE;
 
+  // GTFS Route Type
+  private List<Integer> routeTypes =  new ArrayList<>();
+
   private CoordinateBounds bounds;
 
   private HashSet<String> agenciesExcludingScheduled = new HashSet<>();
@@ -57,7 +61,7 @@ public final class ArrivalsAndDeparturesQueryBean implements Serializable {
     this.minutesAfter = bean.minutesAfter;
     this.frequencyMinutesBefore = bean.frequencyMinutesBefore;
     this.frequencyMinutesAfter = bean.frequencyMinutesAfter;
-    this.includeInputIdsInNearby = bean .includeInputIdsInNearby;
+    this.includeInputIdsInNearby = bean.includeInputIdsInNearby;
     this.bounds = bean.bounds;
   }
 
@@ -132,6 +136,25 @@ public final class ArrivalsAndDeparturesQueryBean implements Serializable {
     this.bounds = bounds;
   }
 
+  public List<Integer> getRouteTypes() {
+    return routeTypes;
+  }
+
+  public void setRouteTypes(List<Integer> types) {
+    this.routeTypes = types;
+  }
+  public void setRouteType(String routeType) {
+    if (routeType == null) return;
+    String[] types = routeType.split(",");
+    for (String type : types) {
+      try {
+        routeTypes.add(Integer.parseInt(type));
+      } catch (NumberFormatException nfe) {
+        // bury
+      }
+    }
+  }
+
   public void setAgenciesExcludingScheduled(HashSet<String> agencies){
     this.agenciesExcludingScheduled = agencies;
   }
@@ -149,6 +172,8 @@ public final class ArrivalsAndDeparturesQueryBean implements Serializable {
     result = prime * result + minutesAfter;
     result = prime * result + minutesBefore;
     result = prime * result + (int) (time ^ (time >>> 32));
+    if (routeTypes != null)
+      result = prime * result + routeTypes.hashCode();
     return result;
   }
 
@@ -171,6 +196,11 @@ public final class ArrivalsAndDeparturesQueryBean implements Serializable {
       return false;
     if (time != other.time)
       return false;
+    if (routeTypes == null || other.routeTypes == null)
+      if (routeTypes != other.routeTypes)
+        return false;
+    if (!routeTypes.equals(other.routeTypes))
+        return false;
     return true;
   }
 }

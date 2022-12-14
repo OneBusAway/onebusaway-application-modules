@@ -54,14 +54,20 @@ public class StopEntryImpl implements StopEntry, Serializable {
 
   private transient List<FrequencyStopTripIndex> _frequencyStopTripIndices = null;
 
-  public StopEntryImpl(AgencyAndId id, double lat, double lon) {
-    if (id == null)
-      throw new IllegalArgumentException("id must not be null");
-    _id = id;
-    _lat = lat;
-    _lon = lon;
+  private final AgencyAndId _parent;
+
+  public StopEntryImpl(AgencyAndId id, double lat, double lon, AgencyAndId parent) {
+      if (id == null)
+        throw new IllegalArgumentException("id must not be null");
+      _id = id;
+      _lat = lat;
+      _lon = lon;
+    _parent = parent;
   }
-  
+  public StopEntryImpl(AgencyAndId id, double lat, double lon) {
+    this(id, lat, lon, null);
+  }
+
   public void setWheelchairBoarding(EAccessibility wheelchairBoarding) {
     _wheelchairBoarding = wheelchairBoarding;
   }
@@ -151,6 +157,10 @@ public class StopEntryImpl implements StopEntry, Serializable {
   @Override
   public int getIndex() {
     return _index;
+  }
+
+  public AgencyAndId getParent() {
+    return _parent;
   }
 
   /****

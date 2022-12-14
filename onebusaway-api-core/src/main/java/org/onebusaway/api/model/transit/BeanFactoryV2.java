@@ -323,6 +323,20 @@ public class BeanFactoryV2 {
       addToReferences(route);
     }
     bean.setRouteIds(routeIds);
+    if (stop.getParent() != null) {
+      StopBean parent = stop.getParent();
+      StopV2Bean parentBean = new StopV2Bean();
+      parentBean.setCode(parent.getCode());
+      parentBean.setDirection(parent.getDirection());
+      parentBean.setId(parent.getId());
+      parentBean.setLat(parent.getLat());
+      parentBean.setLon(parent.getLon());
+      parentBean.setLocationType(parent.getLocationType());
+      parentBean.setName(parent.getName());
+      parentBean.setWheelchairBoarding(parent.getWheelchairBoarding());
+      bean.setParent(parentBean.getId());
+      _references.addStop(parentBean);
+    }
 
     return bean;
   }
@@ -344,6 +358,7 @@ public class BeanFactoryV2 {
     bean.setServiceId(trip.getServiceId());
     bean.setShapeId(trip.getShapeId());
     bean.setBlockId(trip.getBlockId());
+    bean.setPeakOffpeak(trip.getPeakOffpeak());
 
     return bean;
   }
@@ -1014,7 +1029,6 @@ public class BeanFactoryV2 {
     }
 
     bean.setLimitExceeded(sad.isLimitExceeded());
-
     return bean;
 
   }
@@ -1070,6 +1084,9 @@ public class BeanFactoryV2 {
     bean.setScheduledDepartureInterval(getTimeInterval(ad.getScheduledDepartureInterval()));
     bean.setPredictedArrivalInterval(getTimeInterval(ad.getPredictedArrivalInterval()));
     bean.setPredictedDepartureInterval(getTimeInterval(ad.getPredictedDepartureInterval()));
+    bean.setScheduledTrack(ad.getScheduledTrack());
+    bean.setActualTrack(ad.getActualTrack());
+    bean.setStatus(ad.getStatus());
 
     if (ad.getFrequency() != null)
       bean.setFrequency(getFrequency(ad.getFrequency()));
@@ -1173,6 +1190,7 @@ public class BeanFactoryV2 {
     }
 
     bean.setReason(situation.getReason());
+    bean.setConsequenceMessage(situation.getConsequenceMessage());
 
     bean.setSummary(getBestString(situation.getSummaries()));
     bean.setDescription(getBestString(situation.getDescriptions()));

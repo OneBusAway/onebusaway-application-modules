@@ -99,10 +99,14 @@ class StopWithArrivalsAndDeparturesBeanServiceImpl implements
 
       List<ArrivalAndDepartureBean> arrivalsAndDepartures = _arrivalsAndDeparturesBeanService.getArrivalsAndDeparturesByStopId(
           id, query);
-      allArrivalsAndDepartures.addAll(arrivalsAndDepartures);
+      if (!arrivalsAndDepartures.isEmpty()) {
+        // we only add stopBean if it actually has results
+        stops.add(stopBean);
+        allArrivalsAndDepartures.addAll(arrivalsAndDepartures);
+      }
 
       List<AgencyAndId> nearbyStopIds = _nearbyStopsBeanService.getNearbyStops(
-          stopBean, 100);
+          stopBean, 100, query.getRouteTypes());
       // these stops need a distanceFromQuery as well -- its added below
       allNearbyStopIds.addAll(nearbyStopIds);
 

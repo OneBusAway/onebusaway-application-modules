@@ -107,6 +107,15 @@ class StopBeanServiceImpl implements StopBeanService {
 
     StopBean sb = new StopBean();
     fillStopBean(stop, narrative, sb);
+    if (stop.getParent() != null) {
+      AgencyAndId parentId = stop.getParent();
+      StopBean parentBean = new StopBean();
+      StopNarrative parentNarrative = _narrativeService.getStopForId(parentId);
+      StopEntry parent = _transitGraphDao.getStopEntryForId(parentId);
+      fillStopBean(parent, parentNarrative, parentBean);
+      fillRoutesForStopBean(parent, parentBean, serviceDate);
+      sb.setParent(parentBean);
+    }
     fillRoutesForStopBean(stop, sb, serviceDate);
     return sb;
   }

@@ -61,38 +61,27 @@ public class S3BundleStoreImpl extends AbstractBundleStoreImpl implements Bundle
 
     @Override
     public List<BundleItem> getBundles() throws Exception {
-        ExternalServices es = new ExternalServicesBridgeFactory().getExternalServices();
-        String s3IndexFile = remoteIndexURI;
-        es.getFileAsStream(s3IndexFile, new InputStreamConsumer() {
-            @Override
-            public void accept(InputStream inputStream) throws IOException {
-                ObjectMapper mapper = new ObjectMapper();
-                if (inputStream == null) {
-                    _log.error("no content for index {}", remoteIndexURI);
-                    return;
-                }
-                JsonParser parser = mapper.createParser(inputStream);
-                TreeNode treeNode = parser.readValueAsTree();
-                TreeNode latestNode = treeNode.get("latest");
-                if (latestNode == null || !latestNode.isValueNode()) {
-                    _log.error("unexpected format for index {}, {}", remoteIndexURI, parser.getValueAsString());
-                    return;
-                }
-                String latest = latestNode.toString();
-                if (latest != null && latest.indexOf("\"") != -1)
-                    latest = latest.replace("\"", "");
-
-                if (StringUtils.isBlank(latest)) {
-                    _log.error("no value retrieved for key latest at {}", remoteIndexURI);
-                    return;
-                }
-                _log.info("found latest bundle at {}", latest);
+        // for testing we support a file:/// or / syntax
+        if (isFile(remoteIndexURI)) {
+            String indexFile = remoteIndexURI.replaceFirst("file:", "");
+            _log.info("looking for index file on disk at " + indexFile);
+           String latest = parseConfigFromStream(new FileInputStream(indexFile));
+            if (latest != null)
                 setLatestBundleURI(latest);
-            }
-        }, getProfile(), getRegion());
-
+        } else {
+            ExternalServices es = new ExternalServicesBridgeFactory().getExternalServices();
+            String s3IndexFile = remoteIndexURI;
+            es.getFileAsStream(s3IndexFile, new InputStreamConsumer() {
+                @Override
+                public void accept(InputStream inputStream) throws IOException {
+                    String latest = parseConfigFromStream(inputStream);
+                    if (latest != null)
+                        setLatestBundleURI(latest);
+                }
+            }, getProfile(), getRegion());
+        }
         if (this.latestBundleURI == null)
-            throw new RuntimeException("no index file found at " + s3IndexFile);
+            throw new RuntimeException("no index file found at " + remoteIndexURI);
 
         String bundleRoot = this._bundleRootPath;
         String[] bundleNameParts = latestBundleURI.split("/");
@@ -104,25 +93,19 @@ public class S3BundleStoreImpl extends AbstractBundleStoreImpl implements Bundle
         } else {
             // download and extract bundle
             if (latestBundleURI != null) {
-                es.getFileAsStream(latestBundleURI, new InputStreamConsumer() {
-                    @Override
-                    public void accept(InputStream inputStream) throws IOException {
-                        String bundleLocation = bundleRoot + File.separator + bundleName;
-                        new File(bundleLocation).mkdirs();
-                        File bundleFile = new File(bundleLocation + ".tar.gz");
-                        bundleFile.createNewFile();
-                        _log.info("copying bundle to {}", bundleFile);
-                        FileOutputStream fileStream = new FileOutputStream(bundleFile);
-                        IOUtils.copy(inputStream, fileStream);
-                        _log.info("new bundle at {}", bundleLocation);
-                        Process exec = Runtime.getRuntime().exec("tar zxvf " + bundleFile + " -C " + bundleRoot);
-                        try {
-                            int i = exec.waitFor();
-                        } catch (InterruptedException e) {
-                            return;
+                if (isFile(latestBundleURI)) {
+                    String bundleFile = latestBundleURI.replaceFirst("file:", "");
+                    _log.info("loading bundle file on disk at " + bundleFile);
+                    extractBundleFromInput(new FileInputStream(bundleFile), bundleRoot, bundleName);
+                } else {
+                    ExternalServices es = new ExternalServicesBridgeFactory().getExternalServices();
+                    es.getFileAsStream(latestBundleURI, new InputStreamConsumer() {
+                        @Override
+                        public void accept(InputStream inputStream) throws IOException {
+                            FileOutputStream fileStream = extractBundleFromInput(inputStream, bundleRoot, bundleName);
                         }
-                    }
-                }, getProfile(), getRegion());
+                    }, getProfile(), getRegion());
+                }
             }
         }
 
@@ -156,6 +139,57 @@ public class S3BundleStoreImpl extends AbstractBundleStoreImpl implements Bundle
         bundleItems.add(validLocalBundle);
         _log.info("created bundleItems for local bundle {}", possibleBundle);
         return bundleItems;
+    }
+
+    private boolean isFile(String remoteIndexURI) {
+        if (remoteIndexURI == null) return false;
+        return remoteIndexURI.startsWith("/")
+                || remoteIndexURI.startsWith("file:///");
+    }
+
+    private FileOutputStream extractBundleFromInput(InputStream inputStream, String bundleRoot, String bundleName) throws IOException {
+        String bundleLocation = bundleRoot + File.separator + bundleName;
+
+        new File(bundleLocation).mkdirs();
+        File bundleFile = new File(bundleLocation + ".tar.gz");
+        bundleFile.createNewFile();
+        _log.info("copying bundle to {}", bundleFile);
+        FileOutputStream fileStream = new FileOutputStream(bundleFile);
+        IOUtils.copy(inputStream, fileStream);
+        _log.info("new bundle at {}", bundleLocation);
+        Process exec = Runtime.getRuntime().exec("tar zxvf " + bundleFile + " -C " + bundleRoot);
+        try {
+            int i = exec.waitFor();
+        } catch (InterruptedException e) {
+            return null;
+        }
+
+        return fileStream;
+    }
+
+    private String parseConfigFromStream(InputStream inputStream) throws IOException {
+        ObjectMapper mapper = new ObjectMapper();
+        if (inputStream == null) {
+            _log.error("no content for index {}", remoteIndexURI);
+            return null;
+        }
+        JsonParser parser = mapper.createParser(inputStream);
+        TreeNode treeNode = parser.readValueAsTree();
+        TreeNode latestNode = treeNode.get("latest");
+        if (latestNode == null || !latestNode.isValueNode()) {
+            _log.error("unexpected format for index {}, {}", remoteIndexURI, parser.getValueAsString());
+            return null;
+        }
+        String latest = latestNode.toString();
+        if (latest != null && latest.indexOf("\"") != -1)
+            latest = latest.replace("\"", "");
+
+        if (StringUtils.isBlank(latest)) {
+            _log.error("no value retrieved for key latest at {}", remoteIndexURI);
+            return null;
+        }
+        _log.info("found latest bundle at {}", latest);
+        return latest;
     }
 
     private boolean bundleExists(String bundleName) {

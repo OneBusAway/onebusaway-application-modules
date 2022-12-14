@@ -70,5 +70,4 @@ public class StopsWithArrivalsAndDeparturesV2Bean implements Serializable {
     public void setLimitExceeded(boolean limitExceeded) {
         this.limitExceeded = limitExceeded;
     }
-
 }

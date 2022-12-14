@@ -88,6 +88,10 @@ public class ArrivalAndDepartureV2Bean implements Serializable {
   
   private int totalStopsInTrip;
 
+  private String scheduledTrack;
+
+  private String actualTrack;
+
   public String getRouteId() {
     return routeId;
   }
@@ -344,7 +348,23 @@ public void setTotalStopsInTrip(int totalStopsInTrip) {
 	this.totalStopsInTrip = totalStopsInTrip;
 }
 
-public long computeBestArrivalTime() {
+  public String getScheduledTrack() {
+    return scheduledTrack;
+  }
+
+  public void setScheduledTrack(String scheduledTrack) {
+    this.scheduledTrack = scheduledTrack;
+  }
+
+  public String getActualTrack() {
+    return actualTrack;
+  }
+
+  public void setActualTrack(String actualTrack) {
+    this.actualTrack = actualTrack;
+  }
+
+  public long computeBestArrivalTime() {
     return hasPredictedArrivalTime() ? getPredictedArrivalTime()
         : getScheduledArrivalTime();
   }

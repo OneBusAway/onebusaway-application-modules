@@ -25,6 +25,7 @@ import org.onebusaway.exceptions.OutOfServiceAreaServiceException;
 import org.onebusaway.exceptions.ServiceException;
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.transit_data.model.*;
+import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.util.SystemTime;
 import org.onebusaway.util.services.configuration.ConfigurationService;
@@ -33,7 +34,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.io.IOException;
 import java.sql.Date;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * inspired by ArrivalsAndDepartureForStop, but returns multiple stops
@@ -108,6 +111,12 @@ public class ArrivalsAndDeparturesForLocationAction extends ApiActionSupport {
         emptyReturnsNotFound = flag;
     }
 
+    /**
+     * comma delimited list of GTFS route types
+      */
+    public void setRouteType(String routeType) {
+        _query.setRouteType(routeType);
+    }
     public void setMaxCount(int maxCount) {
         _maxCount.setMaxCount(maxCount);
     }
@@ -128,6 +137,7 @@ public class ArrivalsAndDeparturesForLocationAction extends ApiActionSupport {
         // new EQueryType that keeps results consistent if limitExceed is true
         // previous searches deliberately shuffled results
         searchQuery.setType(SearchQueryBean.EQueryType.ORDERED_BY_CLOSEST);
+        searchQuery.setRouteTypes(_query.getRouteTypes());
 
         ArrivalsAndDeparturesQueryBean adQuery = _query;
         adQuery.setIncludeInputIdsInNearby(true); // include the queried ids in nearby

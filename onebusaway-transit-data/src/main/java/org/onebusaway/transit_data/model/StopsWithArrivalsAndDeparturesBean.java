@@ -18,6 +18,7 @@ package org.onebusaway.transit_data.model;
 import java.util.List;
 
 import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
+import org.onebusaway.transit_data.model.trips.TripBean;
 
 public class StopsWithArrivalsAndDeparturesBean extends ApplicationBean {
 
