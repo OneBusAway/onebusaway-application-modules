@@ -63,6 +63,7 @@ public final class ArrivalsAndDeparturesQueryBean implements Serializable {
     this.frequencyMinutesAfter = bean.frequencyMinutesAfter;
     this.includeInputIdsInNearby = bean.includeInputIdsInNearby;
     this.bounds = bean.bounds;
+    this.agenciesExcludingScheduled = bean.agenciesExcludingScheduled;
   }
 
   public long getTime() {

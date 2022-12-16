@@ -143,6 +143,7 @@ public class ArrivalsAndDeparturesForLocationAction extends ApiActionSupport {
         adQuery.setIncludeInputIdsInNearby(true); // include the queried ids in nearby
         adQuery.setMaxCount(maxCount); // limit nearby results appropriately
         adQuery.setBounds(searchQuery.getBounds());
+        adQuery.setAgenciesExcludingScheduled(this.getAgenciesExcludingScheduled());
         StopsWithArrivalsAndDeparturesBean adResult = null;
         try {
             StopsBean stopResult = _service.getStops(searchQuery);
