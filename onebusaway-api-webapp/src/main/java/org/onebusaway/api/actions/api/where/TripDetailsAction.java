@@ -16,6 +16,7 @@
 package org.onebusaway.api.actions.api.where;
 
 import java.util.Date;
+import java.util.HashSet;
 
 import org.apache.struts2.rest.DefaultHttpHeaders;
 import org.onebusaway.api.actions.api.ApiActionSupport;
@@ -27,6 +28,7 @@ import org.onebusaway.transit_data.model.trips.TripDetailsBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsInclusionBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsQueryBean;
 import org.onebusaway.transit_data.services.TransitDataService;
+import org.onebusaway.util.AgencyAndIdLibrary;
 import org.onebusaway.util.SystemTime;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -119,6 +121,13 @@ public class TripDetailsAction extends ApiActionSupport {
 
     if (trip == null)
       return setResourceNotFoundResponse();
+    HashSet agenciesExcludingScheduled = this.getAgenciesExcludingScheduled();
+    if(agenciesExcludingScheduled.contains(AgencyAndIdLibrary.convertFromString(trip.getTripId()).getAgencyId())){
+      if (trip.getStatus().getVehicleId() == null){
+        return setResourceNotFoundResponse();
+      }
+    }
+
 
     BeanFactoryV2 factory = getBeanFactoryV2();
     EntryWithReferencesBean<TripDetailsV2Bean> response = factory.getResponse(trip);

@@ -18,6 +18,8 @@ package org.onebusaway.transit_data.model;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Collections;
+import java.util.HashSet;
 
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.util.SystemTime;
@@ -46,6 +48,8 @@ public final class ArrivalsAndDeparturesQueryBean implements Serializable {
   private List<Integer> routeTypes =  new ArrayList<>();
 
   private CoordinateBounds bounds;
+
+  private HashSet<String> agenciesExcludingScheduled = new HashSet<>();
 
   public ArrivalsAndDeparturesQueryBean() {
 
@@ -149,6 +153,14 @@ public final class ArrivalsAndDeparturesQueryBean implements Serializable {
         // bury
       }
     }
+  }
+
+  public void setAgenciesExcludingScheduled(HashSet<String> agencies){
+    this.agenciesExcludingScheduled = agencies;
+  }
+
+  public HashSet<String> getAgenciesExcludingScheduled(){
+    return this.agenciesExcludingScheduled;
   }
 
   @Override

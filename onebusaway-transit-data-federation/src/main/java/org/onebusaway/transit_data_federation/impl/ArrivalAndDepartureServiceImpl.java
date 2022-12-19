@@ -257,6 +257,14 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
         blockInstance, trip.getId(), stop.getId(), stopSequence, serviceDate,
         timeOfServiceDate, time);
 
+    String agency = instance.getBlockInstance().getBlock().getBlock().getId().getAgencyId();
+    HashSet<String> agenciesExcludingScheduled = query.getAgenciesExcludingScheduled();
+    if(!instance.isPredictedArrivalTimeSet() && !instance.isPredictedDepartureTimeSet()){
+      if(query.getAgenciesExcludingScheduled().contains(instance.getBlockInstance().getBlock().getBlock().getId().getAgencyId())){
+        return null;
+      }
+    }
+
     if (!locations.isEmpty()) {
 
       /**

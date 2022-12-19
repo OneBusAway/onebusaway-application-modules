@@ -807,6 +807,7 @@ public class TransitDataServiceTemplateImpl implements TransitDataServiceTemplat
     adQuery.setServiceDate(query.getServiceDate());
     adQuery.setVehicleId(AgencyAndIdLibrary.convertFromString(query.getVehicleId()));
     adQuery.setTime(query.getTime());
+    adQuery.setAgenciesExcludingScheduled(query.getAgenciesExcludingScheduled());
 
     return adQuery;
   }
