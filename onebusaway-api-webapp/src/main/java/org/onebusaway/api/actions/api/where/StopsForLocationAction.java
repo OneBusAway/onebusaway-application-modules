@@ -16,6 +16,8 @@
 package org.onebusaway.api.actions.api.where;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.struts2.rest.DefaultHttpHeaders;
 import org.onebusaway.api.actions.api.ApiActionSupport;
@@ -59,6 +61,9 @@ public class StopsForLocationAction extends ApiActionSupport {
 
   private MaxCountSupport _maxCount = new MaxCountSupport(100, 250);
 
+  // GTFS route type (3=bus)
+  private String _routeType;
+
   private String _query;
 
   public StopsForLocationAction() {
@@ -93,6 +98,10 @@ public class StopsForLocationAction extends ApiActionSupport {
     _maxCount.setMaxCount(maxCount);
   }
 
+  public void setRouteType(String routeType) {
+    this._routeType = routeType;
+  }
+
   public DefaultHttpHeaders index() throws IOException, ServiceException {
 
     int maxCount = _maxCount.getMaxCount();
@@ -109,6 +118,13 @@ public class StopsForLocationAction extends ApiActionSupport {
     searchQuery.setBounds(bounds);
     searchQuery.setMaxCount(maxCount);
     searchQuery.setType(EQueryType.BOUNDS);
+    if (_routeType != null && _routeType.length() > 0) {
+      List<Integer> routeFilters = new ArrayList<>();
+      for (String typeStr : _routeType.split(",")) {
+        routeFilters.add(Integer.parseInt(typeStr));
+      }
+      searchQuery.setRouteTypes(routeFilters);
+    }
     if (_query != null) {
       searchQuery.setQuery(_query);
       searchQuery.setType(EQueryType.BOUNDS_OR_CLOSEST);
