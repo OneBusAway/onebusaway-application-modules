@@ -119,6 +119,8 @@ public class StopsForLocationAction extends ApiActionSupport {
     searchQuery.setMaxCount(maxCount);
     searchQuery.setType(EQueryType.BOUNDS);
     if (_routeType != null && _routeType.length() > 0) {
+      // for this filtering to work we need to order the results
+      searchQuery.setType(SearchQueryBean.EQueryType.ORDERED_BY_CLOSEST);
       List<Integer> routeFilters = new ArrayList<>();
       for (String typeStr : _routeType.split(",")) {
         routeFilters.add(Integer.parseInt(typeStr));
