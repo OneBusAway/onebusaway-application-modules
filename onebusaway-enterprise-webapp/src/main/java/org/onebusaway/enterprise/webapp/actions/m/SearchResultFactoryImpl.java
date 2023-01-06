@@ -496,9 +496,8 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
 		  MonitoredVehicleJourneyStructure journey, long updateTime,
 	      boolean isStopContext) {
 
-	  NaturalLanguageStringStructure progressStatus = journey.getProgressStatus();
 	  MonitoredCallStructure monitoredCall = journey.getMonitoredCall();
-	  
+
 	  if(!isStopContext) {
 		  return null;
 	  }
@@ -509,30 +508,49 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
 	  if (age > staleTimeout) {
 		  return null;
 	  }
-	  
-	  if(monitoredCall.getExpectedArrivalTime() != null) {
-		  long predictedArrival = monitoredCall.getExpectedArrivalTime().getTime();
 
-		  SiriExtensionWrapper wrapper = (SiriExtensionWrapper) monitoredCall.getExtensions().getAny();
-		  SiriDistanceExtension distanceExtension = wrapper.getDistances();
-		  String distance = distanceExtension.getPresentableDistance();
-      //add space to the distance so that occupancy lines up correctly with time [pjm]
+      if (isTerminal(journey)) {
+        if (monitoredCall.getExpectedDepartureTime() != null) {
+          return getPresentableTime(journey, updateTime, monitoredCall.getExpectedDepartureTime().getTime(), "DEPARTS ");
+        }
+      }
+      if (monitoredCall.getExpectedArrivalTime() != null) {
+        return getPresentableTime(journey, updateTime, monitoredCall.getExpectedArrivalTime().getTime(), "ARR ");
+      }
 
-      double minutes = Math.floor((predictedArrival - updateTime) / 60 / 1000);
-		  String timeString = Math.round(minutes) + " minute" + ((Math.abs(minutes) != 1) ? "s" : "");
-      String timeAndDistance = "<strong>" + timeString + "</strong>, " + distance;
-      String loadOccupancy = getPresentableOccupancy(journey, updateTime);
-
-      if(progressStatus != null && progressStatus.getValue().contains("prevTrip")) {
-		    	return timeString;
-		  } else {
-		    	return timeAndDistance + ", " + loadOccupancy;
-		  }
-	  }
-	  
 	  return null;
-  }	  
-  
+  }
+
+  private String getPresentableTime(MonitoredVehicleJourneyStructure journey, long updateTime, long arrivalOrDeparture, String qualifierText) {
+    NaturalLanguageStringStructure progressStatus = journey.getProgressStatus();
+    MonitoredCallStructure monitoredCall = journey.getMonitoredCall();
+
+    SiriExtensionWrapper wrapper = (SiriExtensionWrapper) monitoredCall.getExtensions().getAny();
+    SiriDistanceExtension distanceExtension = wrapper.getDistances();
+    String distance = distanceExtension.getPresentableDistance();
+
+    double minutes = Math.floor((arrivalOrDeparture - updateTime) / 60 / 1000);
+    String timeString = Math.round(minutes) + " minute" + ((Math.abs(minutes) != 1) ? "s" : "");
+    String timeAndDistance = "<strong>" + timeString + "</strong>, " + distance;
+    String loadOccupancy = getPresentableOccupancy(journey, updateTime);
+
+    if(progressStatus != null && progressStatus.getValue().contains("prevTrip")) {
+      return qualifierText + timeString;
+    } else {
+      return qualifierText + timeAndDistance + ", " + loadOccupancy;
+    }
+
+  }
+
+  private boolean isTerminal(MonitoredVehicleJourneyStructure journey) {
+    String origin = journey.getOriginRef().getValue();
+    String destination = journey.getDestinationRef().getValue();
+    String currentStop = journey.getMonitoredCall().getStopPointRef().getValue();
+    if (currentStop == null)
+      return false;
+    return (currentStop.equals(origin) || currentStop.equals(destination));
+  }
+
   private String getPresentableDistance(
       MonitoredVehicleJourneyStructure journey, long updateTime,
       boolean isStopContext) {
