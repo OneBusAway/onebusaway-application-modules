@@ -114,6 +114,9 @@ public class ArrivalAndDepartureForStopAction extends ApiActionSupport {
 
     ArrivalAndDepartureBean result = _service.getArrivalAndDepartureForStop(_query);
 
+    if(!result.hasPredictedArrivalTime() && !result.hasPredictedDepartureTime()){
+      return setResourceNotFoundResponse();
+    }
     if (result == null)
       return setResourceNotFoundResponse();
 
