@@ -17,7 +17,6 @@ package org.onebusaway.api.actions.api.where;
 
 import java.util.Date;
 import java.util.HashSet;
-import java.util.List;
 
 import org.apache.struts2.rest.DefaultHttpHeaders;
 import org.onebusaway.api.actions.api.ApiActionSupport;
@@ -31,8 +30,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.opensymphony.xwork2.conversion.annotations.TypeConversion;
 import com.opensymphony.xwork2.validator.annotations.RequiredFieldValidator;
-
-import org.onebusaway.util.services.configuration.ConfigurationService;
 
 public class ArrivalAndDepartureForStopAction extends ApiActionSupport {
 
@@ -114,9 +111,6 @@ public class ArrivalAndDepartureForStopAction extends ApiActionSupport {
 
     ArrivalAndDepartureBean result = _service.getArrivalAndDepartureForStop(_query);
 
-    if(!result.hasPredictedArrivalTime() && !result.hasPredictedDepartureTime()){
-      return setResourceNotFoundResponse();
-    }
     if (result == null)
       return setResourceNotFoundResponse();
 
