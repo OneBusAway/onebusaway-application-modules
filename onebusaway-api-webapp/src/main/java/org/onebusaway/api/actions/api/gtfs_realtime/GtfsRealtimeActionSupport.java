@@ -24,6 +24,8 @@ import org.onebusaway.exceptions.ServiceException;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.util.SystemTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.google.transit.realtime.GtfsRealtime.FeedHeader;
@@ -35,6 +37,7 @@ import com.opensymphony.xwork2.validator.annotations.RequiredFieldValidator;
 public abstract class GtfsRealtimeActionSupport extends ApiActionSupport {
 
   private static final long serialVersionUID = 1L;
+  private static Logger _log = LoggerFactory.getLogger(GtfsRealtimeActionSupport.class);
 
   enum FILTER_TYPE {
     UNFILTERED,
@@ -108,7 +111,12 @@ public abstract class GtfsRealtimeActionSupport extends ApiActionSupport {
       fillFeedMessage(feed, _agencyId, time, FILTER_TYPE.UNFILTERED, null);
     }
 
-    return setOkResponse(feed.build());
+    try {
+      return setOkResponse(feed.build());
+    } catch (Throwable t) {
+      _log.error("exception constructing GTFS-RT:", t, t);
+      return setExceptionResponse();
+    }
   }
 
   protected abstract void fillFeedMessage(FeedMessage.Builder feed,
