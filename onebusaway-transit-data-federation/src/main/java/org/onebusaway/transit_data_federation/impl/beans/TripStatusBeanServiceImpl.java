@@ -347,6 +347,7 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
         }
 
         tpb.setTimepointId(tpr.getTimepointId().toString());
+        // This may not be the expected trip (returning entire block now)
         tpb.setTripId(tpr.getTripId().toString());
         tpb.setStopSequence(tpr.getStopSequence());
         tpb.setTimepointPredictedArrivalTime(tpr.getTimepointPredictedArrivalTime());

@@ -667,6 +667,7 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
           instance.getStop().getId());
       boolean sequenceMatches = tpr.getStopSequence() > 0
           && tpr.getStopSequence() == gtfsSequence;
+      // records may have predictions across multiple blocks
       if (!tripMatches || !stopMatches)
         continue;
 

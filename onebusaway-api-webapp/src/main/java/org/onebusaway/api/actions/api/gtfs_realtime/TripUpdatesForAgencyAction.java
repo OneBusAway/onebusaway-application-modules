@@ -32,6 +32,9 @@ import com.google.transit.realtime.GtfsRealtime.VehicleDescriptor;
 import org.onebusaway.transit_data.model.trips.TimepointPredictionBean;
 import org.onebusaway.util.AgencyAndIdLibrary;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class TripUpdatesForAgencyAction extends GtfsRealtimeActionSupport {
 
   private static final long serialVersionUID = 2L;
@@ -56,56 +59,118 @@ public class TripUpdatesForAgencyAction extends GtfsRealtimeActionSupport {
         continue;
       }
 
-      FeedEntity.Builder entity = feed.addEntityBuilder();
-      entity.setId(Integer.toString(feed.getEntityCount()));
-      TripUpdate.Builder tripUpdate = entity.getTripUpdateBuilder();
-
-      TripDescriptor.Builder tripDesc = tripUpdate.getTripBuilder();
-      tripDesc.setTripId(normalizeId(activeTrip.getId()));
-      tripDesc.setRouteId(normalizeId(route.getId()));
-
-      VehicleDescriptor.Builder vehicleDesc = tripUpdate.getVehicleBuilder();
-      vehicleDesc.setId(normalizeId(vehicle.getVehicleId()));
-
-      if (tripStatus.getTimepointPredictions() != null && tripStatus.getTimepointPredictions().size() > 0) {
-        for (TimepointPredictionBean timepointPrediction: tripStatus.getTimepointPredictions()) {
-          AgencyAndId stopId = modifiedStopId(agencyId, timepointPrediction.getTimepointId());
-          TripUpdate.StopTimeUpdate.Builder stopTimeUpdate = tripUpdate.addStopTimeUpdateBuilder();
-          /*
-           NOTE: here we may serve a stop that belongs to a separate agency and GTFS-RT leaves no way
-           * to indicate that
-           */
-          stopTimeUpdate.setStopId(normalizeId(stopId.toString()));
-          TripUpdate.StopTimeEvent.Builder arrival = stopTimeUpdate.getArrivalBuilder();
-          if (timepointPrediction.getTimepointPredictedArrivalTime() != -1) {
-            arrival.setTime(timepointPrediction.getTimepointPredictedArrivalTime()/1000L);
-          }
-  
-          TripUpdate.StopTimeEvent.Builder departure = stopTimeUpdate.getDepartureBuilder();
-          if (timepointPrediction.getTimepointPredictedDepartureTime() != -1) {
-            departure.setTime(timepointPrediction.getTimepointPredictedDepartureTime()/1000L);
-          }
-
-	      
-        }
-        
-        tripUpdate.setTimestamp(vehicle.getLastUpdateTime() / 1000);
+      List<TripUpdate.Builder> tripUpdates = new ArrayList<>();
+      if (tripStatus.getTimepointPredictions() != null && !tripStatus.getTimepointPredictions().isEmpty()) {
+        // use the predictions that we fed to us, not the trivial trip delay propagation
+        // also support multiple tripUpdates on the block, not just the active trip
+        tripUpdates.addAll(serveTripUpdatesFromTimepoints(agencyId, tripStatus, feed, timestamp));
       } else {
-        StopBean nextStop = tripStatus.getNextStop();
-        if (nextStop != null) {
-          AgencyAndId stopId = modifiedStopId(agencyId, nextStop.getId());
-          if (stopId.getAgencyId().equals(agencyId)) {
-            TripUpdate.StopTimeUpdate.Builder stopTimeUpdate = tripUpdate.addStopTimeUpdateBuilder();
-            stopTimeUpdate.setStopId(normalizeId(stopId.toString()));
-            TripUpdate.StopTimeEvent.Builder departure = stopTimeUpdate.getDepartureBuilder();
-            departure.setTime(timestamp / 1000 + tripStatus.getNextStopTimeOffset());
-          }
-        }
-        
+        // we still support legacy trip delay propagation
+        tripUpdates.add(serveTripUpdatesFromStatus(agencyId, tripStatus, feed, timestamp));
       }
-      tripUpdate.setDelay((int) tripStatus.getScheduleDeviation());
-      tripUpdate.setTimestamp(vehicle.getLastUpdateTime() / 1000);
+
+      for (TripUpdate.Builder tripUpdate : tripUpdates) {
+        // we add a vehicle descriptor to each update
+        // this may wrong for downstream trips
+        tripUpdate.setTimestamp(vehicle.getLastUpdateTime() / 1000);
+        VehicleDescriptor.Builder vehicleDesc = tripUpdate.getVehicleBuilder();
+        vehicleDesc.setId(normalizeId(vehicle.getVehicleId()));
+      }
     }
+  }
+
+  private TripUpdate.Builder serveTripUpdatesFromStatus(String agencyId, TripStatusBean tripStatus, FeedMessage.Builder feed, long timestamp) {
+
+    TripBean activeTrip = tripStatus.getActiveTrip();
+
+    FeedEntity.Builder entity = feed.addEntityBuilder();
+    // make the id something meaningful and distinct
+    entity.setId(activeTrip.getId() + "_" + timestamp);
+    TripUpdate.Builder tripUpdate = entity.getTripUpdateBuilder();
+
+    TripDescriptor.Builder tripDesc = tripUpdate.getTripBuilder();
+    tripDesc.setTripId(normalizeId(activeTrip.getId()));
+    RouteBean route = activeTrip.getRoute();
+    tripDesc.setRouteId(normalizeId(route.getId()));
+    StopBean nextStop = tripStatus.getNextStop();
+    if (nextStop != null) {
+      AgencyAndId stopId = modifiedStopId(agencyId, nextStop.getId());
+      if (stopId.getAgencyId().equals(agencyId)) {
+        // create the minimal and single stopTimeUpdate using schedule deviation
+        TripUpdate.StopTimeUpdate.Builder stopTimeUpdate = tripUpdate.addStopTimeUpdateBuilder();
+        stopTimeUpdate.setStopId(normalizeId(stopId.toString()));
+        TripUpdate.StopTimeEvent.Builder departure = stopTimeUpdate.getDepartureBuilder();
+        departure.setTime(timestamp / 1000 + tripStatus.getNextStopTimeOffset());
+      }
+    }
+    tripUpdate.setDelay((int) tripStatus.getScheduleDeviation());
+    return tripUpdate;
+
+  }
+
+  private List<TripUpdate.Builder> serveTripUpdatesFromTimepoints(String agencyId, TripStatusBean tripStatus, FeedMessage.Builder feed, long timestamp) {
+    TripBean activeTrip = tripStatus.getActiveTrip();
+    List<TripUpdate.Builder> tripUpdates = new ArrayList<>();
+
+    for (String activeTripId : activeTripsIds(tripStatus)) {
+      FeedEntity.Builder entity = feed.addEntityBuilder();
+      // make the id something meaningful and distinct
+      entity.setId(activeTripId + "_" + timestamp);
+      TripUpdate.Builder tripUpdate = entity.getTripUpdateBuilder();
+      tripUpdates.add(tripUpdate);
+      TripDescriptor.Builder tripDesc = tripUpdate.getTripBuilder();
+      tripDesc.setTripId(normalizeId(activeTripId));
+
+
+      if (activeTripId.equals(activeTrip.getId())) {
+        RouteBean route = activeTrip.getRoute();
+        // we only know route if we are on activeTrip
+        // the block may interline!
+        tripDesc.setRouteId(normalizeId(route.getId()));
+        tripUpdate.setDelay((int) tripStatus.getScheduleDeviation());
+      }
+
+      for (TimepointPredictionBean timepointPrediction : tripStatus.getTimepointPredictions()) {
+        if (!timepointPrediction.getTripId().equals(activeTripId)) {
+          continue;
+        }
+
+        AgencyAndId stopId = modifiedStopId(agencyId, timepointPrediction.getTimepointId());
+        TripUpdate.StopTimeUpdate.Builder stopTimeUpdate = tripUpdate.addStopTimeUpdateBuilder();
+        /*
+         NOTE: here we may serve a stop that belongs to a separate agency and GTFS-RT leaves no way
+         * to indicate that
+         */
+        stopTimeUpdate.setStopId(normalizeId(stopId.toString()));
+        TripUpdate.StopTimeEvent.Builder arrival = stopTimeUpdate.getArrivalBuilder();
+        if (timepointPrediction.getTimepointPredictedArrivalTime() != -1) {
+          arrival.setTime(timepointPrediction.getTimepointPredictedArrivalTime() / 1000L);
+        }
+
+        TripUpdate.StopTimeEvent.Builder departure = stopTimeUpdate.getDepartureBuilder();
+        if (timepointPrediction.getTimepointPredictedDepartureTime() != -1) {
+          departure.setTime(timepointPrediction.getTimepointPredictedDepartureTime() / 1000L);
+        }
+        tripUpdate.setTimestamp(timestamp / 1000);
+      }
+    }
+    return tripUpdates;
+  }
+
+
+
+  private List<String> activeTripsIds(TripStatusBean tripStatus) {
+    ArrayList<String> activeTrips = new ArrayList<>();
+    if (tripStatus.getTimepointPredictions().isEmpty()) {
+      activeTrips.add(tripStatus.getActiveTrip().getId());
+    } else {
+      for (TimepointPredictionBean timepointPrediction : tripStatus.getTimepointPredictions()) {
+        if (!activeTrips.contains(timepointPrediction.getTripId())) {
+          activeTrips.add(timepointPrediction.getTripId());
+        }
+      }
+    }
+    return activeTrips;
   }
 
 }

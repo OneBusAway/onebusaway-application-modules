@@ -134,18 +134,18 @@ public class GtfsRealtimeTripLibraryTest {
 
     CombinedTripUpdatesAndVehiclePosition group = groups.get(0);
     assertSame(blockA, group.block.getBlockInstance().getBlock().getBlock());
-    assertEquals(2, group.tripUpdates.size());
-    TripUpdate tripUpdate = group.tripUpdates.get(0);
+    assertEquals(2, group.getTripUpdatesSize());
+    TripUpdate tripUpdate = group.getTripUpdates().get(0);
     assertEquals("tripA", tripUpdate.getTrip().getTripId());
-    tripUpdate = group.tripUpdates.get(1);
+    tripUpdate = group.getTripUpdates().get(1);
     assertEquals("tripB", tripUpdate.getTrip().getTripId());
 
     group = groups.get(1);
     assertSame(blockB, group.block.getBlockInstance().getBlock().getBlock());
-    assertEquals(2, group.tripUpdates.size());
-    tripUpdate = group.tripUpdates.get(0);
+    assertEquals(2, group.getTripUpdatesSize());
+    tripUpdate = group.getTripUpdates().get(0);
     assertEquals("tripC", tripUpdate.getTrip().getTripId());
-    tripUpdate = group.tripUpdates.get(1);
+    tripUpdate = group.getTripUpdates().get(1);
     assertEquals("tripD", tripUpdate.getTrip().getTripId());
 
     VehicleLocationRecord record = _library.createVehicleLocationRecordForUpdate(groups.get(0));
@@ -183,7 +183,7 @@ public class GtfsRealtimeTripLibraryTest {
     CombinedTripUpdatesAndVehiclePosition update = new CombinedTripUpdatesAndVehiclePosition();
     update.block = new BlockDescriptor();
     update.block.setBlockInstance(blockInstanceA);
-    update.tripUpdates = Arrays.asList(tripUpdate);
+    update.setTripUpdates(Arrays.asList(tripUpdate));
 
     VehicleLocationRecord record = _library.createVehicleLocationRecordForUpdate(update);
     assertEquals(123456789000L, record.getTimeOfRecord());
@@ -220,7 +220,7 @@ public class GtfsRealtimeTripLibraryTest {
     CombinedTripUpdatesAndVehiclePosition update = new CombinedTripUpdatesAndVehiclePosition();
     update.block = new BlockDescriptor();
     update.block.setBlockInstance(blockInstanceA);
-    update.tripUpdates = Arrays.asList(tripUpdate);
+    update.setTripUpdates(Arrays.asList(tripUpdate));
 
     VehicleLocationRecord record = _library.createVehicleLocationRecordForUpdate(update);
     
@@ -260,7 +260,7 @@ public class GtfsRealtimeTripLibraryTest {
     CombinedTripUpdatesAndVehiclePosition update = new CombinedTripUpdatesAndVehiclePosition();
     update.block = new BlockDescriptor();
     update.block.setBlockInstance(blockInstanceA);
-    update.tripUpdates = Collections.singletonList(tripUpdate);
+    update.setTripUpdates(Collections.singletonList(tripUpdate));
 
     StopModificationStrategy strategy = Mockito.mock(StopModificationStrategy.class);
     Mockito.when(strategy.convertStopId("replaceA")).thenReturn("stopA");
@@ -512,7 +512,7 @@ public class GtfsRealtimeTripLibraryTest {
   }
 
   /**
-   * This method tests that we DO NOT propagate a time point prediction record
+   * This method tests that we (finally) propagate a time point prediction record
    * when it comes from a trip that hasn't started yet.
    *
    * Current time = 7:31. Trip update delay = 2 minutes
@@ -520,10 +520,8 @@ public class GtfsRealtimeTripLibraryTest {
    * Stop A (trip A)  7:30             7:33
    * Stop A (trip B)  7:40             7:44
    *
-   * TODO:  Ideally this would be propagated, but the TDS expects the trp
-   * to correspond to the trip, and will serve bad predictions otherwise
-   * TODO:  Refactor the TDS to have block level support for predictions
-   * and improve GtfsRealtimeTripLibrary to parse all predictions along
+   * The TDS finally has block level support for predictions
+   * and GtfsRealtimeTripLibrary parses all predictions along
    * that block
    */
   @Test
@@ -563,9 +561,8 @@ public class GtfsRealtimeTripLibraryTest {
     assertEquals(tripADept, time(7, 33) * 1000);
 
     long tripBDept = getPredictedDepartureTimeByStopIdAndTripId(record, "stopA", "tripB");
-    // TODO
-    //assertEquals(tripBDept, time(7, 44) * 1000);
-    assertEquals(tripBDept, -1);
+    // prediction for next trip, tripB
+    assertEquals(tripBDept, time(7, 44) * 1000);
   }
 
   @Test
@@ -665,6 +662,10 @@ public class GtfsRealtimeTripLibraryTest {
   }
 
 
+  /**
+   * This test has been updated to demonstrate support for multiple trips on the
+   * same block
+   */
   @Test
   public void testCombinedUpdateWithRealtimeVehicleAndAnonVehicle() {
     GtfsRealtime.VehiclePosition.Builder vehicleWithVId = GtfsRealtime.VehiclePosition.newBuilder();
@@ -704,6 +705,7 @@ public class GtfsRealtimeTripLibraryTest {
     Mockito.when(_entitySource.getTrip("tripA")).thenReturn(tripA);
     Mockito.when(_entitySource.getTrip("tripB")).thenReturn(tripB);
     Mockito.when(_entitySource.getTrip("tripC")).thenReturn(tripC);
+    // trips A,B and C belong to block A
     BlockEntryImpl blockA = block("blockA");
     BlockConfigurationEntry blockConfigA = blockConfiguration(blockA,
             serviceIds("s1"), tripA, tripB, tripC);
@@ -747,8 +749,12 @@ public class GtfsRealtimeTripLibraryTest {
     assertEquals(1, groups.size());
     CombinedTripUpdatesAndVehiclePosition c = groups.get(0);
     assertNotNull(c.vehiclePosition);
-    assertNotNull(c.tripUpdates);
-    assertEquals(1, c.tripUpdates.size());
+    assertNotNull(c.getTripUpdates());
+    assertEquals(3, c.getTripUpdatesSize());
+    // ordering is now important!
+    assertEquals("tripA", c.getTripUpdates().get(0).getTrip().getTripId());
+    assertEquals("tripB", c.getTripUpdates().get(1).getTrip().getTripId());
+    assertEquals("tripC", c.getTripUpdates().get(2).getTrip().getTripId());
   }
 
   private static FeedMessage.Builder createFeed() {

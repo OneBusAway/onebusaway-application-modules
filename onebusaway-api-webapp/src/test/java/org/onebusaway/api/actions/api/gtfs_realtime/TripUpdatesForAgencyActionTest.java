@@ -122,7 +122,7 @@ public class TripUpdatesForAgencyActionTest {
 
     {
       FeedEntity entity = feed.getEntity(0);
-      assertEquals("1", entity.getId());
+      assertEquals("1_t0_" + now, entity.getId());
       TripUpdate tripUpdate = entity.getTripUpdate();
       assertEquals("t0", tripUpdate.getTrip().getTripId());
       assertEquals("r1", tripUpdate.getTrip().getRouteId());
@@ -136,7 +136,7 @@ public class TripUpdatesForAgencyActionTest {
     }
     {
       FeedEntity entity = feed.getEntity(1);
-      assertEquals("2", entity.getId());
+      assertEquals("1_t1_" + now, entity.getId());
       TripUpdate tripUpdate = entity.getTripUpdate();
       assertEquals("t1", tripUpdate.getTrip().getTripId());
       assertEquals("r1", tripUpdate.getTrip().getRouteId());

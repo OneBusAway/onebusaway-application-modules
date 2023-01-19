@@ -282,7 +282,8 @@ public final class SiriSupport {
 				monitoredVehicleJourney.setOriginAimedDepartureTime(departureTime);
 			}
 		}    
-		
+
+		// TODO this will have an issue with loop routes!
 		Map<String, TimepointPredictionRecord> stopIdToPredictionRecordMap = new HashMap<String, TimepointPredictionRecord>();
 		
 		// (build map of vehicle IDs to TPRs)
@@ -584,6 +585,7 @@ public final class SiriSupport {
 								stopTime.getDistanceAlongBlock() - blockTrip.getDistanceAlongBlock(),
 								stopTime.getDistanceAlongBlock() - distanceOfVehicleAlongBlock,
 								visitNumber, blockTripStopsAfterTheVehicle - 1,
+								/* TODO currently stopId, should also be indexed on stop sequence as well*/
 								stopLevelPredictions.get(monitoredCallStopBean.getId()),
 								hasRealtimeData,
 								responseTimestamp,

@@ -1084,6 +1084,7 @@ public class BlockLocationServiceImpl implements BlockLocationService,
     for (TimepointPredictionRecord tpr : predictions) {
       // because the builder does not support schedule relationship suppress skipped stops
       if (!tpr.isSkipped()) {
+        // note: this may return trips outside active trip
         builder.setTimepointId(tpr.getTimepointId());
         builder.setTimepointScheduledTime(tpr.getTimepointScheduledTime());
         builder.setTimepointPredictedArrivalTime(tpr.getTimepointPredictedArrivalTime());

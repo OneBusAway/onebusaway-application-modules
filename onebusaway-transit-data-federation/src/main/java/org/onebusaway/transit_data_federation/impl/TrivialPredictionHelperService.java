@@ -64,6 +64,10 @@ public class TrivialPredictionHelperService implements PredictionHelperService {
 
 		if (beans != null && beans.size() > 0) {
 			for (TimepointPredictionBean bean : beans) {
+				if (!tripStatus.getActiveTrip().getId().equals(bean.getTripId())) {
+					_log.debug("skipping timepoint for non-active trip {}", bean.getTripId());
+					continue;
+				}
 				TimepointPredictionRecord tpr = new TimepointPredictionRecord();
 
 				tpr.setTimepointId(AgencyAndIdLibrary.convertFromString(bean.getTimepointId()));
