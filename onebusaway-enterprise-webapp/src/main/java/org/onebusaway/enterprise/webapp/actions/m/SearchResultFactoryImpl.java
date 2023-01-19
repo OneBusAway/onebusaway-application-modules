@@ -543,6 +543,12 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
   }
 
   private boolean isTerminal(MonitoredVehicleJourneyStructure journey) {
+    if (journey == null
+            || journey.getOriginRef() == null
+            || journey.getDestinationRef() == null
+            || journey.getMonitoredCall() == null) {
+      return false;
+    }
     String origin = journey.getOriginRef().getValue();
     String destination = journey.getDestinationRef().getValue();
     String currentStop = journey.getMonitoredCall().getStopPointRef().getValue();
