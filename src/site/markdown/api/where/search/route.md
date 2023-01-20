@@ -6,7 +6,7 @@ Search for a route based on its name.
 
 ## Sample Request
 
-http://api.pugetsound.onebusaway.org/api/where/search/route.json?input=crystal&key=TEST
+http://api.pugetsound.onebusaway.org/api/where/search/route.json?input=crystal&amp;key=TEST
 
 ## Sample Response
 
