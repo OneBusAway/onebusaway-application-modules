@@ -570,6 +570,10 @@ public interface TransitDataService extends FederatedService {
   @FederatedByAgencyIdMethod
   public List<String> getSearchSuggestions(String agencyId, String input);
 
+  public ListBean<StopBean> getStopSuggestions(String agencyId, String input, int maxCount);
+
+  public ListBean<RouteBean> getRouteSuggestions(String agencyId, String input, int maxCount);
+
   /**
    * Given a stop, route, and direction, test if that stop has revenue service
    * on the given route in the given direction.

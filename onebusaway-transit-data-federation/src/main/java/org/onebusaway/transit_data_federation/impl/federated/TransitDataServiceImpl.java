@@ -625,6 +625,18 @@ public class TransitDataServiceImpl implements TransitDataService {
   }
 
   @Override
+  public ListBean<StopBean> getStopSuggestions(String agencyId, String input, int maxCount) {
+    ListBean<StopBean> result = this._bundleSearchService.getStopSuggestions(input, maxCount);
+    return result;
+  }
+
+  @Override
+  public ListBean<RouteBean> getRouteSuggestions(String agencyId, String input, int maxCount) {
+    ListBean<RouteBean> result = this._bundleSearchService.getRouteSuggestions(input, maxCount);
+    return result;
+  }
+
+  @Override
   public Boolean stopHasRevenueServiceOnRoute(String agencyId, String stopId, String routeId, String directionId) {
           return _transitDataService.stopHasRevenueServiceOnRoute(agencyId, stopId, routeId, directionId);
   }

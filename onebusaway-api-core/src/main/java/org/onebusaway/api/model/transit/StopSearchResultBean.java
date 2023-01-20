@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2015 Cambridge Systematics
+ * Copyright (C) 2023 Cambridge Systematics, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,20 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.onebusaway.transit_data_federation.services.bundle;
+package org.onebusaway.api.model.transit;
 
 import org.onebusaway.transit_data.model.ListBean;
-import org.onebusaway.transit_data.model.RouteBean;
 import org.onebusaway.transit_data.model.StopBean;
 
-import java.util.List;
+import java.io.Serializable;
 
-public interface BundleSearchService {
-	
-	public List<String> getSuggestions(String input);
+/**
+ * results of searching for a stop.
+ */
+public class StopSearchResultBean implements Serializable {
 
-	public ListBean<StopBean> getStopSuggestions(String input, int maxCount);
+  private static final long serialVersionUID = 1L;
+  ListBean<StopBean> stopSuggestions;
+  public void setStopSuggestions(ListBean<StopBean> stopSuggestions) {
+    this.stopSuggestions = stopSuggestions;
+  }
 
-	public ListBean<RouteBean> getRouteSuggestions(String input, int maxCount);
-
+  public ListBean<StopBean> getStopSuggestions() {
+    return stopSuggestions;
+  }
 }

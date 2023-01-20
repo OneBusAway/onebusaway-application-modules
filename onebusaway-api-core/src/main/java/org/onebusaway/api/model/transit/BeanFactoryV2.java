@@ -115,6 +115,32 @@ public class BeanFactoryV2 {
     return entry(getStop(stop));
   }
 
+  public ListWithReferencesBean<StopV2Bean> getResponse(StopSearchResultBean input) {
+    List<StopV2Bean> beans = new ArrayList<>();
+    for (StopBean stop : input.getStopSuggestions().getList()) {
+      // swap objects for ids and references
+      beans.add(getStop(stop));
+    }
+    return new ListWithRangeAndReferencesBean<>(
+            beans,
+            input.getStopSuggestions().isLimitExceeded(),
+            false,
+            this._references);
+  }
+
+  public ListWithReferencesBean<RouteV2Bean> getResponse(RouteSearchResultBean input) {
+    List<RouteV2Bean> beans = new ArrayList<>();
+    for (RouteBean route : input.getRouteSuggestions().getList()) {
+      // swap objects for ids and references
+      beans.add(getRoute(route));
+    }
+    return new ListWithRangeAndReferencesBean<>(
+            beans,
+            input.getRouteSuggestions().isLimitExceeded(),
+            false,
+            this._references);
+  }
+
   public EntryWithReferencesBean<TripV2Bean> getResponse(TripBean trip) {
     return entry(getTrip(trip));
   }
