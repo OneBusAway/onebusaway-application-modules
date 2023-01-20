@@ -87,10 +87,6 @@
             <id>repo.camsys-apps.com</id>
             <url>https://repo.camsys-apps.com/third-party/</url>
         </pluginRepository>
-        <pluginRepository>
-            <id>public.onebusaway.org</id>
-            <url>http://nexus.onebusaway.org/content/groups/public/</url>
-        </pluginRepository>
     </pluginRepositories>
 
 
