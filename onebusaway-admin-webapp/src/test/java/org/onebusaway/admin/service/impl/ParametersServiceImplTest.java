@@ -61,54 +61,54 @@ public class ParametersServiceImplTest {
 	@Test
 	public void testGetParameters() {
 		Map<String, String> configParameters = new HashMap<String, String>();
-		configParameters.put("tdm.crewAssignmentRefreshInterval", "120");
-		configParameters.put("admin.senderEmailAddress", "mtabuscis@mtabuscis.net");
+		configParameters.put("agency_1.hideScheduleInfo", "true");
+		configParameters.put("admin.showVehicleStatus", "true");
 		
 		when(configurationService.getConfiguration()).thenReturn(configParameters);
 		
 		Map<String,String> displayParameters = service.getParameters();
 		
 		assertTrue("Expecting translated key to be present in the map", 
-				displayParameters.containsKey("tdmCrewAssignmentRefreshKey"));
-		assertEquals("Expecting value to be associated with the translated key", "120",
-				displayParameters.get("tdmCrewAssignmentRefreshKey"));
+				displayParameters.containsKey("admin.showVehicleStatus"));
+		assertEquals("Expecting value to be associated with the translated key", "true",
+				displayParameters.get("admin.showVehicleStatus"));
 		
 		assertTrue("Expecting translated key to be present in the map", 
-				displayParameters.containsKey("adminSenderEmailAddressKey"));
-		assertEquals("Expecting value to be associated with the translated key", "mtabuscis@mtabuscis.net",
-				displayParameters.get("adminSenderEmailAddressKey"));
+				displayParameters.containsKey("agency_1.hideScheduleInfo"));
+		assertEquals("Expecting value to be associated with the translated key", "true",
+				displayParameters.get("agency_1.hideScheduleInfo"));
 	}
 	
 	@Test
 	public void testSaveParameters() throws Exception {
 		Map<String, String> parameters = new HashMap<String, String>();
-		parameters.put("tdmCrewAssignmentRefreshKey", "120");
-		parameters.put("adminSenderEmailAddressKey", "mtabuscis@mtabuscis.net");
+		parameters.put("agency_1.hideScheduleInfo", "true");
+		parameters.put("admin.showVehicleStatus", "true");
 		
 		boolean success = service.saveParameters(parameters);
 		
 		assertTrue("Expecting save operation to be successful", success);
 		
-		verify(configurationService).setConfigurationValue("tdm", "tdm.crewAssignmentRefreshInterval", "120");
-		verify(configurationService).setConfigurationValue("admin", "admin.senderEmailAddress", 
-				"mtabuscis@mtabuscis.net");
+		verify(configurationService).setConfigurationValue("agency_1", "agency_1.hideScheduleInfo", "true");
+		verify(configurationService).setConfigurationValue("admin", "admin.showVehicleStatus",
+				"true");
 	}
 	
 	@Test
 	public void testSaveParametersException() throws Exception {
 		Map<String, String> parameters = new HashMap<String, String>();
-		parameters.put("tdmCrewAssignmentRefreshKey", "120");
-		parameters.put("adminSenderEmailAddressKey", "mtabuscis@mtabuscis.net");
+		parameters.put("agency_1.hideScheduleInfo", "true");
+		parameters.put("admin.showVehicleStatus", "true");
 		
 		doThrow(new Exception()).when(configurationService).
-						setConfigurationValue("tdm", "tdm.crewAssignmentRefreshInterval", "120");
-		
+						setConfigurationValue("agency_1", "agency_1.hideScheduleInfo", "true");
+		// force an exception and then confirm success is fale
 		boolean success = service.saveParameters(parameters);
 		
-		assertFalse("Expecting save operation to be successful", success);
+		assertFalse("Expecting save operation to fail", success);
 		
-		verify(configurationService).setConfigurationValue("admin", "admin.senderEmailAddress", 
-				"mtabuscis@mtabuscis.net");
+		verify(configurationService).setConfigurationValue("admin", "admin.showVehicleStatus",
+				"true");
 	}
 
 }
