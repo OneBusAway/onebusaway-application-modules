@@ -550,11 +550,10 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
       return false;
     }
     String origin = journey.getOriginRef().getValue();
-    String destination = journey.getDestinationRef().getValue();
     String currentStop = journey.getMonitoredCall().getStopPointRef().getValue();
     if (currentStop == null)
       return false;
-    return (currentStop.equals(origin) || currentStop.equals(destination));
+    return (currentStop.equals(origin));
   }
 
   private String getPresentableDistance(
