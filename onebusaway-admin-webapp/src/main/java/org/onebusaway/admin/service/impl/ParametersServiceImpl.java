@@ -44,6 +44,7 @@ public class ParametersServiceImpl implements ParametersService {
 			String uiKey = entry.getKey();
 			String value = entry.getValue();
 			String configKey = keyTranslator.getConfigKey(uiKey);
+			if (configKey == null) return false;
 			String component = configKey.split("[.]")[0];
 			try {
 				configurationService.setConfigurationValue(component, configKey, value);

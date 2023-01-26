@@ -93,6 +93,15 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 	
 				updateConfigurationMap(configKey, configValue);
 			}
+		} else {
+			List<Map<String, String>> items = _configurationServiceClient.getItems(null, null);
+			if (items == null) return;
+			for (Map<String, String> item : items) {
+				String component = item.get("component");
+				String key = item.get("key");
+				String value = item.get("value");
+				_configurationKeyToValueMap.put(component+"."+key, value);
+			}
 		}
 	}
 

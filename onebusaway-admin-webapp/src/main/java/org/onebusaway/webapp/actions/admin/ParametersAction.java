@@ -18,6 +18,7 @@ package org.onebusaway.webapp.actions.admin;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.struts2.convention.annotation.AllowedMethods;
 import org.apache.struts2.convention.annotation.Result;
 import org.apache.struts2.convention.annotation.Results;
 import org.onebusaway.admin.model.ParametersResponse;
@@ -33,6 +34,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 @Results({
 	@Result(name="parameters", type="json", params= {"root","parametersResponse"})
 })
+@AllowedMethods("getParameters")
 public class ParametersAction extends OneBusAwayNYCAdminActionSupport {
 
 	private static final long serialVersionUID = 1L;
