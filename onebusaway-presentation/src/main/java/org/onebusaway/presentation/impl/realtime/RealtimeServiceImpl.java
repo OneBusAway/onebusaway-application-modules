@@ -172,7 +172,7 @@ public class RealtimeServiceImpl implements RealtimeService {
       if (!TransitDataConstants.STATUS_CANCELED.equals(tripDetails.getStatus().getStatus())) {
         activity.setMonitoredVehicleJourney(new MonitoredVehicleJourney());
         SiriSupport.fillMonitoredVehicleJourney(activity.getMonitoredVehicleJourney(),
-                tripDetails.getTrip(), tripDetails.getStatus(), null, OnwardCallsMode.VEHICLE_MONITORING,
+                tripDetails.getTrip(), null, tripDetails.getStatus(), null, OnwardCallsMode.VEHICLE_MONITORING,
                 _presentationService, _transitDataService, maximumOnwardCalls,
                 timePredictionRecords, tripDetails.getStatus().isPredicted(), currentTime, showRawLocation, showApc);
         output.add(activity);
@@ -236,7 +236,8 @@ public class RealtimeServiceImpl implements RealtimeService {
     if (!TransitDataConstants.STATUS_CANCELED.equals(tripDetailsForCurrentTrip.getStatus())) {
       output.setMonitoredVehicleJourney(new MonitoredVehicleJourney());
       SiriSupport.fillMonitoredVehicleJourney(output.getMonitoredVehicleJourney(),
-              tripDetailsForCurrentTrip.getTrip(), tripDetailsForCurrentTrip.getStatus(), null, OnwardCallsMode.VEHICLE_MONITORING,
+              tripDetailsForCurrentTrip.getTrip(), null, tripDetailsForCurrentTrip.getStatus(),
+              null, OnwardCallsMode.VEHICLE_MONITORING,
               _presentationService, _transitDataService, maximumOnwardCalls,
               timePredictionRecords, tripDetailsForCurrentTrip.getStatus().isPredicted(), currentTime, false, showApc);
       return output;
@@ -249,7 +250,9 @@ public class RealtimeServiceImpl implements RealtimeService {
     List<MonitoredStopVisitStructure> output = new ArrayList<MonitoredStopVisitStructure>();
 
     for (ArrivalAndDepartureBean adBean : getArrivalsAndDeparturesForStop(stopId, currentTime)) {
-      
+
+      // adBean is projection of the vehicle at that stop, which may be a FUTURE trip, especially for a departure
+      // tripStatus is relative to activeTrip/current trip
       TripStatusBean statusBeanForCurrentTrip = adBean.getTripStatus();
       TripBean tripBeanForAd = adBean.getTrip();
       final RouteBean routeBean = tripBeanForAd.getRoute();
@@ -298,7 +301,8 @@ public class RealtimeServiceImpl implements RealtimeService {
       if (!TransitDataConstants.STATUS_CANCELED.equals(statusBeanForCurrentTrip.getStatus())) {
         stopVisit.setMonitoredVehicleJourney(new MonitoredVehicleJourneyStructure());
         SiriSupport.fillMonitoredVehicleJourney(stopVisit.getMonitoredVehicleJourney(),
-                tripBeanForAd, statusBeanForCurrentTrip, adBean.getStop(), OnwardCallsMode.STOP_MONITORING,
+                tripBeanForAd, adBean, adBean.getTripStatus(),
+                adBean.getStop(), OnwardCallsMode.STOP_MONITORING,
                 _presentationService, _transitDataService, maximumOnwardCalls,
                 timePredictionRecords, statusBeanForCurrentTrip.isPredicted(), currentTime, false, showApc);
         output.add(stopVisit);
@@ -309,8 +313,8 @@ public class RealtimeServiceImpl implements RealtimeService {
     Collections.sort(output, new Comparator<MonitoredStopVisitStructure>() {
         public int compare(MonitoredStopVisitStructure arg0, MonitoredStopVisitStructure arg1) {
           try {
-            Date expectedArrival0 = arg0.getMonitoredVehicleJourney().getMonitoredCall().getExpectedArrivalTime();
-    		    Date expectedArrival1 = arg1.getMonitoredVehicleJourney().getMonitoredCall().getExpectedArrivalTime();
+            Date expectedArrival0 = arg0.getMonitoredVehicleJourney().getMonitoredCall().getExpectedDepartureTime();
+    		    Date expectedArrival1 = arg1.getMonitoredVehicleJourney().getMonitoredCall().getExpectedDepartureTime();
             return expectedArrival0.compareTo(expectedArrival1);
           } catch(Exception e) {
             return -1;

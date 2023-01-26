@@ -365,7 +365,7 @@ public class PresentationServiceImpl implements PresentationService {
 	}
 	else{
 		if(adBean.getScheduledArrivalTime() > 0 && adBean.getScheduledArrivalTime() < getTime()) {
-		  _log.debug("shcheduled arrival in past drop");
+		  _log.debug("scheduled arrival in past drop");
 			return false;
 		}
 	}
@@ -375,9 +375,10 @@ public class PresentationServiceImpl implements PresentationService {
     TripBean activeTrip = status.getActiveTrip();
     TripBean adTripBean = adBean.getTrip();
 
-	// if ad is not on the trip this bus is on, or the previous trip, filter out
+	// if ad is not on the trip this bus is on, or the previous trip (or next trip) filter out
 	if(!adTripBean.getId().equals(activeTrip.getId()) 
-			&& !(adBean.getBlockTripSequence() - 1 == status.getBlockTripSequence())) {
+			&& !(adBean.getBlockTripSequence() - 1 == status.getBlockTripSequence())
+      && !(adBean.getBlockTripSequence() + 1 == status.getBlockTripSequence())) {
 	  _log.debug("  " + status.getVehicleId() + " filtered out due to trip block sequence");
 	  return false;
 	}
@@ -431,7 +432,8 @@ public class PresentationServiceImpl implements PresentationService {
      * Those are the buses we want to filter out here.  
      */
 
-	// only consider buses that are in layover
+	  // only consider buses that are in layover -- this is legacy OBANYC logic,
+    // traditional AVL will not have LAYOVER_ states
     if(phase != null && 
         (phase.toUpperCase().equals("LAYOVER_BEFORE") || phase.toUpperCase().equals("LAYOVER_DURING"))) {
 

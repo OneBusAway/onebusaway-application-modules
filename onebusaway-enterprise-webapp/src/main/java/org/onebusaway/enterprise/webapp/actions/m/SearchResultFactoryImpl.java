@@ -16,6 +16,7 @@
 package org.onebusaway.enterprise.webapp.actions.m;
 
 import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -70,6 +71,8 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
   private Boolean _serviceDateFilter = null;
   private String _apcMode = null;
   private Map<String, String> occupancyStatusEnumToDisplay = new HashMap<>();
+
+  boolean debug = true;
 
   public SearchResultFactoryImpl(TransitDataService transitDataService,
       RealtimeService realtimeService, ConfigurationService configurationService) {
@@ -203,27 +206,26 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
     List<RouteAtStop> routesWithNoVehiclesEnRoute = new ArrayList<RouteAtStop>();
     List<RouteAtStop> routesWithNoScheduledService = new ArrayList<RouteAtStop>();
     List<RouteBean> filteredRoutes = new ArrayList<RouteBean>();
-    
+
     Set<String> serviceAlertDescriptions = new HashSet<String>();
 
     for (RouteBean routeBean : stopBean.getRoutes()) {
       if (routeFilter != null && !routeFilter.isEmpty()
-          && !routeFilter.contains(routeBean)) {
+              && !routeFilter.contains(routeBean)) {
         filteredRoutes.add(routeBean);
         continue;
       }
 
-        ServiceDate serviceDate = null;
-        boolean serviceDateFilterOn = getServiceDateFilter();
-        if (serviceDateFilterOn) serviceDate = new ServiceDate(new Date(SystemTime.currentTimeMillis()));
+      ServiceDate serviceDate = null;
+      boolean serviceDateFilterOn = getServiceDateFilter();
+      if (serviceDateFilterOn) serviceDate = new ServiceDate(new Date(SystemTime.currentTimeMillis()));
 
-        StopsForRouteBean stopsForRoute;
-        if (serviceDate != null) {
-            stopsForRoute = _transitDataService.getStopsForRouteForServiceDate(routeBean.getId(), serviceDate);
-        }
-        else {
-            stopsForRoute = _transitDataService.getStopsForRoute(routeBean.getId());
-        }
+      StopsForRouteBean stopsForRoute;
+      if (serviceDate != null) {
+        stopsForRoute = _transitDataService.getStopsForRouteForServiceDate(routeBean.getId(), serviceDate);
+      } else {
+        stopsForRoute = _transitDataService.getStopsForRoute(routeBean.getId());
+      }
 
       List<RouteDirection> directions = new ArrayList<RouteDirection>();
       List<StopGroupingBean> stopGroupings = stopsForRoute.getStopGroupings();
@@ -241,37 +243,37 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
 
           // arrivals in this direction
           Map<String, List<StopOnRoute>> arrivalsForRouteAndDirection = getDisplayStringsByHeadsignForStopAndRouteAndDirection(
-              stopBean, routeBean, stopGroupBean);
+                  stopBean, routeBean, stopGroupBean);
 
           // service alerts for this route + direction
           List<ServiceAlertBean> serviceAlertBeans = _realtimeService.getServiceAlertsForRouteAndDirection(
-              routeBean.getId(), stopGroupBean.getId());
+                  routeBean.getId(), stopGroupBean.getId());
           populateServiceAlerts(serviceAlertDescriptions, serviceAlertBeans);
 
           // also include service alerts for route + stop
           serviceAlertBeans = _realtimeService.getServiceAlertsForRouteAndStop(
-                    routeBean.getId(), stopBean.getId());
+                  routeBean.getId(), stopBean.getId());
           populateServiceAlerts(serviceAlertDescriptions, serviceAlertBeans);
 
           // service in this direction
           Boolean hasUpcomingScheduledService = _transitDataService.stopHasUpcomingScheduledService(
-        	  (routeBean.getAgency()!=null?routeBean.getAgency().getId():null),
-              SystemTime.currentTimeMillis(), stopBean.getId(), routeBean.getId(),
-              stopGroupBean.getId());
+                  (routeBean.getAgency() != null ? routeBean.getAgency().getId() : null),
+                  SystemTime.currentTimeMillis(), stopBean.getId(), routeBean.getId(),
+                  stopGroupBean.getId());
 
           // if there are buses on route, always have "scheduled service"
           if (!arrivalsForRouteAndDirection.isEmpty()) {
             hasUpcomingScheduledService = true;
           }
 
-          
-          if(arrivalsForRouteAndDirection.isEmpty()) {
-            directions.add(new RouteDirection(stopGroupBean.getName().getName(), stopGroupBean, Collections.<StopOnRoute>emptyList(), 
-                hasUpcomingScheduledService, Collections.<String>emptyList()));
+
+          if (arrivalsForRouteAndDirection.isEmpty()) {
+            directions.add(new RouteDirection(stopGroupBean.getName().getName(), stopGroupBean, Collections.<StopOnRoute>emptyList(),
+                    hasUpcomingScheduledService, Collections.<String>emptyList()));
           } else {
-            for (Map.Entry<String,List<StopOnRoute>> entry : arrivalsForRouteAndDirection.entrySet()) {
-              directions.add(new RouteDirection(entry.getKey(), stopGroupBean, entry.getValue(), 
-                 hasUpcomingScheduledService, Collections.<String>emptyList()));
+            for (Map.Entry<String, List<StopOnRoute>> entry : arrivalsForRouteAndDirection.entrySet()) {
+              directions.add(new RouteDirection(entry.getKey(), stopGroupBean, entry.getValue(),
+                      hasUpcomingScheduledService, Collections.<String>emptyList()));
             }
           }
         }
@@ -281,25 +283,25 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
       // or has service with vehicles en route. Add RouteAtStop object to appropriate collection.
       // Now one RouteAtStop object exists for each direction for each route.
       for (RouteDirection direction : directions) {
-    	  List<RouteDirection> directionList = Collections.<RouteDirection>singletonList(direction);
-    	  
-    	  RouteAtStop routeAtStop = new RouteAtStop(routeBean, directionList, serviceAlertDescriptions);
-    	  
-    	  if (!direction.getStops().isEmpty())
-    		  routesWithArrivals.add(routeAtStop);
-    	  else if (Boolean.FALSE.equals(direction.getHasUpcomingScheduledService()))
-    		  routesWithNoScheduledService.add(routeAtStop);
-    	  else
-    		  routesWithNoVehiclesEnRoute.add(routeAtStop);
+        List<RouteDirection> directionList = Collections.<RouteDirection>singletonList(direction);
+
+        RouteAtStop routeAtStop = new RouteAtStop(routeBean, directionList, serviceAlertDescriptions);
+
+        if (!direction.getStops().isEmpty())
+          routesWithArrivals.add(routeAtStop);
+        else if (Boolean.FALSE.equals(direction.getHasUpcomingScheduledService()))
+          routesWithNoScheduledService.add(routeAtStop);
+        else
+          routesWithNoVehiclesEnRoute.add(routeAtStop);
       }
     }
 
-      // add stop level service alerts
-      List<ServiceAlertBean> stopServiceAlertBeans = getServiceAlertsForStop(stopBean.getId());
-      populateServiceAlerts(serviceAlertDescriptions, stopServiceAlertBeans);
-    
+    // add stop level service alerts
+    List<ServiceAlertBean> stopServiceAlertBeans = getServiceAlertsForStop(stopBean.getId());
+    populateServiceAlerts(serviceAlertDescriptions, stopServiceAlertBeans);
+
     return new StopResult(stopBean, routesWithArrivals,
-        routesWithNoVehiclesEnRoute, routesWithNoScheduledService, filteredRoutes, serviceAlertDescriptions);
+            routesWithNoVehiclesEnRoute, routesWithNoScheduledService, filteredRoutes, serviceAlertDescriptions);
   }
 
     private List<ServiceAlertBean> getServiceAlertsForStop(String stopId) {
@@ -508,15 +510,25 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
 	  if (age > staleTimeout) {
 		  return null;
 	  }
+    String blockId = "";
+    if (journey != null && journey.getBlockRef()!= null && journey.getBlockRef().getValue() != null) {
+      blockId = journey.getBlockRef().getValue();
+      blockId += ":" + journey.getFramedVehicleJourneyRef().getDatedVehicleJourneyRef();
+    }
 
-      if (isTerminal(journey)) {
-        if (monitoredCall.getExpectedDepartureTime() != null) {
-          return getPresentableTime(journey, updateTime, monitoredCall.getExpectedDepartureTime().getTime(), "DEPARTS ");
-        }
+    if (isTerminal(journey)) {
+      if (monitoredCall.getExpectedDepartureTime() != null) {
+        String qualifierText = "";
+        if (debug) qualifierText = "DEPARTS(" + blockId + ") ";
+        return getPresentableTime(journey, updateTime, monitoredCall.getExpectedDepartureTime().getTime(), qualifierText);
       }
-      if (monitoredCall.getExpectedArrivalTime() != null) {
-        return getPresentableTime(journey, updateTime, monitoredCall.getExpectedArrivalTime().getTime(), "ARR ");
-      }
+    }
+    if (monitoredCall.getExpectedArrivalTime() != null) {
+      String qualifierText = "";
+      if (debug) qualifierText = "ARR(" + blockId + ") ";
+
+      return getPresentableTime(journey, updateTime, monitoredCall.getExpectedArrivalTime().getTime(), qualifierText);
+    }
 
 	  return null;
   }
@@ -531,6 +543,10 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
 
     double minutes = Math.floor((arrivalOrDeparture - updateTime) / 60 / 1000);
     String timeString = Math.round(minutes) + " minute" + ((Math.abs(minutes) != 1) ? "s" : "");
+    if (debug) {
+      SimpleDateFormat sdf = new SimpleDateFormat("hh:mm a");
+      timeString += ", " + sdf.format(new Date(arrivalOrDeparture));
+    }
     String timeAndDistance = "<strong>" + timeString + "</strong>, " + distance;
     String loadOccupancy = getPresentableOccupancy(journey, updateTime);
 

@@ -91,24 +91,34 @@ public final class SiriSupport {
 	 * in the case of A-D for stop!
 	 */
 	@SuppressWarnings("unused")
-	public static void fillMonitoredVehicleJourney(MonitoredVehicleJourneyStructure monitoredVehicleJourney, 
-			TripBean framedJourneyTripBean, TripStatusBean currentVehicleTripStatus, StopBean monitoredCallStopBean, OnwardCallsMode onwardCallsMode,
-			PresentationService presentationService, TransitDataService transitDataService,
-			int maximumOnwardCalls, List<TimepointPredictionRecord> stopLevelPredictions, boolean hasRealtimeData, long responseTimestamp, boolean showRawLocation, boolean showApc) {
-
+	public static void fillMonitoredVehicleJourney(MonitoredVehicleJourneyStructure monitoredVehicleJourney,
+																																		 TripBean framedJourneyTripBean, ArrivalAndDepartureBean adBean,
+																																		 TripStatusBean currentVehicleTripStatus,
+																																		 StopBean monitoredCallStopBean, OnwardCallsMode onwardCallsMode,
+																																		 PresentationService presentationService, TransitDataService transitDataService,
+																																		 int maximumOnwardCalls, List<TimepointPredictionRecord> stopLevelPredictions,
+																																		 boolean hasRealtimeData, long responseTimestamp, boolean showRawLocation, boolean showApc) {
 
 		if (currentVehicleTripStatus != null && TransitDataConstants.STATUS_CANCELED.equals(currentVehicleTripStatus.getStatus())) {
 			_log.error("aborting fillMVJ as trip is canceled");
 			return;
 		}
 
-		BlockInstanceBean blockInstance = 
-				transitDataService.getBlockInstance(currentVehicleTripStatus.getActiveTrip().getBlockId(), currentVehicleTripStatus.getServiceDate());
-		
+		BlockInstanceBean blockInstance = null;
+		if (adBean == null) {
+			blockInstance = transitDataService.getBlockInstance(currentVehicleTripStatus.getActiveTrip().getBlockId(), currentVehicleTripStatus.getServiceDate());
+		} else {
+			blockInstance = transitDataService.getBlockInstance(adBean.getTrip().getBlockId(), currentVehicleTripStatus.getServiceDate());
+		}
+
 		List<BlockTripBean> blockTrips = blockInstance.getBlockConfiguration().getTrips();
 
 		if(monitoredCallStopBean == null) {
-			monitoredCallStopBean = currentVehicleTripStatus.getNextStop();
+			if (adBean == null) {
+				monitoredCallStopBean = currentVehicleTripStatus.getNextStop();
+			} else {
+				monitoredCallStopBean = adBean.getStop();
+			}
 		}
 		
 		/////////////
@@ -130,9 +140,11 @@ public final class SiriSupport {
 		if (shortName == null) {
 		  shortName = framedJourneyTripBean.getRoute().getId().split("_")[1];
 		}
-		if (!isBlank(currentVehicleTripStatus.getActiveTrip().getRouteShortName())) {
+		String routeName = currentVehicleTripStatus.getActiveTrip().getRouteShortName();
+		if (adBean != null) routeName = adBean.getRouteShortName();
+		if (!isBlank(routeName)) {
 			// look for an override like an express desginator
-			routeShortName.setValue(currentVehicleTripStatus.getActiveTrip().getRouteShortName());
+			routeShortName.setValue(routeName);
 		} else {
 			routeShortName.setValue(shortName);
 		}
@@ -147,8 +159,9 @@ public final class SiriSupport {
 		monitoredVehicleJourney.setDestinationName(headsign);
 		
 		VehicleRefStructure vehicleRef = new VehicleRefStructure();
-		
-		if(currentVehicleTripStatus.getVehicleId() == null){
+		String vehicleAgencyAndId = currentVehicleTripStatus.getVehicleId();
+		if (adBean != null) vehicleAgencyAndId = adBean.getVehicleId();
+		if(vehicleAgencyAndId == null){
 			String tripId = framedJourneyTripBean.getId();
 			String blockId = framedJourneyTripBean.getBlockId();
 			String directionId = framedJourneyTripBean.getDirectionId();
@@ -159,23 +172,20 @@ public final class SiriSupport {
 			vehicleRef.setValue(vehicleId);
 		}
 		else{
-			vehicleRef.setValue(currentVehicleTripStatus.getVehicleId());
+			vehicleRef.setValue(vehicleAgencyAndId);
 		}
 		
 		monitoredVehicleJourney.setVehicleRef(vehicleRef);
 
 		monitoredVehicleJourney.getVehicleMode().add(toVehicleMode(currentVehicleTripStatus.getVehicleType()));
-
-		monitoredVehicleJourney.setMonitored(currentVehicleTripStatus.isPredicted());
+		boolean isPredicted = currentVehicleTripStatus.isPredicted();;
+		if (adBean != null) isPredicted = adBean.isPredicted();;
+		monitoredVehicleJourney.setMonitored(isPredicted);
 
 		monitoredVehicleJourney.setBearing((float)currentVehicleTripStatus.getOrientation());
 
 		monitoredVehicleJourney.setProgressRate(getProgressRateForPhaseAndStatus(
-				currentVehicleTripStatus.getStatus(), currentVehicleTripStatus.getPhase()));
-
-		if (showApc) {
-			fillOccupancy(monitoredVehicleJourney, transitDataService, currentVehicleTripStatus);
-		}
+						currentVehicleTripStatus.getStatus(), currentVehicleTripStatus.getPhase()));
 
 		// origin-destination
 		for(int i = 0; i < blockTrips.size(); i++) {
@@ -212,16 +222,16 @@ public final class SiriSupport {
 		DecimalFormat df = new DecimalFormat();
 		df.setMaximumFractionDigits(6);
 
-        //if we want to show the raw location AND we have realtime or if its on detour, show actual location
-        if ((showRawLocation && currentVehicleTripStatus.getLastKnownLocation() != null) || (presentationService.isOnDetour(currentVehicleTripStatus))) {
-            location.setLatitude(new BigDecimal(df.format(currentVehicleTripStatus.getLastKnownLocation().getLat())));
-            location.setLongitude(new BigDecimal(df.format(currentVehicleTripStatus.getLastKnownLocation().getLon())));
-        } else { //show snapped location
-            if (currentVehicleTripStatus.getLocation() != null) {
-                location.setLatitude(new BigDecimal(df.format(currentVehicleTripStatus.getLocation().getLat())));
-                location.setLongitude(new BigDecimal(df.format(currentVehicleTripStatus.getLocation().getLon())));
-            }
-        }
+		//if we want to show the raw location AND we have realtime or if its on detour, show actual location
+		if ((showRawLocation && currentVehicleTripStatus.getLastKnownLocation() != null) || (presentationService.isOnDetour(currentVehicleTripStatus))) {
+			location.setLatitude(new BigDecimal(df.format(currentVehicleTripStatus.getLastKnownLocation().getLat())));
+			location.setLongitude(new BigDecimal(df.format(currentVehicleTripStatus.getLastKnownLocation().getLon())));
+		} else { //show snapped location
+			if (currentVehicleTripStatus.getLocation() != null) {
+				location.setLatitude(new BigDecimal(df.format(currentVehicleTripStatus.getLocation().getLat())));
+				location.setLongitude(new BigDecimal(df.format(currentVehicleTripStatus.getLocation().getLon())));
+			}
+		}
 
 		monitoredVehicleJourney.setVehicleLocation(location);
 
@@ -244,72 +254,58 @@ public final class SiriSupport {
 		}
 
 		// block ref (including it all the time in case needed)
-			BlockRefStructure blockRef = new BlockRefStructure();
-			blockRef.setValue(framedJourneyTripBean.getBlockId());
-			monitoredVehicleJourney.setBlockRef(blockRef);
-
-		// scheduled depature time
-		if (presentationService.isBlockLevelInference(currentVehicleTripStatus) 
-				&& (presentationService.isInLayover(currentVehicleTripStatus) 
-				|| !framedJourneyTripBean.getId().equals(currentVehicleTripStatus.getActiveTrip().getId()))) {
-			BlockStopTimeBean originDepartureStopTime = null;
-
-			for(int t = 0; t < blockTrips.size(); t++) {
-				BlockTripBean thisTrip = blockTrips.get(t);
-				BlockTripBean nextTrip = null;    		
-				if(t + 1 < blockTrips.size()) {
-					nextTrip = blockTrips.get(t + 1);
-				}
-
-				if(thisTrip.getTrip().getId().equals(currentVehicleTripStatus.getActiveTrip().getId())) {    			
-					// just started new trip
-					if(currentVehicleTripStatus.getDistanceAlongTrip() < (0.5 * currentVehicleTripStatus.getTotalDistanceAlongTrip())) {
-						originDepartureStopTime = thisTrip.getBlockStopTimes().get(0);
-
-					// at end of previous trip
-					} else {
-						if(nextTrip != null) {
-							originDepartureStopTime = nextTrip.getBlockStopTimes().get(0);
-						}
-					}
-
-					break;
-				}
-			}
-
-			if(originDepartureStopTime != null) {            	
-				Date departureTime = new Date(currentVehicleTripStatus.getServiceDate() + (originDepartureStopTime.getStopTime().getDepartureTime() * 1000));
-				monitoredVehicleJourney.setOriginAimedDepartureTime(departureTime);
-			}
-		}    
+		BlockRefStructure blockRef = new BlockRefStructure();
+		blockRef.setValue(framedJourneyTripBean.getBlockId());
+		monitoredVehicleJourney.setBlockRef(blockRef);
 
 		// TODO this will have an issue with loop routes!
-		Map<String, TimepointPredictionRecord> stopIdToPredictionRecordMap = new HashMap<String, TimepointPredictionRecord>();
-		
+		Map<String, TimepointPredictionRecord> tripStopIdToPredictionRecordMap = new HashMap<String, TimepointPredictionRecord>();
+
 		// (build map of vehicle IDs to TPRs)
 		if(stopLevelPredictions != null) {
 			for(TimepointPredictionRecord tpr : stopLevelPredictions) {
 				if (!tpr.isSkipped()) {
 					// prune skipped stops from prediction map
-					stopIdToPredictionRecordMap.put(AgencyAndId.convertToString(tpr.getTimepointId()), tpr);
+					tripStopIdToPredictionRecordMap.put(framedJourneyTripBean.getId() + ":" + AgencyAndId.convertToString(tpr.getTimepointId()), tpr);
 				}
 			}
 		}
-		
-		// monitored call
-		if(!presentationService.isOnDetour(currentVehicleTripStatus))
-			fillMonitoredCall(monitoredVehicleJourney, blockInstance, currentVehicleTripStatus, monitoredCallStopBean, 
-				presentationService, transitDataService, stopIdToPredictionRecordMap, hasRealtimeData, responseTimestamp);
 
-		// onward calls
-		if(!presentationService.isOnDetour(currentVehicleTripStatus))
-			fillOnwardCalls(monitoredVehicleJourney, blockInstance, framedJourneyTripBean, currentVehicleTripStatus, onwardCallsMode,
-				presentationService, transitDataService, stopIdToPredictionRecordMap, maximumOnwardCalls, hasRealtimeData, responseTimestamp);
+		if (showApc) {
+			if (adBean == null) {
+				fillOccupancy(monitoredVehicleJourney, transitDataService, currentVehicleTripStatus);
+				// monitored call
+				fillMonitoredCall(monitoredVehicleJourney, blockInstance, currentVehicleTripStatus,
+								monitoredCallStopBean,
+								presentationService, transitDataService,
+								tripStopIdToPredictionRecordMap, hasRealtimeData,
+								currentVehicleTripStatus.getActiveTrip().getId(),
+								-1,
+								-1,
+								responseTimestamp);
+				// onward calls
+				fillOnwardCalls(monitoredVehicleJourney, blockInstance, framedJourneyTripBean, currentVehicleTripStatus, onwardCallsMode,
+								presentationService, transitDataService, tripStopIdToPredictionRecordMap, maximumOnwardCalls, hasRealtimeData, responseTimestamp);
+				// situations
+				fillSituations(monitoredVehicleJourney, currentVehicleTripStatus);
 
-		// situations
-		fillSituations(monitoredVehicleJourney, currentVehicleTripStatus);
+			} else {
+				fillOccupancy(monitoredVehicleJourney, transitDataService, adBean.getTripStatus());
+				// monitored call
+				fillMonitoredCall(monitoredVehicleJourney, blockInstance, adBean.getTripStatus(), monitoredCallStopBean,
+								presentationService, transitDataService, tripStopIdToPredictionRecordMap, hasRealtimeData,
+								adBean.getTrip().getId(),
+								adBean.getScheduledArrivalTime(),
+								adBean.getScheduledDepartureTime(),
+								responseTimestamp);
+				// onward calls
+				fillOnwardCalls(monitoredVehicleJourney, blockInstance, framedJourneyTripBean, adBean.getTripStatus(), onwardCallsMode,
+								presentationService, transitDataService, tripStopIdToPredictionRecordMap, maximumOnwardCalls, hasRealtimeData, responseTimestamp);
+				// situations
+				fillSituations(monitoredVehicleJourney, adBean.getTripStatus());
 
-		return;
+			}
+		}
 	}
 
 	private static void fillOccupancy(MonitoredVehicleJourneyStructure mvj, TransitDataService tds, TripStatusBean tripStatus) {
@@ -498,8 +494,8 @@ public final class SiriSupport {
 						visitNumber, blockTripStopsAfterTheVehicle - 1,
 						stopLevelPredictions.get(stopTime.getStopTime().getStop().getId()),
 						hasRealtimeData, responseTimestamp,
-						getScheduledArrivalTime(currentVehicleTripStatus, stopTime),
-						getScheduledDepartureTime(currentVehicleTripStatus, stopTime),
+						getScheduledArrivalTime(currentVehicleTripStatus.getServiceDate(), -1, stopTime),
+						getScheduledDepartureTime(currentVehicleTripStatus.getServiceDate(), -1, stopTime),
 						currentVehicleTripStatus.getScheduleDeviation());
 
 				if (ocs != null)
@@ -519,10 +515,13 @@ public final class SiriSupport {
 		return;
 	}
 
-	private static void fillMonitoredCall(MonitoredVehicleJourneyStructure monitoredVehicleJourney, 
-			BlockInstanceBean blockInstance, TripStatusBean tripStatus, StopBean monitoredCallStopBean, 
-			PresentationService presentationService, TransitDataService transitDataService,
-			Map<String, TimepointPredictionRecord> stopLevelPredictions, boolean hasRealtimeData, long responseTimestamp) {
+	private static void fillMonitoredCall(MonitoredVehicleJourneyStructure monitoredVehicleJourney,
+																				BlockInstanceBean blockInstance, TripStatusBean tripStatus, StopBean monitoredCallStopBean,
+																				PresentationService presentationService, TransitDataService transitDataService,
+																				Map<String, TimepointPredictionRecord> tripStopLevelPredictions, boolean hasRealtimeData,
+																				String referenceTripId,
+																				long scheduledArrivalTime, long scheduledDepartureTime,
+																				long responseTimestamp) {
 
 		List<BlockTripBean> blockTrips = blockInstance.getBlockConfiguration().getTrips();
 		
@@ -534,8 +533,8 @@ public final class SiriSupport {
 			BlockTripBean blockTrip = blockTrips.get(i);
 
 			if(!foundActiveTrip) {
-				if(tripStatus.getActiveTrip().getId().equals(blockTrip.getTrip().getId())) {
-					
+				if(referenceTripId.equals(blockTrip.getTrip().getId())) {
+
 					double distanceAlongTrip = tripStatus.getDistanceAlongTrip();
 					
 					if(!hasRealtimeData){
@@ -565,7 +564,7 @@ public final class SiriSupport {
 
 				// block trip stops away--on this trip, only after we've passed the stop, 
 				// on future trips, count always.
-				if(tripStatus.getActiveTrip().getId().equals(blockTrip.getTrip().getId())) {
+				if(referenceTripId.equals(blockTrip.getTrip().getId())) {
 					if(stopTime.getDistanceAlongBlock() >= distanceOfVehicleAlongBlock) {
 						blockTripStopsAfterTheVehicle++;
 					} else {
@@ -581,19 +580,19 @@ public final class SiriSupport {
 				// monitored call
 				if(stopTime.getStopTime().getStop().getId().equals(monitoredCallStopBean.getId())) {
 					if(!presentationService.isOnDetour(tripStatus)) {
-							MonitoredCallStructure msc = getMonitoredCallStructure(stopTime.getStopTime().getStop(), presentationService,
-								stopTime.getDistanceAlongBlock() - blockTrip.getDistanceAlongBlock(),
-								stopTime.getDistanceAlongBlock() - distanceOfVehicleAlongBlock,
-								visitNumber, blockTripStopsAfterTheVehicle - 1,
-								/* TODO currently stopId, should also be indexed on stop sequence as well*/
-								stopLevelPredictions.get(monitoredCallStopBean.getId()),
-								hasRealtimeData,
-								responseTimestamp,
-								getScheduledArrivalTime(tripStatus, stopTime),
-								getScheduledDepartureTime(tripStatus, stopTime),
-								tripStatus.getScheduleDeviation());
-							if(msc != null)
-								monitoredVehicleJourney.setMonitoredCall(msc);
+						MonitoredCallStructure msc = getMonitoredCallStructure(stopTime.getStopTime().getStop(), presentationService,
+										stopTime.getDistanceAlongBlock() - blockTrip.getDistanceAlongBlock(),
+										stopTime.getDistanceAlongBlock() - distanceOfVehicleAlongBlock,
+										visitNumber, blockTripStopsAfterTheVehicle - 1,
+										/* TODO currently trip+stopId, should also be indexed on stop sequence as well*/
+										tripStopLevelPredictions.get(referenceTripId + ":" + monitoredCallStopBean.getId()),
+										hasRealtimeData,
+										responseTimestamp,
+										getScheduledArrivalTime(tripStatus.getServiceDate(), scheduledArrivalTime, stopTime),
+										getScheduledDepartureTime(tripStatus.getServiceDate(), scheduledDepartureTime, stopTime),
+										tripStatus.getScheduleDeviation());
+						if(msc != null)
+							monitoredVehicleJourney.setMonitoredCall(msc);
 					}
 
 					// we found our monitored call--stop
@@ -603,12 +602,14 @@ public final class SiriSupport {
 		}
 	}
 
-	private static long getScheduledArrivalTime(TripStatusBean tripStatus, BlockStopTimeBean stopTime){
-		return tripStatus.getServiceDate() + (stopTime.getStopTime().getArrivalTime() * 1000);
+	private static long getScheduledArrivalTime(long serviceDate, long scheduledArrivalTime, BlockStopTimeBean stopTime){
+		if (scheduledArrivalTime > 0) return scheduledArrivalTime;
+		return serviceDate + (stopTime.getStopTime().getArrivalTime() * 1000);
 	}
 
-	private static long getScheduledDepartureTime(TripStatusBean tripStatus, BlockStopTimeBean stopTime){
-		return tripStatus.getServiceDate() + (stopTime.getStopTime().getDepartureTime() * 1000);
+	private static long getScheduledDepartureTime(long serviceDate, long scheduledDepartureTime, BlockStopTimeBean stopTime){
+		if (scheduledDepartureTime > 0) return scheduledDepartureTime;
+		return serviceDate + (stopTime.getStopTime().getDepartureTime() * 1000);
 	}
 
 	private static void fillSituations(MonitoredVehicleJourneyStructure monitoredVehicleJourney, TripStatusBean tripStatus) {
@@ -767,17 +768,17 @@ public final class SiriSupport {
 		distances.setDistanceFromCall(NumberUtils.toDouble(df.format(distanceOfVehicleFromCall)));		
 		distances.setPresentableDistance(presentationService.getPresentableDistance(distances));
 
-        long deviation = 0L;
-        if (monitoredCallStructure.getExpectedArrivalTime() != null &&
-                monitoredCallStructure.getAimedArrivalTime() != null) {
-            //get schedule deviation in milliseconds
-            long deviationSeconds = monitoredCallStructure.getExpectedArrivalTime().getTime() -
-                    monitoredCallStructure.getAimedArrivalTime().getTime();
-            deviation = Math.round(deviationSeconds/(1000.0 * 60.0));
-        }
+		long deviation = 0L;
+		if (monitoredCallStructure.getExpectedArrivalTime() != null &&
+						monitoredCallStructure.getAimedArrivalTime() != null) {
+				//get schedule deviation in milliseconds
+				long deviationSeconds = monitoredCallStructure.getExpectedArrivalTime().getTime() -
+								monitoredCallStructure.getAimedArrivalTime().getTime();
+				deviation = Math.round(deviationSeconds/(1000.0 * 60.0));
+		}
 
-        wrapper.setDeviation(String.valueOf(deviation));
-        wrapper.setDistances(distances);
+		wrapper.setDeviation(String.valueOf(deviation));
+		wrapper.setDistances(distances);
 		distancesExtensions.setAny(wrapper);
 		monitoredCallStructure.setExtensions(distancesExtensions);
 
@@ -813,7 +814,7 @@ public final class SiriSupport {
 
 	private static int getVisitNumber(HashMap<String, Integer> visitNumberForStop, StopBean stop) {
 		int visitNumber;
-
+		// count how many times we've visited this stop
 		if (visitNumberForStop.containsKey(stop.getId())) {
 			visitNumber = visitNumberForStop.get(stop.getId()) + 1;
 		} else {
