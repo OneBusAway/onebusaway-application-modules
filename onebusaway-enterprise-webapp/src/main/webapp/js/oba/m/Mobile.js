@@ -66,15 +66,20 @@ OBA.Mobile = (function() {
 			// ajax refresh for browsers that support it
 			refreshBar.find("a").click(function(e) {
 				e.preventDefault();
-
-				refreshTimestamp.text("Loading...");
+				var newText = refreshTimestamp.text().replaceAll("Updated", "Updating...");
+				refreshTimestamp.text(newText);
 				refreshBar.addClass("loadingRefresh");
 
 				jQuery("#content")
-					.load(location.href + " #content>*", null, function() {
-						refreshTimestamp.text("Updated " + new Date().format("mediumTime"));
-						refreshBar.removeClass("loadingRefresh");
-						updateServiceAlertHeaderText();
+					.load(location.href + " #content>*", null, function(responseText, textStatus, jqXHR) {
+						console.log("textStatus=" + textStatus);
+						if ( textStatus == "success") {
+							refreshTimestamp.text("Updated " + new Date().format("mediumTime"));
+							refreshBar.removeClass("loadingRefresh");
+							updateServiceAlertHeaderText();
+						} else {
+							// var newTxt = refreshTimestamp.text().replaceAll("Updated ", "Loading...")
+						}
 					});
 			});
 		}
