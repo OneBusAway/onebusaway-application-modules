@@ -59,6 +59,8 @@ import uk.org.siri.siri.OccupancyEnumeration;
 import uk.org.siri.siri.VehicleActivityStructure;
 import uk.org.siri.siri.VehicleActivityStructure.MonitoredVehicleJourney;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl implements SearchResultFactory {
 
   private ConfigurationService _configurationService;
@@ -72,7 +74,7 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
   private String _apcMode = null;
   private Map<String, String> occupancyStatusEnumToDisplay = new HashMap<>();
 
-  boolean debug = true;
+  boolean debug = false;
 
   public SearchResultFactoryImpl(TransitDataService transitDataService,
       RealtimeService realtimeService, ConfigurationService configurationService) {
@@ -368,22 +370,85 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
       } else {
         vehicleId = "N/A"; // insert an empty element so it aligns with distanceAways
       }
-      
+
+      String loadOccupancy = null;
+      if (visit.getMonitoredVehicleJourney() != null) {
+        loadOccupancy = getPresentableOccupancy(visit.getMonitoredVehicleJourney(), visit.getRecordedAtTime().getTime());
+      }
+
       List<String> distanceAways = new ArrayList<String>();
       List<String> vehicleIds = new ArrayList<String>();
       if (vehicleId.contains("_")) vehicleId = vehicleId.split("_")[1];
       vehicleIds.add(vehicleId);
-      if(timePrediction != null) {
-    	  distanceAways.add(timePrediction);
+
+      String qualifierText = getQualifierText(visit.getMonitoredVehicleJourney(), visit.getRecordedAtTime().getTime(), true);
+
+      // new format: timePrediction \t icon+vehicleId \t weeble/occupancy \t distanceAways
+      String columms = "";
+      // column 1: prediction
+      if (isNotBlank(timePrediction)) {
+        if (isActiveTrip(visit.getMonitoredVehicleJourney())) {
+          if (visit.getMonitoredVehicleJourney().isMonitored()) {
+            columms += openSpan("predictionContainer", "activeArrivalPrediction") + timePrediction + closeSpan();
+          } else {
+            columms += openSpan("predictionContainer", "futureArrivalPrediction") + timePrediction + closeSpan();
+          }
+        } else {
+          columms += openSpan("predictionContainer","futureArrivalPrediction") + timePrediction + closeSpan();
+        }
       } else {
-    	  distanceAways.add(distance);
+        columms += "schedule";
       }
-      
+      // column 2: vehicleId
+      if (isNotBlank(vehicleId) && vehicleId.length() < 6)
+        columms+= openSpan("vehicleIdContainer", "vehicleArrival") + vehicleId + closeSpan();
+      else {
+        columms+= openSpan("vehicleIdContainer", "vehicleScheduledArrival") + "scheduled" + closeSpan();
+      }
+      // column 3: occupancy
+      if (isNotBlank(loadOccupancy))
+        columms+= loadOccupancy;
+      else
+        columms+= openSpan("occupancyPlaceHolder") + "&nbsp;" + closeSpan();
+      // column 4: distance + qualifier
+      if (isNotBlank(distance)) {
+        if (isNotBlank(qualifierText))
+          distance += qualifierText;
+        columms += openSpan("distanceContainer", "distanceArrival") + distance + closeSpan();
+      }
+      distanceAways.add(columms);
+
       results.get(visit.getMonitoredVehicleJourney().getDestinationName().getValue()).add(
     		  		new StopOnRoute(stopBean,distanceAways, visit.getMonitoredVehicleJourney().isMonitored(), vehicleIds));
     }
 
     return results;
+  }
+
+  private boolean isActiveTrip(MonitoredVehicleJourneyStructure journey) {
+    if (journey != null) {
+      NaturalLanguageStringStructure progressStatus = journey.getProgressStatus();
+      if (progressStatus != null && progressStatus.getValue().contains("prevTrip")) {
+        return false;
+      } else {
+        return true;
+      }
+    }
+    return false; // we are not active if journey is null
+  }
+
+  private String openSpan(String spanClass) {
+    return openSpan(null, spanClass);
+  }
+  private String openSpan(String divClass, String spanClass) {
+    if (divClass == null)
+      return "<div class='arrivalDepartureContainer'>" +
+              "<span class=\"" + spanClass + "\">";
+    return "<div class='" + divClass + "'>" +
+            "<span class=\"" + spanClass + "\">";
+  }
+  private String closeSpan() {
+    return "</span>"+  "</div>";
   }
 
   private String getPresentableOccupancy(MonitoredVehicleJourneyStructure journey, long updateTime) {
@@ -507,8 +572,9 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
 	  int staleTimeout = getStaleTimeout();
 	  long age = (SystemTime.currentTimeMillis() - updateTime) / 1000;
 
+    String qualifierText = "";
 	  if (age > staleTimeout) {
-		  return null;
+      qualifierText = " (stale)";
 	  }
     String blockId = "";
     if (journey != null && journey.getBlockRef()!= null && journey.getBlockRef().getValue() != null) {
@@ -516,17 +582,16 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
       blockId += ":" + journey.getFramedVehicleJourneyRef().getDatedVehicleJourneyRef();
     }
 
-    if (isTerminal(journey)) {
+    if (isOriginTerminal(journey)) {
+      // we show departures for origin terminal
       if (monitoredCall.getExpectedDepartureTime() != null) {
-        String qualifierText = "";
-        if (debug) qualifierText = "DEPARTS(" + blockId + ") ";
+        if (debug) qualifierText += "DEPARTS(" + blockId + ") ";
         return getPresentableTime(journey, updateTime, monitoredCall.getExpectedDepartureTime().getTime(), qualifierText);
       }
     }
     if (monitoredCall.getExpectedArrivalTime() != null) {
-      String qualifierText = "";
-      if (debug) qualifierText = "ARR(" + blockId + ") ";
-
+      if (debug) qualifierText += "ARR(" + blockId + ") ";
+      // otherwise show arrivals
       return getPresentableTime(journey, updateTime, monitoredCall.getExpectedArrivalTime().getTime(), qualifierText);
     }
 
@@ -534,31 +599,21 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
   }
 
   private String getPresentableTime(MonitoredVehicleJourneyStructure journey, long updateTime, long arrivalOrDeparture, String qualifierText) {
-    NaturalLanguageStringStructure progressStatus = journey.getProgressStatus();
-    MonitoredCallStructure monitoredCall = journey.getMonitoredCall();
-
-    SiriExtensionWrapper wrapper = (SiriExtensionWrapper) monitoredCall.getExtensions().getAny();
-    SiriDistanceExtension distanceExtension = wrapper.getDistances();
-    String distance = distanceExtension.getPresentableDistance();
+    if (qualifierText == null)
+      qualifierText = "";
 
     double minutes = Math.floor((arrivalOrDeparture - updateTime) / 60 / 1000);
-    String timeString = Math.round(minutes) + " minute" + ((Math.abs(minutes) != 1) ? "s" : "");
+    String timeString = "<strong>" + Math.round(minutes) + "</strong>"
+            + " minute" + ((Math.abs(minutes) != 1) ? "s" : "" );
     if (debug) {
       SimpleDateFormat sdf = new SimpleDateFormat("hh:mm a");
       timeString += ", " + sdf.format(new Date(arrivalOrDeparture));
     }
-    String timeAndDistance = "<strong>" + timeString + "</strong>, " + distance;
-    String loadOccupancy = getPresentableOccupancy(journey, updateTime);
 
-    if(progressStatus != null && progressStatus.getValue().contains("prevTrip")) {
-      return qualifierText + timeString;
-    } else {
-      return qualifierText + timeAndDistance + ", " + loadOccupancy;
-    }
-
+    return timeString + qualifierText;
   }
 
-  private boolean isTerminal(MonitoredVehicleJourneyStructure journey) {
+  private boolean isOriginTerminal(MonitoredVehicleJourneyStructure journey) {
     if (journey == null
             || journey.getOriginRef() == null
             || journey.getDestinationRef() == null
@@ -572,55 +627,60 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
     return (currentStop.equals(origin));
   }
 
+  private String getQualifierText(MonitoredVehicleJourneyStructure journey, long updateTime,
+                                  boolean isStopContext) {
+    MonitoredCallStructure monitoredCall = journey.getMonitoredCall();
+    SiriExtensionWrapper wrapper = (SiriExtensionWrapper) monitoredCall.getExtensions().getAny();
+    SiriDistanceExtension distanceExtension = wrapper.getDistances();
+    String message = "";
+    NaturalLanguageStringStructure progressStatus = journey.getProgressStatus();
+
+    if (!isActiveTrip(journey)) {
+      // don't comment on non-active trips
+      return message;
+    }
+
+    // at terminal label only appears in stop results
+    if (isStopContext && progressStatus != null
+            && progressStatus.getValue().contains("layover")) {
+
+      if(journey.getOriginAimedDepartureTime() != null) {
+        DateFormat formatter = DateFormat.getTimeInstance(DateFormat.SHORT);
+
+        if(journey.getOriginAimedDepartureTime().getTime() < new Date(SystemTime.currentTimeMillis()).getTime()) {
+          message += "at terminal";
+        } else {
+          message += "at terminal, scheduled to depart " + formatter.format(journey.getOriginAimedDepartureTime());
+        }
+      } else {
+        message += "at terminal";
+      }
+    } else if (!isActiveTrip(journey)) {
+      message += " +layover";
+    }
+
+    int staleTimeout = getStaleTimeout();
+    long age = (SystemTime.currentTimeMillis() - updateTime) / 1000;
+
+    return message;
+  }
   private String getPresentableDistance(
       MonitoredVehicleJourneyStructure journey, long updateTime,
       boolean isStopContext) {
     MonitoredCallStructure monitoredCall = journey.getMonitoredCall();
     SiriExtensionWrapper wrapper = (SiriExtensionWrapper) monitoredCall.getExtensions().getAny();
     SiriDistanceExtension distanceExtension = wrapper.getDistances();
-
-    String message = "";
-    String distance = "<strong>" + distanceExtension.getPresentableDistance() + "</strong>";
-    String loadOccupancy = getPresentableOccupancy(journey, updateTime);
-
     NaturalLanguageStringStructure progressStatus = journey.getProgressStatus();
+    String message = "";
 
-    // at terminal label only appears in stop results
-    if (isStopContext && progressStatus != null
-            && progressStatus.getValue().contains("layover")) {
-   
-    	if(journey.getOriginAimedDepartureTime() != null) {
-        	DateFormat formatter = DateFormat.getTimeInstance(DateFormat.SHORT);
-        	
-        	if(journey.getOriginAimedDepartureTime().getTime() < new Date(SystemTime.currentTimeMillis()).getTime()) {
-        		message += "at terminal";
-        	} else {    			
-        		message += "at terminal, scheduled to depart " + formatter.format(journey.getOriginAimedDepartureTime());
-        	}
-        } else {
-        	message += "at terminal";
-        }
-    } else if (isStopContext && progressStatus != null
-        && progressStatus.getValue().contains("prevTrip")) {
-    	message += "+ scheduled layover at terminal";
+    if (!isActiveTrip(journey)) {
+      return message; /* don't comment on trips not active, results are not reliable */
     }
-    	
-    int staleTimeout = getStaleTimeout();
-    long age = (SystemTime.currentTimeMillis() - updateTime) / 1000;
-
-    if (age > staleTimeout) {
-      if (message.length() > 0) {
-        message += ", ";
-      }
-
-      message += "old data";
+    if (!journey.isMonitored()) {
+      return message;
     }
-
-    if (message.length() > 0)
-      // here we choose not to show occupancy as it is likely a different trip
-      return distance + " (" + message + ")";
-    else
-      return distance + loadOccupancy;
+    String distance = distanceExtension.getPresentableDistance();
+    return distance;
   }
 
   private int getStaleTimeout() {
