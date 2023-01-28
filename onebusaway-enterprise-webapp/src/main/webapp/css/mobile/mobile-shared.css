@@ -449,6 +449,10 @@ small {
 .activeArrivalPrediction strong {
 	font-size: 150%;
 }
+.activeArrivalPrediction b {
+	color: red;
+	font-weight: normal;
+}
 
 .futureArrivalPrediction {
 	margin-left: 1px;
@@ -457,20 +461,24 @@ small {
 	font-size: 150%;
 	font-weight: normal;
 }
-
+.futureArrivalPrediction b {
+	color: red;
+	font-weight: normal;
+}
+/* prediction 30 + vehicle 13 + apc 27 + distance 28 + padding =  98*/
 .predictionContainer {
 	display: inline-block;
-	width: 24%;
+	width: 30%;
 	font-size: .90em;
 }
 .vehicleIdContainer {
 	display: inline-block;
-	width: 10%;
+	width: 13%;
 	font-size: .90em;
 }
 .distanceContainer {
 	display: inline-block;
-	width: 32%;
+	width: 28%;
 	font-size: .90em;
 }
 .vehicleArrival {
@@ -770,7 +778,7 @@ small {
 .apcLadderContainer {
    display: inline-block;
    height: 0;
-   width: 28%;
+   width: 27%;
 }
 
 .apcDotG {

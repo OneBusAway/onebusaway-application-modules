@@ -63,6 +63,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl implements SearchResultFactory {
 
+  private static final int MAX_VEHICLE_ID_SIZE = 10;
   private ConfigurationService _configurationService;
 
   private RealtimeService _realtimeService;
@@ -400,7 +401,8 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
         columms += "schedule";
       }
       // column 2: vehicleId
-      if (isNotBlank(vehicleId) && vehicleId.length() < 6)
+      if (visit.getMonitoredVehicleJourney().isMonitored()
+              && isNotBlank(vehicleId) && vehicleId.length() < MAX_VEHICLE_ID_SIZE)
         columms+= openSpan("vehicleIdContainer", "vehicleArrival") + vehicleId + closeSpan();
       else {
         columms+= openSpan("vehicleIdContainer", "vehicleScheduledArrival") + "scheduled" + closeSpan();
@@ -409,7 +411,7 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
       if (isNotBlank(loadOccupancy))
         columms+= loadOccupancy;
       else
-        columms+= openSpan("occupancyPlaceHolder") + "&nbsp;" + closeSpan();
+        columms+= openSpan("occupancyPlaceHolder", "apcLadderContainer") + "&nbsp;" + closeSpan();
       // column 4: distance + qualifier
       if (isNotBlank(distance)) {
         if (isNotBlank(qualifierText))
@@ -458,8 +460,10 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
     if (age > staleTimeout) {
 //      System.out.println("tossing record " + journey.getVehicleRef().getValue()
 //              + " with age " + age + "s old");
-      return "";
+      return null;
     }
+    if (!journey.isMonitored() || !isActiveTrip(journey))
+      return null;
 
     String apcMode = getApcMode();
 
@@ -486,17 +490,20 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
       loadOccupancy = loadOccupancy.toUpperCase();
 
       if (loadOccupancy.equals(OccupancyEnumeration.SEATS_AVAILABLE.name()) || loadOccupancy.equals(OccupancyStatus.MANY_SEATS_AVAILABLE.name())) {
-        loadOccupancy = "<div class='apcLadderContainer'><span class='" + stylePrefix + "G'></span>";
+        String occupancyText = getOccupancyString(OccupancyEnumeration.SEATS_AVAILABLE.name());
+        loadOccupancy = "<div class='apcLadderContainer' title='" + occupancyText + "' aria-label='" + occupancyText + "'><span class='" + stylePrefix + "G'></span>";
         if (!showIcons)
-          loadOccupancy += "<span class='apcTextG'>" + getOccupancyString(OccupancyEnumeration.SEATS_AVAILABLE.name()) + "</span>";
+          loadOccupancy += "<span class='apcTextG'>" + occupancyText + "</span>";
         loadOccupancy += "</div>";
       } else if (loadOccupancy.equals(OccupancyEnumeration.STANDING_AVAILABLE.name()) || loadOccupancy.equals(OccupancyStatus.FEW_SEATS_AVAILABLE.name())) {
-        loadOccupancy = "<div class='apcLadderContainer'><span class='" + stylePrefix + "Y'></span>";
+        String occupancyText = getOccupancyString(OccupancyEnumeration.STANDING_AVAILABLE.name());
+        loadOccupancy = "<div class='apcLadderContainer' title='" + occupancyText + "' aria-label='" + occupancyText + "'><span class='" + stylePrefix + "Y'></span>";
         if (!showIcons)
           loadOccupancy += "<span class='apcTextY'>" + getOccupancyString(OccupancyEnumeration.STANDING_AVAILABLE.name()) + "</span></div>";
         loadOccupancy += "</div>";
       } else if (loadOccupancy.equals(OccupancyEnumeration.FULL.name()) || loadOccupancy.equals(OccupancyStatus.FULL.name())) {
-        loadOccupancy = "<div class='apcLadderContainer'><span class='" + stylePrefix + "R'></span>";
+        String occupancyText = getOccupancyString(OccupancyEnumeration.FULL.name());
+        loadOccupancy = "<div class='apcLadderContainer' title='" + occupancyText + "' aria-label='" + occupancyText + "'><span class='" + stylePrefix + "R'></span>";
         if (!showIcons)
           loadOccupancy +="<span class='apcTextR'>" + getOccupancyString(OccupancyEnumeration.FULL.name()) + "</span></div>";
         loadOccupancy += "</div>";
@@ -586,7 +593,7 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
 
     String qualifierText = "";
 	  if (age > staleTimeout) {
-      qualifierText = " (stale)";
+      qualifierText = " <b>(old data)</b>";
 	  }
     String blockId = "";
     if (journey != null && journey.getBlockRef()!= null && journey.getBlockRef().getValue() != null) {

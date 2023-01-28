@@ -243,7 +243,9 @@ public final class SiriSupport {
 		}
 
 		// "prevTrip" really means not on the framedvehiclejourney trip
-		if(!framedJourneyTripBean.getId().equals(currentVehicleTripStatus.getActiveTrip().getId())) {
+		if (adBean != null && !adBean.getTrip().getId().equals(currentVehicleTripStatus.getActiveTrip().getId())) {
+			progressStatuses.add("prevTrip");
+		} else if(!framedJourneyTripBean.getId().equals(currentVehicleTripStatus.getActiveTrip().getId())) {
 			progressStatuses.add("prevTrip");
 		}
 
