@@ -533,22 +533,26 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
   }
 
   private void fillDistanceAwayStringsList(
-	  MonitoredVehicleJourney mvj,
-	  Date recordedAtTime,
-	  String stopId,
-      Map<String, List<String>> map) { 
+      MonitoredVehicleJourney mvj,
+      Date recordedAtTime,
+      String stopId,
+      Map<String, List<String>> map) {
       
-      // Distance Away
-      List<String> distanceStrings = map.get(stopId);
-      if (distanceStrings == null) {
-        distanceStrings = new ArrayList<String>();
-      }
+    // Distance Away
+    List<String> distanceStrings = map.get(stopId);
+    if (distanceStrings == null) {
+      distanceStrings = new ArrayList<String>();
+    }
 
-      distanceStrings.add(getPresentableDistance(
-    		  mvj,
-    		  recordedAtTime.getTime(), false));
-      map.put(stopId, distanceStrings);
-
+    // getPresentableDistance doesn't include occupancy
+    String distance = getPresentableDistance(
+          mvj,
+          recordedAtTime.getTime(), false);
+    String occupancy = getPresentableOccupancy(mvj, recordedAtTime.getTime());
+    if (occupancy != null)
+      distance += "&nbsp;&nbsp;" + occupancy;
+    distanceStrings.add(distance);
+    map.put(stopId, distanceStrings);
   }
   
   private void fillVehicleIdsStringList(
@@ -699,6 +703,10 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
       return message;
     }
     String distance = distanceExtension.getPresentableDistance();
+    if (!isStopContext) {
+      // always considered active to give it treatment
+      distance = "<strong>" + distance + "</strong>";
+    }
     return distance;
   }
 
