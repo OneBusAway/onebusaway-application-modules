@@ -57,19 +57,21 @@
 					<s:iterator value="directions">
 						<div class="directionAtStop">
 							<p>
-								<s:url var="url" namespace="/m" action="index" anchor="%{directionId}-%{hintless}">
-									<s:param name="q">
-										<s:if test="%{useAgencyId == 'true'}">
-											<s:property value="id+' '+shortName" />
-										</s:if>
-										<s:else>
-											<s:property value="shortName" />
-										</s:else>
-									</s:param>
-								</s:url>
-								<a href="${url}">
-									<strong><s:property value="shortName" />&amp;nbsp;&amp;nbsp;<s:property value="destination" /></strong>
-								</a>
+								<div class="directionAtStopHeader">
+									<s:url var="url" namespace="/m" action="index" anchor="%{directionId}-%{hintless}">
+										<s:param name="q">
+											<s:if test="%{useAgencyId == 'true'}">
+												<s:property value="id+' '+shortName" />
+											</s:if>
+											<s:else>
+												<s:property value="shortName" />
+											</s:else>
+										</s:param>
+									</s:url>
+									<a href="${url}">
+										<strong><s:property value="shortName" />&amp;nbsp;&amp;nbsp;<s:property value="destination" /></strong>
+									</a>
+								</div>
 							</p>
 							
 							<s:iterator value="stops">

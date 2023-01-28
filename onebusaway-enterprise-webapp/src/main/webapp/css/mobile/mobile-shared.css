@@ -339,6 +339,10 @@ small {
 	margin-bottom: .5em;
 	margin-left: 0.3em;
 }
+.directionAtStopHeader {
+	margin-bottom: .5em;
+	margin-left: 0.3em;
+}
 
 .routeList,.routeDescription {
 	padding-top: .25em;
@@ -352,6 +356,7 @@ small {
 	font-weight: bold;
 	color: rgb(129,129,129);
 	margin-left: 0.3em;
+	margin-bottom: 0.5em;
 }
 
 .routeHeader {
@@ -465,15 +470,16 @@ small {
 	color: red;
 	font-weight: normal;
 }
-/* prediction 30 + vehicle 13 + apc 27 + distance 28 + padding =  98*/
+/* prediction 30 + vehicle 14 + apc/occupancyPlaceHolder 26 + distance 28 + padding =  98*/
 .predictionContainer {
 	display: inline-block;
 	width: 30%;
 	font-size: .90em;
+	padding-left: 1px;/* align with directionAtStopHeader */
 }
 .vehicleIdContainer {
 	display: inline-block;
-	width: 13%;
+	width: 14%;
 	font-size: .90em;
 }
 .distanceContainer {
@@ -516,7 +522,7 @@ small {
 	display: inline-block;
 	height: 0;
 	padding-left: 1px;
-	width: 28%;
+	width: 26%;
 }
 .qualifierArrival {
 	text-align: right;
@@ -778,7 +784,7 @@ small {
 .apcLadderContainer {
    display: inline-block;
    height: 0;
-   width: 27%;
+   width: 26%;
 }
 
 .apcDotG {
