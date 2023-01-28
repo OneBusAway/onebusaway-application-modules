@@ -465,29 +465,41 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
 
     String occupancyStr = "";
     if (apcMode != null) {
-      occupancyStr = getApcModeOccupancy(journey);
+        occupancyStr = getApcModeOccupancy(journey, showIconsForOccupancy());
     }
     return occupancyStr;
   }
 
+  private boolean showIconsForOccupancy() {
+    return _configurationService.getConfigurationValueAsBoolean("display.apcIcons", true);
+  }
 
 
-  private String getApcModeOccupancy(MonitoredVehicleJourneyStructure journey) {
+  private String getApcModeOccupancy(MonitoredVehicleJourneyStructure journey, boolean showIcons) {
 
     if (journey.getOccupancy() != null) {
-
+      String stylePrefix = "apcDot";
+      if (showIcons) {
+        stylePrefix = "weeble";
+      }
       String loadOccupancy = journey.getOccupancy().toString();
       loadOccupancy = loadOccupancy.toUpperCase();
 
       if (loadOccupancy.equals(OccupancyEnumeration.SEATS_AVAILABLE.name()) || loadOccupancy.equals(OccupancyStatus.MANY_SEATS_AVAILABLE.name())) {
-        loadOccupancy = "<div class='apcLadderContainer'><span class='apcDotG'></span> <span class='apcTextG'>" + getOccupancyString(OccupancyEnumeration.SEATS_AVAILABLE.name()) + "</span></div>";
-        //loadOccupancy = "<icon class='apcicong'> </icon>";
+        loadOccupancy = "<div class='apcLadderContainer'><span class='" + stylePrefix + "G'></span>";
+        if (!showIcons)
+          loadOccupancy += "<span class='apcTextG'>" + getOccupancyString(OccupancyEnumeration.SEATS_AVAILABLE.name()) + "</span>";
+        loadOccupancy += "</div>";
       } else if (loadOccupancy.equals(OccupancyEnumeration.STANDING_AVAILABLE.name()) || loadOccupancy.equals(OccupancyStatus.FEW_SEATS_AVAILABLE.name())) {
-        loadOccupancy = "<div class='apcLadderContainer'><span class='apcDotY'></span> <span class='apcTextY'>" + getOccupancyString(OccupancyEnumeration.STANDING_AVAILABLE.name()) + "</span></div>";
-        //loadOccupancy = "<icon class='apcicony'> </icon>";
+        loadOccupancy = "<div class='apcLadderContainer'><span class='" + stylePrefix + "Y'></span>";
+        if (!showIcons)
+          loadOccupancy += "<span class='apcTextY'>" + getOccupancyString(OccupancyEnumeration.STANDING_AVAILABLE.name()) + "</span></div>";
+        loadOccupancy += "</div>";
       } else if (loadOccupancy.equals(OccupancyEnumeration.FULL.name()) || loadOccupancy.equals(OccupancyStatus.FULL.name())) {
-        loadOccupancy = "<div class='apcLadderContainer'><span class='apcDotR'></span> <span class='apcTextR'>" + getOccupancyString(OccupancyEnumeration.FULL.name()) + "</span></div>";
-        //loadOccupancy = "<icon class='apciconr'> </icon>";
+        loadOccupancy = "<div class='apcLadderContainer'><span class='" + stylePrefix + "R'></span>";
+        if (!showIcons)
+          loadOccupancy +="<span class='apcTextR'>" + getOccupancyString(OccupancyEnumeration.FULL.name()) + "</span></div>";
+        loadOccupancy += "</div>";
       }
 
       return " " + loadOccupancy;
