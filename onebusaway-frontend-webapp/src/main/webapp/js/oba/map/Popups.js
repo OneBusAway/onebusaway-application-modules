@@ -431,6 +431,19 @@ OBA.Popups = (function() {
 		return getOccupancyApcModeOccupancy(MonitoredVehicleJourney, addDashedLine);
 	}
 
+	function isOriginTerminal(MonitoredVehicleJourney) {
+		if (MonitoredVehicleJourney.OriginRef !== 'undefined') {
+			var origin = MonitoredVehicleJourney.OriginRef;
+			if (MonitoredVehicleJourney.MonitoredCall !== 'undefined') {
+				var currentStop = MonitoredVehicleJourney.MonitoredCall.StopPointRef;
+				if (origin === currentStop) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
 
 	function getOccupancyForBus(MonitoredVehicleJourney){
 		var occupancyLoad = getOccupancy(MonitoredVehicleJourney, true);
@@ -661,13 +674,21 @@ OBA.Popups = (function() {
 
 
                              var timePrediction = null;
-                             var expectedArrivalTime = null;
-                             if(typeof monitoredVehicleJourney.MonitoredCall.ExpectedArrivalTime !== 'undefined'
+                             var expectedTime = null;
+							 if(isOriginTerminal(monitoredVehicleJourney)
+							 && typeof monitoredVehicleJourney.MonitoredCall.ExpectedDepartureTime !== 'undefined'
+								 && monitoredVehicleJourney.MonitoredCall.ExpectedDepartureTime !== null) {
+								 timePrediction = "DEP2:" + OBA.Util.getArrivalEstimateForISOString(
+									 monitoredVehicleJourney.MonitoredCall.ExpectedDepartureTime,
+									 monitoredVehicleJourney.RecordedAtTime/*synthetic property*/);
+								 expectedTime =
+									 OBA.Util.ISO8601StringToDate(monitoredVehicleJourney.MonitoredCall.ExpectedDepartureTime).format(dateFormat.masks.shortTime);
+							 } else if(typeof monitoredVehicleJourney.MonitoredCall.ExpectedArrivalTime !== 'undefined'
                                  && monitoredVehicleJourney.MonitoredCall.ExpectedArrivalTime !== null) {
                                  timePrediction = OBA.Util.getArrivalEstimateForISOString(
                                          monitoredVehicleJourney.MonitoredCall.ExpectedArrivalTime,
                                          monitoredVehicleJourney.RecordedAtTime/*synthetic property*/);
-                                 expectedArrivalTime =
+                                 expectedTime =
 									 OBA.Util.ISO8601StringToDate(monitoredVehicleJourney.MonitoredCall.ExpectedArrivalTime).format(dateFormat.masks.shortTime);
 						}
 
@@ -706,8 +727,8 @@ OBA.Popups = (function() {
 
 						// time mode
 						if(timePrediction != null && stalled === false) {
-							if (expectedArrivalTime != null && OBA.Config.showExpectedArrivalTimeInStopPopup == "true") {
-                                timePrediction += ', ' + expectedArrivalTime;
+							if (expectedTime != null && OBA.Config.showExpectedArrivalTimeInStopPopup == "true") {
+                                timePrediction += ', ' + expectedTime;
                         	}
 							if(wrapped === false) {
 								timePrediction += ", " + distance;
