@@ -985,9 +985,7 @@ public class GtfsRealtimeTripLibrary {
       // called once per block -- we do not validate if the trip is active
       if (update == null) return null;
       if (update.vehiclePosition == null) return null;
-      if (update.vehiclePosition.hasOccupancyStatus()
-              && update.vehiclePosition.hasVehicle()
-              && update.vehiclePosition.getVehicle().hasId()) {
+      if (update.vehiclePosition.hasOccupancyStatus()) {
         VehicleOccupancyRecord vor = new VehicleOccupancyRecord();
         // here we assume the vehicle's agency matches that of its block
         vor.setVehicleId(new AgencyAndId(update.block.getBlockInstance().getBlock().getBlock().getId().getAgencyId(), update.block.getVehicleId()));
@@ -996,12 +994,22 @@ public class GtfsRealtimeTripLibrary {
         } catch (IllegalArgumentException iae) {
           _log.debug("unknown occupancy value: " + iae);
         }
-        TripEntry firstTrip = _entitySource.getTrip(update.getTripUpdates().get(0).getTrip().getTripId());
-        // link this occupancy to route+direction so it will expire at end of trip
+
+        TripEntry firstTrip = null;
+        if (update.vehiclePosition.hasTrip() && update.vehiclePosition.getTrip().hasTripId()) {
+          // use trip from VP, as the combined update may have many trips
+          firstTrip = _entitySource.getTrip(update.vehiclePosition.getTrip().getTripId());
+        }
+        // fall back on trip from combined update
+        if (firstTrip == null) {
+          firstTrip = _entitySource.getTrip(update.getTripUpdates().get(0).getTrip().getTripId());
+        }
         if (firstTrip != null && firstTrip.getRoute() != null) {
+          // link this occupancy to route+direction so it will expire at end of trip
           vor.setRouteId(AgencyAndIdLibrary.convertToString(firstTrip.getRoute().getId()));
           vor.setDirectionId(firstTrip.getDirectionId());
         }
+
         if (vor.getOccupancyStatus() == null) {
           // the valueOf failed to match, the spec may have added new fields...
           _log.warn("unmatched occupancy status " + update.vehiclePosition.getOccupancyStatus().name());
