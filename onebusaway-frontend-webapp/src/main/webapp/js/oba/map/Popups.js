@@ -678,7 +678,7 @@ OBA.Popups = (function() {
 							 if(isOriginTerminal(monitoredVehicleJourney)
 							 && typeof monitoredVehicleJourney.MonitoredCall.ExpectedDepartureTime !== 'undefined'
 								 && monitoredVehicleJourney.MonitoredCall.ExpectedDepartureTime !== null) {
-								 timePrediction = "DEP2:" + OBA.Util.getArrivalEstimateForISOString(
+								 timePrediction = OBA.Util.getArrivalEstimateForISOString(
 									 monitoredVehicleJourney.MonitoredCall.ExpectedDepartureTime,
 									 monitoredVehicleJourney.RecordedAtTime/*synthetic property*/);
 								 expectedTime =
