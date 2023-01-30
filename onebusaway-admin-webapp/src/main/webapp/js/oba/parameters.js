@@ -62,7 +62,8 @@ function getConfigParameters() {
 			updateParametersView(response.configParameters);
 		},
 		error: function(request) {
-			alert("Error loading parameters from the server : ", request.statusText);
+			alert("Error loading parameters from the server : "+ request.responseText);
+			console.log(request);
 		}
 		
 	});
