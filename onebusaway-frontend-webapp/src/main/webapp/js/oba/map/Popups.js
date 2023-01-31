@@ -394,30 +394,49 @@ OBA.Popups = (function() {
 		var occupancyLoad = "N/A";
 
 		//console.log('occupancy: '+ MonitoredVehicleJourney.Occupancy);
-
-		if(MonitoredVehicleJourney.Occupancy == "seatsAvailable"){
-			occupancyLoad = '<span class="apcDotG"></span>'+
-				'<span id="apcTextG">&nbsp;' + lookupOccupancy("seatsAvailable") + '</span>';
-			if(addDashedLine == true){
-				occupancyLoad += '<div class="apcDashedLine"><img src="img/occupancy/apcLoadG.png"></div>';
+		var stylePrefix = "apcDot";
+		if (OBA.Config.apcIcons) {
+			stylePrefix = "weeble";
+		}
+		if(MonitoredVehicleJourney.Occupancy == "seatsAvailable") {
+			var occupancyText = lookupOccupancy("seatsAvailable");
+			var occupancyClass = stylePrefix + "G";
+			if (!OBA.Config.apcIcons) {
+				occupancyLoad = '<span class="apcDotG"></span>' +
+					'<span id="apcTextG">&nbsp;' + occupancyText + '</span>';
+				if (addDashedLine == true) {
+					occupancyLoad += '<div class="apcDashedLine"><img src="img/occupancy/apcLoadG.png"></div>';
+				}
+			} else {
+				occupancyLoad = '<span class="' + occupancyClass + '"></span>';
 			}
-			//occupancyLoad = '<span class="apcicong"> </span>';
 		}
 		else if(MonitoredVehicleJourney.Occupancy == "standingAvailable"){
-			occupancyLoad = '<span class="apcDotY"></span>'+
-				'<span id="apcTextY">&nbsp;' + lookupOccupancy("standingAvailable") + '</span>';
-			if(addDashedLine == true){
-				occupancyLoad += '<div class="apcDashedLine"><img src="img/occupancy/apcLoadY.png"></div>';
+			var occupancyText = lookupOccupancy("standingAvailable");
+			var occupancyClass = stylePrefix + "Y";
+			if (!OBA.Config.apcIcons) {
+				occupancyLoad = '<span class="apcDotY"></span>' +
+					'<span id="apcTextY">&nbsp;' + lookupOccupancy("standingAvailable") + '</span>';
+				if (addDashedLine == true) {
+					occupancyLoad += '<div class="apcDashedLine"><img src="img/occupancy/apcLoadY.png"></div>';
+				}
+			} else {
+				occupancyLoad = '<span class="' + occupancyClass + '"></span>';
 			}
-			//occupancyLoad = '<span class="apcicony"> </span>';
 		}
 		else if(MonitoredVehicleJourney.Occupancy == "full"){
-			occupancyLoad = '<span class="apcDotR"></span>'+
-				'<span id="apcTextR">&nbsp;' + lookupOccupancy("full") + '</span>';
-			if(addDashedLine == true){
-				occupancyLoad += '<div class="apcDashedLine"><img src="img/occupancy/apcLoadR.png"></div>';
+			var occupancyText = lookupOccupancy("full");
+			var occupancyClass = stylePrefix + "R";
+			if (!OBA.Config.apcIcons) {
+				occupancyLoad = '<span class="apcDotR"></span>' +
+					'<span id="apcTextR">&nbsp;' + lookupOccupancy("full") + '</span>';
+				if (addDashedLine == true) {
+					occupancyLoad += '<div class="apcDashedLine"><img src="img/occupancy/apcLoadR.png"></div>';
+				}
+			} else {
+				occupancyLoad = '<span class="' + occupancyClass + '"></span>';
 			}
-			//occupancyLoad = '<span class="apciconr"> </span>';
+
 		}
 
 		return occupancyLoad;
