@@ -321,7 +321,7 @@ OBA.Sign = function() {
 
 				// even if route name/ affected journeys not present we still display the alert
 				var alert = "N/A";
-				if (situation.Summary != "undefined") {
+				if (situation.Summary != "undefined" && situation.Description != "undefined") {
 					alert = jQuery("<div></div>")
 						.addClass("alert")
 						.html('<p class="alert_summary">' + situation.Summary.replace(/\n\n/g, "<br/><br/>").replace(/\n/g, " ") + '</p><p>' + situation.Description.replace(/$/g, "<br/><br/>").replace(/\n\n/g, "<br/><br/>").replace(/\n/g, " ") + '</p>');
