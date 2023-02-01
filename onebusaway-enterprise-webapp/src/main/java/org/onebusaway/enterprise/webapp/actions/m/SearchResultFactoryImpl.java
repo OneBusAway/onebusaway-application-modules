@@ -411,12 +411,15 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
       if (isNotBlank(loadOccupancy))
         columms+= loadOccupancy;
       else
-        columms+= openSpan("occupancyPlaceHolder", "apcLadderContainer") + "&nbsp;" + closeSpan();
+        columms += emptyDiv("apcLadderContainer");
       // column 4: distance + qualifier
       if (isNotBlank(distance)) {
         if (isNotBlank(qualifierText))
           distance += qualifierText;
         columms += openSpan("distanceContainer", "distanceArrival") + distance + closeSpan();
+      } else {
+        // striving for parity in layout
+        columms += openSpan("distanceContainer", "distanceArrival") + closeSpan();
       }
       distanceAways.add(columms);
 
@@ -451,6 +454,9 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
   }
   private String closeSpan() {
     return "</span>"+  "</div>";
+  }
+  private String emptyDiv(String divClass) {
+    return "<div class='" + divClass + "'><span class='weeble0'></span></div>";
   }
 
   private String getPresentableOccupancy(MonitoredVehicleJourneyStructure journey, long updateTime) {
@@ -509,7 +515,7 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
         loadOccupancy += "</div>";
       }
 
-      return " " + loadOccupancy;
+      return loadOccupancy;
     } else
       return "";
   }
@@ -550,7 +556,7 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
           recordedAtTime.getTime(), false);
     String occupancy = getPresentableOccupancy(mvj, recordedAtTime.getTime());
     if (occupancy != null)
-      distance += "&nbsp;&nbsp;" + occupancy;
+      distance += occupancy;
     distanceStrings.add(distance);
     map.put(stopId, distanceStrings);
   }

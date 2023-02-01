@@ -518,12 +518,6 @@ small {
 .distanceArrival {
 	margin-left: 0px;
 }
-.occupancyPlaceHolder {
-	display: inline-block;
-	height: 0;
-	padding-left: 1px;
-	width: 26%;
-}
 .qualifierArrival {
 	text-align: right;
 }
@@ -783,7 +777,6 @@ small {
 /* apc defaults */
 .apcLadderContainer {
    display: inline-block;
-   height: 0;
    width: 26%;
 }
 
@@ -837,6 +830,16 @@ small {
 
 /* apc weebles */
 /* G for green for seats available */
+.weeble0 {
+	height: 16px;
+	width: 20px;
+	background-color: #FFFFFF;
+	display: inline-block;
+	background-image: url("img/icon-crowding-0.png");
+	background-repeat: no-repeat;
+	background-size: cover;
+}
+
 .weebleG {
 	height: 16px;
 	width: 20px;
