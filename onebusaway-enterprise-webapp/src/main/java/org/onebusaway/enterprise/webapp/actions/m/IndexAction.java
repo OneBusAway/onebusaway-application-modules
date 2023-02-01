@@ -365,4 +365,8 @@ public class IndexAction extends OneBusAwayEnterpriseActionSupport {
   public String getFeedbackFormURL() {
     return _configurationService.getConfigurationValueAsString("display.feedbackForm.url", null);
   }
+  public String getHideStopGroupHeader() {
+    return _configurationService.getConfigurationValueAsString("display.useAgencyId", "true");
+  }
+
 }
