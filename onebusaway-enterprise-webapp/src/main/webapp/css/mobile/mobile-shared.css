@@ -778,6 +778,7 @@ small {
 .apcLadderContainer {
    display: inline-block;
    width: 26%;
+   margin-left: 5px;
 }
 
 .apcDotG {
