@@ -159,6 +159,17 @@
 .popup .apcLadderContainer {
 
 }
+/* 0 for no data */
+.popup ul li.arrival .weeble0,
+.popup ul li.nextStop .weeble0 {
+	height: 12px;
+	width: 20px;
+	background-color: #FFFFFF;
+	display: inline-block;
+	background-image: url("img/icon-crowding-0.png");
+	background-repeat: no-repeat;
+	background-size: cover;
+}
 /* G for green for seats available */
 .popup ul li.arrival .weebleG,
 .popup ul li.nextStop .weebleG {

@@ -391,7 +391,7 @@ OBA.Popups = (function() {
 		if(MonitoredVehicleJourney.Occupancy === undefined)
 			return '';
 
-		var occupancyLoad = "N/A";
+		var occupancyLoad = "<span class='weeble0'></span>";
 
 		//console.log('occupancy: '+ MonitoredVehicleJourney.Occupancy);
 		var stylePrefix = "apcDot";
@@ -403,12 +403,12 @@ OBA.Popups = (function() {
 			var occupancyClass = stylePrefix + "G";
 			if (!OBA.Config.apcIcons) {
 				occupancyLoad = '<span class="apcDotG"></span>' +
-					'<span id="apcTextG">&nbsp;' + occupancyText + '</span>';
+					'<span id="apcTextG">' + occupancyText + '</span>';
 				if (addDashedLine == true) {
 					occupancyLoad += '<div class="apcDashedLine"><img src="img/occupancy/apcLoadG.png"></div>';
 				}
 			} else {
-				occupancyLoad = '<span class="' + occupancyClass + '"></span>';
+				occupancyLoad = '<span title="' + occupancyText + '" aria-label="' + occupancyText + '" class="' + occupancyClass + '"></span>';
 			}
 		}
 		else if(MonitoredVehicleJourney.Occupancy == "standingAvailable"){
@@ -416,12 +416,12 @@ OBA.Popups = (function() {
 			var occupancyClass = stylePrefix + "Y";
 			if (!OBA.Config.apcIcons) {
 				occupancyLoad = '<span class="apcDotY"></span>' +
-					'<span id="apcTextY">&nbsp;' + lookupOccupancy("standingAvailable") + '</span>';
+					'<span id="apcTextY">' + lookupOccupancy("standingAvailable") + '</span>';
 				if (addDashedLine == true) {
 					occupancyLoad += '<div class="apcDashedLine"><img src="img/occupancy/apcLoadY.png"></div>';
 				}
 			} else {
-				occupancyLoad = '<span class="' + occupancyClass + '"></span>';
+				occupancyLoad = '<span title="' + occupancyText + '" aria-label="' + occupancyText + '" class="' + occupancyClass + '"></span>';
 			}
 		}
 		else if(MonitoredVehicleJourney.Occupancy == "full"){
@@ -429,12 +429,12 @@ OBA.Popups = (function() {
 			var occupancyClass = stylePrefix + "R";
 			if (!OBA.Config.apcIcons) {
 				occupancyLoad = '<span class="apcDotR"></span>' +
-					'<span id="apcTextR">&nbsp;' + lookupOccupancy("full") + '</span>';
+					'<span id="apcTextR">' + lookupOccupancy("full") + '</span>';
 				if (addDashedLine == true) {
 					occupancyLoad += '<div class="apcDashedLine"><img src="img/occupancy/apcLoadR.png"></div>';
 				}
 			} else {
-				occupancyLoad = '<span class="' + occupancyClass + '"></span>';
+				occupancyLoad = '<span title="' + occupancyText + '" aria-label="' + occupancyText + '" class="' + occupancyClass + '"></span>';
 			}
 
 		}
