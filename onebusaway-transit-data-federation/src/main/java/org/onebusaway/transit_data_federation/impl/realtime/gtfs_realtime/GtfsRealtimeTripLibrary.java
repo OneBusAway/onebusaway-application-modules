@@ -18,6 +18,7 @@
 package org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime;
 
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
@@ -183,7 +184,7 @@ public class GtfsRealtimeTripLibrary {
         // Trip update has a vehicle ID - index by vehicle ID
         String vehicleId = getVehicleId(tu);
 
-        tripUpdatesByVehicleId.put(vehicleId, tu);
+        tripUpdatesByVehicleId.put(vehicleId, addStartDateTime(tu));
 
       } else {
         /*
@@ -347,6 +348,42 @@ public class GtfsRealtimeTripLibrary {
     }
 
     return updates;
+  }
+
+  // in order to support multiple trip updates per block we need
+  // to internally require trip_start_time which means we formally
+  // require trip_start_date;
+  private TripUpdate addStartDateTime(TripUpdate tu) {
+    if (!tu.hasTrip() || !tu.getTrip().hasTripId()) {
+      throw new IllegalStateException("unidentifiable trip " + tu);
+    }
+    if (tu.getTrip().hasStartTime()) {
+      //nothing to do
+      return tu;
+    }
+
+    TripEntry trip = _entitySource.getTrip(tu.getTrip().getTripId());
+    StopTimeEntry stopTimeEntry = trip.getStopTimes().get(0);
+    int arrivalTime = stopTimeEntry.getArrivalTime();
+
+    ServiceDate serviceDate = null;
+    String dateString = null;
+    if (tu.getTrip().hasStartDate())
+      dateString = tu.getTrip().getStartDate();
+    if (dateString == null || dateString.length() == 0)
+      dateString = "00000000"; // reference from epoch
+    try {
+      serviceDate = ServiceDate.parseString(dateString);
+    } catch (ParseException e) {
+      throw new IllegalStateException("invalid date format |" + tu.getTrip().getStartDate() +
+              "| for trip |" + tu.getTrip().getTripId() + "|");
+    }
+    Date startTime = new Date(serviceDate.getAsDate().getTime() + (arrivalTime * 1000));
+    SimpleDateFormat sdfTime = new SimpleDateFormat("hh:mm:ss");
+    TripDescriptor.Builder tdBuilder = tu.getTrip().toBuilder();
+    tdBuilder.setStartTime(sdfTime.format(startTime));
+    TripUpdate.Builder builder = tu.toBuilder();
+    return builder.setTrip(tdBuilder.build()).build();
   }
 
   // take hints from the vehicle position feed and hold on to for later grouping
@@ -514,6 +551,8 @@ public class GtfsRealtimeTripLibrary {
     		return null;
     	}
     } else {
+      // we have legacy support for missing service date
+      // mostly for unit tests but also legacy feeds
     	long timeFrom = currentTime - 30 * 60 * 1000;
     	long timeTo = currentTime + 30 * 60 * 1000;
     	

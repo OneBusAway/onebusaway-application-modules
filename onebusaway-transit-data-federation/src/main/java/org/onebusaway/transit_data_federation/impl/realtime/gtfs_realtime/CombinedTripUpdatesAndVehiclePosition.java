@@ -15,6 +15,8 @@
  */
 package org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -53,9 +55,8 @@ class CombinedTripUpdatesAndVehiclePosition implements
 
   /*
    * We want the tripUpdates in temporal order for convenient usage inside
-   * the TDS, but we don't want to take the expense of looking up schedule values.
-   * We hence take the shortcut of comparing tripIds and assuming they increment
-   * for later trips.  This is a big assumption but generally proves to be true.
+   * the TDS, but we need to support empty trip updates.
+   * So now we enforce start_time property on storage and sort by that!
    */
   private class TripComparator implements Comparator {
     @Override
@@ -64,8 +65,27 @@ class CombinedTripUpdatesAndVehiclePosition implements
         return 0;
       TripUpdate t1 = (TripUpdate)o1;
       TripUpdate t2 = (TripUpdate)o2;
-      // we trivially compare trip Ids hoping they are sequential/increasing in a block
-      return t1.getTrip().getTripId().compareTo(t2.getTrip().getTripId());
+      verifyStartTime(t1);
+      verifyStartTime(t2);
+      return Math.toIntExact(parseDate(t1.getTrip().getStartDate(), t1.getTrip().getStartTime()) -
+              parseDate(t2.getTrip().getStartDate(), t2.getTrip().getStartTime()));
+    }
+
+    private long parseDate(String startDate, String startTime) throws IllegalStateException {
+      if (startDate == null || startDate.length() == 0)
+        startDate = "00000000";
+      SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd hh:mm:ss");
+      try {
+        return sdf.parse(startDate + " " + startTime).getTime();
+      } catch (ParseException e) {
+        throw new IllegalStateException("invalid date format: " + startDate + " " + startTime);
       }
+    }
+
+    private void verifyStartTime(TripUpdate t) {
+      if (!t.hasTrip() || !t.getTrip().hasStartTime())
+        throw new IllegalStateException("TripUpdate needs to have start time on trip " + t);
+    }
+
   }
 }

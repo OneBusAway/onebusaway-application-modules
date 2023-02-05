@@ -72,10 +72,10 @@ public class GtfsRealtimeTripLibraryTest {
   @Test
   public void test() {
 
-    FeedEntity tripUpdateEntityA = createTripUpdate("tripA", "stopA", 60, true);
-    FeedEntity tripUpdateEntityB = createTripUpdate("tripB", "stopB", 120, true);
-    FeedEntity tripUpdateEntityC = createTripUpdate("tripC", "stopA", 30, true);
-    FeedEntity tripUpdateEntityD = createTripUpdate("tripD", "stopB", 90, true);
+    FeedEntity tripUpdateEntityA = createTripUpdate("tripA", "stopA","07:30:00", 60, true);
+    FeedEntity tripUpdateEntityB = createTripUpdate("tripB", "stopB","08:30:00", 120, true);
+    FeedEntity tripUpdateEntityC = createTripUpdate("tripC", "stopA","08:30:00", 30, true);
+    FeedEntity tripUpdateEntityD = createTripUpdate("tripD", "stopB","09:30:00", 90, true);
 
     FeedMessage.Builder tripUpdates = createFeed();
     tripUpdates.addEntity(tripUpdateEntityA);
@@ -128,6 +128,7 @@ public class GtfsRealtimeTripLibraryTest {
     List<CombinedTripUpdatesAndVehiclePosition> groups = _library.groupTripUpdatesAndVehiclePositions(
         tripUpdates.build(), vehiclePositions.build());
 
+    // ensure we grouped 4 updates into 2 combined
     assertEquals(2, groups.size());
 
     Collections.sort(groups);
@@ -136,6 +137,7 @@ public class GtfsRealtimeTripLibraryTest {
     assertSame(blockA, group.block.getBlockInstance().getBlock().getBlock());
     assertEquals(2, group.getTripUpdatesSize());
     TripUpdate tripUpdate = group.getTripUpdates().get(0);
+    // this verifies our sort order
     assertEquals("tripA", tripUpdate.getTrip().getTripId());
     tripUpdate = group.getTripUpdates().get(1);
     assertEquals("tripB", tripUpdate.getTrip().getTripId());
@@ -286,7 +288,7 @@ public class GtfsRealtimeTripLibraryTest {
     
     StopTimeUpdate.Builder stopTimeUpdate = stopTimeUpdateWithDepartureDelay("stopA", 180);
    
-    TripUpdate.Builder tripUpdate = tripUpdate("tripA", (_library.getCurrentTime() + day)/1000,
+    TripUpdate.Builder tripUpdate = tripUpdate("tripA", "07:30:00", (_library.getCurrentTime() + day)/1000,
         120, stopTimeUpdate);
 
     TripEntryImpl tripA = trip("tripA");
@@ -349,7 +351,7 @@ public class GtfsRealtimeTripLibraryTest {
     BlockInstance blockInstanceA = new BlockInstance(blockConfigA, 0L);
 
     StopTimeUpdate.Builder stopTimeUpdateBuilder = stopTimeUpdateWithScheduleRelationship("stopB", 1);
-    TripUpdate.Builder tripUpdateBuilder = tripUpdate("tripA", _library.getCurrentTime(), 0, stopTimeUpdateBuilder);
+    TripUpdate.Builder tripUpdateBuilder = tripUpdate("tripA", "07:30:00", _library.getCurrentTime(), 0, stopTimeUpdateBuilder);
 
     Mockito.when(_entitySource.getTrip("tripA")).thenReturn(tripA);
 
@@ -416,7 +418,7 @@ public class GtfsRealtimeTripLibraryTest {
     BlockInstance blockInstanceA = new BlockInstance(blockConfigA, 0L);
     
     StopTimeUpdate.Builder stopTimeUpdate = stopTimeUpdateWithDepartureDelay("stopB", 180);
-    TripUpdate.Builder tripUpdate = tripUpdate("tripA", _library.getCurrentTime()/1000,  120, stopTimeUpdate);
+    TripUpdate.Builder tripUpdate = tripUpdate("tripA", "07:30:00", _library.getCurrentTime()/1000,  120, stopTimeUpdate);
    
     Mockito.when(_entitySource.getTrip("tripA")).thenReturn(tripA);
     
@@ -457,7 +459,7 @@ public class GtfsRealtimeTripLibraryTest {
     BlockInstance blockInstanceA = new BlockInstance(blockConfigA, 0L);
     
     StopTimeUpdate.Builder stopTimeUpdate = stopTimeUpdateWithDepartureDelay("stopB", 180);
-    TripUpdate.Builder tripUpdate = tripUpdate("tripA", _library.getCurrentTime()/1000,  120, stopTimeUpdate);
+    TripUpdate.Builder tripUpdate = tripUpdate("tripA", "07:30:00", _library.getCurrentTime()/1000,  120, stopTimeUpdate);
    
     Mockito.when(_entitySource.getTrip("tripA")).thenReturn(tripA);
     
@@ -495,7 +497,7 @@ public class GtfsRealtimeTripLibraryTest {
     BlockInstance blockInstanceA = new BlockInstance(blockConfigA, 0L);
     
     StopTimeUpdate.Builder stopTimeUpdate = stopTimeUpdateWithDepartureDelay("stopA", 180);
-    TripUpdate.Builder tripUpdate = tripUpdate("tripA", _library.getCurrentTime()/1000,  120, stopTimeUpdate);
+    TripUpdate.Builder tripUpdate = tripUpdate("tripA", "07:30:00", _library.getCurrentTime()/1000,  120, stopTimeUpdate);
    
     Mockito.when(_entitySource.getTrip("tripA")).thenReturn(tripA);
     
@@ -540,10 +542,10 @@ public class GtfsRealtimeTripLibraryTest {
     BlockInstance blockInstanceA = new BlockInstance(blockConfigA, 0L);
 
     StopTimeUpdate.Builder stuA = stopTimeUpdateWithDepartureDelay("stopA", 180);
-    TripUpdate.Builder tuA = tripUpdate("tripA", _library.getCurrentTime()/1000,  120, stuA);
+    TripUpdate.Builder tuA = tripUpdate("tripA", "07:30:00", _library.getCurrentTime()/1000,  120, stuA);
 
     StopTimeUpdate.Builder stuB = stopTimeUpdateWithDepartureDelay("stopA", 240);
-    TripUpdate.Builder tuB = tripUpdate("tripB", _library.getCurrentTime()/1000,  0, stuB);
+    TripUpdate.Builder tuB = tripUpdate("tripB",  "07:40:00", _library.getCurrentTime()/1000,  0, stuB);
 
     tuA.setVehicle(vehicle("bus1"));
     tuB.setVehicle(vehicle("bus1"));
@@ -556,6 +558,7 @@ public class GtfsRealtimeTripLibraryTest {
                     Mockito.anyLong(), Mockito.anyLong())).thenReturn(Arrays.asList(blockInstanceA));
 
     VehicleLocationRecord record = vehicleLocationRecord(tuA, tuB);
+    assertNotNull(record);
 
     long tripADept = getPredictedDepartureTimeByStopIdAndTripId(record, "stopA", "tripA");
     assertEquals(tripADept, time(7, 33) * 1000);
@@ -573,7 +576,7 @@ public class GtfsRealtimeTripLibraryTest {
 
     StopTimeUpdate.Builder stopTimeUpdate = stopTimeUpdateWithDepartureDelay("stopA", 180);
 
-    TripUpdate.Builder tripUpdate = tripUpdate("tripA", (_library.getCurrentTime() + day)/1000,
+    TripUpdate.Builder tripUpdate = tripUpdate("tripA", "07:30:00", (_library.getCurrentTime() + day)/1000,
             120, stopTimeUpdate);
 
     TripEntryImpl tripA = trip("tripA");
@@ -680,13 +683,13 @@ public class GtfsRealtimeTripLibraryTest {
 
 
     // Trip Update: has v1 Vehicle
-    FeedEntity tripUpdateEntityA = createTripUpdate("tripA", "stopA", 58, true, "v1");
+    FeedEntity tripUpdateEntityA = createTripUpdate("tripA", "stopA", "07:30:00",58, true, "v1");
     assertTrue(tripUpdateEntityA.hasVehicle());
     assertTrue(tripUpdateEntityA.getVehicle().getVehicle().hasId());
     // Trip Update: has no vehicle
-    FeedEntity tripUpdateEntityB = createTripUpdate("tripB", "stopA", 59, true);
+    FeedEntity tripUpdateEntityB = createTripUpdate("tripB", "stopA", "07:45:00", 59, true);
     // Trip Update: has no Vehicle
-    FeedEntity tripUpdateEntityC = createTripUpdate("tripC", "stopA", 60, true);
+    FeedEntity tripUpdateEntityC = createTripUpdate("tripC", "stopA", "08:00:00", 60, true);
 
     FeedMessage.Builder tripUpdates = createFeed();
     tripUpdates.addEntity(tripUpdateEntityA);
@@ -723,6 +726,7 @@ public class GtfsRealtimeTripLibraryTest {
     // add a trip descriptor to the vehicle position feed
     TripDescriptor.Builder td = TripDescriptor.newBuilder();
     td.setTripId("tripA");
+    td.setStartTime("07:30:00");
     GtfsRealtime.VehiclePosition.Builder vehiclePositionWithVId = GtfsRealtime.VehiclePosition.newBuilder();
     vehiclePositionWithVId.setTrip(td);
     vehiclePositionWithVId.setCurrentStopSequence(25);
@@ -765,12 +769,12 @@ public class GtfsRealtimeTripLibraryTest {
     return builder;
   }
 
-  private FeedEntity createTripUpdate(String tripId, String stopId, int delay,
+  private FeedEntity createTripUpdate(String tripId, String stopId, String startTime,int delay,
                                       boolean arrival) {
-    return createTripUpdate(tripId, stopId, delay, arrival, null);
+    return createTripUpdate(tripId, stopId, startTime, delay, arrival, null);
   }
 
-  private FeedEntity createTripUpdate(String tripId, String stopId, int delay,
+  private FeedEntity createTripUpdate(String tripId, String stopId, String startTime, int delay,
       boolean arrival, String vehicleId) {
 
     TripUpdate.Builder tripUpdate = TripUpdate.newBuilder();
@@ -799,6 +803,7 @@ public class GtfsRealtimeTripLibraryTest {
 
     TripDescriptor.Builder tripDescriptor = TripDescriptor.newBuilder();
     tripDescriptor.setTripId(tripId);
+    tripDescriptor.setStartTime(startTime);
     tripUpdate.setTrip(tripDescriptor);
 
     FeedEntity.Builder tripUpdateEntity = FeedEntity.newBuilder();
@@ -838,10 +843,14 @@ public class GtfsRealtimeTripLibraryTest {
     return GtfsRealtime.VehicleDescriptor.newBuilder().setId(id).build();
   }
   
-  private static TripUpdate.Builder tripUpdate(String tripId, long timestamp, int delay,
+  private static TripUpdate.Builder tripUpdate(String tripId, String startTime, long timestamp, int delay,
       StopTimeUpdate.Builder... stopTimeUpdates) {
     TripUpdate.Builder tu = TripUpdate.newBuilder()
-        .setTrip(TripDescriptor.newBuilder().setTripId(tripId))
+        .setTrip(
+                TripDescriptor.newBuilder()
+                        .setTripId(tripId)
+                        .setStartTime(startTime)
+        )
         .setDelay(delay)
         .setTimestamp(timestamp);
     
@@ -875,6 +884,7 @@ public class GtfsRealtimeTripLibraryTest {
   }
 
   private static long getPredictedDepartureTimeByStopIdAndTripId(VehicleLocationRecord record, String stopId, String tripId) {
+    if (record == null || record.getTimepointPredictions() == null) return -1;
     for (TimepointPredictionRecord tpr : record.getTimepointPredictions()) {
       if (tpr.getTimepointId().getId().equals(stopId)) {
         if (tripId == null || tpr.getTripId().getId().equals(tripId)) {

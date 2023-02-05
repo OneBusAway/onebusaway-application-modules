@@ -96,7 +96,7 @@ public final class SiriSupport {
 																																		 TripStatusBean currentVehicleTripStatus,
 																																		 StopBean monitoredCallStopBean, OnwardCallsMode onwardCallsMode,
 																																		 PresentationService presentationService, TransitDataService transitDataService,
-																																		 int maximumOnwardCalls, List<TimepointPredictionRecord> stopLevelPredictions,
+																																		 int maximumOnwardCalls, List<TimepointPredictionRecord> stopLevelPredictionsAcrossBlock,
 																																		 boolean hasRealtimeData, long responseTimestamp, boolean showRawLocation, boolean showApc) {
 
 		if (currentVehicleTripStatus != null && TransitDataConstants.STATUS_CANCELED.equals(currentVehicleTripStatus.getStatus())) {
@@ -264,11 +264,13 @@ public final class SiriSupport {
 		Map<String, TimepointPredictionRecord> tripStopIdToPredictionRecordMap = new HashMap<String, TimepointPredictionRecord>();
 
 		// (build map of vehicle IDs to TPRs)
-		if(stopLevelPredictions != null) {
-			for(TimepointPredictionRecord tpr : stopLevelPredictions) {
+		if(stopLevelPredictionsAcrossBlock != null) {
+			for(TimepointPredictionRecord tpr : stopLevelPredictionsAcrossBlock) {
 				if (!tpr.isSkipped()) {
-					// prune skipped stops from prediction map
-					tripStopIdToPredictionRecordMap.put(framedJourneyTripBean.getId() + ":" + AgencyAndId.convertToString(tpr.getTimepointId()), tpr);
+					if (framedJourneyTripBean.getId() != null && framedJourneyTripBean.getId().equals(tpr.getTripId())) {
+						// prune skipped stops from prediction map
+						tripStopIdToPredictionRecordMap.put(tpr.getTripId() + ":" + AgencyAndId.convertToString(tpr.getTimepointId()), tpr);
+					}
 				}
 			}
 		}

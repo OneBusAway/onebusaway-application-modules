@@ -52,6 +52,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import uk.org.siri.siri.MonitoredCallStructure;
 import uk.org.siri.siri.MonitoredStopVisitStructure;
 import uk.org.siri.siri.MonitoredVehicleJourneyStructure;
 import uk.org.siri.siri.VehicleActivityStructure;
@@ -313,13 +314,19 @@ public class RealtimeServiceImpl implements RealtimeService {
     Collections.sort(output, new Comparator<MonitoredStopVisitStructure>() {
         public int compare(MonitoredStopVisitStructure arg0, MonitoredStopVisitStructure arg1) {
           try {
-            Date expectedArrival0 = arg0.getMonitoredVehicleJourney().getMonitoredCall().getExpectedDepartureTime();
-    		    Date expectedArrival1 = arg1.getMonitoredVehicleJourney().getMonitoredCall().getExpectedDepartureTime();
-            return expectedArrival0.compareTo(expectedArrival1);
+            Date prediction0 = bestDate(arg0.getMonitoredVehicleJourney().getMonitoredCall());
+    		    Date prediction1 = bestDate(arg1.getMonitoredVehicleJourney().getMonitoredCall());
+            return prediction0.compareTo(prediction1);
           } catch(Exception e) {
             return -1;
           }
         }
+      // prefer departure time to arrival time
+      private Date bestDate(MonitoredCallStructure monitoredCall) {
+        if (monitoredCall.getExpectedDepartureTime() != null)
+          return monitoredCall.getExpectedDepartureTime();
+        return monitoredCall.getExpectedArrivalTime();
+      }
     });
     
     return output;
