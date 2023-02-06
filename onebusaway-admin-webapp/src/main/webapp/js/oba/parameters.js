@@ -70,6 +70,7 @@ function getConfigParameters() {
 }
 
 function updateParametersView(configParameters) {
+	console.log(configParameters);
 	var panels = $("#accordion").children("li");
 	//Update view by looping through sections in each accordion panel
 	for(var i=0; i<panels.length; i++) {
@@ -81,13 +82,20 @@ function updateParametersView(configParameters) {
 				for(var k=0; k<properties.length; k++) {
 					var keyElement = $(properties[k]).find("input[type='hidden']");
 					var configKey = keyElement.val();
+					console.log("multi");
+					console.log(configKey);
 					$(keyElement).next().val(configParameters[configKey]);
+					console.log("configParameters[configKey]:" + configParameters[configKey]);
+
 				}
 			} else {
 				//Sections are properties in this case. Set the values to the next sibling 
 				//of the hidden child
 				var keyElement = $(sections[j]).find("input[type='hidden']");
 				var configKey = keyElement.val();
+				console.log("single");
+				console.log(configKey);
+				console.log("configParameters['admin.agenciesExcludingScheduled']: " + configParameters["admin.agenciesExcludingScheduled"]);
 				$(keyElement).next().val(configParameters[configKey]);
 			}
 		}
@@ -122,7 +130,9 @@ function saveParameters() {
 				}
 			},
 			error: function(request) {
-				alert("Error saving parameter values");
+				//alert("Error saving parameter values");
+				console.log("error. Request = ");
+				console.log(request);
 			}
 		});
 	} else {
