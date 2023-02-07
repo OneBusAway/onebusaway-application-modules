@@ -363,8 +363,8 @@ public class GtfsRealtimeTripLibrary {
     }
 
     TripEntry trip = _entitySource.getTrip(tu.getTrip().getTripId());
-    if (trip.getStopTimes().isEmpty()) {
-      _log.error("no stoptime for trip {}, cannot determine start time", tu.getTrip().getTripId());
+    if (trip == null || trip.getStopTimes() == null || trip.getStopTimes().isEmpty()) {
+      _log.error("no stoptimes for trip {}, cannot determine start time", tu.getTrip().getTripId());
       return tu;
     }
     StopTimeEntry stopTimeEntry = trip.getStopTimes().get(0);
