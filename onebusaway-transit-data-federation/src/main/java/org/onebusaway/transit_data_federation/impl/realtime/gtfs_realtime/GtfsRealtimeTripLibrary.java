@@ -363,6 +363,10 @@ public class GtfsRealtimeTripLibrary {
     }
 
     TripEntry trip = _entitySource.getTrip(tu.getTrip().getTripId());
+    if (trip.getStopTimes().isEmpty()) {
+      _log.error("no stoptime for trip {}, cannot determine start time", tu.getTrip().getTripId());
+      return tu;
+    }
     StopTimeEntry stopTimeEntry = trip.getStopTimes().get(0);
     int arrivalTime = stopTimeEntry.getArrivalTime();
 
@@ -375,8 +379,9 @@ public class GtfsRealtimeTripLibrary {
     try {
       serviceDate = ServiceDate.parseString(dateString);
     } catch (ParseException e) {
-      throw new IllegalStateException("invalid date format |" + tu.getTrip().getStartDate() +
+      _log.error("invalid date format |" + tu.getTrip().getStartDate() +
               "| for trip |" + tu.getTrip().getTripId() + "|");
+      return tu;
     }
     Date startTime = new Date(serviceDate.getAsDate().getTime() + (arrivalTime * 1000));
     SimpleDateFormat sdfTime = new SimpleDateFormat("hh:mm:ss");
