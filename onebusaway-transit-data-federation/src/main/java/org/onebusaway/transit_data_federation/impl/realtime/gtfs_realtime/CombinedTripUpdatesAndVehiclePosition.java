@@ -65,10 +65,13 @@ class CombinedTripUpdatesAndVehiclePosition implements
         return 0;
       TripUpdate t1 = (TripUpdate)o1;
       TripUpdate t2 = (TripUpdate)o2;
-      verifyStartTime(t1);
-      verifyStartTime(t2);
-      return Math.toIntExact(parseDate(t1.getTrip().getStartDate(), t1.getTrip().getStartTime()) -
-              parseDate(t2.getTrip().getStartDate(), t2.getTrip().getStartTime()));
+      if (verifyStartTime(t1) && verifyStartTime(t2)) {
+        return Math.toIntExact(parseDate(t1.getTrip().getStartDate(), t1.getTrip().getStartTime()) -
+                parseDate(t2.getTrip().getStartDate(), t2.getTrip().getStartTime()));
+      } else {
+        // try and do something reasonable without a start date
+        return t1.getTrip().getTripId().compareTo(t2.getTrip().getTripId());
+      }
     }
 
     private long parseDate(String startDate, String startTime) throws IllegalStateException {
@@ -82,9 +85,10 @@ class CombinedTripUpdatesAndVehiclePosition implements
       }
     }
 
-    private void verifyStartTime(TripUpdate t) {
+    private boolean verifyStartTime(TripUpdate t) {
       if (!t.hasTrip() || !t.getTrip().hasStartTime())
-        throw new IllegalStateException("TripUpdate needs to have start time on trip " + t);
+        return false;
+      return true;
     }
 
   }
