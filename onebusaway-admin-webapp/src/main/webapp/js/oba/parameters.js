@@ -42,6 +42,22 @@ jQuery(function() {
 	$("#results #save").click(saveParameters);
 	
 	window.onbeforeunload = confirmMessage;
+
+	var field = jQuery("#csrfField");
+	var csrf_token = field.val();
+	var csrf_name = field.attr('name');
+	if (csrf_name && csrf_token) {
+		jQuery.ajaxPrefilter(function (options, originalOptions, jqXHR) {
+			if (options.type.toLowerCase() === "post") {
+				// initialize `data` to empty string if it does not exist
+				options.data = options.data || "";
+				// add leading ampersand if `data` is non-empty
+				options.data += options.data ? "&" : "";
+				// add _token entry
+				options.data += csrf_name + '=' + csrf_token;
+			}
+		});
+	}
 	
 });
 
