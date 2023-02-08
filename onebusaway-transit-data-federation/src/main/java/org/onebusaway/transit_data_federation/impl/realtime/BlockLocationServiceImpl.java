@@ -831,6 +831,8 @@ public class BlockLocationServiceImpl implements BlockLocationService,
       VehicleLocationRecord record, BlockInstance blockInstance) {
 
     BlockConfigurationEntry blockConfig = blockInstance.getBlock();
+    // we don't have a specified time, so use the timeOfRecord to see if the trip is
+    // active now
     long serviceDate = blockInstance.getServiceDate();
 
     long targetTime = record.getTimeOfRecord();
@@ -857,6 +859,7 @@ public class BlockLocationServiceImpl implements BlockLocationService,
           blockConfig, record.getDistanceAlongBlock());
     }
 
+    // use the scheduledTime we guessed at earlier
     return _scheduledBlockLocationService.getScheduledBlockLocationFromScheduledTime(
         blockConfig, scheduledTime);
   }

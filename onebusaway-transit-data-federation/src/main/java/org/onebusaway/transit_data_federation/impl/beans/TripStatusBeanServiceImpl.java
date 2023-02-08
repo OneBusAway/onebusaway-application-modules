@@ -27,6 +27,7 @@ import org.onebusaway.realtime.api.TimepointPredictionRecord;
 import org.onebusaway.realtime.api.VehicleOccupancyRecord;
 import org.onebusaway.transit_data.model.ListBean;
 import org.onebusaway.transit_data.model.StopBean;
+import org.onebusaway.transit_data.model.TransitDataConstants;
 import org.onebusaway.transit_data.model.TripStopTimesBean;
 import org.onebusaway.transit_data.model.schedule.FrequencyBean;
 import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
@@ -40,6 +41,7 @@ import org.onebusaway.transit_data.model.trips.TripsForAgencyQueryBean;
 import org.onebusaway.transit_data.model.trips.TripsForBoundsQueryBean;
 import org.onebusaway.transit_data.model.trips.TripsForRouteQueryBean;
 import org.onebusaway.transit_data_federation.impl.realtime.apc.VehicleOccupancyRecordCache;
+import org.onebusaway.transit_data_federation.services.ArrivalAndDepartureService;
 import org.onebusaway.util.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.beans.ServiceAlertsBeanService;
 import org.onebusaway.transit_data_federation.services.beans.StopBeanService;
@@ -81,6 +83,8 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
 
   private VehicleOccupancyRecordCache _vehicleOccupancyRecordCache;
 
+  private ArrivalAndDepartureService _arrivalAndDepartureService;
+
   @Autowired
   public void setTransitGraphDao(TransitGraphDao transitGraphDao) {
     _transitGraphDao = transitGraphDao;
@@ -117,6 +121,11 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
   public void setVehicleOccupancyRecordCache(VehicleOccupancyRecordCache cache) {
     this._vehicleOccupancyRecordCache = cache;
   }
+  @Autowired
+  public void setArrivalAndDepartureService(ArrivalAndDepartureService arrivalAndDepartureService) {
+    this._arrivalAndDepartureService = arrivalAndDepartureService;
+  }
+
   /****
    * {@link TripDetailsBeanService} Interface
    ****/
@@ -231,6 +240,13 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
 
     TripStatusBean bean = new TripStatusBean();
     bean.setStatus("default");
+    if (TransitDataConstants.STATUS_CANCELED.equals(blockLocation.getStatus())) {
+      if (_arrivalAndDepartureService.getHideCanceledTrips()) {
+        // if we are configured to hide canceled trips, then this bean should be null
+        return null;
+      }
+      bean.setStatus(TransitDataConstants.STATUS_CANCELED);
+    }
 
     BlockInstance blockInstance = blockLocation.getBlockInstance();
     long serviceDate = blockInstance.getServiceDate();
@@ -430,7 +446,8 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
     }
     if (inclusion.isIncludeTripStatus() && blockLocation != null) {
       status = getBlockLocationAsStatusBean(blockLocation, time);
-      vehicleId = AgencyAndIdLibrary.convertFromString(status.getVehicleId());
+      if (status != null)
+        vehicleId = AgencyAndIdLibrary.convertFromString(status.getVehicleId());
     }
 
     List<ServiceAlertBean> situations = _serviceAlertBeanService.getServiceAlertsForVehicleJourney(

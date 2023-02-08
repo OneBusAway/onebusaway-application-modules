@@ -81,4 +81,6 @@ public interface ArrivalAndDepartureService {
    */
   public ArrivalAndDepartureInstance getNextStopArrivalAndDeparture(
       ArrivalAndDepartureInstance instance);
+
+  public boolean getHideCanceledTrips();
 }

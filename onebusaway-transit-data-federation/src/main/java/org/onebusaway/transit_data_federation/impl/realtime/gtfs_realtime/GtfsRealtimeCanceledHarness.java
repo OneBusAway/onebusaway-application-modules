@@ -109,6 +109,7 @@ public class GtfsRealtimeCanceledHarness {
         _vehicleLocationListener.handleVehicleLocationRecord(record);
       }
     }
+    _log.info("cancelled all service for route {}", _routeId);
   }
 
   private VehicleLocationRecord createVehicleLocationRecord(TripEntry trip) {
@@ -137,7 +138,7 @@ public class GtfsRealtimeCanceledHarness {
       try {
         refresh();
       } catch (Throwable t) {
-        _log.error("harness blew: ", t, t);
+        _log.error("refresh exception: ", t, t);
       }
     }
   }

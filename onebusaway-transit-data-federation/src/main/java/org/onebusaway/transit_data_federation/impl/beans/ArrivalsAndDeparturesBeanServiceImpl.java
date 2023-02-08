@@ -22,6 +22,7 @@ import org.onebusaway.realtime.api.VehicleOccupancyRecord;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
 import org.onebusaway.transit_data.model.ArrivalsAndDeparturesQueryBean;
 import org.onebusaway.transit_data.model.StopBean;
+import org.onebusaway.transit_data.model.TransitDataConstants;
 import org.onebusaway.transit_data.model.realtime.HistogramBean;
 import org.onebusaway.transit_data.model.schedule.FrequencyBean;
 import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
@@ -262,6 +263,11 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
         new HashMap<AgencyAndId, StopBean>());
     applyBlockLocationToBean(instance, bean, time);
     applySituationsToBean(time, instance, bean);
+    boolean hideCanceled = _arrivalAndDepartureService.getHideCanceledTrips();
+    if (hideCanceled && TransitDataConstants.STATUS_CANCELED.equals(bean.getStatus())) {
+      // hide this result, its canceled
+      return null;
+    }
 
     if (!this.useScheduleDeviationHistory) {
       return bean;
@@ -364,17 +370,23 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
       ArrivalAndDepartureBean bean, long targetTime) {
 
     boolean hasFrequency = instance.getFrequency() != null;
+    boolean isCanceled = TransitDataConstants.STATUS_CANCELED.equals(instance.getStatus());
 
-    if (instance.isPredictedArrivalTimeSet()) {
-      bean.setPredictedArrivalTime(instance.getPredictedArrivalTime());
-      if (hasFrequency)
-        bean.setScheduledArrivalTime(bean.getPredictedArrivalTime());
+    if (!isCanceled) {
+      if (instance.isPredictedArrivalTimeSet()) {
+        bean.setPredictedArrivalTime(instance.getPredictedArrivalTime());
+        if (hasFrequency)
+          bean.setScheduledArrivalTime(bean.getPredictedArrivalTime());
+      }
+
+      if (instance.isPredictedDepartureTimeSet()) {
+        bean.setPredictedDepartureTime(instance.getPredictedDepartureTime());
+        if (hasFrequency)
+          bean.setScheduledDepartureTime(bean.getPredictedDepartureTime());
+      }
     }
-
-    if (instance.isPredictedDepartureTimeSet()) {
-      bean.setPredictedDepartureTime(instance.getPredictedDepartureTime());
-      if (hasFrequency)
-        bean.setScheduledDepartureTime(bean.getPredictedDepartureTime());
+    else {
+        bean.setStatus(TransitDataConstants.STATUS_CANCELED);
     }
 
     BlockStopTimeEntry stopTime = instance.getBlockStopTime();
@@ -383,7 +395,11 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
     if (blockLocation == null)
       return;
 
-    bean.setPredicted(blockLocation.isPredicted());
+    if (!isCanceled) {
+      bean.setPredicted(blockLocation.isPredicted());
+    } else {
+      bean.setPredicted(false);
+    }
 
     // Distance from stop
     if (blockLocation.isDistanceAlongBlockSet()) {
@@ -406,7 +422,7 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
     if (blockLocation.getLastUpdateTime() > 0)
       bean.setLastUpdateTime(blockLocation.getLastUpdateTime());
 
-    if (blockLocation.getVehicleId() != null) {
+    if (blockLocation.getVehicleId() != null && !isCanceled) {
       bean.setVehicleId(AgencyAndIdLibrary.convertToString(blockLocation.getVehicleId()));
       if (_vehicleOccupancyRecordCache != null && blockLocation.getActiveTrip() != null) {
         // be specific in our vehicle lookup -- we only want to apply occupancy if its the same route/direction
@@ -422,7 +438,11 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
 
     TripStatusBean tripStatusBean = _tripDetailsBeanService.getBlockLocationAsStatusBean(
         blockLocation, targetTime);
-    bean.setTripStatus(tripStatusBean);
+    if (!_arrivalAndDepartureService.getHideCanceledTrips()
+            && !TransitDataConstants.STATUS_CANCELED.equals(tripStatusBean.getStatus())) {
+      // if configured hide this result
+      bean.setTripStatus(tripStatusBean);
+    }
   }
 
   private void applySituationsToBean(long time,
