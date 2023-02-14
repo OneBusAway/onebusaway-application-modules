@@ -47,6 +47,7 @@ import org.onebusaway.transit_data.model.trips.TripStatusBean;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.transit_data_federation.siri.SiriDistanceExtension;
 import org.onebusaway.transit_data_federation.siri.SiriExtensionWrapper;
+import org.onebusaway.util.AgencyAndIdLibrary;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -267,7 +268,7 @@ public final class SiriSupport {
 		if(stopLevelPredictionsAcrossBlock != null) {
 			for(TimepointPredictionRecord tpr : stopLevelPredictionsAcrossBlock) {
 				if (!tpr.isSkipped()) {
-					if (framedJourneyTripBean.getId() != null && framedJourneyTripBean.getId().equals(tpr.getTripId())) {
+					if (framedJourneyTripBean.getId() != null && framedJourneyTripBean.getId().equals(AgencyAndIdLibrary.convertToString(tpr.getTripId()))) {
 						// prune skipped stops from prediction map
 						tripStopIdToPredictionRecordMap.put(tpr.getTripId() + ":" + AgencyAndId.convertToString(tpr.getTimepointId()), tpr);
 					}
@@ -278,37 +279,40 @@ public final class SiriSupport {
 		if (showApc) {
 			if (adBean == null) {
 				fillOccupancy(monitoredVehicleJourney, transitDataService, currentVehicleTripStatus);
-				// monitored call
-				fillMonitoredCall(monitoredVehicleJourney, blockInstance, currentVehicleTripStatus,
-								monitoredCallStopBean,
-								presentationService, transitDataService,
-								tripStopIdToPredictionRecordMap, hasRealtimeData,
-								currentVehicleTripStatus.getActiveTrip().getId(),
-								-1,
-								-1,
-								responseTimestamp);
-				// onward calls
-				fillOnwardCalls(monitoredVehicleJourney, blockInstance, framedJourneyTripBean, currentVehicleTripStatus, onwardCallsMode,
-								presentationService, transitDataService, tripStopIdToPredictionRecordMap, maximumOnwardCalls, hasRealtimeData, responseTimestamp);
-				// situations
-				fillSituations(monitoredVehicleJourney, currentVehicleTripStatus);
-
 			} else {
 				fillOccupancy(monitoredVehicleJourney, transitDataService, adBean.getTripStatus());
-				// monitored call
-				fillMonitoredCall(monitoredVehicleJourney, blockInstance, adBean.getTripStatus(), monitoredCallStopBean,
-								presentationService, transitDataService, tripStopIdToPredictionRecordMap, hasRealtimeData,
-								adBean.getTrip().getId(),
-								adBean.getScheduledArrivalTime(),
-								adBean.getScheduledDepartureTime(),
-								responseTimestamp);
-				// onward calls
-				fillOnwardCalls(monitoredVehicleJourney, blockInstance, framedJourneyTripBean, adBean.getTripStatus(), onwardCallsMode,
-								presentationService, transitDataService, tripStopIdToPredictionRecordMap, maximumOnwardCalls, hasRealtimeData, responseTimestamp);
-				// situations
-				fillSituations(monitoredVehicleJourney, adBean.getTripStatus());
-
 			}
+		}
+		if (adBean == null) {
+			// monitored call
+			fillMonitoredCall(monitoredVehicleJourney, blockInstance, currentVehicleTripStatus,
+							monitoredCallStopBean,
+							presentationService, transitDataService,
+							tripStopIdToPredictionRecordMap, hasRealtimeData,
+							currentVehicleTripStatus.getActiveTrip().getId(),
+							-1,
+							-1,
+							responseTimestamp);
+			// onward calls
+			fillOnwardCalls(monitoredVehicleJourney, blockInstance, framedJourneyTripBean, currentVehicleTripStatus, onwardCallsMode,
+							presentationService, transitDataService, tripStopIdToPredictionRecordMap, maximumOnwardCalls, hasRealtimeData, responseTimestamp);
+			// situations
+			fillSituations(monitoredVehicleJourney, currentVehicleTripStatus);
+
+		} else {
+			// monitored call
+			fillMonitoredCall(monitoredVehicleJourney, blockInstance, adBean.getTripStatus(), monitoredCallStopBean,
+							presentationService, transitDataService, tripStopIdToPredictionRecordMap, hasRealtimeData,
+							adBean.getTrip().getId(),
+							adBean.getScheduledArrivalTime(),
+							adBean.getScheduledDepartureTime(),
+							responseTimestamp);
+			// onward calls
+			fillOnwardCalls(monitoredVehicleJourney, blockInstance, framedJourneyTripBean, adBean.getTripStatus(), onwardCallsMode,
+							presentationService, transitDataService, tripStopIdToPredictionRecordMap, maximumOnwardCalls, hasRealtimeData, responseTimestamp);
+			// situations
+			fillSituations(monitoredVehicleJourney, adBean.getTripStatus());
+
 		}
 	}
 
@@ -572,8 +576,8 @@ public final class SiriSupport {
 					if(stopTime.getDistanceAlongBlock() >= distanceOfVehicleAlongBlock) {
 						blockTripStopsAfterTheVehicle++;
 					} else {
-						// bus has passed this stop already--no need to go further
-						continue;
+						// we don't break out of loop, as we may need to match to a later trip!
+//						continue;
 					}
 
 				// future trip--bus hasn't reached this trip yet, so count all stops
@@ -600,7 +604,9 @@ public final class SiriSupport {
 					}
 
 					// we found our monitored call--stop
-					return;
+					if (monitoredVehicleJourney.getMonitoredCall() != null) {
+						return;
+					}
 				}
 			}    	
 		}

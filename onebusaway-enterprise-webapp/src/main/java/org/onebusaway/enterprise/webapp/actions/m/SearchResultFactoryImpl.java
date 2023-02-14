@@ -211,6 +211,10 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
     List<RouteBean> filteredRoutes = new ArrayList<RouteBean>();
 
     Set<String> serviceAlertDescriptions = new HashSet<String>();
+    // stop visits -- we pull this out of the loop as it doesn't change
+    List<MonitoredStopVisitStructure> visitList = _realtimeService.getMonitoredStopVisitsForStop(
+            stopBean.getId(), 0, SystemTime.currentTimeMillis());
+
 
     for (RouteBean routeBean : stopBean.getRoutes()) {
       if (routeFilter != null && !routeFilter.isEmpty()
@@ -246,7 +250,7 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
 
           // arrivals in this direction
           Map<String, List<StopOnRoute>> arrivalsForRouteAndDirection = getDisplayStringsByHeadsignForStopAndRouteAndDirection(
-                  stopBean, routeBean, stopGroupBean);
+                  stopBean, routeBean, stopGroupBean, visitList);
 
           // service alerts for this route + direction
           List<ServiceAlertBean> serviceAlertBeans = _realtimeService.getServiceAlertsForRouteAndDirection(
@@ -329,15 +333,11 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
 
   // stop view
   private Map<String, List<StopOnRoute>> getDisplayStringsByHeadsignForStopAndRouteAndDirection(
-      StopBean stopBean, RouteBean routeBean, StopGroupBean stopGroupBean) {
+      StopBean stopBean, RouteBean routeBean, StopGroupBean stopGroupBean, List<MonitoredStopVisitStructure> visitList) {
     
     Map<String, List<StopOnRoute>> results = new HashMap<String, List<StopOnRoute>>();
 
     Boolean showApc = _realtimeService.showApc();
-
-    // stop visits
-    List<MonitoredStopVisitStructure> visitList = _realtimeService.getMonitoredStopVisitsForStop(
-        stopBean.getId(), 0, SystemTime.currentTimeMillis());
 
     for (MonitoredStopVisitStructure visit : visitList) {
       String routeId = visit.getMonitoredVehicleJourney().getLineRef().getValue();
