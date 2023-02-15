@@ -278,6 +278,11 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 		}
 	}
 
+	@Override
+	public Map<String, String> getConfigFromLocalFile() {
+		return _configurationServiceClient.getConfigFromLocalFile();
+	}
+
 	// Local Config Methods
 	
 	private String getLocalConfigurationValue(String configurationItemKey)
