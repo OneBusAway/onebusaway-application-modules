@@ -50,7 +50,7 @@ class CombinedTripUpdatesAndVehiclePosition implements
 
   @Override
   public String toString() {
-    return "block=" + block.toString() + " tripUpdates=" + tripUpdates.toString() + ((vehiclePosition != null) ? " vehiclePosition=" + vehiclePosition.toString() : "");
+    return "block=" + (block!=null?block.toString():"empty") + " tripUpdates=" + tripUpdates.toString() + ((vehiclePosition != null) ? " vehiclePosition=" + vehiclePosition.toString() : "");
   }
 
   /*

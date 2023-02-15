@@ -512,9 +512,16 @@ public class GtfsRealtimeTripLibrary {
     int rawTripStartTime = blockTripsById.get(tripId).getDepartureTimeForIndex(
         0);
 
+    // here we adjust our block start time by the difference between the
+    // real-time tripStartTime and our scheduled tripStartTime
+    // if the result is negative our tripStartTime is likely invalid
+    // recover gracefully by using the rawBlockStarTime
     int adjustedBlockStartTime = rawBlockStartTime
         + (tripStartTime - rawTripStartTime);
 
+    if (adjustedBlockStartTime < 0) {
+      return rawBlockStartTime;
+    }
     return adjustedBlockStartTime;
   }
 
