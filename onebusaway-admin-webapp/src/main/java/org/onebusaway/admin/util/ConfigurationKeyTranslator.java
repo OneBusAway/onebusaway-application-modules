@@ -35,6 +35,7 @@ public class ConfigurationKeyTranslator {
 		configToUIKeys = HashBiMap.create();
 		configToUIKeys.put("agency_1.hideScheduleInfo", "agency_1.hideScheduleInfo");
 		configToUIKeys.put("admin.showVehicleStatus", "admin.showVehicleStatus");
+		configToUIKeys.put("admin.agenciesExcludingScheduled", "admin.agenciesExcludingScheduled");
 
 		//Create another map with inverse mapping that is ui to config keys
 		uiToConfigKeys = configToUIKeys.inverse();

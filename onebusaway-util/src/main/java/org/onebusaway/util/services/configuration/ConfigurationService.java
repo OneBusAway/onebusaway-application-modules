@@ -70,4 +70,6 @@ public interface ConfigurationService {
      * {"component": "agency_1", "key": "hideScheduleInfo", "value": "true"}
      */
   public boolean getConfigurationFlagForAgency(String agencyId, String configurationItemKey);
+
+    Map<String, String> getConfigFromLocalFile();
 }

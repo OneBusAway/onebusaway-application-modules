@@ -17,6 +17,8 @@ package org.onebusaway.util.impl.configuration;
 
 import static org.junit.Assert.*;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.onebusaway.container.refresh.RefreshService;
 import org.onebusaway.util.rest.RestApiLibrary;
 import org.onebusaway.util.services.configuration.ConfigurationServiceClient;
@@ -24,8 +26,12 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Map;
 
 public class ConfigurationServiceImplTest {
 
@@ -67,6 +73,67 @@ public class ConfigurationServiceImplTest {
 
     hideScheduleInfo = service.getConfigurationFlagForAgency("1", "hideScheduleInfo");
     assertEquals("expected true", true, hideScheduleInfo);
+
+  }
+
+  @Test
+  public void testMergeConfig(){
+    HashMap<String, Object> old = new HashMap<>();
+    ArrayList<HashMap> items = new ArrayList<>();
+    HashMap<String, String> item1 = new HashMap<>();
+    item1.put("component", "admin");
+    item1.put("key", "test");
+    item1.put("value","hello World");
+    items.add(item1);
+    old.put("config", items);
+
+  }
+
+  @Test
+  public void testWriteConfig(){
+
+//    ConfigFileStructure cfs  =  new ConfigFileStructure();
+//    cfs.oba = new HashMap<String, String>();
+//    cfs.oba.put("env", "jared");
+//    cfs.config = new ArrayList<ConfigItem>(Arrays.asList(new ConfigItem("testing","jared","hello world!")));
+
+
+    try {
+      ObjectMapper mapper = new ObjectMapper();
+      ConfigFileStructure cfs = mapper.readValue(new File("/opt/nyc/oba/config.json"), ConfigFileStructure.class);
+      String output = mapper.writeValueAsString(cfs);
+      System.out.println(output);
+      String pretty = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(cfs);
+      System.out.println(pretty);
+      mapper.writerWithDefaultPrettyPrinter().writeValue(new File("/Users/jkoester/Desktop/configOutput.json"), cfs);
+    } catch (IOException e) {
+      e.printStackTrace();
+      throw new RuntimeException(e);
+    }
+
+  }
+
+  @Test
+  public void testReadConfig(){
+    ObjectMapper mapper = new ObjectMapper();
+    try {
+
+      String jsonString = "{\"oba\":{\"env\":\"jared\"},\"config\":[{\"component\":\"testing\",\"key\":\"jared\",\"value\":\"hello world!\"}]}";
+      ConfigFileStructure cfs = mapper.readValue(new File("/opt/nyc/oba/config.json"), ConfigFileStructure.class);
+
+
+      // compact print
+      System.out.println(cfs);
+
+      // pretty print
+      String prettyFile = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(cfs);
+
+      System.out.println(prettyFile);
+
+
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
   }
 
   private void addToSettings(ArrayList settings, String component, String key, String value) {
@@ -76,6 +143,25 @@ public class ConfigurationServiceImplTest {
     kv1.put("key", key);
     kv1.put("value", value);
     settings.add(kv1);
+  }
+
+  private static class ConfigItem{
+    public String component;
+    public String key;
+    public String value;
+
+    public ConfigItem(String c, String k, String v){
+      this.component = c;
+      this.key = k;
+      this.value = v;
+    }
+    public ConfigItem(){
+
+    }
+  }
+  private static class ConfigFileStructure{
+    public HashMap<String, String> oba;
+    public ArrayList<ConfigItem> config;
   }
 
 }

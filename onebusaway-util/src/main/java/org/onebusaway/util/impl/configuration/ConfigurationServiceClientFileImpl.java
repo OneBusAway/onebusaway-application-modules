@@ -16,7 +16,9 @@
 package org.onebusaway.util.impl.configuration;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -87,10 +89,32 @@ public class ConfigurationServiceClientFileImpl implements
 	}
 
 	@Override
-	public void setConfigItem(String baseObject, String component, String key,
+	public void setConfigItem(String baseObject, String component, String configurationKey,
 			String value) throws Exception {
-		// TODO Auto-generated method stub
-		_log.info("empty setConfigItem");
+		String key = configurationKey.substring(configurationKey.indexOf(".")+1);
+
+		try {
+			ObjectMapper mapper = new ObjectMapper();
+			ConfigFileStructure cfs = mapper.readValue(new File(configFile), ConfigFileStructure.class);
+			boolean found = false;
+			for (ConfigItem item : cfs.config) {
+				if (item.component.equals(component) && item.key.equals(key)) {
+					item.value = value;
+					found = true;
+
+				}
+			}
+			if(!found){
+				_log.warn("Could not find an existing configuration item for " + component + ":" + key + " so one will be created");
+				cfs.config.add(new ConfigItem(component, key, value));
+			}
+			mapper.writerWithDefaultPrettyPrinter().writeValue(new File(configFile), cfs);
+			System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(cfs));
+		}catch(Exception e){
+			e.printStackTrace();
+			throw new RuntimeException(e);
+		}
+
 	}
 
 	@Override
@@ -160,8 +184,46 @@ public class ConfigurationServiceClientFileImpl implements
 
 	}
 
+	@Override
+	public HashMap<String, String> getConfigFromLocalFile() {
+		try {
+			ObjectMapper mapper = new ObjectMapper();
+			ConfigFileStructure cfs = mapper.readValue(new File(configFile), ConfigFileStructure.class);
+
+			HashMap<String, String> config = new HashMap<>();
+			for(ConfigItem item : cfs.config){
+				config.put(item.component + "." + item.key, item.value);
+			}
+			return config;
+
+		} catch (IOException e) {
+			e.printStackTrace();
+			throw new RuntimeException(e);
+		}
+	}
+
+	@Override
 	public boolean isLocal() {
 		return isLocal;
 	}
-	
+
+	private static class ConfigItem{
+		public String component;
+		public String key;
+		public String value;
+
+		public ConfigItem(String c, String k, String v){
+			this.component = c;
+			this.key = k;
+			this.value = v;
+		}
+		public ConfigItem(){
+
+		}
+	}
+	private static class ConfigFileStructure{
+		public HashMap<String, String> oba;
+		public ArrayList<ConfigurationServiceClientFileImpl.ConfigItem> config;
+	}
+
 }
