@@ -26,7 +26,7 @@ public class ConfigApiAction {
     @GET
     @Produces("application/json")
     public Response list(){
-        Map<String, String> config = _configurationService.getConfiguration();
+        Map<String, String> config = _configurationService.getConfigFromLocalFile();
         String json = config.toString();
         Response result = Response.ok(json).build();
         return result;
