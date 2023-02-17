@@ -17,7 +17,10 @@ package org.onebusaway.util.impl.configuration;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -187,19 +190,62 @@ public class ConfigurationServiceClientFileImpl implements
 	@Override
 	public HashMap<String, String> getConfigFromLocalFile() {
 		try {
-			ObjectMapper mapper = new ObjectMapper();
-			ConfigFileStructure cfs = mapper.readValue(new File(configFile), ConfigFileStructure.class);
+		ObjectMapper mapper = new ObjectMapper();
+		ConfigFileStructure cfs = mapper.readValue(new File(configFile), ConfigFileStructure.class);
+		return getConfigFromCFS(cfs);
+		} catch (IOException e) {
+			_log.error(e.getMessage());
+			_log.error("problem converting file config file contents to config map");
+		}
+		return new HashMap<>();
+	}
 
+	private HashMap<String, String> getConfigFromCFS(ConfigFileStructure cfs){
 			HashMap<String, String> config = new HashMap<>();
 			for(ConfigItem item : cfs.config){
 				config.put(item.component + "." + item.key, item.value);
 			}
 			return config;
+	}
 
-		} catch (IOException e) {
-			e.printStackTrace();
+	public HashMap<String, String> getConfigFromApi() {
+
+		InputStream in = null;
+
+		URL url = null;
+		try {
+			url = new URL("localhost:9999/api/config");
+		} catch (MalformedURLException e) {
 			throw new RuntimeException(e);
 		}
+		try {
+			URLConnection urlConnection = url.openConnection();
+			in = null;
+
+			in = urlConnection.getInputStream();
+
+
+		} catch (IOException ex) {
+			_log.error("connection issue with url " + url + ", ex=" + ex);
+			return new HashMap<>();
+		} finally {
+			try {
+				if (in != null) in.close();
+			} catch (IOException ex) {
+				_log.error("error closing url stream " + url);
+			}
+		}
+
+		try{
+			ObjectMapper mapper = new ObjectMapper();
+			ConfigFileStructure cfs = mapper.readValue(in, ConfigFileStructure.class);
+			return getConfigFromCFS(cfs);
+		}catch (IOException e){
+			_log.error(e.getMessage());
+			_log.error("problem reading from config api");
+		}
+
+		return new HashMap<>();
 	}
 
 	@Override
@@ -216,9 +262,6 @@ public class ConfigurationServiceClientFileImpl implements
 			this.component = c;
 			this.key = k;
 			this.value = v;
-		}
-		public ConfigItem(){
-
 		}
 	}
 	private static class ConfigFileStructure{

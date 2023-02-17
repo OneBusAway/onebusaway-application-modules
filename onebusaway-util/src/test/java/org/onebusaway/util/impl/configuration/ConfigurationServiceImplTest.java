@@ -25,13 +25,18 @@ import org.onebusaway.util.services.configuration.ConfigurationServiceClient;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
+import org.springframework.context.annotation.Bean;
+import org.springframework.http.*;
+import org.springframework.web.client.RestTemplate;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.*;
 
 public class ConfigurationServiceImplTest {
 
@@ -134,6 +139,12 @@ public class ConfigurationServiceImplTest {
     } catch (IOException e) {
       e.printStackTrace();
     }
+  }
+
+  @Test
+  public void fetchConfigFromApiTest(){
+      HashMap<String, String> config = client.getConfigFromApi();
+      System.out.println(config);
   }
 
   private void addToSettings(ArrayList settings, String component, String key, String value) {
