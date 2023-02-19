@@ -1,5 +1,7 @@
 package org.onebusaway.admin.service.api;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.json.JSONObject;
 import org.onebusaway.admin.service.api.ConfigResource;
 import org.onebusaway.util.services.configuration.ConfigurationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,8 +29,10 @@ public class ConfigApiAction {
     @Produces("application/json")
     public Response list(){
         Map<String, String> config = _configurationService.getConfigFromLocalFile();
-        String json = config.toString();
-        Response result = Response.ok(json).build();
+        JSONObject json = new JSONObject(config);
+        String output = json.toString();
+
+        Response result = Response.ok(output).build();
         return result;
     }
 
