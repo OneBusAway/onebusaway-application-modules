@@ -213,8 +213,9 @@ public class ConfigurationServiceClientFileImpl implements
 		InputStream in = null;
 
 		URL url = null;
+		String urlString = "http://localhost:9999/api/config";
 		try {
-			url = new URL("localhost:9999/api/config");
+			url = new URL(urlString);
 		} catch (MalformedURLException e) {
 			throw new RuntimeException(e);
 		}
@@ -223,6 +224,10 @@ public class ConfigurationServiceClientFileImpl implements
 			in = null;
 
 			in = urlConnection.getInputStream();
+			ObjectMapper mapper = new ObjectMapper();
+			HashMap<String, String> config = mapper.readValue(in, new TypeReference<HashMap<String, String>>() {
+			});
+			return config;
 
 
 		} catch (IOException ex) {
@@ -236,16 +241,6 @@ public class ConfigurationServiceClientFileImpl implements
 			}
 		}
 
-		try{
-			ObjectMapper mapper = new ObjectMapper();
-			ConfigFileStructure cfs = mapper.readValue(in, ConfigFileStructure.class);
-			return getConfigFromCFS(cfs);
-		}catch (IOException e){
-			_log.error(e.getMessage());
-			_log.error("problem reading from config api");
-		}
-
-		return new HashMap<>();
 	}
 
 	@Override
@@ -263,10 +258,14 @@ public class ConfigurationServiceClientFileImpl implements
 			this.key = k;
 			this.value = v;
 		}
+		public ConfigItem(){
+
+		}
 	}
 	private static class ConfigFileStructure{
 		public HashMap<String, String> oba;
 		public ArrayList<ConfigurationServiceClientFileImpl.ConfigItem> config;
 	}
+
 
 }
