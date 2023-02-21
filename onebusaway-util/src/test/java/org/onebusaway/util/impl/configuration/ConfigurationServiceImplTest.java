@@ -90,30 +90,6 @@ public class ConfigurationServiceImplTest {
   }
 
   @Test
-  public void testWriteConfig(){
-
-//    ConfigFileStructure cfs  =  new ConfigFileStructure();
-//    cfs.oba = new HashMap<String, String>();
-//    cfs.oba.put("env", "jared");
-//    cfs.config = new ArrayList<ConfigItem>(Arrays.asList(new ConfigItem("testing","jared","hello world!")));
-
-
-    try {
-      ObjectMapper mapper = new ObjectMapper();
-      ConfigFileStructure cfs = mapper.readValue(new File("/opt/nyc/oba/config.json"), ConfigFileStructure.class);
-      String output = mapper.writeValueAsString(cfs);
-      System.out.println(output);
-      String pretty = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(cfs);
-      System.out.println(pretty);
-      mapper.writerWithDefaultPrettyPrinter().writeValue(new File("/Users/jkoester/Desktop/configOutput.json"), cfs);
-    } catch (IOException e) {
-      e.printStackTrace();
-      throw new RuntimeException(e);
-    }
-
-  }
-
-  @Test
   public void testReadConfig(){
     ObjectMapper mapper = new ObjectMapper();
     try {

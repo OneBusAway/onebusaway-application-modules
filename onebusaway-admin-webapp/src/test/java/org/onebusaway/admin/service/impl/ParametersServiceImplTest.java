@@ -64,7 +64,7 @@ public class ParametersServiceImplTest {
 		configParameters.put("agency_1.hideScheduleInfo", "true");
 		configParameters.put("admin.showVehicleStatus", "true");
 		
-		when(configurationService.getConfiguration()).thenReturn(configParameters);
+		when(configurationService.getConfigFromLocalFile()).thenReturn(configParameters);
 		
 		Map<String,String> displayParameters = service.getParameters();
 		
