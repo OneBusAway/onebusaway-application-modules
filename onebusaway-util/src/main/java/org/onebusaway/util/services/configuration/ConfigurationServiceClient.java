@@ -16,6 +16,7 @@
 package org.onebusaway.util.services.configuration;
 
 import java.net.URL;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -39,7 +40,9 @@ public interface ConfigurationServiceClient {
   List<Map<String, String>> getItems(String baseObject, String... params) throws Exception;
   
   String getItem(String baseObject, String key) throws Exception;
-  
+
+  HashMap<String, String> getConfigFromLocalFile();
+
   boolean isLocal();
 
 }
