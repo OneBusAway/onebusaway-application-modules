@@ -59,15 +59,15 @@ public class ParametersServiceImpl implements ParametersService {
 
 	@Override
 	public Map<String, String> getParameters() {
-		Map<String, String> displayParameters = new HashMap<String, String>(); 
-		
+		Map<String, String> displayParameters = new HashMap<String, String>();
+
 		//Get config values from TDM
-		Map<String, String> configParameters = configurationService.getConfiguration();
-		
+		Map<String, String> configParameters = configurationService.getConfigFromLocalFile();
+
 		for(Map.Entry<String, String> entry : configParameters.entrySet()) {
 			String configKey = entry.getKey();
 			String configValue = entry.getValue();
-			//Translate config key to its UI counterpart. 
+			//Translate config key to its UI counterpart.
 			String uiKey = keyTranslator.getUIKey(configKey);
 			if(StringUtils.isNotBlank(uiKey)) {
 				//uikey can be null if there is a mismatch between
@@ -75,6 +75,9 @@ public class ParametersServiceImpl implements ParametersService {
 				displayParameters.put(uiKey, configValue);
 			}
 		}
+
+
+
 		
 		return displayParameters;
 	}

@@ -34,7 +34,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 @Results({
 	@Result(name="parameters", type="json", params= {"root","parametersResponse"})
 })
-@AllowedMethods("getParameters")
+@AllowedMethods({"getParameters","saveParameters"})
 public class ParametersAction extends OneBusAwayNYCAdminActionSupport {
 
 	private static final long serialVersionUID = 1L;
