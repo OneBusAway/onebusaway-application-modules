@@ -17,9 +17,7 @@ package org.onebusaway.admin.service.impl;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang.StringUtils;
@@ -40,49 +38,30 @@ public class ParametersServiceImpl implements ParametersService {
 
 	private ConfigurationService configurationService;
 	private ConfigurationKeyTranslator keyTranslator;
+
+	//TODO wire this instead of hard-coding
+	private String configFile = "/opt/wmata/oba/config.json";
 	
 	@Override
 	public boolean saveParameters(Map<String, String> parameters) {
 		boolean saveSuccess = true;
 
-
-		String[] agenciesExcludingScheduled = parameters.get("admin.agenciesExcludingScheduled").split(",");
-		//TODO can't leave this hard-coded like this
-		HashMap<String, String> displayNameToIdMap = new HashMap<>();
-		displayNameToIdMap.put("WMATA", "1");
-		displayNameToIdMap.put("DASH", "2");
-		displayNameToIdMap.put("TestAgency", "3");
+		HashSet agenciesExcludingScheduled = new HashSet(List.of(parameters.get("admin.agenciesExcludingScheduled").split(",")));
 
 		ObjectMapper mapper = new ObjectMapper();
 		try {
-			ConfigFileStructure cfs = mapper.readValue(new File("/opt/wmata/oba/config.json"), ConfigFileStructure.class);
-			for (Map.Entry<String,String> agency : displayNameToIdMap.entrySet()){
-				cfs.agencies.get(agency.getValue()).hideScheduleInfo = false;
+			ConfigFileStructure cfs = mapper.readValue(new File(configFile), ConfigFileStructure.class);
+			for (Map.Entry<String,Agency> agency : cfs.agencies.entrySet()){
+				if(agenciesExcludingScheduled.contains(agency.getValue().displayName)){
+					agency.getValue().hideScheduleInfo = true;
+				}else{
+					agency.getValue().hideScheduleInfo = false;
+				}
 
 			}
-			for(String agency : agenciesExcludingScheduled){
-				String agencyId = displayNameToIdMap.get(agency);
-				cfs.agencies.get(agencyId).hideScheduleInfo = true;
-
-			}
-			mapper.writerWithDefaultPrettyPrinter().writeValue(new File("/opt/wmata/oba/config.json"), cfs);
+			mapper.writerWithDefaultPrettyPrinter().writeValue(new File(configFile), cfs);
 			configurationService.setConfigurationValue("admin", "agenciesExcludingScheduled", parameters.get("admin.agenciesExcludingScheduled"));
 
-
-
-//		for(Map.Entry<String, String> entry: parameters.entrySet()) {
-//			String uiKey = entry.getKey();
-//			String value = entry.getValue();
-//			String configKey = keyTranslator.getConfigKey(uiKey);
-//			if (configKey == null) return false;
-//			String component = configKey.split("[.]")[0];
-//			try {
-//				configurationService.setConfigurationValue(component, configKey, value);
-//			} catch (Exception e) {
-//				saveSuccess = false;
-//				e.printStackTrace();
-//			}
-//		}
 		} catch (Exception e) {
 			saveSuccess = false;
 			e.printStackTrace();
@@ -97,16 +76,24 @@ public class ParametersServiceImpl implements ParametersService {
 
 		ArrayList<String> agenciesExcludingScheduled = new ArrayList<>();
 		//Get parameters from the file
-		HashMap<String, ConfigurationServiceClientFileImpl.Agency> configParameters = (HashMap<String, ConfigurationServiceClientFileImpl.Agency>) configurationService.getConfigFromLocalFile();
+		try {
+			ObjectMapper mapper = new ObjectMapper();
+			HashMap<String, Agency> configParameters = mapper.readValue(new File(configFile), ConfigFileStructure.class).agencies;
 
-		for(Map.Entry<String, ConfigurationServiceClientFileImpl.Agency> entry : configParameters.entrySet()) {
-			if(entry.getValue().hideScheduleInfo){
-				agenciesExcludingScheduled.add(entry.getValue().displayName);
+			for (Map.Entry<String, Agency> entry : configParameters.entrySet()) {
+				if (entry.getValue().hideScheduleInfo) {
+					agenciesExcludingScheduled.add(entry.getValue().displayName);
+				}
 			}
+			displayParameters.put("admin.agenciesExcludingScheduled", csl(agenciesExcludingScheduled));
+			return displayParameters;
+		}catch(Exception e){
+			e.printStackTrace();
+			//TODO better error reporting here. ParametersService could use a logger
+			return null;
 		}
-		displayParameters.put("admin.agenciesExcludingScheduled", csl(agenciesExcludingScheduled));
-		return displayParameters;
 	}
+
 
 	//Makes a Java list into a String that is a comma-separated list
 	private String csl(ArrayList<String> input){
