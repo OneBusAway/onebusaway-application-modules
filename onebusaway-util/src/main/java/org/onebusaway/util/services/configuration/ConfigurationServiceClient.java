@@ -45,4 +45,5 @@ public interface ConfigurationServiceClient {
 
   boolean isLocal();
 
+  void setExternalConfigurationApiUrl(String url);
 }

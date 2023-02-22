@@ -50,9 +50,10 @@ public class ConfigurationServiceClientFileImpl implements
 	private HashMap<String, Object> cachedMergeConfig = null;
 
 	// when populated merge values in from admin config service
-	private String adminApiUrl;
-	public void setAdminApiUrl(String url) {
-		this.adminApiUrl = url;
+	private String externalConfigurationApiUrl;
+	@Override
+	public void setExternalConfigurationApiUrl(String url) {
+		this.externalConfigurationApiUrl = url;
 	}
 
 	private HashMap<String, Object> _config = null;
@@ -124,9 +125,9 @@ public class ConfigurationServiceClientFileImpl implements
 				cfs.config.add(new ConfigItem(component, key, value));
 			}
 			mapper.writerWithDefaultPrettyPrinter().writeValue(new File(configFile), cfs);
-			System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(cfs));
-		}catch(Exception e){
-			e.printStackTrace();
+			_log.debug(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(cfs));
+		} catch (Exception e) {
+			_log.error("exception writing config:", e,e);
 			throw new RuntimeException(e);
 		}
 
@@ -272,8 +273,7 @@ public class ConfigurationServiceClientFileImpl implements
 		ConfigFileStructure cfs = mapper.readValue(new File(configFile), ConfigFileStructure.class);
 		return getConfigFromCFS(cfs);
 		} catch (IOException e) {
-			_log.error(e.getMessage());
-			_log.error("problem converting file config file contents to config map");
+			_log.error("problem converting file config file contents to config map", e, e);
 		}
 		return new HashMap<>();
 	}
@@ -287,17 +287,19 @@ public class ConfigurationServiceClientFileImpl implements
 	}
 
 	public HashMap<String, Object> getConfigFromApi() {
-		if (adminApiUrl == null || adminApiUrl.length() == 0)
+		if (externalConfigurationApiUrl == null || externalConfigurationApiUrl.length() == 0)
 			return null;
 
 		InputStream in = null;
 
 		URL url = null;
-		String urlString = adminApiUrl;
+		String urlString = externalConfigurationApiUrl;
 		try {
 			url = new URL(urlString);
 		} catch (MalformedURLException e) {
-			throw new RuntimeException(e);
+			// this is likely a configuration issue
+			_log.info("external configuration failed: ",e, e);
+			return null;
 		}
 		try {
 			URLConnection urlConnection = url.openConnection();
@@ -308,11 +310,10 @@ public class ConfigurationServiceClientFileImpl implements
 			HashMap<String, Object> config = mapper.readValue(in, new TypeReference<HashMap<String, Object>>() {
 			});
 			return config;
-
-
 		} catch (IOException ex) {
-			_log.error("connection issue with url " + url + ", ex=" + ex);
-			return new HashMap<>();
+			// todo this can happen, its not fatal
+			_log.info("connection issue with url " + url + ", ex=" + ex);
+			return null;
 		} finally {
 			try {
 				if (in != null) in.close();

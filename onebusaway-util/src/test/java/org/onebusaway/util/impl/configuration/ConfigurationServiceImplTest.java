@@ -17,7 +17,6 @@ package org.onebusaway.util.impl.configuration;
 
 import static org.junit.Assert.*;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.onebusaway.container.refresh.RefreshService;
 import org.onebusaway.util.rest.RestApiLibrary;
@@ -139,7 +138,7 @@ public class ConfigurationServiceImplTest {
   public void testGetConfigFromApi() throws URISyntaxException, MalformedURLException {
     URI uri = getClass().getResource("config.json").toURI();
     String url = uri.toURL().toString();
-    client.setAdminApiUrl(url);
+    client.setExternalConfigurationApiUrl(url);
     HashMap<String, Object> results = client.getConfigFromApi();
     assertNotNull(results);
     ArrayList<HashMap<String, String>> configList = (ArrayList<HashMap<String, String>>) results.get("config");
