@@ -15,6 +15,9 @@
  */
 package org.onebusaway.util.services.configuration;
 
+import org.onebusaway.util.impl.configuration.ConfigurationServiceClientFileImpl;
+
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -71,5 +74,5 @@ public interface ConfigurationService {
      */
   public boolean getConfigurationFlagForAgency(String agencyId, String configurationItemKey);
 
-    Map<String, String> getConfigFromLocalFile();
+    Map<String, ConfigurationServiceClientFileImpl.Agency> getConfigFromLocalFile();
 }

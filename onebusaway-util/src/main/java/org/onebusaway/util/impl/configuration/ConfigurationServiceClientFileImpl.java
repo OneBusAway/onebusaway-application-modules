@@ -76,6 +76,11 @@ public class ConfigurationServiceClientFileImpl implements
 		_log.info("config service using configFile=" + configFile);
 		this.configFile = configFile;
 	}
+
+	public boolean isAgencyExcludingScheduled(String agencyId){
+		System.out.println(_config);
+		return true;
+	}
 	
 	@PostConstruct
 	private void checkConfig(){
@@ -188,19 +193,20 @@ public class ConfigurationServiceClientFileImpl implements
 	}
 
 	@Override
-	public HashMap<String, String> getConfigFromLocalFile() {
+	public HashMap<String, ConfigurationServiceClientFileImpl.Agency> getParametersFromLocalFile() {
 		try {
 		ObjectMapper mapper = new ObjectMapper();
 		ConfigFileStructure cfs = mapper.readValue(new File(configFile), ConfigFileStructure.class);
-		return getConfigFromCFS(cfs);
+
+		return cfs.agencies;
 		} catch (IOException e) {
 			_log.error(e.getMessage());
 			_log.error("problem converting file config file contents to config map");
 		}
-		return new HashMap<>();
+		return null;
 	}
 
-	private HashMap<String, String> getConfigFromCFS(ConfigFileStructure cfs){
+	private HashMap<String, String> getParametersFromCFS(ConfigFileStructure cfs){
 			HashMap<String, String> config = new HashMap<>();
 			for(ConfigItem item : cfs.config){
 				config.put(item.component + "." + item.key, item.value);
@@ -248,7 +254,7 @@ public class ConfigurationServiceClientFileImpl implements
 		return isLocal;
 	}
 
-	private static class ConfigItem{
+	public static class ConfigItem{
 		public String component;
 		public String key;
 		public String value;
@@ -262,9 +268,14 @@ public class ConfigurationServiceClientFileImpl implements
 
 		}
 	}
-	private static class ConfigFileStructure{
+	public static class ConfigFileStructure{
 		public HashMap<String, String> oba;
+		public HashMap<String, ConfigurationServiceClientFileImpl.Agency> agencies;
 		public ArrayList<ConfigurationServiceClientFileImpl.ConfigItem> config;
+	}
+	public static class Agency{
+		public String displayName;
+		public boolean hideScheduleInfo;
 	}
 
 

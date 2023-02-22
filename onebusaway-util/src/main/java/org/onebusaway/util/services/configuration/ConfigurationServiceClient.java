@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.gson.JsonObject;
+import org.onebusaway.util.impl.configuration.ConfigurationServiceClientFileImpl;
 
 public interface ConfigurationServiceClient {
 
@@ -41,7 +42,7 @@ public interface ConfigurationServiceClient {
   
   String getItem(String baseObject, String key) throws Exception;
 
-  HashMap<String, String> getConfigFromLocalFile();
+  HashMap<String, ConfigurationServiceClientFileImpl.Agency> getParametersFromLocalFile();
 
   boolean isLocal();
 

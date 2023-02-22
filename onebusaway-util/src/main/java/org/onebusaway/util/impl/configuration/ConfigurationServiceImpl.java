@@ -42,8 +42,8 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 	@Autowired
 	private ThreadPoolTaskScheduler _taskScheduler;
 
-	@Autowired
-	private String adminApiUrl;
+//	@Autowired
+//	private String adminApiUrl;
 	
 	private RefreshService _refreshService = null;
 
@@ -284,8 +284,8 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 	}
 
 	@Override
-	public Map<String, String> getConfigFromLocalFile() {
-		return _configurationServiceClient.getConfigFromLocalFile();
+	public HashMap<String, ConfigurationServiceClientFileImpl.Agency> getConfigFromLocalFile() {
+		return _configurationServiceClient.getParametersFromLocalFile();
 	}
 
 	// Local Config Methods
