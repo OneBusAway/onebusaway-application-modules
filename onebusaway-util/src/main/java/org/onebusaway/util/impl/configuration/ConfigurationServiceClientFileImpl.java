@@ -200,7 +200,7 @@ public class ConfigurationServiceClientFileImpl implements
 	}
 	// if configured, merge the staticConfig with dynamicConfig.  DynamicConfig
 	// takes priority
-	HashMap<String, Object> mergeConfig(HashMap<String, Object> staticConfig) {
+	synchronized HashMap<String, Object> mergeConfig(HashMap<String, Object> staticConfig) {
 		if (cachedMergeConfig == null || cacheExpired()) {
 			HashMap<String, Object> dynamicContent = this.getConfigFromApi();
 			if (dynamicContent == null || dynamicContent.isEmpty()) return staticConfig;
