@@ -41,6 +41,9 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
 	@Autowired
 	private ThreadPoolTaskScheduler _taskScheduler;
+
+	@Autowired
+	private String adminApiUrl;
 	
 	private RefreshService _refreshService = null;
 
@@ -49,6 +52,8 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 	private ConcurrentMap<String, String> _configurationKeyToValueMap = new ConcurrentHashMap<String, String>();
 
 	private HashMap<String, Object> _localConfiguration = null;
+
+	private HashMap<String, HashMap<String, String>> agencies;
 
 	@Autowired
 	public void setRefreshService(RefreshService refreshService) {
