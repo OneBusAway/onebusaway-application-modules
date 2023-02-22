@@ -42,9 +42,6 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 	@Autowired
 	private ThreadPoolTaskScheduler _taskScheduler;
 
-//	@Autowired
-	private String adminApiUrl;
-	
 	private RefreshService _refreshService = null;
 
 	private ConfigurationServiceClient _configurationServiceClient = null;

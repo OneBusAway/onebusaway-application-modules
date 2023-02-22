@@ -28,6 +28,9 @@ import org.mockito.Mock;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.*;
 
 public class ConfigurationServiceImplTest {
@@ -75,15 +78,75 @@ public class ConfigurationServiceImplTest {
 
   @Test
   public void testMergeConfig(){
-    HashMap<String, Object> old = new HashMap<>();
+    HashMap<String, Object> staticContent = new HashMap<>();
     ArrayList<HashMap> items = new ArrayList<>();
     HashMap<String, String> item1 = new HashMap<>();
     item1.put("component", "admin");
     item1.put("key", "test");
-    item1.put("value","hello World");
+    item1.put("value","static");
     items.add(item1);
-    old.put("config", items);
 
+    item1 = new HashMap<>();
+    item1.put("component", "admin");
+    item1.put("key", "staticOnly");
+    item1.put("value","static");
+    items.add(item1);
+
+    staticContent.put("config", items);
+
+    HashMap<String, Object> dynamicContent = new HashMap<>();
+    HashMap<String, String> item2 = new HashMap<>();
+    items = new ArrayList<>();
+    item2.put("component", "admin");
+    item2.put("key", "test");
+    item2.put("value","dynamic");
+    items.add(item2);
+
+    item2 = new HashMap<>();
+    item2.put("component", "admin");
+    item2.put("key", "dynamicOnly");
+    item2.put("value","dynamic");
+    items.add(item2);
+    dynamicContent.put("config", items);
+
+    HashMap<String, Object> mergeConfig = client.mergeConfig(staticContent, dynamicContent);
+    ArrayList<HashMap<String, String>> mergedItems = (ArrayList) mergeConfig.get("config");
+    boolean found1 = false;
+    boolean found2 = false;
+    boolean found3 = false;
+
+    for (HashMap<String, String> mergedItem : mergedItems) {
+      String actualKey = client.getItemKey(mergedItem);
+      if ("admin.staticOnly".equals(actualKey)) {
+        found1 = true;
+        assertEquals("static", mergedItem.get("value"));
+      } else if ("admin.dynamicOnly".equals(actualKey)) {
+        found2 = true;
+        assertEquals("dynamic", mergedItem.get("value"));
+      } else if ("admin.test".equals(actualKey)) {
+        found3 = true;
+        assertEquals("dynamic", mergedItem.get("value"));
+      } else {
+        fail("unexpected key=" +actualKey);
+      }
+    }
+    assertTrue(found1);
+    assertTrue(found2);
+    assertTrue(found3);
+  }
+
+  @Test
+  public void testGetConfigFromApi() throws URISyntaxException, MalformedURLException {
+    URI uri = getClass().getResource("config.json").toURI();
+    String url = uri.toURL().toString();
+    client.setAdminApiUrl(url);
+    HashMap<String, Object> results = client.getConfigFromApi();
+    assertNotNull(results);
+    ArrayList<HashMap<String, String>> configList = (ArrayList<HashMap<String, String>>) results.get("config");
+    HashMap<String, String> item1 = configList.get(0);
+    assertEquals("tdm", item1.get("component"));
+    assertEquals("display.minimumValue", item1.get("key"));
+    assertEquals("false", item1.get("value"));
   }
 
   @Test

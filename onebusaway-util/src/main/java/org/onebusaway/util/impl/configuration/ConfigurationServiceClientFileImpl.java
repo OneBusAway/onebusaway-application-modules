@@ -43,6 +43,18 @@ public class ConfigurationServiceClientFileImpl implements
 
 	private static Logger _log = LoggerFactory
 			.getLogger(ConfigurationServiceClientFileImpl.class);
+
+	private static long CACHE_TIME_MILLIS = 5 * 60 * 1000; // 5 mins
+	private long lastCacheTime = 0;
+
+	private HashMap<String, Object> cachedMergeConfig = null;
+
+	// when populated merge values in from admin config service
+	private String adminApiUrl;
+	public void setAdminApiUrl(String url) {
+		this.adminApiUrl = url;
+	}
+
 	private HashMap<String, Object> _config = null;
 	// for unit tests
 	public void setConfig(HashMap<String, Object> config) {
@@ -170,7 +182,7 @@ public class ConfigurationServiceClientFileImpl implements
 
     private HashMap<String, Object> getConfig() {
 		  if (_config != null) {
-			  return _config;
+			  return mergeConfig(_config);
 		  }
 		  
 		    try {
@@ -183,8 +195,74 @@ public class ConfigurationServiceClientFileImpl implements
 		        _log.info("Failed to get configuration out of " + this.configFile + ", continuing without it.");
 
 		      }
-		      return _config;
+		      return mergeConfig(_config);
 
+	}
+	// if configured, merge the staticConfig with dynamicConfig.  DynamicConfig
+	// takes priority
+	HashMap<String, Object> mergeConfig(HashMap<String, Object> staticConfig) {
+		if (cachedMergeConfig == null || cacheExpired()) {
+			HashMap<String, Object> dynamicContent = this.getConfigFromApi();
+			if (dynamicContent == null || dynamicContent.isEmpty()) return staticConfig;
+			cachedMergeConfig = mergeConfig(staticConfig, dynamicContent);
+			lastCacheTime = System.currentTimeMillis();
+		}
+		return cachedMergeConfig;
+	}
+
+	private boolean cacheExpired() {
+		if (System.currentTimeMillis() - lastCacheTime > CACHE_TIME_MILLIS) {
+			return true;
+		}
+		return false;
+	}
+
+	HashMap<String, Object> mergeConfig(HashMap<String, Object> staticConfig,
+																			HashMap<String, Object> dynamicConfig) {
+
+		ArrayList<HashMap> mergedItems = new ArrayList<>();
+		// only merge config elements
+		ArrayList<HashMap> staticItems = (ArrayList<HashMap>) staticConfig.get("config");
+		ArrayList<HashMap> dynamicItems = (ArrayList<HashMap>) dynamicConfig.get("config");
+		for (HashMap<String, String> staticItem : staticItems) {
+			HashMap<String, String> dynamicItem = getConfigItem(getItemKey(staticItem), dynamicItems);
+			mergedItems.add(mergeComponent(staticItem, dynamicItem));
+		}
+		for (HashMap dynamicItem : dynamicItems) {
+			mergedItems.add(mergeComponent(dynamicItem, null));
+		}
+
+		staticConfig.put("config", mergedItems);
+		return staticConfig;
+	}
+
+	private HashMap<String, String> getConfigItem(String searchItemKey, ArrayList<HashMap> configItems) {
+		if (configItems == null) return new HashMap<>();
+		for (HashMap<String, String> configItem : configItems) {
+			String itemKey = getItemKey(configItem);
+			if (itemKey.equals(searchItemKey))
+				return configItem;
+		}
+		return null;
+	}
+
+	String getItemKey(HashMap<String, String> configItem) {
+		if (configItem == null) return null;
+		return configItem.get("component") + "." + configItem.get("key");
+	}
+
+	private HashMap<String, String> mergeComponent(HashMap<String, String> staticMap, HashMap<String, String> dynamicMap) {
+		if (dynamicMap == null) return staticMap;
+		if (staticMap == null) return dynamicMap;
+
+		String component = dynamicMap.get("component");
+		String key = dynamicMap.get("key");
+		String value = dynamicMap.get("value");
+
+		staticMap.put("component", component);
+		staticMap.put("key", key);
+		staticMap.put("value", value);
+		return staticMap;
 	}
 
 	@Override
@@ -208,12 +286,14 @@ public class ConfigurationServiceClientFileImpl implements
 			return config;
 	}
 
-	public HashMap<String, String> getConfigFromApi() {
+	public HashMap<String, Object> getConfigFromApi() {
+		if (adminApiUrl == null || adminApiUrl.length() == 0)
+			return null;
 
 		InputStream in = null;
 
 		URL url = null;
-		String urlString = "http://localhost:9999/api/config";
+		String urlString = adminApiUrl;
 		try {
 			url = new URL(urlString);
 		} catch (MalformedURLException e) {
@@ -225,7 +305,7 @@ public class ConfigurationServiceClientFileImpl implements
 
 			in = urlConnection.getInputStream();
 			ObjectMapper mapper = new ObjectMapper();
-			HashMap<String, String> config = mapper.readValue(in, new TypeReference<HashMap<String, String>>() {
+			HashMap<String, Object> config = mapper.readValue(in, new TypeReference<HashMap<String, Object>>() {
 			});
 			return config;
 
