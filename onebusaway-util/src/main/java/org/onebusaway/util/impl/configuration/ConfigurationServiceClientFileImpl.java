@@ -17,7 +17,10 @@ package org.onebusaway.util.impl.configuration;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -187,19 +190,57 @@ public class ConfigurationServiceClientFileImpl implements
 	@Override
 	public HashMap<String, String> getConfigFromLocalFile() {
 		try {
-			ObjectMapper mapper = new ObjectMapper();
-			ConfigFileStructure cfs = mapper.readValue(new File(configFile), ConfigFileStructure.class);
+		ObjectMapper mapper = new ObjectMapper();
+		ConfigFileStructure cfs = mapper.readValue(new File(configFile), ConfigFileStructure.class);
+		return getConfigFromCFS(cfs);
+		} catch (IOException e) {
+			_log.error(e.getMessage());
+			_log.error("problem converting file config file contents to config map");
+		}
+		return new HashMap<>();
+	}
 
+	private HashMap<String, String> getConfigFromCFS(ConfigFileStructure cfs){
 			HashMap<String, String> config = new HashMap<>();
 			for(ConfigItem item : cfs.config){
 				config.put(item.component + "." + item.key, item.value);
 			}
 			return config;
+	}
 
-		} catch (IOException e) {
-			e.printStackTrace();
+	public HashMap<String, String> getConfigFromApi() {
+
+		InputStream in = null;
+
+		URL url = null;
+		String urlString = "http://localhost:9999/api/config";
+		try {
+			url = new URL(urlString);
+		} catch (MalformedURLException e) {
 			throw new RuntimeException(e);
 		}
+		try {
+			URLConnection urlConnection = url.openConnection();
+			in = null;
+
+			in = urlConnection.getInputStream();
+			ObjectMapper mapper = new ObjectMapper();
+			HashMap<String, String> config = mapper.readValue(in, new TypeReference<HashMap<String, String>>() {
+			});
+			return config;
+
+
+		} catch (IOException ex) {
+			_log.error("connection issue with url " + url + ", ex=" + ex);
+			return new HashMap<>();
+		} finally {
+			try {
+				if (in != null) in.close();
+			} catch (IOException ex) {
+				_log.error("error closing url stream " + url);
+			}
+		}
+
 	}
 
 	@Override
