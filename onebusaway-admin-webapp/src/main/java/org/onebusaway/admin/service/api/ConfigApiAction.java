@@ -66,6 +66,7 @@ public class ConfigApiAction {
     private Map<String, List<ConfigItem>> translate(Map<String, List<ConfigParameter>> parameters) {
         Map<String, List<ConfigItem>> map = new HashMap();
         List<ConfigItem> items = new ArrayList<>();
+        if (parameters == null) return map;
         for (String agencyKey : parameters.keySet()) {
             for (ConfigParameter configParameter : parameters.get(agencyKey)) {
                 ConfigItem item = new ConfigItem("agency_" + agencyKey, configParameter.getKey(), configParameter.getValue());
