@@ -15,7 +15,9 @@
  */
 package org.onebusaway.webapp.actions.admin;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.struts2.convention.annotation.AllowedMethods;
@@ -23,6 +25,7 @@ import org.apache.struts2.convention.annotation.Result;
 import org.apache.struts2.convention.annotation.Results;
 import org.onebusaway.admin.model.ParametersResponse;
 import org.onebusaway.admin.service.ParametersService;
+import org.onebusaway.util.impl.configuration.ConfigParameter;
 import org.onebusaway.webapp.actions.OneBusAwayNYCAdminActionSupport;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -47,16 +50,20 @@ public class ParametersAction extends OneBusAwayNYCAdminActionSupport {
 	
 	public String getParameters() {
 		Map<String, String> configParameters = parametersService.getParameters();
-		
 		parametersResponse = new ParametersResponse();
 		parametersResponse.setConfigParameters(configParameters);
-		
 		return "parameters";
 	}
-	
+
+	// todo pull this from config
+	public List<String> getExcludingAgencies() {
+		String[] list = {"1", "45", "71"};
+		return Arrays.asList(list);
+	}
+
 	public String saveParameters() {
 		parametersResponse = new ParametersResponse();
-		Map<String, String> parameters = buildParameters();
+		Map<String, List<ConfigParameter>> parameters = buildParametersList();
 		if(parametersService.saveParameters(parameters)) {
 			parametersResponse.setSaveSuccess(true);
 		} else {
@@ -64,19 +71,25 @@ public class ParametersAction extends OneBusAwayNYCAdminActionSupport {
 		}
 		return "parameters";
 	}
-	
-	private Map<String, String> buildParameters() {
-		Map<String, String> parameters = new HashMap<String, String>();
-		
+
+	private Map<String, List<ConfigParameter>> buildParametersList() {
+		Map<String, List<ConfigParameter>> parameters = new HashMap<>();
 		for(String param : params) {
-			String [] configPairs = param.split(":");
-			if(configPairs.length < 2) {
+			String[] configPairs = param.split(":");
+			if (configPairs.length < 2) {
 				throw new RuntimeException("Expecting config data in key value pairs");
-			} 
-			parameters.put(configPairs[0], configPairs[1]);
+			}
+			ConfigParameter configParameter = new ConfigParameter();
+			String [] agencyAndKey = configPairs[0].split("_");
+			if (agencyAndKey.length < 2) {
+				throw new RuntimeException("Expecting agency and key data in key value pairs");
+			}
+
+			configParameter.setKey(agencyAndKey[1]);
+			configParameter.setValue(configPairs[1]);
+			parameters.put(agencyAndKey[0], Arrays.asList(configParameter));
 		}
-		
-		return parameters;
+			return parameters;
 	}
 
 	/**

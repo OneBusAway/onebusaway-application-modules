@@ -44,7 +44,7 @@ public class ConfigurationServiceClientFileImpl implements
 	private static Logger _log = LoggerFactory
 			.getLogger(ConfigurationServiceClientFileImpl.class);
 
-	private static long CACHE_TIME_MILLIS = 5 * 60 * 1000; // 5 mins
+	private static long CACHE_TIME_MILLIS = 1 * 60 * 1000; // 1 min
 	private long lastCacheTime = 0;
 
 	private HashMap<String, Object> cachedMergeConfig = null;
@@ -113,16 +113,16 @@ public class ConfigurationServiceClientFileImpl implements
 			ObjectMapper mapper = new ObjectMapper();
 			ConfigFileStructure cfs = mapper.readValue(new File(configFile), ConfigFileStructure.class);
 			boolean found = false;
-			for (ConfigItem item : cfs.config) {
-				if (item.component.equals(component) && item.key.equals(key)) {
-					item.value = value;
+			for (ConfigItem item : cfs.getConfig()) {
+				if (item.getComponent().equals(component) && item.getKey().equals(key)) {
+					item.setValue(value);
 					found = true;
 
 				}
 			}
 			if(!found){
 				_log.warn("Could not find an existing configuration item for " + component + ":" + key + " so one will be created");
-				cfs.config.add(new ConfigItem(component, key, value));
+				cfs.getConfig().add(new ConfigItem(component, key, value));
 			}
 			mapper.writerWithDefaultPrettyPrinter().writeValue(new File(configFile), cfs);
 			_log.debug(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(cfs));
@@ -267,21 +267,22 @@ public class ConfigurationServiceClientFileImpl implements
 	}
 
 	@Override
-	public HashMap<String, String> getConfigFromLocalFile() {
+	public Map<String, List<ConfigParameter>> getParametersFromLocalFile() {
 		try {
 		ObjectMapper mapper = new ObjectMapper();
 		ConfigFileStructure cfs = mapper.readValue(new File(configFile), ConfigFileStructure.class);
-		return getConfigFromCFS(cfs);
+
+		return cfs.getAgencies();
 		} catch (IOException e) {
 			_log.error("problem converting file config file contents to config map", e, e);
 		}
-		return new HashMap<>();
+		return null;
 	}
 
-	private HashMap<String, String> getConfigFromCFS(ConfigFileStructure cfs){
+	private HashMap<String, String> getParametersFromCFS(ConfigFileStructure cfs){
 			HashMap<String, String> config = new HashMap<>();
-			for(ConfigItem item : cfs.config){
-				config.put(item.component + "." + item.key, item.value);
+			for(ConfigItem item : cfs.getConfig()){
+				config.put(item.getComponent() + "." + item.getKey(), item.getValue());
 			}
 			return config;
 	}
@@ -309,6 +310,7 @@ public class ConfigurationServiceClientFileImpl implements
 			ObjectMapper mapper = new ObjectMapper();
 			HashMap<String, Object> config = mapper.readValue(in, new TypeReference<HashMap<String, Object>>() {
 			});
+			_log.info("refreshing configuration with {}", config);
 			return config;
 		} catch (IOException ex) {
 			// todo this can happen, its not fatal
@@ -329,23 +331,5 @@ public class ConfigurationServiceClientFileImpl implements
 		return isLocal;
 	}
 
-	private static class ConfigItem{
-		public String component;
-		public String key;
-		public String value;
-
-		public ConfigItem(String c, String k, String v){
-			this.component = c;
-			this.key = k;
-			this.value = v;
-		}
-		public ConfigItem(){
-
-		}
-	}
-	private static class ConfigFileStructure{
-		public HashMap<String, String> oba;
-		public ArrayList<ConfigurationServiceClientFileImpl.ConfigItem> config;
-	}
 
 }

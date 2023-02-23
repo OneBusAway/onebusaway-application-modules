@@ -15,7 +15,10 @@
  */
 package org.onebusaway.admin.service.api;
 
-import org.json.JSONObject;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.onebusaway.util.impl.configuration.ConfigItem;
+import org.onebusaway.util.impl.configuration.ConfigParameter;
 import org.onebusaway.util.services.configuration.ConfigurationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.slf4j.Logger;
@@ -24,6 +27,9 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Path("/config")
@@ -33,14 +39,36 @@ public class ConfigApiAction {
     ConfigurationService _configurationService;
 
     @GET
+    @Path("/list")
     @Produces("application/json")
     public Response list(){
-        Map<String, String> config = _configurationService.getConfigFromLocalFile();
-        JSONObject json = new JSONObject(config);
-        String output = json.toString();
+        Map<String, List<ConfigParameter>> parameters = _configurationService.getParametersFromLocalFile();
+
+        Map<String, List<ConfigItem>> config = translate(parameters);
+        ObjectMapper mapper = new ObjectMapper();
+        String output = null;
+        try {
+            output = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(config);
+        } catch (JsonProcessingException e) {
+            _log.error("exception processing =" + e, e);
+            return Response.serverError().build();
+        }
 
         Response result = Response.ok(output).build();
         return result;
+    }
+
+    private Map<String, List<ConfigItem>> translate(Map<String, List<ConfigParameter>> parameters) {
+        Map<String, List<ConfigItem>> map = new HashMap();
+        List<ConfigItem> items = new ArrayList<>();
+        for (String agencyKey : parameters.keySet()) {
+            for (ConfigParameter configParameter : parameters.get(agencyKey)) {
+                ConfigItem item = new ConfigItem("agency_" + agencyKey, configParameter.getKey(), configParameter.getValue());
+                items.add(item);
+            }
+        }
+        map.put("config", items);
+        return map;
     }
 
     private static Logger _log = LoggerFactory.getLogger(ConfigResource.class);

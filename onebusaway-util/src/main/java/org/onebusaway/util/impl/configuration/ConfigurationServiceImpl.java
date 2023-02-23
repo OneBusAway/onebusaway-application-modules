@@ -281,8 +281,8 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 	}
 
 	@Override
-	public Map<String, String> getConfigFromLocalFile() {
-		return _configurationServiceClient.getConfigFromLocalFile();
+	public Map<String, List<ConfigParameter>> getParametersFromLocalFile() {
+		return _configurationServiceClient.getParametersFromLocalFile();
 	}
 
 	// Local Config Methods
