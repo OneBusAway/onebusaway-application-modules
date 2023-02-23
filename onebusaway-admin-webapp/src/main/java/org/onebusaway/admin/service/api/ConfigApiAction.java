@@ -42,20 +42,25 @@ public class ConfigApiAction {
     @Path("/list")
     @Produces("application/json")
     public Response list(){
-        Map<String, List<ConfigParameter>> parameters = _configurationService.getParametersFromLocalFile();
-
-        Map<String, List<ConfigItem>> config = translate(parameters);
-        ObjectMapper mapper = new ObjectMapper();
-        String output = null;
         try {
-            output = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(config);
-        } catch (JsonProcessingException e) {
-            _log.error("exception processing =" + e, e);
+            Map<String, List<ConfigParameter>> parameters = _configurationService.getParametersFromLocalFile();
+
+            Map<String, List<ConfigItem>> config = translate(parameters);
+            ObjectMapper mapper = new ObjectMapper();
+            String output = null;
+            try {
+                output = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(config);
+            } catch (JsonProcessingException e) {
+                _log.error("exception processing =" + e, e);
+                return Response.serverError().build();
+            }
+
+            Response result = Response.ok(output).build();
+            return result;
+        } catch (Throwable t) {
+            _log.error("list issue=", t, t);
             return Response.serverError().build();
         }
-
-        Response result = Response.ok(output).build();
-        return result;
     }
 
     private Map<String, List<ConfigItem>> translate(Map<String, List<ConfigParameter>> parameters) {
