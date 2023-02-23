@@ -60,48 +60,7 @@
 					<ul id="accordion">
 						<li>
 							<h3><a href="#" class="heading">Module: Admin</a></h3>
-							<div id="tdmSection">
-								<div id="WMATA" class="propertyHolder">
-									<label class="propertyHeader">Exclude Scheduled Data: WMATA</label>
-									<div class="propertyDescription">
-										<p>Enter true if you want to suppress data of scheduled busses, and only show realtime busses.</p>
-									</div>
-									<div>
-										<input type="hidden" id="1_hideScheduleInfo" value="1_hideScheduleInfo"/>
-										<input type="text" id="1_hideScheduleInfo" name="1_hideScheduleInfo">
-										</input>
-										<label id="propertyUnit">true/false</label>
-									</div>
-								</div>
-
-								<br/>
-								<div id="DC Circulator" class="propertyHolder rightProperty">
-									<label class="propertyHeader">Exclude Scheduled Data: DC Circulator</label>
-									<div class="propertyDescription">
-										<p>Enter true if you want to suppress data of scheduled busses, and only show realtime busses.</p>
-									</div>
-									<div>
-										<input type="hidden" id="45_hideScheduleInfo" value="45_hideScheduleInfo"/>
-										<input type="text" id="45_hideScheduleInfo" name="45_hideScheduleInfo">
-										</input>
-										<label id="propertyUnit">true/false</label>
-									</div>
-								</div>
-
-								<br/>
-								<div id="DASH" class="propertyHolder">
-									<label class="propertyHeader">Exclude Scheduled Data: DASH</label>
-									<div class="propertyDescription">
-										<p>Enter true if you want to suppress data of scheduled busses, and only show realtime busses.</p>
-									</div>
-									<div>
-										<input type="hidden" id="71_hideScheduleInfo" value="71_hideScheduleInfo"/>
-										<input type="text" id="71_hideScheduleInfo" name="71_hideScheduleInfo">
-										</input>
-										<label id="propertyUnit">true/false</label>
-									</div>
-								</div>
-
+							<div id="dynamicAgencies">
 
 							</div>
 						</li>
