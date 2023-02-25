@@ -427,7 +427,7 @@ public class SearchServiceImpl implements SearchService {
 		String normalizedQuery = normalizeQuery(results, query, serviceDate);
 
 		if (results.isEmpty() && hasHint) {
-			tryAsExactRoute(results, hint, resultFactory, serviceDate);
+			tryAsExactRoute(results, normalizedQuery, hint, resultFactory, serviceDate);
 		}
 
 		if (results.isEmpty() && hasHint) {
@@ -436,7 +436,7 @@ public class SearchServiceImpl implements SearchService {
 
 		if (results.isEmpty() && !hasComma) {
 			// before we consider tokens, try route exactly as queried
-			tryAsExactRoute(results, query.toUpperCase().trim(), resultFactory, serviceDate);
+			tryAsExactRoute(results, null, query.toUpperCase().trim(), resultFactory, serviceDate);
 		}
 
 		// if we have a comma, we are not a single route
@@ -698,13 +698,13 @@ public class SearchServiceImpl implements SearchService {
 	}
   }
 
-	private void tryAsExactRoute(SearchResultCollection results, String routeQuery,
+	private void tryAsExactRoute(SearchResultCollection results, String additionalTerm, String expectedTerm,
 								 SearchResultFactory resultFactory, ServiceDate serviceDate) {
 
 	  	// try as route_id
 		RouteBean testRouteBean = null;
 		try {
-			testRouteBean = _transitDataService.getRouteForId(routeQuery);
+			testRouteBean = _transitDataService.getRouteForId(expectedTerm);
 		} catch (ServiceException se) {
 			// not an agency-and-id
 		}
@@ -715,26 +715,44 @@ public class SearchServiceImpl implements SearchService {
 		}
 
 		// short name matching -- if single exact result
-		if (_routeShortNameToRouteBeanMap.get(routeQuery) != null) {
-			List<RouteBean> routeBeans = _routeShortNameToRouteBeanMap.get(routeQuery);
+		if (_routeShortNameToRouteBeanMap.get(expectedTerm) != null) {
+			List<RouteBean> routeBeans = _routeShortNameToRouteBeanMap.get(expectedTerm);
 			if (routeBeans.size() == 1) {
 				results.addMatch(resultFactory.getRouteResult(routeBeans.get(0)));
 				results.setHint("tryAsRoute");
 				return;
-			} else {
-				_log.debug("multiple short names, not selecting!");
+			}
+			// if we have more data see if it matches
+			if (additionalTerm != null) {
+				for (RouteBean routeBean : _routeShortNameToRouteBeanMap.get(expectedTerm)) {
+					AgencyAndId routeId = AgencyAndIdLibrary.convertFromString(routeBean.getId());
+					if (routeId.getId().equalsIgnoreCase(additionalTerm)) {
+						results.addMatch(resultFactory.getRouteResult(routeBean));
+						results.setHint("tryAsRoute");
+						return;
+					}
+				}
 			}
 		}
 
 		// long name matching -- if single exact result
-		if (_routeLongNameToRouteBeanMap.get(routeQuery) != null) {
-			List<RouteBean> routeBeans = _routeLongNameToRouteBeanMap.get(routeQuery);
+		if (_routeLongNameToRouteBeanMap.get(expectedTerm) != null) {
+			List<RouteBean> routeBeans = _routeLongNameToRouteBeanMap.get(expectedTerm);
 			if (routeBeans.size() == 1) {
 				results.addMatch(resultFactory.getRouteResult(routeBeans.get(0)));
 				results.setHint("tryAsRoute");
 				return;
-			} else {
-				_log.debug("multiple route long names, not selecting!");
+			}
+			// if we have more data see if it matches
+			if (additionalTerm != null) {
+				for (RouteBean routeBean : _routeLongNameToRouteBeanMap.get(expectedTerm)) {
+					AgencyAndId routeId = AgencyAndIdLibrary.convertFromString(routeBean.getId());
+					if (routeId.getId().equalsIgnoreCase(additionalTerm)) {
+						results.addMatch(resultFactory.getRouteResult(routeBean));
+						results.setHint("tryAsRoute");
+						return;
+					}
+				}
 			}
 		}
 
