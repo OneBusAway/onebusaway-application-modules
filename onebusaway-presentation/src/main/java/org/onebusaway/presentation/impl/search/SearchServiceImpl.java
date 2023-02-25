@@ -714,21 +714,27 @@ public class SearchServiceImpl implements SearchService {
 			return;
 		}
 
-		// short name matching
+		// short name matching -- if single exact result
 		if (_routeShortNameToRouteBeanMap.get(routeQuery) != null) {
-			for (RouteBean routeBean : _routeShortNameToRouteBeanMap.get(routeQuery)) {
-				results.addMatch(resultFactory.getRouteResult(routeBean));
+			List<RouteBean> routeBeans = _routeShortNameToRouteBeanMap.get(routeQuery);
+			if (routeBeans.size() == 1) {
+				results.addMatch(resultFactory.getRouteResult(routeBeans.get(0)));
 				results.setHint("tryAsRoute");
 				return;
+			} else {
+				_log.debug("multiple short names, not selecting!");
 			}
 		}
 
-		// long name matching
+		// long name matching -- if single exact result
 		if (_routeLongNameToRouteBeanMap.get(routeQuery) != null) {
-			for (RouteBean routeBean : _routeLongNameToRouteBeanMap.get(routeQuery)) {
-				results.addMatch(resultFactory.getRouteResult(routeBean));
+			List<RouteBean> routeBeans = _routeLongNameToRouteBeanMap.get(routeQuery);
+			if (routeBeans.size() == 1) {
+				results.addMatch(resultFactory.getRouteResult(routeBeans.get(0)));
 				results.setHint("tryAsRoute");
 				return;
+			} else {
+				_log.debug("multiple route long names, not selecting!");
 			}
 		}
 
