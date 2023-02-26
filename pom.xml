@@ -23,7 +23,7 @@
     <spring-version>5.2.20.RELEASE</spring-version>
     <csv-entities-version>1.1.6</csv-entities-version>
     <collections-version>1.2.8</collections-version>
-    <gtfs-version>1.3.118</gtfs-version>
+    <gtfs-version>1.3.119-SNAPSHOT</gtfs-version>
     <gtfs-api-version>1.2.23</gtfs-api-version>
     <jackson-version>2.12.0</jackson-version>
     <jersey-version>2.31</jersey-version>
@@ -31,7 +31,7 @@
     <onebusaway-siri-1-api-version>1.0.1</onebusaway-siri-1-api-version>
     <onebusaway-siri-2-api-version>1.0.5</onebusaway-siri-2-api-version>
     <wiki_integration_version>1.0.0</wiki_integration_version>
-    <slf4j.version>1.7.5</slf4j.version>
+    <slf4j.version>2.0.6</slf4j.version>
     <guava-version>16.0.1</guava-version>
     <log4j.version>2.17.2</log4j.version>
     <protobuf.version>3.12.4</protobuf.version>
@@ -156,6 +156,12 @@
                 <groupId>org.onebusaway</groupId>
                 <artifactId>onebusaway-csv-entities</artifactId>
                 <version>${csv-entities-version}</version>
+                <exclusions>
+                    <exclusion>
+                        <artifactId>slf4j-api</artifactId>
+                        <groupId>org.slf4j</groupId>
+                    </exclusion>
+                </exclusions>
             </dependency>
 
             <dependency>
@@ -380,6 +386,12 @@
                 <groupId>com.brsanthu</groupId>
                 <artifactId>google-analytics-java</artifactId>
                 <version>1.1.2</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>jcl-over-slf4j</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.apache.httpcomponents</groupId>

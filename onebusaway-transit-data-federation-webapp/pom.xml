@@ -10,6 +10,9 @@
 
   <name>onebusaway-transit-data-federation-webapp</name>
 
+  <properties>
+    <log4j.appender>ROLL</log4j.appender>
+  </properties>
   <dependencies>
 
     <!--       Log4j 2 -->
@@ -46,11 +49,6 @@
       <artifactId>hessian</artifactId>
     </dependency>
 
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-log4j12</artifactId>
-      <version>${slf4j.version}</version>
-    </dependency>
     <dependency>
       <groupId>log4j</groupId>
       <artifactId>apache-log4j-extras</artifactId>
@@ -100,6 +98,16 @@
 
   <build>
     <finalName>onebusaway-transit-data-federation-webapp</finalName>
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+        <filtering>true</filtering>
+        <includes>
+          <!-- rewrite log4j2.xml -->
+          <include>**/*.xml</include>
+        </includes>
+      </resource>
+    </resources>
   </build>
 
 </project>

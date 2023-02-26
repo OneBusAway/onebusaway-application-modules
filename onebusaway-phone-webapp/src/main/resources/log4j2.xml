@@ -21,8 +21,8 @@
 
     <!-- 0 or more appender elements -->
     <Appenders>
-        <RollingFile name="ROLL" fileName="/var/log/tomcat8/sms.log"
-                     filePattern="/var/log/tomcat8/sms.%d{yyyy-MM-dd}-%i.log.gz">
+        <RollingFile name="ROLL" fileName="/var/log/tomcat8/phone-webapp.log"
+                     filePattern="/var/log/tomcat8/phone-webapp.%d{yyyy-MM-dd}-%i.log.gz">
             <PatternLayout>
                 <Pattern>%d{ISO8601} %-5p [%F:%L] : %m%n</Pattern>
             </PatternLayout>
@@ -39,12 +39,6 @@
     </Appenders>
 
     <Loggers>
-        <Logger name="org.hibernate.engine.internal.StatisticalLoggingSessionEventListener"
-                level="FATAL"
-                additivity="false">
-            <AppenderRef ref="${log4j.appender}"/>
-        </Logger>
-
         <Root level="info">
             <AppenderRef ref="${log4j.appender}"/>
         </Root>

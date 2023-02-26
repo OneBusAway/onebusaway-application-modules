@@ -22,12 +22,6 @@
 			<version>${slf4j.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-log4j12</artifactId>
-			<version>${slf4j.version}</version>
-		</dependency>
-
-		<dependency>
 			<groupId>org.onebusaway</groupId>
 			<artifactId>onebusaway-api-core</artifactId>
 			<version>${project.version}</version>
@@ -170,6 +164,12 @@
 		<dependency>
 			<groupId>com.brsanthu</groupId>
 			<artifactId>google-analytics-java</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>jcl-over-slf4j</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
