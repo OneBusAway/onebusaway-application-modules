@@ -710,8 +710,14 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
       boolean sequenceMatches = tpr.getStopSequence() > 0
           && tpr.getStopSequence() == gtfsSequence;
       // records may have predictions across multiple blocks
-      if (!tripMatches || !stopMatches)
+      if (!tripMatches) {
+        _log.debug("unmatched trip on tpr: " + tpr.getTripId() + " != " + instance.getBlockTrip().getTrip().getId());
         continue;
+      }
+      if (!stopMatches) {
+        _log.debug("unmatched stop on tpr: " + tpr.getTimepointId() + " != " + instance.getStop().getId());
+        continue;
+      }
 
       if (sequenceMatches || tprStopIndex == thisStopIndex) {
 

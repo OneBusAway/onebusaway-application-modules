@@ -438,9 +438,13 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
 
     TripStatusBean tripStatusBean = _tripDetailsBeanService.getBlockLocationAsStatusBean(
         blockLocation, targetTime);
-    if (!_arrivalAndDepartureService.getHideCanceledTrips()
-            && !TransitDataConstants.STATUS_CANCELED.equals(tripStatusBean.getStatus())) {
-      // if configured hide this result
+
+    if (TransitDataConstants.STATUS_CANCELED.equals(tripStatusBean.getStatus())) {
+      if (!_arrivalAndDepartureService.getHideCanceledTrips()) {
+        bean.setTripStatus(tripStatusBean);
+      }
+    } else {
+      // not cancelled, set status
       bean.setTripStatus(tripStatusBean);
     }
   }
