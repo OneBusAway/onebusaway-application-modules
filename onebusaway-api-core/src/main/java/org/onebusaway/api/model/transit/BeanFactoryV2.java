@@ -1442,4 +1442,7 @@ public class BeanFactoryV2 {
           }
   }
 
+  public ListWithReferencesBean<RouteGroupingBean> getResponse(ListBean<RouteGroupingBean> beans) {
+    return list(beans.getList(), beans.isLimitExceeded());
+  }
 }

@@ -59,7 +59,6 @@ import org.onebusaway.util.AgencyAndIdLibrary;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.util.*;
 
@@ -144,6 +143,9 @@ public class TransitDataServiceTemplateImpl implements TransitDataServiceTemplat
 
   @Autowired
   private VehicleOccupancyRecordCache _vehicleOccupancyRecordCache;
+
+  @Autowired
+  private CanonicalRoutesService _canonicalRouteServce;
 
   /****
    * {@link TransitDataService} Interface
@@ -764,6 +766,10 @@ public class TransitDataServiceTemplateImpl implements TransitDataServiceTemplat
   public BundleMetadata getBundleMetadata() {
     // TODO Auto-generated method stub
     return null;
+  }
+
+  public ListBean<RouteGroupingBean> getCanonicalRoute(long serviceDate, AgencyAndId routeId) {
+    return _canonicalRouteServce.getCanonicalOrMergedRoute(serviceDate, routeId);
   }
 
   public ListBean<ConsolidatedStopMapBean> getAllConsolidatedStops() {

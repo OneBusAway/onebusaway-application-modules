@@ -472,6 +472,11 @@ public class TransitDataServiceImpl implements TransitDataService {
   }
 
   @Override
+  public ListBean<RouteGroupingBean> getCanonicalRoute(long serviceDate, AgencyAndId routeId) {
+    return _transitDataService.getCanonicalRoute(serviceDate, routeId);
+  }
+
+  @Override
   public void removeAllServiceAlertsForAgencyId(String agencyId) {
     blockUntilBundleIsReady();
     _transitDataService.removeAllServiceAlertsForAgencyId(agencyId);

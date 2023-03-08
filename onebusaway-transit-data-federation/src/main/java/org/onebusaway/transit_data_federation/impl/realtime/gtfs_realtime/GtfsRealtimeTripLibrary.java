@@ -494,6 +494,11 @@ public class GtfsRealtimeTripLibrary {
   }
 
 
+  /**
+   * Calculate block start time from real-time trip start time value.
+   * Frequency based trips are differentiated based on start time.
+   * Scheduled based trips don't currently use this.
+   */
   private int getBlockStartTimeForTripStartTime(BlockInstance instance,
       AgencyAndId tripId, int tripStartTime) {
     BlockConfigurationEntry block = instance.getBlock();
