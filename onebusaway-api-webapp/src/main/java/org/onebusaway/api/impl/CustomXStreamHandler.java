@@ -45,13 +45,7 @@ import org.onebusaway.api.model.transit.service_alerts.TimeRangeV2Bean;
 import org.onebusaway.api.model.where.ArrivalAndDepartureBeanV1;
 import org.onebusaway.geospatial.model.EncodedPolygonBean;
 import org.onebusaway.geospatial.model.EncodedPolylineBean;
-import org.onebusaway.transit_data.model.AgencyWithCoverageBean;
-import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
-import org.onebusaway.transit_data.model.RouteBean;
-import org.onebusaway.transit_data.model.StopBean;
-import org.onebusaway.transit_data.model.StopCalendarDaysBean;
-import org.onebusaway.transit_data.model.StopGroupBean;
-import org.onebusaway.transit_data.model.StopGroupingBean;
+import org.onebusaway.transit_data.model.*;
 
 import com.thoughtworks.xstream.XStream;
 
@@ -127,6 +121,7 @@ public class CustomXStreamHandler extends XStreamHandler {
     xstream.alias("blockStopTime", BlockStopTimeV2Bean.class);
     xstream.alias("stopTime", StopTimeV2Bean.class);
     xstream.alias("tripStopTime", TripStopTimeV2Bean.class);
+    xstream.alias("routeGrouping", RouteGroupingBean.class);
     xstream.alias("stopSchedule", StopScheduleV2Bean.class);
     xstream.alias("stopRouteSchedule", StopRouteScheduleV2Bean.class);
     xstream.alias("stopRouteDirectionSchedule",

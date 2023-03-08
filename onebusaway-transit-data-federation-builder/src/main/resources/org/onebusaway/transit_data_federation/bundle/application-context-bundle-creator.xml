@@ -152,6 +152,15 @@
 
   <bean id="blockLocationHistoryTask" class="org.onebusaway.transit_data_federation.bundle.tasks.history.BlockLocationHistoryTask" />
 
+  <!-- optional canonical shapes and stop patterns -->
+  <bean class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
+    <property name="taskName" value="canonical_shape_index" />
+    <property name="afterTaskName" value="block_location_history" />
+    <property name="task" ref="canonicalRouteIndexTask" />
+  </bean>
+
+  <bean id="canonicalRouteIndexTask" class="org.onebusaway.transit_data_federation.bundle.tasks.CanonicalRouteTask" />
+
   <!-- Pre Cache -->
 
   <bean class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">

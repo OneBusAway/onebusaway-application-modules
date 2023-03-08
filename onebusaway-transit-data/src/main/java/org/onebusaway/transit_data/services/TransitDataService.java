@@ -619,4 +619,11 @@ public interface TransitDataService extends FederatedService {
   @FederatedByAgencyIdMethod
   public ListBean<ServiceAlertRecordBean> getAllServiceAlertRecordsForAgencyId(
 		String agencyId);
+
+  /**
+   * return canonical or ideal stop patterns / stop shapes for a route, such as
+   * those displayed on a system map or strip map without a specific trip context.
+   */
+  @FederatedByAgencyIdMethod
+  ListBean<RouteGroupingBean> getCanonicalRoute(long serviceDate, AgencyAndId routeId);
 }
