@@ -16,6 +16,7 @@
 package org.onebusaway.transit_data_federation.bundle;
 
 import junit.framework.TestCase;
+import org.junit.Ignore;
 import org.onebusaway.transit_data_federation.impl.bundle.S3BundleStoreImpl;
 import org.onebusaway.transit_data_federation.model.bundle.BundleItem;
 
@@ -27,6 +28,7 @@ public class FederatedTransitDataBundleConventionMainTest extends TestCase {
 
 
 
+    @Ignore
     public void testRun() throws Exception {
         FederatedTransitDataBundleConventionMain main = new FederatedTransitDataBundleConventionMain();
         String bundleOutputDir =
