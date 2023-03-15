@@ -102,14 +102,65 @@ public class CanonicalRoutesServiceImpl implements CanonicalRoutesService {
         || stopsForRoute.getStopGroupings().isEmpty()) {
      // this is an ideal route only, with no physical schedule
      // return what little we know about it from the canonical index
-      return createRouteDirectionBean(routeId, serviceDate);
+      return addReferences(createRouteDirectionBean(routeId, serviceDate));
 
     }
     // if index then use
     List<RouteStopCollectionEntry> routeStops =_entry.getRouteStopCollectionEntries(routeId);
 
     // else create merged
-    return merge(routeId, stopsForRoute, createRouteDirectionBean(routeId, serviceDate));
+    return addReferences(merge(routeId, stopsForRoute, createRouteDirectionBean(routeId, serviceDate)));
+  }
+
+  private ListBean<RouteGroupingBean> addReferences(ListBean<RouteGroupingBean> bean) {
+    if (bean == null || bean.getList() == null) return bean;
+
+    for (RouteGroupingBean routeGroupingBean : bean.getList()) {
+      addReferences(routeGroupingBean);
+    }
+    return bean;
+  }
+
+  private void addReferences(RouteGroupingBean bean) {
+    if (bean == null) return;
+    Set<AgencyAndId> visitedRoutes = new HashSet<>();
+    Set<AgencyAndId> visitedStops = new HashSet<>();
+    if (bean.getRouteId() != null)
+      visitedRoutes.add(bean.getRouteId());
+    if (bean.getStopGroupings() == null) {
+      loadReferences(bean, visitedRoutes, visitedStops);
+      return;
+    }
+    for (StopGroupingBean stopGrouping : bean.getStopGroupings()) {
+      for (StopGroupBean stopGroup : stopGrouping.getStopGroups()) {
+        for (String stopId : stopGroup.getStopIds()) {
+          try {
+            AgencyAndId stop = AgencyAndIdLibrary.convertFromString(stopId);
+            if (stop != null)
+              visitedStops.add(stop);
+          } catch (IllegalStateException ise) {
+            // bury
+          }
+        }
+      }
+    }
+    loadReferences(bean, visitedRoutes, visitedStops);
+
+  }
+
+  private void loadReferences(RouteGroupingBean bean, Set<AgencyAndId> visitedRoutes, Set<AgencyAndId> visitedStops) {
+    for (AgencyAndId visitedRoute : visitedRoutes) {
+      RouteBean route = _transitDataService.getRouteForId(AgencyAndIdLibrary.convertToString(visitedRoute));
+      if (route != null)
+        bean.getRoutes().add(route);
+    }
+
+    for (AgencyAndId visitedStop : visitedStops) {
+      StopBean stop = _transitDataService.getStop(AgencyAndIdLibrary.convertToString(visitedStop));
+      if (stop != null)
+        bean.getStops().add(stop);
+    }
+
   }
 
   private ListBean<RouteGroupingBean> merge(AgencyAndId routeId, StopsForRouteBean stopsForRoute, ListBean<RouteGroupingBean> beans) {

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.onebusaway.transit_data.model;
+package org.onebusaway.api.model;
 
 import org.onebusaway.gtfs.model.AgencyAndId;
 
@@ -21,17 +21,11 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * represents idealized/canonical data about a route.
- */
-public class RouteGroupingBean implements Serializable {
-  // routeId
+public class RouteGroupingV2Bean implements Serializable {
+
   private AgencyAndId routeId;
   // stopGroupings
-  private List<StopGroupingBean> stopGroupings;
-  private List<RouteBean> routes = new ArrayList<>();
-  private List<StopBean> stops = new ArrayList<>();
-
+  private List<StopGroupingV2Bean> stopGroupings = new ArrayList<>();
 
   public AgencyAndId getRouteId() {
     return routeId;
@@ -41,19 +35,11 @@ public class RouteGroupingBean implements Serializable {
     this.routeId = routeId;
   }
 
-  public List<StopGroupingBean> getStopGroupings() {
+  public List<StopGroupingV2Bean> getStopGroupings() {
     return stopGroupings;
   }
 
-  public void setStopGroupings(List<StopGroupingBean> stopGroupings) {
+  public void setStopGroupings(List<StopGroupingV2Bean> stopGroupings) {
     this.stopGroupings = stopGroupings;
-  }
-
-  public List<RouteBean> getRoutes() {
-    return routes;
-  }
-
-  public List<StopBean> getStops() {
-    return stops;
   }
 }

@@ -23,6 +23,8 @@ import org.apache.struts2.rest.handler.XStreamHandler;
 
 import org.onebusaway.api.actions.api.ValidationErrorBean;
 import org.onebusaway.api.model.ResponseBean;
+import org.onebusaway.api.model.StopGroupV2Bean;
+import org.onebusaway.api.model.StopGroupingV2Bean;
 import org.onebusaway.api.model.TimeBean;
 import org.onebusaway.api.model.transit.*;
 import org.onebusaway.api.model.transit.blocks.BlockConfigurationV2Bean;
@@ -98,8 +100,8 @@ public class CustomXStreamHandler extends XStreamHandler {
     xstream.alias("arrivalAndDeparture", ArrivalAndDepartureBeanV1.class);
     xstream.alias("encodedPolyline", EncodedPolylineBean.class);
     xstream.alias("encodedPolygon", EncodedPolygonBean.class);
-    xstream.alias("stopGrouping", StopGroupingBean.class);
-    xstream.alias("stopGroup", StopGroupBean.class);
+    xstream.alias("stopGrouping", StopGroupingV2Bean.class);
+    xstream.alias("stopGroup", StopGroupV2Bean.class);
     xstream.alias("agency-with-coverage", AgencyWithCoverageBean.class);
     xstream.alias("calendar-days", StopCalendarDaysBean.class);
 

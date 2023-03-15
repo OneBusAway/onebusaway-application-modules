@@ -22,6 +22,9 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import org.onebusaway.api.impl.MaxCountSupport;
+import org.onebusaway.api.model.RouteGroupingV2Bean;
+import org.onebusaway.api.model.StopGroupV2Bean;
+import org.onebusaway.api.model.StopGroupingV2Bean;
 import org.onebusaway.api.model.transit.blocks.BlockConfigurationV2Bean;
 import org.onebusaway.api.model.transit.blocks.BlockInstanceV2Bean;
 import org.onebusaway.api.model.transit.blocks.BlockStopTimeV2Bean;
@@ -260,6 +263,24 @@ public class BeanFactoryV2 {
       ServiceAlertBean situation) {
     return entry(getSituation(situation));
   }
+
+  public ListWithReferencesBean<RouteGroupingV2Bean> getResponse(ListBean<RouteGroupingBean> beans) {
+
+    List<RouteGroupingV2Bean> v2Beans = new ArrayList<>();
+
+    for (RouteGroupingBean routeGroupingBean : beans.getList()) {
+      v2Beans.add(getRouteGroupingBean(routeGroupingBean));
+      for (RouteBean route : routeGroupingBean.getRoutes()) {
+        _references.addRoute(getRoute(route));
+      }
+      for (StopBean stop : routeGroupingBean.getStops()) {
+        _references.addStop(getStop(stop));
+      }
+    }
+
+    return list(v2Beans, beans.isLimitExceeded());
+  }
+
 
   /****
    *
@@ -630,6 +651,60 @@ public class BeanFactoryV2 {
 
     return bean;
   }
+
+  public RouteGroupingV2Bean getRouteGroupingBean(RouteGroupingBean bean) {
+    RouteGroupingV2Bean v2Bean = new RouteGroupingV2Bean();
+    v2Bean.setRouteId(bean.getRouteId());
+    for (StopGroupingBean stopGrouping : bean.getStopGroupings()) {
+      v2Bean.getStopGroupings().add(getStopGrouping(stopGrouping));
+    }
+
+    return v2Bean;
+  }
+
+  public StopGroupingV2Bean getStopGrouping(StopGroupingBean bean) {
+    StopGroupingV2Bean v2Bean = new StopGroupingV2Bean();
+    v2Bean.setType(bean.getType());
+    v2Bean.setOrdered(bean.isOrdered());
+    if (bean.getStopGroups() != null) {
+      for (StopGroupBean stopGroup : bean.getStopGroups()) {
+        StopGroupV2Bean stopGroupV2 = getStopGroup(stopGroup);
+        if (stopGroupV2 != null)
+          v2Bean.getStopGroups().add(stopGroupV2);
+      }
+
+    }
+    return v2Bean;
+  }
+
+  public StopGroupV2Bean getStopGroup(StopGroupBean bean) {
+    StopGroupV2Bean v2Bean = new StopGroupV2Bean();
+    v2Bean.setId(bean.getId());
+    v2Bean.setName(bean.getName());
+    if (bean.getStopIds() != null) {
+      for (String stopId : bean.getStopIds()) {
+        v2Bean.getStopIds().add(stopId);
+      }
+    }
+    if (bean.getSubGroups() != null) {
+      for (StopGroupBean subGroup : bean.getSubGroups()) {
+        // we don't attempt to detect cycles here
+        // if we need to retrieve from set
+        StopGroupV2Bean subGroupV2 = getStopGroup(subGroup);
+        if (subGroupV2 != null)
+          v2Bean.getSubGroups().add(subGroupV2);
+      }
+    }
+    if (bean.getPolylines() != null) {
+      for (EncodedPolylineBean polyline : bean.getPolylines()) {
+        v2Bean.getPolylines().add(polyline);
+      }
+    }
+
+
+    return v2Bean;
+  }
+
 
   public ListWithReferencesBean<CurrentVehicleEstimateV2Bean> getCurrentVehicleEstimates(
       ListBean<CurrentVehicleEstimateBean> estimates) {
@@ -1442,7 +1517,4 @@ public class BeanFactoryV2 {
           }
   }
 
-  public ListWithReferencesBean<RouteGroupingBean> getResponse(ListBean<RouteGroupingBean> beans) {
-    return list(beans.getList(), beans.isLimitExceeded());
-  }
 }
