@@ -35,6 +35,7 @@ import java.util.Map;
 
 import static org.junit.Assert.*;
 import static org.onebusaway.transit_data_federation.impl.CanonicalRoutesServiceImpl.CANONICAL_TYPE;
+import static org.onebusaway.transit_data_federation.services.CanonicalRoutesService.DIRECTION_TYPE;
 import static org.onebusaway.transit_data_federation.services.CanonicalRoutesService.HEURISTIC_TYPE;
 
 /**
@@ -214,7 +215,7 @@ public class CanonicalRoutesServiceImplTest {
     assertEquals(2, bean.getStopGroupings().size());
 
     assertEquals(HEURISTIC_TYPE, bean.getStopGroupings().get(0).getType());
-    assertEquals(HEURISTIC_TYPE, bean.getStopGroupings().get(1).getType());
+    assertEquals(DIRECTION_TYPE, bean.getStopGroupings().get(1).getType());
   }
 
   private StopsForRouteBean createGtfsResults() {

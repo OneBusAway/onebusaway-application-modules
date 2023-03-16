@@ -27,5 +27,6 @@ public interface CanonicalRoutesService {
 
   public static final String CANONICAL_TYPE = "canonical";
   public static final String HEURISTIC_TYPE = "heuristic";
+  public static final String DIRECTION_TYPE = "direction";
   ListBean<RouteGroupingBean> getCanonicalOrMergedRoute(long serviceDate, AgencyAndId routeId);
 }
