@@ -97,7 +97,7 @@ public class CanonicalRoutesServiceImpl implements CanonicalRoutesService {
   @Override
   public ListBean<RouteGroupingBean> getCanonicalOrMergedRoute(long serviceDate, AgencyAndId routeId) {
 
-    StopsForRouteBean stopsForRoute = _transitDataService.getStopsForRoute(AgencyAndIdLibrary.convertToString(routeId));
+    StopsForRouteBean stopsForRoute = copy(_transitDataService.getStopsForRoute(AgencyAndIdLibrary.convertToString(routeId)));
     if (stopsForRoute == null || stopsForRoute.getStopGroupings() == null
         || stopsForRoute.getStopGroupings().isEmpty()) {
      // this is an ideal route only, with no physical schedule
@@ -105,8 +105,6 @@ public class CanonicalRoutesServiceImpl implements CanonicalRoutesService {
       return addReferences(createRouteDirectionBean(routeId, serviceDate));
 
     }
-    // if index then use
-    List<RouteStopCollectionEntry> routeStops =_entry.getRouteStopCollectionEntries(routeId);
 
     // else create merged
     return addReferences(merge(routeId, stopsForRoute, createRouteDirectionBean(routeId, serviceDate)));
@@ -365,7 +363,56 @@ public class CanonicalRoutesServiceImpl implements CanonicalRoutesService {
     return results;
   }
 
-  private String nullSafeGet(String id) {
+
+  private StopsForRouteBean copy(StopsForRouteBean input) {
+    if (input == null) return null;
+    StopsForRouteBean output = new StopsForRouteBean();
+    output.setRoute(input.getRoute());
+    output.setStops(input.getStops());
+    output.setPolylines(input.getPolylines());
+    output.setStopGroupings(copyStopGroupingList(input.getStopGroupings()));
+    return output;
+  }
+
+  private List<StopGroupingBean> copyStopGroupingList(List<StopGroupingBean> stopGroupings) {
+    if (stopGroupings == null)
+      return null;
+    List<StopGroupingBean> output = new ArrayList<>();
+    for (StopGroupingBean input : stopGroupings) {
+      output.add(copy(input));
+    }
+    return output;
+  }
+
+  private StopGroupingBean copy(StopGroupingBean input) {
+    if (input == null) return null;
+    StopGroupingBean output = new StopGroupingBean();
+    output.setType(input.getType());
+    output.setOrdered(input.isOrdered());
+    output.setStopGroups(copy(input.getStopGroups()));
+    return output;
+  }
+
+  private List<StopGroupBean> copy(List<StopGroupBean> inputs) {
+    if (inputs == null) return null;
+    List<StopGroupBean> output = new ArrayList<>();
+    for (StopGroupBean input : inputs) {
+      output.add(copy(input));
+    }
+    return output;
+  }
+
+  private StopGroupBean copy(StopGroupBean input) {
+    if (input == null) return null;
+    StopGroupBean output = new StopGroupBean();
+    output.setId(input.getId());
+    output.setName(input.getName());
+    output.setPolylines(input.getPolylines());
+    output.setStopIds(input.getStopIds());
+    output.setSubGroups(copy(input.getSubGroups()));
+    return output;
+  }
+    private String nullSafeGet(String id) {
     if (id == null) return Strings.EMPTY;
     return id;
   }
