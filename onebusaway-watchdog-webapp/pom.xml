@@ -40,6 +40,11 @@
 			<version>0.0.12</version>
 		</dependency>
 		<dependency>
+			<groupId>com.amazonaws</groupId>
+			<artifactId>aws-java-sdk-core</artifactId>
+			<version>1.11.602</version>
+		</dependency>
+		<dependency>
 			<groupId>org.onebusaway</groupId>
 			<artifactId>onebusaway-util</artifactId>
 			<version>${project.version}</version>
@@ -124,7 +129,7 @@
 		
 		<dependency>
 			<groupId>com.amazonaws</groupId>
-			<artifactId>aws-java-sdk-cloudwatch</artifactId>
+			<artifactId>aws-java-sdk-core</artifactId>
 			<version>1.10.31</version>
 		</dependency>
 		<dependency>
