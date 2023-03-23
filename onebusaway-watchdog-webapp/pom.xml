@@ -33,6 +33,12 @@
 			<artifactId>onebusaway-transit-data-federation</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		<!-- for S3BundleStoreImpl -->
+		<dependency>
+			<groupId>org.onebusaway</groupId>
+			<artifactId>onebusaway-cloud-aws</artifactId>
+			<version>0.0.12</version>
+		</dependency>
 		<dependency>
 			<groupId>org.onebusaway</groupId>
 			<artifactId>onebusaway-util</artifactId>
