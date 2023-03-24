@@ -41,6 +41,8 @@
     <org_onebusaway_test_rmi_port>9902</org_onebusaway_test_rmi_port>
     <maven.compiler.source>11</maven.compiler.source>
     <maven.compiler.target>11</maven.compiler.target>
+    <!-- this needs to match cloud-services -->
+    <aws.version>1.11.602</aws.version>
   </properties>
 
 
