@@ -133,4 +133,14 @@ public class BundleManagementServiceMock implements BundleManagementService {
 		// TODO Auto-generated method stub
 		
 	}
+
+	@Override
+	public int getApplicableBundlesSize() {
+		return 0;
+	}
+
+	@Override
+	public String getCurrentBundleId() {
+		return null;
+	}
 }
