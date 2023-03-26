@@ -140,19 +140,24 @@ public class BundleManagementServiceImpl implements BundleManagementService {
       _log.info("builder mode:  using bundle.root of " + bundleRoot);
       _bundleStore = new LocalBundleStoreImpl(bundleRoot);
       _scheduler = new HourlyBundleSchedulerImpl();
+      _scheduler.setup(this, _taskScheduler);
       return;
     }
     if(!_standaloneMode) {
       _bundleStore = new HttpBundleStoreImpl(_bundleRootPath, _restApiLibrary);
       _scheduler = new HourlyBundleSchedulerImpl();
+      _scheduler.setup(this, _taskScheduler);
     }
     else{
       if (_remoteSourceURI == null) {
         _bundleStore = new LocalBundleStoreImpl(_bundleRootPath);
         _scheduler = new HourlyBundleSchedulerImpl();
+        _scheduler.setup(this, _taskScheduler);
       } else {
+        _log.info("setting up interval based bundle refresh with refresh interval=" + REFRESH_INTERVAL_MINUTES);
         _bundleStore = new S3BundleStoreImpl(_bundleRootPath, _remoteSourceURI);
         _scheduler = new IntervalBundleSchedulerImpl(REFRESH_INTERVAL_MINUTES);
+        _scheduler.setup(this, _taskScheduler);
       }
     }
     
