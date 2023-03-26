@@ -51,6 +51,7 @@ public class IntervalBundleSchedulerImpl implements BundleScheduler {
     public void run() {
       try {
         _service.discoverBundles();
+        _service.refreshApplicableBundles();
         _service.reevaluateBundleAssignment();
       } catch (Exception e) {
         _log.error("Error updating bundle list: " + e.getMessage(), e);
