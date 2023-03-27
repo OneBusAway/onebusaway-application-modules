@@ -133,7 +133,8 @@ public class LongTermAveragesResource extends MetricResource {
 					locationInvalidLatLonByAgency.put(agencyId, new int[ROLLING_AVERAGE_COUNT]);
 				}
 				if (_refreshInterval > 0) {
-					_refreshTask = _scheduledExecutorService.scheduleAtFixedRate(new RefreshTask(), 0, _refreshInterval, TimeUnit.SECONDS);
+					_log.info("scheduling long term average with refresh = " + _refreshInterval);
+					_refreshTask = _scheduledExecutorService.scheduleAtFixedRate(new RefreshTask(), _refreshInterval, _refreshInterval, TimeUnit.SECONDS);
 				}
 			} catch (Throwable t) {
 				_log.error("exception initalizing: ", t, t);
