@@ -158,6 +158,8 @@ public class BundleManagementServiceImpl implements BundleManagementService {
         _bundleStore = new S3BundleStoreImpl(_bundleRootPath, _remoteSourceURI);
         _scheduler = new IntervalBundleSchedulerImpl(REFRESH_INTERVAL_MINUTES);
         _scheduler.setup(this, _taskScheduler);
+        _log.info("when using interval based we discover on a thread, returning...");
+        return;
       }
     }
     
