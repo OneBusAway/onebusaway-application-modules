@@ -50,14 +50,14 @@ import uk.org.siri.siri_2.StopMonitoringDeliveryStructure;
 import com.brsanthu.googleanalytics.EventHit;
 import com.brsanthu.googleanalytics.PageViewHit;
 
-public class StopMonitoringV2Action  extends MonitoringActionBase 
+public class StopMonitoringV2Action  extends MonitoringActionBase
     implements ServletRequestAware, ServletResponseAware {
 
   private static final long serialVersionUID = 1L;
-  
+
   @Autowired
   private GoogleAnalyticsServiceImpl _gaService;
-  
+
 
   private Siri _response;
 
@@ -88,17 +88,17 @@ public class StopMonitoringV2Action  extends MonitoringActionBase
 
     _realtimeService.setTime(responseTimestamp);
     String detailLevelParam = _request.getParameter(STOP_MONITORING_DETAIL_LEVEL);
-    
+
     //get the detail level parameter or set it to default if not specified
       DetailLevel detailLevel;
-      
+
       if(DetailLevel.contains(detailLevelParam)){
         detailLevel = DetailLevel.valueOf(detailLevelParam.toUpperCase());
       }
       else{
         detailLevel = DetailLevel.NORMAL;
       }
-      
+
     // User Parameters
     String lineRef = _request.getParameter(LINE_REF);
     String monitoringRef = _request.getParameter(MONITORING_REF);
@@ -107,12 +107,12 @@ public class StopMonitoringV2Action  extends MonitoringActionBase
     String maxOnwardCallsParam = _request.getParameter(MAX_ONWARD_CALLS);
     String maxStopVisitsParam = _request.getParameter(MAX_STOP_VISITS);
     String minStopVisitsParam = _request.getParameter(MIN_STOP_VISITS);
-    
+
     // Error Strings
     String routeIdsErrorString = "";
     String stopIdsErrorString = "";
 
-    /* 
+    /*
      * We need to support the user providing no agency id which means 'all
     agencies'. So, this array will hold a single agency if the user provides it or
     all agencies if the user provides none. We'll iterate over them later while
@@ -121,15 +121,15 @@ public class StopMonitoringV2Action  extends MonitoringActionBase
 
     List<AgencyAndId> routeIds = new ArrayList<AgencyAndId>();
     List<AgencyAndId> stopIds = new ArrayList<AgencyAndId>();
-    
+
 
     List<String> agencyIds = processAgencyIds(agencyId);
-    
+
     stopIdsErrorString = processStopIds(monitoringRef, stopIds, agencyIds);
     routeIdsErrorString =  processRouteIds(lineRef, routeIds, agencyIds);
-    
+
     int maximumOnwardCalls = 0;
-    
+
     if (detailLevel.equals(DetailLevel.CALLS)) {
       maximumOnwardCalls = SiriSupportV2.convertToNumeric(maxOnwardCallsParam, Integer.MAX_VALUE);
     }
@@ -140,19 +140,19 @@ public class StopMonitoringV2Action  extends MonitoringActionBase
     //  _monitoringActionSupport.reportToGoogleAnalytics(_request,
     //      "Stop Monitoring", StringUtils.join(stopIds, ","),
     //      _configurationService);
-    //}   
-    
-    
+    //}
+
+
     // Setup Filters
     Map<Filters, String> filters = new HashMap<Filters, String>();
     filters.put(Filters.DIRECTION_REF, directionId);
     filters.put(Filters.MAX_STOP_VISITS, maxStopVisitsParam);
     filters.put(Filters.MIN_STOP_VISITS, minStopVisitsParam);
-    
-    
+
+
     // Monitored Stop Visits
     List<MonitoredStopVisitStructure> visits = new ArrayList<MonitoredStopVisitStructure>();
-    
+
     for (AgencyAndId stopId : stopIds) {
 
       if (!stopId.hasValues())
@@ -241,11 +241,13 @@ public class StopMonitoringV2Action  extends MonitoringActionBase
   public String getStopMonitoring() {
     try {
       if (_type.equals("xml")) {
-        this._servletResponse.setContentType("application/xml");
+        this._servletResponse.setContentType("application/xml; charset=UTF-8");
+        this._servletResponse.setCharacterEncoding("UTF-8");
         return _realtimeService.getSiriXmlSerializer()
             .getXml(_response);
       } else {
-        this._servletResponse.setContentType("application/json");
+        this._servletResponse.setContentType("application/json; charset=UTF-8");
+        this._servletResponse.setCharacterEncoding("UTF-8");
         return _realtimeService.getSiriJsonSerializer().getJson(
             _response, _request.getParameter("callback"));
       }
@@ -270,18 +272,18 @@ public class StopMonitoringV2Action  extends MonitoringActionBase
 
   private void processGoogleAnalytics(){
     processGoogleAnalyticsPageView();
-    processGoogleAnalyticsApiKeys();  
+    processGoogleAnalyticsApiKeys();
   }
-  
+
   private void processGoogleAnalyticsPageView(){
     _gaService.post(new PageViewHit());
   }
-  
+
   private void processGoogleAnalyticsApiKeys(){
-    String apiKey = _request.getParameter("key"); 
+    String apiKey = _request.getParameter("key");
     if(StringUtils.isBlank(apiKey))
       apiKey = "Key Information Unavailable";
-    
+
     _gaService.post(new EventHit(GA_EVENT_CATEGORY, GA_EVENT_ACTION, apiKey, 1));
   }
 }

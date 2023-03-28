@@ -55,9 +55,9 @@ import uk.org.siri.siri_2.Siri;
 import uk.org.siri.siri_2.VehicleActivityStructure;
 import uk.org.siri.siri_2.VehicleMonitoringDeliveryStructure;
 
-public class VehicleMonitoringV2Action extends MonitoringActionBase 
+public class VehicleMonitoringV2Action extends MonitoringActionBase
     implements ServletRequestAware, ServletResponseAware {
-  
+
   private static final long serialVersionUID = 1L;
   protected static Logger _log = LoggerFactory.getLogger(VehicleMonitoringV2Action.class);
 
@@ -65,7 +65,7 @@ public class VehicleMonitoringV2Action extends MonitoringActionBase
 
   @Autowired
   private GoogleAnalyticsServiceImpl _gaService;
-  
+
   private Siri _response;
 
   private String _cachedResponse = null;
@@ -73,7 +73,7 @@ public class VehicleMonitoringV2Action extends MonitoringActionBase
   private ServiceAlertsHelperV2 _serviceAlertsHelper = new ServiceAlertsHelperV2();
 
   HttpServletRequest _request;
-  
+
   private HttpServletResponse _servletResponse;
 
   // See urlrewrite.xml as to how this is set. Which means this action doesn't
@@ -87,26 +87,26 @@ public class VehicleMonitoringV2Action extends MonitoringActionBase
   }
 
   public DefaultHttpHeaders index() throws IOException {
-    
+
     long currentTimestamp = getTime();
-    
+
     processGoogleAnalytics();
     //_monitoringActionSupport.setupGoogleAnalytics(_request, _configurationService);
-    
+
     _realtimeService.setTime(currentTimestamp);
-    
+
     String detailLevelParam = _request.getParameter(VEHICLE_MONITORING_DETAIL_LEVEL);
-  
+
   //get the detail level parameter or set it to default if not specified
     DetailLevel detailLevel;
-    
+
     if(DetailLevel.contains(detailLevelParam)){
       detailLevel = DetailLevel.valueOf(detailLevelParam.toUpperCase());
     }
     else{
       detailLevel = DetailLevel.NORMAL;
     }
-    
+
     // User Parameters
   String lineRef = _request.getParameter(LINE_REF);
   String vehicleRef = _request.getParameter(VEHICLE_REF);
@@ -115,42 +115,42 @@ public class VehicleMonitoringV2Action extends MonitoringActionBase
   String maxOnwardCallsParam = _request.getParameter(MAX_ONWARD_CALLS);
   String maxStopVisitsParam = _request.getParameter(MAX_STOP_VISITS);
   String minStopVisitsParam = _request.getParameter(MIN_STOP_VISITS);
-    
+
   // Error Strings
   String routeIdsErrorString = "";
-  
+
     /*
      * We need to support the user providing no agency id which means 'all agencies'.
     So, this array will hold a single agency if the user provides it or all
-    agencies if the user provides none. We'll iterate over them later while 
+    agencies if the user provides none. We'll iterate over them later while
     querying for vehicles and routes
     */
-  
+
   List<AgencyAndId> routeIds = new ArrayList<AgencyAndId>();
-  
+
   List<String> agencyIds = processAgencyIds(agencyId);
     List<AgencyAndId> vehicleIds = processVehicleIds(vehicleRef, agencyIds);
     routeIdsErrorString =  processRouteIds(lineRef, routeIds, agencyIds);
-    
+
     int maximumOnwardCalls = 0;
-    
+
     if (detailLevel.equals(DetailLevel.CALLS)) {
     maximumOnwardCalls = SiriSupportV2.convertToNumeric(maxOnwardCallsParam, Integer.MAX_VALUE);
   }
-    
+
     String gaLabel = null;
-    
+
     // *** CASE 1: single vehicle, ignore any other filters
     if (vehicleIds.size() > 0) {
-      
+
       gaLabel = vehicleRef;
-      
+
       List<VehicleActivityStructure> activities = new ArrayList<VehicleActivityStructure>();
       try{
         for (AgencyAndId vehicleId : vehicleIds) {
           VehicleActivityStructure activity = _realtimeService.getVehicleActivityForVehicle(
               vehicleId.toString(), maximumOnwardCalls, detailLevel, currentTimestamp);
-  
+
           if (activity != null) {
             activities.add(activity);
           }
@@ -159,26 +159,26 @@ public class VehicleMonitoringV2Action extends MonitoringActionBase
       catch(Exception e){
         _log.info(e.getMessage(),e);
       }
-      
+
       // No vehicle id validation, so we pass null for error
       _response = generateSiriResponse(activities, null, null, currentTimestamp);
 
       // *** CASE 2: by route, using direction id, if provided
     } else if (lineRef != null) {
-      
+
       gaLabel = lineRef;
-      
+
       List<VehicleActivityStructure> activities = new ArrayList<VehicleActivityStructure>();
-      
+
       for (AgencyAndId routeId : routeIds) {
-        
+
         List<VehicleActivityStructure> activitiesForRoute = _realtimeService.getVehicleActivityForRoute(
             routeId.toString(), directionId, maximumOnwardCalls, detailLevel, currentTimestamp);
         if (activitiesForRoute != null) {
           activities.addAll(activitiesForRoute);
         }
       }
-      
+
       if (vehicleIds.size() > 0) {
         List<VehicleActivityStructure> filteredActivities = new ArrayList<VehicleActivityStructure>();
 
@@ -195,21 +195,21 @@ public class VehicleMonitoringV2Action extends MonitoringActionBase
 
         activities = filteredActivities;
       }
-      
+
       Exception error = null;
       if (lineRef != null && routeIds.size() == 0) {
         error = new Exception(routeIdsErrorString.trim());
       }
 
       _response = generateSiriResponse(activities, routeIds, error, currentTimestamp);
-      
+
       // *** CASE 3: all vehicles
     } else {
       try {
       gaLabel = "All Vehicles";
-      
+
       //int hashKey = _siriCacheService.hash(maximumOnwardCalls, agencyIds, _type);
-      
+
       List<VehicleActivityStructure> activities = new ArrayList<VehicleActivityStructure>();
       //if (!_siriCacheService.containsKey(hashKey)) {
         for (String agency : agencyIds) {
@@ -237,11 +237,11 @@ public class VehicleMonitoringV2Action extends MonitoringActionBase
         throw new RuntimeException(e);
       }
     }
-    
+
     //if (_monitoringActionSupport.canReportToGoogleAnalytics(_configurationService)) {
     //  _monitoringActionSupport.reportToGoogleAnalytics(_request, "Vehicle Monitoring", gaLabel, _configurationService);
-    //} 
-    
+    //}
+
     try {
       this._servletResponse.getWriter().write(getVehicleMonitoring());
     } catch (IOException e) {
@@ -253,31 +253,31 @@ public class VehicleMonitoringV2Action extends MonitoringActionBase
 
   /**
    * Generate a siri response for a set of VehicleActivities
-   * 
+   *
    * @param routeId
    */
   private Siri generateSiriResponse(List<VehicleActivityStructure> activities,
       List<AgencyAndId> routeIds, Exception error, long currentTimestamp) {
-    
+
     VehicleMonitoringDeliveryStructure vehicleMonitoringDelivery = new VehicleMonitoringDeliveryStructure();
     vehicleMonitoringDelivery.setResponseTimestamp(DateUtil.toXmlGregorianCalendar(currentTimestamp));
-    
+
     ServiceDelivery serviceDelivery = new ServiceDelivery();
     serviceDelivery.setResponseTimestamp(DateUtil.toXmlGregorianCalendar(currentTimestamp));
     serviceDelivery.getVehicleMonitoringDelivery().add(vehicleMonitoringDelivery);
-    
+
     if (error != null) {
       ServiceDeliveryErrorConditionStructure errorConditionStructure = new ServiceDeliveryErrorConditionStructure();
-      
+
       ErrorDescriptionStructure errorDescriptionStructure = new ErrorDescriptionStructure();
       errorDescriptionStructure.setValue(error.getMessage());
-      
+
       OtherErrorStructure otherErrorStructure = new OtherErrorStructure();
       otherErrorStructure.setErrorText(error.getMessage());
-      
+
       errorConditionStructure.setDescription(errorDescriptionStructure);
       errorConditionStructure.setOtherError(otherErrorStructure);
-      
+
       vehicleMonitoringDelivery.setErrorCondition(errorConditionStructure);
     } else {
       Calendar gregorianCalendar = new GregorianCalendar();
@@ -302,13 +302,15 @@ public class VehicleMonitoringV2Action extends MonitoringActionBase
       // check the cache first
       return _cachedResponse;
     }
-    
+
     try {
       if (_type.equals("xml")) {
-        this._servletResponse.setContentType("application/xml");
+        this._servletResponse.setContentType("application/xml; charset=UTF-8");
+        this._servletResponse.setCharacterEncoding("UTF-8");
         return _realtimeService.getSiriXmlSerializer().getXml(_response);
       } else {
-        this._servletResponse.setContentType("application/json");
+        this._servletResponse.setContentType("application/json; charset=UTF-8");
+        this._servletResponse.setCharacterEncoding("UTF-8");
         return _realtimeService.getSiriJsonSerializer().getJson(_response,
             _request.getParameter("callback"));
       }
@@ -326,25 +328,25 @@ public class VehicleMonitoringV2Action extends MonitoringActionBase
   public void setServletResponse(HttpServletResponse servletResponse) {
     this._servletResponse = servletResponse;
   }
-  
+
   public HttpServletResponse getServletResponse(){
     return _servletResponse;
   }
-  
+
   private void processGoogleAnalytics(){
     processGoogleAnalyticsPageView();
-    processGoogleAnalyticsApiKeys();  
+    processGoogleAnalyticsApiKeys();
   }
-  
+
   private void processGoogleAnalyticsPageView(){
     _gaService.post(new PageViewHit());
   }
-  
+
   private void processGoogleAnalyticsApiKeys(){
-    String apiKey = _request.getParameter("key"); 
+    String apiKey = _request.getParameter("key");
     if(StringUtils.isBlank(apiKey))
       apiKey = "Key Information Unavailable";
-    
+
     _gaService.post(new EventHit(GA_EVENT_CATEGORY, GA_EVENT_ACTION, apiKey, 1));
   }
 }
