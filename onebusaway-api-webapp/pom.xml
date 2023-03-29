@@ -53,6 +53,8 @@
     <dependency>
         <groupId>org.onebusaway</groupId>
         <artifactId>onebusaway-siri-api-v20</artifactId>
+        <scope>system</scope>
+        <systemPath>/home/grzegorz/jary/onebusaway-siri-api-v20-1.0.3.jar</systemPath>
         <version>${onebusaway-siri-2-api-version}</version>
     </dependency>
 
@@ -182,6 +184,7 @@
 		<groupId>org.apache.httpcomponents</groupId>
 		<artifactId>httpclient</artifactId>
 	</dependency>
+
   </dependencies>
 
   <build>
