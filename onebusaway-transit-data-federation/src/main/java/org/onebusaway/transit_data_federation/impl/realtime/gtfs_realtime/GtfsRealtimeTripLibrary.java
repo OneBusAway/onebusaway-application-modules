@@ -662,6 +662,11 @@ public class GtfsRealtimeTripLibrary {
 
           if (tripId != null) {
             best.isCanceled = tripUpdate.getTrip().getScheduleRelationship().equals(TripDescriptor.ScheduleRelationship.CANCELED);
+            if (best.isCanceled)
+              result.addCancelledTripId(tripUpdate.getTrip().getTripId());
+            boolean isAdded = tripUpdate.getTrip().getScheduleRelationship().equals(TripDescriptor.ScheduleRelationship.ADDED);
+            if (isAdded)
+              result.addAddedTripId(tripUpdate.getTrip().getTripId());
             record.setStatus(tripUpdate.getTrip().getScheduleRelationship().toString());
             _log.debug("schedule=" + tripUpdate.getTrip().getScheduleRelationship() + "; isCanceled=" + best.isCanceled);
           }

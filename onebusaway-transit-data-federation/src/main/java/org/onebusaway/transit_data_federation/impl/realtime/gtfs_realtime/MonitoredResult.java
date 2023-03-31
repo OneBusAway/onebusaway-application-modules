@@ -15,10 +15,7 @@
  */
 package org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.geospatial.model.CoordinatePoint;
@@ -31,6 +28,8 @@ public class MonitoredResult {
   private Set<String> _matchedTripIds = new HashSet<String>();
   private Set<String> _unmatchedStopIds = new HashSet<String>();
   private Set<String> _matchedStopIds = new HashSet<String>();
+  private Set<String> _canelledTripIds = new HashSet<>();
+  private Set<String> _addedTripIds = new HashSet<>();
   private Set<AgencyAndId> _unmatchedBlockIds = new HashSet<AgencyAndId>();
   private Set<CoordinatePoint> _allCoordinates = new HashSet<CoordinatePoint>();
   private int _recordsTotal = 0;
@@ -66,6 +65,19 @@ public class MonitoredResult {
 
   public Set<AgencyAndId> getUnmatchedBlockIds() {
     return _unmatchedBlockIds;
+  }
+
+  public void addCancelledTripId(String id) {
+    _canelledTripIds.add(id);
+  }
+  public Set<String> getCancelledTripIds() {
+    return _canelledTripIds;
+  }
+  public void addAddedTripId(String id) {
+    _addedTripIds.add(id);
+  }
+  public Set<String> getAddedTripIds() {
+    return _addedTripIds;
   }
   
   void setRecordsTotal(int size) {
