@@ -21,6 +21,7 @@ public class TransitDataConstants {
 
   // changed spelling/case to bring in line with GTFS-RT ScheduledRelationship
   public static final String STATUS_CANCELED = "CANCELED";
+  public static final String STATUS_ADDED = "ADDED";
 
   public static final String STATUS_LEGACY_CANCELLED = "cancelled";
   

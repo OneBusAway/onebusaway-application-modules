@@ -37,6 +37,7 @@ import org.onebusaway.realtime.api.OccupancyStatus;
 import org.onebusaway.realtime.api.TimepointPredictionRecord;
 import org.onebusaway.realtime.api.VehicleLocationRecord;
 import org.onebusaway.realtime.api.VehicleOccupancyRecord;
+import org.onebusaway.transit_data.model.TransitDataConstants;
 import org.onebusaway.transit_data_federation.services.blocks.BlockCalendarService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockGeospatialService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
@@ -179,6 +180,9 @@ public class GtfsRealtimeTripLibrary {
       }
 
       TripUpdate tu = fe.getTripUpdate();
+      if (tu.hasTrip() && TransitDataConstants.STATUS_ADDED.equals(tu.getTrip().getScheduleRelationship().toString())) {
+        result.addAddedTripId(tu.getTrip().getTripId());
+      }
 
       if (tu.hasVehicle() && tu.getVehicle().hasId() && StringUtils.isNotBlank(tu.getVehicle().getId())) {
         // Trip update has a vehicle ID - index by vehicle ID
@@ -664,9 +668,6 @@ public class GtfsRealtimeTripLibrary {
             best.isCanceled = tripUpdate.getTrip().getScheduleRelationship().equals(TripDescriptor.ScheduleRelationship.CANCELED);
             if (best.isCanceled)
               result.addCancelledTripId(tripUpdate.getTrip().getTripId());
-            boolean isAdded = tripUpdate.getTrip().getScheduleRelationship().equals(TripDescriptor.ScheduleRelationship.ADDED);
-            if (isAdded)
-              result.addAddedTripId(tripUpdate.getTrip().getTripId());
             record.setStatus(tripUpdate.getTrip().getScheduleRelationship().toString());
             _log.debug("schedule=" + tripUpdate.getTrip().getScheduleRelationship() + "; isCanceled=" + best.isCanceled);
           }
@@ -813,7 +814,8 @@ public class GtfsRealtimeTripLibrary {
       record.setBlockStartTime(blockDescriptor.getStartTime());
     }
 
-    if(blockDescriptor.getScheduleRelationship() != null && !best.isCanceled)
+    // pass along the schedule relationship as a status
+    if(blockDescriptor.getScheduleRelationship() != null)
       record.setStatus(blockDescriptor.getScheduleRelationship().toString());
 
     if (!best.isCanceled)
