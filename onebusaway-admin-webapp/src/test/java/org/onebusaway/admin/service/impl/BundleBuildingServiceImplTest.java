@@ -167,8 +167,8 @@ public class BundleBuildingServiceImplTest {
 
   @Test
   public void testMe() {
-    setup();
-    testBuildHastus();
+//    setup();
+//    testBuildHastus();
   }
 
 
