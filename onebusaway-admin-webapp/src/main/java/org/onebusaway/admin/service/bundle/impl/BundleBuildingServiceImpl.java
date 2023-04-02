@@ -570,8 +570,10 @@ public class BundleBuildingServiceImpl implements BundleBuildingService {
   }
 
   private void demonitorStatus() {
-    _executorService.shutdown();
-    _executorService = null;
+    if (_executorService != null) {
+      _executorService.shutdownNow();
+      _executorService = null;
+    }
   }
   
   // configure entity replacement strategy to consolidate stops based on configurable URL

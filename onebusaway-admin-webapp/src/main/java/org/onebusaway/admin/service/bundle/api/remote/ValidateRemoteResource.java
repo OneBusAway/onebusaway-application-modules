@@ -35,6 +35,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -63,6 +64,13 @@ public class ValidateRemoteResource extends AuthenticatedResource {
         _executorService = Executors.newFixedThreadPool(1);
   }
 
+  @PreDestroy
+  public void shutdown() {
+    if (_executorService != null) {
+      _executorService.shutdownNow();
+      _executorService = null;
+    }
+  }
   @Path("/{bundleDirectory}/{bundleName}/{id}/create")
   @GET
   @Produces("application/json")

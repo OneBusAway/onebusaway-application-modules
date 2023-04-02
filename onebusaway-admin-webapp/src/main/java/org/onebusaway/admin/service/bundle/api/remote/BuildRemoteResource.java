@@ -22,6 +22,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -64,6 +65,14 @@ public class BuildRemoteResource extends AuthenticatedResource {
   @PostConstruct
   public void setup() {
         _executorService = Executors.newFixedThreadPool(1);
+  }
+
+  @PreDestroy
+  public void shutdown() {
+        if (_executorService != null) {
+          _executorService.shutdownNow();
+          _executorService = null;
+        }
   }
 
   @Path("/create")

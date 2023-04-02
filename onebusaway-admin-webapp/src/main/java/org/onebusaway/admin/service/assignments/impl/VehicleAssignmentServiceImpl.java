@@ -36,6 +36,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
@@ -111,6 +112,14 @@ public class VehicleAssignmentServiceImpl implements VehicleAssignmentService {
         tripSummaryCache = CacheBuilder.newBuilder()
                 .expireAfterWrite(1,TimeUnit.MINUTES)
                 .build(tripSummaryLoader);
+    }
+
+    @PreDestroy
+    public void shutdown() {
+        if (_executor != null) {
+            _executor.shutdownNow();
+            _executor = null;
+        }
     }
 
     @Override
