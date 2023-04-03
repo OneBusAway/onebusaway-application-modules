@@ -31,7 +31,7 @@
     <onebusaway-siri-1-api-version>1.0.1</onebusaway-siri-1-api-version>
     <onebusaway-siri-2-api-version>1.0.5</onebusaway-siri-2-api-version>
     <wiki_integration_version>1.0.0</wiki_integration_version>
-    <slf4j.version>2.0.6</slf4j.version>
+    <slf4j.version>1.7.5</slf4j.version>
     <guava-version>16.0.1</guava-version>
     <log4j.version>2.17.2</log4j.version>
     <protobuf.version>3.12.4</protobuf.version>
@@ -521,81 +521,81 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-site-plugin</artifactId>
                 <version>3.3</version>
-                <configuration>
-                    <reportPlugins>
-                        <plugin>
-                            <groupId>org.apache.maven.plugins</groupId>
-                            <artifactId>maven-project-info-reports-plugin</artifactId>
-                            <version>2.3.1</version>
-                            <reportSets>
-                                <reportSet>
-                                    <reports>
-                                        <report>project-team</report>
-                                        <report>mailing-list</report>
-                                        <report>cim</report>
-                                        <report>issue-tracking</report>
-                                        <report>license</report>
-                                        <report>scm</report>
-                                        <report>summary</report>
-                                    </reports>
-                                </reportSet>
-                            </reportSets>
-                        </plugin>
-                        <plugin>
-                            <groupId>org.apache.maven.plugins</groupId>
-                            <artifactId>maven-javadoc-plugin</artifactId>
-                            <version>2.10.3</version>
+<!--                <configuration>-->
+<!--                    <reportPlugins>-->
+<!--                        <plugin>-->
+<!--                            <groupId>org.apache.maven.plugins</groupId>-->
+<!--                            <artifactId>maven-project-info-reports-plugin</artifactId>-->
+<!--                            <version>2.3.1</version>-->
+<!--                            <reportSets>-->
+<!--                                <reportSet>-->
+<!--                                    <reports>-->
+<!--                                        <report>project-team</report>-->
+<!--                                        <report>mailing-list</report>-->
+<!--                                        <report>cim</report>-->
+<!--                                        <report>issue-tracking</report>-->
+<!--                                        <report>license</report>-->
+<!--                                        <report>scm</report>-->
+<!--                                        <report>summary</report>-->
+<!--                                    </reports>-->
+<!--                                </reportSet>-->
+<!--                            </reportSets>-->
+<!--                        </plugin>-->
+<!--                        <plugin>-->
+<!--                            <groupId>org.apache.maven.plugins</groupId>-->
+<!--                            <artifactId>maven-javadoc-plugin</artifactId>-->
+<!--                            <version>2.10.3</version>-->
 
-                            <configuration>
-                                <!--
-                                  bdferris: I ran into an issue where the javadoc process crashed with the following exception:
-                                  java.lang.ClassCastException:
-                                    com.sun.tools.javadoc.ClassDocImpl cannot be cast to com.sun.javadoc.AnnotationTypeDoc
-                                  After some debugging, this turned out to be because we had class defined in the com.google.gwt.user.client.ui
-                                  package, which in turn caused that package to be included in the javadoc build, which in turn caused
-                                  a GWT annotation class to be examined in the Javadoc process, which in turn caused javadoc to crash
-                                  because of a bug in the javadoc application:
-                                    http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6442982
-                                  Thus, we exclude this package to avoid the bug.
-                                   -->
-                                <excludePackageNames>com.google.gwt.user.client.ui</excludePackageNames>
-                                <!-- Turn off Java 8 strict Javadoc checking -->
-                                <additionalparam>-Xdoclint:none</additionalparam>
+<!--                            <configuration>-->
+<!--                                &lt;!&ndash;-->
+<!--                                  bdferris: I ran into an issue where the javadoc process crashed with the following exception:-->
+<!--                                  java.lang.ClassCastException:-->
+<!--                                    com.sun.tools.javadoc.ClassDocImpl cannot be cast to com.sun.javadoc.AnnotationTypeDoc-->
+<!--                                  After some debugging, this turned out to be because we had class defined in the com.google.gwt.user.client.ui-->
+<!--                                  package, which in turn caused that package to be included in the javadoc build, which in turn caused-->
+<!--                                  a GWT annotation class to be examined in the Javadoc process, which in turn caused javadoc to crash-->
+<!--                                  because of a bug in the javadoc application:-->
+<!--                                    http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6442982-->
+<!--                                  Thus, we exclude this package to avoid the bug.-->
+<!--                                   &ndash;&gt;-->
+<!--                                <excludePackageNames>com.google.gwt.user.client.ui</excludePackageNames>-->
+<!--                                &lt;!&ndash; Turn off Java 8 strict Javadoc checking &ndash;&gt;-->
+<!--                                <additionalparam>-Xdoclint:none</additionalparam>-->
 
-                            </configuration>
-                            <reportSets>
-                                <reportSet>
-                                    <id>main</id>
-                                    <reports>
-                                        <report>aggregate</report>
-                                        <report>javadoc</report>
-                                    </reports>
-                                </reportSet>
-                                <reportSet>
-                                    <id>configuration-doclet</id>
-                                    <configuration>
-                                        <doclet>org.onebusaway.configuration_doclet.ConfigurationDoclet</doclet>
-                                        <docletArtifact>
-                                            <groupId>org.onebusaway</groupId>
-                                            <artifactId>onebusaway-configuration-doclet</artifactId>
-                                            <version>1.0.1</version>
-                                        </docletArtifact>
-                                        <useStandardDocletOptions>false</useStandardDocletOptions>
-                                        <additionalparam>-d ${project.build.directory}/site/oba-configs -annotationType
-                                            org.onebusaway.container.ConfigurationParameter
-                                        </additionalparam>
-                                        <destDir>oba-configs</destDir>
-                                        <name>OBA Configs</name>
-                                        <description>OBA Configuration documentation.</description>
-                                    </configuration>
-                                    <reports>
-                                        <report>aggregate</report>
-                                    </reports>
-                                </reportSet>
-                            </reportSets>
-                        </plugin>
-                    </reportPlugins>
-                </configuration>
+<!--                            </configuration>-->
+<!--                            <reportSets>-->
+<!--                                <reportSet>-->
+<!--                                    <id>main</id>-->
+<!--                                    <reports>-->
+<!--                                        <report>aggregate</report>-->
+<!--                                        <report>javadoc</report>-->
+<!--                                    </reports>-->
+<!--                                </reportSet>-->
+<!--                                <reportSet>-->
+<!--                                    <id>configuration-doclet</id>-->
+<!--                                    <configuration>-->
+<!--                                        <doclet>org.onebusaway.configuration_doclet.ConfigurationDoclet</doclet>-->
+<!--                                        <docletArtifact>-->
+<!--                                            <groupId>org.onebusaway</groupId>-->
+<!--                                            <artifactId>onebusaway-configuration-doclet</artifactId>-->
+<!--                                            <version>1.0.1</version>-->
+<!--                                        </docletArtifact>-->
+<!--                                        <useStandardDocletOptions>false</useStandardDocletOptions>-->
+<!--                                        <additionalparam>-d ${project.build.directory}/site/oba-configs -annotationType-->
+<!--                                            org.onebusaway.container.ConfigurationParameter-->
+<!--                                        </additionalparam>-->
+<!--                                        <destDir>oba-configs</destDir>-->
+<!--                                        <name>OBA Configs</name>-->
+<!--                                        <description>OBA Configuration documentation.</description>-->
+<!--                                    </configuration>-->
+<!--                                    <reports>-->
+<!--                                        <report>aggregate</report>-->
+<!--                                    </reports>-->
+<!--                                </reportSet>-->
+<!--                            </reportSets>-->
+<!--                        </plugin>-->
+<!--                    </reportPlugins>-->
+<!--                </configuration>-->
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

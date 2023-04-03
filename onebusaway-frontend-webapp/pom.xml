@@ -14,7 +14,7 @@
 
     <properties>
         <branding-webapp>{project.name}</branding-webapp>
-        <jetty.version>9.4.34.v20201102</jetty.version>
+        <jetty.version>9.4.51.v20230217</jetty.version>
         <xwiki.integration.version>1.0.1</xwiki.integration.version>
     </properties>
 
@@ -30,8 +30,8 @@
         <finalName>onebusaway-frontend-webapp</finalName>
         <plugins>
             <plugin>
-                <groupId>org.mortbay.jetty</groupId>
-                <artifactId>maven-jetty-plugin</artifactId>
+                <groupId>org.eclipse.jetty</groupId>
+                <artifactId>jetty-maven-plugin</artifactId>
                 <version>${jetty.version}</version>
                 <configuration>
                     <contextPath>/</contextPath>
