@@ -62,11 +62,11 @@ public class VehicleMonitoringAction extends ApiActionSupport
   private static final long serialVersionUID = 1L;
 
   protected static Logger _log = LoggerFactory.getLogger(VehicleMonitoringAction.class);
-  
+
   private static final int V3 = 3;
-  
+
   private static final String GA_EVENT_ACTION = "API Key Request";
-  
+
   private static final String GA_EVENT_CATEGORY = "Vehicle Monitoring";
 
   @Autowired
@@ -74,17 +74,17 @@ public class VehicleMonitoringAction extends ApiActionSupport
 
   @Autowired
   private RealtimeService _realtimeService;
-  
+
   private GoogleAnalyticsServiceImpl _gaService;
-  
+
   private Siri _response;
-  
+
   private String _cachedResponse = null;
 
   private ServiceAlertsHelper _serviceAlertsHelper = new ServiceAlertsHelper();
 
   HttpServletRequest _request;
-  
+
   private HttpServletResponse _servletResponse;
 
   // See urlrewrite.xml as to how this is set. Which means this action doesn't
@@ -93,7 +93,7 @@ public class VehicleMonitoringAction extends ApiActionSupport
 
   @Autowired
   private CacheService<Integer, String> _cacheService;
-    
+
   public VehicleMonitoringAction() {
 	    super(V3);
 	  }
@@ -113,23 +113,23 @@ public class VehicleMonitoringAction extends ApiActionSupport
 	processGoogleAnalytics();
 
     long currentTimestamp = getTime();
-    
+
     _realtimeService.setTime(currentTimestamp);
-    
+
     String directionId = _request.getParameter("DirectionRef");
-    
+
     String tripId = _request.getParameter("TripId");
 
     boolean showRawLocation = Boolean.valueOf(_request.getParameter("ShowRawLocation"));
 
     // We need to support the user providing no agency id which means 'all agencies'.
     // So, this array will hold a single agency if the user provides it or all
-    // agencies if the user provides none. We'll iterate over them later while 
+    // agencies if the user provides none. We'll iterate over them later while
     // querying for vehicles and routes
     List<String> agencyIds = new ArrayList<String>();
 
     String agencyId = _request.getParameter("OperatorRef");
-    
+
     if (agencyId != null) {
       agencyIds.add(agencyId);
     } else {
@@ -152,7 +152,7 @@ public class VehicleMonitoringAction extends ApiActionSupport
         }
       }
     }
-    
+
     List<AgencyAndId> routeIds = new ArrayList<AgencyAndId>();
     String routeIdErrorString = "";
     if (_request.getParameter("LineRef") != null) {
@@ -189,11 +189,11 @@ public class VehicleMonitoringAction extends ApiActionSupport
         maximumOnwardCalls = Integer.MAX_VALUE;
       }
     }
-    
+
     // *** CASE 1: single vehicle, ignore any other filters
     if (vehicleIds.size() > 0) {
       List<VehicleActivityStructure> activities = new ArrayList<VehicleActivityStructure>();
-      
+
       for (AgencyAndId vehicleId : vehicleIds) {
         VehicleActivityStructure activity = _realtimeService.getVehicleActivityForVehicle(
             vehicleId.toString(), maximumOnwardCalls, currentTimestamp, tripId);
@@ -209,7 +209,7 @@ public class VehicleMonitoringAction extends ApiActionSupport
         // *** CASE 2: by route, using direction id, if provided
     } else if (_request.getParameter("LineRef") != null) {
       List<VehicleActivityStructure> activities = new ArrayList<VehicleActivityStructure>();
-      
+
       for (AgencyAndId routeId : routeIds) {
 
         List<VehicleActivityStructure> activitiesForRoute = _realtimeService.getVehicleActivityForRoute(
@@ -218,7 +218,7 @@ public class VehicleMonitoringAction extends ApiActionSupport
           activities.addAll(activitiesForRoute);
         }
       }
-      
+
       if (vehicleIds.size() > 0) {
         List<VehicleActivityStructure> filteredActivities = new ArrayList<VehicleActivityStructure>();
 
@@ -235,7 +235,7 @@ public class VehicleMonitoringAction extends ApiActionSupport
 
         activities = filteredActivities;
       }
-      
+
       Exception error = null;
       if (_request.getParameter("LineRef") != null && routeIds.size() == 0) {
         error = new Exception(routeIdErrorString.trim());
@@ -247,7 +247,7 @@ public class VehicleMonitoringAction extends ApiActionSupport
     } else {
       try {
       int hashKey = _cacheService.hash(maximumOnwardCalls, agencyIds, _type);
-      
+
       List<VehicleActivityStructure> activities = new ArrayList<VehicleActivityStructure>();
       if (!_cacheService.containsKey(hashKey)) {
         for (String agency : agencyIds) {
@@ -275,7 +275,7 @@ public class VehicleMonitoringAction extends ApiActionSupport
         throw new RuntimeException(e);
       }
     }
-        
+
     try {
       this._servletResponse.getWriter().write(getVehicleMonitoring());
     } catch (IOException e) {
@@ -289,29 +289,29 @@ public class VehicleMonitoringAction extends ApiActionSupport
    * Generate a siri response for a set of VehicleActivities
    *
    */
-  
+
   private Siri generateSiriResponse(List<VehicleActivityStructure> activities,
       List<AgencyAndId> routeIds, Exception error, long currentTimestamp) {
-    
+
     VehicleMonitoringDeliveryStructure vehicleMonitoringDelivery = new VehicleMonitoringDeliveryStructure();
     vehicleMonitoringDelivery.setResponseTimestamp(new Date(currentTimestamp));
-    
+
     ServiceDelivery serviceDelivery = new ServiceDelivery();
     serviceDelivery.setResponseTimestamp(new Date(currentTimestamp));
     serviceDelivery.getVehicleMonitoringDelivery().add(vehicleMonitoringDelivery);
-    
+
     if (error != null) {
       ServiceDeliveryErrorConditionStructure errorConditionStructure = new ServiceDeliveryErrorConditionStructure();
-      
+
       ErrorDescriptionStructure errorDescriptionStructure = new ErrorDescriptionStructure();
       errorDescriptionStructure.setValue(error.getMessage());
-      
+
       OtherErrorStructure otherErrorStructure = new OtherErrorStructure();
       otherErrorStructure.setErrorText(error.getMessage());
-      
+
       errorConditionStructure.setDescription(errorDescriptionStructure);
       errorConditionStructure.setOtherError(otherErrorStructure);
-      
+
       vehicleMonitoringDelivery.setErrorCondition(errorConditionStructure);
     } else {
       Calendar gregorianCalendar = new GregorianCalendar();
@@ -330,7 +330,7 @@ public class VehicleMonitoringAction extends ApiActionSupport
 
     return siri;
   }
-  
+
   private boolean isValidRoute(AgencyAndId routeId) {
     if (routeId != null && routeId.hasValues() && this._transitDataService.getRouteForId(routeId.toString()) != null) {
       return true;
@@ -346,10 +346,12 @@ public class VehicleMonitoringAction extends ApiActionSupport
 
     try {
       if (_type.equals("xml")) {
-        this._servletResponse.setContentType("application/xml");
+        this._servletResponse.setContentType("application/xml; charset=UTF-8");
+        this._servletResponse.setCharacterEncoding("UTF-8");
         return _realtimeService.getSiriXmlSerializer().getXml(_response);
       } else {
-        this._servletResponse.setContentType("application/json");
+        this._servletResponse.setContentType("application/json; charset=UTF-8");
+        this._servletResponse.setCharacterEncoding("UTF-8");
         return _realtimeService.getSiriJsonSerializer().getJson(_response,
             _request.getParameter("callback"));
       }
@@ -367,26 +369,26 @@ public class VehicleMonitoringAction extends ApiActionSupport
   public void setServletResponse(HttpServletResponse servletResponse) {
     this._servletResponse = servletResponse;
   }
-  
+
   public HttpServletResponse getServletResponse(){
     return _servletResponse;
   }
-  
+
   private void processGoogleAnalytics(){
 //	  processGoogleAnalyticsPageView();
 //	  processGoogleAnalyticsApiKeys();
   }
-  
+
   private void processGoogleAnalyticsPageView(){
 	  _gaService.post(new PageViewHit());
   }
-  
+
   private void processGoogleAnalyticsApiKeys(){
-	  String apiKey = _request.getParameter("key"); 
+	  String apiKey = _request.getParameter("key");
 	  if(StringUtils.isBlank(apiKey))
 		  apiKey = "Key Information Unavailable";
-	  
+
 	  _gaService.post(new EventHit(GA_EVENT_CATEGORY, GA_EVENT_ACTION, apiKey, 1));
   }
-  
+
 }
