@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 package org.onebusaway.api.actions.siri;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -60,7 +59,7 @@ import uk.org.siri.siri.ServiceDelivery;
 import uk.org.siri.siri.ServiceDeliveryErrorConditionStructure;
 import uk.org.siri.siri.Siri;
 import uk.org.siri.siri.StopMonitoringDeliveryStructure;
-
+/*ą*/
 public class StopMonitoringAction extends ApiActionSupport
   implements ServletRequestAware, ServletResponseAware {
 
@@ -294,9 +293,11 @@ public class StopMonitoringAction extends ApiActionSupport
     }
 
     _response = generateSiriResponse(visits, stopIds, error, responseTimestamp);
-
     try {
+      this._servletResponse.setContentType("application/json;charset=UTF-8");//brak xml
+      this._servletResponse.setCharacterEncoding("UTF-8");
       this._servletResponse.getWriter().write(getStopMonitoring());
+      //this._servletResponse.getWriter().write("Witaj świecie");
     } catch (IOException e) {
       e.printStackTrace();
     }

@@ -82,7 +82,7 @@ import uk.org.siri.siri_2.VehicleActivityStructure.MonitoredVehicleJourney;
 /**
  * A source of SIRI classes containing real time data, subject to the
  * conventions expressed in the PresentationService.
- * 
+ *
  * @author jmaki
  * @authoer lcaraballo
  *
@@ -267,7 +267,7 @@ public class RealtimeServiceV2Impl implements RealtimeServiceV2 {
 
   @Override
   public List<MonitoredStopVisitStructure> getMonitoredStopVisitsForStop(
-      String stopId, int maximumOnwardCalls, DetailLevel detailLevel, 
+      String stopId, int maximumOnwardCalls, DetailLevel detailLevel,
       long currentTime, List<AgencyAndId> routeIds, Map<Filters, String> filters) {
     List<MonitoredStopVisitStructure> output = new ArrayList<MonitoredStopVisitStructure>();
 
@@ -327,7 +327,7 @@ public class RealtimeServiceV2Impl implements RealtimeServiceV2 {
 
       // Monitored Stop Visits
       Map<String, MonitoredStopVisitStructure> visitsMap = new HashMap<String, MonitoredStopVisitStructure>();
- 
+
       // visit count filters
       Integer visitCountForThisLine = visitCountByLine.get(thisRouteId);
       if (visitCountForThisLine == null) {
@@ -402,15 +402,15 @@ public class RealtimeServiceV2Impl implements RealtimeServiceV2 {
   public Map<Boolean, List<AnnotatedStopPointStructure>> getAnnotatedStopPointStructures(
       CoordinateBounds bounds,
       List<String> agencyIds,
-      List<AgencyAndId> routeIds, 
-      DetailLevel detailLevel, 
+      List<AgencyAndId> routeIds,
+      DetailLevel detailLevel,
       long currentTime,
       Map<Filters, String> filters) {
 
     // Cache stops by route so we don't need to call the transit data service repeatedly for the same route
     Map<String, StopsForRouteBean> stopsForRouteCache = new HashMap<String, StopsForRouteBean>();
 
-    // Store processed StopBean as AnnotatedStopPointStructure 
+    // Store processed StopBean as AnnotatedStopPointStructure
     List<AnnotatedStopPointStructure> annotatedStopPoints = new ArrayList<AnnotatedStopPointStructure>();
 
     // AnnotatedStopPointStructures List with hasUpcomingScheduledService
@@ -426,7 +426,7 @@ public class RealtimeServiceV2Impl implements RealtimeServiceV2 {
 
     List<StopBean> stopBeans = getStopsForBounds(bounds);
 
-    processAnnotatedStopPoints(agencyIds, routeIds,stopBeans,annotatedStopPoints, 
+    processAnnotatedStopPoints(agencyIds, routeIds,stopBeans,annotatedStopPoints,
         filters, stopsForRouteCache, detailLevel, currentTime);
 
     output.put(upcomingServiceAllStops, annotatedStopPoints);
@@ -437,15 +437,15 @@ public class RealtimeServiceV2Impl implements RealtimeServiceV2 {
   @Override
   public Map<Boolean, List<AnnotatedStopPointStructure>> getAnnotatedStopPointStructures(
       List<String> agencyIds,
-      List<AgencyAndId> routeIds, 
-      DetailLevel detailLevel, 
+      List<AgencyAndId> routeIds,
+      DetailLevel detailLevel,
       long currentTime,
       Map<Filters, String> filters) {
 
     // Cache stops by route so we don't need to call the transit data service repeatedly for the same route
     Map<String, StopsForRouteBean> stopsForRouteCache = new HashMap<String, StopsForRouteBean>();
 
-    // Store processed StopBean as AnnotatedStopPointStructure 
+    // Store processed StopBean as AnnotatedStopPointStructure
     List<AnnotatedStopPointStructure> annotatedStopPoints = new ArrayList<AnnotatedStopPointStructure>();
 
     // AnnotatedStopPointStructures List with hasUpcomingScheduledService
@@ -465,7 +465,7 @@ public class RealtimeServiceV2Impl implements RealtimeServiceV2 {
 
       StopsForRouteBean stopsForLineRef = _transitDataService.getStopsForRoute(routeId);
 
-        processAnnotatedStopPoints(agencyIds, routeIds, stopsForLineRef.getStops(), annotatedStopPoints, filters, 
+        processAnnotatedStopPoints(agencyIds, routeIds, stopsForLineRef.getStops(), annotatedStopPoints, filters,
               stopsForRouteCache, detailLevel, currentTime);
 
     }
@@ -478,18 +478,18 @@ public class RealtimeServiceV2Impl implements RealtimeServiceV2 {
   @Override
   public Map<Boolean, List<AnnotatedLineStructure>> getAnnotatedLineStructures(
       List<String> agencyIds,
-      List<AgencyAndId> routeIds, 
+      List<AgencyAndId> routeIds,
       DetailLevel detailLevel,
-      long currentTime, 
+      long currentTime,
       Map<Filters, String> filters) {
 
-    // Store processed StopBean as AnnotatedStopPointStructure 
+    // Store processed StopBean as AnnotatedStopPointStructure
     List<AnnotatedLineStructure> annotatedLines = new ArrayList<AnnotatedLineStructure>();
 
     // AnnotatedStopPointStructures List with hasUpcomingScheduledService
     Map<Boolean, List<AnnotatedLineStructure>> output = new HashMap<Boolean, List<AnnotatedLineStructure>>();
 
-    Boolean upcomingServiceAllStops = null; 
+    Boolean upcomingServiceAllStops = null;
 
     for(AgencyAndId rteId : routeIds){
 
@@ -510,10 +510,10 @@ public class RealtimeServiceV2Impl implements RealtimeServiceV2 {
           continue;
 
       boolean isValid = SiriSupportV2.fillAnnotatedLineStructure(
-          annotatedLineStructure, 
-          routeResult, 
-          filters, 
-          detailLevel, 
+          annotatedLineStructure,
+          routeResult,
+          filters,
+          detailLevel,
           currentTime);
 
       if(isValid)
@@ -714,8 +714,8 @@ public class RealtimeServiceV2Impl implements RealtimeServiceV2 {
   private void processAnnotatedStopPoints(
       List<String> agencyIds,
       List<AgencyAndId> routeIds,
-      List<StopBean> stopBeans, 
-      List<AnnotatedStopPointStructure> annotatedStopPoints, 
+      List<StopBean> stopBeans,
+      List<AnnotatedStopPointStructure> annotatedStopPoints,
       Map<Filters, String> filters,
       Map<String, StopsForRouteBean> stopsForRouteCache,
       DetailLevel detailLevel,
@@ -810,11 +810,11 @@ public class RealtimeServiceV2Impl implements RealtimeServiceV2 {
           }
 
           // TODO - Re-evaluate the best method to determine upcoming scheduled service
-          Boolean routeHasUpcomingScheduledService = 
+          Boolean routeHasUpcomingScheduledService =
               _transitDataService.routeHasUpcomingScheduledService((routeBean.getAgency()!=null?routeBean.getAgency().getId():null), SystemTime.currentTimeMillis(), routeBean.getId(), directionId);
 
           // if there are buses on route, always have "scheduled service"
-          Boolean routeHasVehiclesInService = 
+          Boolean routeHasVehiclesInService =
               getVehiclesInServiceForRoute(routeBean.getId(), directionId, SystemTime.currentTimeMillis());
 
           if(routeHasVehiclesInService) {
@@ -822,9 +822,9 @@ public class RealtimeServiceV2Impl implements RealtimeServiceV2 {
           }
 
           String hasUpcomingScheduledServiceVal = String.valueOf(routeHasUpcomingScheduledService);
-          
+
           //String hasUpcomingScheduledServiceVal = String.valueOf(routeHasVehiclesInService);
-          if(!SiriSupportV2.passFilter(hasUpcomingScheduledServiceVal,upcomingScheduledServiceFilter) 
+          if(!SiriSupportV2.passFilter(hasUpcomingScheduledServiceVal,upcomingScheduledServiceFilter)
               || routeHasUpcomingScheduledService == null || !routeHasUpcomingScheduledService)
             continue;
 
@@ -836,11 +836,11 @@ public class RealtimeServiceV2Impl implements RealtimeServiceV2 {
             for (String stopId : stopGroupBean.getStopIds()) {
               // service in this direction
               StopBean stopBean = stopIdToStopBeanMap.get(stopId);
-              
+
               Boolean stopHasUpcomingScheduledService = _transitDataService.stopHasUpcomingScheduledService(
                   (routeBean.getAgency()!=null?routeBean.getAgency().getId():null),
                     SystemTime.currentTimeMillis(), stopBean.getId(), routeBean.getId(),
-                    stopGroupBean.getId());  
+                    stopGroupBean.getId());
               stopsOnRoute.add(new StopOnRoute(stopBean, stopHasUpcomingScheduledService));
             }
           }
@@ -884,10 +884,10 @@ public class RealtimeServiceV2Impl implements RealtimeServiceV2 {
           Boolean hasUpcomingScheduledService = _transitDataService
               .stopHasUpcomingScheduledService((route
                   .getAgency() != null ? route
-                  .getAgency().getId() : null), 
-              SystemTime.currentTimeMillis(), 
-              stop.getId(), 
-              stopsForRoute.getRoute().getId(), 
+                  .getAgency().getId() : null),
+              SystemTime.currentTimeMillis(),
+              stop.getId(),
+              stopsForRoute.getRoute().getId(),
               directionId
           );
 
@@ -901,7 +901,7 @@ public class RealtimeServiceV2Impl implements RealtimeServiceV2 {
             continue;
 
           stopRouteDirection.addRouteDirection(new RouteForDirection(route.getId(), directionId, hasUpcomingScheduledService));
-        } 
+        }
       }
 
     return stopRouteDirection;

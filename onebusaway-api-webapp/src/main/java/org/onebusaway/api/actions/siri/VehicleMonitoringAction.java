@@ -277,6 +277,8 @@ public class VehicleMonitoringAction extends ApiActionSupport
     }
 
     try {
+      this._servletResponse.setContentType("application/json;charset=UTF-8");//brak xml
+      this._servletResponse.setCharacterEncoding("UTF-8");
       this._servletResponse.getWriter().write(getVehicleMonitoring());
     } catch (IOException e) {
       e.printStackTrace();
