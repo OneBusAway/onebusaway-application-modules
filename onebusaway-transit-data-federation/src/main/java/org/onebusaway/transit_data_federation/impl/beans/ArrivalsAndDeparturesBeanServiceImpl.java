@@ -235,8 +235,9 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
         continue;
       
       applySituationsToBean(time, instance, bean);
-      if (matchesRouteTypeFilter(bean, query.getRouteTypes()))
+      if (query.getSystemFilterChain().matches(bean) && query.getInstanceFilterChain().matches(bean)) {
         beans.add(bean);
+      }
     }
 
     Collections.sort(beans, new ArrivalAndDepartureComparator());
@@ -244,9 +245,6 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
     return beans;
   }
 
-  private boolean matchesRouteTypeFilter(ArrivalAndDepartureBean bean, List<Integer> routeTypes) {
-      return _stopsBeanService.matchesRouteTypeFilter(bean.getStop(), routeTypes);
-  }
 
   @Override
   public ArrivalAndDepartureBean getArrivalAndDepartureForStop(

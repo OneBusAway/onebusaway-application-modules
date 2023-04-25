@@ -60,11 +60,4 @@ public interface StopsBeanService {
    */
   public StopsBean getStopsByName(String stopName) throws ServiceException;
 
-  /**
-   * test if the given stop matches the applied filter
-   * @param stop
-   * @param routeTypesFilter List of GTFS route types, empty means match all
-   * @return
-   */
-  public boolean matchesRouteTypeFilter(StopBean stop, List<Integer> routeTypesFilter);
 }

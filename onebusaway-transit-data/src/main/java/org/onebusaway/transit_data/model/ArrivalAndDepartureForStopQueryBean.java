@@ -19,6 +19,10 @@ import java.io.Serializable;
 import java.util.HashSet;
 
 @QueryBean
+/**
+ * Query for a specific arrival and departure.  As this is a specific request,
+ * we do not apply the system FilterChain.
+ */
 public final class ArrivalAndDepartureForStopQueryBean implements Serializable {
 
   private static final long serialVersionUID = 1L;

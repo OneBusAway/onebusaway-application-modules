@@ -24,11 +24,9 @@ import org.onebusaway.api.model.where.ArrivalAndDepartureBeanV1;
 import org.onebusaway.api.model.where.StopWithArrivalsAndDeparturesBeanV1;
 import org.onebusaway.exceptions.NoSuchStopServiceException;
 import org.onebusaway.exceptions.ServiceException;
-import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data.model.*;
 import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.transit_data.services.TransitDataService;
-import org.onebusaway.util.AgencyAndIdLibrary;
 import org.onebusaway.util.SystemTime;
 import org.onebusaway.util.services.configuration.ConfigurationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -86,6 +84,10 @@ public class ArrivalsAndDeparturesForStopAction extends ApiActionSupport {
 
   public void setFrequencyMinutesAfter(int frequencyMinutesAfter) {
     _query.setFrequencyMinutesAfter(frequencyMinutesAfter);
+  }
+  @Autowired(required = false)
+  public void setFilterChain(FilterChain filterChain) {
+    _query.setSystemFilterChain(filterChain);
   }
 
 

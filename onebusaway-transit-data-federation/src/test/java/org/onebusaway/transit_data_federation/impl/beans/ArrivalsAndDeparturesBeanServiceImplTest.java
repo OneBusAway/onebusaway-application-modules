@@ -385,13 +385,6 @@ public class ArrivalsAndDeparturesBeanServiceImplTest {
         _tripDetailsBeanService.getBlockLocationAsStatusBean(blockLocationC, t)).thenReturn(
         tripStatusBeanC);
 
-    Mockito.when(
-            _stopsBeanService.matchesRouteTypeFilter(stopABean, Collections.emptyList())).thenReturn(Boolean.TRUE);
-    Mockito.when(
-            _stopsBeanService.matchesRouteTypeFilter(stopBBean, Collections.emptyList())).thenReturn(Boolean.TRUE);
-    Mockito.when(
-            _stopsBeanService.matchesRouteTypeFilter(stopCBean, Collections.emptyList())).thenReturn(Boolean.TRUE);
-
 
     /****
      * 
@@ -570,13 +563,6 @@ public class ArrivalsAndDeparturesBeanServiceImplTest {
             _tripDetailsBeanService.getBlockLocationAsStatusBean(blockLocationC, t)).thenReturn(
             tripStatusBeanC);
 
-    Mockito.when(
-            _stopsBeanService.matchesRouteTypeFilter(stopABean, Collections.emptyList())).thenReturn(Boolean.TRUE);
-    Mockito.when(
-            _stopsBeanService.matchesRouteTypeFilter(stopBBean, Collections.emptyList())).thenReturn(Boolean.TRUE);
-    Mockito.when(
-            _stopsBeanService.matchesRouteTypeFilter(stopCBean, Collections.emptyList())).thenReturn(Boolean.TRUE);
-
 
     /****
      *
@@ -749,13 +735,6 @@ public class ArrivalsAndDeparturesBeanServiceImplTest {
             _tripDetailsBeanService.getBlockLocationAsStatusBean(blockLocationC, t)).thenReturn(
             tripStatusBeanC);
 
-    Mockito.when(
-            _stopsBeanService.matchesRouteTypeFilter(stopABean, Collections.emptyList())).thenReturn(Boolean.TRUE);
-    Mockito.when(
-            _stopsBeanService.matchesRouteTypeFilter(stopBBean, Collections.emptyList())).thenReturn(Boolean.TRUE);
-    Mockito.when(
-            _stopsBeanService.matchesRouteTypeFilter(stopCBean, Collections.emptyList())).thenReturn(Boolean.TRUE);
-
 
     /****
      *
@@ -927,13 +906,6 @@ public class ArrivalsAndDeparturesBeanServiceImplTest {
     Mockito.when(
             _tripDetailsBeanService.getBlockLocationAsStatusBean(blockLocationC, t)).thenReturn(
             tripStatusBeanC);
-
-    Mockito.when(
-            _stopsBeanService.matchesRouteTypeFilter(stopABean, Collections.emptyList())).thenReturn(Boolean.TRUE);
-    Mockito.when(
-            _stopsBeanService.matchesRouteTypeFilter(stopBBean, Collections.emptyList())).thenReturn(Boolean.TRUE);
-    Mockito.when(
-            _stopsBeanService.matchesRouteTypeFilter(stopCBean, Collections.emptyList())).thenReturn(Boolean.TRUE);
 
 
     /****

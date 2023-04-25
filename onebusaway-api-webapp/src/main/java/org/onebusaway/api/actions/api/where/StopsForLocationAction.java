@@ -29,6 +29,7 @@ import org.onebusaway.exceptions.ServiceException;
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
 import org.onebusaway.transit_data.model.SearchQueryBean;
+import org.onebusaway.transit_data.model.StopFilterByRouteType;
 import org.onebusaway.transit_data.model.StopsBean;
 import org.onebusaway.transit_data.model.SearchQueryBean.EQueryType;
 import org.onebusaway.transit_data.services.TransitDataService;
@@ -125,7 +126,7 @@ public class StopsForLocationAction extends ApiActionSupport {
       for (String typeStr : _routeType.split(",")) {
         routeFilters.add(Integer.parseInt(typeStr));
       }
-      searchQuery.setRouteTypes(routeFilters);
+      searchQuery.getInstanceFilterChain().add(new StopFilterByRouteType(routeFilters));
     }
     if (_query != null) {
       searchQuery.setQuery(_query);

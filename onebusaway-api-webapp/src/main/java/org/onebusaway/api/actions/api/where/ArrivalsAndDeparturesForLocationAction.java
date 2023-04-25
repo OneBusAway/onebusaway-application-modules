@@ -52,6 +52,12 @@ public class ArrivalsAndDeparturesForLocationAction extends ApiActionSupport {
     private TransitDataService _service;
     @Autowired
     private ConfigurationService _configService;
+
+    @Autowired(required = false)
+    public void setFilterChain(FilterChain filterChain) {
+        _query.setSystemFilterChain(filterChain);
+    }
+
     private SearchBoundsFactory _searchBoundsFactory = new SearchBoundsFactory(MAX_BOUNDS_RADIUS);
     private MaxCountSupport _maxCount = new MaxCountSupport(250, 1000);
 
@@ -134,7 +140,7 @@ public class ArrivalsAndDeparturesForLocationAction extends ApiActionSupport {
         // new EQueryType that keeps results consistent if limitExceed is true
         // previous searches deliberately shuffled results
         searchQuery.setType(SearchQueryBean.EQueryType.ORDERED_BY_CLOSEST);
-        searchQuery.setRouteTypes(_query.getRouteTypes());
+        searchQuery.setSystemFilterChain(_query.getSystemFilterChain());
 
         ArrivalsAndDeparturesQueryBean adQuery = _query;
         adQuery.setIncludeInputIdsInNearby(true); // include the queried ids in nearby

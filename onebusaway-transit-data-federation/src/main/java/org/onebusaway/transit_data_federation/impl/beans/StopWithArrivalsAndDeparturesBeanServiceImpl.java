@@ -106,7 +106,7 @@ class StopWithArrivalsAndDeparturesBeanServiceImpl implements
       }
 
       List<AgencyAndId> nearbyStopIds = _nearbyStopsBeanService.getNearbyStops(
-          stopBean, 100, query.getRouteTypes());
+          stopBean, 100, query.getInstanceFilterChain());
       // these stops need a distanceFromQuery as well -- its added below
       allNearbyStopIds.addAll(nearbyStopIds);
 

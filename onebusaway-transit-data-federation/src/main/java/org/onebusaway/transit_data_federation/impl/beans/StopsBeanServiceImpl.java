@@ -144,7 +144,10 @@ class StopsBeanServiceImpl implements StopsBeanService {
       if (stopBean.getRoutes().isEmpty())
         continue;
 
-      if (!matchesRouteTypeFilter(stopBean, queryBean.getRouteTypes()))
+      if (!queryBean.getSystemFilterChain().matches(stopBean))
+        continue;
+
+      if (!queryBean.getInstanceFilterChain().matches(stopBean))
         continue;
 
       stopBeans.add(stopBean);
@@ -156,20 +159,6 @@ class StopsBeanServiceImpl implements StopsBeanService {
       // constructResults will perform the truncation if necessary
     }
     return constructResult(stopBeans, limitExceeded);
-  }
-
-  public boolean matchesRouteTypeFilter(StopBean stop, List<Integer> routeTypesFilter) {
-    if (routeTypesFilter == null  || routeTypesFilter.isEmpty())
-      return true; // no filter, everything matches
-
-    for (Integer routeType : routeTypesFilter) {
-      for (RouteBean route : stop.getRoutes()) {
-        if (routeType == route.getType())
-          return true;
-      }
-    }
-
-    return false;
   }
 
   private StopsBean getStopsByBoundsAndQuery(SearchQueryBean queryBean)

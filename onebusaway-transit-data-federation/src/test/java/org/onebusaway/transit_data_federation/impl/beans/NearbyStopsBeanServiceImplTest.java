@@ -70,7 +70,6 @@ public class NearbyStopsBeanServiceImplTest {
     CoordinateBounds bounds = SphericalGeometryLibrary.bounds(stop.getLat(),
         stop.getLon(), 400);
     Mockito.when(_geoBeanService.getStopsByBounds(bounds)).thenReturn(stopIds);
-    Mockito.when(_stopsBeanService.matchesRouteTypeFilter(stop, Collections.emptyList())).thenReturn(Boolean.TRUE);
 
     List<AgencyAndId> nearby = _service.getNearbyStops(stop, 400);
     assertEquals(1, nearby.size());
