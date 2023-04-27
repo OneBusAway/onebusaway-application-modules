@@ -490,8 +490,13 @@ public class GtfsRealtimeTripLibrary {
     
     if (blockDescriptor.getVehicleId() != null) {
       String agencyId = record.getBlockId().getAgencyId();
-      record.setVehicleId(new AgencyAndId(agencyId,
-          blockDescriptor.getVehicleId()));
+      try {
+        AgencyAndId vehicleAgencyAndId = AgencyAndIdLibrary.convertFromString(blockDescriptor.getVehicleId());
+        record.setVehicleId(vehicleAgencyAndId);
+      } catch (IllegalStateException ise) {
+        record.setVehicleId(new AgencyAndId(agencyId,
+                blockDescriptor.getVehicleId()));
+      }
     }
 
     return record;
