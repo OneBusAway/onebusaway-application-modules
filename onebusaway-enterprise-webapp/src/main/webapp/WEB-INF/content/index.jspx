@@ -242,14 +242,22 @@
 
 			<s:set var="link" value="getText('main.apps.link')" />
 			<s:set var="mobile_image" value="getText('main.tools.mobile_image')" />
-			<a href="${link}">
-				<div id="mobileBox">
-					<div id="mobileAvailabilityBox">
-						<h1><s:property value="getText('main.mobileavailability')" /></h1>
-					</div>
-						<img id="mobileImage" src="${mobile_image}" alt="Agency logo" />
-				</div>
-			</a>
+			<s:set var="disableMobileAvailabilityLink" value="getText('main.tools.disableMobileAvailabilityLink')" />
+			<c:choose>
+				<c:when test="${disableMobileAvailabilityLink}">
+				</c:when>
+				<c:otherwise>
+					<a href="${link}">
+						<div id="mobileBox">
+							<div id="mobileAvailabilityBox">
+								<h1><s:property value="getText('main.mobileavailability')" /></h1>
+							</div>
+							<img id="mobileImage" src="${mobile_image}" alt="Agency logo" />
+						</div>
+					</a>
+				</c:otherwise>
+			</c:choose>
+
 
 		</div>
 		<div class="container clear"><!-- jspx --></div>
