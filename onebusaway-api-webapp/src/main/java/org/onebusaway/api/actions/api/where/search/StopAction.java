@@ -17,9 +17,13 @@ package org.onebusaway.api.actions.api.where.search;
 
 import org.apache.struts2.rest.DefaultHttpHeaders;
 import org.onebusaway.api.model.transit.BeanFactoryV2;
+import org.onebusaway.api.model.transit.ListWithReferencesBean;
 import org.onebusaway.api.model.transit.StopSearchResultBean;
+import org.onebusaway.api.model.transit.StopV2Bean;
 import org.onebusaway.exceptions.ServiceException;
+import org.onebusaway.transit_data.model.ArrivalsAndDeparturesQueryBean;
 import org.onebusaway.transit_data.model.ListBean;
+import org.onebusaway.transit_data.model.RouteSort;
 import org.onebusaway.transit_data.model.StopBean;
 
 import java.io.IOException;
@@ -29,7 +33,7 @@ import java.io.IOException;
  * as used by autocomplete controls.
  */
 public class StopAction extends ApiSearchAction {
-
+  private ArrivalsAndDeparturesQueryBean _query = new ArrivalsAndDeparturesQueryBean();
 
   public StopAction() {
     super(V2);
@@ -44,7 +48,13 @@ public class StopAction extends ApiSearchAction {
       BeanFactoryV2 factory = getBeanFactoryV2();
       StopSearchResultBean result = new StopSearchResultBean();
       result.setStopSuggestions(stopSuggestions);
-      return setOkResponse(factory.getResponse(result));
+
+      ListWithReferencesBean<StopV2Bean> factoryResponse =  factory.getResponse(result);
+      factoryResponse.getReferences().getRoutes().sort((a,b) -> RouteSort.compareRoutes(
+              a.getShortName(),
+              b.getShortName(),
+              _query.getSubwayRouteSort()));
+      return setOkResponse(factoryResponse);
     } else {
       return setUnknownVersionResponse();
     }

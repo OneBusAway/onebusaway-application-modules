@@ -18,10 +18,14 @@ package org.onebusaway.api.actions.api.where.search;
 
 import org.apache.struts2.rest.DefaultHttpHeaders;
 import org.onebusaway.api.model.transit.BeanFactoryV2;
+import org.onebusaway.api.model.transit.ListWithReferencesBean;
 import org.onebusaway.api.model.transit.RouteSearchResultBean;
+import org.onebusaway.api.model.transit.RouteV2Bean;
 import org.onebusaway.exceptions.ServiceException;
+import org.onebusaway.transit_data.model.ArrivalsAndDeparturesQueryBean;
 import org.onebusaway.transit_data.model.ListBean;
 import org.onebusaway.transit_data.model.RouteBean;
+import org.onebusaway.transit_data.model.RouteSort;
 
 import java.io.IOException;
 
@@ -31,6 +35,7 @@ import java.io.IOException;
  */
 public class RouteAction extends ApiSearchAction {
 
+  private ArrivalsAndDeparturesQueryBean _query = new ArrivalsAndDeparturesQueryBean();
   public RouteAction() {
     super(V2);
   }
@@ -44,7 +49,13 @@ public class RouteAction extends ApiSearchAction {
       BeanFactoryV2 factory = getBeanFactoryV2();
       RouteSearchResultBean result = new RouteSearchResultBean();
       result.setSuggestions(routeSuggestions);
-      return setOkResponse(factory.getResponse(result));
+      ListWithReferencesBean<RouteV2Bean> factoryResponse = factory.getResponse(result);
+//      factoryResponse.
+      factoryResponse.getList().sort((a,b) -> RouteSort.compareRoutes(
+              a.getShortName(),
+              b.getShortName(),
+              _query.getSubwayRouteSort()));
+      return setOkResponse(factoryResponse);
     } else {
       return setUnknownVersionResponse();
     }

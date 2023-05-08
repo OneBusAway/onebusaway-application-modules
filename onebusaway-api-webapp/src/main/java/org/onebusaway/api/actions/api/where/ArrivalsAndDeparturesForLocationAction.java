@@ -21,6 +21,8 @@ import org.onebusaway.api.actions.api.ApiActionSupport;
 import org.onebusaway.api.impl.MaxCountSupport;
 import org.onebusaway.api.impl.SearchBoundsFactory;
 import org.onebusaway.api.model.transit.BeanFactoryV2;
+import org.onebusaway.api.model.transit.EntryWithReferencesBean;
+import org.onebusaway.api.model.transit.StopsWithArrivalsAndDeparturesV2Bean;
 import org.onebusaway.exceptions.OutOfServiceAreaServiceException;
 import org.onebusaway.exceptions.ServiceException;
 import org.onebusaway.geospatial.model.CoordinateBounds;
@@ -58,6 +60,8 @@ public class ArrivalsAndDeparturesForLocationAction extends ApiActionSupport {
         _query.setSystemFilterChain(filterChain);
     }
 
+    @Autowired
+    private RouteSort subwayRouteSort;
     private SearchBoundsFactory _searchBoundsFactory = new SearchBoundsFactory(MAX_BOUNDS_RADIUS);
     private MaxCountSupport _maxCount = new MaxCountSupport(250, 1000);
 
@@ -164,7 +168,17 @@ public class ArrivalsAndDeparturesForLocationAction extends ApiActionSupport {
         if (adResult == null) {
             return emptyResponse();
         }
-        return setOkResponse(factory.getResponse(adResult));
+
+        EntryWithReferencesBean<StopsWithArrivalsAndDeparturesV2Bean> response = factory.getResponse(adResult);
+
+        response.getEntry().getArrivalsAndDepartures()
+                .sort((a,b) -> RouteSort
+                        .compareRoutes(
+                                a.getRouteShortName(),
+                                b.getRouteShortName(),
+                                _query.getSubwayRouteSort()
+                        ));
+        return setOkResponse(response);
     }
 
     private DefaultHttpHeaders emptyResponse() {

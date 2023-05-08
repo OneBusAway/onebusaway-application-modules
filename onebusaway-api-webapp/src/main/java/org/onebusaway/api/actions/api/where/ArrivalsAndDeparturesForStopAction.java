@@ -20,6 +20,8 @@ import java.util.*;
 import org.apache.struts2.rest.DefaultHttpHeaders;
 import org.onebusaway.api.actions.api.ApiActionSupport;
 import org.onebusaway.api.model.transit.BeanFactoryV2;
+import org.onebusaway.api.model.transit.EntryWithReferencesBean;
+import org.onebusaway.api.model.transit.StopWithArrivalsAndDeparturesV2Bean;
 import org.onebusaway.api.model.where.ArrivalAndDepartureBeanV1;
 import org.onebusaway.api.model.where.StopWithArrivalsAndDeparturesBeanV1;
 import org.onebusaway.exceptions.NoSuchStopServiceException;
@@ -90,7 +92,6 @@ public class ArrivalsAndDeparturesForStopAction extends ApiActionSupport {
     _query.setSystemFilterChain(filterChain);
   }
 
-
   public DefaultHttpHeaders show() throws ServiceException {
     HashSet<String> agenciesExcludingScheduled = new HashSet<String>();
     List<AgencyWithCoverageBean> allAgencies = _service.getAgenciesWithCoverage();
@@ -129,10 +130,25 @@ public class ArrivalsAndDeparturesForStopAction extends ApiActionSupport {
       List<ArrivalAndDepartureBeanV1> arrivals = getArrivalsAsV1(result);
       StopWithArrivalsAndDeparturesBeanV1 v1 = new StopWithArrivalsAndDeparturesBeanV1(
           result.getStop(), arrivals, result.getNearbyStops());
+
+      v1.getArrivalsAndDepartures()
+              .sort((a,b) -> RouteSort.compareRoutes(
+                      a.getRouteShortName(),
+                      b.getRouteShortName(),
+                      _query.getSubwayRouteSort()));
+
       return setOkResponse(v1);
     } else if (isVersion(V2)) {
       BeanFactoryV2 factory = getBeanFactoryV2();
-      return setOkResponse(factory.getResponse(result));
+      EntryWithReferencesBean<StopWithArrivalsAndDeparturesV2Bean> v2 = factory.getResponse(result);
+
+      v2.getEntry().getArrivalsAndDepartures()
+              .sort((a,b) -> RouteSort.compareRoutes(
+                      a.getRouteShortName(),
+                      b.getRouteShortName(),
+                      _query.getSubwayRouteSort()));
+
+      return setOkResponse(v2);
     } else {
       return setUnknownVersionResponse();
     }
