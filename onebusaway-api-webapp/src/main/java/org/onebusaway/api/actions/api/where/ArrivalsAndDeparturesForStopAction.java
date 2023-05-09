@@ -50,6 +50,9 @@ public class ArrivalsAndDeparturesForStopAction extends ApiActionSupport {
   @Autowired
   private ConfigurationService _configService;
 
+  @Autowired
+  private RouteSort customRouteSort;
+
   private String _id;
   
   private ArrivalsAndDeparturesQueryBean _query = new ArrivalsAndDeparturesQueryBean();
@@ -130,25 +133,11 @@ public class ArrivalsAndDeparturesForStopAction extends ApiActionSupport {
       List<ArrivalAndDepartureBeanV1> arrivals = getArrivalsAsV1(result);
       StopWithArrivalsAndDeparturesBeanV1 v1 = new StopWithArrivalsAndDeparturesBeanV1(
           result.getStop(), arrivals, result.getNearbyStops());
-
-      v1.getArrivalsAndDepartures()
-              .sort((a,b) -> RouteSort.compareRoutes(
-                      a.getRouteShortName(),
-                      b.getRouteShortName(),
-                      _query.getSubwayRouteSort()));
-
       return setOkResponse(v1);
     } else if (isVersion(V2)) {
       BeanFactoryV2 factory = getBeanFactoryV2();
-      EntryWithReferencesBean<StopWithArrivalsAndDeparturesV2Bean> v2 = factory.getResponse(result);
-
-      v2.getEntry().getArrivalsAndDepartures()
-              .sort((a,b) -> RouteSort.compareRoutes(
-                      a.getRouteShortName(),
-                      b.getRouteShortName(),
-                      _query.getSubwayRouteSort()));
-
-      return setOkResponse(v2);
+      factory.setCustomRouteSort(customRouteSort);
+      return setOkResponse(factory.getResponse(result));
     } else {
       return setUnknownVersionResponse();
     }
@@ -184,6 +173,17 @@ public class ArrivalsAndDeparturesForStopAction extends ApiActionSupport {
 
       v1s.add(v1);
     }
+
+    String agencyId = v1s.size() > 0 ?
+            v1s.get(0).getRouteId().split("_")[0] :
+            "";
+    v1s.sort((a,b) -> customRouteSort.
+            compareRoutes(
+                    a.getRouteShortName(),
+                    b.getRouteShortName(),
+                    customRouteSort,
+                    agencyId)
+    );
 
     return v1s;
   }

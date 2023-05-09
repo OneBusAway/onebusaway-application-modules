@@ -6,49 +6,58 @@ import java.util.Map;
 
 public class RouteSort implements Serializable {
 
-    private final Map<String, Integer> sortOrderMap = new HashMap<>();
+    private final Map<String, String> agencySortConfiguration;
 
-    private final String sortOrderString;
+    private final Map<String, Map<String, Integer>> routeSortOrderMap = new HashMap<>();
 
     private final String delimiter;
 
-    RouteSort(String sortOrderString) {
-        this.sortOrderString = sortOrderString;
+    RouteSort(Map<String, String> agencySortConfiguration) {
+        this.agencySortConfiguration = agencySortConfiguration;
         this.delimiter = ",";
         setOrderingToMap();
     }
 
-    RouteSort(String sortOrderString, String delimiter){
-        this.sortOrderString = sortOrderString;
-        this.delimiter = delimiter;
-        setOrderingToMap();
-    }
-
     void setOrderingToMap(){
-        String[] sortOrderItems = sortOrderString.split(delimiter);
+        for (String agencyId : agencySortConfiguration.keySet()) {
 
-        for(int i = 0; i< sortOrderItems.length; i++){
-            sortOrderMap.put(sortOrderItems[i].trim(), i);
+            String sortOrderString = agencySortConfiguration.get(agencyId);
+            String[] sortOrderItems = sortOrderString.split(delimiter);
+            Map<String, Integer> sortOrderMap = new HashMap<>();
+
+            for(int i = 0; i< sortOrderItems.length; i++){
+                sortOrderMap.put(sortOrderItems[i].trim(), i);
+            }
+
+            routeSortOrderMap.put(agencyId, sortOrderMap);
         }
+
     }
 
-    static public int compareRoutes(String a, String b, RouteSort routeSortInstance) {
+     public int compareRoutes(String a, String b, RouteSort routeSortInstance, String agencyId) {
 
-        Integer o1 = routeSortInstance.getSortOrderMap().get(a);
-        Integer o2 = routeSortInstance.getSortOrderMap().get(b);
+         if(a == null && b == null){
+             return 0;
+         }
 
-        if(a == null && b == null){
-            return 0;
+         if(a == null){
+             return 1;
+         }
+
+         if(b == null){
+             return -1;
+         }
+
+        Map<String, Integer> sortOrderMap = routeSortInstance.routeSortOrderMap.get(agencyId);
+        // standard ordering if the configuration is not provided
+        if (sortOrderMap == null) {
+            return a.compareTo(b);
         }
 
-        if(a == null){
-            return 1;
-        }
+        Integer o1 = sortOrderMap.get(a);
+        Integer o2 = sortOrderMap.get(b);
 
-        if(b == null){
-            return -1;
-        }
-
+        // the value not found in configuration so use natural order
         if (o1 == null && o2 == null) {
             return a.compareTo(b);
         }
@@ -60,21 +69,16 @@ public class RouteSort implements Serializable {
         if (o2 == null) {
             return -1;
         }
-
+        // compare based on the values inside the map
         return Integer.compare(o1, o2);
-    }
-
-    public Map<String, Integer> getSortOrderMap() {
-        return sortOrderMap;
-    }
-
-    public String getSortOrderString() {
-        return sortOrderString;
     }
 
     public String getDelimiter() {
         return delimiter;
     }
 
+    public Map<String, Map<String, Integer>> getRouteSortOrderMap() {
+        return routeSortOrderMap;
+    }
 }
 

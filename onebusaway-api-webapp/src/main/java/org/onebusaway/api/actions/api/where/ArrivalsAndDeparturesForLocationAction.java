@@ -55,13 +55,14 @@ public class ArrivalsAndDeparturesForLocationAction extends ApiActionSupport {
     @Autowired
     private ConfigurationService _configService;
 
+    @Autowired
+    private RouteSort customRouteSort;
+
     @Autowired(required = false)
     public void setFilterChain(FilterChain filterChain) {
         _query.setSystemFilterChain(filterChain);
     }
 
-    @Autowired
-    private RouteSort subwayRouteSort;
     private SearchBoundsFactory _searchBoundsFactory = new SearchBoundsFactory(MAX_BOUNDS_RADIUS);
     private MaxCountSupport _maxCount = new MaxCountSupport(250, 1000);
 
@@ -168,17 +169,8 @@ public class ArrivalsAndDeparturesForLocationAction extends ApiActionSupport {
         if (adResult == null) {
             return emptyResponse();
         }
-
-        EntryWithReferencesBean<StopsWithArrivalsAndDeparturesV2Bean> response = factory.getResponse(adResult);
-
-        response.getEntry().getArrivalsAndDepartures()
-                .sort((a,b) -> RouteSort
-                        .compareRoutes(
-                                a.getRouteShortName(),
-                                b.getRouteShortName(),
-                                _query.getSubwayRouteSort()
-                        ));
-        return setOkResponse(response);
+        factory.setCustomRouteSort(customRouteSort);
+        return setOkResponse(factory.getResponse(adResult));
     }
 
     private DefaultHttpHeaders emptyResponse() {

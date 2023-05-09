@@ -49,7 +49,6 @@ public final class ArrivalsAndDeparturesQueryBean implements Serializable {
   private FilterChain systemFilterChain = new FilterChain();
   private FilterChain instanceFilterChain = new FilterChain();
 
-  private RouteSort subwayRouteSort = new RouteSort("1,2,3,4,5,6,7,A,C,E,B,D,F,M,G,L,N,Q,R,W,J,Z,Sf,S,Sr,SIR");
 
   public ArrivalsAndDeparturesQueryBean() {
 
@@ -172,14 +171,6 @@ public final class ArrivalsAndDeparturesQueryBean implements Serializable {
 
   public void setInstanceFilterChain(FilterChain instanceFilterChain) {
     this.instanceFilterChain = instanceFilterChain;
-  }
-
-  public RouteSort getSubwayRouteSort() {
-    return subwayRouteSort;
-  }
-
-  public void setSubwayRouteSort(RouteSort subwayRouteSort) {
-    this.subwayRouteSort = subwayRouteSort;
   }
 
   @Override

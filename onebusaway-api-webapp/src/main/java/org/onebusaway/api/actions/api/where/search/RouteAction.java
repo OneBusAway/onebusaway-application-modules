@@ -26,6 +26,7 @@ import org.onebusaway.transit_data.model.ArrivalsAndDeparturesQueryBean;
 import org.onebusaway.transit_data.model.ListBean;
 import org.onebusaway.transit_data.model.RouteBean;
 import org.onebusaway.transit_data.model.RouteSort;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
 
@@ -36,6 +37,10 @@ import java.io.IOException;
 public class RouteAction extends ApiSearchAction {
 
   private ArrivalsAndDeparturesQueryBean _query = new ArrivalsAndDeparturesQueryBean();
+
+  @Autowired
+  private RouteSort customRouteSort;
+
   public RouteAction() {
     super(V2);
   }
@@ -49,13 +54,8 @@ public class RouteAction extends ApiSearchAction {
       BeanFactoryV2 factory = getBeanFactoryV2();
       RouteSearchResultBean result = new RouteSearchResultBean();
       result.setSuggestions(routeSuggestions);
-      ListWithReferencesBean<RouteV2Bean> factoryResponse = factory.getResponse(result);
-//      factoryResponse.
-      factoryResponse.getList().sort((a,b) -> RouteSort.compareRoutes(
-              a.getShortName(),
-              b.getShortName(),
-              _query.getSubwayRouteSort()));
-      return setOkResponse(factoryResponse);
+      factory.setCustomRouteSort(customRouteSort);
+      return setOkResponse(factory.getResponse(result));
     } else {
       return setUnknownVersionResponse();
     }
