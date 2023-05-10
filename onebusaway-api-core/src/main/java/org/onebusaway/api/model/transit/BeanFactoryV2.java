@@ -200,8 +200,8 @@ public class BeanFactoryV2 {
     String agencyId = response
             .getEntry()
             .getArrivalsAndDepartures().size() > 0 ?
-            response.getEntry().getArrivalsAndDepartures().get(0)
-                    .getRouteId().split("_")[0] :
+            AgencyAndIdLibrary.convertFromString(response.getEntry().getArrivalsAndDepartures().get(0)
+                    .getRouteId()).getAgencyId() :
             "";
 
     response.getEntry().getArrivalsAndDepartures()
@@ -224,10 +224,8 @@ public class BeanFactoryV2 {
 
     String agencyId = response
             .getEntry()
-            .getArrivalsAndDepartures().size() > 0 ?
-            response.getEntry().getArrivalsAndDepartures().get(0)
-                    .getRouteId().split("_")[0] :
-            "";
+            .getArrivalsAndDepartures().size() > 0 ? AgencyAndIdLibrary.convertFromString(response.getEntry().getArrivalsAndDepartures().get(0)
+            .getRouteId()).getAgencyId() : "";
 
     response.getEntry()
             .getArrivalsAndDepartures()
