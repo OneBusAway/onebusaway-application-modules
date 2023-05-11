@@ -24,11 +24,7 @@ import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
-import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
-import org.onebusaway.transit_data.model.ArrivalsAndDeparturesQueryBean;
-import org.onebusaway.transit_data.model.StopBean;
-import org.onebusaway.transit_data.model.StopWithArrivalsAndDeparturesBean;
-import org.onebusaway.transit_data.model.StopsWithArrivalsAndDeparturesBean;
+import org.onebusaway.transit_data.model.*;
 import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
 import org.onebusaway.transit_data_federation.services.AgencyService;
 import org.onebusaway.transit_data_federation.services.beans.ArrivalsAndDeparturesBeanService;
@@ -136,7 +132,15 @@ class StopWithArrivalsAndDeparturesBeanServiceImpl implements
                 center.getLon(), stop.getLat(), stop.getLon());
         stop.setDistanceAwayFromQuery(distance);
       }
+
+      List<RouteBean> routeBeans = new ArrayList<>();
+      for (RouteBean routeBean: stop.getRoutes()) {
+        if (_stopBeanService.matchesRouteTypeFilter(routeBean, query.getRouteTypes()))
+          routeBeans.add(routeBean);
+      }
+      stop.setRoutes(routeBeans);
       nearbyStops.add(stop);
+
     }
     // sort the collection so we can trim the furthest
     Collections.sort(nearbyStops, new StopDistanceComparator());
