@@ -91,6 +91,11 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     _registry.add(GtfsRealtimeOneBusAway.obaTripUpdate);
     _registry.add(GtfsRealtimeMTARR.mtaRailroadStopTimeUpdate); // track number
     _registry.add(GtfsRealtimeServiceStatus.mercuryAlert);
+    // NYCT support for added trips
+    _registry.add(GtfsRealtimeNYCT.nyctFeedHeader);
+    _registry.add(GtfsRealtimeNYCT.nyctTripDescriptor);
+    _registry.add(GtfsRealtimeNYCT.nyctStopTimeUpdate);
+
   }
 
   private AgencyService _agencyService;
@@ -178,6 +183,9 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   private boolean _ignoreAlertTripId = false;
 
   private String _alertSourcePrefix = null;
+
+  // this is a change from the default, but is much safer
+  private boolean _validateCurrentTime = false;
 
   @Autowired
   public void setAgencyService(AgencyService agencyService) {
@@ -415,6 +423,8 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     _tripsLibrary.setScheduleAdherenceFromLocation(_scheduleAdherenceFromLocation);
     _tripsLibrary.setBlockGeospatialService(_blockGeospatialService);
     _tripsLibrary.setUseLabelAsVehicleId(_useLabelAsId);
+    _tripsLibrary.setValidateCurrentTime(_validateCurrentTime);
+    _tripsLibrary.setAddedTripService(new AddedTripServiceImpl());
     
     _alertLibrary = new GtfsRealtimeAlertLibrary();
     _alertLibrary.setEntitySource(_entitySource);
@@ -470,7 +480,7 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
    ****/
 
   // test if the transit graph is ready
-  private boolean graphReady() {
+  protected boolean graphReady() {
     try {
       return _transitGraphDao != null
               && _transitGraphDao.getAllRoutes() != null

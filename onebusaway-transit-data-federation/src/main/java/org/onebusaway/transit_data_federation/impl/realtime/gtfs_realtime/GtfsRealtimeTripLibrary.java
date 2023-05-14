@@ -73,7 +73,8 @@ public class GtfsRealtimeTripLibrary {
   private BlockCalendarService _blockCalendarService;
    
   private BlockGeospatialService _blockGeospatialService;
-  
+
+  private AddedTripService _addedTripService;
   /**
    * This is primarily here to assist with unit testing.
    */
@@ -134,6 +135,9 @@ public class GtfsRealtimeTripLibrary {
     _blockGeospatialService = blockGeospatialService;
   }
 
+  public void setAddedTripService(AddedTripService addedTripService) {
+    _addedTripService = addedTripService;
+  }
   /**
    * use the vehicle label as the id.
    * @param useLabelAsVehicleId
@@ -200,6 +204,17 @@ public class GtfsRealtimeTripLibrary {
         BlockDescriptor bd = getTripDescriptorAsBlockDescriptor(result, td, time);
 
         if (bd == null) {
+          // we didn't match to bundle, are we an added trip?
+          if (td.hasExtension(GtfsRealtimeNYCT.nyctTripDescriptor)) {
+            GtfsRealtimeNYCT.NyctTripDescriptor nyctTripDescriptor = td.getExtension(GtfsRealtimeNYCT.nyctTripDescriptor);
+            if (nyctTripDescriptor.hasIsAssigned() && nyctTripDescriptor.getIsAssigned()) {
+              // this is implicitly an added trip
+              result.addAddedTripId(td.getTripId());
+              _log.info("parsing trip {}", td.getTripId());
+              AddedTripInfo addedTripInfo = _addedTripService.handleNyctDescriptor(tu, nyctTripDescriptor);
+              // todo pass addedTripInfo to vehicleLocationListener
+            }
+          }
           continue;
         }
 
