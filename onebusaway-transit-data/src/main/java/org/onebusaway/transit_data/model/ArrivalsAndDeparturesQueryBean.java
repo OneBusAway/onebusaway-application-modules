@@ -49,6 +49,7 @@ public final class ArrivalsAndDeparturesQueryBean implements Serializable {
   private FilterChain systemFilterChain = new FilterChain();
   private FilterChain instanceFilterChain = new FilterChain();
 
+ private List<Integer> routeTypes;
   public ArrivalsAndDeparturesQueryBean() {
 
   }
@@ -143,9 +144,16 @@ public final class ArrivalsAndDeparturesQueryBean implements Serializable {
       if (types == null || types.isEmpty()) return;
       instanceFilterChain.add(new ArrivalAndDepartureFilterByRouteType(types));
   }
+
   public void setRouteType(String routeType) {
     if (routeType == null) return;
-    instanceFilterChain.add(new ArrivalAndDepartureFilterByRouteType(routeType));
+    ArrivalAndDepartureFilterByRouteType arrivalAndDepartureFilterByRouteType = new ArrivalAndDepartureFilterByRouteType(routeType);
+    routeTypes = arrivalAndDepartureFilterByRouteType.getRouteTypes();
+    instanceFilterChain.add(arrivalAndDepartureFilterByRouteType);
+  }
+
+  public List<Integer> getRouteTypes(){
+      return routeTypes;
   }
 
   public void setAgenciesExcludingScheduled(HashSet<String> agencies){

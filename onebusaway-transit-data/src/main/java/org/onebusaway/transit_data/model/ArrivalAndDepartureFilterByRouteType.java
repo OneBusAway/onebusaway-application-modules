@@ -41,6 +41,10 @@ public class ArrivalAndDepartureFilterByRouteType extends ArrivalAndDepartureFil
 
   }
 
+  public List<Integer> getRouteTypes() {
+    return routeTypes;
+  }
+
   public boolean matches(ArrivalAndDepartureBean bean) {
     if (routeTypes == null  || routeTypes.isEmpty())
       return true; // no filter, everything matches
