@@ -67,7 +67,7 @@ public class BundleManagementServiceImpl implements BundleManagementService {
   protected static final int INFERENCE_PROCESSING_THREAD_WAIT_TIMEOUT_IN_SECONDS = 60;
 
   protected static final int MAX_EXPECTED_THREADS = 3000;
-  private static final int REFRESH_INTERVAL_MINUTES = 5;
+  private static final int REFRESH_INTERVAL_MINUTES = 1;
 
   private static Logger _log = LoggerFactory
       .getLogger(BundleManagementServiceImpl.class);

@@ -90,6 +90,18 @@ class StopBeanServiceImpl implements StopBeanService {
       return getStopForIdForServiceDate(id, serviceDate);
   }
 
+  public boolean matchesRouteTypeFilter(RouteBean route, List<Integer> routeTypesFilter) {
+    if (routeTypesFilter == null  || routeTypesFilter.isEmpty())
+      return true; // no filter, everything matches
+
+    for (Integer routeType : routeTypesFilter) {
+      if (routeType == route.getType())
+        return true;
+    }
+
+    return false;
+  }
+
   @Cacheable
   public StopBean getStopForIdForServiceDate(AgencyAndId id, ServiceDate serviceDate) {
 
