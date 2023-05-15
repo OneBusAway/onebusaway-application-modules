@@ -18,10 +18,15 @@ package org.onebusaway.api.actions.api.where.search;
 
 import org.apache.struts2.rest.DefaultHttpHeaders;
 import org.onebusaway.api.model.transit.BeanFactoryV2;
+import org.onebusaway.api.model.transit.ListWithReferencesBean;
 import org.onebusaway.api.model.transit.RouteSearchResultBean;
+import org.onebusaway.api.model.transit.RouteV2Bean;
 import org.onebusaway.exceptions.ServiceException;
+import org.onebusaway.transit_data.model.ArrivalsAndDeparturesQueryBean;
 import org.onebusaway.transit_data.model.ListBean;
 import org.onebusaway.transit_data.model.RouteBean;
+import org.onebusaway.transit_data.model.RouteSort;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
 
@@ -30,6 +35,11 @@ import java.io.IOException;
  * as used by autocomplete controls.
  */
 public class RouteAction extends ApiSearchAction {
+
+  private ArrivalsAndDeparturesQueryBean _query = new ArrivalsAndDeparturesQueryBean();
+
+  @Autowired
+  private RouteSort customRouteSort;
 
   public RouteAction() {
     super(V2);
@@ -44,6 +54,7 @@ public class RouteAction extends ApiSearchAction {
       BeanFactoryV2 factory = getBeanFactoryV2();
       RouteSearchResultBean result = new RouteSearchResultBean();
       result.setSuggestions(routeSuggestions);
+      factory.setCustomRouteSort(customRouteSort);
       return setOkResponse(factory.getResponse(result));
     } else {
       return setUnknownVersionResponse();
