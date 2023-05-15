@@ -86,4 +86,16 @@
             </props>
         </property>
     </bean>
+
+    <bean id="predictedTimeFilter" class="org.onebusaway.transit_data.model.ArrivalAndDepartureFilterByPredictedArrivalTime">
+
+    </bean>
+
+    <bean id="filterChain" class="org.onebusaway.transit_data.model.FilterChain">
+        <property name="arrivalAndDepartureFilters">
+            <list>
+                <ref bean="predictedTimeFilter" />
+            </list>
+        </property>
+    </bean>
 </beans>
