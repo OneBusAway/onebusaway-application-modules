@@ -18,7 +18,6 @@ package org.onebusaway.transit_data_federation.services.transit_graph.dynamic;
 
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.LocalizedServiceId;
-import org.onebusaway.transit_data_federation.impl.transit_graph.TransitGraphImpl;
 import org.onebusaway.transit_data_federation.services.transit_graph.*;
 
 import java.io.IOException;
@@ -148,13 +147,5 @@ public class DynamicTripEntryImpl implements TripEntry, Serializable {
         return "Trip(" + _id + ")";
     }
 
-    /****
-     * Serialization
-     ****/
 
-    private void readObject(ObjectInputStream in) throws IOException,
-            ClassNotFoundException {
-        in.defaultReadObject();
-        TransitGraphImpl.handleTripEntryRead(this);
-    }
 }

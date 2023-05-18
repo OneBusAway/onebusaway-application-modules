@@ -19,7 +19,6 @@ package org.onebusaway.transit_data_federation.services.transit_graph.dynamic;
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data.model.EAccessibility;
-import org.onebusaway.transit_data_federation.impl.transit_graph.TransitGraphImpl;
 import org.onebusaway.transit_data_federation.services.blocks.BlockStopSequenceIndex;
 import org.onebusaway.transit_data_federation.services.blocks.BlockStopTimeIndex;
 import org.onebusaway.transit_data_federation.services.blocks.FrequencyBlockStopTimeIndex;
@@ -200,13 +199,4 @@ public class DynamicStopEntryImpl implements StopEntry, Serializable {
         return this.getIndex() - o.getIndex();
     }
 
-    /*****************************************************************************
-     * Serialization Support
-     ****************************************************************************/
-
-    private void readObject(ObjectInputStream in) throws IOException,
-            ClassNotFoundException {
-        in.defaultReadObject();
-        TransitGraphImpl.handleStopEntryRead(this);
-    }
 }
