@@ -204,12 +204,12 @@ public class BeanFactoryV2 {
                     .getRouteId()).getAgencyId() :
             "";
 
-    response.getEntry().getArrivalsAndDepartures()
+    response.getReferences().getRoutes()
             .sort((a,b) ->
                     customRouteSort
                             .compareRoutes(
-                                    a.getRouteShortName(),
-                                    b.getRouteShortName(),
+                                    a.getShortName(),
+                                    b.getShortName(),
                                     customRouteSort,
                                     agencyId)
             );
@@ -227,12 +227,11 @@ public class BeanFactoryV2 {
             .getArrivalsAndDepartures().size() > 0 ? AgencyAndIdLibrary.convertFromString(response.getEntry().getArrivalsAndDepartures().get(0)
             .getRouteId()).getAgencyId() : "";
 
-    response.getEntry()
-            .getArrivalsAndDepartures()
+    response.getReferences().getRoutes()
             .sort((a,b) -> customRouteSort
                     .compareRoutes(
-                            a.getRouteShortName(),
-                            b.getRouteShortName(),
+                            a.getShortName(),
+                            b.getShortName(),
                             customRouteSort,
                             agencyId));
       return response;
