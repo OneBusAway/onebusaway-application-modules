@@ -63,6 +63,9 @@ public class STDuplicatedTripsIntegrationTest extends AbstractGtfsRealtimeIntegr
     source.refresh(); // launch
 
     // todo now test for expected values
+    // assert duplicated trips are present
+    // assert dynamic trips generated based on that duplication
+    // maybe copy and introspect a block descriptor?
   }
 
   private void writeFeed(GtfsRealtime.FeedMessage feed, URL feedLocation) throws IOException {
