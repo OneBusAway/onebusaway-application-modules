@@ -75,6 +75,8 @@ public class GtfsRealtimeTripLibrary {
   private BlockGeospatialService _blockGeospatialService;
 
   private AddedTripService _addedTripService;
+
+  private DynamicTripBuilder _dynamicTripBuilder;
   /**
    * This is primarily here to assist with unit testing.
    */
@@ -137,6 +139,10 @@ public class GtfsRealtimeTripLibrary {
 
   public void setAddedTripService(AddedTripService addedTripService) {
     _addedTripService = addedTripService;
+  }
+
+  public void setDynamicTripBuilder(DynamicTripBuilder builder) {
+    _dynamicTripBuilder = builder;
   }
   /**
    * use the vehicle label as the id.
@@ -212,7 +218,10 @@ public class GtfsRealtimeTripLibrary {
               result.addAddedTripId(td.getTripId());
               _log.info("parsing trip {}", td.getTripId());
               AddedTripInfo addedTripInfo = _addedTripService.handleNyctDescriptor(tu, nyctTripDescriptor);
-              // todo pass addedTripInfo to vehicleLocationListener
+              // convert to blockDescriptor
+              bd =_dynamicTripBuilder.createBlockDescriptor(addedTripInfo);
+              // if this trip has a vehiclePosition it will be matched later
+              anonymousTripUpdatesByBlock.put(bd, tu);
             }
           }
           continue;
@@ -474,13 +483,17 @@ public class GtfsRealtimeTripLibrary {
 
     BlockDescriptor blockDescriptor = update.block;
     if (update.block == null) return null;
-    String vehicleId = update.block.getVehicleId();
+    String vehicleId = update.block.getVehicleId(); // todo this is messy as its unqualified and rewritten later
     record.setBlockId(blockDescriptor.getBlockInstance().getBlock().getBlock().getId());
     // this is the default, trip updates may cancel this trip
     record.setStatus(blockDescriptor.getScheduleRelationship().toString());
 
-
-    applyTripUpdatesToRecord(result, blockDescriptor, update.getTripUpdates(), record, vehicleId);
+    if (TransitDataConstants.STATUS_ADDED.equals(update.block.getScheduleRelationship().toString())
+    || TransitDataConstants.STATUS_DUPLICATED.equals(update.block.getScheduleRelationship().toString())) {
+      applyDynamicTripUpdatesToRecord(result, blockDescriptor, update.getTripUpdates(), record, vehicleId);
+    } else {
+      applyTripUpdatesToRecord(result, blockDescriptor, update.getTripUpdates(), record, vehicleId);
+    }
 
     if (update.vehiclePosition != null) {
       applyVehiclePositionToRecord(result, blockDescriptor, update.vehiclePosition, record);
@@ -515,6 +528,14 @@ public class GtfsRealtimeTripLibrary {
     }
 
     return record;
+  }
+
+  private void applyDynamicTripUpdatesToRecord(MonitoredResult result,
+                                               BlockDescriptor blockDescriptor,
+                                               List<TripUpdate> tripUpdates,
+                                               VehicleLocationRecord record,
+                                               String vehicleId) {
+    // todo Merha
   }
 
 

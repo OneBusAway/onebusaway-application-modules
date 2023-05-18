@@ -45,6 +45,7 @@ import org.onebusaway.realtime.api.VehicleLocationListener;
 import org.onebusaway.realtime.api.VehicleLocationRecord;
 import org.onebusaway.realtime.api.VehicleOccupancyListener;
 import org.onebusaway.realtime.api.VehicleOccupancyRecord;
+import org.onebusaway.transit_data.model.TransitDataConstants;
 import org.onebusaway.transit_data.model.service_alerts.ECause;
 import org.onebusaway.transit_data.model.service_alerts.ESeverity;
 import org.onebusaway.alerts.impl.ServiceAlertLocalizedString;
@@ -425,6 +426,7 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     _tripsLibrary.setUseLabelAsVehicleId(_useLabelAsId);
     _tripsLibrary.setValidateCurrentTime(_validateCurrentTime);
     _tripsLibrary.setAddedTripService(new AddedTripServiceImpl());
+    _tripsLibrary.setDynamicTripBuilder(new DynamicTripBuilder());
     
     _alertLibrary = new GtfsRealtimeAlertLibrary();
     _alertLibrary.setEntitySource(_entitySource);
@@ -538,8 +540,15 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     Set<AgencyAndId> seenVehicles = new HashSet<AgencyAndId>();
 
     for (CombinedTripUpdatesAndVehiclePosition update : updates) {
+      BlockDescriptor.ScheduleRelationship scheduleRelationship = update.block.getScheduleRelationship();
+      boolean isDynamicTrip = TransitDataConstants.STATUS_ADDED.equals(scheduleRelationship.name());
+
       VehicleLocationRecord record = _tripsLibrary.createVehicleLocationRecordForUpdate(result, update);
       if (record != null) {
+        if (isDynamicTrip) {
+          _monitoredResult.addAddedTripId(record.getTripId().toString());
+          registerDynamicTrip(update.block);
+        }
         if (record.getTripId() != null) {
           // tripId will be null if block was matched
           result.addUnmatchedTripId(record.getTripId().toString());
@@ -548,11 +557,11 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
         // here we try to get a more accurate count of updates
         // some providers re-send old data or future data cluttering the feed
         // the TDS will discard these
-        if (blockNotActive(record)) {
+        if (!isDynamicTrip && blockNotActive(record)) {
           _log.debug("discarding v: " + vehicleId + " as block not active");
           continue;
         }
-        if (!isValidLocation(record, update)) {
+        if (!isDynamicTrip && !isValidLocation(record, update)) {
           _log.debug("discarding v: " + vehicleId + " as location is bad");
           continue;
         }
@@ -595,6 +604,11 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     result.setLastUpdate(newestUpdate);
     _log.info("Agency " + this.getAgencyIds().get(0) + " has active vehicles=" + seenVehicles.size()
         + " for updates=" + updates.size() + " with most recent timestamp " + new Date(newestUpdate));
+  }
+
+  private void registerDynamicTrip(BlockDescriptor block) {
+    // todo Merha
+    // dynamicBlockLocationService.register(block);
   }
 
   private boolean isValidLocation(VehicleLocationRecord record, CombinedTripUpdatesAndVehiclePosition update) {

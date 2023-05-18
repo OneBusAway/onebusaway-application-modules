@@ -19,20 +19,22 @@ import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.realtime.api.VehicleLocationListener;
 import org.onebusaway.realtime.api.VehicleLocationRecord;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Track usage of vehicleLocationListener.
  */
 public class TestVehicleLocationListener implements VehicleLocationListener {
+  private List<VehicleLocationRecord> _records = new ArrayList<>();
   @Override
   public void handleVehicleLocationRecord(VehicleLocationRecord record) {
-
+    _records.add(record);
   }
 
   @Override
   public void handleVehicleLocationRecords(List<VehicleLocationRecord> records) {
-
+    _records.addAll(records);
   }
 
   @Override
@@ -43,5 +45,9 @@ public class TestVehicleLocationListener implements VehicleLocationListener {
   @Override
   public void handleRawPosition(AgencyAndId vehicleId, double lat, double lon, long timestamp) {
 
+  }
+
+  public List<VehicleLocationRecord> getRecords() {
+    return _records;
   }
 }

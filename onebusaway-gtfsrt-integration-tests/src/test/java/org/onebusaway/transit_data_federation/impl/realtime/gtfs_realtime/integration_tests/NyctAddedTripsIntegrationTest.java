@@ -16,14 +16,14 @@
 package org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.integration_tests;
 
 import org.junit.Test;
-import org.onebusaway.realtime.api.VehicleLocationListener;
+import org.onebusaway.realtime.api.VehicleLocationRecord;
 import org.onebusaway.transit_data_federation.impl.realtime.TestVehicleLocationListener;
 import org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.AbstractGtfsRealtimeIntegrationTest;
 import org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.GtfsRealtimeSource;
 import org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.MonitoredResult;
 import org.springframework.core.io.ClassPathResource;
 
-import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.*;
 
 public class NyctAddedTripsIntegrationTest extends AbstractGtfsRealtimeIntegrationTest {
 
@@ -40,7 +40,7 @@ public class NyctAddedTripsIntegrationTest extends AbstractGtfsRealtimeIntegrati
     GtfsRealtimeSource source = getBundleLoader().getSource();
     source.setAgencyId("MTASBWY");
 
-    VehicleLocationListener listener = new TestVehicleLocationListener();
+    TestVehicleLocationListener listener = new TestVehicleLocationListener();
     source.setVehicleLocationListener(listener);
     MonitoredResult testResult = new MonitoredResult();
     source.setMonitoredResult(testResult);
@@ -52,8 +52,16 @@ public class NyctAddedTripsIntegrationTest extends AbstractGtfsRealtimeIntegrati
     source.setTripUpdatesUrl(gtfsRtResource.getURL());
     source.refresh(); // launch
 
-    // check TestVehicleLocationListenr for expected service
+
     // check MonitoredResult for expected number of results
     assertFalse(testResult.getAddedTripIds().isEmpty()); // this doesn't work yet!
+
+    assertEquals(5, listener.getRecords().size()); // todo
+
+    VehicleLocationRecord vehicleLocationRecord = listener.getRecords().get(0);
+    assertEquals("vehicle1", vehicleLocationRecord.getVehicleId()); // todo
+    assertEquals("MTASBWY_trip1", vehicleLocationRecord.getTripId().toString()); // todo
+    assertEquals("MTASBWY_trip1", vehicleLocationRecord.getBlockId().toString()); // todo
+    // * vehicleLocationListener needs to make some determination about the schedule deviation
   }
 }

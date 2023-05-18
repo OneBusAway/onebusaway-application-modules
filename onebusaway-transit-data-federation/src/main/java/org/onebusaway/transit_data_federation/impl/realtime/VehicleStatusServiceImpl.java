@@ -93,6 +93,12 @@ class VehicleStatusServiceImpl implements VehicleLocationListener,
   @Override
   public void handleVehicleLocationRecord(VehicleLocationRecord record) {
 	  if (record.getPhase() == null) {
+
+      // if ADDED/DUPLICATED we follow a different code path
+      // _dynamicBlockVehicleLocationService.handleVehicleLocationRecord(record);
+      // todo Merha
+      // todo sheldonabrown
+
 	    // if the trip is cancelled, the vehicle may not exist
 	    if (!TransitDataConstants.STATUS_CANCELED.equals(record.getStatus()))
           record.setPhase(EVehiclePhase.IN_PROGRESS); // if we've received a report, assume it is in progress/in service
