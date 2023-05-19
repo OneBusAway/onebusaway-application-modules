@@ -76,6 +76,7 @@ public class TripUpdatesForAgencyAction extends GtfsRealtimeActionSupport {
            * to indicate that
            */
           stopTimeUpdate.setStopId(normalizeId(stopId.toString()));
+          stopTimeUpdate.setStopSequence(timepointPrediction.getStopSequence());
           TripUpdate.StopTimeEvent.Builder arrival = stopTimeUpdate.getArrivalBuilder();
           if (timepointPrediction.getTimepointPredictedArrivalTime() != -1) {
             arrival.setTime(timepointPrediction.getTimepointPredictedArrivalTime()/1000L);
