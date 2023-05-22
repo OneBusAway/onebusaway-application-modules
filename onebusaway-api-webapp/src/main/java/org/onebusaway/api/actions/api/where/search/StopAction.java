@@ -28,6 +28,8 @@ import org.onebusaway.transit_data.model.StopBean;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Search for a stop based on its name.  Accepts partial input
@@ -52,6 +54,10 @@ public class StopAction extends ApiSearchAction {
 
       BeanFactoryV2 factory = getBeanFactoryV2();
       StopSearchResultBean result = new StopSearchResultBean();
+      List<StopBean> filteredStopSuggestions = stopSuggestions.getList().stream()
+              .filter(stopBean -> stopBean.getRoutes() != null && !stopBean.getRoutes().isEmpty())
+              .collect(Collectors.toList());
+      stopSuggestions.setList(filteredStopSuggestions);
       result.setStopSuggestions(stopSuggestions);
       factory.setCustomRouteSort(customRouteSort);
       return setOkResponse(factory.getResponse(result));
