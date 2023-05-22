@@ -57,7 +57,8 @@ public class DynamicBlockLocationServiceImpl implements DynamicBlockLocationServ
 
   private static Logger _log = LoggerFactory.getLogger(DynamicBlockLocationServiceImpl.class);
 
-  private Map<AgencyAndId, BlockLocation> _cache = new PassiveExpiringMap<>(CACHE_TIMEOUT);
+  private Map<AgencyAndId, BlockLocation> _blockIdToBlockLocation = new PassiveExpiringMap<>(CACHE_TIMEOUT);
+  private Map<AgencyAndId, RecordAndLocation> _vehicleIdToRecordAndLocation = new PassiveExpiringMap<>(CACHE_TIMEOUT);
 
   @Autowired
   @Qualifier("dynamicBlockIndexServiceImpl")
@@ -67,14 +68,14 @@ public class DynamicBlockLocationServiceImpl implements DynamicBlockLocationServ
 
   @Override
   public void register(BlockLocation blockLocation) {
-    AgencyAndId agencyAndId = blockLocation.getBlockInstance().getBlock().getBlock().getId();
-    _cache.put(agencyAndId, blockLocation);
+    AgencyAndId blockId = blockLocation.getBlockInstance().getBlock().getBlock().getId();
+    _blockIdToBlockLocation.put(blockId, blockLocation);
   }
 
   @Override
   public BlockLocation getLocationForBlockInstance(BlockInstance blockInstance, TargetTime time) {
     // this is a 1-1, much simpler than the static configuration
-    return _cache.get(blockInstance.getBlock().getBlock().getId());
+    return _blockIdToBlockLocation.get(blockInstance.getBlock().getBlock().getId());
   }
 
   @Override
@@ -109,7 +110,9 @@ public class DynamicBlockLocationServiceImpl implements DynamicBlockLocationServ
   }
 
   private void putBlockLocationRecord(BlockInstance blockInstance, VehicleLocationRecord record, ScheduledBlockLocation scheduledBlockLocation) {
-    throw new UnsupportedOperationException();
+    if (record.getVehicleId() != null) {
+      _vehicleIdToRecordAndLocation.put(record.getVehicleId(), new RecordAndLocation(record, scheduledBlockLocation));
+    }
   }
 
   private ScheduledBlockLocation getScheduledBlockLocationForVehicleLocationRecord(VehicleLocationRecord record, BlockInstance blockInstance) {
@@ -417,4 +420,12 @@ public class DynamicBlockLocationServiceImpl implements DynamicBlockLocationServ
     return index;
   }
 
+  private static class RecordAndLocation {
+    private VehicleLocationRecord record;
+    private ScheduledBlockLocation location;
+    public RecordAndLocation(VehicleLocationRecord record, ScheduledBlockLocation location) {
+      this.record = record;
+      this.location = location;
+    }
+  }
 }
