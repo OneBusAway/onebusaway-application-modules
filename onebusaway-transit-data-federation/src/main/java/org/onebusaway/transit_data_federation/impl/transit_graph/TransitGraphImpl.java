@@ -22,7 +22,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -39,8 +38,6 @@ import org.onebusaway.transit_data_federation.services.transit_graph.RouteEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
 import org.onebusaway.transit_data_federation.model.transit_graph.TransitGraph;
-import org.onebusaway.transit_data_federation.services.transit_graph.dynamic.DynamicStopEntryImpl;
-import org.onebusaway.transit_data_federation.services.transit_graph.dynamic.DynamicTripEntryImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -356,14 +353,7 @@ public class TransitGraphImpl implements Serializable, TransitGraph {
     _helper.handleStopEntryRead(stopEntryImpl);
   }
 
-  public static void handleStopEntryRead(DynamicStopEntryImpl stopEntryImpl) {
-    _helper.handleStopEntryRead(stopEntryImpl);
-  }
   public static void handleTripEntryRead(TripEntryImpl tripEntryImpl) {
-    _helper.handleTripEntryRead(tripEntryImpl);
-  }
-
-  public static void handleTripEntryRead(DynamicTripEntryImpl tripEntryImpl) {
     _helper.handleTripEntryRead(tripEntryImpl);
   }
 
@@ -396,11 +386,7 @@ public class TransitGraphImpl implements Serializable, TransitGraph {
 
     private Map<AgencyAndId, StopEntryImpl> _stops = new HashMap<AgencyAndId, StopEntryImpl>();
 
-    private Map<AgencyAndId, DynamicStopEntryImpl> _dynamicStops = new HashMap<AgencyAndId, DynamicStopEntryImpl>();
-
     private Map<AgencyAndId, TripEntryImpl> _trips = new HashMap<AgencyAndId, TripEntryImpl>();
-
-    private Map<AgencyAndId, DynamicTripEntryImpl> _dynamicTrips = new HashMap<AgencyAndId, DynamicTripEntryImpl>();
 
     private List<EntryIdAndCallback<AgencyAndId, StopEntryImpl>> _stopCallbacks = new ArrayList<EntryIdAndCallback<AgencyAndId, StopEntryImpl>>();
     private List<EntryIdAndCallback<AgencyAndId, TripEntryImpl>> _tripCallbacks = new ArrayList<EntryIdAndCallback<AgencyAndId, TripEntryImpl>>();
@@ -408,19 +394,9 @@ public class TransitGraphImpl implements Serializable, TransitGraph {
     public void handleStopEntryRead(StopEntryImpl stopEntryImpl) {
       _stops.put(stopEntryImpl.getId(), stopEntryImpl);
     }
-
-    public void handleStopEntryRead(DynamicStopEntryImpl stopEntryImpl) {
-      _dynamicStops.put(stopEntryImpl.getId(), stopEntryImpl);
-    }
-
     public void handleTripEntryRead(TripEntryImpl tripEntryImpl) {
       _trips.put(tripEntryImpl.getId(), tripEntryImpl);
     }
-
-    public void handleTripEntryRead(DynamicTripEntryImpl tripEntryImpl) {
-      _dynamicTrips.put(tripEntryImpl.getId(), tripEntryImpl);
-    }
-
     public void addStopEntryCallback(AgencyAndId stopEntryId,
         EntryCallback<StopEntryImpl> callback) {
       _stopCallbacks.add(new EntryIdAndCallback<AgencyAndId, StopEntryImpl>(

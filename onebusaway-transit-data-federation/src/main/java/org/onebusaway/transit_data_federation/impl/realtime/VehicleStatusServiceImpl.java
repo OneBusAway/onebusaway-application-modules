@@ -28,20 +28,17 @@ import org.onebusaway.realtime.api.VehicleOccupancyRecord;
 import org.onebusaway.transit_data.model.TransitDataConstants;
 import org.onebusaway.transit_data_federation.services.AgencyService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockVehicleLocationListener;
-import org.onebusaway.transit_data_federation.services.realtime.VehicleLocationCacheElement;
-import org.onebusaway.transit_data_federation.services.realtime.VehicleLocationCacheElements;
-import org.onebusaway.transit_data_federation.services.realtime.VehicleLocationRecordCache;
-import org.onebusaway.transit_data_federation.services.realtime.VehicleStatus;
-import org.onebusaway.transit_data_federation.services.realtime.VehicleStatusService;
+import org.onebusaway.transit_data_federation.services.realtime.*;
 import org.onebusaway.transit_data_federation.impl.realtime.apc.VehicleOccupancyRecordCache;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 @Component
-class VehicleStatusServiceImpl implements VehicleLocationListener,
+public class VehicleStatusServiceImpl implements VehicleLocationListener,
         VehicleOccupancyListener,
     VehicleStatusService {
 
@@ -50,6 +47,8 @@ class VehicleStatusServiceImpl implements VehicleLocationListener,
   private TransitGraphDao _transitGraphDao;
 
   private BlockVehicleLocationListener _blockVehicleLocationService;
+
+  private DynamicBlockLocationService _dynamicBlockLocationService;
 
   private VehicleLocationRecordCache _vehicleLocationRecordCache;
 
@@ -66,6 +65,12 @@ class VehicleStatusServiceImpl implements VehicleLocationListener,
   public void setBlockVehicleLocationService(
       BlockVehicleLocationListener service) {
     _blockVehicleLocationService = service;
+  }
+
+  @Autowired
+  @Qualifier("dynamicBlockLocationServiceImpl")
+  public void setDynamicBlockLocationService(DynamicBlockLocationService service) {
+    _dynamicBlockLocationService = service;
   }
 
   @Autowired
@@ -93,11 +98,11 @@ class VehicleStatusServiceImpl implements VehicleLocationListener,
   @Override
   public void handleVehicleLocationRecord(VehicleLocationRecord record) {
 	  if (record.getPhase() == null) {
-
-      // if ADDED/DUPLICATED we follow a different code path
-      // _dynamicBlockVehicleLocationService.handleVehicleLocationRecord(record);
-      // todo Merha
-      // todo sheldonabrown
+      if (TransitDataConstants.STATUS_ADDED.equals(record.getStatus())
+          || TransitDataConstants.STATUS_DUPLICATED.equals(record.getStatus())) {
+        _dynamicBlockLocationService.handleVehicleLocationRecord(record);
+        return;
+      }
 
 	    // if the trip is cancelled, the vehicle may not exist
 	    if (!TransitDataConstants.STATUS_CANCELED.equals(record.getStatus()))

@@ -39,6 +39,7 @@ import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import uk.org.siri.siri.*;
 import uk.org.siri.siri.AffectedVehicleJourneyStructure.Calls;
@@ -88,6 +89,7 @@ public class SiriService {
   }
 
   @Autowired
+  @Qualifier("vehicleStatusServiceImpl")
   public void set(VehicleLocationListener vehicleLocationListener) {
     _vehicleLocationListener = vehicleLocationListener;
   }

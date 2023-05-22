@@ -16,9 +16,11 @@
 package org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime;
 
 import org.onebusaway.container.ContainerLibrary;
+import org.onebusaway.transit_data_federation.impl.realtime.DynamicBlockIndexServiceImpl;
 import org.onebusaway.transit_data_federation.services.AgencyService;
 import org.onebusaway.transit_data_federation.services.ConsolidatedStopsService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockCalendarService;
+import org.onebusaway.transit_data_federation.services.blocks.DynamicBlockIndexService;
 import org.onebusaway.transit_data_federation.services.bundle.BundleManagementService;
 import org.onebusaway.transit_data_federation.services.realtime.BlockLocationService;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
@@ -37,6 +39,9 @@ public class BundleLoader {
 
   protected BundleContext _bundleContext;
   protected ConfigurableApplicationContext _context;
+  public ConfigurableApplicationContext getApplicationContext() {
+    return _context;
+  }
   protected GtfsRealtimeSource _source;
 
   public BundleLoader(BundleContext bundleContext) {
@@ -65,6 +70,7 @@ public class BundleLoader {
     _source.setBlockLocationService(_context.getBean(BlockLocationService.class));
     _source.setScheduledExecutorService(_context.getBean(ScheduledExecutorService.class));
     _source.setConsolidatedStopsService(_context.getBean(ConsolidatedStopsService.class));
+    _source.setDynamicBlockIndexService(_context.getBean(DynamicBlockIndexServiceImpl.class));
 
     BundleManagementService bundleManagementService = _context.getBean(BundleManagementService.class);
     int i = 0;

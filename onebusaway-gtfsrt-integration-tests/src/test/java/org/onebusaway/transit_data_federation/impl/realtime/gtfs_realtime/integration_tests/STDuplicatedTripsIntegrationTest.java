@@ -15,13 +15,21 @@
  */
 package org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.integration_tests;
 
+import com.google.transit.realtime.GtfsRealtime;
 import org.junit.Test;
 import org.onebusaway.realtime.api.VehicleLocationListener;
 import org.onebusaway.transit_data_federation.impl.realtime.TestVehicleLocationListener;
 import org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.AbstractGtfsRealtimeIntegrationTest;
 import org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.GtfsRealtimeSource;
+import org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.GtfsRtBuilder;
 import org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.MonitoredResult;
 import org.springframework.core.io.ClassPathResource;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 public class STDuplicatedTripsIntegrationTest extends AbstractGtfsRealtimeIntegrationTest  {
   protected String getIntegrationTestPath() {
@@ -36,33 +44,35 @@ public class STDuplicatedTripsIntegrationTest extends AbstractGtfsRealtimeIntegr
   @Test
   public void testDuplicatedTrips1() throws Exception {
     GtfsRealtimeSource source = getBundleLoader().getSource();
-    source.setAgencyId("ST");
+    source.setAgencyId("40");
 
     VehicleLocationListener listener = new TestVehicleLocationListener();
     source.setVehicleLocationListener(listener);
     MonitoredResult testResult = new MonitoredResult();
     source.setMonitoredResult(testResult);
 
-    // todo examples so far in JSON -- check to see if we can get PB or if we need to convert
-    String gtfsrtFilename = "org/onebusaway/transit_data_federation/impl/realtime/gtfs_realtime/integration_tests/st_duplicated_trips/trip_update_1683740698.json";
-    ClassPathResource gtfsRtResource = new ClassPathResource(gtfsrtFilename);
-    if (!gtfsRtResource.exists()) throw new RuntimeException(gtfsrtFilename + " not found in classpath!");
-    source.setTripUpdatesUrl(gtfsRtResource.getURL());
+    // example is in json, convert to protocol buffer
+    String jsonFilename = "org/onebusaway/transit_data_federation/impl/realtime/gtfs_realtime/integration_tests/st_duplicated_trips/trip_update_1683740698.json";
+    ClassPathResource gtfsRtResource = new ClassPathResource(jsonFilename);
+    if (!gtfsRtResource.exists()) throw new RuntimeException(jsonFilename + " not found in classpath!");
+    GtfsRtBuilder builder = new GtfsRtBuilder();
+    GtfsRealtime.FeedMessage feed = builder.readJson(gtfsRtResource.getURL());
+    URL tmpFeedLocation = createFeedLocation();
+    writeFeed(feed, tmpFeedLocation);
+    source.setTripUpdatesUrl(tmpFeedLocation);
     source.refresh(); // launch
-    // this is an example provided in the referenced JSON
-/*
-      "id": "1BB8C2B3-D3DA-4C8B-ABCC-3C042CA40C18",
-      "trip_update": {
-        "trip": {
-          "trip_id": "LLR_2023-03-18_Weekday_100479_1043",
-          "route_id": "100479",
-          "direction_id": 1,
-          "start_time": "10:43:00",
-          "start_date": "20230510",
-          "schedule_relationship": "DUPLICATED"
-        },
 
- */
-    // todo do we want to differentiate added from duplicated?
+    // todo now test for expected values
+    // assert duplicated trips are present
+    // assert dynamic trips generated based on that duplication
+    // maybe copy and introspect a block descriptor?
+  }
+
+  private void writeFeed(GtfsRealtime.FeedMessage feed, URL feedLocation) throws IOException {
+    feed.writeTo(Files.newOutputStream(Path.of(feedLocation.getFile())));
+  }
+
+  private URL createFeedLocation() throws IOException {
+    return File.createTempFile("trip_updates", "pb").toURI().toURL();
   }
 }

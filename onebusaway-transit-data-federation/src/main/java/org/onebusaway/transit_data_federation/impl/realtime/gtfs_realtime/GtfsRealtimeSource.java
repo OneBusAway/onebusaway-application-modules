@@ -57,11 +57,13 @@ import org.onebusaway.transit_data_federation.services.AgencyService;
 import org.onebusaway.transit_data_federation.services.ConsolidatedStopsService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockCalendarService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockGeospatialService;
+import org.onebusaway.transit_data_federation.services.blocks.DynamicBlockIndexService;
 import org.onebusaway.transit_data_federation.services.realtime.BlockLocation;
 import org.onebusaway.transit_data_federation.services.realtime.BlockLocationService;
 import org.onebusaway.alerts.service.ServiceAlerts;
 import org.onebusaway.alerts.service.ServiceAlerts.ServiceAlert;
 import org.onebusaway.alerts.service.ServiceAlertsService;
+import org.onebusaway.transit_data_federation.services.realtime.DynamicBlockLocationService;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -116,6 +118,8 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   private ScheduledExecutorService _scheduledExecutorService;
 
   private ConsolidatedStopsService _consolidatedStopsService;
+
+  private DynamicBlockIndexService _dynamicBlockIndexService;
 
   private ScheduledFuture<?> _refreshTask;
 
@@ -211,6 +215,11 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   @Autowired
   public void setConsolidatedStopsService(ConsolidatedStopsService service) {
     _consolidatedStopsService = service;
+  }
+
+  @Autowired
+  public void setDynamicBlockIndexService(DynamicBlockIndexService dynamicBlockIndexService) {
+    this._dynamicBlockIndexService = dynamicBlockIndexService;
   }
 
   @Autowired
@@ -426,7 +435,10 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     _tripsLibrary.setUseLabelAsVehicleId(_useLabelAsId);
     _tripsLibrary.setValidateCurrentTime(_validateCurrentTime);
     _tripsLibrary.setAddedTripService(new AddedTripServiceImpl());
-    _tripsLibrary.setDynamicTripBuilder(new DynamicTripBuilder());
+    DynamicTripBuilder tripBuilder = new DynamicTripBuilder();
+    tripBuilder.setTransitGraphDao(_transitGraphDao);
+    _tripsLibrary.setDynamicTripBuilder(tripBuilder);
+
     
     _alertLibrary = new GtfsRealtimeAlertLibrary();
     _alertLibrary.setEntitySource(_entitySource);
@@ -548,6 +560,7 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
         if (isDynamicTrip) {
           _monitoredResult.addAddedTripId(record.getTripId().toString());
           registerDynamicTrip(update.block);
+          // todo this should happen later, here now for testinthis._vehicleLocationListener.handleVehicleLocationRecord(record);
         }
         if (record.getTripId() != null) {
           // tripId will be null if block was matched
@@ -607,8 +620,7 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   }
 
   private void registerDynamicTrip(BlockDescriptor block) {
-    // todo Merha
-    // dynamicBlockLocationService.register(block);
+    _dynamicBlockIndexService.register(block.getBlockInstance());
   }
 
   private boolean isValidLocation(VehicleLocationRecord record, CombinedTripUpdatesAndVehiclePosition update) {

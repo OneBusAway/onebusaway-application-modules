@@ -39,6 +39,7 @@ import org.onebusaway.transit_data_federation.services.realtime.VehicleStatus;
 import org.onebusaway.transit_data_federation.services.realtime.VehicleStatusService;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -75,6 +76,7 @@ class VehicleStatusBeanServiceImpl implements VehicleStatusBeanService {
   }
 
   @Autowired
+  @Qualifier("vehicleStatusServiceImpl")
   public void setVehicleLocationListener(
       VehicleLocationListener vehicleLocationListener) {
     _vehicleLocationListener = vehicleLocationListener;
