@@ -16,18 +16,25 @@
 package org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 /**
  * Represents and added trip from GTFS-RT.
  */
 public class AddedTripInfo {
+  private String agencyId;
   private int tripStartTime = 0;
+  private long serviceDate = -1;
   private String tripId = null;
   private String routeId = null;
   private String directionId = null;
   private List<AddedStopInfo> stops = new ArrayList<>();
 
+  public boolean hasServiceDate() {
+    return serviceDate > 0;
+  }
   public int getTripStartTime() {
     return tripStartTime;
   }
@@ -70,5 +77,32 @@ public class AddedTripInfo {
 
   public void setStops(List<AddedStopInfo> stops) {
     this.stops = stops;
+  }
+
+  public void setServiceDateFromStopTime(long time) {
+    serviceDate = getStartOfDay(new Date(time)).getTime();
+  }
+  public static Date getStartOfDay(Date serviceDate) {
+    final Calendar cal = Calendar.getInstance();
+    cal.setTime(serviceDate);
+    cal.set(Calendar.HOUR_OF_DAY, 0);
+    cal.set(Calendar.MINUTE, 0);
+    cal.set(Calendar.SECOND, 0);
+    cal.set(Calendar.MILLISECOND, 000);
+    return cal.getTime();
+  }
+  public long getServiceDate() {
+    return serviceDate;
+  }
+  public void setServiceDate(long time) {
+    this.serviceDate = time;
+  }
+
+  public String getAgencyId() {
+    return agencyId;
+  }
+
+  public void setAgencyId(String agencyId) {
+    this.agencyId = agencyId;
   }
 }

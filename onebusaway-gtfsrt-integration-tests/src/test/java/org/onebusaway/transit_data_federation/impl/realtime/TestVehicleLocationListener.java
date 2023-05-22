@@ -27,19 +27,25 @@ import java.util.List;
  */
 public class TestVehicleLocationListener implements VehicleLocationListener {
   private List<VehicleLocationRecord> _records = new ArrayList<>();
+  private VehicleLocationListener _listener;
+  public void setVehicleLocationListener(VehicleLocationListener listener) {
+    _listener = listener;
+  }
   @Override
   public void handleVehicleLocationRecord(VehicleLocationRecord record) {
     _records.add(record);
+    _listener.handleVehicleLocationRecord(record);
   }
 
   @Override
   public void handleVehicleLocationRecords(List<VehicleLocationRecord> records) {
     _records.addAll(records);
+    _listener.handleVehicleLocationRecords(records);
   }
 
   @Override
   public void resetVehicleLocation(AgencyAndId vehicleId) {
-
+    _listener.resetVehicleLocation(vehicleId);
   }
 
   @Override

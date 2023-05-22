@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2023 Cambridge Systematics, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,13 +15,13 @@
  */
 package org.onebusaway.transit_data_federation.services.realtime;
 
-/**
- * Service methods for accessing/interpolating the position of a transit vehicle
- * give a trip instance and target time.
- *
- * @author bdferris
- *
- */
+import org.onebusaway.realtime.api.VehicleLocationListener;
+import org.onebusaway.realtime.api.VehicleLocationRecord;
+import org.onebusaway.transit_data_federation.model.TargetTime;
+import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 
-public interface BlockLocationService extends StaticBlockLocationService, DynamicBlockLocationService {
+public interface DynamicBlockLocationService extends VehicleLocationListener {
+
+  void register(BlockLocation blockLocation);
+  BlockLocation getLocationForBlockInstance(BlockInstance blockInstance, TargetTime time);
 }

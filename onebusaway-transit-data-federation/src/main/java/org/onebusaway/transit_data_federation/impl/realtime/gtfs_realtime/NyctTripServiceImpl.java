@@ -31,6 +31,9 @@ import java.util.regex.Pattern;
 
 public class NyctTripServiceImpl implements NyctTripService {
 
+  private static final String DEFAULT_AGENCY_ID = "MTASBWY";
+  private String _defaultAgencyId = DEFAULT_AGENCY_ID;
+
   private static final Pattern _rtTripPattern = Pattern.compile(
           "([A-Z0-9]+_)?(?<originDepartureTime>[0-9-]{6})_?(?<route>[A-Z0-9]+)\\.+(?<direction>[NS]?)(?<network>[A-Z0-9 -]*)$");
 
@@ -52,6 +55,7 @@ public class NyctTripServiceImpl implements NyctTripService {
       if (networkId.length() == 0)
         networkId = null;
       AddedTripInfo addedTrip = new AddedTripInfo();
+      addedTrip.setAgencyId(getDefaultAgency());
       addedTrip.setTripStartTime(originDepartureTime);
       addedTrip.setRouteId(routeId);
       addedTrip.setTripId(tripId);
@@ -63,11 +67,17 @@ public class NyctTripServiceImpl implements NyctTripService {
         }
         if (stopTimeUpdate.hasArrival()) {
           // here we assume time not delay
-          stopInfo.setArrivalTime(stopTimeUpdate.getArrival().getTime());
+          stopInfo.setArrivalTime(stopTimeUpdate.getArrival().getTime()*1000);
+          if (!addedTrip.hasServiceDate()) {
+            addedTrip.setServiceDateFromStopTime(stopInfo.getArrivalTime());
+          }
         }
         if (stopTimeUpdate.hasDeparture()) {
           // here we assume time not delay
-          stopInfo.setDepartureTime(stopTimeUpdate.getDeparture().getTime());
+          stopInfo.setDepartureTime(stopTimeUpdate.getDeparture().getTime()*1000);
+          if (!addedTrip.hasServiceDate()) {
+            addedTrip.setServiceDateFromStopTime(stopInfo.getDepartureTime());
+          }
         }
         if (stopTimeUpdate.hasExtension(GtfsRealtimeNYCT.nyctStopTimeUpdate)) {
           GtfsRealtimeNYCT.NyctStopTimeUpdate stopTimeUpdateExtension = stopTimeUpdate.getExtension(GtfsRealtimeNYCT.nyctStopTimeUpdate);
@@ -84,5 +94,13 @@ public class NyctTripServiceImpl implements NyctTripService {
       return addedTrip;
     }
       return null;
+  }
+
+  private String getDefaultAgency() {
+    return _defaultAgencyId;
+  }
+
+  public void setDefaultAgencyId(String defaultAgencyId) {
+    this._defaultAgencyId = defaultAgencyId;
   }
 }

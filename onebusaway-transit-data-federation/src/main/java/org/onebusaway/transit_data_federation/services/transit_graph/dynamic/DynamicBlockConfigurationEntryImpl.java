@@ -50,7 +50,7 @@ public class DynamicBlockConfigurationEntryImpl implements BlockConfigurationEnt
      */
     private List<FrequencyEntry> frequencies;
 
-    private DynamicBlockConfigurationEntryImpl(Builder builder) {
+    public DynamicBlockConfigurationEntryImpl(Builder builder) {
         this.block = builder.block;
         this.serviceIds = builder.serviceIds;
         this.trips = builder.computeBlockTrips(this);
@@ -222,7 +222,10 @@ public class DynamicBlockConfigurationEntryImpl implements BlockConfigurationEnt
             double distance = 0;
             for (int i = 0; i < trips.size(); i++) {
                 TripEntry trip = trips.get(i);
-                distance += trip.getTotalTripDistance() + tripGapDistances[i];
+                double tripGapDistance = 0.0;
+                if (tripGapDistances != null && tripGapDistances.length >= i)
+                    tripGapDistance = tripGapDistances[i];
+                distance += trip.getTotalTripDistance() + tripGapDistance;
             }
             return distance;
         }
@@ -318,8 +321,10 @@ public class DynamicBlockConfigurationEntryImpl implements BlockConfigurationEnt
 
                 prevTripAvgVelocity = computeAverageTripTravelVelocity(stopTimes);
 
-                distanceAlongBlock += tripEntry.getTotalTripDistance()
-                        + tripGapDistances[i];
+                if (tripGapDistances != null && tripGapDistances.length > i) {
+                    distanceAlongBlock += tripEntry.getTotalTripDistance()
+                            + tripGapDistances[i];
+                }
 
                 prevTrip = blockTripEntry;
                 prevTripStopTime = stopTimes.get(stopTimes.size() - 1);

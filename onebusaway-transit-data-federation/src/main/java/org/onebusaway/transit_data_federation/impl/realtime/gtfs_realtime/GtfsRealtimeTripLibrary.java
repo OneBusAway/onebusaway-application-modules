@@ -535,7 +535,57 @@ public class GtfsRealtimeTripLibrary {
                                                List<TripUpdate> tripUpdates,
                                                VehicleLocationRecord record,
                                                String vehicleId) {
-    // todo Merha
+    String agencyId = blockDescriptor.getBlockInstance().getBlock().getBlock().getId().getAgencyId();
+    record.setStatus(blockDescriptor.getScheduleRelationship().toString());
+    record.setServiceDate(blockDescriptor.getBlockInstance().getServiceDate());
+    record.setScheduleDeviation(0); // for subways new schedule is the prediction
+    record.setTimeOfRecord(currentTime());
+    record.setBlockStartTime(blockDescriptor.getStartTime());
+    record.setVehicleId(
+            new AgencyAndId(agencyId,
+            vehicleId));
+    List<TimepointPredictionRecord> timepointPredictions = new ArrayList<TimepointPredictionRecord>();
+    for (TripUpdate tripUpdate : tripUpdates) {
+      if (record.getTripId() == null) {
+        record.setTripId(new AgencyAndId(agencyId, tripUpdate.getTrip().getTripId()));
+      }
+      int sequence = 0;
+      for (StopTimeUpdate stu : tripUpdate.getStopTimeUpdateList()) {
+        TimepointPredictionRecord tpr = new TimepointPredictionRecord();
+        tpr.setTimepointId(new AgencyAndId(agencyId, stu.getStopId()));
+        tpr.setTripId(new AgencyAndId(agencyId, tripUpdate.getTrip().getTripId()));
+        tpr.setStopSequence(sequence);
+        sequence++;
+        tpr.setScheduleRealtionship(blockDescriptor.getScheduleRelationship().ordinal());
+        if (stu.hasArrival() && stu.getArrival().hasTime())
+          tpr.setTimepointPredictedArrivalTime(stu.getArrival().getTime()*1000);
+        if (stu.hasDeparture() && stu.getDeparture().hasTime())
+          tpr.setTimepointPredictedDepartureTime(stu.getDeparture().getTime()*1000);
+        if (stu.hasExtension(GtfsRealtimeNYCT.nyctStopTimeUpdate)) {
+          GtfsRealtimeNYCT.NyctStopTimeUpdate ext = stu.getExtension(GtfsRealtimeNYCT.nyctStopTimeUpdate);
+          if (ext.hasScheduledTrack()) {
+            tpr.setScheduledTrack(ext.getScheduledTrack());
+          }
+          if (ext.hasActualTrack()) {
+            tpr.setActualTrack(ext.getActualTrack());
+          }
+        }
+        if (stu.hasExtension(GtfsRealtimeMTARR.mtaRailroadStopTimeUpdate)) {
+          GtfsRealtimeMTARR.MtaRailroadStopTimeUpdate ext = stu.getExtension(GtfsRealtimeMTARR.mtaRailroadStopTimeUpdate);
+          if (ext.hasTrack()) {
+            tpr.setActualTrack(ext.getTrack());
+          }
+          if (ext.hasTrainStatus()) {
+            tpr.setStatus(ext.getTrainStatus());
+          }
+        }
+
+        timepointPredictions.add(tpr);
+      }
+
+      record.setTimepointPredictions(timepointPredictions);
+    }
+
   }
 
 

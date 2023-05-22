@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2023 Cambridge Systematics, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,15 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.onebusaway.transit_data_federation.services.blocks;
+package org.onebusaway.transit_data_federation.services.realtime;
 
+import org.onebusaway.gtfs.model.calendar.LocalizedServiceId;
+import org.onebusaway.gtfs.model.calendar.ServiceInterval;
 
-/**
- * The {@link BlockIndexService}
- * @author bdferris
- *
- */
-public interface BlockIndexService extends StaticBlockIndexService, DynamicBlockIndexService {
+import java.util.Collection;
+import java.util.Date;
 
+public interface DynamicCalendarService {
+  boolean hasServiceId(LocalizedServiceId localizedServiceId);
 
+  Collection<Date> getServiceDatesWithinRange(LocalizedServiceId localizedServiceId, ServiceInterval interval, Date from, Date to);
 }

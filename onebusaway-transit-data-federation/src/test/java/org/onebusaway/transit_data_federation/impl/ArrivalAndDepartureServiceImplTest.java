@@ -32,7 +32,7 @@ import org.onebusaway.realtime.api.VehicleLocationRecord;
 import org.onebusaway.transit_data.model.TransitDataConstants;
 import org.onebusaway.transit_data_federation.impl.blocks.BlockStatusServiceImpl;
 import org.onebusaway.transit_data_federation.impl.blocks.ScheduledBlockLocationServiceImpl;
-import org.onebusaway.transit_data_federation.impl.realtime.BlockLocationServiceImpl;
+import org.onebusaway.transit_data_federation.impl.realtime.StaticBlockLocationServiceImpl;
 import org.onebusaway.transit_data_federation.impl.realtime.VehicleLocationRecordCacheImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.BlockEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopEntryImpl;
@@ -46,6 +46,7 @@ import org.onebusaway.transit_data_federation.services.blocks.BlockStatusService
 import org.onebusaway.transit_data_federation.services.blocks.ScheduledBlockLocation;
 import org.onebusaway.transit_data_federation.services.realtime.ArrivalAndDepartureInstance;
 import org.onebusaway.transit_data_federation.services.realtime.BlockLocation;
+import org.onebusaway.transit_data_federation.services.realtime.BlockLocationService;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
@@ -76,7 +77,7 @@ public class ArrivalAndDepartureServiceImplTest {
 
   private StopTimeService _stopTimeService;
 
-  private BlockLocationServiceImpl _blockLocationService;
+  private StaticBlockLocationServiceImpl _blockLocationService;
 
   // Setup current time
   private long mCurrentTime = dateAsLong("2015-07-23 13:00");
@@ -108,9 +109,9 @@ public class ArrivalAndDepartureServiceImplTest {
     _stopTimeService = Mockito.mock(StopTimeServiceImpl.class);
     _service.setStopTimeService(_stopTimeService);
 
-    _blockLocationService = new BlockLocationServiceImpl();
+    _blockLocationService = new StaticBlockLocationServiceImpl();
     _blockLocationService.setLocationInterpolation(false);
-    _service.setBlockLocationService(_blockLocationService);
+    _service.setBlockLocationService((BlockLocationService) _blockLocationService);
   }
 
   /**
@@ -1840,8 +1841,6 @@ public class ArrivalAndDepartureServiceImplTest {
    *    A           1             0
    *    B           1             1
    * 
-   * @param timepointPredictions real-time predictions to apply to the
-   *          BlockLocationServiceImpl
    * @return a list of ArrivalAndDepartureInstances which is used to access
    *         predicted arrival/departure times for a stop, for comparison
    *         against the expected values
