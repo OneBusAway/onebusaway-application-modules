@@ -22,6 +22,7 @@ import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.LocalizedServiceId;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
 import org.onebusaway.realtime.api.EVehicleType;
+import org.onebusaway.transit_data.model.TransitDataConstants;
 import org.onebusaway.transit_data_federation.model.ShapePoints;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.transit_graph.*;
@@ -53,7 +54,7 @@ public class DynamicTripBuilder {
   public BlockDescriptor createBlockDescriptor(AddedTripInfo addedTripInfo) {
     // from the addedTripInfo generate the trips and stops, and return in the block descriptor
     BlockDescriptor dynamicBd = new BlockDescriptor();
-    dynamicBd.setScheduleRelationship(BlockDescriptor.ScheduleRelationship.ADDED);
+    dynamicBd.setScheduleRelationship(addedTripInfo.getScheduleRelationship());
     dynamicBd.setBlockInstance(createBlockInstance(addedTripInfo));
     dynamicBd.setStartTime(addedTripInfo.getTripStartTime());
     dynamicBd.setStartDate(new ServiceDate(new Date(addedTripInfo.getServiceDate())));
@@ -84,13 +85,16 @@ public class DynamicTripBuilder {
     trip.setDirectionId(addedTripInfo.getDirectionId());
     trip.setBlock((DynamicBlockEntry) block);
     trip.setServiceId(createLocalizedServiceId(addedTripInfo));
-    trip.setShapeId(createShape(addedTripInfo).getShapeId());
+    trip.setShapeId(createShape(addedTripInfo));
     trip.setStopTimes(createStopTimes(addedTripInfo, trip));
     trip.setTotalTripDistance(calculateTripDistance(trip));
     return trip;
   }
 
-  private ShapePoints createShape(AddedTripInfo addedTripInfo) {
+  private AgencyAndId createShape(AddedTripInfo addedTripInfo) {
+    if(TransitDataConstants.STATUS_DUPLICATED.equals(addedTripInfo.getScheduleRelationship().toString())){
+      return addedTripInfo.getShapeId();
+    }
     ShapePoints shapePoints = new ShapePoints();
     List<String> stopIds = new ArrayList<>();
     String shapeKey =  String.join("|",stopIds);
@@ -103,7 +107,7 @@ public class DynamicTripBuilder {
       List<Double> lats = new ArrayList<>();
       List<Double> lons = new ArrayList<>();
       List<Double> distanceTraveled = new ArrayList<>();
-
+      double distance = 0.0;
       double previousLat = 0.0, previousLon = 0.0;
       int i = 0;
 
@@ -116,7 +120,7 @@ public class DynamicTripBuilder {
         lons.add(lon);
 
         if(i != 0){
-          double distance = SphericalGeometryLibrary.distance(previousLat, previousLon, lat, lon);
+           distance += SphericalGeometryLibrary.distance(previousLat, previousLon, lat, lon);
           distanceTraveled.add(distance);
         }
         previousLat = lat;
@@ -130,7 +134,7 @@ public class DynamicTripBuilder {
 
       _shapeCache.put(shapeKey,shapePoints);
     }
-    return _shapeCache.get(shapeKey);
+    return _shapeCache.get(shapeKey).getShapeId();
 
   }
 

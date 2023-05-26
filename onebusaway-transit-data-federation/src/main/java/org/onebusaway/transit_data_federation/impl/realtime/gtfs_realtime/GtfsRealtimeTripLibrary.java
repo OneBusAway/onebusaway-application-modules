@@ -76,6 +76,8 @@ public class GtfsRealtimeTripLibrary {
 
   private AddedTripService _addedTripService;
 
+  private DuplicatedTripService _duplicatedTripService;
+
   private DynamicTripBuilder _dynamicTripBuilder;
   /**
    * This is primarily here to assist with unit testing.
@@ -141,6 +143,10 @@ public class GtfsRealtimeTripLibrary {
     _addedTripService = addedTripService;
   }
 
+  public void setDuplicatedTripService(DuplicatedTripService duplicatedTripService) {
+    _duplicatedTripService = duplicatedTripService;
+  }
+
   public void setDynamicTripBuilder(DynamicTripBuilder builder) {
     _dynamicTripBuilder = builder;
   }
@@ -190,7 +196,9 @@ public class GtfsRealtimeTripLibrary {
       }
 
       TripUpdate tu = fe.getTripUpdate();
-      if (tu.hasTrip() && TransitDataConstants.STATUS_ADDED.equals(tu.getTrip().getScheduleRelationship().toString())) {
+      if (tu.hasTrip() &&
+              (TransitDataConstants.STATUS_ADDED.equals(tu.getTrip().getScheduleRelationship().toString())
+              || TransitDataConstants.STATUS_DUPLICATED.equals(tu.getTrip().getScheduleRelationship().toString()))) {
         result.addAddedTripId(tu.getTrip().getTripId());
       }
 
@@ -214,10 +222,14 @@ public class GtfsRealtimeTripLibrary {
           if (td.hasExtension(GtfsRealtimeNYCT.nyctTripDescriptor)) {
             GtfsRealtimeNYCT.NyctTripDescriptor nyctTripDescriptor = td.getExtension(GtfsRealtimeNYCT.nyctTripDescriptor);
             if (nyctTripDescriptor.hasIsAssigned() && nyctTripDescriptor.getIsAssigned()) {
-              // this is implicitly an added trip
+              // this is implicitly an added trip OR DUPLICATED
               result.addAddedTripId(td.getTripId());
               _log.info("parsing trip {}", td.getTripId());
-              AddedTripInfo addedTripInfo = _addedTripService.handleNyctDescriptor(tu, nyctTripDescriptor);
+
+              boolean isDuplicated = TransitDataConstants.STATUS_DUPLICATED.equals(tu.getTrip().getScheduleRelationship().toString());
+
+              AddedTripInfo addedTripInfo = isDuplicated ? _duplicatedTripService.handleDuplicatedDescriptor(tu) : _addedTripService.handleNyctDescriptor(tu, nyctTripDescriptor);
+
               // convert to blockDescriptor
               bd =_dynamicTripBuilder.createBlockDescriptor(addedTripInfo);
               // if this trip has a vehiclePosition it will be matched later

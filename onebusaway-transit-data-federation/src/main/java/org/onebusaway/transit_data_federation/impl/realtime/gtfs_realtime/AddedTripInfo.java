@@ -15,6 +15,7 @@
  */
 package org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime;
 
+import org.onebusaway.gtfs.model.AgencyAndId;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -28,9 +29,28 @@ public class AddedTripInfo {
   private int tripStartTime = 0;
   private long serviceDate = -1;
   private String tripId = null;
+  private AgencyAndId shapeId;
   private String routeId = null;
   private String directionId = null;
   private List<AddedStopInfo> stops = new ArrayList<>();
+
+  private BlockDescriptor.ScheduleRelationship scheduleRelationship;
+
+  public BlockDescriptor.ScheduleRelationship getScheduleRelationship() {
+    return scheduleRelationship;
+  }
+
+  public void setScheduleRelationshipValue(String value) {
+    this.scheduleRelationship = BlockDescriptor.ScheduleRelationship.valueOf(value);
+  }
+
+  public AgencyAndId getShapeId() {
+    return shapeId;
+  }
+
+  public void setShapeId(AgencyAndId shapeId) {
+    this.shapeId = shapeId;
+  }
 
   public boolean hasServiceDate() {
     return serviceDate > 0;
