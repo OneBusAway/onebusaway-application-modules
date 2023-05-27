@@ -120,6 +120,7 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   private ConsolidatedStopsService _consolidatedStopsService;
 
   private DynamicBlockIndexService _dynamicBlockIndexService;
+  private DynamicBlockLocationService _dynamicBlockLocationService;
 
   private ScheduledFuture<?> _refreshTask;
 
@@ -220,6 +221,10 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   @Autowired
   public void setDynamicBlockIndexService(DynamicBlockIndexService dynamicBlockIndexService) {
     this._dynamicBlockIndexService = dynamicBlockIndexService;
+  }
+  @Autowired
+  public void setDynamicBlockLocationService(DynamicBlockLocationService _dynamicBlockLocationService) {
+    this._dynamicBlockLocationService = _dynamicBlockLocationService;
   }
 
   @Autowired
@@ -559,8 +564,7 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
       if (record != null) {
         if (isDynamicTrip) {
           _monitoredResult.addAddedTripId(record.getTripId().toString());
-          registerDynamicTrip(update.block);
-          // todo this should happen later, here now for testinthis._vehicleLocationListener.handleVehicleLocationRecord(record);
+          registerDynamicTrip(update.block, record);
         }
         if (record.getTripId() != null) {
           // tripId will be null if block was matched
@@ -619,8 +623,9 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
         + " for updates=" + updates.size() + " with most recent timestamp " + new Date(newestUpdate));
   }
 
-  private void registerDynamicTrip(BlockDescriptor block) {
-    _dynamicBlockIndexService.register(block.getBlockInstance());
+  private void registerDynamicTrip(BlockDescriptor block, VehicleLocationRecord record) {
+    _dynamicBlockLocationService.handleVehicleLocationRecord(block.getBlockInstance(),
+            record);
   }
 
   private boolean isValidLocation(VehicleLocationRecord record, CombinedTripUpdatesAndVehiclePosition update) {

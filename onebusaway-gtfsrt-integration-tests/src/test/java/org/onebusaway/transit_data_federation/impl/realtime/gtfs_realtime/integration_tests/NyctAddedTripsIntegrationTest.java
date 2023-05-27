@@ -17,6 +17,7 @@ package org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.integ
 
 import org.junit.Test;
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.realtime.api.TimepointPredictionRecord;
 import org.onebusaway.realtime.api.VehicleLocationListener;
 import org.onebusaway.realtime.api.VehicleLocationRecord;
 import org.onebusaway.transit_data_federation.impl.realtime.BlockLocationServiceImpl;
@@ -31,6 +32,7 @@ import org.onebusaway.transit_data_federation.services.realtime.ArrivalAndDepart
 import org.onebusaway.transit_data_federation.services.realtime.BlockLocation;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
+import org.onebusaway.transit_data_federation.services.transit_graph.dynamic.DynamicBlockConfigurationEntryImpl;
 import org.springframework.core.io.ClassPathResource;
 
 import java.util.HashSet;
@@ -110,7 +112,11 @@ public class NyctAddedTripsIntegrationTest extends AbstractGtfsRealtimeIntegrati
       if (expectedDynamicTrips.contains(instance.getBlockInstance().getBlock().getTrips().get(0).getTrip().getId().toString())) {
         actualDynamicTripsSize++;
         realtimeBlocks.add(instance.getBlockInstance());
+        assertTrue(instance.getPredictedArrivalTime() > 0 || instance.getPredictedDepartureTime() > 0);
       }
+    }
+    if (expectedDynamicTripsSize != actualDynamicTripsSize) {
+      _log.error("expected {}, actual {}", expectedDynamicTrips, realtimeBlocks);
     }
     assertEquals(expectedDynamicTripsSize, actualDynamicTripsSize);
 
@@ -120,11 +126,27 @@ public class NyctAddedTripsIntegrationTest extends AbstractGtfsRealtimeIntegrati
             new TargetTime(firstStopTime), firstStopTime - window, firstStopTime + window);
     assertNotNull(list);
 
+    for (ArrivalAndDepartureInstance instance : list) {
+      if (instance.getBlockInstance().getBlock() instanceof DynamicBlockConfigurationEntryImpl) {
+        if ("MTASBWY_038500_3..N01R".equals(instance.getBlockInstance().getBlock().getBlock().getId().toString())) {
+          BlockLocation blockLocation = instance.getBlockLocation();
+          assertNotNull(blockLocation);
+          List<TimepointPredictionRecord> timepointPredictions = blockLocation.getTimepointPredictions();
+          assertNotNull(timepointPredictions);
+          // todo now check on some of the timepointPredictions
+          // verify some properties
+          assertEquals(1.0, blockLocation.getDistanceAlongBlock(), 0.1);
+        }
+      }
+    }
+
 
     // now check for blockLocations of that trip
     for (BlockInstance blockInstance : realtimeBlocks) {
       BlockLocation locationForBlockInstance = blockLocationService.getLocationForBlockInstance(blockInstance, new TargetTime(secondStopTime));
-      assertNotNull(locationForBlockInstance);
+      if (locationForBlockInstance == null) {
+        _log.error("no location for blockInstance {}", blockInstance);
+      }
     }
 
   }

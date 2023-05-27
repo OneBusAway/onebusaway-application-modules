@@ -95,8 +95,12 @@ public class DynamicTripBuilder {
       StopEntry stop = findStop(addedTripInfo.getAgencyId(), stopInfo.getStopId());
       DynamicStopTimeEntryImpl stopTime = new DynamicStopTimeEntryImpl();
       stopTime.setStop(copyFromStop(stop));
-      stopTime.setArrivalTime(toSecondsInDay(stopInfo.getArrivalTime(), addedTripInfo.getServiceDate()));
-      stopTime.setDepartureTime(toSecondsInDay(stopInfo.getDepartureTime(), addedTripInfo.getServiceDate()));
+      if (stopInfo.getArrivalTime() > 0) {
+        stopTime.setArrivalTime(toSecondsInDay(stopInfo.getArrivalTime(), addedTripInfo.getServiceDate()));
+      }
+      if (stopInfo.getDepartureTime() > 0) {
+        stopTime.setDepartureTime(toSecondsInDay(stopInfo.getDepartureTime(), addedTripInfo.getServiceDate()));
+      }
       stopTime.setSequence(sequence);
       stopTime.setTrip(trip);
       if (stopTime.getArrivalTime() < 1 && stopTime.getDepartureTime() < 1) {

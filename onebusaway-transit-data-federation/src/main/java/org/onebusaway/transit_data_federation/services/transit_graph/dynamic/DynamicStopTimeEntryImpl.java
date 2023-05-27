@@ -26,8 +26,8 @@ public class DynamicStopTimeEntryImpl implements StopTimeEntry, Serializable {
     private static final long serialVersionUID = 9L;
 
     private int _stopTimeId;
-    private int _arrivalTime;
-    private int _departureTime;
+    private int _arrivalTime = -1;
+    private int _departureTime = -1;
     private OccupancyStatus _historicalOccupancy;
     private int _sequence;
     private int _gtfsSequence;

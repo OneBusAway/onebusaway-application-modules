@@ -54,9 +54,9 @@ public class DynamicCalendarServiceImpl implements DynamicCalendarService {
       return new ArrayList<>();
     }
 
-    Date yesterday = new Date(today.toInstant().toEpochMilli() - 24 * 60 * 60 * 1000);
-    Date tomorrow = new Date(today.toInstant().toEpochMilli() + 24 * 60 * 60 * 1000);
-    Date[] dates = {yesterday, today, tomorrow};
+    // todo:  use from/to to consider if other serviceDates should be considered instead
+    // for example:  many systems use the previous serviceDate up until 3am
+    Date[] dates = {today};
     return Arrays.asList(dates);
   }
 }

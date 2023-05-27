@@ -18,6 +18,8 @@ package org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime;
 import com.google.transit.realtime.GtfsRealtime;
 import com.google.transit.realtime.GtfsRealtimeNYCT;
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -30,6 +32,8 @@ import java.util.regex.Pattern;
  */
 
 public class NyctTripServiceImpl implements NyctTripService {
+
+  private static Logger _log = LoggerFactory.getLogger(NyctTripServiceImpl.class);
 
   private static final String DEFAULT_AGENCY_ID = "MTASBWY";
   private String _defaultAgencyId = DEFAULT_AGENCY_ID;
@@ -65,14 +69,14 @@ public class NyctTripServiceImpl implements NyctTripService {
         if (stopTimeUpdate.hasStopId()) {
           stopInfo.setStopId(stopTimeUpdate.getStopId());
         }
-        if (stopTimeUpdate.hasArrival()) {
+        if (stopTimeUpdate.hasArrival() && stopTimeUpdate.getArrival().getTime() > 0) {
           // here we assume time not delay
           stopInfo.setArrivalTime(stopTimeUpdate.getArrival().getTime()*1000);
           if (!addedTrip.hasServiceDate()) {
             addedTrip.setServiceDateFromStopTime(stopInfo.getArrivalTime());
           }
         }
-        if (stopTimeUpdate.hasDeparture()) {
+        if (stopTimeUpdate.hasDeparture() && stopTimeUpdate.getDeparture().getTime() > 0) {
           // here we assume time not delay
           stopInfo.setDepartureTime(stopTimeUpdate.getDeparture().getTime()*1000);
           if (!addedTrip.hasServiceDate()) {
@@ -88,7 +92,11 @@ public class NyctTripServiceImpl implements NyctTripService {
             stopInfo.setScheduledTrack(stopTimeUpdateExtension.getScheduledTrack());
           }
         }
-        addedTrip.addStopTime(stopInfo);
+        if (stopInfo.getArrivalTime() <= 0 && stopInfo.getDepartureTime() <= 0) {
+          _log.error("invalid stop for update {}", stopTimeUpdate);
+        } else {
+          addedTrip.addStopTime(stopInfo);
+        }
       }
 
       return addedTrip;
