@@ -19,6 +19,7 @@ package org.onebusaway.transit_data_federation.services.transit_graph.dynamic;
 
 import org.onebusaway.realtime.api.OccupancyStatus;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
 
 import java.io.Serializable;
 
@@ -40,7 +41,7 @@ public class DynamicStopTimeEntryImpl implements StopTimeEntry, Serializable {
 
     private DynamicStopEntryImpl _stop;
 
-    private DynamicTripEntryImpl _trip;
+    private TripEntry _trip;
 
     public void setId(int id) {
         _stopTimeId = id;
@@ -83,7 +84,7 @@ public class DynamicStopTimeEntryImpl implements StopTimeEntry, Serializable {
         return this;
     }
 
-    public void setTrip(DynamicTripEntryImpl trip) {
+    public void setTrip(TripEntry trip) {
         _trip = trip;
     }
 
@@ -155,7 +156,7 @@ public class DynamicStopTimeEntryImpl implements StopTimeEntry, Serializable {
     }
 
     @Override
-    public DynamicTripEntryImpl getTrip() {
+    public TripEntry getTrip() {
         return _trip;
     }
 

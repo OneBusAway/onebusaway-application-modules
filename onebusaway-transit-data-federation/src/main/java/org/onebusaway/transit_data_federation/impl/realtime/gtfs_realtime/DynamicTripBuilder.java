@@ -21,15 +21,19 @@ import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.LocalizedServiceId;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
 import org.onebusaway.realtime.api.EVehicleType;
+import org.onebusaway.transit_data_federation.impl.transit_graph.StopTimeEntriesFactory;
+import org.onebusaway.transit_data_federation.model.ShapePoints;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.transit_graph.*;
 import org.onebusaway.transit_data_federation.services.transit_graph.dynamic.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import static com.google.common.primitives.Doubles.toArray;
 import static org.onebusaway.geospatial.services.SphericalGeometryLibrary.distance;
 
 /**
@@ -39,6 +43,13 @@ import static org.onebusaway.geospatial.services.SphericalGeometryLibrary.distan
 public class DynamicTripBuilder {
 
   private static Logger _log = LoggerFactory.getLogger(DynamicTripBuilder.class);
+
+  private StopTimeEntriesFactory _stopTimeEntriesFactory;
+  @Autowired
+  public void setStopTimeEntriesFactory(
+          StopTimeEntriesFactory stopTimeEntriesFactory) {
+    _stopTimeEntriesFactory = stopTimeEntriesFactory;
+  }
 
   private TransitGraphDao _graph;
   public void setTransitGraphDao(TransitGraphDao dao) {
@@ -110,8 +121,30 @@ public class DynamicTripBuilder {
       sequence++;
       stops.add(stopTime);
     }
+    ShapePoints shapePoints = null;
+    shapePoints = loadShapePoints(trip);
+    _stopTimeEntriesFactory.ensureStopTimesHaveShapeDistanceTraveledSet(stops, shapePoints);
     return stops;
   }
+
+  private ShapePoints loadShapePoints(DynamicTripEntryImpl trip) {
+    ShapePoints result = new ShapePoints();
+    result.setShapeId(trip.getShapeId());
+    List<Double> lats = new ArrayList<>();
+    List<Double> lons = new ArrayList<>();
+    if (trip.getStopTimes() != null) {
+      for (StopTimeEntry stopTime : trip.getStopTimes()) {
+        lats.add(stopTime.getStop().getStopLat());
+        lons.add(stopTime.getStop().getStopLon());
+      }
+
+      result.setLats(toArray(lats));
+      result.setLons(toArray(lons));
+      return result;
+    }
+    return null;
+  }
+
 
   private int toSecondsInDay(long time, long serviceDate) {
     return Math.toIntExact((time - serviceDate) / 1000);

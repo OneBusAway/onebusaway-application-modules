@@ -62,8 +62,8 @@ public class DynamicTripEntryImpl implements TripEntry, Serializable {
         return this;
     }
 
-    public DynamicTripEntryImpl setBlock(DynamicBlockEntry block) {
-        _block = block;
+    public TripEntry setBlock(BlockEntry block) {
+        _block = (DynamicBlockEntry) block;
         return this;
     }
 

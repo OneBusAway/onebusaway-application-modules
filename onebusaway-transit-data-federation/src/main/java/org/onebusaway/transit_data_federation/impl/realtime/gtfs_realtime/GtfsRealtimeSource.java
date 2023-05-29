@@ -53,6 +53,7 @@ import org.onebusaway.alerts.impl.ServiceAlertRecord;
 import org.onebusaway.alerts.impl.ServiceAlertSituationConsequenceClause;
 import org.onebusaway.alerts.impl.ServiceAlertTimeRange;
 import org.onebusaway.alerts.impl.ServiceAlertsSituationAffectsClause;
+import org.onebusaway.transit_data_federation.impl.transit_graph.StopTimeEntriesFactory;
 import org.onebusaway.transit_data_federation.services.AgencyService;
 import org.onebusaway.transit_data_federation.services.ConsolidatedStopsService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockCalendarService;
@@ -181,6 +182,8 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   private boolean _scheduleAdherenceFromLocation = false;
 
   private BlockGeospatialService _blockGeospatialService;
+
+  private StopTimeEntriesFactory _stopTimeEntriesFactory;
   
   private boolean _enabled = true;
 
@@ -252,6 +255,11 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   @Autowired
   public void setBlockGeospatialService(BlockGeospatialService blockGeospatialService) {
     _blockGeospatialService = blockGeospatialService;
+  }
+
+  @Autowired
+  public void setStopTimeEntriesFactory(StopTimeEntriesFactory stopTimeEntriesFactory) {
+    _stopTimeEntriesFactory = stopTimeEntriesFactory;
   }
 
   public void setStopModificationStrategy(StopModificationStrategy strategy) {
@@ -441,6 +449,7 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     _tripsLibrary.setValidateCurrentTime(_validateCurrentTime);
     _tripsLibrary.setAddedTripService(new AddedTripServiceImpl());
     DynamicTripBuilder tripBuilder = new DynamicTripBuilder();
+    tripBuilder.setStopTimeEntriesFactory(_stopTimeEntriesFactory);
     tripBuilder.setTransitGraphDao(_transitGraphDao);
     _tripsLibrary.setDynamicTripBuilder(tripBuilder);
 

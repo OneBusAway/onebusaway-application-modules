@@ -32,6 +32,7 @@ import org.onebusaway.realtime.api.VehicleLocationRecord;
 import org.onebusaway.transit_data.model.TransitDataConstants;
 import org.onebusaway.transit_data_federation.impl.blocks.BlockStatusServiceImpl;
 import org.onebusaway.transit_data_federation.impl.blocks.ScheduledBlockLocationServiceImpl;
+import org.onebusaway.transit_data_federation.impl.realtime.BlockLocationServiceImpl;
 import org.onebusaway.transit_data_federation.impl.realtime.StaticBlockLocationServiceImpl;
 import org.onebusaway.transit_data_federation.impl.realtime.VehicleLocationRecordCacheImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.BlockEntryImpl;
@@ -46,7 +47,6 @@ import org.onebusaway.transit_data_federation.services.blocks.BlockStatusService
 import org.onebusaway.transit_data_federation.services.blocks.ScheduledBlockLocation;
 import org.onebusaway.transit_data_federation.services.realtime.ArrivalAndDepartureInstance;
 import org.onebusaway.transit_data_federation.services.realtime.BlockLocation;
-import org.onebusaway.transit_data_federation.services.realtime.BlockLocationService;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
@@ -77,7 +77,8 @@ public class ArrivalAndDepartureServiceImplTest {
 
   private StopTimeService _stopTimeService;
 
-  private StaticBlockLocationServiceImpl _blockLocationService;
+  private BlockLocationServiceImpl _blockLocationService;
+  private StaticBlockLocationServiceImpl _staticBlockLocationService;
 
   // Setup current time
   private long mCurrentTime = dateAsLong("2015-07-23 13:00");
@@ -109,9 +110,12 @@ public class ArrivalAndDepartureServiceImplTest {
     _stopTimeService = Mockito.mock(StopTimeServiceImpl.class);
     _service.setStopTimeService(_stopTimeService);
 
-    _blockLocationService = new StaticBlockLocationServiceImpl();
-    _blockLocationService.setLocationInterpolation(false);
-    _service.setBlockLocationService((BlockLocationService) _blockLocationService);
+    _blockLocationService = new BlockLocationServiceImpl();
+    _staticBlockLocationService = new StaticBlockLocationServiceImpl();
+    _staticBlockLocationService.setLocationInterpolation(false);
+    _blockLocationService.setStaticBlockLocationService(_staticBlockLocationService);
+
+    _service.setBlockLocationService(_blockLocationService);
   }
 
   /**
@@ -1823,9 +1827,9 @@ public class ArrivalAndDepartureServiceImplTest {
 
     // Add data to cache
     _cache.addRecord(blockInstance, vlr, sbl, null);
-    _blockLocationService.setVehicleLocationRecordCache(_cache);
+    _staticBlockLocationService.setVehicleLocationRecordCache(_cache);
     ScheduledBlockLocationServiceImpl scheduledBlockLocationServiceImpl = new ScheduledBlockLocationServiceImpl();
-    _blockLocationService.setScheduledBlockLocationService(scheduledBlockLocationServiceImpl);
+    _staticBlockLocationService.setScheduledBlockLocationService(scheduledBlockLocationServiceImpl);
 
     // Call ArrivalAndDepartureService
     return _service.getArrivalsAndDeparturesForStopInTimeRange(mStopB, target,
@@ -1916,9 +1920,9 @@ public class ArrivalAndDepartureServiceImplTest {
 
     // Add data to cache
     _cache.addRecord(blockInstance, vlr, sbl, null);
-    _blockLocationService.setVehicleLocationRecordCache(_cache);
+    _staticBlockLocationService.setVehicleLocationRecordCache(_cache);
     ScheduledBlockLocationServiceImpl scheduledBlockLocationServiceImpl = new ScheduledBlockLocationServiceImpl();
-    _blockLocationService.setScheduledBlockLocationService(scheduledBlockLocationServiceImpl);
+    _staticBlockLocationService.setScheduledBlockLocationService(scheduledBlockLocationServiceImpl);
 
     // Call ArrivalAndDepartureService
     return _service.getArrivalsAndDeparturesForStopInTimeRange(mStopB, target,
@@ -2039,9 +2043,9 @@ public class ArrivalAndDepartureServiceImplTest {
 
     // Add data to cache
     _cache.addRecord(blockInstance, vlr, sbl, null);
-    _blockLocationService.setVehicleLocationRecordCache(_cache);
+    _staticBlockLocationService.setVehicleLocationRecordCache(_cache);
     ScheduledBlockLocationServiceImpl scheduledBlockLocationServiceImpl = new ScheduledBlockLocationServiceImpl();
-    _blockLocationService.setScheduledBlockLocationService(scheduledBlockLocationServiceImpl);
+    _staticBlockLocationService.setScheduledBlockLocationService(scheduledBlockLocationServiceImpl);
 
     // Call ArrivalAndDepartureService
     return _service.getArrivalsAndDeparturesForStopInTimeRange(mStopB, target,
@@ -2147,9 +2151,9 @@ public class ArrivalAndDepartureServiceImplTest {
 
     // Add data to cache
     _cache.addRecord(blockInstance, vlr, sbl, null);
-    _blockLocationService.setVehicleLocationRecordCache(_cache);
+    _staticBlockLocationService.setVehicleLocationRecordCache(_cache);
     ScheduledBlockLocationServiceImpl scheduledBlockLocationServiceImpl = new ScheduledBlockLocationServiceImpl();
-    _blockLocationService.setScheduledBlockLocationService(scheduledBlockLocationServiceImpl);
+    _staticBlockLocationService.setScheduledBlockLocationService(scheduledBlockLocationServiceImpl);
 
     // Call ArrivalAndDepartureService
     return _service.getArrivalsAndDeparturesForStopInTimeRange(stop, target,
@@ -2307,9 +2311,9 @@ public class ArrivalAndDepartureServiceImplTest {
 
     // Add data to cache
     _cache.addRecord(blockInstance, vlr, sbl, null);
-    _blockLocationService.setVehicleLocationRecordCache(_cache);
+    _staticBlockLocationService.setVehicleLocationRecordCache(_cache);
     ScheduledBlockLocationServiceImpl scheduledBlockLocationServiceImpl = new ScheduledBlockLocationServiceImpl();
-    _blockLocationService.setScheduledBlockLocationService(scheduledBlockLocationServiceImpl);
+    _staticBlockLocationService.setScheduledBlockLocationService(scheduledBlockLocationServiceImpl);
 
     // Call ArrivalAndDepartureService
     return _service.getArrivalsAndDeparturesForStopInTimeRange(stop, target,

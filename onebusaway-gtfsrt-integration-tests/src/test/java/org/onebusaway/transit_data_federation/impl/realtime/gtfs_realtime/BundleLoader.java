@@ -18,6 +18,7 @@ package org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime;
 import org.onebusaway.container.ContainerLibrary;
 import org.onebusaway.transit_data_federation.impl.realtime.DynamicBlockIndexServiceImpl;
 import org.onebusaway.transit_data_federation.impl.realtime.DynamicBlockLocationServiceImpl;
+import org.onebusaway.transit_data_federation.impl.transit_graph.StopTimeEntriesFactory;
 import org.onebusaway.transit_data_federation.services.AgencyService;
 import org.onebusaway.transit_data_federation.services.ConsolidatedStopsService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockCalendarService;
@@ -72,6 +73,7 @@ public class BundleLoader {
     _source.setConsolidatedStopsService(_context.getBean(ConsolidatedStopsService.class));
     _source.setDynamicBlockIndexService(_context.getBean(DynamicBlockIndexServiceImpl.class));
     _source.setDynamicBlockLocationService(_context.getBean(DynamicBlockLocationServiceImpl.class));
+    _source.setStopTimeEntriesFactory(_context.getBean(StopTimeEntriesFactory.class));
 
     BundleManagementService bundleManagementService = _context.getBean(BundleManagementService.class);
     int i = 0;
