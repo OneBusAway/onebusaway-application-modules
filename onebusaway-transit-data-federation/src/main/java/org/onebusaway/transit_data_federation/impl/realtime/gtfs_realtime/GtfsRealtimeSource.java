@@ -91,6 +91,10 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     _registry.add(GtfsRealtimeOneBusAway.obaTripUpdate);
     _registry.add(GtfsRealtimeMTARR.mtaRailroadStopTimeUpdate); // track number
     _registry.add(GtfsRealtimeServiceStatus.mercuryAlert);
+    // NYCT support for added trips
+    _registry.add(GtfsRealtimeNYCT.nyctFeedHeader);
+    _registry.add(GtfsRealtimeNYCT.nyctTripDescriptor);
+    _registry.add(GtfsRealtimeNYCT.nyctStopTimeUpdate);
   }
 
   private AgencyService _agencyService;
