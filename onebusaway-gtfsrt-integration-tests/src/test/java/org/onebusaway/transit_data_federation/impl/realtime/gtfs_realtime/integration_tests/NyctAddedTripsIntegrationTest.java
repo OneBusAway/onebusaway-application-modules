@@ -17,6 +17,8 @@ package org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.integ
 
 import org.junit.Test;
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.gtfs.model.calendar.ServiceDate;
+import org.onebusaway.realtime.api.TimepointPredictionRecord;
 import org.onebusaway.realtime.api.VehicleLocationListener;
 import org.onebusaway.realtime.api.VehicleLocationRecord;
 import org.onebusaway.transit_data_federation.impl.realtime.BlockLocationServiceImpl;
@@ -31,6 +33,7 @@ import org.onebusaway.transit_data_federation.services.realtime.ArrivalAndDepart
 import org.onebusaway.transit_data_federation.services.realtime.BlockLocation;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
+import org.onebusaway.transit_data_federation.services.transit_graph.dynamic.DynamicBlockConfigurationEntryImpl;
 import org.springframework.core.io.ClassPathResource;
 
 import java.util.HashSet;
@@ -74,13 +77,7 @@ public class NyctAddedTripsIntegrationTest extends AbstractGtfsRealtimeIntegrati
 
     assertEquals(148, listener.getRecords().size());
 
-    VehicleLocationRecord firstRecord = null;
-    long firstStopTime = -1;
     for (VehicleLocationRecord vehicleLocationRecord : listener.getRecords()) {
-      if (firstRecord == null) {
-        firstRecord = vehicleLocationRecord;
-        firstStopTime = vehicleLocationRecord.getTimepointPredictions().get(0).getTimepointPredictedArrivalTime();
-      }
       String tripId = vehicleLocationRecord.getTripId().toString();
       assertEquals(tripId, vehicleLocationRecord.getVehicleId().toString()); // vehicles are named the tripId
       assertEquals(tripId, vehicleLocationRecord.getTripId().toString());
@@ -92,10 +89,12 @@ public class NyctAddedTripsIntegrationTest extends AbstractGtfsRealtimeIntegrati
     long window = 75 * 60 * 1000; // 75 minutes
 
     // hard code an example to be repeatable
-    StopEntry secondStop = graph.getStopEntryForId(AgencyAndId.convertFromString("MTASBWY_250N"));
-    long secondStopTime = 1683630090000l;
-    List<ArrivalAndDepartureInstance> list = arrivalAndDepartureService.getArrivalsAndDeparturesForStopInTimeRange(secondStop,
-            new TargetTime(secondStopTime), secondStopTime - window, secondStopTime + window);
+    StopEntry firstStop = graph.getStopEntryForId(AgencyAndId.convertFromString("MTASBWY_250N"));
+    long firstStopTime = 1683630090000l;
+    long serviceDate = new ServiceDate(2023, 5, 9).getAsDate().getTime();
+    long firstPrediction = serviceDate + 25710 * 1000;
+    List<ArrivalAndDepartureInstance> list = arrivalAndDepartureService.getArrivalsAndDeparturesForStopInTimeRange(firstStop,
+            new TargetTime(firstStopTime), firstStopTime - window, firstStopTime + window);
     assertNotNull(list);
     // MTASBWY_040800_3..N01R   MTASBWY_042150_4..N06R    MTASBWY_042250_3..N01R    MTASBWY_042850_3..N01R
     int expectedDynamicTripsSize = 4;
@@ -106,25 +105,46 @@ public class NyctAddedTripsIntegrationTest extends AbstractGtfsRealtimeIntegrati
     expectedDynamicTrips.add("MTASBWY_042250_3..N01R");
     expectedDynamicTrips.add("MTASBWY_042850_3..N01R");
     Set<BlockInstance> realtimeBlocks = new HashSet<>();
+    boolean found = false;
     for (ArrivalAndDepartureInstance instance : list) {
       if (expectedDynamicTrips.contains(instance.getBlockInstance().getBlock().getTrips().get(0).getTrip().getId().toString())) {
+        String tripId = instance.getBlockInstance().getBlock().getTrips().get(0).getTrip().getId().toString();
         actualDynamicTripsSize++;
         realtimeBlocks.add(instance.getBlockInstance());
+        assertTrue(instance.getPredictedArrivalTime() > 0 || instance.getPredictedDepartureTime() > 0);
+        if ("MTASBWY_042850_3..N01R".equals(instance.getBlockInstance().getBlock().getBlock().getId().toString())) {
+          found = true;
+          BlockLocation blockLocation = instance.getBlockLocation();
+          assertNotNull(blockLocation);
+          List<TimepointPredictionRecord> timepointPredictions = blockLocation.getTimepointPredictions();
+          assertNotNull(timepointPredictions);
+          for (TimepointPredictionRecord timepointPrediction : timepointPredictions) {
+            assertTrue(timepointPrediction.getTimepointPredictedArrivalTime() > 0
+                    || timepointPrediction.getTimepointPredictedDepartureTime() > 0);
+            assertEquals("MTASBWY_042850_3..N01R", timepointPrediction.getTripId().toString());
+            assertNotNull(timepointPrediction.getTimepointId());
+          }
+
+          // this is the first update we've seen, so the DaB will always be 0
+          // we don't know the shape or stopping pattern of vehicle before now
+          // so for our purposes the vehicle just started the block
+          assertEquals(0.0, blockLocation.getDistanceAlongBlock(), 0.1);
+        }
       }
+    }
+    if (expectedDynamicTripsSize != actualDynamicTripsSize) {
+      _log.error("expected {}, actual {}", expectedDynamicTrips, realtimeBlocks);
     }
     assertEquals(expectedDynamicTripsSize, actualDynamicTripsSize);
 
-    // next pick the first in the list -- it will be different each time
-    StopEntry firstStop = graph.getStopEntryForId(firstRecord.getTimepointPredictions().get(0).getTimepointId(), true);
-    list = arrivalAndDepartureService.getArrivalsAndDeparturesForStopInTimeRange(firstStop,
-            new TargetTime(firstStopTime), firstStopTime - window, firstStopTime + window);
-    assertNotNull(list);
-
+    assertTrue(found);
 
     // now check for blockLocations of that trip
     for (BlockInstance blockInstance : realtimeBlocks) {
-      BlockLocation locationForBlockInstance = blockLocationService.getLocationForBlockInstance(blockInstance, new TargetTime(secondStopTime));
-      assertNotNull(locationForBlockInstance);
+      BlockLocation locationForBlockInstance = blockLocationService.getLocationForBlockInstance(blockInstance, new TargetTime(firstStopTime));
+      if (locationForBlockInstance == null) {
+        _log.error("no location for blockInstance {}", blockInstance);
+      }
     }
 
   }

@@ -53,6 +53,7 @@ import org.onebusaway.alerts.impl.ServiceAlertRecord;
 import org.onebusaway.alerts.impl.ServiceAlertSituationConsequenceClause;
 import org.onebusaway.alerts.impl.ServiceAlertTimeRange;
 import org.onebusaway.alerts.impl.ServiceAlertsSituationAffectsClause;
+import org.onebusaway.transit_data_federation.impl.transit_graph.StopTimeEntriesFactory;
 import org.onebusaway.transit_data_federation.services.AgencyService;
 import org.onebusaway.transit_data_federation.services.ConsolidatedStopsService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockCalendarService;
@@ -120,6 +121,7 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   private ConsolidatedStopsService _consolidatedStopsService;
 
   private DynamicBlockIndexService _dynamicBlockIndexService;
+  private DynamicBlockLocationService _dynamicBlockLocationService;
 
   private ScheduledFuture<?> _refreshTask;
 
@@ -180,6 +182,8 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   private boolean _scheduleAdherenceFromLocation = false;
 
   private BlockGeospatialService _blockGeospatialService;
+
+  private StopTimeEntriesFactory _stopTimeEntriesFactory;
   
   private boolean _enabled = true;
 
@@ -221,6 +225,10 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   public void setDynamicBlockIndexService(DynamicBlockIndexService dynamicBlockIndexService) {
     this._dynamicBlockIndexService = dynamicBlockIndexService;
   }
+  @Autowired
+  public void setDynamicBlockLocationService(DynamicBlockLocationService _dynamicBlockLocationService) {
+    this._dynamicBlockLocationService = _dynamicBlockLocationService;
+  }
 
   @Autowired
   public void setVehicleLocationListener(
@@ -247,6 +255,11 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   @Autowired
   public void setBlockGeospatialService(BlockGeospatialService blockGeospatialService) {
     _blockGeospatialService = blockGeospatialService;
+  }
+
+  @Autowired
+  public void setStopTimeEntriesFactory(StopTimeEntriesFactory stopTimeEntriesFactory) {
+    _stopTimeEntriesFactory = stopTimeEntriesFactory;
   }
 
   public void setStopModificationStrategy(StopModificationStrategy strategy) {
@@ -436,7 +449,9 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     _tripsLibrary.setValidateCurrentTime(_validateCurrentTime);
     _tripsLibrary.setAddedTripService(new AddedTripServiceImpl());
     DynamicTripBuilder tripBuilder = new DynamicTripBuilder();
+    tripBuilder.setStopTimeEntriesFactory(_stopTimeEntriesFactory);
     tripBuilder.setTransitGraphDao(_transitGraphDao);
+    tripBuilder.setBlockIndexService(_dynamicBlockIndexService);
     _tripsLibrary.setDynamicTripBuilder(tripBuilder);
 
     
@@ -559,8 +574,7 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
       if (record != null) {
         if (isDynamicTrip) {
           _monitoredResult.addAddedTripId(record.getTripId().toString());
-          registerDynamicTrip(update.block);
-          // todo this should happen later, here now for testinthis._vehicleLocationListener.handleVehicleLocationRecord(record);
+          registerDynamicTrip(update.block, record);
         }
         if (record.getTripId() != null) {
           // tripId will be null if block was matched
@@ -619,8 +633,9 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
         + " for updates=" + updates.size() + " with most recent timestamp " + new Date(newestUpdate));
   }
 
-  private void registerDynamicTrip(BlockDescriptor block) {
-    _dynamicBlockIndexService.register(block.getBlockInstance());
+  private void registerDynamicTrip(BlockDescriptor block, VehicleLocationRecord record) {
+    _dynamicBlockLocationService.handleVehicleLocationRecord(block.getBlockInstance(),
+            record);
   }
 
   private boolean isValidLocation(VehicleLocationRecord record, CombinedTripUpdatesAndVehiclePosition update) {

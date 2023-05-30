@@ -18,11 +18,10 @@
 package org.onebusaway.transit_data_federation.impl.transit_graph;
 
 import java.io.Serializable;
-import java.util.List;
 
 import org.onebusaway.realtime.api.OccupancyStatus;
-import org.onebusaway.transit_data_federation.model.bundle.HistoricalRidership;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
 
 public class StopTimeEntryImpl implements StopTimeEntry, Serializable {
 
@@ -43,7 +42,7 @@ public class StopTimeEntryImpl implements StopTimeEntry, Serializable {
 
   private StopEntryImpl _stop;
 
-  private TripEntryImpl _trip;
+  private TripEntry _trip;
 
   public void setId(int id) {
     _stopTimeId = id;
@@ -86,7 +85,7 @@ public class StopTimeEntryImpl implements StopTimeEntry, Serializable {
     return this;
   }
 
-  public void setTrip(TripEntryImpl trip) {
+  public void setTrip(TripEntry trip) {
     _trip = trip;
   }
 
@@ -158,7 +157,7 @@ public class StopTimeEntryImpl implements StopTimeEntry, Serializable {
   }
 
   @Override
-  public TripEntryImpl getTrip() {
+  public TripEntry getTrip() {
     return _trip;
   }
 

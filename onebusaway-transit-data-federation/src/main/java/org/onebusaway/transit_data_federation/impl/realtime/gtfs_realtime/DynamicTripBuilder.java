@@ -22,17 +22,24 @@ import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.LocalizedServiceId;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
 import org.onebusaway.realtime.api.EVehicleType;
+<<<<<<< HEAD
 import org.onebusaway.transit_data.model.TransitDataConstants;
+=======
+import org.onebusaway.transit_data_federation.impl.transit_graph.StopTimeEntriesFactory;
+>>>>>>> 9cd347d9489b4d3e44907665856e7909aef16ca7
 import org.onebusaway.transit_data_federation.model.ShapePoints;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
+import org.onebusaway.transit_data_federation.services.blocks.DynamicBlockIndexService;
 import org.onebusaway.transit_data_federation.services.transit_graph.*;
 import org.onebusaway.transit_data_federation.services.transit_graph.dynamic.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import static com.google.common.primitives.Doubles.toArray;
 import static org.onebusaway.geospatial.services.SphericalGeometryLibrary.distance;
 
 /**
@@ -42,6 +49,17 @@ import static org.onebusaway.geospatial.services.SphericalGeometryLibrary.distan
 public class DynamicTripBuilder {
 
   private static Logger _log = LoggerFactory.getLogger(DynamicTripBuilder.class);
+
+  private StopTimeEntriesFactory _stopTimeEntriesFactory;
+  private DynamicBlockIndexService _blockIndexService;
+  @Autowired
+  public void setStopTimeEntriesFactory(
+          StopTimeEntriesFactory stopTimeEntriesFactory) {
+    _stopTimeEntriesFactory = stopTimeEntriesFactory;
+  }
+  public void setBlockIndexService(DynamicBlockIndexService blockIndexService) {
+    _blockIndexService = blockIndexService;
+  }
 
   private TransitGraphDao _graph;
   public void setTransitGraphDao(TransitGraphDao dao) {
@@ -54,10 +72,26 @@ public class DynamicTripBuilder {
   public BlockDescriptor createBlockDescriptor(AddedTripInfo addedTripInfo) {
     // from the addedTripInfo generate the trips and stops, and return in the block descriptor
     BlockDescriptor dynamicBd = new BlockDescriptor();
+<<<<<<< HEAD
     dynamicBd.setScheduleRelationship(addedTripInfo.getScheduleRelationship());
     dynamicBd.setBlockInstance(createBlockInstance(addedTripInfo));
     dynamicBd.setStartTime(addedTripInfo.getTripStartTime());
     dynamicBd.setStartDate(new ServiceDate(new Date(addedTripInfo.getServiceDate())));
+=======
+    dynamicBd.setScheduleRelationship(BlockDescriptor.ScheduleRelationship.ADDED);
+    AgencyAndId blockId = new AgencyAndId(addedTripInfo.getAgencyId(), addedTripInfo.getTripId());
+    // here we look up past blocks, and advance our position along the block
+    BlockInstance instance = _blockIndexService.getDynamicBlockInstance(blockId);
+    if (instance == null) {
+      dynamicBd.setBlockInstance(createBlockInstance(addedTripInfo));
+      dynamicBd.setStartTime(addedTripInfo.getTripStartTime());
+      dynamicBd.setStartDate(new ServiceDate(new Date(addedTripInfo.getServiceDate())));
+    } else {
+      dynamicBd.setBlockInstance(instance);
+      dynamicBd.setStartTime(addedTripInfo.getTripStartTime());
+      dynamicBd.setStartDate(new ServiceDate(new Date(instance.getServiceDate())));
+    }
+>>>>>>> 9cd347d9489b4d3e44907665856e7909aef16ca7
     return dynamicBd;
   }
 
@@ -145,8 +179,12 @@ public class DynamicTripBuilder {
       StopEntry stop = findStop(addedTripInfo.getAgencyId(), stopInfo.getStopId());
       DynamicStopTimeEntryImpl stopTime = new DynamicStopTimeEntryImpl();
       stopTime.setStop(copyFromStop(stop));
-      stopTime.setArrivalTime(toSecondsInDay(stopInfo.getArrivalTime(), addedTripInfo.getServiceDate()));
-      stopTime.setDepartureTime(toSecondsInDay(stopInfo.getDepartureTime(), addedTripInfo.getServiceDate()));
+      if (stopInfo.getArrivalTime() > 0) {
+        stopTime.setArrivalTime(toSecondsInDay(stopInfo.getArrivalTime(), addedTripInfo.getServiceDate()));
+      }
+      if (stopInfo.getDepartureTime() > 0) {
+        stopTime.setDepartureTime(toSecondsInDay(stopInfo.getDepartureTime(), addedTripInfo.getServiceDate()));
+      }
       stopTime.setSequence(sequence);
       stopTime.setTrip(trip);
       if (stopTime.getArrivalTime() < 1 && stopTime.getDepartureTime() < 1) {
@@ -156,8 +194,30 @@ public class DynamicTripBuilder {
       sequence++;
       stops.add(stopTime);
     }
+    ShapePoints shapePoints = null;
+    shapePoints = loadShapePoints(trip);
+    _stopTimeEntriesFactory.ensureStopTimesHaveShapeDistanceTraveledSet(stops, shapePoints);
     return stops;
   }
+
+  private ShapePoints loadShapePoints(DynamicTripEntryImpl trip) {
+    ShapePoints result = new ShapePoints();
+    result.setShapeId(trip.getShapeId());
+    List<Double> lats = new ArrayList<>();
+    List<Double> lons = new ArrayList<>();
+    if (trip.getStopTimes() != null) {
+      for (StopTimeEntry stopTime : trip.getStopTimes()) {
+        lats.add(stopTime.getStop().getStopLat());
+        lons.add(stopTime.getStop().getStopLon());
+      }
+
+      result.setLats(toArray(lats));
+      result.setLons(toArray(lons));
+      return result;
+    }
+    return null;
+  }
+
 
   private int toSecondsInDay(long time, long serviceDate) {
     return Math.toIntExact((time - serviceDate) / 1000);

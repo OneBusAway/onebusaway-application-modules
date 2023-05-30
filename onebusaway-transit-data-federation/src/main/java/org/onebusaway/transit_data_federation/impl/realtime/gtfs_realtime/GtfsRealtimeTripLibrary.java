@@ -550,7 +550,6 @@ public class GtfsRealtimeTripLibrary {
     String agencyId = blockDescriptor.getBlockInstance().getBlock().getBlock().getId().getAgencyId();
     record.setStatus(blockDescriptor.getScheduleRelationship().toString());
     record.setServiceDate(blockDescriptor.getBlockInstance().getServiceDate());
-    record.setScheduleDeviation(0); // for subways new schedule is the prediction
     record.setTimeOfRecord(currentTime());
     record.setBlockStartTime(blockDescriptor.getStartTime());
     record.setVehicleId(
@@ -596,8 +595,57 @@ public class GtfsRealtimeTripLibrary {
       }
 
       record.setTimepointPredictions(timepointPredictions);
+      record.setScheduleDeviation(calculateScheduleDeviation(blockDescriptor.getBlockInstance(), timepointPredictions));
     }
 
+  }
+
+  /**
+   * scheduleDeviation - in seconds (+deviation is late, -deviation is
+   *    *          early)
+   */
+  private double calculateScheduleDeviation(BlockInstance blockInstance, List<TimepointPredictionRecord> timepointPredictions) {
+    int predictionSize = timepointPredictions.size();
+    int stopTimesSize = blockInstance.getBlock().getTrips().get(0).getStopTimes().size();
+    TimepointPredictionRecord timepointPredictionRecord = timepointPredictions.get(predictionSize - 1);
+    BlockStopTimeEntry blockStopTimeEntry = blockInstance.getBlock().getTrips().get(0).getStopTimes().get(stopTimesSize - 1);
+
+    // we assume linear interpolation of stops, so compare last stops for schedule deviation
+    AgencyAndId predictionStopId = timepointPredictionRecord.getTimepointId();
+    AgencyAndId stopTimeStopId = blockStopTimeEntry.getStopTime().getStop().getId();
+    if (predictionStopId.equals(stopTimeStopId)) {
+      if (timepointPredictionRecord.getTimepointPredictedArrivalTime() > 0)
+        return calculateScheduleDeviation(blockInstance.getServiceDate(), timepointPredictionRecord.getTimepointPredictedArrivalTime(),
+                blockStopTimeEntry.getStopTime().getArrivalTime());
+      if (timepointPredictionRecord.getTimepointPredictedDepartureTime() > 0)
+        return calculateScheduleDeviation(blockInstance.getServiceDate(), timepointPredictionRecord.getTimepointPredictedDepartureTime(),
+                blockStopTimeEntry.getStopTime().getDepartureTime());
+    }
+
+    // we didn't match on the last stop, do a simple search for same stops
+    for (BlockStopTimeEntry stopTime : blockInstance.getBlock().getTrips().get(0).getStopTimes()) {
+      stopTimeStopId = stopTime.getStopTime().getStop().getId();
+      for (TimepointPredictionRecord timepointPrediction : timepointPredictions) {
+        predictionStopId = timepointPrediction.getTimepointId();
+        if (stopTimeStopId.equals(predictionStopId)) {
+          if (timepointPrediction.getTimepointPredictedArrivalTime() > 0) {
+            return calculateScheduleDeviation(blockInstance.getServiceDate(), timepointPredictionRecord.getTimepointPredictedArrivalTime(),
+                    blockStopTimeEntry.getStopTime().getArrivalTime());
+          }
+          if (timepointPrediction.getTimepointPredictedDepartureTime() > 0) {
+            return calculateScheduleDeviation(blockInstance.getServiceDate(), timepointPredictionRecord.getTimepointPredictedDepartureTime(),
+                    blockStopTimeEntry.getStopTime().getDepartureTime());
+          }
+        }
+      }
+    }
+    return 0;  // nothing matched, assume on time
+  }
+
+  private double calculateScheduleDeviation(long serviceDate, long predictionMillis, int stopTimeSeconds) {
+    long stopTime = serviceDate + (stopTimeSeconds * 1000);
+    double deviation = (predictionMillis / 1000) - (stopTime / 1000);
+    return deviation;
   }
 
 

@@ -20,8 +20,12 @@ import org.onebusaway.realtime.api.VehicleLocationRecord;
 import org.onebusaway.transit_data_federation.model.TargetTime;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 
+import java.util.List;
+
 public interface DynamicBlockLocationService extends VehicleLocationListener {
 
-  void register(BlockLocation blockLocation);
+  void register(BlockInstance blockInstance, VehicleLocationRecord record);
   BlockLocation getLocationForBlockInstance(BlockInstance blockInstance, TargetTime time);
+  List<BlockLocation> getLocationsForBlockInstance(BlockInstance blockInstance, TargetTime time);
+   void handleVehicleLocationRecord(BlockInstance blockInstance, VehicleLocationRecord record);
 }

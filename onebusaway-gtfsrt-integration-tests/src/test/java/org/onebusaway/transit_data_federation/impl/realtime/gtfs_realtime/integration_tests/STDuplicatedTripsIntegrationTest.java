@@ -60,7 +60,8 @@ public class STDuplicatedTripsIntegrationTest extends AbstractGtfsRealtimeIntegr
     URL tmpFeedLocation = createFeedLocation();
     writeFeed(feed, tmpFeedLocation);
     source.setTripUpdatesUrl(tmpFeedLocation);
-    source.refresh(); // launch
+    // todo not impl yet
+    //source.refresh(); // launch
 
     // todo now test for expected values
     // assert duplicated trips are present

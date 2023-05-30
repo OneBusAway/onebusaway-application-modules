@@ -54,4 +54,9 @@ public interface TripEntry {
    * @return
    */
   public FrequencyEntry getFrequencyLabel();
+
+  /**
+   * Setter for dynamic instances, for static instances only use during initial building.
+   */
+  TripEntry setBlock(BlockEntry block);
 }

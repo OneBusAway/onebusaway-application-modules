@@ -39,6 +39,13 @@ public class BlockIndexServiceImpl implements BlockIndexService {
   @Autowired
   DynamicBlockIndexService dynamicBlockIndexService;
 
+  public void setStaticBlockIndexService(StaticBlockIndexService staticBlockIndexService) {
+    this.staticBlockIndexService = staticBlockIndexService;
+  }
+  public void setDynamicBlockIndexService(DynamicBlockIndexService dynamicBlockIndexService) {
+    this.dynamicBlockIndexService = dynamicBlockIndexService;
+  }
+
   @Override
   public List<BlockTripIndex> getBlockTripIndices() {
     return staticBlockIndexService.getBlockTripIndices();
@@ -63,11 +70,13 @@ public class BlockIndexServiceImpl implements BlockIndexService {
   public List<BlockStopTimeIndex> getStopTimeIndicesForStop(StopEntry stopEntry) {
     List<BlockStopTimeIndex> list = new ArrayList<>();
     List<BlockStopTimeIndex> staticIndices = staticBlockIndexService.getStopTimeIndicesForStop(stopEntry);
-    List<BlockStopTimeIndex> dynamicIndicies = dynamicBlockIndexService.getStopTimeIndicesForStop(stopEntry);
     if (staticIndices != null)
       list.addAll(staticIndices);
-    if (dynamicIndicies != null)
-      list.addAll(dynamicIndicies);
+    if (dynamicBlockIndexService != null) {
+      List<BlockStopTimeIndex> dynamicIndicies = dynamicBlockIndexService.getStopTimeIndicesForStop(stopEntry);
+      if (dynamicIndicies != null)
+        list.addAll(dynamicIndicies);
+    }
     return list;
   }
 

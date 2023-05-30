@@ -379,7 +379,7 @@ public class ExtendedCalendarServiceImpl implements ExtendedCalendarService {
     // 95% of configs look like this
     if (activeServiceIds.size() == 1 && inactiveServiceIds.isEmpty()) {
       LocalizedServiceId localizedServiceId = activeServiceIds.get(0);
-      if (_dynamicCalendarService.hasServiceId(localizedServiceId)) {
+      if (_dynamicCalendarService != null && _dynamicCalendarService.hasServiceId(localizedServiceId)) {
         // this serviceId comes from dynamic trips
         return _dynamicCalendarService.getServiceDatesWithinRange(localizedServiceId,
                 interval, from, to);
