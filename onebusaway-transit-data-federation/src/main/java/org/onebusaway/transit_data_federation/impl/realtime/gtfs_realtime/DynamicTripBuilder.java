@@ -24,6 +24,7 @@ import org.onebusaway.realtime.api.EVehicleType;
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopTimeEntriesFactory;
 import org.onebusaway.transit_data_federation.model.ShapePoints;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
+import org.onebusaway.transit_data_federation.services.blocks.DynamicBlockIndexService;
 import org.onebusaway.transit_data_federation.services.transit_graph.*;
 import org.onebusaway.transit_data_federation.services.transit_graph.dynamic.*;
 import org.slf4j.Logger;
@@ -45,10 +46,14 @@ public class DynamicTripBuilder {
   private static Logger _log = LoggerFactory.getLogger(DynamicTripBuilder.class);
 
   private StopTimeEntriesFactory _stopTimeEntriesFactory;
+  private DynamicBlockIndexService _blockIndexService;
   @Autowired
   public void setStopTimeEntriesFactory(
           StopTimeEntriesFactory stopTimeEntriesFactory) {
     _stopTimeEntriesFactory = stopTimeEntriesFactory;
+  }
+  public void setBlockIndexService(DynamicBlockIndexService blockIndexService) {
+    _blockIndexService = blockIndexService;
   }
 
   private TransitGraphDao _graph;
@@ -61,9 +66,18 @@ public class DynamicTripBuilder {
     // from the addedTripInfo generate the trips and stops, and return in the block descriptor
     BlockDescriptor dynamicBd = new BlockDescriptor();
     dynamicBd.setScheduleRelationship(BlockDescriptor.ScheduleRelationship.ADDED);
-    dynamicBd.setBlockInstance(createBlockInstance(addedTripInfo));
-    dynamicBd.setStartTime(addedTripInfo.getTripStartTime());
-    dynamicBd.setStartDate(new ServiceDate(new Date(addedTripInfo.getServiceDate())));
+    AgencyAndId blockId = new AgencyAndId(addedTripInfo.getAgencyId(), addedTripInfo.getTripId());
+    // here we look up past blocks, and advance our position along the block
+    BlockInstance instance = _blockIndexService.getDynamicBlockInstance(blockId);
+    if (instance == null) {
+      dynamicBd.setBlockInstance(createBlockInstance(addedTripInfo));
+      dynamicBd.setStartTime(addedTripInfo.getTripStartTime());
+      dynamicBd.setStartDate(new ServiceDate(new Date(addedTripInfo.getServiceDate())));
+    } else {
+      dynamicBd.setBlockInstance(instance);
+      dynamicBd.setStartTime(addedTripInfo.getTripStartTime());
+      dynamicBd.setStartDate(new ServiceDate(new Date(instance.getServiceDate())));
+    }
     return dynamicBd;
   }
 

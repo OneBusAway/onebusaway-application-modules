@@ -451,6 +451,7 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     DynamicTripBuilder tripBuilder = new DynamicTripBuilder();
     tripBuilder.setStopTimeEntriesFactory(_stopTimeEntriesFactory);
     tripBuilder.setTransitGraphDao(_transitGraphDao);
+    tripBuilder.setBlockIndexService(_dynamicBlockIndexService);
     _tripsLibrary.setDynamicTripBuilder(tripBuilder);
 
     
