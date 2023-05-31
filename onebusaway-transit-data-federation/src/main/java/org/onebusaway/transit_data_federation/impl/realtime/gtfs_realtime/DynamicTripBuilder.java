@@ -22,11 +22,8 @@ import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.LocalizedServiceId;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
 import org.onebusaway.realtime.api.EVehicleType;
-<<<<<<< HEAD
 import org.onebusaway.transit_data.model.TransitDataConstants;
-=======
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopTimeEntriesFactory;
->>>>>>> 9cd347d9489b4d3e44907665856e7909aef16ca7
 import org.onebusaway.transit_data_federation.model.ShapePoints;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.blocks.DynamicBlockIndexService;
@@ -72,12 +69,6 @@ public class DynamicTripBuilder {
   public BlockDescriptor createBlockDescriptor(AddedTripInfo addedTripInfo) {
     // from the addedTripInfo generate the trips and stops, and return in the block descriptor
     BlockDescriptor dynamicBd = new BlockDescriptor();
-<<<<<<< HEAD
-    dynamicBd.setScheduleRelationship(addedTripInfo.getScheduleRelationship());
-    dynamicBd.setBlockInstance(createBlockInstance(addedTripInfo));
-    dynamicBd.setStartTime(addedTripInfo.getTripStartTime());
-    dynamicBd.setStartDate(new ServiceDate(new Date(addedTripInfo.getServiceDate())));
-=======
     dynamicBd.setScheduleRelationship(BlockDescriptor.ScheduleRelationship.ADDED);
     AgencyAndId blockId = new AgencyAndId(addedTripInfo.getAgencyId(), addedTripInfo.getTripId());
     // here we look up past blocks, and advance our position along the block
@@ -91,7 +82,6 @@ public class DynamicTripBuilder {
       dynamicBd.setStartTime(addedTripInfo.getTripStartTime());
       dynamicBd.setStartDate(new ServiceDate(new Date(instance.getServiceDate())));
     }
->>>>>>> 9cd347d9489b4d3e44907665856e7909aef16ca7
     return dynamicBd;
   }
 
@@ -119,58 +109,58 @@ public class DynamicTripBuilder {
     trip.setDirectionId(addedTripInfo.getDirectionId());
     trip.setBlock((DynamicBlockEntry) block);
     trip.setServiceId(createLocalizedServiceId(addedTripInfo));
-    trip.setShapeId(createShape(addedTripInfo));
+//    trip.setShapeId(createShape(addedTripInfo));
     trip.setStopTimes(createStopTimes(addedTripInfo, trip));
     trip.setTotalTripDistance(calculateTripDistance(trip));
     return trip;
   }
 
-  private AgencyAndId createShape(AddedTripInfo addedTripInfo) {
-    if(TransitDataConstants.STATUS_DUPLICATED.equals(addedTripInfo.getScheduleRelationship().toString())){
-      return addedTripInfo.getShapeId();
-    }
-    ShapePoints shapePoints = new ShapePoints();
-    List<String> stopIds = new ArrayList<>();
-    String shapeKey =  String.join("|",stopIds);
-
-    for (AddedStopInfo stopInfo : addedTripInfo.getStops()){
-      stopIds.add(stopInfo.getStopId());
-    }
-
-    if(!_shapeCache.containsKey(shapeKey)){
-      List<Double> lats = new ArrayList<>();
-      List<Double> lons = new ArrayList<>();
-      List<Double> distanceTraveled = new ArrayList<>();
-      double distance = 0.0;
-      double previousLat = 0.0, previousLon = 0.0;
-      int i = 0;
-
-      for(String stopId : stopIds){
-        StopEntry stop = findStop(addedTripInfo.getAgencyId(), stopId);
-        double lat = stop.getStopLat();
-        double lon = stop.getStopLon();
-
-        lats.add(lat);
-        lons.add(lon);
-
-        if(i != 0){
-           distance += SphericalGeometryLibrary.distance(previousLat, previousLon, lat, lon);
-          distanceTraveled.add(distance);
-        }
-        previousLat = lat;
-        previousLon = lon;
-        i++;
-      }
-      shapePoints.setDistTraveled(distanceTraveled.stream().mapToDouble(Double::doubleValue).toArray());
-      shapePoints.setLats(lats.stream().mapToDouble(Double::doubleValue).toArray());
-      shapePoints.setLons(lons.stream().mapToDouble(Double::doubleValue).toArray());
-      shapePoints.setShapeId(new AgencyAndId(addedTripInfo.getAgencyId(),addedTripInfo.getAgencyId()));
-
-      _shapeCache.put(shapeKey,shapePoints);
-    }
-    return _shapeCache.get(shapeKey).getShapeId();
-
-  }
+//  private AgencyAndId createShape(AddedTripInfo addedTripInfo) {
+//    if(TransitDataConstants.STATUS_DUPLICATED.equals(addedTripInfo.getScheduleRelationship().toString())){
+//      return addedTripInfo.getShapeId();
+//    }
+//    ShapePoints shapePoints = new ShapePoints();
+//    List<String> stopIds = new ArrayList<>();
+//    String shapeKey =  String.join("|",stopIds);
+//
+//    for (AddedStopInfo stopInfo : addedTripInfo.getStops()){
+//      stopIds.add(stopInfo.getStopId());
+//    }
+//
+//    if(!_shapeCache.containsKey(shapeKey)){
+//      List<Double> lats = new ArrayList<>();
+//      List<Double> lons = new ArrayList<>();
+//      List<Double> distanceTraveled = new ArrayList<>();
+//      double distance = 0.0;
+//      double previousLat = 0.0, previousLon = 0.0;
+//      int i = 0;
+//
+//      for(String stopId : stopIds){
+//        StopEntry stop = findStop(addedTripInfo.getAgencyId(), stopId);
+//        double lat = stop.getStopLat();
+//        double lon = stop.getStopLon();
+//
+//        lats.add(lat);
+//        lons.add(lon);
+//
+//        if(i != 0){
+//           distance += SphericalGeometryLibrary.distance(previousLat, previousLon, lat, lon);
+//          distanceTraveled.add(distance);
+//        }
+//        previousLat = lat;
+//        previousLon = lon;
+//        i++;
+//      }
+//      shapePoints.setDistTraveled(distanceTraveled.stream().mapToDouble(Double::doubleValue).toArray());
+//      shapePoints.setLats(lats.stream().mapToDouble(Double::doubleValue).toArray());
+//      shapePoints.setLons(lons.stream().mapToDouble(Double::doubleValue).toArray());
+//      shapePoints.setShapeId(new AgencyAndId(addedTripInfo.getAgencyId(),addedTripInfo.getAgencyId()));
+//
+//      _shapeCache.put(shapeKey,shapePoints);
+//    }
+//    return _shapeCache.get(shapeKey).getShapeId();
+//
+//  }
 
   private List<StopTimeEntry> createStopTimes(AddedTripInfo addedTripInfo, DynamicTripEntryImpl trip) {
     List<StopTimeEntry> stops = new ArrayList<>();
