@@ -42,6 +42,7 @@ import org.onebusaway.transit_data.model.trips.TripsForBoundsQueryBean;
 import org.onebusaway.transit_data.model.trips.TripsForRouteQueryBean;
 import org.onebusaway.transit_data_federation.impl.realtime.apc.VehicleOccupancyRecordCache;
 import org.onebusaway.transit_data_federation.services.ArrivalAndDepartureService;
+import org.onebusaway.transit_data_federation.services.transit_graph.dynamic.DynamicBlockConfigurationEntryImpl;
 import org.onebusaway.util.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.beans.ServiceAlertsBeanService;
 import org.onebusaway.transit_data_federation.services.beans.StopBeanService;
@@ -393,8 +394,10 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
     List<TripDetailsBean> tripDetails = new ArrayList<TripDetailsBean>();
     for (BlockLocation location : locations) {
       TripDetailsBean details = getBlockLocationAsTripDetails(
-          location.getActiveTripInstance(), location, inclusion, time);
-      tripDetails.add(details);
+              location.getActiveTripInstance(), location, inclusion, time);
+      if (tripDetails != null) {
+        tripDetails.add(details);
+      }
     }
     return new ListBean<TripDetailsBean>(tripDetails, false);
   }

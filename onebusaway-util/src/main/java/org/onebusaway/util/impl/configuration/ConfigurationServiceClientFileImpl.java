@@ -153,6 +153,7 @@ public class ConfigurationServiceClientFileImpl implements
 	public List<Map<String, String>> getItems(String baseObject,
 			String... params) throws Exception {
 		_log.debug("getItems(" + baseObject + ", " + params + ")");
+		if (getConfig() == null) return null;
 		return (List<Map<String, String>>) getConfig().get("config");
 	}
 

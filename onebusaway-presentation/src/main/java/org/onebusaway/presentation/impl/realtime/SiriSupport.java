@@ -108,8 +108,16 @@ public final class SiriSupport {
 		BlockInstanceBean blockInstance = null;
 		if (adBean == null) {
 			blockInstance = transitDataService.getBlockInstance(currentVehicleTripStatus.getActiveTrip().getBlockId(), currentVehicleTripStatus.getServiceDate());
+			if (blockInstance == null) {
+				_log.error("illegal blockId {}",  currentVehicleTripStatus.getActiveTrip().getBlockId());
+				return;
+			}
 		} else {
 			blockInstance = transitDataService.getBlockInstance(adBean.getTrip().getBlockId(), currentVehicleTripStatus.getServiceDate());
+			if (blockInstance == null) {
+				_log.error("illegal blockId {}",  adBean.getTrip().getBlockId());
+				return;
+			}
 		}
 
 		List<BlockTripBean> blockTrips = blockInstance.getBlockConfiguration().getTrips();

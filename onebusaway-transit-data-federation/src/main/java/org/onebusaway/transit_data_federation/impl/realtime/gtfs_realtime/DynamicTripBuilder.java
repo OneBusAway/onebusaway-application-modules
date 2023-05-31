@@ -70,19 +70,24 @@ public class DynamicTripBuilder {
     // here we look up past blocks, and advance our position along the block
     BlockInstance instance = _blockIndexService.getDynamicBlockInstance(blockId);
     if (instance == null) {
-      dynamicBd.setBlockInstance(createBlockInstance(addedTripInfo));
-      dynamicBd.setStartTime(addedTripInfo.getTripStartTime());
-      dynamicBd.setStartDate(new ServiceDate(new Date(addedTripInfo.getServiceDate())));
-    } else {
-      dynamicBd.setBlockInstance(instance);
-      dynamicBd.setStartTime(addedTripInfo.getTripStartTime());
-      dynamicBd.setStartDate(new ServiceDate(new Date(instance.getServiceDate())));
+      instance = createBlockInstance(addedTripInfo);
     }
+
+    if (instance == null) {
+      _log.error("unable to create descriptor for additional trip {}", addedTripInfo);
+      return null;
+    }
+
+    dynamicBd.setBlockInstance(instance);
+    dynamicBd.setStartTime(addedTripInfo.getTripStartTime());
+    dynamicBd.setStartDate(new ServiceDate(new Date(addedTripInfo.getServiceDate())));
     return dynamicBd;
   }
 
   private BlockInstance createBlockInstance(AddedTripInfo addedTripInfo) {
-    return new BlockInstance(createBlockConfiguration(addedTripInfo),
+    BlockConfigurationEntry blockConfiguration = createBlockConfiguration(addedTripInfo);
+    if (blockConfiguration == null) return null;
+    return new BlockInstance(blockConfiguration,
             addedTripInfo.getServiceDate());
   }
 
@@ -92,7 +97,9 @@ public class DynamicTripBuilder {
     configBuilder.setBlock(blockEntry);
     configBuilder.setServiceIds(createServiceIdActivation(addedTripInfo));
     configBuilder.setTrips(new ArrayList<>());
-    configBuilder.getTrips().add(createTrip(addedTripInfo, blockEntry));
+    TripEntry trip = createTrip(addedTripInfo, blockEntry);
+    if (trip == null) return null;
+    configBuilder.getTrips().add(trip);
     DynamicBlockConfigurationEntryImpl config = new DynamicBlockConfigurationEntryImpl(configBuilder);
     blockEntry.getConfigurations().add(config);
     return config;
@@ -101,7 +108,9 @@ public class DynamicTripBuilder {
   private TripEntry createTrip(AddedTripInfo addedTripInfo, BlockEntry block) {
     DynamicTripEntryImpl trip = new DynamicTripEntryImpl();
     trip.setId(new AgencyAndId(addedTripInfo.getAgencyId(), addedTripInfo.getTripId()));
-    trip.setRoute(createRoute(addedTripInfo));
+    DynamicRouteEntry route = createRoute(addedTripInfo);
+    if (route == null) return null;
+    trip.setRoute(route);
     trip.setDirectionId(addedTripInfo.getDirectionId());
     trip.setBlock((DynamicBlockEntry) block);
     trip.setServiceId(createLocalizedServiceId(addedTripInfo));
@@ -197,7 +206,10 @@ public class DynamicTripBuilder {
     String routeId = addedTripInfo.getRouteId();
     if (!_routeCache.containsKey(routeId)) {
       RouteEntry staticRouteEntry = findRouteEntry(addedTripInfo.getAgencyId(), routeId);
-      if (staticRouteEntry == null) throw new IllegalStateException("no such route " + routeId);
+      if (staticRouteEntry == null) {
+        _log.error("no such route " + routeId);
+        return null;
+      }
       _routeCache.put(routeId, copyFromRoute(staticRouteEntry));
     }
     return _routeCache.get(routeId);

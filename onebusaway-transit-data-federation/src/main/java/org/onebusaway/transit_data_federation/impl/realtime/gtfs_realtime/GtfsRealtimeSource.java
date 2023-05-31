@@ -81,6 +81,7 @@ import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import com.jcraft.jsch.SftpException;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 public class GtfsRealtimeSource implements MonitoredDataSource {
 
@@ -222,15 +223,18 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   }
 
   @Autowired
+  @Qualifier("dynamicBlockIndexServiceImpl")
   public void setDynamicBlockIndexService(DynamicBlockIndexService dynamicBlockIndexService) {
     this._dynamicBlockIndexService = dynamicBlockIndexService;
   }
   @Autowired
+  @Qualifier("dynamicBlockLocationServiceImpl")
   public void setDynamicBlockLocationService(DynamicBlockLocationService _dynamicBlockLocationService) {
     this._dynamicBlockLocationService = _dynamicBlockLocationService;
   }
 
   @Autowired
+  @Qualifier("vehicleStatusServiceImpl")
   public void setVehicleLocationListener(
       VehicleLocationListener vehicleLocationListener) {
     _vehicleLocationListener = vehicleLocationListener;

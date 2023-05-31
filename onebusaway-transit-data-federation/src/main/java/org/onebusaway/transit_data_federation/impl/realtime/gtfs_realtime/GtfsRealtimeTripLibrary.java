@@ -220,6 +220,7 @@ public class GtfsRealtimeTripLibrary {
               AddedTripInfo addedTripInfo = _addedTripService.handleNyctDescriptor(tu, nyctTripDescriptor);
               // convert to blockDescriptor
               bd =_dynamicTripBuilder.createBlockDescriptor(addedTripInfo);
+              if (bd == null) continue; // we failed
               // if this trip has a vehiclePosition it will be matched later
               anonymousTripUpdatesByBlock.put(bd, tu);
             }

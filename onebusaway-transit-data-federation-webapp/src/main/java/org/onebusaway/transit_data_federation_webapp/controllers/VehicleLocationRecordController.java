@@ -25,6 +25,7 @@ import org.onebusaway.realtime.api.VehicleLocationListener;
 import org.onebusaway.realtime.api.VehicleLocationRecord;
 import org.onebusaway.util.AgencyAndIdLibrary;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -37,6 +38,7 @@ public class VehicleLocationRecordController {
       "yyyy-MM-dd HH:mm:ss");
 
   @Autowired
+  @Qualifier("vehicleStatusServiceImpl")
   private VehicleLocationListener _vehicleLocationListener;
 
   @RequestMapping("/vehicle-location-record.action")
