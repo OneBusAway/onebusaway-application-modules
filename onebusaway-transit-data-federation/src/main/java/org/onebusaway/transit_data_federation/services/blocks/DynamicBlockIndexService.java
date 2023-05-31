@@ -26,4 +26,6 @@ public interface DynamicBlockIndexService {
   void register(BlockInstance blockInstance);
 
   BlockInstance getDynamicBlockInstance(AgencyAndId blockId);
+
+  List<BlockTripIndex> getBlockTripIndicesForRouteCollectionId(AgencyAndId routeCollectionId);
 }

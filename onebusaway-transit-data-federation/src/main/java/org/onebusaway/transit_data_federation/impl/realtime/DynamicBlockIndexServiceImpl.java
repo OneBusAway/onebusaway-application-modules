@@ -19,12 +19,18 @@ import org.apache.commons.collections4.map.PassiveExpiringMap;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.impl.blocks.BlockIndexFactoryServiceImpl;
 import org.onebusaway.transit_data_federation.impl.blocks.BlockStopTimeIndicesFactory;
+import org.onebusaway.transit_data_federation.model.transit_graph.DynamicGraph;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.blocks.BlockStopTimeIndex;
 import org.onebusaway.transit_data_federation.services.blocks.BlockTripIndex;
 import org.onebusaway.transit_data_federation.services.blocks.DynamicBlockIndexService;
+import org.onebusaway.transit_data_federation.services.narrative.NarrativeService;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.RouteEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -37,17 +43,31 @@ import java.util.*;
  */
 public class DynamicBlockIndexServiceImpl implements DynamicBlockIndexService {
 
+  private static Logger _log = LoggerFactory.getLogger(DynamicBlockIndexServiceImpl.class);
+
   static final int CACHE_TIMEOUT = 5 * 60 * 1000; // 5 minutes
   @Autowired
   private BlockIndexFactoryServiceImpl blockIndexFactoryService;
+  private NarrativeService _narrativeService;
 
+  private DynamicGraph _dynamicGraph;
+
+  private Map<AgencyAndId, List<BlockTripIndex>> blockTripIndexByRouteCollectionId = new PassiveExpiringMap<>(CACHE_TIMEOUT);
   private BlockStopTimeIndicesFactory blockStopTimeIndicesFactory = new BlockStopTimeIndicesFactory();
   // we trivially expire the cache after 5 minutes
   private Map<AgencyAndId, BlockInstance> cacheByBlockId = new PassiveExpiringMap<>(CACHE_TIMEOUT);
   // we trivially expire the cache after 5 minutes
   private Map<AgencyAndId, Set<BlockStopTimeIndex>> blockStopTimeIndicesByStopId = new PassiveExpiringMap<>(CACHE_TIMEOUT);
 
+  @Autowired
+  public void setNarrativeService(NarrativeService narrativeService) {
+    _narrativeService = narrativeService;
+  }
 
+  @Autowired
+  public void setDynamicGraph(DynamicGraph dynamicGraph) {
+    _dynamicGraph = dynamicGraph;
+  }
   @Override
   public List<BlockStopTimeIndex> getStopTimeIndicesForStop(StopEntry stopEntry) {
     if (!blockStopTimeIndicesByStopId.containsKey(stopEntry.getId())) {
@@ -66,7 +86,20 @@ public class DynamicBlockIndexServiceImpl implements DynamicBlockIndexService {
 
     List<BlockEntry> blocks = new ArrayList<>();
     blocks.add(blockInstance.getBlock().getBlock());
+    _dynamicGraph.registerBlock(blockInstance.getBlock().getBlock());
     List<BlockTripIndex> blockTripIndexList = blockIndexFactoryService.createTripIndices(blocks);
+    for (BlockTripIndex blockTripIndex : blockTripIndexList) {
+      TripEntry trip = blockTripIndex.getTrips().get(0).getTrip();
+      _dynamicGraph.registerTrip(trip);
+      RouteEntry route = trip.getRoute();
+      _dynamicGraph.registerRoute(route);
+      if (!blockTripIndexByRouteCollectionId.containsKey(route.getId())) {
+        blockTripIndexByRouteCollectionId.put(route.getId(), new ArrayList<>());
+      }
+      blockTripIndexByRouteCollectionId.get(route.getId()).add(blockTripIndex);
+      _narrativeService.addDynamicTrip(blockTripIndex);
+    }
+
 
     List<BlockStopTimeIndex> indices = blockStopTimeIndicesFactory.createIndices(blocks);
     for (BlockStopTimeIndex sti : indices) {
@@ -82,5 +115,10 @@ public class DynamicBlockIndexServiceImpl implements DynamicBlockIndexService {
   @Override
   public BlockInstance getDynamicBlockInstance(AgencyAndId blockId) {
     return cacheByBlockId.get(blockId);
+  }
+
+  @Override
+  public List<BlockTripIndex> getBlockTripIndicesForRouteCollectionId(AgencyAndId routeCollectionId) {
+    return blockTripIndexByRouteCollectionId.get(routeCollectionId);
   }
 }

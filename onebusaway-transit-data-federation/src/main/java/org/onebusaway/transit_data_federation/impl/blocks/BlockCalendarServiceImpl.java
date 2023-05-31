@@ -29,7 +29,7 @@ import org.onebusaway.collections.Min;
 import org.onebusaway.container.cache.Cacheable;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.ServiceInterval;
-import org.onebusaway.transit_data.model.blocks.BlockInstanceBean;
+import org.onebusaway.transit_data_federation.model.transit_graph.DynamicGraph;
 import org.onebusaway.transit_data_federation.services.ExtendedCalendarService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockCalendarService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockIndexService;
@@ -58,6 +58,8 @@ class BlockCalendarServiceImpl implements BlockCalendarService {
 
   private TransitGraphDao _transitGraphDao;
 
+  private DynamicGraph _dynamicGraph;
+
   @Autowired
   public void setCalendarService(ExtendedCalendarService calendarService) {
     _calendarService = calendarService;
@@ -73,6 +75,10 @@ class BlockCalendarServiceImpl implements BlockCalendarService {
     _transitGraphDao = transitGraphDao;
   }
 
+  @Autowired
+  public void setDynamicGraph(DynamicGraph dynamicGraph) {
+    _dynamicGraph = dynamicGraph;
+  }
   /****
    * {@link BlockCalendarService} Interface
    ****/
@@ -82,6 +88,9 @@ class BlockCalendarServiceImpl implements BlockCalendarService {
   public BlockInstance getBlockInstance(AgencyAndId blockId, long serviceDate) {
 
     BlockEntry block = _transitGraphDao.getBlockEntryForId(blockId);
+    if (block == null && _dynamicGraph != null) {
+      block = _dynamicGraph.getBlockEntryForId(blockId);
+    }
 
     if (block == null)
       throw new IllegalArgumentException("unknown block: " + blockId);

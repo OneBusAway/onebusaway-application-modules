@@ -18,9 +18,12 @@ package org.onebusaway.transit_data_federation.impl.narrative;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.commons.collections4.map.PassiveExpiringMap;
 import org.onebusaway.container.refresh.Refreshable;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.impl.RefreshableResources;
@@ -31,7 +34,9 @@ import org.onebusaway.transit_data_federation.model.narrative.StopNarrative;
 import org.onebusaway.transit_data_federation.model.narrative.StopTimeNarrative;
 import org.onebusaway.transit_data_federation.model.narrative.TripNarrative;
 import org.onebusaway.transit_data_federation.services.FederatedTransitDataBundle;
+import org.onebusaway.transit_data_federation.services.blocks.BlockTripIndex;
 import org.onebusaway.transit_data_federation.services.narrative.NarrativeService;
+import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
 import org.onebusaway.utility.ObjectSerializationLibrary;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +44,9 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class NarrativeServiceImpl implements NarrativeService {
+
+  static final int CACHE_TIMEOUT = 24 * 60 * 60 * 1000; // 1 day
+  private Map<AgencyAndId, TripNarrative> _dynamicTripCache = new PassiveExpiringMap<>(CACHE_TIMEOUT);
 
   private NarrativeProviderImpl _provider;
 
@@ -91,11 +99,32 @@ public class NarrativeServiceImpl implements NarrativeService {
 
   @Override
   public TripNarrative getTripForId(AgencyAndId tripId) {
-    return _provider.getNarrativeForTripId(tripId);
+    TripNarrative tn = _provider.getNarrativeForTripId(tripId);
+    if (tn == null)
+      tn = _dynamicTripCache.get(tripId);
+    return tn;
   }
   
   @Override
   public ShapePoints getShapePointsForId(AgencyAndId id) {
     return _provider.getShapePointsForId(id);
+  }
+
+  @Override
+  public void addDynamicTrip(BlockTripIndex blockTripIndex) {
+    BlockTripEntry blockTripEntry = blockTripIndex.getTrips().get(0);
+    AgencyAndId tripId = blockTripEntry.getTrip().getId();
+
+    if (_dynamicTripCache.containsKey(tripId)) {
+      return; // nothing to do
+    }
+    TripNarrative.Builder builder = TripNarrative.builder();
+
+    List<StopTimeEntry> stopTimes = blockTripEntry.getTrip().getStopTimes();
+    int lastStopIndex = stopTimes.size() - 1;
+    AgencyAndId stopId = stopTimes.get(lastStopIndex).getStop().getId();
+    StopNarrative stopForId = getStopForId(stopId);
+    builder.setTripHeadsign("to " + stopForId.getName());
+    _dynamicTripCache.put(tripId, builder.create());
   }
 }
