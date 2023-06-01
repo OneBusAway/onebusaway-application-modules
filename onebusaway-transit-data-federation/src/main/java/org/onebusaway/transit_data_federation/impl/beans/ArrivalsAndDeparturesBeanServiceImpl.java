@@ -33,6 +33,7 @@ import org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.GtfsRe
 import org.onebusaway.transit_data_federation.model.TargetTime;
 import org.onebusaway.transit_data_federation.model.bundle.HistoricalRidership;
 import org.onebusaway.transit_data_federation.model.narrative.StopTimeNarrative;
+import org.onebusaway.transit_data_federation.model.narrative.TripNarrative;
 import org.onebusaway.transit_data_federation.services.*;
 import org.onebusaway.transit_data_federation.services.beans.*;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
@@ -49,6 +50,8 @@ import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEnt
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
 import org.onebusaway.util.AgencyAndIdLibrary;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jmx.export.annotation.ManagedAttribute;
 import org.springframework.jmx.export.annotation.ManagedResource;
@@ -61,6 +64,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 @ManagedResource("org.onebusaway.transit_data_federation.impl.beans:name=ArrivalsAndDeparturesBeanServiceImpl")
 public class ArrivalsAndDeparturesBeanServiceImpl implements
     ArrivalsAndDeparturesBeanService {
+
+  private static Logger _log = LoggerFactory.getLogger(ArrivalsAndDeparturesBeanServiceImpl.class);
 
   private TransitGraphDao _transitGraphDao;
 
@@ -324,8 +329,15 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
     pab.setDepartureEnabled(stopTime.getSequence() + 1 < trip.getStopTimes().size());
     
     StopTimeNarrative stopTimeNarrative = _narrativeService.getStopTimeForEntry(stopTime);
-    pab.setRouteShortName(stopTimeNarrative.getRouteShortName());
-    pab.setTripHeadsign(stopTimeNarrative.getStopHeadsign());
+    if (stopTimeNarrative == null) {
+      // dynamic stops without a narrative, look to trip instead
+      TripNarrative tripNarrative = _narrativeService.getTripForId(trip.getId());
+      pab.setRouteShortName(tripNarrative.getRouteShortName());
+     pab.setTripHeadsign(tripNarrative.getTripHeadsign());
+    } else {
+      pab.setRouteShortName(stopTimeNarrative.getRouteShortName());
+      pab.setTripHeadsign(stopTimeNarrative.getStopHeadsign());
+    }
 
     StopBean stopBean = stopBeanCache.get(stop.getId());
 

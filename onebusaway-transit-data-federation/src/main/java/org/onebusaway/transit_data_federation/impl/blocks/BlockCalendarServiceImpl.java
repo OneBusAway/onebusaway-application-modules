@@ -46,6 +46,7 @@ import org.onebusaway.transit_data_federation.services.transit_graph.BlockEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.FrequencyEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
+import org.onebusaway.transit_data_federation.services.transit_graph.dynamic.DynamicTripEntryImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -106,7 +107,7 @@ class BlockCalendarServiceImpl implements BlockCalendarService {
      * about the sort order of configurations
      */
     for (BlockConfigurationEntry configuration : configurations) {
-      if (allServiceIdsAreActiveForServiceDate(configuration, date)) {
+      if (_blockIndexService.isDynamicBlock(configuration.getBlock()) || allServiceIdsAreActiveForServiceDate(configuration, date)) {
         return new BlockInstance(configuration, state);
       }
 
@@ -137,6 +138,12 @@ class BlockCalendarServiceImpl implements BlockCalendarService {
     Min<BlockInstance> m = new Min<BlockInstance>();
 
     BlockEntry blockEntry = _transitGraphDao.getBlockEntryForId(blockId);
+    if (blockEntry == null) {
+      blockEntry = _dynamicGraph.getBlockEntryForId(blockId);
+    }
+    if (blockEntry == null) {
+      return m.getMinElements();
+    }
     for (BlockConfigurationEntry blockConfig : blockEntry.getConfigurations()) {
       List<Date> serviceDates = _calendarService.getDatesForServiceIdsAsOrderedList(blockConfig.getServiceIds());
 
@@ -269,6 +276,13 @@ class BlockCalendarServiceImpl implements BlockCalendarService {
     
     InstanceState state = new InstanceState(serviceDate.getTime());
 
+    // we special case the search for dynamic trips
+    if (indexFrom == indexTo && trips.get(0).getTrip() instanceof DynamicTripEntryImpl) {
+      BlockTripEntry trip = trips.get(0);
+      BlockConfigurationEntry block = trip.getBlockConfiguration();
+      BlockInstance instance = new BlockInstance(block, state);
+      instances.add(instance);
+    }
     for (int in = indexFrom; in < indexTo; in++) {
       BlockTripEntry trip = trips.get(in);
       BlockConfigurationEntry block = trip.getBlockConfiguration();

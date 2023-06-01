@@ -38,6 +38,7 @@ import org.onebusaway.transit_data_federation.services.blocks.BlockTripIndex;
 import org.onebusaway.transit_data_federation.services.narrative.NarrativeService;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
 import org.onebusaway.utility.ObjectSerializationLibrary;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -113,18 +114,21 @@ public class NarrativeServiceImpl implements NarrativeService {
   @Override
   public void addDynamicTrip(BlockTripIndex blockTripIndex) {
     BlockTripEntry blockTripEntry = blockTripIndex.getTrips().get(0);
-    AgencyAndId tripId = blockTripEntry.getTrip().getId();
+    TripEntry trip = blockTripEntry.getTrip();
+    AgencyAndId tripId = trip.getId();
 
     if (_dynamicTripCache.containsKey(tripId)) {
       return; // nothing to do
     }
     TripNarrative.Builder builder = TripNarrative.builder();
 
-    List<StopTimeEntry> stopTimes = blockTripEntry.getTrip().getStopTimes();
+    RouteCollectionNarrative routeNarrative = getRouteCollectionForId(trip.getRoute().getId());
+    List<StopTimeEntry> stopTimes = trip.getStopTimes();
     int lastStopIndex = stopTimes.size() - 1;
     AgencyAndId stopId = stopTimes.get(lastStopIndex).getStop().getId();
     StopNarrative stopForId = getStopForId(stopId);
-    builder.setTripHeadsign("to " + stopForId.getName());
+    builder.setTripHeadsign(stopForId.getName());
+    builder.setRouteShortName(routeNarrative.getShortName());
     _dynamicTripCache.put(tripId, builder.create());
   }
 }

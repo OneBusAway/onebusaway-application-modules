@@ -16,6 +16,7 @@
 package org.onebusaway.transit_data_federation.services.blocks;
 
 
+import org.onebusaway.transit_data_federation.services.transit_graph.BlockEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
 
 /**
@@ -27,4 +28,6 @@ public interface BlockIndexService extends StaticBlockIndexService, DynamicBlock
 
 
   boolean isDynamicTrip(TripEntry trip);
+
+  boolean isDynamicBlock(BlockEntry block);
 }

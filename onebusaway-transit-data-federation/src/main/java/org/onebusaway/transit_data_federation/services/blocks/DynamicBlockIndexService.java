@@ -28,4 +28,6 @@ public interface DynamicBlockIndexService {
   BlockInstance getDynamicBlockInstance(AgencyAndId blockId);
 
   List<BlockTripIndex> getBlockTripIndicesForRouteCollectionId(AgencyAndId routeCollectionId);
+
+  List<BlockTripIndex> getBlockTripIndicesForBlock(AgencyAndId blockId);
 }
