@@ -20,8 +20,10 @@ import java.util.List;
 
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.services.blocks.*;
+import org.onebusaway.transit_data_federation.services.transit_graph.BlockEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.dynamic.DynamicBlockEntry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -75,7 +77,18 @@ public class BlockIndexServiceImpl implements BlockIndexService {
 
   @Override
   public List<BlockTripIndex> getBlockTripIndicesForBlock(AgencyAndId blockId) {
-    return staticBlockIndexService.getBlockTripIndicesForBlock(blockId);
+    List<BlockTripIndex> indices = new ArrayList<>();
+    List<BlockTripIndex> staticIndices = staticBlockIndexService.getBlockTripIndicesForBlock(blockId);
+    if (staticIndices != null) {
+      indices.addAll(staticIndices);
+    }
+    if (dynamicBlockIndexService != null) {
+      List<BlockTripIndex> dynamicIndices = dynamicBlockIndexService.getBlockTripIndicesForBlock(blockId);
+      if (dynamicIndices != null) {
+        indices.addAll(dynamicIndices);
+      }
+    }
+    return indices;
   }
 
   @Override
@@ -165,5 +178,8 @@ public class BlockIndexServiceImpl implements BlockIndexService {
   public boolean isDynamicTrip(TripEntry trip) {
     // todo we could do something smarter here
     return trip.getServiceId().toString().contains("DYN-");
+  }
+  public boolean isDynamicBlock(BlockEntry block) {
+    return block instanceof DynamicBlockEntry;
   }
 }

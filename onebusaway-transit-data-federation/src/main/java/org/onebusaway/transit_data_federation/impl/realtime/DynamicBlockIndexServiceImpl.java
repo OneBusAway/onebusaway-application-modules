@@ -59,6 +59,7 @@ public class DynamicBlockIndexServiceImpl implements DynamicBlockIndexService {
   // we trivially expire the cache after 5 minutes
   private Map<AgencyAndId, Set<BlockStopTimeIndex>> blockStopTimeIndicesByStopId = new PassiveExpiringMap<>(CACHE_TIMEOUT);
 
+  private Map<AgencyAndId, List<BlockTripIndex>> blockTripByBlockId = new PassiveExpiringMap<>(CACHE_TIMEOUT);
   @Autowired
   public void setNarrativeService(NarrativeService narrativeService) {
     _narrativeService = narrativeService;
@@ -89,6 +90,10 @@ public class DynamicBlockIndexServiceImpl implements DynamicBlockIndexService {
     _dynamicGraph.registerBlock(blockInstance.getBlock().getBlock());
     List<BlockTripIndex> blockTripIndexList = blockIndexFactoryService.createTripIndices(blocks);
     for (BlockTripIndex blockTripIndex : blockTripIndexList) {
+      if (!blockTripByBlockId.containsKey(id)) {
+        blockTripByBlockId.put(id, new ArrayList<>());
+      }
+      blockTripByBlockId.get(id).add(blockTripIndex);
       TripEntry trip = blockTripIndex.getTrips().get(0).getTrip();
       _dynamicGraph.registerTrip(trip);
       RouteEntry route = trip.getRoute();
@@ -120,5 +125,10 @@ public class DynamicBlockIndexServiceImpl implements DynamicBlockIndexService {
   @Override
   public List<BlockTripIndex> getBlockTripIndicesForRouteCollectionId(AgencyAndId routeCollectionId) {
     return blockTripIndexByRouteCollectionId.get(routeCollectionId);
+  }
+
+  @Override
+  public List<BlockTripIndex> getBlockTripIndicesForBlock(AgencyAndId blockId) {
+    return blockTripByBlockId.get(blockId);
   }
 }
