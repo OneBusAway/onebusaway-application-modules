@@ -16,6 +16,7 @@
 package org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime;
 
 
+import org.apache.commons.collections4.map.PassiveExpiringMap;
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.LocalizedServiceId;
@@ -45,6 +46,7 @@ public class DynamicTripBuilder {
 
   private static Logger _log = LoggerFactory.getLogger(DynamicTripBuilder.class);
 
+  private Map<String, DynamicRouteEntry> _routeCache = new PassiveExpiringMap<>(60 * 60 * 1000);// 1 hour to support bundle changes
   private StopTimeEntriesFactory _stopTimeEntriesFactory;
   private DynamicBlockIndexService _blockIndexService;
   @Autowired
@@ -61,7 +63,6 @@ public class DynamicTripBuilder {
     _graph = dao;
   }
 
-  private Map<String, DynamicRouteEntry> _routeCache = new HashMap<>();
   public BlockDescriptor createBlockDescriptor(AddedTripInfo addedTripInfo) {
     // from the addedTripInfo generate the trips and stops, and return in the block descriptor
     BlockDescriptor dynamicBd = new BlockDescriptor();
@@ -220,7 +221,7 @@ public class DynamicTripBuilder {
     route.setId(staticRouteEntry.getId());
     route.setParent(staticRouteEntry.getParent());
     route.setTrips(new ArrayList<>());
-    route.setType(EVehicleType.BUS.getGtfsType());
+    route.setType(staticRouteEntry.getType());
     return route;
   }
 

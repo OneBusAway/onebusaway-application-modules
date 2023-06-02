@@ -554,9 +554,6 @@ public class GtfsRealtimeTripLibrary {
     } else {
         record.setBlockStartTime(getFirstStpTime(blockDescriptor));
     }
-    record.setVehicleId(
-            new AgencyAndId(agencyId,
-                    vehicleId));
     List<TimepointPredictionRecord> timepointPredictions = new ArrayList<TimepointPredictionRecord>();
     for (TripUpdate tripUpdate : tripUpdates) {
       if (record.getTripId() == null) {
