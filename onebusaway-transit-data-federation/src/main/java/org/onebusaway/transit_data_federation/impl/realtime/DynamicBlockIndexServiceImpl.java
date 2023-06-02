@@ -45,7 +45,7 @@ public class DynamicBlockIndexServiceImpl implements DynamicBlockIndexService {
 
   private static Logger _log = LoggerFactory.getLogger(DynamicBlockIndexServiceImpl.class);
 
-  static final int CACHE_TIMEOUT = 5 * 60 * 1000; // 5 minutes
+  static final int CACHE_TIMEOUT = 12 * 60 * 60 * 1000; // 12 hours
   @Autowired
   private BlockIndexFactoryServiceImpl blockIndexFactoryService;
   private NarrativeService _narrativeService;
