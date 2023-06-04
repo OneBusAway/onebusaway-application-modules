@@ -15,20 +15,14 @@
  */
 package org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime;
 
-import org.onebusaway.gtfs.model.calendar.ServiceDate;
-import org.onebusaway.realtime.api.VehicleLocationListener;
-import org.onebusaway.realtime.api.VehicleLocationRecord;
-import org.onebusaway.transit_data.model.TransitDataConstants;
-import org.onebusaway.transit_data_federation.services.transit_graph.RouteEntry;
-import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
-import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
+import org.onebusaway.gtfs.model.AgencyAndId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import java.util.ArrayList;
+import java.util.*;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -43,12 +37,16 @@ public class GtfsRealtimeCanceledHarness {
 
   // set this to be greater than zero to activate
   private int _refreshInterval = 0;
-  private String _routeId = null;
+  private List<AgencyAndId> _routeIds = new ArrayList<>();
 
+  private GtfsRealtimeCancelService _service;
   private ScheduledFuture<?> _refreshTask;
   private ScheduledExecutorService _scheduledExecutorService;
-  private TransitGraphDao _transitGraphDao;
-  private VehicleLocationListener _vehicleLocationListener;
+
+  @Autowired
+  public void setGtfsRealtimeCancelService(GtfsRealtimeCancelService service) {
+    _service = service;
+  }
 
   public void setRefreshInterval(int refreshInterval) {
     _refreshInterval = refreshInterval;
@@ -60,20 +58,23 @@ public class GtfsRealtimeCanceledHarness {
     _scheduledExecutorService = scheduledExecutorService;
   }
 
-  @Autowired
-  public void setTransitGraphDao(TransitGraphDao transitGraphDao) {
-    _transitGraphDao = transitGraphDao;
-  }
-
-  @Autowired
-  public void setVehicleLocationListener(
-          VehicleLocationListener vehicleLocationListener) {
-    _vehicleLocationListener = vehicleLocationListener;
-  }
-
-
-  public void setRouteId(String routeId) {
-    _routeId = routeId;
+  public void setRouteIds(String routeIdAsCsv) {
+    if (routeIdAsCsv != null)
+      if (routeIdAsCsv.contains(",")) {
+        for (String s : routeIdAsCsv.split(",")) {
+          try {
+            _routeIds.add(AgencyAndId.convertFromString(s));
+          } catch (IllegalStateException ise) {
+            _log.error("invalid route {}", s);
+          }
+        }
+      } else {
+        try {
+          _routeIds.add(AgencyAndId.convertFromString(routeIdAsCsv)); // single element
+        } catch (IllegalStateException ise) {
+          _log.error("invalid route {}", routeIdAsCsv);
+        }
+      }
   }
 
   @PostConstruct
@@ -93,43 +94,8 @@ public class GtfsRealtimeCanceledHarness {
   }
 
   public void refresh() {
-    ArrayList<TripEntry> tripsToCancel = new ArrayList<>();
-    for (TripEntry trip : _transitGraphDao.getAllTrips()) {
-      if (select(trip.getRoute())) {
-        if (isActive(trip)) {
-          tripsToCancel.add(trip);
-        }
-      }
-    }
-
-
-    for (TripEntry trip : tripsToCancel) {
-      VehicleLocationRecord record = createVehicleLocationRecord(trip);
-      if (record != null) {
-        _vehicleLocationListener.handleVehicleLocationRecord(record);
-      }
-    }
-    _log.info("cancelled all service for route {}", _routeId);
-  }
-
-  private VehicleLocationRecord createVehicleLocationRecord(TripEntry trip) {
-    VehicleLocationRecord record = new VehicleLocationRecord();
-    record.setTimeOfRecord(System.currentTimeMillis());
-    record.setBlockId(trip.getBlock().getId());
-    record.setStatus(TransitDataConstants.STATUS_CANCELED);
-    record.setTripId(trip.getId());
-    record.setServiceDate(new ServiceDate().getAsDate().getTime());
-    return record;
-  }
-
-  private boolean isActive(TripEntry trip) {
-    return true; // todo: for now we don't care
-  }
-
-  private boolean select(RouteEntry route) {
-    if (_routeId != null)
-      return _routeId.equals(route.getId().getId());
-    return false;
+    if (_routeIds != null)
+      _service.cancelServiceForRoutes(_routeIds);
   }
 
   private class RefreshTask implements Runnable {

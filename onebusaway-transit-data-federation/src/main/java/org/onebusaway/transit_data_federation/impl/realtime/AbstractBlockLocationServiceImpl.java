@@ -54,7 +54,7 @@ public abstract class AbstractBlockLocationServiceImpl {
    * based on estimated schedule deviation information. If false, we will use
    * the last known location of the bus as the position.
    */
-  private boolean _locationInterpolation = true;
+  private boolean _locationInterpolation = false;
 
   /**
    * Should we sample the schedule deviation history?
