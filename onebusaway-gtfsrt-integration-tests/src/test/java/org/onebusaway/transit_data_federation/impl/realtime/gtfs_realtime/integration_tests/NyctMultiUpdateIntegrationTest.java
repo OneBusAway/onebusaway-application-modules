@@ -68,12 +68,22 @@ public class NyctMultiUpdateIntegrationTest extends AbstractGtfsRealtimeIntegrat
     listener.setVehicleLocationListener(actualListener);
     source.setVehicleLocationListener(listener);
 
+    TransitGraphDao graph = getBundleLoader().getApplicationContext().getBean(TransitGraphDao.class);
+    StopEntry firstStop = graph.getStopEntryForId(AgencyAndId.convertFromString("MTASBWY_250N"));
+    long firstStopTime = 1685384106000l;  //14:15 -- 2 minutes in future
+
+
+
     // this is the gtfs-rt protocol-buffer file to match to the loaded bundle
     String gtfsrtFilename1 = "org/onebusaway/transit_data_federation/impl/realtime/gtfs_realtime/integration_tests/nyct_multi_trips/nyct_subways_gtfs_rt.2023-05-29T14:03:24-04:00.pb";
     ClassPathResource gtfsRtResource1 = new ClassPathResource(gtfsrtFilename1);
     if (!gtfsRtResource1.exists()) throw new RuntimeException(gtfsrtFilename1 + " not found in classpath!");
     source.setTripUpdatesUrl(gtfsRtResource1.getURL());
     source.refresh(); // launch
+
+
+    Map<AgencyAndId, Integer> tripCount = new HashMap<>();
+    verifyBeans("beans run 1", tripCount, firstStop, firstStopTime);
 
     // 10 minutes later
     String gtfsrtFilename2 = "org/onebusaway/transit_data_federation/impl/realtime/gtfs_realtime/integration_tests/nyct_multi_trips/nyct_subways_gtfs_rt.2023-05-29T14:13:29-04:00.pb";
@@ -82,12 +92,34 @@ public class NyctMultiUpdateIntegrationTest extends AbstractGtfsRealtimeIntegrat
     source.setTripUpdatesUrl(gtfsRtResource2.getURL());
     source.refresh(); // launch
 
-    Map<AgencyAndId, Integer> tripCount = new HashMap<>();
+    tripCount.clear();
+    verifyTripRange("range run 2", tripCount, firstStop, firstStopTime);
+    tripCount.clear();
+    verifyBeans("beans run 2", tripCount, firstStop, firstStopTime);
 
+  }
+
+  private void verifyBeans(String message, Map<AgencyAndId, Integer> tripCount, StopEntry firstStop, long firstStopTime) {
+    // search for duplicates in API
+    ArrivalsAndDeparturesBeanService service = getBundleLoader().getApplicationContext().getBean(ArrivalsAndDeparturesBeanService.class);
+    ArrivalsAndDeparturesQueryBean query = new ArrivalsAndDeparturesQueryBean();
+    query.setTime(firstStopTime);
+    List<ArrivalAndDepartureBean> arrivalsAndDeparturesByStopId = service.getArrivalsAndDeparturesByStopId(firstStop.getId(), query);
+
+    for (ArrivalAndDepartureBean bean : arrivalsAndDeparturesByStopId) {
+      AgencyAndId tripId = AgencyAndIdLibrary.convertFromString(bean.getTrip().getId());
+      if (!tripCount.containsKey(tripId)) {
+        tripCount.put(tripId, 0);
+      }
+      tripCount.put(tripId, tripCount.get(tripId) + 1);
+    }
+    verifyTripCounts(message, tripCount);
+
+
+  }
+
+  private void verifyTripRange(String message, Map<AgencyAndId, Integer> tripCount, StopEntry firstStop, long firstStopTime) {
     ArrivalAndDepartureService arrivalAndDepartureService = getBundleLoader().getApplicationContext().getBean(ArrivalAndDepartureService.class);
-    TransitGraphDao graph = getBundleLoader().getApplicationContext().getBean(TransitGraphDao.class);
-    StopEntry firstStop = graph.getStopEntryForId(AgencyAndId.convertFromString("MTASBWY_250N"));
-    long firstStopTime = 1685384106000l;  //14:15 -- 2 minutes in future
 
     long window = 75 * 60 * 1000; // 75 minutes
     List<ArrivalAndDepartureInstance> list = arrivalAndDepartureService.getArrivalsAndDeparturesForStopInTimeRange(firstStop,
@@ -102,9 +134,7 @@ public class NyctMultiUpdateIntegrationTest extends AbstractGtfsRealtimeIntegrat
       tripCount.put(id, tripCount.get(id) + 1);
     }
 
-    verifyTripCounts(tripCount);
-
-
+    verifyTripCounts(message, tripCount);
     int dabSetCount = 0;
     int dynamicBlockCount = 0;
     for (ArrivalAndDepartureInstance instance : list) {
@@ -119,28 +149,14 @@ public class NyctMultiUpdateIntegrationTest extends AbstractGtfsRealtimeIntegrat
     assertTrue(dabSetCount > 0);
     assertEquals(dynamicBlockCount, dabSetCount);
 
-    // search for duplicates in API
-    ArrivalsAndDeparturesBeanService service = getBundleLoader().getApplicationContext().getBean(ArrivalsAndDeparturesBeanService.class);
-    ArrivalsAndDeparturesQueryBean query = new ArrivalsAndDeparturesQueryBean();
-    query.setTime(firstStopTime);
-    List<ArrivalAndDepartureBean> arrivalsAndDeparturesByStopId = service.getArrivalsAndDeparturesByStopId(firstStop.getId(), query);
-    tripCount.clear();
-    for (ArrivalAndDepartureBean bean : arrivalsAndDeparturesByStopId) {
-      AgencyAndId tripId = AgencyAndIdLibrary.convertFromString(bean.getTrip().getId());
-      if (!tripCount.containsKey(tripId)) {
-        tripCount.put(tripId, 0);
-      }
-      tripCount.put(tripId, tripCount.get(tripId) + 1);
-    }
-    verifyTripCounts(tripCount);
-
   }
 
-  private void verifyTripCounts(Map<AgencyAndId, Integer> tripCount) {
+  private void verifyTripCounts(String message, Map<AgencyAndId, Integer> tripCount) {
     for (AgencyAndId tripId : tripCount.keySet()) {
       Integer count = tripCount.get(tripId);
       if (count > 1) {
-        _log.error("duplicate trip {}", tripId);
+        _log.error(message + "; duplicate trip {}", tripId);
+        fail(message + "duplicate trip " + tripId);
       }
     }
   }
