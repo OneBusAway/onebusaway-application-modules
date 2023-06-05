@@ -21,7 +21,6 @@ import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.LocalizedServiceId;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
-import org.onebusaway.realtime.api.EVehicleType;
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopTimeEntriesFactory;
 import org.onebusaway.transit_data_federation.model.ShapePoints;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
@@ -120,6 +119,10 @@ public class DynamicTripBuilder {
     // todo Merha
     trip.setStopTimes(createStopTimes(addedTripInfo, trip));
     trip.setTotalTripDistance(calculateTripDistance(trip));
+    if (trip.getStopTimes() == null || trip.getStopTimes().isEmpty()) {
+      _log.error("aborting trip creation {} with no stops", addedTripInfo.getTripId());
+      return null;
+    }
     return trip;
   }
 
@@ -128,6 +131,10 @@ public class DynamicTripBuilder {
     int sequence = 0;
     for (AddedStopInfo stopInfo : addedTripInfo.getStops()) {
       StopEntry stop = findStop(addedTripInfo.getAgencyId(), stopInfo.getStopId());
+      if (stop == null) {
+        _log.error("no such stop {}", stopInfo.getStopId());
+        continue;
+      }
       DynamicStopTimeEntryImpl stopTime = new DynamicStopTimeEntryImpl();
       stopTime.setStop(copyFromStop(stop));
       if (stopInfo.getArrivalTime() > 0) {
@@ -182,7 +189,7 @@ public class DynamicTripBuilder {
   }
 
   private StopEntry findStop(String agencyId, String stopId) {
-    return _graph.getStopEntryForId(new AgencyAndId(agencyId, stopId), true);
+    return _graph.getStopEntryForId(new AgencyAndId(agencyId, stopId), false);
   }
 
   private double calculateTripDistance(DynamicTripEntryImpl trip) {

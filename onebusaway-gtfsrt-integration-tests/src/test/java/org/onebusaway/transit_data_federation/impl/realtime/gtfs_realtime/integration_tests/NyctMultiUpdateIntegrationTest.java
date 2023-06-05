@@ -18,6 +18,8 @@ package org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.integ
 import org.junit.Test;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.realtime.api.VehicleLocationListener;
+import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
+import org.onebusaway.transit_data.model.ArrivalsAndDeparturesQueryBean;
 import org.onebusaway.transit_data_federation.impl.realtime.BlockLocationServiceImpl;
 import org.onebusaway.transit_data_federation.impl.realtime.TestVehicleLocationListener;
 import org.onebusaway.transit_data_federation.impl.realtime.VehicleStatusServiceImpl;
@@ -25,13 +27,17 @@ import org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.Abstra
 import org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.GtfsRealtimeSource;
 import org.onebusaway.transit_data_federation.model.TargetTime;
 import org.onebusaway.transit_data_federation.services.ArrivalAndDepartureService;
+import org.onebusaway.transit_data_federation.services.beans.ArrivalsAndDeparturesBeanService;
 import org.onebusaway.transit_data_federation.services.realtime.ArrivalAndDepartureInstance;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 import org.onebusaway.transit_data_federation.services.transit_graph.dynamic.DynamicBlockConfigurationEntryImpl;
+import org.onebusaway.util.AgencyAndIdLibrary;
 import org.springframework.core.io.ClassPathResource;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.Assert.*;
 
@@ -76,6 +82,7 @@ public class NyctMultiUpdateIntegrationTest extends AbstractGtfsRealtimeIntegrat
     source.setTripUpdatesUrl(gtfsRtResource2.getURL());
     source.refresh(); // launch
 
+    Map<AgencyAndId, Integer> tripCount = new HashMap<>();
 
     ArrivalAndDepartureService arrivalAndDepartureService = getBundleLoader().getApplicationContext().getBean(ArrivalAndDepartureService.class);
     TransitGraphDao graph = getBundleLoader().getApplicationContext().getBean(TransitGraphDao.class);
@@ -86,6 +93,17 @@ public class NyctMultiUpdateIntegrationTest extends AbstractGtfsRealtimeIntegrat
     List<ArrivalAndDepartureInstance> list = arrivalAndDepartureService.getArrivalsAndDeparturesForStopInTimeRange(firstStop,
             new TargetTime(firstStopTime), firstStopTime - window, firstStopTime + window);
     assertNotNull(list);
+
+    for (ArrivalAndDepartureInstance ad : list) {
+      AgencyAndId id = ad.getBlockTrip().getTrip().getId();
+      if (!tripCount.containsKey(id)) {
+        tripCount.put(id, 0);
+      }
+      tripCount.put(id, tripCount.get(id) + 1);
+    }
+
+    verifyTripCounts(tripCount);
+
 
     int dabSetCount = 0;
     int dynamicBlockCount = 0;
@@ -100,6 +118,31 @@ public class NyctMultiUpdateIntegrationTest extends AbstractGtfsRealtimeIntegrat
     }
     assertTrue(dabSetCount > 0);
     assertEquals(dynamicBlockCount, dabSetCount);
+
+    // search for duplicates in API
+    ArrivalsAndDeparturesBeanService service = getBundleLoader().getApplicationContext().getBean(ArrivalsAndDeparturesBeanService.class);
+    ArrivalsAndDeparturesQueryBean query = new ArrivalsAndDeparturesQueryBean();
+    query.setTime(firstStopTime);
+    List<ArrivalAndDepartureBean> arrivalsAndDeparturesByStopId = service.getArrivalsAndDeparturesByStopId(firstStop.getId(), query);
+    tripCount.clear();
+    for (ArrivalAndDepartureBean bean : arrivalsAndDeparturesByStopId) {
+      AgencyAndId tripId = AgencyAndIdLibrary.convertFromString(bean.getTrip().getId());
+      if (!tripCount.containsKey(tripId)) {
+        tripCount.put(tripId, 0);
+      }
+      tripCount.put(tripId, tripCount.get(tripId) + 1);
+    }
+    verifyTripCounts(tripCount);
+
+  }
+
+  private void verifyTripCounts(Map<AgencyAndId, Integer> tripCount) {
+    for (AgencyAndId tripId : tripCount.keySet()) {
+      Integer count = tripCount.get(tripId);
+      if (count > 1) {
+        _log.error("duplicate trip {}", tripId);
+      }
+    }
   }
 
 }

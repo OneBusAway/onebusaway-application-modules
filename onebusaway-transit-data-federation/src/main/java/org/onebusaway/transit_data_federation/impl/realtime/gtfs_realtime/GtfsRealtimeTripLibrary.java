@@ -623,6 +623,10 @@ public class GtfsRealtimeTripLibrary {
   private double calculateScheduleDeviation(BlockInstance blockInstance, List<TimepointPredictionRecord> timepointPredictions) {
     int predictionSize = timepointPredictions.size();
     int stopTimesSize = blockInstance.getBlock().getTrips().get(0).getStopTimes().size();
+    if (predictionSize < 1) {
+      _log.debug("not enough data to calculate deviation");
+      return 0.0;
+    }
     TimepointPredictionRecord timepointPredictionRecord = timepointPredictions.get(predictionSize - 1);
     BlockStopTimeEntry blockStopTimeEntry = blockInstance.getBlock().getTrips().get(0).getStopTimes().get(stopTimesSize - 1);
 
@@ -673,10 +677,18 @@ public class GtfsRealtimeTripLibrary {
   private int getBlockStartTimeForTripStartTime(BlockInstance instance,
       AgencyAndId tripId, int tripStartTime) {
     BlockConfigurationEntry block = instance.getBlock();
-
-    Map<AgencyAndId, BlockTripEntry> blockTripsById = MappingLibrary.mapToValue(
-        block.getTrips(), "trip.id");
-
+    if (block.getTrips() == null || block.getTrips().isEmpty()) {
+      _log.debug("no trips for trip start time on block {}", block.getBlock().getId());
+      return -1;
+    }
+    Map<AgencyAndId, BlockTripEntry> blockTripsById = null;
+    try {
+      blockTripsById = MappingLibrary.mapToValue(
+              block.getTrips(), "trip.id");
+    } catch (IllegalStateException ise) {
+      _log.debug("invalid block {}", block.getBlock().getId());
+      return -1;
+    }
     int rawBlockStartTime = block.getDepartureTimeForIndex(0);
 
     if (!blockTripsById.containsKey(tripId)) {
