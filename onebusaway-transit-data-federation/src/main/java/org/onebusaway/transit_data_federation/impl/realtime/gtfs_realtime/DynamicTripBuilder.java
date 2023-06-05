@@ -132,7 +132,9 @@ public class DynamicTripBuilder {
     for (AddedStopInfo stopInfo : addedTripInfo.getStops()) {
       StopEntry stop = findStop(addedTripInfo.getAgencyId(), stopInfo.getStopId());
       if (stop == null) {
-        _log.error("no such stop {}", stopInfo.getStopId());
+        // some stops are timepoints/internal and not public
+        // these may not have GTFS equivalent and should be dropped
+        _log.debug("no such stop {}", stopInfo.getStopId());
         continue;
       }
       DynamicStopTimeEntryImpl stopTime = new DynamicStopTimeEntryImpl();
