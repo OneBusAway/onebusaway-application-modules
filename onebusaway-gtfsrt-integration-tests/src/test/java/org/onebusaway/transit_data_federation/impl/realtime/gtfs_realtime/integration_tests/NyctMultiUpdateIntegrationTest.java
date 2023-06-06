@@ -18,8 +18,8 @@ package org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.integ
 import org.junit.Test;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.realtime.api.VehicleLocationListener;
-import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
-import org.onebusaway.transit_data.model.ArrivalsAndDeparturesQueryBean;
+import org.onebusaway.transit_data.model.*;
+import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.transit_data_federation.impl.realtime.BlockLocationServiceImpl;
 import org.onebusaway.transit_data_federation.impl.realtime.TestVehicleLocationListener;
 import org.onebusaway.transit_data_federation.impl.realtime.VehicleStatusServiceImpl;
@@ -84,6 +84,8 @@ public class NyctMultiUpdateIntegrationTest extends AbstractGtfsRealtimeIntegrat
 
     Map<AgencyAndId, Integer> tripCount = new HashMap<>();
     verifyBeans("beans run 1", tripCount, firstStop, firstStopTime);
+    verifyRouteDirection("MTASBWY_1");
+    verifyRouteDirection("MTASBWY_A");
 
     // 10 minutes later
     String gtfsrtFilename2 = "org/onebusaway/transit_data_federation/impl/realtime/gtfs_realtime/integration_tests/nyct_multi_trips/nyct_subways_gtfs_rt.2023-05-29T14:13:29-04:00.pb";
@@ -92,10 +94,24 @@ public class NyctMultiUpdateIntegrationTest extends AbstractGtfsRealtimeIntegrat
     source.setTripUpdatesUrl(gtfsRtResource2.getURL());
     source.refresh(); // launch
 
+    verifyRouteDirection("MTASBWY_1");
+    verifyRouteDirection("MTASBWY_A");
+
     tripCount.clear();
     verifyTripRange("range run 2", tripCount, firstStop, firstStopTime);
     tripCount.clear();
     verifyBeans("beans run 2", tripCount, firstStop, firstStopTime);
+
+    String gtfsrtFilename3 = "org/onebusaway/transit_data_federation/impl/realtime/gtfs_realtime/integration_tests/nyct_multi_trips/nyct_subways_gtfs_rt.2023-05-29T14:23:33-04:00.pb";
+    ClassPathResource gtfsRtResource3 = new ClassPathResource(gtfsrtFilename3);
+    if (!gtfsRtResource3.exists()) throw new RuntimeException(gtfsrtFilename3 + " not found in classpath!");
+    source.setTripUpdatesUrl(gtfsRtResource3.getURL());
+    source.refresh(); // launch
+
+    tripCount.clear();
+    verifyTripRange("range run 3", tripCount, firstStop, firstStopTime);
+    tripCount.clear();
+    verifyBeans("beans run 3", tripCount, firstStop, firstStopTime);
 
   }
 
@@ -149,6 +165,21 @@ public class NyctMultiUpdateIntegrationTest extends AbstractGtfsRealtimeIntegrat
     assertTrue(dabSetCount > 0);
     assertEquals(dynamicBlockCount, dabSetCount);
 
+  }
+
+  private void verifyRouteDirection(String routeId) {
+    int count = 0;
+    TransitDataService service = getBundleLoader().getApplicationContext().getBean(TransitDataService.class);
+    StopsForRouteBean stopsForRoute = service.getStopsForRoute(routeId);
+    for (StopGroupingBean stopGrouping : stopsForRoute.getStopGroupings()) {
+      for (StopGroupBean stopGroup : stopGrouping.getStopGroups()) {
+        _log.error("found route grouping {}", stopGroup.getName().getName());
+        count++;
+      }
+
+    }
+
+    assertEquals(2, count);
   }
 
   private void verifyTripCounts(String message, Map<AgencyAndId, Integer> tripCount) {

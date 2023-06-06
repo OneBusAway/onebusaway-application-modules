@@ -111,12 +111,9 @@ public class DynamicTripBuilder {
     DynamicRouteEntry route = createRoute(addedTripInfo);
     if (route == null) return null;
     trip.setRoute(route);
-    trip.setDirectionId(addedTripInfo.getDirectionId());
-    trip.setBlock((DynamicBlockEntry) block);
+    trip.setDirectionId(getGtfsDirectionId(addedTripInfo.getDirectionId()));
+    trip.setBlock(block);
     trip.setServiceId(createLocalizedServiceId(addedTripInfo));
-    // todo we don't have shape -- would be nice to either copy from
-    // route or generate one based on stops
-    // todo Merha
     trip.setStopTimes(createStopTimes(addedTripInfo, trip));
     trip.setTotalTripDistance(calculateTripDistance(trip));
     if (trip.getStopTimes() == null || trip.getStopTimes().isEmpty()) {
@@ -124,6 +121,14 @@ public class DynamicTripBuilder {
       return null;
     }
     return trip;
+  }
+
+  private String getGtfsDirectionId(String directionFlag) {
+    if ("N".equalsIgnoreCase(directionFlag))
+      return "0";
+    if ("S".equalsIgnoreCase(directionFlag))
+      return "1";
+    return directionFlag;
   }
 
   private List<StopTimeEntry> createStopTimes(AddedTripInfo addedTripInfo, DynamicTripEntryImpl trip) {
@@ -220,7 +225,11 @@ public class DynamicTripBuilder {
         _log.error("no such route " + routeId);
         return null;
       }
-      _routeCache.put(routeId, copyFromRoute(staticRouteEntry));
+      synchronized (_routeCache) {
+        if (!_routeCache.containsKey(routeId)) {
+          _routeCache.put(routeId, copyFromRoute(staticRouteEntry));
+        }
+      }
     }
     return _routeCache.get(routeId);
   }
