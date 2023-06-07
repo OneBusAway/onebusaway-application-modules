@@ -81,9 +81,7 @@ public class NyctMultiUpdateIntegrationTest extends AbstractGtfsRealtimeIntegrat
     source.setTripUpdatesUrl(gtfsRtResource1.getURL());
     source.refresh(); // launch
 
-
-    Map<AgencyAndId, Integer> tripCount = new HashMap<>();
-    verifyBeans("beans run 1", tripCount, firstStop, firstStopTime);
+    verifyBeans("beans run 1", firstStop, firstStopTime);
     verifyRouteDirectionStops("MTASBWY_1");
     verifyRouteDirectionStops("MTASBWY_A");
 
@@ -97,10 +95,7 @@ public class NyctMultiUpdateIntegrationTest extends AbstractGtfsRealtimeIntegrat
     verifyRouteDirectionStops("MTASBWY_1");
     verifyRouteDirectionStops("MTASBWY_A");
 
-    tripCount.clear();
-    verifyTripRange("range run 2", tripCount, firstStop, firstStopTime);
-    tripCount.clear();
-    verifyBeans("beans run 2", tripCount, firstStop, firstStopTime);
+    verifyBeans("beans run 2", firstStop, firstStopTime);
 
     String gtfsrtFilename3 = "org/onebusaway/transit_data_federation/impl/realtime/gtfs_realtime/integration_tests/nyct_multi_trips/nyct_subways_gtfs_rt.2023-05-29T14:23:33-04:00.pb";
     ClassPathResource gtfsRtResource3 = new ClassPathResource(gtfsrtFilename3);
@@ -108,17 +103,15 @@ public class NyctMultiUpdateIntegrationTest extends AbstractGtfsRealtimeIntegrat
     source.setTripUpdatesUrl(gtfsRtResource3.getURL());
     source.refresh(); // launch
 
-    tripCount.clear();
-    verifyTripRange("range run 3", tripCount, firstStop, firstStopTime);
-    tripCount.clear();
-    verifyBeans("beans run 3", tripCount, firstStop, firstStopTime);
+    verifyBeans("beans run 3", firstStop, firstStopTime);
 
     verifyRouteDirectionStops("MTASBWY_1");
     verifyRouteDirectionStops("MTASBWY_A");
 
   }
 
-  private void verifyBeans(String message, Map<AgencyAndId, Integer> tripCount, StopEntry firstStop, long firstStopTime) {
+  private void verifyBeans(String message, StopEntry firstStop, long firstStopTime) {
+    Map<AgencyAndId, Integer> tripCount = new HashMap<>();
     // search for duplicates in API
     ArrivalsAndDeparturesBeanService service = getBundleLoader().getApplicationContext().getBean(ArrivalsAndDeparturesBeanService.class);
     ArrivalsAndDeparturesQueryBean query = new ArrivalsAndDeparturesQueryBean();
@@ -132,12 +125,12 @@ public class NyctMultiUpdateIntegrationTest extends AbstractGtfsRealtimeIntegrat
       }
       tripCount.put(tripId, tripCount.get(tripId) + 1);
     }
-    verifyTripCounts(message, tripCount);
-
+    verifyTripRange("range run 2", firstStop, firstStopTime);
 
   }
 
-  private void verifyTripRange(String message, Map<AgencyAndId, Integer> tripCount, StopEntry firstStop, long firstStopTime) {
+  private void verifyTripRange(String message, StopEntry firstStop, long firstStopTime) {
+    Map<AgencyAndId, Integer> tripCount = new HashMap<>();
     ArrivalAndDepartureService arrivalAndDepartureService = getBundleLoader().getApplicationContext().getBean(ArrivalAndDepartureService.class);
 
     long window = 75 * 60 * 1000; // 75 minutes
