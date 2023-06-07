@@ -73,4 +73,18 @@ public class DynamicRouteEntry  implements RouteEntry, Serializable {
     public int getType() {
         return _type;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null || !(obj instanceof RouteEntry))
+            return false;
+        // static or dynamic routes are treated the same
+        RouteEntry route = (RouteEntry) obj;
+        return _id.equals(route.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return _id.hashCode();
+    }
 }

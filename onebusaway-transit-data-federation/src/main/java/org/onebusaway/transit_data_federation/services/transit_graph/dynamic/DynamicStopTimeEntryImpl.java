@@ -186,6 +186,21 @@ public class DynamicStopTimeEntryImpl implements StopTimeEntry, Serializable {
     }
 
     @Override
+    public boolean equals(Object obj) {
+        if (obj == null || !(obj instanceof StopTimeEntry))
+            return false;
+        StopTimeEntry ste = (StopTimeEntry) obj;
+        return _stopTimeId == ste.getId()
+                && _arrivalTime == ste.getArrivalTime()
+                && _departureTime == ste.getDepartureTime()
+                && _sequence == ste.getSequence();
+    }
+
+    @Override
+    public int hashCode() {
+        return _stopTimeId + _arrivalTime + _departureTime + _sequence;
+    }
+    @Override
     public String toString() {
         return "DynamicStopTimeEntryImpl(stop=" + _stop.getId() + " trip=" + _trip
                 + " arrival=" + _arrivalTime + " departure=" + _departureTime + ")";

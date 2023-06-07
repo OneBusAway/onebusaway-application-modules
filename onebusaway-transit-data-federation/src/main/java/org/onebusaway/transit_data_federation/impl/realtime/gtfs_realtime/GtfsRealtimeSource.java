@@ -197,6 +197,10 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   // this is a change from the default, but is much safer
   private boolean _validateCurrentTime = false;
 
+  private List<AgencyAndId> _routeIdsToCancel = null;
+
+  private GtfsRealtimeCancelService _cancelService;
+
   @Autowired
   public void setAgencyService(AgencyService agencyService) {
     _agencyService = agencyService;
@@ -422,7 +426,24 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   public void setAlertSourcePrefix(String prefix) {
     _alertSourcePrefix = prefix;
   }
-  
+
+  public void setRouteIdsToCancel(List<String> routeAgencyIds) {
+    if (routeAgencyIds != null) {
+      _routeIdsToCancel = new ArrayList<>();
+      for (String routeAgencyId : routeAgencyIds) {
+        try {
+          _routeIdsToCancel.add(AgencyAndId.convertFromString(routeAgencyId));
+        } catch (IllegalStateException ise) {
+          _log.error("invalid routeId {}", ise);
+        }
+      }
+    }
+  }
+
+  @Autowired
+  public void setGtfsRealtimeCancelService(GtfsRealtimeCancelService service) {
+    _cancelService = service;
+  }
   @PostConstruct
   public void start() {
     if (_agencyIds.isEmpty()) {
@@ -499,6 +520,11 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
 
     MonitoredResult result = new MonitoredResult();
     result.setAgencyIds(_agencyIds);
+
+    if (_routeIdsToCancel != null) {
+      _cancelService.cancelServiceForRoutes(_routeIdsToCancel);
+    }
+
     handleUpdates(result, tripUpdates, vehiclePositions, alerts, alertCollection);
     // update reference in a thread safe manner
     _monitoredResult = result;

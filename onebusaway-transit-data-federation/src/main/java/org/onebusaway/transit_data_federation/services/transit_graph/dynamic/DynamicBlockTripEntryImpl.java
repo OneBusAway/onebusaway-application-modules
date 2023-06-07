@@ -154,6 +154,19 @@ public class DynamicBlockTripEntryImpl implements BlockTripEntry, Serializable {
     }
 
     @Override
+    public boolean equals(Object obj) {
+        if (obj == null || !(obj instanceof BlockTripEntry))
+            return false;
+        BlockTripEntry bte = (BlockTripEntry) obj;
+        return blockConfiguration.equals(bte.getBlockConfiguration())
+                && trip.equals(bte.getTrip());
+    }
+
+    @Override
+    public int hashCode() {
+        return blockConfiguration.hashCode() + trip.hashCode();
+    }
+    @Override
     public String toString() {
         return trip.getId().toString();
     }

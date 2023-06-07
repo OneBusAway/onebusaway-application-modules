@@ -66,13 +66,7 @@ public class BlockLocationServiceImpl implements BlockLocationService, DynamicBl
   }
 
   public void handleVehicleLocationRecord(VehicleLocationRecord record) {
-    if (TransitDataConstants.STATUS_ADDED.equals(record.getStatus())
-      || TransitDataConstants.STATUS_DUPLICATED.equals(record.getStatus())) {
-      // todo a little messy here
       ((StaticBlockLocationServiceImpl)_staticBlockLocationService).handleVehicleLocationRecord(record);
-    } else {
-      _dynamicBlockLocationService.handleVehicleLocationRecord(record);
-    }
   }
 
   public void handleVehicleLocationRecord(BlockInstance blockInstance, VehicleLocationRecord record) {
@@ -129,6 +123,7 @@ public class BlockLocationServiceImpl implements BlockLocationService, DynamicBl
 
   @Override
   public BlockLocation getScheduledLocationForBlockInstance(BlockInstance blockInstance, long targetTime) {
+    // although this references the static, dynamic is implicitly included included
     return _staticBlockLocationService.getScheduledLocationForBlockInstance(blockInstance, targetTime);
   }
 
@@ -136,11 +131,6 @@ public class BlockLocationServiceImpl implements BlockLocationService, DynamicBl
   public BlockLocation getLocationForVehicleAndTime(AgencyAndId vehicleId, TargetTime time) {
     return _staticBlockLocationService.getLocationForVehicleAndTime(vehicleId, time);
   }
-
-//  @Override
-//  public void register(BlockLocation blockLocation) {
-//     _dynamicBlockLocationService.register(blockLocation);
-//  }
 
   @Override
   public void register(BlockInstance blockInstance, VehicleLocationRecord record) {

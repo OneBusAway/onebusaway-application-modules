@@ -52,6 +52,18 @@ public class DynamicBlockEntry implements BlockEntry, Serializable {
     }
 
     @Override
+    public boolean equals(Object obj) {
+        if (obj == null || !(obj instanceof BlockEntry))
+            return false;
+        BlockEntry be = (BlockEntry) obj;
+        return _id.equals(be.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return _id.hashCode();
+    }
+    @Override
     public String toString() {
         return _id.toString();
     }

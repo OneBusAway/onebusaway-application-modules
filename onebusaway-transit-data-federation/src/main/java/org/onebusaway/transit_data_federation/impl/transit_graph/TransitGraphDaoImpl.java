@@ -18,6 +18,7 @@ package org.onebusaway.transit_data_federation.impl.transit_graph;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -158,7 +159,9 @@ public class TransitGraphDaoImpl implements TransitGraphDao {
 
   @Override
   public List<RouteEntry> getAllRoutes() {
-    return _graph.getAllRoutes();
+    if (_graph != null)
+      return _graph.getAllRoutes();
+    return new ArrayList<>(); // special case on startup before bundle loaded
   }
 
   @Override

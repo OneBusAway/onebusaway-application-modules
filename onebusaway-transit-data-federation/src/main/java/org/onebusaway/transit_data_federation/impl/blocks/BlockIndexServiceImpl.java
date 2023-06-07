@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.transit_data_federation.impl.realtime.DynamicHelper;
 import org.onebusaway.transit_data_federation.services.blocks.*;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
@@ -41,6 +42,8 @@ public class BlockIndexServiceImpl implements BlockIndexService {
   @Qualifier("dynamicBlockIndexServiceImpl")
   @Autowired
   DynamicBlockIndexService dynamicBlockIndexService;
+
+  private DynamicHelper helper = new DynamicHelper();
 
   public void setStaticBlockIndexService(StaticBlockIndexService staticBlockIndexService) {
     this.staticBlockIndexService = staticBlockIndexService;
@@ -176,10 +179,9 @@ public class BlockIndexServiceImpl implements BlockIndexService {
   }
   @Override
   public boolean isDynamicTrip(TripEntry trip) {
-    // todo we could do something smarter here
-    return trip.getServiceId().toString().contains("DYN-");
+    return helper.isServiceIdDynamic(trip.getServiceId().toString());
   }
   public boolean isDynamicBlock(BlockEntry block) {
-    return block instanceof DynamicBlockEntry;
+    return helper.isBlockDynamic(block);
   }
 }

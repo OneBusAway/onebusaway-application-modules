@@ -36,9 +36,10 @@ import java.util.Date;
 public class DynamicCalendarServiceImpl implements DynamicCalendarService {
 
   private static Logger _log = LoggerFactory.getLogger(DynamicCalendarServiceImpl.class);
+  private DynamicHelper helper = new DynamicHelper();
   @Override
   public boolean hasServiceId(LocalizedServiceId localizedServiceId) {
-    return localizedServiceId.getId().getId().startsWith("DYN-");
+    return helper.isServiceIdDynamic(localizedServiceId.getId().getId());
   }
 
   @Override

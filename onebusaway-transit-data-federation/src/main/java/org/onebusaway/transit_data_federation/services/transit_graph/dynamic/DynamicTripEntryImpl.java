@@ -143,6 +143,19 @@ public class DynamicTripEntryImpl implements TripEntry, Serializable {
     }
 
     @Override
+    public boolean equals(Object obj) {
+        if (obj == null || !(obj instanceof TripEntry))
+            return false;
+        // static or dynamic routes are treated the same
+        TripEntry trip = (TripEntry) obj;
+        return _id.equals(trip.getId())
+                && _serviceId.equals(trip.getServiceId());
+    }
+    @Override
+    public int hashCode() {
+        return _id.hashCode() + _serviceId.hashCode();
+    }
+    @Override
     public String toString() {
         return "Trip(" + _id + ")";
     }

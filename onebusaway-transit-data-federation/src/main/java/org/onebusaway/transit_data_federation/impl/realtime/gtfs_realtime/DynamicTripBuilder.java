@@ -16,6 +16,7 @@
 package org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime;
 
 
+import org.apache.commons.collections4.map.PassiveExpiringMap;
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
 import org.onebusaway.gtfs.model.AgencyAndId;
@@ -47,6 +48,7 @@ public class DynamicTripBuilder {
 
   private static Logger _log = LoggerFactory.getLogger(DynamicTripBuilder.class);
 
+  private Map<String, DynamicRouteEntry> _routeCache = new PassiveExpiringMap<>(60 * 60 * 1000);// 1 hour to support bundle changes
   private StopTimeEntriesFactory _stopTimeEntriesFactory;
   private DynamicBlockIndexService _blockIndexService;
   @Autowired
@@ -63,7 +65,7 @@ public class DynamicTripBuilder {
     _graph = dao;
   }
 
-  private Map<String, DynamicRouteEntry> _routeCache = new HashMap<>();
+//  private Map<String, DynamicRouteEntry> _routeCache = new HashMap<>();
   private Map<String, ShapePoints> _shapeCache = new HashMap<>();
 
   public BlockDescriptor createBlockDescriptor(AddedTripInfo addedTripInfo) {
@@ -115,13 +117,25 @@ public class DynamicTripBuilder {
     DynamicRouteEntry route = createRoute(addedTripInfo);
     if (route == null) return null;
     trip.setRoute(route);
-    trip.setDirectionId(addedTripInfo.getDirectionId());
-    trip.setBlock((DynamicBlockEntry) block);
+    trip.setDirectionId(getGtfsDirectionId(addedTripInfo.getDirectionId()));
+    trip.setBlock(block);
     trip.setServiceId(createLocalizedServiceId(addedTripInfo));
 //    trip.setShapeId(createShape(addedTripInfo));
     trip.setStopTimes(createStopTimes(addedTripInfo, trip));
     trip.setTotalTripDistance(calculateTripDistance(trip));
+    if (trip.getStopTimes() == null || trip.getStopTimes().isEmpty()) {
+      _log.error("aborting trip creation {} with no stops", addedTripInfo.getTripId());
+      return null;
+    }
     return trip;
+  }
+
+  private String getGtfsDirectionId(String directionFlag) {
+    if ("N".equalsIgnoreCase(directionFlag))
+      return "0";
+    if ("S".equalsIgnoreCase(directionFlag))
+      return "1";
+    return directionFlag;
   }
 
 //  private AgencyAndId createShape(AddedTripInfo addedTripInfo) {
@@ -176,6 +190,12 @@ public class DynamicTripBuilder {
     int sequence = 0;
     for (AddedStopInfo stopInfo : addedTripInfo.getStops()) {
       StopEntry stop = findStop(addedTripInfo.getAgencyId(), stopInfo.getStopId());
+      if (stop == null) {
+        // some stops are timepoints/internal and not public
+        // these may not have GTFS equivalent and should be dropped
+        _log.debug("no such stop {}", stopInfo.getStopId());
+        continue;
+      }
       DynamicStopTimeEntryImpl stopTime = new DynamicStopTimeEntryImpl();
       stopTime.setStop(copyFromStop(stop));
       if (stopInfo.getArrivalTime() > 0) {
@@ -230,7 +250,7 @@ public class DynamicTripBuilder {
   }
 
   private StopEntry findStop(String agencyId, String stopId) {
-    return _graph.getStopEntryForId(new AgencyAndId(agencyId, stopId), true);
+    return _graph.getStopEntryForId(new AgencyAndId(agencyId, stopId), false);
   }
 
   private double calculateTripDistance(DynamicTripEntryImpl trip) {
@@ -259,7 +279,11 @@ public class DynamicTripBuilder {
         _log.error("no such route " + routeId);
         return null;
       }
-      _routeCache.put(routeId, copyFromRoute(staticRouteEntry));
+      synchronized (_routeCache) {
+        if (!_routeCache.containsKey(routeId)) {
+          _routeCache.put(routeId, copyFromRoute(staticRouteEntry));
+        }
+      }
     }
     return _routeCache.get(routeId);
   }
@@ -269,7 +293,7 @@ public class DynamicTripBuilder {
     route.setId(staticRouteEntry.getId());
     route.setParent(staticRouteEntry.getParent());
     route.setTrips(new ArrayList<>());
-    route.setType(EVehicleType.BUS.getGtfsType());
+    route.setType(staticRouteEntry.getType());
     return route;
   }
 
