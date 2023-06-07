@@ -113,7 +113,7 @@ public class BlockLocationServiceImpl implements BlockLocationService, DynamicBl
      List<BlockLocation> staticLocations = _staticBlockLocationService.getLocationsForBlockInstance(blockInstance, time);
      if (staticLocations != null)
        list.addAll(staticLocations);
-     if (_dynamicBlockLocationService != null) {
+     if (_dynamicBlockLocationService != null && list.isEmpty()) { // if we have a static entry, don't look for a dynamic
        List<BlockLocation> dynamicLocations = _dynamicBlockLocationService.getLocationsForBlockInstance(blockInstance, time);
        if (dynamicLocations != null)
          list.addAll(dynamicLocations);
