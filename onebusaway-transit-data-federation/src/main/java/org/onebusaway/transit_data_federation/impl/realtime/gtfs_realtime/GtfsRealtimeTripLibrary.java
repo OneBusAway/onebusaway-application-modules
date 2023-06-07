@@ -188,6 +188,15 @@ public class GtfsRealtimeTripLibrary {
       if (!fe.hasTripUpdate()) {
         continue;
       }
+      if (tripUpdateMessage.getHeader().hasExtension(GtfsRealtimeNYCT.nyctFeedHeader)) {
+        GtfsRealtimeNYCT.NyctFeedHeader feedHeader = tripUpdateMessage.getHeader().getExtension(GtfsRealtimeNYCT.nyctFeedHeader);
+        for (GtfsRealtimeNYCT.TripReplacementPeriod tripReplacementPeriod : feedHeader.getTripReplacementPeriodList()) {
+          long endInSeconds = tripReplacementPeriod.getReplacementPeriod().getEnd();
+          long nowInSeconds = System.currentTimeMillis() / 1000;
+          long deltaInMinutes = (endInSeconds - nowInSeconds) / 60;
+          _log.debug("for route {} replacementPeriod is {}", tripReplacementPeriod.getRouteId(), deltaInMinutes);
+        }
+      }
 
       TripUpdate tu = fe.getTripUpdate();
       if (tu.hasTrip() && TransitDataConstants.STATUS_ADDED.equals(tu.getTrip().getScheduleRelationship().toString())) {
@@ -552,7 +561,7 @@ public class GtfsRealtimeTripLibrary {
     if (blockDescriptor.getStartTime() != null) {
       record.setBlockStartTime(blockDescriptor.getStartTime());
     } else {
-        record.setBlockStartTime(getFirstStpTime(blockDescriptor));
+      record.setBlockStartTime(getFirstStpTime(blockDescriptor));
     }
     List<TimepointPredictionRecord> timepointPredictions = new ArrayList<TimepointPredictionRecord>();
     for (TripUpdate tripUpdate : tripUpdates) {
