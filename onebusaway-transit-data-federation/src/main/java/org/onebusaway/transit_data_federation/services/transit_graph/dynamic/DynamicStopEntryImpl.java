@@ -168,22 +168,19 @@ public class DynamicStopEntryImpl implements StopEntry, Serializable {
      * {@link Object} Interface
      ****/
 
-  /*
-  @Override
-  public boolean equals(Object obj) {
-    if (obj == null || !(obj instanceof StopEntryImpl))
-      return false;
-    StopEntryImpl stop = (StopEntryImpl) obj;
-    return _id.equals(stop.getId());
-  }
-  */
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null || !(obj instanceof StopEntry))
+            return false;
+        // static or dynamic stops are treated the same
+        StopEntry stop = (StopEntry) obj;
+        return _id.equals(stop.getId());
+    }
 
-  /*
-  @Override
-  public int hashCode() {
-    return _id.hashCode();
-  }
-  */
+    @Override
+    public int hashCode() {
+        return _id.hashCode();
+    }
 
     @Override
     public String toString() {

@@ -54,9 +54,9 @@ public class DynamicBlockIndexServiceImpl implements DynamicBlockIndexService {
 
   private Map<AgencyAndId, List<BlockTripIndex>> blockTripIndexByRouteCollectionId = new PassiveExpiringMap<>(CACHE_TIMEOUT);
   private BlockStopTimeIndicesFactory blockStopTimeIndicesFactory = new BlockStopTimeIndicesFactory();
-  // we trivially expire the cache after 5 minutes
+  // we trivially expire the cache after CACHE_TIMEOUT minutes
   private Map<AgencyAndId, BlockInstance> cacheByBlockId = new PassiveExpiringMap<>(CACHE_TIMEOUT);
-  // we trivially expire the cache after 5 minutes
+  // we trivially expire the cache after CACHE_TIMEOUT minutes
   private Map<AgencyAndId, Set<BlockStopTimeIndex>> blockStopTimeIndicesByStopId = new PassiveExpiringMap<>(CACHE_TIMEOUT);
 
   private Map<AgencyAndId, List<BlockTripIndex>> blockTripByBlockId = new PassiveExpiringMap<>(CACHE_TIMEOUT);

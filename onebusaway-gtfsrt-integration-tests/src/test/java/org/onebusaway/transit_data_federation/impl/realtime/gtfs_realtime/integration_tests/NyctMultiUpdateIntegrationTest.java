@@ -84,8 +84,8 @@ public class NyctMultiUpdateIntegrationTest extends AbstractGtfsRealtimeIntegrat
 
     Map<AgencyAndId, Integer> tripCount = new HashMap<>();
     verifyBeans("beans run 1", tripCount, firstStop, firstStopTime);
-    verifyRouteDirection("MTASBWY_1");
-    verifyRouteDirection("MTASBWY_A");
+    verifyRouteDirectionStops("MTASBWY_1");
+    verifyRouteDirectionStops("MTASBWY_A");
 
     // 10 minutes later
     String gtfsrtFilename2 = "org/onebusaway/transit_data_federation/impl/realtime/gtfs_realtime/integration_tests/nyct_multi_trips/nyct_subways_gtfs_rt.2023-05-29T14:13:29-04:00.pb";
@@ -94,8 +94,8 @@ public class NyctMultiUpdateIntegrationTest extends AbstractGtfsRealtimeIntegrat
     source.setTripUpdatesUrl(gtfsRtResource2.getURL());
     source.refresh(); // launch
 
-    verifyRouteDirection("MTASBWY_1");
-    verifyRouteDirection("MTASBWY_A");
+    verifyRouteDirectionStops("MTASBWY_1");
+    verifyRouteDirectionStops("MTASBWY_A");
 
     tripCount.clear();
     verifyTripRange("range run 2", tripCount, firstStop, firstStopTime);
@@ -112,6 +112,9 @@ public class NyctMultiUpdateIntegrationTest extends AbstractGtfsRealtimeIntegrat
     verifyTripRange("range run 3", tripCount, firstStop, firstStopTime);
     tripCount.clear();
     verifyBeans("beans run 3", tripCount, firstStop, firstStopTime);
+
+    verifyRouteDirectionStops("MTASBWY_1");
+    verifyRouteDirectionStops("MTASBWY_A");
 
   }
 
@@ -167,7 +170,7 @@ public class NyctMultiUpdateIntegrationTest extends AbstractGtfsRealtimeIntegrat
 
   }
 
-  private void verifyRouteDirection(String routeId) {
+  private void verifyRouteDirectionStops(String routeId) {
     int count = 0;
     TransitDataService service = getBundleLoader().getApplicationContext().getBean(TransitDataService.class);
     StopsForRouteBean stopsForRoute = service.getStopsForRoute(routeId);
@@ -175,6 +178,17 @@ public class NyctMultiUpdateIntegrationTest extends AbstractGtfsRealtimeIntegrat
       for (StopGroupBean stopGroup : stopGrouping.getStopGroups()) {
         _log.error("found route grouping {}", stopGroup.getName().getName());
         count++;
+        String lastStopId = null;
+        for (String stopId : stopGroup.getStopIds()) {
+          if (lastStopId == null) {
+            lastStopId = stopId;
+          } else {
+            if (lastStopId.equals(stopId)) {
+              fail("duplicate stop");
+            }
+          }
+        }
+
       }
 
     }
@@ -187,7 +201,7 @@ public class NyctMultiUpdateIntegrationTest extends AbstractGtfsRealtimeIntegrat
       Integer count = tripCount.get(tripId);
       if (count > 1) {
         _log.error(message + "; duplicate trip {}", tripId);
-        fail(message + "duplicate trip " + tripId);
+        fail(message + " duplicate trip " + tripId);
       }
     }
   }
