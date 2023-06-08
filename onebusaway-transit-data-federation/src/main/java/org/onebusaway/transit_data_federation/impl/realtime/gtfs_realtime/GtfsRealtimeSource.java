@@ -64,7 +64,6 @@ import org.onebusaway.transit_data_federation.services.realtime.BlockLocationSer
 import org.onebusaway.alerts.service.ServiceAlerts;
 import org.onebusaway.alerts.service.ServiceAlerts.ServiceAlert;
 import org.onebusaway.alerts.service.ServiceAlertsService;
-import org.onebusaway.transit_data_federation.services.realtime.DynamicBlockLocationService;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -122,7 +121,6 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   private ConsolidatedStopsService _consolidatedStopsService;
 
   private DynamicBlockIndexService _dynamicBlockIndexService;
-  private DynamicBlockLocationService _dynamicBlockLocationService;
 
   private ScheduledFuture<?> _refreshTask;
 
@@ -231,14 +229,8 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   public void setDynamicBlockIndexService(DynamicBlockIndexService dynamicBlockIndexService) {
     this._dynamicBlockIndexService = dynamicBlockIndexService;
   }
-  @Autowired
-  @Qualifier("dynamicBlockLocationServiceImpl")
-  public void setDynamicBlockLocationService(DynamicBlockLocationService _dynamicBlockLocationService) {
-    this._dynamicBlockLocationService = _dynamicBlockLocationService;
-  }
 
   @Autowired
-  @Qualifier("vehicleStatusServiceImpl")
   public void setVehicleLocationListener(
       VehicleLocationListener vehicleLocationListener) {
     _vehicleLocationListener = vehicleLocationListener;
@@ -604,7 +596,7 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
       if (record != null) {
         if (isDynamicTrip) {
           _monitoredResult.addAddedTripId(record.getTripId().toString());
-          registerDynamicTrip(update.block, record);
+          _dynamicBlockIndexService.register(update.block.getBlockInstance());
         }
         if (record.getTripId() != null) {
           // tripId will be null if block was matched
@@ -661,11 +653,6 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     result.setLastUpdate(newestUpdate);
     _log.info("Agency " + this.getAgencyIds().get(0) + " has active vehicles=" + seenVehicles.size()
         + " for updates=" + updates.size() + " with most recent timestamp " + new Date(newestUpdate));
-  }
-
-  private void registerDynamicTrip(BlockDescriptor block, VehicleLocationRecord record) {
-    _dynamicBlockLocationService.handleVehicleLocationRecord(block.getBlockInstance(),
-            record);
   }
 
   private boolean isValidLocation(VehicleLocationRecord record, CombinedTripUpdatesAndVehiclePosition update) {

@@ -125,7 +125,7 @@ public class NyctMultiUpdateIntegrationTest extends AbstractGtfsRealtimeIntegrat
       }
       tripCount.put(tripId, tripCount.get(tripId) + 1);
     }
-    verifyTripRange("range run 2", firstStop, firstStopTime);
+    verifyTripRange(message, firstStop, firstStopTime);
 
   }
 
@@ -135,7 +135,7 @@ public class NyctMultiUpdateIntegrationTest extends AbstractGtfsRealtimeIntegrat
 
     long window = 75 * 60 * 1000; // 75 minutes
     List<ArrivalAndDepartureInstance> list = arrivalAndDepartureService.getArrivalsAndDeparturesForStopInTimeRange(firstStop,
-            new TargetTime(firstStopTime), firstStopTime - window, firstStopTime + window);
+            new TargetTime(firstStopTime, firstStopTime), firstStopTime - window, firstStopTime + window);
     assertNotNull(list);
 
     for (ArrivalAndDepartureInstance ad : list) {
@@ -158,8 +158,16 @@ public class NyctMultiUpdateIntegrationTest extends AbstractGtfsRealtimeIntegrat
           dabSetCount++;
       }
     }
-    assertTrue(dabSetCount > 0);
-    assertEquals(dynamicBlockCount, dabSetCount);
+    if (message.contains("1")) {
+      assertEquals(0, dabSetCount);
+      assertEquals(1, dynamicBlockCount);
+    } else if (message.contains("2")) {
+      assertEquals(3, dabSetCount);
+      assertEquals(3, dynamicBlockCount);
+    } else if (message.contains("3")) {
+      assertEquals(3, dabSetCount);
+      assertEquals(4, dynamicBlockCount);
+    }
 
   }
 
@@ -169,7 +177,7 @@ public class NyctMultiUpdateIntegrationTest extends AbstractGtfsRealtimeIntegrat
     StopsForRouteBean stopsForRoute = service.getStopsForRoute(routeId);
     for (StopGroupingBean stopGrouping : stopsForRoute.getStopGroupings()) {
       for (StopGroupBean stopGroup : stopGrouping.getStopGroups()) {
-        _log.error("found route grouping {}", stopGroup.getName().getName());
+        _log.debug("found route grouping {}", stopGroup.getName().getName());
         count++;
         String lastStopId = null;
         for (String stopId : stopGroup.getStopIds()) {

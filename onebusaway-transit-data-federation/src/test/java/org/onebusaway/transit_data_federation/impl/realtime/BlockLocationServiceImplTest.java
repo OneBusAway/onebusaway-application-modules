@@ -41,9 +41,9 @@ import org.onebusaway.transit_data_federation.services.realtime.BlockLocation;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 
-public class StaticBlockLocationServiceImplTest {
+public class BlockLocationServiceImplTest {
 
-  private StaticBlockLocationServiceImpl _service;
+  private BlockLocationServiceImpl _service;
 
   private TransitGraphDao _transitGraphDao;
 
@@ -54,7 +54,7 @@ public class StaticBlockLocationServiceImplTest {
   @Before
   public void setup() {
 
-    _service = new StaticBlockLocationServiceImpl();
+    _service = new BlockLocationServiceImpl();
 
     _transitGraphDao = Mockito.mock(TransitGraphDao.class);
     _service.setTransitGraphDao(_transitGraphDao);
