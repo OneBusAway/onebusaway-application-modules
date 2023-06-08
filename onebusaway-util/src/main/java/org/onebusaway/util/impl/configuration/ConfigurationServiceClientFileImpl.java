@@ -18,9 +18,7 @@ package org.onebusaway.util.impl.configuration;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLConnection;
+import java.net.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -47,6 +45,9 @@ public class ConfigurationServiceClientFileImpl implements
 	private static long CACHE_TIME_MILLIS = 1 * 60 * 1000; // 1 min
 	private long lastCacheTime = 0;
 
+	private int connectionTimeout;
+	private int readTimeout;
+
 	private HashMap<String, Object> cachedMergeConfig = null;
 
 	// when populated merge values in from admin config service
@@ -56,7 +57,18 @@ public class ConfigurationServiceClientFileImpl implements
 		this.externalConfigurationApiUrl = url;
 	}
 
+	@Override
+	public void setConnectionTimeout(int connectionTimeout) {
+		this.connectionTimeout = connectionTimeout;
+	}
+
+	@Override
+	public void setReadTimeout(int readTimeout) {
+		this.readTimeout = readTimeout;
+	}
+
 	private HashMap<String, Object> _config = null;
+
 	// for unit tests
 	public void setConfig(HashMap<String, Object> config) {
 		_config = config;
@@ -304,7 +316,8 @@ public class ConfigurationServiceClientFileImpl implements
 		}
 		try {
 			URLConnection urlConnection = url.openConnection();
-			in = null;
+			urlConnection.setConnectTimeout(connectionTimeout);
+			urlConnection.setReadTimeout(readTimeout);
 
 			in = urlConnection.getInputStream();
 			ObjectMapper mapper = new ObjectMapper();
@@ -312,6 +325,9 @@ public class ConfigurationServiceClientFileImpl implements
 			});
 			_log.info("refreshing configuration with {}", config);
 			return config;
+		} catch (SocketTimeoutException e){
+			_log.info("timeout issue with url " + url + ", ex=" + e);
+			return null;
 		} catch (IOException ex) {
 			// todo this can happen, its not fatal
 			_log.info("connection issue with url " + url + ", ex=" + ex);
