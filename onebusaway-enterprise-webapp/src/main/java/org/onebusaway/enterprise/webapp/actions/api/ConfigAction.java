@@ -144,4 +144,8 @@ public class ConfigAction extends OneBusAwayEnterpriseActionSupport {
   public String getFeedbackFormURL() {
     return _configurationService.getConfigurationValueAsString("display.feedbackForm.url", null);
   }
+
+  public String getLegendVisibility() {
+    return _configurationService.getConfigurationValueAsString("display.legendVisibility", "true");
+  }
 }
