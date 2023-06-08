@@ -48,8 +48,6 @@ public class VehicleStatusServiceImpl implements VehicleLocationListener,
 
   private BlockVehicleLocationListener _blockVehicleLocationService;
 
-  private DynamicBlockLocationService _dynamicBlockLocationService;
-
   private VehicleLocationRecordCache _vehicleLocationRecordCache;
 
   private VehicleOccupancyRecordCache _vehicleOccupanycRecordCache;
@@ -65,12 +63,6 @@ public class VehicleStatusServiceImpl implements VehicleLocationListener,
   public void setBlockVehicleLocationService(
       BlockVehicleLocationListener service) {
     _blockVehicleLocationService = service;
-  }
-
-  @Autowired
-  @Qualifier("dynamicBlockLocationServiceImpl")
-  public void setDynamicBlockLocationService(DynamicBlockLocationService service) {
-    _dynamicBlockLocationService = service;
   }
 
   @Autowired

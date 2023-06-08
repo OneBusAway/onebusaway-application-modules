@@ -94,7 +94,7 @@ public class NyctAddedTripsIntegrationTest extends AbstractGtfsRealtimeIntegrati
     long serviceDate = new ServiceDate(2023, 5, 9).getAsDate().getTime();
     long firstPrediction = serviceDate + 25710 * 1000;
     List<ArrivalAndDepartureInstance> list = arrivalAndDepartureService.getArrivalsAndDeparturesForStopInTimeRange(firstStop,
-            new TargetTime(firstStopTime), firstStopTime - window, firstStopTime + window);
+            new TargetTime(firstStopTime, firstStopTime), firstStopTime - window, firstStopTime + window);
     assertNotNull(list);
     // MTASBWY_040800_3..N01R   MTASBWY_042150_4..N06R    MTASBWY_042250_3..N01R    MTASBWY_042850_3..N01R
     int expectedDynamicTripsSize = 4;

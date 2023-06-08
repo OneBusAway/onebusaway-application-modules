@@ -58,7 +58,6 @@ public class GtfsRealtimeCancelServiceImpl implements GtfsRealtimeCancelService 
   }
 
   @Autowired
-  @Qualifier("blockLocationServiceImpl")
   public void setVehicleLocationListener(
           VehicleLocationListener vehicleLocationListener) {
     _vehicleLocationListener = vehicleLocationListener;
