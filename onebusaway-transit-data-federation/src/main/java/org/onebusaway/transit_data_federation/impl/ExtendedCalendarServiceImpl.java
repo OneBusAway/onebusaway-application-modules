@@ -213,6 +213,9 @@ public class ExtendedCalendarServiceImpl implements ExtendedCalendarService {
     // 95% of configs look like this
     if (activeServiceIds.size() == 1 && inactiveServiceIds.isEmpty()) {
       LocalizedServiceId lsid = activeServiceIds.get(0);
+      if (_dynamicCalendarService != null && _dynamicCalendarService.hasServiceId(lsid))
+        return _dynamicCalendarService.isLocalizedServiceIdActiveOnDate(lsid,
+              serviceDate);
       return _calendarService.isLocalizedServiceIdActiveOnDate(lsid,
           serviceDate);
     }

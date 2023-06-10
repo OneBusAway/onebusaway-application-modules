@@ -113,8 +113,21 @@ public class DynamicBlockIndexServiceImpl implements DynamicBlockIndexService {
         // a set to prevent duplicates
         blockStopTimeIndicesByStopId.put(stopId, new HashSet<>());
       }
-      blockStopTimeIndicesByStopId.get(stopId).add(sti);
+      synchronized (blockStopTimeIndicesByStopId) {
+        if (!containsTrip(blockStopTimeIndicesByStopId.get(stopId), sti)) {
+          blockStopTimeIndicesByStopId.get(stopId).add(sti);
+        }
+      }
     }
+  }
+
+  private boolean containsTrip(Set<BlockStopTimeIndex> blockStopTimeIndices, BlockStopTimeIndex sti) {
+    for (BlockStopTimeIndex blockStopTimeIndex : blockStopTimeIndices) {
+      if (sti.getTrips().get(0).getTrip().getId().equals(blockStopTimeIndex.getTrips().get(0).getTrip().getId())) {
+        return true;
+      }
+    }
+    return false;
   }
 
   @Override
