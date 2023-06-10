@@ -19,7 +19,9 @@ import org.onebusaway.exceptions.NoSuchStopServiceException;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.Stop;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
+import org.onebusaway.transit_data.model.RouteBean;
 import org.onebusaway.transit_data.model.StopBean;
+import java.util.List;
 
 public interface StopBeanService {
 
@@ -42,4 +44,6 @@ public interface StopBeanService {
    *           not be found
    */
   public StopBean getStopForIdForServiceDate(AgencyAndId stopId, ServiceDate serviceDate);
+
+  public boolean matchesRouteTypeFilter(RouteBean route, List<Integer> routeTypesFilter);
 }

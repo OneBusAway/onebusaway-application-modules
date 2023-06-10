@@ -20,6 +20,8 @@ import java.util.*;
 import org.apache.struts2.rest.DefaultHttpHeaders;
 import org.onebusaway.api.actions.api.ApiActionSupport;
 import org.onebusaway.api.model.transit.BeanFactoryV2;
+import org.onebusaway.api.model.transit.EntryWithReferencesBean;
+import org.onebusaway.api.model.transit.StopWithArrivalsAndDeparturesV2Bean;
 import org.onebusaway.api.model.where.ArrivalAndDepartureBeanV1;
 import org.onebusaway.api.model.where.StopWithArrivalsAndDeparturesBeanV1;
 import org.onebusaway.exceptions.NoSuchStopServiceException;
@@ -47,6 +49,9 @@ public class ArrivalsAndDeparturesForStopAction extends ApiActionSupport {
 
   @Autowired
   private ConfigurationService _configService;
+
+  @Autowired
+  private RouteSort customRouteSort;
 
   private String _id;
   
@@ -90,7 +95,6 @@ public class ArrivalsAndDeparturesForStopAction extends ApiActionSupport {
     _query.setSystemFilterChain(filterChain);
   }
 
-
   public DefaultHttpHeaders show() throws ServiceException {
     HashSet<String> agenciesExcludingScheduled = new HashSet<String>();
     List<AgencyWithCoverageBean> allAgencies = _service.getAgenciesWithCoverage();
@@ -132,6 +136,7 @@ public class ArrivalsAndDeparturesForStopAction extends ApiActionSupport {
       return setOkResponse(v1);
     } else if (isVersion(V2)) {
       BeanFactoryV2 factory = getBeanFactoryV2();
+      factory.setCustomRouteSort(customRouteSort);
       return setOkResponse(factory.getResponse(result));
     } else {
       return setUnknownVersionResponse();
@@ -168,6 +173,17 @@ public class ArrivalsAndDeparturesForStopAction extends ApiActionSupport {
 
       v1s.add(v1);
     }
+
+    String agencyId = v1s.size() > 0 ?
+            v1s.get(0).getRouteId().split("_")[0] :
+            "";
+    v1s.sort((a,b) -> customRouteSort.
+            compareRoutes(
+                    a.getRouteShortName(),
+                    b.getRouteShortName(),
+                    customRouteSort,
+                    agencyId)
+    );
 
     return v1s;
   }

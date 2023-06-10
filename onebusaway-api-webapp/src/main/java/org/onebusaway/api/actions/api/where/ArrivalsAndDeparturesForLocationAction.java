@@ -21,6 +21,8 @@ import org.onebusaway.api.actions.api.ApiActionSupport;
 import org.onebusaway.api.impl.MaxCountSupport;
 import org.onebusaway.api.impl.SearchBoundsFactory;
 import org.onebusaway.api.model.transit.BeanFactoryV2;
+import org.onebusaway.api.model.transit.EntryWithReferencesBean;
+import org.onebusaway.api.model.transit.StopsWithArrivalsAndDeparturesV2Bean;
 import org.onebusaway.exceptions.OutOfServiceAreaServiceException;
 import org.onebusaway.exceptions.ServiceException;
 import org.onebusaway.geospatial.model.CoordinateBounds;
@@ -52,6 +54,9 @@ public class ArrivalsAndDeparturesForLocationAction extends ApiActionSupport {
     private TransitDataService _service;
     @Autowired
     private ConfigurationService _configService;
+
+    @Autowired
+    private RouteSort customRouteSort;
 
     @Autowired(required = false)
     public void setFilterChain(FilterChain filterChain) {
@@ -164,6 +169,7 @@ public class ArrivalsAndDeparturesForLocationAction extends ApiActionSupport {
         if (adResult == null) {
             return emptyResponse();
         }
+        factory.setCustomRouteSort(customRouteSort);
         return setOkResponse(factory.getResponse(adResult));
     }
 

@@ -76,6 +76,8 @@ public class BeanFactoryV2 {
 
   private Locale _locale;
 
+  private RouteSort customRouteSort;
+
   public BeanFactoryV2(boolean includeReferences) {
     _includeReferences = includeReferences;
     _locale = Locale.getDefault();
@@ -92,6 +94,11 @@ public class BeanFactoryV2 {
   public void setApplicationKey(String applicationKey) {
     _applicationKey = applicationKey;
   }
+
+  public void setCustomRouteSort(RouteSort customRouteSort) {
+    this.customRouteSort = customRouteSort;
+  }
+
 
   public void setLocale(Locale locale) {
     _locale = locale;
@@ -124,11 +131,27 @@ public class BeanFactoryV2 {
       // swap objects for ids and references
       beans.add(getStop(stop));
     }
-    return new ListWithRangeAndReferencesBean<>(
+    ListWithReferencesBean<StopV2Bean> response = new ListWithRangeAndReferencesBean<>(
             beans,
             input.getStopSuggestions().isLimitExceeded(),
             false,
             this._references);
+
+    String agencyId = response.getReferences().getRoutes().size() > 0 ?
+            response.getReferences().getRoutes().get(0).getAgencyId() :
+            "";
+
+    response.getReferences()
+            .getRoutes()
+            .sort((a,b) -> customRouteSort
+                    .compareRoutes(
+                            a.getShortName(),
+                            b.getShortName(),
+                            customRouteSort,
+                            agencyId)
+            );
+
+    return response;
   }
 
   public ListWithReferencesBean<RouteV2Bean> getResponse(RouteSearchResultBean input) {
@@ -137,11 +160,24 @@ public class BeanFactoryV2 {
       // swap objects for ids and references
       beans.add(getRoute(route));
     }
-    return new ListWithRangeAndReferencesBean<>(
+    ListWithReferencesBean<RouteV2Bean> response = new ListWithRangeAndReferencesBean<>(
             beans,
             input.getRouteSuggestions().isLimitExceeded(),
             false,
             this._references);
+
+    String agencyId = response.getList().size() > 0 ?
+            response.getList().get(0).getAgencyId() :
+            "";
+    response
+            .getList().sort((a,b) ->
+                    customRouteSort.compareRoutes(
+                            a.getShortName(),
+                            b.getShortName(),
+                            customRouteSort,
+                            agencyId));
+
+    return response;
   }
 
   public EntryWithReferencesBean<TripV2Bean> getResponse(TripBean trip) {
@@ -159,12 +195,46 @@ public class BeanFactoryV2 {
 
   public EntryWithReferencesBean<StopWithArrivalsAndDeparturesV2Bean> getResponse(
       StopWithArrivalsAndDeparturesBean result) {
-    return entry(getStopWithArrivalAndDepartures(result));
+    EntryWithReferencesBean<StopWithArrivalsAndDeparturesV2Bean> response = entry(getStopWithArrivalAndDepartures(result));
+
+    String agencyId = response
+            .getEntry()
+            .getArrivalsAndDepartures().size() > 0 ?
+            AgencyAndIdLibrary.convertFromString(response.getEntry().getArrivalsAndDepartures().get(0)
+                    .getRouteId()).getAgencyId() :
+            "";
+
+    response.getReferences().getRoutes()
+            .sort((a,b) ->
+                    customRouteSort
+                            .compareRoutes(
+                                    a.getShortName(),
+                                    b.getShortName(),
+                                    customRouteSort,
+                                    agencyId)
+            );
+
+    return response;
   }
 
   public EntryWithReferencesBean<StopsWithArrivalsAndDeparturesV2Bean> getResponse(
           StopsWithArrivalsAndDeparturesBean result) {
-      return entry(getStopsWithArrivalAndDepartures(result));
+
+    EntryWithReferencesBean<StopsWithArrivalsAndDeparturesV2Bean> response = entry(getStopsWithArrivalAndDepartures(result));
+
+    String agencyId = response
+            .getEntry()
+            .getArrivalsAndDepartures().size() > 0 ? AgencyAndIdLibrary.convertFromString(response.getEntry().getArrivalsAndDepartures().get(0)
+            .getRouteId()).getAgencyId() : "";
+
+    response.getReferences().getRoutes()
+            .sort((a,b) -> customRouteSort
+                    .compareRoutes(
+                            a.getShortName(),
+                            b.getShortName(),
+                            customRouteSort,
+                            agencyId));
+      return response;
   }
 
   public EntryWithReferencesBean<ArrivalAndDepartureV2Bean> getResponse(
@@ -1071,6 +1141,7 @@ public class BeanFactoryV2 {
     addToReferences(sad.getStop());
 
     List<ArrivalAndDepartureV2Bean> ads = new ArrayList<ArrivalAndDepartureV2Bean>();
+
     for (ArrivalAndDepartureBean ad : sad.getArrivalsAndDepartures())
       ads.add(getArrivalAndDeparture(ad));
     bean.setArrivalsAndDepartures(ads);
