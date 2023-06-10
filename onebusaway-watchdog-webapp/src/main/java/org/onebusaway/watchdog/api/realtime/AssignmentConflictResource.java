@@ -174,7 +174,7 @@ public class AssignmentConflictResource extends MetricResource {
 
   @PostConstruct
   public void start() {
-    _refreshTask = _scheduledExecutorService.scheduleAtFixedRate(new RefreshTask(), 0, _refreshInterval, TimeUnit.SECONDS);
+    _refreshTask = _scheduledExecutorService.scheduleAtFixedRate(new RefreshTask(), 1, _refreshInterval, TimeUnit.SECONDS);
   }
 
   @PreDestroy
