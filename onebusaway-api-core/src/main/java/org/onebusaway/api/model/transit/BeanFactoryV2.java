@@ -265,14 +265,14 @@ public class BeanFactoryV2 {
   }
 
   private List<RouteV2Bean> finalSort(List<RouteV2Bean> response, String agencyId) {
-    List<RouteV2Bean> mtasbwRouteV2Beans = response
+    List<RouteV2Bean> routeV2BeanList = response
             .stream()
             .filter(r -> r.getAgencyId()
                     .equals(agencyId))
             .collect(Collectors.toList()
             );
 
-    return Stream.concat(mtasbwRouteV2Beans.stream(),response
+    return Stream.concat(routeV2BeanList.stream(),response
                                     .stream().filter(r -> !r.getAgencyId()
                                             .equals(agencyId)))
                             .collect(Collectors.toList());
