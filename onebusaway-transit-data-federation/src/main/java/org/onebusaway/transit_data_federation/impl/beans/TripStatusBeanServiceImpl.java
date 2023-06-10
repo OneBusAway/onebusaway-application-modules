@@ -41,6 +41,7 @@ import org.onebusaway.transit_data.model.trips.TripsForAgencyQueryBean;
 import org.onebusaway.transit_data.model.trips.TripsForBoundsQueryBean;
 import org.onebusaway.transit_data.model.trips.TripsForRouteQueryBean;
 import org.onebusaway.transit_data_federation.impl.realtime.apc.VehicleOccupancyRecordCache;
+import org.onebusaway.transit_data_federation.model.transit_graph.DynamicGraph;
 import org.onebusaway.transit_data_federation.services.ArrivalAndDepartureService;
 import org.onebusaway.util.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.beans.ServiceAlertsBeanService;
@@ -71,6 +72,8 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
 
   private TransitGraphDao _transitGraphDao;
 
+  private DynamicGraph _dynamicGraph;
+
   private BlockStatusService _blockStatusService;
 
   private TripBeanService _tripBeanService;
@@ -88,6 +91,11 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
   @Autowired
   public void setTransitGraphDao(TransitGraphDao transitGraphDao) {
     _transitGraphDao = transitGraphDao;
+  }
+
+  @Autowired
+  public void setDynamicGraph(DynamicGraph dynamicGraph) {
+    _dynamicGraph = dynamicGraph;
   }
 
   @Autowired
@@ -155,6 +163,9 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
     long time = query.getTime();
 
     TripEntry tripEntry = _transitGraphDao.getTripEntryForId(tripId);
+    if (tripEntry == null) {
+      tripEntry = _dynamicGraph.getTripEntryForId(tripId);
+    }
     if (tripEntry == null)
       return new ListBean<TripDetailsBean>();
 
@@ -393,8 +404,10 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
     List<TripDetailsBean> tripDetails = new ArrayList<TripDetailsBean>();
     for (BlockLocation location : locations) {
       TripDetailsBean details = getBlockLocationAsTripDetails(
-          location.getActiveTripInstance(), location, inclusion, time);
-      tripDetails.add(details);
+              location.getActiveTripInstance(), location, inclusion, time);
+      if (tripDetails != null) {
+        tripDetails.add(details);
+      }
     }
     return new ListBean<TripDetailsBean>(tripDetails, false);
   }

@@ -30,13 +30,10 @@ import org.onebusaway.gtfs.model.Route;
 import org.onebusaway.gtfs.model.Stop;
 import org.onebusaway.gtfs.model.StopTime;
 import org.onebusaway.gtfs.model.Trip;
-import org.onebusaway.transit_data_federation.bundle.tasks.transit_graph.DistanceAlongShapeLibrary;
-import org.onebusaway.transit_data_federation.bundle.tasks.transit_graph.StopTimeEntriesFactory;
-import org.onebusaway.transit_data_federation.impl.transit_graph.StopTimeEntryImpl;
-import org.onebusaway.transit_data_federation.impl.transit_graph.TransitGraphImpl;
-import org.onebusaway.transit_data_federation.impl.transit_graph.TripEntryImpl;
+import org.onebusaway.transit_data_federation.impl.transit_graph.*;
 import org.onebusaway.transit_data_federation.model.ShapePoints;
 import org.onebusaway.transit_data_federation.model.ShapePointsFactory;
+import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
 
 public class StopTimeEntriesFactoryTest {
 
@@ -107,12 +104,12 @@ public class StopTimeEntriesFactoryTest {
     shapePointsFactory.addPoint(47.66868172192725, -122.3661729186096);
     ShapePoints shapePoints = shapePointsFactory.create();
 
-    List<StopTimeEntryImpl> entries = factory.processStopTimes(graph,
+    List<StopTimeEntry> entries = factory.processStopTimes(graph,
         stopTimes, tripEntry, shapePoints);
 
     assertEquals(stopTimes.size(), entries.size());
 
-    StopTimeEntryImpl entry = entries.get(0);
+    StopTimeEntry entry = entries.get(0);
     assertEquals(0, entry.getAccumulatedSlackTime());
     assertEquals(time(9, 00), entry.getArrivalTime());
     assertEquals(time(9, 05), entry.getDepartureTime());
@@ -217,12 +214,12 @@ public class StopTimeEntriesFactoryTest {
     shapePointsFactory.addPoint(47.66947942216854, -122.37545336180114);
     ShapePoints shapePoints = shapePointsFactory.create();
 
-    List<StopTimeEntryImpl> entries = factory.processStopTimes(graph,
+    List<StopTimeEntry> entries = factory.processStopTimes(graph,
         stopTimes, tripEntry, shapePoints);
 
     assertEquals(stopTimes.size(), entries.size());
 
-    StopTimeEntryImpl entry = entries.get(0);
+    StopTimeEntry entry = entries.get(0);
     assertEquals(0, entry.getAccumulatedSlackTime());
     assertEquals(time(9, 00), entry.getArrivalTime());
     assertEquals(time(9, 05), entry.getDepartureTime());
@@ -321,12 +318,12 @@ public class StopTimeEntriesFactoryTest {
     shapePointsFactory.addPoint(47.66868172192725, -122.3661729186096);
     ShapePoints shapePoints = shapePointsFactory.create();
 
-    List<StopTimeEntryImpl> entries = factory.processStopTimes(graph,
+    List<StopTimeEntry> entries = factory.processStopTimes(graph,
         stopTimes, tripEntry, shapePoints);
 
     assertEquals(stopTimes.size(), entries.size());
 
-    StopTimeEntryImpl entry = entries.get(0);
+    StopTimeEntry entry = entries.get(0);
     assertEquals(0, entry.getAccumulatedSlackTime());
     assertEquals(time(9, 00), entry.getArrivalTime());
     assertEquals(time(9, 05), entry.getDepartureTime());

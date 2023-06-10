@@ -46,11 +46,12 @@ import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.CalendarServiceData;
 import org.onebusaway.realtime.api.OccupancyStatus;
 import org.onebusaway.transit_data_federation.impl.blocks.BlockIndexFactoryServiceImpl;
+import org.onebusaway.transit_data_federation.impl.blocks.BlockIndexServiceImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopTimeEntryImpl;
-import org.onebusaway.transit_data_federation.services.blocks.BlockIndexService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockStopTimeIndex;
 import org.onebusaway.transit_data_federation.services.blocks.BlockTripIndex;
+import org.onebusaway.transit_data_federation.services.blocks.StaticBlockIndexService;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
@@ -64,7 +65,7 @@ public class StopTimeServiceImplTest {
 
   private ExtendedCalendarServiceImpl _calendarService;
 
-  private BlockIndexService _blockIndexService;
+  private BlockIndexServiceImpl _blockIndexService;
 
   private AgencyAndId _stopId;
 
@@ -97,7 +98,8 @@ public class StopTimeServiceImplTest {
     _calendarService = new ExtendedCalendarServiceImpl();
     _calendarService.setCalendarService(calendarService);
 
-    _blockIndexService = Mockito.mock(BlockIndexService.class);
+    _blockIndexService = new BlockIndexServiceImpl();
+    _blockIndexService.setStaticBlockIndexService(Mockito.mock(StaticBlockIndexService.class));
 
     _service = new StopTimeServiceImpl();
     _service.setTransitGraphDao(graph);

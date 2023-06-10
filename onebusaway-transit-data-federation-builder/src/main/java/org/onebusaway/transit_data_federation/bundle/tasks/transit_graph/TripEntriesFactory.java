@@ -30,10 +30,7 @@ import org.onebusaway.gtfs.model.calendar.LocalizedServiceId;
 import org.onebusaway.gtfs.services.GtfsRelationalDao;
 import org.onebusaway.transit_data_federation.bundle.services.UniqueService;
 import org.onebusaway.transit_data_federation.bundle.tasks.ShapePointHelper;
-import org.onebusaway.transit_data_federation.impl.transit_graph.RouteEntryImpl;
-import org.onebusaway.transit_data_federation.impl.transit_graph.StopTimeEntryImpl;
-import org.onebusaway.transit_data_federation.impl.transit_graph.TransitGraphImpl;
-import org.onebusaway.transit_data_federation.impl.transit_graph.TripEntryImpl;
+import org.onebusaway.transit_data_federation.impl.transit_graph.*;
 import org.onebusaway.transit_data_federation.model.ShapePoints;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
@@ -169,7 +166,7 @@ public class TripEntriesFactory {
     if (!(shapePoints == null || shapePoints.isEmpty()))
       tripEntry.setShapeId(unique(trip.getShapeId()));
 
-    List<StopTimeEntryImpl> stopTimesForTrip = _stopTimeEntriesFactory.processStopTimes(
+    List<StopTimeEntry> stopTimesForTrip = _stopTimeEntriesFactory.processStopTimes(
         graph, stopTimes, tripEntry, shapePoints);
 
     // Also:  only set the trip if there are stops for it
@@ -181,7 +178,7 @@ public class TripEntriesFactory {
     double tripDistance = getTripDistance(stopTimesForTrip, shapePoints);
     tripEntry.setTotalTripDistance(tripDistance);
 
-    tripEntry.setStopTimes(cast(stopTimesForTrip));
+    tripEntry.setStopTimes(stopTimesForTrip);
 
     graph.putTripEntry(tripEntry);
 
@@ -196,10 +193,10 @@ public class TripEntriesFactory {
     return stopTimes;
   }
 
-  private double getTripDistance(List<StopTimeEntryImpl> stopTimes,
+  private double getTripDistance(List<StopTimeEntry> stopTimes,
       ShapePoints shapePoints) {
 
-    StopTimeEntryImpl lastStopTime = null;
+    StopTimeEntry lastStopTime = null;
     try {
     lastStopTime = stopTimes.get(stopTimes.size() - 1);
     } catch (ArrayIndexOutOfBoundsException e) {

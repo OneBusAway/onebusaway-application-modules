@@ -21,6 +21,9 @@ import java.util.List;
 import org.onebusaway.transit_data_federation.impl.transit_graph.BlockTripEntryImpl;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.ServiceIdActivation;
+import org.onebusaway.transit_data_federation.services.transit_graph.dynamic.DynamicBlockTripEntryImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Abstract support class for building searchable indices over
@@ -32,6 +35,7 @@ import org.onebusaway.transit_data_federation.services.transit_graph.ServiceIdAc
  */
 public abstract class AbstractBlockTripIndex implements HasBlockTrips {
 
+  protected static Logger _log = LoggerFactory.getLogger(AbstractBlockTripIndex.class);
   protected final List<BlockTripEntry> _trips;
 
   public AbstractBlockTripIndex(List<BlockTripEntry> trips) {
@@ -44,8 +48,16 @@ public abstract class AbstractBlockTripIndex implements HasBlockTrips {
 
     _trips = trips;
     for (BlockTripEntry trip : trips) {
-      BlockTripEntryImpl tripImpl = (BlockTripEntryImpl) trip;
-      tripImpl.setPattern(this);
+      // here we mix in static and dynamic trips
+      if (trip instanceof BlockTripEntryImpl) {
+        BlockTripEntryImpl tripImpl = (BlockTripEntryImpl) trip;
+        tripImpl.setPattern(this);
+      } else if (trip instanceof DynamicBlockTripEntryImpl) {
+        DynamicBlockTripEntryImpl tripImpl = (DynamicBlockTripEntryImpl) trip;
+        tripImpl.setPattern(this);
+      } else {
+        _log.warn("unknown implementation of BlockTripEntry=" + trip);
+      }
     }
   }
 

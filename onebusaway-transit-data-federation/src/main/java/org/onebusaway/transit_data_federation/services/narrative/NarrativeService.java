@@ -27,6 +27,7 @@ import org.onebusaway.transit_data_federation.model.narrative.RouteCollectionNar
 import org.onebusaway.transit_data_federation.model.narrative.StopNarrative;
 import org.onebusaway.transit_data_federation.model.narrative.StopTimeNarrative;
 import org.onebusaway.transit_data_federation.model.narrative.TripNarrative;
+import org.onebusaway.transit_data_federation.services.blocks.BlockTripIndex;
 import org.onebusaway.transit_data_federation.services.transit_graph.RouteCollectionEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
 
@@ -63,4 +64,6 @@ public interface NarrativeService {
   public StopTimeNarrative getStopTimeForEntry(StopTimeEntry entry);
   
   public ShapePoints getShapePointsForId(AgencyAndId id);
+
+  void addDynamicTrip(BlockTripIndex blockTripIndex);
 }

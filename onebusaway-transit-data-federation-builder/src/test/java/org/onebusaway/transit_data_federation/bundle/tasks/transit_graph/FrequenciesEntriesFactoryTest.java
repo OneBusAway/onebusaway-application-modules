@@ -48,6 +48,7 @@ import org.onebusaway.transit_data_federation.impl.transit_graph.TransitGraphImp
 import org.onebusaway.transit_data_federation.impl.transit_graph.TripEntryImpl;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.FrequencyEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
 
 public class FrequenciesEntriesFactoryTest {
 
@@ -87,10 +88,10 @@ public class FrequenciesEntriesFactoryTest {
   public void testSingleTripWithFrequencies() {
 
     BlockEntryImpl block = block("block");
-    TripEntryImpl tripEntryA = trip("trip").setRoute(_routeEntry).setServiceId(
+    TripEntry tripEntryA = trip("trip").setRoute(_routeEntry).setServiceId(
         _lsid).setBlock(block);
-    _graph.putTripEntry(tripEntryA);
-    addStopTime(tripEntryA, stopTime().setStop(_stopA).setTime(time(7, 00)));
+    _graph.putTripEntry((TripEntryImpl) tripEntryA);
+    addStopTime((TripEntryImpl) tripEntryA, stopTime().setStop(_stopA).setTime(time(7, 00)));
 
     BlockConfigurationEntry blockConfig = blockConfiguration(block,
         serviceIds("serviceId"), tripEntryA);
@@ -134,10 +135,10 @@ public class FrequenciesEntriesFactoryTest {
   public void testTripsWithMismatchedFrequencies() {
 
     BlockEntryImpl block = block("block");
-    TripEntryImpl tripEntryA = trip("trip").setRoute(_routeEntry).setServiceId(
+    TripEntry tripEntryA = trip("trip").setRoute(_routeEntry).setServiceId(
         _lsid).setBlock(block);
-    _graph.putTripEntry(tripEntryA);
-    addStopTime(tripEntryA, stopTime().setStop(_stopA).setTime(time(7, 00)));
+    _graph.putTripEntry((TripEntryImpl) tripEntryA);
+    addStopTime((TripEntryImpl) tripEntryA, stopTime().setStop(_stopA).setTime(time(7, 00)));
 
     Trip trip = new Trip();
     trip.setId(tripEntryA.getId());

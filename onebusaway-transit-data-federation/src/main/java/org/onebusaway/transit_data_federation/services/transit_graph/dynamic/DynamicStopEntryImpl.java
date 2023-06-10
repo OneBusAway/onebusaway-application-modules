@@ -1,0 +1,196 @@
+/**
+ * Copyright (C) 2023 Cambridge Systematics, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.onebusaway.transit_data_federation.services.transit_graph.dynamic;
+
+import org.onebusaway.geospatial.model.CoordinatePoint;
+import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.transit_data.model.EAccessibility;
+import org.onebusaway.transit_data_federation.services.blocks.BlockStopSequenceIndex;
+import org.onebusaway.transit_data_federation.services.blocks.BlockStopTimeIndex;
+import org.onebusaway.transit_data_federation.services.blocks.FrequencyBlockStopTimeIndex;
+import org.onebusaway.transit_data_federation.services.blocks.FrequencyStopTripIndex;
+import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+public class DynamicStopEntryImpl implements StopEntry, Serializable {
+
+    private static final long serialVersionUID = 10L;
+
+    private AgencyAndId _id;
+
+    private double _lat;
+
+    private double _lon;
+
+    private EAccessibility _wheelchairBoarding = EAccessibility.UNKNOWN;
+
+    private transient int _index;
+
+    private transient List<BlockStopTimeIndex> _stopTimeIndices = null;
+
+    private transient List<FrequencyBlockStopTimeIndex> _frequencyStopTimeIndices = null;
+
+    private transient List<BlockStopSequenceIndex> _stopTripIndices = null;
+
+    private transient List<FrequencyStopTripIndex> _frequencyStopTripIndices = null;
+
+    private AgencyAndId _parent;
+
+    public DynamicStopEntryImpl(AgencyAndId id, double lat, double lon, AgencyAndId parent) {
+        if (id == null)
+            throw new IllegalArgumentException("id must not be null");
+        _id = id;
+        _lat = lat;
+        _lon = lon;
+        _parent = parent;
+    }
+
+    public DynamicStopEntryImpl(AgencyAndId id, double lat, double lon) {
+        this(id, lat, lon, null);
+    }
+
+    public void setWheelchairBoarding(EAccessibility wheelchairBoarding) {
+        _wheelchairBoarding = wheelchairBoarding;
+    }
+
+    public void setIndex(int index) {
+        _index = index;
+    }
+
+    public void addStopTimeIndex(BlockStopTimeIndex stopTimeIndex) {
+        if (_stopTimeIndices == null)
+            _stopTimeIndices = new ArrayList<BlockStopTimeIndex>();
+        _stopTimeIndices.add(stopTimeIndex);
+    }
+
+    public List<BlockStopTimeIndex> getStopTimeIndices() {
+        if (_stopTimeIndices == null)
+            return Collections.emptyList();
+        return _stopTimeIndices;
+    }
+
+    public void addFrequencyStopTimeIndex(
+            FrequencyBlockStopTimeIndex stopTimeIndex) {
+        if (_frequencyStopTimeIndices == null)
+            _frequencyStopTimeIndices = new ArrayList<FrequencyBlockStopTimeIndex>();
+        _frequencyStopTimeIndices.add(stopTimeIndex);
+    }
+
+    public List<FrequencyBlockStopTimeIndex> getFrequencyStopTimeIndices() {
+        if (_frequencyStopTimeIndices == null)
+            return Collections.emptyList();
+        return _frequencyStopTimeIndices;
+    }
+
+    public void addBlockStopTripIndex(BlockStopSequenceIndex index) {
+        if (_stopTripIndices == null)
+            _stopTripIndices = new ArrayList<BlockStopSequenceIndex>();
+        _stopTripIndices.add(index);
+    }
+
+    public List<BlockStopSequenceIndex> getStopTripIndices() {
+        if (_stopTripIndices == null)
+            return Collections.emptyList();
+        return _stopTripIndices;
+    }
+
+    public void addFrequencyStopTripIndex(FrequencyStopTripIndex index) {
+        if (_frequencyStopTripIndices == null)
+            _frequencyStopTripIndices = new ArrayList<FrequencyStopTripIndex>();
+        _frequencyStopTripIndices.add(index);
+    }
+
+    public List<FrequencyStopTripIndex> getFrequencyStopTripIndices() {
+        if (_frequencyStopTripIndices == null)
+            return Collections.emptyList();
+        return _frequencyStopTripIndices;
+    }
+
+    /****
+     * {@link StopEntry} Interface
+     ****/
+
+    @Override
+    public AgencyAndId getId() {
+        return _id;
+    }
+
+    @Override
+    public double getStopLat() {
+        return _lat;
+    }
+
+    @Override
+    public double getStopLon() {
+        return _lon;
+    }
+
+    @Override
+    public CoordinatePoint getStopLocation() {
+        return new CoordinatePoint(_lat, _lon);
+    }
+
+    @Override
+    public EAccessibility getWheelchairBoarding() {
+        return _wheelchairBoarding;
+    }
+
+    @Override
+    public int getIndex() {
+        return _index;
+    }
+
+    public AgencyAndId getParent() {
+        return _parent;
+    }
+
+    /****
+     * {@link Object} Interface
+     ****/
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null || !(obj instanceof StopEntry))
+            return false;
+        // static or dynamic stops are treated the same
+        StopEntry stop = (StopEntry) obj;
+        return _id.equals(stop.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return _id.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return "StopEntry(id=" + _id + ")";
+    }
+
+    /****
+     * {@link Comparable} Interface
+     ****/
+
+    @Override
+    public int compareTo(StopEntry o) {
+        return this.getIndex() - o.getIndex();
+    }
+
+}
