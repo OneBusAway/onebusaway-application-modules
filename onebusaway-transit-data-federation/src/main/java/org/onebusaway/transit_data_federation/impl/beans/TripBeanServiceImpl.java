@@ -76,6 +76,8 @@ public class TripBeanServiceImpl implements TripBeanService {
 
     TripNarrative tripNarrative = _narrativeService.getTripForId(tripId);
 
+    if (tripNarrative == null) return null;
+
     TripBean tripBean = new TripBean();
 
     tripBean.setId(ApplicationBeanLibrary.getId(tripId));

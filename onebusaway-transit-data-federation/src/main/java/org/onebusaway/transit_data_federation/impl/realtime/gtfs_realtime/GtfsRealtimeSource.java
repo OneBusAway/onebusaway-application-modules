@@ -603,6 +603,9 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
         VehicleLocationRecord record = _tripsLibrary.createVehicleLocationRecordForUpdate(result, update);
         if (record != null) {
           if (isDynamicTrip) {
+            if (_monitoredResult.getLastUpdate() < record.getTimeOfRecord()) {
+              _monitoredResult.setLastUpdate(record.getTimeOfRecord());
+            }
             _monitoredResult.addAddedTripId(record.getTripId().toString());
             _dynamicBlockIndexService.register(update.block.getBlockInstance());
           }
