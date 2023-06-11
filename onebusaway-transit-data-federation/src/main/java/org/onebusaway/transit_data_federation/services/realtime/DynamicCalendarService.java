@@ -25,4 +25,6 @@ public interface DynamicCalendarService {
   boolean hasServiceId(LocalizedServiceId localizedServiceId);
 
   Collection<Date> getServiceDatesWithinRange(LocalizedServiceId localizedServiceId, ServiceInterval interval, Date from, Date to);
+
+  boolean isLocalizedServiceIdActiveOnDate(LocalizedServiceId lsid, Date serviceDate);
 }

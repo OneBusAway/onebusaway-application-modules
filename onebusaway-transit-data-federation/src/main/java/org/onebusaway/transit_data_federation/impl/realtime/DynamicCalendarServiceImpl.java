@@ -24,10 +24,7 @@ import org.springframework.stereotype.Component;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Date;
+import java.util.*;
 
 @Component
 /**
@@ -46,18 +43,35 @@ public class DynamicCalendarServiceImpl implements DynamicCalendarService {
   public Collection<Date> getServiceDatesWithinRange(LocalizedServiceId localizedServiceId, ServiceInterval interval, Date from, Date to) {
     // a trivial implementation -- the actual date is embedded in the service id instead of looking it up
     // example format: MTASBWY_DYN-2023-05-09
+    Date today = getDateFromServiceId(localizedServiceId);
+
+    long startOfDay = today.getTime();
+    long endOfDay = today.getTime() + (24 * 60 * 60 * 1000) - 1;
+    if (from.getTime() <= endOfDay && startOfDay <= to.getTime()) {
+      Date[] dates = {today};
+      return Arrays.asList(dates);
+    }
+    return Collections.emptyList();
+
+  }
+  @Override
+  public boolean isLocalizedServiceIdActiveOnDate(LocalizedServiceId lsid, Date serviceDate) {
+    Date lsidDate = getDateFromServiceId(lsid);
+    if (lsidDate.equals(serviceDate)) {
+      return true;
+    }
+    return false;
+  }
+
+  private Date getDateFromServiceId(LocalizedServiceId localizedServiceId) {
     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-    Date today = null;
+    Date serviceDate = null;
     try {
-      today = sdf.parse(localizedServiceId.getId().getId().replaceAll("DYN-", ""));
+      serviceDate = sdf.parse(localizedServiceId.getId().getId().replaceAll("DYN-", ""));
     } catch (ParseException e) {
       _log.error("unexpected dynamic serviceId {", localizedServiceId.getId().toString());
-      return new ArrayList<>();
+      return null;
     }
-
-    // todo:  use from/to to consider if other serviceDates should be considered instead
-    // for example:  many systems use the previous serviceDate up until 3am
-    Date[] dates = {today};
-    return Arrays.asList(dates);
+    return serviceDate;
   }
 }

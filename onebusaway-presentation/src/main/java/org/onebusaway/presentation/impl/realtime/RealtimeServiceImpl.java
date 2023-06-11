@@ -26,12 +26,7 @@ import org.onebusaway.presentation.impl.realtime.SiriSupport.OnwardCallsMode;
 import org.onebusaway.presentation.services.realtime.PresentationService;
 import org.onebusaway.presentation.services.realtime.RealtimeService;
 import org.onebusaway.realtime.api.TimepointPredictionRecord;
-import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
-import org.onebusaway.transit_data.model.ArrivalsAndDeparturesQueryBean;
-import org.onebusaway.transit_data.model.ListBean;
-import org.onebusaway.transit_data.model.RouteBean;
-import org.onebusaway.transit_data.model.StopWithArrivalsAndDeparturesBean;
-import org.onebusaway.transit_data.model.TransitDataConstants;
+import org.onebusaway.transit_data.model.*;
 import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationQueryBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
@@ -73,6 +68,8 @@ public class RealtimeServiceImpl implements RealtimeService {
   private ConfigurationService _configurationService;
 
   private PresentationService _presentationService;
+
+  private FilterChain _filterChain;
   
   private SiriXmlSerializer _siriXmlSerializer = new SiriXmlSerializer();
 
@@ -129,6 +126,10 @@ public class RealtimeServiceImpl implements RealtimeService {
     return _siriXmlSerializer;
   }
 
+  @Autowired(required = false)
+  public void setFilterChain(FilterChain chain) {
+    _filterChain = chain;
+  }
   /**
    * SIRI METHODS
    */
@@ -507,6 +508,9 @@ public class RealtimeServiceImpl implements RealtimeService {
     query.setTime(currentTime);
     query.setMinutesBefore(5);
     query.setMinutesAfter(65);
+    if (_filterChain != null) {
+      query.setSystemFilterChain(_filterChain);
+    }
     
     StopWithArrivalsAndDeparturesBean stopWithArrivalsAndDepartures =
       _transitDataService.getStopWithArrivalsAndDepartures(stopId, query);
