@@ -96,9 +96,13 @@ public class CanonicalRoutesServiceImpl implements CanonicalRoutesService {
    */
   @Override
   public ListBean<RouteGroupingBean> getCanonicalOrMergedRoute(long serviceDateMillis, AgencyAndId routeId) {
-
-    ServiceDate serviceDate = new ServiceDate(new Date(serviceDateMillis));
-    StopsForRouteBean stopsForRoute = copy(_transitDataService.getStopsForRouteForServiceDate(AgencyAndIdLibrary.convertToString(routeId), serviceDate));
+    StopsForRouteBean stopsForRoute;
+    if (serviceDateMillis > 1) {
+      ServiceDate serviceDate = new ServiceDate(new Date(serviceDateMillis));
+      stopsForRoute = copy(_transitDataService.getStopsForRouteForServiceDate(AgencyAndIdLibrary.convertToString(routeId), serviceDate));
+    } else {
+      stopsForRoute = copy(_transitDataService.getStopsForRoute(AgencyAndIdLibrary.convertToString(routeId)));
+    }
     if (stopsForRoute == null || stopsForRoute.getStopGroupings() == null
         || stopsForRoute.getStopGroupings().isEmpty()) {
      // this is an ideal route only, with no physical schedule
