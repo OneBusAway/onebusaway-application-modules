@@ -4,4 +4,6 @@ import com.google.transit.realtime.GtfsRealtime;
 
 public interface DuplicatedTripServiceParser {
     AddedTripInfo parse(GtfsRealtime.TripUpdate tu);
+
+  void setGtfsRealtimeEntitySource(GtfsRealtimeEntitySource entitySource);
 }

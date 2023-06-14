@@ -197,29 +197,25 @@ public class GtfsRealtimeTripLibrary {
       if (!fe.hasTripUpdate()) {
         continue;
       }
-      if (tripUpdateMessage.getHeader().hasExtension(GtfsRealtimeNYCT.nyctFeedHeader)) {
-        GtfsRealtimeNYCT.NyctFeedHeader feedHeader = tripUpdateMessage.getHeader().getExtension(GtfsRealtimeNYCT.nyctFeedHeader);
-        for (GtfsRealtimeNYCT.TripReplacementPeriod tripReplacementPeriod : feedHeader.getTripReplacementPeriodList()) {
-          long endInSeconds = tripReplacementPeriod.getReplacementPeriod().getEnd();
-          long nowInSeconds = System.currentTimeMillis() / 1000;
-          long deltaInMinutes = (endInSeconds - nowInSeconds) / 60;
-          _log.debug("for route {} replacementPeriod is {}", tripReplacementPeriod.getRouteId(), deltaInMinutes);
-        }
-      }
 
       TripUpdate tu = fe.getTripUpdate();
+      BlockDescriptor bd = null;
       if (tu.hasTrip() &&
               (TransitDataConstants.STATUS_ADDED.equals(tu.getTrip().getScheduleRelationship().toString())
               || TransitDataConstants.STATUS_DUPLICATED.equals(tu.getTrip().getScheduleRelationship().toString()))) {
         result.addAddedTripId(tu.getTrip().getTripId());
       }
+      if (tu.hasTrip() && TransitDataConstants.STATUS_DUPLICATED.equals(tu.getTrip().getScheduleRelationship().toString())) {
+        result.addAddedTripId(tu.getTrip().getTripId()); // for now we also consider this an ADDED trip
+        AddedTripInfo addedTripInfo = _duplicatedTripService.handleDuplicatedDescriptor(tu);
+        bd =_dynamicTripBuilder.createBlockDescriptor(addedTripInfo);
+        if (bd == null) continue; // we failed
+      }
 
       if (tu.hasVehicle() && tu.getVehicle().hasId() && StringUtils.isNotBlank(tu.getVehicle().getId())) {
         // Trip update has a vehicle ID - index by vehicle ID
         String vehicleId = getVehicleId(tu);
-
         tripUpdatesByVehicleId.put(vehicleId, addStartDateTime(tu));
-
       } else {
         /*
          * Trip update does not have a vehicle ID - index by TripDescriptor
@@ -227,7 +223,9 @@ public class GtfsRealtimeTripLibrary {
          */
         TripDescriptor td = tu.getTrip();
         long time = tu.hasTimestamp() ? tu.getTimestamp() * 1000 : currentTime();
-        BlockDescriptor bd = getTripDescriptorAsBlockDescriptor(result, td, time);
+        if (bd == null) {
+          bd = getTripDescriptorAsBlockDescriptor(result, td, time);
+        }
 
         if (bd == null) {
           // we didn't match to bundle, are we an added trip?

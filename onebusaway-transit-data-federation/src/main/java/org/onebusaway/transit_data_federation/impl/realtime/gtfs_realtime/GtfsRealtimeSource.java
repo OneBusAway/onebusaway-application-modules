@@ -464,6 +464,9 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     _tripsLibrary.setUseLabelAsVehicleId(_useLabelAsId);
     _tripsLibrary.setValidateCurrentTime(_validateCurrentTime);
     _tripsLibrary.setAddedTripService(new AddedTripServiceImpl());
+    DuplicatedTripServiceImpl duplicatedTripService = new DuplicatedTripServiceImpl();
+    duplicatedTripService.setGtfsRealtimeEntitySource(_entitySource);
+    _tripsLibrary.setDuplicatedTripService(duplicatedTripService);
     DynamicTripBuilder tripBuilder = new DynamicTripBuilder();
     tripBuilder.setStopTimeEntriesFactory(_stopTimeEntriesFactory);
     tripBuilder.setTransitGraphDao(_transitGraphDao);
@@ -598,7 +601,8 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
           continue;
         }
         BlockDescriptor.ScheduleRelationship scheduleRelationship = update.block.getScheduleRelationship();
-        boolean isDynamicTrip = TransitDataConstants.STATUS_ADDED.equals(scheduleRelationship.name());
+        boolean isDynamicTrip = TransitDataConstants.STATUS_ADDED.equals(scheduleRelationship.name())
+                || TransitDataConstants.STATUS_DUPLICATED.equals(scheduleRelationship.name());
 
         VehicleLocationRecord record = _tripsLibrary.createVehicleLocationRecordForUpdate(result, update);
         if (record != null) {

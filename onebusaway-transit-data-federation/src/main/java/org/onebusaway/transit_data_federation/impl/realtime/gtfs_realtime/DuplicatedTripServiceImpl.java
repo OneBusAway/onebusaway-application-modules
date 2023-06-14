@@ -8,9 +8,24 @@ public class DuplicatedTripServiceImpl implements DuplicatedTripService{
 
     private static final Logger _log = LoggerFactory.getLogger(DuplicatedTripServiceImpl.class);
 
-    private DuplicatedTripServiceParser DuplicatedTripServiceParser = new DuplicatedTripServiceParserImpl();
+    private GtfsRealtimeEntitySource _entitySource;
+    public void setGtfsRealtimeEntitySource(GtfsRealtimeEntitySource source) {
+        _entitySource = source;
+    }
+
+    private DuplicatedTripServiceParser duplicatedTripServiceParser = null;
+
     @Override
     public AddedTripInfo handleDuplicatedDescriptor(GtfsRealtime.TripUpdate tu) {
-        return DuplicatedTripServiceParser.parse(tu);
+        return getParser().parse(tu);
+    }
+
+    private DuplicatedTripServiceParser getParser() {
+        // we need to lazy load due to the entitySource dependency
+        if (duplicatedTripServiceParser == null) {
+            duplicatedTripServiceParser = new DuplicatedTripServiceParserImpl();
+            duplicatedTripServiceParser.setGtfsRealtimeEntitySource(_entitySource);
+        }
+        return duplicatedTripServiceParser;
     }
 }
