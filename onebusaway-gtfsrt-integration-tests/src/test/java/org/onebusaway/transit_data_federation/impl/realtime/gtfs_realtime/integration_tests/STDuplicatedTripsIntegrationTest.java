@@ -17,12 +17,21 @@ package org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.integ
 
 import com.google.transit.realtime.GtfsRealtime;
 import org.junit.Test;
+import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.gtfs.model.calendar.ServiceDate;
 import org.onebusaway.realtime.api.VehicleLocationListener;
+import org.onebusaway.realtime.api.VehicleLocationRecord;
 import org.onebusaway.transit_data_federation.impl.realtime.TestVehicleLocationListener;
+import org.onebusaway.transit_data_federation.impl.realtime.VehicleStatusServiceImpl;
 import org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.AbstractGtfsRealtimeIntegrationTest;
 import org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.GtfsRealtimeSource;
 import org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.GtfsRtBuilder;
 import org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.MonitoredResult;
+import org.onebusaway.transit_data_federation.model.TargetTime;
+import org.onebusaway.transit_data_federation.services.ArrivalAndDepartureService;
+import org.onebusaway.transit_data_federation.services.realtime.ArrivalAndDepartureInstance;
+import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 import org.springframework.core.io.ClassPathResource;
 
 import java.io.File;
@@ -30,6 +39,9 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
+
+import static org.junit.Assert.*;
 
 public class STDuplicatedTripsIntegrationTest extends AbstractGtfsRealtimeIntegrationTest  {
   protected String getIntegrationTestPath() {
@@ -46,7 +58,9 @@ public class STDuplicatedTripsIntegrationTest extends AbstractGtfsRealtimeIntegr
     GtfsRealtimeSource source = getBundleLoader().getSource();
     source.setAgencyId("40");
 
-    VehicleLocationListener listener = new TestVehicleLocationListener();
+    TestVehicleLocationListener listener = new TestVehicleLocationListener();
+    VehicleLocationListener actualListener = getBundleLoader().getApplicationContext().getBean(VehicleStatusServiceImpl.class);
+    listener.setVehicleLocationListener(actualListener);
     source.setVehicleLocationListener(listener);
     MonitoredResult testResult = new MonitoredResult();
     source.setMonitoredResult(testResult);
@@ -67,6 +81,25 @@ public class STDuplicatedTripsIntegrationTest extends AbstractGtfsRealtimeIntegr
     // assert duplicated trips are present
     // assert dynamic trips generated based on that duplication
     // maybe copy and introspect a block descriptor?
+
+    for (VehicleLocationRecord vehicleLocationRecord : listener.getRecords()) {
+      String tripId = vehicleLocationRecord.getTripId().toString();
+      assertEquals(tripId, vehicleLocationRecord.getVehicleId().toString()); // vehicles are named the tripId
+      assertEquals(tripId, vehicleLocationRecord.getTripId().toString());
+      assertEquals(tripId, vehicleLocationRecord.getBlockId().toString());
+    }
+    ArrivalAndDepartureService arrivalAndDepartureService = getBundleLoader().getApplicationContext().getBean(ArrivalAndDepartureService.class);
+    TransitGraphDao graph = getBundleLoader().getApplicationContext().getBean(TransitGraphDao.class);
+    long window = 75 * 60 * 1000; // 75 minutes
+
+    StopEntry firstStop = graph.getStopEntryForId(AgencyAndId.convertFromString("40_99914"));
+    long firstStoptime = 1683740580l;
+    long serviceDate = new ServiceDate(2023,5,10).getAsDate().getTime();
+
+
+    List<ArrivalAndDepartureInstance> list = arrivalAndDepartureService.getArrivalsAndDeparturesForStopInTimeRange(firstStop,new TargetTime(firstStoptime,firstStoptime),firstStoptime - window, firstStoptime + window);
+    assertNotNull(list);
+
   }
 
   private void writeFeed(GtfsRealtime.FeedMessage feed, URL feedLocation) throws IOException {

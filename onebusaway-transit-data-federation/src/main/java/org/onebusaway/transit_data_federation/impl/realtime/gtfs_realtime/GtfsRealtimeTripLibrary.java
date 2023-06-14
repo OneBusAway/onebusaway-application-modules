@@ -22,6 +22,8 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.google.transit.realtime.GtfsRealtimeMTARR;
 import com.google.transit.realtime.GtfsRealtimeNYCT;
@@ -68,6 +70,7 @@ public class GtfsRealtimeTripLibrary {
 
   private static final Logger _log = LoggerFactory.getLogger(GtfsRealtimeTripLibrary.class);
 
+  private static Pattern _pattern = Pattern.compile("^(-{0,1}\\d+):(\\d{2}):(\\d{2})$");
   private GtfsRealtimeEntitySource _entitySource;
 
   private BlockCalendarService _blockCalendarService;
@@ -807,6 +810,13 @@ public class GtfsRealtimeTripLibrary {
     int blockStartTime = 0;
     if (trip.hasStartTime() && !"0".equals(trip.getStartTime())) {
     	try {
+          Matcher m = _pattern.matcher(trip.getStartTime());
+          if(!m.matches()){
+            long timeInMil = serviceDate.getAsDate().getTime();
+            long epochTime = Long.parseLong(trip.getStartTime());
+            long startTime = (epochTime - timeInMil) / 1000;
+            tripStartTime = (int)startTime;
+          }else
     		tripStartTime = StopTimeFieldMappingFactory.getStringAsSeconds(trip.getStartTime());
     	} catch (InvalidStopTimeException iste) {
     		_log.debug("invalid stopTime of " + trip.getStartTime() + " for trip " + trip);
