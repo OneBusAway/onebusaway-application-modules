@@ -110,7 +110,6 @@ public class ArrivalAndDepartureServiceImplTest {
 
     _blockLocationService = new BlockLocationServiceImpl();
     _blockLocationService.setLocationInterpolation(false);
-
     _service.setBlockLocationService(_blockLocationService);
   }
 

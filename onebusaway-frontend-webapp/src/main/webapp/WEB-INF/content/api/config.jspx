@@ -42,6 +42,7 @@ if(typeof OBA !== 'undefined' &amp;&amp; typeof OBA.Config !== 'undefined') {
 	OBA.Config.serviceAlertText='<s:property value="serviceAlertText" />';
 	OBA.Config.feedbackFormText='<s:property value="feedbackFormText" />';
 	OBA.Config.feedbackFormURL='<s:property value="feedbackFormURL" />';
+	OBA.Config.legendVisibility='<s:property value="legendVisibility" />';
 
 	OBA.Config.siriSMUrl = "<s:property value="siriBaseURL" />" + "/stop-monitoring.json?key=" + OBA.Config.obaApiKey;
 	OBA.Config.siriVMUrl = "<s:property value="siriBaseURL" />" + "/vehicle-monitoring.json?key=" + OBA.Config.obaApiKey;

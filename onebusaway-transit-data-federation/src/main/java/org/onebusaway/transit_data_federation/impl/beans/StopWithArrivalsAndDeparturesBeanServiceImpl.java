@@ -138,9 +138,10 @@ class StopWithArrivalsAndDeparturesBeanServiceImpl implements
         if (_stopBeanService.matchesRouteTypeFilter(routeBean, query.getRouteTypes()))
           routeBeans.add(routeBean);
       }
-      stop.setRoutes(routeBeans);
-      nearbyStops.add(stop);
-
+      if(!routeBeans.isEmpty()){
+        stop.setRoutes(routeBeans);
+        nearbyStops.add(stop);
+      }
     }
     // sort the collection so we can trim the furthest
     Collections.sort(nearbyStops, new StopDistanceComparator());

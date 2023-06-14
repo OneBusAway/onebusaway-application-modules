@@ -18,11 +18,13 @@ package org.onebusaway.transit_data_federation.impl.realtime;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.dynamic.DynamicBlockEntry;
 
+/**
+ * helper methods for Dynamic Trips.
+ */
 public class DynamicHelper {
   public DynamicHelper() {
 
   }
-
 
   public boolean isServiceIdDynamic(String serviceId) {
     if (serviceId == null) return false;

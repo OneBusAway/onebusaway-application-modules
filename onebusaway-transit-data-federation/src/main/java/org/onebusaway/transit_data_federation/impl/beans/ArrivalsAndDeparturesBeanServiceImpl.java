@@ -333,7 +333,7 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
       // dynamic stops without a narrative, look to trip instead
       TripNarrative tripNarrative = _narrativeService.getTripForId(trip.getId());
       pab.setRouteShortName(tripNarrative.getRouteShortName());
-     pab.setTripHeadsign(tripNarrative.getTripHeadsign());
+      pab.setTripHeadsign(tripNarrative.getTripHeadsign());
     } else {
       pab.setRouteShortName(stopTimeNarrative.getRouteShortName());
       pab.setTripHeadsign(stopTimeNarrative.getStopHeadsign());

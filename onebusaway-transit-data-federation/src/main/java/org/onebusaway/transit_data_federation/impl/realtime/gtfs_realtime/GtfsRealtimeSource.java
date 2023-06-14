@@ -99,7 +99,6 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     _registry.add(GtfsRealtimeNYCT.nyctFeedHeader);
     _registry.add(GtfsRealtimeNYCT.nyctTripDescriptor);
     _registry.add(GtfsRealtimeNYCT.nyctStopTimeUpdate);
-
   }
 
   private AgencyService _agencyService;
@@ -588,49 +587,64 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
 
     Set<AgencyAndId> seenVehicles = new HashSet<AgencyAndId>();
 
-    for (CombinedTripUpdatesAndVehiclePosition update : updates) {
-      BlockDescriptor.ScheduleRelationship scheduleRelationship = update.block.getScheduleRelationship();
-      boolean isDynamicTrip = TransitDataConstants.STATUS_ADDED.equals(scheduleRelationship.name());
+    try {
+      for (CombinedTripUpdatesAndVehiclePosition update : updates) {
+        if (update.block == null) {
+          String tripId = null;
+          if (update.getTripUpdates() != null && update.getTripUpdatesSize() > 0)
+            if (update.getTripUpdates().get(0).hasTrip())
+              tripId = update.getTripUpdates().get(0).getTrip().getTripId();
+          _log.error("null block {}, bailing...", tripId);
+          continue;
+        }
+        BlockDescriptor.ScheduleRelationship scheduleRelationship = update.block.getScheduleRelationship();
+        boolean isDynamicTrip = TransitDataConstants.STATUS_ADDED.equals(scheduleRelationship.name());
 
-      VehicleLocationRecord record = _tripsLibrary.createVehicleLocationRecordForUpdate(result, update);
-      if (record != null) {
-        if (isDynamicTrip) {
-          _monitoredResult.addAddedTripId(record.getTripId().toString());
-          _dynamicBlockIndexService.register(update.block.getBlockInstance());
-        }
-        if (record.getTripId() != null) {
-          // tripId will be null if block was matched
-          result.addUnmatchedTripId(record.getTripId().toString());
-        }
-        AgencyAndId vehicleId = record.getVehicleId();
-        // here we try to get a more accurate count of updates
-        // some providers re-send old data or future data cluttering the feed
-        // the TDS will discard these
-        if (!isDynamicTrip && blockNotActive(record)) {
-          _log.debug("discarding v: " + vehicleId + " as block not active");
-          continue;
-        }
-        if (!isDynamicTrip && !isValidLocation(record, update)) {
-          _log.debug("discarding v: " + vehicleId + " as location is bad");
-          continue;
-        }
-        seenVehicles.add(vehicleId);
-        VehicleOccupancyRecord vor = _tripsLibrary.createVehicleOccupancyRecordForUpdate(result, update);
-        Date timestamp = new Date(record.getTimeOfRecord());
-        Date prev = _lastVehicleUpdate.get(vehicleId);
-        if (prev == null || prev.before(timestamp)) {
-          _log.debug("matched vehicle " + vehicleId + " on block=" + record.getBlockId() + " with scheduleDeviation=" + record.getScheduleDeviation());
-          _vehicleLocationListener.handleVehicleLocationRecord(record);
-          if (vor != null) {
-            _vehicleOccupancyListener.handleVehicleOccupancyRecord(vor);
+        VehicleLocationRecord record = _tripsLibrary.createVehicleLocationRecordForUpdate(result, update);
+        if (record != null) {
+          if (isDynamicTrip) {
+            if (_monitoredResult.getLastUpdate() < record.getTimeOfRecord()) {
+              _monitoredResult.setLastUpdate(record.getTimeOfRecord());
+            }
+            _monitoredResult.addAddedTripId(record.getTripId().toString());
+            _dynamicBlockIndexService.register(update.block.getBlockInstance());
           }
-          _lastVehicleUpdate.put(vehicleId, timestamp);
-        } else {
-          _log.debug("discarding: update for vehicle " + vehicleId + " as timestamp in past");
+          if (record.getTripId() != null) {
+            // tripId will be null if block was matched
+            result.addUnmatchedTripId(record.getTripId().toString());
+          }
+          AgencyAndId vehicleId = record.getVehicleId();
+          // here we try to get a more accurate count of updates
+          // some providers re-send old data or future data cluttering the feed
+          // the TDS will discard these
+          if (!isDynamicTrip && blockNotActive(record)) {
+            _log.debug("discarding v: " + vehicleId + " as block not active");
+            continue;
+          }
+          if (!isDynamicTrip && !isValidLocation(record, update)) {
+            _log.debug("discarding v: " + vehicleId + " as location is bad");
+            continue;
+          }
+          seenVehicles.add(vehicleId);
+          VehicleOccupancyRecord vor = _tripsLibrary.createVehicleOccupancyRecordForUpdate(result, update);
+          Date timestamp = new Date(record.getTimeOfRecord());
+          Date prev = _lastVehicleUpdate.get(vehicleId);
+          if (prev == null || prev.before(timestamp)) {
+            _log.debug("matched vehicle " + vehicleId + " on block=" + record.getBlockId() + " with scheduleDeviation=" + record.getScheduleDeviation());
+            _vehicleLocationListener.handleVehicleLocationRecord(record);
+            if (vor != null) {
+              _vehicleOccupancyListener.handleVehicleOccupancyRecord(vor);
+            }
+            _lastVehicleUpdate.put(vehicleId, timestamp);
+          } else {
+            _log.debug("discarding: update for vehicle " + vehicleId + " as timestamp in past");
+          }
         }
       }
-    }
 
+    } catch (Throwable t) {
+      _log.error("fatal exception {}", t, t);
+    }
     Calendar c = Calendar.getInstance();
     c.add(Calendar.MINUTE, -15);
     Date staleRecordThreshold = c.getTime();

@@ -46,4 +46,8 @@ public interface ConfigurationServiceClient {
   boolean isLocal();
 
   void setExternalConfigurationApiUrl(String url);
+
+   void setConnectionTimeout(int connectionTimeout);
+
+  void setReadTimeout(int readTimeout);
 }

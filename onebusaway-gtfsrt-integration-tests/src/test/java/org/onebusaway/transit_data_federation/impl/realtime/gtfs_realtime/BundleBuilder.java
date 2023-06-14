@@ -53,7 +53,7 @@ public class BundleBuilder {
     ClassPathResource bundleResource = new ClassPathResource(bundlePath);
     String bundleInputDir = bundleResource.getURL().getFile();
     String bundleRootDir =
-            System.getProperty("java.io.tmpdir")
+            addSlash(System.getProperty("java.io.tmpdir"))
                     + "bundle" + System.currentTimeMillis();
     makeTempDirectory(bundleRootDir, System.getProperty("bundle.keep"));
 
@@ -62,6 +62,12 @@ public class BundleBuilder {
     String bundleIndexURI = bundleRootDir + File.separator + "index.json";
     _bundleContext.setup(bundleRootDir, bundleGzipURI, bundleIndexURI);
     createIndexJson(bundleGzipURI,  bundleRootDir);
+  }
+
+  private String addSlash(String property) {
+    if (property.endsWith("/"))
+      return property;
+    return property + "/";
   }
 
   protected String buildBundle(String bundleInputDir, String bundleOutputDir, String bundleName) throws IOException {

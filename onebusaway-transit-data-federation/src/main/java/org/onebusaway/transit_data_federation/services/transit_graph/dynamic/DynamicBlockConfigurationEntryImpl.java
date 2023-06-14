@@ -1,6 +1,5 @@
 /**
- * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
- * Copyright (C) 2011 Google, Inc.
+ * Copyright (C) 2023 Cambridge Systematics, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,13 +29,13 @@ public class DynamicBlockConfigurationEntryImpl implements BlockConfigurationEnt
 
     private static final long serialVersionUID = 5L;
 
-    private  BlockEntry block;
+    private BlockEntry block;
 
-    private  ServiceIdActivation serviceIds;
+    private ServiceIdActivation serviceIds;
 
-    private  List<BlockTripEntry> trips;
+    private List<BlockTripEntry> trips;
 
-    private  double totalBlockDistance;
+    private double totalBlockDistance;
 
     private BlockStopTimeList blockStopTimes = new BlockStopTimeList();
 

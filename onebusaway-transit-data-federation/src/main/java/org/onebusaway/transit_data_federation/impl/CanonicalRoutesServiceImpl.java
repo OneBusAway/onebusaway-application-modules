@@ -90,24 +90,29 @@ public class CanonicalRoutesServiceImpl implements CanonicalRoutesService {
    * route if present in the GTFS as well as "canonical" ideal representation of route, again is present
    * in the GTFS.  If no "canonical" information, return "heuristic" type that is a synthetic respresentation
    * of the ideal.
-   * @param serviceDate
+   * @param serviceDateMillis
    * @param routeId
    * @return
    */
   @Override
-  public ListBean<RouteGroupingBean> getCanonicalOrMergedRoute(long serviceDate, AgencyAndId routeId) {
-
-    StopsForRouteBean stopsForRoute = copy(_transitDataService.getStopsForRoute(AgencyAndIdLibrary.convertToString(routeId)));
+  public ListBean<RouteGroupingBean> getCanonicalOrMergedRoute(long serviceDateMillis, AgencyAndId routeId) {
+    StopsForRouteBean stopsForRoute;
+    if (serviceDateMillis > 1) {
+      ServiceDate serviceDate = new ServiceDate(new Date(serviceDateMillis));
+      stopsForRoute = copy(_transitDataService.getStopsForRouteForServiceDate(AgencyAndIdLibrary.convertToString(routeId), serviceDate));
+    } else {
+      stopsForRoute = copy(_transitDataService.getStopsForRoute(AgencyAndIdLibrary.convertToString(routeId)));
+    }
     if (stopsForRoute == null || stopsForRoute.getStopGroupings() == null
         || stopsForRoute.getStopGroupings().isEmpty()) {
      // this is an ideal route only, with no physical schedule
      // return what little we know about it from the canonical index
-      return addReferences(createRouteDirectionBean(routeId, serviceDate));
+      return addReferences(createRouteDirectionBean(routeId, serviceDateMillis));
 
     }
 
     // else create merged
-    return addReferences(merge(routeId, stopsForRoute, createRouteDirectionBean(routeId, serviceDate)));
+    return addReferences(merge(routeId, stopsForRoute, createRouteDirectionBean(routeId, serviceDateMillis)));
   }
 
   private ListBean<RouteGroupingBean> addReferences(ListBean<RouteGroupingBean> bean) {

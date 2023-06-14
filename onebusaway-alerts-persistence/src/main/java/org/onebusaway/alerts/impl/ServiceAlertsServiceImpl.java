@@ -427,9 +427,11 @@ public class ServiceAlertsServiceImpl implements ServiceAlertsService {
 	private <T> void getServiceAlertIdsForKey(
 			Map<T, Set<AgencyAndId>> serviceAlertIdsByKey, T key,
 			Collection<AgencyAndId> matches) {
-		Set<AgencyAndId> ids = serviceAlertIdsByKey.get(key);
-		if (ids != null)
-			matches.addAll(ids);
+		if (serviceAlertIdsByKey != null) {
+			Set<AgencyAndId> ids = serviceAlertIdsByKey.get(key);
+			if (ids != null)
+				matches.addAll(ids);
+		}
 	}
 
 	private List<ServiceAlertRecord> getServiceAlertIdsAsObjects(

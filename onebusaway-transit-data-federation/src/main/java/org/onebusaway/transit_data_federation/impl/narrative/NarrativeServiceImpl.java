@@ -40,12 +40,15 @@ import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEn
 import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
 import org.onebusaway.utility.ObjectSerializationLibrary;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class NarrativeServiceImpl implements NarrativeService {
 
+  private static Logger _log = LoggerFactory.getLogger(NarrativeServiceImpl.class);
   static final int CACHE_TIMEOUT = 24 * 60 * 60 * 1000; // 1 day
   private Map<AgencyAndId, TripNarrative> _dynamicTripCache = new PassiveExpiringMap<>(CACHE_TIMEOUT);
 
@@ -127,6 +130,11 @@ public class NarrativeServiceImpl implements NarrativeService {
     int lastStopIndex = stopTimes.size() - 1;
     AgencyAndId stopId = stopTimes.get(lastStopIndex).getStop().getId();
     StopNarrative stopForId = getStopForId(stopId);
+    if (stopForId == null) {
+      _log.error("no such stop {}", stopId);
+      return;
+    }
+
     builder.setTripHeadsign(stopForId.getName());
     builder.setRouteShortName(routeNarrative.getShortName());
     _dynamicTripCache.put(tripId, builder.create());
