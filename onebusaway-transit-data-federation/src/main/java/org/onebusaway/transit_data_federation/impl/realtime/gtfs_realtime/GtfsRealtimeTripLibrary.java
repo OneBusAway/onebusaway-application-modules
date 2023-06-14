@@ -22,6 +22,8 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.google.transit.realtime.GtfsRealtimeMTARR;
 import com.google.transit.realtime.GtfsRealtimeNYCT;
@@ -68,6 +70,7 @@ public class GtfsRealtimeTripLibrary {
 
   private static final Logger _log = LoggerFactory.getLogger(GtfsRealtimeTripLibrary.class);
 
+  private static Pattern _pattern = Pattern.compile("^(-{0,1}\\d+):(\\d{2}):(\\d{2})$");
   private GtfsRealtimeEntitySource _entitySource;
 
   private BlockCalendarService _blockCalendarService;
@@ -75,6 +78,8 @@ public class GtfsRealtimeTripLibrary {
   private BlockGeospatialService _blockGeospatialService;
 
   private AddedTripService _addedTripService;
+
+  private DuplicatedTripService _duplicatedTripService;
 
   private DynamicTripBuilder _dynamicTripBuilder;
   /**
@@ -141,6 +146,10 @@ public class GtfsRealtimeTripLibrary {
     _addedTripService = addedTripService;
   }
 
+  public void setDuplicatedTripService(DuplicatedTripService duplicatedTripService) {
+    _duplicatedTripService = duplicatedTripService;
+  }
+
   public void setDynamicTripBuilder(DynamicTripBuilder builder) {
     _dynamicTripBuilder = builder;
   }
@@ -199,7 +208,9 @@ public class GtfsRealtimeTripLibrary {
       }
 
       TripUpdate tu = fe.getTripUpdate();
-      if (tu.hasTrip() && TransitDataConstants.STATUS_ADDED.equals(tu.getTrip().getScheduleRelationship().toString())) {
+      if (tu.hasTrip() &&
+              (TransitDataConstants.STATUS_ADDED.equals(tu.getTrip().getScheduleRelationship().toString())
+              || TransitDataConstants.STATUS_DUPLICATED.equals(tu.getTrip().getScheduleRelationship().toString()))) {
         result.addAddedTripId(tu.getTrip().getTripId());
       }
 
@@ -223,10 +234,14 @@ public class GtfsRealtimeTripLibrary {
           if (td.hasExtension(GtfsRealtimeNYCT.nyctTripDescriptor)) {
             GtfsRealtimeNYCT.NyctTripDescriptor nyctTripDescriptor = td.getExtension(GtfsRealtimeNYCT.nyctTripDescriptor);
             if (nyctTripDescriptor.hasIsAssigned() && nyctTripDescriptor.getIsAssigned()) {
-              // this is implicitly an added trip
+              // this is implicitly an added trip OR DUPLICATED
               result.addAddedTripId(td.getTripId());
               _log.info("parsing trip {}", td.getTripId());
-              AddedTripInfo addedTripInfo = _addedTripService.handleNyctDescriptor(tu, nyctTripDescriptor);
+
+              boolean isDuplicated = TransitDataConstants.STATUS_DUPLICATED.equals(tu.getTrip().getScheduleRelationship().toString());
+
+              AddedTripInfo addedTripInfo = isDuplicated ? _duplicatedTripService.handleDuplicatedDescriptor(tu) : _addedTripService.handleNyctDescriptor(tu, nyctTripDescriptor);
+
               // convert to blockDescriptor
               bd =_dynamicTripBuilder.createBlockDescriptor(addedTripInfo);
               if (bd == null) continue; // we failed
@@ -795,6 +810,13 @@ public class GtfsRealtimeTripLibrary {
     int blockStartTime = 0;
     if (trip.hasStartTime() && !"0".equals(trip.getStartTime())) {
     	try {
+          Matcher m = _pattern.matcher(trip.getStartTime());
+          if(!m.matches()){
+            long timeInMil = serviceDate.getAsDate().getTime();
+            long epochTime = Long.parseLong(trip.getStartTime());
+            long startTime = (epochTime - timeInMil) / 1000;
+            tripStartTime = (int)startTime;
+          }else
     		tripStartTime = StopTimeFieldMappingFactory.getStringAsSeconds(trip.getStartTime());
     	} catch (InvalidStopTimeException iste) {
     		_log.debug("invalid stopTime of " + trip.getStartTime() + " for trip " + trip);

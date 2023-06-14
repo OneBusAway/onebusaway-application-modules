@@ -18,9 +18,12 @@ package org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime;
 
 import org.apache.commons.collections4.map.PassiveExpiringMap;
 import org.onebusaway.geospatial.model.CoordinatePoint;
+import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.LocalizedServiceId;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
+import org.onebusaway.realtime.api.EVehicleType;
+import org.onebusaway.transit_data.model.TransitDataConstants;
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopTimeEntriesFactory;
 import org.onebusaway.transit_data_federation.model.ShapePoints;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
@@ -61,6 +64,9 @@ public class DynamicTripBuilder {
   public void setTransitGraphDao(TransitGraphDao dao) {
     _graph = dao;
   }
+
+//  private Map<String, DynamicRouteEntry> _routeCache = new HashMap<>();
+  private Map<String, ShapePoints> _shapeCache = new HashMap<>();
 
   public BlockDescriptor createBlockDescriptor(AddedTripInfo addedTripInfo) {
     // from the addedTripInfo generate the trips and stops, and return in the block descriptor
@@ -114,6 +120,7 @@ public class DynamicTripBuilder {
     trip.setDirectionId(getGtfsDirectionId(addedTripInfo.getDirectionId()));
     trip.setBlock(block);
     trip.setServiceId(createLocalizedServiceId(addedTripInfo));
+//    trip.setShapeId(createShape(addedTripInfo));
     trip.setStopTimes(createStopTimes(addedTripInfo, trip));
     trip.setTotalTripDistance(calculateTripDistance(trip));
     if (trip.getStopTimes() == null || trip.getStopTimes().isEmpty()) {
@@ -130,6 +137,53 @@ public class DynamicTripBuilder {
       return "1";
     return directionFlag;
   }
+
+//  private AgencyAndId createShape(AddedTripInfo addedTripInfo) {
+//    if(TransitDataConstants.STATUS_DUPLICATED.equals(addedTripInfo.getScheduleRelationship().toString())){
+//      return addedTripInfo.getShapeId();
+//    }
+//    ShapePoints shapePoints = new ShapePoints();
+//    List<String> stopIds = new ArrayList<>();
+//    String shapeKey =  String.join("|",stopIds);
+//
+//    for (AddedStopInfo stopInfo : addedTripInfo.getStops()){
+//      stopIds.add(stopInfo.getStopId());
+//    }
+//
+//    if(!_shapeCache.containsKey(shapeKey)){
+//      List<Double> lats = new ArrayList<>();
+//      List<Double> lons = new ArrayList<>();
+//      List<Double> distanceTraveled = new ArrayList<>();
+//      double distance = 0.0;
+//      double previousLat = 0.0, previousLon = 0.0;
+//      int i = 0;
+//
+//      for(String stopId : stopIds){
+//        StopEntry stop = findStop(addedTripInfo.getAgencyId(), stopId);
+//        double lat = stop.getStopLat();
+//        double lon = stop.getStopLon();
+//
+//        lats.add(lat);
+//        lons.add(lon);
+//
+//        if(i != 0){
+//           distance += SphericalGeometryLibrary.distance(previousLat, previousLon, lat, lon);
+//          distanceTraveled.add(distance);
+//        }
+//        previousLat = lat;
+//        previousLon = lon;
+//        i++;
+//      }
+//      shapePoints.setDistTraveled(distanceTraveled.stream().mapToDouble(Double::doubleValue).toArray());
+//      shapePoints.setLats(lats.stream().mapToDouble(Double::doubleValue).toArray());
+//      shapePoints.setLons(lons.stream().mapToDouble(Double::doubleValue).toArray());
+//      shapePoints.setShapeId(new AgencyAndId(addedTripInfo.getAgencyId(),addedTripInfo.getAgencyId()));
+//
+//      _shapeCache.put(shapeKey,shapePoints);
+//    }
+//    return _shapeCache.get(shapeKey).getShapeId();
+//
+//  }
 
   private List<StopTimeEntry> createStopTimes(AddedTripInfo addedTripInfo, DynamicTripEntryImpl trip) {
     List<StopTimeEntry> stops = new ArrayList<>();
