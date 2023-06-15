@@ -125,6 +125,11 @@ public class TripUpdatesForAgencyAction extends GtfsRealtimeActionSupport {
     tripDesc.setTripId(normalizeId(activeTrip.getId()));
     RouteBean route = activeTrip.getRoute();
     tripDesc.setRouteId(normalizeId(route.getId()));
+    if (TransitDataConstants.STATUS_ADDED.equals(tripStatus.getStatus())) {
+      tripDesc.setScheduleRelationship(TripDescriptor.ScheduleRelationship.ADDED);
+    } else {
+      tripDesc.setScheduleRelationship(TripDescriptor.ScheduleRelationship.SCHEDULED);
+    }
     StopBean nextStop = tripStatus.getNextStop();
     if (nextStop != null) {
       AgencyAndId stopId = modifiedStopId(agencyId, nextStop.getId());
@@ -153,6 +158,11 @@ public class TripUpdatesForAgencyAction extends GtfsRealtimeActionSupport {
       tripUpdates.add(tripUpdate);
       TripDescriptor.Builder tripDesc = tripUpdate.getTripBuilder();
       tripDesc.setTripId(normalizeId(activeTripId));
+      if (TransitDataConstants.STATUS_ADDED.equals(tripStatus.getStatus())) {
+        tripDesc.setScheduleRelationship(TripDescriptor.ScheduleRelationship.ADDED);
+      } else {
+        tripDesc.setScheduleRelationship(TripDescriptor.ScheduleRelationship.SCHEDULED);
+      }
 
 
       if (activeTripId.equals(activeTrip.getId())) {
