@@ -23,5 +23,5 @@ import com.google.transit.realtime.GtfsRealtimeNYCT;
  */
 public interface NyctTripService {
   AddedTripInfo parse(GtfsRealtime.TripUpdate tu,
-                      GtfsRealtimeNYCT.NyctTripDescriptor nyctTripDescriptor);
+                      GtfsRealtimeNYCT.NyctTripDescriptor nyctTripDescriptor, long currentTime);
 }

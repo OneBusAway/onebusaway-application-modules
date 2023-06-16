@@ -194,6 +194,9 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   // this is a change from the default, but is much safer
   private boolean _validateCurrentTime = false;
 
+  // a special case of some specific integration - drop unassigned trips
+  private boolean _filterUnassigned = false;
+
   private List<AgencyAndId> _routeIdsToCancel = null;
 
   private GtfsRealtimeCancelService _cancelService;
@@ -431,6 +434,10 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     }
   }
 
+  public void setFilterUnassigned(boolean flag) {
+    _filterUnassigned = flag;
+  }
+
   @Autowired
   public void setGtfsRealtimeCancelService(GtfsRealtimeCancelService service) {
     _cancelService = service;
@@ -464,6 +471,7 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     _tripsLibrary.setUseLabelAsVehicleId(_useLabelAsId);
     _tripsLibrary.setValidateCurrentTime(_validateCurrentTime);
     _tripsLibrary.setAddedTripService(new AddedTripServiceImpl());
+    _tripsLibrary.setFilterUnassigned(_filterUnassigned);
     DynamicTripBuilder tripBuilder = new DynamicTripBuilder();
     tripBuilder.setStopTimeEntriesFactory(_stopTimeEntriesFactory);
     tripBuilder.setTransitGraphDao(_transitGraphDao);

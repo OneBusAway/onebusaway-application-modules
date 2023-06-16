@@ -95,6 +95,8 @@ public class GtfsRealtimeTripLibrary {
   private boolean _scheduleAdherenceFromLocation = false;
 
   private boolean _useLabelAsVehicleId = false;
+
+  private boolean _filterUnassigned = false;
   
   public void setEntitySource(GtfsRealtimeEntitySource entitySource) {
     _entitySource = entitySource;
@@ -152,6 +154,9 @@ public class GtfsRealtimeTripLibrary {
     _useLabelAsVehicleId = useLabelAsVehicleId;
   }
 
+  public void setFilterUnassigned(boolean flag) {
+    _filterUnassigned = flag;
+  }
   /**
    * Trip updates describe a trip which is undertaken by a vehicle (which is
    * itself described in vehicle positions), but GTFS-realtime does not demand
@@ -222,17 +227,25 @@ public class GtfsRealtimeTripLibrary {
           // we didn't match to bundle, are we an added trip?
           if (td.hasExtension(GtfsRealtimeNYCT.nyctTripDescriptor)) {
             GtfsRealtimeNYCT.NyctTripDescriptor nyctTripDescriptor = td.getExtension(GtfsRealtimeNYCT.nyctTripDescriptor);
-            if (nyctTripDescriptor.hasIsAssigned() && nyctTripDescriptor.getIsAssigned()) {
-              // this is implicitly an added trip
-              result.addAddedTripId(td.getTripId());
-              _log.info("parsing trip {}", td.getTripId());
-              AddedTripInfo addedTripInfo = _addedTripService.handleNyctDescriptor(tu, nyctTripDescriptor);
-              // convert to blockDescriptor
-              bd =_dynamicTripBuilder.createBlockDescriptor(addedTripInfo);
-              if (bd == null) continue; // we failed
-              // if this trip has a vehiclePosition it will be matched later
-              anonymousTripUpdatesByBlock.put(bd, tu);
+            // this is implicitly an added trip
+            result.addAddedTripId(td.getTripId());
+            _log.info("parsing trip {}", td.getTripId());
+            AddedTripInfo addedTripInfo = _addedTripService.handleNyctDescriptor(tu, nyctTripDescriptor, _currentTime);
+            long tripStartTimeMillis = addedTripInfo.getServiceDate() + (addedTripInfo.getTripStartTime() * 1000);
+            if (_filterUnassigned && nyctTripDescriptor.hasIsAssigned() && !nyctTripDescriptor.getIsAssigned()) {
+              // we are filtering on unassigned and this trip is marked as unassigned
+              continue;
             }
+            if (!_filterUnassigned && tripStartTimeMillis < _currentTime) {
+              // don't let unassigned trips in the past show up
+              continue;
+            }
+            // convert to blockDescriptor
+            bd =_dynamicTripBuilder.createBlockDescriptor(addedTripInfo);
+            if (bd == null) continue; // we failed
+            // if this trip has a vehiclePosition it will be matched later
+            anonymousTripUpdatesByBlock.put(bd, tu);
+
           }
           continue;
         }

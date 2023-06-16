@@ -28,8 +28,9 @@ public class AddedTripServiceImpl implements AddedTripService {
   private static final Logger _log = LoggerFactory.getLogger(AddedTripServiceImpl.class);
   private NyctTripService nycService = new NyctTripServiceImpl();
   @Override
-  public AddedTripInfo handleNyctDescriptor(GtfsRealtime.TripUpdate tu, GtfsRealtimeNYCT.NyctTripDescriptor nyctTripDescriptor) {
-    AddedTripInfo info = nycService.parse(tu,nyctTripDescriptor);
+  public AddedTripInfo handleNyctDescriptor(GtfsRealtime.TripUpdate tu, GtfsRealtimeNYCT.NyctTripDescriptor nyctTripDescriptor,
+                                            long currentTime) {
+    AddedTripInfo info = nycService.parse(tu,nyctTripDescriptor, currentTime);
     return info;
   }
 }
