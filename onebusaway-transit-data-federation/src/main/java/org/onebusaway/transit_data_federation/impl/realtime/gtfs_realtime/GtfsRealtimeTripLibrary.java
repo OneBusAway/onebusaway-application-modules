@@ -227,8 +227,6 @@ public class GtfsRealtimeTripLibrary {
           // we didn't match to bundle, are we an added trip?
           if (td.hasExtension(GtfsRealtimeNYCT.nyctTripDescriptor)) {
             GtfsRealtimeNYCT.NyctTripDescriptor nyctTripDescriptor = td.getExtension(GtfsRealtimeNYCT.nyctTripDescriptor);
-            // this is implicitly an added trip
-            result.addAddedTripId(td.getTripId());
             _log.info("parsing trip {}", td.getTripId());
             AddedTripInfo addedTripInfo = _addedTripService.handleNyctDescriptor(tu, nyctTripDescriptor, _currentTime);
             long tripStartTimeMillis = addedTripInfo.getServiceDate() + (addedTripInfo.getTripStartTime() * 1000);
@@ -236,10 +234,13 @@ public class GtfsRealtimeTripLibrary {
               // we are filtering on unassigned and this trip is marked as unassigned
               continue;
             }
-            if (!_filterUnassigned && tripStartTimeMillis < _currentTime) {
+            if (nyctTripDescriptor.hasIsAssigned() && !nyctTripDescriptor.getIsAssigned()
+                    && tripStartTimeMillis < _currentTime) {
               // don't let unassigned trips in the past show up
               continue;
             }
+            // this is implicitly an added trip
+            result.addAddedTripId(td.getTripId());
             // convert to blockDescriptor
             bd =_dynamicTripBuilder.createBlockDescriptor(addedTripInfo);
             if (bd == null) continue; // we failed
