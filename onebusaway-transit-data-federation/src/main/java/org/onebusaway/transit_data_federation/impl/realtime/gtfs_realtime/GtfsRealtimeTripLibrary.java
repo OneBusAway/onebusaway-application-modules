@@ -413,6 +413,9 @@ public class GtfsRealtimeTripLibrary {
       //nothing to do
       return tu;
     }
+    if (isNycDynamicTrip(tu)) {
+      return tu; // we can get this from descriptor
+    }
 
     TripEntry trip = _entitySource.getTrip(tu.getTrip().getTripId());
     if (trip == null || trip.getStopTimes() == null || trip.getStopTimes().isEmpty()) {
@@ -559,9 +562,22 @@ public class GtfsRealtimeTripLibrary {
     // check the trip hasExtension nyct_trip_descriptor
     if (!update.getTripUpdates().isEmpty())
       if (update.getTripUpdates().get(0).hasTrip())
-        return update.getTripUpdates().get(0).getTrip().hasExtension(GtfsRealtimeNYCT.nyctTripDescriptor);
+        return isNycDynamicTrip(update.getTripUpdates().get(0));
     return false;
   }
+
+  private boolean isNycDynamicTrip(TripUpdate tu) {
+    if (tu.hasTrip()) {
+      if (tu.getTrip().hasScheduleRelationship()) {
+        return tu.getTrip().getScheduleRelationship().equals(TripDescriptor.ScheduleRelationship.ADDED)
+                || tu.getTrip().getScheduleRelationship().equals(TripDescriptor.ScheduleRelationship.DUPLICATED);
+      }
+      return tu.getTrip().hasExtension(GtfsRealtimeNYCT.nyctTripDescriptor);
+    }
+    return false;
+  }
+
+
 
   private void applyDynamicTripUpdatesToRecord(MonitoredResult result,
                                                BlockDescriptor blockDescriptor,
