@@ -416,7 +416,7 @@ public class GtfsRealtimeTripLibrary {
 
     TripEntry trip = _entitySource.getTrip(tu.getTrip().getTripId());
     if (trip == null || trip.getStopTimes() == null || trip.getStopTimes().isEmpty()) {
-      _log.error("no stoptimes for trip {}, cannot determine start time", tu.getTrip().getTripId());
+      _log.error("no stoptimes for trip {} on agencies {}, cannot determine start time", tu.getTrip().getTripId(), _entitySource.getAgencyIds());
       return tu;
     }
     StopTimeEntry stopTimeEntry = trip.getStopTimes().get(0);

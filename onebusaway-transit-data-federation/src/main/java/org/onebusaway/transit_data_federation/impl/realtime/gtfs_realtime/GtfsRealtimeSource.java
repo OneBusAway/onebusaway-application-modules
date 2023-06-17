@@ -602,7 +602,7 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
           if (update.getTripUpdates() != null && update.getTripUpdatesSize() > 0)
             if (update.getTripUpdates().get(0).hasTrip())
               tripId = update.getTripUpdates().get(0).getTrip().getTripId();
-          _log.error("null block {}, bailing...", tripId);
+          _log.error("null block {} for agencies {}, bailing...", tripId, _agencyIds);
           continue;
         }
         BlockDescriptor.ScheduleRelationship scheduleRelationship = update.block.getScheduleRelationship();
