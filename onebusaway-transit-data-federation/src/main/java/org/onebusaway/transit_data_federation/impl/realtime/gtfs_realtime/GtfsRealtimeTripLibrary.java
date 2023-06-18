@@ -48,6 +48,7 @@ import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTi
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.dynamic.DynamicTripEntryImpl;
 import org.onebusaway.util.AgencyAndIdLibrary;
 import org.onebusaway.util.SystemTime;
 import org.slf4j.Logger;
@@ -819,7 +820,15 @@ public class GtfsRealtimeTripLibrary {
     blockDescriptor.setBlockInstance(instance);
     blockDescriptor.setStartDate(serviceDate);
     if (trip.hasScheduleRelationship()) {
-      blockDescriptor.setScheduleRelationshipValue(trip.getScheduleRelationship().toString());
+      if (isDynamicTrip(tripEntry)) {
+        blockDescriptor.setScheduleRelationship(BlockDescriptor.ScheduleRelationship.ADDED);
+      } else {
+        blockDescriptor.setScheduleRelationshipValue(trip.getScheduleRelationship().toString());
+      }
+    } else {
+      if (isDynamicTrip(tripEntry)) {
+        blockDescriptor.setScheduleRelationship(BlockDescriptor.ScheduleRelationship.ADDED);
+      }
     }
     int tripStartTime = 0;
     int blockStartTime = 0;
@@ -839,6 +848,10 @@ public class GtfsRealtimeTripLibrary {
     	blockDescriptor.setStartTime(blockStartTime);
     }
     return blockDescriptor;
+  }
+
+  private boolean isDynamicTrip(TripEntry trip) {
+    return trip instanceof DynamicTripEntryImpl;
   }
 
   
