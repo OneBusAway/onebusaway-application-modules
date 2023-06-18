@@ -225,31 +225,13 @@ public class GtfsRealtimeTripLibrary {
         BlockDescriptor bd = getTripDescriptorAsBlockDescriptor(result, td, time);
 
         if (bd == null) {
-          // we didn't match to bundle, are we an added trip?
-          if (td.hasExtension(GtfsRealtimeNYCT.nyctTripDescriptor)) {
-            GtfsRealtimeNYCT.NyctTripDescriptor nyctTripDescriptor = td.getExtension(GtfsRealtimeNYCT.nyctTripDescriptor);
-            _log.info("parsing trip {}", td.getTripId());
-            AddedTripInfo addedTripInfo = _addedTripService.handleNyctDescriptor(tu, nyctTripDescriptor, _currentTime);
-            long tripStartTimeMillis = addedTripInfo.getServiceDate() + (addedTripInfo.getTripStartTime() * 1000);
-            if (_filterUnassigned && nyctTripDescriptor.hasIsAssigned() && !nyctTripDescriptor.getIsAssigned()) {
-              // we are filtering on unassigned and this trip is marked as unassigned
-              continue;
-            }
-            if (nyctTripDescriptor.hasIsAssigned() && !nyctTripDescriptor.getIsAssigned()
-                    && tripStartTimeMillis < _currentTime) {
-              // don't let unassigned trips in the past show up
-              continue;
-            }
-            // this is implicitly an added trip
-            result.addAddedTripId(td.getTripId());
-            // convert to blockDescriptor
-            bd =_dynamicTripBuilder.createBlockDescriptor(addedTripInfo);
-            if (bd == null) continue; // we failed
-            // if this trip has a vehiclePosition it will be matched later
-            anonymousTripUpdatesByBlock.put(bd, tu);
+          bd = handleDynamicTripUpdate(tu);
+          if (bd == null) continue; // we failed
+          // this is implicitly an added trip
+          result.addAddedTripId(td.getTripId());
 
-          }
-          continue;
+          // if this trip has a vehiclePosition it will be matched later
+          anonymousTripUpdatesByBlock.put(bd, tu);
         }
 
         // if this block has an assigned vehicle consume the tripUpdate
@@ -352,6 +334,9 @@ public class GtfsRealtimeTripLibrary {
       TripUpdate firstTrip = tripUpdates.iterator().next();
       long time = firstTrip.hasTimestamp() ? firstTrip.getTimestamp() * 1000 : currentTime();
       update.block = getTripDescriptorAsBlockDescriptor(result, firstTrip.getTrip(), time);
+      if (update.block == null && isNycDynamicTrip(firstTrip)) {
+        update.block = handleDynamicTripUpdate(firstTrip);
+      }
       // pass through multiple trip updates per block
       update.setTripUpdates(new ArrayList<>(tripUpdates));
 
@@ -401,6 +386,38 @@ public class GtfsRealtimeTripLibrary {
     }
 
     return updates;
+  }
+
+  private BlockDescriptor handleDynamicTripUpdate(TripUpdate tu) {
+
+    TripDescriptor td = tu.getTrip();
+    // we didn't match to bundle, are we an added trip?
+    if (td.hasExtension(GtfsRealtimeNYCT.nyctTripDescriptor)) {
+      GtfsRealtimeNYCT.NyctTripDescriptor nyctTripDescriptor = td.getExtension(GtfsRealtimeNYCT.nyctTripDescriptor);
+      _log.info("parsing trip {}", td.getTripId());
+      AddedTripInfo addedTripInfo = _addedTripService.handleNyctDescriptor(tu, nyctTripDescriptor, _currentTime);
+      long tripStartTimeMillis = addedTripInfo.getServiceDate() + (addedTripInfo.getTripStartTime() * 1000);
+      if (_filterUnassigned && nyctTripDescriptor.hasIsAssigned() && !nyctTripDescriptor.getIsAssigned()) {
+        // we are filtering on unassigned and this trip is marked as unassigned
+        return null;
+      }
+      if (nyctTripDescriptor.hasIsAssigned() && !nyctTripDescriptor.getIsAssigned()
+              && tripStartTimeMillis < _currentTime) {
+        // don't let unassigned trips in the past show up
+        return null;
+      }
+      // convert to blockDescriptor
+      return _dynamicTripBuilder.createBlockDescriptor(addedTripInfo);
+
+    } else {
+      if (td.getScheduleRelationship().equals(TripDescriptor.ScheduleRelationship.ADDED)) {
+        AddedTripInfo addedTripInfo = _addedTripService.handleAddedDescriptor(_entitySource.getAgencyIds().get(0), tu, _currentTime);
+        if (addedTripInfo != null) {
+          return _dynamicTripBuilder.createBlockDescriptor(addedTripInfo);
+        }
+      }
+    }
+    return null;
   }
 
   // in order to support multiple trip updates per block we need
