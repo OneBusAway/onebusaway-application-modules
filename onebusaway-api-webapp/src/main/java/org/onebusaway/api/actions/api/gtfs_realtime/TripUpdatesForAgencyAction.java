@@ -162,6 +162,7 @@ public class TripUpdatesForAgencyAction extends GtfsRealtimeActionSupport {
       if (TransitDataConstants.STATUS_ADDED.equals(tripStatus.getStatus())) {
         tripDesc.setScheduleRelationship(TripDescriptor.ScheduleRelationship.ADDED);
         tripDesc.setStartDate(formatStartDate(tripStatus.getServiceDate()));
+        tripDesc.setStartTime(formatStartTime(tripStatus.getServiceDate() + (tripStatus.getTripStartTime() * 1000)));
       } else {
         tripDesc.setScheduleRelationship(TripDescriptor.ScheduleRelationship.SCHEDULED);
       }
@@ -202,6 +203,10 @@ public class TripUpdatesForAgencyAction extends GtfsRealtimeActionSupport {
     return tripUpdates;
   }
 
+  private String formatStartTime(long l) {
+    SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+    return sdf.format(new Date(l));
+  }
 
 
   private List<String> activeTripsIds(TripStatusBean tripStatus) {

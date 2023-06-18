@@ -38,6 +38,8 @@ public final class TripStatusBean implements Serializable {
 
   private long serviceDate;
 
+  private int tripStartTime;
+
   private String occupancyStatus;
 
   private FrequencyBean frequency;
@@ -126,6 +128,14 @@ public final class TripStatusBean implements Serializable {
 
   public void setServiceDate(long serviceDate) {
     this.serviceDate = serviceDate;
+  }
+
+  public int getTripStartTime() {
+    return tripStartTime;
+  }
+
+  public void setTripStartTime(int tripStartTime) {
+    this.tripStartTime = tripStartTime;
   }
 
   public String getOccupancyStatus() { return occupancyStatus; }
