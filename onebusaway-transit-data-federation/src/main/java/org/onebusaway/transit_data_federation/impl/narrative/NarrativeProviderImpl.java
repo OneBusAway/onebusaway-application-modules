@@ -143,6 +143,7 @@ public final class NarrativeProviderImpl implements Serializable {
   public List<StopTimeNarrative> getStopTimeNarrativesForPattern(AgencyAndId routeId, String directionId, List<AgencyAndId> stopIds) {
     List<StopTimeNarrative> results = _patternToStopTimeNarratives.get(new RoutePattern(routeId, directionId, stopIds));
     if (results == null) {
+      if (_routeDirectionToStopPatterns == null) return results;
       // not a direct cache hit, dig deeper
       List<StopPattern> patterns = _routeDirectionToStopPatterns.get(new RouteDirection(routeId, directionId));
       return find(stopIds, patterns);
