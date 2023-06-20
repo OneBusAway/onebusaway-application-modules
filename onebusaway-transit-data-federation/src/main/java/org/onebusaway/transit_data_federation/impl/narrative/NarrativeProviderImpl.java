@@ -155,7 +155,7 @@ public final class NarrativeProviderImpl implements Serializable {
     private List<AgencyAndId> stopIds;
     public RoutePattern(AgencyAndId routeId, String direction, List<AgencyAndId> stopIds) {
       if (routeId == null) throw new NullPointerException("routeId cannot be null");
-      if (direction == null) throw new NullPointerException("direction cannot be null");
+      if (direction == null) direction = "null";
       if (stopIds == null) throw new NullPointerException("stopIds cannot be null, but can be empty");
       this.routeId = routeId;
       this.directionId = direction;
