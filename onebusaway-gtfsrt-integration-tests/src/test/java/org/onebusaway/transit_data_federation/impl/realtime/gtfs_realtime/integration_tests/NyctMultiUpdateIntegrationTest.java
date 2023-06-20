@@ -51,6 +51,8 @@ import static org.junit.Assert.*;
  */
 public class NyctMultiUpdateIntegrationTest extends AbstractGtfsRealtimeIntegrationTest {
 
+  private Set<String> stopHeadsigns = new HashSet<>();
+
   protected String getIntegrationTestPath() {
     return "org/onebusaway/transit_data_federation/impl/realtime/gtfs_realtime/integration_tests/nyct_multi_trips";
   }
@@ -104,7 +106,7 @@ public class NyctMultiUpdateIntegrationTest extends AbstractGtfsRealtimeIntegrat
       i++;
     }
 
-
+    assertEquals(5, stopHeadsigns.size());
   }
 
   private void verifyBeans(String message, StopEntry firstStop, long firstStopTime) {
@@ -135,31 +137,19 @@ public class NyctMultiUpdateIntegrationTest extends AbstractGtfsRealtimeIntegrat
   }
 
   private void verifyNarrative(ArrivalAndDepartureBean bean) {
-    List<String> bannedTrips = new ArrayList<>();
-    bannedTrips.add("MTASBWY_083600_4..N01R");
-    bannedTrips.add("MTASBWY_084400_4..N01R)");
-    bannedTrips.add("MTASBWY_085200_4..N01R");
-    bannedTrips.add("MTASBWY_086000_4..N01R");
-    bannedTrips.add("MTASBWY_086800_4..N01R");
-    bannedTrips.add("MTASBWY_087600_4..N01R");
-    bannedTrips.add("MTASBWY_084400_4..N01R");
-    bannedTrips.add("MTASBWY_088400_4..N01R");
 
     TripEntry trip = getBundleLoader().getApplicationContext().getBean(TransitGraphDao.class)
             .getTripEntryForId(AgencyAndIdLibrary.convertFromString(bean.getTrip().getId()));
     String tripId = trip.getId().toString();
-    if (bannedTrips.contains(tripId))
-      return;
 
     NarrativeService narrativeService = getBundleLoader().getApplicationContext().getBean(NarrativeService.class);
     for (StopTimeEntry stopTimeEntry : trip.getStopTimes()) {
       StopTimeNarrative stopTimeNarrative = narrativeService.getStopTimeForEntry(stopTimeEntry);
       if (stopTimeNarrative == null) {
         fail("missing narrative for " + stopTimeEntry);
-      }
+      } else if (stopTimeNarrative.getStopHeadsign() != null)
+        stopHeadsigns.add(stopTimeNarrative.getStopHeadsign());
     }
-
-
   }
 
   private void verifyPredictions(ArrivalAndDepartureBean bean) {
