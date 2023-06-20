@@ -17,11 +17,9 @@
 package org.onebusaway.transit_data_federation.impl.narrative;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
+import org.apache.commons.collections4.map.PassiveExpiringMap;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.model.ShapePoints;
 import org.onebusaway.transit_data_federation.model.narrative.AgencyNarrative;
@@ -35,6 +33,7 @@ import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
 public final class NarrativeProviderImpl implements Serializable {
 
   private static final long serialVersionUID = 2L;
+  private static final int CACHE_TIMEOUT = 24 * 60 * 60 * 1000; // 1 day
 
   private Map<String, AgencyNarrative> _agencyNarratives = new HashMap<String, AgencyNarrative>();
 
@@ -45,6 +44,10 @@ public final class NarrativeProviderImpl implements Serializable {
   private Map<AgencyAndId, TripNarrative> _tripNarratives = new HashMap<AgencyAndId, TripNarrative>();
 
   private Map<AgencyAndId, List<StopTimeNarrative>> _stopTimeNarrativesByTripIdAndStopTimeSequence = new HashMap<AgencyAndId, List<StopTimeNarrative>>();
+
+  private Map<AgencyAndId, List<StopTimeNarrative>> _dynamicStopTimeNarrativesByTripIdAndStopTimeSequence = new PassiveExpiringMap<AgencyAndId, List<StopTimeNarrative>>(CACHE_TIMEOUT);
+
+  private final Map<RoutePattern, List<StopTimeNarrative>> _patternToStopTimeNarratives = new HashMap<>();
 
   private Map<AgencyAndId, ShapePoints> _shapePointsById = new HashMap<AgencyAndId, ShapePoints>();
 
@@ -77,6 +80,22 @@ public final class NarrativeProviderImpl implements Serializable {
     while (narratives.size() <= index)
       narratives.add(null);
     narratives.set(index, narrative);
+
+  }
+
+  public void addNarrativeForStopTimeEntry(AgencyAndId tripId, int index,
+                                           StopTimeNarrative narrative) {
+
+    List<StopTimeNarrative> narratives = _dynamicStopTimeNarrativesByTripIdAndStopTimeSequence.get(tripId);
+    if (narratives == null) {
+      narratives = new ArrayList<StopTimeNarrative>();
+      _dynamicStopTimeNarrativesByTripIdAndStopTimeSequence.put(tripId, narratives);
+    }
+
+    while (narratives.size() <= index)
+      narratives.add(null);
+    narratives.set(index, narrative);
+
   }
 
   public void setShapePointsForId(AgencyAndId shapeId, ShapePoints shapePoints) {
@@ -99,6 +118,8 @@ public final class NarrativeProviderImpl implements Serializable {
     TripEntry trip = entry.getTrip();
     List<StopTimeNarrative> narratives = _stopTimeNarrativesByTripIdAndStopTimeSequence.get(trip.getId());
     if (narratives == null)
+      narratives = _dynamicStopTimeNarrativesByTripIdAndStopTimeSequence.get(trip.getId());
+    if (narratives == null)
       return null;
     int index = entry.getSequence();
     return narratives.get(index);
@@ -115,5 +136,45 @@ public final class NarrativeProviderImpl implements Serializable {
 
   public ShapePoints getShapePointsForId(AgencyAndId id) {
     return _shapePointsById.get(id);
+  }
+
+  public List<StopTimeNarrative> getStopTimeNarrativesForPattern(AgencyAndId routeId, String directionId, List<AgencyAndId> stopIds) {
+    return _patternToStopTimeNarratives.get(new RoutePattern(routeId, directionId, stopIds));
+  }
+
+  public void setNarrativesForStops(AgencyAndId routeId, String directionId, List<AgencyAndId> stopIds, List<StopTimeNarrative> narratives) {
+    if (stopIds.size() != narratives.size())
+      throw new IllegalStateException("mismatch between pattern and narratives");
+    RoutePattern pattern = new RoutePattern(routeId, directionId, stopIds);
+    _patternToStopTimeNarratives.put(pattern, narratives);
+  }
+
+  public static class RoutePattern implements Serializable {
+    private AgencyAndId routeId;
+    private String directionId;
+    private List<AgencyAndId> stopIds;
+    public RoutePattern(AgencyAndId routeId, String direction, List<AgencyAndId> stopIds) {
+      if (routeId == null) throw new NullPointerException("routeId cannot be null");
+      if (direction == null) throw new NullPointerException("direction cannot be null");
+      if (stopIds == null) throw new NullPointerException("stopIds cannot be null, but can be empty");
+      this.routeId = routeId;
+      this.directionId = direction;
+      this.stopIds = stopIds;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      if (obj == null || !(obj instanceof RoutePattern))
+        return false;
+      RoutePattern rd = (RoutePattern) obj;
+      return rd.routeId.equals(routeId)
+              && rd.directionId.equals(directionId)
+              && Objects.equals(rd.stopIds, stopIds);
+    }
+
+    @Override
+    public int hashCode() {
+      return routeId.hashCode() + directionId.hashCode() + stopIds.hashCode();
+    }
   }
 }

@@ -28,11 +28,15 @@ import org.onebusaway.transit_data_federation.impl.realtime.VehicleStatusService
 import org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.AbstractGtfsRealtimeIntegrationTest;
 import org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.GtfsRealtimeSource;
 import org.onebusaway.transit_data_federation.model.TargetTime;
+import org.onebusaway.transit_data_federation.model.narrative.StopTimeNarrative;
 import org.onebusaway.transit_data_federation.services.ArrivalAndDepartureService;
 import org.onebusaway.transit_data_federation.services.beans.ArrivalsAndDeparturesBeanService;
+import org.onebusaway.transit_data_federation.services.narrative.NarrativeService;
 import org.onebusaway.transit_data_federation.services.realtime.ArrivalAndDepartureInstance;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
+import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.dynamic.DynamicBlockConfigurationEntryImpl;
 import org.onebusaway.util.AgencyAndIdLibrary;
 import org.springframework.core.io.ClassPathResource;
@@ -124,8 +128,37 @@ public class NyctMultiUpdateIntegrationTest extends AbstractGtfsRealtimeIntegrat
       }
       tripCount.put(tripId, tripCount.get(tripId) + 1);
       verifyPredictions(bean);
+      verifyNarrative(bean);
     }
     verifyTripRange(message, firstStop, firstStopTime);
+
+  }
+
+  private void verifyNarrative(ArrivalAndDepartureBean bean) {
+    List<String> bannedTrips = new ArrayList<>();
+    bannedTrips.add("MTASBWY_083600_4..N01R");
+    bannedTrips.add("MTASBWY_084400_4..N01R)");
+    bannedTrips.add("MTASBWY_085200_4..N01R");
+    bannedTrips.add("MTASBWY_086000_4..N01R");
+    bannedTrips.add("MTASBWY_086800_4..N01R");
+    bannedTrips.add("MTASBWY_087600_4..N01R");
+    bannedTrips.add("MTASBWY_084400_4..N01R");
+    bannedTrips.add("MTASBWY_088400_4..N01R");
+
+    TripEntry trip = getBundleLoader().getApplicationContext().getBean(TransitGraphDao.class)
+            .getTripEntryForId(AgencyAndIdLibrary.convertFromString(bean.getTrip().getId()));
+    String tripId = trip.getId().toString();
+    if (bannedTrips.contains(tripId))
+      return;
+
+    NarrativeService narrativeService = getBundleLoader().getApplicationContext().getBean(NarrativeService.class);
+    for (StopTimeEntry stopTimeEntry : trip.getStopTimes()) {
+      StopTimeNarrative stopTimeNarrative = narrativeService.getStopTimeForEntry(stopTimeEntry);
+      if (stopTimeNarrative == null) {
+        fail("missing narrative for " + stopTimeEntry);
+      }
+    }
+
 
   }
 

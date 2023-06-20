@@ -31,6 +31,8 @@ import org.onebusaway.transit_data_federation.services.blocks.BlockTripIndex;
 import org.onebusaway.transit_data_federation.services.transit_graph.RouteCollectionEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
 
+import java.util.List;
+
 /**
  * Service methods supporting narrative querying. We define "narrative" as any
  * information that isn't used in raw schedule, trip planning, and routing
@@ -66,4 +68,9 @@ public interface NarrativeService {
   public ShapePoints getShapePointsForId(AgencyAndId id);
 
   void addDynamicTrip(BlockTripIndex blockTripIndex);
+
+  public void addNarrativeForStopTimeEntry(AgencyAndId tripId, int index,
+                                           StopTimeNarrative narrative);
+
+  List<StopTimeNarrative> getStopTimeNarrativesForPattern(AgencyAndId routeId, String directionId, List<AgencyAndId> stopIds);
 }

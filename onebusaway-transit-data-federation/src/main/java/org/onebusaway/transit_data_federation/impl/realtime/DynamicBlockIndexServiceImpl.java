@@ -19,16 +19,14 @@ import org.apache.commons.collections4.map.PassiveExpiringMap;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.impl.blocks.BlockIndexFactoryServiceImpl;
 import org.onebusaway.transit_data_federation.impl.blocks.BlockStopTimeIndicesFactory;
+import org.onebusaway.transit_data_federation.model.narrative.StopTimeNarrative;
 import org.onebusaway.transit_data_federation.model.transit_graph.DynamicGraph;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.blocks.BlockStopTimeIndex;
 import org.onebusaway.transit_data_federation.services.blocks.BlockTripIndex;
 import org.onebusaway.transit_data_federation.services.blocks.DynamicBlockIndexService;
 import org.onebusaway.transit_data_federation.services.narrative.NarrativeService;
-import org.onebusaway.transit_data_federation.services.transit_graph.BlockEntry;
-import org.onebusaway.transit_data_federation.services.transit_graph.RouteEntry;
-import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
-import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -103,6 +101,21 @@ public class DynamicBlockIndexServiceImpl implements DynamicBlockIndexService {
       }
       blockTripIndexByRouteCollectionId.get(route.getId()).add(blockTripIndex);
       _narrativeService.addDynamicTrip(blockTripIndex);
+
+      List<AgencyAndId> stopIds = new ArrayList<>();
+      for (BlockStopTimeEntry blockStopTimeEntry : blockTripIndex.getTrips().get(0).getStopTimes()) {
+          stopIds.add(blockStopTimeEntry.getStopTime().getStop().getId());
+      }
+      List<StopTimeNarrative> stopTimeNarratives = _narrativeService.getStopTimeNarrativesForPattern(route.getId(), trip.getDirectionId(), stopIds);
+      if (stopTimeNarratives != null) {
+        int stopIndex = 1;
+        for (StopTimeNarrative stopTimeNarrative : stopTimeNarratives) {
+          if (stopTimeNarrative != null) {
+            _narrativeService.addNarrativeForStopTimeEntry(trip.getId(), stopIndex, stopTimeNarrative);
+          }
+          stopIndex++;
+        }
+      }
     }
 
 
