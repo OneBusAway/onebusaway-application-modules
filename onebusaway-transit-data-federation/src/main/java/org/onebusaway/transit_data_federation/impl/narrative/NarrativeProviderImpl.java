@@ -141,6 +141,7 @@ public final class NarrativeProviderImpl implements Serializable {
   }
 
   public List<StopTimeNarrative> getStopTimeNarrativesForPattern(AgencyAndId routeId, String directionId, List<AgencyAndId> stopIds) {
+    if (_patternToStopTimeNarratives == null) return null;
     List<StopTimeNarrative> results = _patternToStopTimeNarratives.get(new RoutePattern(routeId, directionId, stopIds));
     if (results == null) {
       if (_routeDirectionToStopPatterns == null) return results;
