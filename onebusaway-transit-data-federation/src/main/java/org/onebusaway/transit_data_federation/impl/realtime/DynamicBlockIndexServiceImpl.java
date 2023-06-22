@@ -72,8 +72,11 @@ public class DynamicBlockIndexServiceImpl implements DynamicBlockIndexService {
     if (!blockStopTimeIndicesByStopId.containsKey(stopEntry.getId())) {
       return null;
     }
-    Set<BlockStopTimeIndex> set = blockStopTimeIndicesByStopId.get(stopEntry.getId());
-    return new ArrayList<>(set);
+    synchronized (blockStopTimeIndicesByStopId) {
+      Set<BlockStopTimeIndex> set = blockStopTimeIndicesByStopId.get(stopEntry.getId());
+      return new ArrayList<>(set);
+    }
+
   }
 
   @Override
