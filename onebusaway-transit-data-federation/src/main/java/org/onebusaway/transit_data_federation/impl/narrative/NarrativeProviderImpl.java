@@ -88,6 +88,7 @@ public final class NarrativeProviderImpl implements Serializable {
   public void addNarrativeForStopTimeEntry(AgencyAndId tripId, int index,
                                            StopTimeNarrative narrative) {
 
+    init();
     List<StopTimeNarrative> narratives = _dynamicStopTimeNarrativesByTripIdAndStopTimeSequence.get(tripId);
     if (narratives == null) {
       narratives = new ArrayList<StopTimeNarrative>();
@@ -119,8 +120,10 @@ public final class NarrativeProviderImpl implements Serializable {
   public StopTimeNarrative getNarrativeForStopTimeEntry(StopTimeEntry entry) {
     TripEntry trip = entry.getTrip();
     List<StopTimeNarrative> narratives = _stopTimeNarrativesByTripIdAndStopTimeSequence.get(trip.getId());
-    if (narratives == null)
+    if (narratives == null) {
+      init();
       narratives = _dynamicStopTimeNarrativesByTripIdAndStopTimeSequence.get(trip.getId());
+    }
     if (narratives == null)
       return null;
     int index = entry.getSequence();
@@ -177,6 +180,12 @@ public final class NarrativeProviderImpl implements Serializable {
     // only add this if it doesn't already exist
     if (find(stopIds, stopPatterns) == null) {
       stopPatterns.add(stopPattern);
+    }
+  }
+
+  private void init() {
+    if (_dynamicStopTimeNarrativesByTripIdAndStopTimeSequence == null) {
+      _dynamicStopTimeNarrativesByTripIdAndStopTimeSequence = new PassiveExpiringMap<AgencyAndId, List<StopTimeNarrative>>(CACHE_TIMEOUT);
     }
   }
 
