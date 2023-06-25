@@ -19,6 +19,7 @@ import com.google.transit.realtime.GtfsRealtime;
 import org.junit.Test;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
+import org.onebusaway.realtime.api.TimepointPredictionRecord;
 import org.onebusaway.realtime.api.VehicleLocationListener;
 import org.onebusaway.realtime.api.VehicleLocationRecord;
 import org.onebusaway.transit_data_federation.impl.realtime.TestVehicleLocationListener;
@@ -30,8 +31,10 @@ import org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.Monito
 import org.onebusaway.transit_data_federation.model.TargetTime;
 import org.onebusaway.transit_data_federation.services.ArrivalAndDepartureService;
 import org.onebusaway.transit_data_federation.services.realtime.ArrivalAndDepartureInstance;
+import org.onebusaway.transit_data_federation.services.realtime.BlockLocation;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
+import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
 import org.springframework.core.io.ClassPathResource;
 
 import java.io.File;
@@ -39,6 +42,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.*;
@@ -88,14 +92,48 @@ public class STDuplicatedTripsIntegrationTest extends AbstractGtfsRealtimeIntegr
     long window = 75 * 60 * 1000; // 75 minutes
 
     StopEntry firstStop = graph.getStopEntryForId(AgencyAndId.convertFromString("40_99914"));
-    long firstStoptime = 1683740580l; //Wed May 10 13:43:00 EDT 2023
+    long firstStopTime = 1683740698000L;
     long serviceDate = new ServiceDate(2023,5,10).getAsDate().getTime();
 
-
-    List<ArrivalAndDepartureInstance> list = arrivalAndDepartureService.getArrivalsAndDeparturesForStopInTimeRange(firstStop,new TargetTime(firstStoptime,firstStoptime),firstStoptime - window, firstStoptime + window);
+    List<ArrivalAndDepartureInstance> list = arrivalAndDepartureService.getArrivalsAndDeparturesForStopInTimeRange(firstStop,new TargetTime(firstStopTime,firstStopTime),firstStopTime - window, firstStopTime + window);
     assertNotNull(list);
-    assertTrue(!list.isEmpty());
+    // LLR_2023-03-18_Weekday_100479_1043  LLR_2023-03-18_Weekday_100479_2047
 
+    int expectedDuplicatedTripsSize = 1;
+    int actualDuplicatedTripsSize = 0;
+
+    List<String> expectedduplicatedTrips = new ArrayList<>();
+    expectedduplicatedTrips.add("LLR_2023-03-18_Weekday_100479_1043_Dup");
+    expectedduplicatedTrips.add("LLR_2023-03-18_Weekday_100479_2047");
+
+      List<TripEntry> DynamictripsFound = new ArrayList<>();
+    for(ArrivalAndDepartureInstance instance : list){
+      String tripId = instance.getStopTimeInstance().getStopTime().getTrip().getTrip().getId().getId();
+      AgencyAndId stopID = instance.getStopTimeInstance().getStopTime().getStopTime().getStop().getId();
+      if(expectedduplicatedTrips.contains(tripId)){
+        DynamictripsFound.add(instance.getStopTimeInstance().getStopTime().getTrip().getTrip());
+        actualDuplicatedTripsSize++;
+        assertTrue(instance.getPredictedArrivalTime() > 0 || instance.getPredictedDepartureTime() > 0);
+        if ("40_LLR_2023-03-18_Weekday_100479_1043_Dup".equals(instance.getBlockInstance().getBlock().getBlock().getId().toString())) {
+          BlockLocation blockLocation =  instance.getBlockLocation();
+          assertNotNull(blockLocation);
+          List<TimepointPredictionRecord> timepointPredictions = blockLocation.getTimepointPredictions();
+          assertNotNull(timepointPredictions);
+          for(TimepointPredictionRecord timepointPrediction : timepointPredictions){
+            assertTrue(timepointPrediction.getTimepointPredictedArrivalTime() > 0 ||
+            timepointPrediction.getTimepointPredictedDepartureTime() > 0);
+            assertEquals("40_LLR_2023-03-18_Weekday_100479_1043_Dup",timepointPrediction.getTripId().toString());
+            assertNotNull(timepointPrediction.getTimepointId());
+          }
+        }
+      }
+    }
+    if(expectedDuplicatedTripsSize != actualDuplicatedTripsSize){
+      _log.error("expected {}, actual {}", expectedDuplicatedTripsSize, actualDuplicatedTripsSize);
+    }
+    assertEquals(expectedDuplicatedTripsSize,actualDuplicatedTripsSize);
+//
+//    assertTrue(foundDuplicate);
   }
 
   private void writeFeed(GtfsRealtime.FeedMessage feed, URL feedLocation) throws IOException {

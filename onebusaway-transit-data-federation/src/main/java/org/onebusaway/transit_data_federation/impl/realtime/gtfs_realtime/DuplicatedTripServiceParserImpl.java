@@ -62,14 +62,14 @@ public class DuplicatedTripServiceParserImpl implements DuplicatedTripServicePar
             // start_date: "YYmmDD"
             throw new UnsupportedOperationException("not implemented yet");
         }
-        duplicatedTrip.setTripId(tripId);
+        duplicatedTrip.setTripId(tripId + "_Dup");
         duplicatedTrip.setRouteId(tripEntry.getRoute().getId().getId());
         duplicatedTrip.setDirectionId(tripEntry.getDirectionId());
         duplicatedTrip.setShapeId(tripEntry.getShapeId());
 
         for(StopTimeEntry stopTimeEntry : tripEntry.getStopTimes() ){
             AddedStopInfo stopInfo = new AddedStopInfo();
-            stopInfo.setStopId(String.valueOf(stopTimeEntry.getId()));
+            stopInfo.setStopId(stopTimeEntry.getStop().getId().getId());
             stopInfo.setArrivalTime(stopTimeEntry.getArrivalTime());
             stopInfo.setDepartureTime(stopTimeEntry.getDepartureTime());
             stopInfos.add(stopInfo);

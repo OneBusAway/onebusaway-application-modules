@@ -239,7 +239,7 @@ public class DynamicTripBuilder {
 
 
   private int toSecondsInDay(long time, long serviceDate) {
-    return Math.toIntExact((time - serviceDate) / 1000);
+    return Math.toIntExact(((time * 1000) + serviceDate) / 1000);
   }
 
   private DynamicStopEntryImpl copyFromStop(StopEntry staticStop) {
