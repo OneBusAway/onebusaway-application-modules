@@ -51,7 +51,7 @@ import static org.junit.Assert.*;
  */
 public class NyctMultiUpdateIntegrationTest extends AbstractGtfsRealtimeIntegrationTest {
 
-  private Set<String> stopHeadsigns = new HashSet<>();
+  private Map<AgencyAndId, Set<String>> stopHeadsigns = new HashMap<>();
 
   protected String getIntegrationTestPath() {
     return "org/onebusaway/transit_data_federation/impl/realtime/gtfs_realtime/integration_tests/nyct_multi_trips";
@@ -106,7 +106,15 @@ public class NyctMultiUpdateIntegrationTest extends AbstractGtfsRealtimeIntegrat
       i++;
     }
 
-    assertEquals(5, stopHeadsigns.size());
+    for (AgencyAndId stopId : stopHeadsigns.keySet()) {
+      if (stopHeadsigns.get(stopId).size() > 1) {
+        _log.error("bad result for stop {} with {}", stopId, stopHeadsigns.get(stopId));
+        fail();
+      } else {
+        _log.error("result: stopId {} has {}", stopId, stopHeadsigns.get(stopId));
+      }
+    }
+
   }
 
   private void verifyBeans(String message, StopEntry firstStop, long firstStopTime) {
@@ -144,11 +152,16 @@ public class NyctMultiUpdateIntegrationTest extends AbstractGtfsRealtimeIntegrat
 
     NarrativeService narrativeService = getBundleLoader().getApplicationContext().getBean(NarrativeService.class);
     for (StopTimeEntry stopTimeEntry : trip.getStopTimes()) {
+      AgencyAndId stopId = stopTimeEntry.getStop().getId();
       StopTimeNarrative stopTimeNarrative = narrativeService.getStopTimeForEntry(stopTimeEntry);
       if (stopTimeNarrative == null) {
         fail("missing narrative for " + stopTimeEntry);
-      } else if (stopTimeNarrative.getStopHeadsign() != null)
-        stopHeadsigns.add(stopTimeNarrative.getStopHeadsign());
+      } else if (stopTimeNarrative.getStopHeadsign() != null) {
+        if (!stopHeadsigns.containsKey(stopId)) {
+          stopHeadsigns.put(stopId, new HashSet<>());
+        }
+        stopHeadsigns.get(stopId).add(bean.getTrip().getRoute().getId() + ":" + stopTimeEntry.getStop().getId() + ":" + stopTimeNarrative.getStopHeadsign());
+      }
     }
   }
 

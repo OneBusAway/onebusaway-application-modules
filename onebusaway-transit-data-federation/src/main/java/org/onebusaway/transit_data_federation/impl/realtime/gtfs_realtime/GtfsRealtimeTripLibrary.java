@@ -394,7 +394,7 @@ public class GtfsRealtimeTripLibrary {
     // we didn't match to bundle, are we an added trip?
     if (td.hasExtension(GtfsRealtimeNYCT.nyctTripDescriptor)) {
       GtfsRealtimeNYCT.NyctTripDescriptor nyctTripDescriptor = td.getExtension(GtfsRealtimeNYCT.nyctTripDescriptor);
-      _log.info("parsing trip {}", td.getTripId());
+      _log.debug("parsing trip {}", td.getTripId());
       AddedTripInfo addedTripInfo = _addedTripService.handleNyctDescriptor(tu, nyctTripDescriptor, _currentTime);
       long tripStartTimeMillis = addedTripInfo.getServiceDate() + (addedTripInfo.getTripStartTime() * 1000);
       if (_filterUnassigned && nyctTripDescriptor.hasIsAssigned() && !nyctTripDescriptor.getIsAssigned()) {

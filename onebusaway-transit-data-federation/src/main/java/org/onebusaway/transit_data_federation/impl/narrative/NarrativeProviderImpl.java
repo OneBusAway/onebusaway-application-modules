@@ -19,6 +19,7 @@ package org.onebusaway.transit_data_federation.impl.narrative;
 import java.io.Serializable;
 import java.util.*;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.map.PassiveExpiringMap;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.model.ShapePoints;
@@ -85,10 +86,13 @@ public final class NarrativeProviderImpl implements Serializable {
 
   }
 
+  public void addStopNarrativesForTrip(AgencyAndId tripId, List<StopTimeNarrative> stopTimeNarratives) {
+    _dynamicStopTimeNarrativesByTripIdAndStopTimeSequence.put(tripId, stopTimeNarratives);
+  }
+
   public void addNarrativeForStopTimeEntry(AgencyAndId tripId, int index,
                                            StopTimeNarrative narrative) {
 
-    init();
     List<StopTimeNarrative> narratives = _dynamicStopTimeNarrativesByTripIdAndStopTimeSequence.get(tripId);
     if (narratives == null) {
       narratives = new ArrayList<StopTimeNarrative>();
@@ -119,15 +123,17 @@ public final class NarrativeProviderImpl implements Serializable {
 
   public StopTimeNarrative getNarrativeForStopTimeEntry(StopTimeEntry entry) {
     TripEntry trip = entry.getTrip();
+    int index = entry.getSequence();
     List<StopTimeNarrative> narratives = _stopTimeNarrativesByTripIdAndStopTimeSequence.get(trip.getId());
     if (narratives == null) {
-      init();
       narratives = _dynamicStopTimeNarrativesByTripIdAndStopTimeSequence.get(trip.getId());
     }
-    if (narratives == null)
+    if (narratives == null) {
       return null;
-    int index = entry.getSequence();
-    return narratives.get(index);
+    }
+    // if our trip started midway through the stopping pattern, we need to calculate an offset
+    int offset =  (narratives.size() - trip.getStopTimes().size());
+    return narratives.get(index + offset);
   }
 
   public RouteCollectionNarrative getRouteCollectionNarrativeForId(
@@ -156,9 +162,12 @@ public final class NarrativeProviderImpl implements Serializable {
   }
 
   private List<StopTimeNarrative> find(List<AgencyAndId> stopIds, List<StopPattern> patterns) {
-    if (patterns == null) return null;
     for (StopPattern pattern : patterns) {
-      if (Collections.indexOfSubList(pattern.stopIds, stopIds) != -1) {
+      if (pattern.stopIds == null) continue;
+      if (CollectionUtils.isEqualCollection(pattern.stopIds, stopIds))
+        return pattern.narratives;
+      int subListLocation = Collections.indexOfSubList(pattern.stopIds, stopIds);
+      if (subListLocation > -1) {
         return pattern.narratives;
       }
     }
@@ -169,7 +178,8 @@ public final class NarrativeProviderImpl implements Serializable {
     if (stopIds.size() != narratives.size())
       throw new IllegalStateException("mismatch between pattern and narratives");
     RoutePattern pattern = new RoutePattern(routeId, directionId, stopIds);
-    _patternToStopTimeNarratives.put(pattern, narratives);
+    if (!_patternToStopTimeNarratives.containsKey(pattern))
+      _patternToStopTimeNarratives.put(pattern, narratives);
     RouteDirection routeDirection = new RouteDirection(routeId, directionId);
     StopPattern stopPattern = new StopPattern(stopIds, narratives);
     if (!_routeDirectionToStopPatterns.containsKey(routeDirection)) {
@@ -180,12 +190,6 @@ public final class NarrativeProviderImpl implements Serializable {
     // only add this if it doesn't already exist
     if (find(stopIds, stopPatterns) == null) {
       stopPatterns.add(stopPattern);
-    }
-  }
-
-  private void init() {
-    if (_dynamicStopTimeNarrativesByTripIdAndStopTimeSequence == null) {
-      _dynamicStopTimeNarrativesByTripIdAndStopTimeSequence = new PassiveExpiringMap<AgencyAndId, List<StopTimeNarrative>>(CACHE_TIMEOUT);
     }
   }
 
@@ -209,7 +213,7 @@ public final class NarrativeProviderImpl implements Serializable {
       RoutePattern rd = (RoutePattern) obj;
       return rd.routeId.equals(routeId)
               && rd.directionId.equals(directionId)
-              && Objects.equals(rd.stopIds, stopIds);
+              && CollectionUtils.isEqualCollection(rd.stopIds, stopIds);
     }
 
     @Override
