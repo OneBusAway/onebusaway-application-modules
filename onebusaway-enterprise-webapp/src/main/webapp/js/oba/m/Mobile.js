@@ -191,6 +191,7 @@ OBA.Mobile = (function() {
 	function addMapBehaviour() {
 		var mapElement = document.getElementById("map");
 		if (mapElement !== null) {
+			mapElement.style.overflow = 'hidden';
 			$("#mapExpander").click(function () {
 				$mapExpander = $(this);
 				$mapDiv = $('#map');
