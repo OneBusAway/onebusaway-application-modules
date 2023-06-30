@@ -21,12 +21,12 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import org.onebusaway.api.model.transit.realtime.GtfsRealtimeConstantsV2;
 import org.onebusaway.transit_data_federation.services.transit_graph.AgencyEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import com.google.protobuf.ExtensionRegistry;
-import com.google.transit.realtime.GtfsRealtimeConstants;
 import com.google.transit.realtime.GtfsRealtimeOneBusAway;
 import com.google.transit.realtime.GtfsRealtime.FeedHeader;
 import com.google.transit.realtime.GtfsRealtime.FeedMessage;
@@ -150,7 +150,7 @@ public class GtfsRealtimeArchiverTask extends RealtimeArchiverTask {
     if (url == null) {
       FeedMessage.Builder builder = FeedMessage.newBuilder();
       FeedHeader.Builder header = FeedHeader.newBuilder();
-      header.setGtfsRealtimeVersion(GtfsRealtimeConstants.VERSION);
+      header.setGtfsRealtimeVersion(GtfsRealtimeConstantsV2.VERSION);
       builder.setHeader(header);
       return builder.build();
     }

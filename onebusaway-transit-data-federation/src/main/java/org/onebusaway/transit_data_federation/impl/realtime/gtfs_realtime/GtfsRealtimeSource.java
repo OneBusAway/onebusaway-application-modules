@@ -38,6 +38,7 @@ import javax.annotation.PreDestroy;
 
 import com.google.transit.realtime.*;
 import org.apache.commons.lang.StringUtils;
+import org.onebusaway.api.model.transit.realtime.GtfsRealtimeConstantsV2;
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
 import org.onebusaway.gtfs.model.AgencyAndId;
@@ -1077,7 +1078,7 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   private FeedMessage getDefaultFeedMessage() {
     FeedMessage.Builder builder = FeedMessage.newBuilder();
     FeedHeader.Builder header = FeedHeader.newBuilder();
-    header.setGtfsRealtimeVersion(GtfsRealtimeConstants.VERSION);
+    header.setGtfsRealtimeVersion(GtfsRealtimeConstantsV2.VERSION);
     builder.setHeader(header);
     return builder.build();
   }
