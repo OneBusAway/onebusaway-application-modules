@@ -316,8 +316,41 @@ public class RealtimeServiceImpl implements RealtimeService {
         public int compare(MonitoredStopVisitStructure arg0, MonitoredStopVisitStructure arg1) {
           try {
             Date prediction0 = bestDate(arg0.getMonitoredVehicleJourney().getMonitoredCall());
-    		    Date prediction1 = bestDate(arg1.getMonitoredVehicleJourney().getMonitoredCall());
-            return prediction0.compareTo(prediction1);
+            Date prediction1 = bestDate(arg1.getMonitoredVehicleJourney().getMonitoredCall());
+            Boolean vehicleAtStop0 = arg0.getMonitoredVehicleJourney().getMonitoredCall().isVehicleAtStop();
+            Boolean vehicleAtStop1 = arg1.getMonitoredVehicleJourney().getMonitoredCall().isVehicleAtStop();
+
+//            Both vehicles are at stop, we prioritize the one with earlier expected departure time
+            if(Boolean.TRUE.equals(vehicleAtStop0) && Boolean.TRUE.equals(vehicleAtStop1)){
+              if(prediction0 != null && prediction1 != null){
+                return prediction0.compareTo(prediction1);
+              } else if (prediction0 != null) {
+                return -1;
+              } else if (prediction1 != null) {
+                return 1;
+              }
+            }
+
+            // Only first vehicle is at stop, it should come first
+            if(Boolean.TRUE.equals(vehicleAtStop0)){
+              return -1;
+            }
+
+            // Only second vehicle is at stop, it should come first
+            if(Boolean.TRUE.equals(vehicleAtStop1)){
+              return 1;
+            }
+
+            // Neither vehicle is at the stop, we compare the expected time
+            if(prediction0 != null && prediction1 != null){
+              return prediction0.compareTo(prediction1);
+            } else if (prediction0 != null) {
+              return -1;
+            } else if (prediction1 != null) {
+              return 1;
+            }
+
+            return 0;
           } catch(Exception e) {
             return -1;
           }
