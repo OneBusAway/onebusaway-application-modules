@@ -16,7 +16,7 @@
 package org.onebusaway.nextbus.impl.gtfsrt;
 
 import com.google.transit.realtime.GtfsRealtime;
-import com.google.transit.realtime.GtfsRealtimeConstants;
+import org.onebusaway.api.model.transit.realtime.GtfsRealtimeConstantsV2;
 import org.onebusaway.gtfs.model.AgencyAndId;
 
 import java.util.Date;
@@ -28,7 +28,7 @@ public class GtfsrtHelper {
 
         GtfsRealtime.FeedHeader.Builder feedHeader = GtfsRealtime.FeedHeader.newBuilder();
         feedHeader.setIncrementality(GtfsRealtime.FeedHeader.Incrementality.FULL_DATASET);
-        feedHeader.setGtfsRealtimeVersion(GtfsRealtimeConstants.VERSION);
+        feedHeader.setGtfsRealtimeVersion(GtfsRealtimeConstantsV2.VERSION);
         if (timestampInSeconds != null) {
             feedHeader.setTimestamp(timestampInSeconds);
         } else {
