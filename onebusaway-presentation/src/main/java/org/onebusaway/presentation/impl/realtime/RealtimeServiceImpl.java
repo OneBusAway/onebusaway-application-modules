@@ -316,7 +316,7 @@ public class RealtimeServiceImpl implements RealtimeService {
         public int compare(MonitoredStopVisitStructure arg0, MonitoredStopVisitStructure arg1) {
           try {
             Date prediction0 = bestDate(arg0.getMonitoredVehicleJourney().getMonitoredCall());
-    		    Date prediction1 = bestDate(arg1.getMonitoredVehicleJourney().getMonitoredCall());
+            Date prediction1 = bestDate(arg1.getMonitoredVehicleJourney().getMonitoredCall());
             return prediction0.compareTo(prediction1);
           } catch(Exception e) {
             return -1;
@@ -324,8 +324,13 @@ public class RealtimeServiceImpl implements RealtimeService {
         }
       // prefer departure time to arrival time
       private Date bestDate(MonitoredCallStructure monitoredCall) {
-        if (monitoredCall.getExpectedDepartureTime() != null)
+
+        if (monitoredCall.getExpectedDepartureTime() != null) {
+          if(monitoredCall.getExpectedArrivalTime() != null && monitoredCall.getExpectedArrivalTime() != monitoredCall.getExpectedDepartureTime()){
+            return monitoredCall.getExpectedArrivalTime();
+          }
           return monitoredCall.getExpectedDepartureTime();
+        }
         return monitoredCall.getExpectedArrivalTime();
       }
     });
