@@ -210,6 +210,8 @@ public class GtfsRealtimeTripLibrary {
         AddedTripInfo addedTripInfo = _duplicatedTripService.handleDuplicatedDescriptor(tu);
         bd =_dynamicTripBuilder.createBlockDescriptor(addedTripInfo);
         if (bd == null) continue; // we failed
+        anonymousTripUpdatesByBlock.put(bd, tu);
+        continue; // don't let this trip update be processed
       }
 
       if (tu.hasVehicle() && tu.getVehicle().hasId() && StringUtils.isNotBlank(tu.getVehicle().getId())) {
@@ -567,6 +569,7 @@ public class GtfsRealtimeTripLibrary {
                                                List<TripUpdate> tripUpdates,
                                                VehicleLocationRecord record,
                                                String vehicleId) {
+    boolean isDuplicated = blockDescriptor.getScheduleRelationship().equals(BlockDescriptor.ScheduleRelationship.DUPLICATED);
     String agencyId = blockDescriptor.getBlockInstance().getBlock().getBlock().getId().getAgencyId();
     record.setStatus(blockDescriptor.getScheduleRelationship().toString());
     record.setServiceDate(blockDescriptor.getBlockInstance().getServiceDate());
@@ -579,13 +582,23 @@ public class GtfsRealtimeTripLibrary {
     List<TimepointPredictionRecord> timepointPredictions = new ArrayList<TimepointPredictionRecord>();
     for (TripUpdate tripUpdate : tripUpdates) {
       if (record.getTripId() == null) {
-        record.setTripId(new AgencyAndId(agencyId, tripUpdate.getTrip().getTripId()));
+        // if duplicated alter tripId so its unique
+        if (isDuplicated) {
+          record.setTripId(new AgencyAndId(agencyId, markDuplicated(tripUpdate.getTrip().getTripId())));
+        } else {
+          record.setTripId(new AgencyAndId(agencyId, tripUpdate.getTrip().getTripId()));
+        }
       }
       int sequence = 0;
       for (StopTimeUpdate stu : tripUpdate.getStopTimeUpdateList()) {
         TimepointPredictionRecord tpr = new TimepointPredictionRecord();
         tpr.setTimepointId(new AgencyAndId(agencyId, stu.getStopId()));
-        tpr.setTripId(new AgencyAndId(agencyId, tripUpdate.getTrip().getTripId()));
+        // if duplicated alter tripId so its unique
+        if (isDuplicated) {
+          tpr.setTripId(new AgencyAndId(agencyId, markDuplicated(tripUpdate.getTrip().getTripId())));
+        } else {
+          tpr.setTripId(new AgencyAndId(agencyId, tripUpdate.getTrip().getTripId()));
+        }
         tpr.setStopSequence(sequence);
         sequence++;
         switch (stu.getScheduleRelationship()) {
@@ -628,6 +641,10 @@ public class GtfsRealtimeTripLibrary {
       record.setScheduleDeviation(calculateScheduleDeviation(blockDescriptor.getBlockInstance(), timepointPredictions));
     }
 
+  }
+
+  private String markDuplicated(String tripId) {
+    return tripId + "_Dup";
   }
 
   private int getFirstStpTime(BlockDescriptor blockDescriptor) {

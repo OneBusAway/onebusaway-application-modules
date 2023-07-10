@@ -91,7 +91,7 @@ public class STDuplicatedTripsIntegrationTest extends AbstractGtfsRealtimeIntegr
     TransitGraphDao graph = getBundleLoader().getApplicationContext().getBean(TransitGraphDao.class);
     long window = 75 * 60 * 1000; // 75 minutes
 
-    StopEntry firstStop = graph.getStopEntryForId(AgencyAndId.convertFromString("40_99914"));
+    StopEntry firstStop = graph.getStopEntryForId(AgencyAndId.convertFromString("40_99914")); // 9:55 trip duplicated to 10:43
     long firstStopTime = 1683740698000L;
     long serviceDate = new ServiceDate(2023,5,10).getAsDate().getTime();
 

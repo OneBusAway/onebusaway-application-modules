@@ -17,6 +17,7 @@ package org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime;
 
 import com.google.transit.realtime.GtfsRealtime;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
+import org.onebusaway.transit_data.model.TransitDataConstants;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
 import org.slf4j.Logger;
@@ -38,6 +39,7 @@ public class DuplicatedTripServiceParserImpl implements DuplicatedTripServicePar
     @Override
     public AddedTripInfo parse(GtfsRealtime.TripUpdate tu) {
         AddedTripInfo duplicatedTrip = new AddedTripInfo();
+        duplicatedTrip.setScheduleRelationshipValue(TransitDataConstants.STATUS_DUPLICATED);
         List<AddedStopInfo> stopInfos = new ArrayList<>();
         String tripId = tu.getTrip().getTripId();
         // this is an existing trip that we will change the start time of
