@@ -79,11 +79,11 @@
 							<s:iterator value="stops">
 								<c:choose>
 									<c:when test="${!hasRealtime}">
-										<ol class="arrivalsAtStopSchedule">
-											<c:forEach var="distanceAway" items="${distanceAways}">
-												<li>${distanceAway} <span class="scheduleAlert"> (Schedule Data)</span></li>
-											</c:forEach>
-										</ol>
+<!--										<ol class="arrivalsAtStopSchedule">-->
+<!--											<c:forEach var="distanceAway" items="${distanceAways}">-->
+<!--												<li>${distanceAway} <span class="scheduleAlert"> (Schedule Data)</span></li>-->
+<!--											</c:forEach>-->
+<!--										</ol>-->
 									</c:when>
 									<c:otherwise>
 										<ol class="arrivalsAtStop">
@@ -91,7 +91,7 @@
 												<li>${distanceAway}</li>
 											</c:forEach>
 										</ol>
-									</c:otherwise>		
+									</c:otherwise>
 								</c:choose>	
 							</s:iterator>
 						</div>
