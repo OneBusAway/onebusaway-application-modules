@@ -16,6 +16,7 @@
 package org.onebusaway.api.actions.api.where;
 
 import java.util.Date;
+import java.util.HashSet;
 
 import org.apache.struts2.rest.DefaultHttpHeaders;
 import org.onebusaway.api.actions.api.ApiActionSupport;
@@ -103,6 +104,10 @@ public class ArrivalAndDepartureForStopAction extends ApiActionSupport {
 
     if (_query.getTime() == 0)
       _query.setTime(SystemTime.currentTimeMillis());
+
+    HashSet<String> agenciesExcludingScheduled = this.getAgenciesExcludingScheduled();
+
+    _query.setAgenciesExcludingScheduled(agenciesExcludingScheduled);
 
     ArrivalAndDepartureBean result = _service.getArrivalAndDepartureForStop(_query);
 

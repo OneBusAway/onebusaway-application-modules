@@ -22,6 +22,7 @@ import org.onebusaway.realtime.api.VehicleOccupancyRecord;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
 import org.onebusaway.transit_data.model.ArrivalsAndDeparturesQueryBean;
 import org.onebusaway.transit_data.model.StopBean;
+import org.onebusaway.transit_data.model.TransitDataConstants;
 import org.onebusaway.transit_data.model.realtime.HistogramBean;
 import org.onebusaway.transit_data.model.schedule.FrequencyBean;
 import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
@@ -32,6 +33,7 @@ import org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.GtfsRe
 import org.onebusaway.transit_data_federation.model.TargetTime;
 import org.onebusaway.transit_data_federation.model.bundle.HistoricalRidership;
 import org.onebusaway.transit_data_federation.model.narrative.StopTimeNarrative;
+import org.onebusaway.transit_data_federation.model.narrative.TripNarrative;
 import org.onebusaway.transit_data_federation.services.*;
 import org.onebusaway.transit_data_federation.services.beans.*;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
@@ -48,6 +50,8 @@ import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEnt
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
 import org.onebusaway.util.AgencyAndIdLibrary;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jmx.export.annotation.ManagedAttribute;
 import org.springframework.jmx.export.annotation.ManagedResource;
@@ -60,6 +64,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 @ManagedResource("org.onebusaway.transit_data_federation.impl.beans:name=ArrivalsAndDeparturesBeanServiceImpl")
 public class ArrivalsAndDeparturesBeanServiceImpl implements
     ArrivalsAndDeparturesBeanService {
+
+  private static Logger _log = LoggerFactory.getLogger(ArrivalsAndDeparturesBeanServiceImpl.class);
 
   private TransitGraphDao _transitGraphDao;
 
@@ -206,6 +212,13 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
     Map<AgencyAndId, StopBean> stopBeanCache = new HashMap<AgencyAndId, StopBean>();
 
     for (ArrivalAndDepartureInstance instance : instances) {
+      String agency = instance.getBlockInstance().getBlock().getBlock().getId().getAgencyId();
+      HashSet<String> agenciesExcludingScheduled = query.getAgenciesExcludingScheduled();
+      if(!instance.isPredictedArrivalTimeSet() && !instance.isPredictedDepartureTimeSet()){
+        if(query.getAgenciesExcludingScheduled().contains(instance.getBlockInstance().getBlock().getBlock().getId().getAgencyId())){
+          continue;
+        }
+      }
 
       FrequencyEntry frequency = instance.getFrequency();
 
@@ -227,8 +240,9 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
         continue;
       
       applySituationsToBean(time, instance, bean);
-      if (matchesRouteTypeFilter(bean, query.getRouteTypes()))
+      if (query.getSystemFilterChain().matches(bean) && query.getInstanceFilterChain().matches(bean)) {
         beans.add(bean);
+      }
     }
 
     Collections.sort(beans, new ArrivalAndDepartureComparator());
@@ -236,9 +250,6 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
     return beans;
   }
 
-  private boolean matchesRouteTypeFilter(ArrivalAndDepartureBean bean, List<Integer> routeTypes) {
-      return _stopsBeanService.matchesRouteTypeFilter(bean.getStop(), routeTypes);
-  }
 
   @Override
   public ArrivalAndDepartureBean getArrivalAndDepartureForStop(
@@ -255,6 +266,11 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
         new HashMap<AgencyAndId, StopBean>());
     applyBlockLocationToBean(instance, bean, time);
     applySituationsToBean(time, instance, bean);
+    boolean hideCanceled = _arrivalAndDepartureService.getHideCanceledTrips();
+    if (hideCanceled && TransitDataConstants.STATUS_CANCELED.equals(bean.getStatus())) {
+      // hide this result, its canceled
+      return null;
+    }
 
     if (!this.useScheduleDeviationHistory) {
       return bean;
@@ -313,8 +329,15 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
     pab.setDepartureEnabled(stopTime.getSequence() + 1 < trip.getStopTimes().size());
     
     StopTimeNarrative stopTimeNarrative = _narrativeService.getStopTimeForEntry(stopTime);
-    pab.setRouteShortName(stopTimeNarrative.getRouteShortName());
-    pab.setTripHeadsign(stopTimeNarrative.getStopHeadsign());
+    if (stopTimeNarrative == null) {
+      // dynamic stops without a narrative, look to trip instead
+      TripNarrative tripNarrative = _narrativeService.getTripForId(trip.getId());
+      pab.setRouteShortName(tripNarrative.getRouteShortName());
+      pab.setTripHeadsign(tripNarrative.getTripHeadsign());
+    } else {
+      pab.setRouteShortName(stopTimeNarrative.getRouteShortName());
+      pab.setTripHeadsign(stopTimeNarrative.getStopHeadsign());
+    }
 
     StopBean stopBean = stopBeanCache.get(stop.getId());
 
@@ -357,17 +380,23 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
       ArrivalAndDepartureBean bean, long targetTime) {
 
     boolean hasFrequency = instance.getFrequency() != null;
+    boolean isCanceled = TransitDataConstants.STATUS_CANCELED.equals(instance.getStatus());
 
-    if (instance.isPredictedArrivalTimeSet()) {
-      bean.setPredictedArrivalTime(instance.getPredictedArrivalTime());
-      if (hasFrequency)
-        bean.setScheduledArrivalTime(bean.getPredictedArrivalTime());
+    if (!isCanceled) {
+      if (instance.isPredictedArrivalTimeSet()) {
+        bean.setPredictedArrivalTime(instance.getPredictedArrivalTime());
+        if (hasFrequency)
+          bean.setScheduledArrivalTime(bean.getPredictedArrivalTime());
+      }
+
+      if (instance.isPredictedDepartureTimeSet()) {
+        bean.setPredictedDepartureTime(instance.getPredictedDepartureTime());
+        if (hasFrequency)
+          bean.setScheduledDepartureTime(bean.getPredictedDepartureTime());
+      }
     }
-
-    if (instance.isPredictedDepartureTimeSet()) {
-      bean.setPredictedDepartureTime(instance.getPredictedDepartureTime());
-      if (hasFrequency)
-        bean.setScheduledDepartureTime(bean.getPredictedDepartureTime());
+    else {
+        bean.setStatus(TransitDataConstants.STATUS_CANCELED);
     }
 
     BlockStopTimeEntry stopTime = instance.getBlockStopTime();
@@ -376,7 +405,11 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
     if (blockLocation == null)
       return;
 
-    bean.setPredicted(blockLocation.isPredicted());
+    if (!isCanceled) {
+      bean.setPredicted(blockLocation.isPredicted());
+    } else {
+      bean.setPredicted(false);
+    }
 
     // Distance from stop
     if (blockLocation.isDistanceAlongBlockSet()) {
@@ -399,7 +432,7 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
     if (blockLocation.getLastUpdateTime() > 0)
       bean.setLastUpdateTime(blockLocation.getLastUpdateTime());
 
-    if (blockLocation.getVehicleId() != null) {
+    if (blockLocation.getVehicleId() != null && !isCanceled) {
       bean.setVehicleId(AgencyAndIdLibrary.convertToString(blockLocation.getVehicleId()));
       if (_vehicleOccupancyRecordCache != null && blockLocation.getActiveTrip() != null) {
         // be specific in our vehicle lookup -- we only want to apply occupancy if its the same route/direction
@@ -415,7 +448,15 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
 
     TripStatusBean tripStatusBean = _tripDetailsBeanService.getBlockLocationAsStatusBean(
         blockLocation, targetTime);
-    bean.setTripStatus(tripStatusBean);
+
+    if (TransitDataConstants.STATUS_CANCELED.equals(tripStatusBean.getStatus())) {
+      if (!_arrivalAndDepartureService.getHideCanceledTrips()) {
+        bean.setTripStatus(tripStatusBean);
+      }
+    } else {
+      // not cancelled, set status
+      bean.setTripStatus(tripStatusBean);
+    }
   }
 
   private void applySituationsToBean(long time,

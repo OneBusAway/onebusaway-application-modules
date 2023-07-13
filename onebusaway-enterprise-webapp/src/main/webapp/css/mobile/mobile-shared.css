@@ -339,6 +339,10 @@ small {
 	margin-bottom: .5em;
 	margin-left: 0.3em;
 }
+.directionAtStopHeader {
+	margin-bottom: .5em;
+	margin-left: 0.3em;
+}
 
 .routeList,.routeDescription {
 	padding-top: .25em;
@@ -352,6 +356,7 @@ small {
 	font-weight: bold;
 	color: rgb(129,129,129);
 	margin-left: 0.3em;
+	margin-bottom: 0.5em;
 }
 
 .routeHeader {
@@ -412,13 +417,12 @@ small {
 
 
 .arrivalsAtStop li {
-	margin-left: 10px;
-	padding-left: 16px;
-	background-image: url('img/bullet_bus.png');
+	margin-left: 1px;
+	padding-left: 1px;
 	background-repeat: no-repeat;
 	background-position: left top;
 	zoom: 1;   /* hasLayout fix for IE */
-	line-height: 1.2em;
+	line-height: 1em;
 }
 .arrivalsAtStop li small {
 	display: inline-block;
@@ -427,15 +431,96 @@ small {
 
 
 .arrivalsAtStopSchedule li {
-	margin-left: 10px;
-	padding-left: 16px;
-	background-image: url('img/schedule_bullet_bus.png');
+	margin-left: 1px;
+	padding-left: 1px;
 	background-repeat: no-repeat;
 	background-position: left top;
 	zoom: 1;   /* hasLayout fix for IE */
 	line-height: 1.2em;
 }
 
+/* support for columns */
+.arrivalDepartureContainer {
+	display: inline-block;
+	height: 0;
+	padding-left: 1px;
+	width: 28%;
+}
+
+.activeArrivalPrediction {
+	margin-left: 1px;
+	font-weight: bold;
+}
+.activeArrivalPrediction strong {
+	font-size: 150%;
+}
+.activeArrivalPrediction b {
+	color: red;
+	font-weight: normal;
+}
+
+.futureArrivalPrediction {
+	margin-left: 1px;
+}
+.futureArrivalPrediction strong {
+	font-size: 150%;
+	font-weight: normal;
+}
+.futureArrivalPrediction b {
+	color: red;
+	font-weight: normal;
+}
+/* prediction 30 + vehicle 14 + apc/occupancyPlaceHolder 26 + distance 28 + padding =  98*/
+.predictionContainer {
+	display: inline-block;
+	width: 30%;
+	font-size: .90em;
+	padding-left: 1px;/* align with directionAtStopHeader */
+}
+.vehicleIdContainer {
+	display: inline-block;
+	width: 14%;
+	font-size: .90em;
+}
+.distanceContainer {
+	display: inline-block;
+	width: 28%;
+	font-size: .90em;
+}
+.vehicleArrival {
+	margin-left: 0px; /* column spacing */
+	padding-left: 16px; /* space out from icon */
+	background-image: url('img/bullet_bus.png');
+	background-repeat: no-repeat;
+	background-position: left top;
+	zoom: 1;   /* hasLayout fix for IE */
+	line-height: 1.2em;
+	color: #040496; /* match color of icon */
+	text-decoration-color: #040496;
+	font-size: 0.85em;
+	font-weight: bold;
+}
+.vehicleScheduledArrival {
+	margin-left: 0px; /* column spacing */
+	padding-left: 16px; /* space out from icon */
+	background-image: url('img/schedule_bullet_bus.png');
+	background-repeat: no-repeat;
+	background-position: left top;
+	zoom: 1;   /* hasLayout fix for IE */
+	line-height: 1.2em;
+	color: #AAAAAA;
+	text-decoration-color: #AAAAAA;
+	font-size: 0.85em;
+}
+.occupancyArrival {
+	margin-left: 0px;
+}
+.distanceArrival {
+	margin-left: 0px;
+}
+.qualifierArrival {
+	text-align: right;
+}
 .scheduleAlert{
 	font-size: .9em;
 	color: #ff0000;
@@ -690,10 +775,11 @@ small {
 }
 
 /* apc defaults */
-   .apcLadderContainer {
-	   display: inline-block;
-	   height: 0;
-   }
+.apcLadderContainer {
+   display: inline-block;
+   width: 26%;
+   margin-left: 5px;
+}
 
 .apcDotG {
 	height: 12px;
@@ -707,7 +793,7 @@ small {
 	color: #268C0B;
 	display: inline-block;
 	white-space: nowrap;
-	font-size: 14px;
+	font-size: 8px;
 	font-weight: bold;
 }
 
@@ -723,7 +809,7 @@ small {
 	color: #EF8424;
 	display: inline-block;
 	white-space: nowrap;
-	font-size: 14px;
+	font-size: 8px;
 	font-weight: bold;
 }
 
@@ -739,8 +825,50 @@ small {
 	color: #CA001F;
 	display: inline-block;
 	white-space: nowrap;
-	font-size: 14px;
+	font-size: 8px;
 	font-weight: bold;
+}
+
+/* apc weebles */
+/* G for green for seats available */
+.weeble0 {
+	height: 16px;
+	width: 20px;
+	background-color: #FFFFFF;
+	display: inline-block;
+	background-image: url("img/icon-crowding-0.png");
+	background-repeat: no-repeat;
+	background-size: cover;
+}
+
+.weebleG {
+	height: 16px;
+	width: 20px;
+	background-color: #FFFFFF;
+	display: inline-block;
+	background-image: url("img/icon-crowding-1.png");
+	background-repeat: no-repeat;
+	background-size: cover;
+}
+/* Y for yellow for standing available */
+.weebleY {
+	height: 16px;
+	width: 20px;
+	background-color: #FFFFFF;
+	display: inline-block;
+	background-image: url("img/icon-crowding-2.png");
+	background-repeat: no-repeat;
+	background-size: cover;
+}
+/* R for red for full */
+.weebleR {
+	height: 16px;
+	width: 20px;
+	background-color: #FFFFFF;
+	display: inline-block;
+	background-image: url("img/icon-crowding-3.png");
+	background-repeat: no-repeat;
+	background-size: cover;
 }
 
 .apcicong {

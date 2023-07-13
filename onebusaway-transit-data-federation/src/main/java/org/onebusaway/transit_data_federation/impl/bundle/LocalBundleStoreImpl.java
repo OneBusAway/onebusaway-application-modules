@@ -46,6 +46,7 @@ public class LocalBundleStoreImpl extends AbstractBundleStoreImpl implements Bun
 	@Override
 	public List<BundleItem> getBundles() {
 		ArrayList<BundleItem> output = new ArrayList<BundleItem>();
+		if (_bundleRootPath == null) return output;
 
 		File bundleRoot = new File(_bundleRootPath);
 

@@ -25,7 +25,7 @@ public class TimepointPredictionRecord implements Serializable {
   private static final long serialVersionUID = 2L;
 
   /**
-   * 
+   * of the format AGENCY_stopTime.getStop().getId()
    */
   private AgencyAndId timepointId;
   

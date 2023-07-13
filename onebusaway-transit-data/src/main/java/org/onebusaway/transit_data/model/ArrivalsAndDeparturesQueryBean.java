@@ -16,8 +16,8 @@
 package org.onebusaway.transit_data.model;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.HashSet;
 
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.util.SystemTime;
@@ -42,11 +42,14 @@ public final class ArrivalsAndDeparturesQueryBean implements Serializable {
 
   private int maxCount = Integer.MAX_VALUE;
 
-  // GTFS Route Type
-  private List<Integer> routeTypes =  new ArrayList<>();
-
   private CoordinateBounds bounds;
 
+  private HashSet<String> agenciesExcludingScheduled = new HashSet<>();
+
+  private FilterChain systemFilterChain = new FilterChain();
+  private FilterChain instanceFilterChain = new FilterChain();
+
+ private List<Integer> routeTypes;
   public ArrivalsAndDeparturesQueryBean() {
 
   }
@@ -59,6 +62,10 @@ public final class ArrivalsAndDeparturesQueryBean implements Serializable {
     this.frequencyMinutesAfter = bean.frequencyMinutesAfter;
     this.includeInputIdsInNearby = bean.includeInputIdsInNearby;
     this.bounds = bean.bounds;
+    this.agenciesExcludingScheduled = bean.agenciesExcludingScheduled;
+    this.maxCount = bean.maxCount;
+    this.systemFilterChain = bean.systemFilterChain;
+    this.instanceFilterChain = bean.instanceFilterChain;
   }
 
   public long getTime() {
@@ -132,23 +139,44 @@ public final class ArrivalsAndDeparturesQueryBean implements Serializable {
     this.bounds = bounds;
   }
 
-  public List<Integer> getRouteTypes() {
-    return routeTypes;
-  }
 
   public void setRouteTypes(List<Integer> types) {
-    this.routeTypes = types;
+      if (types == null || types.isEmpty()) return;
+      instanceFilterChain.add(new ArrivalAndDepartureFilterByRouteType(types));
   }
   public void setRouteType(String routeType) {
     if (routeType == null) return;
-    String[] types = routeType.split(",");
-    for (String type : types) {
-      try {
-        routeTypes.add(Integer.parseInt(type));
-      } catch (NumberFormatException nfe) {
-        // bury
-      }
-    }
+    ArrivalAndDepartureFilterByRouteType arrivalAndDepartureFilterByRouteType = new ArrivalAndDepartureFilterByRouteType(routeType);
+    routeTypes = arrivalAndDepartureFilterByRouteType.getRouteTypes();
+    instanceFilterChain.add(arrivalAndDepartureFilterByRouteType);
+  }
+
+  public List<Integer> getRouteTypes(){
+      return routeTypes;
+  }
+
+  public void setAgenciesExcludingScheduled(HashSet<String> agencies){
+    this.agenciesExcludingScheduled = agencies;
+  }
+
+  public HashSet<String> getAgenciesExcludingScheduled(){
+    return this.agenciesExcludingScheduled;
+  }
+
+  public FilterChain getSystemFilterChain() {
+    return systemFilterChain;
+  }
+
+  public void setSystemFilterChain(FilterChain systemFilterChain) {
+    this.systemFilterChain = systemFilterChain;
+  }
+
+  public FilterChain getInstanceFilterChain() {
+    return instanceFilterChain;
+  }
+
+  public void setInstanceFilterChain(FilterChain instanceFilterChain) {
+    this.instanceFilterChain = instanceFilterChain;
   }
 
   @Override
@@ -160,8 +188,8 @@ public final class ArrivalsAndDeparturesQueryBean implements Serializable {
     result = prime * result + minutesAfter;
     result = prime * result + minutesBefore;
     result = prime * result + (int) (time ^ (time >>> 32));
-    if (routeTypes != null)
-      result = prime * result + routeTypes.hashCode();
+    if (instanceFilterChain != null)
+      result = prime * result + instanceFilterChain.hashCode();
     return result;
   }
 
@@ -184,11 +212,11 @@ public final class ArrivalsAndDeparturesQueryBean implements Serializable {
       return false;
     if (time != other.time)
       return false;
-    if (routeTypes == null || other.routeTypes == null)
-      if (routeTypes != other.routeTypes)
+    if (instanceFilterChain == null || other.instanceFilterChain == null)
+      if (instanceFilterChain != other.instanceFilterChain)
         return false;
-    if (!routeTypes.equals(other.routeTypes))
-        return false;
+    if (!instanceFilterChain.equals(other.instanceFilterChain))
+      return false;
     return true;
   }
 }

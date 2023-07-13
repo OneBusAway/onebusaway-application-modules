@@ -3,13 +3,16 @@
   <parent>
     <groupId>org.onebusaway</groupId>
     <artifactId>onebusaway-application-modules</artifactId>
-    <version>2.2.1-cs-SNAPSHOT</version>
+    <version>2.4.1-cs-SNAPSHOT</version>
   </parent>
   <artifactId>onebusaway-transit-data-federation-webapp</artifactId>
   <packaging>war</packaging>
 
   <name>onebusaway-transit-data-federation-webapp</name>
 
+  <properties>
+    <log4j.appender>ROLL</log4j.appender>
+  </properties>
   <dependencies>
 
     <!--       Log4j 2 -->
@@ -47,11 +50,6 @@
     </dependency>
 
     <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-log4j12</artifactId>
-      <version>${slf4j.version}</version>
-    </dependency>
-    <dependency>
       <groupId>log4j</groupId>
       <artifactId>apache-log4j-extras</artifactId>
       <version>1.1</version>
@@ -59,7 +57,7 @@
     <dependency>
       <groupId>commons-logging</groupId>
       <artifactId>commons-logging</artifactId>
-      <version>1.1.2</version>
+      <version>1.2</version>
     </dependency>
 
     <dependency>
@@ -100,6 +98,16 @@
 
   <build>
     <finalName>onebusaway-transit-data-federation-webapp</finalName>
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+        <filtering>true</filtering>
+        <includes>
+          <!-- rewrite log4j2.xml -->
+          <include>**/*.xml</include>
+        </includes>
+      </resource>
+    </resources>
   </build>
 
 </project>

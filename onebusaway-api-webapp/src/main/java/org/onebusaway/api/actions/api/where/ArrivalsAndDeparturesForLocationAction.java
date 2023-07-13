@@ -21,11 +21,12 @@ import org.onebusaway.api.actions.api.ApiActionSupport;
 import org.onebusaway.api.impl.MaxCountSupport;
 import org.onebusaway.api.impl.SearchBoundsFactory;
 import org.onebusaway.api.model.transit.BeanFactoryV2;
+import org.onebusaway.api.model.transit.EntryWithReferencesBean;
+import org.onebusaway.api.model.transit.StopsWithArrivalsAndDeparturesV2Bean;
 import org.onebusaway.exceptions.OutOfServiceAreaServiceException;
 import org.onebusaway.exceptions.ServiceException;
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.transit_data.model.*;
-import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.util.SystemTime;
 import org.onebusaway.util.services.configuration.ConfigurationService;
@@ -34,9 +35,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.io.IOException;
 import java.sql.Date;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 /**
  * inspired by ArrivalsAndDepartureForStop, but returns multiple stops
@@ -55,6 +54,15 @@ public class ArrivalsAndDeparturesForLocationAction extends ApiActionSupport {
     private TransitDataService _service;
     @Autowired
     private ConfigurationService _configService;
+
+    @Autowired
+    private RouteSort customRouteSort;
+
+    @Autowired(required = false)
+    public void setFilterChain(FilterChain filterChain) {
+        _query.setSystemFilterChain(filterChain);
+    }
+
     private SearchBoundsFactory _searchBoundsFactory = new SearchBoundsFactory(MAX_BOUNDS_RADIUS);
     private MaxCountSupport _maxCount = new MaxCountSupport(250, 1000);
 
@@ -137,12 +145,13 @@ public class ArrivalsAndDeparturesForLocationAction extends ApiActionSupport {
         // new EQueryType that keeps results consistent if limitExceed is true
         // previous searches deliberately shuffled results
         searchQuery.setType(SearchQueryBean.EQueryType.ORDERED_BY_CLOSEST);
-        searchQuery.setRouteTypes(_query.getRouteTypes());
+        searchQuery.setSystemFilterChain(_query.getSystemFilterChain());
 
         ArrivalsAndDeparturesQueryBean adQuery = _query;
         adQuery.setIncludeInputIdsInNearby(true); // include the queried ids in nearby
         adQuery.setMaxCount(maxCount); // limit nearby results appropriately
         adQuery.setBounds(searchQuery.getBounds());
+        adQuery.setAgenciesExcludingScheduled(this.getAgenciesExcludingScheduled());
         StopsWithArrivalsAndDeparturesBean adResult = null;
         try {
             StopsBean stopResult = _service.getStops(searchQuery);
@@ -160,6 +169,7 @@ public class ArrivalsAndDeparturesForLocationAction extends ApiActionSupport {
         if (adResult == null) {
             return emptyResponse();
         }
+        factory.setCustomRouteSort(customRouteSort);
         return setOkResponse(factory.getResponse(adResult));
     }
 

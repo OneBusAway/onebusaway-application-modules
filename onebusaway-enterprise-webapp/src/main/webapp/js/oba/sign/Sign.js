@@ -319,10 +319,17 @@ OBA.Sign = function() {
 					});
 				}
 
-				// even if route name/ affected journeys not present we still display the alert
-				var alert = jQuery("<div></div>")
-								.addClass("alert")
-								.html('<p class="alert_summary">' + situation.Summary.replace(/\n\n/g, "<br/><br/>").replace(/\n/g, " ") + '</p><p>' + situation.Description.replace(/$/g, "<br/><br/>").replace(/\n\n/g, "<br/><br/>").replace(/\n/g, " ") + '</p>');
+				// even if route name / affected journeys not present we still display the alert
+				var alert = "";
+				if (typeof situation.Summary != "undefined" && situation.Summary.replace != "undefined") {
+					alert += '<p class="alert_summary">' + situation.Summary.replace(/\n\n/g, "<br/><br/>").replace(/\n/g, " ") + '</p>';
+				}
+				if (typeof situation.Description != "undefined" && situation.Description.replace != "undefined") {
+					alert += '<p>' + situation.Description.replace(/$/g, "<br/><br/>").replace(/\n\n/g, "<br/><br/>").replace(/\n/g, " ") + '</p>';
+				}
+				alert = jQuery("<div></div>")
+					.addClass("alert")
+					.html(alert);
 
 				alert.prepend(signWrapper);
 

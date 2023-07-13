@@ -20,6 +20,7 @@ import static org.junit.Assert.assertNotNull;
 
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.onebusaway.api.model.transit.realtime.GtfsRealtimeConstantsV2;
 import org.onebusaway.gtfs_realtime.archiver.listener.GtfsRealtimeEntitySource;
 import org.onebusaway.gtfs_realtime.model.AlertModel;
 import org.onebusaway.gtfs_realtime.model.EntitySelectorModel;
@@ -33,7 +34,6 @@ import com.google.transit.realtime.GtfsRealtime.FeedMessage;
 import com.google.transit.realtime.GtfsRealtime.TimeRange;
 import com.google.transit.realtime.GtfsRealtime.TranslatedString;
 import com.google.transit.realtime.GtfsRealtime.TranslatedString.Translation;
-import com.google.transit.realtime.GtfsRealtimeConstants;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -282,7 +282,7 @@ public class FeedServiceImplTest {
   private FeedMessage.Builder createFeed() {
     FeedMessage.Builder builder = FeedMessage.newBuilder();
     FeedHeader.Builder header = FeedHeader.newBuilder();
-    header.setGtfsRealtimeVersion(GtfsRealtimeConstants.VERSION);
+    header.setGtfsRealtimeVersion(GtfsRealtimeConstantsV2.VERSION);
     builder.setHeader(header);
     return builder;
   }

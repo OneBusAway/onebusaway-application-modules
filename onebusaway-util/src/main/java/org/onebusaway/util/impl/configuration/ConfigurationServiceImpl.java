@@ -41,7 +41,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
 	@Autowired
 	private ThreadPoolTaskScheduler _taskScheduler;
-	
+
 	private RefreshService _refreshService = null;
 
 	private ConfigurationServiceClient _configurationServiceClient = null;
@@ -49,6 +49,8 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 	private ConcurrentMap<String, String> _configurationKeyToValueMap = new ConcurrentHashMap<String, String>();
 
 	private HashMap<String, Object> _localConfiguration = null;
+
+	private HashMap<String, HashMap<String, String>> agencies;
 
 	@Autowired
 	public void setRefreshService(RefreshService refreshService) {
@@ -92,6 +94,15 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 				String configValue = configItem.get("value").getAsString();
 	
 				updateConfigurationMap(configKey, configValue);
+			}
+		} else {
+			List<Map<String, String>> items = _configurationServiceClient.getItems(null, null);
+			if (items == null) return;
+			for (Map<String, String> item : items) {
+				String component = item.get("component");
+				String key = item.get("key");
+				String value = item.get("value");
+				_configurationKeyToValueMap.put(component+"."+key, value);
 			}
 		}
 	}
@@ -267,6 +278,11 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			_log.error("exception for (" + agencyId + ", " + configurationItemKey + ")", any);
 			return false;
 		}
+	}
+
+	@Override
+	public Map<String, List<ConfigParameter>> getParametersFromLocalFile() {
+		return _configurationServiceClient.getParametersFromLocalFile();
 	}
 
 	// Local Config Methods

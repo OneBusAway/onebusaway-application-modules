@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.onebusaway</groupId>
 		<artifactId>onebusaway-application-modules</artifactId>
-		<version>2.2.1-cs-SNAPSHOT</version>
+		<version>2.4.1-cs-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>onebusaway-util</artifactId>
@@ -77,7 +77,13 @@
 		<dependency>
     	<groupId>com.brsanthu</groupId>
     	<artifactId>google-analytics-java</artifactId>
-	</dependency>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>jcl-over-slf4j</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
 	<dependency>
 		<groupId>org.apache.httpcomponents</groupId>
 		<artifactId>httpclient</artifactId>

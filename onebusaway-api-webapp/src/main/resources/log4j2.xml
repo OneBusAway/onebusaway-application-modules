@@ -42,10 +42,10 @@
 		<Logger name="org.hibernate.engine.internal.StatisticalLoggingSessionEventListener"
 				level="fatal"
 				additivity="false">
-			<AppenderRef ref="ROLL"/>
+			<AppenderRef ref="${log4j.appender}"/>
 		</Logger>
 		<Root level="info">
-			<AppenderRef ref="ROLL"/>
+			<AppenderRef ref="${log4j.appender}"/>
 		</Root>
 	</Loggers>
 

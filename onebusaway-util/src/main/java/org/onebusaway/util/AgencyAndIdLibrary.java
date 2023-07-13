@@ -38,9 +38,12 @@ public class AgencyAndIdLibrary {
    * @return an id object
    */
   public static AgencyAndId convertFromString(String value) {
+      return convertFromString(value, ID_SEPARATOR);
+  }
+  public static AgencyAndId convertFromString(String value, char separator) {
     if( value == null || value.isEmpty())
       return null;
-    int index = value.indexOf(ID_SEPARATOR);
+    int index = value.indexOf(separator);
     if (index == -1) {
       throw new IllegalStateException("invalid agency-and-id: " + value);
     } else {

@@ -16,6 +16,8 @@
 package org.onebusaway.api.actions.api;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 
 import org.apache.struts2.rest.DefaultHttpHeaders;
 import org.onebusaway.api.ResponseCodes;
@@ -23,9 +25,13 @@ import org.onebusaway.api.actions.OneBusAwayApiActionSupport;
 import org.onebusaway.api.impl.MaxCountSupport;
 import org.onebusaway.api.model.ResponseBean;
 import org.onebusaway.api.model.transit.BeanFactoryV2;
+import org.onebusaway.transit_data.model.AgencyWithCoverageBean;
+import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.util.SystemTime;
 
 import com.opensymphony.xwork2.ModelDriven;
+import org.onebusaway.util.services.configuration.ConfigurationService;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class ApiActionSupport extends OneBusAwayApiActionSupport implements
     ModelDriven<ResponseBean> {
@@ -45,6 +51,11 @@ public class ApiActionSupport extends OneBusAwayApiActionSupport implements
   private boolean _includeReferences = true;
   
   private Long time = null;
+
+  @Autowired
+  private TransitDataService _service;
+  @Autowired
+  private ConfigurationService _configService;
   
   public void setTime(long time) {
     this.time = time;
@@ -146,6 +157,18 @@ public class ApiActionSupport extends OneBusAwayApiActionSupport implements
         ResponseCodes.RESPONSE_SERVICE_EXCEPTION, "unknown version: "
             + _version, null);
     return new DefaultHttpHeaders().withStatus(_response.getCode());
+  }
+
+  public HashSet<String> getAgenciesExcludingScheduled(){
+    HashSet<String> agenciesExcludingScheduled = new HashSet<String>();
+    List<AgencyWithCoverageBean> allAgencies = _service.getAgenciesWithCoverage();
+    for (AgencyWithCoverageBean agencyBean: allAgencies){
+      String agency = agencyBean.getAgency().getId();
+      if(_configService.getConfigurationFlagForAgency(agency, "hideScheduleInfo")){
+        agenciesExcludingScheduled.add(agency);
+      }
+    }
+    return agenciesExcludingScheduled;
   }
 
   protected int getReturnVersion() {

@@ -3,7 +3,7 @@
     <parent>
         <artifactId>onebusaway-application-modules</artifactId>
         <groupId>org.onebusaway</groupId>
-        <version>2.2.1-cs-SNAPSHOT</version>
+        <version>2.4.1-cs-SNAPSHOT</version>
     </parent>
     <artifactId>onebusaway-federations-webapp</artifactId>
     <packaging>war</packaging>
@@ -102,66 +102,66 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
-                <groupId>org.codehaus.cargo</groupId>
-                <artifactId>cargo-maven2-plugin</artifactId>
-                <configuration>
-                    <configuration>
-                        <home>${project.build.directory}/tomcat7x/container</home>
-                        <properties>
-                            <cargo.jvmargs>${cargo.jvmargs}</cargo.jvmargs>
-                            <cargo.servlet.port>${org_onebusaway_test_port}</cargo.servlet.port>
-                            <cargo.tomcat.ajp.port>${org_onebusaway_test_ajp_port}</cargo.tomcat.ajp.port>
-                            <cargo.rmi.port>${org_onebusaway_test_rmi_port}</cargo.rmi.port>
-                        </properties>
-                    </configuration>
-                    <container>
-                        <containerId>tomcat7x</containerId>
-                        <zipUrlInstaller>
-                            <url>http://developer.onebusaway.org/dist/apache-tomcat-${tomcat-version}.zip</url>
-                            <extractDir>${java.io.tmpdir}/cargo-installs</extractDir>
-                        </zipUrlInstaller>
-                    </container>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>start-container</id>
-                        <phase>pre-integration-test</phase>
-                        <goals>
-                            <goal>start</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>deploy-service-registry</id>
-                        <phase>pre-integration-test</phase>
-                        <goals>
-                            <goal>deployer-deploy</goal>
-                        </goals>
-                        <configuration>
-                            <deployer>
-                                <type>installed</type>
-                            </deployer>
-                            <deployables>
-                                <deployable>
-                                    <groupId>org.onebusaway</groupId>
-                                    <artifactId>onebusaway-federations-webapp</artifactId>
-                                    <type>war</type>
-                                    <properties>
-                                        <context>onebusaway-federations-webapp</context>
-                                    </properties>
-                                    <pingURL>http://localhost:${org_onebusaway_test_port}/onebusaway-federations-webapp/remoting/index.action</pingURL>
-                                </deployable>
-                            </deployables>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <phase>post-integration-test</phase>
-                        <goals>
-                            <goal>stop</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
+<!--            <plugin>-->
+<!--                <groupId>org.codehaus.cargo</groupId>-->
+<!--                <artifactId>cargo-maven2-plugin</artifactId>-->
+<!--                <configuration>-->
+<!--                    <configuration>-->
+<!--                        <home>${project.build.directory}/tomcat7x/container</home>-->
+<!--                        <properties>-->
+<!--                            <cargo.jvmargs>${cargo.jvmargs}</cargo.jvmargs>-->
+<!--                            <cargo.servlet.port>${org_onebusaway_test_port}</cargo.servlet.port>-->
+<!--                            <cargo.tomcat.ajp.port>${org_onebusaway_test_ajp_port}</cargo.tomcat.ajp.port>-->
+<!--                            <cargo.rmi.port>${org_onebusaway_test_rmi_port}</cargo.rmi.port>-->
+<!--                        </properties>-->
+<!--                    </configuration>-->
+<!--                    <container>-->
+<!--                        <containerId>tomcat7x</containerId>-->
+<!--                        <zipUrlInstaller>-->
+<!--                            <url>http://developer.onebusaway.org/dist/apache-tomcat-${tomcat-version}.zip</url>-->
+<!--                            <extractDir>${java.io.tmpdir}/cargo-installs</extractDir>-->
+<!--                        </zipUrlInstaller>-->
+<!--                    </container>-->
+<!--                </configuration>-->
+<!--                <executions>-->
+<!--                    <execution>-->
+<!--                        <id>start-container</id>-->
+<!--                        <phase>pre-integration-test</phase>-->
+<!--                        <goals>-->
+<!--                            <goal>start</goal>-->
+<!--                        </goals>-->
+<!--                    </execution>-->
+<!--                    <execution>-->
+<!--                        <id>deploy-service-registry</id>-->
+<!--                        <phase>pre-integration-test</phase>-->
+<!--                        <goals>-->
+<!--                            <goal>deployer-deploy</goal>-->
+<!--                        </goals>-->
+<!--                        <configuration>-->
+<!--                            <deployer>-->
+<!--                                <type>installed</type>-->
+<!--                            </deployer>-->
+<!--                            <deployables>-->
+<!--                                <deployable>-->
+<!--                                    <groupId>org.onebusaway</groupId>-->
+<!--                                    <artifactId>onebusaway-federations-webapp</artifactId>-->
+<!--                                    <type>war</type>-->
+<!--                                    <properties>-->
+<!--                                        <context>onebusaway-federations-webapp</context>-->
+<!--                                    </properties>-->
+<!--                                    <pingURL>http://localhost:${org_onebusaway_test_port}/onebusaway-federations-webapp/remoting/index.action</pingURL>-->
+<!--                                </deployable>-->
+<!--                            </deployables>-->
+<!--                        </configuration>-->
+<!--                    </execution>-->
+<!--                    <execution>-->
+<!--                        <phase>post-integration-test</phase>-->
+<!--                        <goals>-->
+<!--                            <goal>stop</goal>-->
+<!--                        </goals>-->
+<!--                    </execution>-->
+<!--                </executions>-->
+<!--            </plugin>-->
         </plugins>
     </build>
 </project>

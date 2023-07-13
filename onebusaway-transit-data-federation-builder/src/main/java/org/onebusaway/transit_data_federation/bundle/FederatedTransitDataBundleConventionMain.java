@@ -64,7 +64,7 @@ public class FederatedTransitDataBundleConventionMain {
     private Date fromDate = null;
 
 
-    public void run(String[] args) {
+    public String run(String[] args) {
         logVersion();
 
         if (args == null || args.length != 3) {
@@ -103,6 +103,7 @@ public class FederatedTransitDataBundleConventionMain {
         build(creator);
         String bundleFile = assemble(request, bundleName);
         System.out.println("bundle file stored at " + bundleFile);
+        return bundleFile;
     }
 
     private String handleClassPath(String inputPathStr) {

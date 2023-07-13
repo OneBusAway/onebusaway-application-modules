@@ -91,12 +91,9 @@
                                    namespace="/admin/vehiclestatusmap" /> <s:a href="%{url}">Vehicle Status Map</s:a>
                         </li>
                     </s:if>
-                    <s:if test="isPageAvailable('showUpdateConfig', 'org.onebusaway.webapp.actions.admin.DeployConfigAction')">
+                    <s:if test="isPageAvailable('showUpdateConfig', 'org.onebusaway.webapp.actions.admin.ParametersAction')">
 						<li><s:url var="url" action="parameters" namespace="/admin" />
 							<s:a href="%{url}">Configuration Parameters Utility</s:a></li>
-						<li><s:url var="url" action="deploy-config"
-								namespace="/admin" /> <s:a href="%{url}">Update Configuration Files</s:a>
-						</li>
 					</s:if>
 					<s:if test="isPageAvailable('showReports', 'org.onebusaway.webapp.actions.admin.ReportsAction')">
 						<li><s:url var="url" action="reports" namespace="/admin" />

@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.gson.JsonObject;
+import org.onebusaway.util.impl.configuration.ConfigParameter;
 
 public interface ConfigurationServiceClient {
 
@@ -39,7 +40,14 @@ public interface ConfigurationServiceClient {
   List<Map<String, String>> getItems(String baseObject, String... params) throws Exception;
   
   String getItem(String baseObject, String key) throws Exception;
-  
+
+  Map<String, List<ConfigParameter>> getParametersFromLocalFile();
+
   boolean isLocal();
 
+  void setExternalConfigurationApiUrl(String url);
+
+   void setConnectionTimeout(int connectionTimeout);
+
+  void setReadTimeout(int readTimeout);
 }

@@ -17,6 +17,7 @@
       <item name="Phone and SMS" href="/features/phone-and-sms.html" />
       <item name="Sign Mode" href="/features/sign-mode.html" />
       <item name="GTFS-realtime" href="/features/gtfs-realtime.html" />
+      <item name="Search API" href="/api/where/search/index.html" />
     </menu>    
     <menu name="Guides">
       <item name="Quick-Start" href="/guides/quickstart-guide.html" />

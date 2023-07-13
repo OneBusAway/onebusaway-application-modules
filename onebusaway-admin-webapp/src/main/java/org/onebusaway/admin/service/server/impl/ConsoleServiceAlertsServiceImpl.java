@@ -16,7 +16,6 @@
 package org.onebusaway.admin.service.server.impl;
 
 import com.google.transit.realtime.GtfsRealtime;
-import com.google.transit.realtime.GtfsRealtimeConstants;
 import org.onebusaway.admin.service.server.ConsoleServiceAlertsService;
 import org.onebusaway.alerts.impl.ServiceAlertBeanHelper;
 import org.onebusaway.alerts.impl.ServiceAlertBuilderHelper;
@@ -24,6 +23,7 @@ import org.onebusaway.alerts.impl.ServiceAlertRecord;
 import org.onebusaway.alerts.impl.ServiceAlertTimeRange;
 import org.onebusaway.alerts.service.ServiceAlerts;
 import org.onebusaway.alerts.service.ServiceAlertsService;
+import org.onebusaway.api.model.transit.realtime.GtfsRealtimeConstantsV2;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data.model.ListBean;
 import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
@@ -65,7 +65,7 @@ public class ConsoleServiceAlertsServiceImpl implements ConsoleServiceAlertsServ
 
         GtfsRealtime.FeedMessage.Builder feed = GtfsRealtime.FeedMessage.newBuilder();
         GtfsRealtime.FeedHeader.Builder header = feed.getHeaderBuilder();
-        header.setGtfsRealtimeVersion(GtfsRealtimeConstants.VERSION);
+        header.setGtfsRealtimeVersion(GtfsRealtimeConstantsV2.VERSION);
         long time = SystemTime.currentTimeMillis();
         header.setTimestamp(time / 1000);
 

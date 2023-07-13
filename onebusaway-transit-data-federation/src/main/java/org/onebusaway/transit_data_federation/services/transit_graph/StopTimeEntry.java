@@ -87,4 +87,39 @@ public interface StopTimeEntry {
    * @return the total number of stops in this trip
    */
   public int getTotalStopsInTrip();
+
+  /**
+   * Setter for dynamic instances, for static instances only use during initial building.
+   */
+  void setShapePointIndex(int index);
+
+  /**
+   * Setter for dynamic instances, for static instances only use during initial building.
+   */
+  void setShapeDistTraveled(double distanceAlongShape);
+
+  /**
+   * Setter for dynamic instances, for static instances only use during initial building.
+   */
+  void setTrip(TripEntry tripEntry);
+
+  /**
+   * Setter for dynamic instances, for static instances only use during initial building.
+   */
+  void setTotalStopsInTrip(int size);
+
+  /**
+   * Setter for dynamic instances, for static instances only use during initial building.
+   */
+  void setArrivalTime(int arrivalTime);
+
+  /**
+   * Setter for dynamic instances, for static instances only use during initial building.
+   */
+  void setDepartureTime(int departureTime);
+
+  /**
+   * Setter for dynamic instances, for static instances only use during initial building.
+   */
+  void setAccumulatedSlackTime(int accumulatedSlackTime);
 }

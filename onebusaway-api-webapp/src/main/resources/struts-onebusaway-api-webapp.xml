@@ -39,7 +39,7 @@
 
         <result-types>
             <result-type name="xml" class="org.onebusaway.api.impl.XmlResult" />
-            <result-type name="rss" class="org.onebusaway.presentation.rss.RomeResult"/>
+<!--            <result-type name="rss" class="org.onebusaway.presentation.rss.RomeResult"/>-->
         </result-types>
 
         <interceptors>

@@ -24,6 +24,7 @@ import org.onebusaway.container.cache.CacheableArgument;
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.transit_data.model.FilterChain;
 import org.onebusaway.transit_data.model.StopBean;
 import org.onebusaway.transit_data_federation.services.beans.GeospatialBeanService;
 import org.onebusaway.transit_data_federation.services.beans.NearbyStopsBeanService;
@@ -50,11 +51,11 @@ class NearbyStopsBeanServiceImpl implements NearbyStopsBeanService {
 
   public List<AgencyAndId> getNearbyStops(
           StopBean stopBean, double radius) {
-    return getNearbyStops(stopBean, radius, Collections.emptyList());
+    return getNearbyStops(stopBean, radius, new FilterChain());
   }
   @Cacheable
   public List<AgencyAndId> getNearbyStops(
-      @CacheableArgument(keyProperty = "id") StopBean stopBean, double radius, List<Integer> routeTypesFilter) {
+      @CacheableArgument(keyProperty = "id") StopBean stopBean, double radius, FilterChain filterChain) {
 
     CoordinateBounds bounds = SphericalGeometryLibrary.bounds(
         stopBean.getLat(), stopBean.getLon(), radius);
@@ -64,8 +65,9 @@ class NearbyStopsBeanServiceImpl implements NearbyStopsBeanService {
 
     for (AgencyAndId id : ids) {
       if (!ApplicationBeanLibrary.getId(id).equals(stopBean.getId())) {
-        if (_stopsBeanService.matchesRouteTypeFilter(stopBean, routeTypesFilter))
+        if (filterChain.matches(stopBean)) {
           excludingSource.add(id);
+        }
       }
     }
     return excludingSource;

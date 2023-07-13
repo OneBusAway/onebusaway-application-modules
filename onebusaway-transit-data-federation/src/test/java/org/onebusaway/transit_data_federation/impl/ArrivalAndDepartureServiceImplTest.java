@@ -15,9 +15,7 @@
  */
 package org.onebusaway.transit_data_federation.impl;
 
-import static junit.framework.TestCase.assertTrue;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.block;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.blockConfiguration;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.dateAsLong;
@@ -1638,7 +1636,7 @@ public class ArrivalAndDepartureServiceImplTest {
    */
   @Test
   public void testGetArrivalsAndDeparturesForStopInTimeRange18() {
-
+    _service.setHideCanceledTrips(true);
     // Call ArrivalsAndDeparturesForStopInTimeRange method in
     // ArrivalAndDepartureServiceImpl
     List<ArrivalAndDepartureInstance> arrivalsAndDepartures = getArrivalsAndDeparturesForStopInTimeRangeForCancelledTrip();
@@ -1646,6 +1644,36 @@ public class ArrivalAndDepartureServiceImplTest {
     assertNotNull(arrivalsAndDepartures);
     assertEquals(0, arrivalsAndDepartures.size());
     
+  }
+
+  /**
+   * This method tests trip update CANCELED support
+   *
+   * Test configuration: Trip for stopA and stopB is cancelled
+   * but we've enabled showing cancelled trips.
+   * There should be two arrivals and departures returned
+   * from the API!
+   */
+  @Test
+  public void testGetArrivalsAndDeparturesForStopInTimeRange18a() {
+
+    _service.setHideCanceledTrips(false);
+    // Call ArrivalsAndDeparturesForStopInTimeRange method in
+    // ArrivalAndDepartureServiceImpl
+    List<ArrivalAndDepartureInstance> arrivalsAndDepartures = getArrivalsAndDeparturesForStopInTimeRangeForCancelledTrip();
+
+    assertNotNull(arrivalsAndDepartures);
+    assertEquals(2, arrivalsAndDepartures.size());
+    ArrivalAndDepartureInstance firstArrival = arrivalsAndDepartures.get(0);
+    assertEquals(0, firstArrival.getPredictedArrivalTime());
+    assertEquals(0, firstArrival.getPredictedDepartureTime());
+    // promote the status so its obvious
+    assertEquals(TransitDataConstants.STATUS_CANCELED, firstArrival.getStatus());
+    assertEquals(TransitDataConstants.STATUS_CANCELED, firstArrival.getBlockLocation().getStatus());
+    assertNull(firstArrival.getBlockLocation().getTimepointPredictions());
+    // ensure we have no vehicle set if CANCELED
+    assertEquals(null, firstArrival.getBlockLocation().getVehicleId());
+    assertFalse(firstArrival.getBlockLocation().isInService());
   }
 
   /**
@@ -1812,8 +1840,6 @@ public class ArrivalAndDepartureServiceImplTest {
    *    A           1             0
    *    B           1             1
    * 
-   * @param timepointPredictions real-time predictions to apply to the
-   *          BlockLocationServiceImpl
    * @return a list of ArrivalAndDepartureInstances which is used to access
    *         predicted arrival/departure times for a stop, for comparison
    *         against the expected values

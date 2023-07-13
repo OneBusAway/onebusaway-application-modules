@@ -15,6 +15,9 @@
  */
 package org.onebusaway.util.services.configuration;
 
+import org.onebusaway.util.impl.configuration.ConfigParameter;
+
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -70,4 +73,6 @@ public interface ConfigurationService {
      * {"component": "agency_1", "key": "hideScheduleInfo", "value": "true"}
      */
   public boolean getConfigurationFlagForAgency(String agencyId, String configurationItemKey);
+
+  public Map<String, List<ConfigParameter>> getParametersFromLocalFile();
 }

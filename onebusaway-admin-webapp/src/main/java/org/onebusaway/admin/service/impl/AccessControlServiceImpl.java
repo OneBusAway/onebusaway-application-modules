@@ -15,10 +15,7 @@
  */
 package org.onebusaway.admin.service.impl;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.PostConstruct;
@@ -112,11 +109,21 @@ public class AccessControlServiceImpl implements AccessControlService {
 	private void init() throws Exception {
 		
 		roleByName = new ConcurrentHashMap<String, Role>();
+		List<Map<String, String>> settings = null;
+		try {
+			settings = _configurationServiceClient.getItems("config", "list");
+		} catch (Exception any) {
+			final String msg = "ERROR: configuration service not configured";
+			System.out.println(msg);
+			_log.error(msg);
+		}
 		
-		List<Map<String, String>> settings = _configurationServiceClient.getItems("config", "list");
-		
-		if (settings == null)
-			throw new Exception("No configuration supplied");
+		if (settings == null) {
+			final String msg = "ERROR:  roles not configured.  Defaulting ADMIN";
+			System.out.println(msg);
+			_log.error(msg);
+			settings = createDefaultAdminConfig();
+		}
 		
 		for (Map<String, String> setting : settings) {
 			
@@ -144,5 +151,15 @@ public class AccessControlServiceImpl implements AccessControlService {
   			}
 		}
 	}
-	
+
+	private List<Map<String, String>> createDefaultAdminConfig() {
+		List<Map<String, String>> items = new ArrayList<>();
+		Map<String, String> map = new HashMap<>();
+		map.put("component", "privilege");
+		map.put("key", "ROLE_ADMINISTRATOR");
+		map.put("value", "*");
+		items.add(map);
+		return items;
+	}
+
 }

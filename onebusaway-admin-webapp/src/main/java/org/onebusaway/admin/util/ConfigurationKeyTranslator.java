@@ -33,35 +33,10 @@ public class ConfigurationKeyTranslator {
 		//Holds mappings of config keys to ui keys. This map needs to be updated for each new key
 		//introduced in tdm.config.xml if it needs to be displayed in admin parameters UI.
 		configToUIKeys = HashBiMap.create();
-		
-		configToUIKeys.put("tdm.crewAssignmentRefreshInterval", "tdmCrewAssignmentRefreshKey");
-		configToUIKeys.put("tdm.vehicleAssignmentRefreshInterval", "tdmVehicleAssignmentRefreshKey");
-		configToUIKeys.put("admin.senderEmailAddress", "adminSenderEmailAddressKey");
-		configToUIKeys.put("admin.instanceId", "adminInstanceIdKey");
-		configToUIKeys.put("display.stalledTimeout", "displayStalledTimeoutKey");
-		configToUIKeys.put("display.staleTimeout", "displayStaleTimeoutKey");
-		configToUIKeys.put("display.offRouteDistance", "displayOffrouteDistanceKey");
-		configToUIKeys.put("display.hideTimeout", "displayHideTimeoutKey");
-    configToUIKeys.put("display.bingMapsKey", "displayBingMapsKey");
-    configToUIKeys.put("display.obaApiKey", "displayObaApiKey");
-    configToUIKeys.put("display.obaApiExcludeGaKey", "displayObaApiExcludeGaKey");
-		configToUIKeys.put("display.previousTripFilterDistance", "displayPreviousFilterKey");
-		configToUIKeys.put("display.googleAnalyticsSiteId", "displayGoogleAnalyticsIdKey");
-		configToUIKeys.put("display.googleMapsClientId","displayGoogleMapsIdKey");
-		configToUIKeys.put("display.googleMapsSecretKey", "displayGoogleMapsSecretKey");
-		configToUIKeys.put("display.useTimePredictions", "displayUseTimePredictionsKey");
-		configToUIKeys.put("inference-engine.inputQueueName", "ieInputQueueNameKey");
-		configToUIKeys.put("inference-engine.outputQueueName", "ieOutputQueueNameKey");
-		configToUIKeys.put("inference-engine.inputQueuePort", "ieInputQueuePortKey");
-		configToUIKeys.put("inference-engine.outputQueuePort", "ieOutputQueuePortKey");
-		configToUIKeys.put("inference-engine.inputQueueHost", "ieInputQueueHostKey");
-		configToUIKeys.put("inference-engine.outputQueueHost", "ieOutputQueueHostKey");
-		configToUIKeys.put("tds.inputQueueName", "tdsInputQueueNameKey");
-		configToUIKeys.put("tds.inputQueuePort", "tdsInputQueuePortKey");
-		configToUIKeys.put("tds.inputQueueHost", "tdsInputQueueHostKey");
-		configToUIKeys.put("operational-api.host", "opsApiHostKey");
-		configToUIKeys.put("operational-api.historicalRecordLimit", "opsApiMaxRecordLimitKey");
-		
+		configToUIKeys.put("agency_1.hideScheduleInfo", "agency_1.hideScheduleInfo");
+		configToUIKeys.put("admin.showVehicleStatus", "admin.showVehicleStatus");
+		configToUIKeys.put("admin.agenciesExcludingScheduled", "admin.agenciesExcludingScheduled");
+
 		//Create another map with inverse mapping that is ui to config keys
 		uiToConfigKeys = configToUIKeys.inverse();
 		

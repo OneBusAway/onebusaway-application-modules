@@ -81,6 +81,7 @@
 	margin-top: 3px;
 }
 
+/* occupancy setup */
 .popup .apcDotG {
 	height: 12px;
 	width: 12px;
@@ -153,6 +154,56 @@
 	width: 10px;
 	display: inline-block;
 }
+
+/* apc weebles */
+.popup .apcLadderContainer {
+
+}
+/* 0 for no data */
+.popup ul li.arrival .weeble0,
+.popup ul li.nextStop .weeble0 {
+	height: 12px;
+	width: 20px;
+	background-color: #FFFFFF;
+	display: inline-block;
+	background-image: url("img/icon-crowding-0.png");
+	background-repeat: no-repeat;
+	background-size: cover;
+}
+/* G for green for seats available */
+.popup ul li.arrival .weebleG,
+.popup ul li.nextStop .weebleG {
+	height: 12px;
+	width: 20px;
+	background-color: #FFFFFF;
+	display: inline-block;
+	background-image: url("img/icon-crowding-1.png");
+	background-repeat: no-repeat;
+	background-size: cover;
+}
+/* Y for yellow for standing available */
+.popup ul li.arrival .weebleY,
+.popup ul li.nextStop .weebleY {
+	height: 12px;
+	width: 20px;
+	background-color: #FFFFFF;
+	display: inline-block;
+	background-image: url("img/icon-crowding-2.png");
+	background-repeat: no-repeat;
+	background-size: cover;
+}
+/* R for red for full */
+.popup ul li.arrival .weebleR,
+.popup ul li.nextStop .weebleR  {
+	height: 12px;
+	width: 20px;
+	background-color: #FFFFFF;
+	display: inline-block;
+	background-image: url("img/icon-crowding-3.png");
+	background-repeat: no-repeat;
+	background-size: cover;
+}
+/* end apc */
 
 .popup .header .updated.stale {
     color: #d12020;

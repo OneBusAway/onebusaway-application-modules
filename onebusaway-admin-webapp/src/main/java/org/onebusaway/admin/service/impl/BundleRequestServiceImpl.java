@@ -72,6 +72,14 @@ public class BundleRequestServiceImpl implements BundleRequestService, ServletCo
     _executorService = Executors.newFixedThreadPool(1);
   }
 
+  @PostConstruct
+  public void shutdown() {
+    if (_executorService != null) {
+      _executorService.shutdownNow();
+      _executorService = null;
+    }
+  }
+
   public void setInstanceId(String instanceId) {
     _instanceId = instanceId;
   }

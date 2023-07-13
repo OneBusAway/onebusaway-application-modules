@@ -56,16 +56,16 @@ public class BundleBuildResponse {
   private static final int BUNDLE_BUILD_NAME_LEN = 255;
   private static final int BUNDLE_START_DATE_LEN = 20;
   private static final int BUNDLE_END_DATE_LEN = 20;
-  private static final int BUNDLE_COMMENT_LEN = 4096;
+  private static final int BUNDLE_COMMENT_LEN = 255;
   private static final int BUNDLE_DIR_NAME_LEN = 255;
   private static final int BUNDLE_EMAIL_TO_LEN = 255;
-  private static final int BUNDLE_RESULTS_LINK_LEN = 4096;
+  private static final int BUNDLE_RESULTS_LINK_LEN = 255;
   private static final int BUNDLE_ID_LEN = 255;
   private static final int ID_LEN = 10;
   private static final int NAME_LEN = 255;
-  private static final int STATUS_LEN = 4096;
-  private static final int EX_MSG_LEN = 4096;
-  private static final int EX_ROOT_CAUSE_LEN = 4096;
+  private static final int STATUS_LEN = 255;
+  private static final int EX_MSG_LEN = 255;
+  private static final int EX_ROOT_CAUSE_LEN = 255;
 
   @Id
   @Column(nullable = true, name="id", length = ID_LEN)

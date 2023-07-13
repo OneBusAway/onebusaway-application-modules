@@ -35,6 +35,7 @@ import javax.annotation.PreDestroy;
 import org.onebusaway.collections.ConcurrentCollectionsLibrary;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.realtime.api.VehicleLocationRecord;
+import org.onebusaway.transit_data.model.TransitDataConstants;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.blocks.ScheduledBlockLocation;
 import org.onebusaway.transit_data_federation.services.realtime.ScheduleDeviationSamples;
@@ -159,7 +160,10 @@ public class VehicleLocationRecordCacheImpl implements VehicleLocationRecordCach
       ScheduleDeviationSamples samples) {
 
     AgencyAndId vehicleId = record.getVehicleId();
-
+    if (vehicleId == null && TransitDataConstants.STATUS_CANCELED.equals(record.getStatus())) {
+      vehicleId = record.getTripId();  // cache needs an id, use trip
+    }
+    if (vehicleId == null) return null;
     while (true) {
 
       VehicleLocationCacheEntry newCacheEntry = new VehicleLocationCacheEntry(

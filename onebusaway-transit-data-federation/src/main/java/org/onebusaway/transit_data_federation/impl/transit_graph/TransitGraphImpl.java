@@ -22,7 +22,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -395,11 +394,9 @@ public class TransitGraphImpl implements Serializable, TransitGraph {
     public void handleStopEntryRead(StopEntryImpl stopEntryImpl) {
       _stops.put(stopEntryImpl.getId(), stopEntryImpl);
     }
-
     public void handleTripEntryRead(TripEntryImpl tripEntryImpl) {
       _trips.put(tripEntryImpl.getId(), tripEntryImpl);
     }
-
     public void addStopEntryCallback(AgencyAndId stopEntryId,
         EntryCallback<StopEntryImpl> callback) {
       _stopCallbacks.add(new EntryIdAndCallback<AgencyAndId, StopEntryImpl>(
