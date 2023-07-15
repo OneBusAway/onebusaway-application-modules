@@ -1840,8 +1840,6 @@ public class ArrivalAndDepartureServiceImplTest {
    *    A           1             0
    *    B           1             1
    * 
-   * @param timepointPredictions real-time predictions to apply to the
-   *          BlockLocationServiceImpl
    * @return a list of ArrivalAndDepartureInstances which is used to access
    *         predicted arrival/departure times for a stop, for comparison
    *         against the expected values

@@ -38,6 +38,7 @@ import javax.annotation.PreDestroy;
 
 import com.google.transit.realtime.*;
 import org.apache.commons.lang.StringUtils;
+import org.onebusaway.api.model.transit.realtime.GtfsRealtimeConstantsV2;
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
 import org.onebusaway.gtfs.model.AgencyAndId;
@@ -45,6 +46,7 @@ import org.onebusaway.realtime.api.VehicleLocationListener;
 import org.onebusaway.realtime.api.VehicleLocationRecord;
 import org.onebusaway.realtime.api.VehicleOccupancyListener;
 import org.onebusaway.realtime.api.VehicleOccupancyRecord;
+import org.onebusaway.transit_data.model.TransitDataConstants;
 import org.onebusaway.transit_data.model.service_alerts.ECause;
 import org.onebusaway.transit_data.model.service_alerts.ESeverity;
 import org.onebusaway.alerts.impl.ServiceAlertLocalizedString;
@@ -52,10 +54,12 @@ import org.onebusaway.alerts.impl.ServiceAlertRecord;
 import org.onebusaway.alerts.impl.ServiceAlertSituationConsequenceClause;
 import org.onebusaway.alerts.impl.ServiceAlertTimeRange;
 import org.onebusaway.alerts.impl.ServiceAlertsSituationAffectsClause;
+import org.onebusaway.transit_data_federation.impl.transit_graph.StopTimeEntriesFactory;
 import org.onebusaway.transit_data_federation.services.AgencyService;
 import org.onebusaway.transit_data_federation.services.ConsolidatedStopsService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockCalendarService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockGeospatialService;
+import org.onebusaway.transit_data_federation.services.blocks.DynamicBlockIndexService;
 import org.onebusaway.transit_data_federation.services.realtime.BlockLocation;
 import org.onebusaway.transit_data_federation.services.realtime.BlockLocationService;
 import org.onebusaway.alerts.service.ServiceAlerts;
@@ -77,6 +81,7 @@ import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import com.jcraft.jsch.SftpException;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 public class GtfsRealtimeSource implements MonitoredDataSource {
 
@@ -114,6 +119,8 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   private ScheduledExecutorService _scheduledExecutorService;
 
   private ConsolidatedStopsService _consolidatedStopsService;
+
+  private DynamicBlockIndexService _dynamicBlockIndexService;
 
   private ScheduledFuture<?> _refreshTask;
 
@@ -174,6 +181,8 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   private boolean _scheduleAdherenceFromLocation = false;
 
   private BlockGeospatialService _blockGeospatialService;
+
+  private StopTimeEntriesFactory _stopTimeEntriesFactory;
   
   private boolean _enabled = true;
 
@@ -182,6 +191,16 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   private boolean _ignoreAlertTripId = false;
 
   private String _alertSourcePrefix = null;
+
+  // this is a change from the default, but is much safer
+  private boolean _validateCurrentTime = false;
+
+  // a special case of some specific integration - drop unassigned trips
+  private boolean _filterUnassigned = false;
+
+  private List<AgencyAndId> _routeIdsToCancel = null;
+
+  private GtfsRealtimeCancelService _cancelService;
 
   @Autowired
   public void setAgencyService(AgencyService agencyService) {
@@ -209,6 +228,12 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   }
 
   @Autowired
+  @Qualifier("dynamicBlockIndexServiceImpl")
+  public void setDynamicBlockIndexService(DynamicBlockIndexService dynamicBlockIndexService) {
+    this._dynamicBlockIndexService = dynamicBlockIndexService;
+  }
+
+  @Autowired
   public void setVehicleLocationListener(
       VehicleLocationListener vehicleLocationListener) {
     _vehicleLocationListener = vehicleLocationListener;
@@ -233,6 +258,11 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   @Autowired
   public void setBlockGeospatialService(BlockGeospatialService blockGeospatialService) {
     _blockGeospatialService = blockGeospatialService;
+  }
+
+  @Autowired
+  public void setStopTimeEntriesFactory(StopTimeEntriesFactory stopTimeEntriesFactory) {
+    _stopTimeEntriesFactory = stopTimeEntriesFactory;
   }
 
   public void setStopModificationStrategy(StopModificationStrategy strategy) {
@@ -391,7 +421,28 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   public void setAlertSourcePrefix(String prefix) {
     _alertSourcePrefix = prefix;
   }
-  
+
+  public void setRouteIdsToCancel(List<String> routeAgencyIds) {
+    if (routeAgencyIds != null) {
+      _routeIdsToCancel = new ArrayList<>();
+      for (String routeAgencyId : routeAgencyIds) {
+        try {
+          _routeIdsToCancel.add(AgencyAndId.convertFromString(routeAgencyId));
+        } catch (IllegalStateException ise) {
+          _log.error("invalid routeId {}", ise);
+        }
+      }
+    }
+  }
+
+  public void setFilterUnassigned(boolean flag) {
+    _filterUnassigned = flag;
+  }
+
+  @Autowired
+  public void setGtfsRealtimeCancelService(GtfsRealtimeCancelService service) {
+    _cancelService = service;
+  }
   @PostConstruct
   public void start() {
     if (_agencyIds.isEmpty()) {
@@ -419,6 +470,15 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     _tripsLibrary.setScheduleAdherenceFromLocation(_scheduleAdherenceFromLocation);
     _tripsLibrary.setBlockGeospatialService(_blockGeospatialService);
     _tripsLibrary.setUseLabelAsVehicleId(_useLabelAsId);
+    _tripsLibrary.setValidateCurrentTime(_validateCurrentTime);
+    _tripsLibrary.setAddedTripService(new AddedTripServiceImpl());
+    _tripsLibrary.setFilterUnassigned(_filterUnassigned);
+    DynamicTripBuilder tripBuilder = new DynamicTripBuilder();
+    tripBuilder.setStopTimeEntriesFactory(_stopTimeEntriesFactory);
+    tripBuilder.setTransitGraphDao(_transitGraphDao);
+    tripBuilder.setBlockIndexService(_dynamicBlockIndexService);
+    _tripsLibrary.setDynamicTripBuilder(tripBuilder);
+
     
     _alertLibrary = new GtfsRealtimeAlertLibrary();
     _alertLibrary.setEntitySource(_entitySource);
@@ -460,6 +520,11 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
 
     MonitoredResult result = new MonitoredResult();
     result.setAgencyIds(_agencyIds);
+
+    if (_routeIdsToCancel != null) {
+      _cancelService.cancelServiceForRoutes(_routeIdsToCancel);
+    }
+
     handleUpdates(result, tripUpdates, vehiclePositions, alerts, alertCollection);
     // update reference in a thread safe manner
     _monitoredResult = result;
@@ -474,7 +539,7 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
    ****/
 
   // test if the transit graph is ready
-  private boolean graphReady() {
+  protected boolean graphReady() {
     try {
       return _transitGraphDao != null
               && _transitGraphDao.getAllRoutes() != null
@@ -531,42 +596,64 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
 
     Set<AgencyAndId> seenVehicles = new HashSet<AgencyAndId>();
 
-    for (CombinedTripUpdatesAndVehiclePosition update : updates) {
-      VehicleLocationRecord record = _tripsLibrary.createVehicleLocationRecordForUpdate(result, update);
-      if (record != null) {
-        if (record.getTripId() != null) {
-          // tripId will be null if block was matched
-          result.addUnmatchedTripId(record.getTripId().toString());
-        }
-        AgencyAndId vehicleId = record.getVehicleId();
-        // here we try to get a more accurate count of updates
-        // some providers re-send old data or future data cluttering the feed
-        // the TDS will discard these
-        if (blockNotActive(record)) {
-          _log.debug("discarding v: " + vehicleId + " as block not active");
+    try {
+      for (CombinedTripUpdatesAndVehiclePosition update : updates) {
+        if (update.block == null) {
+          String tripId = null;
+          if (update.getTripUpdates() != null && update.getTripUpdatesSize() > 0)
+            if (update.getTripUpdates().get(0).hasTrip())
+              tripId = update.getTripUpdates().get(0).getTrip().getTripId();
+          _log.error("null block {} for agencies {}, bailing...", tripId, _agencyIds);
           continue;
         }
-        if (!isValidLocation(record, update)) {
-          _log.debug("discarding v: " + vehicleId + " as location is bad");
-          continue;
-        }
-        seenVehicles.add(vehicleId);
-        VehicleOccupancyRecord vor = _tripsLibrary.createVehicleOccupancyRecordForUpdate(result, update);
-        Date timestamp = new Date(record.getTimeOfRecord());
-        Date prev = _lastVehicleUpdate.get(vehicleId);
-        if (prev == null || prev.before(timestamp)) {
-          _log.debug("matched vehicle " + vehicleId + " on block=" + record.getBlockId() + " with scheduleDeviation=" + record.getScheduleDeviation());
-          _vehicleLocationListener.handleVehicleLocationRecord(record);
-          if (vor != null) {
-            _vehicleOccupancyListener.handleVehicleOccupancyRecord(vor);
+        BlockDescriptor.ScheduleRelationship scheduleRelationship = update.block.getScheduleRelationship();
+        boolean isDynamicTrip = TransitDataConstants.STATUS_ADDED.equals(scheduleRelationship.name());
+
+        VehicleLocationRecord record = _tripsLibrary.createVehicleLocationRecordForUpdate(result, update);
+        if (record != null) {
+          if (isDynamicTrip) {
+            if (_monitoredResult.getLastUpdate() < record.getTimeOfRecord()) {
+              _monitoredResult.setLastUpdate(record.getTimeOfRecord());
+            }
+            _monitoredResult.addAddedTripId(record.getTripId().toString());
+            _dynamicBlockIndexService.register(update.block.getBlockInstance());
           }
-          _lastVehicleUpdate.put(vehicleId, timestamp);
-        } else {
-          _log.debug("discarding: update for vehicle " + vehicleId + " as timestamp in past");
+          if (record.getTripId() != null) {
+            // tripId will be null if block was matched
+            result.addUnmatchedTripId(record.getTripId().toString());
+          }
+          AgencyAndId vehicleId = record.getVehicleId();
+          // here we try to get a more accurate count of updates
+          // some providers re-send old data or future data cluttering the feed
+          // the TDS will discard these
+          if (!isDynamicTrip && blockNotActive(record)) {
+            _log.debug("discarding v: " + vehicleId + " as block not active");
+            continue;
+          }
+          if (!isDynamicTrip && !isValidLocation(record, update)) {
+            _log.debug("discarding v: " + vehicleId + " as location is bad");
+            continue;
+          }
+          seenVehicles.add(vehicleId);
+          VehicleOccupancyRecord vor = _tripsLibrary.createVehicleOccupancyRecordForUpdate(result, update);
+          Date timestamp = new Date(record.getTimeOfRecord());
+          Date prev = _lastVehicleUpdate.get(vehicleId);
+          if (prev == null || prev.before(timestamp)) {
+            _log.debug("matched vehicle " + vehicleId + " on block=" + record.getBlockId() + " with scheduleDeviation=" + record.getScheduleDeviation());
+            _vehicleLocationListener.handleVehicleLocationRecord(record);
+            if (vor != null) {
+              _vehicleOccupancyListener.handleVehicleOccupancyRecord(vor);
+            }
+            _lastVehicleUpdate.put(vehicleId, timestamp);
+          } else {
+            _log.debug("discarding: update for vehicle " + vehicleId + " as timestamp in past");
+          }
         }
       }
-    }
 
+    } catch (Throwable t) {
+      _log.error("fatal exception {}", t, t);
+    }
     Calendar c = Calendar.getInstance();
     c.add(Calendar.MINUTE, -15);
     Date staleRecordThreshold = c.getTime();
@@ -991,7 +1078,7 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   private FeedMessage getDefaultFeedMessage() {
     FeedMessage.Builder builder = FeedMessage.newBuilder();
     FeedHeader.Builder header = FeedHeader.newBuilder();
-    header.setGtfsRealtimeVersion(GtfsRealtimeConstants.VERSION);
+    header.setGtfsRealtimeVersion(GtfsRealtimeConstantsV2.VERSION);
     builder.setHeader(header);
     return builder.build();
   }

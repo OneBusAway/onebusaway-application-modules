@@ -22,7 +22,7 @@ import com.google.transit.realtime.GtfsRealtime.TranslatedString.Translation;
 import com.google.transit.realtime.GtfsRealtime.TripDescriptor.ScheduleRelationship;
 import com.google.transit.realtime.GtfsRealtime.TripUpdate.StopTimeEvent;
 import com.google.transit.realtime.GtfsRealtime.TripUpdate.StopTimeUpdate;
-import com.google.transit.realtime.GtfsRealtimeConstants;
+import org.onebusaway.api.model.transit.realtime.GtfsRealtimeConstantsV2;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.realtime.api.TimepointPredictionRecord;
 import org.onebusaway.realtime.api.VehicleLocationRecord;
@@ -273,7 +273,7 @@ class GtfsRealtimeServiceImpl implements GtfsRealtimeService {
 
     FeedHeader.Builder feedHeader = FeedHeader.newBuilder();
     feedHeader.setIncrementality(Incrementality.FULL_DATASET);
-    feedHeader.setGtfsRealtimeVersion(GtfsRealtimeConstants.VERSION);
+    feedHeader.setGtfsRealtimeVersion(GtfsRealtimeConstantsV2.VERSION);
     feedMessage.setHeader(feedHeader);
     return feedMessage;
   }

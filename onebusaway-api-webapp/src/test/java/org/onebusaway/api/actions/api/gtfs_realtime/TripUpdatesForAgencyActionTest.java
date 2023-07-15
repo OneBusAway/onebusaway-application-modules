@@ -16,6 +16,7 @@
 package org.onebusaway.api.actions.api.gtfs_realtime;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -30,6 +31,7 @@ import org.onebusaway.transit_data.model.RouteBean;
 import org.onebusaway.transit_data.model.StopBean;
 import org.onebusaway.transit_data.model.VehicleStatusBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
+import org.onebusaway.transit_data.model.trips.TripDetailsBean;
 import org.onebusaway.transit_data.model.trips.TripStatusBean;
 import org.onebusaway.transit_data.services.TransitDataService;
 
@@ -109,7 +111,9 @@ public class TripUpdatesForAgencyActionTest {
     ListBean<VehicleStatusBean> bean = new ListBean<VehicleStatusBean>();
     bean.setList(vehicles);
     Mockito.when(_service.getAllVehiclesForAgency("1", now)).thenReturn(bean);
-
+    ListBean<TripDetailsBean> beans = new ListBean<>();
+    beans.setList(new ArrayList<>());
+    Mockito.when(_service.getTripsForAgency(any())).thenReturn(beans);
     _action.setId("1");
     _action.setTime(new Date(now));
 

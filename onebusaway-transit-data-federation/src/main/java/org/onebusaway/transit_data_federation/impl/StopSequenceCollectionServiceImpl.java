@@ -261,9 +261,11 @@ public class StopSequenceCollectionServiceImpl implements
         for (BlockTripEntry blockTrip : sequence.getTrips()) {
           TripEntry trip = blockTrip.getTrip();
           TripNarrative tripNarrative = _narrativeService.getTripForId(trip.getId());
-          String headsign = tripNarrative.getTripHeadsign();
-          if (headsign != null && headsign.length() > 0)
-            names.increment(headsign);
+          if (tripNarrative != null) {
+            String headsign = tripNarrative.getTripHeadsign();
+            if (headsign != null && headsign.length() > 0)
+              names.increment(headsign);
+          }
         }
       }
 

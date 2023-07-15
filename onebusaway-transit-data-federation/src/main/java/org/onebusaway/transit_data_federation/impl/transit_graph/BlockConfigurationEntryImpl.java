@@ -376,4 +376,18 @@ public class BlockConfigurationEntryImpl implements BlockConfigurationEntry,
     }
   }
 
+  @Override
+  public boolean equals(Object obj) {
+    if (obj == null || !(obj instanceof BlockConfigurationEntry))
+      return false;
+    BlockConfigurationEntry bce = (BlockConfigurationEntry) obj;
+    return block.equals(bce.getBlock())
+            && serviceIds.equals(bce.getServiceIds());
+  }
+
+  @Override
+  public int hashCode() {
+    return block.hashCode() + serviceIds.hashCode();
+  }
+
 }

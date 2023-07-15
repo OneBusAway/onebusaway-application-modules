@@ -201,17 +201,17 @@ public class UnitTestingSupport {
   }
 
   public static BlockConfigurationEntry linkBlockTrips(BlockEntryImpl block,
-      TripEntryImpl... trips) {
+      TripEntry... trips) {
     return linkBlockTrips(block, null, trips);
   }
 
   public static BlockConfigurationEntry linkBlockTrips(BlockEntryImpl block,
-      List<FrequencyEntry> frequencies, TripEntryImpl... trips) {
+      List<FrequencyEntry> frequencies, TripEntry... trips) {
 
     List<TripEntry> tripEntries = new ArrayList<TripEntry>();
     Set<LocalizedServiceId> serviceIds = new TreeSet<LocalizedServiceId>();
     for (int i = 0; i < trips.length; i++) {
-      TripEntryImpl trip = trips[i];
+      TripEntry trip = trips[i];
       trip.setBlock(block);
       tripEntries.add(trip);
       if (trip.getServiceId() != null)
@@ -239,7 +239,7 @@ public class UnitTestingSupport {
   }
 
   public static BlockConfigurationEntry linkBlockTrips(String blockId,
-      TripEntryImpl... trips) {
+      TripEntry... trips) {
     return linkBlockTrips(block(blockId), trips);
   }
 

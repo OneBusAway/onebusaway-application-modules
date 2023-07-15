@@ -48,6 +48,7 @@ import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTi
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.dynamic.DynamicTripEntryImpl;
 import org.onebusaway.util.AgencyAndIdLibrary;
 import org.onebusaway.util.SystemTime;
 import org.slf4j.Logger;
@@ -73,7 +74,10 @@ public class GtfsRealtimeTripLibrary {
   private BlockCalendarService _blockCalendarService;
    
   private BlockGeospatialService _blockGeospatialService;
-  
+
+  private AddedTripService _addedTripService;
+
+  private DynamicTripBuilder _dynamicTripBuilder;
   /**
    * This is primarily here to assist with unit testing.
    */
@@ -92,6 +96,8 @@ public class GtfsRealtimeTripLibrary {
   private boolean _scheduleAdherenceFromLocation = false;
 
   private boolean _useLabelAsVehicleId = false;
+
+  private boolean _filterUnassigned = false;
   
   public void setEntitySource(GtfsRealtimeEntitySource entitySource) {
     _entitySource = entitySource;
@@ -134,6 +140,13 @@ public class GtfsRealtimeTripLibrary {
     _blockGeospatialService = blockGeospatialService;
   }
 
+  public void setAddedTripService(AddedTripService addedTripService) {
+    _addedTripService = addedTripService;
+  }
+
+  public void setDynamicTripBuilder(DynamicTripBuilder builder) {
+    _dynamicTripBuilder = builder;
+  }
   /**
    * use the vehicle label as the id.
    * @param useLabelAsVehicleId
@@ -142,6 +155,9 @@ public class GtfsRealtimeTripLibrary {
     _useLabelAsVehicleId = useLabelAsVehicleId;
   }
 
+  public void setFilterUnassigned(boolean flag) {
+    _filterUnassigned = flag;
+  }
   /**
    * Trip updates describe a trip which is undertaken by a vehicle (which is
    * itself described in vehicle positions), but GTFS-realtime does not demand
@@ -178,6 +194,15 @@ public class GtfsRealtimeTripLibrary {
       if (!fe.hasTripUpdate()) {
         continue;
       }
+      if (tripUpdateMessage.getHeader().hasExtension(GtfsRealtimeNYCT.nyctFeedHeader)) {
+        GtfsRealtimeNYCT.NyctFeedHeader feedHeader = tripUpdateMessage.getHeader().getExtension(GtfsRealtimeNYCT.nyctFeedHeader);
+        for (GtfsRealtimeNYCT.TripReplacementPeriod tripReplacementPeriod : feedHeader.getTripReplacementPeriodList()) {
+          long endInSeconds = tripReplacementPeriod.getReplacementPeriod().getEnd();
+          long nowInSeconds = System.currentTimeMillis() / 1000;
+          long deltaInMinutes = (endInSeconds - nowInSeconds) / 60;
+          _log.debug("for route {} replacementPeriod is {}", tripReplacementPeriod.getRouteId(), deltaInMinutes);
+        }
+      }
 
       TripUpdate tu = fe.getTripUpdate();
       if (tu.hasTrip() && TransitDataConstants.STATUS_ADDED.equals(tu.getTrip().getScheduleRelationship().toString())) {
@@ -200,7 +225,13 @@ public class GtfsRealtimeTripLibrary {
         BlockDescriptor bd = getTripDescriptorAsBlockDescriptor(result, td, time);
 
         if (bd == null) {
-          continue;
+          bd = handleDynamicTripUpdate(tu);
+          if (bd == null) continue; // we failed
+          // this is implicitly an added trip
+          result.addAddedTripId(td.getTripId());
+
+          // if this trip has a vehiclePosition it will be matched later
+          anonymousTripUpdatesByBlock.put(bd, tu);
         }
 
         // if this block has an assigned vehicle consume the tripUpdate
@@ -303,6 +334,9 @@ public class GtfsRealtimeTripLibrary {
       TripUpdate firstTrip = tripUpdates.iterator().next();
       long time = firstTrip.hasTimestamp() ? firstTrip.getTimestamp() * 1000 : currentTime();
       update.block = getTripDescriptorAsBlockDescriptor(result, firstTrip.getTrip(), time);
+      if (update.block == null && isNycDynamicTrip(firstTrip)) {
+        update.block = handleDynamicTripUpdate(firstTrip);
+      }
       // pass through multiple trip updates per block
       update.setTripUpdates(new ArrayList<>(tripUpdates));
 
@@ -354,6 +388,38 @@ public class GtfsRealtimeTripLibrary {
     return updates;
   }
 
+  private BlockDescriptor handleDynamicTripUpdate(TripUpdate tu) {
+
+    TripDescriptor td = tu.getTrip();
+    // we didn't match to bundle, are we an added trip?
+    if (td.hasExtension(GtfsRealtimeNYCT.nyctTripDescriptor)) {
+      GtfsRealtimeNYCT.NyctTripDescriptor nyctTripDescriptor = td.getExtension(GtfsRealtimeNYCT.nyctTripDescriptor);
+      _log.debug("parsing trip {}", td.getTripId());
+      AddedTripInfo addedTripInfo = _addedTripService.handleNyctDescriptor(tu, nyctTripDescriptor, _currentTime);
+      long tripStartTimeMillis = addedTripInfo.getServiceDate() + (addedTripInfo.getTripStartTime() * 1000);
+      if (_filterUnassigned && nyctTripDescriptor.hasIsAssigned() && !nyctTripDescriptor.getIsAssigned()) {
+        // we are filtering on unassigned and this trip is marked as unassigned
+        return null;
+      }
+      if (nyctTripDescriptor.hasIsAssigned() && !nyctTripDescriptor.getIsAssigned()
+              && tripStartTimeMillis < _currentTime) {
+        // don't let unassigned trips in the past show up
+        return null;
+      }
+      // convert to blockDescriptor
+      return _dynamicTripBuilder.createBlockDescriptor(addedTripInfo);
+
+    } else {
+      if (td.getScheduleRelationship().equals(TripDescriptor.ScheduleRelationship.ADDED)) {
+        AddedTripInfo addedTripInfo = _addedTripService.handleAddedDescriptor(_entitySource.getAgencyIds().get(0), tu, _currentTime);
+        if (addedTripInfo != null) {
+          return _dynamicTripBuilder.createBlockDescriptor(addedTripInfo);
+        }
+      }
+    }
+    return null;
+  }
+
   // in order to support multiple trip updates per block we need
   // to internally require trip_start_time which means we formally
   // require trip_start_date;
@@ -365,10 +431,13 @@ public class GtfsRealtimeTripLibrary {
       //nothing to do
       return tu;
     }
+    if (isNycDynamicTrip(tu)) {
+      return tu; // we can get this from descriptor
+    }
 
     TripEntry trip = _entitySource.getTrip(tu.getTrip().getTripId());
     if (trip == null || trip.getStopTimes() == null || trip.getStopTimes().isEmpty()) {
-      _log.error("no stoptimes for trip {}, cannot determine start time", tu.getTrip().getTripId());
+      _log.error("no stoptimes for trip {} on agencies {}, cannot determine start time", tu.getTrip().getTripId(), _entitySource.getAgencyIds());
       return tu;
     }
     StopTimeEntry stopTimeEntry = trip.getStopTimes().get(0);
@@ -459,13 +528,18 @@ public class GtfsRealtimeTripLibrary {
 
     BlockDescriptor blockDescriptor = update.block;
     if (update.block == null) return null;
-    String vehicleId = update.block.getVehicleId();
+    String vehicleId = update.block.getVehicleId(); // todo this is messy as its unqualified and rewritten later
     record.setBlockId(blockDescriptor.getBlockInstance().getBlock().getBlock().getId());
     // this is the default, trip updates may cancel this trip
     record.setStatus(blockDescriptor.getScheduleRelationship().toString());
 
-
-    applyTripUpdatesToRecord(result, blockDescriptor, update.getTripUpdates(), record, vehicleId);
+    if (TransitDataConstants.STATUS_ADDED.equals(update.block.getScheduleRelationship().toString())
+    || TransitDataConstants.STATUS_DUPLICATED.equals(update.block.getScheduleRelationship().toString())
+    || isNycDynamicTrip(update)) {
+      applyDynamicTripUpdatesToRecord(result, blockDescriptor, update.getTripUpdates(), record, vehicleId);
+    } else {
+      applyTripUpdatesToRecord(result, blockDescriptor, update.getTripUpdates(), record, vehicleId);
+    }
 
     if (update.vehiclePosition != null) {
       applyVehiclePositionToRecord(result, blockDescriptor, update.vehiclePosition, record);
@@ -502,6 +576,155 @@ public class GtfsRealtimeTripLibrary {
     return record;
   }
 
+  private boolean isNycDynamicTrip(CombinedTripUpdatesAndVehiclePosition update) {
+    // check the trip hasExtension nyct_trip_descriptor
+    if (!update.getTripUpdates().isEmpty())
+      if (update.getTripUpdates().get(0).hasTrip())
+        return isNycDynamicTrip(update.getTripUpdates().get(0));
+    return false;
+  }
+
+  private boolean isNycDynamicTrip(TripUpdate tu) {
+    if (tu.hasTrip()) {
+      if (tu.getTrip().hasScheduleRelationship()) {
+        return tu.getTrip().getScheduleRelationship().equals(TripDescriptor.ScheduleRelationship.ADDED)
+                || tu.getTrip().getScheduleRelationship().equals(TripDescriptor.ScheduleRelationship.DUPLICATED);
+      }
+      return tu.getTrip().hasExtension(GtfsRealtimeNYCT.nyctTripDescriptor);
+    }
+    return false;
+  }
+
+
+
+  private void applyDynamicTripUpdatesToRecord(MonitoredResult result,
+                                               BlockDescriptor blockDescriptor,
+                                               List<TripUpdate> tripUpdates,
+                                               VehicleLocationRecord record,
+                                               String vehicleId) {
+    String agencyId = blockDescriptor.getBlockInstance().getBlock().getBlock().getId().getAgencyId();
+    record.setStatus(blockDescriptor.getScheduleRelationship().toString());
+    record.setServiceDate(blockDescriptor.getBlockInstance().getServiceDate());
+    record.setTimeOfRecord(currentTime());
+    if (blockDescriptor.getStartTime() != null) {
+      record.setBlockStartTime(blockDescriptor.getStartTime());
+    } else {
+      record.setBlockStartTime(getFirstStpTime(blockDescriptor));
+    }
+    List<TimepointPredictionRecord> timepointPredictions = new ArrayList<TimepointPredictionRecord>();
+    for (TripUpdate tripUpdate : tripUpdates) {
+      if (record.getTripId() == null) {
+        record.setTripId(new AgencyAndId(agencyId, tripUpdate.getTrip().getTripId()));
+      }
+      int sequence = 0;
+      for (StopTimeUpdate stu : tripUpdate.getStopTimeUpdateList()) {
+        TimepointPredictionRecord tpr = new TimepointPredictionRecord();
+        tpr.setTimepointId(new AgencyAndId(agencyId, stu.getStopId()));
+        tpr.setTripId(new AgencyAndId(agencyId, tripUpdate.getTrip().getTripId()));
+        tpr.setStopSequence(sequence);
+        sequence++;
+        switch (stu.getScheduleRelationship()) {
+          case SCHEDULED:
+            tpr.setScheduleRealtionship(TimepointPredictionRecord.ScheduleRelationship.SCHEDULED.getValue());
+            break;
+          case SKIPPED:
+            tpr.setScheduleRealtionship(TimepointPredictionRecord.ScheduleRelationship.SKIPPED.getValue());
+            break;
+          default:
+            tpr.setScheduleRealtionship(TimepointPredictionRecord.ScheduleRelationship.SCHEDULED.getValue());
+        }
+        if (stu.hasArrival() && stu.getArrival().hasTime())
+          tpr.setTimepointPredictedArrivalTime(stu.getArrival().getTime()*1000);
+        if (stu.hasDeparture() && stu.getDeparture().hasTime())
+          tpr.setTimepointPredictedDepartureTime(stu.getDeparture().getTime()*1000);
+        if (stu.hasExtension(GtfsRealtimeNYCT.nyctStopTimeUpdate)) {
+          GtfsRealtimeNYCT.NyctStopTimeUpdate ext = stu.getExtension(GtfsRealtimeNYCT.nyctStopTimeUpdate);
+          if (ext.hasScheduledTrack()) {
+            tpr.setScheduledTrack(ext.getScheduledTrack());
+          }
+          if (ext.hasActualTrack()) {
+            tpr.setActualTrack(ext.getActualTrack());
+          }
+        }
+        if (stu.hasExtension(GtfsRealtimeMTARR.mtaRailroadStopTimeUpdate)) {
+          GtfsRealtimeMTARR.MtaRailroadStopTimeUpdate ext = stu.getExtension(GtfsRealtimeMTARR.mtaRailroadStopTimeUpdate);
+          if (ext.hasTrack()) {
+            tpr.setActualTrack(ext.getTrack());
+          }
+          if (ext.hasTrainStatus()) {
+            tpr.setStatus(ext.getTrainStatus());
+          }
+        }
+
+        timepointPredictions.add(tpr);
+      }
+
+      record.setTimepointPredictions(timepointPredictions);
+      record.setScheduleDeviation(calculateScheduleDeviation(blockDescriptor.getBlockInstance(), timepointPredictions));
+    }
+
+  }
+
+  private int getFirstStpTime(BlockDescriptor blockDescriptor) {
+    if (blockDescriptor.getBlockInstance() != null)
+      if (!blockDescriptor.getBlockInstance().getBlock().getTrips().isEmpty())
+        if (!blockDescriptor.getBlockInstance().getBlock().getTrips().get(0).getStopTimes().isEmpty())
+          return blockDescriptor.getBlockInstance().getBlock().getTrips().get(0).getStopTimes().get(0).getStopTime().getDepartureTime();
+    return -1;
+  }
+
+  /**
+   * scheduleDeviation - in seconds (+deviation is late, -deviation is
+   *    *          early)
+   */
+  private double calculateScheduleDeviation(BlockInstance blockInstance, List<TimepointPredictionRecord> timepointPredictions) {
+    int predictionSize = timepointPredictions.size();
+    int stopTimesSize = blockInstance.getBlock().getTrips().get(0).getStopTimes().size();
+    if (predictionSize < 1) {
+      _log.debug("not enough data to calculate deviation");
+      return 0.0;
+    }
+    TimepointPredictionRecord timepointPredictionRecord = timepointPredictions.get(predictionSize - 1);
+    BlockStopTimeEntry blockStopTimeEntry = blockInstance.getBlock().getTrips().get(0).getStopTimes().get(stopTimesSize - 1);
+
+    // we assume linear interpolation of stops, so compare last stops for schedule deviation
+    AgencyAndId predictionStopId = timepointPredictionRecord.getTimepointId();
+    AgencyAndId stopTimeStopId = blockStopTimeEntry.getStopTime().getStop().getId();
+    if (predictionStopId.equals(stopTimeStopId)) {
+      if (timepointPredictionRecord.getTimepointPredictedArrivalTime() > 0)
+        return calculateScheduleDeviation(blockInstance.getServiceDate(), timepointPredictionRecord.getTimepointPredictedArrivalTime(),
+                blockStopTimeEntry.getStopTime().getArrivalTime());
+      if (timepointPredictionRecord.getTimepointPredictedDepartureTime() > 0)
+        return calculateScheduleDeviation(blockInstance.getServiceDate(), timepointPredictionRecord.getTimepointPredictedDepartureTime(),
+                blockStopTimeEntry.getStopTime().getDepartureTime());
+    }
+
+    // we didn't match on the last stop, do a simple search for same stops
+    for (BlockStopTimeEntry stopTime : blockInstance.getBlock().getTrips().get(0).getStopTimes()) {
+      stopTimeStopId = stopTime.getStopTime().getStop().getId();
+      for (TimepointPredictionRecord timepointPrediction : timepointPredictions) {
+        predictionStopId = timepointPrediction.getTimepointId();
+        if (stopTimeStopId.equals(predictionStopId)) {
+          if (timepointPrediction.getTimepointPredictedArrivalTime() > 0) {
+            return calculateScheduleDeviation(blockInstance.getServiceDate(), timepointPredictionRecord.getTimepointPredictedArrivalTime(),
+                    blockStopTimeEntry.getStopTime().getArrivalTime());
+          }
+          if (timepointPrediction.getTimepointPredictedDepartureTime() > 0) {
+            return calculateScheduleDeviation(blockInstance.getServiceDate(), timepointPredictionRecord.getTimepointPredictedDepartureTime(),
+                    blockStopTimeEntry.getStopTime().getDepartureTime());
+          }
+        }
+      }
+    }
+    return 0;  // nothing matched, assume on time
+  }
+
+  private double calculateScheduleDeviation(long serviceDate, long predictionMillis, int stopTimeSeconds) {
+    long stopTime = serviceDate + (stopTimeSeconds * 1000);
+    double deviation = (predictionMillis / 1000) - (stopTime / 1000);
+    return deviation;
+  }
+
 
   /**
    * Calculate block start time from real-time trip start time value.
@@ -511,10 +734,18 @@ public class GtfsRealtimeTripLibrary {
   private int getBlockStartTimeForTripStartTime(BlockInstance instance,
       AgencyAndId tripId, int tripStartTime) {
     BlockConfigurationEntry block = instance.getBlock();
-
-    Map<AgencyAndId, BlockTripEntry> blockTripsById = MappingLibrary.mapToValue(
-        block.getTrips(), "trip.id");
-
+    if (block.getTrips() == null || block.getTrips().isEmpty()) {
+      _log.debug("no trips for trip start time on block {}", block.getBlock().getId());
+      return -1;
+    }
+    Map<AgencyAndId, BlockTripEntry> blockTripsById = null;
+    try {
+      blockTripsById = MappingLibrary.mapToValue(
+              block.getTrips(), "trip.id");
+    } catch (IllegalStateException ise) {
+      _log.debug("invalid block {}", block.getBlock().getId());
+      return -1;
+    }
     int rawBlockStartTime = block.getDepartureTimeForIndex(0);
 
     if (!blockTripsById.containsKey(tripId)) {
@@ -606,7 +837,15 @@ public class GtfsRealtimeTripLibrary {
     blockDescriptor.setBlockInstance(instance);
     blockDescriptor.setStartDate(serviceDate);
     if (trip.hasScheduleRelationship()) {
-      blockDescriptor.setScheduleRelationshipValue(trip.getScheduleRelationship().toString());
+      if (isDynamicTrip(tripEntry)) {
+        blockDescriptor.setScheduleRelationship(BlockDescriptor.ScheduleRelationship.ADDED);
+      } else {
+        blockDescriptor.setScheduleRelationshipValue(trip.getScheduleRelationship().toString());
+      }
+    } else {
+      if (isDynamicTrip(tripEntry)) {
+        blockDescriptor.setScheduleRelationship(BlockDescriptor.ScheduleRelationship.ADDED);
+      }
     }
     int tripStartTime = 0;
     int blockStartTime = 0;
@@ -626,6 +865,10 @@ public class GtfsRealtimeTripLibrary {
     	blockDescriptor.setStartTime(blockStartTime);
     }
     return blockDescriptor;
+  }
+
+  private boolean isDynamicTrip(TripEntry trip) {
+    return trip instanceof DynamicTripEntryImpl;
   }
 
   

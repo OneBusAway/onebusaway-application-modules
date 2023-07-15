@@ -18,6 +18,7 @@ package org.onebusaway.transit_data_federation.impl.transit_graph;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -27,6 +28,7 @@ import org.onebusaway.exceptions.NoSuchStopServiceException;
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.impl.RefreshableResources;
+import org.onebusaway.transit_data_federation.model.transit_graph.DynamicGraph;
 import org.onebusaway.util.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.FederatedTransitDataBundle;
 import org.onebusaway.transit_data_federation.services.transit_graph.AgencyEntry;
@@ -48,11 +50,17 @@ public class TransitGraphDaoImpl implements TransitGraphDao {
 
   private TransitGraph _graph;
 
+  private DynamicGraph _dynamicGraph;
+
   @Autowired
   public void setBundle(FederatedTransitDataBundle bundle) {
     _bundle = bundle;
   }
 
+  @Autowired
+  public void setDynamicGraph(DynamicGraph dynamicGraph) {
+    _dynamicGraph = dynamicGraph;
+  }
   public void setTransitGraph(TransitGraph graph) {
     _graph = graph;
   }
@@ -133,7 +141,10 @@ public class TransitGraphDaoImpl implements TransitGraphDao {
 
   @Override
   public TripEntry getTripEntryForId(AgencyAndId id) {
-    return _graph.getTripEntryForId(id);
+    TripEntry entry = _graph.getTripEntryForId(id);
+    if (entry == null && _dynamicGraph != null)
+      entry = _dynamicGraph.getTripEntryForId(id);
+    return entry;
   }
 
   @Override
@@ -148,7 +159,9 @@ public class TransitGraphDaoImpl implements TransitGraphDao {
 
   @Override
   public List<RouteEntry> getAllRoutes() {
-    return _graph.getAllRoutes();
+    if (_graph != null)
+      return _graph.getAllRoutes();
+    return new ArrayList<>(); // special case on startup before bundle loaded
   }
 
   @Override

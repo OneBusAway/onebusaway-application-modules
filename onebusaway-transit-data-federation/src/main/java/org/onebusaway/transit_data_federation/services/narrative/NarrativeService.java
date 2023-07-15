@@ -27,8 +27,11 @@ import org.onebusaway.transit_data_federation.model.narrative.RouteCollectionNar
 import org.onebusaway.transit_data_federation.model.narrative.StopNarrative;
 import org.onebusaway.transit_data_federation.model.narrative.StopTimeNarrative;
 import org.onebusaway.transit_data_federation.model.narrative.TripNarrative;
+import org.onebusaway.transit_data_federation.services.blocks.BlockTripIndex;
 import org.onebusaway.transit_data_federation.services.transit_graph.RouteCollectionEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
+
+import java.util.List;
 
 /**
  * Service methods supporting narrative querying. We define "narrative" as any
@@ -63,4 +66,13 @@ public interface NarrativeService {
   public StopTimeNarrative getStopTimeForEntry(StopTimeEntry entry);
   
   public ShapePoints getShapePointsForId(AgencyAndId id);
+
+  void addDynamicTrip(BlockTripIndex blockTripIndex);
+
+  public void addNarrativeForStopTimeEntry(AgencyAndId tripId, int index,
+                                           StopTimeNarrative narrative);
+
+  public void addStopNarrativesForTrip(AgencyAndId tripId, List<StopTimeNarrative> stopTimeNarratives);
+
+  List<StopTimeNarrative> getStopTimeNarrativesForPattern(AgencyAndId routeId, String directionId, List<AgencyAndId> stopIds);
 }

@@ -24,14 +24,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.onebusaway.transit_data_federation.bundle.tasks.transit_graph.DistanceAlongShapeLibrary;
-import org.onebusaway.transit_data_federation.bundle.tasks.transit_graph.DistanceAlongShapeLibrary.DistanceAlongShapeException;
+import org.onebusaway.transit_data_federation.impl.transit_graph.DistanceAlongShapeLibrary;
+import org.onebusaway.transit_data_federation.impl.transit_graph.DistanceAlongShapeLibrary.DistanceAlongShapeException;
 import org.onebusaway.transit_data_federation.impl.shapes.PointAndIndex;
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopTimeEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.TripEntryImpl;
 import org.onebusaway.transit_data_federation.model.ShapePoints;
 import org.onebusaway.transit_data_federation.model.ShapePointsFactory;
+import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
 import org.onebusaway.transit_data_federation.testing.UnitTestingSupport;
 
 public class DistanceAlongShapeMain {
@@ -53,7 +54,7 @@ public class DistanceAlongShapeMain {
       DistanceAlongShapeException {
 
     ShapePoints shapePoints = readShapePoints(shapeFile);
-    List<StopTimeEntryImpl> stopTimes = readStopTimes(stopsFile);
+    List<StopTimeEntry> stopTimes = readStopTimes(stopsFile);
 
     DistanceAlongShapeLibrary library = new DistanceAlongShapeLibrary();
     PointAndIndex[] points = library.getDistancesAlongShape(shapePoints,
@@ -80,7 +81,7 @@ public class DistanceAlongShapeMain {
     return factory.create();
   }
 
-  private List<StopTimeEntryImpl> readStopTimes(String path) throws IOException {
+  private List<StopTimeEntry> readStopTimes(String path) throws IOException {
 
     BufferedReader reader = new BufferedReader(new FileReader(path));
     String line = null;
@@ -90,7 +91,7 @@ public class DistanceAlongShapeMain {
     int index = 0;
 
     TripEntryImpl trip = UnitTestingSupport.trip("trip");
-    List<StopTimeEntryImpl> stopTimes = new ArrayList<StopTimeEntryImpl>();
+    List<StopTimeEntry> stopTimes = new ArrayList<StopTimeEntry>();
 
     while ((line = reader.readLine()) != null) {
       String[] tokens = line.split(" ");

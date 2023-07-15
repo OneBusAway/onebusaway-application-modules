@@ -32,6 +32,7 @@ import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -174,7 +175,20 @@ public class AssignmentConflictResource extends MetricResource {
 
   @PostConstruct
   public void start() {
-    _refreshTask = _scheduledExecutorService.scheduleAtFixedRate(new RefreshTask(), 0, _refreshInterval, TimeUnit.SECONDS);
+    int i = 0;
+    while (_refreshTask == null && !_scheduledExecutorService.isShutdown()) {
+      i++;
+      try {
+        _refreshTask = _scheduledExecutorService.scheduleAtFixedRate(new RefreshTask(), 1, _refreshInterval, TimeUnit.SECONDS);
+      } catch (RejectedExecutionException ree) {
+        _log.error("executor rejected execution of {}, trying again, try {}", this.getClass().getName(), i);
+        try {
+          Thread.sleep(5000 * i);
+        } catch (InterruptedException e) {
+          return;
+        }
+      }
+    }
   }
 
   @PreDestroy

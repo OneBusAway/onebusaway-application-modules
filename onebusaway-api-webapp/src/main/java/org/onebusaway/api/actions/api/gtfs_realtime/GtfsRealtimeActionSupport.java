@@ -19,6 +19,7 @@ import java.util.Date;
 
 import org.apache.struts2.rest.DefaultHttpHeaders;
 import org.onebusaway.api.actions.api.ApiActionSupport;
+import org.onebusaway.api.model.transit.realtime.GtfsRealtimeConstantsV2;
 import org.onebusaway.api.services.AgencyAndIdModificationStrategy;
 import org.onebusaway.exceptions.ServiceException;
 import org.onebusaway.gtfs.model.AgencyAndId;
@@ -30,7 +31,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.google.transit.realtime.GtfsRealtime.FeedHeader;
 import com.google.transit.realtime.GtfsRealtime.FeedMessage;
-import com.google.transit.realtime.GtfsRealtimeConstants;
 import com.opensymphony.xwork2.conversion.annotations.TypeConversion;
 import com.opensymphony.xwork2.validator.annotations.RequiredFieldValidator;
 
@@ -103,7 +103,7 @@ public abstract class GtfsRealtimeActionSupport extends ApiActionSupport {
 
     FeedMessage.Builder feed = FeedMessage.newBuilder();
     FeedHeader.Builder header = feed.getHeaderBuilder();
-    header.setGtfsRealtimeVersion(GtfsRealtimeConstants.VERSION);
+    header.setGtfsRealtimeVersion(GtfsRealtimeConstantsV2.VERSION);
     header.setTimestamp(time / 1000);
     if (getRouteFilterId() != null) {
       fillFeedMessage(feed, _agencyId, time, FILTER_TYPE.ROUTE_ID, getRouteFilterId());

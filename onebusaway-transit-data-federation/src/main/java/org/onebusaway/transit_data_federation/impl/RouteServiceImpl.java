@@ -107,8 +107,10 @@ class RouteServiceImpl implements RouteService {
 
         if (serviceDate != null) {
           TimeZone serviceTimezone = trip.getServiceId().getTimeZone();
-          boolean isActiveTrip = _calendarService.isLocalizedServiceIdActiveOnDate(trip.getServiceId(), serviceDate.getAsDate(serviceTimezone));
-          if (!isActiveTrip) continue;//skip this trip if not active
+          if (!_blockIndexService.isDynamicTrip(trip)) { // dynamic trips are always active
+            boolean isActiveTrip = _calendarService.isLocalizedServiceIdActiveOnDate(trip.getServiceId(), serviceDate.getAsDate(serviceTimezone));
+            if (!isActiveTrip) continue;//skip this trip if not active
+          }
         }
 
         routeCollectionIds.add(trip.getRouteCollection().getId());

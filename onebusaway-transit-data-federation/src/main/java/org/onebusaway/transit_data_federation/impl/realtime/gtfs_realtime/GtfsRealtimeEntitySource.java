@@ -173,4 +173,8 @@ class GtfsRealtimeEntitySource {
     AgencyAndId id = new AgencyAndId(_agencyIds.get(0), stopId);
     return ServiceAlertLibrary.id(id);
   }
+
+  public List<String> getAgencyIds() {
+    return _agencyIds;
+  }
 }

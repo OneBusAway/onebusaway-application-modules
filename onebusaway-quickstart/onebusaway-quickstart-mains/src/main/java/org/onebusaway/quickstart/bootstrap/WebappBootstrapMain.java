@@ -198,7 +198,7 @@ public class WebappBootstrapMain {
           URL resource = context.getResource(path);
           if (resource != null) {
             target = path;
-            baseRequest.setPathInfo(target);
+            baseRequest.setContext(_context.getServletContext(), target); // todo test this after container upgrade.
             _context.handle(target, baseRequest, request, response);
             return;
           }

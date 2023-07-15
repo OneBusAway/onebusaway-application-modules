@@ -661,10 +661,10 @@ public class TransitDataServiceImpl implements TransitDataService {
     return _transitDataService.getAllConsolidatedStops();
   }
 
-@Override
-public ServiceAlertBean copyServiceAlert(String agencyId,
-	      ServiceAlertBean situation) {
-	return _transitDataService.copyServiceAlert(agencyId, situation);
-}
-  
+  @Override
+  public ServiceAlertBean copyServiceAlert(String agencyId,
+          ServiceAlertBean situation) {
+    return _transitDataService.copyServiceAlert(agencyId, situation);
+  }
+
 }
