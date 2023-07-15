@@ -174,15 +174,11 @@ public class ArrivalsAndDeparturesForStopAction extends ApiActionSupport {
       v1s.add(v1);
     }
 
-    String agencyId = v1s.size() > 0 ?
-            v1s.get(0).getRouteId().split("_")[0] :
-            "";
     v1s.sort((a,b) -> customRouteSort.
             compareRoutes(
                     a.getRouteShortName(),
                     b.getRouteShortName(),
-                    customRouteSort,
-                    agencyId)
+                    customRouteSort)
     );
 
     return v1s;
