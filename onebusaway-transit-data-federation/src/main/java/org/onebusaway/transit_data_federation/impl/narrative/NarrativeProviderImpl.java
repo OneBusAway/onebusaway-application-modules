@@ -23,11 +23,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.map.PassiveExpiringMap;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.model.ShapePoints;
-import org.onebusaway.transit_data_federation.model.narrative.AgencyNarrative;
-import org.onebusaway.transit_data_federation.model.narrative.RouteCollectionNarrative;
-import org.onebusaway.transit_data_federation.model.narrative.StopNarrative;
-import org.onebusaway.transit_data_federation.model.narrative.StopTimeNarrative;
-import org.onebusaway.transit_data_federation.model.narrative.TripNarrative;
+import org.onebusaway.transit_data_federation.model.narrative.*;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
 
@@ -53,6 +49,8 @@ public final class NarrativeProviderImpl implements Serializable {
   private final Map<RoutePattern, List<StopTimeNarrative>> _patternToStopTimeNarratives = new HashMap<>();
 
   private Map<AgencyAndId, ShapePoints> _shapePointsById = new HashMap<AgencyAndId, ShapePoints>();
+
+  private Map<StopDirectionKey, RouteAndHeadsignNarrative> _patternCache = new HashMap();
 
   public void setNarrativeForAgency(String agencyId, AgencyNarrative narrative) {
     _agencyNarratives.put(agencyId, narrative);
@@ -128,12 +126,32 @@ public final class NarrativeProviderImpl implements Serializable {
     if (narratives == null) {
       narratives = _dynamicStopTimeNarrativesByTripIdAndStopTimeSequence.get(trip.getId());
     }
+    if (narratives == null)
+      return getNarrativeFromPattern(entry);
     if (narratives == null) {
       return null;
     }
     // if our trip started midway through the stopping pattern, we need to calculate an offset
     int offset =  (narratives.size() - trip.getStopTimes().size());
     return narratives.get(index + offset);
+  }
+
+
+  /**
+   * return pattern name convention if present.
+   * @param entry
+   * @return
+   */
+  private StopTimeNarrative getNarrativeFromPattern(StopTimeEntry entry) {
+    AgencyAndId stopId = entry.getStop().getId();
+    String directionId = entry.getTrip().getDirectionId();
+    StopDirectionKey sd = new StopDirectionKey(stopId, directionId);
+    RouteAndHeadsignNarrative rd =_patternCache.get(sd);
+    if (rd == null) return null;
+    StopTimeNarrative.Builder builder = new StopTimeNarrative.Builder();
+    builder.setStopHeadsign(rd.getHeadsign());
+    builder.setRouteShortName(rd.getRouteShortname());
+    return builder.create();
   }
 
   public RouteCollectionNarrative getRouteCollectionNarrativeForId(
@@ -272,5 +290,9 @@ public final class NarrativeProviderImpl implements Serializable {
     public int hashCode() {
       return stopIds.hashCode() + narratives.hashCode();
     }
+  }
+
+  public void addRouteAndHeadsign(StopDirectionKey stopDirectionKey, RouteAndHeadsignNarrative routeAndHeadsignNarrative) {
+    _patternCache.put(stopDirectionKey, routeAndHeadsignNarrative);
   }
 }
