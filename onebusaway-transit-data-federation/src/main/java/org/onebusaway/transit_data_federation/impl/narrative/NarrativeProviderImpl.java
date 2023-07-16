@@ -24,11 +24,7 @@ import java.util.Map;
 
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.model.ShapePoints;
-import org.onebusaway.transit_data_federation.model.narrative.AgencyNarrative;
-import org.onebusaway.transit_data_federation.model.narrative.RouteCollectionNarrative;
-import org.onebusaway.transit_data_federation.model.narrative.StopNarrative;
-import org.onebusaway.transit_data_federation.model.narrative.StopTimeNarrative;
-import org.onebusaway.transit_data_federation.model.narrative.TripNarrative;
+import org.onebusaway.transit_data_federation.model.narrative.*;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
 
@@ -47,6 +43,8 @@ public final class NarrativeProviderImpl implements Serializable {
   private Map<AgencyAndId, List<StopTimeNarrative>> _stopTimeNarrativesByTripIdAndStopTimeSequence = new HashMap<AgencyAndId, List<StopTimeNarrative>>();
 
   private Map<AgencyAndId, ShapePoints> _shapePointsById = new HashMap<AgencyAndId, ShapePoints>();
+
+  private Map<StopDirectionKey, RouteAndHeadsignNarrative> _patternCache = new HashMap();
 
   public void setNarrativeForAgency(String agencyId, AgencyNarrative narrative) {
     _agencyNarratives.put(agencyId, narrative);
@@ -99,9 +97,28 @@ public final class NarrativeProviderImpl implements Serializable {
     TripEntry trip = entry.getTrip();
     List<StopTimeNarrative> narratives = _stopTimeNarrativesByTripIdAndStopTimeSequence.get(trip.getId());
     if (narratives == null)
-      return null;
+      return getNarrativeFromPattern(entry);
+
     int index = entry.getSequence();
     return narratives.get(index);
+  }
+
+
+  /**
+   * return pattern name convention if present.
+   * @param entry
+   * @return
+   */
+  private StopTimeNarrative getNarrativeFromPattern(StopTimeEntry entry) {
+    AgencyAndId stopId = entry.getStop().getId();
+    String directionId = entry.getTrip().getDirectionId();
+    StopDirectionKey sd = new StopDirectionKey(stopId, directionId);
+    RouteAndHeadsignNarrative rd =_patternCache.get(sd);
+    if (rd == null) return null;
+    StopTimeNarrative.Builder builder = new StopTimeNarrative.Builder();
+    builder.setStopHeadsign(rd.getHeadsign());
+    builder.setRouteShortName(rd.getRouteShortname());
+    return builder.create();
   }
 
   public RouteCollectionNarrative getRouteCollectionNarrativeForId(
@@ -115,5 +132,9 @@ public final class NarrativeProviderImpl implements Serializable {
 
   public ShapePoints getShapePointsForId(AgencyAndId id) {
     return _shapePointsById.get(id);
+  }
+
+  public void addRouteAndHeadsign(StopDirectionKey stopDirectionKey, RouteAndHeadsignNarrative routeAndHeadsignNarrative) {
+    _patternCache.put(stopDirectionKey, routeAndHeadsignNarrative);
   }
 }
