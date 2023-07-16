@@ -139,4 +139,18 @@ public class NarrativeServiceImpl implements NarrativeService {
     builder.setRouteShortName(routeNarrative.getShortName());
     _dynamicTripCache.put(tripId, builder.create());
   }
+
+  public void addStopNarrativesForTrip(AgencyAndId tripId, List<StopTimeNarrative> stopTimeNarratives) {
+    _provider.addStopNarrativesForTrip(tripId, stopTimeNarratives);
+  }
+
+  public void addNarrativeForStopTimeEntry(AgencyAndId tripId, int index,
+                                           StopTimeNarrative narrative) {
+    _provider.addNarrativeForStopTimeEntry(tripId, index, narrative);
+  }
+
+  @Override
+  public List<StopTimeNarrative> getStopTimeNarrativesForPattern(AgencyAndId routeId, String directionId, List<AgencyAndId> stopIds) {
+    return _provider.getStopTimeNarrativesForPattern(routeId, directionId, stopIds);
+  }
 }

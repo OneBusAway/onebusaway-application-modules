@@ -38,6 +38,7 @@ import javax.annotation.PreDestroy;
 
 import com.google.transit.realtime.*;
 import org.apache.commons.lang.StringUtils;
+import org.onebusaway.api.model.transit.realtime.GtfsRealtimeConstantsV2;
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
 import org.onebusaway.gtfs.model.AgencyAndId;
@@ -193,6 +194,9 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
 
   // this is a change from the default, but is much safer
   private boolean _validateCurrentTime = false;
+
+  // a special case of some specific integration - drop unassigned trips
+  private boolean _filterUnassigned = false;
 
   private List<AgencyAndId> _routeIdsToCancel = null;
 
@@ -431,6 +435,10 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     }
   }
 
+  public void setFilterUnassigned(boolean flag) {
+    _filterUnassigned = flag;
+  }
+
   @Autowired
   public void setGtfsRealtimeCancelService(GtfsRealtimeCancelService service) {
     _cancelService = service;
@@ -464,6 +472,7 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     _tripsLibrary.setUseLabelAsVehicleId(_useLabelAsId);
     _tripsLibrary.setValidateCurrentTime(_validateCurrentTime);
     _tripsLibrary.setAddedTripService(new AddedTripServiceImpl());
+    _tripsLibrary.setFilterUnassigned(_filterUnassigned);
     DuplicatedTripServiceImpl duplicatedTripService = new DuplicatedTripServiceImpl();
     duplicatedTripService.setGtfsRealtimeEntitySource(_entitySource);
     _tripsLibrary.setDuplicatedTripService(duplicatedTripService);
@@ -597,7 +606,7 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
           if (update.getTripUpdates() != null && update.getTripUpdatesSize() > 0)
             if (update.getTripUpdates().get(0).hasTrip())
               tripId = update.getTripUpdates().get(0).getTrip().getTripId();
-          _log.error("null block {}, bailing...", tripId);
+          _log.error("null block {} for agencies {}, bailing...", tripId, _agencyIds);
           continue;
         }
         BlockDescriptor.ScheduleRelationship scheduleRelationship = update.block.getScheduleRelationship();
@@ -1073,7 +1082,7 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   private FeedMessage getDefaultFeedMessage() {
     FeedMessage.Builder builder = FeedMessage.newBuilder();
     FeedHeader.Builder header = FeedHeader.newBuilder();
-    header.setGtfsRealtimeVersion(GtfsRealtimeConstants.VERSION);
+    header.setGtfsRealtimeVersion(GtfsRealtimeConstantsV2.VERSION);
     builder.setHeader(header);
     return builder.build();
   }

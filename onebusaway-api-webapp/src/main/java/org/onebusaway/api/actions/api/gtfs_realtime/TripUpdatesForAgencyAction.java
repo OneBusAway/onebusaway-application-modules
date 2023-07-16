@@ -16,23 +16,21 @@
  */
 package org.onebusaway.api.actions.api.gtfs_realtime;
 
+import com.google.transit.realtime.GtfsRealtime;
 import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.transit_data.model.ListBean;
-import org.onebusaway.transit_data.model.RouteBean;
-import org.onebusaway.transit_data.model.StopBean;
-import org.onebusaway.transit_data.model.VehicleStatusBean;
-import org.onebusaway.transit_data.model.trips.TripBean;
-import org.onebusaway.transit_data.model.trips.TripStatusBean;
+import org.onebusaway.transit_data.model.*;
+import org.onebusaway.transit_data.model.trips.*;
 
 import com.google.transit.realtime.GtfsRealtime.FeedEntity;
 import com.google.transit.realtime.GtfsRealtime.FeedMessage;
 import com.google.transit.realtime.GtfsRealtime.TripDescriptor;
 import com.google.transit.realtime.GtfsRealtime.TripUpdate;
 import com.google.transit.realtime.GtfsRealtime.VehicleDescriptor;
-import org.onebusaway.transit_data.model.trips.TimepointPredictionBean;
 import org.onebusaway.util.AgencyAndIdLibrary;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class TripUpdatesForAgencyAction extends GtfsRealtimeActionSupport {
@@ -77,6 +75,41 @@ public class TripUpdatesForAgencyAction extends GtfsRealtimeActionSupport {
         vehicleDesc.setId(normalizeId(vehicle.getVehicleId()));
       }
     }
+    addCancelledTrips(agencyId, feed, timestamp);
+  }
+
+  private void addCancelledTrips(String agencyId, FeedMessage.Builder feed, long timestamp) {
+    TripsForAgencyQueryBean query = new TripsForAgencyQueryBean();
+    query.setAgencyId(agencyId);
+    query.setTime(timestamp);
+    ListBean<TripDetailsBean> tripsForAgency = _service.getTripsForAgency(query);
+    for (TripDetailsBean tripDetailsBean : tripsForAgency.getList()) {
+      if (tripDetailsBean.getStatus() != null) {
+        String status = tripDetailsBean.getStatus().getStatus();
+        if (!"default".equals(status)) {
+          System.out.println("status=" + status);
+        }
+        if (TransitDataConstants.STATUS_CANCELED.equals(tripDetailsBean.getStatus().getStatus())) {
+          FeedEntity.Builder entity = feed.addEntityBuilder();
+
+          // make the id something meaningful and distinct
+          entity.setId(tripDetailsBean.getTripId() + "_" + timestamp);
+          TripUpdate.Builder tripUpdate = entity.getTripUpdateBuilder();
+          TripDescriptor.Builder tripDesc = tripUpdate.getTripBuilder();
+          tripDesc.setScheduleRelationship(TripDescriptor.ScheduleRelationship.CANCELED);
+          tripDesc.setTripId(normalizeId(tripDetailsBean.getTripId()));
+          tripDesc.setStartDate(formatStartDate(tripDetailsBean.getServiceDate()));
+          RouteBean route = tripDetailsBean.getTrip().getRoute();
+          tripDesc.setRouteId(normalizeId(route.getId()));
+        }
+      }
+    }
+
+  }
+
+  private String formatStartDate(long serviceDate) {
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+    return sdf.format(new Date(serviceDate));
   }
 
   private TripUpdate.Builder serveTripUpdatesFromStatus(String agencyId, TripStatusBean tripStatus, FeedMessage.Builder feed, long timestamp) {
@@ -92,6 +125,12 @@ public class TripUpdatesForAgencyAction extends GtfsRealtimeActionSupport {
     tripDesc.setTripId(normalizeId(activeTrip.getId()));
     RouteBean route = activeTrip.getRoute();
     tripDesc.setRouteId(normalizeId(route.getId()));
+    if (TransitDataConstants.STATUS_ADDED.equals(tripStatus.getStatus())) {
+      tripDesc.setScheduleRelationship(TripDescriptor.ScheduleRelationship.ADDED);
+      tripDesc.setStartDate(formatStartDate(tripStatus.getServiceDate()));
+    } else {
+      tripDesc.setScheduleRelationship(TripDescriptor.ScheduleRelationship.SCHEDULED);
+    }
     StopBean nextStop = tripStatus.getNextStop();
     if (nextStop != null) {
       AgencyAndId stopId = modifiedStopId(agencyId, nextStop.getId());
@@ -120,6 +159,13 @@ public class TripUpdatesForAgencyAction extends GtfsRealtimeActionSupport {
       tripUpdates.add(tripUpdate);
       TripDescriptor.Builder tripDesc = tripUpdate.getTripBuilder();
       tripDesc.setTripId(normalizeId(activeTripId));
+      if (TransitDataConstants.STATUS_ADDED.equals(tripStatus.getStatus())) {
+        tripDesc.setScheduleRelationship(TripDescriptor.ScheduleRelationship.ADDED);
+        tripDesc.setStartDate(formatStartDate(tripStatus.getServiceDate()));
+        tripDesc.setStartTime(formatStartTime(tripStatus.getServiceDate() + (tripStatus.getTripStartTime() * 1000)));
+      } else {
+        tripDesc.setScheduleRelationship(TripDescriptor.ScheduleRelationship.SCHEDULED);
+      }
 
 
       if (activeTripId.equals(activeTrip.getId())) {
@@ -157,6 +203,10 @@ public class TripUpdatesForAgencyAction extends GtfsRealtimeActionSupport {
     return tripUpdates;
   }
 
+  private String formatStartTime(long l) {
+    SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+    return sdf.format(new Date(l));
+  }
 
 
   private List<String> activeTripsIds(TripStatusBean tripStatus) {

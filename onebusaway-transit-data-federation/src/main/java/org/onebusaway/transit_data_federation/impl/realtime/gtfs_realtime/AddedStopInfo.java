@@ -34,18 +34,22 @@ public class AddedStopInfo {
     this.stopId = stopId;
   }
 
+  // in millis as long implies
   public long getArrivalTime() {
     return arrivalTime;
   }
 
+  // in millis as long implies
   public void setArrivalTime(long arrivalTime) {
     this.arrivalTime = arrivalTime;
   }
 
+  // in millis as long implies
   public long getDepartureTime() {
     return departureTime;
   }
 
+  // in millis as long implies
   public void setDepartureTime(long departureTime) {
     this.departureTime = departureTime;
   }

@@ -50,6 +50,7 @@ import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTi
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.dynamic.DynamicTripEntryImpl;
 import org.onebusaway.util.AgencyAndIdLibrary;
 import org.onebusaway.util.SystemTime;
 import org.slf4j.Logger;
@@ -100,7 +101,9 @@ public class GtfsRealtimeTripLibrary {
   private boolean _scheduleAdherenceFromLocation = false;
 
   private boolean _useLabelAsVehicleId = false;
-  
+
+  private boolean _filterUnassigned = false;
+
   public void setEntitySource(GtfsRealtimeEntitySource entitySource) {
     _entitySource = entitySource;
   }
@@ -161,6 +164,9 @@ public class GtfsRealtimeTripLibrary {
     _useLabelAsVehicleId = useLabelAsVehicleId;
   }
 
+  public void setFilterUnassigned(boolean flag) {
+    _filterUnassigned = flag;
+  }
   /**
    * Trip updates describe a trip which is undertaken by a vehicle (which is
    * itself described in vehicle positions), but GTFS-realtime does not demand
@@ -230,26 +236,13 @@ public class GtfsRealtimeTripLibrary {
         }
 
         if (bd == null) {
-          // we didn't match to bundle, are we an added trip?
-          if (td.hasExtension(GtfsRealtimeNYCT.nyctTripDescriptor)) {
-            GtfsRealtimeNYCT.NyctTripDescriptor nyctTripDescriptor = td.getExtension(GtfsRealtimeNYCT.nyctTripDescriptor);
-            if (nyctTripDescriptor.hasIsAssigned() && nyctTripDescriptor.getIsAssigned()) {
-              // this is implicitly an added trip OR DUPLICATED
-              result.addAddedTripId(td.getTripId());
-              _log.info("parsing trip {}", td.getTripId());
+          bd = handleDynamicTripUpdate(tu);
+          if (bd == null) continue; // we failed
+          // this is implicitly an added trip
+          result.addAddedTripId(td.getTripId());
 
-              boolean isDuplicated = TransitDataConstants.STATUS_DUPLICATED.equals(tu.getTrip().getScheduleRelationship().toString());
-
-              AddedTripInfo addedTripInfo = isDuplicated ? _duplicatedTripService.handleDuplicatedDescriptor(tu) : _addedTripService.handleNyctDescriptor(tu, nyctTripDescriptor);
-
-              // convert to blockDescriptor
-              bd =_dynamicTripBuilder.createBlockDescriptor(addedTripInfo);
-              if (bd == null) continue; // we failed
-              // if this trip has a vehiclePosition it will be matched later
-              anonymousTripUpdatesByBlock.put(bd, tu);
-            }
-          }
-          continue;
+          // if this trip has a vehiclePosition it will be matched later
+          anonymousTripUpdatesByBlock.put(bd, tu);
         }
 
         // if this block has an assigned vehicle consume the tripUpdate
@@ -352,6 +345,9 @@ public class GtfsRealtimeTripLibrary {
       TripUpdate firstTrip = tripUpdates.iterator().next();
       long time = firstTrip.hasTimestamp() ? firstTrip.getTimestamp() * 1000 : currentTime();
       update.block = getTripDescriptorAsBlockDescriptor(result, firstTrip.getTrip(), time);
+      if (update.block == null && isNycDynamicTrip(firstTrip)) {
+        update.block = handleDynamicTripUpdate(firstTrip);
+      }
       // pass through multiple trip updates per block
       update.setTripUpdates(new ArrayList<>(tripUpdates));
 
@@ -403,6 +399,38 @@ public class GtfsRealtimeTripLibrary {
     return updates;
   }
 
+  private BlockDescriptor handleDynamicTripUpdate(TripUpdate tu) {
+
+    TripDescriptor td = tu.getTrip();
+    // we didn't match to bundle, are we an added trip?
+    if (td.hasExtension(GtfsRealtimeNYCT.nyctTripDescriptor)) {
+      GtfsRealtimeNYCT.NyctTripDescriptor nyctTripDescriptor = td.getExtension(GtfsRealtimeNYCT.nyctTripDescriptor);
+      _log.debug("parsing trip {}", td.getTripId());
+      AddedTripInfo addedTripInfo = _addedTripService.handleNyctDescriptor(tu, nyctTripDescriptor, _currentTime);
+      long tripStartTimeMillis = addedTripInfo.getServiceDate() + (addedTripInfo.getTripStartTime() * 1000);
+      if (_filterUnassigned && nyctTripDescriptor.hasIsAssigned() && !nyctTripDescriptor.getIsAssigned()) {
+        // we are filtering on unassigned and this trip is marked as unassigned
+        return null;
+      }
+      if (nyctTripDescriptor.hasIsAssigned() && !nyctTripDescriptor.getIsAssigned()
+              && tripStartTimeMillis < _currentTime) {
+        // don't let unassigned trips in the past show up
+        return null;
+      }
+      // convert to blockDescriptor
+      return _dynamicTripBuilder.createBlockDescriptor(addedTripInfo);
+
+    } else {
+      if (td.getScheduleRelationship().equals(TripDescriptor.ScheduleRelationship.ADDED)) {
+        AddedTripInfo addedTripInfo = _addedTripService.handleAddedDescriptor(_entitySource.getAgencyIds().get(0), tu, _currentTime);
+        if (addedTripInfo != null) {
+          return _dynamicTripBuilder.createBlockDescriptor(addedTripInfo);
+        }
+      }
+    }
+    return null;
+  }
+
   // in order to support multiple trip updates per block we need
   // to internally require trip_start_time which means we formally
   // require trip_start_date;
@@ -414,10 +442,13 @@ public class GtfsRealtimeTripLibrary {
       //nothing to do
       return tu;
     }
+    if (isNycDynamicTrip(tu)) {
+      return tu; // we can get this from descriptor
+    }
 
     TripEntry trip = _entitySource.getTrip(tu.getTrip().getTripId());
     if (trip == null || trip.getStopTimes() == null || trip.getStopTimes().isEmpty()) {
-      _log.error("no stoptimes for trip {}, cannot determine start time", tu.getTrip().getTripId());
+      _log.error("no stoptimes for trip {} on agencies {}, cannot determine start time", tu.getTrip().getTripId(), _entitySource.getAgencyIds());
       return tu;
     }
     StopTimeEntry stopTimeEntry = trip.getStopTimes().get(0);
@@ -560,9 +591,22 @@ public class GtfsRealtimeTripLibrary {
     // check the trip hasExtension nyct_trip_descriptor
     if (!update.getTripUpdates().isEmpty())
       if (update.getTripUpdates().get(0).hasTrip())
-        return update.getTripUpdates().get(0).getTrip().hasExtension(GtfsRealtimeNYCT.nyctTripDescriptor);
+        return isNycDynamicTrip(update.getTripUpdates().get(0));
     return false;
   }
+
+  private boolean isNycDynamicTrip(TripUpdate tu) {
+    if (tu.hasTrip()) {
+      if (tu.getTrip().hasScheduleRelationship()) {
+        return tu.getTrip().getScheduleRelationship().equals(TripDescriptor.ScheduleRelationship.ADDED)
+                || tu.getTrip().getScheduleRelationship().equals(TripDescriptor.ScheduleRelationship.DUPLICATED);
+      }
+      return tu.getTrip().hasExtension(GtfsRealtimeNYCT.nyctTripDescriptor);
+    }
+    return false;
+  }
+
+
 
   private void applyDynamicTripUpdatesToRecord(MonitoredResult result,
                                                BlockDescriptor blockDescriptor,
@@ -819,7 +863,15 @@ public class GtfsRealtimeTripLibrary {
     blockDescriptor.setBlockInstance(instance);
     blockDescriptor.setStartDate(serviceDate);
     if (trip.hasScheduleRelationship()) {
-      blockDescriptor.setScheduleRelationshipValue(trip.getScheduleRelationship().toString());
+      if (isDynamicTrip(tripEntry)) {
+        blockDescriptor.setScheduleRelationship(BlockDescriptor.ScheduleRelationship.ADDED);
+      } else {
+        blockDescriptor.setScheduleRelationshipValue(trip.getScheduleRelationship().toString());
+      }
+    } else {
+      if (isDynamicTrip(tripEntry)) {
+        blockDescriptor.setScheduleRelationship(BlockDescriptor.ScheduleRelationship.ADDED);
+      }
     }
     int tripStartTime = 0;
     int blockStartTime = 0;
@@ -848,7 +900,11 @@ public class GtfsRealtimeTripLibrary {
     return blockDescriptor;
   }
 
-  
+  private boolean isDynamicTrip(TripEntry trip) {
+    return trip instanceof DynamicTripEntryImpl;
+  }
+
+
   private void applyTripUpdatesToRecord(MonitoredResult result, BlockDescriptor blockDescriptor,
       List<TripUpdate> tripUpdates, VehicleLocationRecord record, String vehicleId) {
 

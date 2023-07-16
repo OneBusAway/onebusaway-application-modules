@@ -297,12 +297,24 @@ public class GenerateNarrativesTask implements Runnable {
       provider.setNarrativeForTripId(trip.getId(), tripNarrative);
 
       List<StopTime> stopTimes = _gtfsDao.getStopTimesForTrip(trip);
+      List<AgencyAndId> stopIds = new ArrayList<>();
+      for (StopTime stopTime : stopTimes) {
+        if (stopTime.getStop() == null) {
+          stopIds.add(new AgencyAndId(trip.getId().getAgencyId(), "null"));
+        } else {
+          stopIds.add(stopTime.getStop().getId());
+        }
+      }
+      List<StopTimeNarrative> narratives = new ArrayList<>();
       int stopTimeIndex = 0;
       for (StopTime stopTime : stopTimes) {
         StopTimeNarrative stopTimeNarrative = getStopTimeNarrative(stopTime);
         provider.setNarrativeForStopTimeEntry(trip.getId(), stopTimeIndex++,
             stopTimeNarrative);
+        narratives.add(stopTimeNarrative);
       }
+      if (trip.getRoute() != null)
+        provider.setNarrativesForStops(trip.getRoute().getId(), trip.getDirectionId(), stopIds, narratives);
     }
   }
 

@@ -28,11 +28,15 @@ import org.onebusaway.transit_data_federation.impl.realtime.VehicleStatusService
 import org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.AbstractGtfsRealtimeIntegrationTest;
 import org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.GtfsRealtimeSource;
 import org.onebusaway.transit_data_federation.model.TargetTime;
+import org.onebusaway.transit_data_federation.model.narrative.StopTimeNarrative;
 import org.onebusaway.transit_data_federation.services.ArrivalAndDepartureService;
 import org.onebusaway.transit_data_federation.services.beans.ArrivalsAndDeparturesBeanService;
+import org.onebusaway.transit_data_federation.services.narrative.NarrativeService;
 import org.onebusaway.transit_data_federation.services.realtime.ArrivalAndDepartureInstance;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
+import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.dynamic.DynamicBlockConfigurationEntryImpl;
 import org.onebusaway.util.AgencyAndIdLibrary;
 import org.springframework.core.io.ClassPathResource;
@@ -46,6 +50,8 @@ import static org.junit.Assert.*;
  * other fields in ADDED trip support
  */
 public class NyctMultiUpdateIntegrationTest extends AbstractGtfsRealtimeIntegrationTest {
+
+  private Map<AgencyAndId, Set<String>> stopHeadsigns = new HashMap<>();
 
   protected String getIntegrationTestPath() {
     return "org/onebusaway/transit_data_federation/impl/realtime/gtfs_realtime/integration_tests/nyct_multi_trips";
@@ -100,6 +106,14 @@ public class NyctMultiUpdateIntegrationTest extends AbstractGtfsRealtimeIntegrat
       i++;
     }
 
+    for (AgencyAndId stopId : stopHeadsigns.keySet()) {
+      if (stopHeadsigns.get(stopId).size() > 1) {
+        _log.error("bad result for stop {} with {}", stopId, stopHeadsigns.get(stopId));
+        fail();
+      } else {
+        _log.error("result: stopId {} has {}", stopId, stopHeadsigns.get(stopId));
+      }
+    }
 
   }
 
@@ -124,9 +138,31 @@ public class NyctMultiUpdateIntegrationTest extends AbstractGtfsRealtimeIntegrat
       }
       tripCount.put(tripId, tripCount.get(tripId) + 1);
       verifyPredictions(bean);
+      verifyNarrative(bean);
     }
     verifyTripRange(message, firstStop, firstStopTime);
 
+  }
+
+  private void verifyNarrative(ArrivalAndDepartureBean bean) {
+
+    TripEntry trip = getBundleLoader().getApplicationContext().getBean(TransitGraphDao.class)
+            .getTripEntryForId(AgencyAndIdLibrary.convertFromString(bean.getTrip().getId()));
+    String tripId = trip.getId().toString();
+
+    NarrativeService narrativeService = getBundleLoader().getApplicationContext().getBean(NarrativeService.class);
+    for (StopTimeEntry stopTimeEntry : trip.getStopTimes()) {
+      AgencyAndId stopId = stopTimeEntry.getStop().getId();
+      StopTimeNarrative stopTimeNarrative = narrativeService.getStopTimeForEntry(stopTimeEntry);
+      if (stopTimeNarrative == null) {
+        fail("missing narrative for " + stopTimeEntry);
+      } else if (stopTimeNarrative.getStopHeadsign() != null) {
+        if (!stopHeadsigns.containsKey(stopId)) {
+          stopHeadsigns.put(stopId, new HashSet<>());
+        }
+        stopHeadsigns.get(stopId).add(bean.getTrip().getRoute().getId() + ":" + stopTimeEntry.getStop().getId() + ":" + stopTimeNarrative.getStopHeadsign());
+      }
+    }
   }
 
   private void verifyPredictions(ArrivalAndDepartureBean bean) {

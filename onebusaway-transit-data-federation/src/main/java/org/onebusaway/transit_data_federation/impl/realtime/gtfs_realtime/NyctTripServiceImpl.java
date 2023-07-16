@@ -21,8 +21,11 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.AddedTripInfo.getStartOfDay;
 
 /**
  * Support for MTA NYCT custom extensions.
@@ -42,7 +45,7 @@ public class NyctTripServiceImpl implements NyctTripService {
           "([A-Z0-9]+_)?(?<originDepartureTime>[0-9-]{6})_?(?<route>[A-Z0-9]+)\\.+(?<direction>[NS]?)(?<network>[A-Z0-9 -]*)$");
 
 
-  public AddedTripInfo parse(GtfsRealtime.TripUpdate tu, GtfsRealtimeNYCT.NyctTripDescriptor nyctTripDescriptor) {
+  public AddedTripInfo parse(GtfsRealtime.TripUpdate tu, GtfsRealtimeNYCT.NyctTripDescriptor nyctTripDescriptor, long currentTime) {
     String pathId, routeId, directionId, networkId;
     int originDepartureTime;
     String tripId = tu.getTrip().getTripId();
@@ -61,6 +64,8 @@ public class NyctTripServiceImpl implements NyctTripService {
       AddedTripInfo addedTrip = new AddedTripInfo();
       addedTrip.setAgencyId(getDefaultAgency());
       addedTrip.setTripStartTime(originDepartureTime);
+      // here we make an assumption about the service data
+      addedTrip.setServiceDate(getStartOfDay(new Date(currentTime)).getTime());
       addedTrip.setRouteId(routeId);
       addedTrip.setTripId(tripId);
       addedTrip.setDirectionId(directionId);
@@ -72,16 +77,10 @@ public class NyctTripServiceImpl implements NyctTripService {
         if (stopTimeUpdate.hasArrival() && stopTimeUpdate.getArrival().getTime() > 0) {
           // here we assume time not delay
           stopInfo.setArrivalTime(stopTimeUpdate.getArrival().getTime()*1000);
-          if (!addedTrip.hasServiceDate()) {
-            addedTrip.setServiceDateFromStopTime(stopInfo.getArrivalTime());
-          }
         }
         if (stopTimeUpdate.hasDeparture() && stopTimeUpdate.getDeparture().getTime() > 0) {
           // here we assume time not delay
           stopInfo.setDepartureTime(stopTimeUpdate.getDeparture().getTime()*1000);
-          if (!addedTrip.hasServiceDate()) {
-            addedTrip.setServiceDateFromStopTime(stopInfo.getDepartureTime());
-          }
         }
         if (stopTimeUpdate.hasExtension(GtfsRealtimeNYCT.nyctStopTimeUpdate)) {
           GtfsRealtimeNYCT.NyctStopTimeUpdate stopTimeUpdateExtension = stopTimeUpdate.getExtension(GtfsRealtimeNYCT.nyctStopTimeUpdate);

@@ -13,15 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime;
+package org.onebusaway.api.model.transit.realtime;
 
-import com.google.transit.realtime.GtfsRealtime;
-import com.google.transit.realtime.GtfsRealtimeNYCT;
+public class GtfsRealtimeConstantsV2 {
+    public static final String VERSION = "2.0";
 
-/**
- * Support for MTA NYCT custom extensions.
- */
-public interface NyctTripService {
-  AddedTripInfo parse(GtfsRealtime.TripUpdate tu,
-                      GtfsRealtimeNYCT.NyctTripDescriptor nyctTripDescriptor, long currentTime);
+    public GtfsRealtimeConstantsV2() {
+    }
+
 }
