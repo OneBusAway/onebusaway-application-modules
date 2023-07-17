@@ -75,4 +75,6 @@ public interface NarrativeService {
   public void addStopNarrativesForTrip(AgencyAndId tripId, List<StopTimeNarrative> stopTimeNarratives);
 
   List<StopTimeNarrative> getStopTimeNarrativesForPattern(AgencyAndId routeId, String directionId, List<AgencyAndId> stopIds);
+
+  StopTimeNarrative getStopTimeNarrativeForPattern(AgencyAndId routeId, AgencyAndId stopId, String directionId);
 }

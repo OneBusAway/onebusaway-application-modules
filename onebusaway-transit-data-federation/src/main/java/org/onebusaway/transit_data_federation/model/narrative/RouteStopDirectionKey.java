@@ -22,12 +22,14 @@ import java.io.Serializable;
 /**
  * Key for pattern narrative.
  */
-public class StopDirectionKey implements Serializable {
+public class RouteStopDirectionKey implements Serializable {
 
+  private AgencyAndId routeId;
   private AgencyAndId stopId;
   private String directionId;
 
-  public StopDirectionKey(AgencyAndId stopId, String directionId) {
+  public RouteStopDirectionKey(AgencyAndId routeId, AgencyAndId stopId, String directionId) {
+    this.routeId = routeId;
     this.stopId = stopId;
     this.directionId = directionId;
   }
@@ -36,14 +38,17 @@ public class StopDirectionKey implements Serializable {
   public boolean equals(Object obj) {
     if (obj == null)
       return false;
-    if (!(obj instanceof StopDirectionKey))
+    if (!(obj instanceof RouteStopDirectionKey))
       return false;
-    StopDirectionKey sd = (StopDirectionKey) obj;
+    RouteStopDirectionKey sd = (RouteStopDirectionKey) obj;
+    if (sd.routeId == null && routeId != null)
+      return false;
     if (sd.stopId == null && stopId != null)
       return false;
     if (sd.directionId == null && directionId != null)
       return false;
-    return stopId.equals(sd.stopId)
+    return routeId.equals(sd.routeId)
+            && stopId.equals(sd.stopId)
             && directionId.equals(sd.directionId);
   }
 }

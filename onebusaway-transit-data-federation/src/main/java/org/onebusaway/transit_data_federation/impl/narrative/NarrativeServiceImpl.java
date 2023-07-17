@@ -153,4 +153,9 @@ public class NarrativeServiceImpl implements NarrativeService {
   public List<StopTimeNarrative> getStopTimeNarrativesForPattern(AgencyAndId routeId, String directionId, List<AgencyAndId> stopIds) {
     return _provider.getStopTimeNarrativesForPattern(routeId, directionId, stopIds);
   }
+
+  @Override
+  public StopTimeNarrative getStopTimeNarrativeForPattern(AgencyAndId routeId, AgencyAndId stopId, String directionId) {
+    return _provider.getStopTimeNarrativeForPattern(routeId, stopId, directionId);
+  }
 }
