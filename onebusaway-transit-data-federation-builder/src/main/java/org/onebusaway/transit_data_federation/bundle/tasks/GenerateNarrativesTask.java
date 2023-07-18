@@ -191,7 +191,7 @@ public class GenerateNarrativesTask implements Runnable {
     else if ("1".equals(directionId)) {
       String[] routes = de.getDaytimeRoutes().split(" ");
       for (String route : routes) {
-        list.add(new RouteStopDirectionKey(new AgencyAndId(de.getAgencyId(), route), new AgencyAndId(de.getAgencyId(), de.getGtfsStopIdDirection0()), "1"));
+        list.add(new RouteStopDirectionKey(new AgencyAndId(de.getAgencyId(), route), new AgencyAndId(de.getAgencyId(), de.getGtfsStopIdDirection1()), "1"));
       }
     }
     return list;
