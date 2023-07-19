@@ -404,9 +404,9 @@
                 <version>4.5.9</version><!-- needs to match onebusaway-cloud-services -->
             </dependency>
             <dependency>
-                <groupId>org.mariadb.jdbc</groupId>
-                <artifactId>mariadb-java-client</artifactId>
-                <version>3.1.4</version>
+                <groupId>mysql</groupId>
+                <artifactId>mysql-connector-java</artifactId>
+                <version>5.1.48</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
