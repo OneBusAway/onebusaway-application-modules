@@ -320,12 +320,6 @@
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.onebusaway</groupId>
-            <artifactId>onebusaway-api-core</artifactId>
-            <version>2.4.3-cs-SNAPSHOT</version>
-            <scope>compile</scope>
-        </dependency>
 
 
     </dependencies>

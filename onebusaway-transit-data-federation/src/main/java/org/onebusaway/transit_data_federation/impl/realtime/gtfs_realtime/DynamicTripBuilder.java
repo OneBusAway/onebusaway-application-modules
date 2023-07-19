@@ -65,7 +65,7 @@ public class DynamicTripBuilder {
   public BlockDescriptor createBlockDescriptor(AddedTripInfo addedTripInfo) {
     // from the addedTripInfo generate the trips and stops, and return in the block descriptor
     BlockDescriptor dynamicBd = new BlockDescriptor();
-    dynamicBd.setScheduleRelationship(BlockDescriptor.ScheduleRelationship.ADDED);
+    dynamicBd.setScheduleRelationship(addedTripInfo.getScheduleRelationship());
     AgencyAndId blockId = new AgencyAndId(addedTripInfo.getAgencyId(), addedTripInfo.getTripId());
     // here we look up past blocks, and advance our position along the block
     BlockInstance instance = _blockIndexService.getDynamicBlockInstance(blockId);
@@ -185,7 +185,11 @@ public class DynamicTripBuilder {
 
 
   private int toSecondsInDay(long time, long serviceDate) {
-    return Math.toIntExact((time - serviceDate) / 1000);
+    if (time > serviceDate) {
+      // we have millis format
+      return Math.toIntExact((time - serviceDate) / 1000);
+    }
+    return Math.toIntExact(time);
   }
 
   private DynamicStopEntryImpl copyFromStop(StopEntry staticStop) {
