@@ -141,7 +141,7 @@
         <module>onebusaway-util</module>
         <module>onebusaway-alerts-persistence</module>
         <module>onebusaway-watchdog-webapp</module>
-        <module>onebusaway-status-agent</module>
+<!--        <module>onebusaway-status-agent</module>-->
         <module>onebusaway-alerts-api</module>
         <module>onebusaway-gtfsrt-integration-tests</module>
     </modules>
