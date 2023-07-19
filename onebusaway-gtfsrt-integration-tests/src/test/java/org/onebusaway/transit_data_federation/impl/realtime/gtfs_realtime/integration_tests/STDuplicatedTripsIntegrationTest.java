@@ -44,6 +44,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.TimeZone;
 
 import static org.junit.Assert.*;
 
@@ -58,7 +59,17 @@ public class STDuplicatedTripsIntegrationTest extends AbstractGtfsRealtimeIntegr
   }
 
   @Test
-  public void testDuplicatedTrips1() throws Exception {
+  public void testDuplicatedTrips() throws Exception {
+    TimeZone aDefault = TimeZone.getDefault();
+    try {
+      TimeZone.setDefault(TimeZone.getTimeZone("America/Los_Angeles"));
+      runTest();
+    } finally {
+      TimeZone.setDefault(aDefault);
+    }
+  }
+
+  public void runTest() throws Exception {
     GtfsRealtimeSource source = getBundleLoader().getSource();
     source.setAgencyId("40");
 

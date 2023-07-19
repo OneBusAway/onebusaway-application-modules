@@ -330,6 +330,11 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
     
     StopTimeNarrative stopTimeNarrative = _narrativeService.getStopTimeForEntry(stopTime);
     if (stopTimeNarrative == null) {
+      stopTimeNarrative = _narrativeService.getStopTimeNarrativeForPattern(trip.getRoute().getId(),
+                            stop.getId(),
+                            trip.getDirectionId());
+    }
+    if (stopTimeNarrative == null) {
       // dynamic stops without a narrative, look to trip instead
       TripNarrative tripNarrative = _narrativeService.getTripForId(trip.getId());
       pab.setRouteShortName(tripNarrative.getRouteShortName());

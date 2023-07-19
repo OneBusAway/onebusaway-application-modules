@@ -44,13 +44,13 @@ public final class NarrativeProviderImpl implements Serializable {
 
   private Map<AgencyAndId, List<StopTimeNarrative>> _dynamicStopTimeNarrativesByTripIdAndStopTimeSequence = new PassiveExpiringMap<AgencyAndId, List<StopTimeNarrative>>(CACHE_TIMEOUT);
 
-  private Map<RouteDirection, List<StopPattern>> _routeDirectionToStopPatterns = new HashMap();
+  private Map<RouteDirection, List<StopPattern>> _routeDirectionToStopPatterns = new HashMap<>();
 
   private final Map<RoutePattern, List<StopTimeNarrative>> _patternToStopTimeNarratives = new HashMap<>();
 
   private Map<AgencyAndId, ShapePoints> _shapePointsById = new HashMap<AgencyAndId, ShapePoints>();
 
-  private Map<StopDirectionKey, RouteAndHeadsignNarrative> _patternCache = new HashMap();
+  private Map<RouteStopDirectionKey, RouteAndHeadsignNarrative> _patternCache = new HashMap<>();
 
   public void setNarrativeForAgency(String agencyId, AgencyNarrative narrative) {
     _agencyNarratives.put(agencyId, narrative);
@@ -128,7 +128,6 @@ public final class NarrativeProviderImpl implements Serializable {
     }
     if (narratives == null)
       return getNarrativeFromPattern(entry);
-
     if (narratives == null) {
       return null;
     }
@@ -144,9 +143,10 @@ public final class NarrativeProviderImpl implements Serializable {
    * @return
    */
   private StopTimeNarrative getNarrativeFromPattern(StopTimeEntry entry) {
+    AgencyAndId routeId = entry.getTrip().getRoute().getId();
     AgencyAndId stopId = entry.getStop().getId();
     String directionId = entry.getTrip().getDirectionId();
-    StopDirectionKey sd = new StopDirectionKey(stopId, directionId);
+    RouteStopDirectionKey sd = new RouteStopDirectionKey(routeId, stopId, directionId);
     RouteAndHeadsignNarrative rd =_patternCache.get(sd);
     if (rd == null) return null;
     StopTimeNarrative.Builder builder = new StopTimeNarrative.Builder();
@@ -293,7 +293,21 @@ public final class NarrativeProviderImpl implements Serializable {
     }
   }
 
-  public void addRouteAndHeadsign(StopDirectionKey stopDirectionKey, RouteAndHeadsignNarrative routeAndHeadsignNarrative) {
-    _patternCache.put(stopDirectionKey, routeAndHeadsignNarrative);
+  public void addRouteAndHeadsign(RouteStopDirectionKey routeStopDirectionKey, RouteAndHeadsignNarrative routeAndHeadsignNarrative) {
+    _patternCache.put(routeStopDirectionKey, routeAndHeadsignNarrative);
+  }
+
+  public int getPatternCount() {
+    return _patternCache.size();
+  }
+
+  public StopTimeNarrative getStopTimeNarrativeForPattern(AgencyAndId routeId, AgencyAndId stopId, String directionId) {
+    RouteStopDirectionKey key = new RouteStopDirectionKey(routeId, stopId, directionId);
+    RouteAndHeadsignNarrative routeAndHeadsignNarrative = _patternCache.get(key);
+    if (routeAndHeadsignNarrative == null) return null;
+    StopTimeNarrative.Builder narrative = StopTimeNarrative.builder();
+    narrative.setStopHeadsign(routeAndHeadsignNarrative.getHeadsign());
+    narrative.setRouteShortName(routeAndHeadsignNarrative.getRouteShortname());
+    return narrative.create();
   }
 }

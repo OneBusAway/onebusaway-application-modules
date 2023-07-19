@@ -610,6 +610,10 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
           continue;
         }
         BlockDescriptor.ScheduleRelationship scheduleRelationship = update.block.getScheduleRelationship();
+        if (scheduleRelationship == null) {
+          _log.error("no schedule relationship for update {}", update);
+          continue;
+        }
         boolean isDynamicTrip = TransitDataConstants.STATUS_ADDED.equals(scheduleRelationship.name())
                 || TransitDataConstants.STATUS_DUPLICATED.equals(scheduleRelationship.name());
 

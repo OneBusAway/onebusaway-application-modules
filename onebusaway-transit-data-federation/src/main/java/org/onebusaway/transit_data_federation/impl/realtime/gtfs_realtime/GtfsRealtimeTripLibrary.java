@@ -878,12 +878,12 @@ public class GtfsRealtimeTripLibrary {
     if (trip.hasStartTime() && !"0".equals(trip.getStartTime())) {
     	try {
           Matcher m = _pattern.matcher(trip.getStartTime());
-          if(!m.matches()){
+          if(!m.matches()) {
             long timeInMil = serviceDate.getAsDate().getTime();
             long epochTime = Long.parseLong(trip.getStartTime());
             long startTime = (epochTime - timeInMil) / 1000;
             tripStartTime = (int)startTime;
-          }else
+          } else
     		tripStartTime = StopTimeFieldMappingFactory.getStringAsSeconds(trip.getStartTime());
     	} catch (InvalidStopTimeException iste) {
     		_log.debug("invalid stopTime of " + trip.getStartTime() + " for trip " + trip);

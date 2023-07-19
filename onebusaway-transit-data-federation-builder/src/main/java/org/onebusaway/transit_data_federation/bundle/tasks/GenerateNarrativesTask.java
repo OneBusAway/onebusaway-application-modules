@@ -161,27 +161,40 @@ public class GenerateNarrativesTask implements Runnable {
   }
 
   private void generateRouteHeadsignPatterns(NarrativeProviderImpl provider) {
-    if (_gtfsDao.getAllDirectionEntries() == null) return;
-    for (DirectionEntry de : _gtfsDao.getAllDirectionEntries()) {
-      StopDirectionKey sdNorth = createStopDirectionKey(de.getGtfsStopId(), "0");
-      RouteAndHeadsignNarrative rhNorth = new RouteAndHeadsignNarrative(de.getRailroadNorthDescriptor(), de.getLine());
-      provider.addRouteAndHeadsign(sdNorth, rhNorth);
-      StopDirectionKey sdSouth = createStopDirectionKey(de.getGtfsStopId(), "1");
-      RouteAndHeadsignNarrative rhSouth = new RouteAndHeadsignNarrative(de.getRailroadSouthDescriptor(), de.getLine());
-      provider.addRouteAndHeadsign(sdSouth, rhSouth);
+    if (_gtfsDao.getAllDirectionEntries() == null) {
+      _log.info("no directionEntries to process");
+      return;
     }
-
+    for (DirectionEntry de : _gtfsDao.getAllDirectionEntries()) {
+      List<RouteStopDirectionKey> sdNorths = createStopDirectionKey(de, "0");
+      RouteAndHeadsignNarrative rhNorth = new RouteAndHeadsignNarrative(de.getHeadsignDirection0(), de.getLine());
+      for (RouteStopDirectionKey sdNorth : sdNorths) {
+        provider.addRouteAndHeadsign(sdNorth, rhNorth);
+      }
+      List<RouteStopDirectionKey> sdSouths = createStopDirectionKey(de, "1");
+      RouteAndHeadsignNarrative rhSouth = new RouteAndHeadsignNarrative(de.getHeadsignDirection1(), de.getLine());
+      for (RouteStopDirectionKey sdSouth : sdSouths) {
+        provider.addRouteAndHeadsign(sdSouth, rhSouth);
+      }
+    }
+    _log.info("processed {} directionEntries with cache size {}", _gtfsDao.getAllDirectionEntries().size(), provider.getPatternCount());
   }
 
-  private StopDirectionKey createStopDirectionKey(String gtfsStopId, String directionId) {
-    String compassDirection;
-    if ("0".equals(directionId))
-      compassDirection = "N";
-    else if ("1".equals(directionId))
-      compassDirection = "S";
-    else
-      compassDirection = "?";
-    return new StopDirectionKey(new AgencyAndId("MTASBWY", gtfsStopId + compassDirection), directionId);
+  private List<RouteStopDirectionKey> createStopDirectionKey(DirectionEntry de, String directionId) {
+    ArrayList<RouteStopDirectionKey> list = new ArrayList<>();
+    if ("0".equals(directionId)) {
+      String[] routes = de.getDaytimeRoutes().split(" ");
+      for (String route : routes) {
+        list.add(new RouteStopDirectionKey(new AgencyAndId(de.getAgencyId(), route), new AgencyAndId(de.getAgencyId(), de.getGtfsStopIdDirection0()), "0"));
+      }
+    }
+    else if ("1".equals(directionId)) {
+      String[] routes = de.getDaytimeRoutes().split(" ");
+      for (String route : routes) {
+        list.add(new RouteStopDirectionKey(new AgencyAndId(de.getAgencyId(), route), new AgencyAndId(de.getAgencyId(), de.getGtfsStopIdDirection1()), "1"));
+      }
+    }
+    return list;
   }
 
   public void generateAgencyNarratives(NarrativeProviderImpl provider) {
