@@ -41,15 +41,15 @@ public class RouteStopDirectionKey implements Serializable {
     if (!(obj instanceof RouteStopDirectionKey))
       return false;
     RouteStopDirectionKey sd = (RouteStopDirectionKey) obj;
-    if (sd.routeId == null && routeId != null)
+    if (routeId == null && sd.routeId != null)
       return false;
-    if (sd.stopId == null && stopId != null)
+    if (stopId == null && sd.stopId != null)
       return false;
-    if (sd.directionId == null && directionId != null)
+    if (directionId == null && sd.directionId != null)
       return false;
-    return routeId.equals(sd.routeId)
-            && stopId.equals(sd.stopId)
-            && directionId.equals(sd.directionId);
+    return (routeId != null && routeId.equals(sd.routeId))
+            && (stopId != null && stopId.equals(sd.stopId))
+            && (directionId != null && directionId.equals(sd.directionId));
   }
 
   @Override
