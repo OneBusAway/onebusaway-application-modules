@@ -22,7 +22,9 @@ import org.onebusaway.transit_data_federation.services.AgencyService;
 import org.onebusaway.transit_data_federation.services.ConsolidatedStopsService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockCalendarService;
 import org.onebusaway.transit_data_federation.services.bundle.BundleManagementService;
+import org.onebusaway.transit_data_federation.services.narrative.NarrativeService;
 import org.onebusaway.transit_data_federation.services.realtime.BlockLocationService;
+import org.onebusaway.transit_data_federation.services.shapes.ShapePointService;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,6 +74,8 @@ public class BundleLoader {
     _source.setConsolidatedStopsService(_context.getBean(ConsolidatedStopsService.class));
     _source.setDynamicBlockIndexService(_context.getBean(DynamicBlockIndexServiceImpl.class));
     _source.setStopTimeEntriesFactory(_context.getBean(StopTimeEntriesFactory.class));
+    _source.setNarrativeService(_context.getBean(NarrativeService.class));
+    _source.setShapePointService(_context.getBean(ShapePointService.class));
 
     BundleManagementService bundleManagementService = _context.getBean(BundleManagementService.class);
     int i = 0;

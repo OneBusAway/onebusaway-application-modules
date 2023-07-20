@@ -25,6 +25,8 @@ import org.onebusaway.transit_data_federation.impl.transit_graph.StopTimeEntries
 import org.onebusaway.transit_data_federation.model.ShapePoints;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.blocks.DynamicBlockIndexService;
+import org.onebusaway.transit_data_federation.services.narrative.NarrativeService;
+import org.onebusaway.transit_data_federation.services.shapes.ShapePointService;
 import org.onebusaway.transit_data_federation.services.transit_graph.*;
 import org.onebusaway.transit_data_federation.services.transit_graph.dynamic.*;
 import org.slf4j.Logger;
@@ -48,7 +50,9 @@ public class DynamicTripBuilder {
   private Map<String, DynamicRouteEntry> _routeCache = new PassiveExpiringMap<>(60 * 60 * 1000);// 1 hour to support bundle changes
   private StopTimeEntriesFactory _stopTimeEntriesFactory;
   private DynamicBlockIndexService _blockIndexService;
-  @Autowired
+  private ShapePointService _shapePointService;
+  private NarrativeService _narrativeService;
+
   public void setStopTimeEntriesFactory(
           StopTimeEntriesFactory stopTimeEntriesFactory) {
     _stopTimeEntriesFactory = stopTimeEntriesFactory;
@@ -60,6 +64,15 @@ public class DynamicTripBuilder {
   private TransitGraphDao _graph;
   public void setTransitGraphDao(TransitGraphDao dao) {
     _graph = dao;
+  }
+
+
+  public void setShapePointService(ShapePointService service) {
+    _shapePointService = service;
+  }
+
+  public void setNarrativeService(NarrativeService service) {
+    _narrativeService = service;
   }
 
   public BlockDescriptor createBlockDescriptor(AddedTripInfo addedTripInfo) {
@@ -120,7 +133,34 @@ public class DynamicTripBuilder {
       _log.error("aborting trip creation {} with no stops", addedTripInfo.getTripId());
       return null;
     }
+    // here we set the shapeId to the tripId
+    trip.setShapeId(createShape(trip, new AgencyAndId(trip.getId().getAgencyId(), trip.getId().getId())));
     return trip;
+  }
+
+  private AgencyAndId createShape(DynamicTripEntryImpl trip, AgencyAndId shapeId) {
+    ShapePoints shapePointsForShapeId = _shapePointService.getShapePointsForShapeId(shapeId);
+    if (shapePointsForShapeId == null) {
+      createShapePoints(trip, shapeId);
+    }
+    return shapeId;
+  }
+
+  private void createShapePoints(DynamicTripEntryImpl trip, AgencyAndId shapeId) {
+    List<Double> lats = new ArrayList<>();
+    List<Double> lons = new ArrayList<>();
+
+    for (StopTimeEntry stopTimeEntry : trip.getStopTimes()) {
+      CoordinatePoint stopLocation = stopTimeEntry.getStop().getStopLocation();
+      lats.add(stopLocation.getLat());
+      lons.add(stopLocation.getLon());
+    }
+    ShapePoints shapePoints = new ShapePoints();
+    shapePoints.setShapeId(shapeId);
+    shapePoints.setLats(lats.stream().mapToDouble(Double::doubleValue).toArray());
+    shapePoints.setLons(lons.stream().mapToDouble(Double::doubleValue).toArray());
+    shapePoints.ensureDistTraveled();
+    _narrativeService.addShapePoints(shapePoints);
   }
 
   private String getGtfsDirectionId(String directionFlag) {

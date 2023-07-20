@@ -77,4 +77,6 @@ public interface NarrativeService {
   List<StopTimeNarrative> getStopTimeNarrativesForPattern(AgencyAndId routeId, String directionId, List<AgencyAndId> stopIds);
 
   StopTimeNarrative getStopTimeNarrativeForPattern(AgencyAndId routeId, AgencyAndId stopId, String directionId);
+
+  public void addShapePoints(ShapePoints shapePoints);
 }

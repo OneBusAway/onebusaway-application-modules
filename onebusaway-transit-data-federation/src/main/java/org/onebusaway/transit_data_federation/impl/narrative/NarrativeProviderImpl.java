@@ -50,6 +50,8 @@ public final class NarrativeProviderImpl implements Serializable {
 
   private Map<AgencyAndId, ShapePoints> _shapePointsById = new HashMap<AgencyAndId, ShapePoints>();
 
+  Map<AgencyAndId, ShapePoints> _dynamicShapesById = new PassiveExpiringMap<>(CACHE_TIMEOUT);
+
   private Map<RouteStopDirectionKey, RouteAndHeadsignNarrative> _patternCache = new HashMap<>();
 
   public void setNarrativeForAgency(String agencyId, AgencyNarrative narrative) {
@@ -165,7 +167,9 @@ public final class NarrativeProviderImpl implements Serializable {
   }
 
   public ShapePoints getShapePointsForId(AgencyAndId id) {
-    return _shapePointsById.get(id);
+    if (_shapePointsById.containsKey(id))
+     return _shapePointsById.get(id);
+    return _dynamicShapesById.get(id);
   }
 
   public List<StopTimeNarrative> getStopTimeNarrativesForPattern(AgencyAndId routeId, String directionId, List<AgencyAndId> stopIds) {
@@ -210,6 +214,11 @@ public final class NarrativeProviderImpl implements Serializable {
     if (find(stopIds, stopPatterns) == null) {
       stopPatterns.add(stopPattern);
     }
+  }
+
+
+  public void addShapePoints(ShapePoints shapePoints) {
+    _dynamicShapesById.put(shapePoints.getShapeId(), shapePoints);
   }
 
   public static class RoutePattern implements Serializable {
