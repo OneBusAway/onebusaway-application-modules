@@ -182,18 +182,9 @@ public class GenerateNarrativesTask implements Runnable {
 
   private List<RouteStopDirectionKey> createStopDirectionKey(DirectionEntry de, String directionId) {
     ArrayList<RouteStopDirectionKey> list = new ArrayList<>();
-    if ("0".equals(directionId)) {
-      String[] routes = de.getDaytimeRoutes().split(" ");
-      for (String route : routes) {
-        list.add(new RouteStopDirectionKey(new AgencyAndId(de.getAgencyId(), route), new AgencyAndId(de.getAgencyId(), de.getGtfsStopIdDirection0()), "0"));
-      }
-    }
-    else if ("1".equals(directionId)) {
-      String[] routes = de.getDaytimeRoutes().split(" ");
-      for (String route : routes) {
-        list.add(new RouteStopDirectionKey(new AgencyAndId(de.getAgencyId(), route), new AgencyAndId(de.getAgencyId(), de.getGtfsStopIdDirection1()), "1"));
-      }
-    }
+    // we don't use daytime routes, we just use stop and direction for now
+    list.add(new RouteStopDirectionKey(null, new AgencyAndId(de.getAgencyId(), de.getGtfsStopIdDirection0()), "0"));
+    list.add(new RouteStopDirectionKey(null, new AgencyAndId(de.getAgencyId(), de.getGtfsStopIdDirection1()), "1"));
     return list;
   }
 

@@ -158,4 +158,9 @@ public class NarrativeServiceImpl implements NarrativeService {
   public StopTimeNarrative getStopTimeNarrativeForPattern(AgencyAndId routeId, AgencyAndId stopId, String directionId) {
     return _provider.getStopTimeNarrativeForPattern(routeId, stopId, directionId);
   }
+
+  @Override
+  public void addShapePoints(ShapePoints shapePoints) {
+    _provider.addShapePoints(shapePoints);
+  }
 }

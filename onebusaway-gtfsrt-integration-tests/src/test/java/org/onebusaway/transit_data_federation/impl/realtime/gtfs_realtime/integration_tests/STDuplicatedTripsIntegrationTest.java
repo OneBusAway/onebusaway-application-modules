@@ -17,12 +17,24 @@ package org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.integ
 
 import com.google.transit.realtime.GtfsRealtime;
 import org.junit.Test;
+import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.gtfs.model.calendar.ServiceDate;
+import org.onebusaway.realtime.api.TimepointPredictionRecord;
 import org.onebusaway.realtime.api.VehicleLocationListener;
+import org.onebusaway.realtime.api.VehicleLocationRecord;
 import org.onebusaway.transit_data_federation.impl.realtime.TestVehicleLocationListener;
+import org.onebusaway.transit_data_federation.impl.realtime.VehicleStatusServiceImpl;
 import org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.AbstractGtfsRealtimeIntegrationTest;
 import org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.GtfsRealtimeSource;
 import org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.GtfsRtBuilder;
 import org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.MonitoredResult;
+import org.onebusaway.transit_data_federation.model.TargetTime;
+import org.onebusaway.transit_data_federation.services.ArrivalAndDepartureService;
+import org.onebusaway.transit_data_federation.services.realtime.ArrivalAndDepartureInstance;
+import org.onebusaway.transit_data_federation.services.realtime.BlockLocation;
+import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
+import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
 import org.springframework.core.io.ClassPathResource;
 
 import java.io.File;
@@ -30,6 +42,11 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.TimeZone;
+
+import static org.junit.Assert.*;
 
 public class STDuplicatedTripsIntegrationTest extends AbstractGtfsRealtimeIntegrationTest  {
   protected String getIntegrationTestPath() {
@@ -42,11 +59,23 @@ public class STDuplicatedTripsIntegrationTest extends AbstractGtfsRealtimeIntegr
   }
 
   @Test
-  public void testDuplicatedTrips1() throws Exception {
+  public void testDuplicatedTrips() throws Exception {
+    TimeZone aDefault = TimeZone.getDefault();
+    try {
+      TimeZone.setDefault(TimeZone.getTimeZone("America/Los_Angeles"));
+      runTest();
+    } finally {
+      TimeZone.setDefault(aDefault);
+    }
+  }
+
+  public void runTest() throws Exception {
     GtfsRealtimeSource source = getBundleLoader().getSource();
     source.setAgencyId("40");
 
-    VehicleLocationListener listener = new TestVehicleLocationListener();
+    TestVehicleLocationListener listener = new TestVehicleLocationListener();
+    VehicleLocationListener actualListener = getBundleLoader().getApplicationContext().getBean(VehicleStatusServiceImpl.class);
+    listener.setVehicleLocationListener(actualListener);
     source.setVehicleLocationListener(listener);
     MonitoredResult testResult = new MonitoredResult();
     source.setMonitoredResult(testResult);
@@ -60,13 +89,62 @@ public class STDuplicatedTripsIntegrationTest extends AbstractGtfsRealtimeIntegr
     URL tmpFeedLocation = createFeedLocation();
     writeFeed(feed, tmpFeedLocation);
     source.setTripUpdatesUrl(tmpFeedLocation);
-    // todo not impl yet
-    //source.refresh(); // launch
+    source.refresh(); // launch
 
-    // todo now test for expected values
-    // assert duplicated trips are present
-    // assert dynamic trips generated based on that duplication
-    // maybe copy and introspect a block descriptor?
+
+    for (VehicleLocationRecord vehicleLocationRecord : listener.getRecords()) {
+      // for now we confirm some elements are present
+      assertNotNull(vehicleLocationRecord.getVehicleId());
+      assertNotNull(vehicleLocationRecord.getBlockId());
+    }
+
+    ArrivalAndDepartureService arrivalAndDepartureService = getBundleLoader().getApplicationContext().getBean(ArrivalAndDepartureService.class);
+    TransitGraphDao graph = getBundleLoader().getApplicationContext().getBean(TransitGraphDao.class);
+    long window = 75 * 60 * 1000; // 75 minutes
+
+    StopEntry firstStop = graph.getStopEntryForId(AgencyAndId.convertFromString("40_99914")); // 9:55 trip duplicated to 10:43
+    long firstStopTime = 1683740698000L;
+    long serviceDate = new ServiceDate(2023,5,10).getAsDate().getTime();
+
+    List<ArrivalAndDepartureInstance> list = arrivalAndDepartureService.getArrivalsAndDeparturesForStopInTimeRange(firstStop,new TargetTime(firstStopTime,firstStopTime),firstStopTime - window, firstStopTime + window);
+    assertNotNull(list);
+    // LLR_2023-03-18_Weekday_100479_1043  LLR_2023-03-18_Weekday_100479_2047
+
+    int expectedDuplicatedTripsSize = 1;
+    int actualDuplicatedTripsSize = 0;
+
+    List<String> expectedduplicatedTrips = new ArrayList<>();
+    expectedduplicatedTrips.add("LLR_2023-03-18_Weekday_100479_1043_Dup");
+    expectedduplicatedTrips.add("LLR_2023-03-18_Weekday_100479_2047");
+
+      List<TripEntry> DynamictripsFound = new ArrayList<>();
+    for(ArrivalAndDepartureInstance instance : list){
+      String tripId = instance.getStopTimeInstance().getStopTime().getTrip().getTrip().getId().getId();
+      AgencyAndId stopID = instance.getStopTimeInstance().getStopTime().getStopTime().getStop().getId();
+      if(expectedduplicatedTrips.contains(tripId)){
+        DynamictripsFound.add(instance.getStopTimeInstance().getStopTime().getTrip().getTrip());
+        actualDuplicatedTripsSize++;
+        assertTrue(instance.getPredictedArrivalTime() > 0 || instance.getPredictedDepartureTime() > 0);
+        if ("40_LLR_2023-03-18_Weekday_100479_1043_Dup".equals(instance.getBlockInstance().getBlock().getBlock().getId().toString())) {
+          BlockLocation blockLocation =  instance.getBlockLocation();
+          assertNotNull(blockLocation);
+          List<TimepointPredictionRecord> timepointPredictions = blockLocation.getTimepointPredictions();
+          assertNotNull(timepointPredictions);
+          for(TimepointPredictionRecord timepointPrediction : timepointPredictions){
+            assertTrue(timepointPrediction.getTimepointPredictedArrivalTime() > 0 ||
+            timepointPrediction.getTimepointPredictedDepartureTime() > 0);
+            assertEquals("40_LLR_2023-03-18_Weekday_100479_1043_Dup",timepointPrediction.getTripId().toString());
+            assertNotNull(timepointPrediction.getTimepointId());
+          }
+        }
+      }
+    }
+    if(expectedDuplicatedTripsSize != actualDuplicatedTripsSize){
+      _log.error("expected {}, actual {}", expectedDuplicatedTripsSize, actualDuplicatedTripsSize);
+    }
+    assertEquals(expectedDuplicatedTripsSize,actualDuplicatedTripsSize);
+//
+//    assertTrue(foundDuplicate);
   }
 
   private void writeFeed(GtfsRealtime.FeedMessage feed, URL feedLocation) throws IOException {

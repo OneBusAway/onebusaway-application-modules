@@ -50,6 +50,8 @@ public final class NarrativeProviderImpl implements Serializable {
 
   private Map<AgencyAndId, ShapePoints> _shapePointsById = new HashMap<AgencyAndId, ShapePoints>();
 
+  Map<AgencyAndId, ShapePoints> _dynamicShapesById = new PassiveExpiringMap<>(CACHE_TIMEOUT);
+
   private Map<RouteStopDirectionKey, RouteAndHeadsignNarrative> _patternCache = new HashMap<>();
 
   public void setNarrativeForAgency(String agencyId, AgencyNarrative narrative) {
@@ -146,7 +148,8 @@ public final class NarrativeProviderImpl implements Serializable {
     AgencyAndId routeId = entry.getTrip().getRoute().getId();
     AgencyAndId stopId = entry.getStop().getId();
     String directionId = entry.getTrip().getDirectionId();
-    RouteStopDirectionKey sd = new RouteStopDirectionKey(routeId, stopId, directionId);
+    // we don't use route for now
+    RouteStopDirectionKey sd = new RouteStopDirectionKey(/*routeId*/null, stopId, directionId);
     RouteAndHeadsignNarrative rd =_patternCache.get(sd);
     if (rd == null) return null;
     StopTimeNarrative.Builder builder = new StopTimeNarrative.Builder();
@@ -165,7 +168,10 @@ public final class NarrativeProviderImpl implements Serializable {
   }
 
   public ShapePoints getShapePointsForId(AgencyAndId id) {
-    return _shapePointsById.get(id);
+    if (_shapePointsById.containsKey(id))
+     return _shapePointsById.get(id);
+    if (_dynamicShapesById == null) return null;
+    return _dynamicShapesById.get(id);
   }
 
   public List<StopTimeNarrative> getStopTimeNarrativesForPattern(AgencyAndId routeId, String directionId, List<AgencyAndId> stopIds) {
@@ -210,6 +216,12 @@ public final class NarrativeProviderImpl implements Serializable {
     if (find(stopIds, stopPatterns) == null) {
       stopPatterns.add(stopPattern);
     }
+  }
+
+
+  public void addShapePoints(ShapePoints shapePoints) {
+    if (_dynamicShapesById == null) _dynamicShapesById = new PassiveExpiringMap<>(CACHE_TIMEOUT);
+    _dynamicShapesById.put(shapePoints.getShapeId(), shapePoints);
   }
 
   public static class RoutePattern implements Serializable {
@@ -302,7 +314,8 @@ public final class NarrativeProviderImpl implements Serializable {
   }
 
   public StopTimeNarrative getStopTimeNarrativeForPattern(AgencyAndId routeId, AgencyAndId stopId, String directionId) {
-    RouteStopDirectionKey key = new RouteStopDirectionKey(routeId, stopId, directionId);
+    // we don't use route for now
+    RouteStopDirectionKey key = new RouteStopDirectionKey(/*routeId*/null, stopId, directionId);
     RouteAndHeadsignNarrative routeAndHeadsignNarrative = _patternCache.get(key);
     if (routeAndHeadsignNarrative == null) return null;
     StopTimeNarrative.Builder narrative = StopTimeNarrative.builder();

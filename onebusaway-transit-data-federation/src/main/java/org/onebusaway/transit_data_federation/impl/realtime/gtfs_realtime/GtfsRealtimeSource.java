@@ -60,11 +60,13 @@ import org.onebusaway.transit_data_federation.services.ConsolidatedStopsService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockCalendarService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockGeospatialService;
 import org.onebusaway.transit_data_federation.services.blocks.DynamicBlockIndexService;
+import org.onebusaway.transit_data_federation.services.narrative.NarrativeService;
 import org.onebusaway.transit_data_federation.services.realtime.BlockLocation;
 import org.onebusaway.transit_data_federation.services.realtime.BlockLocationService;
 import org.onebusaway.alerts.service.ServiceAlerts;
 import org.onebusaway.alerts.service.ServiceAlerts.ServiceAlert;
 import org.onebusaway.alerts.service.ServiceAlertsService;
+import org.onebusaway.transit_data_federation.services.shapes.ShapePointService;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -121,6 +123,8 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   private ConsolidatedStopsService _consolidatedStopsService;
 
   private DynamicBlockIndexService _dynamicBlockIndexService;
+
+  private NarrativeService _narrativeService;
 
   private ScheduledFuture<?> _refreshTask;
 
@@ -183,7 +187,9 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   private BlockGeospatialService _blockGeospatialService;
 
   private StopTimeEntriesFactory _stopTimeEntriesFactory;
-  
+
+  private ShapePointService _shapePointService;
+
   private boolean _enabled = true;
 
   private boolean _useLabelAsId = false;
@@ -234,6 +240,11 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   }
 
   @Autowired
+  public void setNarrativeService(NarrativeService service) {
+    this._narrativeService = service;
+  }
+
+  @Autowired
   public void setVehicleLocationListener(
       VehicleLocationListener vehicleLocationListener) {
     _vehicleLocationListener = vehicleLocationListener;
@@ -263,6 +274,11 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   @Autowired
   public void setStopTimeEntriesFactory(StopTimeEntriesFactory stopTimeEntriesFactory) {
     _stopTimeEntriesFactory = stopTimeEntriesFactory;
+  }
+
+  @Autowired
+  public void setShapePointService(ShapePointService service) {
+    _shapePointService = service;
   }
 
   public void setStopModificationStrategy(StopModificationStrategy strategy) {
@@ -473,10 +489,15 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     _tripsLibrary.setValidateCurrentTime(_validateCurrentTime);
     _tripsLibrary.setAddedTripService(new AddedTripServiceImpl());
     _tripsLibrary.setFilterUnassigned(_filterUnassigned);
+    DuplicatedTripServiceImpl duplicatedTripService = new DuplicatedTripServiceImpl();
+    duplicatedTripService.setGtfsRealtimeEntitySource(_entitySource);
+    _tripsLibrary.setDuplicatedTripService(duplicatedTripService);
     DynamicTripBuilder tripBuilder = new DynamicTripBuilder();
     tripBuilder.setStopTimeEntriesFactory(_stopTimeEntriesFactory);
+    tripBuilder.setShapePointService(_shapePointService);
     tripBuilder.setTransitGraphDao(_transitGraphDao);
     tripBuilder.setBlockIndexService(_dynamicBlockIndexService);
+    tripBuilder.setNarrativeService(_narrativeService);
     _tripsLibrary.setDynamicTripBuilder(tripBuilder);
 
     
@@ -607,7 +628,12 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
           continue;
         }
         BlockDescriptor.ScheduleRelationship scheduleRelationship = update.block.getScheduleRelationship();
-        boolean isDynamicTrip = TransitDataConstants.STATUS_ADDED.equals(scheduleRelationship.name());
+        if (scheduleRelationship == null) {
+          _log.error("no schedule relationship for update {}", update);
+          continue;
+        }
+        boolean isDynamicTrip = TransitDataConstants.STATUS_ADDED.equals(scheduleRelationship.name())
+                || TransitDataConstants.STATUS_DUPLICATED.equals(scheduleRelationship.name());
 
         VehicleLocationRecord record = _tripsLibrary.createVehicleLocationRecordForUpdate(result, update);
         if (record != null) {
