@@ -169,6 +169,7 @@ public final class NarrativeProviderImpl implements Serializable {
   public ShapePoints getShapePointsForId(AgencyAndId id) {
     if (_shapePointsById.containsKey(id))
      return _shapePointsById.get(id);
+    if (_dynamicShapesById == null) return null;
     return _dynamicShapesById.get(id);
   }
 
@@ -218,6 +219,7 @@ public final class NarrativeProviderImpl implements Serializable {
 
 
   public void addShapePoints(ShapePoints shapePoints) {
+    if (_dynamicShapesById == null) _dynamicShapesById = new PassiveExpiringMap<>(CACHE_TIMEOUT);
     _dynamicShapesById.put(shapePoints.getShapeId(), shapePoints);
   }
 
