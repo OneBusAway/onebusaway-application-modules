@@ -52,7 +52,7 @@ public final class NarrativeProviderImpl implements Serializable {
 
   Map<AgencyAndId, ShapePoints> _dynamicShapesById = new PassiveExpiringMap<>(CACHE_TIMEOUT);
 
-  private Map<RouteStopDirectionKey, RouteAndHeadsignNarrative> _patternCache = new HashMap<>();
+  private Map<StopDirectionKey, RouteAndHeadsignNarrative> _patternCache = new HashMap<>();
 
   public void setNarrativeForAgency(String agencyId, AgencyNarrative narrative) {
     _agencyNarratives.put(agencyId, narrative);
@@ -149,7 +149,7 @@ public final class NarrativeProviderImpl implements Serializable {
     AgencyAndId stopId = entry.getStop().getId();
     String directionId = entry.getTrip().getDirectionId();
     // we don't use route for now
-    RouteStopDirectionKey sd = new RouteStopDirectionKey(/*routeId*/null, stopId, directionId);
+    StopDirectionKey sd = new StopDirectionKey(stopId, directionId);
     RouteAndHeadsignNarrative rd =_patternCache.get(sd);
     if (rd == null) return null;
     StopTimeNarrative.Builder builder = new StopTimeNarrative.Builder();
@@ -305,8 +305,8 @@ public final class NarrativeProviderImpl implements Serializable {
     }
   }
 
-  public void addRouteAndHeadsign(RouteStopDirectionKey routeStopDirectionKey, RouteAndHeadsignNarrative routeAndHeadsignNarrative) {
-    _patternCache.put(routeStopDirectionKey, routeAndHeadsignNarrative);
+  public void addRouteAndHeadsign(StopDirectionKey stopDirectionKey, RouteAndHeadsignNarrative routeAndHeadsignNarrative) {
+    _patternCache.put(stopDirectionKey, routeAndHeadsignNarrative);
   }
 
   public int getPatternCount() {
@@ -315,7 +315,7 @@ public final class NarrativeProviderImpl implements Serializable {
 
   public StopTimeNarrative getStopTimeNarrativeForPattern(AgencyAndId routeId, AgencyAndId stopId, String directionId) {
     // we don't use route for now
-    RouteStopDirectionKey key = new RouteStopDirectionKey(/*routeId*/null, stopId, directionId);
+    StopDirectionKey key = new StopDirectionKey(stopId, directionId);
     RouteAndHeadsignNarrative routeAndHeadsignNarrative = _patternCache.get(key);
     if (routeAndHeadsignNarrative == null) return null;
     StopTimeNarrative.Builder narrative = StopTimeNarrative.builder();

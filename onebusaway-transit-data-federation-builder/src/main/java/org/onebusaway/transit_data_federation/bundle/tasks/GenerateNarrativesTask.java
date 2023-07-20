@@ -166,25 +166,25 @@ public class GenerateNarrativesTask implements Runnable {
       return;
     }
     for (DirectionEntry de : _gtfsDao.getAllDirectionEntries()) {
-      List<RouteStopDirectionKey> sdNorths = createStopDirectionKey(de, "0");
+      List<StopDirectionKey> sdNorths = createStopDirectionKey(de, "0");
       RouteAndHeadsignNarrative rhNorth = new RouteAndHeadsignNarrative(de.getHeadsignDirection0(), de.getLine());
-      for (RouteStopDirectionKey sdNorth : sdNorths) {
+      for (StopDirectionKey sdNorth : sdNorths) {
         provider.addRouteAndHeadsign(sdNorth, rhNorth);
       }
-      List<RouteStopDirectionKey> sdSouths = createStopDirectionKey(de, "1");
+      List<StopDirectionKey> sdSouths = createStopDirectionKey(de, "1");
       RouteAndHeadsignNarrative rhSouth = new RouteAndHeadsignNarrative(de.getHeadsignDirection1(), de.getLine());
-      for (RouteStopDirectionKey sdSouth : sdSouths) {
+      for (StopDirectionKey sdSouth : sdSouths) {
         provider.addRouteAndHeadsign(sdSouth, rhSouth);
       }
     }
     _log.info("processed {} directionEntries with cache size {}", _gtfsDao.getAllDirectionEntries().size(), provider.getPatternCount());
   }
 
-  private List<RouteStopDirectionKey> createStopDirectionKey(DirectionEntry de, String directionId) {
-    ArrayList<RouteStopDirectionKey> list = new ArrayList<>();
+  private List<StopDirectionKey> createStopDirectionKey(DirectionEntry de, String directionId) {
+    ArrayList<StopDirectionKey> list = new ArrayList<>();
     // we don't use daytime routes, we just use stop and direction for now
-    list.add(new RouteStopDirectionKey(null, new AgencyAndId(de.getAgencyId(), de.getGtfsStopIdDirection0()), "0"));
-    list.add(new RouteStopDirectionKey(null, new AgencyAndId(de.getAgencyId(), de.getGtfsStopIdDirection1()), "1"));
+    list.add(new StopDirectionKey(new AgencyAndId(de.getAgencyId(), de.getGtfsStopIdDirection0()), "0"));
+    list.add(new StopDirectionKey(new AgencyAndId(de.getAgencyId(), de.getGtfsStopIdDirection1()), "1"));
     return list;
   }
 
