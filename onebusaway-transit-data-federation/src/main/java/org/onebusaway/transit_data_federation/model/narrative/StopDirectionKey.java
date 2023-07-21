@@ -54,4 +54,13 @@ public class StopDirectionKey implements Serializable {
     return stopId.equals(sd.stopId)
             && directionId.equals(sd.directionId);
   }
+  @Override
+  public int hashCode() {
+    int hash = 17;
+    if (stopId != null)
+      hash += stopId.hashCode();
+    if (directionId != null)
+      hash += directionId.hashCode();
+    return hash;
+  }
 }
