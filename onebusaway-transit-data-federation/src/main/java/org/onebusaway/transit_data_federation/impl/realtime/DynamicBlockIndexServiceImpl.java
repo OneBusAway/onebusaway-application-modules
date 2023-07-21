@@ -109,10 +109,6 @@ public class DynamicBlockIndexServiceImpl implements DynamicBlockIndexService {
       for (BlockStopTimeEntry blockStopTimeEntry : blockTripIndex.getTrips().get(0).getStopTimes()) {
           stopIds.add(blockStopTimeEntry.getStopTime().getStop().getId());
       }
-      List<StopTimeNarrative> stopTimeNarratives = _narrativeService.getStopTimeNarrativesForPattern(route.getId(), trip.getDirectionId(), stopIds);
-      if (stopTimeNarratives != null) {
-        _narrativeService.addStopNarrativesForTrip(trip.getId(), stopTimeNarratives);
-      }
     }
 
 

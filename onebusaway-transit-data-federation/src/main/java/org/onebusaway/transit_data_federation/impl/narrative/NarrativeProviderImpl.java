@@ -42,10 +42,6 @@ public final class NarrativeProviderImpl implements Serializable {
 
   private Map<AgencyAndId, List<StopTimeNarrative>> _stopTimeNarrativesByTripIdAndStopTimeSequence = new HashMap<AgencyAndId, List<StopTimeNarrative>>();
 
-  private Map<AgencyAndId, List<StopTimeNarrative>> _dynamicStopTimeNarrativesByTripIdAndStopTimeSequence = new PassiveExpiringMap<AgencyAndId, List<StopTimeNarrative>>(CACHE_TIMEOUT);
-
-  private Map<RouteDirection, List<StopPattern>> _routeDirectionToStopPatterns = new HashMap<>();
-
   private final Map<RoutePattern, List<StopTimeNarrative>> _patternToStopTimeNarratives = new HashMap<>();
 
   private Map<AgencyAndId, ShapePoints> _shapePointsById = new HashMap<AgencyAndId, ShapePoints>();
@@ -86,24 +82,6 @@ public final class NarrativeProviderImpl implements Serializable {
 
   }
 
-  public void addStopNarrativesForTrip(AgencyAndId tripId, List<StopTimeNarrative> stopTimeNarratives) {
-    _dynamicStopTimeNarrativesByTripIdAndStopTimeSequence.put(tripId, stopTimeNarratives);
-  }
-
-  public void addNarrativeForStopTimeEntry(AgencyAndId tripId, int index,
-                                           StopTimeNarrative narrative) {
-
-    List<StopTimeNarrative> narratives = _dynamicStopTimeNarrativesByTripIdAndStopTimeSequence.get(tripId);
-    if (narratives == null) {
-      narratives = new ArrayList<StopTimeNarrative>();
-      _dynamicStopTimeNarrativesByTripIdAndStopTimeSequence.put(tripId, narratives);
-    }
-
-    while (narratives.size() <= index)
-      narratives.add(null);
-    narratives.set(index, narrative);
-
-  }
 
   public void setShapePointsForId(AgencyAndId shapeId, ShapePoints shapePoints) {
     _shapePointsById.put(shapeId, shapePoints);
@@ -122,20 +100,19 @@ public final class NarrativeProviderImpl implements Serializable {
   }
 
   public StopTimeNarrative getNarrativeForStopTimeEntry(StopTimeEntry entry) {
+    // if we have an override use it first
+    StopTimeNarrative narrative = getNarrativeFromPattern(entry);
+    if (narrative != null) {
+      return narrative;
+    }
     TripEntry trip = entry.getTrip();
     int index = entry.getSequence();
     List<StopTimeNarrative> narratives = _stopTimeNarrativesByTripIdAndStopTimeSequence.get(trip.getId());
-    if (narratives == null) {
-      narratives = _dynamicStopTimeNarrativesByTripIdAndStopTimeSequence.get(trip.getId());
-    }
-    if (narratives == null)
-      return getNarrativeFromPattern(entry);
+
     if (narratives == null) {
       return null;
     }
-    // if our trip started midway through the stopping pattern, we need to calculate an offset
-    int offset =  (narratives.size() - trip.getStopTimes().size());
-    return narratives.get(index + offset);
+    return narratives.get(index);
   }
 
 
@@ -177,12 +154,6 @@ public final class NarrativeProviderImpl implements Serializable {
   public List<StopTimeNarrative> getStopTimeNarrativesForPattern(AgencyAndId routeId, String directionId, List<AgencyAndId> stopIds) {
     if (_patternToStopTimeNarratives == null) return null;
     List<StopTimeNarrative> results = _patternToStopTimeNarratives.get(new RoutePattern(routeId, directionId, stopIds));
-    if (results == null) {
-      if (_routeDirectionToStopPatterns == null) return results;
-      // not a direct cache hit, dig deeper
-      List<StopPattern> patterns = _routeDirectionToStopPatterns.get(new RouteDirection(routeId, directionId));
-      return find(stopIds, patterns);
-    }
     return results;
   }
 
@@ -205,17 +176,6 @@ public final class NarrativeProviderImpl implements Serializable {
     RoutePattern pattern = new RoutePattern(routeId, directionId, stopIds);
     if (!_patternToStopTimeNarratives.containsKey(pattern))
       _patternToStopTimeNarratives.put(pattern, narratives);
-    RouteDirection routeDirection = new RouteDirection(routeId, directionId);
-    StopPattern stopPattern = new StopPattern(stopIds, narratives);
-    if (!_routeDirectionToStopPatterns.containsKey(routeDirection)) {
-      _routeDirectionToStopPatterns.put(routeDirection, new ArrayList<>());
-    }
-
-    List<StopPattern> stopPatterns = _routeDirectionToStopPatterns.get(routeDirection);
-    // only add this if it doesn't already exist
-    if (find(stopIds, stopPatterns) == null) {
-      stopPatterns.add(stopPattern);
-    }
   }
 
 
