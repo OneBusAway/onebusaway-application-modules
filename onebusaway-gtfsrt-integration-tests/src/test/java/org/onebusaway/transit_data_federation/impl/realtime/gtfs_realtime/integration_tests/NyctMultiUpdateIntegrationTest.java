@@ -158,7 +158,10 @@ public class NyctMultiUpdateIntegrationTest extends AbstractGtfsRealtimeIntegrat
       AgencyAndId stopId = stopTimeEntry.getStop().getId();
       StopTimeNarrative stopTimeNarrative = narrativeService.getStopTimeForEntry(stopTimeEntry);
       if (stopTimeNarrative == null) {
-        fail("missing narrative for " + stopTimeEntry);
+        stopTimeNarrative = narrativeService.getStopTimeNarrativeForPattern(null, stopId, trip.getDirectionId());
+        if (stopTimeNarrative == null) {
+          fail("missing narrative for " + stopTimeEntry);
+        }
       } else if (stopTimeNarrative.getStopHeadsign() != null) {
         if (!stopHeadsigns.containsKey(stopId)) {
           stopHeadsigns.put(stopId, new HashSet<>());

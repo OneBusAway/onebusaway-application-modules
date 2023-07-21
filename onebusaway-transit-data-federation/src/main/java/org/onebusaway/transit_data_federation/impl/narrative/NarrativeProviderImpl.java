@@ -122,7 +122,6 @@ public final class NarrativeProviderImpl implements Serializable {
    * @return
    */
   private StopTimeNarrative getNarrativeFromPattern(StopTimeEntry entry) {
-    AgencyAndId routeId = entry.getTrip().getRoute().getId();
     AgencyAndId stopId = entry.getStop().getId();
     String directionId = entry.getTrip().getDirectionId();
     // we don't use route for now
