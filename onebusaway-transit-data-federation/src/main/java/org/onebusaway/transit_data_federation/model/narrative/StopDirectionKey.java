@@ -32,6 +32,14 @@ public class StopDirectionKey implements Serializable {
     this.directionId = directionId;
   }
 
+  public AgencyAndId getStopId() {
+    return stopId;
+  }
+
+  public String getDirectionId() {
+    return directionId;
+  }
+
   @Override
   public boolean equals(Object obj) {
     if (obj == null)
