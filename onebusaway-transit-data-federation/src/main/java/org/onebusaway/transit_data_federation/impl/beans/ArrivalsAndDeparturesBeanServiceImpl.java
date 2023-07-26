@@ -334,13 +334,15 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
               stop.getId(),
               trip.getDirectionId());
     }
+    TripNarrative tripNarrative = _narrativeService.getTripForId(trip.getId());
     if (stopTimeNarrative == null) {
       // dynamic stops without a narrative, look to trip instead
-      TripNarrative tripNarrative = _narrativeService.getTripForId(trip.getId());
       pab.setRouteShortName(tripNarrative.getRouteShortName());
       pab.setTripHeadsign(tripNarrative.getTripHeadsign());
     } else {
-      pab.setRouteShortName(stopTimeNarrative.getRouteShortName());
+      // use the short name from the trip
+      pab.setRouteShortName(tripNarrative.getRouteShortName());
+      // use the stop headsign from the stop
       pab.setTripHeadsign(stopTimeNarrative.getStopHeadsign());
     }
 
