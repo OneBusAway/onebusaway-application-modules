@@ -225,7 +225,7 @@ public class DynamicTripBuilder {
 
 
   private int toSecondsInDay(long time, long serviceDate) {
-    if (time > serviceDate) {
+    if (time > Integer.MAX_VALUE) {
       // we have millis format
       return Math.toIntExact((time - serviceDate) / 1000);
     }
