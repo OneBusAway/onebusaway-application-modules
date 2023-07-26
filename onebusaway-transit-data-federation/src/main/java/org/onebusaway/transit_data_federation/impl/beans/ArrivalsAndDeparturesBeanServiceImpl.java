@@ -340,8 +340,12 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
       pab.setRouteShortName(tripNarrative.getRouteShortName());
       pab.setTripHeadsign(tripNarrative.getTripHeadsign());
     } else {
-      // use the short name from the trip
-      pab.setRouteShortName(tripNarrative.getRouteShortName());
+      if (tripNarrative != null) {
+        // use the short name from the trip
+        pab.setRouteShortName(tripNarrative.getRouteShortName());
+      } else {
+        pab.setRouteShortName(stopTimeNarrative.getRouteShortName());
+      }
       // use the stop headsign from the stop
       pab.setTripHeadsign(stopTimeNarrative.getStopHeadsign());
     }
