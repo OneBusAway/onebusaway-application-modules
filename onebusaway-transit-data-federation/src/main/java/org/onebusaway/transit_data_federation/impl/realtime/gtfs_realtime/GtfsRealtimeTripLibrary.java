@@ -563,7 +563,15 @@ public class GtfsRealtimeTripLibrary {
 
     if (result != null) {
       if (record.getTripId() != null) {
-        result.addMatchedTripId(record.getTripId().toString());
+        if (record.getStatus().equals(TransitDataConstants.STATUS_ADDED)) {
+          result.addAddedTripId(record.getTripId().toString());
+        } else if (record.getStatus().equals(TransitDataConstants.STATUS_DUPLICATED)) {
+          result.addDuplicatedTripId(record.getTripId().toString());
+        } else if (record.getStatus().equals(TransitDataConstants.STATUS_CANCELED)) {
+          result.addCancelledTripId(record.getTripId().toString());
+        } else {
+          result.addMatchedTripId(record.getTripId().toString());
+        }
       } else if (record.getBlockId() != null) {
         // here we take a matched block as if it were a trip
         result.addMatchedTripId(record.getBlockId().toString());

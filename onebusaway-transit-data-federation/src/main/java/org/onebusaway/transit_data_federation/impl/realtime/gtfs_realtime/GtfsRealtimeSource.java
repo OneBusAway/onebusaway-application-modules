@@ -128,6 +128,8 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
 
   private ScheduledFuture<?> _refreshTask;
 
+  private DataSourceMonitor _monitor;
+
   private URL _tripUpdatesUrl;
 
   private String _sftpTripUpdatesUrl;
@@ -239,6 +241,10 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     this._dynamicBlockIndexService = dynamicBlockIndexService;
   }
 
+  @Autowired
+  public void setDataSourceMonitor(DataSourceMonitor monitor) {
+    this._monitor = monitor;
+  }
   @Autowired
   public void setNarrativeService(NarrativeService service) {
     this._narrativeService = service;
@@ -541,6 +547,7 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
 
     MonitoredResult result = new MonitoredResult();
     result.setAgencyIds(_agencyIds);
+    result.setFeedId(getFeedId());
 
     if (_routeIdsToCancel != null) {
       _cancelService.cancelServiceForRoutes(_routeIdsToCancel);
@@ -700,8 +707,16 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     }
     // NOTE: this implies receiving stale updates is equivalent to not being updated at all
     result.setLastUpdate(newestUpdate);
-    _log.info("Agency " + this.getAgencyIds().get(0) + " has active vehicles=" + seenVehicles.size()
-        + " for updates=" + updates.size() + " with most recent timestamp " + new Date(newestUpdate));
+    if (_monitor != null) {
+      _monitor.logUpdate(result);
+    }
+    _log.info("Agency " + getFeedId() + " has active vehicles=" + seenVehicles.size()
+            + ", matched=" + result.getMatchedTripIds().size()
+            + ", added=" + result.getAddedTripIds().size()
+            + ", duplicated=" + result.getDuplicatedTripIds().size()
+            + ", cancelled=" + result.getCancelledTripIds().size()
+            + " for updates=" + updates.size() + " with most recent timestamp " + new Date(newestUpdate));
+
   }
 
   private boolean isValidLocation(VehicleLocationRecord record, CombinedTripUpdatesAndVehiclePosition update) {
