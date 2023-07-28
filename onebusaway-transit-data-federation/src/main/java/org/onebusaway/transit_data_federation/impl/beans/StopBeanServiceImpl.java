@@ -82,7 +82,7 @@ class StopBeanServiceImpl implements StopBeanService {
     _consolidatedStopsService = consolidatedStopsService;
   }
 
-//  @Cacheable
+  @Cacheable
   /** serviceDate can be null.
    *  If included, the routes returned in the stopBean will be filtered by service date
   **/
@@ -102,7 +102,7 @@ class StopBeanServiceImpl implements StopBeanService {
     return false;
   }
 
-//  @Cacheable
+  @Cacheable
   public StopBean getStopForIdForServiceDate(AgencyAndId id, ServiceDate serviceDate) {
 
     StopEntry stop = _transitGraphDao.getStopEntryForId(id);

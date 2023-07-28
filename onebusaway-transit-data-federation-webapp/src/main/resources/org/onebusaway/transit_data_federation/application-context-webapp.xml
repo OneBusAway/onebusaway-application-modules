@@ -33,4 +33,25 @@
     </bean>
     <bean id="configurationServiceClient" class="org.onebusaway.util.impl.configuration.ConfigurationServiceClientFileImpl" >
     </bean>
+
+    <bean id="getStopForIdCache" class="org.onebusaway.container.spring.ehcache.EhCacheFactoryBean" primary="true">
+        <property name="cacheManager" ref="cacheManager" />
+        <property name="cacheName" value="org.onebusaway.transit_data_federation.services.beans.StopBeanService.getStopForId" />
+        <property name="maxElementsInMemory" value="1000" />
+        <property name="eternal" value="false" />
+        <property name="timeToLive" value="3600" />
+        <property name="timeToIdle" value="3600" />
+        <property name="overflowToDisk" value="false" />
+        <property name="diskPersistent" value="false" />
+    </bean>
+    <bean id="getStopForIdForServiceDateCache" class="org.onebusaway.container.spring.ehcache.EhCacheFactoryBean" primary="true">
+        <property name="cacheManager" ref="cacheManager" />
+        <property name="cacheName" value="org.onebusaway.transit_data_federation.services.beans.StopBeanService.getStopForIdForServiceDate" />
+        <property name="maxElementsInMemory" value="1000" />
+        <property name="eternal" value="false" />
+        <property name="timeToLive" value="3600" />
+        <property name="timeToIdle" value="3600" />
+        <property name="overflowToDisk" value="false" />
+        <property name="diskPersistent" value="false" />
+    </bean>
 </beans>
