@@ -1280,7 +1280,8 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
           refresh();
         }
       } catch (Throwable ex) {
-        _log.warn("Error updating from GTFS-realtime data sources for config {}", getFeedId(), ex, ex);
+        _log.warn("Error updating from GTFS-realtime data sources for config {}, {}", getFeedId(), ex, ex);
+        ex.printStackTrace();
       }
     }
   }
