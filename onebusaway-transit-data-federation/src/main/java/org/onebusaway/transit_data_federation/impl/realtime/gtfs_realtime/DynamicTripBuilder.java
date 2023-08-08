@@ -76,25 +76,30 @@ public class DynamicTripBuilder {
   }
 
   public BlockDescriptor createBlockDescriptor(AddedTripInfo addedTripInfo) {
-    // from the addedTripInfo generate the trips and stops, and return in the block descriptor
-    BlockDescriptor dynamicBd = new BlockDescriptor();
-    dynamicBd.setScheduleRelationship(addedTripInfo.getScheduleRelationship());
-    AgencyAndId blockId = new AgencyAndId(addedTripInfo.getAgencyId(), addedTripInfo.getTripId());
-    // here we look up past blocks, and advance our position along the block
-    BlockInstance instance = _blockIndexService.getDynamicBlockInstance(blockId);
-    if (instance == null) {
-      instance = createBlockInstance(addedTripInfo);
-    }
+    try {
+      // from the addedTripInfo generate the trips and stops, and return in the block descriptor
+      BlockDescriptor dynamicBd = new BlockDescriptor();
+      dynamicBd.setScheduleRelationship(addedTripInfo.getScheduleRelationship());
+      AgencyAndId blockId = new AgencyAndId(addedTripInfo.getAgencyId(), addedTripInfo.getTripId());
+      // here we look up past blocks, and advance our position along the block
+      BlockInstance instance = _blockIndexService.getDynamicBlockInstance(blockId);
+      if (instance == null) {
+        instance = createBlockInstance(addedTripInfo);
+      }
 
-    if (instance == null) {
-      _log.error("unable to create descriptor for additional trip {}", addedTripInfo);
+      if (instance == null) {
+        _log.error("unable to create descriptor for additional trip {}", addedTripInfo);
+        return null;
+      }
+
+      dynamicBd.setBlockInstance(instance);
+      dynamicBd.setStartTime(addedTripInfo.getTripStartTime());
+      dynamicBd.setStartDate(new ServiceDate(new Date(addedTripInfo.getServiceDate())));
+      return dynamicBd;
+    } catch (Throwable t) {
+      _log.error("source-exception {}", t, t);
       return null;
     }
-
-    dynamicBd.setBlockInstance(instance);
-    dynamicBd.setStartTime(addedTripInfo.getTripStartTime());
-    dynamicBd.setStartDate(new ServiceDate(new Date(addedTripInfo.getServiceDate())));
-    return dynamicBd;
   }
 
   private BlockInstance createBlockInstance(AddedTripInfo addedTripInfo) {

@@ -32,7 +32,12 @@ public class DuplicatedTripServiceImpl implements DuplicatedTripService{
 
     @Override
     public AddedTripInfo handleDuplicatedDescriptor(GtfsRealtime.TripUpdate tu) {
-        return getParser().parse(tu);
+        try {
+            return getParser().parse(tu);
+        } catch (Throwable t) {
+            _log.error("source-exception {}", t, t);
+            return null;
+        }
     }
 
     private DuplicatedTripServiceParser getParser() {

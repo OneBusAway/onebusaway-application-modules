@@ -594,7 +594,7 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     List<CombinedTripUpdatesAndVehiclePosition> combinedUpdates = _tripsLibrary.groupTripUpdatesAndVehiclePositions(result,
             tripUpdates, vehiclePositions);
     result.setRecordsTotal(combinedUpdates.size());
-    handleCombinedUpdates(result, combinedUpdates);
+    handleCombinedUpdatesLogged(result, combinedUpdates);
     cacheVehicleLocations(vehiclePositions);
     handleAlerts(alerts);
     handleAlertCollection(alertCollection);
@@ -615,6 +615,14 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     }
   }
 
+  void handleCombinedUpdatesLogged(MonitoredResult result,
+                             List<CombinedTripUpdatesAndVehiclePosition> updates) {
+    try {
+      handleCombinedUpdates(result, updates);
+    } catch (Throwable t) {
+      _log.error("handleCombinedUpdates source-exception: {}", t, t);
+    }
+  }
   // package private for unit tests
    void handleCombinedUpdates(MonitoredResult result,
       List<CombinedTripUpdatesAndVehiclePosition> updates) {

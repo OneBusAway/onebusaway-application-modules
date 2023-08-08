@@ -42,33 +42,38 @@ public class AddedTripServiceImpl implements AddedTripService {
 
   @Override
   public AddedTripInfo handleAddedDescriptor(String agencyId, GtfsRealtime.TripUpdate tu, long currentTime) {
-    AddedTripInfo addedTrip = new AddedTripInfo();
-    if (!tu.hasTrip()) return null;
-    GtfsRealtime.TripDescriptor trip = tu.getTrip();
+    try {
+      AddedTripInfo addedTrip = new AddedTripInfo();
+      if (!tu.hasTrip()) return null;
+      GtfsRealtime.TripDescriptor trip = tu.getTrip();
 
-    addedTrip.setAgencyId(agencyId);
-    addedTrip.setTripStartTime(parseTripStartTime(trip.getStartTime()));
-    addedTrip.setServiceDate(getStartOfDay(new Date(currentTime)).getTime());
-    addedTrip.setScheduleRelationshipValue(trip.getScheduleRelationship().toString());
-    addedTrip.setRouteId(trip.getRouteId());
-    addedTrip.setDirectionId(String.valueOf(trip.getDirectionId()));
-    for (GtfsRealtime.TripUpdate.StopTimeUpdate stopTimeUpdate : tu.getStopTimeUpdateList()) {
-      AddedStopInfo stopInfo = new AddedStopInfo();
-      if (stopTimeUpdate.hasStopId()) {
-        stopInfo.setStopId(stopTimeUpdate.getStopId());
+      addedTrip.setAgencyId(agencyId);
+      addedTrip.setTripStartTime(parseTripStartTime(trip.getStartTime()));
+      addedTrip.setServiceDate(getStartOfDay(new Date(currentTime)).getTime());
+      addedTrip.setScheduleRelationshipValue(trip.getScheduleRelationship().toString());
+      addedTrip.setRouteId(trip.getRouteId());
+      addedTrip.setDirectionId(String.valueOf(trip.getDirectionId()));
+      for (GtfsRealtime.TripUpdate.StopTimeUpdate stopTimeUpdate : tu.getStopTimeUpdateList()) {
+        AddedStopInfo stopInfo = new AddedStopInfo();
+        if (stopTimeUpdate.hasStopId()) {
+          stopInfo.setStopId(stopTimeUpdate.getStopId());
+        }
+        if (stopTimeUpdate.hasArrival() && stopTimeUpdate.getArrival().getTime() > 0) {
+          stopInfo.setArrivalTime(stopTimeUpdate.getArrival().getTime() * 1000);
+        }
+        if (stopTimeUpdate.hasDeparture() && stopTimeUpdate.getDeparture().getTime() > 0) {
+          stopInfo.setDepartureTime(stopTimeUpdate.getDeparture().getTime() * 1000);
+        }
+        if (stopInfo.getArrivalTime() > 0 || stopInfo.getDepartureTime() > 0) {
+          addedTrip.addStopTime(stopInfo);
+        }
       }
-      if (stopTimeUpdate.hasArrival() && stopTimeUpdate.getArrival().getTime() > 0) {
-        stopInfo.setArrivalTime(stopTimeUpdate.getArrival().getTime()*1000);
-      }
-      if (stopTimeUpdate.hasDeparture() && stopTimeUpdate.getDeparture().getTime() > 0) {
-        stopInfo.setDepartureTime(stopTimeUpdate.getDeparture().getTime()*1000);
-      }
-      if (stopInfo.getArrivalTime() > 0 || stopInfo.getDepartureTime() > 0) {
-        addedTrip.addStopTime(stopInfo);
-      }
+
+      return addedTrip;
+    } catch (Throwable t) {
+      _log.error("source-exception {}", t, t);
+      return null;
     }
-
-    return addedTrip;
   }
 
   private int parseTripStartTime(String startTime) {
