@@ -416,6 +416,7 @@ public class GtfsRealtimeTripLibrary {
         GtfsRealtimeNYCT.NyctTripDescriptor nyctTripDescriptor = td.getExtension(GtfsRealtimeNYCT.nyctTripDescriptor);
         _log.debug("parsing trip {}", td.getTripId());
         AddedTripInfo addedTripInfo = _addedTripService.handleNyctDescriptor(tu, nyctTripDescriptor, _currentTime);
+        if (addedTripInfo == null) return null;
         long tripStartTimeMillis = addedTripInfo.getServiceDate() + (addedTripInfo.getTripStartTime() * 1000);
         if (_filterUnassigned && nyctTripDescriptor.hasIsAssigned() && !nyctTripDescriptor.getIsAssigned()) {
           // we are filtering on unassigned and this trip is marked as unassigned
