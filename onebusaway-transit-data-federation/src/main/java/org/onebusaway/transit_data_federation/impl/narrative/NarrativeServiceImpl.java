@@ -18,6 +18,7 @@ package org.onebusaway.transit_data_federation.impl.narrative;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -49,8 +50,7 @@ import org.springframework.stereotype.Component;
 public class NarrativeServiceImpl implements NarrativeService {
 
   private static Logger _log = LoggerFactory.getLogger(NarrativeServiceImpl.class);
-  static final int CACHE_TIMEOUT = 24 * 60 * 60 * 1000; // 1 day
-  private Map<AgencyAndId, TripNarrative> _dynamicTripCache = new PassiveExpiringMap<>(CACHE_TIMEOUT);
+  private Map<AgencyAndId, TripNarrative> _dynamicTripCache = new HashMap<>();
 
   private NarrativeProviderImpl _provider;
 
@@ -68,6 +68,7 @@ public class NarrativeServiceImpl implements NarrativeService {
   @PostConstruct
   @Refreshable(dependsOn = RefreshableResources.NARRATIVE_DATA)
   public void setup() throws IOException, ClassNotFoundException {
+    _dynamicTripCache.clear();
     File path = _bundle.getNarrativeProviderPath();
     if (path.exists()) {
       _provider = ObjectSerializationLibrary.readObject(path);

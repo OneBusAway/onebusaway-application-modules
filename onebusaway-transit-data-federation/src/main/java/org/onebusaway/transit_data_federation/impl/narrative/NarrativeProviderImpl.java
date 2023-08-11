@@ -21,7 +21,9 @@ import java.util.*;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.map.PassiveExpiringMap;
+import org.onebusaway.container.refresh.Refreshable;
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.transit_data_federation.impl.RefreshableResources;
 import org.onebusaway.transit_data_federation.model.ShapePoints;
 import org.onebusaway.transit_data_federation.model.narrative.*;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
@@ -30,7 +32,6 @@ import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
 public final class NarrativeProviderImpl implements Serializable {
 
   private static final long serialVersionUID = 2L;
-  private static final int CACHE_TIMEOUT = 24 * 60 * 60 * 1000; // 1 day
 
   private Map<String, AgencyNarrative> _agencyNarratives = new HashMap<String, AgencyNarrative>();
 
@@ -46,11 +47,16 @@ public final class NarrativeProviderImpl implements Serializable {
 
   private Map<AgencyAndId, ShapePoints> _shapePointsById = new HashMap<AgencyAndId, ShapePoints>();
 
-  Map<AgencyAndId, ShapePoints> _dynamicShapesById = new PassiveExpiringMap<>(CACHE_TIMEOUT);
+  Map<AgencyAndId, ShapePoints> _dynamicShapesById = new HashMap<>();
 
   private Map<StopDirectionKey, RouteAndHeadsignNarrative> _patternCache = new HashMap<>();
 
-  public void setNarrativeForAgency(String agencyId, AgencyNarrative narrative) {
+  @Refreshable(dependsOn = RefreshableResources.TRANSIT_GRAPH)
+  public void reset() {
+    _dynamicShapesById.clear();
+  }
+
+    public void setNarrativeForAgency(String agencyId, AgencyNarrative narrative) {
     _agencyNarratives.put(agencyId, narrative);
   }
 
@@ -179,7 +185,6 @@ public final class NarrativeProviderImpl implements Serializable {
 
 
   public void addShapePoints(ShapePoints shapePoints) {
-    if (_dynamicShapesById == null) _dynamicShapesById = new PassiveExpiringMap<>(CACHE_TIMEOUT);
     _dynamicShapesById.put(shapePoints.getShapeId(), shapePoints);
   }
 
