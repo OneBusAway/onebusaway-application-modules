@@ -21,17 +21,12 @@ import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.LocalizedServiceId;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
-import org.onebusaway.transit_data_federation.impl.transit_graph.StopTimeEntriesFactory;
 import org.onebusaway.transit_data_federation.model.ShapePoints;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
-import org.onebusaway.transit_data_federation.services.blocks.DynamicBlockIndexService;
-import org.onebusaway.transit_data_federation.services.narrative.NarrativeService;
-import org.onebusaway.transit_data_federation.services.shapes.ShapePointService;
 import org.onebusaway.transit_data_federation.services.transit_graph.*;
 import org.onebusaway.transit_data_federation.services.transit_graph.dynamic.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -48,31 +43,17 @@ public class DynamicTripBuilder {
   private static Logger _log = LoggerFactory.getLogger(DynamicTripBuilder.class);
 
   private Map<String, DynamicRouteEntry> _routeCache = new PassiveExpiringMap<>(60 * 60 * 1000);// 1 hour to support bundle changes
-  private StopTimeEntriesFactory _stopTimeEntriesFactory;
-  private DynamicBlockIndexService _blockIndexService;
-  private ShapePointService _shapePointService;
-  private NarrativeService _narrativeService;
 
-  public void setStopTimeEntriesFactory(
-          StopTimeEntriesFactory stopTimeEntriesFactory) {
-    _stopTimeEntriesFactory = stopTimeEntriesFactory;
-  }
-  public void setBlockIndexService(DynamicBlockIndexService blockIndexService) {
-    _blockIndexService = blockIndexService;
+  private GtfsRealtimeServiceSource _serviceSource;
+
+  public void setServiceSource(GtfsRealtimeServiceSource serviceSource) {
+    this._serviceSource = serviceSource;
   }
 
-  private TransitGraphDao _graph;
-  public void setTransitGraphDao(TransitGraphDao dao) {
-    _graph = dao;
-  }
+  private GtfsRealtimeEntitySource _entitySource;
 
-
-  public void setShapePointService(ShapePointService service) {
-    _shapePointService = service;
-  }
-
-  public void setNarrativeService(NarrativeService service) {
-    _narrativeService = service;
+  public void setEntityource(GtfsRealtimeEntitySource dataSource) {
+    this._entitySource = dataSource;
   }
 
   public BlockDescriptor createBlockDescriptor(AddedTripInfo addedTripInfo) {
@@ -82,7 +63,7 @@ public class DynamicTripBuilder {
       dynamicBd.setScheduleRelationship(addedTripInfo.getScheduleRelationship());
       AgencyAndId blockId = new AgencyAndId(addedTripInfo.getAgencyId(), addedTripInfo.getTripId());
       // here we look up past blocks, and advance our position along the block
-      BlockInstance instance = _blockIndexService.getDynamicBlockInstance(blockId);
+      BlockInstance instance = _serviceSource.getBlockIndexService().getDynamicBlockInstance(blockId);
       if (instance == null) {
         instance = createBlockInstance(addedTripInfo);
       }
@@ -144,7 +125,7 @@ public class DynamicTripBuilder {
   }
 
   private AgencyAndId createShape(DynamicTripEntryImpl trip, AgencyAndId shapeId) {
-    ShapePoints shapePointsForShapeId = _shapePointService.getShapePointsForShapeId(shapeId);
+    ShapePoints shapePointsForShapeId = _serviceSource.getShapePointService().getShapePointsForShapeId(shapeId);
     if (shapePointsForShapeId == null) {
       createShapePoints(trip, shapeId);
     }
@@ -165,7 +146,7 @@ public class DynamicTripBuilder {
     shapePoints.setLats(lats.stream().mapToDouble(Double::doubleValue).toArray());
     shapePoints.setLons(lons.stream().mapToDouble(Double::doubleValue).toArray());
     shapePoints.ensureDistTraveled();
-    _narrativeService.addShapePoints(shapePoints);
+    _serviceSource.getNarrativeService().addShapePoints(shapePoints);
   }
 
   private String getGtfsDirectionId(String directionFlag) {
@@ -180,6 +161,7 @@ public class DynamicTripBuilder {
     List<StopTimeEntry> stops = new ArrayList<>();
     int sequence = 0;
     for (AddedStopInfo stopInfo : addedTripInfo.getStops()) {
+      if (stopInfo == null) continue;
       StopEntry stop = findStop(addedTripInfo.getAgencyId(), stopInfo.getStopId());
       if (stop == null) {
         // some stops are timepoints/internal and not public
@@ -206,7 +188,7 @@ public class DynamicTripBuilder {
     }
     ShapePoints shapePoints = null;
     shapePoints = loadShapePoints(trip);
-    _stopTimeEntriesFactory.ensureStopTimesHaveShapeDistanceTraveledSet(stops, shapePoints);
+    _serviceSource.getStopTimeEntriesFactory().ensureStopTimesHaveShapeDistanceTraveledSet(stops, shapePoints);
     return stops;
   }
 
@@ -245,7 +227,7 @@ public class DynamicTripBuilder {
   }
 
   private StopEntry findStop(String agencyId, String stopId) {
-    return _graph.getStopEntryForId(new AgencyAndId(agencyId, stopId), false);
+    return _entitySource.getStop(new AgencyAndId(agencyId, stopId));
   }
 
   private double calculateTripDistance(DynamicTripEntryImpl trip) {
@@ -293,7 +275,7 @@ public class DynamicTripBuilder {
   }
 
   private RouteEntry findRouteEntry(String agency, String routeId) {
-    return _graph.getRouteForId(new AgencyAndId(agency, routeId));
+    return _entitySource.getRoute(new AgencyAndId(agency, routeId));
   }
 
   private BlockEntry createBlockEntry(AddedTripInfo addedTripInfo) {

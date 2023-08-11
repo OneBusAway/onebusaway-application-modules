@@ -626,4 +626,7 @@ public interface TransitDataService extends FederatedService {
    */
   @FederatedByAgencyIdMethod
   ListBean<RouteGroupingBean> getCanonicalRoute(long serviceDate, AgencyAndId routeId);
+
+  @FederatedByAgencyIdMethod
+  StopDirectionSwap findStopDirectionSwap(AgencyAndId routeId, String directionId, AgencyAndId stopId);
 }

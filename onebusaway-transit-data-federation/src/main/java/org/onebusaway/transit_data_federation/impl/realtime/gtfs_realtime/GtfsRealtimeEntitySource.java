@@ -49,6 +49,10 @@ class GtfsRealtimeEntitySource {
     _agencyIds = agencyIds;
   }
 
+  public RouteEntry getRoute(AgencyAndId routeId) {
+    return _transitGraphDao.getRouteForId(routeId);
+  }
+
   /**
    * Given a route id without an agency prefix, we attempt to find a
    * {@link RouteEntry} with the specified id by cycling through the set of
@@ -121,6 +125,10 @@ class GtfsRealtimeEntitySource {
     return null;
   }
 
+  public StopEntry getStop(AgencyAndId stopId) {
+    return _transitGraphDao.getStopEntryForId(stopId, false);
+  }
+
   public Id getStopId(String stopId) {
 
     for (String agencyId : _agencyIds) {
@@ -177,4 +185,15 @@ class GtfsRealtimeEntitySource {
   public List<String> getAgencyIds() {
     return _agencyIds;
   }
+
+  public boolean isGraphReady() {
+    try {
+      return _transitGraphDao != null
+              && _transitGraphDao.getAllRoutes() != null
+              && !_transitGraphDao.getAllRoutes().isEmpty();
+    } catch (Throwable t) {
+      return false;
+    }
+  }
+
 }

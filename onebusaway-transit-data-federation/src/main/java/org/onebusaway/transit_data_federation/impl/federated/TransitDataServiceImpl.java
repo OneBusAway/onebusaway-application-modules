@@ -477,6 +477,11 @@ public class TransitDataServiceImpl implements TransitDataService {
   }
 
   @Override
+  public StopDirectionSwap findStopDirectionSwap(AgencyAndId routeId, String directionId, AgencyAndId stopId) {
+    return _transitDataService.findStopDirectionSwap(routeId, directionId, stopId);
+  }
+
+  @Override
   public void removeAllServiceAlertsForAgencyId(String agencyId) {
     blockUntilBundleIsReady();
     _transitDataService.removeAllServiceAlertsForAgencyId(agencyId);

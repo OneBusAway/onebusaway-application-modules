@@ -17,6 +17,8 @@ package org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime;
 
 import com.google.transit.realtime.GtfsRealtime;
 import com.google.transit.realtime.GtfsRealtimeNYCT;
+import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.transit_data.model.StopDirectionSwap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,14 +36,21 @@ public class AddedTripServiceImpl implements AddedTripService {
   private static final Logger _log = LoggerFactory.getLogger(AddedTripServiceImpl.class);
   private NyctTripService nycService = new NyctTripServiceImpl();
   @Override
-  public AddedTripInfo handleNyctDescriptor(GtfsRealtime.TripUpdate tu, GtfsRealtimeNYCT.NyctTripDescriptor nyctTripDescriptor,
+  public AddedTripInfo handleNyctDescriptor(GtfsRealtimeServiceSource serviceSource, GtfsRealtime.TripUpdate tu, GtfsRealtimeNYCT.NyctTripDescriptor nyctTripDescriptor,
                                             long currentTime) {
     AddedTripInfo info = nycService.parse(tu,nyctTripDescriptor, currentTime);
+    if (info != null) {
+      if (info.getStops() != null) {
+        for (AddedStopInfo addedStop : info.getStops()) {
+          enforceWrongwayConcurrency(serviceSource, info, addedStop);
+        }
+      }
+    }
     return info;
   }
 
   @Override
-  public AddedTripInfo handleAddedDescriptor(String agencyId, GtfsRealtime.TripUpdate tu, long currentTime) {
+  public AddedTripInfo handleAddedDescriptor(GtfsRealtimeServiceSource serviceSource, String agencyId, GtfsRealtime.TripUpdate tu, long currentTime) {
     try {
       AddedTripInfo addedTrip = new AddedTripInfo();
       if (!tu.hasTrip()) return null;
@@ -65,6 +74,7 @@ public class AddedTripServiceImpl implements AddedTripService {
           stopInfo.setDepartureTime(stopTimeUpdate.getDeparture().getTime() * 1000);
         }
         if (stopInfo.getArrivalTime() > 0 || stopInfo.getDepartureTime() > 0) {
+          enforceWrongwayConcurrency(serviceSource, addedTrip, stopInfo);
           addedTrip.addStopTime(stopInfo);
         }
       }
@@ -74,6 +84,23 @@ public class AddedTripServiceImpl implements AddedTripService {
       _log.error("source-exception {}", t, t);
       return null;
     }
+  }
+
+  private void enforceWrongwayConcurrency(GtfsRealtimeServiceSource serviceSource, AddedTripInfo info, AddedStopInfo stopInfo) {
+    if (stopInfo == null) return;
+    StopDirectionSwap swap = serviceSource.getStopSwapService().findStopDirectionSwap(new AgencyAndId(info.getAgencyId(), info.getRouteId()),
+            mapDirection(info.getDirectionId()),
+            new AgencyAndId(info.getAgencyId(), stopInfo.getStopId()));
+    if (swap == null) return;
+    stopInfo.setStopId(AgencyAndId.convertToString(swap.getToStop()));
+  }
+
+  private String mapDirection(String compassDirection) {
+    if ("N".equals(compassDirection))
+      return "0";
+    if ("S".equals(compassDirection))
+      return "1";
+    return "-1";
   }
 
   private int parseTripStartTime(String startTime) {

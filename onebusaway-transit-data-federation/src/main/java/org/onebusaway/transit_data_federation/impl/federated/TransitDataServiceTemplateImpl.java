@@ -147,6 +147,9 @@ public class TransitDataServiceTemplateImpl implements TransitDataServiceTemplat
   @Autowired
   private CanonicalRoutesService _canonicalRouteServce;
 
+  @Autowired
+  private StopSwapService _stopSwapService;
+
   /****
    * {@link TransitDataService} Interface
    ****/
@@ -779,6 +782,9 @@ public class TransitDataServiceTemplateImpl implements TransitDataServiceTemplat
     return ret;
   }
 
+  public StopDirectionSwap findStopDirectionSwap(AgencyAndId routeId, String directionId, AgencyAndId stopId) {
+    return _stopSwapService.findStopDirectionSwap(routeId, directionId, stopId);
+  }
   /****
    * Private Methods
    ****/

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2023 Cambridge Systematics, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.onebusaway.transit_data_federation.services.bundle;
+package org.onebusaway.transit_data_federation.services;
 
-public interface TransitDataServiceTemplate {
+import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.transit_data.model.StopDirectionSwap;
 
+/**
+ * Service to manage swapping of stops, aka wrong-way concurrencies.
+ */
+public interface StopSwapService {
+  StopDirectionSwap findStopDirectionSwap(AgencyAndId routeId, String directionId, AgencyAndId stopId);
 }

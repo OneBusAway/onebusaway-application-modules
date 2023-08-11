@@ -73,16 +73,8 @@ public class GtfsRealtimeTripLibrary {
 
   private static Pattern _pattern = Pattern.compile("^(-{0,1}\\d+):(\\d{2}):(\\d{2})$");
   private GtfsRealtimeEntitySource _entitySource;
+  private GtfsRealtimeServiceSource _serviceSource;
 
-  private BlockCalendarService _blockCalendarService;
-   
-  private BlockGeospatialService _blockGeospatialService;
-
-  private AddedTripService _addedTripService;
-
-  private DuplicatedTripService _duplicatedTripService;
-
-  private DynamicTripBuilder _dynamicTripBuilder;
   /**
    * This is primarily here to assist with unit testing.
    */
@@ -108,9 +100,7 @@ public class GtfsRealtimeTripLibrary {
     _entitySource = entitySource;
   }
 
-  public void setBlockCalendarService(BlockCalendarService blockCalendarService) {
-    _blockCalendarService = blockCalendarService;
-  }
+  public void setServiceSource(GtfsRealtimeServiceSource serviceSource) { _serviceSource = serviceSource; }
 
   public long getCurrentTime() {
     return _currentTime;
@@ -141,21 +131,6 @@ public class GtfsRealtimeTripLibrary {
     _scheduleAdherenceFromLocation = scheduleAdherenceFromLocation;
   }
   
-  public void setBlockGeospatialService(BlockGeospatialService blockGeospatialService) {
-    _blockGeospatialService = blockGeospatialService;
-  }
-
-  public void setAddedTripService(AddedTripService addedTripService) {
-    _addedTripService = addedTripService;
-  }
-
-  public void setDuplicatedTripService(DuplicatedTripService duplicatedTripService) {
-    _duplicatedTripService = duplicatedTripService;
-  }
-
-  public void setDynamicTripBuilder(DynamicTripBuilder builder) {
-    _dynamicTripBuilder = builder;
-  }
   /**
    * use the vehicle label as the id.
    * @param useLabelAsVehicleId
@@ -222,8 +197,8 @@ public class GtfsRealtimeTripLibrary {
       }
       if (tu.hasTrip() && TransitDataConstants.STATUS_DUPLICATED.equals(tu.getTrip().getScheduleRelationship().toString())) {
         result.addAddedTripId(tu.getTrip().getTripId()); // for now we also consider this an ADDED trip
-        AddedTripInfo addedTripInfo = _duplicatedTripService.handleDuplicatedDescriptor(tu);
-        bd =_dynamicTripBuilder.createBlockDescriptor(addedTripInfo);
+        AddedTripInfo addedTripInfo = _serviceSource.getDuplicatedTripService().handleDuplicatedDescriptor(tu);
+        bd = _serviceSource.getDynamicTripBuilder().createBlockDescriptor(addedTripInfo);
         if (bd == null) continue; // we failed
         anonymousTripUpdatesByBlock.put(bd, tu);
         continue; // don't let this trip update be processed
@@ -415,7 +390,7 @@ public class GtfsRealtimeTripLibrary {
       if (td.hasExtension(GtfsRealtimeNYCT.nyctTripDescriptor)) {
         GtfsRealtimeNYCT.NyctTripDescriptor nyctTripDescriptor = td.getExtension(GtfsRealtimeNYCT.nyctTripDescriptor);
         _log.debug("parsing trip {}", td.getTripId());
-        AddedTripInfo addedTripInfo = _addedTripService.handleNyctDescriptor(tu, nyctTripDescriptor, _currentTime);
+        AddedTripInfo addedTripInfo = _serviceSource.getAddedTripService().handleNyctDescriptor(_serviceSource, tu, nyctTripDescriptor, _currentTime);
         if (addedTripInfo == null) return null;
         long tripStartTimeMillis = addedTripInfo.getServiceDate() + (addedTripInfo.getTripStartTime() * 1000);
         if (_filterUnassigned && nyctTripDescriptor.hasIsAssigned() && !nyctTripDescriptor.getIsAssigned()) {
@@ -428,13 +403,13 @@ public class GtfsRealtimeTripLibrary {
           return null;
         }
         // convert to blockDescriptor
-        return _dynamicTripBuilder.createBlockDescriptor(addedTripInfo);
+        return _serviceSource.getDynamicTripBuilder().createBlockDescriptor(addedTripInfo);
 
       } else {
         if (td.getScheduleRelationship().equals(TripDescriptor.ScheduleRelationship.ADDED)) {
-          AddedTripInfo addedTripInfo = _addedTripService.handleAddedDescriptor(_entitySource.getAgencyIds().get(0), tu, _currentTime);
+          AddedTripInfo addedTripInfo = _serviceSource.getAddedTripService().handleAddedDescriptor(_serviceSource, _entitySource.getAgencyIds().get(0), tu, _currentTime);
           if (addedTripInfo != null) {
-            return _dynamicTripBuilder.createBlockDescriptor(addedTripInfo);
+            return _serviceSource.getDynamicTripBuilder().createBlockDescriptor(addedTripInfo);
           }
         }
       }
@@ -852,7 +827,7 @@ public class GtfsRealtimeTripLibrary {
       }
 
       if (serviceDate != null) {
-        instance = _blockCalendarService.getBlockInstance(block.getId(),
+        instance = _serviceSource.getBlockCalendarService().getBlockInstance(block.getId(),
                 serviceDate.getAsDate().getTime());
         if (instance == null) {
           _log.debug("block " + block.getId() + " does not exist on service date "
@@ -865,11 +840,11 @@ public class GtfsRealtimeTripLibrary {
         long timeFrom = currentTime - 30 * 60 * 1000;
         long timeTo = currentTime + 30 * 60 * 1000;
 
-        List<BlockInstance> instances = _blockCalendarService.getActiveBlocks(
+        List<BlockInstance> instances = _serviceSource.getBlockCalendarService().getActiveBlocks(
                 block.getId(), timeFrom, timeTo);
 
         if (instances.isEmpty()) {
-          instances = _blockCalendarService.getClosestActiveBlocks(block.getId(),
+          instances = _serviceSource.getBlockCalendarService().getClosestActiveBlocks(block.getId(),
                   currentTime);
         }
 
@@ -1308,7 +1283,7 @@ public class GtfsRealtimeTripLibrary {
       CoordinatePoint location = new CoordinatePoint(position.getLatitude(), position.getLongitude());
       double totalDistance = blockDescriptor.getBlockInstance().getBlock().getTotalBlockDistance();
       long timestamp = vehiclePosition.hasTimestamp() ? record.getTimeOfLocationUpdate() : record.getTimeOfRecord();
-      ScheduledBlockLocation loc = _blockGeospatialService.getBestScheduledBlockLocationForLocation(
+      ScheduledBlockLocation loc = _serviceSource.getBlockGeospatialService().getBestScheduledBlockLocationForLocation(
           blockDescriptor.getBlockInstance(), location, timestamp, 0, totalDistance);
       
       long serviceDateTime = record.getServiceDate();
