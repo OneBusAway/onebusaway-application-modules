@@ -71,10 +71,10 @@ public class DynamicBlockIndexServiceImpl implements DynamicBlockIndexService {
 
   @Refreshable(dependsOn = RefreshableResources.TRANSIT_GRAPH)
   public void reset() {
-    blockTripIndexByRouteCollectionId.clear();
-    cacheByBlockId.clear();
-    blockStopTimeIndicesByStopId.clear();
-    blockTripByBlockId.clear();
+//    blockTripIndexByRouteCollectionId.clear();
+//    cacheByBlockId.clear();
+//    blockStopTimeIndicesByStopId.clear();
+//    blockTripByBlockId.clear();
   }
   @Override
   public List<BlockStopTimeIndex> getStopTimeIndicesForStop(StopEntry stopEntry) {

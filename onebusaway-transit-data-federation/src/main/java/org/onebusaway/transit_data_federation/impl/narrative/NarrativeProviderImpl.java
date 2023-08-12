@@ -53,7 +53,7 @@ public final class NarrativeProviderImpl implements Serializable {
 
   @Refreshable(dependsOn = RefreshableResources.TRANSIT_GRAPH)
   public void reset() {
-    _dynamicShapesById.clear();
+//    _dynamicShapesById.clear();
   }
 
     public void setNarrativeForAgency(String agencyId, AgencyNarrative narrative) {

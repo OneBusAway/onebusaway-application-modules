@@ -46,9 +46,9 @@ public class DynamicGraphImpl implements DynamicGraph {
 
   @Refreshable(dependsOn = RefreshableResources.TRANSIT_GRAPH)
   public void reset() {
-    blockEntryById.clear();
-    tripEntryById.clear();
-    routeEntryById.clear();
+//    blockEntryById.clear();
+//    tripEntryById.clear();
+//    routeEntryById.clear();
   }
   @Override
   public void registerTrip(TripEntry tripEntry) {
