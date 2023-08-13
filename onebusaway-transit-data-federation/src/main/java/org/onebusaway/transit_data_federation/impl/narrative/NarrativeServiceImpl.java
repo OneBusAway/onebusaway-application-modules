@@ -68,7 +68,7 @@ public class NarrativeServiceImpl implements NarrativeService {
   @PostConstruct
   @Refreshable(dependsOn = RefreshableResources.NARRATIVE_DATA)
   public void setup() throws IOException, ClassNotFoundException {
-    _dynamicTripCache.clear();
+//    _dynamicTripCache.clear();
     File path = _bundle.getNarrativeProviderPath();
     if (path.exists()) {
       _provider = ObjectSerializationLibrary.readObject(path);
