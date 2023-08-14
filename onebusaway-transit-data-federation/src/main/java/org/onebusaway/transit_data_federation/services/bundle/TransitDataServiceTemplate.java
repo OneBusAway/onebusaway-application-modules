@@ -15,9 +15,6 @@
  */
 package org.onebusaway.transit_data_federation.services.bundle;
 
-import org.onebusaway.transit_data.services.TransitDataService;
-
-public interface TransitDataServiceTemplate{
-
+public interface TransitDataServiceTemplate {
 
 }

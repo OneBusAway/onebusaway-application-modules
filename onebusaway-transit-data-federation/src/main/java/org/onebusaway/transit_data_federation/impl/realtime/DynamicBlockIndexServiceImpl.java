@@ -16,7 +16,9 @@
 package org.onebusaway.transit_data_federation.impl.realtime;
 
 import org.apache.commons.collections4.map.PassiveExpiringMap;
+import org.onebusaway.container.refresh.Refreshable;
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.transit_data_federation.impl.RefreshableResources;
 import org.onebusaway.transit_data_federation.impl.blocks.BlockIndexFactoryServiceImpl;
 import org.onebusaway.transit_data_federation.impl.blocks.BlockStopTimeIndicesFactory;
 import org.onebusaway.transit_data_federation.model.narrative.StopTimeNarrative;
@@ -43,21 +45,20 @@ public class DynamicBlockIndexServiceImpl implements DynamicBlockIndexService {
 
   private static Logger _log = LoggerFactory.getLogger(DynamicBlockIndexServiceImpl.class);
 
-  static final int CACHE_TIMEOUT = 12 * 60 * 60 * 1000; // 12 hours
   @Autowired
   private BlockIndexFactoryServiceImpl blockIndexFactoryService;
   private NarrativeService _narrativeService;
 
   private DynamicGraph _dynamicGraph;
 
-  private Map<AgencyAndId, List<BlockTripIndex>> blockTripIndexByRouteCollectionId = new PassiveExpiringMap<>(CACHE_TIMEOUT);
+  private Map<AgencyAndId, List<BlockTripIndex>> blockTripIndexByRouteCollectionId = new HashMap<>();
   private BlockStopTimeIndicesFactory blockStopTimeIndicesFactory = new BlockStopTimeIndicesFactory();
-  // we trivially expire the cache after CACHE_TIMEOUT minutes
-  private Map<AgencyAndId, BlockInstance> cacheByBlockId = new PassiveExpiringMap<>(CACHE_TIMEOUT);
-  // we trivially expire the cache after CACHE_TIMEOUT minutes
-  private Map<AgencyAndId, Set<BlockStopTimeIndex>> blockStopTimeIndicesByStopId = new PassiveExpiringMap<>(CACHE_TIMEOUT);
 
-  private Map<AgencyAndId, List<BlockTripIndex>> blockTripByBlockId = new PassiveExpiringMap<>(CACHE_TIMEOUT);
+  private Map<AgencyAndId, BlockInstance> cacheByBlockId = new HashMap<>();
+
+  private Map<AgencyAndId, Set<BlockStopTimeIndex>> blockStopTimeIndicesByStopId = new HashMap<>();
+
+  private Map<AgencyAndId, List<BlockTripIndex>> blockTripByBlockId = new HashMap<>();
   @Autowired
   public void setNarrativeService(NarrativeService narrativeService) {
     _narrativeService = narrativeService;
@@ -66,6 +67,14 @@ public class DynamicBlockIndexServiceImpl implements DynamicBlockIndexService {
   @Autowired
   public void setDynamicGraph(DynamicGraph dynamicGraph) {
     _dynamicGraph = dynamicGraph;
+  }
+
+  @Refreshable(dependsOn = RefreshableResources.TRANSIT_GRAPH)
+  public void reset() {
+//    blockTripIndexByRouteCollectionId.clear();
+//    cacheByBlockId.clear();
+//    blockStopTimeIndicesByStopId.clear();
+//    blockTripByBlockId.clear();
   }
   @Override
   public List<BlockStopTimeIndex> getStopTimeIndicesForStop(StopEntry stopEntry) {
@@ -108,10 +117,6 @@ public class DynamicBlockIndexServiceImpl implements DynamicBlockIndexService {
       List<AgencyAndId> stopIds = new ArrayList<>();
       for (BlockStopTimeEntry blockStopTimeEntry : blockTripIndex.getTrips().get(0).getStopTimes()) {
           stopIds.add(blockStopTimeEntry.getStopTime().getStop().getId());
-      }
-      List<StopTimeNarrative> stopTimeNarratives = _narrativeService.getStopTimeNarrativesForPattern(route.getId(), trip.getDirectionId(), stopIds);
-      if (stopTimeNarratives != null) {
-        _narrativeService.addStopNarrativesForTrip(trip.getId(), stopTimeNarratives);
       }
     }
 

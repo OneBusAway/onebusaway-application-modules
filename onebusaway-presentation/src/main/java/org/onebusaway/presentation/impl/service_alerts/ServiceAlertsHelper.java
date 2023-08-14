@@ -499,7 +499,9 @@ public class ServiceAlertsHelper {
     if (vehicleJourneys.getAffectedVehicleJourney().size() > 0) {
       affectsStructure.setVehicleJourneys(vehicleJourneys);
     }
-    if ((vehicleJourneys.getAffectedVehicleJourney().size() > 0) || hasOperators) {
+    if ((vehicleJourneys.getAffectedVehicleJourney().size() > 0) ||
+            hasOperators ||
+            affectsStructure.getStopPoints().getAffectedStopPoint().size()>0) {
       ptSituation.setAffects(affectsStructure);
     }
 

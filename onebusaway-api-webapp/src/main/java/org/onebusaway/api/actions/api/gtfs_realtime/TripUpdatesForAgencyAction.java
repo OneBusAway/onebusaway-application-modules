@@ -105,9 +105,6 @@ public class TripUpdatesForAgencyAction extends GtfsRealtimeActionSupport {
     for (TripDetailsBean tripDetailsBean : tripsForAgency.getList()) {
       if (tripDetailsBean.getStatus() != null) {
         String status = tripDetailsBean.getStatus().getStatus();
-        if (!"default".equals(status)) {
-          System.out.println("status=" + status);
-        }
         if (TransitDataConstants.STATUS_CANCELED.equals(tripDetailsBean.getStatus().getStatus())) {
           FeedEntity.Builder entity = feed.addEntityBuilder();
 

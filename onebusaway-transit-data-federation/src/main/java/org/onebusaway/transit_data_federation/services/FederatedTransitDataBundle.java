@@ -141,4 +141,7 @@ public class FederatedTransitDataBundle {
 
   public File getCanonicalRoutePath() { return new File(_path, "CanonicalRoute.obj"); }
 
+  public File getStopSwapPath() {
+    return new File(_path, "WrongWayConcurrencies.obj");
+  }
 }

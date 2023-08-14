@@ -118,6 +118,17 @@ public abstract class MetricResource {
             tripIds.add(tripId);
           }
         }
+        // we alter our definition of inservice to include added and duplicated trips
+        for (String tripId : result.getAddedTripIds()) {
+          if (agencyId.equals(AgencyAndIdLibrary.convertFromString(tripId).getAgencyId())) {
+            tripIds.add(tripId);
+          }
+        }
+        for (String tripId : result.getDuplicatedTripIds()) {
+          if (agencyId.equals(AgencyAndIdLibrary.convertFromString(tripId).getAgencyId())) {
+            tripIds.add(tripId);
+          }
+        }
       }
     }
     List<String> prunedTripIds = new ArrayList<String>(tripIds.size());

@@ -150,12 +150,18 @@ public class NyctMultiUpdateIntegrationTest extends AbstractGtfsRealtimeIntegrat
             .getTripEntryForId(AgencyAndIdLibrary.convertFromString(bean.getTrip().getId()));
     String tripId = trip.getId().toString();
 
+    assertNotNull(bean.getTrip().getShapeId()); // trip must have a shape
+    AgencyAndId shapeId = AgencyAndId.convertFromString(bean.getTrip().getShapeId());
+
     NarrativeService narrativeService = getBundleLoader().getApplicationContext().getBean(NarrativeService.class);
     for (StopTimeEntry stopTimeEntry : trip.getStopTimes()) {
       AgencyAndId stopId = stopTimeEntry.getStop().getId();
       StopTimeNarrative stopTimeNarrative = narrativeService.getStopTimeForEntry(stopTimeEntry);
       if (stopTimeNarrative == null) {
-        fail("missing narrative for " + stopTimeEntry);
+        stopTimeNarrative = narrativeService.getStopTimeNarrativeForPattern(null, stopId, trip.getDirectionId());
+        if (stopTimeNarrative == null) {
+          fail("missing narrative for " + stopTimeEntry);
+        }
       } else if (stopTimeNarrative.getStopHeadsign() != null) {
         if (!stopHeadsigns.containsKey(stopId)) {
           stopHeadsigns.put(stopId, new HashSet<>());
@@ -163,6 +169,13 @@ public class NyctMultiUpdateIntegrationTest extends AbstractGtfsRealtimeIntegrat
         stopHeadsigns.get(stopId).add(bean.getTrip().getRoute().getId() + ":" + stopTimeEntry.getStop().getId() + ":" + stopTimeNarrative.getStopHeadsign());
       }
     }
+    // verify the shape exists
+    boolean foundShape = narrativeService.getShapePointsForId(shapeId) != null;
+    if (!foundShape) {
+      _log.error("no shape for trip {}", tripId);
+      fail();
+    }
+
   }
 
   private void verifyPredictions(ArrivalAndDepartureBean bean) {
