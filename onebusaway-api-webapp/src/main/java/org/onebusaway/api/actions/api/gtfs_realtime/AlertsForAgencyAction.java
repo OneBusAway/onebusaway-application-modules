@@ -16,7 +16,6 @@
 package org.onebusaway.api.actions.api.gtfs_realtime;
 
 
-import org.apache.struts2.ServletActionContext;
 import org.onebusaway.alerts.impl.ServiceAlertBuilderHelper;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data.model.ListBean;
@@ -25,28 +24,17 @@ import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
 import com.google.transit.realtime.GtfsRealtime.FeedMessage;
 import org.onebusaway.transit_data.model.service_alerts.SituationAffectsBean;
 
-import javax.servlet.http.HttpServletResponse;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.Locale;
-import java.util.TimeZone;
 
 public class AlertsForAgencyAction extends GtfsRealtimeActionSupport {
 
   private static final long serialVersionUID = 1L;
-  private static final SimpleDateFormat _sdf;
-
-  static {
-    _sdf = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss 'GMT' ", Locale.US);
-    _sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
-  }
 
   @Override
   protected void fillFeedMessage(FeedMessage.Builder feed, String agencyId,
       long timestamp, FILTER_TYPE filterType, String filterValue) {
 
-    long feedTimestamp = feed.getHeader().getTimestamp();
+    long feedTimestamp = feed.getHeader().hasTimestamp() ? feed.getHeader().getTimestamp() : timestamp;
     ListBean<ServiceAlertBean> alerts = _service.getAllServiceAlertsForAgencyId(agencyId);
     if (FILTER_TYPE.ROUTE_ID == filterType) {
       ArrayList<ServiceAlertBean> filteredList = new ArrayList<>();
@@ -73,19 +61,6 @@ public class AlertsForAgencyAction extends GtfsRealtimeActionSupport {
     } else {
       ServiceAlertBuilderHelper.fillFeedMessage(feed, alerts, agencyId, timestamp);
     }
-
-    if(feedTimestamp != 0){
-      long lastModifiedMills = feedTimestamp * 1000L;
-      String lastModifiedHeader = _sdf.format(new Date(lastModifiedMills));
-      HttpServletResponse response = ServletActionContext.getResponse();
-      response.setHeader("Last-Modified", lastModifiedHeader);
-    } else {
-      long lastModifiedMills = timestamp * 1000L;
-      String lastModifiedHeader = _sdf.format(new Date(lastModifiedMills));
-
-      HttpServletResponse response = ServletActionContext.getResponse();
-      response.setHeader("Last-Modified", lastModifiedHeader);
-    }
-
+    setLastModifiedHeader(feedTimestamp);
   }
 }

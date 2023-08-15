@@ -16,8 +16,7 @@
  */
 package org.onebusaway.api.actions.api.gtfs_realtime;
 
-import com.google.transit.realtime.GtfsRealtime;
-import org.apache.struts2.ServletActionContext;
+
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data.model.*;
 import org.onebusaway.transit_data.model.trips.*;
@@ -29,7 +28,6 @@ import com.google.transit.realtime.GtfsRealtime.TripUpdate;
 import com.google.transit.realtime.GtfsRealtime.VehicleDescriptor;
 import org.onebusaway.util.AgencyAndIdLibrary;
 
-import javax.servlet.http.HttpServletResponse;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -37,17 +35,11 @@ public class TripUpdatesForAgencyAction extends GtfsRealtimeActionSupport {
 
   private static final long serialVersionUID = 2L;
 
-  private static final SimpleDateFormat _sdf;
-
-  static {
-    _sdf = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss 'GMT' ", Locale.US);
-    _sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
-  }
   @Override
   protected void fillFeedMessage(FeedMessage.Builder feed, String agencyId,
       long timestamp, FILTER_TYPE filterType, String filterValue) {
 
-    long feedTimestamp = feed.getHeader().getTimestamp();
+    long feedTimestamp = feed.getHeader().hasTimestamp() ? feed.getHeader().getTimestamp() : timestamp;
     ListBean<VehicleStatusBean> vehicles = _service.getAllVehiclesForAgency(
         agencyId, timestamp);
 
@@ -82,18 +74,7 @@ public class TripUpdatesForAgencyAction extends GtfsRealtimeActionSupport {
         vehicleDesc.setId(normalizeId(vehicle.getVehicleId()));
       }
     }
-    if(feedTimestamp != 0){
-      long lastModifiedMills = feedTimestamp * 1000L;
-      String lastModifiedHeader = _sdf.format(new Date(lastModifiedMills));
-      HttpServletResponse response = ServletActionContext.getResponse();
-      response.setHeader("Last-Modified", lastModifiedHeader);
-    } else {
-      long lastModifiedMills = timestamp * 1000L;
-      String lastModifiedHeader = _sdf.format(new Date(lastModifiedMills));
-
-      HttpServletResponse response = ServletActionContext.getResponse();
-      response.setHeader("Last-Modified", lastModifiedHeader);
-    }
+    setLastModifiedHeader(feedTimestamp);
     addCancelledTrips(agencyId, feed, timestamp);
   }
 
