@@ -39,7 +39,6 @@ public class TripUpdatesForAgencyAction extends GtfsRealtimeActionSupport {
   protected void fillFeedMessage(FeedMessage.Builder feed, String agencyId,
       long timestamp, FILTER_TYPE filterType, String filterValue) {
 
-    long feedTimestamp = feed.getHeader().hasTimestamp() ? feed.getHeader().getTimestamp() : timestamp;
     ListBean<VehicleStatusBean> vehicles = _service.getAllVehiclesForAgency(
         agencyId, timestamp);
 
@@ -74,7 +73,7 @@ public class TripUpdatesForAgencyAction extends GtfsRealtimeActionSupport {
         vehicleDesc.setId(normalizeId(vehicle.getVehicleId()));
       }
     }
-    setLastModifiedHeader(feedTimestamp);
+    setLastModifiedHeader(timestamp);
     addCancelledTrips(agencyId, feed, timestamp);
   }
 
