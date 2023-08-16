@@ -16,7 +16,7 @@
  */
 package org.onebusaway.api.actions.api.gtfs_realtime;
 
-import com.google.transit.realtime.GtfsRealtime;
+
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data.model.*;
 import org.onebusaway.transit_data.model.trips.*;
@@ -29,9 +29,7 @@ import com.google.transit.realtime.GtfsRealtime.VehicleDescriptor;
 import org.onebusaway.util.AgencyAndIdLibrary;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 public class TripUpdatesForAgencyAction extends GtfsRealtimeActionSupport {
 
@@ -41,6 +39,7 @@ public class TripUpdatesForAgencyAction extends GtfsRealtimeActionSupport {
   protected void fillFeedMessage(FeedMessage.Builder feed, String agencyId,
       long timestamp, FILTER_TYPE filterType, String filterValue) {
 
+    long feedTimestamp = feed.getHeader().hasTimestamp() ? feed.getHeader().getTimestamp() : timestamp;
     ListBean<VehicleStatusBean> vehicles = _service.getAllVehiclesForAgency(
         agencyId, timestamp);
 
@@ -75,6 +74,7 @@ public class TripUpdatesForAgencyAction extends GtfsRealtimeActionSupport {
         vehicleDesc.setId(normalizeId(vehicle.getVehicleId()));
       }
     }
+    setLastModifiedHeader(feedTimestamp);
     addCancelledTrips(agencyId, feed, timestamp);
   }
 

@@ -15,8 +15,12 @@
  */
 package org.onebusaway.api.actions.api.gtfs_realtime;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
+import java.util.TimeZone;
 
+import org.apache.struts2.ServletActionContext;
 import org.apache.struts2.rest.DefaultHttpHeaders;
 import org.onebusaway.api.actions.api.ApiActionSupport;
 import org.onebusaway.api.model.transit.realtime.GtfsRealtimeConstantsV2;
@@ -33,6 +37,8 @@ import com.google.transit.realtime.GtfsRealtime.FeedHeader;
 import com.google.transit.realtime.GtfsRealtime.FeedMessage;
 import com.opensymphony.xwork2.conversion.annotations.TypeConversion;
 import com.opensymphony.xwork2.validator.annotations.RequiredFieldValidator;
+
+import javax.servlet.http.HttpServletResponse;
 
 public abstract class GtfsRealtimeActionSupport extends ApiActionSupport {
 
@@ -59,6 +65,13 @@ public abstract class GtfsRealtimeActionSupport extends ApiActionSupport {
   private String _routeFilterId = null;
 
   private boolean _removeAgencyIds = true;
+
+  private static final SimpleDateFormat _sdf;
+
+  static {
+    _sdf = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss 'GMT' ", Locale.US);
+    _sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
+  }
 
   public GtfsRealtimeActionSupport() {
     super(V2);
@@ -121,6 +134,16 @@ public abstract class GtfsRealtimeActionSupport extends ApiActionSupport {
 
   protected abstract void fillFeedMessage(FeedMessage.Builder feed,
       String agencyId, long timestamp, FILTER_TYPE filterType, String filterValue);
+
+  protected void setLastModifiedHeader(long feedTimestamp){
+    if(feedTimestamp != 0){
+      long lastModifiedMills = feedTimestamp * 1000L;
+      String lastModifiedHeader = _sdf.format(new Date(lastModifiedMills));
+      HttpServletResponse response = ServletActionContext.getResponse();
+      response.setHeader("Last-Modified", lastModifiedHeader);
+    }
+
+  }
 
   protected String normalizeId(String id) {
     if (_removeAgencyIds) {

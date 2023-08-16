@@ -32,6 +32,8 @@ import com.google.transit.realtime.GtfsRealtime.VehicleDescriptor;
 import com.google.transit.realtime.GtfsRealtime.VehiclePosition;
 import org.onebusaway.util.AgencyAndIdLibrary;
 
+
+
 public class VehiclePositionsForAgencyAction extends GtfsRealtimeActionSupport {
 
   private static final long serialVersionUID = 1L;
@@ -39,6 +41,8 @@ public class VehiclePositionsForAgencyAction extends GtfsRealtimeActionSupport {
   @Override
   protected void fillFeedMessage(FeedMessage.Builder feed, String agencyId,
       long timestamp, FILTER_TYPE filterType, String filterValue) {
+
+    long feedTimestamp = feed.getHeader().hasTimestamp() ? feed.getHeader().getTimestamp() : timestamp;
 
     ListBean<VehicleStatusBean> vehicles = _service.getAllVehiclesForAgency(
         agencyId, timestamp);
@@ -90,5 +94,6 @@ public class VehiclePositionsForAgencyAction extends GtfsRealtimeActionSupport {
         feed.addEntity(entity);
       }
     }
+    setLastModifiedHeader(feedTimestamp);
   }
 }

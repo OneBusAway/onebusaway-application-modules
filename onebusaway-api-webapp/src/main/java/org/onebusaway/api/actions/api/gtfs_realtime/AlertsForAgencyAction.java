@@ -34,6 +34,7 @@ public class AlertsForAgencyAction extends GtfsRealtimeActionSupport {
   protected void fillFeedMessage(FeedMessage.Builder feed, String agencyId,
       long timestamp, FILTER_TYPE filterType, String filterValue) {
 
+    long feedTimestamp = feed.getHeader().hasTimestamp() ? feed.getHeader().getTimestamp() : timestamp;
     ListBean<ServiceAlertBean> alerts = _service.getAllServiceAlertsForAgencyId(agencyId);
     if (FILTER_TYPE.ROUTE_ID == filterType) {
       ArrayList<ServiceAlertBean> filteredList = new ArrayList<>();
@@ -60,6 +61,6 @@ public class AlertsForAgencyAction extends GtfsRealtimeActionSupport {
     } else {
       ServiceAlertBuilderHelper.fillFeedMessage(feed, alerts, agencyId, timestamp);
     }
-
+    setLastModifiedHeader(feedTimestamp);
   }
 }
