@@ -92,7 +92,7 @@ public class AddedTripServiceImpl implements AddedTripService {
             mapDirection(info.getDirectionId()),
             new AgencyAndId(info.getAgencyId(), stopInfo.getStopId()));
     if (swap == null) return;
-    stopInfo.setStopId(AgencyAndId.convertToString(swap.getToStop()));
+    stopInfo.setStopId(swap.getToStop().getId());
   }
 
   private String mapDirection(String compassDirection) {
