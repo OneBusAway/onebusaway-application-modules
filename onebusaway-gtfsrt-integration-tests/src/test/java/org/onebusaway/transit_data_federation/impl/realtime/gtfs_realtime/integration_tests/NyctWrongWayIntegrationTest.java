@@ -108,5 +108,7 @@ public class NyctWrongWayIntegrationTest extends AbstractGtfsRealtimeIntegration
       }
 
     }
+    verifyBeans("northStop", northStop, firstStopTime);
+    verifyBeans("southStop", southStop, firstStopTime);
   }
 }
