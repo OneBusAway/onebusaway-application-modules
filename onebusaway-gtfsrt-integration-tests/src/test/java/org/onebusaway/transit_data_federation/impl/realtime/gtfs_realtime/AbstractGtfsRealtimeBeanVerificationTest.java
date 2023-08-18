@@ -23,14 +23,16 @@ import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 import org.springframework.core.io.ClassPathResource;
 
+import static org.junit.Assert.assertNotNull;
+
 /**
  * Do some basic tests of the response of arrivals-departures for the given stops.
  */
 public abstract class AbstractGtfsRealtimeBeanVerificationTest extends AbstractGtfsRealtimeIntegrationTest {
 
     protected abstract String getPbFilename();
-    protected abstract String getNorthStop();
-    protected abstract String getSouthStop();
+    protected abstract String[] getNorthStops();
+    protected abstract String[] getSouthStops();
 
     public void executeTest() throws Exception {
         GtfsRealtimeSource source = getBundleLoader().getSource();
@@ -50,12 +52,19 @@ public abstract class AbstractGtfsRealtimeBeanVerificationTest extends AbstractG
         source.refresh(); // launch
 
         TransitGraphDao graph = getBundleLoader().getApplicationContext().getBean(TransitGraphDao.class);
-        StopEntry southStop = graph.getStopEntryForId(AgencyAndId.convertFromString(getSouthStop()));
-        StopEntry northStop = graph.getStopEntryForId(AgencyAndId.convertFromString(getNorthStop()));
         long firstStopTime = source.getGtfsRealtimeTripLibrary().getCurrentTime();
         long window = 75 * 60 * 1000; // 75 minutes
 
-        verifyBeans("northStop", northStop, firstStopTime);
-        verifyBeans("southStop", southStop, firstStopTime);
+        for (String southStopId : getSouthStops()) {
+            StopEntry southStop = graph.getStopEntryForId(AgencyAndId.convertFromString(southStopId));
+            assertNotNull(southStop);
+            verifyBeans("southStop", southStop, firstStopTime);
+        }
+
+        for (String northStopId : getNorthStops()) {
+            StopEntry northStop = graph.getStopEntryForId(AgencyAndId.convertFromString(northStopId));
+            assertNotNull(northStop);
+            verifyBeans("northStop", northStop, firstStopTime);
+        }
     }
 }

@@ -36,13 +36,15 @@ public class NyctWrongWayMIntegrationTest extends AbstractGtfsRealtimeBeanVerifi
     }
 
     @Override
-    protected String getSouthStop() {
-        return "MTASBWY_M16S";
+    protected String[] getSouthStops() {
+        String[] a = {"MTASBWY_M11N"}; // not found
+        return a;
     }
 
     @Override
-    protected String getNorthStop() {
-        return "MTASBWY_M16N";
+    protected String[] getNorthStops() {
+        String[] a = {"MTASBWY_M11S"};
+        return a;
     }
     @Test
     public void testWrongWayConcurrenciesOnJM() throws Exception {

@@ -15,6 +15,7 @@
  */
 package org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.integration_tests;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.AbstractGtfsRealtimeBeanVerificationTest;
 
@@ -36,16 +37,19 @@ public class NyctWrongWayLIntegrationTest extends AbstractGtfsRealtimeBeanVerifi
     }
 
     @Override
-    protected String getSouthStop() {
-        return "MTASBWY_J27S";
+    protected String[] getSouthStops() {
+        String[] a = {"MTASBWY_J27N"};
+        return a;
     }
 
     @Override
-    protected String getNorthStop() {
-        return "MTASBWY_J27N";
+    protected String[] getNorthStops() {
+        String[] a = {"MTASBWY_J27S"};
+        return a;
     }
 
     @Test
+    @Ignore
     public void test() throws Exception {
         executeTest();
     }

@@ -99,6 +99,7 @@ public abstract class AbstractGtfsRealtimeIntegrationTest {
     query.getSystemFilterChain().add(new ArrivalAndDepartureFilterByRealtime(filter));
     List<ArrivalAndDepartureBean> arrivalsAndDeparturesByStopId = service.getArrivalsAndDeparturesByStopId(firstStop.getId(), query);
 
+    assertTrue("no A/Ds for stop " + firstStop.getId(), !arrivalsAndDeparturesByStopId.isEmpty());
     _log.debug("found {} ADs at {}", arrivalsAndDeparturesByStopId.size(), new Date(firstStopTime));
     for (ArrivalAndDepartureBean bean : arrivalsAndDeparturesByStopId) {
       AgencyAndId tripId = AgencyAndIdLibrary.convertFromString(bean.getTrip().getId());

@@ -38,13 +38,15 @@ public class NyctWrongWayGIntegrationTest extends AbstractGtfsRealtimeBeanVerifi
   }
 
   @Override
-  protected String getSouthStop() {
-    return "MTASBWY_A42S";
+  protected String[] getSouthStops() {
+    String[] a = {"MTASBWY_A42S"};
+    return a;
   }
 
   @Override
-  protected String getNorthStop() {
-    return "MTASBWY_A42N";
+  protected String[] getNorthStops() {
+    String[] a = {"MTASBWY_A42N"};
+    return a;
   }
 
 
