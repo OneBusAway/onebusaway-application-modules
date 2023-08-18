@@ -18,7 +18,8 @@ package org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.integ
 import org.junit.Test;
 import org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.AbstractGtfsRealtimeBeanVerificationTest;
 
-public class NyctWrongWayMIntegrationTest extends AbstractGtfsRealtimeBeanVerificationTest {
+public class NyctWrongWayJIntegrationTest extends AbstractGtfsRealtimeBeanVerificationTest {
+
     @Override
     protected String getIntegrationTestPath() {
         return "org/onebusaway/transit_data_federation/impl/realtime/gtfs_realtime/integration_tests/nyct_wrong_way";
@@ -30,22 +31,22 @@ public class NyctWrongWayMIntegrationTest extends AbstractGtfsRealtimeBeanVerifi
         return paths;
     }
 
-    @Override
     protected String getPbFilename() {
-        return "org/onebusaway/transit_data_federation/impl/realtime/gtfs_realtime/integration_tests/nyct_wrong_way/m.pb";
+        return "org/onebusaway/transit_data_federation/impl/realtime/gtfs_realtime/integration_tests/nyct_wrong_way/j.pb";
     }
 
     @Override
     protected String getSouthStop() {
-        return "MTASBWY_M16S";
+        return "MTASBWY_M01N";
     }
 
     @Override
     protected String getNorthStop() {
-        return "MTASBWY_M16N";
+        return "MTASBWY_M01S";
     }
+
     @Test
-    public void testWrongWayConcurrenciesOnJM() throws Exception {
+    public void testWrongWayConcurrenciesOnJ() throws Exception {
         executeTest();
     }
 
