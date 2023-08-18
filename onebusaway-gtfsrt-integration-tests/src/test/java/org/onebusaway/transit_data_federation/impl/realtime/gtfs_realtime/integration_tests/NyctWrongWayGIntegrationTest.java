@@ -37,7 +37,7 @@ import static org.junit.Assert.assertNotNull;
 /**
  * Test G stop replacement of wrong way concurrencies.
  */
-public class NyctWrongWayIntegrationTest extends AbstractGtfsRealtimeIntegrationTest {
+public class NyctWrongWayGIntegrationTest extends AbstractGtfsRealtimeIntegrationTest {
   @Override
   protected String getIntegrationTestPath() {
     return "org/onebusaway/transit_data_federation/impl/realtime/gtfs_realtime/integration_tests/nyct_wrong_way";
@@ -50,7 +50,7 @@ public class NyctWrongWayIntegrationTest extends AbstractGtfsRealtimeIntegration
   }
 
   @Test
-  public void testWrongWayConcurrencies() throws Exception {
+  public void testWrongWayConcurrenciesOnG() throws Exception {
     GtfsRealtimeSource source = getBundleLoader().getSource();
     source.setAgencyId("MTASBWY");
 

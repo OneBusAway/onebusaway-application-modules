@@ -281,7 +281,14 @@ public final class NarrativeProviderImpl implements Serializable {
     // we don't use route for now
     StopDirectionKey key = new StopDirectionKey(stopId, directionId);
     RouteAndHeadsignNarrative routeAndHeadsignNarrative = _patternCache.get(key);
-    if (routeAndHeadsignNarrative == null) return null;
+    if (routeAndHeadsignNarrative == null) {
+      for (StopDirectionKey stopDirectionKey : _patternCache.keySet()) {
+        if (stopDirectionKey.getStopId().equals(stopId)) {
+          System.out.println("patternCache miss but stop exists=" + stopDirectionKey.getStopId() + "," + stopDirectionKey.getDirectionId());
+        }
+      }
+      return null;
+    }
     StopTimeNarrative.Builder narrative = StopTimeNarrative.builder();
     narrative.setStopHeadsign(routeAndHeadsignNarrative.getHeadsign());
     narrative.setRouteShortName(routeAndHeadsignNarrative.getRouteShortname());
