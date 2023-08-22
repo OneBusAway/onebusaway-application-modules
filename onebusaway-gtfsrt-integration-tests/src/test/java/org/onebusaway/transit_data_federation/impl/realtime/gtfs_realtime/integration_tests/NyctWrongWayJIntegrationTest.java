@@ -18,6 +18,9 @@ package org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.integ
 import org.junit.Test;
 import org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.AbstractGtfsRealtimeBeanVerificationTest;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class NyctWrongWayJIntegrationTest extends AbstractGtfsRealtimeBeanVerificationTest {
 
     @Override
@@ -47,6 +50,24 @@ public class NyctWrongWayJIntegrationTest extends AbstractGtfsRealtimeBeanVerifi
         String[] a = {"MTASBWY_M11N","MTASBWY_M16N",
                 "MTASBWY_M19N","MTASBWY_M20N","MTASBWY_M21N","MTASBWY_M22N","MTASBWY_M23N"};
         return a;
+    }
+
+    protected Map<String, String> getStopToHeadsignMap() {
+        Map<String, String> map = new HashMap();
+        map.put("MTASBWY_M11N.1", "Jamaica & Middle Village");
+        map.put("MTASBWY_M11N.0", "Jamaica & Middle Village");
+        map.put("MTASBWY_M11S.1", "Manhattan");
+        map.put("MTASBWY_M11S.0", "Manhattan");
+
+        //GTFS:  M16S "Manhattan", direction = 1 (S)
+        //GTFS:  M16N "Jamaica & Middle Village", direction = 0 (N)
+        map.put("MTASBWY_M16N.1", "Jamaica & Middle Village"); // this is a wrong way concurrency
+        map.put("MTASBWY_M16N.0", "Jamaica & Middle Village"); // this is GTFS supported
+        // now M16S
+        map.put("MTASBWY_M16S.0", "Manhattan"); // this is a wrong way concurrency
+        map.put("MTASBWY_M16S.1", "Manhattan"); // this is GTFS supported
+
+        return map;
     }
 
     @Test

@@ -19,10 +19,15 @@ import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.realtime.api.VehicleLocationListener;
 import org.onebusaway.transit_data_federation.impl.realtime.TestVehicleLocationListener;
 import org.onebusaway.transit_data_federation.impl.realtime.VehicleStatusServiceImpl;
+import org.onebusaway.transit_data_federation.model.narrative.StopTimeNarrative;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 import org.springframework.core.io.ClassPathResource;
 
+import java.util.Map;
+
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 /**
@@ -33,6 +38,11 @@ public abstract class AbstractGtfsRealtimeBeanVerificationTest extends AbstractG
     protected abstract String getPbFilename();
     protected abstract String[] getNorthStops();
     protected abstract String[] getSouthStops();
+    protected Map<String, String> getStopToHeadsignMap() {
+        return null;
+    }
+
+
 
     public void executeTest() throws Exception {
         GtfsRealtimeSource source = getBundleLoader().getSource();
@@ -67,4 +77,16 @@ public abstract class AbstractGtfsRealtimeBeanVerificationTest extends AbstractG
             verifyBeans("northStop", northStop, firstStopTime);
         }
     }
+    public void validateHeadsign(StopTimeEntry stopTimeEntry, StopTimeNarrative stopTimeNarrative) {
+        Map<String, String> stopToHeadsign = getStopToHeadsignMap();
+        if (stopToHeadsign == null || stopToHeadsign.isEmpty()) return;
+        String stopId = AgencyAndId.convertToString(stopTimeEntry.getStop().getId());
+        String directionId = stopTimeEntry.getTrip().getDirectionId();
+        String expectedHeadsign = stopToHeadsign.get(stopId + "." + directionId);
+        if (expectedHeadsign == null) return;
+        // if we have a headsign compare it to the narrative
+        assertEquals("stop " + stopId + " and direction " + directionId
+                + " expected ", expectedHeadsign, stopTimeNarrative.getStopHeadsign());
+    }
+
 }

@@ -134,6 +134,7 @@ public abstract class AbstractGtfsRealtimeIntegrationTest {
           fail();
         }
       } else if (stopTimeNarrative.getStopHeadsign() != null) {
+        validateHeadsign(stopTimeEntry, stopTimeNarrative);
         if (!stopHeadsigns.containsKey(stopId)) {
           stopHeadsigns.put(stopId, new HashSet<>());
         }
@@ -147,6 +148,10 @@ public abstract class AbstractGtfsRealtimeIntegrationTest {
       fail();
     }
 
+  }
+
+  public void validateHeadsign(StopTimeEntry stopTimeEntry, StopTimeNarrative stopTimeNarrative) {
+    // no-op here -- optionally implemented by subclasses
   }
 
   protected void verifyPredictions(ArrivalAndDepartureBean bean) {

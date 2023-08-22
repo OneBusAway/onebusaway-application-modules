@@ -19,6 +19,9 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.AbstractGtfsRealtimeBeanVerificationTest;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class NyctWrongWayLIntegrationTest extends AbstractGtfsRealtimeBeanVerificationTest {
 
     @Override
@@ -46,6 +49,14 @@ public class NyctWrongWayLIntegrationTest extends AbstractGtfsRealtimeBeanVerifi
     protected String[] getNorthStops() {
         String[] a = {"MTASBWY_J27S"};
         return a;
+    }
+    protected Map<String, String> getStopToHeadsignMap() {
+        Map<String, String> map = new HashMap();
+        map.put("MTASBWY_J17N.1", "Jamaica");
+        map.put("MTASBWY_J27N.0", "Jamaica");
+        map.put("MTASBWY_J17S.1", "Manhattan");
+        map.put("MTASBWY_J27S.0", "Manhattan");
+        return map;
     }
 
     @Test
