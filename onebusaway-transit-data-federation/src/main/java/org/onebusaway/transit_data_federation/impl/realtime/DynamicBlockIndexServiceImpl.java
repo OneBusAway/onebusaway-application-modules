@@ -44,6 +44,7 @@ import java.util.*;
 public class DynamicBlockIndexServiceImpl implements DynamicBlockIndexService {
 
   private static Logger _log = LoggerFactory.getLogger(DynamicBlockIndexServiceImpl.class);
+  private static final int CACHE_TIMEOUT = 18 * 60 * 60 * 1000; // 18 hours
 
   @Autowired
   private BlockIndexFactoryServiceImpl blockIndexFactoryService;
@@ -51,14 +52,14 @@ public class DynamicBlockIndexServiceImpl implements DynamicBlockIndexService {
 
   private DynamicGraph _dynamicGraph;
 
-  private Map<AgencyAndId, List<BlockTripIndex>> blockTripIndexByRouteCollectionId = new HashMap<>();
+  private Map<AgencyAndId, List<BlockTripIndex>> blockTripIndexByRouteCollectionId = new PassiveExpiringMap<>(CACHE_TIMEOUT);
   private BlockStopTimeIndicesFactory blockStopTimeIndicesFactory = new BlockStopTimeIndicesFactory();
 
-  private Map<AgencyAndId, BlockInstance> cacheByBlockId = new HashMap<>();
+  private Map<AgencyAndId, BlockInstance> cacheByBlockId = new PassiveExpiringMap<>(CACHE_TIMEOUT);
 
-  private Map<AgencyAndId, Set<BlockStopTimeIndex>> blockStopTimeIndicesByStopId = new HashMap<>();
+  private Map<AgencyAndId, Set<BlockStopTimeIndex>> blockStopTimeIndicesByStopId = new PassiveExpiringMap<>(CACHE_TIMEOUT);
 
-  private Map<AgencyAndId, List<BlockTripIndex>> blockTripByBlockId = new HashMap<>();
+  private Map<AgencyAndId, List<BlockTripIndex>> blockTripByBlockId = new PassiveExpiringMap<>(CACHE_TIMEOUT);
   @Autowired
   public void setNarrativeService(NarrativeService narrativeService) {
     _narrativeService = narrativeService;
@@ -71,6 +72,7 @@ public class DynamicBlockIndexServiceImpl implements DynamicBlockIndexService {
 
   @Refreshable(dependsOn = RefreshableResources.TRANSIT_GRAPH)
   public void reset() {
+    // we don't clear these here as they transcend the bundle swap (they aren't dependent on bundle data)
 //    blockTripIndexByRouteCollectionId.clear();
 //    cacheByBlockId.clear();
 //    blockStopTimeIndicesByStopId.clear();
