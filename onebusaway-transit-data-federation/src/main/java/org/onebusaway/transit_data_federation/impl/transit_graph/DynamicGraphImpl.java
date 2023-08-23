@@ -35,9 +35,10 @@ import java.util.Map;
 @Component
 public class DynamicGraphImpl implements DynamicGraph {
 
-  private Map<AgencyAndId, BlockEntry> blockEntryById = new HashMap<>();
-  private Map<AgencyAndId, TripEntry> tripEntryById = new HashMap<>();
-  private Map<AgencyAndId, RouteEntry> routeEntryById = new HashMap<>();
+  private static final int CACHE_TIMEOUT = 18 * 60 * 60 * 1000; // 18 hours
+  private Map<AgencyAndId, BlockEntry> blockEntryById = new PassiveExpiringMap<>(CACHE_TIMEOUT);
+  private Map<AgencyAndId, TripEntry> tripEntryById = new PassiveExpiringMap<>(CACHE_TIMEOUT);
+  private Map<AgencyAndId, RouteEntry> routeEntryById = new PassiveExpiringMap<>(CACHE_TIMEOUT);
 
   @Override
   public TripEntry getTripEntryForId(AgencyAndId id) {
@@ -46,6 +47,7 @@ public class DynamicGraphImpl implements DynamicGraph {
 
   @Refreshable(dependsOn = RefreshableResources.TRANSIT_GRAPH)
   public void reset() {
+    // these maps expire passively, this data is not dependent upon graph reloading
 //    blockEntryById.clear();
 //    tripEntryById.clear();
 //    routeEntryById.clear();
