@@ -86,6 +86,7 @@ public abstract class AbstractGtfsRealtimeBeanVerificationTest extends AbstractG
         if (expectedHeadsign == null) return;
         // if we have a headsign compare it to the narrative
         assertEquals("stop " + stopId + " and direction " + directionId
+                + " on route " + stopTimeEntry.getTrip().getRoute().getId()
                 + " expected ", expectedHeadsign, stopTimeNarrative.getStopHeadsign());
     }
 

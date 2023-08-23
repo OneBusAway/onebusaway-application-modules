@@ -46,7 +46,7 @@ public class NyctWrongWayMIntegrationTest extends AbstractGtfsRealtimeBeanVerifi
 
     @Override
     protected String[] getSouthStops() {
-        String[] a = {"MTASBWY_M01S", "MTASBWY_M04S", "MTASBWY_M10S", "MTASBWY_M16S", "MTASBWY_M18S",};
+        String[] a = {"MTASBWY_M01S", "MTASBWY_M04S", "MTASBWY_M10S", "MTASBWY_M16S", "MTASBWY_M18S"};
         return a;
     }
 
@@ -76,6 +76,11 @@ public class NyctWrongWayMIntegrationTest extends AbstractGtfsRealtimeBeanVerifi
         map.put("MTASBWY_M18N.0", "Brooklyn");
         map.put("MTASBWY_M18S.0", "Broad St (JZ) - Uptown (M)");
         map.put("MTASBWY_M18S.1", "Broad St (JZ) - Uptown (M)");
+
+        map.put("MTASBWY_J31N.1", "Jamaica");
+        map.put("MTASBWY_J31N.0", "Jamaica");
+        map.put("MTASBWY_J31S.0", "Manhattan");
+        map.put("MTASBWY_J31S.1", "Manhattan");
 
         return map;
     }

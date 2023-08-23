@@ -18,6 +18,9 @@ package org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.integ
 import org.junit.Test;
 import org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.AbstractGtfsRealtimeBeanVerificationTest;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Test G stop replacement of wrong way concurrencies.
  */
@@ -49,6 +52,14 @@ public class NyctWrongWayGIntegrationTest extends AbstractGtfsRealtimeBeanVerifi
     return a;
   }
 
+  protected Map<String, String> getStopToHeadsignMap() {
+    Map<String, String> map = new HashMap();
+    map.put("MTASBWY_A42N.1", "Manhattan & Church Av");
+    map.put("MTASBWY_A42N.0", "Manhattan & Church Av");
+    map.put("MTASBWY_A42S.1", "Queens");
+    map.put("MTASBWY_A42S.0", "Queens");
+    return map;
+  }
 
   @Test
   public void testWrongWayConcurrenciesOnG() throws Exception {
