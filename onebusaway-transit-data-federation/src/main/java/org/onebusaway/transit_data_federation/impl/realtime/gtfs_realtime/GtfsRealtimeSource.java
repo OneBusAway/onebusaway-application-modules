@@ -744,7 +744,7 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
       return;
     }
 
-    if (alertsCollection == null || alertsCollection.getServiceAlertsCount() == 0) {
+    if (alertsCollection == null) {
       // don't let a single connection issue wipe out the set of alerts
       _log.info("handleAlertCollection nothing to do");
       return;
