@@ -317,15 +317,6 @@
             </s:iterator>
         </s:iterator>
 
-
-        <p>
-            <jsp:element name="a">
-            <jsp:attribute name="href">${pageContext.request.contextPath}</jsp:attribute>
-                <oba:message key="schedule.searchForAnotherStop"/>
-            </jsp:element>
-
-        </p>
-
         </div>
         </td>
     </tr>
