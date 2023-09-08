@@ -60,9 +60,14 @@
 		<div id="mainbox">
 			<div id="topbar">
 				<div id="branding">
-					<s:url var="url" namespace="/admin" action="index"/>
+					<s:if test="!anonymousUser">
+						<s:url var="url" namespace="/admin" action="index"/>
+					</s:if>
+					<s:else>
+						<s:url var="url"/>
+					</s:else>
 					<a href="${url}">
-		  				<s:url var="url2" value="/css/img/onebusaway-nyc.png"></s:url>
+						<s:url var="url2" value="/css/img/onebusaway-nyc.png"></s:url>
 						<img src="${url2}" alt="OneBusAway Enterprise" />
 					</a>
 				</div>
