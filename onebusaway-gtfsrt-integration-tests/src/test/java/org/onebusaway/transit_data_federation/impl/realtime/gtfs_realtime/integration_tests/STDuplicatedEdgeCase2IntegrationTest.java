@@ -17,28 +17,26 @@ package org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.integ
 
 import org.junit.Test;
 import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.realtime.api.TimepointPredictionRecord;
 import org.onebusaway.realtime.api.VehicleLocationRecord;
 import org.onebusaway.transit_data_federation.impl.realtime.TestVehicleLocationListener;
 import org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.GtfsRealtimeSource;
 import org.onebusaway.transit_data_federation.model.TargetTime;
 import org.onebusaway.transit_data_federation.services.ArrivalAndDepartureService;
 import org.onebusaway.transit_data_federation.services.realtime.ArrivalAndDepartureInstance;
-import org.onebusaway.transit_data_federation.services.realtime.BlockLocation;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
 
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.*;
 
 /**
- * An edge case of a duplicated trip.  The duplicated trip is not in service.
+ * Duplicated Trip Edge Case 2: No Stop times provided!
  */
-public class STDuplicatedEdgeCase1IntegrationTest extends AbstractJsonRealtimeIntegrationText {
+public class STDuplicatedEdgeCase2IntegrationTest extends AbstractJsonRealtimeIntegrationText {
+
   protected String getIntegrationTestPath() {
     return "org/onebusaway/transit_data_federation/impl/realtime/gtfs_realtime/integration_tests/st_duplicated_trips";
   }
@@ -56,6 +54,7 @@ public class STDuplicatedEdgeCase1IntegrationTest extends AbstractJsonRealtimeIn
   public void testDuplicatedTrips() throws Exception {
     setupTest();
   }
+
   public void runTestInTimezone() throws Exception {
     GtfsRealtimeSource source = getBundleLoader().getSource();
     source.setAgencyId("40");
@@ -63,7 +62,7 @@ public class STDuplicatedEdgeCase1IntegrationTest extends AbstractJsonRealtimeIn
     TestVehicleLocationListener listener = setupTestListener(source);
 
     // example is in json, convert to protocol buffer
-    String jsonFilename = "org/onebusaway/transit_data_federation/impl/realtime/gtfs_realtime/integration_tests/st_duplicated_trips/TripUpdate-DUPLICATED-1690679342.json";
+    String jsonFilename = "org/onebusaway/transit_data_federation/impl/realtime/gtfs_realtime/integration_tests/st_duplicated_trips/TripUpdate-DUPLICATED-Empty-1690865133.json";
 
     URL tmpFeedLocation = readJson(jsonFilename);
     source.setTripUpdatesUrl(tmpFeedLocation);
@@ -79,44 +78,37 @@ public class STDuplicatedEdgeCase1IntegrationTest extends AbstractJsonRealtimeIn
     TransitGraphDao graph = getBundleLoader().getApplicationContext().getBean(TransitGraphDao.class);
     long window = 75 * 60 * 1000; // 75 minutes
 
-    StopEntry firstStop = graph.getStopEntryForId(AgencyAndId.convertFromString("40_990005"));
-    long firstStopTime = 1690679342000L; // 6:09 -> feed update time
+    /*
+trip_id,stop_id,arrival_time,departure_time,stop_sequence,stop_headsign,timepoint
+LLR_2023-03-18_Weekday_100479_1015,99256,06:00:30,06:01:00,1,,1
+LLR_2023-03-18_Weekday_100479_1015,99260,06:02:30,06:03:00,2,,1
+LLR_2023-03-18_Weekday_100479_1015,621,06:04:30,06:05:00,3,,1
+     */
 
+    long firstStopTime = source.getGtfsRealtimeTripLibrary().getCurrentTime(); // 21:45
+    StopEntry firstStop = graph.getStopEntryForId(AgencyAndId.convertFromString("40_99256"));
+    assertNotNull(firstStop);
     List<ArrivalAndDepartureInstance> list = arrivalAndDepartureService.getArrivalsAndDeparturesForStopInTimeRange(firstStop,new TargetTime(firstStopTime,firstStopTime),firstStopTime - window, firstStopTime + window);
     assertNotNull(list);
+    assertEquals(0, list.size());
 
-    int expectedDuplicatedTripsSize = 1;
-    int actualDuplicatedTripsSize = 0;
-
-    List<String> expectedduplicatedTrips = new ArrayList<>();
-    expectedduplicatedTrips.add("LLR_2023-03-18_Saturday_100479_2021_Dup");
-
-    List<TripEntry> DynamictripsFound = new ArrayList<>();
-    for(ArrivalAndDepartureInstance instance : list){
-      String tripId = instance.getStopTimeInstance().getStopTime().getTrip().getTrip().getId().getId();
-      AgencyAndId stopID = instance.getStopTimeInstance().getStopTime().getStopTime().getStop().getId();
-      if(expectedduplicatedTrips.contains(tripId)){
-        DynamictripsFound.add(instance.getStopTimeInstance().getStopTime().getTrip().getTrip());
-        actualDuplicatedTripsSize++;
-        assertTrue(instance.getPredictedArrivalTime() > 0 || instance.getPredictedDepartureTime() > 0);
-        if ("LLR_2023-03-18_Saturday_100479_2021_Dup".equals(instance.getBlockInstance().getBlock().getBlock().getId().toString())) {
-          BlockLocation blockLocation =  instance.getBlockLocation();
-          assertNotNull(blockLocation);
-          List<TimepointPredictionRecord> timepointPredictions = blockLocation.getTimepointPredictions();
-          assertNotNull(timepointPredictions);
-          for(TimepointPredictionRecord timepointPrediction : timepointPredictions){
-            assertTrue(timepointPrediction.getTimepointPredictedArrivalTime() > 0 ||
-                    timepointPrediction.getTimepointPredictedDepartureTime() > 0);
-            assertEquals("LLR_2023-03-18_Saturday_100479_2021_Dup",timepointPrediction.getTripId().toString());
-            assertNotNull(timepointPrediction.getTimepointId());
-          }
-        }
+    StopEntry lastStop = graph.getStopEntryForId(AgencyAndId.convertFromString("40_990006"));
+    assertNotNull(lastStop);
+    list = arrivalAndDepartureService.getArrivalsAndDeparturesForStopInTimeRange(lastStop,new TargetTime(firstStopTime,firstStopTime),firstStopTime - window, firstStopTime + window);
+    assertNotNull(list);
+    for (ArrivalAndDepartureInstance arrivalAndDepartureInstance : list) {
+      boolean isDynamic = isDynamic(arrivalAndDepartureInstance.getBlockTrip().getTrip());
+      if (isDynamic) {
+        _log.error("found unexpected dynamic trip {}", arrivalAndDepartureInstance.getBlockTrip());
       }
+      assertFalse(isDynamic);
     }
-    if(expectedDuplicatedTripsSize != actualDuplicatedTripsSize){
-      _log.error("expected {}, actual {}", expectedDuplicatedTripsSize, actualDuplicatedTripsSize);
-    }
-    assertEquals(expectedDuplicatedTripsSize,actualDuplicatedTripsSize);
+
+    assertEquals(0, list.size());
+
   }
 
+  private boolean isDynamic(TripEntry trip) {
+    return trip.getId().getId().contains("_Dup");
+  }
 }
