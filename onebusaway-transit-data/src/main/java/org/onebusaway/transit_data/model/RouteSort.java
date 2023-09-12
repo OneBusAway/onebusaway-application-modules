@@ -19,7 +19,7 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-public class RouteSort implements Serializable {
+public class RouteSort implements RouteSorting, Serializable {
 
     private final Map<String, String> agencySortConfiguration;
 
@@ -51,7 +51,7 @@ public class RouteSort implements Serializable {
 
     }
 
-     public int compareRoutes(String a, String b, RouteSort routeSortInstance) {
+     public int compareRoutes(String a, String b) {
 
          if(a == null && b == null){
              return 0;
@@ -65,7 +65,7 @@ public class RouteSort implements Serializable {
              return -1;
          }
 
-        Map<String, Integer> sortOrderMap = routeSortInstance.routeSortOrderMap.get(primarySortAgency);
+        Map<String, Integer> sortOrderMap = this.routeSortOrderMap.get(primarySortAgency);
         // standard ordering if the configuration is not provided
         if (sortOrderMap == null) {
             return a.compareTo(b);

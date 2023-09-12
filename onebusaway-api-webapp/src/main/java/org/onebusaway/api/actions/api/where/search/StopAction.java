@@ -17,13 +17,11 @@ package org.onebusaway.api.actions.api.where.search;
 
 import org.apache.struts2.rest.DefaultHttpHeaders;
 import org.onebusaway.api.model.transit.BeanFactoryV2;
-import org.onebusaway.api.model.transit.ListWithReferencesBean;
 import org.onebusaway.api.model.transit.StopSearchResultBean;
-import org.onebusaway.api.model.transit.StopV2Bean;
 import org.onebusaway.exceptions.ServiceException;
 import org.onebusaway.transit_data.model.ArrivalsAndDeparturesQueryBean;
 import org.onebusaway.transit_data.model.ListBean;
-import org.onebusaway.transit_data.model.RouteSort;
+import org.onebusaway.transit_data.model.RouteSorting;
 import org.onebusaway.transit_data.model.StopBean;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -40,7 +38,7 @@ public class StopAction extends ApiSearchAction {
   private ArrivalsAndDeparturesQueryBean _query = new ArrivalsAndDeparturesQueryBean();
 
   @Autowired
-  private RouteSort customRouteSort;
+  private RouteSorting customRouteSort;
 
   public StopAction() {
     super(V2);

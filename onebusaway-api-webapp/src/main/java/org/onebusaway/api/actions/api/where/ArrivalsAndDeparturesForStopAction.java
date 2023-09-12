@@ -51,7 +51,7 @@ public class ArrivalsAndDeparturesForStopAction extends ApiActionSupport {
   private ConfigurationService _configService;
 
   @Autowired
-  private RouteSort customRouteSort;
+  private RouteSorting customRouteSort;
 
   private String _id;
   
@@ -177,8 +177,7 @@ public class ArrivalsAndDeparturesForStopAction extends ApiActionSupport {
     v1s.sort((a,b) -> customRouteSort.
             compareRoutes(
                     a.getRouteShortName(),
-                    b.getRouteShortName(),
-                    customRouteSort)
+                    b.getRouteShortName())
     );
 
     return v1s;
