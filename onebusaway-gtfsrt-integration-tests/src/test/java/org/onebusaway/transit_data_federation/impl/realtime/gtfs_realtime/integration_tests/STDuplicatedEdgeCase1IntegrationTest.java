@@ -17,6 +17,7 @@ package org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.integ
 
 import org.junit.Test;
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.gtfs.model.calendar.ServiceDate;
 import org.onebusaway.realtime.api.TimepointPredictionRecord;
 import org.onebusaway.realtime.api.VehicleLocationRecord;
 import org.onebusaway.transit_data_federation.impl.realtime.TestVehicleLocationListener;
@@ -35,7 +36,10 @@ import java.util.List;
 
 import static org.junit.Assert.*;
 
-public class STDuplicatedTripsIntegrationTest extends AbstractJsonRealtimeIntegrationText  {
+/**
+ * An edge case of a duplicated trip.  The duplicated trip is not in service.
+ */
+public class STDuplicatedEdgeCase1IntegrationTest extends AbstractJsonRealtimeIntegrationText {
   protected String getIntegrationTestPath() {
     return "org/onebusaway/transit_data_federation/impl/realtime/gtfs_realtime/integration_tests/st_duplicated_trips";
   }
@@ -48,11 +52,10 @@ public class STDuplicatedTripsIntegrationTest extends AbstractJsonRealtimeIntegr
   public String getTimezone() {
     return "America/Los_Angeles";
   }
+
   @Test
   public void testDuplicatedTrips() throws Exception {
-    setupTest();
-  }
-
+    setupTest();  }
   public void runTestInTimezone() throws Exception {
     GtfsRealtimeSource source = getBundleLoader().getSource();
     source.setAgencyId("40");
@@ -60,12 +63,11 @@ public class STDuplicatedTripsIntegrationTest extends AbstractJsonRealtimeIntegr
     TestVehicleLocationListener listener = setupTestListener(source);
 
     // example is in json, convert to protocol buffer
-    String jsonFilename = "org/onebusaway/transit_data_federation/impl/realtime/gtfs_realtime/integration_tests/st_duplicated_trips/trip_update_1683740698.json";
+    String jsonFilename = "org/onebusaway/transit_data_federation/impl/realtime/gtfs_realtime/integration_tests/st_duplicated_trips/TripUpdate-DUPLICATED-1690679342.json";
 
     URL tmpFeedLocation = readJson(jsonFilename);
     source.setTripUpdatesUrl(tmpFeedLocation);
     source.refresh(); // launch
-
 
     for (VehicleLocationRecord vehicleLocationRecord : listener.getRecords()) {
       // for now we confirm some elements are present
@@ -77,19 +79,17 @@ public class STDuplicatedTripsIntegrationTest extends AbstractJsonRealtimeIntegr
     TransitGraphDao graph = getBundleLoader().getApplicationContext().getBean(TransitGraphDao.class);
     long window = 75 * 60 * 1000; // 75 minutes
 
-    StopEntry firstStop = graph.getStopEntryForId(AgencyAndId.convertFromString("40_99914")); // 9:55 trip duplicated to 10:43
-    long firstStopTime = 1683740698000L;
+    StopEntry firstStop = graph.getStopEntryForId(AgencyAndId.convertFromString("40_990005"));
+    long firstStopTime = 1690679342000L; // 6:09 -> feed update time
 
     List<ArrivalAndDepartureInstance> list = arrivalAndDepartureService.getArrivalsAndDeparturesForStopInTimeRange(firstStop,new TargetTime(firstStopTime,firstStopTime),firstStopTime - window, firstStopTime + window);
     assertNotNull(list);
-    // LLR_2023-03-18_Weekday_100479_1043  LLR_2023-03-18_Weekday_100479_2047
 
     int expectedDuplicatedTripsSize = 1;
     int actualDuplicatedTripsSize = 0;
 
     List<String> expectedduplicatedTrips = new ArrayList<>();
-    expectedduplicatedTrips.add("LLR_2023-03-18_Weekday_100479_1043_Dup");
-    expectedduplicatedTrips.add("LLR_2023-03-18_Weekday_100479_2047");
+    expectedduplicatedTrips.add("LLR_2023-03-18_Saturday_100479_2021_Dup");
 
     List<TripEntry> DynamictripsFound = new ArrayList<>();
     for(ArrivalAndDepartureInstance instance : list){
@@ -99,15 +99,15 @@ public class STDuplicatedTripsIntegrationTest extends AbstractJsonRealtimeIntegr
         DynamictripsFound.add(instance.getStopTimeInstance().getStopTime().getTrip().getTrip());
         actualDuplicatedTripsSize++;
         assertTrue(instance.getPredictedArrivalTime() > 0 || instance.getPredictedDepartureTime() > 0);
-        if ("40_LLR_2023-03-18_Weekday_100479_1043_Dup".equals(instance.getBlockInstance().getBlock().getBlock().getId().toString())) {
+        if ("LLR_2023-03-18_Saturday_100479_2021_Dup".equals(instance.getBlockInstance().getBlock().getBlock().getId().toString())) {
           BlockLocation blockLocation =  instance.getBlockLocation();
           assertNotNull(blockLocation);
           List<TimepointPredictionRecord> timepointPredictions = blockLocation.getTimepointPredictions();
           assertNotNull(timepointPredictions);
           for(TimepointPredictionRecord timepointPrediction : timepointPredictions){
             assertTrue(timepointPrediction.getTimepointPredictedArrivalTime() > 0 ||
-            timepointPrediction.getTimepointPredictedDepartureTime() > 0);
-            assertEquals("40_LLR_2023-03-18_Weekday_100479_1043_Dup",timepointPrediction.getTripId().toString());
+                    timepointPrediction.getTimepointPredictedDepartureTime() > 0);
+            assertEquals("LLR_2023-03-18_Saturday_100479_2021_Dup",timepointPrediction.getTripId().toString());
             assertNotNull(timepointPrediction.getTimepointId());
           }
         }
@@ -118,6 +118,5 @@ public class STDuplicatedTripsIntegrationTest extends AbstractJsonRealtimeIntegr
     }
     assertEquals(expectedDuplicatedTripsSize,actualDuplicatedTripsSize);
   }
-
 
 }

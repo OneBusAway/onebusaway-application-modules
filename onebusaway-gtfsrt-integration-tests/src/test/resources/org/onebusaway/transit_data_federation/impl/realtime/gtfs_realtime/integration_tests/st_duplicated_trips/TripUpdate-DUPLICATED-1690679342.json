@@ -1,0 +1,2315 @@
+{
+  "header": {
+    "gtfs_realtime_version": "2.0",
+    "incrementality": "FULL_DATASET",
+    "timestamp": 1690679342
+  },
+  "entity": [
+    {
+      "id": "40C6BD3A-E3CD-465F-B22A-1D0DF0311242",
+      "trip_update": {
+        "trip": {
+          "trip_id": "LLR_2023-03-18_Saturday_100479_1085",
+          "route_id": "100479",
+          "direction_id": 1,
+          "start_time": "18:16:00",
+          "start_date": "20230729",
+          "schedule_relationship": "SCHEDULED"
+        },
+        "vehicle": {
+          "id": "631.158043",
+          "label": "8 [261-256-224-262]"
+        },
+        "stop_time_update": [
+          {
+            "stop_sequence": 1,
+            "stop_id": "99914",
+            "departure": {
+              "time": 1690679760
+            }
+          },
+          {
+            "stop_sequence": 2,
+            "stop_id": "99903",
+            "arrival": {
+              "time": 1690679910
+            },
+            "departure": {
+              "time": 1690679940
+            }
+          },
+          {
+            "stop_sequence": 3,
+            "stop_id": "99905",
+            "arrival": {
+              "time": 1690680150
+            },
+            "departure": {
+              "time": 1690680180
+            }
+          },
+          {
+            "stop_sequence": 4,
+            "stop_id": "55578",
+            "arrival": {
+              "time": 1690680690
+            },
+            "departure": {
+              "time": 1690680720
+            }
+          },
+          {
+            "stop_sequence": 5,
+            "stop_id": "55656",
+            "arrival": {
+              "time": 1690680870
+            },
+            "departure": {
+              "time": 1690680900
+            }
+          },
+          {
+            "stop_sequence": 6,
+            "stop_id": "55778",
+            "arrival": {
+              "time": 1690681110
+            },
+            "departure": {
+              "time": 1690681140
+            }
+          },
+          {
+            "stop_sequence": 7,
+            "stop_id": "55860",
+            "arrival": {
+              "time": 1690681290
+            },
+            "departure": {
+              "time": 1690681320
+            }
+          },
+          {
+            "stop_sequence": 8,
+            "stop_id": "99240",
+            "arrival": {
+              "time": 1690681470
+            },
+            "departure": {
+              "time": 1690681500
+            }
+          },
+          {
+            "stop_sequence": 9,
+            "stop_id": "99256",
+            "arrival": {
+              "time": 1690681650
+            },
+            "departure": {
+              "time": 1690681680
+            }
+          },
+          {
+            "stop_sequence": 10,
+            "stop_id": "99260",
+            "arrival": {
+              "time": 1690681770
+            },
+            "departure": {
+              "time": 1690681800
+            }
+          },
+          {
+            "stop_sequence": 11,
+            "stop_id": "621",
+            "arrival": {
+              "time": 1690681890
+            },
+            "departure": {
+              "time": 1690681920
+            }
+          },
+          {
+            "stop_sequence": 12,
+            "stop_id": "532",
+            "arrival": {
+              "time": 1690682010
+            },
+            "departure": {
+              "time": 1690682040
+            }
+          },
+          {
+            "stop_sequence": 13,
+            "stop_id": "565",
+            "arrival": {
+              "time": 1690682070
+            },
+            "departure": {
+              "time": 1690682100
+            }
+          },
+          {
+            "stop_sequence": 14,
+            "stop_id": "1121",
+            "arrival": {
+              "time": 1690682190
+            },
+            "departure": {
+              "time": 1690682220
+            }
+          },
+          {
+            "stop_sequence": 15,
+            "stop_id": "99603",
+            "arrival": {
+              "time": 1690682370
+            },
+            "departure": {
+              "time": 1690682400
+            }
+          },
+          {
+            "stop_sequence": 16,
+            "stop_id": "99605",
+            "arrival": {
+              "time": 1690682610
+            },
+            "departure": {
+              "time": 1690682640
+            }
+          },
+          {
+            "stop_sequence": 17,
+            "stop_id": "990002",
+            "arrival": {
+              "time": 1690682790
+            },
+            "departure": {
+              "time": 1690682820
+            }
+          },
+          {
+            "stop_sequence": 18,
+            "stop_id": "990004",
+            "arrival": {
+              "time": 1690682910
+            },
+            "departure": {
+              "time": 1690682940
+            }
+          },
+          {
+            "stop_sequence": 19,
+            "stop_id": "990006",
+            "arrival": {
+              "time": 1690683150
+            }
+          }
+        ],
+        "timestamp": 1690679338,
+        "delay": -392
+      }
+    },
+    {
+      "id": "CF092000-97FD-4557-B2AD-66AFDFAEFA82",
+      "trip_update": {
+        "trip": {
+          "trip_id": "LLR_2023-03-18_Saturday_100479_2085",
+          "route_id": "100479",
+          "direction_id": 0,
+          "start_time": "18:13:00",
+          "start_date": "20230729",
+          "schedule_relationship": "SCHEDULED"
+        },
+        "vehicle": {
+          "id": "630.177934",
+          "label": "1 [290-258-278-286]"
+        },
+        "stop_time_update": [
+          {
+            "stop_sequence": 2,
+            "stop_id": "990003",
+            "arrival": {
+              "time": 1690679790
+            },
+            "departure": {
+              "time": 1690679820
+            }
+          },
+          {
+            "stop_sequence": 3,
+            "stop_id": "990001",
+            "arrival": {
+              "time": 1690679910
+            },
+            "departure": {
+              "time": 1690679940
+            }
+          },
+          {
+            "stop_sequence": 4,
+            "stop_id": "99604",
+            "arrival": {
+              "time": 1690680090
+            },
+            "departure": {
+              "time": 1690680120
+            }
+          },
+          {
+            "stop_sequence": 5,
+            "stop_id": "99610",
+            "arrival": {
+              "time": 1690680330
+            },
+            "departure": {
+              "time": 1690680360
+            }
+          },
+          {
+            "stop_sequence": 6,
+            "stop_id": "1108",
+            "arrival": {
+              "time": 1690680510
+            },
+            "departure": {
+              "time": 1690680540
+            }
+          },
+          {
+            "stop_sequence": 7,
+            "stop_id": "455",
+            "arrival": {
+              "time": 1690680630
+            },
+            "departure": {
+              "time": 1690680660
+            }
+          },
+          {
+            "stop_sequence": 8,
+            "stop_id": "501",
+            "arrival": {
+              "time": 1690680690
+            },
+            "departure": {
+              "time": 1690680720
+            }
+          },
+          {
+            "stop_sequence": 9,
+            "stop_id": "623",
+            "arrival": {
+              "time": 1690680810
+            },
+            "departure": {
+              "time": 1690680840
+            }
+          },
+          {
+            "stop_sequence": 10,
+            "stop_id": "99101",
+            "arrival": {
+              "time": 1690680930
+            },
+            "departure": {
+              "time": 1690680960
+            }
+          },
+          {
+            "stop_sequence": 11,
+            "stop_id": "99111",
+            "arrival": {
+              "time": 1690681050
+            },
+            "departure": {
+              "time": 1690681080
+            }
+          },
+          {
+            "stop_sequence": 12,
+            "stop_id": "99121",
+            "arrival": {
+              "time": 1690681230
+            },
+            "departure": {
+              "time": 1690681260
+            }
+          },
+          {
+            "stop_sequence": 13,
+            "stop_id": "55949",
+            "arrival": {
+              "time": 1690681350
+            },
+            "departure": {
+              "time": 1690681380
+            }
+          },
+          {
+            "stop_sequence": 14,
+            "stop_id": "56039",
+            "arrival": {
+              "time": 1690681530
+            },
+            "departure": {
+              "time": 1690681560
+            }
+          },
+          {
+            "stop_sequence": 15,
+            "stop_id": "56159",
+            "arrival": {
+              "time": 1690681770
+            },
+            "departure": {
+              "time": 1690681800
+            }
+          },
+          {
+            "stop_sequence": 16,
+            "stop_id": "56173",
+            "arrival": {
+              "time": 1690681950
+            },
+            "departure": {
+              "time": 1690681980
+            }
+          },
+          {
+            "stop_sequence": 17,
+            "stop_id": "99900",
+            "arrival": {
+              "time": 1690682550
+            },
+            "departure": {
+              "time": 1690682580
+            }
+          },
+          {
+            "stop_sequence": 18,
+            "stop_id": "99904",
+            "arrival": {
+              "time": 1690682730
+            }
+          },
+          {
+            "stop_sequence": 19,
+            "stop_id": "99913",
+            "arrival": {
+              "time": 1690682970
+            },
+            "departure": {
+              "time": 1690683000
+            }
+          }
+        ],
+        "timestamp": 1690679316,
+        "delay": 0
+      }
+    },
+    {
+      "id": "8221EC7F-0E5C-4475-AD6F-42B1FE0E2D1C",
+      "trip_update": {
+        "trip": {
+          "trip_id": "LLR_2023-03-18_Saturday_100479_2021",
+          "route_id": "100479",
+          "direction_id": 0,
+          "start_time": "18:03:40",
+          "start_date": "20230729",
+          "schedule_relationship": "DUPLICATED"
+        },
+        "vehicle": {
+          "id": "674.245294",
+          "label": "73 []"
+        },
+        "stop_time_update": [
+          {
+            "stop_sequence": 1,
+            "stop_id": "990005",
+            "departure": {
+              "time": 1690678180
+            }
+          },
+          {
+            "stop_sequence": 2,
+            "stop_id": "990003",
+            "arrival": {
+              "time": 1690678270
+            },
+            "departure": {
+              "time": 1690678300
+            }
+          },
+          {
+            "stop_sequence": 3,
+            "stop_id": "990001",
+            "arrival": {
+              "time": 1690678390
+            },
+            "departure": {
+              "time": 1690678420
+            }
+          },
+          {
+            "stop_sequence": 4,
+            "stop_id": "99604",
+            "arrival": {
+              "time": 1690678630
+            },
+            "departure": {
+              "time": 1690678660
+            }
+          },
+          {
+            "stop_sequence": 5,
+            "stop_id": "99610",
+            "arrival": {
+              "time": 1690678750
+            },
+            "departure": {
+              "time": 1690678780
+            }
+          },
+          {
+            "stop_sequence": 6,
+            "stop_id": "1108",
+            "arrival": {
+              "time": 1690678870
+            },
+            "departure": {
+              "time": 1690678900
+            }
+          },
+          {
+            "stop_sequence": 7,
+            "stop_id": "455",
+            "arrival": {
+              "delay": 261,
+              "time": 1690679251
+            },
+            "departure": {
+              "time": 1690679282
+            }
+          },
+          {
+            "stop_sequence": 8,
+            "stop_id": "501",
+            "arrival": {
+              "time": 1690679368
+            },
+            "departure": {
+              "time": 1690679398
+            }
+          },
+          {
+            "stop_sequence": 9,
+            "stop_id": "623",
+            "arrival": {
+              "time": 1690679488
+            },
+            "departure": {
+              "time": 1690679518
+            }
+          },
+          {
+            "stop_sequence": 10,
+            "stop_id": "99101",
+            "arrival": {
+              "time": 1690678990
+            },
+            "departure": {
+              "time": 1690679020
+            }
+          },
+          {
+            "stop_sequence": 10,
+            "stop_id": "99101",
+            "arrival": {
+              "time": 1690679608
+            },
+            "departure": {
+              "time": 1690679638
+            }
+          },
+          {
+            "stop_sequence": 11,
+            "stop_id": "99111",
+            "arrival": {
+              "time": 1690679110
+            },
+            "departure": {
+              "time": 1690679140
+            }
+          },
+          {
+            "stop_sequence": 11,
+            "stop_id": "99111",
+            "arrival": {
+              "time": 1690679728
+            },
+            "departure": {
+              "time": 1690679758
+            }
+          },
+          {
+            "stop_sequence": 12,
+            "stop_id": "99121",
+            "arrival": {
+              "time": 1690679290
+            },
+            "departure": {
+              "time": 1690679320
+            }
+          },
+          {
+            "stop_sequence": 12,
+            "stop_id": "99121",
+            "arrival": {
+              "time": 1690679908
+            },
+            "departure": {
+              "time": 1690679938
+            }
+          },
+          {
+            "stop_sequence": 13,
+            "stop_id": "55949",
+            "arrival": {
+              "time": 1690679410
+            },
+            "departure": {
+              "time": 1690679440
+            }
+          },
+          {
+            "stop_sequence": 13,
+            "stop_id": "55949",
+            "arrival": {
+              "time": 1690680028
+            },
+            "departure": {
+              "time": 1690680058
+            }
+          },
+          {
+            "stop_sequence": 14,
+            "stop_id": "56039",
+            "arrival": {
+              "time": 1690679590
+            },
+            "departure": {
+              "time": 1690679620
+            }
+          },
+          {
+            "stop_sequence": 14,
+            "stop_id": "56039",
+            "arrival": {
+              "time": 1690680148
+            },
+            "departure": {
+              "time": 1690680178
+            }
+          },
+          {
+            "stop_sequence": 15,
+            "stop_id": "56159",
+            "arrival": {
+              "time": 1690679830
+            },
+            "departure": {
+              "time": 1690679860
+            }
+          },
+          {
+            "stop_sequence": 15,
+            "stop_id": "56159",
+            "arrival": {
+              "time": 1690680388
+            },
+            "departure": {
+              "time": 1690680418
+            }
+          },
+          {
+            "stop_sequence": 16,
+            "stop_id": "56173",
+            "arrival": {
+              "time": 1690680010
+            },
+            "departure": {
+              "time": 1690680040
+            }
+          },
+          {
+            "stop_sequence": 16,
+            "stop_id": "56173",
+            "arrival": {
+              "time": 1690680568
+            },
+            "departure": {
+              "time": 1690680598
+            }
+          },
+          {
+            "stop_sequence": 17,
+            "stop_id": "99900",
+            "arrival": {
+              "time": 1690680610
+            },
+            "departure": {
+              "time": 1690680640
+            }
+          },
+          {
+            "stop_sequence": 17,
+            "stop_id": "99900",
+            "arrival": {
+              "time": 1690681108
+            },
+            "departure": {
+              "time": 1690681138
+            }
+          },
+          {
+            "stop_sequence": 18,
+            "stop_id": "99904",
+            "arrival": {
+              "time": 1690680790
+            },
+            "departure": {
+              "time": 1690680820
+            }
+          },
+          {
+            "stop_sequence": 18,
+            "stop_id": "99904",
+            "arrival": {
+              "time": 1690681348
+            },
+            "departure": {
+              "time": 1690681378
+            }
+          },
+          {
+            "stop_sequence": 19,
+            "stop_id": "99913",
+            "arrival": {
+              "time": 1690681030
+            },
+            "departure": {
+              "time": 1690681060
+            }
+          },
+          {
+            "stop_sequence": 19,
+            "stop_id": "99913",
+            "arrival": {
+              "time": 1690681528
+            },
+            "departure": {
+              "time": 1690681558
+            }
+          }
+        ],
+        "timestamp": 1690679342,
+        "delay": 0
+      }
+    },
+    {
+      "id": "EBEB7BC2-6873-4285-AD01-6A074068D749",
+      "trip_update": {
+        "trip": {
+          "trip_id": "LLR_2023-03-18_Saturday_100479_2079",
+          "route_id": "100479",
+          "direction_id": 0,
+          "start_time": "17:13:00",
+          "start_date": "20230729",
+          "schedule_relationship": "SCHEDULED"
+        },
+        "vehicle": {
+          "id": "631.920871",
+          "label": "9 [222-263-289-299]"
+        },
+        "stop_time_update": [
+          {
+            "stop_sequence": 17,
+            "stop_id": "99900",
+            "arrival": {
+              "delay": 225,
+              "time": 1690679175
+            },
+            "departure": {
+              "delay": 206,
+              "time": 1690679186
+            }
+          },
+          {
+            "stop_sequence": 18,
+            "stop_id": "99904",
+            "arrival": {
+              "time": 1690679371
+            },
+            "departure": {
+              "time": 1690679401
+            }
+          },
+          {
+            "stop_sequence": 19,
+            "stop_id": "99913",
+            "arrival": {
+              "time": 1690679611
+            }
+          }
+        ],
+        "timestamp": 1690679326,
+        "delay": 241
+      }
+    },
+    {
+      "id": "CF6BA324-32C4-4874-9F8A-CC1F4BADB2C4",
+      "trip_update": {
+        "trip": {
+          "trip_id": "LLR_2023-03-18_Saturday_100479_1083",
+          "route_id": "100479",
+          "direction_id": 1,
+          "start_time": "17:56:00",
+          "start_date": "20230729",
+          "schedule_relationship": "SCHEDULED"
+        },
+        "vehicle": {
+          "id": "665.101575",
+          "label": "6 [149-103-134-109]"
+        },
+        "stop_time_update": [
+          {
+            "stop_sequence": 3,
+            "stop_id": "99905",
+            "arrival": {
+              "delay": -68,
+              "time": 1690678882
+            },
+            "departure": {
+              "delay": -54,
+              "time": 1690678926
+            }
+          },
+          {
+            "stop_sequence": 4,
+            "stop_id": "55578",
+            "arrival": {
+              "time": 1690679409
+            },
+            "departure": {
+              "time": 1690679439
+            }
+          },
+          {
+            "stop_sequence": 5,
+            "stop_id": "55656",
+            "arrival": {
+              "time": 1690679589
+            },
+            "departure": {
+              "time": 1690679619
+            }
+          },
+          {
+            "stop_sequence": 6,
+            "stop_id": "55778",
+            "arrival": {
+              "time": 1690679829
+            },
+            "departure": {
+              "time": 1690679859
+            }
+          },
+          {
+            "stop_sequence": 7,
+            "stop_id": "55860",
+            "arrival": {
+              "time": 1690680009
+            },
+            "departure": {
+              "time": 1690680039
+            }
+          },
+          {
+            "stop_sequence": 8,
+            "stop_id": "99240",
+            "arrival": {
+              "time": 1690680189
+            },
+            "departure": {
+              "time": 1690680219
+            }
+          },
+          {
+            "stop_sequence": 9,
+            "stop_id": "99256",
+            "arrival": {
+              "time": 1690680369
+            },
+            "departure": {
+              "time": 1690680399
+            }
+          },
+          {
+            "stop_sequence": 10,
+            "stop_id": "99260",
+            "arrival": {
+              "time": 1690680489
+            },
+            "departure": {
+              "time": 1690680519
+            }
+          },
+          {
+            "stop_sequence": 11,
+            "stop_id": "621",
+            "arrival": {
+              "time": 1690680609
+            },
+            "departure": {
+              "time": 1690680639
+            }
+          },
+          {
+            "stop_sequence": 12,
+            "stop_id": "532",
+            "arrival": {
+              "time": 1690680729
+            },
+            "departure": {
+              "time": 1690680759
+            }
+          },
+          {
+            "stop_sequence": 13,
+            "stop_id": "565",
+            "arrival": {
+              "time": 1690680789
+            },
+            "departure": {
+              "time": 1690680819
+            }
+          },
+          {
+            "stop_sequence": 14,
+            "stop_id": "1121",
+            "arrival": {
+              "time": 1690680909
+            },
+            "departure": {
+              "time": 1690680939
+            }
+          },
+          {
+            "stop_sequence": 15,
+            "stop_id": "99603",
+            "arrival": {
+              "time": 1690681089
+            },
+            "departure": {
+              "time": 1690681119
+            }
+          },
+          {
+            "stop_sequence": 16,
+            "stop_id": "99605",
+            "arrival": {
+              "time": 1690681329
+            },
+            "departure": {
+              "time": 1690681359
+            }
+          },
+          {
+            "stop_sequence": 17,
+            "stop_id": "990002",
+            "arrival": {
+              "time": 1690681509
+            },
+            "departure": {
+              "time": 1690681539
+            }
+          },
+          {
+            "stop_sequence": 18,
+            "stop_id": "990004",
+            "arrival": {
+              "time": 1690681629
+            },
+            "departure": {
+              "time": 1690681659
+            }
+          },
+          {
+            "stop_sequence": 19,
+            "stop_id": "990006",
+            "arrival": {
+              "time": 1690681869
+            }
+          }
+        ],
+        "timestamp": 1690679332,
+        "delay": -81
+      }
+    },
+    {
+      "id": "40C65FB1-3CFD-4B77-BB3E-7F65B0678AD7",
+      "trip_update": {
+        "trip": {
+          "trip_id": "LLR_2023-03-18_Saturday_100479_2082",
+          "route_id": "100479",
+          "direction_id": 0,
+          "start_time": "17:43:00",
+          "start_date": "20230729",
+          "schedule_relationship": "SCHEDULED"
+        },
+        "vehicle": {
+          "id": "665.661324",
+          "label": "12 [118-111-158-117]"
+        },
+        "stop_time_update": [
+          {
+            "stop_sequence": 10,
+            "stop_id": "99101",
+            "arrival": {
+              "delay": 74,
+              "time": 1690679204
+            },
+            "departure": {
+              "delay": 102,
+              "time": 1690679262
+            }
+          },
+          {
+            "stop_sequence": 11,
+            "stop_id": "99111",
+            "arrival": {
+              "delay": 88,
+              "time": 1690679338
+            },
+            "departure": {
+              "time": 1690679369
+            }
+          },
+          {
+            "stop_sequence": 12,
+            "stop_id": "99121",
+            "arrival": {
+              "time": 1690679484
+            },
+            "departure": {
+              "time": 1690679514
+            }
+          },
+          {
+            "stop_sequence": 13,
+            "stop_id": "55949",
+            "arrival": {
+              "time": 1690679604
+            },
+            "departure": {
+              "time": 1690679634
+            }
+          },
+          {
+            "stop_sequence": 14,
+            "stop_id": "56039",
+            "arrival": {
+              "time": 1690679784
+            },
+            "departure": {
+              "time": 1690679814
+            }
+          },
+          {
+            "stop_sequence": 15,
+            "stop_id": "56159",
+            "arrival": {
+              "time": 1690680024
+            },
+            "departure": {
+              "time": 1690680054
+            }
+          },
+          {
+            "stop_sequence": 16,
+            "stop_id": "56173",
+            "arrival": {
+              "time": 1690680204
+            },
+            "departure": {
+              "time": 1690680234
+            }
+          },
+          {
+            "stop_sequence": 17,
+            "stop_id": "99900",
+            "arrival": {
+              "time": 1690680804
+            },
+            "departure": {
+              "time": 1690680834
+            }
+          },
+          {
+            "stop_sequence": 18,
+            "stop_id": "99904",
+            "arrival": {
+              "time": 1690680984
+            }
+          },
+          {
+            "stop_sequence": 19,
+            "stop_id": "99913",
+            "arrival": {
+              "time": 1690681224
+            },
+            "departure": {
+              "time": 1690681254
+            }
+          }
+        ],
+        "timestamp": 1690679338,
+        "delay": 88
+      }
+    },
+    {
+      "id": "C12355B6-8FBF-4A7D-864A-1B8DECEDBA2E",
+      "trip_update": {
+        "trip": {
+          "trip_id": "LLR_2023-03-18_Saturday_100479_1081",
+          "route_id": "100479",
+          "direction_id": 1,
+          "start_time": "17:36:00",
+          "start_date": "20230729",
+          "schedule_relationship": "SCHEDULED"
+        },
+        "vehicle": {
+          "id": "628.362825",
+          "label": "4 [294-239-301-284]"
+        },
+        "stop_time_update": [
+          {
+            "stop_sequence": 9,
+            "stop_id": "99256",
+            "arrival": {
+              "delay": -83,
+              "time": 1690679167
+            },
+            "departure": {
+              "delay": -57,
+              "time": 1690679223
+            }
+          },
+          {
+            "stop_sequence": 10,
+            "stop_id": "99260",
+            "arrival": {
+              "delay": -69,
+              "time": 1690679301
+            },
+            "departure": {
+              "time": 1690679329
+            }
+          },
+          {
+            "stop_sequence": 11,
+            "stop_id": "621",
+            "arrival": {
+              "time": 1690679430
+            },
+            "departure": {
+              "time": 1690679460
+            }
+          },
+          {
+            "stop_sequence": 12,
+            "stop_id": "532",
+            "arrival": {
+              "time": 1690679550
+            },
+            "departure": {
+              "time": 1690679580
+            }
+          },
+          {
+            "stop_sequence": 13,
+            "stop_id": "565",
+            "arrival": {
+              "time": 1690679610
+            },
+            "departure": {
+              "time": 1690679640
+            }
+          },
+          {
+            "stop_sequence": 14,
+            "stop_id": "1121",
+            "arrival": {
+              "time": 1690679730
+            },
+            "departure": {
+              "time": 1690679760
+            }
+          },
+          {
+            "stop_sequence": 15,
+            "stop_id": "99603",
+            "arrival": {
+              "time": 1690679910
+            },
+            "departure": {
+              "time": 1690679940
+            }
+          },
+          {
+            "stop_sequence": 16,
+            "stop_id": "99605",
+            "arrival": {
+              "time": 1690680150
+            },
+            "departure": {
+              "time": 1690680180
+            }
+          },
+          {
+            "stop_sequence": 17,
+            "stop_id": "990002",
+            "arrival": {
+              "time": 1690680330
+            },
+            "departure": {
+              "time": 1690680360
+            }
+          },
+          {
+            "stop_sequence": 18,
+            "stop_id": "990004",
+            "arrival": {
+              "time": 1690680450
+            },
+            "departure": {
+              "time": 1690680480
+            }
+          },
+          {
+            "stop_sequence": 19,
+            "stop_id": "990006",
+            "arrival": {
+              "time": 1690680690
+            }
+          }
+        ],
+        "timestamp": 1690679301,
+        "delay": -69
+      }
+    },
+    {
+      "id": "76BC371F-53B7-4B1D-A360-905BA05E25FC",
+      "trip_update": {
+        "trip": {
+          "trip_id": "LLR_2023-03-18_Saturday_100479_2080",
+          "route_id": "100479",
+          "direction_id": 0,
+          "start_time": "17:23:00",
+          "start_date": "20230729",
+          "schedule_relationship": "SCHEDULED"
+        },
+        "vehicle": {
+          "id": "632.572793",
+          "label": "10 [253-293-221-283]"
+        },
+        "stop_time_update": [
+          {
+            "stop_sequence": 14,
+            "stop_id": "56039",
+            "arrival": {
+              "delay": 334,
+              "time": 1690678864
+            },
+            "departure": {
+              "delay": 515,
+              "time": 1690679075
+            }
+          },
+          {
+            "stop_sequence": 15,
+            "stop_id": "56159",
+            "arrival": {
+              "delay": 453,
+              "time": 1690679223
+            },
+            "departure": {
+              "delay": 514,
+              "time": 1690679314
+            }
+          },
+          {
+            "stop_sequence": 16,
+            "stop_id": "56173",
+            "arrival": {
+              "time": 1690679385
+            },
+            "departure": {
+              "time": 1690679415
+            }
+          },
+          {
+            "stop_sequence": 17,
+            "stop_id": "99900",
+            "arrival": {
+              "time": 1690679985
+            },
+            "departure": {
+              "time": 1690680015
+            }
+          },
+          {
+            "stop_sequence": 18,
+            "stop_id": "99904",
+            "arrival": {
+              "time": 1690680165
+            }
+          },
+          {
+            "stop_sequence": 19,
+            "stop_id": "99913",
+            "arrival": {
+              "time": 1690680405
+            },
+            "departure": {
+              "time": 1690680435
+            }
+          }
+        ],
+        "timestamp": 1690679314,
+        "delay": 435
+      }
+    },
+    {
+      "id": "CD0B54F9-06CB-4FC5-9F63-C5AC961BFA0B",
+      "trip_update": {
+        "trip": {
+          "trip_id": "LLR_2023-03-18_Saturday_100479_1079",
+          "route_id": "100479",
+          "direction_id": 1,
+          "start_time": "17:16:00",
+          "start_date": "20230729",
+          "schedule_relationship": "SCHEDULED"
+        },
+        "vehicle": {
+          "id": "631.222357",
+          "label": "2 [259-201-234-254]"
+        },
+        "stop_time_update": [
+          {
+            "stop_sequence": 15,
+            "stop_id": "99603",
+            "arrival": {
+              "delay": 232,
+              "time": 1690679002
+            },
+            "departure": {
+              "delay": 277,
+              "time": 1690679077
+            }
+          },
+          {
+            "stop_sequence": 16,
+            "stop_id": "99605",
+            "arrival": {
+              "delay": 239,
+              "time": 1690679249
+            },
+            "departure": {
+              "delay": 260,
+              "time": 1690679300
+            }
+          },
+          {
+            "stop_sequence": 17,
+            "stop_id": "990002",
+            "arrival": {
+              "time": 1690679404
+            },
+            "departure": {
+              "time": 1690679434
+            }
+          },
+          {
+            "stop_sequence": 18,
+            "stop_id": "990004",
+            "arrival": {
+              "time": 1690679524
+            },
+            "departure": {
+              "time": 1690679554
+            }
+          },
+          {
+            "stop_sequence": 19,
+            "stop_id": "990006",
+            "arrival": {
+              "time": 1690679764
+            }
+          }
+        ],
+        "timestamp": 1690679339,
+        "delay": 214
+      }
+    },
+    {
+      "id": "FE8159CA-1AB1-4FAD-B1C8-25EA05B916E2",
+      "trip_update": {
+        "trip": {
+          "trip_id": "LLR_2023-03-18_Saturday_100479_1080",
+          "route_id": "100479",
+          "direction_id": 1,
+          "start_time": "17:26:00",
+          "start_date": "20230729",
+          "schedule_relationship": "SCHEDULED"
+        },
+        "vehicle": {
+          "id": "631.859200",
+          "label": "3 [246-250-302-251]"
+        },
+        "stop_time_update": [
+          {
+            "stop_sequence": 12,
+            "stop_id": "532",
+            "arrival": {
+              "delay": 84,
+              "time": 1690679094
+            },
+            "departure": {
+              "delay": 115,
+              "time": 1690679155
+            }
+          },
+          {
+            "stop_sequence": 13,
+            "stop_id": "565",
+            "arrival": {
+              "delay": 124,
+              "time": 1690679194
+            },
+            "departure": {
+              "delay": 168,
+              "time": 1690679268
+            }
+          },
+          {
+            "stop_sequence": 14,
+            "stop_id": "1121",
+            "arrival": {
+              "delay": 112,
+              "time": 1690679302
+            },
+            "departure": {
+              "time": 1690679331
+            }
+          },
+          {
+            "stop_sequence": 15,
+            "stop_id": "99603",
+            "arrival": {
+              "time": 1690679432
+            },
+            "departure": {
+              "time": 1690679462
+            }
+          },
+          {
+            "stop_sequence": 16,
+            "stop_id": "99605",
+            "arrival": {
+              "time": 1690679672
+            },
+            "departure": {
+              "time": 1690679702
+            }
+          },
+          {
+            "stop_sequence": 17,
+            "stop_id": "990002",
+            "arrival": {
+              "time": 1690679852
+            },
+            "departure": {
+              "time": 1690679882
+            }
+          },
+          {
+            "stop_sequence": 18,
+            "stop_id": "990004",
+            "arrival": {
+              "time": 1690679972
+            }
+          },
+          {
+            "stop_sequence": 19,
+            "stop_id": "990006",
+            "arrival": {
+              "time": 1690680212
+            },
+            "departure": {
+              "time": 1690680242
+            }
+          }
+        ],
+        "timestamp": 1690679302,
+        "delay": 112
+      }
+    },
+    {
+      "id": "6D488837-046A-4769-9471-D0CE76F059AA",
+      "trip_update": {
+        "trip": {
+          "trip_id": "LLR_2023-03-18_Saturday_100479_1084",
+          "route_id": "100479",
+          "direction_id": 1,
+          "start_time": "18:06:00",
+          "start_date": "20230729",
+          "schedule_relationship": "SCHEDULED"
+        },
+        "vehicle": {
+          "id": "642.913778",
+          "label": "7 [213-226-264-281]"
+        },
+        "stop_time_update": [
+          {
+            "stop_sequence": 2,
+            "stop_id": "99903",
+            "arrival": {
+              "delay": 2,
+              "time": 1690679312
+            },
+            "departure": {
+              "time": 1690679353
+            }
+          },
+          {
+            "stop_sequence": 3,
+            "stop_id": "99905",
+            "arrival": {
+              "time": 1690679483
+            },
+            "departure": {
+              "time": 1690679513
+            }
+          },
+          {
+            "stop_sequence": 4,
+            "stop_id": "55578",
+            "arrival": {
+              "time": 1690680023
+            },
+            "departure": {
+              "time": 1690680053
+            }
+          },
+          {
+            "stop_sequence": 5,
+            "stop_id": "55656",
+            "arrival": {
+              "time": 1690680203
+            },
+            "departure": {
+              "time": 1690680233
+            }
+          },
+          {
+            "stop_sequence": 6,
+            "stop_id": "55778",
+            "arrival": {
+              "time": 1690680443
+            },
+            "departure": {
+              "time": 1690680473
+            }
+          },
+          {
+            "stop_sequence": 7,
+            "stop_id": "55860",
+            "arrival": {
+              "time": 1690680623
+            },
+            "departure": {
+              "time": 1690680653
+            }
+          },
+          {
+            "stop_sequence": 8,
+            "stop_id": "99240",
+            "arrival": {
+              "time": 1690680803
+            },
+            "departure": {
+              "time": 1690680833
+            }
+          },
+          {
+            "stop_sequence": 9,
+            "stop_id": "99256",
+            "arrival": {
+              "time": 1690680983
+            },
+            "departure": {
+              "time": 1690681013
+            }
+          },
+          {
+            "stop_sequence": 10,
+            "stop_id": "99260",
+            "arrival": {
+              "time": 1690681103
+            },
+            "departure": {
+              "time": 1690681133
+            }
+          },
+          {
+            "stop_sequence": 11,
+            "stop_id": "621",
+            "arrival": {
+              "time": 1690681223
+            },
+            "departure": {
+              "time": 1690681253
+            }
+          },
+          {
+            "stop_sequence": 12,
+            "stop_id": "532",
+            "arrival": {
+              "time": 1690681343
+            },
+            "departure": {
+              "time": 1690681373
+            }
+          },
+          {
+            "stop_sequence": 13,
+            "stop_id": "565",
+            "arrival": {
+              "time": 1690681403
+            },
+            "departure": {
+              "time": 1690681433
+            }
+          },
+          {
+            "stop_sequence": 14,
+            "stop_id": "1121",
+            "arrival": {
+              "time": 1690681523
+            },
+            "departure": {
+              "time": 1690681553
+            }
+          },
+          {
+            "stop_sequence": 15,
+            "stop_id": "99603",
+            "arrival": {
+              "time": 1690681703
+            },
+            "departure": {
+              "time": 1690681733
+            }
+          },
+          {
+            "stop_sequence": 16,
+            "stop_id": "99605",
+            "arrival": {
+              "time": 1690681943
+            },
+            "departure": {
+              "time": 1690681973
+            }
+          },
+          {
+            "stop_sequence": 17,
+            "stop_id": "990002",
+            "arrival": {
+              "time": 1690682123
+            },
+            "departure": {
+              "time": 1690682153
+            }
+          },
+          {
+            "stop_sequence": 18,
+            "stop_id": "990004",
+            "arrival": {
+              "time": 1690682243
+            }
+          },
+          {
+            "stop_sequence": 19,
+            "stop_id": "990006",
+            "arrival": {
+              "time": 1690682483
+            },
+            "departure": {
+              "time": 1690682513
+            }
+          }
+        ],
+        "timestamp": 1690679312,
+        "delay": 2
+      }
+    },
+    {
+      "id": "78AD5FC0-C98C-4D8A-A7F5-395A1438061A",
+      "trip_update": {
+        "trip": {
+          "trip_id": "LLR_2023-03-18_Saturday_100479_2084",
+          "route_id": "100479",
+          "direction_id": 0,
+          "start_time": "18:03:00",
+          "start_date": "20230729",
+          "schedule_relationship": "SCHEDULED"
+        },
+        "vehicle": {
+          "id": "630.367902",
+          "label": "14 [105-151-130-129]"
+        },
+        "stop_time_update": [
+          {
+            "stop_sequence": 2,
+            "stop_id": "990003",
+            "arrival": {
+              "delay": -50,
+              "time": 1690679140
+            },
+            "departure": {
+              "delay": -19,
+              "time": 1690679201
+            }
+          },
+          {
+            "stop_sequence": 3,
+            "stop_id": "990001",
+            "arrival": {
+              "delay": -7,
+              "time": 1690679303
+            },
+            "departure": {
+              "time": 1690679334
+            }
+          },
+          {
+            "stop_sequence": 4,
+            "stop_id": "99604",
+            "arrival": {
+              "time": 1690679426
+            },
+            "departure": {
+              "time": 1690679456
+            }
+          },
+          {
+            "stop_sequence": 5,
+            "stop_id": "99610",
+            "arrival": {
+              "time": 1690679666
+            },
+            "departure": {
+              "time": 1690679696
+            }
+          },
+          {
+            "stop_sequence": 6,
+            "stop_id": "1108",
+            "arrival": {
+              "time": 1690679846
+            },
+            "departure": {
+              "time": 1690679876
+            }
+          },
+          {
+            "stop_sequence": 7,
+            "stop_id": "455",
+            "arrival": {
+              "time": 1690679966
+            },
+            "departure": {
+              "time": 1690679996
+            }
+          },
+          {
+            "stop_sequence": 8,
+            "stop_id": "501",
+            "arrival": {
+              "time": 1690680026
+            },
+            "departure": {
+              "time": 1690680056
+            }
+          },
+          {
+            "stop_sequence": 9,
+            "stop_id": "623",
+            "arrival": {
+              "time": 1690680146
+            },
+            "departure": {
+              "time": 1690680176
+            }
+          },
+          {
+            "stop_sequence": 10,
+            "stop_id": "99101",
+            "arrival": {
+              "time": 1690680266
+            },
+            "departure": {
+              "time": 1690680296
+            }
+          },
+          {
+            "stop_sequence": 11,
+            "stop_id": "99111",
+            "arrival": {
+              "time": 1690680386
+            },
+            "departure": {
+              "time": 1690680416
+            }
+          },
+          {
+            "stop_sequence": 12,
+            "stop_id": "99121",
+            "arrival": {
+              "time": 1690680566
+            },
+            "departure": {
+              "time": 1690680596
+            }
+          },
+          {
+            "stop_sequence": 13,
+            "stop_id": "55949",
+            "arrival": {
+              "time": 1690680686
+            },
+            "departure": {
+              "time": 1690680716
+            }
+          },
+          {
+            "stop_sequence": 14,
+            "stop_id": "56039",
+            "arrival": {
+              "time": 1690680866
+            },
+            "departure": {
+              "time": 1690680896
+            }
+          },
+          {
+            "stop_sequence": 15,
+            "stop_id": "56159",
+            "arrival": {
+              "time": 1690681106
+            },
+            "departure": {
+              "time": 1690681136
+            }
+          },
+          {
+            "stop_sequence": 16,
+            "stop_id": "56173",
+            "arrival": {
+              "time": 1690681286
+            },
+            "departure": {
+              "time": 1690681316
+            }
+          },
+          {
+            "stop_sequence": 17,
+            "stop_id": "99900",
+            "arrival": {
+              "time": 1690681886
+            },
+            "departure": {
+              "time": 1690681916
+            }
+          },
+          {
+            "stop_sequence": 18,
+            "stop_id": "99904",
+            "arrival": {
+              "time": 1690682066
+            },
+            "departure": {
+              "time": 1690682096
+            }
+          },
+          {
+            "stop_sequence": 19,
+            "stop_id": "99913",
+            "arrival": {
+              "time": 1690682306
+            }
+          }
+        ],
+        "timestamp": 1690679303,
+        "delay": -7
+      }
+    },
+    {
+      "id": "8C11B76F-33C7-43B6-B132-70AB0EF772AD",
+      "trip_update": {
+        "trip": {
+          "trip_id": "LLR_2023-03-18_Saturday_100479_1082",
+          "route_id": "100479",
+          "direction_id": 1,
+          "start_time": "17:46:00",
+          "start_date": "20230729",
+          "schedule_relationship": "SCHEDULED"
+        },
+        "vehicle": {
+          "id": "629.748137",
+          "label": "5 [252-298-245-269]"
+        },
+        "stop_time_update": [
+          {
+            "stop_sequence": 5,
+            "stop_id": "55656",
+            "arrival": {
+              "delay": -41,
+              "time": 1690679029
+            },
+            "departure": {
+              "delay": 19,
+              "time": 1690679119
+            }
+          },
+          {
+            "stop_sequence": 6,
+            "stop_id": "55778",
+            "arrival": {
+              "delay": -33,
+              "time": 1690679277
+            },
+            "departure": {
+              "time": 1690679298
+            }
+          },
+          {
+            "stop_sequence": 7,
+            "stop_id": "55860",
+            "arrival": {
+              "time": 1690679455
+            },
+            "departure": {
+              "time": 1690679485
+            }
+          },
+          {
+            "stop_sequence": 8,
+            "stop_id": "99240",
+            "arrival": {
+              "time": 1690679635
+            },
+            "departure": {
+              "time": 1690679665
+            }
+          },
+          {
+            "stop_sequence": 9,
+            "stop_id": "99256",
+            "arrival": {
+              "time": 1690679815
+            },
+            "departure": {
+              "time": 1690679845
+            }
+          },
+          {
+            "stop_sequence": 10,
+            "stop_id": "99260",
+            "arrival": {
+              "time": 1690679935
+            },
+            "departure": {
+              "time": 1690679965
+            }
+          },
+          {
+            "stop_sequence": 11,
+            "stop_id": "621",
+            "arrival": {
+              "time": 1690680055
+            },
+            "departure": {
+              "time": 1690680085
+            }
+          },
+          {
+            "stop_sequence": 12,
+            "stop_id": "532",
+            "arrival": {
+              "time": 1690680175
+            },
+            "departure": {
+              "time": 1690680205
+            }
+          },
+          {
+            "stop_sequence": 13,
+            "stop_id": "565",
+            "arrival": {
+              "time": 1690680235
+            },
+            "departure": {
+              "time": 1690680265
+            }
+          },
+          {
+            "stop_sequence": 14,
+            "stop_id": "1121",
+            "arrival": {
+              "time": 1690680355
+            },
+            "departure": {
+              "time": 1690680385
+            }
+          },
+          {
+            "stop_sequence": 15,
+            "stop_id": "99603",
+            "arrival": {
+              "time": 1690680535
+            },
+            "departure": {
+              "time": 1690680565
+            }
+          },
+          {
+            "stop_sequence": 16,
+            "stop_id": "99605",
+            "arrival": {
+              "time": 1690680775
+            },
+            "departure": {
+              "time": 1690680805
+            }
+          },
+          {
+            "stop_sequence": 17,
+            "stop_id": "990002",
+            "arrival": {
+              "time": 1690680955
+            },
+            "departure": {
+              "time": 1690680985
+            }
+          },
+          {
+            "stop_sequence": 18,
+            "stop_id": "990004",
+            "arrival": {
+              "time": 1690681075
+            }
+          },
+          {
+            "stop_sequence": 19,
+            "stop_id": "990006",
+            "arrival": {
+              "time": 1690681315
+            },
+            "departure": {
+              "time": 1690681345
+            }
+          }
+        ],
+        "timestamp": 1690679338,
+        "delay": -33
+      }
+    },
+    {
+      "id": "89BBEBD3-9B1E-45B1-9DAE-F57188576D2B",
+      "trip_update": {
+        "trip": {
+          "trip_id": "LLR_2023-03-18_Saturday_100479_2081",
+          "route_id": "100479",
+          "direction_id": 0,
+          "start_time": "17:33:00",
+          "start_date": "20230729",
+          "schedule_relationship": "SCHEDULED"
+        },
+        "vehicle": {
+          "id": "633.293435",
+          "label": "11 [288-233-292-243]"
+        },
+        "stop_time_update": [
+          {
+            "stop_sequence": 12,
+            "stop_id": "99121",
+            "arrival": {
+              "delay": 315,
+              "time": 1690679145
+            },
+            "departure": {
+              "delay": 337,
+              "time": 1690679197
+            }
+          },
+          {
+            "stop_sequence": 13,
+            "stop_id": "55949",
+            "arrival": {
+              "delay": 323,
+              "time": 1690679273
+            },
+            "departure": {
+              "delay": 353,
+              "time": 1690679333
+            }
+          },
+          {
+            "stop_sequence": 14,
+            "stop_id": "56039",
+            "arrival": {
+              "time": 1690679434
+            },
+            "departure": {
+              "time": 1690679464
+            }
+          },
+          {
+            "stop_sequence": 15,
+            "stop_id": "56159",
+            "arrival": {
+              "time": 1690679674
+            },
+            "departure": {
+              "time": 1690679704
+            }
+          },
+          {
+            "stop_sequence": 16,
+            "stop_id": "56173",
+            "arrival": {
+              "time": 1690679854
+            },
+            "departure": {
+              "time": 1690679884
+            }
+          },
+          {
+            "stop_sequence": 17,
+            "stop_id": "99900",
+            "arrival": {
+              "time": 1690680454
+            },
+            "departure": {
+              "time": 1690680484
+            }
+          },
+          {
+            "stop_sequence": 18,
+            "stop_id": "99904",
+            "arrival": {
+              "time": 1690680634
+            },
+            "departure": {
+              "time": 1690680664
+            }
+          },
+          {
+            "stop_sequence": 19,
+            "stop_id": "99913",
+            "arrival": {
+              "time": 1690680874
+            }
+          }
+        ],
+        "timestamp": 1690679333,
+        "delay": 304
+      }
+    },
+    {
+      "id": "F0FD6663-074D-4DBB-9E89-F2E7FE6462BC",
+      "trip_update": {
+        "trip": {
+          "trip_id": "LLR_2023-03-18_Saturday_100479_2083",
+          "route_id": "100479",
+          "direction_id": 0,
+          "start_time": "17:53:00",
+          "start_date": "20230729",
+          "schedule_relationship": "SCHEDULED"
+        },
+        "vehicle": {
+          "id": "642.794356",
+          "label": "13 [223-271-229-279]"
+        },
+        "stop_time_update": [
+          {
+            "stop_sequence": 5,
+            "stop_id": "99610",
+            "arrival": {
+              "delay": -28,
+              "time": 1690679102
+            },
+            "departure": {
+              "delay": 1,
+              "time": 1690679161
+            }
+          },
+          {
+            "stop_sequence": 6,
+            "stop_id": "1108",
+            "arrival": {
+              "delay": -32,
+              "time": 1690679278
+            },
+            "departure": {
+              "delay": -38,
+              "time": 1690679302
+            }
+          },
+          {
+            "stop_sequence": 7,
+            "stop_id": "455",
+            "arrival": {
+              "time": 1690679359
+            },
+            "departure": {
+              "time": 1690679389
+            }
+          },
+          {
+            "stop_sequence": 8,
+            "stop_id": "501",
+            "arrival": {
+              "time": 1690679419
+            },
+            "departure": {
+              "time": 1690679449
+            }
+          },
+          {
+            "stop_sequence": 9,
+            "stop_id": "623",
+            "arrival": {
+              "time": 1690679539
+            },
+            "departure": {
+              "time": 1690679569
+            }
+          },
+          {
+            "stop_sequence": 10,
+            "stop_id": "99101",
+            "arrival": {
+              "time": 1690679659
+            },
+            "departure": {
+              "time": 1690679689
+            }
+          },
+          {
+            "stop_sequence": 11,
+            "stop_id": "99111",
+            "arrival": {
+              "time": 1690679779
+            },
+            "departure": {
+              "time": 1690679809
+            }
+          },
+          {
+            "stop_sequence": 12,
+            "stop_id": "99121",
+            "arrival": {
+              "time": 1690679959
+            },
+            "departure": {
+              "time": 1690679989
+            }
+          },
+          {
+            "stop_sequence": 13,
+            "stop_id": "55949",
+            "arrival": {
+              "time": 1690680079
+            },
+            "departure": {
+              "time": 1690680109
+            }
+          },
+          {
+            "stop_sequence": 14,
+            "stop_id": "56039",
+            "arrival": {
+              "time": 1690680259
+            },
+            "departure": {
+              "time": 1690680289
+            }
+          },
+          {
+            "stop_sequence": 15,
+            "stop_id": "56159",
+            "arrival": {
+              "time": 1690680499
+            },
+            "departure": {
+              "time": 1690680529
+            }
+          },
+          {
+            "stop_sequence": 16,
+            "stop_id": "56173",
+            "arrival": {
+              "time": 1690680679
+            },
+            "departure": {
+              "time": 1690680709
+            }
+          },
+          {
+            "stop_sequence": 17,
+            "stop_id": "99900",
+            "arrival": {
+              "time": 1690681279
+            },
+            "departure": {
+              "time": 1690681309
+            }
+          },
+          {
+            "stop_sequence": 18,
+            "stop_id": "99904",
+            "arrival": {
+              "time": 1690681459
+            }
+          },
+          {
+            "stop_sequence": 19,
+            "stop_id": "99913",
+            "arrival": {
+              "time": 1690681699
+            },
+            "departure": {
+              "time": 1690681729
+            }
+          }
+        ],
+        "timestamp": 1690679302,
+        "delay": -71
+      }
+    }
+  ]
+}
