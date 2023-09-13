@@ -86,5 +86,12 @@
             </props>
         </property>
     </bean>
-    <bean id="customRouteSort" class="org.onebusaway.transit_data.model.DefaultRouteSort"/>
+    <bean id="customRouteSort" class="org.onebusaway.transit_data.model.RouteSort">
+        <constructor-arg name="agencySortConfiguration" >
+            <map>
+            </map>
+        </constructor-arg>
+        <constructor-arg type="java.lang.String" value="" />
+    </bean>
+
 </beans>
