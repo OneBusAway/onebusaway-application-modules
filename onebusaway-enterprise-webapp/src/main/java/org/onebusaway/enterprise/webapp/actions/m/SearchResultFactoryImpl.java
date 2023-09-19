@@ -63,7 +63,6 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl implements SearchResultFactory {
 
-  private static final int MAX_VEHICLE_ID_SIZE = 10;
   private ConfigurationService _configurationService;
 
   private RealtimeService _realtimeService;
@@ -402,7 +401,7 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
       }
       // column 2: vehicleId
       if (visit.getMonitoredVehicleJourney().isMonitored()
-              && isNotBlank(vehicleId) && vehicleId.length() < MAX_VEHICLE_ID_SIZE)
+              && isNotBlank(vehicleId))
         columms+= openSpan("vehicleIdContainer", "vehicleArrival") + vehicleId + closeSpan();
       else {
         columms+= openSpan("vehicleIdContainer", "vehicleScheduledArrival") + "scheduled" + closeSpan();
