@@ -651,18 +651,19 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
             // tripId will be null if block was matched
             result.addUnmatchedTripId(record.getTripId().toString());
           }
+
           AgencyAndId vehicleId = record.getVehicleId();
           // here we try to get a more accurate count of updates
           // some providers re-send old data or future data cluttering the feed
           // the TDS will discard these
           if (!isDynamicTrip && blockNotActive(record)) {
             _log.debug("discarding v: " + vehicleId + " as block not active");
-            result.addUnmatchedTripId(record.getTripId().toString());
+            result.addUnmatchedTripId(metricTripId);
             continue;
           }
           if (!isDynamicTrip && !isValidLocation(record, update)) {
             _log.debug("discarding v: " + vehicleId + " as location is bad");
-            result.addUnmatchedTripId(record.getTripId().toString());
+            result.addUnmatchedTripId(metricTripId);
             continue;
           }
           seenVehicles.add(vehicleId);
