@@ -38,7 +38,8 @@ public class MonitoredResult {
   private long _lastUpdate = 0; // we want the default to be very very old, to catch stale updates
   
   public void addUnmatchedTripId(String tripId) {
-    _unmatchedTripIds.add(tripId);
+    if (tripId != null)
+      _unmatchedTripIds.add(tripId);
   }
 
   public Set<String> getUnmatchedTripIds() {
