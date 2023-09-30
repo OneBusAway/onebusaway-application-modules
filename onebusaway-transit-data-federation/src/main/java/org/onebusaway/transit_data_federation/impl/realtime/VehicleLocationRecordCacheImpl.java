@@ -267,7 +267,7 @@ public class VehicleLocationRecordCacheImpl implements VehicleLocationRecordCach
           - _blockLocationRecordCacheWindowSize * 1000);
       int postSize = _entriesByVehicleId.size();
       int vehiclePostSize = _vehicleIdsByBlockInstance.size();
-      _log.info("cleared {} entries and {} vehicles, now {} entries and {} vehicles",
+      _log.debug("cleared {} entries and {} vehicles, now {} entries and {} vehicles",
               preSize - postSize, vehiclePreSize - vehiclePostSize, postSize, vehiclePostSize);
     }
   }
