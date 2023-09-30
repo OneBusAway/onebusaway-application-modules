@@ -647,9 +647,10 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
             _monitoredResult.addAddedTripId(record.getTripId().toString());
             _serviceSource.getDynamicBlockIndexService().register(update.block.getBlockInstance());
           }
-          if (record.getTripId() != null) {
+          if (record.getTripId() == null) {
             // tripId will be null if block was matched
-            result.addUnmatchedTripId(record.getTripId().toString());
+            result.addUnmatchedTripId(metricTripId);
+            continue;
           }
           AgencyAndId vehicleId = record.getVehicleId();
           // here we try to get a more accurate count of updates
