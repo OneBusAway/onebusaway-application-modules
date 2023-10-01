@@ -35,5 +35,10 @@ public enum EAccessibility {
   /**
    * The feature is not accessible.
    */
-  NOT_ACCESSIBLE
+  NOT_ACCESSIBLE,
+
+  /**
+   * The feature has some accessible features.
+   */
+  PARTIALLY_ACCESSIBLE //EXPERIMENTAL
 }
