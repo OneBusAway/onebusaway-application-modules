@@ -40,16 +40,9 @@ import org.onebusaway.realtime.api.TimepointPredictionRecord;
 import org.onebusaway.realtime.api.VehicleLocationRecord;
 import org.onebusaway.realtime.api.VehicleOccupancyRecord;
 import org.onebusaway.transit_data.model.TransitDataConstants;
-import org.onebusaway.transit_data_federation.services.blocks.BlockCalendarService;
-import org.onebusaway.transit_data_federation.services.blocks.BlockGeospatialService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.blocks.ScheduledBlockLocation;
-import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
-import org.onebusaway.transit_data_federation.services.transit_graph.BlockEntry;
-import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
-import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
-import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
-import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.*;
 import org.onebusaway.transit_data_federation.services.transit_graph.dynamic.DynamicTripEntryImpl;
 import org.onebusaway.util.AgencyAndIdLibrary;
 import org.onebusaway.util.SystemTime;
@@ -635,6 +628,12 @@ public class GtfsRealtimeTripLibrary {
         for (StopTimeUpdate stu : tripUpdate.getStopTimeUpdateList()) {
           TimepointPredictionRecord tpr = new TimepointPredictionRecord();
           tpr.setTimepointId(new AgencyAndId(agencyId, stu.getStopId()));
+          StopEntry testStop = this._entitySource.getStop(tpr.getTimepointId());
+          if (testStop == null) {
+            _log.debug("discarding stu for unknown stop {}", tpr.getTimepointId());
+            continue;
+          }
+
           // if duplicated alter tripId so its unique
           if (isDuplicated) {
             tpr.setTripId(new AgencyAndId(agencyId, markDuplicated(tripUpdate.getTrip().getTripId())));
