@@ -17,6 +17,7 @@
 package org.onebusaway.api.actions.api.gtfs_realtime;
 
 
+import com.google.transit.realtime.GtfsRealtimeOneBusAway;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data.model.*;
 import org.onebusaway.transit_data.model.trips.*;
@@ -116,6 +117,11 @@ public class TripUpdatesForAgencyAction extends GtfsRealtimeActionSupport {
     // make the id something meaningful and distinct
     entity.setId(activeTrip.getId() + "_" + timestamp);
     TripUpdate.Builder tripUpdate = entity.getTripUpdateBuilder();
+    // add extension for headsign support
+    GtfsRealtimeOneBusAway.OneBusAwayTripUpdate.Builder obaTripUpdate =
+            GtfsRealtimeOneBusAway.OneBusAwayTripUpdate.newBuilder();
+    obaTripUpdate.setTripHeadsign(activeTrip.getTripHeadsign());
+    tripUpdate.setExtension(GtfsRealtimeOneBusAway.obaTripUpdate, obaTripUpdate.build());
 
     TripDescriptor.Builder tripDesc = tripUpdate.getTripBuilder();
     tripDesc.setTripId(normalizeId(activeTrip.getId()));
