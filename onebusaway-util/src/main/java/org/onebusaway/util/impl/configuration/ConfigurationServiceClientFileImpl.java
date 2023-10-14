@@ -219,9 +219,11 @@ public class ConfigurationServiceClientFileImpl implements
 	synchronized HashMap<String, Object> mergeConfig(HashMap<String, Object> staticConfig) {
 		if (cachedMergeConfig == null || cacheExpired()) {
 			HashMap<String, Object> dynamicContent = this.getConfigFromApi();
-			if (dynamicContent == null || dynamicContent.isEmpty()) return staticConfig;
-			cachedMergeConfig = mergeConfig(staticConfig, dynamicContent);
+			cachedMergeConfig = staticConfig;
 			lastCacheTime = System.currentTimeMillis();
+			if (dynamicContent == null || dynamicContent.isEmpty()) {
+				return staticConfig;
+			}
 		}
 		return cachedMergeConfig;
 	}
