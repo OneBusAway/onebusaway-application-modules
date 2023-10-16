@@ -21,11 +21,11 @@ public class UTMLibrary {
 
   private static final String LAT_ZONES = "CDEFGHJKLMNPQRSTUVWX";
   
-  public static UTMProjection getProjectionForPoint(CoordinatePoint point) {
+  public static synchronized UTMProjection getProjectionForPoint(CoordinatePoint point) {
     return new UTMProjection(getUTMZoneForLongitude(point.getLon()));
   }
   
-  public static UTMProjection getProjectionForPoint(double lat, double lon) {
+  public static synchronized UTMProjection getProjectionForPoint(double lat, double lon) {
     return new UTMProjection(getUTMZoneForLongitude(lon));
   }
 
