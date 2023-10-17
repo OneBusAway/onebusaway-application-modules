@@ -42,19 +42,17 @@ public class ShapePointHelper {
 
   public ShapePoints getShapePointsForShapeId(AgencyAndId shapeId) {
 
-    synchronized (_cache) {
-      ShapePoints shapePoints = _cache.get(shapeId);
-      if (shapePoints == null) {
-        shapePoints = getShapePointsForShapeIdNonCached(shapeId);
-        _cache.put(shapeId, shapePoints);
-      }
-      return shapePoints;
+    ShapePoints shapePoints = _cache.get(shapeId);
+    if (shapePoints == null) {
+      shapePoints = getShapePointsForShapeIdNonCached(shapeId);
+      _cache.put(shapeId, shapePoints);
     }
+    return shapePoints;
   }
 
   private ShapePoints getShapePointsForShapeIdNonCached(AgencyAndId shapeId) {
 
-    List<ShapePoint> shapePoints = new ArrayList<>(_gtfsDao.getShapePointsForShapeId(shapeId)); // clone for thread safety
+    List<ShapePoint> shapePoints = _gtfsDao.getShapePointsForShapeId(shapeId);
 
     shapePoints = deduplicateShapePoints(shapePoints);
 

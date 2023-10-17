@@ -65,7 +65,6 @@ public class FederatedTransitDataBundleConventionMain {
 
 
     public String run(String[] args) {
-        long start = System.currentTimeMillis();
         logVersion();
 
         if (args == null || args.length != 3) {
@@ -103,7 +102,7 @@ public class FederatedTransitDataBundleConventionMain {
         FederatedTransitDataBundleCreator creator = setup(request);
         build(creator);
         String bundleFile = assemble(request, bundleName);
-        System.out.println("bundle file stored at " + bundleFile + " in " + (System.currentTimeMillis() - start)/1000 + "s");
+        System.out.println("bundle file stored at " + bundleFile);
         return bundleFile;
     }
 
