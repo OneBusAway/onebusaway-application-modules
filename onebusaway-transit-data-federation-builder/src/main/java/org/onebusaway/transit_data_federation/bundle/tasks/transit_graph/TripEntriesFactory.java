@@ -20,6 +20,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.TimeZone;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.onebusaway.container.ConfigurationParameter;
 import org.onebusaway.gtfs.model.Agency;
@@ -52,6 +54,8 @@ public class TripEntriesFactory {
   private StopTimeEntriesFactory _stopTimeEntriesFactory;
 
   private ShapePointHelper _shapePointsHelper;
+
+  private ExecutorService _executor = null;
 
   private boolean _throwExceptionOnInvalidStopToShapeMappingException = false;
 
@@ -91,40 +95,20 @@ public class TripEntriesFactory {
   }
 
   public void processTrips(TransitGraphImpl graph) {
-
+    setupExecutor();
     Collection<Route> routes = _gtfsDao.getAllRoutes();
     int routeIndex = 0;
-
+    List<JobResult> results = new ArrayList<>();
     for (Route route : routes) {
-
-      _log.info("route processed: " + routeIndex + "/" + routes.size());
+      JobResult result = new JobResult();
       routeIndex++;
+      ProcessRouteJob jt = new ProcessRouteJob(graph, route, routeIndex, result);
 
-      List<Trip> tripsForRoute = _gtfsDao.getTripsForRoute(route);
-      
-      int tripCount = tripsForRoute.size();
-      int logInterval = LoggingIntervalUtil.getAppropriateLoggingInterval(tripCount);
-
-      _log.info("trips to process: " + tripCount);
-      int tripIndex = 0;
-      RouteEntryImpl routeEntry = graph.getRouteForId(route.getId());
-      ArrayList<TripEntry> tripEntries = new ArrayList<TripEntry>();
-
-      for (Trip trip : tripsForRoute) {
-        tripIndex++;
-        if (tripIndex % logInterval == 0)
-          _log.info("trips processed: " + tripIndex + "/"
-              + tripsForRoute.size());
-        TripEntryImpl tripEntry = processTrip(graph, trip);
-        if (tripEntry != null) {
-          tripEntry.setRoute(routeEntry);
-          tripEntries.add(tripEntry);
-        }
-      }
-
-      tripEntries.trimToSize();
-      routeEntry.setTrips(tripEntries);
+      results.add(result);
+      _executor.submit(jt);
     }
+
+    waitOnExector(results);
 
     if (_stopTimeEntriesFactory.getInvalidStopToShapeMappingExceptionCount() > 0
         && _throwExceptionOnInvalidStopToShapeMappingException) {
@@ -138,9 +122,71 @@ public class TripEntriesFactory {
     graph.refreshTripMapping();
   }
 
-  private TripEntryImpl processTrip(TransitGraphImpl graph, Trip trip) {
+  private void waitOnExector(List<JobResult> results) {
+    int i = 0;
+    try {
+      for (JobResult result : results) {
+        while (!result.isDone()) {
+          try {
+            _log.info("waiting on result {} of {}", i, results.size());
+            Thread.sleep(1 * 1000);
+          } catch (InterruptedException e) {
+            _log.error("interrupted and exiting");
+            return;
+          }
+        }
+        i++;
+      }
+      _log.info("verified {} complete of {}", i, results.size());
+    } finally {
+      if (_executor != null) {
+        _executor.shutdownNow();
+      }
+    }
+  }
 
-    List<StopTime> stopTimes = _gtfsDao.getStopTimesForTrip(trip);
+  private void setupExecutor() {
+    if (_executor == null) {
+      int cpus = Runtime.getRuntime().availableProcessors();
+      _executor = Executors.newFixedThreadPool(cpus);
+      _log.info("created threadpool of " + cpus);
+    }
+  }
+
+  private void processRoute(TransitGraphImpl graph, Route route, int routeIndex) {
+    List<Trip> tripsForRoute = _gtfsDao.getTripsForRoute(route);
+
+    int tripCount = tripsForRoute.size();
+    int logInterval = LoggingIntervalUtil.getAppropriateLoggingInterval(tripCount * 10); // slow down logging
+
+    _log.info("trips to process: " + tripCount);
+    int tripIndex = 0;
+    RouteEntryImpl routeEntry = graph.getRouteForId(route.getId());
+    ArrayList<TripEntry> tripEntries = new ArrayList<TripEntry>();
+
+    for (Trip trip : tripsForRoute) {
+      tripIndex++;
+      if (tripIndex % logInterval == 0)
+        _log.info("trips processed: " + tripIndex + "/"
+                + tripsForRoute.size());
+      TripEntryImpl tripEntry = processTrip(graph, trip);
+      if (tripEntry != null) {
+        tripEntry.setRoute(routeEntry);
+        tripEntries.add(tripEntry);
+      }
+    }
+
+    tripEntries.trimToSize();
+    routeEntry.setTrips(tripEntries);
+    _log.info("complete {}", routeIndex);
+  }
+
+  private TripEntryImpl processTrip(TransitGraphImpl graph, Trip trip) {
+    List<StopTime> stopTimes = null;
+    synchronized (_gtfsDao) {
+      // getStopTimesForTrip is not thread safe
+      stopTimes = _gtfsDao.getStopTimesForTrip(trip);
+    }
 
     // A trip without stop times is a trip we don't care about
     if (stopTimes.isEmpty())
@@ -216,5 +262,38 @@ public class TripEntriesFactory {
 
   private <T> T unique(T value) {
     return _uniqueService.unique(value);
+  }
+
+  public class ProcessRouteJob implements Runnable {
+    private TransitGraphImpl graph;
+    private Route route;
+    private int routeIndex;
+    private JobResult result;
+    public ProcessRouteJob(TransitGraphImpl graph, Route route, int routeIndex, JobResult result) {
+      this.graph = graph;
+      this.route = route;
+      this.routeIndex = routeIndex;
+      this.result = result;
+    }
+    public void run() {
+      try {
+        processRoute(graph, route, routeIndex);
+      } catch (Throwable t) {
+        _log.error("pr blew {}", t, t);
+      } finally {
+        result.setDone();
+      }
+    }
+
+  }
+
+  public class JobResult {
+    private boolean done = false;
+    public void setDone() {
+      done = true;
+    }
+    public boolean isDone() {
+      return done;
+    }
   }
 }
