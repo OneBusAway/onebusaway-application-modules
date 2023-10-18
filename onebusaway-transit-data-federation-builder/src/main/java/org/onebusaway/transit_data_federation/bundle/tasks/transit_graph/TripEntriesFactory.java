@@ -137,6 +137,7 @@ public class TripEntriesFactory {
         }
         i++;
       }
+      _log.info("verified {} complete of {}", i, results.size());
     } finally {
       if (_executor != null) {
         _executor.shutdownNow();
@@ -146,7 +147,7 @@ public class TripEntriesFactory {
 
   private void setupExecutor() {
     if (_executor == null) {
-      int cpus = (int) (Runtime.getRuntime().availableProcessors());
+      int cpus = Runtime.getRuntime().availableProcessors();
       _executor = Executors.newFixedThreadPool(cpus);
       _log.info("created threadpool of " + cpus);
     }
@@ -181,8 +182,11 @@ public class TripEntriesFactory {
   }
 
   private TripEntryImpl processTrip(TransitGraphImpl graph, Trip trip) {
-
-    List<StopTime> stopTimes = _gtfsDao.getStopTimesForTrip(trip);
+    List<StopTime> stopTimes = null;
+    synchronized (_gtfsDao) {
+      // getStopTimesForTrip is not thread safe
+      stopTimes = _gtfsDao.getStopTimesForTrip(trip);
+    }
 
     // A trip without stop times is a trip we don't care about
     if (stopTimes.isEmpty())

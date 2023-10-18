@@ -54,7 +54,11 @@ public class ShapePointHelper {
 
   private ShapePoints getShapePointsForShapeIdNonCached(AgencyAndId shapeId) {
 
-    List<ShapePoint> shapePoints = new ArrayList<>(_gtfsDao.getShapePointsForShapeId(shapeId)); // clone for thread safety
+    List<ShapePoint> shapePoints = null;
+    synchronized (_gtfsDao) {
+      // getShapePointsForShapeId isn't thread safe
+      shapePoints = _gtfsDao.getShapePointsForShapeId(shapeId);
+    }
 
     shapePoints = deduplicateShapePoints(shapePoints);
 
