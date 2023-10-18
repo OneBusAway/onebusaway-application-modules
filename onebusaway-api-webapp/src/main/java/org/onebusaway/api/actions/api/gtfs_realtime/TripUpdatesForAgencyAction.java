@@ -178,6 +178,12 @@ public class TripUpdatesForAgencyAction extends GtfsRealtimeActionSupport {
         // the block may interline!
         tripDesc.setRouteId(normalizeId(route.getId()));
         tripUpdate.setDelay((int) tripStatus.getScheduleDeviation());
+
+        // add extension for headsign support
+        GtfsRealtimeOneBusAway.OneBusAwayTripUpdate.Builder obaTripUpdate =
+                GtfsRealtimeOneBusAway.OneBusAwayTripUpdate.newBuilder();
+        obaTripUpdate.setTripHeadsign(activeTrip.getTripHeadsign());
+        tripUpdate.setExtension(GtfsRealtimeOneBusAway.obaTripUpdate, obaTripUpdate.build());
       }
 
       for (TimepointPredictionBean timepointPrediction : tripStatus.getTimepointPredictions()) {
