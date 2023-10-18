@@ -120,7 +120,7 @@ function updateAccordion(data) {
 		headerLabel.innerHTML = 'Exclude Scheduled Data: ' + val;
 		var descriptionDiv = document.createElement('div');
 		descriptionDiv.setAttribute('class', 'propertyDescription');
-		descriptionDiv.innerHTML = '<p>Enter true if you want to suppress data of scheduled busses, and only show realtime busses.</p>';
+		descriptionDiv.innerHTML = '<p>Enter true if you want to hide scheduled buses, and only show realtime buses.</p>';
 
 		var inputDiv = document.createElement('div');
 		var hiddenInput = document.createElement('input');
