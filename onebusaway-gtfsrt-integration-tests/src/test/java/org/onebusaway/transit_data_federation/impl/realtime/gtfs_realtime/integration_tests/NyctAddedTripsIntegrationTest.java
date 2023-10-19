@@ -60,7 +60,7 @@ public class NyctAddedTripsIntegrationTest extends AbstractGtfsRealtimeIntegrati
 
     TestVehicleLocationListener listener = new TestVehicleLocationListener();
     BlockLocationServiceImpl blockLocationService = getBundleLoader().getApplicationContext().getBean(BlockLocationServiceImpl.class);
-    // todo had to make VehicleStatusServiceImpl public due to non-unique interfaces -- see if there is a better way
+
     VehicleLocationListener actualListener = getBundleLoader().getApplicationContext().getBean(VehicleStatusServiceImpl.class);
     listener.setVehicleLocationListener(actualListener);
     source.setVehicleLocationListener(listener);

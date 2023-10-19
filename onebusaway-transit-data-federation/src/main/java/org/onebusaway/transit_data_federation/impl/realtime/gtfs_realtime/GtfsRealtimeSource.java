@@ -54,9 +54,11 @@ import org.onebusaway.alerts.impl.ServiceAlertRecord;
 import org.onebusaway.alerts.impl.ServiceAlertSituationConsequenceClause;
 import org.onebusaway.alerts.impl.ServiceAlertTimeRange;
 import org.onebusaway.alerts.impl.ServiceAlertsSituationAffectsClause;
+import org.onebusaway.transit_data_federation.impl.RouteReplacementServiceImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopTimeEntriesFactory;
 import org.onebusaway.transit_data_federation.services.AgencyService;
 import org.onebusaway.transit_data_federation.services.ConsolidatedStopsService;
+import org.onebusaway.transit_data_federation.services.RouteReplacementService;
 import org.onebusaway.transit_data_federation.services.StopSwapService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockCalendarService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockGeospatialService;
@@ -1266,6 +1268,13 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
 	  }
 	}
   }
+
+  public void setRouteRemap(Map<String, String> remaps) {
+    RouteReplacementService routeReplacementService = new RouteReplacementServiceImpl();
+    routeReplacementService.putAll(remaps);
+    _entitySource.setRouteReplacementService(routeReplacementService);
+  }
+
   /****
    *
    ****/

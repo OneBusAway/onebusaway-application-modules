@@ -189,7 +189,7 @@ public abstract class AbstractGtfsRealtimeIntegrationTest {
   }
 
 
-  protected void verifyTripRange(String message, StopEntry firstStop, long firstStopTime) {
+  protected  Map<AgencyAndId, Integer> verifyTripRange(String message, StopEntry firstStop, long firstStopTime) {
     Map<AgencyAndId, Integer> tripCount = new HashMap<>();
     ArrivalAndDepartureService arrivalAndDepartureService = getBundleLoader().getApplicationContext().getBean(ArrivalAndDepartureService.class);
 
@@ -218,7 +218,7 @@ public abstract class AbstractGtfsRealtimeIntegrationTest {
           dabSetCount++;
       }
     }
-
+    return tripCount;
   }
 
   protected void verifyRouteDirectionStops(String routeId) {
