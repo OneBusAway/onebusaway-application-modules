@@ -156,6 +156,10 @@ public class TripUpdatesForAgencyAction extends GtfsRealtimeActionSupport {
     List<TripUpdate.Builder> tripUpdates = new ArrayList<>();
 
     for (String activeTripId : activeTripsIds(tripStatus)) {
+
+      TripStopTimesBean schedule = getScheduleForTrip(activeTripId, tripStatus.getServiceDate(),
+              tripStatus.getVehicleId(), timestamp);
+
       FeedEntity.Builder entity = feed.addEntityBuilder();
       // make the id something meaningful and distinct
       entity.setId(activeTripId + "_" + timestamp);
@@ -208,9 +212,59 @@ public class TripUpdatesForAgencyAction extends GtfsRealtimeActionSupport {
           departure.setTime(timepointPrediction.getTimepointPredictedDepartureTime() / 1000L);
         }
         tripUpdate.setTimestamp(timestamp / 1000);
+
+        String stopHeadsign = getHeadsignForStop(schedule, stopId, timepointPrediction.getStopSequence());
+
+        if (stopHeadsign != null) {
+          GtfsRealtimeOneBusAway.OneBusAwayStopTimeUpdate.Builder obaStopTimeUpdate =
+                  GtfsRealtimeOneBusAway.OneBusAwayStopTimeUpdate.newBuilder();
+          obaStopTimeUpdate.setStopHeadsign(stopHeadsign);
+          stopTimeUpdate.setExtension(GtfsRealtimeOneBusAway.obaStopTimeUpdate, obaStopTimeUpdate.build());
+        }
       }
     }
     return tripUpdates;
+  }
+
+  private TripStopTimesBean getScheduleForTrip(String activeTripId, long serviceDate, String vehicleId, long timestamp) {
+    TripDetailsQueryBean query = new TripDetailsQueryBean();
+    query.setTripId(activeTripId);
+    query.setServiceDate(serviceDate);
+    query.setVehicleId(vehicleId);
+    query.setTime(timestamp);
+    TripDetailsBean tripDetails = _service.getSingleTripDetails(query);
+    TripStopTimesBean schedule = null;
+    if (tripDetails != null) {
+      schedule = tripDetails.getSchedule();
+    }
+    return schedule;
+  }
+
+  private String getHeadsignForStop(TripStopTimesBean schedule, AgencyAndId stopId, int sequence) {
+    if (schedule == null) return null;
+    if (sequence < schedule.getStopTimes().size()) {
+      // try a direct sequence lookup
+      TripStopTimeBean tripStopTimeBean = schedule.getStopTimes().get(sequence);
+      if (tripStopTimeBean.getStop().getId().equals(AgencyAndIdLibrary.convertToString(stopId))) {
+        return tripStopTimeBean.getStopHeadsign();
+      }
+    }
+    // sequence didn't index, but perhaps it matches to gtfs sequence
+    for (TripStopTimeBean stopTime : schedule.getStopTimes()) {
+      if (stopTime.getGtfsSequence() == sequence) {
+        if (stopTime.getStop().getId().equals(AgencyAndIdLibrary.convertToString(stopId))) {
+          return stopTime.getStopHeadsign();
+        }
+      }
+    }
+    // sequence didn't match, find the first stop that matches and hope there are no loops
+    for (TripStopTimeBean stopTime : schedule.getStopTimes()) {
+      if (stopTime.getStop().getId().equals(AgencyAndIdLibrary.convertToString(stopId))) {
+        return stopTime.getStopHeadsign();
+      }
+    }
+    // we fell through -- bad data -- no possible stop headsign
+    return null;
   }
 
   private String formatStartTime(long l) {

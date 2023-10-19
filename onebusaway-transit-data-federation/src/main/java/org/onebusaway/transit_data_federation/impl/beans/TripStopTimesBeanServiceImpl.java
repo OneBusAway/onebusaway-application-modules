@@ -29,12 +29,14 @@ import org.onebusaway.transit_data.model.TripStopTimesBean;
 import org.onebusaway.transit_data.model.schedule.FrequencyBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.transit_data_federation.model.bundle.HistoricalRidership;
+import org.onebusaway.transit_data_federation.model.narrative.StopTimeNarrative;
 import org.onebusaway.transit_data_federation.services.AgencyService;
 import org.onebusaway.transit_data_federation.services.RidershipService;
 import org.onebusaway.transit_data_federation.services.beans.StopBeanService;
 import org.onebusaway.transit_data_federation.services.beans.TripBeanService;
 import org.onebusaway.transit_data_federation.services.beans.TripStopTimesBeanService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockTripInstance;
+import org.onebusaway.transit_data_federation.services.narrative.NarrativeService;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.FrequencyEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
@@ -54,6 +56,8 @@ public class TripStopTimesBeanServiceImpl implements TripStopTimesBeanService {
 
   private RidershipService _ridershipService;
 
+  private NarrativeService _narrativeService;
+
   @Autowired
   public void setAgencyService(AgencyService agencyService) {
     _agencyService = agencyService;
@@ -71,6 +75,11 @@ public class TripStopTimesBeanServiceImpl implements TripStopTimesBeanService {
 
   @Autowired
   public void setOccupancyService(RidershipService ridershipService) { _ridershipService = ridershipService; } // TODO
+
+  @Autowired
+  public void setNarrativeService(NarrativeService narrativeService) {
+    _narrativeService = narrativeService;
+  }
 
   @Override
   public TripStopTimesBean getStopTimesForBlockTrip(BlockTripInstance blockTripInstance) {
@@ -132,6 +141,16 @@ public class TripStopTimesBeanServiceImpl implements TripStopTimesBeanService {
       stBean.setStop(stopBean);
       stBean.setDistanceAlongTrip(stopTime.getShapeDistTraveled());
       stBean.setGtfsSequence(stopTime.getGtfsSequence());
+
+      // ADDED/DUPLICATED trips need the headsign, and are often provided
+      // via additional data.  We lookup only that value here as GTFS info
+      // is available to consumer already
+      StopTimeNarrative stopTimeNarrative = _narrativeService.getStopTimeNarrativeForPattern(trip.getRoute().getId(),
+              stopTime.getStop().getId(),
+              trip.getDirectionId());
+      if (stopTimeNarrative != null) {
+        stBean.setStopHeadsign(stopTimeNarrative.getStopHeadsign());
+      }
 
       List<HistoricalRidership> rid = _ridershipService.getHistoricalRiderships(trip.getRoute().getId(), trip.getId(), stopEntry.getId(), serviceDate);
       if(rid != null && rid.size() > 0) stBean.setHistoricalOccupancy(OccupancyStatus.toEnum(rid.get(0).getLoadFactor()));

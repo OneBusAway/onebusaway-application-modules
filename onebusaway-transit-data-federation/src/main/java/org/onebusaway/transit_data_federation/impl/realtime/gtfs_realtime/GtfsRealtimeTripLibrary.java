@@ -624,6 +624,8 @@ public class GtfsRealtimeTripLibrary {
             record.setTripId(new AgencyAndId(agencyId, tripUpdate.getTrip().getTripId()));
           }
         }
+        // TODO: this be actual index but that proves difficult with
+        // variability of realtime.
         int sequence = 0;
         for (StopTimeUpdate stu : tripUpdate.getStopTimeUpdateList()) {
           TimepointPredictionRecord tpr = new TimepointPredictionRecord();
