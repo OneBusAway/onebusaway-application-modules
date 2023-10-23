@@ -95,6 +95,9 @@ public class DynamicBlockIndexServiceImpl implements DynamicBlockIndexService {
     // if the vehicle changes trips, we rely on the cache record to expire
     // therefore there may be a brief period of overlap
     AgencyAndId id = blockInstance.getBlock().getBlock().getId();
+    if (cacheByBlockId.containsKey(id)) {
+      return; // nothing to do
+    }
     cacheByBlockId.put(id, blockInstance);
 
     List<BlockEntry> blocks = new ArrayList<>();
