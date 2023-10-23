@@ -18,7 +18,6 @@ package org.onebusaway.transit_data_federation.impl.transit_graph;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -40,12 +39,15 @@ import org.onebusaway.transit_data_federation.services.transit_graph.TransitGrap
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
 import org.onebusaway.transit_data_federation.model.transit_graph.TransitGraph;
 import org.onebusaway.utility.ObjectSerializationLibrary;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class TransitGraphDaoImpl implements TransitGraphDao {
 
+  private static final Logger _log = LoggerFactory.getLogger(TransitGraphDaoImpl.class);
   private FederatedTransitDataBundle _bundle;
 
   private TransitGraph _graph;
@@ -65,9 +67,12 @@ public class TransitGraphDaoImpl implements TransitGraphDao {
     _graph = graph;
   }
 
+  private boolean changingBundle = true;
+
   @PostConstruct
   @Refreshable(dependsOn = RefreshableResources.TRANSIT_GRAPH)
   public void setup() throws IOException, ClassNotFoundException {
+    changingBundle = true;
     File path = _bundle.getTransitGraphPath();
 
     if(_graph != null) {
@@ -83,6 +88,23 @@ public class TransitGraphDaoImpl implements TransitGraphDao {
     } else {
       _graph = new TransitGraphImpl();
     }
+    changingBundle = false;
+  }
+
+  private void blockUntilGraphIsReady() {
+    int i = 0;
+    while (changingBundle) {
+      try {
+        Thread.sleep(250);
+        Thread.yield(); // let some other work be done
+      } catch (InterruptedException e) {
+        return;
+      }
+      i++;
+      if (i % 100 == 0) {
+        _log.warn("Bundle is not ready or none is loaded--we've blocked 100 Graph requests since last log event.");
+      }
+    }
   }
 
   /****
@@ -91,27 +113,32 @@ public class TransitGraphDaoImpl implements TransitGraphDao {
 
   @Override
   public List<AgencyEntry> getAllAgencies() {
+    blockUntilGraphIsReady();
     return _graph.getAllAgencies();
   }
 
   @Override
   public AgencyEntry getAgencyForId(String id) {
+    blockUntilGraphIsReady();
     return _graph.getAgencyForId(id);
   }
 
   @Override
   public List<StopEntry> getAllStops() {
+    blockUntilGraphIsReady();
     return _graph.getAllStops();
   }
 
   @Override
   public StopEntry getStopEntryForId(AgencyAndId id) {
+    blockUntilGraphIsReady();
     return _graph.getStopEntryForId(id);
   }
 
   @Override
   public StopEntry getStopEntryForId(AgencyAndId id,
       boolean throwExceptionIfNotFound) {
+    blockUntilGraphIsReady();
     StopEntry stop = _graph.getStopEntryForId(id);
     if (stop == null && throwExceptionIfNotFound)
       throw new NoSuchStopServiceException(
@@ -121,26 +148,31 @@ public class TransitGraphDaoImpl implements TransitGraphDao {
 
   @Override
   public List<StopEntry> getStopsByLocation(CoordinateBounds bounds) {
+    blockUntilGraphIsReady();
     return _graph.getStopsByLocation(bounds);
   }
 
   @Override
   public List<BlockEntry> getAllBlocks() {
+    blockUntilGraphIsReady();
     return _graph.getAllBlocks();
   }
 
   @Override
   public BlockEntry getBlockEntryForId(AgencyAndId blockId) {
+    blockUntilGraphIsReady();
     return _graph.getBlockEntryForId(blockId);
   }
 
   @Override
   public List<TripEntry> getAllTrips() {
+    blockUntilGraphIsReady();
     return _graph.getAllTrips();
   }
 
   @Override
   public TripEntry getTripEntryForId(AgencyAndId id) {
+    blockUntilGraphIsReady();
     TripEntry entry = _graph.getTripEntryForId(id);
     if (entry == null && _dynamicGraph != null)
       entry = _dynamicGraph.getTripEntryForId(id);
@@ -149,23 +181,25 @@ public class TransitGraphDaoImpl implements TransitGraphDao {
 
   @Override
   public List<RouteCollectionEntry> getAllRouteCollections() {
+    blockUntilGraphIsReady();
     return _graph.getAllRouteCollections();
   }
 
   @Override
   public RouteCollectionEntry getRouteCollectionForId(AgencyAndId id) {
+    blockUntilGraphIsReady();
     return _graph.getRouteCollectionForId(id);
   }
 
   @Override
   public List<RouteEntry> getAllRoutes() {
-    if (_graph != null)
-      return _graph.getAllRoutes();
-    return new ArrayList<>(); // special case on startup before bundle loaded
+    blockUntilGraphIsReady();
+    return _graph.getAllRoutes();
   }
 
   @Override
   public RouteEntry getRouteForId(AgencyAndId id) {
+    blockUntilGraphIsReady();
     return _graph.getRouteForId(id);
   }
 }
