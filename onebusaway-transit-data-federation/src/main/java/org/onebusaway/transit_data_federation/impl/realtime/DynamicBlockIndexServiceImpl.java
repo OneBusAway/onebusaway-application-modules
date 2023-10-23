@@ -80,14 +80,13 @@ public class DynamicBlockIndexServiceImpl implements DynamicBlockIndexService {
   }
   @Override
   public List<BlockStopTimeIndex> getStopTimeIndicesForStop(StopEntry stopEntry) {
-    if (!blockStopTimeIndicesByStopId.containsKey(stopEntry.getId())) {
-      return null;
-    }
     synchronized (blockStopTimeIndicesByStopId) {
+      if (!blockStopTimeIndicesByStopId.containsKey(stopEntry.getId())) {
+        return null;
+      }
       Set<BlockStopTimeIndex> set = blockStopTimeIndicesByStopId.get(stopEntry.getId());
       return new ArrayList<>(set);
     }
-
   }
 
   @Override
@@ -127,13 +126,13 @@ public class DynamicBlockIndexServiceImpl implements DynamicBlockIndexService {
 
 
     List<BlockStopTimeIndex> indices = blockStopTimeIndicesFactory.createIndices(blocks);
-    for (BlockStopTimeIndex sti : indices) {
-      AgencyAndId stopId = sti.getStop().getId();
-      if (!blockStopTimeIndicesByStopId.containsKey(stopId)) {
-        // a set to prevent duplicates
-        blockStopTimeIndicesByStopId.put(stopId, new HashSet<>());
-      }
-      synchronized (blockStopTimeIndicesByStopId) {
+    synchronized (blockStopTimeIndicesByStopId) {
+      for (BlockStopTimeIndex sti : indices) {
+        AgencyAndId stopId = sti.getStop().getId();
+        if (!blockStopTimeIndicesByStopId.containsKey(stopId)) {
+          // a set to prevent duplicates
+          blockStopTimeIndicesByStopId.put(stopId, new HashSet<>());
+        }
         if (!containsTrip(blockStopTimeIndicesByStopId.get(stopId), sti)) {
           blockStopTimeIndicesByStopId.get(stopId).add(sti);
         }
