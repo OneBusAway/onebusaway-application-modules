@@ -242,7 +242,7 @@ public class TripUpdatesForAgencyAction extends GtfsRealtimeActionSupport {
 
   private String getHeadsignForStop(TripStopTimesBean schedule, AgencyAndId stopId, int sequence) {
     if (schedule == null) return null;
-    if (sequence < schedule.getStopTimes().size()) {
+    if (sequence < schedule.getStopTimes().size() && sequence >= 0) {
       // try a direct sequence lookup
       TripStopTimeBean tripStopTimeBean = schedule.getStopTimes().get(sequence);
       if (tripStopTimeBean.getStop().getId().equals(AgencyAndIdLibrary.convertToString(stopId))) {
