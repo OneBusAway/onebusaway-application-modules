@@ -642,7 +642,7 @@ public class GtfsRealtimeTripLibrary {
           } else {
             tpr.setTripId(new AgencyAndId(agencyId, tripUpdate.getTrip().getTripId()));
           }
-          tpr.setStopSequence(sequence);
+          tpr.setStopSequence(-1); // don't set the stop sequence if its not from GTFS
           sequence++;
           switch (stu.getScheduleRelationship()) {
             case SCHEDULED:
