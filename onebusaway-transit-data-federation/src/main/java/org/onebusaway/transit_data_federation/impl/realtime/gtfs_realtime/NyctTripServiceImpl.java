@@ -65,7 +65,7 @@ public class NyctTripServiceImpl implements NyctTripService {
       AddedTripInfo addedTrip = new AddedTripInfo();
       addedTrip.setScheduleRelationshipValue(TransitDataConstants.STATUS_ADDED);
       addedTrip.setAgencyId(getDefaultAgency());
-      addedTrip.setTripStartTime(originDepartureTime);
+      addedTrip.setTripStartTime(originDepartureTime * 60 / 100); // 100ths
       // here we make an assumption about the service data
       addedTrip.setServiceDate(getStartOfDay(new Date(currentTime)).getTime());
       addedTrip.setRouteId(routeId);
