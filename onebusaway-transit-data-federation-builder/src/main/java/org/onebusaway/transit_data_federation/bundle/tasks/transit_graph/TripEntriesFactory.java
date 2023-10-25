@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.TimeZone;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import org.onebusaway.container.ConfigurationParameter;
 import org.onebusaway.gtfs.model.Agency;
@@ -140,7 +141,13 @@ public class TripEntriesFactory {
       _log.info("verified {} complete of {}", i, results.size());
     } finally {
       if (_executor != null) {
-        _executor.shutdownNow();
+        try {
+          _executor.shutdown();
+          _executor.awaitTermination(1, TimeUnit.MINUTES);
+          _executor.shutdownNow();
+        } catch (Exception e) {
+          return;
+        }
       }
     }
   }
