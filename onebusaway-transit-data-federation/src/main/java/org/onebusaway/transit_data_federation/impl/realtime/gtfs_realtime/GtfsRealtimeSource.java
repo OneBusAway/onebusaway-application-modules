@@ -647,7 +647,8 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
               _monitoredResult.setLastUpdate(record.getTimeOfRecord());
             }
             _monitoredResult.addAddedTripId(record.getTripId().toString());
-            _serviceSource.getDynamicBlockIndexService().register(update.block.getBlockInstance());
+            int effectiveTime = (int)(record.getServiceDate() - record.getTimeOfRecord()) / 1000;
+            _serviceSource.getDynamicBlockIndexService().register(update.block.getBlockInstance(), effectiveTime);
           }
           if (record.getTripId() != null) {
             // tripId will be null if block was matched
