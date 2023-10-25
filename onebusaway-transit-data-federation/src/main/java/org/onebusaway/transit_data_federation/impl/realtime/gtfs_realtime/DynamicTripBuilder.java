@@ -68,7 +68,7 @@ public class DynamicTripBuilder {
         instance = createBlockInstance(addedTripInfo);
       }
 
-      if (instance == null) {
+      if (instance == null || !isValid(instance)) {
         _log.error("unable to create descriptor for additional trip {}", addedTripInfo);
         return null;
       }
@@ -81,6 +81,30 @@ public class DynamicTripBuilder {
       _log.error("source-exception {}", t, t);
       return null;
     }
+  }
+  // be paranoid about incoming data
+  private boolean isValid(BlockInstance instance) {
+    if (instance.getServiceDate() < 1000l)
+      return false;
+    if (instance.getState() == null)
+      return false;
+    if (instance.getBlock() == null)
+      return false;
+    BlockConfigurationEntry block = instance.getBlock();
+    if (block.getBlock() == null)
+      return false;
+    if (block.getTrips() == null || block.getTrips().isEmpty())
+      return false;
+    BlockTripEntry blockTripEntry = block.getTrips().get(0);
+    if (blockTripEntry.getTrip() == null)
+      return false;
+    if (blockTripEntry.getTrip().getId() == null)
+      return false;
+    if (blockTripEntry.getTrip().getId().getId() == null)
+      return false;
+    if (blockTripEntry.getStopTimes() == null || blockTripEntry.getStopTimes().isEmpty())
+      return false;
+    return true;
   }
 
   private BlockInstance createBlockInstance(AddedTripInfo addedTripInfo) {
