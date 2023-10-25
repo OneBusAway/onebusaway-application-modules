@@ -28,8 +28,8 @@ import java.util.Set;
 public interface GtfsRealtimeCancelService {
 
   Set<RouteEntry> findRoutesForIds(List<AgencyAndId> ids);
-  List<TripDetailsBean> findActiveTripsForRoute(RouteEntry route);
+  List<TripDetailsBean> findActiveTripsForRoute(RouteEntry route, long timestamp);
   void cancel(List<TripDetailsBean> tripsToCancel);
 
-  void cancelServiceForRoutes(List<AgencyAndId> routeIdsToCancel);
+  void cancelServiceForRoutes(List<AgencyAndId> routeIdsToCancel, long timestamp);
 }

@@ -542,7 +542,9 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     result.setFeedId(getFeedId());
 
     if (_routeIdsToCancel != null) {
-      _cancelService.cancelServiceForRoutes(_routeIdsToCancel);
+      long currentTime = _tripsLibrary.getCurrentTime();
+      if (currentTime == 0) currentTime = System.currentTimeMillis();
+      _cancelService.cancelServiceForRoutes(_routeIdsToCancel, currentTime);
     }
 
     handleUpdates(result, tripUpdates, vehiclePositions, alerts, alertCollection);

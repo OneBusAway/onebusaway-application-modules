@@ -31,7 +31,6 @@ import org.onebusaway.transit_data_federation.services.transit_graph.TransitGrap
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -86,21 +85,22 @@ public class GtfsRealtimeCancelServiceImpl implements GtfsRealtimeCancelService 
     return routeSet;
   }
 
-  public List<TripDetailsBean> findActiveTripsForRoutes(Set<RouteEntry> routes) {
+  public List<TripDetailsBean> findActiveTripsForRoutes(Set<RouteEntry> routes, long timestamp) {
     List<TripDetailsBean> beans = new ArrayList<>();
     if (routes == null) return beans;
     for (RouteEntry route : routes) {
-      beans.addAll(findActiveTripsForRoute(route));
+      beans.addAll(findActiveTripsForRoute(route, timestamp));
     }
     return beans;
   }
   @Override
-  public List<TripDetailsBean> findActiveTripsForRoute(RouteEntry route) {
+  public List<TripDetailsBean> findActiveTripsForRoute(RouteEntry route, long timestamp) {
     List<TripDetailsBean> activeTrips = new ArrayList<>();
     TripsForRouteQueryBean query = new TripsForRouteQueryBean();
     query.setRouteId(AgencyAndId.convertToString(route.getId()));
     query.setMaxCount(5000);
-    TripDetailsInclusionBean inclusion = new TripDetailsInclusionBean(true, false, false);
+    query.setTime(timestamp);
+    TripDetailsInclusionBean inclusion = new TripDetailsInclusionBean(true, false, true);
     query.setInclusion(inclusion);
     ListBean<TripDetailsBean> tripsForRoute = _tds.getTripsForRoute(query);
     if (tripsForRoute != null) {
@@ -130,14 +130,14 @@ public class GtfsRealtimeCancelServiceImpl implements GtfsRealtimeCancelService 
 
 
   @Override
-  public void cancelServiceForRoutes(List<AgencyAndId> routeIdsToCancel) {
+  public void cancelServiceForRoutes(List<AgencyAndId> routeIdsToCancel, long timestamp) {
     Set<RouteEntry> routeEntries = _cache.get(routeIdsToCancel);
     if (routeEntries == null) {
       routeEntries = findRoutesForIds(routeIdsToCancel);
       if (routeEntries == null) return;
       _cache.put(routeIdsToCancel, routeEntries);
     }
-    cancel(findActiveTripsForRoutes(routeEntries));
+    cancel(findActiveTripsForRoutes(routeEntries, timestamp));
     _log.info("canceled service for {}", routeIdsToCancel);
   }
 
