@@ -211,20 +211,22 @@ public class DynamicTripBuilder {
       stops.add(stopTime);
     }
     ShapePoints shapePoints = null;
-    shapePoints = loadShapePoints(trip);
+    shapePoints = loadShapePoints(trip, stops);
     _serviceSource.getStopTimeEntriesFactory().ensureStopTimesHaveShapeDistanceTraveledSet(stops, shapePoints);
     return stops;
   }
 
-  private ShapePoints loadShapePoints(DynamicTripEntryImpl trip) {
+  private ShapePoints loadShapePoints(DynamicTripEntryImpl trip, List<StopTimeEntry> stops) {
     ShapePoints result = new ShapePoints();
     result.setShapeId(trip.getShapeId());
     List<Double> lats = new ArrayList<>();
     List<Double> lons = new ArrayList<>();
-    if (trip.getStopTimes() != null) {
-      for (StopTimeEntry stopTime : trip.getStopTimes()) {
-        lats.add(stopTime.getStop().getStopLat());
-        lons.add(stopTime.getStop().getStopLon());
+    if (stops != null) {
+      for (StopTimeEntry stopTime : stops) {
+        if (stopTime != null && stopTime.getStop() != null) {
+          lats.add(stopTime.getStop().getStopLat());
+          lons.add(stopTime.getStop().getStopLon());
+        }
       }
 
       result.setLats(toArray(lats));
