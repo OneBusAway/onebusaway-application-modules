@@ -38,6 +38,7 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URISyntaxException;
@@ -167,6 +168,21 @@ public class FederatedTransitDataBundleConventionMain {
             for (File output : outputFiles) {
                 fs.copyFiles(output, new File(outputsPath + File.separator + output.getName()));
             }
+        }
+
+        String indexFile = System.getProperty("indexFile");
+        if (indexFile != null) {
+            try {
+                _log.info("writing indexFile {}", indexFile);
+                String indexText = "{\"latest\":\"file://" + filename + "\"}";
+                FileWriter fw = new FileWriter(indexFile);
+                fw.write(indexText);
+                fw.close();
+            } catch (Throwable t) {
+                _log.error("unable to create index {}", indexFile, t);
+            }
+        } else {
+            _log.info("indexFile not requested");
         }
         return filename;
     }
