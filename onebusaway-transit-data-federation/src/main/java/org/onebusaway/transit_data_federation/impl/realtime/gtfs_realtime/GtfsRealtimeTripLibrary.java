@@ -183,13 +183,7 @@ public class GtfsRealtimeTripLibrary {
 
       TripUpdate tu = fe.getTripUpdate();
       BlockDescriptor bd = null;
-      if (tu.hasTrip() &&
-              (TransitDataConstants.STATUS_ADDED.equals(tu.getTrip().getScheduleRelationship().toString())
-              || TransitDataConstants.STATUS_DUPLICATED.equals(tu.getTrip().getScheduleRelationship().toString()))) {
-        result.addAddedTripId(tu.getTrip().getTripId());
-      }
       if (tu.hasTrip() && TransitDataConstants.STATUS_DUPLICATED.equals(tu.getTrip().getScheduleRelationship().toString())) {
-        result.addAddedTripId(tu.getTrip().getTripId()); // for now we also consider this an ADDED trip
         AddedTripInfo addedTripInfo = _serviceSource.getDuplicatedTripService().handleDuplicatedDescriptor(tu);
         bd = _serviceSource.getDynamicTripBuilder().createBlockDescriptor(addedTripInfo);
         if (bd == null) continue; // we failed
@@ -215,8 +209,6 @@ public class GtfsRealtimeTripLibrary {
         if (bd == null) {
           bd = handleDynamicTripUpdate(tu);
           if (bd == null) continue; // we failed
-          // this is implicitly an added trip
-          result.addAddedTripId(td.getTripId());
 
           // if this trip has a vehiclePosition it will be matched later
           anonymousTripUpdatesByBlock.put(bd, tu);
@@ -555,8 +547,12 @@ public class GtfsRealtimeTripLibrary {
           result.addMatchedTripId(record.getTripId().toString());
         }
       } else if (record.getBlockId() != null) {
-        // here we take a matched block as if it were a trip
-        result.addMatchedTripId(record.getBlockId().toString());
+        if (record.getStatus().equals(TransitDataConstants.STATUS_CANCELED)) {
+          result.addCancelledTripId(record.getBlockId().toString());
+        } else {
+          // here we take a matched block as if it were a trip
+          result.addMatchedTripId(record.getBlockId().toString());
+        }
       } else {
         // we don't have a tripId, use the BlockId instead
         result.addMatchedTripId(record.getBlockId().toString());
@@ -953,8 +949,6 @@ public class GtfsRealtimeTripLibrary {
 
             if (tripId != null) {
               best.isCanceled = tripUpdate.getTrip().getScheduleRelationship().equals(TripDescriptor.ScheduleRelationship.CANCELED);
-              if (best.isCanceled)
-                result.addCancelledTripId(tripUpdate.getTrip().getTripId());
               record.setStatus(tripUpdate.getTrip().getScheduleRelationship().toString());
               _log.debug("schedule=" + tripUpdate.getTrip().getScheduleRelationship() + "; isCanceled=" + best.isCanceled);
             }

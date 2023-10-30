@@ -68,8 +68,12 @@ public class DynamicTripBuilder {
         instance = createBlockInstance(addedTripInfo);
       }
 
-      if (instance == null || !isValid(instance)) {
-        _log.error("unable to create descriptor for additional trip {}", addedTripInfo);
+      if (instance == null) {
+        _log.error("unable to create descriptor for additional trip {}", addedTripInfo.getTripId());
+      }
+
+      if (!isValid(instance)) {
+        _log.error("validation failed for additional trip {}", addedTripInfo.getTripId());
         return null;
       }
 

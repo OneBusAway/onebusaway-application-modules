@@ -648,7 +648,6 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
             if (_monitoredResult.getLastUpdate() < record.getTimeOfRecord()) {
               _monitoredResult.setLastUpdate(record.getTimeOfRecord());
             }
-            _monitoredResult.addAddedTripId(record.getTripId().toString());
             int effectiveTime = (int)(record.getServiceDate() - record.getTimeOfRecord()) / 1000;
             _serviceSource.getDynamicBlockIndexService().register(update.block.getBlockInstance(), effectiveTime);
           }
