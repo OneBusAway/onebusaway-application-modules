@@ -112,21 +112,30 @@ public abstract class MetricResource {
     for (MonitoredDataSource mds : getDataSources()) {
       MonitoredResult result = mds.getMonitoredResult();
       if (result == null) continue;
-      if (feedId == null || feedId.equals(mds.getFeedId())) {
+      if ((feedId == null || feedId.equals(mds.getFeedId())) && agencyId != null) {
         for (String tripId : result.getMatchedTripIds()) {
-          if (agencyId.equals(AgencyAndIdLibrary.convertFromString(tripId).getAgencyId())) {
-            tripIds.add(tripId);
+          if(tripId != null) {
+            AgencyAndId matchedTripId = AgencyAndIdLibrary.convertFromString(tripId);
+            if (matchedTripId != null && agencyId.equals(matchedTripId.getAgencyId())) {
+              tripIds.add(tripId);
+            }
           }
         }
         // we alter our definition of inservice to include added and duplicated trips
         for (String tripId : result.getAddedTripIds()) {
-          if (agencyId.equals(AgencyAndIdLibrary.convertFromString(tripId).getAgencyId())) {
-            tripIds.add(tripId);
+          if(tripId != null) {
+            AgencyAndId addedTripId = AgencyAndIdLibrary.convertFromString(tripId);
+            if (addedTripId != null && agencyId.equals(addedTripId.getAgencyId())) {
+              tripIds.add(tripId);
+            }
           }
         }
         for (String tripId : result.getDuplicatedTripIds()) {
-          if (agencyId.equals(AgencyAndIdLibrary.convertFromString(tripId).getAgencyId())) {
-            tripIds.add(tripId);
+          if(tripId != null) {
+            AgencyAndId duplicatedTripId = AgencyAndIdLibrary.convertFromString(tripId);
+            if (duplicatedTripId != null && agencyId.equals(duplicatedTripId.getAgencyId())) {
+              tripIds.add(tripId);
+            }
           }
         }
       }
