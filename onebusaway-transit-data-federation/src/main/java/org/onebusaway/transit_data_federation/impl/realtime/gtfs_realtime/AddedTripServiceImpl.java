@@ -57,6 +57,7 @@ public class AddedTripServiceImpl implements AddedTripService {
       GtfsRealtime.TripDescriptor trip = tu.getTrip();
 
       addedTrip.setAgencyId(agencyId);
+      addedTrip.setTripId(trip.getTripId());
       addedTrip.setTripStartTime(parseTripStartTime(trip.getStartTime()));
       addedTrip.setServiceDate(getStartOfDay(new Date(currentTime)).getTime());
       addedTrip.setScheduleRelationshipValue(trip.getScheduleRelationship().toString());
