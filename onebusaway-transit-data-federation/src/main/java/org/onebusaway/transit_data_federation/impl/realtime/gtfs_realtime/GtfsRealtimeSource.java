@@ -714,7 +714,7 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
       _monitor.logUpdate(result);
     }
     _log.info("Agency " + getFeedId() + " has active vehicles=" + seenVehicles.size()
-            + ", matched=" + result.getMatchedTripIds().size()
+            + ", matched=" + result.getMatchedTripIds().size() + " (" + result.getUnmatchedTripIds().size() + ")"
             + ", added=" + result.getAddedTripIds().size()
             + ", duplicated=" + result.getDuplicatedTripIds().size()
             + ", cancelled=" + result.getCancelledTripIds().size()

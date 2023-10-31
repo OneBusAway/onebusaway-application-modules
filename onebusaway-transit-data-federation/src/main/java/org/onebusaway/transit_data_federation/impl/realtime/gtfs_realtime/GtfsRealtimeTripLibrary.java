@@ -544,18 +544,24 @@ public class GtfsRealtimeTripLibrary {
         } else if (record.getStatus().equals(TransitDataConstants.STATUS_CANCELED)) {
           result.addCancelledTripId(record.getTripId().toString());
         } else {
-          result.addMatchedTripId(record.getTripId().toString());
+          if (isTripActive(update)) {
+            result.addMatchedTripId(record.getTripId().toString());
+          }
         }
       } else if (record.getBlockId() != null) {
         if (record.getStatus().equals(TransitDataConstants.STATUS_CANCELED)) {
           result.addCancelledTripId(record.getBlockId().toString());
         } else {
-          // here we take a matched block as if it were a trip
-          result.addMatchedTripId(record.getBlockId().toString());
+          if (isTripActive(update)) {
+            // here we take a matched block as if it were a trip
+            result.addMatchedTripId(record.getBlockId().toString());
+          }
         }
       } else {
-        // we don't have a tripId, use the BlockId instead
-        result.addMatchedTripId(record.getBlockId().toString());
+        if (isTripActive(update)) {
+          // we don't have a tripId, use the BlockId instead
+          result.addMatchedTripId(record.getBlockId().toString());
+        }
       }
     }
     
@@ -571,6 +577,38 @@ public class GtfsRealtimeTripLibrary {
     }
 
     return record;
+  }
+
+  private boolean isTripActive(CombinedTripUpdatesAndVehiclePosition update) {
+    if (update.getTripUpdates().isEmpty())
+      return false;
+    // how far in the future a prediction can be while still being considered active
+    long windowFuture = 60 * 60;
+    TripUpdate tripUpdate = update.getTripUpdates().get(0);
+    int tripUpdateCount = update.getTripUpdates().get(0).getStopTimeUpdateCount();
+    long firstPrediction = -1;
+    long lastPrediction = -1;
+    StopTimeUpdate firstStopTime = tripUpdate.getStopTimeUpdate(0);
+    StopTimeUpdate lastStopTime = tripUpdate.getStopTimeUpdate(tripUpdateCount-1);
+    if (firstStopTime.hasArrival())
+      firstPrediction = firstStopTime.getArrival().getTime();
+    else if (firstStopTime.hasDeparture())
+      firstPrediction = firstStopTime.getDeparture().getTime();
+
+    if (lastStopTime.hasDeparture())
+      lastPrediction = lastStopTime.getDeparture().getTime();
+    else if (lastStopTime.hasArrival())
+      lastPrediction = lastStopTime.getArrival().getTime();
+    if (firstPrediction < 0 || lastPrediction < 0)
+      return false;
+    long currentTime = currentTime()/1000;
+    // part 1: currentTime:14:10 + 01:00 - firstPrediction:14:11 is positive
+    // part 2: currentTime:14:10 - lastPrediction:14:50 is negative
+    boolean active = (
+            currentTime + windowFuture > firstPrediction
+            && lastPrediction > currentTime
+            );
+    return active;
   }
 
   private boolean isNycDynamicTrip(CombinedTripUpdatesAndVehiclePosition update) {
