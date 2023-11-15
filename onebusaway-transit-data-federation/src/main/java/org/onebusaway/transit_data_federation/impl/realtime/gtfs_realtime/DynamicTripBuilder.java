@@ -88,6 +88,7 @@ public class DynamicTripBuilder {
   }
   // be paranoid about incoming data
   private boolean isValid(BlockInstance instance) {
+    if (instance == null) return false;
     if (instance.getServiceDate() < 1000l)
       return false;
     if (instance.getState() == null)
