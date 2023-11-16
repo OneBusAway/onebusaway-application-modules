@@ -91,5 +91,7 @@
             <map>
             </map>
         </constructor-arg>
+        <constructor-arg type="java.lang.String" value="" />
     </bean>
+
 </beans>

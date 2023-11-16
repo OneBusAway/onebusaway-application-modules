@@ -17,14 +17,16 @@ package org.onebusaway.api.actions.api.gtfs_realtime;
 
 import static org.junit.Assert.assertEquals;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
+import com.opensymphony.xwork2.ActionContext;
+import org.apache.struts2.ServletActionContext;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.onebusaway.api.model.ResponseBean;
 import org.onebusaway.transit_data.model.ListBean;
 import org.onebusaway.transit_data.model.service_alerts.NaturalLanguageStringBean;
@@ -41,14 +43,28 @@ import com.google.transit.realtime.GtfsRealtime.TimeRange;
 import com.google.transit.realtime.GtfsRealtime.TranslatedString;
 import com.google.transit.realtime.GtfsRealtime.TranslatedString.Translation;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+@RunWith(MockitoJUnitRunner.class)
 public class AlertsForAgencyActionTest {
 
   private AlertsForAgencyAction _action;
 
   private TransitDataService _service;
 
+  @Mock
+  HttpServletRequest request;
+
+  @Mock
+  HttpServletResponse servletResponse;
   @Before
   public void before() {
+    ActionContext.setContext(new ActionContext(new HashMap<>()));
+
+    ServletActionContext.setRequest(request);
+    ServletActionContext.setResponse(servletResponse);
+
     _action = new AlertsForAgencyAction();
 
     _service = Mockito.mock(TransitDataService.class);

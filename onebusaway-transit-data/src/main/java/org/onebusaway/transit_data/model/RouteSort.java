@@ -19,17 +19,19 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-public class RouteSort implements Serializable {
+public class RouteSort implements RouteSorting, Serializable {
 
     private final Map<String, String> agencySortConfiguration;
 
+    private String primarySortAgency;
     private final Map<String, Map<String, Integer>> routeSortOrderMap = new HashMap<>();
 
     private final String delimiter;
 
-    RouteSort(Map<String, String> agencySortConfiguration) {
+    RouteSort(Map<String, String> agencySortConfiguration, String primarySortAgency) {
         this.agencySortConfiguration = agencySortConfiguration;
         this.delimiter = ",";
+        this.primarySortAgency = primarySortAgency;
         setOrderingToMap();
     }
 
@@ -49,7 +51,7 @@ public class RouteSort implements Serializable {
 
     }
 
-     public int compareRoutes(String a, String b, RouteSort routeSortInstance, String agencyId) {
+     public int compareRoutes(String a, String b) {
 
          if(a == null && b == null){
              return 0;
@@ -63,7 +65,7 @@ public class RouteSort implements Serializable {
              return -1;
          }
 
-        Map<String, Integer> sortOrderMap = routeSortInstance.routeSortOrderMap.get(agencyId);
+        Map<String, Integer> sortOrderMap = this.routeSortOrderMap.get(primarySortAgency);
         // standard ordering if the configuration is not provided
         if (sortOrderMap == null) {
             return a.compareTo(b);
@@ -94,6 +96,10 @@ public class RouteSort implements Serializable {
 
     public Map<String, Map<String, Integer>> getRouteSortOrderMap() {
         return routeSortOrderMap;
+    }
+
+    public String getPrimarySortAgency() {
+        return primarySortAgency;
     }
 }
 

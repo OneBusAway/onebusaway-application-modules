@@ -167,7 +167,7 @@ class RouteBeanServiceImpl implements RouteBeanService {
         narrative, null);
   }
 
-  @Cacheable
+  // @Cacheable
   public StopsForRouteBean getStopsForRouteForServiceDate(AgencyAndId routeId, ServiceDate serviceDate) {
     RouteCollectionEntry routeCollectionEntry = _transitGraphDao.getRouteCollectionForId(routeId);
     RouteCollectionNarrative narrative = _narrativeService.getRouteCollectionForId(routeId);

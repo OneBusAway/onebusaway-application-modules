@@ -43,10 +43,12 @@ public class ConfigurationServiceClientFileImpl implements
 			.getLogger(ConfigurationServiceClientFileImpl.class);
 
 	private static long CACHE_TIME_MILLIS = 1 * 60 * 1000; // 1 min
+	// although this value is millis it is expected to be small to API uses int
+	private static int DEFAULT_TIMEOUT = 1 * 1000;
 	private long lastCacheTime = 0;
 
-	private int connectionTimeout;
-	private int readTimeout;
+	private int connectionTimeout = DEFAULT_TIMEOUT;
+	private int readTimeout = DEFAULT_TIMEOUT;
 
 	private HashMap<String, Object> cachedMergeConfig = null;
 
@@ -218,9 +220,11 @@ public class ConfigurationServiceClientFileImpl implements
 	synchronized HashMap<String, Object> mergeConfig(HashMap<String, Object> staticConfig) {
 		if (cachedMergeConfig == null || cacheExpired()) {
 			HashMap<String, Object> dynamicContent = this.getConfigFromApi();
-			if (dynamicContent == null || dynamicContent.isEmpty()) return staticConfig;
-			cachedMergeConfig = mergeConfig(staticConfig, dynamicContent);
+			cachedMergeConfig = staticConfig;
 			lastCacheTime = System.currentTimeMillis();
+			if (dynamicContent == null || dynamicContent.isEmpty()) {
+				return staticConfig;
+			}
 		}
 		return cachedMergeConfig;
 	}

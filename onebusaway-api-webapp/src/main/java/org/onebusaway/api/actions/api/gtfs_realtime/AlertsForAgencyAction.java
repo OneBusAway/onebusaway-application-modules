@@ -60,6 +60,6 @@ public class AlertsForAgencyAction extends GtfsRealtimeActionSupport {
     } else {
       ServiceAlertBuilderHelper.fillFeedMessage(feed, alerts, agencyId, timestamp);
     }
-
+    setLastModifiedHeader(timestamp);
   }
 }

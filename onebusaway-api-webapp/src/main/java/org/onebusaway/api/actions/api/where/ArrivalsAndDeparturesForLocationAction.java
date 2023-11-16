@@ -56,7 +56,7 @@ public class ArrivalsAndDeparturesForLocationAction extends ApiActionSupport {
     private ConfigurationService _configService;
 
     @Autowired
-    private RouteSort customRouteSort;
+    private RouteSorting customRouteSort;
 
     @Autowired(required = false)
     public void setFilterChain(FilterChain filterChain) {

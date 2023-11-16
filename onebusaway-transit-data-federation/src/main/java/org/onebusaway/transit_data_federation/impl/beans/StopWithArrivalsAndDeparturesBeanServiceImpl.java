@@ -16,6 +16,7 @@
 package org.onebusaway.transit_data_federation.impl.beans;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import org.onebusaway.collections.Counter;
 import org.onebusaway.exceptions.NoSuchStopServiceException;
@@ -160,6 +161,9 @@ class StopWithArrivalsAndDeparturesBeanServiceImpl implements
       stops.remove(stops.size() - 1);
       limitExceeded = true;
     }
+
+    allArrivalsAndDepartures = allArrivalsAndDepartures.stream().sorted((bean1, bean2) -> new StopDistanceComparator().compare(bean1.getStop(), bean2.getStop())).collect(Collectors.toList());
+
     // trim arrivals as well
     while (allArrivalsAndDepartures.size() > query.getMaxCount()) {
       allArrivalsAndDepartures.remove(allArrivalsAndDepartures.size() - 1);

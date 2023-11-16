@@ -32,6 +32,8 @@ import com.google.transit.realtime.GtfsRealtime.VehicleDescriptor;
 import com.google.transit.realtime.GtfsRealtime.VehiclePosition;
 import org.onebusaway.util.AgencyAndIdLibrary;
 
+
+
 public class VehiclePositionsForAgencyAction extends GtfsRealtimeActionSupport {
 
   private static final long serialVersionUID = 1L;
@@ -90,5 +92,6 @@ public class VehiclePositionsForAgencyAction extends GtfsRealtimeActionSupport {
         feed.addEntity(entity);
       }
     }
+    setLastModifiedHeader(timestamp);
   }
 }

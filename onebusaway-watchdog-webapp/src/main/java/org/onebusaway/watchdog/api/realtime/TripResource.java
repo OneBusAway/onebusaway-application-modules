@@ -270,7 +270,7 @@ public class TripResource extends MetricResource {
       double addedTrips = getAddedTripIdCt(agencyId, feedId);
 
       _log.info("agencytrips size=" + scheduleTrips + ", validRealtimeTrips=" + validRealtimeTrips
-              + " cancelled=" + cancelledTrips + ", addedTrips-" + addedTrips
+              + " cancelled=" + cancelledTrips + ", addedTrips=" + addedTrips
               + " for feedId=" + feedId + ", routeId=" + routeId);
       // TODO: OBA doesn't support ADDED trips yet so not added to the metric!!!
       double percent = Math.abs(( (validRealtimeTrips /*+ addedTrips*/ - cancelledTrips) / scheduleTrips) * 100);

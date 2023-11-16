@@ -18,7 +18,6 @@ package org.onebusaway.transit_data_federation.impl.transit_graph;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -40,12 +39,15 @@ import org.onebusaway.transit_data_federation.services.transit_graph.TransitGrap
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
 import org.onebusaway.transit_data_federation.model.transit_graph.TransitGraph;
 import org.onebusaway.utility.ObjectSerializationLibrary;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class TransitGraphDaoImpl implements TransitGraphDao {
 
+  private static final Logger _log = LoggerFactory.getLogger(TransitGraphDaoImpl.class);
   private FederatedTransitDataBundle _bundle;
 
   private TransitGraph _graph;
@@ -68,20 +70,25 @@ public class TransitGraphDaoImpl implements TransitGraphDao {
   @PostConstruct
   @Refreshable(dependsOn = RefreshableResources.TRANSIT_GRAPH)
   public void setup() throws IOException, ClassNotFoundException {
-    File path = _bundle.getTransitGraphPath();
+    TransitGraphImpl newGraph = null;
 
-    if(_graph != null) {
-      TransitGraphImpl graph = (TransitGraphImpl)_graph;
-      graph.empty();
-      _graph = null;
-    }
-    
+    File path = _bundle.getTransitGraphPath();
     if (path.exists()) {
-      TransitGraphImpl graph = ObjectSerializationLibrary.readObject(path);
-      graph.initialize();
-      _graph = graph;
+      long start = System.currentTimeMillis();
+      newGraph = ObjectSerializationLibrary.readObject(path);
+      long delta = System.currentTimeMillis() - start;
+      _log.info("Transit Graph load in {}s", delta/1000);
+      newGraph.initialize();
     } else {
-      _graph = new TransitGraphImpl();
+      newGraph = new TransitGraphImpl();
+    }
+
+    TransitGraphImpl oldGraph = (TransitGraphImpl) _graph;
+    _graph = newGraph;
+
+    if(oldGraph != null) {
+      oldGraph.empty();
+      oldGraph = null;
     }
   }
 
@@ -159,9 +166,7 @@ public class TransitGraphDaoImpl implements TransitGraphDao {
 
   @Override
   public List<RouteEntry> getAllRoutes() {
-    if (_graph != null)
-      return _graph.getAllRoutes();
-    return new ArrayList<>(); // special case on startup before bundle loaded
+    return _graph.getAllRoutes();
   }
 
   @Override

@@ -54,17 +54,23 @@ import org.onebusaway.alerts.impl.ServiceAlertRecord;
 import org.onebusaway.alerts.impl.ServiceAlertSituationConsequenceClause;
 import org.onebusaway.alerts.impl.ServiceAlertTimeRange;
 import org.onebusaway.alerts.impl.ServiceAlertsSituationAffectsClause;
+import org.onebusaway.transit_data_federation.impl.RouteReplacementServiceImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopTimeEntriesFactory;
 import org.onebusaway.transit_data_federation.services.AgencyService;
 import org.onebusaway.transit_data_federation.services.ConsolidatedStopsService;
+import org.onebusaway.transit_data_federation.services.RouteReplacementService;
+import org.onebusaway.transit_data_federation.services.StopSwapService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockCalendarService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockGeospatialService;
+import org.onebusaway.transit_data_federation.services.blocks.BlockIndexService;
 import org.onebusaway.transit_data_federation.services.blocks.DynamicBlockIndexService;
+import org.onebusaway.transit_data_federation.services.narrative.NarrativeService;
 import org.onebusaway.transit_data_federation.services.realtime.BlockLocation;
 import org.onebusaway.transit_data_federation.services.realtime.BlockLocationService;
 import org.onebusaway.alerts.service.ServiceAlerts;
 import org.onebusaway.alerts.service.ServiceAlerts.ServiceAlert;
 import org.onebusaway.alerts.service.ServiceAlertsService;
+import org.onebusaway.transit_data_federation.services.shapes.ShapePointService;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -102,14 +108,6 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     _registry.add(GtfsRealtimeNYCT.nyctStopTimeUpdate);
   }
 
-  private AgencyService _agencyService;
-
-  private TransitGraphDao _transitGraphDao;
-
-  private BlockCalendarService _blockCalendarService;
-
-  private BlockLocationService _blockLocationService;
-
   private VehicleLocationListener _vehicleLocationListener;
 
   private VehicleOccupancyListener _vehicleOccupancyListener;
@@ -120,9 +118,9 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
 
   private ConsolidatedStopsService _consolidatedStopsService;
 
-  private DynamicBlockIndexService _dynamicBlockIndexService;
-
   private ScheduledFuture<?> _refreshTask;
+
+  private DataSourceMonitor _monitor;
 
   private URL _tripUpdatesUrl;
 
@@ -166,7 +164,9 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
    */
   private Map<AgencyAndId, ServiceAlert> _alertsById = new HashMap<AgencyAndId, ServiceAlerts.ServiceAlert>();
 
-  private GtfsRealtimeEntitySource _entitySource;
+  private GtfsRealtimeEntitySource _entitySource = new GtfsRealtimeEntitySource();
+
+  private GtfsRealtimeServiceSource _serviceSource  = new GtfsRealtimeServiceSource();
 
   private GtfsRealtimeTripLibrary _tripsLibrary;
 
@@ -180,10 +180,6 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   
   private boolean _scheduleAdherenceFromLocation = false;
 
-  private BlockGeospatialService _blockGeospatialService;
-
-  private StopTimeEntriesFactory _stopTimeEntriesFactory;
-  
   private boolean _enabled = true;
 
   private boolean _useLabelAsId = false;
@@ -204,22 +200,22 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
 
   @Autowired
   public void setAgencyService(AgencyService agencyService) {
-    _agencyService = agencyService;
+    _serviceSource.setAgencyService(agencyService);
   }
 
   @Autowired
   public void setTransitGraphDao(TransitGraphDao transitGraphDao) {
-    _transitGraphDao = transitGraphDao;
+    _entitySource.setTransitGraphDao(transitGraphDao);
   }
 
   @Autowired
   public void setBlockCalendarService(BlockCalendarService blockCalendarService) {
-    _blockCalendarService = blockCalendarService;
+    _serviceSource.setBlockCalendarService(blockCalendarService);
   }
 
   @Autowired
   public void setBlockLocationService(BlockLocationService blockLocationService) {
-    _blockLocationService = blockLocationService;
+    _serviceSource.setBlockLocationService(blockLocationService);
   }
 
   @Autowired
@@ -230,7 +226,16 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   @Autowired
   @Qualifier("dynamicBlockIndexServiceImpl")
   public void setDynamicBlockIndexService(DynamicBlockIndexService dynamicBlockIndexService) {
-    this._dynamicBlockIndexService = dynamicBlockIndexService;
+    _serviceSource.setDynamicBlockIndexService(dynamicBlockIndexService);
+  }
+
+  @Autowired
+  public void setDataSourceMonitor(DataSourceMonitor monitor) {
+    this._monitor = monitor;
+  }
+  @Autowired
+  public void setNarrativeService(NarrativeService service) {
+    _serviceSource.setNarrativeService(service);
   }
 
   @Autowired
@@ -257,12 +262,27 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   
   @Autowired
   public void setBlockGeospatialService(BlockGeospatialService blockGeospatialService) {
-    _blockGeospatialService = blockGeospatialService;
+   _serviceSource.setBlockGeospatialService(blockGeospatialService);
   }
 
   @Autowired
   public void setStopTimeEntriesFactory(StopTimeEntriesFactory stopTimeEntriesFactory) {
-    _stopTimeEntriesFactory = stopTimeEntriesFactory;
+    _serviceSource.setStopTimeEntriesFactory(stopTimeEntriesFactory);
+  }
+
+  @Autowired
+  public void setShapePointService(ShapePointService service) {
+    _serviceSource.setShapePointService(service);
+  }
+
+  @Autowired
+  public void setStopSwapService(StopSwapService service) {
+    _serviceSource.setStopSwapServce(service);
+  }
+
+  @Autowired
+  public void setBlockIndexService(BlockIndexService service) {
+    _serviceSource.setBlockIndexService(service);
   }
 
   public void setStopModificationStrategy(StopModificationStrategy strategy) {
@@ -447,7 +467,7 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   public void start() {
     if (_agencyIds.isEmpty()) {
       _log.info("no agency ids specified for GtfsRealtimeSource, so defaulting to full agency id set");
-      List<String> agencyIds = _agencyService.getAllAgencyIds();
+      List<String> agencyIds = _serviceSource.getAgencyService().getAllAgencyIds();
       _agencyIds.addAll(agencyIds);
       if (_agencyIds.size() > 3) {
         _log.warn("The default agency id set is quite large (n="
@@ -456,28 +476,27 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
       }
     }
 
-    _entitySource = new GtfsRealtimeEntitySource();
     _entitySource.setAgencyIds(_agencyIds);
-    _entitySource.setTransitGraphDao(_transitGraphDao);
     _entitySource.setConsolidatedStopService(_consolidatedStopsService);
 
     _tripsLibrary = new GtfsRealtimeTripLibrary();
-    _tripsLibrary.setBlockCalendarService(_blockCalendarService);
     _tripsLibrary.setEntitySource(_entitySource);
+    _tripsLibrary.setServiceSource(_serviceSource);
     if (_stopModificationStrategy != null) {
       _tripsLibrary.setStopModificationStrategy(_stopModificationStrategy);
     }
     _tripsLibrary.setScheduleAdherenceFromLocation(_scheduleAdherenceFromLocation);
-    _tripsLibrary.setBlockGeospatialService(_blockGeospatialService);
     _tripsLibrary.setUseLabelAsVehicleId(_useLabelAsId);
     _tripsLibrary.setValidateCurrentTime(_validateCurrentTime);
-    _tripsLibrary.setAddedTripService(new AddedTripServiceImpl());
+
     _tripsLibrary.setFilterUnassigned(_filterUnassigned);
+    DuplicatedTripServiceImpl duplicatedTripService = new DuplicatedTripServiceImpl();
+    duplicatedTripService.setGtfsRealtimeEntitySource(_entitySource);
+    _serviceSource.setDuplicatedTripService(duplicatedTripService);
     DynamicTripBuilder tripBuilder = new DynamicTripBuilder();
-    tripBuilder.setStopTimeEntriesFactory(_stopTimeEntriesFactory);
-    tripBuilder.setTransitGraphDao(_transitGraphDao);
-    tripBuilder.setBlockIndexService(_dynamicBlockIndexService);
-    _tripsLibrary.setDynamicTripBuilder(tripBuilder);
+    tripBuilder.setServiceSource(_serviceSource);
+    tripBuilder.setEntityource(_entitySource);
+    _serviceSource.setDynamicTripBuilder(tripBuilder);
 
     
     _alertLibrary = new GtfsRealtimeAlertLibrary();
@@ -520,9 +539,12 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
 
     MonitoredResult result = new MonitoredResult();
     result.setAgencyIds(_agencyIds);
+    result.setFeedId(getFeedId());
 
     if (_routeIdsToCancel != null) {
-      _cancelService.cancelServiceForRoutes(_routeIdsToCancel);
+      long currentTime = _tripsLibrary.getCurrentTime();
+      if (currentTime == 0) currentTime = System.currentTimeMillis();
+      _cancelService.cancelServiceForRoutes(_routeIdsToCancel, currentTime);
     }
 
     handleUpdates(result, tripUpdates, vehiclePositions, alerts, alertCollection);
@@ -540,14 +562,7 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
 
   // test if the transit graph is ready
   protected boolean graphReady() {
-    try {
-      return _transitGraphDao != null
-              && _transitGraphDao.getAllRoutes() != null
-              && !_transitGraphDao.getAllRoutes().isEmpty();
-    } catch (Exception any) {
-      // on first load we can catch the graph in a state, bury this exception
-      return false;
-    }
+      return _entitySource.isGraphReady();
   }
 
   /**
@@ -566,7 +581,7 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     List<CombinedTripUpdatesAndVehiclePosition> combinedUpdates = _tripsLibrary.groupTripUpdatesAndVehiclePositions(result,
             tripUpdates, vehiclePositions);
     result.setRecordsTotal(combinedUpdates.size());
-    handleCombinedUpdates(result, combinedUpdates);
+    handleCombinedUpdatesLogged(result, combinedUpdates);
     cacheVehicleLocations(vehiclePositions);
     handleAlerts(alerts);
     handleAlertCollection(alertCollection);
@@ -587,6 +602,14 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     }
   }
 
+  void handleCombinedUpdatesLogged(MonitoredResult result,
+                             List<CombinedTripUpdatesAndVehiclePosition> updates) {
+    try {
+      handleCombinedUpdates(result, updates);
+    } catch (Throwable t) {
+      _log.error("handleCombinedUpdates source-exception: {}", t, t);
+    }
+  }
   // package private for unit tests
    void handleCombinedUpdates(MonitoredResult result,
       List<CombinedTripUpdatesAndVehiclePosition> updates) {
@@ -598,16 +621,26 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
 
     try {
       for (CombinedTripUpdatesAndVehiclePosition update : updates) {
+        String metricTripId = null;
+        if (update.getTripUpdates() != null && update.getTripUpdatesSize() > 0) {
+          if (update.getTripUpdates().get(0).hasTrip()) {
+            metricTripId = update.getTripUpdates().get(0).getTrip().getTripId();
+          }
+        }
+
         if (update.block == null) {
-          String tripId = null;
-          if (update.getTripUpdates() != null && update.getTripUpdatesSize() > 0)
-            if (update.getTripUpdates().get(0).hasTrip())
-              tripId = update.getTripUpdates().get(0).getTrip().getTripId();
-          _log.error("null block {} for agencies {}, bailing...", tripId, _agencyIds);
+          _log.error("null block {} for agencies {}, bailing...", metricTripId, _agencyIds);
+          result.addUnmatchedTripId(metricTripId);
           continue;
         }
         BlockDescriptor.ScheduleRelationship scheduleRelationship = update.block.getScheduleRelationship();
-        boolean isDynamicTrip = TransitDataConstants.STATUS_ADDED.equals(scheduleRelationship.name());
+        if (scheduleRelationship == null) {
+          _log.error("no schedule relationship for update {}", update);
+          result.addUnmatchedTripId(metricTripId);
+          continue;
+        }
+        boolean isDynamicTrip = TransitDataConstants.STATUS_ADDED.equals(scheduleRelationship.name())
+                || TransitDataConstants.STATUS_DUPLICATED.equals(scheduleRelationship.name());
 
         VehicleLocationRecord record = _tripsLibrary.createVehicleLocationRecordForUpdate(result, update);
         if (record != null) {
@@ -615,23 +648,26 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
             if (_monitoredResult.getLastUpdate() < record.getTimeOfRecord()) {
               _monitoredResult.setLastUpdate(record.getTimeOfRecord());
             }
-            _monitoredResult.addAddedTripId(record.getTripId().toString());
-            _dynamicBlockIndexService.register(update.block.getBlockInstance());
+            int effectiveTime = (int)(record.getServiceDate() - record.getTimeOfRecord()) / 1000;
+            _serviceSource.getDynamicBlockIndexService().register(update.block.getBlockInstance(), effectiveTime);
           }
           if (record.getTripId() != null) {
             // tripId will be null if block was matched
             result.addUnmatchedTripId(record.getTripId().toString());
           }
+
           AgencyAndId vehicleId = record.getVehicleId();
           // here we try to get a more accurate count of updates
           // some providers re-send old data or future data cluttering the feed
           // the TDS will discard these
           if (!isDynamicTrip && blockNotActive(record)) {
             _log.debug("discarding v: " + vehicleId + " as block not active");
+            result.addUnmatchedTripId(metricTripId);
             continue;
           }
           if (!isDynamicTrip && !isValidLocation(record, update)) {
             _log.debug("discarding v: " + vehicleId + " as location is bad");
+            result.addUnmatchedTripId(metricTripId);
             continue;
           }
           seenVehicles.add(vehicleId);
@@ -674,8 +710,16 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     }
     // NOTE: this implies receiving stale updates is equivalent to not being updated at all
     result.setLastUpdate(newestUpdate);
-    _log.info("Agency " + this.getAgencyIds().get(0) + " has active vehicles=" + seenVehicles.size()
-        + " for updates=" + updates.size() + " with most recent timestamp " + new Date(newestUpdate));
+    if (_monitor != null) {
+      _monitor.logUpdate(result);
+    }
+    _log.info("Agency " + getFeedId() + " has active vehicles=" + seenVehicles.size()
+            + ", matched=" + result.getMatchedTripIds().size() + " (" + result.getUnmatchedTripIds().size() + ")"
+            + ", added=" + result.getAddedTripIds().size()
+            + ", duplicated=" + result.getDuplicatedTripIds().size()
+            + ", cancelled=" + result.getCancelledTripIds().size()
+            + " for updates=" + updates.size() + " with most recent timestamp " + new Date(newestUpdate));
+
   }
 
   private boolean isValidLocation(VehicleLocationRecord record, CombinedTripUpdatesAndVehiclePosition update) {
@@ -683,7 +727,7 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     CoordinatePoint reported = new CoordinatePoint(update.vehiclePosition.getPosition().getLatitude(),
             update.vehiclePosition.getPosition().getLongitude());
 
-    BlockLocation blockLocation = _blockLocationService.getScheduledLocationForBlockInstance(update.block.getBlockInstance(), record.getTimeOfRecord());
+    BlockLocation blockLocation = _serviceSource.getBlockLocationService().getScheduledLocationForBlockInstance(update.block.getBlockInstance(), record.getTimeOfRecord());
       if (blockLocation == null) return true; // this record will be tossed for other reasons
     CoordinatePoint calculated = blockLocation.getLocation();
     double delta = SphericalGeometryLibrary.distanceFaster(reported.getLat(), reported.getLon(),
@@ -712,7 +756,7 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
       return;
     }
 
-    if (alertsCollection == null || alertsCollection.getServiceAlertsCount() == 0) {
+    if (alertsCollection == null) {
       // don't let a single connection issue wipe out the set of alerts
       _log.info("handleAlertCollection nothing to do");
       return;
@@ -810,8 +854,16 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
       if (serviceAlert.getActiveWindowList() != null) {
         for (ServiceAlerts.TimeRange timeRange : serviceAlert.getActiveWindowList()) {
           ServiceAlertTimeRange serviceAlertTimeRange = new ServiceAlertTimeRange();
-          serviceAlertTimeRange.setFromValue(timeRange.getStart());
-          serviceAlertTimeRange.setToValue(timeRange.getEnd());
+          if (timeRange.hasStart()) {
+            if (timeRange.getStart() > 0) {
+              serviceAlertTimeRange.setFromValue(timeRange.getStart());
+            }
+          }
+          if (timeRange.hasEnd()) {
+            if (timeRange.getEnd() > 0) {
+              serviceAlertTimeRange.setToValue(timeRange.getEnd());
+            }
+          }
           serviceAlertRecord.getActiveWindows().add(serviceAlertTimeRange);
         }
       }
@@ -903,8 +955,14 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
         _log.debug("creating alert " + serviceAlertRecord.getAgencyId() + ":" + serviceAlertRecord.getServiceAlertId());
         toAdd.add(serviceAlertRecord);
       } else {
-        _log.debug("updating alert " + serviceAlertRecord.getAgencyId() + ":" + serviceAlertRecord.getServiceAlertId());
-        toUpdate.add(serviceAlertRecord);
+        // one more check!
+        if (existingRecord != null && existingRecord.shallowEquals(serviceAlertRecord)) {
+          // some fields differ but the alert is not materially different, do not update
+          _log.debug("not updating alert {}", existingRecord);
+        } else {
+          _log.debug("updating alert " + serviceAlertRecord.getAgencyId() + ":" + serviceAlertRecord.getServiceAlertId());
+          toUpdate.add(serviceAlertRecord);
+        }
       }
       currentAlerts.add(new AgencyAndId(serviceAlertRecord.getAgencyId(), serviceAlertRecord.getServiceAlertId()));
     } else {
@@ -1226,6 +1284,13 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
 	  }
 	}
   }
+
+  public void setRouteRemap(Map<String, String> remaps) {
+    RouteReplacementService routeReplacementService = new RouteReplacementServiceImpl();
+    routeReplacementService.putAll(remaps);
+    _entitySource.setRouteReplacementService(routeReplacementService);
+  }
+
   /****
    *
    ****/
@@ -1239,7 +1304,8 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
           refresh();
         }
       } catch (Throwable ex) {
-        _log.warn("Error updating from GTFS-realtime data sources for config {}", getFeedId(), ex, ex);
+        _log.warn("Error updating from GTFS-realtime data sources for config {}, {}", getFeedId(), ex, ex);
+        ex.printStackTrace();
       }
     }
   }

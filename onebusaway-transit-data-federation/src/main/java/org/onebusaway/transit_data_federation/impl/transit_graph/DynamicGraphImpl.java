@@ -16,13 +16,16 @@
 package org.onebusaway.transit_data_federation.impl.transit_graph;
 
 import org.apache.commons.collections4.map.PassiveExpiringMap;
+import org.onebusaway.container.refresh.Refreshable;
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.transit_data_federation.impl.RefreshableResources;
 import org.onebusaway.transit_data_federation.model.transit_graph.DynamicGraph;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.RouteEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
 import org.springframework.stereotype.Component;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -32,7 +35,7 @@ import java.util.Map;
 @Component
 public class DynamicGraphImpl implements DynamicGraph {
 
-  static final int CACHE_TIMEOUT = 24 * 60 * 60 * 1000; // 1 day
+  private static final int CACHE_TIMEOUT = 18 * 60 * 60 * 1000; // 18 hours
   private Map<AgencyAndId, BlockEntry> blockEntryById = new PassiveExpiringMap<>(CACHE_TIMEOUT);
   private Map<AgencyAndId, TripEntry> tripEntryById = new PassiveExpiringMap<>(CACHE_TIMEOUT);
   private Map<AgencyAndId, RouteEntry> routeEntryById = new PassiveExpiringMap<>(CACHE_TIMEOUT);
@@ -42,6 +45,13 @@ public class DynamicGraphImpl implements DynamicGraph {
     return tripEntryById.get(id);
   }
 
+  @Refreshable(dependsOn = RefreshableResources.TRANSIT_GRAPH)
+  public void reset() {
+    // these maps expire passively, this data is not dependent upon graph reloading
+//    blockEntryById.clear();
+//    tripEntryById.clear();
+//    routeEntryById.clear();
+  }
   @Override
   public void registerTrip(TripEntry tripEntry) {
     if (!tripEntryById.containsKey(tripEntry.getId())) {

@@ -23,7 +23,7 @@ import java.util.List;
 public interface DynamicBlockIndexService {
   List<BlockStopTimeIndex> getStopTimeIndicesForStop(StopEntry stopEntry);
 
-  void register(BlockInstance blockInstance);
+  void register(BlockInstance blockInstance, int effectiveTime);
 
   BlockInstance getDynamicBlockInstance(AgencyAndId blockId);
 

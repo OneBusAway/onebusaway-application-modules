@@ -61,7 +61,7 @@ public class FrequencyEntriesFactory {
 
     Collection<Frequency> allFrequencies = _gtfsDao.getAllFrequencies();
 
-	int logInterval = LoggingIntervalUtil.getAppropriateLoggingInterval(allFrequencies.size());
+	int logInterval = LoggingIntervalUtil.getAppropriateLoggingInterval(allFrequencies.size()*10);// slow down logging
 
     int frequencyIndex = 0;
     Map<AgencyAndId, Integer> exactTimesValueByTrip = new HashMap<AgencyAndId, Integer>();

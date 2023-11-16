@@ -95,7 +95,7 @@ public class GtfsRealtimeCanceledHarness {
 
   public void refresh() {
     if (_routeIds != null)
-      _service.cancelServiceForRoutes(_routeIds);
+      _service.cancelServiceForRoutes(_routeIds, System.currentTimeMillis());
   }
 
   private class RefreshTask implements Runnable {

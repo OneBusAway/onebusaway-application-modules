@@ -24,7 +24,7 @@ import com.google.transit.realtime.GtfsRealtimeNYCT;
  * OneBusAway supports.
  */
 public interface AddedTripService {
-  AddedTripInfo handleNyctDescriptor(GtfsRealtime.TripUpdate tu, GtfsRealtimeNYCT.NyctTripDescriptor nyctTripDescriptor, long currentTIme);
+  AddedTripInfo handleNyctDescriptor(GtfsRealtimeServiceSource serviceSource, GtfsRealtime.TripUpdate tu, GtfsRealtimeNYCT.NyctTripDescriptor nyctTripDescriptor, long currentTIme);
 
-  AddedTripInfo handleAddedDescriptor(String agencyId, GtfsRealtime.TripUpdate tu, long currentTime);
+  AddedTripInfo handleAddedDescriptor(GtfsRealtimeServiceSource serivceSource, String agencyId, GtfsRealtime.TripUpdate tu, long currentTime);
 }

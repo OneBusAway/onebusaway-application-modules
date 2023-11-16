@@ -18,6 +18,7 @@ package org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime;
 import com.google.transit.realtime.GtfsRealtime;
 import com.google.transit.realtime.GtfsRealtimeNYCT;
 import org.apache.commons.lang.StringUtils;
+import org.onebusaway.transit_data.model.TransitDataConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,8 +63,9 @@ public class NyctTripServiceImpl implements NyctTripService {
       if (networkId.length() == 0)
         networkId = null;
       AddedTripInfo addedTrip = new AddedTripInfo();
+      addedTrip.setScheduleRelationshipValue(TransitDataConstants.STATUS_ADDED);
       addedTrip.setAgencyId(getDefaultAgency());
-      addedTrip.setTripStartTime(originDepartureTime);
+      addedTrip.setTripStartTime(originDepartureTime * 60 / 100); // 100ths
       // here we make an assumption about the service data
       addedTrip.setServiceDate(getStartOfDay(new Date(currentTime)).getTime());
       addedTrip.setRouteId(routeId);

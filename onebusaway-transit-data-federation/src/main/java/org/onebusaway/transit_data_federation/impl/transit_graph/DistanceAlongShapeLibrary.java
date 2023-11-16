@@ -122,8 +122,12 @@ public class DistanceAlongShapeLibrary {
 
     PointAndIndex[] stopTimePoints = new PointAndIndex[stopTimes.size()];
 
-    UTMProjection projection = UTMLibrary.getProjectionForPoint(
-        shapePoints.getLats()[0], shapePoints.getLons()[0]);
+    UTMProjection projection;
+    synchronized (_shapePointsLibrary) {
+      // UTMLibrary isn't thread safe
+      projection = UTMLibrary.getProjectionForPoint(
+              shapePoints.getLats()[0], shapePoints.getLons()[0]);
+    }
 
     List<XYPoint> projectedShapePoints = _shapePointsLibrary.getProjectedShapePoints(
         shapePoints, projection);

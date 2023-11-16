@@ -235,7 +235,7 @@ private void removeDuplicateStopTimes(List<StopTime> stopTimes) {
     boolean distanceTraveledSet = false;
 
     // Do we have shape information?
-    if (shapePoints != null) {
+    if (shapePoints != null && shapePoints.getDistTraveled() != null) {
 
       try {
         PointAndIndex[] stopTimePoints = _distanceAlongShapeLibrary.getDistancesAlongShape(

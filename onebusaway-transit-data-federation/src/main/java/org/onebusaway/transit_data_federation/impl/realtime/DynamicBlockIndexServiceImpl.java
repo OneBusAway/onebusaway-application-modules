@@ -16,7 +16,9 @@
 package org.onebusaway.transit_data_federation.impl.realtime;
 
 import org.apache.commons.collections4.map.PassiveExpiringMap;
+import org.onebusaway.container.refresh.Refreshable;
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.transit_data_federation.impl.RefreshableResources;
 import org.onebusaway.transit_data_federation.impl.blocks.BlockIndexFactoryServiceImpl;
 import org.onebusaway.transit_data_federation.impl.blocks.BlockStopTimeIndicesFactory;
 import org.onebusaway.transit_data_federation.model.narrative.StopTimeNarrative;
@@ -42,8 +44,8 @@ import java.util.*;
 public class DynamicBlockIndexServiceImpl implements DynamicBlockIndexService {
 
   private static Logger _log = LoggerFactory.getLogger(DynamicBlockIndexServiceImpl.class);
+  private static final int CACHE_TIMEOUT = 18 * 60 * 60 * 1000; // 18 hours
 
-  static final int CACHE_TIMEOUT = 12 * 60 * 60 * 1000; // 12 hours
   @Autowired
   private BlockIndexFactoryServiceImpl blockIndexFactoryService;
   private NarrativeService _narrativeService;
@@ -52,9 +54,9 @@ public class DynamicBlockIndexServiceImpl implements DynamicBlockIndexService {
 
   private Map<AgencyAndId, List<BlockTripIndex>> blockTripIndexByRouteCollectionId = new PassiveExpiringMap<>(CACHE_TIMEOUT);
   private BlockStopTimeIndicesFactory blockStopTimeIndicesFactory = new BlockStopTimeIndicesFactory();
-  // we trivially expire the cache after CACHE_TIMEOUT minutes
+
   private Map<AgencyAndId, BlockInstance> cacheByBlockId = new PassiveExpiringMap<>(CACHE_TIMEOUT);
-  // we trivially expire the cache after CACHE_TIMEOUT minutes
+
   private Map<AgencyAndId, Set<BlockStopTimeIndex>> blockStopTimeIndicesByStopId = new PassiveExpiringMap<>(CACHE_TIMEOUT);
 
   private Map<AgencyAndId, List<BlockTripIndex>> blockTripByBlockId = new PassiveExpiringMap<>(CACHE_TIMEOUT);
@@ -67,23 +69,36 @@ public class DynamicBlockIndexServiceImpl implements DynamicBlockIndexService {
   public void setDynamicGraph(DynamicGraph dynamicGraph) {
     _dynamicGraph = dynamicGraph;
   }
+
+  @Refreshable(dependsOn = RefreshableResources.TRANSIT_GRAPH)
+  public void reset() {
+    // we don't clear these here as they transcend the bundle swap (they aren't dependent on bundle data)
+//    blockTripIndexByRouteCollectionId.clear();
+//    cacheByBlockId.clear();
+//    blockStopTimeIndicesByStopId.clear();
+//    blockTripByBlockId.clear();
+  }
   @Override
   public List<BlockStopTimeIndex> getStopTimeIndicesForStop(StopEntry stopEntry) {
-    if (!blockStopTimeIndicesByStopId.containsKey(stopEntry.getId())) {
-      return null;
-    }
     synchronized (blockStopTimeIndicesByStopId) {
+      if (!blockStopTimeIndicesByStopId.containsKey(stopEntry.getId())) {
+        return null;
+      }
       Set<BlockStopTimeIndex> set = blockStopTimeIndicesByStopId.get(stopEntry.getId());
       return new ArrayList<>(set);
     }
-
   }
 
   @Override
-  public void register(BlockInstance blockInstance) {
+  public void register(BlockInstance blockInstance, int effectiveTime) {
     // if the vehicle changes trips, we rely on the cache record to expire
     // therefore there may be a brief period of overlap
     AgencyAndId id = blockInstance.getBlock().getBlock().getId();
+    if (cacheByBlockId.containsKey(id)) {
+      if (isCached(id)) {
+        return; // nothing to do
+      }
+    }
     cacheByBlockId.put(id, blockInstance);
 
     List<BlockEntry> blocks = new ArrayList<>();
@@ -109,26 +124,59 @@ public class DynamicBlockIndexServiceImpl implements DynamicBlockIndexService {
       for (BlockStopTimeEntry blockStopTimeEntry : blockTripIndex.getTrips().get(0).getStopTimes()) {
           stopIds.add(blockStopTimeEntry.getStopTime().getStop().getId());
       }
-      List<StopTimeNarrative> stopTimeNarratives = _narrativeService.getStopTimeNarrativesForPattern(route.getId(), trip.getDirectionId(), stopIds);
-      if (stopTimeNarratives != null) {
-        _narrativeService.addStopNarrativesForTrip(trip.getId(), stopTimeNarratives);
-      }
     }
 
 
     List<BlockStopTimeIndex> indices = blockStopTimeIndicesFactory.createIndices(blocks);
-    for (BlockStopTimeIndex sti : indices) {
-      AgencyAndId stopId = sti.getStop().getId();
-      if (!blockStopTimeIndicesByStopId.containsKey(stopId)) {
-        // a set to prevent duplicates
-        blockStopTimeIndicesByStopId.put(stopId, new HashSet<>());
-      }
-      synchronized (blockStopTimeIndicesByStopId) {
+    synchronized (blockStopTimeIndicesByStopId) {
+      for (BlockStopTimeIndex sti : indices) {
+        AgencyAndId stopId = sti.getStop().getId();
+        if (!blockStopTimeIndicesByStopId.containsKey(stopId)) {
+          // a set to prevent duplicates
+          blockStopTimeIndicesByStopId.put(stopId, new HashSet<>());
+        }
         if (!containsTrip(blockStopTimeIndicesByStopId.get(stopId), sti)) {
           blockStopTimeIndicesByStopId.get(stopId).add(sti);
         }
       }
     }
+  }
+
+  /**
+   * as caches expire, validate the expected entries are present.
+   * @param id
+   * @return
+   */
+  private boolean isCached(AgencyAndId id) {
+    // make sure the info we have matches indicies
+    BlockEntry testBlock = _dynamicGraph.getBlockEntryForId(id);
+    if (testBlock == null) {
+      _log.debug("lost block {}", id);
+      return false;
+    }
+    List<BlockTripIndex> blockTripIndices = blockTripByBlockId.get(id);
+    if (blockTripIndices == null || blockTripIndices.isEmpty()) {
+      _log.debug("lost blockTripIndices {}", id);
+      return false;
+    }
+
+    TripEntry tripEntryForId = _dynamicGraph.getTripEntryForId(id);
+    if (tripEntryForId == null) {
+      _log.debug("lost trip {}", id);
+      return false;
+    }
+    RouteEntry routEntryForId = _dynamicGraph.getRoutEntryForId(tripEntryForId.getRoute().getId());
+    if (routEntryForId == null) {
+      _log.debug("lost route {}", id);
+      return false;
+    }
+
+    List<BlockTripIndex> list = blockTripIndexByRouteCollectionId.get(routEntryForId.getId());
+    if (list == null || list.isEmpty()) {
+      _log.debug("missing blockTripIndex {}", routEntryForId.getId());
+      return false;
+    }
+    return true;
   }
 
   private boolean containsTrip(Set<BlockStopTimeIndex> blockStopTimeIndices, BlockStopTimeIndex sti) {

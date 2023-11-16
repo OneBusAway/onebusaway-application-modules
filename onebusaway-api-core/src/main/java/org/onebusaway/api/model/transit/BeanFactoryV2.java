@@ -77,7 +77,9 @@ public class BeanFactoryV2 {
 
   private Locale _locale;
 
-  private RouteSort customRouteSort;
+  private RouteSorting customRouteSort;
+
+  private String primarySortAgency;
 
   public BeanFactoryV2(boolean includeReferences) {
     _includeReferences = includeReferences;
@@ -96,7 +98,7 @@ public class BeanFactoryV2 {
     _applicationKey = applicationKey;
   }
 
-  public void setCustomRouteSort(RouteSort customRouteSort) {
+  public void setCustomRouteSort(RouteSorting customRouteSort) {
     this.customRouteSort = customRouteSort;
   }
 
@@ -138,24 +140,20 @@ public class BeanFactoryV2 {
             false,
             this._references);
 
-    String agencyId = response.getReferences().getRoutes().size() > 0 ?
-            response.getReferences().getRoutes().get(0).getAgencyId() :
-            "";
-
     response.getReferences()
             .getRoutes()
             .sort((a,b) -> customRouteSort
                     .compareRoutes(
                             a.getShortName(),
-                            b.getShortName(),
-                            customRouteSort,
-                            agencyId)
+                            b.getShortName())
             );
 
-    List<RouteV2Bean> sortedRoutes = finalSort(response.getReferences().getRoutes(),agencyId);
+    primarySortAgency = customRouteSort.getPrimarySortAgency();
+
+    List<RouteV2Bean> sortedRoutes = finalSort(response.getReferences().getRoutes());
     List<AgencyV2Bean> agencyV2BeanList = response.getReferences().getAgencies();
     response.getReferences().setRoutes(sortedRoutes);
-    agencySort(agencyV2BeanList,agencyId);
+    agencySort(agencyV2BeanList);
     return response;
   }
 
@@ -171,21 +169,17 @@ public class BeanFactoryV2 {
             false,
             this._references);
 
-    String agencyId = response.getList().size() > 0 ?
-            response.getList().get(0).getAgencyId() :
-            "";
     response
             .getList().sort((a,b) ->
                     customRouteSort.compareRoutes(
                             a.getShortName(),
-                            b.getShortName(),
-                            customRouteSort,
-                            agencyId));
+                            b.getShortName()));
 
-    List<RouteV2Bean> sortedRoutes = finalSort(response.getList(),agencyId);
+    primarySortAgency = customRouteSort.getPrimarySortAgency();
+    List<RouteV2Bean> sortedRoutes = finalSort(response.getList());
     List<AgencyV2Bean> agencyV2BeanList = response.getReferences().getAgencies();
     response.setList(sortedRoutes);
-    agencySort(agencyV2BeanList,agencyId);
+    agencySort(agencyV2BeanList);
     return response;
   }
 
@@ -206,27 +200,19 @@ public class BeanFactoryV2 {
       StopWithArrivalsAndDeparturesBean result) {
     EntryWithReferencesBean<StopWithArrivalsAndDeparturesV2Bean> response = entry(getStopWithArrivalAndDepartures(result));
 
-    String agencyId = response
-            .getEntry()
-            .getArrivalsAndDepartures().size() > 0 ?
-            AgencyAndIdLibrary.convertFromString(response.getEntry().getArrivalsAndDepartures().get(0)
-                    .getRouteId()).getAgencyId() :
-            "";
-
     response.getReferences().getRoutes()
             .sort((a,b) ->
                     customRouteSort
                             .compareRoutes(
                                     a.getShortName(),
-                                    b.getShortName(),
-                                    customRouteSort,
-                                    agencyId)
+                                    b.getShortName())
             );
 
-    List<RouteV2Bean> sortedRoutes = finalSort(response.getReferences().getRoutes(),agencyId);
+    primarySortAgency = customRouteSort.getPrimarySortAgency();
+    List<RouteV2Bean> sortedRoutes = finalSort(response.getReferences().getRoutes());
     List<AgencyV2Bean> agencyV2BeanList = response.getReferences().getAgencies();
     response.getReferences().setRoutes(sortedRoutes);
-    agencySort(agencyV2BeanList,agencyId);
+    agencySort(agencyV2BeanList);
     return response;
   }
 
@@ -235,46 +221,45 @@ public class BeanFactoryV2 {
 
     EntryWithReferencesBean<StopsWithArrivalsAndDeparturesV2Bean> response = entry(getStopsWithArrivalAndDepartures(result));
 
-    String agencyId = response
-            .getEntry()
-            .getArrivalsAndDepartures().size() > 0 ? AgencyAndIdLibrary.convertFromString(response.getEntry().getArrivalsAndDepartures().get(0)
-            .getRouteId()).getAgencyId() : "";
-
     response.getReferences().getRoutes()
             .sort((a,b) -> customRouteSort
                     .compareRoutes(
                             a.getShortName(),
-                            b.getShortName(),
-                            customRouteSort,
-                            agencyId));
+                            b.getShortName()));
 
-    List<RouteV2Bean> sortedRoutes = finalSort(response.getReferences().getRoutes(),agencyId);
+    primarySortAgency = customRouteSort.getPrimarySortAgency();
+    List<RouteV2Bean> sortedRoutes = finalSort(response.getReferences().getRoutes());
     List<AgencyV2Bean> agencyV2BeanList = response.getReferences().getAgencies();
     response.getReferences().setRoutes(sortedRoutes);
-    agencySort(agencyV2BeanList,agencyId);
+    agencySort(agencyV2BeanList);
 
     return response;
   }
 
-  private void agencySort(List<AgencyV2Bean> agencies, String agencyId) {
+  private void agencySort(List<AgencyV2Bean> agencies) {
+    if (primarySortAgency != null) {
     agencies.sort((a,b) -> {
-      if(a.getId().equals(agencyId)) return -1;
-      if(b.getId().equals(agencyId)) return 1;
+      if(a.getId().equals(primarySortAgency)) return -1;
+      if(b.getId().equals(primarySortAgency)) return 1;
       return a.getId().compareTo(b.getId());
     });
   }
+  }
 
-  private List<RouteV2Bean> finalSort(List<RouteV2Bean> response, String agencyId) {
+  private List<RouteV2Bean> finalSort(List<RouteV2Bean> response) {
+    if (primarySortAgency == null) {
+      return response;
+    }
     List<RouteV2Bean> routeV2BeanList = response
             .stream()
             .filter(r -> r.getAgencyId()
-                    .equals(agencyId))
+                    .equals(primarySortAgency))
             .collect(Collectors.toList()
             );
 
     return Stream.concat(routeV2BeanList.stream(),response
                                     .stream().filter(r -> !r.getAgencyId()
-                                            .equals(agencyId)))
+                                            .equals(primarySortAgency)))
                             .collect(Collectors.toList());
   }
 

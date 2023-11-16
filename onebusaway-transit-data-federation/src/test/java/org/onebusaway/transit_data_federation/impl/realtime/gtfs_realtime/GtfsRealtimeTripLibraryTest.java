@@ -55,6 +55,7 @@ public class GtfsRealtimeTripLibraryTest {
 
   private GtfsRealtimeTripLibrary _library;
   private GtfsRealtimeEntitySource _entitySource;
+  private GtfsRealtimeServiceSource _serviceSource;
   private BlockCalendarService _blockCalendarService;
 
   @Before
@@ -62,11 +63,14 @@ public class GtfsRealtimeTripLibraryTest {
     _library = new GtfsRealtimeTripLibrary();
     _library.setCurrentTime(8 * 60 * 60 * 1000);
     _library.setValidateCurrentTime(false);  // tell library its a test
+    _serviceSource = new GtfsRealtimeServiceSource();
     _entitySource = Mockito.mock(GtfsRealtimeEntitySource.class);
     _library.setEntitySource(_entitySource);
+    _library.setServiceSource(_serviceSource);
 
     _blockCalendarService = Mockito.mock(BlockCalendarService.class);
-    _library.setBlockCalendarService(_blockCalendarService);
+    _serviceSource.setBlockCalendarService(_blockCalendarService);
+
   }
 
   @Test

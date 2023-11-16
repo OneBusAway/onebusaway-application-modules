@@ -91,7 +91,7 @@
 												<li>${distanceAway}</li>
 											</c:forEach>
 										</ol>
-									</c:otherwise>
+									</c:otherwise>		
 								</c:choose>	
 							</s:iterator>
 						</div>

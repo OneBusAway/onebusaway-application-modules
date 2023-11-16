@@ -17,17 +17,16 @@ package org.onebusaway.api.actions.api.where.search;
 
 import org.apache.struts2.rest.DefaultHttpHeaders;
 import org.onebusaway.api.model.transit.BeanFactoryV2;
-import org.onebusaway.api.model.transit.ListWithReferencesBean;
 import org.onebusaway.api.model.transit.StopSearchResultBean;
-import org.onebusaway.api.model.transit.StopV2Bean;
 import org.onebusaway.exceptions.ServiceException;
 import org.onebusaway.transit_data.model.ArrivalsAndDeparturesQueryBean;
 import org.onebusaway.transit_data.model.ListBean;
-import org.onebusaway.transit_data.model.RouteSort;
+import org.onebusaway.transit_data.model.RouteSorting;
 import org.onebusaway.transit_data.model.StopBean;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -39,7 +38,7 @@ public class StopAction extends ApiSearchAction {
   private ArrivalsAndDeparturesQueryBean _query = new ArrivalsAndDeparturesQueryBean();
 
   @Autowired
-  private RouteSort customRouteSort;
+  private RouteSorting customRouteSort;
 
   public StopAction() {
     super(V2);
@@ -48,6 +47,7 @@ public class StopAction extends ApiSearchAction {
 
   public DefaultHttpHeaders index() throws IOException, ServiceException {
     if (isVersion(V2)) {
+      List<Integer> routeTypesToBeFiltered = Arrays.asList(711,712,713,714);
       ListBean<StopBean> stopSuggestions = _service.getStopSuggestions(null, _input, maxCount);
       if (stopSuggestions == null || stopSuggestions.getList().isEmpty())
         return setResourceNotFoundResponse();
@@ -55,7 +55,8 @@ public class StopAction extends ApiSearchAction {
       BeanFactoryV2 factory = getBeanFactoryV2();
       StopSearchResultBean result = new StopSearchResultBean();
       List<StopBean> filteredStopSuggestions = stopSuggestions.getList().stream()
-              .filter(stopBean -> stopBean.getRoutes() != null && !stopBean.getRoutes().isEmpty())
+              .filter(stopBean -> stopBean.getRoutes() != null && !stopBean.getRoutes().isEmpty() &&
+                      stopBean.getRoutes().stream().noneMatch(r -> routeTypesToBeFiltered.contains(r.getType())))
               .collect(Collectors.toList());
       stopSuggestions.setList(filteredStopSuggestions);
       result.setStopSuggestions(stopSuggestions);
