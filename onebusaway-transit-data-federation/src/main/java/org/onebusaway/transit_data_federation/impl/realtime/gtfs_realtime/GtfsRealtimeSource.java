@@ -854,10 +854,16 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
       if (serviceAlert.getActiveWindowList() != null) {
         for (ServiceAlerts.TimeRange timeRange : serviceAlert.getActiveWindowList()) {
           ServiceAlertTimeRange serviceAlertTimeRange = new ServiceAlertTimeRange();
-          if (timeRange.hasStart())
-            serviceAlertTimeRange.setFromValue(timeRange.getStart());
-          if (timeRange.hasEnd())
-            serviceAlertTimeRange.setToValue(timeRange.getEnd());
+          if (timeRange.hasStart()) {
+            if (timeRange.getStart() > 0) {
+              serviceAlertTimeRange.setFromValue(timeRange.getStart());
+            }
+          }
+          if (timeRange.hasEnd()) {
+            if (timeRange.getEnd() > 0) {
+              serviceAlertTimeRange.setToValue(timeRange.getEnd());
+            }
+          }
           serviceAlertRecord.getActiveWindows().add(serviceAlertTimeRange);
         }
       }
@@ -949,8 +955,14 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
         _log.debug("creating alert " + serviceAlertRecord.getAgencyId() + ":" + serviceAlertRecord.getServiceAlertId());
         toAdd.add(serviceAlertRecord);
       } else {
-        _log.debug("updating alert " + serviceAlertRecord.getAgencyId() + ":" + serviceAlertRecord.getServiceAlertId());
-        toUpdate.add(serviceAlertRecord);
+        // one more check!
+        if (existingRecord != null && existingRecord.shallowEquals(serviceAlertRecord)) {
+          // some fields differ but the alert is not materially different, do not update
+          _log.debug("not updating alert {}", existingRecord);
+        } else {
+          _log.debug("updating alert " + serviceAlertRecord.getAgencyId() + ":" + serviceAlertRecord.getServiceAlertId());
+          toUpdate.add(serviceAlertRecord);
+        }
       }
       currentAlerts.add(new AgencyAndId(serviceAlertRecord.getAgencyId(), serviceAlertRecord.getServiceAlertId()));
     } else {

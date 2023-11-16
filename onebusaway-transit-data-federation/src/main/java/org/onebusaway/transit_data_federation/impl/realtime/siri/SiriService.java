@@ -340,9 +340,9 @@ public class SiriService {
     if (ptSituation.getPublicationWindow() != null) {
       HalfOpenTimestampRangeStructure window = ptSituation.getPublicationWindow();
       ServiceAlertTimeRange range = new ServiceAlertTimeRange();
-      if (window.getStartTime() != null)
+      if (window.getStartTime() != null && window.getStartTime().getTime() > 0)
         range.setFromValue(window.getStartTime().getTime());
-      if (window.getEndTime() != null)
+      if (window.getEndTime() != null && window.getEndTime().getTime() > 0)
         range.setToValue(window.getEndTime().getTime());
       if(serviceAlert.getActiveWindows() == null)
         serviceAlert.setActiveWindows(new HashSet<ServiceAlertTimeRange>());
