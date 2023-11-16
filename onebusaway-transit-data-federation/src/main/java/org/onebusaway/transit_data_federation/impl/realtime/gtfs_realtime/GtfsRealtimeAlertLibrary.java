@@ -55,10 +55,12 @@ class GtfsRealtimeAlertLibrary {
     b.setId(ServiceAlertLibrary.id(id));
     for (GtfsRealtime.TimeRange range : alert.getActivePeriodList()) {
       ServiceAlerts.TimeRange.Builder rangeBuilder = ServiceAlerts.TimeRange.newBuilder();
-      if (range.hasStart())
+      if (range.hasStart() && range.getStart() > 0) {
         rangeBuilder.setStart(toMillis(range.getStart()));
-      if (range.hasEnd())
+      }
+      if (range.hasEnd() && range.getEnd() > 0) {
         rangeBuilder.setEnd(toMillis(range.getEnd()));
+      }
       b.addActiveWindow(rangeBuilder);
     }
     if (alert.hasCause())

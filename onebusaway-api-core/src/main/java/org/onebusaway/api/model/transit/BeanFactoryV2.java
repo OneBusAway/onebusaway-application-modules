@@ -1494,8 +1494,10 @@ public class BeanFactoryV2 {
     if (range == null)
       return null;
     TimeRangeV2Bean bean = new TimeRangeV2Bean();
-    bean.setFrom(range.getFrom());
-    bean.setTo(range.getTo());
+    if (range.getFrom() > 0)
+      bean.setFrom(range.getFrom());
+    if (range.getTo() > 0)
+      bean.setTo(range.getTo());
     return bean;
   }
 
