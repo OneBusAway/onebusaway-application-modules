@@ -1498,13 +1498,6 @@ public class BeanFactoryV2 {
       bean.setFrom(range.getFrom());
     if (range.getTo() > 0) {
       bean.setTo(range.getTo());
-    } else {
-      if (bean.getFrom() > 0) {
-        // MTA-38 -- we don't properly support missing end dates
-        // instead we arbitrarily set alarm to be 10 years from now
-        long newTo = bean.getFrom() + 10l * 365/*d*/ * 24/*h*/ * 60/*m*/ * 60/*s*/ * 1000/*ms*/;
-        bean.setTo(newTo);
-      }
     }
     return bean;
   }

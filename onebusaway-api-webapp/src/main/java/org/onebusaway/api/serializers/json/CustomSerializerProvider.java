@@ -20,6 +20,7 @@ import com.fasterxml.jackson.databind.ser.DefaultSerializerProvider;
 import com.fasterxml.jackson.databind.ser.SerializerFactory;
 import org.onebusaway.api.model.transit.FrequencyV2Bean;
 import org.onebusaway.api.model.transit.TimeIntervalV2;
+import org.onebusaway.api.model.transit.service_alerts.TimeRangeV2Bean;
 
 import java.util.Collection;
 import java.util.List;
@@ -44,6 +45,8 @@ public class CustomSerializerProvider extends DefaultSerializerProvider {
   public JsonSerializer<Object> findNullValueSerializer(BeanProperty property) throws JsonMappingException {
     if (property.getType().getRawClass().equals(String.class))
       return Serializers.EMPTY_STRING_SERIALIZER_INSTANCE;
+    if (property.getName().equals("to") && property.getMember().getDeclaringClass().equals(TimeRangeV2Bean.class) )
+      return null; // MTA-38:  don't default Long to null or 0, leave field absent
     if (property.getType().getRawClass().equals(Long.class))
       return Serializers.NULL_NUMBER_SERIALIZER_INSTANCE;
     if (property.getType().getRawClass().equals(Integer.class))
