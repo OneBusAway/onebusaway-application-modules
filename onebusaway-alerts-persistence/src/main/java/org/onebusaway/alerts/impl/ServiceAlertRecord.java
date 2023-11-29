@@ -292,23 +292,6 @@ public class ServiceAlertRecord {
             && Objects.equals(modifiedTime, sar.modifiedTime);
   }
 
-  /**
-   * Compare values but not identities; test if the object is essentially the
-   * same even if dates and ids don't align
-   * @param o
-   * @return
-   */
-  public boolean shallowEquals(Object o) {
-    if (this == o) { return true; }
-    if (o == null || getClass() != o.getClass()) { return false; }
-    ServiceAlertRecord sar = (ServiceAlertRecord) o;
-    return
-            Objects.equals(agencyId, sar.agencyId)
-                    && Objects.equals(serviceAlertId, sar.serviceAlertId)
-                    && Objects.equals(consequenceMessage, sar.consequenceMessage)
-                    && Objects.equals(copy, sar.copy);
-  }
-
   @Override
   public String toString() {
     return "ServiceAlertRecord{" + id + "}";

@@ -955,14 +955,8 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
         _log.debug("creating alert " + serviceAlertRecord.getAgencyId() + ":" + serviceAlertRecord.getServiceAlertId());
         toAdd.add(serviceAlertRecord);
       } else {
-        // one more check!
-        if (existingRecord != null && existingRecord.shallowEquals(serviceAlertRecord)) {
-          // some fields differ but the alert is not materially different, do not update
-          _log.debug("not updating alert {}", existingRecord);
-        } else {
-          _log.debug("updating alert " + serviceAlertRecord.getAgencyId() + ":" + serviceAlertRecord.getServiceAlertId());
-          toUpdate.add(serviceAlertRecord);
-        }
+        _log.debug("updating alert " + serviceAlertRecord.getAgencyId() + ":" + serviceAlertRecord.getServiceAlertId());
+        toUpdate.add(serviceAlertRecord);
       }
       currentAlerts.add(new AgencyAndId(serviceAlertRecord.getAgencyId(), serviceAlertRecord.getServiceAlertId()));
     } else {
