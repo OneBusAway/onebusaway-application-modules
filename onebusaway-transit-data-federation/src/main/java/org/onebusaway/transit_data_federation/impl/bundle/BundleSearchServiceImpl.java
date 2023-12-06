@@ -52,7 +52,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class BundleSearchServiceImpl implements BundleSearchService, ApplicationListener {
 
-	private static final int MAX_TYPE_AHEAD_LENGTH = 10;
+	private static final int MAX_TYPE_AHEAD_LENGTH = 32;
 	@Autowired
 	private TransitDataService _transitDataService = null;
 
@@ -113,7 +113,8 @@ public class BundleSearchServiceImpl implements BundleSearchService, Application
 				suggestions = searchState.getSuggestions();
 				stopSuggestions = searchState.getStopSuggestions();
 				routeSuggestions = searchState.getRouteSuggestions();
-				_log.info("complete");
+				_log.info("complete with suggestions {}, stopSuggestions {}, and routeSuggestions {}",
+								suggestions.size(), stopSuggestions.size(), routeSuggestions.size());
 			}
 		};
 
