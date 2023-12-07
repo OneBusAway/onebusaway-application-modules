@@ -144,8 +144,8 @@ public class BeanFactoryV2 {
             .getRoutes()
             .sort((a,b) -> customRouteSort
                     .compareRoutes(
-                            a.getShortName(),
-                            b.getShortName())
+                            a.getNullSafeShortName(),
+                            b.getNullSafeShortName())
             );
 
     primarySortAgency = customRouteSort.getPrimarySortAgency();
@@ -172,8 +172,8 @@ public class BeanFactoryV2 {
     response
             .getList().sort((a,b) ->
                     customRouteSort.compareRoutes(
-                            a.getShortName(),
-                            b.getShortName()));
+                            a.getNullSafeShortName(),
+                            b.getNullSafeShortName()));
 
     primarySortAgency = customRouteSort.getPrimarySortAgency();
     List<RouteV2Bean> sortedRoutes = finalSort(response.getList());
@@ -204,8 +204,8 @@ public class BeanFactoryV2 {
             .sort((a,b) ->
                     customRouteSort
                             .compareRoutes(
-                                    a.getShortName(),
-                                    b.getShortName())
+                                    a.getNullSafeShortName(),
+                                    b.getNullSafeShortName())
             );
 
     primarySortAgency = customRouteSort.getPrimarySortAgency();
@@ -224,8 +224,8 @@ public class BeanFactoryV2 {
     response.getReferences().getRoutes()
             .sort((a,b) -> customRouteSort
                     .compareRoutes(
-                            a.getShortName(),
-                            b.getShortName()));
+                            a.getNullSafeShortName(),
+                            b.getNullSafeShortName()));
 
     primarySortAgency = customRouteSort.getPrimarySortAgency();
     List<RouteV2Bean> sortedRoutes = finalSort(response.getReferences().getRoutes());

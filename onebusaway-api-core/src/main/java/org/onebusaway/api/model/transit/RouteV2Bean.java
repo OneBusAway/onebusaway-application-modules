@@ -59,6 +59,12 @@ public final class RouteV2Bean implements Serializable, HasId {
     return shortName;
   }
 
+  public String getNullSafeShortName() {
+    if (shortName != null)
+      return shortName;
+    return getId();
+  }
+
   public void setShortName(String shortName) {
     this.shortName = shortName;
   }
