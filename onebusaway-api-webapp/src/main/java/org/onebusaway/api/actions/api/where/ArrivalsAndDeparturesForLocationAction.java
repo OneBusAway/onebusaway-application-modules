@@ -30,6 +30,8 @@ import org.onebusaway.transit_data.model.*;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.util.SystemTime;
 import org.onebusaway.util.services.configuration.ConfigurationService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
@@ -43,6 +45,8 @@ import java.util.List;
  *
  */
 public class ArrivalsAndDeparturesForLocationAction extends ApiActionSupport {
+
+    private static Logger _log = LoggerFactory.getLogger(ArrivalsAndDeparturesForLocationAction.class);
 
     private static final long serialVersionUID = 1L;
     // this api doesn't support v1
@@ -170,7 +174,12 @@ public class ArrivalsAndDeparturesForLocationAction extends ApiActionSupport {
             return emptyResponse();
         }
         factory.setCustomRouteSort(customRouteSort);
-        return setOkResponse(factory.getResponse(adResult));
+        try {
+            return setOkResponse(factory.getResponse(adResult));
+        } catch (Throwable t) {
+            _log.error("BeanFactory Exception {}", t, t);
+            return setExceptionResponse();
+        }
     }
 
     private DefaultHttpHeaders emptyResponse() {
