@@ -187,7 +187,9 @@ class StopWithArrivalsAndDeparturesBeanServiceImpl implements
     for (ArrivalAndDepartureBean arrivalsAndDeparture : arrivalsAndDepartures) {
       if (arrivalsAndDeparture.getTrip().getRoute() == null
           || arrivalsAndDeparture.getTrip().getRoute().getShortName() == null) {
-        _log.error("for A/D {} found a null route:", arrivalsAndDeparture);
+        _log.error("for A/D {} found a null route: {} for trip {}", arrivalsAndDeparture,
+                arrivalsAndDeparture.getTrip().getRoute(),
+                arrivalsAndDeparture.getTrip());
       } else {
         filtered.add(arrivalsAndDeparture);
       }
