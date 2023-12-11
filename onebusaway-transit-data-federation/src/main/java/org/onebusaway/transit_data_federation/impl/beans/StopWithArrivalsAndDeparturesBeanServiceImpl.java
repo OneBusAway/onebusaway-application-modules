@@ -185,11 +185,17 @@ class StopWithArrivalsAndDeparturesBeanServiceImpl implements
   private List<ArrivalAndDepartureBean> filter(List<ArrivalAndDepartureBean> arrivalsAndDepartures) {
     ArrayList<ArrivalAndDepartureBean> filtered = new ArrayList<>();
     for (ArrivalAndDepartureBean arrivalsAndDeparture : arrivalsAndDepartures) {
-      if (arrivalsAndDeparture.getTrip().getRoute() == null
-          || arrivalsAndDeparture.getTrip().getRoute().getShortName() == null) {
-        _log.error("for A/D {} found a null route: {} for trip {}", arrivalsAndDeparture,
-                arrivalsAndDeparture.getTrip().getRoute(),
+      if (arrivalsAndDeparture.getTrip().getRoute() == null) {
+        _log.error("for A/D {} found a null route bean: {} for trip {}", arrivalsAndDeparture,
+                arrivalsAndDeparture.getTrip().getRoute().getId(),
                 arrivalsAndDeparture.getTrip());
+      } else
+      if (arrivalsAndDeparture.getTrip().getRoute().getShortName() == null) {
+        _log.error("for A/D {} found a null route: {}/{}/{} for trip {}", arrivalsAndDeparture,
+                arrivalsAndDeparture.getTrip().getRoute().getId(),
+                arrivalsAndDeparture.getTrip().getRoute().getShortName(),
+                arrivalsAndDeparture.getTrip().getRoute().getLongName(),
+                arrivalsAndDeparture.getTrip().getId());
       } else {
         filtered.add(arrivalsAndDeparture);
       }
