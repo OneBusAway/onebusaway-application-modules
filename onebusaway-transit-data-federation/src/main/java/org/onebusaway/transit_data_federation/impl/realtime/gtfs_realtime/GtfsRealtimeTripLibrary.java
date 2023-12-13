@@ -210,8 +210,12 @@ public class GtfsRealtimeTripLibrary {
           bd = handleDynamicTripUpdate(tu);
           if (bd == null) continue; // we failed
 
-          // if this trip has a vehiclePosition it will be matched later
-          anonymousTripUpdatesByBlock.put(bd, tu);
+          if (bd.getVehicleId() != null) {
+            tripUpdatesByVehicleId.put(bd.getVehicleId(), tu);
+          } else {
+            // if this trip has a vehiclePosition it will be matched later
+            anonymousTripUpdatesByBlock.put(bd, tu);
+          }
         }
 
         // if this block has an assigned vehicle consume the tripUpdate
@@ -643,6 +647,9 @@ public class GtfsRealtimeTripLibrary {
       record.setStatus(blockDescriptor.getScheduleRelationship().toString());
       record.setServiceDate(blockDescriptor.getBlockInstance().getServiceDate());
       record.setTimeOfRecord(currentTime());
+      if (blockDescriptor.getVehicleId() != null) {
+        record.setVehicleId(new AgencyAndId(agencyId, blockDescriptor.getVehicleId()));
+      }
       if (blockDescriptor.getStartTime() != null) {
         record.setBlockStartTime(blockDescriptor.getStartTime());
       } else {

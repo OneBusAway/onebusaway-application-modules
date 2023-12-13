@@ -60,6 +60,7 @@ public class DynamicTripBuilder {
     try {
       // from the addedTripInfo generate the trips and stops, and return in the block descriptor
       BlockDescriptor dynamicBd = new BlockDescriptor();
+      dynamicBd.setVehicleId(addedTripInfo.getVehicleId());
       dynamicBd.setScheduleRelationship(addedTripInfo.getScheduleRelationship());
       AgencyAndId blockId = new AgencyAndId(addedTripInfo.getAgencyId(), addedTripInfo.getTripId());
       // here we look up past blocks, and advance our position along the block

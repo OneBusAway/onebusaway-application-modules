@@ -32,6 +32,7 @@ public class AddedTripInfo {
   private AgencyAndId shapeId;
   private String routeId = null;
   private String directionId = null;
+  private String vehicleId = null;
   private List<AddedStopInfo> stops = new ArrayList<>();
 
   private BlockDescriptor.ScheduleRelationship scheduleRelationship;
@@ -124,5 +125,13 @@ public class AddedTripInfo {
 
   public void setAgencyId(String agencyId) {
     this.agencyId = agencyId;
+  }
+
+  public String getVehicleId() {
+    return vehicleId;
+  }
+
+  public void setVehicleId(String vehicleId) {
+    this.vehicleId = vehicleId;
   }
 }

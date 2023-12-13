@@ -71,6 +71,9 @@ public class NyctTripServiceImpl implements NyctTripService {
       addedTrip.setRouteId(routeId);
       addedTrip.setTripId(tripId);
       addedTrip.setDirectionId(directionId);
+      if (nyctTripDescriptor.hasTrainId()) {
+        addedTrip.setVehicleId(nyctTripDescriptor.getTrainId());
+      }
       for (GtfsRealtime.TripUpdate.StopTimeUpdate stopTimeUpdate : tu.getStopTimeUpdateList()) {
         AddedStopInfo stopInfo = new AddedStopInfo();
         if (stopTimeUpdate.hasStopId()) {
