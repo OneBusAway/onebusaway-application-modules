@@ -55,7 +55,8 @@ public class StopAction extends ApiSearchAction {
       BeanFactoryV2 factory = getBeanFactoryV2();
       StopSearchResultBean result = new StopSearchResultBean();
       List<StopBean> filteredStopSuggestions = stopSuggestions.getList().stream()
-              .filter(stopBean -> stopBean.getRoutes() != null && !stopBean.getRoutes().isEmpty() &&
+              .filter(stopBean -> stopBean.getRoutes() != null &&
+                      stopBean.getRoutes().size() > 1 || stopBean.getRoutes().size() == 1 &&
                       stopBean.getRoutes().stream().noneMatch(r -> routeTypesToBeFiltered.contains(r.getType())))
               .collect(Collectors.toList());
       stopSuggestions.setList(filteredStopSuggestions);
