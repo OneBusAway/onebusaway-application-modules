@@ -74,7 +74,9 @@ public class NyctTripServiceImpl implements NyctTripService {
       if (nyctTripDescriptor.hasTrainId()) {
         addedTrip.setVehicleId(nyctTripDescriptor.getTrainId());
       }
+      int index = -1;
       for (GtfsRealtime.TripUpdate.StopTimeUpdate stopTimeUpdate : tu.getStopTimeUpdateList()) {
+        index++;
         AddedStopInfo stopInfo = new AddedStopInfo();
         if (stopTimeUpdate.hasStopId()) {
           stopInfo.setStopId(stopTimeUpdate.getStopId());
@@ -82,6 +84,10 @@ public class NyctTripServiceImpl implements NyctTripService {
         if (stopTimeUpdate.hasArrival() && stopTimeUpdate.getArrival().getTime() > 0) {
           // here we assume time not delay
           stopInfo.setArrivalTime(stopTimeUpdate.getArrival().getTime()*1000);
+          if (index == tu.getStopTimeUpdateCount()-1) {
+            // default the departure to the arrival if the last stop on the trip
+            stopInfo.setDepartureTime(stopTimeUpdate.getArrival().getTime()*1000);
+          }
         }
         if (stopTimeUpdate.hasDeparture() && stopTimeUpdate.getDeparture().getTime() > 0) {
           // here we assume time not delay
