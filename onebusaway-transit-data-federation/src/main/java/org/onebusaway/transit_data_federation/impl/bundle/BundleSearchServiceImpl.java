@@ -244,7 +244,7 @@ public class BundleSearchServiceImpl implements BundleSearchService, Application
 		private SearchState searchState;
 		private String name;
 		private String hint;
-		private String regex = "\\s+";
+		private String regex = "\\s+|-|/";
 		private RouteBean route;
 		private StopBean stop;
 
