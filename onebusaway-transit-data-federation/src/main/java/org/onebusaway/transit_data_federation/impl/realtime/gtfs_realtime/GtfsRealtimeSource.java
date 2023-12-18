@@ -751,7 +751,7 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     return false;
   }
 
-  private synchronized void handleAlertCollection(ServiceAlerts.ServiceAlertsCollection alertsCollection) {
+  private void handleAlertCollection(ServiceAlerts.ServiceAlertsCollection alertsCollection) {
     if (_alertCollectionUrl == null) {
       return;
     }
@@ -966,7 +966,7 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
 
   }
 
-  private synchronized void handleAlerts(FeedMessage alerts) {
+  private void handleAlerts(FeedMessage alerts) {
 
     // exit if we are configured only in trip updates mode
     if (_alertsUrl == null) {
