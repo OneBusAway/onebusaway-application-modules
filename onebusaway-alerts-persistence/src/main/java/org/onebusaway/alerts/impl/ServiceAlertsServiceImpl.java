@@ -424,7 +424,7 @@ public class ServiceAlertsServiceImpl implements ServiceAlertsService {
 		}
 	}
 
-	private <T> void getServiceAlertIdsForKey(
+	private synchronized <T> void getServiceAlertIdsForKey(
 			Map<T, Set<AgencyAndId>> serviceAlertIdsByKey, T key,
 			Collection<AgencyAndId> matches) {
 		if (serviceAlertIdsByKey != null) {
