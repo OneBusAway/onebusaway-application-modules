@@ -19,10 +19,7 @@ package org.onebusaway.transit_data_federation.impl.beans;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.realtime.api.OccupancyStatus;
 import org.onebusaway.realtime.api.VehicleOccupancyRecord;
-import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
-import org.onebusaway.transit_data.model.ArrivalsAndDeparturesQueryBean;
-import org.onebusaway.transit_data.model.StopBean;
-import org.onebusaway.transit_data.model.TransitDataConstants;
+import org.onebusaway.transit_data.model.*;
 import org.onebusaway.transit_data.model.realtime.HistogramBean;
 import org.onebusaway.transit_data.model.schedule.FrequencyBean;
 import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
@@ -349,6 +346,10 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
       // use the stop headsign from the stop
       pab.setTripHeadsign(stopTimeNarrative.getStopHeadsign());
     }
+    // enforce some properties on the RouteBean
+    if (pab.getTrip().getRoute().getShortName() == null) {
+      pab.getTrip().setRoute(createRouteBean(pab, trip));
+    }
 
     StopBean stopBean = stopBeanCache.get(stop.getId());
 
@@ -385,6 +386,33 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
       if(occ != null && occ.size() > 0) pab.setHistoricalOccupancy(OccupancyStatus.toEnum(occ.get(0).getLoadFactor()));
     }
     return pab;
+  }
+
+  private RouteBean createRouteBean(ArrivalAndDepartureBean pab, TripEntry trip) {
+    RouteBean oldBean = pab.getTrip().getRoute();
+    RouteBean.Builder trb = RouteBean.builder();
+    // agency
+    trb.setAgency(oldBean.getAgency());
+    // id
+    trb.setId(oldBean.getId());
+    if (pab.getRouteShortName() != null) {
+      trb.setShortName(pab.getRouteShortName());
+    } else {
+      trb.setShortName(oldBean.getLongName());
+    }
+    // longName
+    trb.setLongName(oldBean.getLongName());
+    // type
+    trb.setType(oldBean.getType());
+    // color
+    trb.setColor(oldBean.getColor());
+    // textColor
+    trb.setTextColor(oldBean.getTextColor());
+    RouteBean routeBean = trb.create();
+    if (routeBean.getId() == null) {
+      System.out.println("whoa!");
+    }
+    return routeBean;
   }
 
   private void applyBlockLocationToBean(ArrivalAndDepartureInstance instance,
