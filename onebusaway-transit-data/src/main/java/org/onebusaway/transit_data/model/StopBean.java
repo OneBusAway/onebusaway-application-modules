@@ -37,6 +37,8 @@ public class StopBean implements Serializable {
   private int locationType;
 
   private List<RouteBean> routes;
+
+  private List<RouteBean> transfers;
   
   private EAccessibility wheelchairBoarding;
 
@@ -111,6 +113,14 @@ public class StopBean implements Serializable {
 
   public void setRoutes(List<RouteBean> routes) {
     this.routes = routes;
+  }
+
+  public List<RouteBean> getTransfers() {
+    return transfers;
+  }
+
+  public void setTransfers(List<RouteBean> transfers) {
+    this.transfers = transfers;
   }
 
   public EAccessibility getWheelchairBoarding() {

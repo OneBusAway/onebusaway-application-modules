@@ -470,7 +470,15 @@ public class BeanFactoryV2 {
       routeIds.add(route.getId());
       addToReferences(route);
     }
+    List<String> transferIds = new ArrayList<>();
+    if (stop.getTransfers() != null) {
+      for (RouteBean transfer : stop.getTransfers()) {
+        transferIds.add(transfer.getId());
+        addToReferences(transfer); // the reference is a route
+      }
+    }
     bean.setRouteIds(routeIds);
+    bean.setTransferIds(transferIds);
     if (stop.getParent() != null) {
       StopBean parent = stop.getParent();
       StopV2Bean parentBean = new StopV2Bean();
