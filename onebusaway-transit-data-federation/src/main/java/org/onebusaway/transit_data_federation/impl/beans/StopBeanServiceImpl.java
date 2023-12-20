@@ -129,8 +129,25 @@ class StopBeanServiceImpl implements StopBeanService {
       sb.setParent(parentBean);
     }
     fillRoutesForStopBean(stop, sb, serviceDate);
+    fillTransfersForStopBean(stop, narrative, sb);
     return sb;
   }
+
+  private void fillTransfersForStopBean(StopEntry stop, StopNarrative narrative, StopBean bean) {
+    List<AgencyAndId> transfers = _narrativeService.getDefaultTransfers(stop.getId());
+    if (transfers == null) {
+      // we don't have any defaults, use the standard set of routes
+      bean.setTransfers(bean.getRoutes());
+      return;
+    }
+    List<RouteBean> routeBeans = new ArrayList<>(transfers.size());
+    for (AgencyAndId transferId : transfers) {
+      RouteBean transferRouteBean = _routeBeanService.getRouteForId(transferId);
+      routeBeans.add(transferRouteBean);
+    }
+    bean.setTransfers(routeBeans);
+  }
+
 
   private void fillRoutesForStopBean(StopEntry stop, StopBean sb, ServiceDate serviceDate) {
 

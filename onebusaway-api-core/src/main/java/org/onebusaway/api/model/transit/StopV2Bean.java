@@ -42,6 +42,8 @@ public class StopV2Bean implements Serializable, HasId {
   
   private List<String> routeIds;
 
+  private List<String> transferIds;
+
   private String parent;
 
   public String getId() {
@@ -114,6 +116,14 @@ public class StopV2Bean implements Serializable, HasId {
 
   public void setRouteIds(List<String> routeIds) {
     this.routeIds = routeIds;
+  }
+
+  public List<String> getTransferIds() {
+    return transferIds;
+  }
+
+  public void setTransferIds(List<String> transferIds) {
+    this.transferIds = transferIds;
   }
 
   public String getParent() {
