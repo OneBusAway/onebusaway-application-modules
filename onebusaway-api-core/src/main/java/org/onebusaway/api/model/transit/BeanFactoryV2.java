@@ -144,8 +144,8 @@ public class BeanFactoryV2 {
             .getRoutes()
             .sort((a,b) -> customRouteSort
                     .compareRoutes(
-                            a.getShortName(),
-                            b.getShortName())
+                            a.getNullSafeShortName(),
+                            b.getNullSafeShortName())
             );
 
     primarySortAgency = customRouteSort.getPrimarySortAgency();
@@ -172,8 +172,8 @@ public class BeanFactoryV2 {
     response
             .getList().sort((a,b) ->
                     customRouteSort.compareRoutes(
-                            a.getShortName(),
-                            b.getShortName()));
+                            a.getNullSafeShortName(),
+                            b.getNullSafeShortName()));
 
     primarySortAgency = customRouteSort.getPrimarySortAgency();
     List<RouteV2Bean> sortedRoutes = finalSort(response.getList());
@@ -204,8 +204,8 @@ public class BeanFactoryV2 {
             .sort((a,b) ->
                     customRouteSort
                             .compareRoutes(
-                                    a.getShortName(),
-                                    b.getShortName())
+                                    a.getNullSafeShortName(),
+                                    b.getNullSafeShortName())
             );
 
     primarySortAgency = customRouteSort.getPrimarySortAgency();
@@ -221,11 +221,13 @@ public class BeanFactoryV2 {
 
     EntryWithReferencesBean<StopsWithArrivalsAndDeparturesV2Bean> response = entry(getStopsWithArrivalAndDepartures(result));
 
-    response.getReferences().getRoutes()
-            .sort((a,b) -> customRouteSort
-                    .compareRoutes(
-                            a.getShortName(),
-                            b.getShortName()));
+    if (response.getReferences().getRoutes() != null) {
+      response.getReferences().getRoutes()
+              .sort((a, b) -> customRouteSort
+                      .compareRoutes(
+                              a.getNullSafeShortName(),
+                              b.getNullSafeShortName()));
+    }
 
     primarySortAgency = customRouteSort.getPrimarySortAgency();
     List<RouteV2Bean> sortedRoutes = finalSort(response.getReferences().getRoutes());
@@ -237,17 +239,20 @@ public class BeanFactoryV2 {
   }
 
   private void agencySort(List<AgencyV2Bean> agencies) {
-    if (primarySortAgency != null) {
-    agencies.sort((a,b) -> {
-      if(a.getId().equals(primarySortAgency)) return -1;
-      if(b.getId().equals(primarySortAgency)) return 1;
-      return a.getId().compareTo(b.getId());
-    });
-  }
+    if (primarySortAgency != null && agencies != null) {
+      agencies.sort((a,b) -> {
+        if(a.getId().equals(primarySortAgency)) return -1;
+        if(b.getId().equals(primarySortAgency)) return 1;
+        return a.getId().compareTo(b.getId());
+      });
+    }
   }
 
   private List<RouteV2Bean> finalSort(List<RouteV2Bean> response) {
     if (primarySortAgency == null) {
+      return response;
+    }
+    if (response == null) {
       return response;
     }
     List<RouteV2Bean> routeV2BeanList = response
@@ -465,7 +470,15 @@ public class BeanFactoryV2 {
       routeIds.add(route.getId());
       addToReferences(route);
     }
+    List<String> transferIds = new ArrayList<>();
+    if (stop.getTransfers() != null) {
+      for (RouteBean transfer : stop.getTransfers()) {
+        transferIds.add(transfer.getId());
+        addToReferences(transfer); // the reference is a route
+      }
+    }
     bean.setRouteIds(routeIds);
+    bean.setTransferIds(transferIds);
     if (stop.getParent() != null) {
       StopBean parent = stop.getParent();
       StopV2Bean parentBean = new StopV2Bean();

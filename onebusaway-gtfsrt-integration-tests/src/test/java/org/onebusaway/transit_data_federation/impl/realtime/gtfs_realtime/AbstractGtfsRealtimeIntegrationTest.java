@@ -83,7 +83,9 @@ public abstract class AbstractGtfsRealtimeIntegrationTest {
 
   @After
   public void cleanup() {
-    _bundleLoader.close();
+    // if the bundle loader failed prevent further exceptions
+    if (_bundleLoader != null)
+      _bundleLoader.close();
   }
 
   protected void verifyBeans(String message, StopEntry firstStop, long firstStopTime) {

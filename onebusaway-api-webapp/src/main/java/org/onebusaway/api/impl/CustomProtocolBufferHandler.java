@@ -52,7 +52,9 @@ public class CustomProtocolBufferHandler implements ContentTypeHandler {
        * with encoding the serialized protobuf to a String.
        */
       HttpServletResponse res = ServletActionContext.getResponse();
-      message.writeTo(res.getOutputStream());
+      if (res != null && res.getOutputStream() != null) {
+        message.writeTo(res.getOutputStream());
+      }
     } else {
       stream.write(response.getText());
     }

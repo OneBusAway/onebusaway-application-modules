@@ -76,12 +76,26 @@ public class BlockLocationServiceImpl extends AbstractBlockLocationServiceImpl i
   private List<BlockLocationListener> _blockLocationListeners = Collections.emptyList();
 
   /**
-   * By default, we keep around 20 minutes of cache entries
+   * By default, we keep around 20 minutes of cache entries, though
+   * we may not actually use all of that data.  @see _predictionCacheMaxOffset
    */
   private int _blockLocationRecordCacheWindowSize = 20 * 60;
 
-  private int _predictionCacheMaxOffset = 5 * 60;
+  /**
+   * How timely the cache element must be to be considered.  Offset applies
+   * both into the past and future.
+   */
+  private int _predictionCacheMaxOffset = 5 * 60; // default 5 minute cache offset
 
+  /**
+   * For certain modes we override the _predictionCacheMaxOffset with a
+   * far shorter interval as AVL data is DYNAMIC!  That is it changes
+   * state rapidly and may contradict previous updates resulting in duplicates.
+   */
+  private int _statelessAvlOffset = 30; // high frequency AVL demands a shorter cache period
+  public void setStatelessAvlOffset(int offset) {
+    _statelessAvlOffset = offset;
+  }
   private int _blockInstanceMatchingWindow = 60 * 60 * 1000;
 
   /**
@@ -455,7 +469,12 @@ public class BlockLocationServiceImpl extends AbstractBlockLocationServiceImpl i
 
     if (!entries.isEmpty()) {
       List<VehicleLocationCacheElements> inRange = new ArrayList<VehicleLocationCacheElements>();
+      // determine the window for the age of the cache elements
       long offset = _predictionCacheMaxOffset * 1000;
+      if (strategy.getRecordAgeWindowInSeconds() != null) {
+        // we have a local override for the age, use it
+        offset = strategy.getRecordAgeWindowInSeconds() * 1000;
+      }
       for (VehicleLocationCacheElements elements : entries) {
         if (elements.isEmpty())
           continue;
@@ -684,14 +703,37 @@ public class BlockLocationServiceImpl extends AbstractBlockLocationServiceImpl i
 
     public List<BlockLocationRecord> getRecordsFromDao(long fromTime,
                                                        long toTime);
+
+    public Integer getRecordAgeWindowInSeconds();
   }
 
   private class BlockInstanceStrategy implements RecordStrategy {
 
-    private BlockInstance _blockInstance;
+    private final BlockInstance _blockInstance;
+    private final Integer _recordAgeWindowInSeconds;
+    public Integer getRecordAgeWindowInSeconds() {
+      return _recordAgeWindowInSeconds;
+    }
 
     public BlockInstanceStrategy(BlockInstance blockInstance) {
       _blockInstance = blockInstance;
+      _recordAgeWindowInSeconds = getRecordAgeWindowFromBlock(blockInstance);
+    }
+
+    private Integer getRecordAgeWindowFromBlock(BlockInstance blockInstance) {
+      if (blockInstance != null)
+        if (!blockInstance.getBlock().getTrips().isEmpty())
+          if (blockInstance.getBlock().getTrips().get(0).getTrip() != null)
+            if (blockInstance.getBlock().getTrips().get(0).getTrip().getRoute() != null)
+              return getRecordAgeFromRouteType(blockInstance.getBlock().getTrips().get(0).getTrip().getRoute().getType());
+      return null;
+    }
+
+    private Integer getRecordAgeFromRouteType(int routeType) {
+      // SUBWAY AVL demands a different caching configuration
+      if (routeType == EVehicleType.SUBWAY.getGtfsType())
+        return _statelessAvlOffset;
+      return null;
     }
 
     @Override
@@ -711,10 +753,15 @@ public class BlockLocationServiceImpl extends AbstractBlockLocationServiceImpl i
 
   private class VehicleIdRecordStrategy implements RecordStrategy {
 
-    private AgencyAndId _vehicleId;
+    private final AgencyAndId _vehicleId;
+    private final Integer _recordAgeWindowInSeconds;
+    public final Integer getRecordAgeWindowInSeconds() {
+      return _recordAgeWindowInSeconds;
+    }
 
     public VehicleIdRecordStrategy(AgencyAndId vehicleId) {
       _vehicleId = vehicleId;
+      _recordAgeWindowInSeconds = null;
     }
 
     @Override

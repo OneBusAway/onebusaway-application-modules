@@ -15,6 +15,7 @@
  */
 package org.onebusaway.transit_data.model;
 
+import java.util.Date;
 import java.util.List;
 
 import org.onebusaway.realtime.api.OccupancyStatus;
@@ -375,8 +376,10 @@ public boolean hasPredictedArrivalTime() {
 
   @Override
   public String toString() {
-    return "route=" + trip.getRoute() + " scheduled=" + scheduledArrivalTime
-        + " predicted=" + predictedArrivalTime;
+    return "trip=" + trip.getId()
+            + " route=" + (trip.getRoute()!=null?trip.getRoute().getShortName():"NuLl")
+            + " scheduled=" + new Date(scheduledArrivalTime)
+            + " predicted=" + new Date(predictedArrivalTime);
   }
 
 }
