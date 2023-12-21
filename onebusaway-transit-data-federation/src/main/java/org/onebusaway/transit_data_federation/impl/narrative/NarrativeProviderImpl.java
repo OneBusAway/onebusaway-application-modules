@@ -20,7 +20,6 @@ import java.io.Serializable;
 import java.util.*;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.map.PassiveExpiringMap;
 import org.onebusaway.container.refresh.Refreshable;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.impl.RefreshableResources;
@@ -51,7 +50,7 @@ public final class NarrativeProviderImpl implements Serializable {
 
   private Map<StopDirectionKey, RouteAndHeadsignNarrative> _patternCache = new HashMap<>();
 
-  private Map<AgencyAndId, List<AgencyAndId>> _defaultTransfersByStopId = new HashMap<>();
+  private Map<AgencyAndId, List<AgencyAndId>> _staticRoutesByStopId = new HashMap<>();
 
   @Refreshable(dependsOn = RefreshableResources.TRANSIT_GRAPH)
   public void reset() {
@@ -190,12 +189,12 @@ public final class NarrativeProviderImpl implements Serializable {
     _dynamicShapesById.put(shapePoints.getShapeId(), shapePoints);
   }
 
-  public void addDefaultTransfer(AgencyAndId stopId, List<AgencyAndId> transferRouteIds) {
-    _defaultTransfersByStopId.put(stopId, transferRouteIds);
+  public void addStaticRoute(AgencyAndId stopId, List<AgencyAndId> staticRouteIds) {
+    _staticRoutesByStopId.put(stopId, staticRouteIds);
   }
 
-  public List<AgencyAndId> getDefaultTransfers(AgencyAndId stopId) {
-    return _defaultTransfersByStopId.get(stopId);
+  public List<AgencyAndId> getStaticRoutes(AgencyAndId stopId) {
+    return _staticRoutesByStopId.get(stopId);
   }
 
   public static class RoutePattern implements Serializable {

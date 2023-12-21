@@ -134,18 +134,18 @@ class StopBeanServiceImpl implements StopBeanService {
   }
 
   private void fillTransfersForStopBean(StopEntry stop, StopNarrative narrative, StopBean bean) {
-    List<AgencyAndId> transfers = _narrativeService.getDefaultTransfers(stop.getId());
-    if (transfers == null) {
+    List<AgencyAndId> staticRoutes = _narrativeService.getStaticRoutes(stop.getId());
+    if (staticRoutes == null) {
       // we don't have any defaults, use the standard set of routes
-      bean.setTransfers(bean.getRoutes());
+      bean.setStaticRoutes(bean.getRoutes());
       return;
     }
-    List<RouteBean> routeBeans = new ArrayList<>(transfers.size());
-    for (AgencyAndId transferId : transfers) {
-      RouteBean transferRouteBean = _routeBeanService.getRouteForId(transferId);
-      routeBeans.add(transferRouteBean);
+    List<RouteBean> routeBeans = new ArrayList<>(staticRoutes.size());
+    for (AgencyAndId routeId : staticRoutes) {
+      RouteBean staticRouteBean = _routeBeanService.getRouteForId(routeId);
+      routeBeans.add(staticRouteBean);
     }
-    bean.setTransfers(routeBeans);
+    bean.setStaticRoutes(routeBeans);
   }
 
 

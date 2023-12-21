@@ -471,10 +471,10 @@ public class BeanFactoryV2 {
       addToReferences(route);
     }
     List<String> staticRouteIds = new ArrayList<>();
-    if (stop.getTransfers() != null) {
-      for (RouteBean transfer : stop.getTransfers()) {
-        staticRouteIds.add(transfer.getId());
-        addToReferences(transfer); // the reference is a route
+    if (stop.getStaticRoutes() != null) {
+      for (RouteBean staticRoute : stop.getStaticRoutes()) {
+        staticRouteIds.add(staticRoute.getId());
+        addToReferences(staticRoute); // the reference is a route
       }
     }
     bean.setRouteIds(routeIds);

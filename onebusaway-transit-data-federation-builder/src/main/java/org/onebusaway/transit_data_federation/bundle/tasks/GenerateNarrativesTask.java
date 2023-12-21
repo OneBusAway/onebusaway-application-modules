@@ -182,8 +182,8 @@ public class GenerateNarrativesTask implements Runnable {
       AgencyAndId southStopId = new AgencyAndId(de.getAgencyId(), de.getGtfsStopIdDirection1());
       List<AgencyAndId> daytimeRoutes = createRoutes(de.getAgencyId(), de.getDaytimeRoutes());
       if (daytimeRoutes != null) {
-        provider.addDefaultTransfer(northStopId, daytimeRoutes);
-        provider.addDefaultTransfer(southStopId, daytimeRoutes);
+        provider.addStaticRoute(northStopId, daytimeRoutes);
+        provider.addStaticRoute(southStopId, daytimeRoutes);
       }
     }
     _log.info("processed {} directionEntries with cache size {}", _gtfsDao.getAllDirectionEntries().size(), provider.getPatternCount());

@@ -75,5 +75,5 @@ public interface NarrativeService {
 
   public void addShapePoints(ShapePoints shapePoints);
 
-  List<AgencyAndId> getDefaultTransfers(AgencyAndId id);
+  List<AgencyAndId> getStaticRoutes(AgencyAndId id);
 }

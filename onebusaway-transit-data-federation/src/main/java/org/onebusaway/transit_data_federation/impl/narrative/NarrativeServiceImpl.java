@@ -24,7 +24,6 @@ import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
-import org.apache.commons.collections4.map.PassiveExpiringMap;
 import org.onebusaway.container.refresh.Refreshable;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.impl.RefreshableResources;
@@ -157,7 +156,7 @@ public class NarrativeServiceImpl implements NarrativeService {
   }
 
   @Override
-  public List<AgencyAndId> getDefaultTransfers(AgencyAndId stopId) {
-    return _provider.getDefaultTransfers(stopId);
+  public List<AgencyAndId> getStaticRoutes(AgencyAndId stopId) {
+    return _provider.getStaticRoutes(stopId);
   }
 }
