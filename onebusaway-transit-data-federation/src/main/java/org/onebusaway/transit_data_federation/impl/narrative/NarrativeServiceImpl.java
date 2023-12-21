@@ -155,9 +155,4 @@ public class NarrativeServiceImpl implements NarrativeService {
   public void addShapePoints(ShapePoints shapePoints) {
     _provider.addShapePoints(shapePoints);
   }
-
-  @Override
-  public List<AgencyAndId> getDefaultTransfers(AgencyAndId stopId) {
-    return _provider.getDefaultTransfers(stopId);
-  }
 }

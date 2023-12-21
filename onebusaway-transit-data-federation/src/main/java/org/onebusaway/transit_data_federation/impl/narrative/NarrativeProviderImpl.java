@@ -51,8 +51,6 @@ public final class NarrativeProviderImpl implements Serializable {
 
   private Map<StopDirectionKey, RouteAndHeadsignNarrative> _patternCache = new HashMap<>();
 
-  private Map<AgencyAndId, List<AgencyAndId>> _defaultTransfersByStopId = new HashMap<>();
-
   @Refreshable(dependsOn = RefreshableResources.TRANSIT_GRAPH)
   public void reset() {
 //    _dynamicShapesById.clear();
@@ -188,14 +186,6 @@ public final class NarrativeProviderImpl implements Serializable {
 
   public void addShapePoints(ShapePoints shapePoints) {
     _dynamicShapesById.put(shapePoints.getShapeId(), shapePoints);
-  }
-
-  public void addDefaultTransfer(AgencyAndId stopId, List<AgencyAndId> transferRouteIds) {
-    _defaultTransfersByStopId.put(stopId, transferRouteIds);
-  }
-
-  public List<AgencyAndId> getDefaultTransfers(AgencyAndId stopId) {
-    return _defaultTransfersByStopId.get(stopId);
   }
 
   public static class RoutePattern implements Serializable {
