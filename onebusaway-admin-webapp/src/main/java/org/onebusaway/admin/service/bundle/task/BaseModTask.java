@@ -41,7 +41,6 @@ public class BaseModTask {
   protected MultiCSVLogger logger;
   protected BundleRequestResponse requestResponse;
   private String _directoryHint = "modified";
-  private boolean _ignoreDuplicates = true;
   protected ConfigurationServiceClient configurationServiceClient;
   
   @Autowired
@@ -82,10 +81,6 @@ public class BaseModTask {
     _log.info("runModifications(" + agencyId + ") with mappings=" + gtfsBundle.getAgencyIdMappings() );
     GtfsTransformer mod = new GtfsTransformer();
 
-    if (ignoreDuplicates()) {
-      mod.getReader().setOverwriteDuplicates(true);
-    }
-
     TransformFactory factory = mod.getTransformFactory();
     // the transformer may be called twice causing erroneous duplicate messages
     mod.getReader().setOverwriteDuplicates(true);
@@ -118,9 +113,6 @@ public class BaseModTask {
     return cleanup(gtfsBundle);
   }
 
-  public boolean ignoreDuplicates() {
-    return _ignoreDuplicates;
-  }
   public void addExtraMods(GtfsTransformer mod) {
     // default: none
   }

@@ -121,12 +121,7 @@ public class StopTimeEntriesFactory {
     ensureStopTimesHaveShapeDistanceTraveledSet(stopTimeEntries, shapePoints);
 
     removeDuplicateStopTimes(stopTimes);
-    try {
-      ensureStopTimesHaveTimesSet(stopTimes, stopTimeEntries);
-    } catch (Exception any) {
-      _log.error("invalid stop times for trip " + tripEntry.toString());
-      return new ArrayList<StopTimeEntryImpl>(stopTimes.size());
-    }
+    ensureStopTimesHaveTimesSet(stopTimes, stopTimeEntries);
 
     return stopTimeEntries;
   }

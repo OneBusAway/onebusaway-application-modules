@@ -40,7 +40,7 @@
     <bean id="taskScheduler" class="org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler" />
     
     <bean id="configurationServiceClient" class="org.onebusaway.util.impl.configuration.ConfigurationServiceClientFileImpl" >
-      	<constructor-arg type="java.lang.String" value="/opt/mnrt/oba/app-config.json"/>
+      	<constructor-arg type="java.lang.String" value="/var/lib/oba/config.json"/>
     </bean>
     
     <bean id="loggingService" class="org.onebusaway.util.logging.impl.LoggingServiceImpl" />
