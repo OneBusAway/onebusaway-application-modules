@@ -473,8 +473,10 @@ public class BeanFactoryV2 {
     List<String> staticRouteIds = new ArrayList<>();
     if (stop.getStaticRoutes() != null) {
       for (RouteBean staticRoute : stop.getStaticRoutes()) {
-        staticRouteIds.add(staticRoute.getId());
-        addToReferences(staticRoute); // the reference is a route
+        if (staticRoute != null) {
+          staticRouteIds.add(staticRoute.getId());
+          addToReferences(staticRoute); // the reference is a route
+        }
       }
     }
     bean.setRouteIds(routeIds);
