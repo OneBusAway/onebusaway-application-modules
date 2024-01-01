@@ -57,7 +57,7 @@ public class BundleRequestServiceImpl implements BundleRequestService, ServletCo
   @Autowired
   private BundleBuildingService _bundleService;
 
-  @Autowired
+  @Autowired(required = false)
   public void setEmailService(EmailService service) {
     _emailService = service;
   }
@@ -154,7 +154,8 @@ public class BundleRequestServiceImpl implements BundleRequestService, ServletCo
     	msg.append(getResultLink(request.getBundleName(), response.getId(),
     			request.getBundleStartDateString(), request.getBundleEndDateString()));
     	String subject = "Bundle Build " + response.getId() + " complete";
-    	_emailService.send(request.getEmailAddress(), from, subject, msg);
+      if (_emailService != null)
+    	  _emailService.send(request.getEmailAddress(), from, subject, msg);
     }
   }
   

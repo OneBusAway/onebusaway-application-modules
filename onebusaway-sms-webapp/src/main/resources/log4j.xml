@@ -26,7 +26,7 @@
 
     <appender name="ROLL" class="org.apache.log4j.rolling.RollingFileAppender">
         <rollingPolicy class="org.apache.log4j.rolling.TimeBasedRollingPolicy">
-            <param name="FileNamePattern" value="/var/log/tomcat8/sms.%d.log" />
+            <param name="FileNamePattern" value="/opt/oba/logs/sms.%d.log" />
         </rollingPolicy>
 
         <layout class="org.apache.log4j.PatternLayout">

@@ -49,35 +49,6 @@
         <property name="password" value="root" />
     </bean>
 
-    <!-- Database Connection Configuration for Agency Metadata -->
-    <bean id="agencyMetadataDataSource"
-          class="org.springframework.jndi.JndiObjectFactoryBean">
-        <property name="jndiName"
-                  value="java:comp/env/jdbc/agencyMetadataDB"/>
-        <property name="lookupOnStartup"
-                  value="true"/>
-        <property name="cache"
-                  value="true"/>
-        <property name="proxyInterface"
-                  value="javax.sql.DataSource"/>
-        <property name="resourceRef"
-                  value="true" />
-    </bean>
-    <!-- Database Connection Configuration for Bundle Build Response -->
-    <bean id="bundleBuildResponseDataSource"
-          class="org.springframework.jndi.JndiObjectFactoryBean">
-        <property name="jndiName"
-                  value="java:comp/env/jdbc/appDB"/>
-        <property name="lookupOnStartup"
-                  value="true"/>
-        <property name="cache"
-                  value="true"/>
-        <property name="proxyInterface"
-                  value="javax.sql.DataSource"/>
-        <property name="resourceRef"
-                  value="true" />
-    </bean>
-
     <alias name="dataSource" alias="mutableDataSource" />
     <bean id="sessionFactory" class="org.springframework.orm.hibernate5.LocalSessionFactoryBean"
           primary="true">
@@ -91,49 +62,20 @@
 
 
     <!--  Email connection -->
-     <bean id="mailSession"
-          class="org.springframework.jndi.JndiObjectFactoryBean">
-      <property name="jndiName"
-                value="java:comp/env/mail/Session"/> 
-      <property name="lookupOnStartup"
-                value="true"/>   
-      <property name="cache"
-                value="true"/>   
-    </bean> 
+<!--     <bean id="mailSession"-->
+<!--          class="org.springframework.jndi.JndiObjectFactoryBean">-->
+<!--      <property name="jndiName"-->
+<!--                value="java:comp/env/mail/Session"/> -->
+<!--      <property name="lookupOnStartup"-->
+<!--                value="true"/>   -->
+<!--      <property name="cache"-->
+<!--                value="true"/>   -->
+<!--    </bean> -->
    
-    <bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
-    	<property name="session" ref="mailSession"/> 
-	</bean>
+<!--    <bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">-->
+<!--    	<property name="session" ref="mailSession"/> -->
+<!--	</bean>-->
     
-    <!-- Database Connection Configuration for retrieving archived data -->
-    <bean id="gtfsRealtimeArchiveDataSource"
-          class="org.springframework.jndi.JndiObjectFactoryBean">
-      <property name="jndiName"
-                value="java:comp/env/jdbc/archiveDB"/>
-      <property name="lookupOnStartup"
-                value="true"/>
-      <property name="cache"
-                value="true"/>
-      <property name="proxyInterface"
-                value="javax.sql.DataSource"/>
-      <property name="resourceRef"
-                value="true" />
-    </bean>
-
-    <!-- Database Connection Configuration for retrieving assigned vehicle data -->
-    <bean id="assignedVehicleDataSource"
-          class="org.springframework.jndi.JndiObjectFactoryBean">
-        <property name="jndiName"
-                  value="java:comp/env/jdbc/appDB"/>
-        <property name="lookupOnStartup"
-                  value="true"/>
-        <property name="cache"
-                  value="true"/>
-        <property name="proxyInterface"
-                  value="javax.sql.DataSource"/>
-        <property name="resourceRef"
-                  value="true" />
-    </bean>
 
 <!-- Other Stuff: -->
 
@@ -166,6 +108,15 @@
     <property name="properties">
       <props>
         <prop key="cacheManager.cacheManagerName">org.onebusaway.nyc.admin.cacheManager</prop>
+          <!-- this configuration sets up the bundle builder paths -->
+          <!-- please create these paths on disk -->
+          <prop key="bundleStager.builtBundleDirectory">/opt/oba/bundles/builder</prop>
+          <prop key="bundleStager.stagedBundleDirectory">/opt/oba/bundles/staged</prop>
+          <prop key="bundleDeploySource.masterBundleDirectoryPathname">/opt/oba/bundles/active</prop>
+          <prop key="bundleDeployer.deployBundleDirectory">/opt/oba/bundles/active</prop>
+          <prop key="configurationServiceClient.configFile">/opt/oba/admin-config.json</prop>
+          <prop key="parametersServiceImpl.configFile">/opt/oba/admin-config.json</prop>
+
 <!--         <prop key="rssServiceAlertsService.defaultAgencyId">1</prop> -->
 <!--         <prop key="rssServiceAlertsService.alertSource">WMATA</prop> -->
 <!--         <prop key="rssServiceAlertsService.serviceStatusUrlString">http://www.metroalerts.info/rss.aspx?bus</prop> -->
@@ -186,7 +137,7 @@
     
 	<bean id="agencyMetadataSessionFactory"
 		class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
-		<property name="dataSource" ref="agencyMetadataDataSource" />
+		<property name="dataSource" ref="dataSource" />
 		<property name="annotatedClasses">
 			<list>
 				<value>org.onebusaway.agency_metadata.model.AgencyMetadata</value>
@@ -207,7 +158,7 @@
 	</bean>
      <bean id="bundleBuildResponseSessionFactory"
     class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
-    <property name="dataSource" ref="bundleBuildResponseDataSource" />
+    <property name="dataSource" ref="dataSource" />
     <property name="annotatedClasses">
       <list>
         <value>org.onebusaway.admin.model.BundleBuildResponse</value>
@@ -228,7 +179,7 @@
   </bean>
 
   <bean id="gtfsRealtimeArchiveSessionFactory" class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
-    <property name="dataSource" ref="gtfsRealtimeArchiveDataSource" />
+    <property name="dataSource" ref="dataSource" />
     <property name="annotatedClasses">
       <list>
         <value>org.onebusaway.admin.service.bundle.task.model.GtfsBundleInfo</value>
@@ -256,7 +207,7 @@
 
     <bean id="assignmentSessionFactory"
           class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
-        <property name="dataSource" ref="assignedVehicleDataSource" />
+        <property name="dataSource" ref="dataSource" />
         <property name="annotatedClasses">
             <list>
                 <value>org.onebusaway.admin.model.assignments.Assignment</value>

@@ -149,8 +149,9 @@
    <bean id="diffService" class="org.onebusaway.admin.service.impl.DiffServiceImpl" >
      <property name="configurationServiceClient" ref="configurationServiceClient" />
    </bean>
-  
-   <bean id="emailService" class="org.onebusaway.admin.service.impl.EmailServiceImpl" />
+
+    <!-- this requires mail.jar be added to tomcat -->
+<!--   <bean id="emailService" class="org.onebusaway.admin.service.impl.EmailServiceImpl" />-->
       
    <bean id="bundleRequestService" class="org.onebusaway.admin.service.impl.BundleRequestServiceImpl" />
       
