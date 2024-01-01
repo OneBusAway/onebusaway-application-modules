@@ -18,14 +18,18 @@ package org.onebusaway.presentation.impl.realtime;
 import javax.annotation.PostConstruct;
 
 import org.onebusaway.container.ConfigurationParameter;
+import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.presentation.services.realtime.PresentationService;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.transit_data.model.trips.TripStatusBean;
 import org.onebusaway.transit_data_federation.siri.SiriDistanceExtension;
+import org.onebusaway.util.AgencyAndIdLibrary;
 import org.onebusaway.util.SystemTime;
+import org.onebusaway.util.services.configuration.ConfigurationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -44,6 +48,9 @@ public class PresentationServiceImpl implements PresentationService {
   private static final String ONE_MILE_WORD = "mile";
   private static final String MULTIPLE_MILES_WORD = "miles";
   private static final String AWAY_WORD = "away";
+
+  @Autowired
+  private ConfigurationService _configService;
 
   private boolean _showArrivals = false;
 
@@ -320,7 +327,17 @@ public class PresentationServiceImpl implements PresentationService {
 	      return false;
 	    }
     }
-    _log.debug("include passed for " + statusBean.getVehicleId());
+
+    if (!statusBean.isPredicted()) { //if this is a scheduled trip (lacks realtime data):
+        AgencyAndId agencyFromTrip = AgencyAndIdLibrary.convertFromString(statusBean.getActiveTrip().getId());
+        boolean hideScheduleInfo = _configService.getConfigurationFlagForAgency(agencyFromTrip.getAgencyId(),
+                "hideScheduleInfo");  //Does this agency want to hide scheduled trips?
+        if (hideScheduleInfo) {
+            return false;
+        }
+    }
+
+          _log.debug("include passed for " + statusBean.getVehicleId());
     return true;
   }
 
@@ -348,7 +365,7 @@ public class PresentationServiceImpl implements PresentationService {
 	}
 	else{
 		if(adBean.getScheduledArrivalTime() > 0 && adBean.getScheduledArrivalTime() < getTime()) {
-		  _log.debug("shcheduled arrival in past drop");
+		  _log.debug("scheduled arrival in past drop");
 			return false;
 		}
 	}
@@ -358,9 +375,10 @@ public class PresentationServiceImpl implements PresentationService {
     TripBean activeTrip = status.getActiveTrip();
     TripBean adTripBean = adBean.getTrip();
 
-	// if ad is not on the trip this bus is on, or the previous trip, filter out
+	// if ad is not on the trip this bus is on, or the previous trip (or next trip) filter out
 	if(!adTripBean.getId().equals(activeTrip.getId()) 
-			&& !(adBean.getBlockTripSequence() - 1 == status.getBlockTripSequence())) {
+			&& !(adBean.getBlockTripSequence() - 1 == status.getBlockTripSequence())
+      && !(adBean.getBlockTripSequence() + 1 == status.getBlockTripSequence())) {
 	  _log.debug("  " + status.getVehicleId() + " filtered out due to trip block sequence");
 	  return false;
 	}
@@ -414,7 +432,8 @@ public class PresentationServiceImpl implements PresentationService {
      * Those are the buses we want to filter out here.  
      */
 
-	// only consider buses that are in layover
+	  // only consider buses that are in layover -- this is legacy OBANYC logic,
+    // traditional AVL will not have LAYOVER_ states
     if(phase != null && 
         (phase.toUpperCase().equals("LAYOVER_BEFORE") || phase.toUpperCase().equals("LAYOVER_DURING"))) {
 

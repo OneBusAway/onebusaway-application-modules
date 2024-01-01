@@ -128,7 +128,7 @@ public class FederatedTransitDataBundle {
   public File getTripRunDataPath() {
     return new File(_path, "TripRunData.obj");
   }
-  
+  /* end NYC specific additions */
   public File getBlockRunDataPath() {
     return new File(_path, "BlockRunData.obj");
   }
@@ -138,4 +138,10 @@ public class FederatedTransitDataBundle {
   }
 
   public File getHistoricalRidershipPath() { return new File(_path, "HistoricalRiderships.obj"); }
+
+  public File getCanonicalRoutePath() { return new File(_path, "CanonicalRoute.obj"); }
+
+  public File getStopSwapPath() {
+    return new File(_path, "WrongWayConcurrencies.obj");
+  }
 }

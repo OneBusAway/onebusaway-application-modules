@@ -15,23 +15,23 @@
  */
 package org.onebusaway.util.impl.configuration;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.when;
+import static org.junit.Assert.*;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.onebusaway.container.refresh.RefreshService;
-import org.onebusaway.util.impl.configuration.ConfigurationServiceImpl;
 import org.onebusaway.util.rest.RestApiLibrary;
 import org.onebusaway.util.services.configuration.ConfigurationServiceClient;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
 
-import java.net.URL;
+import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.*;
 
-@RunWith(MockitoJUnitRunner.class)
 public class ConfigurationServiceImplTest {
 
   @SuppressWarnings("unused")
@@ -44,46 +44,159 @@ public class ConfigurationServiceImplTest {
   @Mock
   private RestApiLibrary mockRestApiLibrary;
 
-  @InjectMocks
+
   private ConfigurationServiceImpl service;
+  private ConfigurationServiceClientFileImpl client;
+  private HashMap<String, Object> map = new HashMap<>();
 
   @Test
   public void noop()  {
   }
 
-  /*@Before
-  public void setupApiLibrary() throws Exception {
-    RestApiLibrary ral = new RestApiLibrary("localhost", null, "api");    
-    String json = new String("{\"config\":[{\"value\":\"20\",\"key\":\"tdm.crewAssignmentRefreshInterval\",\"description\":null,\"value-type\":\"String\",\"units\":\"minutes\",\"component\":\"tdm\",\"updated\":null}],\"status\":\"OK\"}");
-    when(mockApiLibrary.getItemsForRequest("config", "list"))
-      .thenReturn(ral.getJsonObjectsForString(json));
-
-    ConfigurationServiceClient tdmal = new ConfigurationServiceClientTDMImpl("tdm.staging.obanyc.com", 80, "/api");
-    URL setUrl = tdmal.buildUrl("config", "testComponent", "test123", "set");
-    when(mockRestApiLibrary.setContents(setUrl, "testValue"))
-      .thenReturn(true);
-
-    service.refreshConfiguration();
+@Before
+  public void setUp() throws Exception {
+    service = new ConfigurationServiceImpl();
+    client = new ConfigurationServiceClientFileImpl();
+    client.setConfig(map);
+    service.setConfigurationServiceClient(client);
   }
 
   @Test
-  public void testDefaultvalue() throws Exception {
-    assertEquals(service.getConfigurationValueAsString("test789", "default"), "default");
+  public void testGetConfigurationFlagForAgency() throws Exception {
+    assertNotNull("service cannot be null", service);
+    boolean hideScheduleInfo = service.getConfigurationFlagForAgency("1", "hideScheduleInfo");
+    assertEquals("expected false", false, hideScheduleInfo);
+    ArrayList settings = new ArrayList();
+    addToSettings(settings, "agency_1", "hideScheduleInfo", "true");
+    map.put("config", settings);
+
+    hideScheduleInfo = service.getConfigurationFlagForAgency("1", "hideScheduleInfo");
+    assertEquals("expected true", true, hideScheduleInfo);
+
   }
 
   @Test
-  public void testGetExistingValueFromTDM() throws Exception {
-    assertEquals(service.getConfigurationValueAsString("tdm.crewAssignmentRefreshInterval", null), "20");
+  public void testMergeConfig(){
+    HashMap<String, Object> staticContent = new HashMap<>();
+    ArrayList<HashMap> items = new ArrayList<>();
+    HashMap<String, String> item1 = new HashMap<>();
+    item1.put("component", "admin");
+    item1.put("key", "test");
+    item1.put("value","static");
+    items.add(item1);
+
+    item1 = new HashMap<>();
+    item1.put("component", "admin");
+    item1.put("key", "staticOnly");
+    item1.put("value","static");
+    items.add(item1);
+
+    staticContent.put("config", items);
+
+    HashMap<String, Object> dynamicContent = new HashMap<>();
+    HashMap<String, String> item2 = new HashMap<>();
+    items = new ArrayList<>();
+    item2.put("component", "admin");
+    item2.put("key", "test");
+    item2.put("value","dynamic");
+    items.add(item2);
+
+    item2 = new HashMap<>();
+    item2.put("component", "admin");
+    item2.put("key", "dynamicOnly");
+    item2.put("value","dynamic");
+    items.add(item2);
+    dynamicContent.put("config", items);
+
+    HashMap<String, Object> mergeConfig = client.mergeConfig(staticContent, dynamicContent);
+    ArrayList<HashMap<String, String>> mergedItems = (ArrayList) mergeConfig.get("config");
+    boolean found1 = false;
+    boolean found2 = false;
+    boolean found3 = false;
+
+    for (HashMap<String, String> mergedItem : mergedItems) {
+      String actualKey = client.getItemKey(mergedItem);
+      if ("admin.staticOnly".equals(actualKey)) {
+        found1 = true;
+        assertEquals("static", mergedItem.get("value"));
+      } else if ("admin.dynamicOnly".equals(actualKey)) {
+        found2 = true;
+        assertEquals("dynamic", mergedItem.get("value"));
+      } else if ("admin.test".equals(actualKey)) {
+        found3 = true;
+        assertEquals("dynamic", mergedItem.get("value"));
+      } else {
+        fail("unexpected key=" +actualKey);
+      }
+    }
+    assertTrue(found1);
+    assertTrue(found2);
+    assertTrue(found3);
   }
 
   @Test
-  public void testGetExistingValueFromTDMDefaultOverridden() throws Exception {
-    assertEquals(service.getConfigurationValueAsString("tdm.crewAssignmentRefreshInterval", "30"), "20");
+  public void testGetConfigFromApi() throws URISyntaxException, MalformedURLException {
+    URI uri = getClass().getResource("config.json").toURI();
+    String url = uri.toURL().toString();
+    client.setExternalConfigurationApiUrl(url);
+    HashMap<String, Object> results = client.getConfigFromApi();
+    assertNotNull(results);
+    ArrayList<HashMap<String, String>> configList = (ArrayList<HashMap<String, String>>) results.get("config");
+    HashMap<String, String> item1 = configList.get(0);
+    assertEquals("tdm", item1.get("component"));
+    assertEquals("display.minimumValue", item1.get("key"));
+    assertEquals("false", item1.get("value"));
   }
 
   @Test
-  public void setValue() throws Exception {
-    service.setConfigurationValue("testComponent", "test123", "testValue");
-    assertEquals(service.getConfigurationValueAsString("test123", null), "testValue");
-  }*/
+  public void testReadConfig(){
+    ObjectMapper mapper = new ObjectMapper();
+    try {
+
+      String jsonString = "{\"oba\":{\"env\":\"jared\"},\"config\":[{\"component\":\"testing\",\"key\":\"jared\",\"value\":\"hello world!\"}]}";
+      ConfigFileStructure cfs = mapper.readValue(new File("/opt/nyc/oba/config.json"), ConfigFileStructure.class);
+
+
+      // compact print
+      System.out.println(cfs);
+
+      // pretty print
+      String prettyFile = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(cfs);
+
+      System.out.println(prettyFile);
+
+
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
+
+  private void addToSettings(ArrayList settings, String component, String key, String value) {
+    HashMap<String, String> kv1 = new HashMap<>();
+    // for agency configuration the component is "agency_" + agency_id
+    kv1.put("component", component);
+    kv1.put("key", key);
+    kv1.put("value", value);
+    settings.add(kv1);
+  }
+
+  private static class ConfigItem{
+    public String component;
+    public String key;
+    public String value;
+
+    public ConfigItem(String c, String k, String v){
+      this.component = c;
+      this.key = k;
+      this.value = v;
+    }
+    public ConfigItem(){
+
+    }
+  }
+  private static class ConfigFileStructure{
+    public HashMap<String, String> oba;
+    public ArrayList<ConfigItem> config;
+  }
+
 }

@@ -19,6 +19,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.junit.Before;
@@ -28,6 +29,7 @@ import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data.model.StopBean;
+import org.onebusaway.transit_data_federation.services.beans.StopsBeanService;
 import org.onebusaway.util.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.beans.GeospatialBeanService;
 
@@ -37,12 +39,17 @@ public class NearbyStopsBeanServiceImplTest {
 
   private GeospatialBeanService _geoBeanService;
 
+  private StopsBeanService _stopsBeanService;
+
   @Before
   public void setup() {
     _service = new NearbyStopsBeanServiceImpl();
 
     _geoBeanService = Mockito.mock(GeospatialBeanService.class);
     _service.setGeospatialBeanService(_geoBeanService);
+
+    _stopsBeanService =  Mockito.mock(StopsBeanService.class);
+    _service.setStopsBeanService(_stopsBeanService);
   }
 
   @Test

@@ -15,6 +15,7 @@
  */
 package org.onebusaway.presentation.impl.search;
 
+import org.onebusaway.exceptions.ServiceException;
 import org.onebusaway.geocoder.enterprise.services.EnterpriseGeocoderResult;
 import org.onebusaway.geocoder.enterprise.services.EnterpriseGeocoderService;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
@@ -52,6 +53,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -110,6 +112,8 @@ public class SearchServiceImpl implements SearchService {
 
 	private Map<String, String> _stopCodeToStopIdMap = new HashMap<String, String>();
 
+	private Map<String, Set<String>> _stopNameToStopIdMap = new HashMap<>();
+
 	private String _bundleIdForCaches = null;
 
 	// we keep an internal cache of route short/long names because if we moved
@@ -137,6 +141,7 @@ public class SearchServiceImpl implements SearchService {
 		_routeIdToRouteBeanMap.clear();
 		_routeLongNameToRouteBeanMap.clear();
 		_stopCodeToStopIdMap.clear();
+		_stopNameToStopIdMap.clear();
 
 		for (AgencyWithCoverageBean agency : _transitDataService
 				.getAgenciesWithCoverage()) {
@@ -164,6 +169,10 @@ public class SearchServiceImpl implements SearchService {
 			for (StopBean stop : stopsList) {
 				_stopCodeToStopIdMap.put(agency.getAgency().getId() + "_"
 					+ stop.getCode().toUpperCase(), stop.getId());
+				if (!_stopNameToStopIdMap.containsKey(stop.getName())) {
+					_stopNameToStopIdMap.put(stop.getName(), new HashSet<>());
+				}
+				_stopNameToStopIdMap.get(stop.getName()).add(stop.getId());
 			}
 		}
 
@@ -389,24 +398,46 @@ public class SearchServiceImpl implements SearchService {
 		*  - using a ',' means our query is a lat/lon or a mailing address
 		*  - using a ';' means you are searching for multiple routes
 		*  - entering 3 tokens means you are not looking for routes
+		* - [text] is a differentiation hint from the autocompleter
 		*
 		*  Combined with the above, this is the search order
 		*  1) lat/lon (if its matches regex)
-		*  2) route (if no comma, tokens < 2
+		*  2.1) route_id / route short name exact match / route long name exact match via hint
+		*  2.2) stop_id / stop name exact match via hint
+		*  2.3) route exact match (if no comma, ignore normalization)
+		*  2.4) route (if no comma, tokens < 2)
  		*  3) routes (has semicolon)
  		*  4) stop (if no comma, numeric query, query contains '_')
+ 		*  4.1) stop with route filter
  		*  5) stop name (no comma)
  		*  6) geocode
 		*/
 		SearchResultCollection results = new SearchResultCollection();
 		boolean hasComma = query.indexOf(',') > 0;
 		boolean hasSemiColon = query.indexOf(';') > 0;
+		boolean hasHint = query.indexOf('[') > 0;
+		String hint = null; // [ hint ] from autocompleter used for disambiguation
+		if (hasHint) {
+			hint = query.substring(query.indexOf('[')+1, query.length()-1).replace(']',' ').trim();
+			query = query.substring(0, query.indexOf('['));
+		}
 
 		tryAsLatLon(results, query, resultFactory);
 
 		String normalizedQuery = normalizeQuery(results, query, serviceDate);
-		int normalizedTokens = normalizedQuery.length()
-				- normalizedQuery.replaceAll(" ", "").length() + 1;
+
+		if (results.isEmpty() && hasHint) {
+			tryAsExactRoute(results, normalizedQuery, hint, resultFactory, serviceDate);
+		}
+
+		if (results.isEmpty() && hasHint) {
+			tryAsExactStopName(results, hint, resultFactory);
+		}
+
+		if (results.isEmpty() && !hasComma) {
+			// before we consider tokens, try route exactly as queried
+			tryAsExactRoute(results, null, query.toUpperCase().trim(), resultFactory, serviceDate);
+		}
 
 		// if we have a comma, we are not a single route
 		if (results.isEmpty() && !hasComma) {
@@ -436,6 +467,30 @@ public class SearchServiceImpl implements SearchService {
 		}
 
 		return results;
+	}
+
+	private void tryAsExactStopName(SearchResultCollection results, String stopQuery, SearchResultFactory resultFactory) {
+		StopBean testStopBean = null;
+		try {
+			// try as a stop_id
+			testStopBean = _transitDataService.getStop(stopQuery);
+		} catch (ServiceException se) {
+			// not an agency-and-id
+		}
+		if (testStopBean != null) {
+			results.addMatch(resultFactory.getStopResult(testStopBean, results.getRouteFilter()));
+			results.setHint("tryAsStop");
+			return;
+		}
+		// try stop name match
+		if (_stopNameToStopIdMap.get(stopQuery) != null) {
+			for (String stopId : _stopNameToStopIdMap.get(stopQuery)) {
+				StopBean stopBean = _transitDataService.getStop(stopId);
+				results.addMatch(resultFactory.getStopResult(stopBean, results.getRouteFilter()));
+				results.setHint("tryAsStop");
+				return;
+			}
+		}
 	}
 
 	// use LUCENE index to search on stop name
@@ -643,7 +698,67 @@ public class SearchServiceImpl implements SearchService {
 	}
   }
 
-  private void tryAsRoute(SearchResultCollection results, String routeQueryMixedCase,
+	private void tryAsExactRoute(SearchResultCollection results, String additionalTerm, String expectedTerm,
+								 SearchResultFactory resultFactory, ServiceDate serviceDate) {
+
+	  	// try as route_id
+		RouteBean testRouteBean = null;
+		try {
+			testRouteBean = _transitDataService.getRouteForId(expectedTerm);
+		} catch (ServiceException se) {
+			// not an agency-and-id
+		}
+		if (testRouteBean != null) {
+			results.addMatch(resultFactory.getRouteResult(testRouteBean));
+			results.setHint("tryAsRoute");
+			return;
+		}
+
+		// short name matching -- if single exact result
+		if (_routeShortNameToRouteBeanMap.get(expectedTerm) != null) {
+			List<RouteBean> routeBeans = _routeShortNameToRouteBeanMap.get(expectedTerm);
+			if (routeBeans.size() == 1) {
+				results.addMatch(resultFactory.getRouteResult(routeBeans.get(0)));
+				results.setHint("tryAsRoute");
+				return;
+			}
+			// if we have more data see if it matches
+			if (additionalTerm != null) {
+				for (RouteBean routeBean : _routeShortNameToRouteBeanMap.get(expectedTerm)) {
+					AgencyAndId routeId = AgencyAndIdLibrary.convertFromString(routeBean.getId());
+					if (routeId.getId().equalsIgnoreCase(additionalTerm)) {
+						results.addMatch(resultFactory.getRouteResult(routeBean));
+						results.setHint("tryAsRoute");
+						return;
+					}
+				}
+			}
+		}
+
+		// long name matching -- if single exact result
+		if (_routeLongNameToRouteBeanMap.get(expectedTerm) != null) {
+			List<RouteBean> routeBeans = _routeLongNameToRouteBeanMap.get(expectedTerm);
+			if (routeBeans.size() == 1) {
+				results.addMatch(resultFactory.getRouteResult(routeBeans.get(0)));
+				results.setHint("tryAsRoute");
+				return;
+			}
+			// if we have more data see if it matches
+			if (additionalTerm != null) {
+				for (RouteBean routeBean : _routeLongNameToRouteBeanMap.get(expectedTerm)) {
+					AgencyAndId routeId = AgencyAndIdLibrary.convertFromString(routeBean.getId());
+					if (routeId.getId().equalsIgnoreCase(additionalTerm)) {
+						results.addMatch(resultFactory.getRouteResult(routeBean));
+						results.setHint("tryAsRoute");
+						return;
+					}
+				}
+			}
+		}
+
+	}
+
+	private void tryAsRoute(SearchResultCollection results, String routeQueryMixedCase,
 			SearchResultFactory resultFactory, ServiceDate serviceDate) {
 
 	  String routeQuery = new String(routeQueryMixedCase);
@@ -683,6 +798,7 @@ public class SearchServiceImpl implements SearchService {
 		  }
 		}
 
+		// TOOD make this configurable as it may be expensive on large datasets
 		for (String routeShortName : _routeShortNameToRouteBeanMap.keySet()) {
 			// if the route short name ends or starts with our query, and
 			// whatever's left over

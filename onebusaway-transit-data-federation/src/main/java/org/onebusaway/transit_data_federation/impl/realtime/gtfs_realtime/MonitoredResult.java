@@ -15,10 +15,7 @@
  */
 package org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.geospatial.model.CoordinatePoint;
@@ -31,13 +28,18 @@ public class MonitoredResult {
   private Set<String> _matchedTripIds = new HashSet<String>();
   private Set<String> _unmatchedStopIds = new HashSet<String>();
   private Set<String> _matchedStopIds = new HashSet<String>();
+  private Set<String> _canelledTripIds = new HashSet<>();
+  private Set<String> _addedTripIds = new HashSet<>();
+  private Set<String> _duplicatedTripIds = new HashSet<>();
   private Set<AgencyAndId> _unmatchedBlockIds = new HashSet<AgencyAndId>();
   private Set<CoordinatePoint> _allCoordinates = new HashSet<CoordinatePoint>();
+  private String feedId = null;
   private int _recordsTotal = 0;
   private long _lastUpdate = 0; // we want the default to be very very old, to catch stale updates
   
   public void addUnmatchedTripId(String tripId) {
-    _unmatchedTripIds.add(tripId);
+    if (tripId != null)
+      _unmatchedTripIds.add(tripId);
   }
 
   public Set<String> getUnmatchedTripIds() {
@@ -66,6 +68,19 @@ public class MonitoredResult {
 
   public Set<AgencyAndId> getUnmatchedBlockIds() {
     return _unmatchedBlockIds;
+  }
+
+  public void addCancelledTripId(String id) {
+    _canelledTripIds.add(id);
+  }
+  public Set<String> getCancelledTripIds() {
+    return _canelledTripIds;
+  }
+  public void addAddedTripId(String id) {
+    _addedTripIds.add(id);
+  }
+  public Set<String> getAddedTripIds() {
+    return _addedTripIds;
   }
   
   void setRecordsTotal(int size) {
@@ -113,6 +128,11 @@ public class MonitoredResult {
     this._matchedTripIds.add(tripId);
   }
 
+  public Set<String> getDuplicatedTripIds() { return _duplicatedTripIds; }
+
+  public void addDuplicatedTripId(String tripId) {
+    this._duplicatedTripIds.add(tripId);
+  }
   public Set<CoordinatePoint> getAllCoordinates() {
     return _allCoordinates;
   }
@@ -125,5 +145,15 @@ public class MonitoredResult {
   public void addLatLon(double latitude, double longitude) {
     CoordinatePoint cp = new CoordinatePoint(latitude, longitude);
     _allCoordinates.add(cp);
+  }
+
+  public void setFeedId(String feedId) {
+    this.feedId = feedId;
+  }
+
+  public String getFeedId() {
+    if (feedId == null)
+      return getAgencyIds().toString();
+    return feedId;
   }
 }

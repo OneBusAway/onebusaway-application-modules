@@ -21,6 +21,7 @@ import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.alerts.impl.ServiceAlertLibrary;
 import org.onebusaway.transit_data_federation.services.ConsolidatedStopsService;
 import org.onebusaway.alerts.service.ServiceAlerts.Id;
+import org.onebusaway.transit_data_federation.services.RouteReplacementService;
 import org.onebusaway.transit_data_federation.services.transit_graph.RouteCollectionEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.RouteEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
@@ -37,6 +38,8 @@ class GtfsRealtimeEntitySource {
 
   private ConsolidatedStopsService _consolidatedStopsService;
 
+  private RouteReplacementService _routeReplacementService;
+
   private List<String> _agencyIds;
 
   public void setTransitGraphDao(TransitGraphDao transitGraphDao) {
@@ -45,8 +48,26 @@ class GtfsRealtimeEntitySource {
 
   public void setConsolidatedStopService(ConsolidatedStopsService service) { _consolidatedStopsService = service; }
 
+  public void setRouteReplacementService(RouteReplacementService routeReplacementService) {
+    _routeReplacementService = routeReplacementService;
+  }
+
   public void setAgencyIds(List<String> agencyIds) {
     _agencyIds = agencyIds;
+  }
+
+  public RouteEntry getRoute(AgencyAndId routeId) {
+    routeId = considerRouteReplacements(routeId);
+    return _transitGraphDao.getRouteForId(routeId);
+  }
+
+  private AgencyAndId considerRouteReplacements(AgencyAndId routeId) {
+    if (_routeReplacementService == null)
+      return routeId;
+    if (_routeReplacementService.containsRoute(routeId)) {
+      return _routeReplacementService.replace(routeId);
+    }
+    return routeId;
   }
 
   /**
@@ -121,6 +142,10 @@ class GtfsRealtimeEntitySource {
     return null;
   }
 
+  public StopEntry getStop(AgencyAndId stopId) {
+    return _transitGraphDao.getStopEntryForId(stopId, false);
+  }
+
   public Id getStopId(String stopId) {
 
     for (String agencyId : _agencyIds) {
@@ -173,4 +198,19 @@ class GtfsRealtimeEntitySource {
     AgencyAndId id = new AgencyAndId(_agencyIds.get(0), stopId);
     return ServiceAlertLibrary.id(id);
   }
+
+  public List<String> getAgencyIds() {
+    return _agencyIds;
+  }
+
+  public boolean isGraphReady() {
+    try {
+      return _transitGraphDao != null
+              && _transitGraphDao.getAllRoutes() != null
+              && !_transitGraphDao.getAllRoutes().isEmpty();
+    } catch (Throwable t) {
+      return false;
+    }
+  }
+
 }

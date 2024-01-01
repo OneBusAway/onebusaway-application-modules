@@ -101,6 +101,16 @@ public class SingleBundleManagementServiceImpl implements
   }
 
   @Override
+  public int getApplicableBundlesSize() {
+    return 0;
+  }
+
+  @Override
+  public String getCurrentBundleId() {
+    return getActiveBundleId();
+  }
+
+  @Override
   public void changeBundle(String bundleId) throws Exception {
 
   }

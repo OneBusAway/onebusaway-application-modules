@@ -28,11 +28,7 @@ import org.onebusaway.realtime.api.VehicleOccupancyRecord;
 import org.onebusaway.transit_data.model.TransitDataConstants;
 import org.onebusaway.transit_data_federation.services.AgencyService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockVehicleLocationListener;
-import org.onebusaway.transit_data_federation.services.realtime.VehicleLocationCacheElement;
-import org.onebusaway.transit_data_federation.services.realtime.VehicleLocationCacheElements;
-import org.onebusaway.transit_data_federation.services.realtime.VehicleLocationRecordCache;
-import org.onebusaway.transit_data_federation.services.realtime.VehicleStatus;
-import org.onebusaway.transit_data_federation.services.realtime.VehicleStatusService;
+import org.onebusaway.transit_data_federation.services.realtime.*;
 import org.onebusaway.transit_data_federation.impl.realtime.apc.VehicleOccupancyRecordCache;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
@@ -41,7 +37,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-class VehicleStatusServiceImpl implements VehicleLocationListener,
+public class VehicleStatusServiceImpl implements VehicleLocationListener,
         VehicleOccupancyListener,
     VehicleStatusService {
 

@@ -99,8 +99,42 @@ public class TripResource extends MetricResource {
     }
   }
 
+  @Path("{agencyId}/cancelled")
+  @GET
+  @Produces("application/json")
+  public Response getCancelledTrips(@PathParam("agencyId") String agencyId, @QueryParam("feedId") String feedId) {
+    try {
+      int cancelledTrips = 0;
+      if (this.getDataSources() == null || this.getDataSources().isEmpty()) {
+        _log.error("no configured data sources");
+        return Response.ok(error("cancelled-trips", "no configured data sources")).build();
+      }
+      cancelledTrips = getCancelledTripIdCt(agencyId, feedId);
+      return Response.ok(ok("cancelled-trips", cancelledTrips)).build();
+    } catch (Exception e) {
+      _log.error("getcancelledTrips broke", e);
+      return Response.ok(error("cancelled-trips", e)).build();
+    }
+  }
 
-  
+  @Path("{agencyId}/added")
+  @GET
+  @Produces("application/json")
+  public Response getAddedTrips(@PathParam("agencyId") String agencyId, @QueryParam("feedId") String feedId) {
+    try {
+      int addedTrips = 0;
+      if (this.getDataSources() == null || this.getDataSources().isEmpty()) {
+        _log.error("no configured data sources");
+        return Response.ok(error("added-trips", "no configured data sources")).build();
+      }
+      addedTrips = getAddedTripIdCt(agencyId, feedId);
+      return Response.ok(ok("added-trips", addedTrips)).build();
+    } catch (Exception e) {
+      _log.error("getAddedTrips broke", e);
+      return Response.ok(error("added-trips", e)).build();
+    }
+  }
+
   @Path("{agencyId}/unmatched-ids")
   @GET
   @Produces("application/json")
@@ -127,6 +161,64 @@ public class TripResource extends MetricResource {
     } catch (Exception e) {
       _log.error("getUnmatchedTripIds broke", e);
       return Response.ok(error("unmatched-trip-ids", e)).build();
+    }
+  }
+
+  @Path("{agencyId}/cancelled-ids")
+  @GET
+  @Produces("application/json")
+  public Response getCancelledTripIds(@PathParam("agencyId") String agencyId, @QueryParam("feedId") String feedId) {
+    try {
+      List<String> cancelledTripIds = new ArrayList<String>();
+      if (this.getDataSources() == null || this.getDataSources().isEmpty()) {
+        _log.error("no configured data sources");
+        return Response.ok(error("cancelled-trip-ids", "con configured data sources")).build();
+      }
+
+      for (MonitoredDataSource mds : getDataSources()) {
+        MonitoredResult result = mds.getMonitoredResult();
+        if (result == null) continue;
+        if (feedId == null || feedId.equals(mds.getFeedId())) {
+          for (String mAgencyId : result.getAgencyIds()) {
+            if (agencyId.equals(mAgencyId)) {
+              cancelledTripIds.addAll(result.getCancelledTripIds());
+            }
+          }
+        }
+      }
+      return Response.ok(ok("cancelled-trip-ids", cancelledTripIds)).build();
+    } catch (Exception e) {
+      _log.error("getCancelledTripIds broke", e);
+      return Response.ok(error("cancelled-trip-ids", e)).build();
+    }
+  }
+
+  @Path("{agencyId}/added-ids")
+  @GET
+  @Produces("application/json")
+  public Response getAddedTripIds(@PathParam("agencyId") String agencyId, @QueryParam("feedId") String feedId) {
+    try {
+      List<String> addedTripIds = new ArrayList<String>();
+      if (this.getDataSources() == null || this.getDataSources().isEmpty()) {
+        _log.error("no configured data sources");
+        return Response.ok(error("added-trip-ids", "con configured data sources")).build();
+      }
+
+      for (MonitoredDataSource mds : getDataSources()) {
+        MonitoredResult result = mds.getMonitoredResult();
+        if (result == null) continue;
+        if (feedId == null || feedId.equals(mds.getFeedId())) {
+          for (String mAgencyId : result.getAgencyIds()) {
+            if (agencyId.equals(mAgencyId)) {
+              addedTripIds.addAll(result.getAddedTripIds());
+            }
+          }
+        }
+      }
+      return Response.ok(ok("added-trip-ids", addedTripIds)).build();
+    } catch (Exception e) {
+      _log.error("getAddedTripIds broke", e);
+      return Response.ok(error("added-trip-ids", e)).build();
     }
   }
 
@@ -174,10 +266,14 @@ public class TripResource extends MetricResource {
         return Response.ok(ok("buses-in-service-percent", 0.)).build();
       }
       double validRealtimeTrips = getValidRealtimeTripIds(agencyId, feedId).size();
+      double cancelledTrips = getCancelledTripIdCt(agencyId, feedId);
+      double addedTrips = getAddedTripIdCt(agencyId, feedId);
 
       _log.info("agencytrips size=" + scheduleTrips + ", validRealtimeTrips=" + validRealtimeTrips
+              + " cancelled=" + cancelledTrips + ", addedTrips=" + addedTrips
               + " for feedId=" + feedId + ", routeId=" + routeId);
-      double percent = Math.abs((validRealtimeTrips / scheduleTrips) * 100);
+      // TODO: OBA doesn't support ADDED trips yet so not added to the metric!!!
+      double percent = Math.abs(( (validRealtimeTrips /*+ addedTrips*/ - cancelledTrips) / scheduleTrips) * 100);
       return Response.ok(ok("buses-in-service-percent", percent)).build();
     } catch (Exception e) {
       _log.error("getBusesInServicePercent broke", e);

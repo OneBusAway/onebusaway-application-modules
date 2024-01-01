@@ -18,6 +18,7 @@ package org.onebusaway.transit_data_federation.impl;
 
 import org.onebusaway.collections.FactoryMap;
 import org.onebusaway.collections.Min;
+import org.onebusaway.container.ConfigurationParameter;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.realtime.api.TimepointPredictionRecord;
 import org.onebusaway.transit_data.model.TimeIntervalBean;
@@ -68,10 +69,9 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
 
   private BlockStatusService _blockStatusService;
 
-//  private CacheService _CacheService; // TODO Clarify
-
-
   private boolean removeFuturePredictionsWithoutRealtime = false;
+
+  private boolean hideCanceledTrips = true;
 
   @Autowired
   public void setStopTimeService(StopTimeService stopTimeService) {
@@ -91,6 +91,16 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
 
   public void setRemoveFuturePredictionsWithoutRealtime(boolean remove) {
     this.removeFuturePredictionsWithoutRealtime = remove;
+  }
+
+  @ConfigurationParameter
+  public void setHideCanceledTrips(boolean hide) {
+    this.hideCanceledTrips = hide;
+  }
+
+  @Override
+  public boolean getHideCanceledTrips() {
+    return this.hideCanceledTrips;
   }
 
   @Override
@@ -257,6 +267,7 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
         blockInstance, trip.getId(), stop.getId(), stopSequence, serviceDate,
         timeOfServiceDate, time);
 
+
     if (!locations.isEmpty()) {
 
       /**
@@ -264,6 +275,12 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
        */
       BlockLocation location = locations.get(0);
       applyBlockLocationToInstance(instance, location, time);
+    }
+
+    if(!instance.isPredictedArrivalTimeSet() && !instance.isPredictedDepartureTimeSet()){
+      if(query.getAgenciesExcludingScheduled().contains(instance.getBlockInstance().getBlock().getBlock().getId().getAgencyId())){
+        return null;
+      }
     }
 
     return instance;
@@ -508,7 +525,7 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
               + sti.getFrequencyOffset()) != location.getBlockStartTime())) {
         continue;
       }
-      if (TransitDataConstants.STATUS_CANCELED.equals(location.getStatus())) {
+      if (hideCanceledTrips && TransitDataConstants.STATUS_CANCELED.equals(location.getStatus())) {
         continue;
       }
 
@@ -518,7 +535,7 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
           targetTime.getTargetTime());
 
       if (isArrivalAndDepartureBeanInRange(instance, fromTime, toTime))
-        results.add(instance);
+        results.add(applyCanceledStatus(instance));
     }
 
     if (locations.isEmpty()) {
@@ -541,16 +558,28 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
             applyBlockLocationToInstance(instance, scheduledLocation,
                 targetTime.getTargetTime());
 
-          results.add(instance);
+          results.add(applyCanceledStatus(instance));
         }
 
       } else {
         if (isFrequencyBasedArrivalInRange(blockInstance, sti.getFrequency(),
             fromTime, toTime)) {
-          results.add(instance);
+          results.add(applyCanceledStatus(instance));
         }
       }
     }
+  }
+
+  private ArrivalAndDepartureInstance applyCanceledStatus(ArrivalAndDepartureInstance instance) {
+    // if configured let A/D flow throw as scheduled
+    if (hideCanceledTrips) return instance;
+
+    if (TransitDataConstants.STATUS_CANCELED.equals(instance.getStatus()))
+      instance.setStatus(TransitDataConstants.STATUS_CANCELED);
+    if (instance.getBlockLocation() != null
+        && TransitDataConstants.STATUS_CANCELED.equals(instance.getBlockLocation().getStatus()))
+      instance.setStatus(TransitDataConstants.STATUS_CANCELED);
+    return instance;
   }
 
   private void applyBlockLocationToInstance(
@@ -559,6 +588,12 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
 
     if (instance == null) return;
     instance.setBlockLocation(blockLocation);
+    if (TransitDataConstants.STATUS_CANCELED.equals(blockLocation.getStatus())) {
+      if (!hideCanceledTrips) {
+        applyCanceledAttributes(instance);
+      }
+    }
+
 
     boolean success = setPredictedTimesFromTimepointPredictionRecords(instance,
         blockLocation, targetTime);
@@ -575,6 +610,20 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
         setPredictedTimeIntervals(instance, blockLocation, targetTime);
       }
     }
+  }
+
+  /**
+   * Remove some properties from instance and location to keep it
+   * consistent.  If this block had real-time associated with it
+   * there may be additional contradictory information present.
+   * @param instance
+   */
+  private void applyCanceledAttributes(ArrivalAndDepartureInstance instance) {
+    BlockLocation blockLocation = instance.getBlockLocation();
+    blockLocation.setVehicleId(null);
+    blockLocation.setInService(false);
+    // pass through the status
+    instance.setStatus(blockLocation.getStatus());
   }
 
   /**
@@ -660,8 +709,15 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
           instance.getStop().getId());
       boolean sequenceMatches = tpr.getStopSequence() > 0
           && tpr.getStopSequence() == gtfsSequence;
-      if (!tripMatches || !stopMatches)
+      // records may have predictions across multiple blocks
+      if (!tripMatches) {
+        _log.debug("unmatched trip on tpr: " + tpr.getTripId() + " != " + instance.getBlockTrip().getTrip().getId());
         continue;
+      }
+      if (!stopMatches) {
+        _log.debug("unmatched stop on tpr: " + tpr.getTimepointId() + " != " + instance.getStop().getId());
+        continue;
+      }
 
       if (sequenceMatches || tprStopIndex == thisStopIndex) {
 
@@ -685,6 +741,9 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
       	    setPredictedArrivalTimeForInstance(instance, arrivalTime);
       	}
 
+        instance.setScheduledTrack(tpr.getScheduledTrack());
+        instance.setActualTrack(tpr.getActualTrack());
+        instance.setStatus(tpr.getStatus());
 
         if (sequenceMatches)
           return true;

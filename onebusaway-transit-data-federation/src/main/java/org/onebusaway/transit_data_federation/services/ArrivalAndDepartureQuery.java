@@ -19,6 +19,8 @@ import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
 
+import java.util.HashSet;
+
 public class ArrivalAndDepartureQuery {
 
   private StopEntry stop;
@@ -32,6 +34,8 @@ public class ArrivalAndDepartureQuery {
   private AgencyAndId vehicleId;
 
   private long time;
+
+  private HashSet<String> agenciesExcludingScheduled;
 
   public StopEntry getStop() {
     return stop;
@@ -79,5 +83,13 @@ public class ArrivalAndDepartureQuery {
 
   public void setTime(long time) {
     this.time = time;
+  }
+
+  public HashSet<String> getAgenciesExcludingScheduled() {
+    return this.agenciesExcludingScheduled;
+  }
+
+  public void setAgenciesExcludingScheduled(HashSet<String> agenciesExcludingScheduled) {
+    this.agenciesExcludingScheduled = agenciesExcludingScheduled;
   }
 }

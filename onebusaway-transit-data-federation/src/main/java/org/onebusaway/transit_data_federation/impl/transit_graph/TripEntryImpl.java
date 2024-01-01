@@ -23,11 +23,7 @@ import java.util.List;
 
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.LocalizedServiceId;
-import org.onebusaway.transit_data_federation.services.transit_graph.FrequencyEntry;
-import org.onebusaway.transit_data_federation.services.transit_graph.RouteCollectionEntry;
-import org.onebusaway.transit_data_federation.services.transit_graph.RouteEntry;
-import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
-import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.*;
 
 public class TripEntryImpl implements TripEntry, Serializable {
 
@@ -66,8 +62,8 @@ public class TripEntryImpl implements TripEntry, Serializable {
     return this;
   }
 
-  public TripEntryImpl setBlock(BlockEntryImpl block) {
-    _block = block;
+  public TripEntry setBlock(BlockEntry block) {
+    _block = (BlockEntryImpl) block;
     return this;
   }
 

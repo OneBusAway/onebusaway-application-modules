@@ -19,7 +19,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.List;
 
-import org.onebusaway.admin.bundle.model.Bundle;
+import org.onebusaway.transit_data_federation.bundle.model.Bundle;
 
 public interface BundleSource {
   /**

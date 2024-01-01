@@ -42,7 +42,13 @@ public class ServiceAlertBuilderHelper {
 
         for (ServiceAlertBean serviceAlert : alerts.getList()) {
         GtfsRealtime.FeedEntity.Builder entity = feed.addEntityBuilder();
-        entity.setId(Integer.toString(feed.getEntityCount()));
+        if (serviceAlert.getId() != null) {
+            // if we have an id use it for consistency
+            entity.setId(serviceAlert.getId());
+        } else {
+            // we don't have an id -- perhaps a unit test
+            entity.setId(String.valueOf(feed.getEntityCount()));
+        }
         GtfsRealtime.Alert.Builder alert = entity.getAlertBuilder();
 
         fillTranslations(serviceAlert.getSummaries(),

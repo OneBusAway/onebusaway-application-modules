@@ -98,6 +98,8 @@ public class ShapePointsLibrary {
       List<XYPoint> projectedShapePoints, double[] shapePointDistance,
       XYPoint targetPoint, int fromIndex, int toIndex) {
 
+    if (shapePointDistance == null)
+      return null;
     /**
      * The absolute closest assignment
      */

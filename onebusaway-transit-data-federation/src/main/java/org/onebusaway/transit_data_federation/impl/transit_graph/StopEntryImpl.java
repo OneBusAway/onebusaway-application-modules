@@ -54,14 +54,20 @@ public class StopEntryImpl implements StopEntry, Serializable {
 
   private transient List<FrequencyStopTripIndex> _frequencyStopTripIndices = null;
 
-  public StopEntryImpl(AgencyAndId id, double lat, double lon) {
-    if (id == null)
-      throw new IllegalArgumentException("id must not be null");
-    _id = id;
-    _lat = lat;
-    _lon = lon;
+  private final AgencyAndId _parent;
+
+  public StopEntryImpl(AgencyAndId id, double lat, double lon, AgencyAndId parent) {
+      if (id == null)
+        throw new IllegalArgumentException("id must not be null");
+      _id = id;
+      _lat = lat;
+      _lon = lon;
+    _parent = parent;
   }
-  
+  public StopEntryImpl(AgencyAndId id, double lat, double lon) {
+    this(id, lat, lon, null);
+  }
+
   public void setWheelchairBoarding(EAccessibility wheelchairBoarding) {
     _wheelchairBoarding = wheelchairBoarding;
   }
@@ -153,26 +159,27 @@ public class StopEntryImpl implements StopEntry, Serializable {
     return _index;
   }
 
+  public AgencyAndId getParent() {
+    return _parent;
+  }
+
   /****
    * {@link Object} Interface
    ****/
 
-  /*
   @Override
   public boolean equals(Object obj) {
-    if (obj == null || !(obj instanceof StopEntryImpl))
+    if (obj == null || !(obj instanceof StopEntry))
       return false;
-    StopEntryImpl stop = (StopEntryImpl) obj;
+    // static or dynamic stops are treated the same
+    StopEntry stop = (StopEntry) obj;
     return _id.equals(stop.getId());
   }
-  */
 
-  /*
   @Override
   public int hashCode() {
     return _id.hashCode();
   }
-  */
 
   @Override
   public String toString() {

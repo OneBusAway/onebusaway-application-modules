@@ -91,4 +91,10 @@ public interface BundleManagementService {
   // thread reference keepers
   public void registerInferenceProcessingThread(Future thread);
 
+  // allow clients to see how many bundles are present
+  public int getApplicableBundlesSize();
+
+  // expose the id of the currently loaded bundle
+  public String getCurrentBundleId();
+
 }

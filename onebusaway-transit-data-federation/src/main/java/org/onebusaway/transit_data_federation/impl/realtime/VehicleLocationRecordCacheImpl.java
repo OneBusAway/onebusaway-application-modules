@@ -35,6 +35,7 @@ import javax.annotation.PreDestroy;
 import org.onebusaway.collections.ConcurrentCollectionsLibrary;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.realtime.api.VehicleLocationRecord;
+import org.onebusaway.transit_data.model.TransitDataConstants;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.blocks.ScheduledBlockLocation;
 import org.onebusaway.transit_data_federation.services.realtime.ScheduleDeviationSamples;
@@ -159,7 +160,10 @@ public class VehicleLocationRecordCacheImpl implements VehicleLocationRecordCach
       ScheduleDeviationSamples samples) {
 
     AgencyAndId vehicleId = record.getVehicleId();
-
+    if (vehicleId == null && TransitDataConstants.STATUS_CANCELED.equals(record.getStatus())) {
+      vehicleId = record.getTripId();  // cache needs an id, use trip
+    }
+    if (vehicleId == null) return null;
     while (true) {
 
       VehicleLocationCacheEntry newCacheEntry = new VehicleLocationCacheEntry(
@@ -257,8 +261,14 @@ public class VehicleLocationRecordCacheImpl implements VehicleLocationRecordCach
 
     @Override
     public void run() {
+      int preSize = _entriesByVehicleId.size();
+      int vehiclePreSize = _vehicleIdsByBlockInstance.size();
       clearStaleRecords(SystemTime.currentTimeMillis()
           - _blockLocationRecordCacheWindowSize * 1000);
+      int postSize = _entriesByVehicleId.size();
+      int vehiclePostSize = _vehicleIdsByBlockInstance.size();
+      _log.debug("cleared {} entries and {} vehicles, now {} entries and {} vehicles",
+              preSize - postSize, vehiclePreSize - vehiclePostSize, postSize, vehiclePostSize);
     }
   }
 

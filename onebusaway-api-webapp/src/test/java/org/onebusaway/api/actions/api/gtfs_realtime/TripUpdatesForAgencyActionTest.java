@@ -16,20 +16,28 @@
 package org.onebusaway.api.actions.api.gtfs_realtime;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
+import com.opensymphony.xwork2.ActionContext;
+import org.apache.struts2.ServletActionContext;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.onebusaway.api.model.ResponseBean;
 import org.onebusaway.transit_data.model.ListBean;
 import org.onebusaway.transit_data.model.RouteBean;
 import org.onebusaway.transit_data.model.StopBean;
 import org.onebusaway.transit_data.model.VehicleStatusBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
+import org.onebusaway.transit_data.model.trips.TripDetailsBean;
 import org.onebusaway.transit_data.model.trips.TripStatusBean;
 import org.onebusaway.transit_data.services.TransitDataService;
 
@@ -38,14 +46,29 @@ import com.google.transit.realtime.GtfsRealtime.FeedMessage;
 import com.google.transit.realtime.GtfsRealtime.TripUpdate;
 import com.google.transit.realtime.GtfsRealtime.TripUpdate.StopTimeUpdate;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+@RunWith(MockitoJUnitRunner.class)
 public class TripUpdatesForAgencyActionTest {
 
   private TripUpdatesForAgencyAction _action;
 
   private TransitDataService _service;
 
+  @Mock
+  HttpServletRequest request;
+
+  @Mock
+  HttpServletResponse servletResponse;
+
   @Before
   public void before() {
+    ActionContext.setContext(new ActionContext(new HashMap<>()));
+
+    ServletActionContext.setRequest(request);
+    ServletActionContext.setResponse(servletResponse);
+
     _action = new TripUpdatesForAgencyAction();
 
     _service = Mockito.mock(TransitDataService.class);
@@ -109,7 +132,9 @@ public class TripUpdatesForAgencyActionTest {
     ListBean<VehicleStatusBean> bean = new ListBean<VehicleStatusBean>();
     bean.setList(vehicles);
     Mockito.when(_service.getAllVehiclesForAgency("1", now)).thenReturn(bean);
-
+    ListBean<TripDetailsBean> beans = new ListBean<>();
+    beans.setList(new ArrayList<>());
+    Mockito.when(_service.getTripsForAgency(any())).thenReturn(beans);
     _action.setId("1");
     _action.setTime(new Date(now));
 
@@ -122,7 +147,7 @@ public class TripUpdatesForAgencyActionTest {
 
     {
       FeedEntity entity = feed.getEntity(0);
-      assertEquals("1", entity.getId());
+      assertEquals("1_t0_" + now, entity.getId());
       TripUpdate tripUpdate = entity.getTripUpdate();
       assertEquals("t0", tripUpdate.getTrip().getTripId());
       assertEquals("r1", tripUpdate.getTrip().getRouteId());
@@ -136,7 +161,7 @@ public class TripUpdatesForAgencyActionTest {
     }
     {
       FeedEntity entity = feed.getEntity(1);
-      assertEquals("2", entity.getId());
+      assertEquals("1_t1_" + now, entity.getId());
       TripUpdate tripUpdate = entity.getTripUpdate();
       assertEquals("t1", tripUpdate.getTrip().getTripId());
       assertEquals("r1", tripUpdate.getTrip().getRouteId());

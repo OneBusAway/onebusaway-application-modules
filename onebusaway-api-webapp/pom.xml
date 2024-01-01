@@ -3,7 +3,7 @@
   <parent>
     <groupId>org.onebusaway</groupId>
     <artifactId>onebusaway-application-modules</artifactId>
-    <version>2.4.18-cs</version>
+    <version>2.2.0-SNAPSHOT</version>
   </parent>
   <artifactId>onebusaway-api-webapp</artifactId>
   <packaging>war</packaging>
@@ -60,6 +60,11 @@
       <groupId>org.onebusaway</groupId>
       <artifactId>onebusaway-siri-core</artifactId>
       <version>${onebusaway-siri-version}</version>
+        <exclusions>
+            <exclusion>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+            </exclusion></exclusions>
     </dependency>
 
     <!-- For GTFS-realtime support -->
@@ -67,6 +72,11 @@
       <groupId>org.onebusaway</groupId>
       <artifactId>onebusaway-gtfs-realtime-api</artifactId>
       <version>${gtfs-api-version}</version>
+        <exclusions>
+            <exclusion>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+            </exclusion></exclusions>
     </dependency>
 
 
@@ -94,11 +104,18 @@
       <artifactId>struts2-rest-plugin</artifactId>
     </dependency>
     <!-- This provides support for Struts2 Rome rss result type -->
-    <dependency>
-        <groupId>com.googlecode.s2rome</groupId>
-        <artifactId>struts2-rome-plugin</artifactId>
-        <version>0.3</version>
-    </dependency>
+    <!-- rome is no longer supported -->
+<!--    <dependency>-->
+<!--        <groupId>com.googlecode.s2rome</groupId>-->
+<!--        <artifactId>struts2-rome-plugin</artifactId>-->
+<!--        <version>0.3</version>-->
+<!--        <exclusions>-->
+<!--            <exclusion>-->
+<!--                <groupId>org.slf4j</groupId>-->
+<!--                <artifactId>slf4j-api</artifactId>-->
+<!--            </exclusion>-->
+<!--        </exclusions>-->
+<!--    </dependency>-->
       <dependency>
           <groupId>net.sf.json-lib</groupId>
           <artifactId>json-lib</artifactId>
@@ -110,6 +127,12 @@
         <groupId>com.rometools</groupId>
         <artifactId>rome</artifactId>
         <version>1.7.0</version>
+        <exclusions>
+            <exclusion>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+            </exclusion>
+        </exclusions>
     </dependency>
     <!-- We use HttpServletRequest in XmlResult -->
     <dependency>
@@ -123,32 +146,60 @@
       <groupId>com.notnoop.apns</groupId>
       <artifactId>apns</artifactId>
       <version>0.1.6</version>
+        <exclusions>
+            <exclusion>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+            </exclusion>
+        </exclusions>
     </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>${slf4j.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-log4j12</artifactId>
-            <version>${slf4j.version}</version>
-        </dependency>
+
+<!--       Log4j 2 -->
       <dependency>
+          <groupId>org.apache.logging.log4j</groupId>
+          <artifactId>log4j-api</artifactId>
+          <version>${log4j.version}</version>
+      </dependency>
+      <dependency>
+          <groupId>org.apache.logging.log4j</groupId>
+          <artifactId>log4j-core</artifactId>
+          <version>${log4j.version}</version>
+      </dependency>
+      <dependency>
+          <groupId>org.apache.logging.log4j</groupId>
+          <artifactId>log4j-slf4j-impl</artifactId>
+          <version>${log4j.version}</version>
+      </dependency>
+
+      <!-- Log4j 1 -->
+<!--      <dependency>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-api</artifactId>
+          <version>${slf4j.version}</version>
+      </dependency>
+      <dependency>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-log4j12</artifactId>
+          <version>${slf4j.version}</version>
+      </dependency>-->
+<!--      <dependency>
           <groupId>log4j</groupId>
           <artifactId>log4j</artifactId>
-          <version>1.2.16</version>
+          <version>1.2.16</veapi-webapprsion>
       </dependency>
       <dependency>
           <groupId>log4j</groupId>
           <artifactId>apache-log4j-extras</artifactId>
           <version>1.1</version>
-      </dependency>
+      </dependency>-->
+
+
       <dependency>
           <groupId>commons-logging</groupId>
           <artifactId>commons-logging</artifactId>
-          <version>1.1.2</version>
+          <version>1.2</version>
       </dependency>
+
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
@@ -175,6 +226,12 @@
 	<dependency>
     	<groupId>com.brsanthu</groupId>
     	<artifactId>google-analytics-java</artifactId>
+        <exclusions>
+            <exclusion>
+                <groupId>org.slf4j</groupId>
+                <artifactId>jcl-over-slf4j</artifactId>
+            </exclusion>
+        </exclusions>
 	</dependency>
 	<dependency>
 		<groupId>org.apache.httpcomponents</groupId>
@@ -237,6 +294,12 @@
         </executions>
       </plugin>
     </plugins>
+    <resources>
+      <resource>
+          <directory>src/main/resources</directory>
+          <filtering>true</filtering>
+      </resource>
+    </resources>
   </build>
 
 </project>

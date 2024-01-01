@@ -16,20 +16,23 @@
 package org.onebusaway.admin.service.impl;
 
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.doThrow;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.net.URI;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import com.google.common.io.Files;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.onebusaway.admin.service.ParametersService;
-import org.onebusaway.admin.service.impl.ParametersServiceImpl;
 import org.onebusaway.admin.util.ConfigurationKeyTranslator;
+import org.onebusaway.util.impl.configuration.ConfigParameter;
 import org.onebusaway.util.services.configuration.ConfigurationService;
 
 /**
@@ -60,55 +63,70 @@ public class ParametersServiceImplTest {
 	
 	@Test
 	public void testGetParameters() {
-		Map<String, String> configParameters = new HashMap<String, String>();
-		configParameters.put("tdm.crewAssignmentRefreshInterval", "120");
-		configParameters.put("admin.senderEmailAddress", "mtabuscis@mtabuscis.net");
-		
-		when(configurationService.getConfiguration()).thenReturn(configParameters);
-		
+
+		String config = getClass().getResource("config.json").getFile();
+		service.setConfigFile(config);
+
 		Map<String,String> displayParameters = service.getParameters();
 		
-		assertTrue("Expecting translated key to be present in the map", 
-				displayParameters.containsKey("tdmCrewAssignmentRefreshKey"));
-		assertEquals("Expecting value to be associated with the translated key", "120",
-				displayParameters.get("tdmCrewAssignmentRefreshKey"));
+		assertTrue("Expecting agency to be in map",
+				displayParameters.containsKey("1_hideScheduleInfo"));
+
+		assertEquals("Expecting value to be associated with the translated key", "true",
+						displayParameters.get("1_hideScheduleInfo"));
 		
-		assertTrue("Expecting translated key to be present in the map", 
-				displayParameters.containsKey("adminSenderEmailAddressKey"));
-		assertEquals("Expecting value to be associated with the translated key", "mtabuscis@mtabuscis.net",
-				displayParameters.get("adminSenderEmailAddressKey"));
 	}
-	
+
 	@Test
 	public void testSaveParameters() throws Exception {
-		Map<String, String> parameters = new HashMap<String, String>();
-		parameters.put("tdmCrewAssignmentRefreshKey", "120");
-		parameters.put("adminSenderEmailAddressKey", "mtabuscis@mtabuscis.net");
-		
-		boolean success = service.saveParameters(parameters);
-		
+		Map<String, List<ConfigParameter>> configParameters = createTestParams();
+		File tmpFile = File.createTempFile("config-", ".json");
+		tmpFile.deleteOnExit();
+		URI uri = getClass().getResource("config.json").toURI();
+		File configFile = new File(uri.getPath());
+		assertTrue(configFile.exists());
+		assertTrue(configFile.isFile());
+		Files.copy(configFile, tmpFile);
+		assertTrue(tmpFile.exists());
+		assertTrue(tmpFile.isFile());
+		service.setConfigFile(tmpFile.toURI().getPath());
+		configParameters.get("1").get(0).setValue("tada_surprise");
+		boolean success = service.saveParameters(configParameters);
+		assertFileHasText(tmpFile, "tada_surprise");
 		assertTrue("Expecting save operation to be successful", success);
 		
-		verify(configurationService).setConfigurationValue("tdm", "tdm.crewAssignmentRefreshInterval", "120");
-		verify(configurationService).setConfigurationValue("admin", "admin.senderEmailAddress", 
-				"mtabuscis@mtabuscis.net");
 	}
-	
+
+	private void assertFileHasText(File file, String searchText) throws IOException {
+		FileInputStream fis = new FileInputStream(file);
+		byte[] data = new byte[fis.available()];
+		fis.read(data);
+		String text = new String(data);
+		Matcher m = Pattern.compile(searchText).matcher(text);
+		assertTrue("expected to find " + searchText, m.find());
+	}
+
 	@Test
 	public void testSaveParametersException() throws Exception {
-		Map<String, String> parameters = new HashMap<String, String>();
-		parameters.put("tdmCrewAssignmentRefreshKey", "120");
-		parameters.put("adminSenderEmailAddressKey", "mtabuscis@mtabuscis.net");
+		Map<String, List<ConfigParameter>> configParameters = createTestParams();
+		// an empty file throws an exception, we must have a valid json file
+		File tmpFile = File.createTempFile("config-", ".json");
+		tmpFile.deleteOnExit();
+		// force an exception and then confirm success is false
+		boolean success = service.saveParameters(configParameters);
 		
-		doThrow(new Exception()).when(configurationService).
-						setConfigurationValue("tdm", "tdm.crewAssignmentRefreshInterval", "120");
+		assertFalse("Expecting save operation to fail", success);
 		
-		boolean success = service.saveParameters(parameters);
-		
-		assertFalse("Expecting save operation to be successful", success);
-		
-		verify(configurationService).setConfigurationValue("admin", "admin.senderEmailAddress", 
-				"mtabuscis@mtabuscis.net");
+	}
+
+	private Map<String, List<ConfigParameter>> createTestParams() {
+		Map<String, List<ConfigParameter>> configParameters = new HashMap<>();
+		ConfigParameter param = new ConfigParameter();
+		param.setDisplayName("A City Transit Agency");
+		param.setKey("1_hideScheduleInfo");
+		param.setValue("true");
+		configParameters.put("1", Arrays.asList(param));
+		return configParameters;
 	}
 
 }

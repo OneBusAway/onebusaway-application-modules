@@ -25,7 +25,7 @@ public class TimepointPredictionRecord implements Serializable {
   private static final long serialVersionUID = 2L;
 
   /**
-   * 
+   * of the format AGENCY_stopTime.getStop().getId()
    */
   private AgencyAndId timepointId;
   
@@ -67,6 +67,12 @@ public class TimepointPredictionRecord implements Serializable {
     }
   }
 
+  private String scheduledTrack;
+
+  private String actualTrack;
+
+  private String status;
+
   public TimepointPredictionRecord() {
 
   }
@@ -79,6 +85,9 @@ public class TimepointPredictionRecord implements Serializable {
     this.timepointPredictedDepartureTime = r.timepointPredictedDepartureTime;
     this.timepointScheduledTime = r.timepointScheduledTime;
     this.scheduleRelationship = r.scheduleRelationship;
+    this.actualTrack = r.actualTrack;
+    this.scheduledTrack = r.scheduledTrack;
+    this.status = r.status;
   }
 
   public AgencyAndId getTimepointId() {
@@ -138,5 +147,29 @@ public class TimepointPredictionRecord implements Serializable {
   public boolean isSkipped() {
     return (this.scheduleRelationship != null
             && this.scheduleRelationship.getValue() == ScheduleRelationship.SKIPPED.getValue());
+  }
+
+  public String getScheduledTrack() {
+    return scheduledTrack;
+  }
+
+  public void setScheduledTrack(String scheduledTrack) {
+    this.scheduledTrack = scheduledTrack;
+  }
+
+  public String getActualTrack() {
+    return actualTrack;
+  }
+
+  public void setActualTrack(String actualTrack) {
+    this.actualTrack = actualTrack;
+  }
+
+  public String getStatus() {
+    return status;
+  }
+
+  public void setStatus(String status) {
+    this.status = status;
   }
 }

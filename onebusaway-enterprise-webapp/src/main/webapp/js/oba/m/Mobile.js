@@ -66,15 +66,20 @@ OBA.Mobile = (function() {
 			// ajax refresh for browsers that support it
 			refreshBar.find("a").click(function(e) {
 				e.preventDefault();
-
-				refreshTimestamp.text("Loading...");
+				var newText = refreshTimestamp.text().replaceAll("Updated", "Updating...");
+				refreshTimestamp.text(newText);
 				refreshBar.addClass("loadingRefresh");
 
 				jQuery("#content")
-					.load(location.href + " #content>*", null, function() {
-						refreshTimestamp.text("Updated " + new Date().format("mediumTime"));
-						refreshBar.removeClass("loadingRefresh");
-						updateServiceAlertHeaderText();
+					.load(location.href + " #content>*", null, function(responseText, textStatus, jqXHR) {
+						console.log("textStatus=" + textStatus);
+						if ( textStatus == "success") {
+							refreshTimestamp.text("Updated " + new Date().format("mediumTime"));
+							refreshBar.removeClass("loadingRefresh");
+							updateServiceAlertHeaderText();
+						} else {
+							// var newTxt = refreshTimestamp.text().replaceAll("Updated ", "Loading...")
+						}
 					});
 			});
 		}
@@ -186,6 +191,7 @@ OBA.Mobile = (function() {
 	function addMapBehaviour() {
 		var mapElement = document.getElementById("map");
 		if (mapElement !== null) {
+			mapElement.style.overflow = 'hidden';
 			$("#mapExpander").click(function () {
 				$mapExpander = $(this);
 				$mapDiv = $('#map');
@@ -325,6 +331,14 @@ OBA.Mobile = (function() {
 		initialize: function() {
 			locationField = jQuery("#l");
 			typeField = jQuery("#t");
+			// if query is not present but hash is, reload with the hash as query
+			if (window.location.href.indexOf('q=') < 0 && window.location.hash.length > 1) {
+				var queryString = "?q=" + window.location.hash.substring(1);
+				window.location.hash = "";
+				// hash trumps any existing params, we simply overwrite them
+				window.location.search = queryString;
+				return;
+			}
 			
 			if(navigator.geolocation) {
 				initLocationUI();

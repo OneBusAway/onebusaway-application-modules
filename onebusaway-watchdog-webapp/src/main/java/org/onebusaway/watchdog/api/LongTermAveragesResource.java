@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -133,7 +134,17 @@ public class LongTermAveragesResource extends MetricResource {
 					locationInvalidLatLonByAgency.put(agencyId, new int[ROLLING_AVERAGE_COUNT]);
 				}
 				if (_refreshInterval > 0) {
-					_refreshTask = _scheduledExecutorService.scheduleAtFixedRate(new RefreshTask(), 0, _refreshInterval, TimeUnit.SECONDS);
+					int i = 0;
+					while (_refreshTask == null && !_scheduledExecutorService.isShutdown()) {
+						i++;
+						_log.info("scheduling long term average with refresh = " + _refreshInterval);
+						try {
+							_refreshTask = _scheduledExecutorService.scheduleAtFixedRate(new RefreshTask(), _refreshInterval, _refreshInterval, TimeUnit.SECONDS);
+						} catch (RejectedExecutionException ree) {
+							_log.error("executor rejected execution of {}, trying again, try {}", this.getClass().getName(), i);
+							Thread.sleep(6000 * i);
+						}
+					}
 				}
 			} catch (Throwable t) {
 				_log.error("exception initalizing: ", t, t);

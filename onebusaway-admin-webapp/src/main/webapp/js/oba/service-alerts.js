@@ -49,20 +49,20 @@ jQuery(function() {
 	jQuery("#loadTemplate").click(showHideLoadTemplate);
 
 	// Check  if this is the "Edit Service Alert" page
-	if ($("#service-alert_submit").length > 0) {
+	if ($("#service_alert_submit").length > 0) {
 		// Only enable the Save and Add to Fav buttons if an "owning agency" is selected.
-		if ($("#service-alert_agencyId option:selected").val() == "null") {
-			$("#service-alert_submit").attr("disabled", "disabled");
-            $("#service-alert_addToFav").attr("disabled", "disabled");
+		if ($("#service_alert_agencyId option:selected").val() == "null") {
+			$("#service_alert_submit").attr("disabled", "disabled");
+            $("#service_alert_addToFav").attr("disabled", "disabled");
 			$("")
 		}
-		$("#service-alert_agencyId").change(function() {
-			if ($("#service-alert_agencyId option:selected").val() == "null") {
-				$("#service-alert_submit").attr("disabled", "disabled");
-                $("#service-alert_addToFav").attr("disabled", "disabled");
+		$("#service_alert_agencyId").change(function() {
+			if ($("#service_alert_agencyId option:selected").val() == "null") {
+				$("#service_alert_submit").attr("disabled", "disabled");
+                $("#service_alert_addToFav").attr("disabled", "disabled");
 			} else {
-				$("#service-alert_submit").removeAttr("disabled");
-                $("#service-alert_addToFav").removeAttr("disabled");
+				$("#service_alert_submit").removeAttr("disabled");
+                $("#service_alert_addToFav").removeAttr("disabled");
 			}
 		});
 	}
@@ -95,7 +95,7 @@ jQuery(function() {
 
 function getAgencySelectOptions() {
 	var optionsList = "";
-    var x = document.getElementById("service-alert_agencyId");
+    var x = document.getElementById("service_alert_agencyId");
     var i;
     for (i = 1; i < x.length; i++) {
         optionsList += '<option value="' + x.options[i].value + '">' 
@@ -109,53 +109,53 @@ function onAddAnotherCondition() {
 	var agencySelectOptions = getAgencySelectOptions();
 	var newConditionTable = '<table class="affectsClauseConditions"> \
 		<tr> \
-		    <td class="tdLabel"><label for="service-alert_allAffects_agencyId" class="label">Agency:</label> \
+		    <td class="tdLabel"><label for="service_alert_allAffects_agencyId" class="label">Agency:</label> \
 			</td> \
 			<td> \
 			<select class="alertCondition" name="allAffects['
 				+ currentConditionsCt
-				+ '].agencyId" id="service-alert_allAffects_' + currentConditionsCt + '__agencyId"> \
+				+ '].agencyId" id="service_alert_allAffects_' + currentConditionsCt + '__agencyId"> \
 		    	<option value="null">Select agency affected</option>'
 				+ agencySelectOptions
 			+ '</select> \
 			</td> \
 		</tr> \
 		<tr> \
-		    <td class="tdLabel"><label for="service-alert_allAffects_agencyPartRouteId" class="label">Agency for Route:</label> \
+		    <td class="tdLabel"><label for="service_alert_allAffects_agencyPartRouteId" class="label">Agency for Route:</label> \
 			</td> \
 			<td> \
 			<select class="alertCondition" name="allAffects['
 		+ currentConditionsCt
-		+ '].agencyPartRouteId" id="service-alert_allAffects_' + currentConditionsCt + '__agencyPartRouteId"> \
+		+ '].agencyPartRouteId" id="service_alert_allAffects_' + currentConditionsCt + '__agencyPartRouteId"> \
 		    	<option value="null">Select agency for Route</option>'
 		+ agencySelectOptions
 		+ '</select> \
 			</td> \
 		</tr> \
 		<tr> \
-	    	<td class="tdLabel"><label for="service-alert_allAffects_' + currentConditionsCt + '__routePartRouteId" class="label">Route:</label></td> \
+	    	<td class="tdLabel"><label for="service_alert_allAffects_' + currentConditionsCt + '__routePartRouteId" class="label">Route:</label></td> \
 	    	<td><input class="alertCondition" name="allAffects['
 			+ currentConditionsCt
-			+ '].routePartRouteId" value="" id="service-alert_allAffects_' + currentConditionsCt + '__routePartRouteId" type="text"></td> \
+			+ '].routePartRouteId" value="" id="service_alert_allAffects_' + currentConditionsCt + '__routePartRouteId" type="text"></td> \
 		</tr> \
 		<tr><td style="text-align:center" colspan="2" id="routeValidation' + currentConditionsCt + '">Click Validate to lookup Route</td></tr> \
 		<tr> \
-		    <td class="tdLabel"><label for="service-alert_allAffects_agencyPartStopId" class="label">Agency for Stop:</label> \
+		    <td class="tdLabel"><label for="service_alert_allAffects_agencyPartStopId" class="label">Agency for Stop:</label> \
 			</td> \
 			<td> \
 			<select class="alertCondition" name="allAffects['
 		+ currentConditionsCt
-		+ '].agencyPartStopId" id="service-alert_allAffects_' + currentConditionsCt + '__agencyPartStopId"> \
+		+ '].agencyPartStopId" id="service_alert_allAffects_' + currentConditionsCt + '__agencyPartStopId"> \
 		    	<option value="null">Select agency for Stop</option>'
 		+ agencySelectOptions
 		+ '</select> \
 			</td> \
 		</tr> \
 		<tr> \
-	    	<td class="tdLabel"><label for="service-alert_allAffects_' + currentConditionsCt + '__stopPartStopIdId" class="label">Stop:</label></td> \
+	    	<td class="tdLabel"><label for="service_alert_allAffects_' + currentConditionsCt + '__stopPartStopIdId" class="label">Stop:</label></td> \
 	    	<td><input class="alertCondition" name="allAffects['
 			+ currentConditionsCt
-			+ '].stopPartStopId" value="" id="service-alert_allAffects_' + currentConditionsCt + '__stopPartStopId" type="text"></td> \
+			+ '].stopPartStopId" value="" id="service_alert_allAffects_' + currentConditionsCt + '__stopPartStopId" type="text"></td> \
 		</tr> \
 		<tr><td style="text-align:center" colspan="2" id="stopValidation' + currentConditionsCt + '">Click Validate to lookup Stop</td></tr> \
 		</table>';
@@ -182,6 +182,9 @@ function onAddAnotherCondition() {
 	$("#conditionTable td:last.validateCondition").click(onValidateCondition);
 }
 function onDeleteCondition() {
+	if(!confirm("Are you sure you want to delete this condition?")){
+		return;
+	}
 	$(this).closest('tr').remove();
 	// Reset the name attributes for the remaining conditions to match their 
 	// new positions in the list.
@@ -230,7 +233,7 @@ function onTweetCondition(handler) {
 function onValidateCondition(handler) {
 	var aId = handler.target.id;
 	var id = aId.replace("validateCondition", "");
-	var selector = "service-alert_allAffects_"+ id;
+	var selector = "service_alert_allAffects_"+ id;
 	var agencyStopField = document.getElementById(selector + "__agencyPartStopId");
 	var stopField = document.getElementById(selector + "__stopPartStopId");
 	if (agencyStopField == null || stopField == null) {

@@ -15,26 +15,35 @@
  */
 package org.onebusaway.api.actions.api.gtfs_realtime;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
+import java.util.TimeZone;
 
+import org.apache.struts2.ServletActionContext;
 import org.apache.struts2.rest.DefaultHttpHeaders;
 import org.onebusaway.api.actions.api.ApiActionSupport;
+import org.onebusaway.api.model.transit.realtime.GtfsRealtimeConstantsV2;
 import org.onebusaway.api.services.AgencyAndIdModificationStrategy;
 import org.onebusaway.exceptions.ServiceException;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.util.SystemTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.google.transit.realtime.GtfsRealtime.FeedHeader;
 import com.google.transit.realtime.GtfsRealtime.FeedMessage;
-import com.google.transit.realtime.GtfsRealtimeConstants;
 import com.opensymphony.xwork2.conversion.annotations.TypeConversion;
 import com.opensymphony.xwork2.validator.annotations.RequiredFieldValidator;
+
+import javax.servlet.http.HttpServletResponse;
 
 public abstract class GtfsRealtimeActionSupport extends ApiActionSupport {
 
   private static final long serialVersionUID = 1L;
+  private static Logger _log = LoggerFactory.getLogger(GtfsRealtimeActionSupport.class);
 
   enum FILTER_TYPE {
     UNFILTERED,
@@ -56,6 +65,13 @@ public abstract class GtfsRealtimeActionSupport extends ApiActionSupport {
   private String _routeFilterId = null;
 
   private boolean _removeAgencyIds = true;
+
+  private static final SimpleDateFormat _sdf;
+
+  static {
+    _sdf = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss 'GMT' ", Locale.US);
+    _sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
+  }
 
   public GtfsRealtimeActionSupport() {
     super(V2);
@@ -100,7 +116,7 @@ public abstract class GtfsRealtimeActionSupport extends ApiActionSupport {
 
     FeedMessage.Builder feed = FeedMessage.newBuilder();
     FeedHeader.Builder header = feed.getHeaderBuilder();
-    header.setGtfsRealtimeVersion(GtfsRealtimeConstants.VERSION);
+    header.setGtfsRealtimeVersion(GtfsRealtimeConstantsV2.VERSION);
     header.setTimestamp(time / 1000);
     if (getRouteFilterId() != null) {
       fillFeedMessage(feed, _agencyId, time, FILTER_TYPE.ROUTE_ID, getRouteFilterId());
@@ -108,11 +124,26 @@ public abstract class GtfsRealtimeActionSupport extends ApiActionSupport {
       fillFeedMessage(feed, _agencyId, time, FILTER_TYPE.UNFILTERED, null);
     }
 
-    return setOkResponse(feed.build());
+    try {
+      return setOkResponse(feed.build());
+    } catch (Throwable t) {
+      _log.error("exception constructing GTFS-RT:", t, t);
+      return setExceptionResponse();
+    }
   }
 
   protected abstract void fillFeedMessage(FeedMessage.Builder feed,
       String agencyId, long timestamp, FILTER_TYPE filterType, String filterValue);
+
+  protected void setLastModifiedHeader(long feedTimestamp){
+    if(feedTimestamp != 0){
+      long lastModifiedMills = feedTimestamp * 1000L;
+      String lastModifiedHeader = _sdf.format(new Date(lastModifiedMills));
+      HttpServletResponse response = ServletActionContext.getResponse();
+      response.setHeader("Last-Modified", lastModifiedHeader);
+    }
+
+  }
 
   protected String normalizeId(String id) {
     if (_removeAgencyIds) {

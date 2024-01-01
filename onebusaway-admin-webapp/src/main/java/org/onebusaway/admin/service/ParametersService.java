@@ -15,6 +15,9 @@
  */
 package org.onebusaway.admin.service;
 
+import org.onebusaway.util.impl.configuration.ConfigParameter;
+
+import java.util.List;
 import java.util.Map;
 
 
@@ -27,11 +30,10 @@ import java.util.Map;
 public interface ParametersService {
 
 	/**
-	 * Saves given parameter values to TDM server. 
-	 * @param paramters parameters to save
+	 * Save parameters in backend data store
 	 * @return true if all parameters are saved sucessfully
 	 */
-	boolean saveParameters(Map<String, String> parameters);
+	boolean saveParameters(Map<String, List<ConfigParameter>> configParameters);
 	
 	/**
 	 * Returns all key value pairs of configuration stored on TDM server

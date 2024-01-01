@@ -26,8 +26,9 @@ import java.io.Writer;
 
 /**
  * Struts plugin implementation for rss_2.0.
+ * TODO: find a suitable replacment for this! (Rome is deprecated)
  */
-public class RomeResult extends StrutsResultSupport {
+public class RomeResult /*extends StrutsResultSupport*/ {
 
     private static final long serialVersionUID = 1L;
 

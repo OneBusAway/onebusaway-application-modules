@@ -169,7 +169,7 @@ public abstract class CacheService<K, V> {
   }
 
   public void logStatus() {
-    _log.info(getCache().stats().toString() + "; disabled=" + _disabled
+    _log.debug(getCache().stats().toString() + "; disabled=" + _disabled
         + "; useMemcached=" + useMemcached
         + "; Local Size=" + _cache.size()
         + "; Memcached Size=" + (memcache==null?"[null]":memcache.getStats("sizes")));

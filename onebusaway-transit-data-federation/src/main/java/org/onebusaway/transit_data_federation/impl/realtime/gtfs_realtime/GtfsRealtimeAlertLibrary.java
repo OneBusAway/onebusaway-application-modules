@@ -17,6 +17,7 @@ package org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime;
 
 import java.util.Map;
 
+import com.google.transit.realtime.GtfsRealtimeServiceStatus;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.alerts.service.ServiceAlerts;
 import org.onebusaway.alerts.service.ServiceAlerts.*;
@@ -54,10 +55,12 @@ class GtfsRealtimeAlertLibrary {
     b.setId(ServiceAlertLibrary.id(id));
     for (GtfsRealtime.TimeRange range : alert.getActivePeriodList()) {
       ServiceAlerts.TimeRange.Builder rangeBuilder = ServiceAlerts.TimeRange.newBuilder();
-      if (range.hasStart())
-        rangeBuilder.setStart(range.getStart());
-      if (range.hasEnd())
-        rangeBuilder.setEnd(range.getEnd());
+      if (range.hasStart() && range.getStart() > 0) {
+        rangeBuilder.setStart(toMillis(range.getStart()));
+      }
+      if (range.hasEnd() && range.getEnd() > 0) {
+        rangeBuilder.setEnd(toMillis(range.getEnd()));
+      }
       b.addActiveWindow(rangeBuilder);
     }
     if (alert.hasCause())
@@ -77,7 +80,24 @@ class GtfsRealtimeAlertLibrary {
     }
     if (alert.hasUrl())
       b.setUrl(convertTranslatedString(alert.getUrl()));
+
+    // custom extensions
+    GtfsRealtimeServiceStatus.MercuryAlert mercuryAlert = null;
+    if (alert.hasExtension(GtfsRealtimeServiceStatus.mercuryAlert)) {
+      mercuryAlert =
+              alert.getExtension(GtfsRealtimeServiceStatus.mercuryAlert);
+      if (mercuryAlert.hasAlertType()) {
+        b.setConsequenceMessage(mercuryAlert.getAlertType());
+      }
+    }
     return b;
+  }
+
+  private long toMillis(long secondsOrMillis) {
+    // spec has this as seconds, but internally we use millis
+    if (secondsOrMillis < 1000000000000l)
+      return secondsOrMillis * 1000;
+    return secondsOrMillis;
   }
 
   private Affects.Builder getEntitySelectorAsAffects(EntitySelector selector, Map agencyIdMap, boolean ignoreTripIds) {

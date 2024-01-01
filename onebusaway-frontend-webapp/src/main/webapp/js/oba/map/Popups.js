@@ -391,33 +391,52 @@ OBA.Popups = (function() {
 		if(MonitoredVehicleJourney.Occupancy === undefined)
 			return '';
 
-		var occupancyLoad = "N/A";
+		var occupancyLoad = "<span class='weeble0'></span>";
 
 		//console.log('occupancy: '+ MonitoredVehicleJourney.Occupancy);
-
-		if(MonitoredVehicleJourney.Occupancy == "seatsAvailable"){
-			occupancyLoad = '<span class="apcDotG"></span>'+
-				'<span id="apcTextG">&nbsp;' + lookupOccupancy("seatsAvailable") + '</span>';
-			if(addDashedLine == true){
-				occupancyLoad += '<div class="apcDashedLine"><img src="img/occupancy/apcLoadG.png"></div>';
+		var stylePrefix = "apcDot";
+		if (OBA.Config.apcIcons) {
+			stylePrefix = "weeble";
+		}
+		if(MonitoredVehicleJourney.Occupancy == "seatsAvailable") {
+			var occupancyText = lookupOccupancy("seatsAvailable");
+			var occupancyClass = stylePrefix + "G";
+			if (!OBA.Config.apcIcons) {
+				occupancyLoad = '<span class="apcDotG"></span>' +
+					'<span id="apcTextG">' + occupancyText + '</span>';
+				if (addDashedLine == true) {
+					occupancyLoad += '<div class="apcDashedLine"><img src="img/occupancy/apcLoadG.png"></div>';
+				}
+			} else {
+				occupancyLoad = '<span title="' + occupancyText + '" aria-label="' + occupancyText + '" class="' + occupancyClass + '"></span>';
 			}
-			//occupancyLoad = '<span class="apcicong"> </span>';
 		}
 		else if(MonitoredVehicleJourney.Occupancy == "standingAvailable"){
-			occupancyLoad = '<span class="apcDotY"></span>'+
-				'<span id="apcTextY">&nbsp;' + lookupOccupancy("standingAvailable") + '</span>';
-			if(addDashedLine == true){
-				occupancyLoad += '<div class="apcDashedLine"><img src="img/occupancy/apcLoadY.png"></div>';
+			var occupancyText = lookupOccupancy("standingAvailable");
+			var occupancyClass = stylePrefix + "Y";
+			if (!OBA.Config.apcIcons) {
+				occupancyLoad = '<span class="apcDotY"></span>' +
+					'<span id="apcTextY">' + lookupOccupancy("standingAvailable") + '</span>';
+				if (addDashedLine == true) {
+					occupancyLoad += '<div class="apcDashedLine"><img src="img/occupancy/apcLoadY.png"></div>';
+				}
+			} else {
+				occupancyLoad = '<span title="' + occupancyText + '" aria-label="' + occupancyText + '" class="' + occupancyClass + '"></span>';
 			}
-			//occupancyLoad = '<span class="apcicony"> </span>';
 		}
 		else if(MonitoredVehicleJourney.Occupancy == "full"){
-			occupancyLoad = '<span class="apcDotR"></span>'+
-				'<span id="apcTextR">&nbsp;' + lookupOccupancy("full") + '</span>';
-			if(addDashedLine == true){
-				occupancyLoad += '<div class="apcDashedLine"><img src="img/occupancy/apcLoadR.png"></div>';
+			var occupancyText = lookupOccupancy("full");
+			var occupancyClass = stylePrefix + "R";
+			if (!OBA.Config.apcIcons) {
+				occupancyLoad = '<span class="apcDotR"></span>' +
+					'<span id="apcTextR">' + lookupOccupancy("full") + '</span>';
+				if (addDashedLine == true) {
+					occupancyLoad += '<div class="apcDashedLine"><img src="img/occupancy/apcLoadR.png"></div>';
+				}
+			} else {
+				occupancyLoad = '<span title="' + occupancyText + '" aria-label="' + occupancyText + '" class="' + occupancyClass + '"></span>';
 			}
-			//occupancyLoad = '<span class="apciconr"> </span>';
+
 		}
 
 		return occupancyLoad;
@@ -429,6 +448,19 @@ OBA.Popups = (function() {
 
 	function getOccupancy(MonitoredVehicleJourney, addDashedLine){
 		return getOccupancyApcModeOccupancy(MonitoredVehicleJourney, addDashedLine);
+	}
+
+	function isOriginTerminal(MonitoredVehicleJourney) {
+		if (MonitoredVehicleJourney.OriginRef !== 'undefined') {
+			var origin = MonitoredVehicleJourney.OriginRef;
+			if (MonitoredVehicleJourney.MonitoredCall !== 'undefined') {
+				var currentStop = MonitoredVehicleJourney.MonitoredCall.StopPointRef;
+				if (origin === currentStop) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 
@@ -661,13 +693,21 @@ OBA.Popups = (function() {
 
 
                              var timePrediction = null;
-                             var expectedArrivalTime = null;
-                             if(typeof monitoredVehicleJourney.MonitoredCall.ExpectedArrivalTime !== 'undefined'
+                             var expectedTime = null;
+							 if(isOriginTerminal(monitoredVehicleJourney)
+							 && typeof monitoredVehicleJourney.MonitoredCall.ExpectedDepartureTime !== 'undefined'
+								 && monitoredVehicleJourney.MonitoredCall.ExpectedDepartureTime !== null) {
+								 timePrediction = OBA.Util.getArrivalEstimateForISOString(
+									 monitoredVehicleJourney.MonitoredCall.ExpectedDepartureTime,
+									 monitoredVehicleJourney.RecordedAtTime/*synthetic property*/);
+								 expectedTime =
+									 OBA.Util.ISO8601StringToDate(monitoredVehicleJourney.MonitoredCall.ExpectedDepartureTime).format(dateFormat.masks.shortTime);
+							 } else if(typeof monitoredVehicleJourney.MonitoredCall.ExpectedArrivalTime !== 'undefined'
                                  && monitoredVehicleJourney.MonitoredCall.ExpectedArrivalTime !== null) {
                                  timePrediction = OBA.Util.getArrivalEstimateForISOString(
                                          monitoredVehicleJourney.MonitoredCall.ExpectedArrivalTime,
                                          monitoredVehicleJourney.RecordedAtTime/*synthetic property*/);
-                                 expectedArrivalTime =
+                                 expectedTime =
 									 OBA.Util.ISO8601StringToDate(monitoredVehicleJourney.MonitoredCall.ExpectedArrivalTime).format(dateFormat.masks.shortTime);
 						}
 
@@ -706,8 +746,8 @@ OBA.Popups = (function() {
 
 						// time mode
 						if(timePrediction != null && stalled === false) {
-							if (expectedArrivalTime != null && OBA.Config.showExpectedArrivalTimeInStopPopup == "true") {
-                                timePrediction += ', ' + expectedArrivalTime;
+							if (expectedTime != null && OBA.Config.showExpectedArrivalTimeInStopPopup == "true") {
+                                timePrediction += ', ' + expectedTime;
                         	}
 							if(wrapped === false) {
 								timePrediction += ", " + distance;

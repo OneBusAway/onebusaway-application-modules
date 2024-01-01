@@ -27,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 @ParentPackage("json-default")
 @Result(type="json", params={"callbackParameter", "callback", "root", "suggestions"})
+// TODO: move this to onebusaway-api-webapp so it can have an API key.
 public class AutocompleteAction extends OneBusAwayEnterpriseActionSupport {
 
   private static final long serialVersionUID = 1L;

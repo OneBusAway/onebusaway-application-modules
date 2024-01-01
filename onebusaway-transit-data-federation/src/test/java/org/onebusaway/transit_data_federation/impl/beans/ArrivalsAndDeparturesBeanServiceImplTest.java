@@ -29,16 +29,17 @@ import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.trip;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import org.onebusaway.realtime.api.OccupancyStatus;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
 import org.onebusaway.transit_data.model.ArrivalsAndDeparturesQueryBean;
 import org.onebusaway.transit_data.model.StopBean;
+import org.onebusaway.transit_data.model.TransitDataConstants;
 import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.transit_data.model.trips.TripStatusBean;
 import org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.GtfsRealtimeNegativeArrivals;
@@ -51,10 +52,7 @@ import org.onebusaway.transit_data_federation.model.TargetTime;
 import org.onebusaway.transit_data_federation.model.narrative.StopTimeNarrative;
 import org.onebusaway.transit_data_federation.model.narrative.StopTimeNarrative.Builder;
 import org.onebusaway.transit_data_federation.services.ArrivalAndDepartureService;
-import org.onebusaway.transit_data_federation.services.beans.ServiceAlertsBeanService;
-import org.onebusaway.transit_data_federation.services.beans.StopBeanService;
-import org.onebusaway.transit_data_federation.services.beans.TripBeanService;
-import org.onebusaway.transit_data_federation.services.beans.TripDetailsBeanService;
+import org.onebusaway.transit_data_federation.services.beans.*;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.narrative.NarrativeService;
 import org.onebusaway.transit_data_federation.services.realtime.ArrivalAndDepartureInstance;
@@ -72,9 +70,54 @@ public class ArrivalsAndDeparturesBeanServiceImplTest {
   private ArrivalAndDepartureService _arrivalAndDepartureService;
   private TripBeanService _tripBeanService;
   private StopBeanService _stopBeanService;
+  private StopsBeanService _stopsBeanService;
   private TripDetailsBeanService _tripDetailsBeanService;
   private ServiceAlertsBeanService _serviceAlertsBeanService;
   private GtfsRealtimeNegativeArrivals _gtfsRealtimeNegativeArrivals;
+
+  private StopEntryImpl stopA;
+  private StopEntryImpl stopB;
+  private StopEntryImpl stopC;
+
+  private BlockEntryImpl blockA;
+  private BlockEntryImpl blockB;
+  private BlockEntryImpl blockC;
+
+  private TripEntryImpl tripA;
+  private TripEntryImpl tripB;
+  private TripEntryImpl tripC;
+
+  private BlockConfigurationEntry blockConfigA;
+  private BlockConfigurationEntry blockConfigB;
+  private BlockConfigurationEntry blockConfigC;
+
+  private BlockStopTimeEntry bstAA;
+  private BlockStopTimeEntry bstAB;
+  private BlockStopTimeEntry bstBA;
+  private BlockStopTimeEntry bstBB;
+  private BlockStopTimeEntry bstCA;
+  private BlockStopTimeEntry bstCB;
+
+  private StopTimeEntryImpl stopTimeAB;
+  private StopTimeEntryImpl stopTimeBB;
+  private StopTimeEntryImpl stopTimeCB;
+
+  private BlockInstance blockInstanceA;
+  private BlockInstance blockInstanceB;
+  private BlockInstance blockInstanceC;
+
+  private BlockLocation blockLocationA;
+  private BlockLocation blockLocationB;
+  private BlockLocation blockLocationC;
+
+  private long lastUpdateTime;
+  private long serviceDate;
+
+  private long t = dateAsLong("2010-10-05 16:30");
+
+  private int minutesBefore = 5;
+  private int minutesAfter = 30;
+
 
   @Before
   public void setup() {
@@ -96,6 +139,9 @@ public class ArrivalsAndDeparturesBeanServiceImplTest {
     _stopBeanService = Mockito.mock(StopBeanService.class);
     _service.setStopBeanService(_stopBeanService);
 
+    _stopsBeanService = Mockito.mock(StopsBeanService.class);
+    _service.setStopsBeanService(_stopsBeanService);
+
     _tripDetailsBeanService = Mockito.mock(TripDetailsBeanService.class);
     _service.setTripDetailsBeanService(_tripDetailsBeanService);
 
@@ -104,82 +150,70 @@ public class ArrivalsAndDeparturesBeanServiceImplTest {
     
     _gtfsRealtimeNegativeArrivals = new GtfsRealtimeNegativeArrivalsImpl();
     _service.setGtfsRealtimeNegativeArrivals(_gtfsRealtimeNegativeArrivals);
-  }
 
-  @Test
-  public void test() {
+    serviceDate = dateAsLong("2010-10-05 00:00");
+    lastUpdateTime = dateAsLong("2010-10-05 16:15");
 
-    long t = dateAsLong("2010-10-05 16:30");
-    long serviceDate = dateAsLong("2010-10-05 00:00");
-    int minutesBefore = 5;
-    int minutesAfter = 30;
-
-    StopEntryImpl stopA = stop("stopA", 47.0, -122.0);
-    StopEntryImpl stopB = stop("stopB", 47.0, -122.0);
-    StopEntryImpl stopC = stop("stopC", 47.0, -122.0);
-
-    Mockito.when(_transitGraphDao.getStopEntryForId(stopA.getId(), true)).thenReturn(
-        stopA);
-    Mockito.when(_transitGraphDao.getStopEntryForId(stopB.getId(), true)).thenReturn(
-        stopB);
-    Mockito.when(_transitGraphDao.getStopEntryForId(stopC.getId(), true)).thenReturn(
-        stopC);
 
     /****
      * Block A
      ****/
 
-    BlockEntryImpl blockA = block("blockA");
-    TripEntryImpl tripA = trip("tripA", "sA", 3000);
+    blockA = block("blockA");
+    tripA = trip("tripA", "sA", 3000);
+
+    stopA = stop("stopA", 47.0, -122.0);
+    stopB = stop("stopB", 47.0, -122.0);
+    stopC = stop("stopC", 47.0, -122.0);
 
     stopTime(0, stopA, tripA, time(16, 30), time(16, 35), 1000,50.0);
-    StopTimeEntryImpl stopTimeAB = stopTime(1, stopB, tripA, time(16, 40),
-        time(16, 45), 2000,75.0);
+    stopTimeAB = stopTime(1, stopB, tripA, time(16, 40),
+            time(16, 45), 2000,75.0);
 
-    BlockConfigurationEntry blockConfigA = blockConfiguration(blockA,
-        serviceIds(lsids("sA"), lsids()), tripA);
-    BlockStopTimeEntry bstAA = blockConfigA.getStopTimes().get(0);
-    BlockStopTimeEntry bstAB = blockConfigA.getStopTimes().get(1);
+    blockConfigA = blockConfiguration(blockA,
+            serviceIds(lsids("sA"), lsids()), tripA);
+    bstAA = blockConfigA.getStopTimes().get(0);
+    bstAB = blockConfigA.getStopTimes().get(1);
 
     /****
      * Block B
      ****/
 
-    BlockEntryImpl blockB = block("blockB");
-    TripEntryImpl tripB = trip("tripB", "sA", 3000);
+    blockB = block("blockB");
+    tripB = trip("tripB", "sA", 3000);
 
     stopTime(2, stopA, tripB, time(16, 40), time(16, 45), 1000,50.0);
-    StopTimeEntryImpl stopTimeBB = stopTime(3, stopB, tripB, time(16, 50),
-        time(16, 55), 2000,75.0);
+    stopTimeBB = stopTime(3, stopB, tripB, time(16, 50),
+            time(16, 55), 2000,75.0);
 
-    BlockConfigurationEntry blockConfigB = blockConfiguration(blockB,
-        serviceIds(lsids("sA"), lsids()), tripB);
-    BlockStopTimeEntry bstBA = blockConfigB.getStopTimes().get(0);
-    BlockStopTimeEntry bstBB = blockConfigB.getStopTimes().get(1);
+    blockConfigB = blockConfiguration(blockB,
+            serviceIds(lsids("sA"), lsids()), tripB);
+    bstBA = blockConfigB.getStopTimes().get(0);
+    bstBB = blockConfigB.getStopTimes().get(1);
 
     /****
      * Block C
      ****/
 
-    BlockEntryImpl blockC = block("blockC");
-    TripEntryImpl tripC = trip("tripC", "sA", 3000);
+    blockC = block("blockC");
+    tripC = trip("tripC", "sA", 3000);
 
     stopTime(4, stopC, tripC, time(16, 40), time(16, 45), 1000,50.0);
-    StopTimeEntryImpl stopTimeCB = stopTime(5, stopC, tripC, time(16, 50), time(16, 55), 2000, 75.0);
+    stopTimeCB = stopTime(5, stopC, tripC, time(16, 50), time(16, 55), 2000, 75.0);
 
-    BlockConfigurationEntry blockConfigC = blockConfiguration(blockC,
-        serviceIds(lsids("sA"), lsids()), tripC);
-    BlockStopTimeEntry bstCA = blockConfigC.getStopTimes().get(0);
-    BlockStopTimeEntry bstCB = blockConfigC.getStopTimes().get(1);
+    blockConfigC = blockConfiguration(blockC,
+            serviceIds(lsids("sA"), lsids()), tripC);
+    bstCA = blockConfigC.getStopTimes().get(0);
+    bstCB = blockConfigC.getStopTimes().get(1);
 
     /****
-     * 
+     *
      ****/
 
-    BlockInstance blockInstanceA = new BlockInstance(blockConfigA, serviceDate);
+    blockInstanceA = new BlockInstance(blockConfigA, serviceDate);
     long lastUpdateTime = dateAsLong("2010-10-05 16:15");
 
-    BlockLocation blockLocationA = new BlockLocation();
+    blockLocationA = new BlockLocation();
     blockLocationA.setActiveTrip(bstAA.getTrip());
     blockLocationA.setBlockInstance(blockInstanceA);
     blockLocationA.setClosestStop(bstAA);
@@ -193,12 +227,12 @@ public class ArrivalsAndDeparturesBeanServiceImplTest {
     blockLocationA.setVehicleId(aid("vehicle"));
 
     /****
-     * 
+     *
      ****/
 
-    BlockInstance blockInstanceB = new BlockInstance(blockConfigB, serviceDate);
+    blockInstanceB = new BlockInstance(blockConfigB, serviceDate);
 
-    BlockLocation blockLocationB = new BlockLocation();
+    blockLocationB = new BlockLocation();
     blockLocationB.setActiveTrip(bstBA.getTrip());
     blockLocationB.setBlockInstance(blockInstanceA);
     blockLocationB.setClosestStop(bstBA);
@@ -209,12 +243,12 @@ public class ArrivalsAndDeparturesBeanServiceImplTest {
     blockLocationB.setScheduledDistanceAlongBlock(400);
 
     /****
-     * 
+     *
      ****/
 
-    BlockInstance blockInstanceC = new BlockInstance(blockConfigC, serviceDate);
+    blockInstanceC = new BlockInstance(blockConfigC, serviceDate);
 
-    BlockLocation blockLocationC = new BlockLocation();
+    blockLocationC = new BlockLocation();
     blockLocationC.setActiveTrip(bstCA.getTrip());
     blockLocationC.setBlockInstance(blockInstanceC);
     blockLocationC.setClosestStop(bstCB);
@@ -224,8 +258,27 @@ public class ArrivalsAndDeparturesBeanServiceImplTest {
     blockLocationC.setPredicted(false);
     blockLocationC.setScheduledDistanceAlongBlock(400);
 
+    stopA = stop("stopA", 47.0, -122.0);
+    stopB = stop("stopB", 47.0, -122.0);
+    stopC = stop("stopC", 47.0, -122.0);
+
+    Mockito.when(_transitGraphDao.getStopEntryForId(stopA.getId(), true)).thenReturn(
+            stopA);
+    Mockito.when(_transitGraphDao.getStopEntryForId(stopB.getId(), true)).thenReturn(
+            stopB);
+    Mockito.when(_transitGraphDao.getStopEntryForId(stopC.getId(), true)).thenReturn(
+            stopC);
+
+
+
+
+  }
+
+  @Test
+  public void test() {
+
     /****
-     *
+     * stop time instances
      ****/
 
     long stopTimeFrom = t - minutesBefore * 60 * 1000;
@@ -248,14 +301,15 @@ public class ArrivalsAndDeparturesBeanServiceImplTest {
     TargetTime target = new TargetTime(t, t);
 
     Mockito.when(
-        _arrivalAndDepartureService.getArrivalsAndDeparturesForStopInTimeRange(
-            stopB, target, stopTimeFrom, stopTimeTo)).thenReturn(
-        Arrays.asList(in1, in2, in3));
+            _arrivalAndDepartureService.getArrivalsAndDeparturesForStopInTimeRange(
+                    stopB, target, stopTimeFrom, stopTimeTo)).thenReturn(
+            Arrays.asList(in1, in2, in3));
 
     Mockito.when(
-        _arrivalAndDepartureService.getArrivalsAndDeparturesForStopInTimeRange(
-            stopC, target, stopTimeFrom, stopTimeTo)).thenReturn(
-        Arrays.asList(in3));
+            _arrivalAndDepartureService.getArrivalsAndDeparturesForStopInTimeRange(
+                    stopC, target, stopTimeFrom, stopTimeTo)).thenReturn(
+            Arrays.asList(in3));
+
 
     /****
      * 
@@ -331,6 +385,7 @@ public class ArrivalsAndDeparturesBeanServiceImplTest {
         _tripDetailsBeanService.getBlockLocationAsStatusBean(blockLocationC, t)).thenReturn(
         tripStatusBeanC);
 
+
     /****
      * 
      ****/
@@ -391,4 +446,528 @@ public class ArrivalsAndDeparturesBeanServiceImplTest {
     assertEquals("YY", bean.getRouteShortName());
     assertEquals("default", bean.getStatus());
   }
+
+  /**
+   * confirm CANCELED trips flow through API when enabled.
+   * BlockA is cancelled, others are active
+   */
+  @Test
+  public void testAllCanceled() {
+    /****
+     * stop time instances
+     ****/
+
+    long stopTimeFrom = t - minutesBefore * 60 * 1000;
+    long stopTimeTo = t + minutesAfter * 60 * 1000;
+
+    StopTimeInstance sti1 = new StopTimeInstance(bstAB,blockInstanceA.getState());
+    ArrivalAndDepartureInstance in1 = new ArrivalAndDepartureInstance(sti1);
+    in1.setBlockLocation(blockLocationA);
+    in1.setPredictedArrivalTime((long) (in1.getScheduledArrivalTime() + 5 * 60 * 1000));
+    in1.setPredictedDepartureTime((long) (in1.getScheduledDepartureTime()));
+    in1.setStatus(TransitDataConstants.STATUS_CANCELED);
+
+    StopTimeInstance sti2 = new StopTimeInstance(bstBB, blockInstanceB.getState());
+    ArrivalAndDepartureInstance in2 = new ArrivalAndDepartureInstance(sti2);
+    in2.setBlockLocation(blockLocationB);
+    in2.setStatus(TransitDataConstants.STATUS_CANCELED);
+
+    StopTimeInstance sti3 = new StopTimeInstance(bstCB, blockInstanceC.getState());
+    ArrivalAndDepartureInstance in3 = new ArrivalAndDepartureInstance(sti3);
+    in3.setBlockLocation(blockLocationC);
+    in3.setStatus(TransitDataConstants.STATUS_CANCELED);
+
+    TargetTime target = new TargetTime(t, t);
+
+    Mockito.when(
+            _arrivalAndDepartureService.getArrivalsAndDeparturesForStopInTimeRange(
+                    stopB, target, stopTimeFrom, stopTimeTo)).thenReturn(
+            Arrays.asList(in1, in2, in3));
+
+    Mockito.when(
+            _arrivalAndDepartureService.getArrivalsAndDeparturesForStopInTimeRange(
+                    stopC, target, stopTimeFrom, stopTimeTo)).thenReturn(
+            Arrays.asList(in3));
+
+    /****
+     *
+     ****/
+
+    Builder stopTimeNarrative = StopTimeNarrative.builder();
+    stopTimeNarrative.setStopHeadsign("Downtown");
+    Mockito.when(_narrativeService.getStopTimeForEntry(stopTimeAB)).thenReturn(
+            stopTimeNarrative.create());
+
+    stopTimeNarrative = StopTimeNarrative.builder();
+    stopTimeNarrative.setRouteShortName("XX");
+    Mockito.when(_narrativeService.getStopTimeForEntry(stopTimeBB)).thenReturn(
+            stopTimeNarrative.create());
+
+    stopTimeNarrative = StopTimeNarrative.builder();
+    stopTimeNarrative.setRouteShortName("YY");
+    Mockito.when(_narrativeService.getStopTimeForEntry(stopTimeCB)).thenReturn(
+            stopTimeNarrative.create());
+
+    /****
+     *
+     ****/
+
+    StopBean stopABean = new StopBean();
+    stopABean.setId("1_stopA");
+    Mockito.when(_stopBeanService.getStopForId(stopA.getId(), null)).thenReturn(
+            stopABean);
+
+    StopBean stopBBean = new StopBean();
+    stopBBean.setId("1_stopB");
+    Mockito.when(_stopBeanService.getStopForId(stopB.getId(), null)).thenReturn(
+            stopBBean);
+
+    StopBean stopCBean = new StopBean();
+    stopCBean.setId("1_stopC");
+    Mockito.when(_stopBeanService.getStopForId(stopC.getId(), null)).thenReturn(
+            stopCBean);
+
+    /****
+     *
+     ****/
+
+    TripBean tripABean = new TripBean();
+    Mockito.when(_tripBeanService.getTripForId(aid("tripA"))).thenReturn(
+            tripABean);
+
+    TripBean tripBBean = new TripBean();
+    Mockito.when(_tripBeanService.getTripForId(aid("tripB"))).thenReturn(
+            tripBBean);
+
+    TripBean tripCBean = new TripBean();
+    Mockito.when(_tripBeanService.getTripForId(aid("tripC"))).thenReturn(
+            tripCBean);
+
+    /****
+     *
+     ****/
+
+    TripStatusBean tripStatusBeanA = new TripStatusBean();
+    TripStatusBean tripStatusBeanB = new TripStatusBean();
+    TripStatusBean tripStatusBeanC = new TripStatusBean();
+
+    Mockito.when(
+            _tripDetailsBeanService.getBlockLocationAsStatusBean(blockLocationA, t)).thenReturn(
+            tripStatusBeanA);
+
+    Mockito.when(
+            _tripDetailsBeanService.getBlockLocationAsStatusBean(blockLocationB, t)).thenReturn(
+            tripStatusBeanB);
+
+    Mockito.when(
+            _tripDetailsBeanService.getBlockLocationAsStatusBean(blockLocationC, t)).thenReturn(
+            tripStatusBeanC);
+
+
+    /****
+     *
+     ****/
+
+    ArrivalsAndDeparturesQueryBean query = new ArrivalsAndDeparturesQueryBean();
+    query.setTime(t);
+    query.setMinutesBefore(minutesBefore);
+    query.setMinutesAfter(minutesAfter);
+    query.setFrequencyMinutesBefore(minutesBefore);
+    query.setFrequencyMinutesAfter(minutesAfter);
+
+    List<ArrivalAndDepartureBean> arrivalsAndDepartures = _service.getArrivalsAndDeparturesByStopId(
+            stopB.getId(), query);
+
+    assertEquals(3, arrivalsAndDepartures.size());
+
+    ArrivalAndDepartureBean bean = arrivalsAndDepartures.get(0);
+    assertEquals(1500, bean.getDistanceFromStop(), 0.0);
+    assertEquals(lastUpdateTime, bean.getLastUpdateTime().longValue());
+    assertEquals(1, bean.getNumberOfStopsAway());
+    assertEquals(0L, bean.getPredictedArrivalTime());
+    assertEquals(0L, bean.getPredictedDepartureTime());
+    assertNull(bean.getRouteShortName());
+    assertEquals(dateAsLong("2010-10-05 16:40"), bean.getScheduledArrivalTime());
+    assertEquals(dateAsLong("2010-10-05 16:45"),
+            bean.getScheduledDepartureTime());
+    assertEquals(serviceDate, bean.getServiceDate());
+    assertEquals(TransitDataConstants.STATUS_CANCELED, bean.getStatus());
+    assertSame(stopBBean, bean.getStop());
+    assertSame(tripABean, bean.getTrip());
+    assertSame(tripStatusBeanA, bean.getTripStatus());
+    assertEquals("Downtown", bean.getTripHeadsign());
+    // ensure vehicle is null on canceled trips even if its set upstream
+    assertEquals(null, bean.getVehicleId());
+
+    bean = arrivalsAndDepartures.get(1);
+    assertEquals(1600, bean.getDistanceFromStop(), 0.0);
+    assertNull(bean.getLastUpdateTime());
+    assertEquals(1, bean.getNumberOfStopsAway());
+    assertEquals(0L, bean.getPredictedArrivalTime());
+    assertEquals(0L, bean.getPredictedDepartureTime());
+    assertEquals("XX", bean.getRouteShortName());
+    assertEquals(dateAsLong("2010-10-05 16:50"), bean.getScheduledArrivalTime());
+    assertEquals(dateAsLong("2010-10-05 16:55"),
+            bean.getScheduledDepartureTime());
+    assertEquals(serviceDate, bean.getServiceDate());
+    assertEquals(TransitDataConstants.STATUS_CANCELED, bean.getStatus());
+    assertSame(stopBBean, bean.getStop());
+    assertSame(tripBBean, bean.getTrip());
+    assertSame(tripStatusBeanB, bean.getTripStatus());
+    assertNull(bean.getTripHeadsign());
+    assertNull(bean.getVehicleId());
+
+    bean = arrivalsAndDepartures.get(2);
+    assertSame(tripCBean, bean.getTrip());
+    assertSame(stopCBean, bean.getStop());
+    assertEquals(serviceDate, bean.getServiceDate());
+    assertEquals("YY", bean.getRouteShortName());
+    assertEquals(TransitDataConstants.STATUS_CANCELED, bean.getStatus());
+  }
+
+  @Test
+  public void testBlockACanceled() {
+    /****
+     * stop time instances
+     ****/
+
+    long stopTimeFrom = t - minutesBefore * 60 * 1000;
+    long stopTimeTo = t + minutesAfter * 60 * 1000;
+
+    StopTimeInstance sti1 = new StopTimeInstance(bstAB,blockInstanceA.getState());
+    ArrivalAndDepartureInstance in1 = new ArrivalAndDepartureInstance(sti1);
+    in1.setBlockLocation(blockLocationA);
+    in1.setPredictedArrivalTime((long) (in1.getScheduledArrivalTime() + 5 * 60 * 1000));
+    in1.setPredictedDepartureTime((long) (in1.getScheduledDepartureTime()));
+    in1.setStatus(TransitDataConstants.STATUS_CANCELED);
+
+    StopTimeInstance sti2 = new StopTimeInstance(bstBB, blockInstanceB.getState());
+    ArrivalAndDepartureInstance in2 = new ArrivalAndDepartureInstance(sti2);
+    in2.setBlockLocation(blockLocationB);
+
+    StopTimeInstance sti3 = new StopTimeInstance(bstCB, blockInstanceC.getState());
+    ArrivalAndDepartureInstance in3 = new ArrivalAndDepartureInstance(sti3);
+    in3.setBlockLocation(blockLocationC);
+
+    TargetTime target = new TargetTime(t, t);
+
+    Mockito.when(
+            _arrivalAndDepartureService.getArrivalsAndDeparturesForStopInTimeRange(
+                    stopB, target, stopTimeFrom, stopTimeTo)).thenReturn(
+            Arrays.asList(in1, in2, in3));
+
+    Mockito.when(
+            _arrivalAndDepartureService.getArrivalsAndDeparturesForStopInTimeRange(
+                    stopC, target, stopTimeFrom, stopTimeTo)).thenReturn(
+            Arrays.asList(in3));
+
+    /****
+     *
+     ****/
+
+    Builder stopTimeNarrative = StopTimeNarrative.builder();
+    stopTimeNarrative.setStopHeadsign("Downtown");
+    Mockito.when(_narrativeService.getStopTimeForEntry(stopTimeAB)).thenReturn(
+            stopTimeNarrative.create());
+
+    stopTimeNarrative = StopTimeNarrative.builder();
+    stopTimeNarrative.setRouteShortName("XX");
+    Mockito.when(_narrativeService.getStopTimeForEntry(stopTimeBB)).thenReturn(
+            stopTimeNarrative.create());
+
+    stopTimeNarrative = StopTimeNarrative.builder();
+    stopTimeNarrative.setRouteShortName("YY");
+    Mockito.when(_narrativeService.getStopTimeForEntry(stopTimeCB)).thenReturn(
+            stopTimeNarrative.create());
+
+    /****
+     *
+     ****/
+
+    StopBean stopABean = new StopBean();
+    stopABean.setId("1_stopA");
+    Mockito.when(_stopBeanService.getStopForId(stopA.getId(), null)).thenReturn(
+            stopABean);
+
+    StopBean stopBBean = new StopBean();
+    stopBBean.setId("1_stopB");
+    Mockito.when(_stopBeanService.getStopForId(stopB.getId(), null)).thenReturn(
+            stopBBean);
+
+    StopBean stopCBean = new StopBean();
+    stopCBean.setId("1_stopC");
+    Mockito.when(_stopBeanService.getStopForId(stopC.getId(), null)).thenReturn(
+            stopCBean);
+
+    /****
+     *
+     ****/
+
+    TripBean tripABean = new TripBean();
+    Mockito.when(_tripBeanService.getTripForId(aid("tripA"))).thenReturn(
+            tripABean);
+
+    TripBean tripBBean = new TripBean();
+    Mockito.when(_tripBeanService.getTripForId(aid("tripB"))).thenReturn(
+            tripBBean);
+
+    TripBean tripCBean = new TripBean();
+    Mockito.when(_tripBeanService.getTripForId(aid("tripC"))).thenReturn(
+            tripCBean);
+
+    /****
+     *
+     ****/
+
+    TripStatusBean tripStatusBeanA = new TripStatusBean();
+    TripStatusBean tripStatusBeanB = new TripStatusBean();
+    TripStatusBean tripStatusBeanC = new TripStatusBean();
+
+    Mockito.when(
+            _tripDetailsBeanService.getBlockLocationAsStatusBean(blockLocationA, t)).thenReturn(
+            tripStatusBeanA);
+
+    Mockito.when(
+            _tripDetailsBeanService.getBlockLocationAsStatusBean(blockLocationB, t)).thenReturn(
+            tripStatusBeanB);
+
+    Mockito.when(
+            _tripDetailsBeanService.getBlockLocationAsStatusBean(blockLocationC, t)).thenReturn(
+            tripStatusBeanC);
+
+
+    /****
+     *
+     ****/
+
+    ArrivalsAndDeparturesQueryBean query = new ArrivalsAndDeparturesQueryBean();
+    query.setTime(t);
+    query.setMinutesBefore(minutesBefore);
+    query.setMinutesAfter(minutesAfter);
+    query.setFrequencyMinutesBefore(minutesBefore);
+    query.setFrequencyMinutesAfter(minutesAfter);
+
+    List<ArrivalAndDepartureBean> arrivalsAndDepartures = _service.getArrivalsAndDeparturesByStopId(
+            stopB.getId(), query);
+
+    assertEquals(3, arrivalsAndDepartures.size());
+
+    ArrivalAndDepartureBean bean = arrivalsAndDepartures.get(0);
+    assertEquals(1500, bean.getDistanceFromStop(), 0.0);
+    assertEquals(lastUpdateTime, bean.getLastUpdateTime().longValue());
+    assertEquals(1, bean.getNumberOfStopsAway());
+    assertEquals(0L, bean.getPredictedArrivalTime());
+    assertEquals(0L, bean.getPredictedDepartureTime());
+    assertNull(bean.getRouteShortName());
+    assertEquals(dateAsLong("2010-10-05 16:40"), bean.getScheduledArrivalTime());
+    assertEquals(dateAsLong("2010-10-05 16:45"),
+            bean.getScheduledDepartureTime());
+    assertEquals(serviceDate, bean.getServiceDate());
+    assertEquals(TransitDataConstants.STATUS_CANCELED, bean.getStatus());
+    assertSame(stopBBean, bean.getStop());
+    assertSame(tripABean, bean.getTrip());
+    assertSame(tripStatusBeanA, bean.getTripStatus());
+    assertEquals("Downtown", bean.getTripHeadsign());
+    // ensure vehicle is null on canceled trips even if its set upstream
+    assertEquals(null, bean.getVehicleId());
+
+    bean = arrivalsAndDepartures.get(1);
+    assertEquals(1600, bean.getDistanceFromStop(), 0.0);
+    assertNull(bean.getLastUpdateTime());
+    assertEquals(1, bean.getNumberOfStopsAway());
+    assertEquals(0L, bean.getPredictedArrivalTime());
+    assertEquals(0L, bean.getPredictedDepartureTime());
+    assertEquals("XX", bean.getRouteShortName());
+    assertEquals(dateAsLong("2010-10-05 16:50"), bean.getScheduledArrivalTime());
+    assertEquals(dateAsLong("2010-10-05 16:55"),
+            bean.getScheduledDepartureTime());
+    assertEquals(serviceDate, bean.getServiceDate());
+    assertEquals("default", bean.getStatus());
+    assertSame(stopBBean, bean.getStop());
+    assertSame(tripBBean, bean.getTrip());
+    assertSame(tripStatusBeanB, bean.getTripStatus());
+    assertNull(bean.getTripHeadsign());
+    assertNull(bean.getVehicleId());
+
+    bean = arrivalsAndDepartures.get(2);
+    assertSame(tripCBean, bean.getTrip());
+    assertSame(stopCBean, bean.getStop());
+    assertEquals(serviceDate, bean.getServiceDate());
+    assertEquals("YY", bean.getRouteShortName());
+    assertEquals("default", bean.getStatus());
+  }
+
+  @Test
+  public void testBlockBCanceled() {
+    /****
+     * stop time instances
+     ****/
+
+    long stopTimeFrom = t - minutesBefore * 60 * 1000;
+    long stopTimeTo = t + minutesAfter * 60 * 1000;
+
+    StopTimeInstance sti1 = new StopTimeInstance(bstAB,blockInstanceA.getState());
+    ArrivalAndDepartureInstance in1 = new ArrivalAndDepartureInstance(sti1);
+    in1.setBlockLocation(blockLocationA);
+    in1.setPredictedArrivalTime((long) (in1.getScheduledArrivalTime() + 5 * 60 * 1000));
+    in1.setPredictedDepartureTime((long) (in1.getScheduledDepartureTime()));
+
+    StopTimeInstance sti2 = new StopTimeInstance(bstBB, blockInstanceB.getState());
+    ArrivalAndDepartureInstance in2 = new ArrivalAndDepartureInstance(sti2);
+    in2.setBlockLocation(blockLocationB);
+    in2.setStatus(TransitDataConstants.STATUS_CANCELED);
+
+    StopTimeInstance sti3 = new StopTimeInstance(bstCB, blockInstanceC.getState());
+    ArrivalAndDepartureInstance in3 = new ArrivalAndDepartureInstance(sti3);
+    in3.setBlockLocation(blockLocationC);
+
+    TargetTime target = new TargetTime(t, t);
+
+    Mockito.when(
+            _arrivalAndDepartureService.getArrivalsAndDeparturesForStopInTimeRange(
+                    stopB, target, stopTimeFrom, stopTimeTo)).thenReturn(
+            Arrays.asList(in1, in2, in3));
+
+    Mockito.when(
+            _arrivalAndDepartureService.getArrivalsAndDeparturesForStopInTimeRange(
+                    stopC, target, stopTimeFrom, stopTimeTo)).thenReturn(
+            Arrays.asList(in3));
+
+    /****
+     *
+     ****/
+
+    Builder stopTimeNarrative = StopTimeNarrative.builder();
+    stopTimeNarrative.setStopHeadsign("Downtown");
+    Mockito.when(_narrativeService.getStopTimeForEntry(stopTimeAB)).thenReturn(
+            stopTimeNarrative.create());
+
+    stopTimeNarrative = StopTimeNarrative.builder();
+    stopTimeNarrative.setRouteShortName("XX");
+    Mockito.when(_narrativeService.getStopTimeForEntry(stopTimeBB)).thenReturn(
+            stopTimeNarrative.create());
+
+    stopTimeNarrative = StopTimeNarrative.builder();
+    stopTimeNarrative.setRouteShortName("YY");
+    Mockito.when(_narrativeService.getStopTimeForEntry(stopTimeCB)).thenReturn(
+            stopTimeNarrative.create());
+
+    /****
+     *
+     ****/
+
+    StopBean stopABean = new StopBean();
+    stopABean.setId("1_stopA");
+    Mockito.when(_stopBeanService.getStopForId(stopA.getId(), null)).thenReturn(
+            stopABean);
+
+    StopBean stopBBean = new StopBean();
+    stopBBean.setId("1_stopB");
+    Mockito.when(_stopBeanService.getStopForId(stopB.getId(), null)).thenReturn(
+            stopBBean);
+
+    StopBean stopCBean = new StopBean();
+    stopCBean.setId("1_stopC");
+    Mockito.when(_stopBeanService.getStopForId(stopC.getId(), null)).thenReturn(
+            stopCBean);
+
+    /****
+     *
+     ****/
+
+    TripBean tripABean = new TripBean();
+    Mockito.when(_tripBeanService.getTripForId(aid("tripA"))).thenReturn(
+            tripABean);
+
+    TripBean tripBBean = new TripBean();
+    Mockito.when(_tripBeanService.getTripForId(aid("tripB"))).thenReturn(
+            tripBBean);
+
+    TripBean tripCBean = new TripBean();
+    Mockito.when(_tripBeanService.getTripForId(aid("tripC"))).thenReturn(
+            tripCBean);
+
+    /****
+     *
+     ****/
+
+    TripStatusBean tripStatusBeanA = new TripStatusBean();
+    TripStatusBean tripStatusBeanB = new TripStatusBean();
+    TripStatusBean tripStatusBeanC = new TripStatusBean();
+
+    Mockito.when(
+            _tripDetailsBeanService.getBlockLocationAsStatusBean(blockLocationA, t)).thenReturn(
+            tripStatusBeanA);
+
+    Mockito.when(
+            _tripDetailsBeanService.getBlockLocationAsStatusBean(blockLocationB, t)).thenReturn(
+            tripStatusBeanB);
+
+    Mockito.when(
+            _tripDetailsBeanService.getBlockLocationAsStatusBean(blockLocationC, t)).thenReturn(
+            tripStatusBeanC);
+
+
+    /****
+     *
+     ****/
+
+    ArrivalsAndDeparturesQueryBean query = new ArrivalsAndDeparturesQueryBean();
+    query.setTime(t);
+    query.setMinutesBefore(minutesBefore);
+    query.setMinutesAfter(minutesAfter);
+    query.setFrequencyMinutesBefore(minutesBefore);
+    query.setFrequencyMinutesAfter(minutesAfter);
+
+    List<ArrivalAndDepartureBean> arrivalsAndDepartures = _service.getArrivalsAndDeparturesByStopId(
+            stopB.getId(), query);
+
+    assertEquals(3, arrivalsAndDepartures.size());
+
+    ArrivalAndDepartureBean bean = arrivalsAndDepartures.get(0);
+    assertEquals(1500, bean.getDistanceFromStop(), 0.0);
+    assertEquals(lastUpdateTime, bean.getLastUpdateTime().longValue());
+    assertEquals(1, bean.getNumberOfStopsAway());
+    assertEquals(dateAsLong("2010-10-05 16:45"), bean.getPredictedArrivalTime());
+    assertEquals(dateAsLong("2010-10-05 16:45"),
+            bean.getPredictedDepartureTime());
+    assertNull(bean.getRouteShortName());
+    assertEquals(dateAsLong("2010-10-05 16:40"), bean.getScheduledArrivalTime());
+    assertEquals(dateAsLong("2010-10-05 16:45"),
+            bean.getScheduledDepartureTime());
+    assertEquals(serviceDate, bean.getServiceDate());
+    assertEquals("default", bean.getStatus());
+    assertSame(stopBBean, bean.getStop());
+    assertSame(tripABean, bean.getTrip());
+    assertSame(tripStatusBeanA, bean.getTripStatus());
+    assertEquals("Downtown", bean.getTripHeadsign());
+    // ensure vehicle is null on canceled trips even if its set upstream
+    assertEquals("1_vehicle", bean.getVehicleId());
+
+    bean = arrivalsAndDepartures.get(1);
+    assertEquals(1600, bean.getDistanceFromStop(), 0.0);
+    assertNull(bean.getLastUpdateTime());
+    assertEquals(1, bean.getNumberOfStopsAway());
+    assertEquals(0L, bean.getPredictedArrivalTime());
+    assertEquals(0L, bean.getPredictedDepartureTime());
+    assertEquals("XX", bean.getRouteShortName());
+    assertEquals(dateAsLong("2010-10-05 16:50"), bean.getScheduledArrivalTime());
+    assertEquals(dateAsLong("2010-10-05 16:55"),
+            bean.getScheduledDepartureTime());
+    assertEquals(serviceDate, bean.getServiceDate());
+    assertEquals(TransitDataConstants.STATUS_CANCELED, bean.getStatus());
+    assertSame(stopBBean, bean.getStop());
+    assertSame(tripBBean, bean.getTrip());
+    assertSame(tripStatusBeanB, bean.getTripStatus());
+    assertNull(bean.getTripHeadsign());
+    assertNull(bean.getVehicleId());
+
+    bean = arrivalsAndDepartures.get(2);
+    assertSame(tripCBean, bean.getTrip());
+    assertSame(stopCBean, bean.getStop());
+    assertEquals(serviceDate, bean.getServiceDate());
+    assertEquals("YY", bean.getRouteShortName());
+    assertEquals("default", bean.getStatus());
+  }
+
 }

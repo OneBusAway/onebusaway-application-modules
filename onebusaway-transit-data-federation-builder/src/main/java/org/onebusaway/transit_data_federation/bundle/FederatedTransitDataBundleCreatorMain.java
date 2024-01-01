@@ -82,6 +82,8 @@ public class FederatedTransitDataBundleCreatorMain {
 
   private static final String ARG_ADDITIONAL_RESOURCES_DIRECTORY = "additionalResourcesDirectory";
 
+  private static final String ARG_CONVENTION_MODE = "convention";
+
   public static void main(String[] args) throws Exception {
     System.out.println(System.getProperties());
     FederatedTransitDataBundleCreatorMain main = new FederatedTransitDataBundleCreatorMain();
@@ -97,6 +99,12 @@ public class FederatedTransitDataBundleCreatorMain {
       buildOptions(options);
 
       CommandLine commandLine = parser.parse(options, args);
+
+      if (commandLine.hasOption(ARG_CONVENTION_MODE)) {
+        // convention based directory structure
+        FederatedTransitDataBundleConventionMain.main(commandLine.getArgs());
+        return;
+      }
 
       String[] remainingArgs = commandLine.getArgs();
 
@@ -221,6 +229,7 @@ public class FederatedTransitDataBundleCreatorMain {
   }
 
   protected void buildOptions(Options options) {
+    options.addOption(ARG_CONVENTION_MODE, false, "");
     options.addOption(ARG_USE_DATABASE_FOR_GTFS, false, "");
     options.addOption(ARG_SKIP_TO, true, "");
     options.addOption(ARG_ONLY, true, "");

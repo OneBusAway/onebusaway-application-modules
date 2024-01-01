@@ -16,6 +16,7 @@
 package org.onebusaway.alerts.impl;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
@@ -116,7 +117,10 @@ public class ServiceAlertRecord {
 
   @Column(nullable = false, name="service_alert_id", length = 255)
   private String serviceAlertId;
-  
+
+  @Column(nullable = true, name="consequence_message", length= 50)
+  private String consequenceMessage;
+
   private Boolean copy;
  
   private Long creationTime = 0l;
@@ -214,6 +218,14 @@ public class ServiceAlertRecord {
     this.source = source;
   }
 
+  public String getConsequenceMessage() {
+    return consequenceMessage;
+  }
+
+  public void setConsequenceMessage(String consequenceMessage) {
+    this.consequenceMessage = consequenceMessage;
+  }
+
   public String getAgencyId() {
     return agencyId;
   }
@@ -246,12 +258,43 @@ public class ServiceAlertRecord {
       this.id = id;
   }
 
-public Boolean isCopy() {
-	return copy;
-}
+  public Boolean isCopy() {
+      return copy;
+  }
 
-public void setCopy(Boolean copy) {
-	this.copy = copy;
-}
-  
+  public void setCopy(Boolean copy) {
+      this.copy = copy;
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(id)
+            + Objects.hash(agencyId)
+            + Objects.hash(serviceAlertId)
+            + Objects.hash(consequenceMessage)
+            + Objects.hash(copy)
+            + Objects.hash(creationTime)
+            + Objects.hash(modifiedTime);
+
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) { return true; }
+    if (o == null || getClass() != o.getClass()) { return false; }
+    ServiceAlertRecord sar = (ServiceAlertRecord) o;
+    return Objects.equals(id, sar.id)
+            && Objects.equals(agencyId, sar.agencyId)
+            && Objects.equals(serviceAlertId, sar.serviceAlertId)
+            && Objects.equals(consequenceMessage, sar.consequenceMessage)
+            && Objects.equals(copy, sar.copy)
+            && Objects.equals(creationTime, sar.creationTime)
+            && Objects.equals(modifiedTime, sar.modifiedTime);
+  }
+
+  @Override
+  public String toString() {
+    return "ServiceAlertRecord{" + id + "}";
+  }
+
 }

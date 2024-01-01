@@ -43,6 +43,9 @@ public final class TripBean implements Serializable {
   
   private double totalTripDistance;
 
+  // flag for rail road service type
+  private int peakOffpeak;
+
   public TripBean() {
 
   }
@@ -57,6 +60,7 @@ public final class TripBean implements Serializable {
     this.shapeId = trip.shapeId;
     this.directionId = trip.directionId;
     this.totalTripDistance = trip.totalTripDistance;
+    this.peakOffpeak = trip.peakOffpeak;
   }
 
   public String getId() {
@@ -137,5 +141,13 @@ public final class TripBean implements Serializable {
 
   public void setTotalTripDistance(double totalTripDistance) {
     this.totalTripDistance = totalTripDistance;
+  }
+
+  public int getPeakOffpeak() {
+    return peakOffpeak;
+  }
+
+  public void setPeakOffpeak(int peakOffpeak) {
+    this.peakOffpeak = peakOffpeak;
   }
 }

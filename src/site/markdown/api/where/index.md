@@ -111,6 +111,7 @@ The current list of supported API methods.
 * [agency](methods/agency.html) - get details for a specific agency
 * [arrival-and-departure-for-stop](methods/arrival-and-departure-for-stop.html) - details about a specific arrival/departure at a stop
 * [arrivals-and-departures-for-stop](methods/arrivals-and-departures-for-stop.html) - get current arrivals and departures for a stop
+* [arrivals-and-departures-for-location](methods/arrivals-and-departures-for-location.html) - get current arrivals and departures for a stops near location
 * [block](methods/block.html) - get block configuration for a specific block
 * [cancel-alarm](methods/cancel-alarm.html) - cancel a registered alarm
 * [current-time](methods/current-time.html) - retrieve the current system time
@@ -119,6 +120,7 @@ The current list of supported API methods.
 * [report-problem-with-trip](methods/report-problem-with-trip.html) - submit a user-generated problem for a trip
 * [route-ids-for-agency](methods/route-ids-for-agency.html) - get a list of all route ids for an agency
 * [route](methods/route.html) - get details for a specific route
+* [route-details](methods/route-details.html) - get canonical or ideal information about a route such as needed by a strip map
 * [routes-for-agency](methods/routes-for-agency.html) - get a list of all routes for an agency
 * [routes-for-location](methods/routes-for-location.html) - search for routes near a location, optionally by route name
 * [schedule-for-route](methods/schedule-for-route.html) - get the full schedule for a route on a particular day

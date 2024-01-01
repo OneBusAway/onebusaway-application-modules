@@ -15,22 +15,18 @@
  */
 package org.onebusaway.api.actions.api.where;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import org.apache.struts2.rest.DefaultHttpHeaders;
 import org.onebusaway.api.actions.api.ApiActionSupport;
 import org.onebusaway.api.model.transit.BeanFactoryV2;
+import org.onebusaway.api.model.transit.EntryWithReferencesBean;
+import org.onebusaway.api.model.transit.StopWithArrivalsAndDeparturesV2Bean;
 import org.onebusaway.api.model.where.ArrivalAndDepartureBeanV1;
 import org.onebusaway.api.model.where.StopWithArrivalsAndDeparturesBeanV1;
 import org.onebusaway.exceptions.NoSuchStopServiceException;
 import org.onebusaway.exceptions.ServiceException;
-import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
-import org.onebusaway.transit_data.model.ArrivalsAndDeparturesQueryBean;
-import org.onebusaway.transit_data.model.RouteBean;
-import org.onebusaway.transit_data.model.StopBean;
-import org.onebusaway.transit_data.model.StopWithArrivalsAndDeparturesBean;
+import org.onebusaway.transit_data.model.*;
 import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.util.SystemTime;
@@ -53,6 +49,9 @@ public class ArrivalsAndDeparturesForStopAction extends ApiActionSupport {
 
   @Autowired
   private ConfigurationService _configService;
+
+  @Autowired
+  private RouteSorting customRouteSort;
 
   private String _id;
   
@@ -91,9 +90,21 @@ public class ArrivalsAndDeparturesForStopAction extends ApiActionSupport {
   public void setFrequencyMinutesAfter(int frequencyMinutesAfter) {
     _query.setFrequencyMinutesAfter(frequencyMinutesAfter);
   }
-
+  @Autowired(required = false)
+  public void setFilterChain(FilterChain filterChain) {
+    _query.setSystemFilterChain(filterChain);
+  }
 
   public DefaultHttpHeaders show() throws ServiceException {
+    HashSet<String> agenciesExcludingScheduled = new HashSet<String>();
+    List<AgencyWithCoverageBean> allAgencies = _service.getAgenciesWithCoverage();
+    for (AgencyWithCoverageBean agencyBean: allAgencies){
+      String agency = agencyBean.getAgency().getId();
+      if(_configService.getConfigurationFlagForAgency(agency, "hideScheduleInfo")){
+        agenciesExcludingScheduled.add(agency);
+      }
+    }
+    _query.setAgenciesExcludingScheduled(agenciesExcludingScheduled);
 
     if (hasErrors())
       return setValidationErrorsResponse();
@@ -125,6 +136,7 @@ public class ArrivalsAndDeparturesForStopAction extends ApiActionSupport {
       return setOkResponse(v1);
     } else if (isVersion(V2)) {
       BeanFactoryV2 factory = getBeanFactoryV2();
+      factory.setCustomRouteSort(customRouteSort);
       return setOkResponse(factory.getResponse(result));
     } else {
       return setUnknownVersionResponse();
@@ -161,6 +173,12 @@ public class ArrivalsAndDeparturesForStopAction extends ApiActionSupport {
 
       v1s.add(v1);
     }
+
+    v1s.sort((a,b) -> customRouteSort.
+            compareRoutes(
+                    a.getRouteShortName(),
+                    b.getRouteShortName())
+    );
 
     return v1s;
   }

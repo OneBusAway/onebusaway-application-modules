@@ -25,7 +25,7 @@ public class SearchQueryBean implements Serializable {
   private static final long serialVersionUID = 1L;
 
   public enum EQueryType implements Serializable {
-    BOUNDS, CLOSEST, BOUNDS_OR_CLOSEST
+    BOUNDS, CLOSEST, BOUNDS_OR_CLOSEST, ORDERED_BY_CLOSEST
   }
 
   private EQueryType type;
@@ -38,6 +38,9 @@ public class SearchQueryBean implements Serializable {
   
   // default minimum lucene result score to keep
   private double minScoreToKeep = 1.0;
+
+  private FilterChain systemFilterChain = new FilterChain();
+  private FilterChain instanceFilterChain = new FilterChain();
 
   public EQueryType getType() {
     return type;
@@ -77,5 +80,21 @@ public class SearchQueryBean implements Serializable {
 
   public void setMinScoreToKeep(double minScoreToKeep) {
     this.minScoreToKeep = minScoreToKeep;
+  }
+
+  public FilterChain getSystemFilterChain() {
+    return systemFilterChain;
+  }
+
+  public void setSystemFilterChain(FilterChain systemFilterChain) {
+    this.systemFilterChain = systemFilterChain;
+  }
+
+  public FilterChain getInstanceFilterChain() {
+    return instanceFilterChain;
+  }
+
+  public void setInstanceFilterChain(FilterChain instanceFilterChain) {
+    this.instanceFilterChain = instanceFilterChain;
   }
 }

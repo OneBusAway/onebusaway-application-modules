@@ -20,8 +20,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.onebusaway.api.impl.MaxCountSupport;
+import org.onebusaway.api.model.RouteGroupingV2Bean;
+import org.onebusaway.api.model.StopGroupV2Bean;
+import org.onebusaway.api.model.StopGroupingV2Bean;
 import org.onebusaway.api.model.transit.blocks.BlockConfigurationV2Bean;
 import org.onebusaway.api.model.transit.blocks.BlockInstanceV2Bean;
 import org.onebusaway.api.model.transit.blocks.BlockStopTimeV2Bean;
@@ -73,6 +77,10 @@ public class BeanFactoryV2 {
 
   private Locale _locale;
 
+  private RouteSorting customRouteSort;
+
+  private String primarySortAgency;
+
   public BeanFactoryV2(boolean includeReferences) {
     _includeReferences = includeReferences;
     _locale = Locale.getDefault();
@@ -89,6 +97,11 @@ public class BeanFactoryV2 {
   public void setApplicationKey(String applicationKey) {
     _applicationKey = applicationKey;
   }
+
+  public void setCustomRouteSort(RouteSorting customRouteSort) {
+    this.customRouteSort = customRouteSort;
+  }
+
 
   public void setLocale(Locale locale) {
     _locale = locale;
@@ -115,6 +128,61 @@ public class BeanFactoryV2 {
     return entry(getStop(stop));
   }
 
+  public ListWithReferencesBean<StopV2Bean> getResponse(StopSearchResultBean input) {
+    List<StopV2Bean> beans = new ArrayList<>();
+    for (StopBean stop : input.getStopSuggestions().getList()) {
+      // swap objects for ids and references
+      beans.add(getStop(stop));
+    }
+    ListWithReferencesBean<StopV2Bean> response = new ListWithRangeAndReferencesBean<>(
+            beans,
+            input.getStopSuggestions().isLimitExceeded(),
+            false,
+            this._references);
+
+    response.getReferences()
+            .getRoutes()
+            .sort((a,b) -> customRouteSort
+                    .compareRoutes(
+                            a.getNullSafeShortName(),
+                            b.getNullSafeShortName())
+            );
+
+    primarySortAgency = customRouteSort.getPrimarySortAgency();
+
+    List<RouteV2Bean> sortedRoutes = finalSort(response.getReferences().getRoutes());
+    List<AgencyV2Bean> agencyV2BeanList = response.getReferences().getAgencies();
+    response.getReferences().setRoutes(sortedRoutes);
+    agencySort(agencyV2BeanList);
+    return response;
+  }
+
+  public ListWithReferencesBean<RouteV2Bean> getResponse(RouteSearchResultBean input) {
+    List<RouteV2Bean> beans = new ArrayList<>();
+    for (RouteBean route : input.getRouteSuggestions().getList()) {
+      // swap objects for ids and references
+      beans.add(getRoute(route));
+    }
+    ListWithReferencesBean<RouteV2Bean> response = new ListWithRangeAndReferencesBean<>(
+            beans,
+            input.getRouteSuggestions().isLimitExceeded(),
+            false,
+            this._references);
+
+    response
+            .getList().sort((a,b) ->
+                    customRouteSort.compareRoutes(
+                            a.getNullSafeShortName(),
+                            b.getNullSafeShortName()));
+
+    primarySortAgency = customRouteSort.getPrimarySortAgency();
+    List<RouteV2Bean> sortedRoutes = finalSort(response.getList());
+    List<AgencyV2Bean> agencyV2BeanList = response.getReferences().getAgencies();
+    response.setList(sortedRoutes);
+    agencySort(agencyV2BeanList);
+    return response;
+  }
+
   public EntryWithReferencesBean<TripV2Bean> getResponse(TripBean trip) {
     return entry(getTrip(trip));
   }
@@ -130,7 +198,74 @@ public class BeanFactoryV2 {
 
   public EntryWithReferencesBean<StopWithArrivalsAndDeparturesV2Bean> getResponse(
       StopWithArrivalsAndDeparturesBean result) {
-    return entry(getStopWithArrivalAndDepartures(result));
+    EntryWithReferencesBean<StopWithArrivalsAndDeparturesV2Bean> response = entry(getStopWithArrivalAndDepartures(result));
+
+    response.getReferences().getRoutes()
+            .sort((a,b) ->
+                    customRouteSort
+                            .compareRoutes(
+                                    a.getNullSafeShortName(),
+                                    b.getNullSafeShortName())
+            );
+
+    primarySortAgency = customRouteSort.getPrimarySortAgency();
+    List<RouteV2Bean> sortedRoutes = finalSort(response.getReferences().getRoutes());
+    List<AgencyV2Bean> agencyV2BeanList = response.getReferences().getAgencies();
+    response.getReferences().setRoutes(sortedRoutes);
+    agencySort(agencyV2BeanList);
+    return response;
+  }
+
+  public EntryWithReferencesBean<StopsWithArrivalsAndDeparturesV2Bean> getResponse(
+          StopsWithArrivalsAndDeparturesBean result) {
+
+    EntryWithReferencesBean<StopsWithArrivalsAndDeparturesV2Bean> response = entry(getStopsWithArrivalAndDepartures(result));
+
+    if (response.getReferences().getRoutes() != null) {
+      response.getReferences().getRoutes()
+              .sort((a, b) -> customRouteSort
+                      .compareRoutes(
+                              a.getNullSafeShortName(),
+                              b.getNullSafeShortName()));
+    }
+
+    primarySortAgency = customRouteSort.getPrimarySortAgency();
+    List<RouteV2Bean> sortedRoutes = finalSort(response.getReferences().getRoutes());
+    List<AgencyV2Bean> agencyV2BeanList = response.getReferences().getAgencies();
+    response.getReferences().setRoutes(sortedRoutes);
+    agencySort(agencyV2BeanList);
+
+    return response;
+  }
+
+  private void agencySort(List<AgencyV2Bean> agencies) {
+    if (primarySortAgency != null && agencies != null) {
+      agencies.sort((a,b) -> {
+        if(a.getId().equals(primarySortAgency)) return -1;
+        if(b.getId().equals(primarySortAgency)) return 1;
+        return a.getId().compareTo(b.getId());
+      });
+    }
+  }
+
+  private List<RouteV2Bean> finalSort(List<RouteV2Bean> response) {
+    if (primarySortAgency == null) {
+      return response;
+    }
+    if (response == null) {
+      return response;
+    }
+    List<RouteV2Bean> routeV2BeanList = response
+            .stream()
+            .filter(r -> r.getAgencyId()
+                    .equals(primarySortAgency))
+            .collect(Collectors.toList()
+            );
+
+    return Stream.concat(routeV2BeanList.stream(),response
+                                    .stream().filter(r -> !r.getAgencyId()
+                                            .equals(primarySortAgency)))
+                            .collect(Collectors.toList());
   }
 
   public EntryWithReferencesBean<ArrivalAndDepartureV2Bean> getResponse(
@@ -230,6 +365,24 @@ public class BeanFactoryV2 {
     return entry(getSituation(situation));
   }
 
+  public ListWithReferencesBean<RouteGroupingV2Bean> getResponse(ListBean<RouteGroupingBean> beans) {
+
+    List<RouteGroupingV2Bean> v2Beans = new ArrayList<>();
+
+    for (RouteGroupingBean routeGroupingBean : beans.getList()) {
+      v2Beans.add(getRouteGroupingBean(routeGroupingBean));
+      for (RouteBean route : routeGroupingBean.getRoutes()) {
+        _references.addRoute(getRoute(route));
+      }
+      for (StopBean stop : routeGroupingBean.getStops()) {
+        _references.addStop(getStop(stop));
+      }
+    }
+
+    return list(v2Beans, beans.isLimitExceeded());
+  }
+
+
   /****
    *
    *****/
@@ -318,6 +471,20 @@ public class BeanFactoryV2 {
       addToReferences(route);
     }
     bean.setRouteIds(routeIds);
+    if (stop.getParent() != null) {
+      StopBean parent = stop.getParent();
+      StopV2Bean parentBean = new StopV2Bean();
+      parentBean.setCode(parent.getCode());
+      parentBean.setDirection(parent.getDirection());
+      parentBean.setId(parent.getId());
+      parentBean.setLat(parent.getLat());
+      parentBean.setLon(parent.getLon());
+      parentBean.setLocationType(parent.getLocationType());
+      parentBean.setName(parent.getName());
+      parentBean.setWheelchairBoarding(parent.getWheelchairBoarding());
+      bean.setParent(parentBean.getId());
+      _references.addStop(parentBean);
+    }
 
     return bean;
   }
@@ -339,6 +506,7 @@ public class BeanFactoryV2 {
     bean.setServiceId(trip.getServiceId());
     bean.setShapeId(trip.getShapeId());
     bean.setBlockId(trip.getBlockId());
+    bean.setPeakOffpeak(trip.getPeakOffpeak());
 
     return bean;
   }
@@ -584,6 +752,60 @@ public class BeanFactoryV2 {
 
     return bean;
   }
+
+  public RouteGroupingV2Bean getRouteGroupingBean(RouteGroupingBean bean) {
+    RouteGroupingV2Bean v2Bean = new RouteGroupingV2Bean();
+    v2Bean.setRouteId(bean.getRouteId());
+    for (StopGroupingBean stopGrouping : bean.getStopGroupings()) {
+      v2Bean.getStopGroupings().add(getStopGrouping(stopGrouping));
+    }
+
+    return v2Bean;
+  }
+
+  public StopGroupingV2Bean getStopGrouping(StopGroupingBean bean) {
+    StopGroupingV2Bean v2Bean = new StopGroupingV2Bean();
+    v2Bean.setType(bean.getType());
+    v2Bean.setOrdered(bean.isOrdered());
+    if (bean.getStopGroups() != null) {
+      for (StopGroupBean stopGroup : bean.getStopGroups()) {
+        StopGroupV2Bean stopGroupV2 = getStopGroup(stopGroup);
+        if (stopGroupV2 != null)
+          v2Bean.getStopGroups().add(stopGroupV2);
+      }
+
+    }
+    return v2Bean;
+  }
+
+  public StopGroupV2Bean getStopGroup(StopGroupBean bean) {
+    StopGroupV2Bean v2Bean = new StopGroupV2Bean();
+    v2Bean.setId(bean.getId());
+    v2Bean.setName(bean.getName());
+    if (bean.getStopIds() != null) {
+      for (String stopId : bean.getStopIds()) {
+        v2Bean.getStopIds().add(stopId);
+      }
+    }
+    if (bean.getSubGroups() != null) {
+      for (StopGroupBean subGroup : bean.getSubGroups()) {
+        // we don't attempt to detect cycles here
+        // if we need to retrieve from set
+        StopGroupV2Bean subGroupV2 = getStopGroup(subGroup);
+        if (subGroupV2 != null)
+          v2Bean.getSubGroups().add(subGroupV2);
+      }
+    }
+    if (bean.getPolylines() != null) {
+      for (EncodedPolylineBean polyline : bean.getPolylines()) {
+        v2Bean.getPolylines().add(polyline);
+      }
+    }
+
+
+    return v2Bean;
+  }
+
 
   public ListWithReferencesBean<CurrentVehicleEstimateV2Bean> getCurrentVehicleEstimates(
       ListBean<CurrentVehicleEstimateBean> estimates) {
@@ -950,6 +1172,7 @@ public class BeanFactoryV2 {
     addToReferences(sad.getStop());
 
     List<ArrivalAndDepartureV2Bean> ads = new ArrayList<ArrivalAndDepartureV2Bean>();
+
     for (ArrivalAndDepartureBean ad : sad.getArrivalsAndDepartures())
       ads.add(getArrivalAndDeparture(ad));
     bean.setArrivalsAndDepartures(ads);
@@ -972,6 +1195,45 @@ public class BeanFactoryV2 {
     }
 
     return bean;
+  }
+
+  public StopsWithArrivalsAndDeparturesV2Bean getStopsWithArrivalAndDepartures(
+          StopsWithArrivalsAndDeparturesBean sad) {
+    StopsWithArrivalsAndDeparturesV2Bean bean = new StopsWithArrivalsAndDeparturesV2Bean();
+
+    bean.setStopIds(new ArrayList<>());
+    for (StopBean sb : sad.getStops()) {
+      bean.getStopIds().add(sb.getId());
+    }
+
+    List<ArrivalAndDepartureV2Bean> ads = new ArrayList<ArrivalAndDepartureV2Bean>();
+    for (ArrivalAndDepartureBean ad : sad.getArrivalsAndDepartures())
+      ads.add(getArrivalAndDeparture(ad));
+    bean.setArrivalsAndDepartures(ads);
+
+    List<StopWithDistance> nearbyStopIds = new ArrayList<>();
+    // these stops are already sorted by proximity
+    for (StopBean nearbyStop : sad.getNearbyStops()) {
+      if (nearbyStop.getDistanceAwayFromQuery() != null) {
+        nearbyStopIds.add(new StopWithDistance(nearbyStop.getId(), nearbyStop.getDistanceAwayFromQuery()));
+        addToReferences(nearbyStop);
+      }
+    }
+    bean.setNearbyStopIds(nearbyStopIds);
+
+    List<ServiceAlertBean> situations = sad.getSituations();
+    if (!CollectionsLibrary.isEmpty(situations)) {
+      List<String> situationIds = new ArrayList<String>();
+      for (ServiceAlertBean situation : situations) {
+        addToReferences(situation);
+        situationIds.add(situation.getId());
+      }
+      bean.setSituationIds(situationIds);
+    }
+
+    bean.setLimitExceeded(sad.isLimitExceeded());
+    return bean;
+
   }
 
   public ArrivalAndDepartureV2Bean getArrivalAndDeparture(
@@ -1025,6 +1287,9 @@ public class BeanFactoryV2 {
     bean.setScheduledDepartureInterval(getTimeInterval(ad.getScheduledDepartureInterval()));
     bean.setPredictedArrivalInterval(getTimeInterval(ad.getPredictedArrivalInterval()));
     bean.setPredictedDepartureInterval(getTimeInterval(ad.getPredictedDepartureInterval()));
+    bean.setScheduledTrack(ad.getScheduledTrack());
+    bean.setActualTrack(ad.getActualTrack());
+    bean.setStatus(ad.getStatus());
 
     if (ad.getFrequency() != null)
       bean.setFrequency(getFrequency(ad.getFrequency()));
@@ -1128,6 +1393,7 @@ public class BeanFactoryV2 {
     }
 
     bean.setReason(situation.getReason());
+    bean.setConsequenceMessage(situation.getConsequenceMessage());
 
     bean.setSummary(getBestString(situation.getSummaries()));
     bean.setDescription(getBestString(situation.getDescriptions()));
@@ -1233,8 +1499,11 @@ public class BeanFactoryV2 {
     if (range == null)
       return null;
     TimeRangeV2Bean bean = new TimeRangeV2Bean();
-    bean.setFrom(range.getFrom());
-    bean.setTo(range.getTo());
+    if (range.getFrom() > 0)
+      bean.setFrom(range.getFrom());
+    if (range.getTo() > 0) {
+      bean.setTo(range.getTo());
+    }
     return bean;
   }
 
@@ -1352,4 +1621,5 @@ public class BeanFactoryV2 {
                   return null;
           }
   }
+
 }

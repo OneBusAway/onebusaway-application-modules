@@ -1,0 +1,11 @@
+language: java
+sudo: false
+cache:
+  directories:
+  - $HOME/.m2
+
+install:
+  - mvn -U clean install -Ptravis -Dhttps.protocols=TLSv1,TLSv1.1,TLSv1.2 -DskipTests=true -Dmaven.javadoc.skip=true -Dvalidate.silent=true -Dlog4j.configuration= -B -V -q
+
+script:
+  - mvn test -Dlog4j.configuration= -Dvalidate.silent=true -q

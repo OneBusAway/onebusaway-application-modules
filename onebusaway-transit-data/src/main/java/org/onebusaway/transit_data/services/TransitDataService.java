@@ -570,6 +570,10 @@ public interface TransitDataService extends FederatedService {
   @FederatedByAgencyIdMethod
   public List<String> getSearchSuggestions(String agencyId, String input);
 
+  public ListBean<StopBean> getStopSuggestions(String agencyId, String input, int maxCount);
+
+  public ListBean<RouteBean> getRouteSuggestions(String agencyId, String input, int maxCount);
+
   /**
    * Given a stop, route, and direction, test if that stop has revenue service
    * on the given route in the given direction.
@@ -615,4 +619,14 @@ public interface TransitDataService extends FederatedService {
   @FederatedByAgencyIdMethod
   public ListBean<ServiceAlertRecordBean> getAllServiceAlertRecordsForAgencyId(
 		String agencyId);
+
+  /**
+   * return canonical or ideal stop patterns / stop shapes for a route, such as
+   * those displayed on a system map or strip map without a specific trip context.
+   */
+  @FederatedByAgencyIdMethod
+  ListBean<RouteGroupingBean> getCanonicalRoute(long serviceDate, AgencyAndId routeId);
+
+  @FederatedByAgencyIdMethod
+  StopDirectionSwap findStopDirectionSwap(AgencyAndId routeId, String directionId, AgencyAndId stopId);
 }

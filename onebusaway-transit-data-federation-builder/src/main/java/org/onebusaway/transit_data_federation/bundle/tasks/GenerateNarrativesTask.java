@@ -27,28 +27,20 @@ import java.util.Map;
 import org.onebusaway.collections.Counter;
 import org.onebusaway.collections.MappingLibrary;
 import org.onebusaway.container.refresh.RefreshService;
-import org.onebusaway.gtfs.model.Agency;
-import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.gtfs.model.Route;
-import org.onebusaway.gtfs.model.Stop;
-import org.onebusaway.gtfs.model.StopTime;
-import org.onebusaway.gtfs.model.Trip;
+import org.onebusaway.gtfs.model.*;
 import org.onebusaway.gtfs.services.GtfsRelationalDao;
 import org.onebusaway.transit_data_federation.bundle.services.UniqueService;
 import org.onebusaway.transit_data_federation.impl.RefreshableResources;
 import org.onebusaway.transit_data_federation.impl.narrative.NarrativeProviderImpl;
 import org.onebusaway.transit_data_federation.impl.narrative.NarrativeServiceImpl;
+import org.onebusaway.transit_data_federation.model.narrative.RouteAndHeadsignNarrative;
 import org.onebusaway.transit_data_federation.impl.shapes.DistanceTraveledShapePointIndex;
 import org.onebusaway.transit_data_federation.impl.shapes.PointAndOrientation;
 import org.onebusaway.transit_data_federation.impl.shapes.ShapePointIndex;
 import org.onebusaway.transit_data_federation.model.ProjectedPoint;
 import org.onebusaway.transit_data_federation.model.ShapePoints;
 import org.onebusaway.transit_data_federation.model.modifications.Modifications;
-import org.onebusaway.transit_data_federation.model.narrative.AgencyNarrative;
-import org.onebusaway.transit_data_federation.model.narrative.RouteCollectionNarrative;
-import org.onebusaway.transit_data_federation.model.narrative.StopNarrative;
-import org.onebusaway.transit_data_federation.model.narrative.StopTimeNarrative;
-import org.onebusaway.transit_data_federation.model.narrative.TripNarrative;
+import org.onebusaway.transit_data_federation.model.narrative.*;
 import org.onebusaway.transit_data_federation.services.FederatedTransitDataBundle;
 import org.onebusaway.transit_data_federation.services.blocks.BlockIndexService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockStopTimeIndex;
@@ -157,6 +149,7 @@ public class GenerateNarrativesTask implements Runnable {
     generateShapePointNarratives(provider);
     generateStopNarratives(provider);
     generateTripNarratives(provider);
+    generateRouteHeadsignPatterns(provider);
 
     try {
       ObjectSerializationLibrary.writeObject(
@@ -165,6 +158,37 @@ public class GenerateNarrativesTask implements Runnable {
     } catch (IOException e) {
       throw new IllegalStateException(e);
     }
+  }
+
+  private void generateRouteHeadsignPatterns(NarrativeProviderImpl provider) {
+    if (_gtfsDao.getAllDirectionEntries() == null) {
+      _log.info("no directionEntries to process");
+      return;
+    }
+    for (DirectionEntry de : _gtfsDao.getAllDirectionEntries()) {
+      List<StopDirectionKey> sdNorths = createStopDirectionKey(de, "0");
+      RouteAndHeadsignNarrative rhNorth = new RouteAndHeadsignNarrative(de.getHeadsignDirection0(), de.getLine());
+      for (StopDirectionKey sdNorth : sdNorths) {
+        provider.addRouteAndHeadsign(sdNorth, rhNorth);
+      }
+      List<StopDirectionKey> sdSouths = createStopDirectionKey(de, "1");
+      RouteAndHeadsignNarrative rhSouth = new RouteAndHeadsignNarrative(de.getHeadsignDirection1(), de.getLine());
+      for (StopDirectionKey sdSouth : sdSouths) {
+        provider.addRouteAndHeadsign(sdSouth, rhSouth);
+      }
+    }
+    _log.info("processed {} directionEntries with cache size {}", _gtfsDao.getAllDirectionEntries().size(), provider.getPatternCount());
+  }
+
+  private List<StopDirectionKey> createStopDirectionKey(DirectionEntry de, String directionId) {
+    ArrayList<StopDirectionKey> list = new ArrayList<>();
+    if ("0".equals(directionId)) {
+      // we don't use daytime routes, we just use stop and direction for now
+      list.add(new StopDirectionKey(new AgencyAndId(de.getAgencyId(), de.getGtfsStopIdDirection0()), "0"));
+    } else if ("1".equals(directionId)) {
+      list.add(new StopDirectionKey(new AgencyAndId(de.getAgencyId(), de.getGtfsStopIdDirection1()), "1"));
+    }
+    return list;
   }
 
   public void generateAgencyNarratives(NarrativeProviderImpl provider) {
@@ -280,12 +304,24 @@ public class GenerateNarrativesTask implements Runnable {
       provider.setNarrativeForTripId(trip.getId(), tripNarrative);
 
       List<StopTime> stopTimes = _gtfsDao.getStopTimesForTrip(trip);
+      List<AgencyAndId> stopIds = new ArrayList<>();
+      for (StopTime stopTime : stopTimes) {
+        if (stopTime.getStop() == null) {
+          stopIds.add(new AgencyAndId(trip.getId().getAgencyId(), "null"));
+        } else {
+          stopIds.add(stopTime.getStop().getId());
+        }
+      }
+      List<StopTimeNarrative> narratives = new ArrayList<>();
       int stopTimeIndex = 0;
       for (StopTime stopTime : stopTimes) {
         StopTimeNarrative stopTimeNarrative = getStopTimeNarrative(stopTime);
         provider.setNarrativeForStopTimeEntry(trip.getId(), stopTimeIndex++,
             stopTimeNarrative);
+        narratives.add(stopTimeNarrative);
       }
+      if (trip.getRoute() != null)
+        provider.setNarrativesForStops(trip.getRoute().getId(), trip.getDirectionId(), stopIds, narratives);
     }
   }
 
@@ -532,6 +568,7 @@ public class GenerateNarrativesTask implements Runnable {
     builder.setRouteShortName(deduplicate(trip.getRouteShortName()));
     builder.setTripHeadsign(deduplicate(headsign));
     builder.setTripShortName(deduplicate(trip.getTripShortName()));
+    builder.setPeakOffpeak(trip.getPeakOffpeak());
     return builder.create();
   }
 

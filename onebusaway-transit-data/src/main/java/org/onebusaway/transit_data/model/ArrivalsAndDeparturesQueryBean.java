@@ -16,7 +16,10 @@
 package org.onebusaway.transit_data.model;
 
 import java.io.Serializable;
+import java.util.List;
+import java.util.HashSet;
 
+import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.util.SystemTime;
 
 @QueryBean
@@ -34,6 +37,19 @@ public final class ArrivalsAndDeparturesQueryBean implements Serializable {
 
   private int frequencyMinutesAfter = 30;
 
+  // should the queried for stopIds be included in nearby results
+  private boolean includeInputIdsInNearby = false;
+
+  private int maxCount = Integer.MAX_VALUE;
+
+  private CoordinateBounds bounds;
+
+  private HashSet<String> agenciesExcludingScheduled = new HashSet<>();
+
+  private FilterChain systemFilterChain = new FilterChain();
+  private FilterChain instanceFilterChain = new FilterChain();
+
+ private List<Integer> routeTypes;
   public ArrivalsAndDeparturesQueryBean() {
 
   }
@@ -44,6 +60,12 @@ public final class ArrivalsAndDeparturesQueryBean implements Serializable {
     this.minutesAfter = bean.minutesAfter;
     this.frequencyMinutesBefore = bean.frequencyMinutesBefore;
     this.frequencyMinutesAfter = bean.frequencyMinutesAfter;
+    this.includeInputIdsInNearby = bean.includeInputIdsInNearby;
+    this.bounds = bean.bounds;
+    this.agenciesExcludingScheduled = bean.agenciesExcludingScheduled;
+    this.maxCount = bean.maxCount;
+    this.systemFilterChain = bean.systemFilterChain;
+    this.instanceFilterChain = bean.instanceFilterChain;
   }
 
   public long getTime() {
@@ -86,6 +108,77 @@ public final class ArrivalsAndDeparturesQueryBean implements Serializable {
     this.frequencyMinutesAfter = frequencyMinutesAfter;
   }
 
+  /**
+   * if the queried for stopIds are included in the nearby results
+   */
+  public boolean getIncludeInputIdsInNearby() {
+    return includeInputIdsInNearby;
+  }
+
+  /**
+   * include the queried for stopIds in the nearby results
+   * @param flag
+   */
+  public void setIncludeInputIdsInNearby(boolean flag) {
+    this.includeInputIdsInNearby = flag;
+  }
+
+  public int getMaxCount() {
+    return maxCount;
+  }
+
+  public void setMaxCount(int maxCount) {
+    this.maxCount = maxCount;
+  }
+
+  public CoordinateBounds getBounds() {
+    return bounds;
+  }
+
+  public void setBounds(CoordinateBounds bounds) {
+    this.bounds = bounds;
+  }
+
+
+  public void setRouteTypes(List<Integer> types) {
+      if (types == null || types.isEmpty()) return;
+      instanceFilterChain.add(new ArrivalAndDepartureFilterByRouteType(types));
+  }
+  public void setRouteType(String routeType) {
+    if (routeType == null) return;
+    ArrivalAndDepartureFilterByRouteType arrivalAndDepartureFilterByRouteType = new ArrivalAndDepartureFilterByRouteType(routeType);
+    routeTypes = arrivalAndDepartureFilterByRouteType.getRouteTypes();
+    instanceFilterChain.add(arrivalAndDepartureFilterByRouteType);
+  }
+
+  public List<Integer> getRouteTypes(){
+      return routeTypes;
+  }
+
+  public void setAgenciesExcludingScheduled(HashSet<String> agencies){
+    this.agenciesExcludingScheduled = agencies;
+  }
+
+  public HashSet<String> getAgenciesExcludingScheduled(){
+    return this.agenciesExcludingScheduled;
+  }
+
+  public FilterChain getSystemFilterChain() {
+    return systemFilterChain;
+  }
+
+  public void setSystemFilterChain(FilterChain systemFilterChain) {
+    this.systemFilterChain = systemFilterChain;
+  }
+
+  public FilterChain getInstanceFilterChain() {
+    return instanceFilterChain;
+  }
+
+  public void setInstanceFilterChain(FilterChain instanceFilterChain) {
+    this.instanceFilterChain = instanceFilterChain;
+  }
+
   @Override
   public int hashCode() {
     final int prime = 31;
@@ -95,6 +188,8 @@ public final class ArrivalsAndDeparturesQueryBean implements Serializable {
     result = prime * result + minutesAfter;
     result = prime * result + minutesBefore;
     result = prime * result + (int) (time ^ (time >>> 32));
+    if (instanceFilterChain != null)
+      result = prime * result + instanceFilterChain.hashCode();
     return result;
   }
 
@@ -116,6 +211,11 @@ public final class ArrivalsAndDeparturesQueryBean implements Serializable {
     if (minutesBefore != other.minutesBefore)
       return false;
     if (time != other.time)
+      return false;
+    if (instanceFilterChain == null || other.instanceFilterChain == null)
+      if (instanceFilterChain != other.instanceFilterChain)
+        return false;
+    if (!instanceFilterChain.equals(other.instanceFilterChain))
       return false;
     return true;
   }

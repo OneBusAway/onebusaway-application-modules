@@ -15,10 +15,18 @@
  */
 package org.onebusaway.transit_data_federation.services.bundle;
 
+import org.onebusaway.transit_data.model.ListBean;
+import org.onebusaway.transit_data.model.RouteBean;
+import org.onebusaway.transit_data.model.StopBean;
+
 import java.util.List;
 
 public interface BundleSearchService {
 	
 	public List<String> getSuggestions(String input);
+
+	public ListBean<StopBean> getStopSuggestions(String input, int maxCount);
+
+	public ListBean<RouteBean> getRouteSuggestions(String input, int maxCount);
 
 }

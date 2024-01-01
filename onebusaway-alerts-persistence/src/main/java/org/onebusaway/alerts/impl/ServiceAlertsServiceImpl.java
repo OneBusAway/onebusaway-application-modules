@@ -424,12 +424,17 @@ public class ServiceAlertsServiceImpl implements ServiceAlertsService {
 		}
 	}
 
-	private <T> void getServiceAlertIdsForKey(
+	private synchronized <T> void getServiceAlertIdsForKey(
 			Map<T, Set<AgencyAndId>> serviceAlertIdsByKey, T key,
 			Collection<AgencyAndId> matches) {
-		Set<AgencyAndId> ids = serviceAlertIdsByKey.get(key);
-		if (ids != null)
-			matches.addAll(ids);
+		if (serviceAlertIdsByKey != null) {
+			Set<AgencyAndId> ids = serviceAlertIdsByKey.get(key);
+			if (ids != null) {
+				// copy to guard against changes
+				Set<AgencyAndId> copyOfIds = new HashSet<>(ids);
+				matches.addAll(copyOfIds);
+			}
+		}
 	}
 
 	private List<ServiceAlertRecord> getServiceAlertIdsAsObjects(

@@ -112,10 +112,30 @@ public abstract class MetricResource {
     for (MonitoredDataSource mds : getDataSources()) {
       MonitoredResult result = mds.getMonitoredResult();
       if (result == null) continue;
-      if (feedId == null || feedId.equals(mds.getFeedId())) {
+      if ((feedId == null || feedId.equals(mds.getFeedId())) && agencyId != null) {
         for (String tripId : result.getMatchedTripIds()) {
-          if (agencyId.equals(AgencyAndIdLibrary.convertFromString(tripId).getAgencyId())) {
-            tripIds.add(tripId);
+          if(tripId != null) {
+            AgencyAndId matchedTripId = AgencyAndIdLibrary.convertFromString(tripId);
+            if (matchedTripId != null && agencyId.equals(matchedTripId.getAgencyId())) {
+              tripIds.add(tripId);
+            }
+          }
+        }
+        // we alter our definition of inservice to include added and duplicated trips
+        for (String tripId : result.getAddedTripIds()) {
+          if(tripId != null) {
+            AgencyAndId addedTripId = AgencyAndIdLibrary.convertFromString(tripId);
+            if (addedTripId != null && agencyId.equals(addedTripId.getAgencyId())) {
+              tripIds.add(tripId);
+            }
+          }
+        }
+        for (String tripId : result.getDuplicatedTripIds()) {
+          if(tripId != null) {
+            AgencyAndId duplicatedTripId = AgencyAndIdLibrary.convertFromString(tripId);
+            if (duplicatedTripId != null && agencyId.equals(duplicatedTripId.getAgencyId())) {
+              tripIds.add(tripId);
+            }
           }
         }
       }
@@ -141,7 +161,40 @@ public abstract class MetricResource {
     } 
     return unmatchedTripCt;
   }
-  
+
+  protected int getAddedTripIdCt(String agencyId, String feedId) {
+    int addedTripCt = 0;
+
+    for (MonitoredDataSource mds : getDataSources()) {
+      MonitoredResult result = mds.getMonitoredResult();
+      if (result == null) continue;
+      if (feedId == null || feedId.equals(mds.getFeedId())) {
+        for (String mAgencyId : result.getAgencyIds()) {
+          if (agencyId.equals(mAgencyId)) {
+            addedTripCt += result.getAddedTripIds().size();
+          }
+        }
+      }
+    }
+    return addedTripCt;
+  }
+  protected int getCancelledTripIdCt(String agencyId, String feedId) {
+    int cancelledTripCt = 0;
+
+    for (MonitoredDataSource mds : getDataSources()) {
+      MonitoredResult result = mds.getMonitoredResult();
+      if (result == null) continue;
+      if (feedId == null || feedId.equals(mds.getFeedId())) {
+        for (String mAgencyId : result.getAgencyIds()) {
+          if (agencyId.equals(mAgencyId)) {
+            cancelledTripCt += result.getCancelledTripIds().size();
+          }
+        }
+      }
+    }
+    return cancelledTripCt;
+  }
+
   protected int getMatchedStopCt(String agencyId, String feedId) {
     List<String> matchedStopIds = new ArrayList<String>();
     try {

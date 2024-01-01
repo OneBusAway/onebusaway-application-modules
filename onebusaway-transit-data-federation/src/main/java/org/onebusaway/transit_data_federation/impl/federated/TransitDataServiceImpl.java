@@ -472,6 +472,16 @@ public class TransitDataServiceImpl implements TransitDataService {
   }
 
   @Override
+  public ListBean<RouteGroupingBean> getCanonicalRoute(long serviceDate, AgencyAndId routeId) {
+    return _transitDataService.getCanonicalRoute(serviceDate, routeId);
+  }
+
+  @Override
+  public StopDirectionSwap findStopDirectionSwap(AgencyAndId routeId, String directionId, AgencyAndId stopId) {
+    return _transitDataService.findStopDirectionSwap(routeId, directionId, stopId);
+  }
+
+  @Override
   public void removeAllServiceAlertsForAgencyId(String agencyId) {
     blockUntilBundleIsReady();
     _transitDataService.removeAllServiceAlertsForAgencyId(agencyId);
@@ -625,6 +635,18 @@ public class TransitDataServiceImpl implements TransitDataService {
   }
 
   @Override
+  public ListBean<StopBean> getStopSuggestions(String agencyId, String input, int maxCount) {
+    ListBean<StopBean> result = this._bundleSearchService.getStopSuggestions(input, maxCount);
+    return result;
+  }
+
+  @Override
+  public ListBean<RouteBean> getRouteSuggestions(String agencyId, String input, int maxCount) {
+    ListBean<RouteBean> result = this._bundleSearchService.getRouteSuggestions(input, maxCount);
+    return result;
+  }
+
+  @Override
   public Boolean stopHasRevenueServiceOnRoute(String agencyId, String stopId, String routeId, String directionId) {
           return _transitDataService.stopHasRevenueServiceOnRoute(agencyId, stopId, routeId, directionId);
   }
@@ -644,10 +666,10 @@ public class TransitDataServiceImpl implements TransitDataService {
     return _transitDataService.getAllConsolidatedStops();
   }
 
-@Override
-public ServiceAlertBean copyServiceAlert(String agencyId,
-	      ServiceAlertBean situation) {
-	return _transitDataService.copyServiceAlert(agencyId, situation);
-}
-  
+  @Override
+  public ServiceAlertBean copyServiceAlert(String agencyId,
+          ServiceAlertBean situation) {
+    return _transitDataService.copyServiceAlert(agencyId, situation);
+  }
+
 }

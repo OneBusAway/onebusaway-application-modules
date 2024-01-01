@@ -27,21 +27,32 @@ jQuery(function() {
 			function(){ 
 				/* no-op */
 			});
-	
-	//Load config parameters from the server
-	getConfigParameters();
-	
-	//Listen to change event and mark inputs as changed
-	$("input").bind("keyup propertychange paste", function() {
-		$(this).addClass("changed");
-		$("#results input[type='button']").removeAttr("disabled").css("color", "#595454");
-	});
-	
+
+	//Render the dynamic content
+	getAgencyMap();
+
+
 	//Handle reset and save click events
 	$("#results #reset").click(resetToPrevious);
 	$("#results #save").click(saveParameters);
 	
 	window.onbeforeunload = confirmMessage;
+
+	var field = jQuery("#csrfField");
+	var csrf_token = field.val();
+	var csrf_name = field.attr('name');
+	if (csrf_name && csrf_token) {
+		jQuery.ajaxPrefilter(function (options, originalOptions, jqXHR) {
+			if (options.type.toLowerCase() === "post") {
+				// initialize `data` to empty string if it does not exist
+				options.data = options.data || "";
+				// add leading ampersand if `data` is non-empty
+				options.data += options.data ? "&" : "";
+				// add _token entry
+				options.data += csrf_name + '=' + csrf_token;
+			}
+		});
+	}
 	
 });
 
@@ -53,6 +64,31 @@ function confirmMessage() {
 	return null;
 }
 
+function listenForChanges() {
+	//Listen to change event and mark inputs as changed
+	$("input").bind("keyup propertychange paste", function() {
+		$(this).addClass("changed");
+		$("#results input[type='button']").removeAttr("disabled").css("color", "#595454");
+	});
+
+}
+function getAgencyMap() {
+	$.ajax({
+		url: "parameters!getAgencyIdMap.action?ts=" + new Date().getTime(),
+		type: "GET",
+		dataType: "json",
+		success: function(response) {
+			updateAccordion(response);
+		},
+		error: function(request) {
+			alert("Error loading agency map from the server : "+ request.responseText);
+			console.log(request);
+		}
+
+	});
+
+}
+
 function getConfigParameters() {
 	$.ajax({
 		url: "parameters!getParameters.action?ts=" + new Date().getTime(),
@@ -62,12 +98,72 @@ function getConfigParameters() {
 			updateParametersView(response.configParameters);
 		},
 		error: function(request) {
-			alert("Error loading parameters from the server : ", request.statusText);
+			alert("Error loading parameters from the server : "+ request.responseText);
+			console.log(request);
 		}
 		
 	});
+
+	// now add listeners ONLY after content was added
+	listenForChanges();
 }
 
+function updateAccordion(data) {
+	// dynamically build up content based on parameters
+	// and agencyId APIs
+	var rootDiv = document.getElementById("dynamicAgencies");
+
+	var i = 0;
+	$.each(data["configParameters"], function(key, val) {
+		var headerLabel = document.createElement('label');
+		headerLabel.setAttribute('class', 'propertyHeader');
+		headerLabel.innerHTML = 'Exclude Scheduled Data: ' + val;
+		var descriptionDiv = document.createElement('div');
+		descriptionDiv.setAttribute('class', 'propertyDescription');
+		descriptionDiv.innerHTML = '<p>Enter true if you want to hide scheduled buses, and only show realtime buses.</p>';
+
+		var inputDiv = document.createElement('div');
+		var hiddenInput = document.createElement('input');
+		hiddenInput.setAttribute('type', 'hidden');
+		hiddenInput.setAttribute('id', key+'_'+'hideScheduleInfo');
+		hiddenInput.setAttribute('value', key+'_'+'hideScheduleInfo');
+		hiddenInput.innerHTML = '';
+
+		var textInput = document.createElement('input');
+		textInput.setAttribute('type', 'text');
+		textInput.setAttribute('id', key+'_'+'hideScheduleInfo');
+		textInput.setAttribute('value', key+'_'+'hideScheduleInfo');
+
+		var unitLabel = document.createElement('label');
+		unitLabel.setAttribute('id', 'propertyUnit');
+		unitLabel.innerHTML = '&nbsp;true/false';
+		inputDiv.appendChild(hiddenInput);
+		inputDiv.appendChild(textInput);
+		inputDiv.appendChild(unitLabel);
+
+		var breakElement = document.createElement('br');
+
+		var agencyDiv = document.createElement('div')
+		agencyDiv.setAttribute('id', val);
+		if (i % 2 == 0) {
+			agencyDiv.setAttribute('class', 'propertyHolder');
+		} else {
+			// odd row to right
+			agencyDiv.setAttribute('class', 'propertyHolder rightProperty');
+		}
+
+		agencyDiv.appendChild(headerLabel);
+		agencyDiv.appendChild(descriptionDiv);
+		agencyDiv.appendChild(inputDiv);
+		rootDiv.appendChild(agencyDiv)
+		rootDiv.appendChild(breakElement);
+		i++;
+	})
+
+	// now Load config parameters from the server
+	getConfigParameters();
+
+}
 function updateParametersView(configParameters) {
 	var panels = $("#accordion").children("li");
 	//Update view by looping through sections in each accordion panel
@@ -121,7 +217,9 @@ function saveParameters() {
 				}
 			},
 			error: function(request) {
-				alert("Error saving parameter values");
+				//alert("Error saving parameter values");
+				console.log("error. Request = ");
+				console.log(request);
 			}
 		});
 	} else {
@@ -133,6 +231,9 @@ function buildData() {
 	var data = new Array();
 	var invalid = false;
 	var changedElements = $("input.changed[type='text']");
+	if (changedElements.length == 0) {
+		console.log("no changed elements detected!");
+	}
 	for(var i=0; i<changedElements.length; i++) {
 		var changedElement = $(changedElements[i]);
 		if(changedElement.val() == "" || changedElement.val() == null) {

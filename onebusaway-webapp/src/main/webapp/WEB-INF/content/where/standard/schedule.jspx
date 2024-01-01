@@ -317,11 +317,6 @@
             </jsp:element>
             </s:iterator>
         </s:iterator>
-
-
-        <p>
-            <s:a href="index.html"><oba:message key="schedule.searchForAnotherStop"/></s:a>
-        </p>
         
         </div>
         </td>

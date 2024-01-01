@@ -40,6 +40,7 @@ import org.onebusaway.gtfs.model.calendar.ServiceDate;
 import org.onebusaway.gtfs.model.calendar.ServiceInterval;
 import org.onebusaway.gtfs.services.calendar.CalendarService;
 import org.onebusaway.transit_data_federation.services.ExtendedCalendarService;
+import org.onebusaway.transit_data_federation.services.realtime.DynamicCalendarService;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.ServiceIdActivation;
@@ -51,6 +52,7 @@ import org.springframework.stereotype.Component;
 public class ExtendedCalendarServiceImpl implements ExtendedCalendarService {
 
   private CalendarService _calendarService;
+  private DynamicCalendarService _dynamicCalendarService;
 
   private TransitGraphDao _transitGraphDao;
 
@@ -75,6 +77,11 @@ public class ExtendedCalendarServiceImpl implements ExtendedCalendarService {
   @Autowired
   public void setCalendarService(CalendarService calendarService) {
     _calendarService = calendarService;
+  }
+
+  @Autowired
+  public void setDynamicCalendarService(DynamicCalendarService dcs) {
+    _dynamicCalendarService = dcs;
   }
 
   @Autowired
@@ -206,6 +213,9 @@ public class ExtendedCalendarServiceImpl implements ExtendedCalendarService {
     // 95% of configs look like this
     if (activeServiceIds.size() == 1 && inactiveServiceIds.isEmpty()) {
       LocalizedServiceId lsid = activeServiceIds.get(0);
+      if (_dynamicCalendarService != null && _dynamicCalendarService.hasServiceId(lsid))
+        return _dynamicCalendarService.isLocalizedServiceIdActiveOnDate(lsid,
+              serviceDate);
       return _calendarService.isLocalizedServiceIdActiveOnDate(lsid,
           serviceDate);
     }
@@ -370,9 +380,16 @@ public class ExtendedCalendarServiceImpl implements ExtendedCalendarService {
     // System.out.println(serviceIds + " " + interval + " " + from + " " + to);
 
     // 95% of configs look like this
-    if (activeServiceIds.size() == 1 && inactiveServiceIds.isEmpty())
+    if (activeServiceIds.size() == 1 && inactiveServiceIds.isEmpty()) {
+      LocalizedServiceId localizedServiceId = activeServiceIds.get(0);
+      if (_dynamicCalendarService != null && _dynamicCalendarService.hasServiceId(localizedServiceId)) {
+        // this serviceId comes from dynamic trips
+        return _dynamicCalendarService.getServiceDatesWithinRange(localizedServiceId,
+                interval, from, to);
+      }
       return _calendarService.getServiceDatesWithinRange(
-          activeServiceIds.get(0), interval, from, to);
+              localizedServiceId, interval, from, to);
+    }
 
     for (LocalizedServiceId serviceId : activeServiceIds) {
       List<Date> dates = _calendarService.getServiceDatesWithinRange(serviceId,

@@ -64,6 +64,10 @@ public class TrivialPredictionHelperService implements PredictionHelperService {
 
 		if (beans != null && beans.size() > 0) {
 			for (TimepointPredictionBean bean : beans) {
+				if (!tripStatus.getActiveTrip().getId().equals(bean.getTripId())) {
+					// we let future trip predictions flow through
+					_log.debug("timepoint for non-active trip {}", bean.getTripId());
+				}
 				TimepointPredictionRecord tpr = new TimepointPredictionRecord();
 
 				tpr.setTimepointId(AgencyAndIdLibrary.convertFromString(bean.getTimepointId()));
@@ -73,7 +77,9 @@ public class TrivialPredictionHelperService implements PredictionHelperService {
 				tpr.setStopSequence(bean.getStopSequence());
 				tpr.setTripId(AgencyAndIdLibrary.convertFromString(bean.getTripId()));
 					tpr.setScheduleRealtionship(bean.getScheduleRelationship().getValue());
-
+				tpr.setActualTrack(bean.getActualTrack());
+				tpr.setScheduledTrack(bean.getScheduledTrack());
+				tpr.setStatus(bean.getStatus());
 				records.add(tpr);
 			}
 

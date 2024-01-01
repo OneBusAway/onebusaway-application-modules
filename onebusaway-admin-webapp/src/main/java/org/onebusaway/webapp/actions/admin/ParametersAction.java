@@ -15,13 +15,18 @@
  */
 package org.onebusaway.webapp.actions.admin;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import org.apache.struts2.convention.annotation.AllowedMethods;
 import org.apache.struts2.convention.annotation.Result;
 import org.apache.struts2.convention.annotation.Results;
 import org.onebusaway.admin.model.ParametersResponse;
 import org.onebusaway.admin.service.ParametersService;
+import org.onebusaway.util.impl.configuration.ConfigParameter;
+import org.onebusaway.util.services.configuration.ConfigurationService;
 import org.onebusaway.webapp.actions.OneBusAwayNYCAdminActionSupport;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -31,30 +36,53 @@ import org.springframework.beans.factory.annotation.Autowired;
  *
  */
 @Results({
-	@Result(name="parameters", type="json", params= {"root","parametersResponse"})
+	@Result(name="parameters", type="json", params= {"root","parametersResponse"}),
+	@Result(name="agencyMap", type="json", params= {"root","parametersResponse"})
 })
+@AllowedMethods({"getParameters","getAgencyIdMap","saveParameters"})
 public class ParametersAction extends OneBusAwayNYCAdminActionSupport {
 
 	private static final long serialVersionUID = 1L;
 	
 	private ParametersResponse parametersResponse;
 	private ParametersService parametersService;
-	
+
+	private ConfigurationService configurationService;
 	private String[] params;
-	
-	
+
+	@Autowired
+	public void setConfigurationService(ConfigurationService configurationService) {
+		this.configurationService = configurationService;
+	}
+
 	public String getParameters() {
 		Map<String, String> configParameters = parametersService.getParameters();
-		
 		parametersResponse = new ParametersResponse();
 		parametersResponse.setConfigParameters(configParameters);
-		
 		return "parameters";
 	}
-	
+
+
+	public String getAgencyIdMap() {
+		String agencyMapString = this.configurationService.getConfigurationValueAsString("agencyMap", "1:ACTA");
+		Map<String, String> map = new HashMap<>();
+		for (String kv :agencyMapString.split(",")) {
+			String[] agencyAndName = kv.split(":");
+			map.put(agencyAndName[0], agencyAndName[1]);
+		}
+		parametersResponse = new ParametersResponse();
+		parametersResponse.setConfigParameters(map);
+		return "agencyMap";
+	}
+	public List<String> getExcludingAgencies() {
+		String agencyIdString = this.configurationService.getConfigurationValueAsString("agencyIds", "1");
+		String[] list = agencyIdString.split(",");
+		return Arrays.asList(list);
+	}
+
 	public String saveParameters() {
 		parametersResponse = new ParametersResponse();
-		Map<String, String> parameters = buildParameters();
+		Map<String, List<ConfigParameter>> parameters = buildParametersList();
 		if(parametersService.saveParameters(parameters)) {
 			parametersResponse.setSaveSuccess(true);
 		} else {
@@ -62,19 +90,26 @@ public class ParametersAction extends OneBusAwayNYCAdminActionSupport {
 		}
 		return "parameters";
 	}
-	
-	private Map<String, String> buildParameters() {
-		Map<String, String> parameters = new HashMap<String, String>();
-		
+
+	private Map<String, List<ConfigParameter>> buildParametersList() {
+		Map<String, List<ConfigParameter>> parameters = new HashMap<>();
+		if (params == null) return parameters;
 		for(String param : params) {
-			String [] configPairs = param.split(":");
-			if(configPairs.length < 2) {
+			String[] configPairs = param.split(":");
+			if (configPairs.length < 2) {
 				throw new RuntimeException("Expecting config data in key value pairs");
-			} 
-			parameters.put(configPairs[0], configPairs[1]);
+			}
+			ConfigParameter configParameter = new ConfigParameter();
+			String [] agencyAndKey = configPairs[0].split("_");
+			if (agencyAndKey.length < 2) {
+				throw new RuntimeException("Expecting agency and key data in key value pairs");
+			}
+
+			configParameter.setKey(agencyAndKey[1]);
+			configParameter.setValue(configPairs[1]);
+			parameters.put(agencyAndKey[0], Arrays.asList(configParameter));
 		}
-		
-		return parameters;
+			return parameters;
 	}
 
 	/**

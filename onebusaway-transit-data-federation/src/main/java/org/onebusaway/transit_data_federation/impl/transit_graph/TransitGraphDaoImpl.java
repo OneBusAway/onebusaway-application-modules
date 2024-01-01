@@ -27,6 +27,7 @@ import org.onebusaway.exceptions.NoSuchStopServiceException;
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.impl.RefreshableResources;
+import org.onebusaway.transit_data_federation.model.transit_graph.DynamicGraph;
 import org.onebusaway.util.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.FederatedTransitDataBundle;
 import org.onebusaway.transit_data_federation.services.transit_graph.AgencyEntry;
@@ -38,21 +39,30 @@ import org.onebusaway.transit_data_federation.services.transit_graph.TransitGrap
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
 import org.onebusaway.transit_data_federation.model.transit_graph.TransitGraph;
 import org.onebusaway.utility.ObjectSerializationLibrary;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class TransitGraphDaoImpl implements TransitGraphDao {
 
+  private static final Logger _log = LoggerFactory.getLogger(TransitGraphDaoImpl.class);
   private FederatedTransitDataBundle _bundle;
 
   private TransitGraph _graph;
+
+  private DynamicGraph _dynamicGraph;
 
   @Autowired
   public void setBundle(FederatedTransitDataBundle bundle) {
     _bundle = bundle;
   }
 
+  @Autowired
+  public void setDynamicGraph(DynamicGraph dynamicGraph) {
+    _dynamicGraph = dynamicGraph;
+  }
   public void setTransitGraph(TransitGraph graph) {
     _graph = graph;
   }
@@ -60,20 +70,25 @@ public class TransitGraphDaoImpl implements TransitGraphDao {
   @PostConstruct
   @Refreshable(dependsOn = RefreshableResources.TRANSIT_GRAPH)
   public void setup() throws IOException, ClassNotFoundException {
-    File path = _bundle.getTransitGraphPath();
+    TransitGraphImpl newGraph = null;
 
-    if(_graph != null) {
-      TransitGraphImpl graph = (TransitGraphImpl)_graph;
-      graph.empty();
-      _graph = null;
-    }
-    
+    File path = _bundle.getTransitGraphPath();
     if (path.exists()) {
-      TransitGraphImpl graph = ObjectSerializationLibrary.readObject(path);
-      graph.initialize();
-      _graph = graph;
+      long start = System.currentTimeMillis();
+      newGraph = ObjectSerializationLibrary.readObject(path);
+      long delta = System.currentTimeMillis() - start;
+      _log.info("Transit Graph load in {}s", delta/1000);
+      newGraph.initialize();
     } else {
-      _graph = new TransitGraphImpl();
+      newGraph = new TransitGraphImpl();
+    }
+
+    TransitGraphImpl oldGraph = (TransitGraphImpl) _graph;
+    _graph = newGraph;
+
+    if(oldGraph != null) {
+      oldGraph.empty();
+      oldGraph = null;
     }
   }
 
@@ -133,7 +148,10 @@ public class TransitGraphDaoImpl implements TransitGraphDao {
 
   @Override
   public TripEntry getTripEntryForId(AgencyAndId id) {
-    return _graph.getTripEntryForId(id);
+    TripEntry entry = _graph.getTripEntryForId(id);
+    if (entry == null && _dynamicGraph != null)
+      entry = _dynamicGraph.getTripEntryForId(id);
+    return entry;
   }
 
   @Override

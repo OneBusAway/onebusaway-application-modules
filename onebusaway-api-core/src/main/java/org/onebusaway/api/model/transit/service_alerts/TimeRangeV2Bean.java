@@ -21,23 +21,23 @@ public class TimeRangeV2Bean implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
-  private long from;
+  private Long from = null;
 
-  private long to;
+  private Long to = null;
 
-  public long getFrom() {
+  public Long getFrom() {
     return from;
   }
 
-  public void setFrom(long from) {
+  public void setFrom(Long from) {
     this.from = from;
   }
 
-  public long getTo() {
+  public Long getTo() {
     return to;
   }
 
-  public void setTo(long to) {
+  public void setTo(Long to) {
     this.to = to;
   }
 }

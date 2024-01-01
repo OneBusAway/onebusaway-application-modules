@@ -67,6 +67,7 @@ public class BundleManagementServiceImpl implements BundleManagementService {
   protected static final int INFERENCE_PROCESSING_THREAD_WAIT_TIMEOUT_IN_SECONDS = 60;
 
   protected static final int MAX_EXPECTED_THREADS = 3000;
+  private static final int REFRESH_INTERVAL_MINUTES = 1;
 
   private static Logger _log = LoggerFactory
       .getLogger(BundleManagementServiceImpl.class);
@@ -77,6 +78,9 @@ public class BundleManagementServiceImpl implements BundleManagementService {
 
   protected HashMap<String, BundleItem> _applicableBundles = new HashMap<String, BundleItem>();
 
+  public int getApplicableBundlesSize() {
+    return _applicableBundles.size();
+  }
   protected volatile List<Future> _inferenceProcessingThreads = new ArrayList<Future>();
 
   protected String _bundleRootPath = null;
@@ -84,12 +88,18 @@ public class BundleManagementServiceImpl implements BundleManagementService {
   private BundleStoreService _bundleStore = null;
 
   protected boolean _standaloneMode = true;
+
+  private String _remoteSourceURI = null;
   
   protected boolean _builderMode = false;
 
   protected boolean _bundleIsReady = false;
 
   protected String _currentBundleId = null;
+
+  public String getCurrentBundleId() {
+    return _currentBundleId;
+  }
 
   protected ServiceDate _currentServiceDate = null;
 
@@ -106,6 +116,9 @@ public class BundleManagementServiceImpl implements BundleManagementService {
 
   @Autowired
   protected ThreadPoolTaskScheduler _taskScheduler;
+
+  // this is not injected, we set it up below based on config
+  protected BundleScheduler _scheduler = null;
 
   @Autowired
   protected RefreshService _refreshService;
@@ -126,19 +139,34 @@ public class BundleManagementServiceImpl implements BundleManagementService {
       String bundleRoot = System.getProperty("bundle.root");
       _log.info("builder mode:  using bundle.root of " + bundleRoot);
       _bundleStore = new LocalBundleStoreImpl(bundleRoot);
+      _scheduler = new HourlyBundleSchedulerImpl();
+      _scheduler.setup(this, _taskScheduler);
       return;
     }
     if(!_standaloneMode) {
-      _bundleStore = new HttpBundleStoreImpl(_bundleRootPath, _restApiLibrary);        
+      _bundleStore = new HttpBundleStoreImpl(_bundleRootPath, _restApiLibrary);
+      _scheduler = new HourlyBundleSchedulerImpl();
+      _scheduler.setup(this, _taskScheduler);
     }
     else{
-      _bundleStore = new LocalBundleStoreImpl(_bundleRootPath); 	
+      if (_remoteSourceURI == null) {
+        _bundleStore = new LocalBundleStoreImpl(_bundleRootPath);
+        _scheduler = new HourlyBundleSchedulerImpl();
+        _scheduler.setup(this, _taskScheduler);
+      } else {
+        _log.info("setting up interval based bundle refresh with refresh interval=" + REFRESH_INTERVAL_MINUTES);
+        _bundleStore = new S3BundleStoreImpl(_bundleRootPath, _remoteSourceURI);
+        _scheduler = new IntervalBundleSchedulerImpl(REFRESH_INTERVAL_MINUTES);
+        _scheduler.setup(this, _taskScheduler);
+        _log.info("when using interval based we discover on a thread, returning...");
+        return;
+      }
     }
     
     try{
       discoverBundles();
     }catch(Exception e){
-      _log.error("Unable to retreive Bundle List.");
+      _log.error("Unable to retrieve Bundle List.", e);
       if(!(_bundleStore instanceof LocalBundleStoreImpl)){
         _log.info("Attempting to load local Bundle...");
         _bundleStore = new LocalBundleStoreImpl(_bundleRootPath);
@@ -152,15 +180,7 @@ public class BundleManagementServiceImpl implements BundleManagementService {
     refreshApplicableBundles();
     reevaluateBundleAssignment();
 
-    if (_taskScheduler != null) {
-      _log.info("Starting bundle discovery and switch threads...");
-
-      BundleDiscoveryUpdateThread discoveryThread = new BundleDiscoveryUpdateThread();
-      _taskScheduler.schedule(discoveryThread, discoveryThread);
-
-      BundleSwitchUpdateThread switchThread = new BundleSwitchUpdateThread();
-      _taskScheduler.schedule(switchThread, switchThread);
-    }
+    _scheduler.setup(this, _taskScheduler);
 
   }
 
@@ -250,6 +270,10 @@ public class BundleManagementServiceImpl implements BundleManagementService {
 
   public void setStandaloneMode(boolean standalone) {
     _standaloneMode = standalone;
+  }
+
+  public void setRemoteSourceURI(String s) {
+    _remoteSourceURI = s;
   }
 
   public boolean getStandaloneMode() {
@@ -412,7 +436,7 @@ public class BundleManagementServiceImpl implements BundleManagementService {
 
     } catch (Exception e) {
       _log.error("Bundle " + bundleName + "(" + bundleId + ")"
-          + " failed to load. Disabling for this session...");
+          + " failed to load. Disabling for this session...", e);
       _applicableBundles.remove(bundleId);
       reevaluateBundleAssignment();
 
@@ -525,88 +549,6 @@ public class BundleManagementServiceImpl implements BundleManagementService {
     removeDeadInferenceThreads();
 
     return (_inferenceProcessingThreads.size() == 0);
-  }
-
-  protected class BundleSwitchUpdateThread extends TimerTask implements Trigger {
-
-    // required for subclass
-    public BundleSwitchUpdateThread() {
-    }
-
-    @Override
-    public void run() {
-      try {
-        refreshApplicableBundles();
-        reevaluateBundleAssignment();
-      } catch (Exception e) {
-        _log.error("Error re-evaluating bundle assignment: " + e.getMessage());
-        e.printStackTrace();
-      }
-    }
-
-    @Override
-    public Date nextExecutionTime(TriggerContext arg0) {
-      Date lastTime = arg0.lastScheduledExecutionTime();
-      if (lastTime == null) {
-        lastTime = new Date();
-      }
-
-      Calendar calendar = new GregorianCalendar();
-      calendar.setTime(lastTime);
-      calendar.set(Calendar.MILLISECOND, 0);
-      calendar.set(Calendar.SECOND, 1); // go into the next hour/day
-
-      // if we have no current bundle, keep retrying every minute
-      // to see if we're just waiting for the clock to rollover to the next day
-      if (_applicableBundles.size() > 0 && _currentBundleId == null) {
-        int minutes = calendar.get(Calendar.MINUTE);
-        calendar.set(Calendar.MINUTE, minutes + 1);
-
-      } else {
-        calendar.set(Calendar.MINUTE, 0);
-
-        int hour = calendar.get(Calendar.HOUR);
-        calendar.set(Calendar.HOUR, hour + 1);
-      }
-
-      return calendar.getTime();
-    }
-  }
-
-  protected class BundleDiscoveryUpdateThread extends TimerTask implements
-      Trigger {
-
-    // required for subclass
-    public BundleDiscoveryUpdateThread() {
-    }
-
-    @Override
-    public void run() {
-      try {
-        discoverBundles();
-      } catch (Exception e) {
-        _log.error("Error updating bundle list: " + e.getMessage());
-        e.printStackTrace();
-      }
-    }
-
-    @Override
-    public Date nextExecutionTime(TriggerContext arg0) {
-      Date lastTime = arg0.lastScheduledExecutionTime();
-      if (lastTime == null) {
-        lastTime = new Date();
-      }
-
-      Calendar calendar = new GregorianCalendar();
-      calendar.setTime(lastTime);
-      calendar.set(Calendar.MILLISECOND, 0);
-      calendar.set(Calendar.SECOND, 0);
-
-      int minute = calendar.get(Calendar.MINUTE);
-      calendar.set(Calendar.MINUTE, minute + 15);
-
-      return calendar.getTime();
-    }
   }
 
 }

@@ -22,8 +22,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
-import org.onebusaway.admin.bundle.model.Bundle;
-import org.onebusaway.admin.bundle.model.BundleFile;
+import org.onebusaway.transit_data_federation.bundle.model.Bundle;
+import org.onebusaway.transit_data_federation.bundle.model.BundleFile;
 import org.onebusaway.util.FileUtility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

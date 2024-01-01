@@ -19,7 +19,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.onebusaway.admin.bundle.model.BundleMetadata;
+import org.onebusaway.transit_data_federation.bundle.model.BundleMetadata;
 
 public class StagingBundleProvider {
   private static final String META_DATA_LOCATION = "metadata.json";

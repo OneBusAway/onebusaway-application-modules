@@ -52,19 +52,28 @@
 		</s:if>
 		<s:else>	
 			<s:if test="%{routesWithArrivals.size&gt;0}">
-				<p class="stopResultGroupHeader">Buses en-route:</p>
+				<s:if test="%{hideStopGroupHeader == 'true}">
+					<p class="stopResultGroupHeader">Buses en-route:</p>
+				</s:if>
 				<s:iterator value="routesWithArrivals">
 					<s:iterator value="directions">
 						<div class="directionAtStop">
 							<p>
-								<s:url var="url" namespace="/m" action="index" anchor="%{directionId}-%{q}">
-									<s:param name="q">
-										<s:property value="shortName" />
-									</s:param>
-								</s:url>
-								<a href="${url}">
-									<strong><s:property value="shortName" />&amp;nbsp;&amp;nbsp;<s:property value="destination" /></strong>
-								</a>
+								<div class="directionAtStopHeader">
+									<s:url var="url" namespace="/m" action="index" anchor="%{directionId}-%{hintless}">
+										<s:param name="q">
+											<s:if test="%{useAgencyId == 'true'}">
+												<s:property value="id+' '+shortName" />
+											</s:if>
+											<s:else>
+												<s:property value="shortName" />
+											</s:else>
+										</s:param>
+									</s:url>
+									<a href="${url}">
+										<strong><s:property value="shortName" />&amp;nbsp;&amp;nbsp;<s:property value="destination" /></strong>
+									</a>
+								</div>
 							</p>
 							
 							<s:iterator value="stops">
@@ -79,7 +88,7 @@
 									<c:otherwise>
 										<ol class="arrivalsAtStop">
 											<c:forEach var="distanceAway" items="${distanceAways}" varStatus="status">
-												<li>${distanceAway}  <small>Vehicle ${vehicleIds[status.index]}</small></li>
+												<li>${distanceAway}</li>
 											</c:forEach>
 										</ol>
 									</c:otherwise>		

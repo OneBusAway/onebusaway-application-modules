@@ -16,6 +16,7 @@
 package org.onebusaway.enterprise.webapp.actions.m;
 
 import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -58,6 +59,8 @@ import uk.org.siri.siri.OccupancyEnumeration;
 import uk.org.siri.siri.VehicleActivityStructure;
 import uk.org.siri.siri.VehicleActivityStructure.MonitoredVehicleJourney;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl implements SearchResultFactory {
 
   private ConfigurationService _configurationService;
@@ -70,6 +73,8 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
   private Boolean _serviceDateFilter = null;
   private String _apcMode = null;
   private Map<String, String> occupancyStatusEnumToDisplay = new HashMap<>();
+
+  boolean debug = false;
 
   public SearchResultFactoryImpl(TransitDataService transitDataService,
       RealtimeService realtimeService, ConfigurationService configurationService) {
@@ -203,27 +208,30 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
     List<RouteAtStop> routesWithNoVehiclesEnRoute = new ArrayList<RouteAtStop>();
     List<RouteAtStop> routesWithNoScheduledService = new ArrayList<RouteAtStop>();
     List<RouteBean> filteredRoutes = new ArrayList<RouteBean>();
-    
+
     Set<String> serviceAlertDescriptions = new HashSet<String>();
+    // stop visits -- we pull this out of the loop as it doesn't change
+    List<MonitoredStopVisitStructure> visitList = _realtimeService.getMonitoredStopVisitsForStop(
+            stopBean.getId(), 0, SystemTime.currentTimeMillis());
+
 
     for (RouteBean routeBean : stopBean.getRoutes()) {
       if (routeFilter != null && !routeFilter.isEmpty()
-          && !routeFilter.contains(routeBean)) {
+              && !routeFilter.contains(routeBean)) {
         filteredRoutes.add(routeBean);
         continue;
       }
 
-        ServiceDate serviceDate = null;
-        boolean serviceDateFilterOn = getServiceDateFilter();
-        if (serviceDateFilterOn) serviceDate = new ServiceDate(new Date(SystemTime.currentTimeMillis()));
+      ServiceDate serviceDate = null;
+      boolean serviceDateFilterOn = getServiceDateFilter();
+      if (serviceDateFilterOn) serviceDate = new ServiceDate(new Date(SystemTime.currentTimeMillis()));
 
-        StopsForRouteBean stopsForRoute;
-        if (serviceDate != null) {
-            stopsForRoute = _transitDataService.getStopsForRouteForServiceDate(routeBean.getId(), serviceDate);
-        }
-        else {
-            stopsForRoute = _transitDataService.getStopsForRoute(routeBean.getId());
-        }
+      StopsForRouteBean stopsForRoute;
+      if (serviceDate != null) {
+        stopsForRoute = _transitDataService.getStopsForRouteForServiceDate(routeBean.getId(), serviceDate);
+      } else {
+        stopsForRoute = _transitDataService.getStopsForRoute(routeBean.getId());
+      }
 
       List<RouteDirection> directions = new ArrayList<RouteDirection>();
       List<StopGroupingBean> stopGroupings = stopsForRoute.getStopGroupings();
@@ -241,37 +249,37 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
 
           // arrivals in this direction
           Map<String, List<StopOnRoute>> arrivalsForRouteAndDirection = getDisplayStringsByHeadsignForStopAndRouteAndDirection(
-              stopBean, routeBean, stopGroupBean);
+                  stopBean, routeBean, stopGroupBean, visitList);
 
           // service alerts for this route + direction
           List<ServiceAlertBean> serviceAlertBeans = _realtimeService.getServiceAlertsForRouteAndDirection(
-              routeBean.getId(), stopGroupBean.getId());
+                  routeBean.getId(), stopGroupBean.getId());
           populateServiceAlerts(serviceAlertDescriptions, serviceAlertBeans);
 
           // also include service alerts for route + stop
           serviceAlertBeans = _realtimeService.getServiceAlertsForRouteAndStop(
-                    routeBean.getId(), stopBean.getId());
+                  routeBean.getId(), stopBean.getId());
           populateServiceAlerts(serviceAlertDescriptions, serviceAlertBeans);
 
           // service in this direction
           Boolean hasUpcomingScheduledService = _transitDataService.stopHasUpcomingScheduledService(
-        	  (routeBean.getAgency()!=null?routeBean.getAgency().getId():null),
-              SystemTime.currentTimeMillis(), stopBean.getId(), routeBean.getId(),
-              stopGroupBean.getId());
+                  (routeBean.getAgency() != null ? routeBean.getAgency().getId() : null),
+                  SystemTime.currentTimeMillis(), stopBean.getId(), routeBean.getId(),
+                  stopGroupBean.getId());
 
           // if there are buses on route, always have "scheduled service"
           if (!arrivalsForRouteAndDirection.isEmpty()) {
             hasUpcomingScheduledService = true;
           }
 
-          
-          if(arrivalsForRouteAndDirection.isEmpty()) {
-            directions.add(new RouteDirection(stopGroupBean.getName().getName(), stopGroupBean, Collections.<StopOnRoute>emptyList(), 
-                hasUpcomingScheduledService, Collections.<String>emptyList()));
+
+          if (arrivalsForRouteAndDirection.isEmpty()) {
+            directions.add(new RouteDirection(stopGroupBean.getName().getName(), stopGroupBean, Collections.<StopOnRoute>emptyList(),
+                    hasUpcomingScheduledService, Collections.<String>emptyList()));
           } else {
-            for (Map.Entry<String,List<StopOnRoute>> entry : arrivalsForRouteAndDirection.entrySet()) {
-              directions.add(new RouteDirection(entry.getKey(), stopGroupBean, entry.getValue(), 
-                 hasUpcomingScheduledService, Collections.<String>emptyList()));
+            for (Map.Entry<String, List<StopOnRoute>> entry : arrivalsForRouteAndDirection.entrySet()) {
+              directions.add(new RouteDirection(entry.getKey(), stopGroupBean, entry.getValue(),
+                      hasUpcomingScheduledService, Collections.<String>emptyList()));
             }
           }
         }
@@ -281,25 +289,25 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
       // or has service with vehicles en route. Add RouteAtStop object to appropriate collection.
       // Now one RouteAtStop object exists for each direction for each route.
       for (RouteDirection direction : directions) {
-    	  List<RouteDirection> directionList = Collections.<RouteDirection>singletonList(direction);
-    	  
-    	  RouteAtStop routeAtStop = new RouteAtStop(routeBean, directionList, serviceAlertDescriptions);
-    	  
-    	  if (!direction.getStops().isEmpty())
-    		  routesWithArrivals.add(routeAtStop);
-    	  else if (Boolean.FALSE.equals(direction.getHasUpcomingScheduledService()))
-    		  routesWithNoScheduledService.add(routeAtStop);
-    	  else
-    		  routesWithNoVehiclesEnRoute.add(routeAtStop);
+        List<RouteDirection> directionList = Collections.<RouteDirection>singletonList(direction);
+
+        RouteAtStop routeAtStop = new RouteAtStop(routeBean, directionList, serviceAlertDescriptions);
+
+        if (!direction.getStops().isEmpty())
+          routesWithArrivals.add(routeAtStop);
+        else if (Boolean.FALSE.equals(direction.getHasUpcomingScheduledService()))
+          routesWithNoScheduledService.add(routeAtStop);
+        else
+          routesWithNoVehiclesEnRoute.add(routeAtStop);
       }
     }
 
-      // add stop level service alerts
-      List<ServiceAlertBean> stopServiceAlertBeans = getServiceAlertsForStop(stopBean.getId());
-      populateServiceAlerts(serviceAlertDescriptions, stopServiceAlertBeans);
-    
+    // add stop level service alerts
+    List<ServiceAlertBean> stopServiceAlertBeans = getServiceAlertsForStop(stopBean.getId());
+    populateServiceAlerts(serviceAlertDescriptions, stopServiceAlertBeans);
+
     return new StopResult(stopBean, routesWithArrivals,
-        routesWithNoVehiclesEnRoute, routesWithNoScheduledService, filteredRoutes, serviceAlertDescriptions);
+            routesWithNoVehiclesEnRoute, routesWithNoScheduledService, filteredRoutes, serviceAlertDescriptions);
   }
 
     private List<ServiceAlertBean> getServiceAlertsForStop(String stopId) {
@@ -324,15 +332,11 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
 
   // stop view
   private Map<String, List<StopOnRoute>> getDisplayStringsByHeadsignForStopAndRouteAndDirection(
-      StopBean stopBean, RouteBean routeBean, StopGroupBean stopGroupBean) {
+      StopBean stopBean, RouteBean routeBean, StopGroupBean stopGroupBean, List<MonitoredStopVisitStructure> visitList) {
     
     Map<String, List<StopOnRoute>> results = new HashMap<String, List<StopOnRoute>>();
 
     Boolean showApc = _realtimeService.showApc();
-
-    // stop visits
-    List<MonitoredStopVisitStructure> visitList = _realtimeService.getMonitoredStopVisitsForStop(
-        stopBean.getId(), 0, SystemTime.currentTimeMillis());
 
     for (MonitoredStopVisitStructure visit : visitList) {
       String routeId = visit.getMonitoredVehicleJourney().getLineRef().getValue();
@@ -366,22 +370,92 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
       } else {
         vehicleId = "N/A"; // insert an empty element so it aligns with distanceAways
       }
-      
+
+      String loadOccupancy = null;
+      if (visit.getMonitoredVehicleJourney() != null) {
+        loadOccupancy = getPresentableOccupancy(visit.getMonitoredVehicleJourney(), visit.getRecordedAtTime().getTime());
+      }
+
       List<String> distanceAways = new ArrayList<String>();
       List<String> vehicleIds = new ArrayList<String>();
       if (vehicleId.contains("_")) vehicleId = vehicleId.split("_")[1];
       vehicleIds.add(vehicleId);
-      if(timePrediction != null) {
-    	  distanceAways.add(timePrediction);
+
+      String qualifierText = getQualifierText(visit.getMonitoredVehicleJourney(), visit.getRecordedAtTime().getTime(), true);
+
+      // new format: timePrediction \t icon+vehicleId \t weeble/occupancy \t distanceAways
+      String columms = "";
+      // column 1: prediction
+      if (isNotBlank(timePrediction)) {
+        if (isActiveTrip(visit.getMonitoredVehicleJourney())) {
+          if (visit.getMonitoredVehicleJourney().isMonitored()) {
+            columms += openSpan("predictionContainer", "activeArrivalPrediction") + timePrediction + closeSpan();
+          } else {
+            columms += openSpan("predictionContainer", "futureArrivalPrediction") + timePrediction + closeSpan();
+          }
+        } else {
+          columms += openSpan("predictionContainer","futureArrivalPrediction") + timePrediction + closeSpan();
+        }
       } else {
-    	  distanceAways.add(distance);
+        columms += "schedule";
       }
-      
+      // column 2: vehicleId
+      if (visit.getMonitoredVehicleJourney().isMonitored()
+              && isNotBlank(vehicleId))
+        columms+= openSpan("vehicleIdContainer", "vehicleArrival") + vehicleId + closeSpan();
+      else {
+        columms+= openSpan("vehicleIdContainer", "vehicleScheduledArrival") + "scheduled" + closeSpan();
+      }
+      // column 3: occupancy
+      if (isNotBlank(loadOccupancy))
+        columms+= loadOccupancy;
+      else
+        columms += emptyDiv("apcLadderContainer");
+      // column 4: distance + qualifier
+      if (isNotBlank(distance)) {
+        if (isNotBlank(qualifierText))
+          distance += qualifierText;
+        columms += openSpan("distanceContainer", "distanceArrival") + distance + closeSpan();
+      } else {
+        // striving for parity in layout
+        columms += openSpan("distanceContainer", "distanceArrival") + closeSpan();
+      }
+      distanceAways.add(columms);
+
       results.get(visit.getMonitoredVehicleJourney().getDestinationName().getValue()).add(
     		  		new StopOnRoute(stopBean,distanceAways, visit.getMonitoredVehicleJourney().isMonitored(), vehicleIds));
     }
 
     return results;
+  }
+
+  private boolean isActiveTrip(MonitoredVehicleJourneyStructure journey) {
+    if (journey != null) {
+      NaturalLanguageStringStructure progressStatus = journey.getProgressStatus();
+      if (progressStatus != null && progressStatus.getValue().contains("prevTrip")) {
+        return false;
+      } else {
+        return true;
+      }
+    }
+    return false; // we are not active if journey is null
+  }
+
+  private String openSpan(String spanClass) {
+    return openSpan(null, spanClass);
+  }
+  private String openSpan(String divClass, String spanClass) {
+    if (divClass == null)
+      return "<div class='arrivalDepartureContainer'>" +
+              "<span class=\"" + spanClass + "\">";
+    return "<div class='" + divClass + "'>" +
+            "<span class=\"" + spanClass + "\">";
+  }
+  private String closeSpan() {
+    return "</span>"+  "</div>";
+  }
+  private String emptyDiv(String divClass) {
+    return "<div class='" + divClass + "'><span class='weeble0'></span></div>";
   }
 
   private String getPresentableOccupancy(MonitoredVehicleJourneyStructure journey, long updateTime) {
@@ -391,39 +465,56 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
     if (age > staleTimeout) {
 //      System.out.println("tossing record " + journey.getVehicleRef().getValue()
 //              + " with age " + age + "s old");
-      return "";
+      return null;
     }
+    if (!journey.isMonitored() || !isActiveTrip(journey))
+      return null;
 
     String apcMode = getApcMode();
 
     String occupancyStr = "";
     if (apcMode != null) {
-      occupancyStr = getApcModeOccupancy(journey);
+        occupancyStr = getApcModeOccupancy(journey, showIconsForOccupancy());
     }
     return occupancyStr;
   }
 
+  private boolean showIconsForOccupancy() {
+    return _configurationService.getConfigurationValueAsBoolean("display.apcIcons", true);
+  }
 
 
-  private String getApcModeOccupancy(MonitoredVehicleJourneyStructure journey) {
+  private String getApcModeOccupancy(MonitoredVehicleJourneyStructure journey, boolean showIcons) {
 
     if (journey.getOccupancy() != null) {
-
+      String stylePrefix = "apcDot";
+      if (showIcons) {
+        stylePrefix = "weeble";
+      }
       String loadOccupancy = journey.getOccupancy().toString();
       loadOccupancy = loadOccupancy.toUpperCase();
 
       if (loadOccupancy.equals(OccupancyEnumeration.SEATS_AVAILABLE.name()) || loadOccupancy.equals(OccupancyStatus.MANY_SEATS_AVAILABLE.name())) {
-        loadOccupancy = "<div class='apcLadderContainer'><span class='apcDotG'></span> <span class='apcTextG'>" + getOccupancyString(OccupancyEnumeration.SEATS_AVAILABLE.name()) + "</span></div>";
-        //loadOccupancy = "<icon class='apcicong'> </icon>";
+        String occupancyText = getOccupancyString(OccupancyEnumeration.SEATS_AVAILABLE.name());
+        loadOccupancy = "<div class='apcLadderContainer' title='" + occupancyText + "' aria-label='" + occupancyText + "'><span class='" + stylePrefix + "G'></span>";
+        if (!showIcons)
+          loadOccupancy += "<span class='apcTextG'>" + occupancyText + "</span>";
+        loadOccupancy += "</div>";
       } else if (loadOccupancy.equals(OccupancyEnumeration.STANDING_AVAILABLE.name()) || loadOccupancy.equals(OccupancyStatus.FEW_SEATS_AVAILABLE.name())) {
-        loadOccupancy = "<div class='apcLadderContainer'><span class='apcDotY'></span> <span class='apcTextY'>" + getOccupancyString(OccupancyEnumeration.STANDING_AVAILABLE.name()) + "</span></div>";
-        //loadOccupancy = "<icon class='apcicony'> </icon>";
+        String occupancyText = getOccupancyString(OccupancyEnumeration.STANDING_AVAILABLE.name());
+        loadOccupancy = "<div class='apcLadderContainer' title='" + occupancyText + "' aria-label='" + occupancyText + "'><span class='" + stylePrefix + "Y'></span>";
+        if (!showIcons)
+          loadOccupancy += "<span class='apcTextY'>" + getOccupancyString(OccupancyEnumeration.STANDING_AVAILABLE.name()) + "</span></div>";
+        loadOccupancy += "</div>";
       } else if (loadOccupancy.equals(OccupancyEnumeration.FULL.name()) || loadOccupancy.equals(OccupancyStatus.FULL.name())) {
-        loadOccupancy = "<div class='apcLadderContainer'><span class='apcDotR'></span> <span class='apcTextR'>" + getOccupancyString(OccupancyEnumeration.FULL.name()) + "</span></div>";
-        //loadOccupancy = "<icon class='apciconr'> </icon>";
+        String occupancyText = getOccupancyString(OccupancyEnumeration.FULL.name());
+        loadOccupancy = "<div class='apcLadderContainer' title='" + occupancyText + "' aria-label='" + occupancyText + "'><span class='" + stylePrefix + "R'></span>";
+        if (!showIcons)
+          loadOccupancy +="<span class='apcTextR'>" + getOccupancyString(OccupancyEnumeration.FULL.name()) + "</span></div>";
+        loadOccupancy += "</div>";
       }
 
-      return " " + loadOccupancy;
+      return loadOccupancy;
     } else
       return "";
   }
@@ -447,22 +538,26 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
   }
 
   private void fillDistanceAwayStringsList(
-	  MonitoredVehicleJourney mvj,
-	  Date recordedAtTime,
-	  String stopId,
-      Map<String, List<String>> map) { 
+      MonitoredVehicleJourney mvj,
+      Date recordedAtTime,
+      String stopId,
+      Map<String, List<String>> map) {
       
-      // Distance Away
-      List<String> distanceStrings = map.get(stopId);
-      if (distanceStrings == null) {
-        distanceStrings = new ArrayList<String>();
-      }
+    // Distance Away
+    List<String> distanceStrings = map.get(stopId);
+    if (distanceStrings == null) {
+      distanceStrings = new ArrayList<String>();
+    }
 
-      distanceStrings.add(getPresentableDistance(
-    		  mvj,
-    		  recordedAtTime.getTime(), false));
-      map.put(stopId, distanceStrings);
-
+    // getPresentableDistance doesn't include occupancy
+    String distance = getPresentableDistance(
+          mvj,
+          recordedAtTime.getTime(), false);
+    String occupancy = getPresentableOccupancy(mvj, recordedAtTime.getTime());
+    if (occupancy != null)
+      distance += occupancy;
+    distanceStrings.add(distance);
+    map.put(stopId, distanceStrings);
   }
   
   private void fillVehicleIdsStringList(
@@ -496,9 +591,8 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
 		  MonitoredVehicleJourneyStructure journey, long updateTime,
 	      boolean isStopContext) {
 
-	  NaturalLanguageStringStructure progressStatus = journey.getProgressStatus();
 	  MonitoredCallStructure monitoredCall = journey.getMonitoredCall();
-	  
+
 	  if(!isStopContext) {
 		  return null;
 	  }
@@ -506,82 +600,119 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
 	  int staleTimeout = getStaleTimeout();
 	  long age = (SystemTime.currentTimeMillis() - updateTime) / 1000;
 
+    String qualifierText = "";
 	  if (age > staleTimeout) {
-		  return null;
+      qualifierText = " <b>(old data)</b>";
 	  }
-	  
-	  if(monitoredCall.getExpectedArrivalTime() != null) {
-		  long predictedArrival = monitoredCall.getExpectedArrivalTime().getTime();
+    String blockId = "";
+    if (journey != null && journey.getBlockRef()!= null && journey.getBlockRef().getValue() != null) {
+      blockId = journey.getBlockRef().getValue();
+      blockId += ":" + journey.getFramedVehicleJourneyRef().getDatedVehicleJourneyRef();
+    }
 
-		  SiriExtensionWrapper wrapper = (SiriExtensionWrapper) monitoredCall.getExtensions().getAny();
-		  SiriDistanceExtension distanceExtension = wrapper.getDistances();
-		  String distance = distanceExtension.getPresentableDistance();
-      //add space to the distance so that occupancy lines up correctly with time [pjm]
+    if (isOriginTerminal(journey)) {
+      // we show departures for origin terminal
+      if (monitoredCall.getExpectedDepartureTime() != null) {
+        if (debug) qualifierText += "DEPARTS(" + blockId + ") ";
+        return getPresentableTime(journey, updateTime, monitoredCall.getExpectedDepartureTime().getTime(), qualifierText);
+      }
+    }
+    if (monitoredCall.getExpectedArrivalTime() != null) {
+      if (debug) qualifierText += "ARR(" + blockId + ") ";
+      // otherwise show arrivals
+      return getPresentableTime(journey, updateTime, monitoredCall.getExpectedArrivalTime().getTime(), qualifierText);
+    }
 
-      double minutes = Math.floor((predictedArrival - updateTime) / 60 / 1000);
-		  String timeString = Math.round(minutes) + " minute" + ((Math.abs(minutes) != 1) ? "s" : "");
-      String timeAndDistance = "<strong>" + timeString + "</strong>, " + distance;
-      String loadOccupancy = getPresentableOccupancy(journey, updateTime);
-
-      if(progressStatus != null && progressStatus.getValue().contains("prevTrip")) {
-		    	return timeString;
-		  } else {
-		    	return timeAndDistance + ", " + loadOccupancy;
-		  }
-	  }
-	  
 	  return null;
-  }	  
-  
+  }
+
+  private String getPresentableTime(MonitoredVehicleJourneyStructure journey, long updateTime, long arrivalOrDeparture, String qualifierText) {
+    if (qualifierText == null)
+      qualifierText = "";
+
+    double minutes = Math.floor((arrivalOrDeparture - updateTime) / 60 / 1000);
+    String timeString = "<strong>" + Math.round(minutes) + "</strong>"
+            + " minute" + ((Math.abs(minutes) != 1) ? "s" : "" );
+    if (debug) {
+      SimpleDateFormat sdf = new SimpleDateFormat("hh:mm a");
+      timeString += ", " + sdf.format(new Date(arrivalOrDeparture));
+    }
+
+    return timeString + qualifierText;
+  }
+
+  private boolean isOriginTerminal(MonitoredVehicleJourneyStructure journey) {
+    if (journey == null
+            || journey.getOriginRef() == null
+            || journey.getDestinationRef() == null
+            || journey.getMonitoredCall() == null) {
+      return false;
+    }
+    String origin = journey.getOriginRef().getValue();
+    String currentStop = journey.getMonitoredCall().getStopPointRef().getValue();
+    if (currentStop == null)
+      return false;
+    return (currentStop.equals(origin));
+  }
+
+  private String getQualifierText(MonitoredVehicleJourneyStructure journey, long updateTime,
+                                  boolean isStopContext) {
+    MonitoredCallStructure monitoredCall = journey.getMonitoredCall();
+    SiriExtensionWrapper wrapper = (SiriExtensionWrapper) monitoredCall.getExtensions().getAny();
+    SiriDistanceExtension distanceExtension = wrapper.getDistances();
+    String message = "";
+    NaturalLanguageStringStructure progressStatus = journey.getProgressStatus();
+
+    if (!isActiveTrip(journey)) {
+      // don't comment on non-active trips
+      return message;
+    }
+
+    // at terminal label only appears in stop results
+    if (isStopContext && progressStatus != null
+            && progressStatus.getValue().contains("layover")) {
+
+      if(journey.getOriginAimedDepartureTime() != null) {
+        DateFormat formatter = DateFormat.getTimeInstance(DateFormat.SHORT);
+
+        if(journey.getOriginAimedDepartureTime().getTime() < new Date(SystemTime.currentTimeMillis()).getTime()) {
+          message += "at terminal";
+        } else {
+          message += "at terminal, scheduled to depart " + formatter.format(journey.getOriginAimedDepartureTime());
+        }
+      } else {
+        message += "at terminal";
+      }
+    } else if (!isActiveTrip(journey)) {
+      message += " +layover";
+    }
+
+    int staleTimeout = getStaleTimeout();
+    long age = (SystemTime.currentTimeMillis() - updateTime) / 1000;
+
+    return message;
+  }
   private String getPresentableDistance(
       MonitoredVehicleJourneyStructure journey, long updateTime,
       boolean isStopContext) {
     MonitoredCallStructure monitoredCall = journey.getMonitoredCall();
     SiriExtensionWrapper wrapper = (SiriExtensionWrapper) monitoredCall.getExtensions().getAny();
     SiriDistanceExtension distanceExtension = wrapper.getDistances();
-
-    String message = "";
-    String distance = "<strong>" + distanceExtension.getPresentableDistance() + "</strong>";
-    String loadOccupancy = getPresentableOccupancy(journey, updateTime);
-
     NaturalLanguageStringStructure progressStatus = journey.getProgressStatus();
+    String message = "";
 
-    // at terminal label only appears in stop results
-    if (isStopContext && progressStatus != null
-            && progressStatus.getValue().contains("layover")) {
-   
-    	if(journey.getOriginAimedDepartureTime() != null) {
-        	DateFormat formatter = DateFormat.getTimeInstance(DateFormat.SHORT);
-        	
-        	if(journey.getOriginAimedDepartureTime().getTime() < new Date(SystemTime.currentTimeMillis()).getTime()) {
-        		message += "at terminal";
-        	} else {    			
-        		message += "at terminal, scheduled to depart " + formatter.format(journey.getOriginAimedDepartureTime());
-        	}
-        } else {
-        	message += "at terminal";
-        }
-    } else if (isStopContext && progressStatus != null
-        && progressStatus.getValue().contains("prevTrip")) {
-    	message += "+ scheduled layover at terminal";
+    if (!isActiveTrip(journey)) {
+      return message; /* don't comment on trips not active, results are not reliable */
     }
-    	
-    int staleTimeout = getStaleTimeout();
-    long age = (SystemTime.currentTimeMillis() - updateTime) / 1000;
-
-    if (age > staleTimeout) {
-      if (message.length() > 0) {
-        message += ", ";
-      }
-
-      message += "old data";
+    if (!journey.isMonitored()) {
+      return message;
     }
-
-    if (message.length() > 0)
-      // here we choose not to show occupancy as it is likely a different trip
-      return distance + " (" + message + ")";
-    else
-      return distance + loadOccupancy;
+    String distance = distanceExtension.getPresentableDistance();
+    if (!isStopContext) {
+      // always considered active to give it treatment
+      distance = "<strong>" + distance + "</strong>";
+    }
+    return distance;
   }
 
   private int getStaleTimeout() {

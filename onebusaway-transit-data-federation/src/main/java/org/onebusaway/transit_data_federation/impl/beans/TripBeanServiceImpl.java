@@ -21,6 +21,7 @@ import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data.model.RouteBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.transit_data_federation.model.narrative.TripNarrative;
+import org.onebusaway.transit_data_federation.model.transit_graph.DynamicGraph;
 import org.onebusaway.transit_data_federation.services.beans.RouteBeanService;
 import org.onebusaway.transit_data_federation.services.beans.TripBeanService;
 import org.onebusaway.transit_data_federation.services.narrative.NarrativeService;
@@ -34,6 +35,7 @@ import org.springframework.stereotype.Component;
 public class TripBeanServiceImpl implements TripBeanService {
 
   private TransitGraphDao _graph;
+  private DynamicGraph _dynamicGraph;
 
   private NarrativeService _narrativeService;
 
@@ -43,7 +45,10 @@ public class TripBeanServiceImpl implements TripBeanService {
   public void setTransitGraphDao(TransitGraphDao graph) {
     _graph = graph;
   }
-
+  @Autowired
+  public void setDynamicGraph(DynamicGraph dynamicGraph) {
+    _dynamicGraph = dynamicGraph;
+  }
   @Autowired
   public void setNarrativeService(NarrativeService narrativeService) {
     _narrativeService = narrativeService;
@@ -58,14 +63,20 @@ public class TripBeanServiceImpl implements TripBeanService {
   public TripBean getTripForId(AgencyAndId tripId) {
 
     TripEntry tripEntry = _graph.getTripEntryForId(tripId);
+    if (tripEntry == null) {
+      tripEntry = _dynamicGraph.getTripEntryForId(tripId);
+    }
 
-    if (tripEntry == null)
+    if (tripEntry == null) {
       return null;
+    }
 
     AgencyAndId routeId = tripEntry.getRouteCollection().getId();
     RouteBean routeBean = _routeBeanService.getRouteForId(routeId);
 
     TripNarrative tripNarrative = _narrativeService.getTripForId(tripId);
+
+    if (tripNarrative == null) return null;
 
     TripBean tripBean = new TripBean();
 
@@ -83,6 +94,7 @@ public class TripBeanServiceImpl implements TripBeanService {
 
     tripBean.setDirectionId(tripEntry.getDirectionId());
     tripBean.setTotalTripDistance(tripEntry.getTotalTripDistance());
+    tripBean.setPeakOffpeak(tripNarrative.getPeakOffpeak());
     
     BlockEntry block = tripEntry.getBlock();
     tripBean.setBlockId(ApplicationBeanLibrary.getId(block.getId()));
