@@ -15,6 +15,8 @@
  */
 package org.onebusaway.transit_data.model;
 
+import org.onebusaway.gtfs.model.calendar.AgencyServiceInterval;
+
 import java.io.Serializable;
 import java.util.HashSet;
 
@@ -40,6 +42,8 @@ public final class ArrivalAndDepartureForStopQueryBean implements Serializable {
   private long time;
 
   private HashSet<String> agenciesExcludingScheduled;
+
+  private AgencyServiceInterval serviceInterval;
 
   public String getTripId() {
     return tripId;
@@ -97,4 +101,11 @@ public final class ArrivalAndDepartureForStopQueryBean implements Serializable {
     return this.agenciesExcludingScheduled;
   }
 
+  public AgencyServiceInterval getServiceInterval() {
+    return serviceInterval;
+  }
+
+  public void setServiceInterval(AgencyServiceInterval serviceInterval) {
+    this.serviceInterval = serviceInterval;
+  }
 }

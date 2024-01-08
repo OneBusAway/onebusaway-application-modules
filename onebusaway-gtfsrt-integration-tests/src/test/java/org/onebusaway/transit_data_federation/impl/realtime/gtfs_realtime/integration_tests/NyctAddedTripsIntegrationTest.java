@@ -76,11 +76,11 @@ public class NyctAddedTripsIntegrationTest extends AbstractGtfsRealtimeIntegrati
     // check MonitoredResult for expected number of results
     assertFalse(source.getMonitoredResult().getAddedTripIds().isEmpty());
 
-    assertEquals(252, listener.getRecords().size());
+    assertEquals(257, listener.getRecords().size());
 
     for (VehicleLocationRecord vehicleLocationRecord : listener.getRecords()) {
       String tripId = vehicleLocationRecord.getTripId().toString();
-      assertEquals(tripId, vehicleLocationRecord.getVehicleId().toString()); // vehicles are named the tripId
+      assertNotEquals(tripId, vehicleLocationRecord.getVehicleId().toString()); // vehicles are train Id, not tripId
       assertEquals(tripId, vehicleLocationRecord.getTripId().toString());
       assertEquals(tripId, vehicleLocationRecord.getBlockId().toString());
     }

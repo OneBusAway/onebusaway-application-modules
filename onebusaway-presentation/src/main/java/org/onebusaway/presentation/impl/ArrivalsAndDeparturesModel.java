@@ -27,6 +27,7 @@ import java.util.Set;
 import java.util.TimeZone;
 
 import org.onebusaway.exceptions.NoSuchStopServiceException;
+import org.onebusaway.gtfs.model.calendar.AgencyServiceInterval;
 import org.onebusaway.presentation.client.RoutePresenter;
 import org.onebusaway.presentation.services.DefaultSearchLocationService;
 import org.onebusaway.transit_data.model.AgencyBean;
@@ -39,6 +40,7 @@ import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.users.client.model.UserBean;
 import org.onebusaway.users.services.CurrentUserService;
+import org.onebusaway.util.SystemTime;
 import org.onebusaway.utility.text.NaturalStringOrder;
 import org.onebusaway.utility.text.StringLibrary;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -171,7 +173,7 @@ public class ArrivalsAndDeparturesModel {
   public void process() {
 
     _result = _transitDataService.getStopsWithArrivalsAndDepartures(_stopIds,
-        _query);
+        _query, new AgencyServiceInterval(SystemTime.currentTimeMillis()));
 
     checkForEmptyResult();
     filterResults();

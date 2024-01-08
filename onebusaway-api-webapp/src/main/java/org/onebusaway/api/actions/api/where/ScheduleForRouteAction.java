@@ -16,7 +16,6 @@
 package org.onebusaway.api.actions.api.where;
 
 import java.util.Date;
-import java.util.List;
 
 import com.opensymphony.xwork2.conversion.annotations.TypeConversion;
 import com.opensymphony.xwork2.validator.annotations.RequiredFieldValidator;
@@ -27,8 +26,9 @@ import org.onebusaway.api.model.ResponseBean;
 import org.onebusaway.api.model.transit.BeanFactoryV2;
 import org.onebusaway.exceptions.ServiceException;
 import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.gtfs.model.calendar.ServiceDate;
+import org.onebusaway.gtfs.model.calendar.AgencyServiceInterval;
 import org.onebusaway.transit_data.model.RouteScheduleBean;
+import org.onebusaway.transit_data.services.IntervalFactory;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.util.AgencyAndIdLibrary;
 import org.onebusaway.util.SystemTime;
@@ -47,6 +47,9 @@ public class ScheduleForRouteAction extends ApiActionSupport {
     private String _id;
 
     private Date _date = new Date(SystemTime.currentTimeMillis());
+
+    @Autowired
+    private IntervalFactory _factory;
 
     public ScheduleForRouteAction() {
         super(V2);
@@ -72,9 +75,9 @@ public class ScheduleForRouteAction extends ApiActionSupport {
             return setValidationErrorsResponse();
 
         AgencyAndId id = convertAgencyAndId(_id);
-        ServiceDate serviceDate = new ServiceDate(_date);
+        AgencyServiceInterval serviceInterval = _factory.constructForDate(_date);
 
-        RouteScheduleBean routeSchedule = _service.getScheduleForRoute(id, serviceDate);
+        RouteScheduleBean routeSchedule = _service.getScheduleForRoute(id, serviceInterval);
 
         BeanFactoryV2 factory = getBeanFactoryV2();
         if (routeSchedule.getRoutes().size() == 0) {

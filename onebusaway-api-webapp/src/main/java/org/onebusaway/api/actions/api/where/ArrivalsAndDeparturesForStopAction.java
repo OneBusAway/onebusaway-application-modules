@@ -28,6 +28,7 @@ import org.onebusaway.exceptions.NoSuchStopServiceException;
 import org.onebusaway.exceptions.ServiceException;
 import org.onebusaway.transit_data.model.*;
 import org.onebusaway.transit_data.model.trips.TripBean;
+import org.onebusaway.transit_data.services.IntervalFactory;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.util.SystemTime;
 import org.onebusaway.util.services.configuration.ConfigurationService;
@@ -52,6 +53,9 @@ public class ArrivalsAndDeparturesForStopAction extends ApiActionSupport {
 
   @Autowired
   private RouteSorting customRouteSort;
+
+  @Autowired
+  private IntervalFactory _factory;
 
   private String _id;
   
@@ -116,7 +120,7 @@ public class ArrivalsAndDeparturesForStopAction extends ApiActionSupport {
     StopWithArrivalsAndDeparturesBean result = null;
     try {
       result = _service.getStopWithArrivalsAndDepartures(
-              _id, _query);
+              _id, _query, _factory.constructForDate(new Date(_query.getTime())));
     } catch (NoSuchStopServiceException nsse) {
       return setResourceNotFoundResponse();
     } catch (ServiceException any) {

@@ -17,6 +17,7 @@ package org.onebusaway.transit_data_federation.impl.beans;
 
 import org.onebusaway.container.cache.Cacheable;
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.gtfs.model.calendar.AgencyServiceInterval;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
 import org.onebusaway.transit_data.model.*;
 import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
@@ -101,11 +102,12 @@ public class RouteScheduleBeanServiceImpl implements RouteScheduleBeanService {
 
   @Override
   @Cacheable
-  public RouteScheduleBean getScheduledArrivalsForDate(AgencyAndId routeId, ServiceDate scheduleDate) {
+  public RouteScheduleBean getScheduledArrivalsForInterval(AgencyAndId routeId, AgencyServiceInterval serviceInterval) {
     RouteScheduleBean rsb = new RouteScheduleBean();
     rsb.setOutOfServiceBounds(true);
     rsb.setRouteId(routeId);
-    rsb.setScheduleDate(scheduleDate);
+    // todo add full support for serviceInterval
+    rsb.setScheduleDate(serviceInterval.getServiceDate());
     RouteCollectionEntry routeCollectionForId = _graph.getRouteCollectionForId(routeId);
     if (routeCollectionForId == null) return rsb;
 

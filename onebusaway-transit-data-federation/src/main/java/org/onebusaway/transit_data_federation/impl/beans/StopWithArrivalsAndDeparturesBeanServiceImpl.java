@@ -24,7 +24,7 @@ import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
 import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.gtfs.model.calendar.ServiceDate;
+import org.onebusaway.gtfs.model.calendar.AgencyServiceInterval;
 import org.onebusaway.transit_data.model.*;
 import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
 import org.onebusaway.transit_data_federation.services.AgencyService;
@@ -59,10 +59,10 @@ class StopWithArrivalsAndDeparturesBeanServiceImpl implements
   @Autowired
   private ServiceAlertsBeanService _serviceAlertsBeanService;
 
+  @Override
   public StopWithArrivalsAndDeparturesBean getArrivalsAndDeparturesByStopId(
-      AgencyAndId id, ArrivalsAndDeparturesQueryBean query) {
-
-    StopBean stop = _stopBeanService.getStopForId(id, new ServiceDate(new Date(query.getTime())));
+      AgencyAndId id, ArrivalsAndDeparturesQueryBean query, AgencyServiceInterval serviceInterval) {
+    StopBean stop = _stopBeanService.getStopForId(id, serviceInterval);
     if (stop == null)
       return null;
 
@@ -82,8 +82,9 @@ class StopWithArrivalsAndDeparturesBeanServiceImpl implements
         nearbyStops, situations);
   }
 
+  @Override
   public StopsWithArrivalsAndDeparturesBean getArrivalsAndDeparturesForStopIds(
-      Set<AgencyAndId> ids, ArrivalsAndDeparturesQueryBean query)
+      Set<AgencyAndId> ids, ArrivalsAndDeparturesQueryBean query, AgencyServiceInterval serviceInterval)
       throws NoSuchStopServiceException {
 
     List<StopBean> stops = new ArrayList<StopBean>();
@@ -95,12 +96,13 @@ class StopWithArrivalsAndDeparturesBeanServiceImpl implements
 
     for (AgencyAndId id : ids) {
 
-      StopBean stopBean = _stopBeanService.getStopForId(id, null);
+      StopBean stopBean = _stopBeanService.getStopForId(id, serviceInterval);
       stops.add(stopBean);
 
-      List<ArrivalAndDepartureBean> arrivalsAndDepartures = _arrivalsAndDeparturesBeanService.getArrivalsAndDeparturesByStopId(
-          id, query);
-      if (!arrivalsAndDepartures.isEmpty()) {
+      List<ArrivalAndDepartureBean> arrivalsAndDepartures = null;
+        arrivalsAndDepartures = _arrivalsAndDeparturesBeanService.getArrivalsAndDeparturesByStopId(
+                id, query);
+      if (arrivalsAndDepartures != null && !arrivalsAndDepartures.isEmpty()) {
         // we only add stopBean if it actually has results
         stops.add(stopBean);
         allArrivalsAndDepartures.addAll(filter(arrivalsAndDepartures));

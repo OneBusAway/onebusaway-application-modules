@@ -23,11 +23,14 @@ import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
 import org.onebusaway.transit_data.model.ListBean;
 import org.onebusaway.transit_data.model.RouteGroupingBean;
+import org.onebusaway.transit_data.services.IntervalFactory;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.util.AgencyAndIdLibrary;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.Date;
 
 /**
  * route-details that provides canonical/idealized information on route shapes and stops.
@@ -39,6 +42,9 @@ public class RouteDetailsAction extends ApiActionSupport {
   private static Logger _log = LoggerFactory.getLogger(RouteDetailsAction.class);
   @Autowired
   private TransitDataService _service;
+
+  @Autowired
+  private IntervalFactory _factory;
 
   private String _id;
 
@@ -81,7 +87,7 @@ public class RouteDetailsAction extends ApiActionSupport {
     // we allow for the possibility of multiple results
     ListBean<RouteGroupingBean> beans = null;
     try {
-      beans = _service.getCanonicalRoute(serviceDate, routeId);
+      beans = _service.getCanonicalRoute(_factory.constructForDate(new Date(serviceDate)), routeId);
     } catch (Throwable t) {
       _log.error("exception for canonical data ", t, t);
       return setExceptionResponse();

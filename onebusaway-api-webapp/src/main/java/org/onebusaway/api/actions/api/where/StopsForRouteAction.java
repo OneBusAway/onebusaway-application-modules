@@ -21,9 +21,8 @@ package org.onebusaway.api.actions.api.where;
     import org.onebusaway.api.model.transit.BeanFactoryV2;
     import org.onebusaway.exceptions.ServiceException;
     import org.onebusaway.transit_data.model.StopsForRouteBean;
-    import org.onebusaway.gtfs.model.calendar.ServiceDate;
+    import org.onebusaway.transit_data.services.IntervalFactory;
     import org.onebusaway.transit_data.services.TransitDataService;
-    import org.onebusaway.util.SystemTime;
     import org.onebusaway.util.services.configuration.ConfigurationService;
     import org.slf4j.Logger;
     import org.slf4j.LoggerFactory;
@@ -53,6 +52,9 @@ public class StopsForRouteAction extends ApiActionSupport {
 
   @Autowired
   private ConfigurationService _configService;
+
+  @Autowired
+  private IntervalFactory _factory;
 
   private boolean _includePolylines = true;
 
@@ -91,7 +93,7 @@ public class StopsForRouteAction extends ApiActionSupport {
     StopsForRouteBean result;
     if (serviceDateFilterOn || _date != null) {
       _log.info("using serviceDate " + _date + " with id=" + _id);
-      result = _service.getStopsForRouteForServiceDate(_id, new ServiceDate(_date));
+      result = _service.getStopsForRouteForServiceInterval(_id, _factory.constructForDate(_date));
     } else {
       _log.info("using all service with id=" + _id);
       result = _service.getStopsForRoute(_id);

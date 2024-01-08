@@ -25,6 +25,7 @@ import java.util.Map.Entry;
 import org.apache.struts2.rest.DefaultHttpHeaders;
 import org.apache.struts2.rest.HttpHeaders;
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.gtfs.model.calendar.AgencyServiceInterval;
 import org.onebusaway.nextbus.impl.util.DateUtil;
 import org.onebusaway.nextbus.model.nextbus.Body;
 import org.onebusaway.nextbus.model.nextbus.DisplayStop;
@@ -39,6 +40,7 @@ import org.onebusaway.transit_data.model.StopGroupingBean;
 import org.onebusaway.transit_data.model.StopsForRouteBean;
 import org.onebusaway.transit_data.model.StopsWithArrivalsAndDeparturesBean;
 import org.onebusaway.transit_data.services.TransitDataService;
+import org.onebusaway.util.SystemTime;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.opensymphony.xwork2.ModelDriven;
@@ -105,7 +107,7 @@ public class ScheduleAction extends NextBusApiBase implements ModelDriven<Body<S
 							query.setMinutesBefore(0);
 							query.setMinutesAfter(MINUTES_IN_DAY);
 							
-							StopsWithArrivalsAndDeparturesBean stopsWithArrivals = _service.getStopsWithArrivalsAndDepartures(stopGroupBean.getStopIds(), query);
+							StopsWithArrivalsAndDeparturesBean stopsWithArrivals = _service.getStopsWithArrivalsAndDepartures(stopGroupBean.getStopIds(), query, new AgencyServiceInterval(SystemTime.currentTimeMillis()));
 							
 							for(ArrivalAndDepartureBean arrivalsAndDeparture : stopsWithArrivals.getArrivalsAndDepartures()){
 								
@@ -134,7 +136,7 @@ public class ScheduleAction extends NextBusApiBase implements ModelDriven<Body<S
 							query.setMinutesBefore(0);
 							query.setMinutesAfter(MINUTES_IN_DAY);
 							
-							StopsWithArrivalsAndDeparturesBean stopsWithArrivals = _service.getStopsWithArrivalsAndDepartures(stopGroupBean.getStopIds(), query);
+							StopsWithArrivalsAndDeparturesBean stopsWithArrivals = _service.getStopsWithArrivalsAndDepartures(stopGroupBean.getStopIds(), query, new AgencyServiceInterval(SystemTime.currentTimeMillis()));
 							
 							for(ArrivalAndDepartureBean arrivalsAndDeparture : stopsWithArrivals.getArrivalsAndDepartures()){
 								

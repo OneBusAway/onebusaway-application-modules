@@ -25,7 +25,7 @@ import java.util.Set;
 import org.onebusaway.container.cache.Cacheable;
 import org.onebusaway.exceptions.NoSuchStopServiceException;
 import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.gtfs.model.calendar.ServiceDate;
+import org.onebusaway.gtfs.model.calendar.AgencyServiceInterval;
 import org.onebusaway.transit_data.model.RouteBean;
 import org.onebusaway.transit_data.model.StopBean;
 import org.onebusaway.transit_data_federation.model.narrative.StopNarrative;
@@ -86,8 +86,8 @@ class StopBeanServiceImpl implements StopBeanService {
   /** serviceDate can be null.
    *  If included, the routes returned in the stopBean will be filtered by service date
   **/
-  public StopBean getStopForId(AgencyAndId id, ServiceDate serviceDate) {
-      return getStopForIdForServiceDate(id, serviceDate);
+  public StopBean getStopForId(AgencyAndId id, AgencyServiceInterval serviceInterval) {
+      return getStopForIdForServiceDate(id, serviceInterval);
   }
 
   public boolean matchesRouteTypeFilter(RouteBean route, List<Integer> routeTypesFilter) {
@@ -103,7 +103,7 @@ class StopBeanServiceImpl implements StopBeanService {
   }
 
   @Cacheable
-  public StopBean getStopForIdForServiceDate(AgencyAndId id, ServiceDate serviceDate) {
+  public StopBean getStopForIdForServiceDate(AgencyAndId id, AgencyServiceInterval serviceInterval) {
 
     StopEntry stop = _transitGraphDao.getStopEntryForId(id);
     StopNarrative narrative = _narrativeService.getStopForId(id);
@@ -112,7 +112,7 @@ class StopBeanServiceImpl implements StopBeanService {
       // try looking up consolidated id
       AgencyAndId consolidatedId = _consolidatedStopsService.getConsolidatedStopIdForHiddenStopId(id);
       if (consolidatedId != null)
-        return getStopForId(consolidatedId, serviceDate);
+        return getStopForId(consolidatedId, serviceInterval);
       throw new NoSuchStopServiceException(
               AgencyAndIdLibrary.convertToString(id));
     }
@@ -125,10 +125,10 @@ class StopBeanServiceImpl implements StopBeanService {
       StopNarrative parentNarrative = _narrativeService.getStopForId(parentId);
       StopEntry parent = _transitGraphDao.getStopEntryForId(parentId);
       fillStopBean(parent, parentNarrative, parentBean);
-      fillRoutesForStopBean(parent, parentBean, serviceDate);
+      fillRoutesForStopBean(parent, parentBean, serviceInterval);
       sb.setParent(parentBean);
     }
-    fillRoutesForStopBean(stop, sb, serviceDate);
+    fillRoutesForStopBean(stop, sb, serviceInterval);
     fillTransfersForStopBean(stop, narrative, sb);
     return sb;
   }
@@ -149,11 +149,11 @@ class StopBeanServiceImpl implements StopBeanService {
   }
 
 
-  private void fillRoutesForStopBean(StopEntry stop, StopBean sb, ServiceDate serviceDate) {
+  private void fillRoutesForStopBean(StopEntry stop, StopBean sb, AgencyServiceInterval serviceInterval) {
 
     Set<AgencyAndId> routeCollectionIds;
-    if (serviceDate != null)
-      routeCollectionIds = _routeService.getRouteCollectionIdsForStopForServiceDate(stop.getId(), serviceDate);
+    if (serviceInterval != null)
+      routeCollectionIds = _routeService.getRouteCollectionIdsForStopForServiceDate(stop.getId(), serviceInterval);
     else
       routeCollectionIds = _routeService.getRouteCollectionIdsForStop(stop.getId());
 

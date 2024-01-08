@@ -28,6 +28,7 @@ import org.onebusaway.federations.annotations.FederatedByEntityIdMethod;
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.geospatial.model.EncodedPolylineBean;
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.gtfs.model.calendar.AgencyServiceInterval;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
 import org.onebusaway.realtime.api.TimepointPredictionRecord;
 import org.onebusaway.realtime.api.VehicleOccupancyRecord;
@@ -144,9 +145,9 @@ public class TransitDataServiceImpl implements TransitDataService {
     return _transitDataService.getScheduleForStop(stopId, date);
   }
 
-  public RouteScheduleBean getScheduleForRoute(AgencyAndId routeId, ServiceDate serviceDate) {
+  public RouteScheduleBean getScheduleForRoute(AgencyAndId routeId, AgencyServiceInterval serviceInterval) {
     blockUntilBundleIsReady();
-    return _transitDataService.getScheduleForRoute(routeId, serviceDate);
+    return _transitDataService.getScheduleForRoute(routeId, serviceInterval);
   }
 
   @Override
@@ -168,9 +169,9 @@ public class TransitDataServiceImpl implements TransitDataService {
   }
 
   @Override
-  public StopBean getStopForServiceDate(String stopId, ServiceDate serviceDate) throws ServiceException {
+  public StopBean getStopForServiceDate(String stopId, AgencyServiceInterval serviceInterval) throws ServiceException {
     blockUntilBundleIsReady();
-    return _transitDataService.getStopForServiceDate(stopId, serviceDate);
+    return _transitDataService.getStopForServiceDate(stopId, serviceInterval);
   }
 
   @Override
@@ -181,20 +182,20 @@ public class TransitDataServiceImpl implements TransitDataService {
 
   @Override
   public StopWithArrivalsAndDeparturesBean getStopWithArrivalsAndDepartures(
-      String stopId, ArrivalsAndDeparturesQueryBean query)
+      String stopId, ArrivalsAndDeparturesQueryBean query, AgencyServiceInterval serviceInterval)
       throws ServiceException {
     blockUntilBundleIsReady();
     return _transitDataService.getStopWithArrivalsAndDepartures(
-        stopId, query);
+        stopId, query, serviceInterval);
   }
 
   @Override
   public StopsWithArrivalsAndDeparturesBean getStopsWithArrivalsAndDepartures(
-      Collection<String> stopIds, ArrivalsAndDeparturesQueryBean query)
+      Collection<String> stopIds, ArrivalsAndDeparturesQueryBean query, AgencyServiceInterval serviceInterval)
       throws ServiceException {
     blockUntilBundleIsReady();
     return _transitDataService.getStopsWithArrivalsAndDepartures(
-        stopIds, query);
+        stopIds, query, serviceInterval);
   }
 
   @Override
@@ -239,6 +240,12 @@ public class TransitDataServiceImpl implements TransitDataService {
   public StopsForRouteBean getStopsForRoute(String routeId) {
     blockUntilBundleIsReady();
     return _transitDataService.getStopsForRoute(routeId);
+  }
+
+  @Override
+  public StopsForRouteBean getStopsForRouteForServiceInterval(String routeId, AgencyServiceInterval serviceInterval) {
+    blockUntilBundleIsReady();
+    return _transitDataService.getStopsForRouteForServiceInterval(routeId, serviceInterval);
   }
 
   @Override
@@ -472,8 +479,8 @@ public class TransitDataServiceImpl implements TransitDataService {
   }
 
   @Override
-  public ListBean<RouteGroupingBean> getCanonicalRoute(long serviceDate, AgencyAndId routeId) {
-    return _transitDataService.getCanonicalRoute(serviceDate, routeId);
+  public ListBean<RouteGroupingBean> getCanonicalRoute(AgencyServiceInterval serviceInterval, AgencyAndId routeId) {
+    return _transitDataService.getCanonicalRoute(serviceInterval, routeId);
   }
 
   @Override

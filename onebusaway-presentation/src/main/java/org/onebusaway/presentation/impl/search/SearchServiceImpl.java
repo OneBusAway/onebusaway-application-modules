@@ -18,27 +18,19 @@ package org.onebusaway.presentation.impl.search;
 import org.onebusaway.exceptions.ServiceException;
 import org.onebusaway.geocoder.enterprise.services.EnterpriseGeocoderResult;
 import org.onebusaway.geocoder.enterprise.services.EnterpriseGeocoderService;
-import org.onebusaway.gtfs.model.calendar.ServiceDate;
+import org.onebusaway.gtfs.model.calendar.AgencyServiceInterval;
 import org.onebusaway.presentation.impl.RouteComparator;
 import org.onebusaway.presentation.model.SearchResult;
 import org.onebusaway.presentation.model.SearchResultCollection;
 import org.onebusaway.presentation.services.search.SearchResultFactory;
 import org.onebusaway.presentation.services.search.SearchService;
+import org.onebusaway.transit_data.model.*;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.exceptions.NoSuchStopServiceException;
 import org.onebusaway.exceptions.OutOfServiceAreaServiceException;
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
 import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.transit_data.model.AgencyWithCoverageBean;
-import org.onebusaway.transit_data.model.RouteBean;
-import org.onebusaway.transit_data.model.RoutesBean;
-import org.onebusaway.transit_data.model.SearchQueryBean;
-import org.onebusaway.transit_data.model.StopBean;
-import org.onebusaway.transit_data.model.StopGroupBean;
-import org.onebusaway.transit_data.model.StopGroupingBean;
-import org.onebusaway.transit_data.model.StopsBean;
-import org.onebusaway.transit_data.model.StopsForRouteBean;
 import org.apache.commons.collections.ListUtils;
 import org.apache.commons.lang.StringUtils;
 import org.onebusaway.util.services.configuration.ConfigurationService;
@@ -73,7 +65,7 @@ import org.onebusaway.util.AgencyAndIdLibrary;
 @Component
 public class SearchServiceImpl implements SearchService {
 
-    private static final Logger _log = LoggerFactory.getLogger(SearchServiceImpl.class);
+	private static final Logger _log = LoggerFactory.getLogger(SearchServiceImpl.class);
 
 	// the pattern of what can be leftover after prefix/suffix matching for a
 	// route to be a "suggestion" for a given search
@@ -391,7 +383,7 @@ public class SearchServiceImpl implements SearchService {
 	@Override
 	public SearchResultCollection getSearchResultsForServiceDate(String query,
 			SearchResultFactory resultFactory,
-			ServiceDate serviceDate) {
+			AgencyServiceInterval serviceInterval) {
 		refreshCachesIfNecessary();
 		/*
 		*  This method now makes a series of assumptions!
@@ -424,10 +416,10 @@ public class SearchServiceImpl implements SearchService {
 
 		tryAsLatLon(results, query, resultFactory);
 
-		String normalizedQuery = normalizeQuery(results, query, serviceDate);
+		String normalizedQuery = normalizeQuery(results, query, serviceInterval);
 
 		if (results.isEmpty() && hasHint) {
-			tryAsExactRoute(results, normalizedQuery, hint, resultFactory, serviceDate);
+			tryAsExactRoute(results, normalizedQuery, hint, resultFactory, serviceInterval);
 		}
 
 		if (results.isEmpty() && hasHint) {
@@ -436,12 +428,12 @@ public class SearchServiceImpl implements SearchService {
 
 		if (results.isEmpty() && !hasComma) {
 			// before we consider tokens, try route exactly as queried
-			tryAsExactRoute(results, null, query.toUpperCase().trim(), resultFactory, serviceDate);
+			tryAsExactRoute(results, null, query.toUpperCase().trim(), resultFactory, serviceInterval);
 		}
 
 		// if we have a comma, we are not a single route
 		if (results.isEmpty() && !hasComma) {
-			tryAsRoute(results, normalizedQuery, resultFactory, serviceDate);
+			tryAsRoute(results, normalizedQuery, resultFactory, serviceInterval);
 		}
 
         if (results.isEmpty() && hasSemiColon) {
@@ -451,7 +443,7 @@ public class SearchServiceImpl implements SearchService {
 		// only guess it as a stop if its numeric or has possible agency prefix
 		// results does not support mixed types -- it can only be a route or a stop
 		if (results.isEmpty() && !hasComma && (StringUtils.isNumeric(normalizedQuery) || normalizedQuery.contains("_")) ) {
-			tryAsStop(results, normalizedQuery, resultFactory, serviceDate);
+			tryAsStop(results, normalizedQuery, resultFactory, serviceInterval);
 		}
 
 		if (!"true".equalsIgnoreCase(_configurationService
@@ -515,7 +507,7 @@ public class SearchServiceImpl implements SearchService {
 		return;
 		}
 
-	private String normalizeQuery(SearchResultCollection results, String q, ServiceDate serviceDate) {
+	private String normalizeQuery(SearchResultCollection results, String q, AgencyServiceInterval serviceInterval) {
 		if (q == null) {
 			return null;
 		}
@@ -593,9 +585,9 @@ public class SearchServiceImpl implements SearchService {
 				// if the token is not a route and the next or last token is a
 				// valid stop id (but not also a route ID),
 				// consider the token a bad filter and remove it from the query.
-				if ((lastItem != null && stopsForId(lastItem, serviceDate).size() > 0
+				if ((lastItem != null && stopsForId(lastItem, serviceInterval).size() > 0
 						&& !_routeShortNameToRouteBeanMap.containsKey(lastItem.toUpperCase()))
-						|| (nextItem != null && stopsForId(nextItem, serviceDate).size() > 0
+						|| (nextItem != null && stopsForId(nextItem, serviceInterval).size() > 0
 								&& !_routeShortNameToRouteBeanMap.containsKey(nextItem.toUpperCase()))) { // TOOD Filtering on multiple route matches
 					if (!token.contains("_")) {
 						// if we have an agency Id, its probably a stop, don't
@@ -699,7 +691,7 @@ public class SearchServiceImpl implements SearchService {
   }
 
 	private void tryAsExactRoute(SearchResultCollection results, String additionalTerm, String expectedTerm,
-								 SearchResultFactory resultFactory, ServiceDate serviceDate) {
+								 SearchResultFactory resultFactory, AgencyServiceInterval serviceInterval) {
 
 	  	// try as route_id
 		RouteBean testRouteBean = null;
@@ -759,7 +751,7 @@ public class SearchServiceImpl implements SearchService {
 	}
 
 	private void tryAsRoute(SearchResultCollection results, String routeQueryMixedCase,
-			SearchResultFactory resultFactory, ServiceDate serviceDate) {
+			SearchResultFactory resultFactory, AgencyServiceInterval serviceInterval) {
 
 	  String routeQuery = new String(routeQueryMixedCase);
 		if (routeQuery == null || StringUtils.isEmpty(routeQuery)) {
@@ -882,7 +874,7 @@ public class SearchServiceImpl implements SearchService {
     }
 
 	private void tryAsStop(SearchResultCollection results, String stopQuery,
-			SearchResultFactory resultFactory, ServiceDate serviceDate) {
+			SearchResultFactory resultFactory, AgencyServiceInterval serviceInterval) {
 		if (stopQuery == null || StringUtils.isEmpty(stopQuery)) {
 			return;
 		}
@@ -890,7 +882,7 @@ public class SearchServiceImpl implements SearchService {
 		stopQuery = stopQuery.trim();
 
 		// try to find a stop ID for all known agencies
-		List<StopBean> matches = stopsForId(stopQuery, serviceDate);
+		List<StopBean> matches = stopsForId(stopQuery, serviceInterval);
 
 		if (matches.size() > 0)  // support multiple agency stop matches
 		  for (StopBean stopBean : matches) {
@@ -937,15 +929,15 @@ public class SearchServiceImpl implements SearchService {
 	}
 
 	// Utility method for getting all known stops for an id with no agency
-	private List<StopBean> stopsForId(String id, ServiceDate serviceDate) {
+	private List<StopBean> stopsForId(String id, AgencyServiceInterval serviceInterval) {
 		List<StopBean> matches = new ArrayList<StopBean>();
 		
 		// accept agency denoted stops first!
 		if (id.contains("_")) {
 		  try {
 			  StopBean potentialStop;
-			  if (serviceDate != null) {
-				  potentialStop = _transitDataService.getStopForServiceDate(id, serviceDate);
+			  if (serviceInterval != null) {
+				  potentialStop = _transitDataService.getStopForServiceDate(id, serviceInterval);
 			  } else {
 				  potentialStop = _transitDataService.getStop(id);
 			  }
@@ -966,13 +958,13 @@ public class SearchServiceImpl implements SearchService {
 
 			try {
 				StopBean potentialStop;
-				if (serviceDate == null) {
+				if (serviceInterval == null) {
 					potentialStop = _transitDataService
 							.getStop(potentialStopId.toString());
 				}
 				else {
 					potentialStop = _transitDataService
-							.getStopForServiceDate(potentialStopId.toString(), serviceDate);
+							.getStopForServiceDate(potentialStopId.toString(), serviceInterval);
 				}
 
 				if (potentialStop != null) {
@@ -984,13 +976,13 @@ public class SearchServiceImpl implements SearchService {
 				    // this search is faulty if multi-agency based
 				    // skip if we have a match already
 					  StopBean potentialStop;
-					  if (serviceDate == null) {
+					  if (serviceInterval == null) {
 						  potentialStop = _transitDataService
 								  .getStop(getStopIdFromStopCode(potentialStopId.toString()));
 					  }
 					  else {
 						  potentialStop = _transitDataService
-								  .getStopForServiceDate(getStopIdFromStopCode(potentialStopId.toString()), serviceDate);
+								  .getStopForServiceDate(getStopIdFromStopCode(potentialStopId.toString()), serviceInterval);
 					  }
   					if (potentialStop != null) {
   						matches.add(potentialStop);

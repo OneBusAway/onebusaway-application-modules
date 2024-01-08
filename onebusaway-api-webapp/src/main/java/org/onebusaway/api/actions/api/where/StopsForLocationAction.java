@@ -24,6 +24,7 @@ import org.onebusaway.api.actions.api.ApiActionSupport;
 import org.onebusaway.api.impl.MaxCountSupport;
 import org.onebusaway.api.model.transit.BeanFactoryV2;
 import org.onebusaway.api.model.transit.StopV2Bean;
+import org.onebusaway.api.services.ApiIntervalFactory;
 import org.onebusaway.exceptions.OutOfServiceAreaServiceException;
 import org.onebusaway.exceptions.ServiceException;
 import org.onebusaway.geospatial.model.CoordinateBounds;
@@ -49,6 +50,9 @@ public class StopsForLocationAction extends ApiActionSupport {
 
   @Autowired
   private TransitDataService _service;
+
+  @Autowired
+  private ApiIntervalFactory _factory;
 
   private double _lat;
 
@@ -118,6 +122,7 @@ public class StopsForLocationAction extends ApiActionSupport {
     SearchQueryBean searchQuery = new SearchQueryBean();
     searchQuery.setBounds(bounds);
     searchQuery.setMaxCount(maxCount);
+    searchQuery.setServiceInterval(_factory.constructDefault());
     searchQuery.setType(EQueryType.BOUNDS);
     if (_routeType != null && _routeType.length() > 0) {
       // for this filtering to work we need to order the results

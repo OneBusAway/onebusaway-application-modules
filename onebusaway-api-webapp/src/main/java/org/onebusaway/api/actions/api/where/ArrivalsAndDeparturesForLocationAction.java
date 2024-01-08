@@ -21,12 +21,11 @@ import org.onebusaway.api.actions.api.ApiActionSupport;
 import org.onebusaway.api.impl.MaxCountSupport;
 import org.onebusaway.api.impl.SearchBoundsFactory;
 import org.onebusaway.api.model.transit.BeanFactoryV2;
-import org.onebusaway.api.model.transit.EntryWithReferencesBean;
-import org.onebusaway.api.model.transit.StopsWithArrivalsAndDeparturesV2Bean;
 import org.onebusaway.exceptions.OutOfServiceAreaServiceException;
 import org.onebusaway.exceptions.ServiceException;
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.transit_data.model.*;
+import org.onebusaway.transit_data.services.IntervalFactory;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.util.SystemTime;
 import org.onebusaway.util.services.configuration.ConfigurationService;
@@ -61,6 +60,9 @@ public class ArrivalsAndDeparturesForLocationAction extends ApiActionSupport {
 
     @Autowired
     private RouteSorting customRouteSort;
+
+    @Autowired
+    private IntervalFactory _factory;
 
     @Autowired(required = false)
     public void setFilterChain(FilterChain filterChain) {
@@ -166,7 +168,7 @@ public class ArrivalsAndDeparturesForLocationAction extends ApiActionSupport {
             }
             if (stopIds.isEmpty())
                 return emptyResponse();
-            adResult = _service.getStopsWithArrivalsAndDepartures(stopIds, adQuery);
+            adResult = _service.getStopsWithArrivalsAndDepartures(stopIds, adQuery, _factory.constructForDate(new Date(time)));
         } catch (OutOfServiceAreaServiceException ex) {
             return setOkResponse(new StopsWithArrivalsAndDeparturesBean());
         }

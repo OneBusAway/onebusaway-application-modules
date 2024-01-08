@@ -17,17 +17,15 @@ package org.onebusaway.enterprise.webapp.actions.api;
 
 import org.apache.struts2.convention.annotation.ParentPackage;
 import org.apache.struts2.convention.annotation.Result;
-import org.onebusaway.gtfs.model.calendar.ServiceDate;
+import org.onebusaway.gtfs.model.calendar.AgencyServiceInterval;
 import org.onebusaway.presentation.model.SearchResultCollection;
 import org.onebusaway.presentation.services.realtime.RealtimeService;
 import org.onebusaway.presentation.services.search.SearchService;
+import org.onebusaway.transit_data.services.IntervalFactory;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.enterprise.webapp.actions.OneBusAwayEnterpriseActionSupport;
-import org.onebusaway.util.SystemTime;
 import org.onebusaway.util.services.configuration.ConfigurationService;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import java.util.Date;
 
 @ParentPackage("json-default")
 @Result(type="json", params={"callbackParameter", "callback"})
@@ -47,6 +45,9 @@ public class SearchAction extends OneBusAwayEnterpriseActionSupport {
   @Autowired
   private ConfigurationService _configService;
 
+  @Autowired
+  private IntervalFactory _timeIntervalFactory;
+
   private SearchResultCollection _results = null;
   
   private String _q = null;
@@ -64,11 +65,12 @@ public class SearchAction extends OneBusAwayEnterpriseActionSupport {
 
     boolean serviceDateFilterOn = Boolean.parseBoolean(_configService.getConfigurationValueAsString("display.serviceDateFiltering", "false"));
     if (serviceDateFilterOn) {
-      _results = _searchService.getSearchResultsForServiceDate(_q, new SearchResultFactoryImpl(_searchService, _transitDataService, _realtimeService, _configService), new ServiceDate(new Date(SystemTime.currentTimeMillis())));
+      AgencyServiceInterval serviceInterval = _timeIntervalFactory.constructDefault();
+      _results = _searchService.getSearchResultsForServiceDate(_q, new SearchResultFactoryImpl(_searchService, _transitDataService, _realtimeService, _configService, _timeIntervalFactory), serviceInterval);
 
     }
     else {
-      _results = _searchService.getSearchResults(_q, new SearchResultFactoryImpl(_searchService, _transitDataService, _realtimeService, _configService));
+      _results = _searchService.getSearchResults(_q, new SearchResultFactoryImpl(_searchService, _transitDataService, _realtimeService, _configService, _timeIntervalFactory));
     }
     return SUCCESS;
   }   
