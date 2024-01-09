@@ -404,9 +404,9 @@
                 <version>4.5.9</version><!-- needs to match onebusaway-cloud-services -->
             </dependency>
             <dependency>
-                <groupId>mysql</groupId>
-                <artifactId>mysql-connector-java</artifactId>
-                <version>5.1.48</version>
+                <groupId>com.mysql</groupId>
+                <artifactId>mysql-connector-j</artifactId>
+                <version>8.2.0</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
