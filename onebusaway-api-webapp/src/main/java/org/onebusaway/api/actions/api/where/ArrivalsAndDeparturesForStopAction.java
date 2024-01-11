@@ -114,7 +114,7 @@ public class ArrivalsAndDeparturesForStopAction extends ApiActionSupport {
       return setValidationErrorsResponse();
 
     boolean serviceDateFilterOn = Boolean.parseBoolean(_configService.getConfigurationValueAsString("display.serviceDateFiltering", "false"));
-    if(serviceDateFilterOn || _query.getTime() == 0)
+    if(serviceDateFilterOn && _query.getTime() == 0)
       _query.setTime(SystemTime.currentTimeMillis());
 
     StopWithArrivalsAndDeparturesBean result = null;

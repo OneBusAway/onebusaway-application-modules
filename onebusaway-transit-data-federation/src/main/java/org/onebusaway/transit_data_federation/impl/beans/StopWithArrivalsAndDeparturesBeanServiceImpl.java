@@ -132,7 +132,7 @@ class StopWithArrivalsAndDeparturesBeanServiceImpl implements
       center = SphericalGeometryLibrary.getCenterOfBounds(bounds);
     }
     for (AgencyAndId id : allNearbyStopIds) {
-      StopBean stop = _stopBeanService.getStopForId(id, null);
+      StopBean stop = _stopBeanService.getStopForId(id, serviceInterval);
       if (center != null) {
         // if bounds are present calculate distance of this stop from center
         double distance = SphericalGeometryLibrary.distance(center.getLat(),

@@ -15,7 +15,7 @@
  */
 package org.onebusaway.api.actions.api.where;
 
-import com.opensymphony.xwork2.conversion.annotations.TypeConversion;
+import com.opensymphony.xwork2.conversion.TypeConversionException;
 import org.apache.struts2.rest.DefaultHttpHeaders;
 import org.onebusaway.api.actions.api.ApiActionSupport;
 import org.onebusaway.api.impl.MaxCountSupport;
@@ -24,6 +24,7 @@ import org.onebusaway.api.model.transit.BeanFactoryV2;
 import org.onebusaway.exceptions.OutOfServiceAreaServiceException;
 import org.onebusaway.exceptions.ServiceException;
 import org.onebusaway.geospatial.model.CoordinateBounds;
+import org.onebusaway.gtfs.model.calendar.AgencyServiceInterval;
 import org.onebusaway.transit_data.model.*;
 import org.onebusaway.transit_data.services.IntervalFactory;
 import org.onebusaway.transit_data.services.TransitDataService;
@@ -34,7 +35,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
-import java.sql.Date;
+import java.util.Date;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -116,9 +119,22 @@ public class ArrivalsAndDeparturesForLocationAction extends ApiActionSupport {
         _query.setFrequencyMinutesAfter(frequencyMinutesAfter);
     }
 
-    @TypeConversion(converter = "org.onebusaway.presentation.impl.conversion.DateTimeConverter")
-    public void setTime(Date time) {
-        _time = time.getTime();
+    // The DateTimeConvertor runs between index and show so can't be used here!
+//    @TypeConversion(converter = "org.onebusaway.presentation.impl.conversion.DateTimeConverter")
+    public void setTime(String timeStr) {
+
+        if (timeStr.matches("^(\\d+)$")) {
+            long v = Long.parseLong(timeStr);
+            _time = v;
+        }
+
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
+        try {
+            Date d = format.parse(timeStr);
+            _time = d.getTime();
+        } catch (ParseException e) {
+            throw new TypeConversionException(e);
+        }
     }
 
     public void setEmptyReturnsNotFound(boolean flag) {
@@ -141,9 +157,8 @@ public class ArrivalsAndDeparturesForLocationAction extends ApiActionSupport {
 
         CoordinateBounds bounds = _searchBoundsFactory.createBounds();
         int maxCount = _maxCount.getMaxCount();
-        long time = SystemTime.currentTimeMillis();
-        if (_time != 0)
-            time = _time;
+        if (_time == 0)
+            _time = SystemTime.currentTimeMillis();
         BeanFactoryV2 factory = getBeanFactoryV2();
         SearchQueryBean searchQuery = new SearchQueryBean();
         searchQuery.setBounds(bounds);
@@ -168,7 +183,8 @@ public class ArrivalsAndDeparturesForLocationAction extends ApiActionSupport {
             }
             if (stopIds.isEmpty())
                 return emptyResponse();
-            adResult = _service.getStopsWithArrivalsAndDepartures(stopIds, adQuery, _factory.constructForDate(new Date(time)));
+            AgencyServiceInterval serviceInterval = _factory.constructForDate(new Date(_time));
+            adResult = _service.getStopsWithArrivalsAndDepartures(stopIds, adQuery, serviceInterval);
         } catch (OutOfServiceAreaServiceException ex) {
             return setOkResponse(new StopsWithArrivalsAndDeparturesBean());
         }
