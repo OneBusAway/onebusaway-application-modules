@@ -39,27 +39,36 @@ public class DateTimeConverter extends StrutsTypeConverter {
       
       String value = values[0];
 
-      if (value.matches("^(\\d+)$")) {
-        long v = Long.parseLong(value);
-        if( toClass == Long.TYPE || toClass == Long.class)
-          return v;
-        else
-          return new Date(v);
-      }
+      return parse(value, toClass);
 
-      try {
-        Date d = _format.parse(value);
-        if( toClass == Long.TYPE || toClass == Long.class)
-          return d.getTime();
-        return d;
-      } catch (ParseException e) {
-        e.printStackTrace();
-        throw new TypeConversionException(e);
-      }
     }
     return null;
   }
 
+  public long parse(String value) {
+    return (long) parse(value, Long.class);
+  }
+
+  private Object parse(String value, Class toClass) {
+    if (value.matches("^(\\d+)$")) {
+      long v = Long.parseLong(value);
+      if( toClass == Long.TYPE || toClass == Long.class)
+        return v;
+      else
+        return new Date(v);
+    }
+
+    try {
+      Date d = _format.parse(value);
+      if( toClass == Long.TYPE || toClass == Long.class)
+        return d.getTime();
+      return d;
+    } catch (ParseException e) {
+      e.printStackTrace();
+      throw new TypeConversionException(e);
+    }
+
+  }
   @SuppressWarnings("rawtypes")
   public String convertToString(Map context, Object o) {
     if (o instanceof Date)

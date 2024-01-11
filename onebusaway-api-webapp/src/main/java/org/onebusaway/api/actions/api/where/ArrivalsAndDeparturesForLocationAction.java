@@ -25,6 +25,7 @@ import org.onebusaway.exceptions.OutOfServiceAreaServiceException;
 import org.onebusaway.exceptions.ServiceException;
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.gtfs.model.calendar.AgencyServiceInterval;
+import org.onebusaway.presentation.impl.conversion.DateTimeConverter;
 import org.onebusaway.transit_data.model.*;
 import org.onebusaway.transit_data.services.IntervalFactory;
 import org.onebusaway.transit_data.services.TransitDataService;
@@ -80,6 +81,8 @@ public class ArrivalsAndDeparturesForLocationAction extends ApiActionSupport {
 
     private boolean emptyReturnsNotFound = EMPTY_RETURNS_NOT_FOUND;
 
+    private DateTimeConverter dateTimeConverter = new DateTimeConverter();
+
     public ArrivalsAndDeparturesForLocationAction() {
         super(V2);
     }
@@ -122,19 +125,7 @@ public class ArrivalsAndDeparturesForLocationAction extends ApiActionSupport {
     // The DateTimeConvertor runs between index and show so can't be used here!
 //    @TypeConversion(converter = "org.onebusaway.presentation.impl.conversion.DateTimeConverter")
     public void setTime(String timeStr) {
-
-        if (timeStr.matches("^(\\d+)$")) {
-            long v = Long.parseLong(timeStr);
-            _time = v;
-        }
-
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
-        try {
-            Date d = format.parse(timeStr);
-            _time = d.getTime();
-        } catch (ParseException e) {
-            throw new TypeConversionException(e);
-        }
+        _time = dateTimeConverter.parse(timeStr);
     }
 
     public void setEmptyReturnsNotFound(boolean flag) {
