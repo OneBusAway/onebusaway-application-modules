@@ -137,7 +137,6 @@ public class StopsForLocationAction extends ApiActionSupport {
     searchQuery.setServiceInterval(_factory.constructForDate(new Date(_time)));
     searchQuery.setBounds(bounds);
     searchQuery.setMaxCount(maxCount);
-    searchQuery.setServiceInterval(_factory.constructDefault());
     searchQuery.setType(EQueryType.BOUNDS);
     if (_routeType != null && _routeType.length() > 0) {
       // for this filtering to work we need to order the results
