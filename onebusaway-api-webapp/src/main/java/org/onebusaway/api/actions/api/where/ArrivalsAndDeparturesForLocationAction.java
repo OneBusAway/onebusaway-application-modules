@@ -175,6 +175,7 @@ public class ArrivalsAndDeparturesForLocationAction extends ApiActionSupport {
             if (stopIds.isEmpty())
                 return emptyResponse();
             AgencyServiceInterval serviceInterval = _factory.constructForDate(new Date(_time));
+            adQuery.setServiceInterval(serviceInterval);
             adResult = _service.getStopsWithArrivalsAndDepartures(stopIds, adQuery, serviceInterval);
         } catch (OutOfServiceAreaServiceException ex) {
             return setOkResponse(new StopsWithArrivalsAndDeparturesBean());
