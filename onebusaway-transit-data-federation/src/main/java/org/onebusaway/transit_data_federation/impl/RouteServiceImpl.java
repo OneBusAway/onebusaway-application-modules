@@ -73,9 +73,14 @@ class RouteServiceImpl implements RouteService {
       for (TripEntry trip : trips) {
         ServiceInterval tripServiceInterval = _helper.getServiceIntervalForTrip(trip);
         if (serviceInterval != null) {
-          boolean isActiveTrip = _blockIndexService.isDynamicTrip(trip) || _calendarService.isLocalizedServiceIdActiveInRange(trip.getServiceId(),
-                  tripServiceInterval,
-                  serviceInterval);
+          boolean isActiveTrip;
+          if (_blockIndexService.isDynamicTrip(trip)) {
+            isActiveTrip = _helper.isServiceIntervalActiveInRange(trip.getServiceId(), tripServiceInterval, serviceInterval);
+          } else {
+            isActiveTrip = _calendarService.isLocalizedServiceIdActiveInRange(trip.getServiceId(),
+                    tripServiceInterval,
+                    serviceInterval);
+          }
           if (!isActiveTrip) continue;//skip this trip if not active
         }
 
@@ -116,17 +121,18 @@ class RouteServiceImpl implements RouteService {
         AgencyAndId routeCollectionAgencyAndId = trip.getRouteCollection().getId();
         // don't bother evaluating if this route is already in list
         if (!routeCollectionIds.contains(routeCollectionAgencyAndId)) {
-          if (!_blockIndexService.isDynamicTrip(trip)) { // dynamic trips are always active
             boolean isActiveTrip = false;
             if (serviceInterval != null) {
-              ServiceInterval tripInterval = _helper.getServiceIntervalForTrip(trip);
-              isActiveTrip = _calendarService.isLocalizedServiceIdActiveInRange(trip.getServiceId(),
-                      tripInterval,
-                      serviceInterval);
-              if (!isActiveTrip) continue;//skip this trip if not active
-
+              ServiceInterval stopServiceInterval = _helper.getServiceIntervalForTrip(trip, stopEntry);
+              if (_blockIndexService.isDynamicTrip(trip)) {
+                isActiveTrip = _helper.isServiceIntervalActiveInRange(trip.getServiceId(), stopServiceInterval, serviceInterval);
+              } else {
+                isActiveTrip = _calendarService.isLocalizedServiceIdActiveInRange(trip.getServiceId(),
+                        stopServiceInterval,
+                        serviceInterval);
+              }
+              if (!isActiveTrip) continue; //skip this trip if not active
             }
-          }
           routeCollectionIds.add(routeCollectionAgencyAndId);
         }
       }
@@ -138,10 +144,15 @@ class RouteServiceImpl implements RouteService {
       for (BlockTripEntry blockTrip : blockStopTimeIndex.getTrips()) {
         TripEntry trip = blockTrip.getTrip();
         if (serviceInterval != null) {
-          ServiceInterval tripServiceInterval = _helper.getServiceIntervalForTrip(trip);
-          boolean isActiveTrip = _blockIndexService.isDynamicTrip(trip) || _calendarService.isLocalizedServiceIdActiveInRange(trip.getServiceId(),
-                  tripServiceInterval,
-                  serviceInterval);
+          ServiceInterval stopServiceInterval = _helper.getServiceIntervalForTrip(trip, stopEntry);
+          boolean isActiveTrip;
+          if (_blockIndexService.isDynamicTrip(trip)) {
+            isActiveTrip = _helper.isServiceIntervalActiveInRange(trip.getServiceId(), stopServiceInterval, serviceInterval);
+          } else {
+            isActiveTrip = _calendarService.isLocalizedServiceIdActiveInRange(trip.getServiceId(),
+                    stopServiceInterval,
+                    serviceInterval);
+          }
           if (!isActiveTrip) continue;//skip this trip if not active
         }
 

@@ -20,9 +20,12 @@ import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.AgencyServiceInterval;
+import org.onebusaway.gtfs.model.calendar.LocalizedServiceId;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
+import org.onebusaway.gtfs.model.calendar.ServiceInterval;
 import org.onebusaway.transit_data.model.*;
 import org.onebusaway.transit_data.services.TransitDataService;
+import org.onebusaway.transit_data_federation.impl.ServiceIntervalHelper;
 import org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.AbstractGtfsRealtimeIntegrationTest;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
@@ -47,55 +50,56 @@ public class AgencyServiceIntervalIntegrationTest extends AbstractGtfsRealtimeIn
 
   @Test
   public void testServiceWindows() throws Exception {
+
+    // we load real-time to confirm these queries handle both static and real-time appropriately
+    loadRealtime("org/onebusaway/transit_data_federation/impl/realtime/gtfs_realtime/integration_tests/nyct_r_gtfs/202401120646-nqrw.pb");
+
     // choose an API
     // * stops for location
-    // Stop R33 services D/N/R/W in totality but mainly serves the R, especially at lunch time
+    // Stop R33 services D/N/R/W in totality but mainly serves the R, especially at lunchtime
     Map overrides = new HashMap<String, Integer>();
     overrides.put("MTASBWY", 60); // override in minutes
     ServiceDate baseServiceDate = new ServiceDate(2024, 1, 5);
     long referenceTime= baseServiceDate.getAsDate().getTime() + hourToMillis(12);
 
     AgencyServiceInterval serviceInterval = new AgencyServiceInterval(referenceTime, overrides);
+    StopsBean stops = searchForStopsByLatLon("MTASBWY_R33S", serviceInterval);
 
-    StopsBean stops = searchForStopsByLatLon("MTASBWY_R33N", serviceInterval);
-
-    expectRoutesForStops(stops, "R33", "R");
+    expectRoutesForStops(stops, "R33S", "R");
 
     // * a/d for location
-    StopsWithArrivalsAndDeparturesBean adBean = searchForADStopsByLatLon("MTASBWY_R33N", serviceInterval);
+    StopsWithArrivalsAndDeparturesBean adBean = searchForADStopsByLatLon("MTASBWY_R33S", serviceInterval);
 
     for (StopBean stop : adBean.getStops()) {
-      expectRoutesForStop(stop, "R33", "R");
+      expectRoutesForStop(stop, "R33S", "R");
+    }
+    for (StopBean nearbyStop : adBean.getNearbyStops()) {
+      expectRoutesForStop(nearbyStop, "R33S", "R");
+      expectRoutesForStop(nearbyStop, "R33N", "R");
     }
 
+
     // * a/d for stop
-    StopWithArrivalsAndDeparturesBean stopBean = searchForAdStopByStop("MTASBWY_R33N", serviceInterval);
+    StopWithArrivalsAndDeparturesBean stopBean = searchForAdStopByStop("MTASBWY_R33S", serviceInterval);
     StopBean stop = stopBean.getStop();
-    expectRoutesForStop(stop, "R33", "R");
+    expectRoutesForStop(stop, "R33S", "R");
+    for (StopBean nearbyStop : stopBean.getNearbyStops()) {
+      expectRoutesForStop(nearbyStop, "R33S", "R");
+      expectRoutesForStop(nearbyStop, "R33N", "R");
+    }
+
 
     // * route-details
     ListBean<RouteGroupingBean> beans = searchForRouteByRouteId("MTASBWY_R", serviceInterval);
     for (RouteGroupingBean routeGroupingBean : beans.getList()) {
       for (StopBean routeStop : routeGroupingBean.getStops()) {
-        if (routeStop.getId().contains("R33N")) {
-          // do we care?  from this API?
+        if (routeStop.getId().contains("R33S")) {
+          expectRoutesForStop(routeStop, "R33S", "R");
+        } else if (routeStop.getId().contains("R33N")) {
           expectRoutesForStop(routeStop, "R33N", "R");
         }
       }
     }
-
-    // current services:  A/C/F/(F Shuttle)
-    // expected: A/C/F
-    // query for daytime period
-    // verify expected service
-    // query for nighttime period
-    // verify expected service
-
-    // LATER
-
-
-
-
   }
 
   private ListBean<RouteGroupingBean> searchForRouteByRouteId(String routeId, AgencyServiceInterval serviceInterval) {

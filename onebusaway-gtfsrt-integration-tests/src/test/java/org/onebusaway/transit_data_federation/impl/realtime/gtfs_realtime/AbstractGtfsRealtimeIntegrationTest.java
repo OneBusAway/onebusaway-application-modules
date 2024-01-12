@@ -19,9 +19,12 @@ import org.junit.After;
 import org.junit.Before;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.realtime.api.TimepointPredictionRecord;
+import org.onebusaway.realtime.api.VehicleLocationListener;
 import org.onebusaway.transit_data.model.*;
 import org.onebusaway.transit_data.model.trips.TimepointPredictionBean;
 import org.onebusaway.transit_data.services.TransitDataService;
+import org.onebusaway.transit_data_federation.impl.realtime.TestVehicleLocationListener;
+import org.onebusaway.transit_data_federation.impl.realtime.VehicleStatusServiceImpl;
 import org.onebusaway.transit_data_federation.model.TargetTime;
 import org.onebusaway.transit_data_federation.model.narrative.StopTimeNarrative;
 import org.onebusaway.transit_data_federation.services.ArrivalAndDepartureService;
@@ -36,6 +39,7 @@ import org.onebusaway.transit_data_federation.services.transit_graph.dynamic.Dyn
 import org.onebusaway.util.AgencyAndIdLibrary;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.io.ClassPathResource;
 
 import java.util.*;
 
@@ -86,6 +90,24 @@ public abstract class AbstractGtfsRealtimeIntegrationTest {
     // if the bundle loader failed prevent further exceptions
     if (_bundleLoader != null)
       _bundleLoader.close();
+  }
+
+  protected void loadRealtime(String gtfsrtFilename) throws Exception {
+    GtfsRealtimeSource source = getBundleLoader().getSource();
+    source.setAgencyId("MTASBWY");
+    TestVehicleLocationListener listener = new TestVehicleLocationListener();
+
+    VehicleLocationListener actualListener = getBundleLoader().getApplicationContext().getBean(VehicleStatusServiceImpl.class);
+    listener.setVehicleLocationListener(actualListener);
+    source.setVehicleLocationListener(listener);
+
+
+    // this is the gtfs-rt protocol-buffer file to match to the loaded bundle
+    ClassPathResource gtfsRtResource = new ClassPathResource(gtfsrtFilename);
+    if (!gtfsRtResource.exists()) throw new RuntimeException(gtfsrtFilename + " not found in classpath!");
+    source.setTripUpdatesUrl(gtfsRtResource.getURL());
+    source.refresh(); // launch
+
   }
 
   protected void verifyBeans(String message, StopEntry firstStop, long firstStopTime) {

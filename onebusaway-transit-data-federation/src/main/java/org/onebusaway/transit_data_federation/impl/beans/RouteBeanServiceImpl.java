@@ -261,8 +261,12 @@ class RouteBeanServiceImpl implements RouteBeanService {
         ServiceIdActivation serviceIds = blockTrip.getBlockConfiguration().getServiceIds();
         for (LocalizedServiceId activeServiceId : serviceIds.getActiveServiceIds()) {
           ServiceInterval scheduledService = _helper.getServiceIntervalForTrip(blockTrip);
-          // dynamic trips are always active as they are short lived
-          boolean isActiveTrip = _blockIndexService.isDynamicTrip(blockTrip.getTrip()) || _calendarService.isLocalizedServiceIdActiveInRange(activeServiceId, scheduledService, serviceInterval);
+          boolean isActiveTrip;
+          if (_blockIndexService.isDynamicTrip(blockTrip.getTrip())) {
+            isActiveTrip = _helper.isServiceIntervalActiveInRange(activeServiceId, scheduledService, serviceInterval);
+          } else {
+            isActiveTrip = _calendarService.isLocalizedServiceIdActiveInRange(activeServiceId, scheduledService, serviceInterval);
+          }
           if (isActiveTrip) blockTrips.add(blockTrip);
         }
       }
@@ -332,8 +336,13 @@ class RouteBeanServiceImpl implements RouteBeanService {
             shapeIds.add(trip.getShapeId());
           } else {
             ServiceInterval scheduledService = _helper.getServiceIntervalForTrip(trip);
-            boolean isActiveTrip = _blockIndexService.isDynamicTrip(trip) || _calendarService.isLocalizedServiceIdActiveInRange(trip.getServiceId(),
-                    scheduledService, serviceInterval);
+            boolean isActiveTrip;
+            if (_blockIndexService.isDynamicTrip(trip)) {
+              isActiveTrip = _helper.isServiceIntervalActiveInRange(trip.getServiceId(), scheduledService, serviceInterval);
+            } else {
+              isActiveTrip = _calendarService.isLocalizedServiceIdActiveInRange(trip.getServiceId(),
+                      scheduledService, serviceInterval);
+            }
 
             if (isActiveTrip)
               shapeIds.add(trip.getShapeId());

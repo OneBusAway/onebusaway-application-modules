@@ -15,8 +15,12 @@
  */
 package org.onebusaway.transit_data_federation.impl;
 
+import org.onebusaway.gtfs.model.calendar.AgencyServiceInterval;
+import org.onebusaway.gtfs.model.calendar.LocalizedServiceId;
 import org.onebusaway.gtfs.model.calendar.ServiceInterval;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
 
 /**
@@ -24,6 +28,21 @@ import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
  */
 public class ServiceIntervalHelper {
 
+  public ServiceInterval getServiceIntervalForTrip(TripEntry trip, StopEntry stopEntry) {
+    int intervalStart = Integer.MAX_VALUE;
+    int intervalEnd = 0;
+    for (StopTimeEntry stopTime : trip.getStopTimes()) {
+      if (stopTime.getStop().equals(stopEntry)) {
+        if (stopTime.getArrivalTime() > 0) {
+          intervalStart = Math.min(intervalStart, stopTime.getArrivalTime());
+        }
+        if (stopTime.getDepartureTime() > 0) {
+          intervalEnd = Math.max(intervalEnd, stopTime.getDepartureTime());
+        }
+      }
+    }
+    return new ServiceInterval(intervalStart, intervalEnd);
+  }
   public ServiceInterval getServiceIntervalForTrip(TripEntry trip) {
     int tripStartTime = trip.getStopTimes().get(0).getDepartureTime();
     int tripEndTime = -1;
@@ -41,4 +60,8 @@ public class ServiceIntervalHelper {
     return getServiceIntervalForTrip(trip.getTrip());
   }
 
+  public boolean isServiceIntervalActiveInRange(LocalizedServiceId localizedServiceId, ServiceInterval activeService, AgencyServiceInterval agencyServiceInterval) {
+    ServiceInterval serviceInterval = agencyServiceInterval.getServiceInterval(localizedServiceId.getId().getAgencyId());
+    return Math.max(activeService.getMinArrival(), serviceInterval.getMinArrival()) <= Math.min(activeService.getMaxDeparture(), serviceInterval.getMaxDeparture());
+  }
 }

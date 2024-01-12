@@ -73,7 +73,7 @@ class StopWithArrivalsAndDeparturesBeanServiceImpl implements
         stop, 100);
     List<StopBean> nearbyStops = new ArrayList<StopBean>();
     for (AgencyAndId nearbyStopId : nearbyStopIds)
-      nearbyStops.add(_stopBeanService.getStopForId(nearbyStopId, null));
+      nearbyStops.add(_stopBeanService.getStopForId(nearbyStopId, serviceInterval));
 
     List<ServiceAlertBean> situations = _serviceAlertsBeanService.getServiceAlertsForStopId(
         query.getTime(), id);
