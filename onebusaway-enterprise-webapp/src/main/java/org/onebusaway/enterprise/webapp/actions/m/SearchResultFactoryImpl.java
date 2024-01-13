@@ -27,7 +27,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.onebusaway.geocoder.enterprise.services.EnterpriseGeocoderResult;
-import org.onebusaway.gtfs.model.calendar.ServiceDate;
+import org.onebusaway.gtfs.model.calendar.AgencyServiceInterval;
 import org.onebusaway.presentation.impl.realtime.SiriSupport;
 import org.onebusaway.presentation.impl.search.AbstractSearchResultFactoryImpl;
 import org.onebusaway.presentation.model.SearchResult;
@@ -36,6 +36,7 @@ import org.onebusaway.presentation.services.search.SearchResultFactory;
 import org.onebusaway.realtime.api.OccupancyStatus;
 import org.onebusaway.transit_data.model.*;
 import org.onebusaway.transit_data.model.service_alerts.SituationQueryBean;
+import org.onebusaway.transit_data.services.IntervalFactory;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.transit_data_federation.siri.SiriDistanceExtension;
 import org.onebusaway.transit_data_federation.siri.SiriExtensionWrapper;
@@ -69,6 +70,8 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
 
   private TransitDataService _transitDataService;
 
+  private IntervalFactory _factory;
+
   private Integer _staleTimeout = null;
   private Boolean _serviceDateFilter = null;
   private String _apcMode = null;
@@ -77,10 +80,12 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
   boolean debug = false;
 
   public SearchResultFactoryImpl(TransitDataService transitDataService,
-      RealtimeService realtimeService, ConfigurationService configurationService) {
+                                 RealtimeService realtimeService, ConfigurationService configurationService,
+                                 IntervalFactory factory) {
     _transitDataService = transitDataService;
     _realtimeService = realtimeService;
     _configurationService = configurationService;
+    _factory = factory;
   }
 
   @Override
@@ -92,15 +97,15 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
   public SearchResult getRouteResult(RouteBean routeBean) {
     List<RouteDirection> directions = new ArrayList<RouteDirection>();
 
-      ServiceDate serviceDate = null;
+    AgencyServiceInterval serviceInterval = null;
       boolean serviceDateFilterOn = getServiceDateFilter();
-      if (serviceDateFilterOn) serviceDate = new ServiceDate(new Date(SystemTime.currentTimeMillis()));
+      if (serviceDateFilterOn) serviceInterval = _factory.constructForDate(new Date(SystemTime.currentTimeMillis()));
 
       StopsForRouteBean stopsForRoute;
-      if (serviceDate == null)
+      if (serviceInterval == null)
           stopsForRoute = _transitDataService.getStopsForRoute(routeBean.getId());
       else
-          stopsForRoute = _transitDataService.getStopsForRouteForServiceDate(routeBean.getId(), serviceDate);
+          stopsForRoute = _transitDataService.getStopsForRouteForServiceInterval(routeBean.getId(), serviceInterval);
 
     // create stop ID->stop bean map
     Map<String, StopBean> stopIdToStopBeanMap = new HashMap<String, StopBean>();
@@ -222,13 +227,13 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
         continue;
       }
 
-      ServiceDate serviceDate = null;
+      AgencyServiceInterval serviceInterval = null;
       boolean serviceDateFilterOn = getServiceDateFilter();
-      if (serviceDateFilterOn) serviceDate = new ServiceDate(new Date(SystemTime.currentTimeMillis()));
+      if (serviceDateFilterOn) serviceInterval = _factory.constructForDate(new Date(SystemTime.currentTimeMillis()));
 
       StopsForRouteBean stopsForRoute;
-      if (serviceDate != null) {
-        stopsForRoute = _transitDataService.getStopsForRouteForServiceDate(routeBean.getId(), serviceDate);
+      if (serviceInterval != null) {
+        stopsForRoute = _transitDataService.getStopsForRouteForServiceInterval(routeBean.getId(), serviceInterval);
       } else {
         stopsForRoute = _transitDataService.getStopsForRoute(routeBean.getId());
       }

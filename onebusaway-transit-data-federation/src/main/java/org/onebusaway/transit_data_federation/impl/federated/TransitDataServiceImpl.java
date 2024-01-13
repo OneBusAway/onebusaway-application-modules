@@ -249,12 +249,6 @@ public class TransitDataServiceImpl implements TransitDataService {
   }
 
   @Override
-  public StopsForRouteBean getStopsForRouteForServiceDate(String routeId, ServiceDate serviceDate) {
-    blockUntilBundleIsReady();
-    return _transitDataService.getStopsForRouteForServiceDate(routeId, serviceDate);
-  }
-
-  @Override
   public TripBean getTrip(String tripId) throws ServiceException {
     blockUntilBundleIsReady();
     return _transitDataService.getTrip(tripId);

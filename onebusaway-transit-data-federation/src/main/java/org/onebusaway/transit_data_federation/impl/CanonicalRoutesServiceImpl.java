@@ -16,6 +16,7 @@
 package org.onebusaway.transit_data_federation.impl;
 
 import org.apache.logging.log4j.util.Strings;
+import org.onebusaway.container.cache.Cacheable;
 import org.onebusaway.container.refresh.Refreshable;
 import org.onebusaway.geospatial.model.EncodedPolylineBean;
 import org.onebusaway.gtfs.model.AgencyAndId;
@@ -95,6 +96,7 @@ public class CanonicalRoutesServiceImpl implements CanonicalRoutesService {
    * @return
    */
   @Override
+  @Cacheable
   public ListBean<RouteGroupingBean> getCanonicalOrMergedRoute(AgencyServiceInterval serviceInterval, AgencyAndId routeId) {
     StopsForRouteBean stopsForRoute;
     if (serviceInterval != null) {

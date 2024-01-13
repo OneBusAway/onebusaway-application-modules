@@ -99,13 +99,13 @@ public class SearchResultFactoryImpl implements SearchResultFactory {
   public SearchResult getRouteResult(RouteBean routeBean) {
     List<RouteDirection> directions = new ArrayList<RouteDirection>();
 
-    ServiceDate serviceDate = null;
+    AgencyServiceInterval serviceInterval = null;
     boolean serviceDateFilterOn = Boolean.parseBoolean(_configService.getConfigurationValueAsString("display.serviceDateFiltering", "false"));
-    if (serviceDateFilterOn) serviceDate = new ServiceDate(new Date(SystemTime.currentTimeMillis()));
+    if (serviceDateFilterOn) serviceInterval = _factory.constructForDate(new Date(SystemTime.currentTimeMillis()));
 
     StopsForRouteBean stopsForRoute;
-    if (serviceDate != null) {
-      stopsForRoute = _transitDataService.getStopsForRouteForServiceDate(routeBean.getId(), serviceDate);
+    if (serviceInterval != null) {
+      stopsForRoute = _transitDataService.getStopsForRouteForServiceInterval(routeBean.getId(), serviceInterval);
     }
     else {
       stopsForRoute = _transitDataService.getStopsForRoute(routeBean.getId());
@@ -149,14 +149,14 @@ public class SearchResultFactoryImpl implements SearchResultFactory {
 
     List<StopsForRouteBean> fullStopList = new ArrayList<>();
 
-    ServiceDate serviceDate = null;
+    AgencyServiceInterval serviceInterval = null;
     boolean serviceDateFilterOn = Boolean.parseBoolean(_configService.getConfigurationValueAsString("display.serviceDateFiltering", "false"));
-    if (serviceDateFilterOn) serviceDate = new ServiceDate(new Date(SystemTime.currentTimeMillis()));
+    if (serviceDateFilterOn) serviceInterval = _factory.constructForDate(new Date(SystemTime.currentTimeMillis()));
 
     for(RouteBean routeBean : stopBean.getRoutes()) {
       StopsForRouteBean stopsForRoute;
-      if (serviceDate != null) {
-        stopsForRoute = _transitDataService.getStopsForRouteForServiceDate(routeBean.getId(), serviceDate);
+      if (serviceInterval != null) {
+        stopsForRoute = _transitDataService.getStopsForRouteForServiceInterval(routeBean.getId(), serviceInterval);
       }
       else {
         stopsForRoute = _transitDataService.getStopsForRoute(routeBean.getId());

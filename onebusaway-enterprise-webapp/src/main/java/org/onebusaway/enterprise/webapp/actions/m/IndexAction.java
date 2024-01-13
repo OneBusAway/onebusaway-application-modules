@@ -118,7 +118,7 @@ public class IndexAction extends OneBusAwayEnterpriseActionSupport {
       return SUCCESS;
 
     SearchResultFactory factory = new SearchResultFactoryImpl(
-        _transitDataService, _realtimeService, _configurationService);
+        _transitDataService, _realtimeService, _configurationService, _timeIntervalFactory);
 
     // empty query with location means search for stops near current location
     if (_location != null && _q.isEmpty()) {

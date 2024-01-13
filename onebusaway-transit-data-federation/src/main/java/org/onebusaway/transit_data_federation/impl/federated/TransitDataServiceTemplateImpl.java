@@ -346,11 +346,6 @@ public class TransitDataServiceTemplateImpl implements TransitDataServiceTemplat
     return _routeBeanService.getStopsForRouteForServiceInterval(convertAgencyAndId(routeId), serviceInterval);
   }
 
-  public StopsForRouteBean getStopsForRouteForServiceDate(String routeId, ServiceDate serviceDate) {
-
-    return _routeBeanService.getStopsForRouteForServiceDate(convertAgencyAndId(routeId), serviceDate);
-  }
-
   //@Override
   public TripBean getTrip(String tripId) throws ServiceException {
     

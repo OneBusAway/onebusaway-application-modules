@@ -160,23 +160,10 @@ class RouteBeanServiceImpl implements RouteBeanService {
         narrative, null);
   }
 
+  @Cacheable
   public StopsForRouteBean getStopsForRouteForServiceInterval(AgencyAndId routeId, AgencyServiceInterval serviceInterval) {
     RouteCollectionEntry routeCollectionEntry = _transitGraphDao.getRouteCollectionForId(routeId);
     RouteCollectionNarrative narrative = _narrativeService.getRouteCollectionForId(routeId);
-    if (routeCollectionEntry == null || narrative == null)
-      return null;
-    return getStopsForRouteCollectionAndNarrative(routeCollectionEntry,
-            narrative, serviceInterval);
-  }
-
-  // @Cacheable
-  public StopsForRouteBean getStopsForRouteForServiceDate(AgencyAndId routeId, ServiceDate serviceDate) {
-    RouteCollectionEntry routeCollectionEntry = _transitGraphDao.getRouteCollectionForId(routeId);
-    RouteCollectionNarrative narrative = _narrativeService.getRouteCollectionForId(routeId);
-    AgencyServiceInterval serviceInterval = null;
-    if (serviceDate != null) {
-      serviceInterval = new AgencyServiceInterval(serviceDate);
-    }
     if (routeCollectionEntry == null || narrative == null)
       return null;
     return getStopsForRouteCollectionAndNarrative(routeCollectionEntry,

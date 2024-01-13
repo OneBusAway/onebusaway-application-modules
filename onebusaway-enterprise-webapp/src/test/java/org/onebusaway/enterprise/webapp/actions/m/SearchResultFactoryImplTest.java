@@ -34,6 +34,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.onebusaway.presentation.services.realtime.RealtimeService;
 import org.onebusaway.transit_data.services.TransitDataService;
+import org.onebusaway.transit_data_federation.services.WebIntervalFactory;
 import org.onebusaway.transit_data_federation.siri.SiriDistanceExtension;
 import org.onebusaway.transit_data_federation.siri.SiriExtensionWrapper;
 import org.onebusaway.util.services.configuration.ConfigurationService;
@@ -264,8 +265,9 @@ public class SearchResultFactoryImplTest {
         stopsForRouteBean);
     when(_realtimeService.getServiceAlertsForRouteAndDirection(ROUTE_ID, TEST_STOP_ID)).thenReturn(
         serviceAlerts);
+    WebIntervalFactory factory = new WebIntervalFactory();
     SearchResultFactoryImpl srf = new SearchResultFactoryImpl(
-        _transitDataService, _realtimeService, _configurationService);
+        _transitDataService, _realtimeService, _configurationService, factory);
     Set<RouteBean> routeFilter = new HashSet<RouteBean>();
     StopResult result = (StopResult) srf.getStopResult(stopBean, routeFilter);
     return result;
@@ -277,8 +279,9 @@ public class SearchResultFactoryImplTest {
         stopsForRouteBean);
     when(_realtimeService.getServiceAlertsForRoute(ROUTE_ID)).thenReturn(
         serviceAlerts);
+    WebIntervalFactory factory = new WebIntervalFactory();
     SearchResultFactoryImpl srf = new SearchResultFactoryImpl(
-        _transitDataService, _realtimeService, _configurationService);
+        _transitDataService, _realtimeService, _configurationService, factory);
     RouteResult result = (RouteResult) srf.getRouteResult(createRouteBean());
     return result;
   }

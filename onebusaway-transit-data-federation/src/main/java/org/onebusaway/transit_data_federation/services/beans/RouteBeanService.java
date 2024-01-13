@@ -56,11 +56,5 @@ public interface RouteBeanService {
    *         found
    */
   public StopsForRouteBean getStopsForRouteForServiceInterval(AgencyAndId routeId, AgencyServiceInterval serviceInterval);
-  /**
-   * @param routeId see {@link RouteCollectionEntry#getId()}
-   * @param serviceDate
-   * @return the stops for the route with the specified bean and service date, or null if not
-   *         found
-   */
-  public StopsForRouteBean getStopsForRouteForServiceDate(AgencyAndId routeId, ServiceDate serviceDate);
+
 }

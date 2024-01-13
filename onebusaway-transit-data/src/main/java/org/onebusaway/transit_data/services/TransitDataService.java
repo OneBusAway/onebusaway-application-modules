@@ -34,7 +34,6 @@ import org.onebusaway.federations.annotations.FederatedByEntityIdsMethod;
 import org.onebusaway.geospatial.model.EncodedPolylineBean;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.AgencyServiceInterval;
-import org.onebusaway.gtfs.model.calendar.ServiceDate;
 import org.onebusaway.realtime.api.TimepointPredictionRecord;
 import org.onebusaway.realtime.api.VehicleOccupancyRecord;
 import org.onebusaway.transit_data.OccupancyStatusBean;
@@ -156,20 +155,10 @@ public interface TransitDataService extends FederatedService {
 
   /**
    * @param routeId
-   * @param serviceDate
-   * @return the stops for the specified route and service date, or null if not found
-   * @throws ServiceException
-   */
-  @FederatedByEntityIdMethod
-  public StopsForRouteBean getStopsForRouteForServiceDate(String routeId, ServiceDate serviceDate)
-          throws ServiceException;
-  /**
-   * @param routeId
    * @param serviceInterval
    * @return the stops for the specified route and service date, or null if not found
    * @throws ServiceException
    */
-
   @FederatedByEntityIdMethod
   public StopsForRouteBean getStopsForRouteForServiceInterval(String routeId, AgencyServiceInterval serviceInterval)
           throws ServiceException;
