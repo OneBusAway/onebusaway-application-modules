@@ -23,11 +23,11 @@ vehicle.
 
 ## Details
 
-* vehicledId - the id of the vehicle
-* lastUpdateTime - the last known real-time update from the transit vehicle
-* lastLocationUpdateTime - the last known real-time update from the transit vehicle containing a location update
-* location - the last known location of the vehicle
-* tripId - the id of the vehicle's current trip, which can be used to look up the referenced [`<trip/>` element](trip.html) in the `<references/>` section.
-* tripStatus - [`<tripStatus/>` element](trip-status.html), providing additional status information for the vehicle's trip. 
+* `vehicledId` - the id of the vehicle
+* `lastUpdateTime` - the last known real-time update from the transit vehicle
+* `lastLocationUpdateTime` - the last known real-time update from the transit vehicle containing a location update
+* `location` - the last known location of the vehicle
+* `tripId` - the id of the vehicle's current trip, which can be used to look up the referenced [`<trip/>` element](trip.html) in the `<references/>` section.
+* `tripStatus` - [`<tripStatus/>` element](trip-status.html), providing additional status information for the vehicle's trip. 
 
 A vehicle may not have an actively assigned trip.
