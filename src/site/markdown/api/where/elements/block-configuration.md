@@ -44,28 +44,28 @@ In addition to service id information, the block configuration contains the list
 
 The `<blockConfiguration/>` element has the following sub-elements:
 
-* activeServiceIds - a collection of strings indicating which service ids are active for the block configuration
-* inactiveServiceIds - a collection of strings indicating which service ids are NOT active for the block configuration
-* trips - the sequence of `<blockTrip/>` elements for each block trip in the configuration
+* `activeServiceIds` - a collection of strings indicating which service ids are active for the block configuration
+* `inactiveServiceIds` - a collection of strings indicating which service ids are NOT active for the block configuration
+* `trips` - the sequence of `<blockTrip/>` elements for each block trip in the configuration
 
 The block trip has the following properties:
 
-* tripId - id of the referenced [`<trip/>`](trip.html) element
+* `tripId` - id of the referenced [`<trip/>`](trip.html) element
 * block stop times - see below
 * accumulated slack time - how much slack time from layovers has been accumulated from previous block trips in the block up to the start of this block
-* distanceAlongBlock - how far along the block, in meters, is the start of this trip
+* `distanceAlongBlock` - how far along the block, in meters, is the start of this trip
 
 Block stop times capture the individually scheduled stops along each trip.  We provide the following fields:
 
-* blockSequence - the index of the block stop time in the list of all scheduled stops for the block configuration
-* distanceAlongBlock - how far along the block, in meters, this stop occurs
-* accumulatedSlackTime - how much slack time from layovers has been accumulated previous along the block up until, but not including, this stop
-* stopTime - reference to the general stop time for the trip - see below
+* `blockSequence` - the index of the block stop time in the list of all scheduled stops for the block configuration
+* `distanceAlongBlock` - how far along the block, in meters, this stop occurs
+* `accumulatedSlackTime` - how much slack time from layovers has been accumulated previous along the block up until, but not including, this stop
+* `stopTime` - reference to the general stop time for the trip - see below
 
 A stop time is a more general notion of a scheduled stop along a trip:
 
-* stopId -  id of the referenced [`<stop/>`](stop.html) element
-* arrivalTime - time, in seconds from the start of the service date
-* departureTime - time, in seconds from the start of the service date
-* pickupType - see the [GTFS spec](http://code.google.com/transit/spec/transit_feed_specification.html#stop_times_txt___Field_Definitions)
-* dropOffType - see the [GTFS spec](http://code.google.com/transit/spec/transit_feed_specification.html#stop_times_txt___Field_Definitions)
+* `stopId` -  id of the referenced [`<stop/>`](stop.html) element
+* `arrivalTime` - time, in seconds from the start of the service date
+* `departureTime` - time, in seconds from the start of the service date
+* `pickupType` - see the [GTFS spec](http://code.google.com/transit/spec/transit_feed_specification.html#stop_times_txt___Field_Definitions)
+* `dropOffType` - see the [GTFS spec](http://code.google.com/transit/spec/transit_feed_specification.html#stop_times_txt___Field_Definitions)

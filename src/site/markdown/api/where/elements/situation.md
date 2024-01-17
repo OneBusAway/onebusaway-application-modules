@@ -55,9 +55,9 @@ The `<situation/>` element can be broken up into a couple of relevant sections:
 * `id` - the unique id for this service alert situation
 * `creationTime` - Unix timestamp of when this situation was created
 * reason for the service alert taken from TPEG codes - only one of these will be set
-    * `equipmentReason - ex. engineFailure
-    * `environmentReason - ex. heavySnowfall
-    * `personnelReason - ex. staffAbsence
+    * `equipmentReason` - ex. engineFailure
+    * `environmentReason` - ex. heavySnowfall
+    * `personnelReason` - ex. staffAbsence
     * `miscellaneousReason` - ex. securityAlert
     * `securityAlert` - free text field
 * descriptive text fields - each with a sub `<value/>` element, each also optional
