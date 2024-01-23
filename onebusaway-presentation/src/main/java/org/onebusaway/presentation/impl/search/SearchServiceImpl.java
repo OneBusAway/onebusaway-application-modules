@@ -446,6 +446,12 @@ public class SearchServiceImpl implements SearchService {
 			tryAsStop(results, normalizedQuery, resultFactory, serviceInterval);
 		}
 
+		// OBAHART-165 nomralizedQuery can behave strangely if the routeId exists within the query term
+		// try again with the query itself
+		if (results.isEmpty() && !hasComma && (StringUtils.isNumeric(query))) {
+			tryAsStop(results, query, resultFactory, serviceInterval);
+		}
+
 		if (!"true".equalsIgnoreCase(_configurationService
 				.getConfigurationValueAsString("display.skipStopNameSearch", "false"))) {
 			// this may be controversial -- include configuration to remove
