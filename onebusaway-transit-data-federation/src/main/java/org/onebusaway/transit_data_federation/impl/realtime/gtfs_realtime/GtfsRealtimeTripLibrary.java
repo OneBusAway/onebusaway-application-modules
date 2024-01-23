@@ -590,6 +590,8 @@ public class GtfsRealtimeTripLibrary {
     long windowFuture = 60 * 60;
     TripUpdate tripUpdate = update.getTripUpdates().get(0);
     int tripUpdateCount = update.getTripUpdates().get(0).getStopTimeUpdateCount();
+    if (tripUpdateCount == 0)
+      return false;
     long firstPrediction = -1;
     long lastPrediction = -1;
     StopTimeUpdate firstStopTime = tripUpdate.getStopTimeUpdate(0);
