@@ -29,7 +29,7 @@
     </bean>
 
     <bean id="apiKeyValidationService" class="org.onebusaway.users.impl.validation.KeyValidationServiceImpl"/>
-
+    <bean class="org.onebusaway.api.services.ApiIntervalFactory" />
     <!-- Database Configuration -->
     <bean id="dataSource"
           class="org.springframework.jndi.JndiObjectFactoryBean">
