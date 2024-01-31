@@ -104,6 +104,8 @@ public class SearchServiceImpl implements SearchService {
 
 	private Map<String, String> _stopCodeToStopIdMap = new HashMap<String, String>();
 
+	private Map<String, Set<String>> _unqualifiedStopIdToStopIdMap = new HashMap<String, Set<String>>();
+
 	private Map<String, Set<String>> _stopNameToStopIdMap = new HashMap<>();
 
 	private String _bundleIdForCaches = null;
@@ -133,6 +135,7 @@ public class SearchServiceImpl implements SearchService {
 		_routeIdToRouteBeanMap.clear();
 		_routeLongNameToRouteBeanMap.clear();
 		_stopCodeToStopIdMap.clear();
+		_unqualifiedStopIdToStopIdMap.clear();
 		_stopNameToStopIdMap.clear();
 
 		for (AgencyWithCoverageBean agency : _transitDataService
@@ -159,6 +162,11 @@ public class SearchServiceImpl implements SearchService {
 
 			List<StopBean> stopsList = _transitDataService.getAllRevenueStops(agency);
 			for (StopBean stop : stopsList) {
+				String unqualifiedId = AgencyAndIdLibrary.convertFromString(stop.getId()).getId();
+				if (!_unqualifiedStopIdToStopIdMap.containsKey(unqualifiedId)) {
+					_unqualifiedStopIdToStopIdMap.put(unqualifiedId, new HashSet<>());
+				}
+				_unqualifiedStopIdToStopIdMap.get(unqualifiedId).add(stop.getId());
 				_stopCodeToStopIdMap.put(agency.getAgency().getId() + "_"
 					+ stop.getCode().toUpperCase(), stop.getId());
 				if (!_stopNameToStopIdMap.containsKey(stop.getName())) {
@@ -402,7 +410,8 @@ public class SearchServiceImpl implements SearchService {
  		*  4) stop (if no comma, numeric query, query contains '_')
  		*  4.1) stop with route filter
  		*  5) stop name (no comma)
- 		*  6) geocode
+ 		*  6) unqualified stop id (if unique match)
+ 		*  7) geocode
 		*/
 		SearchResultCollection results = new SearchResultCollection();
 		boolean hasComma = query.indexOf(',') > 0;
@@ -460,6 +469,10 @@ public class SearchServiceImpl implements SearchService {
 			}
 		}
 
+		if (results.isEmpty() && !hasComma) {
+			tryAsUnqualifiedStopId(results, query, resultFactory);
+		}
+
 		if (results.isEmpty()) {
 			tryAsGeocode(results, query, resultFactory);
 		}
@@ -513,6 +526,16 @@ public class SearchServiceImpl implements SearchService {
 		return;
 		}
 
+	private void tryAsUnqualifiedStopId(SearchResultCollection results, String q, SearchResultFactory resultFactory){
+		Set<String> potentialStops = _unqualifiedStopIdToStopIdMap.get(q);
+		if (potentialStops != null && potentialStops.size() == 1) {
+			// need exactly one match for this to work
+			StopBean stopBean = _transitDataService.getStop(potentialStops.iterator().next());
+			results.addMatch(resultFactory.getStopResult(stopBean, results.getRouteFilter()));
+			results.setHint("tryAsUnqualifiedStopId");
+		}
+		// we could alternatively add a suggestions
+	}
 	private String normalizeQuery(SearchResultCollection results, String q, AgencyServiceInterval serviceInterval) {
 		if (q == null) {
 			return null;
