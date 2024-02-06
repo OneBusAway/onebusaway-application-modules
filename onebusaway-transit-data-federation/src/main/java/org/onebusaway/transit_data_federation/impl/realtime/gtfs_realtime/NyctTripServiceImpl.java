@@ -55,7 +55,10 @@ public class NyctTripServiceImpl implements NyctTripService {
     if (matcher.find()) {
       originDepartureTime = Integer.parseInt(matcher.group("originDepartureTime"), 10);
       pathId = StringUtils.rightPad(matcher.group("route"), 3, '.') + matcher.group("direction");
-      routeId = matcher.group("route");
+      routeId = routeFromTripUpdate(tu);
+      if (routeId == null) {
+        routeId = matcher.group("route");
+      }
       directionId = matcher.group("direction");
       if (directionId.length() == 0)
         directionId = null;
@@ -112,6 +115,15 @@ public class NyctTripServiceImpl implements NyctTripService {
       return addedTrip;
     }
       return null;
+  }
+
+  private String routeFromTripUpdate(GtfsRealtime.TripUpdate tu) {
+    if (tu.hasTrip()) {
+      if (tu.getTrip().hasRouteId()) {
+        return tu.getTrip().getRouteId();
+      }
+    }
+    return null;
   }
 
   private String getDefaultAgency() {
