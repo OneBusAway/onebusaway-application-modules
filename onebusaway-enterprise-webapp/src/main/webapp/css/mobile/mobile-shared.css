@@ -534,6 +534,13 @@ small {
 	margin-bottom: .6em;
 }
 
+.routeList small {
+	display: inline-block;
+	text-align: right;
+	width: 20%;
+	font-size: .75em;
+}
+
 .alerts {
 	color: #cc0000;
 	background-color: #FDEEF4;

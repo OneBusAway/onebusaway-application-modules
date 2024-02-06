@@ -120,11 +120,11 @@ public class GenerateStopSearchIndexTask implements Runnable {
 
     // Code
     if (narrative.getCode() != null && narrative.getCode().length() > 0)
-      document.add(new StringField(StopSearchIndexConstants.FIELD_STOP_CODE,
-              narrative.getCode(), Field.Store.NO));
+      document.add(new TextField(StopSearchIndexConstants.FIELD_STOP_CODE,
+              narrative.getCode(), Field.Store.YES)); // allow field to be tokenized and partially matched
     else
       document.add(new TextField(StopSearchIndexConstants.FIELD_STOP_CODE,
-          stopEntry.getId().getId(), Field.Store.NO));
+          stopEntry.getId().getId(), Field.Store.NO)); // don't store as this duplicates FIELD_STOP_ID
 
     if (narrative.getName() != null && narrative.getName().length() > 0)
       document.add(new TextField(StopSearchIndexConstants.FIELD_STOP_NAME,

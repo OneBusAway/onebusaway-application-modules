@@ -165,11 +165,7 @@ public class IndexAction extends OneBusAwayEnterpriseActionSupport {
         }
       } else {
         if (_results.getMatches().isEmpty() && _results.getSuggestions().size() > 1 && !_q.contains(",")) {
-          // we have multiple suggestions but we don't support disambiguation
-          // force a geocode search on the former argument
-          // TODO SUPPORT DISAMBIGUATION!!!!
-          _q = _q + ',';
-          execute();
+          // pass through disambiguation now!  Its supported
         }
       }
     }

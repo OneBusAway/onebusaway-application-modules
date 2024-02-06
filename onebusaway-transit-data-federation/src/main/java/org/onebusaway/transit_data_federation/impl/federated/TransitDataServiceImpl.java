@@ -162,7 +162,13 @@ public class TransitDataServiceImpl implements TransitDataService {
     return _transitDataService.getStopsByName(stopName);
   }
 
-    @Override
+  @Override
+  public StopsBean getStopsByCode(String stopCode) throws ServiceException {
+    blockUntilBundleIsReady();
+    return _transitDataService.getStopsByCode(stopCode);
+  }
+
+  @Override
   public StopBean getStop(String stopId) throws ServiceException {
     blockUntilBundleIsReady();
     return _transitDataService.getStop(stopId);

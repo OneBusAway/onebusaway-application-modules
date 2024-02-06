@@ -353,8 +353,17 @@ public interface TransitDataService extends FederatedService {
   @FederatedByAggregateMethod
   public StopsBean getStopsByName(String stopName) throws ServiceException;
 
+  /**
+   * Search for stops based on stop code
+   * @param stopCode
+   * @return
+   * @throws ServiceException
+   */
+  @FederatedByAggregateMethod
+  public StopsBean getStopsByCode(String stopCode) throws ServiceException;
 
-    /**
+
+  /**
      * @param stopId
      * @return the stop with the specified id, or null if not found
      * @throws ServiceException
