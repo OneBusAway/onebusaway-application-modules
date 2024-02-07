@@ -78,10 +78,10 @@ public class StopSearchServiceImpl implements StopSearchService {
     }
   }
 
-  public SearchResult<AgencyAndId> searchForStopsByCode(String code,
+  public SearchResult<AgencyAndId> searchForStopsByCode(String id,
       int maxResultCount, double minScoreToKeep) throws IOException,
           ParseException {
-    return search(new MultiFieldQueryParser(CODE_FIELDS, _analyzer), code,
+    return search(new MultiFieldQueryParser(CODE_FIELDS, _analyzer), id,
         maxResultCount, minScoreToKeep);
   }
 

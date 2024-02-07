@@ -60,12 +60,4 @@ public interface StopsBeanService {
    */
   public StopsBean getStopsByName(String stopName) throws ServiceException;
 
-  /**
-   * search for a stop based on code.
-   * @param stopCode
-   * @return the list of all stops that are close to the given name
-   * @throws ServiceException
-   */
-  public StopsBean getStopsByCode(String stopCode) throws ServiceException;
-
 }

@@ -245,12 +245,6 @@ public class TransitDataServiceTemplateImpl implements TransitDataServiceTemplat
     return _stopsBeanService.getStopsByName(stopName);
   }
 
-  //@Override
-  public StopsBean getStopsByCode(String stopCode) throws ServiceException {
-
-    return _stopsBeanService.getStopsByCode(stopCode);
-  }
-
 
   //@Override
   public StopBean getStop(String stopId) throws ServiceException {

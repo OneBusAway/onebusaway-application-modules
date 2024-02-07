@@ -467,10 +467,6 @@ public class SearchServiceImpl implements SearchService {
 			if (results.isEmpty() && !hasComma) {
 				tryAsStopName(results, query, resultFactory);
 			}
-
-			if (results.getMatches().isEmpty() && !hasComma) {
-				tryAsStopCode(results, query, resultFactory);
-			}
 		}
 
 		if (results.isEmpty() && !hasComma) {
@@ -529,28 +525,6 @@ public class SearchServiceImpl implements SearchService {
 		}
 		return;
 		}
-
-	// use LUCENE index to search on stop code
-	private void tryAsStopCode(SearchResultCollection results, String q, SearchResultFactory resultFactory){
-		StopsBean beans =_transitDataService.getStopsByCode(q);
-		int count = 0;
-		if (beans == null || beans.getStops() == null) return;
-		for (StopBean stopBean : beans.getStops()) {
-			String agencyId = AgencyAndIdLibrary.convertFromString(stopBean.getId()).getAgencyId();
-			// filter out stops not in service
-			if (_transitDataService.stopHasRevenueService(agencyId, stopBean.getId())) {
-				// this is a fuzzy match so just a suggestion
-				results.addSuggestion(resultFactory.getStopResult(stopBean,
-								results.getRouteFilter()));
-				results.setHint("tryAsStopCode");
-				count++;
-			}
-			if (count > MAX_STOPS) {
-				break;
-			}
-		}
-		return;
-	}
 
 	private void tryAsUnqualifiedStopId(SearchResultCollection results, String q, SearchResultFactory resultFactory){
 		Set<String> potentialStops = _unqualifiedStopIdToStopIdMap.get(q);
@@ -1027,8 +1001,6 @@ public class SearchServiceImpl implements SearchService {
 				}
 			} catch (NoSuchStopServiceException ex) {
 				try {
-					// TODO this is duplicative with tryAsStopCode
-					// perhaps remove after careful testing
 				  if (matches.isEmpty()) {
 				    // this search is faulty if multi-agency based
 				    // skip if we have a match already

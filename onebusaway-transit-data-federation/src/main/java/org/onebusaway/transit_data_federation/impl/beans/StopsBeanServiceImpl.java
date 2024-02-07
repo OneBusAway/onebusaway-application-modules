@@ -56,7 +56,6 @@ class StopsBeanServiceImpl implements StopsBeanService {
 
   private static final double MIN_SCORE = 1.0;
   private static final double NAME_MIN_SCORE = 4.0;
-  private static final double CODE_MIN_SCORE = 1.0;
   private static final int MAX_STOPS = 10;
 
   @Autowired
@@ -89,33 +88,6 @@ class StopsBeanServiceImpl implements StopsBeanService {
       results =
        _searchService.searchForStopsByName(stopName,
               MAX_STOPS, NAME_MIN_SCORE);
-
-      for (AgencyAndId aid : results.getResultsByTopScore()) {
-        StopBean stopBean = _stopBeanService.getStopForId(aid, null);
-        if (stopBean != null) {
-          stopBeans.add(stopBean);
-        }
-      }
-    } catch (Exception e) {
-      _log.error("search failed!", e);
-      // simply return no results, the search was not understood
-      return new StopsBean();
-    }
-    if (results == null) {
-      return new StopsBean();
-    }
-    return constructResult(stopBeans, results.size() == MAX_STOPS);
-  }
-
-  @Override
-  public StopsBean getStopsByCode(String stopCode) throws ServiceException {
-    List<StopBean> stopBeans = new ArrayList<StopBean>();
-    SearchResult<AgencyAndId> results = null;
-    try {
-
-      results =
-              _searchService.searchForStopsByCode(stopCode,
-                      MAX_STOPS, CODE_MIN_SCORE);
 
       for (AgencyAndId aid : results.getResultsByTopScore()) {
         StopBean stopBean = _stopBeanService.getStopForId(aid, null);
