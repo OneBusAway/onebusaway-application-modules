@@ -116,11 +116,20 @@ public class NarrativeServiceImpl implements NarrativeService {
 
   @Override
   public void addDynamicTrip(BlockTripIndex blockTripIndex) {
+    addDynamicTrip(blockTripIndex, false);
+  }
+
+  @Override
+  public void updateDynamicTrip(BlockTripIndex blockTripIndex) {
+    addDynamicTrip(blockTripIndex, true);
+  }
+
+  private void addDynamicTrip(BlockTripIndex blockTripIndex, boolean forceUpdate) {
     BlockTripEntry blockTripEntry = blockTripIndex.getTrips().get(0);
     TripEntry trip = blockTripEntry.getTrip();
     AgencyAndId tripId = trip.getId();
 
-    if (_dynamicTripCache.containsKey(tripId)) {
+    if (_dynamicTripCache.containsKey(tripId) && !forceUpdate) {
       return; // nothing to do
     }
     TripNarrative.Builder builder = TripNarrative.builder();

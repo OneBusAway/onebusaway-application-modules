@@ -69,6 +69,8 @@ public interface NarrativeService {
 
   void addDynamicTrip(BlockTripIndex blockTripIndex);
 
+  void updateDynamicTrip(BlockTripIndex blockTripIndex);
+
   List<StopTimeNarrative> getStopTimeNarrativesForPattern(AgencyAndId routeId, String directionId, List<AgencyAndId> stopIds);
 
   StopTimeNarrative getStopTimeNarrativeForPattern(AgencyAndId routeId, AgencyAndId stopId, String directionId);

@@ -21,7 +21,6 @@ import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.impl.RefreshableResources;
 import org.onebusaway.transit_data_federation.impl.blocks.BlockIndexFactoryServiceImpl;
 import org.onebusaway.transit_data_federation.impl.blocks.BlockStopTimeIndicesFactory;
-import org.onebusaway.transit_data_federation.model.narrative.StopTimeNarrative;
 import org.onebusaway.transit_data_federation.model.transit_graph.DynamicGraph;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.blocks.BlockStopTimeIndex;
@@ -96,9 +95,118 @@ public class DynamicBlockIndexServiceImpl implements DynamicBlockIndexService {
     AgencyAndId id = blockInstance.getBlock().getBlock().getId();
     if (cacheByBlockId.containsKey(id)) {
       if (isCached(id)) {
-        return; // nothing to do
+        merge(blockInstance, effectiveTime); // check for changes
+        return;
       }
     }
+    add(blockInstance, effectiveTime);
+  }
+
+  private void merge(BlockInstance blockInstance, long effectiveTime) {
+    AgencyAndId id = blockInstance.getBlock().getBlock().getId();
+    // test for block changes
+    if (!blockInstance.equals(cacheByBlockId.get(id))) {
+      _log.info("block {} changed!", blockInstance);
+      mergeBlockInstance(blockInstance);
+    }
+
+    mergeBlockTripIndexList(blockInstance);
+
+  }
+
+  private void mergeBlockTripIndexList(BlockInstance blockInstance) {
+    AgencyAndId id = blockInstance.getBlock().getBlock().getId();
+    List<BlockEntry> blocks = new ArrayList<>();
+    blocks.add(blockInstance.getBlock().getBlock());
+
+    // test blockTripByBlockId
+    List<BlockTripIndex> blockTripIndexList = blockIndexFactoryService.createTripIndices(blocks);
+    if (blockTripIndexList.size() > 1) {
+      _log.error("unexpected blockTripList of size {} for {}", blockTripIndexList.size(), blockTripIndexList);
+    }
+    for (BlockTripIndex blockTripIndex : blockTripIndexList) {
+      mergeBlockTripIndex(id, blockTripIndex);
+    }
+
+    mergeBlockStopTimes(blockInstance);
+  }
+
+  private void mergeBlockStopTimes(BlockInstance blockInstance) {
+    List<BlockEntry> blocks = new ArrayList<>();
+    blocks.add(blockInstance.getBlock().getBlock());
+    List<BlockStopTimeIndex> indices = blockStopTimeIndicesFactory.createIndices(blocks);
+    for (BlockStopTimeIndex sti : indices) {
+      AgencyAndId stopId = sti.getStop().getId();
+      if (!blockStopTimeIndicesByStopId.containsKey(stopId)) {
+        // a set to prevent duplicates
+        blockStopTimeIndicesByStopId.put(stopId, new HashSet<>());
+      }
+      BlockStopTimeIndex oldTimeIndex = getBlockStopTimeIndex(blockStopTimeIndicesByStopId.get(stopId), sti);
+      if (!sti.equals(oldTimeIndex)) {
+        _log.debug("time index {} changed!", oldTimeIndex);
+        removeBlockStopTimeIndex(blockStopTimeIndicesByStopId.get(stopId), sti);
+        blockStopTimeIndicesByStopId.get(stopId).add(sti);
+      }
+    }
+  }
+
+  private BlockStopTimeIndex getBlockStopTimeIndex(Set<BlockStopTimeIndex> blockStopTimeIndices, BlockStopTimeIndex sti) {
+    Iterator<BlockStopTimeIndex> iterator = blockStopTimeIndices.iterator();
+    while (iterator.hasNext()) {
+      BlockStopTimeIndex next = iterator.next();
+      if (next.getTrips().get(0).getTrip().getId().equals(sti.getTrips().get(0).getTrip().getId())) {
+        return next;
+      }
+    }
+    return null;
+  }
+
+  private void removeBlockStopTimeIndex(Set<BlockStopTimeIndex> blockStopTimeIndices, BlockStopTimeIndex sti) {
+    Iterator<BlockStopTimeIndex> iterator = blockStopTimeIndices.iterator();
+    while (iterator.hasNext()) {
+      BlockStopTimeIndex next = iterator.next();
+      if (next.getTrips().get(0).getTrip().getId().equals(sti.getTrips().get(0).getTrip().getId())) {
+        iterator.remove();
+      }
+    }
+  }
+
+
+  private void mergeBlockTripIndex(AgencyAndId id, BlockTripIndex blockTripIndex) {
+    List<BlockTripIndex> blockTripIndices = blockTripByBlockId.get(id);
+    BlockTripIndex existingBlockTripIndex = blockTripIndices.get(0);
+    if (!blockTripIndex.equals(existingBlockTripIndex)) {
+      _log.debug("blockTripIndex changed {}, truncating!", blockTripIndex);
+      if (!blockTripByBlockId.containsKey(id)) {
+        blockTripByBlockId.put(id, new ArrayList<>());
+      }
+      blockTripIndices.clear();
+      blockTripIndices.add(blockTripIndex);
+      TripEntry trip = blockTripIndex.getTrips().get(0).getTrip();
+      _dynamicGraph.updateTrip(trip);
+
+      RouteEntry route = trip.getRoute();
+      // we assume the route hasn't changed
+      // test blockTripIndexByRouteCollectionId
+      if (!blockTripIndexByRouteCollectionId.containsKey(route.getId())) {
+        blockTripIndexByRouteCollectionId.put(route.getId(), new ArrayList<>());
+      }
+      blockTripIndexByRouteCollectionId.get(route.getId()).clear();
+      blockTripIndexByRouteCollectionId.get(route.getId()).add(blockTripIndex);
+      _narrativeService.updateDynamicTrip(blockTripIndex);
+    }
+  }
+
+  private void mergeBlockInstance(BlockInstance blockInstance) {
+    AgencyAndId id = blockInstance.getBlock().getBlock().getId();
+    cacheByBlockId.put(id, blockInstance);
+    List<BlockEntry> blocks = new ArrayList<>();
+    blocks.add(blockInstance.getBlock().getBlock());
+    _dynamicGraph.updateBlock(blockInstance.getBlock().getBlock());
+  }
+
+  private void add(BlockInstance blockInstance, long effectiveTime) {
+    AgencyAndId id = blockInstance.getBlock().getBlock().getId();
     cacheByBlockId.put(id, blockInstance);
 
     List<BlockEntry> blocks = new ArrayList<>();
@@ -120,10 +228,6 @@ public class DynamicBlockIndexServiceImpl implements DynamicBlockIndexService {
       blockTripIndexByRouteCollectionId.get(route.getId()).add(blockTripIndex);
       _narrativeService.addDynamicTrip(blockTripIndex);
 
-      List<AgencyAndId> stopIds = new ArrayList<>();
-      for (BlockStopTimeEntry blockStopTimeEntry : blockTripIndex.getTrips().get(0).getStopTimes()) {
-          stopIds.add(blockStopTimeEntry.getStopTime().getStop().getId());
-      }
     }
 
 

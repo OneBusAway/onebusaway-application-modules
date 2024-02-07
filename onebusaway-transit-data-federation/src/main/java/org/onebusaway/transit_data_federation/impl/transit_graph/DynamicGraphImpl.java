@@ -25,7 +25,6 @@ import org.onebusaway.transit_data_federation.services.transit_graph.RouteEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
 import org.springframework.stereotype.Component;
 
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -58,7 +57,10 @@ public class DynamicGraphImpl implements DynamicGraph {
       tripEntryById.put(tripEntry.getId(), tripEntry);
     }
   }
-
+  @Override
+  public void updateTrip(TripEntry tripEntry) {
+    tripEntryById.put(tripEntry.getId(), tripEntry);
+  }
   @Override
   public RouteEntry getRoutEntryForId(AgencyAndId id) {
     return routeEntryById.get(id);
@@ -81,5 +83,10 @@ public class DynamicGraphImpl implements DynamicGraph {
     if (!blockEntryById.containsKey(blockEntry.getId())) {
       blockEntryById.put(blockEntry.getId(), blockEntry);
     }
+  }
+
+  @Override
+  public void updateBlock(BlockEntry blockEntry) {
+    blockEntryById.put(blockEntry.getId(), blockEntry);
   }
 }

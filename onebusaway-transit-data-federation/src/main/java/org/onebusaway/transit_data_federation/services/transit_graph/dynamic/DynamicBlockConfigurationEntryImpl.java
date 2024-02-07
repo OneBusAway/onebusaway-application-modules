@@ -407,8 +407,11 @@ public class DynamicBlockConfigurationEntryImpl implements BlockConfigurationEnt
         if (obj == null || !(obj instanceof BlockConfigurationEntry))
             return false;
         BlockConfigurationEntry bce = (BlockConfigurationEntry) obj;
-        return block.equals(bce.getBlock())
-                && serviceIds.equals(bce.getServiceIds());
+        if (!block.equals(bce.getBlock()))
+            return false;
+        if (!serviceIds.equals(bce.getServiceIds()))
+            return false;
+        return true;
     }
 
     @Override

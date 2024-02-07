@@ -96,4 +96,23 @@ public class BlockStopTimeIndex extends AbstractBlockStopTimeIndex implements
     int stopIndex = _stopIndices[index];
     return blockConfig.getOccupancyForIndex(stopIndex);
   }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj)
+      return true;
+    if (obj == null)
+      return false;
+    if (getClass() != obj.getClass())
+      return false;
+    BlockStopTimeIndex other = (BlockStopTimeIndex) obj;
+    if (_blockConfigs.size() != other._blockConfigs.size())
+      return false;
+    if (!_blockConfigs.containsAll(other._blockConfigs))
+      return false;
+    if (!Arrays.equals(_stopIndices, other._stopIndices))
+      return false;
+    // we don't consider serviceInterval as it tends to be dynamic
+    return true;
+  }
 }

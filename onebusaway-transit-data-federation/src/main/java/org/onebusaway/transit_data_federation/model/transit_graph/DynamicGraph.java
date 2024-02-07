@@ -29,9 +29,13 @@ public interface DynamicGraph {
   TripEntry getTripEntryForId(AgencyAndId id);
   void registerTrip(TripEntry tripEntry);
 
+  void updateTrip(TripEntry tripEntry);
+
   RouteEntry getRoutEntryForId(AgencyAndId id);
   void registerRoute(RouteEntry routeEntry);
 
   BlockEntry getBlockEntryForId(AgencyAndId id);
   void registerBlock(BlockEntry blockEntry);
+
+  void updateBlock(BlockEntry blockEntry);
 }
