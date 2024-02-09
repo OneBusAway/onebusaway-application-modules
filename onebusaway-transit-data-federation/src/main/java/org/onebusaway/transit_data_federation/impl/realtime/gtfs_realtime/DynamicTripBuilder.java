@@ -65,6 +65,10 @@ public class DynamicTripBuilder {
       AgencyAndId blockId = new AgencyAndId(addedTripInfo.getAgencyId(), addedTripInfo.getTripId());
       // here we look up past blocks, and advance our position along the block
       BlockInstance instance = _serviceSource.getBlockIndexService().getDynamicBlockInstance(blockId);
+      // verify the pattern hasn't changed before use
+      if (instance != null && !tripPatternMatches(addedTripInfo, instance)) {
+        instance = null;
+      }
       if (instance == null) {
         instance = createBlockInstance(addedTripInfo);
       }
@@ -87,6 +91,44 @@ public class DynamicTripBuilder {
       return null;
     }
   }
+
+  // test that the stops are the same and in the same order
+  private boolean tripPatternMatches(AddedTripInfo addedTripInfo, BlockInstance instance) {
+    int i = -1;
+    String actualStops = fingerprintTripInfoStops(addedTripInfo.getStops());
+    String expectedStops = fingerprintBlockStops(instance.getBlock().getStopTimes());
+    if (expectedStops.contains(actualStops)) {
+      // added trip info can have less stops but needs to be in the same order
+      return true;
+    }
+    // the patterns were divergent
+    return false;
+  }
+
+  private String fingerprintTripInfoStops(List<AddedStopInfo> stops) {
+    StringBuffer sb = new StringBuffer();
+    if (stops == null) return sb.toString();
+    for (AddedStopInfo stop : stops) {
+      sb.append(stop.getStopId());
+      sb.append(",");
+    }
+    if (sb.length() > 0)
+      return sb.substring(0, sb.length()-1);
+    return sb.toString();
+  }
+
+  private String fingerprintBlockStops(List<BlockStopTimeEntry> stopTimes) {
+    StringBuffer sb = new StringBuffer();
+    if (stopTimes == null) return sb.toString();
+    for (BlockStopTimeEntry stopTime : stopTimes) {
+      sb.append(stopTime.getStopTime().getStop().getId().getId());
+      sb.append(",");
+    }
+    if (sb.length() > 0)
+      return sb.substring(0, sb.length()-1);
+    return sb.toString();
+  }
+
   // be paranoid about incoming data
   private boolean isValid(BlockInstance instance) {
     if (instance == null) return false;
