@@ -691,6 +691,8 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
       _log.error("fatal exception {}", t, t);
     }
     Calendar c = Calendar.getInstance();
+    if (getGtfsRealtimeTripLibrary() != null)
+      c.setTime(new Date(getGtfsRealtimeTripLibrary().getCurrentTime()));
     c.add(Calendar.MINUTE, -15);
     Date staleRecordThreshold = c.getTime();
     long newestUpdate = 0; 
