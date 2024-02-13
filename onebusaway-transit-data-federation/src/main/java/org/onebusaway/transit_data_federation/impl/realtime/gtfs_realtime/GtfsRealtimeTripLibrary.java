@@ -93,7 +93,9 @@ public class GtfsRealtimeTripLibrary {
     _entitySource = entitySource;
   }
 
-  public void setServiceSource(GtfsRealtimeServiceSource serviceSource) { _serviceSource = serviceSource; }
+  public void setServiceSource(GtfsRealtimeServiceSource serviceSource) {
+    _serviceSource = serviceSource;
+  }
 
   public long getCurrentTime() {
     return _currentTime;
@@ -796,49 +798,6 @@ public class GtfsRealtimeTripLibrary {
   }
 
 
-  /**
-   * Calculate block start time from real-time trip start time value.
-   * Frequency based trips are differentiated based on start time.
-   * Scheduled based trips don't currently use this.
-   */
-  private int getBlockStartTimeForTripStartTime(BlockInstance instance,
-      AgencyAndId tripId, int tripStartTime) {
-    BlockConfigurationEntry block = instance.getBlock();
-    if (block.getTrips() == null || block.getTrips().isEmpty()) {
-      _log.debug("no trips for trip start time on block {}", block.getBlock().getId());
-      return -1;
-    }
-    Map<AgencyAndId, BlockTripEntry> blockTripsById = null;
-    try {
-      blockTripsById = MappingLibrary.mapToValue(
-              block.getTrips(), "trip.id");
-    } catch (IllegalStateException ise) {
-      _log.debug("invalid block {}", block.getBlock().getId());
-      return -1;
-    }
-    int rawBlockStartTime = block.getDepartureTimeForIndex(0);
-
-    if (!blockTripsById.containsKey(tripId)) {
-      _log.debug("getBlockStartTimeForTripStartTime(" + instance + ", " + tripId + ", "
-      + tripStartTime + ") did not find matching trip; aborting");
-      return -1;
-    }
-
-    int rawTripStartTime = blockTripsById.get(tripId).getDepartureTimeForIndex(
-        0);
-
-    // here we adjust our block start time by the difference between the
-    // real-time tripStartTime and our scheduled tripStartTime
-    // if the result is negative our tripStartTime is likely invalid
-    // recover gracefully by using the rawBlockStarTime
-    int adjustedBlockStartTime = rawBlockStartTime
-        + (tripStartTime - rawTripStartTime);
-
-    if (adjustedBlockStartTime < 0) {
-      return rawBlockStartTime;
-    }
-    return adjustedBlockStartTime;
-  }
 
   private BlockDescriptor getTripDescriptorAsBlockDescriptor(MonitoredResult result,
       TripDescriptor trip, long currentTime) {
@@ -858,55 +817,21 @@ public class GtfsRealtimeTripLibrary {
         return null;
       }
 
-      ServiceDate serviceDate = null;
-      BlockInstance instance;
-
-      BlockEntry block = tripEntry.getBlock();
-      if (trip.hasStartDate() && !"0".equals(trip.getStartDate())) {
-        try {
-          serviceDate = ServiceDate.parseString(trip.getStartDate());
-        } catch (ParseException ex) {
-          _log.debug("Could not parse service date " + trip.getStartDate(), ex);
-        }
+      BlockServiceDate _blockserviceDate = _serviceSource.getBlockFinder().getBlockServiceDateFromTrip(tripEntry, currentTime);
+      if (_blockserviceDate == null) {
+        // service date is mandatory, we need to aboart
+        _log.error("could not determine service date for trip {}", trip.getTripId());
+        return null;
       }
 
-      if (serviceDate != null) {
-        instance = _serviceSource.getBlockCalendarService().getBlockInstance(block.getId(),
-                serviceDate.getAsDate().getTime());
-        if (instance == null) {
-          _log.debug("block " + block.getId() + " does not exist on service date "
-                  + serviceDate);
-          return null;
-        }
-      } else {
-        // we have legacy support for missing service date
-        // mostly for unit tests but also legacy feeds
-        long timeFrom = currentTime - 30 * 60 * 1000;
-        long timeTo = currentTime + 30 * 60 * 1000;
-
-        List<BlockInstance> instances = _serviceSource.getBlockCalendarService().getActiveBlocks(
-                block.getId(), timeFrom, timeTo);
-
-        if (instances.isEmpty()) {
-          instances = _serviceSource.getBlockCalendarService().getClosestActiveBlocks(block.getId(),
-                  currentTime);
-        }
-
-        if (instances.isEmpty()) {
-          _log.debug("could not find any active instances for the specified block="
-                  + block.getId() + " trip=" + trip);
-          return null;
-        }
-        instance = instances.get(0);
-      }
-
-      if (serviceDate == null) {
-        serviceDate = new ServiceDate(new Date(instance.getServiceDate()));
-      }
+      BlockInstance instance = _blockserviceDate.getBlockInstance();
+      ServiceDate serviceDate = _blockserviceDate.getServiceDate();
+      Integer startTime = _blockserviceDate.getTripStartTime();
 
       BlockDescriptor blockDescriptor = new BlockDescriptor();
       blockDescriptor.setBlockInstance(instance);
       blockDescriptor.setStartDate(serviceDate);
+      blockDescriptor.setStartTime(startTime);
       if (trip.hasScheduleRelationship()) {
         if (isDynamicTrip(tripEntry)) {
           blockDescriptor.setScheduleRelationship(BlockDescriptor.ScheduleRelationship.ADDED);
@@ -917,30 +842,6 @@ public class GtfsRealtimeTripLibrary {
         if (isDynamicTrip(tripEntry)) {
           blockDescriptor.setScheduleRelationship(BlockDescriptor.ScheduleRelationship.ADDED);
         }
-      }
-      int tripStartTime = 0;
-      int blockStartTime = 0;
-      if (trip.hasStartTime() && !"0".equals(trip.getStartTime())) {
-        try {
-          Matcher m = _pattern.matcher(trip.getStartTime());
-          if (!m.matches()) {
-            long timeInMil = serviceDate.getAsDate().getTime();
-            long epochTime = Long.parseLong(trip.getStartTime());
-            long startTime = (epochTime - timeInMil) / 1000;
-            tripStartTime = (int) startTime;
-          } else
-            tripStartTime = StopTimeFieldMappingFactory.getStringAsSeconds(trip.getStartTime());
-        } catch (InvalidStopTimeException iste) {
-          _log.debug("invalid stopTime of " + trip.getStartTime() + " for trip " + trip);
-          return null;
-        }
-        blockStartTime = getBlockStartTimeForTripStartTime(instance,
-                tripEntry.getId(), tripStartTime);
-        if (blockStartTime < 0) {
-          _log.debug("invalid blockStartTime for trip " + trip + " for instance=" + instance);
-          return null;
-        }
-        blockDescriptor.setStartTime(blockStartTime);
       }
       return blockDescriptor;
     } catch (Throwable t) {

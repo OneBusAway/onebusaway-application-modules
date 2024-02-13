@@ -56,4 +56,9 @@ public class TestVehicleLocationListener implements VehicleLocationListener {
   public List<VehicleLocationRecord> getRecords() {
     return _records;
   }
+
+  public void reset() {
+    _records.clear();
+  }
+
 }
