@@ -613,7 +613,7 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   // package private for unit tests
    void handleCombinedUpdates(MonitoredResult result,
       List<CombinedTripUpdatesAndVehiclePosition> updates) {
-
+    long methodStarTime = System.currentTimeMillis();
     // exit if we are configured in alerts mode
     if (_tripUpdatesUrl == null) return;
 
@@ -715,13 +715,14 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     if (_monitor != null) {
       _monitor.logUpdate(result);
     }
+    long methodEndTime = System.currentTimeMillis();
     _log.info("Agency " + getFeedId() + " has active vehicles=" + seenVehicles.size()
             + ", matched=" + result.getMatchedTripIds().size() + " (" + result.getUnmatchedTripIds().size() + ")"
             + ", added=" + result.getAddedTripIds().size()
             + ", duplicated=" + result.getDuplicatedTripIds().size()
             + ", cancelled=" + result.getCancelledTripIds().size()
-            + " for updates=" + updates.size() + " with most recent timestamp " + new Date(newestUpdate));
-
+            + " for updates=" + updates.size() + " with most recent timestamp " + new Date(newestUpdate)
+            + " in " + (methodEndTime-methodStarTime) + "ms");
   }
 
   private boolean isValidLocation(VehicleLocationRecord record, CombinedTripUpdatesAndVehiclePosition update) {

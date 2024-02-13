@@ -15,9 +15,12 @@
  */
 package org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime;
 
+import org.apache.commons.collections4.map.PassiveExpiringMap;
 import org.onebusaway.collections.MappingLibrary;
+import org.onebusaway.container.refresh.Refreshable;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
+import org.onebusaway.transit_data_federation.impl.RefreshableResources;
 import org.onebusaway.transit_data_federation.services.blocks.BlockCalendarService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
@@ -38,9 +41,18 @@ public class BlockFinder {
 
   private static Logger _log = LoggerFactory.getLogger(BlockFinder.class);
 
-  private BlockCalendarService _blockCalendarService;
+  private final BlockCalendarService _blockCalendarService;
+  public final Map<AgencyAndId, BlockServiceDate> _cache = new PassiveExpiringMap<>(30 * 60 * 1000);
+  public final Map<AgencyAndId, Boolean> _nullResultCache = new PassiveExpiringMap<>(30 * 60 * 1000);
+
   public BlockFinder(BlockCalendarService blockCalendarService) {
     _blockCalendarService = blockCalendarService;
+  }
+
+  @Refreshable(dependsOn = RefreshableResources.TRANSIT_GRAPH)
+  public void reset() {
+    _nullResultCache.clear();
+    _cache.clear();
   }
 
   /**
@@ -49,6 +61,17 @@ public class BlockFinder {
    * this is not a simple lookup.
    */
   public BlockServiceDate getBlockServiceDateFromTrip(TripEntry tripEntry,
+                                                      long currentTime) {
+    if (_nullResultCache.containsKey(tripEntry.getId()))
+      return null;
+    if (!_cache.containsKey(tripEntry.getId())) {
+      BlockServiceDate blockServiceDate = getBlockServiceDateFromTripUnCached(tripEntry, currentTime);
+      _cache.put(tripEntry.getId(), blockServiceDate);
+    }
+    return _cache.get(tripEntry.getId());
+  }
+
+  private BlockServiceDate getBlockServiceDateFromTripUnCached(TripEntry tripEntry,
                                                       long currentTime) {
     ServiceDate serviceDate;
     for (ServiceDate serviceDateGuess : getPossibleServiceDates(currentTime)) {
@@ -155,69 +178,4 @@ public class BlockFinder {
     return adjustedBlockStartTime;
   }
 
-  /*
-        int tripStartTime = 0;
-      int blockStartTime = 0;
-      if (trip.hasStartTime() && !"0".equals(trip.getStartTime())) {
-        try {
-          Matcher m = _pattern.matcher(trip.getStartTime());
-          if (!m.matches()) {
-            long timeInMil = serviceDate.getAsDate().getTime();
-            long epochTime = Long.parseLong(trip.getStartTime());
-            long startTime = (epochTime - timeInMil) / 1000;
-            tripStartTime = (int) startTime;
-          } else
-            tripStartTime = StopTimeFieldMappingFactory.getStringAsSeconds(trip.getStartTime());
-        } catch (InvalidStopTimeException iste) {
-          _log.debug("invalid stopTime of " + trip.getStartTime() + " for trip " + trip);
-          return null;
-        }
-        blockStartTime = getBlockStartTimeForTripStartTime(instance,
-                tripEntry.getId(), tripStartTime);
-        if (blockStartTime < 0) {
-          _log.debug("invalid blockStartTime for trip " + trip + " for instance=" + instance);
-          return null;
-        }
-        blockDescriptor.setStartTime(blockStartTime);
-      }
-
-   */
-
-  /*
-
-    if (serviceDate != null) {
-    	instance = _blockCalendarService.getBlockInstance(block.getId(),
-    			serviceDate.getAsDate().getTime());
-    	if (instance == null) {
-    		_log.debug("block " + block.getId() + " does not exist on service date "
-    				+ serviceDate);
-    		return null;
-    	}
-    } else {
-      // we have legacy support for missing service date
-      // mostly for unit tests but also legacy feeds
-    	long timeFrom = currentTime - 30 * 60 * 1000;
-    	long timeTo = currentTime + 30 * 60 * 1000;
-
-    	List<BlockInstance> instances = _blockCalendarService.getActiveBlocks(
-    			block.getId(), timeFrom, timeTo);
-
-    	if (instances.isEmpty()) {
-    		instances = _blockCalendarService.getClosestActiveBlocks(block.getId(),
-    				currentTime);
-    	}
-
-    	if (instances.isEmpty()) {
-    		_log.debug("could not find any active instances for the specified block="
-    				+ block.getId() + " trip=" + trip);
-    		return null;
-    	}
-    	instance = instances.get(0);
-    }
-
-    if (serviceDate == null) {
-    	serviceDate = new ServiceDate(new Date(instance.getServiceDate()));
-    }
-
-   */
 }

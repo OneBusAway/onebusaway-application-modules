@@ -19,6 +19,8 @@ package org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 
+import java.util.Objects;
+
 /**
  * A Block + Service Date model + Trip Start time model.
  */
@@ -45,5 +47,28 @@ public class BlockServiceDate {
 
   public Integer getTripStartTime() {
     return tripStartTime;
+  }
+
+  @Override
+  public int hashCode() {
+    return serviceDate.hashCode() + instance.hashCode()
+            + (tripStartTime==null?0:tripStartTime.hashCode());
+  }
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj)
+      return true;
+    if (obj == null)
+      return false;
+    if (getClass() != obj.getClass())
+      return false;
+    BlockServiceDate other = (BlockServiceDate) obj;
+    if (!serviceDate.equals(other.serviceDate))
+      return false;
+    if (!instance.equals(other.instance))
+      return false;
+    if (!Objects.equals(tripStartTime, other.tripStartTime))
+      return false;
+    return true;
   }
 }
