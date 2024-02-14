@@ -19,6 +19,8 @@ import com.amazonaws.util.IOUtils;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.TreeNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.collections.map.HashedMap;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.onebusaway.cloud.api.ExternalServices;
 import org.onebusaway.cloud.api.ExternalServicesBridgeFactory;
@@ -33,8 +35,7 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * Host Bundles off S3 instead of admin/tdm server.
@@ -50,6 +51,10 @@ public class S3BundleStoreImpl extends AbstractBundleStoreImpl implements Bundle
 
     private String latestBundleURI = null;
     private String remoteIndexURI = null;
+    private boolean initialized = false;
+
+    private final Map<Date, S3BundleItem> _bundleFolderByDate = new HashedMap();
+    private final Map<Date, S3BundleItem> _bundleFileByDate = new HashedMap();
 
     public void setLatestBundleURI(String s) {
         latestBundleURI = s;
@@ -61,6 +66,10 @@ public class S3BundleStoreImpl extends AbstractBundleStoreImpl implements Bundle
 
     @Override
     public List<BundleItem> getBundles() throws Exception {
+        if (!initialized) {
+            loadInitial();
+            initialized = true;
+        }
         // for testing we support a file:/// or / syntax
         if (isFile(remoteIndexURI)) {
             String indexFile = remoteIndexURI.replaceFirst("file:", "");
@@ -85,10 +94,14 @@ public class S3BundleStoreImpl extends AbstractBundleStoreImpl implements Bundle
 
         String bundleRoot = this._bundleRootPath;
         String[] bundleNameParts = latestBundleURI.split("/");
-        final String bundleName = bundleNameParts[bundleNameParts.length-1].replace(".tar.gz", "");
+        final String bundleTarName = bundleNameParts[bundleNameParts.length-1];
+        final String bundleName = bundleTarName.replace(".tar.gz", "");
+        S3BundleItem fileItem = new S3BundleItem(bundleTarName, bundleRoot);
+        S3BundleItem folderItem = new S3BundleItem(bundleName, bundleRoot);
 
         if (bundleExists(bundleName)) {
-            _log.info("bundle {} exists on disk, skipping download");
+            _log.info("bundle {} exists on disk, skipping download", bundleName);
+            prune();
             // TODO: could verify checksums here
         } else {
             // download and extract bundle
@@ -97,6 +110,8 @@ public class S3BundleStoreImpl extends AbstractBundleStoreImpl implements Bundle
                     String bundleFile = latestBundleURI.replaceFirst("file:", "");
                     _log.info("loading bundle file on disk at " + bundleFile);
                     extractBundleFromInput(new FileInputStream(bundleFile), bundleRoot, bundleName);
+                    this._bundleFileByDate.put(new Date(), fileItem);
+                    this._bundleFolderByDate.put(new Date(), folderItem);
                 } else {
                     ExternalServices es = new ExternalServicesBridgeFactory().getExternalServices();
                     es.getFileAsStream(latestBundleURI, new InputStreamConsumer() {
@@ -105,6 +120,10 @@ public class S3BundleStoreImpl extends AbstractBundleStoreImpl implements Bundle
                             FileOutputStream fileStream = extractBundleFromInput(inputStream, bundleRoot, bundleName);
                         }
                     }, getProfile(), getRegion());
+
+                    this._bundleFileByDate.put(new Date(), fileItem);
+                    this._bundleFolderByDate.put(new Date(), folderItem);
+
                 }
             }
         }
@@ -139,6 +158,51 @@ public class S3BundleStoreImpl extends AbstractBundleStoreImpl implements Bundle
         bundleItems.add(validLocalBundle);
         _log.info("created bundleItems for local bundle {}", possibleBundle);
         return bundleItems;
+    }
+
+    private void loadInitial() {
+        // list all directories at bundleRoot
+        String[] bundleDirectories = new File(this._bundleRootPath).list();
+        for (String bundleDirectory : bundleDirectories) {
+            File possibleDirectory = new File(this._bundleRootPath, bundleDirectory);
+            if (possibleDirectory.isDirectory()) {
+                _bundleFolderByDate.put(parseDateFromFolderName(bundleDirectory), new S3BundleItem(bundleDirectory, this._bundleRootPath));
+            } else if (possibleDirectory.isFile() && bundleDirectory.endsWith(".tar.gz")) {
+                _bundleFileByDate.put(parseDateFromFileName(bundleDirectory), new S3BundleItem(bundleDirectory, this._bundleRootPath));
+            } else {
+                _log.error("unexpected sub directory {}", bundleDirectory);
+            }
+        }
+
+
+    }
+
+    private Date parseDateFromFileName(String bundleFile) {
+        if (bundleFile.startsWith("v.")) {
+            try {
+                String millisStr = bundleFile.substring("v.".length(), bundleFile.length() - ".tar.gz".length());
+                long millis = Long.parseLong(millisStr);
+                return new Date(millis);
+            } catch (Exception any) {
+                _log.error("unexpected bundle file {}", bundleFile);
+            }
+        }
+        return new Date();
+    }
+
+    private Date parseDateFromFolderName(String bundleDirectory) {
+        if (bundleDirectory.startsWith("v.")) {
+            try {
+                // we have a date in millis
+                String millisStr = bundleDirectory.substring("v.".length(), bundleDirectory.length());
+                long millis = Long.parseLong(millisStr);
+                return new Date(millis);
+            } catch (Exception any) {
+                _log.error("unexpected bundle directory {}", bundleDirectory);
+                return new Date();
+            }
+        }
+        return new Date();
     }
 
     private boolean isFile(String remoteIndexURI) {
@@ -237,5 +301,60 @@ public class S3BundleStoreImpl extends AbstractBundleStoreImpl implements Bundle
     @Override
     public boolean isLegacyBundle() {
         return false;
+    }
+
+    public void prune() {
+        if (_bundleFolderByDate.size() > 3) {
+            List<Date> ages = new ArrayList<>(_bundleFolderByDate.keySet());
+            Collections.sort(ages);
+            for (int i = 0; i<3; i++) {
+                ages.remove(ages.size()-1); // keep the last 3
+            }
+            for (Date age : ages) {
+              S3BundleItem s3BundleItem = _bundleFolderByDate.get(age);
+              _log.info("deleting bundle directory {} dated {}", s3BundleItem.bundleName, age);
+              deleteFolder(new File(s3BundleItem.bundleRoot, s3BundleItem.bundleName));
+              _bundleFolderByDate.remove(age);
+            }
+        }
+        if (_bundleFileByDate.size() > 3) {
+            List<Date> ages = new ArrayList<>(_bundleFileByDate.keySet());
+            Collections.sort(ages);
+            for (int i = 0; i<3; i++) {
+                ages.remove(ages.size() - 1); // keep the last 3
+            }
+            for (Date age : ages) {
+              S3BundleItem s3BundleItem = _bundleFileByDate.get(age);
+              _log.info("deleting bundle file {} dated {}", s3BundleItem.bundleName, age);
+              deleteFile(new File(s3BundleItem.bundleRoot, s3BundleItem.bundleName));
+              _bundleFileByDate.remove(age);
+            }
+        }
+    }
+
+    private void deleteFile(File file) {
+        try {
+            file.delete();
+        } catch (Exception any) {
+            // bury
+        }
+    }
+
+    private void deleteFolder(File dir) {
+        try {
+            FileUtils.deleteDirectory(dir);
+        } catch (Exception any) {
+            // bury
+        }
+    }
+
+    public static class S3BundleItem {
+
+        private final String bundleName;
+        private final String bundleRoot;
+        public S3BundleItem(String bundleName, String bundleRoot) {
+            this.bundleName = bundleName;
+            this.bundleRoot = bundleRoot;
+        }
     }
 }
