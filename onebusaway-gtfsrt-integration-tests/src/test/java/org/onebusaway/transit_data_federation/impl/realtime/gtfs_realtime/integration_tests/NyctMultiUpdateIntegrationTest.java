@@ -50,7 +50,7 @@ public class NyctMultiUpdateIntegrationTest extends AbstractGtfsRealtimeIntegrat
     return paths;
   }
 
-  @Ignore
+  @Test
   public void testMultiUpdatesViaExtension() throws Exception {
     GtfsRealtimeSource source = getBundleLoader().getSource();
     source.setAgencyId("MTASBWY");
