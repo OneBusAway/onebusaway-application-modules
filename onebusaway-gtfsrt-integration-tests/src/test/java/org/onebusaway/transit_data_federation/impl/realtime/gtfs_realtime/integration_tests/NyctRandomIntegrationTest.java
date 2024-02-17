@@ -56,4 +56,27 @@ public class NyctRandomIntegrationTest extends AbstractGtfsRealtimeIntegrationTe
     expectArrival(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId, 15);
 
   }
+
+  @Test
+  public void test2() throws Exception {
+    // Stops 123N and 110S not showing service after midnight
+    // GTFS-RT trip start date can't be trusted -- we need to compute service day
+    // based on first stop time to avoid negative arrival times
+    List<String> routeIdsToCancel = Arrays.asList("MTASBWY_1","MTASBWY_2","MTASBWY_3");
+    String expectedStopId = "MTASBWY_123N";
+    String expectedRouteId = "MTASBWY_1";
+    String path = getIntegrationTestPath() + File.separator;
+    String name = "nyct_subways_gtfs_rt.2024-02-16T00:53:20-04:00.pb";
+
+    GtfsRealtimeSource source = runRealtime(routeIdsToCancel, expectedRouteId, expectedStopId, path, name);
+    // 147200_1..N03R
+    // start date 20240216
+    // arrival 1708063139 / Fri Feb 16 00:58:59 EST 2024
+    // first stop 1708062869
+    expectArrival(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId, 4);
+    expectArrival(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId, 5);
+//    expectArrival(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId, 11);
+//    expectArrival(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId, 15);
+
+  }
 }

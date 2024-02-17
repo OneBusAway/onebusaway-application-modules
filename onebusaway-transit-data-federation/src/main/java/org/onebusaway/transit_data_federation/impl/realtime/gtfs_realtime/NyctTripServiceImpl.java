@@ -69,8 +69,15 @@ public class NyctTripServiceImpl implements NyctTripService {
       addedTrip.setScheduleRelationshipValue(TransitDataConstants.STATUS_ADDED);
       addedTrip.setAgencyId(getDefaultAgency());
       addedTrip.setTripStartTime(originDepartureTime * 60 / 100); // 100ths
-      // here we make an assumption about the service data
-      addedTrip.setServiceDate(getStartOfDay(new Date(currentTime)).getTime());
+      // current time is not a good approximation of service date just after midnight
+      // and trip service date can't be trusted so use first stop time to prevent
+      // negative stop times
+      Long firstStopTime = getFirstStopTime(tu);
+      if (firstStopTime != null) {
+        addedTrip.setServiceDate(getStartOfDay(new Date(firstStopTime*1000)).getTime());
+      } else {
+        addedTrip.setServiceDate(getStartOfDay(new Date(currentTime)).getTime());
+      }
       addedTrip.setRouteId(routeId);
       addedTrip.setTripId(tripId);
       addedTrip.setDirectionId(directionId);
@@ -115,6 +122,17 @@ public class NyctTripServiceImpl implements NyctTripService {
       return addedTrip;
     }
       return null;
+  }
+
+  private Long getFirstStopTime(GtfsRealtime.TripUpdate tu) {
+    if (tu.getStopTimeUpdateList().isEmpty()) return null;
+    GtfsRealtime.TripUpdate.StopTimeUpdate stopTimeUpdate = tu.getStopTimeUpdateList().get(0);
+    if (!stopTimeUpdate.hasArrival() && ! stopTimeUpdate.hasDeparture()) return null;
+    if (stopTimeUpdate.getArrival().getTime() > 0)
+      return stopTimeUpdate.getArrival().getTime();
+    if (stopTimeUpdate.getDeparture().getTime() > 0)
+      return stopTimeUpdate.getDeparture().getTime();
+    return null;
   }
 
   private String routeFromTripUpdate(GtfsRealtime.TripUpdate tu) {
