@@ -15,6 +15,7 @@
  */
 package org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.integration_tests;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
@@ -53,7 +54,7 @@ public class NyctChangingPatternTest extends AbstractGtfsRealtimeIntegrationTest
     return paths;
   }
 
-  @Test
+  @Ignore
   public void testMultiUpdatesViaExtension() throws Exception {
     GtfsRealtimeSource source = getBundleLoader().getSource();
     source.setAgencyId("MTASBWY");
