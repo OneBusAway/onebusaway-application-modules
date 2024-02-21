@@ -54,6 +54,9 @@ public class AlertsAction extends NextBusApiBase implements
 
 	@Autowired
 	private GtfsrtCache _cache;
+	public void setCache(GtfsrtCache cache) {
+		_cache = cache;
+	}
 
 	private GtfsrtHelper _gtfsrtHelper = new GtfsrtHelper();
 
@@ -135,7 +138,8 @@ public class AlertsAction extends NextBusApiBase implements
 
 	}
 
-	private boolean matchesFilter(ServiceAlertBean bean) {
+	// package private for unit tests
+	boolean matchesFilter(ServiceAlertBean bean) {
 		if (_cache.getAlertFilter() == null || bean.getSource() == null) {
 			return true;
 		}
