@@ -64,7 +64,7 @@ public class NyctRandomIntegrationTest extends AbstractGtfsRealtimeIntegrationTe
     // based on first stop time to avoid negative arrival times
     List<String> routeIdsToCancel = Arrays.asList("MTASBWY_1","MTASBWY_2","MTASBWY_3");
     String expectedStopId = "MTASBWY_123N";
-    String expectedRouteId = "MTASBWY_1";
+    String expectedRouteId = "MTASBWY_2";
     String path = getIntegrationTestPath() + File.separator;
     String name = "nyct_subways_gtfs_rt.2024-02-16T00:53:20-04:00.pb";
 
@@ -78,5 +78,21 @@ public class NyctRandomIntegrationTest extends AbstractGtfsRealtimeIntegrationTe
 //    expectArrival(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId, 11);
 //    expectArrival(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId, 15);
 
+  }
+
+  @Test
+  public void test3() throws Exception {
+  // this pattern breaks head-signs (and A/D on prod)
+    List<String> routeIdsToCancel = Arrays.asList("MTASBWY_J","MTASBWY_Z");
+    String expectedStopId = "MTASBWY_J12N";
+    String expectedRouteId = "MTASBWY_J";
+    String expectedTripId = "MTASBWY_055000_J..N43R";
+    String expectedHeadsign = "Jamaica Center-Parsons/Archer"; // error if "Broadway Junction"
+    String path = getIntegrationTestPath() + File.separator;
+    String name = "nyct_subways_gtfs_rt.2024-02-21T10:00:33-04:00.pb";
+
+    GtfsRealtimeSource source = runRealtime(routeIdsToCancel, expectedRouteId, expectedStopId, path, name);
+    expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId,
+            expectedTripId, expectedHeadsign, 0);
   }
 }

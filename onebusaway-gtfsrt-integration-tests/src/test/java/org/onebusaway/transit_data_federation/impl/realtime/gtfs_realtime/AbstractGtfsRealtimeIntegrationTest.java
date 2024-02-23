@@ -70,6 +70,11 @@ public abstract class AbstractGtfsRealtimeIntegrationTest {
   }
 
   protected Map<AgencyAndId, Set<String>> stopHeadsigns = new HashMap<>();
+
+  private TestVehicleLocationListener _listener;
+  public TestVehicleLocationListener getListener() {
+    return _listener;
+  }
   protected abstract String getIntegrationTestPath();
 
   @Before
@@ -96,11 +101,11 @@ public abstract class AbstractGtfsRealtimeIntegrationTest {
   protected void loadRealtime(String gtfsrtFilename) throws Exception {
     GtfsRealtimeSource source = getBundleLoader().getSource();
     source.setAgencyId("MTASBWY");
-    TestVehicleLocationListener listener = new TestVehicleLocationListener();
+    _listener = new TestVehicleLocationListener();
 
     VehicleLocationListener actualListener = getBundleLoader().getApplicationContext().getBean(VehicleStatusServiceImpl.class);
-    listener.setVehicleLocationListener(actualListener);
-    source.setVehicleLocationListener(listener);
+    _listener.setVehicleLocationListener(actualListener);
+    source.setVehicleLocationListener(_listener);
 
 
     // this is the gtfs-rt protocol-buffer file to match to the loaded bundle
@@ -112,6 +117,10 @@ public abstract class AbstractGtfsRealtimeIntegrationTest {
   }
 
   protected void verifyBeans(String message, StopEntry firstStop, long firstStopTime) {
+    verifyBeans(message, firstStop, firstStopTime, null);
+  }
+
+  protected void verifyBeans(String message, StopEntry firstStop, long firstStopTime, List<String> exceptionTrips) {
     if (firstStopTime == 0l) return;
     assertNotNull("Expecting valid stop", firstStop);
     Map<AgencyAndId, Integer> tripCount = new HashMap<>();
@@ -137,7 +146,7 @@ public abstract class AbstractGtfsRealtimeIntegrationTest {
       verifyPredictions(message, bean);
       verifyNarrative(bean);
     }
-    verifyTripRange(message, firstStop, firstStopTime);
+    verifyTripRange(message, firstStop, firstStopTime, exceptionTrips);
 
   }
 
@@ -221,7 +230,7 @@ public abstract class AbstractGtfsRealtimeIntegrationTest {
   }
 
 
-  protected  Map<AgencyAndId, Integer> verifyTripRange(String message, StopEntry firstStop, long firstStopTime) {
+  protected  Map<AgencyAndId, Integer> verifyTripRange(String message, StopEntry firstStop, long firstStopTime, List<String> exceptionTrips) {
     Map<AgencyAndId, Integer> tripCount = new HashMap<>();
     ArrivalAndDepartureService arrivalAndDepartureService = getBundleLoader().getApplicationContext().getBean(ArrivalAndDepartureService.class);
 
@@ -238,7 +247,7 @@ public abstract class AbstractGtfsRealtimeIntegrationTest {
       tripCount.put(id, tripCount.get(id) + 1);
     }
 
-    verifyTripCounts(message, tripCount);
+    verifyTripCounts(message, tripCount, exceptionTrips);
     int dabSetCount = 0;
     int dynamicBlockCount = 0;
     for (ArrivalAndDepartureInstance instance : list) {
@@ -287,10 +296,10 @@ public abstract class AbstractGtfsRealtimeIntegrationTest {
       }
     }
   }
-  protected void verifyTripCounts(String message, Map<AgencyAndId, Integer> tripCount) {
+  protected void verifyTripCounts(String message, Map<AgencyAndId, Integer> tripCount,  List<String> exceptionTrips) {
     for (AgencyAndId tripId : tripCount.keySet()) {
       Integer count = tripCount.get(tripId);
-      if (count > 1) {
+      if (count > 1 && exceptionTrips != null && !exceptionTrips.contains(tripId.toString())) {
         _log.error(message + "; duplicate trips {} of  {}", count, tripId);
         fail(message + " duplicate trips " + count + " of " + tripId);
       }
@@ -301,11 +310,14 @@ public abstract class AbstractGtfsRealtimeIntegrationTest {
     GtfsRealtimeSource source = getBundleLoader().getSource();
     source.setAgencyId("MTASBWY");
 
-    TestVehicleLocationListener listener = new TestVehicleLocationListener();
+    _listener = new TestVehicleLocationListener();
 
     VehicleLocationListener actualListener = getBundleLoader().getApplicationContext().getBean(VehicleStatusServiceImpl.class);
-    listener.setVehicleLocationListener(actualListener);
-    source.setVehicleLocationListener(listener);
+    _listener.setVehicleLocationListener(actualListener);
+    source.setVehicleLocationListener(_listener);
+
+    MonitoredResult testResult = new MonitoredResult();
+    source.setMonitoredResult(testResult);
 
     // setup cancelled service
     GtfsRealtimeCancelServiceImpl cancelService = getBundleLoader().getApplicationContext().getBean(GtfsRealtimeCancelServiceImpl.class);
@@ -324,7 +336,21 @@ public abstract class AbstractGtfsRealtimeIntegrationTest {
     return source;
   }
 
-  protected void expectArrival(long referenceTime, String stopId, String routeId, int minutesAwayMax) {
+  protected ArrivalAndDepartureBean expectArrivalAndTripAndHeadsign(long referenceTime, String stopId, String routeId,
+                                                                    String tripId, String headsign, int minutesAwayMax) {
+    ArrivalAndDepartureBean bean = expectArrivalAndTrip(referenceTime, stopId, routeId, tripId, minutesAwayMax);
+    assertEquals("expected headsign " + headsign + " but got " + bean.getTrip().getTripHeadsign(),
+            headsign, bean.getTrip().getTripHeadsign());
+    return bean;
+  }
+
+  protected ArrivalAndDepartureBean expectArrivalAndTrip(long referenceTime, String stopId, String routeId, String tripId, int minutesAwayMax) {
+    ArrivalAndDepartureBean bean = expectArrival(referenceTime, stopId, routeId, minutesAwayMax);
+    assertEquals("expected tripId " + tripId + " but got " + bean.getTrip().getId(), tripId, bean.getTrip().getId());
+    return bean;
+  }
+
+  protected ArrivalAndDepartureBean expectArrival(long referenceTime, String stopId, String routeId, int minutesAwayMax) {
     TransitGraphDao graph = getBundleLoader().getApplicationContext().getBean(TransitGraphDao.class);
     StopEntry firstStop = graph.getStopEntryForId(AgencyAndId.convertFromString(stopId));
     assertNotNull("no such stop " + stopId);
@@ -338,22 +364,26 @@ public abstract class AbstractGtfsRealtimeIntegrationTest {
     filter.add("MTASBWY");
     query.getSystemFilterChain().add(new ArrivalAndDepartureFilterByRealtime(filter));
     List<ArrivalAndDepartureBean> arrivalsAndDeparturesByStopId = service.getArrivalsAndDeparturesByStopId(firstStop.getId(), query);
-    testArrival(arrivalsAndDeparturesByStopId, referenceTime, minutesAwayMax);
+    return testArrival(arrivalsAndDeparturesByStopId, routeId, referenceTime, minutesAwayMax);
   }
 
-  protected void testArrival(List<ArrivalAndDepartureBean> arrivalsAndDeparturesByStopId, long referenceTime, int minutesAwayMax) {
+  protected ArrivalAndDepartureBean testArrival(List<ArrivalAndDepartureBean> arrivalsAndDeparturesByStopId, String routeId, long referenceTime, int minutesAwayMax) {
     List<Long> etas = new ArrayList<>();
+    List<String> routes = new ArrayList<>();
     assertFalse(arrivalsAndDeparturesByStopId.isEmpty());
     for (ArrivalAndDepartureBean bean : arrivalsAndDeparturesByStopId) {
       long etaMinutes = (bean.getPredictedArrivalTime() - referenceTime) / 1000 / 60;
       etas.add(etaMinutes);
+      routes.add(bean.getTrip().getRoute().getId());
       if (etaMinutes >= minutesAwayMax-1
-              && etaMinutes <= minutesAwayMax+1) {
-        return; // found!
+              && etaMinutes <= minutesAwayMax+1 && bean.getTrip().getRoute().getId().equals(routeId)) {
+        return bean; // found!
       }
     }
     // not found!!!
-    fail("expected arrival to be at least " + (minutesAwayMax-1) + " minutes away but found " + etas);
+    fail("expected arrival to be at least " + (minutesAwayMax-1) + " minutes away but found " + etas
+      + " on routes " + routes + " when looking for " + routeId);
+    return null;
   }
 
 

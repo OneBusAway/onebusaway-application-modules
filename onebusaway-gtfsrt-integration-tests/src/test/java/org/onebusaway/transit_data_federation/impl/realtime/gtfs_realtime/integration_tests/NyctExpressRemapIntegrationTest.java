@@ -72,7 +72,7 @@ public class NyctExpressRemapIntegrationTest extends AbstractGtfsRealtimeIntegra
     // stop MTASBWY_S16N
     TransitGraphDao graph = getBundleLoader().getApplicationContext().getBean(TransitGraphDao.class);
     StopEntry expectedStop = graph.getStopEntryForId(AgencyAndId.convertFromString("MTASBWY_S16N"));
-    Map<AgencyAndId, Integer> actualTripIds = verifyTripRange("expected SS trip", expectedStop, source.getGtfsRealtimeTripLibrary().getCurrentTime());
+    Map<AgencyAndId, Integer> actualTripIds = verifyTripRange("expected SS trip", expectedStop, source.getGtfsRealtimeTripLibrary().getCurrentTime(), null);
     assertTrue(actualTripIds.containsKey(AgencyAndId.convertFromString("MTASBWY_048000_SS..N")));
   }
 }

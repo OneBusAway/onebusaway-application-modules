@@ -73,12 +73,9 @@ public class DynamicTripBuilder {
         instance = createBlockInstance(addedTripInfo);
       }
 
-      if (instance == null) {
-        _log.error("unable to create descriptor for additional trip {}", addedTripInfo.getTripId());
-      }
-
-      if (!isValid(instance)) {
-        _log.error("validation failed for additional trip {}", addedTripInfo.getTripId());
+      String validationMessage = isValid(instance);
+      if (validationMessage != null) {
+        _log.error("validation failed for additional trip {} with {}", addedTripInfo.getTripId(), validationMessage);
         return null;
       }
 
@@ -130,29 +127,29 @@ public class DynamicTripBuilder {
   }
 
   // be paranoid about incoming data
-  private boolean isValid(BlockInstance instance) {
-    if (instance == null) return false;
+  private String isValid(BlockInstance instance) {
+    if (instance == null) return "NuLl instance";
     if (instance.getServiceDate() < 1000l)
-      return false;
+      return "Invalid ServiceDate " + instance.getServiceDate();
     if (instance.getState() == null)
-      return false;
+      return "Missing State";
     if (instance.getBlock() == null)
-      return false;
+      return "Missing Block";
     BlockConfigurationEntry block = instance.getBlock();
     if (block.getBlock() == null)
-      return false;
+      return "Null Block";
     if (block.getTrips() == null || block.getTrips().isEmpty())
-      return false;
+      return "Empty Trips";
     BlockTripEntry blockTripEntry = block.getTrips().get(0);
     if (blockTripEntry.getTrip() == null)
-      return false;
+      return "Empty BlockTrip";
     if (blockTripEntry.getTrip().getId() == null)
-      return false;
+      return "Missing BlockTrip Id";
     if (blockTripEntry.getTrip().getId().getId() == null)
-      return false;
+      return "Missing BlockTrip Id.id";
     if (blockTripEntry.getStopTimes() == null || blockTripEntry.getStopTimes().isEmpty())
-      return false;
-    return true;
+      return "No StopTImes";
+    return null;
   }
 
   private BlockInstance createBlockInstance(AddedTripInfo addedTripInfo) {
@@ -188,7 +185,7 @@ public class DynamicTripBuilder {
     trip.setStopTimes(createStopTimes(addedTripInfo, trip));
     trip.setTotalTripDistance(calculateTripDistance(trip));
     if (trip.getStopTimes() == null || trip.getStopTimes().isEmpty()) {
-      _log.error("aborting trip creation {} with no stops", addedTripInfo.getTripId());
+      _log.debug("aborting trip creation {} with no stops", addedTripInfo.getTripId());
       return null;
     }
     // here we set the shapeId to the tripId

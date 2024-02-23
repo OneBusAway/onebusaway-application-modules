@@ -15,7 +15,6 @@
  */
 package org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.integration_tests;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
@@ -54,7 +53,7 @@ public class NyctChangingPatternTest extends AbstractGtfsRealtimeIntegrationTest
     return paths;
   }
 
-  @Ignore
+  @Test
   public void testMultiUpdatesViaExtension() throws Exception {
     GtfsRealtimeSource source = getBundleLoader().getSource();
     source.setAgencyId("MTASBWY");
@@ -159,6 +158,7 @@ public class NyctChangingPatternTest extends AbstractGtfsRealtimeIntegrationTest
             */
     };
     List<String> names = Arrays.asList(reverseNames);
+    List<String> exceptionTrips = Arrays.asList("MTASBWY_046300_A..N"); // this is an old AVL bug, the trip has two vehicles!
     Collections.reverse(names);
     int i = 1;
     for (String name : names) {
@@ -167,7 +167,7 @@ public class NyctChangingPatternTest extends AbstractGtfsRealtimeIntegrationTest
       ClassPathResource gtfsRtResourceN = new ClassPathResource(gtfsrtFilenameN);
       source.setTripUpdatesUrl(gtfsRtResourceN.getURL());
       source.refresh();
-      verifyBeans("beans run " + i + ", name=" + name, firstStop, iterationTime);
+      verifyBeans("beans run " + i + ", name=" + name, firstStop, iterationTime, exceptionTrips);
       verifyRouteDirectionStops("MTASBWY_A");
       if (iterationTime == 0l) continue;
       long expectedTime = timeMillis(iterationTime, 8, 52, 0);

@@ -27,10 +27,14 @@ import org.onebusaway.transit_data_federation.model.ShapePoints;
 import org.onebusaway.transit_data_federation.model.narrative.*;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class NarrativeProviderImpl implements Serializable {
 
   private static final long serialVersionUID = 2L;
+
+  private Logger _log = LoggerFactory.getLogger(NarrativeProviderImpl.class);
 
   private Map<String, AgencyNarrative> _agencyNarratives = new HashMap<String, AgencyNarrative>();
 
@@ -293,7 +297,7 @@ public final class NarrativeProviderImpl implements Serializable {
     if (routeAndHeadsignNarrative == null) {
       for (StopDirectionKey stopDirectionKey : _patternCache.keySet()) {
         if (stopDirectionKey.getStopId().equals(stopId)) {
-          System.out.println("patternCache miss but stop exists=" + stopDirectionKey.getStopId() + "," + stopDirectionKey.getDirectionId());
+          _log.error("patternCache miss but stop/direction exists={},{}",  stopDirectionKey.getStopId(), stopDirectionKey.getDirectionId());
         }
       }
       return null;
