@@ -158,7 +158,7 @@ public class NyctChangingPatternTest extends AbstractGtfsRealtimeIntegrationTest
             */
     };
     List<String> names = Arrays.asList(reverseNames);
-    List<String> exceptionTrips = Arrays.asList("MTASBWY_046300_A..N"); // this is an old AVL bug, the trip has two vehicles!
+    List<String> exceptionTrips = null;
     Collections.reverse(names);
     int i = 1;
     for (String name : names) {
@@ -172,7 +172,7 @@ public class NyctChangingPatternTest extends AbstractGtfsRealtimeIntegrationTest
       if (iterationTime == 0l) continue;
       long expectedTime = timeMillis(iterationTime, 8, 52, 0);
       if (iterationTime >=  expectedTime) {
-        debugStop(firstStop, iterationTime);
+        debugStop(firstStop, iterationTime, 15);
       }
       i++;
     }
@@ -196,29 +196,18 @@ public class NyctChangingPatternTest extends AbstractGtfsRealtimeIntegrationTest
     return new ServiceDate(new Date(serviceDate)).getAsDate().getTime() + time(hour, minute, seconds) * 1000;
   }
 
-  private void debugStop(StopEntry stop, long firstStopTime) {
+  private void debugStop(StopEntry stop, long firstStopTime, int headwayMinutes) {
     ArrivalsAndDeparturesBeanService service = getBundleLoader().getApplicationContext().getBean(ArrivalsAndDeparturesBeanService.class);
     ArrivalsAndDeparturesQueryBean query = new ArrivalsAndDeparturesQueryBean();
     query.setTime(firstStopTime);
-    query.setMinutesBefore(15);
-    query.setMinutesAfter(60); // 5 minute headway
+    query.setMinutesBefore(1);
+    query.setMinutesAfter(headwayMinutes); // 5 minute headway
     List<String> filter = new ArrayList<>();
     filter.add("MTASBWY");
     query.getSystemFilterChain().add(new ArrivalAndDepartureFilterByRealtime(filter));
     List<ArrivalAndDepartureBean> arrivalsAndDeparturesByStopId = service.getArrivalsAndDeparturesByStopId(stop.getId(), query);
+    // confirm there is an arrival in headway minutes
     assertFalse(arrivalsAndDeparturesByStopId.isEmpty());
-    boolean found = false;
-    for (ArrivalAndDepartureBean bean : arrivalsAndDeparturesByStopId) {
-      if ("MTASBWY_1A 0736 FAR/207".equals(bean.getVehicleId())) {
-        found = true;
-      }
-    }
-    if (!found) {
-      _log.error("result not found for {} {}", firstStopTime, new Date(firstStopTime));
-    }
-    assertTrue(found);
-    _log.error(arrivalsAndDeparturesByStopId.toString());
-
   }
 
 }

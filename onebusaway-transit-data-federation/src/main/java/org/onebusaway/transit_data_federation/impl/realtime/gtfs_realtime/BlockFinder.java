@@ -26,6 +26,7 @@ import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.dynamic.DynamicBlockConfigurationEntryImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -147,6 +148,9 @@ public class BlockFinder {
       blockTripsById = MappingLibrary.mapToValue(
               block.getTrips(), "trip.id");
     } catch (IllegalStateException ise) {
+      if (block instanceof DynamicBlockConfigurationEntryImpl) {
+        return block.getDepartureTimeForIndex(0); // no adjustment for now
+      }
       _log.debug("invalid block {}", block.getBlock().getId());
       return -1;
     }

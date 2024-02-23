@@ -193,7 +193,7 @@ public class GtfsRealtimeTripLibrary {
         continue; // don't let this trip update be processed
       }
 
-      if (tu.hasVehicle() && tu.getVehicle().hasId() && StringUtils.isNotBlank(tu.getVehicle().getId())) {
+      if (getVehicleId(tu) != null) {
         // Trip update has a vehicle ID - index by vehicle ID
         String vehicleId = getVehicleId(tu);
         tripUpdatesByVehicleId.put(vehicleId, addStartDateTime(tu));
@@ -205,7 +205,7 @@ public class GtfsRealtimeTripLibrary {
         TripDescriptor td = tu.getTrip();
         long time = tu.hasTimestamp() ? tu.getTimestamp() * 1000 : currentTime();
         if (bd == null) {
-          bd = getTripDescriptorAsBlockDescriptor(result, td, time);
+          bd = getTripDescriptorAsBlockDescriptor(result, td, time, null);
         }
 
         if (bd == null) {
@@ -275,7 +275,7 @@ public class GtfsRealtimeTripLibrary {
 
         TripDescriptor td = vp.getTrip();
         long time = vp.hasTimestamp() ? vp.getTimestamp() * 1000 : currentTime();
-        BlockDescriptor bd = getTripDescriptorAsBlockDescriptor(result, td, time);
+        BlockDescriptor bd = getTripDescriptorAsBlockDescriptor(result, td, time, null);
 
         if (bd == null) {
           continue;
@@ -319,7 +319,7 @@ public class GtfsRealtimeTripLibrary {
       // use the first trip to find the block, but pass through all tripUpdates
       TripUpdate firstTrip = tripUpdates.iterator().next();
       long time = firstTrip.hasTimestamp() ? firstTrip.getTimestamp() * 1000 : currentTime();
-      update.block = getTripDescriptorAsBlockDescriptor(result, firstTrip.getTrip(), time);
+      update.block = getTripDescriptorAsBlockDescriptor(result, firstTrip.getTrip(), time, vehicleId);
       if (update.block == null && isNycDynamicTrip(firstTrip)) {
         update.block = handleDynamicTripUpdate(firstTrip);
       }
@@ -539,7 +539,9 @@ public class GtfsRealtimeTripLibrary {
     /**
      * By default, we use the block id as the vehicle id
      */
-    record.setVehicleId(record.getBlockId());
+    if (record.getVehicleId() == null) {
+      record.setVehicleId(record.getBlockId());
+    }
 
     if (result != null) {
       if (record.getTripId() != null) {
@@ -800,7 +802,7 @@ public class GtfsRealtimeTripLibrary {
 
 
   private BlockDescriptor getTripDescriptorAsBlockDescriptor(MonitoredResult result,
-      TripDescriptor trip, long currentTime) {
+      TripDescriptor trip, long currentTime, String vehicleId) {
     try {
       if (!trip.hasTripId()) {
         return null;
@@ -843,6 +845,7 @@ public class GtfsRealtimeTripLibrary {
           blockDescriptor.setScheduleRelationship(BlockDescriptor.ScheduleRelationship.ADDED);
         }
       }
+      blockDescriptor.setVehicleId(vehicleId);
       return blockDescriptor;
     } catch (Throwable t) {
       _log.error("source-exception {}", t, t);
@@ -1265,9 +1268,17 @@ public class GtfsRealtimeTripLibrary {
   }
 
   private String getVehicleId(TripUpdate tu) {
-    if (_useLabelAsVehicleId && tu.hasVehicle() && tu.getVehicle().hasLabel())
-      return tu.getVehicle().getLabel();
-    return tu.getVehicle().getId();
+    if (tu.hasVehicle() && tu.getVehicle().hasId() && StringUtils.isNotBlank(tu.getVehicle().getId())) {
+      if (_useLabelAsVehicleId && tu.hasVehicle() && tu.getVehicle().hasLabel())
+        return tu.getVehicle().getLabel();
+      return tu.getVehicle().getId();
+    }
+    if (tu.hasTrip() && tu.getTrip().hasExtension(GtfsRealtimeNYCT.nyctTripDescriptor)) {
+      GtfsRealtimeNYCT.NyctTripDescriptor nyctTripDescriptor = tu.getTrip().getExtension(GtfsRealtimeNYCT.nyctTripDescriptor);
+      if (nyctTripDescriptor.hasTrainId())
+        return nyctTripDescriptor.getTrainId();
+    }
+    return null; // we can't find anything resembling a vehicleId
   }
   private String getVehicleId(VehiclePosition vp) {
     if (_useLabelAsVehicleId && vp.hasVehicle() && vp.getVehicle().hasLabel())
