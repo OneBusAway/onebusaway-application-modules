@@ -43,7 +43,6 @@ public class BlockFinder {
 
   private final BlockCalendarService _blockCalendarService;
   public final Map<AgencyAndId, BlockServiceDate> _cache = new PassiveExpiringMap<>(30 * 60 * 1000);
-  public final Map<AgencyAndId, Boolean> _nullResultCache = new PassiveExpiringMap<>(30 * 60 * 1000);
 
   public BlockFinder(BlockCalendarService blockCalendarService) {
     _blockCalendarService = blockCalendarService;
@@ -51,7 +50,6 @@ public class BlockFinder {
 
   @Refreshable(dependsOn = RefreshableResources.TRANSIT_GRAPH)
   public void reset() {
-    _nullResultCache.clear();
     _cache.clear();
   }
 
@@ -62,9 +60,7 @@ public class BlockFinder {
    */
   public BlockServiceDate getBlockServiceDateFromTrip(TripEntry tripEntry,
                                                       long currentTime) {
-    if (_nullResultCache.containsKey(tripEntry.getId()))
-      return null;
-    if (!_cache.containsKey(tripEntry.getId())) {
+    if (!_cache.containsKey(tripEntry.getId())) { // note cache may contain null result
       BlockServiceDate blockServiceDate = getBlockServiceDateFromTripUnCached(tripEntry, currentTime);
       _cache.put(tripEntry.getId(), blockServiceDate);
     }
