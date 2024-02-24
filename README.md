@@ -59,9 +59,7 @@ OneBusAway is used in a number of places:
 
 * http://pugetsound.onebusaway.org - the original Seattle-area deployment that started it all
 * http://tampa.onebusaway.org - a deployment in Tampa, Florida
-* http://atlanta.onebusaway.org - a deployment in Atlanta, Georgia
 * http://bustime.mta.info - real-time info for NYC MTA buses
-* http://www.yorkregiontransit.com/en/ridingwithus/apps.asp - Real-time info in York, Canada
 
 Check out the full list on the [OneBusAway Deployments page](https://github.com/OneBusAway/onebusaway/wiki/OneBusAway-Deployments).  Check out the main project page at http://onebusaway.org.
 
