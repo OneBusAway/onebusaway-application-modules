@@ -1,4 +1,4 @@
-## The OneBusAway Application Suite [![Java CI with Maven](https://github.com/OneBusAway/onebusaway-application-modules/actions/workflows/maven.yml/badge.svg)](https://github.com/OneBusAway/onebusaway-application-modules/actions/workflows/maven.yml) [![Join the OneBusAway chat](https://onebusaway.herokuapp.com/badge.svg)](https://onebusaway.herokuapp.com/)
+## The OneBusAway Application Suite [![Java CI with Maven](https://github.com/OneBusAway/onebusaway-application-modules/actions/workflows/maven.yml/badge.svg)](https://github.com/OneBusAway/onebusaway-application-modules/actions/workflows/maven.yml) [Join the OneBusAway chat](https://onebusaway.slack.com/)
 
 A project of the non-profit [Open Transit Software Foundation](https://opentransitsoftwarefoundation.org/)!
 
@@ -47,11 +47,11 @@ There are two options for setting up your own OneBusAway instance:
 
 ## Status
 
-* Latest Stable Release - `2.1.0`:
-    * [onebusaway-transit-data-federation-webapp](https://repo.camsys-apps.com/releases/org/onebusaway/onebusaway-transit-data-federation-webapp/2.1.0/onebusaway-transit-data-federation-webapp-2.1.0.war)
-    * [onebusaway-api-webapp](https://repo.camsys-apps.com/releases/org/onebusaway/onebusaway-api-webapp/2.1.0/onebusaway-api-webapp-2.1.0.war)
-    * [onebusaway-enterprise-acta-webapp](https://repo.camsys-apps.com/releases/org/onebusaway/onebusaway-enterprise-acta-webapp/2.1.0/onebusaway-enterprise-acta-webapp-2.1.0.war)
-* [Previous releases](http://nexus.onebusaway.org/nexus/content/groups/public/org/onebusaway/)
+* Latest Stable Release - `2.4.18-cs`:
+    * [onebusaway-transit-data-federation-webapp](https://repo.camsys-apps.com/releases/org/onebusaway/onebusaway-transit-data-federation-webapp/2.4.18-cs/onebusaway-transit-data-federation-webapp-2.4.18-cs.war)
+    * [onebusaway-api-webapp](https://repo.camsys-apps.com/releases/org/onebusaway/onebusaway-api-webapp/2.4.18-cs/onebusaway-api-webapp-2.4.18-cs.war)
+    * [onebusaway-enterprise-acta-webapp](https://repo.camsys-apps.com/releases/org/onebusaway/onebusaway-enterprise-acta-webapp/2.4.18-cs/onebusaway-enterprise-acta-webapp-2.4.18-cs.war)
+* [Previous releases](https://developer.onebusaway.org/release-notes)
 
 ## Deployments
 
@@ -59,16 +59,13 @@ OneBusAway is used in a number of places:
 
 * http://pugetsound.onebusaway.org - the original Seattle-area deployment that started it all
 * http://tampa.onebusaway.org - a deployment in Tampa, Florida
-* http://atlanta.onebusaway.org - a deployment in Atlanta, Georgia
 * http://bustime.mta.info - real-time info for NYC MTA buses
-* http://www.yorkregiontransit.com/en/ridingwithus/apps.asp - Real-time info in York, Canada
 
 Check out the full list on the [OneBusAway Deployments page](https://github.com/OneBusAway/onebusaway/wiki/OneBusAway-Deployments).  Check out the main project page at http://onebusaway.org.
 
 ## Download
 
-* [Latest Stable Release](http://developer.onebusaway.org/modules/onebusaway-application-modules/current/downloads.html)
-* [Latest Development Release](http://developer.onebusaway.org/modules/onebusaway-application-modules/current-SNAPSHOT/downloads.html)
+* [Latest Stable Release](https://developer.onebusaway.org/downloads)
 
 ## Code Repository
 
@@ -76,7 +73,7 @@ To browse the source online visit https://github.com/OneBusAway/onebusaway-appli
 
 To create a local copy of the repository, use the following command:
 
-`$ git clone git://github.com/OneBusAway/onebusaway-application-modules.git`
+`$ git clone https://github.com/OneBusAway/onebusaway-application-modules.git`
 
 
 ## Developer Information
