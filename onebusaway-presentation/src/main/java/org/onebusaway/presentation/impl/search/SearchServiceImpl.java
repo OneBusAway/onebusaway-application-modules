@@ -495,11 +495,16 @@ public class SearchServiceImpl implements SearchService {
 		}
 		// try stop name match
 		if (_stopNameToStopIdMap.get(stopQuery) != null) {
-			for (String stopId : _stopNameToStopIdMap.get(stopQuery)) {
-				StopBean stopBean = _transitDataService.getStop(stopId);
-				results.addMatch(resultFactory.getStopResult(stopBean, results.getRouteFilter()));
-				results.setHint("tryAsStop");
-				return;
+			// stopNames are not guaranteed unique, and therefore this may return the wrong stop
+			if (_stopNameToStopIdMap.containsKey(stopQuery)) {
+				Set<String> stopIdSet = _stopNameToStopIdMap.get(stopQuery);
+				// if it's not an exact match let later search heuristics catch it
+				if (stopIdSet.size() == 1) {
+					StopBean stopBean = _transitDataService.getStop(stopIdSet.iterator().next());
+					results.addMatch(resultFactory.getStopResult(stopBean, results.getRouteFilter()));
+					results.setHint("tryAsStop");
+					return;
+				}
 			}
 		}
 	}
