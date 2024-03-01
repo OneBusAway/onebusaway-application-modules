@@ -102,7 +102,7 @@ public class NyctRandomIntegrationTest extends AbstractGtfsRealtimeIntegrationTe
     List<String> routeIdsToCancel = Arrays.asList("MTASBWY_J","MTASBWY_Z");
     String expectedStopId = "MTASBWY_A15S";
     String expectedRouteId = "MTASBWY_D";
-    String expectedTripId = "MTASBWY_a053550_D..S14R";
+    String expectedTripId = "MTASBWY_053550_D..S14R";
     String expectedHeadsign = "Coney Island-Stillwell Av";
     String path = getIntegrationTestPath() + File.separator;
     String name = "nyct_subways_gtfs_rt.2024-02-28T09:11:26:00.pb";
