@@ -93,7 +93,7 @@ public class NyctRandomIntegrationTest extends AbstractGtfsRealtimeIntegrationTe
 
     GtfsRealtimeSource source = runRealtime(routeIdsToCancel, expectedRouteId, expectedStopId, path, name);
     expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId,
-            expectedTripId, expectedHeadsign, 0);
+            expectedTripId, null, expectedHeadsign, 0);
   }
 
   @Test
@@ -104,12 +104,19 @@ public class NyctRandomIntegrationTest extends AbstractGtfsRealtimeIntegrationTe
     String expectedRouteId = "MTASBWY_D";
     String expectedTripId = "MTASBWY_053550_D..S14R";
     String expectedHeadsign = "Coney Island-Stillwell Av";
+    String expectedVehicleId = "MTASBWY_1D 0855+ 205/STL";
     String path = getIntegrationTestPath() + File.separator;
     String name = "nyct_subways_gtfs_rt.2024-02-28T09:11:26:00.pb";
 
     GtfsRealtimeSource source = runRealtime(routeIdsToCancel, expectedRouteId, expectedStopId, path, name);
     expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId,
-            expectedTripId, expectedHeadsign, 4);
+            expectedTripId, expectedVehicleId, expectedHeadsign, 4);
+    expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId,
+            "MTASBWY_054050_D..S07R", "MTASBWY_1D 0900+ 205/STL", expectedHeadsign, 16);
+    expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId,
+            "MTASBWY_055100_D..S07R", "MTASBWY_1D 0911 205/STL", expectedHeadsign, 27);
+    expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId,
+            "MTASBWY_056100_D..S07R", "MTASBWY_1D 0921 205/STL", expectedHeadsign, 37);
   }
 
 }

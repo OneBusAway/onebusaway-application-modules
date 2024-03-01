@@ -337,14 +337,20 @@ public abstract class AbstractGtfsRealtimeIntegrationTest {
   }
 
   protected ArrivalAndDepartureBean expectArrivalAndTripAndHeadsign(long referenceTime, String stopId, String routeId,
-                                                                    String tripId, String headsign, int minutesAwayMax) {
+                                                                    String tripId, String expectedVehicleId,
+                                                                    String headsign, int minutesAwayMax) {
     ArrivalAndDepartureBean bean = expectArrivalAndTrip(referenceTime, stopId, routeId, tripId, minutesAwayMax);
     assertEquals("expected headsign " + headsign + " but got " + bean.getTrip().getTripHeadsign(),
             headsign, bean.getTrip().getTripHeadsign());
+    if (expectedVehicleId != null) {
+      assertEquals("expected vehicle " + expectedVehicleId + " but got " + bean.getVehicleId(),
+              expectedVehicleId, bean.getVehicleId());
+    }
     return bean;
   }
 
-  protected ArrivalAndDepartureBean expectArrivalAndTrip(long referenceTime, String stopId, String routeId, String tripId, int minutesAwayMax) {
+  protected ArrivalAndDepartureBean expectArrivalAndTrip(long referenceTime, String stopId, String routeId, String tripId,
+                                                         int minutesAwayMax) {
     ArrivalAndDepartureBean bean = expectArrival(referenceTime, stopId, routeId, minutesAwayMax);
     assertEquals("expected tripId " + tripId + " but got " + bean.getTrip().getId(), tripId, bean.getTrip().getId());
     return bean;
