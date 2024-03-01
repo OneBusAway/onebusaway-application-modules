@@ -34,7 +34,6 @@ public final class NarrativeProviderImpl implements Serializable {
 
   private static final long serialVersionUID = 2L;
 
-  private Logger _log = LoggerFactory.getLogger(NarrativeProviderImpl.class);
 
   private Map<String, AgencyNarrative> _agencyNarratives = new HashMap<String, AgencyNarrative>();
 
@@ -297,7 +296,8 @@ public final class NarrativeProviderImpl implements Serializable {
     if (routeAndHeadsignNarrative == null) {
       for (StopDirectionKey stopDirectionKey : _patternCache.keySet()) {
         if (stopDirectionKey.getStopId().equals(stopId)) {
-          _log.error("patternCache miss but stop/direction exists={},{}",  stopDirectionKey.getStopId(), stopDirectionKey.getDirectionId());
+          System.out.println("patternCache miss but stop/direction exists=" +
+                  stopDirectionKey.getStopId() + ", " + stopDirectionKey.getDirectionId());
         }
       }
       return null;
