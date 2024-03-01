@@ -494,17 +494,15 @@ public class SearchServiceImpl implements SearchService {
 			return;
 		}
 		// try stop name match
-		if (_stopNameToStopIdMap.get(stopQuery) != null) {
-			// stopNames are not guaranteed unique, and therefore this may return the wrong stop
-			if (_stopNameToStopIdMap.containsKey(stopQuery)) {
-				Set<String> stopIdSet = _stopNameToStopIdMap.get(stopQuery);
-				// if it's not an exact match let later search heuristics catch it
-				if (stopIdSet.size() == 1) {
-					StopBean stopBean = _transitDataService.getStop(stopIdSet.iterator().next());
-					results.addMatch(resultFactory.getStopResult(stopBean, results.getRouteFilter()));
-					results.setHint("tryAsStop");
-					return;
-				}
+		// stopNames are not guaranteed unique, and therefore this may return the wrong stop
+		if (_stopNameToStopIdMap.containsKey(stopQuery)) {
+			Set<String> stopIdSet = _stopNameToStopIdMap.get(stopQuery);
+			// if it's not an exact match let later search heuristics catch it
+			if (stopIdSet.size() == 1) {
+				StopBean stopBean = _transitDataService.getStop(stopIdSet.iterator().next());
+				results.addMatch(resultFactory.getStopResult(stopBean, results.getRouteFilter()));
+				results.setHint("tryAsStop");
+				return;
 			}
 		}
 	}
@@ -676,13 +674,23 @@ public class SearchServiceImpl implements SearchService {
   }
 
   private String matchAgencyIds(String q) {
-	  for (String id : getAgencyIds()) {
+	  for (String id : filterToOnlySpaces(getAgencyIds())) {
 	    if (q.contains(id)) {
 	      return id;
 	    }
 	  }
     return null;
   }
+
+	private List<String> filterToOnlySpaces(List<String> agencyIds) {
+		List<String> filtered = new ArrayList<>();
+		for (String agencyId : agencyIds) {
+			if (agencyId.contains(" ")) {
+				filtered.add(agencyId);
+			}
+		}
+	return filtered;
+	}
 
 
 	private List<String> _agencyIds = null;
