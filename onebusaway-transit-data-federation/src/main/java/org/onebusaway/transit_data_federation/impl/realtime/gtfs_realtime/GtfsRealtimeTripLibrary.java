@@ -349,25 +349,26 @@ public class GtfsRealtimeTripLibrary {
       updates.add(update);
     }
 
-    // Set vehicle ID in block if possible
     for (CombinedTripUpdatesAndVehiclePosition update : updates) {
-      String vehicleId = null;
+      // Set vehicle ID in block if missing
+      if ( update.block != null && update.block.getVehicleId() == null) {
+        String vehicleId = null;
 
-      for (TripUpdate tu : update.getTripUpdates()) {
-        if (tu.hasVehicle() && tu.getVehicle().hasId()) {
+        for (TripUpdate tu : update.getTripUpdates()) {
           vehicleId = getVehicleId(tu);
-          break;
+          if (vehicleId != null)
+            break;
         }
-      }
 
-      if (vehicleId == null && update.vehiclePosition != null
-          && update.vehiclePosition.hasVehicle()
-          && update.vehiclePosition.getVehicle().hasId()) {
-        vehicleId = getVehicleId(update.vehiclePosition);
-      }
+        if (vehicleId == null && update.vehiclePosition != null
+                && update.vehiclePosition.hasVehicle()
+                && update.vehiclePosition.getVehicle().hasId()) {
+          vehicleId = getVehicleId(update.vehiclePosition);
+        }
 
-      if (vehicleId != null && update.block != null && update.block.getVehicleId() == null) {
-        update.block.setVehicleId(vehicleId);
+        if (vehicleId != null && update.block != null) {
+          update.block.setVehicleId(vehicleId);
+        }
       }
     }
 
