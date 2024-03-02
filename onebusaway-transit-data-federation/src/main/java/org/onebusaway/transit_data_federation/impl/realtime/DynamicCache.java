@@ -33,7 +33,7 @@ public class DynamicCache {
   private long lastPruneTime = 0l;
   private long pruneIntervalMillis = 1 * 60 * 60 * 1000; // 1 hour
 
-  private long windowInMillis = 5 * 60 * 1000; // 90 minutes // TODO before commit
+  private long windowInMillis = 90 * 60 * 1000; // 90 minutes
 
   public void setPruneIntervalMillis(long millis) {
     this.pruneIntervalMillis = millis;
