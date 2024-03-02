@@ -87,7 +87,7 @@ public class NyctChangingPatternTest extends AbstractGtfsRealtimeIntegrationTest
             "1707401383.ace.pb",
             "1707401323.ace.pb",
             "1707401262.ace.pb",
-            "1707401202.ace.pb"/*,
+            "1707401202.ace.pb",
             "1707401142.ace.pb",
             "1707401081.ace.pb",
             "1707401021.ace.pb",
@@ -155,7 +155,7 @@ public class NyctChangingPatternTest extends AbstractGtfsRealtimeIntegrationTest
             "1707397277.ace.pb",
             "1707397217.ace.pb",
             "1707397157.ace.pb"
-            */
+
     };
     List<String> names = Arrays.asList(reverseNames);
     List<String> exceptionTrips = null;

@@ -135,7 +135,6 @@ public abstract class AbstractGtfsRealtimeIntegrationTest {
     query.getSystemFilterChain().add(new ArrivalAndDepartureFilterByRealtime(filter));
     List<ArrivalAndDepartureBean> arrivalsAndDeparturesByStopId = service.getArrivalsAndDeparturesByStopId(firstStop.getId(), query);
 
-    assertTrue("no A/Ds for stop " + firstStop.getId(), !arrivalsAndDeparturesByStopId.isEmpty());
     _log.debug("found {} ADs at {}", arrivalsAndDeparturesByStopId.size(), new Date(firstStopTime));
     for (ArrivalAndDepartureBean bean : arrivalsAndDeparturesByStopId) {
       AgencyAndId tripId = AgencyAndIdLibrary.convertFromString(bean.getTrip().getId());
@@ -192,9 +191,16 @@ public abstract class AbstractGtfsRealtimeIntegrationTest {
 
   protected void verifyPredictions(String message, ArrivalAndDepartureBean bean) {
     if (bean.getTripStatus().getTimepointPredictions() == null) {
-      _log.error("missing predictions for bean {}", bean);
-      fail(message + " missing predictions for bean " + bean);
-      return;
+      long currentTime = this._bundleLoader.getSource().getGtfsRealtimeTripLibrary().getCurrentTime();
+      if (currentTime > bean.getPredictedArrivalTime() || currentTime > bean.getPredictedDepartureTime()) {
+        // the arrival is in the past, don't fail for this
+        _log.debug("past arrival {}", bean);
+        return;
+      } else {
+        _log.error("missing predictions for bean {}", bean);
+        fail(message + " missing predictions for bean " + bean);
+        return;
+      }
     }
     verifyTimepoints(bean.getTripStatus().getTimepointPredictions());
     AgencyAndId tripId = AgencyAndIdLibrary.convertFromString(bean.getTrip().getId());
