@@ -1193,7 +1193,7 @@ public class GtfsRealtimeTripLibrary {
       }
     }
 
-    if (stopTimeUpdate.hasStopId()) {
+    if (stopTimeUpdate.hasStopId() && (stopTimeUpdate.hasArrival() || stopTimeUpdate.hasDeparture())) {
       int time = getTimeForStopTimeUpdate(stopTimeUpdate, serviceDate);
       String stopId = convertStopId(stopTimeUpdate.getStopId());
       // There could be loops, meaning a stop could appear multiple times along
