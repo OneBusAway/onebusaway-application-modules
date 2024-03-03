@@ -58,6 +58,7 @@ public class DynamicGraphImpl extends DynamicCache implements DynamicGraph {
   }
 
   private void prune(long currentTime) {
+    long start = System.currentTimeMillis();
     try {
       resetStats(currentTime);
       int effectiveTime = getEffectiveTime(currentTime);
@@ -66,6 +67,8 @@ public class DynamicGraphImpl extends DynamicCache implements DynamicGraph {
       pruneRouteEntryById(effectiveTime);
     } catch (Throwable t) {
       _log.error("prune exception {}", t, t);
+    } finally {
+      _log.info("cache prune complete in {}ms", System.currentTimeMillis()-start);
     }
   }
 

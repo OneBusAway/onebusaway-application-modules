@@ -92,6 +92,7 @@ public class DynamicBlockIndexServiceImpl extends DynamicCache implements Dynami
   }
 
   private void prune(long currentTime) {
+    long start = System.currentTimeMillis();
     try {
       resetStats(currentTime);
       int effectiveTime = getEffectiveTime(currentTime);
@@ -101,6 +102,8 @@ public class DynamicBlockIndexServiceImpl extends DynamicCache implements Dynami
       prunceBlockTripByBlockId(currentTime, effectiveTime);
     } catch (Throwable t) {
       _log.error("pune exception {}", t, t);
+    } finally {
+      _log.info("cache prune complete in {}ms", System.currentTimeMillis()-start);
     }
   }
 
