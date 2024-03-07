@@ -358,7 +358,9 @@ public abstract class AbstractGtfsRealtimeIntegrationTest {
   protected ArrivalAndDepartureBean expectArrivalAndTrip(long referenceTime, String stopId, String routeId, String tripId,
                                                          int minutesAwayMax) {
     ArrivalAndDepartureBean bean = expectArrival(referenceTime, stopId, routeId, minutesAwayMax);
-    assertEquals("expected tripId " + tripId + " but got " + bean.getTrip().getId(), tripId, bean.getTrip().getId());
+    assertEquals("expected tripId " + tripId + " but got " + bean.getTrip().getId()
+            + " for minutes Away " + minutesAwayMax,
+            tripId, bean.getTrip().getId());
     return bean;
   }
 
@@ -381,11 +383,14 @@ public abstract class AbstractGtfsRealtimeIntegrationTest {
 
   protected ArrivalAndDepartureBean testArrival(List<ArrivalAndDepartureBean> arrivalsAndDeparturesByStopId, String routeId, long referenceTime, int minutesAwayMax) {
     List<Long> etas = new ArrayList<>();
+    List<String> trips = new ArrayList<>();
     List<String> routes = new ArrayList<>();
-    assertFalse(arrivalsAndDeparturesByStopId.isEmpty());
+
+    assertFalse("no stops for arrival time " + minutesAwayMax, arrivalsAndDeparturesByStopId.isEmpty());
     for (ArrivalAndDepartureBean bean : arrivalsAndDeparturesByStopId) {
       long etaMinutes = (bean.getPredictedArrivalTime() - referenceTime) / 1000 / 60;
       etas.add(etaMinutes);
+      trips.add(bean.getTrip().getId());
       routes.add(bean.getTrip().getRoute().getId());
       if (etaMinutes >= minutesAwayMax-1
               && etaMinutes <= minutesAwayMax+1 && bean.getTrip().getRoute().getId().equals(routeId)) {
@@ -394,7 +399,9 @@ public abstract class AbstractGtfsRealtimeIntegrationTest {
     }
     // not found!!!
     fail("expected arrival to be at least " + (minutesAwayMax-1) + " minutes away but found " + etas
-      + " on routes " + routes + " when looking for " + routeId);
+      + " on routes " + routes
+      + " and trips " + trips
+      + " when looking for " + routeId);
     return null;
   }
 

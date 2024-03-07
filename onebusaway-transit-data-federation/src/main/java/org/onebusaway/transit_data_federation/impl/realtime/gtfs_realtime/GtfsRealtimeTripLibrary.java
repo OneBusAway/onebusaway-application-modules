@@ -22,7 +22,6 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.google.transit.realtime.GtfsRealtimeMTARR;
@@ -320,7 +319,7 @@ public class GtfsRealtimeTripLibrary {
       TripUpdate firstTrip = tripUpdates.iterator().next();
       long time = firstTrip.hasTimestamp() ? firstTrip.getTimestamp() * 1000 : currentTime();
       update.block = getTripDescriptorAsBlockDescriptor(result, firstTrip.getTrip(), time, vehicleId);
-      if (update.block == null && isNycDynamicTrip(firstTrip)) {
+      if (isNycDynamicTrip(firstTrip)) {
         update.block = handleDynamicTripUpdate(firstTrip);
       }
       // pass through multiple trip updates per block
