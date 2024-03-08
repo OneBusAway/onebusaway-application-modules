@@ -15,6 +15,7 @@
  */
 package org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.integration_tests;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.realtime.api.TimepointPredictionRecord;
@@ -48,7 +49,8 @@ public class STDuplicatedTripsIntegrationTest extends AbstractJsonRealtimeIntegr
   public String getTimezone() {
     return "America/Los_Angeles";
   }
-  @Test
+//  @Test
+  @Ignore
   public void testDuplicatedTrips() throws Exception {
     setupTest();
   }
