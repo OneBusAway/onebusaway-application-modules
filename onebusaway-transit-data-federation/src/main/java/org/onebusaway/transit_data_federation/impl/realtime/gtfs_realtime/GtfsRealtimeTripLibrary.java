@@ -749,7 +749,7 @@ public class GtfsRealtimeTripLibrary {
 
       }
     }
-  return null;
+  return stopId;
   }
 
   private String markDuplicated(String tripId) {
