@@ -411,6 +411,8 @@ public class DynamicBlockConfigurationEntryImpl implements BlockConfigurationEnt
             return false;
         if (!serviceIds.equals(bce.getServiceIds()))
             return false;
+        if (blockStopTimes.size() != bce.getStopTimes().size())
+            return false;
         return true;
     }
 

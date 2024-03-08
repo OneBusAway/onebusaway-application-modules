@@ -178,14 +178,17 @@ public class NyctRandomIntegrationTest extends AbstractGtfsRealtimeIntegrationTe
     // part II: expect 043300_D..S14R  1D 0713 205/STL 57mins
     String part2 = "nyct_subways_gtfs_rt.2024-03-05T06:17:43.pb";
     // now has 30 stops, D01S at 7:13:30
-    // too far in future?
-    //source = runRealtime(routeIdsToCancel, expectedRouteId, expectedStopId, path, part2);
+    // and therefor headsign should change!!!!
+    source = runRealtime(routeIdsToCancel, expectedRouteId, expectedStopId, path, part2);
     expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), "MTASBWY_D01S", expectedRouteId,
-            "MTASBWY_043300_D..S14R", "MTASBWY_1D 0713 205/STL", "Bedford Park Blvd", 58);
+            "MTASBWY_043300_D..S14R", "MTASBWY_1D 0713 205/STL", "Coney Island-Stillwell Av", 55);
     // AND D14S at 7:44:30
-    // too far in future?
-//    expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId,
-//            "MTASBWY_043300_D..S14R", "MTASBWY_1D 0713 205/STL", "Bedford Park Blvd", 200);
+    expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId,
+            "MTASBWY_043300_D..S14R", "MTASBWY_1D 0713 205/STL", "Coney Island-Stillwell Av", 86);
+    // AND D43 (last stop)
+    expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), "MTASBWY_D43S", expectedRouteId,
+            "MTASBWY_043300_D..S14R", "MTASBWY_1D 0713 205/STL", "Coney Island-Stillwell Av", 141);
+
 
 
 
@@ -194,7 +197,7 @@ public class NyctRandomIntegrationTest extends AbstractGtfsRealtimeIntegrationTe
     source = runRealtime(routeIdsToCancel, expectedRouteId, expectedStopId, path, part3);
     // ok things get interesting here!  we loose the trip, even tho the feed still hav a D14S 7:44 arrival
     expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId,
-            "MTASBWY_043300_D..S14R", "MTASBWY_1D 0713 205/STL", "Bedford Park Blvd", 26);
+            "MTASBWY_043300_D..S14R", "MTASBWY_1D 0713 205/STL", "Coney Island-Stillwell Av", 26);
 
     // part IV: expect 043700_D..S14R  1D 0717 BPK/STL (departed)
     // grab a downstream stop....D10S is first guess

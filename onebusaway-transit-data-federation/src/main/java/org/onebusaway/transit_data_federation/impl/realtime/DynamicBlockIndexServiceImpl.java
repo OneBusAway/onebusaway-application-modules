@@ -234,13 +234,13 @@ public class DynamicBlockIndexServiceImpl extends DynamicCache implements Dynami
 
 
   private void mergeBlockTripIndex(AgencyAndId id, BlockTripIndex blockTripIndex) {
+    if (!blockTripByBlockId.containsKey(id)) {
+      blockTripByBlockId.put(id, new ArrayList<>());
+    }
     List<BlockTripIndex> blockTripIndices = blockTripByBlockId.get(id);
     BlockTripIndex existingBlockTripIndex = blockTripIndices.get(0);
     if (!blockTripIndex.equals(existingBlockTripIndex)) {
       _log.debug("blockTripIndex changed {}, truncating!", blockTripIndex);
-      if (!blockTripByBlockId.containsKey(id)) {
-        blockTripByBlockId.put(id, new ArrayList<>());
-      }
       blockTripIndices.clear();
       blockTripIndices.add(blockTripIndex);
       TripEntry trip = blockTripIndex.getTrips().get(0).getTrip();
@@ -252,7 +252,14 @@ public class DynamicBlockIndexServiceImpl extends DynamicCache implements Dynami
       if (!blockTripIndexByRouteCollectionId.containsKey(route.getId())) {
         blockTripIndexByRouteCollectionId.put(route.getId(), new ArrayList<>());
       }
-      blockTripIndexByRouteCollectionId.get(route.getId()).clear();
+      // remove old blockTrip in route
+      Iterator<BlockTripIndex> routeIterator = blockTripIndexByRouteCollectionId.get(route.getId()).iterator();
+      while (routeIterator.hasNext()) {
+        BlockTripIndex index = routeIterator.next();
+        if (index.getTrips().get(0).getTrip().getId().equals(id)) {
+          routeIterator.remove();
+        }
+      }
       blockTripIndexByRouteCollectionId.get(route.getId()).add(blockTripIndex);
       _narrativeService.updateDynamicTrip(blockTripIndex);
     }
@@ -261,8 +268,6 @@ public class DynamicBlockIndexServiceImpl extends DynamicCache implements Dynami
   private void mergeBlockInstance(BlockInstance blockInstance) {
     AgencyAndId id = blockInstance.getBlock().getBlock().getId();
     cacheByBlockId.put(id, blockInstance);
-    List<BlockEntry> blocks = new ArrayList<>();
-    blocks.add(blockInstance.getBlock().getBlock());
     _dynamicGraph.updateBlock(blockInstance.getBlock().getBlock());
   }
 

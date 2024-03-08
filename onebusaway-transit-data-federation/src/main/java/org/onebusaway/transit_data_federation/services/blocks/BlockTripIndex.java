@@ -18,6 +18,7 @@ package org.onebusaway.transit_data_federation.services.blocks;
 
 import java.util.List;
 
+import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
 
 @TransitTimeIndex
@@ -60,6 +61,13 @@ public class BlockTripIndex extends AbstractBlockTripIndex {
     // we don't consider serviceInterval as it tends to be dynamic
     if (_trips.size() != other._trips.size() && !_trips.containsAll(other._trips)) {
       return false;
+    }
+    for (int i = 0; i < _trips.size(); i++) {
+      List<BlockStopTimeEntry> stopTimes = _trips.get(i).getStopTimes();
+      List<BlockStopTimeEntry> otherStopTimes = other._trips.get(i).getStopTimes();
+      if (stopTimes.size() != otherStopTimes.size() && !stopTimes.containsAll(otherStopTimes)) {
+        return false;
+      }
     }
     return true;
   }
