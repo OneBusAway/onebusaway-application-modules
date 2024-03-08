@@ -32,12 +32,11 @@ import org.onebusaway.collections.Min;
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
-import org.onebusaway.gtfs.serialization.mappings.InvalidStopTimeException;
-import org.onebusaway.gtfs.serialization.mappings.StopTimeFieldMappingFactory;
 import org.onebusaway.realtime.api.OccupancyStatus;
 import org.onebusaway.realtime.api.TimepointPredictionRecord;
 import org.onebusaway.realtime.api.VehicleLocationRecord;
 import org.onebusaway.realtime.api.VehicleOccupancyRecord;
+import org.onebusaway.transit_data.model.StopDirectionSwap;
 import org.onebusaway.transit_data.model.TransitDataConstants;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.blocks.ScheduledBlockLocation;
@@ -676,7 +675,9 @@ public class GtfsRealtimeTripLibrary {
         int sequence = 0;
         for (StopTimeUpdate stu : tripUpdate.getStopTimeUpdateList()) {
           TimepointPredictionRecord tpr = new TimepointPredictionRecord();
-          tpr.setTimepointId(new AgencyAndId(agencyId, stu.getStopId()));
+          AgencyAndId correctedStopId = enforceWrongWayConcurrency(blockDescriptor, new AgencyAndId(agencyId, tripUpdate.getTrip().getTripId()),
+                  new AgencyAndId(agencyId,stu.getStopId()));
+          tpr.setTimepointId(correctedStopId);
           StopEntry testStop = this._entitySource.getStop(tpr.getTimepointId());
           if (testStop == null) {
             _log.debug("discarding stu for unknown stop {}", tpr.getTimepointId());
@@ -733,6 +734,22 @@ public class GtfsRealtimeTripLibrary {
     } catch (Throwable t) {
       _log.error("source-exception {}", t, t);
     }
+  }
+
+  private AgencyAndId enforceWrongWayConcurrency(BlockDescriptor blockDescriptor, AgencyAndId tripId, AgencyAndId stopId) {
+    for (BlockTripEntry blockTripEntry : blockDescriptor.getBlockInstance().getBlock().getTrips()) {
+      if (blockTripEntry.getTrip().getId().equals(tripId)) {
+        AgencyAndId routeId = blockTripEntry.getTrip().getRoute().getId();
+        String directionId = blockTripEntry.getTrip().getDirectionId();
+
+        StopDirectionSwap stopDirectionSwap = _serviceSource.getStopSwapService().findStopDirectionSwap(routeId, directionId, stopId);
+        if (stopDirectionSwap == null)
+          return stopId;
+        return stopDirectionSwap.getToStop();
+
+      }
+    }
+  return null;
   }
 
   private String markDuplicated(String tripId) {
