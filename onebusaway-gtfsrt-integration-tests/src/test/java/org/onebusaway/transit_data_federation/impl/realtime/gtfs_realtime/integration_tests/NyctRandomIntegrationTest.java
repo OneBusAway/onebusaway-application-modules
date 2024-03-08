@@ -204,4 +204,29 @@ public class NyctRandomIntegrationTest extends AbstractGtfsRealtimeIntegrationTe
             "MTASBWY_043700_D..S14R", "MTASBWY_1D 0717 BPK/STL", "Coney Island-Stillwell Av", 0);
 
   }
+
+  @Test
+  /*
+   * If the first stop on a trip is a wrong way concurrency verify that predictions still match.
+   */
+  public void test8() throws Exception {
+    List<String> routeIdsToCancel = Arrays.asList("MTASBWY_B","MTASBWY_D","MTASBWY_F","MTASBWY_M");
+    String expectedStopId = "MTASBWY_M11N"; // wrong way stop
+    String expectedRouteId = "MTASBWY_M";
+    String path = getIntegrationTestPath() + File.separator;
+    String part1 = "nyct_subways_gtfs_rt.2024-03-05T19:58:50.pb";
+    GtfsRealtimeSource source = runRealtime(routeIdsToCancel, expectedRouteId, expectedStopId, path, part1);
+    expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId,
+            "MTASBWY_118550_M..S20X009", "MTASBWY_1M 1945+ 576/MET", "Middle Village-Metropolitan Av", 16);
+    // when train passes Broadway-Lafayette it drops out of system
+    // Missing data for Essex St to Myrtle Av
+    // (also late night trips running from Myrtle Ave to Met don't show Myrtle Ave
+    // M stopping pattern
+    // Delancey St-Essex St: M18S (but actually M18N for wrong way concurrency)
+    // Myrtle: M11S
+    String part2 = "nyct_subways_gtfs_rt.2024-03-05T19:59:50.pb";
+    source = runRealtime(routeIdsToCancel, expectedRouteId, expectedStopId, path, part2);
+    expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId,
+            "MTASBWY_118550_M..S20X009", "MTASBWY_1M 1945+ 576/MET", "Middle Village-Metropolitan Av", 15);
+  }
 }

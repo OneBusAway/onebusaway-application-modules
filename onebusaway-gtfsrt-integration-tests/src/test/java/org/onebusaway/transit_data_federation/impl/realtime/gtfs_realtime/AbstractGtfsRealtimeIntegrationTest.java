@@ -289,7 +289,7 @@ public abstract class AbstractGtfsRealtimeIntegrationTest {
       }
     }
 
-    assertEquals(2, count);
+    assertEquals("expecting 2 stop groups for route " + routeId, 2, count);
   }
 
   protected void verifyStopHeadsigns() {
