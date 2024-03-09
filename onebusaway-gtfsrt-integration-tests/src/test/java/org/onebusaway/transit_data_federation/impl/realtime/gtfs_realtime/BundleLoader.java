@@ -65,6 +65,7 @@ public class BundleLoader {
     AgencyService agencyService = _context.getBean(AgencyService.class);
     TransitGraphDao currentTransitGraphDao = _context.getBean(TransitGraphDao.class);
     _source = new GtfsRealtimeSource();
+    _source.setRefreshInterval(0); // don't refresh
 
     // set the bundle _source
     _source.setTransitGraphDao(currentTransitGraphDao);

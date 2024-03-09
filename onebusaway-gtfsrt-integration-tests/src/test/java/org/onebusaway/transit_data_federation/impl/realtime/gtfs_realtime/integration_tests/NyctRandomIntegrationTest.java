@@ -214,13 +214,13 @@ public class NyctRandomIntegrationTest extends AbstractGtfsRealtimeIntegrationTe
    */
   public void test8() throws Exception {
     List<String> routeIdsToCancel = Arrays.asList("MTASBWY_B","MTASBWY_D","MTASBWY_F","MTASBWY_M");
-    String expectedStopId = "MTASBWY_M11N"; // wrong way stop
+    String expectedStopId = "MTASBWY_M11S"; // wrong way stop, scheduled as M11N
     String expectedRouteId = "MTASBWY_M";
     String path = getIntegrationTestPath() + File.separator;
     String part1 = "nyct_subways_gtfs_rt.2024-03-05T19:58:50.pb";
     GtfsRealtimeSource source = runRealtime(routeIdsToCancel, expectedRouteId, expectedStopId, path, part1);
     expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId,
-            "MTASBWY_118550_M..S20X009", "MTASBWY_1M 1945+ 576/MET", "Middle Village-Metropolitan Av", 16);
+            "MTASBWY_118550_M..S20X009", "MTASBWY_1M 1945+ 576/MET", "Middle Village-Metropolitan Av", 17);
     // when train passes Broadway-Lafayette it drops out of system
     // Missing data for Essex St to Myrtle Av
     // (also late night trips running from Myrtle Ave to Met don't show Myrtle Ave
