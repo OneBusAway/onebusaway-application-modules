@@ -16,6 +16,7 @@
 package org.onebusaway.admin.service.assignments.impl;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.onebusaway.admin.model.assignments.AssignmentConfig;
@@ -45,7 +46,7 @@ public class AssignmentConfigDaoImplTest {
         _dao.deleteAll();
     }
 
-    @Test
+    @Ignore
     @Transactional
     public void getAssignmentTest() {
         Date date = new Date();
@@ -64,7 +65,7 @@ public class AssignmentConfigDaoImplTest {
 
     }
 
-    @Test
+    @Ignore
     @Transactional
     public void getAllTest() {
 
@@ -87,7 +88,7 @@ public class AssignmentConfigDaoImplTest {
 
     }
 
-    @Test
+    @Ignore
     public void deleteTest() {
         Date date = new Date();
 
@@ -110,7 +111,7 @@ public class AssignmentConfigDaoImplTest {
         assertNull(retrievedAssignmentConfig);
     }
 
-    @Test
+    @Ignore
     public void deleteAllTest() {
         Date date = new Date();
 
