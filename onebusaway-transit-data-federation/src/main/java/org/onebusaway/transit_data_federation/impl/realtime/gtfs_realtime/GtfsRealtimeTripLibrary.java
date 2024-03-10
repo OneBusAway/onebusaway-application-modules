@@ -630,11 +630,12 @@ public class GtfsRealtimeTripLibrary {
 
   private boolean isNycDynamicTrip(TripUpdate tu) {
     if (tu.hasTrip()) {
+      if (tu.getTrip().hasExtension(GtfsRealtimeNYCT.nyctTripDescriptor))
+        return true;
       if (tu.getTrip().hasScheduleRelationship()) {
         return tu.getTrip().getScheduleRelationship().equals(TripDescriptor.ScheduleRelationship.ADDED)
                 || tu.getTrip().getScheduleRelationship().equals(TripDescriptor.ScheduleRelationship.DUPLICATED);
       }
-      return tu.getTrip().hasExtension(GtfsRealtimeNYCT.nyctTripDescriptor);
     }
     return false;
   }
