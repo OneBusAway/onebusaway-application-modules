@@ -81,6 +81,10 @@ public class AssignmentDaoImplTest {
     }
 
 
+    @Test
+    public void emptyTest() {
+        return;
+    }
    @Ignore
     public void getAssignmentTest() {
         Date currentServiceDate = currentServiceDate();
