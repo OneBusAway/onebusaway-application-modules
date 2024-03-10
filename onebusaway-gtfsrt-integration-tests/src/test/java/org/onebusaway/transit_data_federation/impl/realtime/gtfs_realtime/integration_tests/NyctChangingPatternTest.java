@@ -168,7 +168,7 @@ public class NyctChangingPatternTest extends AbstractGtfsRealtimeIntegrationTest
       source.setTripUpdatesUrl(gtfsRtResourceN.getURL());
       source.refresh();
       verifyBeans("beans run " + i + ", name=" + name, firstStop, iterationTime, exceptionTrips);
-      verifyRouteDirectionStops("MTASBWY_A");
+      verifyRouteDirectionStops("MTASBWY_A", _exceptionRouteIds);
       if (iterationTime == 0l) continue;
       long expectedTime = timeMillis(iterationTime, 8, 52, 0);
       if (iterationTime >=  expectedTime) {

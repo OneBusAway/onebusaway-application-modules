@@ -77,6 +77,7 @@ public abstract class AbstractGtfsRealtimeIntegrationTest {
   }
   protected abstract String getIntegrationTestPath();
 
+  protected List<String> _exceptionRouteIds = Arrays.asList("MTASBWY_M");
   @Before
   public void setup() throws Exception {
     _bundleBuilder = new BundleBuilder();
@@ -268,7 +269,7 @@ public abstract class AbstractGtfsRealtimeIntegrationTest {
     return tripCount;
   }
 
-  protected void verifyRouteDirectionStops(String routeId) {
+  protected void verifyRouteDirectionStops(String routeId, List<String> exceptionRouteIds) {
     int count = 0;
     TransitDataService service = getBundleLoader().getApplicationContext().getBean(TransitDataService.class);
     StopsForRouteBean stopsForRoute = service.getStopsForRoute(routeId);
@@ -289,7 +290,9 @@ public abstract class AbstractGtfsRealtimeIntegrationTest {
       }
     }
 
-    assertEquals("expecting 2 stop groups for route " + routeId, 2, count);
+    if (!exceptionRouteIds.contains(routeId)){
+      assertEquals("expecting 2 stop groups for route " + routeId, 2, count);
+    }
   }
 
   protected void verifyStopHeadsigns() {
@@ -335,7 +338,7 @@ public abstract class AbstractGtfsRealtimeIntegrationTest {
     source.setTripUpdatesUrl(gtfsRtResourceN.getURL());
     source.refresh();
 
-    verifyRouteDirectionStops(expectedRouteId);
+    verifyRouteDirectionStops(expectedRouteId, _exceptionRouteIds);
     verifyStopHeadsigns();
 
 

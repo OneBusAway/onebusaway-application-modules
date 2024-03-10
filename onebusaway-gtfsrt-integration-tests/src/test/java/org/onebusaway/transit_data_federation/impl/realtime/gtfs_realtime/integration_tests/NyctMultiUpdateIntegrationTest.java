@@ -95,8 +95,8 @@ public class NyctMultiUpdateIntegrationTest extends AbstractGtfsRealtimeIntegrat
       source.setTripUpdatesUrl(gtfsRtResourceN.getURL());
       source.refresh();
       verifyBeans("beans run " + i, firstStop, source.getGtfsRealtimeTripLibrary().getCurrentTime());
-      verifyRouteDirectionStops("MTASBWY_1");
-      verifyRouteDirectionStops("MTASBWY_A");
+      verifyRouteDirectionStops("MTASBWY_1", _exceptionRouteIds);
+      verifyRouteDirectionStops("MTASBWY_A", _exceptionRouteIds);
       i++;
     }
 
