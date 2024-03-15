@@ -317,7 +317,9 @@ public abstract class AbstractGtfsRealtimeIntegrationTest {
 
   protected GtfsRealtimeSource runRealtime(List<String> routeIdsToCancel, String expectedRouteId, String expectedStopId, String path, String name)  throws Exception {
     GtfsRealtimeSource source = getBundleLoader().getSource();
-    source.setAgencyId("MTASBWY");
+    if (!source.getAgencyIds().contains("MTASBWY")) {
+      source.setAgencyId("MTASBWY");
+    }
 
     _listener = new TestVehicleLocationListener();
 

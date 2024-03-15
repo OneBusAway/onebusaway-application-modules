@@ -392,4 +392,40 @@ public class NyctRandomIntegrationTest extends AbstractGtfsRealtimeIntegrationTe
     expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), "MTASBWY_A28S", "MTASBWY_E",
             "MTASBWY_142350_E..S04R", "MTASBWY_1E 2343+ P-A/WTC", "World Trade Center", 11);
   }
+
+  /**
+   * Test stale feed behavour.
+   * @throws Exception
+   */
+  @Test
+  public void test10() throws Exception {
+
+    List<String> routeIdsToCancel = Arrays.asList("MTASBWY_A", "MTASBWY_B", "MTASBWY_C", "MTASBWY_D");
+    String expectedStopId = "MTASBWY_A09N";
+    String expectedRouteId = "MTASBWY_A";
+    String path = getIntegrationTestPath() + File.separator;
+
+    String part1 = "nyct_subways_gtfs_rt.2024-03-04T00:02:50-04:00.pb";
+    GtfsRealtimeSource source = runRealtime(routeIdsToCancel, expectedRouteId, expectedStopId, path, part1);
+    expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId,
+            "MTASBWY_136500_A..N", "MTASBWY_1A 2245 LEF/207", "Inwood-207 St", 4);
+    expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId,
+            "MTASBWY_136700_A..N", "MTASBWY_1A 2247 FAR/207", "Inwood-207 St", 26);
+
+    for (int i=0; i<10; i++) {
+      // feed was stale/repeated for 10 minutes
+      source = runRealtime(routeIdsToCancel, expectedRouteId, expectedStopId, path, part1);
+      expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId,
+              "MTASBWY_136500_A..N", "MTASBWY_1A 2245 LEF/207", "Inwood-207 St", 4);
+      expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId,
+              "MTASBWY_136700_A..N", "MTASBWY_1A 2247 FAR/207", "Inwood-207 St", 26);
+    }
+
+    String part2 = "nyct_subways_gtfs_rt.2024-03-04T00:13:15-04:00.pb";
+    source = runRealtime(routeIdsToCancel, expectedRouteId, expectedStopId, path, part2);
+    expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId,
+            "MTASBWY_136700_A..N", "MTASBWY_1A 2247 FAR/207", "Inwood-207 St", 17);
+    expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId,
+            "MTASBWY_143050_A..N", "MTASBWY_EA 2350+ CAN/207", "Inwood-207 St", 4);
+  }
 }
