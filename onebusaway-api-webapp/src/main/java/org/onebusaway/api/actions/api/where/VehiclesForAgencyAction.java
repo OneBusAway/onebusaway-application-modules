@@ -46,6 +46,8 @@ public class VehiclesForAgencyAction extends ApiActionSupport {
 
   private long _time = 0;
 
+  private Integer _ageInSeconds = null;
+
   public VehiclesForAgencyAction() {
     super(V2);
   }
@@ -64,6 +66,10 @@ public class VehiclesForAgencyAction extends ApiActionSupport {
     _time = time.getTime();
   }
 
+  public void setAgeInSeconds(Integer age) {
+    _ageInSeconds = age;
+  }
+
   public DefaultHttpHeaders show() throws IOException, ServiceException {
 
     if (!isVersion(V2))
@@ -79,8 +85,14 @@ public class VehiclesForAgencyAction extends ApiActionSupport {
     BeanFactoryV2 factory = getBeanFactoryV2();
 
     try {
-      ListBean<VehicleStatusBean> vehicles = _service.getAllVehiclesForAgency(
-          _id, time);
+      ListBean<VehicleStatusBean> vehicles;
+      if (_ageInSeconds != null && _ageInSeconds > 0) {
+        vehicles = _service.getFilteredVehiclesForAgency(
+                _id, time, _ageInSeconds);
+      } else {
+        vehicles = _service.getAllVehiclesForAgency(
+                _id, time);
+      }
       return setOkResponse(factory.getVehicleStatusResponse(vehicles));
     } catch (OutOfServiceAreaServiceException ex) {
       return setOkResponse(factory.getEmptyList(VehicleStatusV2Bean.class, true));

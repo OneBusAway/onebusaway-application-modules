@@ -327,6 +327,13 @@ public class TransitDataServiceImpl implements TransitDataService {
   }
 
   @Override
+  public ListBean<VehicleStatusBean> getFilteredVehiclesForAgency(String agencyId,
+                                                             long time, Integer ageInSeconds) {
+    blockUntilBundleIsReady();
+    return _transitDataService.getFilteredVehiclesForAgency(agencyId, time, ageInSeconds);
+  }
+
+  @Override
   public VehicleLocationRecordBean getVehicleLocationRecordForVehicleId(
       String vehicleId, long targetTime) {
     blockUntilBundleIsReady();

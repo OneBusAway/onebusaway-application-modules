@@ -241,6 +241,10 @@ public interface TransitDataService extends FederatedService {
   public ListBean<VehicleStatusBean> getAllVehiclesForAgency(String agencyId,
       long time);
 
+  @FederatedByAgencyIdMethod
+  public ListBean<VehicleStatusBean> getFilteredVehiclesForAgency(String agencyId,
+                                                             long time, Integer ageInSeconds);
+
   @FederatedByEntityIdMethod
   public VehicleLocationRecordBean getVehicleLocationRecordForVehicleId(
       String vehicleId, long targetTime);

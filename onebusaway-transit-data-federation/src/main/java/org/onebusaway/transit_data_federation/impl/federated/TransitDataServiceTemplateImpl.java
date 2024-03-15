@@ -434,6 +434,13 @@ public class TransitDataServiceTemplateImpl implements TransitDataServiceTemplat
   }
 
   //@Override
+  public ListBean<VehicleStatusBean> getFilteredVehiclesForAgency(String agencyId,
+                                                             long time, Integer ageInSeconds) {
+
+    return _vehicleStatusBeanService.getFilteredVehiclesForAgency(agencyId, time, ageInSeconds);
+  }
+
+  //@Override
   public VehicleLocationRecordBean getVehicleLocationRecordForVehicleId(
       String vehicleId, long targetTime) {
     
