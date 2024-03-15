@@ -32,12 +32,16 @@ import org.onebusaway.transit_data.services.IntervalFactory;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.util.SystemTime;
 import org.onebusaway.util.services.configuration.ConfigurationService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.opensymphony.xwork2.conversion.annotations.TypeConversion;
 import com.opensymphony.xwork2.validator.annotations.RequiredFieldValidator;
 
 public class ArrivalsAndDeparturesForStopAction extends ApiActionSupport {
+
+  private static final Logger _log = LoggerFactory.getLogger(ArrivalsAndDeparturesForStopAction.class);
 
   private static final long serialVersionUID = 1L;
 
@@ -122,15 +126,20 @@ public class ArrivalsAndDeparturesForStopAction extends ApiActionSupport {
       result = _service.getStopWithArrivalsAndDepartures(
               _id, _query, _factory.constructForDate(new Date(_query.getTime())));
     } catch (NoSuchStopServiceException nsse) {
+      _log.error("no such stop Exception {}", nsse, nsse);
       return setResourceNotFoundResponse();
     } catch (ServiceException any) {
+      _log.error("Service Exception {}", any, any);
       return setResourceNotFoundResponse();
     } catch (Exception any) {
+      _log.error("General Exception {}", any, any);
       return setExceptionResponse();
     }
 
-    if (result == null)
+    if (result == null) {
+      _log.error("no such stop for id {}", _id);
       return setResourceNotFoundResponse();
+    }
 
     if (isVersion(V1)) {
       // Convert data to v1 form
