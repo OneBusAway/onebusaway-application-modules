@@ -232,4 +232,164 @@ public class NyctRandomIntegrationTest extends AbstractGtfsRealtimeIntegrationTe
     expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId,
             "MTASBWY_118550_M..S20X009", "MTASBWY_1M 1945+ 576/MET", "Middle Village-Metropolitan Av", 15);
   }
+
+  /**
+   * Test for a drop in service at 00:37.
+   */
+  @Test
+  public void test9() throws Exception {
+
+    List<String> routeIdsToCancel = Arrays.asList("MTASBWY_A","MTASBWY_B","MTASBWY_C","MTASBWY_D");
+    String expectedStopId = "MTASBWY_A02N";
+    String expectedRouteId = "MTASBWY_A";
+    String path = getIntegrationTestPath() + File.separator;
+
+    String part1 = "nyct_subways_gtfs_rt.2024-03-4T00:25:58-04:00.pb";
+    GtfsRealtimeSource source = runRealtime(routeIdsToCancel, expectedRouteId, expectedStopId, path, part1);
+    expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId,
+            "MTASBWY_138150_A..N", "MTASBWY_1A 2301+ FAR/207", "Inwood-207 St", 36);
+    expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId,
+            "MTASBWY_141800_A..N", "MTASBWY_1A 2338 LEF/207", "Inwood-207 St", 45);
+    expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId,
+            "MTASBWY_141200_A..N", "MTASBWY_1A 2332 FAR/207", "Inwood-207 St", 58);
+    expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), "MTASBWY_A28S", "MTASBWY_E",
+            "MTASBWY_142350_E..S04R", "MTASBWY_1E 2343+ P-A/WTC", "World Trade Center", 15);
+
+    String part2 = "nyct_subways_gtfs_rt.2024-03-4T00:26:58-04:00.pb";
+    source = runRealtime(routeIdsToCancel, expectedRouteId, expectedStopId, path, part2);
+    expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId,
+            "MTASBWY_138150_A..N", "MTASBWY_1A 2301+ FAR/207", "Inwood-207 St", 35);
+    expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId,
+            "MTASBWY_141800_A..N", "MTASBWY_1A 2338 LEF/207", "Inwood-207 St", 45);
+    expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId,
+            "MTASBWY_141200_A..N", "MTASBWY_1A 2332 FAR/207", "Inwood-207 St", 56);
+    expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), "MTASBWY_A28S", "MTASBWY_E",
+            "MTASBWY_142350_E..S04R", "MTASBWY_1E 2343+ P-A/WTC", "World Trade Center", 15);
+
+    String part3 = "nyct_subways_gtfs_rt.2024-03-4T00:27:58-04:00.pb";
+    source = runRealtime(routeIdsToCancel, expectedRouteId, expectedStopId, path, part3);
+    expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId,
+            "MTASBWY_138150_A..N", "MTASBWY_1A 2301+ FAR/207", "Inwood-207 St", 33);
+    expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId,
+            "MTASBWY_141800_A..N", "MTASBWY_1A 2338 LEF/207", "Inwood-207 St", 46);
+    expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId,
+            "MTASBWY_141200_A..N", "MTASBWY_1A 2332 FAR/207", "Inwood-207 St", 55);
+    expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), "MTASBWY_A28S", "MTASBWY_E",
+            "MTASBWY_142350_E..S04R", "MTASBWY_1E 2343+ P-A/WTC", "World Trade Center", 15);
+
+    String part4 = "nyct_subways_gtfs_rt.2024-03-4T00:28:58-04:00.pb";
+    source = runRealtime(routeIdsToCancel, expectedRouteId, expectedStopId, path, part4);
+    expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId,
+            "MTASBWY_138150_A..N", "MTASBWY_1A 2301+ FAR/207", "Inwood-207 St", 33);
+    expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId,
+            "MTASBWY_141800_A..N", "MTASBWY_1A 2338 LEF/207", "Inwood-207 St", 45);
+    expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId,
+            "MTASBWY_141200_A..N", "MTASBWY_1A 2332 FAR/207", "Inwood-207 St", 55);
+    expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), "MTASBWY_A28S", "MTASBWY_E",
+            "MTASBWY_142350_E..S04R", "MTASBWY_1E 2343+ P-A/WTC", "World Trade Center", 15);
+
+    String part5 = "nyct_subways_gtfs_rt.2024-03-4T00:29:58-04:00.pb";
+    source = runRealtime(routeIdsToCancel, expectedRouteId, expectedStopId, path, part5);
+    expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId,
+            "MTASBWY_138150_A..N", "MTASBWY_1A 2301+ FAR/207", "Inwood-207 St", 33);
+    expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId,
+            "MTASBWY_141800_A..N", "MTASBWY_1A 2338 LEF/207", "Inwood-207 St", 44);
+    expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId,
+            "MTASBWY_141200_A..N", "MTASBWY_1A 2332 FAR/207", "Inwood-207 St", 53);
+    expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), "MTASBWY_A28S", "MTASBWY_E",
+            "MTASBWY_142350_E..S04R", "MTASBWY_1E 2343+ P-A/WTC", "World Trade Center", 16);
+
+    String part6 = "nyct_subways_gtfs_rt.2024-03-4T00:30:58-04:00.pb";
+    source = runRealtime(routeIdsToCancel, expectedRouteId, expectedStopId, path, part6);
+    expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId,
+            "MTASBWY_138150_A..N", "MTASBWY_1A 2301+ FAR/207", "Inwood-207 St", 33);
+    expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId,
+            "MTASBWY_141800_A..N", "MTASBWY_1A 2338 LEF/207", "Inwood-207 St", 42);
+    expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId,
+            "MTASBWY_141200_A..N", "MTASBWY_1A 2332 FAR/207", "Inwood-207 St", 53);
+    expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), "MTASBWY_A28S", "MTASBWY_E",
+            "MTASBWY_142350_E..S04R", "MTASBWY_1E 2343+ P-A/WTC", "World Trade Center", 13);
+
+    String part7 = "nyct_subways_gtfs_rt.2024-03-4T00:31:58-04:00.pb";
+    source = runRealtime(routeIdsToCancel, expectedRouteId, expectedStopId, path, part7);
+    expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId,
+            "MTASBWY_138150_A..N", "MTASBWY_1A 2301+ FAR/207", "Inwood-207 St", 32);
+    expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId,
+            "MTASBWY_141800_A..N", "MTASBWY_1A 2338 LEF/207", "Inwood-207 St", 41);
+    expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId,
+            "MTASBWY_141200_A..N", "MTASBWY_1A 2332 FAR/207", "Inwood-207 St", 52);
+    expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), "MTASBWY_A28S", "MTASBWY_E",
+            "MTASBWY_142350_E..S04R", "MTASBWY_1E 2343+ P-A/WTC", "World Trade Center", 14);
+
+    String part8 = "nyct_subways_gtfs_rt.2024-03-4T00:32:58-04:00.pb";
+    source = runRealtime(routeIdsToCancel, expectedRouteId, expectedStopId, path, part8);
+    expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId,
+            "MTASBWY_138150_A..N", "MTASBWY_1A 2301+ FAR/207", "Inwood-207 St", 33);
+    expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId,
+            "MTASBWY_141800_A..N", "MTASBWY_1A 2338 LEF/207", "Inwood-207 St", 40);
+    expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId,
+            "MTASBWY_141200_A..N", "MTASBWY_1A 2332 FAR/207", "Inwood-207 St", 50);
+    expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), "MTASBWY_A28S", "MTASBWY_E",
+            "MTASBWY_142350_E..S04R", "MTASBWY_1E 2343+ P-A/WTC", "World Trade Center", 11);
+
+    String part9 = "nyct_subways_gtfs_rt.2024-03-4T00:33:58-04:00.pb";
+    source = runRealtime(routeIdsToCancel, expectedRouteId, expectedStopId, path, part9);
+    expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId,
+            "MTASBWY_138150_A..N", "MTASBWY_1A 2301+ FAR/207", "Inwood-207 St", 32);
+    expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId,
+            "MTASBWY_141800_A..N", "MTASBWY_1A 2338 LEF/207", "Inwood-207 St", 39);
+    expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId,
+            "MTASBWY_141200_A..N", "MTASBWY_1A 2332 FAR/207", "Inwood-207 St", 50);
+    expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), "MTASBWY_A28S", "MTASBWY_E",
+            "MTASBWY_142350_E..S04R", "MTASBWY_1E 2343+ P-A/WTC", "World Trade Center", 10);
+
+    String part10 = "nyct_subways_gtfs_rt.2024-03-4T00:34:59-04:00.pb";
+    source = runRealtime(routeIdsToCancel, expectedRouteId, expectedStopId, path, part10);
+    expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId,
+            "MTASBWY_138150_A..N", "MTASBWY_1A 2301+ FAR/207", "Inwood-207 St", 31);
+    expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId,
+            "MTASBWY_141800_A..N", "MTASBWY_1A 2338 LEF/207", "Inwood-207 St", 38);
+    expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId,
+            "MTASBWY_141200_A..N", "MTASBWY_1A 2332 FAR/207", "Inwood-207 St", 51);
+    expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), "MTASBWY_A28S", "MTASBWY_E",
+            "MTASBWY_142350_E..S04R", "MTASBWY_1E 2343+ P-A/WTC", "World Trade Center", 11);
+
+
+    String part11 = "nyct_subways_gtfs_rt.2024-03-4T00:35:09-04:00.pb";
+    source = runRealtime(routeIdsToCancel, expectedRouteId, expectedStopId, path, part11);
+    expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId,
+            "MTASBWY_138150_A..N", "MTASBWY_1A 2301+ FAR/207", "Inwood-207 St", 30);
+    expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId,
+            "MTASBWY_141800_A..N", "MTASBWY_1A 2338 LEF/207", "Inwood-207 St", 38);
+    expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId,
+            "MTASBWY_141200_A..N", "MTASBWY_1A 2332 FAR/207", "Inwood-207 St", 50);
+    expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), "MTASBWY_A28S", "MTASBWY_E",
+            "MTASBWY_142350_E..S04R", "MTASBWY_1E 2343+ P-A/WTC", "World Trade Center", 10);
+
+    String part12 = "nyct_subways_gtfs_rt.2024-03-4T00:35:19-04:00.pb";
+    source = runRealtime(routeIdsToCancel, expectedRouteId, expectedStopId, path, part12);
+    expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId,
+            "MTASBWY_138150_A..N", "MTASBWY_1A 2301+ FAR/207", "Inwood-207 St", 30);
+
+    String part13 = "nyct_subways_gtfs_rt.2024-03-4T00:35:29-04:00.pb";
+    source = runRealtime(routeIdsToCancel, expectedRouteId, expectedStopId, path, part13);
+    expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId,
+            "MTASBWY_138150_A..N", "MTASBWY_1A 2301+ FAR/207", "Inwood-207 St", 30);
+
+    String part14 = "nyct_subways_gtfs_rt.2024-03-4T00:35:39-04:00.pb";
+    source = runRealtime(routeIdsToCancel, expectedRouteId, expectedStopId, path, part14);
+    expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId,
+            "MTASBWY_138150_A..N", "MTASBWY_1A 2301+ FAR/207", "Inwood-207 St", 30);
+
+    String part15 = "nyct_subways_gtfs_rt.2024-03-4T00:35:49-04:00.pb";
+    source = runRealtime(routeIdsToCancel, expectedRouteId, expectedStopId, path, part15);
+    expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId,
+            "MTASBWY_138150_A..N", "MTASBWY_1A 2301+ FAR/207", "Inwood-207 St", 30);
+    expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId,
+            "MTASBWY_141800_A..N", "MTASBWY_1A 2338 LEF/207", "Inwood-207 St", 38);
+    expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId,
+            "MTASBWY_141200_A..N", "MTASBWY_1A 2332 FAR/207", "Inwood-207 St", 48);
+    expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), "MTASBWY_A28S", "MTASBWY_E",
+            "MTASBWY_142350_E..S04R", "MTASBWY_1E 2343+ P-A/WTC", "World Trade Center", 11);
+  }
 }
