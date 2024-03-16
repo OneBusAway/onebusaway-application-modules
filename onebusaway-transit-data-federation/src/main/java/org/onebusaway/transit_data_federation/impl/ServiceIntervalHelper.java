@@ -48,7 +48,7 @@ public class ServiceIntervalHelper {
     int tripEndTime = -1;
     int position = trip.getStopTimes().size();
     // account for missing end times
-    while (tripEndTime < 0) {
+    while (tripEndTime < 0 && position > 0)  {
       position--;
       tripEndTime = trip.getStopTimes().get(position).getArrivalTime();
     }
