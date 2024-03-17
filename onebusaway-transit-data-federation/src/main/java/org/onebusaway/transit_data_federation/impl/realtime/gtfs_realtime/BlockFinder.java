@@ -73,7 +73,7 @@ public class BlockFinder {
     ServiceDate serviceDate;
     for (ServiceDate serviceDateGuess : getPossibleServiceDates(currentTime)) {
       BlockInstance blockInstance = _blockCalendarService.getBlockInstance(tripEntry.getBlock().getId(),
-              serviceDateGuess.getAsDate().getTime());
+                serviceDateGuess.getAsDate().getTime());
       if (blockInstance != null) {
         serviceDate = new ServiceDate(new Date(blockInstance.getServiceDate()));
         Integer tripStartTime = getTripStartTime(blockInstance, tripEntry);
