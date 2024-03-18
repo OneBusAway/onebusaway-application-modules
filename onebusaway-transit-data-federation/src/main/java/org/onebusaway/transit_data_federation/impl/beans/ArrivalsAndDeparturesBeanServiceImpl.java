@@ -349,7 +349,7 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
       pab.setTripHeadsign(stopTimeNarrative.getStopHeadsign());
     }
     // enforce some properties on the RouteBean
-    if (pab.getTrip().getRoute() != null && pab.getTrip().getRoute().getShortName() == null) {
+    if (pab.getTrip() != null && pab.getTrip().getRoute() != null && pab.getTrip().getRoute().getShortName() == null) {
       pab.getTrip().setRoute(createRouteBean(pab, trip));
     }
 
