@@ -249,7 +249,8 @@ public class DynamicTripBuilder {
       stopTime.setSequence(sequence);
       stopTime.setTrip(trip);
       if (stopTime.getArrivalTime() < 1 && stopTime.getDepartureTime() < 1) {
-        _log.error("invalid stoptime -- no data: " + stopInfo);
+        _log.error("invalid stoptime -- no data for stop {} on trip {} with arrival {}/departure {} ",
+                stopTime.getId(), trip.getId(), stopTime.getArrivalTime(), stopTime.getDepartureTime());
         continue;
       }
       sequence++;

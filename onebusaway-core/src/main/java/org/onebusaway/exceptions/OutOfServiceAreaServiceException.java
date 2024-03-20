@@ -22,4 +22,7 @@ public class OutOfServiceAreaServiceException extends ServiceAreaServiceExceptio
   public OutOfServiceAreaServiceException() {
       super("out of service area");
   }
+  public OutOfServiceAreaServiceException(String msg) {
+    super("out of service area: " + msg);
+  }
 }

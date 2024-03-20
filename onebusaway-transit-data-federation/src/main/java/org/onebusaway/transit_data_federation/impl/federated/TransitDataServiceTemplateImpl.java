@@ -845,6 +845,6 @@ public class TransitDataServiceTemplateImpl implements TransitDataServiceTemplat
       }
     }
 
-    throw new OutOfServiceAreaServiceException();
+    throw new OutOfServiceAreaServiceException(cb.toString());
   }
 }
