@@ -22,6 +22,8 @@ import org.onebusaway.transit_data.model.TransitDataConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.Instant;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -53,7 +55,7 @@ public class NyctTripServiceImpl implements NyctTripService {
     Matcher matcher = _rtTripPattern.matcher(tripId);
 
     if (matcher.find()) {
-      originDepartureTime = Integer.parseInt(matcher.group("originDepartureTime"), 10);
+      originDepartureTime = Integer.parseInt(matcher.group("originDepartureTime"), 10) * 60 /100;
       pathId = StringUtils.rightPad(matcher.group("route"), 3, '.') + matcher.group("direction");
       routeId = routeFromTripUpdate(tu);
       if (routeId == null) {
@@ -68,13 +70,13 @@ public class NyctTripServiceImpl implements NyctTripService {
       AddedTripInfo addedTrip = new AddedTripInfo();
       addedTrip.setScheduleRelationshipValue(TransitDataConstants.STATUS_ADDED);
       addedTrip.setAgencyId(getDefaultAgency());
-      addedTrip.setTripStartTime(originDepartureTime * 60 / 100); // 100ths
+      addedTrip.setTripStartTime(originDepartureTime); // 100ths
       // current time is not a good approximation of service date just after midnight
       // and trip service date can't be trusted so use first stop time to prevent
       // negative stop times
       Long firstStopTime = getFirstStopTime(tu);
-      if (firstStopTime != null) {
-        addedTrip.setServiceDate(getStartOfDay(new Date(firstStopTime*1000)).getTime());
+      if (isJustPastMidnight(currentTime) && isPreviousDayTrip(nyctTripDescriptor.getTrainId())) {
+        addedTrip.setServiceDate(getStartOfDay(yesterday(currentTime)).getTime());
       } else {
         addedTrip.setServiceDate(getStartOfDay(new Date(currentTime)).getTime());
       }
@@ -122,6 +124,29 @@ public class NyctTripServiceImpl implements NyctTripService {
       return addedTrip;
     }
       return null;
+  }
+
+  private boolean isPreviousDayTrip(String trainId) {
+    if (trainId == null) return false;
+    if (!trainId.contains(" ")) return false;
+
+    //<route> <time>(+) <origin_stop>/<destination stop>
+    String timeStr = trainId.split(" ")[1];
+    timeStr = timeStr.replace("+", "");
+
+    return Integer.parseInt(timeStr) > 2200;
+  }
+
+  private boolean isJustPastMidnight(long currentTime) {
+    if (Instant.ofEpochMilli(currentTime).atZone(ZoneId.systemDefault()).getHour() < 2) {
+      return true;
+    }
+    return false;
+  }
+
+  private Date yesterday(long currentTime) {
+    return new Date(Instant.ofEpochMilli(currentTime).atZone(ZoneId.systemDefault())
+            .minusDays(1).toInstant().toEpochMilli());
   }
 
   private Long getFirstStopTime(GtfsRealtime.TripUpdate tu) {

@@ -428,4 +428,197 @@ public class NyctRandomIntegrationTest extends AbstractGtfsRealtimeIntegrationTe
     expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId,
             "MTASBWY_143050_A..N", "MTASBWY_EA 2350+ CAN/207", "Inwood-207 St", 4);
   }
+
+  @Test
+  /*
+   * Incorrect headsigns during construction/maintenance.
+   * Should not be showing Flusing-Main St not 74 St-Broadway
+   */
+  public void test11() throws Exception {
+    List<String> routeIdsToCancel = Arrays.asList("MTASBWY_7");
+    String expectedStopId = "MTASBWY_701S";
+    String expectedRouteId = "MTASBWY_7";
+    String path = getIntegrationTestPath() + File.separator;
+    String part1 = "nyct_subways_gtfs_rt.2024-03-19T09:27:19-04:00.pb";
+    GtfsRealtimeSource source = runRealtime(routeIdsToCancel, expectedRouteId, expectedStopId, path, part1);
+    expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId,
+            "MTASBWY_060100_7..S", "MTASBWY_07 1001 MST/34H", "34 St-Hudson Yards", 34);
+    // second update
+    String part2 = "nyct_subways_gtfs_rt.2024-03-19T09:27:35-04:00.pb";
+    source = runRealtime(routeIdsToCancel, expectedRouteId, expectedStopId, path, part2);
+    expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId,
+            "MTASBWY_060100_7..S", "MTASBWY_07 1001 MST/34H", "34 St-Hudson Yards", 34);
+  }
+
+  /**
+   * Missing trips after bad behaviour on A/C/E
+   *
+   */
+  @Test
+  public void test12() throws Exception {
+    List<String> routeIdsToCancel = Arrays.asList("MTASBWY_A,MTASBWY_C,MTASBWY_E");
+    String expectedStopId = "MTASBWY_A15N";
+    String expectedRouteId = "MTASBWY_A";
+    String path = getIntegrationTestPath() + File.separator;
+    String part1 = "nyct_subways_gtfs_rt.2024-03-19T00:35:06-04:00.pb";
+    GtfsRealtimeSource source = runRealtime(routeIdsToCancel, expectedRouteId, expectedStopId, path, part1);
+    expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId,
+            "MTASBWY_138150_A..N", "MTASBWY_1A 2301+ FAR/207", "Inwood-207 St", 3);
+    expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId,
+            "MTASBWY_141800_A..N", "MTASBWY_1A 2338 LEF/207", "Inwood-207 St", 9);
+    expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId,
+            "MTASBWY_141200_A..N", "MTASBWY_1A 2332 FAR/207", "Inwood-207 St", 39);
+    expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId,
+            "MTASBWY_000800_A..N", "MTASBWY_1A 0008 LEF/207", "Inwood-207 St", 45);
+    expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId,
+            "MTASBWY_000200_A..N", "MTASBWY_1A 0002 FAR/207", "Inwood-207 St", 52);
+    expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId,
+            "MTASBWY_002200_A..N", "MTASBWY_1A 0022 FAR/207", "Inwood-207 St", 69);
+
+
+    // second update
+    String part2 = "nyct_subways_gtfs_rt.2024-03-19T00:35:46-04:00.pb";
+    source = runRealtime(routeIdsToCancel, expectedRouteId, expectedStopId, path, part2);
+    expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId,
+            "MTASBWY_138150_A..N", "MTASBWY_1A 2301+ FAR/207", "Inwood-207 St", 3);
+    expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId,
+            "MTASBWY_141800_A..N", "MTASBWY_1A 2338 LEF/207", "Inwood-207 St", 9);
+    expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId,
+            "MTASBWY_141200_A..N", "MTASBWY_1A 2332 FAR/207", "Inwood-207 St", 39);
+    expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId,
+            "MTASBWY_000800_A..N", "MTASBWY_1A 0008 LEF/207", "Inwood-207 St", 45);
+    expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId,
+            "MTASBWY_000200_A..N", "MTASBWY_1A 0002 FAR/207", "Inwood-207 St", 52);
+    expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId,
+            "MTASBWY_002200_A..N", "MTASBWY_1A 0022 FAR/207", "Inwood-207 St", 69);
+
+  }
+  /**
+   * Missing trips after bad behaviour, as with test12 but 1/2/3
+   *
+   */
+  @Test
+  public void test13() throws Exception {
+    List<String> routeIdsToCancel = Arrays.asList("MTASBWY_1,MTASBWY_2,MTASBWY_3");
+    String expectedStopId = "MTASBWY_142S";
+    String expectedRouteId = "MTASBWY_2";
+    String path = getIntegrationTestPath() + File.separator;
+    String part1 = "nyct_subways_gtfs_rt.2024-03-19T00:35:04-04:00.pb";
+    GtfsRealtimeSource source = runRealtime(routeIdsToCancel, expectedRouteId, expectedStopId, path, part1);
+    expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId,
+            "MTASBWY_139250_2..S08X082", "MTASBWY_02 2312+ 241/SFT", "South Ferry", 5);
+    expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, "MTASBWY_1",
+            "MTASBWY_141850_1..S03R", "MTASBWY_01 2338+ 242/SFT", "South Ferry", 8);
+    expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId,
+            "MTASBWY_140650_2..S08X082", "MTASBWY_02 2326+ 241/SFT", "South Ferry", 11);
+    expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, "MTASBWY_1",
+            "MTASBWY_143250_1..S03R", "MTASBWY_01 2352+ 242/SFT", "South Ferry", 13);
+    expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId,
+            "MTASBWY_141900_2..S08X082", "MTASBWY_02 2339  241/SFT", "South Ferry", 22);
+    expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, "MTASBWY_1",
+            "MTASBWY_000650_1..S03R", "MTASBWY_01 0006+ 242/SFT", "South Ferry", 28);
+    expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId,
+            "MTASBWY_143900_2..S08X082", "MTASBWY_02 2359  241/SFT", "South Ferry", 36);
+    expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, "MTASBWY_1",
+            "MTASBWY_002550_1..S03R", "MTASBWY_01 0025+ 242/SFT", "South Ferry", 47);
+
+    // second update
+    String part2 = "nyct_subways_gtfs_rt.2024-03-19T00:35:49-04:00.pb";
+    source = runRealtime(routeIdsToCancel, expectedRouteId, expectedStopId, path, part2);
+    expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId,
+            "MTASBWY_139250_2..S08X082", "MTASBWY_02 2312+ 241/SFT", "South Ferry", 3);
+    expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, "MTASBWY_1",
+            "MTASBWY_141850_1..S03R", "MTASBWY_01 2338+ 242/SFT", "South Ferry", 8);
+    expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId,
+            "MTASBWY_140650_2..S08X082", "MTASBWY_02 2326+ 241/SFT", "South Ferry", 11);
+    expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, "MTASBWY_1",
+            "MTASBWY_143250_1..S03R", "MTASBWY_01 2352+ 242/SFT", "South Ferry", 13);
+    expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId,
+            "MTASBWY_141900_2..S08X082", "MTASBWY_02 2339  241/SFT", "South Ferry", 22);
+    expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, "MTASBWY_1",
+            "MTASBWY_000650_1..S03R", "MTASBWY_01 0006+ 242/SFT", "South Ferry", 28);
+    expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId,
+            "MTASBWY_143900_2..S08X082", "MTASBWY_02 2359  241/SFT", "South Ferry", 36);
+    expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, "MTASBWY_1",
+            "MTASBWY_002550_1..S03R", "MTASBWY_01 0025+ 242/SFT", "South Ferry", 45);
+
+  }
+
+  @Test
+  public void test14a() throws Exception {
+    List<String> routeIdsToCancel = Arrays.asList("MTASBWY_A,MTASBWY_C,MTASBWY_E");
+    String expectedStopId = "MTASBWY_A02N";
+    String expectedRouteId = "MTASBWY_A";
+    String path = getIntegrationTestPath() + File.separator;
+    String tripId = "MTASBWY_141800_A..N";
+    String vehicleId = "MTASBWY_1A 2338 LEF/207";
+    String headsign = "Inwood-207 St";
+    String part1 = "gtfs-ace-03202024-003200";
+    GtfsRealtimeSource source = runRealtime(routeIdsToCancel, expectedRouteId, expectedStopId, path, part1);
+    expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId,
+            tripId, vehicleId, headsign, 48);
+
+  }
+
+  /**
+   * MTA-114 trips drop between 00:36 and 00:44
+   * @throws Exception
+   */
+  @Test
+  public void test14() throws Exception {
+    List<String> routeIdsToCancel = Arrays.asList("MTASBWY_A,MTASBWY_C,MTASBWY_E");
+    String expectedStopId = "MTASBWY_A02N";
+    String expectedRouteId = "MTASBWY_A";
+    String path = getIntegrationTestPath() + File.separator;
+    String tripId = "MTASBWY_141800_A..N";
+    String vehicleId = "MTASBWY_1A 2338 LEF/207";
+    String headsign = "Inwood-207 St";
+
+    // MISSING trips after 00:35
+
+    String[] files = {
+//            "gtfs-ace-03192024-235707", "68",
+            "gtfs-ace-03192024-235807", "61",
+//            "gtfs-ace-03192024-235907", "60",
+//            "gtfs-ace-03192024-235957", "59",
+//            "gtfs-ace-03202024-000007", "59",
+//            "gtfs-ace-03202024-000457", "54",
+//            "gtfs-ace-03202024-000958", "65",
+//            "gtfs-ace-03202024-001458", "60",
+//            "gtfs-ace-03202024-001959", "55",
+//            "gtfs-ace-03202024-002459", "53",
+//            "gtfs-ace-03202024-002559", "52",
+//            "gtfs-ace-03202024-002659", "51",
+//            "gtfs-ace-03202024-002800", "50",
+//            "gtfs-ace-03202024-002900", "51",
+//            "gtfs-ace-03202024-003000", "50",
+//            "gtfs-ace-03202024-003100", "49",
+            "gtfs-ace-03202024-003200", "48",
+//            "gtfs-ace-03202024-003300", "47",
+//            "gtfs-ace-03202024-003400", "46",
+//            "gtfs-ace-03202024-003500", "45",
+//            "gtfs-ace-03202024-003600", "44",
+//            "gtfs-ace-03202024-003700", "43",
+//            "gtfs-ace-03202024-003801", "42",
+//            "gtfs-ace-03202024-003901", "41"
+    };
+    testForPredictions(routeIdsToCancel, expectedRouteId, expectedStopId, path,
+            tripId, vehicleId, headsign,
+            files);
+
+  }
+
+  private void testForPredictions(List<String> routeIdsToCancel, String expectedRouteId, String expectedStopId,
+                                  String path, String tripId, String vehicleId, String headsign,
+                                  String[] files) throws Exception {
+    int i = 0;
+    while (i < files.length) {
+      GtfsRealtimeSource source = runRealtime(routeIdsToCancel, expectedRouteId, expectedStopId, path, files[i]);
+      expectArrivalAndTripAndHeadsign("run[" + i + "]=" + files[i], source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId,
+              tripId, vehicleId, headsign, Integer.parseInt(files[i+1]));
+      i+=2;
+    }
+
+  }
+
 }
