@@ -7,7 +7,7 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>onebusaway-application-modules</artifactId>
-  <version>2.5.7-cs-SNAPSHOT</version>
+  <version>2.5.7-cs</version>
   <packaging>pom</packaging>
 
     <name>onebusaway-application-modules</name>
@@ -83,7 +83,7 @@
         <connection>scm:git:git@github.com:camsys/onebusaway-application-modules.git</connection>
         <developerConnection>scm:git:git@github.com:camsys/onebusaway-application-modules.git</developerConnection>
         <url>scm:git:git@github.com:camsys/onebusaway-application-modules</url>
-        <tag>onebusaway-application-modules-2.5.6-cs</tag>
+        <tag>onebusaway-application-modules-2.5.7-cs</tag>
     </scm>
 
     <pluginRepositories>
