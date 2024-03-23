@@ -93,7 +93,7 @@ public class BundleLoader {
     for (int j = 0; j < 10; j++) {
       Thread.sleep(1000);
     }
-    _source.setFilterUnassigned(true);
+    _source.setFilterUnassigned(false);  // let time disqualify those trips
     _source.start(); // initialize
 
   }

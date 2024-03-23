@@ -608,6 +608,39 @@ public class NyctRandomIntegrationTest extends AbstractGtfsRealtimeIntegrationTe
 
   }
 
+  /**
+   * Short turn L-trains have the incorrect headisgn.
+   * @throws Exception
+   */
+  @Test
+  public void test15() throws Exception {
+    List<String> routeIdsToCancel = Arrays.asList("MTASBWY_L");
+    String expectedStopId = "MTASBWY_L17N";
+    String expectedRouteId = "MTASBWY_L";
+    String path = getIntegrationTestPath() + File.separator;
+    String tripId = "MTASBWY_143450_L..N";
+    String vehicleId = "MTASBWY_0L 2354+RPY/LOR";
+    String headsign = "Lorimer St";
+
+    String part0 = "gtfs-l-03222024-232658";  // trip pattern goes through to L01
+    GtfsRealtimeSource source = runRealtime(routeIdsToCancel, expectedRouteId, expectedStopId, path, part0);
+    expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId,
+            tripId, "MTASBWY_0L 2354+RPY/8AV", "8 Av", 43);
+
+    String part1 = "gtfs-l-03222024-233513"; //L01=8 Av; L10=Lorimer St
+    source = runRealtime(routeIdsToCancel, expectedRouteId, expectedStopId, path, part1);
+    // this update is unassigned and dropped!
+//    expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId,
+//            tripId, vehicleId, headsign, 35);
+
+    // train is assigned late!
+    String part2 = "gtfs-l-03222024-234728"; /// short turn to L10
+    source = runRealtime(routeIdsToCancel, expectedRouteId, expectedStopId, path, part2);
+    expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId,
+            tripId, vehicleId, headsign, 23);
+
+  }
+
   private void testForPredictions(List<String> routeIdsToCancel, String expectedRouteId, String expectedStopId,
                                   String path, String tripId, String vehicleId, String headsign,
                                   String[] files) throws Exception {
