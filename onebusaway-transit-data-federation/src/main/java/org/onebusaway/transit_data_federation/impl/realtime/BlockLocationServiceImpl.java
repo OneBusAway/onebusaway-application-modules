@@ -92,7 +92,7 @@ public class BlockLocationServiceImpl extends AbstractBlockLocationServiceImpl i
    * far shorter interval as AVL data is DYNAMIC!  That is it changes
    * state rapidly and may contradict previous updates resulting in duplicates.
    */
-  private int _statelessAvlOffset = 120; // high frequency AVL demands a shorter cache period
+  private int _statelessAvlOffset = 30; // high frequency AVL demands a shorter cache period
   public void setStatelessAvlOffset(int offset) {
     _statelessAvlOffset = offset;
   }
