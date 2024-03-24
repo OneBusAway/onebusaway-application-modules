@@ -641,6 +641,27 @@ public class NyctRandomIntegrationTest extends AbstractGtfsRealtimeIntegrationTe
 
   }
 
+  /**
+   * Missing L trip after 23:30
+   * @throws Exception
+   */
+  @Test
+  public void test16() throws Exception {
+    List<String> routeIdsToCancel = Arrays.asList("MTASBWY_L");
+    String expectedStopId = "MTASBWY_L17N";
+    String expectedRouteId = "MTASBWY_L";
+    String path = getIntegrationTestPath() + File.separator;
+    String tripId = "MTASBWY_000650_L..N";
+    String vehicleId = "MTASBWY_0L 0006+RPY/LOR";
+    String headsign = "Lorimer St";
+
+    String part0 = "gtfs-l-03222024-233958";
+    GtfsRealtimeSource source = runRealtime(routeIdsToCancel, expectedRouteId, expectedStopId, path, part0);
+    expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId,
+            tripId, vehicleId, headsign, 41);
+
+  }
+
   private void testForPredictions(List<String> routeIdsToCancel, String expectedRouteId, String expectedStopId,
                                   String path, String tripId, String vehicleId, String headsign,
                                   String[] files) throws Exception {
