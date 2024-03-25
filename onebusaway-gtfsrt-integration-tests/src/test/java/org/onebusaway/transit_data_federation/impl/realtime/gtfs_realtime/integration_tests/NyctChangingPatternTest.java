@@ -172,7 +172,8 @@ public class NyctChangingPatternTest extends AbstractGtfsRealtimeIntegrationTest
       if (iterationTime == 0l) continue;
       long expectedTime = timeMillis(iterationTime, 8, 52, 0);
       if (iterationTime >=  expectedTime) {
-        debugStop(firstStop, iterationTime, 15);
+        debugStop("run " + i + " for stop " + firstStop.getId() + " using file " + name,
+                firstStop, iterationTime, 22);
       }
       i++;
     }
@@ -196,7 +197,7 @@ public class NyctChangingPatternTest extends AbstractGtfsRealtimeIntegrationTest
     return new ServiceDate(new Date(serviceDate)).getAsDate().getTime() + time(hour, minute, seconds) * 1000;
   }
 
-  private void debugStop(StopEntry stop, long firstStopTime, int headwayMinutes) {
+  private void debugStop(String msg, StopEntry stop, long firstStopTime, int headwayMinutes) {
     ArrivalsAndDeparturesBeanService service = getBundleLoader().getApplicationContext().getBean(ArrivalsAndDeparturesBeanService.class);
     ArrivalsAndDeparturesQueryBean query = new ArrivalsAndDeparturesQueryBean();
     query.setTime(firstStopTime);
@@ -207,7 +208,7 @@ public class NyctChangingPatternTest extends AbstractGtfsRealtimeIntegrationTest
     query.getSystemFilterChain().add(new ArrivalAndDepartureFilterByRealtime(filter));
     List<ArrivalAndDepartureBean> arrivalsAndDeparturesByStopId = service.getArrivalsAndDeparturesByStopId(stop.getId(), query);
     // confirm there is an arrival in headway minutes
-    assertFalse(arrivalsAndDeparturesByStopId.isEmpty());
+    assertFalse(msg, arrivalsAndDeparturesByStopId.isEmpty());
   }
 
 }
