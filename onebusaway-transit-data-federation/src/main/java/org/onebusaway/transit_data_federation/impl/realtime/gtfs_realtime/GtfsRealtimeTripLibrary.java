@@ -201,7 +201,7 @@ public class GtfsRealtimeTripLibrary {
          * (includes start date and time).
          */
         TripDescriptor td = tu.getTrip();
-        long time = tu.hasTimestamp() ? tu.getTimestamp() * 1000 : currentTime();
+        long time = tu.hasTimestamp() ? ensureMillis(tu.getTimestamp(), _currentTime) : currentTime();
         if (bd == null) {
           bd = getTripDescriptorAsBlockDescriptor(result, td, time, null);
         }
@@ -371,6 +371,14 @@ public class GtfsRealtimeTripLibrary {
     }
 
     return updates;
+  }
+
+  private long ensureMillis(long timestamp, long currentTime) {
+    // some feeds use millis, but the specification says seconds
+    if (Math.abs(currentTime - timestamp) > 100l * 365 * 24 * 60 * 60) {
+      return timestamp * 1000;
+    }
+    return timestamp;
   }
 
   private BlockDescriptor handleDynamicTripUpdate(TripUpdate tu) {
@@ -839,7 +847,7 @@ public class GtfsRealtimeTripLibrary {
 
       BlockServiceDate _blockserviceDate = _serviceSource.getBlockFinder().getBlockServiceDateFromTrip(tripEntry, currentTime);
       if (_blockserviceDate == null) {
-        // service date is mandatory, we need to aboart
+        // service date is mandatory, we need to abort
         _log.error("could not determine service date for trip {}", trip.getTripId());
         return null;
       }

@@ -71,7 +71,8 @@ public class BlockFinder {
   private BlockServiceDate getBlockServiceDateFromTripUnCached(TripEntry tripEntry,
                                                       long currentTime) {
     ServiceDate serviceDate;
-    for (ServiceDate serviceDateGuess : getPossibleServiceDates(currentTime)) {
+    List<ServiceDate> possibleServiceDates = getPossibleServiceDates(currentTime);
+    for (ServiceDate serviceDateGuess : possibleServiceDates) {
       BlockInstance blockInstance = _blockCalendarService.getBlockInstance(tripEntry.getBlock().getId(),
                 serviceDateGuess.getAsDate().getTime());
       if (blockInstance != null) {
@@ -85,6 +86,8 @@ public class BlockFinder {
         }
       }
     }
+    // log this failure
+    _log.error("block {} of trip {} not found on service dates {}", tripEntry.getBlock().getId(), tripEntry.getId(), possibleServiceDates);
     return null;
   }
 
