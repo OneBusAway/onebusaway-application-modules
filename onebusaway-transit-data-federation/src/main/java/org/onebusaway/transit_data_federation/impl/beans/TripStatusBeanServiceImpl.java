@@ -396,7 +396,7 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
       if (vor != null) {
         bean.setOccupancyStatus(vor.getOccupancyStatus());
         bean.setOccupancyCount(vor.getRawCount());
-        if (vor.getCapacity() > 0) {
+        if (vor.getCapacity() != null && vor.getCapacity() > 0) {
           bean.setOccupancyCapacity(vor.getCapacity());
         } else {
           bean.setOccupancyCapacity(-1);
