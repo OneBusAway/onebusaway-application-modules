@@ -108,6 +108,8 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     _registry.add(GtfsRealtimeNYCT.nyctStopTimeUpdate);
     // MTA Bus Time Crowding
     _registry.add(GtfsRealtimeCrowding.crowdingDescriptor);
+    // Stroller support
+    _registry.add(GtfsRealtimeOneBusAway.obaVehicleDescriptor);
   }
 
   private VehicleLocationListener _vehicleLocationListener;

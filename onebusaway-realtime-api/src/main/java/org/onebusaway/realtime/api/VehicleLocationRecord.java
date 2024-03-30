@@ -82,6 +82,8 @@ public class VehicleLocationRecord implements Serializable {
 
   private String status;
 
+  private List<String> vehicleFeatures;
+
   public VehicleLocationRecord() {
 
   }
@@ -283,6 +285,21 @@ public class VehicleLocationRecord implements Serializable {
 
   public void setStatus(String status) {
     this.status = status;
+  }
+
+  public boolean hasVehicleFeatures() {
+    return vehicleFeatures != null && !vehicleFeatures.isEmpty();
+  }
+
+  public void addVehicleFeature(String feature) {
+    if (vehicleFeatures == null) {
+      vehicleFeatures = new ArrayList<>();
+    }
+    vehicleFeatures.add(feature);
+  }
+
+  public List<String> getVehicleFeatures() {
+    return vehicleFeatures;
   }
 
   @Override

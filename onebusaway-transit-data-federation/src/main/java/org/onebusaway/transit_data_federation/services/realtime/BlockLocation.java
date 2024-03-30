@@ -111,6 +111,8 @@ public class BlockLocation {
   
   private List<TimepointPredictionRecord> timepointPredictions;
 
+  private List<String> vehicleFeatures;
+
   public BlockLocation() {
 
   }
@@ -485,6 +487,13 @@ public class BlockLocation {
   
   public void setTimepointPredictions(List<TimepointPredictionRecord> timepointPredictions) {
       this.timepointPredictions = timepointPredictions;
+  }
+
+  public void setVehicleFeatures(List<String> vehicleFeatures) {
+    this.vehicleFeatures = vehicleFeatures;
+  }
+  public List<String> getVehicleFeatures() {
+    return vehicleFeatures;
   }
 
   @Override

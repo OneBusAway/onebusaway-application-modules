@@ -27,6 +27,7 @@ import java.util.regex.Pattern;
 import com.google.transit.realtime.GtfsRealtimeCrowding;
 import com.google.transit.realtime.GtfsRealtimeMTARR;
 import com.google.transit.realtime.GtfsRealtimeNYCT;
+import com.google.transit.realtime.GtfsRealtimeOneBusAway;
 import org.apache.commons.lang.StringUtils;
 import org.onebusaway.collections.MappingLibrary;
 import org.onebusaway.collections.Min;
@@ -1266,6 +1267,14 @@ public class GtfsRealtimeTripLibrary {
       record.setScheduleDeviation(deviation);
       _log.debug("deviation reset to {} from {} for vehicle {}", deviation, oldDeviation, vehiclePosition.getVehicle().getId());
 
+    }
+
+    // MTA Bus Time extension for Vehicle Features such as STROLLER
+    if (vehiclePosition.getVehicle().hasExtension(GtfsRealtimeOneBusAway.obaVehicleDescriptor)) {
+      GtfsRealtimeOneBusAway.OneBusAwayVehicleDescriptor vehicleDescriptor = vehiclePosition.getVehicle().getExtension(GtfsRealtimeOneBusAway.obaVehicleDescriptor);
+      for (String feature : vehicleDescriptor.getVehicleFeatureList()) {
+        record.addVehicleFeature(feature);
+      }
     }
   }
   

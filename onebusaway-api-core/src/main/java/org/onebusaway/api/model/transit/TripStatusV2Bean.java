@@ -94,6 +94,8 @@ public final class TripStatusV2Bean implements Serializable {
 
   private List<String> situationIds;
 
+  private List<String> vehicleFeatures;
+
   public String getActiveTripId() {
     return activeTripId;
   }
@@ -311,5 +313,13 @@ public final class TripStatusV2Bean implements Serializable {
 
   public void setOccupancyCapacity(Integer occupancyCapacity) {
     this.occupancyCapacity = occupancyCapacity;
+  }
+
+  public void setVehicleFeatures(List<String> vehicleFeatures) {
+    this.vehicleFeatures = vehicleFeatures;
+  }
+
+  public List<String> getVehicleFeatures() {
+    return vehicleFeatures;
   }
 }

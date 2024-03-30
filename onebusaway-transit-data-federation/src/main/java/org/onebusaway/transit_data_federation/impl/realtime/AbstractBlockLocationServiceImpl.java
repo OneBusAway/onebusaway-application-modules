@@ -157,6 +157,7 @@ public abstract class AbstractBlockLocationServiceImpl {
       location.setLastLocationUpdateTime(record.getTimeOfLocationUpdate());
       location.setScheduleDeviation(record.getScheduleDeviation());
       location.setScheduleDeviations(cacheElement.getScheduleDeviations());
+      location.setVehicleFeatures(record.getVehicleFeatures());
 
       if (record.isCurrentLocationSet()) {
         CoordinatePoint p = new CoordinatePoint(record.getCurrentLocationLat(),

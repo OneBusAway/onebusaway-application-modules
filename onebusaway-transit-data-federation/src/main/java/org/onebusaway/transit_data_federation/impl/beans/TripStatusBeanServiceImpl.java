@@ -278,6 +278,7 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
       bean.setLastKnownOrientation(blockLocation.getLastKnownOrientation());
 
     bean.setScheduleDeviation(blockLocation.getScheduleDeviation());
+    bean.setVehicleFeatures(blockLocation.getVehicleFeatures());
 
     BlockTripInstance activeTripInstance = blockLocation.getActiveTripInstance();
 

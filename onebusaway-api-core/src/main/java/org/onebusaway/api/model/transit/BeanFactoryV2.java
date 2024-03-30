@@ -589,6 +589,7 @@ public class BeanFactoryV2 {
     }
     bean.setOccupancyCount(tripStatus.getOccupancyCount());
     bean.setOccupancyCapacity(tripStatus.getOccupancyCapacity());
+    bean.setVehicleFeatures(tripStatus.getVehicleFeatures());
 
     List<ServiceAlertBean> situations = tripStatus.getSituations();
     if (situations != null && !situations.isEmpty()) {
