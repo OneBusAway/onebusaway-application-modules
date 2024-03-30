@@ -392,8 +392,18 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
       VehicleOccupancyRecord vor = _vehicleOccupancyRecordCache.getRecordForVehicleIdAndRoute(blockLocation.getVehicleId(),
               blockLocation.getActiveTrip().getTrip().getRoute().getId().toString(),
               blockLocation.getActiveTrip().getTrip().getDirectionId());
-      if (vor != null)
+      if (vor != null) {
         bean.setOccupancyStatus(vor.getOccupancyStatus());
+        bean.setOccupancyCount(vor.getRawCount());
+        if (vor.getCapacity() > 0) {
+          bean.setOccupancyCapacity(vor.getCapacity());
+        } else {
+          bean.setOccupancyCapacity(-1);
+        }
+      } else {
+        bean.setOccupancyCount(-1);
+        bean.setOccupancyCapacity(-1);
+      }
     }
 
     return bean;

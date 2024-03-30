@@ -480,8 +480,12 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
         VehicleOccupancyRecord vor = _vehicleOccupancyRecordCache.getRecordForVehicleIdAndRoute(AgencyAndIdLibrary.convertFromString(bean.getVehicleId()),
                 blockLocation.getActiveTrip().getTrip().getRoute().getId().toString(),
                 blockLocation.getActiveTrip().getTrip().getDirectionId());
-        if (vor != null)
+        if (vor != null) {
           bean.setOccupancyStatus(vor.getOccupancyStatus());
+          // while occupancy status is directly on the A/D bean
+          // capacity and count belongs to the vehicle and the trip
+        }
+
       }
 
 

@@ -584,8 +584,11 @@ public class BeanFactoryV2 {
       bean.setDistanceAlongTrip(tripStatus.getDistanceAlongTrip());
     bean.setVehicleId(tripStatus.getVehicleId());
 
-    if (tripStatus.getOccupancyStatus() != null)
+    if (tripStatus.getOccupancyStatus() != null) {
       bean.setOccupancyStatus(OccupancyStatus.valueOf(tripStatus.getOccupancyStatus()));
+    }
+    bean.setOccupancyCount(tripStatus.getOccupancyCount());
+    bean.setOccupancyCapacity(tripStatus.getOccupancyCapacity());
 
     List<ServiceAlertBean> situations = tripStatus.getSituations();
     if (situations != null && !situations.isEmpty()) {
@@ -863,10 +866,18 @@ public class BeanFactoryV2 {
 
     if(vehicleStatus.getOccupancyCount() != null){
       bean.setOccupancyCount(vehicleStatus.getOccupancyCount());
+    } else {
+      bean.setOccupancyCount(-1);
     }
 
     if(vehicleStatus.getOccupancyCapacity() != null){
-      bean.setOccupancyCapacity(vehicleStatus.getOccupancyCapacity());
+      if (vehicleStatus.getOccupancyCapacity() > 0) {
+        bean.setOccupancyCapacity(vehicleStatus.getOccupancyCapacity());
+      } else {
+        bean.setOccupancyCapacity(-1);
+      }
+    } else {
+      bean.setOccupancyCapacity(-1);
     }
 
     TripBean trip = vehicleStatus.getTrip();

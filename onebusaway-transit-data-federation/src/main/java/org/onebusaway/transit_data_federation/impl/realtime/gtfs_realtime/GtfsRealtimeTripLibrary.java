@@ -24,6 +24,7 @@ import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
+import com.google.transit.realtime.GtfsRealtimeCrowding;
 import com.google.transit.realtime.GtfsRealtimeMTARR;
 import com.google.transit.realtime.GtfsRealtimeNYCT;
 import org.apache.commons.lang.StringUtils;
@@ -1318,28 +1319,11 @@ public class GtfsRealtimeTripLibrary {
       if (update == null) return null;
       if (update.vehiclePosition == null) return null;
       if (update.vehiclePosition.hasOccupancyStatus()) {
-        VehicleOccupancyRecord vor = new VehicleOccupancyRecord();
-        // here we assume the vehicle's agency matches that of its block
-        vor.setVehicleId(new AgencyAndId(update.block.getBlockInstance().getBlock().getBlock().getId().getAgencyId(), update.block.getVehicleId()));
+        VehicleOccupancyRecord vor = initalizeVehicleOccupancyRecord(update);
         try {
           vor.setOccupancyStatus(OccupancyStatus.valueOf(update.vehiclePosition.getOccupancyStatus().name()));
         } catch (IllegalArgumentException iae) {
           _log.debug("unknown occupancy value: " + iae);
-        }
-
-        TripEntry firstTrip = null;
-        if (update.vehiclePosition.hasTrip() && update.vehiclePosition.getTrip().hasTripId()) {
-          // use trip from VP, as the combined update may have many trips
-          firstTrip = _entitySource.getTrip(update.vehiclePosition.getTrip().getTripId());
-        }
-        // fall back on trip from combined update
-        if (firstTrip == null) {
-          firstTrip = _entitySource.getTrip(update.getTripUpdates().get(0).getTrip().getTripId());
-        }
-        if (firstTrip != null && firstTrip.getRoute() != null) {
-          // link this occupancy to route+direction so it will expire at end of trip
-          vor.setRouteId(AgencyAndIdLibrary.convertToString(firstTrip.getRoute().getId()));
-          vor.setDirectionId(firstTrip.getDirectionId());
         }
 
         if (vor.getOccupancyStatus() == null) {
@@ -1349,10 +1333,51 @@ public class GtfsRealtimeTripLibrary {
         }
         return vor;
       }
+
+      // do we have crowding_descriptor?
+      if (update.vehiclePosition.hasExtension(GtfsRealtimeCrowding.crowdingDescriptor)) {
+        GtfsRealtimeCrowding.CrowdingDescriptor crowdingDescriptor = update.vehiclePosition.getExtension(GtfsRealtimeCrowding.crowdingDescriptor);
+        VehicleOccupancyRecord vor = initalizeVehicleOccupancyRecord(update);
+        if (crowdingDescriptor.hasEstimatedCount()) {
+          vor.setRawCount(crowdingDescriptor.getEstimatedCount());
+        }
+        if (crowdingDescriptor.hasEstimatedCapacity()) {
+          vor.setCapacity(crowdingDescriptor.getEstimatedCapacity());
+        }
+        return vor;
+      }
+
       return null;
     }
 
-    private static class BestScheduleDeviation {
+  private VehicleOccupancyRecord initalizeVehicleOccupancyRecord(CombinedTripUpdatesAndVehiclePosition update) {
+    VehicleOccupancyRecord vor = new VehicleOccupancyRecord();
+    // test if vehicle is fully qualified, if so use it as is
+    try {
+      vor.setVehicleId(AgencyAndIdLibrary.convertFromString(update.block.getVehicleId()));
+    } catch (IllegalStateException ise) {
+      // here we assume the vehicle's agency matches that of its block
+      vor.setVehicleId(new AgencyAndId(update.block.getBlockInstance().getBlock().getBlock().getId().getAgencyId(), update.block.getVehicleId()));
+    }
+    TripEntry firstTrip = null;
+    if (update.vehiclePosition.hasTrip() && update.vehiclePosition.getTrip().hasTripId()) {
+      // use trip from VP, as the combined update may have many trips
+      firstTrip = _entitySource.getTrip(update.vehiclePosition.getTrip().getTripId());
+    }
+    // fall back on trip from combined update
+    if (firstTrip == null) {
+      firstTrip = _entitySource.getTrip(update.getTripUpdates().get(0).getTrip().getTripId());
+    }
+    if (firstTrip != null && firstTrip.getRoute() != null) {
+      // link this occupancy to route+direction so it will expire at end of trip
+      vor.setRouteId(AgencyAndIdLibrary.convertToString(firstTrip.getRoute().getId()));
+      vor.setDirectionId(firstTrip.getDirectionId());
+    }
+
+    return vor;
+  }
+
+  private static class BestScheduleDeviation {
     public int delta = Integer.MAX_VALUE;
     public int scheduleDeviation = 0;
     public boolean isInPast = true;
