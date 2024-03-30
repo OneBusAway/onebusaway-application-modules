@@ -187,7 +187,7 @@ public class GtfsRealtimeTripLibrary {
       BlockDescriptor bd = null;
       if (tu.hasTrip() && TransitDataConstants.STATUS_DUPLICATED.equals(tu.getTrip().getScheduleRelationship().toString())) {
         AddedTripInfo addedTripInfo = _serviceSource.getDuplicatedTripService().handleDuplicatedDescriptor(tu);
-        bd = _serviceSource.getDynamicTripBuilder().createBlockDescriptor(addedTripInfo);
+        bd = _serviceSource.getDynamicTripBuilder().createBlockDescriptor(addedTripInfo, getCurrentTime());
         if (bd == null) continue; // we failed
         anonymousTripUpdatesByBlock.put(bd, tu);
         continue; // don't let this trip update be processed
@@ -403,13 +403,13 @@ public class GtfsRealtimeTripLibrary {
           return null;
         }
         // convert to blockDescriptor
-        return _serviceSource.getDynamicTripBuilder().createBlockDescriptor(addedTripInfo);
+        return _serviceSource.getDynamicTripBuilder().createBlockDescriptor(addedTripInfo, getCurrentTime());
 
       } else {
         if (td.getScheduleRelationship().equals(TripDescriptor.ScheduleRelationship.ADDED)) {
           AddedTripInfo addedTripInfo = _serviceSource.getAddedTripService().handleAddedDescriptor(_serviceSource, _entitySource.getAgencyIds().get(0), tu, _currentTime);
           if (addedTripInfo != null) {
-            return _serviceSource.getDynamicTripBuilder().createBlockDescriptor(addedTripInfo);
+            return _serviceSource.getDynamicTripBuilder().createBlockDescriptor(addedTripInfo, getCurrentTime());
           }
         }
       }
@@ -528,6 +528,7 @@ public class GtfsRealtimeTripLibrary {
 
     BlockDescriptor blockDescriptor = update.block;
     if (update.block == null) return null;
+    record.setMutated(update.block.getMutated());
     String vehicleId = update.block.getVehicleId(); // todo this is messy as its unqualified and rewritten later
     record.setBlockId(blockDescriptor.getBlockInstance().getBlock().getBlock().getId());
     // this is the default, trip updates may cancel this trip
