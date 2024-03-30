@@ -149,6 +149,10 @@ public abstract class AbstractBlockLocationServiceImpl {
         location.setEffectiveScheduleTime(scheduledLocation.getScheduledTime());
         location.setDistanceAlongBlock(scheduledLocation.getDistanceAlongBlock());
       }
+      if (record.getMutated()) {
+        // reset distance along block as it can't be trusted -- MTA-118
+        location.setDistanceAlongBlock(1.0);
+      }
 
       location.setBlockStartTime(record.getBlockStartTime());
       location.setPredicted(true);
