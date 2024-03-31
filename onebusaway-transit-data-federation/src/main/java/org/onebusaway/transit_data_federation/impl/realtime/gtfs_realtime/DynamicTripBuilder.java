@@ -70,6 +70,8 @@ public class DynamicTripBuilder {
         // the trip has mutated and is already underway
         if (isBlockUnderway(instance, addedTripInfo.getServiceDate(), currentTime)) {
           dynamicBd.setMutated(true);  // mark as mutated -- hint for location
+        } else {
+          dynamicBd.setMutated(false);
         }
         instance = null;
       }
