@@ -84,8 +84,6 @@ public class VehicleLocationRecord implements Serializable {
 
   private List<String> vehicleFeatures;
 
-  private boolean mutated;
-
   public VehicleLocationRecord() {
 
   }
@@ -102,7 +100,6 @@ public class VehicleLocationRecord implements Serializable {
     this.serviceDate = r.serviceDate;
     this.tripId = r.tripId;
     this.vehicleId = r.vehicleId;
-    this.mutated = r.mutated;
 
     List<TimepointPredictionRecord> timepointPredictions = r.getTimepointPredictions();
     if (timepointPredictions != null) {
@@ -303,14 +300,6 @@ public class VehicleLocationRecord implements Serializable {
 
   public List<String> getVehicleFeatures() {
     return vehicleFeatures;
-  }
-
-  public void setMutated(boolean mutated) {
-    this.mutated = mutated;
-  }
-
-  public boolean getMutated() {
-    return mutated;
   }
 
   @Override

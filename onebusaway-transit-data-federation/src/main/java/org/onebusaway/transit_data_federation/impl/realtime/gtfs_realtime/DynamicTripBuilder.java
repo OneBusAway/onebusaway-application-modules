@@ -67,12 +67,6 @@ public class DynamicTripBuilder {
       BlockInstance instance = _serviceSource.getBlockIndexService().getDynamicBlockInstance(blockId);
       // verify the pattern hasn't changed before use
       if (instance != null && !tripPatternMatches(addedTripInfo, instance)) {
-        // the trip has mutated and is already underway
-        if (isBlockUnderway(instance, addedTripInfo.getServiceDate(), currentTime)) {
-          dynamicBd.setMutated(true);  // mark as mutated -- hint for location
-        } else {
-          dynamicBd.setMutated(false);
-        }
         instance = null;
       }
       if (instance == null) {
@@ -95,19 +89,6 @@ public class DynamicTripBuilder {
     }
   }
 
-  private boolean isBlockUnderway(BlockInstance instance, long serviceDate, long currentTime) {
-    BlockTripEntry blockTripEntry = instance.getBlock().getTrips().get(0);
-    if (blockTripEntry.getStopTimes().isEmpty())
-      return false;
-    BlockStopTimeEntry blockStopTimeEntry = blockTripEntry.getStopTimes().get(0);
-    int time = 0;
-    time = blockStopTimeEntry.getStopTime().getArrivalTime();
-    if (time <= 0)
-      time = blockStopTimeEntry.getStopTime().getDepartureTime();
-    if (time + serviceDate < currentTime)
-      return true;
-    return false;
-  }
 
   // test that the stops are the same and in the same order
   private boolean tripPatternMatches(AddedTripInfo addedTripInfo, BlockInstance instance) {

@@ -28,7 +28,6 @@ class BlockDescriptor {
 
   private String vehicleId;
 
-  private boolean mutated = false;
 
   private ScheduleRelationship scheduleRelationship = ScheduleRelationship.SCHEDULED;
   
@@ -84,13 +83,6 @@ class BlockDescriptor {
     return scheduleRelationship;
   }
 
-  public boolean getMutated() {
-    return mutated;
-  }
-
-  public void setMutated(boolean mutated) {
-    this.mutated = mutated;
-  }
   @Override
   public int hashCode() {
     final int prime = 31;

@@ -113,10 +113,6 @@ public class BlockLocation {
 
   private List<String> vehicleFeatures;
 
-  // indicate the trip pattern has changed and the information may
-  // not be accurate
-  private boolean mutated = false;
-
 
   public BlockLocation() {
 
@@ -501,13 +497,6 @@ public class BlockLocation {
     return vehicleFeatures;
   }
 
-
-  public void setMutated(boolean mutated) {
-    this.mutated = mutated;
-  }
-  public boolean getMutated() {
-    return mutated;
-  }
 
   @Override
   public String toString() {

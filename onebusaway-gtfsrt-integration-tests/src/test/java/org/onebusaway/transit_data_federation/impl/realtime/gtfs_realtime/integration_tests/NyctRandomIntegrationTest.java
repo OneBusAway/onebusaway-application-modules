@@ -16,6 +16,7 @@
 package org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.integration_tests;
 
 import org.junit.Test;
+import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
 import org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.AbstractGtfsRealtimeIntegrationTest;
 import org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.GtfsRealtimeSource;
 
@@ -624,8 +625,8 @@ public class NyctRandomIntegrationTest extends AbstractGtfsRealtimeIntegrationTe
 
     String part0 = "gtfs-l-03222024-232658";  // trip pattern goes through to L01
     GtfsRealtimeSource source = runRealtime(routeIdsToCancel, expectedRouteId, expectedStopId, path, part0);
-    expectArrivalAndTripAndHeadsignDistance(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId,
-            tripId, "MTASBWY_0L 2354+RPY/8AV", "8 Av", 43, 0.0); // first update
+    ArrivalAndDepartureBean arrivalAndDepartureBean = expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId,
+            tripId, "MTASBWY_0L 2354+RPY/8AV", "8 Av", 43); // first update
 
     String part1 = "gtfs-l-03222024-233513"; //L01=8 Av; L10=Lorimer St
     source = runRealtime(routeIdsToCancel, expectedRouteId, expectedStopId, path, part1);
@@ -636,8 +637,8 @@ public class NyctRandomIntegrationTest extends AbstractGtfsRealtimeIntegrationTe
     // train is assigned late!
     String part2 = "gtfs-l-03222024-234728"; /// short turn to L10
     source = runRealtime(routeIdsToCancel, expectedRouteId, expectedStopId, path, part2);
-    expectArrivalAndTripAndHeadsignDistance(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId,
-            tripId, vehicleId, headsign, 23, 1.0);
+    arrivalAndDepartureBean = expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId,
+            tripId, vehicleId, headsign, 23);
 
   }
 

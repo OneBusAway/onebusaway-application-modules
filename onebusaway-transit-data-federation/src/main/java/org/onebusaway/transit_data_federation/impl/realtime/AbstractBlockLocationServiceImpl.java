@@ -292,7 +292,6 @@ public abstract class AbstractBlockLocationServiceImpl {
     location.setNextStop(scheduledLocation.getNextStop());
     location.setNextStopTimeOffset(scheduledLocation.getNextStopTimeOffset());
     location.setPreviousStop(scheduledLocation.getPreviousStop());
-    location.setMutated(scheduledLocation.getMutated());
 
     return location;
   }

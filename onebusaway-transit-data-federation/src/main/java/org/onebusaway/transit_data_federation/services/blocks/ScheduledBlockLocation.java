@@ -47,9 +47,6 @@ public class ScheduledBlockLocation {
 
   private int stopTimeIndex;
 
-  // indicate the trip pattern has changed
-  // and the information may not be accurate
-  private boolean mutated = false;
 
   /**
    * Should never be null, even if the trip is not in service. In the case of
@@ -197,13 +194,6 @@ public void setPreviousStopTimeOffset(int previousStopTimeOffset) {
     this.stopTimeIndex = stopTimeIndex;
   }
 
-  public boolean getMutated() {
-    return mutated;
-  }
-
-  public void setMutated(boolean mutated) {
-    this.mutated = mutated;
-  }
 
   @Override
   public String toString() {

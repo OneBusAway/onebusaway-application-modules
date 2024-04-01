@@ -528,7 +528,6 @@ public class GtfsRealtimeTripLibrary {
 
     BlockDescriptor blockDescriptor = update.block;
     if (update.block == null) return null;
-    record.setMutated(update.block.getMutated());
     String vehicleId = update.block.getVehicleId(); // todo this is messy as its unqualified and rewritten later
     record.setBlockId(blockDescriptor.getBlockInstance().getBlock().getBlock().getId());
     // this is the default, trip updates may cancel this trip
