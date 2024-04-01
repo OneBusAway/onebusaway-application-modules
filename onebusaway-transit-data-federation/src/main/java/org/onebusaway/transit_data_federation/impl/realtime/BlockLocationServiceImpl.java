@@ -234,6 +234,8 @@ public class BlockLocationServiceImpl extends AbstractBlockLocationServiceImpl i
       ScheduledBlockLocation scheduledBlockLocation = getScheduledBlockLocationForVehicleLocationRecord(
               record, instance);
 
+      scheduledBlockLocation.setMutated(record.getMutated());
+
       if (!record.isScheduleDeviationSet() && scheduledBlockLocation != null ) {
         int deviation = (int) ((record.getTimeOfRecord() - record.getServiceDate()) / 1000 - scheduledBlockLocation.getScheduledTime());
         record.setScheduleDeviation(deviation);

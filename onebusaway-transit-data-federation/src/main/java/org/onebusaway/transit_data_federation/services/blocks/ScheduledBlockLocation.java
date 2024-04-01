@@ -47,6 +47,10 @@ public class ScheduledBlockLocation {
 
   private int stopTimeIndex;
 
+  // indicate the trip pattern has changed
+  // and the information may not be accurate
+  private boolean mutated = false;
+
   /**
    * Should never be null, even if the trip is not in service. In the case of
    * out of service before the start of the block, the active trip will be the
@@ -192,7 +196,15 @@ public void setPreviousStopTimeOffset(int previousStopTimeOffset) {
   public void setStopTimeIndex(int stopTimeIndex) {
     this.stopTimeIndex = stopTimeIndex;
   }
-  
+
+  public boolean getMutated() {
+    return mutated;
+  }
+
+  public void setMutated(boolean mutated) {
+    this.mutated = mutated;
+  }
+
   @Override
   public String toString() {
     StringBuilder b = new StringBuilder();

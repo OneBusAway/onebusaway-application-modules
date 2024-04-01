@@ -149,10 +149,6 @@ public abstract class AbstractBlockLocationServiceImpl {
         location.setEffectiveScheduleTime(scheduledLocation.getScheduledTime());
         location.setDistanceAlongBlock(scheduledLocation.getDistanceAlongBlock());
       }
-      if (record.getMutated()) {
-        // reset distance along block as it can't be trusted -- MTA-
-        location.setDistanceAlongBlock(1.0);
-      }
 
       location.setBlockStartTime(record.getBlockStartTime());
       location.setPredicted(true);
@@ -296,6 +292,7 @@ public abstract class AbstractBlockLocationServiceImpl {
     location.setNextStop(scheduledLocation.getNextStop());
     location.setNextStopTimeOffset(scheduledLocation.getNextStopTimeOffset());
     location.setPreviousStop(scheduledLocation.getPreviousStop());
+    location.setMutated(scheduledLocation.getMutated());
 
     return location;
   }
