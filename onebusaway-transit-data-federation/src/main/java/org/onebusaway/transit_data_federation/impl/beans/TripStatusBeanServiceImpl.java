@@ -286,7 +286,9 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
       BlockTripEntry activeBlockTrip = activeTripInstance.getBlockTrip();
       // if mutated we set the trip to 1.0 as a hint
       if (blockLocation.getMutated()) {
-        bean.setScheduledDistanceAlongTrip(1.0);
+//        bean.setScheduledDistanceAlongTrip(1.0);
+        bean.setScheduledDistanceAlongTrip(blockLocation.getScheduledDistanceAlongBlock()
+                - activeBlockTrip.getDistanceAlongBlock());
       } else {
         bean.setScheduledDistanceAlongTrip(blockLocation.getScheduledDistanceAlongBlock()
                 - activeBlockTrip.getDistanceAlongBlock());
