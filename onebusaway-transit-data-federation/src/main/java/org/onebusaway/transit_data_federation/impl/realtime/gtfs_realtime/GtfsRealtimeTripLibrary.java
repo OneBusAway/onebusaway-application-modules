@@ -894,8 +894,22 @@ public class GtfsRealtimeTripLibrary {
 
       BlockConfigurationEntry blockConfiguration = instance.getBlock();
       List<BlockTripEntry> blockTrips = blockConfiguration.getTrips();
-      Map<String, List<TripUpdate>> tripUpdatesByTripId = MappingLibrary.mapToValueList(
+      Map<String, List<TripUpdate>> tempTripUpdatesByTripId = MappingLibrary.mapToValueList(
               tripUpdates, "trip.tripId");
+      Map<String, List<TripUpdate>> tripUpdatesByTripId = new HashMap<>();
+      // if we have fuzzy matching enabled
+      if (this._entitySource.getTripIdRegexes() != null) {
+        for (String existingTripId : tempTripUpdatesByTripId.keySet()) {
+          String newTripId = existingTripId;
+          for (String tripIdRegex : this._entitySource.getTripIdRegexes()) {
+              newTripId = newTripId.replaceAll(tripIdRegex, "");
+            }
+            tripUpdatesByTripId.put(newTripId, tempTripUpdatesByTripId.get(existingTripId));
+        }
+      } else {
+        // no fuzzy matching, copy the reference
+        tripUpdatesByTripId = tempTripUpdatesByTripId;
+      }
 
       long t = currentTime();
       int currentTime = (int) ((t - instance.getServiceDate()) / 1000);

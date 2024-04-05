@@ -62,6 +62,10 @@ class GtfsRealtimeEntitySource {
     _tripIdRegexs = tripIdRegex;
   }
 
+  public List<String> getTripIdRegexes() {
+    return _tripIdRegexs;
+  }
+
   public RouteEntry getRoute(AgencyAndId routeId) {
     routeId = considerRouteReplacements(routeId);
     return _transitGraphDao.getRouteForId(routeId);
