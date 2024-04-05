@@ -42,8 +42,6 @@ class GtfsRealtimeEntitySource {
 
   private List<String> _agencyIds;
 
-  private List<String> _tripIdRegexs;
-
   public void setTransitGraphDao(TransitGraphDao transitGraphDao) {
     _transitGraphDao = transitGraphDao;
   }
@@ -56,10 +54,6 @@ class GtfsRealtimeEntitySource {
 
   public void setAgencyIds(List<String> agencyIds) {
     _agencyIds = agencyIds;
-  }
-
-  public void setTripIdRegexs(List<String> tripIdRegex) {
-    _tripIdRegexs = tripIdRegex;
   }
 
   public RouteEntry getRoute(AgencyAndId routeId) {
@@ -129,18 +123,7 @@ class GtfsRealtimeEntitySource {
   }
 
   public TripEntry getTrip(String tripId) {
-    if (_tripIdRegexs != null) {
-      for (String regex : _tripIdRegexs) {
-        TripEntry tripEntry = getTripInternal(tripId.replaceAll(regex, ""));
-        if (tripEntry != null) {
-          return tripEntry;
-        }
-      }
-    }
-    return getTripInternal(tripId);
-  }
 
-  private TripEntry getTripInternal(String tripId) {
     for (String agencyId : _agencyIds) {
       AgencyAndId id = new AgencyAndId(agencyId, tripId);
       TripEntry trip = _transitGraphDao.getTripEntryForId(id);

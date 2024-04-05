@@ -152,8 +152,6 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
 
   private List<String> _agencyIds = new ArrayList<String>();
 
-  private List<String>_tripIdRegexs = null;
-
   /**
    * We keep track of vehicle location updates, only pushing them to the
    * underling {@link VehicleLocationListener} when they've been updated, since
@@ -370,10 +368,6 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   public void setAgencyIds(List<String> agencyIds) {
     _agencyIds.addAll(agencyIds);
   }
-
-  public void setTripIdRegexes(List<String> tripIdRegexes) {
-    _tripIdRegexs = tripIdRegexes;
-  }
   
   public void setShowNegativeScheduledArrivals(boolean _showNegativeScheduledArrivals) {
     this._showNegativeScheduledArrivals = _showNegativeScheduledArrivals;
@@ -487,7 +481,6 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     }
 
     _entitySource.setAgencyIds(_agencyIds);
-    _entitySource.setTripIdRegexs(_tripIdRegexs);
     _entitySource.setConsolidatedStopService(_consolidatedStopsService);
 
     _tripsLibrary = new GtfsRealtimeTripLibrary();
