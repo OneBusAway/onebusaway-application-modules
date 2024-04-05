@@ -580,7 +580,7 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
                                           ServiceAlerts.ServiceAlertsCollection alertCollection) {
 	  
 	long time = tripUpdates.getHeader().getTimestamp() * 1000;
-	_tripsLibrary.setCurrentTime(time);
+	_tripsLibrary.setCurrentTime(_tripsLibrary.ensureMillis(time, System.currentTimeMillis()));
 
     List<CombinedTripUpdatesAndVehiclePosition> combinedUpdates = _tripsLibrary.groupTripUpdatesAndVehiclePositions(result,
             tripUpdates, vehiclePositions);
@@ -675,7 +675,7 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
           }
           seenVehicles.add(vehicleId);
           VehicleOccupancyRecord vor = _tripsLibrary.createVehicleOccupancyRecordForUpdate(result, update);
-          Date timestamp = new Date(record.getTimeOfRecord());
+          Date timestamp = new Date(getGtfsRealtimeTripLibrary().ensureMillis(record.getTimeOfRecord(), _tripsLibrary.getCurrentTime()));
           Date prev = _lastVehicleUpdate.get(vehicleId);
           if (prev == null || prev.before(timestamp)) {
             _log.debug("matched vehicle " + vehicleId + " on block=" + record.getBlockId() + " with scheduleDeviation=" + record.getScheduleDeviation());
@@ -685,7 +685,8 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
             }
             _lastVehicleUpdate.put(vehicleId, timestamp);
           } else {
-            _log.debug("discarding: update for vehicle " + vehicleId + " as timestamp in past");
+            _log.info("discarding: update for vehicle " + vehicleId
+                    + " as timestamp in past (" + (timestamp.getTime()-prev.getTime()) + "ms)");
           }
         }
       }
