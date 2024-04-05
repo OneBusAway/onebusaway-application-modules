@@ -342,7 +342,7 @@ public final class SiriSupport {
 	}
 
 	private static OccupancyEnumeration mapOccupancyStatusToEnumeration(VehicleOccupancyRecord vor) {
-		if (vor == null) return null;
+		if (vor == null || vor.getOccupancyStatus() == null) return null;
 		switch (vor.getOccupancyStatus()) {
 			case UNKNOWN:
 				return null;
