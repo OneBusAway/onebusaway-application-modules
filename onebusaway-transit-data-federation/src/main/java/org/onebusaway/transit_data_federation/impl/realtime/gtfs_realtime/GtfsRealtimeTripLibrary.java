@@ -203,7 +203,7 @@ public class GtfsRealtimeTripLibrary {
          * (includes start date and time).
          */
         TripDescriptor td = tu.getTrip();
-        long time = tu.hasTimestamp() ? ensureMillis(tu.getTimestamp(), currentTime()) : currentTime();
+        long time = tu.hasTimestamp() ? ensureMillis(tu.getTimestamp()) : currentTime();
         if (bd == null) {
           bd = getTripDescriptorAsBlockDescriptor(result, td, time, null);
         }
@@ -260,9 +260,9 @@ public class GtfsRealtimeTripLibrary {
 
           VehiclePosition otherUpdate = vehiclePositionsByVehicleId.get(vehicleId);
 
-          long otherTimestamp = ensureMillis(otherUpdate.getTimestamp(), currentTime());
+          long otherTimestamp = ensureMillis(otherUpdate.getTimestamp());
 
-          if (ensureMillis(vp.getTimestamp(), currentTime()) > otherTimestamp) {
+          if (ensureMillis(vp.getTimestamp()) > otherTimestamp) {
             vehiclePositionsByVehicleId.put(vehicleId, vp);
           }
 
@@ -274,7 +274,7 @@ public class GtfsRealtimeTripLibrary {
          */
 
         TripDescriptor td = vp.getTrip();
-        long time = vp.hasTimestamp() ? ensureMillis(vp.getTimestamp(), currentTime()) : currentTime();
+        long time = vp.hasTimestamp() ? ensureMillis(vp.getTimestamp()) : currentTime();
         BlockDescriptor bd = getTripDescriptorAsBlockDescriptor(result, td, time, null);
 
         if (bd == null) {
@@ -318,7 +318,7 @@ public class GtfsRealtimeTripLibrary {
 
       // use the first trip to find the block, but pass through all tripUpdates
       TripUpdate firstTrip = tripUpdates.iterator().next();
-      long time = firstTrip.hasTimestamp() ? ensureMillis(firstTrip.getTimestamp(), currentTime()) : currentTime();
+      long time = firstTrip.hasTimestamp() ? ensureMillis(firstTrip.getTimestamp()) : currentTime();
       update.block = getTripDescriptorAsBlockDescriptor(result, firstTrip.getTrip(), time, vehicleId);
       if (isNycDynamicTrip(firstTrip)) {
         update.block = handleDynamicTripUpdate(firstTrip);
@@ -375,12 +375,14 @@ public class GtfsRealtimeTripLibrary {
     return updates;
   }
 
-  long ensureMillis(long timestamp, long currentTime) {
+  long ensureMillis(long timestamp) {
     // some feeds use millis, but the specification says seconds
-    if (Math.abs(currentTime - timestamp) > 100l * 365 * 24 * 60 * 60) {
-      return timestamp * 1000;
+    // logic here is if the timestamp is not within 100 years then it is the wrong scale
+    long diff = System.currentTimeMillis()/1000 - timestamp;
+    if (Math.abs(diff) > 100l * 365 * 24 * 60 * 60) {
+      return timestamp;
     }
-    return timestamp;
+    return timestamp * 1000;
   }
 
   private BlockDescriptor handleDynamicTripUpdate(TripUpdate tu) {
@@ -938,7 +940,7 @@ public class GtfsRealtimeTripLibrary {
               best.tripUpdateHasDelay = true;
             }
             if (tripUpdate.hasTimestamp()) {
-              best.timestamp = ensureMillis(tripUpdate.getTimestamp(), currentTime());
+              best.timestamp = ensureMillis(tripUpdate.getTimestamp());
             }
 
             if (tripId != null) {
@@ -1261,7 +1263,7 @@ public class GtfsRealtimeTripLibrary {
       VehicleLocationRecord record) {
     Position position = vehiclePosition.getPosition();
     if (vehiclePosition.hasTimestamp()) {
-      record.setTimeOfLocationUpdate(ensureMillis(vehiclePosition.getTimestamp(), _currentTime)); //vehicle timestamp is in seconds
+      record.setTimeOfLocationUpdate(ensureMillis(vehiclePosition.getTimestamp())); //vehicle timestamp is in seconds
     }
     record.setCurrentLocationLat(position.getLatitude());
     record.setCurrentLocationLon(position.getLongitude());

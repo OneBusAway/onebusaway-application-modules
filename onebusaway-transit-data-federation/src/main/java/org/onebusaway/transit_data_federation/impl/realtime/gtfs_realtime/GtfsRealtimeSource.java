@@ -587,7 +587,7 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
                                           ServiceAlerts.ServiceAlertsCollection alertCollection) {
 	  
 	long time = tripUpdates.getHeader().getTimestamp() * 1000;
-	_tripsLibrary.setCurrentTime(_tripsLibrary.ensureMillis(time, System.currentTimeMillis()));
+	_tripsLibrary.setCurrentTime(_tripsLibrary.ensureMillis(time));
 
     List<CombinedTripUpdatesAndVehiclePosition> combinedUpdates = _tripsLibrary.groupTripUpdatesAndVehiclePositions(result,
             tripUpdates, vehiclePositions);
@@ -682,7 +682,7 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
           }
           seenVehicles.add(vehicleId);
           VehicleOccupancyRecord vor = _tripsLibrary.createVehicleOccupancyRecordForUpdate(result, update);
-          Date timestamp = new Date(getGtfsRealtimeTripLibrary().ensureMillis(record.getTimeOfRecord(), _tripsLibrary.getCurrentTime()));
+          Date timestamp = new Date(getGtfsRealtimeTripLibrary().ensureMillis(record.getTimeOfRecord()));
           Date prev = _lastVehicleUpdate.get(vehicleId);
           if (prev == null || prev.before(timestamp)) {
             _log.debug("matched vehicle " + vehicleId + " on block=" + record.getBlockId() + " with scheduleDeviation=" + record.getScheduleDeviation());
