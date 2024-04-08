@@ -211,7 +211,7 @@ public class GtfsRealtimeTripLibraryTest {
     update.setTripUpdates(Arrays.asList(tripUpdate));
 
     VehicleLocationRecord record = _library.createVehicleLocationRecordForUpdate(update);
-    assertEquals(123456789L, record.getTimeOfRecord());
+    assertEquals(123456789000L, record.getTimeOfRecord());
     assertEquals(120, record.getScheduleDeviation(), 0.0);
   }
   
@@ -299,7 +299,7 @@ public class GtfsRealtimeTripLibraryTest {
     _library.setStopModificationStrategy(strategy);
 
     VehicleLocationRecord record = _library.createVehicleLocationRecordForUpdate(update);
-    assertEquals(123456789L, record.getTimeOfRecord());
+    assertEquals(123456789000L, record.getTimeOfRecord());
     assertEquals(120, record.getScheduleDeviation(), 0.0);
 
     TimepointPredictionRecord tpr = record.getTimepointPredictions().get(0);
@@ -524,7 +524,7 @@ public class GtfsRealtimeTripLibraryTest {
     VehicleLocationRecord record = vehicleLocationRecord(tripUpdate);
     
     long stopADept = getPredictedDepartureTimeByStopId(record, "stopA");
-    assertEquals(stopADept, 27120000); // no tpr for this stop
+    assertEquals(stopADept, -1); // no tpr for this stop
     
     long stopBDept = getPredictedDepartureTimeByStopId(record, "stopB");
     assertEquals(stopBDept, time(7, 43) * 1000);
