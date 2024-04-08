@@ -15,7 +15,7 @@
  */
 package org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime;
 
-import org.onebusaway.gtfs.model.AgencyAndId;;
+import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.services.ConsolidatedStopsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
