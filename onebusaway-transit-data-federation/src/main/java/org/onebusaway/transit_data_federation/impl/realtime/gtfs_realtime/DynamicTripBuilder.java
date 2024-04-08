@@ -76,7 +76,7 @@ public class DynamicTripBuilder {
         instance = null;
       }
       if (instance == null) {
-        instance = createBlockInstance(addedTripInfo);
+        instance = createBlockInstance(addedTripInfo, dynamicBd.getMutated());
       }
 
       String validationMessage = isValid(instance);
@@ -189,20 +189,20 @@ public class DynamicTripBuilder {
     return null;
   }
 
-  private BlockInstance createBlockInstance(AddedTripInfo addedTripInfo) {
-    BlockConfigurationEntry blockConfiguration = createBlockConfiguration(addedTripInfo);
+  private BlockInstance createBlockInstance(AddedTripInfo addedTripInfo, boolean isMutated) {
+    BlockConfigurationEntry blockConfiguration = createBlockConfiguration(addedTripInfo, isMutated);
     if (blockConfiguration == null) return null;
     return new BlockInstance(blockConfiguration,
             addedTripInfo.getServiceDate());
   }
 
-  private BlockConfigurationEntry createBlockConfiguration(AddedTripInfo addedTripInfo) {
+  private BlockConfigurationEntry createBlockConfiguration(AddedTripInfo addedTripInfo, boolean isMutated) {
     DynamicBlockConfigurationEntryImpl.Builder configBuilder = DynamicBlockConfigurationEntryImpl.builder();
     BlockEntry blockEntry = createBlockEntry(addedTripInfo);
     configBuilder.setBlock(blockEntry);
     configBuilder.setServiceIds(createServiceIdActivation(addedTripInfo));
     configBuilder.setTrips(new ArrayList<>());
-    TripEntry trip = createTrip(addedTripInfo, blockEntry);
+    TripEntry trip = createTrip(addedTripInfo, blockEntry, isMutated);
     if (trip == null) return null;
     configBuilder.getTrips().add(trip);
     DynamicBlockConfigurationEntryImpl config = new DynamicBlockConfigurationEntryImpl(configBuilder);
@@ -210,7 +210,7 @@ public class DynamicTripBuilder {
     return config;
   }
 
-  private TripEntry createTrip(AddedTripInfo addedTripInfo, BlockEntry block) {
+  private TripEntry createTrip(AddedTripInfo addedTripInfo, BlockEntry block, boolean isMutated) {
     DynamicTripEntryImpl trip = new DynamicTripEntryImpl();
     trip.setId(new AgencyAndId(addedTripInfo.getAgencyId(), addedTripInfo.getTripId()));
     DynamicRouteEntry route = createRoute(addedTripInfo);
@@ -219,7 +219,7 @@ public class DynamicTripBuilder {
     trip.setDirectionId(getGtfsDirectionId(addedTripInfo.getDirectionId()));
     trip.setBlock(block);
     trip.setServiceId(createLocalizedServiceId(addedTripInfo));
-    trip.setStopTimes(createStopTimes(addedTripInfo, trip));
+    trip.setStopTimes(createStopTimes(addedTripInfo, trip, isMutated));
     trip.setTotalTripDistance(calculateTripDistance(trip));
     if (trip.getStopTimes() == null || trip.getStopTimes().isEmpty()) {
       _log.debug("aborting trip creation {} with no stops", addedTripInfo.getTripId());
@@ -263,9 +263,12 @@ public class DynamicTripBuilder {
     return directionFlag;
   }
 
-  private List<StopTimeEntry> createStopTimes(AddedTripInfo addedTripInfo, DynamicTripEntryImpl trip) {
+  private List<StopTimeEntry> createStopTimes(AddedTripInfo addedTripInfo, DynamicTripEntryImpl trip, boolean isMutated) {
     List<StopTimeEntry> stops = new ArrayList<>();
     int sequence = 0;
+    if (isMutated) {
+      sequence = 1;
+    }
     for (AddedStopInfo stopInfo : addedTripInfo.getStops()) {
       if (stopInfo == null) continue;
       StopEntry stop = findStop(addedTripInfo.getAgencyId(), stopInfo.getStopId());

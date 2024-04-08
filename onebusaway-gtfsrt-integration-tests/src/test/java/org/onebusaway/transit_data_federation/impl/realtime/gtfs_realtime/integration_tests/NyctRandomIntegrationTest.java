@@ -625,8 +625,9 @@ public class NyctRandomIntegrationTest extends AbstractGtfsRealtimeIntegrationTe
 
     String part0 = "gtfs-l-03222024-232658";  // trip pattern goes through to L01
     GtfsRealtimeSource source = runRealtime(routeIdsToCancel, expectedRouteId, expectedStopId, path, part0);
-    expectArrivalAndTripAndHeadsignDistance(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId,
-            tripId, "MTASBWY_0L 2354+RPY/8AV", "8 Av", 43, 0.0); // first update
+    ArrivalAndDepartureBean arrivalAndDepartureBean = expectArrivalAndTripAndHeadsignDistance(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId,
+            tripId, "MTASBWY_0L 2354+RPY/8AV", "8 Av", 43, 0.0);// first update
+    int originalStopSequence = arrivalAndDepartureBean.getStopSequence();
 
     String part1 = "gtfs-l-03222024-233513"; //L01=8 Av; L10=Lorimer St
     source = runRealtime(routeIdsToCancel, expectedRouteId, expectedStopId, path, part1);
@@ -637,9 +638,12 @@ public class NyctRandomIntegrationTest extends AbstractGtfsRealtimeIntegrationTe
     // train is assigned late!
     String part2 = "gtfs-l-03222024-234728"; /// short turn to L10
     source = runRealtime(routeIdsToCancel, expectedRouteId, expectedStopId, path, part2);
-    expectArrivalAndTripAndHeadsignDistance(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId,
+    ArrivalAndDepartureBean arrivalAndDepartureBean1 = expectArrivalAndTripAndHeadsignDistance(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId,
             tripId, vehicleId, headsign, 23, 1.0);
-
+    int updatedStopSequence = arrivalAndDepartureBean1.getStopSequence();
+    assertEquals(10, originalStopSequence);
+    assertEquals(11, updatedStopSequence); // stop sequence moved as trip is mutated
+    assertEquals(11, updatedStopSequence); // stop sequence moved as trip is mutated
   }
 
   /**
