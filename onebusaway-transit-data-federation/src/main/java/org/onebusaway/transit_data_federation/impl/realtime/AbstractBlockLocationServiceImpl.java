@@ -149,10 +149,10 @@ public abstract class AbstractBlockLocationServiceImpl {
         location.setEffectiveScheduleTime(scheduledLocation.getScheduledTime());
         location.setDistanceAlongBlock(scheduledLocation.getDistanceAlongBlock());
       }
-      if (record.getMutated() && 0.0 == location.getDistanceAlongBlock()) {
+      //if (record.getMutated() && 0.0 == location.getDistanceAlongBlock()) {
         // ensure DaB is not 0 as the trip is underway -- MTA-118
-        location.setDistanceAlongBlock(1.0);
-      }
+        // location.setDistanceAlongBlock(1.0);
+      //}
 
       location.setBlockStartTime(record.getBlockStartTime());
       location.setPredicted(true);
