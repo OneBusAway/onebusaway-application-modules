@@ -70,8 +70,7 @@ public class DynamicTripBuilder {
         // the trip has mutated and is already underway
         if (isBlockUnderway(instance, addedTripInfo.getServiceDate(), currentTime)) {
           dynamicBd.setMutated(true);  // mark as mutated -- hint for location
-        } else {
-          dynamicBd.setMutated(false); // reset state on successive updates
+          // we don't worry about unsetting it as we only prevent 0.0 distanceAlongTrip currently
         }
         instance = null;
       }
@@ -96,17 +95,24 @@ public class DynamicTripBuilder {
   }
 
   private boolean isBlockUnderway(BlockInstance instance, long serviceDate, long currentTime) {
+    return isPastStop(instance, serviceDate, currentTime, 0);
+  }
+
+  private boolean isPastStop(BlockInstance instance, long serviceDate, long currentTime, int stopSequence) {
     BlockTripEntry blockTripEntry = instance.getBlock().getTrips().get(0);
     if (blockTripEntry.getStopTimes().isEmpty())
       return false;
-    BlockStopTimeEntry blockStopTimeEntry = blockTripEntry.getStopTimes().get(0);
+    BlockStopTimeEntry blockStopTimeEntry = blockTripEntry.getStopTimes().get(stopSequence);
     int time = 0;
     time = blockStopTimeEntry.getStopTime().getArrivalTime();
     if (time <= 0)
       time = blockStopTimeEntry.getStopTime().getDepartureTime();
-    if (time + serviceDate < currentTime)
+    long stopTime = time + serviceDate;
+    if (stopTime < currentTime) {
       return true;
+    }
     return false;
+
   }
 
   // test that the stops are the same and in the same order

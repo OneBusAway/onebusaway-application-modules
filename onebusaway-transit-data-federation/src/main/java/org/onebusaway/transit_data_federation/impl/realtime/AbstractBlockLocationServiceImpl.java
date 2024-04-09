@@ -150,8 +150,8 @@ public abstract class AbstractBlockLocationServiceImpl {
         location.setDistanceAlongBlock(scheduledLocation.getDistanceAlongBlock());
       }
       if (record.getMutated()) {
-        // reset distance along block as it can't be trusted -- MTA-118
-        location.setDistanceAlongBlock(1.0);
+        // ensure DaB is not 0 as the trip is underway -- MTA-118
+        location.setDistanceAlongBlock(1.0 + location.getDistanceAlongBlock());
       }
 
       location.setBlockStartTime(record.getBlockStartTime());
