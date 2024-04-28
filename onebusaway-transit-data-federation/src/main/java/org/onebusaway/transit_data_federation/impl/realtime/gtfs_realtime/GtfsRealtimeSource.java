@@ -692,7 +692,7 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
             }
             _lastVehicleUpdate.put(vehicleId, timestamp);
           } else {
-            _log.info("discarding: update for vehicle " + vehicleId
+            _log.debug("discarding: update for vehicle " + vehicleId
                     + " as timestamp in past (" + (timestamp.getTime()-prev.getTime()) + "ms)");
           }
         }
