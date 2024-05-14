@@ -868,7 +868,9 @@ function onCreateDatasetClick() {
 	// Clear fields on the Upload tab
 	if (agencyMetadataAvailable) {
 		$('#agency_data tr').slice(1).remove();
-		onAddAnotherAgencyClick("file");
+		//onAddAnotherAgencyClick("file");
+		jQuery("#addAnotherAgency").click();
+
 	}
 	$("#uploadFiles #bundleComment").val("");
 	$('#existingFilesTable tr').slice(1).remove();
