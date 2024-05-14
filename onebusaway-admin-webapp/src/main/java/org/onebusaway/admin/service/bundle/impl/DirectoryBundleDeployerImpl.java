@@ -38,6 +38,7 @@ public class DirectoryBundleDeployerImpl implements BundleDeployer {
   private FileUtility _fileUtil;
   private NYCFileUtils _nycFileUtils;
   private String _deployBundleDirectory;
+  private boolean _cleanupDeployEnabled = false;
   
   public void setDeployBundleDirectory(String localBundlePath) {
     _deployBundleDirectory = localBundlePath;
@@ -98,7 +99,9 @@ public class DirectoryBundleDeployerImpl implements BundleDeployer {
     List<String> bundles = listFiles(path, MAX_RESULTS);
 
     if (bundles != null && !bundles.isEmpty()) {
-      clearBundleDeployDirectory();
+      if (_cleanupDeployEnabled) {
+        clearBundleDeployDirectory();
+      }
     } else {
       _log.error("no bundles found at path=" + path);
       return bundlesDownloaded;
@@ -106,7 +109,7 @@ public class DirectoryBundleDeployerImpl implements BundleDeployer {
 
     for (String bundle : bundles) {
       String bundleFilename = _nycFileUtils.parseFileName(bundle, File.separator);
-      // retreive bundle and add it to the list of bundles
+      // retrieve bundle and add it to the list of bundles
       try{
         _log.info("getting bundle = " + bundle);
         get(bundle, _deployBundleDirectory);

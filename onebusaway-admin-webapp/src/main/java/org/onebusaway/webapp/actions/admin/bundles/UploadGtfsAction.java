@@ -155,7 +155,7 @@ public class UploadGtfsAction extends OneBusAwayNYCAdminActionSupport {
         }
       }
     }
-    // name it something safe -- as url may have stuffin it
+    // name it something safe -- as url may have stuff in it
     target += File.separator + agencyId + ".zip";
     _log.info("Target: " + target);
 
