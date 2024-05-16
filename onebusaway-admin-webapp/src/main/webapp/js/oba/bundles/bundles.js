@@ -75,6 +75,11 @@ jQuery(function() {
 	// politely set our hash as tabs are changed
 	jQuery("#tabs").bind("tabsshow", function(event, ui) {
 		window.location.hash = ui.tab.hash;
+		if (ui.tab.hash == "#Deploy") {
+			// when deploy tab clicked, pre-load some data
+			jQuery("#deployBundle_listButton").click();
+			jQuery("#deployBundle_listCurrentButton").click();
+		}
 	});
 
 	// Set values for dataset select lists on Compare tab
@@ -402,7 +407,7 @@ jQuery(function() {
 	// copy existing dataset to a new directory
 	jQuery(".copyDirectory").click(onCopyExistingDatasetClick);
 
-	// copy existing dataset to a new directory
+	// delete existing dataset
 	jQuery(".deleteDirectory").click(onDeleteExistingDatasetClick);
 	
 	// upload bundle source data for selected agency
@@ -539,9 +544,10 @@ jQuery(function() {
 	jQuery("#deployBundle #deployBundle_progress #expand").bind({
 		'click' : toggleDeployBundleResultList});
 
-	//Handle deploy button click event
-	jQuery("#deployBundle_deployButton").click(onDeployClick);
+	//Handle deploy list button click event
 	jQuery("#deployBundle_listButton").click(onDeployListClick);
+	jQuery("#deployBundle_listCurrentButton").click(deployListBundles);
+
 	onDeployListClick();
 	
 	//Handle download button click event
@@ -638,6 +644,66 @@ jQuery(function() {
 			}
 		}
 	});
+
+	// for deploying named bundle
+	$("#DeployingPopup").dialog({
+		autoOpen: false,
+		modal: true,
+		width: 'auto',
+		buttons: [{
+			id: "deployingSuccessCancel",
+			text: "Continue",
+			click: function() {
+				$(this).dialog("close");
+			}
+		}],
+		open: function() {
+			$('.ui-dialog-buttonpane').find('button:contains("Continue")').addClass('cancelDeletePopup');
+		}
+	});
+
+	// For Delete deployment
+	$("#deleteDeployPopup").dialog({
+		autoOpen: false,
+		modal: true,
+		width: 'auto',
+		buttons: [{
+			id: "deleteDeployCancel",
+			text: "Cancel",
+			click: function() {
+				$(this).dialog("close");
+			}
+		},
+			{
+				id: "deleteDeployContinue",
+				text: "Delete dataset",
+				click: function() {
+					$(this).dialog("close");
+					onDeleteDeployConfirmed();
+				}
+			}],
+		open: function() {
+			$('.ui-dialog-buttonpane').find('button:contains("Cancel")').addClass('cancelDeletePopup');
+		}
+	});
+
+	// For "Delete Success" popup to confirm the directory was deleted
+	$("#deleteDeploySuccessPopup").dialog({
+		autoOpen: false,
+		modal: true,
+		width: 'auto',
+		buttons: [{
+			id: "deleteDeploySuccessCancel",
+			text: "Continue",
+			click: function() {
+				$(this).dialog("close");
+			}
+		}],
+		open: function() {
+			$('.ui-dialog-buttonpane').find('button:contains("Continue")').addClass('cancelDeletePopup');
+		}
+	});
+
 
 	$("#Build input[type=button]").removeAttr('disabled');
 
@@ -747,6 +813,9 @@ function onStageContinueClick() {
 
 function onDeployContinueClick() {
 	var $tabs = jQuery("#tabs");
+	// load some data when tab becomes active
+	jQuery("#deployBundle_listButton").click();
+	jQuery("#deployBundle_listCurrentButton").click();
 	$tabs.tabs('select', 6);
 }
 //Helper method for setting up different DIVs HTML
@@ -902,9 +971,20 @@ function onDeleteDatasetConfirmed() {
 	onDeleteDataset();
 }
 
+function onDeleteDeployConfirmed() {
+	onDeleteDeployedItemClick();
+	// refresh automatically
+	deployListBundles();
+}
+
 function onDeleteExistingDatasetClick() {
 	selectedDirectory = $(this).closest("tr").find(".directoryName").text();
 	var continueDelete = $("#deletePopup").dialog("open");
+}
+
+function onDeleteDeployedClick() {
+	selectedDirectory = $(this).closest("tr").find(".deployedItemName").text();
+	var continueDelete = $("#deleteDeployPopup").dialog("open");
 }
 
 function onAnyCommentsClick() {
@@ -1119,6 +1199,23 @@ function onSelectDataset(sourceDirectoryType) {
 				alert("There was an error processing your request. Please try again.");
 			}
 	});
+}
+
+function onDeleteDeployedItemClick() {
+	var selectedItem = selectedDirectory;
+	console.log("requesting delete of deployed item " + selectedItem + " using CSRF token " + csrfToken);
+	jQuery.ajax({
+		url: "../../api/bundle/deploy/delete/" + selectedItem + "?ts=" + new Date().getTime(),
+		type: "GET",
+		async: false,
+		success: function(response) {
+			$("#deleteSuccessPopup").dialog("open");
+		},
+		error: function(request) {
+			alert("There was an error processing your request. Please try again.");
+		}
+	});
+
 }
 
 function onDeleteDataset() {
@@ -1869,7 +1966,7 @@ function bundleUrl(buildType) {
 			timeout = setTimeout(bundleUrl.bind(null, buildType), 10000);
 		}
 	});
-	var url = $esultLink.text();
+	var url = $resultLink.text();
 	if (url == null || url == "") {
 		window.setTimeout(bundleUrl.bind(null, buildType), 5000);
 	}
@@ -2767,15 +2864,58 @@ function updateStageStatus() {
 }
 
 
-function onDeployClick() {
-	deployBundle();
+function deployListBundles() {
+	// get a list of currently deployed bundles so it can be pruned
+	// CSRF token not required on /api/bundle/*
+	jQuery.ajax({
+		url: "../../api/bundle/list?ts=" +new Date().getTime(),
+		type: "GET",
+		async: false,
+		success: function(data) {
+			if (data == undefined) {
+				console.log("empty response");
+				return;
+			}
+			if (typeof data=="string") {
+				// work around bad header
+				data = eval('(' + data + ')');
+			}
+			jQuery("#deployBundleCurrentTable tbody").empty();
+
+			// iterate over list
+			jQuery.each(data.bundles, function(index, value) {
+				console.log("value=" + value);
+				var deployName = value.name;
+				var start = value["service-date-from"];
+				var end = value["service-date-to"];
+				var updated = value.updated;
+				console.log("deployName=" + index + ":" + deployName);
+				var newRow = '<tr class="deployResultListRow"> \
+					<td class="deployedItemName">' + deployName + '</td> \
+					<td class="deployDate">' + start + '</td> \
+					<td class="deployDate">' + end + '</td> \
+					<td class="deployDate">' + updated + '</td> \
+					<td class="deleteDeployedItem">delete</td></tr>';
+				jQuery("#deployBundleCurrentTable").append(newRow);
+			});
+			// apply the onClick listener to the delete column
+			jQuery(".deleteDeployedItem").click(onDeleteDeployedClick);
+
+		},
+		error: function (request) {
+			alert("There was an error processing your request. Please try again.");
+		}
+	});
 }
 
-function deployBundle(){
-	var environment = jQuery("#deploy_environment").text();
-	// TODO consider POST
+function onDeployBundleClick(){
+	var selectedItem = $(this).closest("tr").find(".deployedItemName").text();
+	// give some feedback to the user that the link was clicked
+	// this action can be rather slow so this prevents multiple clicks
+	// ideally this would be async instead
+	$("#DeployingPopup").dialog("open");
 	jQuery.ajax({
-		url: "../../api/bundle/deploy/from/" + environment + "?ts=" +new Date().getTime(),
+		url: "../../api/bundle/deploy/name/" + selectedItem + "?ts=" +new Date().getTime(),
 		type: "GET",
 		async: false,
 		success: function(response) {
@@ -2785,16 +2925,10 @@ function deployBundle(){
 				if (typeof response=="string") {
 					bundleResponse = eval('(' + response + ')');
 				}
-				jQuery("#deployBundle_resultList").html("calling...");
-				jQuery("#deployBundle_id").text(bundleResponse.id);
-				jQuery("#deployBundle #requestLabels").show().css("display","block");
-				jQuery("#deployContentsHolder #deployBox #deploying").show().css("display","block");
-				jQuery("#deployBundle_deployProgress").text("Deploying ...");
-				jQuery("#deployContentsHolder #deployBox #deploying #deployingProgress").attr("src","../../css/img/ajax-loader.gif");
+				// this allows call to be async in future
 				window.setTimeout(updateDeployStatus, 5000);
 			} else {
-				jQuery("#deployBundle_id").text(error);
-				jQuery("#deployBundle_resultList").html("error");
+				alert("Response from Server was not understood");
 			}
 		},
 		error: function(request) {
@@ -2804,77 +2938,13 @@ function deployBundle(){
 }
 
 function updateDeployStatus() {
-	id = jQuery("#deployBundle_id").text();
-	// TODO consider POST
-	jQuery.ajax({
-		url: "../../api/bundle/deploy/status/" + id + "/list?ts=" +new Date().getTime(),
-		type: "GET",
-		async: false,
-		success: function(response) {
-			var txt = "<ul>";
-			var bundleResponse = response;
-			if (bundleResponse == null) {
-				jQuery("#deployBundle_deployProgress").text("Deploy Complete!");
-				jQuery("#deployContentsHolder #deployBox #deploying #deployingProgress").attr("src","../../css/img/dialog-warning-4.png");
-				jQuery("#deployBundle_resultList").html("unknown id=" + id);
-				return;
-			}
-			// the header is set wrong for the proxied object, run eval to correct
-			if (typeof response=="string") {
-				bundleResponse = eval('(' + response + ')');
-			}
-			if (bundleResponse.status != "complete" && bundleResponse.status != "error") {
-				window.setTimeout(updateDeployStatus, 5000); // recurse
-			} else {
-				toggleDeployBundleResultList();
-				jQuery("#bundleResultsHolder #bundleResults #deployBundle_progress").show().css("display","block");
-				jQuery("#bundleResultsHolder #bundleResults #deployBundle_resultList").show().css("display","block");
-				if (bundleResponse.status == "complete") {
-					jQuery("#deployContentsHolder #deployBox #deploying #deployingProgress").attr("src","../../css/img/dialog-accept-2.png");
-					jQuery("#deployBundle_deployProgress").text("Deploy Complete!");
-					// set resultList to bundleNames list
-					var size = bundleResponse.bundleNames.length;
-					if (size > 0) {
-						for (var i=0; i<size; i++) {
-							txt = txt + "<li>" + bundleResponse.bundleNames[i] + "</li>";
-						}
-					}
-					var continueButton = jQuery("#deploy_continue");
-					enableContinueButton(continueButton);
-				} else {
-					jQuery("#deployContentsHolder #deployBox #deploying #deployingProgress").attr("src","../../css/img/dialog-warning-4.png");
-					jQuery("#deployBundle_deployProgress").text("Deploy Failed!");
-					// we've got an error
-					txt = txt + "<li><font color=\"red\">ERROR!  Please consult the logs and check the "
-					+ "filesystem permissions before continuing</font></li>";
-				}
-			}
-			txt = txt + "</ul>";
-			jQuery("#deployBundle_resultList").html(txt).css("font-size", "12px");	
-		},
-		error: function(request) {
-			clearTimeout(timeout);
-			toggleDeployBundleResultList();
-			jQuery("#deployContentsHolder #deployBox #deploying #deployingProgress").attr("src","../../css/img/dialog-warning-4.png");
-			jQuery("#deployBundle_deployProgress").text("Deploy Failed!");
-			jQuery("#bundleResultsHolder #bundleResults #deployBundle_progress").show().css("display","block");
-			jQuery("#bundleResultsHolder #bundleResults #deployBundle_resultList").show().css("display","block");
-
-			// error out on a 500 error, the session will be lost so it will not recover
-			var txt = "<ul>";
-			txt = txt + "<li><font color=\"red\">The server returned an internal error.  Please consult the logs" 
-			+ " or retry your request</font></li>";
-			txt = txt + "</ul>";
-			jQuery("#deployBundle_resultList").html(txt).css("font-size", "12px");
-		}
-	});
+	onDeployListClick();
 }
 
 function onDeployListClick(){
 	var environment = jQuery("#deploy_environment").text();
-	// TODO consider POST
 	jQuery.ajax({
-		url: "../../api/bundle/deploy/list/" + environment + "?ts=" +new Date().getTime(),
+		url: "../../api/bundle/staged/list?ts=" +new Date().getTime(),
 		type: "GET",
 		async: false,
 		success: function(response) {
@@ -2885,15 +2955,25 @@ function onDeployListClick(){
 				if (typeof response=="string") {
 					bundleResponse = eval('(' + response + ')');
 				}
-				// parse array of bundle names
-				var size = bundleResponse.length;
-				if (size > 0) {
-					for (var i=0; i<size; i++) {
-						txt = txt + "<li>" + bundleResponse[i] + "</li>";
-					}
-				}
-				txt = txt + "</ul>";
-				jQuery("#deployBundle_bundleList").html(txt).css("font-size", "12px");	
+
+				jQuery("#deployStagedCurrentTable tbody").empty();
+				jQuery.each(response.bundles, function(index, value) {
+					console.log("value=" + value);
+					var deployName = value.name;
+					var start = value["service-date-from"];
+					var end = value["service-date-to"];
+					var updated = value.updated;
+					console.log("deployName=" + index + ":" + deployName);
+					var newRow = '<tr class="deployResultListRow"> \
+					<td class="deployedItemName">' + deployName + '</td> \
+					<td class="deployDate">' + start + '</td> \
+					<td class="deployDate">' + end + '</td> \
+					<td class="deployDate">' + updated + '</td> \
+					<td class="deployStagedItem">deploy</td></tr>';
+					jQuery("#deployStagedCurrentTable").append(newRow);
+				});
+				jQuery(".deployStagedItem").click(onDeployBundleClick);
+				deployListBundles();
 
 			}
 		},
