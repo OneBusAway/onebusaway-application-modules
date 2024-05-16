@@ -190,7 +190,26 @@ public class LocalBundleDeployerServiceImpl implements BundleDeployerService{
       return Response.serverError().build();
     }
 
-    /**
+    @Override
+    public Response delete(String name) {
+      return bundleDeployer.delete(name);
+    }
+
+  @Override
+  public Response deployName(String name) {
+    String path = getBundleDirectory() + File.separator;
+    BundleStatus status = new BundleStatus();
+    try {
+      bundleDeployer.deploy(status, path, name);
+      String jsonStatus = jsonSerializer(status);
+      return Response.ok(jsonStatus).build();
+    } catch (Exception e) {
+      _log.error("exception serializing response:", e);
+    }
+    return Response.serverError().build();
+  }
+
+  /**
      * query the status of a requested bundle deployment
      * @param id the id of a BundleDeploymentStatus
      * @return a serialized version of the requested BundleDeploymentStatus, null otherwise
@@ -351,7 +370,7 @@ public class LocalBundleDeployerServiceImpl implements BundleDeployerService{
       
       @Override
       public void run() {
-        bundleDeployer.deploy(status, path);
+        bundleDeployer.deploy(status, path, null);
       }
     }
 

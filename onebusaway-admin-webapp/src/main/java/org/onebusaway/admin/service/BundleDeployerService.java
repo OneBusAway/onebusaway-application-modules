@@ -27,10 +27,14 @@ public interface BundleDeployerService {
 
   public Response deploy(String environment);
 
+  public Response deployName(String name);
+
   public Response deployStatus(String id);
 
   public Response getBundleFile(String bundleId, String relativeFilename);
 
   public Response getBundleList();
+
+  public Response delete(String name);
 
 }

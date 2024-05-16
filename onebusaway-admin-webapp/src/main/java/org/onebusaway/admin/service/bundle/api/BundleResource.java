@@ -195,6 +195,34 @@ public class BundleResource extends AuthenticatedResource implements ServletCont
     }
     return _localBundleDeployer.deploy(environment);
   }
+
+  @Path("/deploy/name/{name}")
+  @GET
+  public Response deployNamedBundle(@PathParam("name")
+                         String name) {
+    if (!isAuthorized()) {
+      return Response.noContent().build();
+    }
+
+    if(isTdm()){
+      return Response.noContent().build();
+    }
+    return _localBundleDeployer.deployName(name);
+  }
+
+  @Path("/deploy/delete/{name}")
+  @GET
+  public Response deployDelete(@PathParam("name")
+                               String name) {
+    if (!isAuthorized()) {
+      return Response.noContent().build();
+    }
+    if (isTdm()) {
+      // not supported
+      return Response.noContent().build();
+    }
+    return _localBundleDeployer.delete(name);
+  }
   
   @Path("/deploy/status/{id}/list")
   @GET
