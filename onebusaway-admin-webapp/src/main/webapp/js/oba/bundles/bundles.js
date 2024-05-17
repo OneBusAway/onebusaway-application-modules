@@ -1317,7 +1317,7 @@ function onUploadSelectedAgenciesClick() {
 					$this.find(".agencyDataSource").addClass('agencyUploadSuccess');
 				},
 				error: function(request) {
-					console.log("Error uploadeding " + agencyDataFile.name);
+					console.log("Error uploading " + agencyDataFile.name);
 					alert("There was an error processing your request. Please try again.");
 				}
 			});
@@ -2929,7 +2929,8 @@ function onDeployBundleClick(){
 				if (typeof response=="string") {
 					bundleResponse = eval('(' + response + ')');
 				}
-				// this allows call to be async in future
+				// we treat call as async, and don't parse the response
+				// instead we rely on the list to update or for user to give up!
 				window.setTimeout(updateDeployStatus, 5000);
 			} else {
 				alert("Response from Server was not understood");
