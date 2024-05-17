@@ -2747,6 +2747,7 @@ function stageBundle() {
 	var environment = jQuery("#deploy_environment").text();
 	var bundleDir = selectedDirectory;
 	var bundleName = jQuery("#Build #bundleBuildName").val();
+	console.log("calling " + "../../api/bundle/stagerequest/" + environment + "/" + bundleDir + "/" + bundleName + "?ts=" +new Date().getTime())
 	// TODO consider POST
 	jQuery.ajax({
 		url: "../../api/bundle/stagerequest/" + environment + "/" + bundleDir + "/" + bundleName + "?ts=" +new Date().getTime(), 
@@ -2789,6 +2790,7 @@ function stageBundle() {
 			}
 		},
 		error: function(request) {
+			console.log("failure=" + JSON.stringify(request, null, 2));
 			alert("There was an error processing your request. Please try again.");
 		}
 	});
@@ -2798,6 +2800,7 @@ function stageBundle() {
 function updateStageStatus() {
 	id = jQuery("#stageBundle_id").text();
 	// TODO consider POST
+	console.log("status check " + "../../api/bundle/stage/status/" + id + "/list?ts=" +new Date().getTime());
 	jQuery.ajax({
 		url: "../../api/bundle/stage/status/" + id + "/list?ts=" +new Date().getTime(),
 		type: "GET",
@@ -2845,6 +2848,7 @@ function updateStageStatus() {
 			jQuery("#stageBundle_resultList").html(txt).css("font-size", "12px");	
 		},
 		error: function(request) {
+			console.log("failure=" + JSON.stringify(request, null, 2));
 			clearTimeout(timeout);
 
 			jQuery("#stageContentsHolder #stagingBox #staging #stagingProgress").attr("src","../../css/img/dialog-warning-4.png");
