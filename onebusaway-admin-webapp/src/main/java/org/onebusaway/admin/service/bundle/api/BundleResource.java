@@ -68,23 +68,12 @@ public class BundleResource extends AuthenticatedResource implements ServletCont
     String environment, @PathParam("bundleDir")
     String bundleDir, @PathParam("bundleName")
     String bundleName) {
-      // TODO this should follow the deployer pattern with an async response
-      // object
       if (!isAuthorized()) {
     	return Response.noContent().build();
 	  }
-	  
+
+      _log.info("stage request env={} dir={} bundle-{}", environment, bundleDir, bundleName);
 	  return _localBundleStager.stage(environment, bundleDir, bundleName);
-    
-    /*String json = "{ERROR}";
-      try {
-        _bundleStager.stage(environment, bundleDir, bundleName);
-        _bundleStager.notifyOTP(bundleName);
-        json = "{SUCCESS}";
-      } catch (Exception any) {
-        _log.error("stage failed:", any);
-      }
-      return Response.ok(json).build();*/
   }
   
   @Path("/stage/status/{id}/list")
