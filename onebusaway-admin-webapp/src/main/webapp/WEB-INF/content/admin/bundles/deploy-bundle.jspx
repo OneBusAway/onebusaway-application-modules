@@ -23,6 +23,11 @@
 		<div class="tabHeader">
 			<label class="headerLabel">Bundle(s) Available to Deploy</label>
 		</div>
+		<div id="deploypage_info"> <!-- hidden var for environment -->
+			<label id="deploy_environment" class="adminLabel directoryLabel">
+				<s:property value="environment" ></s:property>
+			</label>
+		</div>
 		<div id="deployBundle">
 			<div id="deployBundle_stagedList">
 				<div>
