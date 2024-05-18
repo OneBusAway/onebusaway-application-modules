@@ -66,13 +66,75 @@
 <!-- //prevent jspx minimization -->
 	
 </script>
-
+<!-- setup init and libraries -->
 <s:url var="url" value="/js/oba/bundles/bundles.js">
 	<!-- //prevent jspx minimization -->
 </s:url>
 <script type="text/javascript" src="${url}">
+	<!-- //prevent jspx minimization -->
+</script>
+<!-- tab 1 -->
+<s:url var="url" value="/js/oba/bundles/bundles-Create.js">
+	<!-- //prevent jspx minimization -->
+</s:url>
+<script type="text/javascript" src="${url}">
+	<!-- //prevent jspx minimization -->
+</script>
+<!-- tab 2 -->
+<s:url var="url" value="/js/oba/bundles/bundles-Upload.js">
+	<!-- //prevent jspx minimization -->
+</s:url>
+<script type="text/javascript" src="${url}">
+	<!-- //prevent jspx minimization -->
+</script>
+<!-- tab 3 -->
+<s:url var="url" value="/js/oba/bundles/bundles-Validate.js">
+	<!-- //prevent jspx minimization -->
+</s:url>
+<script type="text/javascript" src="${url}">
+	<!-- //prevent jspx minimization -->
+</script>
+<!-- tab 4 -->
+<s:url var="url" value="/js/oba/bundles/bundles-Build.js">
+	<!-- //prevent jspx minimization -->
+</s:url>
+<script type="text/javascript" src="${url}">
+	<!-- //prevent jspx minimization -->
+</script>
+<!-- tab 5 -->
+<s:url var="url" value="/js/oba/bundles/bundles-Compare.js">
+	<!-- //prevent jspx minimization -->
+</s:url>
+<script type="text/javascript" src="${url}">
+	<!-- //prevent jspx minimization -->
+</script>
+<!-- tab 6 -->
+<s:url var="url" value="/js/oba/bundles/bundles-Stage.js">
+	<!-- //prevent jspx minimization -->
+</s:url>
+<script type="text/javascript" src="${url}">
+	<!-- //prevent jspx minimization -->
+</script>
+<!-- tab 7 -->
+<s:url var="url" value="/js/oba/bundles/bundles-Deploy.js">
+	<!-- //prevent jspx minimization -->
+</s:url>
+<script type="text/javascript" src="${url}">
+	<!-- //prevent jspx minimization -->
+</script>
+<!-- tab 8 -->
+<s:url var="url" value="/js/oba/bundles/bundles-Download.js">
+	<!-- //prevent jspx minimization -->
+</s:url>
+<script type="text/javascript" src="${url}">
+	<!-- //prevent jspx minimization -->
+</script>
+<!-- tab 9 -->
+<s:url var="url" value="/js/oba/bundles/bundles-Sync.js">
+	<!-- //prevent jspx minimization -->
+</s:url>
+<script type="text/javascript" src="${url}">
 <!-- //prevent jspx minimization -->
-
 </script>
 </head>
 <body>
