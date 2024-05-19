@@ -1,9 +1,40 @@
-function init() {
+function initStage() {
+    //toggle bundle staging progress list
+    jQuery("#stageBundle #stageBundle_progress #expand").bind({
+        'click' : toggleStageBundleResultList});
+
+
+    //Handle stage button click event
+    jQuery("#stageBundle_stageButton").click(onStageClick);
+
+
 
 }
 
 function onStageClick() {
     stageBundle();
+}
+
+function onStageContinueClick() {
+    var $tabs = jQuery("#tabs");
+    $tabs.tabs('select', 5);
+}
+
+function enableStageButton() {
+    jQuery("#stageBundle_stageButton").removeAttr("disabled").css("color", "#000");
+    enableContinueButton($("#stage_continue"));
+}
+
+function disableStageButton() {
+    jQuery("#stageBundle_stageButton").attr("disabled", "disabled").css("color", "#999");
+    disableContinueButton($("#stage_continue"));
+}
+
+function toggleStageBundleResultList() {
+    var $image = jQuery("#stageBundle #stageBundle_progress #expand");
+    changeImageSrc($image);
+    //Toggle progress result list
+    jQuery("#stageBundle #stageBundle_resultList").toggle();
 }
 
 function stageBundle() {
@@ -128,5 +159,17 @@ function updateStageStatus() {
             jQuery("#stageBundle_resultList").html(txt).css("font-size", "12px");
         }
     });
+}
+
+function changeImageSrc($image) {
+
+    var $imageSource = $image.attr("src");
+    if($imageSource.indexOf("right-3") != -1) {
+        //Change the img to down arrow
+        $image.attr("src", "../../css/img/arrow-down-3.png");
+    } else {
+        //Change the img to right arrow
+        $image.attr("src", "../../css/img/arrow-right-3.png");
+    }
 }
 

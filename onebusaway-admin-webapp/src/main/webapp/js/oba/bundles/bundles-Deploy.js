@@ -1,5 +1,97 @@
-function init() {
+function initDeploy() {
+    //toggle bundle deploy progress list
+    jQuery("#deployBundle #deployBundle_progress #expand").bind({
+        'click' : toggleDeployBundleResultList});
 
+    //Handle deploy list button click event
+    jQuery("#deployBundle_listButton").click(onDeployListClick);
+    jQuery("#deployBundle_listCurrentButton").click(deployListBundles);
+
+    onDeployListClick();
+
+    // for deploying named bundle
+    $("#DeployingPopup").dialog({
+        autoOpen: false,
+        modal: true,
+        width: 'auto',
+        buttons: [{
+            id: "deployingSuccessCancel",
+            text: "Continue",
+            click: function() {
+                $(this).dialog("close");
+            }
+        }],
+        open: function() {
+            $('.ui-dialog-buttonpane').find('button:contains("Continue")').addClass('cancelDeletePopup');
+        }
+    });
+
+    // For Delete deployment
+    $("#deleteDeployPopup").dialog({
+        autoOpen: false,
+        modal: true,
+        width: 'auto',
+        buttons: [{
+            id: "deleteDeployCancel",
+            text: "Cancel",
+            click: function() {
+                $(this).dialog("close");
+            }
+        },
+            {
+                id: "deleteDeployContinue",
+                text: "Delete dataset",
+                click: function() {
+                    $(this).dialog("close");
+                    onDeleteDeployConfirmed();
+                }
+            }],
+        open: function() {
+            $('.ui-dialog-buttonpane').find('button:contains("Cancel")').addClass('cancelDeletePopup');
+        }
+    });
+
+    // For "Delete Success" popup to confirm the directory was deleted
+    $("#deleteDeploySuccessPopup").dialog({
+        autoOpen: false,
+        modal: true,
+        width: 'auto',
+        buttons: [{
+            id: "deleteDeploySuccessCancel",
+            text: "Continue",
+            click: function() {
+                $(this).dialog("close");
+            }
+        }],
+        open: function() {
+            $('.ui-dialog-buttonpane').find('button:contains("Continue")').addClass('cancelDeletePopup');
+        }
+    });
+
+
+}
+
+function onDeleteDeployedClick() {
+    selectedDirectory = $(this).closest("tr").find(".deployedItemName").text();
+    var continueDelete = $("#deleteDeployPopup").dialog("open");
+}
+
+function onDeployContinueClick() {
+    var $tabs = jQuery("#tabs");
+    // load some data when tab becomes active
+    jQuery("#deployBundle_listButton").click();
+    jQuery("#deployBundle_listCurrentButton").click();
+    $tabs.tabs('select', 6);
+}
+
+function enableDeployButton() {
+    jQuery("#deployBundle_deployButton").removeAttr("disabled").css("color", "#000");
+    enableContinueButton($("#deploy_continue"));
+}
+
+function disableDeployButton() {
+    jQuery("#deployBundle_deployButton").attr("disabled", "disabled").css("color", "#999");
+    disableContinueButton($("#deploy_continue"));
 }
 
 

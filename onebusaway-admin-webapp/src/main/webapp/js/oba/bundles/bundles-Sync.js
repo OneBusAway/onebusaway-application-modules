@@ -1,4 +1,8 @@
-function init() {
+function initSync() {
+    //Handle sync button click event
+    jQuery("#syncBundle_syncButton").click(onSyncDeployedBundleClick);
+
+    $("#Sync #syncProgressDiv").hide();
 
 }
 

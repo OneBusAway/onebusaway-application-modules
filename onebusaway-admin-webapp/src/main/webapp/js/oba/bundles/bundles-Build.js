@@ -1,5 +1,79 @@
-function init() {
+function initBuild() {
+    //toggle bundle build progress list
+    jQuery("#buildBundle #buildBundle_buildTestProgress #expand").bind({
+        'click' : toggleBuildBundleResultList});
 
+    //Handle build button click event
+    jQuery("#Build #testBuildBundleButton").click({buildType: "test"}, onBuildClick);
+    jQuery("#Build #finalBuildBundleButton").click({buildType: "final"}, onBuildClick);
+
+    // Toggle the test and final build details textarea
+    jQuery("#viewTestBuildDetails").click({buildType: "test"}, toggleBuildBundleResultList);
+    jQuery("#viewFinalBuildDetails").click({buildType: "final"}, toggleBuildBundleResultList);
+
+
+    //Enable or disable create/select button when user enters/removes directory name
+    //For a copy, a value must also be provided for the destination directory
+    //Using bind() with propertychange event as live() does not work in IE for unknown reasons
+    jQuery("#createDataset #directoryName").bind("input propertychange", function() {
+        var text = jQuery("#createDataset #directoryName").val();
+        var validDatasetNameExp = /^[a-zA-Z0-9_-]+$/;
+        jQuery('#Create #filenameError').hide();
+        disableSelectButton();
+        if (text.length > 0) {
+            if (text.match(validDatasetNameExp)) {
+                if (!jQuery("#copy").is(":checked") || copyDestText.length > 0) {
+                    enableSelectButton();
+                }
+            } else {
+                jQuery('#Create #filenameError').show();
+                jQuery("#createDirectory #createDirectoryContents #createDirectoryResult").hide();
+            }
+        }
+    });
+
+    //Enable "Continue" button when user enters a destination name for copying
+    //a dataset. If the name is removed or invalid, disable the "Continue" button.
+    //Using bind() with propertychange event as live() does not work in IE for unknown reasons
+    jQuery("#destinationDirectory").bind("input propertychange", function() {
+        var text = jQuery("#destinationDirectory").val();
+        var validDatasetNameExp = /^[a-zA-Z0-9_-]+$/;
+        jQuery('#copyFilenameError').hide();
+        $("#copyContinue").button("disable");
+        if (text.length > 0) {
+            if (text.match(validDatasetNameExp)) {
+                $("#copyContinue").button("enable");
+            } else {
+                jQuery('#copyFilenameError').show();
+            }
+        }
+    });
+
+    disableStageButton();
+    disableDownloadButton();
+    disableBuildButtons();
+
+    $("#Build input[type=button]").removeAttr('disabled');
+
+    $("#buildBundle_testResultList").prop('readonly', true);
+
+    $("#buildBundle_finalResultList").prop('readonly', true);
+
+    $("#testProgressBar").progressbar({
+        value: 0
+    });
+
+    $("#finalProgressBar").progressbar({
+        value: 0
+    });
+
+    clearPreviousBuildResults();
+
+}
+
+function onBuildContinueClick() {
+    var $tabs = jQuery("#tabs");
+    $tabs.tabs('select', 4);
 }
 
 function onBuildClick(event) {
@@ -332,7 +406,7 @@ function updateBuildStatus(buildType) {
                     }
                     disableStageButton();
                     disableDownloadButton();
-                    enableBuildButton();
+                    enableBuildButtons();
                 }
             }
         },

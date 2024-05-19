@@ -1,7 +1,94 @@
+function initUpload() {
+    // toggle agency row as selected when checkbox is clicked
+    jQuery("#agency_data").on("change", "tr :checkbox", onSelectAgencyChange);
 
-function init() {
+    // change input type to 'file' if protocol changes to 'file'
+    jQuery("#agency_data").on("change", "tr .agencyProtocol", onAgencyProtocolChange);
+
+    // upload bundle source data for selected agency
+    jQuery("#uploadButton").click(onUploadSelectedAgenciesClick);
+
+    // add another row to the list of agencies and their source data
+    jQuery("#addAnotherAgency").click(onAddAnotherAgencyClick);
+
+    jQuery("#addNewAgency").click(onAddNewAgencyClick);
+
+    // remove selected agencies
+    jQuery("#uploadFiles #agency_data").on('click', '.removeAgency', onRemoveSelectedAgenciesClick);
+
+    // popup the Comments box
+    jQuery("#anyNotes").click(onAnyCommentsClick);
+
+    // if bundle comment has changed, save it to info.json
+    jQuery("#Upload #bundleComment").change(onBundleCommentChanged);
+
+    //Retrieve transit agency metadata
+    getAgencyMetadata();
+
+    // Retrieve dataset name and build name for bundle currently deployed on staging.
+    //getDeployedOnStagingBundleInfo();
+
+    // For "Add Comments" popup to add user commments about a dataset
+    $("#addCommentsPopup").dialog({
+        autoOpen: false,
+        modal: true,
+        width: 'auto',
+        buttons: {
+            "Cancel": function() {
+                $(this).dialog("close");
+            },
+            "Continue": function() {
+                $(this).dialog("close");
+            }
+        }
+    });
+
 
 }
+
+function onUploadContinueClick() {
+    var $tabs = jQuery("#tabs");
+    $tabs.tabs('select', 2);
+}
+
+function onAnyCommentsClick() {
+    $("#addCommentsPopup").dialog("open");
+}
+
+function onRemoveSelectedAgenciesClick() {
+    $(this).closest('tr').remove();
+}
+
+function onAgencyIdSelectClick() {
+    var idx = $(this).find(":selected").index();
+    $(this).closest('tr').find(".agencyId").val(agencyMetadata[idx].legacyId);
+    var url = agencyMetadata[idx].gtfsFeedUrl;
+    if (url == null) {
+        url = "";
+    }
+    var previous_protocol = $(this).closest('tr').find(".agencyProtocol").val();
+    var protocol = "file";
+    if (url.toLowerCase().substring(0,4) === 'http') {
+        protocol = "http";
+    } else if (url.toLowerCase().substring(0,3) === 'ftp') {
+        protocol = "ftp";
+    }
+    if ((previous_protocol == "file" && protocol != "file")
+        || (previous_protocol != "file" && protocol == "file")) {
+        var dataSource = $(this).closest('tr').find(".agencyDataSource");
+        if (protocol == "file") {
+            dataSource.replaceWith('<input class="agencyDataSource" type="file" undefined=""></input>');
+        } else if (dataSource.attr('type') == 'file') {
+            dataSource.replaceWith('<input class="agencyDataSource" type="text" undefined=""></input>');
+        }
+    }
+    $(this).closest('tr').find(".agencyProtocol").val(protocol);
+    if (protocol != "file") {		// Not possible to provide a value for "file"
+        // fields for security reasons.
+        $(this).closest('tr').find(".agencyDataSource").val(url);
+    }
+}
+
 
 function onBundleCommentChanged() {
     var data = {};
@@ -156,6 +243,10 @@ function onAgencyProtocolChange() {
     }
 }
 
+function onUploadSelectedAgenciesClickAsync() {
+    var bundleDir = selectedDirectory;
+    // TOOD -- in progress
+}
 function onUploadSelectedAgenciesClick() {
     var bundleDir = selectedDirectory;
     var cleanedDirs = [];

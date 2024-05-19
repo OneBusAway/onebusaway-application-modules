@@ -1,5 +1,31 @@
-function init() {
+function initValidate() {
+    //if bundle build name is entered, enable the Validate button
+    jQuery("#Validate #prevalidate_bundleName").on("input propertychange", onBundleNameChanged);
+    jQuery("#Build #bundleBuildName").on("input propertychange", onBundleNameChanged);
 
+    //initially hide the Validation Progress label
+    jQuery("#prevalidate_progress").hide();
+
+    //toggle validation progress list
+    jQuery("#prevalidateInputs #prevalidate_progress #expand").bind({
+        'click' : toggleValidationResultList});
+
+    //initially disable the Validate button on the Pre-validate tab
+    disableValidateButton();
+
+}
+
+function onPrevalidateContinueClick() {
+    var $tabs = jQuery("#tabs");
+    $tabs.tabs('select', 3);
+}
+
+function enableValidateButton() {
+    jQuery("#prevalidateInputs #validateBox #validateButton").removeAttr("disabled").css("color", "#000");
+}
+
+function disableValidateButton() {
+    jQuery("#prevalidateInputs #validateBox #validateButton").attr("disabled", "disabled").css("color", "#999");
 }
 
 function onBundleNameChanged() {
