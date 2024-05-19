@@ -3,6 +3,168 @@ function initCreate() {
     // hookup ajax call to select
     jQuery("#newDirectoryButton").click(onCreateDatasetClick);
 
+    // use an existing dataset
+    jQuery("#existingDirectoryButton").click(onExistingDatasetClick);
+
+    // copy existing dataset to a new directory
+    jQuery(".copyDirectory").click(onCopyExistingDatasetClick);
+
+    // delete existing dataset
+    jQuery(".deleteDirectory").click(onDeleteExistingDatasetClick);
+
+    //toggle advanced option contents
+    jQuery("#createDirectory #advancedOptions #expand").bind({
+        'click' : toggleAdvancedOptions	});
+
+    //initially hide the Request Id label if the Request Id is blank
+    if (jQuery("#prevalidate_id").text().length == 0) {
+        jQuery("#prevalidate_id_label").hide();
+    }
+
+    //handle create, select and copy radio buttons
+    jQuery("input[name='options']").change(directoryOptionChanged);
+
+    //Handle validate button click event
+    jQuery("#prevalidateInputs #validateBox #validateButton").click(onValidateClick);
+
+    //Initialize date pickers
+    jQuery("#startDatePicker").datepicker(
+        {
+            dateFormat: "yy-mm-dd",
+            altField: "#startDate",
+            onSelect: function(selectedDate) {
+                jQuery("#endDatePicker").datepicker("option", "minDate", selectedDate);
+            }
+        });
+    jQuery("#endDatePicker").datepicker(
+        {
+            dateFormat: "yy-mm-dd",
+            altField: "#endDate",
+            onSelect: function(selectedDate) {
+                jQuery("#startDatePicker").datepicker("option", "maxDate", selectedDate);
+            }
+        });
+
+    jQuery("#currentDirectories").selectable({
+        stop: function() {
+            var names = $.map($('#listItem.ui-selected strong, this'), function(element, i) {
+                return $(element).text();
+            });
+            if (names.length > 0) {
+                var $element = jQuery("#createDirectory #directoryName");
+                // only return the first selection, as multiple selections are possible
+                $element.attr("value", names[0]);
+                jQuery("#createDirectory #createDirectoryContents #createDirectoryResult").show().css("display","block");
+                jQuery("#createDirectoryResult #resultImage").attr("src", "../../css/img/warning_16.png");
+
+                if(jQuery("#select").is(":checked")){
+                    jQuery("#createDirectoryMessage").text("Click Select button to load your directory")
+                        .css("font-weight", "bold").css("color", "red");
+                    //Enable select button
+                    enableSelectButton();
+                }
+
+                //Do little different if its copy.
+                if (jQuery("#copy").is(":checked")) {
+                    jQuery("#createDirectoryMessage").text("Click Copy to copy directory contents")
+                        .css("font-weight", "bold").css("color", "red");
+                    //Enable select button
+                    enableSelectButton();
+                }
+            }
+        }
+    });
+
+
+    // On choose tab, only one existing directory can be selected at a time
+    jQuery("#existingDataset tr input:checkbox").click(function () {
+        var state = $(this).prop("checked");
+        $(this).parent().parent().parent().find('input:checked').prop("checked", false);
+        $(this).prop("checked", state);
+        // If this item is selected, enable the "Add files..." button
+        if (state == true) {
+            jQuery("#existingDirectoryButton").removeAttr("disabled").css("color", "#000");
+        } else {
+            jQuery("#existingDirectoryButton").attr("disabled", "disabled").css("color", "#999");
+        }
+    });
+
+    jQuery("#create_continue").click(onCreateContinueClick);
+
+    // For "Copy" popup to specify a destination directory
+    $("#copyPopup").dialog({
+        autoOpen: false,
+        modal: true,
+        width: 'auto',
+        buttons: [{
+            id: "copyCancel",
+            text: "Cancel",
+            click: function() {
+                $(this).dialog("close");
+            }
+        },
+            {
+                id: "copyContinue",
+                text: "Continue",
+                click: function() {
+                    destinationDirectory = $("#destinationDirectory").val();
+                    $(this).dialog("close");
+                    onCopyDestinationSpecified();
+                }
+            }],
+        open: function() {
+            $('.ui-dialog-buttonpane').find('button:contains("Cancel")').addClass('cancelCopyPopup');
+        }
+    });
+
+    // For "Delete" popup to confirm deleting the directory
+    $("#deletePopup").dialog({
+        autoOpen: false,
+        modal: true,
+        width: 'auto',
+        buttons: [{
+            id: "deleteCancel",
+            text: "Cancel",
+            click: function() {
+                $(this).dialog("close");
+            }
+        },
+            {
+                id: "deleteContinue",
+                text: "Delete dataset",
+                click: function() {
+                    $(this).dialog("close");
+                    onDeleteDatasetConfirmed();
+                }
+            }],
+        open: function() {
+            $('.ui-dialog-buttonpane').find('button:contains("Cancel")').addClass('cancelDeletePopup');
+        }
+    });
+
+    // For "Delete Success" popup to confirm the directory was deleted
+    $("#deleteSuccessPopup").dialog({
+        autoOpen: false,
+        modal: true,
+        width: 'auto',
+        buttons: [{
+            id: "deleteSuccessCancel",
+            text: "Continue",
+            click: function() {
+                $(this).dialog("close");
+            }
+        }],
+        open: function() {
+            $('.ui-dialog-buttonpane').find('button:contains("Continue")').addClass('cancelDeletePopup');
+        }
+    });
+
+
+}
+
+function onCreateContinueClick() {
+    var $tabs = jQuery("#tabs");
+    $tabs.tabs('select', 1);
 }
 
 function onExistingDatasetClick() {
@@ -347,30 +509,29 @@ function directoryOptionChanged() {
     jQuery("#createDirectory #createDirectoryContents #directoryButton").attr("disabled", "disabled").css("color", "#999");
     jQuery('#currentDirectories .ui-selected').removeClass('ui-selected');
 
-    if(jQuery("#create").is(":checked")) {
+    if (jQuery("#create").is(":checked")) {
         //Change the button text and hide select directory list
         jQuery("#createDirectoryContents #directoryButton").val("Create");
-        jQuery("#createDirectoryContents #directoryButton").attr("name","method:createDirectory");
+        jQuery("#createDirectoryContents #directoryButton").attr("name", "method:createDirectory");
         jQuery("#selectExistingContents").hide();
         jQuery('#copyDirectory').hide();
         // Blank out the Comment box
         jQuery("#uploadFiles #bundleComment").val("");
-    }
-    else if(jQuery("#copy").is(":checked")) {
+    } else if (jQuery("#copy").is(":checked")) {
         jQuery("#createDirectoryContents #directoryButton").val("Copy");
-        jQuery("#createDirectoryContents #directoryButton").attr("name","method:selectDirectory");
+        jQuery("#createDirectoryContents #directoryButton").attr("name", "method:selectDirectory");
         jQuery("#selectExistingContents").show();
         var element = '<br><div id="copyDirectory">' + 'Destination: ' +
             '<input type="text" id="destDirectoryName" class="destDirectoryName" required="required"/>' + '<label class="required">*</label></div>';
-        if(jQuery('#destDirectoryName').length){
+        if (jQuery('#destDirectoryName').length) {
             //Do nothing
             console.log('Element exists');
             jQuery('#copyDirectory').show();
-        }else{
+        } else {
             jQuery(element).insertAfter("#directoryButton");
             //Enable or disable create/select button when user enters/removes the destination
             // directory name for a Copy
-            jQuery("#createDirectoryContents #destDirectoryName").bind("input propertychange", function() {
+            jQuery("#createDirectoryContents #destDirectoryName").bind("input propertychange", function () {
                 var text = selectedDirectory;
                 var copyDestText = jQuery("#createDirectory #destDirectoryName").val();
                 if (text.length > 0 && copyDestText.length > 0) {
@@ -381,12 +542,10 @@ function directoryOptionChanged() {
                 }
             });
         }
-    }
-    else
-    {
+    } else {
         //Change the button text and show select directory list
         jQuery("#createDirectoryContents #directoryButton").val("Select");
-        jQuery("#createDirectoryContents #directoryButton").attr("name","method:selectDirectory");
+        jQuery("#createDirectoryContents #directoryButton").attr("name", "method:selectDirectory");
         jQuery("#selectExistingContents").show();
         jQuery('#copyDirectory').hide();
         // TODO replace the existingDirectories form call with this below
@@ -403,7 +562,93 @@ function directoryOptionChanged() {
 //		}
 //		});
     }
+}
 
+
+//Helper method for setting up different DIVs HTML
+function setDivHtml(field, info){
+    var messages = '<ul>';
+    $.each(info, function(i, str) {
+        messages = messages + '<li>' + str + '</li>';
+    });
+    messages = messages + '</ul>';
+    jQuery(field).html(messages).css("font-size", "12px");
+}
+
+
+//Helper method for showing build file list on bundle selection
+function showBuildFileList(info, id) {
+    var txt = '<ul>';
+    $.each(info, function(i, str) {
+        if(str.search(".csv") != -1){
+            var encoded = encodeURIComponent(str);
+            var description = str.slice(0, str.lastIndexOf(".csv"));
+            txt = txt + "<li>" + description + ":"
+                + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
+                + "<img src=\"../../css/img/go-down-5.png\" />"
+                + "<a href=\"manage-bundles!downloadOutputFile.action?id="
+                + id+ "&downloadFilename="
+                + encoded + "\">" + ".csv" +  "</a></li>";
+        }
+    });
+
+    // append log file
+    txt = txt + "<li>" + "Bundle Builder Log:" + "&nbsp;"
+        + " " + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
+        + "<img src=\"../../css/img/go-down-5.png\" />"
+        + "<a href=\"manage-bundles!downloadOutputFile.action?id="
+        + id+ "&downloadFilename="
+        + encodeURIComponent("bundleBuilder.out.txt") + "\">" + ".txt" +  "</a></li>";
+    txt = txt + '</ul>';
+
+    jQuery("#buildBundle_fileList").html(txt).css("display", "block");
+    jQuery("#buildBundle #downloadLogs").show().css("display", "block");
+    jQuery("#buildBundle #downloadLogs #downloadButton").attr("href", "manage-bundles!buildOutputZip.action?id=" + id);
+}
+
+function onDeleteDeployedItemClick() {
+    var selectedItem = selectedDirectory;
+    console.log("requesting delete of deployed item " + selectedItem + " using CSRF token " + csrfToken);
+    jQuery.ajax({
+        url: "../../api/bundle/deploy/delete/" + selectedItem + "?ts=" + new Date().getTime(),
+        type: "GET",
+        async: false,
+        success: function(response) {
+            $("#deleteSuccessPopup").dialog("open");
+        },
+        error: function(request) {
+            alert("There was an error processing your request. Please try again.");
+        }
+    });
+
+}
+
+function onDeleteDataset() {
+    var bundleDir = selectedDirectory;
+    var actionName = "deleteDirectory";
+    var data = {};
+    data[csrfParameter] = csrfToken;
+    data["ts"] = new Date().getTime();
+    data["directoryName"] = bundleDir;
+
+    jQuery.ajax({
+        url: "manage-bundles!" + actionName + ".action",
+        type: "POST",
+        data: data,
+        async: false,
+        success: function(response) {
+            disableSelectButton();
+            $("#deleteSuccessPopup").dialog("open");
+            // Remove dataset from list of datasets
+            var datasetTd = $('td').filter(function(){
+                return $(this).text() === bundleDir;
+            })
+            datasetTd.parent().remove();
+        },
+        error: function(request) {
+            alert("There was an error processing your request. Please try again.");
+        }
+    });
 }
 
 

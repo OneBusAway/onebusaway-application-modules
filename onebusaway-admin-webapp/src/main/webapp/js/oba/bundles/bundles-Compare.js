@@ -1,5 +1,284 @@
-function init() {
+function initCompare() {
 
+    // On Compare tab
+    jQuery("#currentDatasetList").on("change", onCurrentDatasetChange);
+    jQuery("#currentBuildNameList").on("change", onCurrentBuildNameChange);
+
+    jQuery("#currentArchivedDatasetList").on("change", onCurrentArchivedDatasetChange);
+    jQuery("#currentArchivedBuildNameList").on("change", onCurrentArchivedBuildNameChange);
+
+    jQuery("#compareToDatasetList").on("change", onCompareToDatasetChange);
+    jQuery("#compareToBuildNameList").on("change", onCompareToBuildNameChange);
+
+    jQuery("#compareToArchivedDatasetList").on("change", onCompareToArchivedDatasetChange);
+    jQuery("#compareToArchivedBuildNameList").on("change", onCompareToArchivedBuildNameChange);
+
+    jQuery("#printFixedRouteRptButton").click(onPrintFixedRouteRptClick);
+
+    // Set values for dataset select lists on Compare tab
+    $("#currentDatasetList > option").each(function(index, value) {
+        $(this).val(index);
+    });
+    $("#compareToDatasetList > option").each(function(index, value) {
+        $(this).val(index);
+    });
+    $("#currentArchivedDatasetList > option").each(function(index, value) {
+        $(this).val(index);
+    });
+    $("#compareToArchivedDatasetList > option").each(function(index, value) {
+        $(this).val(index);
+    });
+    $('#Compare #buildingReportDiv').hide();
+    $("#currentArchivedDatasetList").hide();
+    $("#currentArchivedBuildNameList").hide();
+    $("#compareToArchivedDatasetList").hide();
+    $("#compareToArchivedBuildNameList").hide();
+
+    $('#Compare #useArchiveCheckbox').change(function() {
+        $("#diffResultsTable tbody").empty();
+        $('#fixedRouteDiffTable tbody').empty();
+        if($(this).is(":checked")) {
+            $("#currentDatasetList").hide();
+            $("#currentBuildNameList").hide();
+            $("#compareToDatasetList").hide();
+            $("#compareToBuildNameList").hide();
+            $("#currentArchivedDatasetList").show();
+            $("#currentArchivedBuildNameList").show();
+            $("#compareToArchivedDatasetList").show();
+            $("#compareToArchivedBuildNameList").show();
+            if (currentArchivedReportDataset && currentArchivedReportBuildName
+                && compareToArchivedDataset && compareToArchivedBuildName) {
+                buildDiffReport();
+            }
+        } else {
+            $("#currentArchivedDatasetList").hide();
+            $("#currentArchivedBuildNameList").hide();
+            $("#compareToArchivedDatasetList").hide();
+            $("#compareToArchivedBuildNameList").hide();
+            $("#currentDatasetList").show();
+            $("#currentBuildNameList").show();
+            $("#compareToDatasetList").show();
+            $("#compareToBuildNameList").show();
+            if (currentReportDataset && currentReportBuildName
+                && compareToDataset && compareToBuildName) {
+                buildDiffReport();
+            }
+        }
+    });
+
+    jQuery("#compareCurrentDirectories").selectable({
+        stop: function() {
+            var names = $.map($('#compareListItem.ui-selected strong, this'), function(element, i) {
+                return $(element).text();
+            });
+            if (names.length > 0) {
+                var data = {};
+                data[csrfParameter] = csrfToken;
+                data["selectedBundleName"] = names[0];
+
+                jQuery.ajax({
+                    url: "manage-bundles!existingBuildList.action",
+                    data: data,
+                    type: "GET",
+                    async: false,
+                    success: function(data) {
+                        $('#compareSelectedBuild').text('');
+                        $('#diffResult').text('');
+                        $.each(data, function(index, value) {
+                            $('#compareSelectedBuild').append(
+                                "<div id=\"compareBuildListItem\"><div class=\"listData\"><strong>"+value+"</strong></div></div>");
+                        });
+                    }
+                })
+            }
+        }
+    });
+
+
+    jQuery("#compareSelectedBuild").selectable({
+        stop: function() {
+            var bundleNames = $.map($('#compareListItem.ui-selected strong, this'), function(element, i) {
+                return $(element).text();
+            });
+            var buildNames = $.map($('#compareBuildListItem.ui-selected strong, this'), function(element, i) {
+                return $(element).text();
+            });
+            if (buildNames.length > 0) {
+                // Clear any previous results from the tables
+                $('#diffResultsTable tr').slice(1).remove();
+                $('#fixedRouteDiffTable tr').slice(1).remove();
+                var data = {};
+                data[csrfParameter] = csrfToken;
+                data["datasetName"] = selectedDirectory;
+                data["buildName"] = jQuery("#bundleBuildName").val();
+                data["datasetName2"] = bundleNames[0];
+                data["buildName2"] = buildNames[0];
+
+                jQuery.ajax({
+                    url: "compare-bundles!diffResult.action",
+                    data: data,
+                    type: "GET",
+                    async: false,
+                    success: function(data) {
+                        $.each(data.diffResults, function(index, value) {
+                            // Skip first three rows of results
+                            if (index >= 3) {
+                                var diffRow = formatDiffRow(value);
+                                $("#diffResultsTable").append(diffRow);
+                            }
+                        });
+                        var baseBundle = selectedDirectory + " / " + jQuery("#bundleBuildName").val();
+                        var compareToBundle = bundleNames[0] + " / " + buildNames[0];
+                        $("#baseBundle").text(baseBundle + " (green)");
+                        $("#compareToBundle").text(compareToBundle + " (red)");
+                        $.each(data.fixedRouteDiffs, function(index, value) {
+                            var modeName = value.modeName;
+                            var modeClass = "";
+                            var modeFirstLineClass=" modeFirstLine";
+                            var addSpacer = true;
+                            if (value.srcCode == 1) {
+                                modeClass = "currentRpt";
+                            } else if (value.srcCode == 2) {
+                                modeClass = "selectedRpt";
+                            }
+                            $.each(value.routes, function(index2, value2) {
+                                var routeNum = value2.routeNum;
+                                var routeName = value2.routeName;
+                                var routeFirstLineClass=" routeFirstLine";
+                                addSpacer = false;
+                                if (index2 > 0) {
+                                    modeName = "";
+                                    modeFirstLineClass = "";
+                                }
+                                var routeClass = modeClass;
+                                if (value2.srcCode == 1) {
+                                    routeClass = "currentRpt";
+                                } else if (value2.srcCode == 2) {
+                                    routeClass = "selectedRpt";
+                                }
+                                $.each(value2.headsignCounts, function(headsignIdx, headsign) {
+                                    var headsignName = headsign.headsign;
+                                    var headsignBorderClass = "";
+                                    if (headsignIdx > 0) {
+                                        modeName = "";
+                                        routeNum = "";
+                                        routeName = "";
+                                        modeFirstLineClass = "";
+                                        routeFirstLineClass = "";
+                                        headsignBorderClass = " headsignBorder";
+                                        addSpacer = false;
+                                    }
+                                    var headsignClass = routeClass;
+                                    if (headsign.srcCode == 1) {
+                                        headsignClass = "currentRpt";
+                                    } else if (headsign.srcCode == 2) {
+                                        headsignClass = "selectedRpt";
+                                    }
+                                    $.each(headsign.dirCounts, function(dirIdx, direction) {
+                                        var dirName = direction.direction;
+                                        var dirBorderClass = "";
+                                        if (dirIdx > 0) {
+                                            modeName = "";
+                                            routeNum = "";
+                                            routeName = "";
+                                            headsignName = "";
+                                            modeFirstLineClass = "";
+                                            routeFirstLineClass = "";
+                                            headsignBorderClass = "";
+                                            dirBorderClass = " dirBorder";
+                                            addSpacer = false;
+                                        }
+                                        var dirClass = headsignClass;
+                                        if (direction.srcCode == 1) {
+                                            dirClass = "currentRpt";
+                                        } else if (direction.srcCode == 2) {
+                                            dirClass = "selectedRpt";
+                                        }
+                                        $.each(direction.stopCounts, function(index3, value3) {
+                                            var stopCt = value3.stopCt;
+                                            var stopClass = "";
+                                            if (dirClass == "currentRpt") {
+                                                stopClass = "currentStopCt";
+                                            } else if (dirClass == "selectedRpt") {
+                                                stopClass = "selectedStopCt";
+                                            }
+                                            if (value3.srcCode == 1) {
+                                                stopClass = "currentStopCt";
+                                            } else if (value3.srcCode == 2) {
+                                                stopClass = "selectedStopCt";
+                                            }
+                                            var weekdayTrips = value3.tripCts[0];
+                                            var satTrips = value3.tripCts[1];
+                                            var sunTrips = value3.tripCts[2];
+                                            if (index3 > 0) {
+                                                modeName = "";
+                                                modeFirstLineClass = "";
+                                                routeNum = "";
+                                                routeName = "";
+                                                headsignName = "";
+                                                dirName = "";
+                                                routeFirstLineClass = "";
+                                                headsignBorderClass = "";
+                                                dirBorderClass = "";
+                                                addSpacer = false;
+                                            }
+                                            if (index > 0 && headsignIdx == 0
+                                                && dirIdx == 0 && index3 == 0) {
+                                                addSpacer = true;
+                                            }
+                                            if (addSpacer) {
+                                                var new_spacer_row = '<tr class="spacer"> \
+													<td></td> \
+													<td></td> \
+													<td></td> \
+													<td></td> \
+													<td></td> \
+													<td></td> \
+													<td></td> \
+													<td></td> \
+													<td></td> \
+													</tr>';
+                                                $('#fixedRouteDiffTable').append(new_spacer_row);
+                                            }
+                                            var new_row = '<tr class="fixedRouteDiff' + modeFirstLineClass + routeFirstLineClass + '"> \
+												<td class="' + modeClass + ' modeName" >' + modeName + '</td> \
+												<td class="' + routeClass + routeFirstLineClass + ' rtNum" >' + routeNum + '</td> \
+												<td class="' + routeClass + routeFirstLineClass + '">' + routeName + '</td> \
+												<td class="' + headsignClass + routeFirstLineClass + headsignBorderClass + '">' + headsignName + '</td> \
+												<td class="' + dirClass + routeFirstLineClass + headsignBorderClass + dirBorderClass + '">' + dirName + '</td> \
+												<td class="' + stopClass + routeFirstLineClass + headsignBorderClass + dirBorderClass + '">' + stopCt + '</td> \
+												<td class="' + stopClass + routeFirstLineClass + headsignBorderClass + dirBorderClass + '">' + weekdayTrips + '</td> \
+												<td class="' + stopClass + routeFirstLineClass + headsignBorderClass + dirBorderClass + '">' + satTrips + '</td> \
+												<td class="' + stopClass + routeFirstLineClass + headsignBorderClass + dirBorderClass + '">' + sunTrips + '</td> \
+												</tr>';
+                                            $('#fixedRouteDiffTable').append(new_row);
+                                        });
+                                    });
+                                });
+                            });
+                        });
+                        // Add bottom border to reprot
+                        var new_spacer_row = '<tr class="spacer"> \
+							<td></td> \
+							<td></td> \
+							<td></td> \
+							<td></td> \
+							<td></td> \
+							<td></td> \
+							<td></td> \
+							<td></td> \
+							</tr>';
+                        $('#fixedRouteDiffTable').append(new_spacer_row);
+                    }
+                })
+            }
+        }
+    });
+
+}
+
+function onPrintFixedRouteRptClick() {
+    window.print();
 }
 
 /**
