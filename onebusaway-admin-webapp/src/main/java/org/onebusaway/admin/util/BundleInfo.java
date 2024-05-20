@@ -19,7 +19,10 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.onebusaway.admin.service.FileService;
@@ -95,4 +98,35 @@ public class BundleInfo {
     }
   }
 
+
+  public synchronized boolean addFileToBundleForDirectoryName(String bundleDir,
+                                              String agencyId,
+                                              String agencyProtocol,
+                                              Date uploadDate) {
+    try {
+      _log.info("addFileToBundleForDirectoryName for {}/{}", agencyId, bundleDir);
+      JSONObject bundleTrackingObject = getBundleTrackingObject(bundleDir);
+      JSONObject agencyObj = new JSONObject();
+      if (bundleTrackingObject != null) {
+        JSONArray agencyList = new JSONArray();
+        if (bundleTrackingObject.get("agencyList") != null) {
+          agencyList = (JSONArray) bundleTrackingObject.get("agencyList");
+        }
+        agencyObj.put("agencyId", agencyId);
+        agencyObj.put("agencyDataSource", "gtfs");
+        agencyObj.put("agencyDataSourceType", "gtfs");
+        agencyObj.put("agencyProtocol", agencyProtocol);
+        agencyObj.put("agencyBundleUploadDate",
+                new SimpleDateFormat("MMM dd yyyy").format(uploadDate));
+        agencyList.add(agencyObj);
+        bundleTrackingObject.put("agencyList", agencyList);
+        _log.info("writeBundleTrackingInfo {}/{} of {}", agencyId, bundleDir, bundleTrackingObject.toJSONString());
+        writeBundleTrackingInfo(bundleTrackingObject, bundleDir);
+      }
+    } catch (Exception e) {
+      _log.info("addFileToBundleForDirectoryName blew for {}/{}", agencyId, bundleDir, e, e);
+      return false;
+    }
+    return true;
+  }
 }

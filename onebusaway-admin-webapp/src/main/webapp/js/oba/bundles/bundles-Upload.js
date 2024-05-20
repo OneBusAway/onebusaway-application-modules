@@ -6,7 +6,7 @@ function initUpload() {
     jQuery("#agency_data").on("change", "tr .agencyProtocol", onAgencyProtocolChange);
 
     // upload bundle source data for selected agency
-    jQuery("#uploadButton").click(onUploadSelectedAgenciesClick);
+    jQuery("#uploadButton").click(onUploadSelectedAgenciesClickAsync);
 
     // add another row to the list of agencies and their source data
     jQuery("#addAnotherAgency").click(onAddAnotherAgencyClick);
@@ -47,8 +47,8 @@ function initUpload() {
 }
 
 function onUploadContinueClick() {
-    var $tabs = jQuery("#tabs");
-    $tabs.tabs('select', 2);
+    // we don't switch tabs here, instead we update the table
+    window.setTimeout(updateExistingFileList, 5000);
 }
 
 function onAnyCommentsClick() {
@@ -208,8 +208,6 @@ function onAddAnotherAgencyClick(inputType) {
 }
 
 function onSelectAgencyChange() {
-    console.log("in onSelectAgencyChange, v1");
-    console.log("parent: " + $(this).parent().get(0).tagName);
     $this = $(this);
     if ($this.parent().is("th")) {	// For the checkbox in the header, turn all the rest on/off
         if ($this.is(":checked")) {
@@ -233,7 +231,6 @@ function onSelectAgencyChange() {
 }
 
 function onAgencyProtocolChange() {
-    console.log("in onAgencyProtocolChange, v1");
     var protocol = $(this).val();
     var dataSource = $(this).closest('tr').find(".agencyDataSource");
     if (protocol == "file") {
@@ -245,7 +242,24 @@ function onAgencyProtocolChange() {
 
 function onUploadSelectedAgenciesClickAsync() {
     var bundleDir = selectedDirectory;
-    // TOOD -- in progress
+    $('#agency_data .agencySelected').each(function() {
+        $this = $(this)
+        var agencyId = $(this).find('.agencyIdSelect').val();
+        var agencyDataSourceType = $(this).find('.agencyDataSourceType').val();
+        var agencyProtocol = $(this).find('.agencyProtocol').val();
+        var agencyDataSource = $(this).find('.agencyDataSource').val();
+        if (agencyProtocol == "file") {
+            var agencyDataFile = $(this).find(':file')[0].files[0];
+        }
+        addExistingFileRow(agencyId, agencyDataSourceType, agencyDataSource, "pending");
+        if (agencyProtocol != "file") {
+            uploadFromUrl(bundleDir, agencyId, agencyDataSourceType, agencyProtocol, agencyDataSource, "false");
+        } else {
+            uploadFromLocal(bundleDir, agencyId, agencyDataSourceType, agencyProtocol, agencyDataSource, cleanDir);
+        }
+        // for each pending upload check on the status server side
+    });
+    onUploadContinueClick();
 }
 function onUploadSelectedAgenciesClick() {
     var bundleDir = selectedDirectory;
@@ -267,62 +281,127 @@ function onUploadSelectedAgenciesClick() {
             cleanDir = "false";
         }
         if (agencyProtocol != "file") {
-            var actionName = "uploadSourceData";
-            jQuery.ajax({
-                url: "upload-gtfs!" + actionName + ".action?ts=" + new Date().getTime(),
-                type: "GET",
-                data: {
-                    "directoryName" : bundleDir,
-                    "agencyId" : agencyId,
-                    "agencyDataSourceType" : agencyDataSourceType,
-                    "agencyProtocol" : agencyProtocol,
-                    "agencyDataSource" : agencyDataSource,
-                    "cleanDir" : cleanDir
-                },
-                async: false,
-                success: function(response) {
-                    console.log("Successfully uploaded " + agencyDataSource);
-                    $this.find("div").addClass('agencyCheckboxUploadSuccess');
-                    $this.find(".agencyDataSource").addClass('agencyUploadSuccess');
-                },
-                error: function(request) {
-                    console.log("Error uploadeding " + agencyDataSource);
-                    alert("There was an error processing your request. Please try again.");
-                }
-            });
+            uploadFromUrl(bundleDir, agencyId, agencyDataSourceType, agencyProtocol, agencyDataSource, cleanDir);
         } else {
-            console.log("about to call manage-bundles!uploadSourceFile");
-            var files = agencyDataFile;
-            console.log("file name is: " + agencyDataFile.name);
-            var formData = new FormData();
-            formData.append("ts", new Date().getTime());
-            formData.append("directoryName", bundleDir);
-            formData.append("agencyId", agencyId);
-            formData.append("agencyDataSourceType", agencyDataSourceType);
-            formData.append("agencyProtocol", agencyProtocol);
-            formData.append("agencySourceFile", agencyDataFile);
-            formData.append("cleanDir", cleanDir);
-            formData.append(csrfParameter, csrfToken);
-            var actionName = "uploadSourceFile";
-            jQuery.ajax({
-                url: "upload-gtfs!" + actionName + ".action",
-                type: "POST",
-                data: formData,
-                cache: false,
-                processData: false,
-                contentType: false,
-                async: false,
-                success: function(response) {
-                    console.log("Successfully uploaded " + agencyDataFile.name);
-                    $this.find("div").addClass('agencyCheckboxUploadSuccess');
-                    $this.find(".agencyDataSource").addClass('agencyUploadSuccess');
-                },
-                error: function(request) {
-                    console.log("Error uploading " + agencyDataFile.name);
-                    alert("There was an error processing your request. Please try again.");
-                }
-            });
+            uploadFromLocal(bundleDir, agencyId, agencyDataSourceType, agencyProtocol, agencyDataSource, cleanDir);
         }
     });
     onUploadContinueClick();
 }
+
+function uploadFromUrl(bundleDir, bundleAgencyId, agencyDataSourceType, agencyProtocol, agencyDataSource, cleanDir) {
+    jQuery.ajax({
+        url: "../../api/bundle/upload/register/" + bundleAgencyId + "/" + bundleDir + "/" + agencyDataSourceType,
+        type: "POST",
+        data: {
+            "url" : agencyDataSource
+        },
+        async: false,
+        success: function(response) {
+            // we let updateStatus query this
+        },
+        error: function(request) {
+             alert("There was an error processing your request. Please try again.");
+        }
+    });
+
+    updateStatus(bundleAgencyId, bundleDir);
+}
+
+function updateStatus(bundleAgencyId, bundleDir) {
+    jQuery.ajax({
+        url: "../../api/bundle/upload/status/" + bundleAgencyId + "/" + bundleDir,
+        type: "GET",
+        async: false,
+        success: function(response) {
+            if (typeof response=="string") {
+                // work around bad header
+                response = eval('(' + response + ')');
+            }
+            // update status to response
+            $('#existingFilesTable').find("td.agencyFileRow").each(function () {
+                var foundAgencyId = $(this).text();
+                if (bundleAgencyId === foundAgencyId) {
+                    // find the status column and update it
+                    $(this).closest('tr').find(".statusOrDate").text(response.status);
+                    if (response.status != "done" && response.status != "error") {
+                        window.setTimeout(updateExistingFileList, 10000);
+                    } else {
+                        if (response.status == "done") {
+                            $(this).closest('tr').find(".statusOrDate").text("uploaded " + response.uploadDate);
+                            tagAgencyUpload(foundAgencyId, "agencyUploadSuccess");
+                        } else {
+                            tagAgencyUpload(foundAgencyId, "agencyUploadFailure")
+                        }
+                    }
+                }
+            });
+        },
+        error: function(request) {
+            // update status to error
+            $('#existingFilesTable').find("td.agencyFileRow").each(function () {
+                var foundAgencyId = $(this).find("td.agencyFileRow").text();
+                if (bundleAgencyId === foundAgencyId) {
+                    // find the status column and update it
+                    $(this).closest("td.statusOrDate").text("server error");
+                }
+            });
+
+        }
+    });
+
+}
+
+function uploadFromLocal(bundleDir, bundleAgencyId, agencyDataSourceType, agencyProtocol, agencyDataSource, cleanDir) {
+    console.log("about to call manage-bundles!uploadSourceFile");
+    var files = agencyDataFile;
+    console.log("file name is: " + agencyDataFile.name);
+    var formData = new FormData();
+    formData.append("ts", new Date().getTime());
+    formData.append("directoryName", bundleDir);
+    formData.append("agencyId", agencyId);
+    formData.append("agencyDataSourceType", agencyDataSourceType);
+    formData.append("agencyProtocol", agencyProtocol);
+    formData.append("agencySourceFile", agencyDataFile);
+    formData.append("cleanDir", cleanDir);
+    formData.append(csrfParameter, csrfToken);
+    var actionName = "uploadSourceFile";
+    jQuery.ajax({
+        url: "upload-gtfs!" + actionName + ".action",
+        type: "POST",
+        data: formData,
+        cache: false,
+        processData: false,
+        contentType: false,
+        async: false,
+        success: function(response) {
+            console.log("Successfully uploaded " + agencyDataFile.name);
+            $this.find("div").addClass('agencyCheckboxUploadSuccess');
+            $this.find(".agencyDataSource").addClass('agencyUploadSuccess');
+        },
+        error: function(request) {
+            console.log("Error uploading " + agencyDataFile.name);
+            alert("There was an error processing your request. Please try again.");
+        }
+    });
+
+}
+
+function updateExistingFileList() {
+    // call an API to show contents of file lists
+    $('tr.pendingUpload').each(function() {
+        var bundleAgencyId = $(this).find("td.agencyFileRow").text();
+        var bundleDir = selectedDirectory;
+        updateStatus(bundleAgencyId, bundleDir);
+    });
+}
+
+function tagAgencyUpload(bundleAgencyId, statusClass) {
+    jQuery(".agencyIdSelect").each(function () {
+        var foundAgencyId = $(this).val();
+        if (foundAgencyId == bundleAgencyId) {
+            $(this).closest('tr').find(".agencyDataSource").addClass(statusClass);
+        }
+    });
+}
+

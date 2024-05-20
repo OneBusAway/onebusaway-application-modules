@@ -39,13 +39,11 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.MappingJsonFactory;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.joda.time.LocalDate;
 import org.json.JSONObject;
 import org.onebusaway.admin.bundle.BundleProvider;
 import org.onebusaway.admin.bundle.BundlesListMessage;
+import org.onebusaway.admin.util.JsonUtil;
 import org.onebusaway.transit_data_federation.bundle.model.Bundle;
 import org.onebusaway.transit_data_federation.bundle.model.BundleStatus;
 import org.onebusaway.admin.json.JsonTool;
@@ -81,6 +79,7 @@ public class LocalBundleDeployerServiceImpl implements BundleDeployerService{
     
     private Map<String, BundleStatus> _deployMap = new HashMap<String, BundleStatus>();
     private Integer jobCounter = 0;
+    private JsonUtil jsonUtil = new JsonUtil();
 
     @PostConstruct
     public void setup() {
@@ -347,13 +346,7 @@ public class LocalBundleDeployerServiceImpl implements BundleDeployerService{
     }
     
     private String jsonSerializer(Object object) throws IOException{
-      //serialize the status object and send to client -- it contains an id for querying
-      final StringWriter sw = new StringWriter();
-      final MappingJsonFactory jsonFactory = new MappingJsonFactory();
-      final JsonGenerator jsonGenerator = jsonFactory.createJsonGenerator(sw);
-      ObjectMapper mapper = new ObjectMapper();
-      mapper.writeValue(jsonGenerator, object);
-      return sw.toString();
+      return jsonUtil.serialize(object);
     }
     
     /**

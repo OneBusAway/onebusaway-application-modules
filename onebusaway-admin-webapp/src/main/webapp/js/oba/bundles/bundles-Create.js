@@ -393,14 +393,7 @@ function onSelectDataset(sourceDirectoryType) {
                                 if (agency.agencyBundleUploadDate != null) {
                                     uploadDate = agency.agencyBundleUploadDate;
                                 }
-                                var new_row = '<tr class="previouslyUploaded"> \
-										<td>' + agencyName + '</td> \
-										<td>' + agency.agencyDataSourceType + '</td> \
-										<td>' + agency.agencyDataSource + '</td> \
-										<td>' + uploadDate + '</td> \
-										<td></td>  \
-										</tr>';
-                                $('#existingFilesTable').append(new_row);
+                                addExistingFileRow(agencyName, agency.agencyDataSourceType, agency.agencyDataSource, uploadDate);
                             }
                         }
                     }
@@ -443,6 +436,20 @@ function onSelectDataset(sourceDirectoryType) {
             alert("There was an error processing your request. Please try again.");
         }
     });
+}
+
+function addExistingFileRow(agencyName, type, protocol, uploadDate) {
+    var classType = "previouslyUploaded";
+    if (uploadDate == "pending")
+        classType = "pendingUpload";
+    var new_row = '<tr class="'+ classType + '"> \
+										<td class="agencyFileRow">' + agencyName + '</td> \
+										<td>' + type + '</td> \
+										<td>' + protocol + '</td> \
+										<td class="statusOrDate">' + uploadDate + '</td> \
+										</tr>';
+    $('#existingFilesTable').append(new_row);
+
 }
 
 //Populates bundle information in related fields.

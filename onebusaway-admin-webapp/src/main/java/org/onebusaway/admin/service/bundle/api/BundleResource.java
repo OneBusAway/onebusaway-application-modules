@@ -16,9 +16,7 @@
 package org.onebusaway.admin.service.bundle.api;
 
 import javax.servlet.ServletContext;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 
 import org.onebusaway.admin.service.BundleArchiverService;
@@ -52,6 +50,8 @@ public class BundleResource extends AuthenticatedResource implements ServletCont
   @Autowired
   @Qualifier("tdmRemoteBundleDeployerImpl")
   private BundleDeployerService _tdmBundleDeployer;
+  @Autowired
+  private BundleUploadService _uploadService;
   
   private String tdmURL;
 
@@ -244,8 +244,21 @@ public class BundleResource extends AuthenticatedResource implements ServletCont
     }
     return _localBundleDeployer.getBundleFile(bundleId, relativeFilename);
   }
-  
-  
+
+  @Path("/upload/register/{agencyId}/{bundleDir}/{uploadType}")
+  @POST
+  public Response doUploadAsync(@PathParam("agencyId") String agencyId,
+                                @PathParam("bundleDir") String bundleDir,
+                                @PathParam("uploadType") String uploadType,
+                                @FormParam("url") String uploadUrl) {
+    return _uploadService.register(agencyId, bundleDir, uploadType, uploadUrl);
+  }
+  @Path("/upload/status/{agencyId}/{bundleDir}")
+  @GET
+  public Response query(@PathParam("agencyId") String agencyId,
+                                @PathParam("bundleDir") String bundleDir) {
+    return _uploadService.query(agencyId, bundleDir);
+  }
   private boolean isTdm() {
     if (isTdm != null)
       return isTdm;

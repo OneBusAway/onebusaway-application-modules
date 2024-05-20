@@ -40,7 +40,7 @@ import org.springframework.beans.factory.annotation.Autowired;
   @Result(name="uploadStatus", type="json",
   params={"root", "directoryStatus"})
 })
-@AllowedMethods({"uploadSourceData"})
+@AllowedMethods({"uploadSourceData", "uploadSourceFile", "uploadSourceDataAsync"})
 public class UploadGtfsAction extends OneBusAwayNYCAdminActionSupport {
   private static Logger _log = LoggerFactory.getLogger(UploadGtfsAction.class);
   private static final long serialVersionUID = 1L;
@@ -117,47 +117,9 @@ public class UploadGtfsAction extends OneBusAwayNYCAdminActionSupport {
     _log.info("directory name: " + directoryName);
     _log.info("base path: " + fileService.getBucketName());
     _log.info("cleanDir: " + cleanDir);
-    // Build URL/File path
-    String src = agencyDataSource;
-    if (agencyProtocol.equals("http")) {
-      if (src.startsWith("//")) {
-        src = "http:" + src;
-      } else if (src.startsWith("/")) {
-        src = "http:/" + src;
-      } else if (!src.toLowerCase().startsWith("http")) {
-        src = "http://" + src;
-      }
-    } else if (agencyProtocol.equals("ftp")) {
-      if (src.startsWith("//")) {
-        src = "ftp:" + src;
-      } else if (src.startsWith("/")) {
-        src = "ftp:/" + src;
-      } else if (!src.toLowerCase().startsWith("ftp")) {
-        src = "ftp://" + src;
-      }      
-    }
-    _log.info("Source: " + src);
+    String src = buildSrc();
 
-    // Build target path
-    String target = fileService.getBucketName() + "/" + directoryName + "/";
-    if (agencyDataSourceType.equals("gtfs")) {
-      target += fileService.getGtfsPath();
-    } else {
-      target += fileService.getAuxPath();
-    }
-    target += "/" + agencyId;
-    // Clean target directory before appending the file name to the target string
-    if (cleanDir) {
-      File targetDir = new File(target);
-      if (targetDir.exists()) {
-        for (File file: targetDir.listFiles()) {
-          file.delete();
-        }
-      }
-    }
-    // name it something safe -- as url may have stuff in it
-    target += File.separator + agencyId + ".zip";
-    _log.info("Target: " + target);
+    String target = buildTarget();
 
     // Copy file
     if (agencyProtocol.equals("http") || agencyProtocol.equals("ftp")) {
@@ -201,6 +163,54 @@ public class UploadGtfsAction extends OneBusAwayNYCAdminActionSupport {
     bundleObj.put("agencyList", agencyList);
     bundleInfo.writeBundleTrackingInfo(bundleObj, directoryName);
     return "uploadStatus";
+  }
+
+  private String buildSrc() {
+    // Build URL/File path
+    String src = agencyDataSource;
+    if (agencyProtocol.equals("http")) {
+      if (src.startsWith("//")) {
+        src = "http:" + src;
+      } else if (src.startsWith("/")) {
+        src = "http:/" + src;
+      } else if (!src.toLowerCase().startsWith("http")) {
+        src = "http://" + src;
+      }
+    } else if (agencyProtocol.equals("ftp")) {
+      if (src.startsWith("//")) {
+        src = "ftp:" + src;
+      } else if (src.startsWith("/")) {
+        src = "ftp:/" + src;
+      } else if (!src.toLowerCase().startsWith("ftp")) {
+        src = "ftp://" + src;
+      }
+    }
+    _log.info("Source: " + src);
+    return src;
+  }
+
+  private String buildTarget() {
+    // Build target path
+    String target = fileService.getBucketName() + "/" + directoryName + "/";
+    if (agencyDataSourceType.equals("gtfs")) {
+      target += fileService.getGtfsPath();
+    } else {
+      target += fileService.getAuxPath();
+    }
+    target += "/" + agencyId;
+    // Clean target directory before appending the file name to the target string
+    if (cleanDir) {
+      File targetDir = new File(target);
+      if (targetDir.exists()) {
+        for (File file: targetDir.listFiles()) {
+          file.delete();
+        }
+      }
+    }
+    // name it something safe -- as url may have stuff in it
+    target += File.separator + agencyId + ".zip";
+    _log.info("Target: " + target);
+    return target;
   }
 
   @SuppressWarnings("unchecked")

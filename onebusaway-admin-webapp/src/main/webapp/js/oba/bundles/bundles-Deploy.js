@@ -72,7 +72,6 @@ function initDeploy() {
 }
 
 function onDeleteDeployedClick() {
-    selectedDirectory = $(this).closest("tr").find(".deployedItemName").text();
     var continueDelete = $("#deleteDeployPopup").dialog("open");
 }
 
