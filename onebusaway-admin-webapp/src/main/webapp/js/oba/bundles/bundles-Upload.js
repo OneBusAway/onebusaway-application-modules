@@ -255,7 +255,8 @@ function onUploadSelectedAgenciesClickAsync() {
         if (agencyProtocol != "file") {
             uploadFromUrl(bundleDir, agencyId, agencyDataSourceType, agencyProtocol, agencyDataSource, "false");
         } else {
-            uploadFromLocal(bundleDir, agencyId, agencyDataSourceType, agencyProtocol, agencyDataSource, cleanDir);
+            console.log("async datafile = " + agencyDataFile);
+            uploadFromLocal(bundleDir, agencyId, agencyDataSourceType, agencyProtocol, agencyDataSource, "false", agencyDataFile);
         }
         // for each pending upload check on the status server side
     });
@@ -270,8 +271,13 @@ function onUploadSelectedAgenciesClick() {
         var agencyDataSourceType = $(this).find('.agencyDataSourceType').val();
         var agencyProtocol = $(this).find('.agencyProtocol').val();
         var agencyDataSource = $(this).find('.agencyDataSource').val();
+        var agencyDataFile = null;
         if (agencyProtocol == "file") {
-            var agencyDataFile = $(this).find(':file')[0].files[0];
+            console.log("found file protocol for agencyId=" + agencyId);
+            agencyDataFile = $(this).find(':file')[0].files[0];
+            console.log("file protocol for agencyId=" + agencyId + " has agencyDatFile=" + agencyDataFile);
+        } else {
+            console.log("assuming http protocol for agencyId=" + agencyId);
         }
         // Check if the target directory for this agency has already been cleaned
         var cleanDir = "true";
@@ -283,7 +289,11 @@ function onUploadSelectedAgenciesClick() {
         if (agencyProtocol != "file") {
             uploadFromUrl(bundleDir, agencyId, agencyDataSourceType, agencyProtocol, agencyDataSource, cleanDir);
         } else {
-            uploadFromLocal(bundleDir, agencyId, agencyDataSourceType, agencyProtocol, agencyDataSource, cleanDir);
+            if (agencyDataFile === 'undefined' || agencyDataFile === null) {
+                alert("upload missing agencyDataFile!");
+            } else {
+            uploadFromLocal(bundleDir, agencyId, agencyDataSourceType, agencyProtocol, agencyDataSource, cleanDir, agencyDataFile);
+            }
         }
     });
     onUploadContinueClick();
@@ -352,22 +362,22 @@ function updateStatus(bundleAgencyId, bundleDir) {
 
 }
 
-function uploadFromLocal(bundleDir, bundleAgencyId, agencyDataSourceType, agencyProtocol, agencyDataSource, cleanDir) {
-    console.log("about to call manage-bundles!uploadSourceFile");
-    var files = agencyDataFile;
-    console.log("file name is: " + agencyDataFile.name);
+function uploadFromLocal(bundleDir, bundleAgencyId, agencyDataSourceType, agencyProtocol, agencyDataSource, cleanDir, agencyDataFile) {
+    // console.log("about to call manage-bundles!uploadSourceFile");
+
+    console.log("accept file name is: " + agencyDataFile.name);
     var formData = new FormData();
     formData.append("ts", new Date().getTime());
-    formData.append("directoryName", bundleDir);
-    formData.append("agencyId", agencyId);
-    formData.append("agencyDataSourceType", agencyDataSourceType);
-    formData.append("agencyProtocol", agencyProtocol);
+    // formData.append("directoryName", bundleDir);
+    // formData.append("agencyId", bundleAgencyId);
+    // formData.append("agencyDataSourceType", agencyDataSourceType);
+    // formData.append("agencyProtocol", agencyProtocol);
     formData.append("agencySourceFile", agencyDataFile);
-    formData.append("cleanDir", cleanDir);
+    // formData.append("cleanDir", cleanDir);
     formData.append(csrfParameter, csrfToken);
-    var actionName = "uploadSourceFile";
+    // var actionName = "uploadSourceFile";
     jQuery.ajax({
-        url: "upload-gtfs!" + actionName + ".action",
+        url: "../../api/bundle/upload/accept/" + bundleAgencyId + "/" + bundleDir + "/" + agencyDataSourceType,
         type: "POST",
         data: formData,
         cache: false,

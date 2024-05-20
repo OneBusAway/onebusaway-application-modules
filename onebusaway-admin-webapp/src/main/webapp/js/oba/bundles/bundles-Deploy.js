@@ -9,23 +9,6 @@ function initDeploy() {
 
     onDeployListClick();
 
-    // for deploying named bundle
-    $("#DeployingPopup").dialog({
-        autoOpen: false,
-        modal: true,
-        width: 'auto',
-        buttons: [{
-            id: "deployingSuccessCancel",
-            text: "Continue",
-            click: function() {
-                $(this).dialog("close");
-            }
-        }],
-        open: function() {
-            $('.ui-dialog-buttonpane').find('button:contains("Continue")').addClass('cancelDeletePopup');
-        }
-    });
-
     // For Delete deployment
     $("#deleteDeployPopup").dialog({
         autoOpen: false,
@@ -139,11 +122,11 @@ function deployListBundles() {
 }
 
 function onDeployBundleClick(){
+    $(this).text("deploying...please wait");
     var selectedItem = $(this).closest("tr").find(".deployedItemName").text();
     // give some feedback to the user that the link was clicked
     // this action can be rather slow so this prevents multiple clicks
     // ideally this would be async instead
-    $("#DeployingPopup").dialog("open");
     jQuery.ajax({
         url: "../../api/bundle/deploy/name/" + selectedItem + "?ts=" +new Date().getTime(),
         type: "GET",
@@ -209,7 +192,6 @@ function onDeployListClick(){
             }
         },
         error: function(request) {
-            jQuery("#DeployingPopup").hide();
             alert("There was an error processing your request. Please try again.");
         }
     });

@@ -48,23 +48,6 @@ function stageBundle() {
         type: "GET",
         async: false,
         success: function(response) {
-            /*var bundleResponse = response;
-                if (bundleResponse != undefined) {
-                    if (typeof response=="string") {
-                        if (bundleResponse.match(/SUCCESS/)) {
-                            toggleStageBundleResultList();
-                            jQuery("#bundleStagingResultsHolder #bundleStagingResults #stageBundle_progress").show().css("display","block");
-                            jQuery("#bundleStagingResultsHolder #bundleStagingResults #stageBundle_resultList").show().css("display","block");
-                            jQuery("#stageBundle_resultList").html(bundleName);
-                            jQuery("#stageContentsHolder #stageBox #staging #stagingProgress").attr("src","../../css/img/dialog-accept-2.png");
-                            jQuery("#stageBundle_stageProgress").text("Staging Complete!");
-                            var continueButton = jQuery("#stage_continue");
-                            enableContinueButton(continueButton);
-                        } else {
-                            jQuery("#stageBundle_id").text("Failed to Stage requested Bundle!");
-                            jQuery("#stageBundle_resultList").html("error");
-                        }
-                    }*/
             var bundleResponse = response;
             if (bundleResponse != undefined) {
                 // the header is set wrong for the proxied object, run eval to correct
@@ -115,7 +98,6 @@ function updateStageStatus() {
             if (bundleResponse.status != "complete" && bundleResponse.status != "error") {
                 window.setTimeout(updateStageStatus, 5000); // recurse
             } else {
-                toggleStageBundleResultList();
                 jQuery("#bundleStagingResultsHolder #bundleStagingResults #stageBundle_progress").show().css("display","block");
                 jQuery("#bundleStagingResultsHolder #bundleStagingResults #stageBundle_resultList").show().css("display","block");
                 if (bundleResponse.status == "complete") {
