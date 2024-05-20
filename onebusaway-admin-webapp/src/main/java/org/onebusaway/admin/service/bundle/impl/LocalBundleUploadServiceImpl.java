@@ -27,6 +27,7 @@ import org.springframework.stereotype.Component;
 import javax.ws.rs.core.Response;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
@@ -76,9 +77,34 @@ public class LocalBundleUploadServiceImpl implements BundleUploadService {
   }
 
   @Override
+  public Response accept(String agencyId, String bundleDir, String uploadType, InputStream agencySourceFile) {
+    UploadResponse status = new UploadResponse();
+    status.status = "initial";
+
+    String target = fileService.getBucketName()
+            + File.separator + bundleDir
+            + File.separator + "gtfs_latest"
+            + File.separator + agencyId
+            + File.separator + agencyId + ".zip";
+    _log.info("requesting thread for copy of {} to {} for {}", agencySourceFile, target, agencyId);
+    AcceptThread thread = new AcceptThread(status, bundleInfo, agencyId, bundleDir,
+            target, agencySourceFile);
+    thread.start();
+    statusMap.put(hash(agencyId, bundleDir),
+            status);
+    try {
+      return Response.ok(jsonSerializer(status)).build();
+    } catch (IOException e) {
+      _log.error("parsing error", e);
+    }
+    return Response.serverError().build();
+  }
+
+  @Override
   public Response query(String agencyId, String bundleDir) {
     UploadResponse uploadResponse = statusMap.get(hash(agencyId, bundleDir));
     if (uploadResponse == null) {
+      _log.error("we don't know anything about request {}/{}", agencyId, bundleDir);
       return Response.serverError().build();
     }
     try {
@@ -86,6 +112,7 @@ public class LocalBundleUploadServiceImpl implements BundleUploadService {
     } catch (IOException e) {
       _log.error("parsing error", e);
     }
+    _log.error("fall through for request {}/{}", agencyId, bundleDir);
     return Response.serverError().build();
   }
 
@@ -95,6 +122,50 @@ public class LocalBundleUploadServiceImpl implements BundleUploadService {
 
   private String jsonSerializer(Object object) throws IOException {
     return jsonUtil.serialize(object);
+  }
+
+  public static class AcceptThread extends Thread {
+    private String agencyId;
+    private String target;
+    private String bundleDir;
+    private InputStream agencySourceFile;
+    private UploadResponse status;
+    private BundleInfo bundleInfo;
+
+    public AcceptThread(UploadResponse status, BundleInfo bundleInfo, String agencyId, String bundleDir,
+                        String target, InputStream agencySourceFile) {
+      this.agencyId = agencyId;
+      this.bundleDir = bundleDir;
+      this.target = target;
+      this.agencySourceFile = agencySourceFile;
+      this.status = status;
+      this.bundleInfo = bundleInfo;
+    }
+    @Override
+    public void run() {
+      status.status = "in queue";
+      File targetPath = new File(target);
+      targetPath.mkdirs();
+      status.status = "copying";
+      try {
+        Files.copy(agencySourceFile, targetPath.toPath(), StandardCopyOption.REPLACE_EXISTING);
+      } catch (IOException e) {
+        _log.error("exception while copying agency source file", e);
+        status.status = "error";
+        return;
+      }
+      status.status = "done";
+      Date uploadDate = new Date();
+      status.uploadDate = new SimpleDateFormat("MMM dd yyyy").format(uploadDate);
+      boolean updateSuccess = bundleInfo.addFileToBundleForDirectoryName(bundleDir,
+              agencyId,
+              "http",
+              uploadDate);
+      if (!updateSuccess) {
+        status.status = "json error";
+      }
+
+    }
   }
 
   public static class UploadThread extends Thread {
@@ -113,6 +184,7 @@ public class LocalBundleUploadServiceImpl implements BundleUploadService {
       this.bundleInfo = bundleInfo;
       this.agencyId = agencyId;
     }
+    @Override
     public void run() {
       // Copy file
       try {
@@ -121,7 +193,13 @@ public class LocalBundleUploadServiceImpl implements BundleUploadService {
         File targetPath = new File(target);
         targetPath.mkdirs();
         status.status = "downloading";
-        Files.copy(website.openStream(), targetPath.toPath(), StandardCopyOption.REPLACE_EXISTING);
+        try {
+          Files.copy(website.openStream(), targetPath.toPath(), StandardCopyOption.REPLACE_EXISTING);
+        } catch (Throwable t) {
+          _log.error("exception while copying agency source file", t);
+          status.status = "error";
+          return;
+        }
         status.status = "done";
         Date uploadDate = new Date();
         status.uploadDate = new SimpleDateFormat("MMM dd yyyy").format(uploadDate);

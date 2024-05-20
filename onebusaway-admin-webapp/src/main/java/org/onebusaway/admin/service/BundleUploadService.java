@@ -16,8 +16,10 @@
 package org.onebusaway.admin.service;
 
 import javax.ws.rs.core.Response;
+import java.io.InputStream;
 
 public interface BundleUploadService {
   Response register(String agencyId, String bundleDir, String uploadType, String uploadUrl);
+  Response accept(String agencyId, String bundleDir, String uploadType, InputStream agencySourceFile);
   Response query(String agencyId, String bundleDir);
 }

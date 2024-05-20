@@ -17,6 +17,7 @@ package org.onebusaway.admin.service.bundle.api;
 
 import javax.servlet.ServletContext;
 import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.onebusaway.admin.service.BundleArchiverService;
@@ -30,6 +31,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.ServletContextAware;
+
+import java.io.InputStream;
 
 @Path("/bundle")
 @Component
@@ -253,6 +256,17 @@ public class BundleResource extends AuthenticatedResource implements ServletCont
                                 @FormParam("url") String uploadUrl) {
     return _uploadService.register(agencyId, bundleDir, uploadType, uploadUrl);
   }
+
+  @Path("/upload/accept/{agencyId}/{bundleDir}/{uploadType}")
+  @Consumes(MediaType.MULTIPART_FORM_DATA)
+  @POST
+  public Response doAccept(@PathParam("agencyId") String agencyId,
+                           @PathParam("bundleDir") String bundleDir,
+                           @PathParam("uploadType") String uploadType,
+                           InputStream agencySourceFile) {
+    return _uploadService.accept(agencyId, bundleDir, uploadType, agencySourceFile);
+  }
+
   @Path("/upload/status/{agencyId}/{bundleDir}")
   @GET
   public Response query(@PathParam("agencyId") String agencyId,
