@@ -240,12 +240,6 @@ function onDeleteDatasetConfirmed() {
     onDeleteDataset();
 }
 
-function onDeleteDeployConfirmed() {
-    onDeleteDeployedItemClick();
-    // refresh automatically
-    deployListBundles();
-}
-
 function onDeleteExistingDatasetClick() {
     selectedDirectory = $(this).closest("tr").find(".directoryName").text();
     var continueDelete = $("#deletePopup").dialog("open");
@@ -627,23 +621,6 @@ function showBuildFileList(info, id) {
     jQuery("#buildBundle_fileList").html(txt).css("display", "block");
     jQuery("#buildBundle #downloadLogs").show().css("display", "block");
     jQuery("#buildBundle #downloadLogs #downloadButton").attr("href", "manage-bundles!buildOutputZip.action?id=" + id);
-}
-
-function onDeleteDeployedItemClick() {
-    var selectedItem = selectedDirectory;
-    console.log("requesting delete of deployed item " + selectedItem + " using CSRF token " + csrfToken);
-    jQuery.ajax({
-        url: "../../api/bundle/deploy/delete/" + selectedItem + "?ts=" + new Date().getTime(),
-        type: "GET",
-        async: false,
-        success: function(response) {
-            $("#deleteSuccessPopup").dialog("open");
-        },
-        error: function(request) {
-            alert("There was an error processing your request. Please try again.");
-        }
-    });
-
 }
 
 function onDeleteDataset() {
