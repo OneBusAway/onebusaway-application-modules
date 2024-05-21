@@ -71,8 +71,16 @@ function initDeploy() {
 }
 
 function onDeleteDeployedClick() {
+    selectedDeployDirectory = $(this).closest("tr").find(".deployedItemName").text();
     var continueDelete = $("#deleteDeployPopup").dialog("open");
 }
+
+function onDeleteDeployConfirmed() {
+    onDeleteDeployedItemClick();
+    // refresh automatically
+    deployListBundles();
+}
+
 
 function onDeployContinueClick() {
     var $tabs = jQuery("#tabs");
@@ -90,6 +98,22 @@ function enableDeployButton() {
 function disableDeployButton() {
     jQuery("#deployBundle_deployButton").attr("disabled", "disabled").css("color", "#999");
     disableContinueButton($("#deploy_continue"));
+}
+
+function onDeleteDeployedItemClick() {
+    console.log("requesting delete of deployed item " + selectedDeployDirectory + " using CSRF token " + csrfToken);
+    jQuery.ajax({
+        url: "../../api/bundle/deploy/delete/" + selectedDeployDirectory + "?ts=" + new Date().getTime(),
+        type: "GET",
+        async: false,
+        success: function(response) {
+            $("#deleteSuccessPopup").dialog("open");
+        },
+        error: function(request) {
+            alert("There was an error processing your request. Please try again.");
+        }
+    });
+
 }
 
 
@@ -139,12 +163,12 @@ function deployListBundles() {
 
 function onDeployBundleClick(){
     $(this).text("deploying...please wait");
-    var selectedItem = $(this).closest("tr").find(".deployedItemName").text();
+    var deployItemName = $(this).closest("tr").find(".deployedItemName").text();
     // give some feedback to the user that the link was clicked
     // this action can be rather slow so this prevents multiple clicks
     // ideally this would be async instead
     jQuery.ajax({
-        url: "../../api/bundle/deploy/name/" + selectedItem + "?ts=" +new Date().getTime(),
+        url: "../../api/bundle/deploy/name/" + deployItemName + "?ts=" +new Date().getTime(),
         type: "GET",
         async: false,
         success: function(response) {

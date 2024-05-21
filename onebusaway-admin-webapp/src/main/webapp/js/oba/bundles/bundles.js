@@ -18,6 +18,7 @@ var timeout = null;
 var agencyMetadataAvailable = false;
 var agencyMetadata;		//For agency metadata
 var selectedDirectory = "";  //Selected on Choose tab, used by Upload tab
+var selectedDeployDirectory = ""; // deploy deletion selection in Deploy tab
 var destinationDirectory = ""; //For "copy" on Choose tab, used by Upload tab
 var userComments = "";		// User comments about the selected dataset
 var buildBundleId = "";		// Build request id, stored in info.json.
