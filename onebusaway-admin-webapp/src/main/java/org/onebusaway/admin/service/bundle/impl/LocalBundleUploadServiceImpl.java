@@ -87,9 +87,9 @@ public class LocalBundleUploadServiceImpl implements BundleUploadService {
             + File.separator + agencyId
             + File.separator + agencyId + ".zip";
     _log.info("requesting thread for copy of {} to {} for {}", agencySourceFile, target, agencyId);
-    AcceptThread thread = new AcceptThread(status, bundleInfo, agencyId, bundleDir,
+    AcceptCommand acceptCommand = new AcceptCommand(status, bundleInfo, agencyId, bundleDir,
             target, agencySourceFile);
-    thread.start();
+    acceptCommand.execute(); // this is synchronous to keep connection open
     statusMap.put(hash(agencyId, bundleDir),
             status);
     try {
@@ -124,7 +124,7 @@ public class LocalBundleUploadServiceImpl implements BundleUploadService {
     return jsonUtil.serialize(object);
   }
 
-  public static class AcceptThread extends Thread {
+  public static class AcceptCommand {
     private String agencyId;
     private String target;
     private String bundleDir;
@@ -132,8 +132,8 @@ public class LocalBundleUploadServiceImpl implements BundleUploadService {
     private UploadResponse status;
     private BundleInfo bundleInfo;
 
-    public AcceptThread(UploadResponse status, BundleInfo bundleInfo, String agencyId, String bundleDir,
-                        String target, InputStream agencySourceFile) {
+    public AcceptCommand(UploadResponse status, BundleInfo bundleInfo, String agencyId, String bundleDir,
+                         String target, InputStream agencySourceFile) {
       this.agencyId = agencyId;
       this.bundleDir = bundleDir;
       this.target = target;
@@ -141,8 +141,8 @@ public class LocalBundleUploadServiceImpl implements BundleUploadService {
       this.status = status;
       this.bundleInfo = bundleInfo;
     }
-    @Override
-    public void run() {
+
+    public void execute() {
       status.status = "in queue";
       File targetPath = new File(target);
       targetPath.mkdirs();
