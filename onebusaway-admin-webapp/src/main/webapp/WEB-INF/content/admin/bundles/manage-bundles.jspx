@@ -146,13 +146,13 @@
 				<ul id="breadcrumb">
 					<li><a href="#Create" title="Create Directory"><span>1. <s:text name="manage-bundles.createTitle"/></span></a></li>
 					<li><a href="#Upload" title="Upload Files"><span>2. <s:text name="manage-bundles.uploadTitle"/></span></a></li>
-					<li><a href="#Validate" title="Pre-validate inputs"><span>3. <s:text name="manage-bundles.validateTitle"/></span></a></li>
+					<li><a href="#Validate" title="Pre-validate inputs"><span class="unusedTab">3. <s:text name="manage-bundles.validateTitle"/></span></a></li>
 					<li><a href="#Build" title="Build And Validate"><span>4. <s:text name="manage-bundles.buildTitle"/></span></a></li>
-					<li><a href="#Compare" title="Compare Bundle"><span>5. <s:text name="manage-bundles.compareTitle"/></span></a></li>
+					<li><a href="#Compare" title="Compare Bundle"><span class="unusedTab">5. <s:text name="manage-bundles.compareTitle"/></span></a></li>
 					<li><a href="#Stage" title="Stage Bundle"><span>6. <s:text name="manage-bundles.stageTitle"/></span></a></li>
 					<li><a href="#Deploy" title="Deploy Bundle"><span>7. <s:text name="manage-bundles.deployTitle"/></span></a></li>
-					<li><a href="#Download" title="Download Bundle"><span>8. <s:text name="manage-bundles.downloadTitle"/></span></a></li>
-					<li><a href="#Sync" title="Sync Bundle"><span>9. <s:text name="manage-bundles.syncTitle"/></span></a></li>
+					<li><a href="#Download" title="Download Bundle"><span class="unusedTab">8. <s:text name="manage-bundles.downloadTitle"/></span></a></li>
+					<li><a href="#Sync" title="Sync Bundle"><span class="unusedTab">9. <s:text name="manage-bundles.syncTitle"/></span></a></li>
 				</ul>
 
 				<div id="Create">

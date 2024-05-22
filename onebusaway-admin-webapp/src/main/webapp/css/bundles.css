@@ -36,6 +36,10 @@
     color: #808080;
 }
 
+.unusedTab {
+  color: darkgray;
+}
+
 #tabs #breadcrumb a {
     display:block;
     background-repeat:no-repeat;
