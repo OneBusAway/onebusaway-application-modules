@@ -137,12 +137,10 @@ function deployListBundles() {
 
             // iterate over list
             jQuery.each(data.bundles, function(index, value) {
-                // console.log("value=" + value);
                 var deployName = value.name;
                 var start = value["service-date-from"];
                 var end = value["service-date-to"];
                 var updated = value.updated;
-                // console.log("deployName=" + index + ":" + deployName);
                 var newRow = '<tr class="deployResultListRow' + isExpired(start, end) + isActive(start, end) + isFuture(start, end) + '"> \
 					<td class="deployedItemName">' + deployName + '</td> \
 					<td class="deployDate">' + start + '</td> \
@@ -212,12 +210,10 @@ function onDeployListClick(){
 
                 jQuery("#deployStagedCurrentTable tbody").empty();
                 jQuery.each(response.bundles, function(index, value) {
-                    console.log("value=" + value);
                     var deployName = value.name;
                     var start = value["service-date-from"];
                     var end = value["service-date-to"];
                     var updated = value.updated;
-                    console.log("deployName=" + index + ":" + deployName);
                     var newRow = '<tr class="deployResultListRow' + isExpired(start, end) + isActive(start, end) + isFuture(start, end) + '"> \
 					<td class="deployedItemName">' + deployName + '</td> \
 					<td class="deployDate">' + start + '</td> \
@@ -244,7 +240,6 @@ function isExpired(start, end) {
     let endDate = parse(end);
     let now = new Date();
     if (now > endDate) {
-        console.log("isExpired(" + start + "," + end +")=true");
         return " deployItemExpired";
     }
     return "";
@@ -254,7 +249,6 @@ function isActive(start, end) {
     let endDate = parse(end);
     let now = new Date();
     if (now >= startDate && now <= endDate) {
-        console.log("isActive(" + start + "," + end +")=true");
         return " deployItemCurrent";
     }
     return "";
@@ -264,7 +258,6 @@ function isFuture(start, end) {
     // let endDate = parse(end);
     let now = new Date();
     if (now < startDate) {
-        console.log("isFuture(" + start + "," + end +")=true");
         return " deployItemFuture";
     }
     return "";
