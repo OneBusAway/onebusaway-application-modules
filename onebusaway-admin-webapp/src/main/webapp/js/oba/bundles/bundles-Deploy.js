@@ -137,13 +137,13 @@ function deployListBundles() {
 
             // iterate over list
             jQuery.each(data.bundles, function(index, value) {
-                console.log("value=" + value);
+                // console.log("value=" + value);
                 var deployName = value.name;
                 var start = value["service-date-from"];
                 var end = value["service-date-to"];
                 var updated = value.updated;
-                console.log("deployName=" + index + ":" + deployName);
-                var newRow = '<tr class="deployResultListRow"> \
+                // console.log("deployName=" + index + ":" + deployName);
+                var newRow = '<tr class="deployResultListRow' + isExpired(start, end) + isActive(start, end) + isFuture(start, end) + '"> \
 					<td class="deployedItemName">' + deployName + '</td> \
 					<td class="deployDate">' + start + '</td> \
 					<td class="deployDate">' + end + '</td> \
@@ -218,7 +218,7 @@ function onDeployListClick(){
                     var end = value["service-date-to"];
                     var updated = value.updated;
                     console.log("deployName=" + index + ":" + deployName);
-                    var newRow = '<tr class="deployResultListRow"> \
+                    var newRow = '<tr class="deployResultListRow' + isExpired(start, end) + isActive(start, end) + isFuture(start, end) + '"> \
 					<td class="deployedItemName">' + deployName + '</td> \
 					<td class="deployDate">' + start + '</td> \
 					<td class="deployDate">' + end + '</td> \
@@ -235,4 +235,37 @@ function onDeployListClick(){
             alert("There was an error processing your request. Please try again.");
         }
     });
+}
+
+function parse(d) {
+    return new Date(d);
+}
+function isExpired(start, end) {
+    let endDate = parse(end);
+    let now = new Date();
+    if (now > endDate) {
+        console.log("isExpired(" + start + "," + end +")=true");
+        return " deployItemExpired";
+    }
+    return "";
+}
+function isActive(start, end) {
+    let startDate = parse(start);
+    let endDate = parse(end);
+    let now = new Date();
+    if (now >= startDate && now <= endDate) {
+        console.log("isActive(" + start + "," + end +")=true");
+        return " deployItemCurrent";
+    }
+    return "";
+}
+function isFuture(start, end) {
+    let startDate = parse(start);
+    // let endDate = parse(end);
+    let now = new Date();
+    if (now < startDate) {
+        console.log("isFuture(" + start + "," + end +")=true");
+        return " deployItemFuture";
+    }
+    return "";
 }

@@ -818,6 +818,15 @@
   padding-top : 10px;
 }
 
+.deployItemExpired {
+  color: gray;
+}
+.deployItemCurrent {
+  color: green;
+}
+.deployItemFuture {
+  color: red;
+}
 
 /** stage section **/
 
