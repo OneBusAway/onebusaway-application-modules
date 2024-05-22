@@ -25,8 +25,11 @@
 				</div>
 		<div id="prevalidateInputs">
 			<label class="bundleHeader">Pre-Bundle Building Validation of
-				GTFS and AUX Files</label>
+				GTFS and AUX Files (Deprecated)</label>
 			<div class="directoryLabels">
+				<label class="adminLabel directoryLabel">Please use <a href="https://gtfs-validator.mobilitydata.org/">https://gtfs-validator.mobilitydata.org/</a>
+					for more current validation</label>
+				<p/>
 				<label class="adminLabel directoryLabel">Bundle Directory :</label> 
 				<label id="prevalidate_bundleDirectory" class="adminLabel directoryLabel">
 					<s:property value="bundleDirectory" />
