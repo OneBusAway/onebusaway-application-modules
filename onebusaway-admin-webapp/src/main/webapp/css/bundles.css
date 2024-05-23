@@ -803,6 +803,11 @@
   display:none;
 }
 
+#currentBundleHint {
+  padding-top: 1em;
+  padding-left: 10em;
+}
+
 #helpfulMessage, .helpfulMessage {
   padding-top : 20px;
 }

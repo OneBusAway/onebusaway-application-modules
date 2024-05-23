@@ -135,6 +135,7 @@ function deployListBundles() {
             }
             jQuery("#deployBundleCurrentTable tbody").empty();
 
+            data.bundles.sort(bundleListCompare);
             // iterate over list
             jQuery.each(data.bundles, function(index, value) {
                 var deployName = value.name;
@@ -260,4 +261,14 @@ function isFuture(start, end) {
         return " deployItemFuture";
     }
     return "";
+}
+
+function bundleListCompare(a,b) {
+    if (new Date(a["service-date-from"]) <  new Date(b["service-date-from"])) return -1;
+    if (new Date(a["service-date-from"]) >  new Date(b["service-date-from"])) return 1;
+    if (new Date(a["service-date-to"]) <  new Date(b["service-date-to"])) return -1;
+    if (new Date(a["service-date-to"]) >  new Date(b["service-date-to"])) return 1;
+    if (new Date(a.updated) < new Date(b.updated)) return -1;
+    if (new Date(a.updated) > new Date(b.updated)) return 1;
+    return 0;
 }
