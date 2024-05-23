@@ -194,7 +194,6 @@ function updateDeployStatus() {
 }
 
 function onDeployListClick(){
-    var environment = jQuery("#deploy_environment").text();
     jQuery.ajax({
         url: "../../api/bundle/staged/list?ts=" +new Date().getTime(),
         type: "GET",
