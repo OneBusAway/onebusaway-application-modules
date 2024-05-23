@@ -9,7 +9,7 @@ The OneBusAway application suite's primary function is to share real-time public
     * [Sign-mode](https://github.com/OneBusAway/onebusaway-application-modules/wiki/Sign-Mode) - Same information as the standard web interface, but in a large format for large displays (e.g., large televisions)
     * A mobile-optimized version of the web interface for smart phone mobile browsers
     * A text-only version of the web interface for more-basic mobile browsers
-  * [OneBusAway REST API](http://developer.onebusaway.org/modules/onebusaway-application-modules/current/api/where/index.html) - A RESTful web-service that can be used to quickly write applications built on top of transit data. This API powers the following apps:
+  * [OneBusAway REST API]( https://developer.onebusaway.org/api/where) - A RESTful web-service that can be used to quickly write applications built on top of transit data. This API powers the following apps:
     * [OneBusAway iOS (iPhone)](https://github.com/OneBusAway/onebusaway-ios)
     * [OneBusAway Android](https://github.com/OneBusAway/onebusaway-android)
     * [OneBusAway Windows Phone](https://github.com/OneBusAway/onebusaway-windows-phone)
