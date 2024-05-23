@@ -175,6 +175,7 @@ function initCreate() {
         }
     });
 
+    populateInUseColumn();
 
 }
 
@@ -418,11 +419,9 @@ function onSelectDataset(sourceDirectoryType) {
                 enableContinueButton(continueButton);
                 var bundleDir = status.directoryName;
                 var bundleInfo = status.bundleInfo;
-                console.log("bundleInfo=" + bundleInfo);
                 if(bundleInfo != null || bundleInfo != undefined){
                     showBundleInfo(JSON.stringify(bundleInfo));
                 }
-                console.log("bundleDir=" + bundleDir);
                 jQuery("#selectedDataset").text("You are adding files to " + bundleDir);
                 jQuery("#prevalidate_bundleDirectory").text(bundleDir);
                 jQuery("#selected_bundleDirectory").text(bundleDir);
@@ -542,7 +541,6 @@ function directoryOptionChanged() {
             '<input type="text" id="destDirectoryName" class="destDirectoryName" required="required"/>' + '<label class="required">*</label></div>';
         if (jQuery('#destDirectoryName').length) {
             //Do nothing
-            console.log('Element exists');
             jQuery('#copyDirectory').show();
         } else {
             jQuery(element).insertAfter("#directoryButton");
@@ -651,4 +649,68 @@ function onDeleteDataset() {
     });
 }
 
+function populateInUseColumn() {
+    // list of datasets that are staged or deployed; aka inUse
+    var datasets = [];
+    // call staged/list
+    getStagedDatasets(datasets);
+    // call deploy/list
+    getDeployedDatasets(datasets);
+    // iterate over table
+    jQuery("#existingDataset tbody").find(".directoryName").each(function() {
+        var dataset = $(this).text();
+        if (datasets.includes(dataset)) {
+            // if datasetName in dataset then add true to column
+            $(this).closest("tr").find(".datasetInUse").text("Yes");
+        }
+    });
+}
 
+function getStagedDatasets(datasets) {
+    jQuery.ajax({
+        url: "../../api/bundle/staged/list?ts=" +new Date().getTime(),
+        type: "GET",
+        async: false,
+        success: function(response) {
+            var bundleResponse = response;
+            if (bundleResponse != undefined) {
+                var txt = "<ul>";
+                // the header is set wrong for the proxied object, run eval to correct
+                if (typeof response=="string") {
+                    bundleResponse = eval('(' + response + ')');
+                }
+                jQuery.each(response.bundles, function(index, value) {
+                    datasets.push(value.dataset);
+                });
+            }
+        },
+        error: function(request) {
+            //alert("There was an error processing your request. Please try again.");
+        }
+    });
+
+}
+function getDeployedDatasets(datasets) {
+    jQuery.ajax({
+        url: "../../api/bundle/list?ts=" +new Date().getTime(),
+        type: "GET",
+        async: false,
+        success: function(response) {
+            var bundleResponse = response;
+            if (bundleResponse != undefined) {
+                var txt = "<ul>";
+                // the header is set wrong for the proxied object, run eval to correct
+                if (typeof response=="string") {
+                    bundleResponse = eval('(' + response + ')');
+                }
+                jQuery.each(response.bundles, function(index, value) {
+                    datasets.push(value.dataset);
+                });
+            }
+        },
+        error: function(request) {
+            //alert("There was an error processing your request. Please try again.");
+        }
+    });
+
+}
