@@ -52,6 +52,7 @@
 						<th></th>
 						<th>Dataset Name</th>
 						<th>Last Updated Date</th>
+						<th>In Use?</th>
 						<th></th>
 						<th></th>
 					</tr>
@@ -69,6 +70,7 @@
 							<td class="timestamp">
 								<s:property value="creationTimestamp" />
 							</td>
+							<td class="datasetInUse"><!-- space --></td>
 							<td class="copyDirectory">copy</td>
 							<td class="deleteDirectory">delete</td>
 						</tr> 
