@@ -110,12 +110,4 @@
 		</div>
 	</div>
 </div>
-<div id="DeployingPopup">
-	<div id="DeployingSuccessPopupContents">
-		<div id="DeployingSuccessPopupHeader">
-			<p>Deploying, Please wait...</p>
-		</div>
-	</div>
-</div>
-
 </html>
