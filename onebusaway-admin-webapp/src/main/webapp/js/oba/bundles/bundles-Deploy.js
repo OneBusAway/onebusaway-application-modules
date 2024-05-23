@@ -161,6 +161,7 @@ function deployListBundles() {
 }
 
 function onDeployBundleClick(){
+    $(this).text("deploying...please wait");
     var deployItemName = $(this).closest("tr").find(".deployedItemName").text();
     // give some feedback to the user that the link was clicked
     // this action can be rather slow so this prevents multiple clicks
