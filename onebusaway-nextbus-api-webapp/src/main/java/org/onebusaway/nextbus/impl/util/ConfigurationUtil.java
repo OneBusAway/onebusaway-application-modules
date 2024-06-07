@@ -20,6 +20,7 @@ import java.util.Map;
 
 public class ConfigurationUtil {
   
+  private String protocol = "http";
   private String transiTimeHost = "localhost";
   private String transiTimePort = "8080";
   private String transiTimeKey = "8a3273b0";
@@ -27,6 +28,15 @@ public class ConfigurationUtil {
   private int httpTimeoutSeconds = 15;
   
   public ConfigurationUtil(){}
+
+  public String getProtocol() {
+    return protocol;
+  }
+
+  public void setProtocol(String protocol) {
+    this.protocol = protocol;
+  }
+
   public String getTransiTimeHost() {
     return transiTimeHost;
   }

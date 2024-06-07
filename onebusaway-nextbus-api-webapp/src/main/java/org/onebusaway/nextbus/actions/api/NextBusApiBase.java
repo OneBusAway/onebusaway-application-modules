@@ -311,10 +311,11 @@ public class NextBusApiBase {
       return null;
     }
 
+    String protocol = configUtil.getProtocol();
     String host = configUtil.getTransiTimeHost();
     String port = configUtil.getTransiTimePort();
     String apiKey = configUtil.getTransiTimeKey();
-    String serviceUrl = "http://" + host + ":" + port + "/api/v1/key/" + apiKey
+    String serviceUrl =  protocol + "://" + host + ":" + port + "/api/v1/key/" + apiKey
         + "/agency/";
     return serviceUrl;
   }
