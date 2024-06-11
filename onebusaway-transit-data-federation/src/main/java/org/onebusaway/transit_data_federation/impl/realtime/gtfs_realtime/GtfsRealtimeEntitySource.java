@@ -40,18 +40,29 @@ class GtfsRealtimeEntitySource {
 
   private RouteReplacementService _routeReplacementService;
 
+  private RealtimeFuzzyMatcher _realtimeFuzzyMatcher;
+
   private List<String> _agencyIds;
 
   private List<String> _tripIdRegexs;
+
+  private long _currentTime = 0l;
 
   public void setTransitGraphDao(TransitGraphDao transitGraphDao) {
     _transitGraphDao = transitGraphDao;
   }
 
+  public TransitGraphDao getTransitGraphDao() {
+    return _transitGraphDao;
+  }
   public void setConsolidatedStopService(ConsolidatedStopsService service) { _consolidatedStopsService = service; }
 
   public void setRouteReplacementService(RouteReplacementService routeReplacementService) {
     _routeReplacementService = routeReplacementService;
+  }
+
+  public void setRealtimeFuzzyMatcher(RealtimeFuzzyMatcher fuzzyMatcher) {
+    _realtimeFuzzyMatcher = fuzzyMatcher;
   }
 
   public void setAgencyIds(List<String> agencyIds) {
@@ -141,7 +152,35 @@ class GtfsRealtimeEntitySource {
         }
       }
     }
-    return getTripInternal(tripId);
+    TripEntry possibleTrip = getTripInternal(tripId);
+    if (possibleTrip != null) {
+      return possibleTrip;
+    }
+    return getFuzzyTrip(tripId);
+  }
+
+  private TripEntry getFuzzyTrip(String tripId) {
+    if (_realtimeFuzzyMatcher == null) {
+      return null;
+    }
+
+    for (String agencyId : _agencyIds) {
+      AgencyAndId id = new AgencyAndId(agencyId, tripId);
+      TripEntry trip = _realtimeFuzzyMatcher.findTrip(id, _currentTime);
+      if (trip != null) {
+        return trip;
+      }
+    }
+    try {
+      AgencyAndId id = AgencyAndId.convertFromString(tripId);
+      TripEntry trip = _realtimeFuzzyMatcher.findTrip(id, _currentTime);
+      if (trip != null)
+        return trip;
+    } catch (IllegalArgumentException ex) {
+
+    }
+
+    return null;
   }
 
   private TripEntry getTripInternal(String tripId) {
@@ -234,4 +273,7 @@ class GtfsRealtimeEntitySource {
     }
   }
 
+  public void setCurrentTime(long currentTime) {
+    _currentTime = currentTime;
+  }
 }
