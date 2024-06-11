@@ -56,10 +56,7 @@ import org.onebusaway.alerts.impl.ServiceAlertTimeRange;
 import org.onebusaway.alerts.impl.ServiceAlertsSituationAffectsClause;
 import org.onebusaway.transit_data_federation.impl.RouteReplacementServiceImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopTimeEntriesFactory;
-import org.onebusaway.transit_data_federation.services.AgencyService;
-import org.onebusaway.transit_data_federation.services.ConsolidatedStopsService;
-import org.onebusaway.transit_data_federation.services.RouteReplacementService;
-import org.onebusaway.transit_data_federation.services.StopSwapService;
+import org.onebusaway.transit_data_federation.services.*;
 import org.onebusaway.transit_data_federation.services.blocks.BlockCalendarService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockGeospatialService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockIndexService;
@@ -200,6 +197,9 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   // a special case of some specific integration - drop unassigned trips
   private boolean _filterUnassigned = false;
 
+  // allow trip_ids to match fuzzily instead of strictly
+  private boolean _enableFuzzyMatching = false;
+
   private List<AgencyAndId> _routeIdsToCancel = null;
 
   private GtfsRealtimeCancelService _cancelService;
@@ -289,6 +289,11 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   @Autowired
   public void setBlockIndexService(BlockIndexService service) {
     _serviceSource.setBlockIndexService(service);
+  }
+
+  @Autowired
+  public void setCalendarService(ExtendedCalendarService service) {
+    _serviceSource.setCalendarService(service);
   }
 
   public void setStopModificationStrategy(StopModificationStrategy strategy) {
@@ -469,6 +474,10 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     _filterUnassigned = flag;
   }
 
+  public void setEnableFuzzyMatching(boolean flag) {
+    _enableFuzzyMatching = flag;
+  }
+
   @Autowired
   public void setGtfsRealtimeCancelService(GtfsRealtimeCancelService service) {
     _cancelService = service;
@@ -489,6 +498,13 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     _entitySource.setAgencyIds(_agencyIds);
     _entitySource.setTripIdRegexs(_tripIdRegexs);
     _entitySource.setConsolidatedStopService(_consolidatedStopsService);
+
+    if (_enableFuzzyMatching) {
+      RealtimeFuzzyMatcher fuzzyMatcher = new RealtimeFuzzyMatcher(_entitySource.getTransitGraphDao(),
+              _serviceSource.getCalendarService());
+      _entitySource.setRealtimeFuzzyMatcher(fuzzyMatcher);
+    }
+
 
     _tripsLibrary = new GtfsRealtimeTripLibrary();
     _tripsLibrary.setEntitySource(_entitySource);
