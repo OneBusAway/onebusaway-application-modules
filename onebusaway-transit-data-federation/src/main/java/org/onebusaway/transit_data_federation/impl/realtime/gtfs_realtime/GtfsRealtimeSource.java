@@ -39,6 +39,7 @@ import javax.annotation.PreDestroy;
 import com.google.transit.realtime.*;
 import org.apache.commons.lang.StringUtils;
 import org.onebusaway.api.model.transit.realtime.GtfsRealtimeConstantsV2;
+import org.onebusaway.container.refresh.Refreshable;
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
 import org.onebusaway.gtfs.model.AgencyAndId;
@@ -54,6 +55,7 @@ import org.onebusaway.alerts.impl.ServiceAlertRecord;
 import org.onebusaway.alerts.impl.ServiceAlertSituationConsequenceClause;
 import org.onebusaway.alerts.impl.ServiceAlertTimeRange;
 import org.onebusaway.alerts.impl.ServiceAlertsSituationAffectsClause;
+import org.onebusaway.transit_data_federation.impl.RefreshableResources;
 import org.onebusaway.transit_data_federation.impl.RouteReplacementServiceImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopTimeEntriesFactory;
 import org.onebusaway.transit_data_federation.services.*;
@@ -150,6 +152,8 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   private List<String> _agencyIds = new ArrayList<String>();
 
   private List<String>_tripIdRegexs = null;
+
+  private List<String> _tripIdFuzzyPatterns = null;
 
   /**
    * We keep track of vehicle location updates, only pushing them to the
@@ -296,6 +300,13 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     _serviceSource.setCalendarService(service);
   }
 
+  @Refreshable(dependsOn = RefreshableResources.TRANSIT_GRAPH)
+  public void bundleSwapListener() {
+    if (_entitySource != null && _entitySource.getRealtimeFuzzyMatcher() != null) {
+      _entitySource.getRealtimeFuzzyMatcher().reset();
+    }
+  }
+
   public void setStopModificationStrategy(StopModificationStrategy strategy) {
     _stopModificationStrategy = strategy;
   }
@@ -379,7 +390,11 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   public void setTripIdRegexes(List<String> tripIdRegexes) {
     _tripIdRegexs = tripIdRegexes;
   }
-  
+
+  public void setTripIdFuzzyPatterns(List<String> tripIdFuzzyPatterns) {
+    _tripIdFuzzyPatterns = tripIdFuzzyPatterns;
+  }
+
   public void setShowNegativeScheduledArrivals(boolean _showNegativeScheduledArrivals) {
     this._showNegativeScheduledArrivals = _showNegativeScheduledArrivals;
   }
@@ -502,6 +517,9 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     if (_enableFuzzyMatching) {
       RealtimeFuzzyMatcher fuzzyMatcher = new RealtimeFuzzyMatcher(_entitySource.getTransitGraphDao(),
               _serviceSource.getCalendarService());
+      fuzzyMatcher.setTripIdRegexs(_tripIdFuzzyPatterns);
+      fuzzyMatcher.setAgencies(new HashSet<>(_agencyIds));
+
       _entitySource.setRealtimeFuzzyMatcher(fuzzyMatcher);
     }
 

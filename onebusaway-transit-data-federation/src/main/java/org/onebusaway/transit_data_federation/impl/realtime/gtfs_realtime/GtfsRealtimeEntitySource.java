@@ -65,6 +65,10 @@ class GtfsRealtimeEntitySource {
     _realtimeFuzzyMatcher = fuzzyMatcher;
   }
 
+  public RealtimeFuzzyMatcher getRealtimeFuzzyMatcher() {
+    return _realtimeFuzzyMatcher;
+  }
+
   public void setAgencyIds(List<String> agencyIds) {
     _agencyIds = agencyIds;
   }
@@ -157,6 +161,13 @@ class GtfsRealtimeEntitySource {
       return possibleTrip;
     }
     return getFuzzyTrip(tripId);
+  }
+
+  public TripEntry getFuzzyTrip(AgencyAndId tripId) {
+    if (_realtimeFuzzyMatcher == null) {
+      return null;
+    }
+    return _realtimeFuzzyMatcher.findTrip(tripId, _currentTime);
   }
 
   private TripEntry getFuzzyTrip(String tripId) {

@@ -229,7 +229,7 @@ OBA.Popups = (function() {
 		var vehicleIdParts = vehicleId.split("_");
         var blockId = activity.MonitoredVehicleJourney.BlockRef;
         var vehicleIdWithoutAgency = vehicleIdParts[1];
-        var blockIdWithoutAgency = blockId.split("_")[1];
+		var blockIdWithoutAgency = blockId.substring(blockId.indexOf("_")+1); // accept multiple "_" chars
 		var routeName = activity.MonitoredVehicleJourney.LineRef;
 		var isMonitored = activity.MonitoredVehicleJourney.Monitored;
 

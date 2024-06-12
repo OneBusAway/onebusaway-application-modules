@@ -15,10 +15,9 @@
  */
 package org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime;
 
-import org.onebusaway.container.refresh.Refreshable;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.LocalizedServiceId;
-import org.onebusaway.transit_data_federation.impl.RefreshableResources;
+import org.onebusaway.gtfs.model.calendar.ServiceDate;
 import org.onebusaway.transit_data_federation.services.ExtendedCalendarService;
 import org.onebusaway.transit_data_federation.services.transit_graph.ServiceIdActivation;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
@@ -50,6 +49,19 @@ public class RealtimeFuzzyMatcher {
   private Set<AgencyAndId> _nullCache = new HashSet<>();
   private ScheduledExecutorService _executor = Executors.newSingleThreadScheduledExecutor();
   private int _cacheResetFrequencyMinutes = DEFAULT_REFRESH_INTERVAL;
+  private List<String> _tripIdRegexs = new ArrayList<>();
+  private Map<AgencyAndId, List<TripEntry>> _baseTripsByAgencyId = new HashMap<>();
+  private Set<String> _agencies = new HashSet<>();
+  boolean isInitialized = false;
+  boolean firstRun = true;
+
+  public void setAgencies(Set<String> agencies) {
+    _agencies.addAll(agencies);
+  }
+
+  public void setTripIdRegexs(List<String> tripIdRegexs) {
+    _tripIdRegexs.addAll(tripIdRegexs);
+  }
 
   public void setRefreshInterval(int refreshIntervalMinutes) {
     _cacheResetFrequencyMinutes = refreshIntervalMinutes;
@@ -62,7 +74,7 @@ public class RealtimeFuzzyMatcher {
 
   @PostConstruct
   public void start() {
-    _executor.scheduleAtFixedRate(new RefreshTask(), 10,
+    _executor.scheduleAtFixedRate(new RefreshTask(), 2,
             _cacheResetFrequencyMinutes,
             TimeUnit.MINUTES);
   }
@@ -74,13 +86,41 @@ public class RealtimeFuzzyMatcher {
     }
   }
 
-  @Refreshable(dependsOn = RefreshableResources.TRANSIT_GRAPH)
-  public void reset() {
+  public synchronized void reset() {
+    isInitialized = false;
+    long start = System.currentTimeMillis();
    _cache.clear();
    _nullCache.clear();
+    for (TripEntry trip : dao.getAllTrips()) {
+      if (_agencies.contains(trip.getId().getAgencyId())) {
+        String baseTripId = trip.getId().getId();
+        for (String tripIdRegex : _tripIdRegexs) {
+          baseTripId = baseTripId.replaceAll(tripIdRegex, "");
+        }
+        AgencyAndId baseTripAndAgencyId = new AgencyAndId(trip.getId().getAgencyId(), baseTripId);
+        if (!_baseTripsByAgencyId.containsKey(baseTripAndAgencyId)) {
+          _baseTripsByAgencyId.put(baseTripAndAgencyId, new ArrayList<>());
+        }
+        _baseTripsByAgencyId.get(baseTripAndAgencyId).add(trip);
+      }
+    }
+
+    long end = System.currentTimeMillis();
+    _log.info("index built in " + (end - start) + " ms");
+    isInitialized = true;
   }
 
-  public TripEntry findTrip(AgencyAndId tripId, long currentTime) {
+  public synchronized TripEntry findTrip(AgencyAndId tripId, long currentTime) {
+    if (firstRun)
+    {
+      start();
+      firstRun = false;
+    }
+
+    if (!isInitialized) {
+      return null;
+    }
+
     if (_cache.containsKey(tripId)) {
       return _cache.get(tripId);
     }
@@ -89,12 +129,21 @@ public class RealtimeFuzzyMatcher {
     }
     TripEntry trip = getBestTrip(tripId, currentTime);
     if (trip != null) {
+      logResult(trip, tripId);
       _cache.put(tripId, trip);
     } else {
       _nullCache.add(tripId);
       // we can't log this here as we try multiple agencies
     }
     return trip;
+  }
+
+  private void logResult(TripEntry trip, AgencyAndId tripId) {
+    Date currentServiceDay = new ServiceDate().getAsDate();
+    Set<Date> datesForServiceIds = calendarService.getDatesForServiceIds(new ServiceIdActivation(trip.getServiceId()));
+    if (!datesForServiceIds.contains(currentServiceDay)) {
+      _log.error("trip {} matched to {} on serviceId {}/{}", tripId, trip.getId(), trip.getServiceId(), datesForServiceIds);
+    }
   }
 
   private TripEntry getBestTrip(AgencyAndId tripId, long currentTime) {
@@ -139,12 +188,9 @@ public class RealtimeFuzzyMatcher {
 
   private List<TripEntry> getPossibleTrips(AgencyAndId tripId) {
     List<TripEntry> possibleTrips = new ArrayList<TripEntry>();
-    for (TripEntry trip : dao.getAllTrips()) {
-      if (trip.getId().toString().contains(tripId.toString())) {
-        possibleTrips.add(trip);
-      }
+    if (_baseTripsByAgencyId.containsKey(tripId)) {
+      possibleTrips.addAll(_baseTripsByAgencyId.get(tripId));
     }
-
     return possibleTrips;
   }
 

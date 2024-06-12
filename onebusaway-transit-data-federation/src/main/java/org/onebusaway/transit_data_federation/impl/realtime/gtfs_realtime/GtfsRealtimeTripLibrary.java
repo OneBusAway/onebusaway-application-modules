@@ -909,7 +909,10 @@ public class GtfsRealtimeTripLibrary {
           for (String tripIdRegex : this._entitySource.getTripIdRegexes()) {
               newTripId = newTripId.replaceAll(tripIdRegex, "");
             }
-            tripUpdatesByTripId.put(newTripId, tempTripUpdatesByTripId.get(existingTripId));
+          AgencyAndId keyAndId = fuzzyMatchTripId(new AgencyAndId(instance.getBlock().getBlock().getId().getAgencyId(), newTripId));
+          if (keyAndId != null) {
+            tripUpdatesByTripId.put(AgencyAndIdLibrary.convertToString(keyAndId), tempTripUpdatesByTripId.get(existingTripId));
+          }
         }
       } else {
         // no fuzzy matching, copy the reference
@@ -929,7 +932,7 @@ public class GtfsRealtimeTripLibrary {
       for (BlockTripEntry blockTrip : blockTrips) {
         TripEntry trip = blockTrip.getTrip();
         AgencyAndId tripId = trip.getId();
-        List<TripUpdate> updatesForTrip = tripUpdatesByTripId.get(tripId.getId());
+        List<TripUpdate> updatesForTrip = tripUpdatesByTripId.get(AgencyAndIdLibrary.convertToString(tripId));
 
         if (updatesForTrip != null) {
           for (TripUpdate tripUpdate : updatesForTrip) {
@@ -1109,6 +1112,14 @@ public class GtfsRealtimeTripLibrary {
     } catch (Throwable t) {
       _log.error("source-exception {}", t, t);
     }
+  }
+
+  private AgencyAndId fuzzyMatchTripId(AgencyAndId tripId) {
+    TripEntry fuzzyTrip = _entitySource.getFuzzyTrip(tripId);
+    if (fuzzyTrip == null) {
+      return tripId;
+    }
+    return fuzzyTrip.getId();
   }
 
   private BlockStopTimeEntry getBlockStopTimeForStopTimeUpdate(MonitoredResult result,
