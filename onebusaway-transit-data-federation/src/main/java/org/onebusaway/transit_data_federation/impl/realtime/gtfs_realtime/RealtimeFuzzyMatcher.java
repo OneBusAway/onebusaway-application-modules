@@ -49,7 +49,8 @@ public class RealtimeFuzzyMatcher {
   private Set<AgencyAndId> _nullCache = new HashSet<>();
   private ScheduledExecutorService _executor = Executors.newSingleThreadScheduledExecutor();
   private int _cacheResetFrequencyMinutes = DEFAULT_REFRESH_INTERVAL;
-  private List<String> _tripIdRegexs = new ArrayList<>();
+  private List<String> _realtimeTripIdRegexs = new ArrayList<>();
+  private List<String> _scheduleTripIdRegexs = new ArrayList<>();
   private Map<AgencyAndId, List<TripEntry>> _baseTripsByAgencyId = new HashMap<>();
   private Set<String> _agencies = new HashSet<>();
   boolean isInitialized = false;
@@ -59,8 +60,12 @@ public class RealtimeFuzzyMatcher {
     _agencies.addAll(agencies);
   }
 
-  public void setTripIdRegexs(List<String> tripIdRegexs) {
-    _tripIdRegexs.addAll(tripIdRegexs);
+  public void setRealtimeTripIdRegexes(List<String> tripIdRegexs) {
+    _realtimeTripIdRegexs.addAll(tripIdRegexs);
+  }
+
+  public void setScheduleTripIdRegexs(List<String> tripIdRegexs) {
+    _scheduleTripIdRegexs.addAll(tripIdRegexs);
   }
 
   public void setRefreshInterval(int refreshIntervalMinutes) {
@@ -94,7 +99,7 @@ public class RealtimeFuzzyMatcher {
     for (TripEntry trip : dao.getAllTrips()) {
       if (_agencies.contains(trip.getId().getAgencyId())) {
         String baseTripId = trip.getId().getId();
-        for (String tripIdRegex : _tripIdRegexs) {
+        for (String tripIdRegex : _realtimeTripIdRegexs) {
           baseTripId = baseTripId.replaceAll(tripIdRegex, "");
         }
         AgencyAndId baseTripAndAgencyId = new AgencyAndId(trip.getId().getAgencyId(), baseTripId);
@@ -106,7 +111,7 @@ public class RealtimeFuzzyMatcher {
     }
 
     long end = System.currentTimeMillis();
-    _log.info("index built in " + (end - start) + " ms");
+    _log.info("index built/reset in " + (end - start) + " ms");
     isInitialized = true;
   }
 
@@ -127,6 +132,16 @@ public class RealtimeFuzzyMatcher {
     if (_nullCache.contains(tripId)) {
       return null;
     }
+
+    if (_scheduleTripIdRegexs != null && _scheduleTripIdRegexs.size() > 0) {
+      String agencyId = tripId.getAgencyId();
+      String alteredTripId = tripId.getId();
+      for (String regex : _scheduleTripIdRegexs) {
+        alteredTripId = alteredTripId.replaceAll(regex, "");
+        tripId = new AgencyAndId(agencyId, alteredTripId);
+      }
+    }
+
     TripEntry trip = getBestTrip(tripId, currentTime);
     if (trip != null) {
       logResult(trip, tripId);
