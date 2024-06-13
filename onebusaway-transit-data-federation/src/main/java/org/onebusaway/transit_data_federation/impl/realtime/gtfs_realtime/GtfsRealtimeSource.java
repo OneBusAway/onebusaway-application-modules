@@ -151,9 +151,9 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
 
   private List<String> _agencyIds = new ArrayList<String>();
 
-  private List<String>_tripIdRegexs = null;
+  private List<String> _scheduleTripIdRegexs = null;
 
-  private List<String> _tripIdFuzzyPatterns = null;
+  private List<String> _realtimeTripIdRegexes = null;
 
   /**
    * We keep track of vehicle location updates, only pushing them to the
@@ -302,6 +302,7 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
 
   @Refreshable(dependsOn = RefreshableResources.TRANSIT_GRAPH)
   public void bundleSwapListener() {
+    _log.info("bundleSwapListener invoked");
     if (_entitySource != null && _entitySource.getRealtimeFuzzyMatcher() != null) {
       _entitySource.getRealtimeFuzzyMatcher().reset();
     }
@@ -387,12 +388,12 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     _agencyIds.addAll(agencyIds);
   }
 
-  public void setTripIdRegexes(List<String> tripIdRegexes) {
-    _tripIdRegexs = tripIdRegexes;
+  public void setScheduleTripIdRegexes(List<String> regexes) {
+    _scheduleTripIdRegexs = regexes;
   }
 
-  public void setTripIdFuzzyPatterns(List<String> tripIdFuzzyPatterns) {
-    _tripIdFuzzyPatterns = tripIdFuzzyPatterns;
+  public void setRealtimeTripIdRegexes(List<String> regexes) {
+    _realtimeTripIdRegexes = regexes;
   }
 
   public void setShowNegativeScheduledArrivals(boolean _showNegativeScheduledArrivals) {
@@ -511,13 +512,14 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     }
 
     _entitySource.setAgencyIds(_agencyIds);
-    _entitySource.setTripIdRegexs(_tripIdRegexs);
+    _entitySource.setTripIdRegexs(_scheduleTripIdRegexs);
     _entitySource.setConsolidatedStopService(_consolidatedStopsService);
 
     if (_enableFuzzyMatching) {
       RealtimeFuzzyMatcher fuzzyMatcher = new RealtimeFuzzyMatcher(_entitySource.getTransitGraphDao(),
               _serviceSource.getCalendarService());
-      fuzzyMatcher.setTripIdRegexs(_tripIdFuzzyPatterns);
+      fuzzyMatcher.setRealtimeTripIdRegexes(_realtimeTripIdRegexes);
+      fuzzyMatcher.setScheduleTripIdRegexs(_scheduleTripIdRegexs);
       fuzzyMatcher.setAgencies(new HashSet<>(_agencyIds));
 
       _entitySource.setRealtimeFuzzyMatcher(fuzzyMatcher);
