@@ -178,6 +178,15 @@ public class RealtimeFuzzyMatcher {
   }
 
   private Date getClosestDate(Set<Date> datesForServiceIds, long currentTime) {
+    // try for an exact match first
+    Date serviceDate = new ServiceDate(new Date(currentTime)).getAsDate();
+    for (Date date : datesForServiceIds) {
+      if (date.equals(serviceDate)) {
+        return date;
+      }
+    }
+
+    // we didn't find an exact match, grab the closest
     List<DateDiff> diffs = new ArrayList<>();
     for (Date date : datesForServiceIds) {
       // difference from middle of service day
