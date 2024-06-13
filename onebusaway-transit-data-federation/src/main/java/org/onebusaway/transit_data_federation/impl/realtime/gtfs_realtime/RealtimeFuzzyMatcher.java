@@ -166,7 +166,9 @@ public class RealtimeFuzzyMatcher {
       LocalizedServiceId serviceId = trip.getServiceId();
       Set<Date> datesForServiceIds = calendarService.getDatesForServiceIds(new ServiceIdActivation(serviceId));
       Date closestDate = getClosestDate(datesForServiceIds, currentTime);
-      scores.add(new TripScore(trip, score(closestDate, currentTime)));
+      if (closestDate != null) {
+        scores.add(new TripScore(trip, score(closestDate, currentTime)));
+      }
     }
 
     return scores;
@@ -192,6 +194,8 @@ public class RealtimeFuzzyMatcher {
       // difference from middle of service day
       diffs.add(new DateDiff(date, Math.abs(date.getTime() + (6 * 60 * 60 * 1000) - currentTime)));
     }
+    if (diffs.isEmpty())
+      return null;
     return Collections.min(diffs).getDate();
   }
 
