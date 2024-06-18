@@ -7,7 +7,7 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>onebusaway-application-modules</artifactId>
-  <version>2.2.1-SNAPSHOT</version>
+  <version>2.5.12-cs</version>
   <packaging>pom</packaging>
 
     <name>onebusaway-application-modules</name>
@@ -23,8 +23,8 @@
     <spring-version>5.2.24.RELEASE</spring-version>
     <csv-entities-version>1.1.7</csv-entities-version>
     <collections-version>1.2.8</collections-version>
-    <gtfs-version>1.4.9</gtfs-version>
-    <gtfs-api-version>1.2.27</gtfs-api-version>
+    <gtfs-version>1.4.17</gtfs-version>
+    <gtfs-api-version>1.2.32</gtfs-api-version>
     <jackson-version>2.12.0</jackson-version>
     <jersey-version>2.31</jersey-version>
     <onebusaway-siri-version>1.0.6</onebusaway-siri-version>
@@ -83,7 +83,7 @@
         <connection>scm:git:git@github.com:camsys/onebusaway-application-modules.git</connection>
         <developerConnection>scm:git:git@github.com:camsys/onebusaway-application-modules.git</developerConnection>
         <url>scm:git:git@github.com:camsys/onebusaway-application-modules</url>
-    <tag>onebusaway-application-modules-2.2.0</tag>
+        <tag>onebusaway-application-modules-2.5.12-cs</tag>
     </scm>
 
     <pluginRepositories>
@@ -404,9 +404,9 @@
                 <version>4.5.9</version><!-- needs to match onebusaway-cloud-services -->
             </dependency>
             <dependency>
-                <groupId>mysql</groupId>
-                <artifactId>mysql-connector-java</artifactId>
-                <version>5.1.48</version>
+                <groupId>com.mysql</groupId>
+                <artifactId>mysql-connector-j</artifactId>
+                <version>8.2.0</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

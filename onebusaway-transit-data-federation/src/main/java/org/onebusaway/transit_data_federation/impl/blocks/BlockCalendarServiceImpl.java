@@ -93,8 +93,10 @@ class BlockCalendarServiceImpl implements BlockCalendarService {
       block = _dynamicGraph.getBlockEntryForId(blockId);
     }
 
-    if (block == null)
-      throw new IllegalArgumentException("unknown block: " + blockId);
+    if (block == null) {
+      // we no longer throw an exception here, null is a possibility
+      return null;
+    }
 
     List<BlockConfigurationEntry> configurations = block.getConfigurations();
     int index = 0;

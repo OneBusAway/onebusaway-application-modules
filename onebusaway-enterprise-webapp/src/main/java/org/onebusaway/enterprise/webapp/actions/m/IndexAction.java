@@ -24,13 +24,14 @@ import java.util.Set;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.onebusaway.geospatial.model.CoordinatePoint;
-import org.onebusaway.gtfs.model.calendar.ServiceDate;
+import org.onebusaway.gtfs.model.calendar.AgencyServiceInterval;
 import org.onebusaway.presentation.model.SearchResult;
 import org.onebusaway.presentation.model.SearchResultCollection;
 import org.onebusaway.presentation.services.realtime.RealtimeService;
 import org.onebusaway.presentation.services.routes.RouteListService;
 import org.onebusaway.presentation.services.search.SearchResultFactory;
 import org.onebusaway.presentation.services.search.SearchService;
+import org.onebusaway.transit_data.services.IntervalFactory;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.util.SystemTime;
 import org.onebusaway.util.services.configuration.ConfigurationService;
@@ -64,6 +65,9 @@ public class IndexAction extends OneBusAwayEnterpriseActionSupport {
 
   @Autowired
   private RouteListService _routeListService;
+
+  @Autowired
+  private IntervalFactory _timeIntervalFactory;
 
   private SearchResultCollection _results = new SearchResultCollection();
 
@@ -114,7 +118,7 @@ public class IndexAction extends OneBusAwayEnterpriseActionSupport {
       return SUCCESS;
 
     SearchResultFactory factory = new SearchResultFactoryImpl(
-        _transitDataService, _realtimeService, _configurationService);
+        _transitDataService, _realtimeService, _configurationService, _timeIntervalFactory);
 
     // empty query with location means search for stops near current location
     if (_location != null && _q.isEmpty()) {
@@ -133,7 +137,8 @@ public class IndexAction extends OneBusAwayEnterpriseActionSupport {
 
       boolean serviceDateFilterOn = Boolean.parseBoolean(_configService.getConfigurationValueAsString("display.serviceDateFiltering", "false"));
       if (serviceDateFilterOn) {
-        _results = _searchService.getSearchResultsForServiceDate(_q, factory, new ServiceDate(new Date(SystemTime.currentTimeMillis())));
+        AgencyServiceInterval serviceInterval = _timeIntervalFactory.constructDefault();
+        _results = _searchService.getSearchResultsForServiceDate(_q, factory, serviceInterval);
       }
       else {
         _results = _searchService.getSearchResults(_q, factory);

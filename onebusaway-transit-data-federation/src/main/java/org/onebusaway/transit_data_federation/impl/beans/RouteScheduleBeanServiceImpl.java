@@ -17,6 +17,7 @@ package org.onebusaway.transit_data_federation.impl.beans;
 
 import org.onebusaway.container.cache.Cacheable;
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.gtfs.model.calendar.AgencyServiceInterval;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
 import org.onebusaway.transit_data.model.*;
 import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
@@ -36,6 +37,7 @@ import org.onebusaway.transit_data_federation.services.blocks.BlockTripIndex;
 import org.onebusaway.transit_data_federation.services.narrative.NarrativeService;
 import org.onebusaway.transit_data_federation.services.transit_graph.*;
 import org.onebusaway.util.AgencyAndIdLibrary;
+import org.onebusaway.utility.text.StringLibrary;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -101,11 +103,12 @@ public class RouteScheduleBeanServiceImpl implements RouteScheduleBeanService {
 
   @Override
   @Cacheable
-  public RouteScheduleBean getScheduledArrivalsForDate(AgencyAndId routeId, ServiceDate scheduleDate) {
+  public RouteScheduleBean getScheduledArrivalsForInterval(AgencyAndId routeId, AgencyServiceInterval serviceInterval) {
     RouteScheduleBean rsb = new RouteScheduleBean();
     rsb.setOutOfServiceBounds(true);
     rsb.setRouteId(routeId);
-    rsb.setScheduleDate(scheduleDate);
+    // todo add full support for serviceInterval
+    rsb.setScheduleDate(serviceInterval.getServiceDate());
     RouteCollectionEntry routeCollectionForId = _graph.getRouteCollectionForId(routeId);
     if (routeCollectionForId == null) return rsb;
 
@@ -330,6 +333,7 @@ public class RouteScheduleBeanServiceImpl implements RouteScheduleBeanService {
 
   private void addStopReference(BeanReferences references, StopEntry stop,
                                 RouteEntry route) {
+    // TODO this is too similar to StopBeanServiceImpl -- consider refactoring
     StopBean bean = new StopBean();
     bean.setId(AgencyAndIdLibrary.convertToString(stop.getId()));
     if (references.hasStop(stop.getId())){
@@ -344,13 +348,37 @@ public class RouteScheduleBeanServiceImpl implements RouteScheduleBeanService {
     bean.setId(AgencyAndIdLibrary.convertToString(stop.getId()));
     bean.setLat(stop.getStopLat());
     bean.setLon(stop.getStopLon());
+    if (stop.getParent() != null) {
+      if (references.hasStop(stop.getParent())) {
+        bean.setParent(references.getStop(stop.getParent()));
+      } else {
+        AgencyAndId parentId = stop.getParent();
+        StopBean parentBean = new StopBean();
+        StopNarrative parentNarrative = _narrativeService.getStopForId(parentId);
+        StopEntry parent = _graph.getStopEntryForId(parentId);
+        parentBean.setId(AgencyAndIdLibrary.convertToString(parentId));
+        parentBean.setLat(parent.getStopLat());
+        parentBean.setLon(parent.getStopLon());
+        parentBean.setName(parentNarrative.getName());
+        parentBean.setCode(StringLibrary.getBestName(parentNarrative.getCode(),
+                parent.getId().getId()));
+        parentBean.setLocationType(parentNarrative.getLocationType());
+        parentBean.setDirection(parentNarrative.getDirection());
+        parentBean.setWheelchairBoarding(parent.getWheelchairBoarding());
+        ArrayList<RouteBean> parentRoutes = new ArrayList<>();
+        parentBean.setRoutes(parentRoutes); // we don't recursively fill this
+        bean.setParent(parentBean);
+        references.getStops().add(parentBean);
+      }
+    }
     ArrayList<RouteBean> routes = new ArrayList<>();
     routes.add(findOrBuildRouteBean(references, route.getId()));
     bean.setRoutes(routes);
     StopNarrative narrative = _narrativeService.getStopForId(stop.getId());
     if (narrative == null) return;
     bean.setName(narrative.getName());
-    bean.setCode(narrative.getCode());
+    bean.setCode(StringLibrary.getBestName(narrative.getCode(),
+            stop.getId().getId()));
     bean.setDirection(narrative.getDirection());
     return;
   }

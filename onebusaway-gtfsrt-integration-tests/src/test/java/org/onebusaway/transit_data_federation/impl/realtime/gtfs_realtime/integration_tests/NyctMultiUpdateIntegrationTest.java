@@ -18,28 +18,15 @@ package org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.integ
 import org.junit.Ignore;
 import org.junit.Test;
 import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.realtime.api.TimepointPredictionRecord;
 import org.onebusaway.realtime.api.VehicleLocationListener;
-import org.onebusaway.transit_data.model.*;
-import org.onebusaway.transit_data.model.trips.TimepointPredictionBean;
-import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.transit_data_federation.impl.realtime.BlockLocationServiceImpl;
 import org.onebusaway.transit_data_federation.impl.realtime.TestVehicleLocationListener;
 import org.onebusaway.transit_data_federation.impl.realtime.VehicleStatusServiceImpl;
 import org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.AbstractGtfsRealtimeIntegrationTest;
+import org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.GtfsRealtimeCancelServiceImpl;
 import org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.GtfsRealtimeSource;
-import org.onebusaway.transit_data_federation.model.TargetTime;
-import org.onebusaway.transit_data_federation.model.narrative.StopTimeNarrative;
-import org.onebusaway.transit_data_federation.services.ArrivalAndDepartureService;
-import org.onebusaway.transit_data_federation.services.beans.ArrivalsAndDeparturesBeanService;
-import org.onebusaway.transit_data_federation.services.narrative.NarrativeService;
-import org.onebusaway.transit_data_federation.services.realtime.ArrivalAndDepartureInstance;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
-import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
-import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
-import org.onebusaway.transit_data_federation.services.transit_graph.dynamic.DynamicBlockConfigurationEntryImpl;
-import org.onebusaway.util.AgencyAndIdLibrary;
 import org.springframework.core.io.ClassPathResource;
 
 import java.util.*;
@@ -76,6 +63,11 @@ public class NyctMultiUpdateIntegrationTest extends AbstractGtfsRealtimeIntegrat
     listener.setVehicleLocationListener(actualListener);
     source.setVehicleLocationListener(listener);
 
+    // setup cancelled service
+    GtfsRealtimeCancelServiceImpl cancelService = getBundleLoader().getApplicationContext().getBean(GtfsRealtimeCancelServiceImpl.class);
+    source.setGtfsRealtimeCancelService(cancelService);
+    source.setRouteIdsToCancel(Arrays.asList("MTASBWY_1","MTASBWY_2","MTASBWY_3"));
+
     TransitGraphDao graph = getBundleLoader().getApplicationContext().getBean(TransitGraphDao.class);
     StopEntry firstStop = graph.getStopEntryForId(AgencyAndId.convertFromString("MTASBWY_250N"));
     long firstStopTime = 1685384106000l;  //14:15 -- 2 minutes in future
@@ -93,7 +85,8 @@ public class NyctMultiUpdateIntegrationTest extends AbstractGtfsRealtimeIntegrat
             "nyct_subways_gtfs_rt.2023-05-29T14:11:28-04:00.pb",
             "nyct_subways_gtfs_rt.2023-05-29T14:12:28-04:00.pb",
             "nyct_subways_gtfs_rt.2023-05-29T14:13:29-04:00.pb",
-            "nyct_subways_gtfs_rt.2023-05-29T14:14:29-04:00.pb"
+            "nyct_subways_gtfs_rt.2023-05-29T14:14:29-04:00.pb",
+            "nyct_subways_gtfs_rt.2023-05-29T15:22:00-04:00.pb"
     };
 
     int i = 1;
@@ -103,8 +96,8 @@ public class NyctMultiUpdateIntegrationTest extends AbstractGtfsRealtimeIntegrat
       source.setTripUpdatesUrl(gtfsRtResourceN.getURL());
       source.refresh();
       verifyBeans("beans run " + i, firstStop, source.getGtfsRealtimeTripLibrary().getCurrentTime());
-      verifyRouteDirectionStops("MTASBWY_1");
-      verifyRouteDirectionStops("MTASBWY_A");
+      verifyRouteDirectionStops("MTASBWY_1", _exceptionRouteIds);
+      verifyRouteDirectionStops("MTASBWY_A", _exceptionRouteIds);
       i++;
     }
 

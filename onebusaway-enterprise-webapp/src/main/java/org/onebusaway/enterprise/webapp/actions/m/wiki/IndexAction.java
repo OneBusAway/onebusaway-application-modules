@@ -35,10 +35,10 @@ public class IndexAction extends OneBusAwayEnterpriseActionSupport implements
 
 	private HttpServletRequest httpServletRequest;
 
-	@Autowired
+	@Autowired(required = false)
 	private WikiDocumentService _wikiDocumentService;
 
-	@Autowired
+	@Autowired(required = false)
 	private WikiRenderingService _wikiRenderingService;
 
 	protected String namespace;
@@ -50,6 +50,9 @@ public class IndexAction extends OneBusAwayEnterpriseActionSupport implements
 
 	@Override
 	public String execute() throws Exception {
+		if (_wikiDocumentService == null || _wikiRenderingService == null) {
+			return "NotFound";
+		}
 		if (namespace == null || namespace.isEmpty()) {
 			namespace = "MainMobile";
 		}

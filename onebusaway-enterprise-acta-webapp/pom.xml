@@ -4,14 +4,14 @@
   <parent>
     <artifactId>onebusaway-application-modules</artifactId>
     <groupId>org.onebusaway</groupId>
-    <version>2.2.1-SNAPSHOT</version>
+    <version>2.5.12-cs</version>
   </parent>
   <artifactId>onebusaway-enterprise-acta-webapp</artifactId>
   <packaging>war</packaging>
-  
+
   <name>onebusaway-enterprise-acta-webapp</name>
-  
-  
+
+
   	<properties>
 		<branding-webapp>{project.name}</branding-webapp>
 		<jetty.version>9.4.51.v20230217</jetty.version>
@@ -26,7 +26,7 @@
 			<url>http://maven.xwiki.org/releases</url>
 		</repository>
 	</repositories>
-	
+
   <dependencies>
     <dependency>
 		<groupId>org.onebusaway</groupId>
@@ -35,7 +35,7 @@
 		<type>war</type>
 	</dependency>
   </dependencies>
-  
+
   <profiles>
 		<profile>
 			<id>cloud</id> <!-- aka services-dev --> <!-- aka staging, production -->
@@ -46,7 +46,7 @@
 				<tds.path>http://localhost:8080/onebusaway-transit-data-federation-webapp</tds.path>
 				<vtms.path>http://localhost:8080/onebusaway-transit-data-federation-webapp</vtms.path>
 				<config.path>http://localhost:8080/onebusaway-transit-data-federation-webapp</config.path>
-				<archive.path>http://archive/onebusaway-report-archive</archive.path><!-- 
+				<archive.path>http://archive/onebusaway-report-archive</archive.path><!--
 					assumes domain is set in resolv.conf -->
 				<log4j.appender>ROLL</log4j.appender>
 				<create-apikey>false</create-apikey>
@@ -107,7 +107,7 @@
 					<artifactId>onebusaway-presentation</artifactId>
 					<version>${project.version}</version>
 				</dependency>
-		
+
 				<dependency>
 					<groupId>org.onebusaway</groupId>
 					<artifactId>onebusaway-transit-data</artifactId>
@@ -173,7 +173,7 @@
   <build>
     <finalName>onebusaway-enterprise-acta-webapp</finalName>
     <plugins>
-		
+
 			<plugin>
 				<groupId>org.eclipse.jetty</groupId>
 				<artifactId>jetty-maven-plugin</artifactId>				<version>${jetty.version}</version>

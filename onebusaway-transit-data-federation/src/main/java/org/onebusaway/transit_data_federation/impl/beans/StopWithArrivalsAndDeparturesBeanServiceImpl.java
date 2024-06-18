@@ -24,15 +24,17 @@ import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
 import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.gtfs.model.calendar.ServiceDate;
+import org.onebusaway.gtfs.model.calendar.AgencyServiceInterval;
 import org.onebusaway.transit_data.model.*;
 import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
+import org.onebusaway.transit_data.model.service_alerts.SituationQueryBean;
 import org.onebusaway.transit_data_federation.services.AgencyService;
 import org.onebusaway.transit_data_federation.services.beans.ArrivalsAndDeparturesBeanService;
 import org.onebusaway.transit_data_federation.services.beans.NearbyStopsBeanService;
 import org.onebusaway.transit_data_federation.services.beans.ServiceAlertsBeanService;
 import org.onebusaway.transit_data_federation.services.beans.StopBeanService;
 import org.onebusaway.transit_data_federation.services.beans.StopWithArrivalsAndDeparturesBeanService;
+import org.onebusaway.util.AgencyAndIdLibrary;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,10 +61,10 @@ class StopWithArrivalsAndDeparturesBeanServiceImpl implements
   @Autowired
   private ServiceAlertsBeanService _serviceAlertsBeanService;
 
+  @Override
   public StopWithArrivalsAndDeparturesBean getArrivalsAndDeparturesByStopId(
-      AgencyAndId id, ArrivalsAndDeparturesQueryBean query) {
-
-    StopBean stop = _stopBeanService.getStopForId(id, new ServiceDate(new Date(query.getTime())));
+      AgencyAndId id, ArrivalsAndDeparturesQueryBean query, AgencyServiceInterval serviceInterval) {
+    StopBean stop = _stopBeanService.getStopForId(id, serviceInterval);
     if (stop == null)
       return null;
 
@@ -73,17 +75,25 @@ class StopWithArrivalsAndDeparturesBeanServiceImpl implements
         stop, 100);
     List<StopBean> nearbyStops = new ArrayList<StopBean>();
     for (AgencyAndId nearbyStopId : nearbyStopIds)
-      nearbyStops.add(_stopBeanService.getStopForId(nearbyStopId, null));
+      nearbyStops.add(_stopBeanService.getStopForId(nearbyStopId, serviceInterval));
 
     List<ServiceAlertBean> situations = _serviceAlertsBeanService.getServiceAlertsForStopId(
         query.getTime(), id);
 
+    // looks for service alerts for schedules routes -- not just active service
+    Map<String, ServiceAlertBean> situationsById = new HashMap<String, ServiceAlertBean>();
+    findServiceAlertsForRouteIds(Collections.singletonList(stop), situationsById);
+    Set<ServiceAlertBean> allSituations = new HashSet<>();
+    allSituations.addAll(situations);
+    allSituations.addAll(situationsById.values());
+
     return new StopWithArrivalsAndDeparturesBean(stop, arrivalsAndDepartures,
-        nearbyStops, situations);
+        nearbyStops, new ArrayList<>(allSituations));
   }
 
+  @Override
   public StopsWithArrivalsAndDeparturesBean getArrivalsAndDeparturesForStopIds(
-      Set<AgencyAndId> ids, ArrivalsAndDeparturesQueryBean query)
+      Set<AgencyAndId> ids, ArrivalsAndDeparturesQueryBean query, AgencyServiceInterval serviceInterval)
       throws NoSuchStopServiceException {
 
     List<StopBean> stops = new ArrayList<StopBean>();
@@ -95,12 +105,13 @@ class StopWithArrivalsAndDeparturesBeanServiceImpl implements
 
     for (AgencyAndId id : ids) {
 
-      StopBean stopBean = _stopBeanService.getStopForId(id, null);
+      StopBean stopBean = _stopBeanService.getStopForId(id, serviceInterval);
       stops.add(stopBean);
 
-      List<ArrivalAndDepartureBean> arrivalsAndDepartures = _arrivalsAndDeparturesBeanService.getArrivalsAndDeparturesByStopId(
-          id, query);
-      if (!arrivalsAndDepartures.isEmpty()) {
+      List<ArrivalAndDepartureBean> arrivalsAndDepartures = null;
+        arrivalsAndDepartures = _arrivalsAndDeparturesBeanService.getArrivalsAndDeparturesByStopId(
+                id, query);
+      if (arrivalsAndDepartures != null && !arrivalsAndDepartures.isEmpty()) {
         // we only add stopBean if it actually has results
         stops.add(stopBean);
         allArrivalsAndDepartures.addAll(filter(arrivalsAndDepartures));
@@ -130,7 +141,7 @@ class StopWithArrivalsAndDeparturesBeanServiceImpl implements
       center = SphericalGeometryLibrary.getCenterOfBounds(bounds);
     }
     for (AgencyAndId id : allNearbyStopIds) {
-      StopBean stop = _stopBeanService.getStopForId(id, null);
+      StopBean stop = _stopBeanService.getStopForId(id, serviceInterval);
       if (center != null) {
         // if bounds are present calculate distance of this stop from center
         double distance = SphericalGeometryLibrary.distance(center.getLat(),
@@ -167,6 +178,8 @@ class StopWithArrivalsAndDeparturesBeanServiceImpl implements
     }
 
     allArrivalsAndDepartures = allArrivalsAndDepartures.stream().sorted((bean1, bean2) -> new StopDistanceComparator().compare(bean1.getStop(), bean2.getStop())).collect(Collectors.toList());
+    // find service alerts for scheduled / inactive service as well
+    findServiceAlertsForRouteIds(stops, situationsById);
 
     // trim arrivals as well
     while (allArrivalsAndDepartures.size() > query.getMaxCount()) {
@@ -180,6 +193,42 @@ class StopWithArrivalsAndDeparturesBeanServiceImpl implements
     result.setTimeZone(timeZone.getID());
     result.setLimitExceeded(limitExceeded);
     return result;
+  }
+
+  /**
+   * Given a set of stops, return a map of serviceAlertIds and their beans
+   * of applicable alerts.
+   * @param stops
+   * @param situationsById
+   */
+  private void findServiceAlertsForRouteIds(List<StopBean> stops, Map<String, ServiceAlertBean> situationsById) {
+    if (stops ==  null || stops.isEmpty()) return;
+
+    Set<AgencyAndId> routeIds = new HashSet<>();
+
+    for (StopBean stopBean : stops) {
+      for (RouteBean routeBean : stopBean.getRoutes()) {
+        routeIds.add(AgencyAndIdLibrary.convertFromString(routeBean.getId()));
+      }
+    }
+    for (StopBean stopBean : stops) {
+      for (RouteBean routeBean : stopBean.getStaticRoutes()) {
+        routeIds.add(AgencyAndIdLibrary.convertFromString(routeBean.getId()));
+      }
+    }
+
+    for (AgencyAndId routeId : routeIds) {
+      SituationQueryBean query = new SituationQueryBean();
+      SituationQueryBean.AffectsBean affects = new SituationQueryBean.AffectsBean();
+      query.getAffects().add(affects);
+      affects.setRouteId(AgencyAndIdLibrary.convertToString(routeId));
+      List<ServiceAlertBean> serviceAlerts = _serviceAlertsBeanService.getServiceAlerts(query);
+      for (ServiceAlertBean serviceAlert : serviceAlerts) {
+        if (!situationsById.containsKey(serviceAlert.getId())) {
+          situationsById.put(serviceAlert.getId(), serviceAlert);
+        }
+      }
+    }
   }
 
   private List<ArrivalAndDepartureBean> filter(List<ArrivalAndDepartureBean> arrivalsAndDepartures) {

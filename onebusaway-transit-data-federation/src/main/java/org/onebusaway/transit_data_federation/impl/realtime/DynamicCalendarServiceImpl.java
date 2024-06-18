@@ -45,8 +45,9 @@ public class DynamicCalendarServiceImpl implements DynamicCalendarService {
     // example format: MTASBWY_DYN-2023-05-09
     Date today = getDateFromServiceId(localizedServiceId);
 
-    long startOfDay = today.getTime();
-    long endOfDay = today.getTime() + (24 * 60 * 60 * 1000) - 1;
+    // service day can have overlap on both sides
+    long startOfDay = today.getTime() - (1 * 60 * 60 * 1000); // allow 23:00 to be active
+    long endOfDay = today.getTime() + (24 * 60 * 60 * 1000)  + (3 * 60 * 60 * 1000)- 1; // allow up to 02:59:59 to be active
     if (from.getTime() <= endOfDay && startOfDay <= to.getTime()) {
       Date[] dates = {today};
       return Arrays.asList(dates);

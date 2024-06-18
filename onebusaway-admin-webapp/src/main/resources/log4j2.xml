@@ -21,8 +21,8 @@
 
 	<!-- 0 or more appender elements -->
 	<Appenders>
-		<RollingFile name="ROLL" fileName="/opt/oba/logs/admin-webapp.log"
-					 filePattern="/opt/oba/logs/admin-webapp.%d{yyyy-MM-dd}-%i.log.gz">
+		<RollingFile name="ROLL" fileName="/tmp/logs/admin-webapp.log"
+					 filePattern="/tmp/logs/admin-webapp.%d{yyyy-MM-dd}-%i.log.gz">
 			<PatternLayout>
 				<Pattern>%d{ISO8601} %-5p [%F:%L] : %m%n</Pattern>
 			</PatternLayout>
@@ -39,14 +39,14 @@
 	</Appenders>
 
 	<Loggers>
-		<Logger name="org.hibernate.engine.internal.StatisticalLoggingSessionEventListener"
-				level="fatal"
-				additivity="false">
-			<AppenderRef ref="${log4j.appender}"/>
-		</Logger>
-		<Logger name="org.springframework.security.web.authentication.AnonymousAuthenticationFilter" level="debug" additivity="false">
-			<AppenderRef ref="${log4j.appender}"/>
-		</Logger>
+<!--		<Logger name="org.hibernate.engine.internal.StatisticalLoggingSessionEventListener"-->
+<!--				level="fatal"-->
+<!--				additivity="false">-->
+<!--			<AppenderRef ref="${log4j.appender}"/>-->
+<!--		</Logger>-->
+<!--		<Logger name="org.springframework.security.web.authentication.AnonymousAuthenticationFilter" level="debug" additivity="false">-->
+<!--			<AppenderRef ref="${log4j.appender}"/>-->
+<!--		</Logger>-->
 		<Root level="${log4j.priority}">
 			<AppenderRef ref="${log4j.appender}"/>
 		</Root>

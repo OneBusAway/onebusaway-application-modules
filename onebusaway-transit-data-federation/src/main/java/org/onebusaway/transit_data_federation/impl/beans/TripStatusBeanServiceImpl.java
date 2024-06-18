@@ -278,13 +278,14 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
       bean.setLastKnownOrientation(blockLocation.getLastKnownOrientation());
 
     bean.setScheduleDeviation(blockLocation.getScheduleDeviation());
+    bean.setVehicleFeatures(blockLocation.getVehicleFeatures());
 
     BlockTripInstance activeTripInstance = blockLocation.getActiveTripInstance();
 
     if (activeTripInstance != null) {
       BlockTripEntry activeBlockTrip = activeTripInstance.getBlockTrip();
-      bean.setScheduledDistanceAlongTrip(blockLocation.getScheduledDistanceAlongBlock()
-          - activeBlockTrip.getDistanceAlongBlock());
+        bean.setScheduledDistanceAlongTrip(blockLocation.getScheduledDistanceAlongBlock()
+                - activeBlockTrip.getDistanceAlongBlock());
       bean.setDistanceAlongTrip(blockLocation.getDistanceAlongBlock()
           - activeBlockTrip.getDistanceAlongBlock());
       TripEntry activeTrip = activeBlockTrip.getTrip();
@@ -392,8 +393,18 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
       VehicleOccupancyRecord vor = _vehicleOccupancyRecordCache.getRecordForVehicleIdAndRoute(blockLocation.getVehicleId(),
               blockLocation.getActiveTrip().getTrip().getRoute().getId().toString(),
               blockLocation.getActiveTrip().getTrip().getDirectionId());
-      if (vor != null)
+      if (vor != null) {
         bean.setOccupancyStatus(vor.getOccupancyStatus());
+        bean.setOccupancyCount(vor.getRawCount());
+        if (vor.getCapacity() != null && vor.getCapacity() > 0) {
+          bean.setOccupancyCapacity(vor.getCapacity());
+        } else {
+          bean.setOccupancyCapacity(-1);
+        }
+      } else {
+        bean.setOccupancyCount(-1);
+        bean.setOccupancyCapacity(-1);
+      }
     }
 
     return bean;

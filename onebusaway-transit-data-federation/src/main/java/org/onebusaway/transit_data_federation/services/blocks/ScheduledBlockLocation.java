@@ -47,6 +47,7 @@ public class ScheduledBlockLocation {
 
   private int stopTimeIndex;
 
+
   /**
    * Should never be null, even if the trip is not in service. In the case of
    * out of service before the start of the block, the active trip will be the
@@ -192,7 +193,8 @@ public void setPreviousStopTimeOffset(int previousStopTimeOffset) {
   public void setStopTimeIndex(int stopTimeIndex) {
     this.stopTimeIndex = stopTimeIndex;
   }
-  
+
+
   @Override
   public String toString() {
     StringBuilder b = new StringBuilder();

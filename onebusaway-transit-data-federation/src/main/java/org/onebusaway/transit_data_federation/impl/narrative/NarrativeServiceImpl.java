@@ -24,7 +24,6 @@ import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
-import org.apache.commons.collections4.map.PassiveExpiringMap;
 import org.onebusaway.container.refresh.Refreshable;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.impl.RefreshableResources;
@@ -117,11 +116,20 @@ public class NarrativeServiceImpl implements NarrativeService {
 
   @Override
   public void addDynamicTrip(BlockTripIndex blockTripIndex) {
+    addDynamicTrip(blockTripIndex, false);
+  }
+
+  @Override
+  public void updateDynamicTrip(BlockTripIndex blockTripIndex) {
+    addDynamicTrip(blockTripIndex, true);
+  }
+
+  private void addDynamicTrip(BlockTripIndex blockTripIndex, boolean forceUpdate) {
     BlockTripEntry blockTripEntry = blockTripIndex.getTrips().get(0);
     TripEntry trip = blockTripEntry.getTrip();
     AgencyAndId tripId = trip.getId();
 
-    if (_dynamicTripCache.containsKey(tripId)) {
+    if (_dynamicTripCache.containsKey(tripId) && !forceUpdate) {
       return; // nothing to do
     }
     TripNarrative.Builder builder = TripNarrative.builder();
@@ -154,5 +162,10 @@ public class NarrativeServiceImpl implements NarrativeService {
   @Override
   public void addShapePoints(ShapePoints shapePoints) {
     _provider.addShapePoints(shapePoints);
+  }
+
+  @Override
+  public List<AgencyAndId> getStaticRoutes(AgencyAndId stopId) {
+    return _provider.getStaticRoutes(stopId);
   }
 }

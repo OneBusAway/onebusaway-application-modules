@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.HashSet;
 
 import org.onebusaway.geospatial.model.CoordinateBounds;
+import org.onebusaway.gtfs.model.calendar.AgencyServiceInterval;
 import org.onebusaway.util.SystemTime;
 
 @QueryBean
@@ -48,6 +49,8 @@ public final class ArrivalsAndDeparturesQueryBean implements Serializable {
 
   private FilterChain systemFilterChain = new FilterChain();
   private FilterChain instanceFilterChain = new FilterChain();
+
+  private AgencyServiceInterval serviceInterval;
 
  private List<Integer> routeTypes;
   public ArrivalsAndDeparturesQueryBean() {
@@ -177,6 +180,14 @@ public final class ArrivalsAndDeparturesQueryBean implements Serializable {
 
   public void setInstanceFilterChain(FilterChain instanceFilterChain) {
     this.instanceFilterChain = instanceFilterChain;
+  }
+
+  public AgencyServiceInterval getServiceInterval() {
+    return serviceInterval;
+  }
+
+  public void setServiceInterval(AgencyServiceInterval serviceInterval) {
+    this.serviceInterval = serviceInterval;
   }
 
   @Override

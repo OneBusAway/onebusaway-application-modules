@@ -96,8 +96,17 @@ class VehicleStatusBeanServiceImpl implements VehicleStatusBeanService {
   }
 
   @Override
+  public ListBean<VehicleStatusBean> getFilteredVehiclesForAgency(String agencyId,
+                                                             long time, Integer ageInSeconds) {
+    return getAllVehiclesForAgency(agencyId, time, ageInSeconds);
+  }
+  @Override
   public ListBean<VehicleStatusBean> getAllVehiclesForAgency(String agencyId,
       long time) {
+      return getAllVehiclesForAgency(agencyId, time, null);
+    }
+  private ListBean<VehicleStatusBean> getAllVehiclesForAgency(String agencyId,
+                                                             long time, Integer ageInSeconds) {
 
     List<VehicleStatus> statuses = _vehicleStatusService.getAllVehicleStatuses();
 
@@ -109,7 +118,9 @@ class VehicleStatusBeanServiceImpl implements VehicleStatusBeanService {
         continue;
 
       VehicleStatusBean bean = getStatusAsBean(status, time);
-      beans.add(bean);
+      if (isActive(bean, time, ageInSeconds)) {
+        beans.add(bean);
+      }
     }
 
     return new ListBean<VehicleStatusBean>(beans, false);
@@ -246,8 +257,11 @@ class VehicleStatusBeanServiceImpl implements VehicleStatusBeanService {
       }
     }
 
-    if (status.getOccupancyRecord() != null)
+    if (status.getOccupancyRecord() != null) {
       bean.setOccupancyStatus(status.getOccupancyRecord().getOccupancyStatus());
+      bean.setOccupancyCount(status.getOccupancyRecord().getRawCount());
+      bean.setOccupancyCapacity(status.getOccupancyRecord().getCapacity());
+    }
 
     return bean;
   }
@@ -330,5 +344,11 @@ class VehicleStatusBeanServiceImpl implements VehicleStatusBeanService {
     bean.setTripId(AgencyAndIdLibrary.convertToString(record.getActiveTrip().getTrip().getId()));
     bean.setVehicleId(AgencyAndIdLibrary.convertToString(record.getVehicleId()));
     return bean;
+  }
+
+  private boolean isActive(VehicleStatusBean bean, long time, Integer ageInSeconds) {
+    if (ageInSeconds == null)
+      return true;
+    return (bean.getLastUpdateTime() > time - (ageInSeconds * 1000));
   }
 }

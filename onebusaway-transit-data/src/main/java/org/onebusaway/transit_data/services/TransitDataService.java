@@ -33,7 +33,7 @@ import org.onebusaway.federations.annotations.FederatedByEntityIdMethod;
 import org.onebusaway.federations.annotations.FederatedByEntityIdsMethod;
 import org.onebusaway.geospatial.model.EncodedPolylineBean;
 import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.gtfs.model.calendar.ServiceDate;
+import org.onebusaway.gtfs.model.calendar.AgencyServiceInterval;
 import org.onebusaway.realtime.api.TimepointPredictionRecord;
 import org.onebusaway.realtime.api.VehicleOccupancyRecord;
 import org.onebusaway.transit_data.OccupancyStatusBean;
@@ -155,13 +155,14 @@ public interface TransitDataService extends FederatedService {
 
   /**
    * @param routeId
-   * @param serviceDate
+   * @param serviceInterval
    * @return the stops for the specified route and service date, or null if not found
    * @throws ServiceException
    */
   @FederatedByEntityIdMethod
-  public StopsForRouteBean getStopsForRouteForServiceDate(String routeId, ServiceDate serviceDate)
+  public StopsForRouteBean getStopsForRouteForServiceInterval(String routeId, AgencyServiceInterval serviceInterval)
           throws ServiceException;
+
 
   /**
    * @param tripId
@@ -240,6 +241,10 @@ public interface TransitDataService extends FederatedService {
   public ListBean<VehicleStatusBean> getAllVehiclesForAgency(String agencyId,
       long time);
 
+  @FederatedByAgencyIdMethod
+  public ListBean<VehicleStatusBean> getFilteredVehiclesForAgency(String agencyId,
+                                                             long time, Integer ageInSeconds);
+
   @FederatedByEntityIdMethod
   public VehicleLocationRecordBean getVehicleLocationRecordForVehicleId(
       String vehicleId, long targetTime);
@@ -278,18 +283,20 @@ public interface TransitDataService extends FederatedService {
   /**
    * @param stopId
    * @param query
+   * @param serviceInterval
    * @return stop with arrival and departure information for the specified stop
    *         and time range, or null if not found
    * @throws ServiceException
    */
   @FederatedByEntityIdMethod
   public StopWithArrivalsAndDeparturesBean getStopWithArrivalsAndDepartures(
-      String stopId, ArrivalsAndDeparturesQueryBean query)
+      String stopId, ArrivalsAndDeparturesQueryBean query, AgencyServiceInterval serviceInterval)
       throws ServiceException;
 
   /**
    * @param stopIds
    * @param query
+   * @param serviceInterval
    * @return stops with arrival and departure information for the specified
    *         stops and time range
    * @throws ServiceException
@@ -298,7 +305,7 @@ public interface TransitDataService extends FederatedService {
    */
   @FederatedByEntityIdsMethod
   public StopsWithArrivalsAndDeparturesBean getStopsWithArrivalsAndDepartures(
-      Collection<String> stopIds, ArrivalsAndDeparturesQueryBean query)
+      Collection<String> stopIds, ArrivalsAndDeparturesQueryBean query, AgencyServiceInterval serviceInterval)
       throws ServiceException;
 
   @FederatedByEntityIdMethod(propertyExpression = "stopId")
@@ -324,12 +331,12 @@ public interface TransitDataService extends FederatedService {
 
   /**
    * @param routeId
-   * @param serviceDate
+   * @param serviceInterval
    * @return retrieve the full schedule for the route on the specified date
    * @throws ServiceException
    */
   @FederatedByEntityIdMethod
-  public RouteScheduleBean getScheduleForRoute(AgencyAndId routeId, ServiceDate serviceDate);
+  public RouteScheduleBean getScheduleForRoute(AgencyAndId routeId, AgencyServiceInterval serviceInterval);
 
   /**
    * 
@@ -361,12 +368,12 @@ public interface TransitDataService extends FederatedService {
 
   /**
    * @param stopId
-   * @param serviceDate
+   * @param serviceInterval
    * @return the stop with the specified id, or null if not found
    * @throws ServiceException
    */
   @FederatedByEntityIdMethod
-  public StopBean getStopForServiceDate(String stopId, ServiceDate serviceDate) throws ServiceException;
+  public StopBean getStopForServiceDate(String stopId, AgencyServiceInterval serviceInterval) throws ServiceException;
 
   /**
    * @param agencyId
@@ -625,7 +632,7 @@ public interface TransitDataService extends FederatedService {
    * those displayed on a system map or strip map without a specific trip context.
    */
   @FederatedByAgencyIdMethod
-  ListBean<RouteGroupingBean> getCanonicalRoute(long serviceDate, AgencyAndId routeId);
+  ListBean<RouteGroupingBean> getCanonicalRoute(AgencyServiceInterval serviceInterval, AgencyAndId routeId);
 
   @FederatedByAgencyIdMethod
   StopDirectionSwap findStopDirectionSwap(AgencyAndId routeId, String directionId, AgencyAndId stopId);

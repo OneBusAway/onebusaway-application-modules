@@ -22,6 +22,8 @@ import org.onebusaway.transit_data.model.TransitDataConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -53,9 +55,12 @@ public class NyctTripServiceImpl implements NyctTripService {
     Matcher matcher = _rtTripPattern.matcher(tripId);
 
     if (matcher.find()) {
-      originDepartureTime = Integer.parseInt(matcher.group("originDepartureTime"), 10);
+      originDepartureTime = Integer.parseInt(matcher.group("originDepartureTime"), 10) * 60 /100;
       pathId = StringUtils.rightPad(matcher.group("route"), 3, '.') + matcher.group("direction");
-      routeId = matcher.group("route");
+      routeId = routeFromTripUpdate(tu);
+      if (routeId == null) {
+        routeId = matcher.group("route");
+      }
       directionId = matcher.group("direction");
       if (directionId.length() == 0)
         directionId = null;
@@ -65,9 +70,8 @@ public class NyctTripServiceImpl implements NyctTripService {
       AddedTripInfo addedTrip = new AddedTripInfo();
       addedTrip.setScheduleRelationshipValue(TransitDataConstants.STATUS_ADDED);
       addedTrip.setAgencyId(getDefaultAgency());
-      addedTrip.setTripStartTime(originDepartureTime * 60 / 100); // 100ths
-      // here we make an assumption about the service data
-      addedTrip.setServiceDate(getStartOfDay(new Date(currentTime)).getTime());
+      addedTrip.setTripStartTime(originDepartureTime); // 100ths
+      addedTrip.setServiceDate(parseTimeFromUpdate(tu, currentTime));
       addedTrip.setRouteId(routeId);
       addedTrip.setTripId(tripId);
       addedTrip.setDirectionId(directionId);
@@ -112,6 +116,26 @@ public class NyctTripServiceImpl implements NyctTripService {
       return addedTrip;
     }
       return null;
+  }
+
+  private long parseTimeFromUpdate(GtfsRealtime.TripUpdate tu, long currentTime) {
+    String startDate = tu.getTrip().getStartDate();
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+    try {
+      return sdf.parse(startDate).getTime();
+    } catch (ParseException e) {
+      _log.error("invalid date {}", startDate);
+      return getStartOfDay(new Date(currentTime)).getTime();
+    }
+  }
+
+  private String routeFromTripUpdate(GtfsRealtime.TripUpdate tu) {
+    if (tu.hasTrip()) {
+      if (tu.getTrip().hasRouteId()) {
+        return tu.getTrip().getRouteId();
+      }
+    }
+    return null;
   }
 
   private String getDefaultAgency() {

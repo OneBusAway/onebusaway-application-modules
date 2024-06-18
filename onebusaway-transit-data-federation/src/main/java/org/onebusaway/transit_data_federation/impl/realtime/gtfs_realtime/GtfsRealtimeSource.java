@@ -106,6 +106,10 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     _registry.add(GtfsRealtimeNYCT.nyctFeedHeader);
     _registry.add(GtfsRealtimeNYCT.nyctTripDescriptor);
     _registry.add(GtfsRealtimeNYCT.nyctStopTimeUpdate);
+    // MTA Bus Time Crowding
+    _registry.add(GtfsRealtimeCrowding.crowdingDescriptor);
+    // Stroller support
+    _registry.add(GtfsRealtimeOneBusAway.obaVehicleDescriptor);
   }
 
   private VehicleLocationListener _vehicleLocationListener;
@@ -147,6 +151,8 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   private Map _alertAgencyIdMap;
 
   private List<String> _agencyIds = new ArrayList<String>();
+
+  private List<String>_tripIdRegexs = null;
 
   /**
    * We keep track of vehicle location updates, only pushing them to the
@@ -364,6 +370,10 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   public void setAgencyIds(List<String> agencyIds) {
     _agencyIds.addAll(agencyIds);
   }
+
+  public void setTripIdRegexes(List<String> tripIdRegexes) {
+    _tripIdRegexs = tripIdRegexes;
+  }
   
   public void setShowNegativeScheduledArrivals(boolean _showNegativeScheduledArrivals) {
     this._showNegativeScheduledArrivals = _showNegativeScheduledArrivals;
@@ -477,6 +487,7 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     }
 
     _entitySource.setAgencyIds(_agencyIds);
+    _entitySource.setTripIdRegexs(_tripIdRegexs);
     _entitySource.setConsolidatedStopService(_consolidatedStopsService);
 
     _tripsLibrary = new GtfsRealtimeTripLibrary();
@@ -576,7 +587,7 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
                                           ServiceAlerts.ServiceAlertsCollection alertCollection) {
 	  
 	long time = tripUpdates.getHeader().getTimestamp() * 1000;
-	_tripsLibrary.setCurrentTime(time);
+	_tripsLibrary.setCurrentTime(_tripsLibrary.ensureMillis(time));
 
     List<CombinedTripUpdatesAndVehiclePosition> combinedUpdates = _tripsLibrary.groupTripUpdatesAndVehiclePositions(result,
             tripUpdates, vehiclePositions);
@@ -613,7 +624,7 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   // package private for unit tests
    void handleCombinedUpdates(MonitoredResult result,
       List<CombinedTripUpdatesAndVehiclePosition> updates) {
-
+    long methodStarTime = System.currentTimeMillis();
     // exit if we are configured in alerts mode
     if (_tripUpdatesUrl == null) return;
 
@@ -648,8 +659,7 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
             if (_monitoredResult.getLastUpdate() < record.getTimeOfRecord()) {
               _monitoredResult.setLastUpdate(record.getTimeOfRecord());
             }
-            int effectiveTime = (int)(record.getServiceDate() - record.getTimeOfRecord()) / 1000;
-            _serviceSource.getDynamicBlockIndexService().register(update.block.getBlockInstance(), effectiveTime);
+            _serviceSource.getDynamicBlockIndexService().register(update.block.getBlockInstance(), record.getTimeOfRecord());
           }
           if (record.getTripId() != null) {
             // tripId will be null if block was matched
@@ -672,7 +682,7 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
           }
           seenVehicles.add(vehicleId);
           VehicleOccupancyRecord vor = _tripsLibrary.createVehicleOccupancyRecordForUpdate(result, update);
-          Date timestamp = new Date(record.getTimeOfRecord());
+          Date timestamp = new Date(getGtfsRealtimeTripLibrary().ensureMillis(record.getTimeOfRecord()));
           Date prev = _lastVehicleUpdate.get(vehicleId);
           if (prev == null || prev.before(timestamp)) {
             _log.debug("matched vehicle " + vehicleId + " on block=" + record.getBlockId() + " with scheduleDeviation=" + record.getScheduleDeviation());
@@ -682,7 +692,8 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
             }
             _lastVehicleUpdate.put(vehicleId, timestamp);
           } else {
-            _log.debug("discarding: update for vehicle " + vehicleId + " as timestamp in past");
+            _log.debug("discarding: update for vehicle " + vehicleId
+                    + " as timestamp in past (" + (timestamp.getTime()-prev.getTime()) + "ms)");
           }
         }
       }
@@ -691,6 +702,8 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
       _log.error("fatal exception {}", t, t);
     }
     Calendar c = Calendar.getInstance();
+    if (getGtfsRealtimeTripLibrary() != null)
+      c.setTime(new Date(getGtfsRealtimeTripLibrary().getCurrentTime()));
     c.add(Calendar.MINUTE, -15);
     Date staleRecordThreshold = c.getTime();
     long newestUpdate = 0; 
@@ -713,13 +726,14 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     if (_monitor != null) {
       _monitor.logUpdate(result);
     }
+    long methodEndTime = System.currentTimeMillis();
     _log.info("Agency " + getFeedId() + " has active vehicles=" + seenVehicles.size()
             + ", matched=" + result.getMatchedTripIds().size() + " (" + result.getUnmatchedTripIds().size() + ")"
             + ", added=" + result.getAddedTripIds().size()
             + ", duplicated=" + result.getDuplicatedTripIds().size()
             + ", cancelled=" + result.getCancelledTripIds().size()
-            + " for updates=" + updates.size() + " with most recent timestamp " + new Date(newestUpdate));
-
+            + " for updates=" + updates.size() + " with most recent timestamp " + new Date(newestUpdate)
+            + " in " + (methodEndTime-methodStarTime) + "ms");
   }
 
   private boolean isValidLocation(VehicleLocationRecord record, CombinedTripUpdatesAndVehiclePosition update) {
@@ -1299,7 +1313,6 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
         }
       } catch (Throwable ex) {
         _log.warn("Error updating from GTFS-realtime data sources for config {}, {}", getFeedId(), ex, ex);
-        ex.printStackTrace();
       }
     }
   }

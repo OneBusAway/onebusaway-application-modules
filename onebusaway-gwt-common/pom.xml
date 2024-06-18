@@ -2,7 +2,7 @@
     <parent>
         <groupId>org.onebusaway</groupId>
         <artifactId>onebusaway-application-modules</artifactId>
-        <version>2.2.1-SNAPSHOT</version>
+        <version>2.5.12-cs</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>onebusaway-gwt-common</artifactId>
@@ -68,7 +68,7 @@
                 <artifactId>gwt-maven-plugin</artifactId>
                 <configuration>
                     <modules>
-                        <!-- 
+                        <!--
                         <module>org.onebusaway.webapp.gwt.AgenciesMap</module>
                         <module>org.onebusaway.webapp.gwt.BookmarkEditApplication</module>
                         <module>org.onebusaway.webapp.gwt.MobileApplication</module>

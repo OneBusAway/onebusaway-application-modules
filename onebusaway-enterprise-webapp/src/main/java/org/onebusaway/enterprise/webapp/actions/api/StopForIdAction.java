@@ -23,20 +23,17 @@ import java.util.List;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.gtfs.model.calendar.AgencyServiceInterval;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
 import org.onebusaway.presentation.impl.service_alerts.ServiceAlertsHelper;
 import org.onebusaway.presentation.services.realtime.RealtimeService;
+import org.onebusaway.transit_data.model.*;
+import org.onebusaway.transit_data.services.IntervalFactory;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.enterprise.webapp.actions.OneBusAwayEnterpriseActionSupport;
 import org.onebusaway.enterprise.webapp.actions.api.model.RouteAtStop;
 import org.onebusaway.enterprise.webapp.actions.api.model.RouteDirection;
 import org.onebusaway.enterprise.webapp.actions.api.model.StopResult;
-import org.onebusaway.transit_data.model.NameBean;
-import org.onebusaway.transit_data.model.RouteBean;
-import org.onebusaway.transit_data.model.StopBean;
-import org.onebusaway.transit_data.model.StopGroupBean;
-import org.onebusaway.transit_data.model.StopGroupingBean;
-import org.onebusaway.transit_data.model.StopsForRouteBean;
 import org.onebusaway.util.AgencyAndIdLibrary;
 import org.onebusaway.util.SystemTime;
 import org.onebusaway.util.services.configuration.ConfigurationService;
@@ -62,6 +59,9 @@ public class StopForIdAction extends OneBusAwayEnterpriseActionSupport {
 
   @Autowired
   private ConfigurationService _configService;
+
+  @Autowired
+  private IntervalFactory _timeIntervalFactory;
 
   private ObjectMapper _mapper = new ObjectMapper();    
 
@@ -91,7 +91,8 @@ public class StopForIdAction extends OneBusAwayEnterpriseActionSupport {
       StopBean stop;
 
       if (serviceDateFilterOn) {
-        stop = _transitDataService.getStopForServiceDate(_stopId, new ServiceDate(new Date(SystemTime.currentTimeMillis())));
+        AgencyServiceInterval serviceInterval = _timeIntervalFactory.constructDefault();
+        stop = _transitDataService.getStopForServiceDate(_stopId, serviceInterval);
       } else {
         stop = _transitDataService.getStop(_stopId);
       }
@@ -105,7 +106,8 @@ public class StopForIdAction extends OneBusAwayEnterpriseActionSupport {
       for (RouteBean routeBean : stop.getRoutes()) {
         StopsForRouteBean stopsForRoute;
         if (serviceDateFilterOn) {
-          stopsForRoute = _transitDataService.getStopsForRouteForServiceDate(routeBean.getId(), new ServiceDate(new Date(SystemTime.currentTimeMillis())));
+          AgencyServiceInterval serviceInterval = _timeIntervalFactory.constructDefault();
+          stopsForRoute = _transitDataService.getStopsForRouteForServiceInterval(routeBean.getId(), serviceInterval);
         } else {
           stopsForRoute = _transitDataService.getStopsForRoute(routeBean.getId());
         }

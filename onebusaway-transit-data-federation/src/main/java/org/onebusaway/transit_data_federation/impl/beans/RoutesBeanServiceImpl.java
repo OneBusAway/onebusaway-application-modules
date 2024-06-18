@@ -85,7 +85,7 @@ class RoutesBeanServiceImpl implements RoutesBeanService {
       RefreshableResources.NARRATIVE_DATA
       })
   @PostConstruct
-  public void setup() {
+  public synchronized void setup() {
     _stopTreesByRouteId.clear();
     
     for (StopEntry stop : _graphDao.getAllStops()) {

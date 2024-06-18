@@ -19,6 +19,7 @@ import java.util.List;
 
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.Stop;
+import org.onebusaway.gtfs.model.calendar.AgencyServiceInterval;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
 import org.onebusaway.transit_data.model.ArrivalsAndDeparturesQueryBean;
 import org.onebusaway.transit_data_federation.services.ArrivalAndDepartureQuery;
@@ -46,13 +47,10 @@ public interface ArrivalsAndDeparturesBeanService {
    * Return arrival and departure information for a single trip instance
    * arriving and departing a particular stop.
    * 
-   * @param stopId the target stop id
-   * @param tripId the target tripId
-   * @param serviceDate the target service date
-   * @param vehicleId optionally specify a particular vehicle id, or null
-   * @param time the time to query
+   * @param query
+   * @param serviceInterval
    * @return the arrival and departure information, or null if not found
    */
   public ArrivalAndDepartureBean getArrivalAndDepartureForStop(
-      ArrivalAndDepartureQuery query);
+          ArrivalAndDepartureQuery query, AgencyServiceInterval serviceInterval);
 }

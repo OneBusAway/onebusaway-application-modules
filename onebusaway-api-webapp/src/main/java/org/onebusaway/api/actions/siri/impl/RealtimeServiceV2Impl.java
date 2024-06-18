@@ -33,6 +33,7 @@ import org.onebusaway.api.actions.siri.model.RouteResult;
 import org.onebusaway.api.actions.siri.model.StopOnRoute;
 import org.onebusaway.api.actions.siri.model.StopRouteDirection;
 import org.onebusaway.api.actions.siri.service.RealtimeServiceV2;
+import org.onebusaway.api.services.ApiIntervalFactory;
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.geospatial.model.EncodedPolylineBean;
 import org.onebusaway.gtfs.model.AgencyAndId;
@@ -95,6 +96,8 @@ public class RealtimeServiceV2Impl implements RealtimeServiceV2 {
   @Autowired
   public TransitDataService _transitDataService;
 
+  public ApiIntervalFactory _apiIntervalFactory;
+
   private ConfigurationService _configurationService;
 
   private PresentationService _presentationService;
@@ -124,6 +127,11 @@ public class RealtimeServiceV2Impl implements RealtimeServiceV2 {
   public void setTransitDataService(
       TransitDataService transitDataService) {
     _transitDataService = transitDataService;
+  }
+
+  @Autowired
+  public void setApiIntervalFactory(ApiIntervalFactory factory) {
+    this._apiIntervalFactory = factory;
   }
 
   @Autowired
@@ -696,7 +704,7 @@ public class RealtimeServiceV2Impl implements RealtimeServiceV2 {
     query.setMinutesAfter(5 * 60);
 
     StopWithArrivalsAndDeparturesBean stopWithArrivalsAndDepartures = _transitDataService
-        .getStopWithArrivalsAndDepartures(stopId, query);
+        .getStopWithArrivalsAndDepartures(stopId, query, _apiIntervalFactory.constructForDate(new Date(currentTime)));
 
     return stopWithArrivalsAndDepartures.getArrivalsAndDepartures();
   }

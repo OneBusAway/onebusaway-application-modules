@@ -33,6 +33,7 @@ import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.gtfs.model.calendar.AgencyServiceInterval;
 import org.onebusaway.transit_data.model.*;
 import org.onebusaway.transit_data_federation.model.SearchResult;
 import org.onebusaway.util.AgencyAndIdLibrary;
@@ -124,8 +125,13 @@ class StopsBeanServiceImpl implements StopsBeanService {
     }
     List<StopBean> stopBeans = new ArrayList<StopBean>();
 
+    AgencyServiceInterval serviceInterval = null;
+    if (queryBean.getServiceInterval() != null) {
+      serviceInterval = queryBean.getServiceInterval();
+    }
+
     for (AgencyAndId stopId : stopIds) {
-      StopBean stopBean = _stopBeanService.getStopForId(stopId, null);
+      StopBean stopBean = _stopBeanService.getStopForId(stopId, serviceInterval);
       if (stopBean == null)
         throw new ServiceException();
 

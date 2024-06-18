@@ -18,7 +18,7 @@ package org.onebusaway.transit_data_federation.services.beans;
 import org.onebusaway.exceptions.NoSuchStopServiceException;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.Stop;
-import org.onebusaway.gtfs.model.calendar.ServiceDate;
+import org.onebusaway.gtfs.model.calendar.AgencyServiceInterval;
 import org.onebusaway.transit_data.model.RouteBean;
 import org.onebusaway.transit_data.model.StopBean;
 import java.util.List;
@@ -27,23 +27,23 @@ public interface StopBeanService {
 
   /**
    * @param stopId see {@link Stop#getId()}
-   * @param serviceDate
+   * @param serviceInterval
    * @return the populated stop bean, or null if a stop with the specified id
    *         was not found
    * @throws NoSuchStopServiceException if the stop with the specified id could
    *           not be found
    */
-  public StopBean getStopForId(AgencyAndId stopId, ServiceDate serviceDate);
+  public StopBean getStopForId(AgencyAndId stopId, AgencyServiceInterval serviceInterval);
 
   /**
    * @param stopId see {@link Stop#getId()}
-   * @serviceDate serviceDate
+   * @serviceInterval serviceInterval
    * @return the populated stop bean, or null if a stop with the specified id
    *         was not found
    * @throws NoSuchStopServiceException if the stop with the specified id could
    *           not be found
    */
-  public StopBean getStopForIdForServiceDate(AgencyAndId stopId, ServiceDate serviceDate);
+  public StopBean getStopForIdForServiceDate(AgencyAndId stopId, AgencyServiceInterval serviceInterval);
 
   public boolean matchesRouteTypeFilter(RouteBean route, List<Integer> routeTypesFilter);
 }

@@ -33,10 +33,10 @@ public class IndexAction extends OneBusAwayEnterpriseActionSupport {
 
 	private static final long serialVersionUID = 1L;
 
-	@Autowired
+	@Autowired(required = false)
 	private WikiDocumentService _wikiDocumentService;
 
-	@Autowired
+	@Autowired(required = false)
 	private WikiRenderingService _wikiRenderingService;
 
 	@Autowired
@@ -137,6 +137,9 @@ public class IndexAction extends OneBusAwayEnterpriseActionSupport {
 	
 	@Override
 	public String execute() throws Exception {
+		if (_wikiDocumentService == null || _wikiRenderingService == null)
+			return "NotFound";
+
 		if(namespace == null || namespace.isEmpty()) {
 			namespace = "Main";
 		}

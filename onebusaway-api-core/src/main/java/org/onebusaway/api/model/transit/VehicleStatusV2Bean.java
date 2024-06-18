@@ -34,7 +34,7 @@ public final class VehicleStatusV2Bean implements Serializable {
 
   private Integer occupancyCount;
 
-  private Integer occupancyCapacity;
+  private Integer occupancyCapacity = -1;
 
   private long lastUpdateTime;
 

@@ -1,0 +1,11 @@
+{"header":
+{"gtfs_realtime_version":"2.0","incrementality":"FULL_DATASET","timestamp":1692417600},
+  "entity":[{"id":"4507C229-B5A1-4A70-B994-F20FCA4F5C85",
+    "trip_update":{"trip":{"trip_id":"364060","route_id":"Z8","direction_id":1,"start_time":"23:35:00","start_date":"20230818","schedule_relationship":"SCHEDULED"},
+      "vehicle":{"id":"123"},
+      "stop_time_update":[
+        {"stop_sequence":46,"stop_id":"13004","departure":{"time":1692417600}}
+      ]
+    }
+  }
+  ]}

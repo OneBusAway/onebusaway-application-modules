@@ -16,6 +16,7 @@
 package org.onebusaway.transit_data.model;
 
 import org.onebusaway.geospatial.model.CoordinateBounds;
+import org.onebusaway.gtfs.model.calendar.AgencyServiceInterval;
 
 import java.io.Serializable;
 
@@ -41,6 +42,8 @@ public class SearchQueryBean implements Serializable {
 
   private FilterChain systemFilterChain = new FilterChain();
   private FilterChain instanceFilterChain = new FilterChain();
+
+  private AgencyServiceInterval serviceInterval;
 
   public EQueryType getType() {
     return type;
@@ -96,5 +99,13 @@ public class SearchQueryBean implements Serializable {
 
   public void setInstanceFilterChain(FilterChain instanceFilterChain) {
     this.instanceFilterChain = instanceFilterChain;
+  }
+
+  public AgencyServiceInterval getServiceInterval() {
+    return serviceInterval;
+  }
+
+  public void setServiceInterval(AgencyServiceInterval serviceInterval) {
+    this.serviceInterval = serviceInterval;
   }
 }

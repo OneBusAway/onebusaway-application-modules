@@ -16,7 +16,7 @@
 package org.onebusaway.transit_data_federation.services.beans;
 
 import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.gtfs.model.calendar.ServiceDate;
+import org.onebusaway.gtfs.model.calendar.AgencyServiceInterval;
 import org.onebusaway.transit_data.model.RouteScheduleBean;
 
 /**
@@ -25,7 +25,7 @@ import org.onebusaway.transit_data.model.RouteScheduleBean;
  */
 public interface RouteScheduleBeanService {
 
-  public RouteScheduleBean getScheduledArrivalsForDate(
-          AgencyAndId routeId, ServiceDate date);
+  public RouteScheduleBean getScheduledArrivalsForInterval(
+          AgencyAndId routeId, AgencyServiceInterval serviceInterval);
 
 }

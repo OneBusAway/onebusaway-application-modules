@@ -63,6 +63,11 @@ public class CustomProtocolBufferHandler implements ContentTypeHandler {
 
   @Override
   public String fromObject(ActionInvocation actionInvocation, Object obj, String s, Writer stream) throws IOException {
+    if (obj == null) {
+      // nothing to do, likely an exception in the stack
+      return null;
+    }
+
     ResponseBean response = (ResponseBean) obj;
     if (response.getData() != null && response.getData() instanceof Message) {
       Message message = (Message) response.getData();

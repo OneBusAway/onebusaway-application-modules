@@ -17,6 +17,7 @@ package org.onebusaway.transit_data_federation.services.beans;
 
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.Route;
+import org.onebusaway.gtfs.model.calendar.AgencyServiceInterval;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
 import org.onebusaway.transit_data.model.RouteBean;
 import org.onebusaway.transit_data.model.StopsForRouteBean;
@@ -50,9 +51,10 @@ public interface RouteBeanService {
 
   /**
    * @param routeId see {@link RouteCollectionEntry#getId()}
-   * @param serviceDate
-   * @return the stops for the route with the specified bean and service date, or null if not
+   * @param serviceInterval
+   * @return the stops for the route with the specified bean and service interval, or null if not
    *         found
    */
-  public StopsForRouteBean getStopsForRouteForServiceDate(AgencyAndId routeId, ServiceDate serviceDate);
+  public StopsForRouteBean getStopsForRouteForServiceInterval(AgencyAndId routeId, AgencyServiceInterval serviceInterval);
+
 }

@@ -22,6 +22,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.gtfs.model.calendar.AgencyServiceInterval;
 import org.onebusaway.presentation.impl.realtime.SiriSupport.OnwardCallsMode;
 import org.onebusaway.presentation.services.realtime.PresentationService;
 import org.onebusaway.presentation.services.realtime.RealtimeService;
@@ -518,7 +519,7 @@ public class RealtimeServiceImpl implements RealtimeService {
     }
     
     StopWithArrivalsAndDeparturesBean stopWithArrivalsAndDepartures =
-      _transitDataService.getStopWithArrivalsAndDepartures(stopId, query);
+      _transitDataService.getStopWithArrivalsAndDepartures(stopId, query, new AgencyServiceInterval(currentTime));
 
     return stopWithArrivalsAndDepartures.getArrivalsAndDepartures();
   }

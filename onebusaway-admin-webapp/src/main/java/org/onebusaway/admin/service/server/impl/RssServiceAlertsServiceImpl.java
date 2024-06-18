@@ -70,6 +70,8 @@ public class RssServiceAlertsServiceImpl implements IntegratingServiceAlertsServ
     private FeedMessage _feed = null;
     private Locale _locale = null;
 
+    private int _refreshRate = 2; // minutes
+
     @Autowired
     public void setTransitDataService(TransitDataService tds) {
       _transitDataService = tds;
@@ -98,7 +100,14 @@ public class RssServiceAlertsServiceImpl implements IntegratingServiceAlertsServ
     public void setLocale(Locale locale) {
       _locale = locale;
     }
-    
+
+    public void setRefreshRate(int rateInMinutes) {
+        this._refreshRate = rateInMinutes;
+    }
+    public int getRefreshRate() {
+        return _refreshRate;
+    }
+
     public boolean isEnabled() {
       return _serviceStatusUrlString != null && _serviceAdvisoryUrlString != null;
     }
@@ -118,7 +127,7 @@ public class RssServiceAlertsServiceImpl implements IntegratingServiceAlertsServ
         // re-build internal route cache
         _executor.scheduleAtFixedRate(new RefreshDataTask(), 0, 1, TimeUnit.HOURS);
         // poll feed after cache is built above
-        _executor.scheduleAtFixedRate(new PollRssTask(), 1, 5, TimeUnit.MINUTES);
+        _executor.scheduleAtFixedRate(new PollRssTask(), 1, getRefreshRate(), TimeUnit.MINUTES);
     }
 
     @PreDestroy
