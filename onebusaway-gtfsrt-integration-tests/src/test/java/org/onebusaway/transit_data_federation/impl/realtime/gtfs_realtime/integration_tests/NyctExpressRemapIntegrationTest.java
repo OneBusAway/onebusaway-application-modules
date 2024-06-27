@@ -66,7 +66,7 @@ public class NyctExpressRemapIntegrationTest extends AbstractGtfsRealtimeIntegra
     source.setTripUpdatesUrl(gtfsRtResource.getURL());
     source.refresh(); // launch
 
-    assertEquals(20, listener.getRecords().size()); // would be 9 if just SI
+    assertEquals(19, listener.getRecords().size()); // would be 9 if just SI
     // now check for a specific SS trip in A/D to confirm it flowed through system
     // MTASBWY_048000_SS..N
     // stop MTASBWY_S16N

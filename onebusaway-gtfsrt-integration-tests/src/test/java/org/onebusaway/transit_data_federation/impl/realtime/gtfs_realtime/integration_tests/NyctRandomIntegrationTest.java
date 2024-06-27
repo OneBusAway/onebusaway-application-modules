@@ -132,12 +132,12 @@ public class NyctRandomIntegrationTest extends AbstractGtfsRealtimeIntegrationTe
     String expectedRouteId = "MTASBWY_D";
     String[] expectedTripIds = Arrays.asList(/*"MTASBWY_044700_D..S14R", "MTASBWY_045700_D..S14R", "MTASBWY_046300_D..S14R",
             "MTASBWY_047050_D..S14R", "MTASBWY_047700_D..S14R", "MTASBWY_048600_D..S14R",*/
-            "MTASBWY_049900_D..S14R", "MTASBWY_050500_D..S14R", "MTASBWY_050850_D..S14R").toArray(new String[0]);
+            "MTASBWY_049900_D..S14R"/*, "MTASBWY_050500_D..S14R", "MTASBWY_050850_D..S14R"*/).toArray(new String[0]);
     String expectedHeadsign = "Coney Island-Stillwell Av";
     String[] expectedVehicleIds = Arrays.asList(/*"MTASBWY_1D 0727 BPK/STL", "MTASBWY_1D 0737 BPK/STL", "MTASBWY_1D 0743 205/STL",
             "MTASBWY_1D 0750+ 205/STL", "MTASBWY_1D 0757 205/STL", "MTASBWY_1D 0806 205/STL",*/
-            "MTASBWY_1D 0819 BPK/STL", "MTASBWY_1D 0825 BPK/STL", "MTASBWY_1D 0828+ 205/STL").toArray(new String[0]);
-    int[] expectedArrivals = {7, 14, 21};
+            "MTASBWY_1D 0819 BPK/STL"/*, "MTASBWY_1D 0825 BPK/STL", "MTASBWY_1D 0828+ 205/STL"*/).toArray(new String[0]);
+    int[] expectedArrivals = {7};
     String path = getIntegrationTestPath() + File.separator;
     String name = "nyct_subways_gtfs_rt.2024-03-04T08:28:35:00.pb";
     /* Mon Mar  4 08:28:35 EST 2024
@@ -148,8 +148,8 @@ public class NyctRandomIntegrationTest extends AbstractGtfsRealtimeIntegrationTe
     -A15S 047700_D..S14R     D     047700_D..S14R     Coney Island-Stillwell Av       Ar 0819 (38m)  1D 0757 205/STL    A3                             --- MISSING TRIP ---                                                                            --- MISSING TRIP ---
     -A15S 048600_D..S14R     D     048600_D..S14R     Coney Island-Stillwell Av       Ar 0825 (44m)  1D 0806 205/STL    A3                             --- MISSING TRIP ---                                                                            --- MISSING TRIP ---
     A15S 049500_D..S14R     D     049500_D..S14R     Coney Island-Stillwell Av       Ar 0837 (56m)  1D 0815 205/STL    A3                             --- MISSING TRIP ---                                                                            --- MISSING TRIP ---
-    A15S 050100_D..S14R     D     050100_D..S14R     Coney Island-Stillwell Av       Ar 0843 (1h)   1D 0821 205/STL    A3                             --- MISSING TRIP ---                                                                            --- MISSING TRIP ---
-    A15S 050850_D..S14R     D     050850_D..S14R     Coney Island-Stillwell Av       Ar 0850 (1h)   1D 0828+ 205/STL   A3                             --- MISSING TRIP ---                                                                            --- MISSING TRIP ---
+    A15S 050100_D..S14R     D     050100_D..S14R     Coney Island-Stillwell Av       Ar 0843 (1h)   1D 0821 205/STL    A3   unassigned                          --- MISSING TRIP ---                                                                            --- MISSING TRIP ---
+    A15S 050850_D..S14R     D     050850_D..S14R     Coney Island-Stillwell Av       Ar 0850 (1h)   1D 0828+ 205/STL   A3   unassigned                          --- MISSING TRIP ---                                                                            --- MISSING TRIP ---
      */
 
     assertEquals(expectedTripIds.length, expectedVehicleIds.length);
@@ -669,6 +669,32 @@ public class NyctRandomIntegrationTest extends AbstractGtfsRealtimeIntegrationTe
     GtfsRealtimeSource source = runRealtime(routeIdsToCancel, expectedRouteId, expectedStopId, path, part0);
     expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId,
             tripId, vehicleId, headsign, 41);
+
+  }
+
+  /**
+   * Confirm that in progress trips with is_assigned=false are suppressed (MTA-148)
+   * @throws Exception
+   */
+  @Test
+  public void test17() throws Exception {
+    List<String> routeIdsToCancel = Arrays.asList("MTASBWY_6");
+    String expectedStopId = "MTASBWY_631N";
+    String expectedRouteId = "MTASBWY_6";
+    String path = getIntegrationTestPath() + File.separator;
+    String tripId = "MTASBWY_067800_6..N01X017";
+    String vehicleId = "MTASBWY_06 1118  BBR/WSQ";
+    String headsign = "Westchester Sq-E Tremont Av";
+
+    String part0 = "gtfs-06242024-112957";
+    GtfsRealtimeSource source = runRealtime(routeIdsToCancel, expectedRouteId, expectedStopId, path, part0);
+    try {
+      expectArrivalAndTripAndHeadsign(source.getGtfsRealtimeTripLibrary().getCurrentTime(), expectedStopId, expectedRouteId,
+              tripId, vehicleId, headsign, 1);
+      fail("expected trip " + tripId + " to be missing as its unassigned");
+    } catch (AssertionError ae) {
+      // success -- trip should not be found.
+    }
 
   }
 

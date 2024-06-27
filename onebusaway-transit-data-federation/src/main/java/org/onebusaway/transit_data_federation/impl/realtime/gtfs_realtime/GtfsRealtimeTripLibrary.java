@@ -398,11 +398,11 @@ public class GtfsRealtimeTripLibrary {
         AddedTripInfo addedTripInfo = _serviceSource.getAddedTripService().handleNyctDescriptor(_serviceSource, tu, nyctTripDescriptor, _currentTime);
         if (addedTripInfo == null) return null;
         long tripStartTimeMillis = addedTripInfo.getServiceDate() + (addedTripInfo.getTripStartTime() * 1000);
-        if (_filterUnassigned && nyctTripDescriptor.hasIsAssigned() && !nyctTripDescriptor.getIsAssigned()) {
+        if (_filterUnassigned && !nyctTripDescriptor.getIsAssigned()) {
           // we are filtering on unassigned and this trip is marked as unassigned
           return null;
         }
-        if (nyctTripDescriptor.hasIsAssigned() && !nyctTripDescriptor.getIsAssigned()
+        if (!nyctTripDescriptor.getIsAssigned()
                 && tripStartTimeMillis < _currentTime) {
           // don't let unassigned trips in the past show up
           return null;
