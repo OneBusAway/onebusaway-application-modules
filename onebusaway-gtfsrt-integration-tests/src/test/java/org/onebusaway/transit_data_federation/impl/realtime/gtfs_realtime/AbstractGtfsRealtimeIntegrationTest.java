@@ -394,7 +394,7 @@ public abstract class AbstractGtfsRealtimeIntegrationTest {
   protected ArrivalAndDepartureBean expectArrival(String msg, long referenceTime, String stopId, String routeId, int minutesAwayMax) {
     TransitGraphDao graph = getBundleLoader().getApplicationContext().getBean(TransitGraphDao.class);
     StopEntry firstStop = graph.getStopEntryForId(AgencyAndId.convertFromString(stopId));
-    assertNotNull("no such stop " + stopId);
+    assertNotNull("no such stop " + stopId, firstStop);
     ArrivalsAndDeparturesBeanService service = getBundleLoader().getApplicationContext().getBean(ArrivalsAndDeparturesBeanService.class);
     ArrivalsAndDeparturesQueryBean query = new ArrivalsAndDeparturesQueryBean();
     assertTrue("invalid reference time of " + referenceTime, referenceTime > 0);
