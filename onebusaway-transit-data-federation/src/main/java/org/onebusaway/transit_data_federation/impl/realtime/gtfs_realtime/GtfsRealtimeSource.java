@@ -306,6 +306,10 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     if (_entitySource != null && _entitySource.getRealtimeFuzzyMatcher() != null) {
       _entitySource.getRealtimeFuzzyMatcher().reset();
     }
+    // force cache update
+    if (_serviceSource.getBlockFinder() != null) {
+      _serviceSource.getBlockFinder().reset();
+    }
   }
 
   public void setStopModificationStrategy(StopModificationStrategy strategy) {
