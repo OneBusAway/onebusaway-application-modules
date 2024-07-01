@@ -49,7 +49,6 @@ public class BlockFinder {
     _blockCalendarService = blockCalendarService;
   }
 
-  @Refreshable(dependsOn = RefreshableResources.TRANSIT_GRAPH)
   public void reset() {
     _cache.clear();
   }
