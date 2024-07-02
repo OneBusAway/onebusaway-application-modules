@@ -95,7 +95,8 @@ public class TripUpdatesAction extends NextBusApiBase  implements
                 if (hasServiceUrl(agencyId)) {
                     String gtfsrtUrl = getServiceUrl(agencyId) + agencyId + TRIP_UPDATES_COMMAND;
                     try {
-                        remoteFeedMessage = _httpUtil.getFeedMessage(gtfsrtUrl, 30);
+                        Map<String, String> headersMap = _configMapUtil.getConfig(agencyId).getHeadersMap();
+                        remoteFeedMessage = _httpUtil.getFeedMessage(gtfsrtUrl, 30, headersMap);
                         if (feedMessage == null) {
                             if (remoteFeedMessage.hasHeader()
                                     && remoteFeedMessage.getHeader().hasTimestamp()

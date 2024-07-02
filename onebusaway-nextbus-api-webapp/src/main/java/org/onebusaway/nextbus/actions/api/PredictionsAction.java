@@ -19,9 +19,11 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.*;
 
+import com.google.gson.JsonObject;
 import org.apache.struts2.rest.DefaultHttpHeaders;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.nextbus.impl.exceptions.*;
+import org.onebusaway.nextbus.impl.util.ConfigurationUtil;
 import org.onebusaway.nextbus.model.RouteStopId;
 import org.onebusaway.nextbus.model.nextbus.Body;
 import org.onebusaway.nextbus.model.nextbus.BodyError;
@@ -153,7 +155,7 @@ public class PredictionsAction extends NextBusApiBase implements
       processRoutes(agencyId, route, stopIds, routeIds, agencyRouteIdStopIdMap);
 
       for (Map.Entry<String, Set<RouteStopId>> entry : agencyRouteIdStopIdMap.entrySet()) {
-        String uri = buildPredictionsUrl(entry.getKey(), entry.getValue());
+        String uri = buildPredictionsUrl(_configMapUtil.getConfig(agencyId), entry.getKey(), entry.getValue());
         allPredictions.addAll(getRemotePredictions(uri));
       }
 
@@ -230,29 +232,55 @@ public class PredictionsAction extends NextBusApiBase implements
     routeStopIds.add(new RouteStopId(routeId, stopId));
   }
 
-  private String buildPredictionsUrl(String agencyId, Set<RouteStopId> routeStopIds){
-
-    String serviceUrl = getServiceUrl(agencyId) + agencyId + PREDICTIONS_COMMAND + "?";
-    StringBuilder routeStop = new StringBuilder();
+  private String buildPredictionsUrl(ConfigurationUtil config, String agencyId, Set<RouteStopId> routeStopIds){
+      String serviceUrl = getServiceUrl(agencyId);
+      if (config.getUrlOverride() == null) {
+        serviceUrl +=  agencyId + PREDICTIONS_COMMAND + "?";
+      } else {
+        // not a TTC server, use the URL as is
+        serviceUrl +=  "?";
+      }
+      StringBuilder routeStop = new StringBuilder();
 
     for(RouteStopId routeStopId: routeStopIds){
+      routeStop.append(toString(config, routeStopId));
+    }
+
+      String uri = serviceUrl + routeStop.toString() + "format=" + REQUEST_TYPE;
+      _log.info(uri);
+
+      return uri;
+  }
+
+  private String toString(ConfigurationUtil config, RouteStopId routeStopId) {
+    StringBuilder routeStop = new StringBuilder();
+    if (config.getUrlOverride() == null) {
+      // TTC format of parameters
       routeStop.append("rs=");
       routeStop.append(routeStopId.getRouteId().getId());
       routeStop.append("|");
       routeStop.append(routeStopId.getStopId().getId());
       routeStop.append("&");
+    } else {
+      // alternative format of params
+      routeStop.append("stop=");
+      routeStop.append(routeStopId.getStopId().getId());
+      routeStop.append("&");
+      routeStop.append("route=");
+      routeStop.append(routeStopId.getRouteId().getId());
+      routeStop.append("&");
     }
-
-    String uri = serviceUrl + routeStop.toString() + "format=" + REQUEST_TYPE;
-    _log.info(uri);
-
-    return uri;
+    return routeStop.toString();
   }
 
   private List<Predictions> getRemotePredictions(String uri) throws IOException {
     int timeout = _configMapUtil.getConfig(agencyId).getHttpTimeoutSeconds();
-    JsonArray predictionsJson = _httpUtil.getJsonObject(uri, timeout).getAsJsonArray(
-            "predictions");
+    Map<String, String> headersMap = _configMapUtil.getConfig(agencyId).getHeadersMap();
+    JsonArray predictionsJson = null;
+    JsonObject jsonObject = _httpUtil.getJsonObject(uri, timeout, headersMap);
+    if (jsonObject.has("predictions")) {
+      predictionsJson = jsonObject.getAsJsonArray("predictions");
+    }
     Type listType = new TypeToken<List<Predictions>>() {
     }.getType();
 

@@ -24,6 +24,8 @@ public class ConfigurationUtil {
   private String transiTimeHost = "localhost";
   private String transiTimePort = "8080";
   private String transiTimeKey = "8a3273b0";
+  private String urlOverride = null;
+  private Map<String, String> headersMap = new HashMap<>();
   private Map<String,String> agencyMapper = new HashMap<String,String>(1);
   private int httpTimeoutSeconds = 15;
   
@@ -75,6 +77,22 @@ public class ConfigurationUtil {
 
   public void setHttpTimeoutSeconds(int httpTimeoutSeconds) {
     this.httpTimeoutSeconds = httpTimeoutSeconds;
+  }
+
+  public String getUrlOverride() {
+    return urlOverride;
+  }
+
+  public void setUrlOverride(String urlOverride) {
+    this.urlOverride = urlOverride;
+  }
+
+  public Map<String, String> getHeadersMap() {
+    return headersMap;
+  }
+
+  public void setHeadersMap(Map<String, String> headersMap) {
+    this.headersMap = headersMap;
   }
 
   public String toString() {
