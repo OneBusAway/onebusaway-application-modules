@@ -317,6 +317,10 @@ public class NextBusApiBase {
     String apiKey = configUtil.getTransiTimeKey();
     String serviceUrl =  protocol + "://" + host + ":" + port + "/api/v1/key/" + apiKey
         + "/agency/";
+    if (configUtil.getUrlOverride() != null) {
+      // not a TTC server, us the URL override instead
+      serviceUrl =  protocol + "://" + host + ":" + port + configUtil.getUrlOverride();
+    }
     return serviceUrl;
   }
 
