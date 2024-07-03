@@ -67,8 +67,8 @@ public class GtfsRealtimeTripLibraryTest {
     _entitySource = Mockito.mock(GtfsRealtimeEntitySource.class);
     _serviceSource = Mockito.mock(GtfsRealtimeServiceSource.class);
     _blockCalendarService = Mockito.mock(BlockCalendarService.class);
-    // this isn't exactly right but close enough
-    Mockito.when(_serviceSource.getBlockFinder()).thenReturn(new BlockFinder(_blockCalendarService));
+    Mockito.when(_serviceSource.getBlockCalendarService()).thenReturn(_blockCalendarService);
+    Mockito.when(_serviceSource.getBlockFinder()).thenReturn(new BlockFinder(_serviceSource));
     _serviceSource.setBlockCalendarService(_blockCalendarService);
     _library.setEntitySource(_entitySource);
     _library.setServiceSource(_serviceSource);

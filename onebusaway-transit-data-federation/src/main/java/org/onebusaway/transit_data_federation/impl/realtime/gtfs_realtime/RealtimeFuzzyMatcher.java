@@ -46,12 +46,12 @@ public class RealtimeFuzzyMatcher {
   private TransitGraphDao dao;
   private ExtendedCalendarService calendarService;
   private Map<AgencyAndId, TripEntry> _cache = new HashMap<AgencyAndId, TripEntry>();
-  private Set<AgencyAndId> _nullCache = new HashSet<>();
+  private Set<AgencyAndId> _nullCache = new HashSet<>(); // todo is this safe?
   private ScheduledExecutorService _executor = Executors.newSingleThreadScheduledExecutor();
   private int _cacheResetFrequencyMinutes = DEFAULT_REFRESH_INTERVAL;
   private List<String> _realtimeTripIdRegexs = new ArrayList<>();
   private List<String> _scheduleTripIdRegexs = new ArrayList<>();
-  private Map<AgencyAndId, List<TripEntry>> _baseTripsByAgencyId = new HashMap<>();
+  private Map<AgencyAndId, Set<TripEntry>> _baseTripsByAgencyId = new HashMap<>();
   private Set<String> _agencies = new HashSet<>();
   boolean isInitialized = false;
   boolean firstRun = true;
@@ -79,7 +79,7 @@ public class RealtimeFuzzyMatcher {
 
   @PostConstruct
   public void start() {
-    _executor.scheduleAtFixedRate(new RefreshTask(), 2,
+    _executor.scheduleAtFixedRate(new RefreshTask(), 0,
             _cacheResetFrequencyMinutes,
             TimeUnit.MINUTES);
   }
@@ -95,6 +95,7 @@ public class RealtimeFuzzyMatcher {
     isInitialized = false;
     long start = System.currentTimeMillis();
    _cache.clear();
+   _baseTripsByAgencyId.clear();
    _nullCache.clear();
     for (TripEntry trip : dao.getAllTrips()) {
       if (_agencies.contains(trip.getId().getAgencyId())) {
@@ -104,7 +105,7 @@ public class RealtimeFuzzyMatcher {
         }
         AgencyAndId baseTripAndAgencyId = new AgencyAndId(trip.getId().getAgencyId(), baseTripId);
         if (!_baseTripsByAgencyId.containsKey(baseTripAndAgencyId)) {
-          _baseTripsByAgencyId.put(baseTripAndAgencyId, new ArrayList<>());
+          _baseTripsByAgencyId.put(baseTripAndAgencyId, new HashSet<>());
         }
         _baseTripsByAgencyId.get(baseTripAndAgencyId).add(trip);
       }
@@ -166,12 +167,26 @@ public class RealtimeFuzzyMatcher {
     if (possibleTrips.isEmpty()) {
       return null;
     }
+
+    Date currentServiceDay = new ServiceDate(new Date(currentTime)).getAsDate();
+
+    // short circuit to return current day
+    for (TripEntry possibleTrip : possibleTrips) {
+      Set<Date> datesForServiceIds = calendarService.getDatesForServiceIds(new ServiceIdActivation(possibleTrip.getServiceId()));
+      if (datesForServiceIds.contains(currentServiceDay)) {
+        return possibleTrip;
+      }
+    }
+
     List<TripScore> scoredTrips = getScore(possibleTrips, currentTime);
     if (scoredTrips.isEmpty()) {
       return null;
     }
     Collections.sort(scoredTrips);
-    return scoredTrips.get(0).getTrip();
+    TripEntry bestTrip = scoredTrips.get(0).getTrip();
+    Set<Date> datesForServiceIds = calendarService.getDatesForServiceIds(new ServiceIdActivation(bestTrip.getServiceId()));
+    _log.debug("didn't match current day, instead found {} for {}", datesForServiceIds, bestTrip.getId());
+    return bestTrip;
   }
 
   private List<TripScore> getScore(List<TripEntry> possibleTrips, long currentTime) {
@@ -180,38 +195,27 @@ public class RealtimeFuzzyMatcher {
     for (TripEntry trip : possibleTrips) {
       LocalizedServiceId serviceId = trip.getServiceId();
       Set<Date> datesForServiceIds = calendarService.getDatesForServiceIds(new ServiceIdActivation(serviceId));
-      Date closestDate = getClosestDate(datesForServiceIds, currentTime);
-      if (closestDate != null) {
-        scores.add(new TripScore(trip, score(closestDate, currentTime)));
+      if (datesForServiceIds != null && !datesForServiceIds.isEmpty()) {
+        double tripScore = score(datesForServiceIds, currentTime);
+        scores.add(new TripScore(trip, tripScore));
+      } else {
+        _log.debug("no dates for serviceId {}", serviceId);
       }
     }
 
     return scores;
   }
 
-  private double score(Date closestDate, long currentTime) {
-    // score from midday service day
-    return (closestDate.getTime()+ (6 * 60 * 60 * 1000) - currentTime) / 1000 / 60;
-  }
-
-  private Date getClosestDate(Set<Date> datesForServiceIds, long currentTime) {
-    // try for an exact match first
-    Date serviceDate = new ServiceDate(new Date(currentTime)).getAsDate();
-    for (Date date : datesForServiceIds) {
-      if (date.equals(serviceDate)) {
-        return date;
+  private double score(Set<Date> possibleDates, long currentTime) {
+    double lowestScore = Double.MAX_VALUE;
+    for (Date possibleDate : possibleDates) {
+      // score from midday service day
+      double score = (possibleDate.getTime() + (6 * 60 * 60 * 1000) - currentTime) / 1000 / 60.0;
+      if (Math.abs(score) < lowestScore) {
+        lowestScore = score;
       }
     }
-
-    // we didn't find an exact match, grab the closest
-    List<DateDiff> diffs = new ArrayList<>();
-    for (Date date : datesForServiceIds) {
-      // difference from middle of service day
-      diffs.add(new DateDiff(date, Math.abs(date.getTime() + (6 * 60 * 60 * 1000) - currentTime)));
-    }
-    if (diffs.isEmpty())
-      return null;
-    return Collections.min(diffs).getDate();
+    return lowestScore;
   }
 
   private List<TripEntry> getPossibleTrips(AgencyAndId tripId) {
@@ -240,22 +244,6 @@ public class RealtimeFuzzyMatcher {
     }
   }
 
-  private static class DateDiff implements Comparable<DateDiff> {
-    private Date date;
-    private long diff;
-    public DateDiff(Date date, long diff) {
-      this.date = date;
-      this.diff = diff;
-    }
-
-    public Date getDate() {
-      return date;
-    }
-    @Override
-    public int compareTo(DateDiff o) {
-      return Long.compare(Math.abs(diff), Math.abs(o.diff));
-    }
-  }
 
   private class RefreshTask implements Runnable {
     @Override

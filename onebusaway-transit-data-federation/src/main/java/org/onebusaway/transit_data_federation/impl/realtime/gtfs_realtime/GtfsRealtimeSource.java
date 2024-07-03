@@ -208,6 +208,9 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
 
   private GtfsRealtimeCancelService _cancelService;
 
+  // minimize operations while bundle is changing as state is inconsistent
+  private boolean isBundleReady = false;
+
   @Autowired
   public void setAgencyService(AgencyService agencyService) {
     _serviceSource.setAgencyService(agencyService);
@@ -300,7 +303,6 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     _serviceSource.setCalendarService(service);
   }
 
-  @Refreshable(dependsOn = RefreshableResources.TRANSIT_GRAPH)
   public void bundleSwapListener() {
     _log.info("bundleSwapListener invoked");
     if (_entitySource != null && _entitySource.getRealtimeFuzzyMatcher() != null) {
@@ -310,6 +312,16 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     if (_serviceSource.getBlockFinder() != null) {
       _serviceSource.getBlockFinder().reset();
     }
+  }
+
+  @Refreshable(dependsOn = RefreshableResources.MARK_START_BUNDLE_SWAP)
+  public void markBundleNotReady() {
+    isBundleReady = false;
+  }
+  @Refreshable(dependsOn = RefreshableResources.MARK_STOP_BUNDLE_SWAP)
+  public void markBundleReady() {
+    isBundleReady = true;
+    bundleSwapListener();
   }
 
   public void setStopModificationStrategy(StopModificationStrategy strategy) {
@@ -613,7 +625,10 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
 
   // test if the transit graph is ready
   protected boolean graphReady() {
-      return _entitySource.isGraphReady();
+    if (!isBundleReady) {
+      return false;
+    }
+    return true;
   }
 
   /**

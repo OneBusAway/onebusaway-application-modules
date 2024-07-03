@@ -42,8 +42,6 @@ import org.onebusaway.transit_data_federation.util.HttpServiceClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.Trigger;
-import org.springframework.scheduling.TriggerContext;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
 import java.util.ArrayList;
@@ -55,7 +53,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.TimerTask;
 import java.util.concurrent.Future;
 
 
@@ -406,6 +403,7 @@ public class BundleManagementServiceImpl implements BundleManagementService {
     }
 
     _log.info("All inference processing threads have now exited--changing bundle...");
+    _refreshService.refresh(RefreshableResources.MARK_START_BUNDLE_SWAP);
 
     // switch bundle files
     File path;
@@ -461,6 +459,7 @@ public class BundleManagementServiceImpl implements BundleManagementService {
 
     // need to do after bundle is ready so TDS can not block
     removeAndRebuildCache();
+    _refreshService.refresh(RefreshableResources.MARK_STOP_BUNDLE_SWAP);
     _log.info("Cache rebuild complete.");
 
     return;
