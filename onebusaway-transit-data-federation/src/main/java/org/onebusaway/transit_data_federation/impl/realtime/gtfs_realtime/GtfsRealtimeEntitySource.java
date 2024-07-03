@@ -274,16 +274,6 @@ class GtfsRealtimeEntitySource {
     return _agencyIds;
   }
 
-  public boolean isGraphReady() {
-    try {
-      return _transitGraphDao != null
-              && _transitGraphDao.getAllRoutes() != null
-              && !_transitGraphDao.getAllRoutes().isEmpty();
-    } catch (Throwable t) {
-      return false;
-    }
-  }
-
   public void setCurrentTime(long currentTime) {
     _currentTime = currentTime;
   }

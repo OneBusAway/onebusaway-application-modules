@@ -64,10 +64,6 @@ public class GtfsRealtimeServiceSource {
 
   private BlockFinder _blockFinder;
 
-  public GtfsRealtimeServiceSource() {
-    _blockFinder = new BlockFinder(_blockCalendarService);
-  }
-
   public BlockIndexService getBlockIndexService() {
     return _blockIndexService;
   }
@@ -78,7 +74,7 @@ public class GtfsRealtimeServiceSource {
 
   public void setBlockCalendarService(BlockCalendarService blockCalendarService) {
     _blockCalendarService = blockCalendarService;
-    _blockFinder = new BlockFinder(_blockCalendarService);
+    _blockFinder = new BlockFinder(this);
   }
   public void setBlockGeospatialService(BlockGeospatialService blockGeospatialService) {
     _blockGeospatialService = blockGeospatialService;
