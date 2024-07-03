@@ -28,10 +28,15 @@
 <s:url var="url" value="/css/api-key.css" />
 <link rel="stylesheet" href="${url}" type="text/css" />
 
+    <!--TODO: Update jquery and plugins-->
 <s:url var="url" value="/js/biblio/jquery.js" />
 <script type="text/javascript" src="${url}">
 	<!-- prevent jspx minimization -->
 	</script>
+    <!--jquery-migrate plugin to help upgrade to 1.9-->
+<s:url var="url" value="/js/biblio/jquery-migrate-1.4.1.js" />
+<script type="text/javascript" src="${url}">
+    </script>
 <s:url var="url" value="/js/oba/api-key.js" />
 <script type="text/javascript" src="${url}">
 	<!-- prevent jspx minimization -->

@@ -31,9 +31,16 @@
     <s:url var="url" value="/css/user-management.css"/>
     <link rel="stylesheet" href="${url}" type="text/css"/>
 
+    <!--TODO: Update jquery and plugins-->
     <s:url var="url" value="/js/biblio/jquery.js" />
     <script type="text/javascript" src="${url}">
         <!-- prevent jspx minimization -->
+    </script>
+    <s:url var="url" value="/js/biblio/jquery-migrate-1.4.1.js">
+    </s:url>
+    <script type="text/javascript" src="${url}">
+        <!-- //prevent jspx minimization -->
+
     </script>
     <s:url var="url" value="/js/oba/api-key.js" />
     <script type="text/javascript" src="${url}">

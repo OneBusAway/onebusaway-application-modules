@@ -15,6 +15,7 @@
  */
 
 $(document).ready(function() {
+    // TODO: Replace hover with mouseenter and mouseleave https://api.jquery.com/hover/
     $('p.name > a').hover(
         function() {
             var parentTag = $(this).parent().css('border-bottom-color');

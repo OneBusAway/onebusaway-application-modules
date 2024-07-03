@@ -17,14 +17,20 @@
 --%>
 <html>
 <head>
+  <!--TODO: Update jquery and plugins-->
 <script type="text/javascript" src="/onebusaway-watchdog-webapp/js/biblio/jquery.js">
 <!-- //prevent jspx minimization -->
 
 </script>
+  <!--TODO: Update jquery and plugins-->
 <script type="text/javascript" src="/js/biblio/jquery.js">
 <!-- //prevent jspx minimization -->
 	
 </script>
+  <script type="text/javascript" src="/js/biblio/jquery-migrate-1.4.1.js">
+    <!-- //prevent jspx minimization -->
+
+  </script>
 <script type="text/javascript" src="/onebusaway-watchdog-webapp/js/metrics.js">
 <!-- //prevent jspx minimization -->
 	

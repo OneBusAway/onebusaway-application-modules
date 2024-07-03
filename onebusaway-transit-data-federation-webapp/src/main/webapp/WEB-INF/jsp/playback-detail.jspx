@@ -23,14 +23,17 @@
 <jsp:directive.page contentType="text/html" />
 
 <!-- add jquery support -->
+<!--TODO: Update jquery and plugins-->
 <script type="text/javascript" src="js/lib/jquery-1.12.4.min.js">
     <!-- //prevent jspx minimization -->
 </script>
 
 <!-- date picker config -->
+<!--TODO: Update jquery and plugins-->
 <script type="text/javascript" src="js/lib/jquery-ui-1.12.1.js">
     <!-- //prevent jspx minimization -->
 </script>
+<!--TODO: Update jquery and plugins-->
 <link rel="stylesheet" href="css/jquery-ui.css"></link>
 <link rel="stylesheet" href="css/jquery-ui-style.css"></link>
 <script type="text/javascript" src="js/lib/jquery.timepicker-1.3.5.min.js">
@@ -52,6 +55,10 @@
                 'scrollDefault': 'now'
             });
     } );
+</script>
+
+<script type="text/javascript" src="js/lib/jquery-migrate-1.4.1.js">
+	<!-- //prevent jspx minimization -->
 </script>
 <head>
 <title>Playback</title>

@@ -181,7 +181,7 @@ function initCreate() {
 
 function onCreateContinueClick() {
     var $tabs = jQuery("#tabs");
-    $tabs.tabs('select', 1);
+    $tabs.tabs("option", "active", 1);
 }
 
 function onExistingDatasetClick() {
@@ -438,7 +438,7 @@ function onSelectDataset(sourceDirectoryType) {
             }
             if (!fromResultLink) {
                 var $tabs = jQuery("#tabs");
-                $tabs.tabs('select', 1);
+                $tabs.tabs("option", "active", 1);
             }
         },
         error: function(request) {
