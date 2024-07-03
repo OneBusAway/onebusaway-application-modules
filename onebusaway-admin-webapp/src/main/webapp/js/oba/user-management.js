@@ -250,6 +250,7 @@ function activateUser() {
 
 function turnOffEditClick() {
 	jQuery("#actions #edit").off("click");
+	// TODO: Replace hover with mouseenter and mouseleave https://api.jquery.com/hover/
 	jQuery("#actions #edit").hover(function() {
 		jQuery(this).css("cursor", "default");
 	});
@@ -257,6 +258,7 @@ function turnOffEditClick() {
 
 function turnOnEditClick() {
 	jQuery("#actions #edit").on("click", showEditUser);
+	// TODO: Replace hover with mouseenter and mouseleave https://api.jquery.com/hover/
 	jQuery("#actions #edit").hover(function() {
 		jQuery(this).css("cursor", "pointer");
 	});
@@ -293,7 +295,7 @@ function showUserDetails(response) {
     }
     jQuery("#editUser #editUserName").text(response.username);
     jQuery("#editUser #newPassword").val("");
-    jQuery("#editUser #newRole").val(userRole).attr("selected", true);
+    jQuery("#editUser #newRole").val(userRole).prop("selected", true);
 }
 
 function showUserToEdit(username) {

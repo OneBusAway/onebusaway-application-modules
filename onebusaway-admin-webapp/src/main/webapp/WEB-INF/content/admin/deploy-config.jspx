@@ -22,6 +22,7 @@
 <title>Configuration</title>
 <s:url var="url" value="/css/deploy-config.css" />
 <link rel="stylesheet" type="text/css" href="${url}" />
+	<!--TODO: Update jquery and plugins-->
 <s:url var="url" value="/js/biblio/jquery.js">
 </s:url>
 <script type="text/javascript" src="${url}">
@@ -29,11 +30,17 @@
 	
 </script>
 
+	<!--TODO: Update jquery and plugins-->
 <s:url var="url" value="/js/biblio/jquery.ui.js">
 </s:url>
 <script type="text/javascript" src="${url}">
 <!-- //prevent jspx minimization -->
 	
+</script>
+
+<!--jquery-migrate plugin to help upgrade to 1.9-->
+<s:url var="url" value="/js/biblio/jquery-migrate-1.4.1.js" />
+<script type="text/javascript" src="${url}">
 </script>
 
 <s:url var="url" value="/js/oba/deploy-config.js">

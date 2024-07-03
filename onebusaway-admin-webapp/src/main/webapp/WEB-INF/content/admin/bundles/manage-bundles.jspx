@@ -23,6 +23,7 @@
 <jsp:directive.page contentType="text/html" />
 <head>
 <sec:csrfMetaTags />
+<!--TODO: Update jquery and plugins-->
 <s:url var="url" value="/css/jquery-ui.css" />
 <link rel="stylesheet" type="text/css" href="${url}">
 	<!-- //prevent jspx minimization -->
@@ -41,12 +42,20 @@
 <!--
 <s:url var="url" value="/js/biblio/jquery-3.1.1.min.js" />
 -->
+	<!--TODO: Update jquery and plugins-->
 <s:url var="url" value="/js/biblio/jquery.js">
 </s:url>
 <script type="text/javascript" src="${url}">
 <!-- //prevent jspx minimization -->
 	
 </script>
+
+	<s:url var="url" value="/js/biblio/jquery-migrate-1.4.1.js">
+	</s:url>
+	<script type="text/javascript" src="${url}">
+		<!-- //prevent jspx minimization -->
+
+	</script>
 
 <!--
 <s:url var="url" value="http://code.jquery.com/jquery-migrate-1.4.1.js">
@@ -59,6 +68,7 @@
 </script>
 -->
 
+	<!--TODO: Update jquery and plugins-->
 <s:url var="url" value="/js/biblio/jquery.ui.js">
 	<!-- //prevent jspx minimization -->
 </s:url>

@@ -185,6 +185,7 @@ OBA.Sidebar = function() {
 			// marker
 			var marker = routeMap.addDisambiguationMarker(latlng, address, neighborhood, (i + 1));
 
+			// TODO: Replace hover with mouseenter and mouseleave https://api.jquery.com/hover/
 			listItem.hover(function() {
 				routeMap.highlightDisambiguationMarker(marker, (i + 1));
 				listItem.css("background-image", "url('img/location/location_active_sidebar_" + (i + 1) + ".png')");
@@ -252,7 +253,8 @@ OBA.Sidebar = function() {
 					
 					(wizard !== null)? results.triggerHandler("stop_click") : null;
 				});
-				
+
+				// TODO: Replace hover with mouseenter and mouseleave https://api.jquery.com/hover/
 				stopLink.hover(function() {
 					routeMap.highlightStop(stop);
 				}, function() {
@@ -347,6 +349,7 @@ OBA.Sidebar = function() {
 				});
 	
 				// hover polylines
+				// TODO: Replace hover with mouseenter and mouseleave https://api.jquery.com/hover/
 				titleBox.hover(function(e) {
 					titleBox.css("color", "#" + routeResult.color);
 				}, function(e) {
@@ -431,7 +434,8 @@ OBA.Sidebar = function() {
 				jQuery.each(routeResult.directions, function(_, direction) {
 					allPolylines = allPolylines.concat(direction.polylines);
 				});
-				
+
+				// TODO: Replace hover with mouseenter and mouseleave https://api.jquery.com/hover/
 				link.hover(function() {
 					routeMap.showHoverPolyline(allPolylines, routeResult.color);
 				}, function() {
@@ -498,6 +502,7 @@ OBA.Sidebar = function() {
 			}
 
 			if(allPolylines.length > 0) {
+				// TODO: Replace hover with mouseenter and mouseleave https://api.jquery.com/hover/
 				link.hover(function() {
 					routeMap.showHoverPolyline(allPolylines, route.color);
 				}, function() {
@@ -862,6 +867,7 @@ OBA.Sidebar = function() {
 };
 
 // for IE: only start using google maps when the VML/SVG namespace is ready
+// TODO: determine why we do this browser check, and replace with feature detection if possible https://stackoverflow.com/a/9645810
 if(jQuery.browser.msie) {
 	window.onload = function() { OBA.Sidebar().initialize(); };
 } else {

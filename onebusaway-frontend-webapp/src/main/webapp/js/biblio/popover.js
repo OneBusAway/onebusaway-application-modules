@@ -40,6 +40,7 @@
     // set CSS transition event type
     if ( $.support.transition ) {
       transitionEnd = "TransitionEnd"
+      // TODO: Replace browser detection with feature detection https://stackoverflow.com/a/9645810
       if ( $.browser.webkit ) {
       	transitionEnd = "webkitTransitionEnd"
       } else if ( $.browser.mozilla ) {
@@ -300,6 +301,7 @@
       }
     }
 
+    //TODO: replace live() with on() https://api.jquery.com/live/
     if (!options.live) {
       this.each(function() {
         get(this)
@@ -307,6 +309,7 @@
     }
 
     if (options.trigger != 'manual') {
+      //TODO: replace live() with on() https://api.jquery.com/live/
       binder   = options.live ? 'live' : 'bind'
       eventIn  = options.trigger == 'hover' ? 'mouseenter' : 'focus'
       eventOut = options.trigger == 'hover' ? 'mouseleave' : 'blur'
