@@ -122,24 +122,24 @@ public class GtfsRealtimeTripLibraryTest {
     BlockInstance blockInstanceB = new BlockInstance(blockConfigB, 0L);
 
     Mockito.when(
-        _blockCalendarService.getActiveBlocks(Mockito.eq(blockA.getId()),
+        _serviceSource.getBlockCalendarService().getActiveBlocks(Mockito.eq(blockA.getId()),
             Mockito.anyLong(), Mockito.anyLong())).thenReturn(
         Arrays.asList(blockInstanceA));
     Mockito.when(
-        _blockCalendarService.getActiveBlocks(Mockito.eq(blockB.getId()),
+        _serviceSource.getBlockCalendarService().getActiveBlocks(Mockito.eq(blockB.getId()),
             Mockito.anyLong(), Mockito.anyLong())).thenReturn(
         Arrays.asList(blockInstanceB));
     Mockito.when(
-            _blockCalendarService.getBlockInstance(Mockito.eq(tripA.getBlock().getId()),
+            _serviceSource.getBlockCalendarService().getBlockInstance(Mockito.eq(tripA.getBlock().getId()),
                     Mockito.anyLong())).thenReturn(blockInstanceA);
     Mockito.when(
-            _blockCalendarService.getBlockInstance(Mockito.eq(tripB.getBlock().getId()),
+            _serviceSource.getBlockCalendarService().getBlockInstance(Mockito.eq(tripB.getBlock().getId()),
                     Mockito.anyLong())).thenReturn(blockInstanceA);
     Mockito.when(
-            _blockCalendarService.getBlockInstance(Mockito.eq(tripC.getBlock().getId()),
+            _serviceSource.getBlockCalendarService().getBlockInstance(Mockito.eq(tripC.getBlock().getId()),
                     Mockito.anyLong())).thenReturn(blockInstanceB);
     Mockito.when(
-            _blockCalendarService.getBlockInstance(Mockito.eq(tripD.getBlock().getId()),
+            _serviceSource.getBlockCalendarService().getBlockInstance(Mockito.eq(tripD.getBlock().getId()),
                     Mockito.anyLong())).thenReturn(blockInstanceB);
 
     FeedMessage.Builder vehiclePositions = createFeed();
@@ -199,11 +199,11 @@ public class GtfsRealtimeTripLibraryTest {
         serviceIds("s1"), tripA);
     BlockInstance blockInstanceA = new BlockInstance(blockConfigA, 0L);
     Mockito.when(
-        _blockCalendarService.getActiveBlocks(Mockito.eq(blockA.getId()),
+        _serviceSource.getBlockCalendarService().getActiveBlocks(Mockito.eq(blockA.getId()),
             Mockito.anyLong(), Mockito.anyLong())).thenReturn(
         Arrays.asList(blockInstanceA));
     Mockito.when(
-            _blockCalendarService.getBlockInstance(Mockito.eq(tripA.getBlock().getId()),
+            _serviceSource.getBlockCalendarService().getBlockInstance(Mockito.eq(tripA.getBlock().getId()),
                     Mockito.anyLong())).thenReturn(blockInstanceA);
 
     CombinedTripUpdatesAndVehiclePosition update = new CombinedTripUpdatesAndVehiclePosition();
@@ -239,11 +239,11 @@ public class GtfsRealtimeTripLibraryTest {
         serviceIds("s1"), tripA);
     BlockInstance blockInstanceA = new BlockInstance(blockConfigA, 0L);
     Mockito.when(
-        _blockCalendarService.getActiveBlocks(Mockito.eq(blockA.getId()),
+        _serviceSource.getBlockCalendarService().getActiveBlocks(Mockito.eq(blockA.getId()),
             Mockito.anyLong(), Mockito.anyLong())).thenReturn(
         Arrays.asList(blockInstanceA));
     Mockito.when(
-            _blockCalendarService.getBlockInstance(Mockito.eq(tripA.getBlock().getId()),
+            _serviceSource.getBlockCalendarService().getBlockInstance(Mockito.eq(tripA.getBlock().getId()),
                     Mockito.anyLong())).thenReturn(blockInstanceA);
 
     CombinedTripUpdatesAndVehiclePosition update = new CombinedTripUpdatesAndVehiclePosition();
@@ -282,11 +282,11 @@ public class GtfsRealtimeTripLibraryTest {
             serviceIds("s1"), tripA);
     BlockInstance blockInstanceA = new BlockInstance(blockConfigA, 0L);
     Mockito.when(
-            _blockCalendarService.getActiveBlocks(Mockito.eq(blockA.getId()),
+            _serviceSource.getBlockCalendarService().getActiveBlocks(Mockito.eq(blockA.getId()),
                     Mockito.anyLong(), Mockito.anyLong())).thenReturn(
             Collections.singletonList(blockInstanceA));
     Mockito.when(
-            _blockCalendarService.getBlockInstance(Mockito.eq(tripA.getBlock().getId()),
+            _serviceSource.getBlockCalendarService().getBlockInstance(Mockito.eq(tripA.getBlock().getId()),
                     Mockito.anyLong())).thenReturn(blockInstanceA);
 
     CombinedTripUpdatesAndVehiclePosition update = new CombinedTripUpdatesAndVehiclePosition();
@@ -333,7 +333,7 @@ public class GtfsRealtimeTripLibraryTest {
     Mockito.when(_entitySource.getTrip("tripA")).thenReturn(tripA);
     
     Mockito.when(
-        _blockCalendarService.getActiveBlocks(Mockito.eq(blockA.getId()),
+        _serviceSource.getBlockCalendarService().getActiveBlocks(Mockito.eq(blockA.getId()),
             Mockito.anyLong(), Mockito.longThat(new ArgumentMatcher() {
               @Override
               public boolean matches(Object argument) {
@@ -342,7 +342,7 @@ public class GtfsRealtimeTripLibraryTest {
             }))).thenReturn(Arrays.asList(blockInstanceA));
     
     Mockito.when(
-        _blockCalendarService.getActiveBlocks(Mockito.eq(blockA.getId()),
+        _serviceSource.getBlockCalendarService().getActiveBlocks(Mockito.eq(blockA.getId()),
             Mockito.anyLong(), Mockito.longThat(new ArgumentMatcher() {
               @Override
               public boolean matches(Object argument) {
@@ -351,7 +351,7 @@ public class GtfsRealtimeTripLibraryTest {
             }))).thenReturn(Arrays.asList(blockInstanceB));
     
     Mockito.when(
-            _blockCalendarService.getBlockInstance(Mockito.eq(tripA.getBlock().getId()),
+            _serviceSource.getBlockCalendarService().getBlockInstance(Mockito.eq(tripA.getBlock().getId()),
                     Mockito.longThat(new ArgumentMatcher() {
                       @Override
                       public boolean matches(Object argument) {
@@ -359,7 +359,7 @@ public class GtfsRealtimeTripLibraryTest {
                       }
                     }))).thenReturn(blockInstanceB);
     Mockito.when(
-            _blockCalendarService.getBlockInstance(Mockito.eq(tripA.getBlock().getId()),
+            _serviceSource.getBlockCalendarService().getBlockInstance(Mockito.eq(tripA.getBlock().getId()),
                     Mockito.longThat(new ArgumentMatcher() {
                       @Override
                       public boolean matches(Object argument) {
@@ -403,10 +403,10 @@ public class GtfsRealtimeTripLibraryTest {
     Mockito.when(_entitySource.getTrip("tripA")).thenReturn(tripA);
 
     Mockito.when(
-        _blockCalendarService.getActiveBlocks(Mockito.eq(blockA.getId()),
+        _serviceSource.getBlockCalendarService().getActiveBlocks(Mockito.eq(blockA.getId()),
             Mockito.anyLong(), Mockito.anyLong())).thenReturn(Arrays.asList(blockInstanceA));
     Mockito.when(
-            _blockCalendarService.getBlockInstance(Mockito.eq(tripA.getBlock().getId()),
+            _serviceSource.getBlockCalendarService().getBlockInstance(Mockito.eq(tripA.getBlock().getId()),
                     Mockito.anyLong())).thenReturn(blockInstanceA);
 
     StopTimeUpdate stopTimeUpdate = stopTimeUpdateBuilder.build();
@@ -473,10 +473,10 @@ public class GtfsRealtimeTripLibraryTest {
     Mockito.when(_entitySource.getTrip("tripA")).thenReturn(tripA);
     
     Mockito.when(
-        _blockCalendarService.getActiveBlocks(Mockito.eq(blockA.getId()),
+        _serviceSource.getBlockCalendarService().getActiveBlocks(Mockito.eq(blockA.getId()),
             Mockito.anyLong(), Mockito.anyLong())).thenReturn(Arrays.asList(blockInstanceA));
     Mockito.when(
-            _blockCalendarService.getBlockInstance(Mockito.eq(tripA.getBlock().getId()),
+            _serviceSource.getBlockCalendarService().getBlockInstance(Mockito.eq(tripA.getBlock().getId()),
                     Mockito.anyLong())).thenReturn(blockInstanceA);
 
     VehicleLocationRecord record = vehicleLocationRecord(tripUpdate);
@@ -517,10 +517,10 @@ public class GtfsRealtimeTripLibraryTest {
     Mockito.when(_entitySource.getTrip("tripA")).thenReturn(tripA);
     
     Mockito.when(
-        _blockCalendarService.getActiveBlocks(Mockito.eq(blockA.getId()),
+        _serviceSource.getBlockCalendarService().getActiveBlocks(Mockito.eq(blockA.getId()),
             Mockito.anyLong(), Mockito.anyLong())).thenReturn(Arrays.asList(blockInstanceA));
     Mockito.when(
-            _blockCalendarService.getBlockInstance(Mockito.eq(tripA.getBlock().getId()),
+            _serviceSource.getBlockCalendarService().getBlockInstance(Mockito.eq(tripA.getBlock().getId()),
                     Mockito.anyLong())).thenReturn(blockInstanceA);
 
     VehicleLocationRecord record = vehicleLocationRecord(tripUpdate);
@@ -558,10 +558,10 @@ public class GtfsRealtimeTripLibraryTest {
     Mockito.when(_entitySource.getTrip("tripA")).thenReturn(tripA);
     
     Mockito.when(
-        _blockCalendarService.getActiveBlocks(Mockito.eq(blockA.getId()),
+        _serviceSource.getBlockCalendarService().getActiveBlocks(Mockito.eq(blockA.getId()),
             Mockito.anyLong(), Mockito.anyLong())).thenReturn(Arrays.asList(blockInstanceA));
     Mockito.when(
-            _blockCalendarService.getBlockInstance(Mockito.eq(tripA.getBlock().getId()),
+            _serviceSource.getBlockCalendarService().getBlockInstance(Mockito.eq(tripA.getBlock().getId()),
                     Mockito.anyLong())).thenReturn(blockInstanceA);
 
     VehicleLocationRecord record = vehicleLocationRecord(tripUpdate);
@@ -613,10 +613,10 @@ public class GtfsRealtimeTripLibraryTest {
     Mockito.when(_entitySource.getTrip("tripB")).thenReturn(tripB);
 
     Mockito.when(
-            _blockCalendarService.getActiveBlocks(Mockito.eq(blockA.getId()),
+            _serviceSource.getBlockCalendarService().getActiveBlocks(Mockito.eq(blockA.getId()),
                     Mockito.anyLong(), Mockito.anyLong())).thenReturn(Arrays.asList(blockInstanceA));
     Mockito.when(
-            _blockCalendarService.getBlockInstance(Mockito.eq(tripA.getBlock().getId()),
+            _serviceSource.getBlockCalendarService().getBlockInstance(Mockito.eq(tripA.getBlock().getId()),
                     Mockito.anyLong())).thenReturn(blockInstanceA);
 
     VehicleLocationRecord record = vehicleLocationRecord(tuA, tuB);
@@ -654,7 +654,7 @@ public class GtfsRealtimeTripLibraryTest {
     Mockito.when(_entitySource.getTrip("tripA")).thenReturn(tripA);
 
     Mockito.when(
-            _blockCalendarService.getActiveBlocks(Mockito.eq(blockA.getId()),
+            _serviceSource.getBlockCalendarService().getActiveBlocks(Mockito.eq(blockA.getId()),
                     Mockito.anyLong(), Mockito.longThat(new ArgumentMatcher() {
                       @Override
                       public boolean matches(Object argument) {
@@ -663,7 +663,7 @@ public class GtfsRealtimeTripLibraryTest {
                     }))).thenReturn(Arrays.asList(blockInstanceA));
 
     Mockito.when(
-            _blockCalendarService.getActiveBlocks(Mockito.eq(blockA.getId()),
+            _serviceSource.getBlockCalendarService().getActiveBlocks(Mockito.eq(blockA.getId()),
                     Mockito.anyLong(), Mockito.longThat(new ArgumentMatcher() {
                       @Override
                       public boolean matches(Object argument) {
@@ -672,7 +672,7 @@ public class GtfsRealtimeTripLibraryTest {
                     }))).thenReturn(Arrays.asList(blockInstanceB));
 
     Mockito.when(
-            _blockCalendarService.getBlockInstance(Mockito.eq(tripA.getBlock().getId()),
+            _serviceSource.getBlockCalendarService().getBlockInstance(Mockito.eq(tripA.getBlock().getId()),
                     Mockito.anyLong())).thenReturn(blockInstanceA);
 
 
@@ -779,11 +779,11 @@ public class GtfsRealtimeTripLibraryTest {
             serviceIds("s1"), tripA, tripB, tripC);
     BlockInstance blockInstanceA = new BlockInstance(blockConfigA, 0L);
     Mockito.when(
-            _blockCalendarService.getActiveBlocks(Mockito.eq(blockA.getId()),
+            _serviceSource.getBlockCalendarService().getActiveBlocks(Mockito.eq(blockA.getId()),
                     Mockito.anyLong(), Mockito.anyLong())).thenReturn(
             Arrays.asList(blockInstanceA));
     Mockito.when(
-            _blockCalendarService.getBlockInstance(Mockito.eq(tripA.getBlock().getId()),
+            _serviceSource.getBlockCalendarService().getBlockInstance(Mockito.eq(tripA.getBlock().getId()),
                     Mockito.anyLong())).thenReturn(blockInstanceA);
 
     // VehiclePosition:  has tripId "tripA"
