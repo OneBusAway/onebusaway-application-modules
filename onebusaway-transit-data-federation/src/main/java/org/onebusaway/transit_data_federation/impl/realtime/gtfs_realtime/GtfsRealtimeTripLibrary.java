@@ -911,7 +911,7 @@ public class GtfsRealtimeTripLibrary {
             }
           AgencyAndId keyAndId = fuzzyMatchTripId(new AgencyAndId(instance.getBlock().getBlock().getId().getAgencyId(), newTripId));
           if (keyAndId != null) {
-            tripUpdatesByTripId.put(AgencyAndIdLibrary.convertToString(keyAndId), tempTripUpdatesByTripId.get(existingTripId));
+            tripUpdatesByTripId.put(keyAndId.getId(), tempTripUpdatesByTripId.get(existingTripId));
           }
         }
       } else {
@@ -932,7 +932,7 @@ public class GtfsRealtimeTripLibrary {
       for (BlockTripEntry blockTrip : blockTrips) {
         TripEntry trip = blockTrip.getTrip();
         AgencyAndId tripId = trip.getId();
-        List<TripUpdate> updatesForTrip = tripUpdatesByTripId.get(AgencyAndIdLibrary.convertToString(tripId));
+        List<TripUpdate> updatesForTrip = tripUpdatesByTripId.get(tripId.getId());
 
         if (updatesForTrip != null) {
           for (TripUpdate tripUpdate : updatesForTrip) {
