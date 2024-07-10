@@ -39,15 +39,16 @@
 
     // set CSS transition event type
     if ( $.support.transition ) {
-      transitionEnd = "TransitionEnd"
-      // TODO: Replace browser detection with feature detection https://stackoverflow.com/a/9645810
-      if ( $.browser.webkit ) {
-      	transitionEnd = "webkitTransitionEnd"
-      } else if ( $.browser.mozilla ) {
-      	transitionEnd = "transitionend"
-      } else if ( $.browser.opera ) {
-      	transitionEnd = "oTransitionEnd"
+      var transEndEventNames = {
+        'WebkitTransition' : 'webkitTransitionEnd',
+        'MozTransition'    : 'transitionend',
+        'OTransition'      : 'oTransitionEnd',
+        'msTransition'     : 'MSTransitionEnd',
+        'transition'       : 'transitionend'
       }
+      var transitionPropName = Modernizr.prefixed('transition')
+
+      transitionEnd = transEndEventNames[ transitionPropName ]
     }
 
   })

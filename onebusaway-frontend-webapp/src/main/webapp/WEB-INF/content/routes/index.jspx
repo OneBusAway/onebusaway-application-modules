@@ -23,6 +23,15 @@
     <s:set var="useAgencyId" value="useAgencyId" />
     <s:set var="showAgencyNames" value="showAgencyNames" />
     <head>
+        <s:url var="url" value="/js/biblio/jquery.js">
+            <s:param name="v"><s:property value="frontEndVersion" /></s:param>
+        </s:url>
+        <script type="text/javascript" src="${url}"><!-- //prevent jspx minimization --></script>
+
+        <s:url var="url" value="/js/biblio/jquery-migrate-1.4.1.js">
+            <s:param name="v"><s:property value="frontEndVersion" /></s:param>
+        </s:url>
+        <script type="text/javascript" src="${url}"><!-- //prevent jspx minimization --></script>
         <s:url var="url" value="/css/routes/routes.css">
             <s:param name="v"><s:property value="frontEndVersion" /></s:param>
         </s:url>

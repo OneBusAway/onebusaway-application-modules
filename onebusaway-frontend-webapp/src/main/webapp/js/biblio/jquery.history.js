@@ -20,7 +20,7 @@
         get: function(win) {
             var hash = ((win || window).location.hash).replace(/^#/, '');
             // TODO: Replace browser detection with feature detection https://stackoverflow.com/a/9645810
-            return $.browser.mozilla ? hash : decodeURIComponent(hash);
+            return decodeURIComponent(hash);
         },
         encoder: encodeURIComponent
     };
@@ -142,10 +142,5 @@
         }
     };
 
-    // TODO: replace browser detection with feature detection https://stackoverflow.com/a/9645810
-    if($.browser.msie && ($.browser.version < 8 || document.documentMode < 8)) {
-        $.extend(_, IframeImpl);
-    } else {
-        $.extend(_, SimpleImpl);
-    }
+    $.extend(_, SimpleImpl);
 })(jQuery);

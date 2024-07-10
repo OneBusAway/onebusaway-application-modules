@@ -356,6 +356,7 @@
 				<configuration>
 					<excludes combine.children="append">
 						<exclude>**/dateFormat.js</exclude>
+						<exclude>**/modernizr-custom.js</exclude>
 						<exclude>**/popover.js</exclude>
 						<exclude>**/GoogleTranslate.js</exclude>
 						<exclude>**/markerManager.js</exclude>

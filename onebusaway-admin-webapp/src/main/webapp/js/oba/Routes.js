@@ -15,13 +15,10 @@
  */
 
 $(document).ready(function() {
-    // TODO: Replace hover with mouseenter and mouseleave https://api.jquery.com/hover/
-    $('p.name > a').hover(
-        function() {
-            var parentTag = $(this).parent().css('border-bottom-color');
-            $(this).css('color', parentTag);
-        }, function() {
-            $(this).css('color', '#000');
-        }
-        );
+    $('p.name > a').on("mouseenter", function() {
+        var parentTag = $(this).parent().css('border-bottom-color');
+        $(this).css('color', parentTag);
+    }).on("mouseleave", function() {
+        $(this).css('color', '#000');
+    });
 });
