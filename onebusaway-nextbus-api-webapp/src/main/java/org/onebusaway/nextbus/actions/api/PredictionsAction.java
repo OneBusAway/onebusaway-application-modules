@@ -242,9 +242,8 @@ public class PredictionsAction extends NextBusApiBase implements
       }
       StringBuilder routeStop = new StringBuilder();
 
-    for(RouteStopId routeStopId: routeStopIds){
-      routeStop.append(toString(config, routeStopId));
-    }
+      toString(routeStop, config, routeStopIds);
+
 
       String uri = serviceUrl + routeStop.toString() + "format=" + REQUEST_TYPE;
       _log.info(uri);
@@ -252,24 +251,34 @@ public class PredictionsAction extends NextBusApiBase implements
       return uri;
   }
 
-  private String toString(ConfigurationUtil config, RouteStopId routeStopId) {
-    StringBuilder routeStop = new StringBuilder();
+  private void toString(StringBuilder sb, ConfigurationUtil config, Set<RouteStopId> routeStopIds) {
     if (config.getUrlOverride() == null) {
-      // TTC format of parameters
-      routeStop.append("rs=");
-      routeStop.append(routeStopId.getRouteId().getId());
-      routeStop.append("|");
-      routeStop.append(routeStopId.getStopId().getId());
-      routeStop.append("&");
+      // format I: Transitime/TTC
+      // http://localhost:8080/api/v1/key/prod3273b0/agency/1/command/predictions?rs=X2|5988&format=json
+      for(RouteStopId routeStopId: routeStopIds) {
+        sb.append(toString(routeStopId));
+      }
     } else {
-      // alternative format of params
-      routeStop.append("stop=");
-      routeStop.append(routeStopId.getStopId().getId());
-      routeStop.append("&");
-      routeStop.append("route=");
-      routeStop.append(routeStopId.getRouteId().getId());
-      routeStop.append("&");
+      // format II.a: External API
+      // https://localhost/real-time/wmata/predictions?stop=5988&format=json
+      sb.append("stop=");
+      sb.append(routeStopIds.iterator().next().getStopId().getId());
+      sb.append("&");
+
+      // format II.b: External API
+      // https://localhost/real-time/wmata/predictions?stop=5988&route=X2&stop=5988&format=json
+      // TODO:  not supported
     }
+
+  }
+
+  private String toString(RouteStopId routeStopId) {
+    StringBuilder routeStop = new StringBuilder();
+    routeStop.append("rs=");
+    routeStop.append(routeStopId.getRouteId().getId());
+    routeStop.append("|");
+    routeStop.append(routeStopId.getStopId().getId());
+    routeStop.append("&");
     return routeStop.toString();
   }
 
