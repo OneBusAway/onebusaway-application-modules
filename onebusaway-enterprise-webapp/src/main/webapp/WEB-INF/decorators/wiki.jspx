@@ -105,7 +105,6 @@
 &lt;![endif]--&gt;
 </jsp:text>
 
-	<!--TODO: Update jquery and plugins-->
 <s:url var="url" value="/js/biblio/jquery.js">
 	<s:param name="v">
 		<s:property value="frontEndVersion" />
@@ -116,13 +115,13 @@
 	
 </script>
 
-<s:url var="url" value="/js/biblio/jquery-migrate-1.4.1.js">
+<s:url var="url" value="/js/biblio/jquery-migrate-3.4.1.js">
 	<s:param name="v">
 		<s:property value="frontEndVersion" />
 	</s:param>
 </s:url>
 <script type="text/javascript" src="${url}">
-	<!-- //prevent jspx minimization -->
+<!-- //prevent jspx minimization -->
 
 </script>
 

@@ -122,7 +122,7 @@
         
         $tip
         	.find('.close')
-        	.click( function(e) { e.preventDefault(); $tip.hide(); });
+        	.on("click",  function(e) { e.preventDefault(); $tip.hide(); });
 
         $tip
           .css(tp)
@@ -148,7 +148,7 @@
       }
            
       $.support.transition && this.$tip.hasClass('fade') ?
-        $tip.bind(transitionEnd, removeElement) :
+        $tip.on(transitionEnd, removeElement) :
         removeElement()
     }
 
@@ -302,7 +302,6 @@
       }
     }
 
-    //TODO: replace live() with on() https://api.jquery.com/live/
     if (!options.live) {
       this.each(function() {
         get(this)
@@ -310,8 +309,7 @@
     }
 
     if (options.trigger != 'manual') {
-      //TODO: replace live() with on() https://api.jquery.com/live/
-      binder   = options.live ? 'live' : 'bind'
+      binder   = 'on'
       eventIn  = options.trigger == 'hover' ? 'mouseenter' : 'focus'
       eventOut = options.trigger == 'hover' ? 'mouseleave' : 'blur'
       this[binder](eventIn, enter)[binder](eventOut, leave)

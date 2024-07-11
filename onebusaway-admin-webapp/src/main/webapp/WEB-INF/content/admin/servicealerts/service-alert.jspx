@@ -24,7 +24,6 @@
 <title><s:text name="ServiceAlert" /></title>
 <link rel="stylesheet" type="text/css" media="all" href="${oba:resource('/css/admin.css')}"/>
 
-    <!--TODO: Update jquery and plugins-->
 <s:url var="url" value="/css/jquery-ui.css" />
 <link rel="stylesheet" type="text/css" href="${url}">
 	<!-- //prevent jspx minimization -->
@@ -35,21 +34,18 @@
 	<!-- //prevent jspx minimization -->
 </link>
 
-    <!--TODO: Update jquery and plugins-->
 <s:url var="url" value="/js/biblio/jquery.js" />
 <script type="text/javascript" src="${url}">
 <!-- //prevent jspx minimization -->
 	
 </script>
 
-    <!--TODO: Update jquery and plugins-->
 <s:url var="url" value="/js/biblio/jquery.ui.js" />
 <script type="text/javascript" src="${url}">
 <!-- //prevent jspx minimization -->
 	
 </script>
 
-    <!--TODO: Update jquery and plugins-->
 <s:url var="url" value="/js/biblio/jquery.timepicker-1.3.5.min.js">
     <!-- //prevent jspx minimization -->
 </s:url>
@@ -62,7 +58,7 @@
 </s:url>
 <link rel="stylesheet" type="text/css" href="${url}" ></link>
 
-    <s:url var="url" value="/js/biblio/jquery-migrate-1.4.1.js" />
+    <s:url var="url" value="/js/biblio/jquery-migrate-3.4.1.js" />
     <script type="text/javascript" src="${url}">
         <!-- //prevent jspx minimization -->
 

@@ -17,19 +17,19 @@
 function initCreate() {
     jQuery('#Create #filenameError').hide();
     // hookup ajax call to select
-    jQuery("#newDirectoryButton").click(onCreateDatasetClick);
+    jQuery("#newDirectoryButton").on("click", onCreateDatasetClick);
 
     // use an existing dataset
-    jQuery("#existingDirectoryButton").click(onExistingDatasetClick);
+    jQuery("#existingDirectoryButton").on("click", onExistingDatasetClick);
 
     // copy existing dataset to a new directory
-    jQuery(".copyDirectory").click(onCopyExistingDatasetClick);
+    jQuery(".copyDirectory").on("click", onCopyExistingDatasetClick);
 
     // delete existing dataset
-    jQuery(".deleteDirectory").click(onDeleteExistingDatasetClick);
+    jQuery(".deleteDirectory").on("click", onDeleteExistingDatasetClick);
 
     //toggle advanced option contents
-    jQuery("#createDirectory #advancedOptions #expand").bind({
+    jQuery("#createDirectory #advancedOptions #expand").on({
         'click' : toggleAdvancedOptions	});
 
     //initially hide the Request Id label if the Request Id is blank
@@ -38,10 +38,10 @@ function initCreate() {
     }
 
     //handle create, select and copy radio buttons
-    jQuery("input[name='options']").change(directoryOptionChanged);
+    jQuery("input[name='options']").on("change", directoryOptionChanged);
 
     //Handle validate button click event
-    jQuery("#prevalidateInputs #validateBox #validateButton").click(onValidateClick);
+    jQuery("#prevalidateInputs #validateBox #validateButton").on("click", onValidateClick);
 
     //Initialize date pickers
     jQuery("#startDatePicker").datepicker(
@@ -93,19 +93,19 @@ function initCreate() {
 
 
     // On choose tab, only one existing directory can be selected at a time
-    jQuery("#existingDataset tr input:checkbox").click(function () {
+    jQuery("#existingDataset tr input:checkbox").on("click", function () {
         var state = $(this).prop("checked");
         $(this).parent().parent().parent().find('input:checked').prop("checked", false);
         $(this).prop("checked", state);
         // If this item is selected, enable the "Add files..." button
         if (state == true) {
-            jQuery("#existingDirectoryButton").removeAttr("disabled").css("color", "#000");
+            jQuery("#existingDirectoryButton").prop("disabled", false).css("color", "#000");
         } else {
             jQuery("#existingDirectoryButton").attr("disabled", "disabled").css("color", "#999");
         }
     });
 
-    jQuery("#create_continue").click(onCreateContinueClick);
+    jQuery("#create_continue").on("click", onCreateContinueClick);
 
     // For "Copy" popup to specify a destination directory
     $("#copyPopup").dialog({
@@ -193,7 +193,7 @@ function onExistingDatasetClick() {
 }
 
 function enableSelectButton() {
-    jQuery("#Create #createDataset #newDirectoryButton").removeAttr("disabled").css("color", "#000");
+    jQuery("#Create #createDataset #newDirectoryButton").prop("disabled", false).css("color", "#000");
 }
 
 function disableSelectButton() {
@@ -201,7 +201,7 @@ function disableSelectButton() {
 }
 
 function enableAddFilesButton() {
-    jQuery("#Create #createDataset #existingDirectoryButton").removeAttr("disabled").css("color", "#000");
+    jQuery("#Create #createDataset #existingDirectoryButton").prop("disabled", false).css("color", "#000");
 }
 
 function disableAddFilesButton() {
@@ -215,7 +215,7 @@ function onCreateDatasetClick() {
     if (agencyMetadataAvailable) {
         $('#agency_data tr').slice(1).remove();
         //onAddAnotherAgencyClick("file");
-        jQuery("#addAnotherAgency").click();
+        jQuery("#addAnotherAgency").trigger("click");
 
     }
     $("#uploadFiles #bundleComment").val("");
@@ -546,7 +546,7 @@ function directoryOptionChanged() {
             jQuery(element).insertAfter("#directoryButton");
             //Enable or disable create/select button when user enters/removes the destination
             // directory name for a Copy
-            jQuery("#createDirectoryContents #destDirectoryName").bind("input propertychange", function () {
+            jQuery("#createDirectoryContents #destDirectoryName").on("input propertychange", function () {
                 var text = selectedDirectory;
                 var copyDestText = jQuery("#createDirectory #destDirectoryName").val();
                 if (text.length > 0 && copyDestText.length > 0) {

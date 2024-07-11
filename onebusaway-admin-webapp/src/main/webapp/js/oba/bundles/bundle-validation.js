@@ -15,13 +15,13 @@
  */
 
 jQuery(function() {
-	jQuery("#csvFile").click(onCsvFileClick);
+	jQuery("#csvFile").on("click", onCsvFileClick);
 
-	jQuery("#csvOptions input:radio").click(onCsvOptionsClick);
+	jQuery("#csvOptions input:radio").on("click", onCsvOptionsClick);
 
-	jQuery("#environmentOptions input:radio").click(onEnvironmentOptionsClick);
+	jQuery("#environmentOptions input:radio").on("click", onEnvironmentOptionsClick);
 
-	jQuery("#validateBundleButton").click(onValidateBundleButtonClick);
+	jQuery("#validateBundleButton").on("click", onValidateBundleButtonClick);
 
 	$("#csvOptions #csvFile").hide();
 });

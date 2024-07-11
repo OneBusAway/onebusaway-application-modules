@@ -16,12 +16,12 @@
 
 function initDownload() {
     //Handle download button click event
-    jQuery("#downloadBundle_downloadButton").click(onDownloadBundleClick);
+    jQuery("#downloadBundle_downloadButton").on("click", onDownloadBundleClick);
 
 }
 
 function enableDownloadButton() {
-    jQuery("#downloadBundle_downloadButton").removeAttr("disabled").css("color", "#000");
+    jQuery("#downloadBundle_downloadButton").prop("disabled", false).css("color", "#000");
 }
 
 function disableDownloadButton() {

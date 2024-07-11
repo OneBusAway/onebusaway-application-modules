@@ -23,7 +23,7 @@ function initValidate() {
     jQuery("#prevalidate_progress").hide();
 
     //toggle validation progress list
-    jQuery("#prevalidateInputs #prevalidate_progress #expand").bind({
+    jQuery("#prevalidateInputs #prevalidate_progress #expand").on({
         'click' : toggleValidationResultList});
 
     //initially disable the Validate button on the Pre-validate tab
@@ -37,7 +37,7 @@ function onPrevalidateContinueClick() {
 }
 
 function enableValidateButton() {
-    jQuery("#prevalidateInputs #validateBox #validateButton").removeAttr("disabled").css("color", "#000");
+    jQuery("#prevalidateInputs #validateBox #validateButton").prop("disabled", false).css("color", "#000");
 }
 
 function disableValidateButton() {
@@ -193,7 +193,7 @@ function updateValidateList(id) {
             }
             txt = txt + "</ul>";
             jQuery("#prevalidate_fileList").html(txt);
-            jQuery("#prevalidateInputs #validateBox #validateButton").removeAttr("disabled");
+            jQuery("#prevalidateInputs #validateBox #validateButton").prop("disabled", false);
             var continueButton = jQuery("#prevalidate_continue");
             enableContinueButton(continueButton);
         },

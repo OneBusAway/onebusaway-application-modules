@@ -29,7 +29,7 @@ function initCompare() {
     jQuery("#compareToArchivedDatasetList").on("change", onCompareToArchivedDatasetChange);
     jQuery("#compareToArchivedBuildNameList").on("change", onCompareToArchivedBuildNameChange);
 
-    jQuery("#printFixedRouteRptButton").click(onPrintFixedRouteRptClick);
+    jQuery("#printFixedRouteRptButton").on("click", onPrintFixedRouteRptClick);
 
     // Set values for dataset select lists on Compare tab
     $("#currentDatasetList > option").each(function(index, value) {
@@ -50,7 +50,7 @@ function initCompare() {
     $("#compareToArchivedDatasetList").hide();
     $("#compareToArchivedBuildNameList").hide();
 
-    $('#Compare #useArchiveCheckbox').change(function() {
+    $('#Compare #useArchiveCheckbox').on("change", function() {
         $("#diffResultsTable tbody").empty();
         $('#fixedRouteDiffTable tbody').empty();
         if($(this).is(":checked")) {

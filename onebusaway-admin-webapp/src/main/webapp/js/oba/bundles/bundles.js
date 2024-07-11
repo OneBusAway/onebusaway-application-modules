@@ -52,15 +52,15 @@ jQuery(function() {
 		hash = hash.split('?')[0];
 		// TODO this doesn't work when fromEmail query string is present 
 		// alert("hash=" + hash);
-		$(hash).click();
+		$(hash).trigger("click");
 	}
 	// politely set our hash as tabs are changed
-	jQuery("#tabs").bind("tabsshow", function(event, ui) {
+	jQuery("#tabs").on("tabsshow", function(event, ui) {
 		window.location.hash = ui.tab.hash;
 		if (ui.tab.hash == "#Deploy") {
 			// when deploy tab clicked, pre-load some data
-			jQuery("#deployBundle_listButton").click();
-			jQuery("#deployBundle_listCurrentButton").click();
+			jQuery("#deployBundle_listButton").trigger("click");
+			jQuery("#deployBundle_listCurrentButton").trigger("click");
 		}
 	});
 
@@ -75,15 +75,15 @@ jQuery(function() {
 	initSync();
 
 
-	jQuery("#prevalidate_continue").click(onPrevalidateContinueClick);
+	jQuery("#prevalidate_continue").on("click", onPrevalidateContinueClick);
 
-	jQuery("#upload_continue").click(onUploadContinueClick);
+	jQuery("#upload_continue").on("click", onUploadContinueClick);
 
-	jQuery("#build_continue").click(onBuildContinueClick);
+	jQuery("#build_continue").on("click", onBuildContinueClick);
 
-	jQuery("#stage_continue").click(onStageContinueClick);
+	jQuery("#stage_continue").on("click", onStageContinueClick);
 
-	jQuery("#deploy_continue").click(onDeployContinueClick);
+	jQuery("#deploy_continue").on("click", onDeployContinueClick);
 
 	var qs = parseQuerystring();
 	if (qs["fromEmail"] == "true") {
@@ -140,7 +140,7 @@ function showThisAgency(agency){
 
 
 function enableContinueButton(continueButton) {
-	jQuery(continueButton).removeAttr("disabled").css("color", "#000");
+	jQuery(continueButton).prop("disabled", false).css("color", "#000");
 }
 
 function disableContinueButton(continueButton) {
@@ -202,7 +202,7 @@ function getAgencyMetadata(){
 				agencyMetadataAvailable = true;
 				addUploadFileAgencyDropdown();
 				$("#agency_data tr:last .agencyId").hide();
-				jQuery(".agencyIdSelect").change(onAgencyIdSelectClick);
+				jQuery(".agencyIdSelect").on("change", onAgencyIdSelectClick);
 				var url = agencyMetadata[0].gtfsFeedUrl;
 				if (url == null) {
 				  url = "";

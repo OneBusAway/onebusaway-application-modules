@@ -16,12 +16,12 @@
 
 function initStage() {
     //toggle bundle staging progress list
-    jQuery("#stageBundle #stageBundle_progress #expand").bind({
+    jQuery("#stageBundle #stageBundle_progress #expand").on({
         'click' : toggleStageBundleResultList});
 
 
     //Handle stage button click event
-    jQuery("#stageBundle_stageButton").click(onStageClick);
+    jQuery("#stageBundle_stageButton").on("click", onStageClick);
 
 
 
@@ -37,7 +37,7 @@ function onStageContinueClick() {
 }
 
 function enableStageButton() {
-    jQuery("#stageBundle_stageButton").removeAttr("disabled").css("color", "#000");
+    jQuery("#stageBundle_stageButton").prop("disabled", false).css("color", "#000");
     enableContinueButton($("#stage_continue"));
 }
 

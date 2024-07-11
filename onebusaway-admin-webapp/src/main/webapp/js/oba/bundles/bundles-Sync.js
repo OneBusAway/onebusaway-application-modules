@@ -16,7 +16,7 @@
 
 function initSync() {
     //Handle sync button click event
-    jQuery("#syncBundle_syncButton").click(onSyncDeployedBundleClick);
+    jQuery("#syncBundle_syncButton").on("click", onSyncDeployedBundleClick);
 
     $("#Sync #syncProgressDiv").hide();
 

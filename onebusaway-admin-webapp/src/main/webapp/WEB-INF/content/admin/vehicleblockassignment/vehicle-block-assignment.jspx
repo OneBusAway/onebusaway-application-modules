@@ -24,7 +24,6 @@
         <sec:csrfMetaTags />
 
         <!-- STYLING -->
-        <!--TODO: Update jquery and plugins-->
         <s:url var="url" value="/css/jquery-ui.css" />
         <link rel="stylesheet" type="text/css" href="${url}">
             <!-- //prevent jspx minimization -->
@@ -36,14 +35,12 @@
         </link>
 
         <!-- JAVASCRIPT -->
-        <!--TODO: Update jquery and plugins-->
         <s:url var="url" value="/js/biblio/jquery.js">
         </s:url>
         <script type="text/javascript" src="${url}">
             <!-- //prevent jspx minimization -->
         </script>
 
-        <!--TODO: Update jquery and plugins-->
         <s:url var="url" value="/js/biblio/jquery.ui.js">
             <!-- //prevent jspx minimization -->
         </s:url>
@@ -51,7 +48,6 @@
             <!-- //prevent jspx minimization -->
         </script>
 
-        <!--TODO: Update jquery and plugins-->
         <s:url var="url" value="https://cdn.datatables.net/2.0.8/js/dataTables.min.js">
             <!-- //prevent jspx minimization -->
         </s:url>
@@ -64,7 +60,7 @@
             <!-- //prevent jspx minimization -->
         </link>
 
-        <s:url var="url" value="https://code.jquery.com/jquery-migrate-1.4.1.js">
+        <s:url var="url" value="https://code.jquery.com/jquery-migrate-3.4.1.js">
         </s:url>
         <script type="text/javascript" src="${url}">
             <!-- //prevent jspx minimization -->

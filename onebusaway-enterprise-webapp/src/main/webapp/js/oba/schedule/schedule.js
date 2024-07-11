@@ -30,7 +30,7 @@ var oba_where_standard_schedule = function(data) {
 		if( ! groupId )
 			groupId = '';
 		
-		input.click(function() {
+		input.on("click", function() {
 			handleClickInput(entry, groupId);
 		});
 	};

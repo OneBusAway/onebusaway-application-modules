@@ -72,7 +72,7 @@ $.getJSON(contextPath + "/agency", function(data) {
 	})
 	
 	// trigger change eventL: zoom to first agency.
-	select.change(); 
+	select.trigger("change");
 });
 
 // When a route is selected, draw a route polyline and circles for the stops.
@@ -100,7 +100,7 @@ $(".datetime")
 $("#endTime").datetimeEntry("setDatetime", new Date());
 $("#startTime").datetimeEntry("setDatetime", new Date(Date.now() - 1800000)); // 30 min
 
-$("#submit").click(getVehiclePositions);
+$("#submit").on("click", getVehiclePositions);
 
 
 // Get the AVL positions from the API for a given vehicle, and draw on map.

@@ -69,7 +69,7 @@ jQuery(function() {
 
 function showEditUser() {
 	jQuery("#editUser").show();
-	jQuery("#editUser #editSubmit").click(editUser);
+	jQuery("#editUser #editSubmit").on("click", editUser);
 
 	hideResult();
 }
@@ -250,16 +250,14 @@ function activateUser() {
 
 function turnOffEditClick() {
 	jQuery("#actions #edit").off("click");
-	// TODO: Replace hover with mouseenter and mouseleave https://api.jquery.com/hover/
-	jQuery("#actions #edit").hover(function() {
+	jQuery("#actions #edit").on("mouseenter mouseleave", function() {
 		jQuery(this).css("cursor", "default");
 	});
 }
 
 function turnOnEditClick() {
 	jQuery("#actions #edit").on("click", showEditUser);
-	// TODO: Replace hover with mouseenter and mouseleave https://api.jquery.com/hover/
-	jQuery("#actions #edit").hover(function() {
+	jQuery("#actions #edit").on("mouseenter mouseleave", function() {
 		jQuery(this).css("cursor", "pointer");
 	});
 }

@@ -55,9 +55,9 @@ jQuery(function() {
 	$("#compareToArchivedDatasetList").on("change", onCompareToArchivedDatasetChange);
 	$("#compareToArchivedBuildNameList").on("change", onCompareToArchivedBuildNameChange);
 
-	$("#printFixedRouteRptButton").click(onPrintFixedRouteRptClick);
+	$("#printFixedRouteRptButton").on("click", onPrintFixedRouteRptClick);
 
-    $('#useArchiveCheckbox').change(function() {
+    $('#useArchiveCheckbox').on("change", function() {
     	$("#diffResultsTable tbody").empty();
     	$('#fixedRouteDiffTable tbody').empty();
         if($(this).is(":checked")) {
