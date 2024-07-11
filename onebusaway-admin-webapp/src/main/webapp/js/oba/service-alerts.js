@@ -16,17 +16,17 @@
 
 jQuery(function() {
 	// add another condition for the service alert
-	jQuery("#addAnotherCondition").click(onAddAnotherCondition);
+	jQuery("#addAnotherCondition").on("click", onAddAnotherCondition);
 
 	// delete the condition for this service alert
-	jQuery(".deleteCondition").click(onDeleteCondition);
+	jQuery(".deleteCondition").on("click", onDeleteCondition);
 	
 	// hook up service alert links
     for (var i = 0; i < 1000; i++) {
     	var selector = "#tweetAlertLink" + i;
 
     	if (jQuery(selector).length ) {
-            jQuery(selector).click(onTweetCondition);
+            jQuery(selector).on("click", onTweetCondition);
         } else {
     		// first element not found signifies break
     		break;
@@ -37,7 +37,7 @@ jQuery(function() {
 		var selector = "#validateCondition" + i;
 
 		if (jQuery(selector).length ) {
-			jQuery(selector).click(onValidateCondition);
+			jQuery(selector).on("click", onValidateCondition);
 		} else {
 			// first element not found signifies break
 			break;
@@ -46,7 +46,7 @@ jQuery(function() {
 
 
 	// show service alerts template list
-	jQuery("#loadTemplate").click(showHideLoadTemplate);
+	jQuery("#loadTemplate").on("click", showHideLoadTemplate);
 
 	// Check  if this is the "Edit Service Alert" page
 	if ($("#service_alert_submit").length > 0) {
@@ -56,13 +56,13 @@ jQuery(function() {
             $("#service_alert_addToFav").attr("disabled", "disabled");
 			$("")
 		}
-		$("#service_alert_agencyId").change(function() {
+		$("#service_alert_agencyId").on("change", function() {
 			if ($("#service_alert_agencyId option:selected").val() == "null") {
 				$("#service_alert_submit").attr("disabled", "disabled");
                 $("#service_alert_addToFav").attr("disabled", "disabled");
 			} else {
-				$("#service_alert_submit").removeAttr("disabled");
-                $("#service_alert_addToFav").removeAttr("disabled");
+				$("#service_alert_submit").prop("disabled", false);
+                $("#service_alert_addToFav").prop("disabled", false);
 			}
 		});
 	}
@@ -81,12 +81,12 @@ jQuery(function() {
 		}
 	});
 
-    jQuery("#loadTemplateInput [name='template']").change(function(){
+    jQuery("#loadTemplateInput [name='template']").on("change", function(){
 		var selectedTemplateId = jQuery("#loadTemplateInput [name='template']").val();
 		loadTemplate(selectedTemplateId);
 	})
 	
-	jQuery("#loadTemplate").click(function(){
+	jQuery("#loadTemplate").on("click", function(){
 		jQuery("#loadTemplateInput").toggle();
 	});
 	
@@ -178,8 +178,8 @@ function onAddAnotherCondition() {
 		</tr>';
 
 	$('#conditionTable').append(newRow);
-	$("#conditionTable td:last.deleteCondition").click(onDeleteCondition);
-	$("#conditionTable td:last.validateCondition").click(onValidateCondition);
+	$("#conditionTable td:last.deleteCondition").on("click", onDeleteCondition);
+	$("#conditionTable td:last.validateCondition").on("click", onValidateCondition);
 }
 function onDeleteCondition() {
 	if(!confirm("Are you sure you want to delete this condition?")){

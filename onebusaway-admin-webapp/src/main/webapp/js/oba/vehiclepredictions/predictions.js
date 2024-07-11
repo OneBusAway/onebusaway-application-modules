@@ -72,7 +72,7 @@ function initSlots() {
 	}
 	
 	slots.forEach(function(slot) { 
-		jQuery(slot.options).change(function(evt) {
+		jQuery(slot.options).on("change", function(evt) {
 			var val = evt.target.value;
 			setSlotModule(slot, val)
 		})
@@ -138,13 +138,13 @@ function styleForPrediction(field) {
 function startup() {
 	
 	// stuff to do on load
-	jQuery("#display_vehicle").click(onSearchClick);
-	jQuery("#autorefresh").click(onRefreshClick);
-	jQuery("#advanced").click(onAdvancedClick);
-	jQuery("#clear_map").click(onClearMapClick);
+	jQuery("#display_vehicle").on("click", onSearchClick);
+	jQuery("#autorefresh").on("click", onRefreshClick);
+	jQuery("#advanced").on("click", onAdvancedClick);
+	jQuery("#clear_map").on("click", onClearMapClick);
 	
 	
-	jQuery('html').bind('keypress', function(e){
+	jQuery('html').on('keypress', function(e){
 		if (e.keyCode == 13) {
 			onSearchClick();
 			return false;

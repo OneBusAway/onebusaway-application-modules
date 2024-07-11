@@ -186,7 +186,7 @@ OBA.Popups = (function() {
 			var routeId = idParts[2];
 			var routeShortName = idParts[3];
 			
-			element.click(function(e) {
+			element.on("click", function(e) {
 				e.preventDefault();
 				var alertElement = jQuery('#alerts-' + routeId.hashCode());
 				if (alertElement.length === 0) {
@@ -375,7 +375,7 @@ OBA.Popups = (function() {
 		var content = jQuery(html);
 		var zoomHereLink = content.find("#zoomHere");
 
-		zoomHereLink.click(function(e) {
+		zoomHereLink.on("click", function(e) {
 			e.preventDefault();
 			
 			var map = marker.map;
@@ -679,7 +679,7 @@ OBA.Popups = (function() {
 		var content = jQuery(html);
 		var zoomHereLink = content.find("#zoomHere");
 
-		zoomHereLink.click(function(e) {
+		zoomHereLink.on("click", function(e) {
 			e.preventDefault();
 			
 			var map = marker.map;

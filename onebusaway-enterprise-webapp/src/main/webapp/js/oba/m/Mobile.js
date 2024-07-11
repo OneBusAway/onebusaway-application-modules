@@ -38,13 +38,13 @@ OBA.Mobile = (function() {
 			select: function(event, ui) {
 		        if(ui.item){
 		        	searchInput.val(ui.item.value);
-		        	searchForm.submit();
+		        	searchForm.trigger("submit");
 		        }
 		    }
 		});
 		
 		// Close the autocomplete list when the form is submitted
-		searchForm.submit(function() {
+		searchForm.on("submit", function() {
 			searchInput.autocomplete("close");
 			return true;
 		});
@@ -64,7 +64,7 @@ OBA.Mobile = (function() {
 		// only refresh if a single search result
 		if (titleText.text().includes("Refresh")) {
 			// ajax refresh for browsers that support it
-			refreshBar.find("a").click(function(e) {
+			refreshBar.find("a").on("click", function(e) {
 				e.preventDefault();
 				var newText = refreshTimestamp.text().replaceAll("Updated", "Updating...");
 				refreshTimestamp.text(newText);
@@ -106,7 +106,7 @@ OBA.Mobile = (function() {
 		repositionRefreshBar();
 		
 		theWindow.scroll(repositionRefreshBar)
-					.resize(repositionRefreshBar);
+					.on("resize", repositionRefreshBar);
 		
 		setTimeout(refreshContent, defaultTimeout);
 	}
@@ -172,7 +172,7 @@ OBA.Mobile = (function() {
 			var searchPanelForm = jQuery("#searchPanel form");
 			
 			searchPanelForm.find(".q").val("");
-			searchPanelForm.submit();
+			searchPanelForm.trigger("submit");
 			
 		}, function() {
 			alert("Unable to determine your location.");
@@ -184,7 +184,7 @@ OBA.Mobile = (function() {
 	};
 	
 	function refreshContent() {
-		refreshBar.find("a").click();
+		refreshBar.find("a").trigger("click");
 		setTimeout(refreshContent, defaultTimeout);
 	}
 
@@ -192,7 +192,7 @@ OBA.Mobile = (function() {
 		var mapElement = document.getElementById("map");
 		if (mapElement !== null) {
 			mapElement.style.overflow = 'hidden';
-			$("#mapExpander").click(function () {
+			$("#mapExpander").on("click", function () {
 				$mapExpander = $(this);
 				$mapDiv = $('#map');
 				$mapDiv.slideToggle(500, function () {
@@ -255,7 +255,7 @@ OBA.Mobile = (function() {
         resize();
 
         // call when the window is resized
-        theWindow.resize(resize);
+        theWindow.on("resize", resize);
     }
 
     function updateMap() {
@@ -351,7 +351,7 @@ OBA.Mobile = (function() {
 
             updateServiceAlertHeaderText();
 
-            $("#all-routes-button").click(function() {
+            $("#all-routes-button").on("click", function() {
                 window.location = OBA.Config.urlPrefix + "m/routes/index";
             });
 

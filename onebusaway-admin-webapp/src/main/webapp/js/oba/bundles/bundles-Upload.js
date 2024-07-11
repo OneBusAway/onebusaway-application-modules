@@ -22,21 +22,21 @@ function initUpload() {
     jQuery("#agency_data").on("change", "tr .agencyProtocol", onAgencyProtocolChange);
 
     // upload bundle source data for selected agency
-    jQuery("#uploadButton").click(onUploadSelectedAgenciesClickAsync);
+    jQuery("#uploadButton").on("click", onUploadSelectedAgenciesClickAsync);
 
     // add another row to the list of agencies and their source data
-    jQuery("#addAnotherAgency").click(onAddAnotherAgencyClick);
+    jQuery("#addAnotherAgency").on("click", onAddAnotherAgencyClick);
 
-    jQuery("#addNewAgency").click(onAddNewAgencyClick);
+    jQuery("#addNewAgency").on("click", onAddNewAgencyClick);
 
     // remove selected agencies
     jQuery("#uploadFiles #agency_data").on('click', '.removeAgency', onRemoveSelectedAgenciesClick);
 
     // popup the Comments box
-    jQuery("#anyNotes").click(onAnyCommentsClick);
+    jQuery("#anyNotes").on("click", onAnyCommentsClick);
 
     // if bundle comment has changed, save it to info.json
-    jQuery("#Upload #bundleComment").change(onBundleCommentChanged);
+    jQuery("#Upload #bundleComment").on("change", onBundleCommentChanged);
 
     //Retrieve transit agency metadata
     getAgencyMetadata();
@@ -220,7 +220,7 @@ function onAddAnotherAgencyClick(inputType) {
     if (agencyMetadataAvailable) {
         $("#agency_data tr:last .agencyId").hide();
     }
-    jQuery(".agencyIdSelect").change(onAgencyIdSelectClick);
+    jQuery(".agencyIdSelect").on("change", onAgencyIdSelectClick);
 }
 
 function onSelectAgencyChange() {

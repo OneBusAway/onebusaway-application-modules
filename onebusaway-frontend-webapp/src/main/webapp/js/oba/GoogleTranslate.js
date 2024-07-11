@@ -5,7 +5,7 @@ function googleTranslateElementInit() {
 			: "google_translate_element_side";
 	var translate_element = jQuery("#" + translate_element_id);
 	translate_element
-			.click(function(e) {
+			.on("click", function(e) {
 				e.preventDefault();
 				translate_element
 						.html(' ')
@@ -16,6 +16,6 @@ function googleTranslateElementInit() {
 							pageLanguage : 'en',
 							layout : google.translate.TranslateElement.InlineLayout.SIMPLE
 						}, translate_element_id);
-				translate_element.unbind('click');
+				translate_element.off('click');
 			});
 }

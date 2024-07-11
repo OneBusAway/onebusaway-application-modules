@@ -23,7 +23,7 @@
 	<title>Vehicle Predictions</title>
  	<s:url var="url" value="/css/vehicleprediction.css"/> 
  	<link rel="stylesheet" type="text/css" href="${url}" />
-	<!--TODO: Update jquery and plugins-->
+
 	<s:url var="url" value="/js/biblio/jquery.js">
 	</s:url>
 	<script type="text/javascript" src="${url}">
@@ -31,7 +31,6 @@
 		
 	</script>
 
-	<!--TODO: Update jquery and plugins-->
 	<s:url var="url" value="/js/biblio/jquery.ui.js">
 	</s:url>
 	<script type="text/javascript" src="${url}">
@@ -39,10 +38,10 @@
 		
 	</script>
 
-	<s:url var="url" value="/js/biblio/jquery-migrate-1.4.1.js">
+	<s:url var="url" value="/js/biblio/jquery-migrate-3.4.1.js">
 	</s:url>
 	<script type="text/javascript" src="${url}">
-		<!-- //prevent jspx minimization -->
+	<!-- //prevent jspx minimization -->
 
 	</script>
 	

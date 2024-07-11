@@ -22,11 +22,10 @@
  <link rel="stylesheet" href="<%= request.getContextPath() %>/resources/css/style.css" />
  <script src="<%= request.getContextPath() %>/resources/javascript/leaflet.js"></script>
  <script src="<%= request.getContextPath() %>/resources/javascript/leafletRotatedMarker.js"></script>
-<%-- TODO: Update jquery and plugins   --%>
- <script src="<%= request.getContextPath() %>/resources/javascript/jquery-2.1.4.min.js"></script>
+ <script src="<%= request.getContextPath() %>/resources/javascript/jquery-3.7.1.min.js"></script>
  <script src="<%= request.getContextPath() %>/resources/javascript/jquery.plugin.min.js"></script>
  <script src="<%= request.getContextPath() %>/resources/javascript/jquery.datetimeentry.min.js"></script>
- <script src="<%= request.getContextPath() %>/resources/javascript/jquery-migrate-1.4.1.js"></script>
+ <script src="<%= request.getContextPath() %>/resources/javascript/jquery-migrate-3.4.1.js"></script>
  <script src="<%= request.getContextPath() %>/resources/javascript/animation.js"></script>
 </head>
 <body>

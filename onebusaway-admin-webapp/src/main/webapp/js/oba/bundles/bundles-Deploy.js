@@ -16,12 +16,12 @@
 
 function initDeploy() {
     //toggle bundle deploy progress list
-    jQuery("#deployBundle #deployBundle_progress #expand").bind({
+    jQuery("#deployBundle #deployBundle_progress #expand").on({
         'click' : toggleDeployBundleResultList});
 
     //Handle deploy list button click event
-    jQuery("#deployBundle_listButton").click(onDeployListClick);
-    jQuery("#deployBundle_listCurrentButton").click(deployListBundles);
+    jQuery("#deployBundle_listButton").on("click", onDeployListClick);
+    jQuery("#deployBundle_listCurrentButton").on("click", deployListBundles);
 
     onDeployListClick();
 
@@ -85,13 +85,13 @@ function onDeleteDeployConfirmed() {
 function onDeployContinueClick() {
     var $tabs = jQuery("#tabs");
     // load some data when tab becomes active
-    jQuery("#deployBundle_listButton").click();
-    jQuery("#deployBundle_listCurrentButton").click();
+    jQuery("#deployBundle_listButton").trigger("click");
+    jQuery("#deployBundle_listCurrentButton").trigger("click");
     $tabs.tabs('select', 6);
 }
 
 function enableDeployButton() {
-    jQuery("#deployBundle_deployButton").removeAttr("disabled").css("color", "#000");
+    jQuery("#deployBundle_deployButton").prop("disabled", false).css("color", "#000");
     enableContinueButton($("#deploy_continue"));
 }
 
@@ -151,7 +151,7 @@ function deployListBundles() {
                 jQuery("#deployBundleCurrentTable").append(newRow);
             });
             // apply the onClick listener to the delete column
-            jQuery(".deleteDeployedItem").click(onDeleteDeployedClick);
+            jQuery(".deleteDeployedItem").on("click", onDeleteDeployedClick);
 
         },
         error: function (request) {
@@ -222,7 +222,7 @@ function onDeployListClick(){
 					<td class="deployStagedItem">deploy</td></tr>';
                     jQuery("#deployStagedCurrentTable").append(newRow);
                 });
-                jQuery(".deployStagedItem").click(onDeployBundleClick);
+                jQuery(".deployStagedItem").on("click", onDeployBundleClick);
                 deployListBundles();
 
             }
