@@ -233,7 +233,7 @@ public class PredictionsAction extends NextBusApiBase implements
   }
 
   private String buildPredictionsUrl(ConfigurationUtil config, String agencyId, Set<RouteStopId> routeStopIds){
-      String serviceUrl = getServiceUrl(agencyId, PREDICTIONS_COMMAND);
+      String serviceUrl = getServiceUrl(agencyId, PREDICTIONS_COMMAND) + "?";
       StringBuilder routeStop = new StringBuilder();
 
       toString(routeStop, config, routeStopIds);
@@ -283,11 +283,17 @@ public class PredictionsAction extends NextBusApiBase implements
     JsonObject jsonObject = _httpUtil.getJsonObject(uri, timeout, headersMap);
     if (jsonObject.has("predictions")) {
       predictionsJson = jsonObject.getAsJsonArray("predictions");
+    } else if (jsonObject.has("pred")) {
+      predictionsJson = jsonObject.getAsJsonArray("pred");
     }
     Type listType = new TypeToken<List<Predictions>>() {
     }.getType();
 
     List<Predictions> predictions = new Gson().fromJson(predictionsJson, listType);
+    if (predictions == null) {
+      _log.error("unexpected result did not yield predictions for {}: {}", uri, predictionsJson);
+      return new ArrayList<>();
+    }
     return predictions;
   }
 
