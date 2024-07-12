@@ -55,6 +55,10 @@ public class NextBusApiBase {
 
   public static final String SCHEDULE_COMMAND = "/command/scheduleHorizStops";
 
+  public static final String TRIP_UPDATES_COMMAND = "/command/gtfs-rt/tripUpdates";
+
+  public static final String VEHICLE_UPDATES_COMMAND = "/command/gtfs-rt/vehiclePositions";
+
   public static final String REQUEST_TYPE = "json";
 
   public static final long MAX_HEADER_AGE = 90 * 1000;
@@ -305,7 +309,7 @@ public class NextBusApiBase {
     return _configMapUtil.getConfig(gtfsAgencyId) != null;
   }
 
-  public String getServiceUrl(String gtfsAgencyId) {
+  public String getServiceUrl(String gtfsAgencyId, String commandPath) {
     ConfigurationUtil configUtil = _configMapUtil.getConfig(gtfsAgencyId);
     if (configUtil == null) {
       return null;
@@ -317,16 +321,30 @@ public class NextBusApiBase {
     String apiKey = configUtil.getTransiTimeKey();
     String serviceUrl =  protocol + "://" + host + ":" + port + "/api/v1/key/" + apiKey
         + "/agency/";
-    if (configUtil.getUrlOverride() != null) {
+    if (configUtil.getBaseUrlOverride() != null) {
       // not a TTC server, us the URL override instead
-      serviceUrl =  protocol + "://" + host + ":" + port + configUtil.getUrlOverride();
+      serviceUrl =  protocol + "://" + host + ":" + port + configUtil.getBaseUrlOverride();
+
+      if (PREDICTIONS_COMMAND.equals(commandPath)) {
+        serviceUrl += configUtil.getPredictionCommand() + "?";
+      }
+      if (TRIP_UPDATES_COMMAND.equals(commandPath)) {
+        serviceUrl += configUtil.getTripUpdatesCommand();
+      }
+      if (VEHICLE_UPDATES_COMMAND.equals(commandPath)) {
+        serviceUrl += configUtil.getVehiclePositionsCommand();
+      }
+    } else {
+      serviceUrl += gtfsAgencyId + commandPath;
     }
     return serviceUrl;
   }
 
   protected boolean isTimely(long timestamp) {
+    // this timestamp can be seconds or millis depending upon provider....
     if (System.currentTimeMillis() - timestamp > MAX_HEADER_AGE)
-      return false;
+      if (System.currentTimeMillis() / 1000 - timestamp > MAX_HEADER_AGE)
+        return false;
     return true;
   }
 
