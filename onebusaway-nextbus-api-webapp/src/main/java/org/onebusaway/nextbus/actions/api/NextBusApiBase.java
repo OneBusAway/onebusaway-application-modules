@@ -326,7 +326,7 @@ public class NextBusApiBase {
       serviceUrl =  protocol + "://" + host + ":" + port + configUtil.getBaseUrlOverride();
 
       if (PREDICTIONS_COMMAND.equals(commandPath)) {
-        serviceUrl += configUtil.getPredictionCommand() + "?";
+        serviceUrl += configUtil.getPredictionCommand();
       }
       if (TRIP_UPDATES_COMMAND.equals(commandPath)) {
         serviceUrl += configUtil.getTripUpdatesCommand();
