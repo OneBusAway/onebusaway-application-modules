@@ -241,6 +241,7 @@ public class NyctRandomIntegrationTest extends AbstractGtfsRealtimeIntegrationTe
    * Test for a drop in service at 00:37.
    */
   @Test
+  @Ignore("Broken upstream in CamSys repo; probably since about Nov 16 2023 - https://github.com/camsys/onebusaway-application-modules/commits/unified/?after=87a68db9060d67121fcf912359d18f1e4498bb0d+209")
   public void test9() throws Exception {
 
     List<String> routeIdsToCancel = Arrays.asList("MTASBWY_A","MTASBWY_B","MTASBWY_C","MTASBWY_D");
