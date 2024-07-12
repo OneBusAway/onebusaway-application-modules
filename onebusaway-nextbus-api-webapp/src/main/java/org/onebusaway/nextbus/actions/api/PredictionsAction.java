@@ -233,13 +233,7 @@ public class PredictionsAction extends NextBusApiBase implements
   }
 
   private String buildPredictionsUrl(ConfigurationUtil config, String agencyId, Set<RouteStopId> routeStopIds){
-      String serviceUrl = getServiceUrl(agencyId);
-      if (config.getUrlOverride() == null) {
-        serviceUrl +=  agencyId + PREDICTIONS_COMMAND + "?";
-      } else {
-        // not a TTC server, use the URL as is
-        serviceUrl +=  "?";
-      }
+      String serviceUrl = getServiceUrl(agencyId, PREDICTIONS_COMMAND);
       StringBuilder routeStop = new StringBuilder();
 
       toString(routeStop, config, routeStopIds);
@@ -252,7 +246,7 @@ public class PredictionsAction extends NextBusApiBase implements
   }
 
   private void toString(StringBuilder sb, ConfigurationUtil config, Set<RouteStopId> routeStopIds) {
-    if (config.getUrlOverride() == null) {
+    if (config.getBaseUrlOverride() == null) {
       // format I: Transitime/TTC
       // http://localhost:8080/api/v1/key/prod3273b0/agency/1/command/predictions?rs=X2|5988&format=json
       for(RouteStopId routeStopId: routeStopIds) {

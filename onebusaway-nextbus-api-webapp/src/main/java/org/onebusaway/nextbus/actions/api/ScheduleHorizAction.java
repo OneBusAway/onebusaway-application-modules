@@ -76,7 +76,7 @@ public class ScheduleHorizAction extends NextBusApiBase implements
 
     if (isValid(body, routeIds) && hasServiceUrl(agencyId)) {
 
-      String serviceUrl = getServiceUrl(agencyId) + agencyId + SCHEDULE_COMMAND + "?";
+      String serviceUrl = getServiceUrl(agencyId, SCHEDULE_COMMAND) + "?";
       String route = "r=" + getIdNoAgency(routeId);
       String uri = serviceUrl + route + "&format=" + REQUEST_TYPE;
 

@@ -48,8 +48,6 @@ public class VehiclePositionsAction extends NextBusApiBase  implements
 
     private GtfsrtHelper _gtfsrtHelper = new GtfsrtHelper();
 
-    public static final String VEHICLE_UPDATES_COMMAND = "/command/gtfs-rt/vehiclePositions";
-
     private String agencyId;
 
     public String getAgencyId() {
@@ -103,7 +101,7 @@ public class VehiclePositionsAction extends NextBusApiBase  implements
 
             for (String agencyId : agencyIds) {
                 if (hasServiceUrl(agencyId)) {
-                    String gtfsrtUrl = getServiceUrl(agencyId) + agencyId + VEHICLE_UPDATES_COMMAND;
+                    String gtfsrtUrl = getServiceUrl(agencyId, VEHICLE_UPDATES_COMMAND);
                     try {
                         Map<String, String> headersMap = _configMapUtil.getConfig(agencyId).getHeadersMap();
                         remoteFeedMessage = _httpUtil.getFeedMessage(gtfsrtUrl, 30, headersMap);
