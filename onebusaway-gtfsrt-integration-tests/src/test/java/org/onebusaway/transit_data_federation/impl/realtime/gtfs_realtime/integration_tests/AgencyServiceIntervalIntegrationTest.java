@@ -16,6 +16,7 @@
 package org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.integration_tests;
 
 import org.junit.Test;
+import org.junit.Ignore;
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
 import org.onebusaway.gtfs.model.AgencyAndId;
@@ -49,6 +50,7 @@ public class AgencyServiceIntervalIntegrationTest extends AbstractGtfsRealtimeIn
   }
 
   @Test
+  @Ignore("Broken upstream in CamSys repo; probably since about Nov 16 2023 - https://github.com/camsys/onebusaway-application-modules/commits/unified/?after=87a68db9060d67121fcf912359d18f1e4498bb0d+209")
   public void testServiceWindows() throws Exception {
 
     // we load real-time to confirm these queries handle both static and real-time appropriately

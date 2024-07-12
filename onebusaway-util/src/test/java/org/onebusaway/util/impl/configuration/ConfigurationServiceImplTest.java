@@ -148,29 +148,6 @@ public class ConfigurationServiceImplTest {
     assertEquals("false", item1.get("value"));
   }
 
-  @Test
-  public void testReadConfig(){
-    ObjectMapper mapper = new ObjectMapper();
-    try {
-
-      String jsonString = "{\"oba\":{\"env\":\"jared\"},\"config\":[{\"component\":\"testing\",\"key\":\"jared\",\"value\":\"hello world!\"}]}";
-      ConfigFileStructure cfs = mapper.readValue(new File("/opt/nyc/oba/config.json"), ConfigFileStructure.class);
-
-
-      // compact print
-      System.out.println(cfs);
-
-      // pretty print
-      String prettyFile = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(cfs);
-
-      System.out.println(prettyFile);
-
-
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-  }
-
   private void addToSettings(ArrayList settings, String component, String key, String value) {
     HashMap<String, String> kv1 = new HashMap<>();
     // for agency configuration the component is "agency_" + agency_id

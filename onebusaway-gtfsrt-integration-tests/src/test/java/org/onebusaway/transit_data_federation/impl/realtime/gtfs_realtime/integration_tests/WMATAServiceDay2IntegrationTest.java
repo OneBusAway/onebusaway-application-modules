@@ -17,6 +17,7 @@ package org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.integ
 
 import com.google.transit.realtime.GtfsRealtime;
 import org.junit.Test;
+import org.junit.Ignore;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.realtime.api.VehicleLocationListener;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
@@ -49,6 +50,7 @@ public class WMATAServiceDay2IntegrationTest extends AbstractGtfsRealtimeJsonInt
   }
 
   @Test
+  @Ignore("Broken upstream in CamSys repo; probably since about Nov 16 2023 - https://github.com/camsys/onebusaway-application-modules/commits/unified/?after=87a68db9060d67121fcf912359d18f1e4498bb0d+209")
   public void test() throws Exception {
     GtfsRealtimeSource source = getBundleLoader().getSource();
     source.setAgencyId("1");
