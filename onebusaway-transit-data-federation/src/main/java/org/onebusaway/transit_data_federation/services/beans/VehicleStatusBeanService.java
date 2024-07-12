@@ -28,6 +28,9 @@ public interface VehicleStatusBeanService {
   public ListBean<VehicleStatusBean> getAllVehiclesForAgency(String agencyId,
       long time);
 
+  public ListBean<VehicleStatusBean> getFilteredVehiclesForAgency(String agencyId,
+                                                             long time, Integer ageInSeconds);
+
   public VehicleLocationRecordBean getVehicleLocationRecordForVehicleId(
       AgencyAndId id, long targetTime);
 

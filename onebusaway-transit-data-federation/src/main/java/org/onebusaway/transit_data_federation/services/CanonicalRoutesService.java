@@ -16,6 +16,7 @@
 package org.onebusaway.transit_data_federation.services;
 
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.gtfs.model.calendar.AgencyServiceInterval;
 import org.onebusaway.transit_data.model.ListBean;
 import org.onebusaway.transit_data.model.RouteGroupingBean;
 
@@ -28,5 +29,5 @@ public interface CanonicalRoutesService {
   public static final String CANONICAL_TYPE = "canonical";
   public static final String HEURISTIC_TYPE = "heuristic";
   public static final String DIRECTION_TYPE = "direction";
-  ListBean<RouteGroupingBean> getCanonicalOrMergedRoute(long serviceDate, AgencyAndId routeId);
+  ListBean<RouteGroupingBean> getCanonicalOrMergedRoute(AgencyServiceInterval serviceInterval, AgencyAndId routeId);
 }

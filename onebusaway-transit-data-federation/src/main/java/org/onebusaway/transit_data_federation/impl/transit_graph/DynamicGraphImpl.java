@@ -15,17 +15,19 @@
  */
 package org.onebusaway.transit_data_federation.impl.transit_graph;
 
-import org.apache.commons.collections4.map.PassiveExpiringMap;
-import org.onebusaway.container.refresh.Refreshable;
 import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.transit_data_federation.impl.RefreshableResources;
+import org.onebusaway.transit_data_federation.impl.realtime.DynamicCache;
 import org.onebusaway.transit_data_federation.model.transit_graph.DynamicGraph;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.RouteEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 /**
@@ -33,32 +35,71 @@ import java.util.Map;
  * but populated via real-time and not the bundle.
  */
 @Component
-public class DynamicGraphImpl implements DynamicGraph {
+public class DynamicGraphImpl extends DynamicCache implements DynamicGraph {
 
-  private static final int CACHE_TIMEOUT = 18 * 60 * 60 * 1000; // 18 hours
-  private Map<AgencyAndId, BlockEntry> blockEntryById = new PassiveExpiringMap<>(CACHE_TIMEOUT);
-  private Map<AgencyAndId, TripEntry> tripEntryById = new PassiveExpiringMap<>(CACHE_TIMEOUT);
-  private Map<AgencyAndId, RouteEntry> routeEntryById = new PassiveExpiringMap<>(CACHE_TIMEOUT);
+  private static Logger _log = LoggerFactory.getLogger(DynamicGraphImpl.class);
+  private Map<AgencyAndId, BlockEntry> blockEntryById = new HashMap<>();
+  private Map<AgencyAndId, TripEntry> tripEntryById = new HashMap<>();
+  private Map<AgencyAndId, RouteEntry> routeEntryById = new HashMap<>();
 
   @Override
   public TripEntry getTripEntryForId(AgencyAndId id) {
     return tripEntryById.get(id);
   }
 
-  @Refreshable(dependsOn = RefreshableResources.TRANSIT_GRAPH)
-  public void reset() {
-    // these maps expire passively, this data is not dependent upon graph reloading
-//    blockEntryById.clear();
-//    tripEntryById.clear();
-//    routeEntryById.clear();
-  }
   @Override
-  public void registerTrip(TripEntry tripEntry) {
+  public void registerTrip(TripEntry tripEntry, long currentTime) {
+    if (needsPrune(currentTime)) {
+      prune(currentTime);
+    }
     if (!tripEntryById.containsKey(tripEntry.getId())) {
       tripEntryById.put(tripEntry.getId(), tripEntry);
     }
   }
 
+  private void prune(long currentTime) {
+    long start = System.currentTimeMillis();
+    try {
+      resetStats(currentTime);
+      int effectiveTime = getEffectiveTime(currentTime);
+      pruneBlockEntryById(effectiveTime);
+      pruneTripEntryById(effectiveTime);
+      pruneRouteEntryById(effectiveTime);
+    } catch (Throwable t) {
+      _log.error("prune exception {}", t, t);
+    } finally {
+      _log.info("cache prune complete in {}ms", System.currentTimeMillis()-start);
+    }
+  }
+
+  private void pruneRouteEntryById(int effectiveTime) {
+    // routes don't expire
+  }
+
+  private void pruneTripEntryById(int effectiveTime) {
+    Iterator<Map.Entry<AgencyAndId, TripEntry>> iterator = tripEntryById.entrySet().iterator();
+    while (iterator.hasNext()) {
+      Map.Entry<AgencyAndId, TripEntry> next = iterator.next();
+      if (isExpired(next.getValue(), effectiveTime)) {
+        iterator.remove();
+      }
+    }
+  }
+
+  private void pruneBlockEntryById(int effectiveTime) {
+    Iterator<Map.Entry<AgencyAndId, BlockEntry>> iterator = blockEntryById.entrySet().iterator();
+    while (iterator.hasNext()) {
+      Map.Entry<AgencyAndId, BlockEntry> next = iterator.next();
+      if (isExpired(next.getValue(), effectiveTime)) {
+        iterator.remove();
+      }
+    }
+  }
+
+  @Override
+  public void updateTrip(TripEntry tripEntry) {
+    tripEntryById.put(tripEntry.getId(), tripEntry);
+  }
   @Override
   public RouteEntry getRoutEntryForId(AgencyAndId id) {
     return routeEntryById.get(id);
@@ -81,5 +122,10 @@ public class DynamicGraphImpl implements DynamicGraph {
     if (!blockEntryById.containsKey(blockEntry.getId())) {
       blockEntryById.put(blockEntry.getId(), blockEntry);
     }
+  }
+
+  @Override
+  public void updateBlock(BlockEntry blockEntry) {
+    blockEntryById.put(blockEntry.getId(), blockEntry);
   }
 }

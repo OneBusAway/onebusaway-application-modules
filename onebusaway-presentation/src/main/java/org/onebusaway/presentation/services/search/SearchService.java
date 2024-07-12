@@ -15,7 +15,7 @@
  */
 package org.onebusaway.presentation.services.search;
 
-import org.onebusaway.gtfs.model.calendar.ServiceDate;
+import org.onebusaway.gtfs.model.calendar.AgencyServiceInterval;
 import org.onebusaway.presentation.model.SearchResultCollection;
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.transit_data.model.RouteBean;
@@ -26,7 +26,7 @@ public interface SearchService {
 
   public SearchResultCollection getSearchResults(String query, SearchResultFactory resultFactory);
 
-  public SearchResultCollection getSearchResultsForServiceDate(String query, SearchResultFactory resultFactory, ServiceDate serviceDate);
+  public SearchResultCollection getSearchResultsForServiceDate(String query, SearchResultFactory resultFactory, AgencyServiceInterval serviceInterval);
 
   public SearchResultCollection findRoutesStoppingNearPoint(Double latitude, Double longitude, SearchResultFactory resultFactory);
 

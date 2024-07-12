@@ -17,6 +17,7 @@
 package org.onebusaway.transit_data_federation.impl.beans;
 
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.gtfs.model.calendar.AgencyServiceInterval;
 import org.onebusaway.realtime.api.OccupancyStatus;
 import org.onebusaway.realtime.api.VehicleOccupancyRecord;
 import org.onebusaway.transit_data.model.*;
@@ -226,7 +227,7 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
         continue;
       
       ArrivalAndDepartureBean bean = getStopTimeInstanceAsBean(time, instance,
-          stopBeanCache);
+          stopBeanCache, query.getServiceInterval());
       applyBlockLocationToBean(instance, bean, time);
       
       Boolean isNegativeScheduledArrivalsEnabled = _gtfsRealtimeNegativeArrivals.getShowNegativeScheduledArrivalByAgencyId(
@@ -250,7 +251,7 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
 
   @Override
   public ArrivalAndDepartureBean getArrivalAndDepartureForStop(
-      ArrivalAndDepartureQuery query) {
+      ArrivalAndDepartureQuery query, AgencyServiceInterval serviceInterval) {
 
     long time = query.getTime();
 
@@ -260,7 +261,7 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
     }
 
     ArrivalAndDepartureBean bean = getStopTimeInstanceAsBean(time, instance,
-        new HashMap<AgencyAndId, StopBean>());
+        new HashMap<AgencyAndId, StopBean>(), serviceInterval);
     applyBlockLocationToBean(instance, bean, time);
     applySituationsToBean(time, instance, bean);
     boolean hideCanceled = _arrivalAndDepartureService.getHideCanceledTrips();
@@ -305,8 +306,9 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
    ****/
 
   private ArrivalAndDepartureBean getStopTimeInstanceAsBean(long time,
-      ArrivalAndDepartureInstance instance,
-      Map<AgencyAndId, StopBean> stopBeanCache) {
+                                                            ArrivalAndDepartureInstance instance,
+                                                            Map<AgencyAndId, StopBean> stopBeanCache,
+                                                            AgencyServiceInterval serviceInterval) {
 
     ArrivalAndDepartureBean pab = new ArrivalAndDepartureBean();
 
@@ -347,14 +349,14 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
       pab.setTripHeadsign(stopTimeNarrative.getStopHeadsign());
     }
     // enforce some properties on the RouteBean
-    if (pab.getTrip().getRoute() != null && pab.getTrip().getRoute().getShortName() == null) {
+    if (pab.getTrip() != null && pab.getTrip().getRoute() != null && pab.getTrip().getRoute().getShortName() == null) {
       pab.getTrip().setRoute(createRouteBean(pab, trip));
     }
 
     StopBean stopBean = stopBeanCache.get(stop.getId());
 
     if (stopBean == null) {
-      stopBean = _stopBeanService.getStopForId(stop.getId(), null);
+      stopBean = _stopBeanService.getStopForId(stop.getId(), serviceInterval);
       stopBeanCache.put(stop.getId(), stopBean);
     }
 
@@ -478,8 +480,12 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
         VehicleOccupancyRecord vor = _vehicleOccupancyRecordCache.getRecordForVehicleIdAndRoute(AgencyAndIdLibrary.convertFromString(bean.getVehicleId()),
                 blockLocation.getActiveTrip().getTrip().getRoute().getId().toString(),
                 blockLocation.getActiveTrip().getTrip().getDirectionId());
-        if (vor != null)
+        if (vor != null) {
           bean.setOccupancyStatus(vor.getOccupancyStatus());
+          // while occupancy status is directly on the A/D bean
+          // capacity and count belongs to the vehicle and the trip
+        }
+
       }
 
 

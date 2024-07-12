@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
 import org.onebusaway.collections.Counter;
 import org.onebusaway.collections.MappingLibrary;
 import org.onebusaway.container.refresh.RefreshService;
@@ -176,8 +177,29 @@ public class GenerateNarrativesTask implements Runnable {
       for (StopDirectionKey sdSouth : sdSouths) {
         provider.addRouteAndHeadsign(sdSouth, rhSouth);
       }
+      // now create defaultTransfers
+      AgencyAndId northStopId = new AgencyAndId(de.getAgencyId(), de.getGtfsStopIdDirection0());
+      AgencyAndId southStopId = new AgencyAndId(de.getAgencyId(), de.getGtfsStopIdDirection1());
+      List<AgencyAndId> daytimeRoutes = createRoutes(de.getAgencyId(), de.getDaytimeRoutes());
+      if (daytimeRoutes != null) {
+        provider.addStaticRoute(northStopId, daytimeRoutes);
+        provider.addStaticRoute(southStopId, daytimeRoutes);
+      }
     }
     _log.info("processed {} directionEntries with cache size {}", _gtfsDao.getAllDirectionEntries().size(), provider.getPatternCount());
+  }
+
+  private List<AgencyAndId> createRoutes(String agencyId, String daytimeRoutes) {
+    List<AgencyAndId> routes = new ArrayList<>();
+    if (daytimeRoutes != null) {
+      for (String routeId : daytimeRoutes.split("\\s")) {
+        if (StringUtils.isNotBlank(routeId) )
+        routes.add(new AgencyAndId(agencyId, routeId));
+      }
+    }
+    if (routes.isEmpty())
+      return null;
+    return routes;
   }
 
   private List<StopDirectionKey> createStopDirectionKey(DirectionEntry de, String directionId) {

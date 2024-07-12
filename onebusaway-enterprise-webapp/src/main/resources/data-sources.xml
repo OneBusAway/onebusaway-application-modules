@@ -37,6 +37,7 @@
 	<bean id="configurationServiceClient" class="org.onebusaway.util.impl.configuration.ConfigurationServiceClientFileImpl" >
 		<constructor-arg type="java.lang.String" value="/var/lib/obanyc/config.json"/>
 	</bean>
+	<bean class="org.onebusaway.transit_data_federation.services.WebIntervalFactory" />
 
     <!-- Database Configuration -->
 	<bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">

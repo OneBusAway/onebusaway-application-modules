@@ -82,6 +82,10 @@ public class VehicleLocationRecord implements Serializable {
 
   private String status;
 
+  private List<String> vehicleFeatures;
+
+  private boolean mutated;
+
   public VehicleLocationRecord() {
 
   }
@@ -98,6 +102,7 @@ public class VehicleLocationRecord implements Serializable {
     this.serviceDate = r.serviceDate;
     this.tripId = r.tripId;
     this.vehicleId = r.vehicleId;
+    this.mutated = r.mutated;
 
     List<TimepointPredictionRecord> timepointPredictions = r.getTimepointPredictions();
     if (timepointPredictions != null) {
@@ -283,6 +288,29 @@ public class VehicleLocationRecord implements Serializable {
 
   public void setStatus(String status) {
     this.status = status;
+  }
+
+  public boolean hasVehicleFeatures() {
+    return vehicleFeatures != null && !vehicleFeatures.isEmpty();
+  }
+
+  public void addVehicleFeature(String feature) {
+    if (vehicleFeatures == null) {
+      vehicleFeatures = new ArrayList<>();
+    }
+    vehicleFeatures.add(feature);
+  }
+
+  public List<String> getVehicleFeatures() {
+    return vehicleFeatures;
+  }
+
+  public void setMutated(boolean mutated) {
+    this.mutated = mutated;
+  }
+
+  public boolean getMutated() {
+    return mutated;
   }
 
   @Override

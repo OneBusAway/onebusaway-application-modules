@@ -233,8 +233,8 @@ public class BlockStatusServiceImpl implements BlockStatusService {
       long serviceDate, long time) {
 
     if (serviceDate != 0) {
-      BlockInstance blockInstance = _blockCalendarService.getBlockInstance(
-          blockId, serviceDate);
+      BlockInstance blockInstance  = _blockCalendarService.getBlockInstance(
+                blockId, serviceDate);
       if (blockInstance == null)
         return Collections.emptyList();
       BlockConfigurationEntry blockConfig = blockInstance.getBlock();

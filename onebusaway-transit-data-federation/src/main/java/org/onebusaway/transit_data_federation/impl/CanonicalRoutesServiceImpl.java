@@ -16,10 +16,11 @@
 package org.onebusaway.transit_data_federation.impl;
 
 import org.apache.logging.log4j.util.Strings;
+import org.onebusaway.container.cache.Cacheable;
 import org.onebusaway.container.refresh.Refreshable;
 import org.onebusaway.geospatial.model.EncodedPolylineBean;
 import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.gtfs.model.calendar.ServiceDate;
+import org.onebusaway.gtfs.model.calendar.AgencyServiceInterval;
 import org.onebusaway.transit_data.model.*;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.transit_data_federation.impl.transit_graph.CanonicalRoutesEntryImpl;
@@ -90,16 +91,16 @@ public class CanonicalRoutesServiceImpl implements CanonicalRoutesService {
    * route if present in the GTFS as well as "canonical" ideal representation of route, again is present
    * in the GTFS.  If no "canonical" information, return "heuristic" type that is a synthetic respresentation
    * of the ideal.
-   * @param serviceDateMillis
+   * @param serviceInterval
    * @param routeId
    * @return
    */
   @Override
-  public ListBean<RouteGroupingBean> getCanonicalOrMergedRoute(long serviceDateMillis, AgencyAndId routeId) {
+  @Cacheable
+  public ListBean<RouteGroupingBean> getCanonicalOrMergedRoute(AgencyServiceInterval serviceInterval, AgencyAndId routeId) {
     StopsForRouteBean stopsForRoute;
-    if (serviceDateMillis > 1) {
-      ServiceDate serviceDate = new ServiceDate(new Date(serviceDateMillis));
-      stopsForRoute = copy(_transitDataService.getStopsForRouteForServiceDate(AgencyAndIdLibrary.convertToString(routeId), serviceDate));
+    if (serviceInterval != null) {
+      stopsForRoute = copy(_transitDataService.getStopsForRouteForServiceInterval(AgencyAndIdLibrary.convertToString(routeId), serviceInterval));
     } else {
       stopsForRoute = copy(_transitDataService.getStopsForRoute(AgencyAndIdLibrary.convertToString(routeId)));
     }
@@ -107,31 +108,31 @@ public class CanonicalRoutesServiceImpl implements CanonicalRoutesService {
         || stopsForRoute.getStopGroupings().isEmpty()) {
      // this is an ideal route only, with no physical schedule
      // return what little we know about it from the canonical index
-      return addReferences(createRouteDirectionBean(routeId, serviceDateMillis));
+      return addReferences(createRouteDirectionBean(routeId, serviceInterval), serviceInterval);
 
     }
 
     // else create merged
-    return addReferences(merge(routeId, stopsForRoute, createRouteDirectionBean(routeId, serviceDateMillis)));
+    return addReferences(merge(routeId, stopsForRoute, createRouteDirectionBean(routeId, serviceInterval)), serviceInterval);
   }
 
-  private ListBean<RouteGroupingBean> addReferences(ListBean<RouteGroupingBean> bean) {
+  private ListBean<RouteGroupingBean> addReferences(ListBean<RouteGroupingBean> bean, AgencyServiceInterval serviceInterval) {
     if (bean == null || bean.getList() == null) return bean;
 
     for (RouteGroupingBean routeGroupingBean : bean.getList()) {
-      addReferences(routeGroupingBean);
+      addReferences(routeGroupingBean, serviceInterval);
     }
     return bean;
   }
 
-  private void addReferences(RouteGroupingBean bean) {
+  private void addReferences(RouteGroupingBean bean, AgencyServiceInterval serviceInterval) {
     if (bean == null) return;
     Set<AgencyAndId> visitedRoutes = new HashSet<>();
     Set<AgencyAndId> visitedStops = new HashSet<>();
     if (bean.getRouteId() != null)
       visitedRoutes.add(bean.getRouteId());
     if (bean.getStopGroupings() == null) {
-      loadReferences(bean, visitedRoutes, visitedStops);
+      loadReferences(bean, visitedRoutes, visitedStops, serviceInterval);
       return;
     }
     for (StopGroupingBean stopGrouping : bean.getStopGroupings()) {
@@ -147,11 +148,12 @@ public class CanonicalRoutesServiceImpl implements CanonicalRoutesService {
         }
       }
     }
-    loadReferences(bean, visitedRoutes, visitedStops);
+    loadReferences(bean, visitedRoutes, visitedStops, serviceInterval);
 
   }
 
-  private void loadReferences(RouteGroupingBean bean, Set<AgencyAndId> visitedRoutes, Set<AgencyAndId> visitedStops) {
+  private void loadReferences(RouteGroupingBean bean, Set<AgencyAndId> visitedRoutes,
+                              Set<AgencyAndId> visitedStops, AgencyServiceInterval serviceInterval) {
     for (AgencyAndId visitedRoute : visitedRoutes) {
       RouteBean route = _transitDataService.getRouteForId(AgencyAndIdLibrary.convertToString(visitedRoute));
       if (route != null)
@@ -159,7 +161,8 @@ public class CanonicalRoutesServiceImpl implements CanonicalRoutesService {
     }
 
     for (AgencyAndId visitedStop : visitedStops) {
-      StopBean stop = _transitDataService.getStop(AgencyAndIdLibrary.convertToString(visitedStop));
+      StopBean stop = _transitDataService.getStopForServiceDate(AgencyAndIdLibrary.convertToString(visitedStop),
+              serviceInterval);
       if (stop != null)
         bean.getStops().add(stop);
     }
@@ -203,7 +206,7 @@ public class CanonicalRoutesServiceImpl implements CanonicalRoutesService {
     return beans;
   }
 
-  private ListBean<RouteGroupingBean> createRouteDirectionBean(AgencyAndId routeId, long serviceDate) {
+  private ListBean<RouteGroupingBean> createRouteDirectionBean(AgencyAndId routeId, AgencyServiceInterval serviceInterval) {
     List<RouteGroupingBean> results = new ArrayList<>();
     RouteGroupingBean bean = null;
     List<RouteStopCollectionEntry> rscs = _entry.getRouteStopCollectionEntries(routeId);
@@ -213,7 +216,7 @@ public class CanonicalRoutesServiceImpl implements CanonicalRoutesService {
     }
     if (bean == null) {
       // we don't have data so generate via heuristic
-      bean = createBeanFromHeuristic(routeId, serviceDate);
+      bean = createBeanFromHeuristic(routeId, serviceInterval);
     }
 
     if (bean == null) {
@@ -296,15 +299,11 @@ public class CanonicalRoutesServiceImpl implements CanonicalRoutesService {
     return bean;
   }
 
-  private RouteGroupingBean createBeanFromHeuristic(AgencyAndId routeId, long serviceDate) {
-    ServiceDate sd = null;
-    if (serviceDate > 0) {
-      sd = new ServiceDate(new Date(serviceDate));
-    }
+  private RouteGroupingBean createBeanFromHeuristic(AgencyAndId routeId, AgencyServiceInterval serviceInterval) {
     StopsForRouteBean stops = null;
-    if (sd != null) {
+    if (serviceInterval != null) {
       // look up how strip map works and re-use that logic via stops-on-route-for-direction
-      stops = _transitDataService.getStopsForRouteForServiceDate(AgencyAndIdLibrary.convertToString(routeId), sd);
+      stops = _transitDataService.getStopsForRouteForServiceInterval(AgencyAndIdLibrary.convertToString(routeId), serviceInterval);
     } else {
       stops = _transitDataService.getStopsForRoute(AgencyAndIdLibrary.convertToString(routeId));
     }

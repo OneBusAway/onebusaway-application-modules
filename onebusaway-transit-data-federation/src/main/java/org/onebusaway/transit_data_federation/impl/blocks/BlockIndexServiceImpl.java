@@ -108,8 +108,8 @@ public class BlockIndexServiceImpl implements BlockIndexService {
   }
 
   @Override
-  public void register(BlockInstance blockInstance, int effectiveTime) {
-    dynamicBlockIndexService.register(blockInstance, effectiveTime);
+  public void register(BlockInstance blockInstance, long currentTime) {
+    dynamicBlockIndexService.register(blockInstance, currentTime);
   }
 
   @Override

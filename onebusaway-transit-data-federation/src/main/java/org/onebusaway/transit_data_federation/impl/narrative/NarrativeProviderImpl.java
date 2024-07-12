@@ -20,7 +20,6 @@ import java.io.Serializable;
 import java.util.*;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.map.PassiveExpiringMap;
 import org.onebusaway.container.refresh.Refreshable;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.impl.RefreshableResources;
@@ -28,10 +27,13 @@ import org.onebusaway.transit_data_federation.model.ShapePoints;
 import org.onebusaway.transit_data_federation.model.narrative.*;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class NarrativeProviderImpl implements Serializable {
 
   private static final long serialVersionUID = 2L;
+
 
   private Map<String, AgencyNarrative> _agencyNarratives = new HashMap<String, AgencyNarrative>();
 
@@ -50,6 +52,8 @@ public final class NarrativeProviderImpl implements Serializable {
   Map<AgencyAndId, ShapePoints> _dynamicShapesById = new HashMap<>();
 
   private Map<StopDirectionKey, RouteAndHeadsignNarrative> _patternCache = new HashMap<>();
+
+  private Map<AgencyAndId, List<AgencyAndId>> _staticRoutesByStopId = new HashMap<>();
 
   @Refreshable(dependsOn = RefreshableResources.TRANSIT_GRAPH)
   public void reset() {
@@ -188,6 +192,14 @@ public final class NarrativeProviderImpl implements Serializable {
     _dynamicShapesById.put(shapePoints.getShapeId(), shapePoints);
   }
 
+  public void addStaticRoute(AgencyAndId stopId, List<AgencyAndId> staticRouteIds) {
+    _staticRoutesByStopId.put(stopId, staticRouteIds);
+  }
+
+  public List<AgencyAndId> getStaticRoutes(AgencyAndId stopId) {
+    return _staticRoutesByStopId.get(stopId);
+  }
+
   public static class RoutePattern implements Serializable {
     private AgencyAndId routeId;
     private String directionId;
@@ -284,7 +296,8 @@ public final class NarrativeProviderImpl implements Serializable {
     if (routeAndHeadsignNarrative == null) {
       for (StopDirectionKey stopDirectionKey : _patternCache.keySet()) {
         if (stopDirectionKey.getStopId().equals(stopId)) {
-          System.out.println("patternCache miss but stop exists=" + stopDirectionKey.getStopId() + "," + stopDirectionKey.getDirectionId());
+          System.out.println("patternCache miss but stop/direction exists=" +
+                  stopDirectionKey.getStopId() + ", " + stopDirectionKey.getDirectionId());
         }
       }
       return null;

@@ -15,7 +15,8 @@
  */
 package org.onebusaway.enterprise.webapp.actions.api;
 
-import org.onebusaway.gtfs.model.calendar.ServiceDate;
+import org.onebusaway.gtfs.model.calendar.AgencyServiceInterval;
+import org.onebusaway.transit_data.services.IntervalFactory;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.enterprise.webapp.actions.OneBusAwayEnterpriseActionSupport;
 import org.onebusaway.enterprise.webapp.actions.api.model.StopOnRoute;
@@ -47,6 +48,9 @@ public class StopsOnRouteForDirectionAction extends OneBusAwayEnterpriseActionSu
   @Autowired
   private ConfigurationService _configService;
 
+  @Autowired
+  private IntervalFactory _factory;
+
   private List<StopOnRoute> _stops = new ArrayList<StopOnRoute>();
 
   private String _routeId = null;
@@ -70,7 +74,8 @@ public class StopsOnRouteForDirectionAction extends OneBusAwayEnterpriseActionSu
     boolean serviceDateFilterOn = Boolean.parseBoolean(_configService.getConfigurationValueAsString("display.serviceDateFiltering", "false"));
     StopsForRouteBean stopsForRoute;
     if (serviceDateFilterOn) {
-      stopsForRoute = _transitDataService.getStopsForRouteForServiceDate(_routeId, new ServiceDate(new Date(SystemTime.currentTimeMillis())));
+      AgencyServiceInterval serviceInterval = _factory.constructForDate(new Date(SystemTime.currentTimeMillis()));
+      stopsForRoute = _transitDataService.getStopsForRouteForServiceInterval(_routeId, serviceInterval);
     }
     else {
       stopsForRoute = _transitDataService.getStopsForRoute(_routeId);

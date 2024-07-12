@@ -48,6 +48,7 @@ public class STDuplicatedTripsIntegrationTest extends AbstractJsonRealtimeIntegr
   public String getTimezone() {
     return "America/Los_Angeles";
   }
+
   @Test
   public void testDuplicatedTrips() throws Exception {
     setupTest();

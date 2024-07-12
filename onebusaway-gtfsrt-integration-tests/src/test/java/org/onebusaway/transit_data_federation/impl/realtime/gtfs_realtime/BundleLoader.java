@@ -65,6 +65,7 @@ public class BundleLoader {
     AgencyService agencyService = _context.getBean(AgencyService.class);
     TransitGraphDao currentTransitGraphDao = _context.getBean(TransitGraphDao.class);
     _source = new GtfsRealtimeSource();
+    _source.setRefreshInterval(0); // don't refresh
 
     // set the bundle _source
     _source.setTransitGraphDao(currentTransitGraphDao);
@@ -88,11 +89,7 @@ public class BundleLoader {
       Thread.sleep(1000);
       if (i % 10 == 0) _log.info("waiting on bundle.....");
     }
-    // wait an extra bit just in case
-    for (int j = 0; j < 10; j++) {
-      Thread.sleep(1000);
-    }
-    _source.setFilterUnassigned(true);
+    _source.setFilterUnassigned(false);  // let time disqualify those trips
     _source.start(); // initialize
 
   }

@@ -56,7 +56,7 @@ public class DynamicTripBuilder {
     this._entitySource = dataSource;
   }
 
-  public BlockDescriptor createBlockDescriptor(AddedTripInfo addedTripInfo) {
+  public BlockDescriptor createBlockDescriptor(AddedTripInfo addedTripInfo, long currentTime) {
     try {
       // from the addedTripInfo generate the trips and stops, and return in the block descriptor
       BlockDescriptor dynamicBd = new BlockDescriptor();
@@ -65,16 +65,22 @@ public class DynamicTripBuilder {
       AgencyAndId blockId = new AgencyAndId(addedTripInfo.getAgencyId(), addedTripInfo.getTripId());
       // here we look up past blocks, and advance our position along the block
       BlockInstance instance = _serviceSource.getBlockIndexService().getDynamicBlockInstance(blockId);
+      // verify the pattern hasn't changed before use
+      if (instance != null && !tripPatternMatches(addedTripInfo, instance)) {
+        // the trip has mutated and is already underway
+        if (isBlockUnderway(instance, addedTripInfo.getServiceDate(), currentTime)) {
+          dynamicBd.setMutated(true);  // mark as mutated -- hint for location
+          // we don't worry about unsetting it as we only prevent 0.0 distanceAlongTrip currently
+        }
+        instance = null;
+      }
       if (instance == null) {
         instance = createBlockInstance(addedTripInfo);
       }
 
-      if (instance == null) {
-        _log.error("unable to create descriptor for additional trip {}", addedTripInfo.getTripId());
-      }
-
-      if (!isValid(instance)) {
-        _log.error("validation failed for additional trip {}", addedTripInfo.getTripId());
+      String validationMessage = isValid(instance);
+      if (validationMessage != null) {
+        _log.error("validation failed for additional trip {} with {}", addedTripInfo.getTripId(), validationMessage);
         return null;
       }
 
@@ -87,30 +93,106 @@ public class DynamicTripBuilder {
       return null;
     }
   }
+
+  private boolean isBlockUnderway(BlockInstance instance, long serviceDate, long currentTime) {
+    return isPastStop(instance, serviceDate, currentTime, 0);
+  }
+
+  private boolean isPastStop(BlockInstance instance, long serviceDate, long currentTime, int stopSequence) {
+    BlockTripEntry blockTripEntry = instance.getBlock().getTrips().get(0);
+    if (blockTripEntry.getStopTimes().isEmpty())
+      return false;
+    BlockStopTimeEntry blockStopTimeEntry = blockTripEntry.getStopTimes().get(stopSequence);
+    int time = 0;
+    time = blockStopTimeEntry.getStopTime().getArrivalTime();
+    if (time <= 0)
+      time = blockStopTimeEntry.getStopTime().getDepartureTime();
+    long stopTime = time + serviceDate;
+    if (stopTime < currentTime) {
+      return true;
+    }
+    return false;
+
+  }
+
+  // test that the stops are the same and in the same order
+  private boolean tripPatternMatches(AddedTripInfo addedTripInfo, BlockInstance instance) {
+    int i = -1;
+    String actualStops = fingerprintTripInfoStops(addedTripInfo.getStops());
+    String expectedStops = fingerprintBlockStops(instance.getBlock().getStopTimes());
+    if (expectedStops.contains(actualStops)) {
+      // added trip info can have less stops but needs to be in the same order
+      // now make sure end stop is the same to catch short-turn changes
+      String lastAddedStop = lastStopIdAddedStop(addedTripInfo.getStops());
+      if (lastAddedStop == null || lastAddedStop.equals(lastStopIdStopTime(instance.getBlock().getStopTimes()))) {
+        return true;
+      }
+    }
+    // the patterns were divergent
+    return false;
+  }
+
+  private String lastStopIdStopTime(List<BlockStopTimeEntry> stopTimes) {
+    if (stopTimes != null && !stopTimes.isEmpty())
+    return AgencyAndId.convertToString(stopTimes.get(stopTimes.size()-1).getStopTime().getStop().getId());
+    return null;
+  }
+
+  private String lastStopIdAddedStop(List<AddedStopInfo> stops) {
+    if (stops != null && !stops.isEmpty()) {
+      return stops.get(stops.size() - 1).getStopId();
+    }
+    return null;
+  }
+
+  private String fingerprintTripInfoStops(List<AddedStopInfo> stops) {
+    StringBuffer sb = new StringBuffer();
+    if (stops == null) return sb.toString();
+    for (AddedStopInfo stop : stops) {
+      sb.append(stop.getStopId());
+      sb.append(",");
+    }
+    if (sb.length() > 0)
+      return sb.substring(0, sb.length()-1);
+    return sb.toString();
+  }
+
+  private String fingerprintBlockStops(List<BlockStopTimeEntry> stopTimes) {
+    StringBuffer sb = new StringBuffer();
+    if (stopTimes == null) return sb.toString();
+    for (BlockStopTimeEntry stopTime : stopTimes) {
+      sb.append(stopTime.getStopTime().getStop().getId().getId());
+      sb.append(",");
+    }
+    if (sb.length() > 0)
+      return sb.substring(0, sb.length()-1);
+    return sb.toString();
+  }
+
   // be paranoid about incoming data
-  private boolean isValid(BlockInstance instance) {
-    if (instance == null) return false;
+  private String isValid(BlockInstance instance) {
+    if (instance == null) return "NuLl instance";
     if (instance.getServiceDate() < 1000l)
-      return false;
+      return "Invalid ServiceDate " + instance.getServiceDate();
     if (instance.getState() == null)
-      return false;
+      return "Missing State";
     if (instance.getBlock() == null)
-      return false;
+      return "Missing Block";
     BlockConfigurationEntry block = instance.getBlock();
     if (block.getBlock() == null)
-      return false;
+      return "Null Block";
     if (block.getTrips() == null || block.getTrips().isEmpty())
-      return false;
+      return "Empty Trips";
     BlockTripEntry blockTripEntry = block.getTrips().get(0);
     if (blockTripEntry.getTrip() == null)
-      return false;
+      return "Empty BlockTrip";
     if (blockTripEntry.getTrip().getId() == null)
-      return false;
+      return "Missing BlockTrip Id";
     if (blockTripEntry.getTrip().getId().getId() == null)
-      return false;
+      return "Missing BlockTrip Id.id";
     if (blockTripEntry.getStopTimes() == null || blockTripEntry.getStopTimes().isEmpty())
-      return false;
-    return true;
+      return "No StopTImes";
+    return null;
   }
 
   private BlockInstance createBlockInstance(AddedTripInfo addedTripInfo) {
@@ -146,7 +228,7 @@ public class DynamicTripBuilder {
     trip.setStopTimes(createStopTimes(addedTripInfo, trip));
     trip.setTotalTripDistance(calculateTripDistance(trip));
     if (trip.getStopTimes() == null || trip.getStopTimes().isEmpty()) {
-      _log.error("aborting trip creation {} with no stops", addedTripInfo.getTripId());
+      _log.debug("aborting trip creation {} with no stops", addedTripInfo.getTripId());
       return null;
     }
     // here we set the shapeId to the tripId
@@ -210,7 +292,8 @@ public class DynamicTripBuilder {
       stopTime.setSequence(sequence);
       stopTime.setTrip(trip);
       if (stopTime.getArrivalTime() < 1 && stopTime.getDepartureTime() < 1) {
-        _log.error("invalid stoptime -- no data: " + stopInfo);
+        _log.error("invalid stoptime -- no data for stop {} on trip {} with arrival {}/departure {} ",
+                stopTime.getId(), trip.getId(), stopTime.getArrivalTime(), stopTime.getDepartureTime());
         continue;
       }
       sequence++;

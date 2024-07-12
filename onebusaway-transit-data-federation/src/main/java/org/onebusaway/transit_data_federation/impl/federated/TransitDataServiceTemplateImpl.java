@@ -24,6 +24,7 @@ import org.onebusaway.federations.annotations.FederatedByEntityIdMethod;
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.geospatial.model.EncodedPolylineBean;
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.gtfs.model.calendar.AgencyServiceInterval;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
 import org.onebusaway.realtime.api.TimepointPredictionRecord;
 import org.onebusaway.realtime.api.VehicleOccupancyRecord;
@@ -227,8 +228,8 @@ public class TransitDataServiceTemplateImpl implements TransitDataServiceTemplat
   }
 
   //@Override
-  public RouteScheduleBean getScheduleForRoute(AgencyAndId routeId, ServiceDate serviceDate) {
-    return _routeScheduleBeanService.getScheduledArrivalsForDate(routeId, serviceDate);
+  public RouteScheduleBean getScheduleForRoute(AgencyAndId routeId, AgencyServiceInterval serviceInterval) {
+    return _routeScheduleBeanService.getScheduledArrivalsForInterval(routeId, serviceInterval);
 
   }
 
@@ -253,10 +254,10 @@ public class TransitDataServiceTemplateImpl implements TransitDataServiceTemplat
   }
 
   //@Override
-  public StopBean getStopForServiceDate(String stopId, ServiceDate serviceDate) throws ServiceException {
+  public StopBean getStopForServiceDate(String stopId, AgencyServiceInterval serviceInterval) throws ServiceException {
 
     AgencyAndId id = convertAgencyAndId(stopId);
-    return _stopBeanService.getStopForIdForServiceDate(id, serviceDate);
+    return _stopBeanService.getStopForIdForServiceDate(id, serviceInterval);
   }
 
   //@Override
@@ -267,22 +268,22 @@ public class TransitDataServiceTemplateImpl implements TransitDataServiceTemplat
 
   //@Override
   public StopWithArrivalsAndDeparturesBean getStopWithArrivalsAndDepartures(
-      String stopId, ArrivalsAndDeparturesQueryBean query)
+      String stopId, ArrivalsAndDeparturesQueryBean query, AgencyServiceInterval serviceInterval)
       throws ServiceException {
     
     AgencyAndId id = convertAgencyAndId(stopId);
     return _stopWithArrivalsAndDepaturesBeanService.getArrivalsAndDeparturesByStopId(
-        id, query);
+        id, query, serviceInterval);
   }
 
   //@Override
   public StopsWithArrivalsAndDeparturesBean getStopsWithArrivalsAndDepartures(
-      Collection<String> stopIds, ArrivalsAndDeparturesQueryBean query)
+      Collection<String> stopIds, ArrivalsAndDeparturesQueryBean query, AgencyServiceInterval serviceInterval)
       throws ServiceException {
     
     Set<AgencyAndId> ids = convertAgencyAndIds(stopIds);
     return _stopWithArrivalsAndDepaturesBeanService.getArrivalsAndDeparturesForStopIds(
-        ids, query);
+        ids, query, serviceInterval);
   }
 
   //@Override
@@ -291,7 +292,7 @@ public class TransitDataServiceTemplateImpl implements TransitDataServiceTemplat
     
     ArrivalAndDepartureQuery adQuery = createArrivalAndDepartureQuery(query);
 
-    return _arrivalsAndDeparturesBeanService.getArrivalAndDepartureForStop(adQuery);
+    return _arrivalsAndDeparturesBeanService.getArrivalAndDepartureForStop(adQuery, query.getServiceInterval());
   }
 
   //@Override
@@ -340,9 +341,9 @@ public class TransitDataServiceTemplateImpl implements TransitDataServiceTemplat
   }
 
   //@Override
-  public StopsForRouteBean getStopsForRouteForServiceDate(String routeId, ServiceDate serviceDate) {
+  public StopsForRouteBean getStopsForRouteForServiceInterval(String routeId, AgencyServiceInterval serviceInterval) {
 
-    return _routeBeanService.getStopsForRouteForServiceDate(convertAgencyAndId(routeId), serviceDate);
+    return _routeBeanService.getStopsForRouteForServiceInterval(convertAgencyAndId(routeId), serviceInterval);
   }
 
   //@Override
@@ -430,6 +431,13 @@ public class TransitDataServiceTemplateImpl implements TransitDataServiceTemplat
       long time) {
     
     return _vehicleStatusBeanService.getAllVehiclesForAgency(agencyId, time);
+  }
+
+  //@Override
+  public ListBean<VehicleStatusBean> getFilteredVehiclesForAgency(String agencyId,
+                                                             long time, Integer ageInSeconds) {
+
+    return _vehicleStatusBeanService.getFilteredVehiclesForAgency(agencyId, time, ageInSeconds);
   }
 
   //@Override
@@ -771,8 +779,8 @@ public class TransitDataServiceTemplateImpl implements TransitDataServiceTemplat
     return null;
   }
 
-  public ListBean<RouteGroupingBean> getCanonicalRoute(long serviceDate, AgencyAndId routeId) {
-    return _canonicalRouteServce.getCanonicalOrMergedRoute(serviceDate, routeId);
+  public ListBean<RouteGroupingBean> getCanonicalRoute(AgencyServiceInterval serviceInterval, AgencyAndId routeId) {
+    return _canonicalRouteServce.getCanonicalOrMergedRoute(serviceInterval, routeId);
   }
 
   public ListBean<ConsolidatedStopMapBean> getAllConsolidatedStops() {
@@ -837,6 +845,6 @@ public class TransitDataServiceTemplateImpl implements TransitDataServiceTemplat
       }
     }
 
-    throw new OutOfServiceAreaServiceException();
+    throw new OutOfServiceAreaServiceException(cb.toString());
   }
 }

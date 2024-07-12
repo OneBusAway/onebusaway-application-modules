@@ -21,7 +21,8 @@ import java.util.*;
 import org.onebusaway.container.cache.Cacheable;
 import org.onebusaway.exceptions.InternalErrorServiceException;
 import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.gtfs.model.calendar.ServiceDate;
+import org.onebusaway.gtfs.model.calendar.AgencyServiceInterval;
+import org.onebusaway.gtfs.model.calendar.ServiceInterval;
 import org.onebusaway.gtfs.services.calendar.CalendarService;
 import org.onebusaway.transit_data_federation.services.RouteService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockIndexService;
@@ -40,6 +41,8 @@ class RouteServiceImpl implements RouteService {
 
   private CalendarService _calendarService;
 
+  private ServiceIntervalHelper _helper = new ServiceIntervalHelper();
+
   @Autowired
   public void setTransitGraphDao(TransitGraphDao transitGraphDao) {
     _transitGraphDao = transitGraphDao;
@@ -56,21 +59,28 @@ class RouteServiceImpl implements RouteService {
   @Override
   @Cacheable
   public Collection<AgencyAndId> getStopsForRouteCollection(AgencyAndId id) {
-    return getStopsForRouteCollectionForServiceDate(id, null);
+    return getStopsForRouteCollectionForServiceInterval(id, null);
   }
 
   @Override
   @Cacheable
-  public Collection<AgencyAndId> getStopsForRouteCollectionForServiceDate(AgencyAndId id, ServiceDate serviceDate) {
+  public Collection<AgencyAndId> getStopsForRouteCollectionForServiceInterval(AgencyAndId id, AgencyServiceInterval serviceInterval) {
     Set<AgencyAndId> stopIds = new HashSet<AgencyAndId>();
     RouteCollectionEntry routeCollectionEntry = _transitGraphDao.getRouteCollectionForId(id);
 
     for (RouteEntry route : routeCollectionEntry.getChildren()) {
       List<TripEntry> trips = route.getTrips();
       for (TripEntry trip : trips) {
-        if (serviceDate != null) {
-          TimeZone serviceTimezone = trip.getServiceId().getTimeZone();
-          boolean isActiveTrip = _calendarService.isLocalizedServiceIdActiveOnDate(trip.getServiceId(), serviceDate.getAsDate(serviceTimezone));
+        ServiceInterval tripServiceInterval = _helper.getServiceIntervalForTrip(trip);
+        if (serviceInterval != null) {
+          boolean isActiveTrip;
+          if (_blockIndexService.isDynamicTrip(trip)) {
+            isActiveTrip = _helper.isServiceIntervalActiveInRange(trip.getServiceId(), tripServiceInterval, serviceInterval);
+          } else {
+            isActiveTrip = _calendarService.isLocalizedServiceIdActiveInRange(trip.getServiceId(),
+                    tripServiceInterval,
+                    serviceInterval);
+          }
           if (!isActiveTrip) continue;//skip this trip if not active
         }
 
@@ -87,12 +97,16 @@ class RouteServiceImpl implements RouteService {
   @Override
   @Cacheable
   public Set<AgencyAndId> getRouteCollectionIdsForStop(AgencyAndId stopId) {
+    // this API is independent of service interval
     return getRouteCollectionIdsForStopForServiceDate(stopId, null);
   }
 
   @Override
   @Cacheable
-  public Set<AgencyAndId> getRouteCollectionIdsForStopForServiceDate(AgencyAndId stopId, ServiceDate serviceDate) {
+  /*
+  * serviceInterval can be null here.
+   */
+  public Set<AgencyAndId> getRouteCollectionIdsForStopForServiceDate(AgencyAndId stopId, AgencyServiceInterval serviceInterval) {
     StopEntry stopEntry = _transitGraphDao.getStopEntryForId(stopId);
     if (stopEntry == null)
       throw new InternalErrorServiceException("no such stop: id=" + stopId);
@@ -104,16 +118,23 @@ class RouteServiceImpl implements RouteService {
     for (BlockStopTimeIndex blockStopTimeIndex : indices) {
       for (BlockTripEntry blockTrip : blockStopTimeIndex.getTrips()) {
         TripEntry trip = blockTrip.getTrip();
-
-        if (serviceDate != null) {
-          TimeZone serviceTimezone = trip.getServiceId().getTimeZone();
-          if (!_blockIndexService.isDynamicTrip(trip)) { // dynamic trips are always active
-            boolean isActiveTrip = _calendarService.isLocalizedServiceIdActiveOnDate(trip.getServiceId(), serviceDate.getAsDate(serviceTimezone));
-            if (!isActiveTrip) continue;//skip this trip if not active
-          }
+        AgencyAndId routeCollectionAgencyAndId = trip.getRouteCollection().getId();
+        // don't bother evaluating if this route is already in list
+        if (!routeCollectionIds.contains(routeCollectionAgencyAndId)) {
+            boolean isActiveTrip = false;
+            if (serviceInterval != null) {
+              ServiceInterval stopServiceInterval = _helper.getServiceIntervalForTrip(trip, stopEntry);
+              if (_blockIndexService.isDynamicTrip(trip)) {
+                isActiveTrip = _helper.isServiceIntervalActiveInRange(trip.getServiceId(), stopServiceInterval, serviceInterval);
+              } else {
+                isActiveTrip = _calendarService.isLocalizedServiceIdActiveInRange(trip.getServiceId(),
+                        stopServiceInterval,
+                        serviceInterval);
+              }
+              if (!isActiveTrip) continue; //skip this trip if not active
+            }
+          routeCollectionIds.add(routeCollectionAgencyAndId);
         }
-
-        routeCollectionIds.add(trip.getRouteCollection().getId());
       }
     }
 
@@ -122,10 +143,16 @@ class RouteServiceImpl implements RouteService {
     for (FrequencyBlockStopTimeIndex blockStopTimeIndex : frequencyIndices) {
       for (BlockTripEntry blockTrip : blockStopTimeIndex.getTrips()) {
         TripEntry trip = blockTrip.getTrip();
-
-        if (serviceDate != null) {
-          TimeZone serviceTimezone = trip.getServiceId().getTimeZone();
-          boolean isActiveTrip = _calendarService.isLocalizedServiceIdActiveOnDate(trip.getServiceId(), serviceDate.getAsDate(serviceTimezone));
+        if (serviceInterval != null) {
+          ServiceInterval stopServiceInterval = _helper.getServiceIntervalForTrip(trip, stopEntry);
+          boolean isActiveTrip;
+          if (_blockIndexService.isDynamicTrip(trip)) {
+            isActiveTrip = _helper.isServiceIntervalActiveInRange(trip.getServiceId(), stopServiceInterval, serviceInterval);
+          } else {
+            isActiveTrip = _calendarService.isLocalizedServiceIdActiveInRange(trip.getServiceId(),
+                    stopServiceInterval,
+                    serviceInterval);
+          }
           if (!isActiveTrip) continue;//skip this trip if not active
         }
 

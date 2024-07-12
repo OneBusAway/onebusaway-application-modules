@@ -57,7 +57,9 @@ public class GtfsRealtimeServiceSource {
 
   private ShapePointService _shapePointService;
 
-  private StopSwapService stopSwapServce;
+  private StopSwapService _stopSwapServce;
+
+  private BlockFinder _blockFinder;
 
   public BlockIndexService getBlockIndexService() {
     return _blockIndexService;
@@ -69,6 +71,7 @@ public class GtfsRealtimeServiceSource {
 
   public void setBlockCalendarService(BlockCalendarService blockCalendarService) {
     _blockCalendarService = blockCalendarService;
+    _blockFinder = new BlockFinder(_blockCalendarService);
   }
   public void setBlockGeospatialService(BlockGeospatialService blockGeospatialService) {
     _blockGeospatialService = blockGeospatialService;
@@ -156,9 +159,14 @@ public class GtfsRealtimeServiceSource {
   }
 
   public StopSwapService getStopSwapService() {
-    return stopSwapServce;
+    return _stopSwapServce;
   }
+
   public void setStopSwapServce(StopSwapService service) {
-    stopSwapServce = service;
+    _stopSwapServce = service;
+  }
+
+  public BlockFinder getBlockFinder() {
+    return _blockFinder;
   }
 }

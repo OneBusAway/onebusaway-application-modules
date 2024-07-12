@@ -127,6 +127,7 @@ public class GtfsReadingSupport {
       System.out.println("gtfs=" + gtfsBundle.getPath());
 
       GtfsReader reader = new GtfsReader();
+      reader.setOverwriteDuplicates(true);
       reader.setEntitySchemaFactory(factory);
       reader.setInputLocation(gtfsBundle.getPath());
 

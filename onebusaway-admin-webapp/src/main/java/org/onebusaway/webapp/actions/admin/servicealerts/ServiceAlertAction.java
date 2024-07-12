@@ -239,18 +239,18 @@ public String getStartDate() {
   public void setStartDate(Date startDate) throws java.text.ParseException {
     _startDate = startDate;
 
-    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm");
-
-    Date time = null;
     if (_startTime != null && !_startTime.isEmpty()) {
-      time = simpleDateFormat.parse(_startTime);
-      Calendar cal = Calendar.getInstance();
-      cal.setTime(time);
-      int hour = cal.get(Calendar.HOUR_OF_DAY);
-      int min = cal.get(Calendar.MINUTE);
-      setCombinedStartDate(((hour * 60)  + min) * 60 * 1000);
+      try {
+        String[] timeparts = _startTime.split(":");
+        int hour = Integer.parseInt(timeparts[0]);
+        int min = Integer.parseInt(timeparts[1]);
+        setCombinedStartDate(hour, min);
+      } catch (Throwable t) {
+        _log.error("exception setting time {}", _startTime, t);
+        setCombinedStartDate(0, 0);
+      }
     }
-    else setCombinedStartDate(0);
+    else setCombinedStartDate(0, 0);
 	 
   }
 
@@ -267,21 +267,21 @@ public String getStartDate() {
   public void setStartTime(String startTime) throws java.text.ParseException {
   _startTime = startTime;
 
-    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm");
-
-    Date time = null;
     if (_startTime != null && !_startTime.isEmpty()) {
-      time = simpleDateFormat.parse(_startTime);
-      Calendar cal = Calendar.getInstance();
-      cal.setTime(time);
-      int hour = cal.get(Calendar.HOUR_OF_DAY);
-      int min = cal.get(Calendar.MINUTE);
-      setCombinedStartDate(((hour * 60)  + min) * 60 * 1000);
+      try {
+        String[] timeparts = _startTime.split(":");
+        int hour = Integer.parseInt(timeparts[0]);
+        int min = Integer.parseInt(timeparts[1]);
+        setCombinedStartDate(hour, min);
+      } catch (Throwable t) {
+        _log.error("exception setting time {}", _startTime, t);
+        setCombinedStartDate(0, 0);
+      }
     }
-    else setCombinedStartDate(0);
+    else setCombinedStartDate(0, 0);
   }
 
-  private void setCombinedStartDate(long startTime) {
+  private void setCombinedStartDate(int hour, int min) {
     List<TimeRangeBean> publicationWindows = _model.getPublicationWindows();
     if (publicationWindows == null) {
       publicationWindows = new ArrayList<TimeRangeBean>();
@@ -294,11 +294,11 @@ public String getStartDate() {
 
     TimeRangeBean timeRangeBean = publicationWindows.get(0);
 
-    if (startTime == 0 && _startDate != null) {//just have date
+    if (hour == 0 && min == 0 &&  _startDate != null) {//just have date
       timeRangeBean.setFrom(_startDate.getTime());
     }
     else if(_startDate != null){//have both date and time
-      timeRangeBean.setFrom(_startDate.getTime() + startTime);
+      timeRangeBean.setFrom(addTime(_startDate, hour, min));
     }
     else{
       timeRangeBean.setFrom(0);
@@ -309,7 +309,29 @@ public String getStartDate() {
       timeRangeBean.setFrom(timeRangeBean.getTo());
     }
   }
-  
+
+  //// WMATA-609 support daylight savings time
+  private long addTime(Date startDate, int hour, int min) {
+    String prefix = new SimpleDateFormat("yyyy-MM-dd").format(startDate);
+    String dateStr = prefix + " " + lpad(hour) + ":" + lpad(min);
+    try {
+      Date parse = new SimpleDateFormat("yyyy-MM-dd HH:mm").parse(dateStr);
+      return parse.getTime();
+    } catch (ParseException e) {
+      _log.error("unexpected date {}", dateStr, e);
+      return 0;
+    }
+  }
+
+  private String lpad(int t) {
+    String pad = "" + t;
+    if (pad.length() < 2)
+      pad = "0" + pad;
+    return pad;
+  }
+
+
+
   public String getEndDate() {
 	  List<TimeRangeBean> publicationWindows = _model.getPublicationWindows();
 	  if(publicationWindows == null || publicationWindows.isEmpty() || publicationWindows.get(0).getTo() == 0){
@@ -323,18 +345,18 @@ public String getStartDate() {
   public void setEndDate(Date endDate) throws java.text.ParseException {
     _endDate = endDate;
 
-    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm");
-
-    Date time = null;
     if (_endTime != null && !_endTime.isEmpty()) {
-      time = simpleDateFormat.parse(_endTime);
-      Calendar cal = Calendar.getInstance();
-      cal.setTime(time);
-      int hour = cal.get(Calendar.HOUR_OF_DAY);
-      int min = cal.get(Calendar.MINUTE);
-      setCombinedEndDate(((hour * 60)  + min) * 60 * 1000);
+      try {
+        String[] timeparts = _endTime.split(":");
+        int hour = Integer.parseInt(timeparts[0]);
+        int min = Integer.parseInt(timeparts[1]);
+        setCombinedEndDate(hour, min);
+      } catch (Throwable t) {
+        _log.error("exception setting time {}", _endTime, t);
+        setCombinedEndDate(0, 0);
+      }
     }
-    else setCombinedEndDate(0);
+    else setCombinedEndDate(0, 0);
 	 
   }
 
@@ -351,21 +373,21 @@ public String getStartDate() {
   public void setEndTime(String endTime) throws java.text.ParseException {
     _endTime = endTime;
 
-    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm");
-
-    Date time = null;
     if (_endTime != null && !_endTime.isEmpty()) {
-      time = simpleDateFormat.parse(_endTime);
-      Calendar cal = Calendar.getInstance();
-      cal.setTime(time);
-      int hour = cal.get(Calendar.HOUR_OF_DAY);
-      int min = cal.get(Calendar.MINUTE);
-      setCombinedEndDate(((hour * 60)  + min) * 60 * 1000);
+      try {
+        String[] timeparts = _endTime.split(":");
+        int hour = Integer.parseInt(timeparts[0]);
+        int min = Integer.parseInt(timeparts[1]);
+        setCombinedEndDate(hour, min);
+      } catch (Throwable t) {
+        _log.error("exception setting time {}", _endTime, t);
+        setCombinedEndDate(0, 0);
+      }
     }
-    else setCombinedEndDate(0);
+    else setCombinedEndDate(0, 0);
   }
 
-  public void setCombinedEndDate(long endTime) {
+  public void setCombinedEndDate(int hour, int min) {
     List<TimeRangeBean> publicationWindows = _model.getPublicationWindows();
     if (publicationWindows == null) {
       publicationWindows = new ArrayList<TimeRangeBean>();
@@ -378,11 +400,11 @@ public String getStartDate() {
 
     TimeRangeBean timeRangeBean = publicationWindows.get(0);
 
-    if (_endDate != null && endTime == 0) {
+    if (_endDate != null && hour == 0 && min == 0) {
       timeRangeBean.setTo(_endDate.getTime());
     }
     else if(_endDate != null){
-      timeRangeBean.setTo(_endDate.getTime() + endTime);
+      timeRangeBean.setTo(addTime(_endDate, hour, min));
     }
     else{
       timeRangeBean.setTo(0);

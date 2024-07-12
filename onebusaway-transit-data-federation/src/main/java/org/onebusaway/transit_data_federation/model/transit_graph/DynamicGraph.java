@@ -27,11 +27,15 @@ import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
 public interface DynamicGraph {
 
   TripEntry getTripEntryForId(AgencyAndId id);
-  void registerTrip(TripEntry tripEntry);
+  void registerTrip(TripEntry tripEntry, long currentTime);
+
+  void updateTrip(TripEntry tripEntry);
 
   RouteEntry getRoutEntryForId(AgencyAndId id);
   void registerRoute(RouteEntry routeEntry);
 
   BlockEntry getBlockEntryForId(AgencyAndId id);
   void registerBlock(BlockEntry blockEntry);
+
+  void updateBlock(BlockEntry blockEntry);
 }

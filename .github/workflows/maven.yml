@@ -21,4 +21,6 @@ jobs:
           distribution: 'temurin'
           cache: maven
       - name: Build with Maven
-        run: mvn package -Ptravis -Dmaven.javadoc.skip=true -Dvalidate.silent=true -Dlog4j.configuration= -B -V -q
+        run: mvn -U clean install -Ptravis -Dhttps.protocols=TLSv1,TLSv1.1,TLSv1.2 -DskipTests=true -Dmaven.javadoc.skip=true -Dvalidate.silent=true -Dlog4j.configuration= -B -V -q
+      - name: Test with Maven
+        run: mvn test -Dlog4j.configuration=

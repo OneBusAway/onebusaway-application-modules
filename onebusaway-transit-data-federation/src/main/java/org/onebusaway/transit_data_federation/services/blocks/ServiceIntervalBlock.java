@@ -16,6 +16,7 @@
 package org.onebusaway.transit_data_federation.services.blocks;
 
 import java.io.Serializable;
+import java.util.Arrays;
 
 import org.onebusaway.gtfs.model.calendar.ServiceInterval;
 
@@ -93,5 +94,20 @@ public final class ServiceIntervalBlock implements Serializable, Comparable<Serv
   @Override
   public int compareTo(ServiceIntervalBlock o) {
     return minArrivals[0] - o.minArrivals[0];
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj)
+      return true;
+    if (obj == null)
+      return false;
+    if (getClass() != obj.getClass())
+      return false;
+    ServiceIntervalBlock other = (ServiceIntervalBlock) obj;
+    return Arrays.equals(minArrivals, other.minArrivals)
+            && Arrays.equals(minDepartures, other.minDepartures)
+            && Arrays.equals(maxArrivals, other.maxArrivals)
+            && Arrays.equals(maxDepartures, other.maxDepartures);
   }
 }

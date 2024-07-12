@@ -19,6 +19,7 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import org.onebusaway.gtfs.impl.calendar.CalendarServiceImpl;
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.gtfs.model.calendar.AgencyServiceInterval;
 import org.onebusaway.gtfs.model.calendar.CalendarServiceData;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
 import org.onebusaway.transit_data.model.RouteScheduleBean;
@@ -100,8 +101,9 @@ public class RouteScheduleBeanServiceImplTest {
     impl.setCalendarService(this.calendarService);
 
     ServiceDate serviceDate = new ServiceDate(2020, 11, 30);
-    RouteScheduleBean bean = impl.getScheduledArrivalsForDate(new AgencyAndId(AGENCY_ID, ROUTE_ID),
-            serviceDate);
+    AgencyServiceInterval interval = new AgencyServiceInterval(serviceDate);
+    RouteScheduleBean bean = impl.getScheduledArrivalsForInterval(new AgencyAndId(AGENCY_ID, ROUTE_ID),
+            interval);
     assertNotNull(bean);
     assertEquals(route.getId(), bean.getRouteId());
     assertEquals(Arrays.asList(aId("WD_TL")), bean.getServiceIds());

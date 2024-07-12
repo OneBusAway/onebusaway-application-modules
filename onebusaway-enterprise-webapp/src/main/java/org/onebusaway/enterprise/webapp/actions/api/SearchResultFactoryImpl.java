@@ -22,11 +22,14 @@ import java.util.Set;
 
 import org.onebusaway.geospatial.model.EncodedPolylineBean;
 import org.onebusaway.geocoder.enterprise.services.EnterpriseGeocoderResult;
+import org.onebusaway.gtfs.model.calendar.AgencyServiceInterval;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
 import org.onebusaway.presentation.model.SearchResult;
 import org.onebusaway.presentation.services.realtime.RealtimeService;
 import org.onebusaway.presentation.services.search.SearchResultFactory;
 import org.onebusaway.presentation.services.search.SearchService;
+import org.onebusaway.transit_data.model.*;
+import org.onebusaway.transit_data.services.IntervalFactory;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.util.SystemTime;
 import org.onebusaway.enterprise.webapp.actions.api.model.GeocodeResult;
@@ -35,44 +38,44 @@ import org.onebusaway.enterprise.webapp.actions.api.model.RouteDirection;
 import org.onebusaway.enterprise.webapp.actions.api.model.RouteInRegionResult;
 import org.onebusaway.enterprise.webapp.actions.api.model.RouteResult;
 import org.onebusaway.enterprise.webapp.actions.api.model.StopResult;
-import org.onebusaway.transit_data.model.NameBean;
-import org.onebusaway.transit_data.model.RouteBean;
-import org.onebusaway.transit_data.model.StopBean;
-import org.onebusaway.transit_data.model.StopGroupBean;
-import org.onebusaway.transit_data.model.StopGroupingBean;
-import org.onebusaway.transit_data.model.StopsForRouteBean;
 import org.onebusaway.util.services.configuration.ConfigurationService;
 
 public class SearchResultFactoryImpl implements SearchResultFactory {
 
-  private SearchService _searchService;
+  private final SearchService _searchService;
 
-  private TransitDataService _transitDataService;
+  private final TransitDataService _transitDataService;
 
-  private RealtimeService _realtimeService;
+  private final RealtimeService _realtimeService;
 
-  private ConfigurationService _configService;
+  private final ConfigurationService _configService;
 
-  public SearchResultFactoryImpl(SearchService searchService, TransitDataService transitDataService, RealtimeService realtimeService, ConfigurationService configService) {
+  private final IntervalFactory _factory;
+
+  public SearchResultFactoryImpl(SearchService searchService, TransitDataService transitDataService,
+                                 RealtimeService realtimeService, ConfigurationService configService,
+                                 IntervalFactory factory) {
     _searchService = searchService;
     _transitDataService = transitDataService;
     _realtimeService = realtimeService;
     _configService = configService;
+    _factory = factory;
   }
 
   @Override
   public SearchResult getRouteResultForRegion(RouteBean routeBean) {
     List<String> polylines = new ArrayList<String>();
 
-    ServiceDate serviceDate = null;
+    AgencyServiceInterval serviceInterval = null;
     boolean serviceDateFilterOn = Boolean.parseBoolean(_configService.getConfigurationValueAsString("display.serviceDateFiltering", "false"));
-    if (serviceDateFilterOn) serviceDate = new ServiceDate(new Date(SystemTime.currentTimeMillis()));
-
-    StopsForRouteBean stopsForRoute;
-    if (serviceDate == null)
+    if (serviceDateFilterOn) {
+      serviceInterval = _factory.constructDefault();
+    }
+    StopsForRouteBean stopsForRoute = null;
+    if (serviceInterval == null)
       stopsForRoute = _transitDataService.getStopsForRoute(routeBean.getId());
     else
-      stopsForRoute = _transitDataService.getStopsForRouteForServiceDate(routeBean.getId(), serviceDate);
+      stopsForRoute = _transitDataService.getStopsForRouteForServiceInterval(routeBean.getId(), serviceInterval);
 
     List<StopGroupingBean> stopGroupings = stopsForRoute.getStopGroupings();
     for (StopGroupingBean stopGroupingBean : stopGroupings) {
@@ -96,13 +99,13 @@ public class SearchResultFactoryImpl implements SearchResultFactory {
   public SearchResult getRouteResult(RouteBean routeBean) {
     List<RouteDirection> directions = new ArrayList<RouteDirection>();
 
-    ServiceDate serviceDate = null;
+    AgencyServiceInterval serviceInterval = null;
     boolean serviceDateFilterOn = Boolean.parseBoolean(_configService.getConfigurationValueAsString("display.serviceDateFiltering", "false"));
-    if (serviceDateFilterOn) serviceDate = new ServiceDate(new Date(SystemTime.currentTimeMillis()));
+    if (serviceDateFilterOn) serviceInterval = _factory.constructForDate(new Date(SystemTime.currentTimeMillis()));
 
     StopsForRouteBean stopsForRoute;
-    if (serviceDate != null) {
-      stopsForRoute = _transitDataService.getStopsForRouteForServiceDate(routeBean.getId(), serviceDate);
+    if (serviceInterval != null) {
+      stopsForRoute = _transitDataService.getStopsForRouteForServiceInterval(routeBean.getId(), serviceInterval);
     }
     else {
       stopsForRoute = _transitDataService.getStopsForRoute(routeBean.getId());
@@ -146,14 +149,14 @@ public class SearchResultFactoryImpl implements SearchResultFactory {
 
     List<StopsForRouteBean> fullStopList = new ArrayList<>();
 
-    ServiceDate serviceDate = null;
+    AgencyServiceInterval serviceInterval = null;
     boolean serviceDateFilterOn = Boolean.parseBoolean(_configService.getConfigurationValueAsString("display.serviceDateFiltering", "false"));
-    if (serviceDateFilterOn) serviceDate = new ServiceDate(new Date(SystemTime.currentTimeMillis()));
+    if (serviceDateFilterOn) serviceInterval = _factory.constructForDate(new Date(SystemTime.currentTimeMillis()));
 
     for(RouteBean routeBean : stopBean.getRoutes()) {
       StopsForRouteBean stopsForRoute;
-      if (serviceDate != null) {
-        stopsForRoute = _transitDataService.getStopsForRouteForServiceDate(routeBean.getId(), serviceDate);
+      if (serviceInterval != null) {
+        stopsForRoute = _transitDataService.getStopsForRouteForServiceInterval(routeBean.getId(), serviceInterval);
       }
       else {
         stopsForRoute = _transitDataService.getStopsForRoute(routeBean.getId());

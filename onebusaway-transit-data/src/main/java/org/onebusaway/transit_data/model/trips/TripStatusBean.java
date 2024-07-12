@@ -42,6 +42,10 @@ public final class TripStatusBean implements Serializable {
 
   private String occupancyStatus;
 
+  private Integer occupancyCount = -1;
+
+  private Integer occupancyCapacity = -1;
+
   private FrequencyBean frequency;
 
   private double scheduledDistanceAlongTrip = Double.NaN;
@@ -110,6 +114,8 @@ public final class TripStatusBean implements Serializable {
     return activeTrip;
   }
 
+  private List<String> vehicleFeatures;
+
   public void setActiveTrip(TripBean activeTrip) {
     this.activeTrip = activeTrip;
   }
@@ -142,6 +148,22 @@ public final class TripStatusBean implements Serializable {
   public void setOccupancyStatus(OccupancyStatus occupancyStatus) {
     if (occupancyStatus != null)
       this.occupancyStatus = occupancyStatus.name();
+  }
+
+  public Integer getOccupancyCount() {
+    return occupancyCount;
+  }
+
+  public void setOccupancyCount(Integer occupancyCount) {
+    this.occupancyCount = occupancyCount;
+  }
+
+  public Integer getOccupancyCapacity() {
+    return occupancyCapacity;
+  }
+
+  public void setOccupancyCapacity(Integer occupancyCapacity) {
+    this.occupancyCapacity = occupancyCapacity;
   }
 
   public FrequencyBean getFrequency() {
@@ -427,5 +449,12 @@ public void setPreviousStopDistanceFromVehicle(
 
   public void setTimepointPredictions(List<TimepointPredictionBean> timepointPredictions) {
     this.timepointPredictions = timepointPredictions;
+  }
+
+  public void setVehicleFeatures(List<String> vehicleFeatures) {
+    this.vehicleFeatures = vehicleFeatures;
+  }
+  public List<String> getVehicleFeatures() {
+    return vehicleFeatures;
   }
 }

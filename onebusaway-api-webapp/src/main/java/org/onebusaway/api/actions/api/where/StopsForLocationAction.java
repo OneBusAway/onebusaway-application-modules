@@ -17,6 +17,7 @@ package org.onebusaway.api.actions.api.where;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.apache.struts2.rest.DefaultHttpHeaders;
@@ -24,15 +25,18 @@ import org.onebusaway.api.actions.api.ApiActionSupport;
 import org.onebusaway.api.impl.MaxCountSupport;
 import org.onebusaway.api.model.transit.BeanFactoryV2;
 import org.onebusaway.api.model.transit.StopV2Bean;
+import org.onebusaway.api.services.ApiIntervalFactory;
 import org.onebusaway.exceptions.OutOfServiceAreaServiceException;
 import org.onebusaway.exceptions.ServiceException;
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
+import org.onebusaway.presentation.impl.conversion.DateTimeConverter;
 import org.onebusaway.transit_data.model.SearchQueryBean;
 import org.onebusaway.transit_data.model.StopFilterByRouteType;
 import org.onebusaway.transit_data.model.StopsBean;
 import org.onebusaway.transit_data.model.SearchQueryBean.EQueryType;
 import org.onebusaway.transit_data.services.TransitDataService;
+import org.onebusaway.util.SystemTime;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class StopsForLocationAction extends ApiActionSupport {
@@ -50,6 +54,11 @@ public class StopsForLocationAction extends ApiActionSupport {
   @Autowired
   private TransitDataService _service;
 
+  @Autowired
+  private ApiIntervalFactory _factory;
+
+  private DateTimeConverter _dateTimeConverter = new DateTimeConverter();
+
   private double _lat;
 
   private double _lon;
@@ -66,6 +75,8 @@ public class StopsForLocationAction extends ApiActionSupport {
   private String _routeType;
 
   private String _query;
+
+  private long _time = 0;
 
   public StopsForLocationAction() {
     super(LegacyV1ApiSupport.isDefaultToV1() ? V1 : V2);
@@ -103,6 +114,10 @@ public class StopsForLocationAction extends ApiActionSupport {
     this._routeType = routeType;
   }
 
+  public void setTime(String timeStr) {
+      _time = _dateTimeConverter.parse(timeStr);
+  }
+
   public DefaultHttpHeaders index() throws IOException, ServiceException {
 
     int maxCount = _maxCount.getMaxCount();
@@ -114,8 +129,12 @@ public class StopsForLocationAction extends ApiActionSupport {
       return setValidationErrorsResponse();
 
     CoordinateBounds bounds = getSearchBounds();
+    if (_time == 0) {
+      _time = SystemTime.currentTimeMillis();
+    }
 
     SearchQueryBean searchQuery = new SearchQueryBean();
+    searchQuery.setServiceInterval(_factory.constructForDate(new Date(_time)));
     searchQuery.setBounds(bounds);
     searchQuery.setMaxCount(maxCount);
     searchQuery.setType(EQueryType.BOUNDS);

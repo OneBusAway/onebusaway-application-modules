@@ -21,18 +21,14 @@ import java.util.*;
 import org.onebusaway.container.cache.Cacheable;
 import org.onebusaway.geospatial.model.EncodedPolylineBean;
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.gtfs.model.calendar.LocalizedServiceId;
+import org.onebusaway.gtfs.model.calendar.AgencyServiceInterval;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
+import org.onebusaway.gtfs.model.calendar.ServiceInterval;
 import org.onebusaway.gtfs.services.calendar.CalendarService;
-import org.onebusaway.transit_data.model.AgencyBean;
-import org.onebusaway.transit_data.model.NameBean;
-import org.onebusaway.transit_data.model.NameBeanTypes;
-import org.onebusaway.transit_data.model.RouteBean;
-import org.onebusaway.transit_data.model.StopBean;
-import org.onebusaway.transit_data.model.StopGroupBean;
-import org.onebusaway.transit_data.model.StopGroupingBean;
-import org.onebusaway.transit_data.model.StopsForRouteBean;
-import org.onebusaway.transit_data.model.TransitDataConstants;
+import org.onebusaway.transit_data.model.*;
 import org.onebusaway.transit_data_federation.impl.DirectedGraph;
+import org.onebusaway.transit_data_federation.impl.ServiceIntervalHelper;
 import org.onebusaway.transit_data_federation.impl.StopGraphComparator;
 import org.onebusaway.transit_data_federation.model.StopSequence;
 import org.onebusaway.transit_data_federation.model.StopSequenceCollection;
@@ -50,12 +46,7 @@ import org.onebusaway.transit_data_federation.services.blocks.BlockIndexService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockTripIndex;
 import org.onebusaway.transit_data_federation.services.blocks.FrequencyBlockTripIndex;
 import org.onebusaway.transit_data_federation.services.narrative.NarrativeService;
-import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
-import org.onebusaway.transit_data_federation.services.transit_graph.RouteCollectionEntry;
-import org.onebusaway.transit_data_federation.services.transit_graph.RouteEntry;
-import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
-import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
-import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -83,6 +74,8 @@ class RouteBeanServiceImpl implements RouteBeanService {
   private CalendarService _calendarService;
 
   private ExtendedCalendarService _extCalendarService;
+
+  private ServiceIntervalHelper _helper = new ServiceIntervalHelper();
 
   private List<String> _doNotSortRouteIdList = new ArrayList<>();
 
@@ -167,14 +160,14 @@ class RouteBeanServiceImpl implements RouteBeanService {
         narrative, null);
   }
 
-  // @Cacheable
-  public StopsForRouteBean getStopsForRouteForServiceDate(AgencyAndId routeId, ServiceDate serviceDate) {
+  @Cacheable
+  public StopsForRouteBean getStopsForRouteForServiceInterval(AgencyAndId routeId, AgencyServiceInterval serviceInterval) {
     RouteCollectionEntry routeCollectionEntry = _transitGraphDao.getRouteCollectionForId(routeId);
     RouteCollectionNarrative narrative = _narrativeService.getRouteCollectionForId(routeId);
     if (routeCollectionEntry == null || narrative == null)
       return null;
     return getStopsForRouteCollectionAndNarrative(routeCollectionEntry,
-            narrative, serviceDate);
+            narrative, serviceInterval);
   }
 
   /****
@@ -200,18 +193,18 @@ class RouteBeanServiceImpl implements RouteBeanService {
     return bean.create();
   }
 
-  private List<StopBean> getStopBeansForRoute(AgencyAndId routeId, ServiceDate serviceDate) {
+  private List<StopBean> getStopBeansForRoute(AgencyAndId routeId, AgencyServiceInterval serviceInterval) {
     Collection<AgencyAndId> stopIds;
-    if (serviceDate == null){
+    if (serviceInterval == null) {
       stopIds = _routeService.getStopsForRouteCollection(routeId);
     }
     else {
-      stopIds = _routeService.getStopsForRouteCollectionForServiceDate(routeId, serviceDate);
+      stopIds = _routeService.getStopsForRouteCollectionForServiceInterval(routeId, serviceInterval);
     }
     List<StopBean> stops = new ArrayList<StopBean>();
 
     for (AgencyAndId stopId : stopIds) {
-      StopBean stop = _stopBeanService.getStopForId(stopId, null);
+      StopBean stop = _stopBeanService.getStopForId(stopId, serviceInterval);
       stops.add(stop);
     }
 
@@ -219,15 +212,15 @@ class RouteBeanServiceImpl implements RouteBeanService {
   }
 
   private StopsForRouteBean getStopsForRouteCollectionAndNarrative(
-      RouteCollectionEntry routeCollection, RouteCollectionNarrative narrative, ServiceDate serviceDate) {
+      RouteCollectionEntry routeCollection, RouteCollectionNarrative narrative, AgencyServiceInterval serviceInterval) {
 
     StopsForRouteBean result = new StopsForRouteBean();
 
     AgencyAndId routeCollectionId = routeCollection.getId();
     result.setRoute(getRouteBeanForRouteCollection(routeCollectionId, narrative));
-    result.setStops(getStopBeansForRoute(routeCollectionId, serviceDate));
+    result.setStops(getStopBeansForRoute(routeCollectionId, serviceInterval));
 
-    result.setPolylines(getEncodedPolylinesForRoute(routeCollection, serviceDate));
+    result.setPolylines(getEncodedPolylinesForRoute(routeCollection, serviceInterval));
 
     StopGroupingBean directionGrouping = new StopGroupingBean();
     directionGrouping.setType(TransitDataConstants.STOP_GROUPING_TYPE_DIRECTION);
@@ -247,14 +240,22 @@ class RouteBeanServiceImpl implements RouteBeanService {
     getBlockTripsForIndicesMatchingRouteCollection(frequencyBlockIndices,
         routeCollectionId, blockTripsUnfiltered);
 
-    if (serviceDate == null) {
+    if (serviceInterval == null) {
       blockTrips.addAll(blockTripsUnfiltered);//add all the block trips if there is no service date provided
     }
     else {
       for (BlockTripEntry blockTrip : blockTripsUnfiltered) {
-        TimeZone serviceTimezone = blockTrip.getBlockConfiguration().getServiceIds().getTimeZone();
-        boolean isActiveTrip = _extCalendarService.areServiceIdsActiveOnServiceDate(blockTrip.getBlockConfiguration().getServiceIds(), serviceDate.getAsDate(serviceTimezone));
-        if (isActiveTrip) blockTrips.add(blockTrip);
+        ServiceIdActivation serviceIds = blockTrip.getBlockConfiguration().getServiceIds();
+        for (LocalizedServiceId activeServiceId : serviceIds.getActiveServiceIds()) {
+          ServiceInterval scheduledService = _helper.getServiceIntervalForTrip(blockTrip);
+          boolean isActiveTrip;
+          if (_blockIndexService.isDynamicTrip(blockTrip.getTrip())) {
+            isActiveTrip = _helper.isServiceIntervalActiveInRange(activeServiceId, scheduledService, serviceInterval);
+          } else {
+            isActiveTrip = _calendarService.isLocalizedServiceIdActiveInRange(activeServiceId, scheduledService, serviceInterval);
+          }
+          if (isActiveTrip) blockTrips.add(blockTrip);
+        }
       }
     }
 
@@ -312,17 +313,23 @@ class RouteBeanServiceImpl implements RouteBeanService {
   }
 
   private List<EncodedPolylineBean> getEncodedPolylinesForRoute(
-      RouteCollectionEntry routeCollection, ServiceDate serviceDate) {
+      RouteCollectionEntry routeCollection, AgencyServiceInterval serviceInterval) {
 
     Set<AgencyAndId> shapeIds = new HashSet<AgencyAndId>();
     for (RouteEntry route : routeCollection.getChildren()) {
       for (TripEntry trip : route.getTrips()) {
         if (trip.getShapeId() != null) {
-          if (serviceDate == null) {
+          if (serviceInterval == null) {
             shapeIds.add(trip.getShapeId());
           } else {
-            TimeZone serviceTimezone = trip.getServiceId().getTimeZone();
-            boolean isActiveTrip = _calendarService.isLocalizedServiceIdActiveOnDate(trip.getServiceId(), serviceDate.getAsDate(serviceTimezone));
+            ServiceInterval scheduledService = _helper.getServiceIntervalForTrip(trip);
+            boolean isActiveTrip;
+            if (_blockIndexService.isDynamicTrip(trip)) {
+              isActiveTrip = _helper.isServiceIntervalActiveInRange(trip.getServiceId(), scheduledService, serviceInterval);
+            } else {
+              isActiveTrip = _calendarService.isLocalizedServiceIdActiveInRange(trip.getServiceId(),
+                      scheduledService, serviceInterval);
+            }
 
             if (isActiveTrip)
               shapeIds.add(trip.getShapeId());

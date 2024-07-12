@@ -29,13 +29,20 @@
     </bean>
 
     <bean id="apiKeyValidationService" class="org.onebusaway.users.impl.validation.KeyValidationServiceImpl"/>
-    
-     <!-- Database Configuration -->
-    <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
-        <property name="driverClassName" value="com.mysql.jdbc.Driver" />
-        <property name="url" value="jdbc:mysql://localhost:3306/onebusaway" />
-        <property name="username" value="root" />
-        <property name="password" value="root" />
+    <bean class="org.onebusaway.api.services.ApiIntervalFactory" />
+    <!-- Database Configuration -->
+    <bean id="dataSource"
+          class="org.springframework.jndi.JndiObjectFactoryBean">
+        <property name="jndiName"
+                  value="java:comp/env/jdbc/appDB"/>
+        <property name="lookupOnStartup"
+                  value="true"/>
+        <property name="cache"
+                  value="true"/>
+        <property name="proxyInterface"
+                  value="javax.sql.DataSource"/>
+        <property name="resourceRef"
+                  value="true" />
     </bean>
     <bean id="archiveDataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
         <property name="driverClassName" value="com.mysql.jdbc.Driver" />
@@ -49,7 +56,7 @@
         <property name="username" value="root" />
         <property name="password" value="root" />
     </bean>
-    
+
     <bean class="org.onebusaway.container.spring.PropertyOverrideConfigurer">
         <property name="properties">
             <props>

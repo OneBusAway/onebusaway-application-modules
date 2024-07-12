@@ -21,6 +21,7 @@ import org.mockito.Mockito;
 import org.onebusaway.geospatial.model.EncodedPolylineBean;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.RouteStop;
+import org.onebusaway.gtfs.model.calendar.AgencyServiceInterval;
 import org.onebusaway.transit_data.model.*;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.transit_data_federation.impl.transit_graph.CanonicalRoutesEntryImpl;
@@ -49,6 +50,8 @@ public class CanonicalRoutesServiceImplTest {
   private static final AgencyAndId MERGED_ROUTE_ID = new AgencyAndId("1","merged");
 
   private static final AgencyAndId BUNDLE_ONLY_ROUTE_ID = new AgencyAndId("1","bundle");
+
+  private static final AgencyServiceInterval serviceInterval = null;
 
   private static final String SHAPE_1 = "abcde";
   private static final String SHAPE_2 = "fghijk";
@@ -91,7 +94,7 @@ public class CanonicalRoutesServiceImplTest {
 
   @Test
   public void getCanonicalStopNoResults() {
-    ListBean<RouteGroupingBean> canonicalOrMergedRoutes = service.getCanonicalOrMergedRoute(-1, NO_SUCH_ROUTE_ID);
+    ListBean<RouteGroupingBean> canonicalOrMergedRoutes = service.getCanonicalOrMergedRoute(serviceInterval, NO_SUCH_ROUTE_ID);
     assertNotNull(canonicalOrMergedRoutes);
     assertTrue(canonicalOrMergedRoutes.getList().isEmpty());
 
@@ -99,7 +102,7 @@ public class CanonicalRoutesServiceImplTest {
 
   @Test
   public void getCanonicalStopIdsAndShapes() {
-    ListBean<RouteGroupingBean> canonicalOrMergedRoutes = service.getCanonicalOrMergedRoute(-1, CANONICAL_ONLY_ROUTE_ID);
+    ListBean<RouteGroupingBean> canonicalOrMergedRoutes = service.getCanonicalOrMergedRoute(serviceInterval, CANONICAL_ONLY_ROUTE_ID);
     assertNotNull(canonicalOrMergedRoutes);
     assertFalse(canonicalOrMergedRoutes.getList().isEmpty());
     // now verify the fields are as we expect!
@@ -141,7 +144,7 @@ public class CanonicalRoutesServiceImplTest {
             (Mockito.eq(AgencyAndIdLibrary.convertToString(MERGED_ROUTE_ID))))
             .thenReturn(createGtfsResults());
 
-    ListBean<RouteGroupingBean> canonicalOrMergedRoutes = service.getCanonicalOrMergedRoute(-1, MERGED_ROUTE_ID);
+    ListBean<RouteGroupingBean> canonicalOrMergedRoutes = service.getCanonicalOrMergedRoute(serviceInterval, MERGED_ROUTE_ID);
     assertNotNull(canonicalOrMergedRoutes);
     assertFalse(canonicalOrMergedRoutes.getList().isEmpty());
 
@@ -201,7 +204,7 @@ public class CanonicalRoutesServiceImplTest {
                     (Mockito.eq(AgencyAndIdLibrary.convertToString(BUNDLE_ONLY_ROUTE_ID))))
             .thenReturn(createGtfsResults());
 
-    ListBean<RouteGroupingBean> canonicalOrMergedRoutes = service.getCanonicalOrMergedRoute(-1, BUNDLE_ONLY_ROUTE_ID);
+    ListBean<RouteGroupingBean> canonicalOrMergedRoutes = service.getCanonicalOrMergedRoute(serviceInterval, BUNDLE_ONLY_ROUTE_ID);
     assertNotNull(canonicalOrMergedRoutes);
     assertFalse(canonicalOrMergedRoutes.getList().isEmpty());
 

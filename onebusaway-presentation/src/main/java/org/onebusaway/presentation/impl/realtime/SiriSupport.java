@@ -29,6 +29,7 @@ import java.util.Map;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.gtfs.model.calendar.AgencyServiceInterval;
 import org.onebusaway.presentation.services.realtime.PresentationService;
 import org.onebusaway.realtime.api.OccupancyStatus;
 import org.onebusaway.realtime.api.TimepointPredictionRecord;
@@ -48,6 +49,7 @@ import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.transit_data_federation.siri.SiriDistanceExtension;
 import org.onebusaway.transit_data_federation.siri.SiriExtensionWrapper;
 import org.onebusaway.util.AgencyAndIdLibrary;
+import org.onebusaway.util.SystemTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -340,7 +342,7 @@ public final class SiriSupport {
 	}
 
 	private static OccupancyEnumeration mapOccupancyStatusToEnumeration(VehicleOccupancyRecord vor) {
-		if (vor == null) return null;
+		if (vor == null || vor.getOccupancyStatus() == null) return null;
 		switch (vor.getOccupancyStatus()) {
 			case UNKNOWN:
 				return null;
@@ -479,7 +481,8 @@ public final class SiriSupport {
 						if (foundMatch){
 							blockTripStopsAfterTheVehicle++;
 							ArrivalsAndDeparturesQueryBean query = new ArrivalsAndDeparturesQueryBean();
-							StopWithArrivalsAndDeparturesBean result = transitDataService.getStopWithArrivalsAndDepartures(stop.getId(), query);
+							StopWithArrivalsAndDeparturesBean result = transitDataService.getStopWithArrivalsAndDepartures(stop.getId(), query,
+											new AgencyServiceInterval(SystemTime.currentTimeMillis()));
 							// We can't assume the first result is the correct result
 							Collections.sort(result.getArrivalsAndDepartures(), new SortByTime());
 							if (result.getArrivalsAndDepartures().isEmpty()) {

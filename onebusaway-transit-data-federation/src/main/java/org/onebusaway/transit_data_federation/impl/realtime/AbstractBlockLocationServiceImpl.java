@@ -148,8 +148,11 @@ public abstract class AbstractBlockLocationServiceImpl {
       if (scheduledLocation != null) {
         location.setEffectiveScheduleTime(scheduledLocation.getScheduledTime());
         location.setDistanceAlongBlock(scheduledLocation.getDistanceAlongBlock());
-
       }
+      //if (record.getMutated() && 0.0 == location.getDistanceAlongBlock()) {
+        // ensure DaB is not 0 as the trip is underway -- MTA-118
+        // location.setDistanceAlongBlock(1.0);
+      //}
 
       location.setBlockStartTime(record.getBlockStartTime());
       location.setPredicted(true);
@@ -157,6 +160,7 @@ public abstract class AbstractBlockLocationServiceImpl {
       location.setLastLocationUpdateTime(record.getTimeOfLocationUpdate());
       location.setScheduleDeviation(record.getScheduleDeviation());
       location.setScheduleDeviations(cacheElement.getScheduleDeviations());
+      location.setVehicleFeatures(record.getVehicleFeatures());
 
       if (record.isCurrentLocationSet()) {
         CoordinatePoint p = new CoordinatePoint(record.getCurrentLocationLat(),
