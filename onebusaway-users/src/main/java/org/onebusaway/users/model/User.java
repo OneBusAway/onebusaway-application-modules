@@ -103,7 +103,7 @@ public class User extends IdentityBean<Integer> {
 
   private Date lastAccessTime;
 
-  @Column(columnDefinition = "BIT", length = 1)
+  @Column
   private boolean temporary;
 
   @Lob
