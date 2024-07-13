@@ -18,7 +18,7 @@
   <!-- Common Software Dependency Versions -->
   <properties>
     <asm-version>8.0.1</asm-version>
-    <struts-version>2.5.31</struts-version>
+    <struts-version>2.5.33</struts-version>
     <gwt-version>2.4.0</gwt-version>
     <spring-version>5.2.24.RELEASE</spring-version>
     <csv-entities-version>1.1.7</csv-entities-version>
