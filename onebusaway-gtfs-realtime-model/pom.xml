@@ -3,7 +3,7 @@
   <parent>
     <groupId>org.onebusaway</groupId>
     <artifactId>onebusaway-application-modules</artifactId>
-    <version>2.5.12-cs</version>
+    <version>2.5.13-otsf</version>
   </parent>
   <artifactId>onebusaway-gtfs-realtime-model</artifactId>
   <name>onebusaway-gtfs-realtime-model</name>
@@ -36,7 +36,7 @@
 	    <dependency>
 	      <groupId>org.onebusaway</groupId>
 	      <artifactId>onebusaway-container</artifactId>
-	      <version>2.5.12-cs</version>
+	      <version>2.5.13-otsf</version>
 	    </dependency>
 
 	<dependency>
