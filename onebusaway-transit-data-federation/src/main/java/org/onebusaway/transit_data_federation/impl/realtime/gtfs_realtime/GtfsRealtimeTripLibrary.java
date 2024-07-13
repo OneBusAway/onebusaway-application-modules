@@ -1284,6 +1284,15 @@ public class GtfsRealtimeTripLibrary {
     if (result != null) {
       result.addLatLon(position.getLatitude(), position.getLongitude());
     }
+    if (position.hasBearing()) {
+      // GTFS-RT: Bearing, in degrees, clockwise from True North, i.e.,
+      // 0 is North and 90 is East. This can be the compass bearing, or the direction towards the next stop or intermediate location.
+      // OBA: In degrees, 0º is East, 90º is North, 180º is West, and 270º is South
+      double bearing = (position.getBearing() - 90) * -1;
+      if (bearing < 0)
+        bearing = bearing + 360;
+      record.setCurrentOrientation(bearing);
+    }
     if (_scheduleAdherenceFromLocation) {
       CoordinatePoint location = new CoordinatePoint(position.getLatitude(), position.getLongitude());
       double totalDistance = blockDescriptor.getBlockInstance().getBlock().getTotalBlockDistance();
