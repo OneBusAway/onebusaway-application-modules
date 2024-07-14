@@ -36,7 +36,7 @@ OBA.Config = {
 
 		// siriSMUrl and siriVMUrl now moved to config.jspx
 		
-		refreshInterval: 15000,
+		refreshInterval: 5000,
 		
 		// This variable is overwritten by the configuration service--the JS found at configUrl (above)
 		staleTimeout: 120,

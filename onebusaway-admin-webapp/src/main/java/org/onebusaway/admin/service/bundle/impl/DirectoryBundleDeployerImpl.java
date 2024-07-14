@@ -21,7 +21,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
+import javax.ws.rs.core.Response;
 
+import org.apache.commons.io.FileUtils;
 import org.onebusaway.transit_data_federation.bundle.model.BundleStatus;
 import org.onebusaway.admin.service.bundle.BundleDeployer;
 import org.onebusaway.admin.util.NYCFileUtils;
@@ -38,6 +40,7 @@ public class DirectoryBundleDeployerImpl implements BundleDeployer {
   private FileUtility _fileUtil;
   private NYCFileUtils _nycFileUtils;
   private String _deployBundleDirectory;
+  private boolean _cleanupDeployEnabled = false;
   
   public void setDeployBundleDirectory(String localBundlePath) {
     _deployBundleDirectory = localBundlePath;
@@ -58,7 +61,32 @@ public class DirectoryBundleDeployerImpl implements BundleDeployer {
     }
     return bundleFiles;
   }
-  
+
+  @Override
+  /**
+   * Delete a single deployed bundle from the deploy directory
+   * @param name
+   * @return
+   */
+  public Response delete(String name) {
+    String path = this._deployBundleDirectory + File.separator;
+    String bundleDir = path + name;
+    File dirToDelete = new File(bundleDir);
+    if (!dirToDelete.exists() || !dirToDelete.isDirectory()) {
+      _log.error("bad request to delete deploy dir {}", bundleDir);
+      return Response.serverError().build();
+    }
+    try {
+      FileUtils.deleteDirectory(dirToDelete);
+      return Response.ok().build();
+    } catch (Exception e) {
+      _log.error("exception deleting name {}:", name, e, e);
+    }
+    return Response.serverError().build();
+
+  }
+
+
   private List<String> listFiles(String directory, int maxResults){
     File bundleDir = new File(directory);
     int fileCount = 1;
@@ -90,7 +118,7 @@ public class DirectoryBundleDeployerImpl implements BundleDeployer {
    * Copy the bundle from Staging to the Admin Server's bundle serving location, and arrange
    * as necessary.
    */
-  private int deployBundleForServing(BundleStatus status, String path) throws Exception{
+  private int deployBundleForServing(BundleStatus status, String path, String nameFilter) throws Exception{
     _log.info("deployBundleForServing(" + path + ")");
 
     int bundlesDownloaded = 0;
@@ -98,7 +126,9 @@ public class DirectoryBundleDeployerImpl implements BundleDeployer {
     List<String> bundles = listFiles(path, MAX_RESULTS);
 
     if (bundles != null && !bundles.isEmpty()) {
-      clearBundleDeployDirectory();
+      if (_cleanupDeployEnabled) {
+        clearBundleDeployDirectory();
+      }
     } else {
       _log.error("no bundles found at path=" + path);
       return bundlesDownloaded;
@@ -106,7 +136,12 @@ public class DirectoryBundleDeployerImpl implements BundleDeployer {
 
     for (String bundle : bundles) {
       String bundleFilename = _nycFileUtils.parseFileName(bundle, File.separator);
-      // retreive bundle and add it to the list of bundles
+      if (nameFilter != null && !nameFilter.equals(bundleFilename)) {
+        // filter specified, only deploy if it matches
+        continue;
+      }
+
+      // retrieve bundle and add it to the list of bundles
       try{
         _log.info("getting bundle = " + bundle);
         get(bundle, _deployBundleDirectory);
@@ -158,10 +193,10 @@ public class DirectoryBundleDeployerImpl implements BundleDeployer {
   /**
    * Transfer bundles from staging directory to active bundles directory for serving 
    */
-  public void deploy(BundleStatus status, String path) {
+  public void deploy(BundleStatus status, String path, String nameFilter) {
     try {
       status.setStatus(BundleStatus.STATUS_STARTED);
-      deployBundleForServing(status, path);
+      deployBundleForServing(status, path, nameFilter);
       status.setStatus(BundleStatus.STATUS_COMPLETE);
     } catch (Exception e) {
       status.setStatus(BundleStatus.STATUS_ERROR);

@@ -36,6 +36,10 @@
     color: #808080;
 }
 
+.unusedTab {
+  color: darkgray;
+}
+
 #tabs #breadcrumb a {
     display:block;
     background-repeat:no-repeat;
@@ -382,6 +386,9 @@
 
 #uploadFiles #agency_data .agencyUploadSuccess {
   color: green;
+}
+#uploadFiles #agency_data .agencyUploadFailure {
+  color: red;
 }
 
 #prevalidateInputs {
@@ -756,13 +763,13 @@
 
 /** deploy section **/
 #deployBundle {
-  padding-top: 20px;
+  /*padding-top: 20px;*/
 }
 
 #deployBundle #deployContentsHolder {
   border: solid 1px transparent;
   width: 890px;
-  height: 200px;
+  height: 0px;
   overflow: none;
 }
 
@@ -796,6 +803,11 @@
   display:none;
 }
 
+#currentBundleHint {
+  padding-top: 1em;
+  padding-left: 10em;
+}
+
 #helpfulMessage, .helpfulMessage {
   padding-top : 20px;
 }
@@ -811,6 +823,15 @@
   padding-top : 10px;
 }
 
+.deployItemExpired {
+  color: gray;
+}
+.deployItemCurrent {
+  color: green;
+}
+.deployItemFuture {
+  color: red;
+}
 
 /** stage section **/
 
@@ -827,7 +848,7 @@
 #stageBundle #stageContentsHolder {
   border: solid 1px transparent;
   width: 890px;
-  height: 200px;
+  height: 50px;
   overflow: none;
 }
 
@@ -1003,10 +1024,6 @@
     max-width: 25em;
 }
 
-//#Create table #createDataset #newDirectoryButton {
-//	width: 100em;
-//}
-
 #Create .datasetDivHeader, #Upload .existingFilesHeader, #Build .buildDivHeader {
     font-family: "Arial Bold","Arial";
     font-weight: 700;
@@ -1073,7 +1090,8 @@
 #Create #existingDataset .copyDirectory,
 #Create #existingDataset .deleteDirectory,
 #Upload .removeAgency, #Upload #addAnotherAgency,
-#Upload #anyNotes, #Upload #cancelUpload, .bundleLink {
+#Upload #anyNotes, #Upload #cancelUpload, .bundleLink,
+.deleteDeployedItem, .deployStagedItem {
 	color: blue;
 }
 
@@ -1087,8 +1105,10 @@
 #Create #existingDataset .copyDirectory:hover,
 #Create #existingDataset .deleteDirectory:hover,
 #Upload .removeAgency:hover, 
-	#Upload #addAnotherAgency:hover, #Upload #anyNotes:hover,
-	#Upload #cancelUpload:hover, .bundleLink:hover {
+#Upload #addAnotherAgency:hover, #Upload #anyNotes:hover,
+#Upload #cancelUpload:hover, .bundleLink:hover,
+.deleteDeployedItem:hover, .deployStagedItem:hover
+{
 	font-weight: bold;
 	text-decoration: underline;
 	cursor: pointer;
@@ -1098,7 +1118,8 @@
 	width: 1.5em;
 }
 
-#Create .copyDirectory, #Create .deleteDirectory {
+#Create .copyDirectory, #Create .deleteDirectory,
+.deleteDeployedItem {
 	width: 4em;
 }
 
@@ -1323,7 +1344,7 @@
 }
 
 #Upload .agencyColumn {
-	width: 30%;
+	width: 10%;
 }
 
 #Upload .typeColumn {
@@ -1331,15 +1352,11 @@
 }
 
 #Upload .fileOrUrl {
-	width: 40%;
+	width: 60%;
 }
 
 #Upload .whenColumn {
-	width: 10%;
-}
-
-#Upload .whoColumn {
-	width: 10%;
+	width: 20%;
 }
 
 #Upload #existingFileListDiv {
@@ -1412,3 +1429,85 @@
 .clear {
 	clear: both;
 }
+/* clean up list of deploy */
+#Deploy #deployBundle_bundleList {
+  padding-top: 1.5em;
+  padding-left: 30px;
+  padding-bottom: 30px;
+}
+
+/* start of deployBundleCurrentTable / deployStagedCurrentTable */
+#Deploy #listCurrentButtonDiv,
+#Deploy #refreshListButton {
+  padding-top: 1.5em;
+  padding-left: 30px;
+  padding-bottom: 30px;
+}
+#Deploy #deployBundle_listCurrentButton {
+  margin-top: 1.5em;
+}
+
+#Deploy #deployList, #Deploy #deployBundle_stagedList {
+  padding: 0px;
+  border: 1px solid gray;
+  max-width: 100%;
+}
+#Deploy #deployBundleCurrentTable tr:first-child th,
+#Deploy #deployStagedCurrentTable tr:first-child th {
+  border-spacing: 0;
+  border-bottom: 1px solid gray;
+}
+
+#Deploy #deployBundleCurrentTable tbody tr:nth-child(odd),
+#Deploy #deployStagedCurrentTable tbody tr:nth-child(odd) {
+  background: #ccc;
+}
+
+
+#Deploy table {
+  width: 100%;
+  border-bottom: 1px solid gray;
+}
+
+#Deploy #deployBundleCurrentTable caption,
+#Deploy #deployStagedCurrentTable caption {
+  font-weight: bold;
+  font-size: 1.3em;
+  margin-bottom: .3em;
+  line-height: 1em;
+}
+
+#Deploy #deployBundleCurrentTable th,
+#Deploy #deployStagedCurrentTable th {
+  margin-bottom: .1em;
+  padding: .3em;
+}
+
+#Deploy #deployBundleCurrentTable td,
+#Deploy #deployStagedCurrentTable td {
+  padding-top: 3px;
+  padding-right: 10px;
+  padding-bottom: 3px;
+  padding-left: 10px;
+}
+
+#Deploy #deployBundleCurrentTable tr.spacer td,
+#Deploy #deployStagedCurrentTable tr.spacer td {
+  padding-top: 7px;
+  border-top: thin black solid;
+}
+
+#Deploy #deployBundleCurrentTable tr.spacer td:first-child,
+#Deploy #deployStagedCurrentTable tr.spacer td:first-child {
+  border-top: none;
+}
+
+#Deploy #deployBundleCurrentTable tr.spacer td:nth-child(2),
+#Deploy #deployBundleCurrentTable tr.spacer td:last-child,
+#Deploy #deployStagedCurrentTable tr.spacer td:nth-child(2),
+#Deploy #deployStagedCurrentTable tr.spacer td:last-child {
+  border-left: none;
+  border-right: none;
+}
+
+/* end of deployBundleCurrentTable / deployStagedCurrentTable */

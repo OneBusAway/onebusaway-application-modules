@@ -31,7 +31,7 @@ jQuery(function() {
 	//If the Minimum API Request Interval is not a number, disable the "Save"
 	//button. Using bind() with propertychange event as live() does not work
 	//in IE for unknown reasons
-	jQuery("#minApiReqInt").bind("input propertychange", function() {
+	jQuery("#minApiReqInt").on("input propertychange", function() {
 		var text = jQuery("#minApiReqInt").val();
 		var validDatasetNameExp = /^\d*$/;
 		if ((text.length == 0)
@@ -44,7 +44,7 @@ jQuery(function() {
 		}
 	});
 
-    jQuery("#newKey").click(function(e) {
+    jQuery("#newKey").on("click", function(e) {
         e.preventDefault();
         clearApiKeyFields();
         handleGenerateApiKeyClick();

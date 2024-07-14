@@ -15,11 +15,10 @@
  */
 
 $(document).ready(function() {
-    $('p.name > a').hover(
-        function() {
+    $('p.name > a').on("mouseenter", function() {
             var parentTag = $(this).parent().css('border-bottom-color');
             $(this).css('color', parentTag);
-        }, function() {
+        }).on("mouseleave", function() {
             $(this).css('color', '#000');
         }
         );

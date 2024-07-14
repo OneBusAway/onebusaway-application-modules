@@ -28,6 +28,8 @@
   type="text/css"><!-- Prevent jspx minimization --></link>
 
 <script src="//code.jquery.com/jquery.min.js"><!-- Prevent jspx minimization --></script>
+
+<script src="//code.jquery.com/jquery-migrate-3.4.1.js"><!-- Prevent jspx minimization --></script>
 <script
   src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"><!-- Prevent jspx minimization --> </script>
 

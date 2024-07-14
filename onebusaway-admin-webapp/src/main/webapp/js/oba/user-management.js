@@ -69,7 +69,7 @@ jQuery(function() {
 
 function showEditUser() {
 	jQuery("#editUser").show();
-	jQuery("#editUser #editSubmit").click(editUser);
+	jQuery("#editUser #editSubmit").on("click", editUser);
 
 	hideResult();
 }
@@ -250,14 +250,14 @@ function activateUser() {
 
 function turnOffEditClick() {
 	jQuery("#actions #edit").off("click");
-	jQuery("#actions #edit").hover(function() {
+	jQuery("#actions #edit").on("mouseenter mouseleave", function() {
 		jQuery(this).css("cursor", "default");
 	});
 }
 
 function turnOnEditClick() {
 	jQuery("#actions #edit").on("click", showEditUser);
-	jQuery("#actions #edit").hover(function() {
+	jQuery("#actions #edit").on("mouseenter mouseleave", function() {
 		jQuery(this).css("cursor", "pointer");
 	});
 }
@@ -293,7 +293,7 @@ function showUserDetails(response) {
     }
     jQuery("#editUser #editUserName").text(response.username);
     jQuery("#editUser #newPassword").val("");
-    jQuery("#editUser #newRole").val(userRole).attr("selected", true);
+    jQuery("#editUser #newRole").val(userRole).prop("selected", true);
 }
 
 function showUserToEdit(username) {

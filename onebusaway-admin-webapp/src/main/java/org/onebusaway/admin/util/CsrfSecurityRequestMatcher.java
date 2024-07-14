@@ -28,7 +28,8 @@ public class CsrfSecurityRequestMatcher implements RequestMatcher {
     private static Logger _log = LoggerFactory.getLogger(CsrfSecurityRequestMatcher.class);
 
     private Pattern allowedMethods = Pattern.compile("^(GET|HEAD|TRACE|OPTIONS)$");
-    private RegexRequestMatcher unprotectedMatcher = new RegexRequestMatcher("(/api/build/.*|/transitime.*)", null);
+    // POST API operations may need to be added here
+    private RegexRequestMatcher unprotectedMatcher = new RegexRequestMatcher("(/api/build/.*|/api/bundle/.*|/transitime.*)", null);
 
     @Override
     public boolean matches(HttpServletRequest request) {

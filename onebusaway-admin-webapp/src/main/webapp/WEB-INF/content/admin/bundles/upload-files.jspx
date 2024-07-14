@@ -127,7 +127,7 @@
 			</div>
 		</div>
 		<div id="existingFileListDiv">
-			<span class="existingFilesHeader">Existing files in this dataset:</span>
+			<span class="existingFilesHeader">Files in this dataset:</span>
 			<!-- -->
 			<div>
 				<table id="existingFilesTable">
@@ -135,8 +135,7 @@
 						<th class="agencyColumn">Agency</th>
 						<th class="typeColumn">Type</th>
 						<th class="fileOrUrl">File or URL</th>
-						<th class="whenColumn">When?</th>
-						<th class="whoColumn" >Who?</th>
+						<th class="whenColumn">Status/Upload Date</th>
 					</tr>
 				</table>
 			</div>

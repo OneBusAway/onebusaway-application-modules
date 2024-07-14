@@ -17,6 +17,7 @@ package org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime;
 
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopTimeEntriesFactory;
 import org.onebusaway.transit_data_federation.services.AgencyService;
+import org.onebusaway.transit_data_federation.services.ExtendedCalendarService;
 import org.onebusaway.transit_data_federation.services.StopSwapService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockCalendarService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockGeospatialService;
@@ -34,6 +35,8 @@ public class GtfsRealtimeServiceSource {
 
 
   private BlockIndexService _blockIndexService;
+
+  private ExtendedCalendarService _calendarService;
 
   private BlockCalendarService _blockCalendarService;
 
@@ -71,7 +74,7 @@ public class GtfsRealtimeServiceSource {
 
   public void setBlockCalendarService(BlockCalendarService blockCalendarService) {
     _blockCalendarService = blockCalendarService;
-    _blockFinder = new BlockFinder(_blockCalendarService);
+    _blockFinder = new BlockFinder(this);
   }
   public void setBlockGeospatialService(BlockGeospatialService blockGeospatialService) {
     _blockGeospatialService = blockGeospatialService;
@@ -169,4 +172,13 @@ public class GtfsRealtimeServiceSource {
   public BlockFinder getBlockFinder() {
     return _blockFinder;
   }
+
+  public void setCalendarService(ExtendedCalendarService service) {
+    this._calendarService = service;
+  }
+
+  public ExtendedCalendarService getCalendarService() {
+    return _calendarService;
+  }
+
 }

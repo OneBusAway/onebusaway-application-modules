@@ -45,7 +45,7 @@ jQuery(function() {
     });
 
     // Search By Block
-    $('#findBlockField').keyup(delay(function (e) {
+    $('#findBlockField').on("keyup", delay(function (e) {
         table
             .column( 0 )
             .search( this.value.trim() )
@@ -53,7 +53,7 @@ jQuery(function() {
     },300));
 
     // Search By VehicleID
-    $('#findVehicleField').keyup(delay(function (e) {
+    $('#findVehicleField').on("keyup", (delay(function (e) {
         table.draw();
         var valid = hasValidVehicle($(this).val());
         var info = table.page.info();
@@ -62,9 +62,9 @@ jQuery(function() {
         } else {
             $('#notAssignedWrapper').hide();
         }
-    }, 300));
+    }, 300)));
 
-    $('#notAssignedApplyButton').click(function (e) {
+    $('#notAssignedApplyButton').on("click", function (e) {
         var selectedBlock = $('#notAssignedDropDown').val()
         table.rows().eq(0).each( function ( index ) {
             var row = table.row( index );
@@ -90,7 +90,7 @@ jQuery(function() {
         width: 700
     });
 
-    $('.trips').click(function(e){
+    $('.trips').on("click", function(e){
         var blockId = $(this).parent().parent().find(".blockId").text();
         var tripsForBlockUrl = '/api/vehicle-assign/trips/block/' + blockId;
         $.ajax({
@@ -137,7 +137,7 @@ jQuery(function() {
         });
     });
 
-    $(".close").click(function(e){
+    $(".close").on("click", function(e){
         e.preventDefault();
         $(this).parent().parent().find(".checkmark").hide();
         $(this).parent().parent().find(".custom-combobox-input").val("");
@@ -171,7 +171,7 @@ $( function() {
                 .attr( "title", "" )
                 .attr("name", name)
                 .addClass( "custom-combobox-input ui-widget ui-widget-content ui-state-default ui-corner-left vehicleIdInput" )
-                .change(vehicleIdChange)
+                .on("change", vehicleIdChange)
                 .autocomplete({
                     delay: 0,
                     minLength: 0,
@@ -273,7 +273,7 @@ $( function() {
 
     $(".combobox").combobox();
 
-   $(".ui-autocomplete-input").keypress(function(e) {
+   $(".ui-autocomplete-input").on("keypress", function(e) {
         var code = (e.keyCode ? e.keyCode : e.which);
         if(code == 13) { //Enter keycode
             return false;

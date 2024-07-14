@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 $("#messageSuccess, #messageFailure").hide();
-$("#updatePassword").submit(function(evt) {
+$("#updatePassword").on("submit", function(evt) {
 	evt.preventDefault();
 	var csrfParameter = $("meta[name='_csrf_parameter']").attr("content");
 	var csrfHeader = $("meta[name='_csrf_header']").attr("content");

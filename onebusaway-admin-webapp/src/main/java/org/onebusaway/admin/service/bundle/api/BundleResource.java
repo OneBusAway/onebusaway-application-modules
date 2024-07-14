@@ -16,9 +16,8 @@
 package org.onebusaway.admin.service.bundle.api;
 
 import javax.servlet.ServletContext;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.onebusaway.admin.service.BundleArchiverService;
@@ -26,12 +25,15 @@ import org.onebusaway.admin.service.BundleDeployerService;
 import org.onebusaway.admin.service.BundleStagerService;
 import org.onebusaway.admin.service.RemoteConnectionService;
 import org.onebusaway.util.services.configuration.ConfigurationServiceClient;
+import org.onebusaway.admin.service.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.ServletContextAware;
+
+import java.io.InputStream;
 
 @Path("/bundle")
 @Component
@@ -52,6 +54,8 @@ public class BundleResource extends AuthenticatedResource implements ServletCont
   @Autowired
   @Qualifier("tdmRemoteBundleDeployerImpl")
   private BundleDeployerService _tdmBundleDeployer;
+  @Autowired
+  private BundleUploadService _uploadService;
   
   private String tdmURL;
 
@@ -68,23 +72,12 @@ public class BundleResource extends AuthenticatedResource implements ServletCont
     String environment, @PathParam("bundleDir")
     String bundleDir, @PathParam("bundleName")
     String bundleName) {
-      // TODO this should follow the deployer pattern with an async response
-      // object
       if (!isAuthorized()) {
     	return Response.noContent().build();
 	  }
-	  
+
+      _log.info("stage request env={} dir={} bundle-{}", environment, bundleDir, bundleName);
 	  return _localBundleStager.stage(environment, bundleDir, bundleName);
-    
-    /*String json = "{ERROR}";
-      try {
-        _bundleStager.stage(environment, bundleDir, bundleName);
-        _bundleStager.notifyOTP(bundleName);
-        json = "{SUCCESS}";
-      } catch (Exception any) {
-        _log.error("stage failed:", any);
-      }
-      return Response.ok(json).build();*/
   }
   
   @Path("/stage/status/{id}/list")
@@ -195,6 +188,34 @@ public class BundleResource extends AuthenticatedResource implements ServletCont
     }
     return _localBundleDeployer.deploy(environment);
   }
+
+  @Path("/deploy/name/{name}")
+  @GET
+  public Response deployNamedBundle(@PathParam("name")
+                         String name) {
+    if (!isAuthorized()) {
+      return Response.noContent().build();
+    }
+
+    if(isTdm()){
+      return Response.noContent().build();
+    }
+    return _localBundleDeployer.deployName(name);
+  }
+
+  @Path("/deploy/delete/{name}")
+  @GET
+  public Response deployDelete(@PathParam("name")
+                               String name) {
+    if (!isAuthorized()) {
+      return Response.noContent().build();
+    }
+    if (isTdm()) {
+      // not supported
+      return Response.noContent().build();
+    }
+    return _localBundleDeployer.delete(name);
+  }
   
   @Path("/deploy/status/{id}/list")
   @GET
@@ -227,8 +248,32 @@ public class BundleResource extends AuthenticatedResource implements ServletCont
     }
     return _localBundleDeployer.getBundleFile(bundleId, relativeFilename);
   }
-  
-  
+
+  @Path("/upload/register/{agencyId}/{bundleDir}/{uploadType}")
+  @POST
+  public Response doUploadAsync(@PathParam("agencyId") String agencyId,
+                                @PathParam("bundleDir") String bundleDir,
+                                @PathParam("uploadType") String uploadType,
+                                @FormParam("url") String uploadUrl) {
+    return _uploadService.register(agencyId, bundleDir, uploadType, uploadUrl);
+  }
+
+  @Path("/upload/accept/{agencyId}/{bundleDir}/{uploadType}")
+  @Consumes(MediaType.MULTIPART_FORM_DATA)
+  @POST
+  public Response doAccept(@PathParam("agencyId") String agencyId,
+                           @PathParam("bundleDir") String bundleDir,
+                           @PathParam("uploadType") String uploadType,
+                           InputStream agencySourceFile) {
+    return _uploadService.accept(agencyId, bundleDir, uploadType, agencySourceFile);
+  }
+
+  @Path("/upload/status/{agencyId}/{bundleDir}")
+  @GET
+  public Response query(@PathParam("agencyId") String agencyId,
+                                @PathParam("bundleDir") String bundleDir) {
+    return _uploadService.query(agencyId, bundleDir);
+  }
   private boolean isTdm() {
     if (isTdm != null)
       return isTdm;

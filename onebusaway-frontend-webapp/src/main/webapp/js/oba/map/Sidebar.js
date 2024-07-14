@@ -70,7 +70,7 @@ OBA.Sidebar = function() {
 		    }
 		});
 		
-		searchForm.submit(function(e) {
+		searchForm.on("submit", function(e) {
 			e.preventDefault();
 			
 			// Close the autocomplete list when the form is submitted.
@@ -154,7 +154,7 @@ OBA.Sidebar = function() {
 		resize();
 
 		// call when the window is resized
-		theWindow.resize(resize);
+		theWindow.on("resize", resize);
 	}
 
 	// show user list of addresses
@@ -185,10 +185,11 @@ OBA.Sidebar = function() {
 			// marker
 			var marker = routeMap.addDisambiguationMarker(latlng, address, neighborhood, (i + 1));
 
-			listItem.hover(function() {
+			// TODO: Replace hover with mouseenter and mouseleave https://api.jquery.com/hover/
+			listItem.on("mouseenter", function() {
 				routeMap.highlightDisambiguationMarker(marker, (i + 1));
 				listItem.css("background-image", "url('img/location/location_active_sidebar_" + (i + 1) + ".png')");
-			}, function() {
+			}).on("mouseleave", function() {
 				routeMap.unhighlightDisambiguationMarker(marker, (i + 1));
 				listItem.css("background-image", "url('img/location/location_" + (i + 1) + ".png')");
 			});
@@ -245,17 +246,18 @@ OBA.Sidebar = function() {
 
 				stopsList.append(stopItem);
 				
-				stopLink.click(function(e) {
+				stopLink.on("click", function(e) {
 					e.preventDefault();
 					
 					routeMap.showPopupForStopId(stop.id, null);
 					
 					(wizard !== null)? results.triggerHandler("stop_click") : null;
 				});
-				
-				stopLink.hover(function() {
+
+				// TODO: Replace hover with mouseenter and mouseleave https://api.jquery.com/hover/
+				stopLink.on("mouseenter", function() {
 					routeMap.highlightStop(stop);
-				}, function() {
+				}).on("mouseleave", function() {
 					routeMap.unhighlightStop();					
 				});
 				
@@ -340,16 +342,17 @@ OBA.Sidebar = function() {
 				resultsList.append(listItem);
 				
 				// on click of title, pan to route extent 
-				titleBox.click(function(e) {
+				titleBox.on("click", function(e) {
 					e.preventDefault();
 					
 					routeMap.panToRoute(routeResult.id);
 				});
 	
 				// hover polylines
-				titleBox.hover(function(e) {
+				// TODO: Replace hover with mouseenter and mouseleave https://api.jquery.com/hover/
+				titleBox.on("mouseenter", function(e) {
 					titleBox.css("color", "#" + routeResult.color);
-				}, function(e) {
+				}).on("mouseleave", function(e) {
 					titleBox.css("color", "");
 				});
 	
@@ -405,7 +408,7 @@ OBA.Sidebar = function() {
 												.append(loading);
 					
 					// load stops when user expands stop list
-					directionHeader.click(function(e) {
+					directionHeader.on("click", function(e) {
 						loadStopsForRouteAndDirection(routeResult, direction, destinationContainer);
 					});
 					
@@ -431,10 +434,11 @@ OBA.Sidebar = function() {
 				jQuery.each(routeResult.directions, function(_, direction) {
 					allPolylines = allPolylines.concat(direction.polylines);
 				});
-				
-				link.hover(function() {
+
+				// TODO: Replace hover with mouseenter and mouseleave https://api.jquery.com/hover/
+				link.on("mouseenter", function() {
 					routeMap.showHoverPolyline(allPolylines, routeResult.color);
-				}, function() {
+				}).on("mouseleave", function() {
 					routeMap.removeHoverPolyline();
 				});
 				
@@ -498,9 +502,9 @@ OBA.Sidebar = function() {
 			}
 
 			if(allPolylines.length > 0) {
-				link.hover(function() {
+				link.on("mouseenter", function() {
 					routeMap.showHoverPolyline(allPolylines, route.color);
-				}, function() {
+				}).on("mouseleave", function() {
 					routeMap.removeHoverPolyline();
 				});
 			}
@@ -767,7 +771,7 @@ OBA.Sidebar = function() {
 			
 			// Add behavior to the close link in the global alert dialog under the map
 			// so it closes when the link is clicked.
-			mapGlobalAlerts.find("a#closeMapGlobalAlerts").click(function(event){
+			mapGlobalAlerts.find("a#closeMapGlobalAlerts").on("click", function(event){
 				event.preventDefault();
 				mapGlobalAlerts.detach();
 				resize();
@@ -861,9 +865,4 @@ OBA.Sidebar = function() {
 	};
 };
 
-// for IE: only start using google maps when the VML/SVG namespace is ready
-if(jQuery.browser.msie) {
-	window.onload = function() { OBA.Sidebar().initialize(); };
-} else {
-	jQuery(document).ready(function() { OBA.Sidebar().initialize(); });
-}
+jQuery(document).ready(function() { OBA.Sidebar().initialize(); });

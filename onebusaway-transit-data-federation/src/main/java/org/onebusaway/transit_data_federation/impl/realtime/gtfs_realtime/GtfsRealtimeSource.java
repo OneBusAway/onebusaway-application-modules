@@ -39,6 +39,7 @@ import javax.annotation.PreDestroy;
 import com.google.transit.realtime.*;
 import org.apache.commons.lang.StringUtils;
 import org.onebusaway.api.model.transit.realtime.GtfsRealtimeConstantsV2;
+import org.onebusaway.container.refresh.Refreshable;
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
 import org.onebusaway.gtfs.model.AgencyAndId;
@@ -54,12 +55,10 @@ import org.onebusaway.alerts.impl.ServiceAlertRecord;
 import org.onebusaway.alerts.impl.ServiceAlertSituationConsequenceClause;
 import org.onebusaway.alerts.impl.ServiceAlertTimeRange;
 import org.onebusaway.alerts.impl.ServiceAlertsSituationAffectsClause;
+import org.onebusaway.transit_data_federation.impl.RefreshableResources;
 import org.onebusaway.transit_data_federation.impl.RouteReplacementServiceImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopTimeEntriesFactory;
-import org.onebusaway.transit_data_federation.services.AgencyService;
-import org.onebusaway.transit_data_federation.services.ConsolidatedStopsService;
-import org.onebusaway.transit_data_federation.services.RouteReplacementService;
-import org.onebusaway.transit_data_federation.services.StopSwapService;
+import org.onebusaway.transit_data_federation.services.*;
 import org.onebusaway.transit_data_federation.services.blocks.BlockCalendarService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockGeospatialService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockIndexService;
@@ -152,7 +151,9 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
 
   private List<String> _agencyIds = new ArrayList<String>();
 
-  private List<String>_tripIdRegexs = null;
+  private List<String> _scheduleTripIdRegexs = null;
+
+  private List<String> _realtimeTripIdRegexes = null;
 
   /**
    * We keep track of vehicle location updates, only pushing them to the
@@ -200,9 +201,15 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   // a special case of some specific integration - drop unassigned trips
   private boolean _filterUnassigned = false;
 
+  // allow trip_ids to match fuzzily instead of strictly
+  private boolean _enableFuzzyMatching = false;
+
   private List<AgencyAndId> _routeIdsToCancel = null;
 
   private GtfsRealtimeCancelService _cancelService;
+
+  // minimize operations while bundle is changing as state is inconsistent
+  private boolean isBundleReady = false;
 
   @Autowired
   public void setAgencyService(AgencyService agencyService) {
@@ -291,6 +298,32 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     _serviceSource.setBlockIndexService(service);
   }
 
+  @Autowired
+  public void setCalendarService(ExtendedCalendarService service) {
+    _serviceSource.setCalendarService(service);
+  }
+
+  public void bundleSwapListener() {
+    _log.info("bundleSwapListener invoked");
+    if (_entitySource != null && _entitySource.getRealtimeFuzzyMatcher() != null) {
+      _entitySource.getRealtimeFuzzyMatcher().reset();
+    }
+    // force cache update
+    if (_serviceSource.getBlockFinder() != null) {
+      _serviceSource.getBlockFinder().reset();
+    }
+  }
+
+  @Refreshable(dependsOn = RefreshableResources.MARK_START_BUNDLE_SWAP)
+  public void markBundleNotReady() {
+    isBundleReady = false;
+  }
+  @Refreshable(dependsOn = RefreshableResources.MARK_STOP_BUNDLE_SWAP)
+  public void markBundleReady() {
+    isBundleReady = true;
+    bundleSwapListener();
+  }
+
   public void setStopModificationStrategy(StopModificationStrategy strategy) {
     _stopModificationStrategy = strategy;
   }
@@ -371,10 +404,14 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     _agencyIds.addAll(agencyIds);
   }
 
-  public void setTripIdRegexes(List<String> tripIdRegexes) {
-    _tripIdRegexs = tripIdRegexes;
+  public void setScheduleTripIdRegexes(List<String> regexes) {
+    _scheduleTripIdRegexs = regexes;
   }
-  
+
+  public void setRealtimeTripIdRegexes(List<String> regexes) {
+    _realtimeTripIdRegexes = regexes;
+  }
+
   public void setShowNegativeScheduledArrivals(boolean _showNegativeScheduledArrivals) {
     this._showNegativeScheduledArrivals = _showNegativeScheduledArrivals;
   }
@@ -469,6 +506,10 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     _filterUnassigned = flag;
   }
 
+  public void setEnableFuzzyMatching(boolean flag) {
+    _enableFuzzyMatching = flag;
+  }
+
   @Autowired
   public void setGtfsRealtimeCancelService(GtfsRealtimeCancelService service) {
     _cancelService = service;
@@ -487,8 +528,19 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     }
 
     _entitySource.setAgencyIds(_agencyIds);
-    _entitySource.setTripIdRegexs(_tripIdRegexs);
+    _entitySource.setTripIdRegexs(_scheduleTripIdRegexs);
     _entitySource.setConsolidatedStopService(_consolidatedStopsService);
+
+    if (_enableFuzzyMatching) {
+      RealtimeFuzzyMatcher fuzzyMatcher = new RealtimeFuzzyMatcher(_entitySource.getTransitGraphDao(),
+              _serviceSource.getCalendarService());
+      fuzzyMatcher.setRealtimeTripIdRegexes(_realtimeTripIdRegexes);
+      fuzzyMatcher.setScheduleTripIdRegexs(_scheduleTripIdRegexs);
+      fuzzyMatcher.setAgencies(new HashSet<>(_agencyIds));
+
+      _entitySource.setRealtimeFuzzyMatcher(fuzzyMatcher);
+    }
+
 
     _tripsLibrary = new GtfsRealtimeTripLibrary();
     _tripsLibrary.setEntitySource(_entitySource);
@@ -573,7 +625,10 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
 
   // test if the transit graph is ready
   protected boolean graphReady() {
-      return _entitySource.isGraphReady();
+    if (!isBundleReady) {
+      return false;
+    }
+    return true;
   }
 
   /**

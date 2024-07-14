@@ -23,12 +23,12 @@
 <jsp:directive.page contentType="text/html" />
 
 <!-- add jquery support -->
-<script type="text/javascript" src="js/lib/jquery-1.12.4.min.js">
+<script type="text/javascript" src="js/lib/jquery-3.7.1.min.js">
     <!-- //prevent jspx minimization -->
 </script>
 
 <!-- date picker config -->
-<script type="text/javascript" src="js/lib/jquery-ui-1.12.1.js">
+<script type="text/javascript" src="js/lib/jquery-ui.js">
     <!-- //prevent jspx minimization -->
 </script>
 <link rel="stylesheet" href="css/jquery-ui.css"></link>
@@ -52,6 +52,10 @@
                 'scrollDefault': 'now'
             });
     } );
+</script>
+
+<script type="text/javascript" src="js/lib/jquery-migrate-3.4.1.js">
+	<!-- //prevent jspx minimization -->
 </script>
 <head>
 <title>Playback</title>
@@ -99,8 +103,8 @@
 				<td><input type="text" name="baseUrl" value="${detail.baseUrl}"/></td>
 				<td><input type="text" name="refresh" value="30" /></td>
 				<td><input type="text" name="apiKey" value="TEST" /></td>
-				<input type="button" name="update" value="update"  onClick="javascript: document.command.submit();"/>
-				<input type="button" name="clear" value="restart clock" onClick="javascript: document.getElementById('command').value='clear';document.command.submit();" />
+				<input type="button" name="update" value="update"  onClick="javascript: document.command.trigger('submit');"/>
+				<input type="button" name="clear" value="restart clock" onClick="javascript: document.getElementById('command').value='clear';document.command.trigger('submit');" />
 			</form>
 		</tr>
 	</tbody>

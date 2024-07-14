@@ -201,7 +201,7 @@ OBA.Popups = (function() {
 			var routeId = idParts[2];
 			var routeShortName = idParts[3];
 
-			element.click(function(e) {
+			element.on("click", function(e) {
 				e.preventDefault();
 				var alertElement = jQuery('#alerts-' + routeId.hashCode());
 				if (alertElement.length === 0) {
@@ -243,7 +243,7 @@ OBA.Popups = (function() {
         var vehicleIdParts = vehicleId.split("_");
         var blockId = activity.MonitoredVehicleJourney.BlockRef;
         var vehicleIdWithoutAgency = vehicleIdParts[1];
-        var blockIdWithoutAgency = blockId.split("_")[1];
+		var blockIdWithoutAgency = blockId.substring(blockId.indexOf("_")+1); // accept multiple "_" chars
         var routeName = activity.MonitoredVehicleJourney.LineRef;
         var hasRealtime = activity.MonitoredVehicleJourney.Monitored
 
@@ -373,7 +373,7 @@ OBA.Popups = (function() {
 		var content = jQuery(html);
 		var zoomHereLink = content.find("#zoomHere");
 
-		zoomHereLink.click(function(e) {
+		zoomHereLink.on("click", function(e) {
 			e.preventDefault();
 			
 			var map = marker.map;
@@ -846,7 +846,7 @@ OBA.Popups = (function() {
 		var content = jQuery(html);
 		var zoomHereLink = content.find("#zoomHere");
 
-		zoomHereLink.click(function(e) {
+		zoomHereLink.on("click", function(e) {
 			e.preventDefault();
 
 			var map = marker.map;

@@ -24,6 +24,7 @@
 <head>
 
 <title><s:text name="AgencyMetadataEdit" /></title>
+<!--TODO: Update jquery and plugins-->
 <s:url var="url" value="/css/jquery-ui.css" />
 <link rel="stylesheet" type="text/css" href="${url}">
 	<!-- //prevent jspx minimization -->
@@ -34,6 +35,7 @@
 	<!-- //prevent jspx minimization -->
 </link>
 
+	<!--TODO: Update jquery and plugins-->
 <s:url var="url" value="/js/biblio/jquery.js" />
 <script type="text/javascript" src="${url}">
 <!-- //prevent jspx minimization -->
@@ -44,6 +46,11 @@
 <script type="text/javascript" src="${url}">
 <!-- //prevent jspx minimization -->
 	
+</script>
+
+<s:url var="url" value="/js/biblio/jquery-migrate-3.4.1.js" />
+<script type="text/javascript" src="${url}">
+<!-- //prevent jspx minimization -->
 </script>
 
 </head>

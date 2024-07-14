@@ -39,6 +39,10 @@ public final class RefreshableResources {
 
   public static final String STOP_CONSOLIDATION_FILE = "stopConsolidationFile";
 
+  public static final String MARK_START_BUNDLE_SWAP = "startBundleSwap";
+
+  public static final String MARK_STOP_BUNDLE_SWAP = "stopBundleSwap";
+
   // for use on non-TDS tiers
   public static final String BUNDLE_SWAP = "bundleSwap";
 

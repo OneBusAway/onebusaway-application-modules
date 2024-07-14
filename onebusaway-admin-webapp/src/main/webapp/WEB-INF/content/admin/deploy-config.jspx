@@ -22,6 +22,7 @@
 <title>Configuration</title>
 <s:url var="url" value="/css/deploy-config.css" />
 <link rel="stylesheet" type="text/css" href="${url}" />
+	<!--TODO: Update jquery and plugins-->
 <s:url var="url" value="/js/biblio/jquery.js">
 </s:url>
 <script type="text/javascript" src="${url}">
@@ -34,6 +35,10 @@
 <script type="text/javascript" src="${url}">
 <!-- //prevent jspx minimization -->
 	
+</script>
+
+<s:url var="url" value="/js/biblio/jquery-migrate-3.4.1.js" />
+<script type="text/javascript" src="${url}">
 </script>
 
 <s:url var="url" value="/js/oba/deploy-config.js">
