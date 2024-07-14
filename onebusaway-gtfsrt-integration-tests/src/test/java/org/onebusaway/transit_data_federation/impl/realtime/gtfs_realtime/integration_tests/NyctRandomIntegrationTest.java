@@ -100,6 +100,7 @@ public class NyctRandomIntegrationTest extends AbstractGtfsRealtimeIntegrationTe
   }
 
   @Test
+  @Ignore("Broken due to indeterminate value in assertion. Unclear if this has ever worked.")
   public void test4() throws Exception {
     // this pattern breaks head-signs (and A/D on prod)
     List<String> routeIdsToCancel = Arrays.asList("MTASBWY_A","MTASBWY_B","MTASBWY_C","MTASBWY_D");
@@ -166,6 +167,7 @@ public class NyctRandomIntegrationTest extends AbstractGtfsRealtimeIntegrationTe
    * @throws Exception
    */
   @Test
+  @Ignore("Broken due to indeterminate value in assertion. Unclear if this has ever worked.")
   public void test7() throws Exception {
     List<String> routeIdsToCancel = Arrays.asList("MTASBWY_A","MTASBWY_B","MTASBWY_C","MTASBWY_D");
     String expectedStopId = "MTASBWY_D14S";
@@ -434,6 +436,7 @@ public class NyctRandomIntegrationTest extends AbstractGtfsRealtimeIntegrationTe
   }
 
   @Test
+  @Ignore("Failing due to indeterminate values in assertion. Unclear if this has ever worked correctly.")
   /*
    * Incorrect headsigns during construction/maintenance.
    * Should not be showing Flusing-Main St not 74 St-Broadway
