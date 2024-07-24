@@ -29,6 +29,8 @@ import java.io.Serializable;
  */
 public enum OccupancyStatus implements Serializable {
 
+  /* recent addition alias of unknown */
+  NO_DATA_AVAILABLE(-2),
   /** proposed addition */
   UNKNOWN(-1),
   /**
