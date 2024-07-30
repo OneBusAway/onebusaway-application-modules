@@ -203,6 +203,36 @@
 	background-repeat: no-repeat;
 	background-size: cover;
 }
+
+.weebleG {
+	height: 16px;
+	width: 20px;
+	background-color: #FFFFFF;
+	display: inline-block;
+	background-image: url("img/icon-crowding-1.png");
+	background-repeat: no-repeat;
+	background-size: cover;
+}
+/* Y for yellow for standing available */
+.weebleY {
+	height: 16px;
+	width: 20px;
+	background-color: #FFFFFF;
+	display: inline-block;
+	background-image: url("img/icon-crowding-2.png");
+	background-repeat: no-repeat;
+	background-size: cover;
+}
+/* R for red for full */
+.weebleR {
+	height: 16px;
+	width: 20px;
+	background-color: #FFFFFF;
+	display: inline-block;
+	background-image: url("img/icon-crowding-3.png");
+	background-repeat: no-repeat;
+	background-size: cover;
+}
 /* end apc */
 
 .popup .header .updated.stale {
