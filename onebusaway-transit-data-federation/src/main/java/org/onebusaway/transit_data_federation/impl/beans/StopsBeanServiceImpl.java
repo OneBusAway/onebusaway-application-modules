@@ -232,6 +232,20 @@ class StopsBeanServiceImpl implements StopsBeanService {
   }
 
   @Override
+  public StopsBean getStopsForAgencyId(String agencyId) {
+    AgencyEntry agency = _transitGraphDao.getAgencyForId(agencyId);
+    if (agency == null)
+      throw new NoSuchAgencyServiceException(agencyId);
+    List<StopBean> stopBeans = new ArrayList<StopBean>();
+    for (StopEntry stop : agency.getStops()) {
+      AgencyAndId id = stop.getId();
+      StopBean stopBean = _stopBeanService.getStopForId(id, null);
+      stopBeans.add(stopBean);
+    }
+    return constructResult(stopBeans, false);
+  }
+
+  @Override
   public ListBean<String> getStopsIdsForAgencyId(String agencyId) {
     AgencyEntry agency = _transitGraphDao.getAgencyForId(agencyId);
     if (agency == null)

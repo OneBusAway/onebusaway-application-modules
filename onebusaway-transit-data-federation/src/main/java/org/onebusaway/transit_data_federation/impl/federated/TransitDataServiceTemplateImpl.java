@@ -267,6 +267,12 @@ public class TransitDataServiceTemplateImpl implements TransitDataServiceTemplat
   }
 
   //@Override
+  public StopsBean getStopsForAgencyId(String agencyId) {
+
+    return _stopsBeanService.getStopsForAgencyId(agencyId);
+  }
+
+  //@Override
   public StopWithArrivalsAndDeparturesBean getStopWithArrivalsAndDepartures(
       String stopId, ArrivalsAndDeparturesQueryBean query, AgencyServiceInterval serviceInterval)
       throws ServiceException {

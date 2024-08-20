@@ -2,7 +2,7 @@
 
 # Method: stops-ids-for-agency
 
-Retrieve the list of all stops for a particular agency by id
+Retrieve the list of all stop ids for a particular agency by id
 
 ## Sample Request
 
