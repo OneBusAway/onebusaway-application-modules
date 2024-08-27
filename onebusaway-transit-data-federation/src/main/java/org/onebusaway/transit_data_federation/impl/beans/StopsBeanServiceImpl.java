@@ -70,6 +70,16 @@ class StopsBeanServiceImpl implements StopsBeanService {
   @Autowired
   private TransitGraphDao _transitGraphDao;
 
+  @Autowired
+  public void setTransitGraphDao(TransitGraphDao transitGraphDao) {
+    _transitGraphDao = transitGraphDao;
+  }
+
+  @Autowired
+  public void setStopBeanService(StopBeanService stopBeanService) {
+    _stopBeanService = stopBeanService;
+  }
+
   @Override
   public StopsBean getStops(SearchQueryBean queryBean) throws ServiceException {
     String query = queryBean.getQuery();
