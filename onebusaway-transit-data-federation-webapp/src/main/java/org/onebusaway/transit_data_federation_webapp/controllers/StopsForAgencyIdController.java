@@ -33,6 +33,6 @@ public class StopsForAgencyIdController {
   @RequestMapping()
   public ModelAndView index(@RequestParam String agencyId) {
     StopsBean stops = _service.getStopsForAgencyId(agencyId);
-    return new ModelAndView("stops-for-agency-id.jspx", "stops", stops);
+    return new ModelAndView("stops-for-agency-id.jsp", "stops", stops);
   }
 }
