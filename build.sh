@@ -18,7 +18,6 @@
 mvn -U clean install \
     -Dhttps.protocols=TLSv1,TLSv1.1,TLSv1.2 \
     -DskipTests=true \
-    -Dlicense.skip=true \
     -Dmaven.javadoc.skip=true \
     -Dvalidate.silent=true \
     -Dlog4j.configuration=
