@@ -1,11 +1,13 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <parent>
-    <artifactId>onebusaway-application-modules</artifactId>
-    <groupId>org.onebusaway</groupId>
-    <version>2.5.13-otsf</version>
-  </parent>
-  <artifactId>onebusaway-transit-data-federation-builder</artifactId>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<artifactId>onebusaway-application-modules</artifactId>
+		<groupId>org.onebusaway</groupId>
+		<version>2.5.13-otsf</version>
+	</parent>
+	<artifactId>onebusaway-transit-data-federation-builder</artifactId>
 
 	<name>onebusaway-transit-data-federation-builder</name>
 
@@ -48,7 +50,7 @@
 
 		<dependency>
 			<groupId>org.onebusaway</groupId>
-  			<artifactId>onebusaway-csv-entities</artifactId>
+			<artifactId>onebusaway-csv-entities</artifactId>
 			<exclusions>
 				<exclusion>
 					<artifactId>slf4j-api</artifactId>
@@ -129,7 +131,8 @@
 					<skipPoms>false</skipPoms>
 					<generateGitPropertiesFile>true</generateGitPropertiesFile>
 					<generateGitPropertiesFilename>src/main/resources/git.properties</generateGitPropertiesFilename>
-					<!--  travis takes some shortcuts with git so we need to tell the plugin to ignore git errors -->
+					<!--  travis takes some shortcuts with git so we need to tell the plugin to
+					ignore git errors -->
 					<failOnUnableToExtractRepoInfo>false</failOnUnableToExtractRepoInfo>
 					<failOnNoGitDirectory>false</failOnNoGitDirectory>
 					<gitDescribe>
@@ -153,13 +156,17 @@
 							<shadedArtifactAttached>true</shadedArtifactAttached>
 							<shadedClassifierName>withAllDependencies</shadedClassifierName>
 							<transformers>
-								<transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-									<mainClass>org.onebusaway.transit_data_federation.bundle.FederatedTransitDataBundleCreatorMain</mainClass>
+								<transformer
+									implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+									<mainClass>
+										org.onebusaway.transit_data_federation.bundle.FederatedTransitDataBundleCreatorMain</mainClass>
 								</transformer>
-								<transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+								<transformer
+									implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
 									<resource>META-INF/spring.handlers</resource>
 								</transformer>
-								<transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+								<transformer
+									implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
 									<resource>META-INF/spring.schemas</resource>
 								</transformer>
 							</transformers>

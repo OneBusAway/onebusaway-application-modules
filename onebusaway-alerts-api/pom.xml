@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>onebusaway-application-modules</artifactId>
         <groupId>org.onebusaway</groupId>
@@ -53,11 +55,10 @@
                               We don't actually want to build gtfs-realtime.proto, since it's included in
                               io.mobilitydata.transit:gtfs-realtime-bindings, but we do need it to be available for the extension
                               .proto files to import. Thus, it is excluded here.
-                             -->
-                            com/google/transit/realtime/gtfs-realtime.proto
-                        </exclude>
+                             --> com/google/transit/realtime/gtfs-realtime.proto </exclude>
                     </excludes>
-                    <protocArtifact>com.google.protobuf:protoc:${protobuf.version}:exe:${os.detected.classifier}</protocArtifact>
+                    <protocArtifact>
+                        com.google.protobuf:protoc:${protobuf.version}:exe:${os.detected.classifier}</protocArtifact>
                 </configuration>
             </plugin>
             <!-- This is where we control the master plugin version used by all modules -->
