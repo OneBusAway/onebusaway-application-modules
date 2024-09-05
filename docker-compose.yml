@@ -1,0 +1,10 @@
+services:
+  builder:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./build:/root/.m2/repository
+      - .:/src
+    stdin_open: true
+    tty: true

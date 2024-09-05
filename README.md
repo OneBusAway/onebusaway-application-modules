@@ -45,6 +45,18 @@ There are two options for setting up your own OneBusAway instance:
 * [Configuration and Deployment Guide for v2.x](https://github.com/OneBusAway/onebusaway/wiki/Configuration-and-Deployment-Guide-for-v2.x) - Designed to provide a comprehensive deployment method for users who wish to set up a simple OneBusAway application with minimal configurations.
 * [onebusaway-docker (Under development)](https://github.com/OneBusAway/onebusaway-docker) - A community-supported Docker configuration for OneBusAway v2.x is currently under development.
 
+## Docker Development Instructions
+
+Build the image:
+
+```
+docker build -t oba-app-modules .
+docker exec -it onebusaway-application-modules-builder-1 /bin/bash
+./build-and-test.sh
+```
+
+
+
 ## Status
 
 * Latest Stable Release - `2.4.18-cs`:
@@ -92,8 +104,8 @@ To create a local copy of the repository, use the following command:
  * IRC channel:
      - `#onebusaway` on Freenode
      - You can connect using your favorite IRC client or [chat through the web](http://webchat.freenode.net/?channels=onebusaway) (just enter a username and click *Connect*)
- 
+
 
 ## Contact Info
 
-There are [lots of ways to get in touch with us](https://github.com/OneBusAway/onebusaway/wiki/Contact-Us). 
+There are [lots of ways to get in touch with us](https://github.com/OneBusAway/onebusaway/wiki/Contact-Us).
