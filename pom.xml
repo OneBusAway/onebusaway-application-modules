@@ -553,6 +553,7 @@
                 <version>3.0</version>
                 <configuration>
                     <excludes combine.children="append">
+                        <exclude>**/build/**</exclude>
                         <exclude>**/data-sources.xml</exclude>
                         <exclude>**/*.action</exclude>
                         <exclude>**/*.ai</exclude>
