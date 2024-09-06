@@ -1,4 +1,6 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>org.onebusaway</groupId>
@@ -219,7 +221,8 @@
 					<skipPoms>false</skipPoms>
 					<generateGitPropertiesFile>true</generateGitPropertiesFile>
 					<generateGitPropertiesFilename>src/main/resources/git.properties</generateGitPropertiesFilename>
-					<!--  travis takes some shortcuts with git so we need to tell the plugin to ignore git errors -->
+					<!--  travis takes some shortcuts with git so we need to tell the plugin to
+					ignore git errors -->
 					<failOnUnableToExtractRepoInfo>false</failOnUnableToExtractRepoInfo>
 					<failOnNoGitDirectory>false</failOnNoGitDirectory>
 					<gitDescribe>

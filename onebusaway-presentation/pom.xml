@@ -1,4 +1,6 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.onebusaway</groupId>
@@ -40,10 +42,10 @@
             <version>${project.version}</version>
             <!-- exclude xml-apis so legacy gwt support code works -->
             <exclusions>
-            	<exclusion>
-            		<artifactId>xml-apis</artifactId>
-            		<groupId>xml-apis</groupId>
-            	</exclusion>
+                <exclusion>
+                    <artifactId>xml-apis</artifactId>
+                    <groupId>xml-apis</groupId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
@@ -56,16 +58,16 @@
             <artifactId>onebusaway-geocoder</artifactId>
             <version>${project.version}</version>
         </dependency>
-	    <dependency>
-			<groupId>org.onebusaway</groupId>
-			<artifactId>onebusaway-util</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.onebusaway</groupId>
-			<artifactId>onebusaway-siri-core</artifactId>
-			<version>${onebusaway-siri-version}</version>
-	    </dependency>
+        <dependency>
+            <groupId>org.onebusaway</groupId>
+            <artifactId>onebusaway-util</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.onebusaway</groupId>
+            <artifactId>onebusaway-siri-core</artifactId>
+            <version>${onebusaway-siri-version}</version>
+        </dependency>
 
         <!-- RMI-like service for wiring up services between VMs -->
         <dependency>
@@ -85,27 +87,27 @@
             <groupId>org.apache.struts</groupId>
             <artifactId>struts2-convention-plugin</artifactId>
         </dependency>
-      <dependency>
-          <groupId>org.ow2.asm</groupId>
-          <artifactId>asm</artifactId>
-          <version>${asm-version}</version>
-      </dependency>
-      <dependency>
-          <groupId>org.ow2.asm</groupId>
-          <artifactId>asm-commons</artifactId>
-          <version>${asm-version}</version>
-      </dependency>
+        <dependency>
+            <groupId>org.ow2.asm</groupId>
+            <artifactId>asm</artifactId>
+            <version>${asm-version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.ow2.asm</groupId>
+            <artifactId>asm-commons</artifactId>
+            <version>${asm-version}</version>
+        </dependency>
         <dependency>
             <groupId>org.apache.struts</groupId>
             <artifactId>struts2-json-plugin</artifactId>
         </dependency>
 
         <dependency>
-			<groupId>org.apache.struts</groupId>
-			<artifactId>struts2-sitemesh-plugin</artifactId>
-		</dependency>
+            <groupId>org.apache.struts</groupId>
+            <artifactId>struts2-sitemesh-plugin</artifactId>
+        </dependency>
 
-		<dependency>
+        <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-web</artifactId>
         </dependency>
@@ -156,14 +158,14 @@
             <version>2.8.1</version>
         </dependency>
         <dependency>
-          <groupId>com.google.guava</groupId>
-          <artifactId>guava</artifactId>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
         </dependency>
-		<dependency>
-			<groupId>org.onebusaway.util</groupId>
-			<artifactId>comparators</artifactId>
-			<version>1.0.0</version>
-		</dependency>
+        <dependency>
+            <groupId>org.onebusaway.util</groupId>
+            <artifactId>comparators</artifactId>
+            <version>1.0.0</version>
+        </dependency>
         <dependency>
             <groupId>commons-collections</groupId>
             <artifactId>commons-collections</artifactId>

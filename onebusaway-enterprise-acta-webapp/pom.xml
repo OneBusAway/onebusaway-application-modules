@@ -1,18 +1,20 @@
 <?xml version="1.0"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <parent>
-    <artifactId>onebusaway-application-modules</artifactId>
-    <groupId>org.onebusaway</groupId>
-    <version>2.5.13-otsf</version>
-  </parent>
-  <artifactId>onebusaway-enterprise-acta-webapp</artifactId>
-  <packaging>war</packaging>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<artifactId>onebusaway-application-modules</artifactId>
+		<groupId>org.onebusaway</groupId>
+		<version>2.5.13-otsf</version>
+	</parent>
+	<artifactId>onebusaway-enterprise-acta-webapp</artifactId>
+	<packaging>war</packaging>
 
-  <name>onebusaway-enterprise-acta-webapp</name>
+	<name>onebusaway-enterprise-acta-webapp</name>
 
 
-  	<properties>
+	<properties>
 		<branding-webapp>{project.name}</branding-webapp>
 		<jetty.version>9.4.51.v20230217</jetty.version>
 		<xwiki.integration.version>1.0.1</xwiki.integration.version>
@@ -27,16 +29,16 @@
 		</repository>
 	</repositories>
 
-  <dependencies>
-    <dependency>
-		<groupId>org.onebusaway</groupId>
-		<artifactId>onebusaway-enterprise-webapp</artifactId>
-		<version>${project.version}</version>
-		<type>war</type>
-	</dependency>
-  </dependencies>
+	<dependencies>
+		<dependency>
+			<groupId>org.onebusaway</groupId>
+			<artifactId>onebusaway-enterprise-webapp</artifactId>
+			<version>${project.version}</version>
+			<type>war</type>
+		</dependency>
+	</dependencies>
 
-  <profiles>
+	<profiles>
 		<profile>
 			<id>cloud</id> <!-- aka services-dev --> <!-- aka staging, production -->
 			<activation>
@@ -55,9 +57,12 @@
 		<profile>
 			<id>local-front-end</id>
 			<properties>
-				<tds.path>http://sms.dev.obanyc.com:8080/onebusaway-nyc-transit-data-federation-webapp</tds.path>
-				<vtms.path>http://sms.dev.obanyc.com:8080/onebusaway-nyc-transit-data-federation-webapp</vtms.path>
-				<config.path>http://sms.dev.obanyc.com:8080/onebusaway-nyc-transit-data-federation-webapp</config.path>
+				<tds.path>
+					http://sms.dev.obanyc.com:8080/onebusaway-nyc-transit-data-federation-webapp</tds.path>
+				<vtms.path>
+					http://sms.dev.obanyc.com:8080/onebusaway-nyc-transit-data-federation-webapp</vtms.path>
+				<config.path>
+					http://sms.dev.obanyc.com:8080/onebusaway-nyc-transit-data-federation-webapp</config.path>
 				<archive.path>http://archive.dev.obanyc.com/onebusaway-nyc-report-archive</archive.path>
 				<log4j.appender>stdout</log4j.appender>
 				<create-apikey>true</create-apikey>
@@ -101,7 +106,7 @@
 		<profile>
 			<id>eclipse-only</id>
 			<dependencies>
-					<!-- OneBusAway Dependencies -->
+				<!-- OneBusAway Dependencies -->
 				<dependency>
 					<groupId>org.onebusaway</groupId>
 					<artifactId>onebusaway-presentation</artifactId>
@@ -159,42 +164,43 @@
 					<version>1.2.2</version>
 				</dependency>
 				<dependency>
-			      <groupId>javax.servlet</groupId>
-			      <artifactId>jsp-api</artifactId>
-			      <scope>provided</scope>
-			    </dependency>
-			    <dependency>
-			      <groupId>javax.servlet</groupId>
-			      <artifactId>jstl</artifactId>
-			    </dependency>
+					<groupId>javax.servlet</groupId>
+					<artifactId>jsp-api</artifactId>
+					<scope>provided</scope>
+				</dependency>
+				<dependency>
+					<groupId>javax.servlet</groupId>
+					<artifactId>jstl</artifactId>
+				</dependency>
 			</dependencies>
 		</profile>
 	</profiles>
-  <build>
-    <finalName>onebusaway-enterprise-acta-webapp</finalName>
-    <plugins>
+	<build>
+		<finalName>onebusaway-enterprise-acta-webapp</finalName>
+		<plugins>
 
 			<plugin>
 				<groupId>org.eclipse.jetty</groupId>
-				<artifactId>jetty-maven-plugin</artifactId>				<version>${jetty.version}</version>
+				<artifactId>jetty-maven-plugin</artifactId>
+				<version>${jetty.version}</version>
 				<configuration>
 					<contextPath>/</contextPath>
 				</configuration>
 			</plugin>
-	</plugins>
-	<resources>
-		<resource>
-			<directory>src/main/resources</directory>
-			<filtering>true</filtering>
-			<includes>
-				<include>**/*.properties</include>
-				<include>**/*.xml</include>
-			</includes>
-		</resource>
-	</resources>
-	<pluginManagement>
+		</plugins>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
+				<includes>
+					<include>**/*.properties</include>
+					<include>**/*.xml</include>
+				</includes>
+			</resource>
+		</resources>
+		<pluginManagement>
 			<plugins>
-			<!-- This tells eclipse to when to execute the git-commit plugin -->
+				<!-- This tells eclipse to when to execute the git-commit plugin -->
 				<plugin>
 					<groupId>org.eclipse.m2e</groupId>
 					<artifactId>lifecycle-mapping</artifactId>
@@ -229,24 +235,24 @@
 					</configuration>
 				</plugin>
 				<plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-war-plugin</artifactId>
-                    <version>2.1</version>
-                    <configuration>
-                        <archive>
-                            <manifestEntries>
-                                <Implementation-Build>${gitDescribe}</Implementation-Build>
-                            </manifestEntries>
-                        </archive>
-                        <overlays>
-                        	<overlay>
-              					<groupId>org.onebusaway</groupId>
-              					<artifactId>onebusaway-enterprise-webapp</artifactId>
-              				</overlay>
-                        </overlays>
-                    </configuration>
-                </plugin>
-                <plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-war-plugin</artifactId>
+					<version>2.1</version>
+					<configuration>
+						<archive>
+							<manifestEntries>
+								<Implementation-Build>${gitDescribe}</Implementation-Build>
+							</manifestEntries>
+						</archive>
+						<overlays>
+							<overlay>
+								<groupId>org.onebusaway</groupId>
+								<artifactId>onebusaway-enterprise-webapp</artifactId>
+							</overlay>
+						</overlays>
+					</configuration>
+				</plugin>
+				<plugin>
 					<groupId>com.mycila</groupId>
 					<artifactId>license-maven-plugin</artifactId>
 					<configuration>
@@ -261,5 +267,5 @@
 				</plugin>
 			</plugins>
 		</pluginManagement>
-  </build>
+	</build>
 </project>

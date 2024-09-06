@@ -1,4 +1,6 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.onebusaway</groupId>
@@ -10,49 +12,41 @@
   <packaging>jar</packaging>
 
   <dependencies>
-   <!--
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-api</artifactId>
+      <version>${log4j.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-core</artifactId>
+      <version>${log4j.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-slf4j-impl</artifactId>
+      <version>${log4j.version}</version>
+    </dependency>
     <dependency>
       <groupId>org.onebusaway</groupId>
-      <artifactId>onebusaway-gtfs-realtime-api</artifactId>
-      <version>${gtfs-api-version}</version>
-    </dependency> -->
+      <artifactId>onebusaway-container</artifactId>
+      <version>2.5.13-otsf</version>
+    </dependency>
 
-      <!--       Log4j 2 -->
-      <dependency>
-          <groupId>org.apache.logging.log4j</groupId>
-          <artifactId>log4j-api</artifactId>
-          <version>${log4j.version}</version>
-      </dependency>
-      <dependency>
-          <groupId>org.apache.logging.log4j</groupId>
-          <artifactId>log4j-core</artifactId>
-          <version>${log4j.version}</version>
-      </dependency>
-      <dependency>
-          <groupId>org.apache.logging.log4j</groupId>
-          <artifactId>log4j-slf4j-impl</artifactId>
-          <version>${log4j.version}</version>
-      </dependency>
-	    <dependency>
-	      <groupId>org.onebusaway</groupId>
-	      <artifactId>onebusaway-container</artifactId>
-	      <version>2.5.13-otsf</version>
-	    </dependency>
-
-	<dependency>
+    <dependency>
       <groupId>org.onebusaway</groupId>
       <artifactId>onebusaway-gtfs-realtime-api</artifactId>
       <version>${gtfs-api-version}</version>
     </dependency>
 
-     <dependency>
+    <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-lang3</artifactId>
       <version>3.8.1</version>
     </dependency>
 
 
-	</dependencies>
+  </dependencies>
 
 
   <build>
