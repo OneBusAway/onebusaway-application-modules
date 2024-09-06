@@ -553,6 +553,8 @@
                 <version>3.0</version>
                 <configuration>
                     <excludes combine.children="append">
+                        <exclude>**/.gitkeep</exclude>
+                        <exclude>**/docker_app_server/bundle/**</exclude>
                         <exclude>**/build/**</exclude>
                         <exclude>**/data-sources.xml</exclude>
                         <exclude>**/*.action</exclude>
