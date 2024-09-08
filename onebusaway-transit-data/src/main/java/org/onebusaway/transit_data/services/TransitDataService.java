@@ -377,10 +377,16 @@ public interface TransitDataService extends FederatedService {
 
   /**
    * @param agencyId
-   * @return the list of all stops operated by the specified agency
+   * @return the list of all stop ids operated by the specified agency
    */
   @FederatedByAgencyIdMethod
   public ListBean<String> getStopIdsForAgencyId(String agencyId);
+
+  /**
+   * @param agencyId
+   * @return the list of all stops operated by the specified agency
+   */
+  public StopsBean getStopsForAgencyId(String agencyId);
 
   /**
    * 

@@ -46,9 +46,16 @@ public interface StopsBeanService {
   public StopsBean getStops(SearchQueryBean query) throws ServiceException;
 
   /**
-   * 
+   *
    * @param agencyId see {@link Agency#getId()}
    * @return the list of all stops for the specified agency
+   */
+  public StopsBean getStopsForAgencyId(String agencyId);
+
+  /**
+   * 
+   * @param agencyId see {@link Agency#getId()}
+   * @return the list of all stop ids for the specified agency
    */
   public ListBean<String> getStopsIdsForAgencyId(String agencyId);
 

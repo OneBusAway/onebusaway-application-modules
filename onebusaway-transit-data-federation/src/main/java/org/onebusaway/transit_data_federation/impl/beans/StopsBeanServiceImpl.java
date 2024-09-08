@@ -70,6 +70,16 @@ class StopsBeanServiceImpl implements StopsBeanService {
   @Autowired
   private TransitGraphDao _transitGraphDao;
 
+  @Autowired
+  public void setTransitGraphDao(TransitGraphDao transitGraphDao) {
+    _transitGraphDao = transitGraphDao;
+  }
+
+  @Autowired
+  public void setStopBeanService(StopBeanService stopBeanService) {
+    _stopBeanService = stopBeanService;
+  }
+
   @Override
   public StopsBean getStops(SearchQueryBean queryBean) throws ServiceException {
     String query = queryBean.getQuery();
@@ -229,6 +239,20 @@ class StopsBeanServiceImpl implements StopsBeanService {
       }
     }
     Collections.sort(stopBeans, new DistanceAwayComparator());
+  }
+
+  @Override
+  public StopsBean getStopsForAgencyId(String agencyId) {
+    AgencyEntry agency = _transitGraphDao.getAgencyForId(agencyId);
+    if (agency == null)
+      throw new NoSuchAgencyServiceException(agencyId);
+    List<StopBean> stopBeans = new ArrayList<StopBean>();
+    for (StopEntry stop : agency.getStops()) {
+      AgencyAndId id = stop.getId();
+      StopBean stopBean = _stopBeanService.getStopForId(id, null);
+      stopBeans.add(stopBean);
+    }
+    return constructResult(stopBeans, false);
   }
 
   @Override

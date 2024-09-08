@@ -58,7 +58,7 @@ class StopBeanServiceImpl implements StopBeanService {
   private ConsolidatedStopsService _consolidatedStopsService;
 
   @Autowired
-  public void setTranstiGraphDao(TransitGraphDao transitGraphDao) {
+  public void setTransitGraphDao(TransitGraphDao transitGraphDao) {
     _transitGraphDao = transitGraphDao;
   }
 

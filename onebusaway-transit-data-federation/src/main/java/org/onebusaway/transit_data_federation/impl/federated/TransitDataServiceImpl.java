@@ -181,6 +181,12 @@ public class TransitDataServiceImpl implements TransitDataService {
   }
 
   @Override
+  public StopsBean getStopsForAgencyId(String agencyId) {
+    blockUntilBundleIsReady();
+    return _transitDataService.getStopsForAgencyId(agencyId);
+  }
+
+  @Override
   public StopWithArrivalsAndDeparturesBean getStopWithArrivalsAndDepartures(
       String stopId, ArrivalsAndDeparturesQueryBean query, AgencyServiceInterval serviceInterval)
       throws ServiceException {

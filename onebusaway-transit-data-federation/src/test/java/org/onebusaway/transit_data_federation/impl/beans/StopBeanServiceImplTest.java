@@ -55,7 +55,7 @@ public class StopBeanServiceImplTest {
     _service = new StopBeanServiceImpl();
 
     _transitGraphDao = Mockito.mock(TransitGraphDao.class);
-    _service.setTranstiGraphDao(_transitGraphDao);
+    _service.setTransitGraphDao(_transitGraphDao);
 
     _narrativeService = Mockito.mock(NarrativeService.class);
     _service.setNarrativeService(_narrativeService);
