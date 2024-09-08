@@ -45,25 +45,50 @@ There are two options for setting up your own OneBusAway instance:
 * [Configuration and Deployment Guide for v2.x](https://github.com/OneBusAway/onebusaway/wiki/Configuration-and-Deployment-Guide-for-v2.x) - Designed to provide a comprehensive deployment method for users who wish to set up a simple OneBusAway application with minimal configurations.
 * [onebusaway-docker (Under development)](https://github.com/OneBusAway/onebusaway-docker) - A community-supported Docker configuration for OneBusAway v2.x is currently under development.
 
-## Docker Development Instructions
+## Development Instructions with Docker
 
-Build the image:
+```sh
+docker compose up builder
+docker compose exec builder bash # in another shell, for now
+./build.sh --help # acquaint yourself with the build.sh options
+./build.sh --clean --check-updates --test
 
+# now you have built all of the OBA artifacts:
+ls build/org/onebusaway/onebusaway-application-modules
+
+# Download GTFS data and build an OBA transit data bundle from it
+docker compose up bundle_builder
+
+# verify that the bundle built as expected
+ls docker_app_server/bundle
+
+# Start up the app server
+docker compose up appserver
+
+# enter the app server
+docker compose exec appserver bash
+
+# run the copy_resources.sh script (it's on your path)
+# to copy the necessary WAR files into /usr/local/tomcat
+copy_resources.sh
+
+# wait a few seconds for everything to spin up...
 ```
-docker build -t oba-app-modules .
-docker exec -it onebusaway-application-modules-builder-1 /bin/bash
-./build-and-test.sh
-```
 
+Finally, verify that everything works as expected!
+
+* Check out the Tomcat Web App Manager at http://localhost:8080/manager/html (user/pass: admin/admin) to verify that your OBA WARs deployed correctly
+* Check out the config.json API endpoint to verify that everything built correctly: http://localhost:8080/onebusaway-api-webapp/api/where/config.json?key=test
 
 
 ## Status
 
-* Latest Stable Release - `2.4.18-cs`:
-    * [onebusaway-transit-data-federation-webapp](https://repo.camsys-apps.com/releases/org/onebusaway/onebusaway-transit-data-federation-webapp/2.4.18-cs/onebusaway-transit-data-federation-webapp-2.4.18-cs.war)
-    * [onebusaway-api-webapp](https://repo.camsys-apps.com/releases/org/onebusaway/onebusaway-api-webapp/2.4.18-cs/onebusaway-api-webapp-2.4.18-cs.war)
-    * [onebusaway-enterprise-acta-webapp](https://repo.camsys-apps.com/releases/org/onebusaway/onebusaway-enterprise-acta-webapp/2.4.18-cs/onebusaway-enterprise-acta-webapp-2.4.18-cs.war)
-* [Previous releases](https://developer.onebusaway.org/release-notes)
+* Download pre-built JARs and WARs: https://developer.onebusaway.org/downloads
+* Terraform/Open Tofu/Infrastructure as Code: https://github.com/onebusaway/onebusaway-deployment
+* Docker
+  * Pre-built images: https://hub.docker.com/r/opentransitsoftwarefoundation/
+  * Instructions: https://github.com/onebusAway/onebusaway-docker
+
 
 ## Deployments
 
@@ -79,14 +104,6 @@ Check out the full list on the [OneBusAway Deployments page](https://github.com/
 
 * [Latest Stable Release](https://developer.onebusaway.org/downloads)
 
-## Code Repository
-
-To browse the source online visit https://github.com/OneBusAway/onebusaway-application-modules.
-
-To create a local copy of the repository, use the following command:
-
-`$ git clone https://github.com/OneBusAway/onebusaway-application-modules.git`
-
 
 ## Developer Information
 
@@ -101,11 +118,7 @@ To create a local copy of the repository, use the following command:
  * Mailing lists:
      - [Developer discussion list](https://groups.google.com/group/onebusaway-developers)
      - [User discussion list](https://groups.google.com/group/onebusaway-users)
- * IRC channel:
-     - `#onebusaway` on Freenode
-     - You can connect using your favorite IRC client or [chat through the web](http://webchat.freenode.net/?channels=onebusaway) (just enter a username and click *Connect*)
-
 
 ## Contact Info
 
-There are [lots of ways to get in touch with us](https://github.com/OneBusAway/onebusaway/wiki/Contact-Us).
+There are [lots of ways to get in touch with us](https://developer.onebusaway.org/getting-help).

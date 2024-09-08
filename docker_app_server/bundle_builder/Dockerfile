@@ -14,17 +14,17 @@
 # limitations under the License.
 #
 
-FROM maven:3-eclipse-temurin-11
+FROM tomcat:8.5.98-jdk11-temurin
 
-# Install additional development tools if needed
-RUN apt-get update && apt-get install -y \
-    git \
-    vim \
-    && rm -rf /var/lib/apt/lists/*
+ARG OBA_VERSION=2.5.13-otsf
+ENV OBA_VERSION_ENV=$OBA_VERSION
 
-RUN mkdir -p /root/.m2/repository
+# Start configuring OBA
+WORKDIR /oba
 
-WORKDIR /src
+COPY ./build_bundle.sh .
 
-# Set the entrypoint to bash so the container doesn't exit immediately
-ENTRYPOINT ["/bin/bash"]
+CMD /oba/build_bundle.sh ${OBA_VERSION_ENV}
+
+# for debugging
+# CMD ["tail", "-f", "/dev/null"]

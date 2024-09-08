@@ -19,3 +19,6 @@ onebusaway-enterprise-webapp/overlays/
 
 build/*
 !build/.gitkeep
+
+docker_app_server/bundle/*
+!docker_app_server/bundle/.gitkeep
