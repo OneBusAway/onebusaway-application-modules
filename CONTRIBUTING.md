@@ -54,7 +54,7 @@ When you are submitting code to OneBusAway, here are a few guidelines to go by:
 * For each commit to the repository, reference the issue number in the commit message.  Something like `Issue #5: Adding this cool feature`.  This will automatically link your commit to the issue and make it easier to track changes to the codebase.
 * Code style: check out the [Code Style](https://github.com/OneBusAway/onebusaway/wiki/Code-Style) documentation for details on how configure your IDE to match the OneBusAway code-style conventions.  In general, try to match the existing code style when adding new code.
 * Write unit tests.
-* Don't break the build.  You can run `mvn verify` to run all the unit tests and checks for a Maven project to verify that your changes haven't broken anything.  Also keep an eye on our [Continuous Integration Server](http://ci.onebusaway.org/).  Some projects also have Travis CI added, which provides an additional reference for builds.
+* Don't break the build.  You can run `mvn verify` to run all the unit tests and checks for a Maven project to verify that your changes haven't broken anything.
 * Code reviews.  If you are new to OneBusAway development or if you are working on a core piece of OneBusAway, it's a good idea to get someone to do a codereview of your change before committing it to the master repository.  GitHub makes codereviews pretty simple with their [Pull Request](https://help.github.com/articles/using-pull-requests) feature.
 
 ## Commit Access

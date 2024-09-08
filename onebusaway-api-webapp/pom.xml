@@ -1,4 +1,6 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.onebusaway</groupId>
@@ -10,9 +12,9 @@
 
   <name>onebusaway-api-webapp</name>
 
-    <properties>
-        <log4j.appender>ROLL</log4j.appender>
-    </properties>
+  <properties>
+    <log4j.appender>ROLL</log4j.appender>
+  </properties>
 
   <dependencies>
 
@@ -46,25 +48,26 @@
     </dependency>
     -->
     <dependency>
-        <groupId>org.onebusaway</groupId>
-        <artifactId>onebusaway-siri-api-v13</artifactId>
-        <version>${onebusaway-siri-1-api-version}</version>
+      <groupId>org.onebusaway</groupId>
+      <artifactId>onebusaway-siri-api-v13</artifactId>
+      <version>${onebusaway-siri-1-api-version}</version>
     </dependency>
     <dependency>
-        <groupId>org.onebusaway</groupId>
-        <artifactId>onebusaway-siri-api-v20</artifactId>
-        <version>${onebusaway-siri-2-api-version}</version>
+      <groupId>org.onebusaway</groupId>
+      <artifactId>onebusaway-siri-api-v20</artifactId>
+      <version>${onebusaway-siri-2-api-version}</version>
     </dependency>
 
     <dependency>
       <groupId>org.onebusaway</groupId>
       <artifactId>onebusaway-siri-core</artifactId>
       <version>${onebusaway-siri-version}</version>
-        <exclusions>
-            <exclusion>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-api</artifactId>
-            </exclusion></exclusions>
+      <exclusions>
+        <exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-api</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
 
     <!-- For GTFS-realtime support -->
@@ -72,11 +75,12 @@
       <groupId>org.onebusaway</groupId>
       <artifactId>onebusaway-gtfs-realtime-api</artifactId>
       <version>${gtfs-api-version}</version>
-        <exclusions>
-            <exclusion>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-api</artifactId>
-            </exclusion></exclusions>
+      <exclusions>
+        <exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-api</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
 
 
@@ -99,40 +103,40 @@
       <groupId>org.apache.struts</groupId>
       <artifactId>struts2-convention-plugin</artifactId>
     </dependency>
-      <dependency>
+    <dependency>
       <groupId>org.apache.struts</groupId>
       <artifactId>struts2-rest-plugin</artifactId>
     </dependency>
     <!-- This provides support for Struts2 Rome rss result type -->
     <!-- rome is no longer supported -->
-<!--    <dependency>-->
-<!--        <groupId>com.googlecode.s2rome</groupId>-->
-<!--        <artifactId>struts2-rome-plugin</artifactId>-->
-<!--        <version>0.3</version>-->
-<!--        <exclusions>-->
-<!--            <exclusion>-->
-<!--                <groupId>org.slf4j</groupId>-->
-<!--                <artifactId>slf4j-api</artifactId>-->
-<!--            </exclusion>-->
-<!--        </exclusions>-->
-<!--    </dependency>-->
-      <dependency>
-          <groupId>net.sf.json-lib</groupId>
-          <artifactId>json-lib</artifactId>
-          <version>2.4</version>
-          <classifier>jdk15</classifier>
-      </dependency>
+    <!--    <dependency>-->
+    <!--        <groupId>com.googlecode.s2rome</groupId>-->
+    <!--        <artifactId>struts2-rome-plugin</artifactId>-->
+    <!--        <version>0.3</version>-->
+    <!--        <exclusions>-->
+    <!--            <exclusion>-->
+    <!--                <groupId>org.slf4j</groupId>-->
+    <!--                <artifactId>slf4j-api</artifactId>-->
+    <!--            </exclusion>-->
+    <!--        </exclusions>-->
+    <!--    </dependency>-->
+    <dependency>
+      <groupId>net.sf.json-lib</groupId>
+      <artifactId>json-lib</artifactId>
+      <version>2.4</version>
+      <classifier>jdk15</classifier>
+    </dependency>
     <!-- Rome framework for RSS support -->
     <dependency>
-        <groupId>com.rometools</groupId>
-        <artifactId>rome</artifactId>
-        <version>1.7.0</version>
-        <exclusions>
-            <exclusion>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-api</artifactId>
-            </exclusion>
-        </exclusions>
+      <groupId>com.rometools</groupId>
+      <artifactId>rome</artifactId>
+      <version>1.7.0</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-api</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <!-- We use HttpServletRequest in XmlResult -->
     <dependency>
@@ -146,33 +150,33 @@
       <groupId>com.notnoop.apns</groupId>
       <artifactId>apns</artifactId>
       <version>0.1.6</version>
-        <exclusions>
-            <exclusion>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-api</artifactId>
-            </exclusion>
-        </exclusions>
+      <exclusions>
+        <exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-api</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
 
-<!--       Log4j 2 -->
-      <dependency>
-          <groupId>org.apache.logging.log4j</groupId>
-          <artifactId>log4j-api</artifactId>
-          <version>${log4j.version}</version>
-      </dependency>
-      <dependency>
-          <groupId>org.apache.logging.log4j</groupId>
-          <artifactId>log4j-core</artifactId>
-          <version>${log4j.version}</version>
-      </dependency>
-      <dependency>
-          <groupId>org.apache.logging.log4j</groupId>
-          <artifactId>log4j-slf4j-impl</artifactId>
-          <version>${log4j.version}</version>
-      </dependency>
+    <!--       Log4j 2 -->
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-api</artifactId>
+      <version>${log4j.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-core</artifactId>
+      <version>${log4j.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-slf4j-impl</artifactId>
+      <version>${log4j.version}</version>
+    </dependency>
 
-      <!-- Log4j 1 -->
-<!--      <dependency>
+    <!-- Log4j 1 -->
+    <!--      <dependency>
           <groupId>org.slf4j</groupId>
           <artifactId>slf4j-api</artifactId>
           <version>${slf4j.version}</version>
@@ -182,7 +186,7 @@
           <artifactId>slf4j-log4j12</artifactId>
           <version>${slf4j.version}</version>
       </dependency>-->
-<!--      <dependency>
+    <!--      <dependency>
           <groupId>log4j</groupId>
           <artifactId>log4j</artifactId>
           <version>1.2.16</veapi-webapprsion>
@@ -194,11 +198,11 @@
       </dependency>-->
 
 
-      <dependency>
-          <groupId>commons-logging</groupId>
-          <artifactId>commons-logging</artifactId>
-          <version>1.2</version>
-      </dependency>
+    <dependency>
+      <groupId>commons-logging</groupId>
+      <artifactId>commons-logging</artifactId>
+      <version>1.2</version>
+    </dependency>
 
     <dependency>
       <groupId>junit</groupId>
@@ -207,71 +211,72 @@
     </dependency>
 
     <!--  support mysql out of the box -->
-      <dependency>
-          <groupId>com.mysql</groupId>
-          <artifactId>mysql-connector-j</artifactId>
-      </dependency>
+    <dependency>
+      <groupId>com.mysql</groupId>
+      <artifactId>mysql-connector-j</artifactId>
+    </dependency>
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-core</artifactId>
       <scope>test</scope>
     </dependency>
-   	<dependency>
-		<groupId>org.tuckey</groupId>
-		<artifactId>urlrewritefilter</artifactId>
-		<version>3.2.0</version>
-		<type>jar</type>
-		<scope>compile</scope>
-	</dependency>
-	<dependency>
-    	<groupId>com.brsanthu</groupId>
-    	<artifactId>google-analytics-java</artifactId>
-        <exclusions>
-            <exclusion>
-                <groupId>org.slf4j</groupId>
-                <artifactId>jcl-over-slf4j</artifactId>
-            </exclusion>
-        </exclusions>
-	</dependency>
-	<dependency>
-		<groupId>org.apache.httpcomponents</groupId>
-		<artifactId>httpclient</artifactId>
-	</dependency>
+    <dependency>
+      <groupId>org.tuckey</groupId>
+      <artifactId>urlrewritefilter</artifactId>
+      <version>3.2.0</version>
+      <type>jar</type>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.brsanthu</groupId>
+      <artifactId>google-analytics-java</artifactId>
+      <exclusions>
+        <exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>jcl-over-slf4j</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpclient</artifactId>
+    </dependency>
   </dependencies>
 
   <build>
     <finalName>onebusaway-api-webapp</finalName>
     <plugins>
-	  <plugin>
-		<groupId>pl.project13.maven</groupId>
-		<artifactId>git-commit-id-plugin</artifactId>
-		<version>2.2.1</version>
-		<executions>
-		  <execution>
-		    <goals>
-			  <goal>revision</goal>
-			</goals>
-		  </execution>
-		</executions>
-		<configuration>
-		  <prefix>git</prefix>
-		  <dateFormat>dd.MM.yyyy '@' HH:mm:ss z</dateFormat>
-		  <verbose>false</verbose>
-		  <skipPoms>false</skipPoms>
-		  <generateGitPropertiesFile>true</generateGitPropertiesFile>
-		  <generateGitPropertiesFilename>src/main/resources/git.properties</generateGitPropertiesFilename>
-  		  <!--  travis takes some shortcuts with git so we need to tell the plugin to ignore git errors -->
-		  <failOnUnableToExtractRepoInfo>false</failOnUnableToExtractRepoInfo>
-		  <failOnNoGitDirectory>false</failOnNoGitDirectory>
-		  <gitDescribe>
-			<skip>false</skip>
-			<always>true</always>
-			<abbrev>7</abbrev>
-			<dirty>-dirty</dirty>
-			<forceLongFormat>false</forceLongFormat>
-		  </gitDescribe>
-		</configuration>
-	  </plugin>
+      <plugin>
+        <groupId>pl.project13.maven</groupId>
+        <artifactId>git-commit-id-plugin</artifactId>
+        <version>2.2.1</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>revision</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <prefix>git</prefix>
+          <dateFormat>dd.MM.yyyy '@' HH:mm:ss z</dateFormat>
+          <verbose>false</verbose>
+          <skipPoms>false</skipPoms>
+          <generateGitPropertiesFile>true</generateGitPropertiesFile>
+          <generateGitPropertiesFilename>src/main/resources/git.properties</generateGitPropertiesFilename>
+          <!--  travis takes some shortcuts with git so we need to tell the plugin to ignore git
+          errors -->
+          <failOnUnableToExtractRepoInfo>false</failOnUnableToExtractRepoInfo>
+          <failOnNoGitDirectory>false</failOnNoGitDirectory>
+          <gitDescribe>
+            <skip>false</skip>
+            <always>true</always>
+            <abbrev>7</abbrev>
+            <dirty>-dirty</dirty>
+            <forceLongFormat>false</forceLongFormat>
+          </gitDescribe>
+        </configuration>
+      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-resources-plugin</artifactId>
@@ -296,8 +301,8 @@
     </plugins>
     <resources>
       <resource>
-          <directory>src/main/resources</directory>
-          <filtering>true</filtering>
+        <directory>src/main/resources</directory>
+        <filtering>true</filtering>
       </resource>
     </resources>
   </build>

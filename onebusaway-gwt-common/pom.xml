@@ -1,4 +1,6 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <parent>
         <groupId>org.onebusaway</groupId>
         <artifactId>onebusaway-application-modules</artifactId>
@@ -68,16 +70,6 @@
                 <artifactId>gwt-maven-plugin</artifactId>
                 <configuration>
                     <modules>
-                        <!--
-                        <module>org.onebusaway.webapp.gwt.AgenciesMap</module>
-                        <module>org.onebusaway.webapp.gwt.BookmarkEditApplication</module>
-                        <module>org.onebusaway.webapp.gwt.MobileApplication</module>
-                        <module>org.onebusaway.webapp.gwt.NotificationWidgetApplication</module>
-                        <module>org.onebusaway.webapp.gwt.OneBusAwayStandardApplication</module>
-                        <module>org.onebusaway.webapp.gwt.SearchLocationLibrary</module>
-                        <module>org.onebusaway.webapp.gwt.WhereStopFinderRefineViewApplication</module>
-                        <module>org.onebusaway.webapp.gwt.WhereStopFinderStandardApplication</module>
-                        -->
                     </modules>
                     <gwtVersion>${gwt-version}</gwtVersion>
                     <webappDirectory>${project.build.directory}/gwt</webappDirectory>

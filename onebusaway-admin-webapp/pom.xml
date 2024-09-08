@@ -1,12 +1,14 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	<parent>
-		<groupId>org.onebusaway</groupId>
-		<artifactId>onebusaway-application-modules</artifactId>
-		<version>2.5.13-otsf</version>
-	</parent>
-	<artifactId>onebusaway-admin-webapp</artifactId>
-	<packaging>war</packaging>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.onebusaway</groupId>
+        <artifactId>onebusaway-application-modules</artifactId>
+        <version>2.5.13-otsf</version>
+    </parent>
+    <artifactId>onebusaway-admin-webapp</artifactId>
+    <packaging>war</packaging>
 
     <name>onebusaway-admin-webapp</name>
     <properties>
@@ -373,7 +375,8 @@
                     <skipPoms>false</skipPoms>
                     <generateGitPropertiesFile>false</generateGitPropertiesFile>
                     <generateGitPropertiesFilename>src/main/resources/git.properties</generateGitPropertiesFilename>
-                    <!--  travis takes some shortcuts with git so we need to tell the plugin to ignore git errors -->
+                    <!--  travis takes some shortcuts with git so we need to tell the plugin to
+                    ignore git errors -->
                     <failOnUnableToExtractRepoInfo>false</failOnUnableToExtractRepoInfo>
                     <failOnNoGitDirectory>false</failOnNoGitDirectory>
                     <gitDescribe>
@@ -385,17 +388,6 @@
                     </gitDescribe>
                 </configuration>
             </plugin>
-            <!--
-                          <plugin>
-                            <groupId>org.apache.maven.plugins</groupId>
-                            <artifactId>maven-compiler-plugin</artifactId>
-                            <version>3.3</version>
-                            <configuration>
-                              <source>1.7</source>
-                              <target>1.7</target>
-                            </configuration>
-                          </plugin>
-            -->
         </plugins>
         <resources>
             <resource>
@@ -421,7 +413,8 @@
                     </configuration>
                 </plugin>
 
-                <!--This plugin's configuration is used to store Eclipse m2e settings
+                <!--This
+                plugin's configuration is used to store Eclipse m2e settings
                     only. It has no influence on the Maven build itself. -->
                 <plugin>
                     <groupId>org.eclipse.m2e</groupId>
