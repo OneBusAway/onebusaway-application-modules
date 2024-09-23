@@ -2,13 +2,9 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-    <parent>
-        <artifactId>onebusaway</artifactId>
-        <groupId>org.onebusaway</groupId>
-        <version>1.2.10.1</version>
-    </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>onebusaway-application-modules</artifactId>
+    <groupId>org.onebusaway</groupId>
     <version>2.5.13-otsf</version>
     <packaging>pom</packaging>
 
@@ -100,12 +96,6 @@
     </issueManagement>
 
     <!-- releases and snapshots should be inherited -->
-    <distributionManagement>
-        <site>
-            <id>${site_id}</id>
-            <url>${site_url}</url>
-        </site>
-    </distributionManagement>
     <modules>
         <module>onebusaway-admin-webapp</module>
         <module>onebusaway-agency-metadata</module>
@@ -514,14 +504,8 @@
                     <artifactId>gwt-maven-plugin</artifactId>
                     <version>2.4.0-1-oba</version>
                 </plugin>
-                <plugin>
-                    <!-- disable gpg as its not installed on build server -->
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-gpg-plugin</artifactId>
-                    <configuration>
-                        <skip>true</skip>
-                    </configuration>
-                </plugin>
+
+
             </plugins>
         </pluginManagement>
         <plugins>
@@ -571,6 +555,30 @@
                         <exclude>**/log4j2.xml</exclude>
                         <exclude>**/log4j-stdout.xml</exclude>
                     </excludes>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-gpg-plugin</artifactId>
+                <version>3.2.5</version>
+                <executions>
+                    <execution>
+                        <id>sign-artifacts</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>sign</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.sonatype.central</groupId>
+                <artifactId>central-publishing-maven-plugin</artifactId>
+                <version>0.5.0</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <publishingServerId>central</publishingServerId>
+                    <autoPublish>true</autoPublish>
                 </configuration>
             </plugin>
         </plugins>
