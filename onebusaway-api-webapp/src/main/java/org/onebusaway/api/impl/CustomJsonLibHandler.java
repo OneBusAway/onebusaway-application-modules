@@ -15,7 +15,6 @@
  */
 package org.onebusaway.api.impl;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.*;
 import com.opensymphony.xwork2.ActionInvocation;
 import com.opensymphony.xwork2.inject.Inject;
@@ -32,7 +31,7 @@ import java.io.Writer;
 
 public class CustomJsonLibHandler extends AbstractContentTypeHandler {
 
-        private String defaultEncoding = "ISO-8859-1";
+        private String defaultEncoding = "UTF-8";
         private ObjectMapper mapper = new ObjectMapper();
 
         public void toObject(ActionInvocation invocation, Reader in, Object target) throws IOException {
@@ -92,8 +91,9 @@ public class CustomJsonLibHandler extends AbstractContentTypeHandler {
                 }
                 // we used to set charset for callbacks
                 // after Jackson upgrade to 2.12.0 this no longer works
-                //return "application/json;charset=" + this.defaultEncoding;
-                return "application/json";
+                return "application/json; charset=" + this.defaultEncoding;
+                //we don't see polish characters in responses without it
+                //return "application/json;
         }
 
         public String getExtension() {
