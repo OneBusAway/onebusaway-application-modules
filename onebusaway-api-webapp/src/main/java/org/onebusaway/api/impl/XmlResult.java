@@ -36,6 +36,7 @@ public class XmlResult extends StrutsResultSupport {
     HttpServletResponse response = ServletActionContext.getResponse();
     RequestDispatcher dispatcher = request.getRequestDispatcher(finalLocation);
     response.setContentType("text/xml");
+    response.setCharacterEncoding("UTF-8");
     dispatcher.include(request, response);
   }
 

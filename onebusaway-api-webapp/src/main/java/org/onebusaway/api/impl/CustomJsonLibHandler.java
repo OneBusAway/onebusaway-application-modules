@@ -32,7 +32,6 @@ import java.io.Writer;
 
 public class CustomJsonLibHandler extends AbstractContentTypeHandler {
 
-        private String defaultEncoding = "ISO-8859-1";
         private ObjectMapper mapper = new ObjectMapper();
 
         public void toObject(ActionInvocation invocation, Reader in, Object target) throws IOException {
@@ -90,9 +89,6 @@ public class CustomJsonLibHandler extends AbstractContentTypeHandler {
                 if(callback != null){
                         return "application/javascript";
                 }
-                // we used to set charset for callbacks
-                // after Jackson upgrade to 2.12.0 this no longer works
-                //return "application/json;charset=" + this.defaultEncoding;
                 return "application/json";
         }
 
@@ -102,6 +98,6 @@ public class CustomJsonLibHandler extends AbstractContentTypeHandler {
 
         @Inject("struts.i18n.encoding")
         public void setDefaultEncoding(String val) {
-                this.defaultEncoding = val;
+                /* nop - TODO: can this just be removed? */
         }
 }
