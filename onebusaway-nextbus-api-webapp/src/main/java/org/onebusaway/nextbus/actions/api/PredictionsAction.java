@@ -17,6 +17,7 @@ package org.onebusaway.nextbus.actions.api;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.net.URISyntaxException;
 import java.util.*;
 
 import com.google.gson.JsonObject;
@@ -276,11 +277,13 @@ public class PredictionsAction extends NextBusApiBase implements
     return routeStop.toString();
   }
 
-  private List<Predictions> getRemotePredictions(String uri) throws IOException {
+  private List<Predictions> getRemotePredictions(String uri) throws IOException, URISyntaxException {
     int timeout = _configMapUtil.getConfig(agencyId).getHttpTimeoutSeconds();
     Map<String, String> headersMap = _configMapUtil.getConfig(agencyId).getHeadersMap();
+    Map<String, String> paramsMap = _configMapUtil.getConfig(agencyId).getParamsMap();
+
     JsonArray predictionsJson = null;
-    JsonObject jsonObject = _httpUtil.getJsonObject(uri, timeout, headersMap);
+    JsonObject jsonObject = _httpUtil.getJsonObject(uri, timeout, headersMap, paramsMap);
     if (jsonObject.has("predictions")) {
       predictionsJson = jsonObject.getAsJsonArray("predictions");
     } else if (jsonObject.has("pred")) {
