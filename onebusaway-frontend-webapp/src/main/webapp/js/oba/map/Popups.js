@@ -860,7 +860,8 @@ OBA.Popups = (function() {
             header: 'p.popupServiceAlert',
             collapsible: true,
             active: false,
-            autoHeight: false
+            autoHeight: false,
+			heightStyle: "content"
         });
 
 		
