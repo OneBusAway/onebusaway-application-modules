@@ -15,7 +15,7 @@
         <xwiki.version>2.3.1</xwiki.version>
         <xwiki.integration.version>1.0.1</xwiki.integration.version>
         <geotools.version>20.5</geotools.version>
-        <spring.security.version>5.3.2.RELEASE</spring.security.version>
+        <spring.security.version>5.4.11</spring.security.version>
         <bundle.builtPath>/var/lib/oba/bundles/builder</bundle.builtPath>
         <bundle.stagedPath>/var/lib/oba/bundles/staged</bundle.stagedPath>
         <bundle.deployPath>/var/lib/oba/bundles/active</bundle.deployPath>
