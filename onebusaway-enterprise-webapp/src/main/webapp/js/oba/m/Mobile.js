@@ -19,9 +19,6 @@ OBA.Mobile = (function() {
     var expandAlerts = false;
 
     var theWindow = jQuery(window);
-    var mainbox = jQuery("#mainbox");
-    var topBarDiv = jQuery("#branding");
-    var bottomBarDiv = jQuery("#footer");
     var routeMap = null;
 	var locationField = null;
 	var typeField = null;
@@ -191,10 +188,11 @@ OBA.Mobile = (function() {
 	function addMapBehaviour() {
 		var mapElement = document.getElementById("map");
 		if (mapElement !== null) {
-			//mapElement.style.overflow = 'hidden';
+			mapElement.style.overflow = 'hidden';
 			$("#mapExpander").on("click", function () {
 				$mapExpander = $(this);
 				$mapDiv = $('#map');
+				$mapDiv.css({'overflow':'scroll'})
 				$mapDiv.slideToggle(500, function () {
 					$mapExpander.children('span').text(function () {
 						return $mapDiv.is(":visible") ? "HIDE MAP" : "SHOW MAP";
@@ -231,6 +229,9 @@ OBA.Mobile = (function() {
 
     var resize = function() {
         var w = theWindow.width();
+        var mainbox = jQuery("#mainbox");
+        var topBarDiv = jQuery("#branding");
+    	var bottomBarDiv = jQuery("#footer");
 
         if (w <= 1060) {
             mainbox.css("width", "960px");
