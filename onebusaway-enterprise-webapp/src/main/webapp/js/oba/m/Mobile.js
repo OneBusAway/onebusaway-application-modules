@@ -230,7 +230,7 @@ OBA.Mobile = (function() {
     var resize = function() {
         var w = theWindow.width();
         var mainbox = jQuery("#mainbox");
-        var topBarDiv = jQuery("#branding");
+        var topBarDiv = jQuery("#topbar");
     	var bottomBarDiv = jQuery("#footer");
 
         if (w <= 1060) {
