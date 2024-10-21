@@ -319,7 +319,7 @@ OBA.Sidebar = function() {
 				// If popup.js has specified to expand alerts, that has been taken into account above and we
 				// reset the global state to not expand alerts.
 				if (expandAlerts) {
-					serviceAlertContainer.accordion("activate" , 0);
+					serviceAlertContainer.accordion("option", "active" , 0);
 					expandAlerts = false;
 				}
 				
