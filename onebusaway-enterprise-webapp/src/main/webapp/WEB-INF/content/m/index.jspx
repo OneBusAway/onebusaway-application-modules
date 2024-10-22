@@ -159,7 +159,7 @@
 				<input type="hidden" name="t" id="t" />
 			</s:form>
 			<s:if test="%{results.empty}">
-				<small>Enter a bus stop code, route, or street address.</small>
+				<p><small>Enter a bus stop code, route, or street address.</small></p>
 			</s:if>
 		</div>
 

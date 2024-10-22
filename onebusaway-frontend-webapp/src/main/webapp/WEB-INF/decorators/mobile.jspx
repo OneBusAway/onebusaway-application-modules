@@ -76,8 +76,8 @@
 	</div>
 
 	<decorator:body />
-	
-	<div id="footer">
+
+	<div id="footer" style="position:fixed;bottom:0px;">
     	<p>
 			<s:url var="mobileHelpUrl" namespace="/m/wiki" action="Help/Index"/>	
     		<a href="${mobileHelpUrl}">Help</a> | 
