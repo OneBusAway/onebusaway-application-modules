@@ -247,7 +247,7 @@ OBA.Mobile = (function() {
             var h = theWindow.height() - topBarDiv.height()  - 1;
         }
 
-        jQuery("#mainbox").height(h * 0.5);//only use half of that space
+		jQuery("#mainbox").height(h * 0.5);//only use half of that space
 		jQuery("#mainbox").width(w * 0.92); //match refresh button width
 		jQuery("#map").height(h * 0.5);//only use half of that space
 		jQuery("#map").width(w * 0.92); //match refresh button width
