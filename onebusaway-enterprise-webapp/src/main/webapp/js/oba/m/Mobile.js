@@ -227,28 +227,25 @@ OBA.Mobile = (function() {
         });
     }
 
-    var resize = function() {
+	var resize = function() {
         var w = theWindow.width();
-        var mainbox = jQuery("#mainbox");
-        var topBarDiv = jQuery("#topbar");
-    	var bottomBarDiv = jQuery("#footer");
 
         if (w <= 1060) {
-            mainbox.css("width", "960px");
+			jQuery("#mainbox").css("width", "960px");
         } else {
-            mainbox.css("width", w - 150); // 75px margin on each
+			jQuery("#mainbox").css("width", w - 150); // 75px margin on each
                                            // side for dropdown menus
         }
 
         // Check if bottomBar is enabled and adjust height accordingly
-        if (bottomBarDiv.is(':visible') == true){
-            var h = theWindow.height() - topBarDiv.height() - bottomBarDiv.outerHeight() - 1;
+        if (jQuery("#footer").is(':visible') == true){
+            var h = theWindow.height() - jQuery("#topbar").height() - jQuery("#footer").outerHeight() - 1;
         } else {
-            var h = theWindow.height() - topBarDiv.height()  - 1;
+            var h = theWindow.height() - jQuery("#topbar").height()  - 1;
         }
 
-		jQuery("#mainbox").height(h * 0.5);//only use half of that space
-		jQuery("#mainbox").width(w * 0.92); //match refresh button width
+		jQuery("#mainbox").height(h);
+		jQuery("#mainbox").width(w);
 		jQuery("#map").height(h * 0.5);//only use half of that space
 		jQuery("#map").width(w * 0.92); //match refresh button width
     };
