@@ -236,13 +236,7 @@ OBA.Mobile = (function() {
 			jQuery("#mainbox").css("width", w - 150); // 75px margin on each
                                            // side for dropdown menus
         }
-
-        // Check if bottomBar is enabled and adjust height accordingly
-        if (jQuery("#footer").is(':visible') == true){
-            var h = theWindow.height() - jQuery("#topbar").height() - jQuery("#footer").outerHeight() - 1;
-        } else {
-            var h = theWindow.height() - jQuery("#topbar").height()  - 1;
-        }
+		var h = theWindow.height() - jQuery("#topbar").height()  - 1;
 
 		jQuery("#mainbox").height(h);
 		jQuery("#mainbox").width(w);
