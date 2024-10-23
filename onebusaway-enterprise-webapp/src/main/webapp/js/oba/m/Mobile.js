@@ -16,46 +16,46 @@
 var OBA = window.OBA || {};
 
 OBA.Mobile = (function() {
-    var expandAlerts = false;
+	var expandAlerts = false;
 
-    var theWindow = jQuery(window);
-    var routeMap = null;
+	var theWindow = jQuery(window);
+	var routeMap = null;
 	var locationField = null;
 	var typeField = null;
 	var refreshBar = null;
 	var defaultTimeout = OBA.Config.refreshInterval;
-	
+
 	function addAutocompleteBehavior() {
-		
+
 		var searchForm = jQuery("#searchPanel form");
 		var searchInput = jQuery("#searchPanel form input[type=text]");
-		
+
 		searchInput.autocomplete({
 			source: "../" + OBA.Config.autocompleteUrl,
 			select: function(event, ui) {
-		        if(ui.item){
-		        	searchInput.val(ui.item.value);
-		        	searchForm.trigger("submit");
-		        }
-		    }
+				if(ui.item){
+					searchInput.val(ui.item.value);
+					searchForm.trigger("submit");
+				}
+			}
 		});
-		
+
 		// Close the autocomplete list when the form is submitted
 		searchForm.on("submit", function() {
 			searchInput.autocomplete("close");
 			return true;
 		});
 	}
-	
+
 	function addRefreshBehavior() {
 		// refresh button logic
 		refreshBar = jQuery("#refresh")
-					.css("position", "relative")
-					.css("right", "20")
-					.css("left", "12");
+			.css("position", "relative")
+			.css("right", "20")
+			.css("left", "12");
 
 		var refreshTimestamp = refreshBar
-								.find("strong");
+			.find("strong");
 
 		var titleText = refreshBar.find("a");
 		// only refresh if a single search result
@@ -80,15 +80,15 @@ OBA.Mobile = (function() {
 					});
 			});
 		}
-				
+
 		// scrolling/fixed refresh bar logic
 		var contentDiv = jQuery("#content")
-							.css("padding-top", refreshBar.height() * 0.1);
+			.css("padding-top", refreshBar.height() * 0.1);
 
 		var topLimit = contentDiv.offset().top + (refreshBar.height() * 0.25) - 20;
-		
+
 		jQuery("body")
-					.css("position", "relative");
+			.css("position", "relative");
 
 		var theWindow = jQuery(window);
 		var repositionRefreshBar = function() {
@@ -97,39 +97,39 @@ OBA.Mobile = (function() {
 			if(top < topLimit) {
 				top = topLimit;
 			}
-			
+
 			// refreshBar.css("top", top + 3);
 		};
 		repositionRefreshBar();
-		
+
 		theWindow.scroll(repositionRefreshBar)
-					.on("resize", repositionRefreshBar);
-		
+			.on("resize", repositionRefreshBar);
+
 		setTimeout(refreshContent, defaultTimeout);
 	}
-	
+
 	function initLocationUI() {
 		jQuery("#submitButton").removeClass("loading");
-		
+
 		var searchPanelForm = jQuery("#searchPanel form");
-		
+
 		var splitButton = jQuery("<div></div>").attr("id", "nearby-button-bar");
-		
+
 		var nearbyStopsBtn = jQuery("<div></div>").attr("id", "nearby-stops-button")
 			.attr("aria-label", "Find nearby stops using GPS").attr("tabindex", 0)
 			.addClass("nearby-button").appendTo(splitButton);
-		
+
 		var nearbyRoutesBtn = jQuery("<div></div>").attr("id", "nearby-routes-button")
 			.attr("aria-label", "Find nearby routes using GPS").attr("tabindex", 0)
 			.addClass("nearby-button").appendTo(splitButton);
-		
+
 		nearbyStopsBtn.append(jQuery("<div></div>").attr("id", "nearby-stops-button-icon")
-				.append(jQuery("<span></span>").addClass("nearby-text").text("Nearby Stops")));
+			.append(jQuery("<span></span>").addClass("nearby-text").text("Nearby Stops")));
 		nearbyRoutesBtn.append(jQuery("<div></div>").attr("id", "nearby-routes-button-icon")
-				.append(jQuery("<span></span>").addClass("nearby-text").text("Nearby Routes")));
-		
+			.append(jQuery("<span></span>").addClass("nearby-text").text("Nearby Routes")));
+
 		searchPanelForm.before(splitButton);
-				
+
 		$( ".nearby-button" ).mousedown(function() {
 			// change other button to mouse up
 			if (jQuery(this).attr("id") === "nearby-stops-button") {
@@ -139,7 +139,7 @@ OBA.Mobile = (function() {
 			}
 			jQuery(this).addClass("down");
 		});
-		
+
 		$( ".nearby-button" ).mouseup(function() {
 			if (jQuery(this).attr("id") === "nearby-stops-button") {
 				typeField.val("stops");
@@ -149,7 +149,7 @@ OBA.Mobile = (function() {
 			queryByLocation();
 		});
 	};
-	
+
 	// event when user turns on location
 	function queryByLocation() {
 		// show "finding location" message button to user while 
@@ -158,28 +158,28 @@ OBA.Mobile = (function() {
 		jQuery(".q").attr("placeholder", "Finding your location...");
 
 		navigator.geolocation.getCurrentPosition(function(location) {
-			
+
 			jQuery(".q").attr("placeholder", "Searching...");
 
 			// update search field
 			if(locationField !== null) {
 				locationField.val(location.coords.latitude + "," + location.coords.longitude);
 			}
-			
+
 			var searchPanelForm = jQuery("#searchPanel form");
-			
+
 			searchPanelForm.find(".q").val("");
 			searchPanelForm.trigger("submit");
-			
+
 		}, function() {
 			alert("Unable to determine your location.");
 			jQuery(".nearby-button").removeClass("down");
 			jQuery("#submitButton").removeClass("loading");
 			jQuery(".q").removeAttr("placeholder");
-			
+
 		});
 	};
-	
+
 	function refreshContent() {
 		refreshBar.find("a").trigger("click");
 		setTimeout(refreshContent, defaultTimeout);
@@ -201,67 +201,69 @@ OBA.Mobile = (function() {
 				});
 			});
 		}
-    }
+	}
 
 	function updateServiceAlertHeaderText() {
 		$('#serviceAlertHeader span').html("<strong>" + OBA.Config.serviceAlertText + ":</strong>");
 	}
 
-    function addRoutesToLegend(routeResults, title, filter, stopId) {
+	function addRoutesToLegend(routeResults, title, filter, stopId) {
 
-        var filterExistsInResults = false;
+		var filterExistsInResults = false;
 
-        jQuery.each(routeResults, function(_, routeResult) {
-            if (routeResult.shortName === filter) {
-                filterExistsInResults = true;
-                return false;
-            }
-        });
+		jQuery.each(routeResults, function(_, routeResult) {
+			if (routeResult.shortName === filter) {
+				filterExistsInResults = true;
+				return false;
+			}
+		});
 
-        jQuery.each(routeResults, function(_, routeResult) {
+		jQuery.each(routeResults, function(_, routeResult) {
 
-            if (!filter || routeResult.shortName === filter || !filterExistsInResults) {
-                // add to map
-                routeMap.addRoute(routeResult);
-            }
-        });
-    }
+			if (!filter || routeResult.shortName === filter || !filterExistsInResults) {
+				// add to map
+				routeMap.addRoute(routeResult);
+			}
+		});
+	}
 
-    var resize = function() {
-        var w = theWindow.width();
-        var mainbox = jQuery("#mainbox");
-        var topBarDiv = jQuery("#topbar");
-    	var bottomBarDiv = jQuery("#footer");
+	var resize = function() {
+		var w = theWindow.width();
+		var mainbox = jQuery("#mainbox");
+		var topBarDiv = jQuery("#topbar");
+		var bottomBarDiv = jQuery("#footer");
 
-        if (w <= 1060) {
-            mainbox.css("width", "960px");
-        } else {
-            mainbox.css("width", w - 150); // 75px margin on each
-                                           // side for dropdown menus
-        }
+		if (w <= 1060) {
+			mainbox.css("width", "960px");
+		} else {
+			mainbox.css("width", w - 150); // 75px margin on each
+										   // side for dropdown menus
+		}
 
-        // Check if bottomBar is enabled and adjust height accordingly
-        if (bottomBarDiv.is(':visible') == true){
-            var h = theWindow.height() - topBarDiv.height() - bottomBarDiv.outerHeight() - 1;
-        } else {
-            var h = theWindow.height() - topBarDiv.height()  - 1;
-        }
+		// Check if bottomBar is enabled and adjust height accordingly
+		if (bottomBarDiv.is(':visible') == true){
+			var h = theWindow.height() - topBarDiv.height() - bottomBarDiv.outerHeight() - 1;
+		} else {
+			var h = theWindow.height() - topBarDiv.height()  - 1;
+		}
 
-        jQuery("#map").height(h * 0.5);//only use half of that space
+		jQuery("#mainbox").height(h * 0.5);//only use half of that space
+		jQuery("#mainbox").width(w * 0.92); //match refresh button width
+		jQuery("#map").height(h * 0.5);//only use half of that space
 		jQuery("#map").width(w * 0.92); //match refresh button width
-    };
+	};
 
-    function addResizeBehavior() {
+	function addResizeBehavior() {
 
-        resize();
+		resize();
 
-        // call when the window is resized
-        theWindow.on("resize", resize);
-    }
+		// call when the window is resized
+		theWindow.on("resize", resize);
+	}
 
-    function updateMap() {
-        var q = jQuery(".q").val();
-        if (q != '' && q != null && $('#map').is(":visible")) {
+	function updateMap() {
+		var q = jQuery(".q").val();
+		if (q != '' && q != null && $('#map').is(":visible")) {
 
 			var searchResponse = jQuery.getJSON(OBA.Config.searchUrl + "?callback=?", {q: q}, function (json) {
 
@@ -274,20 +276,20 @@ OBA.Mobile = (function() {
 					routeFilterShortName = routeFilter[0].shortName;
 				}
 
-                // Get stopIds for coloring stops in RouteMap.js
-                var stopsOnRoutes = { stops:[] };
+				// Get stopIds for coloring stops in RouteMap.js
+				var stopsOnRoutes = { stops:[] };
 
-                jQuery.each(matches, function(_, match) {
-                    if (match.stopIdsForRoute) {
-                        jQuery.each(match.stopIdsForRoute, function (_, stop) {
-                            if (stopsOnRoutes.stops.length < 1 || stopsOnRoutes.stops.indexOf(stop.id) === -1) {
-                                stopsOnRoutes.stops.push(stop);
-                            }
-                        });
-                    }
-                });
+				jQuery.each(matches, function(_, match) {
+					if (match.stopIdsForRoute) {
+						jQuery.each(match.stopIdsForRoute, function (_, stop) {
+							if (stopsOnRoutes.stops.length < 1 || stopsOnRoutes.stops.indexOf(stop.id) === -1) {
+								stopsOnRoutes.stops.push(stop);
+							}
+						});
+					}
+				});
 
-                jQuery("body").data( "savedData", stopsOnRoutes);
+				jQuery("body").data( "savedData", stopsOnRoutes);
 
 				var showPopup = false;//don't want popup to show up initially
 
@@ -340,24 +342,24 @@ OBA.Mobile = (function() {
 				window.location.search = queryString;
 				return;
 			}
-			
+
 			if(navigator.geolocation) {
 				initLocationUI();
-			}			
-			
+			}
+
 			addRefreshBehavior();
 			addAutocompleteBehavior();
 			addMapBehaviour();
-            addResizeBehavior();
+			addResizeBehavior();
 
-            updateServiceAlertHeaderText();
+			updateServiceAlertHeaderText();
 
-            $("#all-routes-button").on("click", function() {
-                window.location = OBA.Config.urlPrefix + "m/routes/index";
-            });
+			$("#all-routes-button").on("click", function() {
+				window.location = OBA.Config.urlPrefix + "m/routes/index";
+			});
 
-            // initialize map, and continue initialization of things that use the map
-            // on load only when google maps says it's ready.
+			// initialize map, and continue initialization of things that use the map
+			// on load only when google maps says it's ready.
 			var mapElement = document.getElementById("map");
 			if (mapElement !== null) {
 				routeMap = OBA.RouteMap(mapElement, function() {
@@ -367,7 +369,7 @@ OBA.Mobile = (function() {
 				}, function(routeId, serviceAlerts) { // service alert notification handler
 				});
 
-			$('#map').hide();
+				$('#map').hide();
 			}
 
 
