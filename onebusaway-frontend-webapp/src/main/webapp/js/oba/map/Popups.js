@@ -214,7 +214,7 @@ OBA.Popups = (function() {
 						500,
 						function() {
 							if (alertElement.accordion("option", "active") !== 0) {
-								alertElement.accordion("activate" , 0);
+								alertElement.accordion("option", "active" , 0);
 							} else {
 								alertElement.animate(
 									{ opacity : 0 },
