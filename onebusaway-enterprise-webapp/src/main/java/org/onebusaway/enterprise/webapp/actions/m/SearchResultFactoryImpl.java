@@ -489,11 +489,11 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
   }
 
 
-  private String getApcModeOccupancy(MonitoredVehicleJourneyStructure journey, boolean showIcons) {
+  private String getApcModeOccupancy(MonitoredVehicleJourneyStructure journey, boolean showText) {
 
     if (journey.getOccupancy() != null) {
       String stylePrefix = "apcDot";
-      if (showIcons) {
+      if (!showText) {
         stylePrefix = "weeble";
       }
       String loadOccupancy = journey.getOccupancy().toString();
@@ -502,19 +502,19 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
       if (loadOccupancy.equals(OccupancyEnumeration.SEATS_AVAILABLE.name()) || loadOccupancy.equals(OccupancyStatus.MANY_SEATS_AVAILABLE.name())) {
         String occupancyText = getOccupancyString(OccupancyEnumeration.SEATS_AVAILABLE.name());
         loadOccupancy = "<div class='apcLadderContainer' title='" + occupancyText + "' aria-label='" + occupancyText + "'><span class='" + stylePrefix + "G'></span>";
-        if (!showIcons)
+        if (showText)
           loadOccupancy += "<span class='apcTextG'>" + occupancyText + "</span>";
         loadOccupancy += "</div>";
       } else if (loadOccupancy.equals(OccupancyEnumeration.STANDING_AVAILABLE.name()) || loadOccupancy.equals(OccupancyStatus.FEW_SEATS_AVAILABLE.name())) {
         String occupancyText = getOccupancyString(OccupancyEnumeration.STANDING_AVAILABLE.name());
         loadOccupancy = "<div class='apcLadderContainer' title='" + occupancyText + "' aria-label='" + occupancyText + "'><span class='" + stylePrefix + "Y'></span>";
-        if (!showIcons)
+        if (showText)
           loadOccupancy += "<span class='apcTextY'>" + getOccupancyString(OccupancyEnumeration.STANDING_AVAILABLE.name()) + "</span></div>";
         loadOccupancy += "</div>";
       } else if (loadOccupancy.equals(OccupancyEnumeration.FULL.name()) || loadOccupancy.equals(OccupancyStatus.FULL.name())) {
         String occupancyText = getOccupancyString(OccupancyEnumeration.FULL.name());
         loadOccupancy = "<div class='apcLadderContainer' title='" + occupancyText + "' aria-label='" + occupancyText + "'><span class='" + stylePrefix + "R'></span>";
-        if (!showIcons)
+        if (showText)
           loadOccupancy +="<span class='apcTextR'>" + getOccupancyString(OccupancyEnumeration.FULL.name()) + "</span></div>";
         loadOccupancy += "</div>";
       }
