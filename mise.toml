@@ -1,0 +1,3 @@
+[tools]
+java = 'temurin-11'
+maven = '3'
