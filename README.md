@@ -4,6 +4,7 @@ A project of the non-profit [Open Transit Software Foundation](https://opentrans
 
 The OneBusAway application suite's primary function is to share real-time public transit information with riders across a variety of interfaces:
 
+  * [Wayfinder](https://github.com/onebusAway/wayfinder) - A high-performance web application built with with the SvelteKit JavaScript web app framework
   * [OneBusAway Web](http://pugetsound.onebusaway.org/) - A variety of web interfaces to transit data
     * A standard web interface to transit data, including maps and stop pages with real-time info
     * [Sign-mode](https://github.com/OneBusAway/onebusaway-application-modules/wiki/Sign-Mode) - Same information as the standard web interface, but in a large format for large displays (e.g., large televisions)
@@ -12,16 +13,8 @@ The OneBusAway application suite's primary function is to share real-time public
   * [OneBusAway REST API]( https://developer.onebusaway.org/api/where) - A RESTful web-service that can be used to quickly write applications built on top of transit data. This API powers the following apps:
     * [OneBusAway iOS (iPhone)](https://github.com/OneBusAway/onebusaway-ios)
     * [OneBusAway Android](https://github.com/OneBusAway/onebusaway-android)
-    * [OneBusAway Windows Phone](https://github.com/OneBusAway/onebusaway-windows-phone)
-    * [OneBusAway Windows 8](https://github.com/OneBusAway/onebusaway-windows8)
-    * [OneBusAway Windows 10 (under development)](https://github.com/OneBusAway/onebusaway-windows10)
-    * [OneBusAway Fire Phone (based on Android)](https://github.com/OneBusAway/onebusaway-android)
     * [OneBusAway Alexa (for Amazon Echo, etc.)](https://github.com/OneBusAway/onebusaway-alexa)
-    * [OneBusAway Glassware (for Google Glass)](https://github.com/OneBusAway/onebusaway-android/pull/219)
-    * [OneBusAway for Pebble Smartwatch](https://github.com/onebusaway/onebusaway-pebbletime)
   * [OneBusAway GTFS-realtime export](http://developer.onebusaway.org/modules/onebusaway-application-modules/current-SNAPSHOT/api/gtfs-realtime.html) - A bulk export of all trip updates (predictions), vehicle positions, and service alerts for a transit system in the [GTFS-realtime format](https://developers.google.com/transit/gtfs-realtime/).
-  * [OneBusAway Phone](https://github.com/OneBusAway/onebusaway-application-modules/wiki/OneBusAway-Phone-and-SMS) - A Interactive Voice Response (IVR) phone application for accessing real-time transit information
-  * [OneBusAway SMS](https://github.com/OneBusAway/onebusaway-application-modules/wiki/OneBusAway-Phone-and-SMS) - An SMS service for accessing real-time transit information
   * [OneBusAway Watchdog](https://github.com/OneBusAway/onebusaway-application-modules/wiki/OneBusAway-Watchdog) - A module hosting webservices for monitoring realtime data
 
 Watch the [YouTube video](http://www.youtube.com/watch?v=CBctcyE7Am4&feature=player_embedded) for more information.
@@ -49,7 +42,7 @@ There are two options for setting up your own OneBusAway instance:
 
 ```sh
 docker compose up builder
-docker compose exec builder bash # in another shell, for now
+docker compose exec builder bash # from another window or tab
 ./build.sh --help # acquaint yourself with the build.sh options
 ./build.sh --clean --check-updates --test
 
@@ -80,15 +73,13 @@ Finally, verify that everything works as expected!
 * Check out the Tomcat Web App Manager at http://localhost:8080/manager/html (user/pass: admin/admin) to verify that your OBA WARs deployed correctly
 * Check out the config.json API endpoint to verify that everything built correctly: http://localhost:8080/onebusaway-api-webapp/api/where/config.json?key=test
 
-
-## Status
+## Deploy OneBusAway
 
 * Download pre-built JARs and WARs: https://developer.onebusaway.org/downloads
 * Terraform/Open Tofu/Infrastructure as Code: https://github.com/onebusaway/onebusaway-deployment
 * Docker
   * Pre-built images: https://hub.docker.com/r/opentransitsoftwarefoundation/
   * Instructions: https://github.com/onebusAway/onebusaway-docker
-
 
 ## Deployments
 
@@ -104,6 +95,19 @@ Check out the full list on the [OneBusAway Deployments page](https://github.com/
 
 * [Latest Stable Release](https://developer.onebusaway.org/downloads)
 
+## Build and Deploy OBA Artifacts to Maven Central
+
+1. Set up your environment, including GPG
+   * [Maven Central documentation](https://central.sonatype.org/publish/requirements/gpg/)
+   * [Some helpful information elided by Sonatype](https://www.swissarmyronin.dk/Miscellaneous/Gpg-maven/)
+2. Run the command `mvn deploy -DskipTests`
+3. Upload the Zip file at `./target/central-publishing/central-bundle.zip` to [Maven Central's publishing page](https://central.sonatype.com/publishing/deployments).
+    * The Zip file is about 600MB in size. Be sure to have a fast, reliable connection. 
+
+Open questions and issues:
+
+* I haven't figured out why I cannot get the `mvn deploy` command to upload to Maven Central automatically.
+* We need to automate deployment to Maven Central via GitHub Actions eventually, too.
 
 ## Developer Information
 
