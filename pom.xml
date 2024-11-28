@@ -12,6 +12,24 @@
     <description>The core OneBusAway application suite.</description>
     <url>https://github.com/onebusaway/onebusaway-application-modules/wiki/</url>
 
+    <developers>
+        <developer>
+            <id>aaronbrethorst</id>
+            <name>Aaron Brethorst</name>
+            <email>aaron@onebusaway.org</email>
+            <organization>OneBusAway</organization>
+            <organizationUrl>https://www.onebusaway.org</organizationUrl>
+        </developer>
+    </developers>
+
+    <licenses>
+        <license>
+            <name>Apache 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
     <!-- Common Software Dependency Versions -->
     <properties>
         <asm-version>8.0.1</asm-version>
@@ -89,7 +107,6 @@
         </pluginRepository>
     </pluginRepositories>
 
-
     <issueManagement>
         <system>GitHub</system>
         <url>https://github.com/OneBusAway/onebusaway-application-modules/issues</url>
@@ -97,31 +114,20 @@
 
     <!-- releases and snapshots should be inherited -->
     <modules>
-        <module>onebusaway-admin-webapp</module>
         <module>onebusaway-agency-metadata</module>
         <module>onebusaway-api-core</module>
         <module>onebusaway-api-webapp</module>
-        <module>onebusaway-combined-webapp</module>
         <module>onebusaway-container</module>
         <module>onebusaway-core</module>
-        <module>onebusaway-enterprise-acta-webapp</module>
-        <module>onebusaway-enterprise-webapp</module>
         <module>onebusaway-federations</module>
         <module>onebusaway-federations-webapp</module>
-        <module>onebusaway-frontend-webapp</module>
         <module>onebusaway-geocoder</module>
         <module>onebusaway-geospatial</module>
         <module>onebusaway-gtfs-hibernate-spring</module>
         <module>onebusaway-gtfs-realtime-archiver</module>
         <module>onebusaway-gtfs-realtime-model</module>
-        <module>onebusaway-gwt-common</module>
-        <module>onebusaway-nextbus-api-webapp</module>
-        <module>onebusaway-phone</module>
-        <module>onebusaway-phone-webapp</module>
         <module>onebusaway-twilio-webapp</module>
         <module>onebusaway-presentation</module>
-        <!--    <module>onebusaway-quickstart</module>--> <!-- deprecated -->
-        <module>onebusaway-sms-webapp</module>
         <module>onebusaway-realtime-api</module>
         <module>onebusaway-transit-data</module>
         <module>onebusaway-transit-data-federation</module>
@@ -131,9 +137,22 @@
         <module>onebusaway-util</module>
         <module>onebusaway-alerts-persistence</module>
         <module>onebusaway-watchdog-webapp</module>
-        <!--        <module>onebusaway-status-agent</module>-->
         <module>onebusaway-alerts-api</module>
         <module>onebusaway-gtfsrt-integration-tests</module>
+
+        <!-- Disabled Modules: These are deprecated and should be removed. -->
+<!--        <module>onebusaway-admin-webapp</module>-->
+<!--        <module>onebusaway-combined-webapp</module>-->
+<!--        <module>onebusaway-enterprise-acta-webapp</module>-->
+<!--        <module>onebusaway-enterprise-webapp</module>-->
+<!--        <module>onebusaway-frontend-webapp</module>-->
+<!--        <module>onebusaway-gwt-common</module>-->
+<!--        <module>onebusaway-nextbus-api-webapp</module>-->
+<!--        <module>onebusaway-phone</module>-->
+<!--        <module>onebusaway-phone-webapp</module>-->
+<!--        <module>onebusaway-quickstart</module>-->
+<!--        <module>onebusaway-sms-webapp</module>-->
+<!--        <module>onebusaway-status-agent</module>-->
     </modules>
 
     <!-- This is where we control the master dependency version used by all modules -->
@@ -411,9 +430,8 @@
                       as an official part of Eclipse, m2e introduced the concept of Lifecycle Mappings for Maven plugins:
                         http://wiki.eclipse.org/M2E_plugin_execution_not_covered
                       This basically means that every Maven plugin needs to have explicit behavior defined about how it
-                      should be integrated integrated into the Eclipse build cycle.  Many plugins already have mappings
-                    defined
-                      by defined, but some don't.  We define those lifecycle mappings below.
+                      should be integrated into the Eclipse build cycle.  Many plugins already have mappings defined
+                      by default, but some don't.  We define those lifecycle mappings below.
                     -->
                     <groupId>org.eclipse.m2e</groupId>
                     <artifactId>lifecycle-mapping</artifactId>
