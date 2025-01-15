@@ -21,7 +21,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Map.Entry;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 
 import com.google.transit.realtime.GtfsRealtimeCrowding;
@@ -45,7 +46,6 @@ import org.onebusaway.transit_data_federation.services.blocks.ScheduledBlockLoca
 import org.onebusaway.transit_data_federation.services.transit_graph.*;
 import org.onebusaway.transit_data_federation.services.transit_graph.dynamic.DynamicTripEntryImpl;
 import org.onebusaway.util.AgencyAndIdLibrary;
-import org.onebusaway.util.SystemTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -160,7 +160,8 @@ public class GtfsRealtimeTripLibrary {
   }
 
   public List<CombinedTripUpdatesAndVehiclePosition> groupTripUpdatesAndVehiclePositions(MonitoredResult result,
-                                                                                         FeedMessage tripUpdateMessage, FeedMessage vehiclePositionsMessage) {
+                                                                                         FeedMessage tripUpdateMessage,
+                                                                                         FeedMessage vehiclePositionsMessage) {
     try {
       return groupTripUpdatesAndVehiclePositionsInternal(result, tripUpdateMessage, vehiclePositionsMessage);
     } catch (Throwable t) {
@@ -892,225 +893,341 @@ public class GtfsRealtimeTripLibrary {
   }
 
   
-  private void applyTripUpdatesToRecord(MonitoredResult result, BlockDescriptor blockDescriptor,
-      List<TripUpdate> tripUpdates, VehicleLocationRecord record, String vehicleId) {
+  private void applyTripUpdatesToRecord(MonitoredResult result,
+                                        BlockDescriptor blockDescriptor,
+                                        List<TripUpdate> tripUpdates,
+                                        VehicleLocationRecord record,
+                                        String vehicleId) {
     try {
-      BlockInstance instance = blockDescriptor.getBlockInstance();
+      BlockInstance blockInstance = blockDescriptor.getBlockInstance();
 
-      BlockConfigurationEntry blockConfiguration = instance.getBlock();
+      BlockConfigurationEntry blockConfiguration = blockInstance.getBlock();
       List<BlockTripEntry> blockTrips = blockConfiguration.getTrips();
-      Map<String, List<TripUpdate>> tempTripUpdatesByTripId = MappingLibrary.mapToValueList(
-              tripUpdates, "trip.tripId");
-      Map<String, List<TripUpdate>> tripUpdatesByTripId = new HashMap<>();
-      // if we have fuzzy matching enabled
-      if (this._entitySource.getTripIdRegexes() != null) {
-        for (String existingTripId : tempTripUpdatesByTripId.keySet()) {
-          String newTripId = existingTripId;
-          for (String tripIdRegex : this._entitySource.getTripIdRegexes()) {
-              newTripId = newTripId.replaceAll(tripIdRegex, "");
-            }
-          AgencyAndId keyAndId = fuzzyMatchTripId(new AgencyAndId(instance.getBlock().getBlock().getId().getAgencyId(), newTripId));
-          if (keyAndId != null) {
-            tripUpdatesByTripId.put(keyAndId.getId(), tempTripUpdatesByTripId.get(existingTripId));
-          }
-        }
-      } else {
-        // no fuzzy matching, copy the reference
-        tripUpdatesByTripId = tempTripUpdatesByTripId;
-      }
+      long serviceDate = blockInstance.getServiceDate();
 
-      long t = _currentTime;
-      int currentTime = (int) ((t - instance.getServiceDate()) / 1000);
+      Map<String, List<TripUpdate>> tripUpdatesByTripId = mapPotentialTripIdsToTripUpdates(tripUpdates, blockInstance);
+
+
       // best is just used to calculate instantaneous schedule deviation
       // it no longer selects the "best trip"
-      BestScheduleDeviation best = new BestScheduleDeviation();
+      BestScheduleDeviation instantaneousScheduleDeviation = new BestScheduleDeviation();
       long lastStopScheduleTime = Long.MIN_VALUE;
       boolean singleTimepointRecord = false;
 
       List<TimepointPredictionRecord> timepointPredictions = new ArrayList<TimepointPredictionRecord>();
+      AtomicBoolean hasNonSkippedStops = new AtomicBoolean(false);
 
+      // Get TimepointPredictions for all trips on block
       for (BlockTripEntry blockTrip : blockTrips) {
         TripEntry trip = blockTrip.getTrip();
         AgencyAndId tripId = trip.getId();
+
+        List<BlockStopTimeEntry> blockTripStopTimes = blockTrip.getStopTimes();
         List<TripUpdate> updatesForTrip = tripUpdatesByTripId.get(tripId.getId());
 
         if (updatesForTrip != null) {
           for (TripUpdate tripUpdate : updatesForTrip) {
-
-            if (tripUpdate.hasDelay()) {
-              // if we have delay assume that is our schedule deviation
-              best.delta = 0;
-              best.isInPast = false;
-              best.scheduleDeviation = tripUpdate.getDelay();
-              best.tripId = tripId;
-              best.tripUpdateHasDelay = true;
-            }
-            if (tripUpdate.hasTimestamp()) {
-              best.timestamp = ensureMillis(tripUpdate.getTimestamp());
-            }
-
-            if (tripId != null) {
-              best.isCanceled = tripUpdate.getTrip().getScheduleRelationship().equals(TripDescriptor.ScheduleRelationship.CANCELED);
-              record.setStatus(tripUpdate.getTrip().getScheduleRelationship().toString());
-              _log.debug("schedule=" + tripUpdate.getTrip().getScheduleRelationship() + "; isCanceled=" + best.isCanceled);
-            }
-
-            for (StopTimeUpdate stopTimeUpdate : tripUpdate.getStopTimeUpdateList()) {
-              BlockStopTimeEntry blockStopTime = getBlockStopTimeForStopTimeUpdate(result,
-                      tripUpdate, stopTimeUpdate, blockTrip.getStopTimes(),
-                      instance.getServiceDate());
-
-              // loop through and store last stop time on trip
-              List<BlockStopTimeEntry> stopTimes = blockTrip.getStopTimes();
-              for (BlockStopTimeEntry bste : stopTimes) {
-                long scheduleTime = instance.getServiceDate() + bste.getStopTime().getArrivalTime() * 1000;
-                if (scheduleTime > lastStopScheduleTime) {
-                  lastStopScheduleTime = scheduleTime;
-                }
-              }
-
-              if (blockStopTime == null)
-                continue;
-
-              StopTimeEntry stopTime = blockStopTime.getStopTime();
-
-              TimepointPredictionRecord tpr = new TimepointPredictionRecord();
-              tpr.setTimepointId(stopTime.getStop().getId());
-              tpr.setTripId(stopTime.getTrip().getId());
-              if (!stopTimeUpdate.getScheduleRelationship().equals(StopTimeUpdate.ScheduleRelationship.SKIPPED)) {
-                tpr.setTimepointScheduledTime(instance.getServiceDate() + stopTime.getArrivalTime() * 1000);
-              }
-              if (stopTimeUpdate.hasStopSequence()) {
-                tpr.setStopSequence(stopTimeUpdate.getStopSequence());
-              }
-              if (stopTimeUpdate.getScheduleRelationship().equals(StopTimeUpdate.ScheduleRelationship.SKIPPED)) {
-                tpr.setScheduleRealtionship(StopTimeUpdate.ScheduleRelationship.SKIPPED_VALUE); // set tpr scheduleRelationship enum to SKIPPED
-                timepointPredictions.add(tpr);
-                _log.debug("SKIPPED stop:" + tpr.getTimepointId() + "  seq: " + tpr.getStopSequence() + " trip: " + tpr.getTripId());
-              } else {
-                tpr.setScheduleRealtionship(StopTimeUpdate.ScheduleRelationship.SCHEDULED_VALUE);
-              }
-
-              if (!stopTimeUpdate.getScheduleRelationship().equals(StopTimeUpdate.ScheduleRelationship.SKIPPED)) {
-                int currentArrivalTime = computeArrivalTime(stopTime,
-                        stopTimeUpdate, instance.getServiceDate());
-                int currentDepartureTime = computeDepartureTime(stopTime,
-                        stopTimeUpdate, instance.getServiceDate());
-
-                if (currentArrivalTime >= 0) {
-                  updateBestScheduleDeviation(currentTime,
-                          stopTime.getArrivalTime(), currentArrivalTime, best, tripId, vehicleId);
-
-                  long timepointPredictedTime = instance.getServiceDate() + (currentArrivalTime * 1000L);
-                  tpr.setTimepointPredictedArrivalTime(timepointPredictedTime);
-                }
-
-                if (currentDepartureTime >= 0) {
-                  updateBestScheduleDeviation(currentTime,
-                          stopTime.getDepartureTime(), currentDepartureTime, best, tripId, vehicleId);
-
-                  long timepointPredictedTime = instance.getServiceDate() + (currentDepartureTime * 1000L);
-                  tpr.setTimepointPredictedDepartureTime(timepointPredictedTime);
-                }
-
-                if (tpr.getTimepointPredictedArrivalTime() != -1 ||
-                        tpr.getTimepointPredictedDepartureTime() != -1) {
-                  // we finally consume timepoints across the block
-                  timepointPredictions.add(tpr);
-                }
-
-                if (stopTimeUpdate.hasExtension(GtfsRealtimeNYCT.nyctStopTimeUpdate)) {
-                  GtfsRealtimeNYCT.NyctStopTimeUpdate ext = stopTimeUpdate.getExtension(GtfsRealtimeNYCT.nyctStopTimeUpdate);
-                  if (ext.hasScheduledTrack()) {
-                    tpr.setScheduledTrack(ext.getScheduledTrack());
-                  }
-                  if (ext.hasActualTrack()) {
-                    tpr.setActualTrack(ext.getActualTrack());
-                  }
-                }
-                if (stopTimeUpdate.hasExtension(GtfsRealtimeMTARR.mtaRailroadStopTimeUpdate)) {
-                  GtfsRealtimeMTARR.MtaRailroadStopTimeUpdate ext = stopTimeUpdate.getExtension(GtfsRealtimeMTARR.mtaRailroadStopTimeUpdate);
-                  if (ext.hasTrack()) {
-                    tpr.setActualTrack(ext.getTrack());
-                  }
-                  if (ext.hasTrainStatus()) {
-                    tpr.setStatus(ext.getTrainStatus());
-                  }
-                }
-
-              } // end not skipped
-            }
+            updateScheduleDeviation(instantaneousScheduleDeviation, tripUpdate, tripId);
+            updateRecordWithTripStatus(record, tripUpdate, tripId);
+            addTimepointPredictionForTrip(timepointPredictions, tripUpdate, result, instantaneousScheduleDeviation,
+                    blockTripStopTimes, tripId, vehicleId, lastStopScheduleTime, serviceDate, hasNonSkippedStops);
           }
         }
 
+        singleTimepointRecord = isSingleTimepointRecord(timepointPredictions, tripUpdates);
 
-        if (timepointPredictions.size() == 1 && tripUpdates.get(0).getStopTimeUpdateList().size() == 1) {
-          singleTimepointRecord = true;
-        }
         // If we have a TripUpdate delay and timepoint predictions, interpolate
         // timepoint predictions for close, unserved stops. See GtfsRealtimeTripLibraryTest
         // for full explanation
         // best.tripUpdateHasDelay = true => best.scheduleDeviation is TripUpdate delay
-        if ((timepointPredictions.size() > 0 && best.tripUpdateHasDelay)
-                || singleTimepointRecord) {
-          Set<AgencyAndId> records = new HashSet<AgencyAndId>();
-          for (TimepointPredictionRecord tpr : timepointPredictions) {
-            records.add(tpr.getTimepointId());
-          }
-          long tprStartTime = getEarliestTimeInRecords(timepointPredictions);
-          for (StopTimeEntry stopTime : trip.getStopTimes()) {
-            if (records.contains(stopTime.getStop().getId())) {
-              continue;
-            }
-            long predictionOffset = instance.getServiceDate() + (best.scheduleDeviation * 1000L);
-            long predictedDepartureTime = (stopTime.getDepartureTime() * 1000L) + predictionOffset;
-            long predictedArrivalTime = (stopTime.getArrivalTime() * 1000L) + predictionOffset;
-            long scheduledArrivalTime = instance.getServiceDate() + stopTime.getArrivalTime() * 1000;
-            long time = best.timestamp != 0 ? best.timestamp : _currentTime;
-
-            /*
-             * if the timpepointrecord needs interpolated (one before, one after),
-             * OR
-             * we have a single Timepoint record and the arrival is
-             * in the future and before the last stop
-             */
-            if ((predictedDepartureTime > time && predictedDepartureTime < tprStartTime)
-                    || (singleTimepointRecord
-                    && (predictedDepartureTime > time
-                    && scheduledArrivalTime <= lastStopScheduleTime))) {
-              TimepointPredictionRecord tpr = new TimepointPredictionRecord();
-              tpr.setTimepointId(stopTime.getStop().getId());
-              tpr.setTripId(stopTime.getTrip().getId());
-              tpr.setStopSequence(stopTime.getGtfsSequence());
-              tpr.setTimepointPredictedArrivalTime(predictedArrivalTime);
-              tpr.setTimepointPredictedDepartureTime(predictedDepartureTime);
-              tpr.setTimepointScheduledTime(scheduledArrivalTime);
-              tpr.setScheduleRealtionship(StopTimeUpdate.ScheduleRelationship.SCHEDULED_VALUE);
-              timepointPredictions.add(tpr);
-            }
-          }
-        }
+        List<StopTimeEntry> stopTimes = trip.getStopTimes();
+        addTimepointPredictionForTripsWIthTripDelays(timepointPredictions, instantaneousScheduleDeviation,
+                singleTimepointRecord, stopTimes, lastStopScheduleTime, serviceDate);
       }
 
-      record.setServiceDate(instance.getServiceDate());
-      if (blockDescriptor.getStartTime() != null) {
-        record.setBlockStartTime(blockDescriptor.getStartTime());
-      }
-
-      // pass along the schedule relationship as a status
-      if (blockDescriptor.getScheduleRelationship() != null)
-        record.setStatus(blockDescriptor.getScheduleRelationship().toString());
-
-      if (!best.isCanceled)
-        record.setScheduleDeviation(best.scheduleDeviation);
-      if (best.timestamp != 0) {
-        record.setTimeOfRecord(best.timestamp);
-      }
+      updateRecordForTripUpdate(record, timepointPredictions, serviceDate, blockDescriptor,
+              instantaneousScheduleDeviation, hasNonSkippedStops);
 
 
-      record.setTimepointPredictions(timepointPredictions);
     } catch (Throwable t) {
       _log.error("source-exception {}", t, t);
+    }
+  }
+
+  private void updateRecordForTripUpdate(VehicleLocationRecord record,
+                                         List<TimepointPredictionRecord> timepointPredictions,
+                                         long serviceDate,
+                                         BlockDescriptor blockDescriptor,
+                                         BestScheduleDeviation instantaneousScheduleDeviation,
+                                         AtomicBoolean hasNonSkippedStops){
+
+    record.setServiceDate(serviceDate);
+
+    if (blockDescriptor.getStartTime() != null) {
+      record.setBlockStartTime(blockDescriptor.getStartTime());
+    }
+
+    if (instantaneousScheduleDeviation.timestamp != 0) {
+      record.setTimeOfRecord(instantaneousScheduleDeviation.timestamp);
+    }
+
+    if(!hasNonSkippedStops.get()){
+      record.setStatus(TripDescriptor.ScheduleRelationship.CANCELED.name());
+      instantaneousScheduleDeviation.isCanceled = true;
+    } else if (blockDescriptor.getScheduleRelationship() != null) {
+      record.setStatus(blockDescriptor.getScheduleRelationship().name());
+    }
+
+    if (!instantaneousScheduleDeviation.isCanceled){
+      record.setScheduleDeviation(instantaneousScheduleDeviation.scheduleDeviation);
+    }
+
+    record.setTimepointPredictions(timepointPredictions);
+
+  }
+
+  private void addTimepointPredictionForTripsWIthTripDelays(List<TimepointPredictionRecord> timepointPredictions,
+                                                            BestScheduleDeviation instantaneousScheduleDeviation,
+                                                            boolean singleTimepointRecord,
+                                                            List<StopTimeEntry> stopTimes,
+                                                            long lastStopScheduleTime,
+                                                            long serviceDate) {
+    if ((timepointPredictions.size() > 0 && instantaneousScheduleDeviation.tripUpdateHasDelay)
+            || singleTimepointRecord) {
+
+      Set<AgencyAndId> records = new HashSet<>();
+
+      for (TimepointPredictionRecord tpr : timepointPredictions) {
+        records.add(tpr.getTimepointId());
+      }
+
+      long tprStartTime = getEarliestTimeInRecords(timepointPredictions);
+      for (StopTimeEntry stopTime : stopTimes) {
+        if (records.contains(stopTime.getStop().getId())) {
+          continue;
+        }
+        long predictionOffset = serviceDate + (instantaneousScheduleDeviation.scheduleDeviation * 1000L);
+        long predictedDepartureTime = (stopTime.getDepartureTime() * 1000L) + predictionOffset;
+        long predictedArrivalTime = (stopTime.getArrivalTime() * 1000L) + predictionOffset;
+        long scheduledArrivalTime = serviceDate + stopTime.getArrivalTime() * 1000;
+        long time = instantaneousScheduleDeviation.timestamp != 0 ? instantaneousScheduleDeviation.timestamp : _currentTime;
+
+        /*
+         * if the timpepointrecord needs interpolated (one before, one after),
+         * OR
+         * we have a single Timepoint record and the arrival is
+         * in the future and before the last stop
+         */
+        if ((predictedDepartureTime > time && predictedDepartureTime < tprStartTime)
+                || (singleTimepointRecord
+                && (predictedDepartureTime > time
+                && scheduledArrivalTime <= lastStopScheduleTime))) {
+          TimepointPredictionRecord tpr = new TimepointPredictionRecord();
+          tpr.setTimepointId(stopTime.getStop().getId());
+          tpr.setTripId(stopTime.getTrip().getId());
+          tpr.setStopSequence(stopTime.getGtfsSequence());
+          tpr.setTimepointPredictedArrivalTime(predictedArrivalTime);
+          tpr.setTimepointPredictedDepartureTime(predictedDepartureTime);
+          tpr.setTimepointScheduledTime(scheduledArrivalTime);
+          tpr.setScheduleRealtionship(StopTimeUpdate.ScheduleRelationship.SCHEDULED_VALUE);
+          timepointPredictions.add(tpr);
+        }
+      }
+    }
+  }
+
+
+  private void addTimepointPredictionForTrip(List<TimepointPredictionRecord> timepointPredictions,
+                                             TripUpdate tripUpdate,
+                                             MonitoredResult result,
+                                             BestScheduleDeviation instantaneousScheduleDeviation,
+                                             List<BlockStopTimeEntry> tripStopTimes,
+                                             AgencyAndId tripId,
+                                             String vehicleId,
+                                             long lastStopScheduleTime,
+                                             long serviceDate,
+                                             AtomicBoolean hasNonSkippedStops) {
+
+    int currentTime = (int) ((_currentTime - serviceDate) / 1000);
+
+    for (StopTimeUpdate stopTimeUpdate : tripUpdate.getStopTimeUpdateList()) {
+
+      BlockStopTimeEntry blockStopTime = getBlockStopTimeForStopTimeUpdate(result, tripUpdate, stopTimeUpdate,
+              tripStopTimes, serviceDate);
+
+      lastStopScheduleTime = getLastScheduledStopTimeForTrip(tripStopTimes, lastStopScheduleTime, serviceDate);
+
+      if (blockStopTime == null)
+        continue;
+
+      StopTimeEntry stopTime = blockStopTime.getStopTime();
+
+      TimepointPredictionRecord tpr = createTimePointRecord(stopTime, stopTimeUpdate, serviceDate);
+
+      if(tpr.isSkipped()){
+        timepointPredictions.add(tpr);
+        _log.debug("SKIPPED stop:" + tpr.getTimepointId() + "  seq: " + tpr.getStopSequence() + " trip: " + tpr.getTripId());
+      } else {
+        hasNonSkippedStops.set(true);
+        int currentArrivalTime = computeArrivalTime(stopTime, stopTimeUpdate, serviceDate);
+        int currentDepartureTime = computeDepartureTime(stopTime, stopTimeUpdate, serviceDate);
+
+        updateBestScheduleDeviation(currentTime, stopTime.getArrivalTime(), currentArrivalTime,
+                instantaneousScheduleDeviation, tripId, vehicleId);
+
+        updateBestScheduleDeviation(currentTime, stopTime.getDepartureTime(), currentDepartureTime,
+                instantaneousScheduleDeviation, tripId, vehicleId);
+
+        updateTimepointPredictedArrivalTime(tpr, serviceDate, currentArrivalTime);
+
+        updateTimepointPredictedDepartureTime(tpr, serviceDate, currentDepartureTime);
+
+        updateTimepointPredictionForNyctExtension(stopTimeUpdate, tpr);
+
+        updateTimepointPredictionForMtaRRExtension(stopTimeUpdate, tpr);
+
+        if (hasValidTimepointPredicitonTime(tpr)) {
+          timepointPredictions.add(tpr);
+        }
+      }
+    }
+
+  }
+
+  private boolean isSingleTimepointRecord(List<TimepointPredictionRecord> timepointPredictions,
+                                          List<TripUpdate> tripUpdates) {
+    if (timepointPredictions.size() == 1 && tripUpdates.get(0).getStopTimeUpdateList().size() == 1) {
+      return true;
+    }
+    return false;
+  }
+
+  private void updateTimepointPredictionForMtaRRExtension(StopTimeUpdate stopTimeUpdate,
+                                                          TimepointPredictionRecord tpr) {
+    if (stopTimeUpdate.hasExtension(GtfsRealtimeMTARR.mtaRailroadStopTimeUpdate)) {
+      GtfsRealtimeMTARR.MtaRailroadStopTimeUpdate ext = stopTimeUpdate.getExtension(GtfsRealtimeMTARR.mtaRailroadStopTimeUpdate);
+      if (ext.hasTrack()) {
+        tpr.setActualTrack(ext.getTrack());
+      }
+      if (ext.hasTrainStatus()) {
+        tpr.setStatus(ext.getTrainStatus());
+      }
+    }
+  }
+
+  private void updateTimepointPredictionForNyctExtension(StopTimeUpdate stopTimeUpdate,
+                                                         TimepointPredictionRecord tpr) {
+    if (stopTimeUpdate.hasExtension(GtfsRealtimeNYCT.nyctStopTimeUpdate)) {
+      GtfsRealtimeNYCT.NyctStopTimeUpdate ext = stopTimeUpdate.getExtension(GtfsRealtimeNYCT.nyctStopTimeUpdate);
+      if (ext.hasScheduledTrack()) {
+        tpr.setScheduledTrack(ext.getScheduledTrack());
+      }
+      if (ext.hasActualTrack()) {
+        tpr.setActualTrack(ext.getActualTrack());
+      }
+    }
+  }
+
+  private boolean hasValidTimepointPredicitonTime(TimepointPredictionRecord tpr) {
+    return tpr.getTimepointPredictedArrivalTime() != -1 || tpr.getTimepointPredictedDepartureTime() != -1;
+  }
+
+  private void updateTimepointPredictedDepartureTime(TimepointPredictionRecord tpr,
+                                                     long serviceDate,
+                                                     int currentDepartureTime) {
+    long timepointPredictedTime = serviceDate + (currentDepartureTime * 1000L);
+    tpr.setTimepointPredictedDepartureTime(timepointPredictedTime);
+  }
+
+
+  private void updateTimepointPredictedArrivalTime(TimepointPredictionRecord tpr,
+                                                   long serviceDate,
+                                                   long currentArrivalTime) {
+    if(currentArrivalTime >=0) {
+      long timepointPredictedTime = serviceDate + (currentArrivalTime * 1000L);
+      tpr.setTimepointPredictedArrivalTime(timepointPredictedTime);
+    }
+  }
+
+  private Map<String, List<TripUpdate>> mapPotentialTripIdsToTripUpdates(List<TripUpdate> tripUpdates,
+                                                                         BlockInstance blockInstance
+                                                                         ) {
+    Map<String, List<TripUpdate>> tripUpdatesByTripId = new HashMap<>();
+    Map<String, List<TripUpdate>> tempTripUpdatesByTripId = MappingLibrary.mapToValueList(tripUpdates, "trip.tripId");
+
+    if (this._entitySource.getTripIdRegexes() != null) {
+      for (String existingTripId : tempTripUpdatesByTripId.keySet()) {
+        String newTripId = existingTripId;
+        for (String tripIdRegex : this._entitySource.getTripIdRegexes()) {
+          newTripId = newTripId.replaceAll(tripIdRegex, "");
+        }
+        AgencyAndId keyAndId = fuzzyMatchTripId(new AgencyAndId(blockInstance.getBlock().getBlock().getId().getAgencyId(), newTripId));
+        if (keyAndId != null) {
+          tripUpdatesByTripId.put(keyAndId.getId(), tempTripUpdatesByTripId.get(existingTripId));
+        }
+      }
+    } else {
+      // no fuzzy matching, copy the reference
+      tripUpdatesByTripId = tempTripUpdatesByTripId;
+    }
+    return tripUpdatesByTripId;
+  }
+
+  private static TimepointPredictionRecord createTimePointRecord(StopTimeEntry stopTime,
+                                                                 StopTimeUpdate stopTimeUpdate,
+                                                                 long serviceDate) {
+    TimepointPredictionRecord tpr = new TimepointPredictionRecord();
+    tpr.setTimepointId(stopTime.getStop().getId());
+    tpr.setTripId(stopTime.getTrip().getId());
+
+    if (stopTimeUpdate.hasStopSequence()) {
+      tpr.setStopSequence(stopTimeUpdate.getStopSequence());
+    }
+    if (stopTimeUpdate.getScheduleRelationship().equals(StopTimeUpdate.ScheduleRelationship.SKIPPED)) {
+      tpr.setScheduleRealtionship(StopTimeUpdate.ScheduleRelationship.SKIPPED_VALUE);
+    } else {
+      tpr.setScheduleRealtionship(StopTimeUpdate.ScheduleRelationship.SCHEDULED_VALUE);
+      tpr.setTimepointScheduledTime(serviceDate + stopTime.getArrivalTime() * 1000);
+    }
+    return tpr;
+  }
+
+  private long getLastScheduledStopTimeForTrip(List<BlockStopTimeEntry> stopTimes,
+                                               long lastStopScheduleTime,
+                                               long serviceDate
+                                               ) {
+    for (BlockStopTimeEntry bste : stopTimes) {
+      long scheduleTime = serviceDate + bste.getStopTime().getArrivalTime() * 1000;
+      lastStopScheduleTime = Math.max(scheduleTime, lastStopScheduleTime);
+    }
+    return lastStopScheduleTime;
+  }
+
+  private void updateRecordWithTripStatus(VehicleLocationRecord record, TripUpdate tripUpdate, AgencyAndId tripId) {
+    if(tripId != null && tripUpdate.hasTrip() && tripUpdate.getTrip().hasScheduleRelationship()){
+      record.setStatus(tripUpdate.getTrip().getScheduleRelationship().name());
+    }
+  }
+
+  private void updateScheduleDeviation(BestScheduleDeviation instantaneousScheduleDeviation,
+                                       TripUpdate tripUpdate,
+                                       AgencyAndId tripId) {
+    if(tripUpdate.hasDelay()){
+      instantaneousScheduleDeviation.delta = 0;
+      instantaneousScheduleDeviation.isInPast = false;
+      instantaneousScheduleDeviation.scheduleDeviation = tripUpdate.getDelay();
+      instantaneousScheduleDeviation.tripId = tripId;
+      instantaneousScheduleDeviation.tripUpdateHasDelay = true;
+    }
+
+    if(tripUpdate.hasTimestamp()){
+      instantaneousScheduleDeviation.timestamp = ensureMillis(tripUpdate.getTimestamp());
+    }
+
+    if (tripId != null && tripUpdate.hasTrip() && tripUpdate.getTrip().hasScheduleRelationship()) {
+      instantaneousScheduleDeviation.isCanceled =
+              tripUpdate.getTrip().getScheduleRelationship().equals(TripDescriptor.ScheduleRelationship.CANCELED);
+      _log.debug("schedule=" + tripUpdate.getTrip().getScheduleRelationship());
     }
   }
 
@@ -1257,7 +1374,7 @@ public class GtfsRealtimeTripLibrary {
       int expectedStopTime, int actualStopTime, BestScheduleDeviation best, AgencyAndId tripId, String vehicleId) {
 
     // if scheduleDeviation comes from delay do not recalculate
-    if (best.tripUpdateHasDelay)
+    if (actualStopTime < 0 || best.tripUpdateHasDelay)
       return;
     int delta = Math.abs(currentTime - actualStopTime);
     boolean isInPast = currentTime > actualStopTime;
