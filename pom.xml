@@ -91,13 +91,6 @@
         <tag>onebusaway-application-modules-2.5.13-otsf</tag>
     </scm>
 
-    <pluginRepositories>
-        <pluginRepository>
-            <id>repo.camsys-apps.com</id>
-            <url>https://repo.camsys-apps.com/third-party/</url>
-        </pluginRepository>
-    </pluginRepositories>
-
     <issueManagement>
         <system>GitHub</system>
         <url>https://github.com/OneBusAway/onebusaway-application-modules/issues</url>
