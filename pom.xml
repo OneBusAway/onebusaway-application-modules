@@ -73,10 +73,6 @@
             <url>https://repo1.maven.org/maven2/</url>
         </repository>
         <repository>
-            <id>repo.camsys-apps.com</id>
-            <url>https://repo.camsys-apps.com/third-party/</url>
-        </repository>
-        <repository>
             <id>releases-camsys-public-repo</id>
             <url>https://repo.camsys-apps.com/releases/</url>
             <releases>
