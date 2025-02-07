@@ -32,14 +32,8 @@ import com.conveyal.gtfs.service.impl.GtfsStatisticsService;
 public class GtfsStatisticsTask implements Runnable {
 	private Logger _log = LoggerFactory.getLogger(GtfsStatisticsTask.class);
 	private static final String ALL_AGENCIES = "TOTAL";
-	//private GtfsMutableRelationalDao _dao;
 	private GtfsRelationalDaoImpl _dao;
 	private FederatedTransitDataBundle _bundle;
-	
-//	@Autowired
-//	public void setGtfsDao(GtfsMutableRelationalDao dao) {
-//		_dao = dao;
-//	}
 
 	@Autowired
 	public void setGtfsDao(GtfsRelationalDaoImpl dao) {
