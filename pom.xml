@@ -73,8 +73,8 @@
             <url>https://repo1.maven.org/maven2/</url>
         </repository>
         <repository>
-            <id>releases-camsys-public-repo</id>
-            <url>https://repo.camsys-apps.com/releases/</url>
+            <id>releases-oba-public-repo</id>
+            <url>https://maven.onebusaway.org/</url>
             <releases>
                 <enabled>true</enabled>
             </releases>

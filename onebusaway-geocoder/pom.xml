@@ -15,7 +15,7 @@
         <geotools.version>20.5</geotools.version>
     </properties>
 
-    <repositories> <!-- remove after copying to repo.camsys-apps.com -->
+    <repositories>
         <repository>
             <id>osgeo</id>
             <name>Open Source Geospatial Foundation Repository</name>
