@@ -42,17 +42,23 @@ There are two options for setting up your own OneBusAway instance:
 
 ```sh
 docker compose up builder
-docker compose exec builder bash # from another window or tab
+
+# Now, open another window or tab and continue running commands:
+
+docker compose exec builder bash
 ./build.sh --help # acquaint yourself with the build.sh options
 ./build.sh --clean --check-updates --test
 
 # now you have built all of the OBA artifacts:
 ls build/org/onebusaway/onebusaway-application-modules
 
+# Exit the builder container
+exit
+
 # Download GTFS data and build an OBA transit data bundle from it
 docker compose up bundle_builder
 
-# verify that the bundle built as expected
+# verify that the bundle built as expected - there should be roughly 27 items in that directory
 ls docker_app_server/bundle
 
 # Start up the app server
