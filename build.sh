@@ -59,7 +59,7 @@ while [[ "$#" -gt 0 ]]; do
 done
 
 # Construct the Maven command
-cmd="mvn ${check_updates}${clean}install"
+cmd="mvn -Dgpg.skip=true ${check_updates}${clean}install"
 
 # Add options based on parsed arguments
 if [ "$run_tests" = "false" ]; then
