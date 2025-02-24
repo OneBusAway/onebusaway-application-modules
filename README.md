@@ -83,7 +83,7 @@ Finally, verify that everything works as expected!
 
 ### VSCode
 
-0. Make sure that you have completed all of the earlier steps and that the endpoint `http://localhost:8080/onebusaway-api-webapp/api/where/config.json?key=test`
+0. Make sure that you have completed all of the earlier steps and that this endpoint loads in your browser: `http://localhost:8080/onebusaway-api-webapp/api/where/config.json?key=test`
 1. Install these extensions:
   * [Debugger for Java](https://marketplace.visualstudio.com/items?itemName=vscjava.vscode-java-debug)
   * [Extension Pack for Java](https://marketplace.visualstudio.com/items?itemName=vscjava.vscode-java-pack)
