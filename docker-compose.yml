@@ -56,7 +56,8 @@ services:
     depends_on:
       - database
     ports:
-      - "8080:8080"
+      - "5005:5005" # Debug port
+      - "8080:8080" # App server port
     volumes:
       - type: bind
         source: ./docker_app_server/config/server.xml
