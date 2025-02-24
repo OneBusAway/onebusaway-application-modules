@@ -79,6 +79,19 @@ Finally, verify that everything works as expected!
 * Check out the Tomcat Web App Manager at http://localhost:8080/manager/html (user/pass: admin/admin) to verify that your OBA WARs deployed correctly
 * Check out the config.json API endpoint to verify that everything built correctly: http://localhost:8080/onebusaway-api-webapp/api/where/config.json?key=test
 
+## Debugging
+
+### VSCode
+
+0. Make sure that you have completed all of the earlier steps and that the endpoint `http://localhost:8080/onebusaway-api-webapp/api/where/config.json?key=test`
+1. Install these extensions:
+  * [Debugger for Java](https://marketplace.visualstudio.com/items?itemName=vscjava.vscode-java-debug)
+  * [Extension Pack for Java](https://marketplace.visualstudio.com/items?itemName=vscjava.vscode-java-pack)
+2. Set breakpoints in the code file that you want to debug. If you're just getting started, we recommend that you set a breakpoint in `onebusaway-api-webapp/src/main/java/org/onebusaway/api/actions/api/where/ConfigAction.java` in the `index()` method. 
+3. Open the Run and Debug tab in VSCode, make sure that the debug target dropdown lists `Debug (Attach)`.
+4. Click the Start Debugging button.
+5. Open your web browser and navigate to the API action where you have set a breakpoint. If you have set a breakpoint in ConfigAction.java, navigate to http://localhost:8080/onebusaway-api-webapp/api/where/config.json?key=test
+
 ## Deploy OneBusAway
 
 * Download pre-built JARs and WARs: https://developer.onebusaway.org/downloads

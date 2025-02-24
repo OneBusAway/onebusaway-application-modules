@@ -14,12 +14,13 @@
 # limitations under the License.
 #
 
-FROM tomcat:8.5.98-jdk11-temurin
+FROM tomcat:8.5.100-jdk11-temurin
 
 ENV CATALINA_HOME /usr/local/tomcat
 ENV TZ=America/Los_Angeles
 ARG OBA_VERSION=2.5.13-otsf
 ENV OBA_VERSION=$OBA_VERSION
+ENV JAVA_TOOL_OPTIONS="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
 
 RUN apt-get update && apt-get install -y \
     jq \
@@ -56,3 +57,7 @@ RUN wget "https://cdn.mysql.com/Downloads/Connector-J/mysql-connector-j-8.4.0.ta
 
 COPY ./copy_resources.sh /usr/local/bin/copy_resources.sh
 RUN chmod +x /usr/local/bin/copy_resources.sh
+
+# Expose debugging port
+
+EXPOSE 5005
