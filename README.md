@@ -52,24 +52,12 @@ docker compose exec builder bash
 # now you have built all of the OBA artifacts:
 ls build/org/onebusaway/onebusaway-application-modules
 
-# Exit the builder container
-exit
+# Next, build a data bundle:
+cd /oba
+./build_bundle.sh
 
-# Download GTFS data and build an OBA transit data bundle from it
-docker compose up bundle_builder
-
-# verify that the bundle built as expected - there should be roughly 27 items in that directory
-ls docker_app_server/bundle
-
-# Start up the app server
-docker compose up appserver
-
-# enter the app server
-docker compose exec appserver bash
-
-# run the copy_resources.sh script (it's on your path)
-# to copy the necessary WAR files into /usr/local/tomcat
-copy_resources.sh
+# Finally, copy all of the built WAR resources into /usr/local/tomcat
+./copy_resources.sh
 
 # wait a few seconds for everything to spin up...
 ```

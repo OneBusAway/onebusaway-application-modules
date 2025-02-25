@@ -19,14 +19,11 @@
 
 echo "Copying resources to Tomcat for OBA_VERSION $OBA_VERSION"
 
-cp /root/.m2/repository/org/onebusaway/onebusaway-enterprise-acta-webapp/$OBA_VERSION/onebusaway-enterprise-acta-webapp-$OBA_VERSION.war /usr/local/tomcat/webapps/onebusaway-enterprise-acta-webapp.war
-cp /root/.m2/repository/org/onebusaway/onebusaway-api-webapp/$OBA_VERSION/onebusaway-api-webapp-$OBA_VERSION.war /usr/local/tomcat/webapps/onebusaway-api-webapp.war
-cp /root/.m2/repository/org/onebusaway/onebusaway-transit-data-federation-webapp/$OBA_VERSION/onebusaway-transit-data-federation-webapp-$OBA_VERSION.war /usr/local/tomcat/webapps/onebusaway-transit-data-federation-webapp.war
+cp -f /root/.m2/repository/org/onebusaway/onebusaway-api-webapp/$OBA_VERSION/onebusaway-api-webapp-$OBA_VERSION.war /usr/local/tomcat/webapps/onebusaway-api-webapp.war
+cp -f /root/.m2/repository/org/onebusaway/onebusaway-transit-data-federation-webapp/$OBA_VERSION/onebusaway-transit-data-federation-webapp-$OBA_VERSION.war /usr/local/tomcat/webapps/onebusaway-transit-data-federation-webapp.war
 
-unzip /usr/local/tomcat/webapps/onebusaway-enterprise-acta-webapp.war -d /usr/local/tomcat/webapps/onebusaway-enterprise-acta-webapp
 unzip /usr/local/tomcat/webapps/onebusaway-api-webapp.war -d /usr/local/tomcat/webapps/onebusaway-api-webapp
 unzip /usr/local/tomcat/webapps/onebusaway-transit-data-federation-webapp.war -d /usr/local/tomcat/webapps/onebusaway-transit-data-federation-webapp
 
-cp /oba_config_files/onebusaway-enterprise-acta-webapp-data-sources.xml /usr/local/tomcat/webapps/onebusaway-enterprise-acta-webapp/WEB-INF/classes/data-sources.xml
-cp /oba_config_files/onebusaway-api-webapp-data-sources.xml /usr/local/tomcat/webapps/onebusaway-api-webapp/WEB-INF/classes/data-sources.xml
-cp /oba_config_files/onebusaway-transit-data-federation-webapp-data-sources.xml /usr/local/tomcat/webapps/onebusaway-transit-data-federation-webapp/WEB-INF/classes/data-sources.xml
+cp -f /oba_config_files/onebusaway-api-webapp-data-sources.xml /usr/local/tomcat/webapps/onebusaway-api-webapp/WEB-INF/classes/data-sources.xml
+cp -f /oba_config_files/onebusaway-transit-data-federation-webapp-data-sources.xml /usr/local/tomcat/webapps/onebusaway-transit-data-federation-webapp/WEB-INF/classes/data-sources.xml
