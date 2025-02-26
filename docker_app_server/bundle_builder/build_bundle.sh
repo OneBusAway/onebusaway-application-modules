@@ -16,22 +16,22 @@
 # limitations under the License.
 #
 
-OBA_VERSION="$@"
-
-# If GTFS_URL is not set or is empty, then use a default value:
-RESOLVED_GTFS_URL=${GTFS_URL:-https://unitrans.ucdavis.edu/media/gtfs/Unitrans_GTFS.zip}
+if [ -z "$GTFS_URL" ]; then
+    echo "GTFS_URL is not set"
+    exit 1
+fi
 
 echo "OBA Bundle Builder Starting"
 echo "GTFS_URL: $GTFS_URL"
-echo "Resolved GTFS_URL: $RESOLVED_GTFS_URL"
 echo "OBA Version: $OBA_VERSION"
 
-wget -O /bundle/gtfs.zip ${RESOLVED_GTFS_URL}
+wget -O /bundle/gtfs.zip ${GTFS_URL}
 
 # The JAR must be executed from within the same directory
 # as the bundle, or else some necessary files are not generated.
 
-cp /root/.m2/repository/org/onebusaway/onebusaway-transit-data-federation-builder/$OBA_VERSION/onebusaway-transit-data-federation-builder-$OBA_VERSION-withAllDependencies.jar /oba/builder.jar
+cp /src/build/org/onebusaway/onebusaway-transit-data-federation-builder/$OBA_VERSION/onebusaway-transit-data-federation-builder-$OBA_VERSION-withAllDependencies.jar \
+   /oba/builder.jar
 
 cd /bundle \
     && java -Xss4m -Xmx3g \

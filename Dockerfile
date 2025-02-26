@@ -14,17 +14,75 @@
 # limitations under the License.
 #
 
-FROM maven:3-eclipse-temurin-11
+FROM tomcat:8.5.100-jdk11-temurin
 
-# Install additional development tools if needed
+ARG MAVEN_VERSION=3.9.9
+
+ARG OBA_VERSION=2.5.13-otsf
+ENV OBA_VERSION=$OBA_VERSION
+
+ENV CATALINA_HOME /usr/local/tomcat
+ENV CATALINA_OPTS="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
+ENV TZ=America/Los_Angeles
+ENV MAVEN_HOME /usr/share/maven
+ENV MAVEN_CONFIG /root/.m2
+ENV GTFS_URL https://www.soundtransit.org/GTFS-rail/40_gtfs.zip
+ENV PATH="/oba:${PATH}"
+
+# Install additional necessary tools
 RUN apt-get update && apt-get install -y \
+    curl \
     git \
+    jq \
+    python3-pip \
+    supervisor \
+    tzdata \
+    unzip \
+    unzip \
     vim \
+    xmlstarlet \
+    && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
+
+# Install Maven
+RUN mkdir -p /usr/share/maven /usr/share/maven/ref && \
+    curl -fsSL -o /tmp/apache-maven.tar.gz https://downloads.apache.org/maven/maven-3/${MAVEN_VERSION}/binaries/apache-maven-${MAVEN_VERSION}-bin.tar.gz && \
+    tar -xzf /tmp/apache-maven.tar.gz -C /usr/share/maven --strip-components=1 && \
+    rm -f /tmp/apache-maven.tar.gz && \
+    ln -s /usr/share/maven/bin/mvn /usr/bin/mvn
 
 RUN mkdir -p /root/.m2/repository
 
+# Set up bundle builder
+WORKDIR /oba
+COPY ./docker_app_server/bundle_builder/build_bundle.sh .
+COPY ./docker_app_server/copy_resources.sh .
+
+# Set the configured time zone
+RUN ln -fs /usr/share/zoneinfo/$TZ /etc/localtime && dpkg-reconfigure -f noninteractive tzdata
+
+# Set up the host-manager and manager webapps
+RUN rm -rf $CATALINA_HOME/webapps
+RUN mv $CATALINA_HOME/webapps.dist $CATALINA_HOME/webapps
+
+COPY ./docker_app_server/config/tomcat-users.xml $CATALINA_HOME/conf/
+
+COPY ./docker_app_server/config/host-manager_context.xml $CATALINA_HOME/webapps/docs/META-INF/context.xml
+COPY ./docker_app_server/config/host-manager_context.xml $CATALINA_HOME/webapps/examples/META-INF/context.xml
+COPY ./docker_app_server/config/host-manager_context.xml $CATALINA_HOME/webapps/host-manager/META-INF/context.xml
+COPY ./docker_app_server/config/host-manager_context.xml $CATALINA_HOME/webapps/manager/META-INF/context.xml
+COPY ./docker_app_server/config/host-manager_context.xml $CATALINA_HOME/webapps/ROOT/META-INF/context.xml
+
+# MySQL Connector
+WORKDIR $CATALINA_HOME/lib
+RUN wget "https://cdn.mysql.com/Downloads/Connector-J/mysql-connector-j-8.4.0.tar.gz" \
+    && tar -zxvf mysql-connector-j-8.4.0.tar.gz \
+    && mv mysql-connector-j-8.4.0/mysql-connector-j-8.4.0.jar . \
+    && rm mysql-connector-j-8.4.0.tar.gz \
+    && rm -rf mysql-connector-j-8.4.0
+
+# Put the user in the source code directory when they shell in
 WORKDIR /src
 
-# Set the entrypoint to bash so the container doesn't exit immediately
-ENTRYPOINT ["/bin/bash"]
+# Expose an additional port for debugging
+EXPOSE 5005
