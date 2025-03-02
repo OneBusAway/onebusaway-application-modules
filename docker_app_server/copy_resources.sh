@@ -19,6 +19,9 @@
 
 echo "Copying resources to Tomcat for OBA_VERSION $OBA_VERSION"
 
+rm -rf /usr/local/tomcat/webapps/onebusaway-api-webapp
+rm -rf /usr/local/tomcat/webapps/onebusaway-transit-data-federation-webapp
+
 cp -f /root/.m2/repository/org/onebusaway/onebusaway-api-webapp/$OBA_VERSION/onebusaway-api-webapp-$OBA_VERSION.war /usr/local/tomcat/webapps/onebusaway-api-webapp.war
 cp -f /root/.m2/repository/org/onebusaway/onebusaway-transit-data-federation-webapp/$OBA_VERSION/onebusaway-transit-data-federation-webapp-$OBA_VERSION.war /usr/local/tomcat/webapps/onebusaway-transit-data-federation-webapp.war
 
