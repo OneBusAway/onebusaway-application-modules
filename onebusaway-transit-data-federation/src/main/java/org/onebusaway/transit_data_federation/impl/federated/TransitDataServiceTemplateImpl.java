@@ -146,10 +146,13 @@ public class TransitDataServiceTemplateImpl implements TransitDataServiceTemplat
   private VehicleOccupancyRecordCache _vehicleOccupancyRecordCache;
 
   @Autowired
-  private CanonicalRoutesService _canonicalRouteServce;
+  private CanonicalRoutesService _canonicalRouteService;
 
   @Autowired
   private StopSwapService _stopSwapService;
+
+  @Autowired
+  private MetricsBeanService _metricsBeanService;
 
   /****
    * {@link TransitDataService} Interface
@@ -270,6 +273,11 @@ public class TransitDataServiceTemplateImpl implements TransitDataServiceTemplat
   public StopsBean getStopsForAgencyId(String agencyId) {
 
     return _stopsBeanService.getStopsForAgencyId(agencyId);
+  }
+
+  //@Override
+  public MetricsBean getMetrics() {
+    return _metricsBeanService.getMetrics();
   }
 
   //@Override
@@ -786,7 +794,7 @@ public class TransitDataServiceTemplateImpl implements TransitDataServiceTemplat
   }
 
   public ListBean<RouteGroupingBean> getCanonicalRoute(AgencyServiceInterval serviceInterval, AgencyAndId routeId) {
-    return _canonicalRouteServce.getCanonicalOrMergedRoute(serviceInterval, routeId);
+    return _canonicalRouteService.getCanonicalOrMergedRoute(serviceInterval, routeId);
   }
 
   public ListBean<ConsolidatedStopMapBean> getAllConsolidatedStops() {
