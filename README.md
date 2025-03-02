@@ -46,8 +46,8 @@ docker compose up builder
 # Now, open another window or tab and continue running commands:
 
 docker compose exec builder bash
-./build.sh --help # acquaint yourself with the build.sh options
-./build.sh --clean --check-updates --test
+./make.sh --help # acquaint yourself with the make.sh options
+./make.sh --clean --check-updates --test
 
 # now you have built all of the OBA artifacts:
 ls build/org/onebusaway/onebusaway-application-modules
@@ -57,7 +57,7 @@ cd /oba
 ./build_bundle.sh
 
 # Finally, copy all of the built WAR resources into /usr/local/tomcat
-./copy_resources.sh
+copy_resources.sh
 
 # wait a few seconds for everything to spin up...
 ```

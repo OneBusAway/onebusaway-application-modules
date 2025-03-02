@@ -388,6 +388,8 @@ public interface TransitDataService extends FederatedService {
    */
   public StopsBean getStopsForAgencyId(String agencyId);
 
+  public MetricsBean getMetrics();
+
   /**
    * 
    * @param shapeId

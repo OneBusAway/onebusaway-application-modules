@@ -111,6 +111,10 @@ public class BeanFactoryV2 {
    * Response Methods
    ****/
 
+  public EntryWithReferencesBean<MetricsBean> getResponse(MetricsBean metrics) {
+    return entry(metrics);
+  }
+
   public EntryWithReferencesBean<AgencyV2Bean> getResponse(AgencyBean agency) {
     return entry(getAgency(agency));
   }

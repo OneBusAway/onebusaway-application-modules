@@ -279,7 +279,6 @@ class StopsBeanServiceImpl implements StopsBeanService {
     return result;
   }
 
-
   private static class DistanceAwayComparator implements Comparator {
 
     @Override

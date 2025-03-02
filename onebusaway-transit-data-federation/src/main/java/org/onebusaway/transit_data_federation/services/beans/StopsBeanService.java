@@ -18,10 +18,7 @@ package org.onebusaway.transit_data_federation.services.beans;
 import org.onebusaway.exceptions.ServiceException;
 import org.onebusaway.gtfs.model.Agency;
 import org.onebusaway.gtfs.model.Stop;
-import org.onebusaway.transit_data.model.ListBean;
-import org.onebusaway.transit_data.model.SearchQueryBean;
-import org.onebusaway.transit_data.model.StopBean;
-import org.onebusaway.transit_data.model.StopsBean;
+import org.onebusaway.transit_data.model.*;
 
 import java.util.List;
 
