@@ -28,10 +28,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Stream;
 
 @Component
 public class MetricsBeanServiceImpl implements MetricsBeanService {
@@ -44,11 +42,33 @@ public class MetricsBeanServiceImpl implements MetricsBeanService {
   @Override
   public MetricsBean getMetrics() {
     MetricsBean bean = new MetricsBean();
-    bean.setAgenciesWithCoverageCount(_transitDataService.getAgenciesWithCoverage().size());
+
+    populateAgencyFields(bean);
+
     bean.setScheduledTripsCount(getScheduledTrips());
+
     return bean;
   }
 
+  /**
+   * Fills in all agency-related fields in the MetricsBean.
+   * @param bean The MetricsBean object that is populated.
+   */
+  private void populateAgencyFields(MetricsBean bean) {
+    List<AgencyWithCoverageBean> agencies = _transitDataService.getAgenciesWithCoverage();
+    bean.setAgenciesWithCoverageCount(agencies.size());
+
+    ArrayList<String> agencyIDs = new ArrayList<String>();
+    for (AgencyWithCoverageBean a : agencies) {
+      agencyIDs.add(a.getAgency().getId());
+    }
+    bean.setAgencyIDs(agencyIDs.toArray(String[]::new));
+  }
+
+  /**
+   * Retrieves a dictionary of agency IDs mapped to scheduled trips count.
+   * @return The per-agency trip count.
+   */
   private HashMap<String,Integer> getScheduledTrips() {
     HashMap<String,Integer> tripCountMap = new HashMap<String, Integer>();
     for (AgencyWithCoverageBean agency : _transitDataService.getAgenciesWithCoverage()) {
@@ -58,6 +78,15 @@ public class MetricsBeanServiceImpl implements MetricsBeanService {
     return tripCountMap;
   }
 
+  /**
+   * Retrieves the list of scheduled trips for the specified agencyId and optional routeId.
+   *
+   * Note: This code was ported over from onebusaway-watchdog-webapp.
+   *
+   * @param agencyId The ID of the agency. Required.
+   * @param routeId The ID of the route. Optional.
+   * @return The number of scheduled trips that match.
+   */
   private int getScheduledTrips(String agencyId, String routeId) {
     Set<TripDetailsBean> agencyTrips = new HashSet<TripDetailsBean>();
     TripsForAgencyQueryBean query = new TripsForAgencyQueryBean();
