@@ -21,12 +21,12 @@ ARG MAVEN_VERSION=3.9.9
 ARG OBA_VERSION=2.5.13-otsf
 ENV OBA_VERSION=$OBA_VERSION
 
-ENV CATALINA_HOME /usr/local/tomcat
+ENV CATALINA_HOME="/usr/local/tomcat"
 ENV CATALINA_OPTS="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
-ENV TZ=America/Los_Angeles
-ENV MAVEN_HOME /usr/share/maven
-ENV MAVEN_CONFIG /root/.m2
-ENV GTFS_URL https://www.soundtransit.org/GTFS-rail/40_gtfs.zip
+ENV TZ="America/Los_Angeles"
+ENV MAVEN_HOME="/usr/share/maven"
+ENV MAVEN_CONFIG="/root/.m2"
+ENV GTFS_URL="https://www.soundtransit.org/GTFS-KCM/google_transit.zip"
 ENV PATH="/oba:${PATH}"
 
 # Install additional necessary tools

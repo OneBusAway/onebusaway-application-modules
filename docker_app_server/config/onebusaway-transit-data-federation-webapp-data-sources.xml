@@ -61,4 +61,25 @@
       </props>
     </property>
   </bean>
+
+  <bean class="org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.GtfsRealtimeSource">
+    <property
+      name="tripUpdatesUrl"
+      value="https://api.pugetsound.onebusaway.org/api/gtfs_realtime/trip-updates-for-agency/1.pb?key=org.onebusaway.iphone"
+    />
+    <property
+      name="vehiclePositionsUrl"
+      value="https://api.pugetsound.onebusaway.org/api/gtfs_realtime/vehicle-positions-for-agency/1.pb?key=org.onebusaway.iphone"
+    />
+    <property
+      name="alertsUrl"
+      value="https://api.pugetsound.onebusaway.org/api/gtfs_realtime/alerts-for-agency/1.pb?key=org.onebusaway.iphone"
+    />
+    <property name="refreshInterval" value="30" />
+    <property name="agencyId" value="1" />
+    <property name="headersMap">
+      <map>
+      </map>
+    </property>
+  </bean>
 </beans>
