@@ -13,16 +13,21 @@
 package org.onebusaway.transit_data.model;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class MetricsBean implements Serializable {
   private static final long serialVersionUID = 1L;
 
-  // Agencies with Coverage Count
+  // Agencies with Coverage
 
   public int getAgenciesWithCoverageCount() { return agenciesWithCoverageCount; }
   public void setAgenciesWithCoverageCount(int agenciesWithCoverageCount) { this.agenciesWithCoverageCount = agenciesWithCoverageCount; }
   private int agenciesWithCoverageCount;
+
+  public String[] getAgencyIDs() { return agencyIDs; }
+  public void setAgencyIDs(String[] agencyIDs) { this.agencyIDs = agencyIDs; }
+  private String[] agencyIDs = {};
 
   // Scheduled Trips Count
 
