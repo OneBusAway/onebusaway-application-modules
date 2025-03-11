@@ -32,8 +32,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.amazonaws.Response;
-
 import java.util.*;
 
 @Component
@@ -65,6 +63,8 @@ public class MetricsBeanServiceImpl implements MetricsBeanService {
 
     populateStopFields(bean);
 
+    populateRealtimeTripFields(bean);
+
     bean.setScheduledTripsCount(getScheduledTrips());
 
     return bean;
@@ -83,6 +83,14 @@ public class MetricsBeanServiceImpl implements MetricsBeanService {
       agencyIDs.add(a.getAgency().getId());
     }
     bean.setAgencyIDs(agencyIDs.toArray(String[]::new));
+  }
+
+  /**
+   * Fills in all realtime trip-related fields in the MetricsBean.
+   * @param bean The MetricsBean object that is populated.
+   */
+  private void populateRealtimeTripFields(MetricsBean bean) {
+    bean.setRealtimeTripIDsUnmatched(getRealtimeTripIDsUnmatched());
   }
 
   /**
@@ -128,6 +136,55 @@ public class MetricsBeanServiceImpl implements MetricsBeanService {
     }
     _log.debug("scheduledTrips for (" + agencyId + ", " + routeId + "): " + agencyTrips.size() + " matched trips");
     return agencyTrips.size();
+  }
+
+  /**
+   * Retrieves a dictionary of agency IDs mapped to the list of unmatched trip IDs.
+   * @return The per-agency unmatched trip IDs list.
+   */
+  private HashMap<String, ArrayList<String>> getRealtimeTripIDsUnmatched() {
+    HashMap<String, ArrayList<String>> unmatchedTrips = new HashMap<>();
+    for (AgencyWithCoverageBean agency : _transitDataService.getAgenciesWithCoverage()) {
+      String id = agency.getAgency().getId();
+      unmatchedTrips.put(id, getUnmatchedTripIds(id, null));
+    }
+    return unmatchedTrips;
+  }
+
+  /**
+   * Retrieves the list of unmatched trip IDs for the specified agencyId.
+   *
+   * Note: This code was ported over from onebusaway-watchdog-webapp.
+   *
+   * @param agencyId The ID of the agency. Required.
+   * @return The list of unmatched trip IDs.
+   */
+  private ArrayList<String> getUnmatchedTripIds(String agencyId,String feedId) {
+    try {
+      ArrayList<String> unmatchedTripIds = new ArrayList<String>();
+      List<MonitoredDataSource> dataSources = getDataSources();
+      if (dataSources == null || dataSources.isEmpty()) {
+        _log.error("no configured data sources");
+        return new ArrayList<>();
+      }
+
+      for (MonitoredDataSource mds : getDataSources()) {
+        MonitoredResult result = mds.getMonitoredResult();
+        if (result == null)
+          continue;
+        if (feedId == null || feedId.equals(mds.getFeedId())) {
+          for (String mAgencyId : result.getAgencyIds()) {
+            if (agencyId.equals(mAgencyId)) {
+              unmatchedTripIds.addAll(result.getUnmatchedTripIds());
+            }
+          }
+        }
+      }
+      return unmatchedTripIds;
+    } catch (Exception e) {
+      _log.error("getUnmatchedTripIds broke", e);
+      return new ArrayList<>();
+    }
   }
 
   /**
