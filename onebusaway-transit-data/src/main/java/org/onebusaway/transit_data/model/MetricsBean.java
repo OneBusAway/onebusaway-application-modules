@@ -40,6 +40,11 @@ public class MetricsBean implements Serializable {
   public HashMap<String, ArrayList<String>> getRealtimeTripIDsUnmatched() { return realtimeTripIDsUnmatched; }
   public void setRealtimeTripIDsUnmatched(HashMap<String, ArrayList<String>> realtimeTripIDsUnmatched) { this.realtimeTripIDsUnmatched = realtimeTripIDsUnmatched; }
 
+  // Realtime Trips ids unmatched count
+  private HashMap<String, Integer> realtimeTripCountsUnmatched;
+  public HashMap<String, Integer> getRealtimeTripCountsUnmatched() { return realtimeTripCountsUnmatched; }
+  public void setRealtimeTripCountsUnmatched(HashMap<String, Integer> realtimeTripCountsUnmatched) { this.realtimeTripCountsUnmatched = realtimeTripCountsUnmatched; }
+  
   // Unmatched Stop IDs
   private HashMap<String, ArrayList<String>> stopIDsUnmatched;
   public HashMap<String, ArrayList<String>> getStopIDsUnmatched() { return stopIDsUnmatched; }

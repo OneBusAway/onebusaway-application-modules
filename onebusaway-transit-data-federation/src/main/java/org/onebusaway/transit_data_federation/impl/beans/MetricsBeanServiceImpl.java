@@ -91,6 +91,7 @@ public class MetricsBeanServiceImpl implements MetricsBeanService {
    */
   private void populateRealtimeTripFields(MetricsBean bean) {
     bean.setRealtimeTripIDsUnmatched(getRealtimeTripIDsUnmatched());
+    bean.setRealtimeTripCountsUnmatched(getUnmatchedTripCounts());
   }
 
   /**
@@ -185,6 +186,19 @@ public class MetricsBeanServiceImpl implements MetricsBeanService {
       _log.error("getUnmatchedTripIds broke", e);
       return new ArrayList<>();
     }
+  }
+
+  /**
+   * Retrieves a dictionary of agency IDs mapped to the count of unmatched trip IDs.
+   * @return The per-agency unmatched trip IDs count.
+   */
+  private HashMap<String, Integer> getUnmatchedTripCounts() {
+    HashMap<String, Integer> unmatchedTripCounts = new HashMap<>();
+    for (AgencyWithCoverageBean agency : _transitDataService.getAgenciesWithCoverage()) {
+      String id = agency.getAgency().getId();
+      unmatchedTripCounts.put(id, getUnmatchedTripIds(id, null).size());
+    }
+    return unmatchedTripCounts;
   }
 
   /**
