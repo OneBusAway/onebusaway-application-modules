@@ -134,6 +134,9 @@ public class MetricsBeanServiceImpl implements MetricsBeanService {
   private void populateStopFields(MetricsBean bean) {
     // add unmatched stops
     bean.setStopIDsUnmatched(getUnmatchedStops());
+    
+    // add matched stops
+    bean.setStopIDsMatchedCount(getMatchedStopsCount());
   }
 
   /**
@@ -148,6 +151,19 @@ public class MetricsBeanServiceImpl implements MetricsBeanService {
     }
     return unmatchedStops;
   }
+  
+  /**
+   * Retrieves a dictionary of agency IDs mapped to matched stop IDs.
+   * @return The per-agency matched stop IDs.
+   */
+  private HashMap<String, Integer> getMatchedStopsCount() {
+	HashMap<String, Integer> matchedStopIdsCountMap = new HashMap<String, Integer>();
+	for (AgencyWithCoverageBean agency : _transitDataService.getAgenciesWithCoverage()) {
+	  String id = agency.getAgency().getId();
+	  matchedStopIdsCountMap.put(id, getMatchedStopCount(id, null));
+	}
+	return matchedStopIdsCountMap;
+  }
 
   /**
    * Retrieves the list of unmatched stop IDs for the specified agencyId.
@@ -155,13 +171,14 @@ public class MetricsBeanServiceImpl implements MetricsBeanService {
    * Note: This code was ported over from onebusaway-watchdog-webapp.
    *
    * @param agencyId The ID of the agency. Required.
+   * @param feedId The ID of the feed. Optional.
    * @return The list of unmatched stop IDs.
    */
-  private ArrayList<String> getUnmatchedStopIds(String agencyId,String feedId) {
+  private ArrayList<String> getUnmatchedStopIds(String agencyId, String feedId) {
     try {
       ArrayList<String> unmatchedStopIds = new ArrayList<String>();
       List<MonitoredDataSource> dataSources = getDataSources();
-      if (dataSources == null  || dataSources.isEmpty()) {
+      if (dataSources == null || dataSources.isEmpty()) {
         _log.error("no configured data sources");
         return new ArrayList<String>();
       }
@@ -180,6 +197,43 @@ public class MetricsBeanServiceImpl implements MetricsBeanService {
     } catch (Exception e) {
       _log.error("getUnmatchedStopIds broke", e);
       return new ArrayList<String>();
+    }
+  }
+  
+  /**
+   * Retrieves the list of matched stop IDs for the specified agencyId.
+   *
+   * Note: This code was ported over from onebusaway-watchdog-webapp.
+   *
+   * @param agencyId The ID of the agency. Required.
+   * @param feedId The ID of the feed. Optional.
+   * @return The count of matched stop IDs.
+   */
+  private int getMatchedStopCount(String agencyId,String feedId) {
+    try {
+      ArrayList<String> matchedStopIds = new ArrayList<String>();
+      List<MonitoredDataSource> dataSources = getDataSources();
+      if (dataSources == null || dataSources.isEmpty()) {
+        _log.error("no configured data sources");
+        return 0;
+      }
+      for (MonitoredDataSource mds : dataSources) {
+        MonitoredResult result = mds.getMonitoredResult();
+        if (result == null) continue;
+        if (feedId == null || feedId.equals(mds.getFeedId())) {
+          for (String mAgencyId : result.getAgencyIds()) {
+            if (agencyId.equals(mAgencyId)) {
+              for (String stopId : result.getMatchedStopIds()) {
+            	  matchedStopIds.add(stopId);
+              }
+            }
+          }
+        }
+      }
+      return matchedStopIds.size();
+    } catch (Exception e) {
+      _log.error("getUnmatchedStopIds broke", e);
+      return 0;
     }
   }
 }
