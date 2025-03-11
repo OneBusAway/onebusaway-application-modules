@@ -153,7 +153,7 @@ public class MetricsBeanServiceImpl implements MetricsBeanService {
   }
   
   /**
-   * Retrieves a dictionary of agency IDs mapped to matched stop IDs.
+   * Retrieves a dictionary of agency IDs mapped to matched counts of stop ID.
    * @return The per-agency matched stop IDs.
    */
   private HashMap<String, Integer> getMatchedStopsCount() {
@@ -209,7 +209,7 @@ public class MetricsBeanServiceImpl implements MetricsBeanService {
    * @param feedId The ID of the feed. Optional.
    * @return The count of matched stop IDs.
    */
-  private int getMatchedStopCount(String agencyId,String feedId) {
+  private int getMatchedStopCount(String agencyId, String feedId) {
     try {
       ArrayList<String> matchedStopIds = new ArrayList<String>();
       List<MonitoredDataSource> dataSources = getDataSources();
