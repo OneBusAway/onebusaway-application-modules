@@ -31,6 +31,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import com.amazonaws.Response;
+
 import java.util.*;
 
 @Component
@@ -135,6 +138,8 @@ public class MetricsBeanServiceImpl implements MetricsBeanService {
     // add unmatched stops
     bean.setStopIDsUnmatched(getUnmatchedStops());
     bean.setStopIDsUnmatchedCount(getUnmatchedStopIdsCount());
+    // add matched stops
+    bean.setStopIDsMatchedCount(getMatchedStopIdsCount());
   }
 
   /**
@@ -231,6 +236,53 @@ public class MetricsBeanServiceImpl implements MetricsBeanService {
     } catch (Exception e) {
       _log.error("getUnmatchedStops broke", e);
       return 0;
+    }
+  }
+
+  /**
+   * Retrieves a dictionary of agency IDs mapped to the count of matched stop IDs.
+   * @return The per-agency matched stop IDs count.
+   */
+  private HashMap<String, Integer> getMatchedStopIdsCount() {
+    HashMap<String, Integer> matchedStopIdsCountMap = new HashMap<String, Integer>();
+    for (AgencyWithCoverageBean agency : _transitDataService.getAgenciesWithCoverage()) {
+      String id = agency.getAgency().getId();
+      matchedStopIdsCountMap.put(id, getMatchedStopIdsList(id, null).size());
+    }
+    return matchedStopIdsCountMap;
+  }
+
+  /**
+   * Retrieves the List of matched stops for the specified agencyId.
+   *
+   * @param agencyId The ID of the agency. Required.
+   * @param feedId The ID of the feed. Optional.
+   * @return The list of matched stops.
+   */
+  private ArrayList<String> getMatchedStopIdsList(String agencyId, String feedId) {
+    ArrayList<String> matchedStopIds = new ArrayList<String>();
+    List<MonitoredDataSource> dataSources = getDataSources();
+    try {
+      if (dataSources == null || dataSources.isEmpty()) {
+        _log.error("no configured data sources");
+        return new ArrayList<String>();
+      }
+      
+      for (MonitoredDataSource mds : getDataSources()) {
+        MonitoredResult result = mds.getMonitoredResult();
+        if (result == null) continue;
+        if (feedId == null || feedId.equals(mds.getFeedId())) {
+          for (String mAgencyId : result.getAgencyIds()) {
+            if (agencyId.equals(mAgencyId)) {
+              matchedStopIds.addAll(result.getMatchedStopIds());
+            }
+          }
+        }                
+      }
+      return matchedStopIds;
+    } catch (Exception e) {
+      _log.error("getMatchedStopCount broke", e);
+      return new ArrayList<String>();
     }
   }
 }
