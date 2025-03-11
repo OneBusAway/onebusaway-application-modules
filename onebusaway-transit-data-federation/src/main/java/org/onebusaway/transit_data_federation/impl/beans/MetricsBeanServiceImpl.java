@@ -206,7 +206,7 @@ public class MetricsBeanServiceImpl implements MetricsBeanService {
    * @param feedId The ID of the feed. Optional.
    * @return The number of unmatched stops.
    */
-  public int getUnmatchedStopsCount(String agencyId, String feedId) {
+  private int getUnmatchedStopsCount(String agencyId, String feedId) {
     try {
       int unmatchedStops = 0;
       List<MonitoredDataSource> dataSources = getDataSources();
