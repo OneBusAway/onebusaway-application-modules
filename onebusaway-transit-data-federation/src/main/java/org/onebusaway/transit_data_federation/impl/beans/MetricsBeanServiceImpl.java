@@ -134,6 +134,7 @@ public class MetricsBeanServiceImpl implements MetricsBeanService {
   private void populateStopFields(MetricsBean bean) {
     // add unmatched stops
     bean.setStopIDsUnmatched(getUnmatchedStops());
+    bean.setStopIDsUnmatchedCount(getUnmatchedStopIdsCount());
   }
 
   /**
@@ -180,6 +181,56 @@ public class MetricsBeanServiceImpl implements MetricsBeanService {
     } catch (Exception e) {
       _log.error("getUnmatchedStopIds broke", e);
       return new ArrayList<String>();
+    }
+  }
+  
+  /**
+   * Retrieves a dictionary of agency IDs mapped to the count of unmatched stop IDs.
+   * @return The per-agency unmatched stop IDs count.
+   */
+  private HashMap<String, Integer> getUnmatchedStopIdsCount() {
+    HashMap<String, Integer> unmatchedStopIdsCountMap = new HashMap<String, Integer>();
+    for (AgencyWithCoverageBean agency : _transitDataService.getAgenciesWithCoverage()) {
+      String id = agency.getAgency().getId();
+      unmatchedStopIdsCountMap.put(id, getUnmatchedStopsCount(id, null));
+    }
+    return unmatchedStopIdsCountMap;
+  }
+
+  /**
+   * Retrieves the number of unmatched stops for the specified agencyId.
+   *
+   * Note: This code was ported over from onebusaway-watchdog-webapp.
+   *
+   * @param agencyId The ID of the agency. Required.
+   * @param feedId The ID of the feed. Optional.
+   * @return The number of unmatched stops.
+   */
+  public int getUnmatchedStopsCount(String agencyId, String feedId) {
+    try {
+      int unmatchedStops = 0;
+      List<MonitoredDataSource> dataSources = getDataSources();
+      if (dataSources == null || dataSources.isEmpty()) {
+        _log.error("no configured data sources");
+        return 0;
+      }
+      
+      for (MonitoredDataSource mds : getDataSources()) {
+        MonitoredResult result = mds.getMonitoredResult();
+        if (result == null) continue;
+        if (feedId == null || feedId.equals(mds.getFeedId())) {
+          for (String mAgencyId : result.getAgencyIds()) {
+            _log.debug("examining agency=" + mAgencyId + " with unmatched stops=" + result.getUnmatchedStopIds().size());
+            if (agencyId.equals(mAgencyId)) {
+              unmatchedStops += result.getUnmatchedStopIds().size();
+            }
+          }
+        }
+      }
+      return unmatchedStops;
+    } catch (Exception e) {
+      _log.error("getUnmatchedStops broke", e);
+      return 0;
     }
   }
 }
