@@ -39,4 +39,9 @@ public class MetricsBean implements Serializable {
   private HashMap<String, ArrayList<String>> stopIDsUnmatched;
   public HashMap<String, ArrayList<String>> getStopIDsUnmatched() { return stopIDsUnmatched; }
   public void setStopIDsUnmatched(HashMap<String, ArrayList<String>> stopIDsUnmatched) { this.stopIDsUnmatched = stopIDsUnmatched; }
+
+  // Unmatched Stop ids count
+  public HashMap<String, Integer> getStopIDsUnmatchedCount() { return stopIDsUnmatchedCount; }
+  public void setStopIDsUnmatchedCount(HashMap<String, Integer> stopIDsUnmatchedCount) { this.stopIDsUnmatchedCount = stopIDsUnmatchedCount; }
+  private HashMap<String, Integer> stopIDsUnmatchedCount;
 }
