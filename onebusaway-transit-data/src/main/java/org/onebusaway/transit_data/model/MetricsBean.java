@@ -35,8 +35,28 @@ public class MetricsBean implements Serializable {
   public void setScheduledTripsCount(HashMap<String, Integer> scheduledTripsCount) { this.scheduledTripsCount = scheduledTripsCount; }
   private HashMap<String, Integer> scheduledTripsCount;
 
+  // Realtime Trips ids unmatched list
+  private HashMap<String, ArrayList<String>> realtimeTripIDsUnmatched;
+  public HashMap<String, ArrayList<String>> getRealtimeTripIDsUnmatched() { return realtimeTripIDsUnmatched; }
+  public void setRealtimeTripIDsUnmatched(HashMap<String, ArrayList<String>> realtimeTripIDsUnmatched) { this.realtimeTripIDsUnmatched = realtimeTripIDsUnmatched; }
+
+  // Realtime Trips ids unmatched count
+  private HashMap<String, Integer> realtimeTripCountsUnmatched;
+  public HashMap<String, Integer> getRealtimeTripCountsUnmatched() { return realtimeTripCountsUnmatched; }
+  public void setRealtimeTripCountsUnmatched(HashMap<String, Integer> realtimeTripCountsUnmatched) { this.realtimeTripCountsUnmatched = realtimeTripCountsUnmatched; }
+  
   // Unmatched Stop IDs
   private HashMap<String, ArrayList<String>> stopIDsUnmatched;
   public HashMap<String, ArrayList<String>> getStopIDsUnmatched() { return stopIDsUnmatched; }
   public void setStopIDsUnmatched(HashMap<String, ArrayList<String>> stopIDsUnmatched) { this.stopIDsUnmatched = stopIDsUnmatched; }
+
+  // Unmatched Stop ids count
+  public HashMap<String, Integer> getStopIDsUnmatchedCount() { return stopIDsUnmatchedCount; }
+  public void setStopIDsUnmatchedCount(HashMap<String, Integer> stopIDsUnmatchedCount) { this.stopIDsUnmatchedCount = stopIDsUnmatchedCount; }
+  private HashMap<String, Integer> stopIDsUnmatchedCount;
+
+  // Matched Stop ids count
+  public HashMap<String, Integer> getStopIDsMatchedCount() { return stopIDsMatchedCount; }
+  public void setStopIDsMatchedCount(HashMap<String, Integer> stopIDsMatchedCount) { this.stopIDsMatchedCount = stopIDsMatchedCount; }
+  private HashMap<String, Integer> stopIDsMatchedCount;
 }

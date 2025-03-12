@@ -31,6 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
 import java.util.*;
 
 @Component
@@ -62,6 +63,8 @@ public class MetricsBeanServiceImpl implements MetricsBeanService {
 
     populateStopFields(bean);
 
+    populateRealtimeTripFields(bean);
+
     bean.setScheduledTripsCount(getScheduledTrips());
 
     return bean;
@@ -80,6 +83,15 @@ public class MetricsBeanServiceImpl implements MetricsBeanService {
       agencyIDs.add(a.getAgency().getId());
     }
     bean.setAgencyIDs(agencyIDs.toArray(String[]::new));
+  }
+
+  /**
+   * Fills in all realtime trip-related fields in the MetricsBean.
+   * @param bean The MetricsBean object that is populated.
+   */
+  private void populateRealtimeTripFields(MetricsBean bean) {
+    bean.setRealtimeTripIDsUnmatched(getRealtimeTripIDsUnmatched());
+    bean.setRealtimeTripCountsUnmatched(getUnmatchedTripCounts());
   }
 
   /**
@@ -128,12 +140,77 @@ public class MetricsBeanServiceImpl implements MetricsBeanService {
   }
 
   /**
+   * Retrieves a dictionary of agency IDs mapped to the list of unmatched trip IDs.
+   * @return The per-agency unmatched trip IDs list.
+   */
+  private HashMap<String, ArrayList<String>> getRealtimeTripIDsUnmatched() {
+    HashMap<String, ArrayList<String>> unmatchedTrips = new HashMap<>();
+    for (AgencyWithCoverageBean agency : _transitDataService.getAgenciesWithCoverage()) {
+      String id = agency.getAgency().getId();
+      unmatchedTrips.put(id, getUnmatchedTripIds(id, null));
+    }
+    return unmatchedTrips;
+  }
+
+  /**
+   * Retrieves the list of unmatched trip IDs for the specified agencyId.
+   *
+   * Note: This code was ported over from onebusaway-watchdog-webapp.
+   *
+   * @param agencyId The ID of the agency. Required.
+   * @return The list of unmatched trip IDs.
+   */
+  private ArrayList<String> getUnmatchedTripIds(String agencyId,String feedId) {
+    try {
+      ArrayList<String> unmatchedTripIds = new ArrayList<String>();
+      List<MonitoredDataSource> dataSources = getDataSources();
+      if (dataSources == null || dataSources.isEmpty()) {
+        _log.error("no configured data sources");
+        return new ArrayList<>();
+      }
+
+      for (MonitoredDataSource mds : getDataSources()) {
+        MonitoredResult result = mds.getMonitoredResult();
+        if (result == null)
+          continue;
+        if (feedId == null || feedId.equals(mds.getFeedId())) {
+          for (String mAgencyId : result.getAgencyIds()) {
+            if (agencyId.equals(mAgencyId)) {
+              unmatchedTripIds.addAll(result.getUnmatchedTripIds());
+            }
+          }
+        }
+      }
+      return unmatchedTripIds;
+    } catch (Exception e) {
+      _log.error("getUnmatchedTripIds broke", e);
+      return new ArrayList<>();
+    }
+  }
+
+  /**
+   * Retrieves a dictionary of agency IDs mapped to the count of unmatched trip IDs.
+   * @return The per-agency unmatched trip IDs count.
+   */
+  private HashMap<String, Integer> getUnmatchedTripCounts() {
+    HashMap<String, Integer> unmatchedTripCounts = new HashMap<>();
+    for (AgencyWithCoverageBean agency : _transitDataService.getAgenciesWithCoverage()) {
+      String id = agency.getAgency().getId();
+      unmatchedTripCounts.put(id, getUnmatchedTripIds(id, null).size());
+    }
+    return unmatchedTripCounts;
+  }
+
+  /**
    * Fills in all stop-related fields in the MetricsBean.
    * @param bean The MetricsBean object that is populated.
    */
   private void populateStopFields(MetricsBean bean) {
     // add unmatched stops
     bean.setStopIDsUnmatched(getUnmatchedStops());
+    bean.setStopIDsUnmatchedCount(getUnmatchedStopIdsCount());
+    // add matched stops
+    bean.setStopIDsMatchedCount(getMatchedStopIdsCount());
   }
 
   /**
@@ -179,6 +256,103 @@ public class MetricsBeanServiceImpl implements MetricsBeanService {
       return unmatchedStopIds;
     } catch (Exception e) {
       _log.error("getUnmatchedStopIds broke", e);
+      return new ArrayList<String>();
+    }
+  }
+  
+  /**
+   * Retrieves a dictionary of agency IDs mapped to the count of unmatched stop IDs.
+   * @return The per-agency unmatched stop IDs count.
+   */
+  private HashMap<String, Integer> getUnmatchedStopIdsCount() {
+    HashMap<String, Integer> unmatchedStopIdsCountMap = new HashMap<String, Integer>();
+    for (AgencyWithCoverageBean agency : _transitDataService.getAgenciesWithCoverage()) {
+      String id = agency.getAgency().getId();
+      unmatchedStopIdsCountMap.put(id, getUnmatchedStopsCount(id, null));
+    }
+    return unmatchedStopIdsCountMap;
+  }
+
+  /**
+   * Retrieves the number of unmatched stops for the specified agencyId.
+   *
+   * Note: This code was ported over from onebusaway-watchdog-webapp.
+   *
+   * @param agencyId The ID of the agency. Required.
+   * @param feedId The ID of the feed. Optional.
+   * @return The number of unmatched stops.
+   */
+  private int getUnmatchedStopsCount(String agencyId, String feedId) {
+    try {
+      int unmatchedStops = 0;
+      List<MonitoredDataSource> dataSources = getDataSources();
+      if (dataSources == null || dataSources.isEmpty()) {
+        _log.error("no configured data sources");
+        return 0;
+      }
+      
+      for (MonitoredDataSource mds : getDataSources()) {
+        MonitoredResult result = mds.getMonitoredResult();
+        if (result == null) continue;
+        if (feedId == null || feedId.equals(mds.getFeedId())) {
+          for (String mAgencyId : result.getAgencyIds()) {
+            _log.debug("examining agency=" + mAgencyId + " with unmatched stops=" + result.getUnmatchedStopIds().size());
+            if (agencyId.equals(mAgencyId)) {
+              unmatchedStops += result.getUnmatchedStopIds().size();
+            }
+          }
+        }
+      }
+      return unmatchedStops;
+    } catch (Exception e) {
+      _log.error("getUnmatchedStops broke", e);
+      return 0;
+    }
+  }
+
+  /**
+   * Retrieves a dictionary of agency IDs mapped to the count of matched stop IDs.
+   * @return The per-agency matched stop IDs count.
+   */
+  private HashMap<String, Integer> getMatchedStopIdsCount() {
+    HashMap<String, Integer> matchedStopIdsCountMap = new HashMap<String, Integer>();
+    for (AgencyWithCoverageBean agency : _transitDataService.getAgenciesWithCoverage()) {
+      String id = agency.getAgency().getId();
+      matchedStopIdsCountMap.put(id, getMatchedStopIdsList(id, null).size());
+    }
+    return matchedStopIdsCountMap;
+  }
+
+  /**
+   * Retrieves the List of matched stops for the specified agencyId.
+   *
+   * @param agencyId The ID of the agency. Required.
+   * @param feedId The ID of the feed. Optional.
+   * @return The list of matched stops.
+   */
+  private ArrayList<String> getMatchedStopIdsList(String agencyId, String feedId) {
+    ArrayList<String> matchedStopIds = new ArrayList<String>();
+    List<MonitoredDataSource> dataSources = getDataSources();
+    try {
+      if (dataSources == null || dataSources.isEmpty()) {
+        _log.error("no configured data sources");
+        return new ArrayList<String>();
+      }
+      
+      for (MonitoredDataSource mds : getDataSources()) {
+        MonitoredResult result = mds.getMonitoredResult();
+        if (result == null) continue;
+        if (feedId == null || feedId.equals(mds.getFeedId())) {
+          for (String mAgencyId : result.getAgencyIds()) {
+            if (agencyId.equals(mAgencyId)) {
+              matchedStopIds.addAll(result.getMatchedStopIds());
+            }
+          }
+        }                
+      }
+      return matchedStopIds;
+    } catch (Exception e) {
+      _log.error("getMatchedStopCount broke", e);
       return new ArrayList<String>();
     }
   }
