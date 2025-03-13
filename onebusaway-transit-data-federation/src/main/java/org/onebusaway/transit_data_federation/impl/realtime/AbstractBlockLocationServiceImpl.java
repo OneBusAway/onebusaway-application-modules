@@ -167,7 +167,7 @@ public abstract class AbstractBlockLocationServiceImpl {
                 record.getCurrentLocationLon());
         location.setLastKnownLocation(p);
       }
-      location.setOrientation(record.getCurrentOrientation());
+      location.setLastKnownOrientation(record.getCurrentOrientation());
       location.setPhase(record.getPhase());
       if (TransitDataConstants.STATUS_CANCELED.equals(record.getStatus())) {
         isCancelled = true;

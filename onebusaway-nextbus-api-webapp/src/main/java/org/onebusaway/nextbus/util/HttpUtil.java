@@ -16,6 +16,7 @@
 package org.onebusaway.nextbus.util;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.Map;
 
 import com.google.transit.realtime.GtfsRealtime;
@@ -24,7 +25,10 @@ import org.apache.http.client.ClientProtocolException;
 import com.google.gson.JsonObject;
 
 public interface HttpUtil {
-	JsonObject getJsonObject(String uri, int timeout, Map<String, String> headersMap) throws ClientProtocolException, IOException;
-	GtfsRealtime.FeedMessage getFeedMessage(final String urlString, int timeoutSeconds, Map<String, String> headersMap) throws ClientProtocolException, IOException;
+	JsonObject getJsonObject(String uri, int timeout, Map<String, String> headersMap, Map<String, String> paramsMap) throws ClientProtocolException, IOException, URISyntaxException;
+	GtfsRealtime.FeedMessage getFeedMessage(final String urlString,
+											int timeoutSeconds,
+											Map<String, String> headersMap,
+											Map<String, String> paramsMap) throws ClientProtocolException, IOException, URISyntaxException;
 	String getEncodedUrl(String url);
 }

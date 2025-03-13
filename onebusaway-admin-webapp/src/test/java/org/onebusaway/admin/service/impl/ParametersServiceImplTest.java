@@ -112,6 +112,7 @@ public class ParametersServiceImplTest {
 		// an empty file throws an exception, we must have a valid json file
 		File tmpFile = File.createTempFile("config-", ".json");
 		tmpFile.deleteOnExit();
+		service.setConfigFile(tmpFile.toURI().getPath());
 		// force an exception and then confirm success is false
 		boolean success = service.saveParameters(configParameters);
 		

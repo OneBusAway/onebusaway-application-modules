@@ -154,7 +154,9 @@ public class TripEntriesFactory {
 
   private void setupExecutor() {
     if (_executor == null) {
-      int cpus = Runtime.getRuntime().availableProcessors();
+      // there is a bug buried deep here when we are highly parallel and frequency generation fails
+      // int cpus = Runtime.getRuntime().availableProcessors();
+      int cpus = 1;
       _executor = Executors.newFixedThreadPool(cpus);
       _log.info("created threadpool of " + cpus);
     }

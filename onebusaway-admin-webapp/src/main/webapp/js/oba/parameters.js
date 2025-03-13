@@ -18,7 +18,8 @@
 jQuery(function() {
 	//Initialize the accordion control
 	$("#accordion").accordion({
-		autoHeight: false
+		autoHeight: false,
+		heightStyle: "content"
 	});
 	
 	//Allow only positive numbers for text boxes with numeric units

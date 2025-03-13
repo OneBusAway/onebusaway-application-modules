@@ -45,7 +45,7 @@ if(typeof OBA !== 'undefined' &amp;&amp; typeof OBA.Config !== 'undefined') {
 	OBA.Config.legendVisibility='<s:property value="legendVisibility" />';
 
 	OBA.Config.siriSMUrl = "<s:property value="siriBaseURL" />" + "/stop-monitoring.json?key=" + OBA.Config.obaApiKey;
-	OBA.Config.siriVMUrl = "<s:property value="siriBaseURL" />" + "/vehicle-monitoring.json?key=" + OBA.Config.obaApiKey;
+	OBA.Config.siriVMUrl = "<s:property value="siriBaseURL" />" + "/vehicle-monitoring.json?key=" + OBA.Config.obaApiKey + "&amp;ShowRawLocation=true";
 	OBA.Config.apiBaseUrl = "<s:property value="apiBaseURL" />";
 	OBA.Config.timeApiUrl = "<s:property value="apiBaseURL" />" + "/api/where/current-time.json?key=" + OBA.Config.obaApiKey;
 	OBA.Config.showSMS = "<s:property value="showSMS" />";

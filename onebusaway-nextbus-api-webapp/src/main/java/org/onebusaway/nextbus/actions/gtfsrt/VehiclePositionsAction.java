@@ -104,7 +104,8 @@ public class VehiclePositionsAction extends NextBusApiBase  implements
                     String gtfsrtUrl = getServiceUrl(agencyId, VEHICLE_UPDATES_COMMAND);
                     try {
                         Map<String, String> headersMap = _configMapUtil.getConfig(agencyId).getHeadersMap();
-                        remoteFeedMessage = _httpUtil.getFeedMessage(gtfsrtUrl, 30, headersMap);
+                        Map<String, String> paramsMap = _configMapUtil.getConfig(agencyId).getParamsMap();
+                        remoteFeedMessage = _httpUtil.getFeedMessage(gtfsrtUrl, 30, headersMap, paramsMap);
                         if (feedMessage == null) {
                             if (remoteFeedMessage.hasHeader()
                                     && remoteFeedMessage.getHeader().hasTimestamp()
