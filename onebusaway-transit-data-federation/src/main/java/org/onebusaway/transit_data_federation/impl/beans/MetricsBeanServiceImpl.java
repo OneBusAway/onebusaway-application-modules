@@ -37,7 +37,6 @@ import java.util.*;
 
 @Component
 public class MetricsBeanServiceImpl implements MetricsBeanService {
-  
   @Autowired
   private TransitDataService _transitDataService;
 
@@ -53,7 +52,6 @@ public class MetricsBeanServiceImpl implements MetricsBeanService {
     }
     return dataSources;
   }
-  
   protected static Logger _log = LoggerFactory.getLogger(MetricsBeanServiceImpl.class);
 
   @Override
