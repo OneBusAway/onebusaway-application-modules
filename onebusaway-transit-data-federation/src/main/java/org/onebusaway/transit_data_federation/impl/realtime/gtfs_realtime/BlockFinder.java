@@ -17,14 +17,13 @@ package org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime;
 
 import org.apache.commons.collections4.map.PassiveExpiringMap;
 import org.onebusaway.collections.MappingLibrary;
-import org.onebusaway.container.refresh.Refreshable;
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.gtfs.model.calendar.LocalizedServiceId;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
-import org.onebusaway.transit_data_federation.impl.RefreshableResources;
-import org.onebusaway.transit_data_federation.services.blocks.BlockCalendarService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.ServiceIdActivation;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.dynamic.DynamicBlockConfigurationEntryImpl;
 import org.slf4j.Logger;
@@ -42,14 +41,14 @@ public class BlockFinder {
 
   private static Logger _log = LoggerFactory.getLogger(BlockFinder.class);
 
-  private final BlockCalendarService _blockCalendarService;
+  private final GtfsRealtimeServiceSource _serviceSource;
+
   public final Map<AgencyAndId, BlockServiceDate> _cache = new PassiveExpiringMap<>(30 * 60 * 1000);
 
-  public BlockFinder(BlockCalendarService blockCalendarService) {
-    _blockCalendarService = blockCalendarService;
+  public BlockFinder(GtfsRealtimeServiceSource serviceSource) {
+    _serviceSource = serviceSource;
   }
 
-  @Refreshable(dependsOn = RefreshableResources.TRANSIT_GRAPH)
   public void reset() {
     _cache.clear();
   }
@@ -61,7 +60,7 @@ public class BlockFinder {
    */
   public BlockServiceDate getBlockServiceDateFromTrip(TripEntry tripEntry,
                                                       long currentTime) {
-    if (!_cache.containsKey(tripEntry.getId())) { // note cache may contain null result
+    if (!_cache.containsKey(tripEntry.getId())) {
       BlockServiceDate blockServiceDate = getBlockServiceDateFromTripUnCached(tripEntry, currentTime);
       _cache.put(tripEntry.getId(), blockServiceDate);
     }
@@ -73,7 +72,7 @@ public class BlockFinder {
     ServiceDate serviceDate;
     List<ServiceDate> possibleServiceDates = getPossibleServiceDates(currentTime);
     for (ServiceDate serviceDateGuess : possibleServiceDates) {
-      BlockInstance blockInstance = _blockCalendarService.getBlockInstance(tripEntry.getBlock().getId(),
+      BlockInstance blockInstance = _serviceSource.getBlockCalendarService().getBlockInstance(tripEntry.getBlock().getId(),
                 serviceDateGuess.getAsDate().getTime());
       if (blockInstance != null) {
         serviceDate = new ServiceDate(new Date(blockInstance.getServiceDate()));
@@ -87,7 +86,10 @@ public class BlockFinder {
       }
     }
     // log this failure
-    _log.error("block {} of trip {} not found on service dates {}", tripEntry.getBlock().getId(), tripEntry.getId(), possibleServiceDates);
+    LocalizedServiceId serviceId = tripEntry.getServiceId();
+    Set<Date> datesForServiceIds = _serviceSource.getCalendarService().getDatesForServiceIds(new ServiceIdActivation(serviceId));
+    _log.error("block {} of trip {} with serviceId {}/{} not found on service dates {}",
+            tripEntry.getBlock().getId(), tripEntry.getId(), serviceId, datesForServiceIds, possibleServiceDates);
     return null;
   }
 

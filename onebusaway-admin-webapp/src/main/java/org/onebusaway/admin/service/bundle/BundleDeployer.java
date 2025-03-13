@@ -19,10 +19,12 @@ import java.util.List;
 
 import org.onebusaway.transit_data_federation.bundle.model.BundleStatus;
 
+import javax.ws.rs.core.Response;
 
 
 public interface BundleDeployer {
   void setup();
-  void deploy(BundleStatus status, String path);
+  void deploy(BundleStatus status, String path, String nameFilter);
   List<String> listStagedBundles(String path);
+  Response delete(String name);
 }

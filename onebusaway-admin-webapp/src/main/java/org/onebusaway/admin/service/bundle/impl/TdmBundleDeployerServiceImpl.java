@@ -90,6 +90,12 @@ public class TdmBundleDeployerServiceImpl implements BundleDeployerService{
     return Response.ok(json).build();
   }
 
+  @Override
+  public Response deployName(String name) {
+    _log.error("deployName not implemented");
+    return null;
+  }
+
   /**
    * query the status of a requested bundle deployment
    * @param id the id of a BundleDeploymentStatus
@@ -139,6 +145,12 @@ public class TdmBundleDeployerServiceImpl implements BundleDeployerService{
   @Override
   public String getLatestBundleId() {
     _log.error("getLatestBundleId not implemented");
+    return null;
+  }
+
+  @Override
+  public Response delete(String name) {
+    _log.error("delete not implemented");
     return null;
   }
 

@@ -41,6 +41,7 @@ public class DirectoryBundleStagerImpl implements BundleStager {
   
   private String _builtBundleDirectory;
   private String _stagingDirectory;
+  private boolean _cleanupStagingEnabled = true;
   
   private FileUtility _fileUtil;
   
@@ -80,13 +81,14 @@ public class DirectoryBundleStagerImpl implements BundleStager {
     File srcFile = new File(srcDir, bundleName + ".tar.gz");
     File destDir = new File(this.getStagedBundleDirectory());
     _log.info("deleting " + destDir);
-    // cleanup from past run
-    try {
-      FileUtils.deleteDirectory(destDir);
-    } catch (Exception any) {
-      _log.error("deleteDir failed with :", any);
+    if (_cleanupStagingEnabled) {
+      // cleanup from past run
+      try {
+        FileUtils.deleteDirectory(destDir);
+      } catch (Exception any) {
+        _log.error("deleteDir failed with :", any);
+      }
     }
-    
     try{
       _log.info("making directory" + destDir);
       destDir.mkdir();

@@ -39,14 +39,16 @@
 
     // set CSS transition event type
     if ( $.support.transition ) {
-      transitionEnd = "TransitionEnd"
-      if ( $.browser.webkit ) {
-      	transitionEnd = "webkitTransitionEnd"
-      } else if ( $.browser.mozilla ) {
-      	transitionEnd = "transitionend"
-      } else if ( $.browser.opera ) {
-      	transitionEnd = "oTransitionEnd"
+      var transEndEventNames = {
+        'WebkitTransition' : 'webkitTransitionEnd',
+        'MozTransition'    : 'transitionend',
+        'OTransition'      : 'oTransitionEnd',
+        'msTransition'     : 'MSTransitionEnd',
+        'transition'       : 'transitionend'
       }
+      var transitionPropName = Modernizr.prefixed('transition')
+
+      transitionEnd = transEndEventNames[ transitionPropName ]
     }
 
   })
@@ -120,7 +122,7 @@
         
         $tip
         	.find('.close')
-        	.click( function(e) { e.preventDefault(); $tip.hide(); });
+        	.on("click",  function(e) { e.preventDefault(); $tip.hide(); });
 
         $tip
           .css(tp)
@@ -146,7 +148,7 @@
       }
            
       $.support.transition && this.$tip.hasClass('fade') ?
-        $tip.bind(transitionEnd, removeElement) :
+        $tip.on(transitionEnd, removeElement) :
         removeElement()
     }
 
@@ -307,7 +309,7 @@
     }
 
     if (options.trigger != 'manual') {
-      binder   = options.live ? 'live' : 'bind'
+      binder   = 'on'
       eventIn  = options.trigger == 'hover' ? 'mouseenter' : 'focus'
       eventOut = options.trigger == 'hover' ? 'mouseleave' : 'blur'
       this[binder](eventIn, enter)[binder](eventOut, leave)

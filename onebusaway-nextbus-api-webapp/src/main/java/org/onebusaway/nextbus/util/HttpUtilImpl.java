@@ -15,11 +15,10 @@
  */
 package org.onebusaway.nextbus.util;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import com.google.transit.realtime.GtfsRealtime.FeedMessage;
 import org.apache.commons.httpclient.HttpStatus;
@@ -50,18 +49,28 @@ public class HttpUtilImpl implements HttpUtil {
 	@Autowired
 	private HttpClientPool _httpClientPool;
 
-	public JsonObject getJsonObject(final String urlString, int timeoutSeconds)
+	public JsonObject getJsonObject(final String urlString, int timeoutSeconds,
+																	Map<String, String> headersMap)
 			throws ClientProtocolException, IOException {
 		CloseableHttpResponse response = null;
 
 		try {
-			response = getResponse(urlString, timeoutSeconds);
+			response = getResponse(urlString, timeoutSeconds, headersMap);
 			HttpEntity entity = getEntity(response);
 			InputStream content = entity.getContent();
 			try{
 				JsonParser jp = new JsonParser();
-				JsonElement root = jp.parse(new InputStreamReader(content));
+				JsonElement root = jp.parse(new InputStreamReader(rewriteStream(content)));
 				JsonObject rootobj = root.getAsJsonObject();
+				if (rootobj == null)
+					return rootobj;
+				if (rootobj.has("predictions"))
+					return rootobj;
+				if (rootobj.has("data")) {
+					// alternative format, result is nested in wrapper
+					rootobj = rootobj.get("data").getAsJsonObject();
+					return rootobj;
+				}
 				return rootobj;
 			} finally{
 				content.close();
@@ -75,12 +84,44 @@ public class HttpUtilImpl implements HttpUtil {
 		}
 	}
 
-	public FeedMessage getFeedMessage(final String urlString, int timeoutSeconds) throws ClientProtocolException, IOException {
+	private InputStream rewriteStream(InputStream content) throws IOException {
+		if (content == null) return null;
+		BufferedReader reader = new BufferedReader(new InputStreamReader(content));
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(baos));
+		String line = null;
+		while ((line = reader.readLine()) != null) {
+			// map destinations -> dest
+			line = replaceToken(line, "destinations", "dest");
+			// map directionId -> dir
+			line = replaceToken(line, "directionId", "dir");
+			// map predictions -> pred
+			line = replaceToken(line, "predictions", "pred");
+			// map tripId -> trip
+			line = replaceToken(line, "tripId", "trip");
+			// map vehicleId -> vehicle
+			line = replaceToken(line, "vehicleId", "vehicle");
+			// map predictionsData -> predictions
+			line = replaceToken(line, "predictionsData", "predictions");
+			writer.write(line);
+		}
+		writer.close();
+		return new ByteArrayInputStream(baos.toByteArray());
+	}
+
+	private String replaceToken(String line, String token, String replacement) {
+		String qToken = "\"" + token + "\"";
+		String qReplacement = "\"" + replacement + "\"";
+		return line.replace(qToken, qReplacement);
+	}
+
+	public FeedMessage getFeedMessage(final String urlString, int timeoutSeconds,
+																		Map<String, String> headersMap) throws ClientProtocolException, IOException {
 
 		CloseableHttpResponse response = null;
 
 		try {
-			response = getResponse(urlString, timeoutSeconds);
+			response = getResponse(urlString, timeoutSeconds, headersMap);
 			HttpEntity entity = getEntity(response);
 			InputStream content = entity.getContent();
 			try{
@@ -100,8 +141,12 @@ public class HttpUtilImpl implements HttpUtil {
 		}
 	}
 
-	public CloseableHttpResponse getResponse(String urlString, int timeoutSeconds) throws ClientProtocolException, IOException{
+	public CloseableHttpResponse getResponse(String urlString, int timeoutSeconds,
+																					 Map<String, String> headersMap) throws ClientProtocolException, IOException{
 		HttpGet request = new HttpGet(getEncodedUrl(urlString));
+		if (headersMap != null) {
+			headersMap.forEach(request::setHeader);
+		}
 		RequestConfig.Builder config = RequestConfig.custom()
 				.setConnectTimeout(timeoutSeconds * 1000)
 				.setSocketTimeout(timeoutSeconds * 1000);

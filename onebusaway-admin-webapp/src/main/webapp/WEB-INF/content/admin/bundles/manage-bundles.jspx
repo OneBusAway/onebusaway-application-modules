@@ -38,9 +38,6 @@
 	<!-- //prevent jspx minimization -->
 </link>
 
-<!--
-<s:url var="url" value="/js/biblio/jquery-3.1.1.min.js" />
--->
 <s:url var="url" value="/js/biblio/jquery.js">
 </s:url>
 <script type="text/javascript" src="${url}">
@@ -48,16 +45,12 @@
 	
 </script>
 
-<!--
-<s:url var="url" value="http://code.jquery.com/jquery-migrate-1.4.1.js">
+<s:url var="url" value="/js/biblio/jquery-migrate-3.4.1.js">
 </s:url>
-
 <script type="text/javascript" src="${url}">
--->
-<!-- //prevent jspx minimization -->
-<!--
+	<!-- //prevent jspx minimization -->
+
 </script>
--->
 
 <s:url var="url" value="/js/biblio/jquery.ui.js">
 	<!-- //prevent jspx minimization -->
@@ -66,13 +59,75 @@
 <!-- //prevent jspx minimization -->
 	
 </script>
-
+<!-- setup init and libraries -->
 <s:url var="url" value="/js/oba/bundles/bundles.js">
 	<!-- //prevent jspx minimization -->
 </s:url>
 <script type="text/javascript" src="${url}">
-<!-- //prevent jspx minimization -->
-
+	<!-- //prevent jspx minimization -->
+</script>
+<!-- tab 1 -->
+<s:url var="url" value="/js/oba/bundles/bundles-Create.js">
+	<!-- //prevent jspx minimization -->
+</s:url>
+<script type="text/javascript" src="${url}">
+	<!-- //prevent jspx minimization -->
+</script>
+<!-- tab 2 -->
+<s:url var="url" value="/js/oba/bundles/bundles-Upload.js">
+	<!-- //prevent jspx minimization -->
+</s:url>
+<script type="text/javascript" src="${url}">
+	<!-- //prevent jspx minimization -->
+</script>
+<!-- tab 3 -->
+<s:url var="url" value="/js/oba/bundles/bundles-Validate.js">
+	<!-- //prevent jspx minimization -->
+</s:url>
+<script type="text/javascript" src="${url}">
+	<!-- //prevent jspx minimization -->
+</script>
+<!-- tab 4 -->
+<s:url var="url" value="/js/oba/bundles/bundles-Build.js">
+	<!-- //prevent jspx minimization -->
+</s:url>
+<script type="text/javascript" src="${url}">
+	<!-- //prevent jspx minimization -->
+</script>
+<!-- tab 5 -->
+<s:url var="url" value="/js/oba/bundles/bundles-Compare.js">
+	<!-- //prevent jspx minimization -->
+</s:url>
+<script type="text/javascript" src="${url}">
+	<!-- //prevent jspx minimization -->
+</script>
+<!-- tab 6 -->
+<s:url var="url" value="/js/oba/bundles/bundles-Stage.js">
+	<!-- //prevent jspx minimization -->
+</s:url>
+<script type="text/javascript" src="${url}">
+	<!-- //prevent jspx minimization -->
+</script>
+<!-- tab 7 -->
+<s:url var="url" value="/js/oba/bundles/bundles-Deploy.js">
+	<!-- //prevent jspx minimization -->
+</s:url>
+<script type="text/javascript" src="${url}">
+	<!-- //prevent jspx minimization -->
+</script>
+<!-- tab 8 -->
+<s:url var="url" value="/js/oba/bundles/bundles-Download.js">
+	<!-- //prevent jspx minimization -->
+</s:url>
+<script type="text/javascript" src="${url}">
+	<!-- //prevent jspx minimization -->
+</script>
+<!-- tab 9 -->
+<s:url var="url" value="/js/oba/bundles/bundles-Sync.js">
+	<!-- //prevent jspx minimization -->
+</s:url>
+<script type="text/javascript" src="${url}">
+	<!-- //prevent jspx minimization -->
 </script>
 </head>
 <body>
@@ -84,13 +139,13 @@
 				<ul id="breadcrumb">
 					<li><a href="#Create" title="Create Directory"><span>1. <s:text name="manage-bundles.createTitle"/></span></a></li>
 					<li><a href="#Upload" title="Upload Files"><span>2. <s:text name="manage-bundles.uploadTitle"/></span></a></li>
-					<li><a href="#Validate" title="Pre-validate inputs"><span>3. <s:text name="manage-bundles.validateTitle"/></span></a></li>
+					<li><a href="#Validate" title="Pre-validate inputs"><span class="unusedTab">3. <s:text name="manage-bundles.validateTitle"/></span></a></li>
 					<li><a href="#Build" title="Build And Validate"><span>4. <s:text name="manage-bundles.buildTitle"/></span></a></li>
-					<li><a href="#Compare" title="Compare Bundle"><span>5. <s:text name="manage-bundles.compareTitle"/></span></a></li>
+					<li><a href="#Compare" title="Compare Bundle"><span class="unusedTab">5. <s:text name="manage-bundles.compareTitle"/></span></a></li>
 					<li><a href="#Stage" title="Stage Bundle"><span>6. <s:text name="manage-bundles.stageTitle"/></span></a></li>
 					<li><a href="#Deploy" title="Deploy Bundle"><span>7. <s:text name="manage-bundles.deployTitle"/></span></a></li>
-					<li><a href="#Download" title="Download Bundle"><span>8. <s:text name="manage-bundles.downloadTitle"/></span></a></li>
-					<li><a href="#Sync" title="Sync Bundle"><span>9. <s:text name="manage-bundles.syncTitle"/></span></a></li>
+					<li><a href="#Download" title="Download Bundle"><span class="unusedTab">8. <s:text name="manage-bundles.downloadTitle"/></span></a></li>
+					<li><a href="#Sync" title="Sync Bundle"><span class="unusedTab">9. <s:text name="manage-bundles.syncTitle"/></span></a></li>
 				</ul>
 
 				<div id="Create">

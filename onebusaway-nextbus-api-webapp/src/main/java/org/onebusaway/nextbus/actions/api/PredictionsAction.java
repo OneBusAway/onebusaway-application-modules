@@ -19,9 +19,11 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.*;
 
+import com.google.gson.JsonObject;
 import org.apache.struts2.rest.DefaultHttpHeaders;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.nextbus.impl.exceptions.*;
+import org.onebusaway.nextbus.impl.util.ConfigurationUtil;
 import org.onebusaway.nextbus.model.RouteStopId;
 import org.onebusaway.nextbus.model.nextbus.Body;
 import org.onebusaway.nextbus.model.nextbus.BodyError;
@@ -153,7 +155,7 @@ public class PredictionsAction extends NextBusApiBase implements
       processRoutes(agencyId, route, stopIds, routeIds, agencyRouteIdStopIdMap);
 
       for (Map.Entry<String, Set<RouteStopId>> entry : agencyRouteIdStopIdMap.entrySet()) {
-        String uri = buildPredictionsUrl(entry.getKey(), entry.getValue());
+        String uri = buildPredictionsUrl(_configMapUtil.getConfig(agencyId), entry.getKey(), entry.getValue());
         allPredictions.addAll(getRemotePredictions(uri));
       }
 
@@ -230,33 +232,68 @@ public class PredictionsAction extends NextBusApiBase implements
     routeStopIds.add(new RouteStopId(routeId, stopId));
   }
 
-  private String buildPredictionsUrl(String agencyId, Set<RouteStopId> routeStopIds){
+  private String buildPredictionsUrl(ConfigurationUtil config, String agencyId, Set<RouteStopId> routeStopIds){
+      String serviceUrl = getServiceUrl(agencyId, PREDICTIONS_COMMAND) + "?";
+      StringBuilder routeStop = new StringBuilder();
 
-    String serviceUrl = getServiceUrl(agencyId) + agencyId + PREDICTIONS_COMMAND + "?";
-    StringBuilder routeStop = new StringBuilder();
+      toString(routeStop, config, routeStopIds);
 
-    for(RouteStopId routeStopId: routeStopIds){
-      routeStop.append("rs=");
-      routeStop.append(routeStopId.getRouteId().getId());
-      routeStop.append("|");
-      routeStop.append(routeStopId.getStopId().getId());
-      routeStop.append("&");
+
+      String uri = serviceUrl + routeStop.toString() + "format=" + REQUEST_TYPE;
+      _log.info(uri);
+
+      return uri;
+  }
+
+  private void toString(StringBuilder sb, ConfigurationUtil config, Set<RouteStopId> routeStopIds) {
+    if (config.getBaseUrlOverride() == null) {
+      // format I: Transitime/TTC
+      // http://localhost:8080/api/v1/key/prod3273b0/agency/1/command/predictions?rs=X2|5988&format=json
+      for(RouteStopId routeStopId: routeStopIds) {
+        sb.append(toString(routeStopId));
+      }
+    } else {
+      // format II.a: External API
+      // https://localhost/real-time/wmata/predictions?stop=5988&format=json
+      sb.append("stop=");
+      sb.append(routeStopIds.iterator().next().getStopId().getId());
+      sb.append("&");
+
+      // format II.b: External API
+      // https://localhost/real-time/wmata/predictions?stop=5988&route=X2&stop=5988&format=json
+      // TODO:  not supported
     }
 
-    String uri = serviceUrl + routeStop.toString() + "format=" + REQUEST_TYPE;
-    _log.info(uri);
+  }
 
-    return uri;
+  private String toString(RouteStopId routeStopId) {
+    StringBuilder routeStop = new StringBuilder();
+    routeStop.append("rs=");
+    routeStop.append(routeStopId.getRouteId().getId());
+    routeStop.append("|");
+    routeStop.append(routeStopId.getStopId().getId());
+    routeStop.append("&");
+    return routeStop.toString();
   }
 
   private List<Predictions> getRemotePredictions(String uri) throws IOException {
     int timeout = _configMapUtil.getConfig(agencyId).getHttpTimeoutSeconds();
-    JsonArray predictionsJson = _httpUtil.getJsonObject(uri, timeout).getAsJsonArray(
-            "predictions");
+    Map<String, String> headersMap = _configMapUtil.getConfig(agencyId).getHeadersMap();
+    JsonArray predictionsJson = null;
+    JsonObject jsonObject = _httpUtil.getJsonObject(uri, timeout, headersMap);
+    if (jsonObject.has("predictions")) {
+      predictionsJson = jsonObject.getAsJsonArray("predictions");
+    } else if (jsonObject.has("pred")) {
+      predictionsJson = jsonObject.getAsJsonArray("pred");
+    }
     Type listType = new TypeToken<List<Predictions>>() {
     }.getType();
 
     List<Predictions> predictions = new Gson().fromJson(predictionsJson, listType);
+    if (predictions == null) {
+      _log.error("unexpected result did not yield predictions for {}: {}", uri, predictionsJson);
+      return new ArrayList<>();
+    }
     return predictions;
   }
 

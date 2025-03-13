@@ -33,8 +33,8 @@ jQuery(function() {
 
 
 	//Handle reset and save click events
-	$("#results #reset").click(resetToPrevious);
-	$("#results #save").click(saveParameters);
+	$("#results #reset").on("click", resetToPrevious);
+	$("#results #save").on("click", saveParameters);
 	
 	window.onbeforeunload = confirmMessage;
 
@@ -66,9 +66,9 @@ function confirmMessage() {
 
 function listenForChanges() {
 	//Listen to change event and mark inputs as changed
-	$("input").bind("keyup propertychange paste", function() {
+	$("input").on("keyup propertychange paste", function() {
 		$(this).addClass("changed");
-		$("#results input[type='button']").removeAttr("disabled").css("color", "#595454");
+		$("#results input[type='button']").prop("disabled", false).css("color", "#595454");
 	});
 
 }

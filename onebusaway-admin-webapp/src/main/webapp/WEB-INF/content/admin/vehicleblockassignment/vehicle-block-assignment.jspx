@@ -24,7 +24,7 @@
         <sec:csrfMetaTags />
 
         <!-- STYLING -->
-        <s:url var="url" value="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" />
+        <s:url var="url" value="/css/jquery-ui.css" />
         <link rel="stylesheet" type="text/css" href="${url}">
             <!-- //prevent jspx minimization -->
         </link>
@@ -34,28 +34,33 @@
             <!-- //prevent jspx minimization -->
         </link>
 
-        <s:url var="url" value="//cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css" />
+        <!-- JAVASCRIPT -->
+        <s:url var="url" value="/js/biblio/jquery.js">
+        </s:url>
+        <script type="text/javascript" src="${url}">
+            <!-- //prevent jspx minimization -->
+        </script>
+
+        <s:url var="url" value="/js/biblio/jquery.ui.js">
+            <!-- //prevent jspx minimization -->
+        </s:url>
+        <script type="text/javascript" src="${url}">
+            <!-- //prevent jspx minimization -->
+        </script>
+
+        <s:url var="url" value="https://cdn.datatables.net/2.0.8/js/dataTables.min.js">
+            <!-- //prevent jspx minimization -->
+        </s:url>
+        <script type="text/javascript" src="${url}">
+            <!-- //prevent jspx minimization -->
+        </script>
+
+        <s:url var="url" value="https://cdn.datatables.net/2.0.8/css/dataTables.dataTables.min.css" />
         <link rel="stylesheet" type="text/css" href="${url}">
             <!-- //prevent jspx minimization -->
         </link>
 
-
-        <!-- JAVASCRIPT -->
-        <s:url var="url" value="https://code.jquery.com/jquery-1.12.4.js">
-        </s:url>
-        <script type="text/javascript" src="${url}">
-            <!-- //prevent jspx minimization -->
-        </script>
-
-        <s:url var="url" value="https://code.jquery.com/ui/1.12.1/jquery-ui.js">
-            <!-- //prevent jspx minimization -->
-        </s:url>
-        <script type="text/javascript" src="${url}">
-            <!-- //prevent jspx minimization -->
-        </script>
-
-        <s:url var="url" value="//cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js">
-            <!-- //prevent jspx minimization -->
+        <s:url var="url" value="https://code.jquery.com/jquery-migrate-3.4.1.js">
         </s:url>
         <script type="text/javascript" src="${url}">
             <!-- //prevent jspx minimization -->

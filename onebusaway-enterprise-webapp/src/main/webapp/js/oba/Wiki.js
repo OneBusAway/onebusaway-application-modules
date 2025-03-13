@@ -40,19 +40,19 @@ OBA.Wiki = function() {
 		resize();
 
 		// call when the window is resized
-		theWindow.resize(resize);
+		theWindow.on("resize", resize);
 	}
 	
 	function googleTranslateElementInit() {
 		
 		var translate_element = jQuery("#google_translate_element");		
-		translate_element.click(function (e) {
+		translate_element.on("click", function (e) {
 			e.preventDefault();
 			translate_element.html(' ')
 							 .attr('src','//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit');
 			new google.translate.TranslateElement({pageLanguage: 'en', 
 				layout: google.translate.TranslateElement.InlineLayout.SIMPLE}, 'google_translate_element');
-			translate_element.unbind('click');
+			translate_element.off('click');
 		});						
 	}
 		
@@ -64,9 +64,5 @@ OBA.Wiki = function() {
 	};
 };
 
-//for IE: only start using google maps when the VML/SVG namespace is ready
-if(jQuery.browser.msie) {
-	window.onload = function() { OBA.Wiki().initialize(); };
-} else {
-	jQuery(document).ready(function() { OBA.Wiki().initialize(); });
-}
+
+jQuery(document).ready(function() { OBA.Wiki().initialize(); });

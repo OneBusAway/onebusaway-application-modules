@@ -20,13 +20,28 @@ import java.util.Map;
 
 public class ConfigurationUtil {
   
+  private String protocol = "http";
   private String transiTimeHost = "localhost";
   private String transiTimePort = "8080";
   private String transiTimeKey = "8a3273b0";
+  private String baseUrlOverride = null;
+  private String predictionCommand;
+  private String tripUpdatesCommand;
+  private String vehiclePositionsCommand;
+  private Map<String, String> headersMap = new HashMap<>();
   private Map<String,String> agencyMapper = new HashMap<String,String>(1);
   private int httpTimeoutSeconds = 15;
   
   public ConfigurationUtil(){}
+
+  public String getProtocol() {
+    return protocol;
+  }
+
+  public void setProtocol(String protocol) {
+    this.protocol = protocol;
+  }
+
   public String getTransiTimeHost() {
     return transiTimeHost;
   }
@@ -65,6 +80,46 @@ public class ConfigurationUtil {
 
   public void setHttpTimeoutSeconds(int httpTimeoutSeconds) {
     this.httpTimeoutSeconds = httpTimeoutSeconds;
+  }
+
+  public String getBaseUrlOverride() {
+    return baseUrlOverride;
+  }
+
+  public void setBaseUrlOverride(String urlOverride) {
+    this.baseUrlOverride = urlOverride;
+  }
+
+  public void setPredictionCommand(String predictionCommand) {
+    this.predictionCommand = predictionCommand;
+  }
+
+  public void setTripUpdatesCommand(String tripUpdatesCommand) {
+    this.tripUpdatesCommand = tripUpdatesCommand;
+  }
+
+  public void setVehiclePositionsCommand(String vehiclePositionsCommand) {
+    this.vehiclePositionsCommand = vehiclePositionsCommand;
+  }
+
+  public Map<String, String> getHeadersMap() {
+    return headersMap;
+  }
+
+  public void setHeadersMap(Map<String, String> headersMap) {
+    this.headersMap = headersMap;
+  }
+
+  public String getPredictionCommand() {
+    return predictionCommand;
+  }
+
+  public String getTripUpdatesCommand() {
+    return tripUpdatesCommand;
+  }
+
+  public String getVehiclePositionsCommand() {
+    return vehiclePositionsCommand;
   }
 
   public String toString() {

@@ -100,7 +100,7 @@ public class PredictionsForMultiStopsAction extends NextBusApiBase implements
 
           String agencyId = entry.getKey();
 
-          String serviceUrl = getServiceUrl(agencyId) + agencyId + PREDICTIONS_COMMAND + "?";
+          String serviceUrl = getServiceUrl(agencyId, PREDICTIONS_COMMAND) + "?";
 
           Set<RouteStopId> routeStopIds = entry.getValue();
 
@@ -111,7 +111,8 @@ public class PredictionsForMultiStopsAction extends NextBusApiBase implements
           _log.info(uri);
 
           int timeout = _configMapUtil.getConfig(agencyId).getHttpTimeoutSeconds();
-          JsonArray predictionsJson = _httpUtil.getJsonObject(uri, timeout).getAsJsonArray(
+          Map<String, String> headersMap = _configMapUtil.getConfig(agencyId).getHeadersMap();
+          JsonArray predictionsJson = _httpUtil.getJsonObject(uri, timeout, headersMap).getAsJsonArray(
                   "predictions");
           Type listType = new TypeToken<List<Predictions>>() {
           }.getType();

@@ -58,6 +58,10 @@ public class DataSourceMonitorImpl implements DataSourceMonitor {
     String feedId = result.getFeedId();
     String env = System.getProperty("oba.cloud.env");
     if (env == null) env = "test";
+    String bypass = System.getProperty("oba.gtfsrt.skip_monitor");
+    if ("true".equals(bypass)) {
+      return;
+    }
 
     es.publishMetric(env, "Matched", "feed", feedId, result.getMatchedTripIds().size());
     es.publishMetric(env, "Added", "feed", feedId, result.getAddedTripIds().size());

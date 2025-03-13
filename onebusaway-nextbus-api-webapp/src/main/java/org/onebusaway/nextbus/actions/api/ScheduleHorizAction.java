@@ -18,6 +18,7 @@ package org.onebusaway.nextbus.actions.api;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.struts2.rest.DefaultHttpHeaders;
 import org.onebusaway.gtfs.model.AgencyAndId;
@@ -75,13 +76,14 @@ public class ScheduleHorizAction extends NextBusApiBase implements
 
     if (isValid(body, routeIds) && hasServiceUrl(agencyId)) {
 
-      String serviceUrl = getServiceUrl(agencyId) + agencyId + SCHEDULE_COMMAND + "?";
+      String serviceUrl = getServiceUrl(agencyId, SCHEDULE_COMMAND) + "?";
       String route = "r=" + getIdNoAgency(routeId);
       String uri = serviceUrl + route + "&format=" + REQUEST_TYPE;
 
       try {
         int timeout = _configMapUtil.getConfig(agencyId).getHttpTimeoutSeconds();
-        JsonArray scheduleJson = _httpUtil.getJsonObject(uri, timeout).getAsJsonArray(
+        Map<String, String> headersMap = _configMapUtil.getConfig(agencyId).getHeadersMap();
+        JsonArray scheduleJson = _httpUtil.getJsonObject(uri, timeout, headersMap).getAsJsonArray(
             "schedule");
         Type listType = new TypeToken<List<ScheduleRoute>>() {
         }.getType();

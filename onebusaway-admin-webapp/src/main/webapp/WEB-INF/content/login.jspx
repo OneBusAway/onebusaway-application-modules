@@ -22,7 +22,7 @@
 	<title><s:text name="admin.title"/>: Login</title>
 	<script type="text/javascript">
 		function goBackToLogin() {
-			document.getElementById('tryagain').click();
+			document.getElementById('tryagain').trigger("click");
 		}
 	</script>
 </head>

@@ -24,6 +24,7 @@
 <head>
 
 <title><s:text name="ServiceAlertEdit" /></title>
+
 <s:url var="url" value="/css/jquery-ui.css" />
 <link rel="stylesheet" type="text/css" href="${url}">
 	<!-- //prevent jspx minimization -->
@@ -62,6 +63,12 @@
 	<!-- //prevent jspx minimization -->
 </s:url>
 <link rel="stylesheet" type="text/css" href="${url}" ></link>
+
+	<s:url var="url" value="/js/biblio/jquery-migrate-3.4.1.js" />
+	<script type="text/javascript" src="${url}">
+		<!-- //prevent jspx minimization -->
+
+	</script>
 
 <s:url var="url" value="/api/remote-config.action">
 	<s:param name="v"><s:property value="frontEndVersion" /></s:param>

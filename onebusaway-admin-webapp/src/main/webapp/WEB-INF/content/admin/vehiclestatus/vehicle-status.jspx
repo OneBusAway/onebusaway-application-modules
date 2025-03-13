@@ -36,12 +36,12 @@
 	<link rel="stylesheet" type="text/css" href="${url}">
 		<!-- //prevent jspx minimization -->
 	</link>
-	
+
 	<s:url var="url" value="/js/biblio/jquery.js" />
 	<script type="text/javascript" src="${url}">
 	<!-- //prevent jspx minimization -->
 	</script>
-	
+
 	<s:url var="url" value="/js/biblio/jquery.ui.js" />
 	<script type="text/javascript" src="${url}">
 	<!-- //prevent jspx minimization -->
@@ -51,12 +51,16 @@
 	<script type="text/javascript" src="${url}">
 	<!-- //prevent jspx minimization -->
 	</script>
-	
+
 	<s:url var="url" value="/js/biblio/jqGrid.js" />
 	<script type="text/javascript" src="${url}">
 	<!-- //prevent jspx minimization -->
 	</script>
-	
+
+	<s:url var="url" value="/js/biblio/jquery-migrate-3.4.1.js" />
+	<script type="text/javascript" src="${url}">
+	<!-- //prevent jspx minimization -->
+	</script>
 	
 	<s:url var="url" value="/js/biblio/ember.js" />
 	<script type="text/javascript" src="${url}">

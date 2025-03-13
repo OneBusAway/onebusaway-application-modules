@@ -15,11 +15,11 @@
  */
 jQuery(function() {
 	//toggle Deploy deploy progress list
-	jQuery("#deployConfig #deployConfig_progress #expand").bind({
+	jQuery("#deployConfig #deployConfig_progress #expand").on({
 			'click' : toggleDeployConfigResultList});
 
-	jQuery("#deployConfig_listButton").click(onDeployListClick);
-	jQuery("#deployConfig_deployButton").click(onDeployClick);
+	jQuery("#deployConfig_listButton").on("click", onDeployListClick);
+	jQuery("#deployConfig_deployButton").on("click", onDeployClick);
 
 	onDeployListClick();
 });

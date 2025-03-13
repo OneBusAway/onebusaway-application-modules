@@ -116,7 +116,7 @@ OBA.Presentation = function() {
 	    		w.text(that.getNameForRoute(this));
 	    		w.appendTo(shortNameRoutesPanel);
 	    		if( routeClickHandler ) {
-	    			w.click(function() {
+	    			w.on("click", function() {
 	    				routeClickHandler(route,stop);
 	    			});
 	    		}
@@ -138,7 +138,7 @@ OBA.Presentation = function() {
 	    		w.text(name);
 	    		w.appendTo(longNameRoutesPanel);
 	    		if( routeClickHandler ) {
-	    			w.click(function() {
+	    			w.on("click", function() {
 	    				routeClickHandler(route,stop);
 	    			});
 	    		}

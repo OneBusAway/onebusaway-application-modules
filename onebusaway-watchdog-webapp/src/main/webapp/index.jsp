@@ -25,6 +25,10 @@
 <!-- //prevent jspx minimization -->
 	
 </script>
+<script type="text/javascript" src="/js/biblio/jquery-migrate-3.4.1.js">
+  <!-- //prevent jspx minimization -->
+
+</script>
 <script type="text/javascript" src="/onebusaway-watchdog-webapp/js/metrics.js">
 <!-- //prevent jspx minimization -->
 	

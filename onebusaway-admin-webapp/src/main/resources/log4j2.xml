@@ -39,6 +39,10 @@
 	</Appenders>
 
 	<Loggers>
+		<!-- turn down hibernate logging -->
+		<Logger name="org.hibernate" level="error" additivity="false">
+			<AppenderRef ref="stdout" />
+		</Logger>
 <!--		<Logger name="org.hibernate.engine.internal.StatisticalLoggingSessionEventListener"-->
 <!--				level="fatal"-->
 <!--				additivity="false">-->

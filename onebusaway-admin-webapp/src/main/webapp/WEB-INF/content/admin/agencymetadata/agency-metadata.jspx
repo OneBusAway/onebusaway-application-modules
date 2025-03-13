@@ -23,6 +23,7 @@
 <head>
 <title><s:text name="Agency Metadata" /></title>
 
+<!--TODO: Update jquery and plugins-->
 <s:url var="url" value="/css/jquery-ui.css" />
 <link rel="stylesheet" type="text/css" href="${url}">
 	<!-- //prevent jspx minimization -->
@@ -43,6 +44,12 @@
 </s:url>
 <script type="text/javascript" src="${url}">
 <!-- //prevent jspx minimization -->
+
+</script>
+
+<s:url var="url" value="/js/biblio/jquery-migrate-3.4.1.js" />
+<script type="text/javascript" src="${url}">
+	<!-- //prevent jspx minimization -->
 
 </script>
 

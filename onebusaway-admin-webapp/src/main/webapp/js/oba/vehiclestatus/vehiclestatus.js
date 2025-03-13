@@ -112,13 +112,13 @@ VehicleStatus.TopBarView = Ember.View.extend({
 		var controller = this.get('controller');
 		//Clear previous autorefresh interval if set
 		if($("#enableAutoRefresh").is(":checked")) {
-			$("#enableAutoRefresh").removeAttr("checked");
+			$("#enableAutoRefresh").prop("checked", false);
 			controller.autoRefreshGrid($("#enableAutoRefresh").checked);
 		}
 		//open dialog
 		refreshDialog.dialog('open');
 		var set = refreshDialog.find('#set');
-		set.bind({'click' : function() {
+		set.on({'click' : function() {
 			 $("#autoRefreshBox #autoRefresh").text($("#refreshRate").val() + " sec");
 			 refreshDialog.dialog('close');
 		}});
@@ -290,8 +290,8 @@ VehicleStatus.FiltersController = Ember.ArrayController.create({
 		var filters = $("#filters");
 		filters.find("input:text").val("");
 		filters.find("select").val("all");
-		$("#checkFilters #emergencyCheck").removeAttr("checked");
-		$("#checkFilters #formalInferrenceCheck").removeAttr("checked");
+		$("#checkFilters #emergencyCheck").prop("checked", false);
+		$("#checkFilters #formalInferrenceCheck").prop("checked", false);
 	}
 });
 

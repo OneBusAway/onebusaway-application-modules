@@ -56,6 +56,8 @@ public class DynamicTripBuilder {
     this._entitySource = dataSource;
   }
 
+  private boolean testLastStop = false;
+
   public BlockDescriptor createBlockDescriptor(AddedTripInfo addedTripInfo, long currentTime) {
     try {
       // from the addedTripInfo generate the trips and stops, and return in the block descriptor
@@ -121,11 +123,13 @@ public class DynamicTripBuilder {
     String actualStops = fingerprintTripInfoStops(addedTripInfo.getStops());
     String expectedStops = fingerprintBlockStops(instance.getBlock().getStopTimes());
     if (expectedStops.contains(actualStops)) {
-      // added trip info can have less stops but needs to be in the same order
-      // now make sure end stop is the same to catch short-turn changes
-      String lastAddedStop = lastStopIdAddedStop(addedTripInfo.getStops());
-      if (lastAddedStop == null || lastAddedStop.equals(lastStopIdStopTime(instance.getBlock().getStopTimes()))) {
-        return true;
+      if (testLastStop) {
+        // added trip info can have less stops but needs to be in the same order
+        // now make sure end stop is the same to catch short-turn changes
+        String lastAddedStop = lastStopIdAddedStop(addedTripInfo.getStops());
+        if (lastAddedStop == null || lastAddedStop.equals(lastStopIdStopTime(instance.getBlock().getStopTimes()))) {
+          return true;
+        }
       }
     }
     // the patterns were divergent

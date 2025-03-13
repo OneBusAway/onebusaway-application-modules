@@ -19,7 +19,8 @@
         },
         get: function(win) {
             var hash = ((win || window).location.hash).replace(/^#/, '');
-            return $.browser.mozilla ? hash : decodeURIComponent(hash);
+            // TODO: Replace browser detection with feature detection https://stackoverflow.com/a/9645810
+            return decodeURIComponent(hash);
         },
         encoder: encodeURIComponent
     };
@@ -141,9 +142,5 @@
         }
     };
 
-    if($.browser.msie && ($.browser.version < 8 || document.documentMode < 8)) {
-        $.extend(_, IframeImpl);
-    } else {
-        $.extend(_, SimpleImpl);
-    }
+    $.extend(_, SimpleImpl);
 })(jQuery);
