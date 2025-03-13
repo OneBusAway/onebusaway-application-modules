@@ -63,7 +63,6 @@ public class MetricsBeanServiceImpl implements MetricsBeanService {
     populateStopFields(bean);
 
     populateRealtimeTripFields(bean);
-    
     bean.setScheduledTripsCount(getScheduledTrips());
 
     return bean;
@@ -298,14 +297,14 @@ public class MetricsBeanServiceImpl implements MetricsBeanService {
             _log.debug("examining agency=" + mAgencyId + " with unmatched stops=" + result.getUnmatchedStopIds().size());
             if (agencyId.equals(mAgencyId)) {
               unmatchedStops += result.getUnmatchedStopIds().size();
-              return unmatchedStops;
-            } catch (Exception e) {
-            _log.error("getUnmatchedStops broke", e);
-            return 0;
             }
           }
         }
       }
+      return unmatchedStops;
+    } catch (Exception e) {
+      _log.error("getUnmatchedStops broke", e);
+      return 0;
     }
   }
 
@@ -387,7 +386,7 @@ public class MetricsBeanServiceImpl implements MetricsBeanService {
   private ArrayList<String> getMatchedStopIdsList(String agencyId, String feedId) {
     ArrayList<String> matchedStopIds = new ArrayList<String>();
     List<MonitoredDataSource> dataSources = getDataSources();
-    try {getUnmatchedTripCounts
+    try {
       if (dataSources == null || dataSources.isEmpty()) {
         _log.error("no configured data sources");
         return new ArrayList<String>();
