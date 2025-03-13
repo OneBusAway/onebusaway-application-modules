@@ -64,10 +64,5 @@ OBA.Wiki = function() {
 	};
 };
 
-//for IE: only start using google maps when the VML/SVG namespace is ready
-// TODO: determine why we do this browser check, and replace with feature detection if possible https://stackoverflow.com/a/9645810
-if(jQuery.browser.msie) {
-	window.onload = function() { OBA.Wiki().initialize(); };
-} else {
-	jQuery(document).ready(function() { OBA.Wiki().initialize(); });
-}
+
+jQuery(document).ready(function() { OBA.Wiki().initialize(); });

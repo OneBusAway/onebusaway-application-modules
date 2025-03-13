@@ -355,10 +355,10 @@
 					<groupId>com.mycila</groupId>
 					<artifactId>license-maven-plugin</artifactId>
 					<version>2.12</version>
-
 					<configuration>
 						<excludes combine.children="append">
 							<exclude>**/dateFormat.js</exclude>
+							<exclude>**/modernizr-custom.js</exclude>
 							<exclude>**/popover.js</exclude>
 							<exclude>**/GoogleTranslate.js</exclude>
 							<exclude>**/markerManager.js</exclude>
