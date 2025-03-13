@@ -63,11 +63,7 @@ public class MetricsBeanServiceImpl implements MetricsBeanService {
     populateStopFields(bean);
 
     populateRealtimeTripFields(bean);
-<<<<<<< HEAD
-
-=======
     
->>>>>>> a4bd7729e (feat(metrics): populate realtime trip counts matched in MetricsBean)
     bean.setScheduledTripsCount(getScheduledTrips());
 
     return bean;
@@ -262,7 +258,6 @@ public class MetricsBeanServiceImpl implements MetricsBeanService {
       return new ArrayList<String>();
     }
   }
-<<<<<<< HEAD
   
   /**
    * Retrieves a dictionary of agency IDs mapped to the count of unmatched stop IDs.
@@ -303,7 +298,16 @@ public class MetricsBeanServiceImpl implements MetricsBeanService {
             _log.debug("examining agency=" + mAgencyId + " with unmatched stops=" + result.getUnmatchedStopIds().size());
             if (agencyId.equals(mAgencyId)) {
               unmatchedStops += result.getUnmatchedStopIds().size();
-=======
+              return unmatchedStops;
+            } catch (Exception e) {
+            _log.error("getUnmatchedStops broke", e);
+            return 0;
+            }
+          }
+        }
+      }
+    }
+  }
 
   /**
    * Retrieves the count of matched trips on a per-agency basis.
@@ -353,19 +357,13 @@ public class MetricsBeanServiceImpl implements MetricsBeanService {
             AgencyAndId duplicatedTripId = AgencyAndIdLibrary.convertFromString(tripId);
             if (duplicatedTripId != null && agencyId.equals(duplicatedTripId.getAgencyId())) {
               tripIds.add(tripId);
->>>>>>> a4bd7729e (feat(metrics): populate realtime trip counts matched in MetricsBean)
             }
           }
         }
       }
-<<<<<<< HEAD
-      return unmatchedStops;
-    } catch (Exception e) {
-      _log.error("getUnmatchedStops broke", e);
-      return 0;
     }
+    return new ArrayList<>(tripIds);
   }
-
   /**
    * Retrieves a dictionary of agency IDs mapped to the count of matched stop IDs.
    * @return The per-agency matched stop IDs count.
@@ -389,7 +387,7 @@ public class MetricsBeanServiceImpl implements MetricsBeanService {
   private ArrayList<String> getMatchedStopIdsList(String agencyId, String feedId) {
     ArrayList<String> matchedStopIds = new ArrayList<String>();
     List<MonitoredDataSource> dataSources = getDataSources();
-    try {
+    try {getUnmatchedTripCounts
       if (dataSources == null || dataSources.isEmpty()) {
         _log.error("no configured data sources");
         return new ArrayList<String>();
@@ -411,17 +409,12 @@ public class MetricsBeanServiceImpl implements MetricsBeanService {
       _log.error("getMatchedStopCount broke", e);
       return new ArrayList<String>();
     }
-=======
-    }
-    return new ArrayList<>(tripIds);
   }
-
   /**
    * Fills in all real-time trip-related fields in the MetricsBean.
    * @param bean The MetricsBean object that is populated.
    */
   private void populateRealtimeTripFields(MetricsBean bean) {
     bean.setRealtimeTripCountsMatched(getRealtimeTripCountsMatched());
->>>>>>> a4bd7729e (feat(metrics): populate realtime trip counts matched in MetricsBean)
   }
 }
