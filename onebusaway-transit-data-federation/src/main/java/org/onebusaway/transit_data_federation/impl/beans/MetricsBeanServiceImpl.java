@@ -16,6 +16,7 @@
 package org.onebusaway.transit_data_federation.impl.beans;
 
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.util.AgencyAndIdLibrary;
 import org.onebusaway.transit_data.model.AgencyWithCoverageBean;
 import org.onebusaway.transit_data.model.ListBean;
 import org.onebusaway.transit_data.model.MetricsBean;
@@ -36,7 +37,6 @@ import java.util.*;
 
 @Component
 public class MetricsBeanServiceImpl implements MetricsBeanService {
-
   @Autowired
   private TransitDataService _transitDataService;
 
@@ -52,7 +52,6 @@ public class MetricsBeanServiceImpl implements MetricsBeanService {
     }
     return dataSources;
   }
-
   protected static Logger _log = LoggerFactory.getLogger(MetricsBeanServiceImpl.class);
 
   @Override
@@ -64,7 +63,6 @@ public class MetricsBeanServiceImpl implements MetricsBeanService {
     populateStopFields(bean);
 
     populateRealtimeTripFields(bean);
-
     bean.setScheduledTripsCount(getScheduledTrips());
 
     return bean;
@@ -92,6 +90,7 @@ public class MetricsBeanServiceImpl implements MetricsBeanService {
   private void populateRealtimeTripFields(MetricsBean bean) {
     bean.setRealtimeTripIDsUnmatched(getRealtimeTripIDsUnmatched());
     bean.setRealtimeTripCountsUnmatched(getUnmatchedTripCounts());
+    bean.setRealtimeTripCountsMatched(getRealtimeTripCountsMatched());
   }
 
   /**
@@ -310,6 +309,61 @@ public class MetricsBeanServiceImpl implements MetricsBeanService {
     }
   }
 
+  /**
+   * Retrieves the count of matched trips on a per-agency basis.
+   * @return A map of agency IDs to matched trip counts.
+   */
+  private HashMap<String, Integer> getRealtimeTripCountsMatched() {
+    HashMap<String, Integer> matchedTripCounts = new HashMap<>();
+    for (AgencyWithCoverageBean agency : _transitDataService.getAgenciesWithCoverage()) {
+      String agencyId = agency.getAgency().getId();
+      int matchedTripCount = getValidRealtimeTripIds(agencyId, null).size();
+      matchedTripCounts.put(agencyId, matchedTripCount);
+    }
+    return matchedTripCounts;
+  }
+
+  /**
+   * Retrieves the list of valid real-time trip IDs for the specified agencyId and optional feedId.
+   * @param agencyId The ID of the agency. Required.
+   * @param feedId The ID of the feed. Optional.
+   * @return The list of valid real-time trip IDs.
+   */
+  private List<String> getValidRealtimeTripIds(String agencyId, String feedId) {
+    Set<String> tripIds = new HashSet<>();
+
+    for (MonitoredDataSource mds : getDataSources()) {
+      MonitoredResult result = mds.getMonitoredResult();
+      if (result == null) continue;
+      if ((feedId == null || feedId.equals(mds.getFeedId())) && agencyId != null) {
+        for (String tripId : result.getMatchedTripIds()) {
+          if (tripId != null) {
+            AgencyAndId matchedTripId = AgencyAndIdLibrary.convertFromString(tripId);
+            if (matchedTripId != null && agencyId.equals(matchedTripId.getAgencyId())) {
+              tripIds.add(tripId);
+            }
+          }
+        }
+        for (String tripId : result.getAddedTripIds()) {
+          if (tripId != null) {
+            AgencyAndId addedTripId = AgencyAndIdLibrary.convertFromString(tripId);
+            if (addedTripId != null && agencyId.equals(addedTripId.getAgencyId())) {
+              tripIds.add(tripId);
+            }
+          }
+        }
+        for (String tripId : result.getDuplicatedTripIds()) {
+          if (tripId != null) {
+            AgencyAndId duplicatedTripId = AgencyAndIdLibrary.convertFromString(tripId);
+            if (duplicatedTripId != null && agencyId.equals(duplicatedTripId.getAgencyId())) {
+              tripIds.add(tripId);
+            }
+          }
+        }
+      }
+    }
+    return new ArrayList<>(tripIds);
+  }
   /**
    * Retrieves a dictionary of agency IDs mapped to the count of matched stop IDs.
    * @return The per-agency matched stop IDs count.
