@@ -16,7 +16,7 @@
 package org.onebusaway.transit_data_federation.impl.beans;
 
 import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.gtfs.services.AgencyAndIdLibrary;
+import org.onebusaway.util.AgencyAndIdLibrary;
 import org.onebusaway.transit_data.model.AgencyWithCoverageBean;
 import org.onebusaway.transit_data.model.ListBean;
 import org.onebusaway.transit_data.model.MetricsBean;
@@ -90,6 +90,7 @@ public class MetricsBeanServiceImpl implements MetricsBeanService {
   private void populateRealtimeTripFields(MetricsBean bean) {
     bean.setRealtimeTripIDsUnmatched(getRealtimeTripIDsUnmatched());
     bean.setRealtimeTripCountsUnmatched(getUnmatchedTripCounts());
+    bean.setRealtimeTripCountsMatched(getRealtimeTripCountsMatched());
   }
 
   /**
@@ -408,12 +409,5 @@ public class MetricsBeanServiceImpl implements MetricsBeanService {
       _log.error("getMatchedStopCount broke", e);
       return new ArrayList<String>();
     }
-  }
-  /**
-   * Fills in all real-time trip-related fields in the MetricsBean.
-   * @param bean The MetricsBean object that is populated.
-   */
-  private void populateRealtimeTripFields(MetricsBean bean) {
-    bean.setRealtimeTripCountsMatched(getRealtimeTripCountsMatched());
   }
 }
