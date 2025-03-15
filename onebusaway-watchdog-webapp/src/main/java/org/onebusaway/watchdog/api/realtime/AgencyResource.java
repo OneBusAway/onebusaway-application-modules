@@ -21,6 +21,8 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.MonitoredDataSource;
 import org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.MonitoredResult;
@@ -52,11 +54,22 @@ public class AgencyResource extends MetricResource {
           }
         }
       }
-      return Response.ok(ok("last-update-delta", (SystemTime.currentTimeMillis() - lastUpdate)/1000)).build();
+
+      long timeSinceLastUpdate = (SystemTime.currentTimeMillis() - lastUpdate) / 1000;
+
+     
+      Map<String, Long> timeSinceLastRealtimeUpdate = new HashMap<>();
+      timeSinceLastRealtimeUpdate.put(agencyId, timeSinceLastUpdate);
+
+      Map<String, Object> responseJson = new HashMap<>();
+      responseJson.put("agenciesWithCoverageCount", 1);
+      responseJson.put("timeSinceLastRealtimeUpdate", timeSinceLastRealtimeUpdate);
+      responseJson.put("scheduledTripsCount", new HashMap<>()); // Placeholder for future data
+
+      return Response.ok(responseJson).build();
     } catch (Exception e) {
       _log.error("getLastUpdateDelta broke", e);
       return Response.ok(error("last-update-delta", e)).build();
     }
   }
-
 }
