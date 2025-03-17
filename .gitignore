@@ -6,6 +6,7 @@ pom.xml.releaseBackup
 .classpath
 .idea
 **/bin/*
+!/bin/*
 *.iml
 *.class
 git.properties
