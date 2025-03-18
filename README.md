@@ -45,19 +45,26 @@ docker compose up builder
 
 # Now, open another window or tab and continue running commands:
 
-docker compose exec builder bash
-./make.sh --help # acquaint yourself with the make.sh options
-./make.sh --clean --check-updates --test
+# acquaint yourself with the make options
+bin/make --help 
 
-# now you have built all of the OBA artifacts:
-ls build/org/onebusaway/onebusaway-application-modules
+# build the project
+bin/make
 
-# Next, build a data bundle:
-cd /oba
-./build_bundle.sh
+# now you have built all of the OBA artifacts, which can be found in the `/root/.m2/repository` directory.
+
+# enter the docker container and look around
+bin/shell 
+ls /root/.m2/repository # this runs inside the docker container
+
+# exit the docker container
+exit 
+
+# Build a data bundle, which will power the OBA server:
+bin/build_bundle
 
 # Finally, copy all of the built WAR resources into /usr/local/tomcat
-copy_resources.sh
+bin/copy_and_relaunch
 
 # wait a few seconds for everything to spin up...
 ```
@@ -66,6 +73,7 @@ Finally, verify that everything works as expected!
 
 * Check out the Tomcat Web App Manager at http://localhost:8080/manager/html (user/pass: admin/admin) to verify that your OBA WARs deployed correctly
 * Check out the config.json API endpoint to verify that everything built correctly: http://localhost:8080/onebusaway-api-webapp/api/where/config.json?key=test
+* If the server isn't loading, Ctrl+C the Docker container to terminate it, then relaunch it, and everything should work fine.
 
 ## Debugging
 
