@@ -30,7 +30,7 @@ wget -O /bundle/gtfs.zip ${GTFS_URL}
 # The JAR must be executed from within the same directory
 # as the bundle, or else some necessary files are not generated.
 
-cp /src/build/org/onebusaway/onebusaway-transit-data-federation-builder/$OBA_VERSION/onebusaway-transit-data-federation-builder-$OBA_VERSION-withAllDependencies.jar \
+cp /root/.m2/repository/org/onebusaway/onebusaway-transit-data-federation-builder/$OBA_VERSION/onebusaway-transit-data-federation-builder-$OBA_VERSION-withAllDependencies.jar \
    /oba/builder.jar
 
 cd /bundle \
