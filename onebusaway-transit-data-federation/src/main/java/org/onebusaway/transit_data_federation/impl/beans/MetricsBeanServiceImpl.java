@@ -219,7 +219,7 @@ public class MetricsBeanServiceImpl implements MetricsBeanService {
    * @param bean The MetricsBean object that is populated.
    */
   private void populateTotalRecordsFields(MetricsBean bean) {
-    bean.setRealtimeTripCountsTotal(getTotalRecordsCounts());
+    bean.setRealtimeRecordsTotal(getTotalRecordsCounts());
   }
 
   /**
@@ -238,6 +238,9 @@ public class MetricsBeanServiceImpl implements MetricsBeanService {
 
   /**
    * Retrieves the total record count for the specified agencyId and optional feedId.
+   *
+   * Note: This code was ported over from onebusaway-watchdog-webapp.
+   *
    * @param agencyId The ID of the agency. Required.
    * @param feedId The ID of the feed. Optional.
    * @return The total record count.
