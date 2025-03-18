@@ -325,6 +325,9 @@ public class MetricsBeanServiceImpl implements MetricsBeanService {
 
   /**
    * Retrieves the list of valid real-time trip IDs for the specified agencyId and optional feedId.
+   *
+   * Note: This code was ported over from onebusaway-watchdog-webapp.
+   * 
    * @param agencyId The ID of the agency. Required.
    * @param feedId The ID of the feed. Optional.
    * @return The list of valid real-time trip IDs.
