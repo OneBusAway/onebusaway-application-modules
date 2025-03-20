@@ -213,7 +213,7 @@ public class GtfsRealtimeTripLibraryTest {
 
     VehicleLocationRecord record = _library.createVehicleLocationRecordForUpdate(update);
     assertEquals(123456789000L, record.getTimeOfRecord());
-    assertEquals(120, record.getScheduleDeviation(), 0.0);
+    assertEquals(Float.NaN, record.getScheduleDeviation(), 0.0);
   }
   
   @Test
