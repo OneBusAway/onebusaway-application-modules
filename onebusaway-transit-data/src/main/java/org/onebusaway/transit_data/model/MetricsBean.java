@@ -20,20 +20,18 @@ public class MetricsBean implements Serializable {
   private static final long serialVersionUID = 1L;
 
   // Agencies with Coverage
-
+  private int agenciesWithCoverageCount;
   public int getAgenciesWithCoverageCount() { return agenciesWithCoverageCount; }
   public void setAgenciesWithCoverageCount(int agenciesWithCoverageCount) { this.agenciesWithCoverageCount = agenciesWithCoverageCount; }
-  private int agenciesWithCoverageCount;
 
+  private String[] agencyIDs = {};
   public String[] getAgencyIDs() { return agencyIDs; }
   public void setAgencyIDs(String[] agencyIDs) { this.agencyIDs = agencyIDs; }
-  private String[] agencyIDs = {};
 
   // Scheduled Trips Count
-
+  private HashMap<String, Integer> scheduledTripsCount;
   public HashMap<String, Integer> getScheduledTripsCount() { return scheduledTripsCount; }
   public void setScheduledTripsCount(HashMap<String, Integer> scheduledTripsCount) { this.scheduledTripsCount = scheduledTripsCount; }
-  private HashMap<String, Integer> scheduledTripsCount;
 
   // Realtime Trips ids unmatched list
   private HashMap<String, ArrayList<String>> realtimeTripIDsUnmatched;
@@ -59,4 +57,9 @@ public class MetricsBean implements Serializable {
   public HashMap<String, Integer> getStopIDsMatchedCount() { return stopIDsMatchedCount; }
   public void setStopIDsMatchedCount(HashMap<String, Integer> stopIDsMatchedCount) { this.stopIDsMatchedCount = stopIDsMatchedCount; }
   private HashMap<String, Integer> stopIDsMatchedCount;
+
+  // Realtime Trip Counts Matched
+  private HashMap<String, Integer> realtimeTripCountsMatched;
+  public HashMap<String, Integer> getRealtimeTripCountsMatched() { return realtimeTripCountsMatched; }
+  public void setRealtimeTripCountsMatched(HashMap<String, Integer> realtimeTripCountsMatched) { this.realtimeTripCountsMatched = realtimeTripCountsMatched; }
 }
