@@ -63,6 +63,9 @@ public class MetricsBeanServiceImpl implements MetricsBeanService {
     populateStopFields(bean);
 
     populateRealtimeTripFields(bean);
+
+    populateTotalRecordsFields(bean);
+
     bean.setScheduledTripsCount(getScheduledTrips());
 
     return bean;
@@ -210,6 +213,53 @@ public class MetricsBeanServiceImpl implements MetricsBeanService {
     bean.setStopIDsUnmatchedCount(getUnmatchedStopIdsCount());
     // add matched stops
     bean.setStopIDsMatchedCount(getMatchedStopIdsCount());
+  }
+  /**
+   * Fills in all total records-related fields in the MetricsBean.
+   * @param bean The MetricsBean object that is populated.
+   */
+  private void populateTotalRecordsFields(MetricsBean bean) {
+    bean.setRealtimeRecordsTotal(getTotalRecordsCounts());
+  }
+
+  /**
+   * Retrieves a dictionary of agency IDs mapped to the total records count.
+   * @return The per-agency total records count.
+   */
+  private HashMap<String, Integer> getTotalRecordsCounts() {
+    HashMap<String, Integer> totalRecordsCounts = new HashMap<>();
+    for (AgencyWithCoverageBean agency : _transitDataService.getAgenciesWithCoverage()) {
+        String agencyId = agency.getAgency().getId();
+        int totalRecordsCount = getTotalRecordCount(agencyId, null);
+        totalRecordsCounts.put(agencyId, totalRecordsCount);
+    }
+    return totalRecordsCounts;
+  }
+
+  /**
+   * Retrieves the total record count for the specified agencyId and optional feedId.
+   *
+   * Note: This code was ported over from onebusaway-watchdog-webapp.
+   *
+   * @param agencyId The ID of the agency. Required.
+   * @param feedId The ID of the feed. Optional.
+   * @return The total record count.
+   */
+  private int getTotalRecordCount(String agencyId, String feedId) {
+    int totalRecords = 0;
+
+    for (MonitoredDataSource mds : getDataSources()) {
+      MonitoredResult result = mds.getMonitoredResult();
+      if (result == null) continue;
+      if (feedId == null || feedId.equals(mds.getFeedId())) {
+        for (String mAgencyId : result.getAgencyIds()) {
+          if (agencyId.equals(mAgencyId)) {
+            totalRecords += result.getRecordsTotal();
+          }
+        }
+      }
+    }
+    return totalRecords;
   }
 
   /**
