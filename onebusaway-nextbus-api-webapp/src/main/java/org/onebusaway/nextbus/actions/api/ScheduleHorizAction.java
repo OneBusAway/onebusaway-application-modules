@@ -83,7 +83,8 @@ public class ScheduleHorizAction extends NextBusApiBase implements
       try {
         int timeout = _configMapUtil.getConfig(agencyId).getHttpTimeoutSeconds();
         Map<String, String> headersMap = _configMapUtil.getConfig(agencyId).getHeadersMap();
-        JsonArray scheduleJson = _httpUtil.getJsonObject(uri, timeout, headersMap).getAsJsonArray(
+        Map<String, String> paramsMap = _configMapUtil.getConfig(agencyId).getParamsMap();
+        JsonArray scheduleJson = _httpUtil.getJsonObject(uri, timeout, headersMap, paramsMap).getAsJsonArray(
             "schedule");
         Type listType = new TypeToken<List<ScheduleRoute>>() {
         }.getType();

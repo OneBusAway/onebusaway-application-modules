@@ -112,7 +112,9 @@ public class PredictionsForMultiStopsAction extends NextBusApiBase implements
 
           int timeout = _configMapUtil.getConfig(agencyId).getHttpTimeoutSeconds();
           Map<String, String> headersMap = _configMapUtil.getConfig(agencyId).getHeadersMap();
-          JsonArray predictionsJson = _httpUtil.getJsonObject(uri, timeout, headersMap).getAsJsonArray(
+          Map<String, String> paramsMap = _configMapUtil.getConfig(agencyId).getParamsMap();
+
+          JsonArray predictionsJson = _httpUtil.getJsonObject(uri, timeout, headersMap, paramsMap).getAsJsonArray(
                   "predictions");
           Type listType = new TypeToken<List<Predictions>>() {
           }.getType();

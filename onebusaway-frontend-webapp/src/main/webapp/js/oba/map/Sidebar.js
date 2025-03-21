@@ -313,12 +313,13 @@ OBA.Sidebar = function() {
 				serviceAlertContainer.accordion({ header: 'p.serviceAlert', 
 					collapsible: true, 
 					active: false, 
-					autoHeight: false });
+					autoHeight: false,
+					heightStyle: "content"});
 				
 				// If popup.js has specified to expand alerts, that has been taken into account above and we
 				// reset the global state to not expand alerts.
 				if (expandAlerts) {
-					serviceAlertContainer.accordion("activate" , 0);
+					serviceAlertContainer.accordion("option", "active" , 0);
 					expandAlerts = false;
 				}
 				
@@ -397,7 +398,7 @@ OBA.Sidebar = function() {
 					var stopsList = jQuery("<ul></ul>")
 												.addClass("stops")
 												.addClass("not-loaded");
-	
+
 					var loading = jQuery("<div><span>Loading...</span></div>")
 												.addClass("loading");
 	
@@ -416,7 +417,8 @@ OBA.Sidebar = function() {
 					destinationContainer.accordion({ header: 'p', 
 						collapsible: true, 
 						active: false, 
-						autoHeight: false });
+						autoHeight: false,
+						heightStyle: "content"});
 					
 					listItem.append(destinationContainer);
 				});

@@ -29,6 +29,8 @@ public class ConfigurationUtil {
   private String tripUpdatesCommand;
   private String vehiclePositionsCommand;
   private Map<String, String> headersMap = new HashMap<>();
+  private Map<String, String> paramsMap = new HashMap<>();
+
   private Map<String,String> agencyMapper = new HashMap<String,String>(1);
   private int httpTimeoutSeconds = 15;
   
@@ -108,6 +110,14 @@ public class ConfigurationUtil {
 
   public void setHeadersMap(Map<String, String> headersMap) {
     this.headersMap = headersMap;
+  }
+
+  public Map<String, String> getParamsMap() {
+    return paramsMap;
+  }
+
+  public void setParamsMap(Map<String, String> paramsMap) {
+    this.paramsMap = paramsMap;
   }
 
   public String getPredictionCommand() {

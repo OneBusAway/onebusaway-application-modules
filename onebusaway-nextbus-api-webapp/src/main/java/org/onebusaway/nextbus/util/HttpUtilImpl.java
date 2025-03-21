@@ -16,6 +16,8 @@
 package org.onebusaway.nextbus.util;
 
 import java.io.*;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +31,7 @@ import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.message.BasicNameValuePair;
@@ -49,13 +52,13 @@ public class HttpUtilImpl implements HttpUtil {
 	@Autowired
 	private HttpClientPool _httpClientPool;
 
-	public JsonObject getJsonObject(final String urlString, int timeoutSeconds,
-																	Map<String, String> headersMap)
-			throws ClientProtocolException, IOException {
+	public JsonObject getJsonObject(final String urlString, int timeoutSeconds, Map<String, String> headersMap,
+									Map<String, String> paramsMap)
+			throws ClientProtocolException, IOException, URISyntaxException {
 		CloseableHttpResponse response = null;
 
 		try {
-			response = getResponse(urlString, timeoutSeconds, headersMap);
+			response = getResponse(urlString, timeoutSeconds, headersMap, paramsMap);
 			HttpEntity entity = getEntity(response);
 			InputStream content = entity.getContent();
 			try{
@@ -115,13 +118,15 @@ public class HttpUtilImpl implements HttpUtil {
 		return line.replace(qToken, qReplacement);
 	}
 
-	public FeedMessage getFeedMessage(final String urlString, int timeoutSeconds,
-																		Map<String, String> headersMap) throws ClientProtocolException, IOException {
+	public FeedMessage getFeedMessage(final String urlString,
+									  int timeoutSeconds,
+									  Map<String, String> headersMap,
+									  Map<String, String> paramsMap) throws ClientProtocolException, IOException, URISyntaxException {
 
 		CloseableHttpResponse response = null;
 
 		try {
-			response = getResponse(urlString, timeoutSeconds, headersMap);
+			response = getResponse(urlString, timeoutSeconds, headersMap, paramsMap);
 			HttpEntity entity = getEntity(response);
 			InputStream content = entity.getContent();
 			try{
@@ -141,12 +146,23 @@ public class HttpUtilImpl implements HttpUtil {
 		}
 	}
 
-	public CloseableHttpResponse getResponse(String urlString, int timeoutSeconds,
-																					 Map<String, String> headersMap) throws ClientProtocolException, IOException{
-		HttpGet request = new HttpGet(getEncodedUrl(urlString));
+	public CloseableHttpResponse getResponse(String urlString, int timeoutSeconds, Map<String, String> headersMap,
+											 Map<String, String> paramsMap) throws ClientProtocolException, IOException, URISyntaxException {
+
+		URIBuilder uriBuilder = new URIBuilder(getEncodedUrl(urlString));
+
+		for (Map.Entry<String, String> entry : paramsMap.entrySet()) {
+			uriBuilder.addParameter(entry.getKey(), entry.getValue());
+		}
+
+		URI uri = uriBuilder.build();
+
+		HttpGet request = new HttpGet(uri);
+
 		if (headersMap != null) {
 			headersMap.forEach(request::setHeader);
 		}
+
 		RequestConfig.Builder config = RequestConfig.custom()
 				.setConnectTimeout(timeoutSeconds * 1000)
 				.setSocketTimeout(timeoutSeconds * 1000);
