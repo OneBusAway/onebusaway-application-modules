@@ -68,4 +68,9 @@ public class MetricsBean implements Serializable {
   private HashMap<String, Integer> realtimeTripCountsMatched;
   public HashMap<String, Integer> getRealtimeTripCountsMatched() { return realtimeTripCountsMatched; }
   public void setRealtimeTripCountsMatched(HashMap<String, Integer> realtimeTripCountsMatched) { this.realtimeTripCountsMatched = realtimeTripCountsMatched; }
+
+  // Last Update Delta
+  private HashMap<String, Long> timeSinceLastRealtimeUpdate;
+  public HashMap<String, Long> getTimeSinceLastRealtimeUpdate() { return timeSinceLastRealtimeUpdate; }
+  public void setTimeSinceLastRealtimeUpdate(HashMap<String, Long> timeSinceLastRealtimeUpdate) { this.timeSinceLastRealtimeUpdate = timeSinceLastRealtimeUpdate; }
 }

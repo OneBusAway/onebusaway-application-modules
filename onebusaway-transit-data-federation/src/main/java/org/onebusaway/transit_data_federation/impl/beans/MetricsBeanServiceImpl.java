@@ -17,6 +17,7 @@ package org.onebusaway.transit_data_federation.impl.beans;
 
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.util.AgencyAndIdLibrary;
+import org.onebusaway.util.SystemTime;
 import org.onebusaway.transit_data.model.AgencyWithCoverageBean;
 import org.onebusaway.transit_data.model.ListBean;
 import org.onebusaway.transit_data.model.MetricsBean;
@@ -67,6 +68,8 @@ public class MetricsBeanServiceImpl implements MetricsBeanService {
     populateTotalRecordsFields(bean);
 
     bean.setScheduledTripsCount(getScheduledTrips());
+
+    bean.setTimeSinceLastRealtimeUpdate(getLastUpdateDelta());
 
     return bean;
   }
@@ -462,5 +465,51 @@ public class MetricsBeanServiceImpl implements MetricsBeanService {
       _log.error("getMatchedStopCount broke", e);
       return new ArrayList<String>();
     }
+  }
+
+  /**
+   * Retrieves the last update delta for all agencies.
+   * @return A map of agency IDs to last update delta in seconds.
+   */
+  private HashMap<String, Long> getLastUpdateDelta() {
+    HashMap<String, Long> lastUpdateDelta = new HashMap<String, Long>();
+    for (AgencyWithCoverageBean agency : _transitDataService.getAgenciesWithCoverage()) {
+      String id = agency.getAgency().getId();
+      lastUpdateDelta.put(id, getLastUpdateDelta(id, null));
+    }
+    return lastUpdateDelta;
+  }
+
+  /**
+   * Retrieves the last update delta for the specified agencyId and optional feedId.
+   * 
+   * @param agencyId The ID of the agency. Required.
+   * @param feedId The ID of the feed. Optional.
+   * @return last update delta in seconds.
+   */
+  private Long getLastUpdateDelta(String agencyId,String feedId) {
+    long lastUpdate = 0;
+    try {
+      List<MonitoredDataSource> dataSources = getDataSources();
+      if (dataSources == null || dataSources.isEmpty()) {
+        throw new Exception("no configured data sources");
+      }
+
+      for (MonitoredDataSource mds : dataSources) {
+        MonitoredResult result = mds.getMonitoredResult();
+        if (result == null) continue;
+        if (feedId == null || feedId.equals(mds.getFeedId())) {
+          for (String mAgencyId : result.getAgencyIds()) {
+            if (agencyId.equals(mAgencyId)) {
+              lastUpdate += result.getLastUpdate();
+            }
+          }
+        }
+      }
+    } catch (Exception e) {
+      _log.error("getLastUpdateDelta broke", e);
+      lastUpdate = 0;
+    }
+    return (SystemTime.currentTimeMillis() - lastUpdate) / 1000;
   }
 }
