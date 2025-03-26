@@ -44,6 +44,15 @@ public class MetricsBeanServiceImpl implements MetricsBeanService {
   @Autowired
   private RealtimeSourceServiceImpl _sourceService;
 
+  @Autowired
+  public void setTransitDataService(TransitDataService transitDataService) {
+    _transitDataService = transitDataService;
+  }
+
+  @Autowired
+  public void setRealtimeSourceServiceImpl(RealtimeSourceServiceImpl sourceService) {
+    _sourceService = sourceService;
+  }
   protected List<MonitoredDataSource> getDataSources() {
     List<MonitoredDataSource> dataSources = new ArrayList<>();
     for (GtfsRealtimeSource source : _sourceService.getSources()) {
