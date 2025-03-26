@@ -21,6 +21,8 @@ services:
       dockerfile: Dockerfile
       args:
         MAVEN_VERSION: 3.9.9
+    environment:
+      - GTFS_URL="http://www.sdmts.com/google_transit_files/google_transit.zip"
     depends_on:
       - database
     ports:

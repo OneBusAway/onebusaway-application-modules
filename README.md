@@ -77,16 +77,32 @@ Finally, verify that everything works as expected!
 
 ## GTFS Data
 
-**Be sure to rebuild the Docker image if you change any of these settings!**
+By default, the development server is configured to use static and real-time data from the Seattle area transit agency, King County Metro.
 
-By default, the development server is configured to use static and real-time data from the Seattle area transit agency, King County Metro. To change this default to fit your development, testing, or debugging needs, change the following settings:
+### Change your Data Source, Step by Step
 
-* `./Dockerfile` - Change `GTFS_URL` to your static GTFS URL: `GTFS_URL="https://www.soundtransit.org/GTFS-KCM/google_transit.zip"` (or modify it in the docker-compose.yml file).
-* `./docker_app_server/config/onebusaway-transit-data-federation-webapp-data-sources.xml` - change the following properties...
-  * `tripUpdatesUrl`
-  * `vehiclePositionsUrl`
-  * `alertsUrl`
-  * `agencyId`
+1. Delete the contents of `./docker_app_server/bundle` (i.e. run the command `rm -rf ./docker_app_server/bundle/*`)
+1. Update the GTFS_URL value in docker-compose.yml (See Static Data Changes for more)
+1. Update the contents of `./docker_app_server/config/onebusaway-transit-data-federation-webapp-data-sources.xml` as described in Realtime Data Changes
+1. In a separate terminal, launch the builder service: `docker compose up builder`
+1. From the root of the repository run the following commands:
+  * `bin/make` - Build the project (probably unnecessary, but better safe than sorry!)
+  * `bin/build_bundle` - Create a new data bundle
+  * `bin/copy_and_relaunch` - Copies the latest JAR and WAR files, as well as the contents of `./docker_app_server/config` into `$CATALINA_HOME`
+1. If necessary, restart the `builder` service: Ctrl+C and then `docker compose up builder`
+
+### Static Data Changes
+
+`./Dockerfile` - Change `GTFS_URL` to your static GTFS URL: `GTFS_URL="https://www.soundtransit.org/GTFS-KCM/google_transit.zip"` (or modify it in the docker-compose.yml file).
+
+### Realtime Data Changes
+
+In the file `./docker_app_server/config/onebusaway-transit-data-federation-webapp-data-sources.xml`, change the following properties:
+
+* `tripUpdatesUrl`
+* `vehiclePositionsUrl`
+* `alertsUrl`
+* `agencyId`
 
 **Note**: if the GTFS-RT feeds require a header-supplied API key, also modify the `headersMap` property thusly:
 
