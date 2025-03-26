@@ -75,6 +75,39 @@ Finally, verify that everything works as expected!
 * Check out the config.json API endpoint to verify that everything built correctly: http://localhost:8080/onebusaway-api-webapp/api/where/config.json?key=test
 * If the server isn't loading, Ctrl+C the Docker container to terminate it, then relaunch it, and everything should work fine.
 
+## GTFS Data
+
+**Be sure to rebuild the Docker image if you change any of these settings!**
+
+By default, the development server is configured to use static and real-time data from the Seattle area transit agency, King County Metro. To change this default to fit your development, testing, or debugging needs, change the following settings:
+
+* `./Dockerfile` - Change `GTFS_URL` to your static GTFS URL: `GTFS_URL="https://www.soundtransit.org/GTFS-KCM/google_transit.zip"` (or modify it in the docker-compose.yml file).
+* `./docker_app_server/config/onebusaway-transit-data-federation-webapp-data-sources.xml` - change the following properties...
+  * `tripUpdatesUrl`
+  * `vehiclePositionsUrl`
+  * `alertsUrl`
+  * `agencyId`
+
+**Note**: if the GTFS-RT feeds require a header-supplied API key, also modify the `headersMap` property thusly:
+
+```
+<property name="headersMap">
+  <map>
+    <entry key="{API KEY PROPERTY NAME}" value="{API KEY PROPERTY VALUE}" />
+  </map>
+</property>
+```
+
+for example:
+
+```
+<property name="headersMap">
+  <map>
+    <entry key="X-API-KEY" value="12345" />
+  </map>
+</property>
+```
+
 ## Debugging
 
 ### VSCode
