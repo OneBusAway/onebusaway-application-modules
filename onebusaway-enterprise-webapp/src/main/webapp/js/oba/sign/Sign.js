@@ -193,7 +193,7 @@ OBA.Sign = function() {
 	function advance() {
 		var idToDisplay = stopIdsToRequest.shift();
 		stopIdsToRequest.push(idToDisplay);
-		update(idToDisplay);
+		reverseScroll(idToDisplay);
 	}
 
 	function updateClock() {
@@ -817,6 +817,14 @@ OBA.Sign = function() {
 			});
 			
 		}); // ajax()			
+	}
+	
+	function reverseScroll(idToDisplay) {
+		var oldContent = jQuery("#content");
+		var contentWidth = oldContent.width();
+		oldContent.animate({left: -contentWidth}, 500, function() {
+			update(idToDisplay);
+		});
 	}
 	
 	return {

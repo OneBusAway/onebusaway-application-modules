@@ -176,7 +176,18 @@ Note all DIVs are generated and should not be hard-coded
 	.simply-scroll .simply-scroll-btn-down.disabled {}
 	.simply-scroll .simply-scroll-btn-down:hover {}
 	
-
+	.simply-scroll .simply-scroll-reverse {
+		animation: reverseScroll 0.5s ease-in-out;
+	}
+	
+	@keyframes reverseScroll {
+		0% {
+			transform: translateY(0);
+		}
+		100% {
+			transform: translateY(-100%);
+		}
+	}
 
 /* Vertical scroller example */
 
