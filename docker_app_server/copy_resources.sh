@@ -16,7 +16,6 @@
 # limitations under the License.
 #
 
-
 echo "Copying resources to Tomcat for OBA_VERSION $OBA_VERSION"
 
 rm -rf /usr/local/tomcat/webapps/onebusaway-api-webapp
