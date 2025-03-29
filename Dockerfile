@@ -14,7 +14,15 @@
 # limitations under the License.
 #
 
-FROM tomcat:8.5.100-jdk11-temurin
+FROM golang:1.24.1-bookworm AS gobuilder
+
+# Install gtfstidy - https://github.com/patrickbr/gtfstidy
+WORKDIR /src
+COPY ./docker_app_server/set_goarch.sh .
+RUN ./set_goarch.sh
+RUN CGO_ENABLED=0 go install github.com/patrickbr/gtfstidy@latest
+
+FROM tomcat:8.5.100-jdk11-temurin-focal AS server
 
 ARG MAVEN_VERSION=3.9.9
 
@@ -55,6 +63,9 @@ RUN mkdir -p $MAVEN_CONFIG/repository
 WORKDIR /oba
 COPY ./docker_app_server/bundle_builder/build_bundle.sh .
 COPY ./docker_app_server/copy_resources.sh .
+
+# Copy the gtfstidy binary over from gobuilder
+COPY --from=gobuilder /go/bin/gtfstidy .
 
 # Set the configured time zone
 RUN ln -fs /usr/share/zoneinfo/$TZ /etc/localtime && dpkg-reconfigure -f noninteractive tzdata
