@@ -22,7 +22,7 @@ services:
       args:
         MAVEN_VERSION: 3.9.9
     environment:
-      - GTFS_URL="https://www.soundtransit.org/GTFS-KCM/google_transit.zip"
+      - GTFS_URL=https://www.soundtransit.org/GTFS-KCM/google_transit.zip
     depends_on:
       - database
     ports:
