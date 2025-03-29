@@ -38,9 +38,7 @@ RUN apt-get update && apt-get install -y \
     supervisor \
     tzdata \
     unzip \
-    unzip \
     vim \
-    xmlstarlet \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -51,7 +49,7 @@ RUN mkdir -p /usr/share/maven /usr/share/maven/ref && \
     rm -f /tmp/apache-maven.tar.gz && \
     ln -s /usr/share/maven/bin/mvn /usr/bin/mvn
 
-RUN mkdir -p /root/.m2/repository
+RUN mkdir -p $MAVEN_CONFIG/repository
 
 # Set up bundle builder
 WORKDIR /oba
