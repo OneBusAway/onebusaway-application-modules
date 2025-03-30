@@ -25,7 +25,27 @@ echo "OBA Bundle Builder Starting"
 echo "GTFS_URL: $GTFS_URL"
 echo "OBA Version: $OBA_VERSION"
 
-wget -O /bundle/gtfs.zip ${GTFS_URL}
+cd /bundle
+
+wget -O gtfs_pristine.zip ${GTFS_URL}
+
+# Run gtfstidy (https://github.com/patrickbr/gtfstidy) with the following options enabled:
+# -O: remove entities that are not referenced anywhere
+# -s: minimize shapes (using Douglas-Peucker)
+# -c: minimize services by searching for the optimal exception/range coverage
+# -R: remove route duplicates
+# -C: remove duplicate services in calendar.txt and calendar_dates.txt
+# -S: remove shape duplicates
+# -m: remeasure shapes (filling measurement-holes)
+# -e: if non-required fields have errors, fall back to the default values
+# -D: drop erroneous entries from feed
+gtfstidy -OscRCSmeD gtfs_pristine.zip
+
+cd gtfs-out
+
+zip ../gtfs_tidied.zip *
+
+cd ..
 
 # The JAR must be executed from within the same directory
 # as the bundle, or else some necessary files are not generated.
@@ -33,8 +53,4 @@ wget -O /bundle/gtfs.zip ${GTFS_URL}
 cp /root/.m2/repository/org/onebusaway/onebusaway-transit-data-federation-builder/$OBA_VERSION/onebusaway-transit-data-federation-builder-$OBA_VERSION-withAllDependencies.jar \
    /oba/builder.jar
 
-cd /bundle \
-    && java -Xss4m -Xmx3g \
-        -jar /oba/builder.jar \
-        ./gtfs.zip \
-        .
+java -Xss4m -Xmx3g -jar /oba/builder.jar ./gtfs_tidied.zip .
