@@ -93,7 +93,10 @@ By default, the development server is configured to use static and real-time dat
 
 ### Static Data Changes
 
-`./Dockerfile` - Change `GTFS_URL` to your static GTFS URL: `GTFS_URL="https://www.soundtransit.org/GTFS-KCM/google_transit.zip"` (or modify it in the docker-compose.yml file).
+`./docker-compose.yml`:
+
+* Change `GTFS_URL` to your static GTFS URL: `GTFS_URL=https://www.soundtransit.org/GTFS-KCM/google_transit.zip`
+* Change your time zone (`TZ`) to match the time zone of the agency specified in your GTFS data: `TZ=America/Los_Angeles` 
 
 ### Realtime Data Changes
 
@@ -116,12 +119,28 @@ In the file `./docker_app_server/config/onebusaway-transit-data-federation-webap
 
 for example:
 
-```
-<property name="headersMap">
-  <map>
-    <entry key="X-API-KEY" value="12345" />
-  </map>
-</property>
+```xml
+<bean class="org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.GtfsRealtimeSource">
+    <property
+      name="tripUpdatesUrl"
+      value="https://gtfsbridge.spokanetransit.com/realtime/TripUpdate/TripUpdates.pb"
+    />
+    <property
+      name="vehiclePositionsUrl"
+      value="https://gtfsbridge.spokanetransit.com/realtime/vehicle/VehiclePositions.pb"
+    />
+    <property
+      name="alertsUrl"
+      value="https://gtfsbridge.spokanetransit.com/realtime/Alert/Alerts.pb"
+    />
+    <property name="refreshInterval" value="30" />
+    <property name="agencyId" value="STA" />
+    <property name="headersMap">
+      <map>
+          <entry key="X-API-KEY" value="12345" />
+      </map>
+    </property>
+</bean>
 ```
 
 ## Debugging
