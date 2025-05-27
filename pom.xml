@@ -40,7 +40,7 @@
         <gwt-version>2.4.0</gwt-version>
         <maven-resources-plugin-version>3.3.1</maven-resources-plugin-version>
         <maven-shade-plugin-version>3.6.0</maven-shade-plugin-version>
-        <spring-version>5.2.24.RELEASE</spring-version>
+        <spring-version>6.1.14</spring-version>
         <csv-entities-version>1.1.7</csv-entities-version>
         <collections-version>1.2.8</collections-version>
         <gtfs-version>1.4.17</gtfs-version>
