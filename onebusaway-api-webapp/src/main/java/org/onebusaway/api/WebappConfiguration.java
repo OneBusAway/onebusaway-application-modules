@@ -63,11 +63,19 @@ public class WebappConfiguration {
         try {
             // Create the package-private KeyValidationServiceImpl using reflection
             Class<?> implClass = Class.forName("org.onebusaway.users.impl.validation.KeyValidationServiceImpl");
-            Object service = implClass.getDeclaredConstructor().newInstance();
+            var constructor = implClass.getDeclaredConstructor();
+            constructor.setAccessible(true);  // Allow access to package-private constructor
+            Object service = constructor.newInstance();
             
             // Set the providers using reflection
-            var method = implClass.getMethod("setProviders", List.class);
-            method.invoke(service, List.of(new SaltedPasswordValidationProviderV1Impl()));
+            var setProvidersMethod = implClass.getMethod("setProviders", java.util.Collection.class);
+            setProvidersMethod.setAccessible(true);  // Allow access to the method
+            setProvidersMethod.invoke(service, List.of(new SaltedPasswordValidationProviderV1Impl()));
+            
+            // Set the default provider ID to match the SaltedPasswordValidationProviderV1Impl ID
+            var setDefaultProviderMethod = implClass.getMethod("setDefaultProviderId", String.class);
+            setDefaultProviderMethod.setAccessible(true);
+            setDefaultProviderMethod.invoke(service, "spv1");
             
             return (KeyValidationService) service;
         } catch (Exception e) {
