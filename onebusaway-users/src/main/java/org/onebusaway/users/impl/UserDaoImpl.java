@@ -25,6 +25,10 @@ import java.util.List;
 import org.hibernate.*;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.Root;
 import org.onebusaway.users.model.User;
 import org.onebusaway.users.model.UserIndex;
 import org.onebusaway.users.model.UserIndexKey;
@@ -169,12 +173,16 @@ class UserDaoImpl implements UserDao {
   @Override
   @Transactional
   public Integer getUserKeyCount(final String keyType) {
-      Criteria criteria = getSession().createCriteria(User.class)
-              .createCriteria("userIndices")
-              .add(Restrictions.eq("id.type", keyType))
-              .setProjection(Projections.rowCount());
-      List<User> users = criteria.list();
-      Long lcount = (Long) criteria.uniqueResult();
+      Session session = getSession();
+      CriteriaBuilder cb = session.getCriteriaBuilder();
+      CriteriaQuery<Long> query = cb.createQuery(Long.class);
+      Root<User> userRoot = query.from(User.class);
+      Join<User, UserIndex> userIndicesJoin = userRoot.join("userIndices");
+      
+      query.select(cb.count(userRoot))
+           .where(cb.equal(userIndicesJoin.get("id").get("type"), keyType));
+      
+      Long lcount = session.createQuery(query).getSingleResult();
       Integer count = BigDecimal.valueOf(lcount).intValueExact(); // do range checking
       return count;
   }
@@ -182,14 +190,20 @@ class UserDaoImpl implements UserDao {
   @Override
   @Transactional
   public List<User> getUsersForKeyType(final int start, final int maxResults, final String keyType) {
-
-    Criteria criteria = getSession().createCriteria(User.class)
-            .createCriteria("userIndices")
-            .add(Restrictions.eq("id.type", keyType))
-            .setFirstResult(start)
-            .setMaxResults(maxResults);
-    List<User> users = criteria.list();
-    return users;
+      Session session = getSession();
+      CriteriaBuilder cb = session.getCriteriaBuilder();
+      CriteriaQuery<User> query = cb.createQuery(User.class);
+      Root<User> userRoot = query.from(User.class);
+      Join<User, UserIndex> userIndicesJoin = userRoot.join("userIndices");
+      
+      query.select(userRoot)
+           .where(cb.equal(userIndicesJoin.get("id").get("type"), keyType));
+      
+      List<User> users = session.createQuery(query)
+              .setFirstResult(start)
+              .setMaxResults(maxResults)
+              .getResultList();
+      return users;
   }
 
   @Transactional

@@ -20,7 +20,7 @@ import java.util.List;
 
 import org.hibernate.NonUniqueResultException;
 import org.hibernate.query.Query;
-import org.hibernate.SQLQuery;
+import org.hibernate.query.NativeQuery;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.onebusaway.util.SystemTime;
@@ -85,13 +85,13 @@ public class ServiceAlertsPersistenceDB implements ServiceAlertsPersistence {
   @Transactional
   public boolean deleteOrphans() {
     try {
-      SQLQuery sqlQuery = getSession().createSQLQuery("delete from transit_data_service_alerts_localized_strings where servicealert_url_id is null AND servicealert_summary_id is null AND servicealert_description_id is null");
+      NativeQuery<?> sqlQuery = getSession().createNativeQuery("delete from transit_data_service_alerts_localized_strings where servicealert_url_id is null AND servicealert_summary_id is null AND servicealert_description_id is null");
       sqlQuery.executeUpdate();
-      sqlQuery = getSession().createSQLQuery("delete from transit_data_service_alerts_situation_affects where serviceAlertRecord_Id is null");
+      sqlQuery = getSession().createNativeQuery("delete from transit_data_service_alerts_situation_affects where serviceAlertRecord_Id is null");
       sqlQuery.executeUpdate();
-      sqlQuery = getSession().createSQLQuery("delete from transit_data_service_alerts_situation_consequence where serviceAlertRecord_Id is null");
+      sqlQuery = getSession().createNativeQuery("delete from transit_data_service_alerts_situation_consequence where serviceAlertRecord_Id is null");
       sqlQuery.executeUpdate();
-      sqlQuery = getSession().createSQLQuery("delete from transit_data_service_alerts_time_ranges where serviceAlertRecord_id is null AND servicealert_publication_window_id is null AND servicealert_active_window_id is null");
+      sqlQuery = getSession().createNativeQuery("delete from transit_data_service_alerts_time_ranges where serviceAlertRecord_id is null AND servicealert_publication_window_id is null AND servicealert_active_window_id is null");
       sqlQuery.executeUpdate();
     } catch (Exception any) {
       return false;
