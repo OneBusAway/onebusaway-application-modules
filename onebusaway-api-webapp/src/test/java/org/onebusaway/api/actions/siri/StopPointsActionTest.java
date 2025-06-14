@@ -16,11 +16,12 @@
 package org.onebusaway.api.actions.siri;
 
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.anyLong;
-import static org.mockito.Matchers.anyListOf;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static org.onebusaway.api.actions.siri.SiriAction.STOP_POINTS_DETAIL_LEVEL;
 
@@ -208,7 +209,7 @@ public class StopPointsActionTest {
   Map<Boolean, List<AnnotatedStopPointStructure>> annotatedStopPointMap = new HashMap<Boolean, List<AnnotatedStopPointStructure>>();
   annotatedStopPointMap.put(true, mockStopPoints);
 
-  when(realtimeService.getAnnotatedStopPointStructures(anyListOf(String.class), anyListOf(AgencyAndId.class), any(DetailLevel.class), anyLong(), anyMapOf(Filters.class, String.class))).thenReturn(annotatedStopPointMap);
+  when(realtimeService.getAnnotatedStopPointStructures(anyList(), anyList(), any(DetailLevel.class), anyLong(), anyMap())).thenReturn(annotatedStopPointMap);
     
   // XML Serializer
   SiriXmlSerializerV2 serializer = new SiriXmlSerializerV2();

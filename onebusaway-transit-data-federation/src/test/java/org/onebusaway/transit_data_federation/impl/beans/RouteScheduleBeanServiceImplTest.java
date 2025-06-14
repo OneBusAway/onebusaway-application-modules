@@ -49,7 +49,7 @@ import java.util.*;
 import static java.util.stream.Collectors.toList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.*;
 

@@ -16,7 +16,7 @@
 package org.onebusaway.enterprise.webapp.api;
 
 import static org.junit.Assert.*;
-import static org.mockito.Matchers.anyObject;
+import static org.mockito.ArgumentMatchers.anyObject;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
