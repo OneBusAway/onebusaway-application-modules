@@ -2,6 +2,8 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+Important: there are other CLAUDE.md files in subdirectories. When working on repository-wide changes, be sure to read all of them before starting work.
+
 ## Project Overview
 
 OneBusAway is a comprehensive transit information system that provides real-time public transit data through multiple interfaces (web, mobile apps, REST API). The system is built with a modular, federated architecture using Java, Spring Framework, Apache Struts 2, and Maven for build management.
@@ -10,7 +12,7 @@ OneBusAway is a comprehensive transit information system that provides real-time
 
 ### Building the Project
 - `./make.sh` - Build the entire project with default settings (skips tests and javadoc)
-- `./make.sh --clean` - Clean build from scratch  
+- `./make.sh --clean` - Clean build from scratch
 - `./make.sh --test` - Build and run tests
 - `./make.sh --help` - Show all build options
 
@@ -76,7 +78,7 @@ OneBusAway is a comprehensive transit information system that provides real-time
 ### Real-time Feed Configuration
 Update the following properties in data-sources.xml:
 - `tripUpdatesUrl` - GTFS-realtime Trip Updates feed
-- `vehiclePositionsUrl` - GTFS-realtime Vehicle Positions feed  
+- `vehiclePositionsUrl` - GTFS-realtime Vehicle Positions feed
 - `alertsUrl` - GTFS-realtime Alerts feed
 - `agencyId` - Transit agency identifier
 - `headersMap` - API keys for authenticated feeds
