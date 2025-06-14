@@ -13,7 +13,7 @@
     <name>onebusaway-container</name>
 
     <properties>
-        <aspectj-version>1.7.3</aspectj-version>
+        <aspectj-version>1.9.19</aspectj-version>
     </properties>
 
     <dependencies>
@@ -56,7 +56,7 @@
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-ehcache</artifactId>
-            <version>5.4.24.Final</version>
+            <version>5.6.15.Final</version>
         </dependency>
         <dependency>
             <groupId>javax.annotation</groupId>

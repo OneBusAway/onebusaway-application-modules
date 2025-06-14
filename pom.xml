@@ -203,7 +203,7 @@
             <dependency>
                 <groupId>org.hibernate</groupId>
                 <artifactId>hibernate-core</artifactId>
-                <version>5.4.24.Final</version>
+                <version>5.6.15.Final</version>
                 <exclusions>
                     <exclusion>
                         <groupId>xml-apis</groupId>
