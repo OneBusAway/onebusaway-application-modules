@@ -2,6 +2,8 @@ package org.onebusaway.api;
 
 import javax.sql.DataSource;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.jdbc.DataSourceBuilder;
@@ -24,6 +26,8 @@ import java.util.Properties;
  */
 @Configuration
 public class DataSourceConfiguration {
+
+    private static final Logger logger = LoggerFactory.getLogger(DataSourceConfiguration.class);
 
     @Value("${onebusaway.datasource.jndi-name:java:comp/env/jdbc/appDB}")
     private String jndiName;
@@ -48,7 +52,8 @@ public class DataSourceConfiguration {
             jndiObjectFactoryBean.afterPropertiesSet();
             return (DataSource) jndiObjectFactoryBean.getObject();
         } catch (Exception e) {
-            // Fallback to direct JDBC configuration if JNDI lookup fails
+            logger.warn("JNDI lookup failed for '{}', falling back to direct JDBC configuration: {}", jndiName, e.getMessage());
+            logger.debug("JNDI lookup exception details", e);
             return createFallbackDataSource();
         }
     }
@@ -59,12 +64,7 @@ public class DataSourceConfiguration {
     @Bean(name = "archiveDataSource")
     @ConfigurationProperties(prefix = "onebusaway.datasource.archive")
     public DataSource archiveDataSource() {
-        return DataSourceBuilder.create()
-                .driverClassName("com.mysql.cj.jdbc.Driver")
-                .url("jdbc:mysql://localhost:3306/onebusaway")
-                .username("${DATABASE_USER:root}")
-                .password("${DATABASE_PASSWORD:root}")
-                .build();
+        return DataSourceBuilder.create().build();
     }
 
     /**
@@ -73,12 +73,7 @@ public class DataSourceConfiguration {
     @Bean(name = "agencyDataSource")
     @ConfigurationProperties(prefix = "onebusaway.datasource.agency")
     public DataSource agencyDataSource() {
-        return DataSourceBuilder.create()
-                .driverClassName("com.mysql.cj.jdbc.Driver")
-                .url("jdbc:mysql://localhost:3306/onebusaway")
-                .username("${DATABASE_USER:root}")
-                .password("${DATABASE_PASSWORD:root}")
-                .build();
+        return DataSourceBuilder.create().build();
     }
 
     /**

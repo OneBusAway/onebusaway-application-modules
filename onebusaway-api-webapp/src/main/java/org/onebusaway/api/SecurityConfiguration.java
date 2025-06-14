@@ -70,7 +70,7 @@ public class SecurityConfiguration {
                 headers.frameOptions().deny();
                 
                 if (contentTypeOptionsEnabled) {
-                    headers.contentTypeOptions().and();
+                    headers.contentTypeOptions();
                 }
                 
                 if (xssProtectionEnabled) {
