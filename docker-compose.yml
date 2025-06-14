@@ -20,7 +20,7 @@ services:
       context: .
       dockerfile: Dockerfile
       args:
-        MAVEN_VERSION: 3.9.9
+        MAVEN_VERSION: 3.9.10
     environment:
       - GTFS_URL=https://www.soundtransit.org/GTFS-KCM/google_transit.zip
       - TZ=America/Los_Angeles

@@ -24,7 +24,7 @@ RUN CGO_ENABLED=0 go install github.com/patrickbr/gtfstidy@latest
 
 FROM tomcat:8.5.100-jdk17-temurin-focal AS server
 
-ARG MAVEN_VERSION=3.9.9
+ARG MAVEN_VERSION=3.9.10
 
 ARG OBA_VERSION=2.6.0
 ENV OBA_VERSION=$OBA_VERSION
