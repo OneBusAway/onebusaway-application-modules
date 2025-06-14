@@ -109,6 +109,7 @@
         <module>onebusaway-geocoder</module>
         <module>onebusaway-geospatial</module>
         <module>onebusaway-gtfs-hibernate-spring</module>
+        <module>onebusaway-hibernate-compat</module>
         <module>onebusaway-gtfs-realtime-archiver</module>
         <module>onebusaway-gtfs-realtime-model</module>
         <module>onebusaway-twilio-webapp</module>
