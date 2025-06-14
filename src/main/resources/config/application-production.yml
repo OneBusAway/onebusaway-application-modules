@@ -1,0 +1,58 @@
+# Production environment configuration
+spring:
+  datasource:
+    url: ${DATABASE_URL:jdbc:mysql://localhost:3306/onebusaway}
+    username: ${DATABASE_USERNAME:oba}
+    password: ${DATABASE_PASSWORD}
+    hikari:
+      maximum-pool-size: 50
+      minimum-idle: 10
+      
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
+        use_sql_comments: false
+        
+  # Production logging
+  logging:
+    level:
+      org.onebusaway: INFO
+      org.springframework: WARN
+      org.hibernate: WARN
+      root: WARN
+    file:
+      name: /var/log/onebusaway/application.log
+      
+  # Actuator for production (restricted)
+  management:
+    endpoints:
+      web:
+        exposure:
+          include: health,info,metrics
+        base-path: /actuator
+    endpoint:
+      health:
+        show-details: never
+
+# Production specific OneBusAway configuration
+onebusaway:
+  gtfs:
+    url: ${GTFS_URL}
+    realtime:
+      refresh-interval: ${GTFS_RT_REFRESH_INTERVAL:60s}
+      trip-updates-url: ${GTFS_RT_TRIP_UPDATES_URL}
+      vehicle-positions-url: ${GTFS_RT_VEHICLE_POSITIONS_URL}
+      alerts-url: ${GTFS_RT_ALERTS_URL}
+  api:
+    key:
+      required: true
+    cors:
+      allowed-origins: ${CORS_ALLOWED_ORIGINS}
+  federation:
+    enabled: ${FEDERATION_ENABLED:false}
+  bundle:
+    path: ${OBA_BUNDLE_PATH:/var/lib/onebusaway/bundle}

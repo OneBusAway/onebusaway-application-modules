@@ -1,0 +1,45 @@
+# Development environment configuration
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/onebusaway_dev?useSSL=false&serverTimezone=UTC
+    username: oba_dev
+    password: oba_dev
+    
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        use_sql_comments: true
+        
+  # Development logging
+  logging:
+    level:
+      org.onebusaway: DEBUG
+      org.springframework: INFO
+      org.hibernate.SQL: DEBUG
+      org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+      
+  # Actuator for development
+  management:
+    endpoints:
+      web:
+        exposure:
+          include: "*"
+    endpoint:
+      health:
+        show-details: always
+
+# Development specific OneBusAway configuration
+onebusaway:
+  gtfs:
+    url: ${GTFS_URL:https://github.com/OneBusAway/onebusaway-gtfs-modules/raw/master/onebusaway-gtfs-modules-testdata/src/main/resources/testagency_gtfs.zip}
+    realtime:
+      refresh-interval: 30s
+  api:
+    key:
+      required: false
+  bundle:
+    path: ${OBA_BUNDLE_PATH:./target/bundle}

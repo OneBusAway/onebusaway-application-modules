@@ -1,0 +1,45 @@
+# Test environment configuration
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ""
+    
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+    
+  h2:
+    console:
+      enabled: true
+      
+  # Test logging
+  logging:
+    level:
+      org.onebusaway: DEBUG
+      org.springframework: WARN
+      org.hibernate: WARN
+      
+  # Actuator for testing
+  management:
+    endpoints:
+      web:
+        exposure:
+          include: "*"
+
+# Test specific OneBusAway configuration
+onebusaway:
+  gtfs:
+    url: "classpath:testagency_gtfs.zip"
+    realtime:
+      enabled: false
+  api:
+    key:
+      required: false
+  federation:
+    enabled: false
+  bundle:
+    path: "./target/test-bundle"
