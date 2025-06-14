@@ -4,9 +4,44 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Important: there are other CLAUDE.md files in subdirectories. When working on repository-wide changes, be sure to read all of them before starting work.
 
+## 🚀 Active Project: Spring Boot Upgrade
+
+**CRITICAL**: This repository is undergoing a Spring Boot 3.x upgrade. See `spring-boot-upgrade.md` for the complete migration plan and current status.
+
+**Current State**: Phase 1 Foundation completed - Spring Boot infrastructure in place with backward compatibility
+**Next Phase**: Configuration Migration (XML to Java-based @Configuration classes)
+**Key Files**:
+- `spring-boot-upgrade.md` - Complete migration plan and status
+- `src/main/resources/config/application*.yml` - Spring Boot profiles
+- `onebusaway-api-webapp/src/main/java/org/onebusaway/api/` - Spring Boot application classes
+
 ## Project Overview
 
 OneBusAway is a comprehensive transit information system that provides real-time public transit data through multiple interfaces (web, mobile apps, REST API). The system is built with a modular, federated architecture using Java, Spring Framework, Apache Struts 2, and Maven for build management.
+
+**Architecture Note**: Currently migrating from Spring Framework 5.3.29 + Struts 2 to Spring Boot 3.2.12 + Spring MVC in a phased approach to maintain stability.
+
+### Spring Boot Upgrade Guidelines for AI Agents
+
+**Context for Continuation**:
+1. **Approach**: Incremental, backward-compatible migration preserving all existing functionality
+2. **Phase 1 Completed**: Spring Boot foundation, profiles, and basic application classes established
+3. **Key Principle**: No breaking changes - existing XML configs and Struts actions must continue working
+4. **Testing Required**: Run `./make.sh` after each change to ensure 26 modules still build successfully
+5. **Critical Files to Preserve**: All existing `/WEB-INF/web.xml`, `struts.xml`, and Spring XML context files
+
+**Next Phase Tasks** (in order):
+1. Create Java `@Configuration` classes parallel to existing XML configs
+2. Gradually migrate Spring bean definitions from XML to Java
+3. Maintain dual XML/Java config until complete
+4. Convert Struts 2 actions to Spring MVC `@RestController` classes
+5. Update URL mappings and request handling
+
+**Migration Patterns Established**:
+- Spring Boot auto-configuration excluded where OneBusAway patterns exist
+- Properties externalized to `application-{profile}.yml` files
+- CORS and security configured in Spring Boot style
+- JAX-RS dependencies maintained for backward compatibility
 
 ## Development Commands
 

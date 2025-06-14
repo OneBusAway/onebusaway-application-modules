@@ -26,6 +26,31 @@ OneBusAway currently uses Spring Framework 5.3.29 with traditional XML-based con
 - Phase 1 Week 3-4: Configuration Migration (XML to Java-based @Configuration classes)
 - Begin Struts 2 to Spring MVC migration planning
 
+**Technical Context for AI Agents:**
+
+*Key Files Created:*
+- `src/main/resources/config/application*.yml` - Spring Boot profile configurations
+- `onebusaway-api-webapp/src/main/java/org/onebusaway/api/OneBusAwayApiApplication.java` - Main Spring Boot application
+- `onebusaway-api-webapp/src/main/java/org/onebusaway/api/ApiConfiguration.java` - API-specific Spring configuration
+- `onebusaway-api-webapp/src/main/java/org/onebusaway/api/SecurityConfiguration.java` - Spring Security setup
+
+*Dependencies Added:*
+- Spring Boot BOM 3.2.12 in parent pom.xml
+- Spring Boot starters: web, actuator, security, test
+- JAX-RS API compatibility maintained for existing Jersey usage
+
+*Critical Constraints:*
+- All existing Struts 2 actions must continue functioning
+- XML Spring contexts still active and required
+- No API endpoint changes allowed
+- Build must succeed for all 26 Maven modules
+
+*Migration Pattern:*
+1. Add Spring Boot alongside existing configs (not replacing)
+2. Create parallel Java configs before removing XML
+3. Test each component individually before integration
+4. Maintain feature flags for rollback capability
+
 ## Migration Strategy
 
 ### Phase-Based Incremental Approach
