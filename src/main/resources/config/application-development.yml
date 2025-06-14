@@ -13,6 +13,9 @@ spring:
       hibernate:
         format_sql: true
         use_sql_comments: true
+        generate_statistics: true
+        cache:
+          use_second_level_cache: false  # Disable caching in development for easier debugging
         
   # Development logging
   logging:
@@ -41,5 +44,21 @@ onebusaway:
   api:
     key:
       required: false
+    security:
+      hsts:
+        enabled: false  # Disable HSTS in development (no HTTPS typically)
+      xss-protection:
+        enabled: true
+      content-type-options:
+        enabled: true
   bundle:
     path: ${OBA_BUNDLE_PATH:./target/bundle}
+  datasource:
+    archive:
+      url: jdbc:mysql://localhost:3306/onebusaway_dev?useSSL=false&serverTimezone=UTC
+      username: ${DATABASE_USER:oba_dev}
+      password: ${DATABASE_PASSWORD:oba_dev}
+    agency:
+      url: jdbc:mysql://localhost:3306/onebusaway_dev?useSSL=false&serverTimezone=UTC
+      username: ${DATABASE_USER:oba_dev}
+      password: ${DATABASE_PASSWORD:oba_dev}
