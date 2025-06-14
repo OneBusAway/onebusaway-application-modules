@@ -42,6 +42,7 @@
         <maven-shade-plugin-version>3.6.0</maven-shade-plugin-version>
         <spring-version>5.3.29</spring-version>
         <spring-boot-version>3.2.12</spring-boot-version>
+        <hibernate-version>6.6.2.Final</hibernate-version>
         <csv-entities-version>1.1.7</csv-entities-version>
         <collections-version>1.2.8</collections-version>
         <gtfs-version>1.4.17</gtfs-version>
@@ -212,9 +213,9 @@
             </dependency>
 
             <dependency>
-                <groupId>org.hibernate</groupId>
+                <groupId>org.hibernate.orm</groupId>
                 <artifactId>hibernate-core</artifactId>
-                <version>5.6.15.Final</version>
+                <version>${hibernate-version}</version>
                 <exclusions>
                     <exclusion>
                         <groupId>xml-apis</groupId>
@@ -222,6 +223,14 @@
                     </exclusion>
                 </exclusions>
             </dependency>
+            
+            <!-- Jakarta Persistence API for Hibernate 6 -->
+            <dependency>
+                <groupId>jakarta.persistence</groupId>
+                <artifactId>jakarta.persistence-api</artifactId>
+                <version>3.1.0</version>
+            </dependency>
+            
             <dependency>
                 <groupId>javax.annotation</groupId>
                 <artifactId>javax.annotation-api</artifactId>
