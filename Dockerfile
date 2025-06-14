@@ -22,7 +22,7 @@ COPY ./docker_app_server/set_goarch.sh .
 RUN ./set_goarch.sh
 RUN CGO_ENABLED=0 go install github.com/patrickbr/gtfstidy@latest
 
-FROM tomcat:8.5.100-jdk11-temurin-focal AS server
+FROM tomcat:8.5.100-jdk17-temurin-focal AS server
 
 ARG MAVEN_VERSION=3.9.9
 
