@@ -45,7 +45,7 @@
         <collections-version>1.2.8</collections-version>
         <gtfs-version>1.4.17</gtfs-version>
         <gtfs-api-version>1.2.32</gtfs-api-version>
-        <jackson-version>2.12.0</jackson-version>
+        <jackson-version>2.15.2</jackson-version>
         <jersey-version>2.31</jersey-version>
         <onebusaway-siri-version>1.0.6</onebusaway-siri-version>
         <onebusaway-siri-1-api-version>1.0.1</onebusaway-siri-1-api-version>
@@ -55,8 +55,8 @@
         <slf4j.version>1.7.5</slf4j.version>
         <guava-version>16.0.1</guava-version>
         <log4j.version>2.17.2</log4j.version>
-        <!-- bump protobuf to support mac m2s aaarch -->
-        <protobuf.version>3.17.3</protobuf.version>
+        <!-- bump protobuf to support mac m2s aaarch and Java 17 -->
+        <protobuf.version>3.21.12</protobuf.version>
         <!--  These properties are primarily used in configuring joint integration tests -->
         <org_onebusaway_test_port>9900</org_onebusaway_test_port>
         <org_onebusaway_test_ajp_port>9901</org_onebusaway_test_ajp_port>
@@ -187,7 +187,7 @@
             <dependency>
                 <groupId>commons-collections</groupId>
                 <artifactId>commons-collections</artifactId>
-                <version>3.2</version>
+                <version>3.2.2</version>
             </dependency>
             <dependency>
                 <groupId>commons-dbcp</groupId>
@@ -371,13 +371,13 @@
             <dependency>
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>
-                <version>4.12</version>
+                <version>4.13.2</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-core</artifactId>
-                <version>3.3.3</version>
+                <version>5.4.0</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
@@ -394,7 +394,7 @@
             <dependency>
                 <groupId>org.apache.httpcomponents</groupId>
                 <artifactId>httpclient</artifactId>
-                <version>4.5.9</version><!-- needs to match onebusaway-cloud-services -->
+                <version>4.5.14</version><!-- Updated for security, needs to match onebusaway-cloud-services -->
             </dependency>
             <dependency>
                 <groupId>com.mysql</groupId>
