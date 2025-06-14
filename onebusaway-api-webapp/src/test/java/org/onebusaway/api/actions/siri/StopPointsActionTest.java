@@ -40,7 +40,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.onebusaway.api.actions.siri.impl.RealtimeServiceV2Impl;
 import org.onebusaway.api.actions.siri.impl.SiriSupportV2.Filters;
 import org.onebusaway.api.actions.siri.model.DetailLevel;

@@ -82,7 +82,7 @@ public class ApiKeyInterceptorTest {
 
   @Test
   public void testIsAllowedValidUser() {
-    when(_ks.getPermission((String)anyObject(), (String)anyObject())).thenReturn(Status.AUTHORIZED);
+    when(_ks.getPermission((String)any(), (String)any())).thenReturn(Status.AUTHORIZED);
     assertNotNull(_params.get("key"));
     assertNotNull(_httpParams.get("key"));
     assertNotNull(_httpParams.get("key").getMultipleValues());
@@ -93,13 +93,13 @@ public class ApiKeyInterceptorTest {
 
   @Test
   public void testIsAllowedRateLimit() {
-    when(_ks.getPermission((String)anyObject(), (String)anyObject())).thenReturn(Status.RATE_EXCEEDED);
+    when(_ks.getPermission((String)any(), (String)any())).thenReturn(Status.RATE_EXCEEDED);
     assertEquals(429, _aki.isAllowed(_ai));
   }
 
   @Test
   public void testIsAllowedUnauthorized() {
-    when(_ks.getPermission((String)anyObject(), (String)anyObject())).thenReturn(Status.UNAUTHORIZED);
+    when(_ks.getPermission((String)any(), (String)any())).thenReturn(Status.UNAUTHORIZED);
     /*
      * whoops!  The enterprise webapp chooses to return 403 instead of 401
      * We authenticated (we found the api key) but we are not authorized
