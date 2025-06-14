@@ -15,11 +15,9 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
  * adding Spring Boot capabilities
  */
 @Configuration
-@Import({DataSourceConfiguration.class, JpaConfiguration.class})
+@Import({DataSourceConfiguration.class, JpaConfiguration.class, WebappConfiguration.class})
 @ImportResource({
-    "classpath:org/onebusaway/api/application-context-webapp.xml",
-    "classpath:org/onebusaway/container/application-context.xml",
-    "classpath:org/onebusaway/users/application-context.xml"
+    "classpath:org/onebusaway/container/application-context.xml"
 })
 public class ApiConfiguration {
 
