@@ -2,7 +2,9 @@
 
 ## Executive Summary
 
-This document provides a comprehensive overview of OneBusAway's ongoing modernization efforts, coordinating multiple parallel upgrade projects to transform the platform from a traditional Spring Framework application to a modern, cloud-native transit data system running on Java 21 with Spring Boot.
+This document provides a comprehensive overview of OneBusAway's ongoing modernization efforts, coordinating multiple
+parallel upgrade projects to transform the platform from a traditional Spring Framework application to a modern,
+cloud-native transit data system running on Java 21 with Spring Boot.
 
 ## 🎯 Strategic Objectives
 
