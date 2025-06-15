@@ -30,7 +30,7 @@ ARG OBA_VERSION=2.6.0
 ENV OBA_VERSION=$OBA_VERSION
 
 ENV CATALINA_HOME="/usr/local/tomcat"
-ENV CATALINA_OPTS="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005 -XX:+UseZGC -XX:+UnlockExperimentalVMOptions"
+ENV CATALINA_OPTS="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005 -XX:+UseZGC -XX:+UnlockExperimentalVMOptions -Djavax.xml.bind.JAXBContextFactory=com.sun.xml.bind.v2.ContextFactory"
 ENV TZ="America/Los_Angeles"
 ENV MAVEN_HOME="/usr/share/maven"
 ENV MAVEN_CONFIG="/root/.m2"

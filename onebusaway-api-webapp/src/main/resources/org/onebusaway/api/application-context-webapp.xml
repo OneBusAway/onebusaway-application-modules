@@ -35,6 +35,9 @@
   <import resource="classpath:org/onebusaway/util/application-context.xml" />
   <!-- This turns on automatic annotation configuration -->
   <context:annotation-config />
+  
+  <!-- Include Java-based configuration -->
+  <bean class="org.onebusaway.api.OneBusAwayApiApplication" />
 
   <!-- -->
   <aop:aspectj-autoproxy />
