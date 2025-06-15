@@ -148,14 +148,8 @@
 
         <dependencies>
             
-            <!-- Spring Boot BOM -->
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-dependencies</artifactId>
-                <version>${spring-boot-version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
+            <!-- Spring Boot BOM removed to eliminate Jersey auto-configuration conflicts -->
+            <!-- Traditional Spring Framework approach without Spring Boot -->
 
             <dependency>
                 <groupId>org.onebusaway</groupId>
@@ -435,33 +429,7 @@
                 <version>4.0.1</version>
             </dependency>
             
-            <!-- Spring Boot Starters for selective adoption -->
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-starter</artifactId>
-                <version>${spring-boot-version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-starter-web</artifactId>
-                <version>${spring-boot-version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-starter-data-jpa</artifactId>
-                <version>${spring-boot-version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-starter-actuator</artifactId>
-                <version>${spring-boot-version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-starter-test</artifactId>
-                <version>${spring-boot-version}</version>
-                <scope>test</scope>
-            </dependency>
+            <!-- Spring Boot dependencies removed - using traditional Spring Framework -->
             
             <!-- JAXB dependencies for Java 11+ compatibility -->
             <dependency>
@@ -597,12 +565,7 @@
                     <version>2.4.0-1-oba</version>
                 </plugin>
                 
-                <!-- Spring Boot Maven Plugin -->
-                <plugin>
-                    <groupId>org.springframework.boot</groupId>
-                    <artifactId>spring-boot-maven-plugin</artifactId>
-                    <version>${spring-boot-version}</version>
-                </plugin>
+                <!-- Spring Boot Maven Plugin removed -->
 
             </plugins>
         </pluginManagement>

@@ -32,33 +32,11 @@
       <groupId>org.onebusaway</groupId>
       <artifactId>onebusaway-transit-data-federation</artifactId>
       <version>${project.version}</version>
-      <exclusions>
-        <!-- Exclude Spring Boot auto-configuration to prevent Jersey conflicts -->
-        <exclusion>
-          <groupId>org.springframework.boot</groupId>
-          <artifactId>spring-boot-autoconfigure</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.springframework.boot</groupId>
-          <artifactId>spring-boot</artifactId>
-        </exclusion>
-      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.onebusaway</groupId>
       <artifactId>onebusaway-presentation</artifactId>
       <version>${project.version}</version>
-      <exclusions>
-        <!-- Exclude Spring Boot auto-configuration to prevent Jersey conflicts -->
-        <exclusion>
-          <groupId>org.springframework.boot</groupId>
-          <artifactId>spring-boot-autoconfigure</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.springframework.boot</groupId>
-          <artifactId>spring-boot</artifactId>
-        </exclusion>
-      </exclusions>
     </dependency>
 
     <!-- This is the original SIRI API implementation that we hope to eventually move away from -->
