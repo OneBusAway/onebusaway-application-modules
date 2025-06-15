@@ -1,0 +1,43 @@
+# Java-only configuration profile for testing complete migration
+# Excludes XML context files to verify Java configuration completeness
+
+spring:
+  profiles:
+    active: java-only
+  
+  # Override context configuration to exclude XML files
+  config:
+    import: []
+
+# OneBusAway configuration remains the same
+onebusaway:
+  gtfs:
+    realtime:
+      enabled: true
+  federation:
+    enabled: false
+    service-url: http://localhost:8080/onebusaway-transit-data-federation-webapp/remoting/transit-data-service
+  api:
+    cors:
+      enabled: true
+      allowed-origins: "*"
+      allowed-methods: "GET,POST,PUT,DELETE,OPTIONS"
+    security:
+      hsts:
+        enabled: true
+      xss-protection:
+        enabled: true
+      content-type-options:
+        enabled: true
+  datasource:
+    jndi-name: java:comp/env/jdbc/appDB
+    archive:
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      url: jdbc:mysql://localhost:3306/onebusaway
+      username: ${DATABASE_USER:root}
+      password: ${DATABASE_PASSWORD:root}
+    agency:
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      url: jdbc:mysql://localhost:3306/onebusaway
+      username: ${DATABASE_USER:root}
+      password: ${DATABASE_PASSWORD:root}

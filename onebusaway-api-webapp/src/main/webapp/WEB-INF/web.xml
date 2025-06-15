@@ -35,6 +35,12 @@
         </param-value>
   </context-param>
   
+  <!-- Alternative configuration for Java-only mode -->
+  <context-param>
+    <param-name>spring.profiles.active</param-name>
+    <param-value>${SPRING_PROFILES_ACTIVE:development}</param-value>
+  </context-param>
+  
 
   <!-- Filters -->
   <filter>
