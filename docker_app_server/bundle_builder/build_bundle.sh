@@ -53,4 +53,4 @@ cd ..
 cp /root/.m2/repository/org/onebusaway/onebusaway-transit-data-federation-builder/$OBA_VERSION/onebusaway-transit-data-federation-builder-$OBA_VERSION-withAllDependencies.jar \
    /oba/builder.jar
 
-java -Xss4m -Xmx3g -jar /oba/builder.jar ./gtfs_tidied.zip .
+java -Xss4m -Xmx3g --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.lang.invoke=ALL-UNNAMED --add-opens java.base/sun.nio.ch=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED --add-opens java.base/java.security=ALL-UNNAMED -jar /oba/builder.jar ./gtfs_tidied.zip .

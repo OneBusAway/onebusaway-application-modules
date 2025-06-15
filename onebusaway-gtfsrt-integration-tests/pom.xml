@@ -114,16 +114,21 @@
       <artifactId>jackson-module-jaxb-annotations</artifactId>
       <version>${jackson-version}</version>
     </dependency>
-    <!-- java 11 xml changes -->
+    <!-- java 17 xml changes -->
     <dependency>
       <groupId>jakarta.xml.bind</groupId>
       <artifactId>jakarta.xml.bind-api</artifactId>
-      <version>2.3.3</version>
+      <version>4.0.0</version>
     </dependency>
     <dependency>
       <groupId>org.glassfish.jaxb</groupId>
       <artifactId>jaxb-runtime</artifactId>
-      <version>2.3.3</version>
+      <version>4.0.3</version>
+    </dependency>
+    <dependency>
+      <groupId>org.glassfish.jaxb</groupId>
+      <artifactId>jaxb-core</artifactId>
+      <version>4.0.3</version>
     </dependency>
     <!--  Support for sftp protocol -->
     <dependency>
