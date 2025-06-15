@@ -39,6 +39,7 @@
   <!-- Include Java-based configuration -->
   <bean class="org.onebusaway.api.OneBusAwayApiApplication" />
   <bean class="org.onebusaway.api.config.DataSourceConfiguration" />
+  <bean class="org.onebusaway.api.config.ApiServiceConfiguration" />
 
   <!-- -->
   <aop:aspectj-autoproxy />
