@@ -22,7 +22,7 @@ COPY ./docker_app_server/set_goarch.sh .
 RUN ./set_goarch.sh
 RUN CGO_ENABLED=0 go install github.com/patrickbr/gtfstidy@latest
 
-FROM tomcat:8.5.100-jdk17-temurin-focal AS server
+FROM tomcat:8.5.100-jdk21-temurin-focal AS server
 
 ARG MAVEN_VERSION=3.9.10
 
@@ -30,7 +30,7 @@ ARG OBA_VERSION=2.6.0
 ENV OBA_VERSION=$OBA_VERSION
 
 ENV CATALINA_HOME="/usr/local/tomcat"
-ENV CATALINA_OPTS="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
+ENV CATALINA_OPTS="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005 -XX:+UseZGC -XX:+UnlockExperimentalVMOptions"
 ENV TZ="America/Los_Angeles"
 ENV MAVEN_HOME="/usr/share/maven"
 ENV MAVEN_CONFIG="/root/.m2"

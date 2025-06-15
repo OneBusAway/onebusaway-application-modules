@@ -5,6 +5,15 @@ spring:
   profiles:
     active: development
   
+  # Java 21 Virtual Threads Configuration
+  threads:
+    virtual:
+      enabled: true
+  task:
+    execution:
+      pool:
+        virtual-threads: true
+  
   # Database configuration
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver

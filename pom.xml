@@ -35,7 +35,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-        <asm-version>8.0.1</asm-version>
+        <asm-version>9.6</asm-version>
         <struts-version>2.5.33</struts-version>
         <gwt-version>2.4.0</gwt-version>
         <maven-resources-plugin-version>3.3.1</maven-resources-plugin-version>
@@ -55,16 +55,17 @@
         <wiki_integration_version>1.0.0</wiki_integration_version>
         <!-- slf4j 2+ is not compatible with log4j2+ -->
         <slf4j.version>1.7.5</slf4j.version>
-        <guava-version>32.1.2-jre</guava-version>
+        <guava-version>33.0.0-jre</guava-version>
         <log4j.version>2.17.2</log4j.version>
         <!-- bump protobuf to support mac m2s aaarch and Java 17 -->
-        <protobuf.version>3.21.12</protobuf.version>
+        <protobuf.version>3.25.5</protobuf.version>
         <!--  These properties are primarily used in configuring joint integration tests -->
         <org_onebusaway_test_port>9900</org_onebusaway_test_port>
         <org_onebusaway_test_ajp_port>9901</org_onebusaway_test_ajp_port>
         <org_onebusaway_test_rmi_port>9902</org_onebusaway_test_rmi_port>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
+        <maven.compiler.release>21</maven.compiler.release>
         <!-- this needs to match cloud-services -->
         <aws.version>1.11.602</aws.version>
     </properties>
@@ -509,7 +510,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>3.1.2</version>
+                    <version>3.2.5</version>
                     <!-- By default, we exclude anything in the org.onebusaway.integration package
                     from regular unit test -->
                     <configuration>
@@ -586,9 +587,9 @@
         <plugins>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.11.0</version>
+                <version>3.12.1</version>
                 <configuration>
-                    <release>17</release>
+                    <release>21</release>
                 </configuration>
             </plugin>
             <plugin>
