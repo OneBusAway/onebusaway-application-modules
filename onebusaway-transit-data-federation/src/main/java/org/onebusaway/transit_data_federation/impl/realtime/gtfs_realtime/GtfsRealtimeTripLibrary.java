@@ -602,6 +602,10 @@ public class GtfsRealtimeTripLibrary {
     return record;
   }
 
+    public boolean getIsTripActive(CombinedTripUpdatesAndVehiclePosition update) {
+    return this.isTripActive(update);
+  }
+
   private boolean isTripActive(CombinedTripUpdatesAndVehiclePosition update) {
     if (update.getTripUpdates().isEmpty())
       return false;
