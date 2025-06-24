@@ -602,6 +602,10 @@ public class GtfsRealtimeTripLibrary {
     return record;
   }
 
+    public boolean getIsTripActive(CombinedTripUpdatesAndVehiclePosition update) {
+    return this.isTripActive(update);
+  }
+
   private boolean isTripActive(CombinedTripUpdatesAndVehiclePosition update) {
     if (update.getTripUpdates().isEmpty())
       return false;
@@ -615,6 +619,15 @@ public class GtfsRealtimeTripLibrary {
     long lastPrediction = -1;
     StopTimeUpdate firstStopTime = tripUpdate.getStopTimeUpdate(0);
     StopTimeUpdate lastStopTime = tripUpdate.getStopTimeUpdate(tripUpdateCount-1);
+
+    if (lastStopTime.hasArrival() 
+            && !lastStopTime.getArrival().hasTime()
+            && lastStopTime.getArrival().hasDelay()
+            && tripUpdate.getTrip().getScheduleRelationship()
+            .equals(TripDescriptor.ScheduleRelationship.SCHEDULED)) {
+        return true;
+    }
+
     if (firstStopTime.hasArrival())
       firstPrediction = firstStopTime.getArrival().getTime();
     else if (firstStopTime.hasDeparture())
