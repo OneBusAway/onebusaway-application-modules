@@ -36,7 +36,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
         <asm-version>8.0.1</asm-version>
-        <struts-version>2.5.33</struts-version>
+        <struts-version>6.8.0</struts-version>
         <gwt-version>2.4.0</gwt-version>
         <maven-resources-plugin-version>3.3.1</maven-resources-plugin-version>
         <maven-shade-plugin-version>3.6.0</maven-shade-plugin-version>
