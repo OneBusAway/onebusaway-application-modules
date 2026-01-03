@@ -25,3 +25,5 @@ docker_app_server/bundle/*
 !docker_app_server/bundle/.gitkeep
 
 dependency-reduced-pom.xml
+
+.claude/settings.local.json
