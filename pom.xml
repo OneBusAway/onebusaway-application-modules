@@ -135,7 +135,6 @@
 <!--        <module>onebusaway-nextbus-api-webapp</module>-->
 <!--        <module>onebusaway-phone</module>-->
 <!--        <module>onebusaway-phone-webapp</module>-->
-<!--        <module>onebusaway-quickstart</module>-->
 <!--        <module>onebusaway-sms-webapp</module>-->
 <!--        <module>onebusaway-status-agent</module>-->
     </modules>
@@ -543,7 +542,6 @@
                         <exclude>bin/**</exclude>
                         <exclude>.github/**</exclude>
                         <exclude>src/test/resources/**</exclude>
-                        <exclude>onebusaway-quickstart/**</exclude>
                         <exclude>**/git.properties</exclude>
                         <exclude>**/log4j2.xml</exclude>
                         <exclude>**/log4j-stdout.xml</exclude>
