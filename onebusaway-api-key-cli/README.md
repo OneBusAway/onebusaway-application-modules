@@ -67,6 +67,7 @@ java -jar onebusaway-api-key-cli/target/onebusaway-api-key-cli-2.7.0-withAllDepe
 | Option | Description |
 |--------|-------------|
 | `-c, --config <path>` | Path to data-sources.xml (required for all commands except help) |
+| `-j, --json` | Output in JSON format (for scripting and automation) |
 
 ### Create Options
 
@@ -205,6 +206,89 @@ Show general help:
 
 ```bash
 java -jar onebusaway-api-key-cli-2.7.0-withAllDependencies.jar help
+```
+
+### JSON Output
+
+All commands support the `--json` flag for machine-readable output. This is useful for scripting and automation.
+
+List keys in JSON format:
+
+```bash
+java -jar onebusaway-api-key-cli-2.7.0-withAllDependencies.jar list \
+    --config /path/to/data-sources.xml \
+    --json
+```
+
+Output:
+```json
+{
+  "total" : 3,
+  "keys" : [ "key1", "key2", "key3" ]
+}
+```
+
+Get key details in JSON format:
+
+```bash
+java -jar onebusaway-api-key-cli-2.7.0-withAllDependencies.jar get \
+    --config /path/to/data-sources.xml \
+    --key my-api-key \
+    --json
+```
+
+Output:
+```json
+{
+  "key" : "my-api-key",
+  "contactName" : "Jane Developer",
+  "contactCompany" : "Transit Agency",
+  "contactEmail" : "jane@example.com",
+  "contactDetails" : "Mobile app integration",
+  "minApiRequestInterval" : 100
+}
+```
+
+Create a key with JSON output:
+
+```bash
+java -jar onebusaway-api-key-cli-2.7.0-withAllDependencies.jar create \
+    --config /path/to/data-sources.xml \
+    --key new-key \
+    --email dev@example.com \
+    --json
+```
+
+Output:
+```json
+{
+  "success" : true,
+  "message" : "API key created successfully",
+  "key" : "new-key",
+  "contactName" : "",
+  "contactCompany" : "",
+  "contactEmail" : "dev@example.com",
+  "contactDetails" : "",
+  "minApiRequestInterval" : 100
+}
+```
+
+Delete a key with JSON output:
+
+```bash
+java -jar onebusaway-api-key-cli-2.7.0-withAllDependencies.jar delete \
+    --config /path/to/data-sources.xml \
+    --key old-key \
+    --json
+```
+
+Output:
+```json
+{
+  "success" : true,
+  "message" : "API key deleted successfully",
+  "key" : "old-key"
+}
 ```
 
 ## API Key Validation

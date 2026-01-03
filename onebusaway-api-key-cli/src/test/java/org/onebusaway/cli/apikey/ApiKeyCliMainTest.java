@@ -506,6 +506,141 @@ public class ApiKeyCliMainTest {
         }
     }
 
+    // ==================== JSON Output Tests ====================
+
+    @Test
+    public void testCreate_JsonOutput_Success() throws Exception {
+        String keyValue = "json-test-key";
+        UserIndex mockUserIndex = createMockUserIndex(keyValue);
+        User mockUser = mockUserIndex.getUser();
+
+        when(userService.getUserIndexForId(any(UserIndexKey.class))).thenReturn(null);
+        when(userService.getOrCreateUserForIndexKey(any(UserIndexKey.class), eq(""), eq(true)))
+            .thenReturn(mockUserIndex);
+
+        cli.run(new String[]{
+            "create", "--config", "/tmp/data-sources.xml",
+            "--key", keyValue,
+            "--name", "Test User",
+            "--email", "test@example.com",
+            "--json"
+        });
+
+        String output = outContent.toString();
+        assertTrue(output.contains("\"success\" : true"));
+        assertTrue(output.contains("\"key\" : \"json-test-key\""));
+        assertTrue(output.contains("\"contactName\" : \"Test User\""));
+        assertTrue(output.contains("\"contactEmail\" : \"test@example.com\""));
+    }
+
+    @Test
+    public void testList_JsonOutput_WithKeys() throws Exception {
+        when(userService.getUserIndexKeyValuesForKeyType(UserIndexTypes.API_KEY))
+            .thenReturn(Arrays.asList("key1", "key2", "key3"));
+
+        cli.run(new String[]{"list", "--config", "/tmp/data-sources.xml", "--json"});
+
+        String output = outContent.toString();
+        assertTrue(output.contains("\"total\" : 3"));
+        assertTrue(output.contains("\"keys\""));
+        assertTrue(output.contains("\"key1\""));
+        assertTrue(output.contains("\"key2\""));
+        assertTrue(output.contains("\"key3\""));
+    }
+
+    @Test
+    public void testList_JsonOutput_Empty() throws Exception {
+        when(userService.getUserIndexKeyValuesForKeyType(UserIndexTypes.API_KEY))
+            .thenReturn(Collections.emptyList());
+
+        cli.run(new String[]{"list", "--config", "/tmp/data-sources.xml", "--json"});
+
+        String output = outContent.toString();
+        assertTrue(output.contains("\"total\" : 0"));
+        assertTrue(output.contains("\"keys\" : [ ]"));
+    }
+
+    @Test
+    public void testGet_JsonOutput_ExistingKey() throws Exception {
+        String keyValue = "my-json-key";
+        UserIndex mockUserIndex = createMockUserIndex(keyValue);
+        User mockUser = mockUserIndex.getUser();
+        UserBean mockBean = new UserBean();
+        mockBean.setContactName("Jane Doe");
+        mockBean.setContactCompany("Widget Inc");
+        mockBean.setContactEmail("jane@widget.com");
+        mockBean.setContactDetails("Production key");
+        mockBean.setMinApiRequestInterval(500L);
+
+        when(userService.getUserIndexForId(any(UserIndexKey.class))).thenReturn(mockUserIndex);
+        when(userService.getUserAsBean(mockUser)).thenReturn(mockBean);
+
+        cli.run(new String[]{"get", "--config", "/tmp/data-sources.xml", "--key", keyValue, "--json"});
+
+        String output = outContent.toString();
+        assertTrue(output.contains("\"key\" : \"my-json-key\""));
+        assertTrue(output.contains("\"contactName\" : \"Jane Doe\""));
+        assertTrue(output.contains("\"contactCompany\" : \"Widget Inc\""));
+        assertTrue(output.contains("\"contactEmail\" : \"jane@widget.com\""));
+        assertTrue(output.contains("\"minApiRequestInterval\" : 500"));
+    }
+
+    @Test
+    public void testUpdate_JsonOutput_Success() throws Exception {
+        String keyValue = "update-json-key";
+        UserIndex mockUserIndex = createMockUserIndex(keyValue);
+        User mockUser = mockUserIndex.getUser();
+        UserBean mockBean = new UserBean();
+        mockBean.setContactName("Old Name");
+        mockBean.setContactCompany("Old Company");
+        mockBean.setContactEmail("old@email.com");
+        mockBean.setContactDetails("Old details");
+        mockBean.setMinApiRequestInterval(100L);
+
+        when(userService.getUserIndexForId(any(UserIndexKey.class))).thenReturn(mockUserIndex);
+        when(userService.getUserAsBean(mockUser)).thenReturn(mockBean);
+
+        cli.run(new String[]{
+            "update", "--config", "/tmp/data-sources.xml",
+            "--key", keyValue,
+            "--name", "New Name",
+            "--json"
+        });
+
+        String output = outContent.toString();
+        assertTrue(output.contains("\"success\" : true"));
+        assertTrue(output.contains("\"key\" : \"update-json-key\""));
+        assertTrue(output.contains("\"contactName\" : \"New Name\""));
+    }
+
+    @Test
+    public void testDelete_JsonOutput_Success() throws Exception {
+        String keyValue = "delete-json-key";
+        UserIndex mockUserIndex = createMockUserIndex(keyValue);
+        User mockUser = mockUserIndex.getUser();
+
+        when(userService.getUserIndexForId(any(UserIndexKey.class))).thenReturn(mockUserIndex);
+
+        cli.run(new String[]{"delete", "--config", "/tmp/data-sources.xml", "--key", keyValue, "--json"});
+
+        String output = outContent.toString();
+        assertTrue(output.contains("\"success\" : true"));
+        assertTrue(output.contains("\"message\" : \"API key deleted successfully\""));
+        assertTrue(output.contains("\"key\" : \"delete-json-key\""));
+    }
+
+    @Test
+    public void testList_JsonOutput_ShortFlag() throws Exception {
+        when(userService.getUserIndexKeyValuesForKeyType(UserIndexTypes.API_KEY))
+            .thenReturn(Arrays.asList("key1"));
+
+        cli.run(new String[]{"list", "--config", "/tmp/data-sources.xml", "-j"});
+
+        String output = outContent.toString();
+        assertTrue(output.contains("\"total\" : 1"));
+        assertTrue(output.contains("\"keys\""));
+    }
+
     // ==================== Helper Methods ====================
 
     private UserIndex createMockUserIndex(String keyValue) {

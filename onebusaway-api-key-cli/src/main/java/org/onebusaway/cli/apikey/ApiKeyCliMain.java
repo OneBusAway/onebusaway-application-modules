@@ -15,7 +15,9 @@
  */
 package org.onebusaway.cli.apikey;
 
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
@@ -26,6 +28,9 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.onebusaway.container.ContainerLibrary;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import org.onebusaway.users.client.model.UserBean;
 import org.onebusaway.users.model.User;
 import org.onebusaway.users.model.UserIndex;
@@ -54,6 +59,12 @@ public class ApiKeyCliMain {
     private ConfigurableApplicationContext context;
     private UserService userService;
     private UserPropertiesService userPropertiesService;
+    private final ObjectMapper objectMapper;
+
+    public ApiKeyCliMain() {
+        this.objectMapper = new ObjectMapper();
+        this.objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
+    }
 
     /**
      * Sets the UserService (for testing).
@@ -120,21 +131,23 @@ public class ApiKeyCliMain {
 
         initializeContext(configPath);
 
+        boolean jsonOutput = cli.hasOption("json");
+
         switch (command) {
             case "create":
-                doCreate(cli);
+                doCreate(cli, jsonOutput);
                 break;
             case "list":
-                doList();
+                doList(jsonOutput);
                 break;
             case "get":
-                doGet(cli);
+                doGet(cli, jsonOutput);
                 break;
             case "update":
-                doUpdate(cli);
+                doUpdate(cli, jsonOutput);
                 break;
             case "delete":
-                doDelete(cli);
+                doDelete(cli, jsonOutput);
                 break;
             default:
                 System.err.println("Unknown command: " + command);
@@ -161,6 +174,10 @@ public class ApiKeyCliMain {
         configOption.setRequired(false); // We'll check manually for better error messages
         options.addOption(configOption);
 
+        // Add --json flag to all commands
+        Option jsonOption = new Option("j", "json", false, "Output in JSON format");
+        options.addOption(jsonOption);
+
         switch (command) {
             case "create":
                 options.addOption(new Option("k", "key", true, "API key value (optional, UUID generated if not provided)"));
@@ -184,7 +201,7 @@ public class ApiKeyCliMain {
                 options.addOption(new Option("m", "minApiReqInt", true, "Minimum API request interval in ms"));
                 break;
             case "list":
-                // No additional options
+                // No additional options beyond --json
                 break;
         }
 
@@ -241,7 +258,7 @@ public class ApiKeyCliMain {
         return minApiReqInt;
     }
 
-    private void doCreate(CommandLine cli) throws Exception {
+    private void doCreate(CommandLine cli, boolean jsonOutput) throws Exception {
         String keyValue = cli.getOptionValue("key");
         if (keyValue == null || keyValue.isEmpty()) {
             keyValue = UUID.randomUUID().toString();
@@ -276,25 +293,45 @@ public class ApiKeyCliMain {
         // Clear cache
         userService.getMinApiRequestIntervalForKey(keyValue, true);
 
-        System.out.println("API key created successfully: " + keyValue);
+        if (jsonOutput) {
+            Map<String, Object> result = new LinkedHashMap<>();
+            result.put("success", true);
+            result.put("message", "API key created successfully");
+            result.put("key", keyValue);
+            result.put("contactName", name);
+            result.put("contactCompany", company);
+            result.put("contactEmail", email);
+            result.put("contactDetails", details);
+            result.put("minApiRequestInterval", minApiReqInt);
+            System.out.println(objectMapper.writeValueAsString(result));
+        } else {
+            System.out.println("API key created successfully: " + keyValue);
+        }
     }
 
-    private void doList() throws Exception {
+    private void doList(boolean jsonOutput) throws Exception {
         List<String> apiKeys = userService.getUserIndexKeyValuesForKeyType(UserIndexTypes.API_KEY);
 
-        if (apiKeys.isEmpty()) {
-            System.out.println("No API keys found");
-            return;
-        }
+        if (jsonOutput) {
+            Map<String, Object> result = new LinkedHashMap<>();
+            result.put("total", apiKeys.size());
+            result.put("keys", apiKeys);
+            System.out.println(objectMapper.writeValueAsString(result));
+        } else {
+            if (apiKeys.isEmpty()) {
+                System.out.println("No API keys found");
+                return;
+            }
 
-        System.out.println("API Keys (" + apiKeys.size() + " total):");
-        System.out.println("----------------------------------------");
-        for (String key : apiKeys) {
-            System.out.println(key);
+            System.out.println("API Keys (" + apiKeys.size() + " total):");
+            System.out.println("----------------------------------------");
+            for (String key : apiKeys) {
+                System.out.println(key);
+            }
         }
     }
 
-    private void doGet(CommandLine cli) throws Exception {
+    private void doGet(CommandLine cli, boolean jsonOutput) throws Exception {
         String keyValue = cli.getOptionValue("key");
         if (keyValue == null || keyValue.isEmpty()) {
             throw new IllegalArgumentException("--key is required");
@@ -310,17 +347,28 @@ public class ApiKeyCliMain {
         User user = userIndex.getUser();
         UserBean bean = userService.getUserAsBean(user);
 
-        System.out.println("API Key Details:");
-        System.out.println("----------------------------------------");
-        System.out.println("Key:                  " + keyValue);
-        System.out.println("Contact Name:         " + nullSafe(bean.getContactName()));
-        System.out.println("Contact Company:      " + nullSafe(bean.getContactCompany()));
-        System.out.println("Contact Email:        " + nullSafe(bean.getContactEmail()));
-        System.out.println("Contact Details:      " + nullSafe(bean.getContactDetails()));
-        System.out.println("Min API Req Interval: " + bean.getMinApiRequestInterval() + " ms");
+        if (jsonOutput) {
+            Map<String, Object> result = new LinkedHashMap<>();
+            result.put("key", keyValue);
+            result.put("contactName", nullSafe(bean.getContactName()));
+            result.put("contactCompany", nullSafe(bean.getContactCompany()));
+            result.put("contactEmail", nullSafe(bean.getContactEmail()));
+            result.put("contactDetails", nullSafe(bean.getContactDetails()));
+            result.put("minApiRequestInterval", bean.getMinApiRequestInterval());
+            System.out.println(objectMapper.writeValueAsString(result));
+        } else {
+            System.out.println("API Key Details:");
+            System.out.println("----------------------------------------");
+            System.out.println("Key:                  " + keyValue);
+            System.out.println("Contact Name:         " + nullSafe(bean.getContactName()));
+            System.out.println("Contact Company:      " + nullSafe(bean.getContactCompany()));
+            System.out.println("Contact Email:        " + nullSafe(bean.getContactEmail()));
+            System.out.println("Contact Details:      " + nullSafe(bean.getContactDetails()));
+            System.out.println("Min API Req Interval: " + bean.getMinApiRequestInterval() + " ms");
+        }
     }
 
-    private void doUpdate(CommandLine cli) throws Exception {
+    private void doUpdate(CommandLine cli, boolean jsonOutput) throws Exception {
         String keyValue = cli.getOptionValue("key");
         if (keyValue == null || keyValue.isEmpty()) {
             throw new IllegalArgumentException("--key is required");
@@ -354,10 +402,23 @@ public class ApiKeyCliMain {
         // Clear cache
         userService.getMinApiRequestIntervalForKey(keyValue, true);
 
-        System.out.println("API key updated successfully: " + keyValue);
+        if (jsonOutput) {
+            Map<String, Object> result = new LinkedHashMap<>();
+            result.put("success", true);
+            result.put("message", "API key updated successfully");
+            result.put("key", keyValue);
+            result.put("contactName", nullSafe(name));
+            result.put("contactCompany", nullSafe(company));
+            result.put("contactEmail", nullSafe(email));
+            result.put("contactDetails", nullSafe(details));
+            result.put("minApiRequestInterval", minApiReqInt);
+            System.out.println(objectMapper.writeValueAsString(result));
+        } else {
+            System.out.println("API key updated successfully: " + keyValue);
+        }
     }
 
-    private void doDelete(CommandLine cli) throws Exception {
+    private void doDelete(CommandLine cli, boolean jsonOutput) throws Exception {
         String keyValue = cli.getOptionValue("key");
         if (keyValue == null || keyValue.isEmpty()) {
             throw new IllegalArgumentException("--key is required");
@@ -402,7 +463,15 @@ public class ApiKeyCliMain {
             // Ignore - key is deleted
         }
 
-        System.out.println("API key deleted successfully: " + keyValue);
+        if (jsonOutput) {
+            Map<String, Object> result = new LinkedHashMap<>();
+            result.put("success", true);
+            result.put("message", "API key deleted successfully");
+            result.put("key", keyValue);
+            System.out.println(objectMapper.writeValueAsString(result));
+        } else {
+            System.out.println("API key deleted successfully: " + keyValue);
+        }
     }
 
     private String nullSafe(String value) {
@@ -424,6 +493,7 @@ public class ApiKeyCliMain {
         System.out.println();
         System.out.println("Global Options:");
         System.out.println("  -c, --config <path>   Path to data-sources.xml (required)");
+        System.out.println("  -j, --json            Output in JSON format");
         System.out.println();
         System.out.println("Examples:");
         System.out.println("  java -jar onebusaway-api-key-cli.jar create --config /path/to/data-sources.xml --key my-key --email user@example.com");
