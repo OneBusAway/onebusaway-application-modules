@@ -13,8 +13,8 @@
     <name>onebusaway-federations-webapp</name>
 
     <properties>
-        <tomcat-version>7.0.70</tomcat-version>
-        <cargo.jvmargs>-Xmx2G -XX:MaxPermSize=256m</cargo.jvmargs>
+        <tomcat-version>10.1.18</tomcat-version>
+        <cargo.jvmargs>-Xmx2G</cargo.jvmargs>
     </properties>
 
     <dependencies>
@@ -38,7 +38,7 @@
         </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-slf4j-impl</artifactId>
+            <artifactId>log4j-slf4j2-impl</artifactId>
             <version>${log4j.version}</version>
         </dependency>
 
@@ -87,7 +87,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.0.0-M3</version>
+                <version>3.2.5</version>
                 <executions>
                     <execution>
                         <id>integration-tests</id>

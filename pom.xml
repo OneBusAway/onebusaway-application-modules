@@ -35,34 +35,34 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-        <asm-version>8.0.1</asm-version>
+        <asm-version>9.6</asm-version>
         <struts-version>2.5.33</struts-version>
         <gwt-version>2.4.0</gwt-version>
         <maven-resources-plugin-version>3.3.1</maven-resources-plugin-version>
         <maven-shade-plugin-version>3.6.0</maven-shade-plugin-version>
-        <spring-version>5.2.24.RELEASE</spring-version>
+        <spring-version>5.3.39</spring-version>
         <csv-entities-version>1.1.7</csv-entities-version>
         <collections-version>1.2.8</collections-version>
         <gtfs-version>1.4.17</gtfs-version>
         <gtfs-api-version>1.2.32</gtfs-api-version>
-        <jackson-version>2.12.0</jackson-version>
-        <jersey-version>2.31</jersey-version>
+        <jackson-version>2.17.0</jackson-version>
+        <jersey-version>2.41</jersey-version>
+        <hibernate-version>5.6.15.Final</hibernate-version>
         <onebusaway-siri-version>1.0.6</onebusaway-siri-version>
         <onebusaway-siri-1-api-version>1.0.1</onebusaway-siri-1-api-version>
         <onebusaway-siri-2-api-version>1.0.5</onebusaway-siri-2-api-version>
         <wiki_integration_version>1.0.0</wiki_integration_version>
-        <!-- slf4j 2+ is not compatible with log4j2+ -->
-        <slf4j.version>1.7.5</slf4j.version>
-        <guava-version>16.0.1</guava-version>
-        <log4j.version>2.17.2</log4j.version>
-        <!-- bump protobuf to support mac m2s aaarch -->
-        <protobuf.version>3.17.3</protobuf.version>
+        <slf4j.version>2.0.12</slf4j.version>
+        <guava-version>33.0.0-jre</guava-version>
+        <log4j.version>2.23.0</log4j.version>
+        <!-- bump protobuf to support mac m2s aarch and Java 17 -->
+        <protobuf.version>3.25.3</protobuf.version>
         <!--  These properties are primarily used in configuring joint integration tests -->
         <org_onebusaway_test_port>9900</org_onebusaway_test_port>
         <org_onebusaway_test_ajp_port>9901</org_onebusaway_test_ajp_port>
         <org_onebusaway_test_rmi_port>9902</org_onebusaway_test_rmi_port>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
         <!-- this needs to match cloud-services -->
         <aws.version>1.11.602</aws.version>
     </properties>
@@ -176,7 +176,7 @@
             <dependency>
                 <groupId>org.hsqldb</groupId>
                 <artifactId>hsqldb</artifactId>
-                <version>2.3.2</version>
+                <version>2.7.2</version>
             </dependency>
 
             <dependency>
@@ -203,7 +203,7 @@
             <dependency>
                 <groupId>org.hibernate</groupId>
                 <artifactId>hibernate-core</artifactId>
-                <version>5.4.24.Final</version>
+                <version>${hibernate-version}</version>
                 <exclusions>
                     <exclusion>
                         <groupId>xml-apis</groupId>
@@ -286,20 +286,20 @@
             </dependency>
             <dependency>
                 <groupId>javax.servlet</groupId>
-                <artifactId>servlet-api</artifactId>
-                <version>2.4</version>
+                <artifactId>javax.servlet-api</artifactId>
+                <version>4.0.1</version>
                 <scope>provided</scope>
             </dependency>
             <dependency>
-                <groupId>javax.servlet</groupId>
-                <artifactId>jsp-api</artifactId>
-                <version>2.0</version>
+                <groupId>javax.servlet.jsp</groupId>
+                <artifactId>javax.servlet.jsp-api</artifactId>
+                <version>2.3.3</version>
                 <scope>provided</scope>
             </dependency>
             <dependency>
                 <groupId>javax.servlet</groupId>
                 <artifactId>jstl</artifactId>
-                <version>1.1.2</version>
+                <version>1.2</version>
             </dependency>
             <dependency>
                 <groupId>taglibs</groupId>
@@ -449,7 +449,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>3.0.0-M3</version>
+                    <version>3.2.5</version>
                     <!-- By default, we exclude anything in the org.onebusaway.integration package
                     from regular unit test -->
                     <configuration>
@@ -513,9 +513,9 @@
         <plugins>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.1</version>
+                <version>3.12.1</version>
                 <configuration>
-                    <release>11</release>
+                    <release>17</release>
                 </configuration>
             </plugin>
             <plugin>
@@ -602,6 +602,7 @@
                     </execution>
                 </executions>
             </plugin>
+            <!-- Commented out for local builds - required for publishing to Maven Central
             <plugin>
                 <groupId>org.sonatype.central</groupId>
                 <artifactId>central-publishing-maven-plugin</artifactId>
@@ -612,15 +613,17 @@
                     <autoPublish>true</autoPublish>
                 </configuration>
             </plugin>
+            -->
         </plugins>
-        <!-- force a newer version of ssh for site:deploy -->
+        <!-- force a newer version of ssh for site:deploy
         <extensions>
             <extension>
                 <groupId>org.apache.maven.wagon</groupId>
                 <artifactId>wagon-ssh</artifactId>
-                <version>3.3.4</version>
+                <version>3.5.3</version>
             </extension>
         </extensions>
+        -->
 
     </build>
     <profiles>
