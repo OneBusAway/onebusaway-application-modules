@@ -24,7 +24,7 @@ RUN CGO_ENABLED=0 go install github.com/patrickbr/gtfstidy@latest
 
 FROM tomcat:8.5.100-jdk11-temurin-focal AS server
 
-ARG MAVEN_VERSION=3.9.9
+ARG MAVEN_VERSION=12
 
 ARG OBA_VERSION=2.7.0
 ENV OBA_VERSION=$OBA_VERSION
@@ -85,12 +85,11 @@ COPY ./docker_app_server/config/host-manager_context.xml $CATALINA_HOME/webapps/
 
 # MySQL Connector
 WORKDIR $CATALINA_HOME/lib
-RUN wget "https://cdn.mysql.com/Downloads/Connector-J/mysql-connector-j-8.4.0.tar.gz" \
-    && tar -zxvf mysql-connector-j-8.4.0.tar.gz \
-    && mv mysql-connector-j-8.4.0/mysql-connector-j-8.4.0.jar . \
-    && rm mysql-connector-j-8.4.0.tar.gz \
-    && rm -rf mysql-connector-j-8.4.0
-
+RUN wget "https://cdn.mysql.com/Downloads/Connector-J/mysql-connector-j-9.4.0.tar.gz" \
+    && tar -zxvf mysql-connector-j-9.4.0.tar.gz \
+    && mv mysql-connector-j-9.4.0/mysql-connector-j-9.4.0.jar . \
+    && rm mysql-connector-j-9.4.0.tar.gz \
+    && rm -rf mysql-connector-j-9.4.0
 # Put the user in the source code directory when they shell in
 WORKDIR /src
 
