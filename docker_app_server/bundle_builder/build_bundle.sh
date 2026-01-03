@@ -43,6 +43,7 @@ gtfstidy -OscRCSmeD gtfs_pristine.zip
 
 cd gtfs-out
 
+rm -f ../gtfs_tidied.zip
 zip ../gtfs_tidied.zip *
 
 cd ..
