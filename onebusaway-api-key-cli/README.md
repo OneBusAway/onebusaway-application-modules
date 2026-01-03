@@ -43,6 +43,14 @@ The database must already have the OneBusAway schema created (tables `oba_users`
 java -jar onebusaway-api-key-cli-2.7.0-withAllDependencies.jar <command> [options]
 ```
 
+### Example
+
+```bash
+java -jar onebusaway-api-key-cli/target/onebusaway-api-key-cli-2.7.0-withAllDependencies.jar \
+  list \
+  --config api-key-cli-data-source.xml
+```
+
 ### Commands
 
 | Command | Description |
