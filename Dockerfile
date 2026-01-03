@@ -26,7 +26,7 @@ FROM tomcat:8.5.100-jdk11-temurin-focal AS server
 
 ARG MAVEN_VERSION=3.9.9
 
-ARG OBA_VERSION=2.6.0
+ARG OBA_VERSION=2.7.0
 ENV OBA_VERSION=$OBA_VERSION
 
 ENV CATALINA_HOME="/usr/local/tomcat"
