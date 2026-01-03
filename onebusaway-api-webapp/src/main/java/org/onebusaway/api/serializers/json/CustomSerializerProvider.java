@@ -16,6 +16,7 @@
 package org.onebusaway.api.serializers.json;
 
 import com.fasterxml.jackson.databind.*;
+import com.fasterxml.jackson.databind.cfg.CacheProvider;
 import com.fasterxml.jackson.databind.ser.DefaultSerializerProvider;
 import com.fasterxml.jackson.databind.ser.SerializerFactory;
 import org.onebusaway.api.model.transit.FrequencyV2Bean;
@@ -39,6 +40,11 @@ public class CustomSerializerProvider extends DefaultSerializerProvider {
   @Override
   public CustomSerializerProvider createInstance(SerializationConfig config, SerializerFactory jsf) {
     return new CustomSerializerProvider(this, config, jsf);
+  }
+
+  @Override
+  public DefaultSerializerProvider withCaches(CacheProvider cacheProvider) {
+    return new CustomSerializerProvider(this, _config, _serializerFactory);
   }
 
   @Override
