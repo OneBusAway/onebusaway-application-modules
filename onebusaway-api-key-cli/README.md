@@ -98,33 +98,57 @@ java -jar onebusaway-api-key-cli/target/onebusaway-api-key-cli-2.7.0-withAllDepe
 
 ## Examples
 
-### Create a new API key with auto-generated UUID
+### Create Command
+
+Create a new API key with auto-generated UUID:
+
+```bash
+java -jar onebusaway-api-key-cli-2.7.0-withAllDependencies.jar create \
+    --config /path/to/data-sources.xml
+```
+
+Create a key with contact information:
 
 ```bash
 java -jar onebusaway-api-key-cli-2.7.0-withAllDependencies.jar create \
     --config /path/to/data-sources.xml \
-    --email admin@example.com \
     --name "Admin User" \
-    --company "Transit Agency"
+    --email admin@example.com
 ```
 
-### Create a key with a specific value
+Create a key with a specific value instead of auto-generated UUID:
+
+```bash
+java -jar onebusaway-api-key-cli-2.7.0-withAllDependencies.jar create \
+    --config /path/to/data-sources.xml \
+    --key my-custom-api-key
+```
+
+Create a key with all options:
 
 ```bash
 java -jar onebusaway-api-key-cli-2.7.0-withAllDependencies.jar create \
     --config /path/to/data-sources.xml \
     --key my-custom-api-key \
-    --email developer@example.com
+    --name "Jane Developer" \
+    --company "Transit Agency" \
+    --email developer@example.com \
+    --details "Mobile app integration - approved 2024-01" \
+    --minApiReqInt 50
 ```
 
-### List all API keys
+### List Command
+
+List all API keys:
 
 ```bash
 java -jar onebusaway-api-key-cli-2.7.0-withAllDependencies.jar list \
     --config /path/to/data-sources.xml
 ```
 
-### Get details for a specific key
+### Get Command
+
+Get details for a specific key:
 
 ```bash
 java -jar onebusaway-api-key-cli-2.7.0-withAllDependencies.jar get \
@@ -132,22 +156,55 @@ java -jar onebusaway-api-key-cli-2.7.0-withAllDependencies.jar get \
     --key my-custom-api-key
 ```
 
-### Update an existing key
+### Update Command
+
+Update just the email for an existing key:
 
 ```bash
 java -jar onebusaway-api-key-cli-2.7.0-withAllDependencies.jar update \
     --config /path/to/data-sources.xml \
     --key my-custom-api-key \
-    --email newemail@example.com \
-    --minApiReqInt 50
+    --email newemail@example.com
 ```
 
-### Delete an API key
+Update the rate limit for an existing key:
+
+```bash
+java -jar onebusaway-api-key-cli-2.7.0-withAllDependencies.jar update \
+    --config /path/to/data-sources.xml \
+    --key my-custom-api-key \
+    --minApiReqInt 200
+```
+
+Update all fields for an existing key:
+
+```bash
+java -jar onebusaway-api-key-cli-2.7.0-withAllDependencies.jar update \
+    --config /path/to/data-sources.xml \
+    --key my-custom-api-key \
+    --name "John Smith" \
+    --company "New Transit Corp" \
+    --email updated@example.com \
+    --details "Updated contact - transferred ownership 2024-06" \
+    --minApiReqInt 100
+```
+
+### Delete Command
+
+Delete an API key:
 
 ```bash
 java -jar onebusaway-api-key-cli-2.7.0-withAllDependencies.jar delete \
     --config /path/to/data-sources.xml \
     --key my-custom-api-key
+```
+
+### Help Command
+
+Show general help:
+
+```bash
+java -jar onebusaway-api-key-cli-2.7.0-withAllDependencies.jar help
 ```
 
 ## API Key Validation
