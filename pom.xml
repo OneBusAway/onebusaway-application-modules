@@ -120,7 +120,6 @@
         <module>onebusaway-users</module>
         <module>onebusaway-util</module>
         <module>onebusaway-alerts-persistence</module>
-        <module>onebusaway-watchdog-webapp</module>
         <module>onebusaway-alerts-api</module>
         <module>onebusaway-gtfsrt-integration-tests</module>
         <module>onebusaway-api-key-cli</module>

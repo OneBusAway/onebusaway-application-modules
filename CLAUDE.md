@@ -35,6 +35,8 @@ mvn test -Dtest=ConfigActionTest#testIndex
 mvn verify
 ```
 
+**Note:** If tests fail with protobuf-related errors (e.g., `NoSuchMethodError` on `ServiceAlerts` classes), run `mvn clean install -DskipTests` first to regenerate protobuf classes, then run tests.
+
 ### Docker Development (Recommended)
 
 ```bash
@@ -80,7 +82,6 @@ bin/shell                          # Shell into container
 - `onebusaway-api-webapp` - Main REST API (most commonly modified)
 - `onebusaway-transit-data-federation-webapp` - Admin/federation UI
 - `onebusaway-gtfs-realtime-archiver` - Archives realtime data
-- `onebusaway-watchdog-webapp` - Monitoring endpoints
 
 **CLI Tools:**
 - `onebusaway-api-key-cli` - Command-line API key management
