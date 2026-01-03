@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(bin/build_bundle:*)",
+      "Bash(docker run:*)",
+      "Bash(docker compose exec:*)",
+      "Bash(docker compose:*)",
+      "Bash(java -jar:*)",
+      "Bash(tree:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(mvn test:*)",
+      "Bash(mvn package:*)"
+    ]
+  }
+}
