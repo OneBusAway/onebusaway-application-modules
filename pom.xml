@@ -107,7 +107,6 @@
         <module>onebusaway-core</module>
         <module>onebusaway-federations</module>
         <module>onebusaway-federations-webapp</module>
-        <module>onebusaway-geocoder</module>
         <module>onebusaway-geospatial</module>
         <module>onebusaway-gtfs-hibernate-spring</module>
         <module>onebusaway-gtfs-realtime-archiver</module>
