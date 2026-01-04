@@ -129,7 +129,6 @@
         <!-- Disabled Modules: These are deprecated and should be removed. -->
 <!--        <module>onebusaway-admin-webapp</module>-->
 <!--        <module>onebusaway-combined-webapp</module>-->
-<!--        <module>onebusaway-enterprise-acta-webapp</module>-->
 <!--        <module>onebusaway-enterprise-webapp</module>-->
 <!--        <module>onebusaway-frontend-webapp</module>-->
 <!--        <module>onebusaway-gwt-common</module>-->
