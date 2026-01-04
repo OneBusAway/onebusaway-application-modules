@@ -112,7 +112,6 @@
         <module>onebusaway-gtfs-hibernate-spring</module>
         <module>onebusaway-gtfs-realtime-archiver</module>
         <module>onebusaway-gtfs-realtime-model</module>
-        <module>onebusaway-twilio-webapp</module>
         <module>onebusaway-presentation</module>
         <module>onebusaway-realtime-api</module>
         <module>onebusaway-transit-data</module>
