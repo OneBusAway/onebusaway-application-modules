@@ -128,7 +128,7 @@
      <bean id="httpServiceClient" class="org.onebusaway.transit_data_federation.util.HttpServiceClientImpl" >
       <constructor-arg type="java.lang.String" value="localhost"/>
       <constructor-arg type="java.lang.Integer" value="9999" />
-      <constructor-arg type="java.lang.String" value="/onebusaway-admin-webapp/api/" />
+      <constructor-arg type="java.lang.String" value="/onebusaway-api-webapp/api/" />
     </bean>
 
   

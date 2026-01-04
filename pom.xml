@@ -65,6 +65,8 @@
         <maven.compiler.target>11</maven.compiler.target>
         <!-- this needs to match cloud-services -->
         <aws.version>1.11.602</aws.version>
+        <!-- Skip slow GTFSRT integration tests by default; CI sets this to false -->
+        <skipGtfsrtIntegrationTests>true</skipGtfsrtIntegrationTests>
     </properties>
 
     <repositories>
@@ -110,7 +112,6 @@
         <module>onebusaway-gtfs-hibernate-spring</module>
         <module>onebusaway-gtfs-realtime-archiver</module>
         <module>onebusaway-gtfs-realtime-model</module>
-        <module>onebusaway-twilio-webapp</module>
         <module>onebusaway-presentation</module>
         <module>onebusaway-realtime-api</module>
         <module>onebusaway-transit-data</module>
@@ -120,24 +121,10 @@
         <module>onebusaway-users</module>
         <module>onebusaway-util</module>
         <module>onebusaway-alerts-persistence</module>
-        <module>onebusaway-watchdog-webapp</module>
         <module>onebusaway-alerts-api</module>
         <module>onebusaway-gtfsrt-integration-tests</module>
         <module>onebusaway-api-key-cli</module>
 
-        <!-- Disabled Modules: These are deprecated and should be removed. -->
-<!--        <module>onebusaway-admin-webapp</module>-->
-<!--        <module>onebusaway-combined-webapp</module>-->
-<!--        <module>onebusaway-enterprise-acta-webapp</module>-->
-<!--        <module>onebusaway-enterprise-webapp</module>-->
-<!--        <module>onebusaway-frontend-webapp</module>-->
-<!--        <module>onebusaway-gwt-common</module>-->
-<!--        <module>onebusaway-nextbus-api-webapp</module>-->
-<!--        <module>onebusaway-phone</module>-->
-<!--        <module>onebusaway-phone-webapp</module>-->
-<!--        <module>onebusaway-quickstart</module>-->
-<!--        <module>onebusaway-sms-webapp</module>-->
-<!--        <module>onebusaway-status-agent</module>-->
     </modules>
 
     <!-- This is where we control the master dependency version used by all modules -->
@@ -543,7 +530,6 @@
                         <exclude>bin/**</exclude>
                         <exclude>.github/**</exclude>
                         <exclude>src/test/resources/**</exclude>
-                        <exclude>onebusaway-quickstart/**</exclude>
                         <exclude>**/git.properties</exclude>
                         <exclude>**/log4j2.xml</exclude>
                         <exclude>**/log4j-stdout.xml</exclude>
