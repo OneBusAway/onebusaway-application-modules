@@ -12,7 +12,6 @@ pom.xml.releaseBackup
 git.properties
 .DS_Store
 
-onebusaway-enterprise-webapp/overlays/
 
 build/*
 !build/.gitkeep
