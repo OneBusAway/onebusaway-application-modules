@@ -126,8 +126,6 @@
         <module>onebusaway-gtfsrt-integration-tests</module>
         <module>onebusaway-api-key-cli</module>
 
-        <!-- Disabled Modules: These are deprecated and should be removed. -->
-<!--        <module>onebusaway-frontend-webapp</module>-->
     </modules>
 
     <!-- This is where we control the master dependency version used by all modules -->
