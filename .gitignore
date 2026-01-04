@@ -12,8 +12,6 @@ pom.xml.releaseBackup
 git.properties
 .DS_Store
 
-onebusaway-admin-webapp/overlays/
-
 onebusaway-enterprise-webapp/overlays/
 
 build/*

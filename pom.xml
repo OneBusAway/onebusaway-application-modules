@@ -127,7 +127,6 @@
         <module>onebusaway-api-key-cli</module>
 
         <!-- Disabled Modules: These are deprecated and should be removed. -->
-<!--        <module>onebusaway-admin-webapp</module>-->
 <!--        <module>onebusaway-combined-webapp</module>-->
 <!--        <module>onebusaway-enterprise-webapp</module>-->
 <!--        <module>onebusaway-frontend-webapp</module>-->
