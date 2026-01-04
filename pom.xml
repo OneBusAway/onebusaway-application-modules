@@ -129,7 +129,6 @@
         <!-- Disabled Modules: These are deprecated and should be removed. -->
 <!--        <module>onebusaway-enterprise-webapp</module>-->
 <!--        <module>onebusaway-frontend-webapp</module>-->
-<!--        <module>onebusaway-gwt-common</module>-->
     </modules>
 
     <!-- This is where we control the master dependency version used by all modules -->
