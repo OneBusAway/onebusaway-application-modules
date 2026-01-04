@@ -17,7 +17,6 @@ To run just the api webapp in stand-alone mode, you will need:
 Optionally, the individual component webapps that make up the OneBusAway application suite can each be downloaded individually:
 
 * [onebusaway-transit-data-federation-webapp-${currentVersion}.war](http://nexus.onebusaway.org/service/local/artifact/maven/content?r=public&amp;g=org.onebusaway&amp;a=onebusaway-transit-data-federation-webapp&amp;e=war&amp;v=${currentVersion}) - serve your transit data bundle
-* [onebusaway-webapp-${currentVersion}.war](http://nexus.onebusaway.org/service/local/artifact/maven/content?r=public&amp;g=org.onebusaway&amp;a=onebusaway-webapp&amp;e=war&amp;v=${currentVersion}) - web interface
 * [onebusaway-api-webapp-${currentVersion}.war](http://nexus.onebusaway.org/service/local/artifact/maven/content?r=public&amp;g=org.onebusaway&amp;a=onebusaway-api-webapp&amp;e=war&amp;v=${currentVersion}) - api interface
 * [onebusaway-sms-webapp-${currentVersion}.war](http://nexus.onebusaway.org/service/local/artifact/maven/content?r=public&amp;g=org.onebusaway&amp;a=onebusaway-sms-webapp&amp;e=war&amp;v=${currentVersion}) - sms interface
 * [onebusaway-phone-webapp-${currentVersion}.war](http://nexus.onebusaway.org/service/local/artifact/maven/content?r=public&amp;g=org.onebusaway&amp;a=onebusaway-phone-webapp&amp;e=war&amp;v=${currentVersion}) - phone (IVR) interface

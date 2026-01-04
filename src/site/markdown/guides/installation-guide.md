@@ -33,8 +33,7 @@ Which webapps will you be running?  For your first install, we recommend the `on
 combines all the major OneBusAway modules and functionality into one application.  It includes the following modules:
 
 * `onebusaway-transit-data-federation-webapp` - back-end transit data
-* `onebusaway-webapp` - standard web interface  
-* `onebusaway-api-webapp` - REST and SIRI api interfaces  
+* `onebusaway-api-webapp` - REST and SIRI api interfaces
 * `onebusaway-sms-webapp` - SMS interface
 * `onebusaway-phone-webapp` - phone (IVR) interface
   
@@ -91,7 +90,7 @@ handy for injecting `data-sources.xml` without modifying the war.  The key is to
 webapp:
 
 ~~~
-<Context path="onebusaway-webapp" docBase="path/to/onebusaway-webapp.war">
+<Context path="onebusaway-api-webapp" docBase="path/to/onebusaway-api-webapp.war">
   <Parameter name="contextConfigLocation"
             value="classpath:application-context-webapp.xml file:path/to/data-sources.xml"
          override="false" />
@@ -113,7 +112,6 @@ If you are deploying the webapps individually, the locations are:
 * onebusaway-api-webapp: classpath:org/onebusaway/api/application-context-webapp.xml
 * onebusaway-phone-webapp: classpath:org/onebusaway/phone/application-context-webapp.xml
 * onebusaway-sms-webapp: classpath:org/onebusaway/sms/application-context-webapp.xml
-* onebusaway-webapp: classpath:org/onebusaway/webapp/application-context-webapp.xml
 
 ## Configuring the Combined Webapp
 
@@ -144,14 +142,13 @@ The primary configuration element sets your `bundlePath`, pointing to your [Tran
 In addition, you might optionally consider [changing the default database](database-configuration-guide.html) or
 [adding a real-time data source](realtime-configuration-guide.html).
 
-## Specific Confugration Guides
+## Specific Configuration Guides
 
 For configuration details for each of user-interface components, see the specific configuration guides:
 
 * [API Config](api-webapp-configuration-guide.html)
 * [SMS Config](sms-webapp-configuration-guide.html)
 * [Phone Config](phone-webapp-configuration-guide.html)
-* [Web Config](webapp-configuration-guide.html)
 
 ## Configuring Webapps Independently
 
@@ -161,7 +158,7 @@ installation, but the configuration is more complex as result.  As described abo
 its own `data-sources.xml` file.
 
 The key issue is that when you run the transit data webapp (`onebusaway-transit-data-federation-webapp`) independently
-of the user interface webapps (`onebusaway-webapp`, `onebusaway-api-webapp`, etc.), you will need to explicitly
+of the user interface webapps (`onebusaway-api-webapp`, etc.), you will need to explicitly
 configure an RPC mechanism that allows the webapps to communicate with each other.  Details are included below.
 
 #### Configuring onebusaway-transit-data-federation-webapp
