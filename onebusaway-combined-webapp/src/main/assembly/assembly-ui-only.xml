@@ -27,7 +27,6 @@
     <dependencySet>
       <includes>
         <include>org.onebusaway:onebusaway-api-webapp:war</include>
-        <include>org.onebusaway:onebusaway-phone-webapp:war</include>        
       </includes>
       <outputDirectory>/</outputDirectory>
       <unpack>true</unpack>

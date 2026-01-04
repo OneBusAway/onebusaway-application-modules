@@ -21,12 +21,6 @@
     </dependency>
     <dependency>
       <groupId>org.onebusaway</groupId>
-      <artifactId>onebusaway-phone-webapp</artifactId>
-      <version>${project.version}</version>
-      <type>war</type>
-    </dependency>
-    <dependency>
-      <groupId>org.onebusaway</groupId>
       <artifactId>onebusaway-transit-data-federation-webapp</artifactId>
       <version>${project.version}</version>
       <type>war</type>

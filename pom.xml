@@ -134,8 +134,6 @@
 <!--        <module>onebusaway-frontend-webapp</module>-->
 <!--        <module>onebusaway-gwt-common</module>-->
 <!--        <module>onebusaway-nextbus-api-webapp</module>-->
-<!--        <module>onebusaway-phone</module>-->
-<!--        <module>onebusaway-phone-webapp</module>-->
     </modules>
 
     <!-- This is where we control the master dependency version used by all modules -->

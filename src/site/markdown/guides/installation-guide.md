@@ -34,8 +34,7 @@ combines all the major OneBusAway modules and functionality into one application
 
 * `onebusaway-transit-data-federation-webapp` - back-end transit data
 * `onebusaway-api-webapp` - REST and SIRI api interfaces
-* `onebusaway-phone-webapp` - phone (IVR) interface
-  
+
 Optionally, you can also download and run each OneBusAway webapp independently.  This is useful when you just need one
 piece of OneBusAway functionality or want to do a more complex deployment.  See special configuration details towards
 the end of this guide.
@@ -109,7 +108,6 @@ If you are deploying the webapps individually, the locations are:
 
 * onebusaway-transit-data-federation-webapp: classpath:org/onebusaway/transit_data_federation/application-context-webapp.xml
 * onebusaway-api-webapp: classpath:org/onebusaway/api/application-context-webapp.xml
-* onebusaway-phone-webapp: classpath:org/onebusaway/phone/application-context-webapp.xml
 
 ## Configuring the Combined Webapp
 
@@ -142,10 +140,7 @@ In addition, you might optionally consider [changing the default database](datab
 
 ## Specific Configuration Guides
 
-For configuration details for each of user-interface components, see the specific configuration guides:
-
-* [API Config](api-webapp-configuration-guide.html)
-* [Phone Config](phone-webapp-configuration-guide.html)
+For configuration details for the API, see [API Config](api-webapp-configuration-guide.html).
 
 ## Configuring Webapps Independently
 
