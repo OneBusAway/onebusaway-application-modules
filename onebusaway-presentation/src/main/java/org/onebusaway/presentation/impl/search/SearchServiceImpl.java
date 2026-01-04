@@ -16,9 +16,8 @@
 package org.onebusaway.presentation.impl.search;
 
 import org.onebusaway.exceptions.ServiceException;
-import org.onebusaway.geocoder.enterprise.services.EnterpriseGeocoderResult;
-import org.onebusaway.geocoder.enterprise.services.EnterpriseGeocoderService;
 import org.onebusaway.gtfs.model.calendar.AgencyServiceInterval;
+import org.onebusaway.presentation.model.GeocoderResult;
 import org.onebusaway.presentation.impl.RouteComparator;
 import org.onebusaway.presentation.model.SearchResult;
 import org.onebusaway.presentation.model.SearchResultCollection;
@@ -89,9 +88,6 @@ public class SearchServiceImpl implements SearchService {
 
 	@Autowired
 	private ConfigurationService _configurationService;
-
-	@Autowired
-	private EnterpriseGeocoderService _geocoderService;
 
 	@Autowired
 	private TransitDataService _transitDataService;
@@ -719,10 +715,10 @@ public class SearchServiceImpl implements SearchService {
 		try {
 			Double lat = Double.parseDouble(latStr);
 			Double lon = Double.parseDouble(lonStr);
-			EnterpriseGeocoderResult egr = new SimpleEnterpriseGeocoderResult(lat, lon);
+			GeocoderResult geocoderResult = new SimpleGeocoderResult(lat, lon);
 
 			_log.info("found lat/lon");
-			results.addMatch(resultFactory.getGeocoderResult(egr,
+			results.addMatch(resultFactory.getGeocoderResult(geocoderResult,
 					results.getRouteFilter()));
 			results.setHint("tryAsLatLon");
 		} catch (Exception any) {
@@ -949,25 +945,8 @@ public class SearchServiceImpl implements SearchService {
 
 	private void tryAsGeocode(SearchResultCollection results, String query,
 			SearchResultFactory resultFactory) {
-		List<EnterpriseGeocoderResult> geocoderResults = _geocoderService
-				.enterpriseGeocode(query);
-
-		// guard against misconfiguration
-		if (geocoderResults == null) return;
-		
-		for (EnterpriseGeocoderResult result : geocoderResults) {
-			if (geocoderResults.size() == 1) {
-				results.addMatch(resultFactory.getGeocoderResult(result,
-						results.getRouteFilter()));
-				results.setGeocode(true);
-				results.setHint("tryAsGeocode");
-			} else {
-				results.addSuggestion(resultFactory.getGeocoderResult(result,
-						results.getRouteFilter()));
-				results.setGeocode(true);
-				results.setHint("tryAsGeocode");
-			}
-		}
+		// Geocoding has been disabled - the geocoder module has been removed.
+		// Address-based search is no longer supported.
 	}
 
 	// Utility method for getting all known stops for an id with no agency
@@ -1120,11 +1099,11 @@ public class SearchServiceImpl implements SearchService {
 		}
 	}
 
-	public static class SimpleEnterpriseGeocoderResult implements EnterpriseGeocoderResult {
+	public static class SimpleGeocoderResult implements GeocoderResult {
 
   		private Double lat = null;
   		private Double lon = null;
-  		public SimpleEnterpriseGeocoderResult(Double lat, Double lon) {
+  		public SimpleGeocoderResult(Double lat, Double lon) {
   			this.lat = lat;
   			this.lon = lon;
 		}

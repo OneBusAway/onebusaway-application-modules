@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2024 Cambridge Systematics, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,10 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.onebusaway.presentation.services;
+package org.onebusaway.presentation.model;
 
-import org.onebusaway.geocoder.model.GeocoderResult;
+import org.onebusaway.geospatial.model.CoordinateBounds;
 
-public interface GeocoderResultPresentationService {
-  public String getGeocoderResultAsString(GeocoderResult result);
+/**
+ * Result from geocoding a location query. This is a simplified local version
+ * that replaces the dependency on onebusaway-geocoder module.
+ */
+public interface GeocoderResult {
+
+  Double getLatitude();
+
+  Double getLongitude();
+
+  String getNeighborhood();
+
+  String getFormattedAddress();
+
+  CoordinateBounds getBounds();
+
+  boolean isRegion();
+
 }
