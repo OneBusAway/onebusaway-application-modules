@@ -29,15 +29,12 @@ choose whichever container you like, but we use Apache Tomcat by default.  You c
 
 * [Download Apache Tomcat 5.5](http://tomcat.apache.org/download-55.cgi)
   
-Which webapps will you be running?  For your first install, we recommend the `onebusaway-combined-webapp.war`, which
-combines all the major OneBusAway modules and functionality into one application.  It includes the following modules:
+The main OneBusAway webapps are:
 
 * `onebusaway-transit-data-federation-webapp` - back-end transit data
-* `onebusaway-api-webapp` - REST and SIRI api interfaces
+* `onebusaway-api-webapp` - REST and SIRI API interfaces
 
-Optionally, you can also download and run each OneBusAway webapp independently.  This is useful when you just need one
-piece of OneBusAway functionality or want to do a more complex deployment.  See special configuration details towards
-the end of this guide.
+See configuration details below for each webapp.
 
 There is plenty of documentation on the web for installing webapps in your container of choice, so we will focus on
 specific configuration details here along with some tips for making things work with Apache Tomcat.
@@ -102,56 +99,19 @@ It's important to note that when you override contextConfigLocation in this way,
 'contextConfigLocation' entry in web.xml for the webapp, but we lose it when we override).  The location of the webapp
 is dependent on the webapps you are using:
 
-* onebusaway-combined-webapp: classpath:application-context-webapp.xml
-
-If you are deploying the webapps individually, the locations are:
-
 * onebusaway-transit-data-federation-webapp: classpath:org/onebusaway/transit_data_federation/application-context-webapp.xml
 * onebusaway-api-webapp: classpath:org/onebusaway/api/application-context-webapp.xml
-
-## Configuring the Combined Webapp
-
-There is a minimum amount of configuration you need to perform to prepare the `onebusaway-combined-webapp` to be run.
-At minimum, you need to add the following entries to your `data-sources.xml` file:
-
-~~~
-<?xml version="1.0" encoding="UTF-8"?>
-<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xmlns:context="http://www.springframework.org/schema/context"
-    xsi:schemaLocation="
-        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
-        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd">
-    
-    <!-- Define your bundle path.  You can also do this externally with a "bundlePath" System property -->
-    <bean class="org.onebusaway.container.spring.SystemPropertyOverrideConfigurer">
-        <property name="order" value="-2" />
-        <property name="properties">
-            <props>
-                <prop key="bundlePath">/path/to/your/transit-data-bundle</prop>
-            </props>
-        </property>
-    </bean>
-</beans>
-~~~
-
-The primary configuration element sets your `bundlePath`, pointing to your [Transit Data Bundle](transit-data-bundle-guide.html).
-In addition, you might optionally consider [changing the default database](database-configuration-guide.html) or
-[adding a real-time data source](realtime-configuration-guide.html).
 
 ## Specific Configuration Guides
 
 For configuration details for the API, see [API Config](api-webapp-configuration-guide.html).
 
-## Configuring Webapps Independently
+## Configuring the Webapps
 
-As mentioned previously, there may be situations where you do not wish to use the `onebusaway-combined-webapp.war`, but
-instead you wish to use the individual OneBusAway webapps.  This gives you more power and flexibility for your
-installation, but the configuration is more complex as result.  As described above, each webapp is configured through
-its own `data-sources.xml` file.
+Each webapp is configured through its own `data-sources.xml` file.
 
-The key issue is that when you run the transit data webapp (`onebusaway-transit-data-federation-webapp`) independently
-of the user interface webapps (`onebusaway-api-webapp`, etc.), you will need to explicitly
-configure an RPC mechanism that allows the webapps to communicate with each other.  Details are included below.
+The transit data webapp (`onebusaway-transit-data-federation-webapp`) and user interface webapps (`onebusaway-api-webapp`, etc.)
+communicate via an RPC mechanism. Configuration details are included below.
 
 #### Configuring onebusaway-transit-data-federation-webapp
 
