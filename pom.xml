@@ -136,7 +136,6 @@
 <!--        <module>onebusaway-nextbus-api-webapp</module>-->
 <!--        <module>onebusaway-phone</module>-->
 <!--        <module>onebusaway-phone-webapp</module>-->
-<!--        <module>onebusaway-sms-webapp</module>-->
     </modules>
 
     <!-- This is where we control the master dependency version used by all modules -->

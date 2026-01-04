@@ -177,7 +177,6 @@ The bulk of database operations happen in one of two modules:
 The `onebusaway-users` module uses a database to manage user account information.  This module is included by the
 major UI modules:
 
-* onebusaway-sms-webapp
 * onebusaway-phone-webapp
 
 As such, each of these application modules typically need a `data-sources.xml` resource with the appropriate

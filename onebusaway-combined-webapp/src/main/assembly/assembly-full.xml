@@ -28,7 +28,6 @@
       <includes>
         <include>org.onebusaway:onebusaway-api-webapp:war</include>
         <include>org.onebusaway:onebusaway-phone-webapp:war</include>
-        <include>org.onebusaway:onebusaway-sms-webapp:war</include>
         <include>org.onebusaway:onebusaway-transit-data-federation-webapp:war</include>
       </includes>
       <outputDirectory>/</outputDirectory>
