@@ -127,8 +127,8 @@ public class StopSearchServiceImpl implements StopSearchService {
 
 
     // we can safely cast to int here, maxResultCount can't exceed 2 billion results
-    List<AgencyAndId> ids = new ArrayList<AgencyAndId>((int)top.totalHits);
-    double[] scores = new double[(int)top.totalHits];
+    List<AgencyAndId> ids = new ArrayList<AgencyAndId>((int)top.totalHits.value);
+    double[] scores = new double[(int)top.totalHits.value];
 
     int index = 0;
     for (AgencyAndId id : topScores.keySet()) {
