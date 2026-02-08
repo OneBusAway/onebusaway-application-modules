@@ -249,12 +249,12 @@ public class ApiKeyCliMainTest {
         User mockUser = mockUserIndex.getUser();
 
         when(userService.getUserIndexForId(any(UserIndexKey.class))).thenReturn(null);
-        when(userService.getOrCreateUserForIndexKey(any(UserIndexKey.class), eq(""), eq(true)))
+        when(userService.getOrCreateUserForIndexKey(any(UserIndexKey.class), eq("test-key-123"), eq(false)))
             .thenReturn(mockUserIndex);
 
         cli.run(new String[]{"create", "--config", "/tmp/data-sources.xml", "--key", keyValue});
 
-        verify(userService).getOrCreateUserForIndexKey(any(UserIndexKey.class), eq(""), eq(true));
+        verify(userService).getOrCreateUserForIndexKey(any(UserIndexKey.class), eq("test-key-123"), eq(false));
         verify(userPropertiesService).authorizeApi(eq(mockUser), anyLong());
         verify(userPropertiesService).updateApiKeyContactInfo(eq(mockUser), anyString(), anyString(), anyString(), anyString());
         assertTrue(outContent.toString().contains("API key created successfully"));
@@ -267,7 +267,7 @@ public class ApiKeyCliMainTest {
         User mockUser = mockUserIndex.getUser();
 
         when(userService.getUserIndexForId(any(UserIndexKey.class))).thenReturn(null);
-        when(userService.getOrCreateUserForIndexKey(any(UserIndexKey.class), eq(""), eq(true)))
+        when(userService.getOrCreateUserForIndexKey(any(UserIndexKey.class), eq("test-key-456"), eq(false)))
             .thenReturn(mockUserIndex);
 
         cli.run(new String[]{
@@ -515,7 +515,7 @@ public class ApiKeyCliMainTest {
         User mockUser = mockUserIndex.getUser();
 
         when(userService.getUserIndexForId(any(UserIndexKey.class))).thenReturn(null);
-        when(userService.getOrCreateUserForIndexKey(any(UserIndexKey.class), eq(""), eq(true)))
+        when(userService.getOrCreateUserForIndexKey(any(UserIndexKey.class), eq("json-test-key"), eq(false)))
             .thenReturn(mockUserIndex);
 
         cli.run(new String[]{
