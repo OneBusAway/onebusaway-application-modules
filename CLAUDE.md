@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 OneBusAway Application Modules - a multi-module Maven project providing real-time public transit information. The suite powers REST APIs, web interfaces, and integrations for transit agencies worldwide.
 
-**Version:** 2.7.0
+**Version:** 2.7.1
 **Java:** 11
 **Framework:** Spring 5.2.24 (not Spring Boot), Struts 2.5.33, Hibernate 5.4.24
 
