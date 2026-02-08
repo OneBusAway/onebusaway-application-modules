@@ -284,7 +284,7 @@ public class ApiKeyCliMain {
         }
 
         // Create the key
-        UserIndex userIndex = userService.getOrCreateUserForIndexKey(indexKey, "", true);
+        UserIndex userIndex = userService.getOrCreateUserForIndexKey(indexKey, keyValue, false);
         userPropertiesService.authorizeApi(userIndex.getUser(), minApiReqInt);
 
         User user = userIndex.getUser();
