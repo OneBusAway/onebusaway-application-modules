@@ -88,7 +88,7 @@
         <connection>scm:git:git@github.com:onebusaway/onebusaway-application-modules.git</connection>
         <developerConnection>scm:git:git@github.com:onebusaway/onebusaway-application-modules.git</developerConnection>
         <url>scm:git:git@github.com:onebusaway/onebusaway-application-modules</url>
-        <tag>onebusaway-application-modules-2.7.0</tag>
+        <tag>onebusaway-application-modules-2.7.1</tag>
     </scm>
 
     <issueManagement>

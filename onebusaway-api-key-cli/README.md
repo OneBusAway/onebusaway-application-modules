@@ -12,7 +12,7 @@ mvn clean package -pl onebusaway-api-key-cli -am
 
 This creates a standalone JAR with all dependencies at:
 ```
-onebusaway-api-key-cli/target/onebusaway-api-key-cli-2.7.0-withAllDependencies.jar
+onebusaway-api-key-cli/target/onebusaway-api-key-cli-2.7.1-withAllDependencies.jar
 ```
 
 ## Prerequisites
@@ -40,13 +40,13 @@ The database must already have the OneBusAway schema created (tables `oba_users`
 ## Usage
 
 ```bash
-java -jar onebusaway-api-key-cli-2.7.0-withAllDependencies.jar <command> [options]
+java -jar onebusaway-api-key-cli-2.7.1-withAllDependencies.jar <command> [options]
 ```
 
 ### Example
 
 ```bash
-java -jar onebusaway-api-key-cli/target/onebusaway-api-key-cli-2.7.0-withAllDependencies.jar \
+java -jar onebusaway-api-key-cli/target/onebusaway-api-key-cli-2.7.1-withAllDependencies.jar \
   list \
   --config api-key-cli-data-source.xml
 ```
@@ -104,14 +104,14 @@ java -jar onebusaway-api-key-cli/target/onebusaway-api-key-cli-2.7.0-withAllDepe
 Create a new API key with auto-generated UUID:
 
 ```bash
-java -jar onebusaway-api-key-cli-2.7.0-withAllDependencies.jar create \
+java -jar onebusaway-api-key-cli-2.7.1-withAllDependencies.jar create \
     --config /path/to/data-sources.xml
 ```
 
 Create a key with contact information:
 
 ```bash
-java -jar onebusaway-api-key-cli-2.7.0-withAllDependencies.jar create \
+java -jar onebusaway-api-key-cli-2.7.1-withAllDependencies.jar create \
     --config /path/to/data-sources.xml \
     --name "Admin User" \
     --email admin@example.com
@@ -120,7 +120,7 @@ java -jar onebusaway-api-key-cli-2.7.0-withAllDependencies.jar create \
 Create a key with a specific value instead of auto-generated UUID:
 
 ```bash
-java -jar onebusaway-api-key-cli-2.7.0-withAllDependencies.jar create \
+java -jar onebusaway-api-key-cli-2.7.1-withAllDependencies.jar create \
     --config /path/to/data-sources.xml \
     --key my-custom-api-key
 ```
@@ -128,7 +128,7 @@ java -jar onebusaway-api-key-cli-2.7.0-withAllDependencies.jar create \
 Create a key with all options:
 
 ```bash
-java -jar onebusaway-api-key-cli-2.7.0-withAllDependencies.jar create \
+java -jar onebusaway-api-key-cli-2.7.1-withAllDependencies.jar create \
     --config /path/to/data-sources.xml \
     --key my-custom-api-key \
     --name "Jane Developer" \
@@ -143,7 +143,7 @@ java -jar onebusaway-api-key-cli-2.7.0-withAllDependencies.jar create \
 List all API keys:
 
 ```bash
-java -jar onebusaway-api-key-cli-2.7.0-withAllDependencies.jar list \
+java -jar onebusaway-api-key-cli-2.7.1-withAllDependencies.jar list \
     --config /path/to/data-sources.xml
 ```
 
@@ -152,7 +152,7 @@ java -jar onebusaway-api-key-cli-2.7.0-withAllDependencies.jar list \
 Get details for a specific key:
 
 ```bash
-java -jar onebusaway-api-key-cli-2.7.0-withAllDependencies.jar get \
+java -jar onebusaway-api-key-cli-2.7.1-withAllDependencies.jar get \
     --config /path/to/data-sources.xml \
     --key my-custom-api-key
 ```
@@ -162,7 +162,7 @@ java -jar onebusaway-api-key-cli-2.7.0-withAllDependencies.jar get \
 Update just the email for an existing key:
 
 ```bash
-java -jar onebusaway-api-key-cli-2.7.0-withAllDependencies.jar update \
+java -jar onebusaway-api-key-cli-2.7.1-withAllDependencies.jar update \
     --config /path/to/data-sources.xml \
     --key my-custom-api-key \
     --email newemail@example.com
@@ -171,7 +171,7 @@ java -jar onebusaway-api-key-cli-2.7.0-withAllDependencies.jar update \
 Update the rate limit for an existing key:
 
 ```bash
-java -jar onebusaway-api-key-cli-2.7.0-withAllDependencies.jar update \
+java -jar onebusaway-api-key-cli-2.7.1-withAllDependencies.jar update \
     --config /path/to/data-sources.xml \
     --key my-custom-api-key \
     --minApiReqInt 200
@@ -180,7 +180,7 @@ java -jar onebusaway-api-key-cli-2.7.0-withAllDependencies.jar update \
 Update all fields for an existing key:
 
 ```bash
-java -jar onebusaway-api-key-cli-2.7.0-withAllDependencies.jar update \
+java -jar onebusaway-api-key-cli-2.7.1-withAllDependencies.jar update \
     --config /path/to/data-sources.xml \
     --key my-custom-api-key \
     --name "John Smith" \
@@ -195,7 +195,7 @@ java -jar onebusaway-api-key-cli-2.7.0-withAllDependencies.jar update \
 Delete an API key:
 
 ```bash
-java -jar onebusaway-api-key-cli-2.7.0-withAllDependencies.jar delete \
+java -jar onebusaway-api-key-cli-2.7.1-withAllDependencies.jar delete \
     --config /path/to/data-sources.xml \
     --key my-custom-api-key
 ```
@@ -205,7 +205,7 @@ java -jar onebusaway-api-key-cli-2.7.0-withAllDependencies.jar delete \
 Show general help:
 
 ```bash
-java -jar onebusaway-api-key-cli-2.7.0-withAllDependencies.jar help
+java -jar onebusaway-api-key-cli-2.7.1-withAllDependencies.jar help
 ```
 
 ### JSON Output
@@ -215,7 +215,7 @@ All commands support the `--json` flag for machine-readable output. This is usef
 List keys in JSON format:
 
 ```bash
-java -jar onebusaway-api-key-cli-2.7.0-withAllDependencies.jar list \
+java -jar onebusaway-api-key-cli-2.7.1-withAllDependencies.jar list \
     --config /path/to/data-sources.xml \
     --json
 ```
@@ -231,7 +231,7 @@ Output:
 Get key details in JSON format:
 
 ```bash
-java -jar onebusaway-api-key-cli-2.7.0-withAllDependencies.jar get \
+java -jar onebusaway-api-key-cli-2.7.1-withAllDependencies.jar get \
     --config /path/to/data-sources.xml \
     --key my-api-key \
     --json
@@ -252,7 +252,7 @@ Output:
 Create a key with JSON output:
 
 ```bash
-java -jar onebusaway-api-key-cli-2.7.0-withAllDependencies.jar create \
+java -jar onebusaway-api-key-cli-2.7.1-withAllDependencies.jar create \
     --config /path/to/data-sources.xml \
     --key new-key \
     --email dev@example.com \
@@ -276,7 +276,7 @@ Output:
 Delete a key with JSON output:
 
 ```bash
-java -jar onebusaway-api-key-cli-2.7.0-withAllDependencies.jar delete \
+java -jar onebusaway-api-key-cli-2.7.1-withAllDependencies.jar delete \
     --config /path/to/data-sources.xml \
     --key old-key \
     --json
