@@ -13,7 +13,7 @@
     <name>onebusaway-container</name>
 
     <properties>
-        <aspectj-version>1.7.3</aspectj-version>
+        <aspectj-version>1.9.21</aspectj-version>
     </properties>
 
     <dependencies>
@@ -30,7 +30,7 @@
         </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-slf4j-impl</artifactId>
+            <artifactId>log4j-slf4j2-impl</artifactId>
             <version>${log4j.version}</version>
         </dependency>
 
@@ -56,7 +56,7 @@
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-ehcache</artifactId>
-            <version>5.4.24.Final</version>
+            <version>${hibernate-version}</version>
         </dependency>
         <dependency>
             <groupId>javax.annotation</groupId>
@@ -122,9 +122,9 @@
         </dependency>
 
         <dependency>
-            <groupId>javassist</groupId>
+            <groupId>org.javassist</groupId>
             <artifactId>javassist</artifactId>
-            <version>3.4.GA</version>
+            <version>3.29.2-GA</version>
         </dependency>
 
         <!-- These are just here to support ServletContextAwareMetadataNamingStrategy... -->
@@ -134,7 +134,7 @@
         </dependency>
         <dependency>
             <groupId>javax.servlet</groupId>
-            <artifactId>servlet-api</artifactId>
+            <artifactId>javax.servlet-api</artifactId>
             <scope>provided</scope>
         </dependency>
 
