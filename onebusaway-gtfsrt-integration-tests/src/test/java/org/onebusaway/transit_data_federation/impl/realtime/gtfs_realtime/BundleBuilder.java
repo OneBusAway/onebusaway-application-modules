@@ -24,11 +24,17 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Support for building bundles in integration tests.
  */
 public class BundleBuilder {
+
+  // Distinguishes bundle output directories across builds within one JVM;
+  // combined with the process id (see buildBundle) it keeps parallel surefire
+  // forks from colliding on a shared temp directory.
+  private static final AtomicInteger BUNDLE_SEQ = new AtomicInteger();
 
   private BundleContext _bundleContext = new BundleContext();
 
@@ -52,12 +58,16 @@ public class BundleBuilder {
   public void buildBundle(String bundlePath) throws Exception {
     ClassPathResource bundleResource = new ClassPathResource(bundlePath);
     String bundleInputDir = bundleResource.getURL().getFile();
+    // Unique across parallel forks (pid) and across builds within a fork (seq)
+    // so concurrent JVMs never write into the same bundle directory. A bare
+    // timestamp is not enough: two forks can build in the same millisecond.
+    String uniqueId = ProcessHandle.current().pid() + "-" + BUNDLE_SEQ.incrementAndGet();
     String bundleRootDir =
             addSlash(System.getProperty("java.io.tmpdir"))
-                    + "bundle" + System.currentTimeMillis();
+                    + "bundle" + uniqueId;
     makeTempDirectory(bundleRootDir, System.getProperty("bundle.keep"));
 
-    String bundleName = "v" + System.currentTimeMillis();
+    String bundleName = "v" + uniqueId;
     String bundleGzipURI = buildBundle(bundleInputDir, bundleRootDir, bundleName);
     String bundleIndexURI = bundleRootDir + File.separator + "index.json";
     _bundleContext.setup(bundleRootDir, bundleGzipURI, bundleIndexURI);
