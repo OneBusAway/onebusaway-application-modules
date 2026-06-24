@@ -829,6 +829,34 @@ public class GtfsRealtimeTripLibraryTest {
     assertEquals("tripC", c.getTripUpdates().get(2).getTrip().getTripId());
   }
 
+   @Test
+  public void testIsTripActive_WithDelayNoTimeAndScheduledTrip() {
+
+    StopTimeEvent arrival = StopTimeEvent.newBuilder()
+            .setDelay(30)
+            .build();
+
+    StopTimeUpdate stopTimeUpdate = StopTimeUpdate.newBuilder()
+            .setArrival(arrival)
+            .build();
+
+    TripDescriptor tripDescriptor = TripDescriptor.newBuilder()
+            .setScheduleRelationship(TripDescriptor.ScheduleRelationship.SCHEDULED)
+            .build();
+
+    TripUpdate tripUpdate = TripUpdate.newBuilder()
+            .setTrip(tripDescriptor)
+            .addStopTimeUpdate(stopTimeUpdate)
+            .build();
+
+    CombinedTripUpdatesAndVehiclePosition update = new CombinedTripUpdatesAndVehiclePosition();
+    update.setTripUpdates(List.of(tripUpdate));
+    // Act
+    boolean result = _library.getIsTripActive(update);
+    // Assert
+    assertTrue("Trip should be active when StopTimeUpdate has delay and trip is SCHEDULED.", result);
+}
+
   private static FeedMessage.Builder createFeed() {
     FeedMessage.Builder builder = FeedMessage.newBuilder();
     FeedHeader.Builder header = FeedHeader.newBuilder();
