@@ -55,6 +55,29 @@ public abstract class AbstractGtfsRealtimeIntegrationTest {
 
   protected static Logger _log = LoggerFactory.getLogger(AbstractGtfsRealtimeIntegrationTest.class);
 
+  /**
+   * Building the GTFS bundle (parsing GTFS into the transit graph) is by far the
+   * most expensive part of these tests, and the result is an immutable bundle on
+   * disk. We therefore build each dataset at most once per JVM and reuse it,
+   * keyed by integration-test path. Multiple test classes (and, for
+   * NyctRandomIntegrationTest, multiple methods) share the same dataset, so this
+   * eliminates the bulk of the redundant work.
+   *
+   * <p>Note: only the on-disk bundle is shared. A fresh Spring context and
+   * {@link GtfsRealtimeSource} are still created per test method (see
+   * {@link #setup()}) because realtime state -- route cancellations in the cancel
+   * service and added/dynamic blocks in the dynamic block index -- accumulates in
+   * singleton beans within each per-method Spring context and must not leak
+   * between methods.
+   *
+   * <p>The map holds only the lightweight {@link BundleContext} (a few on-disk
+   * paths) and is never evicted, which is fine for a test JVM. This complements
+   * {@link BundleBuilder}'s cross-run, env-var-driven reuse ({@code bundle.keep}
+   * / {@code bundle.index.json}); here we dedupe builds automatically within a
+   * single run, across datasets and classes.
+   */
+  private static final Map<String, BundleContext> BUILT_BUNDLES = new HashMap<>();
+
   private BundleContext _bundleContext;
   protected BundleContext getBundleContext() {
     return _bundleContext;
@@ -62,11 +85,6 @@ public abstract class AbstractGtfsRealtimeIntegrationTest {
   private BundleLoader _bundleLoader;
   public BundleLoader getBundleLoader() {
     return _bundleLoader;
-  }
-
-  private BundleBuilder _bundleBuilder;
-  public BundleBuilder getBundleBuilder() {
-    return _bundleBuilder;
   }
 
   protected Map<AgencyAndId, Set<String>> stopHeadsigns = new HashMap<>();
@@ -80,10 +98,19 @@ public abstract class AbstractGtfsRealtimeIntegrationTest {
   protected List<String> _exceptionRouteIds = Arrays.asList("MTASBWY_M");
   @Before
   public void setup() throws Exception {
-    _bundleBuilder = new BundleBuilder();
-    _bundleBuilder.setup(getIntegrationTestPath());
-    _bundleContext = _bundleBuilder.getBundleContext();
+    // Build the dataset once per JVM (see BUILT_BUNDLES), reusing it for later
+    // methods/classes that share the same dataset. No locking needed: surefire
+    // forks are separate JVMs and methods within a fork run sequentially.
+    String path = getIntegrationTestPath();
+    _bundleContext = BUILT_BUNDLES.get(path);
+    if (_bundleContext == null) {
+      BundleBuilder builder = new BundleBuilder();
+      builder.setup(path);
+      _bundleContext = builder.getBundleContext();
+      BUILT_BUNDLES.put(path, _bundleContext);
+    }
 
+    // A fresh context + source per method keeps realtime state isolated.
     _bundleLoader = new BundleLoader(_bundleContext);
     _bundleLoader.create(getPaths());
     _bundleLoader.load();

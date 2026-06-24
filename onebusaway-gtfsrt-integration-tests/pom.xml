@@ -12,6 +12,15 @@
 
   <name>onebusaway-gtfsrt-integration-tests</name>
 
+  <properties>
+    <!-- Number of parallel JVMs used to run these integration tests. Each fork
+         loads a full transit bundle into memory, so this trades memory for
+         wall-clock time. 2 is a safe default for a typical CI runner; raise it
+         (e.g. -Dintegration.forkCount=4 or a per-core multiplier like 1C) only
+         on hosts with spare memory, and drop to 1 if forks run out of memory. -->
+    <integration.forkCount>2</integration.forkCount>
+  </properties>
+
   <dependencies>
 
     <!--       Log4j 2 -->
@@ -133,5 +142,25 @@
     </dependency>
 
   </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <!-- The integration tests are independent per class; run them in
+               parallel JVMs to use the available CI cores. reuseForks lets the
+               per-JVM bundle cache (see AbstractGtfsRealtimeIntegrationTest)
+               be shared across classes that use the same dataset within a fork.
+               Do NOT add <parallel>methods</parallel> / threadCount here: the
+               bundle cache and the per-method global system properties set in
+               BundleLoader assume methods run sequentially within a fork. -->
+          <forkCount>${integration.forkCount}</forkCount>
+          <reuseForks>true</reuseForks>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 
 </project>
