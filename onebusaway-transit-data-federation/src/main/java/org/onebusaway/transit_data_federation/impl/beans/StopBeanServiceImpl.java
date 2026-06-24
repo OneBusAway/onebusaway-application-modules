@@ -39,11 +39,15 @@ import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 import org.onebusaway.utility.text.NaturalStringOrder;
 import org.onebusaway.utility.text.StringLibrary;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 class StopBeanServiceImpl implements StopBeanService {
+
+  private static final Logger _log = LoggerFactory.getLogger(StopBeanServiceImpl.class);
 
   private static RouteBeanComparator _routeBeanComparator = new RouteBeanComparator();
 
@@ -143,6 +147,12 @@ class StopBeanServiceImpl implements StopBeanService {
     List<RouteBean> routeBeans = new ArrayList<>(staticRoutes.size());
     for (AgencyAndId routeId : staticRoutes) {
       RouteBean staticRouteBean = _routeBeanService.getRouteForId(routeId);
+      if (staticRouteBean == null) {
+        // Same orphan-route guard as fillRoutesForStopBean below; see issue #461.
+        _log.warn("stop {} references static route {} that does not resolve to a route; skipping",
+            stop.getId(), routeId);
+        continue;
+      }
       routeBeans.add(staticRouteBean);
     }
     bean.setStaticRoutes(routeBeans);
@@ -162,6 +172,15 @@ class StopBeanServiceImpl implements StopBeanService {
 
     for (AgencyAndId routeCollectionId : routeCollectionIds) {
       RouteBean bean = _routeBeanService.getRouteForId(routeCollectionId);
+      if (bean == null) {
+        // A corrupt stop->route-collection index entry can reference a
+        // collection that no longer resolves to a route. Dropping it here keeps
+        // a single bad entry from NPEing bean serialization and blanking the
+        // entire API response. See issue #461.
+        _log.warn("stop {} references route collection {} that does not resolve to a route; skipping",
+            stop.getId(), routeCollectionId);
+        continue;
+      }
       routeBeans.add(bean);
     }
 

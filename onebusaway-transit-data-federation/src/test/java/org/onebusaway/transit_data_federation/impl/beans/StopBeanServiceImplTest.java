@@ -19,7 +19,9 @@ package org.onebusaway.transit_data_federation.impl.beans;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -115,5 +117,80 @@ public class StopBeanServiceImplTest {
     assertEquals(1, routes.size());
 
     assertSame(route, routes.get(0));
+  }
+
+  /**
+   * A stop's route-collection index can reference a collection that no longer
+   * resolves to a route bean (e.g. a corrupt service-date entry in the bundle).
+   * {@link RouteBeanService#getRouteForId} then returns null. We must not let a
+   * null {@link RouteBean} leak into the stop's routes list: in production a
+   * single such orphan route survives the sort (a lone element is never
+   * compared) and later NPEs in bean serialization, blanking the whole API
+   * response with a literal "null".
+   */
+  @Test
+  public void testGetStopForId_skipsUnresolvableRoute() {
+
+    AgencyAndId stopId = new AgencyAndId("29", "1109");
+
+    StopEntryImpl stopEntry = new StopEntryImpl(stopId, 47.1, -122.1);
+    Mockito.when(_transitGraphDao.getStopEntryForId(stopId)).thenReturn(
+        stopEntry);
+
+    StopNarrative.Builder builder = StopNarrative.builder();
+    builder.setName("stop name");
+    StopNarrative stop = builder.create();
+    Mockito.when(_narrativeService.getStopForId(stopId)).thenReturn(stop);
+
+    AgencyAndId orphanRouteId = new AgencyAndId("1", "orphan");
+
+    Set<AgencyAndId> routeIds = new HashSet<AgencyAndId>();
+    routeIds.add(orphanRouteId);
+    Mockito.when(_routeService.getRouteCollectionIdsForStop(stopId)).thenReturn(
+        routeIds);
+
+    // the corrupt collection id resolves to null
+    Mockito.when(_routeBeanService.getRouteForId(orphanRouteId)).thenReturn(null);
+
+    StopBean stopBean = _service.getStopForId(stopId, null);
+
+    assertNotNull(stopBean);
+    List<RouteBean> routes = stopBean.getRoutes();
+    assertTrue("unresolvable route must not leak into routes list", routes.isEmpty());
+  }
+
+  /**
+   * The static-routes path resolves route beans the same way as the primary
+   * routes path, so an unresolvable static route must likewise be dropped
+   * rather than leak a null into the stop's static routes list. See issue #461.
+   */
+  @Test
+  public void testGetStopForId_skipsUnresolvableStaticRoute() {
+
+    AgencyAndId stopId = new AgencyAndId("29", "1109");
+
+    StopEntryImpl stopEntry = new StopEntryImpl(stopId, 47.1, -122.1);
+    Mockito.when(_transitGraphDao.getStopEntryForId(stopId)).thenReturn(
+        stopEntry);
+
+    StopNarrative.Builder builder = StopNarrative.builder();
+    builder.setName("stop name");
+    Mockito.when(_narrativeService.getStopForId(stopId)).thenReturn(builder.create());
+
+    // no active routes, so only the static-route path populates the bean
+    Mockito.when(_routeService.getRouteCollectionIdsForStop(stopId)).thenReturn(
+        new HashSet<AgencyAndId>());
+
+    AgencyAndId orphanStaticRouteId = new AgencyAndId("1", "orphan");
+    Mockito.when(_narrativeService.getStaticRoutes(stopId)).thenReturn(
+        Collections.singletonList(orphanStaticRouteId));
+    // the corrupt static route resolves to null
+    Mockito.when(_routeBeanService.getRouteForId(orphanStaticRouteId)).thenReturn(null);
+
+    StopBean stopBean = _service.getStopForId(stopId, null);
+
+    assertNotNull(stopBean);
+    assertTrue("unresolvable static route must not leak into static routes list",
+        stopBean.getStaticRoutes().isEmpty());
   }
 }

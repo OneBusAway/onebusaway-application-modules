@@ -471,6 +471,8 @@ public class BeanFactoryV2 {
 
     List<String> routeIds = new ArrayList<String>();
     for (RouteBean route : stop.getRoutes()) {
+      if (route == null)
+        continue;
       routeIds.add(route.getId());
       addToReferences(route);
     }

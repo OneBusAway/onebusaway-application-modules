@@ -141,18 +141,27 @@ public class ArrivalsAndDeparturesForStopAction extends ApiActionSupport {
       return setResourceNotFoundResponse();
     }
 
-    if (isVersion(V1)) {
-      // Convert data to v1 form
-      List<ArrivalAndDepartureBeanV1> arrivals = getArrivalsAsV1(result);
-      StopWithArrivalsAndDeparturesBeanV1 v1 = new StopWithArrivalsAndDeparturesBeanV1(
-          result.getStop(), arrivals, result.getNearbyStops());
-      return setOkResponse(v1);
-    } else if (isVersion(V2)) {
-      BeanFactoryV2 factory = getBeanFactoryV2();
-      factory.setCustomRouteSort(customRouteSort);
-      return setOkResponse(factory.getResponse(result));
-    } else {
-      return setUnknownVersionResponse();
+    // Bean conversion must stay inside a try/catch: an unexpected failure here
+    // (e.g. a corrupt bundle record) would otherwise unwind out of the action
+    // with _response unset, and the ModelDriven serializer would emit a bare
+    // "null" body with HTTP 200 instead of a proper error. See issue #461.
+    try {
+      if (isVersion(V1)) {
+        // Convert data to v1 form
+        List<ArrivalAndDepartureBeanV1> arrivals = getArrivalsAsV1(result);
+        StopWithArrivalsAndDeparturesBeanV1 v1 = new StopWithArrivalsAndDeparturesBeanV1(
+            result.getStop(), arrivals, result.getNearbyStops());
+        return setOkResponse(v1);
+      } else if (isVersion(V2)) {
+        BeanFactoryV2 factory = getBeanFactoryV2();
+        factory.setCustomRouteSort(customRouteSort);
+        return setOkResponse(factory.getResponse(result));
+      } else {
+        return setUnknownVersionResponse();
+      }
+    } catch (Exception any) {
+      _log.error("Failed to build arrivals-and-departures response for stop {}", _id, any);
+      return setExceptionResponse();
     }
   }
 
