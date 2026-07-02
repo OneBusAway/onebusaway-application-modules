@@ -108,6 +108,8 @@ public class BlockLocation {
   private ScheduleDeviationSamples scheduleDeviations = null;
 
   private AgencyAndId vehicleId;
+
+  private AgencyAndId realtimeTripId;
   
   private List<TimepointPredictionRecord> timepointPredictions;
 
@@ -480,6 +482,14 @@ public class BlockLocation {
 
   public void setVehicleId(AgencyAndId vehicleId) {
     this.vehicleId = vehicleId;
+  }
+
+  public AgencyAndId getRealtimeTripId() {
+    return realtimeTripId;
+  }
+
+  public void setRealtimeTripId(AgencyAndId realtimeTripId) {
+    this.realtimeTripId = realtimeTripId;
   }
 
   public List<TimepointPredictionRecord> getTimepointPredictions() {
