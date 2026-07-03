@@ -176,11 +176,12 @@ public class TripUpdatesForAgencyAction extends GtfsRealtimeActionSupport {
         if (trip.getRoute() != null)
           tripDesc.setRouteId(normalizeId(trip.getRoute().getId()));
 
-        tripDesc.setStartDate(formatStartDate(tripStatus.getServiceDate()));
-        long tripStartMs = tripStatus.getServiceDate();
-        if (tripDetails.getStatus() != null)
-          tripStartMs += tripDetails.getStatus().getTripStartTime() * 1000L;
-        tripDesc.setStartTime(formatStartTime(tripStartMs));
+        long tripServiceDate = tripDetails.getServiceDate();
+        tripDesc.setStartDate(formatStartDate(tripServiceDate));
+        if (tripDetails.getStatus() != null) {
+          long tripStartMs = tripServiceDate + tripDetails.getStatus().getTripStartTime() * 1000L;
+          tripDesc.setStartTime(formatStartTime(tripStartMs));
+        }
 
         if (trip.getTripHeadsign() != null) {
           GtfsRealtimeOneBusAway.OneBusAwayTripUpdate.Builder obaTripUpdate =
