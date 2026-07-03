@@ -716,13 +716,18 @@ public class GtfsRealtimeTripLibrary {
             case SKIPPED:
               tpr.setScheduleRealtionship(TimepointPredictionRecord.ScheduleRelationship.SKIPPED.getValue());
               break;
+            case NO_DATA:
+              tpr.setScheduleRealtionship(TimepointPredictionRecord.ScheduleRelationship.NO_DATA.getValue());
+              break;
             default:
               tpr.setScheduleRealtionship(TimepointPredictionRecord.ScheduleRelationship.SCHEDULED.getValue());
           }
-          if (stu.hasArrival() && stu.getArrival().hasTime())
-            tpr.setTimepointPredictedArrivalTime(stu.getArrival().getTime() * 1000);
-          if (stu.hasDeparture() && stu.getDeparture().hasTime())
-            tpr.setTimepointPredictedDepartureTime(stu.getDeparture().getTime() * 1000);
+          if (stu.getScheduleRelationship() != StopTimeUpdate.ScheduleRelationship.NO_DATA) {
+            if (stu.hasArrival() && stu.getArrival().hasTime())
+              tpr.setTimepointPredictedArrivalTime(stu.getArrival().getTime() * 1000);
+            if (stu.hasDeparture() && stu.getDeparture().hasTime())
+              tpr.setTimepointPredictedDepartureTime(stu.getDeparture().getTime() * 1000);
+          }
           if (stu.hasExtension(GtfsRealtimeNYCT.nyctStopTimeUpdate)) {
             GtfsRealtimeNYCT.NyctStopTimeUpdate ext = stu.getExtension(GtfsRealtimeNYCT.nyctStopTimeUpdate);
             if (ext.hasScheduledTrack()) {
@@ -983,7 +988,11 @@ public class GtfsRealtimeTripLibrary {
               if (stopTimeUpdate.hasStopSequence()) {
                 tpr.setStopSequence(stopTimeUpdate.getStopSequence());
               }
-              if (stopTimeUpdate.getScheduleRelationship().equals(StopTimeUpdate.ScheduleRelationship.SKIPPED)) {
+              if (stopTimeUpdate.getScheduleRelationship().equals(StopTimeUpdate.ScheduleRelationship.NO_DATA)) {
+                tpr.setScheduleRealtionship(StopTimeUpdate.ScheduleRelationship.NO_DATA_VALUE);
+                timepointPredictions.add(tpr);
+                _log.debug("NO_DATA stop:" + tpr.getTimepointId() + "  seq: " + tpr.getStopSequence() + " trip: " + tpr.getTripId());
+              } else if (stopTimeUpdate.getScheduleRelationship().equals(StopTimeUpdate.ScheduleRelationship.SKIPPED)) {
                 tpr.setScheduleRealtionship(StopTimeUpdate.ScheduleRelationship.SKIPPED_VALUE); // set tpr scheduleRelationship enum to SKIPPED
                 timepointPredictions.add(tpr);
                 _log.debug("SKIPPED stop:" + tpr.getTimepointId() + "  seq: " + tpr.getStopSequence() + " trip: " + tpr.getTripId());
@@ -991,7 +1000,8 @@ public class GtfsRealtimeTripLibrary {
                 tpr.setScheduleRealtionship(StopTimeUpdate.ScheduleRelationship.SCHEDULED_VALUE);
               }
 
-              if (!stopTimeUpdate.getScheduleRelationship().equals(StopTimeUpdate.ScheduleRelationship.SKIPPED)) {
+              if (!stopTimeUpdate.getScheduleRelationship().equals(StopTimeUpdate.ScheduleRelationship.SKIPPED)
+                      && !stopTimeUpdate.getScheduleRelationship().equals(StopTimeUpdate.ScheduleRelationship.NO_DATA)) {
                 int currentArrivalTime = computeArrivalTime(stopTime,
                         stopTimeUpdate, instance.getServiceDate());
                 int currentDepartureTime = computeDepartureTime(stopTime,
