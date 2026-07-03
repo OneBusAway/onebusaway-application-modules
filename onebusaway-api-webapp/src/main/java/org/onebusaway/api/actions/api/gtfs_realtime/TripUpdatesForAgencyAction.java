@@ -157,8 +157,9 @@ public class TripUpdatesForAgencyAction extends GtfsRealtimeActionSupport {
 
     for (String activeTripId : activeTripsIds(tripStatus)) {
 
-      TripStopTimesBean schedule = getScheduleForTrip(activeTripId, tripStatus.getServiceDate(),
+      TripDetailsBean tripDetails = getTripDetailsForTrip(activeTripId, tripStatus.getServiceDate(),
               tripStatus.getVehicleId(), timestamp);
+      TripStopTimesBean schedule = tripDetails != null ? tripDetails.getSchedule() : null;
 
       FeedEntity.Builder entity = feed.addEntityBuilder();
       // make the id something meaningful and distinct
@@ -167,27 +168,38 @@ public class TripUpdatesForAgencyAction extends GtfsRealtimeActionSupport {
       tripUpdates.add(tripUpdate);
       TripDescriptor.Builder tripDesc = tripUpdate.getTripBuilder();
       tripDesc.setTripId(normalizeId(activeTripId));
-      if (TransitDataConstants.STATUS_ADDED.equals(tripStatus.getStatus())) {
-        tripDesc.setScheduleRelationship(TripDescriptor.ScheduleRelationship.ADDED);
+
+      // Per-trip metadata from schedule
+      if (tripDetails != null && tripDetails.getTrip() != null) {
+        TripBean trip = tripDetails.getTrip();
+
+        if (trip.getRoute() != null)
+          tripDesc.setRouteId(normalizeId(trip.getRoute().getId()));
+
         tripDesc.setStartDate(formatStartDate(tripStatus.getServiceDate()));
-        tripDesc.setStartTime(formatStartTime(tripStatus.getServiceDate() + (tripStatus.getTripStartTime() * 1000)));
-      } else {
-        tripDesc.setScheduleRelationship(TripDescriptor.ScheduleRelationship.SCHEDULED);
+        long tripStartMs = tripStatus.getServiceDate();
+        if (tripDetails.getStatus() != null)
+          tripStartMs += tripDetails.getStatus().getTripStartTime() * 1000L;
+        tripDesc.setStartTime(formatStartTime(tripStartMs));
+
+        if (trip.getTripHeadsign() != null) {
+          GtfsRealtimeOneBusAway.OneBusAwayTripUpdate.Builder obaTripUpdate =
+              GtfsRealtimeOneBusAway.OneBusAwayTripUpdate.newBuilder();
+          obaTripUpdate.setTripHeadsign(trip.getTripHeadsign());
+          tripUpdate.setExtension(GtfsRealtimeOneBusAway.obaTripUpdate, obaTripUpdate.build());
+        }
+
+        if (tripDetails.getStatus() != null
+            && TransitDataConstants.STATUS_ADDED.equals(tripDetails.getStatus().getStatus())) {
+          tripDesc.setScheduleRelationship(TripDescriptor.ScheduleRelationship.ADDED);
+        } else {
+          tripDesc.setScheduleRelationship(TripDescriptor.ScheduleRelationship.SCHEDULED);
+        }
       }
 
-
+      // delay: only meaningful for the active trip
       if (activeTripId.equals(activeTrip.getId())) {
-        RouteBean route = activeTrip.getRoute();
-        // we only know route if we are on activeTrip
-        // the block may interline!
-        tripDesc.setRouteId(normalizeId(route.getId()));
         tripUpdate.setDelay((int) tripStatus.getScheduleDeviation());
-
-        // add extension for headsign support
-        GtfsRealtimeOneBusAway.OneBusAwayTripUpdate.Builder obaTripUpdate =
-                GtfsRealtimeOneBusAway.OneBusAwayTripUpdate.newBuilder();
-        obaTripUpdate.setTripHeadsign(activeTrip.getTripHeadsign());
-        tripUpdate.setExtension(GtfsRealtimeOneBusAway.obaTripUpdate, obaTripUpdate.build());
       }
 
       for (TimepointPredictionBean timepointPrediction : tripStatus.getTimepointPredictions()) {
@@ -226,18 +238,13 @@ public class TripUpdatesForAgencyAction extends GtfsRealtimeActionSupport {
     return tripUpdates;
   }
 
-  private TripStopTimesBean getScheduleForTrip(String activeTripId, long serviceDate, String vehicleId, long timestamp) {
+  private TripDetailsBean getTripDetailsForTrip(String activeTripId, long serviceDate, String vehicleId, long timestamp) {
     TripDetailsQueryBean query = new TripDetailsQueryBean();
     query.setTripId(activeTripId);
     query.setServiceDate(serviceDate);
     query.setVehicleId(vehicleId);
     query.setTime(timestamp);
-    TripDetailsBean tripDetails = _service.getSingleTripDetails(query);
-    TripStopTimesBean schedule = null;
-    if (tripDetails != null) {
-      schedule = tripDetails.getSchedule();
-    }
-    return schedule;
+    return _service.getSingleTripDetails(query);
   }
 
   private String getHeadsignForStop(TripStopTimesBean schedule, AgencyAndId stopId, int sequence) {
