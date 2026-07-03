@@ -373,7 +373,9 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
       List<TimepointPredictionBean> timepointPredictions = new ArrayList<TimepointPredictionBean>();
       for (TimepointPredictionRecord tpr: blockLocation.getTimepointPredictions()) {
         TimepointPredictionBean tpb = new TimepointPredictionBean();
-        tpb.setScheduleRealtionship(tpr.getScheduleRelationship().getValue());
+        tpb.setScheduleRealtionship(tpr.getScheduleRelationship() != null
+            ? tpr.getScheduleRelationship().getValue()
+            : TimepointPredictionBean.ScheduleRelationship.SCHEDULED.getValue());
 
         tpb.setTimepointId(tpr.getTimepointId().toString());
         // This may not be the expected trip (returning entire block now)
