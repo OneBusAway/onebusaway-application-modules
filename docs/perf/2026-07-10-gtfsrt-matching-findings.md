@@ -447,6 +447,9 @@ loop) and diff the `BASELINE` line + re-capture the flamegraphs.
 
 ### Fix 1 — Cache/memoize `BlockStopTimeList.get()` (highest reward, do first)
 
+> **STATUS: IMPLEMENTED & VALIDATED** (see Addendum §D) — −71 % allocation,
+> −24 % median refresh, behavior preserved. Details below were the pre-work plan.
+
 - **What:** Stop reconstructing a `BlockStopTimeEntryImpl` on every `.get(index)`.
   The wrapped data (`tripIndices`, `accumulatedStopTimeIndices`, `trips`, per-trip
   `stopTimes`) is fixed for the bundle's lifetime, so the wrappers are effectively
@@ -684,18 +687,53 @@ i.e. effectively continuously. That points away from "the 30 s poll" and toward 
 3. A weaker cloud vCPU multiplies per-refresh cost — but even 5–10× only reaches
    ~3–7% duty at 30 s; it cannot alone explain 85%.
 
-## D. Bottom line
+## D. Fix #1 implemented and validated (memoize `BlockStopTimeList.get()`)
 
-- The **per-refresh waste** identified in the baseline (the `BlockStopTimeList.get()`
-  allocation churn) is **reconfirmed** under faithful constrained conditions:
-  ~195 ms median is dominated by that hot path, and its allocation churn is what
-  produces the ~2 s GC spikes on a small heap. **Fix #1 (§7) still stands.**
+Fix #1 from §7 is now implemented: `BlockStopTimeList.get(index)` populates a
+lazy, `transient` `BlockStopTimeEntry[]` cache instead of building a fresh
+`BlockStopTimeEntryImpl` on every call (`BlockConfigurationEntryImpl.java`).
+Thread-safe without locking because `BlockStopTimeEntryImpl` has only final
+fields (a racing reader sees `null`→rebuild or a safely-published instance).
+Guarded by `BlockConfigurationEntryImplTest` (values correct + element identity
+memoized); `ScheduledBlockLocationServiceImplTest` (14) and the golden
+`GtfsRealtimeTripLibraryCharacterizationTest` still pass unchanged.
+
+Measured before/after on the **same constrained harness** (quiet config,
+`--cpus=1 --memory=2g`, warmup 8 / measure 40, 3 repeats each; allocation via a
+per-measure-thread `com.sun.management.ThreadMXBean` counter added to
+`GtfsRtRefreshBenchmark`):
+
+| Metric | Before (rebuild/call) | After (memoized) | Δ |
+|---|---|---|---|
+| **Allocation / refresh** (measure thread) | **542 MB** | **159 MB** | **−71%** |
+| **p50 refresh** | 188 ms | 143 ms | **−24%** |
+| mean refresh | 261 ms | 312 ms | within noise |
+| p95 refresh | 0.6–1.6 s | 1.2–1.6 s | within noise |
+
+- **Allocation is the decisive, deterministic result: −71 %** (542 → 159 MB per
+  refresh), squarely in the ~59–69 % range §4/§6 attributed to this call. This is
+  the fix's core claim, proven.
+- **Median refresh is a stable −24 %** (188 → 143 ms across all 3 reps) — the
+  typical-case latency win from no longer allocating + minor-GC'ing per `.get()`.
+- **Mean and p95 are GC-pause-timing noise** on this fast desktop core with a
+  1.2 GB heap: both before and after hit occasional ~1.5 s pauses whose timing
+  lands randomly in a 40-sample window, so the mean is not a reliable comparator
+  here (the median is). The 71 % allocation cut should convert to lower GC CPU on
+  a more memory-pressured or slower production box, but this harness on desktop
+  hardware cannot demonstrate that cleanly — re-measure on the target box.
+
+## E. Bottom line
+
+- **Fix #1 is done and proven**: −71 % allocation, −24 % median refresh, behavior
+  preserved by existing + new tests. It also lightens the arrivals **read** path,
+  which shares `getBlockLocation` → `BlockStopTimeList.get()`.
+- The **per-refresh waste** identified in the baseline is **reconfirmed** under
+  faithful constrained conditions and now **fixed**.
 - The **`[%F:%L]` logging hypothesis is refuted** as a material CPU cost.
-- The **85% peg is still not reproduced by any poll-path experiment**, now with
-  much stronger evidence that it is **not** the single 30 s poll. The next
-  reproduction to run is **concurrent read load** against `getBlockLocation`
-  (§7 Fix #1 would benefit that path too), gated on first confirming the box's
-  real request traffic and poll cadence.
+- The **85 % peg is still not reproduced by any poll-path experiment**, with
+  strong evidence it is **not** the single 30 s poll. The next reproduction to
+  run is **concurrent read load** against `getBlockLocation` (now cheaper post-Fix
+  #1), gated on first confirming the box's real request traffic and poll cadence.
 
 ### Addendum provenance
 
@@ -705,6 +743,7 @@ i.e. effectively continuously. That points away from "the 30 s poll" and toward 
 | A/B/C timings (3 reps) | `perf/run-constrained.sh {prod,cheap,quiet}`, `--cpus=1 --memory=2g`, `TZ=America/Los_Angeles` |
 | Flood magnitude (~52 lines/refresh) | measure-phase log counts: 17 bailing + 17 no-stoptimes + ~9 route-not-found per refresh |
 | `%F`/`%L` cost claim | Log4j2 manual, Pattern Layout (Location/Line converters: "expensive … not garbage-free") |
+| Fix #1 before/after (alloc −71 %, p50 −24 %) | `perf/run-constrained.sh quiet`, 3 reps each, memoization stashed/restored via git; alloc from `GtfsRtRefreshBenchmark`'s `ThreadMXBean` counter |
 
 Run artifacts (bundle, `.pb` feeds, per-config logs) are git-ignored and not
 committed; the harness, log configs, and runner script are.

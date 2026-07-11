@@ -40,7 +40,10 @@ LOGCFG="${REPO}/onebusaway-gtfsrt-perf/perf/logconfigs/log4j2-${CFG}.xml"
 [ -f "$LOGCFG" ] || { echo "no such log config: $LOGCFG" >&2; exit 2; }
 [ -f "$CP_FILE" ] || { echo "missing classpath file $CP_FILE (run: mvn -pl onebusaway-gtfsrt-perf dependency:build-classpath -Dmdep.outputFile=$CP_FILE)" >&2; exit 2; }
 
-CP="${REPO}/onebusaway-gtfsrt-perf/target/classes:$(cat "$CP_FILE")"
+# EXTRA_CP is prepended so freshly-compiled classes (e.g. a module's target/classes)
+# win over the same artifact's jar in the resolved classpath -- lets a rebuilt
+# module be measured without a slow `mvn install` (which also triggers gpg signing).
+CP="${EXTRA_CP:+${EXTRA_CP}:}${REPO}/onebusaway-gtfsrt-perf/target/classes:$(cat "$CP_FILE")"
 # The experiment dir lives under /private/tmp on macOS; mount it too.
 EXP_MNT="$(cd "$BUNDLE_ROOT/.." && pwd -P)"
 
