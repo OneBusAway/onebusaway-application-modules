@@ -92,8 +92,14 @@ public class GtfsRtRefreshBenchmark {
       java.lang.management.ThreadMXBean bean = java.lang.management.ManagementFactory.getThreadMXBean();
       if (bean instanceof com.sun.management.ThreadMXBean) {
         com.sun.management.ThreadMXBean sun = (com.sun.management.ThreadMXBean) bean;
-        if (sun.isThreadAllocatedMemorySupported())
+        if (sun.isThreadAllocatedMemorySupported()) {
+          // Measurement is disabled by default per the JDK spec; enable it (once,
+          // idempotent) so getThreadAllocatedBytes() reports a real value rather
+          // than -1 on a capable JVM that happens to have it turned off.
+          if (!sun.isThreadAllocatedMemoryEnabled())
+            sun.setThreadAllocatedMemoryEnabled(true);
           return sun.getThreadAllocatedBytes(Thread.currentThread().getId());
+        }
       }
     } catch (Throwable ignore) {
       // fall through
