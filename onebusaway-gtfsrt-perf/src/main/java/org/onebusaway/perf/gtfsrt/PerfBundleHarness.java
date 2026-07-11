@@ -105,6 +105,21 @@ public class PerfBundleHarness {
     _source.markBundleReady();
     _source.setFilterUnassigned(false);
 
+    // Pin the feed to specific agency ids, exactly as production does
+    // (GTFS_RT_FEEDS "agencyIds":["1"]). GtfsRealtimeSource.start() otherwise
+    // defaults _agencyIds to EVERY agency in the graph (see start(), line ~519),
+    // which against a multi-agency bundle would resolve trip ids against all
+    // agencies and distort both matching and the "null block ... bailing" flood.
+    // Comma-separated via -Dperf.agencyIds=1 (default: leave empty = all agencies).
+    String agencyIds = System.getProperty("perf.agencyIds");
+    if (agencyIds != null && !agencyIds.trim().isEmpty()) {
+      for (String id : agencyIds.split(",")) {
+        String trimmed = id.trim();
+        if (!trimmed.isEmpty()) _source.setAgencyId(trimmed);
+      }
+      System.out.println("pinned feed agencyIds=" + _source.getAgencyIds());
+    }
+
     // Capturing listener that delegates to the real block-location write path.
     VehicleStatusServiceImpl real = _context.getBean(VehicleStatusServiceImpl.class);
     _source.setVehicleLocationListener(new CountingListener(real, _lastCount));

@@ -33,6 +33,16 @@ worth fixing regardless, but reconciling it with the exact production figure
 still needs two facts we did not have: the production **poll cadence** and the
 **API read-path traffic** hitting the same box. See §2 and §6.
 
+> **Follow-up (see the Addendum at the end):** a second round rebuilt the
+> reproduction to mirror the real production container — the multi-agency
+> `rule-set-19` build-56 bundle, a live-feed ERROR flood, the production
+> `[%F:%L]` log config, and a `--cpus=1 --memory=2g` box. Two results: (1) the
+> tempting **"expensive `[%F:%L]` logging × flood"** hypothesis is **refuted** —
+> immaterial at the real flood size; (2) even fully faithful and constrained, one
+> 30 s poll is still only **~0.7% of a core**, confirming §2 empirically. The
+> per-refresh allocation waste is reconfirmed; the 85% peg still points to a
+> **continuous** driver (read traffic / cadence), not the single poll.
+
 ---
 
 ## 1. Setup
@@ -574,3 +584,127 @@ flamegraphs to validate the actual (not estimated) delta, and run
 All numbers are from single real runs against the real KCM bundle and pinned feed
 snapshot. Estimates and inferences are labeled inline. Run artifacts (bundle,
 `.pb` feeds, flamegraphs) are git-ignored and were not committed.
+
+---
+
+# Addendum (2026-07-10, follow-up) — Faithful constrained reproduction; the logging hypothesis, tested and refuted
+
+The baseline above ran a **single-agency KCM** bundle on an **unconstrained
+desktop** and, honestly, could not reproduce the production 85% peg (§2). This
+follow-up rebuilt the reproduction to mirror the **actual production container**
+— `agency-dockerfiles/test-organization-1/Dockerfile` — as closely as the harness
+allows, to (a) test a specific new hypothesis about logging cost and (b) see
+whether a size-and-config-faithful poll pegs a constrained core.
+
+## A. What changed to raise fidelity
+
+| Dimension | Baseline (§1) | This addendum (production-faithful) |
+|---|---|---|
+| Bundle | bare KCM `google_transit.zip`, 1 agency | **rule-set-19 build 56**, the real prod bundle: 5 agencies (metro `1`, sound_transit `40`, kitsap `20`, everett `97`, monorail `96`) |
+| Feed agency pinning | implicit (only agency present) | **`agencyIds:["1"]`**, exactly as `GTFS_RT_FEEDS` pins it (harness now calls `setAgencyId`; otherwise `GtfsRealtimeSource.start()` defaults to *all* agencies) |
+| Trip resolution | fresh bundle → nearly all resolve | live KCM feed vs **stale build-56** bundle → a **real per-cycle ERROR flood** (~52 log lines/refresh: 17 `null block … bailing` + 17 `no stoptimes` + ~9 `route not found … defaulting` + summary/alerts) |
+| Log config | plain test layout | **the production `tdf-log4j2.xml`**: `Root=info` with the `[%F:%L]` location converter (Dockerfile line 4) |
+| CPU / RAM | unconstrained desktop | **`docker run --cpus=1 --memory=2g`** (`-Xmx1200m`) |
+| Timezone | host (America/Los_Angeles) | **`TZ=America/Los_Angeles`** in-container (Dockerfile line 8) — required: GTFS service-date math (`BlockFinder`) NPEs under the stock UTC image |
+
+Matching was **byte-identical across every run** (381 active vehicles, **matched
+373 / 398** updates), so the only variable between the three log configs below is
+the logging. (This also closes a §1 honesty gap: the `matched=…` summary line is
+now captured — `matched=373 (46)` for `updates=398`.)
+
+Harness/config artifacts are committed under `onebusaway-gtfsrt-perf/`:
+`PerfBundleHarness` agency pinning, `perf/logconfigs/log4j2-{prod,cheap,quiet}.xml`,
+and `perf/run-constrained.sh`.
+
+## B. The logging hypothesis
+
+The production log pattern is `[%F:%L]` (file + line) at `Root=info`. The Log4j2
+manual is explicit that `%F`/`%L` are *"an expensive operation and not
+garbage-free"* — each event walks the stack and allocates. Hypothesis: the
+per-cycle ERROR flood, multiplied by that per-line stack walk, is a hidden CPU
+cost the plain-log baseline never saw. Three configs, identical in every respect
+**except** logging, isolate it:
+
+- **prod** — `[%F:%L]` at `info` (full flood, with location) — faithful to prod.
+- **cheap** — same flood, layout drops `[%F:%L]` for the cached logger name.
+- **quiet** — the three flooding loggers muted to `OFF` (no flood at all).
+
+`prod − cheap` isolates location-computation cost; `cheap − quiet` isolates the
+flood's log-volume cost; `quiet` is the pure matching floor.
+
+### Result (3 repeats each, `--cpus=1 --memory=2g`, warmup 8 / measure 30)
+
+| Config | p50 refresh (range) | mean refresh (range) | p95 spread |
+|---|---|---|---|
+| **quiet** (no flood) | 194 ms (190–201) | 294 ms (256–331) | 0.34–1.41 s |
+| **cheap** (flood, no `%F:%L`) | ~205 ms (198–313\*) | 305 ms (217–371) | 0.29–1.91 s |
+| **prod** (`[%F:%L]` + flood) | 205 ms (198–215) | 319 ms (277–356) | 0.51–2.01 s |
+
+\* cheap's 313 ms p50 is a GC-timing outlier in one of three runs.
+
+**Verdict: the logging hypothesis is refuted at the real flood magnitude.** The
+config-to-config differences (~10–25 ms on the mean) are *smaller than each single
+config's own run-to-run spread* (75–155 ms), which is dominated by G1 pause
+timing (note the p95 column swinging 0.3–2.0 s). `%F:%L` **is** expensive
+per call, but ~52 flood lines/refresh × a stack walk is a rounding error against
+~195 ms of matching. It would only matter if the flood were orders of magnitude
+larger. Muting the flood loggers is still worth doing for **log hygiene** (see
+[[oba-render-cpu-realtime]]), but it will **not** meaningfully cut CPU.
+
+## C. Does a faithful, constrained poll peg the core? No.
+
+Even with the full production config — multi-agency bundle, real flood,
+`[%F:%L]` at info, 1 vCPU, 2 GB, LA time — a warmed poll is **~195–210 ms median
+/ ~290–320 ms mean**, with occasional GC spikes to ~2 s. At the production **30 s
+cadence**:
+
+```
+median 200 ms / 30,000 ms ≈ 0.67% of one core
+worst p95 ~2 s / 30,000 ms ≈ 6.7% of one core (and only ~5% of polls)
+```
+
+This **confirms §2's reconciliation caveat empirically**, and rules the logging
+hypothesis out as the missing factor. A single 30 s feed poll — however
+faithfully reproduced — does not peg a 1-vCPU core.
+
+The same runs also show sustained back-to-back throughput of **~3 refresh/s = one
+full core when the work runs continuously**. So the arithmetic of an 85% peg
+requires the block-location work to run **~127× more often than once/30 s** —
+i.e. effectively continuously. That points away from "the 30 s poll" and toward a
+**continuous or high-frequency driver of the same hot path**:
+
+1. **API read traffic (leading candidate).** `getBlockLocation` — the #2 CPU
+   hotspot (§3) and the same code that hammers `BlockStopTimeList.get()` — is the
+   arrivals-and-departures **read** path. Even modest sustained QPS pegs the core
+   independently of polling. Not exercised by this poll-only harness. **Verify
+   `http_request_count` on the box** (health checks, monitoring pollers, and app
+   traffic all count).
+2. **Tighter effective cadence / more feeds** than the single 30 s feed. Verify
+   the deployed `refreshInterval` and feed count.
+3. A weaker cloud vCPU multiplies per-refresh cost — but even 5–10× only reaches
+   ~3–7% duty at 30 s; it cannot alone explain 85%.
+
+## D. Bottom line
+
+- The **per-refresh waste** identified in the baseline (the `BlockStopTimeList.get()`
+  allocation churn) is **reconfirmed** under faithful constrained conditions:
+  ~195 ms median is dominated by that hot path, and its allocation churn is what
+  produces the ~2 s GC spikes on a small heap. **Fix #1 (§7) still stands.**
+- The **`[%F:%L]` logging hypothesis is refuted** as a material CPU cost.
+- The **85% peg is still not reproduced by any poll-path experiment**, now with
+  much stronger evidence that it is **not** the single 30 s poll. The next
+  reproduction to run is **concurrent read load** against `getBlockLocation`
+  (§7 Fix #1 would benefit that path too), gated on first confirming the box's
+  real request traffic and poll cadence.
+
+### Addendum provenance
+
+| Artifact | Source |
+|---|---|
+| Multi-agency bundle | `BuildKcmBundle` over `rule-set-19` build-56 feeds in `<agencyId>/<feed>.zip` layout |
+| A/B/C timings (3 reps) | `perf/run-constrained.sh {prod,cheap,quiet}`, `--cpus=1 --memory=2g`, `TZ=America/Los_Angeles` |
+| Flood magnitude (~52 lines/refresh) | measure-phase log counts: 17 bailing + 17 no-stoptimes + ~9 route-not-found per refresh |
+| `%F`/`%L` cost claim | Log4j2 manual, Pattern Layout (Location/Line converters: "expensive … not garbage-free") |
+
+Run artifacts (bundle, `.pb` feeds, per-config logs) are git-ignored and not
+committed; the harness, log configs, and runner script are.
