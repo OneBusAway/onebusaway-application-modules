@@ -31,8 +31,9 @@ IMAGE="${IMAGE:-eclipse-temurin:11-jdk}"
 CPUS="${CPUS:-1}"
 MEM="${MEM:-2g}"
 XMX="${XMX:-1200m}"
-# Production (agency-dockerfiles/test-organization-1/Dockerfile line 8) runs in
-# America/Los_Angeles. GTFS service-date math (BlockFinder) is timezone-sensitive;
+# The production image (its Dockerfile's TZ env, in the separate
+# agency-dockerfiles deploy repo) runs in America/Los_Angeles. GTFS service-date
+# math (BlockFinder) is timezone-sensitive;
 # the stock temurin image is UTC, which mis-resolves service dates and NPEs.
 TZ_ENV="${TZ_ENV:-America/Los_Angeles}"
 LOGCFG="${REPO}/onebusaway-gtfsrt-perf/perf/logconfigs/log4j2-${CFG}.xml"

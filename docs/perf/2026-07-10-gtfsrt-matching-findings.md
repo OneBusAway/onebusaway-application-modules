@@ -606,9 +606,9 @@ whether a size-and-config-faithful poll pegs a constrained core.
 | Bundle | bare KCM `google_transit.zip`, 1 agency | **rule-set-19 build 56**, the real prod bundle: 5 agencies (metro `1`, sound_transit `40`, kitsap `20`, everett `97`, monorail `96`) |
 | Feed agency pinning | implicit (only agency present) | **`agencyIds:["1"]`**, exactly as `GTFS_RT_FEEDS` pins it (harness now calls `setAgencyId`; otherwise `GtfsRealtimeSource.start()` defaults to *all* agencies) |
 | Trip resolution | fresh bundle → nearly all resolve | live KCM feed vs **stale build-56** bundle → a **real per-cycle ERROR flood** (~52 log lines/refresh: 17 `null block … bailing` + 17 `no stoptimes` + ~9 `route not found … defaulting` + summary/alerts) |
-| Log config | plain test layout | **the production `tdf-log4j2.xml`**: `Root=info` with the `[%F:%L]` location converter (Dockerfile line 4) |
+| Log config | plain test layout | **the production `tdf-log4j2.xml`**: `Root=info` with the `[%F:%L]` location converter (copied in by the deploy Dockerfile) |
 | CPU / RAM | unconstrained desktop | **`docker run --cpus=1 --memory=2g`** (`-Xmx1200m`) |
-| Timezone | host (America/Los_Angeles) | **`TZ=America/Los_Angeles`** in-container (Dockerfile line 8) — required: GTFS service-date math (`BlockFinder`) NPEs under the stock UTC image |
+| Timezone | host (America/Los_Angeles) | **`TZ=America/Los_Angeles`** in-container (the deploy Dockerfile's `TZ`) — required: GTFS service-date math (`BlockFinder`) NPEs under the stock UTC image |
 
 Matching was **byte-identical across every run** (381 active vehicles, **matched
 373 / 398** updates), so the only variable between the three log configs below is
