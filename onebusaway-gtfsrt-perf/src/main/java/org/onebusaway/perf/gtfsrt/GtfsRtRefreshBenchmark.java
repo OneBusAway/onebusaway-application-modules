@@ -16,7 +16,9 @@
 package org.onebusaway.perf.gtfsrt;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * Drives GtfsRealtimeSource.refresh() in a timed loop. System properties:
@@ -34,7 +36,11 @@ public class GtfsRtRefreshBenchmark {
     String vp = new File(rtDir, "vehiclepositions.pb").toURI().toString();
     String al = new File(rtDir, "alerts.pb").toURI().toString();
 
-    PerfBundleHarness harness = new PerfBundleHarness(bundleRoot, tu, vp, al);
+    // Pin the feed to these agency ids, as production's GTFS_RT_FEEDS does
+    // (default: empty = all agencies). Comma-separated via -Dperf.agencyIds=1.
+    List<String> agencyIds = parseCsv(System.getProperty("perf.agencyIds"));
+
+    PerfBundleHarness harness = new PerfBundleHarness(bundleRoot, tu, vp, al, agencyIds);
     harness.open();
     try {
       System.out.println("== warmup " + warmup + " ==");
@@ -111,5 +117,17 @@ public class GtfsRtRefreshBenchmark {
     String v = System.getProperty(key);
     if (v == null) throw new IllegalStateException("missing -D" + key);
     return v;
+  }
+
+  /** Splits a comma-separated value into trimmed, non-empty tokens (empty list if null). */
+  private static List<String> parseCsv(String value) {
+    List<String> result = new ArrayList<>();
+    if (value != null) {
+      for (String token : value.split(",")) {
+        String trimmed = token.trim();
+        if (!trimmed.isEmpty()) result.add(trimmed);
+      }
+    }
+    return result;
   }
 }
