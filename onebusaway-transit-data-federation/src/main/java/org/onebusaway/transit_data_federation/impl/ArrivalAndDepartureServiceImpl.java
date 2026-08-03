@@ -726,20 +726,28 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
         long arrivalTime = tpr.getTimepointPredictedArrivalTime();
 
         long departureTime = tpr.getTimepointPredictedDepartureTime();
-        if (departureTime <= 0) {
+        if (departureTime <= 0 && arrivalTime > 0) {
           int slack = instance.getBlockStopTime().getStopTime().getSlackTime();
-          departureTime = arrivalTime + slack * 1000;
+          departureTime = arrivalTime + slack * 1000L;
+        }
+        // no real departure prediction and nothing to derive one from:
+        // normalize to this class's own "no prediction" sentinel (0), not
+        // the TimepointPredictionRecord's -1, so it isn't mistaken downstream
+        // for a real (if implausible) timestamp
+        if (departureTime <= 0) {
+          departureTime = 0;
         }
         setPredictedDepartureTimeForInstance(instance, departureTime);
 
         /*
-         * if arrivalTime is -1 be polite to clients and serve departureTime
+         * if arrivalTime is not a real prediction be polite to clients and
+         * serve departureTime instead
          */
-      	if (arrivalTime == -1) {
-      	    setPredictedArrivalTimeForInstance(instance, departureTime);
-      	} else {
-      	    setPredictedArrivalTimeForInstance(instance, arrivalTime);
-      	}
+        if (arrivalTime <= 0) {
+          setPredictedArrivalTimeForInstance(instance, departureTime);
+        } else {
+          setPredictedArrivalTimeForInstance(instance, arrivalTime);
+        }
 
         instance.setScheduledTrack(tpr.getScheduledTrack());
         instance.setActualTrack(tpr.getActualTrack());
@@ -829,7 +837,10 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
 
     instance.setPredictedArrivalTime(arrivalTime);
 
-    if (instance.getFrequency() != null)
+    // a cleared/absent prediction (arrivalTime <= 0) must not stomp a
+    // frequency-based trip's computed schedule -- only a real prediction
+    // should shift it
+    if (instance.getFrequency() != null && arrivalTime > 0)
       instance.setScheduledArrivalTime(arrivalTime);
   }
 
@@ -845,7 +856,10 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
 
     instance.setPredictedDepartureTime(departureTime);
 
-    if (instance.getFrequency() != null)
+    // a cleared/absent prediction (departureTime <= 0) must not stomp a
+    // frequency-based trip's computed schedule -- only a real prediction
+    // should shift it
+    if (instance.getFrequency() != null && departureTime > 0)
       instance.setScheduledDepartureTime(departureTime);
   }
 
