@@ -1,6 +1,7 @@
 # OBA Multi-Agency Bundle Build — Technical Spec
 
-> **Status:** draft 1
+> **Status:** draft 2 — reviewed against the source tree; corrections in §1.1,
+> §4.3, §6.1, §6.2.2, §6.3, §6.4, §7.2, §7.4, §8.2
 > **Audience:** the engineer (human or Claude agent) building the
 > `onebusawaycloud` GTFS merge pipeline that produces bundles for OBA's
 > `onebusaway-transit-data-federation-builder`.
@@ -38,12 +39,16 @@ external `onebusaway-gtfs-modules` `GtfsReader` is a separate library
 with its own version axis. Pin both.
 
 The current Docker container uses `tomcat:8.5.100-jdk11-temurin-focal`
-(see top of `Dockerfile`), invokes `gtfstidy` (latest at build time, from
-`github.com/patrickbr/gtfstidy`), and downloads the builder jar at
-`onebusaway-transit-data-federation-builder-${OBA_VERSION}-withAllDependencies.jar`.
-If you build a different image, replicate those dependencies — none of
-the consolidation behavior in this spec works without the builder jar
-that produced it.
+(see top of `Dockerfile`), and invokes `gtfstidy` (latest at build time, from
+`github.com/patrickbr/gtfstidy`). The builder jar
+(`onebusaway-transit-data-federation-builder-${OBA_VERSION}-withAllDependencies.jar`)
+is **not downloaded**: `build_bundle.sh:54-55` copies it out of the
+container's local Maven repository
+(`/root/.m2/repository/org/onebusaway/onebusaway-transit-data-federation-builder/…`)
+into `/oba/builder.jar`, and it lands in that repository by building the
+source tree inside the container (`bin/make`). If you build a different
+image, replicate those dependencies — none of the consolidation behavior
+in this spec works without the builder jar that produced it.
 
 ---
 
@@ -194,12 +199,17 @@ for (Class<?> entityClass : entityClasses) {           // outer: type
 }
 ```
 
-That outer loop is the whole reason consolidation works. **All Agencies
-across all feeds load first, then all Stops, then all Routes, then all
-Trips, then all StopTimes.** By the time UCSD's `stop_times.txt` rows are
-parsing and asking "what Stop is this row referring to?", every canonical
-stop from every feed is guaranteed to already be in the store. The
-consolidation rewrites in §5 can therefore always resolve.
+That outer loop is the whole reason consolidation works. The class order
+itself comes from the external library (`_readers.get(0).getEntityClasses()`);
+in `onebusaway-gtfs` **1.4.17** (the version pinned by this repo's
+`pom.xml` `<gtfs-version>`) the relevant subsequence is
+**Agency → … → Route → … → Stop → Trip → StopTime** — note that Routes
+load *before* Stops. The load-bearing guarantee is: **every Stop from
+every feed is in the store before any feed's StopTimes parse.** By the
+time UCSD's `stop_times.txt` rows are parsing and asking "what Stop is
+this row referring to?", every canonical stop from every feed is
+guaranteed to already be in the store. The consolidation rewrites in §5
+can therefore always resolve.
 
 ### 4.4 `agencyIdMappings`
 
@@ -417,11 +427,17 @@ ids are unrelated. The XML in §6.2 declares all four `GtfsBundle`
 beans without `id=` attributes (they're inline list elements), and
 that's correct and idiomatic.
 
-The `GtfsReadingSupport` lookup falls back to a singular `gtfs-bundle`
-bean (no `s`) if no `gtfs-bundles` is present
-(`onebusaway-transit-data-federation-builder/src/main/java/org/onebusaway/transit_data_federation/bundle/tasks/GtfsReadingSupport.java:159-164`).
-Always use the plural form for multi-agency builds — the singular is a
-single-feed legacy shape.
+`GtfsReadingSupport.getGtfsBundles` contains what looks like a fallback
+to a singular `gtfs-bundle` bean (no `s`)
+(`onebusaway-transit-data-federation-builder/src/main/java/org/onebusaway/transit_data_federation/bundle/tasks/GtfsReadingSupport.java:153-168`),
+but the fallback is unreachable in practice: the build context is a plain
+Spring `GenericApplicationContext` (see
+`ContainerLibrary.createContext`, called from
+`FederatedTransitDataBundleCreator.build`), and `getBean("gtfs-bundles")`
+on a missing bean **throws `NoSuchBeanDefinitionException`** rather than
+returning `null` — the null-check on line 156 never sees a null. A config
+without a `gtfs-bundles` bean fails the build with that exception.
+Always define the plural `gtfs-bundles` bean.
 
 ### 6.2 Full Spring XML example for the SDMTS case
 
@@ -527,8 +543,15 @@ them to the multi-reader. Add to the same XML:
       class="org.onebusaway.transit_data_federation.bundle.tasks.EntityReplacementLoggerImpl"/>
 ```
 
-After the build, `/bundle/logs/` contains a CSV per replaced entity
-type. Inspect it as a sanity check on consolidation completeness.
+After the build, `/bundle/logs/` contains `gtfs_stop_replacements.csv`
+— the logger is stop-specific (`EntityReplacementLoggerImpl.log()`
+writes one row per replaced stop with original/replacement ids, names,
+and coordinates), regardless of what other entity types appear in the
+mapping — plus `MultiCSVLogger`'s own `summary.csv` of row counts.
+Inspect it as a sanity check on consolidation completeness. (If
+`basePath` is left unset, `MultiCSVLogger` falls back to
+`java.io.tmpdir` and creates the directory itself —
+`MultiCSVLogger.java:82-88`.)
 
 ### 6.3 Invocation
 
@@ -556,10 +579,15 @@ are not generated."* The builder writes some scratch artifacts to the
 current working directory, not just the output directory.
 
 Do **not** pass any positional `.zip` arg. If you do, the Main class
-adds an anonymous `GtfsBundle` (no `defaultAgencyId`) to the
-`gtfs-bundles` bean it constructs in-memory
-(`FederatedTransitDataBundleCreatorMain.java:135-139`), and the
-behavior becomes undefined relative to your XML.
+registers its own in-memory `gtfs-bundles` bean definition containing
+only the anonymous zip bundles
+(`FederatedTransitDataBundleCreatorMain.java:135-139`) — and it **wins**:
+`ContainerLibrary.createContext`
+(`onebusaway-container/src/main/java/org/onebusaway/container/ContainerLibrary.java:104-108`)
+registers programmatic bean definitions *after* loading the XML context
+paths, so a same-named programmatic bean silently replaces your XML's
+`gtfs-bundles` bean. Every `defaultAgencyId` you configured is dropped
+and you're back to the flattened single-agency behavior of §2.
 
 ### 6.4 Complete replacement `build_bundle.sh`
 
@@ -593,8 +621,15 @@ for AGENCY in "${!FEEDS[@]}"; do
   fi
 done
 
-mkdir -p /bundle/feeds
+mkdir -p /bundle/feeds /bundle/logs
 cd /bundle
+
+# Stage the builder jar out of the in-container Maven repository. The
+# original build_bundle.sh does this too — /oba/builder.jar does not
+# exist in the image until this cp runs (the jar is produced by building
+# the source tree in-container via bin/make, not downloaded).
+cp "/root/.m2/repository/org/onebusaway/onebusaway-transit-data-federation-builder/${OBA_VERSION}/onebusaway-transit-data-federation-builder-${OBA_VERSION}-withAllDependencies.jar" \
+   /oba/builder.jar
 
 for AGENCY in "${!FEEDS[@]}"; do
   URL="${FEEDS[$AGENCY]}"
@@ -728,7 +763,16 @@ should be canonical). Don't try to automate this end-to-end.
 ships `StopConsolidationSuggestionsTask`
 (`onebusaway-transit-data-federation-builder/src/main/java/org/onebusaway/transit_data_federation/bundle/tasks/StopConsolidationSuggestionsTask.java`).
 It implements the proximity-based candidate detection logic OBA itself
-uses. Read it as a reference for thresholds and pairing heuristics
+uses: a hard-coded **20 m** threshold (`distanceThreshold` in `run()`),
+great-circle distance via `SphericalGeometryLibrary.distance`,
+cross-agency pairs only (each agency's stops are compared against the
+stops of previously-seen agencies), and union–find grouping so chains of
+nearby stops come out as one suggestion set. Two caveats before reusing
+it directly: it runs as a *bundle task* against the already-loaded DAO
+(not standalone against raw zips), and it hard-codes a fetch of the
+Puget Sound consolidation wiki file (`CONSOLIDATED_URL`, line 45) to
+suppress already-consolidated pairs — for SDMTS you'd have to modify
+that. Read it as a reference for thresholds and pairing heuristics
 even if you write your own script outside the builder pipeline.
 
 **Algorithm if you write your own.** For each pair of agency feeds:
@@ -814,6 +858,22 @@ per line, in the form `<id> <- <original-line-from-file>`. Empty output
 means everything resolves. Run this as a CI gate — the build should not
 proceed if any canonical id is missing.
 
+Two argument-parsing details worth knowing
+(`UtilityLibrary.getGtfsBundlesForArguments`):
+
+- Any argument ending in `.xml` is loaded as a Spring context path and
+  the `gtfs-bundles` bean found there is appended to the bundle list
+  (`UtilityLibrary.java:38-39` and `60-69`). So instead of repeating
+  `path:agencyId` pairs, you can pass the *same* `bundle-config.xml`
+  used for the build — one source of truth for paths and agency ids.
+  (The context is fully instantiated, so the XML's
+  `entityReplacementStrategy` bean will also be created and will read
+  the consolidation file; that's harmless here.)
+- A bare path with **no** `:agencyId` suffix gets an auto-generated
+  numeric default agency id (`99990`, `99991`, …
+  `UtilityLibrary.java:34,50`) — which makes every canonical id in your
+  file look "missing." Always pass the `:agencyId` suffix or the XML.
+
 ### 7.5 Step 5 — Build the bundle
 
 Per §6.3. Output: a directory containing the binary bundle files
@@ -877,8 +937,8 @@ replacement log CSV.
 
 If you want a record of what was absorbed, wire in the optional
 `MultiCSVLogger` and `entityReplacementLogger` beans
-(`GtfsReadingSupport.java:112-120`). The CSV they produce is the
-auditable artifact for each build.
+(`GtfsReadingSupport.java:112-120`). The `gtfs_stop_replacements.csv`
+they produce (see §6.2.2) is the auditable artifact for each build.
 
 ### 8.3 Routes/trips with `agency_id` collisions across feeds
 
@@ -1042,14 +1102,15 @@ investigation:
 | `GtfsBundle` config schema | `onebusaway-transit-data-federation-builder/src/main/java/org/onebusaway/transit_data_federation/bundle/model/GtfsBundle.java:35-108` |
 | Per-feed `GtfsReader` setup loop | `onebusaway-transit-data-federation-builder/src/main/java/org/onebusaway/transit_data_federation/bundle/tasks/GtfsReadingSupport.java:102-144` |
 | Optional `entityReplacementStrategy` bean pickup | `onebusaway-transit-data-federation-builder/src/main/java/org/onebusaway/transit_data_federation/bundle/tasks/GtfsReadingSupport.java:109-121` |
-| Class-major, feed-minor load order | `onebusaway-transit-data-federation-builder/src/main/java/org/onebusaway/transit_data_federation/bundle/tasks/GtfsMultiReaderImpl.java:92-138` |
+| Class-major, feed-minor load order | `onebusaway-transit-data-federation-builder/src/main/java/org/onebusaway/transit_data_federation/bundle/tasks/GtfsMultiReaderImpl.java:92-142` |
 | `EntityReplacementStrategy` interface | `onebusaway-transit-data-federation-builder/src/main/java/org/onebusaway/transit_data_federation/bundle/services/EntityReplacementStrategy.java:23-74` |
 | `StoreImpl` save+lookup interception | `onebusaway-transit-data-federation-builder/src/main/java/org/onebusaway/transit_data_federation/bundle/tasks/GtfsMultiReaderImpl.java:152-195` |
 | Consolidation file parser | `onebusaway-transit-data-federation-builder/src/main/java/org/onebusaway/transit_data_federation/bundle/tasks/EntityReplacementStrategyFactory.java:43-105` |
 | `path:agencyId` arg parser (verification tool only) | `onebusaway-transit-data-federation-builder/src/main/java/org/onebusaway/transit_data_federation/bundle/utilities/UtilityLibrary.java:29-72` |
 | Verification utility entry point | `onebusaway-transit-data-federation-builder/src/main/java/org/onebusaway/transit_data_federation/bundle/utilities/GtfsStopReplacementVerificationMain.java:46-95` |
 | Example commented-out wiring (admin webapp) | `onebusaway-admin-webapp/src/main/resources/org/onebusaway/transit_data_federation/bundle/application-context-bundle-admin.xml` |
-| Singular `gtfs-bundle` fallback bean | `onebusaway-transit-data-federation-builder/src/main/java/org/onebusaway/transit_data_federation/bundle/tasks/GtfsReadingSupport.java:153-168` |
+| Singular `gtfs-bundle` fallback bean (unreachable — see §6.1) | `onebusaway-transit-data-federation-builder/src/main/java/org/onebusaway/transit_data_federation/bundle/tasks/GtfsReadingSupport.java:153-168` |
+| Programmatic beans override XML beans (`createContext`) | `onebusaway-container/src/main/java/org/onebusaway/container/ContainerLibrary.java:87-110` |
 | Candidate-detection reference impl | `onebusaway-transit-data-federation-builder/src/main/java/org/onebusaway/transit_data_federation/bundle/tasks/StopConsolidationSuggestionsTask.java` |
 | `MultiCSVLogger` (`basePath` setter) | `onebusaway-transit-data-federation-builder/src/main/java/org/onebusaway/transit_data_federation/bundle/tasks/MultiCSVLogger.java:53` |
 | `EntityReplacementLoggerImpl` | `onebusaway-transit-data-federation-builder/src/main/java/org/onebusaway/transit_data_federation/bundle/tasks/EntityReplacementLoggerImpl.java` |
