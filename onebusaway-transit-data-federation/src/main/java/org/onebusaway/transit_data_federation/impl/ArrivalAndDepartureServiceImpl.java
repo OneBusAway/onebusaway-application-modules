@@ -727,8 +727,17 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
 
         long departureTime = tpr.getTimepointPredictedDepartureTime();
         if (departureTime <= 0) {
-          int slack = instance.getBlockStopTime().getStopTime().getSlackTime();
-          departureTime = arrivalTime + slack * 1000;
+          if (arrivalTime > 0) {
+            int slack = instance.getBlockStopTime().getStopTime().getSlackTime();
+            departureTime = arrivalTime + slack * 1000;
+          } else {
+            /*
+             * arrivalTime is the -1 "no prediction" sentinel, so there is
+             * nothing to synthesize a departure from. Adding slack here would
+             * publish slack * 1000 - 1 as a real predicted time.
+             */
+            departureTime = arrivalTime;
+          }
         }
         setPredictedDepartureTimeForInstance(instance, departureTime);
 

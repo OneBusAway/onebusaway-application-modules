@@ -238,6 +238,39 @@ public class ArrivalAndDepartureServiceImplTest {
   }
 
   /**
+   * A {@link TimepointPredictionRecord} that carries neither a predicted
+   * arrival nor a predicted departure leaves both fields at the -1 "no
+   * prediction" sentinel.
+   *
+   * Stop A is scheduled 13:30 - 13:35, so its slack time is 300 seconds. Adding
+   * that slack to the sentinel would publish 300 * 1000 - 1 = 299999 as a real
+   * predicted time: an epoch value a few seconds past 1970 that clients cannot
+   * tell apart from a genuine prediction. Both fields should stay at the
+   * sentinel instead.
+   */
+  @Test
+  public void testGetArrivalsAndDeparturesForStopInTimeRangeWithNoPredictedTimes() {
+
+    // A prediction record for Stop A that supplies neither time, so both the
+    // predicted arrival and the predicted departure remain -1
+    TimepointPredictionRecord tprA = new TimepointPredictionRecord();
+    tprA.setTimepointId(mStopA.getId());
+    tprA.setTripId(mTrip1.getId());
+
+    List<ArrivalAndDepartureInstance> arrivalsAndDepartures = getArrivalsAndDeparturesForStopInTimeRangeByTimepointPredictionRecord(Arrays.asList(tprA));
+
+    long predictedArrivalTimeStopA = getPredictedArrivalTimeByStopId(
+        arrivalsAndDepartures, mStopA.getId());
+    long predictedDepartureTimeStopA = getPredictedDepartureTimeByStopId(
+        arrivalsAndDepartures, mStopA.getId());
+
+    // Without a usable arrival there is nothing to synthesize a departure from,
+    // so the sentinel must survive rather than become slack * 1000 - 1
+    assertEquals(-1, predictedDepartureTimeStopA);
+    assertEquals(-1, predictedArrivalTimeStopA);
+  }
+
+  /**
    * This method tests upstream time point predictions with only a predicted
    * *departure* time.
    * 
