@@ -100,11 +100,13 @@ public class BlockLocationServiceImplTest {
     BlockLocation phantomLocation = new BlockLocation();
     phantomLocation.setVehicleId(phantomVehicleId);
     phantomLocation.setBlockInstance(blockInstance);
+    phantomLocation.setLastUpdateTime(0);
 
 
     List<BlockLocation> locations = new ArrayList<>();
     locations.add(realLocation);
     locations.add(phantomLocation);
+    
 
 
 
@@ -113,6 +115,7 @@ public class BlockLocationServiceImplTest {
    
     assertEquals(1, locations.size());
     assertEquals("real-coach-123", locations.get(0).getVehicleId().getId());
+    
 
   }
 

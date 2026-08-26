@@ -280,25 +280,27 @@ public class BlockLocationServiceImpl extends AbstractBlockLocationServiceImpl i
           long targetTime) {
     return getBlockLocation(blockInstance, null, scheduledLocation, targetTime);
   }
-  
+  //  Method to filter out phantom vehicles from the list of block locations
   void filterPhantoms(List<BlockLocation> locations) {
-   if (locations.isEmpty())
+   if (locations == null||locations.isEmpty())
       return; 
-          String currentBlockId = locations.get(0).getBlockInstance().getBlock().getBlock().getId().getId();
+    String currentBlockId = locations.get(0).getBlockInstance().getBlock().getBlock().getId().getId();
 
-          boolean hasRealVehicle = locations.stream().anyMatch(location ->
-            location.getVehicleId() != null && !location.getVehicleId().getId().equals(currentBlockId)
+    boolean hasRealVehicle = locations.stream().anyMatch(location ->
+      location.getVehicleId() != null && 
+      !location.getVehicleId().getId().equals(currentBlockId)
+    );
+
+    if (hasRealVehicle) {
+      locations.removeIf(location ->
+        location.getVehicleId() != null &&
+        location.getVehicleId().getId().equals(currentBlockId) &&
+        location.getLastLocationUpdateTime() == 0
           );
-
-          if (hasRealVehicle) {
-            locations.removeIf(location ->
-              location.getVehicleId() != null &&
-                location.getVehicleId().getId().equals(currentBlockId) &&
-                location.getLastLocationUpdateTime() == 0
-            );
-          }
+    }
   }
   
+
   @Override
   public List<BlockLocation> getLocationsForBlockInstance(
           BlockInstance blockInstance, TargetTime time) {
