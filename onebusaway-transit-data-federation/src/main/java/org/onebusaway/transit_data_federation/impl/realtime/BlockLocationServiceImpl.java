@@ -281,6 +281,24 @@ public class BlockLocationServiceImpl extends AbstractBlockLocationServiceImpl i
     return getBlockLocation(blockInstance, null, scheduledLocation, targetTime);
   }
 
+  public void filterPhantoms(List<BlockLocation> locations) {
+   if (locations.isEmpty())
+      return;
+          String currentBlockId = locations.get(0).getBlockInstance().getBlock().getBlock().getId().getId();
+
+          boolean hasRealVehicle = locations.stream().anyMatch(location ->
+            location.getVehicleId() != null && !location.getVehicleId().getId().equals(currentBlockId)
+          );
+
+          if (hasRealVehicle) {
+            locations.removeIf(location ->
+              location.getVehicleId() != null &&
+                location.getVehicleId().getId().equals(currentBlockId) &&
+                location.getLastLocationUpdateTime() == 0
+            );
+          }
+  }
+
   @Override
   public List<BlockLocation> getLocationsForBlockInstance(
           BlockInstance blockInstance, TargetTime time) {
@@ -294,9 +312,13 @@ public class BlockLocationServiceImpl extends AbstractBlockLocationServiceImpl i
       if (location != null)
         locations.add(location);
     }
+    if(locations.size() > 1){
+      filterPhantoms(locations);
+    }
 
     return locations;
   }
+  
 
   @Override
   public Map<AgencyAndId, List<BlockLocation>> getLocationsForBlockInstance(
@@ -316,7 +338,7 @@ public class BlockLocationServiceImpl extends AbstractBlockLocationServiceImpl i
           locationsByVehicleId.get(location.getVehicleId()).add(location);
         }
       }
-    }
+    }  
 
     return locationsByVehicleId;
   }

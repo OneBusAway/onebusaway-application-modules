@@ -25,10 +25,14 @@ import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.stopTime;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.trip;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.onebusaway.geospatial.model.CoordinatePoint;
+import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.impl.transit_graph.BlockEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.TripEntryImpl;
@@ -70,6 +74,45 @@ public class BlockLocationServiceImplTest {
 
   @Test
   public void testApplyRealtimeData() {
+
+  }
+  @Test
+  public void testRemovePhantomVehicle() {
+
+  
+    BlockEntryImpl block = block("phantom-block");
+    TripEntryImpl tripA = trip("phantom-trip", "serviceId");
+    StopEntryImpl stopA = stop("a", 47.5, -122.5);
+    stopTime(0, stopA, tripA, 30, 90, 0, 50.0);
+    BlockConfigurationEntry blockConfig = linkBlockTrips(block, tripA);
+    long serviceDate = 1000 * 1000;
+    BlockInstance blockInstance = new BlockInstance(blockConfig, serviceDate);
+
+    
+    AgencyAndId realVehicleId = new AgencyAndId("AGENCY", "real-coach-123");
+    AgencyAndId phantomVehicleId = new AgencyAndId("AGENCY", "phantom-block");
+
+    BlockLocation realLocation =  new BlockLocation();
+    realLocation.setVehicleId(realVehicleId);
+    realLocation.setBlockInstance(blockInstance);
+
+
+    BlockLocation phantomLocation = new BlockLocation();
+    phantomLocation.setVehicleId(phantomVehicleId);
+    phantomLocation.setBlockInstance(blockInstance);
+
+
+    List<BlockLocation> locations = new ArrayList<>();
+    locations.add(realLocation);
+    locations.add(phantomLocation);
+
+
+
+    
+    _service.filterPhantoms(locations);
+   
+    assertEquals(1, locations.size());
+    assertEquals("real-coach-123", locations.get(0).getVehicleId().getId());
 
   }
 
