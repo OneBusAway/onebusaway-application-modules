@@ -280,10 +280,10 @@ public class BlockLocationServiceImpl extends AbstractBlockLocationServiceImpl i
           long targetTime) {
     return getBlockLocation(blockInstance, null, scheduledLocation, targetTime);
   }
-
-  public void filterPhantoms(List<BlockLocation> locations) {
+  
+  void filterPhantoms(List<BlockLocation> locations) {
    if (locations.isEmpty())
-      return;
+      return; 
           String currentBlockId = locations.get(0).getBlockInstance().getBlock().getBlock().getId().getId();
 
           boolean hasRealVehicle = locations.stream().anyMatch(location ->
@@ -298,7 +298,7 @@ public class BlockLocationServiceImpl extends AbstractBlockLocationServiceImpl i
             );
           }
   }
-
+  
   @Override
   public List<BlockLocation> getLocationsForBlockInstance(
           BlockInstance blockInstance, TargetTime time) {
@@ -375,6 +375,7 @@ public class BlockLocationServiceImpl extends AbstractBlockLocationServiceImpl i
   /****
    * Private Methods
    ****/
+ 
 
   private BlockInstance getVehicleLocationRecordAsBlockInstance(
           VehicleLocationRecord record) {
