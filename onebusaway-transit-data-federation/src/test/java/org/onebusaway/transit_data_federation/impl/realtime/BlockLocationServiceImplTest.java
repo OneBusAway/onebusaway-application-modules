@@ -148,20 +148,44 @@ public class BlockLocationServiceImplTest {
     phantomLocation.setBlockInstance(blockInstance);
     phantomLocation.setLastUpdateTime(0);
 
-    // Create locations list and verify filtering
-    List<BlockLocation> locations = new ArrayList<>();
-    locations.add(realLocation);
-    locations.add(phantomLocation);
+    // Populate the vehicle location cache with a real and a phantom record
+    VehicleLocationRecordCacheImpl cache = new VehicleLocationRecordCacheImpl();
+    _service.setVehicleLocationRecordCache(cache);
 
-    // Call filterPhantoms to remove the phantom
-    _service.filterPhantoms(locations);
+    long now = System.currentTimeMillis();
 
-    // Verify phantom vehicle was filtered out and only real vehicle remains
-    assertEquals(1, locations.size());
-    assertEquals(realVehicleId, locations.get(0).getVehicleId());
-    assertFalse(locations.stream().anyMatch(loc -> 
-        loc.getVehicleId() != null && 
-        loc.getVehicleId().getId().equals(phantomVehicleId.getId())));
+    org.onebusaway.realtime.api.VehicleLocationRecord realRecord = new org.onebusaway.realtime.api.VehicleLocationRecord();
+    realRecord.setBlockId(blockInstance.getBlock().getBlock().getId());
+    realRecord.setServiceDate(serviceDate);
+    realRecord.setVehicleId(realVehicleId);
+    realRecord.setTimeOfRecord(now);
+    realRecord.setTimeOfLocationUpdate(now);
+
+    org.onebusaway.realtime.api.VehicleLocationRecord phantomRecord = new org.onebusaway.realtime.api.VehicleLocationRecord();
+    phantomRecord.setBlockId(blockInstance.getBlock().getBlock().getId());
+    phantomRecord.setServiceDate(serviceDate);
+    phantomRecord.setVehicleId(phantomVehicleId);
+    phantomRecord.setTimeOfRecord(now);
+
+    ScheduledBlockLocation scheduled = new ScheduledBlockLocation();
+    scheduled.setActiveTrip(blockConfig.getTrips().get(0));
+    scheduled.setDistanceAlongBlock(0);
+    scheduled.setLocation(new CoordinatePoint(stopA.getStopLat(), stopA.getStopLon()));
+    scheduled.setInService(true);
+
+    cache.addRecord(blockInstance, realRecord, scheduled, null);
+    cache.addRecord(blockInstance, phantomRecord, null, null);
+
+    List<Date> times = new ArrayList<>();
+    times.add(new Date(now));
+
+    Map<AgencyAndId, List<BlockLocation>> map = _service.getLocationsForBlockInstance(blockInstance, times, now);
+
+    // Verify the returned map contains only the real vehicle id
+    assertEquals(1, map.size());
+    assertTrue(map.containsKey(realVehicleId));
+    assertFalse(map.containsKey(phantomVehicleId));
+    assertEquals(1, map.get(realVehicleId).size());
   }
 
   @Test
