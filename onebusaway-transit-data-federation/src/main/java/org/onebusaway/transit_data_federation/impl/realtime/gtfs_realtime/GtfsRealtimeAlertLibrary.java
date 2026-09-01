@@ -19,13 +19,12 @@ import java.util.Map;
 
 import com.google.transit.realtime.GtfsRealtimeServiceStatus;
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.alerts.impl.ServiceAlertLibrary;
 import org.onebusaway.alerts.service.ServiceAlerts;
 import org.onebusaway.alerts.service.ServiceAlerts.*;
-import org.onebusaway.alerts.impl.ServiceAlertLibrary;
 import org.onebusaway.util.SystemTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import com.google.transit.realtime.GtfsRealtime;
 import com.google.transit.realtime.GtfsRealtime.Alert;
 import com.google.transit.realtime.GtfsRealtime.EntitySelector;

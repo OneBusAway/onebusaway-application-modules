@@ -41,6 +41,8 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+
+import java.lang.reflect.Array;
 import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -300,6 +302,8 @@ public class BlockLocationServiceImpl extends AbstractBlockLocationServiceImpl i
     }
   }
   
+  
+  
 
   @Override
   public List<BlockLocation> getLocationsForBlockInstance(
@@ -333,15 +337,24 @@ public class BlockLocationServiceImpl extends AbstractBlockLocationServiceImpl i
       TargetTime tt = new TargetTime(time.getTime(), currentTime);
       List<VehicleLocationCacheElements> records = getBlockLocationRecordCollectionForBlock(
               blockInstance, tt);
+
+      List<BlockLocation> locationsForTime = new ArrayList<BlockLocation>();
+
       for (VehicleLocationCacheElements cacheRecord : records) {
         BlockLocation location = getBlockLocation(blockInstance, cacheRecord,
                 null, time.getTime());
-        if (location != null) {
-          locationsByVehicleId.get(location.getVehicleId()).add(location);
+        
+       if (location != null) {
+          locationsForTime.add(location);
         }
       }
-    }  
+      filterPhantoms(locationsForTime);
 
+      for(BlockLocation location : locationsForTime){
+        locationsByVehicleId.get(location.getVehicleId()).add(location);
+      }
+    } 
+     
     return locationsByVehicleId;
   }
 

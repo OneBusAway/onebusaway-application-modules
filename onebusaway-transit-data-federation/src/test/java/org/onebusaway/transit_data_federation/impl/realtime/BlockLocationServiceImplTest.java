@@ -26,11 +26,14 @@ import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.trip;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
+import org.onebusaway.collections.FactoryMap;
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.impl.transit_graph.BlockEntryImpl;
@@ -42,6 +45,7 @@ import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.blocks.ScheduledBlockLocation;
 import org.onebusaway.transit_data_federation.services.blocks.ScheduledBlockLocationService;
 import org.onebusaway.transit_data_federation.services.realtime.BlockLocation;
+import org.onebusaway.transit_data_federation.services.realtime.VehicleLocationCacheElements;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 
@@ -96,27 +100,68 @@ public class BlockLocationServiceImplTest {
     realLocation.setVehicleId(realVehicleId);
     realLocation.setBlockInstance(blockInstance);
 
+    BlockLocation phantomLocation = new BlockLocation();
+    phantomLocation.setVehicleId(phantomVehicleId);
+    phantomLocation.setBlockInstance(blockInstance);
+    phantomLocation.setLastUpdateTime(0);
+  
+    List<BlockLocation> locations = new ArrayList<>();
+    locations.add(realLocation);
+    locations.add(phantomLocation);
 
+    
+  
+
+    
+    _service.filterPhantoms(locations);
+    
+  
+
+    assertEquals(1, locations.size());
+    assertEquals("real-coach-123", locations.get(0).getVehicleId().getId());
+
+    
+
+  }
+  @Test
+  public void testMapOverloadRemovesPhantomVehicle() {
+    // Setup block and trips
+    BlockEntryImpl block = block("phantom-block");
+    TripEntryImpl tripA = trip("phantom-trip", "serviceId");
+    StopEntryImpl stopA = stop("a", 47.5, -122.5);
+    stopTime(0, stopA, tripA, 30, 90, 0, 50.0);
+    BlockConfigurationEntry blockConfig = linkBlockTrips(block, tripA);
+    long serviceDate = 1000 * 1000;
+    BlockInstance blockInstance = new BlockInstance(blockConfig, serviceDate);
+
+    AgencyAndId realVehicleId = new AgencyAndId("AGENCY", "real-coach-123");
+    AgencyAndId phantomVehicleId = new AgencyAndId("AGENCY", "phantom-block");
+
+    // Create real location
+    BlockLocation realLocation = new BlockLocation();
+    realLocation.setVehicleId(realVehicleId);
+    realLocation.setBlockInstance(blockInstance);
+
+    // Create phantom location with lastUpdateTime == 0
     BlockLocation phantomLocation = new BlockLocation();
     phantomLocation.setVehicleId(phantomVehicleId);
     phantomLocation.setBlockInstance(blockInstance);
     phantomLocation.setLastUpdateTime(0);
 
-
+    // Create locations list and verify filtering
     List<BlockLocation> locations = new ArrayList<>();
     locations.add(realLocation);
     locations.add(phantomLocation);
-    
 
-
-
-    
+    // Call filterPhantoms to remove the phantom
     _service.filterPhantoms(locations);
-   
-    assertEquals(1, locations.size());
-    assertEquals("real-coach-123", locations.get(0).getVehicleId().getId());
-    
 
+    // Verify phantom vehicle was filtered out and only real vehicle remains
+    assertEquals(1, locations.size());
+    assertEquals(realVehicleId, locations.get(0).getVehicleId());
+    assertFalse(locations.stream().anyMatch(loc -> 
+        loc.getVehicleId() != null && 
+        loc.getVehicleId().getId().equals(phantomVehicleId.getId())));
   }
 
   @Test
