@@ -34,6 +34,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.onebusaway.alerts.impl.ServiceAlertRecord;
+import org.onebusaway.alerts.service.ServiceAlerts;
 import org.onebusaway.alerts.service.ServiceAlertsService;
 import org.onebusaway.gtfs.model.AgencyAndId;
 
@@ -66,6 +67,7 @@ public class GtfsRealtimeSourceAlertsTest {
     _source.setAgencyIds(Collections.singletonList("1"));
     _source.setFeedId("feed");
     _source.setAlertsUrl(new URL("http://localhost/alerts.pb"));
+    _source.setAlertCollectionUrl(new URL("http://localhost/alert-collection.pb"));
     _source.setServiceAlertService(_alertsService);
     _source.setAlertLibrary(new GtfsRealtimeAlertLibrary());
   }
@@ -118,6 +120,23 @@ public class GtfsRealtimeSourceAlertsTest {
     assertEquals(3, savedAlertCount());
   }
 
+  @Test
+  public void unchangedCollectionAlertsAreNotSavedAgain() throws Exception {
+    _source.handleAlertCollection(collection("Detour on route 10", 1000L));
+    _source.handleAlertCollection(collection("Detour on route 10", 1000L));
+
+    assertEquals(1, savedAlertCount());
+  }
+
+  @Test
+  public void collectionAlertsWithNewTimestampsAreSavedAgain() throws Exception {
+    // unlike the GTFS-RT converter, a collection's publisher sets these times
+    _source.handleAlertCollection(collection("Detour on route 10", 1000L));
+    _source.handleAlertCollection(collection("Detour on route 10", 2000L));
+
+    assertEquals(2, savedAlertCount());
+  }
+
   private int savedAlertCount() {
     @SuppressWarnings("unchecked")
     ArgumentCaptor<List<ServiceAlertRecord>> saved = ArgumentCaptor.forClass((Class) List.class);
@@ -125,6 +144,18 @@ public class GtfsRealtimeSourceAlertsTest {
     List<ServiceAlertRecord> all = new ArrayList<>();
     for (List<ServiceAlertRecord> batch : saved.getAllValues()) all.addAll(batch);
     return all.size();
+  }
+
+  private static ServiceAlerts.ServiceAlertsCollection collection(String summary, long time) {
+    ServiceAlerts.ServiceAlert alert = ServiceAlerts.ServiceAlert.newBuilder()
+        .setId(ServiceAlerts.Id.newBuilder().setAgencyId("1").setId("C1"))
+        .setCreationTime(time)
+        .setModifiedTime(time)
+        .setSummary(ServiceAlerts.TranslatedString.newBuilder()
+            .addTranslation(ServiceAlerts.TranslatedString.Translation.newBuilder()
+                .setText(summary).setLanguage("en")))
+        .build();
+    return ServiceAlerts.ServiceAlertsCollection.newBuilder().addServiceAlerts(alert).build();
   }
 
   private static FeedMessage feed(String header) {

@@ -825,7 +825,8 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     return false;
   }
 
-  private void handleAlertCollection(ServiceAlerts.ServiceAlertsCollection alertsCollection) {
+  // package-private for testing
+  void handleAlertCollection(ServiceAlerts.ServiceAlertsCollection alertsCollection) {
     if (_alertCollectionUrl == null) {
       return;
     }
@@ -849,7 +850,8 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
 
       AgencyAndId id = new AgencyAndId(alert.getId().getAgencyId(), alert.getId().getId());
       idsInCollection.add(id);
-      handleSingleAlert(id, alert.toBuilder(), currentAlerts, toAdd, toUpdate, savedContent, alert);
+      // a collection's timestamps come from its publisher, so a change to them is a real change
+      handleSingleAlert(id, alert.toBuilder(), currentAlerts, toAdd, toUpdate, savedContent, alert, false);
     }
 
     saveAlerts(toAdd, toUpdate, savedContent);
@@ -925,12 +927,13 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
                                  Set<ServiceAlertRecord> toAdd,
                                  Set<ServiceAlertRecord> toUpdate,
                                  Map<AgencyAndId, ServiceAlert> savedContent,
-                                 ServiceAlert alert) {
+                                 ServiceAlert alert,
+                                 boolean ignoreTimestamps) {
 
     ServiceAlert serviceAlert = alert;
-    // cache value of alert, stored without timestamps
+    // cache value of alert, stored without converter-stamped timestamps
     ServiceAlert existingAlert = _alertsById.get(id);
-    ServiceAlert alertContent = withoutTimestamps(serviceAlert);
+    ServiceAlert alertContent = ignoreTimestamps ? withoutTimestamps(serviceAlert) : serviceAlert;
 
     // a repeat of an alert already queued this poll would save the same id twice
     if (alertContent.equals(savedContent.get(id))) {
@@ -1112,7 +1115,7 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
         ServiceAlert.Builder serviceAlertBuilder = _alertLibrary.getAlertAsServiceAlert(
                 id, alert, _alertAgencyIdMap, _ignoreAlertTripId);
         ServiceAlert serviceAlert = serviceAlertBuilder.build();
-        handleSingleAlert(id, serviceAlertBuilder, currentAlerts, toAdd, toUpdate, savedContent, serviceAlert);
+        handleSingleAlert(id, serviceAlertBuilder, currentAlerts, toAdd, toUpdate, savedContent, serviceAlert, true);
 
       }
     }
