@@ -895,10 +895,18 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
 
   private void saveAlerts(Set<ServiceAlertRecord> toAdd, Set<ServiceAlertRecord> toUpdate,
                           Map<AgencyAndId, ServiceAlert> savedContent) {
-    _serviceAlertService.createOrUpdateServiceAlerts(getAgencyIds().get(0), new ArrayList<ServiceAlertRecord>(toAdd));
-    _serviceAlertService.createOrUpdateServiceAlerts(getAgencyIds().get(0), new ArrayList<ServiceAlertRecord>(toUpdate));
     // remember content only once it's saved, so a failed save is retried next poll
-    _alertsById.putAll(savedContent);
+    saveAndRemember(toAdd, savedContent);
+    saveAndRemember(toUpdate, savedContent);
+  }
+
+  private void saveAndRemember(Set<ServiceAlertRecord> records,
+                               Map<AgencyAndId, ServiceAlert> savedContent) {
+    _serviceAlertService.createOrUpdateServiceAlerts(getAgencyIds().get(0), new ArrayList<ServiceAlertRecord>(records));
+    for (ServiceAlertRecord record : records) {
+      AgencyAndId id = new AgencyAndId(record.getAgencyId(), record.getServiceAlertId());
+      _alertsById.put(id, savedContent.get(id));
+    }
   }
 
   /**
@@ -923,6 +931,12 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     // cache value of alert, stored without timestamps
     ServiceAlert existingAlert = _alertsById.get(id);
     ServiceAlert alertContent = withoutTimestamps(serviceAlert);
+
+    // a repeat of an alert already queued this poll would save the same id twice
+    if (alertContent.equals(savedContent.get(id))) {
+      currentAlerts.add(id);
+      return;
+    }
 
     // don't update if there's nothing to do, but re-save an unchanged alert
     // the service no longer has (pruned from the feed or deleted elsewhere)
