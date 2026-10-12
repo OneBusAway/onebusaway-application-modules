@@ -293,6 +293,7 @@ public class ServiceAlertsServiceImpl implements ServiceAlertsService {
 
 	@Override
 	public List<ServiceAlertRecord> getServiceAlertsForRouteId(long time, AgencyAndId routeId) {
+		reloadIfStale();
 		Set<AgencyAndId> serviceAlertIds = new HashSet<AgencyAndId>();
 		getServiceAlertIdsForKey(_cache.getServiceAlertIdsByRouteId(), routeId, serviceAlertIds);
 		return getServiceAlertIdsAsObjects(serviceAlertIds, time);
@@ -300,6 +301,7 @@ public class ServiceAlertsServiceImpl implements ServiceAlertsService {
 
 	@Override
 	public List<ServiceAlertRecord> getServiceAlertsForRouteAndStopId(long time, AgencyAndId routeId, AgencyAndId stopId) {
+		reloadIfStale();
 		Set<AgencyAndId> serviceAlertIds = new HashSet<AgencyAndId>();
 		RouteAndStopCallRef routeAndStopCallRef = new RouteAndStopCallRef(routeId,
 				stopId);
@@ -309,6 +311,7 @@ public class ServiceAlertsServiceImpl implements ServiceAlertsService {
 	}
 
 	public List<ServiceAlertRecord> getServiceAlertsForRouteAndDirection(long time, AgencyAndId routeId, AgencyAndId tripId, String directionId) {
+		reloadIfStale();
 		Set<AgencyAndId> serviceAlertIds = new HashSet<AgencyAndId>();
 		RouteAndDirectionRef lineAndDirectionRef = new RouteAndDirectionRef(routeId,
 				directionId);
@@ -327,6 +330,7 @@ public class ServiceAlertsServiceImpl implements ServiceAlertsService {
 
 	@Override
 	public List<ServiceAlertRecord> getServiceAlertsForTripAndStopId(long time, AgencyAndId tripId, AgencyAndId stopId) {
+		reloadIfStale();
 		Set<AgencyAndId> serviceAlertIds = new HashSet<AgencyAndId>();
 		getServiceAlertIdsForKey(_cache.getServiceAlertIdsByTripId(), tripId,
 				serviceAlertIds);
