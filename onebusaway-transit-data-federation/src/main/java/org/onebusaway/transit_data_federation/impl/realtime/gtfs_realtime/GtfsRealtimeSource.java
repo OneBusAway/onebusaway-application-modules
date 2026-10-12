@@ -353,6 +353,11 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     _sftpVehiclePositionsUrl = sftpVehiclePositionsUrl;
   }
 
+  // package-private for testing; start() creates the library otherwise
+  void setAlertLibrary(GtfsRealtimeAlertLibrary alertLibrary) {
+    _alertLibrary = alertLibrary;
+  }
+
   public void setAlertsUrl(URL alertsUrl) {
     _alertsUrl = alertsUrl;
   }
@@ -888,6 +893,17 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
 
   }
 
+  /**
+   * Compares alerts ignoring creation and modified times, which
+   * {@link GtfsRealtimeAlertLibrary} stamps with the current time on every
+   * poll (they are required fields, hence buildPartial). Comparing them made every alert look changed, so every alert was
+   * saved to the database on every refresh.
+   */
+  static boolean sameAlertContent(ServiceAlert a, ServiceAlert b) {
+    return a.toBuilder().clearCreationTime().clearModifiedTime().buildPartial()
+        .equals(b.toBuilder().clearCreationTime().clearModifiedTime().buildPartial());
+  }
+
   private void handleSingleAlert(AgencyAndId id,
                                  ServiceAlert.Builder serviceAlertBuilder,
                                  Set<AgencyAndId> currentAlerts,
@@ -902,8 +918,7 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     ServiceAlertRecord existingRecord = _serviceAlertService.getServiceAlertForId(new AgencyAndId(id.getAgencyId(), id.getId()));
 
     // don't update if there's nothing to do
-    if ((existingAlert == null
-            || !existingAlert.equals(serviceAlert))) {
+    if (existingAlert == null || !sameAlertContent(existingAlert, serviceAlert)) {
       _alertsById.put(id, serviceAlert);
 
       ServiceAlertRecord serviceAlertRecord = new ServiceAlertRecord();
@@ -1035,7 +1050,8 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
 
   }
 
-  private void handleAlerts(FeedMessage alerts) {
+  // package-private for testing
+  void handleAlerts(FeedMessage alerts) {
 
     // exit if we are configured only in trip updates mode
     if (_alertsUrl == null) {
