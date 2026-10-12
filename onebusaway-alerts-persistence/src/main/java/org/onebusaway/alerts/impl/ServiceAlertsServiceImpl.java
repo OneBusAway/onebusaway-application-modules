@@ -30,6 +30,10 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 import java.util.*;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.ReentrantLock;
 
 @Component
@@ -65,10 +69,16 @@ public class ServiceAlertsServiceImpl implements ServiceAlertsService {
 	private final Object _indexLock = new Object();
 
 	/**
-	 * Set when a reader saw the database change but a writer held the write
-	 * lock, so the reload is retried on a later read.
+	 * Checks the database for changes made elsewhere (another instance, the
+	 * admin console) and reloads, off the request threads.
 	 */
-	private volatile boolean _reloadPending = false;
+	private Executor _syncExecutor = Executors.newSingleThreadExecutor(runnable -> {
+		Thread thread = new Thread(runnable, "service-alerts-sync");
+		thread.setDaemon(true);
+		return thread;
+	});
+
+	private final AtomicBoolean _syncQueued = new AtomicBoolean(false);
 
 	@Autowired
 	public void setServiceAlertsCache(ServiceAlertsCache cache) {
@@ -84,6 +94,14 @@ public class ServiceAlertsServiceImpl implements ServiceAlertsService {
 	  _persister = persister;
 	}
 	
+	/**
+	 * Where reader-triggered sync checks run. Tests that write through a
+	 * transaction other threads can't see pass a same-thread executor.
+	 */
+	public void setSyncExecutor(Executor executor) {
+		_syncExecutor = executor;
+	}
+
 	public ServiceAlertsPersistence getServiceAlertsPeristence() {
 	  return _persister;
 	}
@@ -100,6 +118,8 @@ public class ServiceAlertsServiceImpl implements ServiceAlertsService {
 	@PreDestroy
 	public void stop() {
 		_log.info("Stopping ServiceAlertsService");
+		if (_syncExecutor instanceof ExecutorService)
+			((ExecutorService) _syncExecutor).shutdownNow();
 	}
 
 	/****
@@ -585,21 +605,25 @@ public class ServiceAlertsServiceImpl implements ServiceAlertsService {
 	}
 
 	/**
-	 * Readers reload when the database has changed, but never wait behind a
-	 * writer to do it: a writer holding the lock is already bringing the cache
-	 * up to date, and the reload is retried on a later read.
+	 * Readers serve the current cache and leave the staleness check and any
+	 * reload to the sync thread, so no request waits on the database. At most
+	 * one check is queued at a time.
 	 */
 	private void reloadIfStale() {
-		if (!_reloadPending && !_persister.cachedNeedsSync()) return;
-		if (_writeLock.tryLock()) {
-			try {
-				_reloadPending = false;
-				loadServiceAlerts();
-			} finally {
-				_writeLock.unlock();
-			}
-		} else {
-			_reloadPending = true;
+		if (!_syncQueued.compareAndSet(false, true)) return;
+		try {
+			_syncExecutor.execute(() -> {
+				try {
+					if (_persister.cachedNeedsSync()) loadServiceAlerts();
+				} catch (Throwable t) {
+					_log.error("issue syncing service alerts: ", t);
+				} finally {
+					_syncQueued.set(false);
+				}
+			});
+		} catch (RuntimeException e) {
+			// executor shut down
+			_syncQueued.set(false);
 		}
 	}
 

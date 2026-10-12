@@ -91,12 +91,30 @@ public class ServiceAlertsServiceImplConcurrencyTest {
     assertEquals(0, _service.getServiceAlertsForStopId(-1, new AgencyAndId("1", "100")).size());
   }
 
+  @Test
+  public void readersDoNotReloadAStaleCacheThemselves() throws Exception {
+    _persister.rows.add(stopAlert("C", "1_100")); // written by another instance
+    _persister.stale = true;
+    _persister.blockReads();
+
+    readWithin(() -> _service.getServiceAlertsForStopId(-1, new AgencyAndId("1", "100")));
+    assertTrue("reload never reached the database", _persister.writing.await(5, TimeUnit.SECONDS));
+
+    _persister.release.countDown();
+    long deadline = System.currentTimeMillis() + 5000;
+    while (_service.getServiceAlertsForStopId(-1, new AgencyAndId("1", "100")).size() < 2
+        && System.currentTimeMillis() < deadline) {
+      Thread.sleep(10);
+    }
+    assertEquals(2, _service.getServiceAlertsForStopId(-1, new AgencyAndId("1", "100")).size());
+  }
+
   private <T> T readWithin(java.util.concurrent.Callable<T> read) throws Exception {
     Future<T> reader = _executor.submit(read);
     try {
       return reader.get(1, TimeUnit.SECONDS);
     } catch (TimeoutException e) {
-      throw new AssertionError("reader blocked while a writer was waiting on the database");
+      throw new AssertionError("reader blocked on database work");
     }
   }
 
@@ -112,18 +130,23 @@ public class ServiceAlertsServiceImplConcurrencyTest {
 
   /**
    * In-memory persistence whose writes or lookups can be held open, standing
-   * in for a slow database round trip.
+   * in for a slow database round trip. {@link #stale} makes the next
+   * cachedNeedsSync report a change made by another instance.
    */
   private static class BlockingPersistence implements ServiceAlertsPersistence {
     final CountDownLatch writing = new CountDownLatch(1);
     final CountDownLatch release = new CountDownLatch(1);
     private volatile boolean blockWrites = false;
     private volatile boolean blockLookups = false;
-    private final List<ServiceAlertRecord> rows = Collections.synchronizedList(new ArrayList<>());
+    private volatile boolean blockReads = false;
+    volatile boolean stale = false;
+    final List<ServiceAlertRecord> rows = Collections.synchronizedList(new ArrayList<>());
 
     void blockWrites() { blockWrites = true; }
 
     void blockLookups() { blockLookups = true; }
+
+    void blockReads() { blockReads = true; }
 
     private void maybeBlock(boolean block) {
       if (!block) return;
@@ -139,7 +162,12 @@ public class ServiceAlertsServiceImplConcurrencyTest {
     public void delete(ServiceAlertRecord record) { rows.remove(record); }
 
     @Override
-    public List<ServiceAlertRecord> getAlerts() { return new ArrayList<>(rows); }
+    public List<ServiceAlertRecord> getAlerts() {
+      maybeBlock(blockReads);
+      synchronized (rows) {
+        return new ArrayList<>(rows);
+      }
+    }
 
     @Override
     public void saveOrUpdate(ServiceAlertRecord record) {
@@ -170,7 +198,11 @@ public class ServiceAlertsServiceImplConcurrencyTest {
     public boolean needsSync() { return false; }
 
     @Override
-    public boolean cachedNeedsSync() { return false; }
+    public boolean cachedNeedsSync() {
+      boolean wasStale = stale;
+      stale = false;
+      return wasStale;
+    }
 
     @Override
     public boolean deleteOrphans() { return true; }
