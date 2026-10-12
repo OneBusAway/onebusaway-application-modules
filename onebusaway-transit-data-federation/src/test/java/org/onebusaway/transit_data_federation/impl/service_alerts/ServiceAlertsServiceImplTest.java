@@ -90,6 +90,8 @@ public class ServiceAlertsServiceImplTest extends AbstractTransactionalJUnit4Spr
         ((ServiceAlertsServiceImpl)_service).setServiceAlertsCache(cache);
         _persister = new ServiceAlertsPersistenceDB();
         ((ServiceAlertsServiceImpl)_service).setServiceAlertsPersistence(_persister);
+        // the test transaction's writes are invisible to other threads, so sync on the reader
+        ((ServiceAlertsServiceImpl)_service).setSyncExecutor(Runnable::run);
         _persister.setRefreshInterval(1000);
         _persister.setSessionFactory(_sessionFactory);
 

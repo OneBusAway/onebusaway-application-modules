@@ -30,6 +30,11 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 import java.util.*;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.ReentrantLock;
 
 @Component
 public class ServiceAlertsServiceImpl implements ServiceAlertsService {
@@ -51,6 +56,39 @@ public class ServiceAlertsServiceImpl implements ServiceAlertsService {
 	
 	private ServiceAlertsPersistence _persister;
 
+	/**
+	 * Serializes writers, which do database work. Readers never take it, so a
+	 * realtime alerts refresh can't stall arrivals or trip details.
+	 */
+	private final ReentrantLock _writeLock = new ReentrantLock();
+
+	/**
+	 * Guards the in-memory indexes. Held only for in-memory work, never across
+	 * a database call.
+	 */
+	private final Object _indexLock = new Object();
+
+	/**
+	 * Checks the database for changes made elsewhere (another instance, the
+	 * admin console) and reloads, off the request threads.
+	 */
+	private Executor _syncExecutor = Executors.newSingleThreadExecutor(runnable -> {
+		Thread thread = new Thread(runnable, "service-alerts-sync");
+		thread.setDaemon(true);
+		return thread;
+	});
+
+	private final AtomicBoolean _syncQueued = new AtomicBoolean(false);
+
+	/**
+	 * Reads before this time don't queue a sync check. The persister throttles
+	 * the database check itself; this keeps busy readers from waking the sync
+	 * thread on every request just to learn nothing is due.
+	 */
+	private static final long SYNC_CHECK_INTERVAL_MS = 250;
+
+	private volatile long _nextSyncCheck = 0;
+
 	@Autowired
 	public void setServiceAlertsCache(ServiceAlertsCache cache) {
 	  _cache = cache;
@@ -65,6 +103,14 @@ public class ServiceAlertsServiceImpl implements ServiceAlertsService {
 	  _persister = persister;
 	}
 	
+	/**
+	 * Where reader-triggered sync checks run. Tests that write through a
+	 * transaction other threads can't see pass a same-thread executor.
+	 */
+	public void setSyncExecutor(Executor executor) {
+		_syncExecutor = executor;
+	}
+
 	public ServiceAlertsPersistence getServiceAlertsPeristence() {
 	  return _persister;
 	}
@@ -81,6 +127,8 @@ public class ServiceAlertsServiceImpl implements ServiceAlertsService {
 	@PreDestroy
 	public void stop() {
 		_log.info("Stopping ServiceAlertsService");
+		if (_syncExecutor instanceof ExecutorService)
+			((ExecutorService) _syncExecutor).shutdownNow();
 	}
 
 	/****
@@ -88,119 +136,142 @@ public class ServiceAlertsServiceImpl implements ServiceAlertsService {
 	 ****/
 
 	@Override
-	public synchronized ServiceAlertRecord createOrUpdateServiceAlert(
+	public ServiceAlertRecord createOrUpdateServiceAlert(
       ServiceAlertRecord serviceAlertRecord) {
+		_writeLock.lock();
+		try {
+			if (_persister.needsSync()) this.loadServiceAlerts();
 
-	  if (_persister.needsSync()) this.loadServiceAlerts();
-	  
-		if (serviceAlertRecord.getServiceAlertId() == null) {
-			UUID uuid = UUID.randomUUID();
-			serviceAlertRecord.setServiceAlertId(uuid.toString());
-		}
-
-		long lastModified = SystemTime.currentTimeMillis();
-		if (serviceAlertRecord.getCreationTime() < 1l)
-        serviceAlertRecord.setCreationTime(lastModified);
-
-		updateReferences(serviceAlertRecord);
-		saveDBServiceAlerts(serviceAlertRecord, lastModified);
-		return serviceAlertRecord;
-	}
-
-	@Override
-	public synchronized List<ServiceAlertRecord> createOrUpdateServiceAlerts(String agencyId, List<ServiceAlertRecord> records) {
-		if (_persister.needsSync()) this.loadServiceAlerts();
-		long lastModified = SystemTime.currentTimeMillis();
-
-		for (ServiceAlertRecord serviceAlertRecord : records) {
 			if (serviceAlertRecord.getServiceAlertId() == null) {
 				UUID uuid = UUID.randomUUID();
 				serviceAlertRecord.setServiceAlertId(uuid.toString());
 			}
 
-
+			long lastModified = SystemTime.currentTimeMillis();
 			if (serviceAlertRecord.getCreationTime() < 1l)
 				serviceAlertRecord.setCreationTime(lastModified);
 
 			updateReferences(serviceAlertRecord);
+			saveDBServiceAlerts(serviceAlertRecord, lastModified);
+			return serviceAlertRecord;
+		} finally {
+			_writeLock.unlock();
 		}
-		saveDBServiceAlerts(records, lastModified);
-		return records;
+	}
 
+	@Override
+	public List<ServiceAlertRecord> createOrUpdateServiceAlerts(String agencyId, List<ServiceAlertRecord> records) {
+		if (records.isEmpty()) return records;
+		_writeLock.lock();
+		try {
+			if (_persister.needsSync()) this.loadServiceAlerts();
+			long lastModified = SystemTime.currentTimeMillis();
+
+			for (ServiceAlertRecord serviceAlertRecord : records) {
+				if (serviceAlertRecord.getServiceAlertId() == null) {
+					UUID uuid = UUID.randomUUID();
+					serviceAlertRecord.setServiceAlertId(uuid.toString());
+				}
+
+				if (serviceAlertRecord.getCreationTime() < 1l)
+					serviceAlertRecord.setCreationTime(lastModified);
+
+				updateReferences(serviceAlertRecord);
+			}
+			saveDBServiceAlerts(records, lastModified);
+			return records;
+		} finally {
+			_writeLock.unlock();
+		}
 	}
 
 
 	@Override
-	public synchronized ServiceAlertRecord copyServiceAlert(ServiceAlertRecord serviceAlertRecord) {
-		
-		if (_persister.needsSync()) this.loadServiceAlerts();
-		UUID uuid = UUID.randomUUID();
-		serviceAlertRecord.setServiceAlertId(uuid.toString());
+	public ServiceAlertRecord copyServiceAlert(ServiceAlertRecord serviceAlertRecord) {
+		_writeLock.lock();
+		try {
+			if (_persister.needsSync()) this.loadServiceAlerts();
+			UUID uuid = UUID.randomUUID();
+			serviceAlertRecord.setServiceAlertId(uuid.toString());
 
-		long lastModified = SystemTime.currentTimeMillis();
-        serviceAlertRecord.setCreationTime(lastModified);
-        serviceAlertRecord.setCopy(Boolean.TRUE);
-		
-		updateReferences(serviceAlertRecord);
-		saveDBServiceAlerts(serviceAlertRecord, lastModified);
-		return serviceAlertRecord;
+			long lastModified = SystemTime.currentTimeMillis();
+			serviceAlertRecord.setCreationTime(lastModified);
+			serviceAlertRecord.setCopy(Boolean.TRUE);
+
+			updateReferences(serviceAlertRecord);
+			saveDBServiceAlerts(serviceAlertRecord, lastModified);
+			return serviceAlertRecord;
+		} finally {
+			_writeLock.unlock();
+		}
 	}	
 
 	@Override
-	public synchronized void removeServiceAlert(AgencyAndId serviceAlertId) {
+	public void removeServiceAlert(AgencyAndId serviceAlertId) {
 		removeServiceAlerts(Arrays.asList(serviceAlertId));
 	}
 
 	@Override
-	public synchronized void removeServiceAlerts(List<AgencyAndId> serviceAlertIds) {
-	  if (_persister.needsSync()) this.loadServiceAlerts();
-		for (AgencyAndId serviceAlertId : serviceAlertIds) {
-      ServiceAlertRecord existingServiceAlert = _cache.removeServiceAlert(serviceAlertId);
+	public void removeServiceAlerts(List<AgencyAndId> serviceAlertIds) {
+		if (serviceAlertIds.isEmpty()) return;
+		_writeLock.lock();
+		try {
+			if (_persister.needsSync()) this.loadServiceAlerts();
+			for (AgencyAndId serviceAlertId : serviceAlertIds) {
+				synchronized (_indexLock) {
+					ServiceAlertRecord existingServiceAlert = _cache.removeServiceAlert(serviceAlertId);
+					if (existingServiceAlert != null) {
+						updateReferences(existingServiceAlert, null);
+					}
+				}
 
-			if (existingServiceAlert != null) {
-				updateReferences(existingServiceAlert, null);
+				//Now remove from the DataBase.
+				ServiceAlertRecord existingServiceAlertRecord = getServiceAlertRecordByAlertId(serviceAlertId.getAgencyId(), serviceAlertId.getId());
+				_log.debug("deleting service alert " + serviceAlertId.getId());
+				if (existingServiceAlertRecord != null) {
+					_persister.delete(existingServiceAlertRecord);
+				}
 			}
-			
-			//Now remove from the DataBase.
-			ServiceAlertRecord existingServiceAlertRecord = getServiceAlertRecordByAlertId(serviceAlertId.getAgencyId(), serviceAlertId.getId());
-			_log.debug("deleting service alert " + serviceAlertId.getId());
-			if (existingServiceAlertRecord != null) {
-			  _persister.delete(existingServiceAlertRecord);
-			}
-		}    
+		} finally {
+			_writeLock.unlock();
+		}
 	}
 
 	@Override
-	public synchronized void removeAllServiceAlertsForFederatedAgencyId(
+	public void removeAllServiceAlertsForFederatedAgencyId(
 			String agencyId) {
-		Set<AgencyAndId> ids = _cache.getServiceAlertIdsByServiceAlertAgencyId().get(agencyId);
-		if (ids != null)
-			removeServiceAlerts(new ArrayList<AgencyAndId>(ids));
+		List<AgencyAndId> ids = new ArrayList<AgencyAndId>();
+		getServiceAlertIdsForKey(_cache.getServiceAlertIdsByServiceAlertAgencyId(), agencyId, ids);
+		removeServiceAlerts(ids);
 	}
 
 	@Override
 	public ServiceAlertRecord getServiceAlertForId(AgencyAndId serviceAlertId) {
-	  if (_persister.cachedNeedsSync()) this.loadServiceAlerts();
-		return _cache.getServiceAlerts().get(serviceAlertId);
+		reloadIfStale();
+		synchronized (_indexLock) {
+			return _cache.getServiceAlerts().get(serviceAlertId);
+		}
 	}
 
 	@Override
 	public List<ServiceAlertRecord> getAllServiceAlerts() {
-	  if (_persister.cachedNeedsSync()) this.loadServiceAlerts();
-		return new ArrayList<ServiceAlertRecord>(_cache.getServiceAlerts().values());
+		reloadIfStale();
+		synchronized (_indexLock) {
+			return new ArrayList<ServiceAlertRecord>(_cache.getServiceAlerts().values());
+		}
 	}
 
 	@Override
 	public List<ServiceAlertRecord> getServiceAlertsForFederatedAgencyId(String agencyId) {
-	  if (_persister.cachedNeedsSync()) this.loadServiceAlerts();
-		Set<AgencyAndId> serviceAlertIds = _cache.getServiceAlertIdsByServiceAlertAgencyId().get(agencyId);
+		Set<AgencyAndId> serviceAlertIds = new HashSet<AgencyAndId>();
+		getServiceAlertIdsForKey(_cache.getServiceAlertIdsByServiceAlertAgencyId(), agencyId,
+				serviceAlertIds);
 		return getServiceAlertIdsAsObjects(serviceAlertIds);
 	}
 
 	@Override
 	public List<ServiceAlertRecord> getServiceAlertsForAgencyId(long time,
 			String agencyId) {
-	  if (_persister.cachedNeedsSync()) this.loadServiceAlerts();
 		Set<AgencyAndId> serviceAlertIds = new HashSet<AgencyAndId>();
 		getServiceAlertIdsForKey(_cache.getServiceAlertIdsByAgencyId(), agencyId,
 				serviceAlertIds);
@@ -210,7 +281,6 @@ public class ServiceAlertsServiceImpl implements ServiceAlertsService {
 	@Override
 	public List<ServiceAlertRecord> getServiceAlertsForStopId(long time,
 			AgencyAndId stopId) {
-	  if (_persister.cachedNeedsSync()) this.loadServiceAlerts();
 		Set<AgencyAndId> serviceAlertIds = new HashSet<AgencyAndId>();
 		getServiceAlertIdsForKey(_cache.getServiceAlertIdsByAgencyId(), stopId.getAgencyId(),
 				serviceAlertIds);
@@ -268,7 +338,6 @@ public class ServiceAlertsServiceImpl implements ServiceAlertsService {
 	@Override
 	public List<ServiceAlertRecord> getServiceAlerts(SituationQueryBean query) {
 		Set<AgencyAndId> serviceAlertIds = new HashSet<AgencyAndId>();
-		if (_persister.cachedNeedsSync()) this.loadServiceAlerts();
 		for (SituationQueryBean.AffectsBean affects : query.getAffects()) {
 
 			AgencyAndId routeId = AgencyAndId.convertFromString(affects.getRouteId());
@@ -348,8 +417,10 @@ public class ServiceAlertsServiceImpl implements ServiceAlertsService {
 
 	private void updateReferences(ServiceAlertRecord serviceAlert) {
 		AgencyAndId id = ServiceAlertLibrary.agencyAndId(serviceAlert.getAgencyId(), serviceAlert.getServiceAlertId());
-    	ServiceAlertRecord existingServiceAlert = _cache.putServiceAlert(id, serviceAlert);
-		updateReferences(existingServiceAlert, serviceAlert);
+		synchronized (_indexLock) {
+			ServiceAlertRecord existingServiceAlert = _cache.putServiceAlert(id, serviceAlert);
+			updateReferences(existingServiceAlert, serviceAlert);
+		}
 	}
 
 	private void updateReferences(ServiceAlertRecord existingServiceAlert,
@@ -424,16 +495,17 @@ public class ServiceAlertsServiceImpl implements ServiceAlertsService {
 		}
 	}
 
-	private synchronized <T> void getServiceAlertIdsForKey(
+	private <T> void getServiceAlertIdsForKey(
 			Map<T, Set<AgencyAndId>> serviceAlertIdsByKey, T key,
 			Collection<AgencyAndId> matches) {
-		if (serviceAlertIdsByKey != null) {
+		// every indexed reader comes through here, so none can skip the check
+		reloadIfStale();
+		if (serviceAlertIdsByKey == null)
+			return;
+		synchronized (_indexLock) {
 			Set<AgencyAndId> ids = serviceAlertIdsByKey.get(key);
-			if (ids != null) {
-				// copy to guard against changes
-				Set<AgencyAndId> copyOfIds = new HashSet<>(ids);
-				matches.addAll(copyOfIds);
-			}
+			if (ids != null)
+				matches.addAll(ids);
 		}
 	}
 
@@ -448,10 +520,12 @@ public class ServiceAlertsServiceImpl implements ServiceAlertsService {
 			return Collections.emptyList();
 		List<ServiceAlertRecord> serviceAlerts = new ArrayList<ServiceAlertRecord>(
 				serviceAlertIds.size());
-		for (AgencyAndId serviceAlertId : serviceAlertIds) {
-			ServiceAlertRecord serviceAlert = _cache.getServiceAlerts().get(serviceAlertId);
-			if (serviceAlert != null && filterByTime(serviceAlert, time))
-				serviceAlerts.add(serviceAlert);
+		synchronized (_indexLock) {
+			for (AgencyAndId serviceAlertId : serviceAlertIds) {
+				ServiceAlertRecord serviceAlert = _cache.getServiceAlerts().get(serviceAlertId);
+				if (serviceAlert != null && filterByTime(serviceAlert, time))
+					serviceAlerts.add(serviceAlert);
+			}
 		}
 		return serviceAlerts;
 	}
@@ -531,34 +605,71 @@ public class ServiceAlertsServiceImpl implements ServiceAlertsService {
 	 ****/
 
 	@Override
-	public synchronized void cleanup() {
-		_persister.deleteOrphans();
+	public void cleanup() {
+		_writeLock.lock();
+		try {
+			_persister.deleteOrphans();
+		} finally {
+			_writeLock.unlock();
+		}
+	}
+
+	/**
+	 * Readers serve the current cache and leave the staleness check and any
+	 * reload to the sync thread, so no request waits on the database. At most
+	 * one check is queued at a time.
+	 */
+	private void reloadIfStale() {
+		long now = SystemTime.currentTimeMillis();
+		if (now < _nextSyncCheck) return;
+		if (!_syncQueued.compareAndSet(false, true)) return;
+		_nextSyncCheck = now + SYNC_CHECK_INTERVAL_MS;
+		try {
+			_syncExecutor.execute(() -> {
+				try {
+					if (_persister.cachedNeedsSync()) loadServiceAlerts();
+				} catch (Throwable t) {
+					_log.error("issue syncing service alerts: ", t);
+				} finally {
+					_syncQueued.set(false);
+				}
+			});
+		} catch (RuntimeException e) {
+			// executor shut down
+			_syncQueued.set(false);
+		}
 	}
 
 	@Override
-	public synchronized void loadServiceAlerts() {
-	  _cache.clear(); //we need to clear the cache in case records were deleted
-		List<ServiceAlertRecord> alerts = _persister.getAlerts();
-		_log.debug("Loaded " + alerts.size() + " service alerts from DB");
-		try {			
-			for (ServiceAlertRecord serviceAlert : alerts) {
-				updateReferences(serviceAlert);
+	public void loadServiceAlerts() {
+		_writeLock.lock();
+		try {
+			// read before taking the index lock so readers keep the old cache meanwhile
+			List<ServiceAlertRecord> alerts = _persister.getAlerts();
+			_log.debug("Loaded " + alerts.size() + " service alerts from DB");
+			try {
+				synchronized (_indexLock) {
+					_cache.clear(); //we need to clear the cache in case records were deleted
+					for (ServiceAlertRecord serviceAlert : alerts) {
+						updateReferences(serviceAlert);
+					}
+				}
+				_log.info("updateReferences complete with "
+						+ _cache.getServiceAlertIdsByAgencyId().size() + " agency alerts, "
+						+ _cache.getServiceAlertIdsByRouteAndStop().size() + " route and stop alerts, "
+						+ _cache.getServiceAlertIdsByRouteId().size() + " route alerts, and "
+						+ _cache.getServiceAlerts().size() + " distinct alerts");
+			} catch (Exception ex) {
+				_log.error("error loading service alerts from DB ", ex);
 			}
-			_log.info("updateReferences complete with "
-					+ _cache.getServiceAlertIdsByAgencyId().size() + " agency alerts, "
-					+ _cache.getServiceAlertIdsByRouteAndStop().size() + " route and stop alerts, "
-					+ _cache.getServiceAlertIdsByRouteId().size() + " route alerts, and "
-					+ _cache.getServiceAlerts().size() + " distinct alerts");
-
-
-		} catch (Exception ex) {
-			_log.error("error loading service alerts from DB ", ex);
+		} finally {
+			_writeLock.unlock();
 		}
 	}
 
 	// this is admittedly slow performing, but it is only called on an update
 	// of a single service alert
-	private synchronized void saveDBServiceAlerts(ServiceAlertRecord alert, Long lastModified) {
+	private void saveDBServiceAlerts(ServiceAlertRecord alert, Long lastModified) {
           if (lastModified == null) lastModified = SystemTime.currentTimeMillis();
           alert.setModifiedTime(lastModified); // we need to assume its changed, as we don't track the affects clause
           ServiceAlertRecord persistedServiceAlertRecord = _persister.getServiceAlertRecordByAlertId(alert.getAgencyId(), alert.getServiceAlertId());
@@ -568,7 +679,7 @@ public class ServiceAlertsServiceImpl implements ServiceAlertsService {
           _persister.saveOrUpdate(alert);
 	}
 
-	private synchronized void saveDBServiceAlerts(List<ServiceAlertRecord> alerts, Long lastModified) {
+	private void saveDBServiceAlerts(List<ServiceAlertRecord> alerts, Long lastModified) {
 		if (lastModified == null) lastModified = SystemTime.currentTimeMillis();
 		for (ServiceAlertRecord alert : alerts) {
 			alert.setModifiedTime(lastModified); // we need to assume its changed, as we don't track the affects clause

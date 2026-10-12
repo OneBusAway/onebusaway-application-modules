@@ -353,6 +353,11 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     _sftpVehiclePositionsUrl = sftpVehiclePositionsUrl;
   }
 
+  // package-private for testing; start() creates the library otherwise
+  void setAlertLibrary(GtfsRealtimeAlertLibrary alertLibrary) {
+    _alertLibrary = alertLibrary;
+  }
+
   public void setAlertsUrl(URL alertsUrl) {
     _alertsUrl = alertsUrl;
   }
@@ -820,7 +825,8 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     return false;
   }
 
-  private void handleAlertCollection(ServiceAlerts.ServiceAlertsCollection alertsCollection) {
+  // package-private for testing
+  void handleAlertCollection(ServiceAlerts.ServiceAlertsCollection alertsCollection) {
     if (_alertCollectionUrl == null) {
       return;
     }
@@ -834,6 +840,7 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     Set<AgencyAndId> currentAlerts = new HashSet<AgencyAndId>();
     Set<ServiceAlertRecord> toAdd = new HashSet<>();
     Set<ServiceAlertRecord> toUpdate = new HashSet<>();
+    Map<AgencyAndId, ServiceAlert> savedContent = new HashMap<>();
 
     long start = System.currentTimeMillis();
     _log.info("[" + getFeedId() + "] handleAlertCollection running....");
@@ -843,11 +850,11 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
 
       AgencyAndId id = new AgencyAndId(alert.getId().getAgencyId(), alert.getId().getId());
       idsInCollection.add(id);
-      handleSingleAlert(id, alert.toBuilder(), currentAlerts, toAdd, toUpdate, alert);
+      // a collection's timestamps come from its publisher, so a change to them is a real change
+      handleSingleAlert(id, alert.toBuilder(), currentAlerts, toAdd, toUpdate, savedContent, alert, false);
     }
 
-    _serviceAlertService.createOrUpdateServiceAlerts(getAgencyIds().get(0), new ArrayList<ServiceAlertRecord>(toAdd));
-    _serviceAlertService.createOrUpdateServiceAlerts(getAgencyIds().get(0), new ArrayList<ServiceAlertRecord>(toUpdate));
+    saveAlerts(toAdd, toUpdate, savedContent);
 
     Set<AgencyAndId> toBeDeleted = new HashSet<AgencyAndId>();
     for (ServiceAlertRecord sa : _serviceAlertService.getAllServiceAlerts()) {
@@ -888,23 +895,58 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
 
   }
 
+  private void saveAlerts(Set<ServiceAlertRecord> toAdd, Set<ServiceAlertRecord> toUpdate,
+                          Map<AgencyAndId, ServiceAlert> savedContent) {
+    // remember content only once it's saved, so a failed save is retried next poll
+    saveAndRemember(toAdd, savedContent);
+    saveAndRemember(toUpdate, savedContent);
+  }
+
+  private void saveAndRemember(Set<ServiceAlertRecord> records,
+                               Map<AgencyAndId, ServiceAlert> savedContent) {
+    _serviceAlertService.createOrUpdateServiceAlerts(getAgencyIds().get(0), new ArrayList<ServiceAlertRecord>(records));
+    for (ServiceAlertRecord record : records) {
+      AgencyAndId id = new AgencyAndId(record.getAgencyId(), record.getServiceAlertId());
+      _alertsById.put(id, savedContent.get(id));
+    }
+  }
+
+  /**
+   * Strips creation and modified times, which {@link GtfsRealtimeAlertLibrary}
+   * stamps with the current time on every poll (they are required fields,
+   * hence buildPartial). Comparing them made every alert look changed, so
+   * every alert was saved to the database on every refresh.
+   */
+  static ServiceAlert withoutTimestamps(ServiceAlert alert) {
+    return alert.toBuilder().clearCreationTime().clearModifiedTime().buildPartial();
+  }
+
   private void handleSingleAlert(AgencyAndId id,
                                  ServiceAlert.Builder serviceAlertBuilder,
                                  Set<AgencyAndId> currentAlerts,
                                  Set<ServiceAlertRecord> toAdd,
                                  Set<ServiceAlertRecord> toUpdate,
-                                 ServiceAlert alert) {
+                                 Map<AgencyAndId, ServiceAlert> savedContent,
+                                 ServiceAlert alert,
+                                 boolean ignoreTimestamps) {
 
     ServiceAlert serviceAlert = alert;
-    // cache value of alert
+    // cache value of alert, stored without converter-stamped timestamps
     ServiceAlert existingAlert = _alertsById.get(id);
-    // data store value of service alert
-    ServiceAlertRecord existingRecord = _serviceAlertService.getServiceAlertForId(new AgencyAndId(id.getAgencyId(), id.getId()));
+    ServiceAlert alertContent = ignoreTimestamps ? withoutTimestamps(serviceAlert) : serviceAlert;
 
-    // don't update if there's nothing to do
-    if ((existingAlert == null
-            || !existingAlert.equals(serviceAlert))) {
-      _alertsById.put(id, serviceAlert);
+    // a repeat of an alert already queued this poll would save the same id twice
+    if (alertContent.equals(savedContent.get(id))) {
+      currentAlerts.add(id);
+      return;
+    }
+
+    // don't update if there's nothing to do, but re-save an unchanged alert
+    // the service no longer has (pruned from the feed or deleted elsewhere)
+    // so it isn't lost until its content changes
+    if (existingAlert == null || !existingAlert.equals(alertContent)
+        || _serviceAlertService.getServiceAlertForId(id) == null) {
+      savedContent.put(id, alertContent);
 
       ServiceAlertRecord serviceAlertRecord = new ServiceAlertRecord();
       // indicate this came from a feed so we can prune expired alerts
@@ -1035,7 +1077,8 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
 
   }
 
-  private void handleAlerts(FeedMessage alerts) {
+  // package-private for testing
+  void handleAlerts(FeedMessage alerts) {
 
     // exit if we are configured only in trip updates mode
     if (_alertsUrl == null) {
@@ -1051,6 +1094,7 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     Set<AgencyAndId> currentAlerts = new HashSet<AgencyAndId>();
     Set<ServiceAlertRecord> toAdd = new HashSet<>();
     Set<ServiceAlertRecord> toUpdate = new HashSet<>();
+    Map<AgencyAndId, ServiceAlert> savedContent = new HashMap<>();
 
     long start = System.currentTimeMillis();
     _log.info("[" + getFeedId() + "] handleAlerts running....");
@@ -1071,16 +1115,12 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
         ServiceAlert.Builder serviceAlertBuilder = _alertLibrary.getAlertAsServiceAlert(
                 id, alert, _alertAgencyIdMap, _ignoreAlertTripId);
         ServiceAlert serviceAlert = serviceAlertBuilder.build();
-        // cache value of alert
-        ServiceAlert existingAlert = _alertsById.get(id);
-
-        handleSingleAlert(id, serviceAlertBuilder, currentAlerts, toAdd, toUpdate, serviceAlert);
+        handleSingleAlert(id, serviceAlertBuilder, currentAlerts, toAdd, toUpdate, savedContent, serviceAlert, true);
 
       }
     }
 
-    _serviceAlertService.createOrUpdateServiceAlerts(getAgencyIds().get(0), new ArrayList<ServiceAlertRecord>(toAdd));
-    _serviceAlertService.createOrUpdateServiceAlerts(getAgencyIds().get(0), new ArrayList<ServiceAlertRecord>(toUpdate));
+    saveAlerts(toAdd, toUpdate, savedContent);
 
     Set<AgencyAndId> toBeDeleted = new HashSet<AgencyAndId>();
     for (ServiceAlertRecord sa : _serviceAlertService.getAllServiceAlerts()) {
