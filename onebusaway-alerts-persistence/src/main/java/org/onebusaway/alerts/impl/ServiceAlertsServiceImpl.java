@@ -80,6 +80,15 @@ public class ServiceAlertsServiceImpl implements ServiceAlertsService {
 
 	private final AtomicBoolean _syncQueued = new AtomicBoolean(false);
 
+	/**
+	 * Reads before this time don't queue a sync check. The persister throttles
+	 * the database check itself; this keeps busy readers from waking the sync
+	 * thread on every request just to learn nothing is due.
+	 */
+	private static final long SYNC_CHECK_INTERVAL_MS = 250;
+
+	private volatile long _nextSyncCheck = 0;
+
 	@Autowired
 	public void setServiceAlertsCache(ServiceAlertsCache cache) {
 	  _cache = cache;
@@ -493,15 +502,12 @@ public class ServiceAlertsServiceImpl implements ServiceAlertsService {
 	private <T> void getServiceAlertIdsForKey(
 			Map<T, Set<AgencyAndId>> serviceAlertIdsByKey, T key,
 			Collection<AgencyAndId> matches) {
+		if (serviceAlertIdsByKey == null)
+			return;
 		synchronized (_indexLock) {
-		if (serviceAlertIdsByKey != null) {
 			Set<AgencyAndId> ids = serviceAlertIdsByKey.get(key);
-			if (ids != null) {
-				// copy to guard against changes
-				Set<AgencyAndId> copyOfIds = new HashSet<>(ids);
-				matches.addAll(copyOfIds);
-			}
-		}
+			if (ids != null)
+				matches.addAll(ids);
 		}
 	}
 
@@ -616,7 +622,10 @@ public class ServiceAlertsServiceImpl implements ServiceAlertsService {
 	 * one check is queued at a time.
 	 */
 	private void reloadIfStale() {
+		long now = SystemTime.currentTimeMillis();
+		if (now < _nextSyncCheck) return;
 		if (!_syncQueued.compareAndSet(false, true)) return;
+		_nextSyncCheck = now + SYNC_CHECK_INTERVAL_MS;
 		try {
 			_syncExecutor.execute(() -> {
 				try {
@@ -637,32 +646,26 @@ public class ServiceAlertsServiceImpl implements ServiceAlertsService {
 	public void loadServiceAlerts() {
 		_writeLock.lock();
 		try {
-			loadServiceAlertsLocked();
+			// read before taking the index lock so readers keep the old cache meanwhile
+			List<ServiceAlertRecord> alerts = _persister.getAlerts();
+			_log.debug("Loaded " + alerts.size() + " service alerts from DB");
+			try {
+				synchronized (_indexLock) {
+					_cache.clear(); //we need to clear the cache in case records were deleted
+					for (ServiceAlertRecord serviceAlert : alerts) {
+						updateReferences(serviceAlert);
+					}
+				}
+				_log.info("updateReferences complete with "
+						+ _cache.getServiceAlertIdsByAgencyId().size() + " agency alerts, "
+						+ _cache.getServiceAlertIdsByRouteAndStop().size() + " route and stop alerts, "
+						+ _cache.getServiceAlertIdsByRouteId().size() + " route alerts, and "
+						+ _cache.getServiceAlerts().size() + " distinct alerts");
+			} catch (Exception ex) {
+				_log.error("error loading service alerts from DB ", ex);
+			}
 		} finally {
 			_writeLock.unlock();
-		}
-	}
-
-	private void loadServiceAlertsLocked() {
-		// read before taking the index lock so readers keep the old cache meanwhile
-		List<ServiceAlertRecord> alerts = _persister.getAlerts();
-		_log.debug("Loaded " + alerts.size() + " service alerts from DB");
-		try {
-			synchronized (_indexLock) {
-				_cache.clear(); //we need to clear the cache in case records were deleted
-				for (ServiceAlertRecord serviceAlert : alerts) {
-					updateReferences(serviceAlert);
-				}
-			}
-			_log.info("updateReferences complete with "
-					+ _cache.getServiceAlertIdsByAgencyId().size() + " agency alerts, "
-					+ _cache.getServiceAlertIdsByRouteAndStop().size() + " route and stop alerts, "
-					+ _cache.getServiceAlertIdsByRouteId().size() + " route alerts, and "
-					+ _cache.getServiceAlerts().size() + " distinct alerts");
-
-
-		} catch (Exception ex) {
-			_log.error("error loading service alerts from DB ", ex);
 		}
 	}
 

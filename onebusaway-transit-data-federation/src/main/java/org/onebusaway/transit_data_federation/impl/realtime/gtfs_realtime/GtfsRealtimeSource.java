@@ -914,8 +914,6 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     ServiceAlert serviceAlert = alert;
     // cache value of alert
     ServiceAlert existingAlert = _alertsById.get(id);
-    // data store value of service alert
-    ServiceAlertRecord existingRecord = _serviceAlertService.getServiceAlertForId(new AgencyAndId(id.getAgencyId(), id.getId()));
 
     // don't update if there's nothing to do
     if (existingAlert == null || !sameAlertContent(existingAlert, serviceAlert)) {
@@ -1087,9 +1085,6 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
         ServiceAlert.Builder serviceAlertBuilder = _alertLibrary.getAlertAsServiceAlert(
                 id, alert, _alertAgencyIdMap, _ignoreAlertTripId);
         ServiceAlert serviceAlert = serviceAlertBuilder.build();
-        // cache value of alert
-        ServiceAlert existingAlert = _alertsById.get(id);
-
         handleSingleAlert(id, serviceAlertBuilder, currentAlerts, toAdd, toUpdate, serviceAlert);
 
       }
