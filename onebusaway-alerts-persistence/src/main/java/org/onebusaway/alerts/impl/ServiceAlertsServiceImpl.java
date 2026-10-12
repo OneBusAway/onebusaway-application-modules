@@ -151,8 +151,9 @@ public class ServiceAlertsServiceImpl implements ServiceAlertsService {
 			if (serviceAlertRecord.getCreationTime() < 1l)
 				serviceAlertRecord.setCreationTime(lastModified);
 
-			updateReferences(serviceAlertRecord);
+			// save first so a failed save leaves the cache matching the database
 			saveDBServiceAlerts(serviceAlertRecord, lastModified);
+			updateReferences(serviceAlertRecord);
 			return serviceAlertRecord;
 		} finally {
 			_writeLock.unlock();
@@ -175,10 +176,12 @@ public class ServiceAlertsServiceImpl implements ServiceAlertsService {
 
 				if (serviceAlertRecord.getCreationTime() < 1l)
 					serviceAlertRecord.setCreationTime(lastModified);
-
+			}
+			// save first so a failed save leaves the cache matching the database
+			saveDBServiceAlerts(records, lastModified);
+			for (ServiceAlertRecord serviceAlertRecord : records) {
 				updateReferences(serviceAlertRecord);
 			}
-			saveDBServiceAlerts(records, lastModified);
 			return records;
 		} finally {
 			_writeLock.unlock();
@@ -198,8 +201,9 @@ public class ServiceAlertsServiceImpl implements ServiceAlertsService {
 			serviceAlertRecord.setCreationTime(lastModified);
 			serviceAlertRecord.setCopy(Boolean.TRUE);
 
-			updateReferences(serviceAlertRecord);
+			// save first so a failed save leaves the cache matching the database
 			saveDBServiceAlerts(serviceAlertRecord, lastModified);
+			updateReferences(serviceAlertRecord);
 			return serviceAlertRecord;
 		} finally {
 			_writeLock.unlock();
