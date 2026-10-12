@@ -239,19 +239,25 @@ public class ServiceAlertsServiceImpl implements ServiceAlertsService {
 	@Override
 	public ServiceAlertRecord getServiceAlertForId(AgencyAndId serviceAlertId) {
 		reloadIfStale();
-		return _cache.getServiceAlerts().get(serviceAlertId);
+		synchronized (_indexLock) {
+			return _cache.getServiceAlerts().get(serviceAlertId);
+		}
 	}
 
 	@Override
 	public List<ServiceAlertRecord> getAllServiceAlerts() {
 		reloadIfStale();
-		return new ArrayList<ServiceAlertRecord>(_cache.getServiceAlerts().values());
+		synchronized (_indexLock) {
+			return new ArrayList<ServiceAlertRecord>(_cache.getServiceAlerts().values());
+		}
 	}
 
 	@Override
 	public List<ServiceAlertRecord> getServiceAlertsForFederatedAgencyId(String agencyId) {
 		reloadIfStale();
-		Set<AgencyAndId> serviceAlertIds = _cache.getServiceAlertIdsByServiceAlertAgencyId().get(agencyId);
+		Set<AgencyAndId> serviceAlertIds = new HashSet<AgencyAndId>();
+		getServiceAlertIdsForKey(_cache.getServiceAlertIdsByServiceAlertAgencyId(), agencyId,
+				serviceAlertIds);
 		return getServiceAlertIdsAsObjects(serviceAlertIds);
 	}
 
