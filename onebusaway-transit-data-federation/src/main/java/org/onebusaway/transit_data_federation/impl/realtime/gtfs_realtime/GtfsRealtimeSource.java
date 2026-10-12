@@ -894,14 +894,13 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   }
 
   /**
-   * Compares alerts ignoring creation and modified times, which
-   * {@link GtfsRealtimeAlertLibrary} stamps with the current time on every
-   * poll (they are required fields, hence buildPartial). Comparing them made every alert look changed, so every alert was
-   * saved to the database on every refresh.
+   * Strips creation and modified times, which {@link GtfsRealtimeAlertLibrary}
+   * stamps with the current time on every poll (they are required fields,
+   * hence buildPartial). Comparing them made every alert look changed, so
+   * every alert was saved to the database on every refresh.
    */
-  static boolean sameAlertContent(ServiceAlert a, ServiceAlert b) {
-    return a.toBuilder().clearCreationTime().clearModifiedTime().buildPartial()
-        .equals(b.toBuilder().clearCreationTime().clearModifiedTime().buildPartial());
+  static ServiceAlert withoutTimestamps(ServiceAlert alert) {
+    return alert.toBuilder().clearCreationTime().clearModifiedTime().buildPartial();
   }
 
   private void handleSingleAlert(AgencyAndId id,
@@ -912,12 +911,16 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
                                  ServiceAlert alert) {
 
     ServiceAlert serviceAlert = alert;
-    // cache value of alert
+    // cache value of alert, stored without timestamps
     ServiceAlert existingAlert = _alertsById.get(id);
+    ServiceAlert alertContent = withoutTimestamps(serviceAlert);
 
-    // don't update if there's nothing to do
-    if (existingAlert == null || !sameAlertContent(existingAlert, serviceAlert)) {
-      _alertsById.put(id, serviceAlert);
+    // don't update if there's nothing to do, but re-save an unchanged alert
+    // the service no longer has (pruned from the feed, deleted elsewhere, or
+    // a failed save) so it isn't lost until its content changes
+    if (existingAlert == null || !existingAlert.equals(alertContent)
+        || _serviceAlertService.getServiceAlertForId(id) == null) {
+      _alertsById.put(id, alertContent);
 
       ServiceAlertRecord serviceAlertRecord = new ServiceAlertRecord();
       // indicate this came from a feed so we can prune expired alerts

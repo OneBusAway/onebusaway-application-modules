@@ -16,6 +16,7 @@
 package org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.atLeastOnce;
@@ -33,6 +34,7 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.onebusaway.alerts.impl.ServiceAlertRecord;
 import org.onebusaway.alerts.service.ServiceAlertsService;
+import org.onebusaway.gtfs.model.AgencyAndId;
 
 import com.google.transit.realtime.GtfsRealtime.Alert;
 import com.google.transit.realtime.GtfsRealtime.EntitySelector;
@@ -56,6 +58,8 @@ public class GtfsRealtimeSourceAlertsTest {
   public void setup() throws Exception {
     _alertsService = mock(ServiceAlertsService.class);
     when(_alertsService.getAllServiceAlerts()).thenReturn(Collections.<ServiceAlertRecord>emptyList());
+    // the service holds every saved alert unless a test says otherwise
+    when(_alertsService.getServiceAlertForId(any(AgencyAndId.class))).thenReturn(new ServiceAlertRecord());
 
     _source = new GtfsRealtimeSource();
     _source.setAgencyIds(Collections.singletonList("1"));
@@ -79,6 +83,16 @@ public class GtfsRealtimeSourceAlertsTest {
     _source.handleAlerts(feed("Detour on route 10"));
     Thread.sleep(5);
     _source.handleAlerts(feed("Detour on route 10 has ended"));
+
+    assertEquals(2, savedAlertCount());
+  }
+
+  @Test
+  public void unchangedAlertsTheServiceLostAreSavedAgain() throws Exception {
+    _source.handleAlerts(feed("Detour on route 10"));
+    // e.g. pruned when a poll omitted it, or deleted from the admin console
+    when(_alertsService.getServiceAlertForId(any(AgencyAndId.class))).thenReturn(null);
+    _source.handleAlerts(feed("Detour on route 10"));
 
     assertEquals(2, savedAlertCount());
   }

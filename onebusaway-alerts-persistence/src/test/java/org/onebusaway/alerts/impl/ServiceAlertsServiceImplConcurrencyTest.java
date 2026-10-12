@@ -35,7 +35,7 @@ import org.junit.Test;
 import org.onebusaway.gtfs.model.AgencyAndId;
 
 /**
- * A realtime alerts refresh writes every alert to the database. Readers
+ * A realtime alerts refresh writes changed alerts to the database. Readers
  * (arrivals, trip details, vehicles) must not wait on that database work.
  */
 public class ServiceAlertsServiceImplConcurrencyTest {
@@ -59,6 +59,7 @@ public class ServiceAlertsServiceImplConcurrencyTest {
   public void teardown() {
     _persister.release.countDown();
     _executor.shutdownNow();
+    _service.stop();
   }
 
   @Test
