@@ -151,8 +151,9 @@ public class ServiceAlertsServiceImpl implements ServiceAlertsService {
 			if (serviceAlertRecord.getCreationTime() < 1l)
 				serviceAlertRecord.setCreationTime(lastModified);
 
-			updateReferences(serviceAlertRecord);
+			// save first so a failed save leaves the cache matching the database
 			saveDBServiceAlerts(serviceAlertRecord, lastModified);
+			updateReferences(serviceAlertRecord);
 			return serviceAlertRecord;
 		} finally {
 			_writeLock.unlock();
@@ -175,10 +176,12 @@ public class ServiceAlertsServiceImpl implements ServiceAlertsService {
 
 				if (serviceAlertRecord.getCreationTime() < 1l)
 					serviceAlertRecord.setCreationTime(lastModified);
-
+			}
+			// save first so a failed save leaves the cache matching the database
+			saveDBServiceAlerts(records, lastModified);
+			for (ServiceAlertRecord serviceAlertRecord : records) {
 				updateReferences(serviceAlertRecord);
 			}
-			saveDBServiceAlerts(records, lastModified);
 			return records;
 		} finally {
 			_writeLock.unlock();
@@ -198,8 +201,9 @@ public class ServiceAlertsServiceImpl implements ServiceAlertsService {
 			serviceAlertRecord.setCreationTime(lastModified);
 			serviceAlertRecord.setCopy(Boolean.TRUE);
 
-			updateReferences(serviceAlertRecord);
+			// save first so a failed save leaves the cache matching the database
 			saveDBServiceAlerts(serviceAlertRecord, lastModified);
+			updateReferences(serviceAlertRecord);
 			return serviceAlertRecord;
 		} finally {
 			_writeLock.unlock();
@@ -263,7 +267,6 @@ public class ServiceAlertsServiceImpl implements ServiceAlertsService {
 
 	@Override
 	public List<ServiceAlertRecord> getServiceAlertsForFederatedAgencyId(String agencyId) {
-		reloadIfStale();
 		Set<AgencyAndId> serviceAlertIds = new HashSet<AgencyAndId>();
 		getServiceAlertIdsForKey(_cache.getServiceAlertIdsByServiceAlertAgencyId(), agencyId,
 				serviceAlertIds);
@@ -273,7 +276,6 @@ public class ServiceAlertsServiceImpl implements ServiceAlertsService {
 	@Override
 	public List<ServiceAlertRecord> getServiceAlertsForAgencyId(long time,
 			String agencyId) {
-		reloadIfStale();
 		Set<AgencyAndId> serviceAlertIds = new HashSet<AgencyAndId>();
 		getServiceAlertIdsForKey(_cache.getServiceAlertIdsByAgencyId(), agencyId,
 				serviceAlertIds);
@@ -283,7 +285,6 @@ public class ServiceAlertsServiceImpl implements ServiceAlertsService {
 	@Override
 	public List<ServiceAlertRecord> getServiceAlertsForStopId(long time,
 			AgencyAndId stopId) {
-		reloadIfStale();
 		Set<AgencyAndId> serviceAlertIds = new HashSet<AgencyAndId>();
 		getServiceAlertIdsForKey(_cache.getServiceAlertIdsByAgencyId(), stopId.getAgencyId(),
 				serviceAlertIds);
@@ -293,7 +294,6 @@ public class ServiceAlertsServiceImpl implements ServiceAlertsService {
 
 	@Override
 	public List<ServiceAlertRecord> getServiceAlertsForRouteId(long time, AgencyAndId routeId) {
-		reloadIfStale();
 		Set<AgencyAndId> serviceAlertIds = new HashSet<AgencyAndId>();
 		getServiceAlertIdsForKey(_cache.getServiceAlertIdsByRouteId(), routeId, serviceAlertIds);
 		return getServiceAlertIdsAsObjects(serviceAlertIds, time);
@@ -301,7 +301,6 @@ public class ServiceAlertsServiceImpl implements ServiceAlertsService {
 
 	@Override
 	public List<ServiceAlertRecord> getServiceAlertsForRouteAndStopId(long time, AgencyAndId routeId, AgencyAndId stopId) {
-		reloadIfStale();
 		Set<AgencyAndId> serviceAlertIds = new HashSet<AgencyAndId>();
 		RouteAndStopCallRef routeAndStopCallRef = new RouteAndStopCallRef(routeId,
 				stopId);
@@ -311,7 +310,6 @@ public class ServiceAlertsServiceImpl implements ServiceAlertsService {
 	}
 
 	public List<ServiceAlertRecord> getServiceAlertsForRouteAndDirection(long time, AgencyAndId routeId, AgencyAndId tripId, String directionId) {
-		reloadIfStale();
 		Set<AgencyAndId> serviceAlertIds = new HashSet<AgencyAndId>();
 		RouteAndDirectionRef lineAndDirectionRef = new RouteAndDirectionRef(routeId,
 				directionId);
@@ -330,7 +328,6 @@ public class ServiceAlertsServiceImpl implements ServiceAlertsService {
 
 	@Override
 	public List<ServiceAlertRecord> getServiceAlertsForTripAndStopId(long time, AgencyAndId tripId, AgencyAndId stopId) {
-		reloadIfStale();
 		Set<AgencyAndId> serviceAlertIds = new HashSet<AgencyAndId>();
 		getServiceAlertIdsForKey(_cache.getServiceAlertIdsByTripId(), tripId,
 				serviceAlertIds);
@@ -345,7 +342,6 @@ public class ServiceAlertsServiceImpl implements ServiceAlertsService {
 	@Override
 	public List<ServiceAlertRecord> getServiceAlerts(SituationQueryBean query) {
 		Set<AgencyAndId> serviceAlertIds = new HashSet<AgencyAndId>();
-		reloadIfStale();
 		for (SituationQueryBean.AffectsBean affects : query.getAffects()) {
 
 			AgencyAndId routeId = AgencyAndId.convertFromString(affects.getRouteId());
@@ -506,6 +502,8 @@ public class ServiceAlertsServiceImpl implements ServiceAlertsService {
 	private <T> void getServiceAlertIdsForKey(
 			Map<T, Set<AgencyAndId>> serviceAlertIdsByKey, T key,
 			Collection<AgencyAndId> matches) {
+		// every indexed reader comes through here, so none can skip the check
+		reloadIfStale();
 		if (serviceAlertIdsByKey == null)
 			return;
 		synchronized (_indexLock) {

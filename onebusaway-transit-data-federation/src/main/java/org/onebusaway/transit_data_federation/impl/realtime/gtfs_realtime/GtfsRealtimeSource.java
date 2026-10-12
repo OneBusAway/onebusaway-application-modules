@@ -852,10 +852,7 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
       handleSingleAlert(id, alert.toBuilder(), currentAlerts, toAdd, toUpdate, savedContent, alert);
     }
 
-    _serviceAlertService.createOrUpdateServiceAlerts(getAgencyIds().get(0), new ArrayList<ServiceAlertRecord>(toAdd));
-    _serviceAlertService.createOrUpdateServiceAlerts(getAgencyIds().get(0), new ArrayList<ServiceAlertRecord>(toUpdate));
-    // remember content only once it's saved, so a failed save is retried next poll
-    _alertsById.putAll(savedContent);
+    saveAlerts(toAdd, toUpdate, savedContent);
 
     Set<AgencyAndId> toBeDeleted = new HashSet<AgencyAndId>();
     for (ServiceAlertRecord sa : _serviceAlertService.getAllServiceAlerts()) {
@@ -894,6 +891,14 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
             + " deleted in "
             + (System.currentTimeMillis() - start) + " ms");
 
+  }
+
+  private void saveAlerts(Set<ServiceAlertRecord> toAdd, Set<ServiceAlertRecord> toUpdate,
+                          Map<AgencyAndId, ServiceAlert> savedContent) {
+    _serviceAlertService.createOrUpdateServiceAlerts(getAgencyIds().get(0), new ArrayList<ServiceAlertRecord>(toAdd));
+    _serviceAlertService.createOrUpdateServiceAlerts(getAgencyIds().get(0), new ArrayList<ServiceAlertRecord>(toUpdate));
+    // remember content only once it's saved, so a failed save is retried next poll
+    _alertsById.putAll(savedContent);
   }
 
   /**
@@ -1098,10 +1103,7 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
       }
     }
 
-    _serviceAlertService.createOrUpdateServiceAlerts(getAgencyIds().get(0), new ArrayList<ServiceAlertRecord>(toAdd));
-    _serviceAlertService.createOrUpdateServiceAlerts(getAgencyIds().get(0), new ArrayList<ServiceAlertRecord>(toUpdate));
-    // remember content only once it's saved, so a failed save is retried next poll
-    _alertsById.putAll(savedContent);
+    saveAlerts(toAdd, toUpdate, savedContent);
 
     Set<AgencyAndId> toBeDeleted = new HashSet<AgencyAndId>();
     for (ServiceAlertRecord sa : _serviceAlertService.getAllServiceAlerts()) {
