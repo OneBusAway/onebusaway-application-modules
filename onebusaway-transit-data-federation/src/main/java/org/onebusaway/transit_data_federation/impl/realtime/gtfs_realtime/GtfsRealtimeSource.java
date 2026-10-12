@@ -839,6 +839,7 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     Set<AgencyAndId> currentAlerts = new HashSet<AgencyAndId>();
     Set<ServiceAlertRecord> toAdd = new HashSet<>();
     Set<ServiceAlertRecord> toUpdate = new HashSet<>();
+    Map<AgencyAndId, ServiceAlert> savedContent = new HashMap<>();
 
     long start = System.currentTimeMillis();
     _log.info("[" + getFeedId() + "] handleAlertCollection running....");
@@ -848,11 +849,13 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
 
       AgencyAndId id = new AgencyAndId(alert.getId().getAgencyId(), alert.getId().getId());
       idsInCollection.add(id);
-      handleSingleAlert(id, alert.toBuilder(), currentAlerts, toAdd, toUpdate, alert);
+      handleSingleAlert(id, alert.toBuilder(), currentAlerts, toAdd, toUpdate, savedContent, alert);
     }
 
     _serviceAlertService.createOrUpdateServiceAlerts(getAgencyIds().get(0), new ArrayList<ServiceAlertRecord>(toAdd));
     _serviceAlertService.createOrUpdateServiceAlerts(getAgencyIds().get(0), new ArrayList<ServiceAlertRecord>(toUpdate));
+    // remember content only once it's saved, so a failed save is retried next poll
+    _alertsById.putAll(savedContent);
 
     Set<AgencyAndId> toBeDeleted = new HashSet<AgencyAndId>();
     for (ServiceAlertRecord sa : _serviceAlertService.getAllServiceAlerts()) {
@@ -908,6 +911,7 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
                                  Set<AgencyAndId> currentAlerts,
                                  Set<ServiceAlertRecord> toAdd,
                                  Set<ServiceAlertRecord> toUpdate,
+                                 Map<AgencyAndId, ServiceAlert> savedContent,
                                  ServiceAlert alert) {
 
     ServiceAlert serviceAlert = alert;
@@ -916,11 +920,11 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     ServiceAlert alertContent = withoutTimestamps(serviceAlert);
 
     // don't update if there's nothing to do, but re-save an unchanged alert
-    // the service no longer has (pruned from the feed, deleted elsewhere, or
-    // a failed save) so it isn't lost until its content changes
+    // the service no longer has (pruned from the feed or deleted elsewhere)
+    // so it isn't lost until its content changes
     if (existingAlert == null || !existingAlert.equals(alertContent)
         || _serviceAlertService.getServiceAlertForId(id) == null) {
-      _alertsById.put(id, alertContent);
+      savedContent.put(id, alertContent);
 
       ServiceAlertRecord serviceAlertRecord = new ServiceAlertRecord();
       // indicate this came from a feed so we can prune expired alerts
@@ -1068,6 +1072,7 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     Set<AgencyAndId> currentAlerts = new HashSet<AgencyAndId>();
     Set<ServiceAlertRecord> toAdd = new HashSet<>();
     Set<ServiceAlertRecord> toUpdate = new HashSet<>();
+    Map<AgencyAndId, ServiceAlert> savedContent = new HashMap<>();
 
     long start = System.currentTimeMillis();
     _log.info("[" + getFeedId() + "] handleAlerts running....");
@@ -1088,13 +1093,15 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
         ServiceAlert.Builder serviceAlertBuilder = _alertLibrary.getAlertAsServiceAlert(
                 id, alert, _alertAgencyIdMap, _ignoreAlertTripId);
         ServiceAlert serviceAlert = serviceAlertBuilder.build();
-        handleSingleAlert(id, serviceAlertBuilder, currentAlerts, toAdd, toUpdate, serviceAlert);
+        handleSingleAlert(id, serviceAlertBuilder, currentAlerts, toAdd, toUpdate, savedContent, serviceAlert);
 
       }
     }
 
     _serviceAlertService.createOrUpdateServiceAlerts(getAgencyIds().get(0), new ArrayList<ServiceAlertRecord>(toAdd));
     _serviceAlertService.createOrUpdateServiceAlerts(getAgencyIds().get(0), new ArrayList<ServiceAlertRecord>(toUpdate));
+    // remember content only once it's saved, so a failed save is retried next poll
+    _alertsById.putAll(savedContent);
 
     Set<AgencyAndId> toBeDeleted = new HashSet<AgencyAndId>();
     for (ServiceAlertRecord sa : _serviceAlertService.getAllServiceAlerts()) {

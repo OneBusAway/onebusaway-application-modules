@@ -16,6 +16,7 @@
 package org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -94,6 +95,24 @@ public class GtfsRealtimeSourceAlertsTest {
     when(_alertsService.getServiceAlertForId(any(AgencyAndId.class))).thenReturn(null);
     _source.handleAlerts(feed("Detour on route 10"));
 
+    assertEquals(2, savedAlertCount());
+  }
+
+  @Test
+  public void changedAlertsWhoseSaveFailedAreSavedAgain() throws Exception {
+    _source.handleAlerts(feed("Detour on route 10"));
+    when(_alertsService.createOrUpdateServiceAlerts(anyString(), anyList()))
+        .thenThrow(new RuntimeException("database unavailable"))
+        .thenReturn(Collections.<ServiceAlertRecord>emptyList());
+    try {
+      _source.handleAlerts(feed("Detour on route 10 has ended"));
+      fail("expected the save to fail");
+    } catch (RuntimeException expected) {
+    }
+    // the service still holds the alert, so only the content check can retry it
+    _source.handleAlerts(feed("Detour on route 10 has ended"));
+
+    // the first poll's save and the retry
     assertEquals(2, savedAlertCount());
   }
 
