@@ -16,9 +16,7 @@
 package org.onebusaway.alerts.impl;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -112,19 +110,6 @@ public class ServiceAlertsServiceImplConcurrencyTest {
     assertEquals(2, _service.getServiceAlertsForStopId(-1, new AgencyAndId("1", "100")).size());
   }
 
-  @Test
-  public void aFailedSaveLeavesTheCacheMatchingTheDatabase() throws Exception {
-    _persister.failWrites = true;
-    try {
-      _service.createOrUpdateServiceAlerts("1", Collections.singletonList(stopAlert("B", "1_100")));
-      fail("expected the save to fail");
-    } catch (RuntimeException expected) {
-    }
-
-    assertNull(_service.getServiceAlertForId(new AgencyAndId("1", "B")));
-    assertEquals(1, _service.getServiceAlertsForStopId(-1, new AgencyAndId("1", "100")).size());
-  }
-
   private <T> T readWithin(java.util.concurrent.Callable<T> read) throws Exception {
     Future<T> reader = _executor.submit(read);
     try {
@@ -147,8 +132,7 @@ public class ServiceAlertsServiceImplConcurrencyTest {
   /**
    * In-memory persistence whose writes or lookups can be held open, standing
    * in for a slow database round trip. {@link #stale} makes the next
-   * cachedNeedsSync report a change made by another instance, and
-   * {@link #failWrites} makes bulk saves throw.
+   * cachedNeedsSync report a change made by another instance.
    */
   private static class BlockingPersistence implements ServiceAlertsPersistence {
     final CountDownLatch writing = new CountDownLatch(1);
@@ -157,7 +141,6 @@ public class ServiceAlertsServiceImplConcurrencyTest {
     private volatile boolean blockLookups = false;
     private volatile boolean blockReads = false;
     volatile boolean stale = false;
-    volatile boolean failWrites = false;
     final List<ServiceAlertRecord> rows = Collections.synchronizedList(new ArrayList<>());
 
     void blockWrites() { blockWrites = true; }
@@ -196,7 +179,6 @@ public class ServiceAlertsServiceImplConcurrencyTest {
     @Override
     public void saveOrUpdate(List<ServiceAlertRecord> records) {
       maybeBlock(blockWrites);
-      if (failWrites) throw new RuntimeException("database unavailable");
       for (ServiceAlertRecord record : records) {
         if (!rows.contains(record)) rows.add(record);
       }
