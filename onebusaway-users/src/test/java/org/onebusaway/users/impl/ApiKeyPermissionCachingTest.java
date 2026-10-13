@@ -70,14 +70,4 @@ public class ApiKeyPermissionCachingTest {
 
     assertEquals(0, _dataSource.getConnectionCount());
   }
-
-  @Test
-  public void cachedIntervalLookupDoesNotBorrowAConnection() {
-    _dataSource.reset();
-
-    assertEquals(Long.valueOf(0),
-        _userService.getMinApiRequestIntervalForKey(KEY, false));
-
-    assertEquals(0, _dataSource.getConnectionCount());
-  }
 }

@@ -27,6 +27,5 @@ public class UnboundedBlobHSQLDialect extends HSQLDialect {
 
   public UnboundedBlobHSQLDialect() {
     registerColumnType(Types.BLOB, "blob");
-    registerColumnType(Types.VARBINARY, "blob");
   }
 }

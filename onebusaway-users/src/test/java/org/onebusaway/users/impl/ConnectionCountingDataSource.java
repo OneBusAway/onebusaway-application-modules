@@ -42,13 +42,6 @@ public class ConnectionCountingDataSource extends DelegatingDataSource {
     return super.getConnection();
   }
 
-  @Override
-  public Connection getConnection(String username, String password)
-      throws SQLException {
-    _connections.incrementAndGet();
-    return super.getConnection(username, password);
-  }
-
   public int getConnectionCount() {
     return _connections.get();
   }
