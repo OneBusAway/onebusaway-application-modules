@@ -663,8 +663,6 @@ public class ServiceAlertsServiceImpl implements ServiceAlertsService {
 		}
 	}
 
-	// this is admittedly slow performing, but it is only called on an update
-	// of a single service alert
 	/**
 	 * Saves first so a failed save leaves the cache matching the database.
 	 */
@@ -675,8 +673,7 @@ public class ServiceAlertsServiceImpl implements ServiceAlertsService {
 		}
 	}
 
-	private void saveDBServiceAlerts(List<ServiceAlertRecord> alerts, Long lastModified) {
-		if (lastModified == null) lastModified = SystemTime.currentTimeMillis();
+	private void saveDBServiceAlerts(List<ServiceAlertRecord> alerts, long lastModified) {
 		for (ServiceAlertRecord alert : alerts) {
 			alert.setModifiedTime(lastModified); // we need to assume its changed, as we don't track the affects clause
 			ServiceAlertRecord persistedServiceAlertRecord = _persister.getServiceAlertRecordByAlertId(alert.getAgencyId(), alert.getServiceAlertId());

@@ -125,6 +125,32 @@ public class ServiceAlertsServiceImplConcurrencyTest {
     assertEquals(1, _service.getServiceAlertsForStopId(-1, new AgencyAndId("1", "100")).size());
   }
 
+  @Test
+  public void aFailedSingleSaveLeavesTheCacheMatchingTheDatabase() throws Exception {
+    _persister.failWrites = true;
+    try {
+      _service.createOrUpdateServiceAlert(stopAlert("B", "1_100"));
+      fail("expected the save to fail");
+    } catch (RuntimeException expected) {
+    }
+
+    assertNull(_service.getServiceAlertForId(new AgencyAndId("1", "B")));
+    assertEquals(1, _service.getServiceAlertsForStopId(-1, new AgencyAndId("1", "100")).size());
+  }
+
+  @Test
+  public void aFailedCopyLeavesTheCacheMatchingTheDatabase() throws Exception {
+    _persister.failWrites = true;
+    try {
+      _service.copyServiceAlert(stopAlert("B", "1_100"));
+      fail("expected the save to fail");
+    } catch (RuntimeException expected) {
+    }
+
+    assertEquals(1, _service.getAllServiceAlerts().size());
+    assertEquals(1, _service.getServiceAlertsForStopId(-1, new AgencyAndId("1", "100")).size());
+  }
+
   private <T> T readWithin(java.util.concurrent.Callable<T> read) throws Exception {
     Future<T> reader = _executor.submit(read);
     try {
@@ -148,7 +174,7 @@ public class ServiceAlertsServiceImplConcurrencyTest {
    * In-memory persistence whose writes or lookups can be held open, standing
    * in for a slow database round trip. {@link #stale} makes the next
    * cachedNeedsSync report a change made by another instance, and
-   * {@link #failWrites} makes bulk saves throw.
+   * {@link #failWrites} makes saves throw.
    */
   private static class BlockingPersistence implements ServiceAlertsPersistence {
     final CountDownLatch writing = new CountDownLatch(1);
@@ -190,6 +216,7 @@ public class ServiceAlertsServiceImplConcurrencyTest {
     @Override
     public void saveOrUpdate(ServiceAlertRecord record) {
       maybeBlock(blockWrites);
+      if (failWrites) throw new RuntimeException("database unavailable");
       if (!rows.contains(record)) rows.add(record);
     }
 
