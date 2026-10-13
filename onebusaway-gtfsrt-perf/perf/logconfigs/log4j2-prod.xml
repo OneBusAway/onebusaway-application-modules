@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+  ~ Copyright (C) 2026 Open Transit Software Foundation
+  ~
+  ~  Licensed under the Apache License, Version 2.0 (the "License");
+  ~  you may not use this file except in compliance with the License.
+  ~  You may obtain a copy of the License at
+  ~
+  ~          http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~  Unless required by applicable law or agreed to in writing, software
+  ~  distributed under the License is distributed on an "AS IS" BASIS,
+  ~  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~  See the License for the specific language governing permissions and
+  ~  limitations under the License.
+  -->
+<!--
+  Config A (prod-faithful). Mirrors the production tdf-log4j2.xml (copied into
+  the image by the Dockerfile in the separate agency-dockerfiles deploy repo):
+  Root=info and the [%F:%L] location converter (file + line number). Per the
+  Log4j2 manual, %F and
+  %L are "an expensive operation and not garbage-free": each event walks the
+  stack and allocates. Sync (default) so the cost lands on the calling thread,
+  exactly as in production. The prod RollingFile appender to /opt/oba/logs is
+  dropped (path absent off-container); Console keeps the identical [%F:%L] pattern.
+-->
+<Configuration>
+    <Appenders>
+        <Console name="stdout" target="SYSTEM_OUT">
+            <PatternLayout pattern="[TDF] %d{ISO8601} %-5p [%F:%L] : %m%n"/>
+        </Console>
+    </Appenders>
+    <Loggers>
+        <Root level="info">
+            <AppenderRef ref="stdout"/>
+        </Root>
+    </Loggers>
+</Configuration>
