@@ -175,6 +175,7 @@ public abstract class AbstractBlockLocationServiceImpl {
       }
       location.setStatus(record.getStatus());
       location.setVehicleId(record.getVehicleId());
+      location.setRealtimeTripId(record.getTripId());
 
       List<TimepointPredictionRecord> timepointPredictions = record.getTimepointPredictions();
       if (timepointPredictions != null && !timepointPredictions.isEmpty()) {

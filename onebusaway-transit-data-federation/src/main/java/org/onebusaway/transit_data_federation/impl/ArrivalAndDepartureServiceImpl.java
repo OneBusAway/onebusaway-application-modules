@@ -518,7 +518,15 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
       List<BlockLocation> locations,
       List<ArrivalAndDepartureInstance> results) {
 
+    boolean hasApplicableLocation = false;
+
     for (BlockLocation location : locations) {
+
+      if (!isBlockLocationApplicableToInstance(location, sti)) {
+        continue;
+      }
+
+      hasApplicableLocation = true;
 
       if (sti.isFrequencyOffsetSpecified()
           && ((blockInstance.getBlock().getDepartureTimeForIndex(0)
@@ -538,7 +546,7 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
         results.add(applyCanceledStatus(instance));
     }
 
-    if (locations.isEmpty()) {
+    if (!hasApplicableLocation) {
 
       ArrivalAndDepartureInstance instance = createArrivalAndDepartureForStopTimeInstance(
           sti, frequencyOffsetTime);
@@ -568,6 +576,37 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
         }
       }
     }
+  }
+
+  private boolean isBlockLocationApplicableToInstance(BlockLocation location,
+      StopTimeInstance sti) {
+    if (location == null || !location.isPredicted())
+      return true;
+
+    AgencyAndId instanceTripId = sti.getTrip().getTrip().getId();
+
+    if (hasTimepointPredictionForTrip(location, instanceTripId))
+      return true;
+
+    AgencyAndId realtimeTripId = location.getRealtimeTripId();
+    if (realtimeTripId == null)
+      return true;
+
+    return realtimeTripId.equals(instanceTripId);
+  }
+
+  private boolean hasTimepointPredictionForTrip(BlockLocation location,
+      AgencyAndId tripId) {
+    List<TimepointPredictionRecord> records = location.getTimepointPredictions();
+    if (records == null)
+      return false;
+
+    for (TimepointPredictionRecord record : records) {
+      if (tripId.equals(record.getTripId()))
+        return true;
+    }
+
+    return false;
   }
 
   private ArrivalAndDepartureInstance applyCanceledStatus(ArrivalAndDepartureInstance instance) {
