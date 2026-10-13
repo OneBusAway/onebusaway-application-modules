@@ -308,7 +308,7 @@ public class ArrivalAndDepartureV2Bean implements Serializable {
   }
 
   public boolean hasPredictedDepartureTime() {
-    return this.predictedArrivalTime > 0;
+    return this.predictedDepartureTime > 0;
   }
 
   public long getPredictedDepartureTime() {
