@@ -151,8 +151,7 @@ public class ServiceAlertsServiceImpl implements ServiceAlertsService {
 			if (serviceAlertRecord.getCreationTime() < 1l)
 				serviceAlertRecord.setCreationTime(lastModified);
 
-			updateReferences(serviceAlertRecord);
-			saveDBServiceAlerts(serviceAlertRecord, lastModified);
+			saveThenCache(Collections.singletonList(serviceAlertRecord), lastModified);
 			return serviceAlertRecord;
 		} finally {
 			_writeLock.unlock();
@@ -175,10 +174,8 @@ public class ServiceAlertsServiceImpl implements ServiceAlertsService {
 
 				if (serviceAlertRecord.getCreationTime() < 1l)
 					serviceAlertRecord.setCreationTime(lastModified);
-
-				updateReferences(serviceAlertRecord);
 			}
-			saveDBServiceAlerts(records, lastModified);
+			saveThenCache(records, lastModified);
 			return records;
 		} finally {
 			_writeLock.unlock();
@@ -198,8 +195,7 @@ public class ServiceAlertsServiceImpl implements ServiceAlertsService {
 			serviceAlertRecord.setCreationTime(lastModified);
 			serviceAlertRecord.setCopy(Boolean.TRUE);
 
-			updateReferences(serviceAlertRecord);
-			saveDBServiceAlerts(serviceAlertRecord, lastModified);
+			saveThenCache(Collections.singletonList(serviceAlertRecord), lastModified);
 			return serviceAlertRecord;
 		} finally {
 			_writeLock.unlock();
@@ -667,20 +663,17 @@ public class ServiceAlertsServiceImpl implements ServiceAlertsService {
 		}
 	}
 
-	// this is admittedly slow performing, but it is only called on an update
-	// of a single service alert
-	private void saveDBServiceAlerts(ServiceAlertRecord alert, Long lastModified) {
-          if (lastModified == null) lastModified = SystemTime.currentTimeMillis();
-          alert.setModifiedTime(lastModified); // we need to assume its changed, as we don't track the affects clause
-          ServiceAlertRecord persistedServiceAlertRecord = _persister.getServiceAlertRecordByAlertId(alert.getAgencyId(), alert.getServiceAlertId());
-          if(persistedServiceAlertRecord != null)
-              alert.setId(persistedServiceAlertRecord.getId());
-          _log.debug("Saving Service Alert to DataBase:" + alert.getServiceAlertId());
-          _persister.saveOrUpdate(alert);
+	/**
+	 * Saves first so a failed save leaves the cache matching the database.
+	 */
+	private void saveThenCache(List<ServiceAlertRecord> alerts, long lastModified) {
+		saveDBServiceAlerts(alerts, lastModified);
+		for (ServiceAlertRecord alert : alerts) {
+			updateReferences(alert);
+		}
 	}
 
-	private void saveDBServiceAlerts(List<ServiceAlertRecord> alerts, Long lastModified) {
-		if (lastModified == null) lastModified = SystemTime.currentTimeMillis();
+	private void saveDBServiceAlerts(List<ServiceAlertRecord> alerts, long lastModified) {
 		for (ServiceAlertRecord alert : alerts) {
 			alert.setModifiedTime(lastModified); // we need to assume its changed, as we don't track the affects clause
 			ServiceAlertRecord persistedServiceAlertRecord = _persister.getServiceAlertRecordByAlertId(alert.getAgencyId(), alert.getServiceAlertId());
