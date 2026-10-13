@@ -18,20 +18,31 @@ package org.onebusaway.container.cache;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
+import org.springframework.core.Ordered;
 
 /**
  * Implements an {@link Aspect} aware interceptor that intercepts calls to
  * methods annotated with {@link Cacheable} and returns a cached result when
  * available or calls the underlying method when not.
  * 
+ * Runs outside {@code @Transactional} advice (which defaults to
+ * {@link Ordered#LOWEST_PRECEDENCE}) so a cache hit returns without opening a
+ * transaction or borrowing a database connection.
+ * 
  * @author bdferris
  * @see Cacheable
  */
 @Aspect
-public class CacheableAnnotationInterceptor extends CacheableMethodManager {
+public class CacheableAnnotationInterceptor extends CacheableMethodManager
+    implements Ordered {
 
   @Around("@annotation(org.onebusaway.container.cache.Cacheable)")
   public Object doBasicProfiling(ProceedingJoinPoint pjp) throws Throwable {
     return evaluate(pjp);
+  }
+
+  @Override
+  public int getOrder() {
+    return Ordered.LOWEST_PRECEDENCE - 1;
   }
 }
