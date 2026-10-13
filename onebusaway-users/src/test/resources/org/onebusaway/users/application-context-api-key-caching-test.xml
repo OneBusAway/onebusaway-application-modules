@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (C) 2026 Open Transit Software Foundation
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+            http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<!--
+    The production users context (caching aspect, transaction advice, real
+    services) backed by an in-memory database that counts connection borrows.
+-->
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <import resource="classpath:org/onebusaway/users/application-context.xml" />
+
+    <bean id="dataSource" class="org.onebusaway.users.impl.ConnectionCountingDataSource">
+        <constructor-arg>
+            <bean class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+                <property name="driverClassName" value="org.hsqldb.jdbcDriver" />
+                <property name="url" value="jdbc:hsqldb:mem:org_onebusaway_api_key_caching" />
+                <property name="username" value="sa" />
+                <property name="password" value="" />
+            </bean>
+        </constructor-arg>
+    </bean>
+
+    <bean class="org.onebusaway.container.spring.PropertiesBeanPostProcessor">
+        <property name="target" value="hibernateProperties" />
+        <property name="properties">
+            <props>
+                <prop key="hibernate.dialect">org.onebusaway.users.impl.UnboundedBlobHSQLDialect</prop>
+            </props>
+        </property>
+    </bean>
+
+</beans>
