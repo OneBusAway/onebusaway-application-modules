@@ -153,7 +153,7 @@ public class BlockLocationRecord {
     vehicleId = null;
     vehicleType = EVehicleType.BUS;
   }
-
+  
   private BlockLocationRecord(Builder builder) {
     this.blockId = builder.blockId;
     this.tripId = builder.tripId;
