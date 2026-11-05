@@ -1,0 +1,94 @@
+/**
+ * Copyright (C) 2026 OneBusAway
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.onebusaway.api.actions.api.v2;
+
+import java.io.IOException;
+import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+import org.apache.struts2.rest.DefaultHttpHeaders;
+import org.onebusaway.api.actions.api.ApiActionSupport;
+import org.onebusaway.exceptions.ServiceException;
+import org.onebusaway.transit_data.model.config.BundleMetadata;
+import org.onebusaway.transit_data.services.TransitDataService;
+import org.onebusaway.utility.DateLibrary;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+/**
+ * GET /api/v2/metadata.json — static GTFS freshness for Watchdog, matching
+ * Maglev's endpoint. Single-feed only (issue #487): {@code staticGtfsHash}
+ * is the SHA-256 of the single GTFS zip the bundle was built from.
+ * Plain JSON, no code/data envelope. API-key auth is automatic via
+ * ApiKeyInterceptor — do NOT add @ApiKeyAuthorization(enabled=false).
+ */
+public class MetadataAction extends ApiActionSupport {
+
+  private static final int V2 = 2;
+
+  private static final long serialVersionUID = 1L;
+
+  public MetadataAction() {
+    super(V2);
+  }
+
+  @Autowired
+  private TransitDataService _service;
+
+  public void setTransitDataService(TransitDataService service) {
+    _service = service;
+  }
+
+  public DefaultHttpHeaders index() throws IOException, ServiceException {
+    if (hasErrors())
+      return setValidationErrorsResponse();
+
+    Boolean ready = _service == null ? null : _service.bundleIsReady();
+    if (ready == null || !ready) {
+      return setServiceUnavailableResponseText(
+          "{\"status\":\"unavailable\",\"detail\":\"Bundle not loaded\"}");
+    }
+
+    BundleMetadata meta = _service.getBundleMetadata();
+    // meta is null for bundles built before metadata.json existed
+    // (BundleConfigDao leaves it null when the file is missing). The bundle
+    // is still loaded, so answer 200 with the static fields omitted, same
+    // as Maglev's no-import case, not a 503. Only "no bundle at all"
+    // (checked above via bundleIsReady) is a 503.
+    Map<String, Object> body = new LinkedHashMap<String, Object>();
+    if (meta != null) {
+      if (meta.getStaticGtfsLastUpdated() != null)
+        body.put("staticGtfsLastUpdated", meta.getStaticGtfsLastUpdated());
+      if (meta.getStaticGtfsHash() != null)
+        body.put("staticGtfsHash", meta.getStaticGtfsHash());
+    }
+
+    Map<String, String> feeds = new LinkedHashMap<String, String>();
+    Map<String, Long> updates = _service.getRealtimeFeedLastUpdateTimes();
+    if (updates != null) {
+      for (Map.Entry<String, Long> entry : updates.entrySet()) {
+        feeds.put(entry.getKey(),
+            DateLibrary.getTimeAsIso8601String(new Date(entry.getValue())));
+      }
+    }
+    body.put("realtimeFeeds", feeds);
+
+    String json = new ObjectMapper().writeValueAsString(body);
+    return setOkResponseText(json);
+  }
+}

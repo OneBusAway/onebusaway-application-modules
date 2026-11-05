@@ -33,6 +33,7 @@ import org.onebusaway.transit_data_federation.impl.RefreshableResources;
 import org.onebusaway.transit_data_federation.impl.config.BundleConfigDao;
 import org.onebusaway.transit_data_federation.model.bundle.BundleItem;
 import org.onebusaway.util.AgencyAndIdLibrary;
+import org.onebusaway.utility.DateLibrary;
 import org.onebusaway.transit_data_federation.services.FederatedTransitDataBundle;
 import org.onebusaway.transit_data_federation.services.bundle.BundleManagementService;
 import org.onebusaway.transit_data_federation.services.bundle.BundleStoreService;
@@ -53,6 +54,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.TimeZone;
 import java.util.concurrent.Future;
 
 
@@ -93,6 +95,8 @@ public class BundleManagementServiceImpl implements BundleManagementService {
   protected boolean _bundleIsReady = false;
 
   protected String _currentBundleId = null;
+
+  protected Date _bundleLoadTime = null;
 
   public String getCurrentBundleId() {
     return _currentBundleId;
@@ -314,7 +318,15 @@ public class BundleManagementServiceImpl implements BundleManagementService {
       _log.error("config error:  bundleConfigDao is null");
       return null;
     }
-    return _bundleConfigDao.getBundleMetadata();
+    BundleMetadata meta = _bundleConfigDao.getBundleMetadata();
+    if (meta != null && _bundleLoadTime != null) {
+      // Stamp the time this bundle was actually loaded (RFC 3339 UTC).
+      // This is a load time, not a service date and not a file mtime.
+      // Format in UTC explicitly: the one-arg helper uses the JVM default
+      // timezone, which would emit a local offset instead of 'Z'.
+      meta.setStaticGtfsLastUpdated(DateLibrary.getTimeAsIso8601String(_bundleLoadTime, TimeZone.getTimeZone("UTC")));
+    }
+    return meta;
 
   }
 
@@ -456,6 +468,7 @@ public class BundleManagementServiceImpl implements BundleManagementService {
     _currentBundleId = bundleId;
     _bundleIsReady = true;
     _log.info("New bundle is now ready.");
+    _bundleLoadTime = new Date();
 
     // need to do after bundle is ready so TDS can not block
     removeAndRebuildCache();

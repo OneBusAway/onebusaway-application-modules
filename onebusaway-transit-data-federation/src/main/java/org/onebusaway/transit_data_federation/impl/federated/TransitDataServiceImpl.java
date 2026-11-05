@@ -19,6 +19,7 @@ package org.onebusaway.transit_data_federation.impl.federated;
 
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -61,6 +62,10 @@ import org.onebusaway.transit_data.model.trips.TripsForAgencyQueryBean;
 import org.onebusaway.transit_data.model.trips.TripsForBoundsQueryBean;
 import org.onebusaway.transit_data.model.trips.TripsForRouteQueryBean;
 import org.onebusaway.transit_data.services.TransitDataService;
+import org.onebusaway.transit_data_federation.impl.bundle.RealtimeSourceServiceImpl;
+import org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.GtfsRealtimeSource;
+import org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.MonitoredDataSource;
+import org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.MonitoredResult;
 import org.onebusaway.transit_data_federation.services.bundle.BundleManagementService;
 import org.onebusaway.transit_data_federation.services.bundle.BundleSearchService;
 import org.slf4j.Logger;
@@ -80,6 +85,9 @@ public class TransitDataServiceImpl implements TransitDataService {
   
   @Autowired
   private BundleSearchService _bundleSearchService;
+
+  @Autowired
+  private RealtimeSourceServiceImpl _realtimeSourceService;
   
   @Autowired
   public void set_bundleManagementService(
@@ -624,6 +632,36 @@ public class TransitDataServiceImpl implements TransitDataService {
   public BundleMetadata getBundleMetadata() {
     blockUntilBundleIsReady();
     return _bundleManagementService.getBundleMetadata();
+  }
+
+  @Override
+  public Boolean bundleIsReady() {
+    // Deliberately NO blockUntilBundleIsReady() here: a "no bundle" call
+    // must return immediately so the endpoint can answer 503 fast.
+    if (_bundleManagementService == null)
+      return false;
+    return _bundleManagementService.bundleIsReady();
+  }
+
+  @Override
+  public Map<String, Long> getRealtimeFeedLastUpdateTimes() {
+    Map<String, Long> result = new HashMap<String, Long>();
+    if (_realtimeSourceService == null)
+      return result;
+    // Same iteration as MetricsBeanServiceImpl.getDataSources().
+    for (GtfsRealtimeSource source : _realtimeSourceService.getSources()) {
+      if (!(source instanceof MonitoredDataSource))
+        continue;
+      MonitoredDataSource mds = (MonitoredDataSource) source;
+      MonitoredResult monitored = mds.getMonitoredResult();
+      if (monitored == null)
+        continue;
+      long lastUpdate = monitored.getLastUpdate();
+      if (lastUpdate <= 0)
+        continue; // never updated: omit, never emit an epoch timestamp
+      result.put(mds.getFeedId(), lastUpdate);
+    }
+    return result;
   }
 
   @Override

@@ -24,6 +24,8 @@ public class BundleMetadata implements java.io.Serializable {
   private String name;
   private String serviceDateFrom;
   private String serviceDateTo;
+  private String staticGtfsHash;
+  private String staticGtfsLastUpdated;
   public String getId() {
     return id;
   }
@@ -47,6 +49,18 @@ public class BundleMetadata implements java.io.Serializable {
   }
   public void setServiceDateTo(String serviceDateTo) {
     this.serviceDateTo = serviceDateTo;
+  }
+  public String getStaticGtfsHash() {
+    return staticGtfsHash;
+  }
+  public void setStaticGtfsHash(String staticGtfsHash) {
+    this.staticGtfsHash = staticGtfsHash;
+  }
+  public String getStaticGtfsLastUpdated() {
+    return staticGtfsLastUpdated;
+  }
+  public void setStaticGtfsLastUpdated(String staticGtfsLastUpdated) {
+    this.staticGtfsLastUpdated = staticGtfsLastUpdated;
   }
   
 }
