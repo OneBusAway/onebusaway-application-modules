@@ -19,6 +19,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -87,7 +89,7 @@ public class MetadataActionTest {
   @Test
   public void testHashAndFeedsReturned() throws Exception {
     Mockito.when(_service.bundleIsReady()).thenReturn(true);
-    Mockito.when(_service.getBundleMetadata()).thenReturn(
+    Mockito.when(_service.getBundleMetadataIfReady()).thenReturn(
         meta(HASH, "2026-11-06T00:11:00Z"));
     Map<String, Long> updates = new HashMap<String, Long>();
     updates.put("trip_updates", 1793904060000L);
@@ -104,12 +106,20 @@ public class MetadataActionTest {
     assertEquals("2026-11-06T00:11:00Z", body.get("staticGtfsLastUpdated"));
     assertTrue(body.get("realtimeFeeds") instanceof Map);
     assertTrue(((Map<?, ?>) body.get("realtimeFeeds")).containsKey("trip_updates"));
+    // The value is the update instant formatted in the system default
+    // timezone (yyyy-MM-dd'T'HH:mm:ssXXX), not just the key's presence.
+    // Note: SimpleDateFormat takes uppercase XXX here; lowercase xxx is a
+    // java.time pattern letter and throws IllegalArgumentException.
+    String expectedFeedTime = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX")
+        .format(new Date(1793904060000L));
+    assertEquals(expectedFeedTime,
+        ((Map<?, ?>) body.get("realtimeFeeds")).get("trip_updates"));
   }
 
   @Test
   public void testOldBundleOmitsHash() throws Exception {
     Mockito.when(_service.bundleIsReady()).thenReturn(true);
-    Mockito.when(_service.getBundleMetadata()).thenReturn(
+    Mockito.when(_service.getBundleMetadataIfReady()).thenReturn(
         meta(null, "2026-11-06T00:11:00Z"));
     Mockito.when(_service.getRealtimeFeedLastUpdateTimes()).thenReturn(
         new HashMap<String, Long>());
@@ -138,9 +148,21 @@ public class MetadataActionTest {
   }
 
   @Test
+  public void testBundleGoesAwayMidRequestReturns503() throws Exception {
+    // Readiness was true, but the bundle went away before the metadata read
+    // (swap started / load failed): the non-blocking read returns null and
+    // the re-check sees not-ready, so this is a 503, not a 200.
+    Mockito.when(_service.bundleIsReady()).thenReturn(true, false);
+    Mockito.when(_service.getBundleMetadataIfReady()).thenReturn(null);
+
+    DefaultHttpHeaders headers = _action.index();
+    assertEquals(503, headers.getStatus());
+  }
+
+  @Test
   public void testRealtimeFeedsEmptyObjectNotNull() throws Exception {
     Mockito.when(_service.bundleIsReady()).thenReturn(true);
-    Mockito.when(_service.getBundleMetadata()).thenReturn(
+    Mockito.when(_service.getBundleMetadataIfReady()).thenReturn(
         meta(HASH, null));
     Mockito.when(_service.getRealtimeFeedLastUpdateTimes()).thenReturn(
         new HashMap<String, Long>());
@@ -158,7 +180,7 @@ public class MetadataActionTest {
     // Old bundle: loaded, but built before metadata.json existed, so
     // BundleConfigDao returns null. Still 200, static fields omitted.
     Mockito.when(_service.bundleIsReady()).thenReturn(true);
-    Mockito.when(_service.getBundleMetadata()).thenReturn(null);
+    Mockito.when(_service.getBundleMetadataIfReady()).thenReturn(null);
     Mockito.when(_service.getRealtimeFeedLastUpdateTimes()).thenReturn(
         new HashMap<String, Long>());
 
@@ -174,7 +196,7 @@ public class MetadataActionTest {
   @Test
   public void testLastUpdatedOmittedWhenUnknown() throws Exception {
     Mockito.when(_service.bundleIsReady()).thenReturn(true);
-    Mockito.when(_service.getBundleMetadata()).thenReturn(meta(HASH, null));
+    Mockito.when(_service.getBundleMetadataIfReady()).thenReturn(meta(HASH, null));
     Mockito.when(_service.getRealtimeFeedLastUpdateTimes()).thenReturn(
         new HashMap<String, Long>());
 

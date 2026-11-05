@@ -634,6 +634,20 @@ public class TransitDataServiceImpl implements TransitDataService {
     return _bundleManagementService.getBundleMetadata();
   }
 
+  /**
+   * Current bundle metadata without blocking. Returns null when no bundle is
+   * ready (or the bundle has no metadata); see {@link TransitDataService#getBundleMetadataIfReady()}.
+   */
+  @Override
+  public BundleMetadata getBundleMetadataIfReady() {
+    // No blockUntilBundleIsReady(): the metadata endpoint must answer 503
+    // immediately when no bundle is loaded, not wait out a bundle swap.
+    // BundleManagementServiceImpl.getBundleMetadata() itself does not block.
+    if (_bundleManagementService == null || !_bundleManagementService.bundleIsReady())
+      return null;
+    return _bundleManagementService.getBundleMetadata();
+  }
+
   @Override
   public Boolean bundleIsReady() {
     // Deliberately NO blockUntilBundleIsReady() here: a "no bundle" call
@@ -659,7 +673,11 @@ public class TransitDataServiceImpl implements TransitDataService {
       long lastUpdate = monitored.getLastUpdate();
       if (lastUpdate <= 0)
         continue; // never updated: omit, never emit an epoch timestamp
-      result.put(mds.getFeedId(), lastUpdate);
+      // Several sources can share a feed ID: keep the newest update, so a
+      // later source never overwrites a newer timestamp with an older one.
+      Long existing = result.get(mds.getFeedId());
+      if (existing == null || lastUpdate > existing)
+        result.put(mds.getFeedId(), lastUpdate);
     }
     return result;
   }

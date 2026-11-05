@@ -560,6 +560,16 @@ public interface TransitDataService extends FederatedService {
   public BundleMetadata getBundleMetadata();
 
   /**
+   * Current bundle metadata without blocking. Unlike {@link #getBundleMetadata()},
+   * this never waits for a bundle to become ready: it returns null when no
+   * bundle is ready. A null return is ambiguous — the loaded bundle may also
+   * have no metadata (old bundle) — so callers that must tell the two apart
+   * should re-check {@link #bundleIsReady()}.
+   */
+  @FederatedByAgencyIdMethod(propertyExpression = "agencyId")
+  public BundleMetadata getBundleMetadataIfReady();
+
+  /**
    * Whether a bundle is currently loaded, without blocking. Unlike the
    * other methods, this must NOT wait for a bundle to become ready: the
    * metadata endpoint needs a fast 503 when no bundle is loaded.

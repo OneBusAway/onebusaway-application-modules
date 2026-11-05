@@ -54,6 +54,11 @@ public class MetadataAction extends ApiActionSupport {
     _service = service;
   }
 
+  /**
+   * GET /api/v2/metadata.json. Non-blocking throughout: a bundle swap (or a
+   * failed load) mid-request answers 503 instead of waiting. A loaded bundle
+   * without metadata (old bundle) is 200 with the static fields omitted.
+   */
   public DefaultHttpHeaders index() throws IOException, ServiceException {
     if (hasErrors())
       return setValidationErrorsResponse();
@@ -64,7 +69,18 @@ public class MetadataAction extends ApiActionSupport {
           "{\"status\":\"unavailable\",\"detail\":\"Bundle not loaded\"}");
     }
 
-    BundleMetadata meta = _service.getBundleMetadata();
+    // One non-blocking read: getBundleMetadata() would block here if a swap
+    // started after the readiness check above. A null return is ambiguous —
+    // either the bundle went away mid-request, or the loaded bundle has no
+    // metadata (old bundle) — so re-check readiness to tell them apart.
+    BundleMetadata meta = _service.getBundleMetadataIfReady();
+    if (meta == null) {
+      Boolean stillReady = _service.bundleIsReady();
+      if (stillReady == null || !stillReady) {
+        return setServiceUnavailableResponseText(
+            "{\"status\":\"unavailable\",\"detail\":\"Bundle not loaded\"}");
+      }
+    }
     // meta is null for bundles built before metadata.json existed
     // (BundleConfigDao leaves it null when the file is missing). The bundle
     // is still loaded, so answer 200 with the static fields omitted, same

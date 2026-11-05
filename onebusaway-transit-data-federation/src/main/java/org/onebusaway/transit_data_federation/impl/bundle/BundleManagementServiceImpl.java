@@ -466,9 +466,12 @@ public class BundleManagementServiceImpl implements BundleManagementService {
     _log.info("Garbage collection after bundle switch complete.");
 
     _currentBundleId = bundleId;
+    // Publish the load time before readiness: a request that observes the
+    // new bundle as ready must also see this bundle's timestamp, not the
+    // previous bundle's (or none). Readiness stays the final publication step.
+    _bundleLoadTime = new Date();
     _bundleIsReady = true;
     _log.info("New bundle is now ready.");
-    _bundleLoadTime = new Date();
 
     // need to do after bundle is ready so TDS can not block
     removeAndRebuildCache();

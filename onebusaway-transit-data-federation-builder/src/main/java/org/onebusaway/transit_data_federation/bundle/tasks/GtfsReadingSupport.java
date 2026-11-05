@@ -146,9 +146,13 @@ public class GtfsReadingSupport {
       // Record the SHA-256 of the original zip bytes before any GTFS reading
       // or transformation, so /api/v2/metadata.json can report exactly the
       // hash of the feed Watchdog downloaded. A directory input has no single
-      // zip to hash, so its hash stays null (never hash a directory listing).
+      // zip to hash, so clear the hash (never hash a directory listing).
       if (gtfsBundle.getPath() != null && gtfsBundle.getPath().isFile()) {
         gtfsBundle.setStaticGtfsHash(sha256Hex(gtfsBundle.getPath()));
+      } else {
+        // Clear any hash from an earlier use of this bundle: a reused
+        // GtfsBundle must not report a zip's hash for a directory input.
+        gtfsBundle.setStaticGtfsHash(null);
       }
 
       multiReader.addGtfsReader(reader);

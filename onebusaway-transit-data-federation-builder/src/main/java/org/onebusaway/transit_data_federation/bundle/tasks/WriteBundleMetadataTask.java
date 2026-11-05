@@ -48,6 +48,11 @@ public class WriteBundleMetadataTask implements Runnable {
     _applicationContext = applicationContext;
   }
 
+  /**
+   * Writes metadata.json for the bundle just built. When this run computed no
+   * hash (partial build without gtfs), the hash from any existing metadata on
+   * disk is preserved instead of being dropped.
+   */
   @Override
   public void run() {
     try {
@@ -75,6 +80,21 @@ public class WriteBundleMetadataTask implements Runnable {
           break;
         }
       }
+      // A partial build can run bundle_metadata without gtfs: no bundle then
+      // carries a hash, and overwriting metadata.json would silently drop the
+      // hash the API reports. Preserve the hash from the metadata already on
+      // disk when this run computed none; only a bundle hash replaces it.
+      File outputFile = new File(bundlePath, "metadata.json");
+      if (data.getStaticGtfsHash() == null && outputFile.exists()) {
+        try {
+          BundleMetadata existing = new ObjectMapper().readValue(outputFile, BundleMetadata.class);
+          if (existing != null && existing.getStaticGtfsHash() != null) {
+            data.setStaticGtfsHash(existing.getStaticGtfsHash());
+          }
+        } catch (Exception e) {
+          _log.warn("could not read existing bundle metadata, hash will be omitted", e);
+        }
+      }
       // Service dates must be present and parseable: store discovery does
       // Long.parseLong on them, and a bundle with null dates is skipped, so
       // a CLI-built bundle could never be loaded by a server. Mirror
@@ -82,7 +102,6 @@ public class WriteBundleMetadataTask implements Runnable {
       data.setServiceDateFrom(new Date());
       data.setServiceDateTo(DateUtils.addDays(new Date(), 30));
 
-      File outputFile = new File(bundlePath, "metadata.json");
       new ObjectMapper().writeValue(outputFile, data);
       _log.info("wrote bundle metadata to " + outputFile.getAbsolutePath());
     } catch (Exception e) {
