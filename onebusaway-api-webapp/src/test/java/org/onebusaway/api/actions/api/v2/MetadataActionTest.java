@@ -19,8 +19,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -106,14 +106,13 @@ public class MetadataActionTest {
     assertEquals("2026-11-06T00:11:00Z", body.get("staticGtfsLastUpdated"));
     assertTrue(body.get("realtimeFeeds") instanceof Map);
     assertTrue(((Map<?, ?>) body.get("realtimeFeeds")).containsKey("trip_updates"));
-    // The value is the update instant formatted in the system default
-    // timezone (yyyy-MM-dd'T'HH:mm:ssXXX), not just the key's presence.
-    // Note: SimpleDateFormat takes uppercase XXX here; lowercase xxx is a
-    // java.time pattern letter and throws IllegalArgumentException.
-    String expectedFeedTime = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX")
-        .format(new Date(1793904060000L));
-    assertEquals(expectedFeedTime,
-        ((Map<?, ?>) body.get("realtimeFeeds")).get("trip_updates"));
+    // The value is the update instant. Compare instants, not strings, so the
+    // test is not brittle about how a zero UTC offset renders: SimpleDateFormat
+    // with XXX renders it as "Z", while DateLibrary renders "+00:00" — the
+    // same instant, different spelling, and CI runs in UTC. OffsetDateTime
+    // parses both spellings; Instant.parse would reject "+00:00".
+    assertEquals(Instant.ofEpochMilli(1793904060000L),
+        OffsetDateTime.parse((String) ((Map<?, ?>) body.get("realtimeFeeds")).get("trip_updates")).toInstant());
   }
 
   @Test
