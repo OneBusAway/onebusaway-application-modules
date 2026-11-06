@@ -33,5 +33,7 @@ public class ResponseCodes {
 
   public static final int RESPONSE_SERVICE_EXCEPTION = 500;
 
+  public static final int RESPONSE_SERVICE_UNAVAILABLE = 503;
+
   public static final int RESPONSE_OUT_OF_SERVICE_TIMERANGE = 510;
 }

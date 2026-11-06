@@ -42,6 +42,8 @@ public class GtfsBundle {
 
   private Map<String, String> agencyIdMappings = new HashMap<String, String>();
 
+  private String staticGtfsHash;
+
   /**
    * @return the path to the feed (either a directory or zip file)
    */
@@ -103,6 +105,22 @@ public class GtfsBundle {
    */
   public void setAgencyIdMappings(Map<String, String> agencyIdMappings) {
     this.agencyIdMappings = agencyIdMappings;
+  }
+
+  /**
+   * @return the lowercase hex SHA-256 of the original GTFS zip bytes, as
+   *         recorded at bundle-build time; null when the feed was not a zip
+   *         file (e.g. a directory) or the hash was not recorded (old bundles)
+   */
+  public String getStaticGtfsHash() {
+    return staticGtfsHash;
+  }
+
+  /**
+   * @param staticGtfsHash the lowercase hex SHA-256 of the original GTFS zip bytes
+   */
+  public void setStaticGtfsHash(String staticGtfsHash) {
+    this.staticGtfsHash = staticGtfsHash;
   }
 
 }

@@ -15,7 +15,13 @@
  */
 package org.onebusaway.transit_data_federation.bundle.tasks;
 
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Map;
 
 import org.onebusaway.csv_entities.schema.DefaultEntitySchemaFactory;
@@ -137,6 +143,18 @@ public class GtfsReadingSupport {
       for (Map.Entry<String, String> entry : gtfsBundle.getAgencyIdMappings().entrySet())
         reader.addAgencyIdMapping(entry.getKey(), entry.getValue());
 
+      // Record the SHA-256 of the original zip bytes before any GTFS reading
+      // or transformation, so /api/v2/metadata.json can report exactly the
+      // hash of the feed Watchdog downloaded. A directory input has no single
+      // zip to hash, so clear the hash (never hash a directory listing).
+      if (gtfsBundle.getPath() != null && gtfsBundle.getPath().isFile()) {
+        gtfsBundle.setStaticGtfsHash(sha256Hex(gtfsBundle.getPath()));
+      } else {
+        // Clear any hash from an earlier use of this bundle: a reused
+        // GtfsBundle must not report a zip's hash for a directory input.
+        gtfsBundle.setStaticGtfsHash(null);
+      }
+
       multiReader.addGtfsReader(reader);
     }
 
@@ -165,5 +183,29 @@ public class GtfsReadingSupport {
 
     throw new IllegalStateException(
         "must define either \"gtfs-bundles\" or \"gtfs-bundle\" in config");
+  }
+
+  /**
+   * Lowercase hex SHA-256 of a file's raw bytes, streamed so large zips do
+   * not have to fit in memory.
+   */
+  static String sha256Hex(File file) throws IOException {
+    try {
+      MessageDigest digest = MessageDigest.getInstance("SHA-256");
+      try (InputStream in = new BufferedInputStream(new FileInputStream(file))) {
+        byte[] buffer = new byte[8192];
+        int n;
+        while ((n = in.read(buffer)) != -1) {
+          digest.update(buffer, 0, n);
+        }
+      }
+      StringBuilder hex = new StringBuilder();
+      for (byte b : digest.digest()) {
+        hex.append(String.format("%02x", b));
+      }
+      return hex.toString();
+    } catch (NoSuchAlgorithmException e) {
+      throw new IOException("SHA-256 not available", e);
+    }
   }
 }

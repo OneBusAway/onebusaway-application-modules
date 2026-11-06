@@ -63,6 +63,7 @@ public class FederatedTransitDataBundleConventionMain {
     private ObjectMapper mapper = new ObjectMapper();
     private Date toDate = null;
     private Date fromDate = null;
+    private List<GtfsBundle> _gtfsBundles;
 
 
     public String run(String[] args) {
@@ -261,6 +262,7 @@ public class FederatedTransitDataBundleConventionMain {
         BeanDefinitionBuilder bean = BeanDefinitionBuilder.genericBeanDefinition(GtfsBundles.class);
         bean.addPropertyValue("bundles", gtfsBundles);
         beans.put("gtfs-bundles", bean.getBeanDefinition());
+        _gtfsBundles = gtfsBundles;
         creator.setOutputPath(dataDestDir);
         BeanDefinitionBuilder gtfsBean = BeanDefinitionBuilder.genericBeanDefinition(GtfsRelationalDaoImpl.class);
         beans.put("gtfsRelationalDaoImpl", gtfsBean.getBeanDefinition());
@@ -273,6 +275,10 @@ public class FederatedTransitDataBundleConventionMain {
 
     }
 
+    /**
+     * Writes the bundle's metadata.json (id, name, service dates, and the
+     * static GTFS hash recorded by the gtfs task when present).
+     */
     private void generateJsonMetadata(BundleRequest request) {
         try {
             BundleMetadata data = new BundleMetadata();
@@ -281,6 +287,17 @@ public class FederatedTransitDataBundleConventionMain {
 
             data.setId(request.getName());
             data.setName(request.getName());
+            // Preserve the hash recorded by the gtfs task: assemble() runs
+            // after the creator, and this fresh BundleMetadata would
+            // otherwise overwrite the task's metadata.json without it.
+            if (_gtfsBundles != null) {
+              for (GtfsBundle gtfsBundle : _gtfsBundles) {
+                if (gtfsBundle.getStaticGtfsHash() != null) {
+                  data.setStaticGtfsHash(gtfsBundle.getStaticGtfsHash());
+                  break;
+                }
+              }
+            }
             data.setServiceDateFrom(createFromDate());
             data.setServiceDateTo(createToDate());
             data.setOutputFiles(getBundleFilesWithSumsForDirectory(
