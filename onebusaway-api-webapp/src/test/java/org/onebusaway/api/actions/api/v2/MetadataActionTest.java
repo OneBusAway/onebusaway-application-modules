@@ -176,9 +176,23 @@ public class MetadataActionTest {
   }
 
   @Test
+  public void testUnreadableMetadataReturns503() throws Exception {
+    // metadata.json exists but is corrupt: the endpoint cannot report the
+    // freshness it exists to report, so this is a 503, not a 200.
+    Mockito.when(_service.bundleIsReady()).thenReturn(true);
+    Mockito.when(_service.getBundleMetadataIfReady()).thenReturn(null);
+    Mockito.when(_service.isBundleMetadataUnreadable()).thenReturn(true);
+
+    DefaultHttpHeaders headers = _action.index();
+    assertEquals(503, headers.getStatus());
+    assertTrue(((String) _action.getModel().getData()).contains("unreadable"));
+  }
+
+  @Test
   public void testNullMetadataReturns200WithoutStaticFields() throws Exception {
-    // Old bundle: loaded, but built before metadata.json existed, so
-    // BundleConfigDao returns null. Still 200, static fields omitted.
+    // No metadata and no known load time: still 200, static fields omitted.
+    // (A federated old bundle with a known load time gets a synthesized
+    // timestamp instead of null; see getBundleMetadataIfReady.)
     Mockito.when(_service.bundleIsReady()).thenReturn(true);
     Mockito.when(_service.getBundleMetadataIfReady()).thenReturn(null);
     Mockito.when(_service.getRealtimeFeedLastUpdateTimes()).thenReturn(

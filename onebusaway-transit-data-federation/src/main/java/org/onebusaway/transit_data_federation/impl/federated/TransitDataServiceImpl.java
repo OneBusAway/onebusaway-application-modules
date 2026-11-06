@@ -22,6 +22,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 
 import org.onebusaway.exceptions.ServiceException;
 import org.onebusaway.federations.annotations.FederatedByAgencyIdMethod;
@@ -68,6 +69,7 @@ import org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.Monito
 import org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.MonitoredResult;
 import org.onebusaway.transit_data_federation.services.bundle.BundleManagementService;
 import org.onebusaway.transit_data_federation.services.bundle.BundleSearchService;
+import org.onebusaway.utility.DateLibrary;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -636,7 +638,11 @@ public class TransitDataServiceImpl implements TransitDataService {
 
   /**
    * Current bundle metadata without blocking. Returns null when no bundle is
-   * ready (or the bundle has no metadata); see {@link TransitDataService#getBundleMetadataIfReady()}.
+   * ready (or the bundle has neither metadata nor a known load time); see
+   * {@link TransitDataService#getBundleMetadataIfReady()}. For an older
+   * loaded bundle with no metadata file, synthesizes metadata carrying only
+   * the bundle-load time ({@code staticGtfsLastUpdated}) — the hash stays
+   * omitted, since none was ever recorded for it.
    */
   @Override
   public BundleMetadata getBundleMetadataIfReady() {
@@ -645,7 +651,26 @@ public class TransitDataServiceImpl implements TransitDataService {
     // BundleManagementServiceImpl.getBundleMetadata() itself does not block.
     if (_bundleManagementService == null || !_bundleManagementService.bundleIsReady())
       return null;
-    return _bundleManagementService.getBundleMetadata();
+    BundleMetadata meta = _bundleManagementService.getBundleMetadata();
+    if (meta == null) {
+      // Old bundle with no metadata.json: the issue still requires the
+      // bundle-load timestamp, so synthesize metadata carrying only that.
+      Date loadTime = _bundleManagementService.getBundleLoadTime();
+      if (loadTime != null) {
+        meta = new BundleMetadata();
+        meta.setStaticGtfsLastUpdated(DateLibrary.getTimeAsIso8601String(loadTime, TimeZone.getTimeZone("UTC")));
+      }
+    }
+    return meta;
+  }
+
+  /**
+   * Whether the current bundle's metadata file exists but could not be read.
+   * See {@link TransitDataService#isBundleMetadataUnreadable()}.
+   */
+  @Override
+  public boolean isBundleMetadataUnreadable() {
+    return _bundleManagementService != null && _bundleManagementService.isBundleMetadataUnreadable();
   }
 
   /**

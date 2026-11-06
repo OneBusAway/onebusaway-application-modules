@@ -337,6 +337,23 @@ public class BundleManagementServiceImpl implements BundleManagementService {
 
   }
 
+  /**
+   * The time the current bundle finished loading, or null when no bundle
+   * has been loaded yet.
+   */
+  @Override
+  public Date getBundleLoadTime() {
+    return _bundleLoadTime;
+  }
+
+  /**
+   * Whether the current bundle's metadata file exists but could not be read.
+   */
+  @Override
+  public boolean isBundleMetadataUnreadable() {
+    return _bundleConfigDao != null && _bundleConfigDao.isMetadataUnreadable();
+  }
+
   @Override
   public List<BundleItem> getAllKnownBundles() {
     return _allBundles;

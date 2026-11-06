@@ -562,9 +562,12 @@ public interface TransitDataService extends FederatedService {
   /**
    * Current bundle metadata without blocking. Unlike {@link #getBundleMetadata()},
    * this never waits for a bundle to become ready: it returns null when no
-   * bundle is ready. A null return is ambiguous — the loaded bundle may also
-   * have no metadata (old bundle) — so callers that must tell the two apart
-   * should re-check {@link #bundleIsReady()}.
+   * bundle is ready (or the bundle has neither metadata nor a known load
+   * time). For an older loaded bundle with no metadata file, it synthesizes
+   * metadata carrying only the bundle-load time; the hash stays omitted.
+   * A null return is ambiguous — the bundle may have gone away mid-request —
+   * so callers that must tell that apart from a loaded bundle should re-check
+   * {@link #bundleIsReady()}.
    */
   @FederatedByAgencyIdMethod(propertyExpression = "agencyId")
   public BundleMetadata getBundleMetadataIfReady();
@@ -582,6 +585,13 @@ public interface TransitDataService extends FederatedService {
    * Never null: empty map when there are no feeds.
    */
   public Map<String, Long> getRealtimeFeedLastUpdateTimes();
+
+  /**
+   * Whether the current bundle's metadata file exists but could not be read
+   * (corrupt/unparseable). A missing file (old bundle) is not unreadable.
+   * Never blocks.
+   */
+  public boolean isBundleMetadataUnreadable();
   
   /**
    * Retrieve a list of time predictions for the given trip as represented by the TripStatusBean.

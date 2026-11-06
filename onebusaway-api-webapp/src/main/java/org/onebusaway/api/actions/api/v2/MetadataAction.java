@@ -57,7 +57,8 @@ public class MetadataAction extends ApiActionSupport {
   /**
    * GET /api/v2/metadata.json. Non-blocking throughout: a bundle swap (or a
    * failed load) mid-request answers 503 instead of waiting. A loaded bundle
-   * without metadata (old bundle) is 200 with the static fields omitted.
+   * without metadata (old bundle) is 200 with the load timestamp and the hash
+   * omitted. A bundle whose metadata file exists but cannot be read is 503.
    */
   public DefaultHttpHeaders index() throws IOException, ServiceException {
     if (hasErrors())
@@ -71,21 +72,30 @@ public class MetadataAction extends ApiActionSupport {
 
     // One non-blocking read: getBundleMetadata() would block here if a swap
     // started after the readiness check above. A null return is ambiguous —
-    // either the bundle went away mid-request, or the loaded bundle has no
-    // metadata (old bundle) — so re-check readiness to tell them apart.
+    // either the bundle went away mid-request, or the loaded bundle has
+    // neither metadata nor a known load time — so re-check readiness to tell
+    // them apart. (An old bundle with a known load time is synthesized with
+    // a timestamp instead of null; see getBundleMetadataIfReady.)
     BundleMetadata meta = _service.getBundleMetadataIfReady();
     if (meta == null) {
+      // Unreadable metadata (the file exists but is corrupt) is a 503: the
+      // endpoint cannot report the freshness it exists to report. A missing
+      // file (old bundle) is not unreadable.
+      if (_service.isBundleMetadataUnreadable()) {
+        return setServiceUnavailableResponseText(
+            "{\"status\":\"unavailable\",\"detail\":\"Bundle metadata is unreadable\"}");
+      }
       Boolean stillReady = _service.bundleIsReady();
       if (stillReady == null || !stillReady) {
         return setServiceUnavailableResponseText(
             "{\"status\":\"unavailable\",\"detail\":\"Bundle not loaded\"}");
       }
     }
-    // meta is null for bundles built before metadata.json existed
-    // (BundleConfigDao leaves it null when the file is missing). The bundle
-    // is still loaded, so answer 200 with the static fields omitted, same
-    // as Maglev's no-import case, not a 503. Only "no bundle at all"
-    // (checked above via bundleIsReady) is a 503.
+    // meta is null only when the bundle has neither metadata nor a known load
+    // time. The bundle is still loaded, so answer 200 with the static fields
+    // omitted, same as Maglev's no-import case, not a 503. Only "no bundle
+    // at all" (checked above via bundleIsReady) and unreadable metadata are
+    // 503s.
     Map<String, Object> body = new LinkedHashMap<String, Object>();
     if (meta != null) {
       if (meta.getStaticGtfsLastUpdated() != null)
