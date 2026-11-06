@@ -648,6 +648,11 @@ public class TransitDataServiceImpl implements TransitDataService {
     return _bundleManagementService.getBundleMetadata();
   }
 
+  /**
+   * Non-blocking readiness check: returns false immediately when no bundle is
+   * loaded, instead of waiting out a bundle swap. See
+   * {@link TransitDataService#bundleIsReady()}.
+   */
   @Override
   public Boolean bundleIsReady() {
     // Deliberately NO blockUntilBundleIsReady() here: a "no bundle" call
@@ -657,6 +662,11 @@ public class TransitDataServiceImpl implements TransitDataService {
     return _bundleManagementService.bundleIsReady();
   }
 
+  /**
+   * Last successful update time (millis) per realtime feed id, for feeds that
+   * have updated at least once. Feeds never updated are omitted, and when
+   * several sources share a feed id the newest timestamp wins.
+   */
   @Override
   public Map<String, Long> getRealtimeFeedLastUpdateTimes() {
     Map<String, Long> result = new HashMap<String, Long>();

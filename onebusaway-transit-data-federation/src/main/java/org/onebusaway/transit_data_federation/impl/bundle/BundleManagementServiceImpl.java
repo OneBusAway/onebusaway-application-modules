@@ -92,7 +92,9 @@ public class BundleManagementServiceImpl implements BundleManagementService {
   
   protected boolean _builderMode = false;
 
-  protected boolean _bundleIsReady = false;
+  // Volatile so a thread observing readiness (via bundleIsReady()) also sees
+  // the _bundleLoadTime write that precedes it in changeBundle().
+  protected volatile boolean _bundleIsReady = false;
 
   protected String _currentBundleId = null;
 
@@ -312,6 +314,11 @@ public class BundleManagementServiceImpl implements BundleManagementService {
     return _bundleConfigDao.getBundleMetadata().getId();
   }
 
+  /**
+   * Returns the current bundle's metadata, stamped with the time this bundle
+   * was loaded ({@code staticGtfsLastUpdated}, RFC 3339 UTC), or null when no
+   * bundle metadata exists (old bundle) or the config DAO is unavailable.
+   */
   @Override
   public BundleMetadata getBundleMetadata() {
     if (_bundleConfigDao == null) {
@@ -345,6 +352,11 @@ public class BundleManagementServiceImpl implements BundleManagementService {
     return _applicableBundles.get(_currentBundleId);
   }
 
+  /**
+   * Whether the current bundle is ready to serve requests. Always true in
+   * builder mode; otherwise reflects the readiness flag set when a bundle
+   * finishes loading.
+   */
   // Can messages be processed using this bundle and current state?
   @Override
   public Boolean bundleIsReady() {
@@ -370,6 +382,11 @@ public class BundleManagementServiceImpl implements BundleManagementService {
     changeBundle(bundleId, bundleId);
   }
   
+  /**
+   * Switches the active bundle to the given id and name. Validates the bundle,
+   * waits for inference threads to finish, loads it, then publishes the load
+   * time before marking it ready.
+   */
   public void changeBundle(String bundleId, String bundleName) throws Exception {
     if (bundleId == null || !_applicableBundles.containsKey(bundleId)) {
       throw new Exception("Bundle " + bundleName

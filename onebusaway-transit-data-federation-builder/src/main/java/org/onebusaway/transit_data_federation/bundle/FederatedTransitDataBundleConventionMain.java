@@ -275,6 +275,10 @@ public class FederatedTransitDataBundleConventionMain {
 
     }
 
+    /**
+     * Writes the bundle's metadata.json (id, name, service dates, and the
+     * static GTFS hash recorded by the gtfs task when present).
+     */
     private void generateJsonMetadata(BundleRequest request) {
         try {
             BundleMetadata data = new BundleMetadata();

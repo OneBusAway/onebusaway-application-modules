@@ -50,8 +50,10 @@ public class WriteBundleMetadataTask implements Runnable {
 
   /**
    * Writes metadata.json for the bundle just built. When this run computed no
-   * hash (partial build without gtfs), the hash from any existing metadata on
-   * disk is preserved instead of being dropped.
+   * hash because the gtfs task was skipped (partial build), the hash from any
+   * existing metadata on disk is preserved instead of being dropped. When a
+   * directory feed was read, it correctly produces no hash, so no prior hash
+   * is restored.
    */
   @Override
   public void run() {
@@ -83,9 +85,22 @@ public class WriteBundleMetadataTask implements Runnable {
       // A partial build can run bundle_metadata without gtfs: no bundle then
       // carries a hash, and overwriting metadata.json would silently drop the
       // hash the API reports. Preserve the hash from the metadata already on
-      // disk when this run computed none; only a bundle hash replaces it.
+      // disk only when GTFS was skipped. A bundle whose path is a regular
+      // file would carry a hash if GTFS had run, so a file path with no
+      // computed hash proves the gtfs task was skipped; a directory feed
+      // correctly produces no hash, and restoring the old one would misreport
+      // the previous zip's hash for directory data. Only a bundle hash
+      // replaces a preserved one.
       File outputFile = new File(bundlePath, "metadata.json");
-      if (data.getStaticGtfsHash() == null && outputFile.exists()) {
+      boolean gtfsSkipped = false;
+      for (GtfsBundle bundle : bundles.getBundles()) {
+        File path = bundle.getPath();
+        if (path != null && path.isFile()) {
+          gtfsSkipped = true;
+          break;
+        }
+      }
+      if (data.getStaticGtfsHash() == null && gtfsSkipped && outputFile.exists()) {
         try {
           BundleMetadata existing = new ObjectMapper().readValue(outputFile, BundleMetadata.class);
           if (existing != null && existing.getStaticGtfsHash() != null) {
