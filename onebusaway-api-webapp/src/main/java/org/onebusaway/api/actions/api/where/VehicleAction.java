@@ -16,7 +16,7 @@
 package org.onebusaway.api.actions.api.where;
 
 import java.io.IOException;
-import java.sql.Date;
+import java.util.Date;
 
 import org.apache.struts2.rest.DefaultHttpHeaders;
 import org.onebusaway.api.actions.api.ApiActionSupport;
