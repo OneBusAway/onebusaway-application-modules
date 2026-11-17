@@ -202,6 +202,24 @@ public class ExtendedCalendarServiceImplTest {
   }
 
   @Test
+  public void testGetServiceDatesWithinRange05() {
+
+    // sA is active 2010-09-10 and 2010-09-11; sB is active 2010-09-11 and
+    // 2010-09-12. Only 2010-09-11 is active for both, so the intersection
+    // across the multi-day range must contain exactly that one date.
+    ServiceIdActivation serviceIds = serviceIds(lsids("sA", "sB"), lsids());
+
+    Date from = UnitTestingSupport.date("2010-09-10 09:30");
+    Date to = UnitTestingSupport.date("2010-09-12 10:30");
+
+    Collection<Date> dates = _service.getServiceDatesWithinRange(serviceIds,
+        interval, from, to);
+
+    assertEquals(1, dates.size());
+    assertTrue(dates.contains(new ServiceDate(2010, 9, 11).getAsDate(timeZone())));
+  }
+
+  @Test
   public void testGetServiceDatesForServiceIds04() {
 
     ServiceIdActivation serviceIds = serviceIds(lsids("sA", "sC"), lsids());

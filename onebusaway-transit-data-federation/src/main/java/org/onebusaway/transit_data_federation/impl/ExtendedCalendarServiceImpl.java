@@ -402,7 +402,7 @@ public class ExtendedCalendarServiceImpl implements ExtendedCalendarService {
       if (serviceDates == null)
         serviceDates = new HashSet<Date>(dates);
       else
-        serviceDates.retainAll(serviceDates);
+        serviceDates.retainAll(dates);
 
       // If the dates are empty here after the intersection operation, we can
       // short circuit to no dates
