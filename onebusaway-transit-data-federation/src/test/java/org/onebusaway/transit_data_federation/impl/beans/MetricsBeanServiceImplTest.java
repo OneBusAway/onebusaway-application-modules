@@ -169,6 +169,37 @@ public class MetricsBeanServiceImplTest {
     }
 
     @Test
+    public void testTimeSinceLastRealtimeUpdateUsesTheFreshestFeedForAnAgencyInSeveralFeeds() {
+        long now = System.currentTimeMillis();
+        GtfsRealtimeSource combined = createMockDataSource("combined", "1", new HashSet<>(), new HashSet<>(),
+                new HashSet<>(), new HashSet<>(), 0);
+        when(combined.getMonitoredResult().getLastUpdate()).thenReturn(now - 30_000);
+        GtfsRealtimeSource agencyOnly = createMockDataSource("agency-only", "1", new HashSet<>(), new HashSet<>(),
+                new HashSet<>(), new HashSet<>(), 0);
+        when(agencyOnly.getMonitoredResult().getLastUpdate()).thenReturn(now - 600_000);
+        when(_realtimeSourceService.getSources()).thenReturn(Arrays.asList(combined, agencyOnly));
+
+        long delta = _service.getMetrics().getTimeSinceLastRealtimeUpdate().get("1");
+
+        assertTrue("expected ~30s, got " + delta, delta >= 30 && delta <= 35);
+    }
+
+    @Test
+    public void testTimeSinceLastRealtimeUpdateIgnoresAFeedThatNeverUpdated() {
+        long now = System.currentTimeMillis();
+        GtfsRealtimeSource updating = createMockDataSource("updating", "1", new HashSet<>(), new HashSet<>(),
+                new HashSet<>(), new HashSet<>(), 0);
+        when(updating.getMonitoredResult().getLastUpdate()).thenReturn(now - 30_000);
+        GtfsRealtimeSource neverUpdated = createMockDataSource("alerts-only", "1", new HashSet<>(), new HashSet<>(),
+                new HashSet<>(), new HashSet<>(), 0);
+        when(_realtimeSourceService.getSources()).thenReturn(Arrays.asList(neverUpdated, updating));
+
+        long delta = _service.getMetrics().getTimeSinceLastRealtimeUpdate().get("1");
+
+        assertTrue("expected ~30s, got " + delta, delta >= 30 && delta <= 35);
+    }
+
+    @Test
     public void testGetTotalRecordsCounts() {
         MetricsBean result = _service.getMetrics();
 

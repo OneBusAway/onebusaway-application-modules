@@ -782,6 +782,12 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
       }
     }
     // NOTE: this implies receiving stale updates is equivalent to not being updated at all
+    if (newestUpdate == 0 && _monitoredResult != null) {
+      // No current vehicles (a failed fetch, or an empty feed): keep the last
+      // known update so the source reads as stale, not as never updated.
+      // _monitoredResult is still the previous refresh's result here.
+      newestUpdate = _monitoredResult.getLastUpdate();
+    }
     result.setLastUpdate(newestUpdate);
     if (_monitor != null) {
       _monitor.logUpdate(result);
