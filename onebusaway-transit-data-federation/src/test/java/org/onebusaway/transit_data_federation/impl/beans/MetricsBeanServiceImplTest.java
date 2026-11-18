@@ -192,7 +192,7 @@ public class MetricsBeanServiceImplTest {
         when(updating.getMonitoredResult().getLastUpdate()).thenReturn(now - 30_000);
         GtfsRealtimeSource neverUpdated = createMockDataSource("alerts-only", "1", new HashSet<>(), new HashSet<>(),
                 new HashSet<>(), new HashSet<>(), 0);
-        when(_realtimeSourceService.getSources()).thenReturn(Arrays.asList(neverUpdated, updating));
+        when(_realtimeSourceService.getSources()).thenReturn(Arrays.asList(updating, neverUpdated));
 
         long delta = _service.getMetrics().getTimeSinceLastRealtimeUpdate().get("1");
 

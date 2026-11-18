@@ -179,7 +179,7 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
 
   private GtfsRealtimeAlertLibrary _alertLibrary;
   
-  private MonitoredResult _monitoredResult = new MonitoredResult();
+  private volatile MonitoredResult _monitoredResult = new MonitoredResult();
   
   private String _feedId = null;
   
@@ -783,7 +783,8 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     }
     // NOTE: this implies receiving stale updates is equivalent to not being updated at all
     if (newestUpdate == 0 && _monitoredResult != null) {
-      // No current vehicles (a failed fetch, or an empty feed): keep the last
+      // No vehicles left in _lastVehicleUpdate (e.g. the feed has been empty
+      // long enough for every vehicle to be pruned as stale): keep the last
       // known update so the source reads as stale, not as never updated.
       // _monitoredResult is still the previous refresh's result here.
       newestUpdate = _monitoredResult.getLastUpdate();
