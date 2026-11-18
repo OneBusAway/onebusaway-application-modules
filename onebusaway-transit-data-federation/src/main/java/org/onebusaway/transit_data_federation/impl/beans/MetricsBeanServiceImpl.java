@@ -510,7 +510,8 @@ public class MetricsBeanServiceImpl implements MetricsBeanService {
         if (feedId == null || feedId.equals(mds.getFeedId())) {
           for (String mAgencyId : result.getAgencyIds()) {
             if (agencyId.equals(mAgencyId)) {
-              lastUpdate += result.getLastUpdate();
+              // an agency can be in several feeds: report its freshest update
+              lastUpdate = Math.max(lastUpdate, result.getLastUpdate());
             }
           }
         }
