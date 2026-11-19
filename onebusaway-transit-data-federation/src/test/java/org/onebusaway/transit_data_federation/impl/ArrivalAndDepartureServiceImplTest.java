@@ -910,8 +910,8 @@ public class ArrivalAndDepartureServiceImplTest {
     assertEquals(tprB.getTimepointPredictedArrivalTime(), predictedArrivalTimeBB);
     
     /**
-     * Make sure the predictions happening downstream based on the last stop
-     * of the trip B
+     * Make sure predictions happen downstream within trip B, but do not leak to
+     * the next trip in the block without an explicit prediction for that trip.
      */
     
     long scheduledArrivalTimeBB = getScheduledArrivalTimeByStopId(mTrip2,
@@ -925,25 +925,19 @@ public class ArrivalAndDepartureServiceImplTest {
     long predictedArrivalTimeBC = getPredictedArrivalTimeByStopIdAndSequence(
         arrivalsAndDepartures, mStopA.getId(), mTrip2.getId(), 2);
     
-    long scheduledArrivalTimeStopCA = getScheduledArrivalTimeByStopId(mTrip3,
-        mStopA.getId(), 0);
     long predictedArrivalTimeCA = getPredictedArrivalTimeByStopIdAndSequence(
         arrivalsAndDepartures, mStopA.getId(), mTrip3.getId(), 0);
     
-    long scheduledArrivalTimeStopCB = getScheduledArrivalTimeByStopId(mTrip3,
-        mStopB.getId(), 1);
     long predictedArrivalTimeCB = getPredictedArrivalTimeByStopIdAndSequence(
         arrivalsAndDepartures, mStopB.getId(), mTrip3.getId(), 1);
     
-    long scheduledArrivalTimeStopCC = getScheduledArrivalTimeByStopId(mTrip3,
-        mStopA.getId(), 2);
     long predictedArrivalTimeCC = getPredictedArrivalTimeByStopIdAndSequence(
         arrivalsAndDepartures, mStopA.getId(), mTrip3.getId(), 2);
 
     assertEquals(scheduledArrivalTimeStopBC + delta , TimeUnit.MILLISECONDS.toSeconds(predictedArrivalTimeBC));
-    assertEquals(scheduledArrivalTimeStopCA + delta , TimeUnit.MILLISECONDS.toSeconds(predictedArrivalTimeCA));
-    assertEquals(scheduledArrivalTimeStopCB + delta , TimeUnit.MILLISECONDS.toSeconds(predictedArrivalTimeCB));
-    assertEquals(scheduledArrivalTimeStopCC + delta , TimeUnit.MILLISECONDS.toSeconds(predictedArrivalTimeCC));
+    assertEquals(0, predictedArrivalTimeCA);
+    assertEquals(0, predictedArrivalTimeCB);
+    assertEquals(0, predictedArrivalTimeCC);
   }
   
   /**
@@ -1026,35 +1020,42 @@ public class ArrivalAndDepartureServiceImplTest {
     assertEquals(tprA.getTimepointPredictedArrivalTime(), predictedArrivalTime2C);
     
     /**
-     * Make sure the predictions happening downstream based on the last stop
-     * of the trip B
+     * Make sure predictions do not leak to the next trip in the block without
+     * an explicit prediction for that trip.
      */
     
-    long scheduledArrivalTime2C = getScheduledArrivalTimeByStopId(mTrip2,
-        mStopA.getId(), 2);
-    // Calculate the delay of the last stop A in trip B
-    long delta = TimeUnit.MILLISECONDS.toSeconds(predictedArrivalTime2C)
-        - scheduledArrivalTime2C;
-    
     // Third trip in block
-    long scheduledArrivalTimeStop3A = getScheduledArrivalTimeByStopId(mTrip3,
-        mStopA.getId(), 0);
     long predictedArrivalTime3A = getPredictedArrivalTimeByStopIdAndSequence(
         arrivalsAndDepartures, mStopA.getId(), mTrip3.getId(), 0);
     
-    long scheduledArrivalTimeStop3B = getScheduledArrivalTimeByStopId(mTrip3,
-        mStopB.getId(), 1);
     long predictedArrivalTime3B = getPredictedArrivalTimeByStopIdAndSequence(
         arrivalsAndDepartures, mStopB.getId(), mTrip3.getId(), 1);
     
-    long scheduledArrivalTimeStop3C = getScheduledArrivalTimeByStopId(mTrip3,
-        mStopA.getId(), 2);
     long predictedArrivalTime3C = getPredictedArrivalTimeByStopIdAndSequence(
         arrivalsAndDepartures, mStopA.getId(), mTrip3.getId(), 2);
 
-    assertEquals(scheduledArrivalTimeStop3A + delta, TimeUnit.MILLISECONDS.toSeconds(predictedArrivalTime3A));
-    assertEquals(scheduledArrivalTimeStop3B + delta, TimeUnit.MILLISECONDS.toSeconds(predictedArrivalTime3B));
-    assertEquals(scheduledArrivalTimeStop3C + delta, TimeUnit.MILLISECONDS.toSeconds(predictedArrivalTime3C));
+    assertEquals(0, predictedArrivalTime3A);
+    assertEquals(0, predictedArrivalTime3B);
+    assertEquals(0, predictedArrivalTime3C);
+  }
+
+  @Test
+  public void testGetArrivalsAndDeparturesDoesNotDuplicateTripsForOtherBlockVehicles() {
+    mCurrentTime = dateAsLong("2015-07-23 14:00");
+
+    TimepointPredictionRecord trip2Prediction = new TimepointPredictionRecord();
+    trip2Prediction.setTimepointId(mStopB.getId());
+    trip2Prediction.setTimepointPredictedArrivalTime(createPredictedTime(time(14, 25)));
+    trip2Prediction.setTripId(mTrip2.getId());
+
+    List<ArrivalAndDepartureInstance> arrivalsAndDepartures =
+        getArrivalsAndDeparturesForTwoVehicleBlock(Arrays.asList(trip2Prediction));
+
+    assertEquals(1, countArrivalsAndDeparturesForTrip(arrivalsAndDepartures, mTrip1.getId()));
+    assertEquals(1, countArrivalsAndDeparturesForTrip(arrivalsAndDepartures, mTrip2.getId()));
+    assertEquals(trip2Prediction.getTimepointPredictedArrivalTime(),
+        getPredictedArrivalTimeByStopIdAndSequence(arrivalsAndDepartures,
+            mStopB.getId(), mTrip2.getId(), 1));
   }
   
   /**
@@ -2315,9 +2316,91 @@ public class ArrivalAndDepartureServiceImplTest {
         stopTimeFrom, stopTimeTo);
   }
 
+  private List<ArrivalAndDepartureInstance> getArrivalsAndDeparturesForTwoVehicleBlock(
+      List<TimepointPredictionRecord> trip2Predictions) {
+    TargetTime target = new TargetTime(mCurrentTime, mCurrentTime);
+
+    BlockEntryImpl block = block("blockA");
+
+    stopTime(0, mStopA, mTrip1, time(13, 30), time(13, 35), 1000);
+    stopTime(1, mStopB, mTrip1, time(13, 45), time(13, 50), 2000);
+
+    stopTime(0, mStopA, mTrip2, time(14, 05), time(14, 10), 1000);
+    stopTime(1, mStopB, mTrip2, time(14, 15), time(14, 20), 2000);
+
+    BlockConfigurationEntry blockConfig = blockConfiguration(block,
+        serviceIds(lsids("sA", "sB"), lsids()), mTrip1, mTrip2);
+    BlockStopTimeEntry trip1StopB = blockConfig.getStopTimes().get(1);
+    BlockStopTimeEntry trip2StopB = blockConfig.getStopTimes().get(3);
+
+    BlockInstance blockInstance = new BlockInstance(blockConfig, mServiceDate);
+
+    long stopTimeFrom = dateAsLong("2015-07-23 00:00");
+    long stopTimeTo = dateAsLong("2015-07-24 00:00");
+
+    StopTimeInstance trip1StopTimeInstance = new StopTimeInstance(trip1StopB,
+        blockInstance.getState());
+    StopTimeInstance trip2StopTimeInstance = new StopTimeInstance(trip2StopB,
+        blockInstance.getState());
+
+    Date fromTimeBuffered = new Date(stopTimeFrom
+        - _blockStatusService.getRunningLateWindow() * 1000);
+    Date toTimeBuffered = new Date(stopTimeTo
+        + _blockStatusService.getRunningEarlyWindow() * 1000);
+
+    Mockito.when(
+        _stopTimeService.getStopTimeInstancesInTimeRange(mStopB,
+            fromTimeBuffered, toTimeBuffered,
+            EFrequencyStopTimeBehavior.INCLUDE_UNSPECIFIED)).thenReturn(
+        Arrays.asList(trip1StopTimeInstance, trip2StopTimeInstance));
+
+    VehicleLocationRecordCacheImpl cache = new VehicleLocationRecordCacheImpl();
+    addVehicleLocationRecord(cache, blockInstance, trip1StopB, mTrip1.getId(),
+        new AgencyAndId("1", "vehicle-1"), null);
+    addVehicleLocationRecord(cache, blockInstance, trip2StopB, mTrip2.getId(),
+        new AgencyAndId("1", "vehicle-2"), trip2Predictions);
+
+    _blockLocationService.setVehicleLocationRecordCache(cache);
+    ScheduledBlockLocationServiceImpl scheduledBlockLocationServiceImpl =
+        new ScheduledBlockLocationServiceImpl();
+    _blockLocationService.setScheduledBlockLocationService(scheduledBlockLocationServiceImpl);
+
+    return _service.getArrivalsAndDeparturesForStopInTimeRange(mStopB, target,
+        stopTimeFrom, stopTimeTo);
+  }
+
+  private void addVehicleLocationRecord(VehicleLocationRecordCacheImpl cache,
+      BlockInstance blockInstance, BlockStopTimeEntry blockStopTime,
+      AgencyAndId tripId, AgencyAndId vehicleId,
+      List<TimepointPredictionRecord> timepointPredictions) {
+    VehicleLocationRecord record = new VehicleLocationRecord();
+    record.setBlockId(blockInstance.getBlock().getBlock().getId());
+    record.setTripId(tripId);
+    record.setTimepointPredictions(timepointPredictions);
+    record.setTimeOfRecord(mCurrentTime);
+    record.setVehicleId(vehicleId);
+
+    ScheduledBlockLocation scheduledBlockLocation = new ScheduledBlockLocation();
+    scheduledBlockLocation.setActiveTrip(blockStopTime.getTrip());
+
+    cache.addRecord(blockInstance, record, scheduledBlockLocation, null);
+  }
+
   //
   // Helper methods
   //
+
+  private int countArrivalsAndDeparturesForTrip(
+      List<ArrivalAndDepartureInstance> arrivalsAndDepartures,
+      AgencyAndId tripId) {
+    int count = 0;
+    for (ArrivalAndDepartureInstance adi : arrivalsAndDepartures) {
+      if (tripId.equals(adi.getStopTimeInstance().getTrip().getTrip().getId())) {
+        count++;
+      }
+    }
+    return count;
+  }
 
   private long getPredictedArrivalTimeByStopId(
       List<ArrivalAndDepartureInstance> arrivalsAndDepartures,
