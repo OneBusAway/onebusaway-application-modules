@@ -190,6 +190,15 @@
 
   <bean id="gtfsStats" class="org.onebusaway.transit_data_federation.bundle.tasks.GtfsStatisticsTask" />
   
+  <!-- Bundle Metadata (writes metadata.json with staticGtfsHash) -->
+  <bean class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
+    <property name="taskName" value="bundle_metadata" />
+    <property name="afterTaskName" value="gtfs_stats" />
+    <property name="task" ref="bundleMetadataTask" />
+  </bean>
+
+  <bean id="bundleMetadataTask" class="org.onebusaway.transit_data_federation.bundle.tasks.WriteBundleMetadataTask" />
+  
       
   <!-- <bean id="bundleManagementService" class="org.onebusaway.transit_data_federation.impl.bundle.SingleBundleManagementServiceImpl" /> -->
 

@@ -70,6 +70,22 @@ public class SingleBundleManagementServiceImpl implements
 
   }
 
+  /**
+   * Single-bundle mode does not track a load time; always null.
+   */
+  @Override
+  public Date getBundleLoadTime() {
+    return null;
+  }
+
+  /**
+   * Whether the current bundle's metadata file exists but could not be read.
+   */
+  @Override
+  public boolean isBundleMetadataUnreadable() {
+    return _bundleConfigDao != null && _bundleConfigDao.isMetadataUnreadable();
+  }
+
   @Override
   public List<BundleItem> getAllKnownBundles() {
     return null;

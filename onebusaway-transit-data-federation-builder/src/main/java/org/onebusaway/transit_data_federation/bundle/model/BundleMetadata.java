@@ -30,6 +30,7 @@ public class BundleMetadata {
   private String changeLogUri;
   private String statisticsUri;
   private String validationUri;
+  private String staticGtfsHash;
   
   public String getId() {
     return id;
@@ -85,6 +86,12 @@ public class BundleMetadata {
   }
   public void setValidationUri(String uri) {
     this.validationUri = uri;
+  }
+  public String getStaticGtfsHash() {
+    return staticGtfsHash;
+  }
+  public void setStaticGtfsHash(String staticGtfsHash) {
+    this.staticGtfsHash = staticGtfsHash;
   }
   
 }

@@ -39,7 +39,11 @@ public class BundleConfigDao {
   private FederatedTransitDataBundle _bundle;
   
   private BundleMetadata _meta;
-  
+
+  // True when metadata.json exists but could not be parsed (corrupt). A
+  // missing file (old bundle) leaves this false.
+  private boolean _metadataUnreadable = false;
+
   @Autowired
   public void setBundle(FederatedTransitDataBundle bundle) {
     _bundle = bundle;
@@ -48,11 +52,16 @@ public class BundleConfigDao {
   public BundleMetadata getBundleMetadata() {
     return _meta;
   }
+
+  public boolean isMetadataUnreadable() {
+    return _metadataUnreadable;
+  }
   
   @PostConstruct
   @Refreshable(dependsOn = RefreshableResources.TRANSIT_GRAPH)
   public void setup() throws IOException, ClassNotFoundException {
     _meta = null;
+    _metadataUnreadable = false;
     File path = _bundle.getBundleMetadataPath();
     
     
@@ -65,6 +74,7 @@ public class BundleConfigDao {
         meta = mapper.readValue(path, BundleMetadata.class);
       } catch (Exception any) {
         _log.error("reading metadata failed:", any);
+        _metadataUnreadable = true;
       }
       if (meta != null) {
         _meta = meta;

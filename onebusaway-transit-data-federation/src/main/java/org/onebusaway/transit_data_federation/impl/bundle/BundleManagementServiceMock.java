@@ -99,6 +99,18 @@ public class BundleManagementServiceMock implements BundleManagementService {
 	}
 
 	@Override
+	public Date getBundleLoadTime() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public boolean isBundleMetadataUnreadable() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
 	public void changeBundle(String bundleId) throws Exception {
 		// TODO Auto-generated method stub
 		

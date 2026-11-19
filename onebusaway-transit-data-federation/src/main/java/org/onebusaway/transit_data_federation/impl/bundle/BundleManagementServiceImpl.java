@@ -33,6 +33,7 @@ import org.onebusaway.transit_data_federation.impl.RefreshableResources;
 import org.onebusaway.transit_data_federation.impl.config.BundleConfigDao;
 import org.onebusaway.transit_data_federation.model.bundle.BundleItem;
 import org.onebusaway.util.AgencyAndIdLibrary;
+import org.onebusaway.utility.DateLibrary;
 import org.onebusaway.transit_data_federation.services.FederatedTransitDataBundle;
 import org.onebusaway.transit_data_federation.services.bundle.BundleManagementService;
 import org.onebusaway.transit_data_federation.services.bundle.BundleStoreService;
@@ -53,6 +54,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.TimeZone;
 import java.util.concurrent.Future;
 
 
@@ -90,9 +92,13 @@ public class BundleManagementServiceImpl implements BundleManagementService {
   
   protected boolean _builderMode = false;
 
-  protected boolean _bundleIsReady = false;
+  // Volatile so a thread observing readiness (via bundleIsReady()) also sees
+  // the _bundleLoadTime write that precedes it in changeBundle().
+  protected volatile boolean _bundleIsReady = false;
 
   protected String _currentBundleId = null;
+
+  protected Date _bundleLoadTime = null;
 
   public String getCurrentBundleId() {
     return _currentBundleId;
@@ -308,14 +314,44 @@ public class BundleManagementServiceImpl implements BundleManagementService {
     return _bundleConfigDao.getBundleMetadata().getId();
   }
 
+  /**
+   * Returns the current bundle's metadata, stamped with the time this bundle
+   * was loaded ({@code staticGtfsLastUpdated}, RFC 3339 UTC), or null when no
+   * bundle metadata exists (old bundle) or the config DAO is unavailable.
+   */
   @Override
   public BundleMetadata getBundleMetadata() {
     if (_bundleConfigDao == null) {
       _log.error("config error:  bundleConfigDao is null");
       return null;
     }
-    return _bundleConfigDao.getBundleMetadata();
+    BundleMetadata meta = _bundleConfigDao.getBundleMetadata();
+    if (meta != null && _bundleLoadTime != null) {
+      // Stamp the time this bundle was actually loaded (RFC 3339 UTC).
+      // This is a load time, not a service date and not a file mtime.
+      // Format in UTC explicitly: the one-arg helper uses the JVM default
+      // timezone, which would emit a local offset instead of 'Z'.
+      meta.setStaticGtfsLastUpdated(DateLibrary.getTimeAsIso8601String(_bundleLoadTime, TimeZone.getTimeZone("UTC")));
+    }
+    return meta;
 
+  }
+
+  /**
+   * The time the current bundle finished loading, or null when no bundle
+   * has been loaded yet.
+   */
+  @Override
+  public Date getBundleLoadTime() {
+    return _bundleLoadTime;
+  }
+
+  /**
+   * Whether the current bundle's metadata file exists but could not be read.
+   */
+  @Override
+  public boolean isBundleMetadataUnreadable() {
+    return _bundleConfigDao != null && _bundleConfigDao.isMetadataUnreadable();
   }
 
   @Override
@@ -333,6 +369,11 @@ public class BundleManagementServiceImpl implements BundleManagementService {
     return _applicableBundles.get(_currentBundleId);
   }
 
+  /**
+   * Whether the current bundle is ready to serve requests. Always true in
+   * builder mode; otherwise reflects the readiness flag set when a bundle
+   * finishes loading.
+   */
   // Can messages be processed using this bundle and current state?
   @Override
   public Boolean bundleIsReady() {
@@ -358,6 +399,11 @@ public class BundleManagementServiceImpl implements BundleManagementService {
     changeBundle(bundleId, bundleId);
   }
   
+  /**
+   * Switches the active bundle to the given id and name. Validates the bundle,
+   * waits for inference threads to finish, loads it, then publishes the load
+   * time before marking it ready.
+   */
   public void changeBundle(String bundleId, String bundleName) throws Exception {
     if (bundleId == null || !_applicableBundles.containsKey(bundleId)) {
       throw new Exception("Bundle " + bundleName
@@ -454,6 +500,10 @@ public class BundleManagementServiceImpl implements BundleManagementService {
     _log.info("Garbage collection after bundle switch complete.");
 
     _currentBundleId = bundleId;
+    // Publish the load time before readiness: a request that observes the
+    // new bundle as ready must also see this bundle's timestamp, not the
+    // previous bundle's (or none). Readiness stays the final publication step.
+    _bundleLoadTime = new Date();
     _bundleIsReady = true;
     _log.info("New bundle is now ready.");
 
