@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
-import java.sql.Date;
+import java.util.Date;
 
 public class VehiclePositionForVehicleAction extends ApiActionSupport {
 
