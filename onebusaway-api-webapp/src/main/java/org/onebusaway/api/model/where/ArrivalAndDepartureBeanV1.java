@@ -146,7 +146,7 @@ public class ArrivalAndDepartureBeanV1 implements Serializable {
   }
 
   public boolean hasPredictedDepartureTime() {
-    return this.predictedArrivalTime > 0;
+    return this.predictedDepartureTime > 0;
   }
 
   public long computeBestArrivalTime() {

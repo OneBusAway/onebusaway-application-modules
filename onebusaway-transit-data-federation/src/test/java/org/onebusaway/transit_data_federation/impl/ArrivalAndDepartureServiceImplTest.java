@@ -19,6 +19,8 @@ import static org.junit.Assert.*;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.block;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.blockConfiguration;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.dateAsLong;
+import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.frequency;
+import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.linkBlockTrips;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.lsids;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.serviceIds;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.stop;
@@ -48,6 +50,7 @@ import org.onebusaway.transit_data_federation.services.realtime.ArrivalAndDepart
 import org.onebusaway.transit_data_federation.services.realtime.BlockLocation;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.FrequencyEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
 import org.junit.Before;
 import org.junit.Test;
@@ -97,6 +100,10 @@ public class ArrivalAndDepartureServiceImplTest {
   private TripEntryImpl mTrip2 = trip("tripB", "sB", 3000);
   
   private TripEntryImpl mTrip3 = trip("tripC", "sC", 3000);
+
+  // Used by getArrivalsAndDeparturesForFrequencyStopInTimeRangeByTimepointPredictionRecord,
+  // which builds its own fresh TripEntryImpl per call (see that method for why).
+  private static final AgencyAndId FREQ_TRIP_ID = new AgencyAndId("1", "tripFreqA");
 
   @Before
   public void setup() {
@@ -1696,6 +1703,171 @@ public class ArrivalAndDepartureServiceImplTest {
   }
 
   /**
+   * Regression test for issue #474: when a TimepointPredictionRecord has
+   * neither a real predicted arrival nor departure (both left at the -1
+   * "no prediction" sentinel -- e.g. a SKIPPED stop or a dynamic trip update
+   * with no times populated), the service must not synthesize a bogus
+   * departure via arrivalTime + slack (which corrupts -1 into
+   * slack*1000 - 1, a small positive number indistinguishable from a real
+   * timestamp). Both predicted arrival and departure must resolve to this
+   * class's own "no prediction" sentinel, 0.
+   */
+  @Test
+  public void testGetArrivalsAndDeparturesForStopInTimeRange20() {
+    mCurrentTime = dateAsLong("2015-07-23 14:00");
+
+    TimepointPredictionRecord tprB = new TimepointPredictionRecord();
+    tprB.setTimepointId(mStopB.getId());
+    tprB.setTripId(mTrip1.getId());
+    // arrival and departure left at their TimepointPredictionRecord default of -1
+
+    List<ArrivalAndDepartureInstance> arrivalsAndDepartures =
+        getArrivalsAndDeparturesForStopInTimeRangeByTimepointPredictionRecord(Arrays.asList(tprB));
+
+    // Locate the instance for stop B directly and fail loudly if it's
+    // missing -- getPredictedArrivalTimeByStopId/getPredictedDepartureTimeByStopId
+    // return 0 by default when the stop isn't found at all, which would let
+    // the "predicted == 0" assertions below pass vacuously even if the row
+    // was dropped from the result set entirely.
+    ArrivalAndDepartureInstance stopB = findInstanceForStop(
+        arrivalsAndDepartures, mStopB.getId());
+    assertNotNull("expected an arrival/departure instance for stop B", stopB);
+
+    assertEquals(0, stopB.getPredictedArrivalTime());
+    assertEquals(0, stopB.getPredictedDepartureTime());
+    assertFalse(stopB.isPredictedArrivalTimeSet());
+    assertFalse(stopB.isPredictedDepartureTimeSet());
+  }
+
+  /**
+   * Companion to test20: when departure IS a real prediction but arrival is
+   * missing (-1), the "be polite to clients" fallback should still serve
+   * departureTime as the arrival time.
+   */
+  @Test
+  public void testGetArrivalsAndDeparturesForStopInTimeRange21() {
+    mCurrentTime = dateAsLong("2015-07-23 14:00");
+
+    TimepointPredictionRecord tprB = new TimepointPredictionRecord();
+    tprB.setTimepointId(mStopB.getId());
+    tprB.setTripId(mTrip1.getId());
+    long tprBDepartureTime = createPredictedTime(time(13, 50));
+    tprB.setTimepointPredictedDepartureTime(tprBDepartureTime);
+    // arrival left at default -1; departure is real, so no synthesis should
+    // occur, and predicted arrival should be "politely" set to departureTime
+
+    List<ArrivalAndDepartureInstance> arrivalsAndDepartures =
+        getArrivalsAndDeparturesForStopInTimeRangeByTimepointPredictionRecord(Arrays.asList(tprB));
+
+    long predictedDepartureTimeStopB = getPredictedDepartureTimeByStopId(
+        arrivalsAndDepartures, mStopB.getId());
+    long predictedArrivalTimeStopB = getPredictedArrivalTimeByStopId(
+        arrivalsAndDepartures, mStopB.getId());
+
+    assertEquals(tprBDepartureTime, predictedDepartureTimeStopB);
+    assertEquals(predictedDepartureTimeStopB, predictedArrivalTimeStopB);
+  }
+
+  /**
+   * Companion to test20/21: when arrival IS a real prediction but departure
+   * is missing (-1), departure should still be synthesized as
+   * arrival + slack (the existing, legitimate happy path) -- confirming the
+   * arrivalTime > 0 guard doesn't over-restrict this case.
+   */
+  @Test
+  public void testGetArrivalsAndDeparturesForStopInTimeRange22() {
+    mCurrentTime = dateAsLong("2015-07-23 14:00");
+
+    TimepointPredictionRecord tprB = new TimepointPredictionRecord();
+    tprB.setTimepointId(mStopB.getId());
+    tprB.setTripId(mTrip1.getId());
+    long tprBArrivalTime = createPredictedTime(time(13, 45));
+    tprB.setTimepointPredictedArrivalTime(tprBArrivalTime);
+    // departure left at default -1; arrival is real, so departure should be
+    // synthesized as arrival + slack (stopB's slack is its scheduled
+    // departure-minus-arrival, 13:45 -> 13:50 = 300s)
+
+    List<ArrivalAndDepartureInstance> arrivalsAndDepartures =
+        getArrivalsAndDeparturesForStopInTimeRangeByTimepointPredictionRecord(Arrays.asList(tprB));
+
+    long predictedArrivalTimeStopB = getPredictedArrivalTimeByStopId(
+        arrivalsAndDepartures, mStopB.getId());
+    long predictedDepartureTimeStopB = getPredictedDepartureTimeByStopId(
+        arrivalsAndDepartures, mStopB.getId());
+
+    assertEquals(tprBArrivalTime, predictedArrivalTimeStopB);
+    assertEquals(tprBArrivalTime + 300 * 1000, predictedDepartureTimeStopB);
+  }
+
+  /**
+   * Regression test for issue #474: for a FREQUENCY-based trip,
+   * {@code setPredictedArrivalTimeForInstance}/{@code setPredictedDepartureTimeForInstance}
+   * also update the instance's *scheduled* time (since frequency-based
+   * schedules are computed relative to realtime). Before the fix, clearing a
+   * prediction to the "no prediction" sentinel (0) -- as happens here, since
+   * the TimepointPredictionRecord has neither a real arrival nor departure --
+   * would stomp the previously-computed scheduled arrival/departure with 0 as
+   * well, which in turn knocks the row out of the requested time-range filter
+   * entirely (0 is nowhere near any real query window). The fix must leave
+   * the frequency schedule untouched when there's nothing real to predict.
+   */
+  @Test
+  public void testGetArrivalsAndDeparturesForStopInTimeRange23() {
+    mCurrentTime = dateAsLong("2015-07-23 13:32");
+
+    int freqStartTime = time(13, 0);
+    int freqEndTime = time(15, 0);
+    int headwaySecs = 600;
+
+    // Baseline: no timepoint predictions at all (block location carries no
+    // TimepointPredictionRecords), so the service never touches the
+    // predicted fields and the scheduled time reflects pure frequency math.
+    // This is what the scheduled time *should* still be after the realtime
+    // call below, since only a real prediction is allowed to shift it.
+    List<ArrivalAndDepartureInstance> baseline =
+        getArrivalsAndDeparturesForFrequencyStopInTimeRangeByTimepointPredictionRecord(
+            null, freqStartTime, freqEndTime, headwaySecs);
+    ArrivalAndDepartureInstance baselineStopB = findInstanceForStop(baseline,
+        mStopB.getId());
+    assertNotNull("test setup sanity check: expected a baseline frequency instance for stop B",
+        baselineStopB);
+    long expectedScheduledArrival = baselineStopB.getScheduledArrivalTime();
+    long expectedScheduledDeparture = baselineStopB.getScheduledDepartureTime();
+
+    // Now apply a TimepointPredictionRecord that carries neither a real
+    // arrival nor departure (both left at the TPR's default -1 sentinel).
+    TimepointPredictionRecord tprB = new TimepointPredictionRecord();
+    tprB.setTimepointId(mStopB.getId());
+    tprB.setTripId(FREQ_TRIP_ID);
+
+    List<ArrivalAndDepartureInstance> arrivalsAndDepartures =
+        getArrivalsAndDeparturesForFrequencyStopInTimeRangeByTimepointPredictionRecord(
+            Arrays.asList(tprB), freqStartTime, freqEndTime, headwaySecs);
+
+    ArrivalAndDepartureInstance stopB = findInstanceForStop(
+        arrivalsAndDepartures, mStopB.getId());
+    assertNotNull(
+        "frequency row for stop B must not be dropped when realtime has no usable prediction",
+        stopB);
+
+    assertEquals(0, stopB.getPredictedArrivalTime());
+    assertEquals(0, stopB.getPredictedDepartureTime());
+    assertFalse(stopB.isPredictedArrivalTimeSet());
+    assertFalse(stopB.isPredictedDepartureTimeSet());
+
+    // The frequency schedule must be untouched by the cleared prediction.
+    assertEquals(expectedScheduledArrival, stopB.getScheduledArrivalTime());
+    assertEquals(expectedScheduledDeparture, stopB.getScheduledDepartureTime());
+
+    // And that schedule must still fall within the frequency's service
+    // window, i.e. it wasn't corrupted down to the sentinel value.
+    long freqStart = mServiceDate + freqStartTime * 1000L;
+    long freqEnd = mServiceDate + freqEndTime * 1000L;
+    assertTrue(stopB.getScheduledArrivalTime() >= freqStart);
+    assertTrue(stopB.getScheduledDepartureTime() <= freqEnd);
+  }
+
+  /**
    * Testing StopTime update SKIPPED stops support
    */
   @Test
@@ -1830,6 +2002,117 @@ public class ArrivalAndDepartureServiceImplTest {
     return _service.getArrivalsAndDeparturesForStopInTimeRange(mStopB, target,
         stopTimeFrom, stopTimeTo);
   }
+
+  /**
+   * Similar in spirit to {@link #getArrivalsAndDeparturesForStopInTimeRangeByTimepointPredictionRecord},
+   * but the trip is FREQUENCY-based (headway-driven, no fixed schedule)
+   * rather than schedule-based, and the block has just the one stop (B).
+   * Used to exercise the frequency-schedule-corruption regression covered by
+   * {@code testGetArrivalsAndDeparturesForStopInTimeRange23}.
+   *
+   * A fresh {@link TripEntryImpl} is built on every call (rather than reusing
+   * a shared field) because that test invokes this helper twice -- once for
+   * a "baseline" schedule and once with realtime applied -- and stop times
+   * accumulate on a trip across calls ({@code addStopTime} appends), which
+   * would otherwise leave the second call's block referencing the first
+   * call's (still index-0) stop time entry.
+   *
+   * A single stop also sidesteps {@code applyPostInterpolateForFrequencyNoSchedule}
+   * cross-stop interference: with more than one stop in the block, that
+   * method can synthesize extra instances for one stop using another
+   * already-processed stop's "best" instance as its time base, corrupting
+   * the very value under test here.
+   *
+   * stop_id     trip_id       stop_sequence
+   *    B        tripFreqA          0
+   *
+   * @param timepointPredictions real-time predictions to apply to the
+   *          BlockLocationServiceImpl, or null to apply none at all
+   * @param freqStartTime frequency service window start, in seconds since
+   *          midnight on the service date
+   * @param freqEndTime frequency service window end, in seconds since
+   *          midnight on the service date
+   * @param headwaySecs frequency headway, in seconds
+   * @return a list of ArrivalAndDepartureInstances which is used to access
+   *         predicted/scheduled arrival/departure times for a stop, for
+   *         comparison against the expected values
+   */
+  private List<ArrivalAndDepartureInstance> getArrivalsAndDeparturesForFrequencyStopInTimeRangeByTimepointPredictionRecord(
+      List<TimepointPredictionRecord> timepointPredictions, int freqStartTime,
+      int freqEndTime, int headwaySecs) {
+    TargetTime target = new TargetTime(mCurrentTime, mCurrentTime);
+
+    // Setup block and a fresh trip (see method javadoc for why it's fresh)
+    BlockEntryImpl block = block("blockFreqA");
+    TripEntryImpl trip = trip(FREQ_TRIP_ID.getId(), "sA", 3000);
+
+    stopTime(0, mStopB, trip, time(13, 45), time(13, 50), 2000, 20.0);
+
+    FrequencyEntry freq = frequency(freqStartTime, freqEndTime, headwaySecs, 0);
+    BlockConfigurationEntry blockConfig = linkBlockTrips(block,
+        Arrays.asList(freq), trip);
+    BlockStopTimeEntry bstB = blockConfig.getStopTimes().get(0);
+
+    // Setup block location instance for the trip
+    BlockInstance blockInstance = new BlockInstance(blockConfig, mServiceDate,
+        freq);
+    BlockLocation blockLocation = new BlockLocation();
+    blockLocation.setActiveTrip(bstB.getTrip());
+    blockLocation.setBlockInstance(blockInstance);
+    blockLocation.setClosestStop(bstB);
+    blockLocation.setDistanceAlongBlock(400);
+    blockLocation.setInService(true);
+    blockLocation.setNextStop(bstB);
+    blockLocation.setPredicted(false);
+    blockLocation.setScheduledDistanceAlongBlock(400);
+
+    if (timepointPredictions != null) {
+      blockLocation.setTimepointPredictions(timepointPredictions);
+    }
+
+    // Mock StopTimeInstance with time frame
+    long stopTimeFrom = dateAsLong("2015-07-23 00:00");
+    long stopTimeTo = dateAsLong("2015-07-24 00:00");
+
+    StopTimeInstance stiB = new StopTimeInstance(bstB, blockInstance.getState());
+
+    Date fromTimeBuffered = new Date(stopTimeFrom
+        - _blockStatusService.getRunningLateWindow() * 1000);
+    Date toTimeBuffered = new Date(stopTimeTo
+        + _blockStatusService.getRunningEarlyWindow() * 1000);
+
+    Mockito.when(
+        _stopTimeService.getStopTimeInstancesInTimeRange(mStopB,
+            fromTimeBuffered, toTimeBuffered,
+            EFrequencyStopTimeBehavior.INCLUDE_UNSPECIFIED)).thenReturn(
+        Arrays.asList(stiB));
+
+    // Create and add vehicle location record cache
+    VehicleLocationRecordCacheImpl cache = new VehicleLocationRecordCacheImpl();
+    VehicleLocationRecord vlr = new VehicleLocationRecord();
+    vlr.setBlockId(block.getId());
+    vlr.setTripId(trip.getId());
+    if (timepointPredictions != null) {
+      vlr.setTimepointPredictions(timepointPredictions);
+    }
+    vlr.setTimeOfRecord(mCurrentTime);
+    vlr.setVehicleId(new AgencyAndId("1", "123"));
+
+    // Create ScheduledBlockLocation for cache
+    ScheduledBlockLocation sbl = new ScheduledBlockLocation();
+    sbl.setActiveTrip(blockLocation.getActiveTrip());
+
+    // Add data to cache
+    cache.addRecord(blockInstance, vlr, sbl, null);
+    _blockLocationService.setVehicleLocationRecordCache(cache);
+    ScheduledBlockLocationServiceImpl scheduledBlockLocationServiceImpl = new ScheduledBlockLocationServiceImpl();
+    _blockLocationService.setScheduledBlockLocationService(scheduledBlockLocationServiceImpl);
+
+    // Call ArrivalAndDepartureService
+    return _service.getArrivalsAndDeparturesForStopInTimeRange(mStopB, target,
+        stopTimeFrom, stopTimeTo);
+  }
+
   /**
    * Set up the BlockLocationServiceImpl for the test, using the given
    * timepointPredictions
@@ -2318,6 +2601,17 @@ public class ArrivalAndDepartureServiceImplTest {
   //
   // Helper methods
   //
+
+  private ArrivalAndDepartureInstance findInstanceForStop(
+      List<ArrivalAndDepartureInstance> arrivalsAndDepartures,
+      AgencyAndId stopId) {
+    for (ArrivalAndDepartureInstance adi : arrivalsAndDepartures) {
+      if (adi.getStop().getId().equals(stopId)) {
+        return adi;
+      }
+    }
+    return null;
+  }
 
   private long getPredictedArrivalTimeByStopId(
       List<ArrivalAndDepartureInstance> arrivalsAndDepartures,
