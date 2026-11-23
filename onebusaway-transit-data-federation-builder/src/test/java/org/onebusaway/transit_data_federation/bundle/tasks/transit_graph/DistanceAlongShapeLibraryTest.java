@@ -16,7 +16,6 @@
 package org.onebusaway.transit_data_federation.bundle.tasks.transit_graph;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.BufferedReader;
@@ -28,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.Test;
+import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
 import org.onebusaway.transit_data_federation.impl.transit_graph.DistanceAlongShapeLibrary;
 import org.onebusaway.transit_data_federation.impl.transit_graph.DistanceAlongShapeLibrary.DistanceAlongShapeException;
 import org.onebusaway.transit_data_federation.impl.shapes.PointAndIndex;
@@ -184,11 +184,9 @@ public class DistanceAlongShapeLibraryTest {
     double[] dist = t.shapePoints.getDistTraveled();
     double length = dist[dist.length - 1];
     double half = length / 2;
-    double last = -1;
+    assertMonotonic(points);
     for (int i = 0; i < points.length; i++) {
-      assertTrue("stop " + i + " goes backwards",
-          points[i].distanceAlongShape >= last);
-      last = points[i].distanceAlongShape;
+      double last = points[i].distanceAlongShape;
       if (i < stopsPerDirection)
         assertTrue("outbound stop " + i + " at " + last,
             last < half);
@@ -211,14 +209,15 @@ public class DistanceAlongShapeLibraryTest {
         t.stopTimes);
     long elapsedMs = (System.nanoTime() - start) / 1000000;
 
-    assertNotNull(points);
     assertEquals(2 * stopsPerDirection, points.length);
     assertTrue("took " + elapsedMs + " ms", elapsedMs < 2000);
-    double last = -1;
-    for (PointAndIndex p : points) {
-      assertTrue(p.distanceAlongShape >= last);
-      last = p.distanceAlongShape;
-    }
+    assertMonotonic(points);
+  }
+
+  private static void assertMonotonic(PointAndIndex[] points) {
+    for (int i = 1; i < points.length; i++)
+      assertTrue("stop " + i + " goes backwards",
+          points[i].distanceAlongShape >= points[i - 1].distanceAlongShape);
   }
 
   private static class OutAndBack {
@@ -235,7 +234,7 @@ public class DistanceAlongShapeLibraryTest {
       double shapePointSpacingMeters) {
     double lat0 = 47.6;
     double lon0 = -122.3;
-    double metersPerDegLat = 111320.0;
+    double metersPerDegLat = SphericalGeometryLibrary.METERS_PER_DEGREE_AT_EQUATOR;
     double metersPerDegLon = metersPerDegLat * Math.cos(Math.toRadians(lat0));
     double laneOffsetLat = 12.0 / metersPerDegLat;
 

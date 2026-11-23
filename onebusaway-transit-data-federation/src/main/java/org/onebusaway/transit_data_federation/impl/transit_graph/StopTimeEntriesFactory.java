@@ -257,16 +257,19 @@ private void removeDuplicateStopTimes(List<StopTime> stopTimes) {
             + point + " index=" + pindex.index + " distance="
             + pindex.distanceFromTarget);
       } catch (DistanceAlongShapeLibrary.DistanceAlongShapeException ex) {
-        TripEntry failedTrip = stopTimes.isEmpty() ? null
-            : stopTimes.get(0).getTrip();
-        _log.warn("Could not assign stops to shape for trip="
-            + (failedTrip == null ? null : failedTrip.getId()) + " shapeId="
-            + (failedTrip == null ? null : failedTrip.getShapeId())
-            + "; falling back to straight-line stop-to-stop distances: "
-            + ex.getMessage());
         _invalidStopToShapeMappingExceptionCount++;
       } catch (IllegalArgumentException iae) {
         _log.warn("Stop has illegal coordinates along shapes=" + shapePoints);
+      }
+
+      if (!distanceTraveledSet && !stopTimes.isEmpty()) {
+        // The trip has a shape we could not use: straight-line distances are
+        // shorter than the shape, so every schedule-derived vehicle position
+        // on this trip will be drawn behind the vehicle.
+        TripEntry trip = stopTimes.get(0).getTrip();
+        _log.error("Could not assign stops to shape for trip=" + trip.getId()
+            + " shapeId=" + trip.getShapeId()
+            + "; falling back to straight-line stop-to-stop distances");
       }
     }
 
