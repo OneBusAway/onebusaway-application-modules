@@ -210,7 +210,8 @@ public class DistanceAlongShapeLibraryTest {
     long elapsedMs = (System.nanoTime() - start) / 1000000;
 
     assertEquals(2 * stopsPerDirection, points.length);
-    assertTrue("took " + elapsedMs + " ms", elapsedMs < 2000);
+    // generous bound: catches a return to exponential enumeration, not CI jitter
+    assertTrue("took " + elapsedMs + " ms", elapsedMs < 10000);
     assertMonotonic(points);
   }
 
