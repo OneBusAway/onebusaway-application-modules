@@ -61,6 +61,7 @@ public class PerfBundleHarness {
   private final String _tripUpdatesUrl;
   private final String _vehiclePositionsUrl;
   private final String _alertsUrl;
+  private final List<String> _agencyIds;
 
   private ConfigurableApplicationContext _context;
   private GtfsRealtimeSource _source;
@@ -68,10 +69,22 @@ public class PerfBundleHarness {
 
   public PerfBundleHarness(String bundleRootDir, String tripUpdatesUrl,
                            String vehiclePositionsUrl, String alertsUrl) {
+    this(bundleRootDir, tripUpdatesUrl, vehiclePositionsUrl, alertsUrl, null);
+  }
+
+  /**
+   * @param agencyIds if non-empty, pins the feed to these agency ids exactly as
+   *     production does (GTFS_RT_FEEDS {@code "agencyIds":["1"]}); null/empty
+   *     leaves {@code GtfsRealtimeSource.start()} to default to every agency.
+   */
+  public PerfBundleHarness(String bundleRootDir, String tripUpdatesUrl,
+                           String vehiclePositionsUrl, String alertsUrl,
+                           List<String> agencyIds) {
     _bundleRootDir = bundleRootDir;
     _tripUpdatesUrl = tripUpdatesUrl;
     _vehiclePositionsUrl = vehiclePositionsUrl;
     _alertsUrl = alertsUrl;
+    _agencyIds = agencyIds;
   }
 
   public void open() throws Exception {
@@ -104,6 +117,16 @@ public class PerfBundleHarness {
     }
     _source.markBundleReady();
     _source.setFilterUnassigned(false);
+
+    // Pin the feed to specific agency ids, exactly as production does
+    // (GTFS_RT_FEEDS "agencyIds":["1"]). GtfsRealtimeSource.start() otherwise
+    // defaults _agencyIds to EVERY agency in the graph (see start(), line ~519),
+    // which against a multi-agency bundle would resolve trip ids against all
+    // agencies and distort both matching and the "null block ... bailing" flood.
+    if (_agencyIds != null && !_agencyIds.isEmpty()) {
+      _source.setAgencyIds(_agencyIds);
+      System.out.println("pinned feed agencyIds=" + _source.getAgencyIds());
+    }
 
     // Capturing listener that delegates to the real block-location write path.
     VehicleStatusServiceImpl real = _context.getBean(VehicleStatusServiceImpl.class);

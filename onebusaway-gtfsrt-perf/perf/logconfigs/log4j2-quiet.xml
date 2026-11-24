@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+  ~ Copyright (C) 2026 Open Transit Software Foundation
+  ~
+  ~  Licensed under the Apache License, Version 2.0 (the "License");
+  ~  you may not use this file except in compliance with the License.
+  ~  You may obtain a copy of the License at
+  ~
+  ~          http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~  Unless required by applicable law or agreed to in writing, software
+  ~  distributed under the License is distributed on an "AS IS" BASIS,
+  ~  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~  See the License for the specific language governing permissions and
+  ~  limitations under the License.
+  -->
+<!--
+  Config C (matching floor). Same cheap pattern as log4j2-cheap.xml, but the
+  three loggers that emit the per-cycle flood are muted to OFF:
+    - GtfsRealtimeSource        ("null block ... bailing")
+    - GtfsRealtimeTripLibrary   ("no stoptimes"; "Multiple updates"; "already reported")
+    - GtfsRealtimeEntitySource  ("route not found ... defaulting")
+  This removes the flood entirely (~52 lines/refresh -> ~0), leaving the pure
+  matching + block-location cost. The B - C wall-clock delta isolates the cost
+  of the flood's log volume (formatting + I/O, without location); C is the
+  matching floor the earlier KCM baseline measured. Muting these three loggers
+  is also the realistic production mitigation for the flood.
+-->
+<Configuration>
+    <Appenders>
+        <Console name="stdout" target="SYSTEM_OUT">
+            <PatternLayout pattern="[TDF] %d{ISO8601} %-5p %c{1} : %m%n"/>
+        </Console>
+    </Appenders>
+    <Loggers>
+        <Logger name="org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.GtfsRealtimeSource"
+                level="off" additivity="false"/>
+        <Logger name="org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.GtfsRealtimeTripLibrary"
+                level="off" additivity="false"/>
+        <Logger name="org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.GtfsRealtimeEntitySource"
+                level="off" additivity="false"/>
+        <Root level="info">
+            <AppenderRef ref="stdout"/>
+        </Root>
+    </Loggers>
+</Configuration>

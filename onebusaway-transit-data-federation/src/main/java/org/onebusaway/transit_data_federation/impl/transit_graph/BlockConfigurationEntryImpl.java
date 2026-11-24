@@ -353,6 +353,25 @@ public class BlockConfigurationEntryImpl implements BlockConfigurationEntry,
 
     private static final long serialVersionUID = 1L;
 
+    /**
+     * Lazily-populated cache of the wrappers returned by {@link #get(int)}. The
+     * wrapped inputs ({@code tripIndices}, {@code accumulatedStopTimeIndices},
+     * {@code trips}, and each trip's stop times) are fixed for the bundle's
+     * lifetime, so a given index always maps to an equivalent
+     * {@link BlockStopTimeEntryImpl}. Before this cache, {@code get()} rebuilt
+     * that wrapper on every call — the single largest allocation source on the
+     * realtime poll and arrivals read paths (see
+     * docs/perf/2026-07-10-gtfsrt-matching-findings.md, Fix 1).
+     *
+     * <p>Populated lazily (only touched indices are retained, bounding heap to
+     * the working set). {@code transient} so bundle serialization is unchanged;
+     * it simply repopulates on demand after deserialization. Concurrent access
+     * is safe without locking: {@code BlockStopTimeEntryImpl} has only final
+     * fields, so a racing reader sees either {@code null} (and rebuilds an
+     * equivalent wrapper) or a fully-initialized, safely-published instance.
+     */
+    private transient BlockStopTimeEntry[] cache;
+
     @Override
     public int size() {
       return tripIndices.length;
@@ -360,6 +379,16 @@ public class BlockConfigurationEntryImpl implements BlockConfigurationEntry,
 
     @Override
     public BlockStopTimeEntry get(int index) {
+
+      BlockStopTimeEntry[] localCache = cache;
+      if (localCache == null) {
+        localCache = new BlockStopTimeEntry[tripIndices.length];
+        cache = localCache;
+      }
+
+      BlockStopTimeEntry cached = localCache[index];
+      if (cached != null)
+        return cached;
 
       int tripIndex = tripIndices[index];
 
@@ -372,7 +401,10 @@ public class BlockConfigurationEntryImpl implements BlockConfigurationEntry,
 
       boolean hasNextStop = index + 1 < tripIndices.length;
 
-      return new BlockStopTimeEntryImpl(stopTime, index, blockTrip, hasNextStop);
+      BlockStopTimeEntry entry = new BlockStopTimeEntryImpl(stopTime, index,
+          blockTrip, hasNextStop);
+      localCache[index] = entry;
+      return entry;
     }
   }
 
