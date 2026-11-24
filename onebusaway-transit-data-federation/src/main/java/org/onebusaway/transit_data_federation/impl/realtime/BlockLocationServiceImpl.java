@@ -41,6 +41,8 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+
+import java.lang.reflect.Array;
 import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -280,6 +282,28 @@ public class BlockLocationServiceImpl extends AbstractBlockLocationServiceImpl i
           long targetTime) {
     return getBlockLocation(blockInstance, null, scheduledLocation, targetTime);
   }
+  //  Method to filter out phantom vehicles from the list of block locations
+  void filterPhantoms(List<BlockLocation> locations) {
+   if (locations == null||locations.isEmpty())
+      return; 
+    String currentBlockId = locations.get(0).getBlockInstance().getBlock().getBlock().getId().getId();
+
+    boolean hasRealVehicle = locations.stream().anyMatch(location ->
+      location.getVehicleId() != null && 
+      !location.getVehicleId().getId().equals(currentBlockId)
+    );
+
+    if (hasRealVehicle) {
+      locations.removeIf(location ->
+        location.getVehicleId() != null &&
+        location.getVehicleId().getId().equals(currentBlockId) &&
+        location.getLastLocationUpdateTime() == 0
+          );
+    }
+  }
+  
+  
+  
 
   @Override
   public List<BlockLocation> getLocationsForBlockInstance(
@@ -294,9 +318,13 @@ public class BlockLocationServiceImpl extends AbstractBlockLocationServiceImpl i
       if (location != null)
         locations.add(location);
     }
+    if(locations.size() > 1){
+      filterPhantoms(locations);
+    }
 
     return locations;
   }
+  
 
   @Override
   public Map<AgencyAndId, List<BlockLocation>> getLocationsForBlockInstance(
@@ -309,15 +337,24 @@ public class BlockLocationServiceImpl extends AbstractBlockLocationServiceImpl i
       TargetTime tt = new TargetTime(time.getTime(), currentTime);
       List<VehicleLocationCacheElements> records = getBlockLocationRecordCollectionForBlock(
               blockInstance, tt);
+
+      List<BlockLocation> locationsForTime = new ArrayList<BlockLocation>();
+
       for (VehicleLocationCacheElements cacheRecord : records) {
         BlockLocation location = getBlockLocation(blockInstance, cacheRecord,
                 null, time.getTime());
-        if (location != null) {
-          locationsByVehicleId.get(location.getVehicleId()).add(location);
+        
+       if (location != null) {
+          locationsForTime.add(location);
         }
       }
-    }
+      filterPhantoms(locationsForTime);
 
+      for(BlockLocation location : locationsForTime){
+        locationsByVehicleId.get(location.getVehicleId()).add(location);
+      }
+    } 
+     
     return locationsByVehicleId;
   }
 
@@ -353,6 +390,7 @@ public class BlockLocationServiceImpl extends AbstractBlockLocationServiceImpl i
   /****
    * Private Methods
    ****/
+ 
 
   private BlockInstance getVehicleLocationRecordAsBlockInstance(
           VehicleLocationRecord record) {

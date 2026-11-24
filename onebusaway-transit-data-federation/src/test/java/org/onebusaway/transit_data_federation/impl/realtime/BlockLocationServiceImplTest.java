@@ -25,10 +25,17 @@ import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.stopTime;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.trip;
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
+import org.onebusaway.collections.FactoryMap;
 import org.onebusaway.geospatial.model.CoordinatePoint;
+import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.impl.transit_graph.BlockEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.TripEntryImpl;
@@ -38,6 +45,7 @@ import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.blocks.ScheduledBlockLocation;
 import org.onebusaway.transit_data_federation.services.blocks.ScheduledBlockLocationService;
 import org.onebusaway.transit_data_federation.services.realtime.BlockLocation;
+import org.onebusaway.transit_data_federation.services.realtime.VehicleLocationCacheElements;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 
@@ -71,6 +79,113 @@ public class BlockLocationServiceImplTest {
   @Test
   public void testApplyRealtimeData() {
 
+  }
+  @Test
+  public void testRemovePhantomVehicle() {
+
+  
+    BlockEntryImpl block = block("phantom-block");
+    TripEntryImpl tripA = trip("phantom-trip", "serviceId");
+    StopEntryImpl stopA = stop("a", 47.5, -122.5);
+    stopTime(0, stopA, tripA, 30, 90, 0, 50.0);
+    BlockConfigurationEntry blockConfig = linkBlockTrips(block, tripA);
+    long serviceDate = 1000 * 1000;
+    BlockInstance blockInstance = new BlockInstance(blockConfig, serviceDate);
+
+    
+    AgencyAndId realVehicleId = new AgencyAndId("AGENCY", "real-coach-123");
+    AgencyAndId phantomVehicleId = new AgencyAndId("AGENCY", "phantom-block");
+
+    BlockLocation realLocation =  new BlockLocation();
+    realLocation.setVehicleId(realVehicleId);
+    realLocation.setBlockInstance(blockInstance);
+
+    BlockLocation phantomLocation = new BlockLocation();
+    phantomLocation.setVehicleId(phantomVehicleId);
+    phantomLocation.setBlockInstance(blockInstance);
+    phantomLocation.setLastUpdateTime(0);
+  
+    List<BlockLocation> locations = new ArrayList<>();
+    locations.add(realLocation);
+    locations.add(phantomLocation);
+
+    
+  
+
+    
+    _service.filterPhantoms(locations);
+    
+  
+
+    assertEquals(1, locations.size());
+    assertEquals("real-coach-123", locations.get(0).getVehicleId().getId());
+
+    
+
+  }
+  @Test
+  public void testMapOverloadRemovesPhantomVehicle() {
+    // Setup block and trips
+    BlockEntryImpl block = block("phantom-block");
+    TripEntryImpl tripA = trip("phantom-trip", "serviceId");
+    StopEntryImpl stopA = stop("a", 47.5, -122.5);
+    stopTime(0, stopA, tripA, 30, 90, 0, 50.0);
+    BlockConfigurationEntry blockConfig = linkBlockTrips(block, tripA);
+    long serviceDate = 1000 * 1000;
+    BlockInstance blockInstance = new BlockInstance(blockConfig, serviceDate);
+
+    AgencyAndId realVehicleId = new AgencyAndId("AGENCY", "real-coach-123");
+    AgencyAndId phantomVehicleId = new AgencyAndId("AGENCY", "phantom-block");
+
+    // Create real location
+    BlockLocation realLocation = new BlockLocation();
+    realLocation.setVehicleId(realVehicleId);
+    realLocation.setBlockInstance(blockInstance);
+
+    // Create phantom location with lastUpdateTime == 0
+    BlockLocation phantomLocation = new BlockLocation();
+    phantomLocation.setVehicleId(phantomVehicleId);
+    phantomLocation.setBlockInstance(blockInstance);
+    phantomLocation.setLastUpdateTime(0);
+
+    // Populate the vehicle location cache with a real and a phantom record
+    VehicleLocationRecordCacheImpl cache = new VehicleLocationRecordCacheImpl();
+    _service.setVehicleLocationRecordCache(cache);
+
+    long now = System.currentTimeMillis();
+
+    org.onebusaway.realtime.api.VehicleLocationRecord realRecord = new org.onebusaway.realtime.api.VehicleLocationRecord();
+    realRecord.setBlockId(blockInstance.getBlock().getBlock().getId());
+    realRecord.setServiceDate(serviceDate);
+    realRecord.setVehicleId(realVehicleId);
+    realRecord.setTimeOfRecord(now);
+    realRecord.setTimeOfLocationUpdate(now);
+
+    org.onebusaway.realtime.api.VehicleLocationRecord phantomRecord = new org.onebusaway.realtime.api.VehicleLocationRecord();
+    phantomRecord.setBlockId(blockInstance.getBlock().getBlock().getId());
+    phantomRecord.setServiceDate(serviceDate);
+    phantomRecord.setVehicleId(phantomVehicleId);
+    phantomRecord.setTimeOfRecord(now);
+
+    ScheduledBlockLocation scheduled = new ScheduledBlockLocation();
+    scheduled.setActiveTrip(blockConfig.getTrips().get(0));
+    scheduled.setDistanceAlongBlock(0);
+    scheduled.setLocation(new CoordinatePoint(stopA.getStopLat(), stopA.getStopLon()));
+    scheduled.setInService(true);
+
+    cache.addRecord(blockInstance, realRecord, scheduled, null);
+    cache.addRecord(blockInstance, phantomRecord, null, null);
+
+    List<Date> times = new ArrayList<>();
+    times.add(new Date(now));
+
+    Map<AgencyAndId, List<BlockLocation>> map = _service.getLocationsForBlockInstance(blockInstance, times, now);
+
+    // Verify the returned map contains only the real vehicle id
+    assertEquals(1, map.size());
+    assertTrue(map.containsKey(realVehicleId));
+    assertFalse(map.containsKey(phantomVehicleId));
+    assertEquals(1, map.get(realVehicleId).size());
   }
 
   @Test

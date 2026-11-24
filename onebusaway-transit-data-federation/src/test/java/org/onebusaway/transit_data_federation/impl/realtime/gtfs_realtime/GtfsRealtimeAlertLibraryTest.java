@@ -23,8 +23,9 @@ import org.mockito.Mockito;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.alerts.impl.ServiceAlertLibrary;
 import org.onebusaway.alerts.service.ServiceAlerts;
-import org.onebusaway.alerts.service.ServiceAlerts.*;
 import com.google.transit.realtime.GtfsRealtime;
+
+import org.onebusaway.alerts.service.ServiceAlerts.*;
 import com.google.transit.realtime.GtfsRealtime.Alert;
 import com.google.transit.realtime.GtfsRealtime.EntitySelector;
 import com.google.transit.realtime.GtfsRealtime.TranslatedString;
