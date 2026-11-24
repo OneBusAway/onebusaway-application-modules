@@ -53,8 +53,6 @@ public class DistanceAlongShapeLibrary {
 
   private double _maxDistanceFromStopToShapePoint = 1000;
 
-  private int _maximumNumberOfPotentialAssignments = 1000; // we give up pretty quickly now
-  
   private boolean _lenientStopShapeAssignment = true;
 
   private Set<AgencyAndId> _shapeIdsWeHavePrinted = new HashSet<AgencyAndId>();
@@ -90,21 +88,16 @@ public class DistanceAlongShapeLibrary {
   }
 
   /**
-   * When computing stop-to-shape matches, the potential number of assignments
-   * for possible matches can grow so large that checking for the best
-   * assignment could take way too long. This is often the case when dealing
-   * with malformed shapes.
-   * 
-   * This parameter controls the maximum number of potential assignments we are
-   * willing to consider. If the number of potential assignments is higher than
-   * this number, we throw an exception.
-   * 
-   * @param maximumNumberOfPotentialAssignments
+   * Ignored. Stop-to-shape assignment no longer enumerates combinations, so
+   * there is no limit to configure. Kept so existing configuration that sets
+   * this property still loads.
+   *
+   * @param maximumNumberOfPotentialAssignments ignored
    */
+  @Deprecated
   @ConfigurationParameter
   public void setMaximumNumberOfPotentialAssignment(
       int maximumNumberOfPotentialAssignments) {
-    _maximumNumberOfPotentialAssignments = maximumNumberOfPotentialAssignments;
   }
 
   /**
@@ -275,7 +268,7 @@ public class DistanceAlongShapeLibrary {
         projection, projectedShapePoints);
 
     int startIndex = 0;
-    int assingmentCount = 1;
+    boolean multipleAssignmentsSinceStart = false;
 
     /**
      * We iterate over each stop, examining its possible assignments. If we find
@@ -287,29 +280,22 @@ public class DistanceAlongShapeLibrary {
     for (int index = 0; index < possibleAssignments.size(); index++) {
       List<PointAndIndex> possibleAssignment = possibleAssignments.get(index);
       int count = possibleAssignment.size();
-      if (count == 0) {
-        constructErrorForPotentialAssignmentCount(shapePoints, stopTimes, count);
-      }
 
       boolean hasRegion = index > startIndex;
       boolean hasSingleAssignmentFollowingMultipleAssignments = count == 1
-          && assingmentCount > 1;
+          && multipleAssignmentsSinceStart;
       boolean hasMultipleAssignmentsAndLastPoint = count > 1
           && index == possibleAssignments.size() - 1;
 
       if (hasRegion
           && (hasSingleAssignmentFollowingMultipleAssignments || hasMultipleAssignmentsAndLastPoint)) {
 
-        List<PointAndIndex> currentAssignment = new ArrayList<PointAndIndex>(
-            index - startIndex + 1);
-        Min<Assignment> bestAssignments = new Min<Assignment>();
-        recursivelyConstructAssignments(possibleAssignments, currentAssignment,
-            startIndex, startIndex, index + 1, bestAssignments, 0, stopTimes.get(0).toString());
-        if (bestAssignments.isEmpty()) {
+        List<PointAndIndex> bestAssignment = computeBestRegionAssignment(
+            possibleAssignments, startIndex, index + 1);
+        if (bestAssignment == null) {
           constructError(shapePoints, stopTimes, possibleAssignments,
               projection);
         } else {
-          List<PointAndIndex> bestAssignment = bestAssignments.getMinElement().assigment;
           for (int bestIndex = 0; bestIndex < bestAssignment.size(); bestIndex++) {
             possibleAssignments.set(startIndex + bestIndex,
                 Arrays.asList(bestAssignment.get(bestIndex)));
@@ -318,13 +304,9 @@ public class DistanceAlongShapeLibrary {
       }
       if (count == 1) {
         startIndex = index;
-        assingmentCount = 1;
+        multipleAssignmentsSinceStart = false;
       } else {
-        assingmentCount *= count;
-        if (assingmentCount > _maximumNumberOfPotentialAssignments) {
-          constructErrorForPotentialAssignmentCount(shapePoints, stopTimes,
-              assingmentCount);
-        }
+        multipleAssignmentsSinceStart = true;
       }
     }
 
@@ -431,107 +413,101 @@ public class DistanceAlongShapeLibrary {
         distanceAlongShape);
   }
 
-  private void recursivelyConstructAssignments(
-      List<List<PointAndIndex>> possibleAssignments,
-      List<PointAndIndex> currentAssignment, int index, int indexFrom,
-      int indexTo, Min<Assignment> best, int depth, String id) {
+  /**
+   * Finds the assignment for the stops in [indexFrom, indexTo) that minimizes
+   * the sum of distanceFromTarget subject to distanceAlongShape being
+   * non-decreasing from one stop to the next. This is a shortest-path problem
+   * over a layered graph (one layer per stop, one node per candidate), solved
+   * in O(stops * candidates^2) rather than by enumerating every combination.
+   * 
+   * Among assignments with exactly equal scores, the one that is first in
+   * candidate-index order (comparing stop by stop from the start of the
+   * region) is returned, which is the same one a depth-first enumeration in
+   * candidate order would pick.
+   * 
+   * @return the best assignment, or null if no monotonic assignment exists
+   */
+  private List<PointAndIndex> computeBestRegionAssignment(
+      List<List<PointAndIndex>> possibleAssignments, int indexFrom, int indexTo) {
 
-    /**
-     * If we've made it through ALL assignments, we have a valid assignment!
-     */
-    if (index == indexTo) {
+    List<List<PointAndIndex>> region = possibleAssignments.subList(indexFrom,
+        indexTo);
+    int n = region.size();
 
-      double score = 0;
-      for (PointAndIndex p : currentAssignment)
-        score += p.distanceFromTarget;
-      currentAssignment = new ArrayList<PointAndIndex>(currentAssignment);
-      Assignment result = new Assignment(currentAssignment, score);
-      best.add(score, result);
-      return;
+    // best[i][j]: minimal score of a monotonic assignment of the region's
+    // first i+1 stops that ends with candidate j at stop i
+    double[][] best = new double[n][];
+    List<PointAndIndex> first = region.get(0);
+    best[0] = new double[first.size()];
+    for (int j = 0; j < first.size(); j++)
+      best[0][j] = first.get(j).distanceFromTarget;
+
+    for (int i = 1; i < n; i++) {
+      List<PointAndIndex> cands = region.get(i);
+      List<PointAndIndex> prevCands = region.get(i - 1);
+      best[i] = new double[cands.size()];
+      for (int j = 0; j < cands.size(); j++) {
+        PointAndIndex c = cands.get(j);
+        double min = Double.POSITIVE_INFINITY;
+        for (int k = 0; k < prevCands.size(); k++) {
+          if (prevCands.get(k).distanceAlongShape <= c.distanceAlongShape
+              && best[i - 1][k] < min)
+            min = best[i - 1][k];
+        }
+        best[i][j] = min + c.distanceFromTarget; // infinity if unreachable
+      }
     }
 
-    List<PointAndIndex> possibleAssignmentsForIndex = possibleAssignments.get(index);
+    double total = Double.POSITIVE_INFINITY;
+    for (double v : best[n - 1])
+      total = Math.min(total, v);
+    if (total == Double.POSITIVE_INFINITY)
+      return null;
 
-    List<PointAndIndex> validAssignments = new ArrayList<PointAndIndex>();
-
-    double lastDistanceAlongShape = -1;
-
-    if (index > indexFrom) {
-      PointAndIndex prev = currentAssignment.get(index - 1 - indexFrom);
-      lastDistanceAlongShape = prev.distanceAlongShape;
+    // Mark every node lying on some optimal path, walking back from the end.
+    boolean[][] onOptimalPath = new boolean[n][];
+    for (int i = 0; i < n; i++)
+      onOptimalPath[i] = new boolean[best[i].length];
+    for (int j = 0; j < best[n - 1].length; j++)
+      onOptimalPath[n - 1][j] = best[n - 1][j] == total;
+    for (int i = n - 1; i > 0; i--) {
+      List<PointAndIndex> cands = region.get(i);
+      List<PointAndIndex> prevCands = region.get(i - 1);
+      for (int j = 0; j < cands.size(); j++) {
+        if (!onOptimalPath[i][j])
+          continue;
+        for (int k = 0; k < prevCands.size(); k++) {
+          if (isOptimalEdge(prevCands.get(k), best[i - 1][k], cands.get(j),
+              best[i][j]))
+            onOptimalPath[i - 1][k] = true;
+        }
+      }
     }
 
-    for (PointAndIndex possibleAssignmentForIndex : possibleAssignmentsForIndex) {
-      if (possibleAssignmentForIndex.distanceAlongShape >= lastDistanceAlongShape)
-        validAssignments.add(possibleAssignmentForIndex);
+    // Walk forward choosing the lowest-indexed candidate that stays optimal.
+    List<PointAndIndex> result = new ArrayList<PointAndIndex>(n);
+    int prev = 0;
+    while (!onOptimalPath[0][prev])
+      prev++;
+    result.add(first.get(prev));
+    for (int i = 1; i < n; i++) {
+      List<PointAndIndex> cands = region.get(i);
+      PointAndIndex from = region.get(i - 1).get(prev);
+      int chosen = 0;
+      while (!onOptimalPath[i][chosen]
+          || !isOptimalEdge(from, best[i - 1][prev], cands.get(chosen),
+              best[i][chosen]))
+        chosen++;
+      result.add(cands.get(chosen));
+      prev = chosen;
     }
-
-    /**
-     * There is no satisfying assignment for this search tree, so we return
-     */
-    if (validAssignments.isEmpty()) {
-      return;
-    }
-
-    /**
-     * For each valid assignment, pop it onto the current assignment and
-     * recursively evaluate
-     */
-    if (validAssignments.size() > 100) {
-      _log.warn("complex assignment with depth {} for {} and {} possible assignments",
-              depth, id, possibleAssignments.size());
-
-    }
-    for (PointAndIndex validAssignment : validAssignments) {
-
-      currentAssignment.add(validAssignment);
-
-      recursivelyConstructAssignments(possibleAssignments, currentAssignment,
-          index + 1, indexFrom, indexTo, best, depth+1, id);
-
-      currentAssignment.remove(currentAssignment.size() - 1);
-    }
+    return result;
   }
 
-  private void constructErrorForPotentialAssignmentCount(
-      ShapePoints shapePoints, List<StopTimeEntry> stopTimes, long count)
-      throws InvalidStopToShapeMappingException {
-
-    if (count == 0) {
-      _log.error("We were attempting to compute the distance along a particular trip for each stop time of that "
-          + "trip by snapping them to the shape for that trip.  However, we could not find an assignment for each "
-          + "stop time of the trip, which usually indicates that there is something wrong with the underlying "
-          + "shape data.  For more information on errors of this kind, see:\n"
-          + "  https://github.com/OneBusAway/onebusaway-application-modules/wiki/Stop-to-Shape-Matching");
-    } else {
-      _log.error("We were attempting to compute the distance along a particular trip for each stop time of that "
-          + "trip by snapping them to the shape for that trip.  However, we found WAY TOO MANY potential "
-          + "assignments, which usually indicates that there is something wrong with the underlying shape data.  "
-          + "For more information on errors of this kind, see:\n"
-          + "  https://github.com/OneBusAway/onebusaway-application-modules/wiki/Stop-to-Shape-Matching");
-    }
-
-    StopTimeEntry first = stopTimes.get(0);
-    TripEntry trip = first.getTrip();
-    StopTimeEntry last = stopTimes.get(stopTimes.size() - 1);
-
-    _log.error("error constructing stop-time distances along shape for trip="
-        + trip.getId() + " shape=" + trip.getShapeId() + " firstStopTime="
-        + first.getId() + " lastStopTime=" + last.getId());
-
-    if (_shapeIdsWeHavePrinted.add(trip.getShapeId())) {
-      StringBuilder b = new StringBuilder();
-      for (int i = 0; i < shapePoints.getSize(); i++) {
-        b.append(shapePoints.getLatForIndex(i));
-        b.append(' ');
-        b.append(shapePoints.getLonForIndex(i));
-        b.append(' ');
-        b.append(shapePoints.getDistTraveledForIndex(i));
-        b.append('\n');
-      }
-      _log.error("shape points:\n" + b.toString());
-    }
-    throw new InvalidStopToShapeMappingException(first.getTrip());
+  private static boolean isOptimalEdge(PointAndIndex from, double fromScore,
+      PointAndIndex to, double toScore) {
+    return from.distanceAlongShape <= to.distanceAlongShape
+        && fromScore + to.distanceFromTarget == toScore;
   }
 
   private void constructError(ShapePoints shapePoints,
@@ -619,21 +595,6 @@ public class DistanceAlongShapeLibrary {
     }
 
     throw new InvalidStopToShapeMappingException(first.getTrip());
-  }
-
-  private static class Assignment implements Comparable<Assignment> {
-    private final List<PointAndIndex> assigment;
-    private final double score;
-
-    public Assignment(List<PointAndIndex> assignment, double score) {
-      this.assigment = assignment;
-      this.score = score;
-    }
-
-    @Override
-    public int compareTo(Assignment o) {
-      return Double.compare(score, o.score);
-    }
   }
 
   public static class DistanceAlongShapeException extends Exception {

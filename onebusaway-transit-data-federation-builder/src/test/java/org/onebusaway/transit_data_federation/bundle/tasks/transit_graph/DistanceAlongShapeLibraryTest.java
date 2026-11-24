@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.Test;
+import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
 import org.onebusaway.transit_data_federation.impl.transit_graph.DistanceAlongShapeLibrary;
 import org.onebusaway.transit_data_federation.impl.transit_graph.DistanceAlongShapeLibrary.DistanceAlongShapeException;
 import org.onebusaway.transit_data_federation.impl.shapes.PointAndIndex;
@@ -162,6 +163,112 @@ public class DistanceAlongShapeLibraryTest {
     lastDAB = matchStopToPoint(stopTimes, points, 23, "7435", lastDAB);
     matchStopToPoint(stopTimes, points, 24, "7321", lastDAB);
 
+  }
+
+  /**
+   * A two-way street served by an out-and-back shape: every stop is within the
+   * candidate threshold of both the outbound and inbound passes, so each stop
+   * has two candidate positions. This used to exceed the combinatorial cap on
+   * potential assignments and fail outright.
+   */
+  @Test
+  public void testOutAndBackShape() throws DistanceAlongShapeException {
+    int stopsPerDirection = 25;
+    OutAndBack t = buildOutAndBack(stopsPerDirection, 5000, 400);
+
+    DistanceAlongShapeLibrary library = new DistanceAlongShapeLibrary();
+    PointAndIndex[] points = library.getDistancesAlongShape(t.shapePoints,
+        t.stopTimes);
+    assertEquals(2 * stopsPerDirection, points.length);
+
+    double[] dist = t.shapePoints.getDistTraveled();
+    double length = dist[dist.length - 1];
+    double half = length / 2;
+    assertMonotonic(points);
+    for (int i = 0; i < points.length; i++) {
+      double last = points[i].distanceAlongShape;
+      if (i < stopsPerDirection)
+        assertTrue("outbound stop " + i + " at " + last,
+            last < half);
+      else
+        assertTrue("inbound stop " + i + " at " + last,
+            last > half);
+    }
+    // the last stop is half a stop-spacing (100 m) short of the end of the shape
+    assertEquals(length, points[points.length - 1].distanceAlongShape, 150.0);
+  }
+
+  @Test
+  public void testLongOutAndBackShapeIsFast() throws DistanceAlongShapeException {
+    int stopsPerDirection = 100;
+    OutAndBack t = buildOutAndBack(stopsPerDirection, 20000, 400);
+
+    DistanceAlongShapeLibrary library = new DistanceAlongShapeLibrary();
+    long start = System.nanoTime();
+    PointAndIndex[] points = library.getDistancesAlongShape(t.shapePoints,
+        t.stopTimes);
+    long elapsedMs = (System.nanoTime() - start) / 1000000;
+
+    assertEquals(2 * stopsPerDirection, points.length);
+    // generous bound: catches a return to exponential enumeration, not CI jitter
+    assertTrue("took " + elapsedMs + " ms", elapsedMs < 10000);
+    assertMonotonic(points);
+  }
+
+  private static void assertMonotonic(PointAndIndex[] points) {
+    for (int i = 1; i < points.length; i++)
+      assertTrue("stop " + i + " goes backwards",
+          points[i].distanceAlongShape >= points[i - 1].distanceAlongShape);
+  }
+
+  private static class OutAndBack {
+    ShapePoints shapePoints;
+    List<StopTimeEntry> stopTimes = new ArrayList<StopTimeEntry>();
+  }
+
+  /**
+   * Builds a straight east-west street. The shape runs east along one lane,
+   * then back west along a parallel lane about 12 m to the north. Stops sit
+   * between the lanes (about 6 m from each), so both passes are candidates.
+   */
+  private OutAndBack buildOutAndBack(int stopsPerDirection, double lengthMeters,
+      double shapePointSpacingMeters) {
+    double lat0 = 47.6;
+    double lon0 = -122.3;
+    double metersPerDegLat = SphericalGeometryLibrary.METERS_PER_DEGREE_AT_EQUATOR;
+    double metersPerDegLon = metersPerDegLat * Math.cos(Math.toRadians(lat0));
+    double laneOffsetLat = 12.0 / metersPerDegLat;
+
+    int segments = (int) Math.ceil(lengthMeters / shapePointSpacingMeters);
+    ShapePointsFactory factory = new ShapePointsFactory();
+    for (int i = 0; i <= segments; i++) {
+      double x = lengthMeters * i / segments;
+      factory.addPoint(lat0, lon0 + x / metersPerDegLon);
+    }
+    for (int i = segments; i >= 0; i--) {
+      double x = lengthMeters * i / segments;
+      factory.addPoint(lat0 + laneOffsetLat, lon0 + x / metersPerDegLon);
+    }
+
+    OutAndBack result = new OutAndBack();
+    result.shapePoints = factory.create();
+
+    TripEntryImpl trip = UnitTestingSupport.trip("trip");
+    int index = 0;
+    for (int dir = 0; dir < 2; dir++) {
+      for (int i = 0; i < stopsPerDirection; i++) {
+        double frac = (i + 0.5) / stopsPerDirection;
+        double x = lengthMeters * (dir == 0 ? frac : 1 - frac);
+        // a few meters off the midline, towards the lane the bus is in
+        double lat = lat0 + (laneOffsetLat / 2) + (dir == 0 ? -1 : 1) * 1.0 / metersPerDegLat;
+        StopEntryImpl stop = UnitTestingSupport.stop("s" + index, lat,
+            lon0 + x / metersPerDegLon);
+        result.stopTimes.add(UnitTestingSupport.stopTime(index, stop, trip,
+            index, index, Double.NaN));
+        index++;
+      }
+    }
+    return result;
   }
 
   private double matchStopToPoint(List<StopTimeEntry> stopTimes, PointAndIndex[] points, int i, String stopId, double distanceAlongBlock) {
