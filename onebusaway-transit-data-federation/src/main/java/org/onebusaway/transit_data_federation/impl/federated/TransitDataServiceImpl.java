@@ -19,8 +19,10 @@ package org.onebusaway.transit_data_federation.impl.federated;
 
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 
 import org.onebusaway.exceptions.ServiceException;
 import org.onebusaway.federations.annotations.FederatedByAgencyIdMethod;
@@ -61,8 +63,13 @@ import org.onebusaway.transit_data.model.trips.TripsForAgencyQueryBean;
 import org.onebusaway.transit_data.model.trips.TripsForBoundsQueryBean;
 import org.onebusaway.transit_data.model.trips.TripsForRouteQueryBean;
 import org.onebusaway.transit_data.services.TransitDataService;
+import org.onebusaway.transit_data_federation.impl.bundle.RealtimeSourceServiceImpl;
+import org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.GtfsRealtimeSource;
+import org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.MonitoredDataSource;
+import org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.MonitoredResult;
 import org.onebusaway.transit_data_federation.services.bundle.BundleManagementService;
 import org.onebusaway.transit_data_federation.services.bundle.BundleSearchService;
+import org.onebusaway.utility.DateLibrary;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -80,6 +87,9 @@ public class TransitDataServiceImpl implements TransitDataService {
   
   @Autowired
   private BundleSearchService _bundleSearchService;
+
+  @Autowired
+  private RealtimeSourceServiceImpl _realtimeSourceService;
   
   @Autowired
   public void set_bundleManagementService(
@@ -624,6 +634,87 @@ public class TransitDataServiceImpl implements TransitDataService {
   public BundleMetadata getBundleMetadata() {
     blockUntilBundleIsReady();
     return _bundleManagementService.getBundleMetadata();
+  }
+
+  /**
+   * Current bundle metadata without blocking. Returns null when no bundle is
+   * ready (or the bundle has neither metadata nor a known load time); see
+   * {@link TransitDataService#getBundleMetadataIfReady()}. For an older
+   * loaded bundle with no metadata file, synthesizes metadata carrying only
+   * the bundle-load time ({@code staticGtfsLastUpdated}) — the hash stays
+   * omitted, since none was ever recorded for it.
+   */
+  @Override
+  public BundleMetadata getBundleMetadataIfReady() {
+    // No blockUntilBundleIsReady(): the metadata endpoint must answer 503
+    // immediately when no bundle is loaded, not wait out a bundle swap.
+    // BundleManagementServiceImpl.getBundleMetadata() itself does not block.
+    if (_bundleManagementService == null || !_bundleManagementService.bundleIsReady())
+      return null;
+    BundleMetadata meta = _bundleManagementService.getBundleMetadata();
+    if (meta == null) {
+      // Old bundle with no metadata.json: the issue still requires the
+      // bundle-load timestamp, so synthesize metadata carrying only that.
+      Date loadTime = _bundleManagementService.getBundleLoadTime();
+      if (loadTime != null) {
+        meta = new BundleMetadata();
+        meta.setStaticGtfsLastUpdated(DateLibrary.getTimeAsIso8601String(loadTime, TimeZone.getTimeZone("UTC")));
+      }
+    }
+    return meta;
+  }
+
+  /**
+   * Whether the current bundle's metadata file exists but could not be read.
+   * See {@link TransitDataService#isBundleMetadataUnreadable()}.
+   */
+  @Override
+  public boolean isBundleMetadataUnreadable() {
+    return _bundleManagementService != null && _bundleManagementService.isBundleMetadataUnreadable();
+  }
+
+  /**
+   * Non-blocking readiness check: returns false immediately when no bundle is
+   * loaded, instead of waiting out a bundle swap. See
+   * {@link TransitDataService#bundleIsReady()}.
+   */
+  @Override
+  public Boolean bundleIsReady() {
+    // Deliberately NO blockUntilBundleIsReady() here: a "no bundle" call
+    // must return immediately so the endpoint can answer 503 fast.
+    if (_bundleManagementService == null)
+      return false;
+    return _bundleManagementService.bundleIsReady();
+  }
+
+  /**
+   * Last successful update time (millis) per realtime feed id, for feeds that
+   * have updated at least once. Feeds never updated are omitted, and when
+   * several sources share a feed id the newest timestamp wins.
+   */
+  @Override
+  public Map<String, Long> getRealtimeFeedLastUpdateTimes() {
+    Map<String, Long> result = new HashMap<String, Long>();
+    if (_realtimeSourceService == null)
+      return result;
+    // Same iteration as MetricsBeanServiceImpl.getDataSources().
+    for (GtfsRealtimeSource source : _realtimeSourceService.getSources()) {
+      if (!(source instanceof MonitoredDataSource))
+        continue;
+      MonitoredDataSource mds = (MonitoredDataSource) source;
+      MonitoredResult monitored = mds.getMonitoredResult();
+      if (monitored == null)
+        continue;
+      long lastUpdate = monitored.getLastUpdate();
+      if (lastUpdate <= 0)
+        continue; // never updated: omit, never emit an epoch timestamp
+      // Several sources can share a feed ID: keep the newest update, so a
+      // later source never overwrites a newer timestamp with an older one.
+      Long existing = result.get(mds.getFeedId());
+      if (existing == null || lastUpdate > existing)
+        result.put(mds.getFeedId(), lastUpdate);
+    }
+    return result;
   }
 
   @Override

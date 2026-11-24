@@ -76,7 +76,19 @@ public interface BundleManagementService {
   public String getActiveBundleId();
   
   BundleMetadata getBundleMetadata();
-  
+
+  /**
+   * The time the current bundle finished loading, or null when no bundle
+   * has been loaded (or the implementation does not track it).
+   */
+  public Date getBundleLoadTime();
+
+  /**
+   * Whether the current bundle's metadata file exists but could not be read
+   * (corrupt/unparseable). A missing file (old bundle) is not unreadable.
+   */
+  public boolean isBundleMetadataUnreadable();
+
   public void changeBundle(String bundleId) throws Exception;
 
   public BundleItem getCurrentBundleMetadata();

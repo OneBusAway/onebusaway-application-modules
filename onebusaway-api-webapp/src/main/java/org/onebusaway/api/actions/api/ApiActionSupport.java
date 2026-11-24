@@ -132,6 +132,13 @@ public class ApiActionSupport extends OneBusAwayApiActionSupport implements
     return new DefaultHttpHeaders();
   }
 
+  protected DefaultHttpHeaders setServiceUnavailableResponseText(String text) {
+    _response = new ResponseBean(getReturnVersion(),
+        ResponseCodes.RESPONSE_SERVICE_UNAVAILABLE, "Service Unavailable",
+        text, true);
+    return new DefaultHttpHeaders().withStatus(_response.getCode());
+  }
+
   protected DefaultHttpHeaders setValidationErrorsResponse() {
     ValidationErrorBean bean = new ValidationErrorBean(new ArrayList<String>(
         getActionErrors()), getFieldErrors());
