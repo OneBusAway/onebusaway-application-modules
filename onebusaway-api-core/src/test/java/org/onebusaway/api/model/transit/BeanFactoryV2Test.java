@@ -15,6 +15,7 @@
  */
 package org.onebusaway.api.model.transit;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Collections;
@@ -22,6 +23,8 @@ import java.util.Collections;
 import org.junit.Test;
 import org.onebusaway.transit_data.model.RouteBean;
 import org.onebusaway.transit_data.model.StopBean;
+import org.onebusaway.transit_data.model.StopRouteDirectionScheduleBean;
+import org.onebusaway.transit_data.model.StopTimeInstanceBean;
 
 public class BeanFactoryV2Test {
 
@@ -43,5 +46,27 @@ public class BeanFactoryV2Test {
     StopV2Bean bean = factory.getStop(stop);
 
     assertTrue(bean.getRouteIds().isEmpty());
+  }
+
+  /**
+   * The stop_headsign of a schedule-for-stop stop time must be copied into the
+   * API bean (issue #207).
+   */
+  @Test
+  public void getStopRouteDirectionScheduleCopiesStopHeadsign() {
+    BeanFactoryV2 factory = new BeanFactoryV2(true);
+
+    StopTimeInstanceBean stopTime = new StopTimeInstanceBean();
+    stopTime.setTripId("1_trip");
+    stopTime.setStopHeadsign("Downtown via 1st Ave");
+
+    StopRouteDirectionScheduleBean direction = new StopRouteDirectionScheduleBean();
+    direction.getStopTimes().add(stopTime);
+
+    StopRouteDirectionScheduleV2Bean bean = factory.getStopRouteDirectionSchedule(direction);
+
+    assertEquals(1, bean.getScheduleStopTimes().size());
+    assertEquals("Downtown via 1st Ave",
+        bean.getScheduleStopTimes().get(0).getStopHeadsign());
   }
 }

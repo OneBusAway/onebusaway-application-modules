@@ -43,6 +43,7 @@ import org.onebusaway.transit_data.model.StopRouteScheduleBean;
 import org.onebusaway.transit_data.model.StopTimeGroupBean;
 import org.onebusaway.transit_data.model.StopTimeInstanceBean;
 import org.onebusaway.transit_data.model.schedule.FrequencyInstanceBean;
+import org.onebusaway.transit_data_federation.model.narrative.StopTimeNarrative;
 import org.onebusaway.transit_data_federation.model.narrative.TripNarrative;
 import org.onebusaway.util.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.AgencyService;
@@ -232,6 +233,7 @@ class StopScheduleBeanServiceImpl implements StopScheduleBeanService {
         stiBean.setArrivalTime(sti.getArrivalTime());
         stiBean.setDepartureTime(sti.getDepartureTime());
         stiBean.setServiceId(AgencyAndIdLibrary.convertToString(serviceId));
+        stiBean.setStopHeadsign(getStopHeadsign(bst));
 
         stiBean.setArrivalEnabled(bst.getBlockSequence() > 0);
         stiBean.setDepartureEnabled(bst.getBlockSequence() + 1 < blockConfig.getStopTimes().size());
@@ -275,6 +277,7 @@ class StopScheduleBeanServiceImpl implements StopScheduleBeanService {
             * 1000);
         bean.setHeadwaySecs(sti.getFrequency().getHeadwaySecs());
         bean.setServiceId(AgencyAndIdLibrary.convertToString(serviceId));
+        bean.setStopHeadsign(getStopHeadsign(blockStopTime));
         bean.setArrivalEnabled(blockStopTime.getBlockSequence() > 0);
         bean.setDepartureEnabled(blockStopTime.getBlockSequence() + 1 < blockConfig.getStopTimes().size());
 
@@ -429,6 +432,18 @@ class StopScheduleBeanServiceImpl implements StopScheduleBeanService {
         frequenciesByRouteCollectionId.get(routeCollectionId).add(sti);
       }
     }
+  }
+
+  /**
+   * The stop_headsign from stop_times.txt, carried in the stop time narrative.
+   * Returns null when the stop time has no narrative or no stop headsign.
+   */
+  private String getStopHeadsign(BlockStopTimeEntry blockStopTime) {
+    StopTimeNarrative narrative = _narrativeService.getStopTimeForEntry(
+        blockStopTime.getStopTime());
+    if (narrative == null)
+      return null;
+    return narrative.getStopHeadsign();
   }
 
   private ContinuesAsStopTimeGroupKey getContinuesAsGroupKeyForStopTimeInstance(
