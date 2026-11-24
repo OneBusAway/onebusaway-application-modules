@@ -30,6 +30,7 @@ import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 
 import org.junit.Before;
@@ -51,6 +52,7 @@ import org.onebusaway.transit_data_federation.impl.transit_graph.TripEntryImpl;
 import org.onebusaway.transit_data_federation.model.TargetTime;
 import org.onebusaway.transit_data_federation.model.narrative.StopTimeNarrative;
 import org.onebusaway.transit_data_federation.model.narrative.StopTimeNarrative.Builder;
+import org.onebusaway.transit_data_federation.services.ArrivalAndDepartureQuery;
 import org.onebusaway.transit_data_federation.services.ArrivalAndDepartureService;
 import org.onebusaway.transit_data_federation.services.beans.*;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
@@ -445,6 +447,58 @@ public class ArrivalsAndDeparturesBeanServiceImplTest {
     assertEquals(serviceDate, bean.getServiceDate());
     assertEquals("YY", bean.getRouteShortName());
     assertEquals("default", bean.getStatus());
+  }
+
+  /**
+   * API-output coverage for issue #474, via the singular
+   * getArrivalAndDepartureForStop path (untested elsewhere in this class):
+   * an instance with no usable realtime prediction (predicted arrival/
+   * departure left unset, i.e. 0, as {@link ArrivalAndDepartureServiceImpl}
+   * now produces when a TimepointPredictionRecord has neither a real arrival
+   * nor departure) must still produce a bean with predictedArrivalTime and
+   * predictedDepartureTime of 0 and the original scheduled times intact --
+   * the contract actually observed by API clients, not just the internal
+   * service object.
+   */
+  @Test
+  public void testGetArrivalAndDepartureForStopWithNoUsablePrediction() {
+
+    // bypass _realTimeHistoryService, which isn't wired up in this test class
+    _service.setScheduleDeviationHistory(false);
+
+    StopTimeInstance sti = new StopTimeInstance(bstBB, blockInstanceB.getState());
+    ArrivalAndDepartureInstance instance = new ArrivalAndDepartureInstance(sti);
+    instance.setBlockLocation(blockLocationB);
+    // predicted arrival/departure intentionally left unset (0)
+
+    Builder stopTimeNarrative = StopTimeNarrative.builder();
+    stopTimeNarrative.setRouteShortName("XX");
+    Mockito.when(_narrativeService.getStopTimeForEntry(stopTimeBB)).thenReturn(
+        stopTimeNarrative.create());
+
+    TripStatusBean tripStatusBeanB = new TripStatusBean();
+    Mockito.when(
+        _tripDetailsBeanService.getBlockLocationAsStatusBean(blockLocationB, t)).thenReturn(
+        tripStatusBeanB);
+
+    ArrivalAndDepartureQuery query = new ArrivalAndDepartureQuery();
+    query.setStop(stopB);
+    query.setStopSequence(bstBB.getBlockSequence());
+    query.setTrip(tripB);
+    query.setServiceDate(serviceDate);
+    query.setTime(t);
+    query.setAgenciesExcludingScheduled(new HashSet<String>());
+
+    Mockito.when(_arrivalAndDepartureService.getArrivalAndDepartureForStop(query)).thenReturn(
+        instance);
+
+    ArrivalAndDepartureBean bean = _service.getArrivalAndDepartureForStop(query, null);
+
+    assertNotNull(bean);
+    assertEquals(0L, bean.getPredictedArrivalTime());
+    assertEquals(0L, bean.getPredictedDepartureTime());
+    assertEquals(dateAsLong("2010-10-05 16:50"), bean.getScheduledArrivalTime());
+    assertEquals(dateAsLong("2010-10-05 16:55"), bean.getScheduledDepartureTime());
   }
 
   /**
